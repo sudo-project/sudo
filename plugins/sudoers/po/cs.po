@@ -1,0 +1,1725 @@
+# Portable object template file for the sudoers plugin
+# This file is put in the public domain.
+# Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013
+# Petr Pisar <petr.pisar@atlas.cz>, 2013, 2014.
+#
+# (AIX) registry → (AIXový) registr
+# timestamp → časové údaje
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudoers 1.8.10b3\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2014-02-07 15:13-0700\n"
+"PO-Revision-Date: 2014-03-01 14:53+0100\n"
+"Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
+"Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: confstr.sh:2
+msgid "Password:"
+msgstr "Heslo:"
+
+#: confstr.sh:3
+msgid "*** SECURITY information for %h ***"
+msgstr "*** BEZPEČNOSTNÍ hlášení o %h ***"
+
+#: confstr.sh:4
+msgid "Sorry, try again."
+msgstr "Je nám líto, zkuste to znovu."
+
+#: plugins/sudoers/alias.c:136
+#, c-format
+msgid "Alias `%s' already defined"
+msgstr "Alias „%s“ je již definován"
+
+#: plugins/sudoers/auth/bsdauth.c:75
+#, c-format
+msgid "unable to get login class for user %s"
+msgstr "nelze získat přihlašovací třídu uživatele %s"
+
+#: plugins/sudoers/auth/bsdauth.c:81
+msgid "unable to begin bsd authentication"
+msgstr "nelze zahájit BSD autentizaci"
+
+#: plugins/sudoers/auth/bsdauth.c:89
+msgid "invalid authentication type"
+msgstr "neplatný druh autentizace"
+
+#: plugins/sudoers/auth/bsdauth.c:98
+msgid "unable to initialize BSD authentication"
+msgstr "nelze inicializovat BSD autentizaci"
+
+#: plugins/sudoers/auth/fwtk.c:59
+msgid "unable to read fwtk config"
+msgstr "nelze načíst konfiguraci FWTK"
+
+#: plugins/sudoers/auth/fwtk.c:64
+msgid "unable to connect to authentication server"
+msgstr "k autentizačnímu serveru se nelze připojit"
+
+#: plugins/sudoers/auth/fwtk.c:70 plugins/sudoers/auth/fwtk.c:94
+#: plugins/sudoers/auth/fwtk.c:127
+msgid "lost connection to authentication server"
+msgstr "spojení k autentizačnímu serveru ztraceno"
+
+#: plugins/sudoers/auth/fwtk.c:74
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+"chyba autentizačního serveru:\n"
+"%s"
+
+#: plugins/sudoers/auth/kerb5.c:116
+#, c-format
+msgid "%s: unable to convert principal to string ('%s'): %s"
+msgstr "%s: principála nelze převést na řetězec („%s“): %s"
+
+#: plugins/sudoers/auth/kerb5.c:159
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr "%s: „%s“ nelze rozebrat: %s"
+
+#: plugins/sudoers/auth/kerb5.c:169
+#, c-format
+msgid "%s: unable to resolve credential cache: %s"
+msgstr "%s: nelze najít keš s pověřeními: %s"
+
+#: plugins/sudoers/auth/kerb5.c:217
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr "%s: nelze alokovat volby: %s"
+
+#: plugins/sudoers/auth/kerb5.c:233
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr "%s: nelze získat pověření: %s"
+
+#: plugins/sudoers/auth/kerb5.c:246
+#, c-format
+msgid "%s: unable to initialize credential cache: %s"
+msgstr "%s: nelze inicializovat keš s pověřeními: %s"
+
+#: plugins/sudoers/auth/kerb5.c:250
+#, c-format
+msgid "%s: unable to store credential in cache: %s"
+msgstr "%s: pověření nelze uložit do keše: %s"
+
+#: plugins/sudoers/auth/kerb5.c:315
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr "%s: nelze získat principála stroje: %s"
+
+#: plugins/sudoers/auth/kerb5.c:330
+#, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr "%s: TGT nelze ověřit! Podezření na útok!: %s"
+
+#: plugins/sudoers/auth/pam.c:98
+msgid "unable to initialize PAM"
+msgstr "PAM nelze inicializovat"
+
+#: plugins/sudoers/auth/pam.c:149
+msgid "account validation failure, is your account locked?"
+msgstr "ověření účtu selhalo, není váš účet zamknutý?"
+
+#: plugins/sudoers/auth/pam.c:153
+msgid "Account or password is expired, reset your password and try again"
+msgstr "Účtu nebo heslu vypršela platnost, nastavte si nové heslo a zkuste to znovu"
+
+#: plugins/sudoers/auth/pam.c:161
+#, c-format
+msgid "unable to change expired password: %s"
+msgstr "prošlé heslo nelze změnit: %s"
+
+#: plugins/sudoers/auth/pam.c:166
+msgid "Password expired, contact your system administrator"
+msgstr "Heslu vypršela platnost, kontaktujte správce svého systému"
+
+#: plugins/sudoers/auth/pam.c:170
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "Účtu vypršela platnost nebo v konfiguraci PAM pro sudo chybí sekce „account“. Kontaktujte správce svého systému"
+
+#: plugins/sudoers/auth/pam.c:187
+#, c-format
+msgid "PAM authentication error: %s"
+msgstr "Chyba autentizace PAM: %s"
+
+#: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:222
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "v databázi %s neexistujete"
+
+#: plugins/sudoers/auth/securid5.c:80
+msgid "failed to initialise the ACE API library"
+msgstr "inicializace knihovny ACE selhala"
+
+#: plugins/sudoers/auth/securid5.c:106
+msgid "unable to contact the SecurID server"
+msgstr "nelze kontaktovat server SecurID"
+
+#: plugins/sudoers/auth/securid5.c:115
+msgid "User ID locked for SecurID Authentication"
+msgstr "ID uživatele je pro autentizaci SecurID uzamčeno"
+
+#: plugins/sudoers/auth/securid5.c:119 plugins/sudoers/auth/securid5.c:170
+msgid "invalid username length for SecurID"
+msgstr "neplatná délka uživatelského jména pro SecurID"
+
+#: plugins/sudoers/auth/securid5.c:123 plugins/sudoers/auth/securid5.c:175
+msgid "invalid Authentication Handle for SecurID"
+msgstr "neplatný deskriptor autentizace pro SecurID"
+
+#: plugins/sudoers/auth/securid5.c:127
+msgid "SecurID communication failed"
+msgstr "komunikace se SecurID selhala"
+
+#: plugins/sudoers/auth/securid5.c:131 plugins/sudoers/auth/securid5.c:214
+msgid "unknown SecurID error"
+msgstr "neznámá chyba SecurID"
+
+#: plugins/sudoers/auth/securid5.c:165
+msgid "invalid passcode length for SecurID"
+msgstr "neplatná délka kódu pro SecurID"
+
+#: plugins/sudoers/auth/sia.c:108
+msgid "unable to initialize SIA session"
+msgstr "nelze inicializovat relaci SIA"
+
+#: plugins/sudoers/auth/sudo_auth.c:119
+msgid "invalid authentication methods"
+msgstr "neplatné autentizační metody"
+
+#: plugins/sudoers/auth/sudo_auth.c:120
+msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
+msgstr "Sudo bylo sestaveno s neplatnými autentizačními metodami! Nesmíte míchat samostatnou a nesamostatnou autentizaci."
+
+#: plugins/sudoers/auth/sudo_auth.c:203
+msgid "no authentication methods"
+msgstr "žádné autentizační metody"
+
+#: plugins/sudoers/auth/sudo_auth.c:205
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "Sudo bylo sestaveno bez autentizačních metod! Chcete-li vypnout autentizaci, použijte při sestavování přepínač --disable-autentizaci."
+
+#: plugins/sudoers/auth/sudo_auth.c:389
+msgid "Authentication methods:"
+msgstr "Autentizační metody:"
+
+#: plugins/sudoers/bsm_audit.c:91 plugins/sudoers/bsm_audit.c:158
+msgid "Could not determine audit condition"
+msgstr "Nebylo možné určit podmínku pro audit"
+
+#: plugins/sudoers/bsm_audit.c:134 plugins/sudoers/bsm_audit.c:199
+msgid "unable to commit audit record"
+msgstr "auditní zprávu nelze odeslat"
+
+#: plugins/sudoers/check.c:189
+msgid ""
+"\n"
+"We trust you have received the usual lecture from the local System\n"
+"Administrator. It usually boils down to these three things:\n"
+"\n"
+"    #1) Respect the privacy of others.\n"
+"    #2) Think before you type.\n"
+"    #3) With great power comes great responsibility.\n"
+"\n"
+msgstr ""
+"\n"
+"Věříme, že jste od správce místního systému obdrželi obvyklé školení.\n"
+"Obvykle se jedná o tyto tři věci:\n"
+"\n"
+"    1. Respektujte soukromí druhých.\n"
+"    2. Přemýšlejte, než začnete psát.\n"
+"    3. S velkými právy přichází velká zodpovědnost.\n"
+"\n"
+
+#: plugins/sudoers/check.c:232 plugins/sudoers/check.c:238
+#: plugins/sudoers/sudoers.c:562 plugins/sudoers/sudoers.c:588
+#, c-format
+msgid "unknown uid: %u"
+msgstr "neznámé UID: %u"
+
+#: plugins/sudoers/check.c:235 plugins/sudoers/policy.c:657
+#: plugins/sudoers/sudoers.c:850 plugins/sudoers/testsudoers.c:211
+#: plugins/sudoers/testsudoers.c:363
+#, c-format
+msgid "unknown user: %s"
+msgstr "neznámý uživatel: %s"
+
+#: plugins/sudoers/def_data.c:27
+#, c-format
+msgid "Syslog facility if syslog is being used for logging: %s"
+msgstr "Obor systémového protokolu, je-li syslog použit pro protokolování: %s"
+
+#: plugins/sudoers/def_data.c:31
+#, c-format
+msgid "Syslog priority to use when user authenticates successfully: %s"
+msgstr "Priorita systémového protokolu, která se použije při úspěšné autentizaci uživatele: %s"
+
+#: plugins/sudoers/def_data.c:35
+#, c-format
+msgid "Syslog priority to use when user authenticates unsuccessfully: %s"
+msgstr "Priorita systémového protokolu, která se použije při neúspěšné autentizaci: %s"
+
+#: plugins/sudoers/def_data.c:39
+msgid "Put OTP prompt on its own line"
+msgstr "Dotaz na jednorázový kód bude na vlastním řádku"
+
+#: plugins/sudoers/def_data.c:43
+msgid "Ignore '.' in $PATH"
+msgstr "Ignoruje „.“ v PATH"
+
+#: plugins/sudoers/def_data.c:47
+msgid "Always send mail when sudo is run"
+msgstr "Vždy, když se použije sudo, odešle e-mail"
+
+#: plugins/sudoers/def_data.c:51
+msgid "Send mail if user authentication fails"
+msgstr "Odešle e-mail, když autentizace uživatele selže"
+
+#: plugins/sudoers/def_data.c:55
+msgid "Send mail if the user is not in sudoers"
+msgstr "Odešle e-mail, pokud uživatel není v sudoers"
+
+#: plugins/sudoers/def_data.c:59
+msgid "Send mail if the user is not in sudoers for this host"
+msgstr "Odešle e-mail, když uživatel není v sudoers uveden pro tento stroj"
+
+#: plugins/sudoers/def_data.c:63
+msgid "Send mail if the user is not allowed to run a command"
+msgstr "Odešle e-mail, když uživatel nemá dovoleno spustit příkaz"
+
+#: plugins/sudoers/def_data.c:67
+msgid "Use a separate timestamp for each user/tty combo"
+msgstr "Pro každou kombinaci uživatele a TTY použije samostatný časovač"
+
+#: plugins/sudoers/def_data.c:71
+msgid "Lecture user the first time they run sudo"
+msgstr "Před prvním použitím sudo proškolí uživatele"
+
+#: plugins/sudoers/def_data.c:75
+#, c-format
+msgid "File containing the sudo lecture: %s"
+msgstr "Soubor obsahující školení k sudo: %s"
+
+#: plugins/sudoers/def_data.c:79
+msgid "Require users to authenticate by default"
+msgstr "Standardně vyžaduje, aby se uživatelé autentizovali"
+
+#: plugins/sudoers/def_data.c:83
+msgid "Root may run sudo"
+msgstr "Root může spustit sudo"
+
+#: plugins/sudoers/def_data.c:87
+msgid "Log the hostname in the (non-syslog) log file"
+msgstr "Do (nesyslogového) protokolu zaznamenává název stroje"
+
+#: plugins/sudoers/def_data.c:91
+msgid "Log the year in the (non-syslog) log file"
+msgstr "Do (nesyslogového) protokolu zaznamenává rok"
+
+#: plugins/sudoers/def_data.c:95
+msgid "If sudo is invoked with no arguments, start a shell"
+msgstr "Je-li sudo zavoláno bez argumentů, spustí shell"
+
+#: plugins/sudoers/def_data.c:99
+msgid "Set $HOME to the target user when starting a shell with -s"
+msgstr "Nastaví HOME na cílového uživatele, když se pouští shell s -s"
+
+#: plugins/sudoers/def_data.c:103
+msgid "Always set $HOME to the target user's home directory"
+msgstr "Vždy nastaví HOME na domovský adresář cílového uživatele"
+
+#: plugins/sudoers/def_data.c:107
+msgid "Allow some information gathering to give useful error messages"
+msgstr "Dovolí sběr některých údajů za účelem užitečných chybových zpráv"
+
+#: plugins/sudoers/def_data.c:111
+msgid "Require fully-qualified hostnames in the sudoers file"
+msgstr "Vyžaduje v souboru sudoers plně kvalifikované názvy strojů"
+
+#: plugins/sudoers/def_data.c:115
+msgid "Insult the user when they enter an incorrect password"
+msgstr "Urazí uživatele, pokud zadá chybné heslo"
+
+#: plugins/sudoers/def_data.c:119
+msgid "Only allow the user to run sudo if they have a tty"
+msgstr "Dovolí uživateli spustit sudo, pouze když má TTY"
+
+#: plugins/sudoers/def_data.c:123
+msgid "Visudo will honor the EDITOR environment variable"
+msgstr "Visudo bude dodržovat proměnou prostředí EDITOR"
+
+#: plugins/sudoers/def_data.c:127
+msgid "Prompt for root's password, not the users's"
+msgstr "Ptá se heslo roota, ne na heslo uživatele"
+
+#: plugins/sudoers/def_data.c:131
+msgid "Prompt for the runas_default user's password, not the users's"
+msgstr "Ptá se na heslo runas_default uživatele, ne na heslo uživatele"
+
+#: plugins/sudoers/def_data.c:135
+msgid "Prompt for the target user's password, not the users's"
+msgstr "Ptá se na heslo cílového uživatele, ne na heslo uživatele"
+
+#: plugins/sudoers/def_data.c:139
+msgid "Apply defaults in the target user's login class if there is one"
+msgstr "Použije výchozí nastavení v přihlašovací třídě cílového uživatele, existuje-li"
+
+#: plugins/sudoers/def_data.c:143
+msgid "Set the LOGNAME and USER environment variables"
+msgstr "Nastaví proměnné prostředí LOGNAME a USER"
+
+#: plugins/sudoers/def_data.c:147
+msgid "Only set the effective uid to the target user, not the real uid"
+msgstr "Nastaví pouze efektivní UID na cílového uživatele, nikoliv reálné UID"
+
+#: plugins/sudoers/def_data.c:151
+msgid "Don't initialize the group vector to that of the target user"
+msgstr "Neinicializuje vektor skupin na vektor cílového uživatele"
+
+#: plugins/sudoers/def_data.c:155
+#, c-format
+msgid "Length at which to wrap log file lines (0 for no wrap): %u"
+msgstr "Délka zlomu řádků v protokolu (0 pro nezalamování): %u"
+
+#: plugins/sudoers/def_data.c:159
+#, c-format
+msgid "Authentication timestamp timeout: %.1f minutes"
+msgstr "Limit na časové údaje autentizace: %.1f min"
+
+#: plugins/sudoers/def_data.c:163
+#, c-format
+msgid "Password prompt timeout: %.1f minutes"
+msgstr "Limit na výzvu k heslu: %.1f min"
+
+#: plugins/sudoers/def_data.c:167
+#, c-format
+msgid "Number of tries to enter a password: %u"
+msgstr "Počet pokusů na zadání hesla: %u"
+
+#: plugins/sudoers/def_data.c:171
+#, c-format
+msgid "Umask to use or 0777 to use user's: 0%o"
+msgstr "Umask nebo 0777 pro hodnotu uživatele: 0%o"
+
+#: plugins/sudoers/def_data.c:175
+#, c-format
+msgid "Path to log file: %s"
+msgstr "Cesta k souboru s protokolem: %s"
+
+#: plugins/sudoers/def_data.c:179
+#, c-format
+msgid "Path to mail program: %s"
+msgstr "Cesta k poštovnímu programu: %s"
+
+#: plugins/sudoers/def_data.c:183
+#, c-format
+msgid "Flags for mail program: %s"
+msgstr "Přepínače pro poštovní program: %s"
+
+#: plugins/sudoers/def_data.c:187
+#, c-format
+msgid "Address to send mail to: %s"
+msgstr "Adresa, kam zasílat poštu: %s"
+
+#: plugins/sudoers/def_data.c:191
+#, c-format
+msgid "Address to send mail from: %s"
+msgstr "Adrese, ze které zasílat poštu: %s"
+
+#: plugins/sudoers/def_data.c:195
+#, c-format
+msgid "Subject line for mail messages: %s"
+msgstr "Řádek s předmětem pro poštovní zprávy: %s"
+
+#: plugins/sudoers/def_data.c:199
+#, c-format
+msgid "Incorrect password message: %s"
+msgstr "Zpráva při chybném hesle: %s"
+
+#: plugins/sudoers/def_data.c:203
+#, c-format
+msgid "Path to lecture status dir: %s"
+msgstr "Cesta k adresáři se stavy lekcí: %s"
+
+#: plugins/sudoers/def_data.c:207
+#, c-format
+msgid "Path to authentication timestamp dir: %s"
+msgstr "Cesta k adresáři s časovými údaji autentizace: %s"
+
+#: plugins/sudoers/def_data.c:211
+#, c-format
+msgid "Owner of the authentication timestamp dir: %s"
+msgstr "Vlastník adresáře s časovými údaji autentizace: %s"
+
+#: plugins/sudoers/def_data.c:215
+#, c-format
+msgid "Users in this group are exempt from password and PATH requirements: %s"
+msgstr "Uživatelé v této skupině jsou vyjmuti z požadavků na heslo na PATH: %s"
+
+#: plugins/sudoers/def_data.c:219
+#, c-format
+msgid "Default password prompt: %s"
+msgstr "Výchozí výzva pro heslo: %s"
+
+#: plugins/sudoers/def_data.c:223
+msgid "If set, passprompt will override system prompt in all cases."
+msgstr "Je-li nastaveno, passprompt přebije systémovou výzvu ve všech případech."
+
+#: plugins/sudoers/def_data.c:227
+#, c-format
+msgid "Default user to run commands as: %s"
+msgstr "Výchozí uživatel, pro kterým spouštět příkazy: %s"
+
+#: plugins/sudoers/def_data.c:231
+#, c-format
+msgid "Value to override user's $PATH with: %s"
+msgstr "Hodnota, kterou přebít PATH uživatele: %s"
+
+#: plugins/sudoers/def_data.c:235
+#, c-format
+msgid "Path to the editor for use by visudo: %s"
+msgstr "Cesta k editoru pro potřeby visudo: %s"
+
+#: plugins/sudoers/def_data.c:239
+#, c-format
+msgid "When to require a password for 'list' pseudocommand: %s"
+msgstr "Kdy vyžadovat heslo pro pseudopříkaz „list“: %s"
+
+#: plugins/sudoers/def_data.c:243
+#, c-format
+msgid "When to require a password for 'verify' pseudocommand: %s"
+msgstr "Kdy vyžadovat heslo pro pseudopříkaz „verify“: %s"
+
+#: plugins/sudoers/def_data.c:247
+msgid "Preload the dummy exec functions contained in the sudo_noexec library"
+msgstr "Přednačíst prázdné spouštěcí funkce obsažené v knihovně sudo_noexec"
+
+#: plugins/sudoers/def_data.c:251
+msgid "If LDAP directory is up, do we ignore local sudoers file"
+msgstr "Pokud je adresář LDAP dostupný, ignorovat místní soubor sudoers"
+
+#: plugins/sudoers/def_data.c:255
+#, c-format
+msgid "File descriptors >= %d will be closed before executing a command"
+msgstr "Souborové deskriptory >= %d budou před spuštěním příkazu uzavřeny"
+
+#: plugins/sudoers/def_data.c:259
+msgid "If set, users may override the value of `closefrom' with the -C option"
+msgstr "Je-li nastaveno, uživatelé mohou přebít hodnotu „closefrom“ přepínačem -C"
+
+#: plugins/sudoers/def_data.c:263
+msgid "Allow users to set arbitrary environment variables"
+msgstr "Dovolit uživatelům nastavit libovolné proměnné prostředí"
+
+#: plugins/sudoers/def_data.c:267
+msgid "Reset the environment to a default set of variables"
+msgstr "Vrátit prostředí do výchozí množiny proměnných"
+
+#: plugins/sudoers/def_data.c:271
+msgid "Environment variables to check for sanity:"
+msgstr "Proměnné prostředí kontrolované na logičnost:"
+
+#: plugins/sudoers/def_data.c:275
+msgid "Environment variables to remove:"
+msgstr "Proměnné prostředí, které se mají odstranit:"
+
+#: plugins/sudoers/def_data.c:279
+msgid "Environment variables to preserve:"
+msgstr "Proměnné prostředí, které se mají zachovat:"
+
+#: plugins/sudoers/def_data.c:283
+#, c-format
+msgid "SELinux role to use in the new security context: %s"
+msgstr "Selinuxový role, která se použije v novém bezpečnostním kontextu: %s"
+
+#: plugins/sudoers/def_data.c:287
+#, c-format
+msgid "SELinux type to use in the new security context: %s"
+msgstr "Selinuxový typ, který se použije v novém bezpečnostním kontextu: %s"
+
+#: plugins/sudoers/def_data.c:291
+#, c-format
+msgid "Path to the sudo-specific environment file: %s"
+msgstr "Cesta k souboru s prostředím určeném pro sudo: %s"
+
+#: plugins/sudoers/def_data.c:295
+#, c-format
+msgid "Locale to use while parsing sudoers: %s"
+msgstr "Národní prostředí, které se použije pro rozbor sudoers: %s"
+
+#: plugins/sudoers/def_data.c:299
+msgid "Allow sudo to prompt for a password even if it would be visible"
+msgstr "Dovolit sudu ptát se na heslo, i kdyby bylo čitelné"
+
+#: plugins/sudoers/def_data.c:303
+msgid "Provide visual feedback at the password prompt when there is user input"
+msgstr "Indikovat vstup uživatele při dotazu na heslo"
+
+#: plugins/sudoers/def_data.c:307
+msgid "Use faster globbing that is less accurate but does not access the filesystem"
+msgstr "Použit rychlejší expanzi globů, která je méně přesná, ale nepřistupuje k souborovému systému"
+
+#: plugins/sudoers/def_data.c:311
+msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
+msgstr "Umask zadaná v sudoers přebije uživatelovu, i když je volnější"
+
+#: plugins/sudoers/def_data.c:315
+msgid "Log user's input for the command being run"
+msgstr "Zaznamenávat vstup uživatele pro spouštěný příkaz"
+
+#: plugins/sudoers/def_data.c:319
+msgid "Log the output of the command being run"
+msgstr "Zaznamenávat výstup spouštěného příkazu"
+
+#: plugins/sudoers/def_data.c:323
+msgid "Compress I/O logs using zlib"
+msgstr "Komprimovat protokoly o vstupu/výstupu pomocí zlib"
+
+#: plugins/sudoers/def_data.c:327
+msgid "Always run commands in a pseudo-tty"
+msgstr "Vždy spouštět příkazy v pseudoTTY"
+
+#: plugins/sudoers/def_data.c:331
+#, c-format
+msgid "Plugin for non-Unix group support: %s"
+msgstr "Modul pro podporu neunixových skupin: %s"
+
+#: plugins/sudoers/def_data.c:335
+#, c-format
+msgid "Directory in which to store input/output logs: %s"
+msgstr "Adresář, kam ukládat protokoly o vstupu/výstupu: %s"
+
+#: plugins/sudoers/def_data.c:339
+#, c-format
+msgid "File in which to store the input/output log: %s"
+msgstr "Soubor, do kterého ukládat protokol o vstupu/výstupu: %s"
+
+#: plugins/sudoers/def_data.c:343
+msgid "Add an entry to the utmp/utmpx file when allocating a pty"
+msgstr "Při alokaci PTY přidat záznam do souboru utmp/utmpx"
+
+#: plugins/sudoers/def_data.c:347
+msgid "Set the user in utmp to the runas user, not the invoking user"
+msgstr "Do utmp zapisovat runas uživatele, nikoliv uživatele volajícího"
+
+#: plugins/sudoers/def_data.c:351
+msgid "Set of permitted privileges"
+msgstr "Množina povolujících práv"
+
+#: plugins/sudoers/def_data.c:355
+msgid "Set of limit privileges"
+msgstr "Množina omezujících práv"
+
+#: plugins/sudoers/def_data.c:359
+msgid "Run commands on a pty in the background"
+msgstr "Spouštět příkazy v PTY na pozadí"
+
+#: plugins/sudoers/def_data.c:363
+msgid "PAM service name to use"
+msgstr "Použít tuto službu PAM"
+
+#: plugins/sudoers/def_data.c:367
+msgid "PAM service name to use for login shells"
+msgstr "Název služby PAM, který se použije pro přihlašovací shelly"
+
+#: plugins/sudoers/def_data.c:371
+msgid "Attempt to establish PAM credentials for the target user"
+msgstr "Pokusit se získat pověření PAM pro cílového uživatele"
+
+#: plugins/sudoers/def_data.c:375
+msgid "Create a new PAM session for the command to run in"
+msgstr "Vytvořit pro spouštěný příkaz novou relaci PAM"
+
+#: plugins/sudoers/def_data.c:379
+#, c-format
+msgid "Maximum I/O log sequence number: %u"
+msgstr "Maximální pořadové číslo protokolu o vstupu/výstupu: %u"
+
+#: plugins/sudoers/def_data.c:383
+msgid "Enable sudoers netgroup support"
+msgstr "Zapnout v sudoers podporu netgroup"
+
+#: plugins/sudoers/defaults.c:210 plugins/sudoers/defaults.c:600
+#: plugins/sudoers/visudo_json.c:611 plugins/sudoers/visudo_json.c:647
+#, c-format
+msgid "unknown defaults entry `%s'"
+msgstr "neznámá položka defaults „%s“"
+
+#: plugins/sudoers/defaults.c:218 plugins/sudoers/defaults.c:228
+#: plugins/sudoers/defaults.c:248 plugins/sudoers/defaults.c:261
+#: plugins/sudoers/defaults.c:274 plugins/sudoers/defaults.c:287
+#: plugins/sudoers/defaults.c:300 plugins/sudoers/defaults.c:320
+#: plugins/sudoers/defaults.c:330
+#, c-format
+msgid "value `%s' is invalid for option `%s'"
+msgstr "hodnota „%s“ je pro volbu „%s“ neplatná"
+
+#: plugins/sudoers/defaults.c:221 plugins/sudoers/defaults.c:231
+#: plugins/sudoers/defaults.c:239 plugins/sudoers/defaults.c:256
+#: plugins/sudoers/defaults.c:269 plugins/sudoers/defaults.c:282
+#: plugins/sudoers/defaults.c:295 plugins/sudoers/defaults.c:315
+#: plugins/sudoers/defaults.c:326
+#, c-format
+msgid "no value specified for `%s'"
+msgstr "u „%s“ nebyla zadána žádná hodnota"
+
+#: plugins/sudoers/defaults.c:244
+#, c-format
+msgid "values for `%s' must start with a '/'"
+msgstr "hodnota u „%s“ musí začínat na „/“"
+
+#: plugins/sudoers/defaults.c:306
+#, c-format
+msgid "option `%s' does not take a value"
+msgstr "volba „%s“ nebere hodnotu"
+
+#: plugins/sudoers/env.c:288 plugins/sudoers/env.c:293
+#: plugins/sudoers/env.c:395 plugins/sudoers/linux_audit.c:82
+#: plugins/sudoers/policy.c:442 plugins/sudoers/policy.c:449
+#: plugins/sudoers/prompt.c:171 plugins/sudoers/sudoers.c:656
+#: plugins/sudoers/testsudoers.c:241
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "vnitřní chyba, přetečení %s"
+
+#: plugins/sudoers/env.c:367
+msgid "sudo_putenv: corrupted envp, length mismatch"
+msgstr "sudo_putenv: poškozené pole envp, délka nesouhlasí"
+
+#: plugins/sudoers/env.c:1014
+#, c-format
+msgid "sorry, you are not allowed to set the following environment variables: %s"
+msgstr "je nám líto, ale nemáte dovoleno nastavovat následující proměnné prostředí: %s"
+
+#: plugins/sudoers/group_plugin.c:94
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s musí být vlastněn UID %d"
+
+#: plugins/sudoers/group_plugin.c:98
+#, c-format
+msgid "%s must only be writable by owner"
+msgstr "%s smí být zapisovatelný jen pro vlastníka"
+
+#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "nelze zavést %s: %s"
+
+#: plugins/sudoers/group_plugin.c:110
+#, c-format
+msgid "unable to find symbol \"group_plugin\" in %s"
+msgstr "v %s nelze nalézt symbol „group_plugin“"
+
+#: plugins/sudoers/group_plugin.c:115
+#, c-format
+msgid "%s: incompatible group plugin major version %d, expected %d"
+msgstr "%s: nekompatibilní hlavní verze modulu pro skupiny %d, očekávána %d"
+
+#: plugins/sudoers/interfaces.c:116
+msgid "Local IP address and netmask pairs:\n"
+msgstr "Pár místní IP adresy a masky sítě:\n"
+
+#: plugins/sudoers/iolog.c:99 plugins/sudoers/iolog.c:112
+#: plugins/sudoers/timestamp.c:227
+#, c-format
+msgid "%s exists but is not a directory (0%o)"
+msgstr "%s existuje, ale nejedná se o adresář (0%o)"
+
+#: plugins/sudoers/iolog.c:109 plugins/sudoers/iolog.c:123
+#: plugins/sudoers/iolog.c:127 plugins/sudoers/timestamp.c:221
+#: plugins/sudoers/timestamp.c:242
+#, c-format
+msgid "unable to mkdir %s"
+msgstr "nelze vytvořit adresář %s"
+
+#: plugins/sudoers/iolog.c:190 plugins/sudoers/sudoers.c:710
+#: plugins/sudoers/sudoreplay.c:342 plugins/sudoers/sudoreplay.c:813
+#: plugins/sudoers/sudoreplay.c:1010 plugins/sudoers/timestamp.c:345
+#: plugins/sudoers/visudo.c:823 plugins/sudoers/visudo_json.c:995
+#: plugins/sudoers/visudo_json.c:1001
+#, c-format
+msgid "unable to open %s"
+msgstr "nelze otevřít %s"
+
+#: plugins/sudoers/iolog.c:229 plugins/sudoers/sudoers.c:713
+#: plugins/sudoers/sudoreplay.c:1117
+#, c-format
+msgid "unable to read %s"
+msgstr "%s nelze číst"
+
+#: plugins/sudoers/iolog.c:259 plugins/sudoers/sudoreplay.c:582
+#: plugins/sudoers/timestamp.c:184
+#, c-format
+msgid "unable to write to %s"
+msgstr "do %s nelze zapsat"
+
+#: plugins/sudoers/iolog.c:319 plugins/sudoers/iolog.c:512
+#, c-format
+msgid "unable to create %s"
+msgstr "%s nelze vytvořit"
+
+#: plugins/sudoers/ldap.c:406
+msgid "sudo_ldap_conf_add_ports: port too large"
+msgstr "sudo_ldap_conf_add_ports: port je příliš velký"
+
+#: plugins/sudoers/ldap.c:429
+msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
+msgstr "sudo_ldap_conf_add_ports: nedostatek místa na rozšíření hostbuf"
+
+#: plugins/sudoers/ldap.c:461
+#, c-format
+msgid "unsupported LDAP uri type: %s"
+msgstr "nepodporovaný typ ldapového URI: %s"
+
+#: plugins/sudoers/ldap.c:492
+msgid "unable to mix ldap and ldaps URIs"
+msgstr "nelze míchat URI ldap a ldaps"
+
+#: plugins/sudoers/ldap.c:496 plugins/sudoers/ldap.c:528
+msgid "starttls not supported when using ldaps"
+msgstr "při použití ldaps není starttls podporováno"
+
+#: plugins/sudoers/ldap.c:514
+msgid "sudo_ldap_parse_uri: out of space building hostbuf"
+msgstr "sudo_ldap_parse_uri: nedostatek místo pro vytvoření hostbuf"
+
+#: plugins/sudoers/ldap.c:595
+#, c-format
+msgid "unable to initialize SSL cert and key db: %s"
+msgstr "nelze inicializovat certifikát SSL a databázi klíčů: %s"
+
+#: plugins/sudoers/ldap.c:598
+#, c-format
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "pro SSL musíte v %s nastavit TLS_CERT"
+
+#: plugins/sudoers/ldap.c:1089
+msgid "unable to get GMT time"
+msgstr "nelze získat čas GMT"
+
+#: plugins/sudoers/ldap.c:1095
+msgid "unable to format timestamp"
+msgstr "nelze naformátovat časový údaj"
+
+#: plugins/sudoers/ldap.c:1103
+msgid "unable to build time filter"
+msgstr "nelze vytvořit časový filtr"
+
+#: plugins/sudoers/ldap.c:1322
+msgid "sudo_ldap_build_pass1 allocation mismatch"
+msgstr "nesouhlasí alokace sudo_ldap_build_pass1"
+
+#: plugins/sudoers/ldap.c:1433
+#, c-format
+msgid "%s: %s: %s: %s"
+msgstr "%s: %s: %s: %s"
+
+#: plugins/sudoers/ldap.c:1909
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: %s\n"
+msgstr ""
+"\n"
+"Role LDAP: %s\n"
+
+#: plugins/sudoers/ldap.c:1911
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: UNKNOWN\n"
+msgstr ""
+"\n"
+"Role LDAP: NEZNÁMÁ\n"
+
+#: plugins/sudoers/ldap.c:1958
+#, c-format
+msgid "    Order: %s\n"
+msgstr "    Pořadí: %s\n"
+
+#: plugins/sudoers/ldap.c:1966 plugins/sudoers/parse.c:504
+#: plugins/sudoers/sssd.c:1295
+#, c-format
+msgid "    Commands:\n"
+msgstr "    Příkazy:\n"
+
+#: plugins/sudoers/ldap.c:2509
+#, c-format
+msgid "unable to initialize LDAP: %s"
+msgstr "LDAP nelze inicializovat: %s"
+
+#: plugins/sudoers/ldap.c:2551
+msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
+msgstr "start_tls uvedeno, ale knihovna LDAP nepodporuje ldap_start_tls_s_np() ani ldap_start_tls_s_np()"
+
+#: plugins/sudoers/ldap.c:2784
+#, c-format
+msgid "invalid sudoOrder attribute: %s"
+msgstr "neplatný atribut sudoOrder: %s"
+
+#: plugins/sudoers/linux_audit.c:57
+msgid "unable to open audit system"
+msgstr "nelze otevřít auditní systém"
+
+#: plugins/sudoers/linux_audit.c:93
+msgid "unable to send audit message"
+msgstr "nelze odeslat auditní zprávu"
+
+#: plugins/sudoers/logging.c:136
+#, c-format
+msgid "%8s : %s"
+msgstr "%8s : %s"
+
+#: plugins/sudoers/logging.c:164
+#, c-format
+msgid "%8s : (command continued) %s"
+msgstr "%8s : (příkaz pokračuje) %s"
+
+#: plugins/sudoers/logging.c:189
+#, c-format
+msgid "unable to open log file: %s: %s"
+msgstr "nelze otevřít soubor protokolu: %s: %s"
+
+#: plugins/sudoers/logging.c:192
+#, c-format
+msgid "unable to lock log file: %s: %s"
+msgstr "nelze zamknout soubor protokolu: %s: %s"
+
+#: plugins/sudoers/logging.c:243
+msgid "No user or host"
+msgstr "Žádný uživatel nebo stroj"
+
+#: plugins/sudoers/logging.c:245
+msgid "validation failure"
+msgstr "selhání ověření"
+
+#: plugins/sudoers/logging.c:252
+msgid "user NOT in sudoers"
+msgstr "uživatel NENÍ v sudoers"
+
+#: plugins/sudoers/logging.c:254
+msgid "user NOT authorized on host"
+msgstr "uživatel NENÍ na stroji autorizován"
+
+#: plugins/sudoers/logging.c:256
+msgid "command not allowed"
+msgstr "příkaz nedovolen"
+
+#: plugins/sudoers/logging.c:286
+#, c-format
+msgid "%s is not in the sudoers file.  This incident will be reported.\n"
+msgstr "%s není v souboru sudoers. Tento událost bude ohlášena.\n"
+
+#: plugins/sudoers/logging.c:289
+#, c-format
+msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
+msgstr "%s nemá dovoleno spouštět sudo na %s. Tato událost bude ohlášena.\n"
+
+#: plugins/sudoers/logging.c:293
+#, c-format
+msgid "Sorry, user %s may not run sudo on %s.\n"
+msgstr "Je nám líto, uživatel %s nesmí spouštět sudo na %s.\n"
+
+#: plugins/sudoers/logging.c:296
+#, c-format
+msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
+msgstr "Je nám líto, uživatel %s nemá dovoleno spouštět „%s%s%s“ jako %s%s%s na %s.\n"
+
+#: plugins/sudoers/logging.c:333 plugins/sudoers/sudoers.c:382
+#: plugins/sudoers/sudoers.c:383 plugins/sudoers/sudoers.c:385
+#: plugins/sudoers/sudoers.c:386 plugins/sudoers/sudoers.c:1017
+#: plugins/sudoers/sudoers.c:1018
+#, c-format
+msgid "%s: command not found"
+msgstr "%s: příkaz nenalezen"
+
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:378
+#, c-format
+msgid ""
+"ignoring `%s' found in '.'\n"
+"Use `sudo ./%s' if this is the `%s' you wish to run."
+msgstr ""
+"ignoruje se „%s“ nalezený v „.“\n"
+"Použijte „sudo ./%s„, je-li toto „%s“', který chcete spustit."
+
+#: plugins/sudoers/logging.c:351
+msgid "authentication failure"
+msgstr "selhání autentizace"
+
+#: plugins/sudoers/logging.c:377
+msgid "a password is required"
+msgstr "je vyžadováno heslo"
+
+#: plugins/sudoers/logging.c:441 plugins/sudoers/logging.c:495
+#, c-format
+msgid "%u incorrect password attempt"
+msgid_plural "%u incorrect password attempts"
+msgstr[0] "%u chybný pokus zadat heslo"
+msgstr[1] "%u chybné pokusy zadat heslo"
+msgstr[2] "%u chybných pokusů zadat heslo"
+
+#: plugins/sudoers/logging.c:581
+msgid "unable to fork"
+msgstr "nelze vytvořit proces"
+
+#: plugins/sudoers/logging.c:588 plugins/sudoers/logging.c:644
+#, c-format
+msgid "unable to fork: %m"
+msgstr "nelze vytvořit proces: %m"
+
+#: plugins/sudoers/logging.c:634
+#, c-format
+msgid "unable to open pipe: %m"
+msgstr "nelze otevřít rouru: %m"
+
+#: plugins/sudoers/logging.c:659
+#, c-format
+msgid "unable to dup stdin: %m"
+msgstr "nelze zdvojit standardní vstup: %m"
+
+#: plugins/sudoers/logging.c:694
+#, c-format
+msgid "unable to execute %s: %m"
+msgstr "nelze spustit %s: %m"
+
+#: plugins/sudoers/logging.c:914
+msgid "internal error: insufficient space for log line"
+msgstr "vnitřní chyba: nedostatek místa pro řádek protokolu"
+
+#: plugins/sudoers/match.c:617
+#, c-format
+msgid "unsupported digest type %d for %s"
+msgstr "nepodporovaný druh kontrolního součtu %d pro %s"
+
+#: plugins/sudoers/match.c:647
+#, c-format
+msgid "%s: read error"
+msgstr "%s: chyba při čtení"
+
+#: plugins/sudoers/match.c:661
+#, c-format
+msgid "digest for %s (%s) is not in %s form"
+msgstr "součet pro %s (%s) nemá tvar %s"
+
+#: plugins/sudoers/parse.c:115
+#, c-format
+msgid "parse error in %s near line %d"
+msgstr "chyba rozboru v %s kolem řádku %d"
+
+#: plugins/sudoers/parse.c:118
+#, c-format
+msgid "parse error in %s"
+msgstr "chyba rozboru v %s"
+
+#: plugins/sudoers/parse.c:451
+#, c-format
+msgid ""
+"\n"
+"Sudoers entry:\n"
+msgstr ""
+"\n"
+"Položka v sudoers:\n"
+
+#: plugins/sudoers/parse.c:452
+#, c-format
+msgid "    RunAsUsers: "
+msgstr "    RunAsUsers: "
+
+#: plugins/sudoers/parse.c:466
+#, c-format
+msgid "    RunAsGroups: "
+msgstr "    RunAsGroups: "
+
+#: plugins/sudoers/parse.c:475
+#, c-format
+msgid "    Options: "
+msgstr "    Volby: "
+
+#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:116
+#: plugins/sudoers/policy.c:123 plugins/sudoers/policy.c:145
+#: plugins/sudoers/policy.c:259 plugins/sudoers/policy.c:277
+#: plugins/sudoers/policy.c:284 plugins/sudoers/policy.c:312
+#: plugins/sudoers/policy.c:320 plugins/sudoers/policy.c:327
+#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
+#: plugins/sudoers/set_perms.c:1525
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: plugins/sudoers/policy.c:539 plugins/sudoers/visudo.c:764
+#, c-format
+msgid "unable to execute %s"
+msgstr "nelze vykonat %s"
+
+#: plugins/sudoers/policy.c:681
+#, c-format
+msgid "Sudoers policy plugin version %s\n"
+msgstr "Verze modulu s politikami sudoers je %s\n"
+
+#: plugins/sudoers/policy.c:683
+#, c-format
+msgid "Sudoers file grammar version %d\n"
+msgstr "Verze gramatiky souboru sudoers je %d\n"
+
+#: plugins/sudoers/policy.c:687
+#, c-format
+msgid ""
+"\n"
+"Sudoers path: %s\n"
+msgstr ""
+"\n"
+"Cesta sudoers: %s\n"
+
+#: plugins/sudoers/policy.c:690
+#, c-format
+msgid "nsswitch path: %s\n"
+msgstr "cesta k nsswitch: %s\n"
+
+#: plugins/sudoers/policy.c:692
+#, c-format
+msgid "ldap.conf path: %s\n"
+msgstr "cesta k ldap.conf: %s\n"
+
+#: plugins/sudoers/policy.c:693
+#, c-format
+msgid "ldap.secret path: %s\n"
+msgstr "cesta k ldap.secret: %s\n"
+
+#: plugins/sudoers/pwutil.c:148
+#, c-format
+msgid "unable to cache uid %u, already exists"
+msgstr "nelze zapamatovat si UID %u, již existuje"
+
+#: plugins/sudoers/pwutil.c:190
+#, c-format
+msgid "unable to cache user %s, already exists"
+msgstr "nelze zapamatovat si uživatele %s, již existuje"
+
+#: plugins/sudoers/pwutil.c:393
+#, c-format
+msgid "unable to cache gid %u, already exists"
+msgstr "nelze zapamatovat si GID %u, již existuje"
+
+#: plugins/sudoers/pwutil.c:429
+#, c-format
+msgid "unable to cache group %s, already exists"
+msgstr "nelze zapamatovat si skupinu %s, již existuje"
+
+#: plugins/sudoers/pwutil.c:592 plugins/sudoers/pwutil.c:614
+#, c-format
+msgid "unable to cache group list for %s, already exists"
+msgstr "nelze zapamatovat si seznam skupin pro %s, již existuje"
+
+#: plugins/sudoers/pwutil.c:612
+#, c-format
+msgid "unable to parse groups for %s"
+msgstr "nelze rozebrat skupiny pro %s"
+
+#: plugins/sudoers/set_perms.c:124 plugins/sudoers/set_perms.c:449
+#: plugins/sudoers/set_perms.c:852 plugins/sudoers/set_perms.c:1149
+#: plugins/sudoers/set_perms.c:1441
+msgid "perm stack overflow"
+msgstr "přetečení zásobníku oprávnění"
+
+#: plugins/sudoers/set_perms.c:132 plugins/sudoers/set_perms.c:457
+#: plugins/sudoers/set_perms.c:860 plugins/sudoers/set_perms.c:1157
+#: plugins/sudoers/set_perms.c:1449
+msgid "perm stack underflow"
+msgstr "podtečení zásobníku oprávnění"
+
+#: plugins/sudoers/set_perms.c:191 plugins/sudoers/set_perms.c:504
+#: plugins/sudoers/set_perms.c:1208 plugins/sudoers/set_perms.c:1481
+msgid "unable to change to root gid"
+msgstr "nelze přepnout GID na root"
+
+#: plugins/sudoers/set_perms.c:280 plugins/sudoers/set_perms.c:601
+#: plugins/sudoers/set_perms.c:989 plugins/sudoers/set_perms.c:1285
+msgid "unable to change to runas gid"
+msgstr "nelze přepnout na běhové GID"
+
+#: plugins/sudoers/set_perms.c:292 plugins/sudoers/set_perms.c:613
+#: plugins/sudoers/set_perms.c:999 plugins/sudoers/set_perms.c:1295
+msgid "unable to change to runas uid"
+msgstr "nelze přepnout na běhové UID"
+
+#: plugins/sudoers/set_perms.c:310 plugins/sudoers/set_perms.c:631
+#: plugins/sudoers/set_perms.c:1015 plugins/sudoers/set_perms.c:1311
+msgid "unable to change to sudoers gid"
+msgstr "nelze přepnout na GID sudoers"
+
+#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
+#: plugins/sudoers/set_perms.c:1525
+msgid "too many processes"
+msgstr "příliš mnoho procesů"
+
+#: plugins/sudoers/set_perms.c:1595
+msgid "unable to set runas group vector"
+msgstr "nelze nastavit vektor běhových skupin"
+
+#: plugins/sudoers/sssd.c:252
+msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
+msgstr "nelze inicializovat zdroj SSS. Je SSSD nainstalován na vašem stroji?"
+
+#: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
+#: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
+#: plugins/sudoers/sssd.c:291
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "nelze nalézt symbol „%s“ v %s"
+
+#: plugins/sudoers/sudo_nss.c:283
+#, c-format
+msgid "Matching Defaults entries for %s on %s:\n"
+msgstr "Odpovídající položky Defaults pro %s na %s:\n"
+
+#: plugins/sudoers/sudo_nss.c:296
+#, c-format
+msgid "Runas and Command-specific defaults for %s:\n"
+msgstr "Výchozí hodnoty Runas a Command pro %s:\n"
+
+#: plugins/sudoers/sudo_nss.c:309
+#, c-format
+msgid "User %s may run the following commands on %s:\n"
+msgstr "Uživatel %s smí spustit následující příkazy na %s:\n"
+
+#: plugins/sudoers/sudo_nss.c:318
+#, c-format
+msgid "User %s is not allowed to run sudo on %s.\n"
+msgstr "Uživatel %s nemá dovoleno spustit sudo na %s.\n"
+
+#: plugins/sudoers/sudoers.c:154 plugins/sudoers/sudoers.c:188
+#: plugins/sudoers/sudoers.c:675
+msgid "problem with defaults entries"
+msgstr "problém s položkami defaults"
+
+#: plugins/sudoers/sudoers.c:160
+msgid "no valid sudoers sources found, quitting"
+msgstr "nenalezen žádné platné zdroje sudoers, končí se"
+
+#: plugins/sudoers/sudoers.c:222
+msgid "sudoers specifies that root is not allowed to sudo"
+msgstr "sudoers udává, že root nemá dovoleno použít sudo"
+
+#: plugins/sudoers/sudoers.c:261
+msgid "you are not permitted to use the -C option"
+msgstr "nemáte dovoleno použít přepínač -C"
+
+#: plugins/sudoers/sudoers.c:314
+#, c-format
+msgid "timestamp owner (%s): No such user"
+msgstr "vlastník časového údaje (%s): Takový uživatel neexistuje"
+
+#: plugins/sudoers/sudoers.c:328
+msgid "no tty"
+msgstr "žádné TTY"
+
+#: plugins/sudoers/sudoers.c:329
+msgid "sorry, you must have a tty to run sudo"
+msgstr "je nám líto, ale pro spuštění sudo musíte mít TTY"
+
+#: plugins/sudoers/sudoers.c:377
+msgid "command in current directory"
+msgstr "příkaz v aktuálním adresáři"
+
+#: plugins/sudoers/sudoers.c:394
+msgid "sorry, you are not allowed to preserve the environment"
+msgstr "je nám líto, ale nemáte dovoleno zachovat prostředí"
+
+#: plugins/sudoers/sudoers.c:725 plugins/sudoers/visudo.c:326
+#: plugins/sudoers/visudo.c:590
+#, c-format
+msgid "unable to stat %s"
+msgstr "nelze zjistit údaje o %s"
+
+#: plugins/sudoers/sudoers.c:728
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s není běžný soubor"
+
+#: plugins/sudoers/sudoers.c:731 plugins/sudoers/timestamp.c:283 toke.l:923
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s je vlastněn UID %u, měl by být vlastněn %u"
+
+#: plugins/sudoers/sudoers.c:735 toke.l:930
+#, c-format
+msgid "%s is world writable"
+msgstr "%s je zapisovatelný pro všechny"
+
+#: plugins/sudoers/sudoers.c:738 toke.l:935
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr "%s je vlastněn GID %u, mělo by být %u"
+
+#: plugins/sudoers/sudoers.c:764
+#, c-format
+msgid "only root can use `-c %s'"
+msgstr "pouze root může použít „-c %s“"
+
+#: plugins/sudoers/sudoers.c:781 plugins/sudoers/sudoers.c:783
+#, c-format
+msgid "unknown login class: %s"
+msgstr "neznáma přihlašovací třída: %s"
+
+#: plugins/sudoers/sudoers.c:815
+#, c-format
+msgid "unable to resolve host %s"
+msgstr "nelze přeložit název stroje %s"
+
+#: plugins/sudoers/sudoers.c:878 plugins/sudoers/testsudoers.c:387
+#, c-format
+msgid "unknown group: %s"
+msgstr "neznámá skupina: %s"
+
+#: plugins/sudoers/sudoreplay.c:274
+#, c-format
+msgid "invalid filter option: %s"
+msgstr "neplatná volba filtru: %s"
+
+#: plugins/sudoers/sudoreplay.c:287
+#, c-format
+msgid "invalid max wait: %s"
+msgstr "neplatná maximální doba čekání: %s"
+
+#: plugins/sudoers/sudoreplay.c:293
+#, c-format
+msgid "invalid speed factor: %s"
+msgstr "neplatný násobek rychlosti: %s"
+
+#: plugins/sudoers/sudoreplay.c:296 plugins/sudoers/visudo.c:184
+#, c-format
+msgid "%s version %s\n"
+msgstr "%s verze %s\n"
+
+#: plugins/sudoers/sudoreplay.c:328
+#, c-format
+msgid "%s/%.2s/%.2s/%.2s/timing: %s"
+msgstr "%s/%.2s/%.2s/%.2s/časování: %s"
+
+#: plugins/sudoers/sudoreplay.c:334
+#, c-format
+msgid "%s/%s/timing: %s"
+msgstr "%s/%s/časování: %s"
+
+#: plugins/sudoers/sudoreplay.c:350
+#, c-format
+msgid "Replaying sudo session: %s\n"
+msgstr "Přehrává se relace sudo: %s\n"
+
+#: plugins/sudoers/sudoreplay.c:356
+#, c-format
+msgid "Warning: your terminal is too small to properly replay the log.\n"
+msgstr "Pozor: váš terminál je příliš malý pro správné zobrazení záznamu.\n"
+
+#: plugins/sudoers/sudoreplay.c:357
+#, c-format
+msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
+msgstr "Rozměry záznamu jsou %d × %d, váš terminál má rozměry %d × %d."
+
+#: plugins/sudoers/sudoreplay.c:412
+msgid "unable to set tty to raw mode"
+msgstr "TTY nelze nastavit do přímého režimu"
+
+#: plugins/sudoers/sudoreplay.c:443
+#, c-format
+msgid "invalid timing file line: %s"
+msgstr "neplatný řádek s časovacím souborem: %s"
+
+#: plugins/sudoers/sudoreplay.c:649 plugins/sudoers/sudoreplay.c:674
+#, c-format
+msgid "ambiguous expression \"%s\""
+msgstr "nejednoznačný výraz „%s“"
+
+#: plugins/sudoers/sudoreplay.c:696
+msgid "unmatched ')' in expression"
+msgstr "ve výrazu neodpovídá „)“"
+
+#: plugins/sudoers/sudoreplay.c:700
+#, c-format
+msgid "unknown search term \"%s\""
+msgstr "neznámý vyhledávací výraz „%s“"
+
+#: plugins/sudoers/sudoreplay.c:714
+#, c-format
+msgid "%s requires an argument"
+msgstr "%s vyžaduje argument"
+
+#: plugins/sudoers/sudoreplay.c:718 plugins/sudoers/sudoreplay.c:1090
+#, c-format
+msgid "invalid regular expression: %s"
+msgstr "neplatný regulární výraz: %s"
+
+#: plugins/sudoers/sudoreplay.c:724
+#, c-format
+msgid "could not parse date \"%s\""
+msgstr "datum „%s“ se nepodařilo rozebrat"
+
+#: plugins/sudoers/sudoreplay.c:733
+msgid "unmatched '(' in expression"
+msgstr "ve výrazu neodpovídá „(“"
+
+#: plugins/sudoers/sudoreplay.c:735
+msgid "illegal trailing \"or\""
+msgstr "zakázané zakončení „or“"
+
+#: plugins/sudoers/sudoreplay.c:737
+msgid "illegal trailing \"!\""
+msgstr "zakázané zakončení „!“"
+
+#: plugins/sudoers/sudoreplay.c:790
+#, c-format
+msgid "unknown search type %d"
+msgstr "neznámý vyhledávácí typ %d"
+
+#: plugins/sudoers/sudoreplay.c:827
+#, c-format
+msgid "%s: invalid log file"
+msgstr "%s: neplatný soubor s protokolem"
+
+#: plugins/sudoers/sudoreplay.c:845
+#, c-format
+msgid "%s: time stamp field is missing"
+msgstr "%s: chybí položka s časovým údajem"
+
+#: plugins/sudoers/sudoreplay.c:852
+#, c-format
+msgid "%s: time stamp %s: %s"
+msgstr "%s: čas %s: %s"
+
+#: plugins/sudoers/sudoreplay.c:859
+#, c-format
+msgid "%s: user field is missing"
+msgstr "%s: chybí položka s uživatelem"
+
+#: plugins/sudoers/sudoreplay.c:867
+#, c-format
+msgid "%s: runas user field is missing"
+msgstr "%s: chybí položka s runas uživatelem"
+
+#: plugins/sudoers/sudoreplay.c:875
+#, c-format
+msgid "%s: runas group field is missing"
+msgstr "%s chybí položka s runas skupinou"
+
+#: plugins/sudoers/sudoreplay.c:1230
+#, c-format
+msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
+msgstr "použití: %s [-h] [-d adresář] [-m číslo] [-s číslo] ID\n"
+
+#: plugins/sudoers/sudoreplay.c:1233
+#, c-format
+msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
+msgstr "použití: %s [-h] [-d adresář] -l [vyhledávací_výraz]\n"
+
+#: plugins/sudoers/sudoreplay.c:1242
+#, c-format
+msgid ""
+"%s - replay sudo session logs\n"
+"\n"
+msgstr ""
+"%s – přehraje záznam relace sudo\n"
+"\n"
+
+#: plugins/sudoers/sudoreplay.c:1244
+msgid ""
+"\n"
+"Options:\n"
+"  -d, --directory=dir  specify directory for session logs\n"
+"  -f, --filter=filter  specify which I/O type(s) to display\n"
+"  -h, --help           display help message and exit\n"
+"  -l, --list           list available session IDs, with optional expression\n"
+"  -m, --max-wait=num   max number of seconds to wait between events\n"
+"  -s, --speed=num      speed up or slow down output\n"
+"  -V, --version        display version information and exit"
+msgstr ""
+"\n"
+"Přepínače:\n"
+"  -d, --directory=adresář\n"
+"                       určuje adresář pro záznamy relace\n"
+"  -f, --filter=filtr   určuje, které druhy I/O se mají zobrazit\n"
+"  -h, --help           zobrazí nápovědu a skončí\n"
+"  -l, --list           vypíše seznam ID dostupných relací, s volitelným výrazem\n"
+"  -m, --max-wait=číslo čeká maximálně počet sekund mezi událostmi\n"
+"  -s, --speed=číslo    zrychlí nebo zpomalí výstup\n"
+"  -V, --version        zobrazí údaje o verzi a skončí"
+
+#: plugins/sudoers/testsudoers.c:326
+msgid "\thost  unmatched"
+msgstr "\tstroj se neshoduje"
+
+#: plugins/sudoers/testsudoers.c:329
+msgid ""
+"\n"
+"Command allowed"
+msgstr ""
+"\n"
+"Příkaz povolen"
+
+#: plugins/sudoers/testsudoers.c:330
+msgid ""
+"\n"
+"Command denied"
+msgstr ""
+"\n"
+"Příkaz odepřen"
+
+#: plugins/sudoers/testsudoers.c:330
+msgid ""
+"\n"
+"Command unmatched"
+msgstr ""
+"\n"
+"Příkaz se neshoduje"
+
+# TODO: pluralize
+#: plugins/sudoers/timestamp.c:191
+#, c-format
+msgid "unable to truncate time stamp file to %lld bytes"
+msgstr "nelze zkrátit soubor s časovými údaji na %lld bajtů"
+
+#: plugins/sudoers/timestamp.c:291
+#, c-format
+msgid "%s is group writable"
+msgstr "%s je zapisovatelný pro skupinu"
+
+#: plugins/sudoers/timestamp.c:311
+#, c-format
+msgid "timestamp path too long: %s/%s"
+msgstr "cesta k časovým údajům je příliš dlouhá: %s/%s"
+
+#: plugins/sudoers/timestamp.c:484
+msgid "ignoring time stamp from the future"
+msgstr "časový údaj z budoucnosti se ignoruje"
+
+#: plugins/sudoers/timestamp.c:496
+#, c-format
+msgid "time stamp too far in the future: %20.20s"
+msgstr "časový údaj ukazuje příliš do budoucna: %20.20s"
+
+#: plugins/sudoers/timestamp.c:596 plugins/sudoers/timestamp.c:618
+#, c-format
+msgid "lecture status path too long: %s/%s"
+msgstr "cesta ke stavům lekce je příliš dlouhý: %s/%s"
+
+#: plugins/sudoers/toke_util.c:176
+msgid "fill_args: buffer overflow"
+msgstr "fill_args: přetečení bufferu"
+
+#: plugins/sudoers/visudo.c:186
+#, c-format
+msgid "%s grammar version %d\n"
+msgstr "verze gramatiky %s je %d\n"
+
+#: plugins/sudoers/visudo.c:257 plugins/sudoers/visudo.c:543
+#, c-format
+msgid "press return to edit %s: "
+msgstr "pro úpravu %s stiskněte enter: "
+
+#: plugins/sudoers/visudo.c:342 plugins/sudoers/visudo.c:348
+msgid "write error"
+msgstr "chyba zápisu"
+
+#: plugins/sudoers/visudo.c:430
+#, c-format
+msgid "unable to stat temporary file (%s), %s unchanged"
+msgstr "nelze získat údaje o dočasném souboru (%s), %s nezměněno"
+
+#: plugins/sudoers/visudo.c:435
+#, c-format
+msgid "zero length temporary file (%s), %s unchanged"
+msgstr "dočasný soubor o nulové velikosti (%s), %s nezměněno"
+
+#: plugins/sudoers/visudo.c:441
+#, c-format
+msgid "editor (%s) failed, %s unchanged"
+msgstr "editor (%s) selhal, %s nezměněno"
+
+#: plugins/sudoers/visudo.c:463
+#, c-format
+msgid "%s unchanged"
+msgstr "%s nezměněno"
+
+#: plugins/sudoers/visudo.c:488
+#, c-format
+msgid "unable to re-open temporary file (%s), %s unchanged."
+msgstr "nelze znovu otevřít dočasný soubor (%s), %s nezměněno."
+
+#: plugins/sudoers/visudo.c:498
+#, c-format
+msgid "unabled to parse temporary file (%s), unknown error"
+msgstr "nebylo možné rozebrat dočasný soubor (%s), neznámá chyba"
+
+#: plugins/sudoers/visudo.c:534
+#, c-format
+msgid "internal error, unable to find %s in list!"
+msgstr "vnitřní chyba, v seznamu nelze nalézt %s!"
+
+#: plugins/sudoers/visudo.c:592 plugins/sudoers/visudo.c:601
+#, c-format
+msgid "unable to set (uid, gid) of %s to (%u, %u)"
+msgstr "nelze nastavit (UID, GID) %s na (%u, %u)"
+
+#: plugins/sudoers/visudo.c:596 plugins/sudoers/visudo.c:606
+#, c-format
+msgid "unable to change mode of %s to 0%o"
+msgstr "nelze změnit práva %s na 0%o"
+
+#: plugins/sudoers/visudo.c:623
+#, c-format
+msgid "%s and %s not on the same file system, using mv to rename"
+msgstr "%s a %s se nenachází na jednom souborovém systému, pro přejmenování se použije mv"
+
+#: plugins/sudoers/visudo.c:637
+#, c-format
+msgid "command failed: '%s %s %s', %s unchanged"
+msgstr "příkaz selhal: „'%s %s %s“, %s nezměněno"
+
+#: plugins/sudoers/visudo.c:647
+#, c-format
+msgid "error renaming %s, %s unchanged"
+msgstr "chyba při přejmenování %s, %s nezměněno"
+
+#: plugins/sudoers/visudo.c:709
+msgid "What now? "
+msgstr "Co teď? "
+
+#: plugins/sudoers/visudo.c:723
+msgid ""
+"Options are:\n"
+"  (e)dit sudoers file again\n"
+"  e(x)it without saving changes to sudoers file\n"
+"  (Q)uit and save changes to sudoers file (DANGER!)\n"
+msgstr ""
+"Možnosti jsou:\n"
+"  (e) upravit soubor sudoers znovu\n"
+"  (x) skončit bez uložení změn do souboru sudoers\n"
+"  (Q) skončit a uložit změny do souboru sudoers (NEBEZPEČNÉ!)\n"
+
+#: plugins/sudoers/visudo.c:771
+#, c-format
+msgid "unable to run %s"
+msgstr "nelze spustit %s"
+
+#: plugins/sudoers/visudo.c:797
+#, c-format
+msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
+msgstr "%s: chybný vlastník (UID, GID), měl by být (%u, %u)\n"
+
+#: plugins/sudoers/visudo.c:804
+#, c-format
+msgid "%s: bad permissions, should be mode 0%o\n"
+msgstr "%s: chybná práva, měla by být 0%o\n"
+
+#: plugins/sudoers/visudo.c:829 plugins/sudoers/visudo_json.c:1008
+#, c-format
+msgid "failed to parse %s file, unknown error"
+msgstr "rozbor souboru %s se nezdařil, neznámá chyba"
+
+#: plugins/sudoers/visudo.c:845 plugins/sudoers/visudo_json.c:1017
+#, c-format
+msgid "parse error in %s near line %d\n"
+msgstr "chyba při rozboru %s kolem řádku %d\n"
+
+#: plugins/sudoers/visudo.c:848 plugins/sudoers/visudo_json.c:1020
+#, c-format
+msgid "parse error in %s\n"
+msgstr "chyba při rozboru %s\n"
+
+#: plugins/sudoers/visudo.c:856 plugins/sudoers/visudo.c:863
+#, c-format
+msgid "%s: parsed OK\n"
+msgstr "%s: rozbor úspěšný\n"
+
+#: plugins/sudoers/visudo.c:909
+#, c-format
+msgid "%s busy, try again later"
+msgstr "%s je zaneprázdněn, zkuste to později"
+
+#: plugins/sudoers/visudo.c:953
+#, c-format
+msgid "specified editor (%s) doesn't exist"
+msgstr "zadaný editor (%s) neexistuje"
+
+#: plugins/sudoers/visudo.c:976
+#, c-format
+msgid "unable to stat editor (%s)"
+msgstr "nelze zjisti údaje o editoru (%s)"
+
+#: plugins/sudoers/visudo.c:1024
+#, c-format
+msgid "no editor found (editor path = %s)"
+msgstr "žádný editor nenalezen (cesta k editoru = %s)"
+
+#: plugins/sudoers/visudo.c:1117
+#, c-format
+msgid "Error: cycle in %s_Alias `%s'"
+msgstr "Chyba: smyčka v %s_Alias „%s“"
+
+#: plugins/sudoers/visudo.c:1118
+#, c-format
+msgid "Warning: cycle in %s_Alias `%s'"
+msgstr "Pozor: smyčka v %s_Alias „%s“"
+
+#: plugins/sudoers/visudo.c:1124
+#, c-format
+msgid "Error: %s_Alias `%s' referenced but not defined"
+msgstr "Chyba: %s_Alias „%s“ použit, ale nedefinován"
+
+#: plugins/sudoers/visudo.c:1125
+#, c-format
+msgid "Warning: %s_Alias `%s' referenced but not defined"
+msgstr "Pozor: %s_Alias „%s“ použit, ale nedefinován"
+
+#: plugins/sudoers/visudo.c:1267
+#, c-format
+msgid "%s: unused %s_Alias %s"
+msgstr "%s: nepoužití %s_Alias %s"
+
+#: plugins/sudoers/visudo.c:1329
+#, c-format
+msgid ""
+"%s - safely edit the sudoers file\n"
+"\n"
+msgstr ""
+"%s – bezpečně upraví soubor sudoers\n"
+"\n"
+
+#: plugins/sudoers/visudo.c:1331
+msgid ""
+"\n"
+"Options:\n"
+"  -c, --check       check-only mode\n"
+"  -f, --file=file   specify sudoers file location\n"
+"  -h, --help        display help message and exit\n"
+"  -q, --quiet       less verbose (quiet) syntax error messages\n"
+"  -s, --strict      strict syntax checking\n"
+"  -V, --version     display version information and exit\n"
+"  -x, --export=file export sudoers in JSON format"
+msgstr ""
+"\n"
+"Přepínače:\n"
+"  -c, --check       pouze kontroluje\n"
+"  -f, --file=soubor\n"
+"                    určuje umístění souboru sudoers\n"
+"  -h, --help        zobrazí nápovědu a skončí\n"
+"  -q, --quiet       méně upovídaná (stručnější) hlášení chyb syntaxe\n"
+"  -s, --strict      přísná kontrola syntaxe\n"
+"  -V, --version     zobrazí údaje o verzi a skončí\n"
+"  -x, --export=soubor\n"
+"                    exportuje sudoers do formátu JSON"
+
+#: toke.l:894
+msgid "too many levels of includes"
+msgstr "příliš mnoho úrovní zanoření"
