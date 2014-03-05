@@ -88,7 +88,7 @@ struct io_buffer {
     int rfd;  /* reader (producer) */
     int wfd; /* writer (consumer) */
     int (*action) __P((const char *buf, unsigned int len));
-    char buf[16 * 1024];
+    char buf[32 * 1024];
 };
 
 static char slavename[PATH_MAX];
