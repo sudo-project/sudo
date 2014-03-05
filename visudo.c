@@ -205,12 +205,11 @@ main(argc, argv)
 	exit(check_syntax(sudoers_path, quiet, strict));
 
     /*
-     * Parse the existing sudoers file(s) in quiet mode to highlight any
-     * existing errors and to pull in editor and env_editor conf values.
+     * Parse the existing sudoers file(s) to highlight any existing
+     * errors and to pull in editor and env_editor conf values.
      */
-    if ((yyin = open_sudoers(sudoers_path, TRUE, NULL)) == NULL) {
-	error(1, "%s", sudoers_path);
-    }
+    if ((yyin = open_sudoers(sudoers_path, TRUE, NULL)) == NULL)
+	exit(1);
     init_parser(sudoers_path, 0);
     yyparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
