@@ -23,25 +23,15 @@
 .Sh SYNOPSIS
 .Nm sudoreplay
 .Op Fl h
-.Bk -words
 .Op Fl d Ar directory
-.Ek
-.Bk -words
 .Op Fl f Ar filter
-.Ek
-.Bk -words
 .Op Fl m Ar max_wait
-.Ek
-.Bk -words
 .Op Fl s Ar speed_factor
-.Ek
 ID
 .Pp
 .Nm sudoreplay
 .Op Fl h
-.Bk -words
 .Op Fl d Ar directory
-.Ek
 .Fl l
 .Op search expression
 .Sh DESCRIPTION

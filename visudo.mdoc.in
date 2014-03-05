@@ -28,9 +28,7 @@
 .Sh SYNOPSIS
 .Nm visudo
 .Op Fl chqsV
-.Bk -words
 .Op Fl f Ar sudoers
-.Ek
 .Sh DESCRIPTION
 .Nm visudo
 edits the
