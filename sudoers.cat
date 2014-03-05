@@ -643,7 +643,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        If the system is configured to use the _/_e_t_c_/_h_o_s_t_s file
                        in preference to DNS, the ``canonical'' host name may
                        not be fully-qualified.  The order that sources are
-                       queried for hosts name resolution is usually specified
+                       queried for host name resolution is usually specified
                        in the _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f, _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f,
                        _/_e_t_c_/_h_o_s_t_._c_o_n_f, or, in some cases, _/_e_t_c_/_r_e_s_o_l_v_._c_o_n_f
                        file.  In the _/_e_t_c_/_h_o_s_t_s file, the first host name of
@@ -1535,4 +1535,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.7.10                      July 16, 2012                     Sudo 1.7.10
+Sudo 1.7.10                      March 1, 2014                     Sudo 1.7.10

@@ -1,3 +1,31 @@
+What's new in Sudo 1.7.10p8?
+
+ * Sudo's exit code now indicates a failure if the user does not
+   successfully authenticate.
+
+ * On HP-UX systems, sudo will now use the pstat() function to
+   determine the tty instead of ttyname().
+
+ * Fixed compilation when --without-iologdir configure option is
+   specified.
+
+ * On systems with BSD login classes, if the user specified a group
+   (not a user) to run the command as, it was possible to specify
+   a different login class even when the command was not run as the
+   super user.
+
+ * The closefrom() emulation on Mac OS X now uses /dev/fd if possible.
+   It also now sets the close on exec flag instead of actually
+   closing the descriptors to avoid a crash in libdispatch.
+
+ * The sudoers plugin will now ignore invalid domain names when
+   checking netgroup membership.  Most Linux systems use the string
+   "(none)" for the NIS-style domain name instead of an empty string.
+
+ * Fixed the logic when checking environment variables on the
+   command line against the env_check and env_delete blacklists.
+   This is only a problem when env_reset is disabled in sudoers.
+
 What's new in Sudo 1.7.10p7?
 
  * A time stamp file with the date set to the epoch by "sudo -k" 

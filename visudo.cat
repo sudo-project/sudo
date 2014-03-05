@@ -26,7 +26,7 @@ DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not save the
      changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
      print a message stating the line number(s) where the error occurred and
-     the user will receive the ``What now?''  prompt.  At this point the user
+     the user will receive the ``What now?'' prompt.  At this point the user
      may enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
      changes, or `Q' to quit and save changes.  The `Q' option should be used
      with extreme care because if vviissuuddoo believes there to be a parse error,
@@ -144,4 +144,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.7.10                      July 12, 2012                     Sudo 1.7.10
+Sudo 1.7.10                      March 1, 2014                     Sudo 1.7.10
