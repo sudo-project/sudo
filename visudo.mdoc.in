@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2012
+.\" Copyright (c) 1996,1998-2005, 2007-2014
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 12, 2012
+.Dd March 1, 2014
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -168,7 +168,7 @@ indicating that
 will be read from the standard input.
 .It Fl h
 The
-.Fl h No ( Em help Ns No )
+.Fl h Pq Em help
 option causes
 .Nm visudo
 to print a short help message
@@ -198,7 +198,7 @@ letters, digits, and the underscore
 character.
 .It Fl V
 The
-.Fl V ( Em version Ns No )
+.Fl V ( Em version Ns )
 option causes
 .Nm visudo
 to print its version number

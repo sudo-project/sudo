@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2012
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2014
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 8, 2013
+.Dd March 1, 2014
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -28,7 +28,7 @@
 .Nd execute a command as another user
 .Sh SYNOPSIS
 .Nm sudo
-.Fl h No | Fl K No | Fl k No | Fl L No | Fl V
+.Fl h | Fl K | Fl k | Fl L | Fl V
 .Nm sudo
 .Fl v
 .Op Fl AknS
@@ -36,13 +36,13 @@
 .Op Fl a Ar auth_type
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group name | Ar #gid
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user name | Ar #uid
 .Ek
 .Nm sudo
 .Fl l Ns Op Ar l
@@ -51,7 +51,7 @@
 .Op Fl a Ar auth_type
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group name | Ar #gid
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -60,7 +60,7 @@
 .Op Fl U Ar user name
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user name | Ar #uid
 .Ek
 .Op Ar command
 .Nm sudo
@@ -72,10 +72,10 @@
 .Op Fl C Ar fd
 .Ek
 .Bk -words
-.Op Fl c Ar class No | Ar -
+.Op Fl c Ar class | Ar -
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group name | Ar #gid
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -87,13 +87,13 @@
 .Op Fl t Ar type
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user name | Ar #uid
 .Ek
 .Bk -words
 .Op Sy VAR Ns = Ns Ar value
 .Ek
 .Bk -words
-.Fl i No | Fl s
+.Fl i | Fl s
 .Ek
 .Op Ar command
 .Nm sudoedit
@@ -105,16 +105,16 @@
 .Op Fl C Ar fd
 .Ek
 .Bk -words
-.Op Fl c Ar class No | Ar -
+.Op Fl c Ar class | Ar -
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group name | Ar #gid
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user name | Ar #uid
 .Ek
 .Bk -words
 .Ar
@@ -160,7 +160,7 @@ Normally, if
 .Nm sudo
 requires a password, it will read it from the user's terminal.
 If the
-.Fl A No ( Em askpass Ns No )
+.Fl A Pq Em askpass
 option is specified, a (possibly graphical) helper program is
 executed to read the user's password and output the password to the
 standard output.
@@ -178,7 +178,7 @@ If no askpass program is available,
 will exit with an error.
 .It Fl a Ar type
 The
-.Fl a No ( Em "authentication type" Ns No )
+.Fl a Pq "authentication type"
 option causes
 .Nm sudo
 to use the specified authentication type when validating the user,
@@ -192,7 +192,7 @@ entry in
 This option is only available on systems that support BSD authentication.
 .It Fl b
 The
-.Fl b No ( Em background Ns No )
+.Fl b Pq Em background
 option tells
 .Nm sudo
 to run the given command in the background.
@@ -207,7 +207,7 @@ Normally,
 will close all open file descriptors other than standard input,
 standard output and standard error.
 The
-.Fl C No ( Em close from Ns No )
+.Fl C Pq Em close from
 option allows the user to specify a starting point above the standard
 error (file descriptor three).
 Values less than three are not permitted.
@@ -217,7 +217,7 @@ option in
 .Xr sudoers @mansectform@ .
 .It Fl c Ar class
 The
-.Fl c No ( Em class Ns No )
+.Fl c Pq Em class
 option causes
 .Nm sudo
 to run the command with resource limits and scheduling priority of
@@ -245,7 +245,7 @@ be applied, if present.
 This option is only available on systems with BSD login classes.
 .It Fl E
 The
-.Fl E No ( Em preserve environment Ns No )
+.Fl E Pq Em preserve environment
 option will override the
 .Em env_reset
 option in
@@ -263,7 +263,7 @@ option is specified and the user does not have permission to preserve
 the environment.
 .It Fl e
 The
-.Fl e No ( Em edit Ns No )
+.Fl e Pq Em edit
 option indicates that, instead of running a command, the user wishes
 to edit one or more files.
 In lieu of a command, the string "sudoedit" is used when consulting the
@@ -313,7 +313,7 @@ runs a command with the primary group set to the one specified by
 the password database for the user the command is being run as (by
 default, root).
 The
-.Fl g No ( Em group Ns No )
+.Fl g Pq Em group
 option causes
 .Nm sudo
 to run the command with the primary group set to
@@ -339,7 +339,7 @@ In either case, the primary group will be set to
 .Em group .
 .It Fl H
 The
-.Fl H No ( Em HOME Ns No )
+.Fl H Pq Em HOME
 option option sets the
 .Ev HOME
 environment variable to the home directory of the target user (root
@@ -364,13 +364,13 @@ is set and the
 option is specified on the command line.
 .It Fl h
 The
-.Fl h No ( Em help Ns No )
+.Fl h Pq Em help
 option causes
 .Nm sudo
 to print a short help message to the standard output and exit.
 .It Fl i Op Ar command
 The
-.Fl i No ( Em simulate initial login Ns No )
+.Fl i Pq Em simulate initial login
 option runs the shell specified by the password database entry of
 the target user as a login shell.
 This means that login-specific resource files such as
@@ -395,7 +395,7 @@ section below documents in detail how the
 option affects the environment in which a command is run.
 .It Fl K
 The
-.Fl K No ( sure Em kill Ns No )
+.Fl K Pq sure Em kill
 option is like
 .Fl k
 except that it removes the user's time stamp file entirely and
@@ -403,7 +403,7 @@ may not be used in conjunction with a command or other option.
 This option does not require a password.
 .It Fl k Op Ar command
 When used alone, the
-.Fl k No ( Em kill Ns No )
+.Fl k Pq Em kill
 option to
 .Nm sudo
 invalidates the user's time stamp file.
@@ -430,7 +430,7 @@ will prompt for a password (if one is required by
 and will not update the user's time stamp file.
 .It Fl L
 The
-.Fl L No ( Em list No defaults Ns )
+.Fl L Pq Em list No defaults
 option will list the parameters that
 may be set in a
 .Em Defaults
@@ -441,7 +441,7 @@ This option will be removed from a future version of
 If no
 .Ar command
 is specified, the
-.Fl l No ( Em list Ns No )
+.Fl l Pq Em list
 option will list the allowed (and forbidden) commands for the
 invoking user (or the user specified by the
 .Fl U
@@ -469,7 +469,7 @@ or if
 is specified multiple times, a longer list format is used.
 .It Fl n
 The
-.Fl n No ( Em non-interactive Ns No )
+.Fl n Pq Em non-interactive
 option prevents
 .Nm sudo
 from prompting the user for a password.
@@ -478,7 +478,7 @@ If a password is required for the command to run,
 will display an error message and exit.
 .It Fl P
 The
-.Fl P No ( Em preserve group vector Ns No )
+.Fl P Pq Em preserve group vector
 option causes
 .Nm sudo
 to preserve the invoking user's group vector unaltered.
@@ -490,7 +490,7 @@ The real and effective group IDs, however, are still set to match
 the target user.
 .It Fl p Ar prompt
 The
-.Fl p No ( Em prompt Ns No )
+.Fl p Pq Em prompt
 option allows you to override the default password prompt and use
 a custom one.
 The following percent
@@ -538,13 +538,13 @@ flag is disabled in
 .Em sudoers .
 .It Fl r Ar role
 The
-.Fl r No ( Em role Ns No )
+.Fl r Pq Em role
 option causes the new (SELinux) security context to have the role
 specified by
 .Ar role .
 .It Fl S
 The
-.Fl S ( Em stdin Ns No )
+.Fl S ( Em stdin Ns )
 option causes
 .Nm sudo
 to read the password from the standard input instead of the terminal
@@ -552,7 +552,7 @@ device.
 The password must be followed by a newline character.
 .It Fl s Op Ar command
 The
-.Fl s ( Em shell Ns No )
+.Fl s ( Em shell Ns )
 option runs the shell specified by the
 .Ev SHELL
 environment variable if it is set or the shell as specified in the
@@ -564,7 +564,7 @@ option.
 If no command is specified, an interactive shell is executed.
 .It Fl t Ar type
 The
-.Fl t ( Em type Ns No )
+.Fl t ( Em type Ns )
 option causes the new (SELinux) security context to have the type
 specified by
 .Ar type .
@@ -572,7 +572,7 @@ If no type is specified, the default type is derived from the
 specified role.
 .It Fl U Ar user
 The
-.Fl U ( Em other user Ns No )
+.Fl U ( Em other user Ns )
 option is used in conjunction with the
 .Fl l
 option to specify the user whose privileges should be listed.
@@ -581,7 +581,7 @@ Only root or a user with the
 privilege on the current host may use this option.
 .It Fl u Ar user
 The
-.Fl u ( Em user Ns No )
+.Fl u ( Em user Ns )
 option causes
 .Nm sudo
 to run the specified command as a user other than
@@ -605,7 +605,7 @@ it is not possible to run commands with a uid not listed in the
 password database.
 .It Fl V
 The
-.Fl V ( Em version Ns No )
+.Fl V ( Em version Ns )
 option causes
 .Nm sudo
 to print its version string and exit.
@@ -618,7 +618,7 @@ was built as well a list of the defaults
 was compiled with as well as the machine's local network addresses.
 .It Fl v
 When given the
-.Fl v ( Em validate Ns No )
+.Fl v ( Em validate Ns )
 option,
 .Nm sudo
 will update the user's time stamp file, authenticating the user's
@@ -640,9 +640,9 @@ should stop processing command line arguments.
 .Pp
 Environment variables to be set for the command may also be passed
 on the command line in the form of
-.Sy VAR Ns No = Ns Em value ,
+.Sy VAR Ns = Ns Em value ,
 e.g.\&
-.Sy LD_LIBRARY_PATH Ns No = Ns Em /usr/local/pkg/lib .
+.Sy LD_LIBRARY_PATH Ns = Ns Em /usr/local/pkg/lib .
 Variables passed on the command line are subject to the same
 restrictions as normal environment variables with one important
 exception.
@@ -878,7 +878,7 @@ and, as such, it is not possible for
 to preserve them.
 .Pp
 As a special case, if
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl i
 option (initial login) is
 specified,
@@ -1431,7 +1431,7 @@ If a user runs a command such as
 or
 .Li sudo sh ,
 subsequent commands run from that shell are not subject to
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 security policy.
 The same is true for commands that offer shell escapes (including
 most editors).
@@ -1628,7 +1628,7 @@ if that user is allowed to run arbitrary commands via
 .Nm sudo .
 Also, many programs (such as editors) allow the user to run commands
 via shell escapes, thus avoiding
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 checks.
 However, on most systems it is possible to prevent shell escapes with
 .Nm sudo ' s

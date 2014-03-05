@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2003-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 12, 2012
+.Dd March 1, 2014
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -76,18 +76,18 @@ is no need for a specialized tool to check syntax.
 Another major difference between LDAP and file-based
 .Em sudoers
 is that in LDAP,
-.Nm sudo Ns No -specific
+.Nm sudo Ns -specific
 Aliases are not supported.
 .Pp
 For the most part, there is really no need for
-.Nm sudo Ns No -specific
+.Nm sudo Ns -specific
 Aliases.
 Unix groups or user netgroups can be used in place of User_Aliases and
 Runas_Aliases.
 Host netgroups can be used in place of Host_Aliases.
 Since Unix groups and netgroups can also be stored in LDAP there is no
 real need for
-.Nm sudo Ns No -specific
+.Nm sudo Ns -specific
 aliases.
 .Pp
 Cmnd_Aliases are not really required either since it is possible
@@ -375,7 +375,7 @@ sudoHost: !web01
 .Ed
 .Ss Sudoers schema
 In order to use
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 LDAP support, the
 .Nm sudo
 schema must be
@@ -405,7 +405,7 @@ Sudo reads the
 file for LDAP-specific configuration.
 Typically, this file is shared amongst different LDAP-aware clients.
 As such, most of the settings are not
-.Nm sudo Ns No -specific.
+.Nm sudo Ns -specific.
 Note that
 .Nm sudo
 parses
@@ -501,9 +501,9 @@ The
 parameter specifies the amount of time, in seconds, to wait while trying
 to connect to an LDAP server.
 If multiple
-.Sy URI Ns No s
+.Sy URI Ns s
 or
-.Sy HOST Ns No s
+.Sy HOST Ns s
 are specified, this is the amount of time to wait before trying
 the next one in the list.
 .It Sy NETWORK_TIMEOUT Ar seconds
