@@ -117,7 +117,7 @@
 .Op Fl u Ar user name No | Ar #uid
 .Ek
 .Bk -words
-file ...
+.Ar
 .Ek
 .Sh DESCRIPTION
 .Nm sudo
@@ -233,7 +233,7 @@ character.
 If
 .Ar class
 is
-.Li - ,
+.Cm - ,
 the default login class of the target user will be used.
 Otherwise, the command must be run as the superuser (user ID 0), or
 .Nm sudo
