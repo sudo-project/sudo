@@ -898,8 +898,8 @@ sudo_getdomainname()
 #ifdef HAVE_GETDOMAINNAME
     char *buf, *cp;
 
-    buf = emalloc(HOST_NAME_MAX + 1);
-    if (getdomainname(buf, HOST_NAME_MAX + 1) == 0 && *buf != '\0') {
+    buf = emalloc(MAXHOSTNAMELEN + 1);
+    if (getdomainname(buf, MAXHOSTNAMELEN + 1) == 0 && *buf != '\0') {
 	domain = buf;
 	for (cp = buf; *cp != '\0'; cp++) {
 	    /* Check for illegal characters, Linux may use "(none)". */
