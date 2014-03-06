@@ -3332,15 +3332,15 @@ if test ${with_ldap-'no'} != "no"; then
 	if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
 	    LDAP_LIBS="$LDAP_LIBS -llber"
 	fi
-	dnl check if ldap.h includes lber.h for us
-	AC_MSG_CHECKING([whether lber.h is needed])
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#       include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
-	AC_MSG_RESULT([yes])
-	AC_DEFINE(HAVE_LBER_H)])
     ], [
 	AC_MSG_RESULT([no])
     ])
+    dnl check if ldap.h includes lber.h for us
+    AC_MSG_CHECKING([whether lber.h is needed])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#   include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_LBER_H)])
 
     AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
 	AC_CHECK_FUNCS(ldap_sasl_interactive_bind_s)
