@@ -417,6 +417,8 @@ src/net_ifs.c
 src/openbsd.c
 src/parse_args.c
 src/po/README
+src/po/ca.mo
+src/po/ca.po
 src/po/cs.mo
 src/po/cs.po
 src/po/da.mo

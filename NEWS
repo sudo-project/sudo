@@ -49,6 +49,8 @@ What's new in Sudo 1.8.10?
 
  * Czech and Serbian translations for sudoers from translationproject.org.
 
+ * Catalan translation for sudo from translationproject.org.
+
 What's new in Sudo 1.8.9p5?
 
  * Fixed a compilation error on AIX when LDAP support is enabled.
