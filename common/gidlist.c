@@ -30,7 +30,7 @@
 #include <grp.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
+#include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
 #include "alloc.h"

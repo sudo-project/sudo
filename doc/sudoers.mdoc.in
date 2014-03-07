@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 1, 2014
+.Dd February 15, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -194,10 +194,14 @@ lookup is still done for root, not the user specified by
 .Ev SUDO_USER .
 .Pp
 .Em sudoers
-uses time stamp files for credential caching.
-Once a
-user has been authenticated, the time stamp is updated and the user
-may then use sudo without a password for a short period of time
+uses per-user time stamp files for credential caching.
+Once a user has been authenticated, a record is written
+containing the uid that was used to authenticate, the
+terminal session ID, and a time stamp
+(using a monotonic clock if one is available).
+The user may then use
+.Nm sudo
+without a password for a short period of time
 .Po
 .Li @timeout@
 minutes unless overridden by the
@@ -206,8 +210,8 @@ option
 .Pc .
 By default,
 .Em sudoers
-uses a tty-based time stamp which means that
-there is a separate time stamp for each of a user's login sessions.
+uses a separate record for each tty, which means that
+a user's login sessions are authenticated separately.
 The
 .Em tty_tickets
 option can be disabled to force the use of a
@@ -344,7 +348,7 @@ and, as such, it is not possible for
 to preserve them.
 .Pp
 As a special case, if
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl i
 option (initial login) is
 specified,
@@ -529,7 +533,7 @@ non-Unix group names and IDs (prefixed with
 and
 .Ql %:#
 respectively) and
-.Li User_Alias Ns No es.
+.Li User_Alias Ns es.
 Each list item may be prefixed with zero or more
 .Ql \&!
 operators.
@@ -603,9 +607,9 @@ is similar to a
 .Li User_List
 except that instead
 of
-.Li User_Alias Ns No es
+.Li User_Alias Ns es
 it can contain
-.Li Runas_Alias Ns No es .
+.Li Runas_Alias Ns es .
 Note that
 user names and groups are matched as strings.
 In other words, two
@@ -871,7 +875,7 @@ may be run as.
 A fully-specified
 .Li Runas_Spec
 consists of two
-.Li Runas_List Ns No s
+.Li Runas_List Ns s
 (as defined above) separated by a colon
 .Pq Ql :\&
 and enclosed in a set of parentheses.
@@ -879,18 +883,18 @@ The first
 .Li Runas_List
 indicates
 which users the command may be run as via
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl u
 option.
 The second defines a list of groups that can be specified via
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl g
 option.
 If both
-.Li Runas_List Ns No s
+.Li Runas_List Ns s
 are specified, the command may be run with any combination of users
 and groups listed in their respective
-.Li Runas_List Ns No s.
+.Li Runas_List Ns s.
 If only the first is specified, the command may be run as any user
 in the list but no
 .Fl g
@@ -903,7 +907,7 @@ second is specified, the command may be run as the invoking user
 with the group set to any listed in the
 .Li Runas_List .
 If both
-.Li Runas_List Ns No s
+.Li Runas_List Ns s
 are empty, the command may only be run as the invoking user.
 If no
 .Li Runas_Spec
@@ -926,7 +930,7 @@ may run
 .Pa /bin/ls ,
 .Pa /bin/kill ,
 and
-.Pa /usr/bin/lprm Ns No \(em Ns but
+.Pa /usr/bin/lprm Ns \(em Ns but
 only as
 .Sy operator .
 E.g.,
@@ -1083,7 +1087,7 @@ and
 Once a tag is set on a
 .Li Cmnd ,
 subsequent
-.Li Cmnd Ns No s
+.Li Cmnd Ns s
 in the
 .Li Cmnd_Spec_List ,
 inherit the tag unless it is overridden by the opposite tag (in other words,
@@ -1289,7 +1293,7 @@ it must be
 escaped.
 For example:
 .Bd -literal -offset 4n
-/bin/ls [[\:alpha\:]]*
+/bin/ls [[:\&alpha:\&]]*
 .Ed
 .Pp
 Would match any file name beginning with a letter.
@@ -1575,7 +1579,7 @@ when used as part of a word (e.g.\& a user name or host name):
 .Ql )\& ,
 .Ql \e .
 .Sh SUDOERS OPTIONS
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 behavior can be modified by
 .Li Default_Entry
 lines, as explained earlier.
@@ -1624,7 +1628,7 @@ This flag is
 by default.
 .It closefrom_override
 If set, the user may use
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl C
 option which overrides the default starting point at which
 .Nm sudo
@@ -1645,6 +1649,17 @@ by default when
 is compiled with
 .Sy zlib
 support.
+.It use_netgroups
+If set, netgroups (prefixed with
+.Ql + ) ,
+may be used in place of a user or host.
+For LDAP-based sudoers, netgroup support requires an expensive
+substring match on the server.
+If netgroups are not needed, this option can be disabled to reduce the
+load on the LDAP server.
+This flag is
+.Em on
+by default.
 .It exec_background
 By default,
 .Nm sudo
@@ -1725,8 +1740,7 @@ if they match a value specified in
 .Li editor .
 This flag is
 .Em @env_editor@
-by
-default.
+by default.
 .It env_reset
 If set,
 .Nm sudo
@@ -2209,7 +2223,8 @@ by default.
 .It rootpw
 If set,
 .Nm sudo
-will prompt for the root password instead of the password of the invoking user.
+will prompt for the root password instead of the password of the invoking user
+when running a command or editing a file.
 This flag is
 .Em off
 by default.
@@ -2220,7 +2235,8 @@ will prompt for the password of the user defined by the
 .Em runas_default
 option (defaults to
 .Li @runas_default@ )
-instead of the password of the invoking user.
+instead of the password of the invoking user
+when running a command or editing a file.
 This flag is
 .Em off
 by default.
@@ -2356,8 +2372,8 @@ by the
 .Fl u
 option (defaults to
 .Li root )
-instead of the password of the invoking user.
-In addition, the time stamp file name will include the target user's name.
+instead of the password of the invoking user
+when running a command or editing a file.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the
 .Fl u
@@ -2369,9 +2385,8 @@ by default.
 If set, users must authenticate on a per-tty basis.
 With this flag enabled,
 .Nm sudo
-will use a file named for the tty the user is
-logged in on in the user's time stamp directory.
-If disabled, the time stamp of the directory is used instead.
+will use a separate record in the time stamp file for each tty.
+If disabled, a single record is used for all login sessions.
 This flag is
 .Em @tty_tickets@
 by default.
@@ -2622,9 +2637,9 @@ escape sequences.
 .Pp
 In addition to the escape sequences, path names that end in six or
 more
-.Li X Ns No s
+.Li X Ns s
 will have the
-.Li X Ns No s
+.Li X Ns s
 replaced with a unique combination of digits and letters, similar to the
 .Xr mktemp 3
 function.
@@ -2638,7 +2653,20 @@ overwritten unless
 .Em iolog_file
 ends in six or
 more
-.Li X Ns No s .
+.Li X Ns s .
+.It lecture_status_dir
+The directory in which
+.Nm sudo
+stores per-user lecture status files.
+Once a user has received the lecture, a zero-length file is
+created in this directory so that
+.Nm sudo
+will not lecture the user again.
+This directory should
+.Em not
+be cleared when the system reboots.
+The default is
+.Pa @vardir@/lectured .
 .It limitprivs
 The default Solaris limit privileges to use when constructing a new
 privilege set for a command.
@@ -2818,10 +2846,12 @@ Defaults to
 The directory in which
 .Nm sudo
 stores its time stamp files.
+This directory should be cleared when the system reboots.
 The default is
-.Pa @timedir@ .
+.Pa @rundir@/ts .
 .It timestampowner
-The owner of the time stamp directory and the time stamps stored therein.
+The owner of the lecture status directory, time stamp directory and all
+files stored therein.
 The default is
 .Li root .
 .It type
@@ -3120,7 +3150,7 @@ Environment variables to be preserved in the user's environment when the
 .Em env_reset
 option is in effect.
 This allows fine-grained control over the environment
-.Nm sudo Ns No -spawned
+.Nm sudo Ns -spawned
 processes will receive.
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
@@ -3298,7 +3328,7 @@ failed attempts and the value of the
 .Em passwd_tries
 option.
 .It a password is required
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl n
 option was specified but a password was required.
 .It sorry, you are not allowed to set the following environment variables
@@ -3419,15 +3449,34 @@ file) to the
 line in the
 .Xr sudo.conf @mansectform@
 file.
-.It unable to open @timedir@/username/ttyname
+.It unable to open @rundir@/ts/username
 .Em sudoers
 was unable to read or create the user's time stamp file.
-.It unable to write to @timedir@/username/ttyname
+This can happen when
+.Em timestampowner
+is set to a user other than root and the mode on
+.Pa @rundir@
+is not searchable by group or other.
+The default mode for
+.Pa @rundir@
+is 0711.
+.It unable to write to @rundir@/ts/username
 .Em sudoers
 was unable to write to the user's time stamp file.
-.It unable to mkdir to @timedir@/username
+.It @rundir@/ts is owned by uid X, should be Y
+The time stamp directory is owned by a user other than
+.Em timestampowner .
+This can occur when the value of
+.Em timestampowner
+has been changed.
 .Em sudoers
-was unable to create the user's time stamp directory.
+will ignore the time stamp directory until the owner is corrected.
+.It @rundir@/ts is group writable
+The time stamp directory is group-writable; it should be writable only by
+.Em timestampowner .
+The default mode for the time stamp directory is 0700.
+.Em sudoers
+will ignore the time stamp directory until the mode is corrected.
 .El
 .Ss Notes on logging via syslog
 By default,
@@ -3506,8 +3555,12 @@ Local groups file
 List of network groups
 .It Pa @iolog_dir@
 I/O log files
-.It Pa @timedir@
+.It Pa @rundir@/ts
 Directory containing time stamps for the
+.Em sudoers
+security policy
+.It Pa @vardir@/lectured
+Directory containing lecture status files for the
 .Em sudoers
 security policy
 .It Pa /etc/environment
@@ -3945,7 +3998,7 @@ executes a program, that program is free to do whatever
 it pleases, including run other programs.
 This can be a security issue since it is not uncommon for a program to
 allow shell escapes, which lets a user bypass
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
@@ -3971,7 +4024,7 @@ variable (usually
 .Ev LD_PRELOAD )
 to an alternate shared library.
 On such systems,
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Em noexec
 functionality can be used to prevent a program run by
 .Nm sudo
@@ -4072,41 +4125,51 @@ will be updated with the contents of the temporary copy.
 .Em sudoers
 will check the ownership of its time stamp directory
 .Po
-.Pa @timedir@
+.Pa @rundir@/ts
 by default
 .Pc
 and ignore the directory's contents if it is not owned by root or
 if it is writable by a user other than root.
-On systems that allow non-root users to give away files via
-.Xr chown 2 ,
-if the time stamp directory is located in a world-writable
-directory (e.g.\&,
-.Pa /tmp ) ,
-it is possible for a user to create the time stamp directory before
+Older versions of
 .Nm sudo
-is run.
-However, because
+stored time stamp files in
+.Pa /tmp ;
+this is no longer recommended as it may be possible for a user
+to create the time stamp themselves on systems that allow
+unprivileged users to change the ownership of files they create.
+.Pp
+While the time stamp directory
+.Em should
+be cleared at reboot time, not all systems contain a
+.Pa /var/run
+directory.
+To avoid potential problems,
 .Em sudoers
-checks the ownership and mode of the directory and its
-contents, the only damage that can be done is to
-.Dq hide
-files by putting them in the time stamp dir.
-This is unlikely to happen since once the time stamp dir is owned by root
-and inaccessible by any other user, the user placing files there would be
-unable to get them back out.
+will ignore time stamp files that date from before the machine booted
+on systems where the boot time is available.
+.Pp
+Some systems with graphical desktop environments allow unprivileged
+users to change the system clock.
+Since
+.Em sudoers
+relies on the system clock for time stamp validation, it may be
+possible on such systems for a user to run
+.Nm sudo
+for longer than
+.Em timestamp_timeout
+by setting the clock back.
+To combat this,
+.Em sudoers
+uses a monotonic clock (which never moves backwards) for its time stamps
+if the system supports it.
 .Pp
 .Em sudoers
 will not honor time stamps set far in the future.
 Time stamps with a date greater than current_time + 2 *
 .Li TIMEOUT
-will be ignored and sudo will log and complain.
-This is done to keep a user from creating his/her own time stamp with a
-bogus date on systems that allow users to give away files if the time
-stamp directory is located in a world-writable directory.
-.Pp
-On systems where the boot time is available,
+will be ignored and
 .Em sudoers
-will ignore time stamps that date from before the machine booted.
+will log and complain.
 .Pp
 Since time stamp files live in the file system, they can outlive a
 user's login session.
@@ -4114,24 +4177,24 @@ As a result, a user may be able to login, run a command with
 .Nm sudo
 after authenticating, logout, login again, and run
 .Nm sudo
-without authenticating so long as the time stamp file's modification
-time is within
+without authenticating so long as the record's time stamp is within
 .Li @timeout@
-minutes (or whatever the timeout is set to in
+minutes (or whatever value the timeout is set to in
 .Em sudoers ) .
 When the
 .Em tty_tickets
-option is enabled, the time stamp has per-tty granularity but still
+option is enabled, the time stamp record includes the device
+number of the terminal the user authenticated with.
+This provides per-tty granularity but time stamp records still
 may outlive the user's session.
-On Linux systems where the devpts filesystem is used, Solaris systems
-with the devices filesystem, as well as other systems that utilize a
-devfs filesystem that monotonically increase the inode number of devices
-as they are created (such as Mac OS X),
-.Em sudoers
-is able to determine when a tty-based time stamp file is stale and will
-ignore it.
-Administrators should not rely on this feature as it is not universally
-available.
+The time stamp record also includes the session ID of the process
+that last authenticated.
+This prevents processes in different terminal sessions from using
+the same time stamp record.
+It also helps reduce the chance that a user will be able to run
+.Nm sudo
+without entering a password when logging out and back in again
+on the same terminal.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
 .Nm sudoers
@@ -4146,7 +4209,7 @@ The
 plugin uses the same debug flag format as the
 .Nm sudo
 front-end:
-.Em subsystem Ns No @ Ns Em priority .
+.Em subsystem Ns @ Ns Em priority .
 .Pp
 The priorities used by
 .Nm sudoers ,

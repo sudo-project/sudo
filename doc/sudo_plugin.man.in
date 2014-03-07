@@ -111,15 +111,15 @@ to determine the API version the plugin was
 built against.
 .TP 6n
 open
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*open)(unsigned int version, sudo_conv_t conversation,
             sudo_printf_t plugin_printf, char * const settings[],
             char * const user_info[], char * const user_env[],
             char * const plugin_options[]);
 .RE
 .fi
+.RS 6n
 .sp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error.
@@ -160,7 +160,7 @@ settings
 A vector of user-supplied
 \fBsudo\fR
 settings in the form of
-``name=value''
+\(lqname=value\(rq
 strings.
 The vector is terminated by a
 \fRNULL\fR
@@ -175,20 +175,23 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
 itself but the
 \fIvalue\fR
 might.
-.RS
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 bsdauth_type=string
 Authentication type, if specified by the
 \fB\-a\fR
 flag, to use on
 systems where BSD authentication is supported.
+.PD
 .TP 6n
 closefrom=number
 If specified, the user has requested via the
@@ -219,7 +222,7 @@ plugin is
 \fIsubsystem\fR@\fIpriority\fR
 but the plugin is free to use a different
 format so long as it does not include a comma
-(`,\&').
+(\(oq,\&\(cq).
 There is not currently a way to specify a set of debug flags specific
 to the plugin--the flags are shared by
 \fBsudo\fR
@@ -275,13 +278,13 @@ sudo.conf(@mansectform@).
 network_addrs=list
 A space-separated list of IP network addresses and netmasks in the
 form
-``addr/netmask'',
+\(lqaddr/netmask\(rq,
 e.g.\&
-``192.168.1.2/255.255.255.0''.
+\(lq192.168.1.2/255.255.255.0\(rq.
 The address and netmask pairs may be either IPv4 or IPv6, depending on
 what the operating system supports.
 If the address contains a colon
-(`:\&'),
+(\(oq:\&\(cq),
 it is an IPv6 address, else it is IPv4.
 .TP 6n
 noninteractive=bool
@@ -316,9 +319,9 @@ based on the runas user.
 .TP 6n
 progname=string
 The command name that sudo was run as, typically
-``sudo''
+\(lqsudo\(rq
 or
-``sudoedit''.
+\(lqsudoedit\(rq.
 .TP 6n
 prompt=string
 The prompt to use when requesting a password, if specified via
@@ -392,13 +395,11 @@ section.
 .PP
 Additional settings may be added in the future so the plugin should
 silently ignore settings that it does not recognize.
-.PP
 .RE
-.PD 0
 .TP 6n
 user_info
 A vector of information about the user running the command in the form of
-``name=value''
+\(lqname=value\(rq
 strings.
 The vector is terminated by a
 \fRNULL\fR
@@ -409,19 +410,21 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
 itself but the
 \fIvalue\fR
 might.
-.RS
-.PD
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 cols=int
 The number of columns the user's terminal supports.
 If there is no terminal device available, a default value of 80 is used.
+.PD
 .TP 6n
 cwd=string
 The user's current working directory.
@@ -517,7 +520,7 @@ tty=string
 The path to the user's terminal device.
 If the user has no terminal device associated with the session,
 the value will be empty, as in
-``\fRtty=\fR''.
+\(lq\fRtty=\fR\(rq.
 .TP 6n
 uid=uid_t
 The real user ID of the user invoking
@@ -526,14 +529,15 @@ The real user ID of the user invoking
 user=string
 The name of the user invoking
 \fBsudo\fR.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 user_env
 The user's environment in the form of a
 \fRNULL\fR-terminated vector of
-``name=value''
+\(lqname=value\(rq
 strings.
 .sp
 When parsing
@@ -541,26 +545,26 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
 itself but the
 \fIvalue\fR
 might.
-.PD
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 close
 .br
-.RS
 .nf
-.RS 0n
+.RS 6n
 void (*close)(int exit_status, int error);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBclose\fR()
@@ -569,7 +573,6 @@ function is called when the command being run by
 finishes.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 exit_status
 The command's exit status, as returned by the
@@ -610,17 +613,15 @@ list, the
 \fBsudo\fR
 front end may execute the command directly instead of running
 it as a child process.
-.PP
 .RE
-.PD 0
 .TP 6n
 show_version
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*show_version)(int verbose);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBshow_version\fR()
@@ -637,20 +638,17 @@ or
 function using
 \fRSUDO_CONV_INFO_MSG\fR.
 If the user requests detailed version information, the verbose flag will be set.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 check_policy
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*check_policy)(int argc, char * const argv[]
                     char *env_add[], char **command_info[],
                     char **argv_out[], char **user_env_out[]);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBcheck_policy\fR()
@@ -692,10 +690,10 @@ into
 \fIargv_out\fR,
 separated from the
 editor and its arguments by a
-``\fR--\fR''
+\(lq\fR--\fR\(rq
 element.
 The
-``\fR--\fR''
+\(lq\fR--\fR\(rq
 will
 be removed by
 \fBsudo\fR
@@ -726,7 +724,6 @@ function with
 to present additional error information to the user.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 argc
 The number of elements in
@@ -749,7 +746,7 @@ Additional environment variables specified by the user on the command
 line in the form of a
 \fRNULL\fR-terminated
 vector of
-``name=value''
+\(lqname=value\(rq
 strings.
 The plugin may reject the command if one or more variables
 are not allowed to be set, or it may silently ignore such variables.
@@ -759,7 +756,7 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
@@ -769,7 +766,7 @@ might.
 .TP 6n
 command_info
 Information about the command being run in the form of
-``name=value''
+\(lqname=value\(rq
 strings.
 These values are used by
 \fBsudo\fR
@@ -781,10 +778,13 @@ which must be terminated with a
 pointer.
 The following values are recognized by
 \fBsudo\fR:
-.RS
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 chroot=string
 The root directory to use when running the command.
+.PD
 .TP 6n
 closefrom=number
 If specified,
@@ -1006,9 +1006,7 @@ will base the new entry on
 the invoking user's existing entry.
 .PP
 Unsupported values will be ignored.
-.PP
 .RE
-.PD 0
 .TP 6n
 argv_out
 The
@@ -1017,25 +1015,25 @@ argument vector to pass to the
 execve(2)
 system call when executing the command.
 The plugin is responsible for allocating and populating the vector.
-.PD
 .TP 6n
 user_env_out
 The
 \fRNULL\fR-terminated
 environment vector to use when executing the command.
 The plugin is responsible for allocating and populating the vector.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 list
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*list)(int verbose, const char *list_user,
             int argc, char * const argv[]);
 .RE
 .fi
+.RS 6n
 .sp
 List available privileges for the invoking user.
 Returns 1 on success, 0 on failure and \-1 on error.
@@ -1054,7 +1052,6 @@ or
 \fBplugin_printf\fR()
 function using
 \fRSUDO_CONV_INFO_MSG\fR,
-.PD
 .TP 6n
 verbose
 Flag indicating whether to list in verbose mode or not.
@@ -1083,17 +1080,18 @@ execve(2)
 system call.
 If the command is permitted by the policy, the fully-qualified path
 to the command should be displayed along with any command line arguments.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 validate
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*validate)(void);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBvalidate\fR()
@@ -1123,18 +1121,15 @@ function with
 \fRSUDO_CONF_ERROR_MSG\fR
 to present additional
 error information to the user.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 invalidate
-.RS
 .nf
-.RS 0n
+.RS 6n
 void (*invalidate)(int remove);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBinvalidate\fR()
@@ -1161,18 +1156,15 @@ The
 function should be
 \fRNULL\fR
 if the plugin does not support credential caching.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 init_session
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*init_session)(struct passwd *pwd, char **user_envp[);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBinit_session\fR()
@@ -1205,7 +1197,7 @@ argument points to the environment the command will
 run in, in the form of a
 \fRNULL\fR-terminated
 vector of
-``name=value''
+\(lqname=value\(rq
 strings.
 This is the same string passed back to the front end via
 the Policy Plugin's
@@ -1241,19 +1233,16 @@ function with
 \fRSUDO_CONF_ERROR_MSG\fR
 to present additional
 error information to the user.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 register_hooks
-.RS
 .nf
-.RS 0n
+.RS 6n
 void (*register_hooks)(int version,
    int (*register_hook)(struct sudo_hook *hook));
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBregister_hooks\fR()
@@ -1296,19 +1285,16 @@ front end doesn't support API
 version 1.2 or higher,
 \fRregister_hooks\fR
 will not be called.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 deregister_hooks
-.RS
 .nf
-.RS 0n
+.RS 6n
 void (*deregister_hooks)(int version,
    int (*deregister_hook)(struct sudo_hook *hook));
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBderegister_hooks\fR()
@@ -1353,7 +1339,6 @@ version 1.2 or higher,
 \fRderegister_hooks\fR
 will not be called.
 .RE
-.PD
 .PP
 \fIPolicy Plugin Version Macros\fR
 .nf
@@ -1454,15 +1439,15 @@ to determine the API version the plugin was
 built against.
 .TP 6n
 open
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*open)(unsigned int version, sudo_conv_t conversation,
             sudo_printf_t plugin_printf, char * const settings[],
             char * const user_info[], int argc, char * const argv[],
             char * const user_env[], char * const plugin_options[]);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBopen\fR()
@@ -1532,7 +1517,7 @@ settings
 A vector of user-supplied
 \fBsudo\fR
 settings in the form of
-``name=value''
+\(lqname=value\(rq
 strings.
 The vector is terminated by a
 \fRNULL\fR
@@ -1547,7 +1532,7 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
@@ -1561,7 +1546,7 @@ section for a list of all possible settings.
 .TP 6n
 user_info
 A vector of information about the user running the command in the form of
-``name=value''
+\(lqname=value\(rq
 strings.
 The vector is terminated by a
 \fRNULL\fR
@@ -1572,7 +1557,7 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
@@ -1603,7 +1588,7 @@ user_env
 The user's environment in the form of a
 \fRNULL\fR-terminated
 vector of
-``name=value''
+\(lqname=value\(rq
 strings.
 .sp
 When parsing
@@ -1611,7 +1596,7 @@ When parsing
 the plugin should split on the
 \fBfirst\fR
 equal sign
-(`=')
+(\(oq=\(cq)
 since the
 \fIname\fR
 field will never include one
@@ -1644,18 +1629,19 @@ by the
 front end before using
 \fIplugin_options\fR.
 Failure to do so may result in a crash.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 close
 .br
-.RS
 .nf
-.RS 0n
+.RS 6n
 void (*close)(int exit_status, int error);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBclose\fR()
@@ -1664,7 +1650,6 @@ function is called when the command being run by
 finishes.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 exit_status
 The command's exit status, as returned by the
@@ -1686,17 +1671,18 @@ system call.
 If the command was successfully executed, the value of
 \fRerror\fR
 is 0.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 show_version
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*show_version)(int verbose);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBshow_version\fR()
@@ -1713,18 +1699,15 @@ or
 function using
 \fRSUDO_CONV_INFO_MSG\fR.
 If the user requests detailed version information, the verbose flag will be set.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 log_ttyin
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*log_ttyin)(const char *buf, unsigned int len);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBlog_ttyin\fR()
@@ -1736,7 +1719,6 @@ Returns 1 if the data should be passed to the command, 0 if the data
 is rejected (which will terminate the command) or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 buf
 The buffer containing user input.
@@ -1745,17 +1727,18 @@ len
 The length of
 \fIbuf\fR
 in bytes.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 log_ttyout
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*log_ttyout)(const char *buf, unsigned int len);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBlog_ttyout\fR()
@@ -1767,7 +1750,6 @@ Returns 1 if the data should be passed to the user, 0 if the data is rejected
 (which will terminate the command) or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 buf
 The buffer containing command output.
@@ -1776,17 +1758,18 @@ len
 The length of
 \fIbuf\fR
 in bytes.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 log_stdin
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*log_stdin)(const char *buf, unsigned int len);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBlog_stdin\fR()
@@ -1800,7 +1783,6 @@ Returns 1 if the data should be passed to the command, 0 if the data is
 rejected (which will terminate the command) or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 buf
 The buffer containing user input.
@@ -1809,17 +1791,18 @@ len
 The length of
 \fIbuf\fR
 in bytes.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 log_stdout
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*log_stdout)(const char *buf, unsigned int len);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBlog_stdout\fR()
@@ -1833,7 +1816,6 @@ Returns 1 if the data should be passed to the user, 0 if the data is
 rejected (which will terminate the command) or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 buf
 The buffer containing command output.
@@ -1842,17 +1824,18 @@ len
 The length of
 \fIbuf\fR
 in bytes.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 log_stderr
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*log_stderr)(const char *buf, unsigned int len);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBlog_stderr\fR()
@@ -1866,7 +1849,6 @@ Returns 1 if the data should be passed to the user, 0 if the data is
 rejected (which will terminate the command) or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 buf
 The buffer containing command output.
@@ -1875,16 +1857,16 @@ len
 The length of
 \fIbuf\fR
 in bytes.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 register_hooks
 See the
 \fIPolicy plugin API\fR
 section for a description of
 \fRregister_hooks\fR.
-.PD
 .TP 6n
 deregister_hooks
 See the
@@ -1991,7 +1973,9 @@ hook_type
 The
 \fRhook_type\fR
 field may be one of the following supported hook types:
-.RS
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 \fRSUDO_HOOK_SETENV\fR
 The C library
@@ -2002,20 +1986,19 @@ The
 \fRhook_fn\fR
 field should
 be a function that matches the following typedef:
-.RS
 .nf
 .sp
-.RS 0n
+.RS 6n
 typedef int (*sudo_hook_fn_setenv_t)(const char *name,
    const char *value, int overwrite, void *closure);
 .RE
 .fi
+.RS 6n
 .sp
 If the registered hook does not match the typedef the results are
 unspecified.
-.PP
 .RE
-.PD 0
+.PD
 .TP 6n
 \fRSUDO_HOOK_UNSETENV\fR
 The C library
@@ -2026,18 +2009,13 @@ The
 \fRhook_fn\fR
 field should
 be a function that matches the following typedef:
-.RS
 .nf
 .sp
-.RS 0n
+.RS 6n
 typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
    void *closure);
 .RE
 .fi
-.PD
-.PP
-.RE
-.PD 0
 .TP 6n
 \fRSUDO_HOOK_GETENV\fR
 The C library
@@ -2048,21 +2026,18 @@ The
 \fRhook_fn\fR
 field should
 be a function that matches the following typedef:
-.RS
 .nf
 .sp
-.RS 0n
+.RS 6n
 typedef int (*sudo_hook_fn_getenv_t)(const char *name,
    char **value, void *closure);
 .RE
 .fi
+.RS 6n
 .sp
 If the registered hook does not match the typedef the results are
 unspecified.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 \fRSUDO_HOOK_PUTENV\fR
 The C library
@@ -2073,22 +2048,22 @@ The
 \fRhook_fn\fR
 field should
 be a function that matches the following typedef:
-.RS
 .nf
 .sp
-.RS 0n
+.RS 6n
 typedef int (*sudo_hook_fn_putenv_t)(char *string,
    void *closure);
 .RE
 .fi
+.RS 6n
 .sp
 If the registered hook does not match the typedef the results are
 unspecified.
 .RE
-.PD
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 hook_fn
 sudo_hook_fn_t hook_fn;
@@ -2109,11 +2084,13 @@ is passed as the last function parameter.
 This can be used to pass arbitrary data to the plugin's hook implementation.
 .sp
 The function return value may be one of the following:
-.RS
-.PD
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 \fRSUDO_HOOK_RET_ERROR\fR
 The hook function encountered an error.
+.PD
 .TP 6n
 \fRSUDO_HOOK_RET_NEXT\fR
 The hook completed without error, go on to the next hook (including
@@ -2133,7 +2110,10 @@ hook that operates on a private copy of
 the environment but leaves
 \fRenviron\fR
 unchanged.
+.PD 0
+.PP
 .RE
+.PD
 .PP
 Note that it is very easy to create an infinite loop when hooking
 C library functions.
@@ -2197,11 +2177,11 @@ to the policy plugin.
 A plugin may also accept a
 \fIrunas_user\fR
 in the form of
-``user@hostname''
+\(lquser@hostname\(rq
 which will work with older versions of
 \fBsudo\fR.
 It is anticipated that remote commands will be supported by executing a
-``helper''
+\(lqhelper\(rq
 program.
 The policy plugin should setup the execution environment such that the
 \fBsudo\fR
@@ -2397,13 +2377,13 @@ to determine the API version the group plugin
 was built against.
 .TP 6n
 init
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*init)(int version, sudo_printf_t plugin_printf,
             char *const argv[]);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBinit\fR()
@@ -2446,17 +2426,18 @@ If no arguments were given,
 \fIargv\fR
 will be
 \fRNULL\fR.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 cleanup
-.RS
 .nf
-.RS 0n
+.RS 6n
 void (*cleanup)();
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBcleanup\fR()
@@ -2465,20 +2446,17 @@ function is called when
 has finished its
 group checks.
 The plugin should free any memory it has allocated and close open file handles.
-.PD
-.PP
 .RE
-.PD 0
 .TP 6n
 query
 .br
-.RS
 .nf
-.RS 0n
+.RS 6n
 int (*query)(const char *user, const char *group,
              const struct passwd *pwd);
 .RE
 .fi
+.RS 6n
 .sp
 The
 \fBquery\fR()
@@ -2488,7 +2466,6 @@ is a member of
 \fIgroup\fR.
 .sp
 The function arguments are as follows:
-.PD
 .TP 6n
 user
 The name of the user being looked up in the external group database.
@@ -2508,7 +2485,10 @@ present in the password database,
 \fIpwd\fR
 will be
 \fRNULL\fR.
+.PD 0
+.PP
 .RE
+.PD
 .PP
 \fIGroup API Version Macros\fR
 .nf
@@ -2627,7 +2607,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-``AS IS''
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

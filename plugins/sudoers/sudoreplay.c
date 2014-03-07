@@ -89,10 +89,11 @@
 
 #include <pathnames.h>
 
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "gettext.h"
 #include "logging.h"
 #include "iolog.h"
 #include "queue.h"
@@ -151,12 +152,13 @@ struct search_node {
     union {
 #ifdef HAVE_REGCOMP
 	regex_t cmdre;
+#else
+	char *pattern;
 #endif
 	time_t tstamp;
 	char *cwd;
 	char *tty;
 	char *user;
-	char *pattern;
 	char *runas_group;
 	char *runas_user;
 	struct search_node_list expr;
@@ -184,6 +186,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
+/* XXX move to separate header? */
 extern char *get_timestr(time_t, int);
 extern time_t get_date(char *);
 
@@ -376,7 +379,7 @@ replay_session(const double max_wait, const char *decimal)
     unsigned int i, iovcnt = 0, iovmax = 0;
     struct sudo_event_base *evbase;
     struct iovec iovb, *iov = &iovb;
-    bool interactive = false;
+    bool interactive;
     struct write_closure wc;
     char buf[LINE_MAX];
     sigaction_t sa;
@@ -933,6 +936,7 @@ static int
 list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
+    const char *timestr;
     struct log_info *li;
     int rval = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL)
@@ -961,8 +965,10 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	idstr = cp;
     }
     /* XXX - print rows + cols? */
+    timestr = get_timestr(li->tstamp, 1);
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
-	get_timestr(li->tstamp, 1), li->user, li->tty, li->cwd, li->runas_user);
+	timestr ? timestr : "invalid date",
+	li->user, li->tty, li->cwd, li->runas_user);
     if (li->runas_group)
 	printf("GROUP=%s ; ", li->runas_group);
     printf("TSID=%s ; COMMAND=%s\n", idstr, li->cmd);
@@ -1140,7 +1146,7 @@ check_input(int fd, int what, void *v)
 	if (!paused) {
 	    /* Determine remaining timeout, if any. */
 	    sudo_ev_get_timeleft(ev, &tv);
-	    if (!timevalisset(&tv)) {
+	    if (!sudo_timevalisset(&tv)) {
 		/* No time left, event is done. */
 		debug_return;
 	    }

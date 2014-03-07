@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999, 2001, 2004, 2005, 2007-2012
+ * Copyright (c) 1996, 1998, 1999, 2001, 2004, 2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>.
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -74,12 +74,22 @@
  */
 
 /*
- * Where to put the timestamp files.  Defaults to /var/run/sudo,
- * /var/adm/sudo or /usr/adm/sudo depending on what exists.
+ * Where to store the time stamp files.  Defaults to /var/run/sudo/ts,
+ * /var/db/sudo/ts, /var/lib/sudo/ts, /var/adm/sudo/ts or /usr/adm/sudo/ts
+ * depending on what exists on the system.
  */
 #ifndef _PATH_SUDO_TIMEDIR
 #undef _PATH_SUDO_TIMEDIR
 #endif /* _PATH_SUDO_TIMEDIR */
+
+/*
+ * Where to store the lecture status files.  Defaults to /var/db/sudo/lectured,
+ * /var/lib/sudo/lectured, /var/adm/sudo/lectured or /usr/adm/sudo/lectured
+ * depending on what exists on the system.
+ */
+#ifndef _PATH_SUDO_LECTURE_DIR
+#undef _PATH_SUDO_LECTURE_DIR
+#endif /* _PATH_SUDO_LECTURE_DIR */
 
 /*
  * Where to put the I/O log files.  Defaults to /var/log/sudo-io,

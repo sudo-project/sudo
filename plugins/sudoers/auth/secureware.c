@@ -86,8 +86,8 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 	    epass = bigcrypt(pass, pw_epasswd);
 	else if (crypt_type == AUTH_CRYPT_CRYPT16)
 	    epass = crypt(pass, pw_epasswd);
-    }
 # endif /* HAVE_DISPCRYPT */
+    }
 #elif defined(HAVE_BIGCRYPT)
     epass = bigcrypt(pass, pw_epasswd);
 #endif /* __alpha */

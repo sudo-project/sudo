@@ -54,6 +54,7 @@
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_util.h"
 
 /* XXX - use non-exiting allocators? */
 
@@ -155,14 +156,13 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
 	gettimeofday(&now, NULL);
-	tv = ev->timeout;
-	timevalsub(&tv, &now);
+	sudo_timevalsub(&ev->timeout, &now, &tv);
 	if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec < 0))
-	    timevalclear(&tv);
+	    sudo_timevalclear(&tv);
 	timeout = &tv;
     } else {
 	if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
-	    timevalclear(&tv);
+	    sudo_timevalclear(&tv);
 	    timeout = &tv;
 	} else {
 	    timeout = NULL;

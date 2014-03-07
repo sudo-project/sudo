@@ -40,7 +40,6 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "gettext.h"
 #include <gram.h>
 
 /*
@@ -230,21 +229,41 @@ printstr_json(FILE *fp, const char *pre, const char *str, const char *post,
 }
 
 /*
- * Print struct sudo_command in JSON format, with specified indentation.
+ * Print sudo command member in JSON format, with specified indentation.
  * If last_one is false, a comma will be printed before the newline
  * that closes the object.
  */
 static void
-print_command_json(FILE *fp, struct sudo_command *c, int indent, bool last_one)
+print_command_json(FILE *fp, struct member *m, int indent, bool last_one)
 {
+    struct sudo_command *c = (struct sudo_command *)m->name;
     struct json_value value;
     const char *digest_name;
     debug_decl(print_command_json, SUDO_DEBUG_UTIL)
 
     printstr_json(fp, "{", NULL, NULL, indent);
-    if (c->digest != NULL) {
+    if (m->negated || c->digest != NULL) {
 	putc('\n', fp);
 	indent += 4;
+    } else {
+	putc(' ', fp);
+	indent = 0;
+    }
+
+    /* Print command with optional command line args. */
+    if (c->args != NULL) {
+	printstr_json(fp, "\"", "command", "\": ", indent);
+	printstr_json(fp, "\"", c->cmnd, " ", 0);
+	printstr_json(fp, NULL, c->args, "\"", 0);
+    } else {
+	value.type = JSON_STRING;
+	value.u.string = c->cmnd;
+	print_pair_json(fp, NULL, "command", &value, NULL, indent);
+    }
+
+    /* Optional digest. */
+    if (c->digest != NULL) {
+	fputs(",\n", fp);
 	switch (c->digest->digest_type) {
 	case SUDO_DIGEST_SHA224:
 	    digest_name = "sha224";
@@ -264,21 +283,18 @@ print_command_json(FILE *fp, struct sudo_command *c, int indent, bool last_one)
 	}
 	value.type = JSON_STRING;
 	value.u.string = c->digest->digest_str;
-	print_pair_json(fp, NULL, digest_name, &value, ",\n", indent);
-    } else {
-	putc(' ', fp);
-	indent = 0;
+	print_pair_json(fp, NULL, digest_name, &value, NULL, indent);
     }
-    if (c->args != NULL) {
-	printstr_json(fp, "\"", "command", "\": ", indent);
-	printstr_json(fp, "\"", c->cmnd, " ", 0);
-	printstr_json(fp, NULL, c->args, "\"", 0);
-    } else {
-	value.type = JSON_STRING;
-	value.u.string = c->cmnd;
-	print_pair_json(fp, NULL, "command", &value, NULL, indent);
+
+    /* Command may be negated. */
+    if (m->negated) {
+	fputs(",\n", fp);
+	value.type = JSON_BOOL;
+	value.u.boolean = true;
+	print_pair_json(fp, NULL, "negated", &value, NULL, indent);
     }
-    if (c->digest != NULL) {
+
+    if (indent != 0) {
 	indent -= 4;
 	putc('\n', fp);
 	print_indent(fp, indent);
@@ -392,7 +408,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	typestr = "networkaddr";
 	break;
     case COMMAND:
-	print_command_json(fp, (struct sudo_command *)m->name, indent, last_one);
+	print_command_json(fp, m, indent, last_one);
 	debug_return;
     case WORD:
 	switch (word_type) {
@@ -446,7 +462,21 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
     default:
 	fatalx("unexpected member type %d", m->type);
     }
-    print_pair_json(fp, "{ ", typestr, &value, " }", indent);
+
+    if (m->negated) {
+	print_indent(fp, indent);
+	fputs("{\n", fp);
+	indent += 4;
+	print_pair_json(fp, NULL, typestr, &value, ",\n", indent);
+	value.type = JSON_BOOL;
+	value.u.boolean = true;
+	print_pair_json(fp, NULL, "negated", &value, "\n", indent);
+	indent -= 4;
+	print_indent(fp, indent);
+	putc('}', fp);
+    } else {
+	print_pair_json(fp, "{ ", typestr, &value, " }", indent);
+    }
     if (!last_one)
 	putc(',', fp);
     putc('\n', fp);
@@ -604,6 +634,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	debug_return_bool(need_comma);
 
     fprintf(fp, "%s\n%*s\"Defaults\": [\n", need_comma ? "," : "", indent, "");
+    indent += 4;
 
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
 	type = get_defaults_type(def);
@@ -614,7 +645,6 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	}
 
 	/* Found it, print object container and binding (if any). */
-	indent += 4;
 	fprintf(fp, "%*s{\n", indent, "");
 	indent += 4;
 	print_binding_json(fp, def->binding, def->type, indent);
@@ -780,7 +810,7 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     if (cs->tags.nopasswd != UNSPEC || cs->tags.noexec != UNSPEC ||
 	cs->tags.setenv != UNSPEC || cs->tags.log_input != UNSPEC ||
 	cs->tags.log_output != UNSPEC) {
-	fprintf(fp, "%*s\"Options\": {\n", indent, "");
+	fprintf(fp, "%*s\"Options\": [\n", indent, "");
 	indent += 4;
 	if (cs->tags.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
@@ -788,39 +818,39 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 	    last_one = cs->tags.noexec == UNSPEC &&
 		cs->tags.setenv == UNSPEC && cs->tags.log_input == UNSPEC &&
 		cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "authenticate", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "authenticate", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.noexec != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.noexec;
 	    last_one = cs->tags.setenv == UNSPEC &&
 		cs->tags.log_input == UNSPEC && cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "noexec", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "noexec", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.setenv != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.setenv;
 	    last_one = cs->tags.log_input == UNSPEC &&
 		cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "setenv", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "setenv", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.log_input != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.log_input;
 	    last_one = cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "log_input", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "log_input", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.log_output != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.log_output;
-	    print_pair_json(fp, NULL, "log_output", &value, "\n", indent);
+	    print_pair_json(fp, "{ ", "log_output", &value, " }\n", indent);
 	}
 	indent -= 4;
-	fprintf(fp, "%*s},\n", indent, "");
+	fprintf(fp, "%*s],\n", indent, "");
     }
 
 #ifdef HAVE_SELINUX
@@ -984,7 +1014,7 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 {
     bool ok = false, need_comma = false;
     const int indent = 4;
-    FILE *export_fp;
+    FILE *export_fp = stdout;
     debug_decl(export_sudoers, SUDO_DEBUG_UTIL)
 
     if (strcmp(sudoers_path, "-") == 0) {
@@ -995,13 +1025,12 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	    warning(U_("unable to open %s"), sudoers_path);
 	goto done;
     }
-    if (strcmp(export_path, "-") == 0) {
-	export_fp = stdout;
-	export_path = "stdout";
-    } else if ((export_fp = fopen(export_path, "w")) == NULL) {
-	if (!quiet)
-	    warning(U_("unable to open %s"), export_path);
-	goto done;
+    if (strcmp(export_path, "-") != 0) {
+	if ((export_fp = fopen(export_path, "w")) == NULL) {
+	    if (!quiet)
+		warning(U_("unable to open %s"), export_path);
+	    goto done;
+	}
     }
     init_parser(sudoers_path, quiet);
     if (sudoersparse() && !parse_error) {
@@ -1037,8 +1066,9 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 
     /* Close JSON output. */
     fputs("\n}\n", export_fp);
-    fclose(export_fp);
 
 done:
+    if (export_fp != stdout)
+	fclose(export_fp);
     debug_return_bool(ok);
 }

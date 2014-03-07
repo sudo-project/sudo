@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2013
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -13,10 +12,6 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- * Sponsored in part by the Defense Advanced Research Projects
- * Agency (DARPA) and Air Force Research Laboratory, Air Force
- * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
 #include <config.h>
@@ -24,9 +19,6 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#ifndef __TANDEM
-# include <sys/file.h>
-#endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -48,381 +40,598 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifndef HAVE_STRUCT_TIMESPEC
+# include "compat/timespec.h"
+#endif
 #include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <pwd.h>
 #include <grp.h>
 
 #include "sudoers.h"
+#include "secure_path.h"
 #include "check.h"
 
-static struct sudo_tty_info tty_info;
-static char timestampdir[PATH_MAX];
-static char timestampfile[PATH_MAX];
+/* On Linux, CLOCK_MONOTONIC does not run while suspended. */
+#if defined(CLOCK_BOOTTIME)
+# define SUDO_CLOCK_MONOTONIC	CLOCK_BOOTTIME
+#elif defined(CLOCK_MONOTONIC)
+# define SUDO_CLOCK_MONOTONIC	CLOCK_MONOTONIC
+#else
+# define SUDO_CLOCK_MONOTONIC	CLOCK_REALTIME
+#endif
+
+static char timestamp_file[PATH_MAX];
+static off_t timestamp_hint = (off_t)-1;
+static struct timestamp_entry timestamp_key;
 
 /*
- * Fills in timestampdir as well as timestampfile if using tty tickets.
+ * Returns true if entry matches key, else false.
  */
-int
-build_timestamp(struct passwd *pw)
+static bool
+ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 {
-    char *dirparent;
-    struct stat sb;
-    int len;
-    debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
+    debug_decl(ts_match_record, SUDO_DEBUG_AUTH)
 
-    /* Stash the tty's device, session ID and ctime for ticket comparison. */
-    if (def_tty_tickets) {
-	if (user_ttypath && stat(user_ttypath, &sb) == 0) {
-	    tty_info.dev = sb.st_dev;
-	    tty_info.ino = sb.st_ino;
-	    tty_info.rdev = sb.st_rdev;
-	    tty_info.uid = sb.st_uid;
-	    tty_info.gid = sb.st_gid;
-	}
-	tty_info.sid = user_sid;
+    if (entry->version != key->version)
+	debug_return_bool(false);
+    if (!ISSET(key->flags, TS_ANYUID) && entry->auth_uid != key->auth_uid)
+	debug_return_bool(false);
+    if (entry->type != key->type)
+	debug_return_bool(false);
+    switch (entry->type) {
+    case TS_GLOBAL:
+	/* no ppid or tty to match */
+	break;
+    case TS_PPID:
+	/* verify parent pid */
+	if (entry->u.ppid != key->u.ppid)
+	    debug_return_bool(false);
+	break;
+    case TS_TTY:
+	if (entry->u.ttydev != key->u.ttydev)
+	    debug_return_bool(false);
+	break;
+    default:
+	/* unknown record type, ignore it */
+	debug_return_bool(false);
     }
-
-    dirparent = def_timestampdir;
-    timestampfile[0] = '\0';
-    len = snprintf(timestampdir, sizeof(timestampdir), "%s/%s", dirparent,
-	user_name);
-    if (len <= 0 || (size_t)len >= sizeof(timestampdir))
-	goto bad;
-
-    /*
-     * Timestamp file may be a file in the directory or NUL to use
-     * the directory as the timestamp.
-     */
-    if (def_tty_tickets) {
-	char pidbuf[sizeof("pid") + (((sizeof(pid_t) * 8) + 2) / 3)];
-	char *p;
-
-	if (user_ttypath == NULL) {
-	    /* No tty, use parent pid. */
-	    len = snprintf(pidbuf, sizeof(pidbuf), "pid%u",
-		(unsigned int)getppid());
-	    if (len <= 0 || (size_t)len >= sizeof(pidbuf))
-		goto bad;
-	    p = pidbuf;
-	} else if ((p = strrchr(user_tty, '/'))) {
-	    p++;
-	} else {
-	    p = user_tty;
-	}
-	if (def_targetpw) {
-	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s:%s",
-		dirparent, user_name, p, runas_pw->pw_name);
-	} else {
-	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
-		dirparent, user_name, p);
-	}
-	if (len <= 0 || (size_t)len >= sizeof(timestampfile))
-	    goto bad;
-    } else if (def_targetpw) {
-	len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
-	    dirparent, user_name, runas_pw->pw_name);
-	if (len <= 0 || (size_t)len >= sizeof(timestampfile))
-	    goto bad;
-    }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "using timestamp file %s", timestampfile);
-
-    debug_return_int(len);
-bad:
-    log_fatal(0, N_("timestamp path too long: %s"),
-	*timestampfile ? timestampfile : timestampdir);
-    /* NOTREACHED */
-    debug_return_int(-1);
-}
-
-/*
- * Update the time on the timestamp file/dir or create it if necessary.
- */
-bool
-update_timestamp(struct passwd *pw)
-{
-    debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
-
-    if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
-    if (*timestampfile) {
-	/*
-	 * Store tty info in timestamp file
-	 */
-	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
-	if (fd == -1)
-	    log_warning(USE_ERRNO, N_("unable to open %s"), timestampfile);
-	else {
-	    lock_file(fd, SUDO_LOCK);
-	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info))
-		log_warning(USE_ERRNO, N_("unable to write to %s"), timestampfile);
-	    close(fd);
-	}
-    } else {
-	if (touch(-1, timestampdir, NULL) == -1) {
-	    if (mkdir(timestampdir, 0700) == -1) {
-		log_warning(USE_ERRNO, N_("unable to mkdir %s"),
-		    timestampdir);
-	    }
-	}
-    }
-    if (timestamp_uid != 0)
-	restore_perms();
     debug_return_bool(true);
 }
 
 /*
- * Check the timestamp file and directory and return their status.
+ * Searches the time stamp file descriptor for a record that matches key.
+ * On success, fills in entry with the matching record and returns true.
+ * On failure, returns false.
+ *
+ * Note that records are searched starting at the current file offset,
+ * which may not be the beginning of the file.
  */
-static int
-timestamp_status_internal(bool removing)
+static bool
+ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entry)
 {
-    struct stat sb;
-    struct timeval boottime, mtime;
-    time_t now;
-    char *dirparent = def_timestampdir;
-    int status = TS_ERROR;		/* assume the worst */
-    debug_decl(timestamp_status_internal, SUDO_DEBUG_AUTH)
-
-    if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+    struct timestamp_entry cur;
+    debug_decl(ts_find_record, SUDO_DEBUG_AUTH)
 
     /*
-     * Sanity check dirparent and make it if it doesn't already exist.
-     * We start out assuming the worst (that the dir is not sane) and
-     * if it is ok upgrade the status to ``no timestamp file''.
-     * Note that we don't check the parent(s) of dirparent for
-     * sanity since the sudo dir is often just located in /tmp.
+     * Look for a matching record.
+     * We don't match on the sid or actual time stamp.
      */
-    if (lstat(dirparent, &sb) == 0) {
-	if (!S_ISDIR(sb.st_mode))
-	    log_warning(0, N_("%s exists but is not a directory (0%o)"),
-		dirparent, (unsigned int) sb.st_mode);
-	else if (sb.st_uid != timestamp_uid)
-	    log_warning(0, N_("%s owned by uid %u, should be uid %u"),
-		dirparent, (unsigned int) sb.st_uid,
-		(unsigned int) timestamp_uid);
-	else if ((sb.st_mode & 0000022))
-	    log_warning(0,
-		N_("%s writable by non-owner (0%o), should be mode 0700"),
-		dirparent, (unsigned int) sb.st_mode);
-	else {
-	    if ((sb.st_mode & 0000777) != 0700)
-		(void) chmod(dirparent, 0700);
-	    status = TS_MISSING;
+    while (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
+	if (cur.size != sizeof(cur)) {
+	    /* wrong size, seek to next record */
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"wrong sized record, got %hu, expected %zu",
+		cur.size, sizeof(cur));
+	    lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR);
+	    continue;
 	}
-    } else if (errno != ENOENT) {
-	log_warning(USE_ERRNO, N_("unable to stat %s"), dirparent);
-    } else {
-	/* No dirparent, try to make one. */
-	if (!removing) {
-	    if (mkdir(dirparent, S_IRWXU))
-		log_warning(USE_ERRNO, N_("unable to mkdir %s"),
-		    dirparent);
-	    else
-		status = TS_MISSING;
+	if (ts_match_record(key, &cur)) {
+	    memcpy(entry, &cur, sizeof(struct timestamp_entry));
+	    debug_return_bool(true);
 	}
     }
-    if (status == TS_ERROR)
-	goto done;
-
-    /*
-     * Sanity check the user's ticket dir.  We start by downgrading
-     * the status to TS_ERROR.  If the ticket dir exists and is sane
-     * this will be upgraded to TS_OLD.  If the dir does not exist,
-     * it will be upgraded to TS_MISSING.
-     */
-    status = TS_ERROR;			/* downgrade status again */
-    if (lstat(timestampdir, &sb) == 0) {
-	if (!S_ISDIR(sb.st_mode)) {
-	    if (S_ISREG(sb.st_mode)) {
-		/* convert from old style */
-		if (unlink(timestampdir) == 0)
-		    status = TS_MISSING;
-	    } else
-		log_warning(0, N_("%s exists but is not a directory (0%o)"),
-		    timestampdir, (unsigned int) sb.st_mode);
-	} else if (sb.st_uid != timestamp_uid)
-	    log_warning(0, N_("%s owned by uid %u, should be uid %u"),
-		timestampdir, (unsigned int) sb.st_uid,
-		(unsigned int) timestamp_uid);
-	else if ((sb.st_mode & 0000022))
-	    log_warning(0,
-		N_("%s writable by non-owner (0%o), should be mode 0700"),
-		timestampdir, (unsigned int) sb.st_mode);
-	else {
-	    if ((sb.st_mode & 0000777) != 0700)
-		(void) chmod(timestampdir, 0700);
-	    status = TS_OLD;		/* do date check later */
-	}
-    } else if (errno != ENOENT) {
-	log_warning(USE_ERRNO, N_("unable to stat %s"), timestampdir);
-    } else
-	status = TS_MISSING;
-
-    /*
-     * If there is no user ticket dir, AND we are in tty ticket mode,
-     * AND we are not just going to remove it, create the user ticket dir.
-     */
-    if (status == TS_MISSING && *timestampfile && !removing) {
-	if (mkdir(timestampdir, S_IRWXU) == -1) {
-	    status = TS_ERROR;
-	    log_warning(USE_ERRNO, N_("unable to mkdir %s"), timestampdir);
-	}
-    }
-
-    /*
-     * Sanity check the tty ticket file if it exists.
-     */
-    if (*timestampfile && status != TS_ERROR) {
-	if (status != TS_MISSING)
-	    status = TS_NOFILE;			/* dir there, file missing */
-	if (lstat(timestampfile, &sb) == 0) {
-	    if (!S_ISREG(sb.st_mode)) {
-		status = TS_ERROR;
-		log_warning(0, N_("%s exists but is not a regular file (0%o)"),
-		    timestampfile, (unsigned int) sb.st_mode);
-	    } else {
-		/* If bad uid or file mode, complain and kill the bogus file. */
-		if (sb.st_uid != timestamp_uid) {
-		    log_warning(0,
-			N_("%s owned by uid %u, should be uid %u"),
-			timestampfile, (unsigned int) sb.st_uid,
-			(unsigned int) timestamp_uid);
-		    (void) unlink(timestampfile);
-		} else if ((sb.st_mode & 0000022)) {
-		    log_warning(0,
-			N_("%s writable by non-owner (0%o), should be mode 0600"),
-			timestampfile, (unsigned int) sb.st_mode);
-		    (void) unlink(timestampfile);
-		} else {
-		    /* If not mode 0600, fix it. */
-		    if ((sb.st_mode & 0000777) != 0600)
-			(void) chmod(timestampfile, 0600);
-
-		    /*
-		     * Check for stored tty info.  If the file is zero-sized
-		     * it is an old-style timestamp with no tty info in it.
-		     * If removing, we don't care about the contents.
-		     * The actual mtime check is done later.
-		     */
-		    if (removing) {
-			status = TS_OLD;
-		    } else if (sb.st_size != 0) {
-			struct sudo_tty_info info;
-			int fd = open(timestampfile, O_RDONLY, 0644);
-			if (fd != -1) {
-			    if (read(fd, &info, sizeof(info)) == sizeof(info) &&
-				memcmp(&info, &tty_info, sizeof(info)) == 0) {
-				status = TS_OLD;
-			    }
-			    close(fd);
-			}
-		    }
-		}
-	    }
-	} else if (errno != ENOENT) {
-	    log_warning(USE_ERRNO, N_("unable to stat %s"), timestampfile);
-	    status = TS_ERROR;
-	}
-    }
-
-    /*
-     * If the file/dir exists and we are not removing it, check its mtime.
-     */
-    if (status == TS_OLD && !removing) {
-	mtim_get(&sb, &mtime);
-	if (timevalisset(&mtime)) {
-	    /* Negative timeouts only expire manually (sudo -k). */
-	    if (def_timestamp_timeout < 0) {
-		status = TS_CURRENT;
-	    } else {
-		time(&now);
-		if (def_timestamp_timeout &&
-		    now - mtime.tv_sec < 60 * def_timestamp_timeout) {
-		    /*
-		     * Check for bogus time on the stampfile.  The clock may
-		     * have been set back or user could be trying to spoof us.
-		     */
-		    if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
-			time_t tv_sec = (time_t)mtime.tv_sec;
-			log_warning(0,
-			    N_("timestamp too far in the future: %20.20s"),
-			    4 + ctime(&tv_sec));
-			if (*timestampfile)
-			    (void) unlink(timestampfile);
-			else
-			    (void) rmdir(timestampdir);
-			status = TS_MISSING;
-		    } else if (get_boottime(&boottime) &&
-			timevalcmp(&mtime, &boottime, <)) {
-			status = TS_OLD;
-		    } else {
-			status = TS_CURRENT;
-		    }
-		}
-	    }
-	}
-    }
-
-done:
-    if (timestamp_uid != 0)
-	restore_perms();
-    debug_return_int(status);
-}
-
-int
-timestamp_status(struct passwd *pw)
-{
-    return timestamp_status_internal(false);
+    debug_return_bool(false);
 }
 
 /*
- * Remove the timestamp ticket file/dir.
+ * Find matching record to update or append a new one.
+ * Returns true if the entry was written successfully, else false.
+ */
+static bool
+ts_update_record(int fd, struct timestamp_entry *entry, off_t timestamp_hint)
+{
+    struct timestamp_entry cur;
+    ssize_t nwritten;
+    off_t old_eof = (off_t)-1;
+    debug_decl(ts_update_record, SUDO_DEBUG_AUTH)
+
+    /* First try the hint if one is given. */
+    if (timestamp_hint != (off_t)-1) {
+	if (lseek(fd, timestamp_hint, SEEK_SET) != -1) {
+	    if (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
+		if (ts_match_record(entry, &cur)) {
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			"found existing time stamp record using hint");
+		    goto found_it;
+		}
+	    }
+	}
+    }
+
+    /* Search for matching record. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"searching for time stamp record");
+    lseek(fd, (off_t)0, SEEK_SET);
+    if (ts_find_record(fd, entry, &cur)) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "found existing time stamp record");
+found_it:
+	/* back up over old record */
+	lseek(fd, (off_t)0 - (off_t)cur.size, SEEK_CUR);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "appending new time stamp record");
+	old_eof = lseek(fd, (off_t)0, SEEK_CUR);
+    }
+
+    /* Overwrite existing record or append to end. */
+    nwritten = write(fd, entry, sizeof(struct timestamp_entry));
+    if ((size_t)nwritten == sizeof(struct timestamp_entry))
+	debug_return_bool(true);
+
+    log_warning(nwritten == -1 ? USE_ERRNO : 0,
+	N_("unable to write to %s"), timestamp_file);
+
+    /* Truncate on partial write to be safe. */
+    if (nwritten > 0 && old_eof != (off_t)-1) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "short write, truncating partial time stamp record");
+	if (ftruncate(fd, old_eof) != 0) {
+	    warning(U_("unable to truncate time stamp file to %lld bytes"),
+		(long long)old_eof);
+	}
+    }
+
+    debug_return_bool(false);
+}
+
+/*
+ * Create a directory and any missing parent directories with the
+ * specified mode.
+ * Returns true on success.
+ * Returns false on failure and displays a warning to stderr.
+ */
+static bool
+ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
+{
+    struct stat sb;
+    gid_t parent_gid = 0;
+    char *slash = path;
+    bool rval = false;
+    debug_decl(ts_mkdirs, SUDO_DEBUG_AUTH)
+
+    while ((slash = strchr(slash + 1, '/')) != NULL) {
+	*slash = '\0';
+	if (stat(path, &sb) != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"mkdir %s, mode 0%o", path, parent_mode);
+	    if (mkdir(path, parent_mode) != 0) {
+		if (!quiet)
+		    warning(U_("unable to mkdir %s"), path);
+		goto done;
+	    }
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	} else if (!S_ISDIR(sb.st_mode)) {
+	    if (!quiet) {
+		warningx(U_("%s exists but is not a directory (0%o)"),
+		    path, (unsigned int) sb.st_mode);
+	    }
+	    goto done;
+	} else {
+	    /* Inherit gid of parent dir for ownership. */
+	    parent_gid = sb.st_gid;
+	}
+	*slash = '/';
+    }
+    /* Create final path component. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"mkdir %s, mode 0%o", path, mode);
+    if (mkdir(path, mode) != 0 && errno != EEXIST) {
+	if (!quiet)
+	    warning(U_("unable to mkdir %s"), path);
+	goto done;
+    }
+    ignore_result(chown(path, owner, parent_gid));
+    rval = true;
+done:
+    debug_return_bool(rval);
+}
+
+/*
+ * Check that path is owned by timestamp_uid and not writable by
+ * group or other.  If path is missing and make_it is true, create
+ * the directory and its parent dirs.
+ * Returns true on success or false on failure, setting errno.
+ */
+static bool
+ts_secure_dir(char *path, bool make_it, bool quiet)
+{
+    struct stat sb;
+    bool rval = false;
+    debug_decl(ts_secure_dir, SUDO_DEBUG_AUTH)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
+    switch (sudo_secure_dir(path, timestamp_uid, -1, &sb)) {
+    case SUDO_PATH_SECURE:
+	rval = true;
+	break;
+    case SUDO_PATH_MISSING:
+	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711, quiet)) {
+	    rval = true;
+	    break;
+	}
+	errno = ENOENT;
+	break;
+    case SUDO_PATH_BAD_TYPE:
+	errno = ENOTDIR;
+	if (!quiet)
+	    warning("%s", path);
+	break;
+    case SUDO_PATH_WRONG_OWNER:
+	if (!quiet) {
+	    warningx(U_("%s is owned by uid %u, should be %u"),
+		path, (unsigned int) sb.st_uid,
+		(unsigned int) timestamp_uid);
+	}
+	errno = EACCES;
+	break;
+    case SUDO_PATH_GROUP_WRITABLE:
+	if (!quiet)
+	    warningx(U_("%s is group writable"), path);
+	errno = EACCES;
+	break;
+    }
+    debug_return_bool(rval);
+}
+
+/*
+ * Fills in the timestamp_file[] global variable.
+ * Returns the length of timestamp_file.
+ */
+int
+build_timestamp(struct passwd *pw)
+{
+    int len;
+    debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
+
+    len = snprintf(timestamp_file, sizeof(timestamp_file), "%s/%s",
+	def_timestampdir, user_name);
+    if (len <= 0 || (size_t)len >= sizeof(timestamp_file)) {
+	log_fatal(0, N_("timestamp path too long: %s/%s"),
+	    def_timestampdir, user_name);
+    }
+
+    debug_return_int(len);
+}
+
+/*
+ * Update the time on the timestamp file/dir or create it if necessary.
+ * Returns true on success or false on failure.
+ */
+bool
+update_timestamp(struct passwd *pw)
+{
+    struct timestamp_entry entry;
+    bool rval = false;
+    int fd;
+    debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
+
+    /* Check/create parent directories as needed. */
+    if (!ts_secure_dir(def_timestampdir, true, false))
+	goto done;
+
+    /* Fill in time stamp. */
+    memcpy(&entry, &timestamp_key, sizeof(struct timestamp_entry));
+    clock_gettime(SUDO_CLOCK_MONOTONIC, &entry.ts);
+
+    /* Open time stamp file and lock it for exclusive access. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
+    fd = open(timestamp_file, O_RDWR|O_CREAT, 0600);
+    if (timestamp_uid != 0)
+	restore_perms();
+    if (fd == -1) {
+	log_warning(USE_ERRNO, N_("unable to open %s"), timestamp_file);
+	goto done;
+    }
+
+    /* Update record or append a new one. */
+    lock_file(fd, SUDO_LOCK);
+    ts_update_record(fd, &entry, timestamp_hint);
+    close(fd);
+
+    rval = true;
+
+done:
+    debug_return_bool(rval);
+}
+
+/*
+ * Check the timestamp file and directory and return their status.
+ * Returns one of TS_CURRENT, TS_OLD, TS_MISSING, TS_NOFILE, TS_ERROR.
+ */
+int
+timestamp_status(struct passwd *pw)
+{
+    struct timestamp_entry entry;
+    struct timespec diff, timeout;
+    int status = TS_ERROR;		/* assume the worst */
+    struct stat sb;
+    int fd = -1;
+    debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
+
+    /* Reset time stamp offset hint. */
+    timestamp_hint = (off_t)-1;
+
+    /* Zero timeout means ignore time stamp files. */
+    if (def_timestamp_timeout == 0) {
+	status = TS_OLD;	/* XXX - could also be TS_MISSING */
+	goto done;
+    }
+
+    /* Ignore time stamp files in an insecure directory. */
+    if (!ts_secure_dir(def_timestampdir, false, false)) {
+	if (errno != ENOENT) {
+	    status = TS_ERROR;
+	    goto done;
+	}
+	status = TS_MISSING;	/* not insecure, just missing */
+    }
+
+    /*
+     * Create a key used for matching entries in the time stamp file.
+     * The actual time stamp in the key is used below as the time "now".
+     */
+    memset(&timestamp_key, 0, sizeof(timestamp_key));
+    timestamp_key.version = TS_VERSION;
+    timestamp_key.size = sizeof(timestamp_key);
+    timestamp_key.type = TS_GLOBAL;	/* may be overriden below */
+    if (pw != NULL) {
+	timestamp_key.auth_uid = pw->pw_uid;
+    } else {
+	timestamp_key.flags = TS_ANYUID;
+    }
+    timestamp_key.sid = user_sid;
+    if (def_timestampdir) {
+	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
+	    /* tty-based time stamp */
+	    timestamp_key.type = TS_TTY;
+	    timestamp_key.u.ttydev = sb.st_rdev;
+	} else {
+	    /* ppid-based time stamp */
+	    timestamp_key.type = TS_PPID;
+	    timestamp_key.u.ppid = getppid();
+	}
+    }
+    clock_gettime(SUDO_CLOCK_MONOTONIC, &timestamp_key.ts);
+
+    /* If the time stamp dir is missing there is nothing to do. */
+    if (status == TS_MISSING)
+	goto done;
+
+    /* Open time stamp file and lock it for exclusive access. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
+    fd = open(timestamp_file, O_RDWR);
+    if (timestamp_uid != 0)
+	restore_perms();
+    if (fd == -1) {
+	status = TS_MISSING;
+	goto done;
+    }
+    lock_file(fd, SUDO_LOCK);
+
+    /* Ignore and clear time stamp file if mtime predates boot time. */
+    if (fstat(fd, &sb) == 0) {
+	struct timeval boottime, mtime;
+
+	mtim_get(&sb, &mtime);
+	if (get_boottime(&boottime) && sudo_timevalcmp(&mtime, &boottime, <)) {
+	    ignore_result(ftruncate(fd, (off_t)0));
+	    status = TS_MISSING;
+	    goto done;
+	}
+    }
+
+    /* Read existing record, if any. */
+    if (!ts_find_record(fd, &timestamp_key, &entry)) {
+	status = TS_MISSING;
+	goto done;
+    }
+
+    /* Set record position hint for use by update_timestamp() */
+    timestamp_hint = lseek(fd, (off_t)0, SEEK_CUR);
+    if (timestamp_hint != (off_t)-1)
+	timestamp_hint -= entry.size;
+
+    if (ISSET(entry.flags, TS_DISABLED)) {
+	status = TS_OLD;	/* disabled via sudo -k */
+	goto done;
+    }
+
+    if (entry.type != TS_GLOBAL && entry.sid != timestamp_key.sid) {
+	status = TS_OLD;	/* belongs to different session */
+	goto done;
+    }
+
+    /* Negative timeouts only expire manually (sudo -k).  */
+    if (def_timestamp_timeout < 0) {
+	status = TS_CURRENT;
+	goto done;
+    }
+
+    /* Compare stored time stamp with current time. */
+    sudo_timespecsub(&timestamp_key.ts, &entry.ts, &diff);
+    timeout.tv_sec = 60 * def_timestamp_timeout;
+    timeout.tv_nsec = ((60.0 * def_timestamp_timeout) - (double)timeout.tv_sec)
+	* 1000000000.0;
+    if (sudo_timespeccmp(&diff, &timeout, <)) {
+	status = TS_CURRENT;
+#ifdef CLOCK_MONOTONIC
+	/* A monotonic clock should never run backwards. */
+	if (diff.tv_sec < 0) {
+	    log_warning(0, N_("ignoring time stamp from the future"));
+	    status = TS_OLD;
+	    SET(entry.flags, TS_DISABLED);
+	    ts_update_record(fd, &entry, timestamp_hint);
+	}
+#else
+	/* Check for bogus (future) time in the stampfile. */
+	sudo_timespecsub(&entry.ts, &timestamp_key.ts, &diff);
+	timeout.tv_sec *= 2;
+	if (sudo_timespeccmp(&diff, &timeout, >)) {
+	    time_t tv_sec = (time_t)entry.ts.tv_sec;
+	    log_warning(0,
+		N_("time stamp too far in the future: %20.20s"),
+		4 + ctime(&tv_sec));
+	    status = TS_OLD;
+	    SET(entry.flags, TS_DISABLED);
+	    ts_update_record(fd, &entry, timestamp_hint);
+	}
+#endif /* CLOCK_MONOTONIC */
+    } else {
+	status = TS_OLD;
+    }
+
+done:
+    if (fd != -1)
+	close(fd);
+    debug_return_int(status);
+}
+
+/*
+ * Remove the timestamp entry or file if unlink_it is set.
  */
 void
-remove_timestamp(bool remove)
+remove_timestamp(bool unlink_it)
 {
-    struct timeval tv;
-    char *path;
-    int status;
+    struct timestamp_entry entry;
+    int fd = -1;
     debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
 
     if (build_timestamp(NULL) == -1)
 	debug_return;
 
-    status = timestamp_status_internal(true);
-    if (status != TS_MISSING && status != TS_ERROR) {
-	path = *timestampfile ? timestampfile : timestampdir;
-	if (remove) {
-	    if (*timestampfile)
-		status = unlink(timestampfile);
-	    else
-		status = rmdir(timestampdir);
-	    if (status == -1 && errno != ENOENT) {
-		log_warning(0,
-		    N_("unable to remove %s, will reset to the Unix epoch"),
-		    path);
-		remove = false;
-	    }
-	}
-	if (!remove) {
-	    timevalclear(&tv);
-	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
-		fatal(U_("unable to reset %s to the Unix epoch"), path);
+    /* For "sudo -K" simply unlink the time stamp file. */
+    if (unlink_it) {
+	(void) unlink(timestamp_file);
+	debug_return;
+    }
+
+    /*
+     * Create a key used for matching entries in the time stamp file.
+     */
+    memset(&timestamp_key, 0, sizeof(timestamp_key));
+    timestamp_key.version = TS_VERSION;
+    timestamp_key.size = sizeof(timestamp_key);
+    timestamp_key.type = TS_GLOBAL;	/* may be overriden below */
+    timestamp_key.flags = TS_ANYUID;
+    if (def_timestampdir) {
+	struct stat sb;
+	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
+	    /* tty-based time stamp */
+	    timestamp_key.type = TS_TTY;
+	    timestamp_key.u.ttydev = sb.st_rdev;
+	} else {
+	    /* ppid-based time stamp */
+	    timestamp_key.type = TS_PPID;
+	    timestamp_key.u.ppid = getppid();
 	}
     }
 
+    /* Open time stamp file and lock it for exclusive access. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
+    fd = open(timestamp_file, O_RDWR);
+    if (timestamp_uid != 0)
+	restore_perms();
+    if (fd == -1)
+	goto done;
+    lock_file(fd, SUDO_LOCK);
+
+    /*
+     * Find matching entries and invalidate them.
+     */
+    while (ts_find_record(fd, &timestamp_key, &entry)) {
+	/* Set record position hint for use by update_timestamp() */
+	timestamp_hint = lseek(fd, (off_t)0, SEEK_CUR);
+	if (timestamp_hint != (off_t)-1)
+	    timestamp_hint -= (off_t)entry.size;
+	/* Disable the entry. */
+	SET(entry.flags, TS_DISABLED);
+	ts_update_record(fd, &entry, timestamp_hint);
+    }
+    close(fd);
+
+done:
     debug_return;
 }
 
 /*
- * Lecture status is currently implied by the timestamp status but
- * may be stored separately in a future release.
+ * Returns true if the user has already been lectured.
+ */
+bool
+already_lectured(int unused)
+{
+    char status_file[PATH_MAX];
+    struct stat sb;
+    int len;
+    debug_decl(already_lectured, SUDO_DEBUG_AUTH)
+
+    if (ts_secure_dir(def_lecture_status_dir, false, true)) {
+	len = snprintf(status_file, sizeof(status_file), "%s/%s",
+	    def_lecture_status_dir, user_name);
+	if (len <= 0 || (size_t)len >= sizeof(status_file)) {
+	    log_fatal(0, N_("lecture status path too long: %s/%s"),
+		def_lecture_status_dir, user_name);
+	}
+	debug_return_bool(stat(status_file, &sb) == 0);
+    }
+    debug_return_bool(false);
+}
+
+/*
+ * Create the lecture status file.
+ * Returns true on success or false on failure.
  */
 bool
 set_lectured(void)
 {
-    return true;
+    char lecture_status[PATH_MAX];
+    int len, fd = -1;
+    debug_decl(set_lectured, SUDO_DEBUG_AUTH)
+
+    len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
+	def_lecture_status_dir, user_name);
+    if (len <= 0 || (size_t)len >= sizeof(lecture_status)) {
+	log_fatal(0, N_("lecture status path too long: %s/%s"),
+	    def_lecture_status_dir, user_name);
+    }
+
+    /* Sanity check lecture dir and create if missing. */
+    if (!ts_secure_dir(def_lecture_status_dir, true, false))
+	goto done;
+
+    /* Create lecture file. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
+    fd = open(lecture_status, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+    if (timestamp_uid != 0)
+	restore_perms();
+    if (fd != -1)
+	close(fd);
+
+done:
+    debug_return_bool(fd != -1 ? true : false);
 }

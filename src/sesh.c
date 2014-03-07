@@ -31,10 +31,11 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "gettext.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_exec.h"
@@ -46,7 +47,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     char *cp, *cmnd;
-    int noexec = 0;
+    bool login_shell, noexec = false;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
     setlocale(LC_ALL, "");
@@ -59,6 +60,9 @@ main(int argc, char *argv[], char *envp[])
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
 
+    /* If the first char of argv[0] is '-', we are running as a login shell. */
+    login_shell = argv[0][0] == '-';
+
     /* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
     if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0])
 	noexec = strcmp(cp, "-noexec") == 0;
@@ -69,7 +73,7 @@ main(int argc, char *argv[], char *envp[])
     cmnd = estrdup(argv[0]);
 
     /* If invoked as a login shell, modify argv[0] accordingly. */
-    if (argv[-1][0] == '-') {
+    if (login_shell) {
 	if ((cp = strrchr(argv[0], '/')) == NULL)
 	    cp = argv[0];
 	*cp = '-';

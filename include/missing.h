@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2013
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -312,41 +312,6 @@ const char *getprogname(void);
 extern int errno;
 #endif /* !HAVE_DECL_ERRNO */
 
-#ifndef timevalclear
-# define timevalclear(tv)	((tv)->tv_sec = (tv)->tv_usec = 0)
-#endif
-#ifndef timevalisset
-# define timevalisset(tv)	((tv)->tv_sec || (tv)->tv_usec)
-#endif
-#ifndef timevalcmp
-# define timevalcmp(tv1, tv2, op)					       \
-    (((tv1)->tv_sec == (tv2)->tv_sec) ?					       \
-	((tv1)->tv_usec op (tv2)->tv_usec) :				       \
-	((tv1)->tv_sec op (tv2)->tv_sec))
-#endif
-#ifndef timevaladd
-# define timevaladd(tv1, tv2)						       \
-    do {								       \
-	(tv1)->tv_sec += (tv2)->tv_sec;					       \
-	(tv1)->tv_usec += (tv2)->tv_usec;				       \
-	if ((tv1)->tv_usec >= 1000000) {				       \
-	    (tv1)->tv_sec++;						       \
-	    (tv1)->tv_usec -= 1000000;					       \
-	}								       \
-    } while (0)
-#endif
-#ifndef timevalsub
-# define timevalsub(tv1, tv2)						       \
-    do {								       \
-	(tv1)->tv_sec -= (tv2)->tv_sec;					       \
-	(tv1)->tv_usec -= (tv2)->tv_usec;				       \
-	if ((tv1)->tv_usec < 0) {					       \
-	    (tv1)->tv_sec--;						       \
-	    (tv1)->tv_usec += 1000000;					       \
-	}								       \
-    } while (0)
-#endif
-
 /* Not all systems define NSIG in signal.h */
 #if !defined(NSIG)
 # if defined(_NSIG)
@@ -470,6 +435,16 @@ int sig2str(int, char *);
 long long rpl_strtonum(const char *, long long, long long, const char **);
 # undef strtonum
 # define strtonum rpl_strtonum
+#endif
+#ifndef HAVE_CLOCK_GETTIME
+# define CLOCK_REALTIME 0
+# ifdef __MACH__
+#  define CLOCK_MONOTONIC 1
+# endif
+int clock_gettime(clockid_t clock_id, struct timespec *tp);
+#endif
+#ifndef HAVE_INET_PTON
+int inet_pton(int af, const char *src, void *dst);
 #endif
 
 #endif /* _SUDO_MISSING_H */

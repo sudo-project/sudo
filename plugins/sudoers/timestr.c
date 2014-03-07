@@ -44,21 +44,24 @@ get_timestr(time_t tstamp, int log_year)
     static char buf[128];
     struct tm *timeptr;
 
-    timeptr = localtime(&tstamp);
-
-    /* strftime() does not guarantee to NUL-terminate so we must check. */
-    buf[sizeof(buf) - 1] = '\0';
-    if (strftime(buf, sizeof(buf), log_year ? "%h %e %T %Y" : "%h %e %T",
-	timeptr) != 0 && buf[sizeof(buf) - 1] == '\0')
-	return buf;
+    if ((timeptr = localtime(&tstamp)) != NULL) {
+	/* strftime() does not guarantee to NUL-terminate so we must check. */
+	buf[sizeof(buf) - 1] = '\0';
+	if (strftime(buf, sizeof(buf), log_year ? "%h %e %T %Y" : "%h %e %T",
+	    timeptr) != 0 && buf[sizeof(buf) - 1] == '\0')
+	    return buf;
+    }
 
 #endif /* HAVE_STRFTIME */
 
-    s = ctime(&tstamp) + 4;		/* skip day of the week */
-    if (log_year)
-	s[20] = '\0';			/* avoid the newline */
-    else
-	s[15] = '\0';			/* don't care about year */
+    s = ctime(&tstamp);
+    if (s != NULL) {
+	s += 4;				/* skip day of the week */
+	if (log_year)
+	    s[20] = '\0';		/* avoid the newline */
+	else
+	    s[15] = '\0';		/* don't care about year */
+    }
 
     return s;
 }

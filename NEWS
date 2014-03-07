@@ -1,3 +1,56 @@
+What's new in Sudo 1.8.10?
+
+ * It is now possible to disable network interface probing in
+   sudo.conf by changing the value of the probe_interfaces
+   setting.
+
+ * When listing a user's privileges (sudo -l), the sudoers plugin
+   will now prompt for the user's password even if the targetpw,
+   rootpw or runaspw options are set.
+
+ * The sudoers plugin uses a new format for its time stamp files.
+   Each user now has a single file which may contain multiple records
+   when per-tty time stamps are in use (the default).  The time
+   stamps use a monotonic timer where available and are once again
+   located in a directory under /var/run.  The lecture status is
+   now stored separately from the time stamps in a different directory.
+   Bug #616
+
+ * sudo's -K option will now remove all of the user's time stamps,
+   not just the time stamp for the current terminal.  The -k option
+   can be used to only disable time stamps for the current terminal.
+
+ * If sudo was started in the background and needed to prompt for
+   a password, it was not possible to suspend it at the password
+   prompt.  This now works properly.
+
+ * LDAP-based sudoers now uses a default search filter of
+   (objectClass=sudoRole) for more efficient queries.  The netgroup
+   query has been modified to avoid falling below the minimum length
+   for OpenLDAP substring indices.
+
+ * The new "use_netgroups" sudoers option can be used to explicitly
+   enable or disable netgroups support.  For LDAP-based sudoers,
+   netgroup support requires an expensive substring match on the
+   server.  If netgroups are not needed, this option can be disabled
+   to reduce the load on the LDAP server.
+
+ * Sudo is once again able to open the sudoers file when the group
+   on sudoers doesn't match the expected value, so long as the file
+   is not group writable.
+
+ * Sudo now installs an init.d script to clear the time stamp
+   directory at boot time on AIX and HP-UX systems.  These systems
+   either lack /var/run or do not clear it on boot.
+
+ * The JSON format used by "visudo -x" now properly supports the
+   negation operator.  In addition, the Options object is now the
+   same for both Defaults and Cmnd_Specs.
+
+ * Czech and Serbian translations for sudoers from translationproject.org.
+
+ * Catalan translation for sudo from translationproject.org.
+
 What's new in Sudo 1.8.9p5?
 
  * Fixed a compilation error on AIX when LDAP support is enabled.

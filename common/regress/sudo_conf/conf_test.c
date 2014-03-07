@@ -43,6 +43,7 @@
 
 #include "missing.h"
 #include "sudo_conf.h"
+#include "sudo_util.h"
 
 static void sudo_conf_dump(void);
 
@@ -56,8 +57,9 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
+    initprogname(argc > 0 ? argv[0] : "conf_test");
     if (argc != 2) {
-	fprintf(stderr, "usage: conf_test conf_file\n");
+	fprintf(stderr, "usage: %s conf_file\n", getprogname());
 	exit(1);
     }
     sudo_conf_read(argv[1]);

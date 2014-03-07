@@ -12,7 +12,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="(c) 1993-1996,1998-2013 Todd C. Miller"
+	copyright="(c) 1993-1996,1998-2014 Todd C. Miller"
 	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
@@ -225,7 +225,7 @@ still allow people to get their work done."
 
 	# OS-level directories that should generally exist but might not.
 	extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
-	extradirs="$extradirs `dirname $docdir` `dirname $timedir`"
+	extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
 	test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	test -d ${pp_destdir}/etc/pam.d && extradirs="${extradirs} /etc/pam.d"
 	for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
@@ -266,7 +266,8 @@ still allow people to get their work done."
 	$libexecdir/sudo/sesh	0755 optional,ignore-others
 	$libexecdir/sudo/*	$shlib_mode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
-	$timedir/		0700 root:
+	$rundir/		0711 root:
+	$vardir/		0711 root: ignore-others
 	$docdir/		0755
 	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]
@@ -289,6 +290,23 @@ still allow people to get their work done."
 	/usr/bin/sudoedit    	0755 root: symlink $bindir/sudoedit
 	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay
 	/usr/sbin/visudo    	0755 root: symlink $sbindir/visudo
+%endif
+%if [rpm]
+	/etc/rc.d/init.d/sudo	0755 root: optional
+%endif
+%if [aix]
+	/etc/rc.d/		ignore
+	/etc/rc.d/rc2.d/	ignore
+	/etc/rc.d/rc2.d/**	ignore
+	/etc/rc.d/init.d/	ignore
+	/etc/rc.d/init.d/sudo	0755 root:
+%endif
+%if [sd]
+	/sbin/			ignore
+	/sbin/rc2.d/		ignore
+	/sbin/rc2.d/**		ignore
+	/sbin/init.d/		ignore
+	/sbin/init.d/sudo	0755 root:
 %endif
 
 %files [!aix]
@@ -364,7 +382,34 @@ still allow people to get their work done."
 		exit 0;
 	'
 
-%preun [deb]
+%post [rpm]
+	case "%{pp_rpm_distro}" in
+	aix*)
+		# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
+		if [ -d /etc/rc.d ]; then
+			rm -f /etc/rc.d/rc2.d/S90sudo
+			ln -s /etc/rc.d/init.d/sudo /etc/rc.d/rc2.d/S90sudo
+		fi
+		;;
+	esac
+
+%post [aix]
+	# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
+	if [ -d /etc/rc.d ]; then
+		rm -f /etc/rc.d/rc2.d/S90sudo
+		ln -s /etc/rc.d/init.d/sudo /etc/rc.d/rc2.d/S90sudo
+	fi
+
+%post [sd]
+	# Create /sbin/rc2.d/S900sudo link
+	rm -f /sbin/rc2.d/S900sudo
+	ln -s /sbin/init.d/sudo /sbin/rc2.d/S900sudo
+
+%preun
+	# Remove the time stamp dir and its contents
+	# We currently leave the lecture status files installed
+	rm -rf %{rundir}/ts
+%if [deb]
 	set -e
 
 	# Remove the /etc/ldap/ldap.conf -> /etc/sudo-ldap.conf symlink if
@@ -373,3 +418,20 @@ still allow people to get their work done."
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
+%endif
+%if [rpm]
+	case "%{pp_rpm_distro}" in
+	aix*)
+		# Remove /etc/rc.d/rc2.d/S90sudo link
+		rm -f /etc/rc.d/rc2.d/S90sudo
+		;;
+	esac
+%endif
+%if [aix]
+	# Remove /etc/rc.d/rc2.d/S90sudo link
+	rm -f /etc/rc.d/rc2.d/S90sudo
+%endif
+%if [sd]
+	# Remove /sbin/rc2.d/S900sudo link
+	rm -f /sbin/rc2.d/S900sudo
+%endif

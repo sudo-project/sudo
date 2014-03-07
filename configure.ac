@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.9p5], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.10], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -33,6 +33,7 @@ AC_SUBST([SUDO_OBJS])
 AC_SUBST([LIBS])
 AC_SUBST([SUDO_LIBS])
 AC_SUBST([SUDOERS_LIBS])
+AC_SUBST([STATIC_SUDOERS])
 AC_SUBST([NET_LIBS])
 AC_SUBST([AFS_LIBS])
 AC_SUBST([REPLAY_LIBS])
@@ -85,11 +86,15 @@ AC_SUBST([PIE_CFLAGS])
 AC_SUBST([SSP_LDFLAGS])
 AC_SUBST([SSP_CFLAGS])
 AC_SUBST([NO_VIZ])
+AC_SUBST([INIT_SCRIPT])
+AC_SUBST([INIT_DIR])
+AC_SUBST([RC_LINK])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
 AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
-AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
+AC_SUBST([rundir])dnl real initial value from SUDO_RUNDIR
+AC_SUBST([vardir])dnl real initial value from SUDO_VARDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
 AC_SUBST([sudo_umask])
@@ -131,7 +136,8 @@ AC_SUBST([PLUGINDIR])
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
-timedir=/var/adm/sudo
+rundir=/var/run/sudo
+vardir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -206,6 +212,9 @@ LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
 NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
+INIT_SCRIPT=
+INIT_DIR=
+RC_LINK=
 
 dnl
 dnl Other vaiables
@@ -778,11 +787,25 @@ else
     AC_MSG_RESULT(no)
 fi
 
-AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir], [path to the sudo timestamp dir])],
+AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir=DIR], [deprecated])],
 [case $with_timedir in
-    yes)	AC_MSG_ERROR(["must give --with-timedir an argument."])
+    *)		AC_MSG_ERROR(["--without-timedir no longer supported, see --with-rundir."])
 		;;
-    no)		AC_MSG_ERROR(["--without-timedir not supported."])
+esac])
+
+AC_ARG_WITH(rundir, [AS_HELP_STRING([--with-rundir=DIR], [path to the sudo time stamp parent dir])],
+[case $with_rundir in
+    yes)	AC_MSG_ERROR(["must give --with-rundir an argument."])
+		;;
+    no)		AC_MSG_ERROR(["--without-rundir not supported."])
+		;;
+esac])
+
+AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [path to the sudo var dir])],
+[case $with_vardir in
+    yes)	AC_MSG_ERROR(["must give --with-vardirdir an argument."])
+		;;
+    no)		AC_MSG_ERROR(["--without-vardirdir not supported."])
 		;;
 esac])
 
@@ -1153,7 +1176,7 @@ else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, NULL)
 fi
 
-AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to load plugins from])],
+AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
     no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
 		;;
@@ -1655,6 +1678,11 @@ case "$host" in
 		    RTLD_PRELOAD_VAR="LDR_PRELOAD"
 		fi
 
+		# Remove timedir on boot, AIX does not have /var/run
+		INIT_SCRIPT=aix.sh
+		INIT_DIR=/etc/rc.d/init.d
+		RC_LINK=/etc/rc.d/rc2.d/S90sudo
+
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
@@ -1663,8 +1691,15 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
+		# HP-UX does not clear /var/run so we need to do it
+		INIT_SCRIPT=hpux.sh
+		INIT_DIR=/sbin/init.d
+		RC_LINK=/sbin/rc2.d/S900sudo
+
 		# HP-UX shared libs must be executable
 		SHLIB_MODE=0755
+
+		AC_CHECK_FUNCS(pstat_getproc)
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
@@ -1673,6 +1708,11 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX does not clear /var/run so we need to do it
+		INIT_SCRIPT=hpux.sh
+		INIT_DIR=/sbin/init.d
+		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable
 		SHLIB_MODE=0755
@@ -2182,6 +2222,8 @@ dnl
 SUDO_APPEND_CPPFLAGS(-D__STDC_WANT_LIB_EXT1__=1)
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
+AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types.h>
+#include <time.h>])
 AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
@@ -2388,6 +2430,13 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
 ])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
+AC_CHECK_FUNCS(clock_gettime, [], [
+    # On Solaris, clock_gettime is in librt
+    AC_CHECK_LIB(rt, clock_gettime, [
+	AC_DEFINE(HAVE_CLOCK_GETTIME)
+	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
+    ], [AC_LIBOBJ(clock_gettime)])
+])
 AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [
@@ -2501,27 +2550,34 @@ AC_CHECK_FUNC(socket, [], [
     done
 ])
 dnl
-dnl If inet_addr(3) not in libc, check -lnsl and -linet
+dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems may have inet_pton() in libresolv.
 dnl
-AC_CHECK_FUNC(inet_addr, [], [
-    AC_CHECK_FUNC(__inet_addr, [], [
-	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	    _libs=
-	    for lib in $libs; do
-		case "$NET_LIBS" in
-		    *"$lib"*)   ;;
-		    *)		_libs="$_libs $lib";;
-		esac
-	    done
-	    libs="${_libs# }"
-	    test -z "$libs" && continue
-	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	    extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	    SUDO_CHECK_LIB($lib, inet_addr, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+AC_CHECK_FUNC(inet_pton, [], [
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
 	done
-    ])
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	SUDO_CHECK_LIB($lib, inet_pton, [
+	    AC_DEFINE(HAVE_INET_PTON)
+	    NET_LIBS="${NET_LIBS} $libs"
+	    LIBS="${LIBS} $libs"
+	    break
+	], [], [$extralibs])
+    done
 ])
+if test X"$ac_cv_func_inet_pton" != X"yes"; then
+    AC_LIBOBJ(inet_pton)
+fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
@@ -3257,7 +3313,7 @@ if test ${with_ldap-'no'} != "no"; then
     case "$host_os" in
 	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
-    AC_SEARCH_LIBS(ldap_init, "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}", [
+    AC_SEARCH_LIBS(ldap_init, "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}", [
 	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
 	found=yes
     ])
@@ -3268,10 +3324,17 @@ if test ${with_ldap-'no'} != "no"; then
     LIBS="${_LIBS} ${LDAP_LIBS}"
     dnl check if we need to link with -llber for ber_set_option
     OLIBS="$LIBS"
-    AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
-    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
-	LDAP_LIBS="$LDAP_LIBS -llber"
-    fi
+    AC_MSG_CHECKING([whether lber.h defines LBER_OPT_DEBUG_LEVEL])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#   include <lber.h>]], [[int opt=LBER_OPT_DEBUG_LEVEL;]])], [
+	AC_MSG_RESULT([yes])
+	AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
+	if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
+	    LDAP_LIBS="$LDAP_LIBS -llber"
+	fi
+    ], [
+	AC_MSG_RESULT([no])
+    ])
     dnl check if ldap.h includes lber.h for us
     AC_MSG_CHECKING([whether lber.h is needed])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
@@ -3329,7 +3392,7 @@ case "$lt_cv_dlopen" in
 	if test "$enable_static_sudoers" = "yes"; then
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
-	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
@@ -3342,7 +3405,7 @@ case "$lt_cv_dlopen" in
 	if test "$enable_static_sudoers" = "yes"; then
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
-	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
@@ -3356,7 +3419,7 @@ case "$lt_cv_dlopen" in
 	fi
 	# Preload sudoers module symbols
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
-	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
 	;;
 esac
@@ -3380,7 +3443,8 @@ if test "$utmp_style" = "LEGACY"; then
     SUDO_PATH_UTMP
 fi
 SUDO_LOGFILE
-SUDO_TIMEDIR
+SUDO_RUNDIR
+SUDO_VARDIR
 SUDO_IO_LOGDIR
 
 dnl
@@ -3744,7 +3808,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
@@ -3762,6 +3826,21 @@ if test "$with_pam" = "yes"; then
 	    AC_MSG_NOTICE([You will need to customize sample.pam and install it as /etc/pam.d/sudo])
 	    ;;
     esac
+fi
+dnl
+dnl Warn user if they may need to clear rundir manually.
+dnl
+case "$rundir" in
+    /var/run*)
+	clear_rundir=0
+	;;
+    *)
+	clear_rundir=1
+	;;
+esac
+if test $clear_rundir -eq 1; then
+    AC_MSG_NOTICE([Warning: the $rundir/ts directory must be cleared at boot time.])
+    AC_MSG_NOTICE([         You may need to create a startup item to do this.])
 fi
 
 dnl
@@ -3796,6 +3875,7 @@ AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
+AH_TEMPLATE(HAVE_INET_PTON, [Define to 1 if you have the `inet_pton' function.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_KERB5, [Define to 1 if you use Kerberos V.])
@@ -3848,6 +3928,7 @@ AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
+AH_TEMPLATE(clockid_t, [Define to `int' if <time.h> does not define.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(socklen_t, [Define to `unsigned int' if <sys/socket.h> doesn't define.])
 AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
@@ -3873,42 +3954,7 @@ dnl
 AH_TOP([#ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H])
 
-AH_BOTTOM([/*
- * Macros to convert ctime and mtime into timevals.
- */
-#define timespec2timeval(_ts, _tv) do {					\
-    (_tv)->tv_sec = (_ts)->tv_sec;					\
-    (_tv)->tv_usec = (_ts)->tv_nsec / 1000;				\
-} while (0)
-
-#ifdef HAVE_ST_MTIM
-# ifdef HAVE_ST__TIM
-#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim.st__tim, (_y))
-#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim.st__tim, (_y))
-# else
-#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim, (_y))
-#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim, (_y))
-# endif
-#else
-# ifdef HAVE_ST_MTIMESPEC
-#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctimespec, (_y))
-#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtimespec, (_y))
-# else
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
-# endif /* HAVE_ST_MTIMESPEC */
-#endif /* HAVE_ST_MTIM */
-
-#ifdef __GNUC__
-# define ignore_result(x) do {						       \
-    __typeof__(x) y = (x);						       \
-    (void)y;								       \
-} while(0)
-#else
-# define ignore_result(x)	(void)(x)
-#endif
-
-/* BSD compatibility on some SVR4 systems. */
+AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
 #endif /* __svr4__ */

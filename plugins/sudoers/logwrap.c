@@ -46,7 +46,6 @@ writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen)
     /*
      * Print out line with word wrap around maxlen characters.
      */
-    beg = line;
     while (len > maxlen) {
 	end = beg + maxlen;
 	while (end != beg && *end != ' ')

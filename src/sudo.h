@@ -30,6 +30,8 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
@@ -37,7 +39,6 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-#include "gettext.h"
 
 #ifdef HAVE_PRIV_SET
 # include <priv.h>

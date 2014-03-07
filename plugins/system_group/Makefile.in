@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -54,6 +54,9 @@ PIE_LDFLAGS = @PIE_LDFLAGS@
 # Stack smashing protection flags
 SSP_CFLAGS = @SSP_CFLAGS@
 SSP_LDFLAGS = @SSP_LDFLAGS@
+
+# cppcheck options, usually set in the top-level Makefile
+CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX
 
 # Where to install things...
 prefix = @prefix@
@@ -125,6 +128,9 @@ install-plugin: install-dirs system_group.la
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/system_group.so
+
+cppcheck:
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
 check:
 

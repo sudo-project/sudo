@@ -47,14 +47,15 @@
 #include <fcntl.h>
 #include <time.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
+#include "sudo_util.h"
 
 /*
  * The debug priorities and subsystems are currently hard-coded.

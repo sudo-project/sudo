@@ -52,6 +52,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <limits.h>
 #include <netdb.h>
 #include <errno.h>
 
@@ -299,7 +300,7 @@ gai_lookup(const char *nodename, int flags, int socktype, unsigned short port,
     const char *canonical;
     int i;
 
-    if (inet_aton(nodename, &addr)) {
+    if (inet_pton(AF_INET, nodename, &addr)) {
         canonical = (flags & AI_CANONNAME) ? nodename : NULL;
         ai = gai_addrinfo_new(socktype, canonical, addr, port);
         if (ai == NULL)

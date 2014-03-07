@@ -30,9 +30,11 @@
 #include <errno.h>
 #include <unistd.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "fatal.h"
-#include "gettext.h"
 #include "sudo_debug.h"
 #include "bsm_audit.h"
 

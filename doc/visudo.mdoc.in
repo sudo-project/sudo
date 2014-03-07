@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2013
+.\" Copyright (c) 1996,1998-2005, 2007-2014
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 16, 2013
+.Dd February 15, 2014
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -28,12 +28,8 @@
 .Sh SYNOPSIS
 .Nm visudo
 .Op Fl chqsV
-.Bk -words
 .Op Fl f Ar sudoers
-.Ek
-.Bk -words
 .Op Fl x Ar file
-.Ek
 .Sh DESCRIPTION
 .Nm visudo
 edits the
@@ -144,7 +140,7 @@ will exit with a value of 0.
 If an error is encountered,
 .Nm visudo
 will exit with a value of 1.
-.It Fl f Ar sudoers , Fl -file Ns No = Ns Ar sudoers
+.It Fl f Ar sudoers , Fl -file Ns = Ns Ar sudoers
 Specify an alternate
 .Em sudoers
 file location.
@@ -200,7 +196,7 @@ Print the
 and
 .Em sudoers
 grammar versions and exit.
-.It Fl x Ar file , Fl -export Ns No = Ns Ar file
+.It Fl x Ar file , Fl -export Ns = Ns Ar file
 Export
 .Em sudoers
 in JSON format and write it to

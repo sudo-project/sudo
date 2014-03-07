@@ -700,16 +700,14 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     else
 #endif
 	ignore_result(fwrite(buf, 1, len, io_log_files[idx].fd.f));
-    delay.tv_sec = now.tv_sec;
-    delay.tv_usec = now.tv_usec;
-    timevalsub(&delay, &last_time);
+    sudo_timevalsub(&now, &last_time, &delay);
 #ifdef HAVE_ZLIB_H
     if (iolog_compress)
-	gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %d\n", idx,
+	gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %u\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     else
 #endif
-	fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %d\n", idx,
+	fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %u\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;

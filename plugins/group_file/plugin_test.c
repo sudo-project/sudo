@@ -155,7 +155,7 @@ static int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
-    return group_plugin->query)(user, group, pwd;
+    return (group_plugin->query)(user, group, pwd);
 }
 
 static void

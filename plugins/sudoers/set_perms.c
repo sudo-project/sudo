@@ -891,7 +891,7 @@ set_perms(int perm)
 	if (ostate->euid != ROOT_UID) {
 	    if (setreuid(-1, ROOT_UID)) {
 		snprintf(errbuf, sizeof(errbuf),
-		    "PERM_ROOT: setreuid(-1, %d)", PERM_ROOT);
+		    "PERM_ROOT: setreuid(-1, %d)", ROOT_UID);
 		goto bad;
 	    }
 	}
