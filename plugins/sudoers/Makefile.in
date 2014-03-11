@@ -330,7 +330,6 @@ cppcheck:
 check: $(TEST_PROGS) visudo testsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    rval=0; \
-	    CWD=`pwd`; \
 	    mkdir -p regress/parser; \
 	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
 	    ./check_base64 || rval=`expr $$rval + $$?`; \
