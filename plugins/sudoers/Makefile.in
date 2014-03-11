@@ -367,7 +367,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		else \
 		    failed=`expr $$failed + 1`; \
 		    echo "$$dir/$$base (toke):  FAIL"; \
-		    diff $$out $(srcdir)/$$out.ok || true; \
+		    diff $$toke $(srcdir)/$$toke.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
 	    done; \
@@ -400,7 +400,7 @@ check: $(TEST_PROGS) visudo testsudoers
 			else \
 			    failed=`expr $$failed + 1`; \
 			    echo "$$dir/$$base (stderr): FAIL"; \
-			    diff $$out $(srcdir)/$$out.ok || true; \
+			    diff $$err $(srcdir)/$$err.ok || true; \
 			fi; \
 			total=`expr $$total + 1`; \
 		    elif test -s $$err; then \
