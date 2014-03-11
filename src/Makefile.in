@@ -184,7 +184,9 @@ cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
 
 check: $(TEST_PROGS)
-	./check_ttyname
+	@if test X"$(cross_compiling)" != X"yes"; then \
+	    ./check_ttyname; \
+	fi
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*
