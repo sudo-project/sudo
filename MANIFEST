@@ -33,6 +33,7 @@ common/regress/sudo_conf/test3.in
 common/regress/sudo_conf/test3.out.ok
 common/regress/sudo_conf/test4.in
 common/regress/sudo_conf/test4.out.ok
+common/regress/sudo_conf/test5.err.ok
 common/regress/sudo_conf/test5.in
 common/regress/sudo_conf/test5.out.ok
 common/regress/sudo_conf/test6.in

@@ -126,43 +126,59 @@ uninstall:
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
+# Note: some regress checks are run from srcdir for consistent error messages
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    passed=0; failed=0; total=0; \
-	    total=1; \
-	    if ./atofoo_test; then \
-		passed=`expr $$passed + 1`; \
-	    else \
-		failed=`expr $$failed + 1`; \
-	    fi; \
-	    if ./hltq_test; then \
-		passed=`expr $$passed + 1`; \
-	    else \
-		failed=`expr $$failed + 1`; \
-	    fi; \
+	    rval=0; \
+	    ./atofoo_test || rval=`expr $$rval + $$?`; \
+	    ./hltq_test || rval=`expr $$rval + $$?`; \
+	    build_dir=`pwd`; \
+	    cd $(srcdir); \
 	    for dir in sudo_conf sudo_parseln; do \
-		mkdir -p regress/$$dir; \
-		for t in $(srcdir)/regress/$$dir/*.in; do \
+		passed=0; failed=0; total=0; \
+		mkdir -p $$build_dir/regress/$$dir; \
+		for t in regress/$$dir/*.in; do \
 		    base=`basename $$t .in`; \
-		    out="regress/$$dir/$$base.out"; \
+		    out="$$build_dir/regress/$$dir/$${base}.out"; \
+		    out_ok="regress/$$dir/$${base}.out.ok"; \
+		    err="$$build_dir/regress/$$dir/$${base}.err"; \
+		    err_ok="regress/$$dir/$${base}.err.ok"; \
 		    if test "$$dir" = "sudo_conf"; then \
-			./conf_test $$t >$$out; \
+			$$build_dir/conf_test $$t >$$out 2>$$err; \
 		    else \
-			./parseln_test <$$t >$$out; \
+			$$build_dir/parseln_test <$$t >$$out 2>$$err; \
 		    fi; \
-		    if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
+		    if cmp $$out $$out_ok >/dev/null; then \
 			passed=`expr $$passed + 1`; \
 			echo "$$dir/$$base: OK"; \
 		    else \
 			failed=`expr $$failed + 1`; \
 			echo "$$dir/$$base: FAIL"; \
-			diff $$out $(srcdir)/$$out.ok; \
+			diff $$out $$out_ok || true; \
 		    fi; \
 		    total=`expr $$total + 1`; \
+		    if test -s $$err_ok; then \
+			if cmp $$err $$err_ok >/dev/null; then \
+			    passed=`expr $$passed + 1`; \
+			    echo "$$dir/$$base (stderr): OK"; \
+			else \
+			    failed=`expr $$failed + 1`; \
+			    echo "$$dir/$$base (stderr): FAIL"; \
+			    diff $$err $$err_ok || true; \
+			fi; \
+			total=`expr $$total + 1`; \
+		    elif test -s $$err; then \
+			failed=`expr $$failed + 1`; \
+			echo "$$dir/$$base (stderr): FAIL"; \
+			cat $$err 1>&2; \
+		    fi; \
 		done; \
+		if test $$failed -ne 0; then \
+		    rval=`expr $$rval + $$failed`; \
+		fi; \
+		echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
 	    done; \
-	    echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
-	    exit $$failed; \
+	    exit $$rval; \
 	fi
 
 clean:

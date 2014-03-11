@@ -70,6 +70,7 @@ main(int argc, char *argv[])
     struct test_data *hltq;
     struct test_data_list tq;
     int errors = 0;
+    int ntests = 0;
 
     initprogname(argc > 0 ? argv[0] : "hltq_test");
 
@@ -83,14 +84,17 @@ main(int argc, char *argv[])
 	warningx_nodebug("FAIL: HLTQ_FIRST(1 entry) doesn't return first element: got %p, expected %p", HLTQ_FIRST(&d1), &d1);
 	errors++;
     }
+    ntests++;
     if (HLTQ_LAST(&d1, test_data, entries) != &d1) {
 	warningx_nodebug("FAIL: HLTQ_LAST(1 entry) doesn't return first element: got %p, expected %p", HLTQ_LAST(&d1, test_data, entries), &d1);
 	errors++;
     }
+    ntests++;
     if (HLTQ_PREV(&d1, test_data, entries) != NULL) {
 	warningx_nodebug("FAIL: HLTQ_PREV(1 entry) doesn't return NULL: got %p", HLTQ_PREV(&d1, test_data, entries));
 	errors++;
     }
+    ntests++;
 
     HLTQ_INIT(&d2, entries);
     d2.a = 2;
@@ -112,36 +116,44 @@ main(int argc, char *argv[])
 	warningx_nodebug("FAIL: HLTQ_FIRST(3 entries) doesn't return first element: got %p, expected %p", HLTQ_FIRST(hltq), &d1);
 	errors++;
     }
+    ntests++;
     if (HLTQ_LAST(hltq, test_data, entries) != &d3) {
 	warningx_nodebug("FAIL: HLTQ_LAST(3 entries) doesn't return third element: got %p, expected %p", HLTQ_LAST(hltq, test_data, entries), &d3);
 	errors++;
     }
+    ntests++;
 
     if (HLTQ_NEXT(&d1, entries) != &d2) {
 	warningx_nodebug("FAIL: HLTQ_NEXT(&d1) doesn't return &d2: got %p, expected %p", HLTQ_NEXT(&d1, entries), &d2);
 	errors++;
     }
+    ntests++;
     if (HLTQ_NEXT(&d2, entries) != &d3) {
 	warningx_nodebug("FAIL: HLTQ_NEXT(&d2) doesn't return &d3: got %p, expected %p", HLTQ_NEXT(&d2, entries), &d3);
 	errors++;
     }
+    ntests++;
     if (HLTQ_NEXT(&d3, entries) != NULL) {
 	warningx_nodebug("FAIL: HLTQ_NEXT(&d3) doesn't return NULL: got %p", HLTQ_NEXT(&d3, entries));
 	errors++;
     }
+    ntests++;
 
     if (HLTQ_PREV(&d1, test_data, entries) != NULL) {
 	warningx_nodebug("FAIL: HLTQ_PREV(&d1) doesn't return NULL: got %p", HLTQ_PREV(&d1, test_data, entries));
 	errors++;
     }
+    ntests++;
     if (HLTQ_PREV(&d2, test_data, entries) != &d1) {
 	warningx_nodebug("FAIL: HLTQ_PREV(&d2) doesn't return &d1: got %p, expected %p", HLTQ_PREV(&d2, test_data, entries), &d1);
 	errors++;
     }
+    ntests++;
     if (HLTQ_PREV(&d3, test_data, entries) != &d2) {
 	warningx_nodebug("FAIL: HLTQ_PREV(&d3) doesn't return &d2: got %p, expected %p", HLTQ_PREV(&d3, test_data, entries), &d2);
 	errors++;
     }
+    ntests++;
 
     /* Test conversion to TAILQ. */
     HLTQ_TO_TAILQ(&tq, hltq, entries);
@@ -150,36 +162,47 @@ main(int argc, char *argv[])
 	warningx_nodebug("FAIL: TAILQ_FIRST(&tq) doesn't return first element: got %p, expected %p", TAILQ_FIRST(&tq), &d1);
 	errors++;
     }
+    ntests++;
     if (TAILQ_LAST(&tq, test_data_list) != &d3) {
 	warningx_nodebug("FAIL: TAILQ_LAST(&tq) doesn't return third element: got %p, expected %p", TAILQ_LAST(&tq, test_data_list), &d3);
 	errors++;
     }
+    ntests++;
 
     if (TAILQ_NEXT(&d1, entries) != &d2) {
 	warningx_nodebug("FAIL: TAILQ_NEXT(&d1) doesn't return &d2: got %p, expected %p", TAILQ_NEXT(&d1, entries), &d2);
 	errors++;
     }
+    ntests++;
     if (TAILQ_NEXT(&d2, entries) != &d3) {
 	warningx_nodebug("FAIL: TAILQ_NEXT(&d2) doesn't return &d3: got %p, expected %p", TAILQ_NEXT(&d2, entries), &d3);
 	errors++;
     }
+    ntests++;
     if (TAILQ_NEXT(&d3, entries) != NULL) {
 	warningx_nodebug("FAIL: TAILQ_NEXT(&d3) doesn't return NULL: got %p", TAILQ_NEXT(&d3, entries));
 	errors++;
     }
+    ntests++;
 
     if (TAILQ_PREV(&d1, test_data_list, entries) != NULL) {
 	warningx_nodebug("FAIL: TAILQ_PREV(&d1) doesn't return NULL: got %p", TAILQ_PREV(&d1, test_data_list, entries));
 	errors++;
     }
+    ntests++;
     if (TAILQ_PREV(&d2, test_data_list, entries) != &d1) {
 	warningx_nodebug("FAIL: TAILQ_PREV(&d2) doesn't return &d1: got %p, expected %p", TAILQ_PREV(&d2, test_data_list, entries), &d1);
 	errors++;
     }
+    ntests++;
     if (TAILQ_PREV(&d3, test_data_list, entries) != &d2) {
 	warningx_nodebug("FAIL: TAILQ_PREV(&d3) doesn't return &d2: got %p, expected %p", TAILQ_PREV(&d3, test_data_list, entries), &d2);
 	errors++;
     }
+    ntests++;
+
+    printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
+	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);
 }

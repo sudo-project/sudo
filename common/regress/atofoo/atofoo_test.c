@@ -61,13 +61,14 @@ static struct atobool_data {
 };
 
 static int
-test_atobool(void)
+test_atobool(int *ntests)
 {
     struct atobool_data *d;
     int errors = 0;
     int value;
 
     for (d = atobool_data; d->bool_str != NULL; d++) {
+	(*ntests)++;
 	value = atobool(d->bool_str);
 	if (value != d->value) {
 	    warningx_nodebug("FAIL: %s != %d", d->bool_str, d->value);
@@ -94,7 +95,7 @@ static struct atoid_data {
 };
 
 static int
-test_atoid(void)
+test_atoid(int *ntests)
 {
     struct atoid_data *d;
     const char *errstr;
@@ -103,6 +104,7 @@ test_atoid(void)
     id_t value;
 
     for (d = atoid_data; d->idstr != NULL; d++) {
+	(*ntests)++;
 	errstr = "some error";
 	value = atoid(d->idstr, d->sep, &ep, &errstr);
 	if (errstr != NULL) {
@@ -136,7 +138,7 @@ static struct atomode_data {
 };
 
 static int
-test_atomode(void)
+test_atomode(int *ntests)
 {
     struct atomode_data *d;
     const char *errstr;
@@ -144,6 +146,7 @@ test_atomode(void)
     mode_t mode;
 
     for (d = atomode_data; d->mode_str != NULL; d++) {
+	(*ntests)++;
 	errstr = "some error";
 	mode = atomode(d->mode_str, &errstr);
 	if (errstr != NULL) {
@@ -167,12 +170,16 @@ int
 main(int argc, char *argv[])
 {
     int errors = 0;
+    int ntests = 0;
 
     initprogname(argc > 0 ? argv[0] : "atofoo");
 
-    errors += test_atobool();
-    errors += test_atoid();
-    errors += test_atomode();
+    errors += test_atobool(&ntests);
+    errors += test_atoid(&ntests);
+    errors += test_atomode(&ntests);
+
+    printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
+	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);
 }
