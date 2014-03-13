@@ -697,7 +697,8 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
-			match = host_match && runas_match ? cs->cmnd : NULL;
+			if (cmnd_match == ALLOW)
+			    match = cs->cmnd;
 			goto matched;
 		    }
 		}
