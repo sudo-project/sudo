@@ -1,3 +1,13 @@
+What's new in Sudo 1.8.10p1?
+
+ * Fixed a bug introduced in sudo 1.8.10 that prevented the disabling
+   of tty-based tickets.
+
+ * Fixed a bug with netgated commands in "sudo -l command" that
+   could cause the command to be listed even when it was explicitly
+   denied.  This only affected list mode when a command was specified.
+   Bug #636
+
 What's new in Sudo 1.8.10?
 
  * It is now possible to disable network interface probing in

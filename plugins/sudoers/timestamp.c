@@ -403,7 +403,7 @@ timestamp_status(struct passwd *pw)
 	timestamp_key.flags = TS_ANYUID;
     }
     timestamp_key.sid = user_sid;
-    if (def_timestampdir) {
+    if (def_tty_tickets) {
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
 	    timestamp_key.type = TS_TTY;
@@ -537,7 +537,7 @@ remove_timestamp(bool unlink_it)
     timestamp_key.size = sizeof(timestamp_key);
     timestamp_key.type = TS_GLOBAL;	/* may be overriden below */
     timestamp_key.flags = TS_ANYUID;
-    if (def_timestampdir) {
+    if (def_tty_tickets) {
 	struct stat sb;
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
