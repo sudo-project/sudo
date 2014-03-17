@@ -216,9 +216,9 @@ is
 \(oq-\(cq,
 the exported
 \fIsudoers\fR
-policy will to be written to the standard output.
+policy will be written to the standard output.
 The exported format is intended to be easier for third-party
-applications to parse that the traditional
+applications to parse than the traditional
 \fIsudoers\fR
 format.
 The various values have explicit types which removes much of the

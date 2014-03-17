@@ -74,9 +74,9 @@ DDEESSCCRRIIPPTTIIOONN
 
      --xx _f_i_l_e, ----eexxppoorrtt=_f_i_l_e
                  Export _s_u_d_o_e_r_s in JSON format and write it to _f_i_l_e.  If _f_i_l_e
-                 is `-', the exported _s_u_d_o_e_r_s policy will to be written to the
+                 is `-', the exported _s_u_d_o_e_r_s policy will be written to the
                  standard output.  The exported format is intended to be
-                 easier for third-party applications to parse that the
+                 easier for third-party applications to parse than the
                  traditional _s_u_d_o_e_r_s format.  The various values have explicit
                  types which removes much of the ambiguity of the _s_u_d_o_e_r_s
                  format.
