@@ -1,3 +1,8 @@
+What's new in Sudo 1.8.10p2?
+
+ * Fixed a hang introduced in sudo 1.8.10 when timestamp_timeout
+   is set to zero.
+
 What's new in Sudo 1.8.10p1?
 
  * Fixed a bug introduced in sudo 1.8.10 that prevented the disabling
