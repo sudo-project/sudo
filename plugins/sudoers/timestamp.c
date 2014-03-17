@@ -119,11 +119,13 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
      */
     while (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
 	if (cur.size != sizeof(cur)) {
-	    /* wrong size, seek to next record */
+	    /* wrong size, seek to start of next record */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"wrong sized record, got %hu, expected %zu",
 		cur.size, sizeof(cur));
 	    lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR);
+	    if (cur.size == 0)
+		break;			/* size must be non-zero */
 	    continue;
 	}
 	if (ts_match_record(key, &cur)) {
@@ -326,6 +328,10 @@ update_timestamp(struct passwd *pw)
     bool rval = false;
     int fd;
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
+
+    /* Zero timeout means don't update the time stamp file. */
+    if (def_timestamp_timeout == 0)
+	goto done;
 
     /* Check/create parent directories as needed. */
     if (!ts_secure_dir(def_timestampdir, true, false))
