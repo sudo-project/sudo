@@ -236,7 +236,7 @@ int check_user(int validate, int mode);
 bool user_is_exempt(void);
 
 /* prompt.c */
-char *expand_prompt(const char *old_prompt, const char *user, const char *host);
+char *expand_prompt(const char *old_prompt, const char *auth_user);
 
 /* timestamp.c */
 void remove_timestamp(bool);

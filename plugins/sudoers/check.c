@@ -93,7 +93,7 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
-	    user_name, user_shost);
+	    auth_pw->pw_name);
 
 	rval = verify_user(auth_pw, prompt, validated);
 	if (rval == true && lectured)

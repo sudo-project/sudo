@@ -47,7 +47,7 @@
  * allocated result.  Returns the same string if there are no escapes.
  */
 char *
-expand_prompt(const char *old_prompt, const char *user, const char *host)
+expand_prompt(const char *old_prompt, const char *auth_user)
 {
     size_t len, n;
     int subst;
@@ -72,12 +72,7 @@ expand_prompt(const char *old_prompt, const char *user, const char *host)
 		    break;
 		case 'p':
 		    p++;
-		    if (def_rootpw)
-			    len += 2;
-		    else if (def_targetpw || def_runaspw)
-			    len += strlen(runas_pw->pw_name) - 2;
-		    else
-			    len += strlen(user_name) - 2;
+		    len += strlen(auth_user) - 2;
 		    subst = 1;
 		    break;
 		case 'u':
@@ -123,12 +118,7 @@ expand_prompt(const char *old_prompt, const char *user, const char *host)
 			continue;
 		    case 'p':
 			p++;
-			if (def_rootpw)
-				n = strlcpy(np, "root", np - endp);
-			else if (def_targetpw || def_runaspw)
-				n = strlcpy(np, runas_pw->pw_name, np - endp);
-			else
-				n = strlcpy(np, user_name, np - endp);
+			n = strlcpy(np, auth_user, np - endp);
 			if (n >= (size_t)(np - endp))
 				goto oflow;
 			np += n;
