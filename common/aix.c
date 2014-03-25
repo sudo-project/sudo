@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -71,27 +71,27 @@ static struct aix_limit aix_limits[] = {
 };
 
 static int
-aix_getlimit(char *user, char *lim, rlim64_t *valp)
+aix_getlimit(char *user, char *lim, int *valp)
 {
-    int val;
     debug_decl(aix_getlimit, SUDO_DEBUG_UTIL)
 
-    if (getuserattr(user, lim, &val, SEC_INT) != 0)
+    if (getuserattr(user, lim, valp, SEC_INT) != 0)
 	debug_return_int(-1);
-    *valp = val;
     debug_return_int(0);
 }
 
-static void
+static int
 aix_setlimits(char *user)
 {
     struct rlimit64 rlim;
-    rlim64_t val;
-    int n;
+    int val;
+    size_t n;
     debug_decl(aix_setlimits, SUDO_DEBUG_UTIL)
 
-    if (setuserdb(S_READ) != 0)
-	fatal(U_("unable to open userdb"));
+    if (setuserdb(S_READ) != 0) {
+	warning(U_("unable to open userdb"));
+	debug_return_int(-1);
+    }
 
     /*
      * For each resource limit, get the soft/hard values for the user
@@ -103,16 +103,16 @@ aix_setlimits(char *user)
 	 * hard limit has been defined.
 	 */
 	if (aix_getlimit(user, aix_limits[n].hard, &val) == 0) {
-	    rlim.rlim_max = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
+	    rlim.rlim_max = val == -1 ? RLIM64_INFINITY : (rlim64_t)val * aix_limits[n].factor;
 	    if (aix_getlimit(user, aix_limits[n].soft, &val) == 0)
-		rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
+		rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : (rlim64_t)val * aix_limits[n].factor;
 	    else
 		rlim.rlim_cur = rlim.rlim_max;	/* soft not specd, use hard */
 	} else {
 	    /* No hard limit set, try soft limit, if it exists. */
 	    if (aix_getlimit(user, aix_limits[n].soft, &val) == -1)
 		continue;
-	    rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
+	    rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : (rlim64_t)val * aix_limits[n].factor;
 
 	    /* Set hard limit per AIX /etc/security/limits documentation. */
 	    switch (aix_limits[n].resource) {
@@ -131,7 +131,7 @@ aix_setlimits(char *user)
 	(void)setrlimit64(aix_limits[n].resource, &rlim);
     }
     enduserdb();
-    debug_return;
+    debug_return_int(0);
 }
 
 #ifdef HAVE_SETAUTHDB
@@ -140,41 +140,46 @@ aix_setlimits(char *user)
  * set it as the default for the process.  This ensures that password and
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
  */
-void
+int
 aix_setauthdb(char *user)
 {
     char *registry;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (user != NULL) {
-	if (setuserdb(S_READ) != 0)
-	    fatal(U_("unable to open userdb"));
+	if (setuserdb(S_READ) != 0) {
+	    warning(U_("unable to open userdb"));
+	    debug_return_int(-1);
+	}
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
-	    if (setauthdb(registry, NULL) != 0)
-		fatal(U_("unable to switch to registry \"%s\" for %s"),
+	    if (setauthdb(registry, NULL) != 0) {
+		warning(U_("unable to switch to registry \"%s\" for %s"),
 		    registry, user);
+		debug_return_int(-1);
+	    }
 	}
 	enduserdb();
     }
-    debug_return;
+    debug_return_int(0);
 }
 
 /*
  * Restore the saved administrative domain, if any.
  */
-void
+int
 aix_restoreauthdb(void)
 {
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
-    if (setauthdb(NULL, NULL) != 0)
-	fatal(U_("unable to restore registry"));
-
-    debug_return;
+    if (setauthdb(NULL, NULL) != 0) {
+	warning(U_("unable to restore registry"));
+	debug_return_int(-1);
+    }
+    debug_return_int(0);
 }
 #endif
 
-void
+int
 aix_prep_user(char *user, const char *tty)
 {
     char *info;
@@ -189,12 +194,14 @@ aix_prep_user(char *user, const char *tty)
 
 #ifdef HAVE_SETAUTHDB
     /* set administrative domain */
-    aix_setauthdb(user);
+    if (aix_setauthdb(user) != 0)
+	debug_return_int(-1);
 #endif
 
     /* set resource limits */
-    aix_setlimits(user);
+    if (aix_setlimits(user) != 0)
+	debug_return_int(-1);
 
-    debug_return;
+    debug_return_int(0);
 }
 #endif /* HAVE_GETUSERATTR */

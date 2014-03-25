@@ -43,7 +43,6 @@
  * If a pointer to the base gid is specified, it is stored as the first element
  * in the array.
  * Returns the number of gids in the allocated array.
- * Calls fatalx() on error.
  */
 int
 parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)

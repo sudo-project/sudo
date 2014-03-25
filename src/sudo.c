@@ -887,7 +887,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #endif /* HAVE_PRIV_SET */
 
 #ifdef HAVE_GETUSERATTR
-	aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty);
+	if (aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty) != 0) {
+	    /* error message displayed by aix_prep_user */
+	    goto done;
+	}
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	if (details->login_class) {

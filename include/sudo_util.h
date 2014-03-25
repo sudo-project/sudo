@@ -137,9 +137,9 @@
 #endif
 
 /* aix.c */
-void aix_prep_user(char *user, const char *tty);
-void aix_restoreauthdb(void);
-void aix_setauthdb(char *user);
+int aix_prep_user(char *user, const char *tty);
+int aix_restoreauthdb(void);
+int aix_setauthdb(char *user);
 
 /* atobool.c */
 int atobool(const char *str);

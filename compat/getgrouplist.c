@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2010, 2011, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2011, 2013, 2014
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,16 +47,17 @@
 #endif
 
 #include "missing.h"
+#include "sudo_util.h"
 
 #if defined(HAVE_GETGRSET)
 /*
- * BSD-compatible getgrouplist(3) using getgrset(3)
+ * BSD-compatible getgrouplist(3) using AIX getgrset(3)
  */
 int
 getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 {
     char *cp, *grset = NULL;
-    int i, ngroups = 1;
+    int ngroups = 1;
     int grpsize = *ngroupsp;
     int rval = -1;
     gid_t gid;
