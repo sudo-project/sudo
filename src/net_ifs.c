@@ -216,8 +216,9 @@ done:
 int
 get_net_ifs(char **addrinfo)
 {
+    char ifr_tmpbuf[sizeof(struct ifreq)];
+    struct ifreq *ifr, *ifr_tmp = (struct ifreq *)ifr_tmpbuf;
     struct ifconf *ifconf;
-    struct ifreq *ifr, ifr_tmp;
     struct sockaddr_in *sin;
     int ailen, i, len, n, sock, num_interfaces = 0;
     size_t buflen = sizeof(struct ifconf) + BUFSIZ;
@@ -287,15 +288,15 @@ get_net_ifs(char **addrinfo)
 		continue;
 
 #ifdef SIOCGIFFLAGS
-	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
-	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
-	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) &ifr_tmp) < 0)
+	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
+	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
+	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) ifr_tmp) < 0)
 #endif
-	    ifr_tmp = *ifr;
+	    memcpy(ifr_tmp, ifr, sizeof(*ifr_tmp));
 	
 	/* Skip interfaces marked "down" and "loopback". */
-	if (!ISSET(ifr_tmp.ifr_flags, IFF_UP) ||
-	    ISSET(ifr_tmp.ifr_flags, IFF_LOOPBACK))
+	if (!ISSET(ifr_tmp->ifr_flags, IFF_UP) ||
+	    ISSET(ifr_tmp->ifr_flags, IFF_LOOPBACK))
 		continue;
 
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
@@ -312,18 +313,16 @@ get_net_ifs(char **addrinfo)
 	previfname = ifr->ifr_name;
 
 	/* Get the netmask. */
-	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
-	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
+	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
+	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
+	sin = (struct sockaddr_in *) &ifr_tmp->ifr_addr;
 #ifdef _ISC
-	STRSET(SIOCGIFNETMASK, (caddr_t) &ifr_tmp, sizeof(ifr_tmp));
-	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
+	STRSET(SIOCGIFNETMASK, (caddr_t) ifr_tmp, sizeof(*ifr_tmp));
+	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
 #else
-	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifr_tmp) < 0) {
+	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) ifr_tmp) < 0)
 #endif /* _ISC */
-	    sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 	    sin->sin_addr.s_addr = htonl(IN_CLASSC_NET);
-	}
-	sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 	len = snprintf(cp, ailen - (*addrinfo - cp),
 	    "%s", inet_ntoa(sin->sin_addr));
 	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
