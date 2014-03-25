@@ -219,6 +219,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
+	/* Not an audit event. */
         warningx(U_("sudoers specifies that root is not allowed to sudo"));
         goto bad;
     }    
@@ -258,6 +259,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
+	    /* XXX - audit? */
 	    warningx(U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
@@ -319,6 +321,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If no command line args and "shell_noargs" is not set, error out. */
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs) {
+	/* Not an audit event. */
 	rval = -2; /* usage error */
 	goto done;
     }
@@ -344,6 +347,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Require a password if sudoers says so.  */
     rval = check_user(validated, sudo_mode);
     if (rval != true) {
+	/* Note: log_denial() calls audit for us. */
 	if (!ISSET(validated, VALIDATE_OK))
 	    log_denial(validated, false);
 	goto done;
@@ -365,6 +369,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If the user was not allowed to run the command we are done. */
     if (!ISSET(validated, VALIDATE_OK)) {
+	/* Note: log_failure() calls audit for us. */
 	log_failure(validated, cmnd_status);
 	goto bad;
     }
@@ -391,6 +396,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
+	    /* XXX - audit? */
 	    warningx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else
@@ -662,6 +668,7 @@ set_cmnd(void)
 	}
     }
     if (strlen(user_cmnd) >= PATH_MAX) {
+	audit_failure(NewArgv, N_("command too long"));
 	errno = ENAMETOOLONG;
 	fatal("%s", user_cmnd);
     }
