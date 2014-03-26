@@ -126,7 +126,7 @@ struct sudo_user {
 #define FLAG_AUTH_ERROR		0x400
 
 /*
- * find_path()/load_cmnd() return values
+ * find_path()/set_cmnd() return values
  */
 #define FOUND                   0
 #define NOT_FOUND               1
@@ -144,7 +144,6 @@ struct sudo_user {
 #define MODE_HELP		0x00000040
 #define MODE_LIST		0x00000080
 #define MODE_CHECK		0x00000100
-#define MODE_LISTDEFS		0x00000200
 #define MODE_MASK		0x0000ffff
 
 /* Mode flags */
