@@ -60,8 +60,8 @@
 
 bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);
-void audit_success(char *exec_args[]);
-void audit_failure(char *exec_args[], char const *const fmt, ...) __printflike(2, 3);
+int audit_success(char *exec_args[]);
+int audit_failure(char *exec_args[], char const *const fmt, ...) __printflike(2, 3);
 void log_allowed(int status);
 void log_auth_failure(int status, unsigned int tries);
 void log_denial(int status, bool inform_user);

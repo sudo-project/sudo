@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2009 Christian S.J. Peron
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -49,29 +49,37 @@
 #endif
 
 static int
-audit_sudo_selected(int sf)
+audit_sudo_selected(int sorf)
 {
 	auditinfo_addr_t ainfo_addr;
 	struct au_mask *mask;
-	auditinfo_t ainfo;
-	int rc, sorf;
+	int rc;
 	debug_decl(audit_sudo_selected, SUDO_DEBUG_AUDIT)
 
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
 		if (errno == ENOSYS) {
-			if (getaudit(&ainfo) < 0)
-				fatal("getaudit");
+			auditinfo_t ainfo;
+			/* Fall back to older BSM API. */
+			if (getaudit(&ainfo) < 0) {
+				warning("getaudit");
+				debug_return_int(-1);
+			}
 			mask = &ainfo.ai_mask;
-		} else
-			fatal("getaudit");
-        } else
+		} else {
+			warning("getaudit_addr");
+			debug_return_int(-1);
+		}
+        } else {
 		mask = &ainfo_addr.ai_mask;
-	sorf = (sf == 0) ? AU_PRS_SUCCESS : AU_PRS_FAILURE;
+	}
 	rc = au_preselect(AUE_sudo, mask, sorf, AU_PRS_REREAD);
         debug_return_int(rc);
 }
 
-void
+/*
+ * Returns 0 on success or -1 on error.
+ */
+int
 bsm_audit_success(char **exec_args)
 {
 	auditinfo_addr_t ainfo_addr;
@@ -79,31 +87,37 @@ bsm_audit_success(char **exec_args)
 	token_t *tok;
 	au_id_t auid;
 	long au_cond;
-	int aufd;
+	int aufd, selected;
 	pid_t pid;
 	debug_decl(bsm_audit_success, SUDO_DEBUG_AUDIT)
 
-	pid = getpid();
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
 	 */
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
-			return;
-		fatal(U_("Could not determine audit condition"));
+			debug_return_int(0);
+		warning(U_("Could not determine audit condition"));
+		debug_return_int(-1);
 	}
 	if (au_cond == AUC_NOAUDIT)
-		debug_return;
+		debug_return_int(0);
 	/*
 	 * Check to see if the preselection masks are interested in seeing
 	 * this event.
 	 */
-	if (!audit_sudo_selected(0))
-		debug_return;
-	if (getauid(&auid) < 0)
-		fatal("getauid");
-	if ((aufd = au_open()) == -1)
-		fatal("au_open");
+	selected = audit_sudo_selected(AU_PRS_SUCCESS);
+	if (selected != 1)
+		debug_return_int(!selected ? 0 : -1);
+	if (getauid(&auid) < 0) {
+		warning("getauid");
+		debug_return_int(-1);
+	}
+	if ((aufd = au_open()) == -1) {
+		warning("au_open");
+		debug_return_int(-1);
+	}
+	pid = getpid();
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) {
 		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
@@ -111,33 +125,49 @@ bsm_audit_success(char **exec_args)
 		/*
 		 * NB: We should probably watch out for ERANGE here.
 		 */
-		if (getaudit(&ainfo) < 0)
-			fatal("getaudit");
+		if (getaudit(&ainfo) < 0) {
+			warning("getaudit");
+			debug_return_int(-1);
+		}
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
-	} else
-		fatal("getaudit");
-	if (tok == NULL)
-		fatal("au_to_subject");
+	} else {
+		warning("getaudit_addr");
+		debug_return_int(-1);
+	}
+	if (tok == NULL) {
+		warning("au_to_subject");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 	tok = au_to_exec_args(exec_args);
-	if (tok == NULL)
-		fatal("au_to_exec_args");
+	if (tok == NULL) {
+		warning("au_to_exec_args");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 	tok = au_to_return32(0, 0);
-	if (tok == NULL)
-		fatal("au_to_return32");
+	if (tok == NULL) {
+		warning("au_to_return32");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 #ifdef __sun
 	if (au_close(aufd, 1, AUE_sudo, 0) == -1)
 #else
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 #endif
-		fatal(U_("unable to commit audit record"));
-	debug_return;
+	{
+		warning(U_("unable to commit audit record"));
+		debug_return_int(-1);
+	}
+	debug_return_int(0);
 }
 
-void
+/*
+ * Returns 0 on success or -1 on error.
+ */
+int
 bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 {
 	auditinfo_addr_t ainfo_addr;
@@ -150,54 +180,74 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	int aufd;
 	debug_decl(bsm_audit_success, SUDO_DEBUG_AUDIT)
 
-	pid = getpid();
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
 	 */
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
-			debug_return;
-		fatal(U_("Could not determine audit condition"));
+			debug_return_int(0);
+		warning(U_("Could not determine audit condition"));
+		debug_return_int(-1);
 	}
 	if (au_cond == AUC_NOAUDIT)
-		debug_return;
-	if (!audit_sudo_selected(1))
-		debug_return;
-	if (getauid(&auid) < 0)
-		fatal("getauid");
-	if ((aufd = au_open()) == -1)
-		fatal("au_open");
+		debug_return_int(0);
+	if (!audit_sudo_selected(AU_PRS_FAILURE))
+		debug_return_int(0);
+	if (getauid(&auid) < 0) {
+		warning("getauid");
+		debug_return_int(-1);
+	}
+	if ((aufd = au_open()) == -1) {
+		warning("au_open");
+		debug_return_int(-1);
+	}
+	pid = getpid();
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) { 
 		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
 	} else if (errno == ENOSYS) {
-		if (getaudit(&ainfo) < 0) 
-			fatal("getaudit");
+		if (getaudit(&ainfo) < 0) {
+			warning("getaudit");
+			debug_return_int(-1);
+		}
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
-	} else
-		fatal("getaudit");
-	if (tok == NULL)
-		fatal("au_to_subject");
+	} else {
+		warning("getaudit_addr");
+		debug_return_int(-1);
+	}
+	if (tok == NULL) {
+		warning("au_to_subject");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 	tok = au_to_exec_args(exec_args);
-	if (tok == NULL)
-		fatal("au_to_exec_args");
+	if (tok == NULL) {
+		warning("au_to_exec_args");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 	(void) vsnprintf(text, sizeof(text), fmt, ap);
 	tok = au_to_text(text);
-	if (tok == NULL)
-		fatal("au_to_text");
+	if (tok == NULL) {
+		warning("au_to_text");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 	tok = au_to_return32(EPERM, 1);
-	if (tok == NULL)
-		fatal("au_to_return32");
+	if (tok == NULL) {
+		warning("au_to_return32");
+		debug_return_int(-1);
+	}
 	au_write(aufd, tok);
 #ifdef __sun
 	if (au_close(aufd, 1, AUE_sudo, PAD_FAILURE) == -1)
 #else
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 #endif
-		fatal(U_("unable to commit audit record"));
-	debug_return;
+	{
+		warning(U_("unable to commit audit record"));
+		debug_return_int(-1);
+	}
+	debug_return_int(0);
 }

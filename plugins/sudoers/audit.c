@@ -47,28 +47,30 @@
 # include "linux_audit.h"
 #endif
 
-void
+int
 audit_success(char *exec_args[])
 {
+    int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
     if (exec_args != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	bsm_audit_success(exec_args);
+	rc = bsm_audit_success(exec_args);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	linux_audit_command(exec_args, 1);
+	rc = linux_audit_command(exec_args, 1);
 #endif
     }
 
-    debug_return;
+    debug_return_int(rc);
 }
 
-void
+int
 audit_failure(char *exec_args[], char const *const fmt, ...)
 {
     va_list ap;
     int oldlocale;
+    int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
     /* Audit error messages should be in the sudoers locale. */
@@ -77,15 +79,15 @@ audit_failure(char *exec_args[], char const *const fmt, ...)
     if (exec_args != NULL) {
 	va_start(ap, fmt);
 #ifdef HAVE_BSM_AUDIT
-	bsm_audit_failure(exec_args, _(fmt), ap);
+	rc = bsm_audit_failure(exec_args, _(fmt), ap);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	linux_audit_command(exec_args, 0);
+	rc = linux_audit_command(exec_args, 0);
 #endif
 	va_end(ap);
     }
 
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return;
+    debug_return_int(rc);
 }

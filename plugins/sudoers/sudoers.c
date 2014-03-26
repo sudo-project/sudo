@@ -496,7 +496,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Must audit before uid change. */
-    audit_success(NewArgv);
+    if (audit_success(NewArgv) != 0)
+	goto bad;
 
     /* Setup execution environment to pass back to front-end. */
     rval = sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
