@@ -217,7 +217,7 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdir %s, mode 0%o", path, parent_mode);
+		"mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
 	    if (mkdir(path, parent_mode) != 0) {
 		if (!quiet)
 		    warning(U_("unable to mkdir %s"), path);
@@ -238,7 +238,7 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
     }
     /* Create final path component. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"mkdir %s, mode 0%o", path, mode);
+	"mkdir %s, mode 0%o", path, (unsigned int) mode);
     if (mkdir(path, mode) != 0 && errno != EEXIST) {
 	if (!quiet)
 	    warning(U_("unable to mkdir %s"), path);
