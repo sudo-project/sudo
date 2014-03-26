@@ -63,7 +63,7 @@
 int
 get_boottime(struct timeval *tv)
 {
-    char *ep, *line = NULL;
+    char *line = NULL;
     size_t linesize = 0;
     ssize_t len;
     FILE * fp;
