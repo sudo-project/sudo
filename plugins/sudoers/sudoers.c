@@ -623,12 +623,17 @@ set_cmnd(void)
 	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
 		def_ignore_dot);
 	    restore_perms();
-	    if (rval != FOUND) {
+	    if (rval == NOT_FOUND) {
 		/* Failed as root, try as invoking user. */
 		set_perms(PERM_USER);
 		rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
 		    def_ignore_dot);
 		restore_perms();
+	    }
+	    if (rval == NOT_FOUND_ERROR) {
+		if (errno == ENAMETOOLONG)
+		    audit_failure(NewArgv, N_("command too long"));
+		log_fatal(NO_MAIL|USE_ERRNO, NewArgv[0]);
 	    }
 	}
 
@@ -667,11 +672,6 @@ set_cmnd(void)
 		*--to = '\0';
 	    }
 	}
-    }
-    if (strlen(user_cmnd) >= PATH_MAX) {
-	audit_failure(NewArgv, N_("command too long"));
-	errno = ENAMETOOLONG;
-	fatal("%s", user_cmnd);
     }
 
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
