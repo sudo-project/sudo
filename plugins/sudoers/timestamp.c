@@ -310,8 +310,9 @@ build_timestamp(struct passwd *pw)
     len = snprintf(timestamp_file, sizeof(timestamp_file), "%s/%s",
 	def_timestampdir, user_name);
     if (len <= 0 || (size_t)len >= sizeof(timestamp_file)) {
-	log_fatal(0, N_("timestamp path too long: %s/%s"),
+	log_warning(0, N_("timestamp path too long: %s/%s"),
 	    def_timestampdir, user_name);
+	len = -1;
     }
 
     debug_return_int(len);
@@ -598,11 +599,11 @@ already_lectured(int unused)
     if (ts_secure_dir(def_lecture_status_dir, false, true)) {
 	len = snprintf(status_file, sizeof(status_file), "%s/%s",
 	    def_lecture_status_dir, user_name);
-	if (len <= 0 || (size_t)len >= sizeof(status_file)) {
-	    log_fatal(0, N_("lecture status path too long: %s/%s"),
-		def_lecture_status_dir, user_name);
+	if (len > 0 && (size_t)len < sizeof(status_file)) {
+	    debug_return_bool(stat(status_file, &sb) == 0);
 	}
-	debug_return_bool(stat(status_file, &sb) == 0);
+	log_warning(0, N_("lecture status path too long: %s/%s"),
+	    def_lecture_status_dir, user_name);
     }
     debug_return_bool(false);
 }
@@ -621,8 +622,9 @@ set_lectured(void)
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
 	def_lecture_status_dir, user_name);
     if (len <= 0 || (size_t)len >= sizeof(lecture_status)) {
-	log_fatal(0, N_("lecture status path too long: %s/%s"),
+	log_warning(0, N_("lecture status path too long: %s/%s"),
 	    def_lecture_status_dir, user_name);
+	goto done;
     }
 
     /* Sanity check lecture dir and create if missing. */
