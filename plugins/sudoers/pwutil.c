@@ -144,9 +144,12 @@ sudo_getpwuid(uid_t uid)
 	item->k.uid = uid;
 	/* item->d.pw = NULL; */
     }
-    if (rbinsert(pwcache_byuid, item) != NULL)
-	fatalx(U_("unable to cache uid %u, already exists"),
+    if (rbinsert(pwcache_byuid, item) != NULL) {
+	/* should not happen */
+	warningx(U_("unable to cache uid %u, already exists"),
 	    (unsigned int) uid);
+	item->refcnt = 0;
+    }
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -186,8 +189,11 @@ sudo_getpwnam(const char *name)
 	memcpy(item->k.name, name, len);
 	/* item->d.pw = NULL; */
     }
-    if (rbinsert(pwcache_byname, item) != NULL)
-	fatalx(U_("unable to cache user %s, already exists"), name);
+    if (rbinsert(pwcache_byname, item) != NULL) {
+	/* should not happen */
+	warningx(U_("unable to cache user %s, already exists"), name);
+	item->refcnt = 0;
+    }
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -389,9 +395,12 @@ sudo_getgrgid(gid_t gid)
 	item->k.gid = gid;
 	/* item->d.gr = NULL; */
     }
-    if (rbinsert(grcache_bygid, item) != NULL)
-	fatalx(U_("unable to cache gid %u, already exists"),
+    if (rbinsert(grcache_bygid, item) != NULL) {
+	/* should not happen */
+	warningx(U_("unable to cache gid %u, already exists"),
 	    (unsigned int) gid);
+	item->refcnt = 0;
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -425,8 +434,11 @@ sudo_getgrnam(const char *name)
 	memcpy(item->k.name, name, len);
 	/* item->d.gr = NULL; */
     }
-    if (rbinsert(grcache_byname, item) != NULL)
-	fatalx(U_("unable to cache group %s, already exists"), name);
+    if (rbinsert(grcache_byname, item) != NULL) {
+	/* should not happen */
+	warningx(U_("unable to cache group %s, already exists"), name);
+	item->refcnt = 0;
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -588,15 +600,18 @@ sudo_get_grlist(const struct passwd *pw)
 	memcpy(item->k.name, pw->pw_name, len);
 	/* item->d.grlist = NULL; */
     }
-    if (rbinsert(grlist_cache, item) != NULL)
-	fatalx(U_("unable to cache group list for %s, already exists"),
+    if (rbinsert(grlist_cache, item) != NULL) {
+	/* should not happen */
+	warningx(U_("unable to cache group list for %s, already exists"),
 	    pw->pw_name);
+	item->refcnt = 0;
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.grlist);
 }
 
-void
+int
 sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
 {
     struct cache_item key, *item;
@@ -608,13 +623,17 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
      */
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
-	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
-	    fatalx(U_("unable to parse groups for %s"), pw->pw_name);
-	if (rbinsert(grlist_cache, item) != NULL)
-	    fatalx(U_("unable to cache group list for %s, already exists"),
+	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL) {
+	    warningx(U_("unable to parse groups for %s"), pw->pw_name);
+	    debug_return_int(-1);
+	}
+	if (rbinsert(grlist_cache, item) != NULL) {
+	    warningx(U_("unable to cache group list for %s, already exists"),
 		pw->pw_name);
+	    sudo_grlist_delref_item(item);
+	}
     }
-    debug_return;
+    debug_return_int(0);
 }
 
 bool
