@@ -81,7 +81,6 @@
 #  include <ndir.h>
 # endif
 #endif
-#include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
@@ -605,6 +604,7 @@ digest_matches(const char *file, const struct sudo_digest *sd)
     SHA2_CTX ctx;
     FILE *fp;
     unsigned int i;
+    int h;
     debug_decl(digest_matches, SUDO_DEBUG_MATCH)
 
     for (i = 0; digest_functions[i].digest_name != NULL; i++) {
@@ -620,11 +620,10 @@ digest_matches(const char *file, const struct sudo_digest *sd)
     if (strlen(sd->digest_str) == func->digest_len * 2) {
 	/* Convert the command digest from ascii hex to binary. */
 	for (i = 0; i < func->digest_len; i++) {
-	    if (!isxdigit((unsigned char)sd->digest_str[i + i]) ||
-		!isxdigit((unsigned char)sd->digest_str[i + i + 1])) {
+	    h = hexchar(&sd->digest_str[i + i]);
+	    if (h == -1)
 		goto bad_format;
-	    }
-	    sudoers_digest[i] = hexchar(&sd->digest_str[i + i]);
+	    sudoers_digest[i] = (unsigned char)h;
 	}
     } else {
 	size_t len = base64_decode(sd->digest_str, sudoers_digest,

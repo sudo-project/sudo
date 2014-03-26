@@ -46,7 +46,6 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#include <ctype.h>
 #include <errno.h>
 
 #include "sudoers.h"
@@ -61,6 +60,7 @@ bool
 fill_txt(const char *src, int len, int olen)
 {
     char *dst;
+    int h;
     debug_decl(fill_txt, SUDO_DEBUG_PARSER)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
@@ -75,10 +75,8 @@ fill_txt(const char *src, int len, int olen)
     dst += olen;
     while (len--) {
 	if (*src == '\\' && len) {
-	    if (src[1] == 'x' && len >= 3 && 
-		isxdigit((unsigned char) src[2]) &&
-		isxdigit((unsigned char) src[3])) {
-		*dst++ = hexchar(src + 2);
+	    if (src[1] == 'x' && len >= 3 && (h = hexchar(src + 2)) != -1) {
+		*dst++ = h;
 		src += 4;
 		len -= 3;
 	    } else {

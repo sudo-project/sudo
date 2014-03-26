@@ -21,8 +21,11 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
-#include "fatal.h"
 
+/*
+ * Converts a two-byte hex string to decimal.
+ * Returns the decimal value or -1 for invalid input.
+ */
 int
 hexchar(const char *s)
 {
@@ -87,8 +90,8 @@ hexchar(const char *s)
 	    result[i] = 15;
 	    break;
 	default:
-	    /* Should not happen. */
-	    fatalx("internal error, \\x%s not in proper hex format", s);
+	    /* Invalid input. */
+	    debug_return_int(-1);
 	}
     }
     debug_return_int((result[0] << 4) | result[1]);
