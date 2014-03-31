@@ -22,7 +22,7 @@ Makefile$
 ^doc/.*\.mdoc\.sed$
 ^doc/varsub$
 
-^init.d/*.sh$
+^init.d/.*.sh$
 
 ^pathnames\.h$
 ^src/sudo$
