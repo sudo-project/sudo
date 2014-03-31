@@ -159,7 +159,7 @@ get_net_ifs(char **addrinfo)
 		    "%s%s/", cp == *addrinfo ? "" : " ",
 		    inet_ntoa(sin->sin_addr));
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    warningx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -168,7 +168,7 @@ get_net_ifs(char **addrinfo)
 		len = snprintf(cp, ailen - (*addrinfo - cp),
 		    "%s", inet_ntoa(sin->sin_addr));
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    warningx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -180,7 +180,7 @@ get_net_ifs(char **addrinfo)
 		len = snprintf(cp, ailen - (*addrinfo - cp),
 		    "%s%s/", cp == *addrinfo ? "" : " ", addrbuf);
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    warningx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -189,7 +189,7 @@ get_net_ifs(char **addrinfo)
 		inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
 		len = snprintf(cp, ailen - (*addrinfo - cp), "%s", addrbuf);
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    warningx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -304,7 +304,7 @@ get_net_ifs(char **addrinfo)
 	    "%s%s/", cp == *addrinfo ? "" : " ",
 	    inet_ntoa(sin->sin_addr));
 	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-	    warningx(U_("load_interfaces: overflow detected"));
+	    warningx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
@@ -326,7 +326,7 @@ get_net_ifs(char **addrinfo)
 	len = snprintf(cp, ailen - (*addrinfo - cp),
 	    "%s", inet_ntoa(sin->sin_addr));
 	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-	    warningx(U_("load_interfaces: overflow detected"));
+	    warningx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
