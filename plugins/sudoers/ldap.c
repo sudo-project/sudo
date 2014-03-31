@@ -391,7 +391,7 @@ struct sudo_nss sudo_nss_ldap = {
  * ldap_create() does not take a default port parameter so we must
  * append one if we want something other than LDAP_PORT.
  */
-static void
+static bool
 sudo_ldap_conf_add_ports(void)
 {
 
@@ -402,8 +402,10 @@ sudo_ldap_conf_add_ports(void)
 
     hostbuf[0] = '\0';
     len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
-    if (len <= 0 || (size_t)len >= sizeof(defport))
-	fatalx(U_("sudo_ldap_conf_add_ports: port too large"));
+    if (len <= 0 || (size_t)len >= sizeof(defport)) {
+	warningx(U_("sudo_ldap_conf_add_ports: port too large"));
+	debug_return_bool(false);
+    }
 
     for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
 	if (hostbuf[0] != '\0') {
@@ -423,10 +425,11 @@ sudo_ldap_conf_add_ports(void)
 
     efree(ldap_conf.host);
     ldap_conf.host = estrdup(hostbuf);
-    debug_return;
+    debug_return_bool(true);
 
 toobig:
-    fatalx(U_("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
+    warningx(U_("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
+    debug_return_bool(false);
 }
 #endif
 
@@ -511,7 +514,8 @@ done:
     debug_return_int(rc);
 
 toobig:
-    fatalx(U_("sudo_ldap_parse_uri: out of space building hostbuf"));
+    warningx(U_("sudo_ldap_parse_uri: out of space building hostbuf"));
+    debug_return_int(-1);
 }
 #else
 static char *
@@ -1318,8 +1322,10 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	sudo_gr_delref(grp);
 
     /* Add ALL to list and end the global OR */
-    if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz)
-	fatalx(U_("sudo_ldap_build_pass1 allocation mismatch"));
+    if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz) {
+	warningx(U_("sudo_ldap_build_pass1 allocation mismatch"));
+	debug_return_str(NULL);
+    }
 
     /* Add the time restriction, or simply end the global OR. */
     if (ldap_conf.timed) {
@@ -1693,8 +1699,10 @@ sudo_ldap_read_config(void)
 	 * Cannot specify port directly to ldap_create(), each host must
 	 * include :port to override the default.
 	 */
-	if (ldap_conf.port != LDAP_PORT)
-	    sudo_ldap_conf_add_ports();
+	if (ldap_conf.port != LDAP_PORT) {
+	    if (!sudo_ldap_conf_add_ports())
+		debug_return_bool(false);
+	}
 #endif
     }
 
