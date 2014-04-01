@@ -439,14 +439,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    (unsigned int)runas_pw->pw_gid;
 	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
-	    fatalx(U_("internal error, %s overflow"), "runas_groups");
+	    fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
 	for (i = 0; i < grlist->ngids; i++) {
 	    if (grlist->gids[i] != egid) {
 		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
 		     (unsigned int) grlist->gids[i]);
 		if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
-		    fatalx(U_("internal error, %s overflow"), "runas_groups");
+		    fatalx(U_("internal error, %s overflow"), __func__);
 		cp += len;
 	    }
 	}

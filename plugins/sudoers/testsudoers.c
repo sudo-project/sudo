@@ -238,7 +238,7 @@ main(int argc, char *argv[])
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		fatalx(U_("internal error, %s overflow"), "init_vars()");
+		fatalx(U_("internal error, %s overflow"), getprogname());
 	    to += n;
 	    *to++ = ' ';
 	}

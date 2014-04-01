@@ -665,7 +665,7 @@ set_cmnd(void)
 		for (to = user_args, av = NewArgv + 1; *av; av++) {
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args))
-			fatalx(U_("internal error, %s overflow"), "set_cmnd()");
+			fatalx(U_("internal error, %s overflow"), __func__);
 		    to += n;
 		    *to++ = ' ';
 		}

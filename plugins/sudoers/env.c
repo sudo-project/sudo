@@ -286,12 +286,12 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 
 	if (env.env_size > SIZE_MAX - 128) {
 	    fatalx_nodebug(U_("internal error, %s overflow"),
-		"sudo_putenv_nodebug()");
+		"sudo_putenv_nodebug");
 	}
 	nsize = env.env_size + 128;
 	if (nsize > SIZE_MAX / sizeof(char *)) {
 	    fatalx_nodebug(U_("internal error, %s overflow"),
-		"sudo_putenv_nodebug()");
+		"sudo_putenv_nodebug");
 	}
 	nenvp = realloc(env.envp, nsize * sizeof(char *));
 	if (nenvp == NULL) {
@@ -392,7 +392,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
-	fatalx(U_("internal error, %s overflow"), "sudo_setenv2()");
+	fatalx(U_("internal error, %s overflow"), __func__);
     }
     rval = sudo_putenv(estring, dupcheck, overwrite);
     if (rval == -1)

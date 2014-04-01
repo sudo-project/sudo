@@ -86,8 +86,7 @@ linux_audit_command(char *argv[], int result)
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {
-	    warningx(U_("internal error, %s overflow"),
-		"linux_audit_command()");
+	    warningx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += n;
