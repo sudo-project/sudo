@@ -57,8 +57,10 @@ fill_seq(char *str, size_t strsize, char *logdir)
     int len;
     debug_decl(fill_seq, SUDO_DEBUG_UTIL)
 
-    if (sessid[0] == '\0')
-	io_nextid(logdir, def_iolog_dir, sessid);
+    if (sessid[0] == '\0') {
+	if (!io_nextid(logdir, def_iolog_dir, sessid))
+	    debug_return_size_t((size_t)-1);
+    }
 
     /* Path is of the form /var/log/sudo-io/00/00/01. */
     len = snprintf(str, strsize, "%c%c/%c%c/%c%c", sessid[0],

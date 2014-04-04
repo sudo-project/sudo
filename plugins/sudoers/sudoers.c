@@ -82,8 +82,8 @@
  * Prototypes
  */
 static char *find_editor(int nfiles, char **files, char ***argv_out);
-static int cb_runas_default(const char *);
-static int cb_sudoers_locale(const char *);
+static bool cb_runas_default(const char *);
+static bool cb_sudoers_locale(const char *);
 static int set_cmnd(void);
 static void create_admin_success_flag(void);
 static void init_vars(char * const *);
@@ -895,7 +895,7 @@ set_runasgr(const char *group)
 /*
  * Callback for runas_default sudoers setting.
  */
-static int
+static bool
 cb_runas_default(const char *user)
 {
     /* Only reset runaspw if user didn't specify one. */
@@ -907,7 +907,7 @@ cb_runas_default(const char *user)
 /*
  * Callback for sudoers_locale sudoers setting.
  */
-static int
+static bool
 cb_sudoers_locale(const char *locale)
 {
     sudoers_initlocale(NULL, locale);

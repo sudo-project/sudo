@@ -51,7 +51,7 @@ struct sudo_defs_types {
     int type;
     char *desc;
     struct def_values *values;
-    int (*callback)(const char *);
+    bool (*callback)(const char *);
     union {
 	int flag;
 	int ival;

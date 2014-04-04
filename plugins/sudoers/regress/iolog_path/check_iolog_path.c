@@ -203,7 +203,9 @@ main(int argc, char *argv[])
     exit(errors);
 }
 
-void io_nextid(char *iolog_dir, char *fallback, char id[7])
+bool
+io_nextid(char *iolog_dir, char *fallback, char id[7])
 {
     memcpy(id, sessid, sizeof(sessid));
+    return true;
 }

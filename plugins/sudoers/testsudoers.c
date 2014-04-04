@@ -78,7 +78,7 @@ void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
-static int cb_runas_default(const char *);
+static bool cb_runas_default(const char *);
 static int testsudoers_print(const char *msg);
 
 extern void setgrfile(const char *);
@@ -395,7 +395,7 @@ set_runasgr(const char *group)
 /* 
  * Callback for runas_default sudoers setting.
  */
-static int
+static bool
 cb_runas_default(const char *user)
 {
     /* Only reset runaspw if user didn't specify one. */
