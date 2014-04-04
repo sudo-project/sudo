@@ -418,6 +418,9 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     sudo_sigaction(SIGPIPE, &sa, NULL);
     sudo_sigaction(SIGUSR1, &sa, NULL);
     sudo_sigaction(SIGUSR2, &sa, NULL);
+#ifdef SIGINFO
+    sudo_sigaction(SIGINFO, &sa, NULL);
+#endif
 
     /*
      * When not running the command in a pty, we do not want to
@@ -618,7 +621,7 @@ done:
 }
 
 /*
- * Forward a signal to the monitory (pty version).
+ * Forward a signal to the monitor (pty version).
  */
 static int
 dispatch_signal_pty(struct sudo_event_base *evbase, pid_t child,
@@ -721,7 +724,7 @@ signal_pipe_cb(int fd, int what, void *v)
 }
 
 /*
- * Drain pending signals from signale_pipe written by sudo_handler().
+ * Drain pending signals from signal_pipe written by sudo_handler().
  * Handles the case where the signal was sent to us before
  * we have executed the command.
  * Returns 1 if we should terminate, else 0.
