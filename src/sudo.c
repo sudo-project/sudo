@@ -626,9 +626,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		if (strncmp("runas_groups=", info[i], sizeof("runas_groups=") - 1) == 0) {
-		    /* parse_gid_list() will call fatalx() on error. */
 		    cp = info[i] + sizeof("runas_groups=") - 1;
 		    details->ngroups = parse_gid_list(cp, NULL, &details->groups);
+		    /* parse_gid_list() will print a warning on error. */
+		    if (details->ngroups == -1)
+			exit(1);
 		    break;
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
