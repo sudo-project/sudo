@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -137,6 +137,8 @@ sudoers_policy_init(void *info, char * const envp[])
 
     /* Parse info from front-end. */
     sudo_mode = sudoers_policy_deserialize_info(info, &runas_user, &runas_group);
+    if (ISSET(sudo_mode, MODE_ERROR))
+	debug_return_bool(-1);
 
     init_vars(envp);		/* XXX - move this later? */
 
