@@ -158,5 +158,6 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
-    fatalx(U_("internal error, %s overflow"), __func__);
+    warningx(U_("internal error, %s overflow"), __func__);
+    debug_return_str(NULL);
 }

@@ -281,6 +281,10 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
+	if (state->grlist == NULL) {
+	    errstr = N_("unable to set runas group vector");
+	    goto bad;
+	}
 	state->ruid = ostate->ruid;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	state->suid = ostate->suid;
@@ -602,6 +606,10 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
+	if (state->grlist == NULL) {
+	    errstr = N_("unable to set runas group vector");
+	    goto bad;
+	}
 	state->ruid = ostate->ruid;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	state->suid = ostate->suid;
@@ -990,6 +998,10 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
+	if (state->grlist == NULL) {
+	    errstr = N_("unable to set runas group vector");
+	    goto bad;
+	}
 	state->ruid = ROOT_UID;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
@@ -1286,6 +1298,10 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
+	if (state->grlist == NULL) {
+	    errstr = N_("unable to set runas group vector");
+	    goto bad;
+	}
 	state->ruid = ostate->ruid;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
@@ -1591,8 +1607,10 @@ runas_setgroups(void)
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
-    if (sudo_setgroups(grlist->ngids, grlist->gids) < 0)
-	log_fatal(USE_ERRNO|MSG_ONLY, N_("unable to set runas group vector"));
+    if (sudo_setgroups(grlist->ngids, grlist->gids) < 0) {
+	sudo_grlist_delref(grlist);
+	grlist = NULL;
+    }
     debug_return_ptr(grlist);
 }
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
