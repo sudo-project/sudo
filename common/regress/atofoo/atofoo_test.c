@@ -155,7 +155,8 @@ test_atomode(int *ntests)
 		errors++;
 	    }
 	} else if (mode != d->mode) {
-	    warningx_nodebug("FAIL: %s != 0%o", d->mode_str, d->mode);
+	    warningx_nodebug("FAIL: %s != 0%o", d->mode_str,
+		(unsigned int) d->mode);
 	    errors++;
 	}
     }
