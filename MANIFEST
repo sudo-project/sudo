@@ -364,6 +364,10 @@ plugins/sudoers/regress/testsudoers/test4.out.ok
 plugins/sudoers/regress/testsudoers/test4.sh
 plugins/sudoers/regress/testsudoers/test5.out.ok
 plugins/sudoers/regress/testsudoers/test5.sh
+plugins/sudoers/regress/testsudoers/test6.out.ok
+plugins/sudoers/regress/testsudoers/test6.sh
+plugins/sudoers/regress/testsudoers/test7.out.ok
+plugins/sudoers/regress/testsudoers/test7.sh
 plugins/sudoers/regress/visudo/test1.out.ok
 plugins/sudoers/regress/visudo/test1.sh
 plugins/sudoers/regress/visudo/test2.err.ok
