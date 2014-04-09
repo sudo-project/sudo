@@ -69,6 +69,11 @@
 #  include <ndir.h>
 # endif
 #endif
+#ifdef HAVE_SHA224UPDATE
+# include <sha2.h>
+#else
+# include "compat/sha2.h"
+#endif
 #include <errno.h>
 #include <ctype.h>
 #include "sudoers.h"
@@ -76,7 +81,6 @@
 #include "toke.h"
 #include <gram.h>
 #include "lbuf.h"
-#include "sha2.h"
 #include "secure_path.h"
 
 int sudolineno;			/* current sudoers line number. */
@@ -580,29 +584,29 @@ ALL {
 sha224			{
 			    digest_len = SHA224_DIGEST_LENGTH;
 			    BEGIN WANTDIGEST;
-			    LEXTRACE("SHA224 ");
-			    LEXRETURN(SHA224);
+			    LEXTRACE("SHA224_TOK ");
+			    LEXRETURN(SHA224_TOK);
 			}
 
 sha256			{
 			    digest_len = SHA256_DIGEST_LENGTH;
 			    BEGIN WANTDIGEST;
-			    LEXTRACE("SHA256 ");
-			    LEXRETURN(SHA256);
+			    LEXTRACE("SHA256_TOK ");
+			    LEXRETURN(SHA256_TOK);
 			}
 
 sha384			{
 			    digest_len = SHA384_DIGEST_LENGTH;
 			    BEGIN WANTDIGEST;
-			    LEXTRACE("SHA384 ");
-			    LEXRETURN(SHA384);
+			    LEXTRACE("SHA384_TOK ");
+			    LEXRETURN(SHA384_TOK);
 			}
 
 sha512			{
 			    digest_len = SHA512_DIGEST_LENGTH;
 			    BEGIN WANTDIGEST;
-			    LEXTRACE("SHA512 ");
-			    LEXRETURN(SHA512);
+			    LEXTRACE("SHA512_TOK ");
+			    LEXRETURN(SHA512_TOK);
 			}
 
 sudoedit		{

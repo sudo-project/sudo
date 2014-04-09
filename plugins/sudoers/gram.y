@@ -142,10 +142,10 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 MYSELF			/* run as myself, not another user */
-%token <tok>	 SHA224			/* sha224 digest */
-%token <tok>	 SHA256			/* sha256 digest */
-%token <tok>	 SHA384			/* sha384 digest */
-%token <tok>	 SHA512			/* sha512 digest */
+%token <tok>	 SHA224_TOK		/* sha224 token */
+%token <tok>	 SHA256_TOK		/* sha256 token */
+%token <tok>	 SHA384_TOK		/* sha384 token */
+%token <tok>	 SHA512_TOK		/* sha512 token */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -370,16 +370,16 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			}
 		;
 
-digest		:	SHA224 ':' DIGEST {
+digest		:	SHA224_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
 			}
-		|	SHA256 ':' DIGEST {
+		|	SHA256_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA256, $3);
 			}
-		|	SHA384 ':' DIGEST {
+		|	SHA384_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA384, $3);
 			}
-		|	SHA512 ':' DIGEST {
+		|	SHA512_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA512, $3);
 			}
 		;

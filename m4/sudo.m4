@@ -281,6 +281,24 @@ int putenv(const char *string) {return 0;}], [])],
 ])
 
 dnl
+dnl Check if the data argument for the sha2 functions is void * or u_char *
+dnl
+AC_DEFUN([SUDO_FUNC_SHA2_VOID_PTR],
+[AC_CACHE_CHECK([whether the data argument of SHA224Update() is void *],
+sudo_cv_func_sha2_void_ptr,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+#include <sha2.h>
+void SHA224Update(SHA2_CTX *context, const void *data, size_t len) {return;}], [])],
+    [sudo_cv_func_sha2_void_ptr=yes],
+    [sudo_cv_func_sha2_void_ptr=no])
+  ])
+  if test $sudo_cv_func_sha2_void_ptr = yes; then
+    AC_DEFINE(SHA2_VOID_PTR, 1,
+      [Define to 1 if the sha2 functions use `const void *' instead of `const unsigned char'.])
+  fi
+])
+
+dnl
 dnl check for sa_len field in struct sockaddr
 dnl
 AC_DEFUN([SUDO_SOCK_SA_LEN], [

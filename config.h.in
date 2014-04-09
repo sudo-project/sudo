@@ -527,6 +527,9 @@
 /* Define to 1 if you have the `set_auth_parameters' function. */
 #undef HAVE_SET_AUTH_PARAMETERS
 
+/* Define to 1 if you have the `SHA224Update' function. */
+#undef HAVE_SHA224UPDATE
+
 /* Define to 1 if you have the `shl_load' function. */
 #undef HAVE_SHL_LOAD
 
@@ -985,6 +988,10 @@
 
 /* Define to 1 to send mail when the user is not in the sudoers file. */
 #undef SEND_MAIL_WHEN_NO_USER
+
+/* Define to 1 if the sha2 functions use `const void *' instead of `const
+   unsigned char'. */
+#undef SHA2_VOID_PTR
 
 /* Define to 1 if you want sudo to start a shell if given no arguments. */
 #undef SHELL_IF_NO_ARGS

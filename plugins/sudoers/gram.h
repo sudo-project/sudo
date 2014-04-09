@@ -33,10 +33,10 @@
 #define PRIVS 289
 #define LIMITPRIVS 290
 #define MYSELF 291
-#define SHA224 292
-#define SHA256 293
-#define SHA384 294
-#define SHA512 295
+#define SHA224_TOK 292
+#define SHA256_TOK 293
+#define SHA384_TOK 294
+#define SHA512_TOK 295
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {

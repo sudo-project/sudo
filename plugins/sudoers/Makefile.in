@@ -50,8 +50,10 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 LT_LIBS = $(top_builddir)/common/libsudo_util.la $(LIBOBJDIR)libreplace.la
 LIBS = $(LT_LIBS) @LIBINTL@
 NET_LIBS = @NET_LIBS@
-SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@ @LIBDL@
+SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@ @LIBMD@ @LIBDL@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
+VISUDO_LIBS = $(NET_LIBS) @LIBMD@
+TESTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@ @LIBDL@
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) -DLIBDIR=\"$(libdir)\" @CPPFLAGS@
@@ -134,7 +136,7 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo hexchar.lo \
 		       gram.lo match.lo match_addr.lo pwutil.lo pwutil_impl.lo \
-		       timestr.lo toke.lo toke_util.lo redblack.lo sha2.lo
+		       timestr.lo toke.lo toke_util.lo redblack.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
@@ -153,7 +155,7 @@ CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o
 
 CHECK_BASE64_OBJS = check_base64.o base64.o locale.o
 
-CHECK_DIGEST_OBJS = check_digest.o sha2.o
+CHECK_DIGEST_OBJS = check_digest.o
 
 CHECK_FILL_OBJS = check_fill.o hexchar.o locale.o toke_util.o
 
@@ -200,13 +202,13 @@ sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
 	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(VISUDO_LIBS) $(LIBS)
 
 sudoreplay: timestr.lo $(REPLAY_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(REPLAY_LIBS) $(LIBS)
 
 testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS) @LIBDL@
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(TESTSUDOERS_LIBS) $(LIBS)
 
 check_addr: $(CHECK_ADDR_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS)
@@ -215,7 +217,7 @@ check_base64: $(CHECK_BASE64_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_BASE64_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_digest: $(CHECK_DIGEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @LIBMD@
 
 check_fill: $(CHECK_FILL_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -509,12 +511,12 @@ check_base64.o: $(srcdir)/regress/parser/check_base64.c $(incdir)/missing.h \
                 $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_base64.c
 check_digest.o: $(srcdir)/regress/parser/check_digest.c $(incdir)/missing.h \
-                $(srcdir)/sha2.h $(top_builddir)/config.h
+                $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_digest.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(devdir)/gram.h \
               $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_plugin.h \
-              $(srcdir)/parse.h $(srcdir)/toke.h $(top_builddir)/config.h \
-              $(top_srcdir)/compat/stdbool.h
+              $(incdir)/sudo_util.h $(srcdir)/parse.h $(srcdir)/toke.h \
+              $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_fill.c
 check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(devdir)/def_data.c $(devdir)/def_data.h \
@@ -615,8 +617,8 @@ group_plugin.lo: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/group_plugin.c
 group_plugin.o: group_plugin.lo
-hexchar.lo: $(srcdir)/hexchar.c $(incdir)/fatal.h $(incdir)/missing.h \
-            $(incdir)/sudo_debug.h $(top_builddir)/config.h
+hexchar.lo: $(srcdir)/hexchar.c $(incdir)/missing.h $(incdir)/sudo_debug.h \
+            $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/hexchar.c
 hexchar.o: hexchar.lo
 interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h $(incdir)/alloc.h \
@@ -694,9 +696,9 @@ match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/queue.h \
           $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
           $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/sha2.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h \
-          $(top_srcdir)/compat/fnmatch.h $(top_srcdir)/compat/glob.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h $(top_srcdir)/compat/fnmatch.h \
+          $(top_srcdir)/compat/glob.h $(top_srcdir)/compat/sha2.h \
           $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/match.c
 match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h $(incdir)/alloc.h \
@@ -812,10 +814,6 @@ set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h $(incdir)/alloc.h \
               $(srcdir)/sudoers.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/set_perms.c
-sha2.lo: $(srcdir)/sha2.c $(incdir)/missing.h $(srcdir)/sha2.h \
-         $(top_builddir)/config.h $(top_srcdir)/compat/endian.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sha2.c
-sha2.o: sha2.lo
 sia.lo: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/alloc.h \
         $(incdir)/fatal.h $(incdir)/fileops.h $(incdir)/gettext.h \
         $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_debug.h \
@@ -898,9 +896,9 @@ toke.lo: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/gettext.h $(incdir)/lbuf.h $(incdir)/missing.h \
          $(incdir)/queue.h $(incdir)/secure_path.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sha2.h \
-         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/toke.h \
-         $(top_builddir)/config.h $(top_builddir)/pathnames.h \
+         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/toke.h $(top_builddir)/config.h \
+         $(top_builddir)/pathnames.h $(top_srcdir)/compat/sha2.h \
          $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(devdir)/toke.c
 toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \

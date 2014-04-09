@@ -179,10 +179,10 @@ typedef union {
 #define PRIVS 289
 #define LIMITPRIVS 290
 #define MYSELF 291
-#define SHA224 292
-#define SHA256 293
-#define SHA384 294
-#define SHA512 295
+#define SHA224_TOK 292
+#define SHA256_TOK 293
+#define SHA384_TOK 294
+#define SHA512_TOK 295
 #define YYERRCODE 256
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoerslhs[] =
@@ -550,7 +550,7 @@ char *sudoersname[] =
 "NOPASSWD","PASSWD","NOEXEC","EXEC","SETENV","NOSETENV","LOG_INPUT",
 "NOLOG_INPUT","LOG_OUTPUT","NOLOG_OUTPUT","ALL","COMMENT","HOSTALIAS",
 "CMNDALIAS","USERALIAS","RUNASALIAS","ERROR","TYPE","ROLE","PRIVS","LIMITPRIVS",
-"MYSELF","SHA224","SHA256","SHA384","SHA512",
+"MYSELF","SHA224_TOK","SHA256_TOK","SHA384_TOK","SHA512_TOK",
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const char * const sudoersrule[] =
@@ -594,10 +594,10 @@ char *sudoersrule[] =
 "cmndspeclist : cmndspec",
 "cmndspeclist : cmndspeclist ',' cmndspec",
 "cmndspec : runasspec selinux solarisprivs cmndtag digcmnd",
-"digest : SHA224 ':' DIGEST",
-"digest : SHA256 ':' DIGEST",
-"digest : SHA384 ':' DIGEST",
-"digest : SHA512 ':' DIGEST",
+"digest : SHA224_TOK ':' DIGEST",
+"digest : SHA256_TOK ':' DIGEST",
+"digest : SHA384_TOK ':' DIGEST",
+"digest : SHA512_TOK ':' DIGEST",
 "digcmnd : opcmnd",
 "digcmnd : digest opcmnd",
 "opcmnd : cmnd",
@@ -1089,12 +1089,12 @@ yyloop:
         goto yyreduce;
     }
     if (yyerrflag) goto yyinrecovery;
-#if defined(lint) || defined(__GNUC__)
+#if defined(__GNUC__)
     goto yynewerror;
 #endif
 yynewerror:
     yyerror("syntax error");
-#if defined(lint) || defined(__GNUC__)
+#if defined(__GNUC__)
     goto yyerrlab;
 #endif
 yyerrlab:

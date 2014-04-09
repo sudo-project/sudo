@@ -81,13 +81,17 @@
 #  include <ndir.h>
 # endif
 #endif
+#ifdef HAVE_SHA224UPDATE
+# include <sha2.h>
+#else
+# include "compat/sha2.h"
+#endif
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
 
 #include "sudoers.h"
 #include "parse.h"
-#include "sha2.h"
 #include <gram.h>
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
@@ -561,8 +565,13 @@ static struct digest_function {
     const char *digest_name;
     const unsigned int digest_len;
     void (*init)(SHA2_CTX *);
+#ifdef SHA2_VOID_PTR
+    void (*update)(SHA2_CTX *, const void *, size_t);
+    void (*final)(void *, SHA2_CTX *);
+#else
     void (*update)(SHA2_CTX *, const unsigned char *, size_t);
     void (*final)(unsigned char *, SHA2_CTX *);
+#endif
 } digest_functions[] = {
     {
 	"SHA224",

@@ -222,8 +222,8 @@ atomode.lo: $(srcdir)/atomode.c $(incdir)/gettext.h $(incdir)/missing.h \
             $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atomode.c
 conf_test.lo: $(srcdir)/regress/sudo_conf/conf_test.c $(incdir)/missing.h \
-              $(incdir)/queue.h $(incdir)/sudo_conf.h $(top_builddir)/config.h \
-              $(top_srcdir)/compat/stdbool.h
+              $(incdir)/queue.h $(incdir)/sudo_conf.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/sudo_conf/conf_test.c
 event.lo: $(srcdir)/event.c $(incdir)/alloc.h $(incdir)/fatal.h \
           $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_debug.h \
@@ -259,8 +259,8 @@ gidlist.lo: $(srcdir)/gidlist.c $(incdir)/alloc.h $(incdir)/fatal.h \
             $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/gidlist.c
 hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/fatal.h \
-              $(incdir)/missing.h $(incdir)/queue.h $(top_builddir)/config.h \
-              $(top_srcdir)/compat/stdbool.h
+              $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/tailq/hltq_test.c
 lbuf.lo: $(srcdir)/lbuf.c $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/lbuf.h \
          $(incdir)/missing.h $(incdir)/sudo_debug.h $(top_builddir)/config.h
@@ -269,7 +269,7 @@ locale_stub.lo: $(top_srcdir)/src/locale_stub.c $(incdir)/fatal.h \
                 $(incdir)/gettext.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(top_srcdir)/src/locale_stub.c
 parseln_test.lo: $(srcdir)/regress/sudo_parseln/parseln_test.c \
-                 $(incdir)/fileops.h $(incdir)/missing.h \
+                 $(incdir)/fileops.h $(incdir)/missing.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/sudo_parseln/parseln_test.c
 progname.lo: $(srcdir)/progname.c $(incdir)/missing.h $(incdir)/sudo_util.h \

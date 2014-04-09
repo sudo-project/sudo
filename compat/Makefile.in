@@ -187,7 +187,9 @@ getaddrinfo.lo: $(srcdir)/getaddrinfo.c $(incdir)/missing.h \
 getcwd.lo: $(srcdir)/getcwd.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getcwd.c
 getgrouplist.lo: $(srcdir)/getgrouplist.c $(incdir)/missing.h \
-                 $(top_builddir)/config.h $(top_srcdir)/compat/nss_dbdefs.h
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h \
+                 $(top_srcdir)/compat/nss_dbdefs.h \
+                 $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getgrouplist.c
 getline.lo: $(srcdir)/getline.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getline.c

@@ -731,6 +731,7 @@ CROSS_COMPILING
 COMPAT_TEST_PROGS
 LOCALEDIR_SUFFIX
 SUDO_NLS
+LIBMD
 LIBINTL
 LT_STATIC
 LIBDL
@@ -2976,6 +2977,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3039,6 +3041,7 @@ LCMAN=0
 PSMAN=0
 SEMAN=0
 LIBINTL=
+LIBMD=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -18279,6 +18282,153 @@ fi
 fi
 
 fi
+ac_fn_c_check_header_mongrel "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
+if test "x$ac_cv_header_sha2_h" = xyes; then :
+
+    for ac_func in SHA224Update
+do :
+  ac_fn_c_check_func "$LINENO" "SHA224Update" "ac_cv_func_SHA224Update"
+if test "x$ac_cv_func_SHA224Update" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SHA224UPDATE 1
+_ACEOF
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the data argument of SHA224Update() is void *" >&5
+$as_echo_n "checking whether the data argument of SHA224Update() is void *... " >&6; }
+if ${sudo_cv_func_sha2_void_ptr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+#include <sha2.h>
+void SHA224Update(SHA2_CTX *context, const void *data, size_t len) {return;}
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sudo_cv_func_sha2_void_ptr=yes
+else
+  sudo_cv_func_sha2_void_ptr=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_sha2_void_ptr" >&5
+$as_echo "$sudo_cv_func_sha2_void_ptr" >&6; }
+  if test $sudo_cv_func_sha2_void_ptr = yes; then
+
+$as_echo "#define SHA2_VOID_PTR 1" >>confdefs.h
+
+  fi
+
+else
+
+	# On some systems, SHA224Update is in libmd
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SHA224Update in -lmd" >&5
+$as_echo_n "checking for SHA224Update in -lmd... " >&6; }
+if ${ac_cv_lib_md_SHA224Update+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmd  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SHA224Update ();
+int
+main ()
+{
+return SHA224Update ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_md_SHA224Update=yes
+else
+  ac_cv_lib_md_SHA224Update=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_md_SHA224Update" >&5
+$as_echo "$ac_cv_lib_md_SHA224Update" >&6; }
+if test "x$ac_cv_lib_md_SHA224Update" = xyes; then :
+
+	    $as_echo "#define HAVE_SHA224UPDATE 1" >>confdefs.h
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the data argument of SHA224Update() is void *" >&5
+$as_echo_n "checking whether the data argument of SHA224Update() is void *... " >&6; }
+if ${sudo_cv_func_sha2_void_ptr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+#include <sha2.h>
+void SHA224Update(SHA2_CTX *context, const void *data, size_t len) {return;}
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sudo_cv_func_sha2_void_ptr=yes
+else
+  sudo_cv_func_sha2_void_ptr=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_sha2_void_ptr" >&5
+$as_echo "$sudo_cv_func_sha2_void_ptr" >&6; }
+  if test $sudo_cv_func_sha2_void_ptr = yes; then
+
+$as_echo "#define SHA2_VOID_PTR 1" >>confdefs.h
+
+  fi
+
+	    LIBMD="-lmd"
+
+else
+  case " $LIBOBJS " in
+  *" sha2.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS sha2.$ac_objext"
+ ;;
+esac
+
+fi
+
+
+fi
+done
+
+
+else
+  case " $LIBOBJS " in
+  *" sha2.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS sha2.$ac_objext"
+ ;;
+esac
+
+fi
+
+
 if test X"$with_noexec" != X"no"; then
     # Check for underscore versions of standard exec functions
     # unless we are using dyld symbole interposition

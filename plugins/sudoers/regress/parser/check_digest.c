@@ -39,9 +39,13 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+#ifdef HAVE_SHA224UPDATE
+# include <sha2.h>
+#else
+# include "compat/sha2.h"
+#endif
 
 #include "missing.h"
-#include "sha2.h"
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -49,8 +53,13 @@ static struct digest_function {
     const char *digest_name;
     const int digest_len;
     void (*init)(SHA2_CTX *);
+#ifdef SHA2_VOID_PTR
+    void (*update)(SHA2_CTX *, const void *, size_t);
+    void (*final)(void *, SHA2_CTX *);
+#else
     void (*update)(SHA2_CTX *, const unsigned char *, size_t);
     void (*final)(unsigned char *, SHA2_CTX *);
+#endif
 } digest_functions[] = {
     {
 	"SHA224",

@@ -77,6 +77,7 @@ AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
+AC_SUBST([LIBMD])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
@@ -199,6 +200,7 @@ LCMAN=0
 PSMAN=0
 SEMAN=0
 LIBINTL=
+LIBMD=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -2471,6 +2473,16 @@ if test X"$ac_cv_type_struct_timespec" != X"no"; then
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
 	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
 fi
+AC_CHECK_HEADER([sha2.h], [
+    AC_CHECK_FUNCS(SHA224Update, [SUDO_FUNC_SHA2_VOID_PTR], [
+	# On some systems, SHA224Update is in libmd
+	AC_CHECK_LIB(md, SHA224Update, [
+	    AC_DEFINE(HAVE_SHA224UPDATE)
+	    SUDO_FUNC_SHA2_VOID_PTR
+	    LIBMD="-lmd"
+	], [AC_LIBOBJ(sha2)])
+    ])
+], [AC_LIBOBJ(sha2)])
 dnl
 dnl Function checks for sudo_noexec
 dnl

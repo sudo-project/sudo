@@ -92,6 +92,8 @@ compat/regress/fnmatch/fnm_test.in
 compat/regress/glob/files
 compat/regress/glob/globtest.c
 compat/regress/glob/globtest.in
+compat/sha2.c
+compat/sha2.h
 compat/sig2str.c
 compat/siglist.in
 compat/snprintf.c
@@ -381,8 +383,6 @@ plugins/sudoers/regress/visudo/test4.sh
 plugins/sudoers/regress/visudo/test5.out.ok
 plugins/sudoers/regress/visudo/test5.sh
 plugins/sudoers/set_perms.c
-plugins/sudoers/sha2.c
-plugins/sudoers/sha2.h
 plugins/sudoers/sssd.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
