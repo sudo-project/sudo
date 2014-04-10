@@ -169,8 +169,6 @@ struct sudo_user {
 #define PERM_SUDOERS             0x04
 #define PERM_RUNAS               0x05
 #define PERM_TIMESTAMP           0x06
-#define PERM_NOEXIT              0x10 /* flag */
-#define PERM_MASK                0xf0
 
 /*
  * Shortcuts for sudo_user contents.
@@ -263,9 +261,9 @@ int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct 
 int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
 
 /* set_perms.c */
-void rewind_perms(void);
-int set_perms(int);
-void restore_perms(void);
+bool rewind_perms(void);
+bool set_perms(int);
+bool restore_perms(void);
 int pam_prep_user(struct passwd *);
 
 /* gram.y */

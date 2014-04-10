@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -204,7 +204,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     }
 
     /* Need to be runas user while stat'ing things. */
-    set_perms(PERM_RUNAS);
+    if (!set_perms(PERM_RUNAS))
+	debug_return_int(validated);
 
     match = UNSPEC;
     TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
@@ -278,7 +279,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	if (tags != NULL && tags->nopasswd != UNSPEC)
 	    def_authenticate = !tags->nopasswd;
     }
-    restore_perms();
+    (void) restore_perms();
     debug_return_int(validated);
 }
 

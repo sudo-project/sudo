@@ -463,15 +463,16 @@ init_envtables(void)
     return;
 }
 
-int
+bool
 set_perms(int perm)
 {
-    return 1;
+    return true;
 }
 
-void
+bool
 restore_perms(void)
 {
+    return true;
 }
 
 void

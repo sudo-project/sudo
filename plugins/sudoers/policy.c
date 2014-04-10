@@ -543,7 +543,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     if (fatal_setjmp() != 0) {
 	/* called via fatal(), fatalx() or log_fatal() */
-	rewind_perms();
+	(void) rewind_perms();
 	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }

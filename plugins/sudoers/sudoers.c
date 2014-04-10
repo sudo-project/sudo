@@ -148,7 +148,8 @@ sudoers_policy_init(void *info, char * const envp[])
     snl = sudo_read_nss();
 
     /* LDAP or NSS may modify the euid so we need to be root for the open. */
-    set_perms(PERM_ROOT);
+    if (!set_perms(PERM_ROOT))
+	debug_return_bool(-1);
 
     /* Open and parse sudoers, set global defaults */
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
@@ -204,7 +205,8 @@ sudoers_policy_init(void *info, char * const envp[])
 	rval = true;
 
 cleanup:
-    restore_perms();
+    if (!restore_perms())
+	rval = -1;
 
     debug_return_bool(rval);
 }
@@ -235,7 +237,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
         goto bad;
     }    
 
-    set_perms(PERM_INITIAL);
+    if (!set_perms(PERM_INITIAL))
+        goto bad;
 
     /* Environment variables specified on the command line. */
     if (env_add != NULL && env_add[0] != NULL)
@@ -532,7 +535,8 @@ bad:
 
 done:
     fatal_disable_setjmp();
-    rewind_perms();
+    if (!rewind_perms())
+	rval = -1;
 
     /* Close the password and group files and free up memory. */
     sudo_endpwent();
@@ -600,7 +604,8 @@ init_vars(char * const envp[])
      */
     if (user_group_list == NULL)
 	user_group_list = sudo_get_grlist(sudo_user.pw);
-    set_perms(PERM_INITIAL);
+    if (!set_perms(PERM_INITIAL))
+	debug_return_bool(false);
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
@@ -641,16 +646,20 @@ set_cmnd(void)
 	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
 	    if (def_secure_path && !user_is_exempt())
 		path = def_secure_path;
-	    set_perms(PERM_RUNAS);
+	    if (!set_perms(PERM_RUNAS))
+		debug_return_int(-1);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
 		def_ignore_dot);
-	    restore_perms();
+	    if (!restore_perms())
+		debug_return_int(-1);
 	    if (rval == NOT_FOUND) {
 		/* Failed as root, try as invoking user. */
-		set_perms(PERM_USER);
+		if (!set_perms(PERM_USER))
+		    debug_return_int(-1);
 		rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
 		    def_ignore_dot);
-		restore_perms();
+		if (!restore_perms())
+		    debug_return_int(-1);
 	    }
 	    if (rval == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG)
@@ -721,7 +730,8 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
     FILE *fp = NULL;
     debug_decl(open_sudoers, SUDO_DEBUG_PLUGIN)
 
-    set_perms(PERM_SUDOERS);
+    if (!set_perms(PERM_SUDOERS))
+	debug_return_ptr(NULL);
 
     switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
@@ -732,8 +742,8 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	     */
 	    if (sudoers_uid == ROOT_UID && ISSET(sudoers_mode, S_IRGRP)) {
 		if (!ISSET(sb.st_mode, S_IRGRP) || sb.st_gid != SUDOERS_GID) {
-		    restore_perms();
-		    set_perms(PERM_ROOT);
+		    if (!restore_perms() || !set_perms(PERM_ROOT))
+			debug_return_ptr(NULL);
 		}
 	    }
 	    /*
@@ -777,7 +787,11 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	    break;
     }
 
-    restore_perms();		/* change back to root */
+    if (!restore_perms()) {
+	/* unable to change back to root */
+	fclose(fp);
+	fp = NULL;
+    }
 
     debug_return_ptr(fp);
 }
@@ -1085,12 +1099,13 @@ create_admin_success_flag(void)
 	debug_return;
 
     /* Create admin flag file if it doesn't already exist. */
-    set_perms(PERM_USER);
-    if (stat(flagfile, &statbuf) != 0) {
-	fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
-	close(fd);
+    if (set_perms(PERM_USER)) {
+	if (stat(flagfile, &statbuf) != 0) {
+	    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
+	    close(fd);
+	}
+	(void) restore_perms();
     }
-    restore_perms();
     debug_return;
 }
 #else /* !USE_ADMIN_FLAG */

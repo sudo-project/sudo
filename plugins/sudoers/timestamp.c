@@ -326,6 +326,7 @@ bool
 update_timestamp(struct passwd *pw)
 {
     struct timestamp_entry entry;
+    bool uid_changed = false;
     bool rval = false;
     int fd;
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
@@ -344,10 +345,10 @@ update_timestamp(struct passwd *pw)
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR|O_CREAT, 0600);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd == -1) {
 	log_warning(USE_ERRNO, N_("unable to open %s"), timestamp_file);
 	goto done;
@@ -373,6 +374,7 @@ timestamp_status(struct passwd *pw)
 {
     struct timestamp_entry entry;
     struct timespec diff, timeout;
+    bool uid_changed = false;
     int status = TS_ERROR;		/* assume the worst */
     struct stat sb;
     int fd = -1;
@@ -429,10 +431,10 @@ timestamp_status(struct passwd *pw)
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd == -1) {
 	status = TS_MISSING;
 	goto done;
@@ -524,6 +526,7 @@ void
 remove_timestamp(bool unlink_it)
 {
     struct timestamp_entry entry;
+    bool uid_changed = false;
     int fd = -1;
     debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
 
@@ -559,10 +562,10 @@ remove_timestamp(bool unlink_it)
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd == -1)
 	goto done;
     lock_file(fd, SUDO_LOCK);
@@ -616,6 +619,7 @@ bool
 set_lectured(void)
 {
     char lecture_status[PATH_MAX];
+    bool uid_changed = false;
     int len, fd = -1;
     debug_decl(set_lectured, SUDO_DEBUG_AUTH)
 
@@ -633,10 +637,10 @@ set_lectured(void)
 
     /* Create lecture file. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(lecture_status, O_WRONLY|O_CREAT|O_TRUNC, 0600);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd != -1)
 	close(fd);
 

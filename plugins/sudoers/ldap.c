@@ -2107,9 +2107,11 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
     old_ccname = sudo_krb5_ccname_path(old_ccname);
     if (old_ccname != NULL) {
 	/* Open credential cache as user to prevent stolen creds. */
-	set_perms(PERM_USER);
+	if (!set_perms(PERM_USER))
+	    goto done;
 	ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
-	restore_perms();
+	if (!restore_perms())
+	    goto done;
 
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
@@ -2150,6 +2152,7 @@ write_error:
 		"unable to open %s", old_ccname);
 	}
     }
+done:
     debug_return_str(ret);
 }
 

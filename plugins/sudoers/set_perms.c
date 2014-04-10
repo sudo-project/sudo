@@ -83,18 +83,20 @@ static int perm_stack_depth = 0;
 #undef OID
 #define OID(x) (ostate->x == state->x ? (uid_t)-1 : ostate->x)
 
-void
+bool
 rewind_perms(void)
 {
     debug_decl(rewind_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth != 0) {
-	while (perm_stack_depth > 1)
-	    restore_perms();
+	while (perm_stack_depth > 1) {
+	    if (!restore_perms())
+		debug_return_bool(false);
+	}
 	sudo_grlist_delref(perm_stack[0].grlist);
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 #if defined(HAVE_SETRESUID)
@@ -108,17 +110,13 @@ rewind_perms(void)
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
-int
+bool
 set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
-
-    noexit = ISSET(perm, PERM_NOEXIT);
-    CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -361,25 +359,25 @@ set_perms(int perm)
     }
 
     perm_stack_depth++;
-    debug_return_bool(1);
+    debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
 	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
 	warning("%s", U_(errstr));
-    if (noexit)
-	debug_return_bool(0);
-    exit(1);
+    debug_return_bool(false);
 }
 
-void
+bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
-    if (perm_stack_depth < 2)
-	debug_return;
+    if (perm_stack_depth < 2) {
+	warningx(U_("perm stack underflow"));
+	debug_return_bool(true);
+    }
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -420,10 +418,10 @@ restore_perms(void)
 	}
     }
     sudo_grlist_delref(state->grlist);
-    debug_return;
+    debug_return_bool(true);
 
 bad:
-    exit(1);
+    debug_return_bool(false);
 }
 
 #elif defined(_AIX) && defined(ID_SAVED)
@@ -437,17 +435,13 @@ bad:
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
-int
+bool
 set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
-
-    noexit = ISSET(perm, PERM_NOEXIT);
-    CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -704,25 +698,25 @@ set_perms(int perm)
     }
 
     perm_stack_depth++;
-    debug_return_bool(1);
+    debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
 	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
 	warning("%s", U_(errstr));
-    if (noexit)
-	debug_return_bool(0);
-    exit(1);
+    debug_return_bool(false);
 }
 
-void
+bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
-    if (perm_stack_depth < 2)
-	debug_return;
+    if (perm_stack_depth < 2) {
+	warningx(U_("perm stack underflow"));
+	debug_return_bool(true);
+    }
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -827,10 +821,10 @@ restore_perms(void)
 	}
     }
     sudo_grlist_delref(state->grlist);
-    debug_return;
+    debug_return_bool(true);
 
 bad:
-    exit(1);
+    debug_return_bool(false);
 }
 
 #elif defined(HAVE_SETREUID)
@@ -844,17 +838,13 @@ bad:
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
-int
+bool
 set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
-
-    noexit = ISSET(perm, PERM_NOEXIT);
-    CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -1067,25 +1057,25 @@ set_perms(int perm)
     }
 
     perm_stack_depth++;
-    debug_return_bool(1);
+    debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
 	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
 	warning("%s", U_(errstr));
-    if (noexit)
-	debug_return_bool(0);
-    exit(1);
+    debug_return_bool(false);
 }
 
-void
+bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
-    if (perm_stack_depth < 2)
-	debug_return;
+    if (perm_stack_depth < 2) {
+	warningx(U_("perm stack underflow"));
+	debug_return_bool(true);
+    }
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -1129,10 +1119,10 @@ restore_perms(void)
 	}
     }
     sudo_grlist_delref(state->grlist);
-    debug_return;
+    debug_return_bool(true);
 
 bad:
-    exit(1);
+    debug_return_bool(false);
 }
 
 #elif defined(HAVE_SETEUID)
@@ -1145,17 +1135,13 @@ bad:
  * we are headed for an exec().
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
-int
+bool
 set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
-
-    noexit = ISSET(perm, PERM_NOEXIT);
-    CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -1367,25 +1353,25 @@ set_perms(int perm)
     }
 
     perm_stack_depth++;
-    debug_return_bool(1);
+    debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
 	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
 	warning("%s", U_(errstr));
-    if (noexit)
-	debug_return_bool(0);
-    exit(1);
+    debug_return_bool(false);
 }
 
-void
+bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
-    if (perm_stack_depth < 2)
-	debug_return;
+    if (perm_stack_depth < 2) {
+	warningx(U_("perm stack underflow"));
+	debug_return_bool(true);
+    }
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -1428,10 +1414,10 @@ restore_perms(void)
 	goto bad;
     }
     sudo_grlist_delref(state->grlist);
-    debug_return;
+    debug_return_bool(true);
 
 bad:
-    exit(1);
+    debug_return_bool(false);
 }
 
 #else /* !HAVE_SETRESUID && !HAVE_SETREUID && !HAVE_SETEUID */
@@ -1441,17 +1427,13 @@ bad:
  * NOTE: does not support the "stay_setuid" or timestampowner options.
  *       Also, sudoers_uid and sudoers_gid are not used.
  */
-int
+bool
 set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
-
-    noexit = ISSET(perm, PERM_NOEXIT);
-    CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -1535,25 +1517,25 @@ set_perms(int perm)
     }
 
     perm_stack_depth++;
-    debug_return_bool(1);
+    debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
 	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
 	warning("%s", U_(errstr));
-    if (noexit)
-	debug_return_bool(0);
-    exit(1);
+    debug_return_bool(false);
 }
 
-void
+boll
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
-    if (perm_stack_depth < 2)
-	debug_return;
+    if (perm_stack_depth < 2) {
+	warningx(U_("perm stack underflow"));
+	debug_return_bool(true);
+    }
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -1579,10 +1561,10 @@ restore_perms(void)
 	warning("setuid(%d)", (int)ostate->ruid);
 	goto bad;
     }
-    debug_return;
+    debug_return_bool(true);
 
 bad:
-    exit(1);
+    debug_return_bool(false);
 }
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
 

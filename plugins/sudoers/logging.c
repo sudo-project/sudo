@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996, 1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -236,6 +236,7 @@ log_denial(int status, bool inform_user)
     const char *message;
     char *logline;
     int oldlocale;
+    bool uid_changed;
     debug_decl(log_denial, SUDO_DEBUG_LOGGING)
 
     /* Handle auditing first (audit_failure() handles the locale itself). */
@@ -260,7 +261,7 @@ log_denial(int status, bool inform_user)
 	debug_return;
 
     /* Become root if we are not already. */
-    set_perms(PERM_ROOT|PERM_NOEXIT);
+    uid_changed = set_perms(PERM_ROOT);
 
     if (should_mail(status))
 	send_mail("%s", logline);	/* send mail based on status */
@@ -273,7 +274,8 @@ log_denial(int status, bool inform_user)
     if (def_logfile)
 	do_logfile(logline);
 
-    restore_perms();
+    if (uid_changed)
+	restore_perms();
 
     efree(logline);
 
@@ -389,6 +391,7 @@ log_allowed(int status)
 {
     char *logline;
     int oldlocale;
+    bool uid_changed;
     debug_decl(log_allowed, SUDO_DEBUG_LOGGING)
 
     /* Log and mail messages should be in the sudoers locale. */
@@ -397,7 +400,7 @@ log_allowed(int status)
     logline = new_logline(NULL, 0);
 
     /* Become root if we are not already. */
-    set_perms(PERM_ROOT|PERM_NOEXIT);
+    uid_changed = set_perms(PERM_ROOT);
 
     if (should_mail(status))
 	send_mail("%s", logline);	/* send mail based on status */
@@ -410,7 +413,8 @@ log_allowed(int status)
     if (def_logfile)
 	do_logfile(logline);
 
-    restore_perms();
+    if (uid_changed)
+	restore_perms();
 
     efree(logline);
 
@@ -427,6 +431,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 {
     int oldlocale, serrno = errno;
     char *logline, *message;
+    bool uid_changed;
     va_list ap2;
     debug_decl(vlog_error, SUDO_DEBUG_LOGGING)
 
@@ -463,7 +468,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     }
 
     /* Become root if we are not already. */
-    set_perms(PERM_ROOT|PERM_NOEXIT);
+    uid_changed = set_perms(PERM_ROOT);
 
     /*
      * Send a copy of the error via mail.
@@ -481,7 +486,8 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	    do_logfile(logline);
     }
 
-    restore_perms();
+    if (uid_changed)
+	restore_perms();
 
     efree(logline);
 
@@ -688,10 +694,10 @@ send_mail(const char *fmt, ...)
 		 * (so user cannot kill it) or as the user (for the paranoid).
 		 */
 #ifndef NO_ROOT_MAILER
-		set_perms(PERM_ROOT|PERM_NOEXIT);
+		(void) set_perms(PERM_ROOT);
 		execve(mpath, argv, root_envp);
 #else
-		set_perms(PERM_FULL_USER|PERM_NOEXIT);
+		(void) set_perms(PERM_FULL_USER);
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
 		mysyslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
