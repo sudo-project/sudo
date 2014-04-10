@@ -64,7 +64,7 @@
 
 static void do_syslog(int, char *);
 static void do_logfile(char *);
-static void send_mail(const char *fmt, ...);
+static bool send_mail(const char *fmt, ...);
 static int should_mail(int);
 static void mysyslog(int, const char *, ...);
 static char *new_logline(const char *, int);
@@ -256,6 +256,8 @@ log_denial(int status, bool inform_user)
 	message = _("command not allowed");
 
     logline = new_logline(message, 0);
+    if (logline == NULL)
+	debug_return;
 
     /* Become root if we are not already. */
     set_perms(PERM_ROOT|PERM_NOEXIT);
@@ -543,7 +545,7 @@ log_fatal(int flags, const char *fmt, ...)
 /*
  * Send a message to MAILTO user
  */
-static void
+static bool
 send_mail(const char *fmt, ...)
 {
     FILE *mail;
@@ -566,19 +568,20 @@ send_mail(const char *fmt, ...)
 #endif /* NO_ROOT_MAILER */
     debug_decl(send_mail, SUDO_DEBUG_LOGGING)
 
-    /* Just return if mailer is disabled. */
+    /* If mailer is disabled just return. */
     if (!def_mailerpath || !def_mailto)
-	debug_return;
+	debug_return_bool(true);
 
     /* Make sure the mailer exists and is a regular file. */
     if (stat(def_mailerpath, &sb) != 0 || !S_ISREG(sb.st_mode))
-	debug_return;
+	debug_return_int(false);
 
     /* Fork and return, child will daemonize. */
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    fatal(U_("unable to fork"));
+	    warning(U_("unable to fork"));
+	    debug_return_int(false);
 	    break;
 	case 0:
 	    /* Child. */
@@ -602,7 +605,7 @@ send_mail(const char *fmt, ...)
 	    do {
 		rv = waitpid(pid, &status, 0);
 	    } while (rv == -1 && errno == EINTR);
-	    return; /* not debug */
+	    return true; /* not debug */
     }
 
     /* Daemonize - disassociate from session/tty. */
@@ -911,5 +914,6 @@ new_logline(const char *message, int serrno)
 
     debug_return_str(line);
 toobig:
-    fatalx(U_("internal error: insufficient space for log line"));
+    warningx(U_("internal error, %s overflow"), __func__);
+    debug_return_str(NULL);
 }
