@@ -230,7 +230,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     (void) pam_set_item(pamh, PAM_USER, pw->pw_name);
 
     /*
-     * Set credentials (may include resource limits, device ownership, etc).
+     * Reinitialize credentials when changing the user.
      * We don't worry about a failure from pam_setcred() since with
      * stacked PAM auth modules a failure from one module may override
      * PAM_SUCCESS from another.  For example, given a non-local user,
@@ -238,7 +238,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      * pam_unix is first in the stack, pam_setcred() will fail.
      */
     if (def_pam_setcred)
-	(void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
+	(void) pam_setcred(pamh, PAM_REINITIALIZE_CRED);
 
     if (def_pam_session) {
 	*pam_status = pam_open_session(pamh, 0);
