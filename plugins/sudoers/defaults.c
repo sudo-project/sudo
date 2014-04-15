@@ -489,6 +489,7 @@ init_defaults(void)
 #endif
     def_editor = estrdup(EDITOR);
     def_set_utmp = true;
+    def_pam_setcred = true;
 
     /* Finally do the lists (currently just environment tables). */
     init_envtables();
