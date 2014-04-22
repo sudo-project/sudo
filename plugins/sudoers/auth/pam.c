@@ -315,9 +315,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     int ret = PAM_AUTH_ERR;
     debug_decl(converse, SUDO_DEBUG_AUTH)
 
-    if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
+    if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL)
 	debug_return_int(PAM_SYSTEM_ERR);
-    memset(*response, 0, num_msg * sizeof(struct pam_response));
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
