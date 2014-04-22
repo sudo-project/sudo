@@ -664,7 +664,7 @@ set_cmnd(void)
 	    if (rval == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG)
 		    audit_failure(NewArgv, N_("command too long"));
-		log_warning(NO_MAIL|USE_ERRNO, NewArgv[0]);
+		log_warning(NO_MAIL|USE_ERRNO, "%s", NewArgv[0]);
 		debug_return_int(rval);
 	    }
 	}
