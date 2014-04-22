@@ -511,7 +511,7 @@ check_base64.o: $(srcdir)/regress/parser/check_base64.c $(incdir)/missing.h \
                 $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_base64.c
 check_digest.o: $(srcdir)/regress/parser/check_digest.c $(incdir)/missing.h \
-                $(top_builddir)/config.h
+                $(top_builddir)/config.h $(top_srcdir)/compat/sha2.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_digest.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(devdir)/gram.h \
               $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_plugin.h \

@@ -218,6 +218,9 @@ mktemp.lo: $(srcdir)/mktemp.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mktemp.c
 pw_dup.lo: $(srcdir)/pw_dup.c $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/pw_dup.c
+sha2.lo: $(srcdir)/sha2.c $(incdir)/missing.h $(top_builddir)/config.h \
+         $(top_srcdir)/compat/endian.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sha2.c
 sig2str.lo: $(srcdir)/sig2str.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sig2str.c
 siglist.lo: siglist.c $(incdir)/missing.h $(top_builddir)/config.h
