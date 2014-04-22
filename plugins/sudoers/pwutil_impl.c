@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -245,7 +245,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     } else {
 	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
-	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	    gids = emallocarray(ngids, sizeof(GETGROUPS_T));
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
 	} else {
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
@@ -253,10 +253,10 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 	    if (ngids < 0)
 #endif
 		ngids = NGROUPS_MAX * 2;
-	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	    gids = emallocarray(ngids, sizeof(GETGROUPS_T));
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
 		efree(gids);
-		gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+		gids = emallocarray(ngids, sizeof(GETGROUPS_T));
 		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
 		    ngids = -1;
 	    }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2010-2013
+ * Copyright (c) 1999-2005, 2007, 2010-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -58,7 +58,7 @@
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
  * could be signed (as it is on SunOS 4.x).  This just means that
- * emalloc2() and erealloc3() cannot allocate huge amounts on such a
+ * emallocarray() and ereallocarray() cannot allocate huge amounts on such a
  * platform but that is OK since sudo doesn't need to do so anyway.
  */
 #ifndef SIZE_MAX
@@ -87,18 +87,18 @@ emalloc(size_t size)
 }
 
 /*
- * emalloc2() allocates nmemb * size bytes and exits with an error
+ * emallocarray() allocates nmemb * size bytes and exits with an error
  * if overflow would occur or if the system malloc(3) fails.
  */
 void *
-emalloc2(size_t nmemb, size_t size)
+emallocarray(size_t nmemb, size_t size)
 {
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	fatalx_nodebug(_("internal error, tried to emalloc2(0)"));
+	fatalx_nodebug(_("internal error, tried to emallocarray(0)"));
     if (nmemb > SIZE_MAX / size)
-	fatalx_nodebug(_("internal error, %s overflow"), "emalloc2");
+	fatalx_nodebug(_("internal error, %s overflow"), "emallocarray");
 
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
@@ -148,19 +148,19 @@ erealloc(void *ptr, size_t size)
 }
 
 /*
- * erealloc3() realloc(3)s nmemb * size bytes and exits with an error
+ * ereallocarray() realloc(3)s nmemb * size bytes and exits with an error
  * if overflow would occur or if the system malloc(3)/realloc(3) fails.
  * You can call erealloc() with a NULL pointer even if the system realloc(3)
  * does not support this.
  */
 void *
-erealloc3(void *ptr, size_t nmemb, size_t size)
+ereallocarray(void *ptr, size_t nmemb, size_t size)
 {
 
     if (nmemb == 0 || size == 0)
-	fatalx_nodebug(_("internal error, tried to erealloc3(0)"));
+	fatalx_nodebug(_("internal error, tried to ereallocarray(0)"));
     if (nmemb > SIZE_MAX / size)
-	fatalx_nodebug(_("internal error, %s overflow"), "erealloc3");
+	fatalx_nodebug(_("internal error, %s overflow"), "ereallocarray");
 
     size *= nmemb;
     ptr = ptr ? realloc(ptr, size) : malloc(size);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *
  * Borrowed heavily from newrole source code
@@ -398,7 +398,7 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
-    nargv = emalloc2(argc + 2, sizeof(char *));
+    nargv = emallocarray(argc + 2, sizeof(char *));
     if (noexec)
 	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
     else

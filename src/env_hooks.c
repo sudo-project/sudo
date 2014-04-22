@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -125,7 +125,7 @@ rpl_putenv(PUTENV_CONST char *string)
     /* Append at the end if not already found. */
     if (!found) {
 	size_t env_len = (size_t)(ep - environ);
-	char **envp = erealloc3(priv_environ, env_len + 2, sizeof(char *));
+	char **envp = ereallocarray(priv_environ, env_len + 2, sizeof(char *));
 	if (environ != priv_environ)
 	    memcpy(envp, environ, env_len * sizeof(char *));
 	envp[env_len++] = (char *)string;

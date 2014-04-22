@@ -294,7 +294,7 @@ set_plugin(const char *entry, const char *conf_file)
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	}
-	options = emalloc2(nopts + 1, sizeof(*options));
+	options = emallocarray(nopts + 1, sizeof(*options));
 	/* Fill in options array, there is at least one element. */
 	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
 	    options[nopts++] = estrndup(cp, (size_t)(ep - cp));

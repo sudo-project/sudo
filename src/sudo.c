@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -354,7 +354,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
      */
     ud->ngroups = sudo_conf_max_groups();
     if (ud->ngroups > 0) {
-	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+	ud->groups = emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 	/* No error on insufficient space if user specified max_groups. */
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	rval = 0;
@@ -369,7 +369,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	for (tries = 0; tries < 10 && rval == -1; tries++) {
 	    ud->ngroups <<= 1;
 	    efree(ud->groups);
-	    ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+	    ud->groups = emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
     }
@@ -396,7 +396,7 @@ get_user_groups(struct user_details *ud)
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
 	    /* Use groups from kernel if not too many or source is static. */
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+		ud->groups = emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
 		    efree(ud->groups);
 		    ud->groups = NULL;
@@ -442,7 +442,7 @@ get_user_info(struct user_details *ud)
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
-    user_info = emalloc2(32, sizeof(char *));
+    user_info = emallocarray(32, sizeof(char *));
 
     ud->pid = getpid();
     ud->ppid = getppid();

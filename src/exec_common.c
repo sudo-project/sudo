@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -100,7 +100,7 @@ disable_execute(char *const envp[])
     if (!enabled)
 	env_size++;
 #endif
-    nenvp = emalloc2(env_size, sizeof(*envp));
+    nenvp = emallocarray(env_size, sizeof(*envp));
     memcpy(nenvp, envp, env_len * sizeof(*envp));
     nenvp[env_len] = NULL;
 
@@ -151,7 +151,7 @@ sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexe
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
-	nargv = emalloc2(argc + 2, sizeof(char *));
+	nargv = emallocarray(argc + 2, sizeof(char *));
 	nargv[0] = "sh";
 	nargv[1] = (char *)path;
 	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));

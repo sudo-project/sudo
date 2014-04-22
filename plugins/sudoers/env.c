@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2013
+ * Copyright (c) 2000-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -60,8 +60,8 @@
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
  * could be signed (as it is on SunOS 4.x).  This just means that
- * emalloc2() and erealloc3() cannot allocate huge amounts on such a
- * platform but that is OK since sudo doesn't need to do so anyway.
+ * we cannot allocate huge amounts on such a platform but that is OK
+ * since sudo doesn't need to do so anyway.
  */
 #ifndef SIZE_MAX
 # ifdef SIZE_T_MAX
@@ -241,7 +241,7 @@ env_init(char * const envp[])
 
 	env.env_len = len;
 	env.env_size = len + 1 + 128;
-	env.envp = emalloc2(env.env_size, sizeof(char *));
+	env.envp = emallocarray(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
@@ -755,7 +755,7 @@ rebuild_env(void)
     env.env_len = 0;
     env.env_size = 128;
     old_envp = env.envp;
-    env.envp = emalloc2(env.env_size, sizeof(char *));
+    env.envp = emallocarray(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
 #else

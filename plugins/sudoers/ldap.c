@@ -2806,7 +2806,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
      */
     if (++lres->nentries > lres->allocated_entries) {
 	lres->allocated_entries += ALLOCATION_INCREMENT;
-	lres->entries = erealloc3(lres->entries, lres->allocated_entries,
+	lres->entries = ereallocarray(lres->entries, lres->allocated_entries,
 	    sizeof(lres->entries[0]));
     }
 

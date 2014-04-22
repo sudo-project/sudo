@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -132,7 +132,7 @@ sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
 
      dst->name = estrdup(src->name);
      dst->num_values = src->num_values;
-     dst->values = emalloc2(dst->num_values, sizeof(char *));
+     dst->values = emallocarray(dst->num_values, sizeof(char *));
 
      for (i = 0; i < dst->num_values; ++i)
 	  dst->values[i] = estrdup(src->values[i]);
@@ -150,7 +150,7 @@ sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
      sudo_debug_printf(SUDO_DEBUG_INFO, "emalloc: cnt=%d", src->num_attrs);
 
      dst->num_attrs = src->num_attrs;
-     dst->attrs = emalloc2(dst->num_attrs, sizeof(struct sss_sudo_attr));
+     dst->attrs = emallocarray(dst->num_attrs, sizeof(struct sss_sudo_attr));
 
      for (i = 0; i < dst->num_attrs; ++i)
 	  sudo_sss_attrcpy(dst->attrs + i, src->attrs + i);
@@ -185,7 +185,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 
     out_res = emalloc(sizeof(struct sss_sudo_result));
     out_res->rules = in_res->num_rules > 0 ?
-	emalloc2(in_res->num_rules, sizeof(struct sss_sudo_rule)) : NULL;
+	emallocarray(in_res->num_rules, sizeof(struct sss_sudo_rule)) : NULL;
     out_res->num_rules = 0;
 
     for (i = l = 0; i < in_res->num_rules; ++i) {
@@ -209,7 +209,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	    in_res->num_rules, l);
 	if (l > 0) {
 	    out_res->rules =
-		erealloc3(out_res->rules, l, sizeof(struct sss_sudo_rule));
+		ereallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
 	} else {
 	    efree(out_res->rules);
 	    out_res->rules = NULL;

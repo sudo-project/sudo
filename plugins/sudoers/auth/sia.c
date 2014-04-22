@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2010-2013
+ * Copyright (c) 1999-2005, 2007, 2010-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -96,7 +96,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
-    sudo_argv = emalloc2(sudo_argc + 1, sizeof(char *));
+    sudo_argv = emallocarray(sudo_argc + 1, sizeof(char *));
     sudo_argv[0] = "sudo";
     for (i = 0; i < NewArgc; i++)
 	sudo_argv[i + 1] = NewArgv[i];

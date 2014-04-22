@@ -250,13 +250,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     if (argc == 0) {
 	NewArgc = 1;
-	NewArgv = emalloc2(NewArgc + 1, sizeof(char *));
+	NewArgv = emallocarray(NewArgc + 1, sizeof(char *));
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
 	/* Must leave an extra slot before NewArgv for bash's --login */
 	NewArgc = argc;
-	NewArgv = emalloc2(NewArgc + 2, sizeof(char *));
+	NewArgv = emallocarray(NewArgc + 2, sizeof(char *));
 	memcpy(++NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL)
@@ -1020,7 +1020,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***a
 	efree(editor);
 	debug_return_str(NULL);
     }
-    nargv = (char **) emalloc2(nargc + 1 + nfiles + 1, sizeof(char *));
+    nargv = (char **) emallocarray(nargc + 1 + nfiles + 1, sizeof(char *));
     for (ac = 0; cp != NULL && ac < nargc; ac++) {
 	nargv[ac] = cp;
 	cp = strtok(NULL, " \t");

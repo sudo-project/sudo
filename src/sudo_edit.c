@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008, 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -147,7 +147,7 @@ sudo_edit(struct command_details *command_details)
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
      */
-    tf = emalloc2(nfiles, sizeof(*tf));
+    tf = emallocarray(nfiles, sizeof(*tf));
     memset(tf, 0, nfiles * sizeof(*tf));
     for (i = 0, j = 0; i < nfiles; i++) {
 	rc = -1;
@@ -230,7 +230,7 @@ sudo_edit(struct command_details *command_details)
      * to create a new argv.
      */
     nargc = editor_argc + nfiles;
-    nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
+    nargv = (char **) emallocarray(nargc + 1, sizeof(char *));
     for (ac = 0; ac < editor_argc; ac++)
 	nargv[ac] = command_details->argv[ac];
     for (i = 0; i < nfiles && ac < nargc; )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -183,7 +183,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
 
-    env_add = emalloc2(env_size, sizeof(char *));
+    env_add = emallocarray(env_size, sizeof(char *));
 
     /* Pass progname to plugin so it can call initprogname() */
     sudo_settings[ARG_PROGNAME].value = getprogname();
@@ -371,7 +371,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	} else if (!got_end_of_args && is_envar) {
 	    if (nenv == env_size - 2) {
 		env_size *= 2;
-		env_add = erealloc3(env_add, env_size, sizeof(char *));
+		env_add = ereallocarray(env_add, env_size, sizeof(char *));
 	    }
 	    env_add[nenv++] = argv[optind];
 
@@ -460,7 +460,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
 		strlen(argv[argc - 1]) + 1;
 
-	    cmnd = dst = emalloc2(cmnd_size, 2);
+	    cmnd = dst = emallocarray(cmnd_size, 2);
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
@@ -477,7 +477,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    ac += 2; /* -c cmnd */
 	}
 
-	av = emalloc2(ac + 1, sizeof(char *));
+	av = emallocarray(ac + 1, sizeof(char *));
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = "-c";
@@ -495,7 +495,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #ifdef _PATH_SUDO_PLUGIN_DIR
     sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
-    settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
+    settings = emallocarray(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",

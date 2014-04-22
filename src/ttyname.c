@@ -263,7 +263,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 		/* Add to list of subdirs to search. */
 		if (num_subdirs + 1 > max_subdirs) {
 		    max_subdirs += 64;
-		    subdirs = erealloc3(subdirs, max_subdirs, sizeof(char *));
+		    subdirs = ereallocarray(subdirs, max_subdirs, sizeof(char *));
 		}
 		subdirs[num_subdirs++] = estrdup(pathbuf);
 	    }

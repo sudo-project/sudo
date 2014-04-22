@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -396,7 +396,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     }
 
     /* Build up argument vector for the command */
-    av = emalloc2(ac, sizeof(char *));
+    av = emallocarray(ac, sizeof(char *));
     if ((av[0] = strrchr(editor, '/')) != NULL)
 	av[0]++;
     else

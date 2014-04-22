@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -502,8 +502,8 @@ replay_session(const double max_wait, const char *decimal)
 		    /* Store the line in iov followed by \r\n pair. */
 		    if (iovcnt + 3 > iovmax) {
 			iov = iovmax ?
-			    erealloc3(iov, iovmax <<= 1, sizeof(*iov)) :
-			    emalloc2(iovmax = 32, sizeof(*iov));
+			    ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
+			    emallocarray(iovmax = 32, sizeof(*iov));
 		    }
 		    linelen = (size_t)(ep - cp) + 1;
 		    iov[iovcnt].iov_base = cp;
@@ -1020,7 +1020,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     pathbuf[sdlen] = '\0';
 
     /* Store potential session dirs for sorting. */
-    sessions = emalloc2(sessions_size, sizeof(char *));
+    sessions = emallocarray(sessions_size, sizeof(char *));
     while ((dp = readdir(d)) != NULL) {
 	/* Skip "." and ".." */
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
@@ -1040,7 +1040,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	/* Add name to session list. */
 	if (sessions_len + 1 > sessions_size) {
 	    sessions_size <<= 1;
-	    sessions = erealloc3(sessions, sessions_size, sizeof(char *));
+	    sessions = ereallocarray(sessions, sessions_size, sizeof(char *));
 	}
 	sessions[sessions_len++] = estrdup(dp->d_name);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -60,7 +60,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     base->pfd_high = -1;
     base->pfd_max = 32;
-    base->pfds = erealloc3(NULL, base->pfd_max, sizeof(struct pollfd));
+    base->pfds = ereallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
     for (i = 0; i < base->pfd_max; i++) {
 	base->pfds[i].fd = -1;
     }
@@ -87,7 +87,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	int i;
 	base->pfd_max <<= 1;
 	base->pfds =
-	    erealloc3(base->pfds, base->pfd_max, sizeof(struct pollfd));
+	    ereallocarray(base->pfds, base->pfd_max, sizeof(struct pollfd));
 	for (i = base->pfd_free; i < base->pfd_max; i++) {
 	    base->pfds[i].fd = -1;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010, 2012-1013
+ * Copyright (c) 2009-2010, 2012-1014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -27,9 +27,9 @@ int	 easprintf(char **, const char *, ...) __printflike(2, 3);
 int	 evasprintf(char **, const char *, va_list) __printflike(2, 0);
 void	*ecalloc(size_t, size_t) __malloc_like;
 void	*emalloc(size_t) __malloc_like;
-void	*emalloc2(size_t, size_t) __malloc_like;
+void	*emallocarray(size_t, size_t) __malloc_like;
 void	*erealloc(void *, size_t);
-void	*erealloc3(void *, size_t, size_t);
+void	*ereallocarray(void *, size_t, size_t);
 void	*erecalloc(void *, size_t, size_t, size_t);
 char	*estrdup(const char *) __malloc_like;
 char	*estrndup(const char *, size_t) __malloc_like;

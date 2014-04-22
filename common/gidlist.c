@@ -67,7 +67,7 @@ parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
 	ngids++;
     /* Allocate and fill in array. */
     if (ngids != 0) {
-	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	gids = emallocarray(ngids, sizeof(GETGROUPS_T));
 	ngids = 0;
 	if (basegid != NULL)
 	    gids[ngids++] = *basegid;

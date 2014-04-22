@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -135,7 +135,7 @@ group_plugin_load(char *plugin_info)
             }
         }
 	if (ac != 0) 	{
-	    argv = emalloc2(ac, sizeof(char *));
+	    argv = emallocarray(ac, sizeof(char *));
 	    ac = 0;
 	    for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
 		argv[ac++] = cp;
