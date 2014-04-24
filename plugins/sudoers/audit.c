@@ -55,10 +55,12 @@ audit_success(char *exec_args[])
 
     if (exec_args != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	rc = bsm_audit_success(exec_args);
+	if (bsm_audit_success(exec_args) == -1)
+	    rc = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	rc = linux_audit_command(exec_args, 1);
+	if (linux_audit_command(exec_args, 1) == -1)
+	    rc = -1;
 #endif
     }
 
@@ -77,14 +79,18 @@ audit_failure(char *exec_args[], char const *const fmt, ...)
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     if (exec_args != NULL) {
-	va_start(ap, fmt);
 #ifdef HAVE_BSM_AUDIT
-	rc = bsm_audit_failure(exec_args, _(fmt), ap);
+	va_start(ap, fmt);
+	if (bsm_audit_failure(exec_args, _(fmt), ap) == -1)
+	    rc = -1;
+	va_end(ap);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	rc = linux_audit_command(exec_args, 0);
-#endif
+	va_start(ap, fmt);
+	if (linux_audit_command(exec_args, 0) == -1)
+	    rc = -1;
 	va_end(ap);
+#endif
     }
 
     sudoers_setlocale(oldlocale, NULL);
