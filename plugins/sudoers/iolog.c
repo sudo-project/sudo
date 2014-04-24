@@ -555,8 +555,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	fputs(*av, fp);
     }
     fputc('\n', fp);
-    fclose(fp);
-    debug_return_bool(ferror(fp) == 0);
+    debug_return_bool(fclose(fp) == 0);
 }
 
 static int
