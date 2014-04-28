@@ -65,8 +65,9 @@ get_boottime(struct timeval *tv)
 {
     char *line = NULL;
     size_t linesize = 0;
+    bool found = false;
     ssize_t len;
-    FILE * fp;
+    FILE *fp;
     debug_decl(get_boottime, SUDO_DEBUG_UTIL)
 
     /* read btime from /proc/stat */
@@ -78,7 +79,8 @@ get_boottime(struct timeval *tv)
 		if (llval > 0) {
 		    tv->tv_sec = (time_t)llval;
 		    tv->tv_usec = 0;
-		    debug_return_bool(1);
+		    found = true;
+		    break;
 		}
 	    }
 	}
@@ -86,7 +88,7 @@ get_boottime(struct timeval *tv)
 	free(line);
     }
 
-    debug_return_bool(0);
+    debug_return_bool(found);
 }
 
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
