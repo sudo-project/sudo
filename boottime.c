@@ -66,8 +66,9 @@ get_boottime(tv)
 {
     char *line = NULL;
     size_t linesize = 0;
+    int found = 0;
     ssize_t len;
-    FILE * fp;
+    FILE *fp;
 
     /* read btime from /proc/stat */
     fp = fopen("/proc/stat", "r");
@@ -76,14 +77,15 @@ get_boottime(tv)
 	    if (strncmp(line, "btime ", 6) == 0) {
 		tv->tv_sec = atoi(line + 6);
 		tv->tv_usec = 0;
-		return 1;
+		found = 1;
+		break;
 	    }
 	}
 	fclose(fp);
 	free(line);
     }
 
-    return 0;
+    return found;
 }
 
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
