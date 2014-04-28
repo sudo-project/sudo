@@ -324,7 +324,7 @@ void sudo_setspent(void);
 char *get_timestr(time_t, int);
 
 /* boottime.c */
-int get_boottime(struct timeval *);
+bool get_boottime(struct timeval *);
 
 /* iolog.c */
 bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);

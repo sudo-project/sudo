@@ -28,6 +28,11 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
 # if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
 #  include <memory.h>
@@ -60,7 +65,7 @@
  */
 
 #if defined(__linux__)
-int
+bool
 get_boottime(struct timeval *tv)
 {
     char *line = NULL;
@@ -93,7 +98,7 @@ get_boottime(struct timeval *tv)
 
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
 
-int
+bool
 get_boottime(struct timeval *tv)
 {
     size_t size;
@@ -104,9 +109,9 @@ get_boottime(struct timeval *tv)
     mib[1] = KERN_BOOTTIME;
     size = sizeof(*tv);
     if (sysctl(mib, 2, tv, &size, NULL, 0) != -1)
-	debug_return_bool(1);
+	debug_return_bool(true);
 
-    debug_return_bool(0);
+    debug_return_bool(false);
 }
 
 #elif defined(HAVE_GETUTXID)
@@ -153,6 +158,6 @@ int
 get_boottime(struct timeval *tv)
 {
     debug_decl(get_boottime, SUDO_DEBUG_UTIL)
-    debug_return_bool(0);
+    debug_return_bool(false);
 }
 #endif
