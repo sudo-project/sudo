@@ -2082,10 +2082,13 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
 	if (old_name != NULL)
 	    *old_name = sudo_getenv("KRB5CCNAME");
     }
-    if (name != NULL && *name != '\0')
-	sudo_setenv("KRB5CCNAME", name, true);
-    else
-	sudo_unsetenv("KRB5CCNAME");
+    if (name != NULL && *name != '\0') {
+	if (sudo_setenv("KRB5CCNAME", name, true) == -1)
+	    rc = -1;
+    } else {
+	if (sudo_unsetenv("KRB5CCNAME") == -1)
+	    rc = -1;
+    }
 
     debug_return_int(rc);
 }
@@ -2500,8 +2503,8 @@ sudo_ldap_open(struct sudo_nss *nss)
 
     /* Prevent reading of user ldaprc and system defaults. */
     if (sudo_getenv("LDAPNOINIT") == NULL) {
-	ldapnoinit = true;
-	sudo_setenv("LDAPNOINIT", "1", true);
+	if (sudo_setenv("LDAPNOINIT", "1", true) == 0)
+	    ldapnoinit = true;
     }
 
     /* Set global LDAP options */
@@ -2533,7 +2536,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	goto done;
 
     if (ldapnoinit)
-	sudo_unsetenv("LDAPNOINIT");
+	(void) sudo_unsetenv("LDAPNOINIT");
 
     if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
 #if defined(HAVE_LDAP_START_TLS_S)

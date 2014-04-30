@@ -364,7 +364,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	def_env_reset = false;
 
     /* Build a new environment that avoids any nasty bits. */
-    rebuild_env();
+    if (!rebuild_env())
+	goto bad;
 
     /* Require a password if sudoers says so.  */
     rval = check_user(validated, sudo_mode);
@@ -421,8 +422,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    /* XXX - audit? */
 	    warningx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
-	} else
-	    validate_env_vars(sudo_user.env_vars);
+	} else {
+	    if (!validate_env_vars(sudo_user.env_vars))
+		goto bad;
+	}
     }
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT))) {
@@ -489,7 +492,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	/* Insert system-wide environment variables. */
-	read_env_file(_PATH_ENVIRONMENT, true);
+	if (!read_env_file(_PATH_ENVIRONMENT, true))
+	    warning("%s", _PATH_ENVIRONMENT);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	/* Set environment based on login class. */
@@ -504,11 +508,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Insert system-wide environment variables. */
-    if (def_env_file)
-	read_env_file(def_env_file, false);
+    if (def_env_file) {
+	if (!read_env_file(def_env_file, false))
+	    warning("%s", def_env_file);
+    }
 
     /* Insert user-specified environment variables. */
-    insert_env_vars(sudo_user.env_vars);
+    if (!insert_env_vars(sudo_user.env_vars))
+	goto bad;
 
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	efree(safe_cmnd);

@@ -93,7 +93,8 @@ sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_aix_cleanup, SUDO_DEBUG_AUTH)
 
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
-    sudo_unsetenv("AUTHSTATE");
+    if (sudo_unsetenv("AUTHSTATE") == -1)
+	debug_return_int(AUTH_FAILURE);
 
     debug_return_int(AUTH_SUCCESS);
 }

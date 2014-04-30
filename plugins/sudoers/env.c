@@ -285,13 +285,17 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	size_t nsize;
 
 	if (env.env_size > SIZE_MAX - 128) {
-	    fatalx_nodebug(U_("internal error, %s overflow"),
+	    warningx_nodebug(U_("internal error, %s overflow"),
 		"sudo_putenv_nodebug");
+	    errno = EOVERFLOW;
+	    return -1;
 	}
 	nsize = env.env_size + 128;
 	if (nsize > SIZE_MAX / sizeof(char *)) {
-	    fatalx_nodebug(U_("internal error, %s overflow"),
+	    warningx_nodebug(U_("internal error, %s overflow"),
 		"sudo_putenv_nodebug");
+	    errno = EOVERFLOW;
+	    return -1;
 	}
 	nenvp = realloc(env.envp, nsize * sizeof(char *));
 	if (nenvp == NULL) {
@@ -364,9 +368,8 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
     if (rval == -1) {
 #ifdef ENV_DEBUG
 	if (env.envp[env.env_len] != NULL)
-	    fatalx(U_("sudo_putenv: corrupted envp, length mismatch"));
+	    warningx(U_("sudo_putenv: corrupted envp, length mismatch"));
 #endif
-	fatal(NULL);
     }
     debug_return_int(rval);
 }
@@ -381,7 +384,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 {
     char *estring;
     size_t esize;
-    int rval;
+    int rval = -1;
     debug_decl(sudo_setenv2, SUDO_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
@@ -392,9 +395,11 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
-	fatalx(U_("internal error, %s overflow"), __func__);
+	warningx(U_("internal error, %s overflow"), __func__);
+	errno = EOVERFLOW;
+    } else {
+	rval = sudo_putenv(estring, dupcheck, overwrite);
     }
-    rval = sudo_putenv(estring, dupcheck, overwrite);
     if (rval == -1)
 	efree(estring);
     debug_return_int(rval);
@@ -684,17 +689,23 @@ env_should_keep(const char *var)
  * Merge another environment with our private copy.
  * Only overwrite an existing variable if it is not
  * being preserved from the user's environment.
+ * Returns true on success or false on failure.
  */
-void
+bool
 env_merge(char * const envp[])
 {
     char * const *ep;
+    bool rval = true;
     debug_decl(env_merge, SUDO_DEBUG_ENV)
 
-    for (ep = envp; *ep != NULL; ep++)
-	sudo_putenv(*ep, true, !env_should_keep(*ep));
-
-    debug_return;
+    for (ep = envp; *ep != NULL; ep++) {
+	if (sudo_putenv(*ep, true, !env_should_keep(*ep)) == -1) {
+	    /* XXX cannot undo on failure */
+	    rval = false;
+	    break;
+	}
+    }
+    debug_return_bool(rval);
 }
 
 static void
@@ -738,14 +749,16 @@ env_update_didvar(const char *ep, unsigned int *didvar)
  * Build a new environment and ether clear potentially dangerous
  * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
+ * Returns true on success or false on failure.
  */
-void
+bool
 rebuild_env(void)
 {
     char **old_envp, **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN + 1];
     unsigned int didvar;
     bool reset_home = false;
+    debug_decl(rebuild_env, SUDO_DEBUG_ENV)
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -821,7 +834,8 @@ rebuild_env(void)
 
 	    if (keepit) {
 		/* Preserve variable. */
-		sudo_putenv(*ep, false, false);
+		if (sudo_putenv(*ep, false, false) == -1)
+		    goto bad;
 		env_update_didvar(*ep, &didvar);
 	    }
 	}
@@ -869,7 +883,10 @@ rebuild_env(void)
 		easprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name);
 	    else
 		easprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name);
-	    sudo_putenv(cp, ISSET(didvar, DID_MAIL), true);
+	    if (sudo_putenv(cp, ISSET(didvar, DID_MAIL), true) == -1) {
+		free(cp);
+		goto bad;
+	    }
 	}
     } else {
 	/*
@@ -891,13 +908,15 @@ rebuild_env(void)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
 		    SET(didvar, DID_TERM);
-		sudo_putenv(*ep, false, false);
+		if (sudo_putenv(*ep, false, false) == -1)
+		    goto bad;
 	    }
 	}
     }
     /* Replace the PATH envariable with a secure one? */
     if (def_secure_path && !user_is_exempt()) {
-	sudo_setenv2("PATH", def_secure_path, true, true);
+	if (sudo_setenv2("PATH", def_secure_path, true, true) == -1)
+	    goto bad;
 	SET(didvar, DID_PATH);
     }
 
@@ -921,63 +940,94 @@ rebuild_env(void)
 	sudo_setenv2("HOME", runas_pw->pw_dir, true, true);
 
     /* Provide default values for $TERM and $PATH if they are not set. */
-    if (!ISSET(didvar, DID_TERM))
-	sudo_putenv("TERM=unknown", false, false);
-    if (!ISSET(didvar, DID_PATH))
-	sudo_setenv2("PATH", _PATH_STDPATH, false, true);
+    if (!ISSET(didvar, DID_TERM)) {
+	if (sudo_putenv("TERM=unknown", false, false) == -1)
+	    goto bad;
+    }
+    if (!ISSET(didvar, DID_PATH)) {
+	if (sudo_setenv2("PATH", _PATH_STDPATH, false, true) == -1)
+	    goto bad;
+    }
 
     /* Set PS1 if SUDO_PS1 is set. */
-    if (ps1 != NULL)
-	sudo_putenv(ps1, true, true);
+    if (ps1 != NULL) {
+	if (sudo_putenv(ps1, true, true) == -1)
+	    goto bad;
+    }
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	easprintf(&cp, "%s %s", user_cmnd, user_args);
-	sudo_setenv2("SUDO_COMMAND", cp, true, true);
-	efree(cp);
+	easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
+	if (sudo_putenv(cp, true, true) == -1) {
+	    efree(cp);
+	    goto bad;
+	}
     } else {
-	sudo_setenv2("SUDO_COMMAND", user_cmnd, true, true);
+	if (sudo_setenv2("SUDO_COMMAND", user_cmnd, true, true) == -1)
+	    goto bad;
     }
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
-    sudo_setenv2("SUDO_USER", user_name, true, true);
+    if (sudo_setenv2("SUDO_USER", user_name, true, true) == -1)
+	goto bad;
     snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_uid);
-    sudo_setenv2("SUDO_UID", idbuf, true, true);
+    if (sudo_setenv2("SUDO_UID", idbuf, true, true) == -1)
+	goto bad;
     snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
-    sudo_setenv2("SUDO_GID", idbuf, true, true);
+    if (sudo_setenv2("SUDO_GID", idbuf, true, true) == -1)
+	goto bad;
 
     /* Free old environment. */
     efree(old_envp);
+
+    debug_return_bool(true);
+
+bad:
+    debug_return_bool(false);
 }
 
-void
+/*
+ * Insert all environment variables in envp into the private copy
+ * of the environment.
+ * Returns true on success or false on failure.
+ */
+bool
 insert_env_vars(char * const envp[])
 {
     char * const *ep;
-
-    if (envp == NULL)
-	return;
+    bool rval = true;
+    debug_decl(insert_env_vars, SUDO_DEBUG_ENV)
 
     /* Add user-specified environment variables. */
-    for (ep = envp; *ep != NULL; ep++)
-	sudo_putenv(*ep, true, true);
+    if (envp != NULL) {
+	for (ep = envp; *ep != NULL; ep++) {
+	    /* XXX - no undo on failure */
+	    if (sudo_putenv(*ep, true, true) == -1) {
+		rval = false;
+		break;
+	    }
+	}
+    }
+    debug_return_bool(rval);
 }
 
 /*
  * Validate the list of environment variables passed in on the command
  * line against env_delete, env_check, and env_keep.
- * Calls log_fatal() if any specified variables are not allowed.
+ * Calls log_warning() if any specified variables are not allowed.
+ * Returns true if allowed, else false.
  */
-void
+bool
 validate_env_vars(char * const env_vars[])
 {
     char * const *ep;
     char *eq, *bad = NULL;
     size_t len, blen = 0, bsize = 0;
-    bool okvar;
+    bool okvar, rval = true;
+    debug_decl(validate_env_vars, SUDO_DEBUG_ENV)
 
     if (env_vars == NULL)
-	return;
+	debug_return_bool(true);	/* nothing to do */
 
     /* Add user-specified environment variables. */
     for (ep = env_vars; *ep != NULL; ep++) {
@@ -1011,11 +1061,12 @@ validate_env_vars(char * const env_vars[])
     if (bad != NULL) {
 	bad[blen - 2] = '\0';		/* remove trailing ", " */
 	/* XXX - audit? */
-	log_fatal(NO_MAIL,
+	log_warning(NO_MAIL,
 	    N_("sorry, you are not allowed to set the following environment variables: %s"), bad);
-	/* NOTREACHED */
 	efree(bad);
+	rval = false;
     }
+    debug_return_bool(rval);
 }
 
 /*
@@ -1028,15 +1079,20 @@ validate_env_vars(char * const env_vars[])
  * Invalid lines, blank lines, or lines consisting solely of a comment
  * character are skipped.
  */
-void
+bool
 read_env_file(const char *path, int overwrite)
 {
     FILE *fp;
+    bool rval = true;
     char *cp, *var, *val, *line = NULL;
     size_t var_len, val_len, linesize = 0;
+    debug_decl(read_env_file, SUDO_DEBUG_ENV)
 
-    if ((fp = fopen(path, "r")) == NULL)
-	return;
+    if ((fp = fopen(path, "r")) == NULL) {
+	if (errno != ENOENT)
+	    rval = false;
+	debug_return_bool(rval);
+    }
 
     while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
 	/* Skip blank or comment lines */
@@ -1070,10 +1126,16 @@ read_env_file(const char *path, int overwrite)
 	memcpy(cp, var, var_len + 1); /* includes '=' */
 	memcpy(cp + var_len + 1, val, val_len + 1); /* includes NUL */
 
-	sudo_putenv(cp, true, overwrite);
+	if (sudo_putenv(cp, true, overwrite) == -1) {
+	    /* XXX - no undo on failure */
+	    rval = false;
+	    break;
+	}
     }
     free(line);
     fclose(fp);
+
+    debug_return_bool(rval);
 }
 
 void

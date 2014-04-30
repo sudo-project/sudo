@@ -336,13 +336,13 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
 /* env.c */
 char **env_get(void);
-void env_merge(char * const envp[]);
+bool env_merge(char * const envp[]);
 void env_init(char * const envp[]);
 void init_envtables(void);
-void insert_env_vars(char * const envp[]);
-void read_env_file(const char *, int);
-void rebuild_env(void);
-void validate_env_vars(char * const envp[]);
+bool insert_env_vars(char * const envp[]);
+bool read_env_file(const char *, int);
+bool rebuild_env(void);
+bool validate_env_vars(char * const envp[]);
 int sudo_setenv(const char *var, const char *val, int overwrite);
 int sudo_unsetenv(const char *var);
 char *sudo_getenv(const char *name);

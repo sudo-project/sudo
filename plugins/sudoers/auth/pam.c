@@ -261,7 +261,8 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env. */
 	    env_init(*user_envp);
-	    env_merge(pam_envp);
+	    if (!env_merge(pam_envp))
+		status = PAM_SYSTEM_ERR;
 	    *user_envp = env_get();
 	    env_init(NULL);
 	    efree(pam_envp);
