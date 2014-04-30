@@ -424,7 +424,7 @@ log_allowed(int status)
 }
 
 /*
- * Perform logging for log_warning()/log_fatal()
+ * Perform logging for log_warning().
  */
 static void
 vlog_warning(int flags, const char *fmt, va_list ap)
@@ -527,23 +527,6 @@ log_warning(int flags, const char *fmt, ...)
     va_end(ap);
 
     debug_return;
-}
-
-void
-log_fatal(int flags, const char *fmt, ...)
-{
-    va_list ap;
-    debug_decl(log_error, SUDO_DEBUG_LOGGING)
-
-    /* Log the error. */
-    va_start(ap, fmt);
-    vlog_warning(flags, fmt, ap);
-    va_end(ap);
-
-    /* Exit the plugin. */
-    sudoers_cleanup();
-    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    fatal_longjmp(1);
 }
 
 #define MAX_MAILFLAGS	63

@@ -583,7 +583,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     memset(&details, 0, sizeof(details));
 
     if (fatal_setjmp() != 0) {
-	/* called via fatal(), fatalx() or log_fatal() */
+	/* called via fatal() or fatalx() */
 	rval = -1;
 	goto done;
     }
@@ -680,7 +680,7 @@ sudoers_io_close(int exit_status, int error)
     debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
 
     if (fatal_setjmp() != 0) {
-	/* called via fatal(), fatalx() or log_fatal() */
+	/* called via fatal() or fatalx() */
 	fatal_disable_setjmp();
 	debug_return;
     }
@@ -704,7 +704,7 @@ sudoers_io_version(int verbose)
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
     if (fatal_setjmp() != 0) {
-	/* called via fatal(), fatalx() or log_fatal() */
+	/* called via fatal() or fatalx() */
 	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
@@ -727,7 +727,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     gettimeofday(&now, NULL);
 
     if (fatal_setjmp() != 0) {
-	/* called via fatal(), fatalx() or log_fatal() */
+	/* called via fatal() or fatalx() */
 	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }

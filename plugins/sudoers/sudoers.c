@@ -225,7 +225,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* XXX - would like to move this to policy.c but need the cleanup. */
     if (fatal_setjmp() != 0) {
-	/* error recovery via fatal(), fatalx() or log_fatal() */
+	/* error recovery via fatal() or fatalx() */
 	rval = -1;
 	goto done;
     }
