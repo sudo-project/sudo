@@ -58,20 +58,6 @@
 #include "sudoers.h"
 
 /*
- * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
- * could be signed (as it is on SunOS 4.x).  This just means that
- * we cannot allocate huge amounts on such a platform but that is OK
- * since sudo doesn't need to do so anyway.
- */
-#ifndef SIZE_MAX
-# ifdef SIZE_T_MAX
-#  define SIZE_MAX	SIZE_T_MAX
-# else
-#  define SIZE_MAX	INT_MAX
-# endif /* SIZE_T_MAX */
-#endif /* SIZE_MAX */
-	
-/*
  * Flags used in rebuild_env()
  */
 #undef DID_TERM

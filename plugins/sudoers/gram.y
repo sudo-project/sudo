@@ -56,19 +56,6 @@
 #include "toke.h"
 
 /*
- * We must define SIZE_MAX for yacc's skeleton.c.
- * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
- * could be signed (as it is on SunOS 4.x).
- */
-#ifndef SIZE_MAX
-# ifdef SIZE_T_MAX
-#  define SIZE_MAX	SIZE_T_MAX
-# else
-#  define SIZE_MAX	INT_MAX
-# endif /* SIZE_T_MAX */
-#endif /* SIZE_MAX */
-
-/*
  * Globals
  */
 bool sudoers_warnings = true;

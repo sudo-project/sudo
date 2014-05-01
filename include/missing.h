@@ -148,6 +148,14 @@
 # endif
 #endif
 
+#ifndef SIZE_MAX
+# ifdef SIZE_T_MAX
+#  define SIZE_MAX	SIZE_T_MAX
+# else
+#  define SIZE_MAX	ULONG_MAX
+# endif /* SIZE_T_MAX */
+#endif /* SIZE_MAX */
+
 #ifndef PATH_MAX
 # ifdef _POSIX_PATH_MAX
 #  define PATH_MAX		_POSIX_PATH_MAX
