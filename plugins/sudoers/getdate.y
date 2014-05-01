@@ -34,9 +34,13 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#include <limits.h>
 #include <ctype.h>
 
 #include "missing.h"
