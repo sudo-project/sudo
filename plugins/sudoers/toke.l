@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -757,66 +757,104 @@ pl_compare(const void *v1, const void *v2)
     return strcmp((*p2)->path, (*p1)->path);
 }
 
-static char *
-switch_dir(struct include_stack *stack, char *dirpath)
+/*
+ * Open dirpath and fill in pathsp with an array of regular files
+ * that do not end in '~' or contain a '.'.
+ * Returns the number of files or -1 on error.
+ * If zero files are found, NULL is stored in pathsp.
+ */
+static int
+read_dir_files(const char *dirpath, struct path_list ***pathsp)
 {
     DIR *dir;
-    unsigned int i, count = 0;
-    unsigned int max_paths = 32;
-    char *path = NULL;
+    int i, count = 0;
+    int max_paths = 32;
     struct dirent *dent;
-    struct stat sb;
-    struct path_list *pl, **paths = NULL;
-    debug_decl(switch_dir, SUDO_DEBUG_PARSER)
+    struct path_list **paths = NULL;
+    debug_decl(read_dir_files, SUDO_DEBUG_PARSER)
 
-    if (!(dir = opendir(dirpath))) {
+    dir = opendir(dirpath);
+    if (dir == NULL) {
 	if (errno != ENOENT) {
 	    warning("%s", dirpath);
 	    sudoerserror(NULL);
 	}
-	goto done;
-    }
-    paths = malloc(sizeof(*paths) * max_paths);
-    if (paths == NULL) {
-	closedir(dir);
 	goto bad;
     }
-    while ((dent = readdir(dir))) {
+    paths = malloc(sizeof(*paths) * max_paths);
+    if (paths == NULL)
+	goto bad;
+    while ((dent = readdir(dir)) != NULL) {
+	struct path_list *pl;
+	struct stat sb;
+	char *path;
+
 	/* Ignore files that end in '~' or have a '.' in them. */
 	if (dent->d_name[0] == '\0' || dent->d_name[NAMLEN(dent) - 1] == '~'
 	    || strchr(dent->d_name, '.') != NULL) {
 	    continue;
 	}
-	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1) {
-	    closedir(dir);
+	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1)
 	    goto bad;
-	}
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
 	    efree(path);
-	    path = NULL;
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
-	if (pl == NULL)
+	if (pl == NULL) {
+	    efree(path);
 	    goto bad;
+	}
 	pl->path = path;
 	if (count >= max_paths) {
 	    struct path_list **tmp;
 	    max_paths <<= 1;
 	    tmp = realloc(paths, sizeof(*paths) * max_paths);
 	    if (tmp == NULL) {
-		closedir(dir);
+		efree(path);
+		efree(pl);
 		goto bad;
 	    }
 	    paths = tmp;
 	}
 	paths[count++] = pl;
-	path = NULL;
     }
     closedir(dir);
+    if (count == 0) {
+	efree(paths);
+	paths = NULL;
+    }
+    *pathsp = paths;
+    debug_return_int(count);
+bad:
+    if (dir != NULL)
+	closedir(dir);
+    for (i = 0; i < count; i++) {
+	efree(paths[i]->path);
+	efree(paths[i]);
+    }
+    efree(paths);
+    debug_return_int(-1);
+}
 
-    if (count == 0)
-	goto done;
+/*
+ * Push a list of all files in dirpath onto stack and
+ * return the first one.
+ * XXX - let caller free dirpath and pop first dir off stack.
+ */
+static char *
+switch_dir(struct include_stack *stack, char *dirpath)
+{
+    struct path_list *first, **paths = NULL;
+    int i, count = 0;
+    char *path;
+    debug_decl(switch_dir, SUDO_DEBUG_PARSER)
+
+    /* XXX - a count of 0 should not be an error. */
+    count = read_dir_files(dirpath, &paths);
+    efree(dirpath); /* XXX - let caller free this instead */
+    if (count <= 0)
+	debug_return_str(NULL);
 
     /* Sort the list as an array in reverse order. */
     qsort(paths, count, sizeof(*paths), pl_compare);
@@ -825,25 +863,15 @@ switch_dir(struct include_stack *stack, char *dirpath)
     for (i = 0; i < count; i++) {
 	SLIST_INSERT_HEAD(&stack->more, paths[i], entries);
     }
+    efree(paths);
 
     /* Pull out the first element for parsing, leave the rest for later. */
-    pl = SLIST_FIRST(&stack->more);
+    first = SLIST_FIRST(&stack->more);
     SLIST_REMOVE_HEAD(&stack->more, entries);
-    path = pl->path;
-    efree(pl);
-done:
-    efree(paths);
-    efree(dirpath);
+    path = first->path;
+    efree(first);
+
     debug_return_str(path);
-bad:
-    for (i = 0; i < count; i++) {
-	efree(paths[i]->path);
-	efree(paths[i]);
-    }
-    efree(paths);
-    efree(dirpath);
-    efree(path);
-    debug_return_str(NULL);
 }
 
 #define MAX_SUDOERS_DEPTH	128
@@ -945,7 +973,8 @@ _push_include(char *path, bool isdir)
 		/* NOTREACHED */
 		debug_return_bool(false);
 	}
-	if (!(path = switch_dir(&istack[idepth], path))) {
+	path = switch_dir(&istack[idepth], path);
+	if (path == NULL) {
 	    /* switch_dir() called sudoerserror() for us */
 	    debug_return_bool(false);
 	}
