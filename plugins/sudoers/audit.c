@@ -70,15 +70,17 @@ audit_success(char *exec_args[])
 int
 audit_failure(char *exec_args[], char const *const fmt, ...)
 {
-    va_list ap;
-    int oldlocale;
     int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
-    /* Audit error messages should be in the sudoers locale. */
-    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-
+#if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
     if (exec_args != NULL) {
+	va_list ap;
+	int oldlocale;
+
+	/* Audit error messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
 #ifdef HAVE_BSM_AUDIT
 	va_start(ap, fmt);
 	if (bsm_audit_failure(exec_args, _(fmt), ap) == -1)
@@ -91,9 +93,10 @@ audit_failure(char *exec_args[], char const *const fmt, ...)
 	    rc = -1;
 	va_end(ap);
 #endif
-    }
 
-    sudoers_setlocale(oldlocale, NULL);
+	sudoers_setlocale(oldlocale, NULL);
+    }
+#endif /* HAVE_BSM_AUDIT || HAVE_LINUX_AUDIT */
 
     debug_return_int(rc);
 }
