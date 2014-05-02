@@ -286,6 +286,11 @@ rescan:
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
 		SET(ev->flags, SUDO_EVQ_ACTIVE);
 	    }
+	    if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
+		/* If nonblocking, return immediately if no active events. */
+		if (TAILQ_EMPTY(&base->active))
+		    goto done;
+	    }
 	    break;
 	default:
 	    /* I/O events active, sudo_ev_scan_impl() already added them. */
@@ -333,7 +338,7 @@ rescan:
 	    SET(base->flags, SUDO_EVBASE_GOT_EXIT);
 	    goto done;
 	}
-	if (flags & (SUDO_EVLOOP_ONCE | SUDO_EVLOOP_NONBLOCK))
+	if (ISSET(flags, SUDO_EVLOOP_ONCE))
 	    break;
     }
 done:
