@@ -343,7 +343,7 @@ DEFVAR			[a-z_]+
 			     * Push current buffer and switch to include file.
 			     * We simply ignore empty directories.
 			     */
-			    if (!push_includedir(path) && parse_error)
+			    if (!push_includedir(path))
 				yyterminate();
 			}
 
@@ -838,40 +838,29 @@ bad:
 }
 
 /*
- * Push a list of all files in dirpath onto stack and
- * return the first one.
- * XXX - let caller free dirpath and pop first dir off stack.
+ * Push a list of all files in dirpath onto stack.
+ * Returns the number of files or -1 on error.
  */
-static char *
+static int
 switch_dir(struct include_stack *stack, char *dirpath)
 {
-    struct path_list *first, **paths = NULL;
-    int i, count = 0;
-    char *path;
+    struct path_list **paths = NULL;
+    int count, i;
     debug_decl(switch_dir, SUDO_DEBUG_PARSER)
 
-    /* XXX - a count of 0 should not be an error. */
     count = read_dir_files(dirpath, &paths);
-    efree(dirpath); /* XXX - let caller free this instead */
-    if (count <= 0)
-	debug_return_str(NULL);
+    if (count > 0) {
+	/* Sort the list as an array in reverse order. */
+	qsort(paths, count, sizeof(*paths), pl_compare);
 
-    /* Sort the list as an array in reverse order. */
-    qsort(paths, count, sizeof(*paths), pl_compare);
-
-    /* Build up the list in sorted order. */
-    for (i = 0; i < count; i++) {
-	SLIST_INSERT_HEAD(&stack->more, paths[i], entries);
+	/* Build up the list in sorted order. */
+	for (i = 0; i < count; i++) {
+	    SLIST_INSERT_HEAD(&stack->more, paths[i], entries);
+	}
+	efree(paths);
     }
-    efree(paths);
 
-    /* Pull out the first element for parsing, leave the rest for later. */
-    first = SLIST_FIRST(&stack->more);
-    SLIST_REMOVE_HEAD(&stack->more, entries);
-    path = first->path;
-    efree(first);
-
-    debug_return_str(path);
+    debug_return_int(count);
 }
 
 #define MAX_SUDOERS_DEPTH	128
@@ -939,6 +928,7 @@ _push_include(char *path, bool isdir)
     SLIST_INIT(&istack[idepth].more);
     if (isdir) {
 	struct stat sb;
+	int count;
 	switch (sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb)) {
 	    case SUDO_PATH_SECURE:
 		break;
@@ -973,20 +963,24 @@ _push_include(char *path, bool isdir)
 		/* NOTREACHED */
 		debug_return_bool(false);
 	}
-	path = switch_dir(&istack[idepth], path);
-	if (path == NULL) {
+	count = switch_dir(&istack[idepth], path);
+	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
-	    debug_return_bool(false);
-	}
-	while ((fp = open_sudoers(path, false, &keepopen)) == NULL) {
-	    /* Unable to open path in includedir, go to next one, if any. */
 	    efree(path);
-	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL)
-		debug_return_bool(false);
+	    debug_return_bool(count ? false : true);
+	}
+
+	/* Parse the first dir entry we can open, leave the rest for later. */
+	do {
+	    efree(path);
+	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL) {
+		/* Unable to open any files in include dir, not an error. */
+		debug_return_bool(true);
+	    }
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    path = pl->path;
 	    efree(pl);
-	}
+	} while ((fp = open_sudoers(path, false, &keepopen)) == NULL);
     } else {
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
 	    /* The error was already printed by open_sudoers() */
