@@ -376,9 +376,9 @@ log_auth_failure(int status, unsigned int tries)
      * If sudoers denied the command we'll log that separately.
      */
     if (ISSET(status, FLAG_BAD_PASSWORD))
-	log_warning(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
+	log_warningx(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
     else if (ISSET(status, FLAG_NON_INTERACTIVE))
-	log_warning(flags, N_("a password is required"));
+	log_warningx(flags, N_("a password is required"));
 
     debug_return;
 }
@@ -424,7 +424,7 @@ log_allowed(int status)
 }
 
 /*
- * Perform logging for log_warning().
+ * Perform logging for log_warning()/log_warningx().
  */
 static void
 vlog_warning(int flags, const char *fmt, va_list ap)
@@ -517,6 +517,20 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 
 void
 log_warning(int flags, const char *fmt, ...)
+{
+    va_list ap;
+    debug_decl(log_error, SUDO_DEBUG_LOGGING)
+
+    /* Log the error. */
+    va_start(ap, fmt);
+    vlog_warning(flags|USE_ERRNO, fmt, ap);
+    va_end(ap);
+
+    debug_return;
+}
+
+void
+log_warningx(int flags, const char *fmt, ...)
 {
     va_list ap;
     debug_decl(log_error, SUDO_DEBUG_LOGGING)

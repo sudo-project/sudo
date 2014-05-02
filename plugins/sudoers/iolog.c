@@ -97,7 +97,7 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
     /* Fast path: not a temporary and already exists. */
     if (!is_temp && stat(path, &sb) == 0) {
 	if (!S_ISDIR(sb.st_mode)) {
-	    log_warning(0, N_("%s exists but is not a directory (0%o)"),
+	    log_warningx(0, N_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
 	    ok = false;
 	}
@@ -108,13 +108,13 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
 	    if (mkdir(path, mode) != 0) {
-		log_warning(USE_ERRNO, N_("unable to mkdir %s"), path);
+		log_warning(0, N_("unable to mkdir %s"), path);
 		ok = false;
 		break;
 	    }
 	    ignore_result(chown(path, (uid_t)-1, parent_gid));
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_warning(0, N_("%s exists but is not a directory (0%o)"),
+	    log_warningx(0, N_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
 	    ok = false;
 	    break;
@@ -128,14 +128,14 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 	/* Create final path component. */
 	if (is_temp) {
 	    if (mkdtemp(path) == NULL) {
-		log_warning(USE_ERRNO, N_("unable to mkdir %s"), path);
+		log_warning(0, N_("unable to mkdir %s"), path);
 		ok = false;
 	    } else {
 		ignore_result(chown(path, (uid_t)-1, parent_gid));
 	    }
 	} else {
 	    if (mkdir(path, mode) != 0 && errno != EEXIST) {
-		log_warning(USE_ERRNO, N_("unable to mkdir %s"), path);
+		log_warning(0, N_("unable to mkdir %s"), path);
 		ok = false;
 	    } else {
 		ignore_result(chown(path, (uid_t)-1, parent_gid));
@@ -199,12 +199,12 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
     if (len <= 0 || (size_t)len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
-	log_warning(USE_ERRNO, "%s/seq", pathbuf);
+	log_warning(0, "%s/seq", pathbuf);
 	debug_return_bool(false);
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1) {
-	log_warning(USE_ERRNO, N_("unable to open %s"), pathbuf);
+	log_warning(0, N_("unable to open %s"), pathbuf);
 	debug_return_bool(false);
     }
     lock_file(fd, SUDO_LOCK);
@@ -245,7 +245,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	nread = read(fd, buf, sizeof(buf) - 1);
 	if (nread != 0) {
 	    if (nread == -1) {
-		log_warning(USE_ERRNO, N_("unable to read %s"), pathbuf);
+		log_warning(0, N_("unable to read %s"), pathbuf);
 		debug_return_bool(false);
 	    }
 	    if (buf[nread - 1] == '\n')
@@ -277,7 +277,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
     /* Rewind and overwrite old seq file, including the NUL byte. */
     if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7) {
-	log_warning(USE_ERRNO, N_("unable to write to %s"), pathbuf);
+	log_warning(0, N_("unable to write to %s"), pathbuf);
 	debug_return_bool(false);
     }
     close(fd);
@@ -300,7 +300,7 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
     len = strlcpy(pathbuf, iolog_path, pathsize);
     if (len >= pathsize) {
 	errno = ENAMETOOLONG;
-	log_warning(USE_ERRNO, "%s", iolog_path);
+	log_warning(0, "%s", iolog_path);
 	debug_return_size_t((size_t)-1);
     }
 
@@ -342,7 +342,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 		iol->fd.f = fdopen(fd, "w");
 	}
 	if (fd == -1 || iol->fd.v == NULL) {
-	    log_warning(USE_ERRNO, N_("unable to create %s"), pathbuf);
+	    log_warning(0, N_("unable to create %s"), pathbuf);
 	    debug_return_bool(false);
 	}
     } else {
@@ -540,7 +540,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     strlcat(pathbuf, "/log", PATH_MAX);
     fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
-	log_warning(USE_ERRNO, N_("unable to create %s"), pathbuf);
+	log_warning(0, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);
     }
 

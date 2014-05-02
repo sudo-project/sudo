@@ -237,14 +237,14 @@ get_authpw(int mode)
     } else {
 	if (def_rootpw) {
 	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
-		log_warning(0, N_("unknown uid: %u"), ROOT_UID);
+		log_warningx(0, N_("unknown uid: %u"), ROOT_UID);
 	} else if (def_runaspw) {
 	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-		log_warning(0, N_("unknown user: %s"), def_runas_default);
+		log_warningx(0, N_("unknown user: %s"), def_runas_default);
 	} else if (def_targetpw) {
 	    if (runas_pw->pw_name == NULL) {
 		/* This should never be NULL as we fake up the passwd struct */
-		log_warning(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
+		log_warningx(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
 		    (unsigned int) runas_pw->pw_uid);
 	    } else {
 		sudo_pw_addref(runas_pw);
