@@ -924,6 +924,16 @@ del_io_events(void)
 
     (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
 
+    SLIST_FOREACH(iob, &iobufs, entries) {
+	if (iob->wevent != NULL) {
+	    if (iob->len > iob->off) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "unflushed data: wevent %p, fd %d, events %d",
+		    iob->wevent, iob->wevent->fd, iob->wevent->events);
+	    }
+	}
+    }
+
     /* Free temporary event base, removing its events. */
     sudo_ev_base_free(evbase);
 
