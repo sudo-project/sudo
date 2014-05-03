@@ -348,7 +348,7 @@ log_failure(int status, int flags)
 void
 log_auth_failure(int status, unsigned int tries)
 {
-    int flags = NO_MAIL;
+    int flags = 0;
     debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING)
 
     /* Handle auditing first. */
@@ -363,13 +363,13 @@ log_auth_failure(int status, unsigned int tries)
     if (ISSET(status, VALIDATE_OK)) {
 	/* Command allowed, auth failed; do we need to send mail? */
 	if (def_mail_badpass || def_mail_always)
-	    flags = 0;
+	    SET(flags, SLOG_SEND_MAIL);
     } else {
 	/* Command denied, auth failed; make sure we don't send mail twice. */
 	if (def_mail_badpass && !should_mail(status))
-	    flags = 0;
+	    SET(flags, SLOG_SEND_MAIL);
 	/* Don't log the bad password message, we'll log a denial instead. */
-	flags |= NO_LOG;
+	SET(flags, SLOG_NO_LOG);
     }
 
     /*
@@ -435,8 +435,8 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     va_list ap2;
     debug_decl(vlog_error, SUDO_DEBUG_LOGGING)
 
-    /* Need extra copy of ap for warning() below. */
-    if (!ISSET(flags, NO_STDERR))
+    /* Need extra copy of ap for vwarning()/vwarningx() below. */
+    if (!ISSET(flags, SLOG_NO_STDERR))
 	va_copy(ap2, ap);
 
     /* Log messages should be in the sudoers locale. */
@@ -452,7 +452,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     }
 
     /* Log to debug file. */
-    if (USE_ERRNO) {
+    if (SLOG_USE_ERRNO) {
 	sudo_debug_printf2(NULL, NULL, 0,
 	    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|sudo_debug_subsys, "%s", message);
     } else {
@@ -460,10 +460,10 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	    SUDO_DEBUG_WARN|sudo_debug_subsys, "%s", message);
     }
 
-    if (ISSET(flags, MSG_ONLY)) {
+    if (ISSET(flags, SLOG_RAW_MSG)) {
 	logline = message;
     } else {
-	logline = new_logline(message, ISSET(flags, USE_ERRNO) ? serrno : 0);
+	logline = new_logline(message, ISSET(flags, SLOG_USE_ERRNO) ? serrno : 0);
         efree(message);
     }
 
@@ -473,13 +473,13 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     /*
      * Send a copy of the error via mail.
      */
-    if (!ISSET(flags, NO_MAIL))
+    if (ISSET(flags, SLOG_SEND_MAIL))
 	send_mail("%s", logline);
 
     /*
      * Log to syslog and/or a file.
      */
-    if (!ISSET(flags, NO_LOG)) {
+    if (!ISSET(flags, SLOG_NO_LOG)) {
 	if (def_syslog)
 	    do_syslog(def_syslog_badpri, logline);
 	if (def_logfile)
@@ -496,14 +496,14 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     /*
      * Tell the user (in their locale).
      */
-    if (!ISSET(flags, NO_STDERR)) {
+    if (!ISSET(flags, SLOG_NO_STDERR)) {
 	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
 	    unsigned int tries = va_arg(ap2, unsigned int);
 	    warningx_nodebug(ngettext("%u incorrect password attempt",
 		"%u incorrect password attempts", tries), tries);
 	} else {
-	    if (ISSET(flags, USE_ERRNO))
+	    if (ISSET(flags, SLOG_USE_ERRNO))
 		vwarning_nodebug(_(fmt), ap2);
 	    else
 		vwarningx_nodebug(_(fmt), ap2);
@@ -523,7 +523,7 @@ log_warning(int flags, const char *fmt, ...)
 
     /* Log the error. */
     va_start(ap, fmt);
-    vlog_warning(flags|USE_ERRNO, fmt, ap);
+    vlog_warning(flags|SLOG_USE_ERRNO, fmt, ap);
     va_end(ap);
 
     debug_return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2009-2013
+ * Copyright (c) 1999-2005, 2009-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -25,23 +25,23 @@
 # include <varargs.h>
 #endif
 
-/* Logging types */
-#define SLOG_SYSLOG		0x01
-#define SLOG_FILE		0x02
-#define SLOG_BOTH		0x03
-
 /*
  * Values for sudoers_setlocale()
  */
 #define SUDOERS_LOCALE_USER     0
 #define SUDOERS_LOCALE_SUDOERS  1
 
+/* Logging types */
+#define SLOG_SYSLOG		0x01
+#define SLOG_FILE		0x02
+#define SLOG_BOTH		0x03
+
 /* Flags for log_warning()/log_warningx() */
-#define MSG_ONLY		0x01
-#define USE_ERRNO		0x02	/* internal use only */
-#define NO_MAIL			0x04
-#define NO_STDERR		0x08
-#define NO_LOG			0x10
+#define SLOG_USE_ERRNO		0x01	/* internal use only */
+#define SLOG_RAW_MSG		0x02	/* do not format msg before logging */
+#define SLOG_SEND_MAIL		0x04	/* log via mail */
+#define SLOG_NO_STDERR		0x08	/* do not log via stderr */
+#define SLOG_NO_LOG		0x10	/* do not log via file or syslog */
 
 /*
  * Maximum number of characters to log per entry.  The syslogger

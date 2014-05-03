@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2008, 2010-2013
+ * Copyright (c) 1999-2005, 2007-2008, 2010-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -112,9 +112,9 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	 * API does not currently provide this unless the auth is standalone.
 	 */
 	if ((error = krb5_unparse_name(sudo_context, princ, &pname))) {
-	    log_warningx(NO_MAIL,
-		      N_("%s: unable to convert principal to string ('%s'): %s"),
-		      auth->name, pw->pw_name, error_message(error));
+	    log_warningx(0,
+		N_("%s: unable to convert principal to string ('%s'): %s"),
+		auth->name, pw->pw_name, error_message(error));
 	    debug_return_int(AUTH_FAILURE);
 	}
 
@@ -155,9 +155,8 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 
     error = krb5_parse_name(sudo_context, pname, &(sudo_krb5_data.princ));
     if (error) {
-	log_warningx(NO_MAIL,
-		  N_("%s: unable to parse '%s': %s"), auth->name, pname,
-		  error_message(error));
+	log_warningx(0, N_("%s: unable to parse '%s': %s"), auth->name, pname,
+	    error_message(error));
 	goto done;
     }
 
@@ -165,9 +164,8 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 		    (long) getpid());
     if ((error = krb5_cc_resolve(sudo_context, cache_name,
 	&(sudo_krb5_data.ccache)))) {
-	log_warningx(NO_MAIL,
-		  N_("%s: unable to resolve credential cache: %s"), auth->name,
-		  error_message(error));
+	log_warningx(0, N_("%s: unable to resolve credential cache: %s"),
+	    auth->name, error_message(error));
 	goto done;
     }
 
@@ -213,9 +211,8 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     /* Set default flags based on the local config file. */
     error = krb5_get_init_creds_opt_alloc(sudo_context, &opts);
     if (error) {
-	log_warningx(NO_MAIL,
-		  N_("%s: unable to allocate options: %s"), auth->name,
-		  error_message(error));
+	log_warningx(0, N_("%s: unable to allocate options: %s"), auth->name,
+	    error_message(error));
 	goto done;
     }
 #ifdef HAVE_HEIMDAL
@@ -228,10 +225,10 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 					     pass, krb5_prompter_posix,
 					     NULL, 0, NULL, opts))) {
 	/* Don't print error if just a bad password */
-	if (error != KRB5KRB_AP_ERR_BAD_INTEGRITY)
-	    log_warningx(NO_MAIL,
-		      N_("%s: unable to get credentials: %s"), auth->name,
-		      error_message(error));
+	if (error != KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+	    log_warningx(0, N_("%s: unable to get credentials: %s"),
+		auth->name, error_message(error));
+	}
 	goto done;
     }
     creds = &credbuf;
@@ -242,13 +239,11 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 
     /* Store credential in cache. */
     if ((error = krb5_cc_initialize(sudo_context, ccache, princ))) {
-	log_warningx(NO_MAIL,
-		  N_("%s: unable to initialize credential cache: %s"),
-		  auth->name, error_message(error));
+	log_warningx(0, N_("%s: unable to initialize credential cache: %s"),
+	    auth->name, error_message(error));
     } else if ((error = krb5_cc_store_cred(sudo_context, ccache, creds))) {
-	log_warningx(NO_MAIL,
-		  N_("%s: unable to store credential in cache: %s"),
-		  auth->name, error_message(error));
+	log_warningx(0, N_("%s: unable to store credential in cache: %s"),
+	    auth->name, error_message(error));
     }
 
 done:
@@ -311,9 +306,8 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
      */
     if ((error = krb5_sname_to_principal(sudo_context, NULL, NULL,
 					KRB5_NT_SRV_HST, &server))) {
-	log_warningx(NO_MAIL,
-		  N_("%s: unable to get host principal: %s"), auth_name,
-		  error_message(error));
+	log_warningx(0, N_("%s: unable to get host principal: %s"), auth_name,
+	    error_message(error));
 	debug_return_int(-1);
     }
 
@@ -325,10 +319,10 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
     error = krb5_verify_init_creds(sudo_context, cred, server, NULL,
 				   NULL, &vopt);
     krb5_free_principal(sudo_context, server);
-    if (error)
-	log_warningx(NO_MAIL,
-		  N_("%s: Cannot verify TGT! Possible attack!: %s"),
-		  auth_name, error_message(error));
+    if (error) {
+	log_warningx(0, N_("%s: Cannot verify TGT! Possible attack!: %s"),
+	    auth_name, error_message(error));
+    }
     debug_return_int(error);
 }
 #endif

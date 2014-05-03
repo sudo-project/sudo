@@ -1047,7 +1047,7 @@ validate_env_vars(char * const env_vars[])
     if (bad != NULL) {
 	bad[blen - 2] = '\0';		/* remove trailing ", " */
 	/* XXX - audit? */
-	log_warningx(NO_MAIL,
+	log_warningx(0,
 	    N_("sorry, you are not allowed to set the following environment variables: %s"), bad);
 	efree(bad);
 	rval = false;

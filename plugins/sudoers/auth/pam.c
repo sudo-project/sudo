@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -95,7 +95,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
     pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
 	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
-	log_warning(NO_MAIL, N_("unable to initialize PAM"));
+	log_warning(0, N_("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -146,27 +146,27 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 		case PAM_SUCCESS:
 		    debug_return_int(AUTH_SUCCESS);
 		case PAM_AUTH_ERR:
-		    log_warningx(NO_MAIL, N_("account validation failure, "
+		    log_warningx(0, N_("account validation failure, "
 			"is your account locked?"));
 		    debug_return_int(AUTH_FATAL);
 		case PAM_NEW_AUTHTOK_REQD:
-		    log_warningx(NO_MAIL, N_("Account or password is "
+		    log_warningx(0, N_("Account or password is "
 			"expired, reset your password and try again"));
 		    *pam_status = pam_chauthtok(pamh,
 			PAM_CHANGE_EXPIRED_AUTHTOK);
 		    if (*pam_status == PAM_SUCCESS)
 			debug_return_int(AUTH_SUCCESS);
 		    if ((s = pam_strerror(pamh, *pam_status)) != NULL) {
-			log_warningx(NO_MAIL,
+			log_warningx(0,
 			    N_("unable to change expired password: %s"), s);
 		    }
 		    debug_return_int(AUTH_FAILURE);
 		case PAM_AUTHTOK_EXPIRED:
-		    log_warningx(NO_MAIL,
+		    log_warningx(0,
 			N_("Password expired, contact your system administrator"));
 		    debug_return_int(AUTH_FATAL);
 		case PAM_ACCT_EXPIRED:
-		    log_warningx(NO_MAIL,
+		    log_warningx(0,
 			N_("Account expired or PAM config lacks an \"account\" "
 			"section for sudo, contact your system administrator"));
 		    debug_return_int(AUTH_FATAL);
@@ -184,7 +184,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    debug_return_int(AUTH_FAILURE);
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)) != NULL)
-		log_warningx(NO_MAIL, N_("PAM authentication error: %s"), s);
+		log_warningx(0, N_("PAM authentication error: %s"), s);
 	    debug_return_int(AUTH_FATAL);
     }
 }

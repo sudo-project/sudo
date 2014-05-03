@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2013
+ * Copyright (c) 1993-1996,1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -236,15 +236,18 @@ get_authpw(int mode)
 	pw = sudo_user.pw;
     } else {
 	if (def_rootpw) {
-	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
-		log_warningx(0, N_("unknown uid: %u"), ROOT_UID);
+	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
+		log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"), ROOT_UID);
+	    }
 	} else if (def_runaspw) {
-	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-		log_warningx(0, N_("unknown user: %s"), def_runas_default);
+	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL) {
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("unknown user: %s"), def_runas_default);
+	    }
 	} else if (def_targetpw) {
 	    if (runas_pw->pw_name == NULL) {
 		/* This should never be NULL as we fake up the passwd struct */
-		log_warningx(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
+		log_warningx(SLOG_RAW_MSG, N_("unknown uid: %u"),
 		    (unsigned int) runas_pw->pw_uid);
 	    } else {
 		sudo_pw_addref(runas_pw);

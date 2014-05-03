@@ -182,10 +182,13 @@ found_it:
     if ((size_t)nwritten == sizeof(struct timestamp_entry))
 	debug_return_bool(true);
 
-    if (nwritten == -1)
-	log_warning(0, N_("unable to write to %s"), timestamp_file);
-    else
-	log_warningx(0, N_("unable to write to %s"), timestamp_file);
+    if (nwritten == -1) {
+	log_warning(SLOG_SEND_MAIL,
+	    N_("unable to write to %s"), timestamp_file);
+    } else {
+	log_warningx(SLOG_SEND_MAIL,
+	    N_("unable to write to %s"), timestamp_file);
+    }
 
     /* Truncate on partial write to be safe. */
     if (nwritten > 0 && old_eof != (off_t)-1) {
@@ -312,8 +315,8 @@ build_timestamp(struct passwd *pw)
     len = snprintf(timestamp_file, sizeof(timestamp_file), "%s/%s",
 	def_timestampdir, user_name);
     if (len <= 0 || (size_t)len >= sizeof(timestamp_file)) {
-	log_warningx(0, N_("timestamp path too long: %s/%s"),
-	    def_timestampdir, user_name);
+	log_warningx(SLOG_SEND_MAIL,
+	    N_("timestamp path too long: %s/%s"), def_timestampdir, user_name);
 	len = -1;
     }
 
@@ -352,7 +355,7 @@ update_timestamp(struct passwd *pw)
     if (uid_changed)
 	(void) restore_perms();
     if (fd == -1) {
-	log_warning(0, N_("unable to open %s"), timestamp_file);
+	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), timestamp_file);
 	goto done;
     }
 
@@ -492,7 +495,8 @@ timestamp_status(struct passwd *pw)
 #ifdef CLOCK_MONOTONIC
 	/* A monotonic clock should never run backwards. */
 	if (diff.tv_sec < 0) {
-	    log_warningx(0, N_("ignoring time stamp from the future"));
+	    log_warningx(SLOG_SEND_MAIL,
+		N_("ignoring time stamp from the future"));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
 	    ts_update_record(fd, &entry, timestamp_hint);
@@ -503,7 +507,7 @@ timestamp_status(struct passwd *pw)
 	timeout.tv_sec *= 2;
 	if (sudo_timespeccmp(&diff, &timeout, >)) {
 	    time_t tv_sec = (time_t)entry.ts.tv_sec;
-	    log_warningx(0,
+	    log_warningx(SLOG_SEND_MAIL,
 		N_("time stamp too far in the future: %20.20s"),
 		4 + ctime(&tv_sec));
 	    status = TS_OLD;
@@ -607,7 +611,7 @@ already_lectured(int unused)
 	if (len > 0 && (size_t)len < sizeof(status_file)) {
 	    debug_return_bool(stat(status_file, &sb) == 0);
 	}
-	log_warningx(0, N_("lecture status path too long: %s/%s"),
+	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
 	    def_lecture_status_dir, user_name);
     }
     debug_return_bool(false);
@@ -628,7 +632,7 @@ set_lectured(void)
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
 	def_lecture_status_dir, user_name);
     if (len <= 0 || (size_t)len >= sizeof(lecture_status)) {
-	log_warningx(0, N_("lecture status path too long: %s/%s"),
+	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
 	    def_lecture_status_dir, user_name);
 	goto done;
     }
