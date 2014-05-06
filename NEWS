@@ -1,3 +1,23 @@
+What's new in Sudo 1.8.10p3?
+
+ * Fixed expansion of %p in the prompt for "sudo -l" when rootpw,
+   runaspw or targetpw is set.  Bug #639
+
+ * Fixed matching of uids and gids which was broken in version 1.8.9.
+   Bug #640
+
+ * PAM credential initialization has been re-enabled.  It was
+   unintentionally disabled by default in version 1.8.8.  The way
+   credentials are initialized has also been fixed.  Bug #642.
+
+ * Fixed a descriptor leak on Linux when determing boot time.  Sudo
+   normally closes extra descriptors before running a command so
+   the impact is limited.  Bug #645
+
+ * Fixed flushing of the last buffer of data when I/O logging is
+   enabled.  This bug, introduced in version 1.8.9, could cause
+   incomplete command output on some systems.  Bug #646
+
 What's new in Sudo 1.8.10p2?
 
  * Fixed a hang introduced in sudo 1.8.10 when timestamp_timeout
