@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,30 +50,40 @@ extern char *get_process_ttyname(void);
 int
 main(int argc, char *argv[])
 {
-    char *tty_libc, *tty_sudo;
-    int rval = 0;
+    char *cp, *tty_libc = NULL, *tty_sudo;
+    int fd, rval = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
-
-    /* Lookup tty name via libc. */
-    if ((tty_libc = ttyname(STDIN_FILENO)) == NULL &&
-	(tty_libc = ttyname(STDOUT_FILENO)) == NULL &&
-	(tty_libc = ttyname(STDERR_FILENO)) == NULL)
-	tty_libc = "none";
-    tty_libc = estrdup(tty_libc);
 
     /* Lookup tty name via sudo (using kernel info if possible). */
     if ((tty_sudo = get_process_ttyname()) == NULL)
 	tty_sudo = estrdup("none");
 
-    if (strcmp(tty_libc, "none") == 0) {
-	printf("%s: SKIP (%s)\n", getprogname(), tty_sudo);
-    } else if (strcmp(tty_libc, tty_sudo) == 0) {
-	printf("%s: OK (%s)\n", getprogname(), tty_sudo);
+    /* Lookup tty name via libc and compare to kernel tty. */
+    for (fd = STDERR_FILENO; fd >= STDIN_FILENO; fd--) {
+	cp = ttyname(fd);
+	if (cp != NULL) {
+	    if (tty_libc == NULL || strcmp(cp, tty_libc) != 0) {
+		efree(tty_libc);
+		tty_libc = estrdup(cp);
+	    }
+	    if (tty_sudo != NULL && strcmp(tty_libc, tty_sudo) == 0) {
+		rval = 0;
+		break;
+	    }
+	}
+    }
+    if (tty_libc == NULL && tty_sudo == NULL)
+	rval = 0;
+
+    if (rval == 0) {
+	printf("%s: OK (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
+    } else if (tty_libc == NULL) {
+	printf("%s: SKIP (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
+	rval = 0;
     } else {
 	printf("%s: FAIL %s (sudo) vs. %s (libc)\n", getprogname(),
-	    tty_sudo, tty_libc);
-	rval = 1;
+	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_sudo : "none");
     }
 
     efree(tty_libc);
