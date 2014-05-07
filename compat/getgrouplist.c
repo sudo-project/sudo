@@ -320,7 +320,7 @@ getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 
     setgrent();
     while ((grp = getgrent()) != NULL) {
-	if (grp->gr_gid == basegid)
+	if (grp->gr_gid == basegid || grp->gr_mem == NULL)
 	    continue;
 
 	for (i = 0; grp->gr_mem[i] != NULL; i++) {
