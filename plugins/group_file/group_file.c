@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -121,7 +121,7 @@ sample_query(const char *user, const char *group, const struct passwd *pwd)
     char **member;
 
     grp = mygetgrnam(group);
-    if (grp != NULL) {
+    if (grp != NULL && grp->gr_mem != NULL) {
 	for (member = grp->gr_mem; *member != NULL; member++) {
 	    if (strcasecmp(user, *member) == 0)
 		return true;
