@@ -17130,6 +17130,28 @@ done
 		    $as_echo "#define HAVE__NSS_INITF_GROUP 1" >>confdefs.h
 
 
+else
+
+		    for ac_header in nss_dbdefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "nss_dbdefs.h" "ac_cv_header_nss_dbdefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_nss_dbdefs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NSS_DBDEFS_H 1
+_ACEOF
+
+			# Older Solaris does not export _nss_initf_group
+			# but we can use our own.
+			$as_echo "#define HAVE_NSS_SEARCH 1" >>confdefs.h
+
+			$as_echo "#define HAVE__NSS_XBYY_BUF_ALLOC 1" >>confdefs.h
+
+
+fi
+
+done
+
+
 fi
 
 

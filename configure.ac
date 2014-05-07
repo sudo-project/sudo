@@ -2322,6 +2322,13 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 		    AC_DEFINE([HAVE_NSS_SEARCH])
 		    AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
 		    AC_DEFINE([HAVE__NSS_INITF_GROUP])
+		], [
+		    AC_CHECK_HEADERS(nss_dbdefs.h, [
+			# Older Solaris does not export _nss_initf_group
+			# but we can use our own.
+			AC_DEFINE([HAVE_NSS_SEARCH])
+			AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
+		    ])
 		])
 	    ], [
 		# HP-UX

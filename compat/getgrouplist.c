@@ -102,7 +102,16 @@ done:
 # define ALIGN(p)	(((unsigned long)(p) + ALIGNBYTES) & ~ALIGNBYTES)
 #endif
 
-extern void _nss_initf_group(nss_db_params_t *);
+#if defined(HAVE__NSS_INITF_GROUP) || defined(HAVE___NSS_INITF_GROUP)
+extern void _nss_initf_group(nss_db_params_t *params);
+#else
+static void
+_nss_initf_group(nss_db_params_t *params)
+{
+    params->name = NSS_DBNAM_GROUP;
+    params->default_config = NSS_DEFCONF_GROUP;
+}
+#endif
 
 static id_t
 strtoid(const char *p, int *errval)
