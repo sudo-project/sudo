@@ -1882,6 +1882,12 @@ case "$host" in
 		shadow_libs_optional="-lshadow"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
+    *-*-gnu*)
+		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
+		# lockf() is broken on the Hurd -- use flock instead
+		ac_cv_func_lockf=no
+		ac_cv_func_flock=yes
+		;;
     *-convex-bsd*)
 		OSDEFS="${OSDEFS} -D_CONVEX_SOURCE"
 		if test -z "$GCC"; then
@@ -2028,7 +2034,7 @@ case "$host" in
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 		;;
     *-*-nextstep*)
-		# lockf() on is broken on the NeXT -- use flock instead
+		# lockf() is broken on the NeXT -- use flock instead
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
