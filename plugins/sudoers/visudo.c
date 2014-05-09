@@ -266,7 +266,8 @@ main(int argc, char *argv[])
      */
     if (reparse_sudoers(editor, args, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    (void) install_sudoers(sp, oldperms);
+	    if (sp->doedit)
+		(void) install_sudoers(sp, oldperms);
 	}
     }
 
