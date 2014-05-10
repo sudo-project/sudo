@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: sudo 1.8.9b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2013-12-11 13:41-0700\n"
-"PO-Revision-Date: 2014-03-06 19:40+0100\n"
+"PO-Revision-Date: 2014-03-12 13:54+0100\n"
 "Last-Translator: Walter Garcia-Fontes <walter.garcia@upf.edu>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
 "Language: ca\n"
@@ -343,7 +343,7 @@ msgstr "usa un programa auxiliar per a la pregunta de la contrasenya"
 
 #: src/parse_args.c:618
 msgid "use specified BSD authentication type"
-msgstr "usa el tipus d'autentificació BSD especificat"
+msgstr "usa el tipus d'autenticació BSD especificat"
 
 #: src/parse_args.c:621
 msgid "run command in the background"
