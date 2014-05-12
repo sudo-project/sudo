@@ -119,6 +119,7 @@
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 extern sigjmp_buf fatal_jmp;
 
+int	fatal_callback_deregister(void (*func)(void));
 int	fatal_callback_register(void (*func)(void));
 char   *warning_gettext(const char *msgid) __format_arg(1);
 void	fatal_disable_setjmp(void);

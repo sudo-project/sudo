@@ -168,11 +168,21 @@ _warning(int use_errno, const char *fmt, va_list ap)
     errno = serrno;
 }
 
+/*
+ * Register a callback to be run when fatal()/fatalx() is called.
+ */
 int
 fatal_callback_register(void (*func)(void))
 {
     struct sudo_fatal_callback *cb;
 
+    /* Do not register the same callback twice.  */
+    SLIST_FOREACH(cb, &callbacks, entries) {
+	if (func == cb->func)
+	    return -1;		/* dupe! */
+    }
+
+    /* Allocate and insert new callback. */
     cb = malloc(sizeof(*cb));
     if (cb == NULL)
 	return -1;
@@ -180,6 +190,29 @@ fatal_callback_register(void (*func)(void))
     SLIST_INSERT_HEAD(&callbacks, cb, entries);
 
     return 0;
+}
+
+/*
+ * Deregister a fatal()/fatalx() callback.
+ */
+int
+fatal_callback_deregister(void (*func)(void))
+{
+    struct sudo_fatal_callback *cb, **prev;
+
+    /* Search for callback and remove if found, dupes are not allowed. */
+    SLIST_FOREACH_PREVPTR(cb, prev, &callbacks, entries) {
+	if (cb->func == func) {
+	    if (cb == SLIST_FIRST(&callbacks))
+		SLIST_REMOVE_HEAD(&callbacks, entries);
+	    else
+		SLIST_REMOVE_AFTER(*prev, entries);
+	    free(cb);
+	    return 0;
+	}
+    }
+
+    return -1;
 }
 
 void

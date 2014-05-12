@@ -576,6 +576,9 @@ sudoers_policy_close(int exit_status, int error_code)
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
 	(void)sudo_auth_end_session(runas_pw);
 
+    /* Deregister the callback for fatal()/fatalx(). */
+    fatal_callback_deregister(sudoers_cleanup);
+
     /* Free remaining references to password and group entries. */
     /* XXX - move cleanup to function in sudoers.c */
     sudo_pw_delref(sudo_user.pw);
