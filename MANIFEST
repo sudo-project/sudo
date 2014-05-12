@@ -252,6 +252,8 @@ plugins/sudoers/mkdefaults
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/po/README
+plugins/sudoers/po/ca.mo
+plugins/sudoers/po/ca.po
 plugins/sudoers/po/cs.mo
 plugins/sudoers/po/cs.po
 plugins/sudoers/po/da.mo
