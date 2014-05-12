@@ -332,6 +332,12 @@ plugins/sudoers/regress/sudoers/test13.toke.ok
 plugins/sudoers/regress/sudoers/test14.in 
 plugins/sudoers/regress/sudoers/test14.out.ok 
 plugins/sudoers/regress/sudoers/test14.toke.ok 
+plugins/sudoers/regress/sudoers/test15.in
+plugins/sudoers/regress/sudoers/test15.out.ok
+plugins/sudoers/regress/sudoers/test15.toke.ok
+plugins/sudoers/regress/sudoers/test16.in
+plugins/sudoers/regress/sudoers/test16.out.ok
+plugins/sudoers/regress/sudoers/test16.toke.ok
 plugins/sudoers/regress/sudoers/test2.in
 plugins/sudoers/regress/sudoers/test2.out.ok
 plugins/sudoers/regress/sudoers/test2.toke.ok
