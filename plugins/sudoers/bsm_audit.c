@@ -80,7 +80,7 @@ audit_sudo_selected(int sorf)
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_success(char **exec_args)
+bsm_audit_success(char *exec_args[])
 {
 	auditinfo_addr_t ainfo_addr;
 	auditinfo_t ainfo;
@@ -168,7 +168,7 @@ bsm_audit_success(char **exec_args)
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
+bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 {
 	auditinfo_addr_t ainfo_addr;
 	auditinfo_t ainfo;

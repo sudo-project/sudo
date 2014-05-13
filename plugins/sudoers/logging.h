@@ -58,10 +58,16 @@
  */
 #define LOG_INDENT	"    "
 
+#ifndef _SUDO_MAIN
+/* XXX - needed for auditing */
+extern int NewArgc;
+extern char **NewArgv;
+#endif
+
 bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);
-int audit_success(char *exec_args[]);
-int audit_failure(char *exec_args[], char const *const fmt, ...) __printflike(2, 3);
+int audit_success(int argc, char *argv[]);
+int audit_failure(int argc, char *argv[], char const *const fmt, ...) __printflike(3, 4);
 void log_allowed(int status);
 void log_auth_failure(int status, unsigned int tries);
 void log_denial(int status, bool inform_user);

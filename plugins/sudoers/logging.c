@@ -69,8 +69,6 @@ static int should_mail(int);
 static void mysyslog(int, const char *, ...);
 static char *new_logline(const char *, int);
 
-extern char **NewArgv; /* XXX - for auditing */
-
 #define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
 
 /*
@@ -241,9 +239,9 @@ log_denial(int status, bool inform_user)
 
     /* Handle auditing first (audit_failure() handles the locale itself). */
     if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
-	audit_failure(NewArgv, N_("No user or host"));
+	audit_failure(NewArgc, NewArgv, N_("No user or host"));
     else
-	audit_failure(NewArgv, N_("validation failure"));
+	audit_failure(NewArgc, NewArgv, N_("validation failure"));
 
     /* Log and mail messages should be in the sudoers locale. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
@@ -352,7 +350,7 @@ log_auth_failure(int status, unsigned int tries)
     debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING)
 
     /* Handle auditing first. */
-    audit_failure(NewArgv, N_("authentication failure"));
+    audit_failure(NewArgc, NewArgv, N_("authentication failure"));
 
     /*
      * Do we need to send mail?

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,18 +48,18 @@
 #endif
 
 int
-audit_success(char *exec_args[])
+audit_success(int argc, char *argv[])
 {
     int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
-    if (exec_args != NULL) {
+    if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	if (bsm_audit_success(exec_args) == -1)
+	if (bsm_audit_success(argv) == -1)
 	    rc = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	if (linux_audit_command(exec_args, 1) == -1)
+	if (linux_audit_command(argv, 1) == -1)
 	    rc = -1;
 #endif
     }
@@ -68,13 +68,13 @@ audit_success(char *exec_args[])
 }
 
 int
-audit_failure(char *exec_args[], char const *const fmt, ...)
+audit_failure(int argc, char *argv[], char const *const fmt, ...)
 {
     int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
-    if (exec_args != NULL) {
+    if (argv != NULL) {
 	va_list ap;
 	int oldlocale;
 
@@ -83,13 +83,13 @@ audit_failure(char *exec_args[], char const *const fmt, ...)
 
 #ifdef HAVE_BSM_AUDIT
 	va_start(ap, fmt);
-	if (bsm_audit_failure(exec_args, _(fmt), ap) == -1)
+	if (bsm_audit_failure(argv, _(fmt), ap) == -1)
 	    rc = -1;
 	va_end(ap);
 #endif
 #ifdef HAVE_LINUX_AUDIT
 	va_start(ap, fmt);
-	if (linux_audit_command(exec_args, 0) == -1)
+	if (linux_audit_command(argv, 0) == -1)
 	    rc = -1;
 	va_end(ap);
 #endif

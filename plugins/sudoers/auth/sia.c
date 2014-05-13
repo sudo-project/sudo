@@ -90,8 +90,6 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah = NULL;
     int i;
-    extern int NewArgc;
-    extern char **NewArgv;
     debug_decl(sudo_sia_setup, SUDO_DEBUG_AUTH)
 
     /* Rebuild argv for sia_ses_init() */

@@ -18,7 +18,7 @@
 #ifndef _SUDOERS_BSM_AUDIT_H
 #define	_SUDOERS_BSM_AUDIT_H
 
-int	bsm_audit_success(char **);
-int	bsm_audit_failure(char **, char const * const, va_list);
+int	bsm_audit_success(int argc, char *argv[]);
+int	bsm_audit_failure(int argc, char *argv[], char const * const, va_list);
 
 #endif /* _SUDOERS_BSM_AUDIT_H */

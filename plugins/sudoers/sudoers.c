@@ -354,7 +354,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
-	audit_failure(NewArgv, N_("no tty"));
+	audit_failure(NewArgc, NewArgv, N_("no tty"));
 	warningx(U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
@@ -406,15 +406,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
-	audit_failure(NewArgv, N_("command in current directory"));
+	audit_failure(NewArgc, NewArgv, N_("command in current directory"));
 	warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
-	    audit_failure(NewArgv, N_("%s: command not found"), NewArgv[0]);
+	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+		NewArgv[0]);
 	    warningx(U_("%s: command not found"), NewArgv[0]);
 	} else {
-	    audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
+	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+		user_cmnd);
 	    warningx(U_("%s: command not found"), user_cmnd);
 	}
 	goto bad;
@@ -529,7 +531,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Must audit before uid change. */
-    if (audit_success(NewArgv) != 0)
+    if (audit_success(NewArgc, NewArgv) != 0)
 	goto bad;
 
     /* Setup execution environment to pass back to front-end. */
@@ -675,7 +677,7 @@ set_cmnd(void)
 	    }
 	    if (rval == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG)
-		    audit_failure(NewArgv, N_("command too long"));
+		    audit_failure(NewArgc, NewArgv, N_("command too long"));
 		log_warning(0, "%s", NewArgv[0]);
 		debug_return_int(rval);
 	    }
@@ -1091,7 +1093,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
 	} while (ep != NULL && editor_path == NULL);
     }
     if (!editor_path) {
-	audit_failure(NewArgv, N_("%s: command not found"), editor);
+	audit_failure(NewArgc, NewArgv, N_("%s: command not found"), editor);
 	warningx(U_("%s: command not found"), editor);
     }
     debug_return_str(editor_path);
