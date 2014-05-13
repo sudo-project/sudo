@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1026,6 +1026,13 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	goto done;
     }
     if (strcmp(export_path, "-") != 0) {
+	if (strcmp(sudoers_path, export_path) == 0) {
+	    if (!quiet) {
+		warningx(U_("%s: input and output files must be different"),
+		    sudoers_path);
+	    }
+	    goto done;
+	}
 	if ((export_fp = fopen(export_path, "w")) == NULL) {
 	    if (!quiet)
 		warning(U_("unable to open %s"), export_path);
