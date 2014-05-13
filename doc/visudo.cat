@@ -4,7 +4,7 @@ NNAAMMEE
      vviissuuddoo - edit the sudoers file
 
 SSYYNNOOPPSSIISS
-     vviissuuddoo [--cchhqqssVV] [--ff _s_u_d_o_e_r_s] [--xx _f_i_l_e]
+     vviissuuddoo [--cchhqqssVV] [--ff _s_u_d_o_e_r_s] [--xx _o_u_t_p_u_t___f_i_l_e]
 
 DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to vipw(1m).
@@ -72,14 +72,16 @@ DDEESSCCRRIIPPTTIIOONN
      --VV, ----vveerrssiioonn
                  Print the vviissuuddoo and _s_u_d_o_e_r_s grammar versions and exit.
 
-     --xx _f_i_l_e, ----eexxppoorrtt=_f_i_l_e
-                 Export _s_u_d_o_e_r_s in JSON format and write it to _f_i_l_e.  If _f_i_l_e
-                 is `-', the exported _s_u_d_o_e_r_s policy will be written to the
-                 standard output.  The exported format is intended to be
-                 easier for third-party applications to parse than the
-                 traditional _s_u_d_o_e_r_s format.  The various values have explicit
-                 types which removes much of the ambiguity of the _s_u_d_o_e_r_s
-                 format.
+     --xx _o_u_t_p_u_t___f_i_l_e, ----eexxppoorrtt=_o_u_t_p_u_t___f_i_l_e
+                 Export a _s_u_d_o_e_r_s in JSON format and write it to _o_u_t_p_u_t___f_i_l_e.
+                 If _o_u_t_p_u_t___f_i_l_e is `-', the exported _s_u_d_o_e_r_s policy will be
+                 written to the standard output.  By default, _/_e_t_c_/_s_u_d_o_e_r_s
+                 (and any files it includes) will be exported.  The --ff option
+                 can be used to specify a different _s_u_d_o_e_r_s file to export.
+                 The exported format is intended to be easier for third-party
+                 applications to parse than the traditional _s_u_d_o_e_r_s format.
+                 The various values have explicit types which removes much of
+                 the ambiguity of the _s_u_d_o_e_r_s format.
 
 EENNVVIIRROONNMMEENNTT
      The following environment variables may be consulted depending on the
@@ -123,6 +125,10 @@ DDIIAAGGNNOOSSTTIICCSS
            only a warning by default as ssuuddoo will ignore cycles when parsing
            the _s_u_d_o_e_r_s file.
 
+     visudo: /etc/sudoers: input and output files must be different
+           The --xx flag was used and the specified _o_u_t_p_u_t___f_i_l_e has the same
+           path name as the _s_u_d_o_e_r_s file to export.
+
 SSEEEE AALLSSOO
      vi(1), sudoers(4), sudo(1m), vipw(1m)
 
@@ -156,4 +162,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.10                    February 15, 2014                   Sudo 1.8.10
+Sudo 1.8.10                      May 13, 2014                      Sudo 1.8.10

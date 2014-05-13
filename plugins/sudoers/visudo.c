@@ -1318,7 +1318,7 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-chqsV] [-f sudoers] [-x file]\n", getprogname());
+	"usage: %s [-chqsV] [-f sudoers] [-x output_file]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -1329,12 +1329,12 @@ help(void)
     (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -c, --check       check-only mode\n"
-	"  -f, --file=file   specify sudoers file location\n"
-	"  -h, --help        display help message and exit\n"
-	"  -q, --quiet       less verbose (quiet) syntax error messages\n"
-	"  -s, --strict      strict syntax checking\n"
-	"  -V, --version     display version information and exit\n"
-	"  -x, --export=file export sudoers in JSON format"));
+	"  -c, --check              check-only mode\n"
+	"  -f, --file=sudoers       specify sudoers file location\n"
+	"  -h, --help               display help message and exit\n"
+	"  -q, --quiet              less verbose (quiet) syntax error messages\n"
+	"  -s, --strict             strict syntax checking\n"
+	"  -V, --version            display version information and exit\n"
+	"  -x, --export=output_file write sudoers in JSON format to output_file"));
     exit(0);
 }
