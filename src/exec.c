@@ -877,7 +877,10 @@ handler(int s, siginfo_t *info, void *context)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
+    }
 }
 #else
 void
@@ -889,7 +892,10 @@ handler(int s)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
+    }
 }
 #endif
 
@@ -911,7 +917,10 @@ handler_user_only(int s, siginfo_t *info, void *context)
 	 * The pipe is non-blocking, if we overflow the kernel's pipe
 	 * buffer we drop the signal.  This is not a problem in practice.
 	 */
-	ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+	while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	    if (errno != EINTR)
+		break;
+	}
     }
 }
 #endif /* SA_SIGINFO */

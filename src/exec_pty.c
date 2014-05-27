@@ -148,7 +148,10 @@ mon_handler(int s, siginfo_t *info, void *context)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
+    }
 }
 #else
 static void
@@ -160,7 +163,10 @@ mon_handler(int s)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
+    }
 }
 #endif
 
@@ -1281,7 +1287,10 @@ exec_monitor(struct command_details *details, int backchannel)
 
 	/* setup tty and exec command */
 	exec_pty(details, &cstat, errpipe[1]);
-	ignore_result(write(errpipe[1], &cstat, sizeof(cstat)));
+	while (write(errpipe[1], &cstat, sizeof(cstat)) == -1) {
+	    if (errno != EINTR)
+		break;
+	}
 	_exit(1);
     }
     close(errpipe[1]);

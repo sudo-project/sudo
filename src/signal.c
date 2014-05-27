@@ -102,7 +102,10 @@ sudo_handler(int signo)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
+    }
 }
 
 /*
