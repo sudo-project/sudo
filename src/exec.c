@@ -911,8 +911,13 @@ handler_user_only(int s, siginfo_t *info, void *context)
 {
     unsigned char signo = (unsigned char)s;
 
-    /* Only forward user-generated signals. */
-    if (info != NULL && info->si_code == SI_USER) {
+    /*
+     * Only forward user-generated signals not sent by the command.
+     * Signals sent by the kernel may include SIGTSTP when the user
+     * presses ^Z.  Curses programs often trap ^Z and send SIGTSTP
+     * to their pgrp, so we don't want to send an extra SIGTSTP.
+     */
+    if (info != NULL && info->si_code == SI_USER && info->si_pid != cmnd_pid) {
 	/*
 	 * The pipe is non-blocking, if we overflow the kernel's pipe
 	 * buffer we drop the signal.  This is not a problem in practice.
