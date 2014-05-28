@@ -865,13 +865,20 @@ handler(int s, siginfo_t *info, void *context)
     unsigned char signo = (unsigned char)s;
 
     /*
-     * If the signal came from the command we ran, just ignore
-     * it since we don't want the child to indirectly kill itself.
-     * This can happen with, e.g. BSD-derived versions of reboot
-     * that call kill(-1, SIGTERM) to kill all other processes.
+     * Do not forward signals sent by a process in the command's process
+     * group, do not forward it as we don't want the child to indirectly
+     * kill itself.  For example, this can happen with some versions of
+     * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (info != NULL && info->si_code == SI_USER && info->si_pid == cmnd_pid)
-	    return;
+    if (info != NULL && info->si_code == SI_USER) {
+	pid_t si_pgrp = getpgid(info->si_pid);
+	if (si_pgrp != (pid_t)-1) {
+	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
+		return;
+	} else if (info->si_pid == cmnd_pid) {
+		return;
+	}
+    }
 
     /*
      * The pipe is non-blocking, if we overflow the kernel's pipe
@@ -910,22 +917,31 @@ static void
 handler_user_only(int s, siginfo_t *info, void *context)
 {
     unsigned char signo = (unsigned char)s;
+    pid_t si_pgrp;
 
     /*
-     * Only forward user-generated signals not sent by the command.
-     * Signals sent by the kernel may include SIGTSTP when the user
-     * presses ^Z.  Curses programs often trap ^Z and send SIGTSTP
-     * to their pgrp, so we don't want to send an extra SIGTSTP.
+     * Only forward user-generated signals not sent by a process in
+     * the command's own process group.  Signals sent by the kernel
+     * may include SIGTSTP when the user presses ^Z.  Curses programs
+     * often trap ^Z and send SIGTSTP to their own pgrp, so we don't
+     * want to send an extra SIGTSTP.
      */
-    if (info != NULL && info->si_code == SI_USER && info->si_pid != cmnd_pid) {
-	/*
-	 * The pipe is non-blocking, if we overflow the kernel's pipe
-	 * buffer we drop the signal.  This is not a problem in practice.
-	 */
-	while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
-	    if (errno != EINTR)
-		break;
-	}
+    if (info == NULL || info->si_code != SI_USER)
+	return;
+    if ((si_pgrp = getpgid(info->si_pid)) != (pid_t)-1) {
+	if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
+	    return;
+    } else if (info->si_pid == cmnd_pid) {
+	    return;
+    }
+
+    /*
+     * The pipe is non-blocking, if we overflow the kernel's pipe
+     * buffer we drop the signal.  This is not a problem in practice.
+     */
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
     }
 }
 #endif /* SA_SIGINFO */

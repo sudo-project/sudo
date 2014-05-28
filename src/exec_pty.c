@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -136,13 +136,20 @@ mon_handler(int s, siginfo_t *info, void *context)
     unsigned char signo = (unsigned char)s;
 
     /*
-     * If the signal came from the command we ran, just ignore
-     * it since we don't want the command to indirectly kill itself.
-     * This can happen with, e.g. BSD-derived versions of reboot
-     * that call kill(-1, SIGTERM) to kill all other processes.
+     * If the signal came from the process group of the command we ran,
+     * do not forward it as we don't want the child to indirectly kill
+     * itself.  This can happen with, e.g., BSD-derived versions of
+     * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (info != NULL && info->si_code == SI_USER && info->si_pid == cmnd_pid)
-	    return;
+    if (info != NULL && info->si_code == SI_USER) {
+	pid_t si_pgrp = getpgid(info->si_pid);
+	if (si_pgrp != (pid_t)-1) {
+	    if (si_pgrp == cmnd_pgrp)
+		return;
+	} else if (info->si_pid == cmnd_pid) {
+		return;
+	}
+    }
 
     /*
      * The pipe is non-blocking, if we overflow the kernel's pipe
