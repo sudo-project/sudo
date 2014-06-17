@@ -2423,19 +2423,20 @@ sudo_ldap_bind_s(LDAP *ld)
 		    old_ccname ? old_ccname : "(none)", new_ccname);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "gss_krb5_ccache_name() failed: %d", rc);
+		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	}
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
 	if (new_ccname != NULL) {
-	    rc = sudo_set_krb5_ccache_name(old_ccname, NULL);
+	    rc = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
 	    if (rc == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "restore ccache name %s -> %s", new_ccname, old_ccname);
+		    "restore ccache name %s -> %s", new_ccname,
+		    old_ccname ? old_ccname : "(none)");
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "gss_krb5_ccache_name() failed: %d", rc);
+		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	    /* Remove temporary copy of user's credential cache. */
 	    if (tmp_ccname != NULL)
