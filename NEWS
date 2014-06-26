@@ -1,3 +1,35 @@
+What's new in Sudo 1.8.11
+
+ * The sudoers plugin no longer uses setjmp/longjmp to recover
+   from fatal errors.  All errors are now propagated to the caller
+   via return codes.
+
+ * When running a command in the background, sudo will now forward
+   SIGINFO to the command (if supported).
+
+ * Sudo will now use the system versions of the sha2 functions from
+   libc or libmd if available.
+
+ * Visudo now works correctly on GNU Hurd.  Bug #647
+
+ * Fixed suspend and resume of curses programs on some system when
+   the command is not being run in a pseudo-terminal.  Bug #649
+
+ * Fixed a crash with LDAP-based sudoers on some systems when
+   Kerberos was enabled.
+
+ * Catalan translation for sudoers from translationproject.org.
+
+ * Norwegian Bokmaal translation for sudo from translationproject.org.
+
+ * Greek translation for sudoers from translationproject.org
+
+ * The sudo source tree has been reorganized to more closely resemble
+   that of other gettext-enabled packages.
+
+ * Sudo and its associated programs now link against a shared version
+   of libsudo_util.
+
 What's new in Sudo 1.8.10p3?
 
  * Fixed expansion of %p in the prompt for "sudo -l" when rootpw,
