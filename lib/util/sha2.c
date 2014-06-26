@@ -59,7 +59,7 @@
 #endif
 
 #include "missing.h"
-#include "sha2.h"
+#include "compat/sha2.h"
 
 /*
  * SHA-2 operates on 32-bit and 64-bit words in big endian byte order.

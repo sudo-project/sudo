@@ -47,7 +47,7 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
-SUBDIRS = compat common @ZLIB_SRC@ plugins/group_file plugins/sudoers \
+SUBDIRS = lib/util @ZLIB_SRC@ plugins/group_file plugins/sudoers \
 	  plugins/system_group src include doc
 
 SAMPLES = plugins/sample
@@ -66,7 +66,7 @@ ECHO_C = @ECHO_C@
 
 # Message catalog support
 NLS = @SUDO_NLS@
-POTFILES = src/po/sudo.pot plugins/sudoers/po/sudoers.pot
+POTFILES = po/sudo.pot plugins/sudoers/po/sudoers.pot
 LOCALEDIR_SUFFIX = @LOCALEDIR_SUFFIX@
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
@@ -133,26 +133,25 @@ uninstall-nls:
 	done
 
 siglist.c signame.c:
-	(cd compat && exec $(MAKE) $@)
+	(cd lib/util && exec $(MAKE) $@)
 
 depend: siglist.c signame.c
 	@if test "$(srcdir)" != "."; then \
 	    echo "make depend only supported in the source directory"; \
 	    exit 1; \
 	fi; \
-	$(srcdir)/mkdep.pl $(srcdir)/common/Makefile.in \
-	    $(srcdir)/compat/Makefile.in $(srcdir)/plugins/sample/Makefile.in \
+	$(srcdir)/mkdep.pl $(srcdir)/lib/util/Makefile.in \
+	    $(srcdir)/plugins/sample/Makefile.in \
 	    $(srcdir)/plugins/group_file/Makefile.in \
 	    $(srcdir)/plugins/sudoers/Makefile.in \
 	    $(srcdir)/plugins/system_group/Makefile.in \
-	    $(srcdir)/src/Makefile.in $(srcdir)/zlib/Makefile.in; \
-	./config.status --file $(srcdir)/common/Makefile \
-	    --file $(srcdir)/compat/Makefile \
+	    $(srcdir)/src/Makefile.in $(srcdir)/lib/zlib/Makefile.in; \
+	./config.status --file $(srcdir)/lib/util/Makefile \
 	    --file $(srcdir)/plugins/sample/Makefile \
 	    --file $(srcdir)/plugins/group_file/Makefile \
 	    --file $(srcdir)/plugins/sudoers/Makefile \
 	    --file $(srcdir)/plugins/system_group/Makefile \
-	    --file $(srcdir)/src/Makefile --file $(srcdir)/zlib/Makefile
+	    --file $(srcdir)/src/Makefile --file $(srcdir)/lib/zlib/Makefile
 
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
@@ -178,7 +177,7 @@ Makefile: $(srcdir)/Makefile.in
 sync-po: rsync-po compile-po
 
 rsync-po:
-	rsync -Lrtvz  translationproject.org::tp/latest/sudo/ src/po/
+	rsync -Lrtvz  translationproject.org::tp/latest/sudo/ po/
 	rsync -Lrtvz  translationproject.org::tp/latest/sudoers/ plugins/sudoers/po/
 
 update-pot:
@@ -188,7 +187,7 @@ update-pot:
 		echo "Updating $$pot"; \
 		domain=`basename $$pot .pot`; \
 		case "$$domain" in \
-		    sudo) tmpfiles=; cfiles="src/*c common/*c compat/*c";; \
+		    sudo) tmpfiles=; cfiles="src/*c lib/*/*c";; \
 		    sudoers) \
 			echo "syntax error" > confstr.sh; \
 			sed -n -e 's/^badpass_message="/gettext "/p' \

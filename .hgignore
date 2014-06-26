@@ -30,10 +30,10 @@ Makefile$
 ^src/check_ttyname$
 ^src/sudo_usage\.h$
 
-^compat/mksiglist$
-^compat/mksigname$
-^compat/siglist\.c$
-^compat/signame\.c$
+^lib/util/mksiglist$
+^lib/util/mksigname$
+^lib/util/siglist\.c$
+^lib/util/signame\.c$
 
 ^plugins/sudoers/(sudoers|sudoreplay|testsudoers|visudo|check_[a-z_]+)$
 ^plugins/sudoers/.*\.(out|toke|err)$

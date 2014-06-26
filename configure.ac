@@ -72,7 +72,6 @@ AC_SUBST([LOGINCAP_USAGE])
 AC_SUBST([ZLIB])
 AC_SUBST([ZLIB_SRC])
 AC_SUBST([LIBTOOL_DEPS])
-AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
@@ -237,9 +236,9 @@ RTLD_PRELOAD_DELIM=":"
 RTLD_PRELOAD_DEFAULT=
 
 dnl
-dnl libc replacement functions live in compat
+dnl libc replacement functions live in libsudo_util.a
 dnl
-AC_CONFIG_LIBOBJ_DIR(compat)
+AC_CONFIG_LIBOBJ_DIR(lib/util)
 
 #
 # Prior to sudo 1.8.7, sudo stored libexec files in $libexecdir.
@@ -2754,11 +2753,11 @@ case "$enable_zlib" in
 esac
 if test X"$enable_zlib" = X"builtin"; then
     AC_DEFINE(HAVE_ZLIB_H)
-    CPPFLAGS='-I$(top_builddir)/zlib -I$(top_srcdir)/zlib '"${CPPFLAGS}"
-    ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
-    ZLIB_SRC=zlib
-    AC_CONFIG_HEADER([zlib/zconf.h])
-    AC_CONFIG_FILES([zlib/Makefile])
+    CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
+    ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libz.la'
+    ZLIB_SRC=lib/zlib
+    AC_CONFIG_HEADER([lib/zlib/zconf.h])
+    AC_CONFIG_FILES([lib/zlib/Makefile])
 fi
 
 dnl
@@ -3833,7 +3832,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
