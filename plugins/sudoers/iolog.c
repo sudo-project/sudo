@@ -584,12 +584,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     memset(&details, 0, sizeof(details));
 
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	rval = -1;
-	goto done;
-    }
-
     bindtextdomain("sudoers", LOCALEDIR);
 
     sudo_setpwent();
@@ -663,7 +657,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     rval = true;
 
 done:
-    fatal_disable_setjmp();
     efree(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
@@ -680,12 +673,6 @@ sudoers_io_close(int exit_status, int error)
 {
     int i;
     debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
-
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	fatal_disable_setjmp();
-	debug_return;
-    }
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (io_log_files[i].fd.v == NULL)
@@ -705,12 +692,6 @@ sudoers_io_version(int verbose)
 {
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	fatal_disable_setjmp();
-	debug_return_bool(-1);
-    }
-
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
 
@@ -727,12 +708,6 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
     gettimeofday(&now, NULL);
-
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	fatal_disable_setjmp();
-	debug_return_bool(-1);
-    }
 
 #ifdef HAVE_ZLIB_H
     if (iolog_compress)

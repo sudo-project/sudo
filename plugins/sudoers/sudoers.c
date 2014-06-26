@@ -228,13 +228,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     volatile int rval = true;
     debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
 
-    /* XXX - would like to move this to policy.c but need the cleanup. */
-    if (fatal_setjmp() != 0) {
-	/* error recovery via fatal() or fatalx() */
-	rval = -1;
-	goto done;
-    }
-
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
 	/* Not an audit event. */
@@ -548,7 +541,6 @@ bad:
     rval = false;
 
 done:
-    fatal_disable_setjmp();
     if (!rewind_perms())
 	rval = -1;
 

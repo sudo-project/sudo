@@ -541,13 +541,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	args = NULL;
 
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	(void) rewind_perms();
-	fatal_disable_setjmp();
-	debug_return_bool(-1);
-    }
-
     /* Call the sudoers init function. */
     info.settings = settings;
     info.user_info = user_info;
@@ -559,12 +552,6 @@ static void
 sudoers_policy_close(int exit_status, int error_code)
 {
     debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN)
-
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	fatal_disable_setjmp();
-	debug_return;
-    }
 
     /* We do not currently log the exit status. */
     if (error_code) {
@@ -613,12 +600,6 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	user_env = NULL;
 
-    if (fatal_setjmp() != 0) {
-	/* called via fatal() or fatalx() */
-	fatal_disable_setjmp();
-	debug_return_bool(-1);
-    }
-
     debug_return_bool(sudo_auth_begin_session(pwd, user_env));
 }
 
@@ -664,11 +645,8 @@ sudoers_policy_invalidate(int remove)
     debug_decl(sudoers_policy_invalidate, SUDO_DEBUG_PLUGIN)
 
     user_cmnd = "kill";
-    if (fatal_setjmp() == 0) {
-	remove_timestamp(remove);
-	sudoers_cleanup();
-    }
-    fatal_disable_setjmp();
+    remove_timestamp(remove);
+    sudoers_cleanup();
 
     debug_return;
 }
@@ -707,12 +685,6 @@ static int
 sudoers_policy_version(int verbose)
 {
     debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN)
-
-    if (fatal_setjmp() != 0) {
-	/* error recovery via fatal() or fatalx() */
-	fatal_disable_setjmp();
-	debug_return_bool(-1);
-    }
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
 	PACKAGE_VERSION);

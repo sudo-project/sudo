@@ -18,7 +18,6 @@
 #define	_SUDO_FATAL_H_
 
 #include <stdarg.h>
-#include <setjmp.h>
 
 /*
  * We wrap fatal/fatalx and warning/warningx so that the same output can
@@ -113,17 +112,11 @@
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
 
-#define fatal_setjmp()		(fatal_enable_setjmp(), sigsetjmp(fatal_jmp, 1))
-#define fatal_longjmp(val)	siglongjmp(fatal_jmp, val)
-
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
-extern sigjmp_buf fatal_jmp;
 
 __dso_public int  fatal_callback_deregister(void (*func)(void));
 __dso_public int  fatal_callback_register(void (*func)(void));
 __dso_public char *warning_gettext(const char *msgid) __format_arg(1);
-__dso_public void fatal_disable_setjmp(void);
-__dso_public void fatal_enable_setjmp(void);
 __dso_public void fatal_nodebug(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
 __dso_public void fatalx_nodebug(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
 __dso_public void vfatal_nodebug(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));

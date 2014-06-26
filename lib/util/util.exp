@@ -38,9 +38,6 @@ estrndup
 evasprintf
 fatal_callback_deregister
 fatal_callback_register
-fatal_disable_setjmp
-fatal_enable_setjmp
-fatal_jmp
 fatal_nodebug
 fatalx_nodebug
 fmt_string

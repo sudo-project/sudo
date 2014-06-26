@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,8 +43,6 @@ struct sudo_fatal_callback {
 };
 SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
-__dso_public sigjmp_buf fatal_jmp;
-static bool setjmp_enabled = false;
 static struct sudo_fatal_callback_list callbacks;
 
 static void _warning(int, const char *, va_list);
@@ -71,10 +69,7 @@ fatal_nodebug(const char *fmt, ...)
     _warning(1, fmt, ap);
     va_end(ap);
     do_cleanup();
-    if (setjmp_enabled)
-	siglongjmp(fatal_jmp, 1);
-    else
-	exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 void
@@ -86,10 +81,7 @@ fatalx_nodebug(const char *fmt, ...)
     _warning(0, fmt, ap);
     va_end(ap);
     do_cleanup();
-    if (setjmp_enabled)
-	siglongjmp(fatal_jmp, 1);
-    else
-	exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 void
@@ -97,10 +89,7 @@ vfatal_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     do_cleanup();
-    if (setjmp_enabled)
-	siglongjmp(fatal_jmp, 1);
-    else
-	exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 void
@@ -108,10 +97,7 @@ vfatalx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
-    if (setjmp_enabled)
-	siglongjmp(fatal_jmp, 1);
-    else
-	exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 void
@@ -213,16 +199,4 @@ fatal_callback_deregister(void (*func)(void))
     }
 
     return -1;
-}
-
-void
-fatal_disable_setjmp(void)
-{
-    setjmp_enabled = false;
-}
-
-void
-fatal_enable_setjmp(void)
-{
-    setjmp_enabled = true;
 }
