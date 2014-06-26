@@ -71,9 +71,9 @@ get_ttysize_ioctl(int *rowp, int *colp)
 #endif /* TIOCGWINSZ */
 
 void
-get_ttysize(int *rowp, int *colp)
+sudo_get_ttysize(int *rowp, int *colp)
 {
-    debug_decl(fork_cmnd, SUDO_DEBUG_EXEC)
+    debug_decl(sudo_get_ttysize, SUDO_DEBUG_EXEC)
 
     if (get_ttysize_ioctl(rowp, colp) == -1) {
 	char *p;

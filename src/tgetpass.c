@@ -119,9 +119,9 @@ restart:
      */
     if (!ISSET(flags, TGP_ECHO)) {
 	if (ISSET(flags, TGP_MASK))
-	    neednl = term_cbreak(input);
+	    neednl = sudo_term_cbreak(input);
 	else
-	    neednl = term_noecho(input);
+	    neednl = sudo_term_noecho(input);
     }
 
     /*
@@ -164,7 +164,7 @@ restart:
 restore:
     /* Restore old tty settings and signals. */
     if (!ISSET(flags, TGP_ECHO))
-	term_restore(input, 1);
+	sudo_term_restore(input, 1);
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
@@ -261,7 +261,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     debug_return_str_masked(pass);
 }
 
-extern int term_erase, term_kill;
+extern int sudo_term_erase, sudo_term_kill;
 
 static char *
 getln(int fd, char *buf, size_t bufsiz, int feedback)
@@ -282,7 +282,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
 	if (feedback) {
-	    if (c == term_kill) {
+	    if (c == sudo_term_kill) {
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;
@@ -290,7 +290,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 		}
 		left = bufsiz;
 		continue;
-	    } else if (c == term_erase) {
+	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;

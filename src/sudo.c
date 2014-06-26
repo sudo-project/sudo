@@ -513,7 +513,7 @@ get_user_info(struct user_details *ud)
 	fatal(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
 
-    get_ttysize(&ud->ts_lines, &ud->ts_cols);
+    sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
     easprintf(&user_info[++i], "lines=%d", ud->ts_lines);
     easprintf(&user_info[++i], "cols=%d", ud->ts_cols);
 

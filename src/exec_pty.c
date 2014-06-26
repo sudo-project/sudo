@@ -116,7 +116,7 @@ pty_cleanup(void)
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
     if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1)
-	term_restore(io_fds[SFD_USERTTY], 0);
+	sudo_term_restore(io_fds[SFD_USERTTY], 0);
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
@@ -328,7 +328,7 @@ check_foreground(void)
     if (io_fds[SFD_USERTTY] != -1) {
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
 	if (foreground && !tty_initialized) {
-	    if (term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
 		tty_initialized = true;
 		sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
 	    }
@@ -363,7 +363,7 @@ suspend_parent(int signo)
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		do {
-		    n = term_raw(io_fds[SFD_USERTTY], 0);
+		    n = sudo_term_raw(io_fds[SFD_USERTTY], 0);
 		} while (!n && errno == EINTR);
 		ttymode = TERM_RAW;
 	    }
@@ -378,7 +378,7 @@ suspend_parent(int signo)
 
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED)
-	    term_restore(io_fds[SFD_USERTTY], 0);
+	    sudo_term_restore(io_fds[SFD_USERTTY], 0);
 
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
@@ -413,7 +413,7 @@ suspend_parent(int signo)
 	if (foreground) {
 	    /* Foreground process, set tty to raw mode. */
 	    do {
-		n = term_raw(io_fds[SFD_USERTTY], 0);
+		n = sudo_term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    ttymode = TERM_RAW;
 	} else {
@@ -727,7 +727,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
-	if (term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
 	    tty_initialized = true;
 	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
 	}
@@ -736,7 +736,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
 	    ttymode = TERM_RAW;
 	    do {
-		n = term_raw(io_fds[SFD_USERTTY], 0);
+		n = sudo_term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    if (!n)
 		fatal(U_("unable to set terminal to raw mode"));
@@ -823,7 +823,7 @@ pty_close(struct command_status *cstat)
 
     /* Restore terminal settings. */
     if (io_fds[SFD_USERTTY] != -1)
-	term_restore(io_fds[SFD_USERTTY], 0);
+	sudo_term_restore(io_fds[SFD_USERTTY], 0);
 
     /* If child was signalled, write the reason to stdout like the shell. */
     if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {

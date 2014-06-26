@@ -352,7 +352,7 @@ main(int argc, char *argv[])
     printf(_("Replaying sudo session: %s\n"), li->cmd);
 
     /* Make sure the terminal is large enough. */
-    get_ttysize(&rows, &cols);
+    sudo_get_ttysize(&rows, &cols);
     if (li->rows != 0 && li->cols != 0) {
 	if (li->rows > rows) {
 	    printf(_("Warning: your terminal is too small to properly replay the log.\n"));
@@ -367,7 +367,7 @@ main(int argc, char *argv[])
     /* Replay session corresponding to io_log_files[]. */
     replay_session(max_wait, decimal);
 
-    term_restore(STDIN_FILENO, 1);
+    sudo_term_restore(STDIN_FILENO, 1);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
@@ -410,7 +410,7 @@ replay_session(const double max_wait, const char *decimal)
 	idx = fcntl(STDIN_FILENO, F_GETFL, 0);
 	if (idx != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, idx | O_NONBLOCK);
-	if (!term_raw(STDIN_FILENO, 1))
+	if (!sudo_term_raw(STDIN_FILENO, 1))
 	    fatal(U_("unable to set tty to raw mode"));
     }
 
@@ -1260,7 +1260,7 @@ help(void)
 static void
 sudoreplay_cleanup(void)
 {
-    term_restore(STDIN_FILENO, 0);
+    sudo_term_restore(STDIN_FILENO, 0);
 }
 
 /*
@@ -1270,6 +1270,6 @@ sudoreplay_cleanup(void)
 static void
 sudoreplay_handler(int signo)
 {
-    term_restore(STDIN_FILENO, 0);
+    sudo_term_restore(STDIN_FILENO, 0);
     kill(getpid(), signo);
 }

@@ -69,15 +69,16 @@ static struct termios term, oterm;
 static int changed;
 
 /* tgetpass() needs to know the erase and kill chars for cbreak mode. */
-__dso_public int term_erase;
-__dso_public int term_kill;
+__dso_public int sudo_term_erase;
+__dso_public int sudo_term_kill;
 
 static volatile sig_atomic_t got_sigttou;
 
 /*
  * SIGTTOU signal handler for term_restore that just sets a flag.
  */
-static void sigttou(int signo)
+static void
+sigttou(int signo)
 {
     got_sigttou = 1;
 }
@@ -116,7 +117,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
  * Returns true on success or false on failure.
  */
 bool
-term_restore(int fd, bool flush)
+sudo_term_restore(int fd, bool flush)
 {
     debug_decl(term_restore, SUDO_DEBUG_UTIL)
 
@@ -134,7 +135,7 @@ term_restore(int fd, bool flush)
  * Returns true on success or false on failure.
  */
 bool
-term_noecho(int fd)
+sudo_term_noecho(int fd)
 {
     debug_decl(term_noecho, SUDO_DEBUG_UTIL)
 
@@ -163,7 +164,7 @@ again:
  * Returns true on success or false on failure.
  */
 bool
-term_raw(int fd, int isig)
+sudo_term_raw(int fd, int isig)
 {
     struct termios term;
     debug_decl(term_raw, SUDO_DEBUG_UTIL)
@@ -197,7 +198,7 @@ again:
  * Returns true on success or false on failure.
  */
 bool
-term_cbreak(int fd)
+sudo_term_cbreak(int fd)
 {
     debug_decl(term_cbreak, SUDO_DEBUG_UTIL)
 
@@ -216,8 +217,8 @@ again:
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
     if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
-	term_erase = term.c_cc[VERASE];
-	term_kill = term.c_cc[VKILL];
+	sudo_term_erase = term.c_cc[VERASE];
+	sudo_term_kill = term.c_cc[VKILL];
 	changed = 1;
 	debug_return_bool(true);
     }
@@ -234,7 +235,7 @@ again:
  * Returns true on success or false on failure.
  */
 bool
-term_copy(int src, int dst)
+sudo_term_copy(int src, int dst)
 {
     struct termios tt;
     debug_decl(term_copy, SUDO_DEBUG_UTIL)

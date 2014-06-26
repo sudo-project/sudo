@@ -163,13 +163,13 @@ __dso_public void initprogname(const char *);
 __dso_public int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
 /* term.c */
-__dso_public bool term_cbreak(int);
-__dso_public bool term_copy(int, int);
-__dso_public bool term_noecho(int);
-__dso_public bool term_raw(int, int);
-__dso_public bool term_restore(int, bool);
+__dso_public bool sudo_term_cbreak(int);
+__dso_public bool sudo_term_copy(int, int);
+__dso_public bool sudo_term_noecho(int);
+__dso_public bool sudo_term_raw(int, int);
+__dso_public bool sudo_term_restore(int, bool);
 
 /* ttysize.c */
-__dso_public void get_ttysize(int *rowp, int *colp);
+__dso_public void sudo_get_ttysize(int *rowp, int *colp);
 
 #endif /* _SUDO_UTIL_H */
