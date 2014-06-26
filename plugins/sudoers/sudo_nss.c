@@ -66,8 +66,10 @@ sudo_read_nss(void)
 #ifdef HAVE_SSSD
     bool saw_sss = false;
 #endif
-    bool saw_files = false;
+#ifdef HAVE_LDAP
     bool saw_ldap = false;
+#endif
+    bool saw_files = false;
     bool got_match = false;
     static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)

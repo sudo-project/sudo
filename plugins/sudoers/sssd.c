@@ -124,7 +124,7 @@ static struct sss_sudo_result *sudo_sss_result_get(struct sudo_nss *nss,
 static void
 sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
 {
-     int i;
+     unsigned int i;
      debug_decl(sudo_sss_attrcpy, SUDO_DEBUG_SSSD)
 
      sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
@@ -143,7 +143,7 @@ sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
 static void
 sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
 {
-     int i;
+     unsigned int i;
      debug_decl(sudo_sss_rulecpy, SUDO_DEBUG_SSSD)
 
      sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
@@ -171,7 +171,8 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     int act, void *filterp_arg)
 {
     struct sss_sudo_result *out_res;
-    int i, l, r;
+    unsigned int i, l;
+    int r;
     debug_decl(sudo_sss_filter_result, SUDO_DEBUG_SSSD)
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "in_res=%p, count=%u, act=%s",
@@ -330,7 +331,7 @@ static int sudo_sss_setdefs(struct sudo_nss *nss)
     struct sss_sudo_result *sss_result;
     struct sss_sudo_rule   *sss_rule;
     uint32_t sss_error;
-    int i;
+    unsigned int i;
     debug_decl(sudo_sss_setdefs, SUDO_DEBUG_SSSD);
 
     if (handle == NULL)
@@ -845,7 +846,9 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 {
     char **val_array = NULL, *val;
     char *allowed_cmnd, *allowed_args;
-    int i, foundbang, ret = UNSPEC;
+    int ret = UNSPEC;
+    bool foundbang;
+    unsigned int i;
     struct sudo_digest digest, *allowed_digest = NULL;
     debug_decl(sudo_sss_check_command, SUDO_DEBUG_SSSD);
 
@@ -896,7 +899,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	    *allowed_args++ = '\0';
 
 	/* check the command like normal */
-	if (command_matches(allowed_cmnd, allowed_args, NULL)) {
+	if (command_matches(allowed_cmnd, allowed_args, allowed_digest)) {
 	    /*
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
@@ -907,6 +910,8 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoCommand '%s' ... %s",
 	    val, ret == true ? "MATCH!" : "not");
 	efree(allowed_cmnd);	/* cleanup */
+	if (allowed_digest != NULL)
+	    efree(allowed_digest->digest_str);
     }
 
     handle->fn_free_values(val_array); /* more cleanup */
@@ -1097,7 +1102,8 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
     struct sss_sudo_rule *rule;
-    int i, found = false;
+    unsigned int i;
+    bool found = false;
     debug_decl(sudo_sss_display_cmnd, SUDO_DEBUG_SSSD);
 
     if (handle == NULL)
@@ -1141,15 +1147,12 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
     struct sudo_sss_handle *handle = nss->handle;
-
     struct sss_sudo_rule *rule;
     struct sss_sudo_result *sss_result = NULL;
-
     uint32_t sss_error = 0;
-
     char *prefix, *val, **val_array = NULL;
-    int count = 0, i, j;
-
+    unsigned int i, j;
+    int count = 0;
     debug_decl(sudo_sss_display_defaults, SUDO_DEBUG_SSSD);
 
     if (handle == NULL)
