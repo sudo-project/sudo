@@ -33,18 +33,18 @@ struct plugin_info {
 TAILQ_HEAD(plugin_info_list, plugin_info);
 
 /* Read main sudo.conf file. */
-void sudo_conf_read(const char *);
+__dso_public void sudo_conf_read(const char *);
 
 /* Accessor functions. */
-const char *sudo_conf_askpass_path(void);
-const char *sudo_conf_sesh_path(void);
-const char *sudo_conf_noexec_path(void);
-const char *sudo_conf_plugin_dir_path(void);
-const char *sudo_conf_debug_flags(void);
-struct plugin_info_list *sudo_conf_plugins(void);
-bool sudo_conf_disable_coredump(void);
-bool sudo_conf_probe_interfaces(void);
-int sudo_conf_group_source(void);
-int sudo_conf_max_groups(void);
+__dso_public const char *sudo_conf_askpass_path(void);
+__dso_public const char *sudo_conf_sesh_path(void);
+__dso_public const char *sudo_conf_noexec_path(void);
+__dso_public const char *sudo_conf_plugin_dir_path(void);
+__dso_public const char *sudo_conf_debug_flags(void);
+__dso_public struct plugin_info_list *sudo_conf_plugins(void);
+__dso_public bool sudo_conf_disable_coredump(void);
+__dso_public bool sudo_conf_probe_interfaces(void);
+__dso_public int sudo_conf_group_source(void);
+__dso_public int sudo_conf_max_groups(void);
 
 #endif /* _SUDO_CONF_H */

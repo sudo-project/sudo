@@ -41,19 +41,21 @@ CC = @CC@
 LIBTOOL = @LIBTOOL@
 FLEX = @FLEX@
 YACC = @YACC@
+SED = @SED@
 PERL = perl
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
 LIBS = $(LT_LIBS) @LIBINTL@
 NET_LIBS = @NET_LIBS@
-SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@ @LIBMD@ @LIBDL@
+SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@ @LIBMD@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
 VISUDO_LIBS = $(NET_LIBS) @LIBMD@
-TESTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@ @LIBDL@
+TESTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) -DLIBDIR=\"$(libdir)\" @CPPFLAGS@
@@ -155,7 +157,7 @@ CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o
 
 CHECK_BASE64_OBJS = check_base64.o base64.o locale.o
 
-CHECK_DIGEST_OBJS = check_digest.o
+CHECK_DIGEST_OBJS = check_digest.o locale.o
 
 CHECK_FILL_OBJS = check_fill.o hexchar.o locale.o toke_util.o
 
@@ -183,7 +185,7 @@ $(shlib_map): $(shlib_exp)
 	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
 
 $(shlib_opt): $(shlib_exp)
-	@sed 's/^/+e /' $(shlib_exp) > $@
+	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
 # Prevent default rules from building .c files from .l and .y files
 .l.c:
@@ -200,37 +202,37 @@ sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
 	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(VISUDO_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(VISUDO_LIBS) -no-fast-install
 
 sudoreplay: timestr.lo $(REPLAY_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(LIBS) $(REPLAY_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(LIBS) $(REPLAY_LIBS) -no-fast-install
 
 testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(TESTSUDOERS_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(TESTSUDOERS_LIBS) -no-fast-install
 
 check_addr: $(CHECK_ADDR_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS) -no-fast-install
 
 check_base64: $(CHECK_BASE64_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_BASE64_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_BASE64_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
 
 check_digest: $(CHECK_DIGEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @LIBMD@
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @LIBMD@ -no-fast-install
 
 check_fill: $(CHECK_FILL_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
 
 # We need to link check_symbols with -lpthread on HP-UX since LDAP uses threads
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
 	if [ X"$(soext)" != X"" ]; then \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@ @LIBDL@; \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@ -no-fast-install; \
 	fi
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
 
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
@@ -241,7 +243,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -264,7 +266,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 	    else \
 		getdate_y="$(srcdir)/getdate.y"; \
 	    fi; \
-	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -289,33 +291,31 @@ install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(replaydir) \
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
-	    `echo $(DESTDIR)$(rundir)|sed 's,/[^/]*$$,,'` \
-	    `echo $(DESTDIR)$(vardir)|sed 's,/[^/]*$$,,'`
-	$(INSTALL) -d -O $(install_uid) -G $(install_gid) -m 0711 $(DESTDIR)$(rundir)
-	$(INSTALL) -d -O $(install_uid) -G $(install_gid) -m 0711 $(DESTDIR)$(vardir)
+	    `echo $(DESTDIR)$(rundir)|$(SED) 's,/[^/]*$$,,'` \
+	    `echo $(DESTDIR)$(vardir)|$(SED) 's,/[^/]*$$,,'`
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(rundir)
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(vardir)
 
 install-binaries: visudo sudoreplay install-dirs
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 visudo $(DESTDIR)$(visudodir)/visudo
+	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
+	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-includes:
 
 install-doc: install-dirs
-	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0755 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
+	@LDAP@$(INSTALL) $(INSTALL_OWNER) -m 0755 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
 	if [ X"$(soext)" != X"" -a -e .libs/sudoers$(soext) ]; then \
 	    test X"$$SUDO_PREINSTALL_CMD" != X"" && \
 		$$SUDO_PREINSTALL_CMD .libs/sudoers$(soext); \
-	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir)/sudoers.so; \
+	    INSTALL_BACKUP='~' $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir)/sudoers.so; \
 	fi
 
 install-sudoers: install-dirs
-	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -m 0750 \
-	    $(DESTDIR)$(sudoersdir)/sudoers.d
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0750 $(DESTDIR)$(sudoersdir)/sudoers.d
 	test -r $(DESTDIR)$(sudoersdir)/sudoers || \
-	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -m $(sudoers_mode) \
-		sudoers $(DESTDIR)$(sudoersdir)/sudoers
+	    $(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/sudoers.so

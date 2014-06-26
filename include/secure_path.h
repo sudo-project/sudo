@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,8 +24,8 @@
 #define SUDO_PATH_WORLD_WRITABLE	-4
 #define SUDO_PATH_GROUP_WRITABLE	-5
 
-int sudo_secure_dir(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
-int sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
-int sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp);
+__dso_public int sudo_secure_dir(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+__dso_public int sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+__dso_public int sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp);
 
 #endif /* _SUDO_SECURE_PATH_H */

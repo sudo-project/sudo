@@ -51,6 +51,12 @@ BACKIT=false
 TOUCHIT=true
 DIRMODE=false
 
+# INSTALL_BACKUP is like -b but for use with libtool
+if test X"${INSTALL_BACKUP}" != X""; then
+    BACKIT=true
+    BACKUP="${INSTALL_BACKUP}"
+fi
+
 case `${WHOAMI}` in
 root)
     ROOT=true
@@ -217,7 +223,7 @@ if [ X"$1" != X"$2" ] ; then
     fi
 fi
 
-##  Strip and set the modes.
+##  Strip and set the owner/mode.
 if ${STRIPIT} ; then
     ${STRIP} "${DEST}" || exit 1
 fi
@@ -228,6 +234,6 @@ if ${CHGROUPIT} ; then
     ${CHGRP} "${GROUP}" "${DEST}" || exit 1
 fi
 if ${CHMODIT} ; then
-    ${CHMOD} "${MODE}"  "${DEST}" || exit 1
+    ${CHMOD} "${MODE}" "${DEST}" || exit 1
 fi
 exit 0

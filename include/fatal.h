@@ -119,18 +119,18 @@
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 extern sigjmp_buf fatal_jmp;
 
-int	fatal_callback_deregister(void (*func)(void));
-int	fatal_callback_register(void (*func)(void));
-char   *warning_gettext(const char *msgid) __format_arg(1);
-void	fatal_disable_setjmp(void);
-void	fatal_enable_setjmp(void);
-void	fatal_nodebug(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
-void	fatalx_nodebug(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
-void	vfatal_nodebug(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
-void	vfatalx_nodebug(const char *, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
-void	warning_nodebug(const char *, ...) __printf0like(1, 2);
-void	warningx_nodebug(const char *, ...) __printflike(1, 2);
-void	vwarning_nodebug(const char *, va_list ap) __printf0like(1, 0);
-void	vwarningx_nodebug(const char *, va_list ap) __printflike(1, 0);
+__dso_public int  fatal_callback_deregister(void (*func)(void));
+__dso_public int  fatal_callback_register(void (*func)(void));
+__dso_public char *warning_gettext(const char *msgid) __format_arg(1);
+__dso_public void fatal_disable_setjmp(void);
+__dso_public void fatal_enable_setjmp(void);
+__dso_public void fatal_nodebug(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
+__dso_public void fatalx_nodebug(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
+__dso_public void vfatal_nodebug(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
+__dso_public void vfatalx_nodebug(const char *, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
+__dso_public void warning_nodebug(const char *, ...) __printf0like(1, 2);
+__dso_public void warningx_nodebug(const char *, ...) __printflike(1, 2);
+__dso_public void vwarning_nodebug(const char *, va_list ap) __printf0like(1, 0);
+__dso_public void vwarningx_nodebug(const char *, va_list ap) __printflike(1, 0);
 
 #endif /* _SUDO_FATAL_H_ */

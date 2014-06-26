@@ -14,13 +14,14 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+
+#include "missing.h"
+
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
 # include "compat/fnmatch.h"
 #endif
-
-#include "missing.h"
 
 __dso_public int main(int argc, char *argv[]);
 

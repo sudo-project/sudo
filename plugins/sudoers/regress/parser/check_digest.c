@@ -39,13 +39,14 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+
+#include "missing.h"
+
 #ifdef HAVE_SHA224UPDATE
 # include <sha2.h>
 #else
 # include "compat/sha2.h"
 #endif
-
-#include "missing.h"
 
 __dso_public int main(int argc, char *argv[]);
 

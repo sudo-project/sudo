@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -208,24 +208,24 @@
 extern const char *const sudo_debug_priorities[];
 extern const char *const sudo_debug_subsystems[];
 
-void sudo_debug_enter(const char *func, const char *file, int line, int subsys);
-void sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[]);
-void sudo_debug_exit(const char *func, const char *file, int line, int subsys);
-void sudo_debug_exit_int(const char *func, const char *file, int line, int subsys, int rval);
-void sudo_debug_exit_long(const char *func, const char *file, int line, int subsys, long rval);
-void sudo_debug_exit_size_t(const char *func, const char *file, int line, int subsys, size_t rval);
-void sudo_debug_exit_bool(const char *func, const char *file, int line, int subsys, int rval);
-void sudo_debug_exit_str(const char *func, const char *file, int line, int subsys, const char *rval);
-void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
-void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
-int sudo_debug_fd_get(void);
-int sudo_debug_fd_set(int fd);
-int sudo_debug_init(const char *debugfile, const char *settings);
-void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
-void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
-void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
-void sudo_debug_write(const char *str, int len, int errno_val);
-void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
-pid_t sudo_debug_fork(void);
+__dso_public void sudo_debug_enter(const char *func, const char *file, int line, int subsys);
+__dso_public void sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[]);
+__dso_public void sudo_debug_exit(const char *func, const char *file, int line, int subsys);
+__dso_public void sudo_debug_exit_int(const char *func, const char *file, int line, int subsys, int rval);
+__dso_public void sudo_debug_exit_long(const char *func, const char *file, int line, int subsys, long rval);
+__dso_public void sudo_debug_exit_size_t(const char *func, const char *file, int line, int subsys, size_t rval);
+__dso_public void sudo_debug_exit_bool(const char *func, const char *file, int line, int subsys, int rval);
+__dso_public void sudo_debug_exit_str(const char *func, const char *file, int line, int subsys, const char *rval);
+__dso_public void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
+__dso_public void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
+__dso_public int sudo_debug_fd_get(void);
+__dso_public int sudo_debug_fd_set(int fd);
+__dso_public int sudo_debug_init(const char *debugfile, const char *settings);
+__dso_public void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
+__dso_public void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
+__dso_public void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
+__dso_public void sudo_debug_write(const char *str, int len, int errno_val);
+__dso_public void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
+__dso_public pid_t sudo_debug_fork(void);
 
 #endif /* _SUDO_DEBUG_H */

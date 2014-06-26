@@ -40,11 +40,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 #include <ctype.h>
 #include <grp.h>
 #include <pwd.h>
@@ -52,6 +47,12 @@
 #include <sudo_usage.h>
 #include "sudo.h"
 #include "lbuf.h"
+
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 int tgetpass_flags;
 

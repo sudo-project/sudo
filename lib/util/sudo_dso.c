@@ -40,8 +40,8 @@
 #endif
 #include <errno.h>
 
-#include "sudo_dso.h"
 #include "missing.h"
+#include "sudo_dso.h"
 
 /*
  * Pointer for statically compiled symbols.

@@ -137,39 +137,39 @@
 #endif
 
 /* aix.c */
-int aix_prep_user(char *user, const char *tty);
-int aix_restoreauthdb(void);
-int aix_setauthdb(char *user);
+__dso_public int aix_prep_user(char *user, const char *tty);
+__dso_public int aix_restoreauthdb(void);
+__dso_public int aix_setauthdb(char *user);
 
 /* atobool.c */
-int atobool(const char *str);
+__dso_public int atobool(const char *str);
 
 /* atoid.c */
-id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
+__dso_public id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
 
 /* atomode.c */
-int atomode(const char *cp, const char **errstr);
+__dso_public int atomode(const char *cp, const char **errstr);
 
 /* fmt_string.h */
-char *fmt_string(const char *var, const char *value);
+__dso_public char *fmt_string(const char *var, const char *value);
 
 /* gidlist.c */
-int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+__dso_public int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 
 /* progname.c */
-void initprogname(const char *);
+__dso_public void initprogname(const char *);
 
 /* setgroups.c */
-int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+__dso_public int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
 /* term.c */
-bool term_cbreak(int);
-bool term_copy(int, int);
-bool term_noecho(int);
-bool term_raw(int, int);
-bool term_restore(int, bool);
+__dso_public bool term_cbreak(int);
+__dso_public bool term_copy(int, int);
+__dso_public bool term_noecho(int);
+__dso_public bool term_raw(int, int);
+__dso_public bool term_restore(int, bool);
 
 /* ttysize.c */
-void get_ttysize(int *rowp, int *colp);
+__dso_public void get_ttysize(int *rowp, int *colp);
 
 #endif /* _SUDO_UTIL_H */

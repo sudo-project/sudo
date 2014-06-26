@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2013, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -40,10 +40,10 @@ struct sudo_preload_table {
 };
 
 /* Public functions. */
-char *sudo_dso_strerror(void);
-int sudo_dso_unload(void *handle);
-void *sudo_dso_findsym(void *handle, const char *symbol);
-void *sudo_dso_load(const char *path, int mode);
-void sudo_dso_preload_table(struct sudo_preload_table *table);
+__dso_public char *sudo_dso_strerror(void);
+__dso_public int sudo_dso_unload(void *handle);
+__dso_public void *sudo_dso_findsym(void *handle, const char *symbol);
+__dso_public void *sudo_dso_load(const char *path, int mode);
+__dso_public void sudo_dso_preload_table(struct sudo_preload_table *table);
 
 #endif /* _SUDO_DSO_H */

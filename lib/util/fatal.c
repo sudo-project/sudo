@@ -43,7 +43,7 @@ struct sudo_fatal_callback {
 };
 SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
-sigjmp_buf fatal_jmp;
+__dso_public sigjmp_buf fatal_jmp;
 static bool setjmp_enabled = false;
 static struct sudo_fatal_callback_list callbacks;
 

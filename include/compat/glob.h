@@ -69,8 +69,8 @@ typedef struct {
 #define	GLOB_NOSYS	(-4)	/* Function not supported. */
 #define GLOB_ABEND	GLOB_ABORTED
 
-int	sudo_glob(const char *, int, int (*)(const char *, int), glob_t *);
-void	sudo_globfree(glob_t *);
+__dso_public int  sudo_glob(const char *, int, int (*)(const char *, int), glob_t *);
+__dso_public void sudo_globfree(glob_t *);
 
 #define glob(_a, _b, _c, _d) sudo_glob((_a), (_b), (_c), (_d))
 #define globfree(_a) sudo_globfree((_a))

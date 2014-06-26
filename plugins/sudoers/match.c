@@ -48,11 +48,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_FNMATCH
-# include <fnmatch.h>
-#else
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
 #ifndef SUDOERS_NAME_MATCH
 # ifdef HAVE_GLOB
 #  include <glob.h>
@@ -81,11 +76,6 @@
 #  include <ndir.h>
 # endif
 #endif
-#ifdef HAVE_SHA224UPDATE
-# include <sha2.h>
-#else
-# include "compat/sha2.h"
-#endif
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
@@ -93,6 +83,17 @@
 #include "sudoers.h"
 #include "parse.h"
 #include <gram.h>
+
+#ifdef HAVE_FNMATCH
+# include <fnmatch.h>
+#else
+# include "compat/fnmatch.h"
+#endif /* HAVE_FNMATCH */
+#ifdef HAVE_SHA224UPDATE
+# include <sha2.h>
+#else
+# include "compat/sha2.h"
+#endif
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 

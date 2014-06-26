@@ -26,8 +26,8 @@
 
 struct timeval;
 
-bool lock_file(int, int);
-int touch(int, char *, struct timeval *);
-ssize_t  sudo_parseln(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
+__dso_public bool lock_file(int, int);
+__dso_public int touch(int, char *, struct timeval *);
+__dso_public ssize_t  sudo_parseln(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
 
 #endif /* _SUDO_FILEOPS_H */

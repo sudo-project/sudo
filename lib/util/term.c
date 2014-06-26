@@ -69,8 +69,8 @@ static struct termios term, oterm;
 static int changed;
 
 /* tgetpass() needs to know the erase and kill chars for cbreak mode. */
-int term_erase;
-int term_kill;
+__dso_public int term_erase;
+__dso_public int term_kill;
 
 static volatile sig_atomic_t got_sigttou;
 

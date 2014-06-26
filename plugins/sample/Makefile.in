@@ -29,9 +29,11 @@ cross_compiling = @CROSS_COMPILING@
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@ @LT_STATIC@
+SED = @SED@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # Libraries
 LIBS = $(top_builddir)/lib/util/libsudo_util.la
@@ -75,6 +77,10 @@ shlib_exp = $(srcdir)/sample_plugin.exp
 shlib_map = sample_plugin.map
 shlib_opt = sample_plugin.opt
 
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
+
 # OS dependent defines
 DEFS = @OSDEFS@
 
@@ -102,7 +108,7 @@ $(shlib_map): $(shlib_exp)
 	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
 
 $(shlib_opt): $(shlib_exp)
-	@sed 's/^/+e /' $(shlib_exp) > $@
+	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
 sample_plugin.la: $(OBJS) @LT_LDDEP@
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
@@ -122,7 +128,7 @@ install-doc:
 
 install-plugin: install-dirs sample_plugin.la
 	if [ X"$(soext)" != X"" ]; then \
-	    $(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)/sample_plugin.so; \
+	    $(INSTALL) -b~ $(INSTALL_OWNER) -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)/sample_plugin.so; \
 	fi
 
 uninstall:

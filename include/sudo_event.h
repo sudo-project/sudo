@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -83,43 +83,43 @@ struct sudo_event_base {
 };
 
 /* Allocate a new event base. */
-struct sudo_event_base *sudo_ev_base_alloc(void);
+__dso_public struct sudo_event_base *sudo_ev_base_alloc(void);
 
 /* Free an event base. */
-void sudo_ev_base_free(struct sudo_event_base *base);
+__dso_public void sudo_ev_base_free(struct sudo_event_base *base);
 
 /* Allocate a new event. */
-struct sudo_event *sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callback, void *closure);
+__dso_public struct sudo_event *sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callback, void *closure);
 
 /* Free an event. */
-void sudo_ev_free(struct sudo_event *ev);
+__dso_public void sudo_ev_free(struct sudo_event *ev);
 
 /* Add an event, returns 0 on success, -1 on error */
-int sudo_ev_add(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
+__dso_public int sudo_ev_add(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
 
 /* Delete an event, returns 0 on success, -1 on error */
-int sudo_ev_del(struct sudo_event_base *head, struct sudo_event *ev);
+__dso_public int sudo_ev_del(struct sudo_event_base *head, struct sudo_event *ev);
 
 /* Main event loop, returns SUDO_CB_SUCCESS, SUDO_CB_BREAK or SUDO_CB_ERROR */
-int sudo_ev_loop(struct sudo_event_base *head, int flags);
+__dso_public int sudo_ev_loop(struct sudo_event_base *head, int flags);
 
 /* Return the remaining timeout associated with an event. */
-int sudo_ev_get_timeleft(struct sudo_event *ev, struct timeval *tv);
+__dso_public int sudo_ev_get_timeleft(struct sudo_event *ev, struct timeval *tv);
 
 /* Cause the event loop to exit after one run through. */
-void sudo_ev_loopexit(struct sudo_event_base *base);
+__dso_public void sudo_ev_loopexit(struct sudo_event_base *base);
 
 /* Break out of the event loop right now. */
-void sudo_ev_loopbreak(struct sudo_event_base *base);
+__dso_public void sudo_ev_loopbreak(struct sudo_event_base *base);
 
 /* Rescan for events and restart the event loop. */
-void sudo_ev_loopcontinue(struct sudo_event_base *base);
+__dso_public void sudo_ev_loopcontinue(struct sudo_event_base *base);
 
 /* Returns true if event loop stopped due to sudo_ev_loopexit(). */
-bool sudo_ev_got_exit(struct sudo_event_base *base);
+__dso_public bool sudo_ev_got_exit(struct sudo_event_base *base);
 
 /* Returns true if event loop stopped due to sudo_ev_loopbreak(). */
-bool sudo_ev_got_break(struct sudo_event_base *base);
+__dso_public bool sudo_ev_got_break(struct sudo_event_base *base);
 
 /* Return the fd associated with an event. */
 #define sudo_ev_get_fd(_ev) ((_ev) ? (_ev)->fd : -1)

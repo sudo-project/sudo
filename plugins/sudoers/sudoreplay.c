@@ -81,11 +81,6 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 #include <pathnames.h>
 
@@ -102,6 +97,12 @@
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_util.h"
+
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

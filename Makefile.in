@@ -59,7 +59,10 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
 SHELL = @SHELL@
 
+SED = @SED@
+
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 ECHO_N = @ECHO_N@
 ECHO_C = @ECHO_C@
@@ -104,19 +107,19 @@ cppcheck: config.status
 
 install-dirs install-binaries install-includes install-plugin: config.status pre-install
 	for d in $(SUBDIRS); do \
-	    (cd $$d && exec $(MAKE) $@) && continue; \
+	    (cd $$d && exec $(MAKE) "INSTALL_OWNER=$(INSTALL_OWNER)" $@) && continue; \
 	    exit $$?; \
 	done
 
 install-doc: config.status ChangeLog
 	for d in $(SUBDIRS); do \
-	    (cd $$d && exec $(MAKE) $@) && continue; \
+	    (cd $$d && exec $(MAKE) "INSTALL_OWNER=$(INSTALL_OWNER)" $@) && continue; \
 	    exit $$?; \
 	done
 
 install: config.status ChangeLog pre-install install-nls
 	for d in $(SUBDIRS); do \
-	    (cd $$d && exec $(MAKE) $@) && continue; \
+	    (cd $$d && exec $(MAKE) "INSTALL_OWNER=$(INSTALL_OWNER)" $@) && continue; \
 	    exit $$?; \
 	done
 
@@ -190,7 +193,7 @@ update-pot:
 		    sudo) tmpfiles=; cfiles="src/*c lib/*/*c";; \
 		    sudoers) \
 			echo "syntax error" > confstr.sh; \
-			sed -n -e 's/^badpass_message="/gettext "/p' \
+			$(SED) -n -e 's/^badpass_message="/gettext "/p' \
 			    -e 's/^passprompt="/gettext "/p' \
 			    -e 's/^mailsub="/gettext "/p' configure.ac \
 			    >> confstr.sh; \
@@ -204,7 +207,7 @@ update-pot:
 		    rm -f $$pot.tmp; \
 		else \
 		    printf '/^#$$/+1,$$d\nw\nq\n' | ed - $$pot; \
-		    sed '1,/^#$$/d' $$pot.tmp >> $$pot; \
+		    $(SED) '1,/^#$$/d' $$pot.tmp >> $$pot; \
 		    rm -f $$pot.tmp; \
 		fi; \
 	    done; \
@@ -234,14 +237,14 @@ compile-po:
 		    POFILES="$$POFILES $$po"; \
 		done; \
 	    done; \
-	    echo "all: `echo $$POFILES | sed 's/\.po/.mo/g'`" >> Makefile.$$$$; \
+	    echo "all: `echo $$POFILES | $(SED) 's/\.po/.mo/g'`" >> Makefile.$$$$; \
 	    echo "" >> Makefile.$$$$; \
 	    for po in $$POFILES; do \
-		mo=`echo $$po | sed 's/po$$/mo/'`; \
+		mo=`echo $$po | $(SED) 's/po$$/mo/'`; \
 		echo "$$mo: $$po" >> Makefile.$$$$; \
 		echo "	$(MSGFMT) --statistics -c -o $$mo $$po" >> Makefile.$$$$; \
 	    done; \
-	    make -f Makefile.$$$$; \
+	    $(MAKE) -f Makefile.$$$$; \
 	    rm -f Makefile.$$$$; \
 	fi
 
@@ -251,7 +254,7 @@ install-nls:
 	    for pot in $(POTFILES); do \
 		podir=`dirname $$pot`; \
 		domain=`basename $$pot .pot`; \
-		SUDO_LINGUAS=$${LINGUAS-"`echo $$podir/*.mo|sed 's:'$$podir'/\([^ ]*\).mo:\1:g'`"}; \
+		SUDO_LINGUAS=$${LINGUAS-"`echo $$podir/*.mo | $(SED) 's:'$$podir'/\([^ ]*\).mo:\1:g'`"}; \
 		echo $(ECHO_N) "Installing $$domain message catalogs:$(ECHO_C)"; \
 		for lang in $$SUDO_LINGUAS; do \
 		    test -s $$podir/$$lang.mo || continue; \
@@ -282,13 +285,13 @@ dist: check-dist force-dist
 force-dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
 	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
-	    `sed 's/[ 	].*//' $(srcdir)/MANIFEST`
+	    `$(SED) 's/[ 	].*//' $(srcdir)/MANIFEST`
 	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
 package: sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
-	$(MAKE) install DESTDIR=$$DESTDIR && \
+	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
 	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
 	    --destdir=$$DESTDIR \
 	    $(srcdir)/sudo.pp \

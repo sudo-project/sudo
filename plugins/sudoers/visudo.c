@@ -70,11 +70,6 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 
 #include "sudoers.h"
 #include "parse.h"
@@ -82,6 +77,12 @@
 #include "sudoers_version.h"
 #include "sudo_conf.h"
 #include <gram.h>
+
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 struct sudoersfile {
     TAILQ_ENTRY(sudoersfile) entries;

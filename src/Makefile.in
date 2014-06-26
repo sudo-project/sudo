@@ -29,13 +29,15 @@ cross_compiling = @CROSS_COMPILING@
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@ @LT_STATIC@
+SED = @SED@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
-LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ @LIBINTL@ $(LT_LIBS) @LIBDL@
+LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ @LIBINTL@ $(LT_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
@@ -136,7 +138,7 @@ sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS) -no-fast-install
 
 pre-install:
 
@@ -149,17 +151,19 @@ install-dirs:
 install-rc:
 	@if [ -n "$(INIT_SCRIPT)" ]; then \
 	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR) \
-		`echo $(DESTDIR)$(RC_LINK)|sed 's,/[^/]*$$,,'`; \
-	    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0755 $(top_srcdir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
+		`echo $(DESTDIR)$(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_srcdir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
 	    rm -f $(DESTDIR)$(RC_LINK); \
 	    ln -s $(INIT_DIR)/sudo $(DESTDIR)$(RC_LINK); \
 	fi
 
 install-binaries: install-dirs $(PROGS)
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 04755 sudo $(DESTDIR)$(bindir)/sudo
+	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 04755 sudo $(DESTDIR)$(bindir)/sudo
 	rm -f $(DESTDIR)$(bindir)/sudoedit
 	ln -s sudo $(DESTDIR)$(bindir)/sudoedit
-	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 sesh $(DESTDIR)$(libexecdir)/sudo/sesh; fi
+	if [ -f sesh ]; then \
+	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sesh $(DESTDIR)$(libexecdir)/sudo/sesh; \
+	fi
 
 install-doc:
 
@@ -168,7 +172,9 @@ install-includes:
 # We install sudo_noexec by hand so we can avoid a "lib" prefix
 # and a version number.  Since we use LD_PRELOAD, neither is needed.
 install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/libsudo_noexec$(shlib_ext) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/libsudo_noexec$(shlib_ext) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
+	if [ -f .libs/libsudo_noexec$(shlib_ext) ]; then \
+	    INSTALL_BACKUP='~' $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) .libs/libsudo_noexec$(shlib_ext) $(DESTDIR)$(noexecdir)/$(noexecfile); \
+	fi
 
 install-plugin:
 

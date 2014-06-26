@@ -59,8 +59,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include "compat/getaddrinfo.h"
 #include "missing.h"
+#include "compat/getaddrinfo.h"
 
 /* We need access to h_errno to map errors from gethostbyname. */
 #ifndef HAVE_DECL_H_ERRNO

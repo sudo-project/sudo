@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,28 +47,28 @@ typedef struct {
     uint8_t buffer[SHA512_BLOCK_LENGTH];
 } SHA2_CTX;
 
-void SHA224Init(SHA2_CTX *ctx);
-void SHA224Pad(SHA2_CTX *ctx);
-void SHA224Transform(uint32_t state[8], const uint8_t buffer[SHA224_BLOCK_LENGTH]);
-void SHA224Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-void SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx);
+__dso_public void SHA224Init(SHA2_CTX *ctx);
+__dso_public void SHA224Pad(SHA2_CTX *ctx);
+__dso_public void SHA224Transform(uint32_t state[8], const uint8_t buffer[SHA224_BLOCK_LENGTH]);
+__dso_public void SHA224Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+__dso_public void SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx);
 
-void SHA256Init(SHA2_CTX *ctx);
-void SHA256Pad(SHA2_CTX *ctx);
-void SHA256Transform(uint32_t state[8], const uint8_t buffer[SHA256_BLOCK_LENGTH]);
-void SHA256Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-void SHA256Final(uint8_t digest[SHA256_DIGEST_LENGTH], SHA2_CTX *ctx);
+__dso_public void SHA256Init(SHA2_CTX *ctx);
+__dso_public void SHA256Pad(SHA2_CTX *ctx);
+__dso_public void SHA256Transform(uint32_t state[8], const uint8_t buffer[SHA256_BLOCK_LENGTH]);
+__dso_public void SHA256Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+__dso_public void SHA256Final(uint8_t digest[SHA256_DIGEST_LENGTH], SHA2_CTX *ctx);
 
-void SHA384Init(SHA2_CTX *ctx);
-void SHA384Pad(SHA2_CTX *ctx);
-void SHA384Transform(uint64_t state[8], const uint8_t buffer[SHA384_BLOCK_LENGTH]);
-void SHA384Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-void SHA384Final(uint8_t digest[SHA384_DIGEST_LENGTH], SHA2_CTX *ctx);
+__dso_public void SHA384Init(SHA2_CTX *ctx);
+__dso_public void SHA384Pad(SHA2_CTX *ctx);
+__dso_public void SHA384Transform(uint64_t state[8], const uint8_t buffer[SHA384_BLOCK_LENGTH]);
+__dso_public void SHA384Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+__dso_public void SHA384Final(uint8_t digest[SHA384_DIGEST_LENGTH], SHA2_CTX *ctx);
 
-void SHA512Init(SHA2_CTX *ctx);
-void SHA512Pad(SHA2_CTX *ctx);
-void SHA512Transform(uint64_t state[8], const uint8_t buffer[SHA512_BLOCK_LENGTH]);
-void SHA512Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
-void SHA512Final(uint8_t digest[SHA512_DIGEST_LENGTH], SHA2_CTX *ctx);
+__dso_public void SHA512Init(SHA2_CTX *ctx);
+__dso_public void SHA512Pad(SHA2_CTX *ctx);
+__dso_public void SHA512Transform(uint64_t state[8], const uint8_t buffer[SHA512_BLOCK_LENGTH]);
+__dso_public void SHA512Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+__dso_public void SHA512Final(uint8_t digest[SHA512_DIGEST_LENGTH], SHA2_CTX *ctx);
 
 #endif /* _SUDOERS_SHA2_H */

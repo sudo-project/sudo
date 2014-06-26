@@ -46,11 +46,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_FNMATCH
-# include <fnmatch.h>
-#else
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
@@ -66,6 +61,12 @@
 #include "sudo_conf.h"
 #include "secure_path.h"
 #include <gram.h>
+
+#ifdef HAVE_FNMATCH
+# include <fnmatch.h>
+#else
+# include "compat/fnmatch.h"
+#endif /* HAVE_FNMATCH */
 
 /*
  * Function Prototypes

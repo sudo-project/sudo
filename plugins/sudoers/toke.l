@@ -69,11 +69,6 @@
 #  include <ndir.h>
 # endif
 #endif
-#ifdef HAVE_SHA224UPDATE
-# include <sha2.h>
-#else
-# include "compat/sha2.h"
-#endif
 #include <errno.h>
 #include <ctype.h>
 #include "sudoers.h"
@@ -82,6 +77,12 @@
 #include <gram.h>
 #include "lbuf.h"
 #include "secure_path.h"
+
+#ifdef HAVE_SHA224UPDATE
+# include <sha2.h>
+#else
+# include "compat/sha2.h"
+#endif
 
 int sudolineno;			/* current sudoers line number. */
 int last_token;			/* last token that was parsed. */

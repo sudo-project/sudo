@@ -45,6 +45,8 @@
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <pwd.h>
 
+#include "missing.h"
+
 #define PW_SIZE(name, size)				\
 do {							\
 	if (pw->name) {					\
