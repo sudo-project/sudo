@@ -357,8 +357,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	user_tty = estrdup("unknown"); /* user_ttypath remains NULL */
 
     if (groups != NULL && groups[0] != '\0') {
-	/* parse_gid_list() will print a warning on error. */
-	user_ngids = parse_gid_list(groups, &user_gid, &user_gids);
+	/* sudo_parse_gids() will print a warning on error. */
+	user_ngids = sudo_parse_gids(groups, &user_gid, &user_gids);
 	if (user_ngids == -1)
 	    goto bad;
     }

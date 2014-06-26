@@ -627,8 +627,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_groups=", info[i], sizeof("runas_groups=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_groups=") - 1;
-		    details->ngroups = parse_gid_list(cp, NULL, &details->groups);
-		    /* parse_gid_list() will print a warning on error. */
+		    details->ngroups = sudo_parse_gids(cp, NULL, &details->groups);
+		    /* sudo_parse_gids() will print a warning on error. */
 		    if (details->ngroups == -1)
 			exit(1);
 		    break;

@@ -49,7 +49,6 @@ lbuf_append_quoted
 lbuf_destroy
 lbuf_init
 lbuf_print
-parse_gid_list
 sudo_asprintf
 sudo_clock_gettime
 sudo_closefrom
@@ -120,6 +119,7 @@ sudo_memset_s
 sudo_mkdtemp
 sudo_mkstemps
 sudo_new_key_val
+sudo_parse_gids
 sudo_parseln
 sudo_printf
 sudo_pw_dup

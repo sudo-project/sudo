@@ -154,7 +154,7 @@ __dso_public int atomode(const char *cp, const char **errstr);
 __dso_public char *sudo_new_key_val(const char *key, const char *value);
 
 /* gidlist.c */
-__dso_public int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+__dso_public int sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 
 /* progname.c */
 __dso_public void initprogname(const char *);
