@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,11 +43,11 @@
 # include <project.h>
 # include <sys/task.h>
 #endif
-#include <dlfcn.h>
 #include <errno.h>
 #include <pwd.h>
 
 #include "sudo.h"
+#include "sudo_dso.h"
 
 int
 os_init(int argc, char *argv[], char *envp[])
@@ -57,8 +57,8 @@ os_init(int argc, char *argv[], char *envp[])
      * without this.  We must keep the handle open for it to work.
      * This bug was fixed in Solaris 11 Update 1.
      */
-    void *handle = dlopen("/usr/lib/locale/common/methods_unicode.so.3",
-	RTLD_LAZY|RTLD_GLOBAL);
+    void *handle = sudo_dso_load("/usr/lib/locale/common/methods_unicode.so.3",
+	SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     (void)&handle;
 
     return os_init_common(argc, argv, envp);
