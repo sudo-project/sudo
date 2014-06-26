@@ -2311,7 +2311,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(glob nl_langinfo regcomp setenv strftime strrchr strtoll \
+AC_CHECK_FUNCS(glob nl_langinfo regcomp strftime strrchr strtoll \
 	       sysconf tzset)
 AC_CHECK_FUNCS(getgrouplist, [], [
     case "$host_os" in
@@ -2578,7 +2578,7 @@ dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_pton() in libresolv.
 dnl
-AC_CHECK_FUNC(inet_pton, [], [
+AC_CHECK_FUNC(inet_pton, [AC_DEFINE(HAVE_INET_PTON)], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2002, 2012-2013
+ * Copyright (c) 2000, 2002, 2012-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -63,7 +63,7 @@ do {							\
 } while (0)
 
 struct passwd *
-pw_dup(const struct passwd *pw)
+sudo_pw_dup(const struct passwd *pw)
 {
 	size_t nsize = 0, psize = 0, gsize = 0, dsize = 0, ssize = 0, total;
 #ifdef HAVE_LOGIN_CAP_H

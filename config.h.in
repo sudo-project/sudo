@@ -506,9 +506,6 @@
 /* Define to 1 if you have the `setauthdb' function. */
 #undef HAVE_SETAUTHDB
 
-/* Define to 1 if you have the `setenv' function. */
-#undef HAVE_SETENV
-
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 

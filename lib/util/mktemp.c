@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -144,7 +144,7 @@ mktemp_internal(char *path, int slen, int mode)
 
 #ifndef HAVE_MKSTEMPS
 int
-mkstemps(char *path, int slen)
+sudo_mkstemps(char *path, int slen)
 {
 	return mktemp_internal(path, slen, MKTEMP_FILE);
 }
@@ -152,7 +152,7 @@ mkstemps(char *path, int slen)
 
 #ifndef HAVE_MKDTEMP
 char *
-mkdtemp(char *path)
+sudo_mkdtemp(char *path)
 {
 	if (mktemp_internal(path, 0, MKTEMP_DIR) == -1)
 		return NULL;

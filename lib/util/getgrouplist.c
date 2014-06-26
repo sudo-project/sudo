@@ -54,7 +54,7 @@
  * BSD-compatible getgrouplist(3) using AIX getgrset(3)
  */
 int
-getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 {
     char *cp, *grset = NULL;
     int ngroups = 1;
@@ -276,7 +276,7 @@ done:
  * BSD-compatible getgrouplist(3) using nss_search(3)
  */
 int
-getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 {
     struct nss_groupsbymem gbm;
     static DEFINE_NSS_DB_ROOT(db_root);
@@ -315,7 +315,7 @@ getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
  * BSD-compatible getgrouplist(3) using getgrent(3)
  */
 int
-getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 {
     int i, ngroups = 1;
     int grpsize = *ngroupsp;

@@ -55,12 +55,21 @@ struct option {
 	int val;
 };
 
-int	getopt_long(int, char * const *, const char *,
-	const struct option *, int *);
-int	getopt_long_only(int, char * const *, const char *,
-	const struct option *, int *);
+int	sudo_getopt_long(int, char * const *, const char *,
+	    const struct option *, int *);
+#undef getopt_long
+#define getopt_long(_a, _b, _c, _d, _e) \
+	sudo_getopt_long((_a), (_b), (_c), (_d), (_e))
+
+int	sudo_getopt_long_only(int, char * const *, const char *,
+	    const struct option *, int *);
+#undef getopt_long_only
+#define getopt_long_only(_a, _b, _c, _d, _e) \
+	sudo_getopt_long_only((_a), (_b), (_c), (_d), (_e))
 #if 0
-int	getopt(int, char * const [], const char *);
+int	sudo_getopt(int, char * const [], const char *);
+#undef getopt
+#define getopt(_a, _b, _c)	sudo_getopt((_a), (_b), (_c))
 #endif
 
 extern	char *optarg;			/* getopt(3) external variables */

@@ -267,7 +267,7 @@ fnmatch_ch_success:
     return result;
 }
 
-int rpl_fnmatch(const char *pattern, const char *string, int flags)
+int sudo_fnmatch(const char *pattern, const char *string, int flags)
 {
     static const char dummystring[2] = {' ', 0};
     const int escape = !(flags & FNM_NOESCAPE);

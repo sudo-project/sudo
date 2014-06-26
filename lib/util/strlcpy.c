@@ -1,7 +1,7 @@
 /*	$OpenBSD: strlcpy.c,v 1.5 2001/05/13 15:40:16 deraadt Exp $	*/
 
 /*
- * Copyright (c) 1998, 2003-2005, 2010-2011, 2013
+ * Copyright (c) 1998, 2003-2005, 2010-2011, 2013, 2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -31,7 +31,7 @@
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
 size_t
-strlcpy(char *dst, const char *src, size_t siz)
+sudo_strlcpy(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
 	const char *s = src;

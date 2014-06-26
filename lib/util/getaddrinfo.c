@@ -159,7 +159,7 @@ static const char * const gai_errors[] = {
  * indicating an unknown error.
  */
 const char *
-gai_strerror(int ecode)
+sudo_gai_strerror(int ecode)
 {
     if (ecode < 1 || (size_t) ecode > ARRAY_SIZE(gai_errors))
         return "Unknown error";
@@ -172,7 +172,7 @@ gai_strerror(int ecode)
  * Free a linked list of addrinfo structs.
  */
 void
-freeaddrinfo(struct addrinfo *ai)
+sudo_freeaddrinfo(struct addrinfo *ai)
 {
     struct addrinfo *next;
 
@@ -360,7 +360,7 @@ gai_lookup(const char *nodename, int flags, int socktype, unsigned short port,
  * The actual getaddrinfo implementation.
  */
 int
-getaddrinfo(const char *nodename, const char *servname,
+sudo_getaddrinfo(const char *nodename, const char *servname,
             const struct addrinfo *hints, struct addrinfo **res)
 {
     struct addrinfo *ai;

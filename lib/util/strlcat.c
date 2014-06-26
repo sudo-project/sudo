@@ -1,7 +1,7 @@
 /*	$OpenBSD: strlcat.c,v 1.8 2001/05/13 15:40:15 deraadt Exp $	*/
 
 /*
- * Copyright (c) 1998, 2003-2005, 2010-2011, 2013
+ * Copyright (c) 1998, 2003-2005, 2010-2011, 2013, 2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -34,7 +34,7 @@
  * If retval >= siz, truncation occurred.
  */
 size_t
-strlcat(char *dst, const char *src, size_t siz)
+sudo_strlcat(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
 	const char *s = src;

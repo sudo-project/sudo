@@ -17154,7 +17154,7 @@ $as_echo "#define HAVE_GETGROUPS 1" >>confdefs.h
 fi
 LIBS=$ac_save_LIBS
 
-for ac_func in glob nl_langinfo regcomp setenv strftime strrchr strtoll \
+for ac_func in glob nl_langinfo regcomp strftime strrchr strtoll \
 	       sysconf tzset
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -18903,6 +18903,7 @@ fi
 
 ac_fn_c_check_func "$LINENO" "inet_pton" "ac_cv_func_inet_pton"
 if test "x$ac_cv_func_inet_pton" = xyes; then :
+  $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
 
 else
 

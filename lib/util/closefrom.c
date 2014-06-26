@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2010, 2012-2013
+ * Copyright (c) 2004-2005, 2007, 2010, 2012-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -57,7 +57,7 @@
 #include "missing.h"
 
 #if defined(HAVE_FCNTL_CLOSEM) && !defined(HAVE_DIRFD)
-# define closefrom	closefrom_fallback
+# define sudo_closefrom	closefrom_fallback
 #endif
 
 /*
@@ -98,14 +98,14 @@ closefrom_fallback(int lowfd)
  */
 #if defined(HAVE_FCNTL_CLOSEM)
 void
-closefrom(int lowfd)
+sudo_closefrom(int lowfd)
 {
     if (fcntl(lowfd, F_CLOSEM, 0) == -1)
 	closefrom_fallback(lowfd);
 }
 #elif defined(HAVE_PSTAT_GETPROC)
 void
-closefrom(int lowfd)
+sudo_closefrom(int lowfd)
 {
     struct pst_status pstat;
     int fd;
@@ -119,7 +119,7 @@ closefrom(int lowfd)
 }
 #elif defined(HAVE_DIRFD)
 void
-closefrom(int lowfd)
+sudo_closefrom(int lowfd)
 {
     const char *path;
     DIR *dirp;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,7 +48,7 @@
  * that it be non-zero.  We use EINVAL for all errors.
  */
 errno_t
-memset_s(void *v, rsize_t smax, int c, rsize_t n)
+sudo_memset_s(void *v, rsize_t smax, int c, rsize_t n)
 {
     errno_t ret = 0;
     volatile unsigned char *s = v;

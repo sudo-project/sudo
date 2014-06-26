@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,7 +52,7 @@
  *  too small -> value too small
  */
 long long
-rpl_strtonum(const char *str, long long minval, long long maxval,
+sudo_strtonum(const char *str, long long minval, long long maxval,
     const char **errstrp)
 {
     long long retval;
@@ -86,7 +86,7 @@ enum strtonum_err {
  * Convert a string to a number in the range [minval, maxval]
  */
 long long
-rpl_strtonum(const char *str, long long minval, long long maxval,
+sudo_strtonum(const char *str, long long minval, long long maxval,
     const char **errstrp)
 {
     const unsigned char *ustr = (const unsigned char *)str;

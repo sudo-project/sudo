@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2010-2011, 2013
+ * Copyright (c) 2004-2005, 2007, 2010-2011, 2013, 2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -39,7 +39,7 @@
  * Emulate utimes() via utime()
  */
 int
-utimes(const char *file, const struct timeval *times)
+sudo_utimes(const char *file, const struct timeval *times)
 {
     if (times != NULL) {
 	struct utimbuf utb;
@@ -57,7 +57,7 @@ utimes(const char *file, const struct timeval *times)
  * Emulate futimes() via futime()
  */
 int
-futimes(int fd, const struct timeval *times)
+sudo_futimes(int fd, const struct timeval *times)
 {
     if (times != NULL) {
 	struct utimbuf utb;

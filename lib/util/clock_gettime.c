@@ -43,7 +43,7 @@
  * (and CLOCK_MONOTONIC on Mach).
  */
 int
-clock_gettime(clockid_t clock_id, struct timespec *ts)
+sudo_clock_gettime(clockid_t clock_id, struct timespec *ts)
 {
 
     switch (clock_id) {

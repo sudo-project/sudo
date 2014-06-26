@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008, 2010-2013
+ * Copyright (c) 1999-2005, 2008, 2010-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -616,7 +616,7 @@ done:
 
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-rpl_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
+sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 {
 
 	return xxxprintf(&str, n, 0, fmt, ap);
@@ -625,7 +625,7 @@ rpl_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-rpl_snprintf(char *str, size_t n, char const *fmt, ...)
+sudo_snprintf(char *str, size_t n, char const *fmt, ...)
 {
 	int ret;
 	va_list ap;
@@ -639,7 +639,7 @@ rpl_snprintf(char *str, size_t n, char const *fmt, ...)
 
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-rpl_vasprintf(char **str, const char *fmt, va_list ap)
+sudo_vasprintf(char **str, const char *fmt, va_list ap)
 {
 
 	return xxxprintf(str, 0, 1, fmt, ap);
@@ -648,7 +648,7 @@ rpl_vasprintf(char **str, const char *fmt, va_list ap)
 
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-rpl_asprintf(char **str, char const *fmt, ...)
+sudo_asprintf(char **str, char const *fmt, ...)
 {
 	int ret;
 	va_list ap;

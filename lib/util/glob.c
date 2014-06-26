@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -176,7 +176,7 @@ static void	 qprintf(const char *, Char *);
 #endif
 
 int
-rpl_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
+sudo_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
 	glob_t *pglob)
 {
 	const unsigned char *patnext;
@@ -812,7 +812,7 @@ match(Char *name, Char *pat, Char *patend)
 
 /* Free allocated data belonging to a glob_t structure. */
 void
-rpl_globfree(glob_t *pglob)
+sudo_globfree(glob_t *pglob)
 {
 	int i;
 	char **pp;

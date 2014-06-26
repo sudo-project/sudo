@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -61,7 +61,7 @@ extern const char *const sudo_sys_signame[NSIG];
  * Translate signal number to name.
  */
 int
-sig2str(int signo, char *signame)
+sudo_sig2str(int signo, char *signame)
 {
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
     /* Realtime signal support as per Solaris. */

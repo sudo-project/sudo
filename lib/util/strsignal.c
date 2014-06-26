@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,7 @@ extern const char *const sudo_sys_siglist[NSIG];
  * Get signal description string
  */
 char *
-strsignal(int signo)
+sudo_strsignal(int signo)
 {
     if (signo > 0 && signo < NSIG && sudo_sys_siglist[signo] != NULL)
 	return (char *)sudo_sys_siglist[signo];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2010-2011, 2013
+ * Copyright (c) 2007, 2010-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -28,7 +28,7 @@
  * Find the last occurrence of 'c' in the buffer 's' of size 'n'.
  */
 void *
-memrchr(const void *s, int c, size_t n)
+sudo_memrchr(const void *s, int c, size_t n)
 {
     const unsigned char *cp;
 

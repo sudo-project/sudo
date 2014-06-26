@@ -25,8 +25,8 @@
 #define	FNM_LEADING_DIR	(1 << 3)	/* Only match the leading directory */
 #define	FNM_CASEFOLD	(1 << 4)	/* Case insensitive matching */
 
-int rpl_fnmatch(const char *pattern, const char *string, int flags);
+int sudo_fnmatch(const char *pattern, const char *string, int flags);
 
-#define fnmatch(_a, _b, _c)	rpl_fnmatch((_a), (_b), (_c))
+#define fnmatch(_a, _b, _c)	sudo_fnmatch((_a), (_b), (_c))
 
 #endif /* _FNMATCH_H */

@@ -363,96 +363,127 @@ int innetgr(const char *, const char *, const char *, const char *);
 int getdomainname(char *, size_t);
 #endif
 
-/* Functions "missing" from libc. */
+/*
+ * Functions "missing" from libc.
+ * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
+ */
 
 struct timeval;
 struct timespec;
 
 #ifndef HAVE_CLOSEFROM
-void closefrom(int);
-#endif
+void sudo_closefrom(int);
+# undef closefrom
+# define closefrom(_a) sudo_closefrom((_a))
+#endif /* HAVE_CLOSEFROM */
 #ifndef HAVE_GETCWD
-char *getcwd(char *, size_t size);
-#endif
+char *sudo_getcwd(char *, size_t size);
+# undef getcwd
+# define getcwd(_a, _b) sudo_getcwd((_a), (_b))
+#endif /* HAVE_GETCWD */
 #ifndef HAVE_GETGROUPLIST
-int getgrouplist(const char *, gid_t, gid_t *, int *);
-#endif
+int sudo_getgrouplist(const char *, gid_t, gid_t *, int *);
+# undef getgrouplist
+# define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
+#endif /* GETGROUPLIST */
 #ifndef HAVE_GETLINE
-ssize_t getline(char **, size_t *, FILE *);
-#endif
+ssize_t sudo_getline(char **, size_t *, FILE *);
+# undef getline
+# define getline(_a, _b, _c) sudo_getline((_a), (_b), (_c))
+#endif /* HAVE_GETLINE */
 #ifndef HAVE_UTIMES
-int utimes(const char *, const struct timeval *);
-#endif
+int sudo_utimes(const char *, const struct timeval *);
+# undef utimes
+# define utimes(_a, _b) sudo_utimes(((_a), (_b))
+#endif /* HAVE_UTIMES */
 #ifdef HAVE_FUTIME
-int futimes(int, const struct timeval *);
-#endif
+int sudo_futimes(int, const struct timeval *);
+# undef futimes
+# define futimes(_a, _b) sudo_futimes(((_a), (_b))
+#endif /* HAVE_FUTIME */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-int rpl_snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
+int sudo_snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
 # undef snprintf
-# define snprintf rpl_snprintf
-#endif
+# define snprintf sudo_snprintf
+#endif /* HAVE_SNPRINTF */
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-int rpl_vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
+int sudo_vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
 # undef vsnprintf
-# define vsnprintf rpl_vsnprintf
-#endif
+# define vsnprintf sudo_vsnprintf
+#endif /* HAVE_VSNPRINTF */
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-int rpl_asprintf(char **, const char *, ...) __printflike(2, 3);
+int sudo_asprintf(char **, const char *, ...) __printflike(2, 3);
 # undef asprintf
-# define asprintf rpl_asprintf
-#endif
+# define asprintf sudo_asprintf
+#endif /* HAVE_ASPRINTF */
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-int rpl_vasprintf(char **, const char *, va_list) __printflike(2, 0);
+int sudo_vasprintf(char **, const char *, va_list) __printflike(2, 0);
 # undef vasprintf
-# define vasprintf rpl_vasprintf
-#endif
+# define vasprintf sudo_vasprintf
+#endif /* HAVE_VASPRINTF */
 #ifndef HAVE_STRLCAT
-size_t strlcat(char *, const char *, size_t);
-#endif
+size_t sudo_strlcat(char *, const char *, size_t);
+# undef strlcat
+# define strlcat(_a, _b, _c) sudo_strlcat((_a), (_b), (_c))
+#endif /* HAVE_STRLCAT */
 #ifndef HAVE_STRLCPY
-size_t strlcpy(char *, const char *, size_t);
-#endif
+size_t sudo_strlcpy(char *, const char *, size_t);
+# undef strlcpy
+# define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
+#endif /* HAVE_STRLCPY */
 #ifndef HAVE_MEMRCHR
-void *memrchr(const void *, int, size_t);
-#endif
+void *sudo_memrchr(const void *, int, size_t);
+# undef memrchr
+# define memrchr(_a, _b, _c) sudo_memrchr((_a), (_b), (_c))
+#endif /* HAVE_MEMRCHR */
 #ifndef HAVE_MEMSET_S
-errno_t memset_s(void *, rsize_t, int, rsize_t);
-#endif
+errno_t sudo_memset_s(void *, rsize_t, int, rsize_t);
+# undef memset_s
+# define memset_s(_a, _b, _c, _d) sudo_memset_s((_a), (_b), (_c), (_d))
+#endif /* HAVE_MEMSET_S */
 #ifndef HAVE_MKDTEMP
-char *mkdtemp(char *);
-#endif
+char *sudo_mkdtemp(char *);
+# undef mkdtemp
+# define mkdtemp(_a) sudo_mkdtemp((_a))
+#endif /* HAVE_MKDTEMP */
 #ifndef HAVE_MKSTEMPS
 int mkstemps(char *, int);
-#endif
+# undef mkstemps
+# define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
+#endif /* HAVE_MKSTEMPS */
 #ifndef HAVE_PW_DUP
-struct passwd *pw_dup(const struct passwd *);
-#endif
-#ifndef HAVE_SETENV
-int setenv(const char *, const char *, int);
-#endif
-#ifndef HAVE_UNSETENV
-int unsetenv(const char *);
-#endif
+struct passwd *sudo_pw_dup(const struct passwd *);
+# undef pw_dup
+# define pw_dup(_a) sudo_pw_dup((_a))
+#endif /* HAVE_PW_DUP */
 #ifndef HAVE_STRSIGNAL
-char *strsignal(int);
-#endif
+char *sudo_strsignal(int);
+# undef strsignal
+# define strsignal(_a) sudo_strsignal((_a))
+#endif /* HAVE_STRSIGNAL */
 #ifndef HAVE_SIG2STR
-int sig2str(int, char *);
-#endif
+int sudo_sig2str(int, char *);
+# undef sig2str
+# define sig2str(_a, _b) sudo_sig2str((_a), (_b))
+#endif /* HAVE_SIG2STR */
 #ifndef HAVE_STRTONUM
-long long rpl_strtonum(const char *, long long, long long, const char **);
+long long sudo_strtonum(const char *, long long, long long, const char **);
 # undef strtonum
-# define strtonum rpl_strtonum
-#endif
+# define strtonum(_a, _b, _c, _d) sudo_strtonum((_a), (_b), (_c), (_d))
+#endif /* HAVE_STRTONUM */
 #ifndef HAVE_CLOCK_GETTIME
 # define CLOCK_REALTIME 0
 # ifdef __MACH__
 #  define CLOCK_MONOTONIC 1
 # endif
-int clock_gettime(clockid_t clock_id, struct timespec *tp);
-#endif
+int sudo_clock_gettime(clockid_t clock_id, struct timespec *tp);
+# undef clock_gettime
+# define clock_gettime(_a, _b) sudo_clock_gettime((_a), (_b))
+#endif /* HAVE_CLOCK_GETTIME */
 #ifndef HAVE_INET_PTON
-int inet_pton(int af, const char *src, void *dst);
-#endif
+int sudo_inet_pton(int af, const char *src, void *dst);
+# undef inet_pton
+# define inet_pton(_a, _b, _c) sudo_inet_pton((_a), (_b), (_c))
+#endif /* HAVE_INET_PTON */
 
 #endif /* _SUDO_MISSING_H */
