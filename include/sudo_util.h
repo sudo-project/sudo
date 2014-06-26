@@ -150,8 +150,8 @@ __dso_public id_t atoid(const char *str, const char *sep, char **endp, const cha
 /* atomode.c */
 __dso_public int atomode(const char *cp, const char **errstr);
 
-/* fmt_string.h */
-__dso_public char *fmt_string(const char *var, const char *value);
+/* key_val.c */
+__dso_public char *sudo_new_key_val(const char *key, const char *value);
 
 /* gidlist.c */
 __dso_public int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);

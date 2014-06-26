@@ -40,7 +40,6 @@ fatal_callback_deregister
 fatal_callback_register
 fatal_nodebug
 fatalx_nodebug
-fmt_string
 get_ttysize
 getprogname
 initprogname
@@ -120,6 +119,7 @@ sudo_memrchr
 sudo_memset_s
 sudo_mkdtemp
 sudo_mkstemps
+sudo_new_key_val
 sudo_parseln
 sudo_printf
 sudo_pw_dup

@@ -109,7 +109,7 @@ disable_execute(char *const envp[])
 # ifdef RTLD_PRELOAD_DEFAULT
 	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
-	preload = fmt_string(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
+	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
 	    fatal(NULL);

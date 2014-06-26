@@ -42,20 +42,21 @@
 #include "sudo_util.h"
 
 /*
- * Allocate storage for a name=value string and return it.
+ * Create a new key=value pair and return it.
+ * The caller is responsible for freeing the string.
  */
 char *
-fmt_string(const char *var, const char *val)
+sudo_new_key_val(const char *key, const char *val)
 {
-    size_t var_len = strlen(var);
+    size_t key_len = strlen(key);
     size_t val_len = strlen(val);
     char *cp, *str;
-    debug_decl(fmt_string, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_new_key_val, SUDO_DEBUG_UTIL)
 
-    cp = str = malloc(var_len + 1 + val_len + 1);
-	if (str != NULL) {
-	memcpy(cp, var, var_len);
-	cp += var_len;
+    cp = str = malloc(key_len + 1 + val_len + 1);
+    if (str != NULL) {
+	memcpy(cp, key, key_len);
+	cp += key_len;
 	*cp++ = '=';
 	memcpy(cp, val, val_len);
 	cp += val_len;

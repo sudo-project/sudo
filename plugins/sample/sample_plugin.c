@@ -83,29 +83,6 @@ static gid_t runas_gid = -1;
 static int use_sudoedit = false;
 
 /*
- * Allocate storage for a name=value string and return it.
- */
-static char *
-fmt_string(const char *var, const char *val)
-{
-    size_t var_len = strlen(var);
-    size_t val_len = strlen(val);
-    char *cp, *str;
-
-    cp = str = malloc(var_len + 1 + val_len + 1);
-    if (str != NULL) {
-	memcpy(cp, var, var_len);
-	cp += var_len;
-	*cp++ = '=';
-	memcpy(cp, val, val_len);
-	cp += val_len;
-	*cp = '\0';
-    }
-
-    return str;
-}
-
-/*
  * Plugin policy open function.
  */
 static int
@@ -244,7 +221,7 @@ build_command_info(const char *command)
     command_info = calloc(32, sizeof(char *));
     if (command_info == NULL)
 	return NULL;
-    if ((command_info[i++] = fmt_string("command", command)) == NULL ||
+    if ((command_info[i++] = sudo_new_key_val("command", command)) == NULL ||
 	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
 	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
 	return NULL;

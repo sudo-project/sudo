@@ -94,7 +94,6 @@ lib/util/event_poll.c
 lib/util/event_select.c
 lib/util/fatal.c
 lib/util/fileops.c
-lib/util/fmt_string.c
 lib/util/fnmatch.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
@@ -105,6 +104,7 @@ lib/util/gidlist.c
 lib/util/glob.c
 lib/util/inet_pton.c
 lib/util/isblank.c
+lib/util/key_val.c
 lib/util/lbuf.c
 lib/util/memrchr.c
 lib/util/memset_s.c

@@ -297,8 +297,8 @@ parse_args.o: $(srcdir)/parse_args.c $(incdir)/alloc.h \
               $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h ./sudo_usage.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/parse_args.c
-preload.o: $(srcdir)/preload.c $(incdir)/sudo_dso.h $(incdir)/sudo_plugin.h \
-           $(top_builddir)/config.h
+preload.o: $(srcdir)/preload.c $(incdir)/missing.h $(incdir)/sudo_dso.h \
+           $(incdir)/sudo_plugin.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/preload.c
 preserve_fds.o: $(srcdir)/preserve_fds.c $(incdir)/alloc.h \
                 $(incdir)/compat/stdbool.h $(incdir)/fatal.h \

@@ -464,7 +464,7 @@ get_user_info(struct user_details *ud)
     if (pw == NULL)
 	fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
-    user_info[i] = fmt_string("user", pw->pw_name);
+    user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
 	fatal(NULL);
     ud->username = user_info[i] + sizeof("user=") - 1;
@@ -490,14 +490,14 @@ get_user_info(struct user_details *ud)
 	user_info[++i] = cp;
 
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
-	user_info[++i] = fmt_string("cwd", cwd);
+	user_info[++i] = sudo_new_key_val("cwd", cwd);
 	if (user_info[i] == NULL)
 	    fatal(NULL);
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = get_process_ttyname()) != NULL) {
-	user_info[++i] = fmt_string("tty", cp);
+	user_info[++i] = sudo_new_key_val("tty", cp);
 	if (user_info[i] == NULL)
 	    fatal(NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
@@ -508,7 +508,7 @@ get_user_info(struct user_details *ud)
 	host[sizeof(host) - 1] = '\0';
     else
 	strlcpy(host, "localhost", sizeof(host));
-    user_info[++i] = fmt_string("host", host);
+    user_info[++i] = sudo_new_key_val("host", host);
     if (user_info[i] == NULL)
 	fatal(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;

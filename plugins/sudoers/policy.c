@@ -401,7 +401,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     /* Increase the length of command_info as needed, it is *not* checked. */
     command_info = ecalloc(32, sizeof(char **));
 
-    command_info[info_len++] = fmt_string("command", safe_cmnd);
+    command_info[info_len++] = sudo_new_key_val("command", safe_cmnd);
     if (def_log_input || def_log_output) {
 	if (iolog_path)
 	    command_info[info_len++] = iolog_path;
@@ -425,7 +425,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	command_info[info_len++] = estrdup("sudoedit=true");
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
-	command_info[info_len++] = fmt_string("cwd", runas_pw->pw_dir);
+	command_info[info_len++] = sudo_new_key_val("cwd", runas_pw->pw_dir);
     }
     if (def_stay_setuid) {
 	easprintf(&command_info[info_len++], "runas_uid=%u",
@@ -494,24 +494,24 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     if (def_use_pty)
 	command_info[info_len++] = estrdup("use_pty=true");
     if (def_utmp_runas)
-	command_info[info_len++] = fmt_string("utmp_user", runas_pw->pw_name);
+	command_info[info_len++] = sudo_new_key_val("utmp_user", runas_pw->pw_name);
     if (cmnd_umask != 0777)
 	easprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask);
 #ifdef HAVE_LOGIN_CAP_H
     if (def_use_loginclass)
-	command_info[info_len++] = fmt_string("login_class", login_class);
+	command_info[info_len++] = sudo_new_key_val("login_class", login_class);
 #endif /* HAVE_LOGIN_CAP_H */
 #ifdef HAVE_SELINUX
     if (user_role != NULL)
-	command_info[info_len++] = fmt_string("selinux_role", user_role);
+	command_info[info_len++] = sudo_new_key_val("selinux_role", user_role);
     if (user_type != NULL)
-	command_info[info_len++] = fmt_string("selinux_type", user_type);
+	command_info[info_len++] = sudo_new_key_val("selinux_type", user_type);
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
     if (runas_privs != NULL)
-	command_info[info_len++] = fmt_string("runas_privs", runas_privs);
+	command_info[info_len++] = sudo_new_key_val("runas_privs", runas_privs);
     if (runas_limitprivs != NULL)
-	command_info[info_len++] = fmt_string("runas_limitprivs", runas_limitprivs);
+	command_info[info_len++] = sudo_new_key_val("runas_limitprivs", runas_limitprivs);
 #endif /* HAVE_SELINUX */
 
     /* Fill in exec environment info */

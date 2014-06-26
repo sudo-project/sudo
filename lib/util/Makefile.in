@@ -96,7 +96,7 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LTOBJS = alloc.lo atobool.lo atoid.lo atomode.lo event.lo fatal.lo fileops.lo \
-	 fmt_string.lo gidlist.lo lbuf.lo progname.lo secure_path.lo \
+	 key_val.lo gidlist.lo lbuf.lo progname.lo secure_path.lo \
 	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo \
 	 term.lo ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
 
@@ -334,14 +334,9 @@ fatal.lo: $(srcdir)/fatal.c $(incdir)/alloc.h $(incdir)/compat/stdbool.h \
           $(incdir)/fatal.h $(incdir)/gettext.h $(incdir)/missing.h \
           $(incdir)/queue.h $(incdir)/sudo_plugin.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/fatal.c
-fileops.lo: $(srcdir)/fileops.c $(incdir)/compat/stdbool.h \
-            $(incdir)/compat/timespec.h $(incdir)/fileops.h \
+fileops.lo: $(srcdir)/fileops.c $(incdir)/compat/stdbool.h $(incdir)/fileops.h \
             $(incdir)/missing.h $(incdir)/sudo_debug.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/fileops.c
-fmt_string.lo: $(srcdir)/fmt_string.c $(incdir)/compat/stdbool.h \
-               $(incdir)/missing.h $(incdir)/sudo_debug.h \
-               $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/fmt_string.c
 fnm_test.lo: $(srcdir)/regress/fnmatch/fnm_test.c $(incdir)/compat/fnmatch.h \
              $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/fnmatch/fnm_test.c
@@ -382,6 +377,10 @@ hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/compat/stdbool.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/tailq/hltq_test.c
 isblank.lo: $(srcdir)/isblank.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/isblank.c
+key_val.lo: $(srcdir)/key_val.c $(incdir)/compat/stdbool.h $(incdir)/missing.h \
+            $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/key_val.c
 lbuf.lo: $(srcdir)/lbuf.c $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/lbuf.h \
          $(incdir)/missing.h $(incdir)/sudo_debug.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/lbuf.c
