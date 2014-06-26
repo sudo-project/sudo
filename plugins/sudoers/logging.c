@@ -186,7 +186,7 @@ do_logfile(char *msg)
     if (fp == NULL) {
 	send_mail(_("unable to open log file: %s: %s"),
 	    def_logfile, strerror(errno));
-    } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
+    } else if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
 	send_mail(_("unable to lock log file: %s: %s"),
 	    def_logfile, strerror(errno));
     } else {
@@ -217,7 +217,7 @@ do_logfile(char *msg)
 	    efree(full_line);
 	}
 	(void) fflush(fp);
-	(void) lock_file(fileno(fp), SUDO_UNLOCK);
+	(void) sudo_lock_file(fileno(fp), SUDO_UNLOCK);
 	(void) fclose(fp);
     }
     sudoers_setlocale(oldlocale, NULL);

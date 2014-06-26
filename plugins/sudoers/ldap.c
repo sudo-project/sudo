@@ -2118,7 +2118,7 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
-	    if (lock_file(ofd, SUDO_LOCK)) {
+	    if (sudo_lock_file(ofd, SUDO_LOCK)) {
 		snprintf(new_ccname, sizeof(new_ccname), "%s%s",
 		    _PATH_TMP, "sudocc_XXXXXXXX");
 		nfd = mkstemp(new_ccname);

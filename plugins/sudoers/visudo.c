@@ -315,7 +315,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     char *cp;				/* scratch char pointer */
     char buf[PATH_MAX*2];		/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
-    struct timeval tv, tv1, tv2;	/* time before and after edit */
+    struct timeval tv, times[2];	/* time before and after edit */
     struct timeval orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
     ssize_t nread;			/* number of bytes read */
@@ -351,7 +351,9 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	}
 	(void) close(tfd);
     }
-    (void) touch(-1, sp->tpath, &orig_mtim);
+    times[0].tv_sec = times[1].tv_sec = orig_mtim.tv_sec;
+    times[0].tv_usec = times[1].tv_usec = orig_mtim.tv_usec;
+    (void) utimes(sp->tpath, times);
 
     /* Does the editor support +lineno? */
     if (lineno > 0)
@@ -421,9 +423,9 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
      *  XPG4 specifies that vi's exit value is a function of the
      *  number of errors during editing (?!?!).
      */
-    gettimeofday(&tv1, NULL);
+    gettimeofday(&times[0], NULL);
     if (run_command(editor, av) != -1) {
-	gettimeofday(&tv2, NULL);
+	gettimeofday(&times[1], NULL);
 	/*
 	 * Sanity checks.
 	 */
@@ -451,7 +453,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	 * If mtime and size match but the user spent no measurable
 	 * time in the editor we can't tell if the file was changed.
 	 */
-	if (sudo_timevalcmp(&tv1, &tv2, !=))
+	if (sudo_timevalcmp(&times[0], &times[1], !=))
 	    modified = false;
     }
 
@@ -906,7 +908,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    efree(entry);
 	    debug_return_ptr(NULL);
 	}
-	if (!checkonly && !lock_file(entry->fd, SUDO_TLOCK))
+	if (!checkonly && !sudo_lock_file(entry->fd, SUDO_TLOCK))
 	    fatalx(U_("%s busy, try again later"), entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    fatal("%s", entry->path);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2009-2013
+ * Copyright (c) 1999-2005, 2007, 2009-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -56,51 +56,20 @@
 #else
 # include "compat/stdbool.h"
 #endif
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
-#ifndef HAVE_STRUCT_TIMESPEC
-# include "compat/timespec.h"
-#endif
 
 #include "missing.h"
 #include "fileops.h"
 #include "sudo_debug.h"
 
 /*
- * Update the access and modify times on an fd or file.
- */
-int
-touch(int fd, char *path, struct timeval *tvp)
-{
-    struct timeval times[2];
-    int rval = -1;
-    debug_decl(touch, SUDO_DEBUG_UTIL)
-
-    if (tvp != NULL) {
-	times[0].tv_sec = times[1].tv_sec = tvp->tv_sec;
-	times[0].tv_usec = times[1].tv_usec = tvp->tv_usec;
-    }
-
-#if defined(HAVE_FUTIME) || defined(HAVE_FUTIMES)
-    if (fd != -1)
-	rval = futimes(fd, tvp ? times : NULL);
-    else
-#endif
-    if (path != NULL)
-	rval = utimes(path, tvp ? times : NULL);
-    debug_return_int(rval);
-}
-
-/*
  * Lock/unlock a file.
  */
 #ifdef HAVE_LOCKF
 bool
-lock_file(int fd, int lockit)
+sudo_lock_file(int fd, int lockit)
 {
     int op = 0;
-    debug_decl(lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     switch (lockit) {
 	case SUDO_LOCK:
@@ -117,10 +86,10 @@ lock_file(int fd, int lockit)
 }
 #elif defined(HAVE_FLOCK)
 bool
-lock_file(int fd, int lockit)
+sudo_lock_file(int fd, int lockit)
 {
     int op = 0;
-    debug_decl(lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     switch (lockit) {
 	case SUDO_LOCK:
@@ -137,12 +106,12 @@ lock_file(int fd, int lockit)
 }
 #else
 bool
-lock_file(int fd, int lockit)
+sudo_lock_file(int fd, int lockit)
 {
 #ifdef F_SETLK
     int func;
     struct flock lock;
-    debug_decl(lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     lock.l_start = 0;
     lock.l_len = 0;

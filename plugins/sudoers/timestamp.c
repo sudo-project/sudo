@@ -360,7 +360,7 @@ update_timestamp(struct passwd *pw)
     }
 
     /* Update record or append a new one. */
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
     ts_update_record(fd, &entry, timestamp_hint);
     close(fd);
 
@@ -444,7 +444,7 @@ timestamp_status(struct passwd *pw)
 	status = TS_MISSING;
 	goto done;
     }
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
 
     /* Ignore and clear time stamp file if mtime predates boot time. */
     if (fstat(fd, &sb) == 0) {
@@ -574,7 +574,7 @@ remove_timestamp(bool unlink_it)
 	(void) restore_perms();
     if (fd == -1)
 	goto done;
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
 
     /*
      * Find matching entries and invalidate them.

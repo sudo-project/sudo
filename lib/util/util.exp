@@ -50,7 +50,6 @@ lbuf_append_quoted
 lbuf_destroy
 lbuf_init
 lbuf_print
-lock_file
 parse_gid_list
 sudo_asprintf
 sudo_clock_gettime
@@ -116,6 +115,7 @@ sudo_getopt_long_only
 sudo_glob
 sudo_globfree
 sudo_inet_pton
+sudo_lock_file
 sudo_memrchr
 sudo_memset_s
 sudo_mkdtemp
@@ -142,7 +142,6 @@ term_kill
 term_noecho
 term_raw
 term_restore
-touch
 vfatal_nodebug
 vfatalx_nodebug
 vwarning_nodebug

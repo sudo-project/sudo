@@ -93,7 +93,7 @@ sudo_edit(struct command_details *command_details)
     int rc, i, j, ac, ofd, tfd, nargc, rval, tmplen;
     int editor_argc = 0, nfiles = 0;
     struct stat sb;
-    struct timeval tv, tv1, tv2;
+    struct timeval tv, times[2];
     struct tempfile {
 	char *tfile;
 	char *ofile;
@@ -211,10 +211,12 @@ sudo_edit(struct command_details *command_details)
 	 * We always update the stashed mtime because the time
 	 * resolution of the filesystem the temporary file is on may
 	 * not match that of the filesystem where the file to be edited
-	 * resides.  It is OK if touch() fails since we only use the info
-	 * to determine whether or not a file has been modified.
+	 * resides.  It is OK if futimes() fails since we only use the
+	 * info to determine whether or not a file has been modified.
 	 */
-	(void) touch(tfd, NULL, &tf[j].omtim);
+	times[0].tv_sec = times[1].tv_sec = tf[j].omtim.tv_sec;
+	times[0].tv_usec = times[1].tv_usec = tf[j].omtim.tv_usec;
+	(void) futimes(tfd, times);
 	rc = fstat(tfd, &sb);
 	if (!rc)
 	    mtim_get(&sb, &tf[j].omtim);
@@ -241,7 +243,7 @@ sudo_edit(struct command_details *command_details)
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    gettimeofday(&tv1, NULL);
+    gettimeofday(&times[0], NULL);
     memcpy(&editor_details, command_details, sizeof(editor_details));
     editor_details.uid = user_details.uid;
     editor_details.euid = user_details.uid;
@@ -251,7 +253,7 @@ sudo_edit(struct command_details *command_details)
     editor_details.groups = user_details.groups;
     editor_details.argv = nargv;
     rval = run_command(&editor_details);
-    gettimeofday(&tv2, NULL);
+    gettimeofday(&times[1], NULL);
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < nfiles; i++) {
@@ -279,7 +281,7 @@ sudo_edit(struct command_details *command_details)
 	     * If mtime and size match but the user spent no measurable
 	     * time in the editor we can't tell if the file was changed.
 	     */
-	    if (sudo_timevalcmp(&tv1, &tv2, !=)) {
+	    if (sudo_timevalcmp(&times[0], &times[1], !=)) {
 		warningx(U_("%s unchanged"), tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);

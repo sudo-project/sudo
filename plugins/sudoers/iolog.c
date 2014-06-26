@@ -209,7 +209,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
 	debug_return_bool(false);
     }
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
