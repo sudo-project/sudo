@@ -67,7 +67,6 @@ include/compat/utime.h/
 include/fatal.h
 include/fileops.h
 include/gettext.h
-include/lbuf.h
 include/missing.h
 include/queue.h
 include/secure_path.h
@@ -75,6 +74,7 @@ include/sudo_conf.h
 include/sudo_debug.h
 include/sudo_dso.h
 include/sudo_event.h
+include/sudo_lbuf.h
 include/sudo_plugin.h
 include/sudo_util.h
 indent.pro

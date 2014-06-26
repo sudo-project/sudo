@@ -43,7 +43,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "lbuf.h"
+#include "sudo_lbuf.h"
 #include <gram.h>
 
 /* Characters that must be quoted in sudoers */
@@ -66,9 +66,10 @@ struct sudo_nss sudo_nss_file = {
 /*
  * Local prototypes.
  */
-static int display_bound_defaults(int dtype, struct lbuf *lbuf);
-static void print_member(struct lbuf *lbuf, struct member *m, int alias_type);
-static void print_member2(struct lbuf *lbuf, struct member *m,
+static int display_bound_defaults(int dtype, struct sudo_lbuf *lbuf);
+static void print_member(struct sudo_lbuf *lbuf, struct member *m,
+    int alias_type);
+static void print_member2(struct sudo_lbuf *lbuf, struct member *m,
     const char *separator, int alias_type);
 
 int
@@ -291,40 +292,40 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 
 static void
 sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_file_append_cmnd, SUDO_DEBUG_NSS)
 
 #ifdef HAVE_PRIV_SET
     if (cs->privs)
-	lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
+	sudo_lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
     if (cs->limitprivs)
-	lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
+	sudo_lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
     if (cs->role)
-	lbuf_append(lbuf, "ROLE=%s ", cs->role);
+	sudo_lbuf_append(lbuf, "ROLE=%s ", cs->role);
     if (cs->type)
-	lbuf_append(lbuf, "TYPE=%s ", cs->type);
+	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
     if (TAG_CHANGED(setenv)) {
-	lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
+	sudo_lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
 	tags->setenv = cs->tags.setenv;
     }
     if (TAG_CHANGED(noexec)) {
-	lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
+	sudo_lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
 	tags->noexec = cs->tags.noexec;
     }
     if (TAG_CHANGED(nopasswd)) {
-	lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
+	sudo_lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
 	tags->nopasswd = cs->tags.nopasswd;
     }
     if (TAG_CHANGED(log_input)) {
-	lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
+	sudo_lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
 	tags->log_input = cs->tags.log_input;
     }
     if (TAG_CHANGED(log_output)) {
-	lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
+	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
 	tags->log_output = cs->tags.log_output;
     }
     print_member(lbuf, cs->cmnd, CMNDALIAS);
@@ -338,7 +339,7 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 
 static int
 sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct cmndspec *cs, *prev_cs;
     struct member *m;
@@ -360,41 +361,41 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	    if (RUNAS_CHANGED(cs, prev_cs)) {
 		if (cs != TAILQ_FIRST(&priv->cmndlist))
-		    lbuf_append(lbuf, "\n");
-		lbuf_append(lbuf, "    (");
+		    sudo_lbuf_append(lbuf, "\n");
+		sudo_lbuf_append(lbuf, "    (");
 		if (cs->runasuserlist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m != TAILQ_FIRST(cs->runasuserlist))
-			    lbuf_append(lbuf, ", ");
+			    sudo_lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
 		} else if (cs->runasgrouplist == NULL) {
-		    lbuf_append(lbuf, "%s", def_runas_default);
+		    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 		} else {
-		    lbuf_append(lbuf, "%s", pw->pw_name);
+		    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
 		}
 		if (cs->runasgrouplist != NULL) {
-		    lbuf_append(lbuf, " : ");
+		    sudo_lbuf_append(lbuf, " : ");
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m != TAILQ_FIRST(cs->runasgrouplist))
-			    lbuf_append(lbuf, ", ");
+			    sudo_lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
 		}
-		lbuf_append(lbuf, ") ");
+		sudo_lbuf_append(lbuf, ") ");
 		tags.noexec = UNSPEC;
 		tags.setenv = UNSPEC;
 		tags.nopasswd = UNSPEC;
 		tags.log_input = UNSPEC;
 		tags.log_output = UNSPEC;
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
-		lbuf_append(lbuf, ", ");
+		sudo_lbuf_append(lbuf, ", ");
 	    }
 	    sudo_file_append_cmnd(cs, &tags, lbuf);
 	    prev_cs = cs;
 	    nfound++;
 	}
-	lbuf_append(lbuf, "\n");
+	sudo_lbuf_append(lbuf, "\n");
     }
     debug_return_int(nfound);
 }
@@ -435,7 +436,7 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
 
 static int
 sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct cmndspec *cs, *prev_cs;
     struct member *m;
@@ -449,64 +450,64 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	    if (new_long_entry(cs, prev_cs)) {
-		lbuf_append(lbuf, _("\nSudoers entry:\n"));
-		lbuf_append(lbuf, _("    RunAsUsers: "));
+		sudo_lbuf_append(lbuf, _("\nSudoers entry:\n"));
+		sudo_lbuf_append(lbuf, _("    RunAsUsers: "));
 		if (cs->runasuserlist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m != TAILQ_FIRST(cs->runasuserlist))
-			    lbuf_append(lbuf, ", ");
+			    sudo_lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
 		} else if (cs->runasgrouplist == NULL) {
-		    lbuf_append(lbuf, "%s", def_runas_default);
+		    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 		} else {
-		    lbuf_append(lbuf, "%s", pw->pw_name);
+		    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
 		}
-		lbuf_append(lbuf, "\n");
+		sudo_lbuf_append(lbuf, "\n");
 		if (cs->runasgrouplist != NULL) {
-		    lbuf_append(lbuf, _("    RunAsGroups: "));
+		    sudo_lbuf_append(lbuf, _("    RunAsGroups: "));
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m != TAILQ_FIRST(cs->runasgrouplist))
-			    lbuf_append(lbuf, ", ");
+			    sudo_lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
-		    lbuf_append(lbuf, "\n");
+		    sudo_lbuf_append(lbuf, "\n");
 		}
 		olen = lbuf->len;
-		lbuf_append(lbuf, _("    Options: "));
+		sudo_lbuf_append(lbuf, _("    Options: "));
 		if (TAG_SET(cs->tags.setenv))
-		    lbuf_append(lbuf, "%ssetenv, ", cs->tags.setenv ? "" : "!");
+		    sudo_lbuf_append(lbuf, "%ssetenv, ", cs->tags.setenv ? "" : "!");
 		if (TAG_SET(cs->tags.noexec))
-		    lbuf_append(lbuf, "%snoexec, ", cs->tags.noexec ? "" : "!");
+		    sudo_lbuf_append(lbuf, "%snoexec, ", cs->tags.noexec ? "" : "!");
 		if (TAG_SET(cs->tags.nopasswd))
-		    lbuf_append(lbuf, "%sauthenticate, ", cs->tags.nopasswd ? "!" : "");
+		    sudo_lbuf_append(lbuf, "%sauthenticate, ", cs->tags.nopasswd ? "!" : "");
 		if (TAG_SET(cs->tags.log_input))
-		    lbuf_append(lbuf, "%slog_input, ", cs->tags.log_input ? "" : "!");
+		    sudo_lbuf_append(lbuf, "%slog_input, ", cs->tags.log_input ? "" : "!");
 		if (TAG_SET(cs->tags.log_output))
-		    lbuf_append(lbuf, "%slog_output, ", cs->tags.log_output ? "" : "!");
+		    sudo_lbuf_append(lbuf, "%slog_output, ", cs->tags.log_output ? "" : "!");
 		if (lbuf->buf[lbuf->len - 2] == ',') {
 		    lbuf->len -= 2;	/* remove trailing ", " */
-		    lbuf_append(lbuf, "\n");
+		    sudo_lbuf_append(lbuf, "\n");
 		} else {
 		    lbuf->len = olen;	/* no options */
 		}
 #ifdef HAVE_PRIV_SET
 		if (cs->privs)
-		    lbuf_append(lbuf, "    Privs: %s\n", cs->privs);
+		    sudo_lbuf_append(lbuf, "    Privs: %s\n", cs->privs);
 		if (cs->limitprivs)
-		    lbuf_append(lbuf, "    Limitprivs: %s\n", cs->limitprivs);
+		    sudo_lbuf_append(lbuf, "    Limitprivs: %s\n", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
 		if (cs->role)
-		    lbuf_append(lbuf, "    Role: %s\n", cs->role);
+		    sudo_lbuf_append(lbuf, "    Role: %s\n", cs->role);
 		if (cs->type)
-		    lbuf_append(lbuf, "    Type: %s\n", cs->type);
+		    sudo_lbuf_append(lbuf, "    Type: %s\n", cs->type);
 #endif /* HAVE_SELINUX */
-		lbuf_append(lbuf, _("    Commands:\n"));
+		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }
-	    lbuf_append(lbuf, "\t");
+	    sudo_lbuf_append(lbuf, "\t");
 	    print_member2(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
-	    lbuf_append(lbuf, "\n");
+	    sudo_lbuf_append(lbuf, "\n");
 	    prev_cs = cs;
 	    nfound++;
 	}
@@ -516,7 +517,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 
 int
 sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct userspec *us;
     int nfound = 0;
@@ -543,7 +544,7 @@ done:
  */
 int
 sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
     char *prefix;
@@ -573,16 +574,16 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		continue;
 	}
 	if (d->val != NULL) {
-	    lbuf_append(lbuf, "%s%s%s", prefix, d->var,
+	    sudo_lbuf_append(lbuf, "%s%s%s", prefix, d->var,
 		d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=");
 	    if (strpbrk(d->val, " \t") != NULL) {
-		lbuf_append(lbuf, "\"");
-		lbuf_append_quoted(lbuf, "\"", "%s", d->val);
-		lbuf_append(lbuf, "\"");
+		sudo_lbuf_append(lbuf, "\"");
+		sudo_lbuf_append_quoted(lbuf, "\"", "%s", d->val);
+		sudo_lbuf_append(lbuf, "\"");
 	    } else
-		lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
+		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
 	} else
-	    lbuf_append(lbuf, "%s%s%s", prefix,
+	    sudo_lbuf_append(lbuf, "%s%s%s", prefix,
 		d->op == false ? "!" : "", d->var);
 	prefix = ", ";
 	nfound++;
@@ -596,7 +597,7 @@ done:
  */
 int
 sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     int nfound = 0;
     debug_decl(sudo_file_display_bound_defaults, SUDO_DEBUG_NSS)
@@ -612,7 +613,7 @@ sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
  * Display Defaults entries of the given type.
  */
 static int
-display_bound_defaults(int dtype, struct lbuf *lbuf)
+display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
     struct member_list *binding = NULL;
@@ -649,21 +650,21 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	if (binding != d->binding) {
 	    binding = d->binding;
 	    if (nfound != 1)
-		lbuf_append(lbuf, "\n");
-	    lbuf_append(lbuf, "    Defaults%s", dsep);
+		sudo_lbuf_append(lbuf, "\n");
+	    sudo_lbuf_append(lbuf, "    Defaults%s", dsep);
 	    TAILQ_FOREACH(m, binding, entries) {
 		if (m != TAILQ_FIRST(binding))
-		    lbuf_append(lbuf, ",");
+		    sudo_lbuf_append(lbuf, ",");
 		print_member(lbuf, m, atype);
-		lbuf_append(lbuf, " ");
+		sudo_lbuf_append(lbuf, " ");
 	    }
 	} else
-	    lbuf_append(lbuf, ", ");
+	    sudo_lbuf_append(lbuf, ", ");
 	if (d->val != NULL) {
-	    lbuf_append(lbuf, "%s%s%s", d->var, d->op == '+' ? "+=" :
+	    sudo_lbuf_append(lbuf, "%s%s%s", d->var, d->op == '+' ? "+=" :
 		d->op == '-' ? "-=" : "=", d->val);
 	} else
-	    lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
+	    sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
     }
 
     debug_return_int(nfound);
@@ -720,7 +721,7 @@ done:
  * Print the contents of a struct member to stdout
  */
 static void
-_print_member(struct lbuf *lbuf, char *name, int type, int negated,
+_print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
     const char *separator, int alias_type)
 {
     struct alias *a;
@@ -730,26 +731,26 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 
     switch (type) {
 	case ALL:
-	    lbuf_append(lbuf, "%sALL", negated ? "!" : "");
+	    sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
 	    break;
 	case MYSELF:
-	    lbuf_append(lbuf, "%s%s", negated ? "!" : "", user_name);
+	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", user_name);
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
 	    if (negated)
-		lbuf_append(lbuf, "!");
-	    lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->cmnd);
+		sudo_lbuf_append(lbuf, "!");
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->cmnd);
 	    if (c->args) {
-		lbuf_append(lbuf, " ");
-		lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
+		sudo_lbuf_append(lbuf, " ");
+		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
 	    }
 	    break;
 	case ALIAS:
 	    if ((a = alias_get(name, alias_type)) != NULL) {
 		TAILQ_FOREACH(m, &a->members, entries) {
 		    if (m != TAILQ_FIRST(&a->members))
-			lbuf_append(lbuf, "%s", separator);
+			sudo_lbuf_append(lbuf, "%s", separator);
 		    _print_member(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, separator,
 			alias_type);
@@ -759,20 +760,20 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 	    }
 	    /* FALLTHROUGH */
 	default:
-	    lbuf_append(lbuf, "%s%s", negated ? "!" : "", name);
+	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", name);
 	    break;
     }
     debug_return;
 }
 
 static void
-print_member(struct lbuf *lbuf, struct member *m, int alias_type)
+print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type)
 {
     _print_member(lbuf, m->name, m->type, m->negated, ", ", alias_type);
 }
 
 static void
-print_member2(struct lbuf *lbuf, struct member *m, const char *separator,
+print_member2(struct sudo_lbuf *lbuf, struct member *m, const char *separator,
     int alias_type)
 {
     _print_member(lbuf, m->name, m->type, m->negated, separator, alias_type);

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2007, 2010, 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007, 2010, 2011, 2013, 2014
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,7 +23,7 @@
 /*
  * Line buffer struct.
  */
-struct lbuf {
+struct sudo_lbuf {
     int (*output)(const char *);
     char *buf;
     const char *continuation;
@@ -32,10 +33,10 @@ struct lbuf {
     int cols;
 };
 
-__dso_public void lbuf_init(struct lbuf *, int (*)(const char *), int, const char *, int);
-__dso_public void lbuf_destroy(struct lbuf *);
-__dso_public void lbuf_append(struct lbuf *, const char *, ...) __printflike(2, 3);
-__dso_public void lbuf_append_quoted(struct lbuf *, const char *, const char *, ...) __printflike(3, 4);
-__dso_public void lbuf_print(struct lbuf *);
+__dso_public void sudo_lbuf_init(struct sudo_lbuf *, int (*)(const char *), int, const char *, int);
+__dso_public void sudo_lbuf_destroy(struct sudo_lbuf *);
+__dso_public void sudo_lbuf_append(struct sudo_lbuf *, const char *, ...) __printflike(2, 3);
+__dso_public void sudo_lbuf_append_quoted(struct sudo_lbuf *, const char *, const char *, ...) __printflike(3, 4);
+__dso_public void sudo_lbuf_print(struct sudo_lbuf *);
 
 #endif /* _SUDO_LBUF_H */

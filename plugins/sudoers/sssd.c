@@ -52,7 +52,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "lbuf.h"
+#include "sudo_lbuf.h"
 #include "sudo_dso.h"
 #include "sudo_debug.h"
 
@@ -108,13 +108,13 @@ static int sudo_sss_setdefs(struct sudo_nss *nss);
 static int sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag);
 static int sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw);
 static int sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-				     struct lbuf *lbuf);
+				     struct sudo_lbuf *lbuf);
 
 static int sudo_sss_display_bound_defaults(struct sudo_nss *nss,
-					   struct passwd *pw, struct lbuf *lbuf);
+					   struct passwd *pw, struct sudo_lbuf *lbuf);
 
 static int sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
-				  struct lbuf *lbuf);
+				  struct sudo_lbuf *sudo_lbuf);
 
 
 static struct sss_sudo_result *sudo_sss_result_get(struct sudo_nss *nss,
@@ -1144,7 +1144,7 @@ done:
 
 static int
 sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_rule *rule;
@@ -1196,7 +1196,7 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 
 	for (j = 0; val_array[j] != NULL; ++j) {
 	    val = val_array[j];
-	    lbuf_append(lbuf, "%s%s", prefix, val);
+	    sudo_lbuf_append(lbuf, "%s%s", prefix, val);
 	    prefix = ", ";
 	    count++;
 	}
@@ -1213,7 +1213,7 @@ done:
 // ok
 static int
 sudo_sss_display_bound_defaults(struct sudo_nss *nss,
-    struct passwd *pw, struct lbuf *lbuf)
+    struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_sss_display_bound_defaults, SUDO_DEBUG_SSSD);
     debug_return_int(0);
@@ -1221,30 +1221,30 @@ sudo_sss_display_bound_defaults(struct sudo_nss *nss,
 
 static int
 sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct lbuf *lbuf)
+    struct sss_sudo_rule *rule, struct sudo_lbuf *lbuf)
 {
     char **val_array = NULL;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_long, SUDO_DEBUG_SSSD);
 
     /* get the RunAsUser Values from the entry */
-    lbuf_append(lbuf, "    RunAsUsers: ");
+    sudo_lbuf_append(lbuf, "    RunAsUsers: ");
     switch (handle->fn_get_values(rule, "sudoRunAsUser", &val_array)) {
     case 0:
 	for (i = 0; val_array[i] != NULL; ++i)
-	    lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	break;
     case ENOENT:
 	switch (handle->fn_get_values(rule, "sudoRunAs", &val_array)) {
 	case 0:
 	    for (i = 0; val_array[i] != NULL; ++i)
-		 lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    handle->fn_free_values(val_array);
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    lbuf_append(lbuf, "%s", def_runas_default);
+	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAs): != 0");
@@ -1255,16 +1255,16 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsUser): != 0");
 	debug_return_int(count);
     }
-    lbuf_append(lbuf, "\n");
+    sudo_lbuf_append(lbuf, "\n");
 
     /* get the RunAsGroup Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
     case 0:
-	lbuf_append(lbuf, "    RunAsGroups: ");
+	sudo_lbuf_append(lbuf, "    RunAsGroups: ");
 	for (i = 0; val_array[i] != NULL; ++i)
-	     lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
-	lbuf_append(lbuf, "\n");
+	sudo_lbuf_append(lbuf, "\n");
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
@@ -1278,11 +1278,11 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
     /* get the Option Values from the entry */
     switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
     case 0:
-	lbuf_append(lbuf, "    Options: ");
+	sudo_lbuf_append(lbuf, "    Options: ");
 	for (i = 0; val_array[i] != NULL; ++i)
-	     lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
-	lbuf_append(lbuf, "\n");
+	sudo_lbuf_append(lbuf, "\n");
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
@@ -1295,9 +1295,9 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
     /* Get the command values from the entry. */
     switch (handle->fn_get_values(rule, "sudoCommand", &val_array)) {
     case 0:
-	lbuf_append(lbuf, _("    Commands:\n"));
+	sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	for (i = 0; val_array[i] != NULL; ++i) {
-	     lbuf_append(lbuf, "\t%s\n", val_array[i]);
+	     sudo_lbuf_append(lbuf, "\t%s\n", val_array[i]);
 	     count++;
 	}
 	handle->fn_free_values(val_array);
@@ -1316,19 +1316,19 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 
 static int
 sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct lbuf *lbuf)
+    struct sss_sudo_rule *rule, struct sudo_lbuf *lbuf)
 {
     char **val_array = NULL;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_short, SUDO_DEBUG_SSSD);
 
-    lbuf_append(lbuf, "    (");
+    sudo_lbuf_append(lbuf, "    (");
 
     /* get the RunAsUser Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsUser", &val_array)) {
     case 0:
 	for (i = 0; val_array[i] != NULL; ++i)
-	     lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	break;
     case ENOENT:
@@ -1337,12 +1337,12 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	switch (handle->fn_get_values(rule, "sudoRunAs", &val_array)) {
 	case 0:
 	    for (i = 0; val_array[i] != NULL; ++i)
-		 lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    handle->fn_free_values(val_array);
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    lbuf_append(lbuf, "%s", def_runas_default);
+	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1359,9 +1359,9 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     /* get the RunAsGroup Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
     case 0:
-	lbuf_append(lbuf, " : ");
+	sudo_lbuf_append(lbuf, " : ");
 	for (i = 0; val_array[i] != NULL; ++i)
-	     lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	break;
     case ENOENT:
@@ -1372,7 +1372,7 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	debug_return_int(count);
     }
 
-    lbuf_append(lbuf, ") ");
+    sudo_lbuf_append(lbuf, ") ");
 
     /* get the Option Values from the entry */
     switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
@@ -1382,13 +1382,13 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	    if (*cp == '!')
 		cp++;
 	    if (strcmp(cp, "authenticate") == 0)
-		lbuf_append(lbuf, val_array[i][0] == '!' ?
+		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
 			    "NOPASSWD: " : "PASSWD: ");
 	    else if (strcmp(cp, "noexec") == 0)
-		lbuf_append(lbuf, val_array[i][0] == '!' ?
+		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
 			    "EXEC: " : "NOEXEC: ");
 	    else if (strcmp(cp, "setenv") == 0)
-		lbuf_append(lbuf, val_array[i][0] == '!' ?
+		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
 			    "NOSETENV: " : "SETENV: ");
 	}
 	handle->fn_free_values(val_array);
@@ -1406,7 +1406,7 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     switch (handle->fn_get_values(rule, "sudoCommand", &val_array)) {
     case 0:
 	for (i = 0; val_array[i] != NULL; ++i) {
-	    lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    count++;
 	}
 	handle->fn_free_values(val_array);
@@ -1419,14 +1419,14 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	    "handle->fn_get_values(sudoCommand): != 0");
 	debug_return_int(count);
     }
-    lbuf_append(lbuf, "\n");
+    sudo_lbuf_append(lbuf, "\n");
 
     debug_return_int(count);
 }
 
 static int
 sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct sudo_sss_handle *handle = nss->handle;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,14 +45,14 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "lbuf.h"
+#include "sudo_lbuf.h"
 #include "sudo_debug.h"
 
 void
-lbuf_init(struct lbuf *lbuf, int (*output)(const char *),
+sudo_lbuf_init(struct sudo_lbuf *lbuf, int (*output)(const char *),
     int indent, const char *continuation, int cols)
 {
-    debug_decl(lbuf_init, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL)
 
     lbuf->output = output;
     lbuf->continuation = continuation;
@@ -66,9 +66,9 @@ lbuf_init(struct lbuf *lbuf, int (*output)(const char *),
 }
 
 void
-lbuf_destroy(struct lbuf *lbuf)
+sudo_lbuf_destroy(struct sudo_lbuf *lbuf)
 {
-    debug_decl(lbuf_destroy, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL)
 
     efree(lbuf->buf);
     lbuf->buf = NULL;
@@ -77,7 +77,7 @@ lbuf_destroy(struct lbuf *lbuf)
 }
 
 static void
-lbuf_expand(struct lbuf *lbuf, int extra)
+sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 {
     if (lbuf->len + extra + 1 >= lbuf->size) {
 	do {
@@ -92,12 +92,12 @@ lbuf_expand(struct lbuf *lbuf, int extra)
  * Any characters in set are quoted with a backslash.
  */
 void
-lbuf_append_quoted(struct lbuf *lbuf, const char *set, const char *fmt, ...)
+sudo_lbuf_append_quoted(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
 {
     va_list ap;
     int len;
     char *cp, *s;
-    debug_decl(lbuf_append_quoted, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
@@ -106,7 +106,7 @@ lbuf_append_quoted(struct lbuf *lbuf, const char *set, const char *fmt, ...)
 		goto done;
 	    while ((cp = strpbrk(s, set)) != NULL) {
 		len = (int)(cp - s);
-		lbuf_expand(lbuf, len + 2);
+		sudo_lbuf_expand(lbuf, len + 2);
 		memcpy(lbuf->buf + lbuf->len, s, len);
 		lbuf->len += len;
 		lbuf->buf[lbuf->len++] = '\\';
@@ -115,14 +115,14 @@ lbuf_append_quoted(struct lbuf *lbuf, const char *set, const char *fmt, ...)
 	    }
 	    if (*s != '\0') {
 		len = strlen(s);
-		lbuf_expand(lbuf, len);
+		sudo_lbuf_expand(lbuf, len);
 		memcpy(lbuf->buf + lbuf->len, s, len);
 		lbuf->len += len;
 	    }
 	    fmt += 2;
 	    continue;
 	}
-	lbuf_expand(lbuf, 2);
+	sudo_lbuf_expand(lbuf, 2);
 	if (strchr(set, *fmt) != NULL)
 	    lbuf->buf[lbuf->len++] = '\\';
 	lbuf->buf[lbuf->len++] = *fmt++;
@@ -139,12 +139,12 @@ done:
  * Parse the format and append strings, only %s and %% escapes are supported.
  */
 void
-lbuf_append(struct lbuf *lbuf, const char *fmt, ...)
+sudo_lbuf_append(struct sudo_lbuf *lbuf, const char *fmt, ...)
 {
     va_list ap;
     int len;
     char *s;
-    debug_decl(lbuf_append, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
@@ -152,13 +152,13 @@ lbuf_append(struct lbuf *lbuf, const char *fmt, ...)
 	    if ((s = va_arg(ap, char *)) == NULL)
 		goto done;
 	    len = strlen(s);
-	    lbuf_expand(lbuf, len);
+	    sudo_lbuf_expand(lbuf, len);
 	    memcpy(lbuf->buf + lbuf->len, s, len);
 	    lbuf->len += len;
 	    fmt += 2;
 	    continue;
 	}
-	lbuf_expand(lbuf, 1);
+	sudo_lbuf_expand(lbuf, 1);
 	lbuf->buf[lbuf->len++] = *fmt++;
     }
 done:
@@ -170,11 +170,11 @@ done:
 }
 
 static void
-lbuf_println(struct lbuf *lbuf, char *line, int len)
+sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
 {
     char *cp, save;
     int i, have, contlen;
-    debug_decl(lbuf_println, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_println, SUDO_DEBUG_UTIL)
 
     contlen = lbuf->continuation ? strlen(lbuf->continuation) : 0;
 
@@ -232,11 +232,11 @@ lbuf_println(struct lbuf *lbuf, char *line, int len)
  * The lbuf is reset on return.
  */
 void
-lbuf_print(struct lbuf *lbuf)
+sudo_lbuf_print(struct sudo_lbuf *lbuf)
 {
     char *cp, *ep;
     int len;
-    debug_decl(lbuf_print, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_print, SUDO_DEBUG_UTIL)
 
     if (lbuf->buf == NULL || lbuf->len == 0)
 	goto done;
@@ -263,7 +263,7 @@ lbuf_print(struct lbuf *lbuf)
 	    if ((ep = memchr(cp, '\n', len)) != NULL)
 		len = (int)(ep - cp);
 	    if (len)
-		lbuf_println(lbuf, cp, len);
+		sudo_lbuf_println(lbuf, cp, len);
 	    cp = ep ? ep + 1 : NULL;
 	}
     }

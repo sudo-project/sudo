@@ -44,11 +44,6 @@ get_ttysize
 getprogname
 initprogname
 isblank
-lbuf_append
-lbuf_append_quoted
-lbuf_destroy
-lbuf_init
-lbuf_print
 sudo_asprintf
 sudo_clock_gettime
 sudo_closefrom
@@ -113,6 +108,11 @@ sudo_getopt_long_only
 sudo_glob
 sudo_globfree
 sudo_inet_pton
+sudo_lbuf_append
+sudo_lbuf_append_quoted
+sudo_lbuf_destroy
+sudo_lbuf_init
+sudo_lbuf_print
 sudo_lock_file
 sudo_memrchr
 sudo_memset_s

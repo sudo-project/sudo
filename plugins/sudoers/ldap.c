@@ -68,7 +68,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "lbuf.h"
+#include "sudo_lbuf.h"
 #include "sudo_dso.h"
 
 /* Older Netscape LDAP SDKs don't prototype ldapssl_set_strength() */
@@ -350,11 +350,11 @@ static int sudo_ldap_setdefs(struct sudo_nss *nss);
 static int sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag);
 static int sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw);
 static int sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf);
+    struct sudo_lbuf *lbuf);
 static int sudo_ldap_display_bound_defaults(struct sudo_nss *nss,
-    struct passwd *pw, struct lbuf *lbuf);
+    struct passwd *pw, struct sudo_lbuf *lbuf);
 static int sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf);
+    struct sudo_lbuf *lbuf);
 static struct ldap_result *sudo_ldap_result_get(struct sudo_nss *nss,
     struct passwd *pw);
 
@@ -1771,7 +1771,7 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
  */
 static int
 sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct berval **bv, **p;
     struct timeval tv, *tvp = NULL;
@@ -1805,7 +1805,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		else
 		    prefix = ", ";
 		for (p = bv; *p != NULL; p++) {
-		    lbuf_append(lbuf, "%s%s", prefix, (*p)->bv_val);
+		    sudo_lbuf_append(lbuf, "%s%s", prefix, (*p)->bv_val);
 		    prefix = ", ";
 		    count++;
 		}
@@ -1825,7 +1825,7 @@ done:
  */
 static int
 sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_ldap_display_bound_defaults, SUDO_DEBUG_LDAP)
     debug_return_int(0);
@@ -1835,13 +1835,13 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
  * Print a record in the short form, ala file sudoers.
  */
 static int
-sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
+sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lbuf)
 {
     struct berval **bv, **p;
     int count = 0;
     debug_decl(sudo_ldap_display_entry_short, SUDO_DEBUG_LDAP)
 
-    lbuf_append(lbuf, "    (");
+    sudo_lbuf_append(lbuf, "    (");
 
     /* get the RunAsUser Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
@@ -1849,22 +1849,22 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     } else
-	lbuf_append(lbuf, "%s", def_runas_default);
+	sudo_lbuf_append(lbuf, "%s", def_runas_default);
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv != NULL) {
-	lbuf_append(lbuf, " : ");
+	sudo_lbuf_append(lbuf, " : ");
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     }
-    lbuf_append(lbuf, ") ");
+    sudo_lbuf_append(lbuf, ") ");
 
     /* get the Option Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoOption");
@@ -1874,13 +1874,13 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 	    if (*cp == '!')
 		cp++;
 	    if (strcmp(cp, "authenticate") == 0)
-		lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "NOPASSWD: " : "PASSWD: ");
 	    else if (strcmp(cp, "noexec") == 0)
-		lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "EXEC: " : "NOEXEC: ");
 	    else if (strcmp(cp, "setenv") == 0)
-		lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "NOSETENV: " : "SETENV: ");
 	}
 	ldap_value_free_len(bv);
@@ -1890,12 +1890,12 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	    count++;
 	}
 	ldap_value_free_len(bv);
     }
-    lbuf_append(lbuf, "\n");
+    sudo_lbuf_append(lbuf, "\n");
 
     debug_return_int(count);
 }
@@ -1904,7 +1904,7 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
  * Print a record in the long form.
  */
 static int
-sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
+sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lbuf)
 {
     struct berval **bv, **p;
     char *rdn;
@@ -1914,46 +1914,46 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     /* extract the dn, only show the first rdn */
     rdn = sudo_ldap_get_first_rdn(ld, entry);
     if (rdn != NULL)
-	lbuf_append(lbuf, _("\nLDAP Role: %s\n"), rdn);
+	sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"), rdn);
     else
-	lbuf_append(lbuf, _("\nLDAP Role: UNKNOWN\n"));
+	sudo_lbuf_append(lbuf, _("\nLDAP Role: UNKNOWN\n"));
     if (rdn)
 	ldap_memfree(rdn);
 
     /* get the RunAsUser Values from the entry */
-    lbuf_append(lbuf, "    RunAsUsers: ");
+    sudo_lbuf_append(lbuf, "    RunAsUsers: ");
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
     if (bv == NULL)
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     } else
-	lbuf_append(lbuf, "%s", def_runas_default);
-    lbuf_append(lbuf, "\n");
+	sudo_lbuf_append(lbuf, "%s", def_runas_default);
+    sudo_lbuf_append(lbuf, "\n");
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv != NULL) {
-	lbuf_append(lbuf, "    RunAsGroups: ");
+	sudo_lbuf_append(lbuf, "    RunAsGroups: ");
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
-	lbuf_append(lbuf, "\n");
+	sudo_lbuf_append(lbuf, "\n");
     }
 
     /* get the Option Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv != NULL) {
-	lbuf_append(lbuf, "    Options: ");
+	sudo_lbuf_append(lbuf, "    Options: ");
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
-	lbuf_append(lbuf, "\n");
+	sudo_lbuf_append(lbuf, "\n");
     }
 
     /*
@@ -1963,7 +1963,7 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     bv = ldap_get_values_len(ld, entry, "sudoOrder");
     if (bv != NULL) {
 	if (*bv != NULL) {
-	    lbuf_append(lbuf, _("    Order: %s\n"), (*bv)->bv_val);
+	    sudo_lbuf_append(lbuf, _("    Order: %s\n"), (*bv)->bv_val);
 	}
 	ldap_value_free_len(bv);
     }
@@ -1971,9 +1971,9 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     /* Get the command values from the entry. */
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
-	lbuf_append(lbuf, _("    Commands:\n"));
+	sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "\t%s\n", (*p)->bv_val);
+	    sudo_lbuf_append(lbuf, "\t%s\n", (*p)->bv_val);
 	    count++;
 	}
 	ldap_value_free_len(bv);
@@ -1987,7 +1987,7 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
  */
 static int
 sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
-    struct lbuf *lbuf)
+    struct sudo_lbuf *lbuf)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;

@@ -2003,7 +2003,7 @@ char *yytext;
 #include "parse.h"
 #include "toke.h"
 #include <gram.h>
-#include "lbuf.h"
+#include "sudo_lbuf.h"
 #include "secure_path.h"
 
 #ifdef HAVE_SHA224UPDATE
@@ -4380,14 +4380,14 @@ int
 sudoers_trace_print(const char *msg)
 {
     static bool initialized;
-    static struct lbuf lbuf;
+    static struct sudo_lbuf lbuf;
 
     if (!initialized) {
 	initialized = true;
-	lbuf_init(&lbuf, NULL, 0, NULL, 0);
+	sudo_lbuf_init(&lbuf, NULL, 0, NULL, 0);
     }
 
-    lbuf_append(&lbuf, "%s", msg);
+    sudo_lbuf_append(&lbuf, "%s", msg);
     /* XXX - assumes a final newline */
     if (strchr(msg, '\n') != NULL)
     {

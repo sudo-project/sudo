@@ -292,8 +292,8 @@ openbsd.o: $(srcdir)/openbsd.c $(incdir)/alloc.h $(incdir)/compat/stdbool.h \
 parse_args.o: $(srcdir)/parse_args.c $(incdir)/alloc.h \
               $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
               $(incdir)/fatal.h $(incdir)/fileops.h $(incdir)/gettext.h \
-              $(incdir)/lbuf.h $(incdir)/missing.h $(incdir)/queue.h \
-              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_lbuf.h \
               $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h ./sudo_usage.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/parse_args.c

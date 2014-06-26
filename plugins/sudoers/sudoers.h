@@ -214,7 +214,7 @@ struct sudo_user {
 #endif
 #define ROOT_GID	0
 
-struct lbuf;
+struct sudo_lbuf;
 struct passwd;
 struct stat;
 struct timeval;
@@ -256,9 +256,9 @@ int sudo_file_setdefs(struct sudo_nss *);
 int sudo_file_lookup(struct sudo_nss *, int, int);
 int sudo_file_parse(struct sudo_nss *);
 int sudo_file_display_cmnd(struct sudo_nss *, struct passwd *);
-int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
-int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
-int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
+int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
+int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
+int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
 
 /* set_perms.c */
 bool rewind_perms(void);
