@@ -277,7 +277,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
-	    user_name = estrdup(*cur + sizeof("user=") - 1);
+	    user_name = sudo_estrdup(*cur + sizeof("user=") - 1);
 	    continue;
 	}
 	if (MATCHES(*cur, "uid=")) {
@@ -303,19 +303,19 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "cwd=")) {
-	    user_cwd = estrdup(*cur + sizeof("cwd=") - 1);
+	    user_cwd = sudo_estrdup(*cur + sizeof("cwd=") - 1);
 	    continue;
 	}
 	if (MATCHES(*cur, "tty=")) {
-	    user_tty = user_ttypath = estrdup(*cur + sizeof("tty=") - 1);
+	    user_tty = user_ttypath = sudo_estrdup(*cur + sizeof("tty=") - 1);
 	    if (strncmp(user_tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 		user_tty += sizeof(_PATH_DEV) - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "host=")) {
-	    user_host = user_shost = estrdup(*cur + sizeof("host=") - 1);
+	    user_host = user_shost = sudo_estrdup(*cur + sizeof("host=") - 1);
 	    if ((p = strchr(user_host, '.')))
-		user_shost = estrndup(user_host, (size_t)(p - user_host));
+		user_shost = sudo_estrndup(user_host, (size_t)(p - user_host));
 	    continue;
 	}
 	if (MATCHES(*cur, "lines=")) {
@@ -348,13 +348,13 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
     }
-    user_runhost = user_srunhost = estrdup(remhost ? remhost : user_host);
+    user_runhost = user_srunhost = sudo_estrdup(remhost ? remhost : user_host);
     if ((p = strchr(user_runhost, '.')))
-	user_srunhost = estrndup(user_runhost, (size_t)(p - user_runhost));
+	user_srunhost = sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
     if (user_cwd == NULL)
-	user_cwd = estrdup("unknown");
+	user_cwd = sudo_estrdup("unknown");
     if (user_tty == NULL)
-	user_tty = estrdup("unknown"); /* user_ttypath remains NULL */
+	user_tty = sudo_estrdup("unknown"); /* user_ttypath remains NULL */
 
     if (groups != NULL && groups[0] != '\0') {
 	/* sudo_parse_gids() will print a warning on error. */
@@ -399,48 +399,48 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     debug_decl(sudoers_policy_exec_setup, SUDO_DEBUG_PLUGIN)
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = ecalloc(32, sizeof(char **));
+    command_info = sudo_ecalloc(32, sizeof(char **));
 
     command_info[info_len++] = sudo_new_key_val("command", safe_cmnd);
     if (def_log_input || def_log_output) {
 	if (iolog_path)
 	    command_info[info_len++] = iolog_path;
 	if (def_log_input) {
-	    command_info[info_len++] = estrdup("iolog_stdin=true");
-	    command_info[info_len++] = estrdup("iolog_ttyin=true");
+	    command_info[info_len++] = sudo_estrdup("iolog_stdin=true");
+	    command_info[info_len++] = sudo_estrdup("iolog_ttyin=true");
 	}
 	if (def_log_output) {
-	    command_info[info_len++] = estrdup("iolog_stdout=true");
-	    command_info[info_len++] = estrdup("iolog_stderr=true");
-	    command_info[info_len++] = estrdup("iolog_ttyout=true");
+	    command_info[info_len++] = sudo_estrdup("iolog_stdout=true");
+	    command_info[info_len++] = sudo_estrdup("iolog_stderr=true");
+	    command_info[info_len++] = sudo_estrdup("iolog_ttyout=true");
 	}
 	if (def_compress_io) {
-	    command_info[info_len++] = estrdup("iolog_compress=true");
+	    command_info[info_len++] = sudo_estrdup("iolog_compress=true");
 	}
 	if (def_maxseq) {
-	    easprintf(&command_info[info_len++], "maxseq=%u", def_maxseq);
+	    sudo_easprintf(&command_info[info_len++], "maxseq=%u", def_maxseq);
 	}
     }
     if (ISSET(sudo_mode, MODE_EDIT))
-	command_info[info_len++] = estrdup("sudoedit=true");
+	command_info[info_len++] = sudo_estrdup("sudoedit=true");
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
 	command_info[info_len++] = sudo_new_key_val("cwd", runas_pw->pw_dir);
     }
     if (def_stay_setuid) {
-	easprintf(&command_info[info_len++], "runas_uid=%u",
+	sudo_easprintf(&command_info[info_len++], "runas_uid=%u",
 	    (unsigned int)user_uid);
-	easprintf(&command_info[info_len++], "runas_gid=%u",
+	sudo_easprintf(&command_info[info_len++], "runas_gid=%u",
 	    (unsigned int)user_gid);
-	easprintf(&command_info[info_len++], "runas_euid=%u",
+	sudo_easprintf(&command_info[info_len++], "runas_euid=%u",
 	    (unsigned int)runas_pw->pw_uid);
-	easprintf(&command_info[info_len++], "runas_egid=%u",
+	sudo_easprintf(&command_info[info_len++], "runas_egid=%u",
 	    runas_gr ? (unsigned int)runas_gr->gr_gid :
 	    (unsigned int)runas_pw->pw_gid);
     } else {
-	easprintf(&command_info[info_len++], "runas_uid=%u",
+	sudo_easprintf(&command_info[info_len++], "runas_uid=%u",
 	    (unsigned int)runas_pw->pw_uid);
-	easprintf(&command_info[info_len++], "runas_gid=%u",
+	sudo_easprintf(&command_info[info_len++], "runas_gid=%u",
 	    runas_gr ? (unsigned int)runas_gr->gr_gid :
 	    (unsigned int)runas_pw->pw_gid);
     }
@@ -456,7 +456,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +
 	    ((grlist->ngids + 1) * (MAX_UID_T_LEN + 1));
-	gid_list = emalloc(glsize);
+	gid_list = sudo_emalloc(glsize);
 	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
 	cp = gid_list + sizeof("runas_groups=") - 1;
 
@@ -484,19 +484,19 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	sudo_grlist_delref(grlist);
     }
     if (def_closefrom >= 0)
-	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
+	sudo_easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
     if (def_noexec)
-	command_info[info_len++] = estrdup("noexec=true");
+	command_info[info_len++] = sudo_estrdup("noexec=true");
     if (def_exec_background)
-	command_info[info_len++] = estrdup("exec_background=true");
+	command_info[info_len++] = sudo_estrdup("exec_background=true");
     if (def_set_utmp)
-	command_info[info_len++] = estrdup("set_utmp=true");
+	command_info[info_len++] = sudo_estrdup("set_utmp=true");
     if (def_use_pty)
-	command_info[info_len++] = estrdup("use_pty=true");
+	command_info[info_len++] = sudo_estrdup("use_pty=true");
     if (def_utmp_runas)
 	command_info[info_len++] = sudo_new_key_val("utmp_user", runas_pw->pw_name);
     if (cmnd_umask != 0777)
-	easprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask);
+	sudo_easprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask);
 #ifdef HAVE_LOGIN_CAP_H
     if (def_use_loginclass)
 	command_info[info_len++] = sudo_new_key_val("login_class", login_class);

@@ -45,7 +45,7 @@
 #include <poll.h>
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
@@ -60,7 +60,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     base->pfd_high = -1;
     base->pfd_max = 32;
-    base->pfds = ereallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
+    base->pfds = sudo_ereallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
     for (i = 0; i < base->pfd_max; i++) {
 	base->pfds[i].fd = -1;
     }
@@ -87,7 +87,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	int i;
 	base->pfd_max <<= 1;
 	base->pfds =
-	    ereallocarray(base->pfds, base->pfd_max, sizeof(struct pollfd));
+	    sudo_ereallocarray(base->pfds, base->pfd_max, sizeof(struct pollfd));
 	for (i = base->pfd_free; i < base->pfd_max; i++) {
 	    base->pfds[i].fd = -1;
 	}

@@ -330,7 +330,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 
     /* Create the temp file if needed and set timestamp. */
     if (sp->tpath == NULL) {
-	easprintf(&sp->tpath, "%s.tmp", sp->path);
+	sudo_easprintf(&sp->tpath, "%s.tmp", sp->path);
 	tfd = open(sp->tpath, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (tfd < 0)
 	    sudo_fatal("%s", sp->tpath);
@@ -400,7 +400,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     }
 
     /* Build up argument vector for the command */
-    av = emallocarray(ac, sizeof(char *));
+    av = sudo_emallocarray(ac, sizeof(char *));
     if ((av[0] = strrchr(editor, '/')) != NULL)
 	av[0]++;
     else
@@ -897,8 +897,8 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
-	entry = ecalloc(1, sizeof(*entry));
-	entry->path = estrdup(path);
+	entry = sudo_ecalloc(1, sizeof(*entry));
+	entry->path = sudo_estrdup(path);
 	/* entry->modified = 0; */
 	entry->fd = open(entry->path, open_flags, SUDOERS_MODE);
 	/* entry->tpath = NULL; */
@@ -978,7 +978,7 @@ get_editor(char **args)
 	    /* Should never happen since we already checked above. */
 	    sudo_fatal(U_("unable to stat editor (%s)"), UserEditor);
 	}
-	EditorPath = estrdup(def_editor);
+	EditorPath = sudo_estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
 	    EditorArgs = get_args(Editor);
@@ -1014,7 +1014,7 @@ get_editor(char **args)
      */
     if (Editor == NULL || *Editor == '\0') {
 	efree(EditorPath);
-	EditorPath = estrdup(def_editor);
+	EditorPath = sudo_estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
 	    EditorArgs = get_args(Editor);
@@ -1061,11 +1061,11 @@ get_hostname(void)
 
     if (gethostname(thost, sizeof(thost)) != -1) {
 	thost[sizeof(thost) - 1] = '\0';
-	user_host = estrdup(thost);
+	user_host = sudo_estrdup(thost);
 
 	if ((p = strchr(user_host, '.'))) {
 	    *p = '\0';
-	    user_shost = estrdup(user_host);
+	    user_shost = sudo_estrdup(user_host);
 	    *p = '.';
 	} else {
 	    user_shost = user_host;

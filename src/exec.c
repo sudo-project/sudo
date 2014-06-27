@@ -844,7 +844,7 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
 	snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for child", signame);
 
-    sigfwd = ecalloc(1, sizeof(*sigfwd));
+    sigfwd = sudo_ecalloc(1, sizeof(*sigfwd));
     sigfwd->signo = signo;
     TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 

@@ -360,7 +360,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    goto done;
 #endif
 		}
-		pr->resp = estrdup(pass);
+		pr->resp = sudo_estrdup(pass);
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case PAM_TEXT_INFO:

@@ -354,7 +354,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
      */
     ud->ngroups = sudo_conf_max_groups();
     if (ud->ngroups > 0) {
-	ud->groups = emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+	ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 	/* No error on insufficient space if user specified max_groups. */
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	rval = 0;
@@ -369,7 +369,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	for (tries = 0; tries < 10 && rval == -1; tries++) {
 	    ud->ngroups <<= 1;
 	    efree(ud->groups);
-	    ud->groups = emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+	    ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
     }
@@ -396,7 +396,7 @@ get_user_groups(struct user_details *ud)
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
 	    /* Use groups from kernel if not too many or source is static. */
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		ud->groups = emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+		ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
 		    efree(ud->groups);
 		    ud->groups = NULL;
@@ -417,7 +417,7 @@ get_user_groups(struct user_details *ud)
      * Format group list as a comma-separated string of gids.
      */
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
-    gid_list = emalloc(glsize);
+    gid_list = sudo_emalloc(glsize);
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
@@ -442,7 +442,7 @@ get_user_info(struct user_details *ud)
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
-    user_info = emallocarray(32, sizeof(char *));
+    user_info = sudo_emallocarray(32, sizeof(char *));
 
     ud->pid = getpid();
     ud->ppid = getppid();
@@ -473,18 +473,18 @@ get_user_info(struct user_details *ud)
     if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
 	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_BSHELL;
     }
-    ud->shell = estrdup(ud->shell);
+    ud->shell = sudo_estrdup(ud->shell);
 
-    easprintf(&user_info[++i], "pid=%d", (int)ud->pid);
-    easprintf(&user_info[++i], "ppid=%d", (int)ud->ppid);
-    easprintf(&user_info[++i], "pgid=%d", (int)ud->pgid);
-    easprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid);
-    easprintf(&user_info[++i], "sid=%d", (int)ud->sid);
+    sudo_easprintf(&user_info[++i], "pid=%d", (int)ud->pid);
+    sudo_easprintf(&user_info[++i], "ppid=%d", (int)ud->ppid);
+    sudo_easprintf(&user_info[++i], "pgid=%d", (int)ud->pgid);
+    sudo_easprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid);
+    sudo_easprintf(&user_info[++i], "sid=%d", (int)ud->sid);
 
-    easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
-    easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);
-    easprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid);
-    easprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid);
+    sudo_easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
+    sudo_easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);
+    sudo_easprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid);
+    sudo_easprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid);
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
@@ -514,8 +514,8 @@ get_user_info(struct user_details *ud)
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
-    easprintf(&user_info[++i], "lines=%d", ud->ts_lines);
-    easprintf(&user_info[++i], "cols=%d", ud->ts_cols);
+    sudo_easprintf(&user_info[++i], "lines=%d", ud->ts_lines);
+    sudo_easprintf(&user_info[++i], "cols=%d", ud->ts_cols);
 
     user_info[++i] = NULL;
 
@@ -745,7 +745,7 @@ sudo_check_suid(const char *sudo)
 		int len;
 		char *cp, *colon;
 
-		cp = path = estrdup(path);
+		cp = path = sudo_estrdup(path);
 		do {
 		    if ((colon = strchr(cp, ':')))
 			*colon = '\0';

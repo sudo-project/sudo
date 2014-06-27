@@ -88,7 +88,7 @@ struct rtentry;
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -143,7 +143,7 @@ get_net_ifs(char **addrinfo)
     if (num_interfaces == 0)
 	debug_return_int(0);
     ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = emalloc(ailen);
+    *addrinfo = cp = sudo_emalloc(ailen);
 
     /* Store the IP addr/netmask pairs. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -239,7 +239,7 @@ get_net_ifs(char **addrinfo)
      * Get interface configuration or return.
      */
     for (;;) {
-	ifconf_buf = emalloc(buflen);
+	ifconf_buf = sudo_emalloc(buflen);
 	ifconf = (struct ifconf *) ifconf_buf;
 	ifconf->ifc_len = buflen - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
@@ -264,7 +264,7 @@ get_net_ifs(char **addrinfo)
     if ((n = ifconf->ifc_len / sizeof(struct ifreq)) == 0)
 	debug_return_int(0);
     ailen = n * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = emalloc(ailen);
+    *addrinfo = cp = sudo_emalloc(ailen);
 
     /* For each interface, store the ip address and netmask. */
     for (i = 0; i < ifconf->ifc_len; ) {

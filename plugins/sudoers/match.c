@@ -411,7 +411,7 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	    strcmp(user_cmnd, "sudoedit") == 0 &&
 	    command_args_match(sudoers_cmnd, sudoers_args)) {
 	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(sudoers_cmnd);
+	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
 	    rc = true;
 	}
 	goto done;
@@ -459,7 +459,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args)
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	if (safe_cmnd)
 	    free(safe_cmnd);
-	safe_cmnd = estrdup(user_cmnd);
+	safe_cmnd = sudo_estrdup(user_cmnd);
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -521,7 +521,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(cp);
+	    safe_cmnd = sudo_estrdup(cp);
 	    break;
 	}
     }
@@ -531,7 +531,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	efree(safe_cmnd);
-	safe_cmnd = estrdup(user_cmnd);
+	safe_cmnd = sudo_estrdup(user_cmnd);
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -554,7 +554,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(sudoers_cmnd);
+	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
 	    debug_return_bool(true);
 	}
     }
@@ -712,7 +712,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	debug_return_bool(false);
     }
     efree(safe_cmnd);
-    safe_cmnd = estrdup(sudoers_cmnd);
+    safe_cmnd = sudo_estrdup(sudoers_cmnd);
     debug_return_bool(true);
 }
 #endif /* SUDOERS_NAME_MATCH */
@@ -766,7 +766,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(buf);
+	    safe_cmnd = sudo_estrdup(buf);
 	    break;
 	}
     }
@@ -916,7 +916,7 @@ sudo_getdomainname(void)
 #ifdef HAVE_GETDOMAINNAME
     char *buf, *cp;
 
-    buf = emalloc(HOST_NAME_MAX + 1);
+    buf = sudo_emalloc(HOST_NAME_MAX + 1);
     if (getdomainname(buf, HOST_NAME_MAX + 1) == 0 && *buf != '\0') {
 	domain = buf;
 	for (cp = buf; *cp != '\0'; cp++) {

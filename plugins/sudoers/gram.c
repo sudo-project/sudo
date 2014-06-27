@@ -696,7 +696,7 @@ sudoerserror(const char *s)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno;
-	errorfile = estrdup(sudoers);
+	errorfile = sudo_estrdup(sudoers);
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -722,7 +722,7 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDO_DEBUG_PARSER)
 
-    d = ecalloc(1, sizeof(struct defaults));
+    d = sudo_ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
     /* d->type = 0; */
@@ -739,7 +739,7 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDO_DEBUG_PARSER)
 
-    m = ecalloc(1, sizeof(struct member));
+    m = sudo_ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
     HLTQ_INIT(m, entries);
@@ -753,9 +753,9 @@ new_digest(int digest_type, const char *digest_str)
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDO_DEBUG_PARSER)
 
-    dig = emalloc(sizeof(*dig));
+    dig = sudo_emalloc(sizeof(*dig));
     dig->digest_type = digest_type;
-    dig->digest_str = estrdup(digest_str);
+    dig->digest_str = sudo_estrdup(digest_str);
 
     debug_return_ptr(dig);
 }
@@ -776,7 +776,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	/*
 	 * We use a single binding for each entry in defs.
 	 */
-	binding = emalloc(sizeof(*binding));
+	binding = sudo_emalloc(sizeof(*binding));
 	if (bmem != NULL)
 	    HLTQ_TO_TAILQ(binding, bmem, entries);
 	else
@@ -806,7 +806,7 @@ add_userspec(struct member *members, struct privilege *privs)
     struct userspec *u;
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
-    u = ecalloc(1, sizeof(*u));
+    u = sudo_ecalloc(1, sizeof(*u));
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
@@ -933,7 +933,7 @@ init_parser(const char *path, bool quiet)
     init_lexer();
 
     efree(sudoers);
-    sudoers = path ? estrdup(path) : NULL;
+    sudoers = path ? sudo_estrdup(path) : NULL;
 
     parse_error = false;
     errorlineno = -1;
@@ -1273,7 +1273,7 @@ break;
 case 26:
 #line 246 "gram.y"
 {
-			    struct privilege *p = ecalloc(1, sizeof(*p));
+			    struct privilege *p = sudo_ecalloc(1, sizeof(*p));
 			    HLTQ_TO_TAILQ(&p->hostlist, yyvsp[-2].member, entries);
 			    HLTQ_TO_TAILQ(&p->cmndlist, yyvsp[0].cmndspec, entries);
 			    HLTQ_INIT(p, entries);
@@ -1369,17 +1369,17 @@ break;
 case 36:
 #line 324 "gram.y"
 {
-			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
+			    struct cmndspec *cs = sudo_ecalloc(1, sizeof(*cs));
 			    if (yyvsp[-4].runas != NULL) {
 				if (yyvsp[-4].runas->runasusers != NULL) {
 				    cs->runasuserlist =
-					emalloc(sizeof(*cs->runasuserlist));
+					sudo_emalloc(sizeof(*cs->runasuserlist));
 				    HLTQ_TO_TAILQ(cs->runasuserlist,
 					yyvsp[-4].runas->runasusers, entries);
 				}
 				if (yyvsp[-4].runas->runasgroups != NULL) {
 				    cs->runasgrouplist =
-					emalloc(sizeof(*cs->runasgrouplist));
+					sudo_emalloc(sizeof(*cs->runasgrouplist));
 				    HLTQ_TO_TAILQ(cs->runasgrouplist,
 					yyvsp[-4].runas->runasgroups, entries);
 				}
@@ -1565,7 +1565,7 @@ break;
 case 61:
 #line 466 "gram.y"
 {
-			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = new_member(NULL, MYSELF);
 			    /* $$->runasgroups = NULL; */
 			}
@@ -1573,7 +1573,7 @@ break;
 case 62:
 #line 471 "gram.y"
 {
-			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = yyvsp[0].member;
 			    /* $$->runasgroups = NULL; */
 			}
@@ -1581,7 +1581,7 @@ break;
 case 63:
 #line 476 "gram.y"
 {
-			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = yyvsp[-2].member;
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
@@ -1589,7 +1589,7 @@ break;
 case 64:
 #line 481 "gram.y"
 {
-			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    /* $$->runasusers = NULL; */
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
@@ -1597,7 +1597,7 @@ break;
 case 65:
 #line 486 "gram.y"
 {
-			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = new_member(NULL, MYSELF);
 			    /* $$->runasgroups = NULL; */
 			}
@@ -1684,7 +1684,7 @@ break;
 case 79:
 #line 535 "gram.y"
 {
-			    struct sudo_command *c = ecalloc(1, sizeof(*c));
+			    struct sudo_command *c = sudo_ecalloc(1, sizeof(*c));
 			    c->cmnd = yyvsp[0].command.cmnd;
 			    c->args = yyvsp[0].command.args;
 			    yyval.member = new_member((char *)c, COMMAND);

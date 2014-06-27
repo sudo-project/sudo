@@ -605,7 +605,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
 	(void) fcntl(wfd, F_SETFL, n | O_NONBLOCK);
 
     /* Allocate and add to head of list. */
-    iob = emalloc(sizeof(*iob));
+    iob = sudo_emalloc(sizeof(*iob));
     iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, io_callback, iob);
     iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, io_callback, iob);
     iob->len = 0;

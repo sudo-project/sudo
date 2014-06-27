@@ -36,7 +36,7 @@
 
 #include "missing.h"
 #include "fatal.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "sudo_debug.h"
 #include "linux_audit.h"
 
@@ -82,7 +82,7 @@ linux_audit_command(char *argv[], int result)
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
 	size += strlen(*av) + 1;
-    command = cp = emalloc(size);
+    command = cp = sudo_emalloc(size);
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {

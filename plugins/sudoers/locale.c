@@ -43,7 +43,7 @@
 
 #include "missing.h"
 #include "fatal.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "logging.h"
 
 static int current_locale = SUDOERS_LOCALE_USER;
@@ -61,11 +61,11 @@ sudoers_initlocale(const char *ulocale, const char *slocale)
 {
     if (ulocale != NULL) {
 	efree(user_locale);
-	user_locale = estrdup(ulocale);
+	user_locale = sudo_estrdup(ulocale);
     }
     if (slocale != NULL) {
 	efree(sudoers_locale);
-	sudoers_locale = estrdup(slocale);
+	sudoers_locale = sudo_estrdup(slocale);
     }
 }
 
@@ -88,7 +88,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		current_locale = SUDOERS_LOCALE_USER;
 		res = setlocale(LC_ALL, user_locale ? user_locale : "");
 		if (res != NULL && user_locale == NULL)
-		    user_locale = estrdup(setlocale(LC_ALL, NULL));
+		    user_locale = sudo_estrdup(setlocale(LC_ALL, NULL));
 	    }
 	    break;
 	case SUDOERS_LOCALE_SUDOERS:
@@ -100,7 +100,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		if (res == NULL && sudoers_locale != NULL) {
 		    if (strcmp(sudoers_locale, "C") != 0) {
 			efree(sudoers_locale);
-			sudoers_locale = estrdup("C");
+			sudoers_locale = sudo_estrdup("C");
 			res = setlocale(LC_ALL, "C");
 		    }
 		}

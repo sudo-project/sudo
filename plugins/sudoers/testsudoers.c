@@ -219,7 +219,7 @@ main(int argc, char *argv[])
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
-	user_shost = estrdup(user_host);
+	user_shost = sudo_estrdup(user_host);
 	*p = '.';
     } else {
 	user_shost = user_host;
@@ -235,7 +235,7 @@ main(int argc, char *argv[])
 	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
-	user_args = (char *) emalloc(size);
+	user_args = (char *) sudo_emalloc(size);
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))

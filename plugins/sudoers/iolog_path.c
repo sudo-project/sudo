@@ -172,7 +172,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     /* Expanded path must be <= PATH_MAX */
     if (prefix != NULL)
 	prelen = strlen(prefix);
-    dst = path = emalloc(prelen + PATH_MAX);
+    dst = path = sudo_emalloc(prelen + PATH_MAX);
     *path = '\0';
     pathend = path + prelen + PATH_MAX;
 

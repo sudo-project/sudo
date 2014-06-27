@@ -43,7 +43,7 @@
 #include <ctype.h>
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_lbuf.h"
 #include "sudo_debug.h"
@@ -83,7 +83,7 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 	do {
 	    lbuf->size += 256;
 	} while (lbuf->len + extra + 1 >= lbuf->size);
-	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
+	lbuf->buf = sudo_erealloc(lbuf->buf, lbuf->size);
     }
 }
 

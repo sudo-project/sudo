@@ -44,7 +44,7 @@
 #include <errno.h>
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
@@ -58,7 +58,7 @@ sudo_ev_base_alloc(void)
     struct sudo_event_base *base;
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
-    base = ecalloc(1, sizeof(*base));
+    base = sudo_ecalloc(1, sizeof(*base));
     TAILQ_INIT(&base->events);
     TAILQ_INIT(&base->timeouts);
     if (sudo_ev_base_alloc_impl(base) != 0) {
@@ -93,7 +93,7 @@ sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callback, void *closure)
 
     /* XXX - sanity check events value */
 
-    ev = ecalloc(1, sizeof(*ev));
+    ev = sudo_ecalloc(1, sizeof(*ev));
     ev->fd = fd;
     ev->events = events;
     ev->pfd_idx = -1;

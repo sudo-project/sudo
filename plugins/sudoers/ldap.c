@@ -424,7 +424,7 @@ sudo_ldap_conf_add_ports(void)
     }
 
     efree(ldap_conf.host);
-    ldap_conf.host = estrdup(hostbuf);
+    ldap_conf.host = sudo_estrdup(hostbuf);
     debug_return_bool(true);
 
 toobig:
@@ -452,7 +452,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 
     hostbuf[0] = '\0';
     STAILQ_FOREACH(entry, uri_list, entries) {
-	buf = estrdup(entry->val);
+	buf = sudo_estrdup(entry->val);
 	for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
 	    if (strncasecmp(uri, "ldap://", 7) == 0) {
 		nldap++;
@@ -505,7 +505,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 
     /* Store parsed URI(s) in host for ldap_create() or ldap_init(). */
     efree(ldap_conf.host);
-    ldap_conf.host = estrdup(hostbuf);
+    ldap_conf.host = sudo_estrdup(hostbuf);
 
     rc = LDAP_SUCCESS;
 
@@ -535,7 +535,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 	}
 	len += strlen(uri->val) + 1;
     }
-    buf = cp = emalloc(len);
+    buf = cp = sudo_emalloc(len);
     buf[0] = '\0';
     STAILQ_FOREACH(uri, uri_list, entries) {
 	cp += strlcpy(cp, uri->val, len - (cp - buf));
@@ -882,7 +882,7 @@ sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
 		    ep++;
 		if (*ep != '\0') {
 		    digest->digest_type = digest_type;
-		    digest->digest_str = estrndup(cp, (size_t)(ep - cp));
+		    digest->digest_str = sudo_estrndup(cp, (size_t)(ep - cp));
 		    cp = ep + 1;
 		    while (isblank((unsigned char)*cp))
 			cp++;
@@ -938,10 +938,10 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	/* check for !command */
 	if (*val == '!') {
 	    foundbang = true;
-	    allowed_cmnd = estrdup(1 + val);	/* !command */
+	    allowed_cmnd = sudo_estrdup(1 + val);	/* !command */
 	} else {
 	    foundbang = false;
-	    allowed_cmnd = estrdup(val);	/* command */
+	    allowed_cmnd = sudo_estrdup(val);	/* command */
 	}
 
 	/* split optional args away from command */
@@ -1025,7 +1025,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
-	var = estrdup((*p)->bv_val);
+	var = sudo_estrdup((*p)->bv_val);
 	DPRINTF2("ldap sudoOption: '%s'", var);
 
 	/* check for equals sign past first char */
@@ -1122,9 +1122,9 @@ sudo_ldap_build_default_filter(void)
     debug_decl(sudo_ldap_build_default_filter, SUDO_DEBUG_LDAP)
 
     if (ldap_conf.search_filter)
-	easprintf(&filt, "(&%s(cn=defaults))", ldap_conf.search_filter);
+	sudo_easprintf(&filt, "(&%s(cn=defaults))", ldap_conf.search_filter);
     else
-	filt = estrdup("cn=defaults");
+	filt = sudo_estrdup("cn=defaults");
     debug_return_str(filt);
 }
 
@@ -1266,7 +1266,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
     /* If timed, add space for time limits. */
     if (ldap_conf.timed)
 	sz += TIMEFILTER_LENGTH;
-    buf = emalloc(sz);
+    buf = sudo_emalloc(sz);
     *buf = '\0';
 
     /*
@@ -1364,14 +1364,14 @@ sudo_ldap_build_pass2(void)
      * those get ANDed in to the expression.
      */
     if (def_group_plugin) {
-	easprintf(&filt, "%s%s(|(sudoUser=%s*)(sudoUser=%%:*))%s%s",
+	sudo_easprintf(&filt, "%s%s(|(sudoUser=%s*)(sudoUser=%%:*))%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    def_use_netgroups ? "+" : "",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
-	easprintf(&filt, "%s%s(sudoUser=*)(sudoUser=+*)%s%s",
+	sudo_easprintf(&filt, "%s%s(sudoUser=*)(sudoUser=+*)%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    ldap_conf.timed ? timebuffer : "",
@@ -1394,7 +1394,7 @@ sudo_ldap_read_secret(const char *path)
 		*cp = '\0';
 	    /* copy to bindpw and binddn */
 	    efree(ldap_conf.bindpw);
-	    ldap_conf.bindpw = estrdup(buf);
+	    ldap_conf.bindpw = sudo_estrdup(buf);
 	    efree(ldap_conf.binddn);
 	    ldap_conf.binddn = ldap_conf.rootbinddn;
 	    ldap_conf.rootbinddn = NULL;
@@ -1442,7 +1442,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		break;
 	    case CONF_STR:
 		efree(*(char **)(cur->valp));
-		*(char **)(cur->valp) = *value ? estrdup(value) : NULL;
+		*(char **)(cur->valp) = *value ? sudo_estrdup(value) : NULL;
 		break;
 	    case CONF_LIST_STR:
 		{
@@ -1452,7 +1452,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 
 		    if (len > 0) {
 			head = (struct ldap_config_str_list *)cur->valp;
-			str = emalloc(sizeof(*str) + len);
+			str = sudo_emalloc(sizeof(*str) + len);
 			memcpy(str->val, value, len + 1);
 			STAILQ_INSERT_TAIL(head, str, entries);
 		    }
@@ -1538,7 +1538,7 @@ sudo_ldap_read_config(void)
     ldap_conf.use_sasl = -1;
     ldap_conf.rootuse_sasl = -1;
     ldap_conf.deref = -1;
-    ldap_conf.search_filter = estrdup(DEFAULT_SEARCH_FILTER);
+    ldap_conf.search_filter = sudo_estrdup(DEFAULT_SEARCH_FILTER);
     STAILQ_INIT(&ldap_conf.uri);
     STAILQ_INIT(&ldap_conf.base);
 
@@ -1569,7 +1569,7 @@ sudo_ldap_read_config(void)
     fclose(fp);
 
     if (!ldap_conf.host)
-	ldap_conf.host = estrdup("localhost");
+	ldap_conf.host = sudo_estrdup("localhost");
 
     DPRINTF1("LDAP Config Summary");
     DPRINTF1("===================");
@@ -1710,7 +1710,7 @@ sudo_ldap_read_config(void)
     if (ldap_conf.search_filter && ldap_conf.search_filter[0] != '(') {
 	size_t len = strlen(ldap_conf.search_filter);
 	cp = ldap_conf.search_filter;
-	ldap_conf.search_filter = emalloc(len + 3);
+	ldap_conf.search_filter = sudo_emalloc(len + 3);
 	ldap_conf.search_filter[0] = '(';
 	memcpy(ldap_conf.search_filter + 1, cp, len);
 	ldap_conf.search_filter[len + 1] = ')';
@@ -2338,7 +2338,7 @@ sudo_ldap_result_alloc(void)
     struct ldap_result *result;
     debug_decl(sudo_ldap_result_alloc, SUDO_DEBUG_LDAP)
 
-    result = ecalloc(1, sizeof(*result));
+    result = sudo_ecalloc(1, sizeof(*result));
     STAILQ_INIT(&result->searches);
 
     debug_return_ptr(result);
@@ -2379,7 +2379,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
     debug_decl(sudo_ldap_result_add_search, SUDO_DEBUG_LDAP)
 
     /* Create new entry and add it to the end of the chain. */
-    news = ecalloc(1, sizeof(*news));
+    news = sudo_ecalloc(1, sizeof(*news));
     news->ldap = ldap;
     news->searchresult = searchresult;
     STAILQ_INSERT_TAIL(&lres->searches, news, entries);
@@ -2573,7 +2573,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	goto done;
 
     /* Create a handle container. */
-    handle = ecalloc(1, sizeof(struct sudo_ldap_handle));
+    handle = sudo_ecalloc(1, sizeof(struct sudo_ldap_handle));
     handle->ld = ld;
     /* handle->result = NULL; */
     /* handle->username = NULL; */
@@ -2810,7 +2810,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
      */
     if (++lres->nentries > lres->allocated_entries) {
 	lres->allocated_entries += ALLOCATION_INCREMENT;
-	lres->entries = ereallocarray(lres->entries, lres->allocated_entries,
+	lres->entries = sudo_ereallocarray(lres->entries, lres->allocated_entries,
 	    sizeof(lres->entries[0]));
     }
 
@@ -2941,7 +2941,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 
     /* Store everything in the sudo_nss handle. */
     handle->result = lres;
-    handle->username = estrdup(pw->pw_name);
+    handle->username = sudo_estrdup(pw->pw_name);
     handle->grlist = user_group_list;
 
     debug_return_ptr(lres);

@@ -35,7 +35,7 @@
 #include <pathnames.h>
 #include "missing.h"
 #include "fatal.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "queue.h"
 #include "defaults.h"
 #include "logging.h"

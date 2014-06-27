@@ -51,7 +51,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_plugin.h"
 #include "sudo_debug.h"

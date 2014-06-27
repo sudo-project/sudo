@@ -248,17 +248,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     if (argc == 0) {
 	NewArgc = 1;
-	NewArgv = emallocarray(NewArgc + 1, sizeof(char *));
+	NewArgv = sudo_emallocarray(NewArgc + 1, sizeof(char *));
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
 	/* Must leave an extra slot before NewArgv for bash's --login */
 	NewArgc = argc;
-	NewArgv = emallocarray(NewArgc + 2, sizeof(char *));
+	NewArgv = sudo_emallocarray(NewArgc + 2, sizeof(char *));
 	memcpy(++NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL)
-	    NewArgv[0] = estrdup(runas_pw->pw_shell);
+	    NewArgv[0] = sudo_estrdup(runas_pw->pw_shell);
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -305,7 +305,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     sudoers_setlocale(oldlocale, NULL);
 
     if (safe_cmnd == NULL)
-	safe_cmnd = estrdup(user_cmnd);
+	safe_cmnd = sudo_estrdup(user_cmnd);
 
     /* If only a group was specified, set runas_pw based on invoking user. */
     if (runas_pw == NULL) {
@@ -643,7 +643,7 @@ set_cmnd(void)
     debug_decl(set_cmnd, SUDO_DEBUG_PLUGIN)
 
     /* Allocate user_stat for find_path() and match functions. */
-    user_stat = ecalloc(1, sizeof(struct stat));
+    user_stat = sudo_ecalloc(1, sizeof(struct stat));
 
     /* Default value for cmnd, overridden below. */
     if (user_cmnd == NULL)
@@ -684,7 +684,7 @@ set_cmnd(void)
 	    /* Alloc and build up user_args. */
 	    for (size = 0, av = NewArgv + 1; *av; av++)
 		size += strlen(*av) + 1;
-	    user_args = emalloc(size);
+	    user_args = sudo_emalloc(size);
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
 		/*
 		 * When running a command via a shell, the sudo front-end
@@ -883,10 +883,10 @@ set_fqdn(void)
 	if (user_shost != user_host)
 	    efree(user_shost);
 	efree(user_host);
-	user_host = estrdup(res0->ai_canonname);
+	user_host = sudo_estrdup(res0->ai_canonname);
 	freeaddrinfo(res0);
 	if ((p = strchr(user_host, '.')) != NULL)
-	    user_shost = estrndup(user_host, (size_t)(p - user_host));
+	    user_shost = sudo_estrndup(user_host, (size_t)(p - user_host));
 	else
 	    user_shost = user_host;
     }
@@ -1008,7 +1008,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***a
     debug_decl(resolve_editor, SUDO_DEBUG_PLUGIN)
 
     /* Note: editor becomes part of argv_out and is not freed. */
-    editor = emalloc(edlen + 1);
+    editor = sudo_emalloc(edlen + 1);
     memcpy(editor, ed, edlen);
     editor[edlen] = '\0';
 
@@ -1033,7 +1033,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***a
 	efree(editor);
 	debug_return_str(NULL);
     }
-    nargv = (char **) emallocarray(nargc + 1 + nfiles + 1, sizeof(char *));
+    nargv = (char **) sudo_emallocarray(nargc + 1 + nfiles + 1, sizeof(char *));
     for (ac = 0; cp != NULL && ac < nargc; ac++) {
 	nargv[ac] = cp;
 	cp = strtok(NULL, " \t");

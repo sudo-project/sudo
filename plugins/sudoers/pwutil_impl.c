@@ -116,7 +116,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
 	total += strlen(name) + 1;
 
     /* Allocate space for struct item, struct passwd and the strings. */
-    pwitem = ecalloc(1, total);
+    pwitem = sudo_ecalloc(1, total);
     newpw = &pwitem->pw;
 
     /*
@@ -183,7 +183,7 @@ sudo_make_gritem(gid_t gid, const char *name)
     if (name != NULL)
 	total += strlen(name) + 1;
 
-    gritem = ecalloc(1, total);
+    gritem = sudo_ecalloc(1, total);
 
     /*
      * Copy in group contents and make strings relative to space
@@ -245,7 +245,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     } else {
 	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
-	    gids = emallocarray(ngids, sizeof(GETGROUPS_T));
+	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
 	} else {
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
@@ -253,10 +253,10 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 	    if (ngids < 0)
 #endif
 		ngids = NGROUPS_MAX * 2;
-	    gids = emallocarray(ngids, sizeof(GETGROUPS_T));
+	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
 		efree(gids);
-		gids = emallocarray(ngids, sizeof(GETGROUPS_T));
+		gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
 		    ngids = -1;
 	    }
@@ -285,7 +285,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     total += groupname_len * ngids;
 
 again:
-    grlitem = ecalloc(1, total);
+    grlitem = sudo_ecalloc(1, total);
 
     /*
      * Copy in group list and make pointers relative to space

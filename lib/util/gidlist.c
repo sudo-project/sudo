@@ -33,7 +33,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
@@ -67,7 +67,7 @@ sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
 	ngids++;
     /* Allocate and fill in array. */
     if (ngids != 0) {
-	gids = emallocarray(ngids, sizeof(GETGROUPS_T));
+	gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 	ngids = 0;
 	if (basegid != NULL)
 	    gids[ngids++] = *basegid;

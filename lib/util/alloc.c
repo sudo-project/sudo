@@ -52,13 +52,13 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
  * could be signed (as it is on SunOS 4.x).  This just means that
- * emallocarray() and ereallocarray() cannot allocate huge amounts on such a
+ * sudo_emallocarray() and sudo_ereallocarray() cannot allocate huge amounts on such a
  * platform but that is OK since sudo doesn't need to do so anyway.
  */
 #ifndef SIZE_MAX
@@ -70,16 +70,16 @@
 #endif /* SIZE_MAX */
 
 /*
- * emalloc() calls the system malloc(3) and exits with an error if
+ * sudo_emalloc() calls the system malloc(3) and exits with an error if
  * malloc(3) fails.
  */
 void *
-emalloc(size_t size)
+sudo_emalloc(size_t size)
 {
     void *ptr;
 
     if (size == 0)
-	sudo_fatalx_nodebug(_("internal error, tried to emalloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
 
     if ((ptr = malloc(size)) == NULL)
 	sudo_fatal_nodebug(NULL);
@@ -87,18 +87,18 @@ emalloc(size_t size)
 }
 
 /*
- * emallocarray() allocates nmemb * size bytes and exits with an error
+ * sudo_emallocarray() allocates nmemb * size bytes and exits with an error
  * if overflow would occur or if the system malloc(3) fails.
  */
 void *
-emallocarray(size_t nmemb, size_t size)
+sudo_emallocarray(size_t nmemb, size_t size)
 {
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	sudo_fatalx_nodebug(_("internal error, tried to emallocarray(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
     if (nmemb > SIZE_MAX / size)
-	sudo_fatalx_nodebug(_("internal error, %s overflow"), "emallocarray");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "sudo_emallocarray");
 
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
@@ -107,20 +107,20 @@ emallocarray(size_t nmemb, size_t size)
 }
 
 /*
- * ecalloc() allocates nmemb * size bytes and exits with an error
+ * sudo_ecalloc() allocates nmemb * size bytes and exits with an error
  * if overflow would occur or if the system malloc(3) fails.
  * On success, the allocated space is zero-filled.
  */
 void *
-ecalloc(size_t nmemb, size_t size)
+sudo_ecalloc(size_t nmemb, size_t size)
 {
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	sudo_fatalx_nodebug(_("internal error, tried to ecalloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
     if (nmemb != 1) {
 	if (nmemb > SIZE_MAX / size)
-	    sudo_fatalx_nodebug(_("internal error, %s overflow"), "ecalloc");
+	    sudo_fatalx_nodebug(_("internal error, %s overflow"), "sudo_ecalloc");
 	size *= nmemb;
     }
     if ((ptr = malloc(size)) == NULL)
@@ -130,16 +130,16 @@ ecalloc(size_t nmemb, size_t size)
 }
 
 /*
- * erealloc() calls the system realloc(3) and exits with an error if
- * realloc(3) fails.  You can call erealloc() with a NULL pointer even
+ * sudo_erealloc() calls the system realloc(3) and exits with an error if
+ * realloc(3) fails.  You can call sudo_erealloc() with a NULL pointer even
  * if the system realloc(3) does not support this.
  */
 void *
-erealloc(void *ptr, size_t size)
+sudo_erealloc(void *ptr, size_t size)
 {
 
     if (size == 0)
-	sudo_fatalx_nodebug(_("internal error, tried to erealloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
 
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
@@ -148,19 +148,19 @@ erealloc(void *ptr, size_t size)
 }
 
 /*
- * ereallocarray() realloc(3)s nmemb * size bytes and exits with an error
- * if overflow would occur or if the system malloc(3)/realloc(3) fails.
- * You can call erealloc() with a NULL pointer even if the system realloc(3)
- * does not support this.
+ * sudo_ereallocarray() sudo_realloc(3)s nmemb * size bytes and exits with an
+ * error if overflow would occur or if the system malloc(3)/realloc(3) fails.
+ * You can call sudo_ereallocarray() with a NULL pointer even if the system
+ * realloc(3) does not support this.
  */
 void *
-ereallocarray(void *ptr, size_t nmemb, size_t size)
+sudo_ereallocarray(void *ptr, size_t nmemb, size_t size)
 {
 
     if (nmemb == 0 || size == 0)
-	sudo_fatalx_nodebug(_("internal error, tried to ereallocarray(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
     if (nmemb > SIZE_MAX / size)
-	sudo_fatalx_nodebug(_("internal error, %s overflow"), "ereallocarray");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "sudo_ereallocarray");
 
     size *= nmemb;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
@@ -170,20 +170,20 @@ ereallocarray(void *ptr, size_t nmemb, size_t size)
 }
 
 /*
- * erecalloc() realloc(3)s nmemb * msize bytes and exits with an error
+ * sudo_ersudo_ecalloc() realloc(3)s nmemb * msize bytes and exits with an error
  * if overflow would occur or if the system malloc(3)/realloc(3) fails.
- * On success, the new space is zero-filled.  You can call erealloc()
+ * On success, the new space is zero-filled.  You can call sudo_erealloc()
  * with a NULL pointer even if the system realloc(3) does not support this.
  */
 void *
-erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
+ersudo_ecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
 {
     size_t size;
 
     if (nmemb == 0 || msize == 0)
-	sudo_fatalx_nodebug(_("internal error, tried to erecalloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
     if (nmemb > SIZE_MAX / msize)
-	sudo_fatalx_nodebug(_("internal error, %s overflow"), "erecalloc");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "ersudo_ecalloc");
 
     size = nmemb * msize;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
@@ -197,18 +197,18 @@ erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
 }
 
 /*
- * estrdup() is like strdup(3) except that it exits with an error if
- * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
+ * sudo_estrdup() is like strdup(3) except that it exits with an error if
+ * malloc(3) fails.  NOTE: unlike strdup(3), sudo_estrdup(NULL) is legal.
  */
 char *
-estrdup(const char *src)
+sudo_estrdup(const char *src)
 {
     char *dst = NULL;
     size_t len;
 
     if (src != NULL) {
 	len = strlen(src);
-	dst = (char *) emalloc(len + 1);
+	dst = (char *) sudo_emalloc(len + 1);
 	(void) memcpy(dst, src, len);
 	dst[len] = '\0';
     }
@@ -216,11 +216,11 @@ estrdup(const char *src)
 }
 
 /*
- * estrdup() is like strndup(3) except that it exits with an error if
- * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
+ * sudo_estrndup() is like strndup(3) except that it exits with an error if
+ * malloc(3) fails.  NOTE: unlike strdup(3), sudo_estrdup(NULL) is legal.
  */
 char *
-estrndup(const char *src, size_t maxlen)
+sudo_estrndup(const char *src, size_t maxlen)
 {
     char *dst = NULL;
     size_t len = 0;
@@ -230,7 +230,7 @@ estrndup(const char *src, size_t maxlen)
 	    len++;
 	    maxlen--;
 	}
-	dst = (char *) emalloc(len + 1);
+	dst = (char *) sudo_emalloc(len + 1);
 	(void) memcpy(dst, src, len);
 	dst[len] = '\0';
     }
@@ -238,11 +238,11 @@ estrndup(const char *src, size_t maxlen)
 }
 
 /*
- * easprintf() calls vasprintf() and exits with an error if vasprintf()
+ * sudo_easprintf() calls vasprintf() and exits with an error if vasprintf()
  * returns -1 (out of memory).
  */
 int
-easprintf(char **ret, const char *fmt, ...)
+sudo_easprintf(char **ret, const char *fmt, ...)
 {
     int len;
     va_list ap;
@@ -257,11 +257,11 @@ easprintf(char **ret, const char *fmt, ...)
 }
 
 /*
- * evasprintf() calls vasprintf() and exits with an error if vasprintf()
+ * sudo_evasprintf() calls vasprintf() and exits with an error if vasprintf()
  * returns -1 (out of memory).
  */
 int
-evasprintf(char **ret, const char *format, va_list args)
+sudo_evasprintf(char **ret, const char *format, va_list args)
 {
     int len;
 

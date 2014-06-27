@@ -127,7 +127,7 @@ alias_add(char *name, int type, struct member *members)
     struct alias *a;
     debug_decl(alias_add, SUDO_DEBUG_ALIAS)
 
-    a = ecalloc(1, sizeof(*a));
+    a = sudo_ecalloc(1, sizeof(*a));
     a->name = name;
     a->type = type;
     /* a->used = false; */

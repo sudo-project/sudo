@@ -64,7 +64,7 @@ set_interfaces(const char *ai)
     struct interface *ifp;
     debug_decl(set_interfaces, SUDO_DEBUG_NETIF)
 
-    addrinfo = estrdup(ai);
+    addrinfo = sudo_estrdup(ai);
     for (addr = strtok(addrinfo, " \t"); addr != NULL; addr = strtok(NULL, " \t")) {
 	/* Separate addr and mask. */
 	if ((mask = strchr(addr, '/')) == NULL)
@@ -72,7 +72,7 @@ set_interfaces(const char *ai)
 	*mask++ = '\0';
 
 	/* Parse addr and store in list. */
-	ifp = ecalloc(1, sizeof(*ifp));
+	ifp = sudo_ecalloc(1, sizeof(*ifp));
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
 #ifdef HAVE_STRUCT_IN6_ADDR
@@ -111,7 +111,7 @@ dump_interfaces(const char *ai)
     char *cp, *addrinfo;
     debug_decl(set_interfaces, SUDO_DEBUG_NETIF)
 
-    addrinfo = estrdup(ai);
+    addrinfo = sudo_estrdup(ai);
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Local IP address and netmask pairs:\n"));
     for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))

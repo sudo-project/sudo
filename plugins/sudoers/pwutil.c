@@ -139,7 +139,7 @@ sudo_getpwuid(uid_t uid)
 #endif
     item = sudo_make_pwitem(uid, NULL);
     if (item == NULL) {
-	item = ecalloc(1, sizeof(*item));
+	item = sudo_ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.uid = uid;
 	/* item->d.pw = NULL; */
@@ -183,7 +183,7 @@ sudo_getpwnam(const char *name)
     item = sudo_make_pwitem((uid_t)-1, name);
     if (item == NULL) {
 	len = strlen(name) + 1;
-	item = ecalloc(1, sizeof(*item) + len);
+	item = sudo_ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
@@ -231,7 +231,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	home_len + 1 /* pw_dir */ + shell_len + 1 /* pw_shell */;
 
     for (i = 0; i < 2; i++) {
-	pwitem = ecalloc(1, len);
+	pwitem = sudo_ecalloc(1, len);
 	pw = &pwitem->pw;
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
@@ -390,7 +390,7 @@ sudo_getgrgid(gid_t gid)
      */
     item = sudo_make_gritem(gid, NULL);
     if (item == NULL) {
-	item = ecalloc(1, sizeof(*item));
+	item = sudo_ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.gid = gid;
 	/* item->d.gr = NULL; */
@@ -428,7 +428,7 @@ sudo_getgrnam(const char *name)
     item = sudo_make_gritem((gid_t)-1, name);
     if (item == NULL) {
 	len = strlen(name) + 1;
-	item = ecalloc(1, sizeof(*item) + len);
+	item = sudo_ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
@@ -462,7 +462,7 @@ sudo_fakegrnam(const char *group)
     len = sizeof(*gritem) + name_len + 1;
 
     for (i = 0; i < 2; i++) {
-	gritem = ecalloc(1, len);
+	gritem = sudo_ecalloc(1, len);
 	gr = &gritem->gr;
 	gr->gr_gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
 	gr->gr_name = (char *)(gritem + 1);
@@ -594,7 +594,7 @@ sudo_get_grlist(const struct passwd *pw)
     if (item == NULL) {
 	/* Should not happen. */
 	len = strlen(pw->pw_name) + 1;
-	item = ecalloc(1, sizeof(*item) + len);
+	item = sudo_ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, pw->pw_name, len);

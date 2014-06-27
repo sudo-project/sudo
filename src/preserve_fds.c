@@ -59,7 +59,7 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
     struct preserved_fd *pfd, *pfd_new;
     debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL)
 
-    pfd_new = emalloc(sizeof(*pfd));
+    pfd_new = sudo_emalloc(sizeof(*pfd));
     pfd_new->lowfd = fd;
     pfd_new->highfd = fd;
     pfd_new->flags = fcntl(fd, F_GETFD);
@@ -143,7 +143,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     }
 
     /* Create bitmap of preserved (relocated) fds.  */
-    fdsp = ecalloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsp = sudo_ecalloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
     TAILQ_FOREACH(pfd, pfds, entries) {
 	FD_SET(pfd->lowfd, fdsp);
     }

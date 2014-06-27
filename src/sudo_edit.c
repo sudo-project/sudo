@@ -147,7 +147,7 @@ sudo_edit(struct command_details *command_details)
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
      */
-    tf = emallocarray(nfiles, sizeof(*tf));
+    tf = sudo_emallocarray(nfiles, sizeof(*tf));
     memset(tf, 0, nfiles * sizeof(*tf));
     for (i = 0, j = 0; i < nfiles; i++) {
 	rc = -1;
@@ -181,10 +181,10 @@ sudo_edit(struct command_details *command_details)
 	    cp = tf[j].ofile;
 	suff = strrchr(cp, '.');
 	if (suff != NULL) {
-	    easprintf(&tf[j].tfile, "%.*s/%.*sXXXXXXXX%s", tmplen, tmpdir,
+	    sudo_easprintf(&tf[j].tfile, "%.*s/%.*sXXXXXXXX%s", tmplen, tmpdir,
 		(int)(size_t)(suff - cp), cp, suff);
 	} else {
-	    easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	    sudo_easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
 	}
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
@@ -232,7 +232,7 @@ sudo_edit(struct command_details *command_details)
      * to create a new argv.
      */
     nargc = editor_argc + nfiles;
-    nargv = (char **) emallocarray(nargc + 1, sizeof(char *));
+    nargv = (char **) sudo_emallocarray(nargc + 1, sizeof(char *));
     for (ac = 0; ac < editor_argc; ac++)
 	nargv[ac] = command_details->argv[ac];
     for (i = 0; i < nfiles && ac < nargc; )

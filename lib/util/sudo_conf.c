@@ -51,7 +51,7 @@
 #define SUDO_ERROR_WRAP	0
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "pathnames.h"
 #include "sudo_plugin.h"
@@ -234,8 +234,8 @@ set_debug(const char *entry, const char *conf_file)
 	debug_flags++;
 
     /* Set debug file and parse the flags (init debug as soon as possible). */
-    debug_file = estrndup(entry, filelen);
-    debug_flags = estrdup(debug_flags);
+    debug_file = sudo_estrndup(entry, filelen);
+    debug_flags = sudo_estrdup(debug_flags);
     sudo_debug_init(debug_file, debug_flags);
     efree(debug_file);
 
@@ -260,7 +260,7 @@ set_path(const char *entry, const char *conf_file)
     for (cur = sudo_conf_data.paths; cur->pname != NULL; cur++) {
 	if (strncasecmp(name, cur->pname, cur->pnamelen) == 0 &&
 	    isblank((unsigned char)name[cur->pnamelen])) {
-	    cur->pval = estrdup(path);
+	    cur->pval = sudo_estrdup(path);
 	    break;
 	}
     }
@@ -293,24 +293,24 @@ set_plugin(const char *entry, const char *conf_file)
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	}
-	options = emallocarray(nopts + 1, sizeof(*options));
+	options = sudo_emallocarray(nopts + 1, sizeof(*options));
 	/* Fill in options array, there is at least one element. */
 	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
-	    options[nopts++] = estrndup(cp, (size_t)(ep - cp));
+	    options[nopts++] = sudo_estrndup(cp, (size_t)(ep - cp));
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	    cp = ep;
 	}
-	options[nopts++] = estrdup(cp);
+	options[nopts++] = sudo_estrdup(cp);
 	options[nopts] = NULL;
     } else {
 	/* No extra options. */
 	pathlen = strlen(path);
     }
 
-    info = ecalloc(1, sizeof(*info));
-    info->symbol_name = estrndup(name, namelen);
-    info->path = estrndup(path, pathlen);
+    info = sudo_ecalloc(1, sizeof(*info));
+    info->symbol_name = sudo_estrndup(name, namelen);
+    info->path = sudo_estrndup(path, pathlen);
     info->options = options;
     info->lineno = conf_lineno;
     TAILQ_INSERT_TAIL(&sudo_conf_data.plugins, info, entries);
@@ -390,7 +390,7 @@ sudo_conf_read(const char *conf_file)
     struct stat sb;
     FILE *fp;
     char *cp, *line = NULL;
-    char *prev_locale = estrdup(setlocale(LC_ALL, NULL));
+    char *prev_locale = sudo_estrdup(setlocale(LC_ALL, NULL));
     size_t linesize = 0;
 
     /* Parse sudo.conf in the "C" locale. */

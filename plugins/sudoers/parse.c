@@ -231,16 +231,16 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 #ifdef HAVE_SELINUX
 			/* Set role and type if not specified on command line. */
 			if (user_role == NULL)
-			    user_role = cs->role ? estrdup(cs->role) : def_role;
+			    user_role = cs->role ? sudo_estrdup(cs->role) : def_role;
 			if (user_type == NULL)
-			    user_type = cs->type ? estrdup(cs->type) : def_type;
+			    user_type = cs->type ? sudo_estrdup(cs->type) : def_type;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			/* Set Solaris privilege sets */
 			if (runas_privs == NULL)
-			    runas_privs = cs->privs ? estrdup(cs->privs) : def_privs;
+			    runas_privs = cs->privs ? sudo_estrdup(cs->privs) : def_privs;
 			if (runas_limitprivs == NULL)
-			    runas_limitprivs = cs->limitprivs ? estrdup(cs->limitprivs) : def_limitprivs;
+			    runas_limitprivs = cs->limitprivs ? sudo_estrdup(cs->limitprivs) : def_limitprivs;
 #endif /* HAVE_PRIV_SET */
 			/*
 			 * If user is running command as himself,

@@ -94,7 +94,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
-    sudo_argv = emallocarray(sudo_argc + 1, sizeof(char *));
+    sudo_argv = sudo_emallocarray(sudo_argc + 1, sizeof(char *));
     sudo_argv[0] = "sudo";
     for (i = 0; i < NewArgc; i++)
 	sudo_argv[i + 1] = NewArgv[i];

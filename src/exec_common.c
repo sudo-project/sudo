@@ -100,14 +100,14 @@ disable_execute(char *const envp[])
     if (!enabled)
 	env_size++;
 #endif
-    nenvp = emallocarray(env_size, sizeof(*envp));
+    nenvp = sudo_emallocarray(env_size, sizeof(*envp));
     memcpy(nenvp, envp, env_len * sizeof(*envp));
     nenvp[env_len] = NULL;
 
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
     if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
 	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
@@ -116,7 +116,7 @@ disable_execute(char *const envp[])
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {
-	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
+	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
 	nenvp[preload_idx] = preload;
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -151,7 +151,7 @@ sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexe
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
-	nargv = emallocarray(argc + 2, sizeof(char *));
+	nargv = sudo_emallocarray(argc + 2, sizeof(char *));
 	nargv[0] = "sh";
 	nargv[1] = (char *)path;
 	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));

@@ -80,7 +80,7 @@ static krb5_error_code
 krb5_get_init_creds_opt_alloc(krb5_context context,
     krb5_get_init_creds_opt **opts)
 {
-    *opts = emalloc(sizeof(krb5_get_init_creds_opt));
+    *opts = sudo_emalloc(sizeof(krb5_get_init_creds_opt));
     krb5_get_init_creds_opt_init(*opts);
     return 0;
 }
@@ -120,7 +120,7 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
 	/* Only rewrite prompt if user didn't specify their own. */
 	/*if (!strcmp(prompt, PASSPROMPT)) { */
-	    easprintf(&krb5_prompt, "Password for %s: ", pname);
+	    sudo_easprintf(&krb5_prompt, "Password for %s: ", pname);
 	/*}*/
 	free(pname);
     }
@@ -140,7 +140,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
     if (sudo_krb5_instance != NULL) {
-	easprintf(&pname, "%s%s%s", pw->pw_name,
+	sudo_easprintf(&pname, "%s%s%s", pw->pw_name,
 	    sudo_krb5_instance[0] != '/' ? "/" : "", sudo_krb5_instance);
     }
 

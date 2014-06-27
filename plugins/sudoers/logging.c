@@ -203,10 +203,10 @@ do_logfile(char *msg)
 	    }
 	} else {
 	    if (def_log_host) {
-		len = easprintf(&full_line, "%s : %s : HOST=%s : %s",
+		len = sudo_easprintf(&full_line, "%s : %s : HOST=%s : %s",
 		    timestr, user_name, user_srunhost, msg);
 	    } else {
-		len = easprintf(&full_line, "%s : %s : %s",
+		len = sudo_easprintf(&full_line, "%s : %s : %s",
 		    timestr, user_name, msg);
 	    }
 
@@ -443,10 +443,10 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     /* Expand printf-style format + args (with a special case). */
     if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
 	unsigned int tries = va_arg(ap, unsigned int);
-	easprintf(&message, ngettext("%u incorrect password attempt",
+	sudo_easprintf(&message, ngettext("%u incorrect password attempt",
 	    "%u incorrect password attempts", tries), tries);
     } else {
-	evasprintf(&message, _(fmt), ap);
+	sudo_evasprintf(&message, _(fmt), ap);
     }
 
     /* Log to debug file. */
@@ -670,7 +670,7 @@ send_mail(const char *fmt, ...)
 		(void) close(pfd[1]);
 
 		/* Build up an argv based on the mailer path and flags */
-		mflags = estrdup(def_mailerflags);
+		mflags = sudo_estrdup(def_mailerflags);
 		if ((argv[0] = strrchr(mpath, '/')))
 		    argv[0]++;
 		else
@@ -833,7 +833,7 @@ new_logline(const char *message, int serrno)
 
 	for (ep = sudo_user.env_vars; *ep != NULL; ep++)
 	    evlen += strlen(*ep) + 1;
-	evstr = emalloc(evlen);
+	evstr = sudo_emalloc(evlen);
 	evstr[0] = '\0';
 	for (ep = sudo_user.env_vars; *ep != NULL; ep++) {
 	    strlcat(evstr, *ep, evlen);
@@ -853,7 +853,7 @@ new_logline(const char *message, int serrno)
     /*
      * Allocate and build up the line.
      */
-    line = emalloc(++len);
+    line = sudo_emalloc(++len);
     line[0] = '\0';
 
     if (message != NULL) {

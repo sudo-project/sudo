@@ -39,7 +39,7 @@
 #include <errno.h>
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_util.h"
 
@@ -57,7 +57,7 @@ main(int argc, char *argv[])
 
     /* Lookup tty name via sudo (using kernel info if possible). */
     if ((tty_sudo = get_process_ttyname()) == NULL)
-	tty_sudo = estrdup("none");
+	tty_sudo = sudo_estrdup("none");
 
     /* Lookup tty name via libc and compare to kernel tty. */
     for (fd = STDERR_FILENO; fd >= STDIN_FILENO; fd--) {
@@ -65,7 +65,7 @@ main(int argc, char *argv[])
 	if (cp != NULL) {
 	    if (tty_libc == NULL || strcmp(cp, tty_libc) != 0) {
 		efree(tty_libc);
-		tty_libc = estrdup(cp);
+		tty_libc = sudo_estrdup(cp);
 	    }
 	    if (tty_sudo != NULL && strcmp(tty_libc, tty_sudo) == 0) {
 		rval = 0;

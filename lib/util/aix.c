@@ -35,7 +35,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
@@ -187,7 +187,7 @@ aix_prep_user(char *user, const char *tty)
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     /* set usrinfo, like login(1) does */
-    len = easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
+    len = sudo_easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
 	user, '\0', user, '\0', user, '\0', tty ? tty : "", '\0');
     (void)usrinfo(SETUINFO, info, len);
     efree(info);

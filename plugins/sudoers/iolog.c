@@ -610,7 +610,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If no I/O log path defined we need to figure it out ourselves. */
     if (details.iolog_path == NULL) {
 	/* Get next session ID and convert it into a path. */
-	tofree = emalloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
+	tofree = sudo_emalloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
 	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
 	if (!io_nextid(tofree, NULL, sessid)) {
 	    rval = false;

@@ -227,7 +227,7 @@ env_init(char * const envp[])
 
 	env.env_len = len;
 	env.env_size = len + 1 + 128;
-	env.envp = emallocarray(env.env_size, sizeof(char *));
+	env.envp = sudo_emallocarray(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
@@ -374,7 +374,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     debug_decl(sudo_setenv2, SUDO_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
-    estring = emalloc(esize);
+    estring = sudo_emalloc(esize);
 
     /* Build environment string and insert it. */
     if (strlcpy(estring, var, esize) >= esize ||
@@ -754,7 +754,7 @@ rebuild_env(void)
     env.env_len = 0;
     env.env_size = 128;
     old_envp = env.envp;
-    env.envp = emallocarray(env.env_size, sizeof(char *));
+    env.envp = sudo_emallocarray(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
 #else
@@ -866,9 +866,9 @@ rebuild_env(void)
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
 	    cp = _PATH_MAILDIR;
 	    if (cp[sizeof(_PATH_MAILDIR) - 2] == '/')
-		easprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name);
+		sudo_easprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name);
 	    else
-		easprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name);
+		sudo_easprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name);
 	    if (sudo_putenv(cp, ISSET(didvar, DID_MAIL), true) == -1) {
 		free(cp);
 		goto bad;
@@ -943,7 +943,7 @@ rebuild_env(void)
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
+	sudo_easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
 	if (sudo_putenv(cp, true, true) == -1) {
 	    efree(cp);
 	    goto bad;
@@ -1034,7 +1034,7 @@ validate_env_vars(char * const env_vars[])
 		do {
 		    bsize += 1024;
 		} while (blen + len >= bsize);
-		bad = erealloc(bad, bsize);
+		bad = sudo_erealloc(bad, bsize);
 		bad[blen] = '\0';
 	    }
 	    strlcat(bad, *ep, bsize);
@@ -1108,7 +1108,7 @@ read_env_file(const char *path, int overwrite)
 	    val_len -= 2;
 	}
 
-	cp = emalloc(var_len + 1 + val_len + 1);
+	cp = sudo_emalloc(var_len + 1 + val_len + 1);
 	memcpy(cp, var, var_len + 1); /* includes '=' */
 	memcpy(cp + var_len + 1, val, val_len + 1); /* includes NUL */
 
@@ -1132,22 +1132,22 @@ init_envtables(void)
 
     /* Fill in the "env_delete" list. */
     for (p = initial_badenv_table; *p; p++) {
-	cur = ecalloc(1, sizeof(struct list_member));
-	cur->value = estrdup(*p);
+	cur = sudo_ecalloc(1, sizeof(struct list_member));
+	cur->value = sudo_estrdup(*p);
 	SLIST_INSERT_HEAD(&def_env_delete, cur, entries);
     }
 
     /* Fill in the "env_check" list. */
     for (p = initial_checkenv_table; *p; p++) {
-	cur = ecalloc(1, sizeof(struct list_member));
-	cur->value = estrdup(*p);
+	cur = sudo_ecalloc(1, sizeof(struct list_member));
+	cur->value = sudo_estrdup(*p);
 	SLIST_INSERT_HEAD(&def_env_check, cur, entries);
     }
 
     /* Fill in the "env_keep" list. */
     for (p = initial_keepenv_table; *p; p++) {
-	cur = ecalloc(1, sizeof(struct list_member));
-	cur->value = estrdup(*p);
+	cur = sudo_ecalloc(1, sizeof(struct list_member));
+	cur->value = sudo_estrdup(*p);
 	SLIST_INSERT_HEAD(&def_env_keep, cur, entries);
     }
 }

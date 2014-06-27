@@ -128,14 +128,14 @@ sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
      debug_decl(sudo_sss_attrcpy, SUDO_DEBUG_SSSD)
 
      sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
-     sudo_debug_printf(SUDO_DEBUG_INFO, "emalloc: cnt=%d", src->num_values);
+     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_emalloc: cnt=%d", src->num_values);
 
-     dst->name = estrdup(src->name);
+     dst->name = sudo_estrdup(src->name);
      dst->num_values = src->num_values;
-     dst->values = emallocarray(dst->num_values, sizeof(char *));
+     dst->values = sudo_emallocarray(dst->num_values, sizeof(char *));
 
      for (i = 0; i < dst->num_values; ++i)
-	  dst->values[i] = estrdup(src->values[i]);
+	  dst->values[i] = sudo_estrdup(src->values[i]);
 
      debug_return;
 }
@@ -147,10 +147,10 @@ sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
      debug_decl(sudo_sss_rulecpy, SUDO_DEBUG_SSSD)
 
      sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
-     sudo_debug_printf(SUDO_DEBUG_INFO, "emalloc: cnt=%d", src->num_attrs);
+     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_emalloc: cnt=%d", src->num_attrs);
 
      dst->num_attrs = src->num_attrs;
-     dst->attrs = emallocarray(dst->num_attrs, sizeof(struct sss_sudo_attr));
+     dst->attrs = sudo_emallocarray(dst->num_attrs, sizeof(struct sss_sudo_attr));
 
      for (i = 0; i < dst->num_attrs; ++i)
 	  sudo_sss_attrcpy(dst->attrs + i, src->attrs + i);
@@ -182,11 +182,11 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     if (in_res == NULL)
 	debug_return_ptr(NULL);
 
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "emalloc: cnt=%d", in_res->num_rules);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_emalloc: cnt=%d", in_res->num_rules);
 
-    out_res = emalloc(sizeof(struct sss_sudo_result));
+    out_res = sudo_emalloc(sizeof(struct sss_sudo_result));
     out_res->rules = in_res->num_rules > 0 ?
-	emallocarray(in_res->num_rules, sizeof(struct sss_sudo_rule)) : NULL;
+	sudo_emallocarray(in_res->num_rules, sizeof(struct sss_sudo_rule)) : NULL;
     out_res->num_rules = 0;
 
     for (i = l = 0; i < in_res->num_rules; ++i) {
@@ -210,7 +210,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	    in_res->num_rules, l);
 	if (l > 0) {
 	    out_res->rules =
-		ereallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
+		sudo_ereallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
 	} else {
 	    efree(out_res->rules);
 	    out_res->rules = NULL;
@@ -244,7 +244,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     debug_decl(sudo_sss_open, SUDO_DEBUG_SSSD);
 
     /* Create a handle container. */
-    handle = emalloc(sizeof(struct sudo_sss_handle));
+    handle = sudo_emalloc(sizeof(struct sudo_sss_handle));
 
     /* Load symbols */
     handle->ssslib = sudo_dso_load(path, SUDO_DSO_LAZY);
@@ -817,7 +817,7 @@ sudo_sss_extract_digest(char **cmnd, struct sudo_digest *digest)
 		    ep++;
 		if (*ep != '\0') {
 		    digest->digest_type = digest_type;
-		    digest->digest_str = estrndup(cp, (size_t)(ep - cp));
+		    digest->digest_str = sudo_estrndup(cp, (size_t)(ep - cp));
 		    cp = ep + 1;
 		    while (isblank((unsigned char)*cp))
 			cp++;
@@ -887,10 +887,10 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	/* check for !command */
 	if (*val == '!') {
 	    foundbang = true;
-	    allowed_cmnd = estrdup(1 + val);	/* !command */
+	    allowed_cmnd = sudo_estrdup(1 + val);	/* !command */
 	} else {
 	    foundbang = false;
-	    allowed_cmnd = estrdup(val);	/* command */
+	    allowed_cmnd = sudo_estrdup(val);	/* command */
 	}
 
 	/* split optional args away from command */
@@ -945,7 +945,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
     for (i = 0; val_array[i] != NULL; i++) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'",
 	 val_array[i]);
-	v = estrdup(val_array[i]);
+	v = sudo_estrdup(val_array[i]);
 
 	/* check for equals sign past first char */
 	val = strchr(v, '=');

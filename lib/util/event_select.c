@@ -50,7 +50,7 @@
 #include <errno.h>
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
@@ -64,10 +64,10 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
     debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT)
 
     base->maxfd = NFDBITS - 1;
-    base->readfds_in = ecalloc(1, sizeof(fd_mask));
-    base->writefds_in = ecalloc(1, sizeof(fd_mask));
-    base->readfds_out = ecalloc(1, sizeof(fd_mask));
-    base->writefds_out = ecalloc(1, sizeof(fd_mask));
+    base->readfds_in = sudo_ecalloc(1, sizeof(fd_mask));
+    base->writefds_in = sudo_ecalloc(1, sizeof(fd_mask));
+    base->readfds_out = sudo_ecalloc(1, sizeof(fd_mask));
+    base->writefds_out = sudo_ecalloc(1, sizeof(fd_mask));
 
     debug_return_int(0);
 }
@@ -92,10 +92,10 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ev->fd > base->maxfd) {
 	const int o = (base->maxfd + 1) / NFDBITS;
 	const int n = howmany(ev->fd + 1, NFDBITS);
-	base->readfds_in = erecalloc(base->readfds_in, o, n, sizeof(fd_mask));
-	base->writefds_in = erecalloc(base->writefds_in, o, n, sizeof(fd_mask));
-	base->readfds_out = erecalloc(base->readfds_out, o, n, sizeof(fd_mask));
-	base->writefds_out = erecalloc(base->writefds_out, o, n, sizeof(fd_mask));
+	base->readfds_in = ersudo_ecalloc(base->readfds_in, o, n, sizeof(fd_mask));
+	base->writefds_in = ersudo_ecalloc(base->writefds_in, o, n, sizeof(fd_mask));
+	base->readfds_out = ersudo_ecalloc(base->readfds_out, o, n, sizeof(fd_mask));
+	base->writefds_out = ersudo_ecalloc(base->writefds_out, o, n, sizeof(fd_mask));
 	base->maxfd = (n * NFDBITS) - 1;
     }
 

@@ -184,7 +184,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
 
-    env_add = emallocarray(env_size, sizeof(char *));
+    env_add = sudo_emallocarray(env_size, sizeof(char *));
 
     /* Pass progname to plugin so it can call initprogname() */
     sudo_settings[ARG_PROGNAME].value = getprogname();
@@ -207,7 +207,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /* Set max_groups from sudo.conf. */
     i = sudo_conf_max_groups();
     if (i != -1) {
-	easprintf(&cp, "%d", i);
+	sudo_easprintf(&cp, "%d", i);
 	sudo_settings[ARG_MAX_GROUPS].value = cp;
     }
 
@@ -372,7 +372,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	} else if (!got_end_of_args && is_envar) {
 	    if (nenv == env_size - 2) {
 		env_size *= 2;
-		env_add = ereallocarray(env_add, env_size, sizeof(char *));
+		env_add = sudo_ereallocarray(env_add, env_size, sizeof(char *));
 	    }
 	    env_add[nenv++] = argv[optind];
 
@@ -461,7 +461,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
 		strlen(argv[argc - 1]) + 1;
 
-	    cmnd = dst = emallocarray(cmnd_size, 2);
+	    cmnd = dst = sudo_emallocarray(cmnd_size, 2);
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
@@ -478,7 +478,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    ac += 2; /* -c cmnd */
 	}
 
-	av = emallocarray(ac + 1, sizeof(char *));
+	av = sudo_emallocarray(ac + 1, sizeof(char *));
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = "-c";
@@ -496,7 +496,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #ifdef _PATH_SUDO_PLUGIN_DIR
     sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
-    settings = emallocarray(NUM_SETTINGS + 1, sizeof(char *));
+    settings = sudo_emallocarray(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",

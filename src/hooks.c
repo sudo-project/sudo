@@ -177,7 +177,7 @@ register_hook_internal(struct sudo_hook_list *head,
     struct sudo_hook_entry *hook;
     debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS)
 
-    hook = ecalloc(1, sizeof(*hook));
+    hook = sudo_ecalloc(1, sizeof(*hook));
     hook->u.generic_fn = hook_fn;
     hook->closure = closure;
     SLIST_INSERT_HEAD(head, hook, entries);

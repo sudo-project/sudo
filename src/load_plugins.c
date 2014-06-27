@@ -112,7 +112,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	    if (len >= 3 && info->path[len - 3] == '.' &&
 		info->path[len - 2] == 's' && info->path[len - 1] == 'o') {
 		const char *sopath = info->path;
-		char *slpath = estrdup(info->path);
+		char *slpath = sudo_estrdup(info->path);
 		int serrno = errno;
 
 		slpath[len - 1] = 'l';
@@ -253,7 +253,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    }
 	}
 	if (handle != NULL) {
-	    container = ecalloc(1, sizeof(*container));
+	    container = sudo_ecalloc(1, sizeof(*container));
 	    container->handle = handle;
 	    container->name = info->symbol_name;
 	    container->options = info->options;
@@ -294,7 +294,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
      */
     if (policy_plugin->handle == NULL) {
 	/* Default policy plugin */
-	info = ecalloc(1, sizeof(*info));
+	info = sudo_ecalloc(1, sizeof(*info));
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
 	/* info->options = NULL; */
@@ -305,7 +305,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 
 	/* Default I/O plugin */
 	if (TAILQ_EMPTY(io_plugins)) {
-	    info = ecalloc(1, sizeof(*info));
+	    info = sudo_ecalloc(1, sizeof(*info));
 	    info->symbol_name = "sudoers_io";
 	    info->path = SUDOERS_PLUGIN;
 	    /* info->options = NULL; */

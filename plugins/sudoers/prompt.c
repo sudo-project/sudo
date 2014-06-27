@@ -97,7 +97,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
     }
 
     if (subst) {
-	new_prompt = emalloc(++len);
+	new_prompt = sudo_emalloc(++len);
 	endp = new_prompt + len;
 	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (p[0] =='%') {
@@ -152,7 +152,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 	}
 	*np = '\0';
     } else
-	new_prompt = estrdup(old_prompt);
+	new_prompt = sudo_estrdup(old_prompt);
 
     debug_return_str(new_prompt);
 

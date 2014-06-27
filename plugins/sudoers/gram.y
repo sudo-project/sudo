@@ -244,7 +244,7 @@ privileges	:	privilege
 		;
 
 privilege	:	hostlist '=' cmndspeclist {
-			    struct privilege *p = ecalloc(1, sizeof(*p));
+			    struct privilege *p = sudo_ecalloc(1, sizeof(*p));
 			    HLTQ_TO_TAILQ(&p->hostlist, $1, entries);
 			    HLTQ_TO_TAILQ(&p->cmndlist, $3, entries);
 			    HLTQ_INIT(p, entries);
@@ -322,17 +322,17 @@ cmndspeclist	:	cmndspec
 		;
 
 cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
-			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
+			    struct cmndspec *cs = sudo_ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
 				if ($1->runasusers != NULL) {
 				    cs->runasuserlist =
-					emalloc(sizeof(*cs->runasuserlist));
+					sudo_emalloc(sizeof(*cs->runasuserlist));
 				    HLTQ_TO_TAILQ(cs->runasuserlist,
 					$1->runasusers, entries);
 				}
 				if ($1->runasgroups != NULL) {
 				    cs->runasgrouplist =
-					emalloc(sizeof(*cs->runasgrouplist));
+					sudo_emalloc(sizeof(*cs->runasgrouplist));
 				    HLTQ_TO_TAILQ(cs->runasgrouplist,
 					$1->runasgroups, entries);
 				}
@@ -464,27 +464,27 @@ runasspec	:	/* empty */ {
 		;
 
 runaslist	:	/* empty */ {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = new_member(NULL, MYSELF);
 			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
 			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist ':' grouplist {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
 			    $$->runasgroups = $3;
 			}
 		|	':' grouplist {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    /* $$->runasusers = NULL; */
 			    $$->runasgroups = $2;
 			}
 		|	':' {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = new_member(NULL, MYSELF);
 			    /* $$->runasgroups = NULL; */
 			}
@@ -533,7 +533,7 @@ cmnd		:	ALL {
 			    $$ = new_member($1, ALIAS);
 			}
 		|	COMMAND {
-			    struct sudo_command *c = ecalloc(1, sizeof(*c));
+			    struct sudo_command *c = sudo_ecalloc(1, sizeof(*c));
 			    c->cmnd = $1.cmnd;
 			    c->args = $1.args;
 			    $$ = new_member((char *)c, COMMAND);
@@ -681,7 +681,7 @@ sudoerserror(const char *s)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno;
-	errorfile = estrdup(sudoers);
+	errorfile = sudo_estrdup(sudoers);
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -707,7 +707,7 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDO_DEBUG_PARSER)
 
-    d = ecalloc(1, sizeof(struct defaults));
+    d = sudo_ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
     /* d->type = 0; */
@@ -724,7 +724,7 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDO_DEBUG_PARSER)
 
-    m = ecalloc(1, sizeof(struct member));
+    m = sudo_ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
     HLTQ_INIT(m, entries);
@@ -738,9 +738,9 @@ new_digest(int digest_type, const char *digest_str)
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDO_DEBUG_PARSER)
 
-    dig = emalloc(sizeof(*dig));
+    dig = sudo_emalloc(sizeof(*dig));
     dig->digest_type = digest_type;
-    dig->digest_str = estrdup(digest_str);
+    dig->digest_str = sudo_estrdup(digest_str);
 
     debug_return_ptr(dig);
 }
@@ -761,7 +761,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	/*
 	 * We use a single binding for each entry in defs.
 	 */
-	binding = emalloc(sizeof(*binding));
+	binding = sudo_emalloc(sizeof(*binding));
 	if (bmem != NULL)
 	    HLTQ_TO_TAILQ(binding, bmem, entries);
 	else
@@ -791,7 +791,7 @@ add_userspec(struct member *members, struct privilege *privs)
     struct userspec *u;
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
-    u = ecalloc(1, sizeof(*u));
+    u = sudo_ecalloc(1, sizeof(*u));
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
@@ -918,7 +918,7 @@ init_parser(const char *path, bool quiet)
     init_lexer();
 
     efree(sudoers);
-    sudoers = path ? estrdup(path) : NULL;
+    sudoers = path ? sudo_estrdup(path) : NULL;
 
     parse_error = false;
     errorlineno = -1;

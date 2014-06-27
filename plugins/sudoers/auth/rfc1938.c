@@ -110,7 +110,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     /* Get space for new prompt with embedded challenge */
     if (np_size < op_len + strlen(challenge) + 7) {
 	np_size = op_len + strlen(challenge) + 7;
-	new_prompt = (char *) erealloc(new_prompt, np_size);
+	new_prompt = (char *) sudo_erealloc(new_prompt, np_size);
     }
 
     if (def_long_otp_prompt)

@@ -135,7 +135,7 @@ group_plugin_load(char *plugin_info)
             }
         }
 	if (ac != 0) 	{
-	    argv = emallocarray(ac, sizeof(char *));
+	    argv = sudo_emallocarray(ac, sizeof(char *));
 	    ac = 0;
 	    for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
 		argv[ac++] = cp;

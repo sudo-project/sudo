@@ -125,7 +125,7 @@ rpl_putenv(PUTENV_CONST char *string)
     /* Append at the end if not already found. */
     if (!found) {
 	size_t env_len = (size_t)(ep - environ);
-	char **envp = ereallocarray(priv_environ, env_len + 2, sizeof(char *));
+	char **envp = sudo_ereallocarray(priv_environ, env_len + 2, sizeof(char *));
 	if (environ != priv_environ)
 	    memcpy(envp, environ, env_len * sizeof(char *));
 	envp[env_len++] = (char *)string;

@@ -87,7 +87,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "logging.h"
 #include "iolog.h"
@@ -503,8 +503,8 @@ replay_session(const double max_wait, const char *decimal)
 		    /* Store the line in iov followed by \r\n pair. */
 		    if (iovcnt + 3 > iovmax) {
 			iov = iovmax ?
-			    ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
-			    emallocarray(iovmax = 32, sizeof(*iov));
+			    sudo_ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
+			    sudo_emallocarray(iovmax = 32, sizeof(*iov));
 		    }
 		    linelen = (size_t)(ep - cp) + 1;
 		    iov[iovcnt].iov_base = cp;
@@ -704,7 +704,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	}
 
 	/* Allocate new search node */
-	sn = ecalloc(1, sizeof(*sn));
+	sn = sudo_ecalloc(1, sizeof(*sn));
 	sn->type = type;
 	sn->or = or;
 	sn->negated = not;
@@ -822,7 +822,7 @@ parse_logfile(char *logfile)
      *  2) cwd
      *  3) command with args
      */
-    li = ecalloc(1, sizeof(*li));
+    li = sudo_ecalloc(1, sizeof(*li));
     if (getline(&buf, &bufsize, fp) == -1 ||
 	getline(&li->cwd, &cwdsize, fp) == -1 ||
 	getline(&li->cmd, &cmdsize, fp) == -1) {
@@ -861,7 +861,7 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: user field is missing"), logfile);
 	goto bad;
     }
-    li->user = estrndup(cp, (size_t)(ep - cp));
+    li->user = sudo_estrndup(cp, (size_t)(ep - cp));
 
     /* runas user */
     cp = ep + 1;
@@ -869,7 +869,7 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: runas user field is missing"), logfile);
 	goto bad;
     }
-    li->runas_user = estrndup(cp, (size_t)(ep - cp));
+    li->runas_user = sudo_estrndup(cp, (size_t)(ep - cp));
 
     /* runas group */
     cp = ep + 1;
@@ -878,16 +878,16 @@ parse_logfile(char *logfile)
 	goto bad;
     }
     if (cp != ep)
-	li->runas_group = estrndup(cp, (size_t)(ep - cp));
+	li->runas_group = sudo_estrndup(cp, (size_t)(ep - cp));
 
     /* tty, followed by optional rows + columns */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
-	li->tty = estrdup(cp);
+	li->tty = sudo_estrdup(cp);
     } else {
 	/* tty followed by rows + columns */
-	li->tty = estrndup(cp, (size_t)(ep - cp));
+	li->tty = sudo_estrndup(cp, (size_t)(ep - cp));
 	cp = ep + 1;
 	/* need to NULL out separator to use strtonum() */
 	if ((ep = strchr(cp, ':')) != NULL) {
@@ -1021,7 +1021,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     pathbuf[sdlen] = '\0';
 
     /* Store potential session dirs for sorting. */
-    sessions = emallocarray(sessions_size, sizeof(char *));
+    sessions = sudo_emallocarray(sessions_size, sizeof(char *));
     while ((dp = readdir(d)) != NULL) {
 	/* Skip "." and ".." */
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
@@ -1041,9 +1041,9 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	/* Add name to session list. */
 	if (sessions_len + 1 > sessions_size) {
 	    sessions_size <<= 1;
-	    sessions = ereallocarray(sessions, sessions_size, sizeof(char *));
+	    sessions = sudo_ereallocarray(sessions, sessions_size, sizeof(char *));
 	}
-	sessions[sessions_len++] = estrdup(dp->d_name);
+	sessions[sessions_len++] = sudo_estrdup(dp->d_name);
     }
     closedir(d);
 

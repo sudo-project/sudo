@@ -34,7 +34,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -70,7 +70,7 @@ main(int argc, char *argv[], char *envp[])
     /* Shift argv and make a copy of the command to execute. */
     argv++;
     argc--;
-    cmnd = estrdup(argv[0]);
+    cmnd = sudo_estrdup(argv[0]);
 
     /* If invoked as a login shell, modify argv[0] accordingly. */
     if (login_shell) {

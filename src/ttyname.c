@@ -132,12 +132,12 @@ sudo_ttyname_dev(dev_t tdev)
 	if (*dev != '/') {
 	    /* devname() doesn't use the /dev/ prefix, add one... */
 	    size_t len = sizeof(_PATH_DEV) + strlen(dev);
-	    tty = emalloc(len);
+	    tty = sudo_emalloc(len);
 	    strlcpy(tty, _PATH_DEV, len);
 	    strlcat(tty, dev, len);
 	} else {
 	    /* Should not happen but just in case... */
-	    tty = estrdup(dev);
+	    tty = sudo_estrdup(dev);
 	}
     }
     debug_return_str(tty);
@@ -158,7 +158,7 @@ sudo_ttyname_dev(dev_t tdev)
 
     tty = _ttyname_dev(tdev, buf, sizeof(buf));
 
-    debug_return_str(estrdup(tty));
+    debug_return_str(sudo_estrdup(tty));
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
 /*
@@ -263,14 +263,14 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 		/* Add to list of subdirs to search. */
 		if (num_subdirs + 1 > max_subdirs) {
 		    max_subdirs += 64;
-		    subdirs = ereallocarray(subdirs, max_subdirs, sizeof(char *));
+		    subdirs = sudo_ereallocarray(subdirs, max_subdirs, sizeof(char *));
 		}
-		subdirs[num_subdirs++] = estrdup(pathbuf);
+		subdirs[num_subdirs++] = sudo_estrdup(pathbuf);
 	    }
 	    continue;
 	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
-	    devname = estrdup(pathbuf);
+	    devname = sudo_estrdup(pathbuf);
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "resolved dev %u as %s",
 		(unsigned int)rdev, pathbuf);
 	    goto done;
@@ -315,7 +315,7 @@ sudo_ttyname_dev(dev_t rdev)
 		    (unsigned int)minor(rdev));
 		if (stat(buf, &sb) == 0) {
 		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
-			tty = estrdup(buf);
+			tty = sudo_estrdup(buf);
 		}
 		sudo_debug_printf(SUDO_DEBUG_INFO, "comparing dev %u to %s: %s",
 		    (unsigned int)rdev, buf, tty ? "yes" : "no");
@@ -326,7 +326,7 @@ sudo_ttyname_dev(dev_t rdev)
 	} else {
 	    if (stat(devname, &sb) == 0) {
 		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
-		    tty = estrdup(devname);
+		    tty = sudo_estrdup(devname);
 	    }
 	}
     }
@@ -367,7 +367,7 @@ get_process_ttyname(void)
     mib[5] = 1;
     do {
 	size += size / 10;
-	ki_proc = erealloc(ki_proc, size);
+	ki_proc = sudo_erealloc(ki_proc, size);
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
@@ -508,6 +508,6 @@ get_process_ttyname(void)
 	    tty = ttyname(STDERR_FILENO);
     }
 
-    debug_return_str(estrdup(tty));
+    debug_return_str(sudo_estrdup(tty));
 }
 #endif

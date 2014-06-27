@@ -84,7 +84,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 
     if (path == NULL)
 	debug_return_int(NOT_FOUND);
-    path = estrdup(path);
+    path = sudo_estrdup(path);
     origpath = path;
 
     do {

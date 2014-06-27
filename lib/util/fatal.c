@@ -32,7 +32,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "alloc.h"
+#include "sudo_alloc.h"
 #include "fatal.h"
 #include "queue.h"
 #include "sudo_plugin.h"
@@ -137,7 +137,7 @@ _warning(int use_errno, const char *fmt, va_list ap)
     int serrno = errno;
     char *str;
 
-    evasprintf(&str, fmt, ap);
+    sudo_evasprintf(&str, fmt, ap);
     if (use_errno) {
 	if (fmt != NULL) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG,
