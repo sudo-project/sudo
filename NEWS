@@ -18,6 +18,8 @@ What's new in Sudo 1.8.11
  * Fixed a crash with LDAP-based sudoers on some systems when
    Kerberos was enabled.
 
+ * Sudo now includes optional Solaris audit support.
+
  * Catalan translation for sudoers from translationproject.org.
 
  * Norwegian Bokmaal translation for sudo from translationproject.org.
