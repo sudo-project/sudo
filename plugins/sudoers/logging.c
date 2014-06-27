@@ -332,9 +332,9 @@ log_failure(int status, int flags)
 	 * their path to just contain a single dir.
 	 */
 	if (flags == NOT_FOUND)
-	    warningx(U_("%s: command not found"), user_cmnd);
+	    sudo_warnx(U_("%s: command not found"), user_cmnd);
 	else if (flags == NOT_FOUND_DOT)
-	    warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	    sudo_warnx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
     }
 
     debug_return;
@@ -433,7 +433,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     va_list ap2;
     debug_decl(vlog_error, SUDO_DEBUG_LOGGING)
 
-    /* Need extra copy of ap for vwarning()/vwarningx() below. */
+    /* Need extra copy of ap for sudo_vwarn()/sudo_vwarnx() below. */
     if (!ISSET(flags, SLOG_NO_STDERR))
 	va_copy(ap2, ap);
 
@@ -498,13 +498,13 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
 	    unsigned int tries = va_arg(ap2, unsigned int);
-	    warningx_nodebug(ngettext("%u incorrect password attempt",
+	    sudo_warnx_nodebug(ngettext("%u incorrect password attempt",
 		"%u incorrect password attempts", tries), tries);
 	} else {
 	    if (ISSET(flags, SLOG_USE_ERRNO))
-		vwarning_nodebug(_(fmt), ap2);
+		sudo_vwarn_nodebug(_(fmt), ap2);
 	    else
-		vwarningx_nodebug(_(fmt), ap2);
+		sudo_vwarnx_nodebug(_(fmt), ap2);
 	}
 	sudoers_setlocale(oldlocale, NULL);
 	va_end(ap2);
@@ -581,7 +581,7 @@ send_mail(const char *fmt, ...)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    warning(U_("unable to fork"));
+	    sudo_warn(U_("unable to fork"));
 	    debug_return_int(false);
 	    break;
 	case 0:
@@ -611,9 +611,9 @@ send_mail(const char *fmt, ...)
 
     /* Daemonize - disassociate from session/tty. */
     if (setsid() == -1)
-      warning("setsid");
+      sudo_warn("setsid");
     if (chdir("/") == -1)
-      warning("chdir(/)");
+      sudo_warn("chdir(/)");
     if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
 	(void) dup2(fd, STDIN_FILENO);
 	(void) dup2(fd, STDOUT_FILENO);
@@ -915,6 +915,6 @@ new_logline(const char *message, int serrno)
 
     debug_return_str(line);
 toobig:
-    warningx(U_("internal error, %s overflow"), __func__);
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_str(NULL);
 }

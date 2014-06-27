@@ -271,14 +271,14 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	size_t nsize;
 
 	if (env.env_size > SIZE_MAX - 128) {
-	    warningx_nodebug(U_("internal error, %s overflow"),
+	    sudo_warnx_nodebug(U_("internal error, %s overflow"),
 		"sudo_putenv_nodebug");
 	    errno = EOVERFLOW;
 	    return -1;
 	}
 	nsize = env.env_size + 128;
 	if (nsize > SIZE_MAX / sizeof(char *)) {
-	    warningx_nodebug(U_("internal error, %s overflow"),
+	    sudo_warnx_nodebug(U_("internal error, %s overflow"),
 		"sudo_putenv_nodebug");
 	    errno = EOVERFLOW;
 	    return -1;
@@ -354,7 +354,7 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
     if (rval == -1) {
 #ifdef ENV_DEBUG
 	if (env.envp[env.env_len] != NULL)
-	    warningx(U_("sudo_putenv: corrupted envp, length mismatch"));
+	    sudo_warnx(U_("sudo_putenv: corrupted envp, length mismatch"));
 #endif
     }
     debug_return_int(rval);
@@ -381,7 +381,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
-	warningx(U_("internal error, %s overflow"), __func__);
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	errno = EOVERFLOW;
     } else {
 	rval = sudo_putenv(estring, dupcheck, overwrite);

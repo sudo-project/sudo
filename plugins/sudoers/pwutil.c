@@ -146,7 +146,7 @@ sudo_getpwuid(uid_t uid)
     }
     if (rbinsert(pwcache_byuid, item) != NULL) {
 	/* should not happen */
-	warningx(U_("unable to cache uid %u, already exists"),
+	sudo_warnx(U_("unable to cache uid %u, already exists"),
 	    (unsigned int) uid);
 	item->refcnt = 0;
     }
@@ -191,7 +191,7 @@ sudo_getpwnam(const char *name)
     }
     if (rbinsert(pwcache_byname, item) != NULL) {
 	/* should not happen */
-	warningx(U_("unable to cache user %s, already exists"), name);
+	sudo_warnx(U_("unable to cache user %s, already exists"), name);
 	item->refcnt = 0;
     }
 #ifdef HAVE_SETAUTHDB
@@ -397,7 +397,7 @@ sudo_getgrgid(gid_t gid)
     }
     if (rbinsert(grcache_bygid, item) != NULL) {
 	/* should not happen */
-	warningx(U_("unable to cache gid %u, already exists"),
+	sudo_warnx(U_("unable to cache gid %u, already exists"),
 	    (unsigned int) gid);
 	item->refcnt = 0;
     }
@@ -436,7 +436,7 @@ sudo_getgrnam(const char *name)
     }
     if (rbinsert(grcache_byname, item) != NULL) {
 	/* should not happen */
-	warningx(U_("unable to cache group %s, already exists"), name);
+	sudo_warnx(U_("unable to cache group %s, already exists"), name);
 	item->refcnt = 0;
     }
 done:
@@ -602,7 +602,7 @@ sudo_get_grlist(const struct passwd *pw)
     }
     if (rbinsert(grlist_cache, item) != NULL) {
 	/* should not happen */
-	warningx(U_("unable to cache group list for %s, already exists"),
+	sudo_warnx(U_("unable to cache group list for %s, already exists"),
 	    pw->pw_name);
 	item->refcnt = 0;
     }
@@ -624,11 +624,11 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
 	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL) {
-	    warningx(U_("unable to parse groups for %s"), pw->pw_name);
+	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}
 	if (rbinsert(grlist_cache, item) != NULL) {
-	    warningx(U_("unable to cache group list for %s, already exists"),
+	    sudo_warnx(U_("unable to cache group list for %s, already exists"),
 		pw->pw_name);
 	    sudo_grlist_delref_item(item);
 	}

@@ -200,7 +200,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
-	fatalx(U_("fatal error, unable to load plugins"));
+	sudo_fatalx(U_("fatal error, unable to load plugins"));
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
@@ -208,7 +208,7 @@ main(int argc, char *argv[], char *envp[])
 	if (ok == -2)
 	    usage(1);
 	else
-	    fatalx(U_("unable to initialize policy plugin"));
+	    sudo_fatalx(U_("unable to initialize policy plugin"));
     }
 
     init_signals();
@@ -264,7 +264,7 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		    break;
 		default:
-		    fatalx(U_("error initializing I/O plugin %s"),
+		    sudo_fatalx(U_("error initializing I/O plugin %s"),
 			plugin->name);
 		}
 	    }
@@ -276,7 +276,7 @@ main(int argc, char *argv[], char *envp[])
 		SET(command_details.flags, CD_BACKGROUND);
 	    /* Become full root (not just setuid) so user cannot kill us. */
 	    if (setuid(ROOT_UID) == -1)
-		warning("setuid(%d)", ROOT_UID);
+		sudo_warn("setuid(%d)", ROOT_UID);
 	    /* Restore coredumpsize resource limit before running. */
 #ifdef RLIMIT_CORE
 	    if (sudo_conf_disable_coredump())
@@ -290,7 +290,7 @@ main(int argc, char *argv[], char *envp[])
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
-	    fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
+	    sudo_fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
     exit(exitcode);
@@ -325,13 +325,13 @@ fix_fds(void)
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
 	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
-	    fatal(U_("unable to open %s"), _PATH_DEVNULL);
+	    sudo_fatal(U_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
-	    fatal("dup2");
+	    sudo_fatal("dup2");
 	if (miss[STDOUT_FILENO] && dup2(devnull, STDOUT_FILENO) == -1)
-	    fatal("dup2");
+	    sudo_fatal("dup2");
 	if (miss[STDERR_FILENO] && dup2(devnull, STDERR_FILENO) == -1)
-	    fatal("dup2");
+	    sudo_fatal("dup2");
 	if (devnull > STDERR_FILENO)
 	    close(devnull);
     }
@@ -410,7 +410,7 @@ get_user_groups(struct user_details *ud)
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
 	if (fill_group_list(ud, maxgroups) == -1)
-	    fatal(U_("unable to get group vector"));
+	    sudo_fatal(U_("unable to get group vector"));
     }
 
     /*
@@ -462,11 +462,11 @@ get_user_info(struct user_details *ud)
 
     pw = getpwuid(ud->uid);
     if (pw == NULL)
-	fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
+	sudo_fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
     user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -492,14 +492,14 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = sudo_new_key_val("cwd", cwd);
 	if (user_info[i] == NULL)
-	    fatal(NULL);
+	    sudo_fatal(NULL);
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = get_process_ttyname()) != NULL) {
 	user_info[++i] = sudo_new_key_val("tty", cp);
 	if (user_info[i] == NULL)
-	    fatal(NULL);
+	    sudo_fatal(NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
 	efree(cp);
     }
@@ -510,7 +510,7 @@ get_user_info(struct user_details *ud)
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = sudo_new_key_val("host", host);
     if (user_info[i] == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
@@ -556,7 +556,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("closefrom=") - 1;
 		    details->closefrom = strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    break;
 		}
 		break;
@@ -575,7 +575,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("nice=") - 1;
 		    details->priority = strtonum(cp, INT_MIN, INT_MAX, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
@@ -602,7 +602,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_egid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->egid = (gid_t)id;
 		    SET(details->flags, CD_SET_EGID);
 		    break;
@@ -611,7 +611,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_euid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->euid = (uid_t)id;
 		    SET(details->flags, CD_SET_EUID);
 		    break;
@@ -620,7 +620,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_gid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->gid = (gid_t)id;
 		    SET(details->flags, CD_SET_GID);
 		    break;
@@ -637,7 +637,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_uid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->uid = (uid_t)id;
 		    SET(details->flags, CD_SET_UID);
 		    break;
@@ -649,7 +649,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	            if (*cp != '\0') {
 			details->privs = priv_str_to_set(cp, ",", &endp);
 			if (details->privs == NULL)
-			    warning("invalid runas_privs %s", endp);
+			    sudo_warn("invalid runas_privs %s", endp);
 		    }
 		    break;
 		}
@@ -659,7 +659,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	            if (*cp != '\0') {
 			details->limitprivs = priv_str_to_set(cp, ",", &endp);
 			if (details->limitprivs == NULL)
-			    warning("invalid runas_limitprivs %s", endp);
+			    sudo_warn("invalid runas_limitprivs %s", endp);
 		    }
 		    break;
 		}
@@ -684,7 +684,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("timeout=") - 1;
 		    details->timeout = strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);
 		    break;
 		}
@@ -694,7 +694,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("umask=") - 1;
 		    details->umask = atomode(cp, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), info[i], U_(errstr));
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
@@ -716,7 +716,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -766,16 +766,16 @@ sudo_check_suid(const char *sudo)
 	if (qualified && stat(sudo, &sb) == 0) {
 	    /* Try to determine why sudo was not running as root. */
 	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
-		fatalx(
+		sudo_fatalx(
 		    U_("%s must be owned by uid %d and have the setuid bit set"),
 		    sudo, ROOT_UID);
 	    } else {
-		fatalx(U_("effective uid is not %d, is %s on a file system "
+		sudo_fatalx(U_("effective uid is not %d, is %s on a file system "
 		    "with the 'nosuid' option set or an NFS file system without"
 		    " root privileges?"), ROOT_UID, sudo);
 	    }
 	} else {
-	    fatalx(
+	    sudo_fatalx(
 		U_("effective uid is not %d, is sudo installed setuid root?"),
 		ROOT_UID);
 	}
@@ -871,18 +871,18 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #ifdef HAVE_PRIV_SET
 	if (details->privs != NULL) {
 	    if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
-		warning("unable to set privileges");
+		sudo_warn("unable to set privileges");
 		goto done;
 	    }
 	}
 	if (details->limitprivs != NULL) {
 	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
-		warning("unable to set limit privileges");
+		sudo_warn("unable to set limit privileges");
 		goto done;
 	    }
 	} else if (details->privs != NULL) {
 	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
-		warning("unable to set limit privileges");
+		sudo_warn("unable to set limit privileges");
 		goto done;
 	    }
 	}
@@ -905,7 +905,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	     */
 	    lc = login_getclass((char *)details->login_class);
 	    if (!lc) {
-		warningx(U_("unknown login class %s"), details->login_class);
+		sudo_warnx(U_("unknown login class %s"), details->login_class);
 		errno = ENOENT;
 		goto done;
 	    }
@@ -918,7 +918,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
 	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
-		warning(U_("unable to set user context"));
+		sudo_warn(U_("unable to set user context"));
 		if (details->pw->pw_uid != ROOT_UID)
 		    goto done;
 	    }
@@ -932,27 +932,27 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
 	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		warning(U_("unable to set supplementary group IDs"));
+		sudo_warn(U_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
     }
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning(U_("unable to set effective gid to runas gid %u"),
+	sudo_warn(U_("unable to set effective gid to runas gid %u"),
 	    (unsigned int)details->egid);
 	goto done;
     }
 #endif
     if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	warning(U_("unable to set gid to runas gid %u"),
+	sudo_warn(U_("unable to set gid to runas gid %u"),
 	    (unsigned int)details->gid);
 	goto done;
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
 	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
-	    warning(U_("unable to set process priority"));
+	    sudo_warn(U_("unable to set process priority"));
 	    goto done;
 	}
     }
@@ -960,7 +960,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	(void) umask(details->umask);
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
-	    warning(U_("unable to change root to %s"), details->chroot);
+	    sudo_warn(U_("unable to change root to %s"), details->chroot);
 	    goto done;
 	}
     }
@@ -973,19 +973,19 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	warning(U_("unable to change to runas uid (%u, %u)"), details->uid,
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
 #elif defined(HAVE_SETREUID)
     if (setreuid(details->uid, details->euid) != 0) {
-	warning(U_("unable to change to runas uid (%u, %u)"),
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
 	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #else
     if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	warning(U_("unable to change to runas uid (%u, %u)"), details->uid,
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
@@ -1002,7 +1002,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	if (details->chroot || strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
 	    if (chdir(details->cwd) != 0) {
-		warning(U_("unable to change directory to %s"), details->cwd);
+		sudo_warn(U_("unable to change directory to %s"), details->cwd);
 		goto done;
 	    }
 	}
@@ -1059,7 +1059,7 @@ run_command(struct command_details *details)
 	    exitcode = WTERMSIG(cstat.val) | 128;
 	break;
     default:
-	warningx(U_("unexpected child termination condition: %d"), cstat.type);
+	sudo_warnx(U_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
     debug_return_int(exitcode);
@@ -1096,7 +1096,7 @@ policy_close(struct plugin_container *plugin, int exit_status, int error)
     if (plugin->u.policy->close != NULL)
 	plugin->u.policy->close(exit_status, error);
     else
-	warning(U_("unable to execute %s"), command_details.command);
+	sudo_warn(U_("unable to execute %s"), command_details.command);
     debug_return;
 }
 
@@ -1116,7 +1116,7 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
 {
     debug_decl(policy_check, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->check_policy == NULL) {
-	fatalx(U_("policy plugin %s is missing the `check_policy' method"),
+	sudo_fatalx(U_("policy plugin %s is missing the `check_policy' method"),
 	    plugin->name);
     }
     debug_return_bool(plugin->u.policy->check_policy(argc, argv, env_add,
@@ -1129,7 +1129,7 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
 {
     debug_decl(policy_list, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->list == NULL) {
-	warningx(U_("policy plugin %s does not support listing privileges"),
+	sudo_warnx(U_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
 	debug_return_bool(false);
     }
@@ -1141,7 +1141,7 @@ policy_validate(struct plugin_container *plugin)
 {
     debug_decl(policy_validate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->validate == NULL) {
-	warningx(U_("policy plugin %s does not support the -v option"),
+	sudo_warnx(U_("policy plugin %s does not support the -v option"),
 	    plugin->name);
 	debug_return_bool(false);
     }
@@ -1153,7 +1153,7 @@ policy_invalidate(struct plugin_container *plugin, int remove)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->invalidate == NULL) {
-	fatalx(U_("policy plugin %s does not support the -k/-K options"),
+	sudo_fatalx(U_("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);

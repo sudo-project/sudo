@@ -61,7 +61,7 @@ do_cleanup(void)
 }
 
 void
-fatal_nodebug(const char *fmt, ...)
+sudo_fatal_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -73,7 +73,7 @@ fatal_nodebug(const char *fmt, ...)
 }
 
 void
-fatalx_nodebug(const char *fmt, ...)
+sudo_fatalx_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -85,7 +85,7 @@ fatalx_nodebug(const char *fmt, ...)
 }
 
 void
-vfatal_nodebug(const char *fmt, va_list ap)
+sudo_sudo_vfatal_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     do_cleanup();
@@ -93,7 +93,7 @@ vfatal_nodebug(const char *fmt, va_list ap)
 }
 
 void
-vfatalx_nodebug(const char *fmt, va_list ap)
+sudo_sudo_vfatalx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
@@ -101,7 +101,7 @@ vfatalx_nodebug(const char *fmt, va_list ap)
 }
 
 void
-warning_nodebug(const char *fmt, ...)
+sudo_warn_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -111,7 +111,7 @@ warning_nodebug(const char *fmt, ...)
 }
 
 void
-warningx_nodebug(const char *fmt, ...)
+sudo_warnx_nodebug(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -120,13 +120,13 @@ warningx_nodebug(const char *fmt, ...)
 }
 
 void
-vwarning_nodebug(const char *fmt, va_list ap)
+sudo_vwarn_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx_nodebug(const char *fmt, va_list ap)
+sudo_vwarnx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }
@@ -155,10 +155,10 @@ _warning(int use_errno, const char *fmt, va_list ap)
 }
 
 /*
- * Register a callback to be run when fatal()/fatalx() is called.
+ * Register a callback to be run when sudo_fatal()/sudo_fatalx() is called.
  */
 int
-fatal_callback_register(void (*func)(void))
+sudo_fatal_callback_register(void (*func)(void))
 {
     struct sudo_fatal_callback *cb;
 
@@ -179,10 +179,10 @@ fatal_callback_register(void (*func)(void))
 }
 
 /*
- * Deregister a fatal()/fatalx() callback.
+ * Deregister a sudo_fatal()/sudo_fatalx() callback.
  */
 int
-fatal_callback_deregister(void (*func)(void))
+sudo_fatal_callback_deregister(void (*func)(void))
 {
     struct sudo_fatal_callback *cb, **prev;
 

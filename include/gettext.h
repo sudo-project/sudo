@@ -54,7 +54,7 @@
 # define _(String) gettext(String)
 # define gettext_noop(String) String
 # define N_(String) gettext_noop(String)
-# define U_(String) warning_gettext(String)
+# define U_(String) sudo_warn_gettext(String)
 
 #else /* !HAVE_LIBINTL_H */
 

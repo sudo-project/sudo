@@ -274,7 +274,7 @@ parse_long_options(char * const *nargv, const char *options,
 	if (!exact_match && second_partial_match) {
 		/* ambiguous abbreviation */
 		if (PRINT_ERROR)
-			warningx(ambig,
+			sudo_warnx(ambig,
 #ifdef GNU_COMPATIBLE
 			     current_dash,
 #endif
@@ -287,7 +287,7 @@ parse_long_options(char * const *nargv, const char *options,
 		if (long_options[match].has_arg == no_argument
 		    && has_equal) {
 			if (PRINT_ERROR)
-				warningx(noarg,
+				sudo_warnx(noarg,
 #ifdef GNU_COMPATIBLE
 				     current_dash,
 #endif
@@ -325,7 +325,7 @@ parse_long_options(char * const *nargv, const char *options,
 			 * should be generated.
 			 */
 			if (PRINT_ERROR)
-				warningx(recargstring,
+				sudo_warnx(recargstring,
 #ifdef GNU_COMPATIBLE
 				    current_dash,
 #endif
@@ -346,7 +346,7 @@ parse_long_options(char * const *nargv, const char *options,
 			return (-1);
 		}
 		if (PRINT_ERROR)
-			warningx(illoptstring,
+			sudo_warnx(illoptstring,
 #ifdef GNU_COMPATIBLE
 			      current_dash,
 #endif
@@ -529,11 +529,11 @@ start:
 			++optind;
 #ifdef GNU_COMPATIBLE
 		if (PRINT_ERROR)
-			warningx(posixly_correct ? illoptchar : gnuoptchar,
+			sudo_warnx(posixly_correct ? illoptchar : gnuoptchar,
 			      optchar);
 #else
 		if (PRINT_ERROR)
-			warningx(illoptchar, optchar);
+			sudo_warnx(illoptchar, optchar);
 #endif
 		optopt = optchar;
 		return (BADCH);
@@ -545,7 +545,7 @@ start:
 		else if (++optind >= nargc) {	/* no arg */
 			place = EMSG;
 			if (PRINT_ERROR)
-				warningx(recargchar, optchar);
+				sudo_warnx(recargchar, optchar);
 			optopt = optchar;
 			return (BADARG);
 		} else				/* white space */
@@ -569,7 +569,7 @@ start:
 			if (++optind >= nargc) {	/* no arg */
 				place = EMSG;
 				if (PRINT_ERROR)
-					warningx(recargchar, optchar);
+					sudo_warnx(recargchar, optchar);
 				optopt = optchar;
 				return (BADARG);
 			} else

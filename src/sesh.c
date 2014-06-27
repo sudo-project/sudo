@@ -55,7 +55,7 @@ main(int argc, char *argv[], char *envp[])
     textdomain(PACKAGE_NAME);
 
     if (argc < 2)
-	fatalx(U_("requires at least one argument"));
+	sudo_fatalx(U_("requires at least one argument"));
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
@@ -79,7 +79,7 @@ main(int argc, char *argv[], char *envp[])
 	*cp = '-';
     }
     sudo_execve(cmnd, argv, envp, noexec);
-    warning(U_("unable to execute %s"), argv[0]);
+    sudo_warn(U_("unable to execute %s"), argv[0]);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, EXIT_FAILURE);                
     _exit(EXIT_FAILURE);
 }

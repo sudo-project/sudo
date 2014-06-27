@@ -207,7 +207,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	sdlen--;
     if (sdlen + 1 >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
-	warning("%.*s/", (int)sdlen, dir);
+	sudo_warn("%.*s/", (int)sdlen, dir);
 	goto done;
     }
     memcpy(pathbuf, dir, sdlen);

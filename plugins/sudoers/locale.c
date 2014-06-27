@@ -112,7 +112,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 
 #ifdef HAVE_LIBINTL_H
 char *
-warning_gettext(const char *msgid)
+sudo_warn_gettext(const char *msgid)
 {
     int warning_locale;
     char *msg;

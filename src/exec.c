@@ -130,12 +130,12 @@ static int fork_cmnd(struct command_details *details, int sv[2])
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	fatalx(U_("policy plugin failed session initialization"));
+	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     cmnd_pid = sudo_debug_fork();
     switch (cmnd_pid) {
     case -1:
-	fatal(U_("unable to fork"));
+	sudo_fatal(U_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -300,29 +300,29 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
 
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
 
     /* Event for incoming signals via signal_pipe. */
     signal_event = sudo_ev_alloc(signal_pipe[0],
 	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, ec);
     if (signal_event == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
     if (sudo_ev_add(evbase, signal_event, NULL, false) == -1)
-	fatal(U_("unable to add event to queue"));
+	sudo_fatal(U_("unable to add event to queue"));
 
     /* Event for command status via backchannel. */
     backchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, backchannel_cb, ec);
     if (backchannel_event == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
     if (sudo_ev_add(evbase, backchannel_event, NULL, false) == -1)
-	fatal(U_("unable to add event to queue"));
+	sudo_fatal(U_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
     sigfwd_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_WRITE, forward_signals, NULL);
     if (sigfwd_event == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "signal pipe fd %d\n", signal_pipe[0]);
     sudo_debug_printf(SUDO_DEBUG_INFO, "backchannel fd %d\n", backchannel);
@@ -396,7 +396,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * Parent sends signal info to child and child sends back wait status.
      */
     if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
-	fatal(U_("unable to create sockets"));
+	sudo_fatal(U_("unable to create sockets"));
 
     /*
      * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).
@@ -482,7 +482,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (log_io)
 	add_io_events(evbase);
     if (sudo_ev_loop(evbase, 0) == -1)
-	warning(U_("error in event loop"));
+	sudo_warn(U_("error in event loop"));
     if (sudo_ev_got_break(evbase)) {
 	/* error from callback */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
@@ -500,7 +500,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	/* This is probably not needed in log_io mode. */
 	if (selinux_restore_tty() != 0)
-	    warningx(U_("unable to restore tty label"));
+	    sudo_warnx(U_("unable to restore tty label"));
     }
 #endif
 
@@ -569,7 +569,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 			    if (child_pgrp != ppgrp) {
 				if (tcsetpgrp(fd, child_pgrp) == 0) {
 				    if (killpg(child_pgrp, SIGCONT) != 0) {
-					warning("kill(%d, SIGCONT)",
+					sudo_warn("kill(%d, SIGCONT)",
 					    (int)child_pgrp);
 				    }
 				    close(fd);
@@ -587,7 +587,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 		    sudo_sigaction(SIGTSTP, &sa, &osa);
 		}
 		if (kill(getpid(), signo) != 0)
-		    warning("kill(%d, SIG%s)", (int)getpid(), signame);
+		    sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
 		if (signo == SIGTSTP)
 		    sudo_sigaction(SIGTSTP, &osa, NULL);
 		if (fd != -1) {
@@ -612,7 +612,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 	if (signo == SIGALRM) {
 	    terminate_command(child, false);
 	} else if (kill(child, signo) != 0) {
-	    warning("kill(%d, SIG%s)", (int)child, signame);
+	    sudo_warn("kill(%d, SIG%s)", (int)child, signame);
 	}
     }
     rc = 0;
@@ -774,7 +774,7 @@ dispatch_pending_signals(struct command_status *cstat)
 	sa.sa_handler = SIG_DFL;
 	sudo_sigaction(SIGTSTP, &sa, NULL);
 	if (kill(getpid(), SIGTSTP) != 0)
-	    warning("kill(%d, SIGTSTP)", (int)getpid());
+	    sudo_warn("kill(%d, SIGTSTP)", (int)getpid());
 	/* No need to reinstall SIGTSTP handler. */
     }
     debug_return_int(rval);
@@ -849,7 +849,7 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
     TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 
     if (sudo_ev_add(evbase, sigfwd_event, NULL, true) == -1)
-	fatal(U_("unable to add event to queue"));
+	sudo_fatal(U_("unable to add event to queue"));
 
     debug_return;
 }

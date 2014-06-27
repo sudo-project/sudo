@@ -4036,7 +4036,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     dir = opendir(dirpath);
     if (dir == NULL) {
 	if (errno != ENOENT) {
-	    warning("%s", dirpath);
+	    sudo_warn("%s", dirpath);
 	    sudoerserror(NULL);
 	}
 	goto bad;
@@ -4179,7 +4179,7 @@ _push_include(char *path, bool isdir)
 	new_istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (new_istack == NULL) {
-	    warning(NULL);
+	    sudo_warn(NULL);
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
@@ -4197,24 +4197,24 @@ _push_include(char *path, bool isdir)
 	    case SUDO_PATH_BAD_TYPE:
 		errno = ENOTDIR;
 		if (sudoers_warnings) {
-		    warning("%s", path);
+		    sudo_warn("%s", path);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_WRONG_OWNER:
 		if (sudoers_warnings) {
-		    warningx(U_("%s is owned by uid %u, should be %u"),   
+		    sudo_warnx(U_("%s is owned by uid %u, should be %u"),   
 			path, (unsigned int) sb.st_uid,
 			(unsigned int) sudoers_uid);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_WORLD_WRITABLE:
 		if (sudoers_warnings) {
-		    warningx(U_("%s is world writable"), path);
+		    sudo_warnx(U_("%s is world writable"), path);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_GROUP_WRITABLE:
 		if (sudoers_warnings) {
-		    warningx(U_("%s is owned by gid %u, should be %u"),
+		    sudo_warnx(U_("%s is owned by gid %u, should be %u"),
 			path, (unsigned int) sb.st_gid,
 			(unsigned int) sudoers_gid);
 		}
@@ -4337,7 +4337,7 @@ parse_include(char *base)
     len += (int)(ep - cp);
     path = pp = malloc(len + dirlen + 1);
     if (path == NULL) {
-	warning(NULL);
+	sudo_warn(NULL);
 	sudoerserror(NULL);
 	debug_return_str(NULL);
     }

@@ -195,7 +195,7 @@ found_it:
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "short write, truncating partial time stamp record");
 	if (ftruncate(fd, old_eof) != 0) {
-	    warning(U_("unable to truncate time stamp file to %lld bytes"),
+	    sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
 		(long long)old_eof);
 	}
     }
@@ -225,13 +225,13 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 		"mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
 	    if (mkdir(path, parent_mode) != 0) {
 		if (!quiet)
-		    warning(U_("unable to mkdir %s"), path);
+		    sudo_warn(U_("unable to mkdir %s"), path);
 		goto done;
 	    }
 	    ignore_result(chown(path, (uid_t)-1, parent_gid));
 	} else if (!S_ISDIR(sb.st_mode)) {
 	    if (!quiet) {
-		warningx(U_("%s exists but is not a directory (0%o)"),
+		sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		    path, (unsigned int) sb.st_mode);
 	    }
 	    goto done;
@@ -246,7 +246,7 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 	"mkdir %s, mode 0%o", path, (unsigned int) mode);
     if (mkdir(path, mode) != 0 && errno != EEXIST) {
 	if (!quiet)
-	    warning(U_("unable to mkdir %s"), path);
+	    sudo_warn(U_("unable to mkdir %s"), path);
 	goto done;
     }
     ignore_result(chown(path, owner, parent_gid));
@@ -283,11 +283,11 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
     case SUDO_PATH_BAD_TYPE:
 	errno = ENOTDIR;
 	if (!quiet)
-	    warning("%s", path);
+	    sudo_warn("%s", path);
 	break;
     case SUDO_PATH_WRONG_OWNER:
 	if (!quiet) {
-	    warningx(U_("%s is owned by uid %u, should be %u"),
+	    sudo_warnx(U_("%s is owned by uid %u, should be %u"),
 		path, (unsigned int) sb.st_uid,
 		(unsigned int) timestamp_uid);
 	}
@@ -295,7 +295,7 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 	break;
     case SUDO_PATH_GROUP_WRITABLE:
 	if (!quiet)
-	    warningx(U_("%s is group writable"), path);
+	    sudo_warnx(U_("%s is group writable"), path);
 	errno = EACCES;
 	break;
     }

@@ -62,17 +62,17 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
 	if (seteuid(ROOT_UID) != 0)
-	    fatal("seteuid(ROOT_UID)");
+	    sudo_fatal("seteuid(ROOT_UID)");
     }
     if (setegid(egid) != 0)
-	fatal("setegid(%d)", (int)egid);
+	sudo_fatal("setegid(%d)", (int)egid);
     if (ngroups != -1) {
 	if (sudo_setgroups(ngroups, groups) != 0)
-	    fatal("setgroups");
+	    sudo_fatal("setgroups");
     }
     if (euid != ROOT_UID) {
 	if (seteuid(euid) != 0)
-	    fatal("seteuid(%d)", (int)euid);
+	    sudo_fatal("seteuid(%d)", (int)euid);
     }
     errno = serrno;
 
@@ -107,7 +107,7 @@ sudo_edit(struct command_details *command_details)
      * We will change the euid as needed below.
      */
     if (setuid(ROOT_UID) != 0) {
-	warning(U_("unable to change uid to root (%u)"), ROOT_UID);
+	sudo_warn(U_("unable to change uid to root (%u)"), ROOT_UID);
 	goto cleanup;
     }
 
@@ -139,7 +139,7 @@ sudo_edit(struct command_details *command_details)
 	    editor_argc++;
     }
     if (nfiles == 0) {
-	warningx(U_("plugin error: missing file list for sudoedit"));
+	sudo_warnx(U_("plugin error: missing file list for sudoedit"));
 	goto cleanup;
     }
 
@@ -165,9 +165,9 @@ sudo_edit(struct command_details *command_details)
 	    user_details.ngroups, user_details.groups);
 	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
 	    if (rc)
-		warning("%s", files[i]);
+		sudo_warn("%s", files[i]);
 	    else
-		warningx(U_("%s: not a regular file"), files[i]);
+		sudo_warnx(U_("%s: not a regular file"), files[i]);
 	    if (ofd != -1)
 		close(ofd);
 	    continue;
@@ -187,21 +187,21 @@ sudo_edit(struct command_details *command_details)
 	    easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
 	}
 	if (seteuid(user_details.uid) != 0)
-	    fatal("seteuid(%d)", (int)user_details.uid);
+	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
 	tfd = mkstemps(tf[j].tfile, suff ? strlen(suff) : 0);
 	if (seteuid(ROOT_UID) != 0)
-	    fatal("seteuid(ROOT_UID)");
+	    sudo_fatal("seteuid(ROOT_UID)");
 	if (tfd == -1) {
-	    warning("mkstemps");
+	    sudo_warn("mkstemps");
 	    goto cleanup;
 	}
 	if (ofd != -1) {
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
 		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
-			warning("%s", tf[j].tfile);
+			sudo_warn("%s", tf[j].tfile);
 		    else
-			warningx(U_("%s: short write"), tf[j].tfile);
+			sudo_warnx(U_("%s: short write"), tf[j].tfile);
 		    goto cleanup;
 		}
 	    }
@@ -259,18 +259,18 @@ sudo_edit(struct command_details *command_details)
     for (i = 0; i < nfiles; i++) {
 	rc = -1;
 	if (seteuid(user_details.uid) != 0)
-	    fatal("seteuid(%d)", (int)user_details.uid);
+	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
 	    rc = fstat(tfd, &sb);
 	}
 	if (seteuid(ROOT_UID) != 0)
-	    fatal("seteuid(ROOT_UID)");
+	    sudo_fatal("seteuid(ROOT_UID)");
 	if (rc || !S_ISREG(sb.st_mode)) {
 	    if (rc)
-		warning("%s", tf[i].tfile);
+		sudo_warn("%s", tf[i].tfile);
 	    else
-		warningx(U_("%s: not a regular file"), tf[i].tfile);
-	    warningx(U_("%s left unmodified"), tf[i].ofile);
+		sudo_warnx(U_("%s: not a regular file"), tf[i].tfile);
+	    sudo_warnx(U_("%s left unmodified"), tf[i].ofile);
 	    if (tfd != -1)
 		close(tfd);
 	    continue;
@@ -282,7 +282,7 @@ sudo_edit(struct command_details *command_details)
 	     * time in the editor we can't tell if the file was changed.
 	     */
 	    if (sudo_timevalcmp(&times[0], &times[1], !=)) {
-		warningx(U_("%s unchanged"), tf[i].ofile);
+		sudo_warnx(U_("%s unchanged"), tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);
 		continue;
@@ -294,17 +294,17 @@ sudo_edit(struct command_details *command_details)
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
-	    warning(U_("unable to write to %s"), tf[i].ofile);
-	    warningx(U_("contents of edit session left in %s"), tf[i].tfile);
+	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
 	    close(tfd);
 	    continue;
 	}
 	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
 	    if ((nwritten = write(ofd, buf, nread)) != nread) {
 		if (nwritten == -1)
-		    warning("%s", tf[i].ofile);
+		    sudo_warn("%s", tf[i].ofile);
 		else
-		    warningx(U_("%s: short write"), tf[i].ofile);
+		    sudo_warnx(U_("%s: short write"), tf[i].ofile);
 		break;
 	    }
 	}
@@ -312,11 +312,11 @@ sudo_edit(struct command_details *command_details)
 	    /* success, got EOF */
 	    unlink(tf[i].tfile);
 	} else if (nread < 0) {
-	    warning(U_("unable to read temporary file"));
-	    warningx(U_("contents of edit session left in %s"), tf[i].tfile);
+	    sudo_warn(U_("unable to read temporary file"));
+	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
 	} else {
-	    warning(U_("unable to write to %s"), tf[i].ofile);
-	    warningx(U_("contents of edit session left in %s"), tf[i].tfile);
+	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
 	}
 	close(ofd);
     }

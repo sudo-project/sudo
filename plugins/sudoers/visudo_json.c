@@ -193,10 +193,10 @@ print_pair_json(FILE *fp, const char *pre, const char *name,
 	fputs(value->u.boolean ? "true" : "false", fp);
 	break;
     case JSON_OBJECT:
-	fatalx("internal error: can't print JSON_OBJECT");
+	sudo_fatalx("internal error: can't print JSON_OBJECT");
 	break;
     case JSON_ARRAY:
-	fatalx("internal error: can't print JSON_ARRAY");
+	sudo_fatalx("internal error: can't print JSON_ARRAY");
 	break;
     }
 
@@ -325,7 +325,7 @@ alias_to_word_type(int alias_type)
     case USERALIAS:
 	return TYPE_USERNAME;
     default:
-	fatalx_nodebug("unexpected alias type %d", alias_type);
+	sudo_fatalx_nodebug("unexpected alias type %d", alias_type);
     }
 }
 
@@ -345,7 +345,7 @@ defaults_to_word_type(int defaults_type)
     case DEFAULTS_USER:
 	return TYPE_USERNAME;
     default:
-	fatalx_nodebug("unexpected defaults type %d", defaults_type);
+	sudo_fatalx_nodebug("unexpected defaults type %d", defaults_type);
     }
 }
 
@@ -377,7 +377,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    if (*value.u.string == '#') {
 		id = atoid(m->name + 3, NULL, NULL, &errstr);
 		if (errstr != NULL) {
-		    warningx("internal error: non-Unix group ID %s: \"%s\"",
+		    sudo_warnx("internal error: non-Unix group ID %s: \"%s\"",
 			errstr, m->name);
 		} else {
 		    value.type = JSON_ID;
@@ -390,7 +390,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    if (*value.u.string == '#') {
 		id = atoid(m->name + 2, NULL, NULL, &errstr);
 		if (errstr != NULL) {
-		    warningx("internal error: group ID %s: \"%s\"",
+		    sudo_warnx("internal error: group ID %s: \"%s\"",
 			errstr, m->name);
 		} else {
 		    value.type = JSON_ID;
@@ -424,7 +424,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    if (*value.u.string == '#') {
 		id = atoid(m->name + 1, NULL, NULL, &errstr);
 		if (errstr != NULL) {
-		    warningx("internal error: user ID %s: \"%s\"",
+		    sudo_warnx("internal error: user ID %s: \"%s\"",
 			errstr, m->name);
 		} else {
 		    value.type = JSON_ID;
@@ -434,7 +434,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    }
 	    break;
 	default:
-	    fatalx("unexpected word type %d", word_type);
+	    sudo_fatalx("unexpected word type %d", word_type);
 	}
 	break;
     case ALL:
@@ -456,11 +456,11 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    typestr = "useralias";
 	    break;
 	default:
-	    fatalx("unexpected word type %d", word_type);
+	    sudo_fatalx("unexpected word type %d", word_type);
 	}
 	break;
     default:
-	fatalx("unexpected member type %d", m->type);
+	sudo_fatalx("unexpected member type %d", m->type);
     }
 
     if (m->negated) {
@@ -571,7 +571,7 @@ print_defaults_list_json(FILE *fp, struct defaults *def, int indent)
 	value.u.string = "list_assign";
 	break;
     default:
-	warningx("internal error: unexpected list op %d", def->op);
+	sudo_warnx("internal error: unexpected list op %d", def->op);
 	value.u.string = "unsupported";
 	break;
     }
@@ -639,7 +639,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
-	    warningx(U_("unknown defaults entry `%s'"), def->var);
+	    sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
 	}
@@ -674,7 +674,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	    def = next;
 	    type = get_defaults_type(def);
 	    if (type == -1) {
-		warningx(U_("unknown defaults entry `%s'"), def->var);
+		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
 		/* XXX - just pass it through as a string anyway? */
 		break;;
 	    }
@@ -1022,27 +1022,27 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	sudoers_path = "stdin";
     } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
-	    warning(U_("unable to open %s"), sudoers_path);
+	    sudo_warn(U_("unable to open %s"), sudoers_path);
 	goto done;
     }
     if (strcmp(export_path, "-") != 0) {
 	if (strcmp(sudoers_path, export_path) == 0) {
 	    if (!quiet) {
-		warningx(U_("%s: input and output files must be different"),
+		sudo_warnx(U_("%s: input and output files must be different"),
 		    sudoers_path);
 	    }
 	    goto done;
 	}
 	if ((export_fp = fopen(export_path, "w")) == NULL) {
 	    if (!quiet)
-		warning(U_("unable to open %s"), export_path);
+		sudo_warn(U_("unable to open %s"), export_path);
 	    goto done;
 	}
     }
     init_parser(sudoers_path, quiet);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
-	    warningx(U_("failed to parse %s file, unknown error"), sudoers_path);
+	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;
 	errorfile = sudoers_path;
     }
@@ -1051,10 +1051,10 @@ export_sudoers(const char *sudoers_path, const char *export_path,
     if (parse_error) {
 	if (!quiet) {
 	    if (errorlineno != -1)
-		warningx(_("parse error in %s near line %d\n"),
+		sudo_warnx(_("parse error in %s near line %d\n"),
 		    errorfile, errorlineno);
 	    else if (errorfile != NULL)
-		warningx(_("parse error in %s\n"), errorfile);
+		sudo_warnx(_("parse error in %s\n"), errorfile);
 	}
 	goto done;
     }

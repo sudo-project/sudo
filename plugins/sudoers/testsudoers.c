@@ -155,7 +155,7 @@ main(int argc, char *argv[])
 	    case 'G':
 		sudoers_gid = (gid_t)atoid(optarg, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx("group ID %s: %s", optarg, errstr);
+		    sudo_fatalx("group ID %s: %s", optarg, errstr);
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
 	    case 'U':
 		sudoers_uid = (uid_t)atoid(optarg, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx("user ID %s: %s", optarg, errstr);
+		    sudo_fatalx("user ID %s: %s", optarg, errstr);
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -209,11 +209,11 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	fatalx(U_("unknown user: %s"), user_name);
+	sudo_fatalx(U_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
-	    fatal("gethostname");
+	    sudo_fatal("gethostname");
 	hbuf[sizeof(hbuf) - 1] = '\0';
 	user_host = hbuf;
     }
@@ -239,7 +239,7 @@ main(int argc, char *argv[])
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		fatalx(U_("internal error, %s overflow"), getprogname());
+		sudo_fatalx(U_("internal error, %s overflow"), getprogname());
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -361,7 +361,7 @@ set_runaspw(const char *user)
     }
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL)
-	    fatalx(U_("unknown user: %s"), user);
+	    sudo_fatalx(U_("unknown user: %s"), user);
     }
     if (runas_pw != NULL)
 	sudo_pw_delref(runas_pw);
@@ -385,7 +385,7 @@ set_runasgr(const char *group)
     }
     if (gr == NULL) {
 	if ((gr = sudo_getgrnam(group)) == NULL)
-	    fatalx(U_("unknown group: %s"), group);
+	    sudo_fatalx(U_("unknown group: %s"), group);
     }
     if (runas_gr != NULL)
 	sudo_gr_delref(runas_gr);
@@ -434,20 +434,20 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	    fp = fopen(sudoers, "r");
 	    break;
 	case SUDO_PATH_MISSING:
-	    warning("unable to stat %s", sudoers_base);
+	    sudo_warn("unable to stat %s", sudoers_base);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
-	    warningx("%s is not a regular file", sudoers_base);
+	    sudo_warnx("%s is not a regular file", sudoers_base);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
-	    warningx("%s should be owned by uid %u",
+	    sudo_warnx("%s should be owned by uid %u",
 		sudoers_base, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    warningx("%s is world writable", sudoers_base);
+	    sudo_warnx("%s is world writable", sudoers_base);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
-	    warningx("%s should be owned by gid %u",
+	    sudo_warnx("%s should be owned by gid %u",
 		sudoers_base, (unsigned int) sudoers_gid);
 	    break;
 	default:

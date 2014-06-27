@@ -89,7 +89,7 @@ aix_setlimits(char *user)
     debug_decl(aix_setlimits, SUDO_DEBUG_UTIL)
 
     if (setuserdb(S_READ) != 0) {
-	warning(U_("unable to open userdb"));
+	sudo_warn(U_("unable to open userdb"));
 	debug_return_int(-1);
     }
 
@@ -148,12 +148,12 @@ aix_setauthdb(char *user)
 
     if (user != NULL) {
 	if (setuserdb(S_READ) != 0) {
-	    warning(U_("unable to open userdb"));
+	    sudo_warn(U_("unable to open userdb"));
 	    debug_return_int(-1);
 	}
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
 	    if (setauthdb(registry, NULL) != 0) {
-		warning(U_("unable to switch to registry \"%s\" for %s"),
+		sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
 		    registry, user);
 		debug_return_int(-1);
 	    }
@@ -172,7 +172,7 @@ aix_restoreauthdb(void)
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (setauthdb(NULL, NULL) != 0) {
-	warning(U_("unable to restore registry"));
+	sudo_warn(U_("unable to restore registry"));
 	debug_return_int(-1);
     }
     debug_return_int(0);

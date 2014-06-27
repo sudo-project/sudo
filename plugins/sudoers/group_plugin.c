@@ -80,39 +80,39 @@ group_plugin_load(char *plugin_info)
     }
     if (len <= 0 || (size_t)len >= sizeof(path)) {
 	errno = ENAMETOOLONG;
-	warning("%s%s",
+	sudo_warn("%s%s",
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
 	goto done;
     }
 
     /* Sanity check plugin path. */
     if (stat(path, &sb) != 0) {
-	warning("%s", path);
+	sudo_warn("%s", path);
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {
-	warningx(U_("%s must be owned by uid %d"), path, ROOT_UID);
+	sudo_warnx(U_("%s must be owned by uid %d"), path, ROOT_UID);
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	warningx(U_("%s must only be writable by owner"), path);
+	sudo_warnx(U_("%s must only be writable by owner"), path);
 	goto done;
     }
 
     /* Open plugin and map in symbol. */
     group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!group_handle) {
-	warningx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
 	goto done;
     }
     group_plugin = sudo_dso_findsym(group_handle, "group_plugin");
     if (group_plugin == NULL) {
-	warningx(U_("unable to find symbol \"group_plugin\" in %s"), path);
+	sudo_warnx(U_("unable to find symbol \"group_plugin\" in %s"), path);
 	goto done;
     }
 
     if (GROUP_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
-	warningx(U_("%s: incompatible group plugin major version %d, expected %d"),
+	sudo_warnx(U_("%s: incompatible group plugin major version %d, expected %d"),
 	    path, GROUP_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
 	goto done;

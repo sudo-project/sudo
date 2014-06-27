@@ -58,9 +58,9 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 
     if (info->path[0] == '/') {
 	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
-	    warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	    sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    warningx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+	    sudo_warnx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
 	    goto done;
 	}
 	status = stat(fullpath, sb);
@@ -71,9 +71,9 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	/* Check static symbols. */
 	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
 	    if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
-		warningx(U_("error in %s, line %d while loading plugin `%s'"),
+		sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 		    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-		warningx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+		sudo_warnx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
 		goto done;
 	    }
 	    /* Plugin is static, fake up struct stat. */
@@ -88,9 +88,9 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	len = snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
 	    info->path);
 	if (len <= 0 || (size_t)len >= pathsize) {
-	    warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	    sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    warningx(U_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
+	    sudo_warnx(U_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
 		strerror(ENAMETOOLONG));
 	    goto done;
 	}
@@ -141,21 +141,21 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
     debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warning("%s%s", _PATH_SUDO_PLUGIN_DIR, info->path);
+	sudo_warn("%s%s", _PATH_SUDO_PLUGIN_DIR, info->path);
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("%s must be owned by uid %d"), fullpath, ROOT_UID);
+	sudo_warnx(U_("%s must be owned by uid %d"), fullpath, ROOT_UID);
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("%s must be only be writable by owner"), fullpath);
+	sudo_warnx(U_("%s must be only be writable by owner"), fullpath);
 	goto done;
     }
     rval = true;
@@ -194,29 +194,29 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     /* Open plugin and map in symbol */
     handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!handle) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
 	goto done;
     }
     plugin = sudo_dso_findsym(handle, info->symbol_name);
     if (!plugin) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("unable to find symbol `%s' in %s"), info->symbol_name, path);
+	sudo_warnx(U_("unable to find symbol `%s' in %s"), info->symbol_name, path);
 	goto done;
     }
 
     if (plugin->type != SUDO_POLICY_PLUGIN && plugin->type != SUDO_IO_PLUGIN) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("unknown policy type %d found in %s"), plugin->type, path);
+	sudo_warnx(U_("unknown policy type %d found in %s"), plugin->type, path);
 	goto done;
     }
     if (SUDO_API_VERSION_GET_MAJOR(plugin->version) != SUDO_API_VERSION_MAJOR) {
-	warningx(U_("error in %s, line %d while loading plugin `%s'"),
+	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("incompatible plugin major version %d (expected %d) found in %s"),
+	sudo_warnx(U_("incompatible plugin major version %d (expected %d) found in %s"),
 	    SUDO_API_VERSION_GET_MAJOR(plugin->version),
 	    SUDO_API_VERSION_MAJOR, path);
 	goto done;
@@ -225,12 +225,12 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	if (policy_plugin->handle) {
 	    /* Ignore duplicate entries. */
 	    if (strcmp(policy_plugin->name, info->symbol_name) != 0) {
-		warningx(U_("ignoring policy plugin `%s' in %s, line %d"),
+		sudo_warnx(U_("ignoring policy plugin `%s' in %s, line %d"),
 		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-		warningx(U_("only a single policy plugin may be specified"));
+		sudo_warnx(U_("only a single policy plugin may be specified"));
 		goto done;
 	    }
-	    warningx(U_("ignoring duplicate policy plugin `%s' in %s, line %d"),
+	    sudo_warnx(U_("ignoring duplicate policy plugin `%s' in %s, line %d"),
 		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
 	    sudo_dso_unload(handle);
 	    handle = NULL;
@@ -245,7 +245,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	/* Check for duplicate entries. */
 	TAILQ_FOREACH(container, io_plugins, entries) {
 	    if (strcmp(container->name, info->symbol_name) == 0) {
-		warningx(U_("ignoring duplicate I/O plugin `%s' in %s, line %d"),
+		sudo_warnx(U_("ignoring duplicate I/O plugin `%s' in %s, line %d"),
 		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
 		sudo_dso_unload(handle);
 		handle = NULL;
@@ -316,7 +316,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	}
     }
     if (policy_plugin->u.policy->check_policy == NULL) {
-	warningx(U_("policy plugin %s does not include a check_policy method"),
+	sudo_warnx(U_("policy plugin %s does not include a check_policy method"),
 	    policy_plugin->name);
 	rval = false;
 	goto done;

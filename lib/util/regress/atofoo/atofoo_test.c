@@ -71,7 +71,7 @@ test_atobool(int *ntests)
 	(*ntests)++;
 	value = atobool(d->bool_str);
 	if (value != d->value) {
-	    warningx_nodebug("FAIL: %s != %d", d->bool_str, d->value);
+	    sudo_warnx_nodebug("FAIL: %s != %d", d->bool_str, d->value);
 	    errors++;
 	}
     }
@@ -109,14 +109,14 @@ test_atoid(int *ntests)
 	value = atoid(d->idstr, d->sep, &ep, &errstr);
 	if (errstr != NULL) {
 	    if (d->id != (id_t)-1) {
-		warningx_nodebug("FAIL: %s: %s", d->idstr, errstr);
+		sudo_warnx_nodebug("FAIL: %s: %s", d->idstr, errstr);
 		errors++;
 	    }
 	} else if (value != d->id) {
-	    warningx_nodebug("FAIL: %s != %u", d->idstr, (unsigned int)d->id);
+	    sudo_warnx_nodebug("FAIL: %s != %u", d->idstr, (unsigned int)d->id);
 	    errors++;
 	} else if (d->ep != NULL && ep[0] != d->ep[0]) {
-	    warningx_nodebug("FAIL: ep[0] %d != %d", (int)(unsigned char)ep[0],
+	    sudo_warnx_nodebug("FAIL: ep[0] %d != %d", (int)(unsigned char)ep[0],
 		(int)(unsigned char)d->ep[0]);
 	    errors++;
 	}
@@ -151,11 +151,11 @@ test_atomode(int *ntests)
 	mode = atomode(d->mode_str, &errstr);
 	if (errstr != NULL) {
 	    if (d->mode != (mode_t)-1) {
-		warningx_nodebug("FAIL: %s: %s", d->mode_str, errstr);
+		sudo_warnx_nodebug("FAIL: %s: %s", d->mode_str, errstr);
 		errors++;
 	    }
 	} else if (mode != d->mode) {
-	    warningx_nodebug("FAIL: %s != 0%o", d->mode_str,
+	    sudo_warnx_nodebug("FAIL: %s != 0%o", d->mode_str,
 		(unsigned int) d->mode);
 	    errors++;
 	}

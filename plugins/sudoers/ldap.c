@@ -114,23 +114,23 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #if defined(__GNUC__) && __GNUC__ == 2
 # define DPRINTF1(fmt...) do {						\
     if (ldap_conf.debug >= 1)						\
-	warningx(__VA_ARGS__);						\
+	sudo_warnx(__VA_ARGS__);						\
     sudo_debug_printf(SUDO_DEBUG_DIAG, fmt);				\
 } while (0)
 # define DPRINTF2(fmt...) do {						\
     if (ldap_conf.debug >= 2)						\
-	warningx(__VA_ARGS__);						\
+	sudo_warnx(__VA_ARGS__);						\
     sudo_debug_printf(SUDO_DEBUG_INFO, fmt);				\
 } while (0)
 #else
 # define DPRINTF1(...) do {						\
     if (ldap_conf.debug >= 1)						\
-	warningx(__VA_ARGS__);						\
+	sudo_warnx(__VA_ARGS__);						\
     sudo_debug_printf(SUDO_DEBUG_DIAG, __VA_ARGS__);			\
 } while (0)
 # define DPRINTF2(...) do {						\
     if (ldap_conf.debug >= 2)						\
-	warningx(__VA_ARGS__);						\
+	sudo_warnx(__VA_ARGS__);						\
     sudo_debug_printf(SUDO_DEBUG_INFO, __VA_ARGS__);			\
 } while (0)
 #endif
@@ -403,7 +403,7 @@ sudo_ldap_conf_add_ports(void)
     hostbuf[0] = '\0';
     len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
     if (len <= 0 || (size_t)len >= sizeof(defport)) {
-	warningx(U_("sudo_ldap_conf_add_ports: port too large"));
+	sudo_warnx(U_("sudo_ldap_conf_add_ports: port too large"));
 	debug_return_bool(false);
     }
 
@@ -428,7 +428,7 @@ sudo_ldap_conf_add_ports(void)
     debug_return_bool(true);
 
 toobig:
-    warningx(U_("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
+    sudo_warnx(U_("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
     debug_return_bool(false);
 }
 #endif
@@ -461,7 +461,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 		nldaps++;
 		host = uri + 8;
 	    } else {
-		warningx(U_("unsupported LDAP uri type: %s"), uri);
+		sudo_warnx(U_("unsupported LDAP uri type: %s"), uri);
 		goto done;
 	    }
 
@@ -492,11 +492,11 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 
 	if (nldaps != 0) {
 	    if (nldap != 0) {
-		warningx(U_("unable to mix ldap and ldaps URIs"));
+		sudo_warnx(U_("unable to mix ldap and ldaps URIs"));
 		goto done;
 	    }
 	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS)
-		warningx(U_("starttls not supported when using ldaps"));
+		sudo_warnx(U_("starttls not supported when using ldaps"));
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	}
 	efree(buf);
@@ -514,7 +514,7 @@ done:
     debug_return_int(rc);
 
 toobig:
-    warningx(U_("sudo_ldap_parse_uri: out of space building hostbuf"));
+    sudo_warnx(U_("sudo_ldap_parse_uri: out of space building hostbuf"));
     debug_return_int(-1);
 }
 #else
@@ -529,7 +529,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
     STAILQ_FOREACH(uri, uri_list, entries) {
 	if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
 	    if (strncasecmp(uri->val, "ldaps://", 8) == 0) {
-		warningx(U_("starttls not supported when using ldaps"));
+		sudo_warnx(U_("starttls not supported when using ldaps"));
 		ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	    }
 	}
@@ -596,10 +596,10 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	    }
 	}
 	if (rc != LDAP_SUCCESS) {
-	    warningx(U_("unable to initialize SSL cert and key db: %s"),
+	    sudo_warnx(U_("unable to initialize SSL cert and key db: %s"),
 		ldapssl_err2string(rc));
 	    if (ldap_conf.tls_certfile == NULL)
-		warningx(U_("you must set TLS_CERT in %s to use SSL"),
+		sudo_warnx(U_("you must set TLS_CERT in %s to use SSL"),
 		    path_ldap_conf);
 	    goto done;
 	}
@@ -614,7 +614,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	rc = ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw,
 	    0, &sslrc);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_ssl_client_init(): %s (SSL reason code %d)",
+	    sudo_warnx("ldap_ssl_client_init(): %s (SSL reason code %d)",
 		ldap_err2string(rc), sslrc);
 	    goto done;
 	}
@@ -1090,13 +1090,13 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     /* Make sure we have a formatted timestamp for __now__. */
     time(&now);
     if ((tp = gmtime(&now)) == NULL) {
-	warning(U_("unable to get GMT time"));
+	sudo_warn(U_("unable to get GMT time"));
 	goto done;
     }
 
     /* Format the timestamp according to the RFC. */
     if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
-	warningx(U_("unable to format timestamp"));
+	sudo_warnx(U_("unable to format timestamp"));
 	goto done;
     }
 
@@ -1104,7 +1104,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     bytes = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
 	timebuffer, timebuffer);
     if (bytes <= 0 || (size_t)bytes >= buffersize) {
-	warning(U_("unable to build time filter"));
+	sudo_warn(U_("unable to build time filter"));
 	bytes = 0;
     }
 
@@ -1323,7 +1323,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
 
     /* Add ALL to list and end the global OR */
     if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz) {
-	warningx(U_("sudo_ldap_build_pass1 allocation mismatch"));
+	sudo_warnx(U_("sudo_ldap_build_pass1 allocation mismatch"));
 	debug_return_str(NULL);
     }
 
@@ -1436,7 +1436,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 	    case CONF_INT:
 		*(int *)(cur->valp) = strtonum(value, INT_MIN, INT_MAX, &errstr);
 		if (errstr != NULL) {
-		    warningx(U_("%s: %s: %s: %s"),
+		    sudo_warnx(U_("%s: %s: %s: %s"),
 			path_ldap_conf, keyword, value, U_(errstr));
 		}
 		break;
@@ -2130,14 +2130,14 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 			do {
 			    nwritten = write(nfd, buf + off, nread - off);
 			    if (nwritten == -1) {
-				warning("error writing to %s", new_ccname);
+				sudo_warn("error writing to %s", new_ccname);
 				goto write_error;
 			    }
 			    off += nwritten;
 			} while (off < nread);
 		    }
 		    if (nread == -1)
-			warning("unable to read %s", new_ccname);
+			sudo_warn("unable to read %s", new_ccname);
 write_error:
 		    close(nfd);
 		    if (nread != -1 && nwritten != -1) {
@@ -2146,7 +2146,7 @@ write_error:
 			unlink(new_ccname);	/* failed */
 		    }
 		} else {
-		    warning("unable to create temp file %s", new_ccname);
+		    sudo_warn("unable to create temp file %s", new_ccname);
 		}
 	    }
 	    close(ofd);
@@ -2170,7 +2170,7 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 
     for (; interact->id != SASL_CB_LIST_END; interact++) {
 	if (interact->id != SASL_CB_USER) {
-	    warningx("sudo_ldap_sasl_interact: unexpected interact id %lu",
+	    sudo_warnx("sudo_ldap_sasl_interact: unexpected interact id %lu",
 		interact->id);
 	    rc = LDAP_PARAM_ERROR;
 	    break;
@@ -2222,7 +2222,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 		DPRINTF1("ldap_set_option: %s -> %d", cur->conf_str, ival);
 		rc = ldap_set_option(ld, cur->opt_val, &ival);
 		if (rc != LDAP_OPT_SUCCESS) {
-		    warningx("ldap_set_option: %s -> %d: %s",
+		    sudo_warnx("ldap_set_option: %s -> %d: %s",
 			cur->conf_str, ival, ldap_err2string(rc));
 		    errors++;
 		}
@@ -2234,7 +2234,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 		DPRINTF1("ldap_set_option: %s -> %s", cur->conf_str, sval);
 		rc = ldap_set_option(ld, cur->opt_val, sval);
 		if (rc != LDAP_OPT_SUCCESS) {
-		    warningx("ldap_set_option: %s -> %s: %s",
+		    sudo_warnx("ldap_set_option: %s -> %s: %s",
 			cur->conf_str, sval, ldap_err2string(rc));
 		    errors++;
 		}
@@ -2290,7 +2290,7 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	DPRINTF1("ldap_set_option(LDAP_OPT_TIMEOUT, %d)", ldap_conf.timeout);
 	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
-	    warningx("ldap_set_option(TIMEOUT, %d): %s",
+	    sudo_warnx("ldap_set_option(TIMEOUT, %d): %s",
 		ldap_conf.timeout, ldap_err2string(rc));
 	}
     }
@@ -2307,7 +2307,7 @@ sudo_ldap_set_options_conn(LDAP *ld)
 # if !defined(LDAP_OPT_CONNECT_TIMEOUT) || LDAP_VENDOR_VERSION != 510
 	/* Tivoli Directory Server 6.3 libs always return a (bogus) error. */
 	if (rc != LDAP_OPT_SUCCESS) {
-	    warningx("ldap_set_option(NETWORK_TIMEOUT, %d): %s",
+	    sudo_warnx("ldap_set_option(NETWORK_TIMEOUT, %d): %s",
 		ldap_conf.bind_timelimit / 1000, ldap_err2string(rc));
 	}
 # endif
@@ -2320,7 +2320,7 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	DPRINTF1("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)");
 	rc = ldap_set_option(ld, LDAP_OPT_X_TLS, &val);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s",
+	    sudo_warnx("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s",
 		ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
@@ -2443,7 +2443,7 @@ sudo_ldap_bind_s(LDAP *ld)
 		unlink(tmp_ccname);
 	}
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_sasl_interactive_bind_s(): %s",
+	    sudo_warnx("ldap_sasl_interactive_bind_s(): %s",
 		ldap_err2string(rc));
 	    goto done;
 	}
@@ -2460,7 +2460,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	rc = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,
 	    NULL, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
+	    sudo_warnx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
 	    goto done;
 	}
 	DPRINTF1("ldap_sasl_bind_s() ok");
@@ -2469,7 +2469,7 @@ sudo_ldap_bind_s(LDAP *ld)
     {
 	rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
+	    sudo_warnx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
 	    goto done;
 	}
 	DPRINTF1("ldap_simple_bind_s() ok");
@@ -2521,7 +2521,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	    rc = ldap_initialize(&ld, buf);
 	    efree(buf);
 	    if (rc != LDAP_SUCCESS) {
-		warningx(U_("unable to initialize LDAP: %s"),
+		sudo_warnx(U_("unable to initialize LDAP: %s"),
 		    ldap_err2string(rc));
 	    }
 	}
@@ -2543,7 +2543,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 #if defined(HAVE_LDAP_START_TLS_S)
 	rc = ldap_start_tls_s(ld, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
+	    sudo_warnx("ldap_start_tls_s(): %s", ldap_err2string(rc));
 	    goto done;
 	}
 	DPRINTF1("ldap_start_tls_s() ok");
@@ -2552,18 +2552,18 @@ sudo_ldap_open(struct sudo_nss *nss)
 	rc = ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw,
 	    0, &sslrc);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_ssl_client_init(): %s (SSL reason code %d)",
+	    sudo_warnx("ldap_ssl_client_init(): %s (SSL reason code %d)",
 		ldap_err2string(rc), sslrc);
 	    goto done;
 	}
 	rc = ldap_start_tls_s_np(ld, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_start_tls_s_np(): %s", ldap_err2string(rc));
+	    sudo_warnx("ldap_start_tls_s_np(): %s", ldap_err2string(rc));
 	    goto done;
 	}
 	DPRINTF1("ldap_start_tls_s_np() ok");
 #else
-	warningx(U_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
+	sudo_warnx(U_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
 #endif /* !HAVE_LDAP_START_TLS_S && !HAVE_LDAP_START_TLS_S_NP */
     }
 
@@ -2796,7 +2796,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
 	    DPRINTF2("order attribute raw: %s", (*bv)->bv_val);
 	    order = strtod((*bv)->bv_val, &ep);
 	    if (ep == (*bv)->bv_val || *ep != '\0') {
-		warningx(U_("invalid sudoOrder attribute: %s"), (*bv)->bv_val);
+		sudo_warnx(U_("invalid sudoOrder attribute: %s"), (*bv)->bv_val);
 		order = 0.0;
 	    }
 	    DPRINTF2("order attribute: %f", order);

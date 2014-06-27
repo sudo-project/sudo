@@ -79,10 +79,10 @@ emalloc(size_t size)
     void *ptr;
 
     if (size == 0)
-	fatalx_nodebug(_("internal error, tried to emalloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried to emalloc(0)"));
 
     if ((ptr = malloc(size)) == NULL)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     return ptr;
 }
 
@@ -96,13 +96,13 @@ emallocarray(size_t nmemb, size_t size)
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	fatalx_nodebug(_("internal error, tried to emallocarray(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried to emallocarray(0)"));
     if (nmemb > SIZE_MAX / size)
-	fatalx_nodebug(_("internal error, %s overflow"), "emallocarray");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "emallocarray");
 
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     return ptr;
 }
 
@@ -117,14 +117,14 @@ ecalloc(size_t nmemb, size_t size)
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	fatalx_nodebug(_("internal error, tried to ecalloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried to ecalloc(0)"));
     if (nmemb != 1) {
 	if (nmemb > SIZE_MAX / size)
-	    fatalx_nodebug(_("internal error, %s overflow"), "ecalloc");
+	    sudo_fatalx_nodebug(_("internal error, %s overflow"), "ecalloc");
 	size *= nmemb;
     }
     if ((ptr = malloc(size)) == NULL)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     memset(ptr, 0, size);
     return ptr;
 }
@@ -139,11 +139,11 @@ erealloc(void *ptr, size_t size)
 {
 
     if (size == 0)
-	fatalx_nodebug(_("internal error, tried to erealloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried to erealloc(0)"));
 
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     return ptr;
 }
 
@@ -158,14 +158,14 @@ ereallocarray(void *ptr, size_t nmemb, size_t size)
 {
 
     if (nmemb == 0 || size == 0)
-	fatalx_nodebug(_("internal error, tried to ereallocarray(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried to ereallocarray(0)"));
     if (nmemb > SIZE_MAX / size)
-	fatalx_nodebug(_("internal error, %s overflow"), "ereallocarray");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "ereallocarray");
 
     size *= nmemb;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     return ptr;
 }
 
@@ -181,14 +181,14 @@ erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
     size_t size;
 
     if (nmemb == 0 || msize == 0)
-	fatalx_nodebug(_("internal error, tried to erecalloc(0)"));
+	sudo_fatalx_nodebug(_("internal error, tried to erecalloc(0)"));
     if (nmemb > SIZE_MAX / msize)
-	fatalx_nodebug(_("internal error, %s overflow"), "erecalloc");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "erecalloc");
 
     size = nmemb * msize;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     if (nmemb > onmemb) {
 	size = (nmemb - onmemb) * msize;
 	memset((char *)ptr + (onmemb * msize), 0, size);
@@ -252,7 +252,7 @@ easprintf(char **ret, const char *fmt, ...)
     va_end(ap);
 
     if (len == -1)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     return len;
 }
 
@@ -266,6 +266,6 @@ evasprintf(char **ret, const char *format, va_list args)
     int len;
 
     if ((len = vasprintf(ret, format, args)) == -1)
-	fatal_nodebug(NULL);
+	sudo_fatal_nodebug(NULL);
     return len;
 }

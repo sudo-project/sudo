@@ -70,7 +70,7 @@ disable_execute(char *const envp[])
     (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_SEARCH", NULL);
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
 	debug_return_const_ptr(envp);
-    warning(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
+    sudo_warn(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC
@@ -112,7 +112,7 @@ disable_execute(char *const envp[])
 	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
-	    fatal(NULL);
+	    sudo_fatal(NULL);
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {

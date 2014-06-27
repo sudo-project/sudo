@@ -61,12 +61,12 @@ audit_sudo_selected(int sorf)
 			auditinfo_t ainfo;
 			/* Fall back to older BSM API. */
 			if (getaudit(&ainfo) < 0) {
-				warning("getaudit");
+				sudo_warn("getaudit");
 				debug_return_int(-1);
 			}
 			mask = &ainfo.ai_mask;
 		} else {
-			warning("getaudit_addr");
+			sudo_warn("getaudit_addr");
 			debug_return_int(-1);
 		}
         } else {
@@ -97,7 +97,7 @@ bsm_audit_success(char *exec_args[])
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			debug_return_int(0);
-		warning(U_("Could not determine audit condition"));
+		sudo_warn(U_("Could not determine audit condition"));
 		debug_return_int(-1);
 	}
 	if (au_cond == AUC_NOAUDIT)
@@ -110,11 +110,11 @@ bsm_audit_success(char *exec_args[])
 	if (selected != 1)
 		debug_return_int(!selected ? 0 : -1);
 	if (getauid(&auid) < 0) {
-		warning("getauid");
+		sudo_warn("getauid");
 		debug_return_int(-1);
 	}
 	if ((aufd = au_open()) == -1) {
-		warning("au_open");
+		sudo_warn("au_open");
 		debug_return_int(-1);
 	}
 	pid = getpid();
@@ -126,29 +126,29 @@ bsm_audit_success(char *exec_args[])
 		 * NB: We should probably watch out for ERANGE here.
 		 */
 		if (getaudit(&ainfo) < 0) {
-			warning("getaudit");
+			sudo_warn("getaudit");
 			debug_return_int(-1);
 		}
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
 	} else {
-		warning("getaudit_addr");
+		sudo_warn("getaudit_addr");
 		debug_return_int(-1);
 	}
 	if (tok == NULL) {
-		warning("au_to_subject");
+		sudo_warn("au_to_subject");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
 	tok = au_to_exec_args(exec_args);
 	if (tok == NULL) {
-		warning("au_to_exec_args");
+		sudo_warn("au_to_exec_args");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
 	tok = au_to_return32(0, 0);
 	if (tok == NULL) {
-		warning("au_to_return32");
+		sudo_warn("au_to_return32");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
@@ -158,7 +158,7 @@ bsm_audit_success(char *exec_args[])
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 #endif
 	{
-		warning(U_("unable to commit audit record"));
+		sudo_warn(U_("unable to commit audit record"));
 		debug_return_int(-1);
 	}
 	debug_return_int(0);
@@ -186,7 +186,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			debug_return_int(0);
-		warning(U_("Could not determine audit condition"));
+		sudo_warn(U_("Could not determine audit condition"));
 		debug_return_int(-1);
 	}
 	if (au_cond == AUC_NOAUDIT)
@@ -194,11 +194,11 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	if (!audit_sudo_selected(AU_PRS_FAILURE))
 		debug_return_int(0);
 	if (getauid(&auid) < 0) {
-		warning("getauid");
+		sudo_warn("getauid");
 		debug_return_int(-1);
 	}
 	if ((aufd = au_open()) == -1) {
-		warning("au_open");
+		sudo_warn("au_open");
 		debug_return_int(-1);
 	}
 	pid = getpid();
@@ -207,36 +207,36 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
 	} else if (errno == ENOSYS) {
 		if (getaudit(&ainfo) < 0) {
-			warning("getaudit");
+			sudo_warn("getaudit");
 			debug_return_int(-1);
 		}
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
 	} else {
-		warning("getaudit_addr");
+		sudo_warn("getaudit_addr");
 		debug_return_int(-1);
 	}
 	if (tok == NULL) {
-		warning("au_to_subject");
+		sudo_warn("au_to_subject");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
 	tok = au_to_exec_args(exec_args);
 	if (tok == NULL) {
-		warning("au_to_exec_args");
+		sudo_warn("au_to_exec_args");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
 	(void) vsnprintf(text, sizeof(text), fmt, ap);
 	tok = au_to_text(text);
 	if (tok == NULL) {
-		warning("au_to_text");
+		sudo_warn("au_to_text");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
 	tok = au_to_return32(EPERM, 1);
 	if (tok == NULL) {
-		warning("au_to_return32");
+		sudo_warn("au_to_return32");
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
@@ -246,7 +246,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 #endif
 	{
-		warning(U_("unable to commit audit record"));
+		sudo_warn(U_("unable to commit audit record"));
 		debug_return_int(-1);
 	}
 	debug_return_int(0);

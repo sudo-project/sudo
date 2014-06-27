@@ -249,15 +249,15 @@ static int sudo_sss_open(struct sudo_nss *nss)
     /* Load symbols */
     handle->ssslib = sudo_dso_load(path, SUDO_DSO_LAZY);
     if (handle->ssslib == NULL) {
-	warningx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
-	warningx(U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
+	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	sudo_warnx(U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
 	debug_return_int(EFAULT);
     }
 
     handle->fn_send_recv =
 	sudo_dso_findsym(handle->ssslib, "sss_sudo_send_recv");
     if (handle->fn_send_recv == NULL) {
-	warningx(U_("unable to find symbol \"%s\" in %s"), path,
+	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv");
 	debug_return_int(EFAULT);
     }
@@ -265,7 +265,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     handle->fn_send_recv_defaults =
 	sudo_dso_findsym(handle->ssslib, "sss_sudo_send_recv_defaults");
     if (handle->fn_send_recv_defaults == NULL) {
-	warningx(U_("unable to find symbol \"%s\" in %s"), path,
+	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv_defaults");
 	debug_return_int(EFAULT);
     }
@@ -273,7 +273,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     handle->fn_free_result =
 	sudo_dso_findsym(handle->ssslib, "sss_sudo_free_result");
     if (handle->fn_free_result == NULL) {
-	warningx(U_("unable to find symbol \"%s\" in %s"), path,
+	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_result");
 	debug_return_int(EFAULT);
     }
@@ -281,7 +281,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     handle->fn_get_values =
 	sudo_dso_findsym(handle->ssslib, "sss_sudo_get_values");
     if (handle->fn_get_values == NULL) {
-	warningx(U_("unable to find symbol \"%s\" in %s"), path,
+	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_get_values");
 	debug_return_int(EFAULT);
     }
@@ -289,7 +289,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     handle->fn_free_values =
 	sudo_dso_findsym(handle->ssslib, "sss_sudo_free_values");
     if (handle->fn_free_values == NULL) {
-	warningx(U_("unable to find symbol \"%s\" in %s"), path,
+	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_values");
 	debug_return_int(EFAULT);
     }

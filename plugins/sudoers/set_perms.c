@@ -362,9 +362,9 @@ set_perms(int perm)
     debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
-	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
+	sudo_warnx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
-	warning("%s", U_(errstr));
+	sudo_warn("%s", U_(errstr));
     debug_return_bool(false);
 }
 
@@ -375,7 +375,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2) {
-	warningx(U_("perm stack underflow"));
+	sudo_warnx(U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -393,27 +393,27 @@ restore_perms(void)
     /* XXX - more cases here where euid != ruid */
     if (OID(euid) == ROOT_UID) {
 	if (setresuid(-1, ROOT_UID, -1)) {
-	    warning("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
+	    sudo_warn("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
 		(int)state->ruid, (int)state->euid, (int)state->suid,
 		-1, ROOT_UID, -1);
 	    goto bad;
 	}
     }
     if (setresuid(OID(ruid), OID(euid), OID(suid))) {
-	warning("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
+	sudo_warn("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
 	    (int)state->ruid, (int)state->euid, (int)state->suid,
 	    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
 	goto bad;
     }
     if (setresgid(OID(rgid), OID(egid), OID(sgid))) {
-	warning("setresgid() [%d, %d, %d] -> [%d, %d, %d]",
+	sudo_warn("setresgid() [%d, %d, %d] -> [%d, %d, %d]",
 	    (int)state->rgid, (int)state->egid, (int)state->sgid,
 	    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
 	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
-	    warning("setgroups()");
+	    sudo_warn("setgroups()");
 	    goto bad;
 	}
     }
@@ -701,9 +701,9 @@ set_perms(int perm)
     debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
-	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
+	sudo_warnx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
-	warning("%s", U_(errstr));
+	sudo_warn("%s", U_(errstr));
     debug_return_bool(false);
 }
 
@@ -714,7 +714,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2) {
-	warningx(U_("perm stack underflow"));
+	sudo_warnx(U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -734,7 +734,7 @@ restore_perms(void)
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setuidx(ID_EFFECTIVE, %d)",
 		__func__, ROOT_UID);
 	    if (setuidx(ID_EFFECTIVE, ROOT_UID)) {
-		warning("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		sudo_warn("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
 		    (int)state->ruid, (int)state->euid, (int)state->suid,
 		    -1, ROOT_UID, -1);
 		goto bad;
@@ -745,7 +745,7 @@ restore_perms(void)
 		"%s: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 		__func__, OID(ruid));
 	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, OID(ruid))) {
-		warning("setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%d, %d, %d] -> [%d, %d, %d]",
+		sudo_warn("setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%d, %d, %d] -> [%d, %d, %d]",
 		    (int)state->ruid, (int)state->euid, (int)state->suid,
 		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
 		goto bad;
@@ -756,7 +756,7 @@ restore_perms(void)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "%s: setuidx(ID_EFFECTIVE, %d)", __func__, OID(euid));
 		if (setuidx(ID_EFFECTIVE, OID(euid))) {
-		    warning("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		    sudo_warn("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
 			(int)state->ruid, (int)state->euid, (int)state->suid,
 			(int)OID(ruid), (int)OID(euid), (int)OID(suid));
 		    goto bad;
@@ -767,7 +767,7 @@ restore_perms(void)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: setuidx(ID_REAL|ID_EFFECTIVE, %d)", __func__, OID(ruid));
 	    if (setuidx(ID_REAL|ID_EFFECTIVE, OID(ruid))) {
-		warning("setuidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		sudo_warn("setuidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
 		    (int)state->ruid, (int)state->euid, (int)state->suid,
 		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
 		goto bad;
@@ -777,7 +777,7 @@ restore_perms(void)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "%s: setuidx(ID_EFFECTIVE, %d)", __func__, ostate->euid);
 		if (setuidx(ID_EFFECTIVE, ostate->euid)) {
-		    warning("setuidx(ID_EFFECTIVE, %d)", ostate->euid);
+		    sudo_warn("setuidx(ID_EFFECTIVE, %d)", ostate->euid);
 		    goto bad;
 		}
 	    }
@@ -789,7 +789,7 @@ restore_perms(void)
 		"%s: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 		__func__, OID(rgid));
 	    if (setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, OID(rgid))) {
-		warning("setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%d, %d, %d] -> [%d, %d, %d]",
+		sudo_warn("setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%d, %d, %d] -> [%d, %d, %d]",
 		    (int)state->rgid, (int)state->egid, (int)state->sgid,
 		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 		goto bad;
@@ -798,7 +798,7 @@ restore_perms(void)
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setgidx(ID_EFFECTIVE, %d)",
 		__func__, OID(egid));
 	    if (setgidx(ID_EFFECTIVE, OID(egid))) {
-		warning("setgidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		sudo_warn("setgidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
 		    (int)state->rgid, (int)state->egid, (int)state->sgid,
 		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 		goto bad;
@@ -807,7 +807,7 @@ restore_perms(void)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: setgidx(ID_EFFECTIVE|ID_REAL, %d)", __func__, OID(rgid));
 	    if (setgidx(ID_REAL|ID_EFFECTIVE, OID(rgid))) {
-		warning("setgidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		sudo_warn("setgidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
 		    (int)state->rgid, (int)state->egid, (int)state->sgid,
 		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 		goto bad;
@@ -816,7 +816,7 @@ restore_perms(void)
     }
     if (state->grlist != ostate->grlist) {
 	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
-	    warning("setgroups()");
+	    sudo_warn("setgroups()");
 	    goto bad;
 	}
     }
@@ -1060,9 +1060,9 @@ set_perms(int perm)
     debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
-	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
+	sudo_warnx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
-	warning("%s", U_(errstr));
+	sudo_warn("%s", U_(errstr));
     debug_return_bool(false);
 }
 
@@ -1073,7 +1073,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2) {
-	warningx(U_("perm stack underflow"));
+	sudo_warnx(U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -1097,24 +1097,24 @@ restore_perms(void)
 	if (ID(euid) != ROOT_UID)
 	    ignore_result(setreuid(-1, ROOT_UID));
 	if (setuid(ROOT_UID)) {
-	    warning("setuid() [%d, %d] -> %d)", (int)state->ruid,
+	    sudo_warn("setuid() [%d, %d] -> %d)", (int)state->ruid,
 		(int)state->euid, ROOT_UID);
 	    goto bad;
 	}
     }
     if (setreuid(OID(ruid), OID(euid))) {
-	warning("setreuid() [%d, %d] -> [%d, %d]", (int)state->ruid,
+	sudo_warn("setreuid() [%d, %d] -> [%d, %d]", (int)state->ruid,
 	    (int)state->euid, (int)OID(ruid), (int)OID(euid));
 	goto bad;
     }
     if (setregid(OID(rgid), OID(egid))) {
-	warning("setregid() [%d, %d] -> [%d, %d]", (int)state->rgid,
+	sudo_warn("setregid() [%d, %d] -> [%d, %d]", (int)state->rgid,
 	    (int)state->egid, (int)OID(rgid), (int)OID(egid));
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
 	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
-	    warning("setgroups()");
+	    sudo_warn("setgroups()");
 	    goto bad;
 	}
     }
@@ -1356,9 +1356,9 @@ set_perms(int perm)
     debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
-	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
+	sudo_warnx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
-	warning("%s", U_(errstr));
+	sudo_warn("%s", U_(errstr));
     debug_return_bool(false);
 }
 
@@ -1369,7 +1369,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2) {
-	warningx(U_("perm stack underflow"));
+	sudo_warnx(U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -1390,27 +1390,27 @@ restore_perms(void)
      * real and effective uids to ROOT_UID initially to be safe.
      */
     if (seteuid(ROOT_UID)) {
-	warningx("seteuid() [%d] -> [%d]", (int)state->euid, ROOT_UID);
+	sudo_warnx("seteuid() [%d] -> [%d]", (int)state->euid, ROOT_UID);
 	goto bad;
     }
     if (setuid(ROOT_UID)) {
-	warningx("setuid() [%d, %d] -> [%d, %d]", (int)state->ruid, ROOT_UID,
+	sudo_warnx("setuid() [%d, %d] -> [%d, %d]", (int)state->ruid, ROOT_UID,
 	    ROOT_UID, ROOT_UID);
 	goto bad;
     }
 
     if (OID(egid) != (gid_t)-1 && setegid(ostate->egid)) {
-	warning("setegid(%d)", (int)ostate->egid);
+	sudo_warn("setegid(%d)", (int)ostate->egid);
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
 	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
-	    warning("setgroups()");
+	    sudo_warn("setgroups()");
 	    goto bad;
 	}
     }
     if (OID(euid) != (uid_t)-1 && seteuid(ostate->euid)) {
-	warning("seteuid(%d)", ostate->euid);
+	sudo_warn("seteuid(%d)", ostate->euid);
 	goto bad;
     }
     sudo_grlist_delref(state->grlist);
@@ -1520,9 +1520,9 @@ set_perms(int perm)
     debug_return_bool(true);
 bad:
     if (errno == EAGAIN)
-	warningx(U_("%s: %s"), U_(errstr), U_("too many processes"));
+	sudo_warnx(U_("%s: %s"), U_(errstr), U_("too many processes"));
     else
-	warning("%s", U_(errstr));
+	sudo_warn("%s", U_(errstr));
     debug_return_bool(false);
 }
 
@@ -1533,7 +1533,7 @@ restore_perms(void)
     debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2) {
-	warningx(U_("perm stack underflow"));
+	sudo_warnx(U_("perm stack underflow"));
 	debug_return_bool(true);
     }
 
@@ -1547,18 +1547,18 @@ restore_perms(void)
 	__func__, (int)state->rgid, (int)ostate->rgid);
 
     if (OID(rgid) != (gid_t)-1 && setgid(ostate->rgid)) {
-	warning("setgid(%d)", (int)ostate->rgid);
+	sudo_warn("setgid(%d)", (int)ostate->rgid);
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
 	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
-	    warning("setgroups()");
+	    sudo_warn("setgroups()");
 	    goto bad;
 	}
     }
     sudo_grlist_delref(state->grlist);
     if (OID(ruid) != (uid_t)-1 && setuid(ostate->ruid)) {
-	warning("setuid(%d)", (int)ostate->ruid);
+	sudo_warn("setuid(%d)", (int)ostate->ruid);
 	goto bad;
     }
     debug_return_bool(true);

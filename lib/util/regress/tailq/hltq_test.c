@@ -81,17 +81,17 @@ main(int argc, char *argv[])
     d1.a = 1;
     d1.b = 'a';
     if (HLTQ_FIRST(&d1) != &d1) {
-	warningx_nodebug("FAIL: HLTQ_FIRST(1 entry) doesn't return first element: got %p, expected %p", HLTQ_FIRST(&d1), &d1);
+	sudo_warnx_nodebug("FAIL: HLTQ_FIRST(1 entry) doesn't return first element: got %p, expected %p", HLTQ_FIRST(&d1), &d1);
 	errors++;
     }
     ntests++;
     if (HLTQ_LAST(&d1, test_data, entries) != &d1) {
-	warningx_nodebug("FAIL: HLTQ_LAST(1 entry) doesn't return first element: got %p, expected %p", HLTQ_LAST(&d1, test_data, entries), &d1);
+	sudo_warnx_nodebug("FAIL: HLTQ_LAST(1 entry) doesn't return first element: got %p, expected %p", HLTQ_LAST(&d1, test_data, entries), &d1);
 	errors++;
     }
     ntests++;
     if (HLTQ_PREV(&d1, test_data, entries) != NULL) {
-	warningx_nodebug("FAIL: HLTQ_PREV(1 entry) doesn't return NULL: got %p", HLTQ_PREV(&d1, test_data, entries));
+	sudo_warnx_nodebug("FAIL: HLTQ_PREV(1 entry) doesn't return NULL: got %p", HLTQ_PREV(&d1, test_data, entries));
 	errors++;
     }
     ntests++;
@@ -113,44 +113,44 @@ main(int argc, char *argv[])
      * work as expected.
      */
     if (HLTQ_FIRST(hltq) != &d1) {
-	warningx_nodebug("FAIL: HLTQ_FIRST(3 entries) doesn't return first element: got %p, expected %p", HLTQ_FIRST(hltq), &d1);
+	sudo_warnx_nodebug("FAIL: HLTQ_FIRST(3 entries) doesn't return first element: got %p, expected %p", HLTQ_FIRST(hltq), &d1);
 	errors++;
     }
     ntests++;
     if (HLTQ_LAST(hltq, test_data, entries) != &d3) {
-	warningx_nodebug("FAIL: HLTQ_LAST(3 entries) doesn't return third element: got %p, expected %p", HLTQ_LAST(hltq, test_data, entries), &d3);
+	sudo_warnx_nodebug("FAIL: HLTQ_LAST(3 entries) doesn't return third element: got %p, expected %p", HLTQ_LAST(hltq, test_data, entries), &d3);
 	errors++;
     }
     ntests++;
 
     if (HLTQ_NEXT(&d1, entries) != &d2) {
-	warningx_nodebug("FAIL: HLTQ_NEXT(&d1) doesn't return &d2: got %p, expected %p", HLTQ_NEXT(&d1, entries), &d2);
+	sudo_warnx_nodebug("FAIL: HLTQ_NEXT(&d1) doesn't return &d2: got %p, expected %p", HLTQ_NEXT(&d1, entries), &d2);
 	errors++;
     }
     ntests++;
     if (HLTQ_NEXT(&d2, entries) != &d3) {
-	warningx_nodebug("FAIL: HLTQ_NEXT(&d2) doesn't return &d3: got %p, expected %p", HLTQ_NEXT(&d2, entries), &d3);
+	sudo_warnx_nodebug("FAIL: HLTQ_NEXT(&d2) doesn't return &d3: got %p, expected %p", HLTQ_NEXT(&d2, entries), &d3);
 	errors++;
     }
     ntests++;
     if (HLTQ_NEXT(&d3, entries) != NULL) {
-	warningx_nodebug("FAIL: HLTQ_NEXT(&d3) doesn't return NULL: got %p", HLTQ_NEXT(&d3, entries));
+	sudo_warnx_nodebug("FAIL: HLTQ_NEXT(&d3) doesn't return NULL: got %p", HLTQ_NEXT(&d3, entries));
 	errors++;
     }
     ntests++;
 
     if (HLTQ_PREV(&d1, test_data, entries) != NULL) {
-	warningx_nodebug("FAIL: HLTQ_PREV(&d1) doesn't return NULL: got %p", HLTQ_PREV(&d1, test_data, entries));
+	sudo_warnx_nodebug("FAIL: HLTQ_PREV(&d1) doesn't return NULL: got %p", HLTQ_PREV(&d1, test_data, entries));
 	errors++;
     }
     ntests++;
     if (HLTQ_PREV(&d2, test_data, entries) != &d1) {
-	warningx_nodebug("FAIL: HLTQ_PREV(&d2) doesn't return &d1: got %p, expected %p", HLTQ_PREV(&d2, test_data, entries), &d1);
+	sudo_warnx_nodebug("FAIL: HLTQ_PREV(&d2) doesn't return &d1: got %p, expected %p", HLTQ_PREV(&d2, test_data, entries), &d1);
 	errors++;
     }
     ntests++;
     if (HLTQ_PREV(&d3, test_data, entries) != &d2) {
-	warningx_nodebug("FAIL: HLTQ_PREV(&d3) doesn't return &d2: got %p, expected %p", HLTQ_PREV(&d3, test_data, entries), &d2);
+	sudo_warnx_nodebug("FAIL: HLTQ_PREV(&d3) doesn't return &d2: got %p, expected %p", HLTQ_PREV(&d3, test_data, entries), &d2);
 	errors++;
     }
     ntests++;
@@ -159,44 +159,44 @@ main(int argc, char *argv[])
     HLTQ_TO_TAILQ(&tq, hltq, entries);
 
     if (TAILQ_FIRST(&tq) != &d1) {
-	warningx_nodebug("FAIL: TAILQ_FIRST(&tq) doesn't return first element: got %p, expected %p", TAILQ_FIRST(&tq), &d1);
+	sudo_warnx_nodebug("FAIL: TAILQ_FIRST(&tq) doesn't return first element: got %p, expected %p", TAILQ_FIRST(&tq), &d1);
 	errors++;
     }
     ntests++;
     if (TAILQ_LAST(&tq, test_data_list) != &d3) {
-	warningx_nodebug("FAIL: TAILQ_LAST(&tq) doesn't return third element: got %p, expected %p", TAILQ_LAST(&tq, test_data_list), &d3);
+	sudo_warnx_nodebug("FAIL: TAILQ_LAST(&tq) doesn't return third element: got %p, expected %p", TAILQ_LAST(&tq, test_data_list), &d3);
 	errors++;
     }
     ntests++;
 
     if (TAILQ_NEXT(&d1, entries) != &d2) {
-	warningx_nodebug("FAIL: TAILQ_NEXT(&d1) doesn't return &d2: got %p, expected %p", TAILQ_NEXT(&d1, entries), &d2);
+	sudo_warnx_nodebug("FAIL: TAILQ_NEXT(&d1) doesn't return &d2: got %p, expected %p", TAILQ_NEXT(&d1, entries), &d2);
 	errors++;
     }
     ntests++;
     if (TAILQ_NEXT(&d2, entries) != &d3) {
-	warningx_nodebug("FAIL: TAILQ_NEXT(&d2) doesn't return &d3: got %p, expected %p", TAILQ_NEXT(&d2, entries), &d3);
+	sudo_warnx_nodebug("FAIL: TAILQ_NEXT(&d2) doesn't return &d3: got %p, expected %p", TAILQ_NEXT(&d2, entries), &d3);
 	errors++;
     }
     ntests++;
     if (TAILQ_NEXT(&d3, entries) != NULL) {
-	warningx_nodebug("FAIL: TAILQ_NEXT(&d3) doesn't return NULL: got %p", TAILQ_NEXT(&d3, entries));
+	sudo_warnx_nodebug("FAIL: TAILQ_NEXT(&d3) doesn't return NULL: got %p", TAILQ_NEXT(&d3, entries));
 	errors++;
     }
     ntests++;
 
     if (TAILQ_PREV(&d1, test_data_list, entries) != NULL) {
-	warningx_nodebug("FAIL: TAILQ_PREV(&d1) doesn't return NULL: got %p", TAILQ_PREV(&d1, test_data_list, entries));
+	sudo_warnx_nodebug("FAIL: TAILQ_PREV(&d1) doesn't return NULL: got %p", TAILQ_PREV(&d1, test_data_list, entries));
 	errors++;
     }
     ntests++;
     if (TAILQ_PREV(&d2, test_data_list, entries) != &d1) {
-	warningx_nodebug("FAIL: TAILQ_PREV(&d2) doesn't return &d1: got %p, expected %p", TAILQ_PREV(&d2, test_data_list, entries), &d1);
+	sudo_warnx_nodebug("FAIL: TAILQ_PREV(&d2) doesn't return &d1: got %p, expected %p", TAILQ_PREV(&d2, test_data_list, entries), &d1);
 	errors++;
     }
     ntests++;
     if (TAILQ_PREV(&d3, test_data_list, entries) != &d2) {
-	warningx_nodebug("FAIL: TAILQ_PREV(&d3) doesn't return &d2: got %p, expected %p", TAILQ_PREV(&d3, test_data_list, entries), &d2);
+	sudo_warnx_nodebug("FAIL: TAILQ_PREV(&d3) doesn't return &d2: got %p, expected %p", TAILQ_PREV(&d3, test_data_list, entries), &d2);
 	errors++;
     }
     ntests++;

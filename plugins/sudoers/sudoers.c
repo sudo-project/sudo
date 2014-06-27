@@ -129,7 +129,7 @@ sudoers_policy_init(void *info, char * const envp[])
     sudo_setgrent();
 
     /* Register fatal/fatalx callback. */
-    fatal_callback_register(sudoers_cleanup);
+    sudo_fatal_callback_register(sudoers_cleanup);
 
     /* Initialize environment functions (including replacements). */
     env_init(envp);
@@ -165,7 +165,7 @@ sudoers_policy_init(void *info, char * const envp[])
         }
     }
     if (sources == 0) {
-	warningx(U_("no valid sudoers sources found, quitting"));
+	sudo_warnx(U_("no valid sudoers sources found, quitting"));
 	goto cleanup;
     }
 
@@ -231,7 +231,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
 	/* Not an audit event. */
-        warningx(U_("sudoers specifies that root is not allowed to sudo"));
+        sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
         goto bad;
     }    
 
@@ -276,7 +276,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
 	    /* XXX - audit? */
-	    warningx(U_("you are not permitted to use the -C option"));
+	    sudo_warnx(U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
 	def_closefrom = user_closefrom;
@@ -349,7 +349,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgc, NewArgv, N_("no tty"));
-	warningx(U_("sorry, you must have a tty to run sudo"));
+	sudo_warnx(U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
 
@@ -401,17 +401,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgc, NewArgv, N_("command in current directory"));
-	warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	sudo_warnx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
 	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
 		NewArgv[0]);
-	    warningx(U_("%s: command not found"), NewArgv[0]);
+	    sudo_warnx(U_("%s: command not found"), NewArgv[0]);
 	} else {
 	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
 		user_cmnd);
-	    warningx(U_("%s: command not found"), user_cmnd);
+	    sudo_warnx(U_("%s: command not found"), user_cmnd);
 	}
 	goto bad;
     }
@@ -420,7 +420,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
 	    /* XXX - audit? */
-	    warningx(U_("sorry, you are not allowed to preserve the environment"));
+	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
 	    if (!validate_env_vars(sudo_user.env_vars))
@@ -493,7 +493,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	/* Insert system-wide environment variables. */
 	if (!read_env_file(_PATH_ENVIRONMENT, true))
-	    warning("%s", _PATH_ENVIRONMENT);
+	    sudo_warn("%s", _PATH_ENVIRONMENT);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	/* Set environment based on login class. */
@@ -510,7 +510,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Insert system-wide environment variables. */
     if (def_env_file) {
 	if (!read_env_file(def_env_file, false))
-	    warning("%s", def_env_file);
+	    sudo_warn("%s", def_env_file);
     }
 
     /* Insert user-specified environment variables. */
@@ -595,7 +595,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
-		warningx(U_("unknown uid: %u"), (unsigned int) user_uid);
+		sudo_warnx(U_("unknown uid: %u"), (unsigned int) user_uid);
 		debug_return_bool(false);
 	    }
 
@@ -704,7 +704,7 @@ set_cmnd(void)
 		for (to = user_args, av = NewArgv + 1; *av; av++) {
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args)) {
-			warningx(U_("internal error, %s overflow"), __func__);
+			sudo_warnx(U_("internal error, %s overflow"), __func__);
 			debug_return_int(-1);
 		    }
 		    to += n;
@@ -822,7 +822,7 @@ set_loginclass(struct passwd *pw)
 
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 && pw->pw_uid != 0) {
-	    warningx(U_("only root can use `-c %s'"), login_class);
+	    sudo_warnx(U_("only root can use `-c %s'"), login_class);
 	    rval = false;
 	    goto done;
 	}
@@ -978,7 +978,7 @@ cb_sudoers_locale(const char *locale)
 }
 
 /*
- * Cleanup hook for fatal()/fatalx()
+ * Cleanup hook for sudo_fatal()/sudo_fatalx()
  */
 void
 sudoers_cleanup(void)
@@ -1087,7 +1087,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
     }
     if (!editor_path) {
 	audit_failure(NewArgc, NewArgv, N_("%s: command not found"), editor);
-	warningx(U_("%s: command not found"), editor);
+	sudo_warnx(U_("%s: command not found"), editor);
     }
     debug_return_str(editor_path);
 }

@@ -85,43 +85,43 @@ set_project(struct passwd *pw)
 	case SETPROJ_ERR_TASK:
 	    switch (errno) {
 	    case EAGAIN:
-		warningx(U_("resource control limit has been reached"));
+		sudo_warnx(U_("resource control limit has been reached"));
 		break;
 	    case ESRCH:
-		warningx(U_("user \"%s\" is not a member of project \"%s\""),
+		sudo_warnx(U_("user \"%s\" is not a member of project \"%s\""),
 		    pw->pw_name, proj.pj_name);
 		break;
 	    case EACCES:
-		warningx(U_("the invoking task is final"));
+		sudo_warnx(U_("the invoking task is final"));
 		break;
 	    default:
-		warningx(U_("could not join project \"%s\""), proj.pj_name);
+		sudo_warnx(U_("could not join project \"%s\""), proj.pj_name);
 	    }
 	case SETPROJ_ERR_POOL:
 	    switch (errno) {
 	    case EACCES:
-		warningx(U_("no resource pool accepting default bindings "
+		sudo_warnx(U_("no resource pool accepting default bindings "
 		    "exists for project \"%s\""), proj.pj_name);
 		break;
 	    case ESRCH:
-		warningx(U_("specified resource pool does not exist for "
+		sudo_warnx(U_("specified resource pool does not exist for "
 		    "project \"%s\""), proj.pj_name);
 		break;
 	    default:
-		warningx(U_("could not bind to default resource pool for "
+		sudo_warnx(U_("could not bind to default resource pool for "
 		    "project \"%s\""), proj.pj_name);
 	    }
 	    break;
 	default:
 	    if (errval <= 0) {
-		warningx(U_("setproject failed for project \"%s\""), proj.pj_name);
+		sudo_warnx(U_("setproject failed for project \"%s\""), proj.pj_name);
 	    } else {
-		warningx(U_("warning, resource control assignment failed for "
+		sudo_warnx(U_("warning, resource control assignment failed for "
 		    "project \"%s\""), proj.pj_name);
 	    }
 	}
     } else {
-	warning("getdefaultproj");
+	sudo_warn("getdefaultproj");
     }
     endprojent();
     debug_return;

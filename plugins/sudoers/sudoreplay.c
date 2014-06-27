@@ -252,7 +252,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Register fatal/fatalx callback. */
-    fatal_callback_register(sudoreplay_cleanup);
+    sudo_fatal_callback_register(sudoreplay_cleanup);
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
@@ -273,7 +273,7 @@ main(int argc, char *argv[])
 		else if (strcmp(cp, "ttyout") == 0)
 		    io_log_files[IOFD_TTYOUT].enabled = true;
 		else
-		    fatalx(U_("invalid filter option: %s"), optarg);
+		    sudo_fatalx(U_("invalid filter option: %s"), optarg);
 	    }
 	    break;
 	case 'h':
@@ -286,13 +286,13 @@ main(int argc, char *argv[])
 	    errno = 0;
 	    max_wait = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		fatalx(U_("invalid max wait: %s"), optarg);
+		sudo_fatalx(U_("invalid max wait: %s"), optarg);
 	    break;
 	case 's':
 	    errno = 0;
 	    speed_factor = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		fatalx(U_("invalid speed factor: %s"), optarg);
+		sudo_fatalx(U_("invalid speed factor: %s"), optarg);
 	    break;
 	case 'V':
 	    (void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
@@ -327,13 +327,13 @@ main(int argc, char *argv[])
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
 	if (plen <= 0 || (size_t)plen >= sizeof(path))
-	    fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
+	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
 	    session_dir, id);
 	if (plen <= 0 || (size_t)plen >= sizeof(path))
-	    fatalx(U_("%s/%s/timing: %s"), session_dir,
+	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir,
 		id, strerror(ENAMETOOLONG));
     }
     plen -= 7;
@@ -341,7 +341,7 @@ main(int argc, char *argv[])
     /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
 	if (open_io_fd(path, plen, &io_log_files[idx]) == -1) 
-	    fatal(U_("unable to open %s"), path);
+	    sudo_fatal(U_("unable to open %s"), path);
     }
 
     /* Parse log file. */
@@ -411,20 +411,20 @@ replay_session(const double max_wait, const char *decimal)
 	if (idx != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, idx | O_NONBLOCK);
 	if (!sudo_term_raw(STDIN_FILENO, 1))
-	    fatal(U_("unable to set tty to raw mode"));
+	    sudo_fatal(U_("unable to set tty to raw mode"));
     }
 
     /* Setup event base and input/output events. */
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL)
-	fatal(NULL);
+	sudo_fatal(NULL);
     input_ev = sudo_ev_alloc(STDIN_FILENO, interactive ? SUDO_EV_READ :
 	SUDO_EV_TIMEOUT, check_input, sudo_ev_self_cbarg());
     if (input_ev == NULL)
-        fatal(NULL);
+        sudo_fatal(NULL);
     output_ev = sudo_ev_alloc(STDIN_FILENO, SUDO_EV_WRITE, write_output, &wc);
     if (output_ev == NULL)
-        fatal(NULL);
+        sudo_fatal(NULL);
 
     /*
      * Read each line of the timing file, displaying the output streams.
@@ -442,7 +442,7 @@ replay_session(const double max_wait, const char *decimal)
 
 	buf[strcspn(buf, "\n")] = '\0';
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
-	    fatalx(U_("invalid timing file line: %s"), buf);
+	    sudo_fatalx(U_("invalid timing file line: %s"), buf);
 
 	/* Adjust delay using speed factor and clamp to max_wait */
 	to_wait = seconds / speed_factor;
@@ -581,7 +581,7 @@ write_output(int fd, int what, void *v)
     switch (nwritten) {
     case -1:
 	if (errno != EINTR && errno != EAGAIN)
-	    fatal(U_("unable to write to %s"), "stdout");
+	    sudo_fatal(U_("unable to write to %s"), "stdout");
 	break;
     case 0:
 	break;
@@ -648,7 +648,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    continue;
 	case 'c': /* command */
 	    if (av[0][1] == '\0')
-		fatalx(U_("ambiguous expression \"%s\""), *av);
+		sudo_fatalx(U_("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "cwd", strlen(*av)) == 0)
 		type = ST_CWD;
 	    else if (strncmp(*av, "command", strlen(*av)) == 0)
@@ -673,7 +673,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    break;
 	case 't': /* tty or to date */
 	    if (av[0][1] == '\0')
-		fatalx(U_("ambiguous expression \"%s\""), *av);
+		sudo_fatalx(U_("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "todate", strlen(*av)) == 0)
 		type = ST_TODATE;
 	    else if (strncmp(*av, "tty", strlen(*av)) == 0)
@@ -695,11 +695,11 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    if (av[0][1] != '\0')
 		goto bad;
 	    if (!sub_expr)
-		fatalx(U_("unmatched ')' in expression"));
+		sudo_fatalx(U_("unmatched ')' in expression"));
 	    debug_return_int(av - argv + 1);
 	bad:
 	default:
-	    fatalx(U_("unknown search term \"%s\""), *av);
+	    sudo_fatalx(U_("unknown search term \"%s\""), *av);
 	    /* NOTREACHED */
 	}
 
@@ -713,17 +713,17 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    av += parse_expr(&sn->u.expr, av + 1, true);
 	} else {
 	    if (*(++av) == NULL)
-		fatalx(U_("%s requires an argument"), av[-1]);
+		sudo_fatalx(U_("%s requires an argument"), av[-1]);
 #ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
 		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
-		    fatalx(U_("invalid regular expression: %s"), *av);
+		    sudo_fatalx(U_("invalid regular expression: %s"), *av);
 	    } else
 #endif
 	    if (type == ST_TODATE || type == ST_FROMDATE) {
 		sn->u.tstamp = get_date(*av);
 		if (sn->u.tstamp == -1)
-		    fatalx(U_("could not parse date \"%s\""), *av);
+		    sudo_fatalx(U_("could not parse date \"%s\""), *av);
 	    } else {
 		sn->u.ptr = *av;
 	    }
@@ -732,11 +732,11 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	STAILQ_INSERT_TAIL(head, sn, entries);
     }
     if (sub_expr)
-	fatalx(U_("unmatched '(' in expression"));
+	sudo_fatalx(U_("unmatched '(' in expression"));
     if (or)
-	fatalx(U_("illegal trailing \"or\""));
+	sudo_fatalx(U_("illegal trailing \"or\""));
     if (not)
-	fatalx(U_("illegal trailing \"!\""));
+	sudo_fatalx(U_("illegal trailing \"!\""));
 
     debug_return_int(av - argv);
 }
@@ -775,7 +775,7 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 	    if (rc && rc != REG_NOMATCH) {
 		char buf[BUFSIZ];
 		regerror(rc, &sn->u.cmdre, buf, sizeof(buf));
-		fatalx("%s", buf);
+		sudo_fatalx("%s", buf);
 	    }
 	    res = rc == REG_NOMATCH ? 0 : 1;
 #else
@@ -789,7 +789,7 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 	    res = log->tstamp <= sn->u.tstamp;
 	    break;
 	default:
-	    fatalx(U_("unknown search type %d"), sn->type);
+	    sudo_fatalx(U_("unknown search type %d"), sn->type);
 	    /* NOTREACHED */
 	}
 	if (sn->negated)
@@ -812,7 +812,7 @@ parse_logfile(char *logfile)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
-	warning(U_("unable to open %s"), logfile);
+	sudo_warn(U_("unable to open %s"), logfile);
 	goto bad;
     }
 
@@ -826,7 +826,7 @@ parse_logfile(char *logfile)
     if (getline(&buf, &bufsize, fp) == -1 ||
 	getline(&li->cwd, &cwdsize, fp) == -1 ||
 	getline(&li->cmd, &cmdsize, fp) == -1) {
-	warning(U_("%s: invalid log file"), logfile);
+	sudo_warn(U_("%s: invalid log file"), logfile);
 	goto bad;
     }
 
@@ -844,21 +844,21 @@ parse_logfile(char *logfile)
 
     /* timestamp */
     if ((ep = strchr(cp, ':')) == NULL) {
-	warning(U_("%s: time stamp field is missing"), logfile);
+	sudo_warn(U_("%s: time stamp field is missing"), logfile);
 	goto bad;
     }
     *ep = '\0';
     li->tstamp = sizeof(time_t) == 4 ? strtonum(cp, INT_MIN, INT_MAX, &errstr) :
 	strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
     if (errstr != NULL) {
-	warning(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
+	sudo_warn(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
 	goto bad;
     }
 
     /* user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	warning(U_("%s: user field is missing"), logfile);
+	sudo_warn(U_("%s: user field is missing"), logfile);
 	goto bad;
     }
     li->user = estrndup(cp, (size_t)(ep - cp));
@@ -866,7 +866,7 @@ parse_logfile(char *logfile)
     /* runas user */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	warning(U_("%s: runas user field is missing"), logfile);
+	sudo_warn(U_("%s: runas user field is missing"), logfile);
 	goto bad;
     }
     li->runas_user = estrndup(cp, (size_t)(ep - cp));
@@ -874,7 +874,7 @@ parse_logfile(char *logfile)
     /* runas group */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
-	warning(U_("%s: runas group field is missing"), logfile);
+	sudo_warn(U_("%s: runas group field is missing"), logfile);
 	goto bad;
     }
     if (cp != ep)
@@ -989,7 +989,7 @@ session_compare(const void *v1, const void *v2)
     return strcmp(s1, s2);
 }
 
-/* XXX - always returns 0, calls fatal() on failure */
+/* XXX - always returns 0, calls sudo_fatal() on failure */
 static int
 find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 {
@@ -1009,13 +1009,13 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 
     d = opendir(dir);
     if (d == NULL)
-	fatal(U_("unable to open %s"), dir);
+	sudo_fatal(U_("unable to open %s"), dir);
 
     /* XXX - would be faster to chdir and use relative names */
     sdlen = strlcpy(pathbuf, dir, sizeof(pathbuf));
     if (sdlen + 1 >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
-	fatal("%s/", dir);
+	sudo_fatal("%s/", dir);
     }
     pathbuf[sdlen++] = '/';
     pathbuf[sdlen] = '\0';
@@ -1054,7 +1054,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	    "%s/log", sessions[i]);
 	if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
 	    errno = ENAMETOOLONG;
-	    fatal("%s/%s/log", dir, sessions[i]);
+	    sudo_fatal("%s/%s/log", dir, sessions[i]);
 	}
 	efree(sessions[i]);
 
@@ -1073,7 +1073,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     debug_return_int(0);
 }
 
-/* XXX - always returns 0, calls fatal() on failure */
+/* XXX - always returns 0, calls sudo_fatal() on failure */
 static int
 list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
@@ -1089,7 +1089,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     if (pattern) {
 	re = &rebuf;
 	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
-	    fatalx(U_("invalid regular expression: %s"), pattern);
+	    sudo_fatalx(U_("invalid regular expression: %s"), pattern);
     }
 #else
     re = (char *) pattern;
@@ -1116,7 +1116,7 @@ check_input(int fd, int what, void *v)
 	switch (read(fd, &ch, 1)) {
 	case -1:
 	    if (errno != EINTR && errno != EAGAIN)
-		fatal(U_("unable to read %s"), "stdin");
+		sudo_fatal(U_("unable to read %s"), "stdin");
 	    break;
 	case 0:
 	    /* Ignore EOF. */
@@ -1255,7 +1255,7 @@ help(void)
 }
 
 /*
- * Cleanup hook for fatal()/fatalx()
+ * Cleanup hook for sudo_fatal()/sudo_fatalx()
   */
 static void
 sudoreplay_cleanup(void)

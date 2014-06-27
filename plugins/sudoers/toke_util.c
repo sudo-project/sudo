@@ -65,7 +65,7 @@ fill_txt(const char *src, int len, int olen)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	warning(NULL);
+	sudo_warn(NULL);
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -118,7 +118,7 @@ fill_cmnd(const char *src, int len)
 
     dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
-	warning(NULL);
+	sudo_warn(NULL);
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -159,7 +159,7 @@ fill_args(const char *s, int len, int addspace)
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
 	    efree(sudoerslval.command.args);
-	    warning(NULL);
+	    sudo_warn(NULL);
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	} else
@@ -171,7 +171,7 @@ fill_args(const char *s, int len, int addspace)
     if (addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != (size_t)len) {
-	warningx(U_("internal error, %s overflow"), __func__);
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }

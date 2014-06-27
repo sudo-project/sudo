@@ -68,12 +68,12 @@ check_addr(char *input)
 	cp++;
     expected = strtonum(cp, 0, 1, &errstr);
     if (errstr != NULL)
-	fatalx("expecting 0 or 1, got %s", cp);
+	sudo_fatalx("expecting 0 or 1, got %s", cp);
     input[len] = '\0';
 
     matched = addr_matches(input);
     if (matched != expected) {
-	warningx("%s %smatched: FAIL", input, matched ? "" : "not ");
+	sudo_warnx("%s %smatched: FAIL", input, matched ? "" : "not ");
 	return 1;
     }
     return 0;
@@ -101,7 +101,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", argv[1]);
 
     /*
      * Input is in the following format.  There are two types of
@@ -136,7 +136,7 @@ main(int argc, char *argv[])
 	    errors += check_addr(line + sizeof("address:") - 1);
 	    ntests++;
 	} else {
-	    warningx("unexpected data line: %s\n", line);
+	    sudo_warnx("unexpected data line: %s\n", line);
 	    continue;
 	}
     }

@@ -71,7 +71,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", argv[1]);
 
     /*
      * Each test record consists of a log entry on one line and a list of
@@ -99,7 +99,7 @@ main(int argc, char *argv[])
 		    len = maxlen = strtonum(cp, 1, INT_MAX, NULL);
 		}
 		if (len == 0 || maxlen == 0)
-		    fatalx("%s: invalid length on line %d\n", argv[1], lineno);
+		    sudo_fatalx("%s: invalid length on line %d\n", argv[1], lineno);
 		while (len <= maxlen) {
 		    printf("# word wrap at %d characters\n", (int)len);
 		    writeln_wrap(stdout, lines[0], strlen(lines[0]), len);

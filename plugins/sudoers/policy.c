@@ -106,7 +106,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		p = *cur + sizeof("sudoers_uid=") - 1;
 		sudoers_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL) {
-		    warningx(U_("%s: %s"), *cur, U_(errstr));
+		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
 		}
 		continue;
@@ -115,7 +115,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		p = *cur + sizeof("sudoers_gid=") - 1;
 		sudoers_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL) {
-		    warningx(U_("%s: %s"), *cur, U_(errstr));
+		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
 		}
 		continue;
@@ -124,7 +124,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		p = *cur + sizeof("sudoers_mode=") - 1;
 		sudoers_mode = atomode(p, &errstr);
 		if (errstr != NULL) {
-		    warningx(U_("%s: %s"), *cur, U_(errstr));
+		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
 		}
 		continue;
@@ -148,7 +148,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("closefrom=") - 1;
 	    user_closefrom = strtonum(p, 4, INT_MAX, &errstr);
 	    if (user_closefrom == 0) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -264,7 +264,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("max_groups=") - 1;
 	    sudo_user.max_groups = strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.max_groups == 0) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -284,7 +284,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("uid=") - 1;
 	    user_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -293,7 +293,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("gid=") - 1;
 	    user_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -323,7 +323,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("lines=") - 1;
 	    sudo_user.lines = strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.lines == 0) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -333,7 +333,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("cols=") - 1;
 	    sudo_user.cols = strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.lines == 0) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -342,7 +342,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("sid=") - 1;
 	    sudo_user.sid = (pid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
-		warningx(U_("%s: %s"), *cur, U_(errstr));
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
 	    continue;
@@ -465,7 +465,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    (unsigned int)runas_pw->pw_gid;
 	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
-	    warningx(U_("internal error, %s overflow"), __func__);
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
@@ -474,7 +474,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
 		     (unsigned int) grlist->gids[i]);
 		if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
-		    warningx(U_("internal error, %s overflow"), __func__);
+		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -556,15 +556,15 @@ sudoers_policy_close(int exit_status, int error_code)
     /* We do not currently log the exit status. */
     if (error_code) {
 	errno = error_code;
-	warning(U_("unable to execute %s"), safe_cmnd);
+	sudo_warn(U_("unable to execute %s"), safe_cmnd);
     }
 
     /* Close the session we opened in sudoers_policy_init_session(). */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
 	(void)sudo_auth_end_session(runas_pw);
 
-    /* Deregister the callback for fatal()/fatalx(). */
-    fatal_callback_deregister(sudoers_cleanup);
+    /* Deregister the callback for sudo_fatal()/sudo_fatalx(). */
+    sudo_fatal_callback_deregister(sudoers_cleanup);
 
     /* Free remaining references to password and group entries. */
     /* XXX - move cleanup to function in sudoers.c */
@@ -668,7 +668,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
-	    warningx(U_("unknown user: %s"), list_user);
+	    sudo_warnx(U_("unknown user: %s"), list_user);
 	    debug_return_bool(-1);
 	}
     }

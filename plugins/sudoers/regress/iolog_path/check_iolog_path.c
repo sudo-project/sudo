@@ -75,18 +75,18 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
     time(&now);
     timeptr = localtime(&now);
     if (timeptr == NULL)
-	fatalx("localtime returned NULL");
+	sudo_fatalx("localtime returned NULL");
     strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 
     path = expand_iolog_path(NULL, dir_in, file_in, &slash);
     *slash = '\0';
     if (strcmp(path, dir_out) != 0) {
-	warningx("%s: expected %s, got %s", dir_in, dir_out, path);
+	sudo_warnx("%s: expected %s, got %s", dir_in, dir_out, path);
 	error = 1;
     }
     if (strcmp(slash + 1, file_out) != 0) {
-	warningx("%s: expected %s, got %s", file_in, file_out, slash + 1);
+	sudo_warnx("%s: expected %s, got %s", file_in, file_out, slash + 1);
 	error = 1;
     }
 
@@ -116,7 +116,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", argv[1]);
 
     memset(&pw, 0, sizeof(pw));
     memset(&rpw, 0, sizeof(rpw));
@@ -154,7 +154,7 @@ main(int argc, char *argv[])
 	case 2:
 	    user_gid = (gid_t)atoid(line, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx("group ID %s: %s", line, errstr);
+		sudo_fatalx("group ID %s: %s", line, errstr);
 	    break;
 	case 3:
 	    if (runas_pw->pw_name != NULL)
@@ -164,7 +164,7 @@ main(int argc, char *argv[])
 	case 4:
 	    runas_pw->pw_gid = (gid_t)atoid(line, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx("group ID %s: %s", line, errstr);
+		sudo_fatalx("group ID %s: %s", line, errstr);
 	    break;
 	case 5:
 	    user_shost = strdup(line);
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
 	    tests++;
 	    break;
 	default:
-	    fatalx("internal error, invalid state %d", state);
+	    sudo_fatalx("internal error, invalid state %d", state);
 	}
 	state = (state + 1) % MAX_STATE;
     }
