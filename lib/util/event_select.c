@@ -92,10 +92,10 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ev->fd > base->maxfd) {
 	const int o = (base->maxfd + 1) / NFDBITS;
 	const int n = howmany(ev->fd + 1, NFDBITS);
-	base->readfds_in = ersudo_ecalloc(base->readfds_in, o, n, sizeof(fd_mask));
-	base->writefds_in = ersudo_ecalloc(base->writefds_in, o, n, sizeof(fd_mask));
-	base->readfds_out = ersudo_ecalloc(base->readfds_out, o, n, sizeof(fd_mask));
-	base->writefds_out = ersudo_ecalloc(base->writefds_out, o, n, sizeof(fd_mask));
+	base->readfds_in = sudo_erecalloc(base->readfds_in, o, n, sizeof(fd_mask));
+	base->writefds_in = sudo_erecalloc(base->writefds_in, o, n, sizeof(fd_mask));
+	base->readfds_out = sudo_erecalloc(base->readfds_out, o, n, sizeof(fd_mask));
+	base->writefds_out = sudo_erecalloc(base->writefds_out, o, n, sizeof(fd_mask));
 	base->maxfd = (n * NFDBITS) - 1;
     }
 

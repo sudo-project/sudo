@@ -170,20 +170,20 @@ sudo_ereallocarray(void *ptr, size_t nmemb, size_t size)
 }
 
 /*
- * sudo_ersudo_ecalloc() realloc(3)s nmemb * msize bytes and exits with an error
+ * sudo_erecalloc() realloc(3)s nmemb * msize bytes and exits with an error
  * if overflow would occur or if the system malloc(3)/realloc(3) fails.
  * On success, the new space is zero-filled.  You can call sudo_erealloc()
  * with a NULL pointer even if the system realloc(3) does not support this.
  */
 void *
-ersudo_ecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
+sudo_erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
 {
     size_t size;
 
     if (nmemb == 0 || msize == 0)
 	sudo_fatalx_nodebug(_("internal error, tried allocate zero bytes"));
     if (nmemb > SIZE_MAX / msize)
-	sudo_fatalx_nodebug(_("internal error, %s overflow"), "ersudo_ecalloc");
+	sudo_fatalx_nodebug(_("internal error, %s overflow"), "sudo_erecalloc");
 
     size = nmemb * msize;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
