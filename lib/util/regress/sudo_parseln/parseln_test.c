@@ -42,7 +42,6 @@
 #endif
 
 #include "missing.h"
-#include "fileops.h"
 #include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[]);

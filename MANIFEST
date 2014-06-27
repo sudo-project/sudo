@@ -65,7 +65,6 @@ include/compat/stdbool.h/
 include/compat/timespec.h/
 include/compat/utime.h/
 include/fatal.h
-include/fileops.h
 include/gettext.h
 include/missing.h
 include/queue.h
@@ -93,7 +92,6 @@ lib/util/event.c
 lib/util/event_poll.c
 lib/util/event_select.c
 lib/util/fatal.c
-lib/util/fileops.c
 lib/util/fnmatch.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
@@ -106,11 +104,13 @@ lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c
 lib/util/lbuf.c
+lib/util/locking.c
 lib/util/memrchr.c
 lib/util/memset_s.c
 lib/util/mksiglist.c
 lib/util/mksigname.c
 lib/util/mktemp.c
+lib/util/parseln.c
 lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/regress/atofoo/atofoo_test.c

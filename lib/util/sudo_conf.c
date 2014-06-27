@@ -53,7 +53,6 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "fileops.h"
 #include "pathnames.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"

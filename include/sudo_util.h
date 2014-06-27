@@ -150,11 +150,20 @@ __dso_public id_t atoid(const char *str, const char *sep, char **endp, const cha
 /* atomode.c */
 __dso_public int atomode(const char *cp, const char **errstr);
 
+/* gidlist.c */
+__dso_public int sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+
 /* key_val.c */
 __dso_public char *sudo_new_key_val(const char *key, const char *value);
 
-/* gidlist.c */
-__dso_public int sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+/* locking.c */
+#define SUDO_LOCK	1		/* lock a file */
+#define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
+#define SUDO_UNLOCK	4		/* unlock a file */
+__dso_public bool sudo_lock_file(int, int);
+
+/* parseln.c */
+__dso_public ssize_t sudo_parseln(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
 
 /* progname.c */
 __dso_public void initprogname(const char *);
