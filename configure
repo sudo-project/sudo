@@ -791,6 +791,7 @@ CPPFLAGS
 PROGS
 CFLAGS
 LIBTOOL
+HAVE_SOLARIS_AUDIT
 HAVE_BSM_AUDIT
 target_alias
 host_alias
@@ -841,6 +842,7 @@ with_rpath
 with_blibpath
 with_bsm_audit
 with_linux_audit
+with_solaris_audit
 with_sssd
 with_sssd_lib
 with_incpath
@@ -1628,6 +1630,7 @@ Optional Packages:
   --with-blibpath=PATH    deprecated
   --with-bsm-audit        enable BSM audit support
   --with-linux-audit      enable Linux audit support
+  --with-solaris-audit    enable Solaris audit support
   --with-sssd             enable SSSD support
   --with-sssd-lib         path to the SSSD library
   --with-incpath          additional places to look for include files
@@ -2976,6 +2979,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3992,6 +3996,22 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 		;;
     no)		;;
     *)		as_fn_error $? "\"--with-linux-audit does not take an argument.\"" "$LINENO" 5
+		;;
+esac
+fi
+
+
+
+# Check whether --with-solaris-audit was given.
+if test "${with_solaris_audit+set}" = set; then :
+  withval=$with_solaris_audit; case $with_solaris_audit in
+    yes)	$as_echo "#define HAVE_SOLARIS_AUDIT 1" >>confdefs.h
+
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
+		SUDOERS_OBJS="${SUDOERS_OBJS} solaris_audit.lo"
+		;;
+    no)		;;
+    *)		as_fn_error $? "\"--with-solaris-audit does not take an argument.\"" "$LINENO" 5
 		;;
 esac
 fi
@@ -24816,6 +24836,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

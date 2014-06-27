@@ -46,6 +46,9 @@
 #ifdef HAVE_LINUX_AUDIT
 # include "linux_audit.h"
 #endif
+#ifdef HAVE_SOLARIS_AUDIT
+# include "solaris_audit.h"
+#endif
 
 int
 audit_success(int argc, char *argv[])
@@ -60,6 +63,10 @@ audit_success(int argc, char *argv[])
 #endif
 #ifdef HAVE_LINUX_AUDIT
 	if (linux_audit_command(argv, 1) == -1)
+	    rc = -1;
+#endif
+#ifdef HAVE_SOLARIS_AUDIT
+	if (solaris_audit_success(argc, argv) == -1)
 	    rc = -1;
 #endif
     }
@@ -90,6 +97,12 @@ audit_failure(int argc, char *argv[], char const *const fmt, ...)
 #ifdef HAVE_LINUX_AUDIT
 	va_start(ap, fmt);
 	if (linux_audit_command(argv, 0) == -1)
+	    rc = -1;
+	va_end(ap);
+#endif
+#ifdef HAVE_SOLARIS_AUDIT
+	va_start(ap, fmt);
+	if (solaris_audit_failure(argc, argv, _(fmt), ap) == -1)
 	    rc = -1;
 	va_end(ap);
 #endif

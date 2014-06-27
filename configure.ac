@@ -15,6 +15,7 @@ dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
 AC_SUBST([HAVE_BSM_AUDIT])
+AC_SUBST([HAVE_SOLARIS_AUDIT])
 AC_SUBST([SHELL])
 AC_SUBST([LIBTOOL])
 AC_SUBST([CFLAGS])
@@ -328,6 +329,20 @@ AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux aud
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
+		;;
+esac])
+
+dnl
+dnl Handle Solaris auditing support.
+dnl
+AC_ARG_WITH(solaris-audit, [AS_HELP_STRING([--with-solaris-audit], [enable Solaris audit support])],
+[case $with_solaris_audit in
+    yes)	AC_DEFINE(HAVE_SOLARIS_AUDIT)
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
+		SUDOERS_OBJS="${SUDOERS_OBJS} solaris_audit.lo"
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-solaris-audit does not take an argument."])
 		;;
 esac])
 
@@ -3924,6 +3939,7 @@ AH_TEMPLATE(HAVE_SHL_LOAD, [Define to 1 if you have the `shl_load' function.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
 AH_TEMPLATE(HAVE_RFC1938_SKEYCHALLENGE, [Define to 1 if the skeychallenge() function is RFC1938-compliant and takes 4 arguments.])
+AH_TEMPLATE(HAVE_SOLARIS_AUDIT, [Define to 1 to enable Solaris audit support.])
 AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union.])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member.])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member.])

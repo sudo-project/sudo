@@ -548,6 +548,9 @@
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
+/* Define to 1 to enable Solaris audit support. */
+#undef HAVE_SOLARIS_AUDIT
+
 /* Define to 1 if you have the <spawn.h> header file. */
 #undef HAVE_SPAWN_H
 

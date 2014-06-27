@@ -463,7 +463,8 @@ alias.lo: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/alias.c
 audit.lo: $(srcdir)/audit.c $(incdir)/compat/stdbool.h $(incdir)/gettext.h \
           $(incdir)/missing.h $(incdir)/sudo_debug.h $(srcdir)/bsm_audit.h \
-          $(srcdir)/linux_audit.h $(srcdir)/logging.h $(top_builddir)/config.h
+          $(srcdir)/linux_audit.h $(srcdir)/logging.h \
+          $(srcdir)/solaris_audit.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/audit.c
 base64.lo: $(srcdir)/base64.c $(incdir)/missing.h $(incdir)/sudo_debug.h \
            $(top_builddir)/config.h
@@ -809,6 +810,16 @@ sia.lo: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/sia.c
+solaris_audit.lo: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
+                  $(incdir)/compat/stdbool.h $(incdir)/fatal.h \
+                  $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/queue.h \
+                  $(incdir)/sudo_alloc.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                  $(srcdir)/defaults.h $(srcdir)/logging.h \
+                  $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(top_builddir)/config.h \
+                  $(top_builddir)/pathnames.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/solaris_audit.c
 sssd.lo: $(srcdir)/sssd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/fatal.h $(incdir)/gettext.h $(incdir)/missing.h \
          $(incdir)/queue.h $(incdir)/sudo_alloc.h $(incdir)/sudo_debug.h \

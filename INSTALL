@@ -400,6 +400,9 @@ Authentication options:
         the user name (separated by a slash) when creating the
         principal name.
 
+  --with-solaris-audit
+	Enable audit support for Solaris systems.
+
   --with-opie[=DIR]
 	Enable NRL OPIE OTP (One Time Password) support.  If specified,
 	DIR should contain include and lib directories with opie.h

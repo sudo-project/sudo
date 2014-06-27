@@ -422,6 +422,8 @@ plugins/sudoers/regress/visudo/test4.sh
 plugins/sudoers/regress/visudo/test5.out.ok
 plugins/sudoers/regress/visudo/test5.sh
 plugins/sudoers/set_perms.c
+plugins/sudoers/solaris_audit.c
+plugins/sudoers/solaris_audit.h
 plugins/sudoers/sssd.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
