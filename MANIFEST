@@ -83,9 +83,6 @@ install-sh
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/alloc.c
-lib/util/atobool.c
-lib/util/atoid.c
-lib/util/atomode.c
 lib/util/clock_gettime.c
 lib/util/closefrom.c
 lib/util/event.c
@@ -156,6 +153,9 @@ lib/util/snprintf.c
 lib/util/strlcat.c
 lib/util/strlcpy.c
 lib/util/strsignal.c
+lib/util/strtobool.c
+lib/util/strtoid.c
+lib/util/strtomode.c
 lib/util/strtonum.c
 lib/util/sudo_conf.c
 lib/util/sudo_debug.c
