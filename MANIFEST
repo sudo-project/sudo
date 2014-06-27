@@ -50,7 +50,6 @@ doc/visudo.cat
 doc/visudo.man.in
 doc/visudo.mdoc.in
 include/Makefile.in
-include/alloc.h
 include/compat/charclass.h/
 include/compat/endian.h/
 include/compat/fnmatch.h/
@@ -69,6 +68,7 @@ include/gettext.h
 include/missing.h
 include/queue.h
 include/secure_path.h
+include/sudo_alloc.h
 include/sudo_conf.h
 include/sudo_debug.h
 include/sudo_dso.h
