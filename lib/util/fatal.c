@@ -85,7 +85,7 @@ sudo_fatalx_nodebug(const char *fmt, ...)
 }
 
 void
-sudo_sudo_vfatal_nodebug(const char *fmt, va_list ap)
+sudo_vfatal_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     do_cleanup();
@@ -93,7 +93,7 @@ sudo_sudo_vfatal_nodebug(const char *fmt, va_list ap)
 }
 
 void
-sudo_sudo_vfatalx_nodebug(const char *fmt, va_list ap)
+sudo_vfatalx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
