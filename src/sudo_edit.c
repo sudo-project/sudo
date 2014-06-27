@@ -216,7 +216,11 @@ sudo_edit(struct command_details *command_details)
 	 */
 	times[0].tv_sec = times[1].tv_sec = tf[j].omtim.tv_sec;
 	times[0].tv_usec = times[1].tv_usec = tf[j].omtim.tv_usec;
+#ifdef HAVE_FUTIMES
 	(void) futimes(tfd, times);
+#else
+	(void) utimes(tf[j].tfile, times);
+#endif
 	rc = fstat(tfd, &sb);
 	if (!rc)
 	    mtim_get(&sb, &tf[j].omtim);
