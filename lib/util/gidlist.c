@@ -73,7 +73,7 @@ sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
 	    gids[ngids++] = *basegid;
 	cp = gidstr;
 	do {
-	    gids[ngids] = (GETGROUPS_T) atoid(cp, ",", &ep, &errstr);
+	    gids[ngids] = (GETGROUPS_T) sudo_strtoid(cp, ",", &ep, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), cp, U_(errstr));
 		free(gids);

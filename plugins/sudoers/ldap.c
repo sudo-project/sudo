@@ -1431,7 +1431,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		    *(int *)(cur->valp) = LDAP_DEREF_NEVER;
 		break;
 	    case CONF_BOOL:
-		*(int *)(cur->valp) = atobool(value) == true;
+		*(int *)(cur->valp) = sudo_strtobool(value) == true;
 		break;
 	    case CONF_INT:
 		*(int *)(cur->valp) = strtonum(value, INT_MIN, INT_MAX, &errstr);
@@ -1662,7 +1662,7 @@ sudo_ldap_read_config(void)
     if (ldap_conf.ssl != NULL) {
 	if (strcasecmp(ldap_conf.ssl, "start_tls") == 0)
 	    ldap_conf.ssl_mode = SUDO_LDAP_STARTTLS;
-	else if (atobool(ldap_conf.ssl) == true)
+	else if (sudo_strtobool(ldap_conf.ssl) == true)
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
     }
 

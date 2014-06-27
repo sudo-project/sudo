@@ -141,14 +141,14 @@ __dso_public int aix_prep_user(char *user, const char *tty);
 __dso_public int aix_restoreauthdb(void);
 __dso_public int aix_setauthdb(char *user);
 
-/* atobool.c */
-__dso_public int atobool(const char *str);
+/* strtobool.c */
+__dso_public int sudo_strtobool(const char *str);
 
-/* atoid.c */
-__dso_public id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
+/* strtoid.c */
+__dso_public id_t sudo_strtoid(const char *str, const char *sep, char **endp, const char **errstr);
 
-/* atomode.c */
-__dso_public int atomode(const char *cp, const char **errstr);
+/* strtomode.c */
+__dso_public int sudo_strtomode(const char *cp, const char **errstr);
 
 /* gidlist.c */
 __dso_public int sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);

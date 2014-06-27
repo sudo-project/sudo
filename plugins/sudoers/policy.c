@@ -104,7 +104,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		sudoers_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
+		sudoers_uid = (uid_t) sudo_strtoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -113,7 +113,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		sudoers_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
+		sudoers_gid = (gid_t) sudo_strtoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -122,7 +122,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		p = *cur + sizeof("sudoers_mode=") - 1;
-		sudoers_mode = atomode(p, &errstr);
+		sudoers_mode = sudo_strtomode(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -173,49 +173,49 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "set_home=")) {
-	    if (atobool(*cur + sizeof("set_home=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("set_home=") - 1) == true)
 		SET(flags, MODE_RESET_HOME);
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_environment=")) {
-	    if (atobool(*cur + sizeof("preserve_environment=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("preserve_environment=") - 1) == true)
 		SET(flags, MODE_PRESERVE_ENV);
 	    continue;
 	}
 	if (MATCHES(*cur, "run_shell=")) {
-	    if (atobool(*cur + sizeof("run_shell=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("run_shell=") - 1) == true)
 		SET(flags, MODE_SHELL);
 	    continue;
 	}
 	if (MATCHES(*cur, "login_shell=")) {
-	    if (atobool(*cur + sizeof("login_shell=") - 1) == true) {
+	    if (sudo_strtobool(*cur + sizeof("login_shell=") - 1) == true) {
 		SET(flags, MODE_LOGIN_SHELL);
 		def_env_reset = true;
 	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "implied_shell=")) {
-	    if (atobool(*cur + sizeof("implied_shell=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("implied_shell=") - 1) == true)
 		SET(flags, MODE_IMPLIED_SHELL);
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_groups=")) {
-	    if (atobool(*cur + sizeof("preserve_groups=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("preserve_groups=") - 1) == true)
 		SET(flags, MODE_PRESERVE_GROUPS);
 	    continue;
 	}
 	if (MATCHES(*cur, "ignore_ticket=")) {
-	    if (atobool(*cur + sizeof("ignore_ticket=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("ignore_ticket=") - 1) == true)
 		SET(flags, MODE_IGNORE_TICKET);
 	    continue;
 	}
 	if (MATCHES(*cur, "noninteractive=")) {
-	    if (atobool(*cur + sizeof("noninteractive=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("noninteractive=") - 1) == true)
 		SET(flags, MODE_NONINTERACTIVE);
 	    continue;
 	}
 	if (MATCHES(*cur, "sudoedit=")) {
-	    if (atobool(*cur + sizeof("sudoedit=") - 1) == true)
+	    if (sudo_strtobool(*cur + sizeof("sudoedit=") - 1) == true)
 		SET(flags, MODE_EDIT);
 	    continue;
 	}
@@ -282,7 +282,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "uid=")) {
 	    p = *cur + sizeof("uid=") - 1;
-	    user_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
+	    user_uid = (uid_t) sudo_strtoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -291,7 +291,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
-	    user_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
+	    user_gid = (gid_t) sudo_strtoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -340,7 +340,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
-	    sudo_user.sid = (pid_t) atoid(p, NULL, NULL, &errstr);
+	    sudo_user.sid = (pid_t) sudo_strtoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;

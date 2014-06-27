@@ -123,7 +123,7 @@ next_entry:
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    id = atoid(cp, NULL, NULL, &errstr);
+    id = sudo_strtoid(cp, NULL, NULL, &errstr);
     if (errstr != NULL)
 	goto next_entry;
     gr.gr_gid = (gid_t)id;

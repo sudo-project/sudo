@@ -160,7 +160,7 @@ set_variable(const char *entry, const char *conf_file)
 static void
 set_var_disable_coredump(const char *entry, const char *conf_file)
 {
-    int val = atobool(entry);
+    int val = sudo_strtobool(entry);
 
     if (val != -1)
 	sudo_conf_data.disable_coredump = val;
@@ -198,7 +198,7 @@ set_var_max_groups(const char *entry, const char *conf_file)
 static void
 set_var_probe_interfaces(const char *entry, const char *conf_file)
 {
-    int val = atobool(entry);
+    int val = sudo_strtobool(entry);
 
     if (val != -1)
 	sudo_conf_data.probe_interfaces = val;

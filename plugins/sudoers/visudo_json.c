@@ -375,7 +375,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    value.u.string++;
 	    typestr = "nonunixgroup";
 	    if (*value.u.string == '#') {
-		id = atoid(m->name + 3, NULL, NULL, &errstr);
+		id = sudo_strtoid(m->name + 3, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx("internal error: non-Unix group ID %s: \"%s\"",
 			errstr, m->name);
@@ -388,7 +388,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	} else {
 	    typestr = "usergroup";
 	    if (*value.u.string == '#') {
-		id = atoid(m->name + 2, NULL, NULL, &errstr);
+		id = sudo_strtoid(m->name + 2, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx("internal error: group ID %s: \"%s\"",
 			errstr, m->name);
@@ -422,7 +422,7 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	case TYPE_USERNAME:
 	    typestr = "username";
 	    if (*value.u.string == '#') {
-		id = atoid(m->name + 1, NULL, NULL, &errstr);
+		id = sudo_strtoid(m->name + 1, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx("internal error: user ID %s: \"%s\"",
 			errstr, m->name);

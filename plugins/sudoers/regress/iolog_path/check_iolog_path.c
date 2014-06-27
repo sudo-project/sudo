@@ -152,7 +152,7 @@ main(int argc, char *argv[])
 	    user_name = strdup(line);
 	    break;
 	case 2:
-	    user_gid = (gid_t)atoid(line, NULL, NULL, &errstr);
+	    user_gid = (gid_t)sudo_strtoid(line, NULL, NULL, &errstr);
 	    if (errstr != NULL)
 		sudo_fatalx("group ID %s: %s", line, errstr);
 	    break;
@@ -162,7 +162,7 @@ main(int argc, char *argv[])
 	    runas_pw->pw_name = strdup(line);
 	    break;
 	case 4:
-	    runas_pw->pw_gid = (gid_t)atoid(line, NULL, NULL, &errstr);
+	    runas_pw->pw_gid = (gid_t)sudo_strtoid(line, NULL, NULL, &errstr);
 	    if (errstr != NULL)
 		sudo_fatalx("group ID %s: %s", line, errstr);
 	    break;

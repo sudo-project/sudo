@@ -38,11 +38,11 @@
 
 __dso_public int main(int argc, char *argv[]);
 
-/* atobool() tests */
-static struct atobool_data {
+/* sudo_strtobool() tests */
+static struct strtobool_data {
     const char *bool_str;
     int value;
-} atobool_data[] = {
+} strtobool_data[] = {
     { "true", true },
     { "false", false },
     { "TrUe", true },
@@ -61,15 +61,15 @@ static struct atobool_data {
 };
 
 static int
-test_atobool(int *ntests)
+test_strtobool(int *ntests)
 {
-    struct atobool_data *d;
+    struct strtobool_data *d;
     int errors = 0;
     int value;
 
-    for (d = atobool_data; d->bool_str != NULL; d++) {
+    for (d = strtobool_data; d->bool_str != NULL; d++) {
 	(*ntests)++;
-	value = atobool(d->bool_str);
+	value = sudo_strtobool(d->bool_str);
 	if (value != d->value) {
 	    sudo_warnx_nodebug("FAIL: %s != %d", d->bool_str, d->value);
 	    errors++;
@@ -79,13 +79,13 @@ test_atobool(int *ntests)
     return errors;
 }
 
-/* atoid() tests */
-static struct atoid_data {
+/* sudo_strtoid() tests */
+static struct strtoid_data {
     const char *idstr;
     id_t id;
     const char *sep;
     const char *ep;
-} atoid_data[] = {
+} strtoid_data[] = {
     { "0,1", 0, ",", "," },
     { "10", 10, NULL, NULL },
     { "-2", -2, NULL, NULL },
@@ -95,18 +95,18 @@ static struct atoid_data {
 };
 
 static int
-test_atoid(int *ntests)
+test_strtoid(int *ntests)
 {
-    struct atoid_data *d;
+    struct strtoid_data *d;
     const char *errstr;
     char *ep;
     int errors = 0;
     id_t value;
 
-    for (d = atoid_data; d->idstr != NULL; d++) {
+    for (d = strtoid_data; d->idstr != NULL; d++) {
 	(*ntests)++;
 	errstr = "some error";
-	value = atoid(d->idstr, d->sep, &ep, &errstr);
+	value = sudo_strtoid(d->idstr, d->sep, &ep, &errstr);
 	if (errstr != NULL) {
 	    if (d->id != (id_t)-1) {
 		sudo_warnx_nodebug("FAIL: %s: %s", d->idstr, errstr);
@@ -125,11 +125,11 @@ test_atoid(int *ntests)
     return errors;
 }
 
-/* atomode() tests */
-static struct atomode_data {
+/* sudo_strtomode() tests */
+static struct strtomode_data {
     const char *mode_str;
     mode_t mode;
-} atomode_data[] = {
+} strtomode_data[] = {
     { "755", 0755 },
     { "007", 007 },
     { "7", 7 },
@@ -138,17 +138,17 @@ static struct atomode_data {
 };
 
 static int
-test_atomode(int *ntests)
+test_strtomode(int *ntests)
 {
-    struct atomode_data *d;
+    struct strtomode_data *d;
     const char *errstr;
     int errors = 0;
     mode_t mode;
 
-    for (d = atomode_data; d->mode_str != NULL; d++) {
+    for (d = strtomode_data; d->mode_str != NULL; d++) {
 	(*ntests)++;
 	errstr = "some error";
-	mode = atomode(d->mode_str, &errstr);
+	mode = sudo_strtomode(d->mode_str, &errstr);
 	if (errstr != NULL) {
 	    if (d->mode != (mode_t)-1) {
 		sudo_warnx_nodebug("FAIL: %s: %s", d->mode_str, errstr);
@@ -165,7 +165,7 @@ test_atomode(int *ntests)
 }
 
 /*
- * Simple tests for atobool(), atoid(), atomode().
+ * Simple tests for sudo_strtobool(), sudo_strtoid(), sudo_strtomode().
  */
 int
 main(int argc, char *argv[])
@@ -175,9 +175,9 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "atofoo");
 
-    errors += test_atobool(&ntests);
-    errors += test_atoid(&ntests);
-    errors += test_atomode(&ntests);
+    errors += test_strtobool(&ntests);
+    errors += test_strtoid(&ntests);
+    errors += test_strtomode(&ntests);
 
     printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);

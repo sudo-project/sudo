@@ -22,9 +22,6 @@ _sudo_printf
 aix_prep_user
 aix_restoreauthdb
 aix_setauthdb
-atobool
-atoid
-atomode
 closefrom_fallback
 getprogname
 initprogname
@@ -131,6 +128,9 @@ sudo_snprintf
 sudo_strlcat
 sudo_strlcpy
 sudo_strsignal
+sudo_strtobool
+sudo_strtoid
+sudo_strtomode
 sudo_strtonum
 sudo_term_cbreak
 sudo_term_copy

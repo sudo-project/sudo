@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -55,12 +55,12 @@
  * On error, returns 0 and sets errstr.
  */
 id_t
-atoid(const char *p, const char *sep, char **endp, const char **errstr)
+sudo_strtoid(const char *p, const char *sep, char **endp, const char **errstr)
 {
     char *ep;
     id_t rval = 0;
     bool valid = false;
-    debug_decl(atoid, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
 
     if (sep == NULL)
 	sep = "";

@@ -426,32 +426,32 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_stdin=") - 1) == true)
+		if (sudo_strtobool(*cur + sizeof("iolog_stdin=") - 1) == true)
 		    io_log_files[IOFD_STDIN].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdout=", sizeof("iolog_stdout=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_stdout=") - 1) == true)
+		if (sudo_strtobool(*cur + sizeof("iolog_stdout=") - 1) == true)
 		    io_log_files[IOFD_STDOUT].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stderr=", sizeof("iolog_stderr=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_stderr=") - 1) == true)
+		if (sudo_strtobool(*cur + sizeof("iolog_stderr=") - 1) == true)
 		    io_log_files[IOFD_STDERR].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_ttyin=", sizeof("iolog_ttyin=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == true)
+		if (sudo_strtobool(*cur + sizeof("iolog_ttyin=") - 1) == true)
 		    io_log_files[IOFD_TTYIN].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_ttyout=", sizeof("iolog_ttyout=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == true)
+		if (sudo_strtobool(*cur + sizeof("iolog_ttyout=") - 1) == true)
 		    io_log_files[IOFD_TTYOUT].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_compress=") - 1) == true)
+		if (sudo_strtobool(*cur + sizeof("iolog_compress=") - 1) == true)
 		    iolog_compress = true; /* must be global */
 		continue;
 	    }
@@ -489,7 +489,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_euid_str != NULL)
 	runas_uid_str = runas_euid_str;
     if (runas_uid_str != NULL) {
-	id = atoid(runas_uid_str, NULL, NULL, &errstr);
+	id = sudo_strtoid(runas_uid_str, NULL, NULL, &errstr);
 	if (errstr != NULL)
 	    sudo_warnx("runas uid %s: %s", runas_uid_str, U_(errstr));
 	else
@@ -498,7 +498,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_egid_str != NULL)
 	runas_gid_str = runas_egid_str;
     if (runas_gid_str != NULL) {
-	id = atoid(runas_gid_str, NULL, NULL, &errstr);
+	id = sudo_strtoid(runas_gid_str, NULL, NULL, &errstr);
 	if (errstr != NULL)
 	    sudo_warnx("runas gid %s: %s", runas_gid_str, U_(errstr));
 	else

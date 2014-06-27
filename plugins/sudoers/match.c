@@ -811,7 +811,7 @@ userpw_matches(const char *sudoers_user, const char *user, const struct passwd *
     debug_decl(userpw_matches, SUDO_DEBUG_MATCH)
 
     if (pw != NULL && *sudoers_user == '#') {
-	uid = (uid_t) atoid(sudoers_user + 1, NULL, NULL, &errstr);
+	uid = (uid_t) sudo_strtoid(sudoers_user + 1, NULL, NULL, &errstr);
 	if (errstr == NULL && uid == pw->pw_uid) {
 	    rc = true;
 	    goto done;
@@ -838,7 +838,7 @@ group_matches(const char *sudoers_group, const struct group *gr)
     debug_decl(group_matches, SUDO_DEBUG_MATCH)
 
     if (*sudoers_group == '#') {
-	gid = (gid_t) atoid(sudoers_group + 1, NULL, NULL, &errstr);
+	gid = (gid_t) sudo_strtoid(sudoers_group + 1, NULL, NULL, &errstr);
 	if (errstr == NULL && gid == gr->gr_gid) {
 	    rc = true;
 	    goto done;

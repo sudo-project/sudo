@@ -42,9 +42,9 @@
 #include "sudo_util.h"
 
 int
-atobool(const char *str)
+sudo_strtobool(const char *str)
 {
-    debug_decl(atobool, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_strtobool, SUDO_DEBUG_UTIL)
 
     switch (*str) {
 	case '0':

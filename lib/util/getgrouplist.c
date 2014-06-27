@@ -73,7 +73,7 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     if ((grset = getgrset(name)) != NULL) {
 	const char *errstr;
 	for (cp = strtok(grset, ","); cp != NULL; cp = strtok(NULL, ",")) {
-	    gid = atoid(cp, NULL, NULL, &errstr);
+	    gid = sudo_strtoid(cp, NULL, NULL, &errstr);
 	    if (errstr == NULL && gid != basegid) {
 		if (ngroups == grpsize)
 		    goto done;

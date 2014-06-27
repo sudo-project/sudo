@@ -95,10 +95,10 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LTOBJS = alloc.lo atobool.lo atoid.lo atomode.lo event.lo fatal.lo key_val.lo \
-	 gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo secure_path.lo \
-	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo \
-	 term.lo ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
+LTOBJS = alloc.lo event.lo fatal.lo key_val.lo gidlist.lo lbuf.lo locking.lo \
+	 parseln.lo progname.lo secure_path.lo setgroups.lo strtobool.lo \
+	 strtoid.lo strtomode.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo \
+	 sudo_printf.lo term.lo ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 ATOFOO_TEST_OBJS = atofoo_test.lo locale_stub.lo
 
@@ -287,23 +287,11 @@ aix.lo: $(srcdir)/aix.c $(incdir)/compat/stdbool.h $(incdir)/fatal.h \
 alloc.lo: $(srcdir)/alloc.c $(incdir)/fatal.h $(incdir)/gettext.h \
           $(incdir)/missing.h $(incdir)/sudo_alloc.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/alloc.c
-atobool.lo: $(srcdir)/atobool.c $(incdir)/compat/stdbool.h $(incdir)/missing.h \
-            $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
-            $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atobool.c
 atofoo_test.lo: $(srcdir)/regress/atofoo/atofoo_test.c \
                 $(incdir)/compat/stdbool.h $(incdir)/fatal.h \
                 $(incdir)/missing.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/atofoo/atofoo_test.c
-atoid.lo: $(srcdir)/atoid.c $(incdir)/compat/stdbool.h $(incdir)/gettext.h \
-          $(incdir)/missing.h $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
-          $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atoid.c
-atomode.lo: $(srcdir)/atomode.c $(incdir)/compat/stdbool.h $(incdir)/gettext.h \
-            $(incdir)/missing.h $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
-            $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atomode.c
 clock_gettime.lo: $(srcdir)/clock_gettime.c $(incdir)/compat/timespec.h \
                   $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/clock_gettime.c
@@ -441,6 +429,18 @@ strlcpy.lo: $(srcdir)/strlcpy.c $(incdir)/missing.h $(top_builddir)/config.h
 strsignal.lo: $(srcdir)/strsignal.c $(incdir)/gettext.h $(incdir)/missing.h \
               $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strsignal.c
+strtobool.lo: $(srcdir)/strtobool.c $(incdir)/compat/stdbool.h \
+              $(incdir)/missing.h $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtobool.c
+strtoid.lo: $(srcdir)/strtoid.c $(incdir)/compat/stdbool.h $(incdir)/gettext.h \
+            $(incdir)/missing.h $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtoid.c
+strtomode.lo: $(srcdir)/strtomode.c $(incdir)/compat/stdbool.h \
+              $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtomode.c
 strtonum.lo: $(srcdir)/strtonum.c $(incdir)/gettext.h $(incdir)/missing.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtonum.c

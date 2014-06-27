@@ -823,7 +823,7 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
     if (op == false) {
 	def->sd_un.mode = 0777;
     } else {
-	mode = atomode(val, &errstr);
+	mode = sudo_strtomode(val, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s is %s", val, errstr);

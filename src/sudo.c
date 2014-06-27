@@ -562,7 +562,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'e':
 		if (strncmp("exec_background=", info[i], sizeof("exec_background=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("exec_background=") - 1) == true)
+		    if (sudo_strtobool(info[i] + sizeof("exec_background=") - 1) == true)
 			SET(details->flags, CD_EXEC_BG);
 		    break;
 		}
@@ -580,14 +580,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		if (strncmp("noexec=", info[i], sizeof("noexec=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("noexec=") - 1) == true)
+		    if (sudo_strtobool(info[i] + sizeof("noexec=") - 1) == true)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("preserve_groups=") - 1) == true)
+		    if (sudo_strtobool(info[i] + sizeof("preserve_groups=") - 1) == true)
 			SET(details->flags, CD_PRESERVE_GROUPS);
 		    break;
 		}
@@ -600,7 +600,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
-		    id = atoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->egid = (gid_t)id;
@@ -609,7 +609,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
-		    id = atoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->euid = (uid_t)id;
@@ -618,7 +618,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
-		    id = atoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->gid = (gid_t)id;
@@ -635,7 +635,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
-		    id = atoid(cp, NULL, NULL, &errstr);
+		    id = sudo_strtoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->uid = (uid_t)id;
@@ -669,12 +669,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("selinux_role=", selinux_role)
 		SET_STRING("selinux_type=", selinux_type)
 		if (strncmp("set_utmp=", info[i], sizeof("set_utmp=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("set_utmp=") - 1) == true)
+		    if (sudo_strtobool(info[i] + sizeof("set_utmp=") - 1) == true)
 			SET(details->flags, CD_SET_UTMP);
 		    break;
 		}
 		if (strncmp("sudoedit=", info[i], sizeof("sudoedit=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("sudoedit=") - 1) == true)
+		    if (sudo_strtobool(info[i] + sizeof("sudoedit=") - 1) == true)
 			SET(details->flags, CD_SUDOEDIT);
 		    break;
 		}
@@ -692,14 +692,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
 		    cp = info[i] + sizeof("umask=") - 1;
-		    details->umask = atomode(cp, &errstr);
+		    details->umask = sudo_strtomode(cp, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
 		if (strncmp("use_pty=", info[i], sizeof("use_pty=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("use_pty=") - 1) == true)
+		    if (sudo_strtobool(info[i] + sizeof("use_pty=") - 1) == true)
 			SET(details->flags, CD_USE_PTY);
 		    break;
 		}

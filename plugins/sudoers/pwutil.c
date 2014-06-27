@@ -280,7 +280,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
     uid_t uid;
     debug_decl(sudo_fakepwnam, SUDO_DEBUG_NSS)
 
-    uid = (uid_t) atoid(user + 1, NULL, NULL, &errstr);
+    uid = (uid_t) sudo_strtoid(user + 1, NULL, NULL, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
 	    "uid %s %s", user, errstr);
@@ -464,7 +464,7 @@ sudo_fakegrnam(const char *group)
     for (i = 0; i < 2; i++) {
 	gritem = sudo_ecalloc(1, len);
 	gr = &gritem->gr;
-	gr->gr_gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
+	gr->gr_gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
 	gr->gr_name = (char *)(gritem + 1);
 	memcpy(gr->gr_name, group, name_len + 1);
 	if (errstr != NULL) {
@@ -651,7 +651,7 @@ user_in_group(const struct passwd *pw, const char *group)
 	 * If it could be a sudo-style group ID check gids first.
 	 */
 	if (group[0] == '#') {
-	    gid_t gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
+	    gid_t gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
 		    "gid %s %s", group, errstr);
