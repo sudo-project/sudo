@@ -5373,7 +5373,7 @@ _LT_EOF
       if test yes,no = "$GCC,$with_gnu_ld"; then
 	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
       else
-	_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag'
+	_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
       fi
       if test no = "$with_gnu_ld"; then
 	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
@@ -5431,7 +5431,7 @@ _LT_EOF
 	  _LT_LINKER_OPTION([if $CC understands -b],
 	    _LT_TAGVAR(lt_cv_prog_compiler__b, $1), [-b],
 	    [_LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'],
-	    [_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag'])],
+	    [_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'])],
 	  [_LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'])
 	  ;;
 	esac
@@ -7356,8 +7356,6 @@ _LT_TAGVAR(hardcode_minus_L, $1)=no
 _LT_TAGVAR(hardcode_automatic, $1)=no
 _LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
 _LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
-_LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
 _LT_TAGVAR(inherit_rpath, $1)=no
 _LT_TAGVAR(module_cmds, $1)=
 _LT_TAGVAR(module_expsym_cmds, $1)=
@@ -7490,6 +7488,8 @@ _LT_TAGVAR(hardcode_libdir_flag_spec, $1)=
 _LT_TAGVAR(hardcode_libdir_separator, $1)=
 _LT_TAGVAR(hardcode_minus_L, $1)=no
 _LT_TAGVAR(hardcode_automatic, $1)=no
+_LT_TAGVAR(fix_hardcoded_libdir_flag_spec, $1)=
+_LT_TAGVAR(fix_hardcoded_libdir_flag_spec_ld, $1)=
 _LT_TAGVAR(inherit_rpath, $1)=no
 _LT_TAGVAR(module_cmds, $1)=
 _LT_TAGVAR(module_expsym_cmds, $1)=

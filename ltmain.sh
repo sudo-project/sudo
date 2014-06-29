@@ -8133,15 +8133,6 @@ func_mode_link ()
 		  esac
 		fi
 		add=-l$name
-	        if test -n "$inst_prefix_dir" &&
-		   test -f "$inst_prefix_dir$libdir/$linklib" &&
-		   test -n "${fix_hardcoded_libdir_flag_spec}"; then
-		  linkdir="$inst_prefix_dir$libdir"
-		  add_dir="-L$linkdir"
-		  eval "fix_hardcoded_libdir_flag=\"\${fix_hardcoded_libdir_flag} ${fix_hardcoded_libdir_flag_spec}\""
-		  eval "fix_hardcoded_libdir_flag_ld=\"\${fix_hardcoded_libdir_flag_ld} ${fix_hardcoded_libdir_flag_spec_ld}\""
-		  $lt_unset linkdir
-	        fi
 	      elif test yes = "$hardcode_shlibpath_var"; then
 		add_shlibpath=$dir
 		add=-l$name
@@ -8190,6 +8181,15 @@ func_mode_link ()
 	    elif test yes = "$hardcode_minus_L"; then
 	      add_dir=-L$libdir
 	      add=-l$name
+	      if test -n "$inst_prefix_dir" &&
+		 test -f "$inst_prefix_dir$libdir/$linklib" &&
+		 test -n "${fix_hardcoded_libdir_flag_spec}"; then
+		linkdir="$inst_prefix_dir$libdir"
+		add_dir="-L$linkdir"
+		eval "fix_hardcoded_libdir_flag=\"\${fix_hardcoded_libdir_flag} ${fix_hardcoded_libdir_flag_spec}\""
+		eval "fix_hardcoded_libdir_flag_ld=\"\${fix_hardcoded_libdir_flag_ld} ${fix_hardcoded_libdir_flag_spec_ld}\""
+		$lt_unset linkdir
+	      fi
 	    elif test yes = "$hardcode_shlibpath_var"; then
 	      case :$finalize_shlibpath: in
 	      *":$libdir:"*) ;;

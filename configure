@@ -11727,7 +11727,7 @@ fi
       if test yes,no = "$GCC,$with_gnu_ld"; then
 	archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
       else
-	archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag'
+	archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
       fi
       if test no = "$with_gnu_ld"; then
 	hardcode_libdir_flag_spec='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
@@ -11837,7 +11837,7 @@ $as_echo "$lt_cv_prog_compiler__b" >&6; }
 if test yes = "$lt_cv_prog_compiler__b"; then
     archive_cmds='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
 else
-    archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag'
+    archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
 fi
 
 	  ;;
