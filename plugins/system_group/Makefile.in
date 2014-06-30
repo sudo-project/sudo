@@ -112,7 +112,7 @@ $(shlib_opt): $(shlib_exp)
 	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
 system_group.la: $(OBJS) $(LT_LIBS) @LT_LDDEP@
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
 
 pre-install:
 
@@ -129,11 +129,12 @@ install-doc:
 
 install-plugin: install-dirs system_group.la
 	if [ X"$(soext)" != X"" ]; then \
-	    $(INSTALL) -b~ $(INSTALL_OWNER) -m $(shlib_mode) .libs/system_group$(soext) $(DESTDIR)$(plugindir)/system_group.so; \
+	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) system_group.la $(DESTDIR)$(plugindir); \
 	fi
 
 uninstall:
-	-rm -f $(DESTDIR)$(plugindir)/system_group.so
+	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/system_group.la
+	-rm -f $(DESTDIR)$(plugindir)/system_group.so~
 
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c

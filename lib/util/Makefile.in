@@ -193,6 +193,7 @@ install-doc:
 install-plugin:
 
 uninstall:
+	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.la
 
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c

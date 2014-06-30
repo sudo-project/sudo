@@ -131,8 +131,8 @@ Makefile: $(srcdir)/Makefile.in
 sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
-libsudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
+sudo_noexec.la: sudo_noexec.lo
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
@@ -171,17 +171,21 @@ install-includes:
 
 # We install sudo_noexec by hand so we can avoid a "lib" prefix
 # and a version number.  Since we use LD_PRELOAD, neither is needed.
-install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/libsudo_noexec$(shlib_ext) ]; then \
-	    INSTALL_BACKUP='~' $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) .libs/libsudo_noexec$(shlib_ext) $(DESTDIR)$(noexecdir)/$(noexecfile); \
+install-noexec: install-dirs sudo_noexec.la
+	if [ -f .libs/sudo_noexec$(shlib_ext) ]; then \
+	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_noexec.la $(DESTDIR)$(noexecdir); \
 	fi
 
 install-plugin:
 
 uninstall:
-	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \
+	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
+	-rm -f	$(DESTDIR)$(bindir)/sudo \
+		$(DESTDIR)$(bindir)/sudo~ \
+		$(DESTDIR)$(bindir)/sudoedit \
 		$(DESTDIR)$(libexecdir)/sudo/sesh \
-		$(DESTDIR)$(noexecdir)/$(noexecfile)
+		$(DESTDIR)$(libexecdir)/sudo/sesh~ \
+		$(DESTDIR)$(noexecdir)/sudo_noexec.so~
 	@if [ -n "$(INIT_SCRIPT)" ]; then \
 	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo; \
 	fi

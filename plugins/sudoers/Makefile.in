@@ -199,7 +199,7 @@ libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
 
 sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
-	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(VISUDO_LIBS) -no-fast-install
@@ -309,7 +309,7 @@ install-plugin: sudoers.la install-dirs
 	if [ X"$(soext)" != X"" -a -e .libs/sudoers$(soext) ]; then \
 	    test X"$$SUDO_PREINSTALL_CMD" != X"" && \
 		$$SUDO_PREINSTALL_CMD .libs/sudoers$(soext); \
-	    INSTALL_BACKUP='~' $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir)/sudoers.so; \
+	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudoers.la $(DESTDIR)$(plugindir); \
 	fi
 
 install-sudoers: install-dirs
@@ -318,9 +318,12 @@ install-sudoers: install-dirs
 	    $(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:
-	-rm -f $(DESTDIR)$(plugindir)/sudoers.so
-	-rm -f $(DESTDIR)$(replaydir)/sudoreplay
-	-rm -f $(DESTDIR)$(visudodir)/visudo
+	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
+	-rm -f	$(DESTDIR)$(replaydir)/sudoreplay \
+		$(DESTDIR)$(replaydir)/sudoreplay~ \
+		$(DESTDIR)$(visudodir)/visudo \
+		$(DESTDIR)$(visudodir)/visudo~ \
+		$(DESTDIR)$(plugindir)/sudoers.so~
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
 

@@ -22675,7 +22675,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
 	fi
     fi
     if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} libsudo_noexec.la"
+	PROGS="${PROGS} sudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
 
 	noexec_file="$with_noexec"
