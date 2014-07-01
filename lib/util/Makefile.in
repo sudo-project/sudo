@@ -45,7 +45,7 @@ shlib_opt = util.opt
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@
+LIBTOOL = @LIBTOOL@ @LT_STATIC@
 SED = @SED@
 
 # Our install program supports extra flags...
