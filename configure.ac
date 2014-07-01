@@ -3457,6 +3457,7 @@ case "$lt_cv_dlopen" in
 	    AC_MSG_ERROR(["dlopen present but libtool doesn't appear to support your platform."])
 	fi
 	# Preload sudoers module symbols
+	AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
