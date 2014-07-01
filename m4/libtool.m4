@@ -5372,8 +5372,10 @@ _LT_EOF
     hpux10*)
       if test yes,no = "$GCC,$with_gnu_ld"; then
 	_LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	_LT_TAGVAR(module_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
       else
 	_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	_LT_TAGVAR(module_cmds, $1)='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
       fi
       if test no = "$with_gnu_ld"; then
 	_LT_TAGVAR(hardcode_libdir_flag_spec, $1)='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
@@ -5408,21 +5410,26 @@ _LT_EOF
 	case $host_cpu in
 	hppa*64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
+	  _LT_TAGVAR(module_cmds, $1)='$CC -shared -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
+	  _LT_TAGVAR(module_cmds, $1)='$CC -shared $pic_flag $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	  _LT_TAGVAR(module_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
 	  ;;
 	esac
       else
 	case $host_cpu in
 	hppa*64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
+	  _LT_TAGVAR(module_cmds, $1)='$CC -b -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
+	  _LT_TAGVAR(module_cmds, $1)='$CC -b $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
 	m4_if($1, [], [
@@ -5430,9 +5437,17 @@ _LT_EOF
 	  # (HP92453-01 A.11.01.20 doesn't, HP92453-01 B.11.X.35175-35176.GP does)
 	  _LT_LINKER_OPTION([if $CC understands -b],
 	    _LT_TAGVAR(lt_cv_prog_compiler__b, $1), [-b],
-	    [_LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'],
-	    [_LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'])],
-	  [_LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'])
+	    [
+	      _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	      _LT_TAGVAR(module_cmds, $1)='$CC -b -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	    ], [
+	      _LT_TAGVAR(archive_cmds, $1)='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	      _LT_TAGVAR(module_cmds, $1)='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	    ])],
+	  [
+	    _LT_TAGVAR(archive_cmds, $1)='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	    _LT_TAGVAR(module_cmds, $1)='$CC -b -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	  ])
 	  ;;
 	esac
       fi

@@ -11726,8 +11726,10 @@ fi
     hpux10*)
       if test yes,no = "$GCC,$with_gnu_ld"; then
 	archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	module_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
       else
 	archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	module_cmds='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
       fi
       if test no = "$with_gnu_ld"; then
 	hardcode_libdir_flag_spec='$wl+b $wl$libdir $fix_hardcoded_libdir_flag'
@@ -11783,21 +11785,26 @@ $as_echo "$lt_cv_ldflag_cdp_works" >&6; }
 	case $host_cpu in
 	hppa*64*)
 	  archive_cmds='$CC -shared $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
+	  module_cmds='$CC -shared -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
+	  module_cmds='$CC -shared $pic_flag $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
 	  archive_cmds='$CC -shared $pic_flag $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	  module_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
 	  ;;
 	esac
       else
 	case $host_cpu in
 	hppa*64*)
 	  archive_cmds='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags'
+	  module_cmds='$CC -b -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	ia64*)
 	  archive_cmds='$CC -b $wl+h $wl$soname $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
+	  module_cmds='$CC -b $wl+nodefaultrpath -o $lib $libobjs $deplibs $compiler_flags'
 	  ;;
 	*)
 
@@ -11835,9 +11842,15 @@ fi
 $as_echo "$lt_cv_prog_compiler__b" >&6; }
 
 if test yes = "$lt_cv_prog_compiler__b"; then
-    archive_cmds='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+
+	      archive_cmds='$CC -b $wl+h $wl$soname -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+	      module_cmds='$CC -b -o $lib $libobjs $deplibs $compiler_flags $fix_hardcoded_libdir_flag'
+
 else
-    archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+
+	      archive_cmds='$LD -b +h $soname -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+	      module_cmds='$LD -b -o $lib $libobjs $deplibs $linker_flags $fix_hardcoded_libdir_flag_ld'
+
 fi
 
 	  ;;
