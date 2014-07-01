@@ -28,7 +28,7 @@ cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ @LT_STATIC@
+LIBTOOL = @LIBTOOL@ --tag=disable-static
 SED = @SED@
 
 # Our install program supports extra flags...
