@@ -21615,6 +21615,8 @@ case "$lt_cv_dlopen" in
 	    as_fn_error $? "\"dlopen present but libtool doesn't appear to support your platform.\"" "$LINENO" 5
 	fi
 	# Preload sudoers module symbols
+	$as_echo "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
+
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
