@@ -394,12 +394,12 @@ __dso_public ssize_t sudo_getline(char **, size_t *, FILE *);
 #ifndef HAVE_UTIMES
 __dso_public int sudo_utimes(const char *, const struct timeval *);
 # undef utimes
-# define utimes(_a, _b) sudo_utimes(((_a), (_b))
+# define utimes(_a, _b) sudo_utimes((_a), (_b))
 #endif /* HAVE_UTIMES */
 #ifdef HAVE_FUTIME
 __dso_public int sudo_futimes(int, const struct timeval *);
 # undef futimes
-# define futimes(_a, _b) sudo_futimes(((_a), (_b))
+# define futimes(_a, _b) sudo_futimes((_a), (_b))
 #endif /* HAVE_FUTIME */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 __dso_public int sudo_snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
