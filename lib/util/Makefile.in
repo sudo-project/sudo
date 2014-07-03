@@ -74,7 +74,7 @@ SSP_LDFLAGS = @SSP_LDFLAGS@
 SHLIB_VERSION = 0:0:0
 
 # cppcheck options, usually set in the top-level Makefile
-CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX
+CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -DNSIG=64
 
 # Regression tests
 TEST_PROGS = atofoo_test conf_test hltq_test parseln_test @COMPAT_TEST_PROGS@
