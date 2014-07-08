@@ -1712,8 +1712,9 @@ case "$host" in
 		INIT_DIR=/sbin/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
-		# HP-UX shared libs must be executable
-		SHLIB_MODE=0755
+		# HP-UX shared libs must be executable.
+		# Load time is much greater if writable so use 0555.
+		SHLIB_MODE=0555
 
 		AC_CHECK_FUNCS(pstat_getproc)
 		;;
@@ -1730,8 +1731,9 @@ case "$host" in
 		INIT_DIR=/sbin/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
-		# HP-UX shared libs must be executable
-		SHLIB_MODE=0755
+		# HP-UX shared libs must be executable.
+		# Load time is much greater if writable so use 0555.
+		SHLIB_MODE=0555
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then
