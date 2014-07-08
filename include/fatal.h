@@ -117,6 +117,7 @@ extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 __dso_public int  sudo_fatal_callback_deregister(void (*func)(void));
 __dso_public int  sudo_fatal_callback_register(void (*func)(void));
 __dso_public char *sudo_warn_gettext(const char *msgid) __format_arg(1);
+__dso_public char *sudo_warn_strerror(int errnum);
 __dso_public void sudo_fatal_nodebug(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
 __dso_public void sudo_fatalx_nodebug(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
 __dso_public void sudo_vfatal_nodebug(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));

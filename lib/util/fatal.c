@@ -45,7 +45,7 @@ SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
 static struct sudo_fatal_callback_list callbacks;
 
-static void _warning(int, const char *, va_list);
+static void _warning(int errnum, const char *fmt, va_list ap);
 
 static void
 do_cleanup(void)
@@ -66,7 +66,7 @@ sudo_fatal_nodebug(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(1, fmt, ap);
+    _warning(errno, fmt, ap);
     va_end(ap);
     do_cleanup();
     exit(EXIT_FAILURE);
@@ -87,7 +87,7 @@ sudo_fatalx_nodebug(const char *fmt, ...)
 void
 sudo_vfatal_nodebug(const char *fmt, va_list ap)
 {
-    _warning(1, fmt, ap);
+    _warning(errno, fmt, ap);
     do_cleanup();
     exit(EXIT_FAILURE);
 }
@@ -106,7 +106,7 @@ sudo_warn_nodebug(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(1, fmt, ap);
+    _warning(errno, fmt, ap);
     va_end(ap);
 }
 
@@ -122,7 +122,7 @@ sudo_warnx_nodebug(const char *fmt, ...)
 void
 sudo_vwarn_nodebug(const char *fmt, va_list ap)
 {
-    _warning(1, fmt, ap);
+    _warning(errno, fmt, ap);
 }
 
 void
@@ -132,26 +132,26 @@ sudo_vwarnx_nodebug(const char *fmt, va_list ap)
 }
 
 static void
-_warning(int use_errno, const char *fmt, va_list ap)
+_warning(int errnum, const char *fmt, va_list ap)
 {
-    int serrno = errno;
     char *str;
 
     sudo_evasprintf(&str, fmt, ap);
-    if (use_errno) {
+    if (errnum) {
 	if (fmt != NULL) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG,
-		_("%s: %s: %s\n"), getprogname(), str, strerror(serrno));
+		_("%s: %s: %s\n"), getprogname(), str,
+		sudo_warn_strerror(errnum));
 	} else {
 	    sudo_printf(SUDO_CONV_ERROR_MSG,
-		_("%s: %s\n"), getprogname(), strerror(serrno));
+		_("%s: %s\n"), getprogname(),
+		sudo_warn_strerror(errnum));
 	}
     } else {
 	sudo_printf(SUDO_CONV_ERROR_MSG,
 	    _("%s: %s\n"), getprogname(), str ? str : "(null)");
     }
     efree(str);
-    errno = serrno;
 }
 
 /*

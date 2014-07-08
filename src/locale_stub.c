@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"		/* must be included before missing.h */
@@ -35,3 +41,10 @@ sudo_warn_gettext(const char *msgid)
     return gettext(msgid);
 }
 #endif /* HAVE_LIBINTL_H */
+
+/* No need to swap locales in the front end. */
+char *
+sudo_warn_strerror(int errnum)
+{
+    return strerror(errnum);
+}

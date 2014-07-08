@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -124,3 +124,16 @@ sudo_warn_gettext(const char *msgid)
     return msg;
 }
 #endif /* HAVE_LIBINTL_H */
+
+char *
+sudo_warn_strerror(int errnum)
+{
+    int warning_locale;
+    char *errmsg;
+
+    sudoers_setlocale(SUDOERS_LOCALE_USER, &warning_locale);
+    errmsg = strerror(errnum);
+    sudoers_setlocale(warning_locale, NULL);
+
+    return errmsg;
+}

@@ -148,4 +148,5 @@ sudo_vwarn_nodebug
 sudo_vwarnx_nodebug
 sudo_warn_gettext
 sudo_warn_nodebug
+sudo_warn_strerror
 sudo_warnx_nodebug
