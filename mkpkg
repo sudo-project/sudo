@@ -95,15 +95,6 @@ osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 # Choose compiler options by osversion if not cross-compiling.
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
-	hpux*)
-	    # Use the HP ANSI C compiler on HP-UX if possible
-	    if [ -z "$CC" -a -x /opt/ansic/bin/cc ]; then
-		CC=/opt/ansic/bin/cc; export CC
-		if [ -z "$CFLAGS" ]; then
-		    CFLAGS=-O; export CFLAGS
-		fi
-	    fi
-	    ;;
 	sol[0-9]*)
 	    # Use the Sun Studio C compiler on Solaris if possible
 	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
