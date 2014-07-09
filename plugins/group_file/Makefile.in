@@ -71,8 +71,8 @@ datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 plugindir = @PLUGINDIR@
 
-# File extension, mode and map file to use for shared libraries/objects
-soext = @SOEXT@
+# File mode and map file to use for shared libraries/objects
+shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
 shlib_exp = $(srcdir)/group_file.exp
 shlib_map = group_file.map
@@ -128,7 +128,7 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs group_file.la
-	if [ X"$(soext)" != X"" ]; then \
+	if [ X"$(shlib_enable)" = X"yes" ]; then \
 	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) group_file.la $(DESTDIR)$(plugindir); \
 	fi
 

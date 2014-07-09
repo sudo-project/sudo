@@ -89,8 +89,8 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 
-# File extension, mode and map file to use for shared libraries/objects
-soext = @SOEXT@
+# File mode and map file to use for shared libraries/objects
+shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
 shlib_exp = $(srcdir)/sudoers.exp
 shlib_map = sudoers.map
@@ -227,7 +227,7 @@ check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 
 # We need to link check_symbols with -lpthread on HP-UX since LDAP uses threads
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
-	if [ X"$(soext)" != X"" ]; then \
+	if [ X"$(shlib_enable)" = X"yes" ]; then \
 	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@ -no-fast-install; \
 	fi
 
@@ -306,9 +306,7 @@ install-doc: install-dirs
 	@LDAP@$(INSTALL) $(INSTALL_OWNER) -m 0755 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
-	if [ X"$(soext)" != X"" -a -e .libs/sudoers$(soext) ]; then \
-	    test X"$$SUDO_PREINSTALL_CMD" != X"" && \
-		$$SUDO_PREINSTALL_CMD .libs/sudoers$(soext); \
+	if [ X"$(shlib_enable)" = X"yes" ]; then \
 	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudoers.la $(DESTDIR)$(plugindir); \
 	fi
 
@@ -340,8 +338,8 @@ check: $(TEST_PROGS) visudo testsudoers
 	    diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
-	    if [ X"$(soext)" != X"" -a -e .libs/sudoers$(soext) ]; then \
-		./check_symbols .libs/sudoers$(soext) $(shlib_exp) || rval=`expr $$rval + $$?`; \
+	    if [ X"$(shlib_enable)" = X"yes" ]; then \
+		./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    mkdir -p regress/logging; \
 	    ./check_wrap $(srcdir)/regress/logging/check_wrap.in > regress/logging/check_wrap.out; \

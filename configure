@@ -747,7 +747,6 @@ DONT_LEAK_PATH_INFO
 INSTALL_NOEXEC
 sesh_file
 noexec_file
-SOEXT
 NOEXECDIR
 NOEXECFILE
 mansrcdir
@@ -762,8 +761,8 @@ DEVEL
 SUDOERS_GID
 SUDOERS_UID
 SUDOERS_MODE
-SHLIB_EXT
 SHLIB_MODE
+SHLIB_ENABLE
 MANCOMPRESSEXT
 MANCOMPRESS
 MANDIRTYPE
@@ -2867,7 +2866,6 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
-
 
 
 
@@ -13995,18 +13993,9 @@ if test "$enable_shared" = "no"; then
     lt_cv_dlopen_libs=
     ac_cv_func_dlopen=no
     LT_LDFLAGS=-static
-else
-    eval _shrext="$shrext_cmds"
-    # Darwin uses .dylib for libraries but .so for modules
-    if test X"$_shrext" = X".dylib"; then
-	SOEXT=".so"
-	SHLIB_EXT=".dylib"
-    else
-	SOEXT="$_shrext"
-	SHLIB_EXT="$_shrext"
-    fi
 fi
 LIBDL="$lt_cv_dlopen_libs"
+SHLIB_ENABLE="$enable_dlopen"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking path to sudo_noexec.so" >&5
 $as_echo_n "checking path to sudo_noexec.so... " >&6; }

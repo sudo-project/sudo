@@ -45,8 +45,8 @@ AC_SUBST([MANTYPE])
 AC_SUBST([MANDIRTYPE])
 AC_SUBST([MANCOMPRESS])
 AC_SUBST([MANCOMPRESSEXT])
+AC_SUBST([SHLIB_ENABLE])
 AC_SUBST([SHLIB_MODE])
-AC_SUBST([SHLIB_EXT])
 AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
@@ -61,7 +61,6 @@ AC_SUBST([mansectform])
 AC_SUBST([mansrcdir])
 AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
-AC_SUBST([SOEXT])
 AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_NOEXEC])
@@ -1535,18 +1534,9 @@ if test "$enable_shared" = "no"; then
     lt_cv_dlopen_libs=
     ac_cv_func_dlopen=no
     LT_LDFLAGS=-static
-else
-    eval _shrext="$shrext_cmds"
-    # Darwin uses .dylib for libraries but .so for modules
-    if test X"$_shrext" = X".dylib"; then
-	SOEXT=".so"
-	SHLIB_EXT=".dylib"
-    else
-	SOEXT="$_shrext"
-	SHLIB_EXT="$_shrext"
-    fi
 fi
 LIBDL="$lt_cv_dlopen_libs"
+SHLIB_ENABLE="$enable_dlopen"
 
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
