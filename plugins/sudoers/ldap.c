@@ -1381,20 +1381,48 @@ sudo_ldap_build_pass2(void)
     debug_return_str(filt);
 }
 
+/*
+ * Decode a secret if it is base64 encoded, else return NULL.
+ */
+static char *
+sudo_ldap_decode_secret(const char *secret)
+{
+    char *result = NULL;
+    size_t len, reslen;
+    debug_decl(sudo_ldap_decode_secret, SUDO_DEBUG_LDAP)
+
+    if (strncasecmp(secret, "base64:", sizeof("base64:") - 1) == 0) {
+	/*
+	 * Decode a base64 secret.  The decoded length is 3/4 the encoded
+	 * length but padding may be missing so round up to a multiple of 4.
+	 */
+	secret += sizeof("base64:") - 1;
+	reslen = ((strlen(secret) + 3) / 4 * 3) + 1;
+	result = sudo_emalloc(reslen);
+	len = base64_decode(secret, result, reslen);
+	if (len == (size_t)-1) {
+	    free(result);
+	    result = NULL;
+	}
+    }
+    debug_return_str(result);
+}
+
 static void
 sudo_ldap_read_secret(const char *path)
 {
     FILE *fp;
-    char buf[LINE_MAX], *cp;
+    char buf[LINE_MAX];
     debug_decl(sudo_ldap_read_secret, SUDO_DEBUG_LDAP)
 
     if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
 	if (fgets(buf, sizeof(buf), fp) != NULL) {
-	    if ((cp = strchr(buf, '\n')) != NULL)
-		*cp = '\0';
+	    buf[strcspn(buf, "\n")] = '\0';
 	    /* copy to bindpw and binddn */
 	    efree(ldap_conf.bindpw);
-	    ldap_conf.bindpw = sudo_estrdup(buf);
+	    ldap_conf.bindpw = sudo_ldap_decode_secret(buf);
+	    if (ldap_conf.bindpw == NULL)
+		ldap_conf.bindpw = sudo_estrdup(buf);
 	    efree(ldap_conf.binddn);
 	    ldap_conf.binddn = ldap_conf.rootbinddn;
 	    ldap_conf.rootbinddn = NULL;
@@ -1718,9 +1746,25 @@ sudo_ldap_read_config(void)
 	efree(cp);
     }
 
+
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
-    if (ldap_conf.rootbinddn)
+    if (ldap_conf.rootbinddn) {
 	sudo_ldap_read_secret(path_ldap_secret);
+    } else if (ldap_conf.bindpw) {
+	cp = sudo_ldap_decode_secret(ldap_conf.bindpw);
+	if (cp != NULL) {
+	    efree(ldap_conf.bindpw);
+	    ldap_conf.bindpw = cp;
+	}
+    }
+
+    if (ldap_conf.tls_keypw) {
+	cp = sudo_ldap_decode_secret(ldap_conf.tls_keypw);
+	if (cp != NULL) {
+	    efree(ldap_conf.tls_keypw);
+	    ldap_conf.tls_keypw = cp;
+	}
+    }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     /*

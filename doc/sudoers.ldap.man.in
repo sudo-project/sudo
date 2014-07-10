@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "February 7, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "July 10, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -698,6 +698,27 @@ parameter specifies the password to use when performing LDAP operations.
 This is typically used in conjunction with the
 \fBBINDDN\fR
 parameter.
+The
+\fIsecret\fR
+may be a plain text password or a base64-encoded string with a
+\(lqbase64:\(rq
+prefix.
+For example:
+.nf
+.sp
+.RS 10n
+BINDPW base64:dGVzdA==
+.RE
+.fi
+.RS 6n
+.sp
+If a plain text password is used, it should be a simple string without quotes.
+Plain text passwords may not include the comment character
+(\(oq#\(cq)
+and the escaping of special characters with a backslash
+(\(oq\e\(cq)
+is not supported.
+.RE
 .TP 6n
 \fBROOTBINDDN\fR \fIDN\fR
 The
@@ -848,10 +869,24 @@ The
 \fBTLS_KEYPW\fR
 contains the password used to decrypt the key database on clients
 using the Tivoli Directory Server LDAP library.
-This should be a simple string without quotes.
-The password may not include the comment character
+The
+\fIsecret\fR
+may be a plain text password or a base64-encoded string with a
+\(lqbase64:\(rq
+prefix.
+For example:
+.nf
+.sp
+.RS 10n
+TLS_KEYPW base64:dGVzdA==
+.RE
+.fi
+.RS 6n
+.sp
+If a plain text password is used, it should be a simple string without quotes.
+Plain text passwords may not include the comment character
 (\(oq#\(cq)
-and escaping of special characters with a backslash
+and the escaping of special characters with a backslash
 (\(oq\e\(cq)
 is not supported.
 If this option is used,
@@ -885,6 +920,7 @@ The
 utility can be used to manage the key database and create a
 \fIstash file\fR.
 This option is only supported by the Tivoli LDAP libraries.
+.RE
 .TP 6n
 \fBTLS_RANDFILE\fR \fIfile name\fR
 The

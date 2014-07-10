@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 7, 2014
+.Dd July 10, 2014
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -658,6 +658,22 @@ parameter specifies the password to use when performing LDAP operations.
 This is typically used in conjunction with the
 .Sy BINDDN
 parameter.
+The
+.Ar secret
+may be a plain text password or a base64-encoded string with a
+.Dq base64:
+prefix.
+For example:
+.Bd -literal -offset 4n
+BINDPW base64:dGVzdA==
+.Ed
+.Pp
+If a plain text password is used, it should be a simple string without quotes.
+Plain text passwords may not include the comment character
+.Pq Ql #
+and the escaping of special characters with a backslash
+.Pq Ql \e
+is not supported.
 .It Sy ROOTBINDDN Ar DN
 The
 .Sy ROOTBINDDN
@@ -779,10 +795,20 @@ The
 .Sy TLS_KEYPW
 contains the password used to decrypt the key database on clients
 using the Tivoli Directory Server LDAP library.
-This should be a simple string without quotes.
-The password may not include the comment character
+The
+.Ar secret
+may be a plain text password or a base64-encoded string with a
+.Dq base64:
+prefix.
+For example:
+.Bd -literal -offset 4n
+TLS_KEYPW base64:dGVzdA==
+.Ed
+.Pp
+If a plain text password is used, it should be a simple string without quotes.
+Plain text passwords may not include the comment character
 .Pq Ql #
-and escaping of special characters with a backslash
+and the escaping of special characters with a backslash
 .Pq Ql \e
 is not supported.
 If this option is used,
