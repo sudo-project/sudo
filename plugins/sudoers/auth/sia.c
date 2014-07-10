@@ -132,6 +132,6 @@ sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_sia_cleanup, SUDO_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
-    efree(sudo_argv);
+    sudo_efree(sudo_argv);
     debug_return_int(AUTH_SUCCESS);
 }

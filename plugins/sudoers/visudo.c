@@ -618,7 +618,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
      * mv(1) in case sp->tpath and sp->path are on different file systems.
      */
     if (rename(sp->tpath, sp->path) == 0) {
-	efree(sp->tpath);
+	sudo_efree(sp->tpath);
 	sp->tpath = NULL;
     } else {
 	if (errno == EXDEV) {
@@ -640,11 +640,11 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 		sudo_warnx(U_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		(void) unlink(sp->tpath);
-		efree(sp->tpath);
+		sudo_efree(sp->tpath);
 		sp->tpath = NULL;
 		goto done;
 	    }
-	    efree(sp->tpath);
+	    sudo_efree(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
 	    sudo_warn(U_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
@@ -905,7 +905,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
 	    sudo_warn("%s", entry->path);
-	    efree(entry);
+	    sudo_efree(entry);
 	    debug_return_ptr(NULL);
 	}
 	if (!checkonly && !sudo_lock_file(entry->fd, SUDO_TLOCK))
@@ -1013,7 +1013,7 @@ get_editor(char **args)
      * find one that exists, is regular, and is executable.
      */
     if (Editor == NULL || *Editor == '\0') {
-	efree(EditorPath);
+	sudo_efree(EditorPath);
 	EditorPath = sudo_estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {

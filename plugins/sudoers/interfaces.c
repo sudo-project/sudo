@@ -81,7 +81,7 @@ set_interfaces(const char *ai)
 		inet_pton(AF_INET6, mask, &ifp->netmask.ip6) != 1)
 #endif
 	    {
-		efree(ifp);
+		sudo_efree(ifp);
 		continue;
 	    }
 	} else {
@@ -89,13 +89,13 @@ set_interfaces(const char *ai)
 	    ifp->family = AF_INET;
 	    if (inet_pton(AF_INET, addr, &ifp->addr.ip4) != 1 ||
 		inet_pton(AF_INET, mask, &ifp->netmask.ip4) != 1) {
-		efree(ifp);
+		sudo_efree(ifp);
 		continue;
 	    }
 	}
 	SLIST_INSERT_HEAD(&interfaces, ifp, entries);
     }
-    efree(addrinfo);
+    sudo_efree(addrinfo);
     debug_return;
 }
 
@@ -117,6 +117,6 @@ dump_interfaces(const char *ai)
     for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))
 	sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
 
-    efree(addrinfo);
+    sudo_efree(addrinfo);
     debug_return;
 }

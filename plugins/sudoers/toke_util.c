@@ -158,7 +158,7 @@ fill_args(const char *s, int len, int addspace)
 	    (char *) realloc(sudoerslval.command.args, arg_size) :
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
-	    efree(sudoerslval.command.args);
+	    sudo_efree(sudoerslval.command.args);
 	    sudo_warn(NULL);
 	    sudoerserror(NULL);
 	    debug_return_bool(false);

@@ -352,7 +352,7 @@ init_defaults(void)
 	for (def = sudo_defs_table; def->name; def++) {
 	    switch (def->type & T_MASK) {
 		case T_STR:
-		    efree(def->sd_un.str);
+		    sudo_efree(def->sd_un.str);
 		    def->sd_un.str = NULL;
 		    break;
 		case T_LIST:
@@ -705,7 +705,7 @@ store_str(char *val, struct sudo_defs_types *def, int op)
 {
     debug_decl(store_str, SUDO_DEBUG_DEFAULTS)
 
-    efree(def->sd_un.str);
+    sudo_efree(def->sd_un.str);
     if (op == false)
 	def->sd_un.str = NULL;
     else
@@ -845,8 +845,8 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
     if (op == freeall) {
 	while ((cur = SLIST_FIRST(&def->sd_un.list)) != NULL) {
 	    SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
-	    efree(cur->value);
-	    efree(cur);
+	    sudo_efree(cur->value);
+	    sudo_efree(cur);
 	}
 	debug_return;
     }
@@ -862,8 +862,8 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 		SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
-	    efree(cur->value);
-	    efree(cur);
+	    sudo_efree(cur->value);
+	    sudo_efree(cur);
 	    break;
 	}
 	prev = cur;

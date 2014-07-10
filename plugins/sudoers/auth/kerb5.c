@@ -171,7 +171,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 
 done:
     if (sudo_krb5_instance != NULL)
-	efree(pname);
+	sudo_efree(pname);
     debug_return_int(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 

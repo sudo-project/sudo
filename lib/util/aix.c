@@ -190,7 +190,7 @@ aix_prep_user(char *user, const char *tty)
     len = sudo_easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
 	user, '\0', user, '\0', user, '\0', tty ? tty : "", '\0');
     (void)usrinfo(SETUINFO, info, len);
-    efree(info);
+    sudo_efree(info);
 
 #ifdef HAVE_SETAUTHDB
     /* set administrative domain */

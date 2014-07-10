@@ -119,9 +119,9 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 		info->path = slpath;
 		status = sudo_stat_plugin(info, fullpath, pathsize, sb);
 		if (status == 0) {
-		    efree((void *)sopath);
+		    sudo_efree((void *)sopath);
 		} else {
-		    efree(slpath);
+		    sudo_efree(slpath);
 		    info->path = sopath;
 		    errno = serrno;
 		}
@@ -299,7 +299,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	info->path = SUDOERS_PLUGIN;
 	/* info->options = NULL; */
 	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
-	efree(info);
+	sudo_efree(info);
 	if (!rval)
 	    goto done;
 
@@ -310,7 +310,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    info->path = SUDOERS_PLUGIN;
 	    /* info->options = NULL; */
 	    rval = sudo_load_plugin(policy_plugin, io_plugins, info);
-	    efree(info);
+	    sudo_efree(info);
 	    if (!rval)
 		goto done;
 	}

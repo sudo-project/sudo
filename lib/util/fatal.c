@@ -151,7 +151,7 @@ _warning(int errnum, const char *fmt, va_list ap)
 	sudo_printf(SUDO_CONV_ERROR_MSG,
 	    _("%s: %s\n"), getprogname(), str ? str : "(null)");
     }
-    efree(str);
+    sudo_efree(str);
 }
 
 /*

@@ -62,7 +62,7 @@ sudo_ev_base_alloc(void)
     TAILQ_INIT(&base->events);
     TAILQ_INIT(&base->timeouts);
     if (sudo_ev_base_alloc_impl(base) != 0) {
-	efree(base);
+	sudo_efree(base);
 	base = NULL;
     }
 
@@ -80,7 +80,7 @@ sudo_ev_base_free(struct sudo_event_base *base)
 	sudo_ev_del(base, ev);
     }
     sudo_ev_base_free_impl(base);
-    efree(base);
+    sudo_efree(base);
 
     debug_return;
 }

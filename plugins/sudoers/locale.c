@@ -60,11 +60,11 @@ void
 sudoers_initlocale(const char *ulocale, const char *slocale)
 {
     if (ulocale != NULL) {
-	efree(user_locale);
+	sudo_efree(user_locale);
 	user_locale = sudo_estrdup(ulocale);
     }
     if (slocale != NULL) {
-	efree(sudoers_locale);
+	sudo_efree(sudoers_locale);
 	sudoers_locale = sudo_estrdup(slocale);
     }
 }
@@ -99,7 +99,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		res = setlocale(LC_ALL, sudoers_locale ? sudoers_locale : "C");
 		if (res == NULL && sudoers_locale != NULL) {
 		    if (strcmp(sudoers_locale, "C") != 0) {
-			efree(sudoers_locale);
+			sudo_efree(sudoers_locale);
 			sudoers_locale = sudo_estrdup("C");
 			res = setlocale(LC_ALL, "C");
 		    }

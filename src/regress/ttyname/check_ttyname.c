@@ -64,7 +64,7 @@ main(int argc, char *argv[])
 	cp = ttyname(fd);
 	if (cp != NULL) {
 	    if (tty_libc == NULL || strcmp(cp, tty_libc) != 0) {
-		efree(tty_libc);
+		sudo_efree(tty_libc);
 		tty_libc = sudo_estrdup(cp);
 	    }
 	    if (tty_sudo != NULL && strcmp(tty_libc, tty_sudo) == 0) {
@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_sudo : "none");
     }
 
-    efree(tty_libc);
-    efree(tty_sudo);
+    sudo_efree(tty_libc);
+    sudo_efree(tty_sudo);
     exit(rval);
 }

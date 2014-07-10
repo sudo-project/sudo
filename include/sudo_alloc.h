@@ -20,8 +20,8 @@
 
 #include <stdarg.h>
 
-#undef efree
-#define efree(x)	free((void *)(x))
+#undef sudo_efree
+#define sudo_efree(x)	free((void *)(x))
 
 __dso_public int  sudo_easprintf(char **, const char *, ...) __printflike(2, 3);
 __dso_public int  sudo_evasprintf(char **, const char *, va_list) __printflike(2, 0);

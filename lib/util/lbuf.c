@@ -70,7 +70,7 @@ sudo_lbuf_destroy(struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL)
 
-    efree(lbuf->buf);
+    sudo_efree(lbuf->buf);
     lbuf->buf = NULL;
 
     debug_return;

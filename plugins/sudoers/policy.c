@@ -580,7 +580,7 @@ sudoers_policy_close(int exit_status, int error_code)
 	sudo_grlist_delref(user_group_list);
 	user_group_list = NULL;
     }
-    efree(user_gids);
+    sudo_efree(user_gids);
     user_gids = NULL;
 
     debug_return;

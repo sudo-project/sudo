@@ -518,7 +518,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto bad;
 
     if (ISSET(sudo_mode, MODE_EDIT)) {
-	efree(safe_cmnd);
+	sudo_efree(safe_cmnd);
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
 	if (safe_cmnd == NULL)
 	    goto bad;
@@ -881,8 +881,8 @@ set_fqdn(void)
 	    N_("unable to resolve host %s"), user_host);
     } else {
 	if (user_shost != user_host)
-	    efree(user_shost);
-	efree(user_host);
+	    sudo_efree(user_shost);
+	sudo_efree(user_host);
 	user_host = sudo_estrdup(res0->ai_canonname);
 	freeaddrinfo(res0);
 	if ((p = strchr(user_host, '.')) != NULL)
@@ -1030,7 +1030,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***a
     cp = strtok(editor, " \t");
     if (cp == NULL ||
 	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
-	efree(editor);
+	sudo_efree(editor);
 	debug_return_str(NULL);
     }
     nargv = (char **) sudo_emallocarray(nargc + 1 + nfiles + 1, sizeof(char *));

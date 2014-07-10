@@ -4057,12 +4057,12 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1)
 	    goto bad;
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
-	    efree(path);
+	    sudo_efree(path);
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
-	    efree(path);
+	    sudo_efree(path);
 	    goto bad;
 	}
 	pl->path = path;
@@ -4071,8 +4071,8 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    max_paths <<= 1;
 	    tmp = realloc(paths, sizeof(*paths) * max_paths);
 	    if (tmp == NULL) {
-		efree(path);
-		efree(pl);
+		sudo_efree(path);
+		sudo_efree(pl);
 		goto bad;
 	    }
 	    paths = tmp;
@@ -4081,7 +4081,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     }
     closedir(dir);
     if (count == 0) {
-	efree(paths);
+	sudo_efree(paths);
 	paths = NULL;
     }
     *pathsp = paths;
@@ -4090,10 +4090,10 @@ bad:
     if (dir != NULL)
 	closedir(dir);
     for (i = 0; i < count; i++) {
-	efree(paths[i]->path);
-	efree(paths[i]);
+	sudo_efree(paths[i]->path);
+	sudo_efree(paths[i]);
     }
-    efree(paths);
+    sudo_efree(paths);
     debug_return_int(-1);
 }
 
@@ -4117,7 +4117,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
 	for (i = 0; i < count; i++) {
 	    SLIST_INSERT_HEAD(&stack->more, paths[i], entries);
 	}
-	efree(paths);
+	sudo_efree(paths);
     }
 
     debug_return_int(count);
@@ -4140,15 +4140,15 @@ init_lexer(void)
 	idepth--;
 	while ((pl = SLIST_FIRST(&istack[idepth].more)) != NULL) {
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
-	    efree(pl->path);
-	    efree(pl);
+	    sudo_efree(pl->path);
+	    sudo_efree(pl);
 	}
-	efree(istack[idepth].path);
+	sudo_efree(istack[idepth].path);
 	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
 	sudoers_delete_buffer(istack[idepth].bs);
     }
-    efree(istack);
+    sudo_efree(istack);
     istack = NULL;
     istacksize = idepth = 0;
     sudolineno = 1;
@@ -4226,20 +4226,20 @@ _push_include(char *path, bool isdir)
 	count = switch_dir(&istack[idepth], path);
 	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
-	    efree(path);
+	    sudo_efree(path);
 	    debug_return_bool(count ? false : true);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
 	do {
-	    efree(path);
+	    sudo_efree(path);
 	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL) {
 		/* Unable to open any files in include dir, not an error. */
 		debug_return_bool(true);
 	    }
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    path = pl->path;
-	    efree(pl);
+	    sudo_efree(pl);
 	} while ((fp = open_sudoers(path, false, &keepopen)) == NULL);
     } else {
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
@@ -4279,22 +4279,22 @@ pop_include(void)
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
-	    efree(sudoers);
+	    sudo_efree(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
 	    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
-	    efree(pl);
+	    sudo_efree(pl);
 	    break;
 	}
 	/* Unable to open path in include dir, go to next one. */
-	efree(pl->path);
-	efree(pl);
+	sudo_efree(pl->path);
+	sudo_efree(pl);
     }
     /* If no path list, just pop the last dir on the stack. */
     if (pl == NULL) {
 	idepth--;
 	sudoers_switch_to_buffer(istack[idepth].bs);
-	efree(sudoers);
+	sudo_efree(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;

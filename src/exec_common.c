@@ -156,7 +156,7 @@ sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexe
 	nargv[1] = (char *)path;
 	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
 	execve(_PATH_BSHELL, nargv, envp);
-	efree(nargv);
+	sudo_efree(nargv);
     }
     return -1;
 }

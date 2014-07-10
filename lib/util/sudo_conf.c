@@ -237,7 +237,7 @@ set_debug(const char *entry, const char *conf_file)
     debug_file = sudo_estrndup(entry, filelen);
     debug_flags = sudo_estrdup(debug_flags);
     sudo_debug_init(debug_file, debug_flags);
-    efree(debug_file);
+    sudo_efree(debug_file);
 
     sudo_conf_data.debug_flags = debug_flags;
 }
@@ -454,5 +454,5 @@ done:
     /* Restore locale if needed. */
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
         setlocale(LC_ALL, prev_locale);
-    efree(prev_locale);
+    sudo_efree(prev_locale);
 }

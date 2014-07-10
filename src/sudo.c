@@ -368,7 +368,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	ud->ngroups = system_maxgroups << 1;
 	for (tries = 0; tries < 10 && rval == -1; tries++) {
 	    ud->ngroups <<= 1;
-	    efree(ud->groups);
+	    sudo_efree(ud->groups);
 	    ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
@@ -398,7 +398,7 @@ get_user_groups(struct user_details *ud)
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
 		ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
-		    efree(ud->groups);
+		    sudo_efree(ud->groups);
 		    ud->groups = NULL;
 		}
 	    }
@@ -501,7 +501,7 @@ get_user_info(struct user_details *ud)
 	if (user_info[i] == NULL)
 	    sudo_fatal(NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
-	efree(cp);
+	sudo_efree(cp);
     }
 
     if (gethostname(host, sizeof(host)) == 0)
@@ -759,7 +759,7 @@ sudo_check_suid(const char *sudo)
 		    }
 		    cp = colon + 1;
 		} while (colon);
-		efree(path);
+		sudo_efree(path);
 	    }
 	}
 
@@ -1248,7 +1248,7 @@ iolog_unlink(struct plugin_container *plugin)
     }
     /* Remove from io_plugins list and free. */
     TAILQ_REMOVE(&io_plugins, plugin, entries);
-    efree(plugin);
+    sudo_efree(plugin);
 
     debug_return;
 }

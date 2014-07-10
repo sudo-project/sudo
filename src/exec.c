@@ -510,7 +510,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     sudo_ev_free(signal_event);
     sudo_ev_free(backchannel_event);
     TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
-	efree(sigfwd);
+	sudo_efree(sigfwd);
     }
     TAILQ_INIT(&sigfwd_list);
 done:
@@ -808,7 +808,7 @@ forward_signals(int sock, int what, void *v)
 	    nsent = send(sock, &cstat, sizeof(cstat), 0);
 	} while (nsent == -1 && errno == EINTR);
 	TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
-	efree(sigfwd);
+	sudo_efree(sigfwd);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
 		struct sigforward *sigfwd_next;
@@ -816,7 +816,7 @@ forward_signals(int sock, int what, void *v)
 		    "broken pipe writing to child over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
 		TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
-		    efree(sigfwd);
+		    sudo_efree(sigfwd);
 		}
 		TAILQ_INIT(&sigfwd_list);
 		/* XXX - child (monitor) is dead, we should exit too? */

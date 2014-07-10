@@ -336,7 +336,7 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 				    HLTQ_TO_TAILQ(cs->runasgrouplist,
 					$1->runasgroups, entries);
 				}
-				efree($1);
+				sudo_efree($1);
 			    }
 #ifdef HAVE_SELINUX
 			    cs->role = $2.role;
@@ -816,8 +816,8 @@ init_parser(const char *path, bool quiet)
 	struct privilege *priv, *priv_next;
 
 	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
-	    efree(m->name);
-	    efree(m);
+	    sudo_efree(m->name);
+	    sudo_efree(m);
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
 	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
@@ -830,62 +830,62 @@ init_parser(const char *path, bool quiet)
 #endif /* HAVE_PRIV_SET */
 
 	    TAILQ_FOREACH_SAFE(m, &priv->hostlist, entries, m_next) {
-		efree(m->name);
-		efree(m);
+		sudo_efree(m->name);
+		sudo_efree(m);
 	    }
 	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
 #ifdef HAVE_SELINUX
 		/* Only free the first instance of a role/type. */
 		if (cs->role != role) {
 		    role = cs->role;
-		    efree(cs->role);
+		    sudo_efree(cs->role);
 		}
 		if (cs->type != type) {
 		    type = cs->type;
-		    efree(cs->type);
+		    sudo_efree(cs->type);
 		}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 		/* Only free the first instance of privs/limitprivs. */
 		if (cs->privs != privs) {
 		    privs = cs->privs;
-		    efree(cs->privs);
+		    sudo_efree(cs->privs);
 		}
 		if (cs->limitprivs != limitprivs) {
 		    limitprivs = cs->limitprivs;
-		    efree(cs->limitprivs);
+		    sudo_efree(cs->limitprivs);
 		}
 #endif /* HAVE_PRIV_SET */
 		/* Only free the first instance of runas user/group lists. */
 		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
 		    runasuserlist = cs->runasuserlist;
 		    TAILQ_FOREACH_SAFE(m, runasuserlist, entries, m_next) {
-			efree(m->name);
-			efree(m);
+			sudo_efree(m->name);
+			sudo_efree(m);
 		    }
-		    efree(runasuserlist);
+		    sudo_efree(runasuserlist);
 		}
 		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
 		    runasgrouplist = cs->runasgrouplist;
 		    TAILQ_FOREACH_SAFE(m, runasgrouplist, entries, m_next) {
-			efree(m->name);
-			efree(m);
+			sudo_efree(m->name);
+			sudo_efree(m);
 		    }
-		    efree(runasgrouplist);
+		    sudo_efree(runasgrouplist);
 		}
 		if (cs->cmnd->type == COMMAND) {
 			struct sudo_command *c =
 			    (struct sudo_command *) cs->cmnd->name;
-			efree(c->cmnd);
-			efree(c->args);
+			sudo_efree(c->cmnd);
+			sudo_efree(c->args);
 		}
-		efree(cs->cmnd->name);
-		efree(cs->cmnd);
-		efree(cs);
+		sudo_efree(cs->cmnd->name);
+		sudo_efree(cs->cmnd);
+		sudo_efree(cs);
 	    }
-	    efree(priv);
+	    sudo_efree(priv);
 	}
-	efree(us);
+	sudo_efree(us);
     }
     TAILQ_INIT(&userspecs);
 
@@ -899,17 +899,17 @@ init_parser(const char *path, bool quiet)
 		if (m->type == COMMAND) {
 			struct sudo_command *c =
 			    (struct sudo_command *) m->name;
-			efree(c->cmnd);
-			efree(c->args);
+			sudo_efree(c->cmnd);
+			sudo_efree(c->args);
 		}
-		efree(m->name);
-		efree(m);
+		sudo_efree(m->name);
+		sudo_efree(m);
 	    }
-	    efree(d->binding);
+	    sudo_efree(d->binding);
 	}
-	efree(d->var);
-	efree(d->val);
-	efree(d);
+	sudo_efree(d->var);
+	sudo_efree(d->val);
+	sudo_efree(d);
     }
     TAILQ_INIT(&defaults);
 
@@ -917,7 +917,7 @@ init_parser(const char *path, bool quiet)
 
     init_lexer();
 
-    efree(sudoers);
+    sudo_efree(sudoers);
     sudoers = path ? sudo_estrdup(path) : NULL;
 
     parse_error = false;

@@ -657,7 +657,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     rval = true;
 
 done:
-    efree(tofree);
+    sudo_efree(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
     sudo_endpwent();

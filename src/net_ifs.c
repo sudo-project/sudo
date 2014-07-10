@@ -202,7 +202,7 @@ done:
 #ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
 #else
-    efree(ifaddrs);
+    sudo_efree(ifaddrs);
 #endif
     debug_return_int(num_interfaces);
 }
@@ -257,7 +257,7 @@ get_net_ifs(char **addrinfo)
 	if (ifconf->ifc_len + sizeof(struct ifreq) < buflen)
 	    break;
 	buflen += BUFSIZ;
-	efree(ifconf_buf);
+	sudo_efree(ifconf_buf);
     }
 
     /* Allocate space for the maximum number of interfaces that could exist. */
@@ -334,7 +334,7 @@ get_net_ifs(char **addrinfo)
     }
 
 done:
-    efree(ifconf_buf);
+    sudo_efree(ifconf_buf);
     (void) close(sock);
 
     debug_return_int(num_interfaces);

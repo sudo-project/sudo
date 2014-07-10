@@ -343,7 +343,7 @@ _rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 	_rbdestroy(tree, node->right, destroy);
 	if (destroy != NULL)
 	    destroy(node->data);
-	efree(node);
+	sudo_efree(node);
     }
     debug_return;
 }
@@ -357,7 +357,7 @@ rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
     debug_decl(rbdestroy, SUDO_DEBUG_RBTREE)
     _rbdestroy(tree, rbfirst(tree), destroy);
-    efree(tree);
+    sudo_efree(tree);
     debug_return;
 }
 

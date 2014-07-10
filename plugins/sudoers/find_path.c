@@ -106,7 +106,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || (size_t)len >= sizeof(command)) {
-	    efree(origpath);
+	    sudo_efree(origpath);
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
@@ -116,7 +116,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	path = n + 1;
 
     } while (n);
-    efree(origpath);
+    sudo_efree(origpath);
 
     /*
      * Check current dir if dot was in the PATH

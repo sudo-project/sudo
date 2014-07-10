@@ -103,7 +103,7 @@ sudo_pw_delref_item(void *v)
     debug_decl(sudo_pw_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
-	efree(item);
+	sudo_efree(item);
 
     debug_return;
 }
@@ -253,7 +253,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	    pwitem->cache.k.uid = pw->pw_uid;
 	    if ((node = rbinsert(pwcache_byuid, &pwitem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(pwitem);
+		sudo_efree(pwitem);
 		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	} else {
@@ -261,7 +261,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	    pwitem->cache.k.name = pw->pw_name;
 	    if ((node = rbinsert(pwcache_byname, &pwitem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(pwitem);
+		sudo_efree(pwitem);
 		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	}
@@ -357,7 +357,7 @@ sudo_gr_delref_item(void *v)
     debug_decl(sudo_gr_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
-	efree(item);
+	sudo_efree(item);
 
     debug_return;
 }
@@ -470,7 +470,7 @@ sudo_fakegrnam(const char *group)
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
 		"gid %s %s", group, errstr);
-	    efree(gritem);
+	    sudo_efree(gritem);
 	    debug_return_ptr(NULL);
 	}
 
@@ -481,7 +481,7 @@ sudo_fakegrnam(const char *group)
 	    gritem->cache.k.gid = gr->gr_gid;
 	    if ((node = rbinsert(grcache_bygid, &gritem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(gritem);
+		sudo_efree(gritem);
 		gritem = (struct cache_item_gr *) node->data;
 	    }
 	} else {
@@ -489,7 +489,7 @@ sudo_fakegrnam(const char *group)
 	    gritem->cache.k.name = gr->gr_name;
 	    if ((node = rbinsert(grcache_byname, &gritem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(gritem);
+		sudo_efree(gritem);
 		gritem = (struct cache_item_gr *) node->data;
 	    }
 	}
@@ -513,7 +513,7 @@ sudo_grlist_delref_item(void *v)
     debug_decl(sudo_gr_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
-	efree(item);
+	sudo_efree(item);
 
     debug_return;
 }

@@ -410,7 +410,7 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	if (strcmp(sudoers_cmnd, "sudoedit") == 0 &&
 	    strcmp(user_cmnd, "sudoedit") == 0 &&
 	    command_args_match(sudoers_cmnd, sudoers_args)) {
-	    efree(safe_cmnd);
+	    sudo_efree(safe_cmnd);
 	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
 	    rc = true;
 	}
@@ -520,7 +520,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    efree(safe_cmnd);
+	    sudo_efree(safe_cmnd);
 	    safe_cmnd = sudo_estrdup(cp);
 	    break;
 	}
@@ -530,7 +530,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	debug_return_bool(false);
 
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	efree(safe_cmnd);
+	sudo_efree(safe_cmnd);
 	safe_cmnd = sudo_estrdup(user_cmnd);
 	debug_return_bool(true);
     }
@@ -553,7 +553,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 
     if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    efree(safe_cmnd);
+	    sudo_efree(safe_cmnd);
 	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
 	    debug_return_bool(true);
 	}
@@ -711,7 +711,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	/* XXX - log functions not available but we should log very loudly */
 	debug_return_bool(false);
     }
-    efree(safe_cmnd);
+    sudo_efree(safe_cmnd);
     safe_cmnd = sudo_estrdup(sudoers_cmnd);
     debug_return_bool(true);
 }
@@ -765,7 +765,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    efree(safe_cmnd);
+	    sudo_efree(safe_cmnd);
 	    safe_cmnd = sudo_estrdup(buf);
 	    break;
 	}
@@ -928,7 +928,7 @@ sudo_getdomainname(void)
 	}
     }
     if (domain == NULL)
-	efree(buf);
+	sudo_efree(buf);
 #endif /* HAVE_GETDOMAINNAME */
     return domain;
 }

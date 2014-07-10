@@ -214,7 +214,7 @@ do_logfile(char *msg)
 	     * Print out full_line with word wrap around def_loglinelen chars.
 	     */
 	    writeln_wrap(fp, full_line, len, def_loglinelen);
-	    efree(full_line);
+	    sudo_efree(full_line);
 	}
 	(void) fflush(fp);
 	(void) sudo_lock_file(fileno(fp), SUDO_UNLOCK);
@@ -275,7 +275,7 @@ log_denial(int status, bool inform_user)
     if (uid_changed)
 	restore_perms();
 
-    efree(logline);
+    sudo_efree(logline);
 
     /* Restore locale. */
     sudoers_setlocale(oldlocale, NULL);
@@ -414,7 +414,7 @@ log_allowed(int status)
     if (uid_changed)
 	restore_perms();
 
-    efree(logline);
+    sudo_efree(logline);
 
     sudoers_setlocale(oldlocale, NULL);
 
@@ -462,7 +462,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	logline = message;
     } else {
 	logline = new_logline(message, ISSET(flags, SLOG_USE_ERRNO) ? serrno : 0);
-        efree(message);
+        sudo_efree(message);
     }
 
     /* Become root if we are not already. */
@@ -487,7 +487,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     if (uid_changed)
 	restore_perms();
 
-    efree(logline);
+    sudo_efree(logline);
 
     sudoers_setlocale(oldlocale, NULL);
 
@@ -897,7 +897,7 @@ new_logline(const char *message, int serrno)
 	    strlcat(line, evstr, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
-	efree(evstr);
+	sudo_efree(evstr);
     }
     if (user_cmnd != NULL) {
 	if (strlcat(line, LL_CMND_STR, len) >= len)

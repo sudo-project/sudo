@@ -265,7 +265,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 		status = PAM_SYSTEM_ERR;
 	    *user_envp = env_get();
 	    env_init(NULL);
-	    efree(pam_envp);
+	    sudo_efree(pam_envp);
 	    /* XXX - we leak any duplicates that were in pam_envp */
 	}
     }

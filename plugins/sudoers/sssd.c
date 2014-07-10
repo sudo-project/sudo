@@ -212,7 +212,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	    out_res->rules =
 		sudo_ereallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
 	} else {
-	    efree(out_res->rules);
+	    sudo_efree(out_res->rules);
 	    out_res->rules = NULL;
 	}
     }
@@ -312,7 +312,7 @@ static int sudo_sss_close(struct sudo_nss *nss)
     if (nss && nss->handle) {
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
-	efree(nss->handle);
+	sudo_efree(nss->handle);
     }
     debug_return_int(0);
 }
@@ -909,9 +909,9 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoCommand '%s' ... %s",
 	    val, ret == true ? "MATCH!" : "not");
-	efree(allowed_cmnd);	/* cleanup */
+	sudo_efree(allowed_cmnd);	/* cleanup */
 	if (allowed_digest != NULL)
-	    efree(allowed_digest->digest_str);
+	    sudo_efree(allowed_digest->digest_str);
     }
 
     handle->fn_free_values(val_array); /* more cleanup */
@@ -967,7 +967,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    /* case var Boolean True */
 	    set_default(v, NULL, true);
 	}
-	efree(v);
+	sudo_efree(v);
     }
 
     handle->fn_free_values(val_array);

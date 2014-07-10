@@ -145,7 +145,7 @@ group_plugin_load(char *plugin_info)
     rc = (group_plugin->init)(GROUP_API_VERSION, sudo_printf, argv);
 
 done:
-    efree(argv);
+    sudo_efree(argv);
 
     if (rc != true) {
 	if (group_handle != NULL) {

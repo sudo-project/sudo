@@ -908,13 +908,13 @@ parse_logfile(char *logfile)
 	}
     }
     fclose(fp);
-    efree(buf);
+    sudo_efree(buf);
     debug_return_ptr(li);
 
 bad:
     if (fp != NULL)
 	fclose(fp);
-    efree(buf);
+    sudo_efree(buf);
     free_log_info(li);
     debug_return_ptr(NULL);
 }
@@ -923,13 +923,13 @@ static void
 free_log_info(struct log_info *li)
 {
     if (li != NULL) {
-	efree(li->cwd);
-	efree(li->user);
-	efree(li->runas_user);
-	efree(li->runas_group);
-	efree(li->tty);
-	efree(li->cmd);
-	efree(li);
+	sudo_efree(li->cwd);
+	sudo_efree(li->user);
+	sudo_efree(li->runas_user);
+	sudo_efree(li->runas_group);
+	sudo_efree(li->tty);
+	sudo_efree(li->cmd);
+	sudo_efree(li);
     }
 }
 
@@ -1056,7 +1056,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	    errno = ENAMETOOLONG;
 	    sudo_fatal("%s/%s/log", dir, sessions[i]);
 	}
-	efree(sessions[i]);
+	sudo_efree(sessions[i]);
 
 	/* Check for dir with a log file. */
 	if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
@@ -1068,7 +1068,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 		find_sessions(pathbuf, re, user, tty);
 	}
     }
-    efree(sessions);
+    sudo_efree(sessions);
 
     debug_return_int(0);
 }

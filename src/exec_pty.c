@@ -818,7 +818,7 @@ pty_close(struct command_status *cstat)
     /* Free I/O buffers. */
     while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
 	SLIST_REMOVE_HEAD(&iobufs, entries);
-	efree(iob);
+	sudo_efree(iob);
     }
 
     /* Restore terminal settings. */

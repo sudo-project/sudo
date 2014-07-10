@@ -76,10 +76,10 @@ void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
-    efree(base->readfds_in);
-    efree(base->writefds_in);
-    efree(base->readfds_out);
-    efree(base->writefds_out);
+    sudo_efree(base->readfds_in);
+    sudo_efree(base->writefds_in);
+    sudo_efree(base->readfds_out);
+    sudo_efree(base->writefds_out);
     debug_return;
 }
 

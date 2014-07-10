@@ -83,7 +83,7 @@ audit_role_change(const security_context_t old_context,
 	    message, NULL, NULL, ttyn, 1);
 	if (rc <= 0)
 	    sudo_warn(U_("unable to send audit message"));
-	efree(message);
+	sudo_efree(message);
 	close(au_fd);
     }
 
@@ -299,7 +299,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     debug_return_ptr(new_context);
 
 bad:
-    efree(typebuf);
+    sudo_efree(typebuf);
     context_free(context);
     freecon(new_context);
     debug_return_ptr(NULL);

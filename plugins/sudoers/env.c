@@ -236,7 +236,7 @@ env_init(char * const envp[])
 
 	/* Free the old envp we allocated, if any. */
 	if (env.old_envp != NULL)
-	    efree((void *)env.old_envp);
+	    sudo_efree((void *)env.old_envp);
     }
 
     debug_return;
@@ -387,7 +387,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	rval = sudo_putenv(estring, dupcheck, overwrite);
     }
     if (rval == -1)
-	efree(estring);
+	sudo_efree(estring);
     debug_return_int(rval);
 }
 
@@ -945,7 +945,7 @@ rebuild_env(void)
     if (user_args) {
 	sudo_easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
 	if (sudo_putenv(cp, true, true) == -1) {
-	    efree(cp);
+	    sudo_efree(cp);
 	    goto bad;
 	}
     } else {
@@ -964,7 +964,7 @@ rebuild_env(void)
 	goto bad;
 
     /* Free old environment. */
-    efree(old_envp);
+    sudo_efree(old_envp);
 
     debug_return_bool(true);
 
@@ -1049,7 +1049,7 @@ validate_env_vars(char * const env_vars[])
 	/* XXX - audit? */
 	log_warningx(0,
 	    N_("sorry, you are not allowed to set the following environment variables: %s"), bad);
-	efree(bad);
+	sudo_efree(bad);
 	rval = false;
     }
     debug_return_bool(rval);

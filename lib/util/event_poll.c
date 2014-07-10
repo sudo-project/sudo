@@ -72,7 +72,7 @@ void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
-    efree(base->pfds);
+    sudo_efree(base->pfds);
     debug_return;
 }
 

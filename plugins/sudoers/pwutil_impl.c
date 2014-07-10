@@ -255,7 +255,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 		ngids = NGROUPS_MAX * 2;
 	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-		efree(gids);
+		sudo_efree(gids);
 		gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
 		    ngids = -1;
@@ -263,7 +263,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 	}
     }
     if (ngids <= 0) {
-	efree(gids);
+	sudo_efree(gids);
 	debug_return_ptr(NULL);
     }
 
@@ -322,7 +322,7 @@ again:
 	    len = strlen(grp->gr_name) + 1;
 	    if (cp - (char *)grlitem + len > total) {
 		total += len + groupname_len;
-		efree(grlitem);
+		sudo_efree(grlitem);
 		sudo_gr_delref(grp);
 		goto again;
 	    }
@@ -333,7 +333,7 @@ again:
 	}
     }
     grlist->ngroups = ngroups;
-    efree(gids);
+    sudo_efree(gids);
 
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();

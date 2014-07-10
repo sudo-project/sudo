@@ -285,8 +285,8 @@ done:
     if (d != NULL)
 	closedir(d);
     for (i = 0; i < num_subdirs; i++)
-	efree(subdirs[i]);
-    efree(subdirs);
+	sudo_efree(subdirs[i]);
+    sudo_efree(subdirs);
     debug_return_str(devname);
 }
 
@@ -383,7 +383,7 @@ get_process_ttyname(void)
 	sudo_debug_printf(SUDO_DEBUG_WARN,
 	    "unable to resolve tty via KERN_PROC: %s", strerror(errno));
     }
-    efree(ki_proc);
+    sudo_efree(ki_proc);
 
     debug_return_str(tty);
 }
@@ -461,7 +461,7 @@ get_process_ttyname(void)
 		}
 	    }
 	}
-	efree(line);
+	sudo_efree(line);
     }
 
     debug_return_str(tty);

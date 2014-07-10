@@ -107,7 +107,7 @@ sudo_secureware_cleanup(pw, auth)
 
     if (pw_epasswd != NULL) {
 	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
-	efree(pw_epasswd);
+	sudo_efree(pw_epasswd);
     }
     debug_return_int(AUTH_SUCCESS);
 }

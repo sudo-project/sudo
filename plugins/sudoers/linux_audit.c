@@ -105,7 +105,7 @@ linux_audit_command(char *argv[], int result)
     rc = 0;
 
 done:
-    efree(command);
+    sudo_efree(command);
 
     debug_return_int(rc);
 }

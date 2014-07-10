@@ -64,7 +64,7 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
     pfd_new->highfd = fd;
     pfd_new->flags = fcntl(fd, F_GETFD);
     if (pfd_new->flags == -1) {
-	efree(pfd_new);
+	sudo_efree(pfd_new);
 	debug_return_int(-1);
     }
 
@@ -73,7 +73,7 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 	    /* already preserved */
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"fd %d already preserved", fd);
-	    efree(pfd_new);
+	    sudo_efree(pfd_new);
 	    break;
 	}
 	if (fd < pfd->highfd) {

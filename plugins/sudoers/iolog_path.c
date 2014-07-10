@@ -281,6 +281,6 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
     debug_return_str(path);
 bad:
-    efree(path);
+    sudo_efree(path);
     debug_return_str(NULL);
 }

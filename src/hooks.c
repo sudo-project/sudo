@@ -238,7 +238,7 @@ deregister_hook_internal(struct sudo_hook_list *head,
 		SLIST_REMOVE_HEAD(head, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
-	    efree(hook);
+	    sudo_efree(hook);
 	    break;
 	}
 	prev = hook;
