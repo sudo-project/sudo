@@ -125,6 +125,11 @@ case "$osversion" in
 	if [ $osrelease -ge 60 ]; then
 	    # RHEL 6 and above builds sudo with SSSD support
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
+	    # RHEL 6 and above use /etc/sudo-ldap.conf
+	    if test "$flavor" = "ldap"; then
+		configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
+		    --with-ldap-conf-file=/etc/sudo-ldap.conf"
+	    fi
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--prefix=/usr
