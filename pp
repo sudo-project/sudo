@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2014 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="20140620"
+pp_revision="20140711"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -5517,7 +5517,10 @@ pp_rpm_writefiles () {
     while read t m o g f p st; do
         _l="$p"
 	test $t = d && _l="%dir ${_l%/}/"
-        if test x"$m" = x"-"; then
+	if test $t = s; then
+	    # rpm warns if %attr contains a mode for symlinks
+	    m=-
+        elif test x"$m" = x"-"; then
             case "$t" in
                 d) m=755;;
                 f) m=644;;
