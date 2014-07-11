@@ -102,6 +102,7 @@ still allow people to get their work done."
 		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
 		/Desktop path settings/+1,s/^# //
+		/allow members of group wheel to execute any command/+1,s/^# //
 		w
 		q
 		EOF
