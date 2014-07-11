@@ -295,6 +295,7 @@ package: sudo.pp
 	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
 	    --destdir=$$DESTDIR \
 	    $(srcdir)/sudo.pp \
+	    prefix=$(prefix) \
 	    bindir=$(bindir) \
 	    sbindir=$(sbindir) \
 	    libexecdir=$(libexecdir) \

@@ -223,18 +223,19 @@ still allow people to get their work done."
 	ln -s -f ${sbindir}/visudo ${pp_destdir}/usr/sbin
 %endif
 
-	# OS-level directories that should generally exist but might not.
-	extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
-	extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
-	test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
-	test -d ${pp_destdir}/etc/pam.d && extradirs="${extradirs} /etc/pam.d"
-	for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
-		while test "$dir" != "/"; do
-			osdirs="${osdirs}${osdirs+ }$dir/"
-			dir=`dirname $dir`
-		done
-	done
-	osdirs=`echo $osdirs | tr " " "\n" | sort -u`
+	# Package parent directories when not installing under /usr
+	if test "${prefix}" != "/usr"; then
+	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
+	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
+	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
+	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
+		    while test "$dir" != "/"; do
+			    parentdirs="${parentdirs}${parentdirs+ }$dir/"
+			    dir=`dirname $dir`
+		    done
+	    done
+	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
+	fi
 
 %depend [deb]
 	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
@@ -256,7 +257,9 @@ still allow people to get their work done."
 	echo "Bugs: http://www.sudo.ws/bugs/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %files
-	$osdirs			-
+%if $parentdirs != ""
+	$parentdirs		-
+%endif
 	$bindir/sudo        	4755 root:
 	$bindir/sudoedit    	0755 root: symlink sudo
 	$sbindir/visudo     	0755
