@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "May 13, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "July 12, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -293,9 +293,6 @@ In
 The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
 You may wish to comment out or remove the unused alias.
-In
-\fB\-s\fR
-(strict) mode this is an error, not a warning.
 .TP 6n
 \fRWarning: cycle in {User,Runas,Host,Cmnd}_Alias\fR
 The specified {User,Runas,Host,Cmnd}_Alias includes a reference to

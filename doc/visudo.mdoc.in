@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd May 13, 2014
+.Dd July 12, 2014
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -282,9 +282,6 @@ In
 The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
 You may wish to comment out or remove the unused alias.
-In
-.Fl s
-(strict) mode this is an error, not a warning.
 .It Li Warning: cycle in {User,Runas,Host,Cmnd}_Alias
 The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
 itself, either directly or through an alias it includes.

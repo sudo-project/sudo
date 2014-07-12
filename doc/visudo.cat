@@ -116,8 +116,7 @@ DDIIAAGGNNOOSSTTIICCSS
 
      Warning: unused {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias was defined but never
-           used.  You may wish to comment out or remove the unused alias.  In
-           --ss (strict) mode this is an error, not a warning.
+           used.  You may wish to comment out or remove the unused alias.
 
      Warning: cycle in {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
@@ -162,4 +161,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                      May 13, 2014                      Sudo 1.8.11
+Sudo 1.8.11                      July 12, 2014                     Sudo 1.8.11

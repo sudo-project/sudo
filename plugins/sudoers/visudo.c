@@ -1098,6 +1098,16 @@ alias_remove_recursive(char *name, int type)
     debug_return_bool(rval);
 }
 
+static const char *
+alias_type_to_string(int alias_type)
+{
+    return alias_type == HOSTALIAS ? "Host_Alias" :
+	alias_type == CMNDALIAS ? "Cmnd_Alias" :
+	alias_type == USERALIAS ? "User_Alias" :
+	alias_type == RUNASALIAS ? "Runas_Alias" :
+	"Invalid_Alias";
+}
+
 static int
 check_alias(char *name, int type, int strict, int quiet)
 {
@@ -1117,18 +1127,14 @@ check_alias(char *name, int type, int strict, int quiet)
 	if (!quiet) {
 	    if (errno == ELOOP) {
 		sudo_warnx(strict ?
-		    U_("Error: cycle in %s_Alias `%s'") :
-		    U_("Warning: cycle in %s_Alias `%s'"),
-		    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
-		    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
-		    "Unknown", name);
+		    U_("Error: cycle in %s `%s'") :
+		    U_("Warning: cycle in %s `%s'"),
+		    alias_type_to_string(type), name);
 	    } else {
 		sudo_warnx(strict ?
-		    U_("Error: %s_Alias `%s' referenced but not defined") :
-		    U_("Warning: %s_Alias `%s' referenced but not defined"),
-		    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
-		    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
-		    "Unknown", name);
+		    U_("Error: %s `%s' referenced but not defined") :
+		    U_("Warning: %s `%s' referenced but not defined"),
+		    alias_type_to_string(type), name);
 	    }
 	}
 	errors++;
@@ -1256,7 +1262,7 @@ check_aliases(bool strict, bool quiet)
 
     /* If all aliases were referenced we will have an empty tree. */
     if (!no_aliases() && !quiet)
-	alias_apply(print_unused, strict ? "Error" : "Warning");
+	alias_apply(print_unused, NULL);
 
     debug_return_int(strict ? errors : 0);
 }
@@ -1265,12 +1271,9 @@ static int
 print_unused(void *v1, void *v2)
 {
     struct alias *a = (struct alias *)v1;
-    char *prefix = (char *)v2;
 
-    sudo_warnx_nodebug(U_("%s: unused %s_Alias %s"), prefix,
-	a->type == HOSTALIAS ? "Host" : a->type == CMNDALIAS ? "Cmnd" :
-	a->type == USERALIAS ? "User" : a->type == RUNASALIAS ? "Runas" :
-	"Unknown", a->name);
+    sudo_warnx_nodebug(U_("Warning: unused %s `%s'"),
+	alias_type_to_string(a->type), a->name);
     return 0;
 }
 
