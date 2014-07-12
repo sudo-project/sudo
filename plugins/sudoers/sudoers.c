@@ -82,7 +82,7 @@
 /*
  * Prototypes
  */
-static char *find_editor(int nfiles, char **files, char ***argv_out);
+static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
 static bool cb_runas_default(const char *);
 static bool cb_sudoers_locale(const char *);
 static int set_cmnd(void);
@@ -517,16 +517,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (!insert_env_vars(sudo_user.env_vars))
 	goto bad;
 
+    /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
+	int edit_argc;
+
 	sudo_efree(safe_cmnd);
-	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
-	if (safe_cmnd == NULL)
+	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc, &edit_argv);
+	if (safe_cmnd == NULL || audit_success(edit_argc, edit_argv) != 0)
+	    goto bad;
+    } else {
+	if (audit_success(NewArgc, NewArgv) != 0)
 	    goto bad;
     }
-
-    /* Must audit before uid change. */
-    if (audit_success(NewArgc, NewArgv) != 0)
-	goto bad;
 
     /* Setup execution environment to pass back to front-end. */
     rval = sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
@@ -1000,7 +1002,7 @@ sudoers_cleanup(void)
 }
 
 static char *
-resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***argv_out)
+resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, int *argc_out, char ***argv_out)
 {
     char *cp, **nargv, *editor, *editor_path = NULL;
     int ac, i, nargc;
@@ -1043,6 +1045,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***a
 	nargv[ac++] = files[i++];
     nargv[ac] = NULL;
 
+    *argc_out = nargc;
     *argv_out = nargv;
     debug_return_str(editor_path);
 }
@@ -1053,7 +1056,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***a
  * not the runas (privileged) user.
  */
 static char *
-find_editor(int nfiles, char **files, char ***argv_out)
+find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 {
     const char *cp, *ep, *editor;
     char *editor_path = NULL, **ev, *ev0[4];
@@ -1070,7 +1073,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
     for (ev = ev0; editor_path == NULL && *ev != NULL; ev++) {
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
 	    editor_path = resolve_editor(editor, strlen(editor), nfiles,
-		files, argv_out);
+		files, argc_out, argv_out);
 	}
     }
     if (editor_path == NULL) {
@@ -1081,7 +1084,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
 		len = ep - cp;
 	    else
 		len = strlen(cp);
-	    editor_path = resolve_editor(cp, len, nfiles, files, argv_out);
+	    editor_path = resolve_editor(cp, len, nfiles, files, argc_out, argv_out);
 	    cp = ep + 1;
 	} while (ep != NULL && editor_path == NULL);
     }
