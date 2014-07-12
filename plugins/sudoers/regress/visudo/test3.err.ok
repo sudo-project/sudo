@@ -1,2 +1,2 @@
-visudo: Error: unused User_Alias A
-visudo: Error: unused User_Alias B
+visudo: Warning: unused User_Alias `A'
+visudo: Warning: unused User_Alias `B'
