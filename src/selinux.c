@@ -63,7 +63,7 @@ static struct selinux_state {
 #ifdef HAVE_LINUX_AUDIT
 static int
 audit_role_change(const security_context_t old_context,
-    const security_context_t new_context, const char *ttyn)
+    const security_context_t new_context, const char *ttyn, int result)
 {
     int au_fd, rc = -1;
     char *message;
@@ -80,7 +80,7 @@ audit_role_change(const security_context_t old_context,
 	sudo_easprintf(&message, "newrole: old-context=%s new-context=%s",
 	    old_context, new_context);
 	rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
-	    message, NULL, NULL, ttyn, 1);
+	    message, NULL, NULL, ttyn, result);
 	if (rc <= 0)
 	    sudo_warn(U_("unable to send audit message"));
 	sudo_efree(message);
@@ -335,8 +335,13 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     sudo_warnx("your old context was %s", se_state.old_context);
 #endif
     se_state.new_context = get_exec_context(se_state.old_context, role, type);
-    if (!se_state.new_context)
+    if (!se_state.new_context) {
+#ifdef HAVE_LINUX_AUDIT
+	audit_role_change(se_state.old_context, "?",
+	  se_state.ttyn, 0);
+#endif
 	goto done;
+    }
     
     if (relabel_tty(ttyn, ptyfd) < 0) {
 	sudo_warn(U_("unable to set tty context to %s"), se_state.new_context);
@@ -352,7 +357,7 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 
 #ifdef HAVE_LINUX_AUDIT
     audit_role_change(se_state.old_context, se_state.new_context,
-	se_state.ttyn);
+	se_state.ttyn, 1);
 #endif
 
     rval = 0;
