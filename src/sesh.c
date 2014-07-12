@@ -74,12 +74,12 @@ main(int argc, char *argv[], char *envp[])
 
     /* If invoked as a login shell, modify argv[0] accordingly. */
     if (login_shell) {
-	if ((cp = strrchr(argv[0], '/')) == NULL)
-	    cp = argv[0];
-	*cp = '-';
+	if ((cp = strrchr(argv[0], '/')) != NULL)
+	    argv[0] = cp;
+	argv[0][0] = '-';
     }
     sudo_execve(cmnd, argv, envp, noexec);
-    sudo_warn(U_("unable to execute %s"), argv[0]);
+    sudo_warn(U_("unable to execute %s"), cmnd);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, EXIT_FAILURE);                
     _exit(EXIT_FAILURE);
 }
