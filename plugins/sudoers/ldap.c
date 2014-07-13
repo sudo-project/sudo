@@ -1397,13 +1397,14 @@ sudo_ldap_decode_secret(const char *secret)
 	 * length but padding may be missing so round up to a multiple of 4.
 	 */
 	secret += sizeof("base64:") - 1;
-	reslen = ((strlen(secret) + 3) / 4 * 3) + 1;
-	result = sudo_emalloc(reslen);
+	reslen = ((strlen(secret) + 3) / 4 * 3);
+	result = sudo_emalloc(reslen + 1);
 	len = base64_decode(secret, result, reslen);
 	if (len == (size_t)-1) {
 	    free(result);
 	    result = NULL;
 	}
+	result[len] = '\0';
     }
     debug_return_str((char *)result);
 }
