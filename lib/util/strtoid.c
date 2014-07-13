@@ -37,6 +37,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 
@@ -62,6 +63,9 @@ sudo_strtoid(const char *p, const char *sep, char **endp, const char **errstr)
     bool valid = false;
     debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
 
+    /* skip leading space so we can pick up the sign, if any */
+    while (isspace((unsigned char)*p))
+	p++;
     if (sep == NULL)
 	sep = "";
     errno = 0;
