@@ -1387,7 +1387,7 @@ sudo_ldap_build_pass2(void)
 static char *
 sudo_ldap_decode_secret(const char *secret)
 {
-    char *result = NULL;
+    unsigned char *result = NULL;
     size_t len, reslen;
     debug_decl(sudo_ldap_decode_secret, SUDO_DEBUG_LDAP)
 
@@ -1405,7 +1405,7 @@ sudo_ldap_decode_secret(const char *secret)
 	    result = NULL;
 	}
     }
-    debug_return_str(result);
+    debug_return_str((char *)result);
 }
 
 static void
