@@ -1502,10 +1502,26 @@ if test "$enable_static" = "no"; then
 fi
 
 dnl
-dnl Libtool setup, we require libtool 2.2.6b or higher
+dnl Set host variables and m4 macro dir
 dnl
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
+
+dnl
+dnl On AIX we need to force libtool to install .so files for the plugins
+dnl instead of a .a file that contains the .so.  We do this by enabling
+dnl runtime linking (where the .so file is installed).  This must happen
+dnl before the call to LT_INIT
+dnl
+case "$host_os" in
+aix4.[[23]]|aix4.[[23]].*|aix[[5-9]]*)
+    LDFLAGS="${LDFLAGS}${LDFLAGS+ }-Wl,-brtl"
+    ;;
+esac
+
+dnl
+dnl Libtool init, we require libtool 2.2.6b or higher
+dnl
 LT_PREREQ([2.2.6b])
 LT_INIT([dlopen])
 

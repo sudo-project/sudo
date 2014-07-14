@@ -6357,6 +6357,13 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
+case "$host_os" in
+aix4.[23]|aix4.[23].*|aix[5-9]*)
+    LDFLAGS="${LDFLAGS}${LDFLAGS+ }-Wl,-brtl"
+    ;;
+esac
+
+
 case `pwd` in
   *\ * | *\	*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
