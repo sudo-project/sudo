@@ -53,7 +53,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(top_srcdir) @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -383,11 +383,11 @@ memrchr.lo: $(srcdir)/memrchr.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/memrchr.c
 memset_s.lo: $(srcdir)/memset_s.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/memset_s.c
-mksiglist.lo: $(srcdir)/mksiglist.c $(incdir)/compat/mksiglist.h \
-              $(incdir)/missing.h $(top_builddir)/config.h
+mksiglist.lo: $(srcdir)/mksiglist.c $(incdir)/missing.h $(srcdir)/mksiglist.h \
+              $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mksiglist.c
-mksigname.lo: $(srcdir)/mksigname.c $(incdir)/compat/mksigname.h \
-              $(incdir)/missing.h $(top_builddir)/config.h
+mksigname.lo: $(srcdir)/mksigname.c $(incdir)/missing.h $(srcdir)/mksigname.h \
+              $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mksigname.c
 mktemp.lo: $(srcdir)/mktemp.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mktemp.c

@@ -40,7 +40,7 @@ main(int argc, char *argv[])
     static char *sudo_sys_signame[NSIG];
     int i;
 
-#include "compat/mksigname.h"
+#include "mksigname.h"
 
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");

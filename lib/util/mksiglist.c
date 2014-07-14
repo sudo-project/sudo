@@ -40,7 +40,7 @@ main(int argc, char *argv[])
     static char *sudo_sys_siglist[NSIG];
     int i;
 
-#include "compat/mksiglist.h"
+#include "mksiglist.h"
 
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");
