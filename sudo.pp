@@ -258,7 +258,7 @@ still allow people to get their work done."
 	echo "Bugs: http://www.sudo.ws/bugs/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %files
-%if $parentdirs != ""
+%if X"$parentdirs" != X""
 	$parentdirs		-
 %endif
 	$bindir/sudo        	4755 root:
