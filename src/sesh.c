@@ -74,9 +74,10 @@ main(int argc, char *argv[], char *envp[])
 
     /* If invoked as a login shell, modify argv[0] accordingly. */
     if (login_shell) {
-	if ((cp = strrchr(argv[0], '/')) != NULL)
-	    argv[0] = cp;
-	argv[0][0] = '-';
+	if ((cp = strrchr(argv[0], '/')) == NULL)
+	    sudo_fatal(U_("unable to run %s as a login shell"), argv[0]);
+	*cp = '-';
+	argv[0] = cp;
     }
     sudo_execve(cmnd, argv, envp, noexec);
     sudo_warn(U_("unable to execute %s"), cmnd);
