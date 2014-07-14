@@ -512,6 +512,9 @@
 /* Define to 1 if you have the `setkeycreatecon' function. */
 #undef HAVE_SETKEYCREATECON
 
+/* Define to 1 if you have the `setprogname' function. */
+#undef HAVE_SETPROGNAME
+
 /* Define to 1 if you have the `setresuid' function. */
 #undef HAVE_SETRESUID
 

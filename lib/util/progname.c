@@ -54,12 +54,34 @@
 #include "missing.h"
 #include "sudo_util.h"
 
-#if defined(HAVE_GETPROGNAME) || defined(HAVE___PROGNAME)
+#if defined(HAVE_GETPROGNAME)
 
-/* STUB */
 void
 initprogname(const char *name)
 {
+# ifdef HAVE_SETPROGNAME
+    /* Check for libtool prefix and strip it if present. */
+    name = getprogname();
+    if (name[0] == 'l' && name[1] == 't' && name[2] == '-' && name[3] != '\0')
+	setprogname(name + 3);
+# endif
+    return;
+}
+
+#elif defined(HAVE___PROGNAME)
+
+extern const char *__progname;
+static const char *progname = "";
+
+void
+initprogname(const char *name)
+{
+    /* Check for libtool prefix and strip it if present. */
+    if (__progname[0] == 'l' && __progname[1] == 't' && __progname[2] == '-' &&
+	__progname[3] != '\0')
+	progname = __progname + 3;
+    else
+	progname = __progname;
     return;
 }
 
@@ -84,7 +106,7 @@ initprogname(const char *name)
     if (rc != -1 || errno == EOVERFLOW) {
         strlcpy(ucomm, pstat.pst_ucomm, sizeof(ucomm));
 	progname = ucomm;
-	return;
+	goto done;
     }
 #elif defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)
     /* XXX - configure check for psinfo.pr_fname */
@@ -102,7 +124,7 @@ initprogname(const char *name)
 	if (nread == (ssize_t)sizeof(psinfo)) {
 	    strlcpy(ucomm, psinfo.pr_fname, sizeof(ucomm));
 	    progname = ucomm;
-	    return;
+	    goto done;
 	}
     }
 #endif /* HAVE_PSTAT_GETPROC */
@@ -113,12 +135,18 @@ initprogname(const char *name)
 	base = name;
     }
     progname = base;
-}
 
+done:
+    if (progname[0] == 'l' && progname[1] == 't' && progname[2] == '-' &&
+	progname[3] != '\0')
+	progname += 3;
+}
+#endif /* !HAVE_GETPROGNAME && !HAVE___PROGNAME */
+
+#if !defined(HAVE_GETPROGNAME)
 const char *
-getprogname(void)
+sudo_getprogname(void)
 {
     return progname;
 }
-
-#endif /* !HAVE_GETPROGNAME && !HAVE___PROGNAME */
+#endif /* !HAVE_GETPROGNAME */

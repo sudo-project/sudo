@@ -301,19 +301,6 @@ typedef struct sigaction sigaction_t;
 #endif
 
 /*
- * If we lack getprogname(), emulate with __progname if possible.
- * Otherwise, add a prototype for use with our own getprogname.c.
- */
-#ifndef HAVE_GETPROGNAME
-# ifdef HAVE___PROGNAME
-extern const char *__progname;
-#  define getprogname()		(__progname)
-# else
-__dso_public const char *getprogname(void);
-# endif /* HAVE___PROGNAME */
-#endif /* !HAVE_GETPROGNAME */
-
-/*
  * Declare errno if errno.h doesn't do it for us.
  */
 #if defined(HAVE_DECL_ERRNO) && !HAVE_DECL_ERRNO
@@ -485,5 +472,10 @@ __dso_public int sudo_inet_pton(int af, const char *src, void *dst);
 # undef inet_pton
 # define inet_pton(_a, _b, _c) sudo_inet_pton((_a), (_b), (_c))
 #endif /* HAVE_INET_PTON */
+#ifndef HAVE_GETPROGNAME
+__dso_public const char *sudo_getprogname(void);
+# undef getprogname
+# define getprogname() sudo_getprogname()
+#endif /* HAVE_GETPROGNAME */
 
 #endif /* _SUDO_MISSING_H */

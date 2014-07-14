@@ -23,7 +23,6 @@ aix_prep_user
 aix_restoreauthdb
 aix_setauthdb
 closefrom_fallback
-getprogname
 initprogname
 isblank
 sudo_asprintf
@@ -102,6 +101,7 @@ sudo_getgrouplist
 sudo_getline
 sudo_getopt_long
 sudo_getopt_long_only
+sudo_getprogname
 sudo_glob
 sudo_globfree
 sudo_inet_pton

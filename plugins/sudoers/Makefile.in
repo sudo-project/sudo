@@ -202,28 +202,28 @@ sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
 	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(VISUDO_LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(VISUDO_LIBS)
 
 sudoreplay: timestr.lo $(REPLAY_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(LIBS) $(REPLAY_LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(LIBS) $(REPLAY_LIBS)
 
 testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(TESTSUDOERS_LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(TESTSUDOERS_LIBS)
 
 check_addr: $(CHECK_ADDR_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS)
 
 check_base64: $(CHECK_BASE64_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_BASE64_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_BASE64_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_digest: $(CHECK_DIGEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @LIBMD@ -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @LIBMD@
 
 check_fill: $(CHECK_FILL_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 # We need to link check_symbols with -lpthread on HP-UX since LDAP uses threads
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
@@ -232,7 +232,7 @@ check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
 	fi
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 

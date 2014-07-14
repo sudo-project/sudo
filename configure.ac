@@ -2658,7 +2658,7 @@ done
 dnl
 dnl Check for getprogname() or __progname
 dnl
-AC_CHECK_FUNCS(getprogname, , [
+AC_CHECK_FUNCS(getprogname, [AC_CHECK_FUNCS(setprogname)], [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])

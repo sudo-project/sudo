@@ -19198,6 +19198,16 @@ if test "x$ac_cv_func_getprogname" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GETPROGNAME 1
 _ACEOF
+ for ac_func in setprogname
+do :
+  ac_fn_c_check_func "$LINENO" "setprogname" "ac_cv_func_setprogname"
+if test "x$ac_cv_func_setprogname" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SETPROGNAME 1
+_ACEOF
+
+fi
+done
 
 else
 
