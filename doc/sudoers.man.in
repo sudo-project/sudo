@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "July 11, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "July 16, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2085,6 +2085,9 @@ and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
+This flag is
+\fIoff\fR
+by default.
 .sp
 Input is logged to the directory specified by the
 \fIiolog_dir\fR
@@ -2118,6 +2121,9 @@ If the standard output or standard error is not connected to the
 user's tty, due to I/O redirection or because the command is part
 of a pipeline, that output is also captured and stored in separate
 log files.
+This flag is
+\fIoff\fR
+by default.
 .sp
 Output is logged to the directory specified by the
 \fIiolog_dir\fR
@@ -2221,7 +2227,7 @@ If set, all commands run via
 \fBsudo\fR
 will behave as if the
 \fRNOEXEC\fR
-tag has been set, unless overridden by a
+tag has been set, unless overridden by an
 \fREXEC\fR
 tag.
 See the description of
