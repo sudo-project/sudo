@@ -120,13 +120,13 @@ sudo.man.sed: $(srcdir)/fixman.sh
 	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/sudo.man: $(srcdir)/sudo.man.in sudo.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 sudo.mdoc.sed: $(srcdir)/fixmdoc.sh
 	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
 $(mansrcdir)/sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -149,7 +149,7 @@ visudo.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/visudo.man: $(srcdir)/visudo.man.in visudo.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(mansrcdir)/visudo.mdoc: $(srcdir)/visudo.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
@@ -175,7 +175,7 @@ sudo.conf.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/sudo.conf.man: $(srcdir)/sudo.conf.man.in sudo.conf.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(mansrcdir)/sudo.conf.mdoc: $(srcdir)/sudo.conf.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
@@ -201,13 +201,13 @@ sudoers.man.sed: $(srcdir)/fixman.sh
 	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/sudoers.man: $(srcdir)/sudoers.man.in sudoers.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 sudoers.mdoc.sed: $(srcdir)/fixmdoc.sh
 	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
 $(mansrcdir)/sudoers.mdoc: $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -230,7 +230,7 @@ sudoers.ldap.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in sudoers.ldap.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(mansrcdir)/sudoers.ldap.mdoc: $(srcdir)/sudoers.ldap.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
@@ -256,7 +256,7 @@ sudoreplay.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/sudoreplay.man: $(srcdir)/sudoreplay.man.in sudoreplay.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(mansrcdir)/sudoreplay.mdoc: $(srcdir)/sudoreplay.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
@@ -282,7 +282,7 @@ sudo_plugin.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
 $(mansrcdir)/sudo_plugin.man: $(srcdir)/sudo_plugin.man.in sudo_plugin.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $@.in | $(SED) -f $@.sed > $@
 
 $(mansrcdir)/sudo_plugin.mdoc: $(srcdir)/sudo_plugin.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
