@@ -1841,6 +1841,9 @@ will not be automatically foregrounded.
 Some versions of the linux
 su(1)
 command behave this way.
+This flag is
+\fIoff\fR
+by default.
 .sp
 This setting is only supported by version 1.8.7 or higher.
 It has no effect unless I/O logging is enabled or the

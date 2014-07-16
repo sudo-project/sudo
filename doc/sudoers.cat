@@ -857,7 +857,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        programs that catch these signals and suspend
                        themselves with a different signal (usually SIGTOP)
                        will not be automatically foregrounded.  Some versions
-                       of the linux su(1) command behave this way.
+                       of the linux su(1) command behave this way.  This flag
+                       is _o_f_f by default.
 
                        This setting is only supported by version 1.8.7 or
                        higher.  It has no effect unless I/O logging is enabled
