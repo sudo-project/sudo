@@ -978,6 +978,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        connected to the user's tty, due to I/O redirection or
                        because the command is part of a pipeline, that input
                        is also captured and stored in a separate log file.
+                       This flag is _o_f_f by default.
 
                        Input is logged to the directory specified by the
                        _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
@@ -998,7 +999,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        standard error is not connected to the user's tty, due
                        to I/O redirection or because the command is part of a
                        pipeline, that output is also captured and stored in
-                       separate log files.
+                       separate log files.  This flag is _o_f_f by default.
 
                        Output is logged to the directory specified by the
                        _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
