@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -35,9 +35,7 @@ case "$OUTFILE" in
 	if [ X"$BAMAN" != X"1" ]; then
 		BA_FLAG='/^.*\n\.Op Fl a Ar type/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.It Fl a Ar type/,/BSD authentication\.$/ {
-				d
-			}
+			/^\.It Fl a Ar type/,/BSD authentication\.$/d
 		EOF
 	fi
 
@@ -46,9 +44,7 @@ case "$OUTFILE" in
 	if [ X"$LCMAN" != X"1" ]; then
 		LC_FLAG='/^.*\n\.Op Fl c Ar class/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.It Fl c Ar class/,/BSD login classes\.$/ {
-				d
-			}
+			/^\.It Fl c Ar class/,/BSD login classes\.$/d
 			/^\.Xr login_cap 3 ,$/d
 			/^BSD login class$/ {
 				N
@@ -62,12 +58,8 @@ case "$OUTFILE" in
 	if [ X"$SEMAN" != X"1" ]; then
 		SE_FLAG='/^.*\n\.Op Fl r Ar role/{;N;/^.*\n\.Ek$/d;};/^.*\n\.Op Fl t Ar type/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.It Fl r Ar role/,/^\.Ar role \.$/ {
-				d
-			}
-			/^\.It Fl t Ar type/,/derived from the role\.$/ {
-				d
-			}
+			/^\.It Fl r Ar role/,/^\.Ar role \.$/d
+			/^\.It Fl t Ar type/,/derived from the role\.$/d
 			/^SELinux role and type$/ {
 				N
 				/^SELinux role and type\n\.It$/d
@@ -118,12 +110,8 @@ case "$OUTFILE" in
 	# BSD login class
 	if [ X"$LCMAN" != X"1" ]; then
 		cat >>"$OUTFILE" <<-'EOF'
-			/^On BSD systems/,/\.$/ {
-				d
-			}
-			/^\.It use_loginclass$/,/^\.It/ {
-				/^\.It [^u][^s][^e][^_][^l]/!d
-			}
+			/^On BSD systems/,/\.$/d
+			/^\.It use_loginclass$/,/^by default\./d
 		EOF
 	fi
 
@@ -135,15 +123,8 @@ case "$OUTFILE" in
 				N
 				d
 			}
-			/^\.It limitprivs$/,/^\.It/ {
-				/^\.It [^l][^i][^m][^i][^t]/!d
-			}
-			/^\.It privs$/,/^\.It/ {
-				/^\.It [^p][^r][^i][^v][^s]$/!d
-			}
-			/^On Solaris 10/,/^\.Pp/ {
-				d
-			}
+			/^\.It \(limit\)*privs$/,/is built on Solaris 10 or higher\.$/d
+			/^On Solaris 10/,/^\.Pp/d
 		EOF
 	fi
 
@@ -155,9 +136,7 @@ case "$OUTFILE" in
 				N
 				d
 			}
-			/^\.It [rt][oy][lp]e$/,/^\.It/ {
-				/^\.It [^rt][^oy][^lp][^e]$/!d
-			}
+			/^\.It [rt][oy][lp]e$/,/is built with SELinux support\.$/d
 		EOF
 	fi
 	;;
