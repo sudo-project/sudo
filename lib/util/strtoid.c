@@ -42,7 +42,7 @@
 #include <limits.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before missing.h */
 
 #include "missing.h"
 #include "sudo_debug.h"

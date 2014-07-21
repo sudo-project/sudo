@@ -84,7 +84,7 @@
 
 #include <pathnames.h>
 
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before missing.h */
 
 #include "missing.h"
 #include "sudo_alloc.h"
