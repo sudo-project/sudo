@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -297,7 +297,7 @@ sudo_debug_exit_ptr(const char *func, const char *file, int line,
 
 static void
 sudo_debug_write_conv(const char *func, const char *file, int lineno,
-    const char *str, int len, int errno_val)
+    const char *str, int len, int errnum)
 {
     /* Remove trailing newlines. */
     while (len > 0 && str[len - 1] == '\n')
@@ -305,35 +305,35 @@ sudo_debug_write_conv(const char *func, const char *file, int lineno,
 
     if (len > 0) {
 	if (func != NULL && file != NULL) {
-	    if (errno_val) {
+	    if (errnum) {
 		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s @ %s() %s:%d",
-		    len, str, strerror(errno_val), func, file, lineno);
+		    len, str, strerror(errnum), func, file, lineno);
 	    } else {
 		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s @ %s() %s:%d",
 		    len, str, func, file, lineno);
 	    }
 	} else {
-	    if (errno_val) {
+	    if (errnum) {
 		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s",
-		    len, str, strerror(errno_val));
+		    len, str, strerror(errnum));
 	    } else {
 		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s", len, str);
 	    }
 	}
-    } else if (errno_val) {
+    } else if (errnum) {
 	/* Only print error string. */
 	if (func != NULL && file != NULL) {
 	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%s @ %s() %s:%d",
-		strerror(errno_val), func, file, lineno);
+		strerror(errnum), func, file, lineno);
 	} else {
-	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%s", strerror(errno_val));
+	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%s", strerror(errnum));
 	}
     }
 }
 
 static void
 sudo_debug_write_file(const char *func, const char *file, int lineno,
-    const char *str, int len, int errno_val)
+    const char *str, int len, int errnum)
 {
     char *timestr, numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
     time_t now;
@@ -356,13 +356,13 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
     }
 
     /* Append error string if errno is specified. */
-    if (errno_val) {
+    if (errnum) {
 	if (len > 0) {
 	    iov[iovcnt].iov_base = ": ";
 	    iov[iovcnt].iov_len = 2;
 	    iovcnt++;
 	}
-	iov[iovcnt].iov_base = strerror(errno_val);
+	iov[iovcnt].iov_base = strerror(errnum);
 	iov[iovcnt].iov_len = strlen(iov[iovcnt].iov_base);
 	iovcnt++;
     }
@@ -410,23 +410,16 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
 
 void
 sudo_debug_write2(const char *func, const char *file, int lineno,
-    const char *str, int len, int errno_val)
+    const char *str, int len, int errnum)
 {
     switch (sudo_debug_mode) {
     case SUDO_DEBUG_MODE_CONV:
-	sudo_debug_write_conv(func, file, lineno, str, len, errno_val);
+	sudo_debug_write_conv(func, file, lineno, str, len, errnum);
 	break;
     case SUDO_DEBUG_MODE_FILE:
-	sudo_debug_write_file(func, file, lineno, str, len, errno_val);
+	sudo_debug_write_file(func, file, lineno, str, len, errnum);
 	break;
     }
-}
-
-/* XXX - turn into a macro */
-void
-sudo_debug_write(const char *str, int len, int errno_val)
-{
-    sudo_debug_write2(NULL, NULL, 0, str, len, errno_val);
 }
 
 void

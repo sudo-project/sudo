@@ -202,6 +202,9 @@
 #define sudo_debug_execve(pri, path, argv, envp) \
     sudo_debug_execve2((pri)|sudo_debug_subsys, (path), (argv), (envp))
 
+#define sudo_debug_write(str, len, errnum) \
+    sudo_debug_write2(NULL, NULL, 0, (str), (len), (errnum))
+
 /*
  * NULL-terminated string lists of priorities and subsystems.
  */
@@ -224,7 +227,6 @@ __dso_public int sudo_debug_init(const char *debugfile, const char *settings);
 __dso_public void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
 __dso_public void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
 __dso_public void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
-__dso_public void sudo_debug_write(const char *str, int len, int errno_val);
 __dso_public void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
 __dso_public pid_t sudo_debug_fork(void);
 
