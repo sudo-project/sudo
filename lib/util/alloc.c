@@ -53,7 +53,7 @@
 
 #include "missing.h"
 #include "sudo_alloc.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t

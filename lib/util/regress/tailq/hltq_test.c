@@ -42,7 +42,7 @@
 #endif
 
 #include "missing.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
 

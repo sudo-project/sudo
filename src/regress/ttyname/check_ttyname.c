@@ -40,7 +40,7 @@
 
 #include "missing.h"
 #include "sudo_alloc.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 #include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[]);

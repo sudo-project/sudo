@@ -42,7 +42,7 @@
 #include "gettext.h"		/* must be included before missing.h */
 
 #include "missing.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 #include "sudo_alloc.h"
 #include "logging.h"
 

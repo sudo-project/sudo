@@ -88,7 +88,7 @@
 
 #include "missing.h"
 #include "sudo_alloc.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 #include "logging.h"
 #include "iolog.h"
 #include "sudo_queue.h"

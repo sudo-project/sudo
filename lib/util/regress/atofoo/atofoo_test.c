@@ -34,7 +34,7 @@
 
 #include "missing.h"
 #include "sudo_util.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 
 __dso_public int main(int argc, char *argv[]);
 

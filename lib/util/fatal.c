@@ -33,7 +33,7 @@
 
 #include "missing.h"
 #include "sudo_alloc.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 #include "sudo_queue.h"
 #include "sudo_plugin.h"
 

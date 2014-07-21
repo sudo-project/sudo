@@ -36,7 +36,7 @@
 
 #include "missing.h"
 #include "sudo_alloc.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
