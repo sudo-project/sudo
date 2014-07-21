@@ -36,7 +36,7 @@
 #include "missing.h"
 #include "fatal.h"
 #include "sudo_alloc.h"
-#include "queue.h"
+#include "sudo_queue.h"
 #include "defaults.h"
 #include "logging.h"
 #include "sudo_nss.h"

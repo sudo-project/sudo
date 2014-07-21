@@ -17,7 +17,7 @@
 #ifndef _SUDO_EVENT_H
 #define _SUDO_EVENT_H
 
-#include "queue.h"
+#include "sudo_queue.h"
 
 /* Event types */
 #define SUDO_EV_TIMEOUT		0x01	/* fire after timeout */

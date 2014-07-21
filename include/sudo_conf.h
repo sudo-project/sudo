@@ -17,7 +17,7 @@
 #ifndef _SUDO_CONF_H
 #define _SUDO_CONF_H
 
-#include "queue.h"
+#include "sudo_queue.h"
 
 #define GROUP_SOURCE_ADAPTIVE	0
 #define GROUP_SOURCE_STATIC	1

@@ -43,7 +43,7 @@
 
 #include "missing.h"
 #include "fatal.h"
-#include "queue.h"
+#include "sudo_queue.h"
 #include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[]);

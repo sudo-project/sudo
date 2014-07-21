@@ -91,7 +91,7 @@
 #include "fatal.h"
 #include "logging.h"
 #include "iolog.h"
-#include "queue.h"
+#include "sudo_queue.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"

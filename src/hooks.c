@@ -40,7 +40,7 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 #include "sudo_debug.h"
-#include "queue.h"
+#include "sudo_queue.h"
 
 /* Singly linked hook list. */
 struct sudo_hook_entry {

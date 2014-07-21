@@ -34,7 +34,7 @@
 #include "missing.h"
 #include "sudo_alloc.h"
 #include "fatal.h"
-#include "queue.h"
+#include "sudo_queue.h"
 #include "sudo_plugin.h"
 
 struct sudo_fatal_callback {
