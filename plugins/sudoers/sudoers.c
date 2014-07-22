@@ -73,7 +73,6 @@
 
 #include "sudoers.h"
 #include "auth/sudo_auth.h"
-#include "secure_path.h"
 
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"

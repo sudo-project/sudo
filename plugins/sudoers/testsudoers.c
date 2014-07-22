@@ -59,7 +59,6 @@
 #include "interfaces.h"
 #include "parse.h"
 #include "sudo_conf.h"
-#include "secure_path.h"
 #include <gram.h>
 
 #ifdef HAVE_FNMATCH

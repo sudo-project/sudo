@@ -31,8 +31,8 @@
 #include <errno.h>
 
 #include "missing.h"
+#include "sudo_util.h"
 #include "sudo_debug.h"
-#include "secure_path.h"
 
 /*
  * Verify that path is the right type and not writable by other users.

@@ -49,7 +49,6 @@
 #include <grp.h>
 
 #include "sudoers.h"
-#include "secure_path.h"
 #include "check.h"
 
 /* On Linux, CLOCK_MONOTONIC does not run while suspended. */

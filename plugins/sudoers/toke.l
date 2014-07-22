@@ -76,7 +76,6 @@
 #include "toke.h"
 #include <gram.h>
 #include "sudo_lbuf.h"
-#include "secure_path.h"
 
 #ifdef HAVE_SHA224UPDATE
 # include <sha2.h>

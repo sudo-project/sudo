@@ -58,7 +58,6 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-#include "secure_path.h"
 
 #ifdef __TANDEM
 # define ROOT_UID	65535

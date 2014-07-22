@@ -166,6 +166,19 @@ __dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *
 /* progname.c */
 __dso_public void initprogname(const char *);
 
+/* secure_path.c */
+#define SUDO_PATH_SECURE		0
+#define SUDO_PATH_MISSING		-1
+#define SUDO_PATH_BAD_TYPE		-2
+#define SUDO_PATH_WRONG_OWNER		-3
+#define SUDO_PATH_WORLD_WRITABLE	-4
+#define SUDO_PATH_GROUP_WRITABLE	-5
+struct stat;
+__dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+#define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
+__dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+#define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
+
 /* setgroups.c */
 __dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
 #define sudo_setgroups(_a, _b) sudo_setgroups_v1((_a), (_b))

@@ -65,7 +65,6 @@ include/fatal.h
 include/gettext.h
 include/missing.h
 include/queue.h
-include/secure_path.h
 include/sudo_alloc.h
 include/sudo_conf.h
 include/sudo_debug.h

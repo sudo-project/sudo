@@ -409,9 +409,9 @@ progname.lo: $(srcdir)/progname.c $(incdir)/compat/stdbool.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/progname.c
 pw_dup.lo: $(srcdir)/pw_dup.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/pw_dup.c
-secure_path.lo: $(srcdir)/secure_path.c $(incdir)/missing.h \
-                $(incdir)/secure_path.h $(incdir)/sudo_debug.h \
-                $(top_builddir)/config.h
+secure_path.lo: $(srcdir)/secure_path.c $(incdir)/compat/stdbool.h \
+                $(incdir)/missing.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/secure_path.c
 setgroups.lo: $(srcdir)/setgroups.c $(incdir)/compat/stdbool.h \
               $(incdir)/missing.h $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
@@ -452,8 +452,7 @@ strtonum.lo: $(srcdir)/strtonum.c $(incdir)/missing.h $(incdir)/sudo_gettext.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtonum.c
 sudo_conf.lo: $(srcdir)/sudo_conf.c $(incdir)/compat/stdbool.h \
-              $(incdir)/missing.h $(incdir)/secure_path.h \
-              $(incdir)/sudo_alloc.h $(incdir)/sudo_conf.h \
+              $(incdir)/missing.h $(incdir)/sudo_alloc.h $(incdir)/sudo_conf.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
