@@ -1403,8 +1403,9 @@ sudo_ldap_decode_secret(const char *secret)
 	if (len == (size_t)-1) {
 	    free(result);
 	    result = NULL;
+	} else {
+	    result[len] = '\0';
 	}
-	result[len] = '\0';
     }
     debug_return_str((char *)result);
 }
