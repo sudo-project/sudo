@@ -74,7 +74,7 @@
  * malloc(3) fails.
  */
 void *
-sudo_emalloc(size_t size)
+sudo_emalloc_v1(size_t size)
 {
     void *ptr;
 
@@ -91,7 +91,7 @@ sudo_emalloc(size_t size)
  * if overflow would occur or if the system malloc(3) fails.
  */
 void *
-sudo_emallocarray(size_t nmemb, size_t size)
+sudo_emallocarray_v1(size_t nmemb, size_t size)
 {
     void *ptr;
 
@@ -112,7 +112,7 @@ sudo_emallocarray(size_t nmemb, size_t size)
  * On success, the allocated space is zero-filled.
  */
 void *
-sudo_ecalloc(size_t nmemb, size_t size)
+sudo_ecalloc_v1(size_t nmemb, size_t size)
 {
     void *ptr;
 
@@ -135,7 +135,7 @@ sudo_ecalloc(size_t nmemb, size_t size)
  * if the system realloc(3) does not support this.
  */
 void *
-sudo_erealloc(void *ptr, size_t size)
+sudo_erealloc_v1(void *ptr, size_t size)
 {
 
     if (size == 0)
@@ -154,7 +154,7 @@ sudo_erealloc(void *ptr, size_t size)
  * realloc(3) does not support this.
  */
 void *
-sudo_ereallocarray(void *ptr, size_t nmemb, size_t size)
+sudo_ereallocarray_v1(void *ptr, size_t nmemb, size_t size)
 {
 
     if (nmemb == 0 || size == 0)
@@ -176,7 +176,7 @@ sudo_ereallocarray(void *ptr, size_t nmemb, size_t size)
  * with a NULL pointer even if the system realloc(3) does not support this.
  */
 void *
-sudo_erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
+sudo_erecalloc_v1(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
 {
     size_t size;
 
@@ -201,7 +201,7 @@ sudo_erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
  * malloc(3) fails.  NOTE: unlike strdup(3), sudo_estrdup(NULL) is legal.
  */
 char *
-sudo_estrdup(const char *src)
+sudo_estrdup_v1(const char *src)
 {
     char *dst = NULL;
     size_t len;
@@ -220,7 +220,7 @@ sudo_estrdup(const char *src)
  * malloc(3) fails.  NOTE: unlike strdup(3), sudo_estrdup(NULL) is legal.
  */
 char *
-sudo_estrndup(const char *src, size_t maxlen)
+sudo_estrndup_v1(const char *src, size_t maxlen)
 {
     char *dst = NULL;
     size_t len = 0;
@@ -242,7 +242,7 @@ sudo_estrndup(const char *src, size_t maxlen)
  * returns -1 (out of memory).
  */
 int
-sudo_easprintf(char **ret, const char *fmt, ...)
+sudo_easprintf_v1(char **ret, const char *fmt, ...)
 {
     int len;
     va_list ap;
@@ -261,7 +261,7 @@ sudo_easprintf(char **ret, const char *fmt, ...)
  * returns -1 (out of memory).
  */
 int
-sudo_evasprintf(char **ret, const char *format, va_list args)
+sudo_evasprintf_v1(char **ret, const char *format, va_list args)
 {
     int len;
 

@@ -61,7 +61,7 @@
  *       could also make comment char and line continuation configurable
  */
 ssize_t
-sudo_parseln(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
+sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 {
     size_t linesize = 0, total = 0;
     ssize_t len;

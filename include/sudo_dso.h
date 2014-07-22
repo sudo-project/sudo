@@ -40,10 +40,16 @@ struct sudo_preload_table {
 };
 
 /* Public functions. */
-__dso_public char *sudo_dso_strerror(void);
-__dso_public int sudo_dso_unload(void *handle);
-__dso_public void *sudo_dso_findsym(void *handle, const char *symbol);
-__dso_public void *sudo_dso_load(const char *path, int mode);
-__dso_public void sudo_dso_preload_table(struct sudo_preload_table *table);
+__dso_public char *sudo_dso_strerror_v1(void);
+__dso_public int sudo_dso_unload_v1(void *handle);
+__dso_public void *sudo_dso_findsym_v1(void *handle, const char *symbol);
+__dso_public void *sudo_dso_load_v1(const char *path, int mode);
+__dso_public void sudo_dso_preload_table_v1(struct sudo_preload_table *table);
+
+#define sudo_dso_strerror() sudo_dso_strerror_v1()
+#define sudo_dso_unload(_a) sudo_dso_unload_v1((_a))
+#define sudo_dso_findsym(_a, _b) sudo_dso_findsym_v1((_a), (_b))
+#define sudo_dso_load(_a, _b) sudo_dso_load_v1((_a), (_b))
+#define sudo_dso_preload_table(_a) sudo_dso_preload_table_v1((_a))
 
 #endif /* _SUDO_DSO_H */

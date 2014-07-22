@@ -33,18 +33,29 @@ struct plugin_info {
 TAILQ_HEAD(plugin_info_list, plugin_info);
 
 /* Read main sudo.conf file. */
-__dso_public void sudo_conf_read(const char *);
+__dso_public void sudo_conf_read_v1(const char *conf_file);
+#define sudo_conf_read(_a) sudo_conf_read_v1((_a))
 
 /* Accessor functions. */
-__dso_public const char *sudo_conf_askpass_path(void);
-__dso_public const char *sudo_conf_sesh_path(void);
-__dso_public const char *sudo_conf_noexec_path(void);
-__dso_public const char *sudo_conf_plugin_dir_path(void);
-__dso_public const char *sudo_conf_debug_flags(void);
-__dso_public struct plugin_info_list *sudo_conf_plugins(void);
-__dso_public bool sudo_conf_disable_coredump(void);
-__dso_public bool sudo_conf_probe_interfaces(void);
-__dso_public int sudo_conf_group_source(void);
-__dso_public int sudo_conf_max_groups(void);
+__dso_public const char *sudo_conf_askpass_path_v1(void);
+__dso_public const char *sudo_conf_sesh_path_v1(void);
+__dso_public const char *sudo_conf_noexec_path_v1(void);
+__dso_public const char *sudo_conf_plugin_dir_path_v1(void);
+__dso_public const char *sudo_conf_debug_flags_v1(void);
+__dso_public struct plugin_info_list *sudo_conf_plugins_v1(void);
+__dso_public bool sudo_conf_disable_coredump_v1(void);
+__dso_public bool sudo_conf_probe_interfaces_v1(void);
+__dso_public int sudo_conf_group_source_v1(void);
+__dso_public int sudo_conf_max_groups_v1(void);
+#define sudo_conf_askpass_path() sudo_conf_askpass_path_v1()
+#define sudo_conf_sesh_path() sudo_conf_sesh_path_v1()
+#define sudo_conf_noexec_path() sudo_conf_noexec_path_v1()
+#define sudo_conf_plugin_dir_path() sudo_conf_plugin_dir_path_v1()
+#define sudo_conf_debug_flags() sudo_conf_debug_flags_v1()
+#define sudo_conf_plugins() sudo_conf_plugins_v1()
+#define sudo_conf_disable_coredump() sudo_conf_disable_coredump_v1()
+#define sudo_conf_probe_interfaces() sudo_conf_probe_interfaces_v1()
+#define sudo_conf_group_source() sudo_conf_group_source_v1()
+#define sudo_conf_max_groups() sudo_conf_max_groups_v1()
 
 #endif /* _SUDO_CONF_H */

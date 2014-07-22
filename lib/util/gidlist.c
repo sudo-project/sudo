@@ -45,7 +45,7 @@
  * Returns the number of gids in the allocated array.
  */
 int
-sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
+sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
 {
     int ngids = 0;
     GETGROUPS_T *gids;

@@ -46,7 +46,7 @@
  * The caller is responsible for freeing the string.
  */
 char *
-sudo_new_key_val(const char *key, const char *val)
+sudo_new_key_val_v1(const char *key, const char *val)
 {
     size_t key_len = strlen(key);
     size_t val_len = strlen(val);

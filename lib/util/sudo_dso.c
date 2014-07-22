@@ -49,7 +49,7 @@
 static struct sudo_preload_table *preload_table;
 
 void
-sudo_dso_preload_table(struct sudo_preload_table *table)
+sudo_dso_preload_table_v1(struct sudo_preload_table *table)
 {
     preload_table = table;
 }
@@ -61,7 +61,7 @@ sudo_dso_preload_table(struct sudo_preload_table *table)
 # endif
 
 void *
-sudo_dso_load(const char *path, int mode)
+sudo_dso_load_v1(const char *path, int mode)
 {
     struct sudo_preload_table *pt;
     int flags = DYNAMIC_PATH | BIND_VERBOSE;
@@ -87,7 +87,7 @@ sudo_dso_load(const char *path, int mode)
 }
 
 int
-sudo_dso_unload(void *handle)
+sudo_dso_unload_v1(void *handle)
 {
     struct sudo_preload_table *pt;
 
@@ -103,7 +103,7 @@ sudo_dso_unload(void *handle)
 }
 
 void *
-sudo_dso_findsym(void *vhandle, const char *symbol)
+sudo_dso_findsym_v1(void *vhandle, const char *symbol)
 {
     struct sudo_preload_table *pt;
     shl_t handle = vhandle;
@@ -156,7 +156,7 @@ sudo_dso_findsym(void *vhandle, const char *symbol)
 }
 
 char *
-sudo_dso_strerror(void)
+sudo_dso_strerror_v1(void)
 {
     return strerror(errno);
 }
@@ -168,7 +168,7 @@ sudo_dso_strerror(void)
 # endif
 
 void *
-sudo_dso_load(const char *path, int mode)
+sudo_dso_load_v1(const char *path, int mode)
 {
     struct sudo_preload_table *pt;
     int flags = 0;
@@ -195,7 +195,7 @@ sudo_dso_load(const char *path, int mode)
 }
 
 int
-sudo_dso_unload(void *handle)
+sudo_dso_unload_v1(void *handle)
 {
     struct sudo_preload_table *pt;
 
@@ -211,7 +211,7 @@ sudo_dso_unload(void *handle)
 }
 
 void *
-sudo_dso_findsym(void *handle, const char *symbol)
+sudo_dso_findsym_v1(void *handle, const char *symbol)
 {
     struct sudo_preload_table *pt;
 
@@ -260,7 +260,7 @@ sudo_dso_findsym(void *handle, const char *symbol)
 }
 
 char *
-sudo_dso_strerror(void)
+sudo_dso_strerror_v1(void)
 {
     return dlerror();
 }
@@ -271,7 +271,7 @@ sudo_dso_strerror(void)
  * Emulate dlopen() using a static list of symbols compiled into sudo.
  */
 void *
-sudo_dso_load(const char *path, int mode)
+sudo_dso_load_v1(const char *path, int mode)
 {
     struct sudo_preload_table *pt;
 
@@ -286,7 +286,7 @@ sudo_dso_load(const char *path, int mode)
 }
 
 int
-sudo_dso_unload(void *handle)
+sudo_dso_unload_v1(void *handle)
 {
     struct sudo_preload_table *pt;
 
@@ -300,7 +300,7 @@ sudo_dso_unload(void *handle)
 }
 
 void *
-sudo_dso_findsym(void *handle, const char *symbol)
+sudo_dso_findsym_v1(void *handle, const char *symbol)
 {
     struct sudo_preload_table *pt;
 
@@ -320,7 +320,7 @@ sudo_dso_findsym(void *handle, const char *symbol)
 }
 
 char *
-sudo_dso_strerror(void)
+sudo_dso_strerror_v1(void)
 {
     return strerror(errno);
 }

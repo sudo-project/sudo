@@ -56,7 +56,7 @@
  * On error, returns 0 and sets errstr.
  */
 id_t
-sudo_strtoid(const char *p, const char *sep, char **endp, const char **errstr)
+sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr)
 {
     char *ep;
     id_t rval = 0;

@@ -33,10 +33,16 @@ struct sudo_lbuf {
     int cols;
 };
 
-__dso_public void sudo_lbuf_init(struct sudo_lbuf *, int (*)(const char *), int, const char *, int);
-__dso_public void sudo_lbuf_destroy(struct sudo_lbuf *);
-__dso_public void sudo_lbuf_append(struct sudo_lbuf *, const char *, ...) __printflike(2, 3);
-__dso_public void sudo_lbuf_append_quoted(struct sudo_lbuf *, const char *, const char *, ...) __printflike(3, 4);
-__dso_public void sudo_lbuf_print(struct sudo_lbuf *);
+__dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *, int (*)(const char *), int, const char *, int);
+__dso_public void sudo_lbuf_destroy_v1(struct sudo_lbuf *);
+__dso_public void sudo_lbuf_append_v1(struct sudo_lbuf *, const char *, ...) __printflike(2, 3);
+__dso_public void sudo_lbuf_append_quoted_v1(struct sudo_lbuf *, const char *, const char *, ...) __printflike(3, 4);
+__dso_public void sudo_lbuf_print_v1(struct sudo_lbuf *);
+
+#define sudo_lbuf_init(_a, _b, _c, _d, _e) sudo_lbuf_init_v1((_a), (_b), (_c), (_d), (_e))
+#define sudo_lbuf_destroy(_a) sudo_lbuf_destroy_v1((_a))
+#define sudo_lbuf_append sudo_lbuf_append_v1
+#define sudo_lbuf_append_quoted sudo_lbuf_append_quoted_v1
+#define sudo_lbuf_print(_a) sudo_lbuf_print_v1((_a))
 
 #endif /* _SUDO_LBUF_H */

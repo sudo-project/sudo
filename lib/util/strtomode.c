@@ -42,7 +42,7 @@
  * On error, returns 0 and sets errstr.
  */
 int
-sudo_strtomode(const char *cp, const char **errstr)
+sudo_strtomode_v1(const char *cp, const char **errstr)
 {
     char *ep;
     long lval;

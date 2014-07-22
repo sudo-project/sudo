@@ -40,7 +40,7 @@
 #include "sudo_util.h"
 
 int
-sudo_setgroups(int ngids, const GETGROUPS_T *gids)
+sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
 {
     int maxgids, rval;
     debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL)

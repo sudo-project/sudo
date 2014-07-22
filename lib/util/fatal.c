@@ -61,7 +61,7 @@ do_cleanup(void)
 }
 
 void
-sudo_fatal_nodebug(const char *fmt, ...)
+sudo_fatal_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
 
@@ -73,7 +73,7 @@ sudo_fatal_nodebug(const char *fmt, ...)
 }
 
 void
-sudo_fatalx_nodebug(const char *fmt, ...)
+sudo_fatalx_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
 
@@ -85,7 +85,7 @@ sudo_fatalx_nodebug(const char *fmt, ...)
 }
 
 void
-sudo_vfatal_nodebug(const char *fmt, va_list ap)
+sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 {
     _warning(errno, fmt, ap);
     do_cleanup();
@@ -93,7 +93,7 @@ sudo_vfatal_nodebug(const char *fmt, va_list ap)
 }
 
 void
-sudo_vfatalx_nodebug(const char *fmt, va_list ap)
+sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
@@ -101,7 +101,7 @@ sudo_vfatalx_nodebug(const char *fmt, va_list ap)
 }
 
 void
-sudo_warn_nodebug(const char *fmt, ...)
+sudo_warn_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
 
@@ -111,7 +111,7 @@ sudo_warn_nodebug(const char *fmt, ...)
 }
 
 void
-sudo_warnx_nodebug(const char *fmt, ...)
+sudo_warnx_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -120,13 +120,13 @@ sudo_warnx_nodebug(const char *fmt, ...)
 }
 
 void
-sudo_vwarn_nodebug(const char *fmt, va_list ap)
+sudo_vwarn_nodebug_v1(const char *fmt, va_list ap)
 {
     _warning(errno, fmt, ap);
 }
 
 void
-sudo_vwarnx_nodebug(const char *fmt, va_list ap)
+sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }
@@ -158,7 +158,7 @@ _warning(int errnum, const char *fmt, va_list ap)
  * Register a callback to be run when sudo_fatal()/sudo_fatalx() is called.
  */
 int
-sudo_fatal_callback_register(void (*func)(void))
+sudo_fatal_callback_register_v1(void (*func)(void))
 {
     struct sudo_fatal_callback *cb;
 
@@ -182,7 +182,7 @@ sudo_fatal_callback_register(void (*func)(void))
  * Deregister a sudo_fatal()/sudo_fatalx() callback.
  */
 int
-sudo_fatal_callback_deregister(void (*func)(void))
+sudo_fatal_callback_deregister_v1(void (*func)(void))
 {
     struct sudo_fatal_callback *cb, **prev;
 

@@ -37,7 +37,7 @@
 /*
  * Verify that path is the right type and not writable by other users.
  */
-int
+static int
 sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp)
 {
     struct stat sb;
@@ -68,7 +68,7 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, stru
  * Verify that path is a regular file and not writable by other users.
  */
 int
-sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
 {
     return sudo_secure_path(path, _S_IFREG, uid, gid, sbp);
 }
@@ -77,7 +77,7 @@ sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
  * Verify that path is a directory and not writable by other users.
  */
 int
-sudo_secure_dir(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
 {
     return sudo_secure_path(path, _S_IFDIR, uid, gid, sbp);
 }

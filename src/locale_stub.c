@@ -36,7 +36,7 @@
 #ifdef HAVE_LIBINTL_H
 /* No need to swap locales in the front end. */
 char *
-sudo_warn_gettext(const char *msgid)
+sudo_warn_gettext_v1(const char *msgid)
 {
     return gettext(msgid);
 }
@@ -44,7 +44,7 @@ sudo_warn_gettext(const char *msgid)
 
 /* No need to swap locales in the front end. */
 char *
-sudo_warn_strerror(int errnum)
+sudo_warn_strerror_v1(int errnum)
 {
     return strerror(errnum);
 }

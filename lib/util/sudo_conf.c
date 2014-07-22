@@ -317,20 +317,20 @@ set_plugin(const char *entry, const char *conf_file)
 }
 
 const char *
-sudo_conf_askpass_path(void)
+sudo_conf_askpass_path_v1(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_ASKPASS_IDX].pval;
 }
 
 const char *
-sudo_conf_sesh_path(void)
+sudo_conf_sesh_path_v1(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_SESH_IDX].pval;
 }
 
 #ifdef _PATH_SUDO_NOEXEC
 const char *
-sudo_conf_noexec_path(void)
+sudo_conf_noexec_path_v1(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_NOEXEC_IDX].pval;
 }
@@ -338,44 +338,44 @@ sudo_conf_noexec_path(void)
 
 #ifdef _PATH_SUDO_PLUGIN_DIR
 const char *
-sudo_conf_plugin_dir_path(void)
+sudo_conf_plugin_dir_path_v1(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_PLUGIN_IDX].pval;
 }
 #endif
 
 const char *
-sudo_conf_debug_flags(void)
+sudo_conf_debug_flags_v1(void)
 {
     return sudo_conf_data.debug_flags;
 }
 
 int
-sudo_conf_group_source(void)
+sudo_conf_group_source_v1(void)
 {
     return sudo_conf_data.group_source;
 }
 
 int
-sudo_conf_max_groups(void)
+sudo_conf_max_groups_v1(void)
 {
     return sudo_conf_data.max_groups;
 }
 
 struct plugin_info_list *
-sudo_conf_plugins(void)
+sudo_conf_plugins_v1(void)
 {
     return &sudo_conf_data.plugins;
 }
 
 bool
-sudo_conf_disable_coredump(void)
+sudo_conf_disable_coredump_v1(void)
 {
     return sudo_conf_data.disable_coredump;
 }
 
 bool
-sudo_conf_probe_interfaces(void)
+sudo_conf_probe_interfaces_v1(void)
 {
     return sudo_conf_data.probe_interfaces;
 }
@@ -384,7 +384,7 @@ sudo_conf_probe_interfaces(void)
  * Reads in /etc/sudo.conf and populates sudo_conf_data.
  */
 void
-sudo_conf_read(const char *conf_file)
+sudo_conf_read_v1(const char *conf_file)
 {
     struct sudo_conf_table *cur;
     struct stat sb;

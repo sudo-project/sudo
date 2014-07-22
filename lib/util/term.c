@@ -117,7 +117,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_restore(int fd, bool flush)
+sudo_term_restore_v1(int fd, bool flush)
 {
     debug_decl(term_restore, SUDO_DEBUG_UTIL)
 
@@ -135,7 +135,7 @@ sudo_term_restore(int fd, bool flush)
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_noecho(int fd)
+sudo_term_noecho_v1(int fd)
 {
     debug_decl(term_noecho, SUDO_DEBUG_UTIL)
 
@@ -164,7 +164,7 @@ again:
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_raw(int fd, int isig)
+sudo_term_raw_v1(int fd, int isig)
 {
     struct termios term;
     debug_decl(term_raw, SUDO_DEBUG_UTIL)
@@ -198,7 +198,7 @@ again:
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_cbreak(int fd)
+sudo_term_cbreak_v1(int fd)
 {
     debug_decl(term_cbreak, SUDO_DEBUG_UTIL)
 
@@ -235,7 +235,7 @@ again:
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_copy(int src, int dst)
+sudo_term_copy_v1(int src, int dst)
 {
     struct termios tt;
     debug_decl(term_copy, SUDO_DEBUG_UTIL)

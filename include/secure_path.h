@@ -24,8 +24,10 @@
 #define SUDO_PATH_WORLD_WRITABLE	-4
 #define SUDO_PATH_GROUP_WRITABLE	-5
 
-__dso_public int sudo_secure_dir(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
-__dso_public int sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
-__dso_public int sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp);
+__dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+__dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+
+#define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
+#define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
 
 #endif /* _SUDO_SECURE_PATH_H */

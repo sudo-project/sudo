@@ -42,7 +42,7 @@
 #include "sudo_util.h"
 
 int
-sudo_strtobool(const char *str)
+sudo_strtobool_v1(const char *str)
 {
     debug_decl(sudo_strtobool, SUDO_DEBUG_UTIL)
 

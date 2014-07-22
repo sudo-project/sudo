@@ -65,7 +65,7 @@
  */
 #ifdef HAVE_LOCKF
 bool
-sudo_lock_file(int fd, int lockit)
+sudo_lock_file_v1(int fd, int lockit)
 {
     int op = 0;
     debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
@@ -85,7 +85,7 @@ sudo_lock_file(int fd, int lockit)
 }
 #elif defined(HAVE_FLOCK)
 bool
-sudo_lock_file(int fd, int lockit)
+sudo_lock_file_v1(int fd, int lockit)
 {
     int op = 0;
     debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
@@ -105,7 +105,7 @@ sudo_lock_file(int fd, int lockit)
 }
 #else
 bool
-sudo_lock_file(int fd, int lockit)
+sudo_lock_file_v1(int fd, int lockit)
 {
 #ifdef F_SETLK
     int func;

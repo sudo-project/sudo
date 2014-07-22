@@ -141,7 +141,7 @@ aix_setlimits(char *user)
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
  */
 int
-aix_setauthdb(char *user)
+aix_setauthdb_v1(char *user)
 {
     char *registry;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
@@ -167,7 +167,7 @@ aix_setauthdb(char *user)
  * Restore the saved administrative domain, if any.
  */
 int
-aix_restoreauthdb(void)
+aix_restoreauthdb_v1(void)
 {
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
@@ -180,7 +180,7 @@ aix_restoreauthdb(void)
 #endif
 
 int
-aix_prep_user(char *user, const char *tty)
+aix_prep_user_v1(char *user, const char *tty)
 {
     char *info;
     int len;

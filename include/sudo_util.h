@@ -137,48 +137,65 @@
 #endif
 
 /* aix.c */
-__dso_public int aix_prep_user(char *user, const char *tty);
-__dso_public int aix_restoreauthdb(void);
-__dso_public int aix_setauthdb(char *user);
-
-/* strtobool.c */
-__dso_public int sudo_strtobool(const char *str);
-
-/* strtoid.c */
-__dso_public id_t sudo_strtoid(const char *str, const char *sep, char **endp, const char **errstr);
-
-/* strtomode.c */
-__dso_public int sudo_strtomode(const char *cp, const char **errstr);
+__dso_public int aix_prep_user_v1(char *user, const char *tty);
+#define aix_prep_user(_a, _b) aix_prep_user_v1((_a), (_b))
+__dso_public int aix_restoreauthdb_v1(void);
+#define aix_restoreauthdb() aix_restoreauthdb_v1()
+__dso_public int aix_setauthdb_v1(char *user);
+#define aix_setauthdb(_a) aix_setauthdb_v1((_a))
 
 /* gidlist.c */
-__dso_public int sudo_parse_gids(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+__dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+#define sudo_parse_gids(_a, _b, _c) sudo_parse_gids_v1((_a), (_b), (_c))
 
 /* key_val.c */
-__dso_public char *sudo_new_key_val(const char *key, const char *value);
+__dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
+#define sudo_new_key_val(_a, _b) sudo_new_key_val_v1((_a), (_b))
 
 /* locking.c */
 #define SUDO_LOCK	1		/* lock a file */
 #define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
 #define SUDO_UNLOCK	4		/* unlock a file */
-__dso_public bool sudo_lock_file(int, int);
+__dso_public bool sudo_lock_file_v1(int fd, int action);
+#define sudo_lock_file(_a, _b) sudo_lock_file_v1((_a), (_b))
 
 /* parseln.c */
-__dso_public ssize_t sudo_parseln(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
+__dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
+#define sudo_parseln(_a, _b, _c, _d) sudo_parseln_v1((_a), (_b), (_c), (_d))
 
 /* progname.c */
 __dso_public void initprogname(const char *);
 
 /* setgroups.c */
-__dso_public int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+__dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
+#define sudo_setgroups(_a, _b) sudo_setgroups_v1((_a), (_b))
+
+/* strtobool.c */
+__dso_public int sudo_strtobool_v1(const char *str);
+#define sudo_strtobool(_a) sudo_strtobool_v1((_a))
+
+/* strtoid.c */
+__dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp, const char **errstr);
+#define sudo_strtoid(_a, _b, _c, _d) sudo_strtoid_v1((_a), (_b), (_c), (_d))
+
+/* strtomode.c */
+__dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
+#define sudo_strtomode(_a, _b) sudo_strtomode_v1((_a), (_b))
 
 /* term.c */
-__dso_public bool sudo_term_cbreak(int);
-__dso_public bool sudo_term_copy(int, int);
-__dso_public bool sudo_term_noecho(int);
-__dso_public bool sudo_term_raw(int, int);
-__dso_public bool sudo_term_restore(int, bool);
+__dso_public bool sudo_term_cbreak_v1(int fd);
+#define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
+__dso_public bool sudo_term_copy_v1(int src, int dst);
+#define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
+__dso_public bool sudo_term_noecho_v1(int fd);
+#define sudo_term_noecho(_a) sudo_term_noecho_v1((_a))
+__dso_public bool sudo_term_raw_v1(int fd, int isig);
+#define sudo_term_raw(_a, _b) sudo_term_raw_v1((_a), (_b))
+__dso_public bool sudo_term_restore_v1(int fd, bool flush);
+#define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
 
 /* ttysize.c */
-__dso_public void sudo_get_ttysize(int *rowp, int *colp);
+__dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
+#define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
 
 #endif /* _SUDO_UTIL_H */

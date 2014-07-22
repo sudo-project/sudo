@@ -49,7 +49,7 @@
 #include "sudo_debug.h"
 
 void
-sudo_lbuf_init(struct sudo_lbuf *lbuf, int (*output)(const char *),
+sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, int (*output)(const char *),
     int indent, const char *continuation, int cols)
 {
     debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL)
@@ -66,7 +66,7 @@ sudo_lbuf_init(struct sudo_lbuf *lbuf, int (*output)(const char *),
 }
 
 void
-sudo_lbuf_destroy(struct sudo_lbuf *lbuf)
+sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL)
 
@@ -92,7 +92,7 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
  * Any characters in set are quoted with a backslash.
  */
 void
-sudo_lbuf_append_quoted(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
+sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
 {
     va_list ap;
     int len;
@@ -139,7 +139,7 @@ done:
  * Parse the format and append strings, only %s and %% escapes are supported.
  */
 void
-sudo_lbuf_append(struct sudo_lbuf *lbuf, const char *fmt, ...)
+sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 {
     va_list ap;
     int len;
@@ -232,7 +232,7 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
  * The lbuf is reset on return.
  */
 void
-sudo_lbuf_print(struct sudo_lbuf *lbuf)
+sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 {
     char *cp, *ep;
     int len;

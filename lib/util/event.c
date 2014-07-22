@@ -53,7 +53,7 @@
 /* XXX - use non-exiting allocators? */
 
 struct sudo_event_base *
-sudo_ev_base_alloc(void)
+sudo_ev_base_alloc_v1(void)
 {
     struct sudo_event_base *base;
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
@@ -70,7 +70,7 @@ sudo_ev_base_alloc(void)
 }
 
 void
-sudo_ev_base_free(struct sudo_event_base *base)
+sudo_ev_base_free_v1(struct sudo_event_base *base)
 {
     struct sudo_event *ev, *next;
     debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT)
@@ -86,7 +86,7 @@ sudo_ev_base_free(struct sudo_event_base *base)
 }
 
 struct sudo_event *
-sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callback, void *closure)
+sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure)
 {
     struct sudo_event *ev;
     debug_decl(sudo_ev_alloc, SUDO_DEBUG_EVENT)
@@ -104,7 +104,7 @@ sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callback, void *closure)
 }
 
 void
-sudo_ev_free(struct sudo_event *ev)
+sudo_ev_free_v1(struct sudo_event *ev)
 {
     debug_decl(sudo_ev_free, SUDO_DEBUG_EVENT)
 
@@ -116,7 +116,7 @@ sudo_ev_free(struct sudo_event *ev)
 }
 
 int
-sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
+sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
     struct timeval *timo, bool tohead)
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
@@ -182,7 +182,7 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
 }
 
 int
-sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
+sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
 {
     debug_decl(sudo_ev_del, SUDO_DEBUG_EVENT)
 
@@ -239,7 +239,7 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
  * Returns 0 on success, 1 if no events registered  and -1 on error 
  */
 int
-sudo_ev_loop(struct sudo_event_base *base, int flags)
+sudo_ev_loop_v1(struct sudo_event_base *base, int flags)
 {
     struct timeval now;
     struct sudo_event *ev;
@@ -347,7 +347,7 @@ done:
 }
 
 void
-sudo_ev_loopexit(struct sudo_event_base *base)
+sudo_ev_loopexit_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopexit, SUDO_DEBUG_EVENT)
     SET(base->flags, SUDO_EVBASE_LOOPEXIT);
@@ -355,7 +355,7 @@ sudo_ev_loopexit(struct sudo_event_base *base)
 }
 
 void
-sudo_ev_loopbreak(struct sudo_event_base *base)
+sudo_ev_loopbreak_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopbreak, SUDO_DEBUG_EVENT)
     SET(base->flags, SUDO_EVBASE_LOOPBREAK);
@@ -363,7 +363,7 @@ sudo_ev_loopbreak(struct sudo_event_base *base)
 }
 
 void
-sudo_ev_loopcontinue(struct sudo_event_base *base)
+sudo_ev_loopcontinue_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopcontinue, SUDO_DEBUG_EVENT)
     SET(base->flags, SUDO_EVBASE_LOOPCONT);
@@ -371,21 +371,21 @@ sudo_ev_loopcontinue(struct sudo_event_base *base)
 }
 
 bool
-sudo_ev_got_exit(struct sudo_event_base *base)
+sudo_ev_got_exit_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_got_exit, SUDO_DEBUG_EVENT)
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_EXIT));
 }
 
 bool
-sudo_ev_got_break(struct sudo_event_base *base)
+sudo_ev_got_break_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_got_break, SUDO_DEBUG_EVENT)
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_BREAK));
 }
 
 int
-sudo_ev_get_timeleft(struct sudo_event *ev, struct timeval *tv)
+sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv)
 {
     struct timeval now;
     debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT)
