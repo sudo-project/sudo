@@ -32,7 +32,7 @@
 # include "compat/utime.h"
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifndef HAVE_UTIMES
 /*

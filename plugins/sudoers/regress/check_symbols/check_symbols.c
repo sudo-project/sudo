@@ -38,7 +38,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_dso.h"
 #include "sudo_util.h"
 #include "sudo_fatal.h"

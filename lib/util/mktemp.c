@@ -38,7 +38,7 @@
 # include <time.h>
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #define MKTEMP_FILE	1
 #define MKTEMP_DIR	2

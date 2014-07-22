@@ -37,7 +37,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <limits.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

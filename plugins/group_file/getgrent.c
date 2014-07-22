@@ -44,7 +44,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_util.h"
 
 #ifndef LINE_MAX

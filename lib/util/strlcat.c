@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <string.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the

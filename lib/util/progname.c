@@ -51,7 +51,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_util.h"
 
 #if defined(HAVE_GETPROGNAME)

@@ -59,7 +59,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "compat/getaddrinfo.h"
 
 /* We need access to h_errno to map errors from gethostbyname. */

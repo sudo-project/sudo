@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <poll.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"

@@ -85,7 +85,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <limits.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "compat/charclass.h"
 #include "compat/fnmatch.h"
 

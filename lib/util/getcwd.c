@@ -73,7 +73,7 @@
 # endif
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #define	ISDOT(dp) \
 	(dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \

@@ -42,7 +42,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_lbuf.h"

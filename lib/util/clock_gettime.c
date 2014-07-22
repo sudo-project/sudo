@@ -30,7 +30,7 @@
 # include "compat/timespec.h"
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifdef __MACH__
 # include <mach/mach.h>

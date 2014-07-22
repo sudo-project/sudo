@@ -76,7 +76,7 @@
 #include <limits.h>
 #include <stdarg.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 static int xxxprintf(char **, size_t, int, const char *, va_list);
 

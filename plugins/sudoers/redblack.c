@@ -54,7 +54,7 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_alloc.h"
 #include "sudo_debug.h"
 #include "redblack.h"

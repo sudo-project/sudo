@@ -23,7 +23,7 @@
 
 #include <sys/types.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters

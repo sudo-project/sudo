@@ -40,7 +40,7 @@
 # include <inttypes.h>
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifdef HAVE_SHA224UPDATE
 # include <sha2.h>

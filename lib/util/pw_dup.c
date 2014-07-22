@@ -45,7 +45,7 @@
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <pwd.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #define PW_SIZE(name, size)				\
 do {							\

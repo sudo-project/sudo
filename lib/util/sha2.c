@@ -58,7 +58,7 @@
 # include "compat/endian.h"
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "compat/sha2.h"
 
 /*

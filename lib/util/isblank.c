@@ -21,7 +21,7 @@
 
 #include <sys/types.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #undef isblank
 int

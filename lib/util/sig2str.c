@@ -39,7 +39,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
 #  define sudo_sys_signame	sys_signame

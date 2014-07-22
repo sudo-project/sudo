@@ -25,7 +25,7 @@
 # include <inttypes.h>
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifndef RSIZE_MAX
 # if defined(SIZE_MAX)

@@ -35,7 +35,7 @@
 #include <termios.h>
 #include <limits.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
 

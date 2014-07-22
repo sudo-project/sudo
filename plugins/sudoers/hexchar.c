@@ -19,7 +19,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_debug.h"
 
 /*

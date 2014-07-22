@@ -40,7 +40,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
 

@@ -32,9 +32,9 @@
 #include <libaudit.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "sudo_gettext.h"	/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "sudo_alloc.h"
 #include "sudo_debug.h"

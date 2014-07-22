@@ -40,7 +40,7 @@
 #endif
 #include <errno.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_dso.h"
 
 /*

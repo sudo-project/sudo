@@ -97,7 +97,7 @@
 #include <limits.h>
 #include <pwd.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "compat/glob.h"
 #include "compat/charclass.h"
 

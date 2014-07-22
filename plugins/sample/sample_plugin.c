@@ -56,7 +56,7 @@
 #include <pathnames.h>
 #include "sudo_plugin.h"
 #include "sudo_util.h"
-#include "missing.h"
+#include "sudo_compat.h"
 
 /*
  * Sample plugin module that allows any user who knows the password

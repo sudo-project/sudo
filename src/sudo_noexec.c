@@ -27,7 +27,7 @@
 #include <spawn.h>
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifdef HAVE___INTERPOSE
 /*

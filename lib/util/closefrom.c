@@ -54,7 +54,7 @@
 # endif
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #if defined(HAVE_FCNTL_CLOSEM) && !defined(HAVE_DIRFD)
 # define sudo_closefrom	closefrom_fallback

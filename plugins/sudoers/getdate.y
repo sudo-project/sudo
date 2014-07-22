@@ -43,7 +43,7 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 
 #define EPOCH		1970

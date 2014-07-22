@@ -37,7 +37,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <errno.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #ifndef EAFNOSUPPORT
 # define EAFNOSUPPORT EINVAL

@@ -39,7 +39,7 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "sudo_plugin.h"
 #include "sudo_util.h"

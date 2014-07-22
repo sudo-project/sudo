@@ -21,7 +21,7 @@
 #endif
 #include <errno.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 #define MAX_RESULTS	256
 

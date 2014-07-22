@@ -41,7 +41,7 @@
 # include "compat/stdbool.h"
 #endif
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"

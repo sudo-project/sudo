@@ -30,7 +30,7 @@
 #endif /* STDC_HEADERS */
 #include <signal.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -44,7 +44,7 @@ main(int argc, char *argv[])
 
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");
-    printf("#include \"missing.h\"\n\n");
+    printf("#include \"sudo_compat.h\"\n\n");
     printf("const char *const sudo_sys_siglist[NSIG] = {\n");
     for (i = 0; i < NSIG; i++) {
 	if (sudo_sys_siglist[i] != NULL) {
