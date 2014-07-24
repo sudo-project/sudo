@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "January 22, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "July 24, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -474,9 +474,7 @@ and the plugins.  A future release may add support for per-plugin
 lines and/or support for multiple debugging files for a single
 program.
 .PP
-The priorities used by the
-\fBsudo\fR
-front end, in order of decreasing severity, are:
+The following priorities are supported, in order of decreasing severity:
 \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR
 and
 \fIdebug\fR.
@@ -486,6 +484,31 @@ than it.  For example, a priority of
 would include debug messages logged at
 \fInotice\fR
 and higher.
+.PP
+The priorities
+\fItrace\fR
+and
+\fIdebug\fR
+also include function call tracing which logs when a function is
+entered and when it returns.
+For example, the following trace is for the get_user_groups()
+function located in src/sudo.c:
+.nf
+.sp
+.RS 6n
+sudo[123] -> get_user_groups @ src/sudo.c:385
+sudo[123] <- get_user_groups @ src/sudo.c:429 := groups=10,0,5
+.RE
+.fi
+.PP
+When the function is entered, indicated by a right arrow
+\(oq->\(cq,
+the program, process ID, function, source file and line number
+are logged.
+When the function returns, indicated by a left arrow
+\(oq<-\(cq,
+the same information is logged along with the return value.
+In this case, the return value is a string.
 .PP
 The following subsystems are used by the
 \fBsudo\fR

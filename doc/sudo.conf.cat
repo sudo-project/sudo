@@ -243,11 +243,25 @@ DDEESSCCRRIIPPTTIIOONN
      future release may add support for per-plugin Debug lines and/or support
      for multiple debugging files for a single program.
 
-     The priorities used by the ssuuddoo front end, in order of decreasing
-     severity, are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.
-     Each priority, when specified, also includes all priorities higher than
-     it.  For example, a priority of _n_o_t_i_c_e would include debug messages
-     logged at _n_o_t_i_c_e and higher.
+     The following priorities are supported, in order of decreasing severity:
+     _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.  Each priority,
+     when specified, also includes all priorities higher than it.  For
+     example, a priority of _n_o_t_i_c_e would include debug messages logged at
+     _n_o_t_i_c_e and higher.
+
+     The priorities _t_r_a_c_e and _d_e_b_u_g also include function call tracing which
+     logs when a function is entered and when it returns.  For example, the
+     following trace is for the get_user_groups() function located in
+     src/sudo.c:
+
+           sudo[123] -> get_user_groups @ src/sudo.c:385
+           sudo[123] <- get_user_groups @ src/sudo.c:429 := groups=10,0,5
+
+     When the function is entered, indicated by a right arrow `->', the
+     program, process ID, function, source file and line number are logged.
+     When the function returns, indicated by a left arrow `<-', the same
+     information is logged along with the return value.  In this case, the
+     return value is a string.
 
      The following subsystems are used by the ssuuddoo front-end:
 
@@ -391,4 +405,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                    January 22, 2014                    Sudo 1.8.11
+Sudo 1.8.11                      July 24, 2014                     Sudo 1.8.11
