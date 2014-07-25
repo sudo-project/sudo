@@ -104,7 +104,7 @@ ATOFOO_TEST_OBJS = atofoo_test.lo locale_stub.lo
 
 PARSELN_TEST_OBJS = parseln_test.lo locale_stub.lo
 
-PROGNAME_TEST_OBJS = progname_test.lo locale_stub.lo
+PROGNAME_TEST_OBJS = progname_test.lo progname.lo
 
 CONF_TEST_OBJS = conf_test.lo locale_stub.lo
 
@@ -176,8 +176,8 @@ hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 parseln_test: $(PARSELN_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-progname_test: $(PROGNAME_TEST_OBJS) libsudo_util.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(PROGNAME_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS) -static-libtool-libs
+progname_test: $(PROGNAME_TEST_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(PROGNAME_TEST_OBJS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
 
