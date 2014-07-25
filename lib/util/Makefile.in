@@ -37,7 +37,7 @@ datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 
 # File extension, mode and map file to use for shared libraries/objects
-soext = @SOEXT@
+shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
 shlib_exp = $(srcdir)/util.exp
 shlib_map = util.map
@@ -182,7 +182,7 @@ progname_test: $(PROGNAME_TEST_OBJS)
 pre-install:
 
 install: install-dirs
-	if [ X"$(soext)" != X"" ]; then \
+	if [ X"$(shlib_enable)" = X"yes" ]; then \
 	    INSTALL_BACKUP='~' $(LIBTOOL) --quiet --mode=install $(INSTALL) $(INSTALL_OWNER) libsudo_util.la $(DESTDIR)$(libexecdir)/sudo; \
 	fi
 
