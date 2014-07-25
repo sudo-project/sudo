@@ -1090,13 +1090,15 @@ policy_open(struct plugin_container *plugin, char * const settings[],
 }
 
 static void
-policy_close(struct plugin_container *plugin, int exit_status, int error)
+policy_close(struct plugin_container *plugin, int exit_status, int error_code)
 {
     debug_decl(policy_close, SUDO_DEBUG_PCOMM)
-    if (plugin->u.policy->close != NULL)
-	plugin->u.policy->close(exit_status, error);
-    else
+    if (plugin->u.policy->close != NULL) {
+	plugin->u.policy->close(exit_status, error_code);
+    } else if (error_code) {
+	errno = error_code;
 	sudo_warn(U_("unable to execute %s"), command_details.command);
+    }
     debug_return;
 }
 
@@ -1214,11 +1216,11 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
 }
 
 static void
-iolog_close(struct plugin_container *plugin, int exit_status, int error)
+iolog_close(struct plugin_container *plugin, int exit_status, int error_code)
 {
     debug_decl(iolog_close, SUDO_DEBUG_PCOMM)
     if (plugin->u.io->close != NULL)
-	plugin->u.io->close(exit_status, error);
+	plugin->u.io->close(exit_status, error_code);
     debug_return;
 }
 
