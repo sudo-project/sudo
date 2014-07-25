@@ -84,7 +84,10 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 	}
     }
     if (pfd == NULL) {
-	TAILQ_INSERT_TAIL(pfds, pfd_new, entries);
+	if (TAILQ_EMPTY(pfds))
+	    TAILQ_INSERT_HEAD(pfds, pfd_new, entries);
+	else
+	    TAILQ_INSERT_TAIL(pfds, pfd_new, entries);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "preserving fd %d", fd);
     }
