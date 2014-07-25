@@ -115,6 +115,7 @@ lib/util/regress/fnmatch/fnm_test.in
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
+lib/util/regress/progname/progname_test.c
 lib/util/regress/sudo_conf/conf_test.c
 lib/util/regress/sudo_conf/test1.in
 lib/util/regress/sudo_conf/test1.out.ok
