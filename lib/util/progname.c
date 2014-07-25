@@ -23,10 +23,6 @@
 #endif
 
 #include <sys/types.h>
-#ifdef HAVE_PSTAT_GETPROC
-# include <sys/param.h>
-# include <sys/pstat.h>
-#endif
 #if defined(HAVE_PROCFS_H)
 # include <procfs.h>
 #elif defined(HAVE_SYS_PROCFS_H)
@@ -93,23 +89,7 @@ void
 initprogname(const char *name)
 {
     const char *base;
-#ifdef HAVE_PSTAT_GETPROC
-    static char ucomm[PST_UCOMMLEN];
-    struct pst_status pstat;
-    int rc;
-
-    /*
-     * Determine the progname from pst_ucomm in struct pst_status.
-     * We may get EOVERFLOW if the whole thing doesn't fit but that is OK.
-     */
-    rc = pstat_getproc(&pstat, sizeof(pstat), (size_t)0, (int)getpid());
-    if (rc != -1 || errno == EOVERFLOW) {
-        strlcpy(ucomm, pstat.pst_ucomm, sizeof(ucomm));
-	progname = ucomm;
-	goto done;
-    }
-#elif defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)
-    /* XXX - configure check for psinfo.pr_fname */
+#if (defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)) && !defined(_AIX)
     static char ucomm[PRFNSZ];
     struct psinfo psinfo;
     char path[PATH_MAX];
@@ -127,7 +107,7 @@ initprogname(const char *name)
 	    goto done;
 	}
     }
-#endif /* HAVE_PSTAT_GETPROC */
+#endif /* (HAVE_PROCFS_H || HAVE_SYS_PROCFS_H) && !_AIX */
 
     if ((base = strrchr(name, '/')) != NULL) {
 	base++;
