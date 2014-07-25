@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,19 +16,7 @@
 
 #include <config.h>
 
-/* Large files not supported by procfs.h */
-#if defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)
-# undef _FILE_OFFSET_BITS
-# undef _LARGE_FILES
-#endif
-
 #include <sys/types.h>
-#if defined(HAVE_PROCFS_H)
-# include <procfs.h>
-#elif defined(HAVE_SYS_PROCFS_H)
-# include <sys/procfs.h>
-#endif
-
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -44,13 +32,11 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <errno.h>
-#include <fcntl.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
-#if defined(HAVE_GETPROGNAME)
+#ifdef HAVE_GETPROGNAME
 
 void
 initprogname(const char *name)
@@ -64,66 +50,31 @@ initprogname(const char *name)
     return;
 }
 
-#elif defined(HAVE___PROGNAME)
-
-extern const char *__progname;
-static const char *progname = "";
-
-void
-initprogname(const char *name)
-{
-    /* Check for libtool prefix and strip it if present. */
-    if (__progname[0] == 'l' && __progname[1] == 't' && __progname[2] == '-' &&
-	__progname[3] != '\0')
-	progname = __progname + 3;
-    else
-	progname = __progname;
-    return;
-}
-
-#else
+#else /* !HAVE_GETPROGNAME */
 
 static const char *progname = "";
 
 void
 initprogname(const char *name)
 {
-    const char *base;
-#if (defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)) && !defined(_AIX)
-    static char ucomm[PRFNSZ];
-    struct psinfo psinfo;
-    char path[PATH_MAX];
-    ssize_t nread;
-    int fd;
+# ifdef HAVE___PROGNAME
+    extern const char *__progname;
 
-    /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
-    snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
-    if ((fd = open(path, O_RDONLY, 0)) != -1) {
-	nread = read(fd, &psinfo, sizeof(psinfo));
-	close(fd);
-	if (nread == (ssize_t)sizeof(psinfo)) {
-	    strlcpy(ucomm, psinfo.pr_fname, sizeof(ucomm));
-	    progname = ucomm;
-	    goto done;
-	}
-    }
-#endif /* (HAVE_PROCFS_H || HAVE_SYS_PROCFS_H) && !_AIX */
-
-    if ((base = strrchr(name, '/')) != NULL) {
-	base++;
+    progname = __progname;
+# else
+    if ((progname = strrchr(name, '/')) != NULL) {
+	progname++;
     } else {
-	base = name;
+	progname = name;
     }
-    progname = base;
+#endif
 
 done:
     if (progname[0] == 'l' && progname[1] == 't' && progname[2] == '-' &&
 	progname[3] != '\0')
 	progname += 3;
 }
-#endif /* !HAVE_GETPROGNAME && !HAVE___PROGNAME */
 
-#if !defined(HAVE_GETPROGNAME)
 const char *
 sudo_getprogname(void)
 {
