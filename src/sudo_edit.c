@@ -85,7 +85,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 int
 sudo_edit(struct command_details *command_details)
 {
-    struct command_details editor_details;
+    struct command_details saved_command_details;
     ssize_t nread, nwritten;
     const char *tmpdir;
     char *cp, *suff, **nargv, **ap, **files = NULL;
@@ -248,18 +248,27 @@ sudo_edit(struct command_details *command_details)
      * keeping track of the time spent in the editor.
      */
     gettimeofday(&times[0], NULL);
-    memcpy(&editor_details, command_details, sizeof(editor_details));
-    editor_details.uid = user_details.uid;
-    editor_details.euid = user_details.uid;
-    editor_details.gid = user_details.gid;
-    editor_details.egid = user_details.gid;
-    editor_details.ngroups = user_details.ngroups;
-    editor_details.groups = user_details.groups;
-    editor_details.argv = nargv;
-    rval = run_command(&editor_details);
+    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
+    command_details->uid = user_details.uid;
+    command_details->euid = user_details.uid;
+    command_details->gid = user_details.gid;
+    command_details->egid = user_details.gid;
+    command_details->ngroups = user_details.ngroups;
+    command_details->groups = user_details.groups;
+    command_details->argv = nargv;
+    rval = run_command(command_details);
     gettimeofday(&times[1], NULL);
 
-    /* Copy contents of temp files to real ones */
+    /* Restore saved command_details. */
+    command_details->uid = saved_command_details.uid;
+    command_details->euid = saved_command_details.uid;
+    command_details->gid = saved_command_details.gid;
+    command_details->egid = saved_command_details.gid;
+    command_details->ngroups = saved_command_details.ngroups;
+    command_details->groups = saved_command_details.groups;
+    command_details->argv = saved_command_details.argv;
+
+    /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
 	rc = -1;
 	if (seteuid(user_details.uid) != 0)
