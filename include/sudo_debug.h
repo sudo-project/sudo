@@ -98,7 +98,7 @@
 #else
 # define debug_decl(funcname, subsys)					       \
     const int sudo_debug_subsys = (subsys);				       \
-    const char *__func__ = #funcname;					       \
+    const char __func__[] = #funcname;					       \
     sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 #endif
 
