@@ -972,12 +972,12 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
 	rc = true;
     else if (lhost != shost && innetgr(netgr, shost, user, domain))
 	rc = true;
-#endif /* HAVE_INNETGR */
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"netgroup %s matches (%s|%s, %s, %s): %s", netgr, lhost ? lhost : "",
 	shost ? shost : "", user ? user : "", domain ? domain : "",
 	rc ? "true" : "false");
+#endif /* HAVE_INNETGR */
 
     debug_return_bool(rc);
 }
