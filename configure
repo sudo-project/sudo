@@ -14262,19 +14262,13 @@ case "$host" in
 		RTLD_PRELOAD_DELIM=" "
 
 		# getcwd(3) opens a pipe to getpwd(1)!?!
-		ac_fn_c_check_func "$LINENO" "getcwd" "ac_cv_func_getcwd"
-if test "x$ac_cv_func_getcwd" = xyes; then :
-  $as_echo "#define HAVE_GETCWD 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
+		case " $LIBOBJS " in
   *" getcwd.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS getcwd.$ac_objext"
  ;;
 esac
 
-fi
-
+		$as_echo "#define PREFER_PORTABLE_GETCWD 1" >>confdefs.h
 
 
 		# system headers lack prototypes but gcc helps...
@@ -24934,6 +24928,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

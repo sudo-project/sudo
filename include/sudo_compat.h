@@ -363,11 +363,11 @@ __dso_public void sudo_closefrom(int);
 # undef closefrom
 # define closefrom(_a) sudo_closefrom((_a))
 #endif /* HAVE_CLOSEFROM */
-#ifndef HAVE_GETCWD
+#ifdef PREFER_PORTABLE_GETCWD
 __dso_public char *sudo_getcwd(char *, size_t size);
 # undef getcwd
 # define getcwd(_a, _b) sudo_getcwd((_a), (_b))
-#endif /* HAVE_GETCWD */
+#endif /* PREFER_PORTABLE_GETCWD */
 #ifndef HAVE_GETGROUPLIST
 __dso_public int sudo_getgrouplist(const char *, gid_t, gid_t *, int *);
 # undef getgrouplist

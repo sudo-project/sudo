@@ -1637,7 +1637,8 @@ case "$host" in
 		RTLD_PRELOAD_DELIM=" "
 
 		# getcwd(3) opens a pipe to getpwd(1)!?!
-		AC_REPLACE_FUNCS(getcwd)
+		AC_LIBOBJ(getcwd)
+		AC_DEFINE(PREFER_PORTABLE_GETCWD)
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
@@ -3988,6 +3989,7 @@ AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(NO_TTY_TICKETS, [Define to 1 if you want a single ticket file instead of per-tty files.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
+AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Enable replacement getcwd if system getcwd is broken.])
 AH_TEMPLATE(SECURE_PATH, [Define to 1 to override the user's path with a built-in one.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is not allowed to run sudo on this host.])
