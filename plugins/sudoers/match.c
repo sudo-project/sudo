@@ -782,9 +782,9 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 bool
 hostname_matches(const char *shost, const char *lhost, const char *pattern)
 {
-    debug_decl(hostname_matches, SUDO_DEBUG_MATCH)
     const char *host;
     bool rc;
+    debug_decl(hostname_matches, SUDO_DEBUG_MATCH)
 
     host = strchr(pattern, '.') != NULL ? lhost : shost;
     if (has_meta(pattern)) {
