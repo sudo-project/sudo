@@ -636,10 +636,10 @@ ac_includes_default="\
 ac_c_werror_flag=
 ac_subst_vars='LTLIBOBJS
 KRB5CONFIG
-LIBOBJS
 FLEX
 YFLAGS
 YACC
+LIBOBJS
 NROFFPROG
 MANDOCPROG
 TRPROG
@@ -14262,7 +14262,20 @@ case "$host" in
 		RTLD_PRELOAD_DELIM=" "
 
 		# getcwd(3) opens a pipe to getpwd(1)!?!
-		BROKEN_GETCWD=1
+		ac_fn_c_check_func "$LINENO" "getcwd" "ac_cv_func_getcwd"
+if test "x$ac_cv_func_getcwd" = xyes; then :
+  $as_echo "#define HAVE_GETCWD 1" >>confdefs.h
+
+else
+  case " $LIBOBJS " in
+  *" getcwd.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getcwd.$ac_objext"
+ ;;
+esac
+
+fi
+
+
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
@@ -17805,22 +17818,6 @@ fi
 done
 
 fi
-if test -z "$BROKEN_GETCWD"; then
-    ac_fn_c_check_func "$LINENO" "getcwd" "ac_cv_func_getcwd"
-if test "x$ac_cv_func_getcwd" = xyes; then :
-  $as_echo "#define HAVE_GETCWD 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
-  *" getcwd.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getcwd.$ac_objext"
- ;;
-esac
-
-fi
-
-
-fi
 for ac_func in lockf flock
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -18922,6 +18919,84 @@ fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    fi
+
+    done
+
+fi
+
+ac_fn_c_check_func "$LINENO" "inet_ntoa" "ac_cv_func_inet_ntoa"
+if test "x$ac_cv_func_inet_ntoa" = xyes; then :
+  $as_echo "#define HAVE_INET_NTOA 1" >>confdefs.h
+
+else
+
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+
+    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_ntoa in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for inet_ntoa in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
+  $as_echo_n "(cached) " >&6
+else
+
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$lib${5+ }$extralibs"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char inet_ntoa ();
+int
+main ()
+{
+return inet_ntoa ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras=yes
+else
+  eval sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+
+fi
+
+    if eval test \$sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+	    $as_echo "#define HAVE_INET_NTOA 1" >>confdefs.h
+
+	    NET_LIBS="${NET_LIBS} $libs"
+	    LIBS="${LIBS} $libs"
+	    break
+
     else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -24859,6 +24934,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

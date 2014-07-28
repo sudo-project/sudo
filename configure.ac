@@ -1637,7 +1637,7 @@ case "$host" in
 		RTLD_PRELOAD_DELIM=" "
 
 		# getcwd(3) opens a pipe to getpwd(1)!?!
-		BROKEN_GETCWD=1
+		AC_REPLACE_FUNCS(getcwd)
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
@@ -2455,9 +2455,6 @@ AC_CHECK_FUNCS(seteuid)
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
 fi
-if test -z "$BROKEN_GETCWD"; then
-    AC_REPLACE_FUNCS(getcwd)
-fi
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
@@ -2594,6 +2591,32 @@ AC_CHECK_FUNC(socket, [], [
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
 	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+    done
+])
+dnl
+dnl If inet_ntoa(3) not in libc, check -lnsl and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems may have inet_ntoa() in libresolv.
+dnl
+AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	SUDO_CHECK_LIB($lib, inet_ntoa, [
+	    AC_DEFINE(HAVE_INET_NTOA)
+	    NET_LIBS="${NET_LIBS} $libs"
+	    LIBS="${LIBS} $libs"
+	    break
+	], [], [$extralibs])
     done
 ])
 dnl
@@ -3923,6 +3946,7 @@ AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
+AH_TEMPLATE(HAVE_INET_NTOA, [Define to 1 if you have the `inet_ntoa' function.])
 AH_TEMPLATE(HAVE_INET_PTON, [Define to 1 if you have the `inet_pton' function.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled).])
