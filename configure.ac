@@ -14,8 +14,6 @@ AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
-AC_SUBST([HAVE_BSM_AUDIT])
-AC_SUBST([HAVE_SOLARIS_AUDIT])
 AC_SUBST([SHELL])
 AC_SUBST([LIBTOOL])
 AC_SUBST([CFLAGS])
