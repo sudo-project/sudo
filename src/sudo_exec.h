@@ -25,6 +25,17 @@
 #endif
 
 /*
+ * Some older systems support siginfo but predate SI_USER.
+ */
+#ifdef SA_SIGINFO
+# ifdef SI_USER
+#  define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code == SI_USER)
+# else
+#  define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code <= 0)
+# endif
+#endif
+
+/*
  * Special values to indicate whether continuing in foreground or background.
  */
 #define SIGCONT_FG	-2

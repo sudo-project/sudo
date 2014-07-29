@@ -141,7 +141,7 @@ mon_handler(int s, siginfo_t *info, void *context)
      * itself.  This can happen with, e.g., BSD-derived versions of
      * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (info != NULL && info->si_code == SI_USER) {
+    if (USER_SIGNALED(info)) {
 	pid_t si_pgrp = getpgid(info->si_pid);
 	if (si_pgrp != (pid_t)-1) {
 	    if (si_pgrp == cmnd_pgrp)

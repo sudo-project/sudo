@@ -870,7 +870,7 @@ handler(int s, siginfo_t *info, void *context)
      * kill itself.  For example, this can happen with some versions of
      * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (info != NULL && info->si_code == SI_USER) {
+    if (USER_SIGNALED(info)) {
 	pid_t si_pgrp = getpgid(info->si_pid);
 	if (si_pgrp != (pid_t)-1) {
 	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
@@ -926,7 +926,7 @@ handler_user_only(int s, siginfo_t *info, void *context)
      * often trap ^Z and send SIGTSTP to their own pgrp, so we don't
      * want to send an extra SIGTSTP.
      */
-    if (info == NULL || info->si_code != SI_USER)
+    if (!USER_SIGNALED(info))
 	return;
     if ((si_pgrp = getpgid(info->si_pid)) != (pid_t)-1) {
 	if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
