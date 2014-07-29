@@ -216,6 +216,7 @@ AC_DEFUN([SUDO_FUNC_ISBLANK],
     AC_DEFINE(HAVE_ISBLANK, 1, [Define if you have isblank(3).])
   else
     AC_LIBOBJ(isblank)
+    SUDO_APPEND_COMPAT_EXP(isblank)
   fi
 ])
 
@@ -389,6 +390,16 @@ AC_DEFUN([SUDO_APPEND_CPPFLAGS], [
 	    fi
 	    ;;
     esac
+])
+
+dnl
+dnl Append one or more symbols to COMPAT_EXP
+dnl
+AC_DEFUN([SUDO_APPEND_COMPAT_EXP], [
+    for _sym in $1; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 ])
 
 dnl

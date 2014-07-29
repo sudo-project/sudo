@@ -350,6 +350,11 @@ int innetgr(const char *, const char *, const char *, const char *);
 int getdomainname(char *, size_t);
 #endif
 
+/* We wrap OpenBSD's strtonum() to get translatable error strings. */
+__dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
+#undef strtonum
+#define strtonum(_a, _b, _c, _d) sudo_strtonum((_a), (_b), (_c), (_d))
+
 /*
  * Functions "missing" from libc.
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
@@ -453,11 +458,6 @@ __dso_public int sudo_sig2str(int, char *);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
-#ifndef HAVE_STRTONUM
-__dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
-# undef strtonum
-# define strtonum(_a, _b, _c, _d) sudo_strtonum((_a), (_b), (_c), (_d))
-#endif /* HAVE_STRTONUM */
 #ifndef HAVE_CLOCK_GETTIME
 # define CLOCK_REALTIME 0
 # ifdef __MACH__

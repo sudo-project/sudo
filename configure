@@ -719,6 +719,7 @@ timeout
 vardir
 rundir
 iolog_dir
+COMPAT_EXP
 RC_LINK
 INIT_DIR
 INIT_SCRIPT
@@ -2974,6 +2975,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3054,7 +3056,7 @@ OS_INIT=os_init_common
 INIT_SCRIPT=
 INIT_DIR=
 RC_LINK=
-
+COMPAT_EXP=
 CHECKSHADOW=true
 shadow_defs=
 shadow_funcs=
@@ -14264,6 +14266,12 @@ case "$host" in
  ;;
 esac
 
+
+    for _sym in sudo_getcwd; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 		$as_echo "#define PREFER_PORTABLE_GETCWD 1" >>confdefs.h
 
 
@@ -14371,6 +14379,12 @@ fi
 done
 
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
+
+    for _sym in aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -15209,6 +15223,13 @@ $as_echo "#define NO_VARIADIC_MACROS 1" >>confdefs.h
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
 $as_echo "$as_me: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
+
+    for _sym in sudo_debug_printf_nvm; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
@@ -17188,7 +17209,7 @@ $as_echo "#define HAVE_GETGROUPS 1" >>confdefs.h
 fi
 LIBS=$ac_save_LIBS
 
-for ac_func in glob nl_langinfo regcomp strftime strrchr strtoll \
+for ac_func in killpg nl_langinfo regcomp strftime strrchr strtoll \
 	       sysconf tzset
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -17328,6 +17349,12 @@ fi
 esac
 
 
+    for _sym in sudo_getgrouplist; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
 fi
 done
 
@@ -17346,6 +17373,12 @@ else
   *) LIBOBJS="$LIBOBJS getline.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_getline; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
     for ac_func in fgetln
 do :
@@ -17849,7 +17882,8 @@ if test "x$ac_cv_func_utimes" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_UTIMES 1
 _ACEOF
- for ac_func in futimes futimesat
+
+    for ac_func in futimes futimesat
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -17861,8 +17895,22 @@ _ACEOF
 fi
 done
 
+
 else
-  for ac_func in futime
+
+    case " $LIBOBJS " in
+  *" utimes.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS utimes.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_utimes; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    for ac_func in futime
 do :
   ac_fn_c_check_func "$LINENO" "futime" "ac_cv_func_futime"
 if test "x$ac_cv_func_futime" = xyes; then :
@@ -17870,31 +17918,14 @@ if test "x$ac_cv_func_futime" = xyes; then :
 #define HAVE_FUTIME 1
 _ACEOF
 
-fi
-done
- case " $LIBOBJS " in
-  *" utimes.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS utimes.$ac_objext"
- ;;
-esac
+    for _sym in sudo_futimes; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
 fi
 done
 
-for ac_func in killpg
-do :
-  ac_fn_c_check_func "$LINENO" "killpg" "ac_cv_func_killpg"
-if test "x$ac_cv_func_killpg" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_KILLPG 1
-_ACEOF
-
-else
-  case " $LIBOBJS " in
-  *" killpg.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS killpg.$ac_objext"
- ;;
-esac
 
 fi
 done
@@ -17931,11 +17962,18 @@ if test $sudo_cv_func_fnmatch = yes; then :
   $as_echo "#define HAVE_FNMATCH 1" >>confdefs.h
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
   *" fnmatch.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS fnmatch.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_fnmatch; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 
@@ -17986,84 +18024,161 @@ esac
 
   fi
 
-ac_fn_c_check_func "$LINENO" "memrchr" "ac_cv_func_memrchr"
-if test "x$ac_cv_func_memrchr" = xyes; then :
-  $as_echo "#define HAVE_MEMRCHR 1" >>confdefs.h
+for ac_func in glob
+do :
+  ac_fn_c_check_func "$LINENO" "glob" "ac_cv_func_glob"
+if test "x$ac_cv_func_glob" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GLOB 1
+_ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
+  *" glob.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS glob.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_glob sudo_globfree; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in memrchr
+do :
+  ac_fn_c_check_func "$LINENO" "memrchr" "ac_cv_func_memrchr"
+if test "x$ac_cv_func_memrchr" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MEMRCHR 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
   *" memrchr.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS memrchr.$ac_objext"
  ;;
 esac
 
-fi
 
-ac_fn_c_check_func "$LINENO" "memset_s" "ac_cv_func_memset_s"
+    for _sym in sudo_memrchr; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in memset_s
+do :
+  ac_fn_c_check_func "$LINENO" "memset_s" "ac_cv_func_memset_s"
 if test "x$ac_cv_func_memset_s" = xyes; then :
-  $as_echo "#define HAVE_MEMSET_S 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MEMSET_S 1
+_ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
   *" memset_s.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS memset_s.$ac_objext"
  ;;
 esac
 
-fi
 
-ac_fn_c_check_func "$LINENO" "pw_dup" "ac_cv_func_pw_dup"
+    for _sym in sudo_memset_s; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in pw_dup
+do :
+  ac_fn_c_check_func "$LINENO" "pw_dup" "ac_cv_func_pw_dup"
 if test "x$ac_cv_func_pw_dup" = xyes; then :
-  $as_echo "#define HAVE_PW_DUP 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PW_DUP 1
+_ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
   *" pw_dup.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS pw_dup.$ac_objext"
  ;;
 esac
 
-fi
 
-ac_fn_c_check_func "$LINENO" "strlcpy" "ac_cv_func_strlcpy"
+    for _sym in sudo_pw_dup; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in strlcpy
+do :
+  ac_fn_c_check_func "$LINENO" "strlcpy" "ac_cv_func_strlcpy"
 if test "x$ac_cv_func_strlcpy" = xyes; then :
-  $as_echo "#define HAVE_STRLCPY 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRLCPY 1
+_ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
   *" strlcpy.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS strlcpy.$ac_objext"
  ;;
 esac
 
-fi
 
-ac_fn_c_check_func "$LINENO" "strlcat" "ac_cv_func_strlcat"
+    for _sym in sudo_strlcpy; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+for ac_func in strlcat
+do :
+  ac_fn_c_check_func "$LINENO" "strlcat" "ac_cv_func_strlcat"
 if test "x$ac_cv_func_strlcat" = xyes; then :
-  $as_echo "#define HAVE_STRLCAT 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRLCAT 1
+_ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
   *" strlcat.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS strlcat.$ac_objext"
  ;;
 esac
 
-fi
 
-ac_fn_c_check_func "$LINENO" "strtonum" "ac_cv_func_strtonum"
-if test "x$ac_cv_func_strtonum" = xyes; then :
-  $as_echo "#define HAVE_STRTONUM 1" >>confdefs.h
+    for _sym in sudo_strlcat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
-else
-  case " $LIBOBJS " in
-  *" strtonum.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS strtonum.$ac_objext"
- ;;
-esac
 
 fi
-
+done
 
 for ac_func in clock_gettime
 do :
@@ -18119,11 +18234,19 @@ if test "x$ac_cv_lib_rt_clock_gettime" = xyes; then :
 	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
 
 else
-  case " $LIBOBJS " in
+
+	case " $LIBOBJS " in
   *" clock_gettime.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS clock_gettime.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_clock_gettime; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 
 fi
 
@@ -18140,11 +18263,18 @@ if test "x$ac_cv_func_getopt_long" = xyes; then :
 _ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case " $LIBOBJS " in
   *" getopt_long.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS getopt_long.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_getopt_long sudo_getopt_long_only; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for optreset" >&5
 $as_echo_n "checking for optreset... " >&6; }
@@ -18197,6 +18327,12 @@ else
  ;;
 esac
 
+
+    for _sym in closefrom_fallback sudo_closefrom; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
     ac_fn_c_check_decl "$LINENO" "F_CLOSEM" "ac_cv_have_decl_F_CLOSEM" "
 #	include <limits.h>
 #	include <fcntl.h>
@@ -18219,8 +18355,10 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
-else
+fi
+done
 
+if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     for ac_func in random lrand48
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -18239,10 +18377,23 @@ done
  ;;
 esac
 
+    if test X"$ac_cv_func_mkstemps" = X"no"; then
 
+    for _sym in sudo_mkstemps; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    fi
+    if test X"$ac_cv_func_mkdtemp" = X"no"; then
+
+    for _sym in sudo_mkdtemp; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    fi
 fi
-done
-
 for ac_func in snprintf vsnprintf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -18380,6 +18531,38 @@ esac
 
     fi
 fi
+if test X"$ac_cv_have_working_snprintf" = X"no"; then
+
+    for _sym in sudo_snprintf; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+fi
+if test X"$ac_cv_have_working_vsnprintf" = X"no"; then
+
+    for _sym in sudo_vsnprintf; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+fi
+if test X"$ac_cv_func_asprintf" = X"no"; then
+
+    for _sym in sudo_asprintf; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+fi
+if test X"$ac_cv_func_vasprintf" = X"no"; then
+
+    for _sym in sudo_vasprintf; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+fi
 # We wrap OpenBSD's strtonum() to get translatable error strings.
 for ac_func in strtonum
 do :
@@ -18397,6 +18580,12 @@ case " $LIBOBJS " in
   *) LIBOBJS="$LIBOBJS strtonum.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_strtonum; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim" "ac_cv_member_struct_stat_st_mtim" "$ac_includes_default"
@@ -18419,9 +18608,11 @@ fi
 fi
 
 fi
+FOUND_SHA2=no
 ac_fn_c_check_header_mongrel "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
 if test "x$ac_cv_header_sha2_h" = xyes; then :
 
+    FOUND_SHA2=yes
     for ac_func in SHA224Update
 do :
   ac_fn_c_check_func "$LINENO" "SHA224Update" "ac_cv_func_SHA224Update"
@@ -18543,11 +18734,9 @@ $as_echo "#define SHA2_VOID_PTR 1" >>confdefs.h
 	    LIBMD="-lmd"
 
 else
-  case " $LIBOBJS " in
-  *" sha2.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS sha2.$ac_objext"
- ;;
-esac
+
+	    # Does not have SHA224Update
+	    FOUND_SHA2=no
 
 fi
 
@@ -18556,16 +18745,23 @@ fi
 done
 
 
-else
-  case " $LIBOBJS " in
+fi
+
+
+if test X"$FOUND_SHA2" = X"no"; then
+    case " $LIBOBJS " in
   *" sha2.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS sha2.$ac_objext"
  ;;
 esac
 
+
+    for _sym in SHA224Final SHA224Init SHA224Pad SHA224Transform SHA224Update SHA256Final SHA256Init SHA256Pad SHA256Transform SHA256Update SHA384Final SHA384Init SHA384Pad SHA384Transform SHA384Update SHA512Final SHA512Init SHA512Pad SHA512Transform SHA512Update; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 fi
-
-
 if test X"$with_noexec" != X"no"; then
     # Check for underscore versions of standard exec functions
     # unless we are using dyld symbole interposition
@@ -19003,9 +19199,13 @@ $as_echo "no" >&6; }
 
 fi
 
+found=false
 ac_fn_c_check_func "$LINENO" "inet_pton" "ac_cv_func_inet_pton"
 if test "x$ac_cv_func_inet_pton" = xyes; then :
-  $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
+
+    found=true
+    $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
+
 
 else
 
@@ -19065,6 +19265,7 @@ fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
+	    found=true
 	    $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
 
 	    NET_LIBS="${NET_LIBS} $libs"
@@ -19081,12 +19282,18 @@ $as_echo "no" >&6; }
 
 fi
 
-if test X"$ac_cv_func_inet_pton" != X"yes"; then
+if test X"$found" != X"true"; then
     case " $LIBOBJS " in
   *" inet_pton.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS inet_pton.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_inet_pton; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
 fi
 ac_fn_c_check_func "$LINENO" "syslog" "ac_cv_func_syslog"
@@ -19262,6 +19469,15 @@ for lib in $LIBS; do
 	*)	    NET_LIBS="$NET_LIBS $lib";;
     esac
 done
+if test X"$ax_cv_func_getaddrinfo" = X"no"; then
+
+    for _sym in sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+fi
+
 for ac_func in getprogname
 do :
   ac_fn_c_check_func "$LINENO" "getprogname" "ac_cv_func_getprogname"
@@ -19314,6 +19530,12 @@ fi
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___progname" >&5
 $as_echo "$sudo_cv___progname" >&6; }
+
+    for _sym in sudo_getprogname; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 
 fi
 done
@@ -19665,6 +19887,12 @@ else
  ;;
 esac
 
+
+    for _sym in sudo_strsignal; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
     HAVE_SIGLIST="false"
     ac_fn_c_check_decl "$LINENO" "sys_siglist" "ac_cv_have_decl_sys_siglist" "
 $ac_includes_default
@@ -19755,6 +19983,12 @@ else
   *) LIBOBJS="$LIBOBJS sig2str.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_sig2str; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
     HAVE_SIGNAME="false"
     ac_fn_c_check_decl "$LINENO" "sys_signame" "ac_cv_have_decl_sys_signame" "
@@ -22846,7 +23080,7 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -23839,6 +24073,7 @@ do
     "init.d/aix.sh") CONFIG_FILES="$CONFIG_FILES init.d/aix.sh" ;;
     "init.d/hpux.sh") CONFIG_FILES="$CONFIG_FILES init.d/hpux.sh" ;;
     "lib/util/Makefile") CONFIG_FILES="$CONFIG_FILES lib/util/Makefile" ;;
+    "lib/util/util.exp") CONFIG_FILES="$CONFIG_FILES lib/util/util.exp" ;;
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "plugins/sample/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample/Makefile" ;;

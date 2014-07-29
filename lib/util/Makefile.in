@@ -39,7 +39,7 @@ localstatedir = @localstatedir@
 # File extension, mode and map file to use for shared libraries/objects
 shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
-shlib_exp = $(srcdir)/util.exp
+shlib_exp = ./util.exp
 shlib_map = util.map
 shlib_opt = util.opt
 

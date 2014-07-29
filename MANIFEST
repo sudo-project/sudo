@@ -163,7 +163,7 @@ lib/util/sudo_dso.c
 lib/util/sudo_printf.c
 lib/util/term.c
 lib/util/ttysize.c
-lib/util/util.exp
+lib/util/util.exp.in
 lib/util/utimes.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c

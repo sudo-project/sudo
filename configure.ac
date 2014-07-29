@@ -87,6 +87,7 @@ AC_SUBST([NO_VIZ])
 AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
+AC_SUBST([COMPAT_EXP])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -214,7 +215,7 @@ OS_INIT=os_init_common
 INIT_SCRIPT=
 INIT_DIR=
 RC_LINK=
-
+COMPAT_EXP=
 dnl
 dnl Other vaiables
 dnl
@@ -1636,6 +1637,7 @@ case "$host" in
 
 		# getcwd(3) opens a pipe to getpwd(1)!?!
 		AC_LIBOBJ(getcwd)
+		SUDO_APPEND_COMPAT_EXP(sudo_getcwd)
 		AC_DEFINE(PREFER_PORTABLE_GETCWD)
 
 		# system headers lack prototypes but gcc helps...
@@ -1707,6 +1709,7 @@ case "$host" in
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
+		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -2152,7 +2155,9 @@ AC_INCLUDES_DEFAULT
 ], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
 [AC_MSG_RESULT([no])
  AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
- AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])])
+ AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])
+ SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm)
+])
 
 dnl
 dnl Program checks
@@ -2333,7 +2338,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(glob nl_langinfo regcomp strftime strrchr strtoll \
+AC_CHECK_FUNCS(killpg nl_langinfo regcomp strftime strrchr strtoll \
 	       sysconf tzset)
 AC_CHECK_FUNCS(getgrouplist, [], [
     case "$host_os" in
@@ -2372,9 +2377,11 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 	;;
     esac
     AC_LIBOBJ(getgrouplist)
+    SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
+    SUDO_APPEND_COMPAT_EXP(sudo_getline)
     AC_CHECK_FUNCS(fgetln)
 ])
 dnl
@@ -2456,21 +2463,56 @@ if test X"$with_interfaces" != X"no"; then
 fi
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
-AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
-AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
-SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
+AC_CHECK_FUNCS(utimes, [
+    AC_CHECK_FUNCS(futimes futimesat, [break])
+], [
+    AC_LIBOBJ(utimes)
+    SUDO_APPEND_COMPAT_EXP(sudo_utimes)
+    AC_CHECK_FUNCS(futime, [SUDO_APPEND_COMPAT_EXP(sudo_futimes)])
+])
+SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
+    AC_LIBOBJ(fnmatch)
+    SUDO_APPEND_COMPAT_EXP(sudo_fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
+AC_CHECK_FUNCS(glob, [], [
+    AC_LIBOBJ(glob)
+    SUDO_APPEND_COMPAT_EXP(sudo_glob sudo_globfree)
+])
+AC_CHECK_FUNCS(memrchr, [], [
+    AC_LIBOBJ(memrchr)
+    SUDO_APPEND_COMPAT_EXP(sudo_memrchr)
+])
+AC_CHECK_FUNCS(memset_s, [], [
+    AC_LIBOBJ(memset_s)
+    SUDO_APPEND_COMPAT_EXP(sudo_memset_s)
+])
+AC_CHECK_FUNCS(pw_dup, [], [
+    AC_LIBOBJ(pw_dup)
+    SUDO_APPEND_COMPAT_EXP(sudo_pw_dup)
+])
+AC_CHECK_FUNCS(strlcpy, [], [
+    AC_LIBOBJ(strlcpy)
+    SUDO_APPEND_COMPAT_EXP(sudo_strlcpy)
+])
+AC_CHECK_FUNCS(strlcat, [], [
+    AC_LIBOBJ(strlcat)
+    SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
+])
 AC_CHECK_FUNCS(clock_gettime, [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
 	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
-    ], [AC_LIBOBJ(clock_gettime)])
+    ], [
+	AC_LIBOBJ(clock_gettime)
+	SUDO_APPEND_COMPAT_EXP(sudo_clock_gettime)
+    ])
 ])
-AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
+AC_CHECK_FUNCS(getopt_long, [], [
+    AC_LIBOBJ(getopt_long)
+    SUDO_APPEND_COMPAT_EXP(sudo_getopt_long sudo_getopt_long_only)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern int optreset; optreset = 1; return optreset;]])], [sudo_cv_optreset=yes], [sudo_cv_optreset=no])])
@@ -2480,14 +2522,22 @@ AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
+    SUDO_APPEND_COMPAT_EXP(closefrom_fallback sudo_closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
 #	include <limits.h>
 #	include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemps mkdtemp, [], [
+AC_CHECK_FUNCS(mkstemps mkdtemp)
+if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_CHECK_FUNCS(random lrand48, [break])
     AC_LIBOBJ(mktemp)
-])
+    if test X"$ac_cv_func_mkstemps" = X"no"; then
+	SUDO_APPEND_COMPAT_EXP(sudo_mkstemps)
+    fi
+    if test X"$ac_cv_func_mkdtemp" = X"no"; then
+	SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp)
+    fi
+fi
 AX_FUNC_SNPRINTF
 AC_CHECK_FUNCS(asprintf vasprintf)
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
@@ -2496,24 +2546,46 @@ if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"
 	AC_LIBOBJ(snprintf)
     fi
 fi
+if test X"$ac_cv_have_working_snprintf" = X"no"; then
+    SUDO_APPEND_COMPAT_EXP(sudo_snprintf)
+fi
+if test X"$ac_cv_have_working_vsnprintf" = X"no"; then
+    SUDO_APPEND_COMPAT_EXP(sudo_vsnprintf)
+fi
+if test X"$ac_cv_func_asprintf" = X"no"; then
+    SUDO_APPEND_COMPAT_EXP(sudo_asprintf)
+fi
+if test X"$ac_cv_func_vasprintf" = X"no"; then
+    SUDO_APPEND_COMPAT_EXP(sudo_vasprintf)
+fi
 # We wrap OpenBSD's strtonum() to get translatable error strings.
 AC_CHECK_FUNCS(strtonum)
 AC_LIBOBJ(strtonum)
+SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
 	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
 fi
+FOUND_SHA2=no
 AC_CHECK_HEADER([sha2.h], [
+    FOUND_SHA2=yes
     AC_CHECK_FUNCS(SHA224Update, [SUDO_FUNC_SHA2_VOID_PTR], [
 	# On some systems, SHA224Update is in libmd
 	AC_CHECK_LIB(md, SHA224Update, [
 	    AC_DEFINE(HAVE_SHA224UPDATE)
 	    SUDO_FUNC_SHA2_VOID_PTR
 	    LIBMD="-lmd"
-	], [AC_LIBOBJ(sha2)])
+	], [
+	    # Does not have SHA224Update
+	    FOUND_SHA2=no
+	])
     ])
-], [AC_LIBOBJ(sha2)])
+])
+if test X"$FOUND_SHA2" = X"no"; then
+    AC_LIBOBJ(sha2)
+    SUDO_APPEND_COMPAT_EXP(SHA224Final SHA224Init SHA224Pad SHA224Transform SHA224Update SHA256Final SHA256Init SHA256Pad SHA256Transform SHA256Update SHA384Final SHA384Init SHA384Pad SHA384Transform SHA384Update SHA512Final SHA512Init SHA512Pad SHA512Transform SHA512Update)
+fi
 dnl
 dnl Function checks for sudo_noexec
 dnl
@@ -2623,7 +2695,11 @@ dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_pton() in libresolv.
 dnl
-AC_CHECK_FUNC(inet_pton, [AC_DEFINE(HAVE_INET_PTON)], [
+found=false
+AC_CHECK_FUNC(inet_pton, [
+    found=true
+    AC_DEFINE(HAVE_INET_PTON)
+], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
@@ -2637,6 +2713,7 @@ AC_CHECK_FUNC(inet_pton, [AC_DEFINE(HAVE_INET_PTON)], [
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
 	SUDO_CHECK_LIB($lib, inet_pton, [
+	    found=true
 	    AC_DEFINE(HAVE_INET_PTON)
 	    NET_LIBS="${NET_LIBS} $libs"
 	    LIBS="${LIBS} $libs"
@@ -2644,8 +2721,9 @@ AC_CHECK_FUNC(inet_pton, [AC_DEFINE(HAVE_INET_PTON)], [
 	], [], [$extralibs])
     done
 ])
-if test X"$ac_cv_func_inet_pton" != X"yes"; then
+if test X"$found" != X"true"; then
     AC_LIBOBJ(inet_pton)
+    SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
 fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
@@ -2677,6 +2755,10 @@ for lib in $LIBS; do
 	*)	    NET_LIBS="$NET_LIBS $lib";;
     esac
 done
+if test X"$ax_cv_func_getaddrinfo" = X"no"; then
+    SUDO_APPEND_COMPAT_EXP(sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror)
+fi
+
 dnl
 dnl Check for getprogname() or __progname
 dnl
@@ -2688,6 +2770,7 @@ AC_CHECK_FUNCS(getprogname, [AC_CHECK_FUNCS(setprogname)], [
 	AC_DEFINE(HAVE___PROGNAME)
     fi
     AC_MSG_RESULT($sudo_cv___progname)
+    SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
 ])
 dnl
 dnl Check for __func__ or __FUNCTION__
@@ -2826,6 +2909,7 @@ dnl Check for strsignal() or sys_siglist
 dnl
 AC_CHECK_FUNCS(strsignal, [], [
     AC_LIBOBJ(strsignal)
+    SUDO_APPEND_COMPAT_EXP(sudo_strsignal)
     HAVE_SIGLIST="false"
     AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], [
 	HAVE_SIGLIST="true"
@@ -2844,6 +2928,7 @@ dnl Check for sig2str(), sys_signame or sys_sigabbrev
 dnl
 AC_CHECK_FUNCS(sig2str, [], [
     AC_LIBOBJ(sig2str)
+    SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"
     AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
@@ -3886,7 +3971,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
