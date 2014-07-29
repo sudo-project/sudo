@@ -3306,7 +3306,7 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     if test -z "$LIB_CRYPT"; then
 	_LIBS="$LIBS"
-	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
 	LIBS="$_LIBS"
     fi
 
@@ -3315,13 +3315,11 @@ if test ${with_passwd-'no'} != "no"; then
 	LIBS="$LIBS $shadow_libs"
 	found=no
 	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
-	if test "$found" = "yes"; then
-	    SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
-	elif test -n "$shadow_libs_optional"; then
+	if test "$found" = "yes" -a -n "$shadow_libs_optional"; then
 	    LIBS="$LIBS $shadow_libs_optional"
 	    AC_CHECK_FUNCS($shadow_funcs, [found=yes])
 	    if test "$found" = "yes"; then
-		SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs $shadow_libs_optional"
+		shadow_libs="$shadow_libs $shadow_libs_optional"
 	    fi
 	fi
 	if test "$found" = "yes"; then
@@ -3330,19 +3328,29 @@ if test ${with_passwd-'no'} != "no"; then
 	    esac
 	    test -n "$shadow_defs" && OSDEFS="${OSDEFS} $shadow_defs"
 	else
-	    LIBS="$_LIBS"
+	    shadow_libs=
 	fi
 	CHECKSHADOW=false
+	LIBS="$_LIBS"
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+    fi
+    if test -n "$shadow_libs"; then
+	# sudoers needs to link with shadow libs for password auth
+	SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
     fi
     if test -n "$SECUREWARE"; then
-	AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
+	_LIBS="$LIBS"
+	LIBS="$LIBS $shadow_libs"
+	AC_CHECK_FUNCS(bigcrypt)
 	AUTH_OBJS="$AUTH_OBJS secureware.lo"
+	# set_auth_parameters() and initprivs() are called from sudo.c
+	AC_CHECK_FUNCS(set_auth_parameters initprivs, [test -n "$shadow_libs" && SUDO_LIBS="$SUDO_LIBS $shadow_libs"])
+	LIBS="$_LIBS"
     fi
 fi
 

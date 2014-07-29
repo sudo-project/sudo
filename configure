@@ -790,8 +790,6 @@ CPPFLAGS
 PROGS
 CFLAGS
 LIBTOOL
-HAVE_SOLARIS_AUDIT
-HAVE_BSM_AUDIT
 target_alias
 host_alias
 build_alias
@@ -2866,8 +2864,6 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
-
-
 
 
 
@@ -17982,6 +17978,12 @@ $as_echo "#define HAVE_ISBLANK 1" >>confdefs.h
  ;;
 esac
 
+
+    for _sym in isblank; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
   fi
 
 ac_fn_c_check_func "$LINENO" "memrchr" "ac_cv_func_memrchr"
@@ -20957,7 +20959,7 @@ $as_echo "$ac_cv_search_crypt" >&6; }
 ac_res=$ac_cv_search_crypt
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"
+  test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"
 fi
 
 	LIBS="$_LIBS"
@@ -20979,9 +20981,7 @@ _ACEOF
 fi
 done
 
-	if test "$found" = "yes"; then
-	    SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
-	elif test -n "$shadow_libs_optional"; then
+	if test "$found" = "yes" -a -n "$shadow_libs_optional"; then
 	    LIBS="$LIBS $shadow_libs_optional"
 	    for ac_func in $shadow_funcs
 do :
@@ -20996,7 +20996,7 @@ fi
 done
 
 	    if test "$found" = "yes"; then
-		SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs $shadow_libs_optional"
+		shadow_libs="$shadow_libs $shadow_libs_optional"
 	    fi
 	fi
 	if test "$found" = "yes"; then
@@ -21005,9 +21005,10 @@ done
 	    esac
 	    test -n "$shadow_defs" && OSDEFS="${OSDEFS} $shadow_defs"
 	else
-	    LIBS="$_LIBS"
+	    shadow_libs=
 	fi
 	CHECKSHADOW=false
+	LIBS="$_LIBS"
     fi
     if test "$CHECKSHADOW" = "true"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing getspnam" >&5
@@ -21064,7 +21065,7 @@ ac_res=$ac_cv_search_getspnam
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   $as_echo "#define HAVE_GETSPNAM 1" >>confdefs.h
- CHECKSHADOW=false; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"
+ CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"
 fi
 
     fi
@@ -21123,12 +21124,31 @@ ac_res=$ac_cv_search_getprpwnam
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   $as_echo "#define HAVE_GETPRPWNAM 1" >>confdefs.h
- CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"
+ CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"
 fi
 
     fi
+    if test -n "$shadow_libs"; then
+	# sudoers needs to link with shadow libs for password auth
+	SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
+    fi
     if test -n "$SECUREWARE"; then
-	for ac_func in bigcrypt set_auth_parameters initprivs
+	_LIBS="$LIBS"
+	LIBS="$LIBS $shadow_libs"
+	for ac_func in bigcrypt
+do :
+  ac_fn_c_check_func "$LINENO" "bigcrypt" "ac_cv_func_bigcrypt"
+if test "x$ac_cv_func_bigcrypt" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BIGCRYPT 1
+_ACEOF
+
+fi
+done
+
+	AUTH_OBJS="$AUTH_OBJS secureware.lo"
+	# set_auth_parameters() and initprivs() are called from sudo.c
+	for ac_func in set_auth_parameters initprivs
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -21136,11 +21156,11 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
-
+ test -n "$shadow_libs" && SUDO_LIBS="$SUDO_LIBS $shadow_libs"
 fi
 done
 
-	AUTH_OBJS="$AUTH_OBJS secureware.lo"
+	LIBS="$_LIBS"
     fi
 fi
 
