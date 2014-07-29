@@ -26,6 +26,8 @@ AC_SUBST([LT_LDMAP])
 AC_SUBST([LT_LDOPT])
 AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
+AC_SUBST([LT_STATIC])
+AC_SUBST([LT_DEP_LIBS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
@@ -72,7 +74,6 @@ AC_SUBST([ZLIB_SRC])
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
-AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
 AC_SUBST([LIBMD])
 AC_SUBST([SUDO_NLS])
@@ -2661,7 +2662,7 @@ AC_CHECK_FUNC(socket, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
     done
 ])
 dnl
@@ -2685,7 +2686,6 @@ AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
 	SUDO_CHECK_LIB($lib, inet_ntoa, [
 	    AC_DEFINE(HAVE_INET_NTOA)
 	    NET_LIBS="${NET_LIBS} $libs"
-	    LIBS="${LIBS} $libs"
 	    break
 	], [], [$extralibs])
     done
@@ -2696,6 +2696,7 @@ dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_pton() in libresolv.
 dnl
 found=false
+INET_PTON_LIBS=
 AC_CHECK_FUNC(inet_pton, [
     found=true
     AC_DEFINE(HAVE_INET_PTON)
@@ -2716,7 +2717,7 @@ AC_CHECK_FUNC(inet_pton, [
 	    found=true
 	    AC_DEFINE(HAVE_INET_PTON)
 	    NET_LIBS="${NET_LIBS} $libs"
-	    LIBS="${LIBS} $libs"
+	    INET_PTON_LIBS="$libs"
 	    break
 	], [], [$extralibs])
     done
@@ -2741,7 +2742,7 @@ AC_CHECK_FUNC(syslog, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
     done
 ])
 #
@@ -2757,7 +2758,30 @@ for lib in $LIBS; do
 done
 if test X"$ax_cv_func_getaddrinfo" = X"no"; then
     SUDO_APPEND_COMPAT_EXP(sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror)
+    # We need libsudo_util to pull in dependent libraries for
+    # inet_pton(), gethostbyname(), and getservbyname()
+    if test -n "${INET_PTON_LIBS}"; then
+	LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
+	LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
+    fi
+    AC_CHECK_FUNC(gethostbyname, [], [
+	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	    _libs=
+	    for lib in $libs; do
+		case "$LT_DEP_LIBS" in
+		    *"$lib"*)   ;;
+		    *)	    _libs="$_libs $lib";;
+		esac
+	    done
+	    libs="${_libs# }"
+	    test -z "$libs" && continue
+	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	    extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	    SUDO_CHECK_LIB($lib, gethostbyname, [LT_DEP_LIBS="${LT_DEP_LIBS} $libs"; break], [], [$extralibs])
+	done
+    ])
 fi
+LIBS="$OLIBS"
 
 dnl
 dnl Check for getprogname() or __progname

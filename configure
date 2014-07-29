@@ -734,7 +734,6 @@ LOCALEDIR_SUFFIX
 SUDO_NLS
 LIBMD
 LIBINTL
-LT_STATIC
 LIBDL
 CONFIGURE_ARGS
 LIBTOOL_DEPS
@@ -780,6 +779,8 @@ SUDO_LIBS
 SUDO_OBJS
 SUDOERS_OBJS
 COMMON_OBJS
+LT_DEP_LIBS
+LT_STATIC
 LT_LDEXPORTS
 LT_LDDEP
 LT_LDOPT
@@ -2865,6 +2866,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -19110,7 +19112,7 @@ fi
     if eval test \$sudo_cv_lib_$lib''_socket$_sudo_check_lib_extras = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+	NET_LIBS="${NET_LIBS} $libs"; break
     else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -19186,7 +19188,6 @@ $as_echo "yes" >&6; }
 	    $as_echo "#define HAVE_INET_NTOA 1" >>confdefs.h
 
 	    NET_LIBS="${NET_LIBS} $libs"
-	    LIBS="${LIBS} $libs"
 	    break
 
     else
@@ -19200,6 +19201,7 @@ $as_echo "no" >&6; }
 fi
 
 found=false
+INET_PTON_LIBS=
 ac_fn_c_check_func "$LINENO" "inet_pton" "ac_cv_func_inet_pton"
 if test "x$ac_cv_func_inet_pton" = xyes; then :
 
@@ -19269,7 +19271,7 @@ $as_echo "yes" >&6; }
 	    $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
 
 	    NET_LIBS="${NET_LIBS} $libs"
-	    LIBS="${LIBS} $libs"
+	    INET_PTON_LIBS="$libs"
 	    break
 
     else
@@ -19356,7 +19358,7 @@ fi
     if eval test \$sudo_cv_lib_$lib''_syslog$_sudo_check_lib_extras = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+	NET_LIBS="${NET_LIBS} $libs"; break
     else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -19476,7 +19478,85 @@ if test X"$ax_cv_func_getaddrinfo" = X"no"; then
 "
     done
 
+    # We need libsudo_util to pull in dependent libraries for
+    # inet_pton(), gethostbyname(), and getservbyname()
+    if test -n "${INET_PTON_LIBS}"; then
+	LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
+	LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
+    fi
+    ac_fn_c_check_func "$LINENO" "gethostbyname" "ac_cv_func_gethostbyname"
+if test "x$ac_cv_func_gethostbyname" = xyes; then :
+
+else
+
+	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	    _libs=
+	    for lib in $libs; do
+		case "$LT_DEP_LIBS" in
+		    *"$lib"*)   ;;
+		    *)	    _libs="$_libs $lib";;
+		esac
+	    done
+	    libs="${_libs# }"
+	    test -z "$libs" && continue
+	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	    extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+
+    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gethostbyname in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for gethostbyname in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_gethostbyname$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
+  $as_echo_n "(cached) " >&6
+else
+
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$lib${5+ }$extralibs"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gethostbyname ();
+int
+main ()
+{
+return gethostbyname ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval sudo_cv_lib_$lib''_gethostbyname$_sudo_check_lib_extras=yes
+else
+  eval sudo_cv_lib_$lib''_gethostbyname$_sudo_check_lib_extras=no
+
 fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+
+fi
+
+    if eval test \$sudo_cv_lib_$lib''_gethostbyname$_sudo_check_lib_extras = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	LT_DEP_LIBS="${LT_DEP_LIBS} $libs"; break
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    fi
+
+	done
+
+fi
+
+fi
+LIBS="$OLIBS"
 
 for ac_func in getprogname
 do :
