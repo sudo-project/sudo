@@ -19370,7 +19370,8 @@ $as_echo "no" >&6; }
 fi
 
 #
-# Check for getaddrinfo and add any required libs to NET_LIBS
+# Check for getaddrinfo and add any required libs to NET_LIBS.
+# If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo" >&5
@@ -19465,42 +19466,37 @@ esac
     fi
 fi
 
-for lib in $LIBS; do
-    case "$OLIBS" in
-	*"$lib"*)   ;;
-	*)	    NET_LIBS="$NET_LIBS $lib";;
-    esac
-done
-if test X"$ax_cv_func_getaddrinfo" = X"no"; then
+case " $LIBOBJS " in
+    *" getaddrinfo.$ac_objext "* )
 
     for _sym in sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
 
-    # We need libsudo_util to pull in dependent libraries for
-    # inet_pton(), gethostbyname(), and getservbyname()
-    if test -n "${INET_PTON_LIBS}"; then
-	LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
-	LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
-    fi
-    ac_fn_c_check_func "$LINENO" "gethostbyname" "ac_cv_func_gethostbyname"
+	# We need libsudo_util to pull in dependent libraries for
+	# inet_pton(), gethostbyname(), and getservbyname()
+	if test -n "${INET_PTON_LIBS}"; then
+	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
+	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
+	fi
+	ac_fn_c_check_func "$LINENO" "gethostbyname" "ac_cv_func_gethostbyname"
 if test "x$ac_cv_func_gethostbyname" = xyes; then :
 
 else
 
-	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	    _libs=
-	    for lib in $libs; do
-		case "$LT_DEP_LIBS" in
-		    *"$lib"*)   ;;
-		    *)	    _libs="$_libs $lib";;
-		esac
-	    done
-	    libs="${_libs# }"
-	    test -z "$libs" && continue
-	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	    extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+	    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+		_libs=
+		for lib in $libs; do
+		    case "$LT_DEP_LIBS" in
+			*"$lib"*)   ;;
+			*)	    _libs="$_libs $lib";;
+		    esac
+		done
+		libs="${_libs# }"
+		test -z "$libs" && continue
+		lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+		extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
 
     _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gethostbyname in -l$lib${5+ }$extralibs" >&5
@@ -19551,11 +19547,20 @@ $as_echo "no" >&6; }
 
     fi
 
+	    done
+
+fi
+
+	;;
+    *)
+	for lib in $LIBS; do
+	    case "$OLIBS" in
+		*"$lib"*) ;;
+		*) NET_LIBS="${NET_LIBS} $lib";;
+	    esac
 	done
-
-fi
-
-fi
+	;;
+esac
 LIBS="$OLIBS"
 
 for ac_func in getprogname

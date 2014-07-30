@@ -2746,41 +2746,46 @@ AC_CHECK_FUNC(syslog, [], [
     done
 ])
 #
-# Check for getaddrinfo and add any required libs to NET_LIBS
+# Check for getaddrinfo and add any required libs to NET_LIBS.
+# If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
 AX_FUNC_GETADDRINFO
-for lib in $LIBS; do
-    case "$OLIBS" in
-	*"$lib"*)   ;;
-	*)	    NET_LIBS="$NET_LIBS $lib";;
-    esac
-done
-if test X"$ax_cv_func_getaddrinfo" = X"no"; then
-    SUDO_APPEND_COMPAT_EXP(sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror)
-    # We need libsudo_util to pull in dependent libraries for
-    # inet_pton(), gethostbyname(), and getservbyname()
-    if test -n "${INET_PTON_LIBS}"; then
-	LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
-	LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
-    fi
-    AC_CHECK_FUNC(gethostbyname, [], [
-	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	    _libs=
-	    for lib in $libs; do
-		case "$LT_DEP_LIBS" in
-		    *"$lib"*)   ;;
-		    *)	    _libs="$_libs $lib";;
-		esac
+case " $LIBOBJS " in
+    *" getaddrinfo.$ac_objext "* )
+	SUDO_APPEND_COMPAT_EXP(sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror)
+	# We need libsudo_util to pull in dependent libraries for
+	# inet_pton(), gethostbyname(), and getservbyname()
+	if test -n "${INET_PTON_LIBS}"; then
+	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
+	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
+	fi
+	AC_CHECK_FUNC(gethostbyname, [], [
+	    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+		_libs=
+		for lib in $libs; do
+		    case "$LT_DEP_LIBS" in
+			*"$lib"*)   ;;
+			*)	    _libs="$_libs $lib";;
+		    esac
+		done
+		libs="${_libs# }"
+		test -z "$libs" && continue
+		lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+		extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+		SUDO_CHECK_LIB($lib, gethostbyname, [LT_DEP_LIBS="${LT_DEP_LIBS} $libs"; break], [], [$extralibs])
 	    done
-	    libs="${_libs# }"
-	    test -z "$libs" && continue
-	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	    extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	    SUDO_CHECK_LIB($lib, gethostbyname, [LT_DEP_LIBS="${LT_DEP_LIBS} $libs"; break], [], [$extralibs])
+	])
+	;;
+    *)
+	for lib in $LIBS; do
+	    case "$OLIBS" in
+		*"$lib"*) ;;
+		*) NET_LIBS="${NET_LIBS} $lib";;
+	    esac
 	done
-    ])
-fi
+	;;
+esac
 LIBS="$OLIBS"
 
 dnl
