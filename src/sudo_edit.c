@@ -88,7 +88,7 @@ sudo_edit(struct command_details *command_details)
     struct command_details saved_command_details;
     ssize_t nread, nwritten;
     const char *tmpdir;
-    char *cp, *suff, **nargv, **ap, **files = NULL;
+    char *cp, *suff, **nargv = NULL, **ap, **files = NULL;
     char buf[BUFSIZ];
     int rc, i, j, ac, ofd, tfd, nargc, rval, tmplen;
     int editor_argc = 0, nfiles = 0;
@@ -333,8 +333,8 @@ sudo_edit(struct command_details *command_details)
 	}
 	close(ofd);
     }
-    efree(tf);
-    efree(nargv);
+    sudo_efree(tf);
+    sudo_efree(nargv);
     debug_return_int(rval);
 
 cleanup:
@@ -345,8 +345,8 @@ cleanup:
 		unlink(tf[i].tfile);
 	}
     }
-    efree(tf);
-    efree(nargv);
+    sudo_efree(tf);
+    sudo_efree(nargv);
     debug_return_int(1);
 }
 
