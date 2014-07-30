@@ -236,7 +236,7 @@ sudo_edit(struct command_details *command_details)
      * to create a new argv.
      */
     nargc = editor_argc + nfiles;
-    nargv = (char **) sudo_emallocarray(nargc + 1, sizeof(char *));
+    nargv = sudo_emallocarray(nargc + 1, sizeof(char *));
     for (ac = 0; ac < editor_argc; ac++)
 	nargv[ac] = command_details->argv[ac];
     for (i = 0; i < nfiles && ac < nargc; )
@@ -333,6 +333,8 @@ sudo_edit(struct command_details *command_details)
 	}
 	close(ofd);
     }
+    efree(tf);
+    efree(nargv);
     debug_return_int(rval);
 
 cleanup:
@@ -343,6 +345,8 @@ cleanup:
 		unlink(tf[i].tfile);
 	}
     }
+    efree(tf);
+    efree(nargv);
     debug_return_int(1);
 }
 
