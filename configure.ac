@@ -2540,24 +2540,19 @@ if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     fi
 fi
 AX_FUNC_SNPRINTF
-AC_CHECK_FUNCS(asprintf vasprintf)
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
-    # Don't add snprintf to LIBOBJS if it is already present.
-    if test X"$ac_cv_func_asprintf$ac_cv_func_vasprintf" != X"yesyes"; then
+    # System has a C99-compliant v?snprintf(), check for v?asprintf()
+    AC_CHECK_FUNCS(asprintf, [], [
 	AC_LIBOBJ(snprintf)
-    fi
-fi
-if test X"$ac_cv_have_working_snprintf" = X"no"; then
-    SUDO_APPEND_COMPAT_EXP(sudo_snprintf)
-fi
-if test X"$ac_cv_have_working_vsnprintf" = X"no"; then
-    SUDO_APPEND_COMPAT_EXP(sudo_vsnprintf)
-fi
-if test X"$ac_cv_func_asprintf" = X"no"; then
-    SUDO_APPEND_COMPAT_EXP(sudo_asprintf)
-fi
-if test X"$ac_cv_func_vasprintf" = X"no"; then
-    SUDO_APPEND_COMPAT_EXP(sudo_vasprintf)
+	SUDO_APPEND_COMPAT_EXP(sudo_asprintf)
+    ])
+    AC_CHECK_FUNCS(vasprintf, [], [
+	AC_LIBOBJ(snprintf)
+	SUDO_APPEND_COMPAT_EXP(sudo_vasprintf)
+    ])
+else
+    # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
+    SUDO_APPEND_COMPAT_EXP(sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf)
 fi
 # We wrap OpenBSD's strtonum() to get translatable error strings.
 AC_CHECK_FUNCS(strtonum)

@@ -18510,56 +18510,64 @@ $as_echo "$as_me: WARNING: Replacing missing/broken (v)snprintf() with sudo's ve
 $as_echo "#define PREFER_PORTABLE_SNPRINTF 1" >>confdefs.h
 
 fi
-for ac_func in asprintf vasprintf
+if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+    # System has a C99-compliant v?snprintf(), check for v?asprintf()
+    for ac_func in asprintf
 do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  ac_fn_c_check_func "$LINENO" "asprintf" "ac_cv_func_asprintf"
+if test "x$ac_cv_func_asprintf" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+#define HAVE_ASPRINTF 1
 _ACEOF
 
-fi
-done
+else
 
-if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
-    # Don't add snprintf to LIBOBJS if it is already present.
-    if test X"$ac_cv_func_asprintf$ac_cv_func_vasprintf" != X"yesyes"; then
 	case " $LIBOBJS " in
   *" snprintf.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS snprintf.$ac_objext"
  ;;
 esac
 
-    fi
-fi
-if test X"$ac_cv_have_working_snprintf" = X"no"; then
-
-    for _sym in sudo_snprintf; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-fi
-if test X"$ac_cv_have_working_vsnprintf" = X"no"; then
-
-    for _sym in sudo_vsnprintf; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-fi
-if test X"$ac_cv_func_asprintf" = X"no"; then
 
     for _sym in sudo_asprintf; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
 
+
 fi
-if test X"$ac_cv_func_vasprintf" = X"no"; then
+done
+
+    for ac_func in vasprintf
+do :
+  ac_fn_c_check_func "$LINENO" "vasprintf" "ac_cv_func_vasprintf"
+if test "x$ac_cv_func_vasprintf" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_VASPRINTF 1
+_ACEOF
+
+else
+
+	case " $LIBOBJS " in
+  *" snprintf.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS snprintf.$ac_objext"
+ ;;
+esac
+
 
     for _sym in sudo_vasprintf; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+else
+    # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
+
+    for _sym in sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
