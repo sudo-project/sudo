@@ -34,6 +34,7 @@ Makefile$
 ^lib/util/mksigname$
 ^lib/util/siglist\.c$
 ^lib/util/signame\.c$
+^lib/util/util\.exp$
 
 ^plugins/sudoers/(sudoers|sudoreplay|testsudoers|visudo|check_[a-z_]+)$
 ^plugins/sudoers/.*\.(out|toke|err)$
