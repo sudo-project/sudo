@@ -304,6 +304,16 @@ and
 options.
 This is effectively a whitelist
 for environment variables.
+Environment variables with a value beginning with
+\fR()\fR
+are removed unless both the name and value parts are matched by
+\fIenv_keep\fR
+or
+\fIenv_check\fR,
+as they could be interpreted as
+\fBbash\fR
+functions.
+Prior to version 1.8.11, such variables were always removed.
 .PP
 If, however, the
 \fIenv_reset\fR
@@ -319,17 +329,35 @@ In this case,
 and
 \fIenv_delete\fR
 behave like a blacklist.
+Environment variables with a value beginning with
+\fR()\fR
+are always removed, even if they do not match one of the blacklists.
 Since it is not possible
 to blacklist all potentially dangerous environment variables, use
 of the default
 \fIenv_reset\fR
 behavior is encouraged.
 .PP
-In all cases, environment variables with a value beginning with
-\fR()\fR
-are removed as they could be interpreted as
+By default, environment variables are matched by name.
+However, if the pattern includes an equal sign
+(\(oq=\&\(cq),
+both the variables name and value must match.
+For example, a
 \fBbash\fR
-functions.
+function could be matched as follows:
+.nf
+.sp
+.RS 4n
+env_keep += "my_func=()*"
+.RE
+.fi
+.PP
+Without the
+\(lq\fR=()*\fR\(rq
+suffix, this would not match, as
+\fBbash\fR
+functions are not preserved by default.
+.PP
 The list of environment variables that
 \fBsudo\fR
 allows or denies is

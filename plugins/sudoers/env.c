@@ -536,29 +536,32 @@ sudo_getenv(const char *name)
 }
 
 /*
- * Check the env_delete blacklist.
+ * Check for var against patterns in the specified environment list.
  * Returns true if the variable was found, else false.
  */
 static bool
-matches_env_delete(const char *var)
+matches_env_list(const char *var, struct list_members *list, bool *full_match)
 {
     struct list_member *cur;
-    size_t len;
-    bool iswild;
     bool match = false;
-    debug_decl(matches_env_delete, SUDO_DEBUG_ENV)
+    debug_decl(matches_env_list, SUDO_DEBUG_ENV)
 
-    /* Skip anything listed in env_delete. */
-    SLIST_FOREACH(cur, &def_env_delete, entries) {
-	len = strlen(cur->value);
-	/* Deal with '*' wildcard */
+    SLIST_FOREACH(cur, list, entries) {
+	size_t sep_pos, len = strlen(cur->value);
+	bool iswild = false;
+
+	/* Locate position of the '=' separator in var=value. */
+	sep_pos = strcspn(var, "=");
+
+	/* Deal with '*' wildcard at the end of the pattern. */
 	if (cur->value[len - 1] == '*') {
 	    len--;
 	    iswild = true;
-	} else
-	    iswild = false;
+	}
 	if (strncmp(cur->value, var, len) == 0 &&
-	    (iswild || var[len] == '=')) {
+	    (iswild || len == sep_pos || var[len] == '\0')) {
+	    /* If we matched past the '=', count as a full match. */
+	    *full_match = len > sep_pos + 1;
 	    match = true;
 	    break;
 	}
@@ -567,32 +570,35 @@ matches_env_delete(const char *var)
 }
 
 /*
+ * Check the env_delete blacklist.
+ * Returns true if the variable was found, else false.
+ */
+static bool
+matches_env_delete(const char *var)
+{
+    bool full_match;	/* unused */
+    debug_decl(matches_env_delete, SUDO_DEBUG_ENV)
+
+    /* Skip anything listed in env_delete. */
+    debug_return_bool(matches_env_list(var, &def_env_delete, &full_match));
+}
+
+/*
  * Apply the env_check list.
  * Returns true if the variable is allowed, false if denied
  * or -1 if no match.
  */
 static int
-matches_env_check(const char *var)
+matches_env_check(const char *var, bool *full_match)
 {
-    struct list_member *cur;
-    size_t len;
-    bool iswild;
     int keepit = -1;
     debug_decl(matches_env_check, SUDO_DEBUG_ENV)
 
-    SLIST_FOREACH(cur, &def_env_check, entries) {
-	len = strlen(cur->value);
-	/* Deal with '*' wildcard */
-	if (cur->value[len - 1] == '*') {
-	    len--;
-	    iswild = true;
-	} else
-	    iswild = false;
-	if (strncmp(cur->value, var, len) == 0 &&
-	    (iswild || var[len] == '=')) {
-	    keepit = !strpbrk(var, "/%");
-	    break;
-	}
+    /* Skip anything listed in env_check that includes '/' or '%'. */
+    if (matches_env_list(var, &def_env_check, full_match)) {
+	const char *val = strchr(var, '=');
+	if (val != NULL)
+	    keepit = !strpbrk(++val, "/%");
     }
     debug_return_bool(keepit);
 }
@@ -602,34 +608,17 @@ matches_env_check(const char *var)
  * Returns true if the variable is allowed else false.
  */
 static bool
-matches_env_keep(const char *var)
+matches_env_keep(const char *var, bool *full_match)
 {
-    struct list_member *cur;
-    size_t len;
-    bool iswild, keepit = false;
+    bool keepit = false;
     debug_decl(matches_env_keep, SUDO_DEBUG_ENV)
 
     /* Preserve SHELL variable for "sudo -s". */
     if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0) {
 	keepit = true;
-	goto done;
+    } else if (matches_env_list(var, &def_env_keep, full_match)) {
+	keepit = true;
     }
-
-    SLIST_FOREACH(cur, &def_env_keep, entries) {
-	len = strlen(cur->value);
-	/* Deal with '*' wildcard */
-	if (cur->value[len - 1] == '*') {
-	    len--;
-	    iswild = true;
-	} else
-	    iswild = false;
-	if (strncmp(cur->value, var, len) == 0 &&
-	    (iswild || var[len] == '=')) {
-	    keepit = true;
-	    break;
-	}
-    }
-done:
     debug_return_bool(keepit);
 }
 
@@ -640,13 +629,24 @@ done:
 static bool
 env_should_delete(const char *var)
 {
+    const char *cp;
     int delete_it;
+    bool full_match = false;
     debug_decl(env_should_delete, SUDO_DEBUG_ENV);
+
+    /* Skip variables with values beginning with () (bash functions) */
+    if ((cp = strchr(var, '=')) != NULL) {
+	if (strncmp(cp, "=() ", 3) == 0) {
+	    delete_it = true;
+	    goto done;
+	}
+    }
 
     delete_it = matches_env_delete(var);
     if (!delete_it)
-	delete_it = matches_env_check(var) == false;
+	delete_it = matches_env_check(var, &full_match) == false;
 
+done:
     sudo_debug_printf(SUDO_DEBUG_INFO, "delete %s: %s",
 	var, delete_it ? "YES" : "NO");
     debug_return_bool(delete_it);
@@ -660,12 +660,21 @@ static bool
 env_should_keep(const char *var)
 {
     int keepit;
+    bool full_match = false;
+    const char *cp;
     debug_decl(env_should_keep, SUDO_DEBUG_ENV)
 
-    keepit = matches_env_check(var);
+    keepit = matches_env_check(var, &full_match);
     if (keepit == -1)
-	keepit = matches_env_keep(var);
+	keepit = matches_env_keep(var, &full_match);
 
+    /* Skip bash functions unless we matched on the value as well as name. */
+    if (keepit && !full_match) {
+	if ((cp = strchr(var, '=')) != NULL) {
+	    if (strncmp(cp, "=() ", 3) == 0)
+		keepit = false;
+	}
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "keep %s: %s",
 	var, keepit ? "YES" : "NO");
     debug_return_bool(keepit == true);
@@ -685,6 +694,7 @@ env_merge(char * const envp[])
     debug_decl(env_merge, SUDO_DEBUG_ENV)
 
     for (ep = envp; *ep != NULL; ep++) {
+	/* XXX - avoid checking value here too */
 	if (sudo_putenv(*ep, true, !env_should_keep(*ep)) == -1) {
 	    /* XXX cannot undo on failure */
 	    rval = false;
@@ -800,12 +810,6 @@ rebuild_env(void)
 	for (ep = old_envp; *ep; ep++) {
 	    bool keepit;
 
-	    /* Skip variables with values beginning with () (bash functions) */
-	    if ((cp = strchr(*ep, '=')) != NULL) {
-		if (strncmp(cp, "=() ", 3) == 0)
-		    continue;
-	    }
-
 	    /*
 	     * Look up the variable in the env_check and env_keep lists.
 	     */
@@ -880,12 +884,6 @@ rebuild_env(void)
 	 * env_check.
 	 */
 	for (ep = old_envp; *ep; ep++) {
-	    /* Skip variables with values beginning with () (bash functions) */
-	    if ((cp = strchr(*ep, '=')) != NULL) {
-		if (strncmp(cp, "=() ", 3) == 0)
-		    continue;
-	    }
-
 	    /* Add variable unless it matches a black list. */
 	    if (!env_should_delete(*ep)) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)

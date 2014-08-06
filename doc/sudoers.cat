@@ -122,19 +122,31 @@ DDEESSCCRRIIPPTTIIOONN
      PATH, HOME, MAIL, SHELL, LOGNAME, USER, USERNAME and SUDO_* variables in
      addition to variables from the invoking process permitted by the
      _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.  This is effectively a whitelist for
-     environment variables.
+     environment variables.  Environment variables with a value beginning with
+     () are removed unless both the name and value parts are matched by
+     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they could be interpreted as bbaasshh functions.
+     Prior to version 1.8.11, such variables were always removed.
 
      If, however, the _e_n_v___r_e_s_e_t option is disabled, any variables not
      explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are inherited
      from the invoking process.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave
-     like a blacklist.  Since it is not possible to blacklist all potentially
-     dangerous environment variables, use of the default _e_n_v___r_e_s_e_t behavior is
+     like a blacklist.  Environment variables with a value beginning with ()
+     are always removed, even if they do not match one of the blacklists.
+     Since it is not possible to blacklist all potentially dangerous
+     environment variables, use of the default _e_n_v___r_e_s_e_t behavior is
      encouraged.
 
-     In all cases, environment variables with a value beginning with () are
-     removed as they could be interpreted as bbaasshh functions.  The list of
-     environment variables that ssuuddoo allows or denies is contained in the
-     output of ``sudo -V'' when run as root.
+     By default, environment variables are matched by name.  However, if the
+     pattern includes an equal sign (`='), both the variables name and value
+     must match.  For example, a bbaasshh function could be matched as follows:
+
+         env_keep += "my_func=()*"
+
+     Without the ``=()*'' suffix, this would not match, as bbaasshh functions are
+     not preserved by default.
+
+     The list of environment variables that ssuuddoo allows or denies is contained
+     in the output of ``sudo -V'' when run as root.
 
      Note that the dynamic linker on most operating systems will remove
      variables that can control dynamic linking from the environment of setuid
@@ -2331,4 +2343,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                      July 16, 2014                     Sudo 1.8.11
+Sudo 1.8.11b1                    July 16, 2014                   Sudo 1.8.11b1
