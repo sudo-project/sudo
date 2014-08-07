@@ -166,9 +166,11 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     free(fdsp);
 
     /* Let closefrom() do the rest for us. */
+    if (lastfd + 1 > startfd)
+	startfd = lastfd + 1;
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"closefrom(%d)", lastfd + 1);
-    closefrom(lastfd + 1);
+	"closefrom(%d)", startfd);
+    closefrom(startfd);
 
     /* Restore preserved fds and set flags. */
     TAILQ_FOREACH_REVERSE(pfd, pfds, preserved_fd_list, entries) {
