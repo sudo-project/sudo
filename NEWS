@@ -34,6 +34,25 @@ What's new in Sudo 1.8.11
    may be used to force static linking if the --enable-static-sudoers
    option is also specified.
 
+ * The passwords in ldap.conf and ldap.secret may now be encoded
+   in base64.
+
+ * Audit updates.  SELinux role changes are now audited.  For
+   sudoedit, we now audit the actual editor being run, instead of
+   just the sudoedit command.
+
+ * Fixed bugs in the man page post-processing that could cause
+   portions of the manuals to be removed.
+
+ * Fixed a crash in the system_group plugin.  Bug #653.
+
+ * Fixed sudoedit on platforms without a native version of the
+   getprograme() function.  Bug #654.
+
+ * Fixed compilation problems with some pre-C99 compilers.
+
+ * Fixed sudo's -C option which was broken in version 1.8.9.
+
  * It is now possible to match an environment variable's value as
    well as its name using env_keep and env_check.  This can be used
    to preserve bash functions which would otherwise be removed from
@@ -44,14 +63,14 @@ What's new in Sudo 1.8.10p3?
  * Fixed expansion of %p in the prompt for "sudo -l" when rootpw,
    runaspw or targetpw is set.  Bug #639
 
- * Fixed matching of uids and gids which was broken in version 1.8.9.
+ * Fixed matching of UIDs and GIDs which was broken in version 1.8.9.
    Bug #640
 
  * PAM credential initialization has been re-enabled.  It was
    unintentionally disabled by default in version 1.8.8.  The way
    credentials are initialized has also been fixed.  Bug #642.
 
- * Fixed a descriptor leak on Linux when determing boot time.  Sudo
+ * Fixed a descriptor leak on Linux when determining boot time.  Sudo
    normally closes extra descriptors before running a command so
    the impact is limited.  Bug #645
 
@@ -69,7 +88,7 @@ What's new in Sudo 1.8.10p1?
  * Fixed a bug introduced in sudo 1.8.10 that prevented the disabling
    of tty-based tickets.
 
- * Fixed a bug with netgated commands in "sudo -l command" that
+ * Fixed a bug with negated commands in "sudo -l command" that
    could cause the command to be listed even when it was explicitly
    denied.  This only affected list mode when a command was specified.
    Bug #636
@@ -143,7 +162,7 @@ What's new in Sudo 1.8.9p4?
 
  * Fixed a bug where sudo would exit with an error when the debug
    level is set to util@debug or all@debug and I/O logging is not
-   enabled.  The command would continue runnning after sudo exited.
+   enabled.  The command would continue running after sudo exited.
 
 What's new in Sudo 1.8.9p3?
 
@@ -343,7 +362,7 @@ What's new in Sudo 1.8.7?
    The long list output (sudo -ll) for file-based sudoers is now
    more consistent with the format of LDAP-based sudoers.
 
- * A uid may now be used in the sudoRunAsUser attributes for LDAP
+ * A UID may now be used in the sudoRunAsUser attributes for LDAP
    sudoers.
 
  * Minor plugin API change: the close and version functions are now
@@ -575,12 +594,12 @@ What's new in Sudo 1.8.5?
    exect(), posix_spawn() and posix_spawnp() functions.
 
  * The user/group/mode checks on sudoers files have been relaxed.
-   As long as the file is owned by the sudoers uid, not world-writable
-   and not writable by a group other than the sudoers gid, the file
+   As long as the file is owned by the sudoers UID, not world-writable
+   and not writable by a group other than the sudoers GID, the file
    is considered OK.  Note that visudo will still set the mode to
    the value specified at configure time.
 
- * It is now possible to specify the sudoers path, uid, gid and
+ * It is now possible to specify the sudoers path, UID, GID and
    file mode as options to the plugin in the sudo.conf file.
 
  * Croatian, Galician, German, Lithuanian, Swedish and Vietnamese
@@ -895,7 +914,7 @@ What's new in Sudo 1.8.1p2?
 What's new in Sudo 1.8.1p1?
 
  * Fixed a problem on AIX where sudo was unable to set the final
-   uid if the PAM module modified the effective uid.
+   UID if the PAM module modified the effective UID.
 
  * A non-existent includedir is now treated the same as an empty
    directory and not reported as an error.
@@ -915,8 +934,8 @@ What's new in Sudo 1.8.1?
  * White space is now permitted within a User_List when used in
    conjunction with a per-user Defaults definition.
 
- * A group ID (%#gid) may now be specified in a User_List or Runas_List.
-   Likewise, for non-Unix groups the syntax is %:#gid.
+ * A group ID (%#GID) may now be specified in a User_List or Runas_List.
+   Likewise, for non-Unix groups the syntax is %:#GID.
 
  * Support for double-quoted words in the sudoers file has been fixed.
    The change in 1.7.5 for escaping the double quote character
@@ -1284,13 +1303,13 @@ What's new in Sudo 1.7.2?
    cache an entry by name or by id, depending on how the entry was
    looked up.  Previously, sudo would cache by both name and id
    from a single lookup, but this breaks sites that have multiple
-   password or group database names that map to the same uid or
-   gid.
+   password or group database names that map to the same UID or
+   GID.
 
  * User and group names in sudoers may now be enclosed in double
    quotes to avoid having to escape special characters.
 
- * BSM audit fixes when changing to a non-root uid.
+ * BSM audit fixes when changing to a non-root UID.
 
  * Experimental non-Unix group support.  Currently only works with
    Quest Authorization Services and allows Active Directory groups
@@ -1355,7 +1374,7 @@ What's new in Sudo 1.7.0?
    primary group to run the command as.  The sudoers syntax has been
    extended to include a group section in the Runas specification.
 
- * A uid may now be used anywhere a username is valid.
+ * A UID may now be used anywhere a username is valid.
 
  * The "secure_path" run-time Defaults option has been restored.
 
