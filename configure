@@ -780,6 +780,7 @@ SUDO_OBJS
 SUDOERS_OBJS
 COMMON_OBJS
 LT_DEP_LIBS
+LT_STATIC_LIBUTIL
 LT_STATIC
 LT_LDEXPORTS
 LT_LDDEP
@@ -937,6 +938,7 @@ enable_admin_flag
 enable_nls
 enable_rpath
 enable_static_sudoers
+enable_shared_libutil
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1605,6 +1607,8 @@ Optional Features:
   --disable-rpath         Disable passing of -Rpath to the linker
   --enable-static-sudoers Build the sudoers policy module as part of the sudo
                           binary instead as a plugin
+  --disable-shared-libutil
+                          Disable use of the libsudo_util shared library.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -2866,6 +2870,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -5791,6 +5796,14 @@ if test "${enable_static_sudoers+set}" = set; then :
   enableval=$enable_static_sudoers;
 else
   enable_static_sudoers=no
+fi
+
+
+# Check whether --enable-shared_libutil was given.
+if test "${enable_shared_libutil+set}" = set; then :
+  enableval=$enable_shared_libutil;
+else
+  enable_shared_libutil=yes
 fi
 
 
@@ -22046,6 +22059,21 @@ case "$lt_cv_dlopen" in
 	LT_STATIC=""
 	;;
 esac
+
+#
+# We can only disable linking with the shared libsudo_util if
+# sudoers is linked statically too.
+#
+if test "$enable_shared_libutil" = "no"; then
+    if test X"$STATIC_SUDOERS" = X""; then
+	as_fn_error $? "\"--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.\"" "$LINENO" 5
+    else
+	# Disable use shared version of libsudo_util.
+	LT_STATIC_LIBUTIL="--tag=disable-shared"
+    fi
+else
+    LT_STATIC_LIBUTIL="$LT_STATIC"
+fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
 # the main program is linked against -lpthread.  We have no knowledge of

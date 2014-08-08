@@ -30,7 +30,9 @@ What's new in Sudo 1.8.11
    that of other gettext-enabled packages.
 
  * Sudo and its associated programs now link against a shared version
-   of libsudo_util.
+   of libsudo_util.  The --disable-shared-libutil configure option
+   may be used to force static linking if the --enable-static-sudoers
+   option is also specified.
 
  * It is now possible to match an environment variable's value as
    well as its name using env_keep and env_check.  This can be used

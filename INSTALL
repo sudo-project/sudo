@@ -193,6 +193,15 @@ Compilation options:
         not prevent other plugins from being used and the noexec
         option will continue to function.
 
+  --disable-shared-libutil
+        Disable the use of the dynamic libsudo_util library.  By
+        default, sudo, the sudoers plugin and the associated sudo
+        utilities are linked against a shared version of libsudo_util.
+        If the --disable-shared-libutil option is specified, a
+        static version of the libsudo_util library will be used
+        instead.  This option may only be used in conjunction with
+        the --enable-static-sudoers option.
+
   --enable-zlib[=location]
 	Enable the use of the zlib compress library when storing
 	I/O log files.  If specified, location is the base directory

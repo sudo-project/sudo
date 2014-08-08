@@ -27,6 +27,7 @@ AC_SUBST([LT_LDOPT])
 AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([LT_STATIC])
+AC_SUBST([LT_STATIC_LIBUTIL])
 AC_SUBST([LT_DEP_LIBS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
@@ -1453,6 +1454,10 @@ AC_ARG_ENABLE(rpath,
 AC_ARG_ENABLE(static-sudoers,
 [AS_HELP_STRING([--enable-static-sudoers], [Build the sudoers policy module as part of the sudo binary instead as a plugin])],
 [], [enable_static_sudoers=no])
+
+AC_ARG_ENABLE(shared_libutil,
+[AS_HELP_STRING([--disable-shared-libutil], [Disable use of the libsudo_util shared library.])],
+[], [enable_shared_libutil=yes])
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
@@ -3610,6 +3615,21 @@ case "$lt_cv_dlopen" in
 	LT_STATIC=""
 	;;
 esac
+
+#
+# We can only disable linking with the shared libsudo_util if
+# sudoers is linked statically too.
+#
+if test "$enable_shared_libutil" = "no"; then
+    if test X"$STATIC_SUDOERS" = X""; then
+	AC_MSG_ERROR(["--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled."])
+    else
+	# Disable use shared version of libsudo_util.
+	LT_STATIC_LIBUTIL="--tag=disable-shared"
+    fi
+else
+    LT_STATIC_LIBUTIL="$LT_STATIC"
+fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
 # the main program is linked against -lpthread.  We have no knowledge of

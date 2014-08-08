@@ -45,7 +45,7 @@ shlib_opt = util.opt
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ @LT_STATIC@
+LIBTOOL = @LIBTOOL@ @LT_STATIC_LIBUTIL@
 SED = @SED@
 
 # Our install program supports extra flags...
@@ -182,9 +182,12 @@ progname_test: $(PROGNAME_TEST_OBJS)
 pre-install:
 
 install: install-dirs
-	if [ X"$(shlib_enable)" = X"yes" ]; then \
-	    INSTALL_BACKUP='~' $(LIBTOOL) --quiet --mode=install $(INSTALL) $(INSTALL_OWNER) libsudo_util.la $(DESTDIR)$(libexecdir)/sudo; \
-	fi
+	case "$(LIBTOOL)" in \
+	*disable-shared*) ;; \
+	*)  if [ X"$(shlib_enable)" = X"yes" ]; then \
+		INSTALL_BACKUP='~' $(LIBTOOL) --quiet --mode=install $(INSTALL) $(INSTALL_OWNER) libsudo_util.la $(DESTDIR)$(libexecdir)/sudo; \
+	    fi;; \
+	esac
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(libexecdir)/sudo
