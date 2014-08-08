@@ -147,7 +147,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile .libs
+	-rm -rf Makefile .libs $(shlib_map) $(shlib_opt)
 
 clobber: distclean
 

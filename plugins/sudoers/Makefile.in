@@ -423,7 +423,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile sudoers sudoers.lo .libs $(LINKS)
+	-rm -rf Makefile sudoers sudoers.lo .libs $(shlib_map) $(shlib_opt)
 	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
 	    cmd='rm -rf $(GENERATED)'; \
 	    echo "$$cmd"; eval $$cmd; \
