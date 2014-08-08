@@ -131,8 +131,8 @@ SHELL = @SHELL@
 
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
-TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_symbols \
-	     check_digest check_base64
+TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_digest \
+	     check_base64 @SUDOERS_TEST_PROGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -227,9 +227,7 @@ check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 
 # We need to link check_symbols with -lpthread on HP-UX since LDAP uses threads
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
-	if [ X"$(shlib_enable)" = X"yes" -a X"@LT_STATIC@" != X"" ]; then \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@; \
-	fi
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -338,9 +336,9 @@ check: $(TEST_PROGS) visudo testsudoers
 	    diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
-	    if [ X"$(shlib_enable)" = X"yes" -a X"@LT_STATIC@" != X"" ]; then \
-		./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
-	    fi; \
+	    case "$(TEST_PROGS)" in \
+		*check_symbols*) ./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`;; \
+	    esac; \
 	    mkdir -p regress/logging; \
 	    ./check_wrap $(srcdir)/regress/logging/check_wrap.in > regress/logging/check_wrap.out; \
 	    diff regress/logging/check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok || rval=`expr $$rval + $$?`; \

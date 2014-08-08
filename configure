@@ -729,6 +729,7 @@ SSP_LDFLAGS
 PIE_CFLAGS
 PIE_LDFLAGS
 CROSS_COMPILING
+SUDOERS_TEST_PROGS
 COMPAT_TEST_PROGS
 LOCALEDIR_SUFFIX
 SUDO_NLS
@@ -2870,6 +2871,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -22059,6 +22061,13 @@ case "$lt_cv_dlopen" in
 	LT_STATIC=""
 	;;
 esac
+
+#
+# The check_symbols test can only succeed with a dynamic sudoers plugin.
+#
+if test X"$STATIC_SUDOERS" = X""; then
+    SUDOERS_TEST_PROGS="${SUDOERS_TEST_PROGS}${SUDOERS_TEST_PROGS+ }check_symbols"
+fi
 
 #
 # We can only disable linking with the shared libsudo_util if

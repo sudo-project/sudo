@@ -80,6 +80,7 @@ AC_SUBST([LIBMD])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
+AC_SUBST([SUDOERS_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
@@ -3615,6 +3616,13 @@ case "$lt_cv_dlopen" in
 	LT_STATIC=""
 	;;
 esac
+
+#
+# The check_symbols test can only succeed with a dynamic sudoers plugin.
+#
+if test X"$STATIC_SUDOERS" = X""; then
+    SUDOERS_TEST_PROGS="${SUDOERS_TEST_PROGS}${SUDOERS_TEST_PROGS+ }check_symbols"
+fi
 
 #
 # We can only disable linking with the shared libsudo_util if
