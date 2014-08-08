@@ -137,7 +137,7 @@ sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS) -no-fast-install
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
 

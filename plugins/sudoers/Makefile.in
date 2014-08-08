@@ -228,7 +228,7 @@ check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 # We need to link check_symbols with -lpthread on HP-UX since LDAP uses threads
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
 	if [ X"$(shlib_enable)" = X"yes" -a X"@LT_STATIC@" != X"" ]; then \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@ -no-fast-install; \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@; \
 	fi
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
