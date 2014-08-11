@@ -680,6 +680,7 @@ env_should_keep(const char *var)
     debug_return_bool(keepit == true);
 }
 
+#ifdef HAVE_PAM
 /*
  * Merge another environment with our private copy.
  * Only overwrite an existing variable if it is not
@@ -694,8 +695,9 @@ env_merge(char * const envp[])
     debug_decl(env_merge, SUDO_DEBUG_ENV)
 
     for (ep = envp; *ep != NULL; ep++) {
-	/* XXX - avoid checking value here too */
-	if (sudo_putenv(*ep, true, !env_should_keep(*ep)) == -1) {
+	/* XXX - avoid checking value here, should only check name */
+	bool overwrite = def_env_reset ? !env_should_keep(*ep) : env_should_delete(*ep);
+	if (sudo_putenv(*ep, true, overwrite) == -1) {
 	    /* XXX cannot undo on failure */
 	    rval = false;
 	    break;
@@ -703,6 +705,7 @@ env_merge(char * const envp[])
     }
     debug_return_bool(rval);
 }
+#endif /* HAVE_PAM */
 
 static void
 env_update_didvar(const char *ep, unsigned int *didvar)
