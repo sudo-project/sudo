@@ -351,6 +351,29 @@ contained in the output of
 .Dq Li sudo -V
 when run as root.
 .Pp
+On systems that support PAM where the
+.Sy pam_env
+module is enabled for
+.Nm sudo ,
+variables in the PAM environment may be merged in to the environment.
+If a variable in the PAM environment is already present in the
+user's environment, the value will only be overridden if the variable
+was not preserved by
+.Nm sudoers.
+When
+.Em env_reset
+is enabled, variables preserved from the invoking user's environment
+by the
+.Em env_keep
+list take precedence over those in the PAM environment.
+When
+.Em env_reset
+is disabled, variables present the invoking user's environment
+take precedence over those in the PAM environment unless they
+match a pattern in the
+.Em env_delete
+list.
+.Pp
 Note that the dynamic linker on most operating systems will remove
 variables that can control dynamic linking from the environment of
 setuid executables, including

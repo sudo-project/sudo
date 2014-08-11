@@ -365,6 +365,29 @@ contained in the output of
 \(lq\fRsudo -V\fR\(rq
 when run as root.
 .PP
+On systems that support PAM where the
+\fBpam_env\fR
+module is enabled for
+\fBsudo\fR,
+variables in the PAM environment may be merged in to the environment.
+If a variable in the PAM environment is already present in the
+user's environment, the value will only be overridden if the variable
+was not preserved by
+\fBsudoers.\fR
+When
+\fIenv_reset\fR
+is enabled, variables preserved from the invoking user's environment
+by the
+\fIenv_keep\fR
+list take precedence over those in the PAM environment.
+When
+\fIenv_reset\fR
+is disabled, variables present the invoking user's environment
+take precedence over those in the PAM environment unless they
+match a pattern in the
+\fIenv_delete\fR
+list.
+.PP
 Note that the dynamic linker on most operating systems will remove
 variables that can control dynamic linking from the environment of
 setuid executables, including
