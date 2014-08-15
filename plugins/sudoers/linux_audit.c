@@ -59,7 +59,7 @@ linux_audit_open(void)
 	/* Kernel may not have audit support. */
 	if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT) {
 	    sudo_warn(U_("unable to open audit system"));
-	    au_fd == AUDIT_NOT_CONFIGURED;
+	    au_fd = AUDIT_NOT_CONFIGURED;
 	}
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
