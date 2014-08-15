@@ -69,7 +69,6 @@ initprogname(const char *name)
     }
 #endif
 
-done:
     if (progname[0] == 'l' && progname[1] == 't' && progname[2] == '-' &&
 	progname[3] != '\0')
 	progname += 3;
