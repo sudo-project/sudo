@@ -40,6 +40,7 @@
 #include "sudo_debug.h"
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
+#include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -49,6 +50,8 @@ main(int argc, char *argv[], char *envp[])
     char *cp, *cmnd;
     bool login_shell, noexec = false;
     debug_decl(main, SUDO_DEBUG_MAIN)
+
+    initprogname(argc > 0 ? argv[0] : "sesh");
 
     setlocale(LC_ALL, "");
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
