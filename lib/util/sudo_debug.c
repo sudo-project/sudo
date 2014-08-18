@@ -122,6 +122,9 @@ static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
 static const int num_subsystems = NUM_SUBSYSTEMS;
 
+/* Exposed for sudo_printf.c */
+void sudo_debug_write_file(const char *func, const char *file, int line, const char *str, int len, int errno_val);
+
 /*
  * Parse settings string from sudo.conf and open debugfile.
  * Returns 1 on success, 0 if cannot open debugfile.
@@ -331,7 +334,7 @@ sudo_debug_write_conv(const char *func, const char *file, int lineno,
     }
 }
 
-static void
+void
 sudo_debug_write_file(const char *func, const char *file, int lineno,
     const char *str, int len, int errnum)
 {

@@ -33,6 +33,9 @@
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
 
+/* Not exported outside libsudo_util */
+void sudo_debug_write_file(const char *func, const char *file, int line, const char *str, int len, int errno_val);
+
 __dso_public int
 _sudo_printf(int msg_type, const char *fmt, ...)
 {
@@ -57,7 +60,7 @@ _sudo_printf(int msg_type, const char *fmt, ...)
 	len = vasprintf(&buf, fmt, ap);
 	va_end(ap);
 	if (len != -1)
-	    sudo_debug_write(buf, len, 0);
+	    sudo_debug_write_file(NULL, NULL, 0, buf, len, 0);
 	break;
     default:
 	errno = EINVAL;
