@@ -48,8 +48,12 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_SELINUX
+# include <selinux/selinux.h>
+#endif
 
 #include "sudo.h"
+#include "sudo_exec.h"
 
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 
@@ -327,15 +331,193 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     debug_return_int(errors);
 }
 
+#ifdef HAVE_SELINUX
+static int
+selinux_edit_create_tfiles(struct command_details *command_details,
+    struct tempfile *tf, char * const files[], int nfiles)
+{
+    char **sesh_args, **sesh_ap;
+    int i, rc, sesh_nargs;
+    struct stat sb;
+    struct command_details saved_command_details;
+    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
+    
+    /* Prepare selinux stuff (setexeccon) */
+    if (selinux_setup(command_details->selinux_role,
+	command_details->selinux_type, NULL, -1) != 0)
+	debug_return_int(-1);
+
+    if (nfiles < 1)
+	debug_return_int(0);
+
+    /* Construct common args for sesh */
+    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
+    command_details->command = _PATH_SUDO_SESH;
+    command_details->flags |= CD_SUDOEDIT_COPY;
+    
+    sesh_nargs = 3 + (nfiles * 2) + 1;
+    sesh_args = sesh_ap = sudo_emallocarray(sesh_nargs, sizeof(char *));
+    *sesh_ap++ = "sesh";
+    *sesh_ap++ = "-e";
+    *sesh_ap++ = "0";
+
+    for (i = 0; i < nfiles; i++) {
+	char *tfile, *ofile = files[i];
+	int tfd;
+	*sesh_ap++  = ofile;
+	tf[i].ofile = ofile;
+	if (stat(ofile, &sb) == -1)
+	    memset(&sb, 0, sizeof(sb));		/* new file */
+	tf[i].osize = sb.st_size;
+	mtim_get(&sb, &tf[i].omtim);
+	/*
+	 * The temp file must be created by the sesh helper,
+	 * which uses O_EXCL | O_NOFOLLOW to make this safe.
+	 */
+	tfd = sudo_edit_mktemp(ofile, &tfile);
+	if (tfd == -1) {
+	    sudo_warn("mkstemps");
+	    sudo_efree(tfile);
+	    sudo_efree(sesh_args);
+	    debug_return_int(-1);
+	}
+	/* Helper will re-create temp file with proper security context. */
+	close(tfd);
+	unlink(tfile);
+	*sesh_ap++  = tfile;
+	tf[i].tfile = tfile;
+    }
+    *sesh_ap = NULL;
+
+    /* Run sesh -e 0 <o1> <t1> ... <on> <tn> */
+    command_details->argv = sesh_args;
+    rc = run_command(command_details);
+    switch (rc) {
+    case SESH_SUCCESS:
+	break;
+    case SESH_ERR_BAD_PATHS:
+	sudo_fatalx(_("sesh: internal error: odd number of paths"));
+    case SESH_ERR_NO_FILES:
+	sudo_fatalx(_("sesh: unable to create temporary files"));
+    default:
+	sudo_fatalx(_("sesh: unknown error %d"), rc);
+    }
+
+    /* Restore saved command_details. */
+    command_details->command = saved_command_details.command;
+    command_details->flags = saved_command_details.flags;
+    command_details->argv = saved_command_details.argv;
+    
+    /* Chown to user's UID so they can edit the temporary files. */
+    for (i = 0; i < nfiles; i++) {
+	if (chown(tf[i].tfile, user_details.uid, user_details.gid) != 0) {
+	    sudo_warn("unable to chown(%s) to %d:%d for editing",
+		tf[i].tfile, user_details.uid, user_details.gid);
+	}
+    }
+
+    /* Contents of tf will be freed by caller. */
+    sudo_efree(sesh_args);
+
+    return (nfiles);
+}
+
+static int
+selinux_edit_copy_tfiles(struct command_details *command_details,
+    struct tempfile *tf, int nfiles, struct timeval *times)
+{
+    char **sesh_args, **sesh_ap;
+    int i, rc, sesh_nargs, rval = 1;
+    struct command_details saved_command_details;
+    struct timeval tv;
+    struct stat sb;
+    debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT)
+    
+    /* Prepare selinux stuff (setexeccon) */
+    if (selinux_setup(command_details->selinux_role,
+	command_details->selinux_type, NULL, -1) != 0)
+	debug_return_int(1);
+
+    if (nfiles < 1)
+	debug_return_int(0);
+
+    /* Construct common args for sesh */
+    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
+    command_details->command = _PATH_SUDO_SESH;
+    command_details->flags |= CD_SUDOEDIT_COPY;
+    
+    sesh_nargs = 3 + (nfiles * 2) + 1;
+    sesh_args = sesh_ap = sudo_emallocarray(sesh_nargs, sizeof(char *));
+    *sesh_ap++ = "sesh";
+    *sesh_ap++ = "-e";
+    *sesh_ap++ = "1";
+
+    /* Construct args for sesh -e 1 */
+    for (i = 0; i < nfiles; i++) {
+	if (stat(tf[i].tfile, &sb) == 0) {
+	    mtim_get(&sb, &tv);
+	    if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
+		/*
+		 * If mtime and size match but the user spent no measurable
+		 * time in the editor we can't tell if the file was changed.
+		 */
+		if (sudo_timevalcmp(&times[0], &times[1], !=)) {
+		    sudo_warnx(U_("%s unchanged"), tf[i].ofile);
+		    unlink(tf[i].tfile);
+		    continue;
+		}
+	    }
+	}
+	*sesh_ap++ = tf[i].tfile;
+	*sesh_ap++ = tf[i].ofile;
+	if (chown(tf[i].tfile, command_details->uid, command_details->gid) != 0) {
+	    sudo_warn("unable to chown(%s) back to %d:%d", tf[i].tfile,
+		command_details->uid, command_details->gid);
+	}
+    }
+    *sesh_ap = NULL;
+
+    if (sesh_ap - sesh_args > 3) {
+	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
+	command_details->argv = sesh_args;
+	rc = run_command(command_details);
+	switch (rc) {
+	case SESH_SUCCESS:
+	    rval = 0;
+	    break;
+	case SESH_ERR_NO_FILES:
+	    sudo_warnx(_("unable to copy temporary files back to their original location"));
+	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
+	    break;
+	case SESH_ERR_SOME_FILES:
+	    sudo_warnx(_("unable to copy some of the temporary files back to their original location"));
+	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
+	    break;
+	default:
+	    sudo_warnx(_("sesh: unknown error %d"), rc);
+	    break;
+	}
+    }
+
+    /* Restore saved command_details. */
+    command_details->command = saved_command_details.command;
+    command_details->flags = saved_command_details.flags;
+    command_details->argv = saved_command_details.argv;
+
+    debug_return_int(rval);
+}
+#endif /* HAVE_SELINUX */
+
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
+ * Returns 0 on success and 1 on failure.
  */
 int
 sudo_edit(struct command_details *command_details)
 {
     struct command_details saved_command_details;
     char **nargv = NULL, **ap, **files = NULL;
-    int i, ac, nargc, rval;
+    int errors, i, ac, nargc, rval;
     int editor_argc = 0, nfiles = 0;
     struct timeval times[2];
     struct tempfile *tf = NULL;
@@ -372,7 +554,12 @@ sudo_edit(struct command_details *command_details)
 
     /* Copy editor files to temporaries. */
     tf = sudo_ecalloc(nfiles, sizeof(*tf));
-    nfiles = sudo_edit_create_tfiles(command_details, tf, files, nfiles);
+#ifdef HAVE_SELINUX
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED))
+	nfiles = selinux_edit_create_tfiles(command_details, tf, files, nfiles);
+    else 
+#endif
+	nfiles = sudo_edit_create_tfiles(command_details, tf, files, nfiles);
     if (nfiles <= 0)
 	goto cleanup;
 
@@ -415,12 +602,16 @@ sudo_edit(struct command_details *command_details)
     command_details->argv = saved_command_details.argv;
 
     /* Copy contents of temp files to real ones. */
-    if (sudo_edit_copy_tfiles(command_details, tf, nfiles, times) != 0)
-	rval = 1;
+#ifdef HAVE_SELINUX
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED))
+	errors = selinux_edit_copy_tfiles(command_details, tf, nfiles, times);
+    else
+#endif
+	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
 
     sudo_efree(tf);
     sudo_efree(nargv);
-    debug_return_int(rval);
+    debug_return_int(errors ? 1 : rval);
 
 cleanup:
     /* Clean up temp files and return. */

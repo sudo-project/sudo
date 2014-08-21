@@ -59,6 +59,16 @@
 #define SAVED_SIGUSR2	12
 
 /*
+ * Error codes for sesh
+ */
+#define SESH_SUCCESS	    0		/* successful operation */
+#define SESH_ERR_FAILURE    1		/* unspecified error */
+#define SESH_ERR_INVALID    30		/* invalid -e arg value */
+#define SESH_ERR_BAD_PATHS  31		/* odd number of paths */
+#define SESH_ERR_NO_FILES   32		/* copy error, no files copied */
+#define SESH_ERR_SOME_FILES 33		/* copy error, some files copied */
+
+/*
  * Symbols shared between exec.c and exec_pty.c
  */
 

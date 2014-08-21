@@ -121,6 +121,7 @@ struct user_details {
 #define CD_USE_PTY		0x1000
 #define CD_SET_UTMP		0x2000
 #define CD_EXEC_BG		0x4000
+#define CD_SUDOEDIT_COPY	0x8000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;

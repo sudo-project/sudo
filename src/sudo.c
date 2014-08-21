@@ -1045,6 +1045,14 @@ run_command(struct command_details *details)
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
+	if (WIFEXITED(cstat.val))
+	    exitcode = WEXITSTATUS(cstat.val);
+	else if (WIFSIGNALED(cstat.val))
+	    exitcode = WTERMSIG(cstat.val) | 128;
+#ifdef HAVE_SELINUX
+	if (ISSET(details->flags, CD_SUDOEDIT_COPY))
+	    break;
+#endif
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with wait status %d", cstat.val);
 	policy_close(&policy_plugin, cstat.val, 0);
@@ -1053,10 +1061,6 @@ run_command(struct command_details *details)
 		"calling I/O close with wait status %d", cstat.val);
 	    iolog_close(plugin, cstat.val, 0);
 	}
-	if (WIFEXITED(cstat.val))
-	    exitcode = WEXITSTATUS(cstat.val);
-	else if (WIFSIGNALED(cstat.val))
-	    exitcode = WTERMSIG(cstat.val) | 128;
 	break;
     default:
 	sudo_warnx(U_("unexpected child termination condition: %d"), cstat.type);
