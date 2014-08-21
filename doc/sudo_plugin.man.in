@@ -2589,6 +2589,7 @@ list.
 .TP 6n
 Version 1.5 (sudo 1.8.9)
 The
+\fIpreserve_fds\fR
 entry was added to the
 \fRcommand_info\fR
 list.

@@ -1443,7 +1443,7 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            The _r_e_m_o_t_e___h_o_s_t entry was added to the settings list.
 
      Version 1.5 (sudo 1.8.9)
-           The entry was added to the command_info list.
+           The _p_r_e_s_e_r_v_e___f_d_s entry was added to the command_info list.
 
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)

@@ -2261,7 +2261,7 @@ entry was added to the
 list.
 .It Version 1.5 (sudo 1.8.9)
 The
-.em preserve_fds
+.Em preserve_fds
 entry was added to the
 .Li command_info
 list.
