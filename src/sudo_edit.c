@@ -109,6 +109,9 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     int serrno = errno;
     debug_decl(switch_user, SUDO_DEBUG_EDIT)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"set uid:gid to %u:%u(%u)", euid, egid, ngroups ? groups[0] : egid);
+
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
 	if (seteuid(ROOT_UID) != 0)
@@ -138,6 +141,7 @@ static int
 sudo_edit_mktemp(const char *ofile, char **tfile)
 {
     const char *cp, *suff;
+    int tfd;
     debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT)
 
     if ((cp = strrchr(ofile, '/')) != NULL)
@@ -151,7 +155,10 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     } else {
 	sudo_easprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, cp);
     }
-    debug_return_int(mkstemps(*tfile, suff ? strlen(suff) : 0));
+    tfd = mkstemps(*tfile, suff ? strlen(suff) : 0);
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"%s -> %s, fd %d", ofile, *tfile, tfd);
+    debug_return_int(tfd);
 }
 
 /*
@@ -201,9 +208,13 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	tf[j].ofile = files[i];
 	tf[j].osize = sb.st_size;
 	mtim_get(&sb, &tf[j].omtim);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
 	tfd = sudo_edit_mktemp(tf[j].ofile, &tf[j].tfile);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
 	if (tfd == -1) {
@@ -263,11 +274,15 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
 	rc = -1;
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
 	    rc = fstat(tfd, &sb);
 	}
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
 	if (rc || !S_ISREG(sb.st_mode)) {
@@ -530,6 +545,8 @@ sudo_edit(struct command_details *command_details)
      * Set real, effective and saved uids to root.
      * We will change the euid as needed below.
      */
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"setuid(%u)", ROOT_UID);
     if (setuid(ROOT_UID) != 0) {
 	sudo_warn(U_("unable to change uid to root (%u)"), ROOT_UID);
 	goto cleanup;
