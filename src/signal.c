@@ -96,8 +96,10 @@ restore_signals(void)
 }
 
 static void
-sudo_handler(int signo)
+sudo_handler(int s)
 {
+    unsigned char signo = (unsigned char)s;
+
     /*
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
