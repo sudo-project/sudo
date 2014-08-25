@@ -228,6 +228,8 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 			sudo_warn("%s", tf[j].tfile);
 		    else
 			sudo_warnx(U_("%s: short write"), tf[j].tfile);
+		    close(ofd);
+		    close(tfd);
 		    debug_return_int(-1);
 		}
 	    }
@@ -342,6 +344,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
 	}
 	close(ofd);
+	close(tfd);
     }
     debug_return_int(errors);
 }
