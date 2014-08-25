@@ -58,6 +58,13 @@ What's new in Sudo 1.8.11
    to preserve bash functions which would otherwise be removed from
    the environment.
 
+ * New files created via sudoedit as a non-root user now have the
+   proper group id.  Bug #656
+
+ * Sudoedit now works correctly in conjunction with sudo's SELinux
+   RBAC support.  Temporary files are now created with the proper
+   security context.
+   
 What's new in Sudo 1.8.10p3?
 
  * Fixed expansion of %p in the prompt for "sudo -l" when rootpw,
