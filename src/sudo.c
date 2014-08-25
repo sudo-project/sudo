@@ -710,6 +710,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     if (!ISSET(details->flags, CD_SET_EUID))
 	details->euid = details->uid;
+    if (!ISSET(details->flags, CD_SET_EGID))
+	details->egid = details->gid;
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid));
