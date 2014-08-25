@@ -614,9 +614,9 @@ sudo_edit(struct command_details *command_details)
 
     /* Restore saved command_details. */
     command_details->uid = saved_command_details.uid;
-    command_details->euid = saved_command_details.uid;
+    command_details->euid = saved_command_details.euid;
     command_details->gid = saved_command_details.gid;
-    command_details->egid = saved_command_details.gid;
+    command_details->egid = saved_command_details.egid;
     command_details->ngroups = saved_command_details.ngroups;
     command_details->groups = saved_command_details.groups;
     command_details->argv = saved_command_details.argv;
