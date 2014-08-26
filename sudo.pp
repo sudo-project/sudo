@@ -84,7 +84,7 @@ still allow people to get their work done."
 
 %if [rpm]
 	# Add distro info to release
-	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9][0-9]\).*/\1/' -e 's/^[^0-9]*\([0-9]\)[^0-9].*/\1/'`
+	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,2\}\).*/\1/'`
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
 		pp_rpm_release="$pp_rpm_release.el${osrelease%%[0-9]}"
