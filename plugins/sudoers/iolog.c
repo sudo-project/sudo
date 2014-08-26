@@ -705,29 +705,38 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
+    int rval = true;
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
     gettimeofday(&now, NULL);
 
 #ifdef HAVE_ZLIB_H
-    if (iolog_compress)
-	ignore_result(gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len));
-    else
+    if (iolog_compress) {
+	if (gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len) != (int)len)
+	    rval = -1;
+    } else
 #endif
-	ignore_result(fwrite(buf, 1, len, io_log_files[idx].fd.f));
+    {
+	if (fwrite(buf, 1, len, io_log_files[idx].fd.f) != len)
+	    rval = -1;
+    }
     sudo_timevalsub(&now, &last_time, &delay);
 #ifdef HAVE_ZLIB_H
-    if (iolog_compress)
-	gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %u\n", idx,
-	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
-    else
+    if (iolog_compress) {
+	if (gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %u\n", idx,
+	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) == 0)
+	    rval = -1;
+    } else
 #endif
-	fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %u\n", idx,
-	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
+    {
+	if (fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %u\n", idx,
+	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) < 0)
+	    rval = -1;
+    }
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
-    debug_return_bool(true);
+    debug_return_bool(rval);
 }
 
 static int
