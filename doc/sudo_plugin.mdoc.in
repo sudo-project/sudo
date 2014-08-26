@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 20, 2013
+.Dd August 25, 2014
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1255,6 +1255,20 @@ Any of the logging functions may be set to the
 pointer if no logging is to be performed.
 If the open function returns 0, no I/O will be sent to the plugin.
 .Pp
+If a logging function returns an error
+.Pq \-1 ,
+the running command will be terminated and all of the plugin's logging
+functions will be disabled.
+Other I/O logging plugins will still receive any remaining
+input or output that has not yet been processed.
+.Pp
+If an input logging function rejects the data by returning 0, the
+command will be terminated and the data will not be passed to the
+command, though it will still be sent to any other I/O logging plugins.
+If an output logging function rejects the data by returning 0, the
+command will be terminated and the data will not be written to the
+terminal, though it will still be sent to any other I/O logging plugins.
+.Pp
 The io_plugin struct has the following fields:
 .Bl -tag -width 4n
 .It type
@@ -1283,15 +1297,18 @@ int (*open)(unsigned int version, sudo_conv_t conversation,
 The
 .Fn open
 function is run before the
-.Fn log_input ,
-.Fn log_output
+.Fn log_ttyin ,
+.Fn log_ttyout ,
+.Fn log_stdin ,
+.Fn log_stdout ,
+.Fn log_stderr ,
 or
 .Fn show_version
 functions are called.
-It is only called if the version is being requested or the
+It is only called if the version is being requested or if the
+policy plugin's
 .Fn check_policy
-function has
-returned successfully.
+function has returned successfully.
 It returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error.
 In the latter case,
@@ -1517,7 +1534,8 @@ the user but before it is passed to the running command.
 This allows the plugin to reject data if it chooses to (for instance
 if the input contains banned content).
 Returns 1 if the data should be passed to the command, 0 if the data
-is rejected (which will terminate the command) or \-1 if an error occurred.
+is rejected (which will terminate the running command) or \-1 if an
+error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -1540,7 +1558,7 @@ the command but before it is written to the user's terminal.
 This allows the plugin to reject data if it chooses to (for instance
 if the output contains banned content).
 Returns 1 if the data should be passed to the user, 0 if the data is rejected
-(which will terminate the command) or \-1 if an error occurred.
+(which will terminate the running command) or \-1 if an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -1565,7 +1583,7 @@ before it is passed to the running command.
 This allows the plugin to reject data if it chooses to
 (for instance if the input contains banned content).
 Returns 1 if the data should be passed to the command, 0 if the data is
-rejected (which will terminate the command) or \-1 if an error occurred.
+rejected (which will terminate the running command) or \-1 if an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -1590,7 +1608,7 @@ it is written to the standard output.
 This allows the plugin to reject data if it chooses to
 (for instance if the output contains banned content).
 Returns 1 if the data should be passed to the user, 0 if the data is
-rejected (which will terminate the command) or \-1 if an error occurred.
+rejected (which will terminate the running command) or \-1 if an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -1615,7 +1633,7 @@ is written to the standard error.
 This allows the plugin to reject data if it chooses to
 (for instance if the output contains banned content).
 Returns 1 if the data should be passed to the user, 0 if the data is
-rejected (which will terminate the command) or \-1 if an error occurred.
+rejected (which will terminate the running command) or \-1 if an error occurred.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -2265,6 +2283,24 @@ The
 entry was added to the
 .Li command_info
 list.
+.It Version 1.6 (sudo 1.8.11)
+The behavior when an I/O logging plugin returns an error
+.Pq \-1
+has changed.
+Previously, the
+.Nm sudo
+front end took no action when the
+.Fn log_ttyin ,
+.Fn log_ttyout ,
+.Fn log_stdin ,
+.Fn log_stdout ,
+or
+.Fn log_stderr
+function returned an error.
+.Pp
+The behavior when an I/O logging plugin returns 0 has changed.
+Previously, output from the command would be displayed to the
+terminal even if an output logging function returned 0.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

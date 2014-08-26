@@ -76,16 +76,22 @@
 # define winsize	ttysize
 #endif
 
+/*
+ * I/O buffer with associated read/write events and a logging action.
+ * Used to, e.g. pass data from the pty to the user's terminal
+ * and any I/O logging plugins.
+ */
+struct io_buffer;
+typedef bool (*sudo_io_action_t)(const char *, unsigned int, struct io_buffer *);
 struct io_buffer {
     SLIST_ENTRY(io_buffer) entries;
     struct sudo_event *revent;
     struct sudo_event *wevent;
-    bool (*action)(const char *buf, unsigned int len);
+    sudo_io_action_t action;
     int len; /* buffer length (how much produced) */
     int off; /* write position (how much already consumed) */
     char buf[32 * 1024];
 };
-
 SLIST_HEAD(io_buffer_list, io_buffer);
 
 static char slavename[PATH_MAX];
@@ -202,7 +208,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 
 /* Call I/O plugin tty input log method. */
 static bool
-log_ttyin(const char *buf, unsigned int n)
+log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -212,8 +218,13 @@ log_ttyin(const char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin) {
-	    if (!plugin->u.io->log_ttyin(buf, n)) {
-	    	rval = false;
+	    int rc = plugin->u.io->log_ttyin(buf, n);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_ttyin = NULL;
+		}
+		rval = false;
 		break;
 	    }
 	}
@@ -225,7 +236,7 @@ log_ttyin(const char *buf, unsigned int n)
 
 /* Call I/O plugin stdin log method. */
 static bool
-log_stdin(const char *buf, unsigned int n)
+log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -235,7 +246,12 @@ log_stdin(const char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdin) {
-	    if (!plugin->u.io->log_stdin(buf, n)) {
+	    int rc = plugin->u.io->log_stdin(buf, n);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_stdin = NULL;
+		}
 	    	rval = false;
 		break;
 	    }
@@ -248,7 +264,7 @@ log_stdin(const char *buf, unsigned int n)
 
 /* Call I/O plugin tty output log method. */
 static bool
-log_ttyout(const char *buf, unsigned int n)
+log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -258,11 +274,28 @@ log_ttyout(const char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyout) {
-	    if (!plugin->u.io->log_ttyout(buf, n)) {
+	    int rc = plugin->u.io->log_ttyout(buf, n);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_ttyout = NULL;
+		}
 	    	rval = false;
 		break;
 	    }
 	}
+    }
+    if (!rval) {
+	/*
+	 * I/O plugin rejected the output, delete the write event
+	 * (user's tty) so we do not display the rejected output.
+	 */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: deleting and freeing devtty wevent %p", __func__, iob->wevent);
+	sudo_ev_del(NULL, iob->wevent);
+	sudo_ev_free(iob->wevent);
+	iob->wevent = NULL;
+	iob->off = iob->len = 0;
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
@@ -271,7 +304,7 @@ log_ttyout(const char *buf, unsigned int n)
 
 /* Call I/O plugin stdout log method. */
 static bool
-log_stdout(const char *buf, unsigned int n)
+log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -281,11 +314,28 @@ log_stdout(const char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdout) {
-	    if (!plugin->u.io->log_stdout(buf, n)) {
+	    int rc = plugin->u.io->log_stdout(buf, n);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_stdout = NULL;
+		}
 	    	rval = false;
 		break;
 	    }
 	}
+    }
+    if (!rval) {
+	/*
+	 * I/O plugin rejected the output, delete the write event
+	 * (user's stdout) so we do not display the rejected output.
+	 */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: deleting and freeing stdout wevent %p", __func__, iob->wevent);
+	sudo_ev_del(NULL, iob->wevent);
+	sudo_ev_free(iob->wevent);
+	iob->wevent = NULL;
+	iob->off = iob->len = 0;
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
@@ -294,7 +344,7 @@ log_stdout(const char *buf, unsigned int n)
 
 /* Call I/O plugin stderr log method. */
 static bool
-log_stderr(const char *buf, unsigned int n)
+log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -304,11 +354,28 @@ log_stderr(const char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stderr) {
-	    if (!plugin->u.io->log_stderr(buf, n)) {
+	    int rc = plugin->u.io->log_stderr(buf, n);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_stderr = NULL;
+		}
 	    	rval = false;
 		break;
 	    }
 	}
+    }
+    if (!rval) {
+	/*
+	 * I/O plugin rejected the output, delete the write event
+	 * (user's stderr) so we do not display the rejected output.
+	 */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: deleting and freeing stderr wevent %p", __func__, iob->wevent);
+	sudo_ev_del(NULL, iob->wevent);
+	sudo_ev_free(iob->wevent);
+	iob->wevent = NULL;
+	iob->off = iob->len = 0;
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
@@ -504,7 +571,7 @@ io_callback(int fd, int what, void *v)
 	    default:
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "read %d bytes from fd %d", n, fd);
-		if (!iob->action(iob->buf + iob->len, n))
+		if (!iob->action(iob->buf + iob->len, n, iob))
 		    terminate_command(cmnd_pid, true);
 		iob->len += n;
 		/* Enable writer if not /dev/tty or we are foreground pgrp. */
@@ -589,7 +656,7 @@ io_callback(int fd, int what, void *v)
 }
 
 static void
-io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
+io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *),
     struct io_buffer_list *head)
 {
     int n;
