@@ -226,7 +226,7 @@ build_command_info(const char *command)
 	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
 	return NULL;
     }
-    if (runas_gid != -1) {
+    if (runas_gid != (gid_t)-1) {
 	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
 	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
 	    return NULL;
@@ -456,8 +456,22 @@ io_log_input(const char *buf, unsigned int len)
 static int
 io_log_output(const char *buf, unsigned int len)
 {
+    const char *cp, *ep;
+    bool rval = true;
+
     ignore_result(fwrite(buf, len, 1, output));
-    return true;
+    /*
+     * If we find the string "honk!" in the buffer, reject it.
+     * In practice we'd want to be able to detect the word
+     * broken across two buffers.
+     */
+    for (cp = buf, ep = buf + len; cp < ep; cp++) {
+	if (cp + 5 < ep && memcmp(cp, "honk!", 5) == 0) {
+	    rval = false;
+	    break;
+	}
+    }
+    return rval;
 }
 
 struct policy_plugin sample_policy = {
