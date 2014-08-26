@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.8.10b3\n"
+"Project-Id-Version: sudoers-1.8.11b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-02-07 15:13-0700\n"
-"PO-Revision-Date: 2014-05-24 14:20+0100\n"
+"POT-Creation-Date: 2014-07-30 09:37-0600\n"
+"PO-Revision-Date: 2014-08-10 12:51+0100\n"
 "Last-Translator: Åka Sikrom <a4@hush.com>\n"
 "Language-Team: Norwegian Bokmaal <i18n-nb@lister.ping.uio.no>\n"
 "Language: Norwegian Bokmål\n"
@@ -42,15 +42,15 @@ msgstr "Aliaset «%s» er allerede valgt"
 msgid "unable to get login class for user %s"
 msgstr "klarte ikke å hente innloggingsklasse for brukeren %s"
 
-#: plugins/sudoers/auth/bsdauth.c:81
+#: plugins/sudoers/auth/bsdauth.c:80
 msgid "unable to begin bsd authentication"
 msgstr "klarte ikke å starte bsd-autentisering"
 
-#: plugins/sudoers/auth/bsdauth.c:89
+#: plugins/sudoers/auth/bsdauth.c:88
 msgid "invalid authentication type"
 msgstr "ugyldig autentiseringstype"
 
-#: plugins/sudoers/auth/bsdauth.c:98
+#: plugins/sudoers/auth/bsdauth.c:97
 msgid "unable to initialize BSD authentication"
 msgstr "klarte ikke å starte opp BSD-autentisering"
 
@@ -81,42 +81,42 @@ msgstr ""
 msgid "%s: unable to convert principal to string ('%s'): %s"
 msgstr "%s: klarte ikke å konvertere fullmaktsgiver til streng («%s»). %s"
 
-#: plugins/sudoers/auth/kerb5.c:159
+#: plugins/sudoers/auth/kerb5.c:158
 #, c-format
 msgid "%s: unable to parse '%s': %s"
 msgstr "%s: klarte ikke å tolke «%s». %s"
 
-#: plugins/sudoers/auth/kerb5.c:169
+#: plugins/sudoers/auth/kerb5.c:167
 #, c-format
 msgid "%s: unable to resolve credential cache: %s"
 msgstr "%s: klarte ikke å slå opp i akkreditiv-hurtiglageret. %s"
 
-#: plugins/sudoers/auth/kerb5.c:217
+#: plugins/sudoers/auth/kerb5.c:214
 #, c-format
 msgid "%s: unable to allocate options: %s"
 msgstr "%s: klarte ikke å tildele innstillinger. %s"
 
-#: plugins/sudoers/auth/kerb5.c:233
+#: plugins/sudoers/auth/kerb5.c:229
 #, c-format
 msgid "%s: unable to get credentials: %s"
 msgstr "%s: klarte ikke å hente akkreditiver. %s"
 
-#: plugins/sudoers/auth/kerb5.c:246
+#: plugins/sudoers/auth/kerb5.c:242
 #, c-format
 msgid "%s: unable to initialize credential cache: %s"
 msgstr "%s: klarte ikke å starte opp akkreditiv-hurtiglageret. %s"
 
-#: plugins/sudoers/auth/kerb5.c:250
+#: plugins/sudoers/auth/kerb5.c:245
 #, c-format
 msgid "%s: unable to store credential in cache: %s"
 msgstr "%s: klarte ikke å lagre akkreditiv i hurtiglager. %s"
 
-#: plugins/sudoers/auth/kerb5.c:315
+#: plugins/sudoers/auth/kerb5.c:309
 #, c-format
 msgid "%s: unable to get host principal: %s"
 msgstr "%s: klarte ikke å hente vertens fullmaktsgiver. %s"
 
-#: plugins/sudoers/auth/kerb5.c:330
+#: plugins/sudoers/auth/kerb5.c:323
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s: Klarte ikke å bekrefte TGT! Dette kan være et tegn på at du er under angrep! %s"
@@ -188,39 +188,39 @@ msgstr "ukjent SecurID-feil"
 msgid "invalid passcode length for SecurID"
 msgstr "kodelengden er ugyldig for SecurID"
 
-#: plugins/sudoers/auth/sia.c:108
+#: plugins/sudoers/auth/sia.c:105
 msgid "unable to initialize SIA session"
 msgstr "kalrte ikke å starte opp SIA-økt"
 
-#: plugins/sudoers/auth/sudo_auth.c:119
+#: plugins/sudoers/auth/sudo_auth.c:117
 msgid "invalid authentication methods"
 msgstr "ugyldige autentiseringsmetoder"
 
-#: plugins/sudoers/auth/sudo_auth.c:120
+#: plugins/sudoers/auth/sudo_auth.c:119
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
 msgstr "Din installasjon av sudo har ugyldige autentiseringsmetoder! Du kan ikke blande selvgående og tjeneravhengige autentiseringsmetoder."
 
-#: plugins/sudoers/auth/sudo_auth.c:203
+#: plugins/sudoers/auth/sudo_auth.c:188
 msgid "no authentication methods"
 msgstr "fant ingen autentiseringsmetoder"
 
-#: plugins/sudoers/auth/sudo_auth.c:205
+#: plugins/sudoers/auth/sudo_auth.c:190
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
 msgstr "Din installasjon av sudo har ingen autentiseringsmetoder tilgjengelig! Bruk valget «--disable-authentication» hvis du vil skru av autentisering."
 
-#: plugins/sudoers/auth/sudo_auth.c:389
+#: plugins/sudoers/auth/sudo_auth.c:360
 msgid "Authentication methods:"
 msgstr "Autentiseringsmetoder:"
 
-#: plugins/sudoers/bsm_audit.c:91 plugins/sudoers/bsm_audit.c:158
+#: plugins/sudoers/bsm_audit.c:100 plugins/sudoers/bsm_audit.c:189
 msgid "Could not determine audit condition"
 msgstr "Klarte ikke å finne revisjonsstatus"
 
-#: plugins/sudoers/bsm_audit.c:134 plugins/sudoers/bsm_audit.c:199
+#: plugins/sudoers/bsm_audit.c:161 plugins/sudoers/bsm_audit.c:249
 msgid "unable to commit audit record"
 msgstr "klarte ikke å kjøre revisjonsoppføring"
 
-#: plugins/sudoers/check.c:189
+#: plugins/sudoers/check.c:197
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -240,14 +240,14 @@ msgstr ""
 "    #3) Makt medfører plikt og ansvar.\n"
 "\n"
 
-#: plugins/sudoers/check.c:232 plugins/sudoers/check.c:238
-#: plugins/sudoers/sudoers.c:562 plugins/sudoers/sudoers.c:588
+#: plugins/sudoers/check.c:240 plugins/sudoers/check.c:250
+#: plugins/sudoers/sudoers.c:599 plugins/sudoers/sudoers.c:628
 #, c-format
 msgid "unknown uid: %u"
 msgstr "uid-en «%u» er ukjent"
 
-#: plugins/sudoers/check.c:235 plugins/sudoers/policy.c:657
-#: plugins/sudoers/sudoers.c:850 plugins/sudoers/testsudoers.c:211
+#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:671
+#: plugins/sudoers/sudoers.c:918 plugins/sudoers/testsudoers.c:211
 #: plugins/sudoers/testsudoers.c:363
 #, c-format
 msgid "unknown user: %s"
@@ -648,8 +648,8 @@ msgstr "Høyeste tillatte sekvensnummer i inn-/utdatalogg: %u"
 msgid "Enable sudoers netgroup support"
 msgstr "Slå på støtte for sudoers-nettgruppe"
 
-#: plugins/sudoers/defaults.c:210 plugins/sudoers/defaults.c:600
-#: plugins/sudoers/visudo_json.c:611 plugins/sudoers/visudo_json.c:647
+#: plugins/sudoers/defaults.c:210 plugins/sudoers/defaults.c:601
+#: plugins/sudoers/visudo_json.c:642 plugins/sudoers/visudo_json.c:677
 #, c-format
 msgid "unknown defaults entry `%s'"
 msgstr "standardoppføringa «%s» er ukjent"
@@ -682,20 +682,21 @@ msgstr "verdier for «%s» må starte på «/»"
 msgid "option `%s' does not take a value"
 msgstr "valget «%s» kan ikke gis en verdi"
 
-#: plugins/sudoers/env.c:288 plugins/sudoers/env.c:293
-#: plugins/sudoers/env.c:395 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/policy.c:442 plugins/sudoers/policy.c:449
-#: plugins/sudoers/prompt.c:171 plugins/sudoers/sudoers.c:656
-#: plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/env.c:274 plugins/sudoers/env.c:281
+#: plugins/sudoers/env.c:384 plugins/sudoers/linux_audit.c:89
+#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:468
+#: plugins/sudoers/policy.c:477 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "intern feil: %s er full"
 
-#: plugins/sudoers/env.c:367
+#: plugins/sudoers/env.c:357
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp er korrupt (lengde samsvarer ikke)"
 
-#: plugins/sudoers/env.c:1014
+#: plugins/sudoers/env.c:1051
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "du har ikke tillatelse til å bestemme følgende miljøvariabler: %s"
@@ -710,7 +711,7 @@ msgstr "%s må eies av uid %d"
 msgid "%s must only be writable by owner"
 msgstr "%s kan ikke gi skrivetillatelse til andre enn eieren"
 
-#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
+#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:252
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "klarte ikke å laste inn %s. %s"
@@ -729,41 +730,41 @@ msgstr "%s: versjon %d av gruppetillegget passer ikke (forventet versjon %d)"
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Lokale par av IP-adresser og nettverksmasker:\n"
 
-#: plugins/sudoers/iolog.c:99 plugins/sudoers/iolog.c:112
-#: plugins/sudoers/timestamp.c:227
+#: plugins/sudoers/iolog.c:101 plugins/sudoers/iolog.c:119
+#: plugins/sudoers/timestamp.c:233
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "«%s» finnes, men er ikke en mappe (0%o)"
 
-#: plugins/sudoers/iolog.c:109 plugins/sudoers/iolog.c:123
-#: plugins/sudoers/iolog.c:127 plugins/sudoers/timestamp.c:221
-#: plugins/sudoers/timestamp.c:242
+#: plugins/sudoers/iolog.c:112 plugins/sudoers/iolog.c:133
+#: plugins/sudoers/iolog.c:140 plugins/sudoers/timestamp.c:227
+#: plugins/sudoers/timestamp.c:248
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "klarte ikke å utføre «mkdir %s»"
 
-#: plugins/sudoers/iolog.c:190 plugins/sudoers/sudoers.c:710
-#: plugins/sudoers/sudoreplay.c:342 plugins/sudoers/sudoreplay.c:813
-#: plugins/sudoers/sudoreplay.c:1010 plugins/sudoers/timestamp.c:345
-#: plugins/sudoers/visudo.c:823 plugins/sudoers/visudo_json.c:995
-#: plugins/sudoers/visudo_json.c:1001
+#: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:764
+#: plugins/sudoers/sudoreplay.c:344 plugins/sudoers/sudoreplay.c:815
+#: plugins/sudoers/sudoreplay.c:1012 plugins/sudoers/timestamp.c:357
+#: plugins/sudoers/visudo.c:826 plugins/sudoers/visudo_json.c:1025
+#: plugins/sudoers/visudo_json.c:1038
 #, c-format
 msgid "unable to open %s"
 msgstr "klarte ikke å åpne %s"
 
-#: plugins/sudoers/iolog.c:229 plugins/sudoers/sudoers.c:713
-#: plugins/sudoers/sudoreplay.c:1117
+#: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:768
+#: plugins/sudoers/sudoreplay.c:1119
 #, c-format
 msgid "unable to read %s"
 msgstr "klarte ikke å lese %s"
 
-#: plugins/sudoers/iolog.c:259 plugins/sudoers/sudoreplay.c:582
-#: plugins/sudoers/timestamp.c:184
+#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:584
+#: plugins/sudoers/timestamp.c:186 plugins/sudoers/timestamp.c:189
 #, c-format
 msgid "unable to write to %s"
 msgstr "klarte ikke å skrive til %s"
 
-#: plugins/sudoers/iolog.c:319 plugins/sudoers/iolog.c:512
+#: plugins/sudoers/iolog.c:347 plugins/sudoers/iolog.c:545
 #, c-format
 msgid "unable to create %s"
 msgstr "klarte ikke å opprette %s"
@@ -772,59 +773,59 @@ msgstr "klarte ikke å opprette %s"
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: portnummeret er for stort"
 
-#: plugins/sudoers/ldap.c:429
+#: plugins/sudoers/ldap.c:431
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports: ikke nok lagringsplass for å utvide vertens hurtiglager"
 
-#: plugins/sudoers/ldap.c:461
+#: plugins/sudoers/ldap.c:464
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "LDAP-ens nettadressetype «%s» støttes ikke"
 
-#: plugins/sudoers/ldap.c:492
+#: plugins/sudoers/ldap.c:495
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "du kan ikke blande ldap- og ldaps-nettadresser"
 
-#: plugins/sudoers/ldap.c:496 plugins/sudoers/ldap.c:528
+#: plugins/sudoers/ldap.c:499 plugins/sudoers/ldap.c:532
 msgid "starttls not supported when using ldaps"
 msgstr "starttls støttes ikke når du bruker ldaps"
 
-#: plugins/sudoers/ldap.c:514
+#: plugins/sudoers/ldap.c:517
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri: ikke nok lagringsplass til å bygge opp vertens hurtiglager"
 
-#: plugins/sudoers/ldap.c:595
+#: plugins/sudoers/ldap.c:599
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "klarte ikke å starte opp databasen «%s» for SSL-sertifikater og -nøkler"
 
-#: plugins/sudoers/ldap.c:598
+#: plugins/sudoers/ldap.c:602
 #, c-format
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "du må velge TLS_CERT i «%s» for å bruke SSL"
 
-#: plugins/sudoers/ldap.c:1089
+#: plugins/sudoers/ldap.c:1093
 msgid "unable to get GMT time"
 msgstr "klarte ikke å hente GMT-tid"
 
-#: plugins/sudoers/ldap.c:1095
+#: plugins/sudoers/ldap.c:1099
 msgid "unable to format timestamp"
 msgstr "klarte ikke å formatere tidsstempel"
 
-#: plugins/sudoers/ldap.c:1103
+#: plugins/sudoers/ldap.c:1107
 msgid "unable to build time filter"
 msgstr "klarte ikke å bygge tidsfilter"
 
-#: plugins/sudoers/ldap.c:1322
+#: plugins/sudoers/ldap.c:1326
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1 samsvar ikke ved tildeling"
 
-#: plugins/sudoers/ldap.c:1433
+#: plugins/sudoers/ldap.c:1469
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/ldap.c:1909
+#: plugins/sudoers/ldap.c:1963
 #, c-format
 msgid ""
 "\n"
@@ -833,7 +834,7 @@ msgstr ""
 "\n"
 "LDAP-rolle: %s\n"
 
-#: plugins/sudoers/ldap.c:1911
+#: plugins/sudoers/ldap.c:1965
 #, c-format
 msgid ""
 "\n"
@@ -842,108 +843,108 @@ msgstr ""
 "\n"
 "LDAP-role: UKJENT\n"
 
-#: plugins/sudoers/ldap.c:1958
+#: plugins/sudoers/ldap.c:2012
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Sorter: %s\n"
 
-#: plugins/sudoers/ldap.c:1966 plugins/sudoers/parse.c:504
-#: plugins/sudoers/sssd.c:1295
+#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:506
+#: plugins/sudoers/sssd.c:1298
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Kommandoer:\n"
 
-#: plugins/sudoers/ldap.c:2509
+#: plugins/sudoers/ldap.c:2570
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "klarte ikke å starte opp LDAP. %s"
 
-#: plugins/sudoers/ldap.c:2551
+#: plugins/sudoers/ldap.c:2612
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls er valgt, men LDAP-bibliotekene støtter hverken «ldap_start_tls_s()» eller «ldap_start_tls_s_np()»"
 
-#: plugins/sudoers/ldap.c:2784
+#: plugins/sudoers/ldap.c:2845
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "sudoOrder-egenskapen «%s» er ugyldig"
 
-#: plugins/sudoers/linux_audit.c:57
+#: plugins/sudoers/linux_audit.c:61
 msgid "unable to open audit system"
 msgstr "klarte ikke å åpne revisjonssystemet"
 
-#: plugins/sudoers/linux_audit.c:93
+#: plugins/sudoers/linux_audit.c:100
 msgid "unable to send audit message"
 msgstr "klarte ikke å sende revisjonsmelding"
 
-#: plugins/sudoers/logging.c:136
+#: plugins/sudoers/logging.c:134
 #, c-format
 msgid "%8s : %s"
 msgstr "%8s : %s"
 
-#: plugins/sudoers/logging.c:164
+#: plugins/sudoers/logging.c:162
 #, c-format
 msgid "%8s : (command continued) %s"
 msgstr "%8s : (kommando fortsetter) %s"
 
-#: plugins/sudoers/logging.c:189
+#: plugins/sudoers/logging.c:187
 #, c-format
 msgid "unable to open log file: %s: %s"
 msgstr "klarte ikke å åpne loggfila «%s». %s"
 
-#: plugins/sudoers/logging.c:192
+#: plugins/sudoers/logging.c:190
 #, c-format
 msgid "unable to lock log file: %s: %s"
 msgstr "klarte ikke å låse loggfila «%s». %s"
 
-#: plugins/sudoers/logging.c:243
+#: plugins/sudoers/logging.c:242
 msgid "No user or host"
 msgstr "Ingen bruker eller vert"
 
-#: plugins/sudoers/logging.c:245
+#: plugins/sudoers/logging.c:244
 msgid "validation failure"
 msgstr "feil ved gyldighetssjekk"
 
-#: plugins/sudoers/logging.c:252
+#: plugins/sudoers/logging.c:251
 msgid "user NOT in sudoers"
 msgstr "brukeren er IKKE i sudoers"
 
-#: plugins/sudoers/logging.c:254
+#: plugins/sudoers/logging.c:253
 msgid "user NOT authorized on host"
 msgstr "brukeren er IKKE autorisert på verten"
 
-#: plugins/sudoers/logging.c:256
+#: plugins/sudoers/logging.c:255
 msgid "command not allowed"
 msgstr "denne kommandoen tillates ikke"
 
-#: plugins/sudoers/logging.c:286
+#: plugins/sudoers/logging.c:288
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
 msgstr "%s er ikke i sudoers-fila. Denne hendelsen blir rapportert.\n"
 
-#: plugins/sudoers/logging.c:289
+#: plugins/sudoers/logging.c:291
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
 msgstr "%s has ikke tillatelse til å kjøre sudo på %s. Denne hendelsen blir rapportert.\n"
 
-#: plugins/sudoers/logging.c:293
+#: plugins/sudoers/logging.c:295
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
 msgstr "Brukeren %s kan ikke kjøre sudo på %s.\n"
 
-#: plugins/sudoers/logging.c:296
+#: plugins/sudoers/logging.c:298
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "Brukeren %s har ikke tillatelse til å kjøre «%s%s%s» som %s%s%s på %s.\n"
 
-#: plugins/sudoers/logging.c:333 plugins/sudoers/sudoers.c:382
-#: plugins/sudoers/sudoers.c:383 plugins/sudoers/sudoers.c:385
-#: plugins/sudoers/sudoers.c:386 plugins/sudoers/sudoers.c:1017
-#: plugins/sudoers/sudoers.c:1018
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:407
+#: plugins/sudoers/sudoers.c:409 plugins/sudoers/sudoers.c:411
+#: plugins/sudoers/sudoers.c:413 plugins/sudoers/sudoers.c:1091
+#: plugins/sudoers/sudoers.c:1092
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: fant ikke kommandoen"
 
-#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:378
+#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:403
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
@@ -952,75 +953,71 @@ msgstr ""
 "ignorerer «%s» som ble funnet i «.».\n"
 "Bruk «sudo ./%s» hvis dette er «%s»-programmet du prøver å kjøre."
 
-#: plugins/sudoers/logging.c:351
+#: plugins/sudoers/logging.c:353
 msgid "authentication failure"
 msgstr "feil ved autentisering"
 
-#: plugins/sudoers/logging.c:377
+#: plugins/sudoers/logging.c:379
 msgid "a password is required"
 msgstr "du må bruke et passord her"
 
-#: plugins/sudoers/logging.c:441 plugins/sudoers/logging.c:495
+#: plugins/sudoers/logging.c:446 plugins/sudoers/logging.c:501
 #, c-format
 msgid "%u incorrect password attempt"
 msgid_plural "%u incorrect password attempts"
 msgstr[0] "%u mislykket passordforsøk"
 msgstr[1] "%u mislykkede passordforsøk"
 
-#: plugins/sudoers/logging.c:581
+#: plugins/sudoers/logging.c:584
 msgid "unable to fork"
 msgstr "klarte ikke å lage en kopi av prosessen"
 
-#: plugins/sudoers/logging.c:588 plugins/sudoers/logging.c:644
+#: plugins/sudoers/logging.c:592 plugins/sudoers/logging.c:648
 #, c-format
 msgid "unable to fork: %m"
 msgstr "klarte ikke å lage en kopi av prosessen. %m"
 
-#: plugins/sudoers/logging.c:634
+#: plugins/sudoers/logging.c:638
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "klarte ikke å åpne datarør. %m"
 
-#: plugins/sudoers/logging.c:659
+#: plugins/sudoers/logging.c:663
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "klarte ikke å duplisere standard innkanal. %m"
 
-#: plugins/sudoers/logging.c:694
+#: plugins/sudoers/logging.c:698
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "klarte ikke å kjøre «%s». %m"
 
-#: plugins/sudoers/logging.c:914
-msgid "internal error: insufficient space for log line"
-msgstr "intern feil: logglinje mangler plass"
-
-#: plugins/sudoers/match.c:617
+#: plugins/sudoers/match.c:627
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "behandlingstype %d for %s støttes ikke"
 
-#: plugins/sudoers/match.c:647
+#: plugins/sudoers/match.c:656
 #, c-format
 msgid "%s: read error"
 msgstr "%s: lesefeil"
 
-#: plugins/sudoers/match.c:661
+#: plugins/sudoers/match.c:670
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "behandlingen for %s (%s) er ikke i %s-skjemaet"
 
-#: plugins/sudoers/parse.c:115
+#: plugins/sudoers/parse.c:116
 #, c-format
 msgid "parse error in %s near line %d"
 msgstr "tolkningsfeil i %s ved linje %d"
 
-#: plugins/sudoers/parse.c:118
+#: plugins/sudoers/parse.c:119
 #, c-format
 msgid "parse error in %s"
 msgstr "tolkningsfeil i %s"
 
-#: plugins/sudoers/parse.c:451
+#: plugins/sudoers/parse.c:453
 #, c-format
 msgid ""
 "\n"
@@ -1029,49 +1026,49 @@ msgstr ""
 "\n"
 "Oppføring i sudoers:\n"
 
-#: plugins/sudoers/parse.c:452
+#: plugins/sudoers/parse.c:454
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    Kjør som-brukere: "
 
-#: plugins/sudoers/parse.c:466
+#: plugins/sudoers/parse.c:468
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    Kjør som-grupper: "
 
-#: plugins/sudoers/parse.c:475
+#: plugins/sudoers/parse.c:477
 #, c-format
 msgid "    Options: "
 msgstr "    Valg: "
 
-#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:116
-#: plugins/sudoers/policy.c:123 plugins/sudoers/policy.c:145
-#: plugins/sudoers/policy.c:259 plugins/sudoers/policy.c:277
-#: plugins/sudoers/policy.c:284 plugins/sudoers/policy.c:312
-#: plugins/sudoers/policy.c:320 plugins/sudoers/policy.c:327
-#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
-#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
-#: plugins/sudoers/set_perms.c:1525
+#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:118
+#: plugins/sudoers/policy.c:127 plugins/sudoers/policy.c:151
+#: plugins/sudoers/policy.c:267 plugins/sudoers/policy.c:287
+#: plugins/sudoers/policy.c:296 plugins/sudoers/policy.c:326
+#: plugins/sudoers/policy.c:336 plugins/sudoers/policy.c:345
+#: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
+#: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
+#: plugins/sudoers/set_perms.c:1523
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: plugins/sudoers/policy.c:539 plugins/sudoers/visudo.c:764
+#: plugins/sudoers/policy.c:559 plugins/sudoers/visudo.c:767
 #, c-format
 msgid "unable to execute %s"
 msgstr "klarte ikke å kjøre %s"
 
-#: plugins/sudoers/policy.c:681
+#: plugins/sudoers/policy.c:689
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Sudoers regeltillegg versjon %s\n"
 
-#: plugins/sudoers/policy.c:683
+#: plugins/sudoers/policy.c:691
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Sudoers grammatikkversjon %d\n"
 
-#: plugins/sudoers/policy.c:687
+#: plugins/sudoers/policy.c:695
 #, c-format
 msgid ""
 "\n"
@@ -1080,349 +1077,374 @@ msgstr ""
 "\n"
 "Sti til «sudoers»-fil: %s\n"
 
-#: plugins/sudoers/policy.c:690
+#: plugins/sudoers/policy.c:698
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "Sti til «nsswitch»: %s\n"
 
-#: plugins/sudoers/policy.c:692
+#: plugins/sudoers/policy.c:700
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "Sti til «ldap.conf»: %s\n"
 
-#: plugins/sudoers/policy.c:693
+#: plugins/sudoers/policy.c:701
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "Stil til «ldap.secret»: %s\n"
 
-#: plugins/sudoers/pwutil.c:148
+#: plugins/sudoers/pwutil.c:149
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "klarte ikke å hurtiglagre uid %u. Uid-en eksisterer allerede"
 
-#: plugins/sudoers/pwutil.c:190
+#: plugins/sudoers/pwutil.c:194
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "klarte ikke å hurtiglagre brukeren %s. Brukeren eksisterer allerede"
 
-#: plugins/sudoers/pwutil.c:393
+#: plugins/sudoers/pwutil.c:400
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "klarte ikke å hurtiglagre gid %u. Gid-en eksisterer allerede"
 
-#: plugins/sudoers/pwutil.c:429
+#: plugins/sudoers/pwutil.c:439
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "klarte ikke å hurtiglagre gruppa %s. Gruppa eksisterer allerede"
 
-#: plugins/sudoers/pwutil.c:592 plugins/sudoers/pwutil.c:614
+#: plugins/sudoers/pwutil.c:605 plugins/sudoers/pwutil.c:631
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "klarte ikke å hurtiglagre liste over %s. Lista eksisterer allerede"
 
-#: plugins/sudoers/pwutil.c:612
+#: plugins/sudoers/pwutil.c:627
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "klarte ikke å tolke grupper for %s"
 
-#: plugins/sudoers/set_perms.c:124 plugins/sudoers/set_perms.c:449
-#: plugins/sudoers/set_perms.c:852 plugins/sudoers/set_perms.c:1149
-#: plugins/sudoers/set_perms.c:1441
+#: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:447
+#: plugins/sudoers/set_perms.c:850 plugins/sudoers/set_perms.c:1147
+#: plugins/sudoers/set_perms.c:1439
 msgid "perm stack overflow"
 msgstr "perm-stabelen er full"
 
-#: plugins/sudoers/set_perms.c:132 plugins/sudoers/set_perms.c:457
-#: plugins/sudoers/set_perms.c:860 plugins/sudoers/set_perms.c:1157
-#: plugins/sudoers/set_perms.c:1449
+#: plugins/sudoers/set_perms.c:130 plugins/sudoers/set_perms.c:378
+#: plugins/sudoers/set_perms.c:455 plugins/sudoers/set_perms.c:717
+#: plugins/sudoers/set_perms.c:858 plugins/sudoers/set_perms.c:1076
+#: plugins/sudoers/set_perms.c:1155 plugins/sudoers/set_perms.c:1372
+#: plugins/sudoers/set_perms.c:1447 plugins/sudoers/set_perms.c:1536
 msgid "perm stack underflow"
 msgstr "perm-stabelen er tom"
 
-#: plugins/sudoers/set_perms.c:191 plugins/sudoers/set_perms.c:504
-#: plugins/sudoers/set_perms.c:1208 plugins/sudoers/set_perms.c:1481
+#: plugins/sudoers/set_perms.c:189 plugins/sudoers/set_perms.c:502
+#: plugins/sudoers/set_perms.c:1206 plugins/sudoers/set_perms.c:1479
 msgid "unable to change to root gid"
 msgstr "klarte ikke å endre gid til root-brukerens"
 
-#: plugins/sudoers/set_perms.c:280 plugins/sudoers/set_perms.c:601
-#: plugins/sudoers/set_perms.c:989 plugins/sudoers/set_perms.c:1285
+#: plugins/sudoers/set_perms.c:278 plugins/sudoers/set_perms.c:599
+#: plugins/sudoers/set_perms.c:987 plugins/sudoers/set_perms.c:1283
 msgid "unable to change to runas gid"
 msgstr "klarte ikke å endre til kjør som-brukerens gid"
 
-#: plugins/sudoers/set_perms.c:292 plugins/sudoers/set_perms.c:613
-#: plugins/sudoers/set_perms.c:999 plugins/sudoers/set_perms.c:1295
-msgid "unable to change to runas uid"
-msgstr "klarte ikke å endre til kjør som-brukerens uid"
-
-#: plugins/sudoers/set_perms.c:310 plugins/sudoers/set_perms.c:631
-#: plugins/sudoers/set_perms.c:1015 plugins/sudoers/set_perms.c:1311
-msgid "unable to change to sudoers gid"
-msgstr "klarte ikke å endre til sudoers-gid"
-
-#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
-#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
-#: plugins/sudoers/set_perms.c:1525
-msgid "too many processes"
-msgstr "for mange prosesser"
-
-#: plugins/sudoers/set_perms.c:1595
+#: plugins/sudoers/set_perms.c:283 plugins/sudoers/set_perms.c:604
+#: plugins/sudoers/set_perms.c:992 plugins/sudoers/set_perms.c:1288
 msgid "unable to set runas group vector"
 msgstr "klarte ikke å velge gruppevektor for «runas»"
 
-#: plugins/sudoers/sssd.c:252
+#: plugins/sudoers/set_perms.c:294 plugins/sudoers/set_perms.c:615
+#: plugins/sudoers/set_perms.c:1001 plugins/sudoers/set_perms.c:1297
+msgid "unable to change to runas uid"
+msgstr "klarte ikke å endre til kjør som-brukerens uid"
+
+#: plugins/sudoers/set_perms.c:312 plugins/sudoers/set_perms.c:633
+#: plugins/sudoers/set_perms.c:1017 plugins/sudoers/set_perms.c:1313
+msgid "unable to change to sudoers gid"
+msgstr "klarte ikke å endre til sudoers-gid"
+
+#: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
+#: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
+#: plugins/sudoers/set_perms.c:1523
+msgid "too many processes"
+msgstr "for mange prosesser"
+
+#: plugins/sudoers/solaris_audit.c:48
+msgid "unable to get current working directory"
+msgstr "klarte ikke å hente gjeldende arbeidsmappe"
+
+#: plugins/sudoers/solaris_audit.c:56
+#, c-format
+msgid "truncated audit path user_cmnd: %s"
+msgstr "forkortet revisjonssti «user_cmnd»: %s"
+
+#: plugins/sudoers/solaris_audit.c:63
+#, c-format
+msgid "truncated audit path argv[0]: %s"
+msgstr "forkortet revisjonssti «argv[0]»: %s"
+
+#: plugins/sudoers/solaris_audit.c:112
+msgid "audit_failure message too long"
+msgstr "audit_failure-meldinga er for lang"
+
+#: plugins/sudoers/sssd.c:253
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "klarte ikke å starte opp SSS-kilde. Har du installert SSSD på maskinen?"
 
-#: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
-#: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
-#: plugins/sudoers/sssd.c:291
+#: plugins/sudoers/sssd.c:260 plugins/sudoers/sssd.c:268
+#: plugins/sudoers/sssd.c:276 plugins/sudoers/sssd.c:284
+#: plugins/sudoers/sssd.c:292
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "fant ikke symbolet «%s» i %s"
 
-#: plugins/sudoers/sudo_nss.c:283
+#: plugins/sudoers/sudo_nss.c:285
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr "Standardoppføringer som gjelder for %s på %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:296
+#: plugins/sudoers/sudo_nss.c:298
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr "Kjør-som- og kommandospesifikke standardoppføringer for %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:309
+#: plugins/sudoers/sudo_nss.c:311
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr "Brukeren %s kan kjøre følgende kommandoer på %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:318
+#: plugins/sudoers/sudo_nss.c:320
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Brukeren %s har ikke tillatelse til å kjøre sudo på %s.\n"
 
-#: plugins/sudoers/sudoers.c:154 plugins/sudoers/sudoers.c:188
-#: plugins/sudoers/sudoers.c:675
+#: plugins/sudoers/sudoers.c:160 plugins/sudoers/sudoers.c:201
+#: plugins/sudoers/sudoers.c:726
 msgid "problem with defaults entries"
 msgstr "det har oppstått et problem med én eller flere standardoppføringer"
 
-#: plugins/sudoers/sudoers.c:160
+#: plugins/sudoers/sudoers.c:167
 msgid "no valid sudoers sources found, quitting"
 msgstr "fant ingen gyldig sudoers-kilde. Avslutter."
 
-#: plugins/sudoers/sudoers.c:222
+#: plugins/sudoers/sudoers.c:233
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "sudoers-fila tillater ikke rotbrukeren å kjøre sudo"
 
-#: plugins/sudoers/sudoers.c:261
+#: plugins/sudoers/sudoers.c:278
 msgid "you are not permitted to use the -C option"
 msgstr "du har ikke tillatelse til å bruke valget «-C»"
 
-#: plugins/sudoers/sudoers.c:314
+#: plugins/sudoers/sudoers.c:336
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "eieren («%s») av tidsstempelet finnes ikke"
 
-#: plugins/sudoers/sudoers.c:328
+#: plugins/sudoers/sudoers.c:350
 msgid "no tty"
 msgstr "ingen tty"
 
-#: plugins/sudoers/sudoers.c:329
+#: plugins/sudoers/sudoers.c:351
 msgid "sorry, you must have a tty to run sudo"
 msgstr "du må ha en tty for å kunne kjøre sudo"
 
-#: plugins/sudoers/sudoers.c:377
+#: plugins/sudoers/sudoers.c:402
 msgid "command in current directory"
 msgstr "kommando i gjeldende mappe"
 
-#: plugins/sudoers/sudoers.c:394
+#: plugins/sudoers/sudoers.c:422
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "du har ikke tillatelse til å beholde brukermiljøet"
 
-#: plugins/sudoers/sudoers.c:725 plugins/sudoers/visudo.c:326
-#: plugins/sudoers/visudo.c:590
+#: plugins/sudoers/sudoers.c:674
+msgid "command too long"
+msgstr "kommandoen er for lang"
+
+#: plugins/sudoers/sudoers.c:779 plugins/sudoers/visudo.c:327
+#: plugins/sudoers/visudo.c:593
 #, c-format
 msgid "unable to stat %s"
 msgstr "klarte ikke å lage statistikk av «%s»"
 
-#: plugins/sudoers/sudoers.c:728
+#: plugins/sudoers/sudoers.c:783
 #, c-format
 msgid "%s is not a regular file"
 msgstr "«%s» er ikke en vanlig fil"
 
-#: plugins/sudoers/sudoers.c:731 plugins/sudoers/timestamp.c:283 toke.l:923
+#: plugins/sudoers/sudoers.c:787 plugins/sudoers/timestamp.c:289 toke.l:945
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "«%s» eies av uid %u, som skulle vært %u"
 
-#: plugins/sudoers/sudoers.c:735 toke.l:930
+#: plugins/sudoers/sudoers.c:791 toke.l:952
 #, c-format
 msgid "%s is world writable"
 msgstr "«%s» kan overskrives av alle"
 
-#: plugins/sudoers/sudoers.c:738 toke.l:935
+#: plugins/sudoers/sudoers.c:795 toke.l:957
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "«%s» eies av gid %u, som skulle vært %u"
 
-#: plugins/sudoers/sudoers.c:764
+#: plugins/sudoers/sudoers.c:826
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr "det er bare rotbrukeren som kan bruke «-c %s»"
 
-#: plugins/sudoers/sudoers.c:781 plugins/sudoers/sudoers.c:783
+#: plugins/sudoers/sudoers.c:845
 #, c-format
 msgid "unknown login class: %s"
 msgstr "innloggingsklassen «%s» er ukjent"
 
-#: plugins/sudoers/sudoers.c:815
+#: plugins/sudoers/sudoers.c:882
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "klarte ikke å slå opp vertsnavnet «%s»"
 
-#: plugins/sudoers/sudoers.c:878 plugins/sudoers/testsudoers.c:387
+#: plugins/sudoers/sudoers.c:949 plugins/sudoers/testsudoers.c:387
 #, c-format
 msgid "unknown group: %s"
 msgstr "gruppa «%s» er ukjent"
 
-#: plugins/sudoers/sudoreplay.c:274
+#: plugins/sudoers/sudoreplay.c:276
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "filtervalget «%s» er ugyldig"
 
-#: plugins/sudoers/sudoreplay.c:287
+#: plugins/sudoers/sudoreplay.c:289
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "maksimal ventetid «%s» er ugyldig"
 
-#: plugins/sudoers/sudoreplay.c:293
+#: plugins/sudoers/sudoreplay.c:295
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "hastighetsfaktoren «%s» er ugyldig"
 
-#: plugins/sudoers/sudoreplay.c:296 plugins/sudoers/visudo.c:184
+#: plugins/sudoers/sudoreplay.c:298 plugins/sudoers/visudo.c:184
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s versjon %s\n"
 
-#: plugins/sudoers/sudoreplay.c:328
+#: plugins/sudoers/sudoreplay.c:330
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/tidsberegning: %s"
 
-#: plugins/sudoers/sudoreplay.c:334
+#: plugins/sudoers/sudoreplay.c:336
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/tidsberegning: %s"
 
-#: plugins/sudoers/sudoreplay.c:350
+#: plugins/sudoers/sudoreplay.c:352
 #, c-format
 msgid "Replaying sudo session: %s\n"
 msgstr "Spiller av sudo-økt i reprise: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:356
+#: plugins/sudoers/sudoreplay.c:358
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr "Advarsel: terminalen din er for liten for å gå gjennom loggen skikkelig.\n"
 
-#: plugins/sudoers/sudoreplay.c:357
+#: plugins/sudoers/sudoreplay.c:359
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Loggens størrelse er %d x %d, mens terminalstørrelsen din er %d x %d."
 
-#: plugins/sudoers/sudoreplay.c:412
+#: plugins/sudoers/sudoreplay.c:414
 msgid "unable to set tty to raw mode"
 msgstr "klarte ikke å velge råmodus for tty"
 
-#: plugins/sudoers/sudoreplay.c:443
+#: plugins/sudoers/sudoreplay.c:445
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "linja for tidsberegningsfil  er ugyldig: %s"
 
-#: plugins/sudoers/sudoreplay.c:649 plugins/sudoers/sudoreplay.c:674
+#: plugins/sudoers/sudoreplay.c:651 plugins/sudoers/sudoreplay.c:676
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "uttrykket «%s» er tvetydig"
 
-#: plugins/sudoers/sudoreplay.c:696
+#: plugins/sudoers/sudoreplay.c:698
 msgid "unmatched ')' in expression"
 msgstr "fant ingenting som samsvarer med deluttrykket «)»"
 
-#: plugins/sudoers/sudoreplay.c:700
+#: plugins/sudoers/sudoreplay.c:702
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "søkevalget «%s» er ukjent"
 
-#: plugins/sudoers/sudoreplay.c:714
+#: plugins/sudoers/sudoreplay.c:716
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s krever at du bruker et argument"
 
-#: plugins/sudoers/sudoreplay.c:718 plugins/sudoers/sudoreplay.c:1090
+#: plugins/sudoers/sudoreplay.c:720 plugins/sudoers/sudoreplay.c:1092
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "«%s» er et ugyldig regulært uttrykk"
 
-#: plugins/sudoers/sudoreplay.c:724
+#: plugins/sudoers/sudoreplay.c:726
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "klarte ikke å tolke datoformatet «%s»"
 
-#: plugins/sudoers/sudoreplay.c:733
+#: plugins/sudoers/sudoreplay.c:735
 msgid "unmatched '(' in expression"
 msgstr "uttrykkets «(» samsvarer ikke"
 
-#: plugins/sudoers/sudoreplay.c:735
+#: plugins/sudoers/sudoreplay.c:737
 msgid "illegal trailing \"or\""
 msgstr "du kan ikke avslutte med «or»"
 
-#: plugins/sudoers/sudoreplay.c:737
+#: plugins/sudoers/sudoreplay.c:739
 msgid "illegal trailing \"!\""
 msgstr "du kan ikke avslutte med «!»"
 
-#: plugins/sudoers/sudoreplay.c:790
+#: plugins/sudoers/sudoreplay.c:792
 #, c-format
 msgid "unknown search type %d"
 msgstr "søketypen «%d» er ukjent"
 
-#: plugins/sudoers/sudoreplay.c:827
+#: plugins/sudoers/sudoreplay.c:829
 #, c-format
 msgid "%s: invalid log file"
 msgstr "%s: ugyldig loggfil"
 
-#: plugins/sudoers/sudoreplay.c:845
+#: plugins/sudoers/sudoreplay.c:847
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr "%s: tidsstempel-felt mangler"
 
-#: plugins/sudoers/sudoreplay.c:852
+#: plugins/sudoers/sudoreplay.c:854
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr "%s: tidsstempel %s: %s"
 
-#: plugins/sudoers/sudoreplay.c:859
+#: plugins/sudoers/sudoreplay.c:861
 #, c-format
 msgid "%s: user field is missing"
 msgstr "%s: brukerfeltet mangler"
 
-#: plugins/sudoers/sudoreplay.c:867
+#: plugins/sudoers/sudoreplay.c:869
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr "%s: kjør-som-bruker-feltet mangler"
 
-#: plugins/sudoers/sudoreplay.c:875
+#: plugins/sudoers/sudoreplay.c:877
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr "%s: kjør-som-gruppe-feltet mangler"
 
-#: plugins/sudoers/sudoreplay.c:1230
+#: plugins/sudoers/sudoreplay.c:1232
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "bruk: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 
-#: plugins/sudoers/sudoreplay.c:1233
+#: plugins/sudoers/sudoreplay.c:1235
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "bruk: %s [-h] [-d dir] -l [søkeuttrykk]\n"
 
-#: plugins/sudoers/sudoreplay.c:1242
+#: plugins/sudoers/sudoreplay.c:1244
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1431,7 +1453,7 @@ msgstr ""
 "%s - spill av sudo-øktlogg\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1244
+#: plugins/sudoers/sudoreplay.c:1246
 msgid ""
 "\n"
 "Options:\n"
@@ -1481,118 +1503,114 @@ msgstr ""
 "\n"
 "Kommandoen samsvarer ikke"
 
-#: plugins/sudoers/timestamp.c:191
+#: plugins/sudoers/timestamp.c:197
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "klarte ikke å korte ned tidsstempel-fila til %lld byte"
 
-#: plugins/sudoers/timestamp.c:291
+#: plugins/sudoers/timestamp.c:297
 #, c-format
 msgid "%s is group writable"
 msgstr "%s kan overskrives av gruppa den tilhører"
 
-#: plugins/sudoers/timestamp.c:311
+#: plugins/sudoers/timestamp.c:318
 #, c-format
 msgid "timestamp path too long: %s/%s"
 msgstr "filbanen «%s/%s» for tidsstempel er for lang"
 
-#: plugins/sudoers/timestamp.c:484
+#: plugins/sudoers/timestamp.c:498
 msgid "ignoring time stamp from the future"
 msgstr "tidsstempel for fremtidig tidspunkt blir ignorert"
 
-#: plugins/sudoers/timestamp.c:496
+#: plugins/sudoers/timestamp.c:510
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "tidsstempelet er for langt inn i fremtiden: %20.20s"
 
-#: plugins/sudoers/timestamp.c:596 plugins/sudoers/timestamp.c:618
+#: plugins/sudoers/timestamp.c:613 plugins/sudoers/timestamp.c:634
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "filbanen «%s/%s» for moralpreken-status er for lang"
-
-#: plugins/sudoers/toke_util.c:176
-msgid "fill_args: buffer overflow"
-msgstr "fill_args: hurtiglageret er fullt"
 
 #: plugins/sudoers/visudo.c:186
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr "%s gramatikkversjon %d\n"
 
-#: plugins/sudoers/visudo.c:257 plugins/sudoers/visudo.c:543
+#: plugins/sudoers/visudo.c:257 plugins/sudoers/visudo.c:546
 #, c-format
 msgid "press return to edit %s: "
 msgstr "trykk linjeskift for å redigere %s: "
 
-#: plugins/sudoers/visudo.c:342 plugins/sudoers/visudo.c:348
+#: plugins/sudoers/visudo.c:343 plugins/sudoers/visudo.c:349
 msgid "write error"
 msgstr "skrivefeil"
 
-#: plugins/sudoers/visudo.c:430
+#: plugins/sudoers/visudo.c:433
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "klarte ikke å undersøke midlertidig fil (%s). %s er ikke endret"
 
-#: plugins/sudoers/visudo.c:435
+#: plugins/sudoers/visudo.c:438
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "midlertidig fil (%s) er tom. %s er ikke endret"
 
-#: plugins/sudoers/visudo.c:441
+#: plugins/sudoers/visudo.c:444
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "noe gikk galt med behandleren (%s). %s er ikke endret"
 
-#: plugins/sudoers/visudo.c:463
+#: plugins/sudoers/visudo.c:466
 #, c-format
 msgid "%s unchanged"
 msgstr "%s er ikke endret"
 
-#: plugins/sudoers/visudo.c:488
+#: plugins/sudoers/visudo.c:491
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "klarte ikke å åpne midlertidig fil (%s) på nytt. %s er ikke endret"
 
-#: plugins/sudoers/visudo.c:498
+#: plugins/sudoers/visudo.c:501
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "klarte ikke å tolke midlertidig fil (%s). Ukjent feil"
 
-#: plugins/sudoers/visudo.c:534
+#: plugins/sudoers/visudo.c:537
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "intern feil: fant ikke %s i lista!"
 
-#: plugins/sudoers/visudo.c:592 plugins/sudoers/visudo.c:601
+#: plugins/sudoers/visudo.c:595 plugins/sudoers/visudo.c:604
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "klarte ikke å sette uid og gid for %s til (%u, %u)"
 
-#: plugins/sudoers/visudo.c:596 plugins/sudoers/visudo.c:606
+#: plugins/sudoers/visudo.c:599 plugins/sudoers/visudo.c:609
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "klarte ikke å endre %s modus til 0%o"
 
-#: plugins/sudoers/visudo.c:623
+#: plugins/sudoers/visudo.c:626
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s og %s er ikke på samme filsystem. Bruker «mv» til å gi nye navn"
 
-#: plugins/sudoers/visudo.c:637
+#: plugins/sudoers/visudo.c:640
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "kommando mislyktes. «%s %s %s». %s er ikke endret"
 
-#: plugins/sudoers/visudo.c:647
+#: plugins/sudoers/visudo.c:650
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "klarte ikke å gi %s nytt navn. %s er ikke endret"
 
-#: plugins/sudoers/visudo.c:709
+#: plugins/sudoers/visudo.c:712
 msgid "What now? "
 msgstr "Hva nå? "
 
-#: plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:726
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1604,87 +1622,87 @@ msgstr ""
 "  (x)avslutt uten å lagre endringene dine til sudoers-fila\n"
 "  (Q)avslutt og lagre endringene dine til sudoers-fila (FARLIG!)\n"
 
-#: plugins/sudoers/visudo.c:771
+#: plugins/sudoers/visudo.c:774
 #, c-format
 msgid "unable to run %s"
 msgstr "klarte ikke å kjøre «%s»"
 
-#: plugins/sudoers/visudo.c:797
+#: plugins/sudoers/visudo.c:800
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: feil eier. uid og gid skulle vært «%u, %u»\n"
 
-#: plugins/sudoers/visudo.c:804
+#: plugins/sudoers/visudo.c:807
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: feil tillatelsesmodus. Skulle vært modus 0%o\n"
 
-#: plugins/sudoers/visudo.c:829 plugins/sudoers/visudo_json.c:1008
+#: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1045
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "klarte ikke å tolke fila «%s». Ukjent feil"
 
-#: plugins/sudoers/visudo.c:845 plugins/sudoers/visudo_json.c:1017
+#: plugins/sudoers/visudo.c:848 plugins/sudoers/visudo_json.c:1054
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "tolkefeil i «%s» ved linje %d\n"
 
-#: plugins/sudoers/visudo.c:848 plugins/sudoers/visudo_json.c:1020
+#: plugins/sudoers/visudo.c:851 plugins/sudoers/visudo_json.c:1057
 #, c-format
 msgid "parse error in %s\n"
 msgstr "tolkefeil i «%s»\n"
 
-#: plugins/sudoers/visudo.c:856 plugins/sudoers/visudo.c:863
+#: plugins/sudoers/visudo.c:859 plugins/sudoers/visudo.c:866
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: lest og tolket OK\n"
 
-#: plugins/sudoers/visudo.c:909
+#: plugins/sudoers/visudo.c:912
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s er opptatt. Prøv igjen senere"
 
-#: plugins/sudoers/visudo.c:953
+#: plugins/sudoers/visudo.c:956
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "finner ikke valgt redigeringsprogram (%s)"
 
-#: plugins/sudoers/visudo.c:976
+#: plugins/sudoers/visudo.c:979
 #, c-format
 msgid "unable to stat editor (%s)"
 msgstr "klarte ikke å undersøke redigeringsprogrammet (%s)"
 
-#: plugins/sudoers/visudo.c:1024
+#: plugins/sudoers/visudo.c:1027
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "fant ingen redigeringsprogram («editor»-sti = %s)"
 
-#: plugins/sudoers/visudo.c:1117
+#: plugins/sudoers/visudo.c:1130
 #, c-format
-msgid "Error: cycle in %s_Alias `%s'"
-msgstr "Feil: sløyfe i %s_Alias «%s»"
+msgid "Error: cycle in %s `%s'"
+msgstr "Feil: sløyfe i %s «%s»"
 
-#: plugins/sudoers/visudo.c:1118
+#: plugins/sudoers/visudo.c:1131
 #, c-format
-msgid "Warning: cycle in %s_Alias `%s'"
-msgstr "Advarsel: sløyfe i %s_Alias «%s»"
+msgid "Warning: cycle in %s `%s'"
+msgstr "Advarsel: sløyfe i %s «%s»"
 
-#: plugins/sudoers/visudo.c:1124
+#: plugins/sudoers/visudo.c:1135
 #, c-format
-msgid "Error: %s_Alias `%s' referenced but not defined"
-msgstr "Feil: det refereres til %s_Alias «%s», men aliaset er ikke definert"
+msgid "Error: %s `%s' referenced but not defined"
+msgstr "Feil: det refereres til %s «%s», men aliaset er ikke definert"
 
-#: plugins/sudoers/visudo.c:1125
+#: plugins/sudoers/visudo.c:1136
 #, c-format
-msgid "Warning: %s_Alias `%s' referenced but not defined"
-msgstr "Advarsel: det refereres til %s_Alias «%s», men aliaset er ikke definert"
+msgid "Warning: %s `%s' referenced but not defined"
+msgstr "Advarsel: det refereres til %s «%s», men aliaset er ikke definert"
 
-#: plugins/sudoers/visudo.c:1267
+#: plugins/sudoers/visudo.c:1275
 #, c-format
-msgid "%s: unused %s_Alias %s"
-msgstr "%s: %s_Alias «%s» står ubrukt"
+msgid "Warning: unused %s `%s'"
+msgstr "Advarsel: ubrukt %s «%s»"
 
-#: plugins/sudoers/visudo.c:1329
+#: plugins/sudoers/visudo.c:1335
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1693,28 +1711,42 @@ msgstr ""
 "%s - rediger sudoers-fila på en trygg måte\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1331
+#: plugins/sudoers/visudo.c:1337
 msgid ""
 "\n"
 "Options:\n"
-"  -c, --check       check-only mode\n"
-"  -f, --file=file   specify sudoers file location\n"
-"  -h, --help        display help message and exit\n"
-"  -q, --quiet       less verbose (quiet) syntax error messages\n"
-"  -s, --strict      strict syntax checking\n"
-"  -V, --version     display version information and exit\n"
-"  -x, --export=file export sudoers in JSON format"
+"  -c, --check              check-only mode\n"
+"  -f, --file=sudoers       specify sudoers file location\n"
+"  -h, --help               display help message and exit\n"
+"  -q, --quiet              less verbose (quiet) syntax error messages\n"
+"  -s, --strict             strict syntax checking\n"
+"  -V, --version            display version information and exit\n"
+"  -x, --export=output_file write sudoers in JSON format to output_file"
 msgstr ""
 "\n"
 "Valg:\n"
 "  -c, --check       undersøkelsesmodus\n"
-"  -f, --file=fil   oppgi hvor sudoers-fila ligger\n"
+"  -f, --file=sudoers   oppgi hvor sudoers-fila ligger\n"
 "  -h, --help        vis denne hjelpeteksten og avslutt\n"
 "  -q, --quiet       mindre detaljerte meldinger om syntaksfeil\n"
 "  -s, --strict      streng syntakskontroll\n"
 "  -V, --version     vis versjon og avslutt\n"
-"  -x, --export=fil eksporter sudoers-fil i JSON-format"
+"  -x, --export=utdatafil eksporter sudoers-fil i JSON-format til utdatafil"
 
-#: toke.l:894
+#: plugins/sudoers/visudo_json.c:1031
+#, c-format
+msgid "%s: input and output files must be different"
+msgstr "%s: inndata- og utdatafiler må være ulike"
+
+#: toke.l:915
 msgid "too many levels of includes"
 msgstr "du har for mange nivåer av inkluderte filer"
+
+#~ msgid "internal error: insufficient space for log line"
+#~ msgstr "intern feil: logglinje mangler plass"
+
+#~ msgid "fill_args: buffer overflow"
+#~ msgstr "fill_args: hurtiglageret er fullt"
+
+#~ msgid "%s: unused %s_Alias %s"
+#~ msgstr "%s: %s_Alias «%s» står ubrukt"

@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.9b2\n"
+"Project-Id-Version: sudo-1.8.11b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-12-11 13:41-0700\n"
-"PO-Revision-Date: 2013-12-27 09:14+0800\n"
+"POT-Creation-Date: 2014-07-30 09:37-0600\n"
+"PO-Revision-Date: 2014-08-11 09:38+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -16,148 +16,131 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: common/aix.c:93 common/aix.c:150
+#: lib/util/aix.c:92 lib/util/aix.c:151
 msgid "unable to open userdb"
 msgstr "无法打开 userdb"
 
-#: common/aix.c:153
+#: lib/util/aix.c:156
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr "无法为 %2$s 切换到注册表“%1$s”"
 
-#: common/aix.c:170
+#: lib/util/aix.c:175
 msgid "unable to restore registry"
 msgstr "无法恢复注册表"
 
-#: common/alloc.c:81
-msgid "internal error, tried to emalloc(0)"
-msgstr "内部错误，试图 emalloc(0)"
+#: lib/util/alloc.c:82 lib/util/alloc.c:99 lib/util/alloc.c:120
+#: lib/util/alloc.c:142 lib/util/alloc.c:161 lib/util/alloc.c:184
+msgid "internal error, tried allocate zero bytes"
+msgstr "内部错误，试图分配 0 个字节"
 
-#: common/alloc.c:98
-msgid "internal error, tried to emalloc2(0)"
-msgstr "内部错误，试图 emalloc2(0)"
-
-#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:185
+#: lib/util/alloc.c:101 lib/util/alloc.c:123 lib/util/alloc.c:163
+#: lib/util/alloc.c:186 src/net_ifs.c:162 src/net_ifs.c:171 src/net_ifs.c:183
+#: src/net_ifs.c:192 src/net_ifs.c:307 src/net_ifs.c:329
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "内部错误，%s 溢出"
 
-#: common/alloc.c:119
-msgid "internal error, tried to ecalloc(0)"
-msgstr "内部错误，试图 ecalloc(0)"
-
-#: common/alloc.c:141
-msgid "internal error, tried to erealloc(0)"
-msgstr "内部错误，试图 erealloc(0)"
-
-#: common/alloc.c:160
-msgid "internal error, tried to erealloc3(0)"
-msgstr "内部错误，试图 erealloc3(0)"
-
-#: common/alloc.c:183
-msgid "internal error, tried to erecalloc(0)"
-msgstr "内部错误，试图 erecalloc(0)"
-
-#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
-#: compat/strtonum.c:65 compat/strtonum.c:183
-msgid "invalid value"
-msgstr "值无效"
-
-#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
-#: compat/strtonum.c:68 compat/strtonum.c:195
-msgid "value too large"
-msgstr "值过大"
-
-#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
-#: compat/strtonum.c:189
-msgid "value too small"
-msgstr "值过小"
-
-#: common/fatal.c:158
+#: lib/util/fatal.c:143
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr "%s：%s：%s\n"
 
-#: common/fatal.c:161 common/fatal.c:165
+#: lib/util/fatal.c:147 lib/util/fatal.c:152
 #, c-format
 msgid "%s: %s\n"
 msgstr "%s：%s\n"
 
-#: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
-#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
+#: lib/util/gidlist.c:78 src/load_plugins.c:63 src/load_plugins.c:76
+#: src/sudo.c:559 src/sudo.c:578 src/sudo.c:605 src/sudo.c:614 src/sudo.c:623
+#: src/sudo.c:640 src/sudo.c:687 src/sudo.c:697
 #, c-format
 msgid "%s: %s"
 msgstr "%s：%s"
 
-#: common/sudo_conf.c:177
+#: lib/util/strsignal.c:50
+msgid "Unknown signal"
+msgstr "未知信号"
+
+#: lib/util/strtoid.c:83 lib/util/strtoid.c:111 lib/util/strtomode.c:55
+#: lib/util/strtonum.c:65 lib/util/strtonum.c:183
+msgid "invalid value"
+msgstr "值无效"
+
+#: lib/util/strtoid.c:90 lib/util/strtoid.c:118 lib/util/strtomode.c:61
+#: lib/util/strtonum.c:68 lib/util/strtonum.c:195
+msgid "value too large"
+msgstr "值过大"
+
+#: lib/util/strtoid.c:96 lib/util/strtomode.c:61 lib/util/strtonum.c:68
+#: lib/util/strtonum.c:189
+msgid "value too small"
+msgstr "值过小"
+
+#: lib/util/sudo_conf.c:178
 #, c-format
 msgid "unsupported group source `%s' in %s, line %d"
 msgstr "不支持 %2$s 第 %3$d 行的组来源“%1$s”"
 
-#: common/sudo_conf.c:191
+#: lib/util/sudo_conf.c:192
 #, c-format
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "%2$s 第 %3$d 行的最大组数“%1$s”无效"
 
-#: common/sudo_conf.c:391
+#: lib/util/sudo_conf.c:407
 #, c-format
 msgid "unable to stat %s"
 msgstr "无法 stat %s"
 
-#: common/sudo_conf.c:394
+#: lib/util/sudo_conf.c:410
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s 不是常规文件"
 
-#: common/sudo_conf.c:397
+#: lib/util/sudo_conf.c:413
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s 属于用户 ID %u，应为 %u"
 
-#: common/sudo_conf.c:401
+#: lib/util/sudo_conf.c:417
 #, c-format
 msgid "%s is world writable"
 msgstr "%s 可被任何人写"
 
-#: common/sudo_conf.c:404
+#: lib/util/sudo_conf.c:420
 #, c-format
 msgid "%s is group writable"
 msgstr "%s 可被用户组写"
 
-#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
+#: lib/util/sudo_conf.c:430 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "打不开 %s"
 
-#: compat/strsignal.c:50
-msgid "Unknown signal"
-msgstr "未知信号"
-
-#: src/exec.c:133 src/exec_pty.c:744
+#: src/exec.c:133 src/exec_pty.c:751
 msgid "policy plugin failed session initialization"
 msgstr "策略插件会话初始化失败"
 
-#: src/exec.c:138 src/exec_pty.c:760 src/exec_pty.c:1272 src/tgetpass.c:221
+#: src/exec.c:138 src/exec_pty.c:767 src/exec_pty.c:1283 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr "无法执行 fork"
 
-#: src/exec.c:309 src/exec.c:317 src/exec.c:841 src/exec_pty.c:507
-#: src/exec_pty.c:512 src/exec_pty.c:570 src/exec_pty.c:577 src/exec_pty.c:870
-#: src/exec_pty.c:880 src/exec_pty.c:925 src/exec_pty.c:932
-#: src/exec_pty.c:1334 src/exec_pty.c:1341 src/exec_pty.c:1348
+#: src/exec.c:311 src/exec.c:319 src/exec.c:852 src/exec_pty.c:514
+#: src/exec_pty.c:519 src/exec_pty.c:577 src/exec_pty.c:584 src/exec_pty.c:871
+#: src/exec_pty.c:881 src/exec_pty.c:926 src/exec_pty.c:933
+#: src/exec_pty.c:1348 src/exec_pty.c:1355 src/exec_pty.c:1362
 msgid "unable to add event to queue"
 msgstr "无法将事件添加到队列"
 
-#: src/exec.c:394
+#: src/exec.c:399
 msgid "unable to create sockets"
 msgstr "无法创建套接字"
 
-#: src/exec.c:477
+#: src/exec.c:485
 msgid "error in event loop"
 msgstr "事件循环中有错误"
 
-#: src/exec.c:492
+#: src/exec.c:503
 msgid "unable to restore tty label"
 msgstr "无法恢复终端标签"
 
@@ -165,37 +148,37 @@ msgstr "无法恢复终端标签"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "无法从 PRIV_LIMIT 中移除 PRIV_PROC_EXEC"
 
-#: src/exec_pty.c:184
+#: src/exec_pty.c:194
 msgid "unable to allocate pty"
 msgstr "无法分配伪终端"
 
-#: src/exec_pty.c:682 src/exec_pty.c:691 src/exec_pty.c:699
-#: src/exec_pty.c:1192 src/exec_pty.c:1269 src/signal.c:126 src/tgetpass.c:218
+#: src/exec_pty.c:689 src/exec_pty.c:698 src/exec_pty.c:706
+#: src/exec_pty.c:1203 src/exec_pty.c:1280 src/signal.c:129 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr "无法创建管道"
 
-#: src/exec_pty.c:735
+#: src/exec_pty.c:742
 msgid "unable to set terminal to raw mode"
 msgstr "无法将终端设为原始模式"
 
-#: src/exec_pty.c:1091
+#: src/exec_pty.c:1102
 msgid "error reading from signal pipe"
 msgstr "从单管道读取出错"
 
-#: src/exec_pty.c:1124
+#: src/exec_pty.c:1135
 msgid "error reading from pipe"
 msgstr "从管道读取出错"
 
-#: src/exec_pty.c:1149
+#: src/exec_pty.c:1160
 msgid "error reading from socketpair"
 msgstr "从套接字对读取出错"
 
-#: src/exec_pty.c:1158
+#: src/exec_pty.c:1169
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "联络通道的回应类型异常：%d"
 
-#: src/exec_pty.c:1248
+#: src/exec_pty.c:1259
 msgid "unable to set controlling tty"
 msgstr "无法设置控制终端"
 
@@ -266,53 +249,47 @@ msgstr "忽略位于 %2$s 第 %3$d 行的重复 I/O 插件“%1$s”"
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "策略插件 %s 不包含 check_policy 方法"
 
-#: src/net_ifs.c:156 src/net_ifs.c:165 src/net_ifs.c:177 src/net_ifs.c:186
-#: src/net_ifs.c:297 src/net_ifs.c:321
-msgid "load_interfaces: overflow detected"
-msgstr "load_interfaces：检测到溢出"
-
-#: src/net_ifs.c:226
+#: src/net_ifs.c:236
 msgid "unable to open socket"
 msgstr "无法打开套接字"
 
-#: src/parse_args.c:246
-#, c-format
+#: src/parse_args.c:247
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "-C 选项的参数必须是一个大于等于 3 的数字"
 
-#: src/parse_args.c:408
+#: src/parse_args.c:409
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "您不能同时指定“-i”和“-s”选项"
 
-#: src/parse_args.c:412
+#: src/parse_args.c:413
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "您不能同时指定“-i”和“-E”选项"
 
-#: src/parse_args.c:422
+#: src/parse_args.c:423
 msgid "the `-E' option is not valid in edit mode"
 msgstr "“-E”选项在编辑模式中无效"
 
-#: src/parse_args.c:424
+#: src/parse_args.c:425
 msgid "you may not specify environment variables in edit mode"
 msgstr "在编辑模式中您不能指定环境变量"
 
-#: src/parse_args.c:432
+#: src/parse_args.c:433
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "“-U”选项只能与“-l”选项一起使用"
 
-#: src/parse_args.c:436
+#: src/parse_args.c:437
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "“-A”和“-S”选项不可同时使用"
 
-#: src/parse_args.c:519
+#: src/parse_args.c:520
 msgid "sudoedit is not supported on this platform"
 msgstr "此平台不支持 sudoedit"
 
-#: src/parse_args.c:592
+#: src/parse_args.c:593
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "只能指定 -e、-h、-i、-K、-l、-s、-v 或 -V 选项中的一个"
 
-#: src/parse_args.c:606
+#: src/parse_args.c:607
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -321,7 +298,7 @@ msgstr ""
 "%s - 以其他用户身份编辑文件\n"
 "\n"
 
-#: src/parse_args.c:608
+#: src/parse_args.c:609
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -330,7 +307,7 @@ msgstr ""
 "%s - 以其他用户身份执行一条命令\n"
 "\n"
 
-#: src/parse_args.c:613
+#: src/parse_args.c:614
 #, c-format
 msgid ""
 "\n"
@@ -339,111 +316,111 @@ msgstr ""
 "\n"
 "选项：\n"
 
-#: src/parse_args.c:615
+#: src/parse_args.c:616
 msgid "use a helper program for password prompting"
 msgstr "使用助手程序进行密码提示"
 
-#: src/parse_args.c:618
+#: src/parse_args.c:619
 msgid "use specified BSD authentication type"
 msgstr "使用指定的 BSD 认证类型"
 
-#: src/parse_args.c:621
+#: src/parse_args.c:622
 msgid "run command in the background"
 msgstr "在后台运行命令"
 
-#: src/parse_args.c:623
+#: src/parse_args.c:624
 msgid "close all file descriptors >= num"
 msgstr "关闭所有 >= num 的文件描述符"
 
-#: src/parse_args.c:626
+#: src/parse_args.c:627
 msgid "run command with the specified BSD login class"
 msgstr "以指定的 BSD 登录类别运行命令"
 
-#: src/parse_args.c:629
+#: src/parse_args.c:630
 msgid "preserve user environment when running command"
 msgstr "在执行命令时保留用户环境"
 
-#: src/parse_args.c:631
+#: src/parse_args.c:632
 msgid "edit files instead of running a command"
 msgstr "编辑文件而非执行命令"
 
-#: src/parse_args.c:633
+#: src/parse_args.c:634
 msgid "run command as the specified group name or ID"
 msgstr "以指定的用户组或 ID 执行命令"
 
-#: src/parse_args.c:635
+#: src/parse_args.c:636
 msgid "set HOME variable to target user's home dir"
 msgstr "将 HOME 变量设为目标用户的主目录。"
 
-#: src/parse_args.c:637
+#: src/parse_args.c:638
 msgid "display help message and exit"
 msgstr "显示帮助消息并退出"
 
-#: src/parse_args.c:639
+#: src/parse_args.c:640
 msgid "run command on host (if supported by plugin)"
 msgstr "在主机上运行命令(如果插件支持)"
 
-#: src/parse_args.c:641
+#: src/parse_args.c:642
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "以目标用户身份运行一个登录 shell；可同时指定一条命令"
 
-#: src/parse_args.c:643
+#: src/parse_args.c:644
 msgid "remove timestamp file completely"
 msgstr "完全移除时间戳文件"
 
-#: src/parse_args.c:645
+#: src/parse_args.c:646
 msgid "invalidate timestamp file"
 msgstr "无效的时间戳文件"
 
-#: src/parse_args.c:647
+#: src/parse_args.c:648
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "列出用户权限或检查某个特定命令；对于长格式，使用两次"
 
-#: src/parse_args.c:649
+#: src/parse_args.c:650
 msgid "non-interactive mode, no prompts are used"
 msgstr "非交互模式，不提示"
 
-#: src/parse_args.c:651
+#: src/parse_args.c:652
 msgid "preserve group vector instead of setting to target's"
 msgstr "保留组向量，而非设置为目标的组向量"
 
-#: src/parse_args.c:653
+#: src/parse_args.c:654
 msgid "use the specified password prompt"
 msgstr "使用指定的密码提示"
 
-#: src/parse_args.c:656
+#: src/parse_args.c:657
 msgid "create SELinux security context with specified role"
 msgstr "以指定的角色创建 SELinux 安全环境"
 
-#: src/parse_args.c:659
+#: src/parse_args.c:660
 msgid "read password from standard input"
 msgstr "从标准输入读取密码"
 
-#: src/parse_args.c:661
+#: src/parse_args.c:662
 msgid "run shell as the target user; a command may also be specified"
 msgstr "以目标用户运行 shell；可同时指定一条命令"
 
-#: src/parse_args.c:664
+#: src/parse_args.c:665
 msgid "create SELinux security context with specified type"
 msgstr "以指定的类型创建 SELinux 安全环境"
 
-#: src/parse_args.c:667
+#: src/parse_args.c:668
 msgid "in list mode, display privileges for user"
 msgstr "在列表模式中显示用户的权限"
 
-#: src/parse_args.c:669
+#: src/parse_args.c:670
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "以指定用户或 ID 运行命令(或编辑文件)"
 
-#: src/parse_args.c:671
+#: src/parse_args.c:672
 msgid "display version information and exit"
 msgstr "显示版本信息并退出"
 
-#: src/parse_args.c:673
+#: src/parse_args.c:674
 msgid "update user's timestamp without running a command"
 msgstr "更新用户的时间戳而不执行命令"
 
-#: src/parse_args.c:675
+#: src/parse_args.c:676
 msgid "stop processing command line arguments"
 msgstr "停止处理命令行参数"
 
@@ -520,26 +497,31 @@ msgstr "无法获取 old_context"
 msgid "unable to determine enforcing mode."
 msgstr "无法确定强制模式。"
 
-#: src/selinux.c:342
+#: src/selinux.c:347
 #, c-format
 msgid "unable to set tty context to %s"
 msgstr "无法将终端环境设置为 %s"
 
-#: src/selinux.c:381
+#: src/selinux.c:386
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "无法向 %s 设置 exec 环境"
 
-#: src/selinux.c:388
+#: src/selinux.c:393
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "无法向 %s 设置键创建环境"
 
-#: src/sesh.c:57
+#: src/sesh.c:58
 msgid "requires at least one argument"
 msgstr "要求至少有一个参数"
 
-#: src/sesh.c:78 src/sudo.c:1088
+#: src/sesh.c:78
+#, c-format
+msgid "unable to run %s as a login shell"
+msgstr "无法以登录 shell 执行 %s"
+
+#: src/sesh.c:83 src/sudo.c:1100
 #, c-format
 msgid "unable to execute %s"
 msgstr "无法执行 %s"
@@ -624,84 +606,84 @@ msgstr "无法获取组向量"
 msgid "unknown uid %u: who are you?"
 msgstr "未知的用户 ID %u：您是？"
 
-#: src/sudo.c:762
+#: src/sudo.c:770
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s 必须属于用户 ID %d(的用户)并且设置 setuid 位"
 
-#: src/sudo.c:765
+#: src/sudo.c:773
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "有效用户 ID 不是 %d，%s 位于一个设置了“nosuid”选项的文件系统或没有 root 权限的 NFS 文件系统中吗？"
 
-#: src/sudo.c:771
+#: src/sudo.c:779
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "有效用户 ID 不是 %d，sudo 属于 root 并设置了 setuid 位吗？"
 
-#: src/sudo.c:897
+#: src/sudo.c:908
 #, c-format
 msgid "unknown login class %s"
 msgstr "未知的登录类别 %s"
 
-#: src/sudo.c:910
+#: src/sudo.c:921
 msgid "unable to set user context"
 msgstr "无法设置用户环境"
 
-#: src/sudo.c:924
+#: src/sudo.c:935
 msgid "unable to set supplementary group IDs"
 msgstr "无法设置补充组 ID"
 
-#: src/sudo.c:931
+#: src/sudo.c:942
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "无法设置有效组 ID 来以组 ID %u 运行"
 
-#: src/sudo.c:937
+#: src/sudo.c:948
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "无法设置组 ID 来以组 ID %u 运行"
 
-#: src/sudo.c:944
+#: src/sudo.c:955
 msgid "unable to set process priority"
 msgstr "无法设置进程优先级"
 
-#: src/sudo.c:952
+#: src/sudo.c:963
 #, c-format
 msgid "unable to change root to %s"
 msgstr "无法从 root 切换到 %s"
 
-#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
+#: src/sudo.c:976 src/sudo.c:982 src/sudo.c:988
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "无法切换到以用户 ID(%u，%u)运行"
 
-#: src/sudo.c:994
+#: src/sudo.c:1005
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "无法将目录切换到 %s"
 
-#: src/sudo.c:1051
+#: src/sudo.c:1062
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "异常的子进程终止条件：%d"
 
-#: src/sudo.c:1108
+#: src/sudo.c:1121
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "“check_policy”方法中缺少策略插件 %s"
 
-#: src/sudo.c:1121
+#: src/sudo.c:1134
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "策略插件 %s 不支持列出权限"
 
-#: src/sudo.c:1133
+#: src/sudo.c:1146
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "策略插件 %s不支持 -v 选项"
 
-#: src/sudo.c:1145
+#: src/sudo.c:1158
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "策略插件 %s 不支持 -k/-K 选项"
@@ -715,37 +697,37 @@ msgstr "无法将用户 ID 切换到 root(%u)"
 msgid "plugin error: missing file list for sudoedit"
 msgstr "插件错误：缺少 sudoedit 的文件列表"
 
-#: src/sudo_edit.c:170 src/sudo_edit.c:270
+#: src/sudo_edit.c:170 src/sudo_edit.c:285
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s：不是常规文件"
 
-#: src/sudo_edit.c:204 src/sudo_edit.c:306
+#: src/sudo_edit.c:204 src/sudo_edit.c:320
 #, c-format
 msgid "%s: short write"
 msgstr "%s：截短写入"
 
-#: src/sudo_edit.c:271
+#: src/sudo_edit.c:286
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s 并未修改"
 
-#: src/sudo_edit.c:284
+#: src/sudo_edit.c:298
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 已更改"
 
-#: src/sudo_edit.c:296 src/sudo_edit.c:317
+#: src/sudo_edit.c:310 src/sudo_edit.c:331
 #, c-format
 msgid "unable to write to %s"
 msgstr "无法写入 %s"
 
-#: src/sudo_edit.c:297 src/sudo_edit.c:315 src/sudo_edit.c:318
+#: src/sudo_edit.c:311 src/sudo_edit.c:329 src/sudo_edit.c:332
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "编辑会话的内容留在了 %s 中"
 
-#: src/sudo_edit.c:314
+#: src/sudo_edit.c:328
 msgid "unable to read temporary file"
 msgstr "无法读取临时文件"
 
@@ -783,6 +765,24 @@ msgstr "无法 dup2 stdin"
 #: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "无法恢复 stdin"
+
+#~ msgid "internal error, tried to emalloc2(0)"
+#~ msgstr "内部错误，试图 emalloc2(0)"
+
+#~ msgid "internal error, tried to ecalloc(0)"
+#~ msgstr "内部错误，试图 ecalloc(0)"
+
+#~ msgid "internal error, tried to erealloc(0)"
+#~ msgstr "内部错误，试图 erealloc(0)"
+
+#~ msgid "internal error, tried to erealloc3(0)"
+#~ msgstr "内部错误，试图 erealloc3(0)"
+
+#~ msgid "internal error, tried to erecalloc(0)"
+#~ msgstr "内部错误，试图 erecalloc(0)"
+
+#~ msgid "load_interfaces: overflow detected"
+#~ msgstr "load_interfaces：检测到溢出"
 
 #~ msgid "value out of range"
 #~ msgstr "值超出范围"
