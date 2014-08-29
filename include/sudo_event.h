@@ -147,6 +147,9 @@ __dso_public bool sudo_ev_got_break_v1(struct sudo_event_base *base);
 /* Magic pointer value to use self pointer as callback arg. */
 #define sudo_ev_self_cbarg() ((void *)-1)
 
+/* Add an event to the base's active queue and mark it active (internal). */
+void sudo_ev_activate(struct sudo_event_base *base, struct sudo_event *ev);
+
 /*
  * Backend implementation.
  */

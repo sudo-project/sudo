@@ -201,8 +201,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 			"%s: selected fd %d, events %d, activating %p",
 			__func__, ev->fd, what, ev);
 		    ev->revents = what;
-		    TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
-		    SET(ev->flags, SUDO_EVQ_ACTIVE);
+		    sudo_ev_activate(base, ev);
 		}
 	    }
 	}

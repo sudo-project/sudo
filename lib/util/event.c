@@ -52,6 +52,38 @@
 
 /* XXX - use non-exiting allocators? */
 
+/*
+ * Add an event to the base's active queue and mark it active.
+ */
+void
+sudo_ev_activate(struct sudo_event_base *base, struct sudo_event *ev)
+{
+    TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+    SET(ev->flags, SUDO_EVQ_ACTIVE);
+}
+
+/*
+ * Remove an event from the base's active queue and mark it inactive.
+ */
+static inline void
+sudo_ev_deactivate(struct sudo_event_base *base, struct sudo_event *ev)
+{
+    CLR(ev->flags, SUDO_EVQ_ACTIVE);
+    TAILQ_REMOVE(&base->active, ev, active_entries);
+}
+
+/*
+ * Clear out the base's active queue and mark all events as inactive.
+ */
+static void
+sudo_ev_deactivate_all(struct sudo_event_base *base)
+{
+    struct sudo_event *ev;
+
+    while ((ev = TAILQ_FIRST(&base->active)) != NULL)
+	sudo_ev_deactivate(base, ev);
+}
+
 struct sudo_event_base *
 sudo_ev_base_alloc_v1(void)
 {
@@ -305,8 +337,7 @@ rescan:
 	 */
 	while ((ev = TAILQ_FIRST(&base->active)) != NULL) {
 	    /* Pop first event off the active queue. */
-	    CLR(ev->flags, SUDO_EVQ_ACTIVE);
-	    TAILQ_REMOVE(&base->active, ev, active_entries);
+	    sudo_ev_deactivate(base, ev);
 	    /* Remove from base unless persistent. */
 	    if (!ISSET(ev->events, SUDO_EV_PERSIST))
 		sudo_ev_del(base, ev);
@@ -315,20 +346,14 @@ rescan:
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
 		/* Stop processing events immediately. */
 		SET(base->flags, SUDO_EVBASE_GOT_BREAK);
-		while ((ev = TAILQ_FIRST(&base->active)) != NULL) {
-		    CLR(ev->flags, SUDO_EVQ_ACTIVE);
-		    TAILQ_REMOVE(&base->active, ev, active_entries);
-		}
+		sudo_ev_deactivate_all(base);
 		goto done;
 	    }
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
 		/* Rescan events and start polling again. */
 		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
 		if (!ISSET(flags, SUDO_EVLOOP_ONCE)) {
-		    while ((ev = TAILQ_FIRST(&base->active)) != NULL) {
-			CLR(ev->flags, SUDO_EVQ_ACTIVE);
-			TAILQ_REMOVE(&base->active, ev, active_entries);
-		    }
+		    sudo_ev_deactivate_all(base);
 		    goto rescan;
 		}
 	    }
@@ -336,10 +361,13 @@ rescan:
 	if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
 	    /* exit loop after once through */
 	    SET(base->flags, SUDO_EVBASE_GOT_EXIT);
-	    goto done;
-	}
-	if (ISSET(flags, SUDO_EVLOOP_ONCE))
+	    sudo_ev_deactivate_all(base);
 	    break;
+	}
+	if (ISSET(flags, SUDO_EVLOOP_ONCE)) {
+	    sudo_ev_deactivate_all(base);
+	    break;
+	}
     }
 done:
     base->flags &= SUDO_EVBASE_GOT_MASK;
