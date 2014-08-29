@@ -282,10 +282,10 @@ sudo_ev_loop_v1(struct sudo_event_base *base, int flags)
      * If sudo_ev_loopexit() was called when events were not running
      * the next invocation of sudo_ev_loop() only runs once.
      * All other base flags are ignored unless we are running events.
+     * Note that SUDO_EVLOOP_ONCE and SUDO_EVBASE_LOOPONCE are equivalent.
      */
-    if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT))
-	SET(flags, SUDO_EVLOOP_ONCE);
-    base->flags = 0;
+    base->flags |= (flags & SUDO_EVLOOP_ONCE);
+    base->flags &= (SUDO_EVBASE_LOOPEXIT|SUDO_EVBASE_LOOPONCE);
 
     for (;;) {
 rescan:
@@ -352,19 +352,14 @@ rescan:
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
 		/* Rescan events and start polling again. */
 		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
-		if (!ISSET(flags, SUDO_EVLOOP_ONCE)) {
-		    sudo_ev_deactivate_all(base);
-		    goto rescan;
-		}
+		sudo_ev_deactivate_all(base);
+		goto rescan;
 	    }
 	}
-	if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
-	    /* exit loop after once through */
-	    SET(base->flags, SUDO_EVBASE_GOT_EXIT);
-	    sudo_ev_deactivate_all(base);
-	    break;
-	}
-	if (ISSET(flags, SUDO_EVLOOP_ONCE)) {
+	if (ISSET(base->flags, SUDO_EVBASE_LOOPONCE)) {
+	    /* SUDO_EVBASE_LOOPEXIT is always set w/ SUDO_EVBASE_LOOPONCE */
+	    if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT))
+		SET(base->flags, SUDO_EVBASE_GOT_EXIT);
 	    sudo_ev_deactivate_all(base);
 	    break;
 	}
@@ -378,7 +373,12 @@ void
 sudo_ev_loopexit_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopexit, SUDO_DEBUG_EVENT)
-    SET(base->flags, SUDO_EVBASE_LOOPEXIT);
+    /* SUDO_EVBASE_LOOPBREAK trumps SUDO_EVBASE_LOOPEXIT */
+    if (!ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
+	/* SUDO_EVBASE_LOOPEXIT trumps SUDO_EVBASE_LOOPCONT */
+	CLR(base->flags, SUDO_EVBASE_LOOPCONT);
+	SET(base->flags, (SUDO_EVBASE_LOOPEXIT|SUDO_EVBASE_LOOPONCE));
+    }
     debug_return;
 }
 
@@ -386,6 +386,8 @@ void
 sudo_ev_loopbreak_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopbreak, SUDO_DEBUG_EVENT)
+    /* SUDO_EVBASE_LOOPBREAK trumps SUDO_EVBASE_LOOP{CONT,EXIT,ONCE}. */
+    CLR(base->flags, (SUDO_EVBASE_LOOPCONT|SUDO_EVBASE_LOOPEXIT|SUDO_EVBASE_LOOPONCE));
     SET(base->flags, SUDO_EVBASE_LOOPBREAK);
     debug_return;
 }
@@ -394,7 +396,10 @@ void
 sudo_ev_loopcontinue_v1(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopcontinue, SUDO_DEBUG_EVENT)
-    SET(base->flags, SUDO_EVBASE_LOOPCONT);
+    /* SUDO_EVBASE_LOOP{BREAK,EXIT} trumps SUDO_EVBASE_LOOPCONT */
+    if (!ISSET(base->flags, SUDO_EVBASE_LOOPONCE|SUDO_EVBASE_LOOPBREAK)) {
+	SET(base->flags, SUDO_EVBASE_LOOPCONT);
+    }
     debug_return;
 }
 

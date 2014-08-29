@@ -1138,9 +1138,9 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
 		    WEXITSTATUS(status));
 	    }
+	    if (!WIFSTOPPED(status))
+		alive = false;
 	}
-	if (!WIFSTOPPED(status))
-	    alive = false;
     }
     debug_return_bool(alive);
 }
