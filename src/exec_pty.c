@@ -1160,11 +1160,14 @@ mon_signal_pipe_cb(int fd, int what, void *v)
 {
     struct monitor_closure *mc = v;
     unsigned char signo;
-    ssize_t n;
+    ssize_t nread;
     debug_decl(mon_signal_pipe_cb, SUDO_DEBUG_EXEC);
 
-    n = read(fd, &signo, sizeof(signo));
-    if (n == -1) {
+    nread = read(fd, &signo, sizeof(signo));
+    if (nread <= 0) {
+	/* It should not be possible to get EOF but just in case. */
+	if (nread == 0)
+	    errno = ECONNRESET;
 	if (errno != EINTR && errno != EAGAIN) {
 	    sudo_warn(U_("error reading from signal pipe"));
 	    sudo_ev_loopbreak(mc->evbase);
