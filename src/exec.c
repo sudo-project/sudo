@@ -603,6 +603,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 		/* Child has exited or been killed, we are done. */
 		cstat->type = CMD_WSTATUS;
 		cstat->val = status;
+		sudo_ev_del(evbase, signal_event);
 		sudo_ev_loopexit(evbase);
 		goto done;
 	    }
