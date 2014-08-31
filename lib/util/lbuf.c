@@ -44,9 +44,8 @@
 
 #include "sudo_compat.h"
 #include "sudo_alloc.h"
-#include "sudo_fatal.h"
-#include "sudo_lbuf.h"
 #include "sudo_debug.h"
+#include "sudo_lbuf.h"
 
 void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, int (*output)(const char *),
