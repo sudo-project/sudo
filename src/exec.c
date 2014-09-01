@@ -236,7 +236,7 @@ backchannel_cb(int fd, int what, void *v)
 		 * executed and the other end of the backchannel is closed.
 		 * Just remove the event in this case.
 		 */
-		(void)sudo_ev_del(ec->evbase, backchannel_event);
+		sudo_ev_del(ec->evbase, backchannel_event);
 	    } else {
 		/* XXX - need new CMD_ type for monitor errors. */
 		errno = n ? EIO : ECONNRESET;
@@ -702,10 +702,9 @@ signal_pipe_cb(int fd, int what, void *v)
 		continue;
 	    /* On error, store errno and break out of the event loop. */
 	    if (errno != EAGAIN) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR,
-		    "error reading signal pipe %s", strerror(errno));
 		ec->cstat->type = CMD_ERRNO;
 		ec->cstat->val = errno;
+		sudo_warn(U_("error reading from signal pipe"));
 		sudo_ev_loopbreak(ec->evbase);
 	    }
 	    break;
