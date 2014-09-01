@@ -195,6 +195,9 @@ __dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp,
 __dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
 #define sudo_strtomode(_a, _b) sudo_strtomode_v1((_a), (_b))
 
+/* sudo_printf.c */
+extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
+
 /* term.c */
 __dso_public bool sudo_term_cbreak_v1(int fd);
 #define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))

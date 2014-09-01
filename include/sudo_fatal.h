@@ -112,9 +112,6 @@
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
 
-/* XXX - move to sudo_util.h */
-extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
-
 typedef void (*sudo_fatal_callback_t)(void);
 
 __dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
