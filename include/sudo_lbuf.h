@@ -33,7 +33,9 @@ struct sudo_lbuf {
     int cols;
 };
 
-__dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, int (*output)(const char *), int indent, const char *continuation, int cols);
+typedef int (*sudo_lbuf_output_t)(const char *);
+
+__dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output, int indent, const char *continuation, int cols);
 __dso_public void sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf);
 __dso_public void sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...) __printflike(2, 3);
 __dso_public void sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...) __printflike(3, 4);

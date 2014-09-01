@@ -48,7 +48,7 @@
 #include "sudo_lbuf.h"
 
 void
-sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, int (*output)(const char *),
+sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
     int indent, const char *continuation, int cols)
 {
     debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL)

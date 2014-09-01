@@ -158,7 +158,7 @@ _warning(int errnum, const char *fmt, va_list ap)
  * Register a callback to be run when sudo_fatal()/sudo_fatalx() is called.
  */
 int
-sudo_fatal_callback_register_v1(void (*func)(void))
+sudo_fatal_callback_register_v1(sudo_fatal_callback_t func)
 {
     struct sudo_fatal_callback *cb;
 
@@ -182,7 +182,7 @@ sudo_fatal_callback_register_v1(void (*func)(void))
  * Deregister a sudo_fatal()/sudo_fatalx() callback.
  */
 int
-sudo_fatal_callback_deregister_v1(void (*func)(void))
+sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func)
 {
     struct sudo_fatal_callback *cb, **prev;
 

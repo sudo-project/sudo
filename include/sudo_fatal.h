@@ -112,10 +112,13 @@
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
 
+/* XXX - move to sudo_util.h */
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 
-__dso_public int  sudo_fatal_callback_deregister_v1(void (*func)(void));
-__dso_public int  sudo_fatal_callback_register_v1(void (*func)(void));
+typedef void (*sudo_fatal_callback_t)(void);
+
+__dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
+__dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
 __dso_public char *sudo_warn_gettext_v1(const char *msgid) __format_arg(1);
 __dso_public char *sudo_warn_strerror_v1(int errnum);
 __dso_public void sudo_fatal_nodebug_v1(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
