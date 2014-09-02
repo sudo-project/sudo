@@ -430,7 +430,7 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
 {
     int buflen, pri, subsys, saved_errno = errno;
-    char *buf = NULL;
+    char static_buf[1024], *buf = static_buf;
 
     if (!sudo_debug_mode)
 	return;
@@ -441,14 +441,19 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
 
     /* Make sure we want debug info at this level. */
     if (subsys < num_subsystems && sudo_debug_settings[subsys] >= pri) {
-	buflen = fmt ? vasprintf(&buf, fmt, ap) : 0;
+	buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap) : 0;
+	if (buflen >= (int)sizeof(static_buf)) {
+	    /* Not enough room in static buf, allocate dynamically. */
+	    buflen = vasprintf(&buf, fmt, ap);
+	}
 	if (buflen != -1) {
 	    int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
 	    if (ISSET(level, SUDO_DEBUG_LINENO))
 		sudo_debug_write2(func, file, lineno, buf, buflen, errcode);
 	    else
 		sudo_debug_write2(NULL, NULL, 0, buf, buflen, errcode);
-	    free(buf);
+	    if (buf != static_buf)
+		free(buf);
 	}
     }
 
