@@ -255,7 +255,7 @@ sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
     if (ISSET(ev->flags, SUDO_EVQ_TIMEOUTS))
 	TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 
-    /* Unlink from active list and update base pointers as needed. */
+    /* Unlink from active list. */
     if (ISSET(ev->flags, SUDO_EVQ_ACTIVE))
 	TAILQ_REMOVE(&base->active, ev, active_entries);
 
