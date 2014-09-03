@@ -141,8 +141,10 @@ main(int argc, char *argv[])
 	}
     }
 
-    printf("check_addr: %d tests run, %d errors, %d%% success rate\n",
-	ntests, errors, (ntests - errors) * 100 / ntests);
+    if (ntests != 0) {
+	printf("check_addr: %d tests run, %d errors, %d%% success rate\n",
+	    ntests, errors, (ntests - errors) * 100 / ntests);
+    }
 
     exit(errors);
 }
