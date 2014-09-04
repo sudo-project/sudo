@@ -119,11 +119,13 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #else
     sa.sa_handler = handler;
 #endif
-    sudo_sigaction(SIGCONT, &sa, NULL);
+    if (sudo_sigaction(SIGCONT, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGCONT);
 #ifdef SA_SIGINFO
     sa.sa_sigaction = handler_user_only;
 #endif
-    sudo_sigaction(SIGTSTP, &sa, NULL);
+    if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
 
     /*
      * The policy plugin's session init must be run before we fork
@@ -412,14 +414,21 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #else
     sa.sa_handler = handler;
 #endif
-    sudo_sigaction(SIGTERM, &sa, NULL);
-    sudo_sigaction(SIGALRM, &sa, NULL); /* XXX - only if there is a timeout */
-    sudo_sigaction(SIGCHLD, &sa, NULL);
-    sudo_sigaction(SIGPIPE, &sa, NULL);
-    sudo_sigaction(SIGUSR1, &sa, NULL);
-    sudo_sigaction(SIGUSR2, &sa, NULL);
+    if (sudo_sigaction(SIGTERM, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGTERM);
+    if (sudo_sigaction(SIGALRM, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGALRM);
+    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
+    if (sudo_sigaction(SIGPIPE, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
+    if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGUSR1);
+    if (sudo_sigaction(SIGUSR2, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGUSR2);
 #ifdef SIGINFO
-    sudo_sigaction(SIGINFO, &sa, NULL);
+    if (sudo_sigaction(SIGINFO, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGINFO);
 #endif
 
     /*
@@ -435,9 +444,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sa.sa_sigaction = handler_user_only;
     }
 #endif
-    sudo_sigaction(SIGHUP, &sa, NULL);
-    sudo_sigaction(SIGINT, &sa, NULL);
-    sudo_sigaction(SIGQUIT, &sa, NULL);
+    if (sudo_sigaction(SIGHUP, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGHUP);
+    if (sudo_sigaction(SIGINT, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGINT);
+    if (sudo_sigaction(SIGQUIT, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGQUIT);
 
     /*
      * Child will run the command in the pty, parent will pass data
@@ -584,12 +596,19 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 		    sigemptyset(&sa.sa_mask);
 		    sa.sa_flags = SA_RESTART;
 		    sa.sa_handler = SIG_DFL;
-		    sudo_sigaction(SIGTSTP, &sa, &osa);
+		    if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0) {
+			sudo_warn(U_("unable to set handler for signal %d"),
+			    SIGTSTP);
+		    }
 		}
 		if (kill(getpid(), signo) != 0)
 		    sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
-		if (signo == SIGTSTP)
-		    sudo_sigaction(SIGTSTP, &osa, NULL);
+		if (signo == SIGTSTP) {
+		    if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0) {
+			sudo_warn(U_("unable to restore handler for signal %d"),
+			    SIGTSTP);
+		    }
+		}
 		if (fd != -1) {
 		    /*
 		     * Restore command's process group if different.
@@ -772,7 +791,8 @@ dispatch_pending_signals(struct command_status *cstat)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_DFL;
-	sudo_sigaction(SIGTSTP, &sa, NULL);
+	if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
+	    sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
 	if (kill(getpid(), SIGTSTP) != 0)
 	    sudo_warn("kill(%d, SIGTSTP)", (int)getpid());
 	/* No need to reinstall SIGTSTP handler. */
