@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "August 25, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "September 8, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2247,7 +2247,6 @@ struct sudo_conv_message {
 #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
 #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
 #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
-#define SUDO_CONV_DEBUG_MSG        0x0006 /* debugging message */
 #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
     int msg_type;
     int timeout;
@@ -2309,10 +2308,9 @@ The
 function uses the same underlying mechanism as the
 \fBconversation\fR()
 function but only supports
-\fRSUDO_CONV_INFO_MSG\fR,
-\fRSUDO_CONV_ERROR_MSG\fR
+\fRSUDO_CONV_INFO_MSG\fR
 and
-\fRSUDO_CONV_DEBUG_MSG\fR
+\fRSUDO_CONV_ERROR_MSG\fR
 for the
 \fImsg_type\fR
 parameter.
@@ -2321,26 +2319,6 @@ It can be more convenient than using the
 function if no user reply is needed and supports standard
 \fBprintf\fR()
 escape sequences.
-.PP
-Unlike,
-\fRSUDO_CONV_INFO_MSG\fR
-and
-Dv SUDO_CONV_ERROR_MSG ,
-messages
-sent with the
-\fRSUDO_CONV_DEBUG_MSG\fR
-\fImsg_type\fR
-are not directly
-user-visible.
-Instead, they are logged to the file specified in the
-\fRDebug\fR
-statement (if any) in the
-sudo.conf(@mansectform@).
-file.
-This allows a plugin to log debugging information and is intended
-to be used in conjunction with the
-\fIdebug_flags\fR
-setting.
 .PP
 See the sample plugin for an example of the
 \fBconversation\fR()

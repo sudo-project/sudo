@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 25, 2014
+.Dd September 8, 2014
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1955,7 +1955,6 @@ struct sudo_conv_message {
 #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
 #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
 #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
-#define SUDO_CONV_DEBUG_MSG        0x0006 /* debugging message */
 #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
     int msg_type;
     int timeout;
@@ -2016,10 +2015,9 @@ The
 function uses the same underlying mechanism as the
 .Fn conversation
 function but only supports
-.Dv SUDO_CONV_INFO_MSG ,
-.Dv SUDO_CONV_ERROR_MSG
+.Dv SUDO_CONV_INFO_MSG
 and
-.Dv SUDO_CONV_DEBUG_MSG
+.Dv SUDO_CONV_ERROR_MSG
 for the
 .Em msg_type
 parameter.
@@ -2028,26 +2026,6 @@ It can be more convenient than using the
 function if no user reply is needed and supports standard
 .Fn printf
 escape sequences.
-.Pp
-Unlike,
-.Dv SUDO_CONV_INFO_MSG
-and
-Dv SUDO_CONV_ERROR_MSG ,
-messages
-sent with the
-.Dv SUDO_CONV_DEBUG_MSG
-.Em msg_type
-are not directly
-user-visible.
-Instead, they are logged to the file specified in the
-.Li Debug
-statement (if any) in the
-.Xr sudo.conf @mansectform@ .
-file.
-This allows a plugin to log debugging information and is intended
-to be used in conjunction with the
-.Em debug_flags
-setting.
 .Pp
 See the sample plugin for an example of the
 .Fn conversation
