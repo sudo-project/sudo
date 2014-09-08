@@ -374,87 +374,87 @@ __dso_public char *sudo_getcwd(char *, size_t size);
 # define getcwd(_a, _b) sudo_getcwd((_a), (_b))
 #endif /* PREFER_PORTABLE_GETCWD */
 #ifndef HAVE_GETGROUPLIST
-__dso_public int sudo_getgrouplist(const char *, gid_t, gid_t *, int *);
+__dso_public int sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp);
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
 #ifndef HAVE_GETLINE
-__dso_public ssize_t sudo_getline(char **, size_t *, FILE *);
+__dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
 # undef getline
 # define getline(_a, _b, _c) sudo_getline((_a), (_b), (_c))
 #endif /* HAVE_GETLINE */
 #ifndef HAVE_UTIMES
-__dso_public int sudo_utimes(const char *, const struct timeval *);
+__dso_public int sudo_utimes(const char *file, const struct timeval *times);
 # undef utimes
 # define utimes(_a, _b) sudo_utimes((_a), (_b))
 #endif /* HAVE_UTIMES */
 #ifdef HAVE_FUTIME
-__dso_public int sudo_futimes(int, const struct timeval *);
+__dso_public int sudo_futimes(int fd, const struct timeval *times);
 # undef futimes
 # define futimes(_a, _b) sudo_futimes((_a), (_b))
 #endif /* HAVE_FUTIME */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
+__dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) __printflike(3, 4);
 # undef snprintf
 # define snprintf sudo_snprintf
 #endif /* HAVE_SNPRINTF */
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
+__dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) __printflike(3, 0);
 # undef vsnprintf
 # define vsnprintf sudo_vsnprintf
 #endif /* HAVE_VSNPRINTF */
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_asprintf(char **, const char *, ...) __printflike(2, 3);
+__dso_public int sudo_asprintf(char **str, char const *fmt, ...) __printflike(2, 3);
 # undef asprintf
 # define asprintf sudo_asprintf
 #endif /* HAVE_ASPRINTF */
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-__dso_public int sudo_vasprintf(char **, const char *, va_list) __printflike(2, 0);
+__dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) __printflike(2, 0);
 # undef vasprintf
 # define vasprintf sudo_vasprintf
 #endif /* HAVE_VASPRINTF */
 #ifndef HAVE_STRLCAT
-__dso_public size_t sudo_strlcat(char *, const char *, size_t);
+__dso_public size_t sudo_strlcat(char *dst, const char *src, size_t siz);
 # undef strlcat
 # define strlcat(_a, _b, _c) sudo_strlcat((_a), (_b), (_c))
 #endif /* HAVE_STRLCAT */
 #ifndef HAVE_STRLCPY
-__dso_public size_t sudo_strlcpy(char *, const char *, size_t);
+__dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
 # undef strlcpy
 # define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
 #endif /* HAVE_STRLCPY */
 #ifndef HAVE_MEMRCHR
-__dso_public void *sudo_memrchr(const void *, int, size_t);
+__dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr
 # define memrchr(_a, _b, _c) sudo_memrchr((_a), (_b), (_c))
 #endif /* HAVE_MEMRCHR */
 #ifndef HAVE_MEMSET_S
-__dso_public errno_t sudo_memset_s(void *, rsize_t, int, rsize_t);
+__dso_public errno_t sudo_memset_s(void *v, rsize_t smax, int c, rsize_t n);
 # undef memset_s
 # define memset_s(_a, _b, _c, _d) sudo_memset_s((_a), (_b), (_c), (_d))
 #endif /* HAVE_MEMSET_S */
 #ifndef HAVE_MKDTEMP
-__dso_public char *sudo_mkdtemp(char *);
+__dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp
 # define mkdtemp(_a) sudo_mkdtemp((_a))
 #endif /* HAVE_MKDTEMP */
 #ifndef HAVE_MKSTEMPS
-__dso_public int sudo_mkstemps(char *, int);
+__dso_public int sudo_mkstemps(char *path, int slen);
 # undef mkstemps
 # define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
 #endif /* HAVE_MKSTEMPS */
 #ifndef HAVE_PW_DUP
-__dso_public struct passwd *sudo_pw_dup(const struct passwd *);
+__dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
 # undef pw_dup
 # define pw_dup(_a) sudo_pw_dup((_a))
 #endif /* HAVE_PW_DUP */
 #ifndef HAVE_STRSIGNAL
-__dso_public char *sudo_strsignal(int);
+__dso_public char *sudo_strsignal(int signo);
 # undef strsignal
 # define strsignal(_a) sudo_strsignal((_a))
 #endif /* HAVE_STRSIGNAL */
 #ifndef HAVE_SIG2STR
-__dso_public int sudo_sig2str(int, char *);
+__dso_public int sudo_sig2str(int signo, char *signame);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */

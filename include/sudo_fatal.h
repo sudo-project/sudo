@@ -118,14 +118,14 @@ __dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
 __dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
 __dso_public char *sudo_warn_gettext_v1(const char *msgid) __format_arg(1);
 __dso_public char *sudo_warn_strerror_v1(int errnum);
-__dso_public void sudo_fatal_nodebug_v1(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
-__dso_public void sudo_fatalx_nodebug_v1(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
-__dso_public void sudo_vfatal_nodebug_v1(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
-__dso_public void sudo_vfatalx_nodebug_v1(const char *, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
-__dso_public void sudo_warn_nodebug_v1(const char *, ...) __printf0like(1, 2);
-__dso_public void sudo_warnx_nodebug_v1(const char *, ...) __printflike(1, 2);
-__dso_public void sudo_vwarn_nodebug_v1(const char *, va_list ap) __printf0like(1, 0);
-__dso_public void sudo_vwarnx_nodebug_v1(const char *, va_list ap) __printflike(1, 0);
+__dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) __printf0like(1, 2) __attribute__((__noreturn__));
+__dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) __printflike(1, 2) __attribute__((__noreturn__));
+__dso_public void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
+__dso_public void sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
+__dso_public void sudo_warn_nodebug_v1(const char *fmt, ...) __printf0like(1, 2);
+__dso_public void sudo_warnx_nodebug_v1(const char *fmt, ...) __printflike(1, 2);
+__dso_public void sudo_vwarn_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0);
+__dso_public void sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0);
 
 #define sudo_fatal_callback_deregister(_a) sudo_fatal_callback_deregister_v1((_a))
 #define sudo_fatal_callback_register(_a) sudo_fatal_callback_register_v1((_a))

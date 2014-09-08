@@ -23,16 +23,16 @@
 #undef sudo_efree
 #define sudo_efree(x)	free((void *)(x))
 
-__dso_public int  sudo_easprintf_v1(char **, const char *, ...) __printflike(2, 3);
-__dso_public int  sudo_evasprintf_v1(char **, const char *, va_list) __printflike(2, 0);
-__dso_public void *sudo_ecalloc_v1(size_t, size_t) __malloc_like;
-__dso_public void *sudo_emalloc_v1(size_t) __malloc_like;
-__dso_public void *sudo_emallocarray_v1(size_t, size_t) __malloc_like;
-__dso_public void *sudo_erealloc_v1(void *, size_t);
-__dso_public void *sudo_ereallocarray_v1(void *, size_t, size_t);
-__dso_public void *sudo_erecalloc_v1(void *, size_t, size_t, size_t);
-__dso_public char *sudo_estrdup_v1(const char *) __malloc_like;
-__dso_public char *sudo_estrndup_v1(const char *, size_t) __malloc_like;
+__dso_public int  sudo_easprintf_v1(char **ret, const char *fmt, ...) __printflike(2, 3);
+__dso_public int  sudo_evasprintf_v1(char **ret, const char *fmt, va_list) __printflike(2, 0);
+__dso_public void *sudo_ecalloc_v1(size_t nmemb, size_t size) __malloc_like;
+__dso_public void *sudo_emalloc_v1(size_t size) __malloc_like;
+__dso_public void *sudo_emallocarray_v1(size_t nmemb, size_t size) __malloc_like;
+__dso_public void *sudo_erealloc_v1(void *ptr, size_t size);
+__dso_public void *sudo_ereallocarray_v1(void *ptr, size_t nmemb, size_t size);
+__dso_public void *sudo_erecalloc_v1(void *ptr, size_t onmemb, size_t nmemb, size_t msize);
+__dso_public char *sudo_estrdup_v1(const char *src) __malloc_like;
+__dso_public char *sudo_estrndup_v1(const char *src, size_t maxlen) __malloc_like;
 
 #define sudo_easprintf	sudo_easprintf_v1
 #define sudo_evasprintf(_a, _b, _c) sudo_evasprintf_v1((_a), (_b), (_c))
