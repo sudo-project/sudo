@@ -180,6 +180,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     const char *runas_user = NULL;
     const char *runas_group = NULL;
     const char *debug_flags;
+    const char *progname;
+    int proglen;
     int nenv = 0;
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
@@ -187,10 +189,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     env_add = sudo_emallocarray(env_size, sizeof(char *));
 
     /* Pass progname to plugin so it can call initprogname() */
-    sudo_settings[ARG_PROGNAME].value = getprogname();
+    progname = getprogname();
+    sudo_settings[ARG_PROGNAME].value = progname;
 
     /* First, check to see if we were invoked as "sudoedit". */
-    if (strcmp(getprogname(), "sudoedit") == 0) {
+    proglen = strlen(progname);
+    if (proglen > 4 && strcmp(progname + proglen - 4, "edit") == 0) {
+	progname = "sudoedit";
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
     }
@@ -287,7 +292,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 			    continue;
 			}
 			if (mode && mode != MODE_HELP) {
-			    if (strcmp(getprogname(), "sudoedit") != 0)
+			    if (strcmp(progname, "sudoedit") != 0)
 				usage_excl(1);
 			}
 			mode = MODE_HELP;
