@@ -88,7 +88,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     struct sudoers_policy_open_info *info = v;
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
-    const char *debug_flags = NULL;
     const char *remhost = NULL;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN)
@@ -151,10 +150,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
-	    continue;
-	}
-	if (MATCHES(*cur, "debug_flags=")) {
-	    debug_flags = *cur + sizeof("debug_flags=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_user=")) {
@@ -367,14 +362,11 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     user_umask = umask(SUDO_UMASK);
     umask(user_umask);
 
-    /* Setup debugging if indicated. */
-    if (debug_flags != NULL) {
-	sudo_debug_init(NULL, debug_flags);
-	for (cur = info->settings; *cur != NULL; cur++)
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
-	for (cur = info->user_info; *cur != NULL; cur++)
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "user_info: %s", *cur);
-    }
+    /* Settings and user info debug. */
+    for (cur = info->settings; *cur != NULL; cur++)
+	sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
+    for (cur = info->user_info; *cur != NULL; cur++)
+	sudo_debug_printf(SUDO_DEBUG_INFO, "user_info: %s", *cur);
 
 #undef MATCHES
     debug_return_int(flags);

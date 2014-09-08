@@ -33,15 +33,11 @@
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
 
-/* Not exported outside libsudo_util */
-void sudo_debug_write_file(const char *func, const char *file, int line, const char *str, int len, int errno_val);
-
 __dso_public int
 _sudo_printf(int msg_type, const char *fmt, ...)
 {
     va_list ap;
-    char *buf;
-    int len = -1;
+    int len;
 
     switch (msg_type) {
     case SUDO_CONV_INFO_MSG:
@@ -54,15 +50,8 @@ _sudo_printf(int msg_type, const char *fmt, ...)
 	len = vfprintf(stderr, fmt, ap);
 	va_end(ap);
 	break;
-    case SUDO_CONV_DEBUG_MSG:
-	/* XXX - add debug version of vfprintf()? */
-	va_start(ap, fmt);
-	len = vasprintf(&buf, fmt, ap);
-	va_end(ap);
-	if (len != -1)
-	    sudo_debug_write_file(NULL, NULL, 0, buf, len, 0);
-	break;
     default:
+	len = -1;
 	errno = EINVAL;
 	break;
     }

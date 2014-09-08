@@ -64,7 +64,7 @@
  */
 
 /* Note: this must match the order in sudo_debug.h */
-const char *const sudo_debug_priorities[] = {
+static const char *const sudo_debug_priorities[] = {
     "crit",
     "err",
     "warn",
@@ -77,7 +77,7 @@ const char *const sudo_debug_priorities[] = {
 };
 
 /* Note: this must match the order in sudo_debug.h */
-const char *const sudo_debug_subsystems[] = {
+static const char *const sudo_debug_subsystems[] = {
     "main",
     "args",
     "exec",
@@ -110,20 +110,12 @@ const char *const sudo_debug_subsystems[] = {
 
 #define NUM_SUBSYSTEMS	(sizeof(sudo_debug_subsystems) / sizeof(sudo_debug_subsystems[0]) - 1)
 
-/* Values for sudo_debug_mode */
-#define SUDO_DEBUG_MODE_DISABLED	0
-#define SUDO_DEBUG_MODE_FILE		1
-#define SUDO_DEBUG_MODE_CONV		2
-
 static int sudo_debug_settings[NUM_SUBSYSTEMS];
 static int sudo_debug_fd = -1;
-static int sudo_debug_mode;
+static bool sudo_debug_initialized;
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
 static const int num_subsystems = NUM_SUBSYSTEMS;
-
-/* Exposed for sudo_printf.c */
-void sudo_debug_write_file(const char *func, const char *file, int line, const char *str, int len, int errno_val);
 
 /*
  * Parse settings string from sudo.conf and open debugfile.
@@ -136,34 +128,33 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     int i, j;
 
     /* Make sure we are not already initialized. */
-    if (sudo_debug_mode != SUDO_DEBUG_MODE_DISABLED)
+    if (sudo_debug_initialized)
+	return 1;
+
+    /* A debug file name is required. */
+    if (debugfile == NULL)
 	return 1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
     for (i = 0; i < num_subsystems; i++)
 	sudo_debug_settings[i] = -1;
 
-    /* Open debug file if specified. */
-    if (debugfile != NULL) {
-	if (sudo_debug_fd != -1)
-	    close(sudo_debug_fd);
-	sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
-	if (sudo_debug_fd == -1) {
-	    /* Create debug file as needed and set group ownership. */
-	    if (errno == ENOENT) {
-		sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT,
-		    S_IRUSR|S_IWUSR);
-	    }
-	    if (sudo_debug_fd == -1)
-		return 0;
-	    ignore_result(fchown(sudo_debug_fd, (uid_t)-1, 0));
+    /* Open debug file. */
+    if (sudo_debug_fd != -1)
+	close(sudo_debug_fd);
+    sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
+    if (sudo_debug_fd == -1) {
+	/* Create debug file as needed and set group ownership. */
+	if (errno == ENOENT) {
+	    sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT,
+		S_IRUSR|S_IWUSR);
 	}
-	(void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
-	sudo_debug_mode = SUDO_DEBUG_MODE_FILE;
-    } else {
-	/* Called from the plugin, no debug file. */
-	sudo_debug_mode = SUDO_DEBUG_MODE_CONV;
+	if (sudo_debug_fd == -1)
+	    return 0;
+	ignore_result(fchown(sudo_debug_fd, (uid_t)-1, 0));
     }
+    (void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
+    sudo_debug_initialized = true;
 
     /* Stash the pid string so we only have to format it once. */
     (void)snprintf(sudo_debug_pidstr, sizeof(sudo_debug_pidstr), "[%d] ",
@@ -298,44 +289,8 @@ sudo_debug_exit_ptr(const char *func, const char *file, int line,
 	"<- %s @ %s:%d := %p", func, file, line, rval);
 }
 
-static void
-sudo_debug_write_conv(const char *func, const char *file, int lineno,
-    const char *str, int len, int errnum)
-{
-    /* Remove trailing newlines. */
-    while (len > 0 && str[len - 1] == '\n')
-	len--;
-
-    if (len > 0) {
-	if (func != NULL && file != NULL) {
-	    if (errnum) {
-		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s @ %s() %s:%d",
-		    len, str, strerror(errnum), func, file, lineno);
-	    } else {
-		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s @ %s() %s:%d",
-		    len, str, func, file, lineno);
-	    }
-	} else {
-	    if (errnum) {
-		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s",
-		    len, str, strerror(errnum));
-	    } else {
-		sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s", len, str);
-	    }
-	}
-    } else if (errnum) {
-	/* Only print error string. */
-	if (func != NULL && file != NULL) {
-	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%s @ %s() %s:%d",
-		strerror(errnum), func, file, lineno);
-	} else {
-	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%s", strerror(errnum));
-	}
-    }
-}
-
 void
-sudo_debug_write_file(const char *func, const char *file, int lineno,
+sudo_debug_write2(const char *func, const char *file, int lineno,
     const char *str, int len, int errnum)
 {
     char *timestr, numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
@@ -412,27 +367,13 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
 }
 
 void
-sudo_debug_write2(const char *func, const char *file, int lineno,
-    const char *str, int len, int errnum)
-{
-    switch (sudo_debug_mode) {
-    case SUDO_DEBUG_MODE_CONV:
-	sudo_debug_write_conv(func, file, lineno, str, len, errnum);
-	break;
-    case SUDO_DEBUG_MODE_FILE:
-	sudo_debug_write_file(func, file, lineno, str, len, errnum);
-	break;
-    }
-}
-
-void
 sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
 {
     int buflen, pri, subsys, saved_errno = errno;
     char static_buf[1024], *buf = static_buf;
 
-    if (!sudo_debug_mode)
+    if (!sudo_debug_initialized)
 	return;
 
     /* Extract pri and subsystem from level. */
@@ -491,7 +432,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     int buflen, pri, subsys, log_envp = 0;
     size_t plen;
 
-    if (!sudo_debug_mode)
+    if (!sudo_debug_initialized)
 	return;
 
     /* Extract pri and subsystem from level. */

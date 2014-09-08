@@ -205,12 +205,6 @@
 #define sudo_debug_write(str, len, errnum) \
     sudo_debug_write2(NULL, NULL, 0, (str), (len), (errnum))
 
-/*
- * NULL-terminated string lists of priorities and subsystems.
- */
-extern const char *const sudo_debug_priorities[];
-extern const char *const sudo_debug_subsystems[];
-
 __dso_public void sudo_debug_enter(const char *func, const char *file, int line, int subsys);
 __dso_public void sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[]);
 __dso_public void sudo_debug_exit(const char *func, const char *file, int line, int subsys);
