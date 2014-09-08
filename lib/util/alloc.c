@@ -56,20 +56,6 @@
 #include "sudo_fatal.h"
 
 /*
- * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
- * could be signed (as it is on SunOS 4.x).  This just means that
- * sudo_emallocarray() and sudo_ereallocarray() cannot allocate huge amounts on such a
- * platform but that is OK since sudo doesn't need to do so anyway.
- */
-#ifndef SIZE_MAX
-# ifdef SIZE_T_MAX
-#  define SIZE_MAX	SIZE_T_MAX
-# else
-#  define SIZE_MAX	INT_MAX
-# endif /* SIZE_T_MAX */
-#endif /* SIZE_MAX */
-
-/*
  * sudo_emalloc() calls the system malloc(3) and exits with an error if
  * malloc(3) fails.
  */
@@ -261,11 +247,11 @@ sudo_easprintf_v1(char **ret, const char *fmt, ...)
  * returns -1 (out of memory).
  */
 int
-sudo_evasprintf_v1(char **ret, const char *format, va_list args)
+sudo_evasprintf_v1(char **ret, const char *fmt, va_list args)
 {
     int len;
 
-    if ((len = vasprintf(ret, format, args)) == -1)
+    if ((len = vasprintf(ret, fmt, args)) == -1)
 	sudo_fatal_nodebug(NULL);
     return len;
 }
