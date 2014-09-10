@@ -71,6 +71,9 @@ What's new in Sudo 1.8.11
    logging function rejects the command's output it will no longer
    be displayed to the user's terminal.
 
+ * Fixed a compilation error on systems that lack openpty(), _getpty()
+   and grantpt(). Bug #660
+
 What's new in Sudo 1.8.10p3?
 
  * Fixed expansion of %p in the prompt for "sudo -l" when rootpw,
