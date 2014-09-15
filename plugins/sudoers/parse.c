@@ -49,7 +49,23 @@
 /* Characters that must be quoted in sudoers */
 #define	SUDOERS_QUOTED	":\\,=#\""
 
-/* sudoers nsswitch routines */
+/*
+ * Local prototypes.
+ */
+static int display_bound_defaults(int dtype, struct sudo_lbuf *lbuf);
+static int sudo_file_close(struct sudo_nss *);
+static int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
+static int sudo_file_display_cmnd(struct sudo_nss *, struct passwd *);
+static int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
+static int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
+static int sudo_file_lookup(struct sudo_nss *, int, int);
+static int sudo_file_open(struct sudo_nss *);
+static int sudo_file_parse(struct sudo_nss *);
+static int sudo_file_setdefs(struct sudo_nss *);
+static void print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type);
+static void print_member2(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
+
+/* sudo_nss implementation */
 struct sudo_nss sudo_nss_file = {
     { NULL, NULL },
     sudo_file_open,
@@ -62,15 +78,6 @@ struct sudo_nss sudo_nss_file = {
     sudo_file_display_bound_defaults,
     sudo_file_display_privs
 };
-
-/*
- * Local prototypes.
- */
-static int display_bound_defaults(int dtype, struct sudo_lbuf *lbuf);
-static void print_member(struct sudo_lbuf *lbuf, struct member *m,
-    int alias_type);
-static void print_member2(struct sudo_lbuf *lbuf, struct member *m,
-    const char *separator, int alias_type);
 
 int
 sudo_file_open(struct sudo_nss *nss)

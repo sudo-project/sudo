@@ -248,17 +248,6 @@ int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
 int sudo_auth_cleanup(struct passwd *pw);
 
-/* parse.c */
-int sudo_file_open(struct sudo_nss *);
-int sudo_file_close(struct sudo_nss *);
-int sudo_file_setdefs(struct sudo_nss *);
-int sudo_file_lookup(struct sudo_nss *, int, int);
-int sudo_file_parse(struct sudo_nss *);
-int sudo_file_display_cmnd(struct sudo_nss *, struct passwd *);
-int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
-int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
-int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
-
 /* set_perms.c */
 bool rewind_perms(void);
 bool set_perms(int);
