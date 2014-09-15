@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -90,16 +90,16 @@ sudo_read_nss(void)
 	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
-		got_match = true;
+		got_match = saw_files = true;
 #ifdef HAVE_LDAP
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
-		got_match = true;
+		got_match = saw_ldap = true;
 #endif
 #ifdef HAVE_SSSD
 	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
-		got_match = true;
+		got_match = saw_sss = true;
 #endif
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
 		/* NOTFOUND affects the most recent entry */
@@ -175,20 +175,20 @@ sudo_read_nss(void)
 	    if (!saw_files && strncasecmp(cp, "files", 5) == 0 &&
 		(isspace((unsigned char)cp[5]) || cp[5] == '\0')) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
-		got_match = true;
+		got_match = saw_files = true;
 		ep = &cp[5];
 #ifdef HAVE_LDAP
 	    } else if (!saw_ldap && strncasecmp(cp, "ldap", 4) == 0 &&
 		(isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
-		got_match = true;
+		got_match = saw_ldap = true;
 		ep = &cp[4];
 #endif
 #ifdef HAVE_SSSD
 	    } else if (!saw_sss && strncasecmp(cp, "sss", 3) == 0 &&
 		(isspace((unsigned char)cp[3]) || cp[3] == '\0')) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
-		got_match = true;
+		got_match = saw_sss = true;
 		ep = &cp[3];
 #endif
 	    } else {
