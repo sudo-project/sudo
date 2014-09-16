@@ -52,6 +52,14 @@ extern struct sudo_nss sudo_nss_ldap;
 extern struct sudo_nss sudo_nss_sss;
 #endif
 
+/* Make sure we have not already inserted the nss entry. */
+#define SUDO_NSS_CHECK_UNUSED(nss, tag)					       \
+    if (nss.entries.tqe_next != NULL || nss.entries.tqe_prev != NULL) {      \
+	sudo_warnx("internal error: nsswitch entry \"%s\" already in use",     \
+	    tag);							       \
+	continue;							       \
+    }
+
 #if (defined(HAVE_LDAP) || defined(HAVE_SSSD)) && defined(_PATH_NSSWITCH_CONF)
 /*
  * Read in /etc/nsswitch.conf
@@ -89,15 +97,18 @@ sudo_read_nss(void)
 	/* Parse line */
 	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
+		SUDO_NSS_CHECK_UNUSED(sudo_nss_file, "files");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 		got_match = saw_files = true;
 #ifdef HAVE_LDAP
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
+		SUDO_NSS_CHECK_UNUSED(sudo_nss_ldap, "ldap");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 		got_match = saw_ldap = true;
 #endif
 #ifdef HAVE_SSSD
 	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
+		SUDO_NSS_CHECK_UNUSED(sudo_nss_sss, "sss");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 		got_match = saw_sss = true;
 #endif
