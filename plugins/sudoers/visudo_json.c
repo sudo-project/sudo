@@ -1051,10 +1051,10 @@ export_sudoers(const char *sudoers_path, const char *export_path,
     if (parse_error) {
 	if (!quiet) {
 	    if (errorlineno != -1)
-		sudo_warnx(_("parse error in %s near line %d\n"),
+		sudo_warnx(U_("parse error in %s near line %d\n"),
 		    errorfile, errorlineno);
 	    else if (errorfile != NULL)
-		sudo_warnx(_("parse error in %s\n"), errorfile);
+		sudo_warnx(U_("parse error in %s\n"), errorfile);
 	}
 	goto done;
     }
