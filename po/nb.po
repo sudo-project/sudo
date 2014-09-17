@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.11b1\n"
+"Project-Id-Version: sudo-1.8.11b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-07-30 09:37-0600\n"
-"PO-Revision-Date: 2014-08-10 12:46+0100\n"
+"POT-Creation-Date: 2014-09-04 10:15-0600\n"
+"PO-Revision-Date: 2014-09-12 11:29+0100\n"
 "Last-Translator: Åka Sikrom <a4@hush.com>\n"
 "Language-Team: Norwegian Bokmaal <i18n-nb@lister.ping.uio.no>\n"
 "Language: Norwegian Bokmål\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: Norwegian Bokmål\n"
 
 #: lib/util/aix.c:92 lib/util/aix.c:151
 msgid "unable to open userdb"
@@ -43,12 +44,12 @@ msgstr "intern feil: prøvde å tildele tomme byte"
 msgid "internal error, %s overflow"
 msgstr "intern feil: %s er full"
 
-#: lib/util/fatal.c:143
+#: lib/util/fatal.c:144
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr "%s: %s: %s\n"
 
-#: lib/util/fatal.c:147 lib/util/fatal.c:152
+#: lib/util/fatal.c:148 lib/util/fatal.c:153
 #, c-format
 msgid "%s: %s\n"
 msgstr "%s: %s\n"
@@ -119,68 +120,86 @@ msgstr "«%s» kan overskrives av eiergruppa"
 msgid "unable to open %s"
 msgstr "klarte ikke å åpne %s"
 
-#: src/exec.c:133 src/exec_pty.c:751
+#: src/exec.c:123 src/exec.c:128 src/exec.c:418 src/exec.c:420 src/exec.c:422
+#: src/exec.c:424 src/exec.c:426 src/exec.c:428 src/exec.c:431 src/exec.c:448
+#: src/exec.c:450 src/exec.c:452 src/exec.c:600 src/exec.c:795
+#: src/exec_pty.c:460 src/exec_pty.c:716 src/exec_pty.c:786 src/exec_pty.c:788
+#: src/exec_pty.c:800 src/exec_pty.c:1288 src/exec_pty.c:1290
+#: src/exec_pty.c:1295 src/exec_pty.c:1297 src/exec_pty.c:1311
+#: src/exec_pty.c:1322 src/exec_pty.c:1324 src/exec_pty.c:1326
+#: src/exec_pty.c:1328 src/exec_pty.c:1330 src/exec_pty.c:1332
+#: src/exec_pty.c:1334 src/signal.c:156
+#, c-format
+msgid "unable to set handler for signal %d"
+msgstr "klarte ikke å velge håndtering av signal %d"
+
+#: src/exec.c:135 src/exec_pty.c:825
 msgid "policy plugin failed session initialization"
 msgstr "regeltillegg klarte ikke å gjøre klar økta"
 
-#: src/exec.c:138 src/exec_pty.c:767 src/exec_pty.c:1283 src/tgetpass.c:221
+#: src/exec.c:140 src/exec_pty.c:841 src/exec_pty.c:1372 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr "klarte ikke å lage en kopi av prosessen"
 
-#: src/exec.c:311 src/exec.c:319 src/exec.c:852 src/exec_pty.c:514
-#: src/exec_pty.c:519 src/exec_pty.c:577 src/exec_pty.c:584 src/exec_pty.c:871
-#: src/exec_pty.c:881 src/exec_pty.c:926 src/exec_pty.c:933
-#: src/exec_pty.c:1348 src/exec_pty.c:1355 src/exec_pty.c:1362
+#: src/exec.c:313 src/exec.c:321 src/exec.c:872 src/exec_pty.c:584
+#: src/exec_pty.c:589 src/exec_pty.c:647 src/exec_pty.c:654 src/exec_pty.c:945
+#: src/exec_pty.c:955 src/exec_pty.c:1000 src/exec_pty.c:1007
+#: src/exec_pty.c:1437 src/exec_pty.c:1444 src/exec_pty.c:1451
 msgid "unable to add event to queue"
 msgstr "klarte ikke å sette hendelsen i kø"
 
-#: src/exec.c:399
+#: src/exec.c:401
 msgid "unable to create sockets"
 msgstr "klarte ikke å lage sokkel"
 
-#: src/exec.c:485
+#: src/exec.c:497
 msgid "error in event loop"
 msgstr "feil i hendelsesløkke"
 
-#: src/exec.c:503
+#: src/exec.c:515
 msgid "unable to restore tty label"
 msgstr "klarte ikke å gjenopprette tty-merkelapp"
+
+#: src/exec.c:608 src/exec_pty.c:494 src/signal.c:95
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "klarte ikke å gjenopprette håndtering av signal %d"
+
+#: src/exec.c:726 src/exec_pty.c:1179
+msgid "error reading from signal pipe"
+msgstr "feil ved lesing fra signalrør"
 
 #: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "klarte ikke å fjerne PRIV_PROC_EXEC fra PRIV_LIMIT"
 
-#: src/exec_pty.c:194
+#: src/exec_pty.c:200
 msgid "unable to allocate pty"
 msgstr "klarte ikke å tildele pty"
 
-#: src/exec_pty.c:689 src/exec_pty.c:698 src/exec_pty.c:706
-#: src/exec_pty.c:1203 src/exec_pty.c:1280 src/signal.c:129 src/tgetpass.c:218
+#: src/exec_pty.c:760 src/exec_pty.c:769 src/exec_pty.c:777
+#: src/exec_pty.c:1280 src/exec_pty.c:1369 src/signal.c:137 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr "klarte ikke å lage datarør"
 
-#: src/exec_pty.c:742
+#: src/exec_pty.c:816
 msgid "unable to set terminal to raw mode"
 msgstr "klarte ikke å velge råmodus for terminalen"
 
-#: src/exec_pty.c:1102
-msgid "error reading from signal pipe"
-msgstr "feil ved lesing fra signalrør"
-
-#: src/exec_pty.c:1135
+#: src/exec_pty.c:1212
 msgid "error reading from pipe"
 msgstr "feil ved lesing fra datarør"
 
-#: src/exec_pty.c:1160
+#: src/exec_pty.c:1237
 msgid "error reading from socketpair"
 msgstr "feil ved lesing fra sokkelpar"
 
-#: src/exec_pty.c:1169
+#: src/exec_pty.c:1246
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "uforventet respondstype i bak-kanalen: %d"
 
-#: src/exec_pty.c:1259
+#: src/exec_pty.c:1348
 msgid "unable to set controlling tty"
 msgstr "klarte ikke å velge styrende tty"
 
@@ -514,19 +533,24 @@ msgstr "klarte ikke å velge «%s» som kjørekontekst"
 msgid "unable to set key creation context to %s"
 msgstr "klarte ikke å velge «%s» som nøkkelkontekst"
 
-#: src/sesh.c:58
+#: src/sesh.c:78
 msgid "requires at least one argument"
 msgstr "krever at du bruker minst ett argument"
 
-#: src/sesh.c:78
+#: src/sesh.c:104
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "klarte ikke å kjøre %s som et innloggingsskall"
 
-#: src/sesh.c:83 src/sudo.c:1100
+#: src/sesh.c:109 src/sudo.c:1106
 #, c-format
 msgid "unable to execute %s"
 msgstr "klarte ikke å kjøre «%s»"
+
+#: src/signal.c:77
+#, c-format
+msgid "unable to save handler for signal %d"
+msgstr "klarte ikke å lagre håndtering av signal %d"
 
 #: src/solaris.c:88
 msgid "resource control limit has been reached"
@@ -608,130 +632,152 @@ msgstr "klarte ikke å hente gruppevektor"
 msgid "unknown uid %u: who are you?"
 msgstr "uid %u er ukjent. Hvem er du?"
 
-#: src/sudo.c:770
+#: src/sudo.c:772
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "«%s» må eies av uid %d, og setuid-biten må være valgt"
 
-#: src/sudo.c:773
+#: src/sudo.c:775
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "effektiv uid er ikke %d.  Er «%s» på et filsystem hvor «nosuid» er valgt, eller på et NFS-filsystem uten rot-rettigheter?"
 
-#: src/sudo.c:779
+#: src/sudo.c:781
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "effektiv uid er ikke %d. Er sudo installert med «setuid root»?"
 
-#: src/sudo.c:908
+#: src/sudo.c:910
 #, c-format
 msgid "unknown login class %s"
 msgstr "innloggingsklassen «%s» er ukjent"
 
-#: src/sudo.c:921
+#: src/sudo.c:923
 msgid "unable to set user context"
 msgstr "klarte ikke å velge brukerkontekst"
 
-#: src/sudo.c:935
+#: src/sudo.c:937
 msgid "unable to set supplementary group IDs"
 msgstr "klarte ikke å velge ekstra grruppe-id-er"
 
-#: src/sudo.c:942
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "klarte ikke å velge «runas gid %u» som effektiv gid"
 
-#: src/sudo.c:948
+#: src/sudo.c:950
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "klarte ikke å velge «runas gid %u» som gid"
 
-#: src/sudo.c:955
+#: src/sudo.c:957
 msgid "unable to set process priority"
 msgstr "klarte ikke å velge prosessprioritet"
 
-#: src/sudo.c:963
+#: src/sudo.c:965
 #, c-format
 msgid "unable to change root to %s"
 msgstr "klarte ikke å endre rot til «%s»"
 
-#: src/sudo.c:976 src/sudo.c:982 src/sudo.c:988
+#: src/sudo.c:978 src/sudo.c:984 src/sudo.c:990
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "klarte ikke å endre til runas uid (%u, %u)"
 
-#: src/sudo.c:1005
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "klarte ikke å endre mappe til «%s»"
 
-#: src/sudo.c:1062
+#: src/sudo.c:1068
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "uforventet årsak for avslutning av underprosess: %d"
 
-#: src/sudo.c:1121
+#: src/sudo.c:1127
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "regeltillegget «%s» mangler «check_policy»-metoden"
 
-#: src/sudo.c:1134
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "regeltillegget «%s» støtter ikke listetillatelser"
 
-#: src/sudo.c:1146
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "regeltillegget «%s» støtter ikke valget «-v»"
 
-#: src/sudo.c:1158
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "regeltillegget «%s» støtter ikke valgene «-k» og «-K»"
 
-#: src/sudo_edit.c:110
-#, c-format
-msgid "unable to change uid to root (%u)"
-msgstr "klarte ikke å endre uid til root (%u)"
-
-#: src/sudo_edit.c:142
-msgid "plugin error: missing file list for sudoedit"
-msgstr "feil med tillegg: sudoedit mangler filliste"
-
-#: src/sudo_edit.c:170 src/sudo_edit.c:285
+#: src/sudo_edit.c:203 src/sudo_edit.c:294
 #, c-format
 msgid "%s: not a regular file"
 msgstr "«%s» er ikke en vanlig fil"
 
-#: src/sudo_edit.c:204 src/sudo_edit.c:320
+#: src/sudo_edit.c:230 src/sudo_edit.c:332
 #, c-format
 msgid "%s: short write"
 msgstr "«%s» har kort skriving"
 
-#: src/sudo_edit.c:286
+#: src/sudo_edit.c:295
 #, c-format
 msgid "%s left unmodified"
 msgstr "«%s» ble uendret"
 
-#: src/sudo_edit.c:298
+#: src/sudo_edit.c:308 src/sudo_edit.c:483
 #, c-format
 msgid "%s unchanged"
 msgstr "«%s» er uendret"
 
-#: src/sudo_edit.c:310 src/sudo_edit.c:331
+#: src/sudo_edit.c:321 src/sudo_edit.c:343
 #, c-format
 msgid "unable to write to %s"
 msgstr "klarte ikke å skrive til «%s»"
 
-#: src/sudo_edit.c:311 src/sudo_edit.c:329 src/sudo_edit.c:332
+#: src/sudo_edit.c:322 src/sudo_edit.c:341 src/sudo_edit.c:344
+#: src/sudo_edit.c:508 src/sudo_edit.c:512
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "innhold fra redigeringsøkt ligger igjen i «%s»"
 
-#: src/sudo_edit.c:328
+#: src/sudo_edit.c:340
 msgid "unable to read temporary file"
 msgstr "klarte ikke å lese midlertidig fil"
+
+#: src/sudo_edit.c:417
+msgid "sesh: internal error: odd number of paths"
+msgstr "sesh: intern feil: for høyt antall stier"
+
+#: src/sudo_edit.c:419
+msgid "sesh: unable to create temporary files"
+msgstr "sesh: klarte ikke å lage midlertidige filer"
+
+#: src/sudo_edit.c:421 src/sudo_edit.c:515
+#, c-format
+msgid "sesh: unknown error %d"
+msgstr "sesh: ukjent feil (%d)"
+
+#: src/sudo_edit.c:507
+msgid "unable to copy temporary files back to their original location"
+msgstr "klarte ikke å kopiere midlertidige filer tilbake til opprinnelig plassering"
+
+#: src/sudo_edit.c:511
+msgid "unable to copy some of the temporary files back to their original location"
+msgstr "klarte ikke å kopiere enkelte midlertidige filer tilbake til opprinnelig plassering"
+
+#: src/sudo_edit.c:554
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "klarte ikke å endre uid til root (%u)"
+
+#: src/sudo_edit.c:571
+msgid "plugin error: missing file list for sudoedit"
+msgstr "feil med tillegg: sudoedit mangler filliste"
 
 #: src/tgetpass.c:90
 msgid "no tty present and no askpass program specified"

@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.11b1\n"
+"Project-Id-Version: sudo 1.8.11b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-07-30 09:37-0600\n"
-"PO-Revision-Date: 2014-08-10 11:49+0200\n"
+"POT-Creation-Date: 2014-09-04 10:15-0600\n"
+"PO-Revision-Date: 2014-09-14 19:21+0200\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -41,12 +41,12 @@ msgstr "vnitřní chyba, pokus alokovat nula bajtů"
 msgid "internal error, %s overflow"
 msgstr "vnitřní chyba, přetečení v %s"
 
-#: lib/util/fatal.c:143
+#: lib/util/fatal.c:144
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr "%s: %s: %s\n"
 
-#: lib/util/fatal.c:147 lib/util/fatal.c:152
+#: lib/util/fatal.c:148 lib/util/fatal.c:153
 #, c-format
 msgid "%s: %s\n"
 msgstr "%s: %s\n"
@@ -117,68 +117,86 @@ msgstr "%s je zapisovatelný pro skupinu"
 msgid "unable to open %s"
 msgstr "%s nelze otevřít"
 
-#: src/exec.c:133 src/exec_pty.c:751
+#: src/exec.c:123 src/exec.c:128 src/exec.c:418 src/exec.c:420 src/exec.c:422
+#: src/exec.c:424 src/exec.c:426 src/exec.c:428 src/exec.c:431 src/exec.c:448
+#: src/exec.c:450 src/exec.c:452 src/exec.c:600 src/exec.c:795
+#: src/exec_pty.c:460 src/exec_pty.c:716 src/exec_pty.c:786 src/exec_pty.c:788
+#: src/exec_pty.c:800 src/exec_pty.c:1288 src/exec_pty.c:1290
+#: src/exec_pty.c:1295 src/exec_pty.c:1297 src/exec_pty.c:1311
+#: src/exec_pty.c:1322 src/exec_pty.c:1324 src/exec_pty.c:1326
+#: src/exec_pty.c:1328 src/exec_pty.c:1330 src/exec_pty.c:1332
+#: src/exec_pty.c:1334 src/signal.c:156
+#, c-format
+msgid "unable to set handler for signal %d"
+msgstr "obsluhu pro signál %d nelze nastavit"
+
+#: src/exec.c:135 src/exec_pty.c:825
 msgid "policy plugin failed session initialization"
 msgstr "modul s politikami zrušil inicializaci relace"
 
-#: src/exec.c:138 src/exec_pty.c:767 src/exec_pty.c:1283 src/tgetpass.c:221
+#: src/exec.c:140 src/exec_pty.c:841 src/exec_pty.c:1372 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr "nelze vytvořit potomka"
 
-#: src/exec.c:311 src/exec.c:319 src/exec.c:852 src/exec_pty.c:514
-#: src/exec_pty.c:519 src/exec_pty.c:577 src/exec_pty.c:584 src/exec_pty.c:871
-#: src/exec_pty.c:881 src/exec_pty.c:926 src/exec_pty.c:933
-#: src/exec_pty.c:1348 src/exec_pty.c:1355 src/exec_pty.c:1362
+#: src/exec.c:313 src/exec.c:321 src/exec.c:872 src/exec_pty.c:584
+#: src/exec_pty.c:589 src/exec_pty.c:647 src/exec_pty.c:654 src/exec_pty.c:945
+#: src/exec_pty.c:955 src/exec_pty.c:1000 src/exec_pty.c:1007
+#: src/exec_pty.c:1437 src/exec_pty.c:1444 src/exec_pty.c:1451
 msgid "unable to add event to queue"
 msgstr "událost nelze přidat do fronty"
 
-#: src/exec.c:399
+#: src/exec.c:401
 msgid "unable to create sockets"
 msgstr "nelze vytvořit sockety"
 
-#: src/exec.c:485
+#: src/exec.c:497
 msgid "error in event loop"
 msgstr "chyba ve smyčce s událostmi"
 
-#: src/exec.c:503
+#: src/exec.c:515
 msgid "unable to restore tty label"
 msgstr "nelze obnovit značku TTY"
+
+#: src/exec.c:608 src/exec_pty.c:494 src/signal.c:95
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "nelze obnovit obsluhu signálu %d"
+
+#: src/exec.c:726 src/exec_pty.c:1179
+msgid "error reading from signal pipe"
+msgstr "chyba při čtení ze signální roury"
 
 #: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "z PRIV_LIMIT nelze odstranit PRIV_PROC_EXEC"
 
-#: src/exec_pty.c:194
+#: src/exec_pty.c:200
 msgid "unable to allocate pty"
 msgstr "nelze alokovat PTY"
 
-#: src/exec_pty.c:689 src/exec_pty.c:698 src/exec_pty.c:706
-#: src/exec_pty.c:1203 src/exec_pty.c:1280 src/signal.c:129 src/tgetpass.c:218
+#: src/exec_pty.c:760 src/exec_pty.c:769 src/exec_pty.c:777
+#: src/exec_pty.c:1280 src/exec_pty.c:1369 src/signal.c:137 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr "nelze vytvořit rouru"
 
-#: src/exec_pty.c:742
+#: src/exec_pty.c:816
 msgid "unable to set terminal to raw mode"
 msgstr "terminál nelze přepnout do syrového režimu"
 
-#: src/exec_pty.c:1102
-msgid "error reading from signal pipe"
-msgstr "chyba při čtení ze signální roury"
-
-#: src/exec_pty.c:1135
+#: src/exec_pty.c:1212
 msgid "error reading from pipe"
 msgstr "chyba při čtení z roury"
 
-#: src/exec_pty.c:1160
+#: src/exec_pty.c:1237
 msgid "error reading from socketpair"
 msgstr "chyba při čtení z dvojice socketů"
 
-#: src/exec_pty.c:1169
+#: src/exec_pty.c:1246
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "neočekávaný druh odpovědi na zpětném kanálu: %d"
 
-#: src/exec_pty.c:1259
+#: src/exec_pty.c:1348
 msgid "unable to set controlling tty"
 msgstr "řídicí terminál nelze nastavit"
 
@@ -512,19 +530,24 @@ msgstr "nepodařilo se nastavit kontext pro spuštění na %s"
 msgid "unable to set key creation context to %s"
 msgstr "nepodařilo se nastavit kontext pro vytváření klíčů na %s"
 
-#: src/sesh.c:58
+#: src/sesh.c:78
 msgid "requires at least one argument"
 msgstr "je třeba alespoň jeden argument"
 
-#: src/sesh.c:78
+#: src/sesh.c:104
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "%s nelze spustit jako přihlašovací shell"
 
-#: src/sesh.c:83 src/sudo.c:1100
+#: src/sesh.c:109 src/sudo.c:1106
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s nelze spustit"
+
+#: src/signal.c:77
+#, c-format
+msgid "unable to save handler for signal %d"
+msgstr "obsluhu signálu %d nelze uložit"
 
 #: src/solaris.c:88
 msgid "resource control limit has been reached"
@@ -606,130 +629,152 @@ msgstr "nelze získat vektor skupin"
 msgid "unknown uid %u: who are you?"
 msgstr "neznámé UID %u: kdo jsi?"
 
-#: src/sudo.c:770
+#: src/sudo.c:772
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s musí být vlastněn UID %d a mít nastaven bit setuid"
 
-#: src/sudo.c:773
+#: src/sudo.c:775
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "efektivní UID není %d, nalézá se %s na souborovém systému s nastavenou volbou „nosuid“ nebo na souborovém systému NFS bez práv roota?"
 
-#: src/sudo.c:779
+#: src/sudo.c:781
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "efektivní UID není %d, je sudo nainstalované jako setuid vlastněné rootem?"
 
-#: src/sudo.c:908
+#: src/sudo.c:910
 #, c-format
 msgid "unknown login class %s"
 msgstr "neznámá přihlašovací třída %s"
 
-#: src/sudo.c:921
+#: src/sudo.c:923
 msgid "unable to set user context"
 msgstr "nelze nastavit kontext uživatele"
 
-#: src/sudo.c:935
+#: src/sudo.c:937
 msgid "unable to set supplementary group IDs"
 msgstr "nelze nastavit ID doplňkových skupin"
 
-#: src/sudo.c:942
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "efektivní GID nelze nastavit na %u"
 
-#: src/sudo.c:948
+#: src/sudo.c:950
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "GID nelze nastavit na %u"
 
-#: src/sudo.c:955
+#: src/sudo.c:957
 msgid "unable to set process priority"
 msgstr "nelze nastavit prioritu procesu"
 
-#: src/sudo.c:963
+#: src/sudo.c:965
 #, c-format
 msgid "unable to change root to %s"
 msgstr "kořenový adresář nelze změnit na %s"
 
-#: src/sudo.c:976 src/sudo.c:982 src/sudo.c:988
+#: src/sudo.c:978 src/sudo.c:984 src/sudo.c:990
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "nelze změnit UID na (%u, %u)"
 
-#: src/sudo.c:1005
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "pracovní adresář nelze změnit na %s"
 
-#: src/sudo.c:1062
+#: src/sudo.c:1068
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "neočekávaný důvod ukončení potomka: %d"
 
-#: src/sudo.c:1121
+#: src/sudo.c:1127
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "modulu s politikami %s chybí metoda „check_policy“"
 
-#: src/sudo.c:1134
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "modul s politikami %s nepodporuje získání seznamu oprávnění"
 
-#: src/sudo.c:1146
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "modul s politikami %s nepodporuje přepínač -v"
 
-#: src/sudo.c:1158
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "modul s politikami %s nepodporuje přepínače -k/-K"
 
-#: src/sudo_edit.c:110
-#, c-format
-msgid "unable to change uid to root (%u)"
-msgstr "UID nelze změnit na roota (%u)"
-
-#: src/sudo_edit.c:142
-msgid "plugin error: missing file list for sudoedit"
-msgstr "chyba modulu: programu sudoedit chybí seznam souborů"
-
-#: src/sudo_edit.c:170 src/sudo_edit.c:285
+#: src/sudo_edit.c:203 src/sudo_edit.c:294
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: nejedná se o obyčejný soubor"
 
-#: src/sudo_edit.c:204 src/sudo_edit.c:320
+#: src/sudo_edit.c:230 src/sudo_edit.c:332
 #, c-format
 msgid "%s: short write"
 msgstr "%s: krátký zápis"
 
-#: src/sudo_edit.c:286
+#: src/sudo_edit.c:295
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s ponechán nezměněn"
 
-#: src/sudo_edit.c:298
+#: src/sudo_edit.c:308 src/sudo_edit.c:483
 #, c-format
 msgid "%s unchanged"
 msgstr "%s nezměněn"
 
-#: src/sudo_edit.c:310 src/sudo_edit.c:331
+#: src/sudo_edit.c:321 src/sudo_edit.c:343
 #, c-format
 msgid "unable to write to %s"
 msgstr "do %s nelze zapsat"
 
-#: src/sudo_edit.c:311 src/sudo_edit.c:329 src/sudo_edit.c:332
+#: src/sudo_edit.c:322 src/sudo_edit.c:341 src/sudo_edit.c:344
+#: src/sudo_edit.c:508 src/sudo_edit.c:512
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "obsah relace s úpravami ponechán v %s"
 
-#: src/sudo_edit.c:328
+#: src/sudo_edit.c:340
 msgid "unable to read temporary file"
 msgstr "nelze přečíst dočasný soubor"
+
+#: src/sudo_edit.c:417
+msgid "sesh: internal error: odd number of paths"
+msgstr "sesh: vnitřní chyba: lichý počet cest"
+
+#: src/sudo_edit.c:419
+msgid "sesh: unable to create temporary files"
+msgstr "sesh: nelze vytvořit dočasné soubory"
+
+#: src/sudo_edit.c:421 src/sudo_edit.c:515
+#, c-format
+msgid "sesh: unknown error %d"
+msgstr "sesh: neznámá chyba %d"
+
+#: src/sudo_edit.c:507
+msgid "unable to copy temporary files back to their original location"
+msgstr "dočasné soubory nelze zkopírovat zpět na jejich původní místo"
+
+#: src/sudo_edit.c:511
+msgid "unable to copy some of the temporary files back to their original location"
+msgstr "některé z dočasných souborů nelze zkopírovat zpět na jejich původní místo"
+
+#: src/sudo_edit.c:554
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "UID nelze změnit na roota (%u)"
+
+#: src/sudo_edit.c:571
+msgid "plugin error: missing file list for sudoedit"
+msgstr "chyba modulu: programu sudoedit chybí seznam souborů"
 
 #: src/tgetpass.c:90
 msgid "no tty present and no askpass program specified"
