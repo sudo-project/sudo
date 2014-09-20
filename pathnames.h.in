@@ -178,3 +178,12 @@
 #ifndef _PATH_NETSVC_CONF
 # undef	_PATH_NETSVC_CONF
 #endif /* _PATH_NETSVC_CONF */
+
+/* On AIX, _PATH_BSHELL is /usr/bin/bsh but we want /usr/bin/sh */
+#ifndef _PATH_SUDO_BSHELL
+# ifdef _AIX
+#  define _PATH_SUDO_BSHELL "/usr/bin/sh"
+# else
+#  define _PATH_SUDO_BSHELL _PATH_BSHELL
+# endif
+#endif /* _PATH_SUDO_BSHELL */

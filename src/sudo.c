@@ -471,7 +471,7 @@ get_user_info(struct user_details *ud)
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
     if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
-	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_BSHELL;
+	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_SUDO_BSHELL;
     }
     ud->shell = sudo_estrdup(ud->shell);
 
