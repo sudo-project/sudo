@@ -66,7 +66,7 @@ dnl check for bourne shell in well-known locations
 dnl
 AC_DEFUN([SUDO_PROG_BSHELL], [AC_MSG_CHECKING([for bourne shell])
 found=no
-for p in "/bin/sh" "/usr/bin/sh" "/sbin/sh" "/usr/sbin/sh" "/bin/ksh" "/usr/bin/ksh" "/bin/bash" "/usr/bin/bash"; do
+for p in "/usr/bin/sh" "/bin/sh" "/usr/sbin/sh" "/sbin/sh" "/usr/bin/ksh" "/bin/ksh" "/usr/bin/bash" "/bin/bash"; do
     if test -f "$p"; then
 	found=yes
 	AC_MSG_RESULT([$p])
