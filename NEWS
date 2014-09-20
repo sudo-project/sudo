@@ -77,6 +77,9 @@ What's new in Sudo 1.8.11
  * Fixed a hang when a sudoers source is listed more than once in
    a single sudoers nsswitch.conf entry.
 
+ * Fixed a cross-compilation problem building mksiglist and mksigname.
+   Bug #662
+
 What's new in Sudo 1.8.10p3?
 
  * Fixed expansion of %p in the prompt for "sudo -l" when rootpw,
