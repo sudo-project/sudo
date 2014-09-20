@@ -77,6 +77,11 @@ What's new in Sudo 1.8.11
  * Fixed a hang when a sudoers source is listed more than once in
    a single sudoers nsswitch.conf entry.
 
+ * On AIX, shell scripts without a #! magic number are now passed to
+   /usr/bin/sh, not /usr/bin/bsh.  This is consistent with what the
+   execvp() function on AIX does and matches historic sudo behavior.
+   Bug #661
+
  * Fixed a cross-compilation problem building mksiglist and mksigname.
    Bug #662
 
