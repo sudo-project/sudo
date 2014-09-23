@@ -53,7 +53,7 @@
 #include <pwd.h>
 
 #include "sudo_plugin.h"
-#include "missing.h"
+#include "sudo_compat.h"
 
 /*
  * Sample sudoers group plugin that uses an extra group file with the

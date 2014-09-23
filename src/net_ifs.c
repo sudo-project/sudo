@@ -85,11 +85,11 @@ struct rtentry;
 #endif
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include "missing.h"
-#include "alloc.h"
-#include "fatal.h"
+#include "sudo_compat.h"
+#include "sudo_alloc.h"
+#include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 
@@ -143,7 +143,7 @@ get_net_ifs(char **addrinfo)
     if (num_interfaces == 0)
 	debug_return_int(0);
     ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = emalloc(ailen);
+    *addrinfo = cp = sudo_emalloc(ailen);
 
     /* Store the IP addr/netmask pairs. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -159,7 +159,7 @@ get_net_ifs(char **addrinfo)
 		    "%s%s/", cp == *addrinfo ? "" : " ",
 		    inet_ntoa(sin->sin_addr));
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -168,7 +168,7 @@ get_net_ifs(char **addrinfo)
 		len = snprintf(cp, ailen - (*addrinfo - cp),
 		    "%s", inet_ntoa(sin->sin_addr));
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -180,7 +180,7 @@ get_net_ifs(char **addrinfo)
 		len = snprintf(cp, ailen - (*addrinfo - cp),
 		    "%s%s/", cp == *addrinfo ? "" : " ", addrbuf);
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -189,7 +189,7 @@ get_net_ifs(char **addrinfo)
 		inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
 		len = snprintf(cp, ailen - (*addrinfo - cp), "%s", addrbuf);
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    warningx(U_("load_interfaces: overflow detected"));
+		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
 		cp += len;
@@ -202,7 +202,7 @@ done:
 #ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
 #else
-    efree(ifaddrs);
+    sudo_efree(ifaddrs);
 #endif
     debug_return_int(num_interfaces);
 }
@@ -216,8 +216,9 @@ done:
 int
 get_net_ifs(char **addrinfo)
 {
+    char ifr_tmpbuf[sizeof(struct ifreq)];
+    struct ifreq *ifr, *ifr_tmp = (struct ifreq *)ifr_tmpbuf;
     struct ifconf *ifconf;
-    struct ifreq *ifr, ifr_tmp;
     struct sockaddr_in *sin;
     int ailen, i, len, n, sock, num_interfaces = 0;
     size_t buflen = sizeof(struct ifconf) + BUFSIZ;
@@ -232,13 +233,13 @@ get_net_ifs(char **addrinfo)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
-	fatal(U_("unable to open socket"));
+	sudo_fatal(U_("unable to open socket"));
 
     /*
      * Get interface configuration or return.
      */
     for (;;) {
-	ifconf_buf = emalloc(buflen);
+	ifconf_buf = sudo_emalloc(buflen);
 	ifconf = (struct ifconf *) ifconf_buf;
 	ifconf->ifc_len = buflen - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
@@ -256,14 +257,14 @@ get_net_ifs(char **addrinfo)
 	if (ifconf->ifc_len + sizeof(struct ifreq) < buflen)
 	    break;
 	buflen += BUFSIZ;
-	efree(ifconf_buf);
+	sudo_efree(ifconf_buf);
     }
 
     /* Allocate space for the maximum number of interfaces that could exist. */
     if ((n = ifconf->ifc_len / sizeof(struct ifreq)) == 0)
 	debug_return_int(0);
     ailen = n * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = emalloc(ailen);
+    *addrinfo = cp = sudo_emalloc(ailen);
 
     /* For each interface, store the ip address and netmask. */
     for (i = 0; i < ifconf->ifc_len; ) {
@@ -287,15 +288,15 @@ get_net_ifs(char **addrinfo)
 		continue;
 
 #ifdef SIOCGIFFLAGS
-	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
-	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
-	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) &ifr_tmp) < 0)
+	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
+	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
+	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) ifr_tmp) < 0)
 #endif
-	    ifr_tmp = *ifr;
+	    memcpy(ifr_tmp, ifr, sizeof(*ifr_tmp));
 	
 	/* Skip interfaces marked "down" and "loopback". */
-	if (!ISSET(ifr_tmp.ifr_flags, IFF_UP) ||
-	    ISSET(ifr_tmp.ifr_flags, IFF_LOOPBACK))
+	if (!ISSET(ifr_tmp->ifr_flags, IFF_UP) ||
+	    ISSET(ifr_tmp->ifr_flags, IFF_LOOPBACK))
 		continue;
 
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
@@ -303,7 +304,7 @@ get_net_ifs(char **addrinfo)
 	    "%s%s/", cp == *addrinfo ? "" : " ",
 	    inet_ntoa(sin->sin_addr));
 	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-	    warningx(U_("load_interfaces: overflow detected"));
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
@@ -312,22 +313,20 @@ get_net_ifs(char **addrinfo)
 	previfname = ifr->ifr_name;
 
 	/* Get the netmask. */
-	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
-	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
+	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
+	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
+	sin = (struct sockaddr_in *) &ifr_tmp->ifr_addr;
 #ifdef _ISC
-	STRSET(SIOCGIFNETMASK, (caddr_t) &ifr_tmp, sizeof(ifr_tmp));
-	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
+	STRSET(SIOCGIFNETMASK, (caddr_t) ifr_tmp, sizeof(*ifr_tmp));
+	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
 #else
-	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifr_tmp) < 0) {
+	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) ifr_tmp) < 0)
 #endif /* _ISC */
-	    sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 	    sin->sin_addr.s_addr = htonl(IN_CLASSC_NET);
-	}
-	sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 	len = snprintf(cp, ailen - (*addrinfo - cp),
 	    "%s", inet_ntoa(sin->sin_addr));
 	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-	    warningx(U_("load_interfaces: overflow detected"));
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
@@ -335,7 +334,7 @@ get_net_ifs(char **addrinfo)
     }
 
 done:
-    efree(ifconf_buf);
+    sudo_efree(ifconf_buf);
     (void) close(sock);
 
     debug_return_int(num_interfaces);

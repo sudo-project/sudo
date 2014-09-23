@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,11 +39,11 @@
 #endif /* HAVE_STDBOOL_H */
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include "missing.h"
-#include "fatal.h"
-#include "alloc.h"
+#include "sudo_compat.h"
+#include "sudo_fatal.h"
+#include "sudo_alloc.h"
 #include "logging.h"
 
 static int current_locale = SUDOERS_LOCALE_USER;
@@ -60,12 +60,12 @@ void
 sudoers_initlocale(const char *ulocale, const char *slocale)
 {
     if (ulocale != NULL) {
-	efree(user_locale);
-	user_locale = estrdup(ulocale);
+	sudo_efree(user_locale);
+	user_locale = sudo_estrdup(ulocale);
     }
     if (slocale != NULL) {
-	efree(sudoers_locale);
-	sudoers_locale = estrdup(slocale);
+	sudo_efree(sudoers_locale);
+	sudoers_locale = sudo_estrdup(slocale);
     }
 }
 
@@ -88,7 +88,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		current_locale = SUDOERS_LOCALE_USER;
 		res = setlocale(LC_ALL, user_locale ? user_locale : "");
 		if (res != NULL && user_locale == NULL)
-		    user_locale = estrdup(setlocale(LC_ALL, NULL));
+		    user_locale = sudo_estrdup(setlocale(LC_ALL, NULL));
 	    }
 	    break;
 	case SUDOERS_LOCALE_SUDOERS:
@@ -99,8 +99,8 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		res = setlocale(LC_ALL, sudoers_locale ? sudoers_locale : "C");
 		if (res == NULL && sudoers_locale != NULL) {
 		    if (strcmp(sudoers_locale, "C") != 0) {
-			efree(sudoers_locale);
-			sudoers_locale = estrdup("C");
+			sudo_efree(sudoers_locale);
+			sudoers_locale = sudo_estrdup("C");
 			res = setlocale(LC_ALL, "C");
 		    }
 		}
@@ -112,7 +112,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 
 #ifdef HAVE_LIBINTL_H
 char *
-warning_gettext(const char *msgid)
+sudo_warn_gettext_v1(const char *msgid)
 {
     int warning_locale;
     char *msg;
@@ -124,3 +124,16 @@ warning_gettext(const char *msgid)
     return msg;
 }
 #endif /* HAVE_LIBINTL_H */
+
+char *
+sudo_warn_strerror_v1(int errnum)
+{
+    int warning_locale;
+    char *errmsg;
+
+    sudoers_setlocale(SUDOERS_LOCALE_USER, &warning_locale);
+    errmsg = strerror(errnum);
+    sudoers_setlocale(warning_locale, NULL);
+
+    return errmsg;
+}

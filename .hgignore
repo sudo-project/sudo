@@ -22,7 +22,7 @@ Makefile$
 ^doc/.*\.mdoc\.sed$
 ^doc/varsub$
 
-^init.d/*.sh$
+^init.d/.*.sh$
 
 ^pathnames\.h$
 ^src/sudo$
@@ -30,10 +30,12 @@ Makefile$
 ^src/check_ttyname$
 ^src/sudo_usage\.h$
 
-^compat/mksiglist$
-^compat/mksigname$
-^compat/siglist\.c$
-^compat/signame\.c$
+^lib/util/mksiglist$
+^lib/util/mksigname$
+^lib/util/siglist\.c$
+^lib/util/signame\.c$
+^lib/util/util\.exp$
+^lib/util/regress/.*\.(out|err)$
 
 ^plugins/sudoers/(sudoers|sudoreplay|testsudoers|visudo|check_[a-z_]+)$
 ^plugins/sudoers/.*\.(out|toke|err)$

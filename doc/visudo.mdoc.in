@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 15, 2014
+.Dd July 12, 2014
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -29,7 +29,7 @@
 .Nm visudo
 .Op Fl chqsV
 .Op Fl f Ar sudoers
-.Op Fl x Ar file
+.Op Fl x Ar output_file
 .Sh DESCRIPTION
 .Nm visudo
 edits the
@@ -196,18 +196,26 @@ Print the
 and
 .Em sudoers
 grammar versions and exit.
-.It Fl x Ar file , Fl -export Ns = Ns Ar file
-Export
+.It Fl x Ar output_file , Fl -export Ns = Ns Ar output_file
+Export a
 .Em sudoers
 in JSON format and write it to
-.Ar file .
+.Ar output_file .
 If
-.Ar file
+.Ar output_file
 is
 .Ql - ,
 the exported
 .Em sudoers
 policy will be written to the standard output.
+By default,
+.Pa @sysconfdir@/sudoers
+(and any files it includes) will be exported.
+The
+.Fl f
+option can be used to specify a different
+.Em sudoers
+file to export.
 The exported format is intended to be easier for third-party
 applications to parse than the traditional
 .Em sudoers
@@ -274,9 +282,6 @@ In
 The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
 You may wish to comment out or remove the unused alias.
-In
-.Fl s
-(strict) mode this is an error, not a warning.
 .It Li Warning: cycle in {User,Runas,Host,Cmnd}_Alias
 The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
 itself, either directly or through an alias it includes.
@@ -286,6 +291,14 @@ will ignore cycles when parsing
 the
 .Em sudoers
 file.
+.It Li visudo: @sysconfdir@/sudoers: input and output files must be different
+The
+.Fl x
+flag was used and the specified
+.Ar output_file
+has the same path name as the
+.Em sudoers
+file to export.
 .El
 .Sh SEE ALSO
 .Xr vi 1 ,

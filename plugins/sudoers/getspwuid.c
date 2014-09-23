@@ -142,7 +142,7 @@ sudo_getepw(const struct passwd *pw)
 done:
 #endif
     /* If no shadow password, fall back on regular password. */
-    debug_return_str(estrdup(epw ? epw : pw->pw_passwd));
+    debug_return_str(sudo_estrdup(epw ? epw : pw->pw_passwd));
 }
 
 void

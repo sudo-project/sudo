@@ -40,7 +40,7 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 #include "sudo_debug.h"
-#include "queue.h"
+#include "sudo_queue.h"
 
 /* Singly linked hook list. */
 struct sudo_hook_entry {
@@ -83,7 +83,7 @@ process_hooks_setenv(const char *name, const char *value, int overwrite)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx_nodebug("invalid setenv hook return value: %d", rc);
+		sudo_warnx_nodebug("invalid setenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -108,7 +108,7 @@ process_hooks_putenv(char *string)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx_nodebug("invalid putenv hook return value: %d", rc);
+		sudo_warnx_nodebug("invalid putenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -134,7 +134,7 @@ process_hooks_getenv(const char *name, char **value)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx_nodebug("invalid getenv hook return value: %d", rc);
+		sudo_warnx_nodebug("invalid getenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -161,7 +161,7 @@ process_hooks_unsetenv(const char *name)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx_nodebug("invalid unsetenv hook return value: %d", rc);
+		sudo_warnx_nodebug("invalid unsetenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -177,7 +177,7 @@ register_hook_internal(struct sudo_hook_list *head,
     struct sudo_hook_entry *hook;
     debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS)
 
-    hook = ecalloc(1, sizeof(*hook));
+    hook = sudo_ecalloc(1, sizeof(*hook));
     hook->u.generic_fn = hook_fn;
     hook->closure = closure;
     SLIST_INSERT_HEAD(head, hook, entries);
@@ -238,7 +238,7 @@ deregister_hook_internal(struct sudo_hook_list *head,
 		SLIST_REMOVE_HEAD(head, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
-	    efree(hook);
+	    sudo_efree(hook);
 	    break;
 	}
 	prev = hook;

@@ -66,7 +66,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 
     if (strlen(infile) >= PATH_MAX) {
 	errno = ENAMETOOLONG;
-	fatal("%s", infile);
+	debug_return_int(NOT_FOUND_ERROR);
     }
 
     /*
@@ -84,7 +84,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 
     if (path == NULL)
 	debug_return_int(NOT_FOUND);
-    path = estrdup(path);
+    path = sudo_estrdup(path);
     origpath = path;
 
     do {
@@ -106,8 +106,9 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || (size_t)len >= sizeof(command)) {
+	    sudo_efree(origpath);
 	    errno = ENAMETOOLONG;
-	    fatal("%s", infile);
+	    debug_return_int(NOT_FOUND_ERROR);
 	}
 	if ((found = sudo_goodpath(command, sbp)))
 	    break;
@@ -115,7 +116,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	path = n + 1;
 
     } while (n);
-    efree(origpath);
+    sudo_efree(origpath);
 
     /*
      * Check current dir if dot was in the PATH
@@ -124,7 +125,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	len = snprintf(command, sizeof(command), "./%s", infile);
 	if (len <= 0 || (size_t)len >= sizeof(command)) {
 	    errno = ENAMETOOLONG;
-	    fatal("%s", infile);
+	    debug_return_int(NOT_FOUND_ERROR);
 	}
 	found = sudo_goodpath(command, sbp);
 	if (found && ignore_dot)

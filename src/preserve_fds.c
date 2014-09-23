@@ -59,12 +59,12 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
     struct preserved_fd *pfd, *pfd_new;
     debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL)
 
-    pfd_new = emalloc(sizeof(*pfd));
+    pfd_new = sudo_emalloc(sizeof(*pfd));
     pfd_new->lowfd = fd;
     pfd_new->highfd = fd;
     pfd_new->flags = fcntl(fd, F_GETFD);
     if (pfd_new->flags == -1) {
-	efree(pfd_new);
+	sudo_efree(pfd_new);
 	debug_return_int(-1);
     }
 
@@ -73,7 +73,7 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 	    /* already preserved */
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"fd %d already preserved", fd);
-	    efree(pfd_new);
+	    sudo_efree(pfd_new);
 	    break;
 	}
 	if (fd < pfd->highfd) {
@@ -143,7 +143,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     }
 
     /* Create bitmap of preserved (relocated) fds.  */
-    fdsp = ecalloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsp = sudo_ecalloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
     TAILQ_FOREACH(pfd, pfds, entries) {
 	FD_SET(pfd->lowfd, fdsp);
     }
@@ -166,9 +166,11 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     free(fdsp);
 
     /* Let closefrom() do the rest for us. */
+    if (lastfd + 1 > startfd)
+	startfd = lastfd + 1;
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"closefrom(%d)", lastfd + 1);
-    closefrom(lastfd + 1);
+	"closefrom(%d)", startfd);
+    closefrom(startfd);
 
     /* Restore preserved fds and set flags. */
     TAILQ_FOREACH_REVERSE(pfd, pfds, preserved_fd_list, entries) {

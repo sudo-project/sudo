@@ -127,7 +127,7 @@ alias_add(char *name, int type, struct member *members)
     struct alias *a;
     debug_decl(alias_add, SUDO_DEBUG_ALIAS)
 
-    a = ecalloc(1, sizeof(*a));
+    a = sudo_ecalloc(1, sizeof(*a));
     a->name = name;
     a->type = type;
     /* a->used = false; */
@@ -175,17 +175,17 @@ alias_free(void *v)
     void *next;
     debug_decl(alias_free, SUDO_DEBUG_ALIAS)
 
-    efree(a->name);
+    sudo_efree(a->name);
     TAILQ_FOREACH_SAFE(m, &a->members, entries, next) {
 	if (m->type == COMMAND) {
 		c = (struct sudo_command *) m->name;
-		efree(c->cmnd);
-		efree(c->args);
+		sudo_efree(c->cmnd);
+		sudo_efree(c->args);
 	}
-	efree(m->name);
-	efree(m);
+	sudo_efree(m->name);
+	sudo_efree(m);
     }
-    efree(a);
+    sudo_efree(a);
 
     debug_return;
 }

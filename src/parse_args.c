@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -40,18 +40,19 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_GETOPT_LONG
-# include <getopt.h>
-# else
-# include "compat/getopt.h"
-#endif /* HAVE_GETOPT_LONG */
 #include <ctype.h>
 #include <grp.h>
 #include <pwd.h>
 
 #include <sudo_usage.h>
 #include "sudo.h"
-#include "lbuf.h"
+#include "sudo_lbuf.h"
+
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 int tgetpass_flags;
 
@@ -179,17 +180,22 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     const char *runas_user = NULL;
     const char *runas_group = NULL;
     const char *debug_flags;
+    const char *progname;
+    int proglen;
     int nenv = 0;
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
 
-    env_add = emalloc2(env_size, sizeof(char *));
+    env_add = sudo_emallocarray(env_size, sizeof(char *));
 
     /* Pass progname to plugin so it can call initprogname() */
-    sudo_settings[ARG_PROGNAME].value = getprogname();
+    progname = getprogname();
+    sudo_settings[ARG_PROGNAME].value = progname;
 
     /* First, check to see if we were invoked as "sudoedit". */
-    if (strcmp(getprogname(), "sudoedit") == 0) {
+    proglen = strlen(progname);
+    if (proglen > 4 && strcmp(progname + proglen - 4, "edit") == 0) {
+	progname = "sudoedit";
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
     }
@@ -206,7 +212,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /* Set max_groups from sudo.conf. */
     i = sudo_conf_max_groups();
     if (i != -1) {
-	easprintf(&cp, "%d", i);
+	sudo_easprintf(&cp, "%d", i);
 	sudo_settings[ARG_MAX_GROUPS].value = cp;
     }
 
@@ -243,7 +249,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'C':
 		    if (strtonum(optarg, 3, INT_MAX, NULL) == 0) {
-			warningx(_("the argument to -C must be a number greater than or equal to 3"));
+			sudo_warnx(_("the argument to -C must be a number greater than or equal to 3"));
 			usage(1);
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
@@ -286,7 +292,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 			    continue;
 			}
 			if (mode && mode != MODE_HELP) {
-			    if (strcmp(getprogname(), "sudoedit") != 0)
+			    if (strcmp(progname, "sudoedit") != 0)
 				usage_excl(1);
 			}
 			mode = MODE_HELP;
@@ -371,7 +377,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	} else if (!got_end_of_args && is_envar) {
 	    if (nenv == env_size - 2) {
 		env_size *= 2;
-		env_add = erealloc3(env_add, env_size, sizeof(char *));
+		env_add = sudo_ereallocarray(env_add, env_size, sizeof(char *));
 	    }
 	    env_add[nenv++] = argv[optind];
 
@@ -405,11 +411,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     if (ISSET(flags, MODE_LOGIN_SHELL)) {
 	if (ISSET(flags, MODE_SHELL)) {
-	    warningx(U_("you may not specify both the `-i' and `-s' options"));
+	    sudo_warnx(U_("you may not specify both the `-i' and `-s' options"));
 	    usage(1);
 	}
 	if (ISSET(flags, MODE_PRESERVE_ENV)) {
-	    warningx(U_("you may not specify both the `-i' and `-E' options"));
+	    sudo_warnx(U_("you may not specify both the `-i' and `-E' options"));
 	    usage(1);
 	}
 	SET(flags, MODE_SHELL);
@@ -419,9 +425,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || env_add[0] != NULL)) {
 	if (ISSET(mode, MODE_PRESERVE_ENV))
-	    warningx(U_("the `-E' option is not valid in edit mode"));
+	    sudo_warnx(U_("the `-E' option is not valid in edit mode"));
 	if (env_add[0] != NULL)
-	    warningx(U_("you may not specify environment variables in edit mode"));
+	    sudo_warnx(U_("you may not specify environment variables in edit mode"));
 	usage(1);
     }
     if ((runas_user != NULL || runas_group != NULL) &&
@@ -429,11 +435,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	usage(1);
     }
     if (list_user != NULL && mode != MODE_LIST && mode != MODE_CHECK) {
-	warningx(U_("the `-U' option may only be used with the `-l' option"));
+	sudo_warnx(U_("the `-U' option may only be used with the `-l' option"));
 	usage(1);
     }
     if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
-	warningx(U_("the `-A' and `-S' options may not be used together"));
+	sudo_warnx(U_("the `-A' and `-S' options may not be used together"));
 	usage(1);
     }
     if ((argc == 0 && mode == MODE_EDIT) ||
@@ -460,7 +466,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
 		strlen(argv[argc - 1]) + 1;
 
-	    cmnd = dst = emalloc2(cmnd_size, 2);
+	    cmnd = dst = sudo_emallocarray(cmnd_size, 2);
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
@@ -477,7 +483,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    ac += 2; /* -c cmnd */
 	}
 
-	av = emalloc2(ac + 1, sizeof(char *));
+	av = sudo_emallocarray(ac + 1, sizeof(char *));
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = "-c";
@@ -495,15 +501,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #ifdef _PATH_SUDO_PLUGIN_DIR
     sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
-    settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
+    settings = sudo_emallocarray(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
 		sudo_settings[i].name, sudo_settings[i].value);
-	    settings[j] = fmt_string(sudo_settings[i].name,
+	    settings[j] = sudo_new_key_val(sudo_settings[i].name,
 		sudo_settings[i].value);
 	    if (settings[j] == NULL)
-		fatal(NULL);
+		sudo_fatal(NULL);
 	    j++;
 	}
     }
@@ -516,7 +522,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	argv--;
 	argv[0] = "sudoedit";
 #else
-	fatalx(U_("sudoedit is not supported on this platform"));
+	sudo_fatalx(U_("sudoedit is not supported on this platform"));
 #endif
     }
 
@@ -546,7 +552,7 @@ usage_out(const char *buf)
 void
 usage(int fatal)
 {
-    struct lbuf lbuf;
+    struct sudo_lbuf lbuf;
     char *uvec[6];
     int i, ulen;
 
@@ -570,13 +576,13 @@ usage(int fatal)
      * tty width.
      */
     ulen = (int)strlen(getprogname()) + 8;
-    lbuf_init(&lbuf, fatal ? usage_err : usage_out, ulen, NULL,
+    sudo_lbuf_init(&lbuf, fatal ? usage_err : usage_out, ulen, NULL,
 	user_details.ts_cols);
     for (i = 0; uvec[i] != NULL; i++) {
-	lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
-	lbuf_print(&lbuf);
+	sudo_lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
+	sudo_lbuf_print(&lbuf);
     }
-    lbuf_destroy(&lbuf);
+    sudo_lbuf_destroy(&lbuf);
     if (fatal)
 	exit(1);
 }
@@ -589,92 +595,92 @@ usage_excl(int fatal)
 {
     debug_decl(usage_excl, SUDO_DEBUG_ARGS)
 
-    warningx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
+    sudo_warnx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
     usage(fatal);
 }
 
 static void
 help(void)
 {
-    struct lbuf lbuf;
+    struct sudo_lbuf lbuf;
     const int indent = 30;
     const char *pname = getprogname();
     debug_decl(help, SUDO_DEBUG_ARGS)
 
-    lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
+    sudo_lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0)
-	lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
+	sudo_lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
     else
-	lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
-    lbuf_print(&lbuf);
+	sudo_lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
+    sudo_lbuf_print(&lbuf);
 
     usage(0);
 
-    lbuf_append(&lbuf, _("\nOptions:\n"));
-    lbuf_append(&lbuf, "  -A, --askpass               %s\n",
+    sudo_lbuf_append(&lbuf, _("\nOptions:\n"));
+    sudo_lbuf_append(&lbuf, "  -A, --askpass               %s\n",
 	_("use a helper program for password prompting"));
 #ifdef HAVE_BSD_AUTH_H
-    lbuf_append(&lbuf, "  -a, --auth-type=type   %s\n",
+    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type   %s\n",
 	_("use specified BSD authentication type"));
 #endif
-    lbuf_append(&lbuf, "  -b, --background            %s\n",
+    sudo_lbuf_append(&lbuf, "  -b, --background            %s\n",
 	_("run command in the background"));
-    lbuf_append(&lbuf, "  -C, --close-from=num        %s\n",
+    sudo_lbuf_append(&lbuf, "  -C, --close-from=num        %s\n",
 	_("close all file descriptors >= num"));
 #ifdef HAVE_LOGIN_CAP_H
-    lbuf_append(&lbuf, "  -c, --login-class=class     %s\n",
+    sudo_lbuf_append(&lbuf, "  -c, --login-class=class     %s\n",
 	_("run command with the specified BSD login class"));
 #endif
-    lbuf_append(&lbuf, "  -E, --preserve-env          %s\n",
+    sudo_lbuf_append(&lbuf, "  -E, --preserve-env          %s\n",
 	_("preserve user environment when running command"));
-    lbuf_append(&lbuf, "  -e, --edit                  %s\n",
+    sudo_lbuf_append(&lbuf, "  -e, --edit                  %s\n",
 	_("edit files instead of running a command"));
-    lbuf_append(&lbuf, "  -g, --group=group           %s\n",
+    sudo_lbuf_append(&lbuf, "  -g, --group=group           %s\n",
 	_("run command as the specified group name or ID"));
-    lbuf_append(&lbuf, "  -H, --set-home              %s\n",
+    sudo_lbuf_append(&lbuf, "  -H, --set-home              %s\n",
 	_("set HOME variable to target user's home dir"));
-    lbuf_append(&lbuf, "  -h, --help                  %s\n",
+    sudo_lbuf_append(&lbuf, "  -h, --help                  %s\n",
 	_("display help message and exit"));
-    lbuf_append(&lbuf, "  -h, --host=host             %s\n",
+    sudo_lbuf_append(&lbuf, "  -h, --host=host             %s\n",
 	_("run command on host (if supported by plugin)"));
-    lbuf_append(&lbuf, "  -i, --login                 %s\n",
+    sudo_lbuf_append(&lbuf, "  -i, --login                 %s\n",
 	_("run login shell as the target user; a command may also be specified"));
-    lbuf_append(&lbuf, "  -K, --remove-timestamp      %s\n",
+    sudo_lbuf_append(&lbuf, "  -K, --remove-timestamp      %s\n",
 	_("remove timestamp file completely"));
-    lbuf_append(&lbuf, "  -k, --reset-timestamp       %s\n",
+    sudo_lbuf_append(&lbuf, "  -k, --reset-timestamp       %s\n",
 	_("invalidate timestamp file"));
-    lbuf_append(&lbuf, "  -l, --list                  %s\n",
+    sudo_lbuf_append(&lbuf, "  -l, --list                  %s\n",
 	_("list user's privileges or check a specific command; use twice for longer format"));
-    lbuf_append(&lbuf, "  -n, --non-interactive       %s\n",
+    sudo_lbuf_append(&lbuf, "  -n, --non-interactive       %s\n",
 	_("non-interactive mode, no prompts are used"));
-    lbuf_append(&lbuf, "  -P, --preserve-groups       %s\n",
+    sudo_lbuf_append(&lbuf, "  -P, --preserve-groups       %s\n",
 	_("preserve group vector instead of setting to target's"));
-    lbuf_append(&lbuf, "  -p, --prompt=prompt         %s\n",
+    sudo_lbuf_append(&lbuf, "  -p, --prompt=prompt         %s\n",
 	_("use the specified password prompt"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf, "  -r, --role=role             %s\n",
+    sudo_lbuf_append(&lbuf, "  -r, --role=role             %s\n",
 	_("create SELinux security context with specified role"));
 #endif
-    lbuf_append(&lbuf, "  -S, --stdin                 %s\n",
+    sudo_lbuf_append(&lbuf, "  -S, --stdin                 %s\n",
 	_("read password from standard input"));
-    lbuf_append(&lbuf, "  -s, --shell                 %s\n",
+    sudo_lbuf_append(&lbuf, "  -s, --shell                 %s\n",
 	_("run shell as the target user; a command may also be specified"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf, "  -t, --type=type             %s\n",
+    sudo_lbuf_append(&lbuf, "  -t, --type=type             %s\n",
 	_("create SELinux security context with specified type"));
 #endif
-    lbuf_append(&lbuf, "  -U, --other-user=user       %s\n",
+    sudo_lbuf_append(&lbuf, "  -U, --other-user=user       %s\n",
 	_("in list mode, display privileges for user"));
-    lbuf_append(&lbuf, "  -u, --user=user             %s\n",
+    sudo_lbuf_append(&lbuf, "  -u, --user=user             %s\n",
 	_("run command (or edit file) as specified user name or ID"));
-    lbuf_append(&lbuf, "  -V, --version               %s\n",
+    sudo_lbuf_append(&lbuf, "  -V, --version               %s\n",
 	_("display version information and exit"));
-    lbuf_append(&lbuf, "  -v, --validate              %s\n",
+    sudo_lbuf_append(&lbuf, "  -v, --validate              %s\n",
 	_("update user's timestamp without running a command"));
-    lbuf_append(&lbuf, "  --                          %s\n",
+    sudo_lbuf_append(&lbuf, "  --                          %s\n",
 	_("stop processing command line arguments"));
-    lbuf_print(&lbuf);
-    lbuf_destroy(&lbuf);
+    sudo_lbuf_print(&lbuf);
+    sudo_lbuf_destroy(&lbuf);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 0);
     exit(0);
 }

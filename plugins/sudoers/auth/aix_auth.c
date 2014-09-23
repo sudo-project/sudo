@@ -62,7 +62,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    SUDO_CONV_PROMPT_ECHO_OFF);
 	if (pass == NULL)
 	    break;
-	efree(message);
+	sudo_efree(message);
 	message = NULL;
 	result = authenticate(pw->pw_name, pass, &reenter, &message);
 	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
@@ -83,7 +83,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	}
 	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }
-    efree(message);
+    sudo_efree(message);
     debug_return_int(rval);
 }
 
@@ -93,7 +93,8 @@ sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_aix_cleanup, SUDO_DEBUG_AUTH)
 
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
-    sudo_unsetenv("AUTHSTATE");
+    if (sudo_unsetenv("AUTHSTATE") == -1)
+	debug_return_int(AUTH_FAILURE);
 
     debug_return_int(AUTH_SUCCESS);
 }

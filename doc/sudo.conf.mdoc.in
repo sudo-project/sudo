@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 22, 2014
+.Dd July 24, 2014
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -427,9 +427,7 @@ and the plugins.  A future release may add support for per-plugin
 lines and/or support for multiple debugging files for a single
 program.
 .Pp
-The priorities used by the
-.Nm sudo
-front end, in order of decreasing severity, are:
+The following priorities are supported, in order of decreasing severity:
 .Em crit , err , warn , notice , diag , info , trace
 and
 .Em debug .
@@ -439,6 +437,28 @@ than it.  For example, a priority of
 would include debug messages logged at
 .Em notice
 and higher.
+.Pp
+The priorities
+.Em trace
+and
+.Em debug
+also include function call tracing which logs when a function is
+entered and when it returns.
+For example, the following trace is for the get_user_groups()
+function located in src/sudo.c:
+.Bd -literal -offset indent
+sudo[123] -> get_user_groups @ src/sudo.c:385
+sudo[123] <- get_user_groups @ src/sudo.c:429 := groups=10,0,5
+.Ed
+.Pp
+When the function is entered, indicated by a right arrow
+.Ql -> ,
+the program, process ID, function, source file and line number
+are logged.
+When the function returns, indicated by a left arrow
+.Ql <- ,
+the same information is logged along with the return value.
+In this case, the return value is a string.
 .Pp
 The following subsystems are used by the
 .Nm sudo

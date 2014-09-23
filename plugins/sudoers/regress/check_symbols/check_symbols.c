@@ -38,10 +38,10 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_dso.h"
 #include "sudo_util.h"
-#include "fatal.h"
+#include "sudo_fatal.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -75,11 +75,11 @@ main(int argc, char *argv[])
 
     handle = sudo_dso_load(plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (handle == NULL)
-	fatalx_nodebug("unable to load %s: %s", plugin_path, sudo_dso_strerror());
+	sudo_fatalx_nodebug("unable to load %s: %s", plugin_path, sudo_dso_strerror());
 
     fp = fopen(symbols_file, "r");
     if (fp == NULL)
-	fatal_nodebug("unable to open %s", symbols_file);
+	sudo_fatal_nodebug("unable to open %s", symbols_file);
 
     while (fgets(line, sizeof(line), fp) != NULL) {
 	ntests++;

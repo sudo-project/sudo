@@ -193,6 +193,6 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 	}
     }
 done:
-    debug_return(rval);
+    debug_return_bool(rval);
 }
 #endif /* HAVE_OPENPTY */

@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.10p3], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.11], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -14,7 +14,6 @@ AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
-AC_SUBST([HAVE_BSM_AUDIT])
 AC_SUBST([SHELL])
 AC_SUBST([LIBTOOL])
 AC_SUBST([CFLAGS])
@@ -27,6 +26,9 @@ AC_SUBST([LT_LDMAP])
 AC_SUBST([LT_LDOPT])
 AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
+AC_SUBST([LT_STATIC])
+AC_SUBST([LT_STATIC_LIBUTIL])
+AC_SUBST([LT_DEP_LIBS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
@@ -44,8 +46,8 @@ AC_SUBST([MANTYPE])
 AC_SUBST([MANDIRTYPE])
 AC_SUBST([MANCOMPRESS])
 AC_SUBST([MANCOMPRESSEXT])
+AC_SUBST([SHLIB_ENABLE])
 AC_SUBST([SHLIB_MODE])
-AC_SUBST([SHLIB_EXT])
 AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
@@ -60,7 +62,6 @@ AC_SUBST([mansectform])
 AC_SUBST([mansrcdir])
 AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
-AC_SUBST([SOEXT])
 AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_NOEXEC])
@@ -72,14 +73,14 @@ AC_SUBST([LOGINCAP_USAGE])
 AC_SUBST([ZLIB])
 AC_SUBST([ZLIB_SRC])
 AC_SUBST([LIBTOOL_DEPS])
-AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
-AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
+AC_SUBST([LIBMD])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
+AC_SUBST([SUDOERS_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
@@ -89,6 +90,7 @@ AC_SUBST([NO_VIZ])
 AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
+AC_SUBST([COMPAT_EXP])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -199,6 +201,7 @@ LCMAN=0
 PSMAN=0
 SEMAN=0
 LIBINTL=
+LIBMD=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -215,7 +218,7 @@ OS_INIT=os_init_common
 INIT_SCRIPT=
 INIT_DIR=
 RC_LINK=
-
+COMPAT_EXP=
 dnl
 dnl Other vaiables
 dnl
@@ -235,9 +238,9 @@ RTLD_PRELOAD_DELIM=":"
 RTLD_PRELOAD_DEFAULT=
 
 dnl
-dnl libc replacement functions live in compat
+dnl libc replacement functions live in libsudo_util.a
 dnl
-AC_CONFIG_LIBOBJ_DIR(compat)
+AC_CONFIG_LIBOBJ_DIR(lib/util)
 
 #
 # Prior to sudo 1.8.7, sudo stored libexec files in $libexecdir.
@@ -327,6 +330,20 @@ AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux aud
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
+		;;
+esac])
+
+dnl
+dnl Handle Solaris auditing support.
+dnl
+AC_ARG_WITH(solaris-audit, [AS_HELP_STRING([--with-solaris-audit], [enable Solaris audit support])],
+[case $with_solaris_audit in
+    yes)	AC_DEFINE(HAVE_SOLARIS_AUDIT)
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
+		SUDOERS_OBJS="${SUDOERS_OBJS} solaris_audit.lo"
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-solaris-audit does not take an argument."])
 		;;
 esac])
 
@@ -1439,6 +1456,10 @@ AC_ARG_ENABLE(static-sudoers,
 [AS_HELP_STRING([--enable-static-sudoers], [Build the sudoers policy module as part of the sudo binary instead as a plugin])],
 [], [enable_static_sudoers=no])
 
+AC_ARG_ENABLE(shared_libutil,
+[AS_HELP_STRING([--disable-shared-libutil], [Disable use of the libsudo_util shared library.])],
+[], [enable_shared_libutil=yes])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -1487,10 +1508,26 @@ if test "$enable_static" = "no"; then
 fi
 
 dnl
-dnl Libtool setup, we require libtool 2.2.6b or higher
+dnl Set host variables and m4 macro dir
 dnl
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
+
+dnl
+dnl On AIX we need to force libtool to install .so files for the plugins
+dnl instead of a .a file that contains the .so.  We do this by enabling
+dnl runtime linking (where the .so file is installed).  This must happen
+dnl before the call to LT_INIT
+dnl
+case "$host_os" in
+aix4.[[23]]|aix4.[[23]].*|aix[[5-9]]*)
+    LDFLAGS="${LDFLAGS}${LDFLAGS+ }-Wl,-brtl"
+    ;;
+esac
+
+dnl
+dnl Libtool init, we require libtool 2.2.6b or higher
+dnl
 LT_PREREQ([2.2.6b])
 LT_INIT([dlopen])
 
@@ -1519,18 +1556,9 @@ if test "$enable_shared" = "no"; then
     lt_cv_dlopen_libs=
     ac_cv_func_dlopen=no
     LT_LDFLAGS=-static
-else
-    eval _shrext="$shrext_cmds"
-    # Darwin uses .dylib for libraries but .so for modules
-    if test X"$_shrext" = X".dylib"; then
-	SOEXT=".so"
-	SHLIB_EXT=".dylib"
-    else
-	SOEXT="$_shrext"
-	SHLIB_EXT="$_shrext"
-    fi
 fi
 LIBDL="$lt_cv_dlopen_libs"
+SHLIB_ENABLE="$enable_dlopen"
 
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
@@ -1615,7 +1643,9 @@ case "$host" in
 		RTLD_PRELOAD_DELIM=" "
 
 		# getcwd(3) opens a pipe to getpwd(1)!?!
-		BROKEN_GETCWD=1
+		AC_LIBOBJ(getcwd)
+		SUDO_APPEND_COMPAT_EXP(sudo_getcwd)
+		AC_DEFINE(PREFER_PORTABLE_GETCWD)
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
@@ -1686,6 +1716,7 @@ case "$host" in
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
+		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -1696,8 +1727,9 @@ case "$host" in
 		INIT_DIR=/sbin/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
-		# HP-UX shared libs must be executable
-		SHLIB_MODE=0755
+		# HP-UX shared libs must be executable.
+		# Load time is much greater if writable so use 0555.
+		SHLIB_MODE=0555
 
 		AC_CHECK_FUNCS(pstat_getproc)
 		;;
@@ -1714,8 +1746,9 @@ case "$host" in
 		INIT_DIR=/sbin/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
-		# HP-UX shared libs must be executable
-		SHLIB_MODE=0755
+		# HP-UX shared libs must be executable.
+		# Load time is much greater if writable so use 0555.
+		SHLIB_MODE=0555
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then
@@ -1880,6 +1913,12 @@ case "$host" in
 		shadow_libs_optional="-lshadow"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
+    *-*-gnu*)
+		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
+		# lockf() is broken on the Hurd -- use flock instead
+		ac_cv_func_lockf=no
+		ac_cv_func_flock=yes
+		;;
     *-convex-bsd*)
 		OSDEFS="${OSDEFS} -D_CONVEX_SOURCE"
 		if test -z "$GCC"; then
@@ -2026,7 +2065,7 @@ case "$host" in
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 		;;
     *-*-nextstep*)
-		# lockf() on is broken on the NeXT -- use flock instead
+		# lockf() is broken on the NeXT -- use flock instead
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
@@ -2123,7 +2162,9 @@ AC_INCLUDES_DEFAULT
 ], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
 [AC_MSG_RESULT([no])
  AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
- AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])])
+ AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])
+ SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm)
+])
 
 dnl
 dnl Program checks
@@ -2304,7 +2345,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(glob nl_langinfo regcomp setenv strftime strrchr strtoll \
+AC_CHECK_FUNCS(killpg nl_langinfo regcomp strftime strrchr strtoll \
 	       sysconf tzset)
 AC_CHECK_FUNCS(getgrouplist, [], [
     case "$host_os" in
@@ -2320,6 +2361,13 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 		    AC_DEFINE([HAVE_NSS_SEARCH])
 		    AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
 		    AC_DEFINE([HAVE__NSS_INITF_GROUP])
+		], [
+		    AC_CHECK_HEADERS(nss_dbdefs.h, [
+			# Older Solaris does not export _nss_initf_group
+			# but we can use our own.
+			AC_DEFINE([HAVE_NSS_SEARCH])
+			AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
+		    ])
 		])
 	    ], [
 		# HP-UX
@@ -2336,9 +2384,11 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 	;;
     esac
     AC_LIBOBJ(getgrouplist)
+    SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
+    SUDO_APPEND_COMPAT_EXP(sudo_getline)
     AC_CHECK_FUNCS(fgetln)
 ])
 dnl
@@ -2418,26 +2468,58 @@ AC_CHECK_FUNCS(seteuid)
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
 fi
-if test -z "$BROKEN_GETCWD"; then
-    AC_REPLACE_FUNCS(getcwd)
-fi
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
-AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
-AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
-SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
+AC_CHECK_FUNCS(utimes, [
+    AC_CHECK_FUNCS(futimes futimesat, [break])
+], [
+    AC_LIBOBJ(utimes)
+    SUDO_APPEND_COMPAT_EXP(sudo_utimes)
+    AC_CHECK_FUNCS(futime, [SUDO_APPEND_COMPAT_EXP(sudo_futimes)])
+])
+SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
+    AC_LIBOBJ(fnmatch)
+    SUDO_APPEND_COMPAT_EXP(sudo_fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
+AC_CHECK_FUNCS(glob, [], [
+    AC_LIBOBJ(glob)
+    SUDO_APPEND_COMPAT_EXP(sudo_glob sudo_globfree)
+])
+AC_CHECK_FUNCS(memrchr, [], [
+    AC_LIBOBJ(memrchr)
+    SUDO_APPEND_COMPAT_EXP(sudo_memrchr)
+])
+AC_CHECK_FUNCS(memset_s, [], [
+    AC_LIBOBJ(memset_s)
+    SUDO_APPEND_COMPAT_EXP(sudo_memset_s)
+])
+AC_CHECK_FUNCS(pw_dup, [], [
+    AC_LIBOBJ(pw_dup)
+    SUDO_APPEND_COMPAT_EXP(sudo_pw_dup)
+])
+AC_CHECK_FUNCS(strlcpy, [], [
+    AC_LIBOBJ(strlcpy)
+    SUDO_APPEND_COMPAT_EXP(sudo_strlcpy)
+])
+AC_CHECK_FUNCS(strlcat, [], [
+    AC_LIBOBJ(strlcat)
+    SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
+])
 AC_CHECK_FUNCS(clock_gettime, [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
 	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
-    ], [AC_LIBOBJ(clock_gettime)])
+    ], [
+	AC_LIBOBJ(clock_gettime)
+	SUDO_APPEND_COMPAT_EXP(sudo_clock_gettime)
+    ])
 ])
-AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
+AC_CHECK_FUNCS(getopt_long, [], [
+    AC_LIBOBJ(getopt_long)
+    SUDO_APPEND_COMPAT_EXP(sudo_getopt_long sudo_getopt_long_only)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern int optreset; optreset = 1; return optreset;]])], [sudo_cv_optreset=yes], [sudo_cv_optreset=no])])
@@ -2447,29 +2529,64 @@ AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
+    SUDO_APPEND_COMPAT_EXP(closefrom_fallback sudo_closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
 #	include <limits.h>
 #	include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemps mkdtemp, [], [
+AC_CHECK_FUNCS(mkstemps mkdtemp)
+if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_CHECK_FUNCS(random lrand48, [break])
     AC_LIBOBJ(mktemp)
-])
-AX_FUNC_SNPRINTF
-AC_CHECK_FUNCS(asprintf vasprintf)
-if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
-    # Don't add snprintf to LIBOBJS if it is already present.
-    if test X"$ac_cv_func_asprintf$ac_cv_func_vasprintf" != X"yesyes"; then
-	AC_LIBOBJ(snprintf)
+    if test X"$ac_cv_func_mkstemps" = X"no"; then
+	SUDO_APPEND_COMPAT_EXP(sudo_mkstemps)
     fi
+    if test X"$ac_cv_func_mkdtemp" = X"no"; then
+	SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp)
+    fi
+fi
+AX_FUNC_SNPRINTF
+if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+    # System has a C99-compliant v?snprintf(), check for v?asprintf()
+    AC_CHECK_FUNCS(asprintf, [], [
+	AC_LIBOBJ(snprintf)
+	SUDO_APPEND_COMPAT_EXP(sudo_asprintf)
+    ])
+    AC_CHECK_FUNCS(vasprintf, [], [
+	AC_LIBOBJ(snprintf)
+	SUDO_APPEND_COMPAT_EXP(sudo_vasprintf)
+    ])
+else
+    # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
+    SUDO_APPEND_COMPAT_EXP(sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf)
 fi
 # We wrap OpenBSD's strtonum() to get translatable error strings.
 AC_CHECK_FUNCS(strtonum)
 AC_LIBOBJ(strtonum)
+SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
 	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
+fi
+FOUND_SHA2=no
+AC_CHECK_HEADER([sha2.h], [
+    FOUND_SHA2=yes
+    AC_CHECK_FUNCS(SHA224Update, [SUDO_FUNC_SHA2_VOID_PTR], [
+	# On some systems, SHA224Update is in libmd
+	AC_CHECK_LIB(md, SHA224Update, [
+	    AC_DEFINE(HAVE_SHA224UPDATE)
+	    SUDO_FUNC_SHA2_VOID_PTR
+	    LIBMD="-lmd"
+	], [
+	    # Does not have SHA224Update
+	    FOUND_SHA2=no
+	])
+    ])
+])
+if test X"$FOUND_SHA2" = X"no"; then
+    AC_LIBOBJ(sha2)
+    SUDO_APPEND_COMPAT_EXP(SHA224Final SHA224Init SHA224Pad SHA224Transform SHA224Update SHA256Final SHA256Init SHA256Pad SHA256Transform SHA256Update SHA384Final SHA384Init SHA384Pad SHA384Transform SHA384Update SHA512Final SHA512Init SHA512Pad SHA512Transform SHA512Update)
 fi
 dnl
 dnl Function checks for sudo_noexec
@@ -2546,7 +2663,32 @@ AC_CHECK_FUNC(socket, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
+    done
+])
+dnl
+dnl If inet_ntoa(3) not in libc, check -lnsl and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems may have inet_ntoa() in libresolv.
+dnl
+AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	SUDO_CHECK_LIB($lib, inet_ntoa, [
+	    AC_DEFINE(HAVE_INET_NTOA)
+	    NET_LIBS="${NET_LIBS} $libs"
+	    break
+	], [], [$extralibs])
     done
 ])
 dnl
@@ -2554,7 +2696,12 @@ dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_pton() in libresolv.
 dnl
-AC_CHECK_FUNC(inet_pton, [], [
+found=false
+INET_PTON_LIBS=
+AC_CHECK_FUNC(inet_pton, [
+    found=true
+    AC_DEFINE(HAVE_INET_PTON)
+], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
@@ -2568,15 +2715,17 @@ AC_CHECK_FUNC(inet_pton, [], [
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
 	SUDO_CHECK_LIB($lib, inet_pton, [
+	    found=true
 	    AC_DEFINE(HAVE_INET_PTON)
 	    NET_LIBS="${NET_LIBS} $libs"
-	    LIBS="${LIBS} $libs"
+	    INET_PTON_LIBS="$libs"
 	    break
 	], [], [$extralibs])
     done
 ])
-if test X"$ac_cv_func_inet_pton" != X"yes"; then
+if test X"$found" != X"true"; then
     AC_LIBOBJ(inet_pton)
+    SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
 fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
@@ -2594,24 +2743,56 @@ AC_CHECK_FUNC(syslog, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
     done
 ])
 #
-# Check for getaddrinfo and add any required libs to NET_LIBS
+# Check for getaddrinfo and add any required libs to NET_LIBS.
+# If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
 AX_FUNC_GETADDRINFO
-for lib in $LIBS; do
-    case "$OLIBS" in
-	*"$lib"*)   ;;
-	*)	    NET_LIBS="$NET_LIBS $lib";;
-    esac
-done
+case " $LIBOBJS " in
+    *" getaddrinfo.$ac_objext "* )
+	SUDO_APPEND_COMPAT_EXP(sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror)
+	# We need libsudo_util to pull in dependent libraries for
+	# inet_pton(), gethostbyname(), and getservbyname()
+	if test -n "${INET_PTON_LIBS}"; then
+	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
+	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
+	fi
+	AC_CHECK_FUNC(gethostbyname, [], [
+	    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+		_libs=
+		for lib in $libs; do
+		    case "$LT_DEP_LIBS" in
+			*"$lib"*)   ;;
+			*)	    _libs="$_libs $lib";;
+		    esac
+		done
+		libs="${_libs# }"
+		test -z "$libs" && continue
+		lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+		extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+		SUDO_CHECK_LIB($lib, gethostbyname, [LT_DEP_LIBS="${LT_DEP_LIBS} $libs"; break], [], [$extralibs])
+	    done
+	])
+	;;
+    *)
+	for lib in $LIBS; do
+	    case "$OLIBS" in
+		*"$lib"*) ;;
+		*) NET_LIBS="${NET_LIBS} $lib";;
+	    esac
+	done
+	;;
+esac
+LIBS="$OLIBS"
+
 dnl
 dnl Check for getprogname() or __progname
 dnl
-AC_CHECK_FUNCS(getprogname, , [
+AC_CHECK_FUNCS(getprogname, [AC_CHECK_FUNCS(setprogname)], [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
@@ -2619,6 +2800,7 @@ AC_CHECK_FUNCS(getprogname, , [
 	AC_DEFINE(HAVE___PROGNAME)
     fi
     AC_MSG_RESULT($sudo_cv___progname)
+    SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
 ])
 dnl
 dnl Check for __func__ or __FUNCTION__
@@ -2729,11 +2911,11 @@ case "$enable_zlib" in
 esac
 if test X"$enable_zlib" = X"builtin"; then
     AC_DEFINE(HAVE_ZLIB_H)
-    CPPFLAGS='-I$(top_builddir)/zlib -I$(top_srcdir)/zlib '"${CPPFLAGS}"
-    ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
-    ZLIB_SRC=zlib
-    AC_CONFIG_HEADER([zlib/zconf.h])
-    AC_CONFIG_FILES([zlib/Makefile])
+    CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
+    ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libz.la'
+    ZLIB_SRC=lib/zlib
+    AC_CONFIG_HEADER([lib/zlib/zconf.h])
+    AC_CONFIG_FILES([lib/zlib/Makefile])
 fi
 
 dnl
@@ -2757,6 +2939,7 @@ dnl Check for strsignal() or sys_siglist
 dnl
 AC_CHECK_FUNCS(strsignal, [], [
     AC_LIBOBJ(strsignal)
+    SUDO_APPEND_COMPAT_EXP(sudo_strsignal)
     HAVE_SIGLIST="false"
     AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], [
 	HAVE_SIGLIST="true"
@@ -2775,6 +2958,7 @@ dnl Check for sig2str(), sys_signame or sys_sigabbrev
 dnl
 AC_CHECK_FUNCS(sig2str, [], [
     AC_LIBOBJ(sig2str)
+    SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"
     AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
@@ -3237,7 +3421,7 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     if test -z "$LIB_CRYPT"; then
 	_LIBS="$LIBS"
-	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
 	LIBS="$_LIBS"
     fi
 
@@ -3246,13 +3430,11 @@ if test ${with_passwd-'no'} != "no"; then
 	LIBS="$LIBS $shadow_libs"
 	found=no
 	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
-	if test "$found" = "yes"; then
-	    SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
-	elif test -n "$shadow_libs_optional"; then
+	if test "$found" = "yes" -a -n "$shadow_libs_optional"; then
 	    LIBS="$LIBS $shadow_libs_optional"
 	    AC_CHECK_FUNCS($shadow_funcs, [found=yes])
 	    if test "$found" = "yes"; then
-		SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs $shadow_libs_optional"
+		shadow_libs="$shadow_libs $shadow_libs_optional"
 	    fi
 	fi
 	if test "$found" = "yes"; then
@@ -3261,19 +3443,29 @@ if test ${with_passwd-'no'} != "no"; then
 	    esac
 	    test -n "$shadow_defs" && OSDEFS="${OSDEFS} $shadow_defs"
 	else
-	    LIBS="$_LIBS"
+	    shadow_libs=
 	fi
 	CHECKSHADOW=false
+	LIBS="$_LIBS"
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+    fi
+    if test -n "$shadow_libs"; then
+	# sudoers needs to link with shadow libs for password auth
+	SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
     fi
     if test -n "$SECUREWARE"; then
-	AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
+	_LIBS="$LIBS"
+	LIBS="$LIBS $shadow_libs"
+	AC_CHECK_FUNCS(bigcrypt)
 	AUTH_OBJS="$AUTH_OBJS secureware.lo"
+	# set_auth_parameters() and initprivs() are called from sudo.c
+	AC_CHECK_FUNCS(set_auth_parameters initprivs, [test -n "$shadow_libs" && SUDO_LIBS="$SUDO_LIBS $shadow_libs"])
+	LIBS="$_LIBS"
     fi
 fi
 
@@ -3418,11 +3610,34 @@ case "$lt_cv_dlopen" in
 	    AC_MSG_ERROR(["dlopen present but libtool doesn't appear to support your platform."])
 	fi
 	# Preload sudoers module symbols
+	AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
 	;;
 esac
+
+#
+# The check_symbols test can only succeed with a dynamic sudoers plugin.
+#
+if test X"$STATIC_SUDOERS" = X""; then
+    SUDOERS_TEST_PROGS="${SUDOERS_TEST_PROGS}${SUDOERS_TEST_PROGS+ }check_symbols"
+fi
+
+#
+# We can only disable linking with the shared libsudo_util if
+# sudoers is linked statically too.
+#
+if test "$enable_shared_libutil" = "no"; then
+    if test X"$STATIC_SUDOERS" = X""; then
+	AC_MSG_ERROR(["--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled."])
+    else
+	# Disable use shared version of libsudo_util.
+	LT_STATIC_LIBUTIL="--tag=disable-shared"
+    fi
+else
+    LT_STATIC_LIBUTIL="$LT_STATIC"
+fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
 # the main program is linked against -lpthread.  We have no knowledge of
@@ -3739,7 +3954,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
 	fi
     fi
     if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} libsudo_noexec.la"
+	PROGS="${PROGS} sudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
 
 	noexec_file="$with_noexec"
@@ -3808,7 +4023,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
@@ -3875,6 +4090,7 @@ AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
+AH_TEMPLATE(HAVE_INET_NTOA, [Define to 1 if you have the `inet_ntoa' function.])
 AH_TEMPLATE(HAVE_INET_PTON, [Define to 1 if you have the `inet_pton' function.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled).])
@@ -3900,6 +4116,7 @@ AH_TEMPLATE(HAVE_SHL_LOAD, [Define to 1 if you have the `shl_load' function.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
 AH_TEMPLATE(HAVE_RFC1938_SKEYCHALLENGE, [Define to 1 if the skeychallenge() function is RFC1938-compliant and takes 4 arguments.])
+AH_TEMPLATE(HAVE_SOLARIS_AUDIT, [Define to 1 to enable Solaris audit support.])
 AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union.])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member.])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member.])
@@ -3915,6 +4132,7 @@ AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(NO_TTY_TICKETS, [Define to 1 if you want a single ticket file instead of per-tty files.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
+AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Enable replacement getcwd if system getcwd is broken.])
 AH_TEMPLATE(SECURE_PATH, [Define to 1 to override the user's path with a built-in one.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is not allowed to run sudo on this host.])

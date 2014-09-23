@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,20 +32,22 @@
 #include <libaudit.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include "missing.h"
-#include "fatal.h"
-#include "alloc.h"
+#include "sudo_compat.h"
+#include "sudo_fatal.h"
+#include "sudo_alloc.h"
 #include "sudo_debug.h"
 #include "linux_audit.h"
+
+#define AUDIT_NOT_CONFIGURED	-2
 
 /*
  * Open audit connection if possible.
  * Returns audit fd on success and -1 on failure.
  */
-int
-static linux_audit_open(void)
+static int
+linux_audit_open(void)
 {
     static int au_fd = -1;
     debug_decl(linux_audit_open, SUDO_DEBUG_AUDIT)
@@ -55,8 +57,10 @@ static linux_audit_open(void)
     au_fd = audit_open();
     if (au_fd == -1) {
 	/* Kernel may not have audit support. */
-	if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT)
-	    fatal(U_("unable to open audit system"));
+	if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT) {
+	    sudo_warn(U_("unable to open audit system"));
+	    au_fd = AUDIT_NOT_CONFIGURED;
+	}
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
     }
@@ -66,23 +70,24 @@ static linux_audit_open(void)
 int
 linux_audit_command(char *argv[], int result)
 {
-    int au_fd, rc;
+    int au_fd, rc = -1;
     char *command, *cp, **av;
     size_t size, n;
     debug_decl(linux_audit_command, SUDO_DEBUG_AUDIT)
 
-    if ((au_fd = linux_audit_open()) == -1)
-	debug_return_int(-1);
+    /* Don't return an error if auditing is not configured. */
+    if ((au_fd = linux_audit_open()) < 0)
+	debug_return_int(au_fd == AUDIT_NOT_CONFIGURED ? 0 : -1);
 
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
 	size += strlen(*av) + 1;
-    command = cp = emalloc(size);
+    command = cp = sudo_emalloc(size);
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {
-	    fatalx(U_("internal error, %s overflow"),
-		"linux_audit_command()");
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    goto done;
 	}
 	cp += n;
 	*cp++ = ' ';
@@ -90,11 +95,17 @@ linux_audit_command(char *argv[], int result)
     *--cp = '\0';
 
     /* Log command, ignoring ECONNREFUSED on error. */
-    rc = audit_log_user_command(au_fd, AUDIT_USER_CMD, command, NULL, result);
-    if (rc <= 0 && errno != ECONNREFUSED)
-	warning(U_("unable to send audit message"));
+    if (audit_log_user_command(au_fd, AUDIT_USER_CMD, command, NULL, result) <= 0) {
+	if (errno != ECONNREFUSED) {
+	    sudo_warn(U_("unable to send audit message"));
+	    goto done;
+	}
+    }
 
-    efree(command);
+    rc = 0;
+
+done:
+    sudo_efree(command);
 
     debug_return_int(rc);
 }

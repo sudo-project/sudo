@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2013
+ * Copyright (c) 1993-1996,1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -94,11 +94,15 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    auth_pw->pw_name);
+	if (prompt == NULL) {
+	    rval = -1;
+	    goto done;
+	}
 
 	rval = verify_user(auth_pw, prompt, validated);
 	if (rval == true && lectured)
 	    set_lectured();
-	efree(prompt);
+	sudo_efree(prompt);
     }
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_OK) &&
@@ -116,25 +120,26 @@ int
 check_user(int validated, int mode)
 {
     struct passwd *auth_pw;
-    int rval = true;
+    int rval = -1;
     debug_decl(check_user, SUDO_DEBUG_AUTH)
 
     /*
      * Init authentication system regardless of whether we need a password.
      * Required for proper PAM session support.
      */
-    auth_pw = get_authpw(mode);
-    if (sudo_auth_init(auth_pw) == -1) {
-	rval = -1;
+    if ((auth_pw = get_authpw(mode)) == NULL)
 	goto done;
-    }
+    if (sudo_auth_init(auth_pw) == -1)
+	goto done;
 
     /*
      * Don't prompt for the root passwd or if the user is exempt.
      * If the user is not changing uid/gid, no need for a password.
      */
-    if (!def_authenticate || user_is_exempt())
+    if (!def_authenticate || user_is_exempt()) {
+	rval = true;
 	goto done;
+    }
     if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
 	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))) {
 #ifdef HAVE_SELINUX
@@ -143,7 +148,10 @@ check_user(int validated, int mode)
 #ifdef HAVE_PRIV_SET
 	if (runas_privs == NULL && runas_limitprivs == NULL)
 #endif
+	{
+	    rval = true;
 	    goto done;
+	}
     }
 
     rval = check_user_interactive(validated, mode, auth_pw);
@@ -219,7 +227,7 @@ user_is_exempt(void)
 static struct passwd *
 get_authpw(int mode)
 {
-    struct passwd *pw;
+    struct passwd *pw = NULL;
     debug_decl(get_authpw, SUDO_DEBUG_AUTH)
 
     if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
@@ -228,17 +236,23 @@ get_authpw(int mode)
 	pw = sudo_user.pw;
     } else {
 	if (def_rootpw) {
-	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
-		log_fatal(0, N_("unknown uid: %u"), ROOT_UID);
+	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
+		log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"), ROOT_UID);
+	    }
 	} else if (def_runaspw) {
-	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-		log_fatal(0, N_("unknown user: %s"), def_runas_default);
+	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL) {
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("unknown user: %s"), def_runas_default);
+	    }
 	} else if (def_targetpw) {
-	    if (runas_pw->pw_name == NULL)
-		log_fatal(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
+	    if (runas_pw->pw_name == NULL) {
+		/* This should never be NULL as we fake up the passwd struct */
+		log_warningx(SLOG_RAW_MSG, N_("unknown uid: %u"),
 		    (unsigned int) runas_pw->pw_uid);
-	    sudo_pw_addref(runas_pw);
-	    pw = runas_pw;
+	    } else {
+		sudo_pw_addref(runas_pw);
+		pw = runas_pw;
+	    }
 	} else {
 	    sudo_pw_addref(sudo_user.pw);
 	    pw = sudo_user.pw;

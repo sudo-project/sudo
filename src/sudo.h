@@ -30,12 +30,11 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include "missing.h"
-#include "alloc.h"
-#include "fatal.h"
-#include "fileops.h"
+#include "sudo_compat.h"
+#include "sudo_alloc.h"
+#include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
@@ -122,6 +121,7 @@ struct user_details {
 #define CD_USE_PTY		0x1000
 #define CD_SET_UTMP		0x2000
 #define CD_EXEC_BG		0x4000
+#define CD_SUDOEDIT_COPY	0x8000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;

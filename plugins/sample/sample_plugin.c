@@ -56,7 +56,7 @@
 #include <pathnames.h>
 #include "sudo_plugin.h"
 #include "sudo_util.h"
-#include "missing.h"
+#include "sudo_compat.h"
 
 /*
  * Sample plugin module that allows any user who knows the password
@@ -81,29 +81,6 @@ static FILE *input, *output;
 static uid_t runas_uid = ROOT_UID;
 static gid_t runas_gid = -1;
 static int use_sudoedit = false;
-
-/*
- * Allocate storage for a name=value string and return it.
- */
-static char *
-fmt_string(const char *var, const char *val)
-{
-    size_t var_len = strlen(var);
-    size_t val_len = strlen(val);
-    char *cp, *str;
-
-    cp = str = malloc(var_len + 1 + val_len + 1);
-    if (str != NULL) {
-	memcpy(cp, var, var_len);
-	cp += var_len;
-	*cp++ = '=';
-	memcpy(cp, val, val_len);
-	cp += val_len;
-	*cp = '\0';
-    }
-
-    return str;
-}
 
 /*
  * Plugin policy open function.
@@ -244,12 +221,12 @@ build_command_info(const char *command)
     command_info = calloc(32, sizeof(char *));
     if (command_info == NULL)
 	return NULL;
-    if ((command_info[i++] = fmt_string("command", command)) == NULL ||
+    if ((command_info[i++] = sudo_new_key_val("command", command)) == NULL ||
 	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
 	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
 	return NULL;
     }
-    if (runas_gid != -1) {
+    if (runas_gid != (gid_t)-1) {
 	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
 	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
 	    return NULL;
@@ -479,8 +456,22 @@ io_log_input(const char *buf, unsigned int len)
 static int
 io_log_output(const char *buf, unsigned int len)
 {
+    const char *cp, *ep;
+    bool rval = true;
+
     ignore_result(fwrite(buf, len, 1, output));
-    return true;
+    /*
+     * If we find the string "honk!" in the buffer, reject it.
+     * In practice we'd want to be able to detect the word
+     * broken across two buffers.
+     */
+    for (cp = buf, ep = buf + len; cp < ep; cp++) {
+	if (cp + 5 < ep && memcmp(cp, "honk!", 5) == 0) {
+	    rval = false;
+	    break;
+	}
+    }
+    return rval;
 }
 
 struct policy_plugin sample_policy = {

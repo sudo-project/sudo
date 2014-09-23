@@ -137,39 +137,81 @@
 #endif
 
 /* aix.c */
-void aix_prep_user(char *user, const char *tty);
-void aix_restoreauthdb(void);
-void aix_setauthdb(char *user);
-
-/* atobool.c */
-int atobool(const char *str);
-
-/* atoid.c */
-id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
-
-/* atomode.c */
-int atomode(const char *cp, const char **errstr);
-
-/* fmt_string.h */
-char *fmt_string(const char *var, const char *value);
+__dso_public int aix_prep_user_v1(char *user, const char *tty);
+#define aix_prep_user(_a, _b) aix_prep_user_v1((_a), (_b))
+__dso_public int aix_restoreauthdb_v1(void);
+#define aix_restoreauthdb() aix_restoreauthdb_v1()
+__dso_public int aix_setauthdb_v1(char *user);
+#define aix_setauthdb(_a) aix_setauthdb_v1((_a))
 
 /* gidlist.c */
-int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+__dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+#define sudo_parse_gids(_a, _b, _c) sudo_parse_gids_v1((_a), (_b), (_c))
+
+/* key_val.c */
+__dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
+#define sudo_new_key_val(_a, _b) sudo_new_key_val_v1((_a), (_b))
+
+/* locking.c */
+#define SUDO_LOCK	1		/* lock a file */
+#define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
+#define SUDO_UNLOCK	4		/* unlock a file */
+__dso_public bool sudo_lock_file_v1(int fd, int action);
+#define sudo_lock_file(_a, _b) sudo_lock_file_v1((_a), (_b))
+
+/* parseln.c */
+__dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
+#define sudo_parseln(_a, _b, _c, _d) sudo_parseln_v1((_a), (_b), (_c), (_d))
 
 /* progname.c */
-void initprogname(const char *);
+__dso_public void initprogname(const char *);
+
+/* secure_path.c */
+#define SUDO_PATH_SECURE		0
+#define SUDO_PATH_MISSING		-1
+#define SUDO_PATH_BAD_TYPE		-2
+#define SUDO_PATH_WRONG_OWNER		-3
+#define SUDO_PATH_WORLD_WRITABLE	-4
+#define SUDO_PATH_GROUP_WRITABLE	-5
+struct stat;
+__dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+#define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
+__dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+#define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
 
 /* setgroups.c */
-int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+__dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
+#define sudo_setgroups(_a, _b) sudo_setgroups_v1((_a), (_b))
+
+/* strtobool.c */
+__dso_public int sudo_strtobool_v1(const char *str);
+#define sudo_strtobool(_a) sudo_strtobool_v1((_a))
+
+/* strtoid.c */
+__dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp, const char **errstr);
+#define sudo_strtoid(_a, _b, _c, _d) sudo_strtoid_v1((_a), (_b), (_c), (_d))
+
+/* strtomode.c */
+__dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
+#define sudo_strtomode(_a, _b) sudo_strtomode_v1((_a), (_b))
+
+/* sudo_printf.c */
+extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 
 /* term.c */
-bool term_cbreak(int);
-bool term_copy(int, int);
-bool term_noecho(int);
-bool term_raw(int, int);
-bool term_restore(int, bool);
+__dso_public bool sudo_term_cbreak_v1(int fd);
+#define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
+__dso_public bool sudo_term_copy_v1(int src, int dst);
+#define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
+__dso_public bool sudo_term_noecho_v1(int fd);
+#define sudo_term_noecho(_a) sudo_term_noecho_v1((_a))
+__dso_public bool sudo_term_raw_v1(int fd, int isig);
+#define sudo_term_raw(_a, _b) sudo_term_raw_v1((_a), (_b))
+__dso_public bool sudo_term_restore_v1(int fd, bool flush);
+#define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
 
 /* ttysize.c */
-void get_ttysize(int *rowp, int *colp);
+__dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
+#define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
 
 #endif /* _SUDO_UTIL_H */

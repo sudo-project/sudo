@@ -56,7 +56,7 @@
 # endif
 #endif /* !__linux__ */
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_debug.h"
 
 /*
@@ -68,7 +68,7 @@
 bool
 get_boottime(struct timeval *tv)
 {
-    char *ep, *line = NULL;
+    char *line = NULL;
     size_t linesize = 0;
     bool found = false;
     ssize_t len;

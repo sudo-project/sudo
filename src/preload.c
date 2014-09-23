@@ -28,6 +28,7 @@
 #endif
 
 #include "sudo_plugin.h"
+#include "sudo_compat.h"
 #include "sudo_dso.h"
 
 #ifdef STATIC_SUDOERS_PLUGIN

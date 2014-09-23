@@ -42,7 +42,7 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "missing.h"
+#include "sudo_compat.h"
 
 extern size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 

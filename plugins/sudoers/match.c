@@ -48,11 +48,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_FNMATCH
-# include <fnmatch.h>
-#else
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
 #ifndef SUDOERS_NAME_MATCH
 # ifdef HAVE_GLOB
 #  include <glob.h>
@@ -81,15 +76,24 @@
 #  include <ndir.h>
 # endif
 #endif
-#include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
 
 #include "sudoers.h"
 #include "parse.h"
-#include "sha2.h"
 #include <gram.h>
+
+#ifdef HAVE_FNMATCH
+# include <fnmatch.h>
+#else
+# include "compat/fnmatch.h"
+#endif /* HAVE_FNMATCH */
+#ifdef HAVE_SHA224UPDATE
+# include <sha2.h>
+#else
+# include "compat/sha2.h"
+#endif
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 
@@ -406,8 +410,8 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	if (strcmp(sudoers_cmnd, "sudoedit") == 0 &&
 	    strcmp(user_cmnd, "sudoedit") == 0 &&
 	    command_args_match(sudoers_cmnd, sudoers_args)) {
-	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(sudoers_cmnd);
+	    sudo_efree(safe_cmnd);
+	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
 	    rc = true;
 	}
 	goto done;
@@ -455,7 +459,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args)
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	if (safe_cmnd)
 	    free(safe_cmnd);
-	safe_cmnd = estrdup(user_cmnd);
+	safe_cmnd = sudo_estrdup(user_cmnd);
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -516,8 +520,8 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(cp);
+	    sudo_efree(safe_cmnd);
+	    safe_cmnd = sudo_estrdup(cp);
 	    break;
 	}
     }
@@ -526,8 +530,8 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	debug_return_bool(false);
 
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	efree(safe_cmnd);
-	safe_cmnd = estrdup(user_cmnd);
+	sudo_efree(safe_cmnd);
+	safe_cmnd = sudo_estrdup(user_cmnd);
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -549,8 +553,8 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 
     if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(sudoers_cmnd);
+	    sudo_efree(safe_cmnd);
+	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
 	    debug_return_bool(true);
 	}
     }
@@ -562,8 +566,13 @@ static struct digest_function {
     const char *digest_name;
     const unsigned int digest_len;
     void (*init)(SHA2_CTX *);
+#ifdef SHA2_VOID_PTR
+    void (*update)(SHA2_CTX *, const void *, size_t);
+    void (*final)(void *, SHA2_CTX *);
+#else
     void (*update)(SHA2_CTX *, const unsigned char *, size_t);
     void (*final)(unsigned char *, SHA2_CTX *);
+#endif
 } digest_functions[] = {
     {
 	"SHA224",
@@ -605,6 +614,7 @@ digest_matches(const char *file, const struct sudo_digest *sd)
     SHA2_CTX ctx;
     FILE *fp;
     unsigned int i;
+    int h;
     debug_decl(digest_matches, SUDO_DEBUG_MATCH)
 
     for (i = 0; digest_functions[i].digest_name != NULL; i++) {
@@ -614,17 +624,16 @@ digest_matches(const char *file, const struct sudo_digest *sd)
 	}
     }
     if (func == NULL) {
-	warningx(U_("unsupported digest type %d for %s"), sd->digest_type, file);
+	sudo_warnx(U_("unsupported digest type %d for %s"), sd->digest_type, file);
 	debug_return_bool(false);
     }
     if (strlen(sd->digest_str) == func->digest_len * 2) {
 	/* Convert the command digest from ascii hex to binary. */
 	for (i = 0; i < func->digest_len; i++) {
-	    if (!isxdigit((unsigned char)sd->digest_str[i + i]) ||
-		!isxdigit((unsigned char)sd->digest_str[i + i + 1])) {
+	    h = hexchar(&sd->digest_str[i + i]);
+	    if (h == -1)
 		goto bad_format;
-	    }
-	    sudoers_digest[i] = hexchar(&sd->digest_str[i + i]);
+	    sudoers_digest[i] = (unsigned char)h;
 	}
     } else {
 	size_t len = base64_decode(sd->digest_str, sudoers_digest,
@@ -644,7 +653,7 @@ digest_matches(const char *file, const struct sudo_digest *sd)
 	func->update(&ctx, buf, nread);
     }
     if (ferror(fp)) {
-	warningx(U_("%s: read error"), file);
+	sudo_warnx(U_("%s: read error"), file);
 	fclose(fp);
 	debug_return_bool(false);
     }
@@ -658,7 +667,7 @@ digest_matches(const char *file, const struct sudo_digest *sd)
 	func->digest_name, file, sd->digest_str);
     debug_return_bool(false);
 bad_format:
-    warningx(U_("digest for %s (%s) is not in %s form"), file,
+    sudo_warnx(U_("digest for %s (%s) is not in %s form"), file,
 	sd->digest_str, func->digest_name);
     debug_return_bool(false);
 }
@@ -702,8 +711,8 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	/* XXX - log functions not available but we should log very loudly */
 	debug_return_bool(false);
     }
-    efree(safe_cmnd);
-    safe_cmnd = estrdup(sudoers_cmnd);
+    sudo_efree(safe_cmnd);
+    safe_cmnd = sudo_estrdup(sudoers_cmnd);
     debug_return_bool(true);
 }
 #endif /* SUDOERS_NAME_MATCH */
@@ -756,8 +765,8 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(buf);
+	    sudo_efree(safe_cmnd);
+	    safe_cmnd = sudo_estrdup(buf);
 	    break;
 	}
     }
@@ -773,9 +782,9 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 bool
 hostname_matches(const char *shost, const char *lhost, const char *pattern)
 {
-    debug_decl(hostname_matches, SUDO_DEBUG_MATCH)
     const char *host;
     bool rc;
+    debug_decl(hostname_matches, SUDO_DEBUG_MATCH)
 
     host = strchr(pattern, '.') != NULL ? lhost : shost;
     if (has_meta(pattern)) {
@@ -802,7 +811,7 @@ userpw_matches(const char *sudoers_user, const char *user, const struct passwd *
     debug_decl(userpw_matches, SUDO_DEBUG_MATCH)
 
     if (pw != NULL && *sudoers_user == '#') {
-	uid = (uid_t) atoid(sudoers_user + 1, NULL, NULL, &errstr);
+	uid = (uid_t) sudo_strtoid(sudoers_user + 1, NULL, NULL, &errstr);
 	if (errstr == NULL && uid == pw->pw_uid) {
 	    rc = true;
 	    goto done;
@@ -829,7 +838,7 @@ group_matches(const char *sudoers_group, const struct group *gr)
     debug_decl(group_matches, SUDO_DEBUG_MATCH)
 
     if (*sudoers_group == '#') {
-	gid = (gid_t) atoid(sudoers_group + 1, NULL, NULL, &errstr);
+	gid = (gid_t) sudo_strtoid(sudoers_group + 1, NULL, NULL, &errstr);
 	if (errstr == NULL && gid == gr->gr_gid) {
 	    rc = true;
 	    goto done;
@@ -907,7 +916,7 @@ sudo_getdomainname(void)
 #ifdef HAVE_GETDOMAINNAME
     char *buf, *cp;
 
-    buf = emalloc(HOST_NAME_MAX + 1);
+    buf = sudo_emalloc(HOST_NAME_MAX + 1);
     if (getdomainname(buf, HOST_NAME_MAX + 1) == 0 && *buf != '\0') {
 	domain = buf;
 	for (cp = buf; *cp != '\0'; cp++) {
@@ -919,7 +928,7 @@ sudo_getdomainname(void)
 	}
     }
     if (domain == NULL)
-	efree(buf);
+	sudo_efree(buf);
 #endif /* HAVE_GETDOMAINNAME */
     return domain;
 }
@@ -963,12 +972,12 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
 	rc = true;
     else if (lhost != shost && innetgr(netgr, shost, user, domain))
 	rc = true;
-#endif /* HAVE_INNETGR */
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"netgroup %s matches (%s|%s, %s, %s): %s", netgr, lhost ? lhost : "",
 	shost ? shost : "", user ? user : "", domain ? domain : "",
 	rc ? "true" : "false");
+#endif /* HAVE_INNETGR */
 
     debug_return_bool(rc);
 }

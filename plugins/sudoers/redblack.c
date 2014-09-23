@@ -54,8 +54,8 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include "missing.h"
-#include "alloc.h"
+#include "sudo_compat.h"
+#include "sudo_alloc.h"
 #include "sudo_debug.h"
 #include "redblack.h"
 
@@ -92,7 +92,7 @@ rbcreate(int (*compar)(const void *, const void*))
     struct rbtree *tree;
     debug_decl(rbcreate, SUDO_DEBUG_RBTREE)
 
-    tree = (struct rbtree *) emalloc(sizeof(*tree));
+    tree = (struct rbtree *) sudo_emalloc(sizeof(*tree));
     tree->compar = compar;
 
     /*
@@ -187,7 +187,7 @@ rbinsert(struct rbtree *tree, void *data)
 	node = res < 0 ? node->left : node->right;
     }
 
-    node = (struct rbnode *) emalloc(sizeof(*node));
+    node = (struct rbnode *) sudo_emalloc(sizeof(*node));
     node->data = data;
     node->left = node->right = rbnil(tree);
     node->parent = parent;
@@ -343,7 +343,7 @@ _rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 	_rbdestroy(tree, node->right, destroy);
 	if (destroy != NULL)
 	    destroy(node->data);
-	efree(node);
+	sudo_efree(node);
     }
     debug_return;
 }
@@ -357,7 +357,7 @@ rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
     debug_decl(rbdestroy, SUDO_DEBUG_RBTREE)
     _rbdestroy(tree, rbfirst(tree), destroy);
-    efree(tree);
+    sudo_efree(tree);
     debug_return;
 }
 

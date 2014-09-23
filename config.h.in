@@ -189,9 +189,6 @@
    passwords). */
 #undef HAVE_GETAUTHUID
 
-/* Define to 1 if you have the `getcwd' function. */
-#undef HAVE_GETCWD
-
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
@@ -261,6 +258,9 @@
 
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
+
+/* Define to 1 if you have the `inet_ntoa' function. */
+#undef HAVE_INET_NTOA
 
 /* Define to 1 if you have the `inet_pton' function. */
 #undef HAVE_INET_PTON
@@ -506,14 +506,14 @@
 /* Define to 1 if you have the `setauthdb' function. */
 #undef HAVE_SETAUTHDB
 
-/* Define to 1 if you have the `setenv' function. */
-#undef HAVE_SETENV
-
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 
 /* Define to 1 if you have the `setkeycreatecon' function. */
 #undef HAVE_SETKEYCREATECON
+
+/* Define to 1 if you have the `setprogname' function. */
+#undef HAVE_SETPROGNAME
 
 /* Define to 1 if you have the `setresuid' function. */
 #undef HAVE_SETRESUID
@@ -526,6 +526,9 @@
 
 /* Define to 1 if you have the `set_auth_parameters' function. */
 #undef HAVE_SET_AUTH_PARAMETERS
+
+/* Define to 1 if you have the `SHA224Update' function. */
+#undef HAVE_SHA224UPDATE
 
 /* Define to 1 if you have the `shl_load' function. */
 #undef HAVE_SHL_LOAD
@@ -547,6 +550,9 @@
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
+
+/* Define to 1 to enable Solaris audit support. */
+#undef HAVE_SOLARIS_AUDIT
 
 /* Define to 1 if you have the <spawn.h> header file. */
 #undef HAVE_SPAWN_H
@@ -945,6 +951,9 @@
    ones. */
 #undef PC_INSULTS
 
+/* Enable replacement getcwd if system getcwd is broken. */
+#undef PREFER_PORTABLE_GETCWD
+
 /* Enable replacement (v)snprintf if system (v)snprintf is broken. */
 #undef PREFER_PORTABLE_SNPRINTF
 
@@ -985,6 +994,10 @@
 
 /* Define to 1 to send mail when the user is not in the sudoers file. */
 #undef SEND_MAIL_WHEN_NO_USER
+
+/* Define to 1 if the sha2 functions use `const void *' instead of `const
+   unsigned char'. */
+#undef SHA2_VOID_PTR
 
 /* Define to 1 if you want sudo to start a shell if given no arguments. */
 #undef SHELL_IF_NO_ARGS

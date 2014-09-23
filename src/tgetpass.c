@@ -87,7 +87,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS|TGP_NOECHO_TRY) &&
 	!tty_present()) {
 	if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-	    warningx(U_("no tty present and no askpass program specified"));
+	    sudo_warnx(U_("no tty present and no askpass program specified"));
 	    debug_return_str(NULL);
 	}
 	SET(flags, TGP_ASKPASS);
@@ -96,7 +96,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     /* If using a helper program to get the password, run it instead. */
     if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass == NULL || *askpass == '\0')
-	    fatalx(U_("no askpass program specified, try setting SUDO_ASKPASS"));
+	    sudo_fatalx(U_("no askpass program specified, try setting SUDO_ASKPASS"));
 	debug_return_str_masked(sudo_askpass(askpass, prompt));
     }
 
@@ -119,9 +119,9 @@ restart:
      */
     if (!ISSET(flags, TGP_ECHO)) {
 	if (ISSET(flags, TGP_MASK))
-	    neednl = term_cbreak(input);
+	    neednl = sudo_term_cbreak(input);
 	else
-	    neednl = term_noecho(input);
+	    neednl = sudo_term_noecho(input);
     }
 
     /*
@@ -164,7 +164,7 @@ restart:
 restore:
     /* Restore old tty settings and signals. */
     if (!ISSET(flags, TGP_ECHO))
-	term_restore(input, 1);
+	sudo_term_restore(input, 1);
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
@@ -215,30 +215,30 @@ sudo_askpass(const char *askpass, const char *prompt)
     debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
 
     if (pipe(pfd) == -1)
-	fatal(U_("unable to create pipe"));
+	sudo_fatal(U_("unable to create pipe"));
 
     if ((pid = fork()) == -1)
-	fatal(U_("unable to fork"));
+	sudo_fatal(U_("unable to fork"));
 
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
 	if (dup2(pfd[1], STDOUT_FILENO) == -1) {
-	    warning("dup2");
+	    sudo_warn("dup2");
 	    _exit(255);
 	}
 	if (setuid(ROOT_UID) == -1)
-	    warning("setuid(%d)", ROOT_UID);
+	    sudo_warn("setuid(%d)", ROOT_UID);
 	if (setgid(user_details.gid)) {
-	    warning(U_("unable to set gid to %u"), (unsigned int)user_details.gid);
+	    sudo_warn(U_("unable to set gid to %u"), (unsigned int)user_details.gid);
 	    _exit(255);
 	}
 	if (setuid(user_details.uid)) {
-	    warning(U_("unable to set uid to %u"), (unsigned int)user_details.uid);
+	    sudo_warn(U_("unable to set uid to %u"), (unsigned int)user_details.uid);
 	    _exit(255);
 	}
 	closefrom(STDERR_FILENO + 1);
 	execl(askpass, askpass, prompt, (char *)NULL);
-	warning(U_("unable to run %s"), askpass);
+	sudo_warn(U_("unable to run %s"), askpass);
 	_exit(255);
     }
 
@@ -261,7 +261,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     debug_return_str_masked(pass);
 }
 
-extern int term_erase, term_kill;
+extern int sudo_term_erase, sudo_term_kill;
 
 static char *
 getln(int fd, char *buf, size_t bufsiz, int feedback)
@@ -282,7 +282,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
 	if (feedback) {
-	    if (c == term_kill) {
+	    if (c == sudo_term_kill) {
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;
@@ -290,7 +290,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 		}
 		left = bufsiz;
 		continue;
-	    } else if (c == term_erase) {
+	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;

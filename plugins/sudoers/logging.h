@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2009-2013
+ * Copyright (c) 1999-2005, 2009-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -25,23 +25,23 @@
 # include <varargs.h>
 #endif
 
-/* Logging types */
-#define SLOG_SYSLOG		0x01
-#define SLOG_FILE		0x02
-#define SLOG_BOTH		0x03
-
 /*
  * Values for sudoers_setlocale()
  */
 #define SUDOERS_LOCALE_USER     0
 #define SUDOERS_LOCALE_SUDOERS  1
 
-/* Flags for log_warning()/log_fatal() */
-#define MSG_ONLY		0x01
-#define USE_ERRNO		0x02
-#define NO_MAIL			0x04
-#define NO_STDERR		0x08
-#define NO_LOG			0x10
+/* Logging types */
+#define SLOG_SYSLOG		0x01
+#define SLOG_FILE		0x02
+#define SLOG_BOTH		0x03
+
+/* Flags for log_warning()/log_warningx() */
+#define SLOG_USE_ERRNO		0x01	/* internal use only */
+#define SLOG_RAW_MSG		0x02	/* do not format msg before logging */
+#define SLOG_SEND_MAIL		0x04	/* log via mail */
+#define SLOG_NO_STDERR		0x08	/* do not log via stderr */
+#define SLOG_NO_LOG		0x10	/* do not log via file or syslog */
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
@@ -58,16 +58,22 @@
  */
 #define LOG_INDENT	"    "
 
+#ifndef _SUDO_MAIN
+/* XXX - needed for auditing */
+extern int NewArgc;
+extern char **NewArgv;
+#endif
+
 bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);
-void audit_success(char *exec_args[]);
-void audit_failure(char *exec_args[], char const *const fmt, ...) __printflike(2, 3);
+int audit_success(int argc, char *argv[]);
+int audit_failure(int argc, char *argv[], char const *const fmt, ...) __printflike(3, 4);
 void log_allowed(int status);
 void log_auth_failure(int status, unsigned int tries);
 void log_denial(int status, bool inform_user);
 void log_failure(int status, int flags);
 void log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
-void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 

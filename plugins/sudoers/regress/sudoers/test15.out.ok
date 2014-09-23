@@ -1,0 +1,5 @@
+Parses OK.
+
+
+
+user	ALL = sudoedit /etc/motd

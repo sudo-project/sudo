@@ -49,7 +49,6 @@
 #include <grp.h>
 
 #include "sudoers.h"
-#include "secure_path.h"
 #include "check.h"
 
 /* On Linux, CLOCK_MONOTONIC does not run while suspended. */
@@ -182,15 +181,20 @@ found_it:
     if ((size_t)nwritten == sizeof(struct timestamp_entry))
 	debug_return_bool(true);
 
-    log_warning(nwritten == -1 ? USE_ERRNO : 0,
-	N_("unable to write to %s"), timestamp_file);
+    if (nwritten == -1) {
+	log_warning(SLOG_SEND_MAIL,
+	    N_("unable to write to %s"), timestamp_file);
+    } else {
+	log_warningx(SLOG_SEND_MAIL,
+	    N_("unable to write to %s"), timestamp_file);
+    }
 
     /* Truncate on partial write to be safe. */
     if (nwritten > 0 && old_eof != (off_t)-1) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "short write, truncating partial time stamp record");
 	if (ftruncate(fd, old_eof) != 0) {
-	    warning(U_("unable to truncate time stamp file to %lld bytes"),
+	    sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
 		(long long)old_eof);
 	}
     }
@@ -217,16 +221,16 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdir %s, mode 0%o", path, parent_mode);
+		"mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
 	    if (mkdir(path, parent_mode) != 0) {
 		if (!quiet)
-		    warning(U_("unable to mkdir %s"), path);
+		    sudo_warn(U_("unable to mkdir %s"), path);
 		goto done;
 	    }
 	    ignore_result(chown(path, (uid_t)-1, parent_gid));
 	} else if (!S_ISDIR(sb.st_mode)) {
 	    if (!quiet) {
-		warningx(U_("%s exists but is not a directory (0%o)"),
+		sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		    path, (unsigned int) sb.st_mode);
 	    }
 	    goto done;
@@ -238,10 +242,10 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
     }
     /* Create final path component. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"mkdir %s, mode 0%o", path, mode);
+	"mkdir %s, mode 0%o", path, (unsigned int) mode);
     if (mkdir(path, mode) != 0 && errno != EEXIST) {
 	if (!quiet)
-	    warning(U_("unable to mkdir %s"), path);
+	    sudo_warn(U_("unable to mkdir %s"), path);
 	goto done;
     }
     ignore_result(chown(path, owner, parent_gid));
@@ -278,11 +282,11 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
     case SUDO_PATH_BAD_TYPE:
 	errno = ENOTDIR;
 	if (!quiet)
-	    warning("%s", path);
+	    sudo_warn("%s", path);
 	break;
     case SUDO_PATH_WRONG_OWNER:
 	if (!quiet) {
-	    warningx(U_("%s is owned by uid %u, should be %u"),
+	    sudo_warnx(U_("%s is owned by uid %u, should be %u"),
 		path, (unsigned int) sb.st_uid,
 		(unsigned int) timestamp_uid);
 	}
@@ -290,7 +294,7 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 	break;
     case SUDO_PATH_GROUP_WRITABLE:
 	if (!quiet)
-	    warningx(U_("%s is group writable"), path);
+	    sudo_warnx(U_("%s is group writable"), path);
 	errno = EACCES;
 	break;
     }
@@ -310,8 +314,9 @@ build_timestamp(struct passwd *pw)
     len = snprintf(timestamp_file, sizeof(timestamp_file), "%s/%s",
 	def_timestampdir, user_name);
     if (len <= 0 || (size_t)len >= sizeof(timestamp_file)) {
-	log_fatal(0, N_("timestamp path too long: %s/%s"),
-	    def_timestampdir, user_name);
+	log_warningx(SLOG_SEND_MAIL,
+	    N_("timestamp path too long: %s/%s"), def_timestampdir, user_name);
+	len = -1;
     }
 
     debug_return_int(len);
@@ -325,6 +330,7 @@ bool
 update_timestamp(struct passwd *pw)
 {
     struct timestamp_entry entry;
+    bool uid_changed = false;
     bool rval = false;
     int fd;
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
@@ -343,17 +349,17 @@ update_timestamp(struct passwd *pw)
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR|O_CREAT, 0600);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd == -1) {
-	log_warning(USE_ERRNO, N_("unable to open %s"), timestamp_file);
+	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), timestamp_file);
 	goto done;
     }
 
     /* Update record or append a new one. */
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
     ts_update_record(fd, &entry, timestamp_hint);
     close(fd);
 
@@ -372,6 +378,7 @@ timestamp_status(struct passwd *pw)
 {
     struct timestamp_entry entry;
     struct timespec diff, timeout;
+    bool uid_changed = false;
     int status = TS_ERROR;		/* assume the worst */
     struct stat sb;
     int fd = -1;
@@ -428,15 +435,15 @@ timestamp_status(struct passwd *pw)
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd == -1) {
 	status = TS_MISSING;
 	goto done;
     }
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
 
     /* Ignore and clear time stamp file if mtime predates boot time. */
     if (fstat(fd, &sb) == 0) {
@@ -487,7 +494,8 @@ timestamp_status(struct passwd *pw)
 #ifdef CLOCK_MONOTONIC
 	/* A monotonic clock should never run backwards. */
 	if (diff.tv_sec < 0) {
-	    log_warning(0, N_("ignoring time stamp from the future"));
+	    log_warningx(SLOG_SEND_MAIL,
+		N_("ignoring time stamp from the future"));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
 	    ts_update_record(fd, &entry, timestamp_hint);
@@ -498,7 +506,7 @@ timestamp_status(struct passwd *pw)
 	timeout.tv_sec *= 2;
 	if (sudo_timespeccmp(&diff, &timeout, >)) {
 	    time_t tv_sec = (time_t)entry.ts.tv_sec;
-	    log_warning(0,
+	    log_warningx(SLOG_SEND_MAIL,
 		N_("time stamp too far in the future: %20.20s"),
 		4 + ctime(&tv_sec));
 	    status = TS_OLD;
@@ -523,6 +531,7 @@ void
 remove_timestamp(bool unlink_it)
 {
     struct timestamp_entry entry;
+    bool uid_changed = false;
     int fd = -1;
     debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
 
@@ -558,13 +567,13 @@ remove_timestamp(bool unlink_it)
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd == -1)
 	goto done;
-    lock_file(fd, SUDO_LOCK);
+    sudo_lock_file(fd, SUDO_LOCK);
 
     /*
      * Find matching entries and invalidate them.
@@ -598,11 +607,11 @@ already_lectured(int unused)
     if (ts_secure_dir(def_lecture_status_dir, false, true)) {
 	len = snprintf(status_file, sizeof(status_file), "%s/%s",
 	    def_lecture_status_dir, user_name);
-	if (len <= 0 || (size_t)len >= sizeof(status_file)) {
-	    log_fatal(0, N_("lecture status path too long: %s/%s"),
-		def_lecture_status_dir, user_name);
+	if (len > 0 && (size_t)len < sizeof(status_file)) {
+	    debug_return_bool(stat(status_file, &sb) == 0);
 	}
-	debug_return_bool(stat(status_file, &sb) == 0);
+	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
+	    def_lecture_status_dir, user_name);
     }
     debug_return_bool(false);
 }
@@ -615,14 +624,16 @@ bool
 set_lectured(void)
 {
     char lecture_status[PATH_MAX];
+    bool uid_changed = false;
     int len, fd = -1;
     debug_decl(set_lectured, SUDO_DEBUG_AUTH)
 
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
 	def_lecture_status_dir, user_name);
     if (len <= 0 || (size_t)len >= sizeof(lecture_status)) {
-	log_fatal(0, N_("lecture status path too long: %s/%s"),
+	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
 	    def_lecture_status_dir, user_name);
+	goto done;
     }
 
     /* Sanity check lecture dir and create if missing. */
@@ -631,10 +642,10 @@ set_lectured(void)
 
     /* Create lecture file. */
     if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
+	uid_changed = set_perms(PERM_TIMESTAMP);
     fd = open(lecture_status, O_WRONLY|O_CREAT|O_TRUNC, 0600);
-    if (timestamp_uid != 0)
-	restore_perms();
+    if (uid_changed)
+	(void) restore_perms();
     if (fd != -1)
 	close(fd);
 

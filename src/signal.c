@@ -72,8 +72,10 @@ save_signals(void)
     struct signal_state *ss;
     debug_decl(save_signals, SUDO_DEBUG_MAIN)
 
-    for (ss = saved_signals; ss->signo != -1; ss++)
-	sigaction(ss->signo, NULL, &ss->sa);
+    for (ss = saved_signals; ss->signo != -1; ss++) {
+	if (sigaction(ss->signo, NULL, &ss->sa) != 0)
+	    sudo_warn(U_("unable to save handler for signal %d"), ss->signo);
+    }
 
     debug_return;
 }
@@ -88,21 +90,30 @@ restore_signals(void)
     debug_decl(restore_signals, SUDO_DEBUG_MAIN)
 
     for (ss = saved_signals; ss->signo != -1; ss++) {
-	if (ss->restore)
-	    sigaction(ss->signo, &ss->sa, NULL);
+	if (ss->restore) {
+	    if (sigaction(ss->signo, &ss->sa, NULL) != 0) {
+		sudo_warn(U_("unable to restore handler for signal %d"),
+		    ss->signo);
+	    }
+	}
     }
 
     debug_return;
 }
 
 static void
-sudo_handler(int signo)
+sudo_handler(int s)
 {
+    unsigned char signo = (unsigned char)s;
+
     /*
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
+	if (errno != EINTR)
+	    break;
+    }
 }
 
 /*
@@ -123,7 +134,7 @@ init_signals(void)
      * the select() loop without races (we may not have pselect()).
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	fatal(U_("unable to create pipe"));
+	sudo_fatal(U_("unable to create pipe"));
 
     memset(&sa, 0, sizeof(sa));
     sigfillset(&sa.sa_mask);
@@ -140,8 +151,12 @@ init_signals(void)
 		/* Don't install these until exec time. */
 		break;
 	    default:
-		if (ss->sa.sa_handler != SIG_IGN)
-		    sigaction(ss->signo, &sa, NULL);
+		if (ss->sa.sa_handler != SIG_IGN) {
+		    if (sigaction(ss->signo, &sa, NULL) != 0) {
+			sudo_warn(U_("unable to set handler for signal %d"),
+			    ss->signo);
+		    }
+		}
 		break;
 	}
     }

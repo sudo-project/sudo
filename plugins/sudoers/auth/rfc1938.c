@@ -100,7 +100,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
      */
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge, sizeof(challenge))) {
 	if (IS_ONEANDONLY(auth)) {
-	    warningx(U_("you do not exist in the %s database"), auth->name);
+	    sudo_warnx(U_("you do not exist in the %s database"), auth->name);
 	    debug_return_int(AUTH_FATAL);
 	} else {
 	    debug_return_int(AUTH_FAILURE);
@@ -110,7 +110,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     /* Get space for new prompt with embedded challenge */
     if (np_size < op_len + strlen(challenge) + 7) {
 	np_size = op_len + strlen(challenge) + 7;
-	new_prompt = (char *) erealloc(new_prompt, np_size);
+	new_prompt = (char *) sudo_erealloc(new_prompt, np_size);
     }
 
     if (def_long_otp_prompt)

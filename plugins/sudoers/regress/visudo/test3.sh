@@ -4,7 +4,7 @@
 # Excerises a bug in the redblack tree code.
 #
 
-./visudo -csf - <<EOF
+./visudo -cf - <<EOF
 User_Alias	A=a
 User_Alias	B=a
 User_Alias	C=a

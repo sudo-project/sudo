@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 15, 2014
+.Dd July 16, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -293,6 +293,16 @@ and
 options.
 This is effectively a whitelist
 for environment variables.
+Environment variables with a value beginning with
+.Li ()
+are removed unless both the name and value parts are matched by
+.Em env_keep
+or
+.Em env_check ,
+as they could be interpreted as
+.Sy bash
+functions.
+Prior to version 1.8.11, such variables were always removed.
 .Pp
 If, however, the
 .Em env_reset
@@ -308,23 +318,61 @@ In this case,
 and
 .Em env_delete
 behave like a blacklist.
+Environment variables with a value beginning with
+.Li ()
+are always removed, even if they do not match one of the blacklists.
 Since it is not possible
 to blacklist all potentially dangerous environment variables, use
 of the default
 .Em env_reset
 behavior is encouraged.
 .Pp
-In all cases, environment variables with a value beginning with
-.Li ()
-are removed as they could be interpreted as
+By default, environment variables are matched by name.
+However, if the pattern includes an equal sign
+.Pq Ql =\& ,
+both the variables name and value must match.
+For example, a
 .Sy bash
-functions.
+function could be matched as follows:
+.Bd -literal -offset 4n
+env_keep += "my_func=()*"
+.Ed
+.Pp
+Without the
+.Dq Li =()*
+suffix, this would not match, as
+.Sy bash
+functions are not preserved by default.
+.Pp
 The list of environment variables that
 .Nm sudo
 allows or denies is
 contained in the output of
 .Dq Li sudo -V
 when run as root.
+.Pp
+On systems that support PAM where the
+.Sy pam_env
+module is enabled for
+.Nm sudo ,
+variables in the PAM environment may be merged in to the environment.
+If a variable in the PAM environment is already present in the
+user's environment, the value will only be overridden if the variable
+was not preserved by
+.Nm sudoers.
+When
+.Em env_reset
+is enabled, variables preserved from the invoking user's environment
+by the
+.Em env_keep
+list take precedence over those in the PAM environment.
+When
+.Em env_reset
+is disabled, variables present the invoking user's environment
+take precedence over those in the PAM environment unless they
+match a pattern in the
+.Em env_delete
+list.
 .Pp
 Note that the dynamic linker on most operating systems will remove
 variables that can control dynamic linking from the environment of
@@ -1439,7 +1487,7 @@ to include the file
 The
 .Li #includedir
 directive can be used to create a
-.Pa sudo.d
+.Pa sudoers.d
 directory that the system package manager can drop
 .Em sudoers
 rules
@@ -1712,6 +1760,9 @@ will not be automatically foregrounded.
 Some versions of the linux
 .Xr su 1
 command behave this way.
+This flag is
+.Em off
+by default.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
 It has no effect unless I/O logging is enabled or the
@@ -1942,6 +1993,9 @@ and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
+This flag is
+.Em off
+by default.
 .Pp
 Input is logged to the directory specified by the
 .Em iolog_dir
@@ -1976,6 +2030,9 @@ If the standard output or standard error is not connected to the
 user's tty, due to I/O redirection or because the command is part
 of a pipeline, that output is also captured and stored in separate
 log files.
+This flag is
+.Em off
+by default.
 .Pp
 Output is logged to the directory specified by the
 .Em iolog_dir
@@ -2073,7 +2130,7 @@ If set, all commands run via
 .Nm sudo
 will behave as if the
 .Li NOEXEC
-tag has been set, unless overridden by a
+tag has been set, unless overridden by an
 .Li EXEC
 tag.
 See the description of

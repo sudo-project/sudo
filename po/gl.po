@@ -1,0 +1,822 @@
+# Galician translations for sudo package.
+# This file is put in the public domain.
+#
+# Fran Dieguez <frandieguez@gnome.org>, 2012.
+# Francisco Diéguez <frandieguez@ubuntu.com>, 2012.
+# Leandro Regueiro <leandro.regueiro@gmail.com>, 2012, 2013, 2014.
+#
+# Proxecto Trasno - Adaptación do software libre á lingua galega:  Se desexas
+# colaborar connosco, podes atopar máis información en <http://www.trasno.net>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.8.9b2\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2013-12-11 13:41-0700\n"
+"PO-Revision-Date: 2014-05-10 18:38+0100\n"
+"Last-Translator: Leandro Regueiro <leandro.regueiro@gmail.com>\n"
+"Language-Team: Galician <proxecto@trasno.net>\n"
+"Language: gl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: common/aix.c:93 common/aix.c:150
+msgid "unable to open userdb"
+msgstr "non foi posíbel abrir userdb"
+
+#: common/aix.c:153
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "non foi posíbel ir ao rexistro «%s» para %s"
+
+#: common/aix.c:170
+msgid "unable to restore registry"
+msgstr "non foi posíbel restaurar o rexistro"
+
+#: common/alloc.c:81
+msgid "internal error, tried to emalloc(0)"
+msgstr "erro interno: tentou emalloc(0)"
+
+#: common/alloc.c:98
+msgid "internal error, tried to emalloc2(0)"
+msgstr "erro interno: tentou emalloc2(0)"
+
+#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:185
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "erro interno, desbordamento en %s"
+
+#: common/alloc.c:119
+msgid "internal error, tried to ecalloc(0)"
+msgstr "erro interno, tentou ecalloc(0)"
+
+#: common/alloc.c:141
+msgid "internal error, tried to erealloc(0)"
+msgstr "erro interno, tentou erealloc(0)"
+
+#: common/alloc.c:160
+msgid "internal error, tried to erealloc3(0)"
+msgstr "erro interno, tentou erealloc3(0)"
+
+#: common/alloc.c:183
+msgid "internal error, tried to erecalloc(0)"
+msgstr "erro interno, tentou erealloc(0)"
+
+#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
+#: compat/strtonum.c:65 compat/strtonum.c:183
+msgid "invalid value"
+msgstr "valor non válido"
+
+#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
+#: compat/strtonum.c:68 compat/strtonum.c:195
+msgid "value too large"
+msgstr "valor demasiado grande"
+
+#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
+#: compat/strtonum.c:189
+msgid "value too small"
+msgstr "valor demasiado pequeno"
+
+#: common/fatal.c:158
+#, c-format
+msgid "%s: %s: %s\n"
+msgstr "%s: %s: %s\n"
+
+#: common/fatal.c:161 common/fatal.c:165
+#, c-format
+msgid "%s: %s\n"
+msgstr "%s: %s\n"
+
+#: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
+#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
+#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: common/sudo_conf.c:177
+#, c-format
+msgid "unsupported group source `%s' in %s, line %d"
+msgstr ""
+
+#: common/sudo_conf.c:191
+#, c-format
+msgid "invalid max groups `%s' in %s, line %d"
+msgstr ""
+
+#: common/sudo_conf.c:391
+#, c-format
+msgid "unable to stat %s"
+msgstr "non foi posíbel executar stat en %s"
+
+#: common/sudo_conf.c:394
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s non é un ficheiro normal"
+
+#: common/sudo_conf.c:397
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s é propiedade de uid %u, pero debería ser %u"
+
+#: common/sudo_conf.c:401
+#, c-format
+msgid "%s is world writable"
+msgstr "%s é escribíbel por todo o mundo"
+
+#: common/sudo_conf.c:404
+#, c-format
+msgid "%s is group writable"
+msgstr "%s é escribíbel polo grupo"
+
+#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
+#, c-format
+msgid "unable to open %s"
+msgstr "non foi posíbel abrir %s"
+
+#: compat/strsignal.c:50
+msgid "Unknown signal"
+msgstr "Sinal descoñecido"
+
+#: src/exec.c:133 src/exec_pty.c:744
+msgid "policy plugin failed session initialization"
+msgstr "produciuse un erro durante a inicialización de sesión do engadido de política"
+
+#: src/exec.c:138 src/exec_pty.c:760 src/exec_pty.c:1272 src/tgetpass.c:221
+msgid "unable to fork"
+msgstr "non é posíbel realizar fork"
+
+#: src/exec.c:309 src/exec.c:317 src/exec.c:841 src/exec_pty.c:507
+#: src/exec_pty.c:512 src/exec_pty.c:570 src/exec_pty.c:577 src/exec_pty.c:870
+#: src/exec_pty.c:880 src/exec_pty.c:925 src/exec_pty.c:932
+#: src/exec_pty.c:1334 src/exec_pty.c:1341 src/exec_pty.c:1348
+msgid "unable to add event to queue"
+msgstr ""
+
+#: src/exec.c:394
+msgid "unable to create sockets"
+msgstr "non foi posíbel crear sockets"
+
+#: src/exec.c:477
+msgid "error in event loop"
+msgstr ""
+
+#: src/exec.c:492
+msgid "unable to restore tty label"
+msgstr "non foi posíbel restaurar a etiqueta tty"
+
+#: src/exec_common.c:73
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "non foi posíbel retirar PRIV_PROC_EXEC desde PRIV_LIMIT"
+
+#: src/exec_pty.c:184
+msgid "unable to allocate pty"
+msgstr "non foi posíbel asignar pty"
+
+#: src/exec_pty.c:682 src/exec_pty.c:691 src/exec_pty.c:699
+#: src/exec_pty.c:1192 src/exec_pty.c:1269 src/signal.c:126 src/tgetpass.c:218
+msgid "unable to create pipe"
+msgstr "non foi psosíbel crear tubería"
+
+#: src/exec_pty.c:735
+msgid "unable to set terminal to raw mode"
+msgstr "non foi posíbel estabelcer a terminal en modo directo"
+
+#: src/exec_pty.c:1091
+msgid "error reading from signal pipe"
+msgstr "produciuse un erro ao ler desde a tubería do sinal"
+
+#: src/exec_pty.c:1124
+msgid "error reading from pipe"
+msgstr "produciuse un erro ao ler da tubería"
+
+#: src/exec_pty.c:1149
+msgid "error reading from socketpair"
+msgstr "produciuse un erro ao ler de socketpair"
+
+#: src/exec_pty.c:1158
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "tipo de resposta inesperada en canles alternos %d"
+
+#: src/exec_pty.c:1248
+msgid "unable to set controlling tty"
+msgstr "non foi posíebl estabelecer o controlador tty"
+
+#: src/load_plugins.c:61 src/load_plugins.c:74 src/load_plugins.c:91
+#: src/load_plugins.c:144 src/load_plugins.c:150 src/load_plugins.c:156
+#: src/load_plugins.c:197 src/load_plugins.c:204 src/load_plugins.c:211
+#: src/load_plugins.c:217
+#, c-format
+msgid "error in %s, line %d while loading plugin `%s'"
+msgstr "produciuse un erro en %s, liña %d ao cargar o engadido «%s»"
+
+#: src/load_plugins.c:93
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: src/load_plugins.c:152
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s debe ser propiedade do uid %d"
+
+#: src/load_plugins.c:158
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s só debe ter permisos de escritura polo propietario"
+
+#: src/load_plugins.c:199
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "non foi posíbel cargar %s: %s"
+
+#: src/load_plugins.c:206
+#, c-format
+msgid "unable to find symbol `%s' in %s"
+msgstr " non foi posíbel atopar o símbolo «%s» en %s"
+
+#: src/load_plugins.c:213
+#, c-format
+msgid "unknown policy type %d found in %s"
+msgstr "tipo de política descoñecida %d atopado en %s"
+
+#: src/load_plugins.c:219
+#, c-format
+msgid "incompatible plugin major version %d (expected %d) found in %s"
+msgstr "versión principal %d do engadido incompatíbel (agardábase %d) atopouse en %s"
+
+#: src/load_plugins.c:228
+#, c-format
+msgid "ignoring policy plugin `%s' in %s, line %d"
+msgstr ""
+
+#: src/load_plugins.c:230
+msgid "only a single policy plugin may be specified"
+msgstr "só se pode especificar unha política de engadido"
+
+#: src/load_plugins.c:233
+#, c-format
+msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
+msgstr ""
+
+#: src/load_plugins.c:248
+#, c-format
+msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
+msgstr ""
+
+#: src/load_plugins.c:319
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "a política do engadido %s non inclúe un método check_policy"
+
+#: src/net_ifs.c:156 src/net_ifs.c:165 src/net_ifs.c:177 src/net_ifs.c:186
+#: src/net_ifs.c:297 src/net_ifs.c:321
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: desbordamento detectado"
+
+#: src/net_ifs.c:226
+msgid "unable to open socket"
+msgstr "non foi posíbel abrir o socket"
+
+#: src/parse_args.c:246
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "o agumento -C debe ser un número maior ou igual a 3"
+
+#: src/parse_args.c:408
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "non se deben especificar as opcións «-i» e «-s» simultáneamente"
+
+#: src/parse_args.c:412
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "non se deben especificar as opcións «-i» e «-E» simultáneamente"
+
+#: src/parse_args.c:422
+msgid "the `-E' option is not valid in edit mode"
+msgstr "a opción «-E» non é válida no modo edición"
+
+#: src/parse_args.c:424
+msgid "you may not specify environment variables in edit mode"
+msgstr "non se deben especificar variábeis de ambiente no modo edición"
+
+#: src/parse_args.c:432
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "a opción «-U» só se pode usar coa opción «-l»"
+
+#: src/parse_args.c:436
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "as opcións «-A» e «-S» non se poden empregar conxuntamente"
+
+#: src/parse_args.c:519
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit non se admite nesta plataforma"
+
+#: src/parse_args.c:592
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Só pode especificar unha das opcións -e, -h, -i, -K, -l, -s, -v ou -V"
+
+#: src/parse_args.c:606
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - edita ficheiros como outro usuario\n"
+"\n"
+
+#: src/parse_args.c:608
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - executa unha orde como outro usuario\n"
+"\n"
+
+#: src/parse_args.c:613
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Opcións:\n"
+
+#: src/parse_args.c:615
+msgid "use a helper program for password prompting"
+msgstr "usar un programa auxiliar para a solicitude de contrasinal"
+
+#: src/parse_args.c:618
+msgid "use specified BSD authentication type"
+msgstr "usar tipo de autenticación especificado en BSD"
+
+#: src/parse_args.c:621
+msgid "run command in the background"
+msgstr "executa unha orde en segundo plano"
+
+#: src/parse_args.c:623
+msgid "close all file descriptors >= num"
+msgstr "pecha todos os descritores de ficheiro >= num"
+
+#: src/parse_args.c:626
+msgid "run command with the specified BSD login class"
+msgstr "executa unha orde coa clase de inicio de sesión especificada"
+
+#: src/parse_args.c:629
+msgid "preserve user environment when running command"
+msgstr "conserva o ambiente de usuario ao executar unha orde"
+
+#: src/parse_args.c:631
+msgid "edit files instead of running a command"
+msgstr "edita ficheiros no lugar de executar unha orde"
+
+#: src/parse_args.c:633
+msgid "run command as the specified group name or ID"
+msgstr "executa unha orde como o nome ou ID de grupo especificado"
+
+#: src/parse_args.c:635
+msgid "set HOME variable to target user's home dir"
+msgstr "define a variábel HOME como o cartafol de inicio do usuario"
+
+#: src/parse_args.c:637
+msgid "display help message and exit"
+msgstr "mostra esta mensaxe de axuda e sae"
+
+#: src/parse_args.c:639
+msgid "run command on host (if supported by plugin)"
+msgstr ""
+
+#: src/parse_args.c:641
+msgid "run login shell as the target user; a command may also be specified"
+msgstr "executar un intérprete de ordes de inicio como o usuario destino; tamén se pode especificar unha orde"
+
+#: src/parse_args.c:643
+msgid "remove timestamp file completely"
+msgstr "retira completamente un ficheiro de marca de tempo"
+
+#: src/parse_args.c:645
+msgid "invalidate timestamp file"
+msgstr "invalidar o ficheiro de marca de tempo"
+
+#: src/parse_args.c:647
+msgid "list user's privileges or check a specific command; use twice for longer format"
+msgstr ""
+
+#: src/parse_args.c:649
+msgid "non-interactive mode, no prompts are used"
+msgstr "modo non interactivo, non se preguntará ao usuario"
+
+#: src/parse_args.c:651
+#, fuzzy
+msgid "preserve group vector instead of setting to target's"
+msgstr "conserva o vector de grupos no lugar de definilo ao obxectivo"
+
+#: src/parse_args.c:653
+msgid "use the specified password prompt"
+msgstr "usa o contrasinal especificado"
+
+#: src/parse_args.c:656
+msgid "create SELinux security context with specified role"
+msgstr "crea un contexto de seguranza SELinux co rol especificado"
+
+#: src/parse_args.c:659
+msgid "read password from standard input"
+msgstr "le o contrasinal desde a entrada estándar"
+
+#: src/parse_args.c:661
+msgid "run shell as the target user; a command may also be specified"
+msgstr "executar o intérprete de ordes como o usuario destino; tamén se pode especificar unha orde"
+
+#: src/parse_args.c:664
+msgid "create SELinux security context with specified type"
+msgstr "crea un contexto de seguranza SELinux co tipo especificado"
+
+#: src/parse_args.c:667
+msgid "in list mode, display privileges for user"
+msgstr ""
+
+#: src/parse_args.c:669
+msgid "run command (or edit file) as specified user name or ID"
+msgstr "executa unha orde (ou edita un ficheiro) como o nome ou ID de usuario especificado"
+
+#: src/parse_args.c:671
+msgid "display version information and exit"
+msgstr "mostra a información da versión e sae"
+
+#: src/parse_args.c:673
+msgid "update user's timestamp without running a command"
+msgstr "actualiza a marca de tempo do usuario sen executar ningunha orde"
+
+#: src/parse_args.c:675
+msgid "stop processing command line arguments"
+msgstr "detén o proceso de argumentos da liña de ordes"
+
+#: src/selinux.c:77
+msgid "unable to open audit system"
+msgstr "non foi posíbel abrir o sistema de auditoría"
+
+#: src/selinux.c:85
+msgid "unable to send audit message"
+msgstr "non foi posíbel enviar a mensaxe de auditoría"
+
+#: src/selinux.c:113
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "non foi posíbel executar fgetfilecon %s"
+
+#: src/selinux.c:118
+#, c-format
+msgid "%s changed labels"
+msgstr "%s etiquetas cambiadas"
+
+#: src/selinux.c:123
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "non foi posíbel restaurar o contexto para %s"
+
+#: src/selinux.c:163
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "non foi posíbel abrir %s, non volver a etiquetar tty"
+
+#: src/selinux.c:172
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "non foi posíbel obter o contexto actual de tty, non se volve etiquetar tty"
+
+#: src/selinux.c:179
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "non foi posíbel obter o novo contexto tty, non volver a etiquetar tty"
+
+#: src/selinux.c:186
+msgid "unable to set new tty context"
+msgstr "non foi posíbel estabelecer o novo contexto tty"
+
+#: src/selinux.c:252
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "débese especificar unha regra por tipo %s"
+
+#: src/selinux.c:258
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "non foi posíbel obter o tipo de regra predeterminada %s"
+
+#: src/selinux.c:276
+#, c-format
+msgid "failed to set new role %s"
+msgstr "produciuse un erro ao definir a nova regra %s"
+
+#: src/selinux.c:280
+#, c-format
+msgid "failed to set new type %s"
+msgstr "produciuse un erro ao definir o novo tipo %s"
+
+#: src/selinux.c:289
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s non é un contexto válido"
+
+#: src/selinux.c:324
+msgid "failed to get old_context"
+msgstr "produciuse un erro ao obter old_context"
+
+#: src/selinux.c:330
+msgid "unable to determine enforcing mode."
+msgstr "non foi posíbel determinar o método de forzado"
+
+#: src/selinux.c:342
+#, c-format
+msgid "unable to set tty context to %s"
+msgstr "non foi posíbel definir o contexto tty para %s"
+
+#: src/selinux.c:381
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "non foi posíbel o contexto de execución a %s"
+
+#: src/selinux.c:388
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "non foi posíbel estabelecer a chave de creación de contexto a %s"
+
+#: src/sesh.c:57
+msgid "requires at least one argument"
+msgstr "require cando menos un argumento"
+
+#: src/sesh.c:78 src/sudo.c:1088
+#, c-format
+msgid "unable to execute %s"
+msgstr "non é posíbel executar %s"
+
+#: src/solaris.c:88
+msgid "resource control limit has been reached"
+msgstr "o límite de control de recursos foi alcanzado"
+
+#: src/solaris.c:91
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "o usuario «%s» non é membro do grupo «%s»"
+
+#: src/solaris.c:95
+msgid "the invoking task is final"
+msgstr "a tarefa que invoca é definitiva"
+
+#: src/solaris.c:98
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "non é posíbel unirse ao proxecto «%s»"
+
+#: src/solaris.c:103
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "non hai fondo de recursos aceptando as asignacións existentes par ao proxecto «%s»"
+
+#: src/solaris.c:107
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "o fondo de recursos especificado non existe para o proxecto «%s»"
+
+#: src/solaris.c:111
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "non é posíbel ligar ao fondo de recursos predeterminado para o proxecto «%s»"
+
+#: src/solaris.c:117
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "configuración do proxecto fallada «%s»"
+
+#: src/solaris.c:119
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "aviso, o control de asignación de recuros fallou para o proxecto «%s»"
+
+#: src/sudo.c:196
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Sudo versión %s\n"
+
+#: src/sudo.c:198
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Opcións de configuración: %s\n"
+
+#: src/sudo.c:203
+msgid "fatal error, unable to load plugins"
+msgstr "erro fatal, non foi posíbel cargar os engadidos"
+
+#: src/sudo.c:211
+msgid "unable to initialize policy plugin"
+msgstr "non foi posíbel inicializar a normativa do engadido"
+
+#: src/sudo.c:267
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "erro ao inicializar os engadidos de E/S %s"
+
+#: src/sudo.c:293
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "modo sudo 0x%x non agardado"
+
+#: src/sudo.c:413
+msgid "unable to get group vector"
+msgstr "non é posíbel obter o vector de grupo"
+
+#: src/sudo.c:465
+#, c-format
+msgid "unknown uid %u: who are you?"
+msgstr "uid descoñecido %u: quen é vostede?"
+
+#: src/sudo.c:762
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "%s debe ser propiedade do uid %d e debe ter definido o bit setuid"
+
+#: src/sudo.c:765
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "o uid efectivo non é %d, é %s nun sistema de ficheiros coa opción «nosuid» definida ou nun sistema de ficheiros NFS sen privilexios de root?"
+
+#: src/sudo.c:771
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "o uid efectivo non é %d, está sudo instalado con setuid de root?"
+
+#: src/sudo.c:897
+#, c-format
+msgid "unknown login class %s"
+msgstr "clase de inicio de sesión descoñecida %s"
+
+#: src/sudo.c:910
+msgid "unable to set user context"
+msgstr "non foi posíbel estabelecer o contexto do usuario"
+
+#: src/sudo.c:924
+msgid "unable to set supplementary group IDs"
+msgstr "non foi posíbel estabelecer o grupo suplementario de IDs"
+
+#: src/sudo.c:931
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "non foi posíbel estabelcer o gid efectivo para executar como gid %u"
+
+#: src/sudo.c:937
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "non foi posíbel estabelcer o gid para executar como gid %u"
+
+#: src/sudo.c:944
+msgid "unable to set process priority"
+msgstr "non foi posíbel estabelecer a prioridade de proceso"
+
+#: src/sudo.c:952
+#, c-format
+msgid "unable to change root to %s"
+msgstr "non foi posíbel cambiar de root a %s"
+
+#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "non foi posíbel cambiar as runas uid (%u, %u)"
+
+#: src/sudo.c:994
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "non foi posíbel cambiar ao cartafol %s"
+
+#: src/sudo.c:1051
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "terminación de condición filla non agardada: %d"
+
+#: src/sudo.c:1108
+#, c-format
+msgid "policy plugin %s is missing the `check_policy' method"
+msgstr "a política do engadido %s non inclúe ningún método «check_policy»"
+
+#: src/sudo.c:1121
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "a política do engadido %s non admite listar os privilexios"
+
+#: src/sudo.c:1133
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "a política do engadido %s non admite a opción -v"
+
+#: src/sudo.c:1145
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "a normativa do engadido %s non admite as opcións -k/-K"
+
+#: src/sudo_edit.c:110
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "non foi posíbel cambiar uid a root (%u)"
+
+#: src/sudo_edit.c:142
+msgid "plugin error: missing file list for sudoedit"
+msgstr "erro do engadido: falta a lista de ficheiros para sudoedit"
+
+#: src/sudo_edit.c:170 src/sudo_edit.c:270
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: non é un ficheiro regular"
+
+#: src/sudo_edit.c:204 src/sudo_edit.c:306
+#, c-format
+msgid "%s: short write"
+msgstr "%s: escritura curta"
+
+#: src/sudo_edit.c:271
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s sen modificar"
+
+#: src/sudo_edit.c:284
+#, c-format
+msgid "%s unchanged"
+msgstr "%s sen cambios"
+
+#: src/sudo_edit.c:296 src/sudo_edit.c:317
+#, c-format
+msgid "unable to write to %s"
+msgstr "non foi posíbel escribir en %s"
+
+#: src/sudo_edit.c:297 src/sudo_edit.c:315 src/sudo_edit.c:318
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "os contidos de edición de sesión déixanse en %s"
+
+#: src/sudo_edit.c:314
+msgid "unable to read temporary file"
+msgstr "non é posíbel ler o ficheiro temporal"
+
+#: src/tgetpass.c:90
+msgid "no tty present and no askpass program specified"
+msgstr "sen tty presente e non se especificou un programa askpass"
+
+#: src/tgetpass.c:99
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "non hai programa askpass especificado, tente estabelecer SUDO_ASKPASS"
+
+#: src/tgetpass.c:232
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "non foi posíbel estabelecer o gid a %u"
+
+#: src/tgetpass.c:236
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "non foi posíbel estabelecer o uid a %u"
+
+#: src/tgetpass.c:241
+#, c-format
+msgid "unable to run %s"
+msgstr "non foi posíbel executar %s"
+
+#: src/utmp.c:278
+msgid "unable to save stdin"
+msgstr "non foi posíbel gardar stdin"
+
+#: src/utmp.c:280
+msgid "unable to dup2 stdin"
+msgstr "non foi posíbel facer dup2 stdin"
+
+#: src/utmp.c:283
+msgid "unable to restore stdin"
+msgstr "non foi posíbel restaurar stdin"
+
+#~ msgid "unable to allocate memory"
+#~ msgstr "non foi posíbel asignar memoria"
+
+#~ msgid ": "
+#~ msgstr ": "
+
+#~ msgid "select failed"
+#~ msgstr "selección fallada"
+
+#~ msgid "unknown user: %s"
+#~ msgstr "usuario descoñecido: %s"
+
+#~ msgid "list user's available commands\n"
+#~ msgstr "lista de ordes do usuario dispoñíbeis\n"
+
+#~ msgid "run a shell as target user\n"
+#~ msgstr "executa un intérprete de ordes como un determinado usuario\n"
+
+#~ msgid "when listing, list specified user's privileges\n"
+#~ msgstr "cando está na lista, mostra os privilexios do usuario especificado\n"
+
+#~ msgid "%s: at least one policy plugin must be specified"
+#~ msgstr "%s: debe ser especificada cando menos unha política de engadido"
+
+#~ msgid "must be setuid root"
+#~ msgstr "debe ser setuid root"
+
+#~ msgid "internal error, erealloc3() overflow"
+#~ msgstr "erro interno: desbordamento de erealloc3(0)"

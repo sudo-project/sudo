@@ -56,19 +56,6 @@
 #include "toke.h"
 
 /*
- * We must define SIZE_MAX for yacc's skeleton.c.
- * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
- * could be signed (as it is on SunOS 4.x).
- */
-#ifndef SIZE_MAX
-# ifdef SIZE_T_MAX
-#  define SIZE_MAX	SIZE_T_MAX
-# else
-#  define SIZE_MAX	INT_MAX
-# endif /* SIZE_T_MAX */
-#endif /* SIZE_MAX */
-
-/*
  * Globals
  */
 bool sudoers_warnings = true;
@@ -142,10 +129,10 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 MYSELF			/* run as myself, not another user */
-%token <tok>	 SHA224			/* sha224 digest */
-%token <tok>	 SHA256			/* sha256 digest */
-%token <tok>	 SHA384			/* sha384 digest */
-%token <tok>	 SHA512			/* sha512 digest */
+%token <tok>	 SHA224_TOK		/* sha224 token */
+%token <tok>	 SHA256_TOK		/* sha256 token */
+%token <tok>	 SHA384_TOK		/* sha384 token */
+%token <tok>	 SHA512_TOK		/* sha512 token */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -257,7 +244,7 @@ privileges	:	privilege
 		;
 
 privilege	:	hostlist '=' cmndspeclist {
-			    struct privilege *p = ecalloc(1, sizeof(*p));
+			    struct privilege *p = sudo_ecalloc(1, sizeof(*p));
 			    HLTQ_TO_TAILQ(&p->hostlist, $1, entries);
 			    HLTQ_TO_TAILQ(&p->cmndlist, $3, entries);
 			    HLTQ_INIT(p, entries);
@@ -335,21 +322,21 @@ cmndspeclist	:	cmndspec
 		;
 
 cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
-			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
+			    struct cmndspec *cs = sudo_ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
 				if ($1->runasusers != NULL) {
 				    cs->runasuserlist =
-					emalloc(sizeof(*cs->runasuserlist));
+					sudo_emalloc(sizeof(*cs->runasuserlist));
 				    HLTQ_TO_TAILQ(cs->runasuserlist,
 					$1->runasusers, entries);
 				}
 				if ($1->runasgroups != NULL) {
 				    cs->runasgrouplist =
-					emalloc(sizeof(*cs->runasgrouplist));
+					sudo_emalloc(sizeof(*cs->runasgrouplist));
 				    HLTQ_TO_TAILQ(cs->runasgrouplist,
 					$1->runasgroups, entries);
 				}
-				efree($1);
+				sudo_efree($1);
 			    }
 #ifdef HAVE_SELINUX
 			    cs->role = $2.role;
@@ -370,16 +357,16 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			}
 		;
 
-digest		:	SHA224 ':' DIGEST {
+digest		:	SHA224_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
 			}
-		|	SHA256 ':' DIGEST {
+		|	SHA256_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA256, $3);
 			}
-		|	SHA384 ':' DIGEST {
+		|	SHA384_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA384, $3);
 			}
-		|	SHA512 ':' DIGEST {
+		|	SHA512_TOK ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA512, $3);
 			}
 		;
@@ -477,27 +464,27 @@ runasspec	:	/* empty */ {
 		;
 
 runaslist	:	/* empty */ {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = new_member(NULL, MYSELF);
 			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
 			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist ':' grouplist {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
 			    $$->runasgroups = $3;
 			}
 		|	':' grouplist {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    /* $$->runasusers = NULL; */
 			    $$->runasgroups = $2;
 			}
 		|	':' {
-			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$ = sudo_ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = new_member(NULL, MYSELF);
 			    /* $$->runasgroups = NULL; */
 			}
@@ -546,7 +533,7 @@ cmnd		:	ALL {
 			    $$ = new_member($1, ALIAS);
 			}
 		|	COMMAND {
-			    struct sudo_command *c = ecalloc(1, sizeof(*c));
+			    struct sudo_command *c = sudo_ecalloc(1, sizeof(*c));
 			    c->cmnd = $1.cmnd;
 			    c->args = $1.args;
 			    $$ = new_member((char *)c, COMMAND);
@@ -694,7 +681,7 @@ sudoerserror(const char *s)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno;
-	errorfile = estrdup(sudoers);
+	errorfile = sudo_estrdup(sudoers);
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -720,7 +707,7 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDO_DEBUG_PARSER)
 
-    d = ecalloc(1, sizeof(struct defaults));
+    d = sudo_ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
     /* d->type = 0; */
@@ -737,7 +724,7 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDO_DEBUG_PARSER)
 
-    m = ecalloc(1, sizeof(struct member));
+    m = sudo_ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
     HLTQ_INIT(m, entries);
@@ -751,9 +738,9 @@ new_digest(int digest_type, const char *digest_str)
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDO_DEBUG_PARSER)
 
-    dig = emalloc(sizeof(*dig));
+    dig = sudo_emalloc(sizeof(*dig));
     dig->digest_type = digest_type;
-    dig->digest_str = estrdup(digest_str);
+    dig->digest_str = sudo_estrdup(digest_str);
 
     debug_return_ptr(dig);
 }
@@ -774,7 +761,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	/*
 	 * We use a single binding for each entry in defs.
 	 */
-	binding = emalloc(sizeof(*binding));
+	binding = sudo_emalloc(sizeof(*binding));
 	if (bmem != NULL)
 	    HLTQ_TO_TAILQ(binding, bmem, entries);
 	else
@@ -804,7 +791,7 @@ add_userspec(struct member *members, struct privilege *privs)
     struct userspec *u;
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
-    u = ecalloc(1, sizeof(*u));
+    u = sudo_ecalloc(1, sizeof(*u));
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
@@ -829,8 +816,8 @@ init_parser(const char *path, bool quiet)
 	struct privilege *priv, *priv_next;
 
 	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
-	    efree(m->name);
-	    efree(m);
+	    sudo_efree(m->name);
+	    sudo_efree(m);
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
 	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
@@ -843,62 +830,62 @@ init_parser(const char *path, bool quiet)
 #endif /* HAVE_PRIV_SET */
 
 	    TAILQ_FOREACH_SAFE(m, &priv->hostlist, entries, m_next) {
-		efree(m->name);
-		efree(m);
+		sudo_efree(m->name);
+		sudo_efree(m);
 	    }
 	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
 #ifdef HAVE_SELINUX
 		/* Only free the first instance of a role/type. */
 		if (cs->role != role) {
 		    role = cs->role;
-		    efree(cs->role);
+		    sudo_efree(cs->role);
 		}
 		if (cs->type != type) {
 		    type = cs->type;
-		    efree(cs->type);
+		    sudo_efree(cs->type);
 		}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 		/* Only free the first instance of privs/limitprivs. */
 		if (cs->privs != privs) {
 		    privs = cs->privs;
-		    efree(cs->privs);
+		    sudo_efree(cs->privs);
 		}
 		if (cs->limitprivs != limitprivs) {
 		    limitprivs = cs->limitprivs;
-		    efree(cs->limitprivs);
+		    sudo_efree(cs->limitprivs);
 		}
 #endif /* HAVE_PRIV_SET */
 		/* Only free the first instance of runas user/group lists. */
 		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
 		    runasuserlist = cs->runasuserlist;
 		    TAILQ_FOREACH_SAFE(m, runasuserlist, entries, m_next) {
-			efree(m->name);
-			efree(m);
+			sudo_efree(m->name);
+			sudo_efree(m);
 		    }
-		    efree(runasuserlist);
+		    sudo_efree(runasuserlist);
 		}
 		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
 		    runasgrouplist = cs->runasgrouplist;
 		    TAILQ_FOREACH_SAFE(m, runasgrouplist, entries, m_next) {
-			efree(m->name);
-			efree(m);
+			sudo_efree(m->name);
+			sudo_efree(m);
 		    }
-		    efree(runasgrouplist);
+		    sudo_efree(runasgrouplist);
 		}
 		if (cs->cmnd->type == COMMAND) {
 			struct sudo_command *c =
 			    (struct sudo_command *) cs->cmnd->name;
-			efree(c->cmnd);
-			efree(c->args);
+			sudo_efree(c->cmnd);
+			sudo_efree(c->args);
 		}
-		efree(cs->cmnd->name);
-		efree(cs->cmnd);
-		efree(cs);
+		sudo_efree(cs->cmnd->name);
+		sudo_efree(cs->cmnd);
+		sudo_efree(cs);
 	    }
-	    efree(priv);
+	    sudo_efree(priv);
 	}
-	efree(us);
+	sudo_efree(us);
     }
     TAILQ_INIT(&userspecs);
 
@@ -912,17 +899,17 @@ init_parser(const char *path, bool quiet)
 		if (m->type == COMMAND) {
 			struct sudo_command *c =
 			    (struct sudo_command *) m->name;
-			efree(c->cmnd);
-			efree(c->args);
+			sudo_efree(c->cmnd);
+			sudo_efree(c->args);
 		}
-		efree(m->name);
-		efree(m);
+		sudo_efree(m->name);
+		sudo_efree(m);
 	    }
-	    efree(d->binding);
+	    sudo_efree(d->binding);
 	}
-	efree(d->var);
-	efree(d->val);
-	efree(d);
+	sudo_efree(d->var);
+	sudo_efree(d->val);
+	sudo_efree(d);
     }
     TAILQ_INIT(&defaults);
 
@@ -930,8 +917,8 @@ init_parser(const char *path, bool quiet)
 
     init_lexer();
 
-    efree(sudoers);
-    sudoers = path ? estrdup(path) : NULL;
+    sudo_efree(sudoers);
+    sudoers = path ? sudo_estrdup(path) : NULL;
 
     parse_error = false;
     errorlineno = -1;

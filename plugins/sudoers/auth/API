@@ -33,9 +33,6 @@ The variables in the struct are as follows:
 		initialized in the "init" or "setup" routines.
 
 Possible values of sudo_auth.flags:
-    FLAG_USER		Whether or not the auth functions should run with
-			the euid of the invoking user instead of 0.
-
     FLAG_DISABLED	Set if an "init" or "setup" function fails.
 
     FLAG_STANDALONE	If set, this indicates that the method must

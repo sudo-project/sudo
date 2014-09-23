@@ -44,7 +44,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_util.h"
 
 #ifndef LINE_MAX
@@ -123,7 +123,7 @@ next_entry:
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    id = atoid(cp, NULL, NULL, &errstr);
+    id = sudo_strtoid(cp, NULL, NULL, &errstr);
     if (errstr != NULL)
 	goto next_entry;
     gr.gr_gid = (gid_t)id;

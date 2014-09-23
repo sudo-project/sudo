@@ -80,7 +80,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		pass = tgetpass(msg->msg, msg->timeout, flags);
 		if (pass == NULL)
 		    goto err;
-		repl->reply = estrdup(pass);
+		repl->reply = sudo_estrdup(pass);
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case SUDO_CONV_INFO_MSG:
@@ -90,10 +90,6 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 	    case SUDO_CONV_ERROR_MSG:
 		if (msg->msg)
 		    (void) fputs(msg->msg, stderr);
-		break;
-	    case SUDO_CONV_DEBUG_MSG:
-		if (msg->msg)
-		    sudo_debug_write(msg->msg, strlen(msg->msg), 0);
 		break;
 	    default:
 		goto err;

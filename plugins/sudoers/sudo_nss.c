@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,7 @@
 #include <ctype.h>
 
 #include "sudoers.h"
-#include "lbuf.h"
+#include "sudo_lbuf.h"
 
 extern struct sudo_nss sudo_nss_file;
 #ifdef HAVE_LDAP
@@ -51,6 +51,14 @@ extern struct sudo_nss sudo_nss_ldap;
 #ifdef HAVE_SSSD
 extern struct sudo_nss sudo_nss_sss;
 #endif
+
+/* Make sure we have not already inserted the nss entry. */
+#define SUDO_NSS_CHECK_UNUSED(nss, tag)					       \
+    if (nss.entries.tqe_next != NULL || nss.entries.tqe_prev != NULL) {      \
+	sudo_warnx("internal error: nsswitch entry \"%s\" already in use",     \
+	    tag);							       \
+	continue;							       \
+    }
 
 #if (defined(HAVE_LDAP) || defined(HAVE_SSSD)) && defined(_PATH_NSSWITCH_CONF)
 /*
@@ -66,8 +74,10 @@ sudo_read_nss(void)
 #ifdef HAVE_SSSD
     bool saw_sss = false;
 #endif
-    bool saw_files = false;
+#ifdef HAVE_LDAP
     bool saw_ldap = false;
+#endif
+    bool saw_files = false;
     bool got_match = false;
     static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
@@ -87,17 +97,20 @@ sudo_read_nss(void)
 	/* Parse line */
 	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
+		SUDO_NSS_CHECK_UNUSED(sudo_nss_file, "files");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
-		got_match = true;
+		got_match = saw_files = true;
 #ifdef HAVE_LDAP
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
+		SUDO_NSS_CHECK_UNUSED(sudo_nss_ldap, "ldap");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
-		got_match = true;
+		got_match = saw_ldap = true;
 #endif
 #ifdef HAVE_SSSD
 	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
+		SUDO_NSS_CHECK_UNUSED(sudo_nss_sss, "sss");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
-		got_match = true;
+		got_match = saw_sss = true;
 #endif
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
 		/* NOTFOUND affects the most recent entry */
@@ -173,20 +186,20 @@ sudo_read_nss(void)
 	    if (!saw_files && strncasecmp(cp, "files", 5) == 0 &&
 		(isspace((unsigned char)cp[5]) || cp[5] == '\0')) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
-		got_match = true;
+		got_match = saw_files = true;
 		ep = &cp[5];
 #ifdef HAVE_LDAP
 	    } else if (!saw_ldap && strncasecmp(cp, "ldap", 4) == 0 &&
 		(isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
-		got_match = true;
+		got_match = saw_ldap = true;
 		ep = &cp[4];
 #endif
 #ifdef HAVE_SSSD
 	    } else if (!saw_sss && strncasecmp(cp, "sss", 3) == 0 &&
 		(isspace((unsigned char)cp[3]) || cp[3] == '\0')) {
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
-		got_match = true;
+		got_match = saw_sss = true;
 		ep = &cp[3];
 #endif
 	    } else {
@@ -268,7 +281,7 @@ void
 display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
-    struct lbuf defs, privs;
+    struct sudo_lbuf defs, privs;
     struct stat sb;
     int cols, count, olen;
     debug_decl(display_privs, SUDO_DEBUG_NSS)
@@ -276,36 +289,36 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     cols = sudo_user.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
 	cols = 0;
-    lbuf_init(&defs, output, 4, NULL, cols);
-    lbuf_init(&privs, output, 8, NULL, cols);
+    sudo_lbuf_init(&defs, output, 4, NULL, cols);
+    sudo_lbuf_init(&privs, output, 8, NULL, cols);
 
     /* Display defaults from all sources. */
-    lbuf_append(&defs, _("Matching Defaults entries for %s on %s:\n"),
+    sudo_lbuf_append(&defs, _("Matching Defaults entries for %s on %s:\n"),
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	count += nss->display_defaults(nss, pw, &defs);
     }
     if (count)
-	lbuf_append(&defs, "\n\n");
+	sudo_lbuf_append(&defs, "\n\n");
     else
 	defs.len = 0;
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
     olen = defs.len;
-    lbuf_append(&defs, _("Runas and Command-specific defaults for %s:\n"),
+    sudo_lbuf_append(&defs, _("Runas and Command-specific defaults for %s:\n"),
 	pw->pw_name);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	count += nss->display_bound_defaults(nss, pw, &defs);
     }
     if (count)
-	lbuf_append(&defs, "\n\n");
+	sudo_lbuf_append(&defs, "\n\n");
     else
 	defs.len = olen;
 
     /* Display privileges from all sources. */
-    lbuf_append(&privs,
+    sudo_lbuf_append(&privs,
 	_("User %s may run the following commands on %s:\n"),
 	pw->pw_name, user_srunhost);
     count = 0;
@@ -315,14 +328,14 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     if (count == 0) {
 	defs.len = 0;
 	privs.len = 0;
-	lbuf_append(&privs, _("User %s is not allowed to run sudo on %s.\n"),
+	sudo_lbuf_append(&privs, _("User %s is not allowed to run sudo on %s.\n"),
 	    pw->pw_name, user_shost);
     }
-    lbuf_print(&defs);
-    lbuf_print(&privs);
+    sudo_lbuf_print(&defs);
+    sudo_lbuf_print(&privs);
 
-    lbuf_destroy(&defs);
-    lbuf_destroy(&privs);
+    sudo_lbuf_destroy(&defs);
+    sudo_lbuf_destroy(&privs);
 
     debug_return;
 }

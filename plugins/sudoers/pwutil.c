@@ -103,7 +103,7 @@ sudo_pw_delref_item(void *v)
     debug_decl(sudo_pw_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
-	efree(item);
+	sudo_efree(item);
 
     debug_return;
 }
@@ -139,14 +139,17 @@ sudo_getpwuid(uid_t uid)
 #endif
     item = sudo_make_pwitem(uid, NULL);
     if (item == NULL) {
-	item = ecalloc(1, sizeof(*item));
+	item = sudo_ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.uid = uid;
 	/* item->d.pw = NULL; */
     }
-    if (rbinsert(pwcache_byuid, item) != NULL)
-	fatalx(U_("unable to cache uid %u, already exists"),
+    if (rbinsert(pwcache_byuid, item) != NULL) {
+	/* should not happen */
+	sudo_warnx(U_("unable to cache uid %u, already exists"),
 	    (unsigned int) uid);
+	item->refcnt = 0;
+    }
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -180,14 +183,17 @@ sudo_getpwnam(const char *name)
     item = sudo_make_pwitem((uid_t)-1, name);
     if (item == NULL) {
 	len = strlen(name) + 1;
-	item = ecalloc(1, sizeof(*item) + len);
+	item = sudo_ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
 	/* item->d.pw = NULL; */
     }
-    if (rbinsert(pwcache_byname, item) != NULL)
-	fatalx(U_("unable to cache user %s, already exists"), name);
+    if (rbinsert(pwcache_byname, item) != NULL) {
+	/* should not happen */
+	sudo_warnx(U_("unable to cache user %s, already exists"), name);
+	item->refcnt = 0;
+    }
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -225,7 +231,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	home_len + 1 /* pw_dir */ + shell_len + 1 /* pw_shell */;
 
     for (i = 0; i < 2; i++) {
-	pwitem = ecalloc(1, len);
+	pwitem = sudo_ecalloc(1, len);
 	pw = &pwitem->pw;
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
@@ -247,7 +253,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	    pwitem->cache.k.uid = pw->pw_uid;
 	    if ((node = rbinsert(pwcache_byuid, &pwitem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(pwitem);
+		sudo_efree(pwitem);
 		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	} else {
@@ -255,7 +261,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	    pwitem->cache.k.name = pw->pw_name;
 	    if ((node = rbinsert(pwcache_byname, &pwitem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(pwitem);
+		sudo_efree(pwitem);
 		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	}
@@ -274,7 +280,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
     uid_t uid;
     debug_decl(sudo_fakepwnam, SUDO_DEBUG_NSS)
 
-    uid = (uid_t) atoid(user + 1, NULL, NULL, &errstr);
+    uid = (uid_t) sudo_strtoid(user + 1, NULL, NULL, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
 	    "uid %s %s", user, errstr);
@@ -351,7 +357,7 @@ sudo_gr_delref_item(void *v)
     debug_decl(sudo_gr_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
-	efree(item);
+	sudo_efree(item);
 
     debug_return;
 }
@@ -384,14 +390,17 @@ sudo_getgrgid(gid_t gid)
      */
     item = sudo_make_gritem(gid, NULL);
     if (item == NULL) {
-	item = ecalloc(1, sizeof(*item));
+	item = sudo_ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.gid = gid;
 	/* item->d.gr = NULL; */
     }
-    if (rbinsert(grcache_bygid, item) != NULL)
-	fatalx(U_("unable to cache gid %u, already exists"),
+    if (rbinsert(grcache_bygid, item) != NULL) {
+	/* should not happen */
+	sudo_warnx(U_("unable to cache gid %u, already exists"),
 	    (unsigned int) gid);
+	item->refcnt = 0;
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -419,14 +428,17 @@ sudo_getgrnam(const char *name)
     item = sudo_make_gritem((gid_t)-1, name);
     if (item == NULL) {
 	len = strlen(name) + 1;
-	item = ecalloc(1, sizeof(*item) + len);
+	item = sudo_ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
 	/* item->d.gr = NULL; */
     }
-    if (rbinsert(grcache_byname, item) != NULL)
-	fatalx(U_("unable to cache group %s, already exists"), name);
+    if (rbinsert(grcache_byname, item) != NULL) {
+	/* should not happen */
+	sudo_warnx(U_("unable to cache group %s, already exists"), name);
+	item->refcnt = 0;
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -450,15 +462,15 @@ sudo_fakegrnam(const char *group)
     len = sizeof(*gritem) + name_len + 1;
 
     for (i = 0; i < 2; i++) {
-	gritem = ecalloc(1, len);
+	gritem = sudo_ecalloc(1, len);
 	gr = &gritem->gr;
-	gr->gr_gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
+	gr->gr_gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
 	gr->gr_name = (char *)(gritem + 1);
 	memcpy(gr->gr_name, group, name_len + 1);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
 		"gid %s %s", group, errstr);
-	    efree(gritem);
+	    sudo_efree(gritem);
 	    debug_return_ptr(NULL);
 	}
 
@@ -469,7 +481,7 @@ sudo_fakegrnam(const char *group)
 	    gritem->cache.k.gid = gr->gr_gid;
 	    if ((node = rbinsert(grcache_bygid, &gritem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(gritem);
+		sudo_efree(gritem);
 		gritem = (struct cache_item_gr *) node->data;
 	    }
 	} else {
@@ -477,7 +489,7 @@ sudo_fakegrnam(const char *group)
 	    gritem->cache.k.name = gr->gr_name;
 	    if ((node = rbinsert(grcache_byname, &gritem->cache)) != NULL) {
 		/* Already exists, free the item we created. */
-		efree(gritem);
+		sudo_efree(gritem);
 		gritem = (struct cache_item_gr *) node->data;
 	    }
 	}
@@ -501,7 +513,7 @@ sudo_grlist_delref_item(void *v)
     debug_decl(sudo_gr_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
-	efree(item);
+	sudo_efree(item);
 
     debug_return;
 }
@@ -582,21 +594,24 @@ sudo_get_grlist(const struct passwd *pw)
     if (item == NULL) {
 	/* Should not happen. */
 	len = strlen(pw->pw_name) + 1;
-	item = ecalloc(1, sizeof(*item) + len);
+	item = sudo_ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, pw->pw_name, len);
 	/* item->d.grlist = NULL; */
     }
-    if (rbinsert(grlist_cache, item) != NULL)
-	fatalx(U_("unable to cache group list for %s, already exists"),
+    if (rbinsert(grlist_cache, item) != NULL) {
+	/* should not happen */
+	sudo_warnx(U_("unable to cache group list for %s, already exists"),
 	    pw->pw_name);
+	item->refcnt = 0;
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.grlist);
 }
 
-void
+int
 sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
 {
     struct cache_item key, *item;
@@ -608,13 +623,17 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
      */
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
-	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
-	    fatalx(U_("unable to parse groups for %s"), pw->pw_name);
-	if (rbinsert(grlist_cache, item) != NULL)
-	    fatalx(U_("unable to cache group list for %s, already exists"),
+	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL) {
+	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
+	    debug_return_int(-1);
+	}
+	if (rbinsert(grlist_cache, item) != NULL) {
+	    sudo_warnx(U_("unable to cache group list for %s, already exists"),
 		pw->pw_name);
+	    sudo_grlist_delref_item(item);
+	}
     }
-    debug_return;
+    debug_return_int(0);
 }
 
 bool
@@ -632,7 +651,7 @@ user_in_group(const struct passwd *pw, const char *group)
 	 * If it could be a sudo-style group ID check gids first.
 	 */
 	if (group[0] == '#') {
-	    gid_t gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
+	    gid_t gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
 		    "gid %s %s", group, errstr);

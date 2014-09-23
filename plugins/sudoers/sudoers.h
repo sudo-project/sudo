@@ -30,14 +30,13 @@
 #endif /* HAVE_STDBOOL_H */
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include <pathnames.h>
-#include "missing.h"
-#include "fatal.h"
-#include "alloc.h"
-#include "queue.h"
-#include "fileops.h"
+#include "sudo_compat.h"
+#include "sudo_fatal.h"
+#include "sudo_alloc.h"
+#include "sudo_queue.h"
 #include "defaults.h"
 #include "logging.h"
 #include "sudo_nss.h"
@@ -126,11 +125,12 @@ struct sudo_user {
 #define FLAG_AUTH_ERROR		0x400
 
 /*
- * find_path()/load_cmnd() return values
+ * find_path()/set_cmnd() return values
  */
-#define FOUND                   0
-#define NOT_FOUND               1
+#define FOUND			0
+#define NOT_FOUND		1
 #define NOT_FOUND_DOT		2
+#define NOT_FOUND_ERROR		3
 
 /*
  * Various modes sudo can be in (based on arguments) in hex
@@ -144,7 +144,7 @@ struct sudo_user {
 #define MODE_HELP		0x00000040
 #define MODE_LIST		0x00000080
 #define MODE_CHECK		0x00000100
-#define MODE_LISTDEFS		0x00000200
+#define MODE_ERROR		0x00000200
 #define MODE_MASK		0x0000ffff
 
 /* Mode flags */
@@ -168,8 +168,6 @@ struct sudo_user {
 #define PERM_SUDOERS             0x04
 #define PERM_RUNAS               0x05
 #define PERM_TIMESTAMP           0x06
-#define PERM_NOEXIT              0x10 /* flag */
-#define PERM_MASK                0xf0
 
 /*
  * Shortcuts for sudo_user contents.
@@ -215,7 +213,7 @@ struct sudo_user {
 #endif
 #define ROOT_GID	0
 
-struct lbuf;
+struct sudo_lbuf;
 struct passwd;
 struct stat;
 struct timeval;
@@ -250,21 +248,10 @@ int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
 int sudo_auth_cleanup(struct passwd *pw);
 
-/* parse.c */
-int sudo_file_open(struct sudo_nss *);
-int sudo_file_close(struct sudo_nss *);
-int sudo_file_setdefs(struct sudo_nss *);
-int sudo_file_lookup(struct sudo_nss *, int, int);
-int sudo_file_parse(struct sudo_nss *);
-int sudo_file_display_cmnd(struct sudo_nss *, struct passwd *);
-int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
-int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
-int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
-
 /* set_perms.c */
-void rewind_perms(void);
-int set_perms(int);
-void restore_perms(void);
+bool rewind_perms(void);
+bool set_perms(int);
+bool restore_perms(void);
 int pam_prep_user(struct passwd *);
 
 /* gram.y */
@@ -316,8 +303,7 @@ void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
-void sudo_set_grlist(struct passwd *pw, char * const *groups,
-    char * const *gids);
+int  sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids);
 void sudo_setgrent(void);
 void sudo_setpwent(void);
 void sudo_setspent(void);
@@ -329,8 +315,8 @@ char *get_timestr(time_t, int);
 bool get_boottime(struct timeval *);
 
 /* iolog.c */
-int io_set_max_sessid(const char *sessid);
-void io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
+bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
+bool io_set_max_sessid(const char *sessid);
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
@@ -338,13 +324,13 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
 /* env.c */
 char **env_get(void);
-void env_merge(char * const envp[]);
+bool env_merge(char * const envp[]);
 void env_init(char * const envp[]);
 void init_envtables(void);
-void insert_env_vars(char * const envp[]);
-void read_env_file(const char *, int);
-void rebuild_env(void);
-void validate_env_vars(char * const envp[]);
+bool insert_env_vars(char * const envp[]);
+bool read_env_file(const char *, int);
+bool rebuild_env(void);
+bool validate_env_vars(char * const envp[]);
 int sudo_setenv(const char *var, const char *val, int overwrite);
 int sudo_unsetenv(const char *var);
 char *sudo_getenv(const char *name);

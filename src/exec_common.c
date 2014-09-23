@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,7 +70,7 @@ disable_execute(char *const envp[])
     (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_SEARCH", NULL);
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
 	debug_return_const_ptr(envp);
-    warning(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
+    sudo_warn(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC
@@ -100,23 +100,23 @@ disable_execute(char *const envp[])
     if (!enabled)
 	env_size++;
 #endif
-    nenvp = emalloc2(env_size, sizeof(*envp));
+    nenvp = sudo_emallocarray(env_size, sizeof(*envp));
     memcpy(nenvp, envp, env_len * sizeof(*envp));
     nenvp[env_len] = NULL;
 
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
     if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
-	preload = fmt_string(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
+	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
-	    fatal(NULL);
+	    sudo_fatal(NULL);
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {
-	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
+	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
 	nenvp[preload_idx] = preload;
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -151,12 +151,12 @@ sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexe
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
-	nargv = emalloc2(argc + 2, sizeof(char *));
+	nargv = sudo_emallocarray(argc + 2, sizeof(char *));
 	nargv[0] = "sh";
 	nargv[1] = (char *)path;
 	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
-	execve(_PATH_BSHELL, nargv, envp);
-	efree(nargv);
+	execve(_PATH_SUDO_BSHELL, nargv, envp);
+	sudo_efree(nargv);
     }
     return -1;
 }

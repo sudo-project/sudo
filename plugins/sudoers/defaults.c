@@ -207,7 +207,7 @@ set_default(char *var, char *val, int op)
 	    break;
     }
     if (!cur->name) {
-	warningx(U_("unknown defaults entry `%s'"), var);
+	sudo_warnx(U_("unknown defaults entry `%s'"), var);
 	debug_return_bool(false);
     }
 
@@ -215,20 +215,20 @@ set_default(char *var, char *val, int op)
 	case T_LOGFAC:
 	    if (!store_syslogfac(val, cur, op)) {
 		if (val)
-		    warningx(U_("value `%s' is invalid for option `%s'"),
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
 			val, var);
 		else
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		debug_return_bool(false);
 	    }
 	    break;
 	case T_LOGPRI:
 	    if (!store_syslogpri(val, cur, op)) {
 		if (val)
-		    warningx(U_("value `%s' is invalid for option `%s'"),
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
 			val, var);
 		else
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -236,16 +236,16 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
-		warningx(U_("values for `%s' must start with a '/'"), var);
+		sudo_warnx(U_("values for `%s' must start with a '/'"), var);
 		debug_return_bool(false);
 	    }
 	    if (!store_str(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -253,12 +253,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_int(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -266,12 +266,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_uint(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -279,12 +279,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_float(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -292,18 +292,18 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_mode(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
 	case T_FLAG:
 	    if (val) {
-		warningx(U_("option `%s' does not take a value"), var);
+		sudo_warnx(U_("option `%s' does not take a value"), var);
 		debug_return_bool(false);
 	    }
 	    cur->sd_un.flag = op;
@@ -312,22 +312,22 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(U_("no value specified for `%s'"), var);
+		    sudo_warnx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_list(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
 	case T_TUPLE:
 	    if (!val && !ISSET(cur->type, T_BOOL)) {
-		warningx(U_("no value specified for `%s'"), var);
+		sudo_warnx(U_("no value specified for `%s'"), var);
 		debug_return_bool(false);
 	    }
 	    if (!store_tuple(val, cur, op)) {
-		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
+		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -352,7 +352,7 @@ init_defaults(void)
 	for (def = sudo_defs_table; def->name; def++) {
 	    switch (def->type & T_MASK) {
 		case T_STR:
-		    efree(def->sd_un.str);
+		    sudo_efree(def->sd_un.str);
 		    def->sd_un.str = NULL;
 		    break;
 		case T_LIST:
@@ -418,17 +418,17 @@ init_defaults(void)
 #ifdef UMASK_OVERRIDE
     def_umask_override = true;
 #endif
-    def_iolog_file = estrdup("%{seq}");
-    def_iolog_dir = estrdup(_PATH_SUDO_IO_LOGDIR);
-    def_sudoers_locale = estrdup("C");
+    def_iolog_file = sudo_estrdup("%{seq}");
+    def_iolog_dir = sudo_estrdup(_PATH_SUDO_IO_LOGDIR);
+    def_sudoers_locale = sudo_estrdup("C");
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
-    def_pam_service = estrdup("sudo");
+    def_pam_service = sudo_estrdup("sudo");
 #ifdef HAVE_PAM_LOGIN
-    def_pam_login_service = estrdup("sudo-i");
+    def_pam_login_service = sudo_estrdup("sudo-i");
 #else
-    def_pam_login_service = estrdup("sudo");
+    def_pam_login_service = sudo_estrdup("sudo");
 #endif
 #ifdef NO_PAM_SESSION
     def_pam_session = false;
@@ -467,27 +467,27 @@ init_defaults(void)
 #endif
 
     /* Now do the strings */
-    def_mailto = estrdup(MAILTO);
-    def_mailsub = estrdup(N_(MAILSUBJECT));
-    def_badpass_message = estrdup(_(INCORRECT_PASSWORD));
-    def_lecture_status_dir = estrdup(_PATH_SUDO_LECTURE_DIR);
-    def_timestampdir = estrdup(_PATH_SUDO_TIMEDIR);
-    def_passprompt = estrdup(_(PASSPROMPT));
-    def_runas_default = estrdup(RUNAS_DEFAULT);
+    def_mailto = sudo_estrdup(MAILTO);
+    def_mailsub = sudo_estrdup(N_(MAILSUBJECT));
+    def_badpass_message = sudo_estrdup(_(INCORRECT_PASSWORD));
+    def_lecture_status_dir = sudo_estrdup(_PATH_SUDO_LECTURE_DIR);
+    def_timestampdir = sudo_estrdup(_PATH_SUDO_TIMEDIR);
+    def_passprompt = sudo_estrdup(_(PASSPROMPT));
+    def_runas_default = sudo_estrdup(RUNAS_DEFAULT);
 #ifdef _PATH_SUDO_SENDMAIL
-    def_mailerpath = estrdup(_PATH_SUDO_SENDMAIL);
-    def_mailerflags = estrdup("-t");
+    def_mailerpath = sudo_estrdup(_PATH_SUDO_SENDMAIL);
+    def_mailerflags = sudo_estrdup("-t");
 #endif
 #if (LOGGING & SLOG_FILE)
-    def_logfile = estrdup(_PATH_SUDO_LOGFILE);
+    def_logfile = sudo_estrdup(_PATH_SUDO_LOGFILE);
 #endif
 #ifdef EXEMPTGROUP
-    def_exempt_group = estrdup(EXEMPTGROUP);
+    def_exempt_group = sudo_estrdup(EXEMPTGROUP);
 #endif
 #ifdef SECURE_PATH
-    def_secure_path = estrdup(SECURE_PATH);
+    def_secure_path = sudo_estrdup(SECURE_PATH);
 #endif
-    def_editor = estrdup(EDITOR);
+    def_editor = sudo_estrdup(EDITOR);
     def_set_utmp = true;
     def_pam_setcred = true;
 
@@ -598,7 +598,7 @@ check_defaults(int what, bool quiet)
 	}
 	if (cur->name == NULL) {
 	    if (!quiet)
-		warningx(U_("unknown defaults entry `%s'"), def->var);
+		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
 	    rc = false;
 	}
     }
@@ -705,11 +705,11 @@ store_str(char *val, struct sudo_defs_types *def, int op)
 {
     debug_decl(store_str, SUDO_DEBUG_DEFAULTS)
 
-    efree(def->sd_un.str);
+    sudo_efree(def->sd_un.str);
     if (op == false)
 	def->sd_un.str = NULL;
     else
-	def->sd_un.str = estrdup(val);
+	def->sd_un.str = sudo_estrdup(val);
     if (def->callback)
 	debug_return_bool(def->callback(val));
     debug_return_bool(true);
@@ -823,7 +823,7 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
     if (op == false) {
 	def->sd_un.mode = 0777;
     } else {
-	mode = atomode(val, &errstr);
+	mode = sudo_strtomode(val, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s is %s", val, errstr);
@@ -845,8 +845,8 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
     if (op == freeall) {
 	while ((cur = SLIST_FIRST(&def->sd_un.list)) != NULL) {
 	    SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
-	    efree(cur->value);
-	    efree(cur);
+	    sudo_efree(cur->value);
+	    sudo_efree(cur);
 	}
 	debug_return;
     }
@@ -862,8 +862,8 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 		SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
-	    efree(cur->value);
-	    efree(cur);
+	    sudo_efree(cur->value);
+	    sudo_efree(cur);
 	    break;
 	}
 	prev = cur;
@@ -871,8 +871,8 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 
     /* Add new node to the head of the list. */
     if (op == add) {
-	cur = ecalloc(1, sizeof(struct list_member));
-	cur->value = estrndup(val, len);
+	cur = sudo_ecalloc(1, sizeof(struct list_member));
+	cur->value = sudo_estrndup(val, len);
 	SLIST_INSERT_HEAD(&def->sd_un.list, cur, entries);
     }
     debug_return;

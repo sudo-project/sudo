@@ -46,11 +46,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_FNMATCH
-# include <fnmatch.h>
-#else
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
@@ -64,8 +59,13 @@
 #include "interfaces.h"
 #include "parse.h"
 #include "sudo_conf.h"
-#include "secure_path.h"
 #include <gram.h>
+
+#ifdef HAVE_FNMATCH
+# include <fnmatch.h>
+#else
+# include "compat/fnmatch.h"
+#endif /* HAVE_FNMATCH */
 
 /*
  * Function Prototypes
@@ -78,7 +78,7 @@ void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
-static int cb_runas_default(const char *);
+static bool cb_runas_default(const char *);
 static int testsudoers_print(const char *msg);
 
 extern void setgrfile(const char *);
@@ -152,9 +152,9 @@ main(int argc, char *argv[])
 		user_host = optarg;
 		break;
 	    case 'G':
-		sudoers_gid = (gid_t)atoid(optarg, NULL, NULL, &errstr);
+		sudoers_gid = (gid_t)sudo_strtoid(optarg, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx("group ID %s: %s", optarg, errstr);
+		    sudo_fatalx("group ID %s: %s", optarg, errstr);
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -169,9 +169,9 @@ main(int argc, char *argv[])
 		trace_print = testsudoers_print;
 		break;
 	    case 'U':
-		sudoers_uid = (uid_t)atoid(optarg, NULL, NULL, &errstr);
+		sudoers_uid = (uid_t)sudo_strtoid(optarg, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx("user ID %s: %s", optarg, errstr);
+		    sudo_fatalx("user ID %s: %s", optarg, errstr);
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -208,17 +208,17 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	fatalx(U_("unknown user: %s"), user_name);
+	sudo_fatalx(U_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
-	    fatal("gethostname");
+	    sudo_fatal("gethostname");
 	hbuf[sizeof(hbuf) - 1] = '\0';
 	user_host = hbuf;
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
-	user_shost = estrdup(user_host);
+	user_shost = sudo_estrdup(user_host);
 	*p = '.';
     } else {
 	user_shost = user_host;
@@ -234,11 +234,11 @@ main(int argc, char *argv[])
 	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
-	user_args = (char *) emalloc(size);
+	user_args = (char *) sudo_emalloc(size);
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		fatalx(U_("internal error, %s overflow"), "init_vars()");
+		sudo_fatalx(U_("internal error, %s overflow"), getprogname());
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -352,7 +352,7 @@ set_runaspw(const char *user)
 
     if (*user == '#') {
 	const char *errstr;
-	uid_t uid = atoid(user + 1, NULL, NULL, &errstr);
+	uid_t uid = sudo_strtoid(user + 1, NULL, NULL, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
 		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
@@ -360,7 +360,7 @@ set_runaspw(const char *user)
     }
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL)
-	    fatalx(U_("unknown user: %s"), user);
+	    sudo_fatalx(U_("unknown user: %s"), user);
     }
     if (runas_pw != NULL)
 	sudo_pw_delref(runas_pw);
@@ -376,7 +376,7 @@ set_runasgr(const char *group)
 
     if (*group == '#') {
 	const char *errstr;
-	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	gid_t gid = sudo_strtoid(group + 1, NULL, NULL, &errstr);
 	if (errstr == NULL) {
 	    if ((gr = sudo_getgrgid(gid)) == NULL)
 		gr = sudo_fakegrnam(group);
@@ -384,7 +384,7 @@ set_runasgr(const char *group)
     }
     if (gr == NULL) {
 	if ((gr = sudo_getgrnam(group)) == NULL)
-	    fatalx(U_("unknown group: %s"), group);
+	    sudo_fatalx(U_("unknown group: %s"), group);
     }
     if (runas_gr != NULL)
 	sudo_gr_delref(runas_gr);
@@ -395,7 +395,7 @@ set_runasgr(const char *group)
 /* 
  * Callback for runas_default sudoers setting.
  */
-static int
+static bool
 cb_runas_default(const char *user)
 {
     /* Only reset runaspw if user didn't specify one. */
@@ -433,20 +433,20 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	    fp = fopen(sudoers, "r");
 	    break;
 	case SUDO_PATH_MISSING:
-	    warning("unable to stat %s", sudoers_base);
+	    sudo_warn("unable to stat %s", sudoers_base);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
-	    warningx("%s is not a regular file", sudoers_base);
+	    sudo_warnx("%s is not a regular file", sudoers_base);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
-	    warningx("%s should be owned by uid %u",
+	    sudo_warnx("%s should be owned by uid %u",
 		sudoers_base, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    warningx("%s is world writable", sudoers_base);
+	    sudo_warnx("%s is world writable", sudoers_base);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
-	    warningx("%s should be owned by gid %u",
+	    sudo_warnx("%s should be owned by gid %u",
 		sudoers_base, (unsigned int) sudoers_gid);
 	    break;
 	default:
@@ -463,15 +463,16 @@ init_envtables(void)
     return;
 }
 
-int
+bool
 set_perms(int perm)
 {
-    return 1;
+    return true;
 }
 
-void
+bool
 restore_perms(void)
 {
+    return true;
 }
 
 void

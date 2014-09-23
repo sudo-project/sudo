@@ -46,7 +46,6 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#include <ctype.h>
 #include <errno.h>
 
 #include "sudoers.h"
@@ -61,11 +60,12 @@ bool
 fill_txt(const char *src, int len, int olen)
 {
     char *dst;
+    int h;
     debug_decl(fill_txt, SUDO_DEBUG_PARSER)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	warning(NULL);
+	sudo_warn(NULL);
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -75,10 +75,8 @@ fill_txt(const char *src, int len, int olen)
     dst += olen;
     while (len--) {
 	if (*src == '\\' && len) {
-	    if (src[1] == 'x' && len >= 3 && 
-		isxdigit((unsigned char) src[2]) &&
-		isxdigit((unsigned char) src[3])) {
-		*dst++ = hexchar(src + 2);
+	    if (src[1] == 'x' && len >= 3 && (h = hexchar(src + 2)) != -1) {
+		*dst++ = h;
 		src += 4;
 		len -= 3;
 	    } else {
@@ -120,7 +118,7 @@ fill_cmnd(const char *src, int len)
 
     dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
-	warning(NULL);
+	sudo_warn(NULL);
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -160,8 +158,8 @@ fill_args(const char *s, int len, int addspace)
 	    (char *) realloc(sudoerslval.command.args, arg_size) :
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
-	    efree(sudoerslval.command.args);
-	    warning(NULL);
+	    sudo_efree(sudoerslval.command.args);
+	    sudo_warn(NULL);
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	} else
@@ -173,7 +171,7 @@ fill_args(const char *s, int len, int addspace)
     if (addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != (size_t)len) {
-	warningx(U_("fill_args: buffer overflow"));	/* paranoia */
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }

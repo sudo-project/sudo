@@ -66,7 +66,7 @@ dnl check for bourne shell in well-known locations
 dnl
 AC_DEFUN([SUDO_PROG_BSHELL], [AC_MSG_CHECKING([for bourne shell])
 found=no
-for p in "/bin/sh" "/usr/bin/sh" "/sbin/sh" "/usr/sbin/sh" "/bin/ksh" "/usr/bin/ksh" "/bin/bash" "/usr/bin/bash"; do
+for p in "/usr/bin/sh" "/bin/sh" "/usr/sbin/sh" "/sbin/sh" "/usr/bin/ksh" "/bin/ksh" "/usr/bin/bash" "/bin/bash"; do
     if test -f "$p"; then
 	found=yes
 	AC_MSG_RESULT([$p])
@@ -216,6 +216,7 @@ AC_DEFUN([SUDO_FUNC_ISBLANK],
     AC_DEFINE(HAVE_ISBLANK, 1, [Define if you have isblank(3).])
   else
     AC_LIBOBJ(isblank)
+    SUDO_APPEND_COMPAT_EXP(isblank)
   fi
 ])
 
@@ -277,6 +278,24 @@ int putenv(const char *string) {return 0;}], [])],
     AC_DEFINE(PUTENV_CONST, const, [Define to const if the `putenv' takes a const argument.])
   else
     AC_DEFINE(PUTENV_CONST, [])
+  fi
+])
+
+dnl
+dnl Check if the data argument for the sha2 functions is void * or u_char *
+dnl
+AC_DEFUN([SUDO_FUNC_SHA2_VOID_PTR],
+[AC_CACHE_CHECK([whether the data argument of SHA224Update() is void *],
+sudo_cv_func_sha2_void_ptr,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+#include <sha2.h>
+void SHA224Update(SHA2_CTX *context, const void *data, size_t len) {return;}], [])],
+    [sudo_cv_func_sha2_void_ptr=yes],
+    [sudo_cv_func_sha2_void_ptr=no])
+  ])
+  if test $sudo_cv_func_sha2_void_ptr = yes; then
+    AC_DEFINE(SHA2_VOID_PTR, 1,
+      [Define to 1 if the sha2 functions use `const void *' instead of `const unsigned char'.])
   fi
 ])
 
@@ -371,6 +390,16 @@ AC_DEFUN([SUDO_APPEND_CPPFLAGS], [
 	    fi
 	    ;;
     esac
+])
+
+dnl
+dnl Append one or more symbols to COMPAT_EXP
+dnl
+AC_DEFUN([SUDO_APPEND_COMPAT_EXP], [
+    for _sym in $1; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 ])
 
 dnl

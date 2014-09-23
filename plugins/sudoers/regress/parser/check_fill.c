@@ -42,8 +42,8 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "missing.h"
-#include "queue.h"
+#include "sudo_compat.h"
+#include "sudo_queue.h"
 #include "parse.h"
 #include "toke.h"
 #include "sudo_plugin.h"

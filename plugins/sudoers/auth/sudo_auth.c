@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2008-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -95,8 +95,6 @@ static sudo_auth auth_switch[] = {
 
 static int standalone;
 
-extern char **NewArgv; /* XXX - for auditing */
-
 static void pass_warn(void);
 
 /*
@@ -116,8 +114,9 @@ sudo_auth_init(struct passwd *pw)
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
     if (standalone && auth_switch[1].name != NULL) {
-	audit_failure(NewArgv, N_("invalid authentication methods"));
-    	log_fatal(0, N_("Invalid authentication methods compiled into sudo!  "
+	audit_failure(NewArgc, NewArgv, N_("invalid authentication methods"));
+    	log_warningx(SLOG_SEND_MAIL,
+	    N_("Invalid authentication methods compiled into sudo!  "
 	    "You may not mix standalone and non-standalone authentication."));
 	debug_return_int(-1);
     }
@@ -129,15 +128,8 @@ sudo_auth_init(struct passwd *pw)
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->init && !IS_DISABLED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
-	    status = (auth->init)(pw, auth);
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-
 	    /* Disable if it failed to init unless there was a fatal error. */
+	    status = (auth->init)(pw, auth);
 	    if (status == AUTH_FAILURE)
 		SET(auth->flags, FLAG_DISABLED);
 	    else if (status == AUTH_FATAL)
@@ -161,14 +153,7 @@ sudo_auth_cleanup(struct passwd *pw)
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
 	    status = (auth->cleanup)(pw, auth);
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-
 	    if (status == AUTH_FATAL)
 		break;		/* assume error msg already printed */
 	}
@@ -200,8 +185,8 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     /* Make sure we have at least one auth method. */
     /* XXX - check FLAG_DISABLED too */
     if (auth_switch[0].name == NULL) {
-	audit_failure(NewArgv, N_("no authentication methods"));
-    	log_warning(0,
+	audit_failure(NewArgc, NewArgv, N_("no authentication methods"));
+    	log_warningx(SLOG_SEND_MAIL,
 	    N_("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "
 	    "--disable-authentication configure option."));
@@ -212,14 +197,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
 	    if (auth->setup && !IS_DISABLED(auth)) {
-		if (NEEDS_USER(auth))
-		    set_perms(PERM_USER);
-
 		status = (auth->setup)(pw, &prompt, auth);
-
-		if (NEEDS_USER(auth))
-		    restore_perms();
-
 		if (status == AUTH_FAILURE)
 		    SET(auth->flags, FLAG_DISABLED);
 		else if (status == AUTH_FATAL)
@@ -242,14 +220,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	    if (IS_DISABLED(auth))
 		continue;
 
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
 	    success = auth->status = (auth->verify)(pw, p, auth);
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-
 	    if (auth->status != AUTH_FAILURE)
 		goto done;
 	}

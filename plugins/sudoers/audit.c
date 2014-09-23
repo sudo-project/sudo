@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,9 +34,9 @@
 #include <stdarg.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "gettext.h"		/* must be included before missing.h */
+#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "logging.h"
 #include "sudo_debug.h"
 
@@ -46,46 +46,70 @@
 #ifdef HAVE_LINUX_AUDIT
 # include "linux_audit.h"
 #endif
+#ifdef HAVE_SOLARIS_AUDIT
+# include "solaris_audit.h"
+#endif
 
-void
-audit_success(char *exec_args[])
+int
+audit_success(int argc, char *argv[])
 {
+    int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
-    if (exec_args != NULL) {
+    if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	bsm_audit_success(exec_args);
+	if (bsm_audit_success(argv) == -1)
+	    rc = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	linux_audit_command(exec_args, 1);
+	if (linux_audit_command(argv, 1) == -1)
+	    rc = -1;
+#endif
+#ifdef HAVE_SOLARIS_AUDIT
+	if (solaris_audit_success(argc, argv) == -1)
+	    rc = -1;
 #endif
     }
 
-    debug_return;
+    debug_return_int(rc);
 }
 
-void
-audit_failure(char *exec_args[], char const *const fmt, ...)
+int
+audit_failure(int argc, char *argv[], char const *const fmt, ...)
 {
-    va_list ap;
-    int oldlocale;
+    int rc = 0;
     debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
-    /* Audit error messages should be in the sudoers locale. */
-    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+#if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
+    if (argv != NULL) {
+	va_list ap;
+	int oldlocale;
 
-    if (exec_args != NULL) {
-	va_start(ap, fmt);
+	/* Audit error messages should be in the sudoers locale. */
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
 #ifdef HAVE_BSM_AUDIT
-	bsm_audit_failure(exec_args, _(fmt), ap);
+	va_start(ap, fmt);
+	if (bsm_audit_failure(argv, _(fmt), ap) == -1)
+	    rc = -1;
+	va_end(ap);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-	linux_audit_command(exec_args, 0);
-#endif
+	va_start(ap, fmt);
+	if (linux_audit_command(argv, 0) == -1)
+	    rc = -1;
 	va_end(ap);
+#endif
+#ifdef HAVE_SOLARIS_AUDIT
+	va_start(ap, fmt);
+	if (solaris_audit_failure(argc, argv, _(fmt), ap) == -1)
+	    rc = -1;
+	va_end(ap);
+#endif
+
+	sudoers_setlocale(oldlocale, NULL);
     }
+#endif /* HAVE_BSM_AUDIT || HAVE_LINUX_AUDIT */
 
-    sudoers_setlocale(oldlocale, NULL);
-
-    debug_return;
+    debug_return_int(rc);
 }

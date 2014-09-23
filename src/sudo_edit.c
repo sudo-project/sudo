@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008, 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,10 +48,60 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_SELINUX
+# include <selinux/selinux.h>
+#endif
 
 #include "sudo.h"
+#include "sudo_exec.h"
 
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
+
+/*
+ * Editor temporary file name along with original name, mtime and size.
+ */
+struct tempfile {
+    char *tfile;
+    char *ofile;
+    struct timeval omtim;
+    off_t osize;
+};
+
+static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
+
+/*
+ * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
+ * Returns true on success, else false;
+ */
+static bool
+set_tmpdir(void)
+{
+    const char *tdir;
+    struct stat sb;
+    size_t len;
+    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT)
+
+    if (stat(_PATH_VARTMP, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+	tdir = _PATH_VARTMP;
+    }
+#ifdef _PATH_USRTMP
+    else if (stat(_PATH_USRTMP, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+	tdir = _PATH_USRTMP;
+    }
+#endif
+    else {
+	tdir = _PATH_TMP;
+    }
+    len = strlcpy(edit_tmpdir, tdir, sizeof(edit_tmpdir));
+    if (len >= sizeof(edit_tmpdir)) {
+	errno = ENAMETOOLONG;
+	sudo_warn("%s", tdir);
+	debug_return_bool(false);
+    }
+    while (len > 0 && edit_tmpdir[--len] == '/')
+	edit_tmpdir[len] = '\0';
+    debug_return_bool(true);
+}
 
 static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
@@ -59,20 +109,23 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     int serrno = errno;
     debug_decl(switch_user, SUDO_DEBUG_EDIT)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"set uid:gid to %u:%u(%u)", euid, egid, ngroups ? groups[0] : egid);
+
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
 	if (seteuid(ROOT_UID) != 0)
-	    fatal("seteuid(ROOT_UID)");
+	    sudo_fatal("seteuid(ROOT_UID)");
     }
     if (setegid(egid) != 0)
-	fatal("setegid(%d)", (int)egid);
+	sudo_fatal("setegid(%d)", (int)egid);
     if (ngroups != -1) {
 	if (sudo_setgroups(ngroups, groups) != 0)
-	    fatal("setgroups");
+	    sudo_fatal("setgroups");
     }
     if (euid != ROOT_UID) {
 	if (seteuid(euid) != 0)
-	    fatal("seteuid(%d)", (int)euid);
+	    sudo_fatal("seteuid(%d)", (int)euid);
     }
     errno = serrno;
 
@@ -80,75 +133,55 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 }
 
 /*
- * Wrapper to allow users to edit privileged files with their own uid.
+ * Construct a temporary file name for file and return an
+ * open file descriptor.  The temporary file name is stored
+ * in tfile which the caller is responsible for freeing.
  */
-int
-sudo_edit(struct command_details *command_details)
+static int
+sudo_edit_mktemp(const char *ofile, char **tfile)
 {
-    struct command_details editor_details;
-    ssize_t nread, nwritten;
-    const char *tmpdir;
-    char *cp, *suff, **nargv, **ap, **files = NULL;
-    char buf[BUFSIZ];
-    int rc, i, j, ac, ofd, tfd, nargc, rval, tmplen;
-    int editor_argc = 0, nfiles = 0;
-    struct stat sb;
-    struct timeval tv, tv1, tv2;
-    struct tempfile {
-	char *tfile;
-	char *ofile;
-	struct timeval omtim;
-	off_t osize;
-    } *tf = NULL;
-    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
+    const char *cp, *suff;
+    int tfd;
+    debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT)
 
-    /*
-     * Set real, effective and saved uids to root.
-     * We will change the euid as needed below.
-     */
-    if (setuid(ROOT_UID) != 0) {
-	warning(U_("unable to change uid to root (%u)"), ROOT_UID);
-	goto cleanup;
-    }
-
-    /*
-     * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
-     */
-    if (stat(_PATH_VARTMP, &sb) == 0 && S_ISDIR(sb.st_mode))
-	tmpdir = _PATH_VARTMP;
-#ifdef _PATH_USRTMP
-    else if (stat(_PATH_USRTMP, &sb) == 0 && S_ISDIR(sb.st_mode))
-	tmpdir = _PATH_USRTMP;
-#endif
+    if ((cp = strrchr(ofile, '/')) != NULL)
+	cp++;
     else
-	tmpdir = _PATH_TMP;
-    tmplen = strlen(tmpdir);
-    while (tmplen > 0 && tmpdir[tmplen - 1] == '/')
-	tmplen--;
+	cp = ofile;
+    suff = strrchr(cp, '.');
+    if (suff != NULL) {
+	sudo_easprintf(tfile, "%s/%.*sXXXXXXXX%s", edit_tmpdir,
+	    (int)(size_t)(suff - cp), cp, suff);
+    } else {
+	sudo_easprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, cp);
+    }
+    tfd = mkstemps(*tfile, suff ? strlen(suff) : 0);
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"%s -> %s, fd %d", ofile, *tfile, tfd);
+    debug_return_int(tfd);
+}
 
-    /*
-     * The user's editor must be separated from the files to be
-     * edited by a "--" option.
-     */
-    for (ap = command_details->argv; *ap != NULL; ap++) {
-	if (files)
-	    nfiles++;
-	else if (strcmp(*ap, "--") == 0)
-	    files = ap + 1;
-	else
-	    editor_argc++;
-    }
-    if (nfiles == 0) {
-	warningx(U_("plugin error: missing file list for sudoedit"));
-	goto cleanup;
-    }
+/*
+ * Create temporary copies of files[] and store the temporary path name
+ * along with the original name, size and mtime in tf.
+ * Returns the number of files copied (which may be less than nfiles)
+ * or -1 if a fatal error occurred.
+ */
+static int
+sudo_edit_create_tfiles(struct command_details *command_details,
+    struct tempfile *tf, char * const files[], int nfiles)
+{
+    int i, j, tfd, ofd, rc;
+    char buf[BUFSIZ];
+    ssize_t nwritten, nread;
+    struct timeval times[2];
+    struct stat sb;
+    debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT)
 
     /*
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
      */
-    tf = emalloc2(nfiles, sizeof(*tf));
-    memset(tf, 0, nfiles * sizeof(*tf));
     for (i = 0, j = 0; i < nfiles; i++) {
 	rc = -1;
 	switch_user(command_details->euid, command_details->egid,
@@ -165,9 +198,9 @@ sudo_edit(struct command_details *command_details)
 	    user_details.ngroups, user_details.groups);
 	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
 	    if (rc)
-		warning("%s", files[i]);
+		sudo_warn("%s", files[i]);
 	    else
-		warningx(U_("%s: not a regular file"), files[i]);
+		sudo_warnx(U_("%s: not a regular file"), files[i]);
 	    if (ofd != -1)
 		close(ofd);
 	    continue;
@@ -175,34 +208,29 @@ sudo_edit(struct command_details *command_details)
 	tf[j].ofile = files[i];
 	tf[j].osize = sb.st_size;
 	mtim_get(&sb, &tf[j].omtim);
-	if ((cp = strrchr(tf[j].ofile, '/')) != NULL)
-	    cp++;
-	else
-	    cp = tf[j].ofile;
-	suff = strrchr(cp, '.');
-	if (suff != NULL) {
-	    easprintf(&tf[j].tfile, "%.*s/%.*sXXXXXXXX%s", tmplen, tmpdir,
-		(int)(size_t)(suff - cp), cp, suff);
-	} else {
-	    easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
-	}
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
-	    fatal("seteuid(%d)", (int)user_details.uid);
-	tfd = mkstemps(tf[j].tfile, suff ? strlen(suff) : 0);
+	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
+	tfd = sudo_edit_mktemp(tf[j].ofile, &tf[j].tfile);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
-	    fatal("seteuid(ROOT_UID)");
+	    sudo_fatal("seteuid(ROOT_UID)");
 	if (tfd == -1) {
-	    warning("mkstemps");
-	    goto cleanup;
+	    sudo_warn("mkstemps");
+	    debug_return_int(-1);
 	}
 	if (ofd != -1) {
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
 		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
-			warning("%s", tf[j].tfile);
+			sudo_warn("%s", tf[j].tfile);
 		    else
-			warningx(U_("%s: short write"), tf[j].tfile);
-		    goto cleanup;
+			sudo_warnx(U_("%s: short write"), tf[j].tfile);
+		    close(ofd);
+		    close(tfd);
+		    debug_return_int(-1);
 		}
 	    }
 	    close(ofd);
@@ -211,18 +239,349 @@ sudo_edit(struct command_details *command_details)
 	 * We always update the stashed mtime because the time
 	 * resolution of the filesystem the temporary file is on may
 	 * not match that of the filesystem where the file to be edited
-	 * resides.  It is OK if touch() fails since we only use the info
-	 * to determine whether or not a file has been modified.
+	 * resides.  It is OK if futimes() fails since we only use the
+	 * info to determine whether or not a file has been modified.
 	 */
-	(void) touch(tfd, NULL, &tf[j].omtim);
+	times[0].tv_sec = times[1].tv_sec = tf[j].omtim.tv_sec;
+	times[0].tv_usec = times[1].tv_usec = tf[j].omtim.tv_usec;
+#ifdef HAVE_FUTIMES
+	(void) futimes(tfd, times);
+#else
+	(void) utimes(tf[j].tfile, times);
+#endif
 	rc = fstat(tfd, &sb);
 	if (!rc)
 	    mtim_get(&sb, &tf[j].omtim);
 	close(tfd);
 	j++;
     }
-    if ((nfiles = j) == 0)
-	goto cleanup;		/* no files readable, you lose */
+    debug_return_int(j);
+}
+
+/*
+ * Copy the temporary files specified in tf to the originals.
+ * Returns the number of copy errors or 0 if completely successful.
+ */
+static int
+sudo_edit_copy_tfiles(struct command_details *command_details,
+    struct tempfile *tf, int nfiles, struct timeval *times)
+{
+    int i, tfd, ofd, rc, errors = 0;
+    char buf[BUFSIZ];
+    ssize_t nwritten, nread;
+    struct timeval tv;
+    struct stat sb;
+    debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT)
+
+    /* Copy contents of temp files to real ones. */
+    for (i = 0; i < nfiles; i++) {
+	rc = -1;
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", user_details.uid);
+	if (seteuid(user_details.uid) != 0)
+	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
+	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
+	    rc = fstat(tfd, &sb);
+	}
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "seteuid(%u)", ROOT_UID);
+	if (seteuid(ROOT_UID) != 0)
+	    sudo_fatal("seteuid(ROOT_UID)");
+	if (rc || !S_ISREG(sb.st_mode)) {
+	    if (rc)
+		sudo_warn("%s", tf[i].tfile);
+	    else
+		sudo_warnx(U_("%s: not a regular file"), tf[i].tfile);
+	    sudo_warnx(U_("%s left unmodified"), tf[i].ofile);
+	    if (tfd != -1)
+		close(tfd);
+	    errors++;
+	    continue;
+	}
+	mtim_get(&sb, &tv);
+	if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
+	    /*
+	     * If mtime and size match but the user spent no measurable
+	     * time in the editor we can't tell if the file was changed.
+	     */
+	    if (sudo_timevalcmp(&times[0], &times[1], !=)) {
+		sudo_warnx(U_("%s unchanged"), tf[i].ofile);
+		unlink(tf[i].tfile);
+		close(tfd);
+		errors++;
+		continue;
+	    }
+	}
+	switch_user(command_details->euid, command_details->egid,
+	    command_details->ngroups, command_details->groups);
+	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+	switch_user(ROOT_UID, user_details.egid,
+	    user_details.ngroups, user_details.groups);
+	if (ofd == -1) {
+	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
+	    close(tfd);
+	    errors++;
+	    continue;
+	}
+	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
+	    if ((nwritten = write(ofd, buf, nread)) != nread) {
+		if (nwritten == -1)
+		    sudo_warn("%s", tf[i].ofile);
+		else
+		    sudo_warnx(U_("%s: short write"), tf[i].ofile);
+		break;
+	    }
+	}
+	if (nread == 0) {
+	    /* success, got EOF */
+	    unlink(tf[i].tfile);
+	} else if (nread < 0) {
+	    sudo_warn(U_("unable to read temporary file"));
+	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
+	} else {
+	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+	    sudo_warnx(U_("contents of edit session left in %s"), tf[i].tfile);
+	}
+	close(ofd);
+	close(tfd);
+    }
+    debug_return_int(errors);
+}
+
+#ifdef HAVE_SELINUX
+static int
+selinux_edit_create_tfiles(struct command_details *command_details,
+    struct tempfile *tf, char * const files[], int nfiles)
+{
+    char **sesh_args, **sesh_ap;
+    int i, rc, sesh_nargs;
+    struct stat sb;
+    struct command_details saved_command_details;
+    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
+    
+    /* Prepare selinux stuff (setexeccon) */
+    if (selinux_setup(command_details->selinux_role,
+	command_details->selinux_type, NULL, -1) != 0)
+	debug_return_int(-1);
+
+    if (nfiles < 1)
+	debug_return_int(0);
+
+    /* Construct common args for sesh */
+    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
+    command_details->command = _PATH_SUDO_SESH;
+    command_details->flags |= CD_SUDOEDIT_COPY;
+    
+    sesh_nargs = 3 + (nfiles * 2) + 1;
+    sesh_args = sesh_ap = sudo_emallocarray(sesh_nargs, sizeof(char *));
+    *sesh_ap++ = "sesh";
+    *sesh_ap++ = "-e";
+    *sesh_ap++ = "0";
+
+    for (i = 0; i < nfiles; i++) {
+	char *tfile, *ofile = files[i];
+	int tfd;
+	*sesh_ap++  = ofile;
+	tf[i].ofile = ofile;
+	if (stat(ofile, &sb) == -1)
+	    memset(&sb, 0, sizeof(sb));		/* new file */
+	tf[i].osize = sb.st_size;
+	mtim_get(&sb, &tf[i].omtim);
+	/*
+	 * The temp file must be created by the sesh helper,
+	 * which uses O_EXCL | O_NOFOLLOW to make this safe.
+	 */
+	tfd = sudo_edit_mktemp(ofile, &tfile);
+	if (tfd == -1) {
+	    sudo_warn("mkstemps");
+	    sudo_efree(tfile);
+	    sudo_efree(sesh_args);
+	    debug_return_int(-1);
+	}
+	/* Helper will re-create temp file with proper security context. */
+	close(tfd);
+	unlink(tfile);
+	*sesh_ap++  = tfile;
+	tf[i].tfile = tfile;
+    }
+    *sesh_ap = NULL;
+
+    /* Run sesh -e 0 <o1> <t1> ... <on> <tn> */
+    command_details->argv = sesh_args;
+    rc = run_command(command_details);
+    switch (rc) {
+    case SESH_SUCCESS:
+	break;
+    case SESH_ERR_BAD_PATHS:
+	sudo_fatalx(_("sesh: internal error: odd number of paths"));
+    case SESH_ERR_NO_FILES:
+	sudo_fatalx(_("sesh: unable to create temporary files"));
+    default:
+	sudo_fatalx(_("sesh: unknown error %d"), rc);
+    }
+
+    /* Restore saved command_details. */
+    command_details->command = saved_command_details.command;
+    command_details->flags = saved_command_details.flags;
+    command_details->argv = saved_command_details.argv;
+    
+    /* Chown to user's UID so they can edit the temporary files. */
+    for (i = 0; i < nfiles; i++) {
+	if (chown(tf[i].tfile, user_details.uid, user_details.gid) != 0) {
+	    sudo_warn("unable to chown(%s) to %d:%d for editing",
+		tf[i].tfile, user_details.uid, user_details.gid);
+	}
+    }
+
+    /* Contents of tf will be freed by caller. */
+    sudo_efree(sesh_args);
+
+    return (nfiles);
+}
+
+static int
+selinux_edit_copy_tfiles(struct command_details *command_details,
+    struct tempfile *tf, int nfiles, struct timeval *times)
+{
+    char **sesh_args, **sesh_ap;
+    int i, rc, sesh_nargs, rval = 1;
+    struct command_details saved_command_details;
+    struct timeval tv;
+    struct stat sb;
+    debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT)
+    
+    /* Prepare selinux stuff (setexeccon) */
+    if (selinux_setup(command_details->selinux_role,
+	command_details->selinux_type, NULL, -1) != 0)
+	debug_return_int(1);
+
+    if (nfiles < 1)
+	debug_return_int(0);
+
+    /* Construct common args for sesh */
+    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
+    command_details->command = _PATH_SUDO_SESH;
+    command_details->flags |= CD_SUDOEDIT_COPY;
+    
+    sesh_nargs = 3 + (nfiles * 2) + 1;
+    sesh_args = sesh_ap = sudo_emallocarray(sesh_nargs, sizeof(char *));
+    *sesh_ap++ = "sesh";
+    *sesh_ap++ = "-e";
+    *sesh_ap++ = "1";
+
+    /* Construct args for sesh -e 1 */
+    for (i = 0; i < nfiles; i++) {
+	if (stat(tf[i].tfile, &sb) == 0) {
+	    mtim_get(&sb, &tv);
+	    if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
+		/*
+		 * If mtime and size match but the user spent no measurable
+		 * time in the editor we can't tell if the file was changed.
+		 */
+		if (sudo_timevalcmp(&times[0], &times[1], !=)) {
+		    sudo_warnx(U_("%s unchanged"), tf[i].ofile);
+		    unlink(tf[i].tfile);
+		    continue;
+		}
+	    }
+	}
+	*sesh_ap++ = tf[i].tfile;
+	*sesh_ap++ = tf[i].ofile;
+	if (chown(tf[i].tfile, command_details->uid, command_details->gid) != 0) {
+	    sudo_warn("unable to chown(%s) back to %d:%d", tf[i].tfile,
+		command_details->uid, command_details->gid);
+	}
+    }
+    *sesh_ap = NULL;
+
+    if (sesh_ap - sesh_args > 3) {
+	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
+	command_details->argv = sesh_args;
+	rc = run_command(command_details);
+	switch (rc) {
+	case SESH_SUCCESS:
+	    rval = 0;
+	    break;
+	case SESH_ERR_NO_FILES:
+	    sudo_warnx(_("unable to copy temporary files back to their original location"));
+	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
+	    break;
+	case SESH_ERR_SOME_FILES:
+	    sudo_warnx(_("unable to copy some of the temporary files back to their original location"));
+	    sudo_warnx(U_("contents of edit session left in %s"), edit_tmpdir);
+	    break;
+	default:
+	    sudo_warnx(_("sesh: unknown error %d"), rc);
+	    break;
+	}
+    }
+
+    /* Restore saved command_details. */
+    command_details->command = saved_command_details.command;
+    command_details->flags = saved_command_details.flags;
+    command_details->argv = saved_command_details.argv;
+
+    debug_return_int(rval);
+}
+#endif /* HAVE_SELINUX */
+
+/*
+ * Wrapper to allow users to edit privileged files with their own uid.
+ * Returns 0 on success and 1 on failure.
+ */
+int
+sudo_edit(struct command_details *command_details)
+{
+    struct command_details saved_command_details;
+    char **nargv = NULL, **ap, **files = NULL;
+    int errors, i, ac, nargc, rval;
+    int editor_argc = 0, nfiles = 0;
+    struct timeval times[2];
+    struct tempfile *tf = NULL;
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
+
+    if (!set_tmpdir())
+	goto cleanup;
+
+    /*
+     * Set real, effective and saved uids to root.
+     * We will change the euid as needed below.
+     */
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"setuid(%u)", ROOT_UID);
+    if (setuid(ROOT_UID) != 0) {
+	sudo_warn(U_("unable to change uid to root (%u)"), ROOT_UID);
+	goto cleanup;
+    }
+
+    /*
+     * The user's editor must be separated from the files to be
+     * edited by a "--" option.
+     */
+    for (ap = command_details->argv; *ap != NULL; ap++) {
+	if (files)
+	    nfiles++;
+	else if (strcmp(*ap, "--") == 0)
+	    files = ap + 1;
+	else
+	    editor_argc++;
+    }
+    if (nfiles == 0) {
+	sudo_warnx(U_("plugin error: missing file list for sudoedit"));
+	goto cleanup;
+    }
+
+    /* Copy editor files to temporaries. */
+    tf = sudo_ecalloc(nfiles, sizeof(*tf));
+#ifdef HAVE_SELINUX
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED))
+	nfiles = selinux_edit_create_tfiles(command_details, tf, files, nfiles);
+    else 
+#endif
+	nfiles = sudo_edit_create_tfiles(command_details, tf, files, nfiles);
+    if (nfiles <= 0)
+	goto cleanup;
 
     /*
      * Allocate space for the new argument vector and fill it in.
@@ -230,7 +589,7 @@ sudo_edit(struct command_details *command_details)
      * to create a new argv.
      */
     nargc = editor_argc + nfiles;
-    nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
+    nargv = sudo_emallocarray(nargc + 1, sizeof(char *));
     for (ac = 0; ac < editor_argc; ac++)
 	nargv[ac] = command_details->argv[ac];
     for (i = 0; i < nfiles && ac < nargc; )
@@ -241,84 +600,38 @@ sudo_edit(struct command_details *command_details)
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    gettimeofday(&tv1, NULL);
-    memcpy(&editor_details, command_details, sizeof(editor_details));
-    editor_details.uid = user_details.uid;
-    editor_details.euid = user_details.uid;
-    editor_details.gid = user_details.gid;
-    editor_details.egid = user_details.gid;
-    editor_details.ngroups = user_details.ngroups;
-    editor_details.groups = user_details.groups;
-    editor_details.argv = nargv;
-    rval = run_command(&editor_details);
-    gettimeofday(&tv2, NULL);
+    gettimeofday(&times[0], NULL);
+    memcpy(&saved_command_details, command_details, sizeof(struct command_details));
+    command_details->uid = user_details.uid;
+    command_details->euid = user_details.uid;
+    command_details->gid = user_details.gid;
+    command_details->egid = user_details.gid;
+    command_details->ngroups = user_details.ngroups;
+    command_details->groups = user_details.groups;
+    command_details->argv = nargv;
+    rval = run_command(command_details);
+    gettimeofday(&times[1], NULL);
 
-    /* Copy contents of temp files to real ones */
-    for (i = 0; i < nfiles; i++) {
-	rc = -1;
-	if (seteuid(user_details.uid) != 0)
-	    fatal("seteuid(%d)", (int)user_details.uid);
-	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
-	    rc = fstat(tfd, &sb);
-	}
-	if (seteuid(ROOT_UID) != 0)
-	    fatal("seteuid(ROOT_UID)");
-	if (rc || !S_ISREG(sb.st_mode)) {
-	    if (rc)
-		warning("%s", tf[i].tfile);
-	    else
-		warningx(U_("%s: not a regular file"), tf[i].tfile);
-	    warningx(U_("%s left unmodified"), tf[i].ofile);
-	    if (tfd != -1)
-		close(tfd);
-	    continue;
-	}
-	mtim_get(&sb, &tv);
-	if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
-	    /*
-	     * If mtime and size match but the user spent no measurable
-	     * time in the editor we can't tell if the file was changed.
-	     */
-	    if (sudo_timevalcmp(&tv1, &tv2, !=)) {
-		warningx(U_("%s unchanged"), tf[i].ofile);
-		unlink(tf[i].tfile);
-		close(tfd);
-		continue;
-	    }
-	}
-	switch_user(command_details->euid, command_details->egid,
-	    command_details->ngroups, command_details->groups);
-	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
-	switch_user(ROOT_UID, user_details.egid,
-	    user_details.ngroups, user_details.groups);
-	if (ofd == -1) {
-	    warning(U_("unable to write to %s"), tf[i].ofile);
-	    warningx(U_("contents of edit session left in %s"), tf[i].tfile);
-	    close(tfd);
-	    continue;
-	}
-	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
-	    if ((nwritten = write(ofd, buf, nread)) != nread) {
-		if (nwritten == -1)
-		    warning("%s", tf[i].ofile);
-		else
-		    warningx(U_("%s: short write"), tf[i].ofile);
-		break;
-	    }
-	}
-	if (nread == 0) {
-	    /* success, got EOF */
-	    unlink(tf[i].tfile);
-	} else if (nread < 0) {
-	    warning(U_("unable to read temporary file"));
-	    warningx(U_("contents of edit session left in %s"), tf[i].tfile);
-	} else {
-	    warning(U_("unable to write to %s"), tf[i].ofile);
-	    warningx(U_("contents of edit session left in %s"), tf[i].tfile);
-	}
-	close(ofd);
-    }
-    debug_return_int(rval);
+    /* Restore saved command_details. */
+    command_details->uid = saved_command_details.uid;
+    command_details->euid = saved_command_details.euid;
+    command_details->gid = saved_command_details.gid;
+    command_details->egid = saved_command_details.egid;
+    command_details->ngroups = saved_command_details.ngroups;
+    command_details->groups = saved_command_details.groups;
+    command_details->argv = saved_command_details.argv;
+
+    /* Copy contents of temp files to real ones. */
+#ifdef HAVE_SELINUX
+    if (ISSET(command_details->flags, CD_RBAC_ENABLED))
+	errors = selinux_edit_copy_tfiles(command_details, tf, nfiles, times);
+    else
+#endif
+	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
+
+    sudo_efree(tf);
+    sudo_efree(nargv);
+    debug_return_int(errors ? 1 : rval);
 
 cleanup:
     /* Clean up temp files and return. */
@@ -328,6 +641,8 @@ cleanup:
 		unlink(tf[i].tfile);
 	}
     }
+    sudo_efree(tf);
+    sudo_efree(nargv);
     debug_return_int(1);
 }
 

@@ -35,7 +35,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include "missing.h"
+#include "sudo_compat.h"
 #include "sudo_debug.h"
 
 /*

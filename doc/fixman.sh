@@ -95,6 +95,15 @@ case "$OUTFILE" in
 	fi
 		;;
     sudoers.man.sed)
+	# Join tagged list line with the corresponding item and re-process
+	cat >>"$OUTFILE" <<-'EOF'
+		:again
+		/^\.TP 18n$/ {
+			N
+			bagain
+		}
+	EOF
+
 	# Subsections to remove (SELinux and Solaris are adjacent)
 	RM_SS=
 	if [ X"$PSMAN" != X"1" ]; then
@@ -115,12 +124,8 @@ case "$OUTFILE" in
 	# BSD login class
 	if [ X"$LCMAN" != X"1" ]; then
 		cat >>"$OUTFILE" <<-EOF
-			/^On BSD systems/,/\.$/ {
-				d
-			}
-			/^use_loginclass$/,/^\.TP 18n$/ {
-				/^\.PD$/!d
-			}
+			/^On BSD systems/,/\.$/d
+			/^\.TP 18n\nuse_loginclass$/,/^by default\./d
 		EOF
 	fi
 
@@ -132,12 +137,8 @@ case "$OUTFILE" in
 				N
 				d
 			}
-			/^l*i*m*i*t*privs$/,/^\.TP 18n$/ {
-				/^\.PD$/!d
-			}
-			/^On Solaris 10/,/^\.[sP][pP]/ {
-				d
-			}
+			/^\.TP 18n\n\(limit\)*privs$/,/^is built on Solaris 10 or higher\./d
+			/^On Solaris 10/,/^\.[sP][pP]/d
 		EOF
 	fi
 
@@ -149,9 +150,7 @@ case "$OUTFILE" in
 				N
 				d
 			}
-			/^[rt][oy][lp]e$/,/^\.TP 18n$/ {
-				/^\.PD$/!d
-			}
+			/^\.TP 18n\n[rt][oy][lp]e$/,/^is built with SELinux support\.$/d
 		EOF
 	fi
 	;;

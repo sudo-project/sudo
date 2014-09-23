@@ -19,7 +19,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 5
+#define SUDO_API_VERSION_MINOR 6
 #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
@@ -40,7 +40,6 @@ struct sudo_conv_message {
 #define SUDO_CONV_ERROR_MSG	    0x0003  /* error message */
 #define SUDO_CONV_INFO_MSG	    0x0004  /* informational message */
 #define SUDO_CONV_PROMPT_MASK	    0x0005  /* mask user input */
-#define SUDO_CONV_DEBUG_MSG	    0x0006  /* debugging message */
 #define SUDO_CONV_PROMPT_ECHO_OK    0x1000  /* flag: allow echo if no tty */
     int msg_type;
     int timeout;
