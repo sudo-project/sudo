@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2014 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="20140711"
+pp_revision="20140924"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -1285,6 +1285,7 @@ pp_files_expand () {
 
     #-- process the flags argument
     _flags=
+    _target=
     _optional=false
     _has_target=false
     _ignore=false
