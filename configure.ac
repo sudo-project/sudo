@@ -223,7 +223,6 @@ dnl
 dnl Other vaiables
 dnl
 CHECKSHADOW=true
-shadow_defs=
 shadow_funcs=
 shadow_libs=
 CONFIGURE_ARGS="$@"
@@ -1916,16 +1915,6 @@ case "$host" in
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
 		;;
-    *-convex-bsd*)
-		OSDEFS="${OSDEFS} -D_CONVEX_SOURCE"
-		if test -z "$GCC"; then
-		    CFLAGS="${CFLAGS} -D__STDC__"
-		fi
-
-		shadow_defs="-D_AUDIT -D_ACL -DSecureWare"
-		shadow_funcs="getprpwnam"
-		shadow_libs="-lprot"
-		;;
     *-*-ultrix*)
 		OS="ultrix"
 		shadow_funcs="getauthuid"
@@ -3431,7 +3420,6 @@ if test ${with_passwd-'no'} != "no"; then
 	    case "$shadow_funcs" in
 		*getprpwnam*) SECUREWARE=1;;
 	    esac
-	    test -n "$shadow_defs" && OSDEFS="${OSDEFS} $shadow_defs"
 	else
 	    shadow_libs=
 	fi
