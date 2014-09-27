@@ -190,9 +190,8 @@ user_interrupted(void)
 int
 verify_user(struct passwd *pw, char *prompt, int validated)
 {
-    unsigned int counter = def_passwd_tries + 1;
-    int success = AUTH_FAILURE;
-    int status, rval;
+    unsigned int ntries;
+    int rval, status, success = AUTH_FAILURE;
     char *p;
     sudo_auth *auth;
     sigset_t mask, omask;
@@ -226,14 +225,14 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     sigaddset(&mask, SIGQUIT);
     (void) sigprocmask(SIG_BLOCK, &mask, &omask);
 
-    while (--counter) {
+    for (ntries = 0; ntries < def_passwd_tries; ntries++) {
 	int num_methods = 0;
 
 	/* If user attempted to interrupt password verify, quit now. */
 	if (user_interrupted())
 	    goto done;
 
-	if (counter != def_passwd_tries)
+	if (ntries != 0)
 	    pass_warn();
 
 	/* Do any per-method setup and unconfigure the method if needed */
@@ -293,9 +292,9 @@ done:
 	    break;
 	case AUTH_INTR:
 	case AUTH_FAILURE:
-	    if (counter != def_passwd_tries)
+	    if (ntries != 0)
 		validated |= FLAG_BAD_PASSWORD;
-	    log_auth_failure(validated, def_passwd_tries - counter);
+	    log_auth_failure(validated, ntries);
 	    rval = false;
 	    break;
 	case AUTH_FATAL:
