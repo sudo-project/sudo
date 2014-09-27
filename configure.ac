@@ -226,7 +226,6 @@ CHECKSHADOW=true
 shadow_defs=
 shadow_funcs=
 shadow_libs=
-shadow_libs_optional=
 CONFIGURE_ARGS="$@"
 
 dnl
@@ -1908,9 +1907,7 @@ case "$host" in
 		;;
     *-*-linux*|*-*-k*bsd*-gnu)
 		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
-		# Some Linux versions need to link with -lshadow
 		shadow_funcs="getspnam"
-		shadow_libs_optional="-lshadow"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
     *-*-gnu*)
@@ -3430,13 +3427,6 @@ if test ${with_passwd-'no'} != "no"; then
 	LIBS="$LIBS $shadow_libs"
 	found=no
 	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
-	if test "$found" = "yes" -a -n "$shadow_libs_optional"; then
-	    LIBS="$LIBS $shadow_libs_optional"
-	    AC_CHECK_FUNCS($shadow_funcs, [found=yes])
-	    if test "$found" = "yes"; then
-		shadow_libs="$shadow_libs $shadow_libs_optional"
-	    fi
-	fi
 	if test "$found" = "yes"; then
 	    case "$shadow_funcs" in
 		*getprpwnam*) SECUREWARE=1;;
@@ -3449,7 +3439,7 @@ if test ${with_passwd-'no'} != "no"; then
 	LIBS="$_LIBS"
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([getspnam], [gen shadow], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
     fi
     if test "$CHECKSHADOW" = "true"; then
 	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
