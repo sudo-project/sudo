@@ -95,8 +95,6 @@ static sudo_auth auth_switch[] = {
 
 static int standalone;
 
-static void pass_warn(void);
-
 /*
  * Initialize sudoers authentication method(s).
  * Returns 0 on success and -1 on error.
@@ -159,6 +157,21 @@ sudo_auth_cleanup(struct passwd *pw)
 	}
     }
     debug_return_int(status == AUTH_FATAL ? -1 : 0);
+}
+
+static void
+pass_warn(void)
+{
+    const char *warning = def_badpass_message;
+    debug_decl(pass_warn, SUDO_DEBUG_AUTH)
+
+#ifdef INSULT
+    if (def_insults)
+	warning = INSULT;
+#endif
+    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", warning);
+
+    debug_return;
 }
 
 /*
@@ -308,21 +321,6 @@ sudo_auth_end_session(struct passwd *pw)
 	}
     }
     debug_return_int(status == AUTH_FATAL ? -1 : 1);
-}
-
-static void
-pass_warn(void)
-{
-    const char *warning = def_badpass_message;
-    debug_decl(pass_warn, SUDO_DEBUG_AUTH)
-
-#ifdef INSULT
-    if (def_insults)
-	warning = INSULT;
-#endif
-    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", warning);
-
-    debug_return;
 }
 
 char *
