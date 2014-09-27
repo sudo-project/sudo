@@ -196,7 +196,6 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     (void) sigaction(SIGTSTP, &sa, &osa);
 
     /* Make sure we have at least one auth method. */
-    /* XXX - check FLAG_DISABLED too */
     if (auth_switch[0].name == NULL) {
 	audit_failure(NewArgc, NewArgv, N_("no authentication methods"));
     	log_warningx(SLOG_SEND_MAIL,
@@ -207,15 +206,26 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     }
 
     while (--counter) {
+	int num_methods = 0;
+
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
-	    if (auth->setup && !IS_DISABLED(auth)) {
+	    if (IS_DISABLED(auth))
+		continue;
+	    num_methods++;
+	    if (auth->setup != NULL) {
 		status = (auth->setup)(pw, &prompt, auth);
 		if (status == AUTH_FAILURE)
 		    SET(auth->flags, FLAG_DISABLED);
 		else if (status == AUTH_FATAL)
 		    goto done;		/* assume error msg already printed */
 	    }
+	}
+	if (num_methods == 0) {
+	    audit_failure(NewArgc, NewArgv, N_("no authentication methods"));
+	    log_warningx(SLOG_SEND_MAIL,
+		N_("Unable to initialize authentication methods."));
+	    debug_return_int(-1);
 	}
 
 	/* Get the password unless the auth function will do it for us */
