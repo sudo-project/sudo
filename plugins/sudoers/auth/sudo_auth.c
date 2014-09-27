@@ -174,6 +174,15 @@ pass_warn(void)
     debug_return;
 }
 
+static bool
+user_interrupted(void)
+{
+    sigset_t mask;
+
+    return (sigpending(&mask) == 0 &&
+	(sigismember(&mask, SIGINT) || sigismember(&mask, SIGQUIT)));
+}
+
 /*
  * Verify the specified user.
  * Returns true if verified, false if not or -1 on error.
@@ -186,14 +195,9 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     int status, rval;
     char *p;
     sudo_auth *auth;
-    sigaction_t sa, osa;
+    sigset_t mask, omask;
+    sigaction_t sa, saved_sigtstp;
     debug_decl(verify_user, SUDO_DEBUG_AUTH)
-
-    /* Enable suspend during password entry. */
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_DFL;
-    (void) sigaction(SIGTSTP, &sa, &osa);
 
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL) {
@@ -205,8 +209,32 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	debug_return_int(-1);
     }
 
+    /* Enable suspend during password entry. */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGTSTP, &sa, &saved_sigtstp);
+
+    /*
+     * We treat authentication as a critical section and block
+     * keyboard-generated signals such as SIGINT and SIGQUIT
+     * which might otherwise interrupt a sleep(3).
+     * They are temporarily unblocked by auth_getpass().
+     */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    (void) sigprocmask(SIG_BLOCK, &mask, &omask);
+
     while (--counter) {
 	int num_methods = 0;
+
+	/* If user attempted to interrupt password verify, quit now. */
+	if (user_interrupted())
+	    goto done;
+
+	if (counter != def_passwd_tries)
+	    pass_warn();
 
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
@@ -217,7 +245,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 		status = (auth->setup)(pw, &prompt, auth);
 		if (status == AUTH_FAILURE)
 		    SET(auth->flags, FLAG_DISABLED);
-		else if (status == AUTH_FATAL)
+		else if (status == AUTH_FATAL || user_interrupted())
 		    goto done;		/* assume error msg already printed */
 	    }
 	}
@@ -244,18 +272,23 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 		continue;
 
 	    success = auth->status = (auth->verify)(pw, p, auth);
-	    if (auth->status != AUTH_FAILURE)
-		goto done;
+	    if (success != AUTH_FAILURE)
+		break;
 	}
 	if (!standalone)
 	    memset_s(p, SUDO_CONV_REPL_MAX, 0, strlen(p));
-	pass_warn();
+
+	if (success != AUTH_FAILURE)
+	    goto done;
     }
 
 done:
+    /* Restore signal handlers and signal mask. */
+    (void) sigaction(SIGTSTP, &saved_sigtstp, NULL);
+    (void) sigprocmask(SIG_SETMASK, &omask, NULL);
+
     switch (success) {
 	case AUTH_SUCCESS:
-	    (void) sigaction(SIGTSTP, &osa, NULL);
 	    rval = true;
 	    break;
 	case AUTH_INTR:
@@ -338,6 +371,7 @@ auth_getpass(const char *prompt, int timeout, int type)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
+    sigset_t mask, omask;
     debug_decl(auth_getpass, SUDO_DEBUG_AUTH)
 
     /* Mask user input if pwfeedback set and echo is off. */
@@ -348,7 +382,14 @@ auth_getpass(const char *prompt, int timeout, int type)
     if (def_visiblepw)
 	type |= SUDO_CONV_PROMPT_ECHO_OK;
 
-    /* Call conversation function */
+    /* Unblock SIGINT and SIGQUIT during password entry. */
+    /* XXX - do in tgetpass() itself instead? */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    (void) sigprocmask(SIG_UNBLOCK, &mask, &omask);
+
+    /* Call conversation function. */
     memset(&msg, 0, sizeof(msg));
     msg.msg_type = type;
     msg.timeout = def_passwd_timeout * 60;
@@ -356,6 +397,10 @@ auth_getpass(const char *prompt, int timeout, int type)
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl);
     /* XXX - check for ENOTTY? */
+
+    /* Restore previous signal mask. */
+    (void) sigprocmask(SIG_SETMASK, &omask, NULL);
+
     debug_return_str_masked(repl.reply);
 }
 

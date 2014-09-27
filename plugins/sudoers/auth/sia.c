@@ -43,6 +43,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
+#include <signal.h>
 #include <siad.h>
 
 #include "sudoers.h"
@@ -62,6 +63,8 @@ static int
 sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
     prompt_t *prompts)
 {
+    int rval;
+    sigset_t mask, omask;
     debug_decl(sudo_collect, SUDO_DEBUG_AUTH)
 
     switch (rendition) {
@@ -82,7 +85,18 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 	    break;
     }
 
-    debug_return_int(sia_collect_trm(timeout, rendition, title, nprompts, prompts));
+    /* Unblock SIGINT and SIGQUIT during password entry. */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    sigprocmask(SIG_UNBLOCK, &mask, &omask);
+
+    rval = sia_collect_trm(timeout, rendition, title, nprompts, prompts);
+
+    /* Restore previous signal mask. */
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+
+    debug_return_int(rval);
 }
 
 int
@@ -118,7 +132,7 @@ sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 
     def_prompt = prompt;		/* for sudo_collect */
 
-    /* XXX - need a way to detect user hitting return or EOF at prompt */
+    /* XXX - need a way to detect user hitting ^C or EOF at prompt */
     if (sia_ses_reauthent(sudo_collect, siah) == SIASUCCESS)
 	debug_return_int(AUTH_SUCCESS);
     else
