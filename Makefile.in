@@ -192,7 +192,9 @@ update-pot:
 		case "$$domain" in \
 		    sudo) tmpfiles=; cfiles="src/*c lib/*/*c";; \
 		    sudoers) \
-			echo "syntax error" > confstr.sh; \
+			echo "gettext \"syntax error\"" > confstr.sh; \
+			echo "gettext \"[sudo] password for %p: \"" >> confstr.sh; \
+			echo "gettext \"%p's password: \"" >> confstr.sh; \
 			$(SED) -n -e 's/^badpass_message="/gettext "/p' \
 			    -e 's/^passprompt="/gettext "/p' \
 			    -e 's/^mailsub="/gettext "/p' configure.ac \

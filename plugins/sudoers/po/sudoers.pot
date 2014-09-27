@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.11\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-07-30 09:37-0600\n"
+"POT-Creation-Date: 2014-09-25 21:16-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
+#: confstr.sh:1
+msgid "syntax error"
+msgstr ""
+
 #: confstr.sh:2
-msgid "Password:"
+msgid "[sudo] password for %p: "
 msgstr ""
 
 #: confstr.sh:3
-msgid "*** SECURITY information for %h ***"
+msgid "%p's password: "
 msgstr ""
 
 #: confstr.sh:4
+msgid "Password: "
+msgstr ""
+
+#: confstr.sh:5
+msgid "*** SECURITY information for %h ***"
+msgstr ""
+
+#: confstr.sh:6
 msgid "Sorry, try again."
 msgstr ""
 
@@ -239,7 +251,7 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr ""
 
-#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:671
+#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:663
 #: plugins/sudoers/sudoers.c:918 plugins/sudoers/testsudoers.c:211
 #: plugins/sudoers/testsudoers.c:363
 #, c-format
@@ -680,8 +692,8 @@ msgstr ""
 
 #: plugins/sudoers/env.c:274 plugins/sudoers/env.c:281
 #: plugins/sudoers/env.c:384 plugins/sudoers/linux_audit.c:89
-#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:468
-#: plugins/sudoers/policy.c:477 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:460
+#: plugins/sudoers/policy.c:469 plugins/sudoers/prompt.c:161
 #: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:241
 #: plugins/sudoers/toke_util.c:174
 #, c-format
@@ -692,7 +704,7 @@ msgstr ""
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
-#: plugins/sudoers/env.c:1051
+#: plugins/sudoers/env.c:1052
 #, c-format
 msgid ""
 "sorry, you are not allowed to set the following environment variables: %s"
@@ -841,7 +853,7 @@ msgstr ""
 msgid "    Order: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:506
+#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:513
 #: plugins/sudoers/sssd.c:1298
 #, c-format
 msgid "    Commands:\n"
@@ -1000,43 +1012,43 @@ msgstr ""
 msgid "digest for %s (%s) is not in %s form"
 msgstr ""
 
-#: plugins/sudoers/parse.c:116
+#: plugins/sudoers/parse.c:123
 #, c-format
 msgid "parse error in %s near line %d"
 msgstr ""
 
-#: plugins/sudoers/parse.c:119
+#: plugins/sudoers/parse.c:126
 #, c-format
 msgid "parse error in %s"
 msgstr ""
 
-#: plugins/sudoers/parse.c:453
+#: plugins/sudoers/parse.c:460
 #, c-format
 msgid ""
 "\n"
 "Sudoers entry:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:454
+#: plugins/sudoers/parse.c:461
 #, c-format
 msgid "    RunAsUsers: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:468
+#: plugins/sudoers/parse.c:475
 #, c-format
 msgid "    RunAsGroups: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:477
+#: plugins/sudoers/parse.c:484
 #, c-format
 msgid "    Options: "
 msgstr ""
 
-#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:118
-#: plugins/sudoers/policy.c:127 plugins/sudoers/policy.c:151
-#: plugins/sudoers/policy.c:267 plugins/sudoers/policy.c:287
-#: plugins/sudoers/policy.c:296 plugins/sudoers/policy.c:326
-#: plugins/sudoers/policy.c:336 plugins/sudoers/policy.c:345
+#: plugins/sudoers/policy.c:108 plugins/sudoers/policy.c:117
+#: plugins/sudoers/policy.c:126 plugins/sudoers/policy.c:150
+#: plugins/sudoers/policy.c:262 plugins/sudoers/policy.c:282
+#: plugins/sudoers/policy.c:291 plugins/sudoers/policy.c:321
+#: plugins/sudoers/policy.c:331 plugins/sudoers/policy.c:340
 #: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
 #: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
 #: plugins/sudoers/set_perms.c:1523
@@ -1044,39 +1056,39 @@ msgstr ""
 msgid "%s: %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:559 plugins/sudoers/visudo.c:767
+#: plugins/sudoers/policy.c:551 plugins/sudoers/visudo.c:767
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:689
+#: plugins/sudoers/policy.c:681
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:691
+#: plugins/sudoers/policy.c:683
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:695
+#: plugins/sudoers/policy.c:687
 #, c-format
 msgid ""
 "\n"
 "Sudoers path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:698
+#: plugins/sudoers/policy.c:690
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:700
+#: plugins/sudoers/policy.c:692
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:701
+#: plugins/sudoers/policy.c:693
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr ""
@@ -1185,22 +1197,22 @@ msgstr ""
 msgid "unable to find symbol \"%s\" in %s"
 msgstr ""
 
-#: plugins/sudoers/sudo_nss.c:285
+#: plugins/sudoers/sudo_nss.c:296
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr ""
 
-#: plugins/sudoers/sudo_nss.c:298
+#: plugins/sudoers/sudo_nss.c:309
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr ""
 
-#: plugins/sudoers/sudo_nss.c:311
+#: plugins/sudoers/sudo_nss.c:322
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr ""
 
-#: plugins/sudoers/sudo_nss.c:320
+#: plugins/sudoers/sudo_nss.c:331
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr ""

@@ -55,6 +55,10 @@ static char *def_prompt;
 static char **sudo_argv;
 static int sudo_argc;
 
+#define PROMPT_IS_PASSWORD(_p) \
+    (strncmp((_p), "Password:", 9) == 0 && \
+	((_p)[9] == '\0' || ((_p)[9] == ' ' && (_p)[10] == '\0')))
+
 /*
  * Collection routine (callback) for limiting the timeouts in SIA
  * prompts and (possibly) setting a custom prompt.
@@ -77,8 +81,8 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 	     * and b) the SIA prompt is "Password:" (so we know it is safe).
 	     * This keeps us from overwriting things like S/Key challenges.
 	     */
-	    if (strcmp((char *)prompts[0].prompt, "Password:") == 0 &&
-		strcmp(def_prompt, "Password:") != 0)
+	    if (!PROMPT_IS_PASSWORD(def_prompt) &&
+		PROMPT_IS_PASSWORD((char *)prompts[0].prompt))
 		prompts[0].prompt = (unsigned char *)def_prompt;
 	    break;
 	default:
