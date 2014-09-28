@@ -170,6 +170,7 @@ static const char *initial_badenv_table[] = {
     "PYTHONUSERBASE",		/* python, per user site-packages directory */
     "RUBYLIB",			/* ruby, library load path */
     "RUBYOPT",			/* ruby, extra command line options */
+    "BASH_FUNC_*",		/* new-style bash functions */
     NULL
 };
 
