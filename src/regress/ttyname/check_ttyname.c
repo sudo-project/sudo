@@ -83,7 +83,7 @@ main(int argc, char *argv[])
 	rval = 0;
     } else {
 	printf("%s: FAIL %s (sudo) vs. %s (libc)\n", getprogname(),
-	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_sudo : "none");
+	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
     }
 
     sudo_efree(tty_libc);
