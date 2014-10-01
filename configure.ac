@@ -21,11 +21,11 @@ AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
+AC_SUBST([LIBUTIL_LDFLAGS])
 AC_SUBST([LT_LDFLAGS])
 AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([LT_STATIC])
-AC_SUBST([LT_STATIC_LIBUTIL])
 AC_SUBST([LT_DEP_LIBS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
@@ -3608,11 +3608,10 @@ if test "$enable_shared_libutil" = "no"; then
     if test X"$STATIC_SUDOERS" = X""; then
 	AC_MSG_ERROR(["--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled."])
     else
-	# Disable use shared version of libsudo_util.
-	LT_STATIC_LIBUTIL="--tag=disable-shared"
+	# Do not install sudoers or libsudo_util.
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS}${SUDOERS_LDFLAGS+ }-no-install"
+	LIBUTIL_LDFLAGS="${LIBUTIL_LDFLAGS}${LIBUTIL_LDFLAGS+ }-no-install"
     fi
-else
-    LT_STATIC_LIBUTIL="$LT_STATIC"
 fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
