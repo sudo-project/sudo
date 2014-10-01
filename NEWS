@@ -1,5 +1,8 @@
 What's new in Sudo 1.8.12
 
+ * Fixed a compilation problem on some systems when the
+   --disable-shared-libutil configure option was specified.
+
  * The default password prompt now includes a trailing space after
    "Password:" for consistency with su(1) on most systems.
    Bug #663
