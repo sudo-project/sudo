@@ -45,7 +45,7 @@ shlib_opt = util.opt
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ @LT_STATIC_LIBUTIL@
+LIBTOOL = @LIBTOOL@ @LT_STATIC@
 SED = @SED@
 
 # Our install program supports extra flags...
@@ -60,7 +60,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-LT_LDFLAGS = @LT_LDFLAGS@ @LT_LDEXPORTS@
+LT_LDFLAGS = @LIBUTIL_LDFLAGS@ @LT_LDFLAGS@ @LT_LDEXPORTS@
 
 # PIE flags
 PIE_CFLAGS = @PIE_CFLAGS@
@@ -134,7 +134,12 @@ $(shlib_opt): $(shlib_exp)
 	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
 libsudo_util.la: $(LTOBJS) @LT_LDDEP@
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBDL@
+	case "$(LT_LDFLAGS)" in \
+	*-no-install*) \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS);; \
+	*) \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBDL@;; \
+	esac
 
 siglist.c: mksiglist
 	./mksiglist > $@
@@ -182,8 +187,8 @@ progname_test: $(PROGNAME_TEST_OBJS)
 pre-install:
 
 install: install-dirs
-	case "$(LIBTOOL)" in \
-	*disable-shared*) ;; \
+	case "$(LT_LDFLAGS)" in \
+	*-no-install*) ;; \
 	*)  if [ X"$(shlib_enable)" = X"yes" ]; then \
 		INSTALL_BACKUP='~' $(LIBTOOL) --quiet --mode=install $(INSTALL) $(INSTALL_OWNER) libsudo_util.la $(DESTDIR)$(libexecdir)/sudo; \
 	    fi;; \
