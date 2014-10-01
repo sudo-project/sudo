@@ -16,6 +16,7 @@
 
 #include <config.h>
 
+#include <sys/types.h>
 #ifdef HAVE_GSS_KRB5_CCACHE_NAME
 # if defined(HAVE_GSSAPI_GSSAPI_KRB5_H)
 #  include <gssapi/gssapi.h>
