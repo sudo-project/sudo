@@ -22,8 +22,6 @@ AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
 AC_SUBST([LT_LDFLAGS])
-AC_SUBST([LT_LDMAP])
-AC_SUBST([LT_LDOPT])
 AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([LT_STATIC])
@@ -3717,7 +3715,7 @@ EOF
 	    ]
 	)
 	if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
-	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
+	    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,--version-script,\$(shlib_map)"
 	fi
     else
 	case "$host_os" in
@@ -3743,7 +3741,7 @@ EOF
 		    ]
 		)
 		if test "$sudo_cv_var_solaris_ld_anon_map" = "yes"; then
-		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
+		    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
 		fi
 		;;
 	    hpux*)
@@ -3768,7 +3766,7 @@ EOF
 		    ]
 		)
 		if test "$sudo_cv_var_hpux_ld_symbol_export" = "yes"; then
-		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_opt)"; LT_LDOPT="-Wl,-c,\$(shlib_opt)"
+		    LT_LDDEP="\$(shlib_opt)"; LT_LDEXPORTS="-Wl,-c,\$(shlib_opt)"
 		fi
 		;;
 	esac

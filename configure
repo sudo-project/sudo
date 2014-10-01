@@ -785,8 +785,6 @@ LT_STATIC_LIBUTIL
 LT_STATIC
 LT_LDEXPORTS
 LT_LDDEP
-LT_LDOPT
-LT_LDMAP
 LT_LDFLAGS
 SUDOERS_LDFLAGS
 LDFLAGS
@@ -2983,8 +2981,6 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
-
-
 #
 # Begin initial values for man page substitution
 #
@@ -2995,7 +2991,7 @@ timeout=5
 password_timeout=5
 sudo_umask=0022
 umask_override=off
-passprompt="Password:"
+passprompt="Password: "
 long_otp_prompt=off
 lecture=once
 logfac=auth
@@ -22429,7 +22425,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_gnu_ld_anon_map" >&5
 $as_echo "$sudo_cv_var_gnu_ld_anon_map" >&6; }
 	if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
-	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
+	    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,--version-script,\$(shlib_map)"
 	fi
     else
 	case "$host_os" in
@@ -22475,7 +22471,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_solaris_ld_anon_map" >&5
 $as_echo "$sudo_cv_var_solaris_ld_anon_map" >&6; }
 		if test "$sudo_cv_var_solaris_ld_anon_map" = "yes"; then
-		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
+		    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
 		fi
 		;;
 	    hpux*)
@@ -22520,7 +22516,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_hpux_ld_symbol_export" >&5
 $as_echo "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
 		if test "$sudo_cv_var_hpux_ld_symbol_export" = "yes"; then
-		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_opt)"; LT_LDOPT="-Wl,-c,\$(shlib_opt)"
+		    LT_LDDEP="\$(shlib_opt)"; LT_LDEXPORTS="-Wl,-c,\$(shlib_opt)"
 		fi
 		;;
 	esac
