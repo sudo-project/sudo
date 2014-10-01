@@ -19057,6 +19057,8 @@ _ACEOF
 
 fi
 
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
 if test "x$ac_cv_func_socket" = xyes; then :
 
@@ -19128,6 +19130,9 @@ $as_echo "no" >&6; }
 
 fi
 
+LIBS="$OLIBS"
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 ac_fn_c_check_func "$LINENO" "inet_ntoa" "ac_cv_func_inet_ntoa"
 if test "x$ac_cv_func_inet_ntoa" = xyes; then :
   $as_echo "#define HAVE_INET_NTOA 1" >>confdefs.h
@@ -19205,6 +19210,9 @@ $as_echo "no" >&6; }
 
 fi
 
+LIBS="$OLIBS"
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 found=false
 INET_PTON_LIBS=
 ac_fn_c_check_func "$LINENO" "inet_pton" "ac_cv_func_inet_pton"
@@ -19289,6 +19297,7 @@ $as_echo "no" >&6; }
 
 fi
 
+LIBS="$OLIBS"
 if test X"$found" != X"true"; then
     case " $LIBOBJS " in
   *" inet_pton.$ac_objext "* ) ;;
@@ -19303,6 +19312,8 @@ esac
     done
 
 fi
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 ac_fn_c_check_func "$LINENO" "syslog" "ac_cv_func_syslog"
 if test "x$ac_cv_func_syslog" = xyes; then :
 
@@ -19374,11 +19385,13 @@ $as_echo "no" >&6; }
 
 fi
 
+LIBS="$OLIBS"
 #
 # Check for getaddrinfo and add any required libs to NET_LIBS.
 # If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo" >&5
 $as_echo_n "checking for getaddrinfo... " >&6; }
 if ${ax_cv_func_getaddrinfo+:} false; then :
@@ -19559,7 +19572,7 @@ fi
 	;;
     *)
 	for lib in $LIBS; do
-	    case "$OLIBS" in
+	    case "$NET_LIBS" in
 		*"$lib"*) ;;
 		*) NET_LIBS="${NET_LIBS} $lib";;
 	    esac

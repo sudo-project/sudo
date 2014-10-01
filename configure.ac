@@ -2634,6 +2634,8 @@ dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 AC_CHECK_FUNC(socket, [], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
 	_libs=
@@ -2650,11 +2652,14 @@ AC_CHECK_FUNC(socket, [], [
 	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
     done
 ])
+LIBS="$OLIBS"
 dnl
 dnl If inet_ntoa(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_ntoa() in libresolv.
 dnl
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
@@ -2675,11 +2680,14 @@ AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
 	], [], [$extralibs])
     done
 ])
+LIBS="$OLIBS"
 dnl
 dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_pton() in libresolv.
 dnl
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 found=false
 INET_PTON_LIBS=
 AC_CHECK_FUNC(inet_pton, [
@@ -2707,6 +2715,7 @@ AC_CHECK_FUNC(inet_pton, [
 	], [], [$extralibs])
     done
 ])
+LIBS="$OLIBS"
 if test X"$found" != X"true"; then
     AC_LIBOBJ(inet_pton)
     SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
@@ -2714,6 +2723,8 @@ fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 AC_CHECK_FUNC(syslog, [], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
 	_libs=
@@ -2730,11 +2741,13 @@ AC_CHECK_FUNC(syslog, [], [
 	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
     done
 ])
+LIBS="$OLIBS"
 #
 # Check for getaddrinfo and add any required libs to NET_LIBS.
 # If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
 AX_FUNC_GETADDRINFO
 case " $LIBOBJS " in
     *" getaddrinfo.$ac_objext "* )
@@ -2764,7 +2777,7 @@ case " $LIBOBJS " in
 	;;
     *)
 	for lib in $LIBS; do
-	    case "$OLIBS" in
+	    case "$NET_LIBS" in
 		*"$lib"*) ;;
 		*) NET_LIBS="${NET_LIBS} $lib";;
 	    esac
