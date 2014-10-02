@@ -94,6 +94,7 @@ lib/util/getline.c
 lib/util/getopt_long.c
 lib/util/gidlist.c
 lib/util/glob.c
+lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c

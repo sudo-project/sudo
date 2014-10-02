@@ -98,6 +98,9 @@ struct rtentry;
 # define IFF_LOOPBACK	0
 #endif
 
+#ifndef INET_ADDRSTRLEN
+# define INET_ADDRSTRLEN 16
+#endif
 #ifndef INET6_ADDRSTRLEN
 # define INET6_ADDRSTRLEN 46
 #endif
@@ -115,7 +118,9 @@ get_net_ifs(char **addrinfo)
     struct sockaddr_in *sin;
 #ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
-    char addrbuf[INET6_ADDRSTRLEN];
+    char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
+#else
+    char addrstr[INET_ADDRSTRLEN], maskstr[INET_ADDRSTRLEN];
 #endif
     int ailen, len, num_interfaces = 0;
     char *cp;
@@ -155,18 +160,14 @@ get_net_ifs(char **addrinfo)
 	switch (ifa->ifa_addr->sa_family) {
 	    case AF_INET:
 		sin = (struct sockaddr_in *)ifa->ifa_addr;
-		len = snprintf(cp, ailen - (*addrinfo - cp),
-		    "%s%s/", cp == *addrinfo ? "" : " ",
-		    inet_ntoa(sin->sin_addr));
-		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    sudo_warnx(U_("internal error, %s overflow"), __func__);
-		    goto done;
-		}
-		cp += len;
-
+		if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL)
+		    continue;
 		sin = (struct sockaddr_in *)ifa->ifa_netmask;
+		if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL)
+		    continue;
+
 		len = snprintf(cp, ailen - (*addrinfo - cp),
-		    "%s", inet_ntoa(sin->sin_addr));
+		    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
@@ -176,18 +177,14 @@ get_net_ifs(char **addrinfo)
 #ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
 		sin6 = (struct sockaddr_in6 *)ifa->ifa_addr;
-		inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
-		len = snprintf(cp, ailen - (*addrinfo - cp),
-		    "%s%s/", cp == *addrinfo ? "" : " ", addrbuf);
-		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-		    sudo_warnx(U_("internal error, %s overflow"), __func__);
-		    goto done;
-		}
-		cp += len;
-
+		if (inet_ntop(AF_INET6, &sin6->sin6_addr, addrstr, sizeof(addrstr)) == NULL)
+		    continue;
 		sin6 = (struct sockaddr_in6 *)ifa->ifa_netmask;
-		inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
-		len = snprintf(cp, ailen - (*addrinfo - cp), "%s", addrbuf);
+		if (inet_ntop(AF_INET6, &sin6->sin6_addr, maskstr, sizeof(maskstr)) == NULL)
+		    continue;
+
+		len = snprintf(cp, ailen - (*addrinfo - cp),
+		    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
 		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
@@ -223,6 +220,7 @@ get_net_ifs(char **addrinfo)
     int ailen, i, len, n, sock, num_interfaces = 0;
     size_t buflen = sizeof(struct ifconf) + BUFSIZ;
     char *cp, *previfname = "", *ifconf_buf = NULL;
+    char addrstr[INET_ADDRSTRLEN], maskstr[INET_ADDRSTRLEN];
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
@@ -299,19 +297,6 @@ get_net_ifs(char **addrinfo)
 	    ISSET(ifr_tmp->ifr_flags, IFF_LOOPBACK))
 		continue;
 
-	sin = (struct sockaddr_in *) &ifr->ifr_addr;
-	len = snprintf(cp, ailen - (*addrinfo - cp),
-	    "%s%s/", cp == *addrinfo ? "" : " ",
-	    inet_ntoa(sin->sin_addr));
-	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    goto done;
-	}
-	cp += len;
-
-	/* Stash the name of the interface we saved. */
-	previfname = ifr->ifr_name;
-
 	/* Get the netmask. */
 	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
 	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
@@ -323,13 +308,25 @@ get_net_ifs(char **addrinfo)
 	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) ifr_tmp) < 0)
 #endif /* _ISC */
 	    sin->sin_addr.s_addr = htonl(IN_CLASSC_NET);
+
+	/* Convert the addr and mask to string form. */
+	sin = (struct sockaddr_in *) &ifr->ifr_addr;
+	if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL)
+	    continue;
+	sin = (struct sockaddr_in *) &ifr_tmp->ifr_addr;
+	if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL)
+	    continue;
+
 	len = snprintf(cp, ailen - (*addrinfo - cp),
-	    "%s", inet_ntoa(sin->sin_addr));
+	    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
 	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}
 	cp += len;
+
+	/* Stash the name of the interface we saved. */
+	previfname = ifr->ifr_name;
 	num_interfaces++;
     }
 

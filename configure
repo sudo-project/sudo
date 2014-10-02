@@ -19133,9 +19133,13 @@ fi
 LIBS="$OLIBS"
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
-ac_fn_c_check_func "$LINENO" "inet_ntoa" "ac_cv_func_inet_ntoa"
-if test "x$ac_cv_func_inet_ntoa" = xyes; then :
-  $as_echo "#define HAVE_INET_NTOA 1" >>confdefs.h
+found=false
+ac_fn_c_check_func "$LINENO" "inet_ntop" "ac_cv_func_inet_ntop"
+if test "x$ac_cv_func_inet_ntop" = xyes; then :
+
+    found=true
+    $as_echo "#define HAVE_INET_NTOP 1" >>confdefs.h
+
 
 else
 
@@ -19153,9 +19157,9 @@ else
 	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
 
     _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_ntoa in -l$lib${5+ }$extralibs" >&5
-$as_echo_n "checking for inet_ntoa in -l$lib${5+ }$extralibs... " >&6; }
-    if { as_var=sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_ntop in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for inet_ntop in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_inet_ntop$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -19170,19 +19174,19 @@ else
 #ifdef __cplusplus
 extern "C"
 #endif
-char inet_ntoa ();
+char inet_ntop ();
 int
 main ()
 {
-return inet_ntoa ();
+return inet_ntop ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras=yes
+  eval sudo_cv_lib_$lib''_inet_ntop$_sudo_check_lib_extras=yes
 else
-  eval sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras=no
+  eval sudo_cv_lib_$lib''_inet_ntop$_sudo_check_lib_extras=no
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -19191,11 +19195,12 @@ rm -f core conftest.err conftest.$ac_objext \
 
 fi
 
-    if eval test \$sudo_cv_lib_$lib''_inet_ntoa$_sudo_check_lib_extras = "yes"; then
+    if eval test \$sudo_cv_lib_$lib''_inet_ntop$_sudo_check_lib_extras = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
-	    $as_echo "#define HAVE_INET_NTOA 1" >>confdefs.h
+	    found=true
+	    $as_echo "#define HAVE_INET_NTOP 1" >>confdefs.h
 
 	    NET_LIBS="${NET_LIBS} $libs"
 	    break

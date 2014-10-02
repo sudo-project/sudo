@@ -2654,13 +2654,17 @@ AC_CHECK_FUNC(socket, [], [
 ])
 LIBS="$OLIBS"
 dnl
-dnl If inet_ntoa(3) not in libc, check -lnsl and -linet
+dnl If inet_ntop(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl Some systems may have inet_ntoa() in libresolv.
+dnl Some systems may have inet_ntop() in libresolv.
 dnl
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
-AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
+found=false
+AC_CHECK_FUNC(inet_ntop, [
+    found=true
+    AC_DEFINE(HAVE_INET_NTOP)
+], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
@@ -2673,8 +2677,9 @@ AC_CHECK_FUNC(inet_ntoa, [AC_DEFINE(HAVE_INET_NTOA)], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_ntoa, [
-	    AC_DEFINE(HAVE_INET_NTOA)
+	SUDO_CHECK_LIB($lib, inet_ntop, [
+	    found=true
+	    AC_DEFINE(HAVE_INET_NTOP)
 	    NET_LIBS="${NET_LIBS} $libs"
 	    break
 	], [], [$extralibs])
@@ -4078,7 +4083,7 @@ AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
-AH_TEMPLATE(HAVE_INET_NTOA, [Define to 1 if you have the `inet_ntoa' function.])
+AH_TEMPLATE(HAVE_INET_NTOP, [Define to 1 if you have the `inet_ntop' function.])
 AH_TEMPLATE(HAVE_INET_PTON, [Define to 1 if you have the `inet_pton' function.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled).])
