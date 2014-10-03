@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "@mansectsu@" "February 15, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "February 15, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -367,7 +367,7 @@ shell.
 The command is run with an environment similar to the one
 a user would receive at log in.
 The
-\fICommand Environment\fR
+\fICommand environment\fR
 section in the
 sudoers(@mansectform@)
 manual documents how the
@@ -879,7 +879,7 @@ Because of this, care must be taken when giving users access to commands via
 to verify that the command does not inadvertently give the user an
 effective root shell.
 For more information, please see the
-\fIPREVENTING SHELL ESCAPES\fR
+\fIPreventing shell escapes\fR
 section in
 sudoers(@mansectform@).
 .PP

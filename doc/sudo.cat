@@ -167,7 +167,7 @@ DDEESSCCRRIIPPTTIIOONN
                  attempts to change to that user's home directory before
                  running the shell.  The command is run with an environment
                  similar to the one a user would receive at log in.  The
-                 _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t section in the sudoers(4) manual
+                 _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t section in the sudoers(4) manual
                  documents how the --ii option affects the environment in which
                  a command is run when the _s_u_d_o_e_r_s policy is in use.
 
@@ -435,7 +435,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      those commands.  Because of this, care must be taken when giving users
      access to commands via ssuuddoo to verify that the command does not
      inadvertently give the user an effective root shell.  For more
-     information, please see the _P_R_E_V_E_N_T_I_N_G _S_H_E_L_L _E_S_C_A_P_E_S section in
+     information, please see the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section in
      sudoers(4).
 
      To prevent the disclosure of potentially sensitive information, ssuuddoo

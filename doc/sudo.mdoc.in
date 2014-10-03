@@ -334,7 +334,7 @@ shell.
 The command is run with an environment similar to the one
 a user would receive at log in.
 The
-.Em Command Environment
+.Em Command environment
 section in the
 .Xr sudoers @mansectform@
 manual documents how the
@@ -814,7 +814,7 @@ Because of this, care must be taken when giving users access to commands via
 to verify that the command does not inadvertently give the user an
 effective root shell.
 For more information, please see the
-.Em PREVENTING SHELL ESCAPES
+.Em Preventing shell escapes
 section in
 .Xr sudoers @mansectform@ .
 .Pp
