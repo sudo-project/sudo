@@ -44,7 +44,8 @@ struct sudo_fatal_callback {
 };
 SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
-static struct sudo_fatal_callback_list callbacks;
+static struct sudo_fatal_callback_list callbacks = SLIST_HEAD_INITIALIZER(&callbacks);
+static sudo_conv_t sudo_warn_conversation;
 
 static void _warning(int errnum, const char *fmt, va_list ap);
 
@@ -135,24 +136,44 @@ sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
 static void
 _warning(int errnum, const char *fmt, va_list ap)
 {
-    char *str;
+    if (sudo_warn_conversation != NULL) {
+	struct sudo_conv_message msgs[6];
+	int nmsgs = 0;
+	char *str = NULL;
 
-    sudo_evasprintf(&str, fmt, ap);
-    if (errnum) {
-	if (fmt != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG,
-		_("%s: %s: %s\n"), getprogname(), str,
-		sudo_warn_strerror(errnum));
-	} else {
-	    sudo_printf(SUDO_CONV_ERROR_MSG,
-		_("%s: %s\n"), getprogname(),
-		sudo_warn_strerror(errnum));
-	}
+	/* Use conversation function. */
+        msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+	msgs[nmsgs++].msg = getprogname();
+        if (fmt != NULL) {
+		sudo_evasprintf(&str, fmt, ap);
+		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+		msgs[nmsgs++].msg = ": ";
+		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+		msgs[nmsgs++].msg = str;
+        }
+        if (errnum) {
+	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+	    msgs[nmsgs++].msg = ": ";
+	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+	    msgs[nmsgs++].msg = sudo_warn_strerror(errnum);
+        }
+	msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+	msgs[nmsgs++].msg = "\n";
+	sudo_warn_conversation(nmsgs, msgs, NULL);
+	sudo_efree(str);
     } else {
-	sudo_printf(SUDO_CONV_ERROR_MSG,
-	    _("%s: %s\n"), getprogname(), str ? str : "(null)");
+	/* Write to the standard error. */
+        fputs(getprogname(), stderr);
+        if (fmt != NULL) {
+                fputs(": ", stderr);
+                vfprintf(stderr, fmt, ap);
+        }
+        if (errnum) {
+            fputs(": ", stderr);
+            fputs(sudo_warn_strerror(errnum), stderr);
+        }
+        putc('\n', stderr);
     }
-    sudo_efree(str);
 }
 
 /*
@@ -200,4 +221,14 @@ sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func)
     }
 
     return -1;
+}
+
+/*
+ * Set the conversation function to use for output insteaf of the
+ * standard error.  If conv is NULL, switch back to standard error.
+ */
+void
+sudo_warn_set_conversation_v1(sudo_conv_t conv)
+{
+    sudo_warn_conversation = conv;
 }

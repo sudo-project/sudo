@@ -161,7 +161,6 @@ lib/util/strtonum.c
 lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
-lib/util/sudo_printf.c
 lib/util/term.c
 lib/util/ttysize.c
 lib/util/util.exp.in
@@ -429,6 +428,7 @@ plugins/sudoers/solaris_audit.h
 plugins/sudoers/sssd.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
+plugins/sudoers/sudo_printf.c
 plugins/sudoers/sudoers.c
 plugins/sudoers/sudoers.exp
 plugins/sudoers/sudoers.h

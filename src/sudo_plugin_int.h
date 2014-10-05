@@ -101,7 +101,7 @@ extern struct plugin_container_list io_plugins;
 
 int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[]);
-int _sudo_printf(int msg_type, const char *fmt, ...);
+int sudo_conversation_printf(int msg_type, const char *fmt, ...);
 
 bool sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins);

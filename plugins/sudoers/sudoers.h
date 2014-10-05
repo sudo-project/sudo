@@ -364,6 +364,7 @@ extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
+extern sudo_printf_t sudo_printf;
 #endif
 
 #endif /* _SUDOERS_SUDOERS_H */

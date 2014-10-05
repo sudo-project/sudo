@@ -168,6 +168,9 @@ main(int argc, char *argv[], char *envp[])
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
+    /* Use conversation function for sudo_(warn|fatal)x?. */
+    sudo_warn_set_conversation(sudo_conversation);
+
     /* Make sure we are setuid root. */
     sudo_check_suid(argv[0]);
 
@@ -1085,11 +1088,13 @@ policy_open(struct plugin_container *plugin, char * const settings[],
     case SUDO_API_MKVERSION(1, 0):
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, _sudo_printf, settings, user_info, user_env);
+	    sudo_conversation, sudo_conversation_printf, settings,
+	    user_info, user_env);
 	break;
     default:
 	rval = plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
-	    _sudo_printf, settings, user_info, user_env, plugin->options);
+	    sudo_conversation_printf, settings, user_info, user_env,
+	    plugin->options);
     }
 
     debug_return_bool(rval);
@@ -1205,17 +1210,17 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
 	rval = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, _sudo_printf, settings, user_info, argc, argv,
-	    user_env);
+	    sudo_conversation, sudo_conversation_printf, settings,
+	    user_info, argc, argv, user_env);
 	break;
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
-	    sudo_conversation, _sudo_printf, settings, user_info,
-	    command_info, argc, argv, user_env);
+	    sudo_conversation, sudo_conversation_printf, settings,
+	    user_info, command_info, argc, argv, user_env);
 	break;
     default:
 	rval = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-	    _sudo_printf, settings, user_info, command_info,
+	    sudo_conversation_printf, settings, user_info, command_info,
 	    argc, argv, user_env, plugin->options);
     }
     debug_return_bool(rval);

@@ -1,4 +1,4 @@
-@COMPAT_EXP@_sudo_printf
+@COMPAT_EXP@
 initprogname
 sudo_conf_askpass_path_v1
 sudo_conf_debug_flags_v1
@@ -70,7 +70,6 @@ sudo_lock_file_v1
 sudo_new_key_val_v1
 sudo_parse_gids_v1
 sudo_parseln_v1
-sudo_printf
 sudo_secure_dir_v1
 sudo_secure_file_v1
 sudo_setgroups_v1
@@ -90,3 +89,4 @@ sudo_vwarn_nodebug_v1
 sudo_vwarnx_nodebug_v1
 sudo_warn_nodebug_v1
 sudo_warnx_nodebug_v1
+sudo_warn_set_conversation_v1
