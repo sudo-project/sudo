@@ -27,6 +27,7 @@ cross_compiling = @CROSS_COMPILING@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # Where to install things...
 prefix = @prefix@
@@ -65,7 +66,7 @@ install-binaries:
 install-doc:
 
 install-includes: install-dirs
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
+	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
 
 install-plugin:
 

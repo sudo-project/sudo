@@ -266,7 +266,7 @@ install-nls:
 			    ln -s $$lang $(DESTDIR)$(localedir)/$$lang$(LOCALEDIR_SUFFIX); \
 			fi; \
 		    fi; \
-		    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
+		    $(INSTALL) $(INSTALL_OWNER) -m 0644 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 		done; \
 		echo ""; \
 	    done; \
