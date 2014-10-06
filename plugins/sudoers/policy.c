@@ -69,6 +69,7 @@ struct sudoers_exec_args {
 static int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
+sudo_printf_t sudo_printf;
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
 

@@ -104,7 +104,6 @@ uid_t timestamp_uid;
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 int sudo_mode;
-sudo_printf_t sudo_printf;
 
 static char *prev_user;
 static char *runas_user;
