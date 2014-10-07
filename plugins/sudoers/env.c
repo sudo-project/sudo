@@ -677,7 +677,7 @@ env_should_keep(const char *var)
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "keep %s: %s",
-	var, keepit ? "YES" : "NO");
+	var, keepit == true ? "YES" : "NO");
     debug_return_bool(keepit == true);
 }
 
