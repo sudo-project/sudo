@@ -1003,8 +1003,9 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      * Only change cwd if we have chroot()ed or the policy modules
      * specifies a different cwd.  Must be done after uid change.
      */
-    if (details->cwd) {
-	if (details->chroot || strcmp(details->cwd, user_details.cwd) != 0) {
+    if (details->cwd != NULL) {
+	if (details->chroot || user_details.cwd == NULL ||
+	    strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
 	    if (chdir(details->cwd) != 0) {
 		sudo_warn(U_("unable to change directory to %s"), details->cwd);
