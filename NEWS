@@ -1,4 +1,4 @@
-What's new in Sudo 1.8.12
+What's new in Sudo 1.8.11p1
 
  * Fixed a compilation problem on some systems when the
    --disable-shared-libutil configure option was specified.
@@ -13,6 +13,21 @@ What's new in Sudo 1.8.12
 
  * Fixed a compilation problem on Linux systems that do not use PAM.
    Bug #667
+
+ * "make install" will now work with the stock GNU autotools
+   install-sh script.  Bug #669
+
+ * Fixed a crash with "sudo -i" when the current working directory
+   does not exist.  Bug #670
+
+ * Fixed a potential crash in the debug subsystem when logging a message
+   larger that 1024 bytes.
+
+ * Fixed a "make check" failure for ttyname when stdin is closed and
+   stdout and stderr are redirected to a different tty.  Bug #643
+
+ * Added BASH_FUNC_* to environment blacklist to match newer-style
+   bash functions.
 
 What's new in Sudo 1.8.11
 
