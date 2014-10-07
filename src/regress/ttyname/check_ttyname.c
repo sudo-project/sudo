@@ -50,31 +50,32 @@ extern char *get_process_ttyname(void);
 int
 main(int argc, char *argv[])
 {
-    char *cp, *tty_libc = NULL, *tty_sudo;
-    int fd, rval = 1;
+    char *tty_libc = NULL, *tty_sudo;
+    int rval = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
 
-    /* Lookup tty name via sudo (using kernel info if possible). */
-    if ((tty_sudo = get_process_ttyname()) == NULL)
-	tty_sudo = sudo_estrdup("none");
+    /* Lookup tty name using kernel info if possible. */
+    tty_sudo = get_process_ttyname();
 
-    /* Lookup tty name via libc and compare to kernel tty. */
-    for (fd = STDERR_FILENO; fd >= STDIN_FILENO; fd--) {
-	cp = ttyname(fd);
-	if (cp != NULL) {
-	    if (tty_libc == NULL || strcmp(cp, tty_libc) != 0) {
-		sudo_efree(tty_libc);
-		tty_libc = sudo_estrdup(cp);
-	    }
-	    if (tty_sudo != NULL && strcmp(tty_libc, tty_sudo) == 0) {
-		rval = 0;
-		break;
-	    }
-	}
-    }
-    if (tty_libc == NULL && tty_sudo == NULL)
+#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || \
+    defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || \
+    defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || \
+    defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || \
+    defined(HAVE__TTYNAME_DEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || \
+    defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
+
+    /* Lookup tty name attached to stdin via libc. */
+    tty_libc = ttyname(STDIN_FILENO);
+#endif
+
+    /* Compare libc and kernel ttys. */
+    if (tty_libc != NULL && tty_sudo != NULL) {
+	if (strcmp(tty_libc, tty_sudo) == 0)
+	    rval = 0;
+    } else if (tty_libc == NULL && tty_sudo == NULL) {
 	rval = 0;
+    }
 
     if (rval == 0) {
 	printf("%s: OK (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
@@ -86,7 +87,6 @@ main(int argc, char *argv[])
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
     }
 
-    sudo_efree(tty_libc);
     sudo_efree(tty_sudo);
     exit(rval);
 }
