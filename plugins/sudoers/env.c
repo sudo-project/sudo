@@ -171,6 +171,7 @@ static const char *initial_badenv_table[] = {
     "RUBYLIB",			/* ruby, library load path */
     "RUBYOPT",			/* ruby, extra command line options */
     "BASH_FUNC_*",		/* new-style bash functions */
+    "__BASH_FUNC<*",		/* new-style bash functions (Apple) */
     NULL
 };
 
