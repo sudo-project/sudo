@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 16, 2014
+.Dd October 10, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -299,9 +299,9 @@ are removed unless both the name and value parts are matched by
 .Em env_keep
 or
 .Em env_check ,
-as they could be interpreted as
+as they will be interpreted as fuctions by older versions of the
 .Sy bash
-functions.
+shell.
 Prior to version 1.8.11, such variables were always removed.
 .Pp
 If, however, the
@@ -331,25 +331,27 @@ By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 .Pq Ql =\& ,
 both the variables name and value must match.
-For example, a
+For example, an old-style (pre-shellshock)
 .Sy bash
-function could be matched as follows:
+shell function could be matched as follows:
 .Bd -literal -offset 4n
 env_keep += "my_func=()*"
 .Ed
 .Pp
 Without the
 .Dq Li =()*
-suffix, this would not match, as
+suffix, this would not match, as old-style
 .Sy bash
-functions are not preserved by default.
+shell functions are not preserved by default.
 .Pp
-The list of environment variables that
+The complete list of environment variables that
 .Nm sudo
-allows or denies is
-contained in the output of
+allows or denies is contained in the output of
 .Dq Li sudo -V
 when run as root.
+Please note that this list varies based on the operating system
+.Nm sudo
+is running on.
 .Pp
 On systems that support PAM where the
 .Sy pam_env

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "July 16, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "5" "October 10, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -310,9 +310,9 @@ are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
 or
 \fIenv_check\fR,
-as they could be interpreted as
+as they will be interpreted as fuctions by older versions of the
 \fBbash\fR
-functions.
+shell.
 Prior to version 1.8.11, such variables were always removed.
 .PP
 If, however, the
@@ -342,9 +342,9 @@ By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 (\(oq=\&\(cq),
 both the variables name and value must match.
-For example, a
+For example, an old-style (pre-shellshock)
 \fBbash\fR
-function could be matched as follows:
+shell function could be matched as follows:
 .nf
 .sp
 .RS 4n
@@ -354,16 +354,18 @@ env_keep += "my_func=()*"
 .PP
 Without the
 \(lq\fR=()*\fR\(rq
-suffix, this would not match, as
+suffix, this would not match, as old-style
 \fBbash\fR
-functions are not preserved by default.
+shell functions are not preserved by default.
 .PP
-The list of environment variables that
+The complete list of environment variables that
 \fBsudo\fR
-allows or denies is
-contained in the output of
+allows or denies is contained in the output of
 \(lq\fRsudo -V\fR\(rq
 when run as root.
+Please note that this list varies based on the operating system
+\fBsudo\fR
+is running on.
 .PP
 On systems that support PAM where the
 \fBpam_env\fR

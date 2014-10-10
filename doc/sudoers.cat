@@ -124,8 +124,9 @@ DDEESSCCRRIIPPTTIIOONN
      _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.  This is effectively a whitelist for
      environment variables.  Environment variables with a value beginning with
      () are removed unless both the name and value parts are matched by
-     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they could be interpreted as bbaasshh functions.
-     Prior to version 1.8.11, such variables were always removed.
+     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they will be interpreted as fuctions by older
+     versions of the bbaasshh shell.  Prior to version 1.8.11, such variables were
+     always removed.
 
      If, however, the _e_n_v___r_e_s_e_t option is disabled, any variables not
      explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are inherited
@@ -138,15 +139,17 @@ DDEESSCCRRIIPPTTIIOONN
 
      By default, environment variables are matched by name.  However, if the
      pattern includes an equal sign (`='), both the variables name and value
-     must match.  For example, a bbaasshh function could be matched as follows:
+     must match.  For example, an old-style (pre-shellshock) bbaasshh shell
+     function could be matched as follows:
 
          env_keep += "my_func=()*"
 
-     Without the ``=()*'' suffix, this would not match, as bbaasshh functions are
-     not preserved by default.
+     Without the ``=()*'' suffix, this would not match, as old-style bbaasshh
+     shell functions are not preserved by default.
 
-     The list of environment variables that ssuuddoo allows or denies is contained
-     in the output of ``sudo -V'' when run as root.
+     The complete list of environment variables that ssuuddoo allows or denies is
+     contained in the output of ``sudo -V'' when run as root.  Please note
+     that this list varies based on the operating system ssuuddoo is running on.
 
      On systems that support PAM where the ppaamm__eennvv module is enabled for ssuuddoo,
      variables in the PAM environment may be merged in to the environment.  If
@@ -2353,4 +2356,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                      July 16, 2014                     Sudo 1.8.11
+Sudo 1.8.11                    October 10, 2014                    Sudo 1.8.11
