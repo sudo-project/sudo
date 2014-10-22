@@ -178,6 +178,11 @@ DDEESSCCRRIIPPTTIIOONN
                        plugin was loaded from.  It may be used by a plugin to
                        locate support files.
 
+                 plugin_path=string
+                       The path name of plugin loaded by the ssuuddoo front end.
+                       The path name will be a fully-qualified unless the
+                       plugin was statically compiled into ssuuddoo.
+
                  preserve_environment=bool
                        Set to true if the user specified the --EE flag,
                        indicating that the user wishes to preserve the
@@ -1461,6 +1466,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            The behavior when an I/O logging plugin returns 0 has changed.
            Previously, output from the command would be displayed to the
            terminal even if an output logging function returned 0.
+
+     Version 1.7 (sudo 1.8.12)
+           The _p_l_u_g_i_n___p_a_t_h entry was added to the settings list.
 
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)

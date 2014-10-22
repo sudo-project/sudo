@@ -237,6 +237,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	}
 	if (handle != NULL) {
 	    policy_plugin->handle = handle;
+	    policy_plugin->path = sudo_estrdup(path);
 	    policy_plugin->name = info->symbol_name;
 	    policy_plugin->options = info->options;
 	    policy_plugin->u.generic = plugin;
@@ -255,6 +256,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	if (handle != NULL) {
 	    container = sudo_ecalloc(1, sizeof(*container));
 	    container->handle = handle;
+	    container->path = sudo_estrdup(path);
 	    container->name = info->symbol_name;
 	    container->options = info->options;
 	    container->u.generic = plugin;

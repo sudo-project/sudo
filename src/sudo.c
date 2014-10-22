@@ -1091,6 +1091,8 @@ format_plugin_settings(struct plugin_container *plugin,
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
     plugin_settings = sudo_emallocarray(plugin_settings_size, sizeof(char *));
+    plugin_settings[num_plugin_settings++] =
+	sudo_new_key_val("plugin_path", plugin->path);
     while (settings->name != NULL) {
         if (settings->value != NULL) {
             sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",

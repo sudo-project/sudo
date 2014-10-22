@@ -304,6 +304,14 @@ This is the default directory set at compile time and may not
 correspond to the directory the running plugin was loaded from.
 It may be used by a plugin to locate support files.
 .TP 6n
+plugin_path=string
+The path name of plugin loaded by the
+\fBsudo\fR
+front end.
+The path name will be a fully-qualified unless the plugin was
+statically compiled into
+\fBsudo\fR.
+.TP 6n
 preserve_environment=bool
 Set to true if the user specified the
 \fB\-E\fR
@@ -2608,6 +2616,13 @@ function returned an error.
 The behavior when an I/O logging plugin returns 0 has changed.
 Previously, output from the command would be displayed to the
 terminal even if an output logging function returned 0.
+.TP 6n
+Version 1.7 (sudo 1.8.12)
+The
+\fIplugin_path\fR
+entry was added to the
+\fRsettings\fR
+list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),
