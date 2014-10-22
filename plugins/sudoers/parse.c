@@ -340,8 +340,7 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 }
 
 #define	RUNAS_CHANGED(cs1, cs2) \
-	(cs1 == NULL || cs2 == NULL || \
-	 cs1->runasuserlist != cs2->runasuserlist || \
+	(cs1->runasuserlist != cs2->runasuserlist || \
 	 cs1->runasgrouplist != cs2->runasgrouplist)
 
 static int
@@ -366,7 +365,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 	    continue;
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-	    if (RUNAS_CHANGED(cs, prev_cs)) {
+	    if (prev_cs == NULL || RUNAS_CHANGED(cs, prev_cs)) {
 		if (cs != TAILQ_FIRST(&priv->cmndlist))
 		    sudo_lbuf_append(lbuf, "\n");
 		sudo_lbuf_append(lbuf, "    (");
