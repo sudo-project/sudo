@@ -52,7 +52,7 @@ static int
 get_ttysize_ioctl(int *rowp, int *colp)
 {
     struct winsize wsize;
-    debug_decl(get_ttysize_ioctl, SUDO_DEBUG_EXEC, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(get_ttysize_ioctl, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 &&
 	wsize.ws_row != 0 && wsize.ws_col  != 0) {
@@ -73,7 +73,7 @@ get_ttysize_ioctl(int *rowp, int *colp)
 void
 sudo_get_ttysize_v1(int *rowp, int *colp)
 {
-    debug_decl(sudo_get_ttysize, SUDO_DEBUG_EXEC, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_get_ttysize, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     if (get_ttysize_ioctl(rowp, colp) == -1) {
 	char *p;

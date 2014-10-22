@@ -69,7 +69,7 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 {
     int rval;
     sigset_t mask, omask;
-    debug_decl(sudo_collect, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_collect, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     switch (rendition) {
 	case SIAFORM:
@@ -108,7 +108,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah = NULL;
     int i;
-    debug_decl(sudo_sia_setup, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_sia_setup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
@@ -132,7 +132,7 @@ int
 sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
-    debug_decl(sudo_sia_verify, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     def_prompt = prompt;		/* for sudo_collect */
 
@@ -147,7 +147,7 @@ int
 sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
-    debug_decl(sudo_sia_cleanup, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     (void) sia_ses_release(&siah);
     sudo_efree(sudo_argv);

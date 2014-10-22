@@ -51,7 +51,7 @@ base64_decode(const char *str, unsigned char *dst, size_t dsize)
     unsigned char ch[4];
     char *pos;
     int i;
-    debug_decl(base64_decode, SUDO_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(base64_decode, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
 
     /*
      * Convert from base64 to binary.  Each base64 char holds 6 bits of data

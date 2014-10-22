@@ -82,7 +82,7 @@ struct sudo_nss sudo_nss_file = {
 int
 sudo_file_open(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_open, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (def_ignore_local_sudoers)
 	debug_return_int(-1);
@@ -93,7 +93,7 @@ sudo_file_open(struct sudo_nss *nss)
 int
 sudo_file_close(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_close, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     /* Free parser data structures and close sudoers file. */
     init_parser(NULL, false);
@@ -111,7 +111,7 @@ sudo_file_close(struct sudo_nss *nss)
 int
 sudo_file_parse(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_close, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (nss->handle == NULL)
 	debug_return_int(-1);
@@ -136,7 +136,7 @@ sudo_file_parse(struct sudo_nss *nss)
 int
 sudo_file_setdefs(struct sudo_nss *nss)
 {
-    debug_decl(sudo_file_setdefs, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_setdefs, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (nss->handle == NULL)
 	debug_return_int(-1);
@@ -159,7 +159,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     struct privilege *priv;
     struct userspec *us;
     struct member *matching_user;
-    debug_decl(sudo_file_lookup, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_lookup, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (nss->handle == NULL)
 	debug_return_int(validated);
@@ -301,7 +301,7 @@ static void
 sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     struct sudo_lbuf *lbuf)
 {
-    debug_decl(sudo_file_append_cmnd, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_append_cmnd, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
 #ifdef HAVE_PRIV_SET
     if (cs->privs)
@@ -352,7 +352,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     struct privilege *priv;
     struct cmndtag tags;
     int nfound = 0;
-    debug_decl(sudo_file_display_priv_short, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_display_priv_short, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     /* gcc -Wuninitialized false positive */
     tags.noexec = UNSPEC;
@@ -448,7 +448,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     struct member *m;
     struct privilege *priv;
     int nfound = 0, olen;
-    debug_decl(sudo_file_display_priv_long, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_display_priv_long, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
@@ -527,7 +527,7 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
 {
     struct userspec *us;
     int nfound = 0;
-    debug_decl(sudo_file_display_priv, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_display_priv, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (nss->handle == NULL)
 	goto done;
@@ -555,7 +555,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct defaults *d;
     char *prefix;
     int nfound = 0;
-    debug_decl(sudo_file_display_defaults, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_display_defaults, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (nss->handle == NULL)
 	goto done;
@@ -606,7 +606,7 @@ sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     int nfound = 0;
-    debug_decl(sudo_file_display_bound_defaults, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_display_bound_defaults, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     /* XXX - should only print ones that match what the user can do. */
     nfound += display_bound_defaults(DEFAULTS_RUNAS, lbuf);
@@ -626,7 +626,7 @@ display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
     struct member *m;
     char *dsep;
     int atype, nfound = 0;
-    debug_decl(display_bound_defaults, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(display_bound_defaults, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     switch (dtype) {
 	case DEFAULTS_HOST:
@@ -685,7 +685,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     struct userspec *us;
     int rval = 1;
     int host_match, runas_match, cmnd_match;
-    debug_decl(sudo_file_display_cmnd, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_file_display_cmnd, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if (nss->handle == NULL)
 	goto done;
@@ -733,7 +733,7 @@ _print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
-    debug_decl(_print_member, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(_print_member, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     switch (type) {
 	case ALL:

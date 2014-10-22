@@ -65,33 +65,20 @@ struct sudo_conf_debug_file_list;
  * Note: order must match sudo_debug_subsystems[]
  */
 #define SUDO_DEBUG_MAIN		( 1<<16)  /* sudo main() */
-#define SUDO_DEBUG_ARGS		( 2<<16)  /* command line argument processing */
-#define SUDO_DEBUG_EXEC		( 3<<16)  /* command execution */
-#define SUDO_DEBUG_PTY		( 4<<16)  /* pseudo-tty */
-#define SUDO_DEBUG_UTMP		( 5<<16)  /* utmp file ops */
-#define SUDO_DEBUG_CONV		( 6<<16)  /* user conversation */
-#define SUDO_DEBUG_PCOMM	( 7<<16)  /* plugin communications */
-#define SUDO_DEBUG_UTIL		( 8<<16)  /* utility functions */
-#define SUDO_DEBUG_NETIF	( 9<<16)  /* network interface functions */
-#define SUDO_DEBUG_AUDIT	(10<<16)  /* audit */
-#define SUDO_DEBUG_EDIT		(11<<16)  /* sudoedit */
-#define SUDO_DEBUG_SELINUX	(12<<16)  /* selinux */
-#define SUDO_DEBUG_LDAP		(13<<16)  /* sudoers LDAP */
-#define SUDO_DEBUG_MATCH	(14<<16)  /* sudoers matching */
-#define SUDO_DEBUG_PARSER	(15<<16)  /* sudoers parser */
-#define SUDO_DEBUG_ALIAS	(16<<16)  /* sudoers alias functions */
-#define SUDO_DEBUG_DEFAULTS	(17<<16)  /* sudoers defaults settings */
-#define SUDO_DEBUG_AUTH		(18<<16)  /* authentication functions */
-#define SUDO_DEBUG_ENV		(19<<16)  /* environment handling */
-#define SUDO_DEBUG_LOGGING	(20<<16)  /* logging functions */
-#define SUDO_DEBUG_NSS		(21<<16)  /* network service switch */
-#define SUDO_DEBUG_RBTREE	(22<<16)  /* red-black tree functions */
-#define SUDO_DEBUG_PERMS	(23<<16)  /* uid/gid swapping functions */
-#define SUDO_DEBUG_PLUGIN	(24<<16)  /* main plugin functions */
-#define SUDO_DEBUG_HOOKS	(25<<16)  /* hook functions */
-#define SUDO_DEBUG_SSSD		(26<<16)  /* sudoers SSSD */
-#define SUDO_DEBUG_EVENT	(27<<16)  /* event handling */
-#define SUDO_DEBUG_ALL		0xffff0000  /* all subsystems */
+#define SUDO_DEBUG_UTIL		( 2<<16)  /* utility functions */
+#define SUDO_DEBUG_NETIF	( 3<<16)  /* network interface functions */
+#define SUDO_DEBUG_PLUGIN	( 4<<16)  /* main plugin functions */
+#define SUDO_DEBUG_EVENT	( 5<<16)  /* event handling */
+#define SUDO_DEBUG_ARGS		( 6<<16)  /* command line argument processing */
+#define SUDO_DEBUG_EXEC		( 7<<16)  /* command execution */
+#define SUDO_DEBUG_PTY		( 8<<16)  /* pseudo-tty */
+#define SUDO_DEBUG_UTMP		( 9<<16)  /* utmp file ops */
+#define SUDO_DEBUG_CONV		(10<<16)  /* user conversation */
+#define SUDO_DEBUG_PCOMM	(11<<16)  /* plugin communications */
+#define SUDO_DEBUG_EDIT		(12<<16)  /* sudoedit */
+#define SUDO_DEBUG_SELINUX	(13<<16)  /* selinux */
+#define SUDO_DEBUG_HOOKS	(14<<16)  /* hook functions */
+#define SUDO_DEBUG_ALL		0xffff0000 /* all subsystems */
 
 /* Initializer for instance index to indicate that debugging is not setup. */
 #define SUDO_DEBUG_INSTANCE_INITIALIZER	SUDO_DEBUG_MKINSTANCE(-1)

@@ -53,7 +53,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
     int subst;
     const char *p;
     char *np, *new_prompt, *endp;
-    debug_decl(expand_prompt, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(expand_prompt, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     /* How much space do we need to malloc for the prompt? */
     subst = 0;

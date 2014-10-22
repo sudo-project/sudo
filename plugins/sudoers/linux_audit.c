@@ -50,7 +50,7 @@ static int
 linux_audit_open(void)
 {
     static int au_fd = -1;
-    debug_decl(linux_audit_open, SUDO_DEBUG_AUDIT, sudoers_debug_instance)
+    debug_decl(linux_audit_open, SUDOERS_DEBUG_AUDIT, sudoers_debug_instance)
 
     if (au_fd != -1)
 	debug_return_int(au_fd);
@@ -73,7 +73,7 @@ linux_audit_command(char *argv[], int result)
     int au_fd, rc = -1;
     char *command, *cp, **av;
     size_t size, n;
-    debug_decl(linux_audit_command, SUDO_DEBUG_AUDIT, sudoers_debug_instance)
+    debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT, sudoers_debug_instance)
 
     /* Don't return an error if auditing is not configured. */
     if ((au_fd = linux_audit_open()) < 0)

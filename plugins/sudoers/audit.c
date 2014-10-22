@@ -43,7 +43,7 @@ int
 audit_success(int argc, char *argv[])
 {
     int rc = 0;
-    debug_decl(audit_success, SUDO_DEBUG_AUDIT, sudoers_debug_instance)
+    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT, sudoers_debug_instance)
 
     if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
@@ -67,7 +67,7 @@ int
 audit_failure(int argc, char *argv[], char const *const fmt, ...)
 {
     int rc = 0;
-    debug_decl(audit_success, SUDO_DEBUG_AUDIT, sudoers_debug_instance)
+    debug_decl(audit_success, SUDOERS_DEBUG_AUDIT, sudoers_debug_instance)
 
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
     if (argv != NULL) {

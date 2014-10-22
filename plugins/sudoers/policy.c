@@ -93,7 +93,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     const char *plugin_path = NULL;
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     int flags = 0;
-    debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
 
@@ -403,7 +403,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     char **command_info;
     int info_len = 0;
     int rval = -1;
-    debug_decl(sudoers_policy_exec_setup, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     /* Increase the length of command_info as needed, it is *not* checked. */
     command_info = sudo_ecalloc(32, sizeof(char **));
@@ -539,7 +539,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 {
     struct sudoers_policy_open_info info;
     int prev_instance, rval;
-    debug_decl(sudoers_policy_open, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     sudo_version = version;
     sudo_conv = conversation;
@@ -565,7 +565,7 @@ static void
 sudoers_policy_close(int exit_status, int error_code)
 {
     int prev_instance;
-    debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
@@ -617,7 +617,7 @@ static int
 sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 {
     int prev_instance, rval;
-    debug_decl(sudoers_policy_init_session, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_init_session, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
@@ -636,7 +636,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 {
     struct sudoers_exec_args exec_args;
     int prev_instance, rval;
-    debug_decl(sudoers_policy_check, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
     if (!ISSET(sudo_mode, MODE_EDIT))
@@ -661,7 +661,7 @@ static int
 sudoers_policy_validate(void)
 {
     int prev_instance, rval;
-    debug_decl(sudoers_policy_validate, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
     user_cmnd = "validate";
@@ -676,7 +676,7 @@ static void
 sudoers_policy_invalidate(int remove)
 {
     int prev_instance;
-    debug_decl(sudoers_policy_invalidate, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
@@ -693,7 +693,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
     int prev_instance, rval = -1;
-    debug_decl(sudoers_policy_list, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
@@ -726,7 +726,7 @@ static int
 sudoers_policy_version(int verbose)
 {
     int prev_instance;
-    debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_version, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
@@ -761,7 +761,7 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
 {
     struct sudo_hook hook;
     int prev_instance;
-    debug_decl(sudoers_policy_register_hooks, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_policy_register_hooks, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 

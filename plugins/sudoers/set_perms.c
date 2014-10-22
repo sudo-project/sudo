@@ -86,7 +86,7 @@ static int perm_stack_depth = 0;
 bool
 rewind_perms(void)
 {
-    debug_decl(rewind_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(rewind_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth != 0) {
 	while (perm_stack_depth > 1) {
@@ -116,7 +116,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    debug_decl(set_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(set_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -372,7 +372,7 @@ bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
-    debug_decl(restore_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(restore_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth < 2) {
 	sudo_warnx(U_("perm stack underflow"));
@@ -441,7 +441,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    debug_decl(set_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(set_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -711,7 +711,7 @@ bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
-    debug_decl(restore_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(restore_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth < 2) {
 	sudo_warnx(U_("perm stack underflow"));
@@ -844,7 +844,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    debug_decl(set_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(set_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -1070,7 +1070,7 @@ bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
-    debug_decl(restore_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(restore_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth < 2) {
 	sudo_warnx(U_("perm stack underflow"));
@@ -1141,7 +1141,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    debug_decl(set_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(set_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -1366,7 +1366,7 @@ bool
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
-    debug_decl(restore_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(restore_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth < 2) {
 	sudo_warnx(U_("perm stack underflow"));
@@ -1433,7 +1433,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
     const char *errstr = errbuf;
-    debug_decl(set_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(set_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth == PERM_STACK_MAX) {
 	errstr = N_("perm stack overflow");
@@ -1530,7 +1530,7 @@ boll
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
-    debug_decl(restore_perms, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(restore_perms, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (perm_stack_depth < 2) {
 	sudo_warnx(U_("perm stack underflow"));
@@ -1574,7 +1574,7 @@ runas_setgroups(void)
 {
     struct passwd *pw;
     struct group_list *grlist;
-    debug_decl(runas_setgroups, SUDO_DEBUG_PERMS, sudoers_debug_instance)
+    debug_decl(runas_setgroups, SUDOERS_DEBUG_PERMS, sudoers_debug_instance)
 
     if (def_preserve_groups) {
 	sudo_grlist_addref(user_group_list);

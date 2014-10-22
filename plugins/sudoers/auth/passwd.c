@@ -50,7 +50,7 @@
 int
 sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(sudo_passwd_init, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_passwd_init, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
@@ -69,7 +69,7 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     char *pw_epasswd = auth->data;
     size_t pw_len;
     int matched = 0;
-    debug_decl(sudo_passwd_verify, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     pw_len = strlen(pw_epasswd);
 
@@ -111,7 +111,7 @@ sudo_passwd_cleanup(pw, auth)
     sudo_auth *auth;
 {
     char *pw_epasswd = auth->data;
-    debug_decl(sudo_passwd_cleanup, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_passwd_cleanup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     if (pw_epasswd != NULL) {
 	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));

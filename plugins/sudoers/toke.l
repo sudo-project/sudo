@@ -771,7 +771,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     int max_paths = 32;
     struct dirent *dent;
     struct path_list **paths = NULL;
-    debug_decl(read_dir_files, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(read_dir_files, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     dir = opendir(dirpath);
     if (dir == NULL) {
@@ -846,7 +846,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
 {
     struct path_list **paths = NULL;
     int count, i;
-    debug_decl(switch_dir, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(switch_dir, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     count = read_dir_files(dirpath, &paths);
     if (count > 0) {
@@ -874,7 +874,7 @@ void
 init_lexer(void)
 {
     struct path_list *pl;
-    debug_decl(init_lexer, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(init_lexer, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     while (idepth) {
 	idepth--;
@@ -905,7 +905,7 @@ _push_include(char *path, bool isdir)
 {
     struct path_list *pl;
     FILE *fp;
-    debug_decl(_push_include, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(_push_include, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     /* push current state onto stack */
     if (idepth >= istacksize) {
@@ -1006,7 +1006,7 @@ pop_include(void)
 {
     struct path_list *pl;
     FILE *fp;
-    debug_decl(pop_include, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(pop_include, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     if (idepth == 0)
 	debug_return_bool(false);
@@ -1048,7 +1048,7 @@ parse_include(char *base)
     char *cp, *ep, *path, *pp;
     int dirlen = 0, len = 0, subst = 0;
     size_t shost_len = 0;
-    debug_decl(parse_include, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(parse_include, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     /* Pull out path from #include line. */
     cp = base + sizeof("#include");
@@ -1131,7 +1131,7 @@ sudoers_trace_print(const char *msg)
     /* XXX - assumes a final newline */
     if (strchr(msg, '\n') != NULL)
     {
-	sudo_debug_printf2(NULL, NULL, 0, SUDO_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
+	sudo_debug_printf2(NULL, NULL, 0, SUDOERS_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
 	    "%s:%d %s", sudoers, sudolineno, lbuf.buf);
 	lbuf.len = 0;
     }

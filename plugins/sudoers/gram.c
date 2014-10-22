@@ -687,7 +687,7 @@ unsigned int yystacksize;
 void
 sudoerserror(const char *s)
 {
-    debug_decl(sudoerserror, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     /* If we last saw a newline the error is on the preceding line. */
     if (last_token == COMMENT)
@@ -720,7 +720,7 @@ static struct defaults *
 new_default(char *var, char *val, int op)
 {
     struct defaults *d;
-    debug_decl(new_default, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(new_default, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     d = sudo_ecalloc(1, sizeof(struct defaults));
     d->var = var;
@@ -737,7 +737,7 @@ static struct member *
 new_member(char *name, int type)
 {
     struct member *m;
-    debug_decl(new_member, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(new_member, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     m = sudo_ecalloc(1, sizeof(struct member));
     m->name = name;
@@ -751,7 +751,7 @@ struct sudo_digest *
 new_digest(int digest_type, const char *digest_str)
 {
     struct sudo_digest *dig;
-    debug_decl(new_digest, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(new_digest, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     dig = sudo_emalloc(sizeof(*dig));
     dig->digest_type = digest_type;
@@ -770,7 +770,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d;
     struct member_list *binding;
-    debug_decl(add_defaults, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(add_defaults, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     if (defs != NULL) {
 	/*
@@ -804,7 +804,7 @@ static void
 add_userspec(struct member *members, struct privilege *privs)
 {
     struct userspec *u;
-    debug_decl(add_userspec, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(add_userspec, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     u = sudo_ecalloc(1, sizeof(*u));
     HLTQ_TO_TAILQ(&u->users, members, entries);
@@ -824,7 +824,7 @@ init_parser(const char *path, bool quiet)
     struct member_list *binding;
     struct defaults *d, *d_next;
     struct userspec *us, *us_next;
-    debug_decl(init_parser, SUDO_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(init_parser, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
 
     TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
 	struct member *m, *m_next;

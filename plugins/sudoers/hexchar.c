@@ -30,7 +30,7 @@ hexchar(const char *s)
 {
     unsigned char result[2];
     int i;
-    debug_decl(hexchar, SUDO_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(hexchar, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
 
     for (i = 0; i < 2; i++) {
 	switch (s[i]) {

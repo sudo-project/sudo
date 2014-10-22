@@ -85,35 +85,21 @@ static const char *const sudo_debug_priorities[] = {
 };
 
 /* Note: this must match the order in sudo_debug.h */
-/* XXX - remove sudoers-specific bits */
 static const char *const sudo_debug_default_subsystems[] = {
     "main",
+    "util",
+    "netif",
+    "plugin",
+    "event",
     "args",
     "exec",
     "pty",
     "utmp",
     "conv",
     "pcomm",
-    "util",
-    "netif",
-    "audit",
     "edit",
     "selinux",
-    "ldap",
-    "match",
-    "parser",
-    "alias",
-    "defaults",
-    "auth",
-    "env",
-    "logging",
-    "nss",
-    "rbtree",
-    "perms",
-    "plugin",
     "hooks",
-    "sssd",
-    "event",
     NULL
 };
 

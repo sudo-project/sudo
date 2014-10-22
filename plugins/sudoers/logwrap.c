@@ -41,7 +41,7 @@ writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen)
     char *indent = "";
     char *beg = line;
     char *end;
-    debug_decl(writeln_wrap, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /*
      * Print out line with word wrap around maxlen characters.

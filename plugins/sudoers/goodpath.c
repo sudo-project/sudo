@@ -45,7 +45,7 @@ sudo_goodpath(const char *path, struct stat *sbp)
 {
     struct stat sb;
     bool rval = false;
-    debug_decl(sudo_goodpath, SUDO_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
 
     if (path != NULL && stat(path, &sb) == 0) {
 	/* Make sure path describes an executable regular file. */

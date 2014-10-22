@@ -96,7 +96,7 @@ int
 sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static char	*krb5_prompt;
-    debug_decl(sudo_krb5_init, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_krb5_init, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     if (krb5_prompt == NULL) {
 	krb5_context	sudo_context;
@@ -135,7 +135,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     krb5_context	sudo_context;
     krb5_error_code 	error;
     char		cache_name[64], *pname = pw->pw_name;
-    debug_decl(sudo_krb5_init, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_krb5_init, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
@@ -183,7 +183,7 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     krb5_principal	princ;
     krb5_ccache		ccache;
     krb5_error_code	error;
-    debug_decl(sudo_krb5_verify, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_krb5_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
@@ -202,7 +202,7 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     krb5_ccache		ccache;
     krb5_error_code	error;
     krb5_get_init_creds_opt *opts = NULL;
-    debug_decl(sudo_krb5_verify, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_krb5_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
@@ -266,7 +266,7 @@ sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth)
     krb5_context	sudo_context;
     krb5_principal	princ;
     krb5_ccache		ccache;
-    debug_decl(sudo_krb5_cleanup, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_krb5_cleanup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
@@ -298,7 +298,7 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
     krb5_error_code	error;
     krb5_principal	server;
     krb5_verify_init_creds_opt vopt;
-    debug_decl(verify_krb_v5_tgt, SUDO_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(verify_krb_v5_tgt, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
 
     /*
      * Get the server principal for the local host.

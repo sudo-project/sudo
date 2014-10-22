@@ -118,7 +118,7 @@ dump_defaults(void)
     struct list_member *item;
     struct def_values *def;
     char *desc;
-    debug_decl(dump_defaults, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(dump_defaults, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     for (cur = sudo_defs_table; cur->name; cur++) {
 	if (cur->desc) {
@@ -200,7 +200,7 @@ set_default(char *var, char *val, int op)
 {
     struct sudo_defs_types *cur;
     int num;
-    debug_decl(set_default, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     for (cur = sudo_defs_table, num = 0; cur->name; cur++, num++) {
 	if (strcmp(var, cur->name) == 0)
@@ -345,7 +345,7 @@ init_defaults(void)
 {
     static int firsttime = 1;
     struct sudo_defs_types *def;
-    debug_decl(init_defaults, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(init_defaults, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     /* Clear any old settings. */
     if (!firsttime) {
@@ -508,7 +508,7 @@ update_defaults(int what)
 {
     struct defaults *def;
     bool rc = true;
-    debug_decl(update_defaults, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     TAILQ_FOREACH(def, &defaults, entries) {
 	switch (def->type) {
@@ -567,7 +567,7 @@ check_defaults(int what, bool quiet)
     struct sudo_defs_types *cur;
     struct defaults *def;
     bool rc = true;
-    debug_decl(check_defaults, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     TAILQ_FOREACH(def, &defaults, entries) {
 	switch (def->type) {
@@ -610,7 +610,7 @@ store_int(char *val, struct sudo_defs_types *def, int op)
 {
     const char *errstr;
     int i;
-    debug_decl(store_int, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_int, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == false) {
 	def->sd_un.ival = 0;
@@ -633,7 +633,7 @@ store_uint(char *val, struct sudo_defs_types *def, int op)
 {
     const char *errstr;
     unsigned int u;
-    debug_decl(store_uint, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_uint, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == false) {
 	def->sd_un.uival = 0;
@@ -656,7 +656,7 @@ store_float(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     double d;
-    debug_decl(store_float, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_float, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == false) {
 	def->sd_un.fval = 0.0;
@@ -676,7 +676,7 @@ static bool
 store_tuple(char *val, struct sudo_defs_types *def, int op)
 {
     struct def_values *v;
-    debug_decl(store_tuple, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_tuple, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     /*
      * Look up tuple value by name to find enum def_tuple value.
@@ -703,7 +703,7 @@ store_tuple(char *val, struct sudo_defs_types *def, int op)
 static bool
 store_str(char *val, struct sudo_defs_types *def, int op)
 {
-    debug_decl(store_str, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_str, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     sudo_efree(def->sd_un.str);
     if (op == false)
@@ -719,7 +719,7 @@ static bool
 store_list(char *str, struct sudo_defs_types *def, int op)
 {
     char *start, *end;
-    debug_decl(store_list, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_list, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     /* Remove all old members. */
     if (op == false || op == true)
@@ -748,7 +748,7 @@ static bool
 store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 {
     struct strmap *fac;
-    debug_decl(store_syslogfac, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_syslogfac, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == false) {
 	def->sd_un.ival = false;
@@ -774,7 +774,7 @@ logfac2str(int n)
 {
 #ifdef LOG_NFACILITIES
     struct strmap *fac;
-    debug_decl(logfac2str, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(logfac2str, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
 	;
@@ -788,7 +788,7 @@ static bool
 store_syslogpri(char *val, struct sudo_defs_types *def, int op)
 {
     struct strmap *pri;
-    debug_decl(store_syslogpri, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == false || !val)
 	debug_return_bool(false);
@@ -806,7 +806,7 @@ static const char *
 logpri2str(int n)
 {
     struct strmap *pri;
-    debug_decl(logpri2str, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(logpri2str, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     for (pri = priorities; pri->name && pri->num != n; pri++)
 	;
@@ -818,7 +818,7 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
 {
     mode_t mode;
     const char *errstr;
-    debug_decl(store_mode, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == false) {
 	def->sd_un.mode = 0777;
@@ -840,7 +840,7 @@ static void
 list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 {
     struct list_member *cur, *prev = NULL;
-    debug_decl(list_op, SUDO_DEBUG_DEFAULTS, sudoers_debug_instance)
+    debug_decl(list_op, SUDOERS_DEBUG_DEFAULTS, sudoers_debug_instance)
 
     if (op == freeall) {
 	while ((cur = SLIST_FIRST(&def->sd_un.list)) != NULL) {

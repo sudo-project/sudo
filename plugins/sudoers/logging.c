@@ -87,7 +87,7 @@ mysyslog(int pri, const char *fmt, ...)
 #endif
     char buf[MAXSYSLOGLEN+1];
     va_list ap;
-    debug_decl(mysyslog, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     va_start(ap, fmt);
 #ifdef LOG_NFACILITIES
@@ -124,7 +124,7 @@ do_syslog(int pri, char *msg)
     char *p, *tmp, save;
     const char *fmt;
     int oldlocale;
-    debug_decl(do_syslog, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(do_syslog, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
@@ -176,7 +176,7 @@ do_logfile(char *msg)
     mode_t oldmask;
     int oldlocale;
     FILE *fp;
-    debug_decl(do_logfile, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(do_logfile, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
@@ -235,7 +235,7 @@ log_denial(int status, bool inform_user)
     char *logline;
     int oldlocale;
     bool uid_changed;
-    debug_decl(log_denial, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(log_denial, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* Handle auditing first (audit_failure() handles the locale itself). */
     if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
@@ -315,7 +315,7 @@ void
 log_failure(int status, int flags)
 {
     bool inform_user = true;
-    debug_decl(log_failure, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(log_failure, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
@@ -347,7 +347,7 @@ void
 log_auth_failure(int status, unsigned int tries)
 {
     int flags = 0;
-    debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* Handle auditing first. */
     audit_failure(NewArgc, NewArgv, N_("authentication failure"));
@@ -390,7 +390,7 @@ log_allowed(int status)
     char *logline;
     int oldlocale;
     bool uid_changed;
-    debug_decl(log_allowed, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* Log and mail messages should be in the sudoers locale. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
@@ -431,7 +431,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     char *logline, *message;
     bool uid_changed;
     va_list ap2;
-    debug_decl(vlog_error, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(vlog_error, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* Need extra copy of ap for sudo_vwarn()/sudo_vwarnx() below. */
     if (!ISSET(flags, SLOG_NO_STDERR))
@@ -517,7 +517,7 @@ void
 log_warning(int flags, const char *fmt, ...)
 {
     va_list ap;
-    debug_decl(log_error, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(log_error, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* Log the error. */
     va_start(ap, fmt);
@@ -531,7 +531,7 @@ void
 log_warningx(int flags, const char *fmt, ...)
 {
     va_list ap;
-    debug_decl(log_error, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(log_error, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* Log the error. */
     va_start(ap, fmt);
@@ -567,7 +567,7 @@ send_mail(const char *fmt, ...)
 	NULL
     };
 #endif /* NO_ROOT_MAILER */
-    debug_decl(send_mail, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(send_mail, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     /* If mailer is disabled just return. */
     if (!def_mailerpath || !def_mailto)
@@ -754,7 +754,7 @@ send_mail(const char *fmt, ...)
 static int
 should_mail(int status)
 {
-    debug_decl(should_mail, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(should_mail, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
     debug_return_bool(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
@@ -790,7 +790,7 @@ new_logline(const char *message, int serrno)
 #endif
     const char *tsid = NULL;
     size_t len = 0;
-    debug_decl(new_logline, SUDO_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(new_logline, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
 
 #ifndef SUDOERS_NO_SEQ
     /* A TSID may be a sudoers-style session ID or a free-form string. */

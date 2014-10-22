@@ -80,7 +80,7 @@ sudo_read_nss(void)
     bool saw_files = false;
     bool got_match = false;
     static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
-    debug_decl(sudo_read_nss, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_read_nss, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if ((fp = fopen(_PATH_NSSWITCH_CONF, "r")) == NULL)
 	goto nomatch;
@@ -158,7 +158,7 @@ sudo_read_nss(void)
     bool saw_ldap = false;
     bool got_match = false;
     static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
-    debug_decl(sudo_read_nss, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_read_nss, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     if ((fp = fopen(_PATH_NETSVC_CONF, "r")) == NULL)
 	goto nomatch;
@@ -239,7 +239,7 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
-    debug_decl(sudo_read_nss, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_read_nss, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
 #  ifdef HAVE_SSSD
     TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
@@ -261,7 +261,7 @@ output(const char *buf)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    debug_decl(output, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(output, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
@@ -284,7 +284,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     struct sudo_lbuf defs, privs;
     struct stat sb;
     int cols, count, olen;
-    debug_decl(display_privs, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(display_privs, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     cols = sudo_user.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
@@ -349,7 +349,7 @@ bool
 display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
-    debug_decl(display_cmnd, SUDO_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(display_cmnd, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
 
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->display_cmnd(nss, pw) == 0)
