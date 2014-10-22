@@ -238,10 +238,13 @@ DDEESSCCRRIIPPTTIIOONN
      would log all debugging statements at the _w_a_r_n level and higher in
      addition to those at the _i_n_f_o level for the plugin subsystem.
 
-     Currently, only one Debug entry per program is supported.  The ssuuddoo Debug
-     entry is shared by the ssuuddoo front end, ssuuddooeeddiitt and the plugins.  A
-     future release may add support for per-plugin Debug lines and/or support
-     for multiple debugging files for a single program.
+     As of ssuuddoo 1.8.12, multiple Debug entries may be specified per program.
+     Older versions of ssuuddoo only support a single Debug entry per program.
+     Plugin-specific Debug entries are also supported starting with ssuuddoo
+     1.8.12 and are matched by either the base name of the plugin that was
+     loaded (for example sudoers.so) or by the plugin's fully-qualified path
+     name.  Previously, the ssuuddooeerrss plugin shared the same Debug entry as the
+     ssuuddoo front end and could not be configured separately.
 
      The following priorities are supported, in order of decreasing severity:
      _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.  Each priority,
@@ -405,4 +408,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                      July 24, 2014                     Sudo 1.8.11
+Sudo 1.8.11                    October 21, 2014                    Sudo 1.8.11

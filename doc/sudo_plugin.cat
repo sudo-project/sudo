@@ -115,15 +115,20 @@ DDEESSCCRRIIPPTTIIOONN
                        or another value, back in the _c_o_m_m_a_n_d___i_n_f_o list.
 
                  debug_flags=string
-                       A comma-separated list of debug flags that correspond
-                       to ssuuddoo's Debug entry in sudo.conf(4), if there is one.
-                       The flags are passed to the plugin as they appear in
-                       sudo.conf(4).  The syntax used by ssuuddoo and the ssuuddooeerrss
-                       plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but the plugin is free to
-                       use a different format so long as it does not include a
-                       comma (`,').  There is not currently a way to specify a
-                       set of debug flags specific to the plugin--the flags
-                       are shared by ssuuddoo and the plugin.
+                       A debug file path name followed by a space and a comma-
+                       separated list of debug flags that correspond to the
+                       plugin's Debug entry in sudo.conf(4), if there is one.
+                       The flags are passed to the plugin exactly as they
+                       appear in sudo.conf(4).  The syntax used by ssuuddoo and
+                       the ssuuddooeerrss plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but a plugin
+                       is free to use a different format so long as it does
+                       not include a comma (`,').  Prior to ssuuddoo 1.8.12, there
+                       was no way to specify plugin-specific _d_e_b_u_g___f_l_a_g_s so
+                       the value was always the same as that used by the ssuuddoo
+                       front end and did not include a path name, only the
+                       flags themselves.  As of version 1.7 of the plugin
+                       interface, ssuuddoo will only pass _d_e_b_u_g___f_l_a_g_s if
+                       sudo.conf(4) contains a plugin-specific Debug entry.
 
                  debug_level=number
                        This setting has been deprecated in favor of
@@ -1470,6 +1475,10 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
      Version 1.7 (sudo 1.8.12)
            The _p_l_u_g_i_n___p_a_t_h entry was added to the settings list.
 
+           The _d_e_b_u_g___f_l_a_g_s entry now starts with a debug file path name and
+           may occur multiple times if there are multiple plugin-specific
+           Debug lines in the sudo.conf(4) file.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1489,4 +1498,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                    September 8, 2014                   Sudo 1.8.11
+Sudo 1.8.11                    October 21, 2014                    Sudo 1.8.11

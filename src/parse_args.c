@@ -70,49 +70,47 @@ static struct sudo_settings sudo_settings[] = {
     { "bsdauth_type" },
 #define ARG_LOGIN_CLASS 1
     { "login_class" },
-#define ARG_DEBUG_FLAGS 2
-    { "debug_flags" },
-#define ARG_PRESERVE_ENVIRONMENT 3
+#define ARG_PRESERVE_ENVIRONMENT 2
     { "preserve_environment" },
-#define ARG_RUNAS_GROUP 4
+#define ARG_RUNAS_GROUP 3
     { "runas_group" },
-#define ARG_SET_HOME 5
+#define ARG_SET_HOME 4
     { "set_home" },
-#define ARG_USER_SHELL 6
+#define ARG_USER_SHELL 5
     { "run_shell" },
-#define ARG_LOGIN_SHELL 7
+#define ARG_LOGIN_SHELL 6
     { "login_shell" },
-#define ARG_IGNORE_TICKET 8
+#define ARG_IGNORE_TICKET 7
     { "ignore_ticket" },
-#define ARG_PROMPT 9
+#define ARG_PROMPT 8
     { "prompt" },
-#define ARG_SELINUX_ROLE 10
+#define ARG_SELINUX_ROLE 9
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 11
+#define ARG_SELINUX_TYPE 10
     { "selinux_type" },
-#define ARG_RUNAS_USER 12
+#define ARG_RUNAS_USER 11
     { "runas_user" },
-#define ARG_PROGNAME 13
+#define ARG_PROGNAME 12
     { "progname" },
-#define ARG_IMPLIED_SHELL 14
+#define ARG_IMPLIED_SHELL 13
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 15
+#define ARG_PRESERVE_GROUPS 14
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 16
+#define ARG_NONINTERACTIVE 15
     { "noninteractive" },
-#define ARG_SUDOEDIT 17
+#define ARG_SUDOEDIT 16
     { "sudoedit" },
-#define ARG_CLOSEFROM 18
+#define ARG_CLOSEFROM 17
     { "closefrom" },
-#define ARG_NET_ADDRS 19
+#define ARG_NET_ADDRS 18
     { "network_addrs" },
-#define ARG_MAX_GROUPS 20
+#define ARG_MAX_GROUPS 19
     { "max_groups" },
-#define ARG_PLUGIN_DIR 21
+#define ARG_PLUGIN_DIR 20
     { "plugin_dir" },
-#define ARG_REMOTE_HOST 22
+#define ARG_REMOTE_HOST 21
     { "remote_host" },
-#define NUM_SETTINGS 23
+#define NUM_SETTINGS 22
     { NULL }
 };
 
@@ -176,7 +174,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     char *cp, **env_add;
     const char *runas_user = NULL;
     const char *runas_group = NULL;
-    const char *debug_flags;
     const char *progname;
     int proglen;
     int nenv = 0;
@@ -200,11 +197,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     /* Load local IP addresses and masks. */
     if (get_net_ifs(&cp) > 0)
 	sudo_settings[ARG_NET_ADDRS].value = cp;
-
-    /* Set debug file and flags from sudo.conf. */
-    debug_flags = sudo_conf_debug_flags();
-    if (debug_flags != NULL)
-	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
 
     /* Set max_groups from sudo.conf. */
     i = sudo_conf_max_groups();

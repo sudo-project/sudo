@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd September 8, 2014
+.Dd October 21, 2014
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -187,13 +187,13 @@ The plugin may optionally pass this, or another value, back in the
 .Em command_info
 list.
 .It debug_flags=string
-A comma-separated list of debug flags that correspond to
-.Nm sudo Ns 's
+A debug file path name followed by a space and a comma-separated
+list of debug flags that correspond to the plugin's
 .Li Debug
 entry in
 .Xr sudo.conf @mansectform@ ,
 if there is one.
-The flags are passed to the plugin as they appear in
+The flags are passed to the plugin exactly as they appear in
 .Xr sudo.conf @mansectform@ .
 The syntax used by
 .Nm sudo
@@ -201,13 +201,25 @@ and the
 .Nm sudoers
 plugin is
 .Em subsystem Ns @ Ns Em priority
-but the plugin is free to use a different
+but a plugin is free to use a different
 format so long as it does not include a comma
 .Pq Ql ,\& .
-There is not currently a way to specify a set of debug flags specific
-to the plugin--the flags are shared by
+Prior to
 .Nm sudo
-and the plugin.
+1.8.12, there was no way to specify plugin-specific
+.Em debug_flags
+so the value was always the same as that used by the
+.Nm sudo
+front end and did not include a path name, only the flags themselves.
+As of version 1.7 of the plugin interface, 
+.Nm sudo
+will only pass
+.Em debug_flags
+if
+.Xr sudo.conf @mansectform@
+contains a plugin-specific
+.Li Debug
+entry.
 .It debug_level=number
 This setting has been deprecated in favor of
 .Em debug_flags .
@@ -2292,6 +2304,12 @@ The
 entry was added to the
 .Li settings
 list.
+.Pp
+The
+.Em debug_flags
+entry now starts with a debug file path name and may occur multiple
+times if there are multiple plugin-specific Debug lines in the
+.Xr sudo.conf @mansectform@ file.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

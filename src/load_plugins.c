@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,9 +41,7 @@
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include "sudo_conf.h"
 #include "sudo_dso.h"
-#include "sudo_debug.h"
 
 /* We always use the same name for the sudoers plugin, regardless of the OS */
 #define SUDOERS_PLUGIN	"sudoers.so"
@@ -241,6 +239,9 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    policy_plugin->name = info->symbol_name;
 	    policy_plugin->options = info->options;
 	    policy_plugin->u.generic = plugin;
+	    TAILQ_INIT(&policy_plugin->debug_files);
+	    TAILQ_SWAP(&policy_plugin->debug_files, &info->debug_files,
+		sudo_debug_file, entries);
 	}
     } else if (plugin->type == SUDO_IO_PLUGIN) {
 	/* Check for duplicate entries. */
@@ -260,6 +261,9 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    container->name = info->symbol_name;
 	    container->options = info->options;
 	    container->u.generic = plugin;
+	    TAILQ_INIT(&container->debug_files);
+	    TAILQ_SWAP(&container->debug_files, &info->debug_files,
+		sudo_debug_file, entries);
 	    TAILQ_INSERT_TAIL(io_plugins, container, entries);
 	}
     }

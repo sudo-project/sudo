@@ -1084,32 +1084,41 @@ run_command(struct command_details *details)
  */
 static char **
 format_plugin_settings(struct plugin_container *plugin,
-    struct sudo_settings *settings)
+    struct sudo_settings *sudo_settings)
 {
+    size_t plugin_settings_size, num_plugin_settings = 0;
+    struct sudo_debug_file *debug_file;
+    struct sudo_settings *setting;
     char **plugin_settings;
-    size_t plugin_settings_size = 32, num_plugin_settings = 0;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
+    /* XXX - should use exact plugin_settings_size */
+    /* Determine sudo_settings array size (including plugin_path and NULL) */
+    plugin_settings_size = 2;
+    for (setting = sudo_settings; setting->name != NULL; setting++)
+	plugin_settings_size++;
+    TAILQ_FOREACH(debug_file, &plugin->debug_files, entries)
+	plugin_settings_size++;
+
+    /* Allocate and fill in. */
     plugin_settings = sudo_emallocarray(plugin_settings_size, sizeof(char *));
     plugin_settings[num_plugin_settings++] =
 	sudo_new_key_val("plugin_path", plugin->path);
-    while (settings->name != NULL) {
-        if (settings->value != NULL) {
+    for (setting = sudo_settings; setting->name != NULL; setting++) {
+        if (setting->value != NULL) {
             sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
-                settings->name, settings->value);
-	    /* Expand plugin_settings as needed. */
-	    if (num_plugin_settings == plugin_settings_size) {
-		plugin_settings_size *= 2;
-		plugin_settings = sudo_ereallocarray(plugin_settings,
-		    plugin_settings_size, sizeof(char *));
-	    }
+                setting->name, setting->value);
             plugin_settings[num_plugin_settings] =
-		sudo_new_key_val(settings->name, settings->value);
+		sudo_new_key_val(setting->name, setting->value);
             if (plugin_settings[num_plugin_settings] == NULL)
                 sudo_fatal(NULL);
             num_plugin_settings++;
         }
-	settings++;
+    }
+    TAILQ_FOREACH(debug_file, &plugin->debug_files, entries) {
+	/* XXX - quote filename? */
+	sudo_easprintf(&plugin_settings[num_plugin_settings++],
+	    "debug_flags=%s %s", debug_file->debug_file, debug_file->debug_flags);
     }
     plugin_settings[num_plugin_settings] = NULL;
 

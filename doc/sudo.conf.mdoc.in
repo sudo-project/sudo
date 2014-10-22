@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 24, 2014
+.Dd October 21, 2014
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -413,19 +413,31 @@ level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
 .Pp
-Currently, only one
-.Li Debug
-entry per program is supported.  The
+As of
 .Nm sudo
+1.8.12, multiple
 .Li Debug
-entry is shared by the
+entries may be specified per program.
+Older versions of
 .Nm sudo
-front end,
-.Nm sudoedit
-and the plugins.  A future release may add support for per-plugin
+only support a single
 .Li Debug
-lines and/or support for multiple debugging files for a single
-program.
+entry per program.
+Plugin-specific
+.Li Debug
+entries are also supported starting with
+.Nm sudo
+1.8.12 and are matched by either the base name of the plugin that was loaded
+(for example
+.Li sudoers.so )
+or by the plugin's fully-qualified path name.
+Previously, the
+.Nm sudoers
+plugin shared the same
+.Li Debug
+entry as the
+.Nm sudo
+front end and could not be configured separately.
 .Pp
 The following priorities are supported, in order of decreasing severity:
 .Em crit , err , warn , notice , diag , info , trace

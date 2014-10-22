@@ -54,7 +54,6 @@
 #include "parse.h"
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
-#include "sudo_debug.h"
 
 /* SSSD <--> SUDO interface - do not change */
 struct sss_sudo_attr {

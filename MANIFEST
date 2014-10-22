@@ -131,6 +131,8 @@ lib/util/regress/sudo_conf/test5.in
 lib/util/regress/sudo_conf/test5.out.ok
 lib/util/regress/sudo_conf/test6.in
 lib/util/regress/sudo_conf/test6.out.ok
+lib/util/regress/sudo_conf/test7.in
+lib/util/regress/sudo_conf/test7.out.ok
 lib/util/regress/sudo_parseln/parseln_test.c
 lib/util/regress/sudo_parseln/test1.in
 lib/util/regress/sudo_parseln/test1.out.ok

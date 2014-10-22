@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "July 24, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "October 21, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -460,19 +460,31 @@ level and higher in addition to those at the
 \fIinfo\fR
 level for the plugin subsystem.
 .PP
-Currently, only one
-\fRDebug\fR
-entry per program is supported.  The
+As of
 \fBsudo\fR
+1.8.12, multiple
 \fRDebug\fR
-entry is shared by the
+entries may be specified per program.
+Older versions of
 \fBsudo\fR
-front end,
-\fBsudoedit\fR
-and the plugins.  A future release may add support for per-plugin
+only support a single
 \fRDebug\fR
-lines and/or support for multiple debugging files for a single
-program.
+entry per program.
+Plugin-specific
+\fRDebug\fR
+entries are also supported starting with
+\fBsudo\fR
+1.8.12 and are matched by either the base name of the plugin that was loaded
+(for example
+\fRsudoers.so\fR)
+or by the plugin's fully-qualified path name.
+Previously, the
+\fBsudoers\fR
+plugin shared the same
+\fRDebug\fR
+entry as the
+\fBsudo\fR
+front end and could not be configured separately.
 .PP
 The following priorities are supported, in order of decreasing severity:
 \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR

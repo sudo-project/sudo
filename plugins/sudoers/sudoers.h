@@ -41,6 +41,7 @@
 #include "logging.h"
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
+#include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
 

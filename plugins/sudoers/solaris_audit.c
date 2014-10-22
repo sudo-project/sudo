@@ -24,7 +24,6 @@
 #include <bsm/adt_event.h>
 
 #include "sudoers.h"
-#include "sudo_debug.h"
 #include "solaris_audit.h"
 
 static adt_session_data_t *ah;		/* audit session handle */

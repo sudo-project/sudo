@@ -18,6 +18,17 @@
 #define _SUDO_DEBUG_H
 
 #include <stdarg.h>
+#include "sudo_queue.h"
+
+/*
+ * List of debug files and flags for use in registration.
+ */
+struct sudo_debug_file {
+    TAILQ_ENTRY(sudo_debug_file) entries;
+    char *debug_file;
+    char *debug_flags;
+};
+struct sudo_conf_debug_file_list;
 
 /*
  * The priority and subsystem are encoded in a single 32-bit value.

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "September 8, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "October 21, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -206,13 +206,13 @@ The plugin may optionally pass this, or another value, back in the
 list.
 .TP 6n
 debug_flags=string
-A comma-separated list of debug flags that correspond to
-\fBsudo\fR's
+A debug file path name followed by a space and a comma-separated
+list of debug flags that correspond to the plugin's
 \fRDebug\fR
 entry in
 sudo.conf(@mansectform@),
 if there is one.
-The flags are passed to the plugin as they appear in
+The flags are passed to the plugin exactly as they appear in
 sudo.conf(@mansectform@).
 The syntax used by
 \fBsudo\fR
@@ -220,13 +220,25 @@ and the
 \fBsudoers\fR
 plugin is
 \fIsubsystem\fR@\fIpriority\fR
-but the plugin is free to use a different
+but a plugin is free to use a different
 format so long as it does not include a comma
 (\(oq,\&\(cq).
-There is not currently a way to specify a set of debug flags specific
-to the plugin--the flags are shared by
+Prior to
 \fBsudo\fR
-and the plugin.
+1.8.12, there was no way to specify plugin-specific
+\fIdebug_flags\fR
+so the value was always the same as that used by the
+\fBsudo\fR
+front end and did not include a path name, only the flags themselves.
+As of version 1.7 of the plugin interface,
+\fBsudo\fR
+will only pass
+\fIdebug_flags\fR
+if
+sudo.conf(@mansectform@)
+contains a plugin-specific
+\fRDebug\fR
+entry.
 .TP 6n
 debug_level=number
 This setting has been deprecated in favor of
@@ -2623,6 +2635,12 @@ The
 entry was added to the
 \fRsettings\fR
 list.
+.sp
+The
+\fIdebug_flags\fR
+entry now starts with a debug file path name and may occur multiple
+times if there are multiple plugin-specific Debug lines in the
+sudo.conf(@mansectform@) file.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

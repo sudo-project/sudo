@@ -23,14 +23,25 @@
 #define GROUP_SOURCE_STATIC	1
 #define GROUP_SOURCE_DYNAMIC	2
 
+struct sudo_debug_file;
+TAILQ_HEAD(sudo_conf_debug_file_list, sudo_debug_file);
+
 struct plugin_info {
     TAILQ_ENTRY(plugin_info) entries;
+    struct sudo_conf_debug_file_list debug_files;
     const char *path;
     const char *symbol_name;
     char * const * options;
-    int lineno;
+    unsigned int lineno;
 };
 TAILQ_HEAD(plugin_info_list, plugin_info);
+
+struct sudo_conf_debug {
+    TAILQ_ENTRY(sudo_conf_debug) entries;
+    struct sudo_conf_debug_file_list debug_files;
+    char *progname;
+};
+TAILQ_HEAD(sudo_conf_debug_list, sudo_conf_debug);
 
 /* Read main sudo.conf file. */
 __dso_public void sudo_conf_read_v1(const char *conf_file);
@@ -41,7 +52,7 @@ __dso_public const char *sudo_conf_askpass_path_v1(void);
 __dso_public const char *sudo_conf_sesh_path_v1(void);
 __dso_public const char *sudo_conf_noexec_path_v1(void);
 __dso_public const char *sudo_conf_plugin_dir_path_v1(void);
-__dso_public const char *sudo_conf_debug_flags_v1(void);
+__dso_public struct sudo_conf_debug_list *sudo_conf_debugging_v1(void);
 __dso_public struct plugin_info_list *sudo_conf_plugins_v1(void);
 __dso_public bool sudo_conf_disable_coredump_v1(void);
 __dso_public bool sudo_conf_probe_interfaces_v1(void);
@@ -51,7 +62,7 @@ __dso_public int sudo_conf_max_groups_v1(void);
 #define sudo_conf_sesh_path() sudo_conf_sesh_path_v1()
 #define sudo_conf_noexec_path() sudo_conf_noexec_path_v1()
 #define sudo_conf_plugin_dir_path() sudo_conf_plugin_dir_path_v1()
-#define sudo_conf_debug_flags() sudo_conf_debug_flags_v1()
+#define sudo_conf_debugging() sudo_conf_debugging_v1()
 #define sudo_conf_plugins() sudo_conf_plugins_v1()
 #define sudo_conf_disable_coredump() sudo_conf_disable_coredump_v1()
 #define sudo_conf_probe_interfaces() sudo_conf_probe_interfaces_v1()
