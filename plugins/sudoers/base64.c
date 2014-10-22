@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,8 +35,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
+#include "sudoers.h"
 
 /*
  * Decode a NUL-terminated string in base64 format and store the
@@ -52,7 +51,7 @@ base64_decode(const char *str, unsigned char *dst, size_t dsize)
     unsigned char ch[4];
     char *pos;
     int i;
-    debug_decl(base64_decode, SUDO_DEBUG_MATCH)
+    debug_decl(base64_decode, SUDO_DEBUG_MATCH, sudoers_debug_instance)
 
     /*
      * Convert from base64 to binary.  Each base64 char holds 6 bits of data

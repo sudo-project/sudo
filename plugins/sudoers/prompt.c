@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2013
+ * Copyright (c) 1993-1996,1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -53,7 +53,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
     int subst;
     const char *p;
     char *np, *new_prompt, *endp;
-    debug_decl(expand_prompt, SUDO_DEBUG_AUTH)
+    debug_decl(expand_prompt, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* How much space do we need to malloc for the prompt? */
     subst = 0;

@@ -124,6 +124,7 @@ extern void sudoersrestart(FILE *);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static struct rbtree *alias_freelist;
 static bool checkonly;
@@ -149,7 +150,7 @@ main(int argc, char *argv[])
     int ch, exitcode = 0;
     bool quiet, strict, oldperms;
     const char *export_path;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl(main, SUDO_DEBUG_MAIN, sudoers_debug_instance)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
@@ -321,7 +322,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
     bool rval = false;			/* return value */
-    debug_decl(edit_sudoers, SUDO_DEBUG_UTIL)
+    debug_decl(edit_sudoers, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (fstat(sp->fd, &sb) == -1)
 	sudo_fatal(U_("unable to stat %s"), sp->path);
@@ -479,7 +480,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
     struct sudoersfile *sp, *last;
     FILE *fp;
     int ch;
-    debug_decl(reparse_sudoers, SUDO_DEBUG_UTIL)
+    debug_decl(reparse_sudoers, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     /*
      * Parse the edited sudoers files and do sanity checking
@@ -566,7 +567,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 {
     struct stat sb;
     bool rval = false;
-    debug_decl(install_sudoers, SUDO_DEBUG_UTIL)
+    debug_decl(install_sudoers, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (!sp->modified) {
 	/*
@@ -706,7 +707,7 @@ static int
 whatnow(void)
 {
     int choice, c;
-    debug_decl(whatnow, SUDO_DEBUG_UTIL)
+    debug_decl(whatnow, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     for (;;) {
 	(void) fputs(_("What now? "), stdout);
@@ -738,7 +739,7 @@ static void
 setup_signals(void)
 {
     sigaction_t sa;
-    debug_decl(setup_signals, SUDO_DEBUG_UTIL)
+    debug_decl(setup_signals, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     /*
      * Setup signal handlers to cleanup nicely.
@@ -760,7 +761,7 @@ run_command(char *path, char **argv)
 {
     int status;
     pid_t pid, rv;
-    debug_decl(run_command, SUDO_DEBUG_UTIL)
+    debug_decl(run_command, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
@@ -790,7 +791,7 @@ check_owner(const char *path, bool quiet)
 {
     struct stat sb;
     bool ok = true;
-    debug_decl(check_owner, SUDO_DEBUG_UTIL)
+    debug_decl(check_owner, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (stat(path, &sb) == 0) {
 	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
@@ -816,7 +817,7 @@ static bool
 check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 {
     bool ok = false;
-    debug_decl(check_syntax, SUDO_DEBUG_UTIL)
+    debug_decl(check_syntax, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (strcmp(sudoers_path, "-") == 0) {
 	sudoersin = stdin;
@@ -884,7 +885,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     struct sudoersfile *entry;
     FILE *fp;
     int open_flags;
-    debug_decl(open_sudoers, SUDO_DEBUG_UTIL)
+    debug_decl(open_sudoers, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (checkonly)
 	open_flags = O_RDONLY;
@@ -933,7 +934,7 @@ static char *
 get_editor(char **args)
 {
     char *Editor, *EditorArgs, *EditorPath, *UserEditor, *UserEditorArgs;
-    debug_decl(get_editor, SUDO_DEBUG_UTIL)
+    debug_decl(get_editor, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     /*
      * Check VISUAL and EDITOR environment variables to see which editor
@@ -1037,7 +1038,7 @@ static char *
 get_args(char *cmnd)
 {
     char *args;
-    debug_decl(get_args, SUDO_DEBUG_UTIL)
+    debug_decl(get_args, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     args = cmnd;
     while (*args && !isblank((unsigned char) *args))
@@ -1057,7 +1058,7 @@ static void
 get_hostname(void)
 {
     char *p, thost[HOST_NAME_MAX + 1];
-    debug_decl(get_hostname, SUDO_DEBUG_UTIL)
+    debug_decl(get_hostname, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (gethostname(thost, sizeof(thost)) != -1) {
 	thost[sizeof(thost) - 1] = '\0';
@@ -1084,7 +1085,7 @@ alias_remove_recursive(char *name, int type)
     struct member *m;
     struct alias *a;
     bool rval = true;
-    debug_decl(alias_remove_recursive, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_remove_recursive, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     if ((a = alias_remove(name, type)) != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
@@ -1114,7 +1115,7 @@ check_alias(char *name, int type, int strict, int quiet)
     struct member *m;
     struct alias *a;
     int errors = 0;
-    debug_decl(check_alias, SUDO_DEBUG_ALIAS)
+    debug_decl(check_alias, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     if ((a = alias_get(name, type)) != NULL) {
 	/* check alias contents */
@@ -1156,7 +1157,7 @@ check_aliases(bool strict, bool quiet)
     struct userspec *us;
     struct defaults *d;
     int atype, errors = 0;
-    debug_decl(check_aliases, SUDO_DEBUG_ALIAS)
+    debug_decl(check_aliases, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     alias_freelist = rbcreate(alias_compare);
 

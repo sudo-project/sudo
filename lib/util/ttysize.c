@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,7 +52,7 @@ static int
 get_ttysize_ioctl(int *rowp, int *colp)
 {
     struct winsize wsize;
-    debug_decl(get_ttysize_ioctl, SUDO_DEBUG_EXEC)
+    debug_decl(get_ttysize_ioctl, SUDO_DEBUG_EXEC, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 &&
 	wsize.ws_row != 0 && wsize.ws_col  != 0) {
@@ -73,7 +73,7 @@ get_ttysize_ioctl(int *rowp, int *colp)
 void
 sudo_get_ttysize_v1(int *rowp, int *colp)
 {
-    debug_decl(sudo_get_ttysize, SUDO_DEBUG_EXEC)
+    debug_decl(sudo_get_ttysize, SUDO_DEBUG_EXEC, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     if (get_ttysize_ioctl(rowp, colp) == -1) {
 	char *p;

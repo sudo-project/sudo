@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2009-2013
+ * Copyright (c) 2004-2005, 2007, 2009-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -54,9 +54,7 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include "sudo_compat.h"
-#include "sudo_alloc.h"
-#include "sudo_debug.h"
+#include "sudoers.h"
 #include "redblack.h"
 
 static void rbrepair(struct rbtree *, struct rbnode *);
@@ -90,7 +88,7 @@ struct rbtree *
 rbcreate(int (*compar)(const void *, const void*))
 {
     struct rbtree *tree;
-    debug_decl(rbcreate, SUDO_DEBUG_RBTREE)
+    debug_decl(rbcreate, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     tree = (struct rbtree *) sudo_emalloc(sizeof(*tree));
     tree->compar = compar;
@@ -121,7 +119,7 @@ static void
 rotate_left(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *child;
-    debug_decl(rotate_left, SUDO_DEBUG_RBTREE)
+    debug_decl(rotate_left, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     child = node->right;
     node->right = child->left;
@@ -147,7 +145,7 @@ static void
 rotate_right(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *child;
-    debug_decl(rotate_right, SUDO_DEBUG_RBTREE)
+    debug_decl(rotate_right, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     child = node->left;
     node->left = child->right;
@@ -177,7 +175,7 @@ rbinsert(struct rbtree *tree, void *data)
     struct rbnode *node = rbfirst(tree);
     struct rbnode *parent = rbroot(tree);
     int res;
-    debug_decl(rbinsert, SUDO_DEBUG_RBTREE)
+    debug_decl(rbinsert, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     /* Find correct insertion point. */
     while (node != rbnil(tree)) {
@@ -269,7 +267,7 @@ rbfind(struct rbtree *tree, void *key)
 {
     struct rbnode *node = rbfirst(tree);
     int res;
-    debug_decl(rbfind, SUDO_DEBUG_RBTREE)
+    debug_decl(rbfind, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     while (node != rbnil(tree)) {
 	if ((res = tree->compar(key, node->data)) == 0)
@@ -289,7 +287,7 @@ rbapply_node(struct rbtree *tree, struct rbnode *node,
     int (*func)(void *, void *), void *cookie, enum rbtraversal order)
 {
     int error;
-    debug_decl(rbapply_node, SUDO_DEBUG_RBTREE)
+    debug_decl(rbapply_node, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     if (node != rbnil(tree)) {
 	if (order == preorder)
@@ -316,7 +314,7 @@ static struct rbnode *
 rbsuccessor(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *succ;
-    debug_decl(rbsuccessor, SUDO_DEBUG_RBTREE)
+    debug_decl(rbsuccessor, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     if ((succ = node->right) != rbnil(tree)) {
 	while (succ->left != rbnil(tree))
@@ -337,7 +335,7 @@ rbsuccessor(struct rbtree *tree, struct rbnode *node)
 static void
 _rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 {
-    debug_decl(_rbdestroy, SUDO_DEBUG_RBTREE)
+    debug_decl(_rbdestroy, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
     if (node != rbnil(tree)) {
 	_rbdestroy(tree, node->left, destroy);
 	_rbdestroy(tree, node->right, destroy);
@@ -355,7 +353,7 @@ _rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 void
 rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
-    debug_decl(rbdestroy, SUDO_DEBUG_RBTREE)
+    debug_decl(rbdestroy, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
     _rbdestroy(tree, rbfirst(tree), destroy);
     sudo_efree(tree);
     debug_return;
@@ -368,7 +366,7 @@ void *rbdelete(struct rbtree *tree, struct rbnode *z)
 {
     struct rbnode *x, *y;
     void *data = z->data;
-    debug_decl(rbdelete, SUDO_DEBUG_RBTREE)
+    debug_decl(rbdelete, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     if (z->left == rbnil(tree) || z->right == rbnil(tree))
 	y = z;
@@ -410,7 +408,7 @@ static void
 rbrepair(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *sibling;
-    debug_decl(rbrepair, SUDO_DEBUG_RBTREE)
+    debug_decl(rbrepair, SUDO_DEBUG_RBTREE, sudoers_debug_instance)
 
     while (node->color == black && node != rbfirst(tree)) {
 	if (node == node->parent->left) {

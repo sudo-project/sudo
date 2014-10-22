@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -61,7 +61,7 @@ fill_txt(const char *src, int len, int olen)
 {
     char *dst;
     int h;
-    debug_decl(fill_txt, SUDO_DEBUG_PARSER)
+    debug_decl(fill_txt, SUDO_DEBUG_PARSER, sudoers_debug_instance)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
@@ -96,7 +96,7 @@ bool
 append(const char *src, int len)
 {
     int olen = 0;
-    debug_decl(append, SUDO_DEBUG_PARSER)
+    debug_decl(append, SUDO_DEBUG_PARSER, sudoers_debug_instance)
 
     if (sudoerslval.string != NULL)
 	olen = strlen(sudoerslval.string);
@@ -112,7 +112,7 @@ fill_cmnd(const char *src, int len)
 {
     char *dst;
     int i;
-    debug_decl(fill_cmnd, SUDO_DEBUG_PARSER)
+    debug_decl(fill_cmnd, SUDO_DEBUG_PARSER, sudoers_debug_instance)
 
     arg_len = arg_size = 0;
 
@@ -141,7 +141,7 @@ fill_args(const char *s, int len, int addspace)
 {
     int new_len;
     char *p;
-    debug_decl(fill_args, SUDO_DEBUG_PARSER)
+    debug_decl(fill_args, SUDO_DEBUG_PARSER, sudoers_debug_instance)
 
     if (sudoerslval.command.args == NULL) {
 	addspace = 0;
@@ -188,7 +188,7 @@ bool
 ipv6_valid(const char *s)
 {
     int nmatch = 0;
-    debug_decl(ipv6_valid, SUDO_DEBUG_PARSER)
+    debug_decl(ipv6_valid, SUDO_DEBUG_PARSER, sudoers_debug_instance)
 
     for (; *s != '\0'; s++) {
 	if (s[0] == ':' && s[1] == ':') {

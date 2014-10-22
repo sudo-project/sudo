@@ -70,7 +70,7 @@ static struct timestamp_entry timestamp_key;
 static bool
 ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 {
-    debug_decl(ts_match_record, SUDO_DEBUG_AUTH)
+    debug_decl(ts_match_record, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (entry->version != key->version)
 	debug_return_bool(false);
@@ -110,7 +110,7 @@ static bool
 ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entry)
 {
     struct timestamp_entry cur;
-    debug_decl(ts_find_record, SUDO_DEBUG_AUTH)
+    debug_decl(ts_find_record, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /*
      * Look for a matching record.
@@ -145,7 +145,7 @@ ts_update_record(int fd, struct timestamp_entry *entry, off_t timestamp_hint)
     struct timestamp_entry cur;
     ssize_t nwritten;
     off_t old_eof = (off_t)-1;
-    debug_decl(ts_update_record, SUDO_DEBUG_AUTH)
+    debug_decl(ts_update_record, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* First try the hint if one is given. */
     if (timestamp_hint != (off_t)-1) {
@@ -215,7 +215,7 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
     gid_t parent_gid = 0;
     char *slash = path;
     bool rval = false;
-    debug_decl(ts_mkdirs, SUDO_DEBUG_AUTH)
+    debug_decl(ts_mkdirs, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
@@ -265,7 +265,7 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 {
     struct stat sb;
     bool rval = false;
-    debug_decl(ts_secure_dir, SUDO_DEBUG_AUTH)
+    debug_decl(ts_secure_dir, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
     switch (sudo_secure_dir(path, timestamp_uid, -1, &sb)) {
@@ -309,7 +309,7 @@ int
 build_timestamp(struct passwd *pw)
 {
     int len;
-    debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
+    debug_decl(build_timestamp, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     len = snprintf(timestamp_file, sizeof(timestamp_file), "%s/%s",
 	def_timestampdir, user_name);
@@ -333,7 +333,7 @@ update_timestamp(struct passwd *pw)
     bool uid_changed = false;
     bool rval = false;
     int fd;
-    debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
+    debug_decl(update_timestamp, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Zero timeout means don't update the time stamp file. */
     if (def_timestamp_timeout == 0)
@@ -382,7 +382,7 @@ timestamp_status(struct passwd *pw)
     int status = TS_ERROR;		/* assume the worst */
     struct stat sb;
     int fd = -1;
-    debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
+    debug_decl(timestamp_status, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Reset time stamp offset hint. */
     timestamp_hint = (off_t)-1;
@@ -533,7 +533,7 @@ remove_timestamp(bool unlink_it)
     struct timestamp_entry entry;
     bool uid_changed = false;
     int fd = -1;
-    debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
+    debug_decl(remove_timestamp, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (build_timestamp(NULL) == -1)
 	debug_return;
@@ -602,7 +602,7 @@ already_lectured(int unused)
     char status_file[PATH_MAX];
     struct stat sb;
     int len;
-    debug_decl(already_lectured, SUDO_DEBUG_AUTH)
+    debug_decl(already_lectured, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (ts_secure_dir(def_lecture_status_dir, false, true)) {
 	len = snprintf(status_file, sizeof(status_file), "%s/%s",
@@ -626,7 +626,7 @@ set_lectured(void)
     char lecture_status[PATH_MAX];
     bool uid_changed = false;
     int len, fd = -1;
-    debug_decl(set_lectured, SUDO_DEBUG_AUTH)
+    debug_decl(set_lectured, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
 	def_lecture_status_dir, user_name);

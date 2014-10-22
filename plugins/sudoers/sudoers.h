@@ -346,6 +346,11 @@ int sudoers_policy_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
 void sudoers_cleanup(void);
 
+/* sudoers_debug.c */
+void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
+void sudoers_debug_register(struct sudo_conf_debug_file_list *debug_files, const char *plugin_path);
+extern int sudoers_debug_instance;
+
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
 int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);

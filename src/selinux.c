@@ -67,7 +67,7 @@ audit_role_change(const security_context_t old_context,
 {
     int au_fd, rc = -1;
     char *message;
-    debug_decl(audit_role_change, SUDO_DEBUG_SELINUX)
+    debug_decl(audit_role_change, SUDO_DEBUG_SELINUX, sudo_debug_instance)
 
     au_fd = audit_open();
     if (au_fd == -1) {
@@ -103,7 +103,7 @@ selinux_restore_tty(void)
 {
     int retval = 0;
     security_context_t chk_tty_context = NULL;
-    debug_decl(selinux_restore_tty, SUDO_DEBUG_SELINUX)
+    debug_decl(selinux_restore_tty, SUDO_DEBUG_SELINUX, sudo_debug_instance)
 
     if (se_state.ttyfd == -1 || se_state.new_tty_context == NULL)
 	goto skip_relabel;
@@ -148,7 +148,7 @@ relabel_tty(const char *ttyn, int ptyfd)
     security_context_t tty_con = NULL;
     security_context_t new_tty_con = NULL;
     int fd;
-    debug_decl(relabel_tty, SUDO_DEBUG_SELINUX)
+    debug_decl(relabel_tty, SUDO_DEBUG_SELINUX, sudo_debug_instance)
 
     se_state.ttyfd = ptyfd;
 
@@ -245,7 +245,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     security_context_t new_context = NULL;
     context_t context = NULL;
     char *typebuf = NULL;
-    debug_decl(get_exec_context, SUDO_DEBUG_SELINUX)
+    debug_decl(get_exec_context, SUDO_DEBUG_SELINUX, sudo_debug_instance)
     
     /* We must have a role, the type is optional (we can use the default). */
     if (!role) {
@@ -317,7 +317,7 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     int ptyfd)
 {
     int rval = -1;
-    debug_decl(selinux_setup, SUDO_DEBUG_SELINUX)
+    debug_decl(selinux_setup, SUDO_DEBUG_SELINUX, sudo_debug_instance)
 
     /* Store the caller's SID in old_context. */
     if (getprevcon(&se_state.old_context)) {
@@ -373,7 +373,7 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
     char **nargv;
     const char *sesh;
     int argc, serrno;
-    debug_decl(selinux_execve, SUDO_DEBUG_SELINUX)
+    debug_decl(selinux_execve, SUDO_DEBUG_SELINUX, sudo_debug_instance)
 
     sesh = sudo_conf_sesh_path();
     if (sesh == NULL) {

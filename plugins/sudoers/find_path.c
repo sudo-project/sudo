@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2010-2013
+ * Copyright (c) 1996, 1998-2005, 2010-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -62,7 +62,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
     bool found = false;		/* did we find the command? */
     bool checkdot = false;	/* check current dir? */
     int len;			/* length parameter */
-    debug_decl(find_path, SUDO_DEBUG_UTIL)
+    debug_decl(find_path, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     if (strlen(infile) >= PATH_MAX) {
 	errno = ENAMETOOLONG;

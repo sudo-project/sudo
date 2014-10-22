@@ -119,7 +119,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
 bool
 sudo_term_restore_v1(int fd, bool flush)
 {
-    debug_decl(term_restore, SUDO_DEBUG_UTIL)
+    debug_decl(term_restore, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     if (changed) {
 	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
@@ -137,7 +137,7 @@ sudo_term_restore_v1(int fd, bool flush)
 bool
 sudo_term_noecho_v1(int fd)
 {
-    debug_decl(term_noecho, SUDO_DEBUG_UTIL)
+    debug_decl(term_noecho, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -167,7 +167,7 @@ bool
 sudo_term_raw_v1(int fd, int isig)
 {
     struct termios term;
-    debug_decl(term_raw, SUDO_DEBUG_UTIL)
+    debug_decl(term_raw, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -200,7 +200,7 @@ again:
 bool
 sudo_term_cbreak_v1(int fd)
 {
-    debug_decl(term_cbreak, SUDO_DEBUG_UTIL)
+    debug_decl(term_cbreak, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -238,7 +238,7 @@ bool
 sudo_term_copy_v1(int src, int dst)
 {
     struct termios tt;
-    debug_decl(term_copy, SUDO_DEBUG_UTIL)
+    debug_decl(term_copy, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
 again:
     if (tcgetattr(src, &tt) != 0)

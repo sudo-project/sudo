@@ -26,19 +26,8 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif /* HAVE_STDBOOL_H */
-#include <stdarg.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
-#include "sudo_compat.h"
-#include "logging.h"
-#include "sudo_debug.h"
+#include "sudoers.h"
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
@@ -54,7 +43,7 @@ int
 audit_success(int argc, char *argv[])
 {
     int rc = 0;
-    debug_decl(audit_success, SUDO_DEBUG_AUDIT)
+    debug_decl(audit_success, SUDO_DEBUG_AUDIT, sudoers_debug_instance)
 
     if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
@@ -78,7 +67,7 @@ int
 audit_failure(int argc, char *argv[], char const *const fmt, ...)
 {
     int rc = 0;
-    debug_decl(audit_success, SUDO_DEBUG_AUDIT)
+    debug_decl(audit_success, SUDO_DEBUG_AUDIT, sudoers_debug_instance)
 
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
     if (argv != NULL) {

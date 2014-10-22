@@ -31,11 +31,12 @@ struct sudo_debug_file {
 struct sudo_conf_debug_file_list;
 
 /*
- * The priority and subsystem are encoded in a single 32-bit value.
- * The lower 4 bits are the priority and the top 26 bits are the subsystem.
- * This allows for 16 priorities and a very large number of subsystems.
- * Bit 5 is used as a flag to specify whether to log the errno value.
- * Bit 6 specifies whether to log the function, file and line number data.
+ * The priority, instance and subsystem are encoded in a single 32-bit value.
+ * The first byte holds the priority and flags:
+ *  nybble one is priority, nybble two is flags (errno or lineno).
+ * The second byte is for the instance index (way more than we need).
+ * The upper two bytes are the subsystem.
+ * This allows for 16 priorities, 3 flags, 256 instances, 65535 subsystems.
  */
 
 /*
@@ -52,63 +53,73 @@ struct sudo_conf_debug_file_list;
 #define SUDO_DEBUG_TRACE	7	/* log function enter/exit */
 #define SUDO_DEBUG_DEBUG	8	/* very verbose debugging */
 
-/*
- * Sudo debug subsystems.
- * This includes subsystems in the sudoers plugin.
- * Note: order must match sudo_debug_subsystems[]
- */
-#define SUDO_DEBUG_MAIN		( 1<<6)	/* sudo main() */
-#define SUDO_DEBUG_ARGS		( 2<<6)	/* command line argument processing */
-#define SUDO_DEBUG_EXEC		( 3<<6)	/* command execution */
-#define SUDO_DEBUG_PTY		( 4<<6)	/* pseudo-tty */
-#define SUDO_DEBUG_UTMP		( 5<<6)	/* utmp file ops */
-#define SUDO_DEBUG_CONV		( 6<<6)	/* user conversation */
-#define SUDO_DEBUG_PCOMM	( 7<<6)	/* plugin communications */
-#define SUDO_DEBUG_UTIL		( 8<<6)	/* utility functions */
-#define SUDO_DEBUG_NETIF	( 9<<6)	/* network interface functions */
-#define SUDO_DEBUG_AUDIT	(10<<6)	/* audit */
-#define SUDO_DEBUG_EDIT		(11<<6)	/* sudoedit */
-#define SUDO_DEBUG_SELINUX	(12<<6)	/* selinux */
-#define SUDO_DEBUG_LDAP		(13<<6)	/* sudoers LDAP */
-#define SUDO_DEBUG_MATCH	(14<<6)	/* sudoers matching */
-#define SUDO_DEBUG_PARSER	(15<<6)	/* sudoers parser */
-#define SUDO_DEBUG_ALIAS	(16<<6)	/* sudoers alias functions */
-#define SUDO_DEBUG_DEFAULTS	(17<<6)	/* sudoers defaults settings */
-#define SUDO_DEBUG_AUTH		(18<<6)	/* authentication functions */
-#define SUDO_DEBUG_ENV		(19<<6)	/* environment handling */
-#define SUDO_DEBUG_LOGGING	(20<<6)	/* logging functions */
-#define SUDO_DEBUG_NSS		(21<<6)	/* network service switch */
-#define SUDO_DEBUG_RBTREE	(22<<6)	/* red-black tree functions */
-#define SUDO_DEBUG_PERMS	(23<<6)	/* uid/gid swapping functions */
-#define SUDO_DEBUG_PLUGIN	(24<<6)	/* main plugin functions */
-#define SUDO_DEBUG_HOOKS	(25<<6)	/* hook functions */
-#define SUDO_DEBUG_SSSD		(26<<6) /* sudoers SSSD */
-#define SUDO_DEBUG_EVENT	(27<<6) /* event handling */
-#define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
-
 /* Flag to include string version of errno in debug info. */
 #define SUDO_DEBUG_ERRNO	(1<<4)
 
 /* Flag to include function, file and line number in debug info. */
 #define SUDO_DEBUG_LINENO	(1<<5)
 
-/* Extract priority and convert to an index. */
-#define SUDO_DEBUG_PRI(n) (((n) & 0xf) - 1)
+/*
+ * Sudo debug subsystems.
+ * This includes subsystems in the sudoers plugin.
+ * Note: order must match sudo_debug_subsystems[]
+ */
+#define SUDO_DEBUG_MAIN		( 1<<16)  /* sudo main() */
+#define SUDO_DEBUG_ARGS		( 2<<16)  /* command line argument processing */
+#define SUDO_DEBUG_EXEC		( 3<<16)  /* command execution */
+#define SUDO_DEBUG_PTY		( 4<<16)  /* pseudo-tty */
+#define SUDO_DEBUG_UTMP		( 5<<16)  /* utmp file ops */
+#define SUDO_DEBUG_CONV		( 6<<16)  /* user conversation */
+#define SUDO_DEBUG_PCOMM	( 7<<16)  /* plugin communications */
+#define SUDO_DEBUG_UTIL		( 8<<16)  /* utility functions */
+#define SUDO_DEBUG_NETIF	( 9<<16)  /* network interface functions */
+#define SUDO_DEBUG_AUDIT	(10<<16)  /* audit */
+#define SUDO_DEBUG_EDIT		(11<<16)  /* sudoedit */
+#define SUDO_DEBUG_SELINUX	(12<<16)  /* selinux */
+#define SUDO_DEBUG_LDAP		(13<<16)  /* sudoers LDAP */
+#define SUDO_DEBUG_MATCH	(14<<16)  /* sudoers matching */
+#define SUDO_DEBUG_PARSER	(15<<16)  /* sudoers parser */
+#define SUDO_DEBUG_ALIAS	(16<<16)  /* sudoers alias functions */
+#define SUDO_DEBUG_DEFAULTS	(17<<16)  /* sudoers defaults settings */
+#define SUDO_DEBUG_AUTH		(18<<16)  /* authentication functions */
+#define SUDO_DEBUG_ENV		(19<<16)  /* environment handling */
+#define SUDO_DEBUG_LOGGING	(20<<16)  /* logging functions */
+#define SUDO_DEBUG_NSS		(21<<16)  /* network service switch */
+#define SUDO_DEBUG_RBTREE	(22<<16)  /* red-black tree functions */
+#define SUDO_DEBUG_PERMS	(23<<16)  /* uid/gid swapping functions */
+#define SUDO_DEBUG_PLUGIN	(24<<16)  /* main plugin functions */
+#define SUDO_DEBUG_HOOKS	(25<<16)  /* hook functions */
+#define SUDO_DEBUG_SSSD		(26<<16)  /* sudoers SSSD */
+#define SUDO_DEBUG_EVENT	(27<<16)  /* event handling */
+#define SUDO_DEBUG_ALL		0xffff0000  /* all subsystems */
 
-/* Extract subsystem and convert to an index. */
-#define SUDO_DEBUG_SUBSYS(n) (((n) >> 6) - 1)
+/* Initializer for instance index to indicate that debugging is not setup. */
+#define SUDO_DEBUG_INSTANCE_INITIALIZER	SUDO_DEBUG_MKINSTANCE(-1)
+
+/* The 'default' instance logs to the currently selected debug instance. */
+#define SUDO_DEBUG_INSTANCE_DEFAULT	SUDO_DEBUG_MKINSTANCE(-2)
+
+/* Extract priority number and convert to an index. */
+#define SUDO_DEBUG_PRI(n) (((n) & 0x0f) - 1)
+
+/* Extract instance number and convert to an index. */
+#define SUDO_DEBUG_INSTANCE(n) ((((n) & 0xff00) >> 8) - 2)
+#define SUDO_DEBUG_MKINSTANCE(n) (((n) + 2) << 8)
+
+/* Extract subsystem number and convert to an index. */
+#define SUDO_DEBUG_SUBSYS(n) (((n) >> 16) - 1)
 
 /*
  * Wrapper for sudo_debug_enter() that declares __func__ as needed
  * and sets sudo_debug_subsys for sudo_debug_exit().
  */
 #ifdef HAVE___FUNC__
-# define debug_decl(funcname, subsys)					       \
-    const int sudo_debug_subsys = (subsys);				       \
+# define debug_decl(funcname, subsys, instance)				       \
+    const int sudo_debug_subsys = (subsys)|(instance);			       \
     sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 #else
-# define debug_decl(funcname, subsys)					       \
-    const int sudo_debug_subsys = (subsys);				       \
+# define debug_decl(funcname, subsys, instance)				       \
+    const int sudo_debug_subsys = (subsys)|(instance);			       \
     const char __func__[] = #funcname;					       \
     sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 #endif
@@ -213,26 +224,30 @@ struct sudo_conf_debug_file_list;
 #define sudo_debug_execve(pri, path, argv, envp) \
     sudo_debug_execve2((pri)|sudo_debug_subsys, (path), (argv), (envp))
 
-#define sudo_debug_write(str, len, errnum) \
-    sudo_debug_write2(NULL, NULL, 0, (str), (len), (errnum))
+#define sudo_debug_write(fd, str, len, errnum) \
+    sudo_debug_write2(fd, NULL, NULL, 0, (str), (len), (errnum))
 
+__dso_public int sudo_debug_deregister(int instance_id);
 __dso_public void sudo_debug_enter(const char *func, const char *file, int line, int subsys);
 __dso_public void sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[]);
 __dso_public void sudo_debug_exit(const char *func, const char *file, int line, int subsys);
+__dso_public void sudo_debug_exit_bool(const char *func, const char *file, int line, int subsys, int rval);
 __dso_public void sudo_debug_exit_int(const char *func, const char *file, int line, int subsys, int rval);
 __dso_public void sudo_debug_exit_long(const char *func, const char *file, int line, int subsys, long rval);
+__dso_public void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
 __dso_public void sudo_debug_exit_size_t(const char *func, const char *file, int line, int subsys, size_t rval);
-__dso_public void sudo_debug_exit_bool(const char *func, const char *file, int line, int subsys, int rval);
 __dso_public void sudo_debug_exit_str(const char *func, const char *file, int line, int subsys, const char *rval);
 __dso_public void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
-__dso_public void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
-__dso_public int sudo_debug_fd_get(void);
-__dso_public int sudo_debug_fd_set(int fd);
-__dso_public int sudo_debug_init(const char *debugfile, const char *settings);
-__dso_public void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
-__dso_public void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
-__dso_public void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
-__dso_public void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
 __dso_public pid_t sudo_debug_fork(void);
+__dso_public int sudo_debug_get_default_instance(void);
+__dso_public int sudo_debug_get_fds(fd_set **fdsetp);
+__dso_public int sudo_debug_get_instance(const char *program);
+__dso_public void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
+__dso_public void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
+__dso_public int sudo_debug_register(const char *program, const char *const subsystems[], int num_subsystems, struct sudo_conf_debug_file_list *debug_files);
+__dso_public int sudo_debug_set_default_instance(int inst);
+__dso_public void sudo_debug_update_fd(int ofd, int nfd);
+__dso_public void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
+__dso_public void sudo_debug_write2(int fd, const char *func, const char *file, int line, const char *str, int len, int errnum);
 
 #endif /* _SUDO_DEBUG_H */

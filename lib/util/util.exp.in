@@ -11,6 +11,7 @@ sudo_conf_plugins_v1
 sudo_conf_probe_interfaces_v1
 sudo_conf_read_v1
 sudo_conf_sesh_path_v1
+sudo_debug_deregister
 sudo_debug_enter
 sudo_debug_execve2
 sudo_debug_exit
@@ -21,11 +22,14 @@ sudo_debug_exit_ptr
 sudo_debug_exit_size_t
 sudo_debug_exit_str
 sudo_debug_exit_str_masked
-sudo_debug_fd_get
-sudo_debug_fd_set
 sudo_debug_fork
-sudo_debug_init
+sudo_debug_get_default_instance
+sudo_debug_get_fds
+sudo_debug_get_instance
 sudo_debug_printf2
+sudo_debug_register
+sudo_debug_set_default_instance
+sudo_debug_update_fd
 sudo_debug_vprintf2
 sudo_debug_write2
 sudo_dso_findsym_v1

@@ -104,7 +104,7 @@ sudo_auth_init(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(sudo_auth_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_init, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (auth_switch[0].name == NULL)
 	debug_return_int(0);
@@ -146,7 +146,7 @@ sudo_auth_cleanup(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(sudo_auth_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_cleanup, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -163,7 +163,7 @@ static void
 pass_warn(void)
 {
     const char *warning = def_badpass_message;
-    debug_decl(pass_warn, SUDO_DEBUG_AUTH)
+    debug_decl(pass_warn, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
 #ifdef INSULT
     if (def_insults)
@@ -196,7 +196,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     sudo_auth *auth;
     sigset_t mask, omask;
     sigaction_t sa, saved_sigtstp;
-    debug_decl(verify_user, SUDO_DEBUG_AUTH)
+    debug_decl(verify_user, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL) {
@@ -316,7 +316,7 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(sudo_auth_begin_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_begin_session, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
@@ -333,7 +333,7 @@ sudo_auth_needs_end_session(void)
 {
     sudo_auth *auth;
     bool needed = false;
-    debug_decl(sudo_auth_needs_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_needs_end_session, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
@@ -353,7 +353,7 @@ sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(sudo_auth_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_end_session, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
@@ -371,7 +371,7 @@ auth_getpass(const char *prompt, int timeout, int type)
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
     sigset_t mask, omask;
-    debug_decl(auth_getpass, SUDO_DEBUG_AUTH)
+    debug_decl(auth_getpass, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Mask user input if pwfeedback set and echo is off. */
     if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback)
@@ -407,7 +407,7 @@ void
 dump_auth_methods(void)
 {
     sudo_auth *auth;
-    debug_decl(dump_auth_methods, SUDO_DEBUG_AUTH)
+    debug_decl(dump_auth_methods, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Authentication methods:"));
     for (auth = auth_switch; auth->name; auth++)

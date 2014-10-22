@@ -57,7 +57,7 @@ int
 add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 {
     struct preserved_fd *pfd, *pfd_new;
-    debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL)
+    debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     pfd_new = sudo_emalloc(sizeof(*pfd));
     pfd_new->lowfd = fd;
@@ -99,12 +99,10 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 void
 closefrom_except(int startfd, struct preserved_fd_list *pfds)
 {
-    int debug_fd, fd, lastfd = -1;
+    int fd, lastfd = -1;
     struct preserved_fd *pfd, *pfd_next;
     fd_set *fdsp;
-    debug_decl(closefrom_except, SUDO_DEBUG_UTIL)
-
-    debug_fd = sudo_debug_fd_get();
+    debug_decl(closefrom_except, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /* First, relocate preserved fds to be as contiguous as possible.  */
     TAILQ_FOREACH_REVERSE_SAFE(pfd, pfds, preserved_fd_list, entries, pfd_next) {
@@ -120,12 +118,11 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	    }
 	    /* NOTE: still need to adjust lastfd below with unchanged lowfd. */
 	} else if (fd < pfd->highfd) {
-	    pfd->lowfd = fd;
-	    fd = pfd->highfd;
-	    if (fd == debug_fd)
-		debug_fd = sudo_debug_fd_set(pfd->lowfd);
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"dup %d -> %d", pfd->highfd, pfd->lowfd);
+	    sudo_debug_update_fd(pfd->highfd, pfd->lowfd);
+	    pfd->lowfd = fd;
+	    fd = pfd->highfd;
 	}
 	if (fd != -1)
 	    (void) close(fd);
@@ -191,8 +188,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		    "fcntl(%d, F_SETFD, %d)", pfd->highfd, pfd->flags);
 	    }
-	    if (pfd->lowfd == debug_fd)
-		debug_fd = sudo_debug_fd_set(pfd->highfd);
+	    sudo_debug_update_fd(pfd->lowfd, pfd->highfd);
 	    (void) close(pfd->lowfd);
 	    pfd->lowfd = pfd->highfd;
 	}
@@ -209,7 +205,7 @@ parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr)
     const char *cp = fdstr;
     long lval;
     char *ep;
-    debug_decl(parse_preserved_fds, SUDO_DEBUG_UTIL)
+    debug_decl(parse_preserved_fds, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     do {
 	errno = 0;

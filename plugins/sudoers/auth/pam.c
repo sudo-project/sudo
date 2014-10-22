@@ -87,7 +87,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct pam_conv pam_conv;
     static int pam_status;
-    debug_decl(sudo_pam_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_init, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Initial PAM setup */
     auth->data = (void *) &pam_status;
@@ -133,7 +133,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     const char *s;
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_verify, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     def_prompt = prompt;	/* for converse */
 
@@ -193,7 +193,7 @@ int
 sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_cleanup, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* If successful, we can't close the session until sudo_pam_end_session() */
     if (*pam_status != PAM_SUCCESS || auth->end_session == NULL) {
@@ -208,7 +208,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     int status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_begin_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_begin_session, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /*
      * If there is no valid user we cannot open a PAM session.
@@ -279,7 +279,7 @@ int
 sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = AUTH_SUCCESS;
-    debug_decl(sudo_pam_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_end_session, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (pamh != NULL) {
 	/*
@@ -326,7 +326,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     char *pass;
     int n, type;
     int ret = PAM_AUTH_ERR;
-    debug_decl(converse, SUDO_DEBUG_AUTH)
+    debug_decl(converse, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL)
 	debug_return_int(PAM_SYSTEM_ERR);

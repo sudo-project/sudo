@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2013
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -205,6 +205,7 @@ int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 extern const char *list_user;
 extern struct user_details user_details;
+extern int sudo_debug_instance;
 
 /* sudo_edit.c */
 int sudo_edit(struct command_details *details);

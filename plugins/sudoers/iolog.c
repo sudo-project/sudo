@@ -92,7 +92,7 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
     gid_t parent_gid = 0;
     char *slash = path;
     bool ok = true;
-    debug_decl(io_mkdirs, SUDO_DEBUG_UTIL)
+    debug_decl(io_mkdirs, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     /* Fast path: not a temporary and already exists. */
     if (!is_temp && stat(path, &sb) == 0) {
@@ -155,7 +155,7 @@ io_set_max_sessid(const char *maxval)
 {
     const char *errstr;
     unsigned int value;
-    debug_decl(io_set_max_sessid, SUDO_DEBUG_UTIL)
+    debug_decl(io_set_max_sessid, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     value = strtonum(maxval, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
@@ -187,7 +187,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     ssize_t nread;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    debug_decl(io_nextid, SUDO_DEBUG_UTIL)
+    debug_decl(io_nextid, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     /*
      * Create I/O log directory if it doesn't already exist.
@@ -297,7 +297,7 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     size_t len;
     bool is_temp = false;
-    debug_decl(mkdir_iopath, SUDO_DEBUG_UTIL)
+    debug_decl(mkdir_iopath, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
     if (len >= pathsize) {
@@ -328,7 +328,7 @@ static bool
 open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 {
     int fd;
-    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
+    debug_decl(open_io_fd, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
@@ -370,7 +370,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     id_t id;
     uid_t runas_uid = 0;
     gid_t runas_gid = 0;
-    debug_decl(iolog_deserialize_info, SUDO_DEBUG_UTIL)
+    debug_decl(iolog_deserialize_info, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     details->lines = 24;
     details->cols = 80;
@@ -536,7 +536,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     char * const *av;
     FILE *fp;
     int fd;
-    debug_decl(write_info_log, SUDO_DEBUG_UTIL)
+    debug_decl(write_info_log, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
@@ -566,12 +566,15 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[], char * const args[])
 {
+    struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     struct iolog_details details;
     char pathbuf[PATH_MAX], sessid[7];
     char *tofree = NULL;
+    char * const *cur;
+    const char *plugin_path = NULL;
     size_t len;
-    int i, rval = -1;
-    debug_decl(sudoers_io_open, SUDO_DEBUG_PLUGIN)
+    int i, prev_instance, rval = -1;
+    debug_decl(sudoers_io_open, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
 
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
@@ -580,12 +583,30 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (argc == 0)
 	debug_return_bool(true);
 
+    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
+
     memset(&details, 0, sizeof(details));
 
     bindtextdomain("sudoers", LOCALEDIR);
 
     sudo_setpwent();
     sudo_setgrent();
+
+    /*
+     * Check for debug flags in settings list.
+     */
+    for (cur = settings; *cur != NULL; cur++) {
+	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    sudoers_debug_parse_flags(&debug_files,
+		*cur + sizeof("debug_flags=") - 1);
+	    continue;
+	}
+	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = *cur + sizeof("plugin_path=") - 1;
+	    continue;
+	}
+    }
+    sudoers_debug_register(&debug_files, plugin_path);
 
     /*
      * Pull iolog settings out of command_info.
@@ -653,14 +674,18 @@ done:
 	sudo_gr_delref(details.runas_gr);
     sudo_endgrent();
 
+    sudo_debug_set_default_instance(prev_instance);
+
     debug_return_bool(rval);
 }
 
 static void
 sudoers_io_close(int exit_status, int error)
 {
-    int i;
-    debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
+    int i, prev_instance;
+    debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+
+    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (io_log_files[i].fd.v == NULL)
@@ -672,16 +697,28 @@ sudoers_io_close(int exit_status, int error)
 #endif
 	    fclose(io_log_files[i].fd.f);
     }
+    sudo_debug_set_default_instance(prev_instance);
+
+    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
+	sudo_debug_deregister(sudoers_debug_instance);
+	sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+    }
+
     debug_return;
 }
 
 static int
 sudoers_io_version(int verbose)
 {
-    debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
+    int prev_instance;
+    debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+
+    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
+
+    sudo_debug_set_default_instance(prev_instance);
 
     debug_return_bool(true);
 }
@@ -693,8 +730,10 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
-    int rval = true;
-    debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
+    int prev_instance, rval = true;
+    debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN, sudoers_debug_instance)
+
+    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     gettimeofday(&now, NULL);
 
@@ -723,6 +762,8 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     }
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
+
+    sudo_debug_set_default_instance(prev_instance);
 
     debug_return_bool(rval);
 }

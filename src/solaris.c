@@ -71,7 +71,7 @@ set_project(struct passwd *pw)
     struct project proj;
     char buf[PROJECT_BUFSZ];
     int errval;
-    debug_decl(set_project, SUDO_DEBUG_UTIL)
+    debug_decl(set_project, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /*
      * Collect the default project for the user and settaskid

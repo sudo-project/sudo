@@ -61,7 +61,7 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
     char *ep;
     id_t rval = 0;
     bool valid = false;
-    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     /* skip leading space so we can pick up the sign, if any */
     while (isspace((unsigned char)*p))

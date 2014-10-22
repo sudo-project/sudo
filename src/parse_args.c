@@ -178,7 +178,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     int proglen;
     int nenv = 0;
     int env_size = 32;
-    debug_decl(parse_args, SUDO_DEBUG_ARGS)
+    debug_decl(parse_args, SUDO_DEBUG_ARGS, sudo_debug_instance)
 
     env_add = sudo_emallocarray(env_size, sizeof(char *));
 
@@ -565,7 +565,7 @@ usage(int fatal)
 static void
 usage_excl(int fatal)
 {
-    debug_decl(usage_excl, SUDO_DEBUG_ARGS)
+    debug_decl(usage_excl, SUDO_DEBUG_ARGS, sudo_debug_instance)
 
     sudo_warnx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
     usage(fatal);
@@ -577,7 +577,7 @@ help(void)
     struct sudo_lbuf lbuf;
     const int indent = 30;
     const char *pname = getprogname();
-    debug_decl(help, SUDO_DEBUG_ARGS)
+    debug_decl(help, SUDO_DEBUG_ARGS, sudo_debug_instance)
 
     sudo_lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0)

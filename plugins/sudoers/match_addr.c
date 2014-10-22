@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -58,7 +58,7 @@ addr_matches_if(const char *n)
     unsigned int j;
 #endif
     unsigned int family;
-    debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
+    debug_decl(addr_matches_if, SUDO_DEBUG_MATCH, sudoers_debug_instance)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
     if (inet_pton(AF_INET6, n, &addr.ip6) == 1) {
@@ -111,7 +111,7 @@ addr_matches_if_netmask(const char *n, const char *m)
 #endif
     unsigned int family;
     const char *errstr;
-    debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
+    debug_decl(addr_matches_if, SUDO_DEBUG_MATCH, sudoers_debug_instance)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
     if (inet_pton(AF_INET6, n, &addr.ip6) == 1)
@@ -203,7 +203,7 @@ addr_matches(char *n)
 {
     char *m;
     bool rc;
-    debug_decl(addr_matches, SUDO_DEBUG_MATCH)
+    debug_decl(addr_matches, SUDO_DEBUG_MATCH, sudoers_debug_instance)
 
     /* If there's an explicit netmask, use it. */
     if ((m = strchr(n, '/'))) {

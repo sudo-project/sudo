@@ -67,7 +67,7 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
     ssize_t len;
     char *cp, *line = NULL;
     bool continued;
-    debug_decl(sudo_parseln, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_parseln, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     do {
 	continued = false;

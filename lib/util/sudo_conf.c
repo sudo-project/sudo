@@ -338,17 +338,24 @@ set_debugging(const char *conf_file)
     struct plugin_info *plugin_info;
     const char *progname;
     size_t prognamelen;
-    debug_decl(main, SUDO_DEBUG_UTIL)
+    int instance;
+    debug_decl(main, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     progname = getprogname();
     prognamelen = strlen(progname);
     if (prognamelen > 4 && strcmp(progname + 4, "edit") == 0)
 	prognamelen -= 4;
     TAILQ_FOREACH(debug_spec, &sudo_conf_data.debugging, entries) {
-	/* XXX - only uses last matching Debug entry */
 	if (strncmp(debug_spec->progname, progname, prognamelen) == 0 &&
 	    debug_spec->progname[prognamelen] == '\0') {
-	    sudo_debug_init(TAILQ_LAST(&debug_spec->debug_files, sudo_conf_debug_file_list)->debug_file, TAILQ_LAST(&debug_spec->debug_files, sudo_conf_debug_file_list)->debug_flags);
+	    /*
+	     * Register debug instance for the main program, making it
+	     * the default instance if one is not already set.
+	     */
+	    instance = sudo_debug_register(progname, NULL, 0,
+		&debug_spec->debug_files);
+	    if (sudo_debug_get_default_instance() == SUDO_DEBUG_INSTANCE_INITIALIZER)
+		sudo_debug_set_default_instance(instance);
 	    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    continue;
 	}
@@ -380,7 +387,7 @@ set_paths(const char *conf_file)
 {
     struct sudo_conf_setting *path_spec, *next;
     unsigned int i;
-    debug_decl(sudo_conf_set_paths, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_conf_set_paths, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     /*
      * Store matching paths in sudo_conf_data.path_table.
@@ -407,7 +414,6 @@ set_paths(const char *conf_file)
 	sudo_efree(path_spec->name);
 	sudo_efree(path_spec);
     }
-    TAILQ_INIT(&sudo_conf_data.paths);
     debug_return;
 }
 
@@ -419,9 +425,10 @@ set_variables(const char *conf_file)
 {
     struct sudo_conf_setting *setting, *next;
     struct sudo_conf_var_table *var;
-    debug_decl(sudo_conf_set_variables, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_conf_set_variables, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     TAILQ_FOREACH_SAFE(setting, &sudo_conf_data.settings, entries, next) {
+	TAILQ_REMOVE(&sudo_conf_data.settings, setting, entries);
 	for (var = sudo_conf_var_table; var->name != NULL; var++) {
 	    if (strcmp(setting->name, var->name) == 0) {
 		if (var->setter(setting->value, conf_file, setting->lineno)) {
@@ -442,7 +449,6 @@ set_variables(const char *conf_file)
 	sudo_efree(setting->value);
 	sudo_efree(setting);
     }
-    TAILQ_INIT(&sudo_conf_data.settings);
     debug_return;
 }
 

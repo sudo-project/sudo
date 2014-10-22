@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
+#include "sudoers.h"
 
 /*
  * Converts a two-byte hex string to decimal.
@@ -31,7 +30,7 @@ hexchar(const char *s)
 {
     unsigned char result[2];
     int i;
-    debug_decl(hexchar, SUDO_DEBUG_UTIL)
+    debug_decl(hexchar, SUDO_DEBUG_UTIL, sudoers_debug_instance)
 
     for (i = 0; i < 2; i++) {
 	switch (s[i]) {

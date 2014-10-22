@@ -68,7 +68,7 @@ bool
 sudo_lock_file_v1(int fd, int lockit)
 {
     int op = 0;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     switch (lockit) {
 	case SUDO_LOCK:
@@ -88,7 +88,7 @@ bool
 sudo_lock_file_v1(int fd, int lockit)
 {
     int op = 0;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     switch (lockit) {
 	case SUDO_LOCK:
@@ -110,7 +110,7 @@ sudo_lock_file_v1(int fd, int lockit)
 #ifdef F_SETLK
     int func;
     struct flock lock;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     lock.l_start = 0;
     lock.l_len = 0;

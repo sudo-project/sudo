@@ -16,6 +16,13 @@
 
 #include <config.h>
 
+#include <sys/param.h>		/* for howmany() on Linux */
+#ifdef HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>	/* for howmany() on Solaris */
+#endif
+#ifdef HAVE_SYS_SELECT_H
+# include <sys/select.h>
+#endif /* HAVE_SYS_SELECT_H */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
@@ -78,7 +85,8 @@ static const char *const sudo_debug_priorities[] = {
 };
 
 /* Note: this must match the order in sudo_debug.h */
-static const char *const sudo_debug_subsystems[] = {
+/* XXX - remove sudoers-specific bits */
+static const char *const sudo_debug_default_subsystems[] = {
     "main",
     "args",
     "exec",
@@ -109,62 +117,87 @@ static const char *const sudo_debug_subsystems[] = {
     NULL
 };
 
-#define NUM_SUBSYSTEMS	(sizeof(sudo_debug_subsystems) / sizeof(sudo_debug_subsystems[0]) - 1)
-
-static int sudo_debug_settings[NUM_SUBSYSTEMS];
-static int sudo_debug_fd = -1;
-static bool sudo_debug_initialized;
-static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
-static size_t sudo_debug_pidlen;
-static const int num_subsystems = NUM_SUBSYSTEMS;
+#define NUM_SUBSYSTEMS	(sizeof(sudo_debug_default_subsystems) / sizeof(sudo_debug_default_subsystems[0]) - 1)
 
 /*
- * Parse settings string from sudo.conf and open debugfile.
- * Returns 1 on success, 0 if cannot open debugfile.
- * Unsupported subsystems and priorities are silently ignored.
+ * For multiple programs/plugins there is a per-program instance
+ * and one or more outputs (files).
  */
-int sudo_debug_init(const char *debugfile, const char *settings)
+struct sudo_debug_output {
+    SLIST_ENTRY(sudo_debug_output) entries;
+    char *filename;
+    int *settings;
+    int fd;
+};
+SLIST_HEAD(sudo_debug_output_list, sudo_debug_output);
+struct sudo_debug_instance {
+    char *program;
+    const char *const *subsystems;
+    int num_subsystems;
+    struct sudo_debug_output_list outputs;
+};
+
+/* Support up to 10 instances. */
+#define SUDO_DEBUG_INSTANCE_MAX 10
+static struct sudo_debug_instance *sudo_debug_instances[SUDO_DEBUG_INSTANCE_MAX];
+static int sudo_debug_num_instances;
+
+static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
+static size_t sudo_debug_pidlen;
+
+static fd_set sudo_debug_fdset; /* XXX - make dynamic */
+static int sudo_debug_max_fd = -1;
+
+/* Default instance index to use for common utility functions. */
+static int sudo_debug_default_instance = -1;
+
+/*
+ * Create a new output file for the specified debug instance.
+ */
+static struct sudo_debug_output *
+sudo_debug_new_output(struct sudo_debug_instance *instance,
+    struct sudo_debug_file *debug_file)
 {
     char *buf, *cp, *subsys, *pri;
+    struct sudo_debug_output *output;
     int i, j;
 
-    /* Make sure we are not already initialized. */
-    if (sudo_debug_initialized)
-	return 1;
-
-    /* A debug file name is required. */
-    if (debugfile == NULL)
-	return 1;
+    /* Create new output for the instance. */
+    /* XXX - reuse fd for existing filename? */
+    output = sudo_emalloc(sizeof(*output));
+    output->settings = sudo_emallocarray(instance->num_subsystems, sizeof(int));
+    output->filename = sudo_estrdup(debug_file->debug_file);
+    output->fd = -1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
-    for (i = 0; i < num_subsystems; i++)
-	sudo_debug_settings[i] = -1;
+    for (i = 0; i < instance->num_subsystems; i++)
+	output->settings[i] = -1;
 
     /* Open debug file. */
-    if (sudo_debug_fd != -1)
-	close(sudo_debug_fd);
-    sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
-    if (sudo_debug_fd == -1) {
+    output->fd = open(output->filename, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
+    if (output->fd == -1) {
 	/* Create debug file as needed and set group ownership. */
 	if (errno == ENOENT) {
-	    sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT,
+	    output->fd = open(output->filename, O_WRONLY|O_APPEND|O_CREAT,
 		S_IRUSR|S_IWUSR);
 	}
-	if (sudo_debug_fd == -1)
-	    return 0;
-	ignore_result(fchown(sudo_debug_fd, (uid_t)-1, 0));
+	if (output->fd == -1)
+	    return NULL;
+	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
-    (void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
-    sudo_debug_initialized = true;
+    (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
+    /* XXX - realloc sudo_debug_fdset as needed (or use other bitmap). */
+    if (output->fd < FD_SETSIZE) {
+	FD_SET(output->fd, &sudo_debug_fdset);
+	if (output->fd > sudo_debug_max_fd)
+	    sudo_debug_max_fd = output->fd;
+    }
 
-    /* Stash the pid string so we only have to format it once. */
-    (void)snprintf(sudo_debug_pidstr, sizeof(sudo_debug_pidstr), "[%d] ",
-	(int)getpid());
-    sudo_debug_pidlen = strlen(sudo_debug_pidstr);
-
-    /* Parse settings string. */
-    if ((buf = strdup(settings)) == NULL)
-	return 0;
+    /* Parse Debug conf string. */
+    if ((buf = strdup(debug_file->debug_flags)) == NULL) {
+	/* XXX - free output on error or make non-destructive */
+	return NULL;
+    }
     for ((cp = strtok(buf, ",")); cp != NULL; (cp = strtok(NULL, ","))) {
 	/* Should be in the form subsys@pri. */
 	subsys = cp;
@@ -175,13 +208,13 @@ int sudo_debug_init(const char *debugfile, const char *settings)
 	/* Look up priority and subsystem, fill in sudo_debug_settings[]. */
 	for (i = 0; sudo_debug_priorities[i] != NULL; i++) {
 	    if (strcasecmp(pri, sudo_debug_priorities[i]) == 0) {
-		for (j = 0; sudo_debug_subsystems[j] != NULL; j++) {
+		for (j = 0; instance->subsystems[j] != NULL; j++) {
 		    if (strcasecmp(subsys, "all") == 0) {
-			sudo_debug_settings[j] = i;
+			output->settings[j] = i;
 			continue;
 		    }
-		    if (strcasecmp(subsys, sudo_debug_subsystems[j]) == 0) {
-			sudo_debug_settings[j] = i;
+		    if (strcasecmp(subsys, instance->subsystems[j]) == 0) {
+			output->settings[j] = i;
 			break;
 		    }
 		}
@@ -191,7 +224,169 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     }
     free(buf);
 
-    return 1;
+    return output;
+}
+
+/*
+ * Register a program/plugin with the debug framework,
+ * parses settings string from sudo.conf and opens debugfile.
+ * If subsystem names are specified they override the default values.
+ * NOTE: subsystems must not be freed by caller unless deregistered.
+ * Returns instance index on success or -1 if cannot open debugfile.
+ */
+int
+sudo_debug_register(const char *program, const char *const subsystems[],
+    int num_subsystems, struct sudo_conf_debug_file_list *debug_files)
+{
+    struct sudo_debug_instance *instance = NULL;
+    struct sudo_debug_output *output;
+    struct sudo_debug_file *debug_file;
+    int idx, free_idx = -1;
+
+    if (debug_files == NULL || num_subsystems < 0)
+	return -1;
+
+    /* Use default subsystem names if none are provided. */
+    if (subsystems == NULL || num_subsystems == 0) {
+	subsystems = sudo_debug_default_subsystems;
+	num_subsystems = NUM_SUBSYSTEMS;
+    }
+
+    /* Search for existing instance. */
+    for (idx = 0; idx < sudo_debug_num_instances; idx++) {
+	if (sudo_debug_instances[idx] == NULL) {
+	    free_idx = idx;
+	    continue;
+	}
+	if (sudo_debug_instances[idx]->subsystems == subsystems &&
+	    strcmp(sudo_debug_instances[idx]->program, program) == 0) {
+	    instance = sudo_debug_instances[idx];
+	    break;
+	}
+    }
+
+    if (instance == NULL) {
+	if (free_idx != -1)
+	    idx = free_idx;
+	if (idx == SUDO_DEBUG_INSTANCE_MAX) {
+	    /* XXX - realloc? */
+	    sudo_warnx_nodebug("too many debug instances (max %d)", SUDO_DEBUG_INSTANCE_MAX);
+	    return -1;
+	}
+	if (idx != sudo_debug_num_instances && idx != free_idx) {
+	    sudo_warnx_nodebug("%s: instance number mismatch: expected %d, got %u", __func__, idx, sudo_debug_num_instances);
+	    return -1;
+	}
+	instance = sudo_emalloc(sizeof(*instance));
+	instance->program = sudo_estrdup(program);
+	instance->subsystems = subsystems;
+	instance->num_subsystems = num_subsystems;
+	SLIST_INIT(&instance->outputs);
+	sudo_debug_instances[idx] = instance;
+	if (idx == sudo_debug_num_instances)
+	    sudo_debug_num_instances++;
+    }
+
+    TAILQ_FOREACH(debug_file, debug_files, entries) {
+	output = sudo_debug_new_output(instance, debug_file);
+	if (output != NULL)
+	    SLIST_INSERT_HEAD(&instance->outputs, output, entries);
+    }
+
+    /* Stash the pid string so we only have to format it once. */
+    if (sudo_debug_pidlen == 0) {
+	(void)snprintf(sudo_debug_pidstr, sizeof(sudo_debug_pidstr), "[%d] ",
+	    (int)getpid());
+	sudo_debug_pidlen = strlen(sudo_debug_pidstr);
+    }
+
+    /* Convert index to instance. */
+    return SUDO_DEBUG_MKINSTANCE(idx);
+}
+
+/*
+ * De-register the specified instance from the debug subsystem
+ * and free up any associated data structures.
+ */
+int
+sudo_debug_deregister(int instance_id)
+{
+    struct sudo_debug_instance *instance;
+    struct sudo_debug_output *output, *next;
+    int idx;
+
+    idx = SUDO_DEBUG_INSTANCE(instance_id);
+    if (idx < 0 || idx >= sudo_debug_num_instances) {
+	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
+	    __func__, idx + 1, sudo_debug_num_instances);
+	return -1;
+    }
+    /* Reset default instance as needed. */
+    if (sudo_debug_default_instance == idx)
+	sudo_debug_default_instance = -1;
+
+    instance = sudo_debug_instances[idx];
+    if (instance == NULL)
+	return -1;		/* already deregistered */
+
+    /* Free up instance data, note that subsystems[] is owned by caller. */
+    sudo_debug_instances[idx] = NULL;
+    SLIST_FOREACH_SAFE(output, &instance->outputs, entries, next) {
+	close(output->fd);
+	sudo_efree(output->filename);
+	sudo_efree(output->settings);
+	sudo_efree(output);
+    }
+    sudo_efree(instance->program);
+    sudo_efree(instance);
+
+    if (idx == sudo_debug_num_instances - 1)
+	sudo_debug_num_instances--;
+
+    return 0;
+}
+
+int
+sudo_debug_get_instance(const char *program)
+{
+    size_t proglen;
+    int idx;
+
+    /* Treat "sudoedit" as an alias for "sudo". */
+    proglen = strlen(program);
+    if (proglen > 4 && strcmp(program + proglen - 4, "edit") == 0)
+	proglen -= 4;
+
+    for (idx = 0; idx < sudo_debug_num_instances; idx++) {
+	if (sudo_debug_instances[idx] == NULL)
+	    continue;
+	if (strncmp(sudo_debug_instances[idx]->program, program, proglen) == 0
+	    && sudo_debug_instances[idx]->program[proglen] == '\0')
+	    return SUDO_DEBUG_MKINSTANCE(idx);
+    }
+    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+}
+
+int
+sudo_debug_set_output_fd(int level, int ofd, int nfd)
+{
+    struct sudo_debug_instance *instance;
+    struct sudo_debug_output *output;
+    int idx;
+
+    idx = SUDO_DEBUG_INSTANCE(level);
+    if (idx < 0 || idx >= sudo_debug_num_instances) {
+	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
+	    __func__, idx + 1, sudo_debug_num_instances);
+	return -1;
+    }
+
+    instance = sudo_debug_instances[idx];
+    SLIST_FOREACH(output, &instance->outputs, entries) {
+	if (output->fd == ofd)
+	    output->fd = nfd;
+    }
+    return 0;
 }
 
 pid_t
@@ -291,7 +486,7 @@ sudo_debug_exit_ptr(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_write2(const char *func, const char *file, int lineno,
+sudo_debug_write2(int fd, const char *func, const char *file, int lineno,
     const char *str, int len, int errnum)
 {
     char *timestr, numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
@@ -364,46 +559,71 @@ sudo_debug_write2(const char *func, const char *file, int lineno,
     iov[0].iov_len = 16;
 
     /* Write message in a single syscall */
-    ignore_result(writev(sudo_debug_fd, iov, iovcnt));
+    ignore_result(writev(fd, iov, iovcnt));
 }
 
 void
 sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
 {
-    int pri, subsys;
+    int buflen, idx, pri, subsys, saved_errno = errno;
+    char static_buf[1024], *buf = static_buf;
+    struct sudo_debug_instance *instance;
+    struct sudo_debug_output *output;
+    va_list ap2;
 
-    if (!sudo_debug_initialized)
-	return;
+    if (sudo_debug_num_instances == 0)
+	goto out;
 
-    /* Extract pri and subsystem from level. */
+    /* Extract instance index, priority and subsystem from level. */
+    idx = SUDO_DEBUG_INSTANCE(level);
     pri = SUDO_DEBUG_PRI(level);
     subsys = SUDO_DEBUG_SUBSYS(level);
 
-    /* Make sure we want debug info at this level. */
-    if (subsys < num_subsystems && sudo_debug_settings[subsys] >= pri) {
-	char static_buf[1024], *buf = static_buf;
-	int buflen, saved_errno = errno;
-	va_list ap2;
-
-	va_copy(ap2, ap);
-	buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap) : 0;
-	if (buflen >= (int)sizeof(static_buf)) {
-	    /* Not enough room in static buf, allocate dynamically. */
-	    buflen = vasprintf(&buf, fmt, ap2);
+    /* Find matching instance. */
+    if (idx < 0) {
+	/* Check for default instance, else we are not initialized. */
+	if (sudo_debug_default_instance < 0 ||
+	    SUDO_DEBUG_MKINSTANCE(idx) != SUDO_DEBUG_INSTANCE_DEFAULT) {
+	    goto out;
 	}
-	if (buflen != -1) {
-	    int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
-	    if (ISSET(level, SUDO_DEBUG_LINENO))
-		sudo_debug_write2(func, file, lineno, buf, buflen, errcode);
-	    else
-		sudo_debug_write2(NULL, NULL, 0, buf, buflen, errcode);
-	    if (buf != static_buf)
-		free(buf);
-	}
-	va_end(ap2);
-	errno = saved_errno;
+	idx = sudo_debug_default_instance;
+    } else if (idx >= sudo_debug_num_instances) {
+	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
+	    __func__, idx + 1, sudo_debug_num_instances);
+	goto out;
     }
+    instance = sudo_debug_instances[idx];
+    if (instance == NULL) {
+	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__, idx);
+	goto out;
+    }
+
+    SLIST_FOREACH(output, &instance->outputs, entries) {
+	/* Make sure we want debug info at this level. */
+	if (subsys < instance->num_subsystems && output->settings[subsys] >= pri) {
+	    va_copy(ap2, ap);
+	    buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap) : 0;
+	    if (buflen >= (int)sizeof(static_buf)) {
+		/* Not enough room in static buf, allocate dynamically. */
+		buflen = vasprintf(&buf, fmt, ap2);
+	    }
+	    if (buflen != -1) {
+		int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
+		if (ISSET(level, SUDO_DEBUG_LINENO))
+		    sudo_debug_write2(output->fd, func, file, lineno, buf, buflen, errcode);
+		else
+		    sudo_debug_write2(output->fd, NULL, NULL, 0, buf, buflen, errcode);
+		if (buf != static_buf) {
+		    sudo_efree(buf);
+		    buf = static_buf;
+		}
+	    }
+	    va_end(ap2);
+	}
+    }
+out:
+    errno = saved_errno;
 }
 
 #ifdef NO_VARIADIC_MACROS
@@ -429,108 +649,181 @@ sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
     va_end(ap);
 }
 
+#define EXEC_PREFIX "exec "
+
 void
 sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[])
 {
+    int buflen, idx, pri, subsys, saved_errno = errno;
+    struct sudo_debug_instance *instance;
+    struct sudo_debug_output *output;
     char * const *av;
     char *buf, *cp;
-    int buflen, pri, subsys, log_envp = 0;
     size_t plen;
 
-    if (!sudo_debug_initialized)
-	return;
+    if (sudo_debug_num_instances == 0)
+	goto out;
 
-    /* Extract pri and subsystem from level. */
+    /* Extract instance index, priority and subsystem from level. */
+    idx = SUDO_DEBUG_INSTANCE(level);
     pri = SUDO_DEBUG_PRI(level);
     subsys = SUDO_DEBUG_SUBSYS(level);
 
-    /* Make sure we want debug info at this level. */
-    if (subsys >= num_subsystems || sudo_debug_settings[subsys] < pri)
-	return;
-
-    /* Log envp for debug level "debug". */
-    if (sudo_debug_settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp[0] != NULL)
-	log_envp = 1;
-
-#define EXEC_PREFIX "exec "
-
-    /* Alloc and build up buffer. */
-    plen = strlen(path);
-    buflen = sizeof(EXEC_PREFIX) -1 + plen;
-    if (argv[0] != NULL) {
-	buflen += sizeof(" []") - 1;
-	for (av = argv; *av; av++)
-	    buflen += strlen(*av) + 1;
-	buflen--;
-    }
-    if (log_envp) {
-	buflen += sizeof(" []") - 1;
-	for (av = envp; *av; av++)
-	    buflen += strlen(*av) + 1;
-	buflen--;
-    }
-    buf = malloc(buflen + 1);
-    if (buf == NULL)
-	return;
-
-    /* Copy prefix and command. */
-    memcpy(buf, EXEC_PREFIX, sizeof(EXEC_PREFIX) - 1);
-    cp = buf + sizeof(EXEC_PREFIX) - 1;
-    memcpy(cp, path, plen);
-    cp += plen;
-
-    /* Copy argv. */
-    if (argv[0] != NULL) {
-	*cp++ = ' ';
-	*cp++ = '[';
-	for (av = argv; *av; av++) {
-	    size_t avlen = strlen(*av);
-	    memcpy(cp, *av, avlen);
-	    cp += avlen;
-	    *cp++ = ' ';
+    /* Find matching instance. */
+    if (idx < 0) {
+	/* Check for default instance, else we are not initialized. */
+	if (sudo_debug_default_instance < 0 ||
+	    SUDO_DEBUG_MKINSTANCE(idx) != SUDO_DEBUG_INSTANCE_DEFAULT) {
+	    goto out;
 	}
-	cp[-1] = ']';
+	idx = sudo_debug_default_instance;
+    } else if (idx >= sudo_debug_num_instances) {
+	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
+	    __func__, idx + 1, sudo_debug_num_instances);
+	goto out;
     }
+    instance = sudo_debug_instances[idx];
+    if (instance == NULL) {
+	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__, idx);
+	goto out;
+    }
+    if (subsys >= instance->num_subsystems)
+	goto out;
 
-    if (log_envp) {
-	*cp++ = ' ';
-	*cp++ = '[';
-	for (av = envp; *av; av++) {
-	    size_t avlen = strlen(*av);
-	    memcpy(cp, *av, avlen);
-	    cp += avlen;
-	    *cp++ = ' ';
+    /* XXX - use static buffer if possible */
+    SLIST_FOREACH(output, &instance->outputs, entries) {
+	bool log_envp = false;
+
+	/* Make sure we want debug info at this level. */
+	if (output->settings[subsys] < pri)
+	    continue;
+
+	/* Log envp for debug level "debug". */
+	if (output->settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp[0] != NULL)
+	    log_envp = true;
+
+	/* Alloc and build up buffer. */
+	plen = strlen(path);
+	buflen = sizeof(EXEC_PREFIX) -1 + plen;
+	if (argv[0] != NULL) {
+	    buflen += sizeof(" []") - 1;
+	    for (av = argv; *av; av++)
+		buflen += strlen(*av) + 1;
+	    buflen--;
 	}
-	cp[-1] = ']';
+	if (log_envp) {
+	    buflen += sizeof(" []") - 1;
+	    for (av = envp; *av; av++)
+		buflen += strlen(*av) + 1;
+	    buflen--;
+	}
+	buf = malloc(buflen + 1);
+	if (buf == NULL)
+	    goto out;
+
+	/* Copy prefix and command. */
+	memcpy(buf, EXEC_PREFIX, sizeof(EXEC_PREFIX) - 1);
+	cp = buf + sizeof(EXEC_PREFIX) - 1;
+	memcpy(cp, path, plen);
+	cp += plen;
+
+	/* Copy argv. */
+	if (argv[0] != NULL) {
+	    *cp++ = ' ';
+	    *cp++ = '[';
+	    for (av = argv; *av; av++) {
+		size_t avlen = strlen(*av);
+		memcpy(cp, *av, avlen);
+		cp += avlen;
+		*cp++ = ' ';
+	    }
+	    cp[-1] = ']';
+	}
+
+	if (log_envp) {
+	    *cp++ = ' ';
+	    *cp++ = '[';
+	    for (av = envp; *av; av++) {
+		size_t avlen = strlen(*av);
+		memcpy(cp, *av, avlen);
+		cp += avlen;
+		*cp++ = ' ';
+	    }
+	    cp[-1] = ']';
+	}
+
+	*cp = '\0';
+
+	sudo_debug_write(output->fd, buf, buflen, 0);
+	free(buf);
     }
-
-    *cp = '\0';
-
-    sudo_debug_write(buf, buflen, 0);
-    free(buf);
+out:
+    errno = saved_errno;
 }
 
 /*
- * Getter for the debug descriptor.
+ * Returns the default instance or SUDO_DEBUG_INSTANCE_INITIALIZER
+ * if no default instance is set.
  */
 int
-sudo_debug_fd_get(void)
+sudo_debug_get_default_instance(void)
 {
-    return sudo_debug_fd;
+    return SUDO_DEBUG_MKINSTANCE(sudo_debug_default_instance);
 }
 
 /*
- * Setter for the debug descriptor.
+ * Sets a new default instance, returning the old one.
+ * Note that the old instance may be SUDO_DEBUG_INSTANCE_INITIALIZER
+ * of this is the only instance.
  */
 int
-sudo_debug_fd_set(int fd)
+sudo_debug_set_default_instance(int inst)
 {
-    if (sudo_debug_fd != -1 && fd != sudo_debug_fd) {
-	if (dup2(sudo_debug_fd, fd) == -1)
-	    return -1;
-	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
-	close(sudo_debug_fd);
-	sudo_debug_fd = fd;
+    const int idx = SUDO_DEBUG_INSTANCE(inst);
+    const int old_idx = sudo_debug_default_instance;
+
+    if (idx >= -1 && idx < sudo_debug_num_instances)
+	sudo_debug_default_instance = idx;
+    return SUDO_DEBUG_MKINSTANCE(old_idx);
+}
+
+/*
+ * Replace the ofd with nfd in all outputs if present.
+ * Also updates sudo_debug_fdset.
+ */
+void
+sudo_debug_update_fd(int ofd, int nfd)
+{
+    int idx;
+
+    if (ofd <= sudo_debug_max_fd && FD_ISSET(ofd, &sudo_debug_fdset)) {
+	/* Update sudo_debug_fdset. */
+	FD_CLR(ofd, &sudo_debug_fdset);
+	FD_SET(nfd, &sudo_debug_fdset);
+
+	/* Update the outputs. */
+	for (idx = 0; idx < sudo_debug_num_instances; idx++) {
+	    struct sudo_debug_instance *instance;
+	    struct sudo_debug_output *output;
+
+	    instance = sudo_debug_instances[idx];
+	    if (instance == NULL)
+		continue;
+	    SLIST_FOREACH(output, &instance->outputs, entries) {
+		if (output->fd == ofd)
+		    output->fd = nfd;
+	    }
+	}
     }
-    return sudo_debug_fd;
+}
+
+/*
+ * Returns the highest debug output fd or -1 if no debug files open.
+ * Fills in fdsetp with the value of sudo_debug_fdset.
+ */
+int
+sudo_debug_get_fds(fd_set **fdsetp)
+{
+    *fdsetp = &sudo_debug_fdset;
+    return sudo_debug_max_fd;
 }

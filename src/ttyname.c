@@ -124,7 +124,7 @@ static char *
 sudo_ttyname_dev(dev_t tdev)
 {
     char *dev, *tty = NULL;
-    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /* Some versions of devname() return NULL on failure, others do not. */
     dev = devname(tdev, S_IFCHR);
@@ -154,7 +154,7 @@ static char *
 sudo_ttyname_dev(dev_t tdev)
 {
     char buf[TTYNAME_MAX], *tty;
-    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     tty = _ttyname_dev(tdev, buf, sizeof(buf));
 
@@ -194,7 +194,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
     struct dirent *dp;
     struct stat sb;
     unsigned int i;
-    debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
 	goto done;
@@ -301,7 +301,7 @@ sudo_ttyname_dev(dev_t rdev)
     struct stat sb;
     size_t len;
     char buf[PATH_MAX], **sd, *devname, *tty = NULL;
-    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /*
      * First check search_devs for common tty devices.
@@ -353,7 +353,7 @@ get_process_ttyname(void)
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int mib[6], rc;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /*
      * Lookup controlling tty for this process via sysctl.
@@ -399,7 +399,7 @@ get_process_ttyname(void)
     struct psinfo psinfo;
     ssize_t nread;
     int fd;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
     snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
@@ -431,7 +431,7 @@ get_process_ttyname(void)
     size_t linesize = 0;
     ssize_t len;
     FILE *fp;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /* Try to determine the tty from tty_nr in /proc/pid/stat. */
     snprintf(path, sizeof(path), "/proc/%u/stat", (unsigned int)getpid());
@@ -477,7 +477,7 @@ get_process_ttyname(void)
     struct pst_status pstat;
     char *tty = NULL;
     int rc;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     /*
      * Determine the tty from psdev in struct pst_status.
@@ -501,7 +501,7 @@ char *
 get_process_ttyname(void)
 {
     char *tty;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
     if ((tty = ttyname(STDIN_FILENO)) == NULL) {
 	if ((tty = ttyname(STDOUT_FILENO)) == NULL)

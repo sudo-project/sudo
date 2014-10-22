@@ -61,7 +61,7 @@ disable_execute(char *const envp[])
     bool enabled = false;
 # endif
 #endif /* _PATH_SUDO_NOEXEC */
-    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
+    debug_decl(disable_execute, SUDO_DEBUG_UTIL, sudo_debug_instance)
 
 #ifdef HAVE_PRIV_SET
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */

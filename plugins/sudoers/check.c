@@ -63,7 +63,7 @@ static int
 check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 {
     int status, rval = true;
-    debug_decl(check_user_interactive, SUDO_DEBUG_AUTH)
+    debug_decl(check_user_interactive, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /* Always need a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET))
@@ -121,7 +121,7 @@ check_user(int validated, int mode)
 {
     struct passwd *auth_pw;
     int rval = -1;
-    debug_decl(check_user, SUDO_DEBUG_AUTH)
+    debug_decl(check_user, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     /*
      * Init authentication system regardless of whether we need a password.
@@ -175,7 +175,7 @@ display_lecture(int status)
     ssize_t nread;
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    debug_decl(lecture, SUDO_DEBUG_AUTH)
+    debug_decl(lecture, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (def_lecture == never ||
 	(def_lecture == once && already_lectured(status)))
@@ -212,7 +212,7 @@ bool
 user_is_exempt(void)
 {
     bool rval = false;
-    debug_decl(user_is_exempt, SUDO_DEBUG_AUTH)
+    debug_decl(user_is_exempt, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (def_exempt_group)
 	rval = user_in_group(sudo_user.pw, def_exempt_group);
@@ -228,7 +228,7 @@ static struct passwd *
 get_authpw(int mode)
 {
     struct passwd *pw = NULL;
-    debug_decl(get_authpw, SUDO_DEBUG_AUTH)
+    debug_decl(get_authpw, SUDO_DEBUG_AUTH, sudoers_debug_instance)
 
     if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
 	/* In list mode we always prompt for the user's password. */

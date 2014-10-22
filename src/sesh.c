@@ -66,7 +66,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     int ret;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl(main, SUDO_DEBUG_MAIN, sudo_debug_instance, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     initprogname(argc > 0 ? argv[0] : "sesh");
 

@@ -51,7 +51,7 @@ void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
     int indent, const char *continuation, int cols)
 {
-    debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     lbuf->output = output;
     lbuf->continuation = continuation;
@@ -67,7 +67,7 @@ sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
 void
 sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 {
-    debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     sudo_efree(lbuf->buf);
     lbuf->buf = NULL;
@@ -96,7 +96,7 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
     va_list ap;
     int len;
     char *cp, *s;
-    debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
@@ -143,7 +143,7 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
     va_list ap;
     int len;
     char *s;
-    debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
@@ -173,7 +173,7 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
 {
     char *cp, save;
     int i, have, contlen;
-    debug_decl(sudo_lbuf_println, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_println, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     contlen = lbuf->continuation ? strlen(lbuf->continuation) : 0;
 
@@ -235,7 +235,7 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 {
     char *cp, *ep;
     int len;
-    debug_decl(sudo_lbuf_print, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_lbuf_print, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     if (lbuf->buf == NULL || lbuf->len == 0)
 	goto done;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2013
+ * Copyright (c) 2004-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -60,7 +60,7 @@ alias_compare(const void *v1, const void *v2)
     const struct alias *a1 = (const struct alias *)v1;
     const struct alias *a2 = (const struct alias *)v2;
     int res;
-    debug_decl(alias_compare, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_compare, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     if (v1 == NULL)
 	res = -1;
@@ -83,7 +83,7 @@ alias_get(char *name, int type)
     struct alias key;
     struct rbnode *node;
     struct alias *a = NULL;
-    debug_decl(alias_get, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_get, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     key.name = name;
     key.type = type;
@@ -111,7 +111,7 @@ alias_get(char *name, int type)
 void
 alias_put(struct alias *a)
 {
-    debug_decl(alias_put, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_put, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
     a->used = false;
     debug_return;
 }
@@ -125,7 +125,7 @@ alias_add(char *name, int type, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
-    debug_decl(alias_add, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_add, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     a = sudo_ecalloc(1, sizeof(*a));
     a->name = name;
@@ -146,7 +146,7 @@ alias_add(char *name, int type, struct member *members)
 void
 alias_apply(int (*func)(void *, void *), void *cookie)
 {
-    debug_decl(alias_apply, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_apply, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     rbapply(aliases, func, cookie, inorder);
 
@@ -159,7 +159,7 @@ alias_apply(int (*func)(void *, void *), void *cookie)
 bool
 no_aliases(void)
 {
-    debug_decl(no_aliases, SUDO_DEBUG_ALIAS)
+    debug_decl(no_aliases, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
     debug_return_bool(rbisempty(aliases));
 }
 
@@ -173,7 +173,7 @@ alias_free(void *v)
     struct member *m;
     struct sudo_command *c;
     void *next;
-    debug_decl(alias_free, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_free, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     sudo_efree(a->name);
     TAILQ_FOREACH_SAFE(m, &a->members, entries, next) {
@@ -198,7 +198,7 @@ alias_remove(char *name, int type)
 {
     struct rbnode *node;
     struct alias key;
-    debug_decl(alias_remove, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_remove, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     key.name = name;
     key.type = type;
@@ -212,7 +212,7 @@ alias_remove(char *name, int type)
 void
 init_aliases(void)
 {
-    debug_decl(init_aliases, SUDO_DEBUG_ALIAS)
+    debug_decl(init_aliases, SUDO_DEBUG_ALIAS, sudoers_debug_instance)
 
     if (aliases != NULL)
 	rbdestroy(aliases, alias_free);

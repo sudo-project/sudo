@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "sudo_debug.h"
 #include "sudo_compat.h"
 #include "sudo_alloc.h"
 #include "sudo_fatal.h"
@@ -45,6 +46,7 @@
 
 __dso_public int main(int argc, char *argv[]);
 
+int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 extern char *get_process_ttyname(void);
 
 int
