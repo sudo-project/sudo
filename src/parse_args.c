@@ -65,10 +65,7 @@ static void usage_excl(int);
 /*
  * Mapping of command line flags to name/value settings.
  */
-static struct sudo_settings {
-    const char *name;
-    const char *value;
-} sudo_settings[] = {
+static struct sudo_settings sudo_settings[] = {
 #define ARG_BSDAUTH_TYPE 0
     { "bsdauth_type" },
 #define ARG_LOGIN_CLASS 1
@@ -169,14 +166,14 @@ static struct option long_opts[] = {
  * for the command to be run (if we are running one).
  */
 int
-parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
-    char ***env_addp)
+parse_args(int argc, char **argv, int *nargc, char ***nargv,
+    struct sudo_settings **settingsp, char ***env_addp)
 {
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
-    int ch, i, j;
-    char *cp, **env_add, **settings;
+    int ch, i;
+    char *cp, **env_add;
     const char *runas_user = NULL;
     const char *runas_group = NULL;
     const char *debug_flags;
@@ -449,6 +446,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 	sudo_settings[ARG_IMPLIED_SHELL].value = "true";
     }
+#ifdef _PATH_SUDO_PLUGIN_DIR
+    sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
+#endif
 
     if (mode == MODE_HELP)
 	help();
@@ -495,26 +495,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	argc = ac;
     }
 
-    /*
-     * Format setting_pairs into settings array.
-     */
-#ifdef _PATH_SUDO_PLUGIN_DIR
-    sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
-#endif
-    settings = sudo_emallocarray(NUM_SETTINGS + 1, sizeof(char *));
-    for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
-	if (sudo_settings[i].value) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
-		sudo_settings[i].name, sudo_settings[i].value);
-	    settings[j] = sudo_new_key_val(sudo_settings[i].name,
-		sudo_settings[i].value);
-	    if (settings[j] == NULL)
-		sudo_fatal(NULL);
-	    j++;
-	}
-    }
-    settings[j] = NULL;
-
     if (mode == MODE_EDIT) {
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 	/* Must have the command in argv[0]. */
@@ -526,7 +506,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #endif
     }
 
-    *settingsp = settings;
+    *settingsp = sudo_settings;
     *env_addp = env_add;
     *nargc = argc;
     *nargv = argv;

@@ -109,7 +109,8 @@ static void command_info_to_details(char * const info[],
     struct command_details *details);
 
 /* Policy plugin convenience functions. */
-static int policy_open(struct plugin_container *plugin, char * const settings[],
+static int policy_open(struct plugin_container *plugin,
+    struct sudo_settings *settings,
     char * const user_info[], char * const user_env[]);
 static void policy_close(struct plugin_container *plugin, int exit_status,
     int error);
@@ -123,9 +124,10 @@ static int policy_validate(struct plugin_container *plugin);
 static void policy_invalidate(struct plugin_container *plugin, int remove);
 
 /* I/O log plugin convenience functions. */
-static int iolog_open(struct plugin_container *plugin, char * const settings[],
-    char * const user_info[], char * const command_details[],
-    int argc, char * const argv[], char * const user_env[]);
+static int iolog_open(struct plugin_container *plugin,
+    struct sudo_settings *settings, char * const user_info[],
+    char * const command_details[], int argc, char * const argv[],
+    char * const user_env[]);
 static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
@@ -144,8 +146,9 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     int nargc, ok, exitcode = 0;
-    char **nargv, **settings, **env_add;
+    char **nargv, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
+    struct sudo_settings *settings;
     struct plugin_container *plugin, *next;
     sigset_t mask;
     debug_decl(main, SUDO_DEBUG_MAIN)
@@ -1075,12 +1078,54 @@ run_command(struct command_details *details)
     debug_return_int(exitcode);
 }
 
+/*
+ * Format struct sudo_settings as name=value pairs for the plugin
+ * to consume.  Returns a NULL-terminated plugin-style array of pairs.
+ */
+static char **
+format_plugin_settings(struct plugin_container *plugin,
+    struct sudo_settings *settings)
+{
+    char **plugin_settings;
+    size_t plugin_settings_size = 32, num_plugin_settings = 0;
+    debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
+
+    plugin_settings = sudo_emallocarray(plugin_settings_size, sizeof(char *));
+    while (settings->name != NULL) {
+        if (settings->value != NULL) {
+            sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
+                settings->name, settings->value);
+	    /* Expand plugin_settings as needed. */
+	    if (num_plugin_settings == plugin_settings_size) {
+		plugin_settings_size *= 2;
+		plugin_settings = sudo_ereallocarray(plugin_settings,
+		    plugin_settings_size, sizeof(char *));
+	    }
+            plugin_settings[num_plugin_settings] =
+		sudo_new_key_val(settings->name, settings->value);
+            if (plugin_settings[num_plugin_settings] == NULL)
+                sudo_fatal(NULL);
+            num_plugin_settings++;
+        }
+	settings++;
+    }
+    plugin_settings[num_plugin_settings] = NULL;
+
+    debug_return_ptr(plugin_settings);
+}
+
 static int
-policy_open(struct plugin_container *plugin, char * const settings[],
+policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     char * const user_info[], char * const user_env[])
 {
+    char **plugin_settings;
     int rval;
     debug_decl(policy_open, SUDO_DEBUG_PCOMM)
+
+    /* Convert struct sudo_settings to plugin_settings[] */
+    plugin_settings = format_plugin_settings(plugin, settings);
+    if (plugin_settings == NULL)
+	debug_return_bool(-1);
 
     /*
      * Backwards compatibility for older API versions
@@ -1089,12 +1134,12 @@ policy_open(struct plugin_container *plugin, char * const settings[],
     case SUDO_API_MKVERSION(1, 0):
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, sudo_conversation_printf, settings,
+	    sudo_conversation, sudo_conversation_printf, plugin_settings,
 	    user_info, user_env);
 	break;
     default:
 	rval = plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
-	    sudo_conversation_printf, settings, user_info, user_env,
+	    sudo_conversation_printf, plugin_settings, user_info, user_env,
 	    plugin->options);
     }
 
@@ -1198,12 +1243,18 @@ policy_init_session(struct command_details *details)
 }
 
 static int
-iolog_open(struct plugin_container *plugin, char * const settings[],
+iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[])
 {
+    char **plugin_settings;
     int rval;
     debug_decl(iolog_open, SUDO_DEBUG_PCOMM)
+
+    /* Convert struct sudo_settings to plugin_settings[] */
+    plugin_settings = format_plugin_settings(plugin, settings);
+    if (plugin_settings == NULL)
+	debug_return_bool(-1);
 
     /*
      * Backwards compatibility for older API versions
@@ -1211,17 +1262,17 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
 	rval = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, sudo_conversation_printf, settings,
+	    sudo_conversation, sudo_conversation_printf, plugin_settings,
 	    user_info, argc, argv, user_env);
 	break;
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
-	    sudo_conversation, sudo_conversation_printf, settings,
+	    sudo_conversation, sudo_conversation_printf, plugin_settings,
 	    user_info, command_info, argc, argv, user_env);
 	break;
     default:
 	rval = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-	    sudo_conversation_printf, settings, user_info, command_info,
+	    sudo_conversation_printf, plugin_settings, user_info, command_info,
 	    argc, argv, user_env, plugin->options);
     }
     debug_return_bool(rval);
