@@ -699,12 +699,13 @@ sudoers_io_close(int exit_status, int error)
     }
     sudo_debug_set_default_instance(prev_instance);
 
+    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
 	sudo_debug_deregister(sudoers_debug_instance);
 	sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
     }
 
-    debug_return;
+    return;
 }
 
 static int
