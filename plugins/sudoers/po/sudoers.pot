@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.11\n"
+"Project-Id-Version: sudo 1.8.12\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-09-25 21:16-0600\n"
+"POT-Creation-Date: 2014-10-23 07:54-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,11 +22,11 @@ msgid "syntax error"
 msgstr ""
 
 #: confstr.sh:2
-msgid "[sudo] password for %p: "
+msgid "%p's password: "
 msgstr ""
 
 #: confstr.sh:3
-msgid "%p's password: "
+msgid "[sudo] password for %p: "
 msgstr ""
 
 #: confstr.sh:4
@@ -197,31 +197,35 @@ msgstr ""
 msgid "invalid passcode length for SecurID"
 msgstr ""
 
-#: plugins/sudoers/auth/sia.c:105
+#: plugins/sudoers/auth/sia.c:123
 msgid "unable to initialize SIA session"
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:117
+#: plugins/sudoers/auth/sudo_auth.c:115
 msgid "invalid authentication methods"
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:119
+#: plugins/sudoers/auth/sudo_auth.c:117
 msgid ""
 "Invalid authentication methods compiled into sudo!  You may not mix "
 "standalone and non-standalone authentication."
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:188
+#: plugins/sudoers/auth/sudo_auth.c:203 plugins/sudoers/auth/sudo_auth.c:252
 msgid "no authentication methods"
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:190
+#: plugins/sudoers/auth/sudo_auth.c:205
 msgid ""
 "There are no authentication methods compiled into sudo!  If you want to turn "
 "off authentication, use the --disable-authentication configure option."
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:360
+#: plugins/sudoers/auth/sudo_auth.c:254
+msgid "Unable to initialize authentication methods."
+msgstr ""
+
+#: plugins/sudoers/auth/sudo_auth.c:412
 msgid "Authentication methods:"
 msgstr ""
 
@@ -251,7 +255,7 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr ""
 
-#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:663
+#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:710
 #: plugins/sudoers/sudoers.c:918 plugins/sudoers/testsudoers.c:211
 #: plugins/sudoers/testsudoers.c:363
 #, c-format
@@ -690,21 +694,21 @@ msgstr ""
 msgid "option `%s' does not take a value"
 msgstr ""
 
-#: plugins/sudoers/env.c:274 plugins/sudoers/env.c:281
-#: plugins/sudoers/env.c:384 plugins/sudoers/linux_audit.c:89
-#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:460
-#: plugins/sudoers/policy.c:469 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/env.c:276 plugins/sudoers/env.c:283
+#: plugins/sudoers/env.c:386 plugins/sudoers/linux_audit.c:89
+#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:475
+#: plugins/sudoers/policy.c:484 plugins/sudoers/prompt.c:161
 #: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:241
 #: plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
 msgstr ""
 
-#: plugins/sudoers/env.c:357
+#: plugins/sudoers/env.c:359
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
-#: plugins/sudoers/env.c:1052
+#: plugins/sudoers/env.c:1054
 #, c-format
 msgid ""
 "sorry, you are not allowed to set the following environment variables: %s"
@@ -720,7 +724,7 @@ msgstr ""
 msgid "%s must only be writable by owner"
 msgstr ""
 
-#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:252
+#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
 #, c-format
 msgid "unable to load %s: %s"
 msgstr ""
@@ -853,8 +857,8 @@ msgstr ""
 msgid "    Order: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:513
-#: plugins/sudoers/sssd.c:1298
+#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:512
+#: plugins/sudoers/sssd.c:1297
 #, c-format
 msgid "    Commands:\n"
 msgstr ""
@@ -875,7 +879,7 @@ msgstr ""
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
 
-#: plugins/sudoers/linux_audit.c:61
+#: plugins/sudoers/linux_audit.c:63
 msgid "unable to open audit system"
 msgstr ""
 
@@ -1022,33 +1026,33 @@ msgstr ""
 msgid "parse error in %s"
 msgstr ""
 
-#: plugins/sudoers/parse.c:460
+#: plugins/sudoers/parse.c:459
 #, c-format
 msgid ""
 "\n"
 "Sudoers entry:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:461
+#: plugins/sudoers/parse.c:460
 #, c-format
 msgid "    RunAsUsers: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:475
+#: plugins/sudoers/parse.c:474
 #, c-format
 msgid "    RunAsGroups: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:484
+#: plugins/sudoers/parse.c:483
 #, c-format
 msgid "    Options: "
 msgstr ""
 
-#: plugins/sudoers/policy.c:108 plugins/sudoers/policy.c:117
-#: plugins/sudoers/policy.c:126 plugins/sudoers/policy.c:150
-#: plugins/sudoers/policy.c:262 plugins/sudoers/policy.c:282
-#: plugins/sudoers/policy.c:291 plugins/sudoers/policy.c:321
-#: plugins/sudoers/policy.c:331 plugins/sudoers/policy.c:340
+#: plugins/sudoers/policy.c:111 plugins/sudoers/policy.c:120
+#: plugins/sudoers/policy.c:129 plugins/sudoers/policy.c:153
+#: plugins/sudoers/policy.c:270 plugins/sudoers/policy.c:294
+#: plugins/sudoers/policy.c:303 plugins/sudoers/policy.c:333
+#: plugins/sudoers/policy.c:343 plugins/sudoers/policy.c:352
 #: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
 #: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
 #: plugins/sudoers/set_perms.c:1523
@@ -1056,39 +1060,39 @@ msgstr ""
 msgid "%s: %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:551 plugins/sudoers/visudo.c:767
+#: plugins/sudoers/policy.c:575 plugins/sudoers/visudo.c:767
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:681
+#: plugins/sudoers/policy.c:733
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:683
+#: plugins/sudoers/policy.c:735
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:687
+#: plugins/sudoers/policy.c:739
 #, c-format
 msgid ""
 "\n"
 "Sudoers path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:690
+#: plugins/sudoers/policy.c:742
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:692
+#: plugins/sudoers/policy.c:744
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:693
+#: plugins/sudoers/policy.c:745
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr ""
@@ -1168,31 +1172,31 @@ msgstr ""
 msgid "too many processes"
 msgstr ""
 
-#: plugins/sudoers/solaris_audit.c:48
+#: plugins/sudoers/solaris_audit.c:47
 msgid "unable to get current working directory"
 msgstr ""
 
-#: plugins/sudoers/solaris_audit.c:56
+#: plugins/sudoers/solaris_audit.c:55
 #, c-format
 msgid "truncated audit path user_cmnd: %s"
 msgstr ""
 
-#: plugins/sudoers/solaris_audit.c:63
+#: plugins/sudoers/solaris_audit.c:62
 #, c-format
 msgid "truncated audit path argv[0]: %s"
 msgstr ""
 
-#: plugins/sudoers/solaris_audit.c:112
+#: plugins/sudoers/solaris_audit.c:111
 msgid "audit_failure message too long"
 msgstr ""
 
-#: plugins/sudoers/sssd.c:253
+#: plugins/sudoers/sssd.c:252
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr ""
 
-#: plugins/sudoers/sssd.c:260 plugins/sudoers/sssd.c:268
-#: plugins/sudoers/sssd.c:276 plugins/sudoers/sssd.c:284
-#: plugins/sudoers/sssd.c:292
+#: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
+#: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
+#: plugins/sudoers/sssd.c:291
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr ""
