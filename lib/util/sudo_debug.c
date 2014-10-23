@@ -197,12 +197,14 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    if (strcasecmp(pri, sudo_debug_priorities[i]) == 0) {
 		for (j = 0; instance->subsystems[j] != NULL; j++) {
 		    if (strcasecmp(subsys, "all") == 0) {
-			const int idx = SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]);
+			const idx = instance->subsystem_ids ?
+			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
 			output->settings[idx] = i;
 			continue;
 		    }
 		    if (strcasecmp(subsys, instance->subsystems[j]) == 0) {
-			const int idx = SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]);
+			const idx = instance->subsystem_ids ?
+			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
 			output->settings[idx] = i;
 			break;
 		    }
@@ -259,16 +261,18 @@ sudo_debug_register(const char *program, const char *const subsystems[],
     if (instance == NULL) {
 	unsigned int i, j, max_id = NUM_DEF_SUBSYSTEMS - 1;
 
-	/* Fill in subsystem name -> id mapping. */
-	for (i = 0; subsystems[i] != NULL; i++) {
-	    /* Check default subsystems. */
-	    for (j = 0; j < NUM_DEF_SUBSYSTEMS; j++) {
-		if (strcmp(subsystems[i], sudo_debug_default_subsystems[j]) == 0)
-		    break;
+	/* Fill in subsystem name -> id mapping as needed. */
+	if (ids != NULL) {
+	    for (i = 0; subsystems[i] != NULL; i++) {
+		/* Check default subsystems. */
+		for (j = 0; j < NUM_DEF_SUBSYSTEMS; j++) {
+		    if (strcmp(subsystems[i], sudo_debug_default_subsystems[j]) == 0)
+			break;
+		}
+		if (j == NUM_DEF_SUBSYSTEMS)
+		    j = ++max_id;
+		ids[i] = ((j + 1) << 16);
 	    }
-	    if (j == NUM_DEF_SUBSYSTEMS)
-		j = ++max_id;
-	    ids[i] = ((j + 1) << 16);
 	}
 
 	if (free_idx != -1)
