@@ -23,7 +23,7 @@
  * Sudoers debug subsystems.
  * Note that sudoers_subsystem_ids[] is filled in at debug registration time.
  */
-extern int sudoers_subsystem_ids[];
+extern unsigned int sudoers_subsystem_ids[];
 #define SUDOERS_DEBUG_ALIAS	(sudoers_subsystem_ids[ 0]) /* sudoers alias functions */
 #define SUDOERS_DEBUG_AUDIT	(sudoers_subsystem_ids[ 1]) /* audit */
 #define SUDOERS_DEBUG_AUTH	(sudoers_subsystem_ids[ 2]) /* authentication functions */

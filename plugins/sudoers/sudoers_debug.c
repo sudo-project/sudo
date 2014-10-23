@@ -71,7 +71,7 @@ static const char *const sudoers_subsystem_names[] = {
 #define NUM_SUBSYSTEMS  (sizeof(sudoers_subsystem_names) / sizeof(sudoers_subsystem_names[0]) - 1)
 
 /* Subsystem IDs assigned at registration time. */
-int sudoers_subsystem_ids[NUM_SUBSYSTEMS];
+unsigned int sudoers_subsystem_ids[NUM_SUBSYSTEMS];
 
 /*
  * Parse the "filename flags,..." debug_flags entry and insert a new

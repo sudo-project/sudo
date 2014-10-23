@@ -20,6 +20,21 @@
 #include <stdarg.h>
 #include "sudo_queue.h"
 
+/* Number of bits in a byte. */
+#ifndef NBBY
+# ifdef __NBBY
+#  define NBBY __NBBY
+# else
+#  define NBBY 8
+# endif
+#endif
+
+/* Bit map macros. */
+#define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))
+#define sudo_clrbit(_a, _i)	((_a)[(_i) / NBBY] &= ~(1<<((_i) % NBBY)))
+#define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
+#define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
+ 
 /*
  * List of debug files and flags for use in registration.
  */
@@ -227,11 +242,11 @@ __dso_public void sudo_debug_exit_str(const char *func, const char *file, int li
 __dso_public void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
 __dso_public pid_t sudo_debug_fork(void);
 __dso_public int sudo_debug_get_default_instance(void);
-__dso_public int sudo_debug_get_fds(fd_set **fdsetp);
+__dso_public int sudo_debug_get_fds(unsigned char **fds);
 __dso_public int sudo_debug_get_instance(const char *program);
 __dso_public void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
 __dso_public void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
-__dso_public int sudo_debug_register(const char *program, const char *const subsystems[], int ids[], struct sudo_conf_debug_file_list *debug_files);
+__dso_public int sudo_debug_register(const char *program, const char *const subsystems[], unsigned int ids[], struct sudo_conf_debug_file_list *debug_files);
 __dso_public int sudo_debug_set_default_instance(int inst);
 __dso_public void sudo_debug_update_fd(int ofd, int nfd);
 __dso_public void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);

@@ -16,13 +16,6 @@
 
 #include <config.h>
 
-#include <sys/param.h>		/* for howmany() on Linux */
-#ifdef HAVE_SYS_SYSMACROS_H
-# include <sys/sysmacros.h>	/* for howmany() on Solaris */
-#endif
-#ifdef HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
@@ -119,7 +112,7 @@ SLIST_HEAD(sudo_debug_output_list, sudo_debug_output);
 struct sudo_debug_instance {
     char *program;
     const char *const *subsystems;
-    const int *subsystem_ids;
+    const unsigned int *subsystem_ids;
     unsigned int max_subsystem;
     struct sudo_debug_output_list outputs;
 };
@@ -132,7 +125,8 @@ static int sudo_debug_last_instance = -1;
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
 
-static fd_set sudo_debug_fdset; /* XXX - make dynamic */
+static const int sudo_debug_fdset_size = 1024 * NBBY; /* XXX - make dynamic */
+static unsigned char sudo_debug_fds[1024];	/* XXX - make dynamic */
 static int sudo_debug_max_fd = -1;
 
 /* Default instance index to use for common utility functions. */
@@ -173,9 +167,9 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
     (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
-    /* XXX - realloc sudo_debug_fdset as needed (or use other bitmap). */
-    if (output->fd < FD_SETSIZE) {
-	FD_SET(output->fd, &sudo_debug_fdset);
+    /* XXX - realloc sudo_debug_fds as needed. */
+    if (output->fd < sudo_debug_fdset_size) {
+	sudo_setbit(sudo_debug_fds, output->fd);
 	if (output->fd > sudo_debug_max_fd)
 	    sudo_debug_max_fd = output->fd;
     }
@@ -197,13 +191,13 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    if (strcasecmp(pri, sudo_debug_priorities[i]) == 0) {
 		for (j = 0; instance->subsystems[j] != NULL; j++) {
 		    if (strcasecmp(subsys, "all") == 0) {
-			const int idx = instance->subsystem_ids ?
+			const unsigned int idx = instance->subsystem_ids ?
 			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
 			output->settings[idx] = i;
 			continue;
 		    }
 		    if (strcasecmp(subsys, instance->subsystems[j]) == 0) {
-			const int idx = instance->subsystem_ids ?
+			const unsigned int idx = instance->subsystem_ids ?
 			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
 			output->settings[idx] = i;
 			break;
@@ -227,7 +221,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
  */
 int
 sudo_debug_register(const char *program, const char *const subsystems[],
-    int ids[], struct sudo_conf_debug_file_list *debug_files)
+    unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)
 {
     struct sudo_debug_instance *instance = NULL;
     struct sudo_debug_output *output;
@@ -809,17 +803,17 @@ sudo_debug_set_default_instance(int inst)
 
 /*
  * Replace the ofd with nfd in all outputs if present.
- * Also updates sudo_debug_fdset.
+ * Also updates sudo_debug_fds.
  */
 void
 sudo_debug_update_fd(int ofd, int nfd)
 {
     int idx;
 
-    if (ofd <= sudo_debug_max_fd && FD_ISSET(ofd, &sudo_debug_fdset)) {
-	/* Update sudo_debug_fdset. */
-	FD_CLR(ofd, &sudo_debug_fdset);
-	FD_SET(nfd, &sudo_debug_fdset);
+    if (ofd <= sudo_debug_max_fd && sudo_isset(sudo_debug_fds, ofd)) {
+	/* Update sudo_debug_fds. */
+	sudo_clrbit(sudo_debug_fds, ofd);
+	sudo_setbit(sudo_debug_fds, nfd);
 
 	/* Update the outputs. */
 	for (idx = 0; idx <= sudo_debug_last_instance; idx++) {
@@ -839,11 +833,11 @@ sudo_debug_update_fd(int ofd, int nfd)
 
 /*
  * Returns the highest debug output fd or -1 if no debug files open.
- * Fills in fdsetp with the value of sudo_debug_fdset.
+ * Fills in fdsetp with the value of sudo_debug_fds.
  */
 int
-sudo_debug_get_fds(fd_set **fdsetp)
+sudo_debug_get_fds(unsigned char **fds)
 {
-    *fdsetp = &sudo_debug_fdset;
+    *fds = sudo_debug_fds;
     return sudo_debug_max_fd;
 }

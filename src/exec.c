@@ -174,12 +174,12 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
 	    details->argv, details->envp);
 	if (details->closefrom >= 0) {
 	    int fd, maxfd;
-	    fd_set *debug_fds;
+	    unsigned char *debug_fds;
 
 	    /* Preserve debug fds and error pipe as needed. */
 	    maxfd = sudo_debug_get_fds(&debug_fds);
 	    for (fd = 0; fd <= maxfd; fd++) {
-		if (FD_ISSET(fd, debug_fds))
+		if (sudo_isset(debug_fds, fd))
 		    add_preserved_fd(&details->preserved_fds, fd);
 	    }
 	    if (errfd != -1)
