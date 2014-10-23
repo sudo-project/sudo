@@ -64,20 +64,20 @@ struct sudo_conf_debug_file_list;
  * This includes subsystems in the sudoers plugin.
  * Note: order must match sudo_debug_subsystems[]
  */
-#define SUDO_DEBUG_MAIN		( 1<<16)  /* sudo main() */
-#define SUDO_DEBUG_UTIL		( 2<<16)  /* utility functions */
-#define SUDO_DEBUG_NETIF	( 3<<16)  /* network interface functions */
-#define SUDO_DEBUG_PLUGIN	( 4<<16)  /* main plugin functions */
-#define SUDO_DEBUG_EVENT	( 5<<16)  /* event handling */
-#define SUDO_DEBUG_ARGS		( 6<<16)  /* command line argument processing */
-#define SUDO_DEBUG_EXEC		( 7<<16)  /* command execution */
-#define SUDO_DEBUG_PTY		( 8<<16)  /* pseudo-tty */
-#define SUDO_DEBUG_UTMP		( 9<<16)  /* utmp file ops */
-#define SUDO_DEBUG_CONV		(10<<16)  /* user conversation */
-#define SUDO_DEBUG_PCOMM	(11<<16)  /* plugin communications */
-#define SUDO_DEBUG_EDIT		(12<<16)  /* sudoedit */
-#define SUDO_DEBUG_SELINUX	(13<<16)  /* selinux */
-#define SUDO_DEBUG_HOOKS	(14<<16)  /* hook functions */
+#define SUDO_DEBUG_ARGS		( 1<<16)  /* command line argument processing */
+#define SUDO_DEBUG_CONV		( 2<<16)  /* user conversation */
+#define SUDO_DEBUG_EDIT		( 3<<16)  /* sudoedit */
+#define SUDO_DEBUG_EVENT	( 4<<16)  /* event handling */
+#define SUDO_DEBUG_EXEC		( 5<<16)  /* command execution */
+#define SUDO_DEBUG_HOOKS	( 6<<16)  /* hook functions */
+#define SUDO_DEBUG_MAIN		( 7<<16)  /* sudo main() */
+#define SUDO_DEBUG_NETIF	( 8<<16)  /* network interface functions */
+#define SUDO_DEBUG_PCOMM	( 9<<16)  /* plugin communications */
+#define SUDO_DEBUG_PLUGIN	(10<<16)  /* main plugin functions */
+#define SUDO_DEBUG_PTY		(11<<16)  /* pseudo-tty */
+#define SUDO_DEBUG_SELINUX	(12<<16)  /* selinux */
+#define SUDO_DEBUG_UTIL		(13<<16)  /* utility functions */
+#define SUDO_DEBUG_UTMP		(14<<16)  /* utmp file ops */
 #define SUDO_DEBUG_ALL		0xffff0000 /* all subsystems */
 
 /* Initializer for instance index to indicate that debugging is not setup. */
@@ -231,7 +231,7 @@ __dso_public int sudo_debug_get_fds(fd_set **fdsetp);
 __dso_public int sudo_debug_get_instance(const char *program);
 __dso_public void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
 __dso_public void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
-__dso_public int sudo_debug_register(const char *program, const char *const subsystems[], int num_subsystems, struct sudo_conf_debug_file_list *debug_files);
+__dso_public int sudo_debug_register(const char *program, const char *const subsystems[], int ids[], struct sudo_conf_debug_file_list *debug_files);
 __dso_public int sudo_debug_set_default_instance(int inst);
 __dso_public void sudo_debug_update_fd(int ofd, int nfd);
 __dso_public void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);

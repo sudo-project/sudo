@@ -86,24 +86,24 @@ static const char *const sudo_debug_priorities[] = {
 
 /* Note: this must match the order in sudo_debug.h */
 static const char *const sudo_debug_default_subsystems[] = {
-    "main",
-    "util",
-    "netif",
-    "plugin",
-    "event",
     "args",
-    "exec",
-    "pty",
-    "utmp",
     "conv",
-    "pcomm",
     "edit",
-    "selinux",
+    "event",
+    "exec",
     "hooks",
+    "main",
+    "netif",
+    "pcomm",
+    "plugin",
+    "pty",
+    "selinux",
+    "util",
+    "utmp",
     NULL
 };
 
-#define NUM_SUBSYSTEMS	(sizeof(sudo_debug_default_subsystems) / sizeof(sudo_debug_default_subsystems[0]) - 1)
+#define NUM_DEF_SUBSYSTEMS	(sizeof(sudo_debug_default_subsystems) / sizeof(sudo_debug_default_subsystems[0]) - 1)
 
 /*
  * For multiple programs/plugins there is a per-program instance
@@ -119,7 +119,8 @@ SLIST_HEAD(sudo_debug_output_list, sudo_debug_output);
 struct sudo_debug_instance {
     char *program;
     const char *const *subsystems;
-    int num_subsystems;
+    const int *subsystem_ids;
+    unsigned int max_subsystem;
     struct sudo_debug_output_list outputs;
 };
 
@@ -146,17 +147,17 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 {
     char *buf, *cp, *subsys, *pri;
     struct sudo_debug_output *output;
-    int i, j;
+    unsigned int i, j;
 
     /* Create new output for the instance. */
     /* XXX - reuse fd for existing filename? */
     output = sudo_emalloc(sizeof(*output));
-    output->settings = sudo_emallocarray(instance->num_subsystems, sizeof(int));
+    output->settings = sudo_emallocarray(instance->max_subsystem + 1, sizeof(int));
     output->filename = sudo_estrdup(debug_file->debug_file);
     output->fd = -1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
-    for (i = 0; i < instance->num_subsystems; i++)
+    for (i = 0; i <= instance->max_subsystem; i++)
 	output->settings[i] = -1;
 
     /* Open debug file. */
@@ -196,11 +197,13 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    if (strcasecmp(pri, sudo_debug_priorities[i]) == 0) {
 		for (j = 0; instance->subsystems[j] != NULL; j++) {
 		    if (strcasecmp(subsys, "all") == 0) {
-			output->settings[j] = i;
+			const int idx = SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]);
+			output->settings[idx] = i;
 			continue;
 		    }
 		    if (strcasecmp(subsys, instance->subsystems[j]) == 0) {
-			output->settings[j] = i;
+			const int idx = SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]);
+			output->settings[idx] = i;
 			break;
 		    }
 		}
@@ -222,20 +225,22 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
  */
 int
 sudo_debug_register(const char *program, const char *const subsystems[],
-    int num_subsystems, struct sudo_conf_debug_file_list *debug_files)
+    int ids[], struct sudo_conf_debug_file_list *debug_files)
 {
     struct sudo_debug_instance *instance = NULL;
     struct sudo_debug_output *output;
     struct sudo_debug_file *debug_file;
     int idx, free_idx = -1;
 
-    if (debug_files == NULL || num_subsystems < 0)
+    if (debug_files == NULL)
 	return -1;
 
     /* Use default subsystem names if none are provided. */
-    if (subsystems == NULL || num_subsystems == 0) {
+    if (subsystems == NULL) {
 	subsystems = sudo_debug_default_subsystems;
-	num_subsystems = NUM_SUBSYSTEMS;
+    } else if (ids == NULL) {
+	/* If subsystems are specified we must have ids[] too. */
+	return -1;
     }
 
     /* Search for existing instance. */
@@ -252,6 +257,20 @@ sudo_debug_register(const char *program, const char *const subsystems[],
     }
 
     if (instance == NULL) {
+	unsigned int i, j, max_id = NUM_DEF_SUBSYSTEMS - 1;
+
+	/* Fill in subsystem name -> id mapping. */
+	for (i = 0; subsystems[i] != NULL; i++) {
+	    /* Check default subsystems. */
+	    for (j = 0; j < NUM_DEF_SUBSYSTEMS; j++) {
+		if (strcmp(subsystems[i], sudo_debug_default_subsystems[j]) == 0)
+		    break;
+	    }
+	    if (j == NUM_DEF_SUBSYSTEMS)
+		j = ++max_id;
+	    ids[i] = ((j + 1) << 16);
+	}
+
 	if (free_idx != -1)
 	    idx = free_idx;
 	if (idx == SUDO_DEBUG_INSTANCE_MAX) {
@@ -266,11 +285,20 @@ sudo_debug_register(const char *program, const char *const subsystems[],
 	instance = sudo_emalloc(sizeof(*instance));
 	instance->program = sudo_estrdup(program);
 	instance->subsystems = subsystems;
-	instance->num_subsystems = num_subsystems;
+	instance->subsystem_ids = ids;
+	instance->max_subsystem = max_id;
 	SLIST_INIT(&instance->outputs);
 	sudo_debug_instances[idx] = instance;
 	if (idx == sudo_debug_num_instances)
 	    sudo_debug_num_instances++;
+    } else {
+	/* Check for matching instance but different ids[]. */
+	if (ids != NULL && instance->subsystem_ids != ids) {
+	    unsigned int i;
+
+	    for (i = 0; subsystems[i] != NULL; i++)
+		ids[i] = instance->subsystem_ids[i];
+	}
     }
 
     TAILQ_FOREACH(debug_file, debug_files, entries) {
@@ -552,7 +580,8 @@ void
 sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
 {
-    int buflen, idx, pri, subsys, saved_errno = errno;
+    int buflen, idx, pri, saved_errno = errno;
+    unsigned int subsys;
     char static_buf[1024], *buf = static_buf;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
@@ -587,7 +616,7 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
 
     SLIST_FOREACH(output, &instance->outputs, entries) {
 	/* Make sure we want debug info at this level. */
-	if (subsys < instance->num_subsystems && output->settings[subsys] >= pri) {
+	if (subsys <= instance->max_subsystem && output->settings[subsys] >= pri) {
 	    va_copy(ap2, ap);
 	    buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap) : 0;
 	    if (buflen >= (int)sizeof(static_buf)) {
@@ -640,7 +669,8 @@ sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
 void
 sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[])
 {
-    int buflen, idx, pri, subsys, saved_errno = errno;
+    int buflen, idx, pri, saved_errno = errno;
+    unsigned int subsys;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
     char * const *av;
@@ -673,7 +703,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
 	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__, idx);
 	goto out;
     }
-    if (subsys >= instance->num_subsystems)
+    if (subsys > instance->max_subsystem)
 	goto out;
 
     /* XXX - use static buffer if possible */

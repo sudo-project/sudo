@@ -21,27 +21,26 @@
 
 /*
  * Sudoers debug subsystems.
- * The first five entries must match the sudo front end.
- * Note: order must match sudoers_debug_subsystems[]
+ * Note that sudoers_subsystem_ids[] is filled in at debug registration time.
  */
-#define SUDOERS_DEBUG_MAIN	( 1<<16)   /* main() */
-#define SUDOERS_DEBUG_UTIL	( 2<<16)   /* utility functions */
-#define SUDOERS_DEBUG_NETIF	( 3<<16)   /* network interface functions */
-#define SUDOERS_DEBUG_PLUGIN	( 4<<16)   /* main plugin functions */
-#define SUDOERS_DEBUG_EVENT	( 5<<16)   /* event handling */
-#define SUDOERS_DEBUG_AUDIT	( 6<<16)   /* audit */
-#define SUDOERS_DEBUG_LDAP	( 7<<16)   /* sudoers LDAP */
-#define SUDOERS_DEBUG_MATCH	( 8<<16)   /* sudoers matching */
-#define SUDOERS_DEBUG_PARSER	( 9<<16)   /* sudoers parser */
-#define SUDOERS_DEBUG_ALIAS	(10<<16)   /* sudoers alias functions */
-#define SUDOERS_DEBUG_DEFAULTS	(11<<16)   /* sudoers defaults settings */
-#define SUDOERS_DEBUG_AUTH	(12<<16)   /* authentication functions */
-#define SUDOERS_DEBUG_ENV	(13<<16)   /* environment handling */
-#define SUDOERS_DEBUG_LOGGING	(14<<16)   /* logging functions */
-#define SUDOERS_DEBUG_NSS	(15<<16)   /* network service switch */
-#define SUDOERS_DEBUG_RBTREE	(16<<16)   /* red-black tree functions */
-#define SUDOERS_DEBUG_PERMS	(17<<16)   /* uid/gid swapping functions */
-#define SUDOERS_DEBUG_SSSD	(18<<16)   /* sudoers SSSD */
-#define SUDOERS_DEBUG_ALL	0xffff0000 /* all subsystems */
+extern int sudoers_subsystem_ids[];
+#define SUDOERS_DEBUG_ALIAS	(sudoers_subsystem_ids[ 0]) /* sudoers alias functions */
+#define SUDOERS_DEBUG_AUDIT	(sudoers_subsystem_ids[ 1]) /* audit */
+#define SUDOERS_DEBUG_AUTH	(sudoers_subsystem_ids[ 2]) /* authentication functions */
+#define SUDOERS_DEBUG_DEFAULTS	(sudoers_subsystem_ids[ 3]) /* sudoers defaults settings */
+#define SUDOERS_DEBUG_ENV	(sudoers_subsystem_ids[ 4]) /* environment handling */
+#define SUDOERS_DEBUG_EVENT	(sudoers_subsystem_ids[ 5]) /* event handling */
+#define SUDOERS_DEBUG_LDAP	(sudoers_subsystem_ids[ 6]) /* sudoers LDAP */
+#define SUDOERS_DEBUG_LOGGING	(sudoers_subsystem_ids[ 7]) /* logging functions */
+#define SUDOERS_DEBUG_MAIN	(sudoers_subsystem_ids[ 8]) /* main() */
+#define SUDOERS_DEBUG_MATCH	(sudoers_subsystem_ids[ 9]) /* sudoers matching */
+#define SUDOERS_DEBUG_NETIF	(sudoers_subsystem_ids[10]) /* network interface functions */
+#define SUDOERS_DEBUG_NSS	(sudoers_subsystem_ids[11]) /* network service switch */
+#define SUDOERS_DEBUG_PARSER	(sudoers_subsystem_ids[12]) /* sudoers parser */
+#define SUDOERS_DEBUG_PERMS	(sudoers_subsystem_ids[13]) /* uid/gid swapping functions */
+#define SUDOERS_DEBUG_PLUGIN	(sudoers_subsystem_ids[14]) /* main plugin functions */
+#define SUDOERS_DEBUG_RBTREE	(sudoers_subsystem_ids[15]) /* red-black tree functions */
+#define SUDOERS_DEBUG_SSSD	(sudoers_subsystem_ids[16]) /* sudoers SSSD */
+#define SUDOERS_DEBUG_UTIL	(sudoers_subsystem_ids[17]) /* utility functions */
 
 #endif /* _SUDOERS_DEBUG_H */

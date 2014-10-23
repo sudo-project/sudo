@@ -46,29 +46,32 @@
 
 int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 
-static const char *const sudoers_debug_subsystems[] = {
-    "main",
-    "util",
-    "netif",
-    "plugin",
-    "event",
-    "audit",
-    "ldap",
-    "match",
-    "parser",
+static const char *const sudoers_subsystem_names[] = {
     "alias",
-    "defaults",
+    "audit",
     "auth",
+    "defaults",
     "env",
+    "event",
+    "ldap",
     "logging",
+    "main",
+    "match",
+    "netif",
     "nss",
-    "rbtree",
+    "parser",
     "perms",
+    "plugin",
+    "rbtree",
     "sssd",
+    "util",
     NULL
 };
 
-#define NUM_SUBSYSTEMS  (sizeof(sudoers_debug_subsystems) / sizeof(sudoers_debug_subsystems[0]) - 1)
+#define NUM_SUBSYSTEMS  (sizeof(sudoers_subsystem_names) / sizeof(sudoers_subsystem_names[0]) - 1)
+
+/* Subsystem IDs assigned at registration time. */
+int sudoers_subsystem_ids[NUM_SUBSYSTEMS];
 
 /*
  * Parse the "filename flags,..." debug_flags entry and insert a new
@@ -116,7 +119,7 @@ sudoers_debug_register(struct sudo_conf_debug_file_list *debug_files,
     if (!TAILQ_EMPTY(debug_files)) {
 	if (plugin_path != NULL) {
 	    sudoers_debug_instance = sudo_debug_register(plugin_path,
-		sudoers_debug_subsystems, NUM_SUBSYSTEMS, debug_files);
+		sudoers_subsystem_names, sudoers_subsystem_ids, debug_files);
 	}
 	TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
 	    TAILQ_REMOVE(debug_files, debug_file, entries);

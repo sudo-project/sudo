@@ -352,7 +352,7 @@ set_debugging(const char *conf_file)
 	     * Register debug instance for the main program, making it
 	     * the default instance if one is not already set.
 	     */
-	    instance = sudo_debug_register(progname, NULL, 0,
+	    instance = sudo_debug_register(progname, NULL, NULL,
 		&debug_spec->debug_files);
 	    if (sudo_debug_get_default_instance() == SUDO_DEBUG_INSTANCE_INITIALIZER)
 		sudo_debug_set_default_instance(instance);
