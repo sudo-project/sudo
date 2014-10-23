@@ -38,11 +38,11 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudo_debug.h"
 #include "sudo_compat.h"
 #include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_util.h"
+#include "sudo_debug.h"
 
 __dso_public int main(int argc, char *argv[]);
 
