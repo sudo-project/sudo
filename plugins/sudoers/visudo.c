@@ -124,7 +124,6 @@ extern void sudoersrestart(FILE *);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static struct rbtree *alias_freelist;
 static bool checkonly;
