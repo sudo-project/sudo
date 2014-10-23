@@ -125,8 +125,9 @@ static int sudo_debug_last_instance = -1;
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
 
-static const int sudo_debug_fdset_size = 1024 * NBBY; /* XXX - make dynamic */
-static unsigned char sudo_debug_fds[1024];	/* XXX - make dynamic */
+#define round_nfds(_n)	(((_n) + (4 * NBBY) - 1) & ~((4 * NBBY) - 1))
+static int sudo_debug_fds_size;
+static unsigned char *sudo_debug_fds;
 static int sudo_debug_max_fd = -1;
 
 /* Default instance index to use for common utility functions. */
@@ -167,12 +168,16 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
     (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
-    /* XXX - realloc sudo_debug_fds as needed. */
-    if (output->fd < sudo_debug_fdset_size) {
-	sudo_setbit(sudo_debug_fds, output->fd);
-	if (output->fd > sudo_debug_max_fd)
-	    sudo_debug_max_fd = output->fd;
+    if (sudo_debug_fds_size < output->fd) {
+	/* Bump fds size to the next multiple of 4 * NBBY. */
+	const int new_size = round_nfds(output->fd);
+	sudo_debug_fds = sudo_erecalloc(sudo_debug_fds,
+	    sudo_debug_fds_size / NBBY, new_size / NBBY, sizeof(char));
+	sudo_debug_fds_size = new_size;
     }
+    sudo_setbit(sudo_debug_fds, output->fd);
+    if (output->fd > sudo_debug_max_fd)
+	sudo_debug_max_fd = output->fd;
 
     /* Parse Debug conf string. */
     if ((buf = strdup(debug_file->debug_flags)) == NULL) {
@@ -833,7 +838,7 @@ sudo_debug_update_fd(int ofd, int nfd)
 
 /*
  * Returns the highest debug output fd or -1 if no debug files open.
- * Fills in fdsetp with the value of sudo_debug_fds.
+ * Fills in fds with the value of sudo_debug_fds.
  */
 int
 sudo_debug_get_fds(unsigned char **fds)
