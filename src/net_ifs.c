@@ -84,6 +84,8 @@ struct rtentry;
 # include <ifaddrs.h>
 #endif
 
+#define _SUDO_NET_IFS_C		/* to expose sudo_inet_ntop in sudo_compat.h */
+
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 

@@ -19216,6 +19216,20 @@ $as_echo "no" >&6; }
 fi
 
 LIBS="$OLIBS"
+if test X"$found" != X"true"; then
+    case " $LIBOBJS " in
+  *" inet_ntop.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS inet_ntop.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_inet_ntop; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+fi
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
 found=false

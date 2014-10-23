@@ -2686,6 +2686,10 @@ AC_CHECK_FUNC(inet_ntop, [
     done
 ])
 LIBS="$OLIBS"
+if test X"$found" != X"true"; then
+    AC_LIBOBJ(inet_ntop)
+    SUDO_APPEND_COMPAT_EXP(sudo_inet_ntop)
+fi
 dnl
 dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols

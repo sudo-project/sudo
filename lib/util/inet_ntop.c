@@ -211,7 +211,7 @@ inet_ntop6(const unsigned char *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 const char *
-inet_ntop(int af, const void *src, char *dst, socklen_t size)
+sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size)
 {
 	switch (af) {
 	case AF_INET:

@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_MISSING_H
-#define _SUDO_MISSING_H
+#ifndef _SUDO_COMPAT_H
+#define _SUDO_COMPAT_H
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -467,6 +467,11 @@ __dso_public int sudo_clock_gettime(clockid_t clock_id, struct timespec *tp);
 # undef clock_gettime
 # define clock_gettime(_a, _b) sudo_clock_gettime((_a), (_b))
 #endif /* HAVE_CLOCK_GETTIME */
+#if !defined(HAVE_INET_NTOP) && defined(_SUDO_NET_IFS_C)
+__dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
+# undef inet_ntop
+# define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))
+#endif /* HAVE_INET_NTOP */
 #ifndef HAVE_INET_PTON
 __dso_public int sudo_inet_pton(int af, const char *src, void *dst);
 # undef inet_pton
@@ -478,4 +483,4 @@ __dso_public const char *sudo_getprogname(void);
 # define getprogname() sudo_getprogname()
 #endif /* HAVE_GETPROGNAME */
 
-#endif /* _SUDO_MISSING_H */
+#endif /* _SUDO_COMPAT_H */
