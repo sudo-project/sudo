@@ -127,7 +127,7 @@ struct sudo_debug_instance {
 /* Support up to 10 instances. */
 #define SUDO_DEBUG_INSTANCE_MAX 10
 static struct sudo_debug_instance *sudo_debug_instances[SUDO_DEBUG_INSTANCE_MAX];
-static int sudo_debug_num_instances;
+static int sudo_debug_last_instance = -1;
 
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
@@ -197,13 +197,13 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    if (strcasecmp(pri, sudo_debug_priorities[i]) == 0) {
 		for (j = 0; instance->subsystems[j] != NULL; j++) {
 		    if (strcasecmp(subsys, "all") == 0) {
-			const idx = instance->subsystem_ids ?
+			const int idx = instance->subsystem_ids ?
 			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
 			output->settings[idx] = i;
 			continue;
 		    }
 		    if (strcasecmp(subsys, instance->subsystems[j]) == 0) {
-			const idx = instance->subsystem_ids ?
+			const int idx = instance->subsystem_ids ?
 			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
 			output->settings[idx] = i;
 			break;
@@ -246,7 +246,7 @@ sudo_debug_register(const char *program, const char *const subsystems[],
     }
 
     /* Search for existing instance. */
-    for (idx = 0; idx < sudo_debug_num_instances; idx++) {
+    for (idx = 0; idx <= sudo_debug_last_instance; idx++) {
 	if (sudo_debug_instances[idx] == NULL) {
 	    free_idx = idx;
 	    continue;
@@ -282,8 +282,8 @@ sudo_debug_register(const char *program, const char *const subsystems[],
 	    sudo_warnx_nodebug("too many debug instances (max %d)", SUDO_DEBUG_INSTANCE_MAX);
 	    return -1;
 	}
-	if (idx != sudo_debug_num_instances && idx != free_idx) {
-	    sudo_warnx_nodebug("%s: instance number mismatch: expected %d, got %u", __func__, idx, sudo_debug_num_instances);
+	if (idx != sudo_debug_last_instance + 1 && idx != free_idx) {
+	    sudo_warnx_nodebug("%s: instance number mismatch: expected %d or %d, got %d", __func__, sudo_debug_last_instance + 1, free_idx, idx);
 	    return -1;
 	}
 	instance = sudo_emalloc(sizeof(*instance));
@@ -293,8 +293,8 @@ sudo_debug_register(const char *program, const char *const subsystems[],
 	instance->max_subsystem = max_id;
 	SLIST_INIT(&instance->outputs);
 	sudo_debug_instances[idx] = instance;
-	if (idx == sudo_debug_num_instances)
-	    sudo_debug_num_instances++;
+	if (idx != free_idx)
+	    sudo_debug_last_instance++;
     } else {
 	/* Check for matching instance but different ids[]. */
 	if (ids != NULL && instance->subsystem_ids != ids) {
@@ -334,9 +334,9 @@ sudo_debug_deregister(int instance_id)
     int idx;
 
     idx = SUDO_DEBUG_INSTANCE(instance_id);
-    if (idx < 0 || idx >= sudo_debug_num_instances) {
-	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
-	    __func__, idx + 1, sudo_debug_num_instances);
+    if (idx < 0 || idx > sudo_debug_last_instance) {
+	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
+	    __func__, idx, sudo_debug_last_instance);
 	return -1;
     }
     /* Reset default instance as needed. */
@@ -358,8 +358,8 @@ sudo_debug_deregister(int instance_id)
     sudo_efree(instance->program);
     sudo_efree(instance);
 
-    if (idx == sudo_debug_num_instances - 1)
-	sudo_debug_num_instances--;
+    if (idx == sudo_debug_last_instance)
+	sudo_debug_last_instance--;
 
     return 0;
 }
@@ -375,7 +375,7 @@ sudo_debug_get_instance(const char *program)
     if (proglen > 4 && strcmp(program + proglen - 4, "edit") == 0)
 	proglen -= 4;
 
-    for (idx = 0; idx < sudo_debug_num_instances; idx++) {
+    for (idx = 0; idx <= sudo_debug_last_instance; idx++) {
 	if (sudo_debug_instances[idx] == NULL)
 	    continue;
 	if (strncmp(sudo_debug_instances[idx]->program, program, proglen) == 0
@@ -393,9 +393,9 @@ sudo_debug_set_output_fd(int level, int ofd, int nfd)
     int idx;
 
     idx = SUDO_DEBUG_INSTANCE(level);
-    if (idx < 0 || idx >= sudo_debug_num_instances) {
-	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
-	    __func__, idx + 1, sudo_debug_num_instances);
+    if (idx < 0 || idx > sudo_debug_last_instance) {
+	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
+	    __func__, idx, sudo_debug_last_instance);
 	return -1;
     }
 
@@ -591,7 +591,7 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     struct sudo_debug_output *output;
     va_list ap2;
 
-    if (sudo_debug_num_instances == 0)
+    if (sudo_debug_last_instance == -1)
 	goto out;
 
     /* Extract instance index, priority and subsystem from level. */
@@ -607,9 +607,9 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
 	    goto out;
 	}
 	idx = sudo_debug_default_instance;
-    } else if (idx >= sudo_debug_num_instances) {
-	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
-	    __func__, idx + 1, sudo_debug_num_instances);
+    } else if (idx > sudo_debug_last_instance) {
+	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
+	    __func__, idx, sudo_debug_last_instance);
 	goto out;
     }
     instance = sudo_debug_instances[idx];
@@ -681,7 +681,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     char *buf, *cp;
     size_t plen;
 
-    if (sudo_debug_num_instances == 0)
+    if (sudo_debug_last_instance == -1)
 	goto out;
 
     /* Extract instance index, priority and subsystem from level. */
@@ -697,9 +697,9 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
 	    goto out;
 	}
 	idx = sudo_debug_default_instance;
-    } else if (idx >= sudo_debug_num_instances) {
-	sudo_warnx_nodebug("%s: invalid instance number %d, max %u",
-	    __func__, idx + 1, sudo_debug_num_instances);
+    } else if (idx > sudo_debug_last_instance) {
+	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
+	    __func__, idx, sudo_debug_last_instance);
 	goto out;
     }
     instance = sudo_debug_instances[idx];
@@ -802,7 +802,7 @@ sudo_debug_set_default_instance(int inst)
     const int idx = SUDO_DEBUG_INSTANCE(inst);
     const int old_idx = sudo_debug_default_instance;
 
-    if (idx >= -1 && idx < sudo_debug_num_instances)
+    if (idx >= -1 && idx <= sudo_debug_last_instance)
 	sudo_debug_default_instance = idx;
     return SUDO_DEBUG_MKINSTANCE(old_idx);
 }
@@ -822,7 +822,7 @@ sudo_debug_update_fd(int ofd, int nfd)
 	FD_SET(nfd, &sudo_debug_fdset);
 
 	/* Update the outputs. */
-	for (idx = 0; idx < sudo_debug_num_instances; idx++) {
+	for (idx = 0; idx <= sudo_debug_last_instance; idx++) {
 	    struct sudo_debug_instance *instance;
 	    struct sudo_debug_output *output;
 
