@@ -169,6 +169,8 @@ struct search_node {
 
 static struct search_node_list search_expr = STAILQ_HEAD_INITIALIZER(search_expr);
 
+static int sudoreplay_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+
 static int timing_idx_adj;
 
 static double speed_factor = 1.0;
@@ -236,7 +238,7 @@ main(int argc, char *argv[])
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
     double max_wait = 0;
-    debug_decl(main, SUDO_DEBUG_MAIN, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(main, SUDO_DEBUG_MAIN, sudoreplay_debug_instance)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
@@ -256,6 +258,9 @@ main(int argc, char *argv[])
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
+
+    /* Set debug instance to use (if configured). */
+    sudoreplay_debug_instance = sudo_debug_get_instance(getprogname());
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -385,7 +390,7 @@ replay_session(const double max_wait, const char *decimal)
     char buf[LINE_MAX];
     sigaction_t sa;
     int idx;
-    debug_decl(replay_session, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(replay_session, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     /* Restore tty settings if interupted. */
     fflush(stdout);
@@ -553,7 +558,7 @@ replay_session(const double max_wait, const char *decimal)
 static int
 open_io_fd(char *path, int len, struct io_log_file *iol)
 {
-    debug_decl(open_io_fd, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(open_io_fd, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     if (!iol->enabled)
 	debug_return_int(0);
@@ -575,7 +580,7 @@ write_output(int fd, int what, void *v)
     ssize_t nwritten;
     size_t count, remainder;
     unsigned int i;
-    debug_decl(write_output, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(write_output, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     nwritten = writev(STDOUT_FILENO, wc->iov, wc->iovcnt);
     switch (nwritten) {
@@ -628,7 +633,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
     bool or = false, not = false;
     struct search_node *sn;
     char type, **av;
-    debug_decl(parse_expr, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_expr, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     for (av = argv; *av != NULL; av++) {
 	switch (av[0][0]) {
@@ -747,7 +752,7 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
     struct search_node *sn;
     bool res, matched = last_match;
     int rc;
-    debug_decl(match_expr, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(match_expr, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     STAILQ_FOREACH(sn, head, entries) {
 	switch (sn->type) {
@@ -808,7 +813,7 @@ parse_logfile(char *logfile)
     const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct log_info *li = NULL;
-    debug_decl(parse_logfile, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_logfile, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
@@ -940,7 +945,7 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
     const char *timestr;
     struct log_info *li;
     int rval = -1;
-    debug_decl(list_session, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(list_session, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     if ((li = parse_logfile(logfile)) == NULL)
 	goto done;
@@ -1005,7 +1010,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 #else
     const bool checked_type = false;
 #endif
-    debug_decl(find_sessions, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(find_sessions, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     d = opendir(dir);
     if (d == NULL)
@@ -1079,7 +1084,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
 {
     REGEX_T rebuf, *re = NULL;
-    debug_decl(list_sessions, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(list_sessions, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     /* Parse search expression if present */
     parse_expr(&search_expr, argv, false);
@@ -1110,7 +1115,7 @@ check_input(int fd, int what, void *v)
     struct timeval tv, *timeout = NULL;
     static bool paused = 0;
     char ch;
-    debug_decl(check_input, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(check_input, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     if (ISSET(what, SUDO_EV_READ)) {
 	switch (read(fd, &ch, 1)) {
@@ -1174,7 +1179,7 @@ parse_timing(const char *buf, const char *decimal, int *idx, double *seconds,
     long l;
     double d, fract = 0;
     char *cp, *ep;
-    debug_decl(parse_timing, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_timing, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     /* Parse index */
     ul = strtoul(buf, &ep, 10);

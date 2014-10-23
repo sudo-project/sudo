@@ -51,6 +51,8 @@
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
+int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+
 static int sesh_sudoedit(int argc, char *argv[]);
 
 /*
@@ -66,7 +68,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     int ret;
-    debug_decl(main, SUDO_DEBUG_MAIN, sudo_debug_instance, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(main, SUDO_DEBUG_MAIN, sudo_debug_instance)
 
     initprogname(argc > 0 ? argv[0] : "sesh");
 
@@ -79,6 +81,9 @@ main(int argc, char *argv[], char *envp[])
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
+
+    /* Set debug instance to use (if configured). */
+    sudo_debug_instance = sudo_debug_get_instance(getprogname());
 
     if (strcmp(argv[1], "-e") == 0) {
 	ret = sesh_sudoedit(argc, argv);
@@ -121,7 +126,7 @@ sesh_sudoedit(int argc, char *argv[])
     struct stat sb;
     struct timeval times[2];
     char buf[BUFSIZ];
-    debug_decl(sesh_sudoedit, SUDO_DEBUG_MAIN)
+    debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT, sudo_debug_instance)
 
     if (argc < 3)
 	debug_return_int(SESH_ERR_FAILURE);

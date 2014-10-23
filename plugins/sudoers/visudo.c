@@ -172,6 +172,9 @@ main(int argc, char *argv[])
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
 
+    /* Set debug instance to use (if configured). */
+    sudoers_debug_instance = sudo_debug_get_instance(getprogname());
+
     /*
      * Arg handling.
      */
