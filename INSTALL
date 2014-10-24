@@ -55,11 +55,11 @@ For most systems and configurations it is possible simply to:
        install-doc, and install-sudoers make targets.
 
     6) Edit the sudoers file with `visudo' as necessary for your
-       site.  You will probably want to refer the sample.sudoers
+       site.  You will probably want to refer the example sudoers
        file and sudoers man page included with the sudo package.
 
     7) If you want to use syslogd(8) to do the logging, you'll need
-       to update your /etc/syslog.conf file.  See the sample.syslog.conf
+       to update your /etc/syslog.conf file.  See the example syslog.conf
        file included in the distribution for an example.
 
 Available configure options
@@ -425,8 +425,8 @@ Authentication options:
 	Linux, Solaris and HP-UX (version 11 and higher).
 
 	NOTE: on RedHat Linux and Fedora you *must* have an /etc/pam.d/sudo
-	file install.  You may either use the sample.pam file included with
-	sudo or use /etc/pam.d/su as a reference.  The sample.pam file
+	file install.  You may either use the example pam.conf file included
+	with sudo or use /etc/pam.d/su as a reference.  The pam.conf file
 	included with sudo may or may not work with other Linux distributions.
 	On Solaris and HP-UX 11 systems you should check (and understand)
 	the contents of /etc/pam.conf.  Do a "man pam.conf" for more
@@ -676,7 +676,7 @@ Options that set runtime-changeable default values:
 	How you want to do your logging.  You may choose "syslog",
 	"file", or "both".  Setting this to "syslog" is nice because
 	you can keep all of your sudo logs in one place (see the
-	sample.syslog.conf file).  The default is "syslog".
+	example syslog.conf file).  The default is "syslog".
 	Sudoers options: syslog and logfile
 
   --with-loglen=NUMBER

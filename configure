@@ -23204,7 +23204,7 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -24193,6 +24193,7 @@ do
     "lib/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/zlib/Makefile" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+    "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
     "init.d/aix.sh") CONFIG_FILES="$CONFIG_FILES init.d/aix.sh" ;;
     "init.d/hpux.sh") CONFIG_FILES="$CONFIG_FILES init.d/hpux.sh" ;;
@@ -25288,8 +25289,8 @@ $as_echo "$as_me: sudo session required libpam_hpsec.so.1 bypass_umask bypass_la
 	    fi
 	    ;;
 	linux*)
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: You will need to customize sample.pam and install it as /etc/pam.d/sudo" >&5
-$as_echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d/sudo" >&6;}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: You will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&5
+$as_echo "$as_me: You will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&6;}
 	    ;;
     esac
 fi

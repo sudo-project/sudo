@@ -4020,7 +4020,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
@@ -4035,7 +4035,7 @@ if test "$with_pam" = "yes"; then
 	    fi
 	    ;;
 	linux*)
-	    AC_MSG_NOTICE([You will need to customize sample.pam and install it as /etc/pam.d/sudo])
+	    AC_MSG_NOTICE([You will need to customize examples/pam.conf and install it as /etc/pam.d/sudo])
 	    ;;
     esac
 fi

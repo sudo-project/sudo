@@ -32,6 +32,7 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 docdir = @docdir@
+exampledir = $(datarootdir)/examples/$(PACKAGE_TARNAME)
 mandir = @mandir@
 rundir = @rundir@
 vardir = @vardir@
@@ -48,7 +49,7 @@ sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
 SUBDIRS = lib/util @ZLIB_SRC@ plugins/group_file plugins/sudoers \
-	  plugins/system_group src include doc
+	  plugins/system_group src include doc examples
 
 SAMPLES = plugins/sample
 
@@ -306,6 +307,7 @@ package: sudo.pp
 	    mandir=$(mandir) \
 	    localedir=$(localedir) \
 	    docdir=$(docdir) \
+	    exampledir=$(exampledir) \
 	    sysconfdir=$(sysconfdir) \
 	    sudoersdir=$(sudoersdir) \
 	    sudoers_uid=$(sudoers_uid) \

@@ -21,10 +21,6 @@ doc/TROUBLESHOOTING
 doc/UPGRADE
 doc/fixman.sh
 doc/fixmdoc.sh
-doc/sample.pam
-doc/sample.sudo.conf
-doc/sample.sudoers
-doc/sample.syslog.conf
 doc/schema.ActiveDirectory
 doc/schema.OpenLDAP
 doc/schema.iPlanet
@@ -49,6 +45,11 @@ doc/sudoreplay.mdoc.in
 doc/visudo.cat
 doc/visudo.man.in
 doc/visudo.mdoc.in
+examples/Makefile.in
+examples/pam.conf
+examples/sudo.conf
+examples/sudoers
+examples/syslog.conf
 include/Makefile.in
 include/compat/charclass.h
 include/compat/endian.h

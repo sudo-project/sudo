@@ -23,7 +23,6 @@ srcdir = @srcdir@
 docdir = @docdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-cross_compiling = @CROSS_COMPILING@
 
 # Tools to use
 SED = @SED@
@@ -84,9 +83,8 @@ DEVDOCS = $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
 
 OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
 	     $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
-	     $(srcdir)/LICENSE $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE \
-	     $(srcdir)/sample.*
- 
+	     $(srcdir)/LICENSE $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE
+
 OTHER_DOCS_LDAP = $(top_srcdir)/README.LDAP $(srcdir)/schema.*
 
 VERSION = @PACKAGE_VERSION@
