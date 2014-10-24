@@ -87,6 +87,7 @@ struct plugin_container {
     const char *path;
     char * const *options;
     void *handle;
+    int debug_instance;
     union {
 	struct generic_plugin *generic;
 	struct policy_plugin *policy;

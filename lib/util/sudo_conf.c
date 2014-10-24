@@ -338,7 +338,6 @@ set_debugging(const char *conf_file)
     struct plugin_info *plugin_info;
     const char *progname;
     size_t prognamelen;
-    int instance;
     debug_decl(main, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
 
     progname = getprogname();
@@ -352,10 +351,7 @@ set_debugging(const char *conf_file)
 	     * Register debug instance for the main program, making it
 	     * the default instance if one is not already set.
 	     */
-	    instance = sudo_debug_register(progname, NULL, NULL,
-		&debug_spec->debug_files);
-	    if (sudo_debug_get_default_instance() == SUDO_DEBUG_INSTANCE_INITIALIZER)
-		sudo_debug_set_default_instance(instance);
+	    sudo_debug_register(progname, NULL, NULL, &debug_spec->debug_files);
 	    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    continue;
 	}

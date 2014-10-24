@@ -310,6 +310,10 @@ sudo_debug_register(const char *program, const char *const subsystems[],
 	    SLIST_INSERT_HEAD(&instance->outputs, output, entries);
     }
 
+    /* Set default instance if not already set. */
+    if (sudo_debug_default_instance == -1)
+	sudo_debug_default_instance = idx;
+
     /* Stash the pid string so we only have to format it once. */
     if (sudo_debug_pidlen == 0) {
 	(void)snprintf(sudo_debug_pidstr, sizeof(sudo_debug_pidstr), "[%d] ",

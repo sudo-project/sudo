@@ -238,6 +238,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    policy_plugin->path = sudo_estrdup(path);
 	    policy_plugin->name = info->symbol_name;
 	    policy_plugin->options = info->options;
+	    policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    policy_plugin->u.generic = plugin;
 	    TAILQ_INIT(&policy_plugin->debug_files);
 	    TAILQ_SWAP(&policy_plugin->debug_files, &info->debug_files,
@@ -260,6 +261,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    container->path = sudo_estrdup(path);
 	    container->name = info->symbol_name;
 	    container->options = info->options;
+	    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    container->u.generic = plugin;
 	    TAILQ_INIT(&container->debug_files);
 	    TAILQ_SWAP(&container->debug_files, &info->debug_files,
@@ -329,6 +331,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     }
 
     /* Install hooks (XXX - later). */
+    sudo_debug_set_default_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
     if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
 	if (policy_plugin->u.policy->register_hooks != NULL)
 	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
@@ -339,6 +342,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
 	}
     }
+    sudo_debug_set_default_instance(sudo_debug_instance);
 
 done:
     debug_return_bool(rval);

@@ -218,7 +218,10 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin) {
-	    int rc = plugin->u.io->log_ttyin(buf, n);
+	    int rc;
+
+	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_ttyin(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -229,6 +232,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_default_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
     debug_return_bool(rval);
@@ -246,7 +250,10 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdin) {
-	    int rc = plugin->u.io->log_stdin(buf, n);
+	    int rc;
+
+	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_stdin(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -257,6 +264,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_default_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
     debug_return_bool(rval);
@@ -274,7 +282,10 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyout) {
-	    int rc = plugin->u.io->log_ttyout(buf, n);
+	    int rc;
+
+	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_ttyout(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -285,6 +296,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_default_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -314,7 +326,10 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdout) {
-	    int rc = plugin->u.io->log_stdout(buf, n);
+	    int rc;
+
+	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_stdout(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -325,6 +340,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_default_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -354,7 +370,10 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stderr) {
-	    int rc = plugin->u.io->log_stderr(buf, n);
+	    int rc;
+
+	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_stderr(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -365,6 +384,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_default_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event

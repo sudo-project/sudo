@@ -573,7 +573,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const *cur;
     const char *plugin_path = NULL;
     size_t len;
-    int i, prev_instance, rval = -1;
+    int i, rval = -1;
     debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     sudo_conv = conversation;
@@ -582,8 +582,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
 	debug_return_bool(true);
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     memset(&details, 0, sizeof(details));
 
@@ -674,18 +672,14 @@ done:
 	sudo_gr_delref(details.runas_gr);
     sudo_endgrent();
 
-    sudo_debug_set_default_instance(prev_instance);
-
     debug_return_bool(rval);
 }
 
 static void
 sudoers_io_close(int exit_status, int error)
 {
-    int i, prev_instance;
+    int i;
     debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (io_log_files[i].fd.v == NULL)
@@ -697,7 +691,6 @@ sudoers_io_close(int exit_status, int error)
 #endif
 	    fclose(io_log_files[i].fd.f);
     }
-    sudo_debug_set_default_instance(prev_instance);
 
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
@@ -711,15 +704,10 @@ sudoers_io_close(int exit_status, int error)
 static int
 sudoers_io_version(int verbose)
 {
-    int prev_instance;
     debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
-
-    sudo_debug_set_default_instance(prev_instance);
 
     debug_return_bool(true);
 }
@@ -731,10 +719,8 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
-    int prev_instance, rval = true;
+    int rval = true;
     debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     gettimeofday(&now, NULL);
 
@@ -763,8 +749,6 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     }
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
-
-    sudo_debug_set_default_instance(prev_instance);
 
     debug_return_bool(rval);
 }

@@ -374,7 +374,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     user_umask = umask(SUDO_UMASK);
     umask(user_umask);
 
-    /* Setup debugging if indicated. */
+    /* Setup debugging if indicated. (XXX - do earlier) */
     sudoers_debug_register(&debug_files, plugin_path);
 
     /* Dump settings and user info (XXX - plugin args) */
@@ -538,7 +538,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     char * const user_info[], char * const envp[], char * const args[])
 {
     struct sudoers_policy_open_info info;
-    int prev_instance, rval;
     debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     sudo_version = version;
@@ -549,25 +548,17 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	args = NULL;
 
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
-
     /* Call the sudoers init function. */
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    rval = sudoers_policy_init(&info, envp);
-
-    sudo_debug_set_default_instance(prev_instance);
-    debug_return_bool(rval);
+    debug_return_bool(sudoers_policy_init(&info, envp));
 }
 
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
-    int prev_instance;
     debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     /* We do not currently log the exit status. */
     if (error_code) {
@@ -598,7 +589,6 @@ sudoers_policy_close(int exit_status, int error_code)
     }
     sudo_efree(user_gids);
     user_gids = NULL;
-    sudo_debug_set_default_instance(prev_instance);
 
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
@@ -617,18 +607,13 @@ sudoers_policy_close(int exit_status, int error_code)
 static int
 sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 {
-    int prev_instance, rval;
     debug_decl(sudoers_policy_init_session, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     /* user_env is only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	user_env = NULL;
 
-    rval = sudo_auth_begin_session(pwd, user_env);
-    sudo_debug_set_default_instance(prev_instance);
-    debug_return_bool(rval);
+    debug_return_bool(sudo_auth_begin_session(pwd, user_env));
 }
 
 static int
@@ -636,10 +621,9 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     struct sudoers_exec_args exec_args;
-    int prev_instance, rval;
+    int rval;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
     if (!ISSET(sudo_mode, MODE_EDIT))
 	SET(sudo_mode, MODE_RUN);
 
@@ -654,37 +638,28 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
-    sudo_debug_set_default_instance(prev_instance);
     debug_return_bool(rval);
 }
 
 static int
 sudoers_policy_validate(void)
 {
-    int prev_instance, rval;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
 
-    rval = sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL);
-    sudo_debug_set_default_instance(prev_instance);
-    debug_return_bool(rval);
+    debug_return_bool(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL));
 }
 
 static void
 sudoers_policy_invalidate(int remove)
 {
-    int prev_instance;
     debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     user_cmnd = "kill";
     remove_timestamp(remove);
     sudoers_cleanup();
-    sudo_debug_set_default_instance(prev_instance);
 
     debug_return;
 }
@@ -693,10 +668,8 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
-    int prev_instance, rval = -1;
+    int rval;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     user_cmnd = "list";
     if (argc)
@@ -709,7 +682,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
 	    sudo_warnx(U_("unknown user: %s"), list_user);
-	    goto done;
+	    debug_return_bool(-1);
 	}
     }
     rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
@@ -718,18 +691,13 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = NULL;
     }
 
-done:
-    sudo_debug_set_default_instance(prev_instance);
     debug_return_bool(rval);
 }
 
 static int
 sudoers_policy_version(int verbose)
 {
-    int prev_instance;
     debug_decl(sudoers_policy_version, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
 	PACKAGE_VERSION);
@@ -753,18 +721,17 @@ sudoers_policy_version(int verbose)
 	    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 	}
     }
-    sudo_debug_set_default_instance(prev_instance);
     debug_return_bool(true);
 }
 
+/*
+ * Register environment function hooks.
+ * Note that we have not registered sudoers with the debug subsystem yet.
+ */
 static void
 sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook *hook))
 {
     struct sudo_hook hook;
-    int prev_instance;
-    debug_decl(sudoers_policy_register_hooks, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
-
-    prev_instance = sudo_debug_set_default_instance(sudoers_debug_instance);
 
     memset(&hook, 0, sizeof(hook));
     hook.hook_version = SUDO_HOOK_VERSION;
@@ -784,8 +751,6 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
     hook.hook_type = SUDO_HOOK_PUTENV;
     hook.hook_fn = sudoers_hook_putenv;
     register_hook(&hook);
-
-    sudo_debug_set_default_instance(prev_instance);
 }
 
 __dso_public struct policy_plugin sudoers_policy = {
