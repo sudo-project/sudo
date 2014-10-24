@@ -314,14 +314,14 @@ still allow people to get their work done."
 %endif
 
 %files [!aix]
-	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
 	$mandir/man*/*		0644
+	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
 
 %files [aix]
 	# Some versions use catpages, some use manpages.
-	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
 	$mandir/cat*/*		0644 optional
 	$mandir/man*/*		0644 optional
+	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
 
 %pre [aix]
 	if rpm -q %{name} >/dev/null 2>&1; then
