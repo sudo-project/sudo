@@ -3920,7 +3920,7 @@ dnl We add -Wall and -Werror after all tests so they don't cause failures
 dnl
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
-	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wold-style-definition -Wpointer-arith"
+	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith"
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
