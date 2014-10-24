@@ -270,9 +270,22 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	}
     }
 
+    /* Zero out info strings that we now own (see above). */
+    info->symbol_name = NULL;
+    info->options = NULL;
+
     rval = true;
 done:
     debug_return_bool(rval);
+}
+
+static void
+free_plugin_info(struct plugin_info *info)
+{
+    sudo_efree(info->path);
+    sudo_efree(info->options);
+    sudo_efree(info->symbol_name);
+    sudo_efree(info);
 }
 
 /*
@@ -284,17 +297,19 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 {
     struct plugin_container *container;
     struct plugin_info_list *plugins;
-    struct plugin_info *info;
+    struct plugin_info *info, *next;
     bool rval = false;
     debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN, sudo_debug_instance)
 
-    /* Walk the plugin list from sudo.conf, if any. */
+    /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
-    TAILQ_FOREACH(info, plugins, entries) {
+    TAILQ_FOREACH_SAFE(info, plugins, entries, next) {
 	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
 	if (!rval)
 	    goto done;
+	free_plugin_info(info);
     }
+    TAILQ_INIT(plugins);
 
     /*
      * If no policy plugin, fall back to the default (sudoers).
