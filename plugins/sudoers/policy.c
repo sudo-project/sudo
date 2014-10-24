@@ -90,8 +90,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
-    const char *plugin_path = NULL;
-    struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
@@ -153,11 +151,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
-	    continue;
-	}
-	if (MATCHES(*cur, "debug_flags=")) {
-	    sudoers_debug_parse_flags(&debug_files,
-		*cur + sizeof("debug_flags=") - 1);
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_user=")) {
@@ -276,10 +269,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    remhost = *cur + sizeof("remote_host=") - 1;
 	    continue;
 	}
-	if (MATCHES(*cur, "plugin_path=")) {
-	    plugin_path = *cur + sizeof("plugin_path=") - 1;
-	    continue;
-	}
     }
 
     for (cur = info->user_info; *cur != NULL; cur++) {
@@ -373,9 +362,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     /* Stash initial umask for later use. */
     user_umask = umask(SUDO_UMASK);
     umask(user_umask);
-
-    /* Setup debugging if indicated. (XXX - do earlier) */
-    sudoers_debug_register(&debug_files, plugin_path);
 
     /* Dump settings and user info (XXX - plugin args) */
     for (cur = info->settings; *cur != NULL; cur++)
@@ -537,7 +523,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const envp[], char * const args[])
 {
+    struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     struct sudoers_policy_open_info info;
+    const char *plugin_path = NULL;
+    char * const *cur;
     debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
 
     sudo_version = version;
@@ -547,6 +536,20 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Plugin args are only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	args = NULL;
+
+    /* Initialize the debug subsystem.  */
+    for (cur = settings; *cur != NULL; cur++) {
+	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    sudoers_debug_parse_flags(&debug_files,
+		*cur + sizeof("debug_flags=") - 1);
+	    continue;
+	}
+	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = *cur + sizeof("plugin_path=") - 1;
+	    continue;
+	}
+    }
+    sudoers_debug_register(&debug_files, plugin_path);
 
     /* Call the sudoers init function. */
     info.settings = settings;

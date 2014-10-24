@@ -590,9 +590,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_setpwent();
     sudo_setgrent();
 
-    /*
-     * Check for debug flags in settings list.
-     */
+    /* Initialize the debug subsystem.  */
     for (cur = settings; *cur != NULL; cur++) {
 	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
 	    sudoers_debug_parse_flags(&debug_files,
