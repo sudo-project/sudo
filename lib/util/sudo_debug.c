@@ -370,19 +370,12 @@ sudo_debug_deregister(int instance_id)
 int
 sudo_debug_get_instance(const char *program)
 {
-    size_t proglen;
     int idx;
-
-    /* Treat "sudoedit" as an alias for "sudo". */
-    proglen = strlen(program);
-    if (proglen > 4 && strcmp(program + proglen - 4, "edit") == 0)
-	proglen -= 4;
 
     for (idx = 0; idx <= sudo_debug_last_instance; idx++) {
 	if (sudo_debug_instances[idx] == NULL)
 	    continue;
-	if (strncmp(sudo_debug_instances[idx]->program, program, proglen) == 0
-	    && sudo_debug_instances[idx]->program[proglen] == '\0')
+	if (strcmp(sudo_debug_instances[idx]->program, program) == 0)
 	    return SUDO_DEBUG_MKINSTANCE(idx);
     }
     return SUDO_DEBUG_INSTANCE_INITIALIZER;
