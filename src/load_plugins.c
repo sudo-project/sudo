@@ -240,9 +240,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    policy_plugin->options = info->options;
 	    policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    policy_plugin->u.generic = plugin;
-	    TAILQ_INIT(&policy_plugin->debug_files);
-	    TAILQ_SWAP(&policy_plugin->debug_files, &info->debug_files,
-		sudo_debug_file, entries);
+	    policy_plugin->debug_files = sudo_conf_debug_files(path);
 	}
     } else if (plugin->type == SUDO_IO_PLUGIN) {
 	/* Check for duplicate entries. */
@@ -263,9 +261,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    container->options = info->options;
 	    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    container->u.generic = plugin;
-	    TAILQ_INIT(&container->debug_files);
-	    TAILQ_SWAP(&container->debug_files, &info->debug_files,
-		sudo_debug_file, entries);
+	    policy_plugin->debug_files = sudo_conf_debug_files(path);
 	    TAILQ_INSERT_TAIL(io_plugins, container, entries);
 	}
     }

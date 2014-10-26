@@ -169,11 +169,9 @@ main(int argc, char *argv[])
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(visudo_cleanup);
 
-    /* Read sudo.conf. */
-    sudo_conf_read(NULL);
-
-    /* Set debug instance to use (if configured). */
-    sudoers_debug_instance = sudo_debug_get_instance(getprogname());
+    /* Initialize the debug subsystem. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    sudoers_debug_register(sudo_conf_debug_files(getprogname()), getprogname());
 
     /*
      * Arg handling.

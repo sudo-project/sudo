@@ -323,56 +323,7 @@ store_plugin(const char *cp, unsigned int lineno)
     info->path = sudo_estrndup(path, pathlen);
     info->options = options;
     info->lineno = lineno;
-    TAILQ_INIT(&info->debug_files);
     TAILQ_INSERT_TAIL(&sudo_conf_data.plugins, info, entries);
-}
-
-/*
- * Initialize debugging subsystem for the running program.
- * Also stores plugin-specific debug info in sudo_conf_data.plugins.
- */
-static void
-set_debugging(const char *conf_file)
-{
-    struct sudo_conf_debug *debug_spec;
-    struct plugin_info *plugin_info;
-    const char *progname;
-    size_t prognamelen;
-    debug_decl(main, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
-
-    progname = getprogname();
-    prognamelen = strlen(progname);
-    if (prognamelen > 4 && strcmp(progname + 4, "edit") == 0)
-	prognamelen -= 4;
-    TAILQ_FOREACH(debug_spec, &sudo_conf_data.debugging, entries) {
-	if (strncmp(debug_spec->progname, progname, prognamelen) == 0 &&
-	    debug_spec->progname[prognamelen] == '\0') {
-	    /*
-	     * Register debug instance for the main program, making it
-	     * the default instance if one is not already set.
-	     */
-	    sudo_debug_register(progname, NULL, NULL, &debug_spec->debug_files);
-	    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-	    continue;
-	}
-	/* Move debug_files to plugin if it matches. */
-	TAILQ_FOREACH(plugin_info, &sudo_conf_data.plugins, entries) {
-	    const char *plugin_name = plugin_info->path;
-	    if (debug_spec->progname[0] != '/') {
-		/* Match basename(path). */
-		plugin_name = strrchr(plugin_info->path, '/');
-		if (plugin_name++ == NULL)
-		    plugin_name = plugin_info->path;
-	    }
-	    if (strcmp(debug_spec->progname, plugin_name) == 0) {
-		/* Move debug_files into plugin_info. */
-		TAILQ_SWAP(&plugin_info->debug_files, &debug_spec->debug_files,
-		    sudo_debug_file, entries);
-		break;
-	    }
-	}
-	/* XXX - free up remaining structs */
-    }
 }
 
 /*
@@ -558,6 +509,42 @@ sudo_conf_debugging_v1(void)
     return &sudo_conf_data.debugging;
 }
 
+/* Return the debug files list for a program, or NULL if none. */
+struct sudo_conf_debug_file_list *
+sudo_conf_debug_files_v1(const char *progname)
+{
+    struct sudo_conf_debug *debug_spec;
+    size_t prognamelen, progbaselen;
+    const char *progbase = progname;
+    debug_decl(sudo_conf_debug_files, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+
+    /* Determine basename if program is fully qualified (like for plugins). */
+    prognamelen = progbaselen = strlen(progname);
+    if (*progname == '/') {
+	progbase = strrchr(progname, '/');
+	progbaselen = strlen(++progbase);
+    }
+    /* Convert sudoedit -> sudo. */
+    if (progbaselen > 4 && strcmp(progbase + 4, "edit") == 0) {
+	progbaselen -= 4;
+    }
+    TAILQ_FOREACH(debug_spec, &sudo_conf_data.debugging, entries) {
+	const char *prog = progbase;
+	size_t len = progbaselen;
+
+	if (debug_spec->progname[0] == '/') {
+	    /* Match fully-qualified name, if possible. */
+	    prog = progname;
+	    len = prognamelen;
+	}
+	if (strncmp(debug_spec->progname, prog, len) == 0 &&
+	    debug_spec->progname[len] == '\0') {
+	    debug_return_ptr(&debug_spec->debug_files);
+	}
+    }
+    debug_return_ptr(NULL);
+}
+
 bool
 sudo_conf_disable_coredump_v1(void)
 {
@@ -574,12 +561,11 @@ sudo_conf_probe_interfaces_v1(void)
  * Reads in /etc/sudo.conf and populates sudo_conf_data.
  */
 void
-sudo_conf_read_v1(const char *conf_file)
+sudo_conf_read_v1(const char *conf_file, int conf_types)
 {
-    struct sudo_conf_table *cur;
     struct stat sb;
     FILE *fp;
-    char *cp, *line = NULL;
+    char *line = NULL;
     char *prev_locale = sudo_estrdup(setlocale(LC_ALL, NULL));
     unsigned int conf_lineno = 0;
     size_t linesize = 0;
@@ -624,10 +610,16 @@ sudo_conf_read_v1(const char *conf_file)
     }
 
     while (sudo_parseln(&line, &linesize, &conf_lineno, fp) != -1) {
+	struct sudo_conf_table *cur;
+	unsigned int i;
+	char *cp;
+
 	if (*(cp = line) == '\0')
 	    continue;		/* empty line or comment */
 
-	for (cur = sudo_conf_table; cur->name != NULL; cur++) {
+	for (i = 0, cur = sudo_conf_table; cur->name != NULL; i++, cur++) {
+	    if (!ISSET(conf_types, (1 << i)))
+		continue;
 	    if (strncasecmp(cp, cur->name, cur->namelen) == 0 &&
 		isblank((unsigned char)cp[cur->namelen])) {
 		cp += cur->namelen;
@@ -641,12 +633,11 @@ sudo_conf_read_v1(const char *conf_file)
     fclose(fp);
     free(line);
 
-    /* First, init the debug system. */
-    set_debugging(conf_file);
-
-    /* Then set paths and variables. */
-    set_paths(conf_file);
-    set_variables(conf_file);
+    /* Parse paths and variables as needed. */
+    if (ISSET(conf_types, SUDO_CONF_PATHS))
+	set_paths(conf_file);
+    if (ISSET(conf_types, SUDO_CONF_SETTINGS))
+	set_variables(conf_file);
 
 done:
     /* Restore locale if needed. */

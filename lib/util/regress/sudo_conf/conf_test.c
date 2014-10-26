@@ -63,7 +63,7 @@ main(int argc, char *argv[])
 	fprintf(stderr, "usage: %s conf_file\n", getprogname());
 	exit(1);
     }
-    sudo_conf_read(argv[1]);
+    sudo_conf_read(argv[1], SUDO_CONF_ALL);
     sudo_conf_dump();
 
     exit(0);

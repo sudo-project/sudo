@@ -154,6 +154,8 @@ main(int argc, char *argv[], char *envp[])
     sigset_t mask;
     debug_decl(main, SUDO_DEBUG_MAIN, sudo_debug_instance)
 
+    /* Make sure fds 0-2 are open and do OS-specific initialization. */
+    fix_fds();
     os_init(argc, argv, envp);
 
     setlocale(LC_ALL, "");
@@ -175,6 +177,11 @@ main(int argc, char *argv[], char *envp[])
     /* Use conversation function for sudo_(warn|fatal)x?. */
     sudo_warn_set_conversation(sudo_conversation);
 
+    /* Initialize the debug subsystem. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    sudo_debug_instance = sudo_debug_register(getprogname(),
+	NULL, NULL, sudo_conf_debug_files(getprogname()));
+
     /* Make sure we are setuid root. */
     sudo_check_suid(argv[0]);
 
@@ -182,13 +189,9 @@ main(int argc, char *argv[], char *envp[])
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
     save_signals();
-    fix_fds();
 
-    /* Read sudo.conf. */
-    sudo_conf_read(NULL);
-
-    /* Set debug instance to use with sudo front end (if configured). */
-    sudo_debug_instance = sudo_debug_get_instance(getprogname());
+    /* Parse the rest of sudo.conf. */
+    sudo_conf_read(NULL, SUDO_CONF_ALL & ~SUDO_CONF_DEBUG);
 
     /* Fill in user_info with user name, uid, cwd, etc. */
     memset(&user_details, 0, sizeof(user_details));
@@ -1101,8 +1104,10 @@ format_plugin_settings(struct plugin_container *plugin,
     plugin_settings_size = 2;
     for (setting = sudo_settings; setting->name != NULL; setting++)
 	plugin_settings_size++;
-    TAILQ_FOREACH(debug_file, &plugin->debug_files, entries)
-	plugin_settings_size++;
+    if (plugin->debug_files != NULL) {
+	TAILQ_FOREACH(debug_file, plugin->debug_files, entries)
+	    plugin_settings_size++;
+    }
 
     /* Allocate and fill in. */
     plugin_settings = sudo_emallocarray(plugin_settings_size, sizeof(char *));
@@ -1119,10 +1124,12 @@ format_plugin_settings(struct plugin_container *plugin,
             num_plugin_settings++;
         }
     }
-    TAILQ_FOREACH(debug_file, &plugin->debug_files, entries) {
-	/* XXX - quote filename? */
-	sudo_easprintf(&plugin_settings[num_plugin_settings++],
-	    "debug_flags=%s %s", debug_file->debug_file, debug_file->debug_flags);
+    if (plugin->debug_files != NULL) {
+	TAILQ_FOREACH(debug_file, plugin->debug_files, entries) {
+	    /* XXX - quote filename? */
+	    sudo_easprintf(&plugin_settings[num_plugin_settings++],
+		"debug_flags=%s %s", debug_file->debug_file, debug_file->debug_flags);
+	}
     }
     plugin_settings[num_plugin_settings] = NULL;
 

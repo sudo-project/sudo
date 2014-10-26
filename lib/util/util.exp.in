@@ -1,5 +1,6 @@
 @COMPAT_EXP@initprogname
 sudo_conf_askpass_path_v1
+sudo_conf_debug_files_v1
 sudo_conf_debugging_v1
 sudo_conf_disable_coredump_v1
 sudo_conf_group_source_v1

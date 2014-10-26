@@ -106,19 +106,19 @@ sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files,
 }
 
 /*
- * Register the specified debug files and plugin_path with the
- * debug subsystem.
+ * Register the specified debug files and program with the
+ * debug subsystem, freeing the debug list when done.
  */
 void
 sudoers_debug_register(struct sudo_conf_debug_file_list *debug_files,
-    const char *plugin_path)
+    const char *program)
 {
     struct sudo_debug_file *debug_file, *debug_next;
 
     /* Setup debugging if indicated. */
-    if (!TAILQ_EMPTY(debug_files)) {
-	if (plugin_path != NULL) {
-	    sudoers_debug_instance = sudo_debug_register(plugin_path,
+    if (debug_files != NULL && !TAILQ_EMPTY(debug_files)) {
+	if (program != NULL) {
+	    sudoers_debug_instance = sudo_debug_register(program,
 		sudoers_subsystem_names, sudoers_subsystem_ids, debug_files);
 	}
 	TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
