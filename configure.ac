@@ -2147,7 +2147,7 @@ AC_INCLUDES_DEFAULT
 [AC_MSG_RESULT([no])
  AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
  AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])
- SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm)
+ SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm_v1)
 ])
 
 dnl

@@ -225,7 +225,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
  * Returns instance index on success or -1 if cannot open debugfile.
  */
 int
-sudo_debug_register(const char *program, const char *const subsystems[],
+sudo_debug_register_v1(const char *program, const char *const subsystems[],
     unsigned int ids[], struct sudo_conf_debug_file_list *debug_files)
 {
     struct sudo_debug_instance *instance = NULL;
@@ -330,7 +330,7 @@ sudo_debug_register(const char *program, const char *const subsystems[],
  * and free up any associated data structures.
  */
 int
-sudo_debug_deregister(int instance_id)
+sudo_debug_deregister_v1(int instance_id)
 {
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output, *next;
@@ -368,7 +368,7 @@ sudo_debug_deregister(int instance_id)
 }
 
 int
-sudo_debug_get_instance(const char *program)
+sudo_debug_get_instance_v1(const char *program)
 {
     int idx;
 
@@ -382,7 +382,7 @@ sudo_debug_get_instance(const char *program)
 }
 
 int
-sudo_debug_set_output_fd(int level, int ofd, int nfd)
+sudo_debug_set_output_fd_v1(int level, int ofd, int nfd)
 {
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
@@ -404,7 +404,7 @@ sudo_debug_set_output_fd(int level, int ofd, int nfd)
 }
 
 pid_t
-sudo_debug_fork(void)
+sudo_debug_fork_v1(void)
 {
     pid_t pid;
 
@@ -418,7 +418,7 @@ sudo_debug_fork(void)
 }
 
 void
-sudo_debug_enter(const char *func, const char *file, int line,
+sudo_debug_enter_v1(const char *func, const char *file, int line,
     int subsys)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
@@ -426,7 +426,7 @@ sudo_debug_enter(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit(const char *func, const char *file, int line,
+sudo_debug_exit_v1(const char *func, const char *file, int line,
     int subsys)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
@@ -434,7 +434,7 @@ sudo_debug_exit(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit_int(const char *func, const char *file, int line,
+sudo_debug_exit_int_v1(const char *func, const char *file, int line,
     int subsys, int rval)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
@@ -442,7 +442,7 @@ sudo_debug_exit_int(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit_long(const char *func, const char *file, int line,
+sudo_debug_exit_long_v1(const char *func, const char *file, int line,
     int subsys, long rval)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
@@ -450,7 +450,7 @@ sudo_debug_exit_long(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit_size_t(const char *func, const char *file, int line,
+sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
     int subsys, size_t rval)
 {
     /* XXX - should use %zu but our snprintf.c doesn't support it */
@@ -460,7 +460,7 @@ sudo_debug_exit_size_t(const char *func, const char *file, int line,
 
 /* We use int, not bool, here for functions that return -1 on error. */
 void
-sudo_debug_exit_bool(const char *func, const char *file, int line,
+sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
     int subsys, int rval)
 {
     if (rval == true || rval == false) {
@@ -473,7 +473,7 @@ sudo_debug_exit_bool(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit_str(const char *func, const char *file, int line,
+sudo_debug_exit_str_v1(const char *func, const char *file, int line,
     int subsys, const char *rval)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
@@ -481,7 +481,7 @@ sudo_debug_exit_str(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit_str_masked(const char *func, const char *file, int line,
+sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line,
     int subsys, const char *rval)
 {
     static const char stars[] = "********************************************************************************";
@@ -492,7 +492,7 @@ sudo_debug_exit_str_masked(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_exit_ptr(const char *func, const char *file, int line,
+sudo_debug_exit_ptr_v1(const char *func, const char *file, int line,
     int subsys, const void *rval)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
@@ -500,7 +500,7 @@ sudo_debug_exit_ptr(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_write2(int fd, const char *func, const char *file, int lineno,
+sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     const char *str, int len, int errnum)
 {
     char *timestr, numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
@@ -577,7 +577,7 @@ sudo_debug_write2(int fd, const char *func, const char *file, int lineno,
 }
 
 void
-sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
+sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
 {
     int buflen, idx, pri, saved_errno = errno;
@@ -643,7 +643,7 @@ out:
 
 #ifdef NO_VARIADIC_MACROS
 void
-sudo_debug_printf_nvm(int pri, const char *fmt, ...)
+sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
 {
     va_list ap;
 
@@ -654,7 +654,7 @@ sudo_debug_printf_nvm(int pri, const char *fmt, ...)
 #endif /* NO_VARIADIC_MACROS */
 
 void
-sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
+sudo_debug_printf2_v1(const char *func, const char *file, int lineno, int level,
     const char *fmt, ...)
 {
     va_list ap;
@@ -667,7 +667,7 @@ sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
 #define EXEC_PREFIX "exec "
 
 void
-sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[])
+sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[])
 {
     int buflen, idx, pri, saved_errno = errno;
     unsigned int subsys;
@@ -782,7 +782,7 @@ out:
  * if no default instance is set.
  */
 int
-sudo_debug_get_default_instance(void)
+sudo_debug_get_default_instance_v1(void)
 {
     return SUDO_DEBUG_MKINSTANCE(sudo_debug_default_instance);
 }
@@ -793,7 +793,7 @@ sudo_debug_get_default_instance(void)
  * of this is the only instance.
  */
 int
-sudo_debug_set_default_instance(int inst)
+sudo_debug_set_default_instance_v1(int inst)
 {
     const int idx = SUDO_DEBUG_INSTANCE(inst);
     const int old_idx = sudo_debug_default_instance;
@@ -808,7 +808,7 @@ sudo_debug_set_default_instance(int inst)
  * Also updates sudo_debug_fds.
  */
 void
-sudo_debug_update_fd(int ofd, int nfd)
+sudo_debug_update_fd_v1(int ofd, int nfd)
 {
     int idx;
 
@@ -838,7 +838,7 @@ sudo_debug_update_fd(int ofd, int nfd)
  * Fills in fds with the value of sudo_debug_fds.
  */
 int
-sudo_debug_get_fds(unsigned char **fds)
+sudo_debug_get_fds_v1(unsigned char **fds)
 {
     *fds = sudo_debug_fds;
     return sudo_debug_max_fd;
