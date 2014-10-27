@@ -70,7 +70,7 @@ PIE_LDFLAGS = @PIE_LDFLAGS@
 SSP_CFLAGS = @SSP_CFLAGS@
 SSP_LDFLAGS = @SSP_LDFLAGS@
 
-# Libtool style shard library version
+# Libtool style shared library version
 SHLIB_VERSION = 0:0:0
 
 # cppcheck options, usually set in the top-level Makefile
