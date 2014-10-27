@@ -1,5 +1,8 @@
 What's new in Sudo 1.8.12
 
+ * The embedded copy of zlib is now installed as a shared library
+   where supported if the system zlib is not being used.
+
  * Debug settings for the sudo front end and sudoers plugin are now
    configured separately.
 
