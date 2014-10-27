@@ -125,6 +125,7 @@ lib/util/regress/sudo_conf/test2.in
 lib/util/regress/sudo_conf/test2.out.ok
 lib/util/regress/sudo_conf/test3.in
 lib/util/regress/sudo_conf/test3.out.ok
+lib/util/regress/sudo_conf/test4.err.ok
 lib/util/regress/sudo_conf/test4.in
 lib/util/regress/sudo_conf/test4.out.ok
 lib/util/regress/sudo_conf/test5.err.ok
