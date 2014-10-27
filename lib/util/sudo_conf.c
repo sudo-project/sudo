@@ -73,8 +73,8 @@ struct sudo_conf_table {
 
 struct sudo_conf_path_table {
     const char *pname;
-    const char *pval;
     unsigned int pnamelen;
+    const char *pval;
 };
 
 static bool parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
@@ -121,16 +121,16 @@ static struct sudo_conf_data {
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
 #define SUDO_CONF_ASKPASS_IDX	0
-	{ "askpass", _PATH_SUDO_ASKPASS },
+	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
 #define SUDO_CONF_SESH_IDX	1
-	{ "sesh", _PATH_SUDO_SESH },
+	{ "sesh", sizeof("sesh") - 1, _PATH_SUDO_SESH },
 #ifdef _PATH_SUDO_NOEXEC
 #define SUDO_CONF_NOEXEC_IDX	2
-	{ "noexec", _PATH_SUDO_NOEXEC },
+	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
 #endif
 #ifdef _PATH_SUDO_PLUGIN_DIR
 #define SUDO_CONF_PLUGIN_IDX	3
-	{ "plugin", _PATH_SUDO_PLUGIN_DIR },
+	{ "plugin", sizeof("plugin") - 1, _PATH_SUDO_PLUGIN_DIR },
 #endif
 	{ NULL }
     }
@@ -177,13 +177,12 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
     /* Parse Path line */
     name = entry;
     path = strpbrk(entry, " \t");
-    if (path == NULL || *path != '/') {
-	sudo_warnx(U_("invalid Path value `%s' in %s, line %u"),
-	    entry, conf_file, lineno);
-	debug_return_bool(false);
-    }
+    if (path == NULL)
+	goto bad;
     while (isblank((unsigned char)*path))
 	path++;
+    if (*path != '/')
+	goto bad;
 
     /* Match supported paths, ignore the rest. */
     for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
@@ -197,6 +196,10 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
     }
     sudo_debug_printf(SUDO_DEBUG_WARN, "%s: %s:%u: unknown path %s",
 	__func__, conf_file, lineno, entry);
+    debug_return_bool(false);
+bad:
+    sudo_warnx(U_("invalid Path value `%s' in %s, line %u"),
+	entry, conf_file, lineno);
     debug_return_bool(false);
 }
 
