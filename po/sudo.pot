@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.12\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-10-23 07:54-0600\n"
+"POT-Creation-Date: 2014-10-27 12:35-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,14 +35,14 @@ msgid "internal error, tried allocate zero bytes"
 msgstr ""
 
 #: lib/util/alloc.c:87 lib/util/alloc.c:109 lib/util/alloc.c:149
-#: lib/util/alloc.c:172 src/net_ifs.c:172 src/net_ifs.c:189 src/net_ifs.c:323
+#: lib/util/alloc.c:172 src/net_ifs.c:174 src/net_ifs.c:191 src/net_ifs.c:325
 #, c-format
 msgid "internal error, %s overflow"
 msgstr ""
 
 #: lib/util/gidlist.c:78 src/load_plugins.c:61 src/load_plugins.c:74
-#: src/sudo.c:569 src/sudo.c:588 src/sudo.c:615 src/sudo.c:624 src/sudo.c:633
-#: src/sudo.c:650 src/sudo.c:697 src/sudo.c:707
+#: src/sudo.c:572 src/sudo.c:591 src/sudo.c:618 src/sudo.c:627 src/sudo.c:636
+#: src/sudo.c:653 src/sudo.c:700 src/sudo.c:710
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -66,42 +66,52 @@ msgstr ""
 msgid "value too small"
 msgstr ""
 
-#: lib/util/sudo_conf.c:478
+#: lib/util/sudo_conf.c:181
 #, c-format
-msgid "unsupported group source `%s' in %s, line %d"
+msgid "invalid Path value `%s' in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:493
+#: lib/util/sudo_conf.c:335 lib/util/sudo_conf.c:388
 #, c-format
-msgid "invalid max groups `%s' in %s, line %d"
+msgid "invalid value for %s `%s' in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:603
+#: lib/util/sudo_conf.c:356
+#, c-format
+msgid "unsupported group source `%s' in %s, line %u"
+msgstr ""
+
+#: lib/util/sudo_conf.c:372
+#, c-format
+msgid "invalid max groups `%s' in %s, line %u"
+msgstr ""
+
+#: lib/util/sudo_conf.c:522
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
 
-#: lib/util/sudo_conf.c:606
+#: lib/util/sudo_conf.c:525
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: lib/util/sudo_conf.c:609
+#: lib/util/sudo_conf.c:528
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:613
+#: lib/util/sudo_conf.c:532
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: lib/util/sudo_conf.c:616
+#: lib/util/sudo_conf.c:535
 #, c-format
 msgid "%s is group writable"
 msgstr ""
 
-#: lib/util/sudo_conf.c:626 src/selinux.c:196 src/selinux.c:209 src/sudo.c:338
+#: lib/util/sudo_conf.c:545 src/selinux.c:196 src/selinux.c:209 src/sudo.c:341
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -109,28 +119,28 @@ msgstr ""
 #: src/exec.c:123 src/exec.c:128 src/exec.c:423 src/exec.c:425 src/exec.c:427
 #: src/exec.c:429 src/exec.c:431 src/exec.c:433 src/exec.c:436 src/exec.c:453
 #: src/exec.c:455 src/exec.c:457 src/exec.c:605 src/exec.c:800
-#: src/exec_pty.c:460 src/exec_pty.c:716 src/exec_pty.c:786 src/exec_pty.c:788
-#: src/exec_pty.c:800 src/exec_pty.c:1288 src/exec_pty.c:1290
-#: src/exec_pty.c:1295 src/exec_pty.c:1297 src/exec_pty.c:1311
-#: src/exec_pty.c:1322 src/exec_pty.c:1324 src/exec_pty.c:1326
-#: src/exec_pty.c:1328 src/exec_pty.c:1330 src/exec_pty.c:1332
-#: src/exec_pty.c:1334 src/signal.c:156
+#: src/exec_pty.c:480 src/exec_pty.c:736 src/exec_pty.c:806 src/exec_pty.c:808
+#: src/exec_pty.c:820 src/exec_pty.c:1308 src/exec_pty.c:1310
+#: src/exec_pty.c:1315 src/exec_pty.c:1317 src/exec_pty.c:1331
+#: src/exec_pty.c:1342 src/exec_pty.c:1344 src/exec_pty.c:1346
+#: src/exec_pty.c:1348 src/exec_pty.c:1350 src/exec_pty.c:1352
+#: src/exec_pty.c:1354 src/signal.c:156
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr ""
 
-#: src/exec.c:135 src/exec_pty.c:825
+#: src/exec.c:135 src/exec_pty.c:845
 msgid "policy plugin failed session initialization"
 msgstr ""
 
-#: src/exec.c:140 src/exec_pty.c:841 src/exec_pty.c:1372 src/tgetpass.c:221
+#: src/exec.c:140 src/exec_pty.c:861 src/exec_pty.c:1392 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr ""
 
-#: src/exec.c:318 src/exec.c:326 src/exec.c:877 src/exec_pty.c:584
-#: src/exec_pty.c:589 src/exec_pty.c:647 src/exec_pty.c:654 src/exec_pty.c:945
-#: src/exec_pty.c:955 src/exec_pty.c:1000 src/exec_pty.c:1007
-#: src/exec_pty.c:1437 src/exec_pty.c:1444 src/exec_pty.c:1451
+#: src/exec.c:318 src/exec.c:326 src/exec.c:877 src/exec_pty.c:604
+#: src/exec_pty.c:609 src/exec_pty.c:667 src/exec_pty.c:674 src/exec_pty.c:965
+#: src/exec_pty.c:975 src/exec_pty.c:1020 src/exec_pty.c:1027
+#: src/exec_pty.c:1457 src/exec_pty.c:1464 src/exec_pty.c:1471
 msgid "unable to add event to queue"
 msgstr ""
 
@@ -146,12 +156,12 @@ msgstr ""
 msgid "unable to restore tty label"
 msgstr ""
 
-#: src/exec.c:613 src/exec_pty.c:494 src/signal.c:95
+#: src/exec.c:613 src/exec_pty.c:514 src/signal.c:95
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr ""
 
-#: src/exec.c:731 src/exec_pty.c:1179
+#: src/exec.c:731 src/exec_pty.c:1199
 msgid "error reading from signal pipe"
 msgstr ""
 
@@ -163,29 +173,29 @@ msgstr ""
 msgid "unable to allocate pty"
 msgstr ""
 
-#: src/exec_pty.c:760 src/exec_pty.c:769 src/exec_pty.c:777
-#: src/exec_pty.c:1280 src/exec_pty.c:1369 src/signal.c:137 src/tgetpass.c:218
+#: src/exec_pty.c:780 src/exec_pty.c:789 src/exec_pty.c:797
+#: src/exec_pty.c:1300 src/exec_pty.c:1389 src/signal.c:137 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr ""
 
-#: src/exec_pty.c:816
+#: src/exec_pty.c:836
 msgid "unable to set terminal to raw mode"
 msgstr ""
 
-#: src/exec_pty.c:1212
+#: src/exec_pty.c:1232
 msgid "error reading from pipe"
 msgstr ""
 
-#: src/exec_pty.c:1237
+#: src/exec_pty.c:1257
 msgid "error reading from socketpair"
 msgstr ""
 
-#: src/exec_pty.c:1246
+#: src/exec_pty.c:1266
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
 
-#: src/exec_pty.c:1348
+#: src/exec_pty.c:1368
 msgid "unable to set controlling tty"
 msgstr ""
 
@@ -246,17 +256,17 @@ msgstr ""
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
 msgstr ""
 
-#: src/load_plugins.c:250
+#: src/load_plugins.c:249
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
 msgstr ""
 
-#: src/load_plugins.c:325
+#: src/load_plugins.c:338
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr ""
 
-#: src/net_ifs.c:234
+#: src/net_ifs.c:236
 msgid "unable to open socket"
 msgstr ""
 
@@ -516,16 +526,16 @@ msgstr ""
 msgid "unable to set key creation context to %s"
 msgstr ""
 
-#: src/sesh.c:78
+#: src/sesh.c:80
 msgid "requires at least one argument"
 msgstr ""
 
-#: src/sesh.c:104
+#: src/sesh.c:109
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr ""
 
-#: src/sesh.c:109 src/sudo.c:1172
+#: src/sesh.c:114 src/sudo.c:1186
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -578,123 +588,123 @@ msgstr ""
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:206
+#: src/sudo.c:209
 #, c-format
 msgid "Sudo version %s\n"
 msgstr ""
 
-#: src/sudo.c:208
+#: src/sudo.c:211
 #, c-format
 msgid "Configure options: %s\n"
 msgstr ""
 
-#: src/sudo.c:213
+#: src/sudo.c:216
 msgid "fatal error, unable to load plugins"
 msgstr ""
 
-#: src/sudo.c:221
+#: src/sudo.c:224
 msgid "unable to initialize policy plugin"
 msgstr ""
 
-#: src/sudo.c:277
+#: src/sudo.c:280
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr ""
 
-#: src/sudo.c:303
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:423
+#: src/sudo.c:426
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:475
+#: src/sudo.c:478
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:782
+#: src/sudo.c:785
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:785
+#: src/sudo.c:788
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:791
+#: src/sudo.c:794
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:920
+#: src/sudo.c:923
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:933
+#: src/sudo.c:936
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:947
+#: src/sudo.c:950
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:954
+#: src/sudo.c:957
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:960
+#: src/sudo.c:963
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:967
+#: src/sudo.c:970
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:975
+#: src/sudo.c:978
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:988 src/sudo.c:994 src/sudo.c:1000
+#: src/sudo.c:991 src/sudo.c:997 src/sudo.c:1003
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1018
+#: src/sudo.c:1021
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1079
+#: src/sudo.c:1082
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1193
+#: src/sudo.c:1214
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr ""
 
-#: src/sudo.c:1206
+#: src/sudo.c:1232
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1218
+#: src/sudo.c:1249
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1230
+#: src/sudo.c:1264
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
