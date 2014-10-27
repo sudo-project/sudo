@@ -110,8 +110,8 @@ sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files,
  * debug subsystem, freeing the debug list when done.
  */
 void
-sudoers_debug_register(struct sudo_conf_debug_file_list *debug_files,
-    const char *program)
+sudoers_debug_register(const char *program,
+    struct sudo_conf_debug_file_list *debug_files)
 {
     struct sudo_debug_file *debug_file, *debug_next;
 
@@ -127,5 +127,19 @@ sudoers_debug_register(struct sudo_conf_debug_file_list *debug_files,
 	    sudo_efree(debug_file->debug_flags);
 	    sudo_efree(debug_file);
 	}
+    }
+}
+
+/*
+ * Deregister sudoers_debug_instance if it is registered.
+ */
+void
+sudoers_debug_deregister(void)
+{
+    debug_decl(sudoers_debug_deregister, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+        sudo_debug_deregister(sudoers_debug_instance);
+	sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
     }
 }

@@ -348,7 +348,8 @@ void sudoers_cleanup(void);
 
 /* sudoers_debug.c */
 void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
-void sudoers_debug_register(struct sudo_conf_debug_file_list *debug_files, const char *plugin_path);
+void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
+void sudoers_debug_deregister(void);
 extern int sudoers_debug_instance;
 
 /* policy.c */

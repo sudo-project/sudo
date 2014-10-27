@@ -602,7 +602,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	    continue;
 	}
     }
-    sudoers_debug_register(&debug_files, plugin_path);
+    sudoers_debug_register(plugin_path, &debug_files);
 
     /*
      * Pull iolog settings out of command_info.
@@ -690,11 +690,7 @@ sudoers_io_close(int exit_status, int error)
 	    fclose(io_log_files[i].fd.f);
     }
 
-    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
-	sudo_debug_deregister(sudoers_debug_instance);
-	sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-    }
+    sudoers_debug_deregister();
 
     return;
 }

@@ -140,7 +140,7 @@ main(int argc, char *argv[])
 
     /* Initialize the debug subsystem. */
     sudo_conf_read(NULL, SUDO_CONF_DEBUG);
-    sudoers_debug_register(sudo_conf_debug_files(getprogname()), getprogname());
+    sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
 
     dflag = 0;
     grfile = pwfile = NULL;

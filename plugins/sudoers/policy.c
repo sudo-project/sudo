@@ -549,7 +549,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	    continue;
 	}
     }
-    sudoers_debug_register(&debug_files, plugin_path);
+    sudoers_debug_register(plugin_path, &debug_files);
 
     /* Call the sudoers init function. */
     info.settings = settings;
@@ -593,11 +593,7 @@ sudoers_policy_close(int exit_status, int error_code)
     sudo_efree(user_gids);
     user_gids = NULL;
 
-    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
-	sudo_debug_deregister(sudoers_debug_instance);
-	sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-    }
+    sudoers_debug_deregister();
 
     return;
 }
