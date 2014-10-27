@@ -192,6 +192,7 @@ lib/zlib/trees.c
 lib/zlib/trees.h
 lib/zlib/uncompr.c
 lib/zlib/zconf.h.in
+lib/zlib/zlib.exp
 lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
