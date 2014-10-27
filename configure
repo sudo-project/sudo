@@ -723,7 +723,6 @@ COMPAT_EXP
 RC_LINK
 INIT_DIR
 INIT_SCRIPT
-NO_VIZ
 SSP_CFLAGS
 SSP_LDFLAGS
 PIE_CFLAGS
@@ -2980,7 +2979,6 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
-
 #
 # Begin initial values for man page substitution
 #
@@ -3056,7 +3054,6 @@ SUDO_NLS=disabled
 LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
-NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
 INIT_SCRIPT=
 INIT_DIR=
@@ -15223,7 +15220,7 @@ $as_echo "#define NO_VARIADIC_MACROS 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
 $as_echo "$as_me: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
 
-    for _sym in sudo_debug_printf_nvm; do
+    for _sym in sudo_debug_printf_nvm_v1; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
@@ -22316,7 +22313,6 @@ if test x"$ax_cv_check_cflags___fvisibility_hidden" = xyes; then :
 	CFLAGS="${CFLAGS} -fvisibility=hidden"
 	LT_LDEXPORTS=
 	LT_LDDEP=
-	NO_VIZ=
 
 else
   :

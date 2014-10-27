@@ -35,7 +35,7 @@ CPPFLAGS = -I. -I$(srcdir)
 CFLAGS = @CFLAGS@
 
 # OS dependent defines
-DEFS = @OSDEFS@ @NO_VIZ@
+DEFS = @OSDEFS@
 
 #### End of system configuration section. ####
 

@@ -84,7 +84,6 @@ AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
 AC_SUBST([SSP_LDFLAGS])
 AC_SUBST([SSP_CFLAGS])
-AC_SUBST([NO_VIZ])
 AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
@@ -211,7 +210,6 @@ SUDO_NLS=disabled
 LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
-NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
 INIT_SCRIPT=
 INIT_DIR=
@@ -3685,7 +3683,6 @@ if test -n "$GCC"; then
 	CFLAGS="${CFLAGS} -fvisibility=hidden"
 	LT_LDEXPORTS=
 	LT_LDDEP=
-	NO_VIZ=
     ])
 else
     case "$host_os" in
