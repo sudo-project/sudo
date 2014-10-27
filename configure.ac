@@ -22,6 +22,7 @@ AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
 AC_SUBST([LIBUTIL_LDFLAGS])
+AC_SUBST([ZLIB_LDFLAGS])
 AC_SUBST([LT_LDFLAGS])
 AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
@@ -2903,7 +2904,7 @@ case "$enable_zlib" in
 	AC_DEFINE(HAVE_ZLIB_H)
 	ZLIB="-lz"
 	;;
-    builtin)
+    static|shared|builtin)
 	# handled below
 	;;
     *)
@@ -2913,14 +2914,23 @@ case "$enable_zlib" in
 	ZLIB="${ZLIB} -lz"
 	;;
 esac
-if test X"$enable_zlib" = X"builtin"; then
-    AC_DEFINE(HAVE_ZLIB_H)
-    CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
-    ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libz.la'
-    ZLIB_SRC=lib/zlib
-    AC_CONFIG_HEADER([lib/zlib/zconf.h])
-    AC_CONFIG_FILES([lib/zlib/Makefile])
-fi
+case "$enable_zlib" in
+    builtin|static|dynamic)
+	AC_DEFINE(HAVE_ZLIB_H)
+	CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
+	ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libsudo_z.la'
+	ZLIB_SRC=lib/zlib
+	AC_CONFIG_HEADER([lib/zlib/zconf.h])
+	AC_CONFIG_FILES([lib/zlib/Makefile])
+	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
+	    if test "$enable_zlib" = "shared"; then
+		AC_MSG_ERROR(["Unable to build shared libraries on this system"])
+	    fi
+	    # Build as convenience library
+	    ZLIB_LDFLAGS=-no-install
+	fi
+	;;
+esac
 
 dnl
 dnl Check for errno declaration in errno.h

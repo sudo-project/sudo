@@ -9,12 +9,26 @@
 #define ZCONF_H
 
 /* The following four defines are enabled by sudo's configure script. */
+#undef HAVE_DSO_VISIBILITY
+#undef HAVE_MEMCPY
 #undef HAVE_UNISTD_H
 #undef HAVE_VSNPRINTF
-#undef HAVE_MEMCPY
 #undef _FILE_OFFSET_BITS
 #undef _LARGE_FILES
 #undef const
+
+/* We build sudo and its libs with -fvisibility=hidden where supported. */
+#ifdef HAVE_DSO_VISIBILITY
+# if defined(__GNUC__)
+#  define ZEXTERN extern __attribute__((__visibility__("default")))
+# elif defined(__SUNPRO_C)
+#  define ZEXTERN extern __global
+# elif defined(ZLIB_INTERNAL)
+#  define ZEXTERN extern __declspec(dllexport)
+# else
+#  define ZEXTERN extern __declspec(dllimport)
+# endif
+#endif
 
 /*
  * If you *really* need a unique prefix for all types and library functions,

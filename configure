@@ -784,6 +784,7 @@ LT_STATIC
 LT_LDEXPORTS
 LT_LDDEP
 LT_LDFLAGS
+ZLIB_LDFLAGS
 LIBUTIL_LDFLAGS
 SUDOERS_LDFLAGS
 LDFLAGS
@@ -2868,6 +2869,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -19912,7 +19914,7 @@ fi
 
 	ZLIB="-lz"
 	;;
-    builtin)
+    static|shared|builtin)
 	# handled below
 	;;
     *)
@@ -19946,17 +19948,26 @@ fi
 	ZLIB="${ZLIB} -lz"
 	;;
 esac
-if test X"$enable_zlib" = X"builtin"; then
-    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
+case "$enable_zlib" in
+    builtin|static|dynamic)
+	$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
-    CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
-    ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libz.la'
-    ZLIB_SRC=lib/zlib
-    ac_config_headers="$ac_config_headers lib/zlib/zconf.h"
+	CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
+	ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libsudo_z.la'
+	ZLIB_SRC=lib/zlib
+	ac_config_headers="$ac_config_headers lib/zlib/zconf.h"
 
-    ac_config_files="$ac_config_files lib/zlib/Makefile"
+	ac_config_files="$ac_config_files lib/zlib/Makefile"
 
-fi
+	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
+	    if test "$enable_zlib" = "shared"; then
+		as_fn_error $? "\"Unable to build shared libraries on this system\"" "$LINENO" 5
+	    fi
+	    # Build as convenience library
+	    ZLIB_LDFLAGS=-no-install
+	fi
+	;;
+esac
 
 ac_fn_c_check_decl "$LINENO" "errno" "ac_cv_have_decl_errno" "
 $ac_includes_default
