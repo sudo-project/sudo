@@ -42,6 +42,7 @@ LIBTOOL = @LIBTOOL@
 FLEX = @FLEX@
 YACC = @YACC@
 SED = @SED@
+AWK = @AWK@
 PERL = perl
 
 # Our install program supports extra flags...
@@ -187,7 +188,7 @@ all: $(PROGS)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
 
 $(shlib_map): $(shlib_exp)
-	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
+	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
 
 $(shlib_opt): $(shlib_exp)
 	@$(SED) 's/^/+e /' $(shlib_exp) > $@

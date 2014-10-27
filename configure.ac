@@ -2152,6 +2152,7 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Program checks
 dnl
+AC_PROG_AWK
 AC_PROG_YACC
 AC_PATH_PROG([FLEX], [flex], [flex])
 SUDO_PROG_MV
