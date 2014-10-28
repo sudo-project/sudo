@@ -79,11 +79,10 @@ main(int argc, char *argv[], char *envp[])
     if (argc < 2)
 	sudo_fatalx(U_("requires at least one argument"));
 
-    /* Read sudo.conf. */
-    sudo_conf_read(NULL);
-
-    /* Set debug instance to use (if configured). */
-    sudo_debug_instance = sudo_debug_get_instance(getprogname());
+    /* Read sudo.conf and initialize the debug subsystem. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    sudo_debug_instance = sudo_debug_register(getprogname(),
+        NULL, NULL, sudo_conf_debug_files(getprogname()));
 
     if (strcmp(argv[1], "-e") == 0) {
 	ret = sesh_sudoedit(argc, argv);
