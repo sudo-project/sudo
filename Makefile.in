@@ -252,9 +252,8 @@ compile-po:
 
 install-nls:
 	@if test "$(NLS)" = "enabled"; then \
-	    cd $(top_srcdir); \
 	    for pot in $(POTFILES); do \
-		podir=`dirname $$pot`; \
+		podir=`dirname $(top_srcdir)/$$pot`; \
 		domain=`basename $$pot .pot`; \
 		SUDO_LINGUAS=$${LINGUAS-"`echo $$podir/*.mo | $(SED) 's:'$$podir'/\([^ ]*\).mo:\1:g'`"}; \
 		echo $(ECHO_N) "Installing $$domain message catalogs:$(ECHO_C)"; \
