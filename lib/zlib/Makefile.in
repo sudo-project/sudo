@@ -37,13 +37,14 @@ localstatedir = @localstatedir@
 # File extension, mode and map file to use for shared libraries/objects
 shlib_enable = @SHLIB_ENABLE@
 shlib_mode = @SHLIB_MODE@
-shlib_exp = ./zlib.exp
+shlib_exp = zlib.exp
 shlib_map = zlib.map
 shlib_opt = zlib.opt
 
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
+SED = @SED@
 AWK = @AWK@
 
 # Our install program supports extra flags...
@@ -57,8 +58,8 @@ CPPFLAGS = -I. -I$(srcdir)
 CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
-LT_LDFLAGS = @ZLIB_LDFLAGS@
 LDFLAGS =
+LT_LDFLAGS = @ZLIB_LDFLAGS@ @LT_LDFLAGS@ @LT_LDEXPORTS@
 
 # PIE flags
 PIE_CFLAGS = @PIE_CFLAGS@
@@ -102,7 +103,7 @@ $(shlib_map): $(shlib_exp)
 $(shlib_opt): $(shlib_exp)
 	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
-libsudo_z.la: $(LTOBJS)
+libsudo_z.la: $(LTOBJS) @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
 	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS);; \
