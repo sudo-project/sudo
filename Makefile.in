@@ -291,7 +291,7 @@ force-dist: ChangeLog $(srcdir)/MANIFEST
 	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
-package: sudo.pp
+package: $(srcdir)/sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
 	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
