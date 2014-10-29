@@ -142,15 +142,12 @@ mktemp_internal(char *path, int slen, int mode)
 	return -1;
 }
 
-#ifndef HAVE_MKSTEMPS
 int
 sudo_mkstemps(char *path, int slen)
 {
 	return mktemp_internal(path, slen, MKTEMP_FILE);
 }
-#endif /* HAVE_MKSTEMPS */
 
-#ifndef HAVE_MKDTEMP
 char *
 sudo_mkdtemp(char *path)
 {
@@ -158,5 +155,4 @@ sudo_mkdtemp(char *path)
 		return NULL;
 	return path;
 }
-#endif /* HAVE_MKDTEMP */
 #endif /* !HAVE_MKSTEMPS || !HAVE_MKDTEMP */

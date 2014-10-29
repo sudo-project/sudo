@@ -2518,16 +2518,12 @@ AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
 #	include <limits.h>
 #	include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemps mkdtemp)
+AC_CHECK_FUNCS(mkstemps mkdtemp, [], [break])
 if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_CHECK_FUNCS(random lrand48, [break])
     AC_LIBOBJ(mktemp)
-    if test X"$ac_cv_func_mkstemps" = X"no"; then
-	SUDO_APPEND_COMPAT_EXP(sudo_mkstemps)
-    fi
-    if test X"$ac_cv_func_mkdtemp" = X"no"; then
-	SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp)
-    fi
+    # If either mkdtemp() or mkstemps() is missing, replace both.
+    SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
 fi
 AX_FUNC_SNPRINTF
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then

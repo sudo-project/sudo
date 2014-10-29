@@ -18395,6 +18395,8 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
+else
+  break
 fi
 done
 
@@ -18417,22 +18419,13 @@ done
  ;;
 esac
 
-    if test X"$ac_cv_func_mkstemps" = X"no"; then
+    # If either mkdtemp() or mkstemps() is missing, replace both.
 
-    for _sym in sudo_mkstemps; do
+    for _sym in sudo_mkdtemp sudo_mkstemps; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
 
-    fi
-    if test X"$ac_cv_func_mkdtemp" = X"no"; then
-
-    for _sym in sudo_mkdtemp; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-    fi
 fi
 for ac_func in snprintf vsnprintf
 do :

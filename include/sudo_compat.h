@@ -433,16 +433,14 @@ __dso_public errno_t sudo_memset_s(void *v, rsize_t smax, int c, rsize_t n);
 # undef memset_s
 # define memset_s(_a, _b, _c, _d) sudo_memset_s((_a), (_b), (_c), (_d))
 #endif /* HAVE_MEMSET_S */
-#ifndef HAVE_MKDTEMP
+#if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKSTEMPS)
 __dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp
 # define mkdtemp(_a) sudo_mkdtemp((_a))
-#endif /* HAVE_MKDTEMP */
-#ifndef HAVE_MKSTEMPS
 __dso_public int sudo_mkstemps(char *path, int slen);
 # undef mkstemps
 # define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
-#endif /* HAVE_MKSTEMPS */
+#endif /* !HAVE_MKDTEMP || !HAVE_MKSTEMPS */
 #ifndef HAVE_PW_DUP
 __dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
 # undef pw_dup
