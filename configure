@@ -6380,8 +6380,8 @@ esac
 
 
 
-macro_version='2.4.2.418'
-macro_revision='2.4.2.418'
+macro_version='2.4.2.458.26-92994'
+macro_revision='2.4.3'
 
 
 
@@ -6900,8 +6900,13 @@ else
 	# Adding the 'sed 1q' prevents false positives on HP-UX, which says:
 	#   nm: unknown option "B" ignored
 	# Tru64's nm complains that /dev/null is an invalid object file
-	case `"$tmp_nm" -B /dev/null 2>&1 | sed '1q'` in
-	*/dev/null* | *'Invalid file or object type'*)
+	# MSYS converts /dev/null to NUL, MinGW nm treats NUL as empty
+	case $build_os in
+	mingw*) lt_bad_file=conftest.nm/nofile ;;
+	*) lt_bad_file=/dev/null ;;
+	esac
+	case `"$tmp_nm" -B $lt_bad_file 2>&1 | sed '1q'` in
+	*$lt_bad_file* | *'Invalid file or object type'*)
 	  lt_cv_path_NM="$tmp_nm -B"
 	  break 2
 	  ;;
@@ -8701,6 +8706,71 @@ $as_echo "${lt_sysroot:-no}" >&6; }
 
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for a working dd" >&5
+$as_echo_n "checking for a working dd... " >&6; }
+if ${ac_cv_path_lt_DD+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  printf 0123456789abcdef0123456789abcdef >conftest.i
+cat conftest.i conftest.i >conftest2.i
+: ${lt_DD:=$DD}
+if test -z "$lt_DD"; then
+  ac_path_lt_DD_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in dd; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_lt_DD="$as_dir/$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_lt_DD" || continue
+if "$ac_path_lt_DD" bs=32 count=1 <conftest2.i >conftest.out 2>/dev/null; then
+  cmp -s conftest.i conftest.out \
+  && ac_cv_path_lt_DD="$ac_path_lt_DD" ac_path_lt_DD_found=:
+fi
+      $ac_path_lt_DD_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_lt_DD"; then
+    :
+  fi
+else
+  ac_cv_path_lt_DD=$lt_DD
+fi
+
+rm -f conftest.i conftest2.i conftest.out
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_lt_DD" >&5
+$as_echo "$ac_cv_path_lt_DD" >&6; }
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to truncate binary pipes" >&5
+$as_echo_n "checking how to truncate binary pipes... " >&6; }
+if ${lt_cv_truncate_bin+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  printf 0123456789abcdef0123456789abcdef >conftest.i
+cat conftest.i conftest.i >conftest2.i
+lt_cv_truncate_bin=
+if "$ac_cv_path_lt_DD" bs=32 count=1 <conftest2.i >conftest.out 2>/dev/null; then
+  cmp -s conftest.i conftest.out \
+  && lt_cv_truncate_bin="$ac_cv_path_lt_DD bs=4096 count=1"
+fi
+rm -f conftest.i conftest2.i conftest.out
+test -z "$lt_cv_truncate_bin" && lt_cv_truncate_bin="$SED -e 4q"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $lt_cv_truncate_bin" >&5
+$as_echo "$lt_cv_truncate_bin" >&6; }
+
+
+
+
+
+
 # Check whether --enable-libtool-lock was given.
 if test "${enable_libtool_lock+set}" = set; then :
   enableval=$enable_libtool_lock;
@@ -9685,7 +9755,7 @@ $as_echo "$lt_cv_ld_force_load" >&6; }
       case ${MACOSX_DEPLOYMENT_TARGET-10.0},$host in
 	10.0,*86*-darwin8*|10.0,*-darwin[91]*)
 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
-	10.[012]*)
+	10.[012][,.]*)
 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
 	10.*)
 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
@@ -24007,6 +24077,7 @@ lt_cv_sys_global_symbol_to_c_name_address_lib_prefix='`$ECHO "$lt_cv_sys_global_
 lt_cv_nm_interface='`$ECHO "$lt_cv_nm_interface" | $SED "$delay_single_quote_subst"`'
 nm_file_list_spec='`$ECHO "$nm_file_list_spec" | $SED "$delay_single_quote_subst"`'
 lt_sysroot='`$ECHO "$lt_sysroot" | $SED "$delay_single_quote_subst"`'
+lt_cv_truncate_bin='`$ECHO "$lt_cv_truncate_bin" | $SED "$delay_single_quote_subst"`'
 objdir='`$ECHO "$objdir" | $SED "$delay_single_quote_subst"`'
 MAGIC_CMD='`$ECHO "$MAGIC_CMD" | $SED "$delay_single_quote_subst"`'
 lt_prog_compiler_no_builtin_flag='`$ECHO "$lt_prog_compiler_no_builtin_flag" | $SED "$delay_single_quote_subst"`'
@@ -24129,6 +24200,7 @@ lt_cv_sys_global_symbol_to_c_name_address \
 lt_cv_sys_global_symbol_to_c_name_address_lib_prefix \
 lt_cv_nm_interface \
 nm_file_list_spec \
+lt_cv_truncate_bin \
 lt_prog_compiler_no_builtin_flag \
 lt_prog_compiler_pic \
 lt_prog_compiler_wl \
@@ -24812,39 +24884,34 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
     cat <<_LT_EOF >> "$cfgfile"
 #! $SHELL
-
-# `$ECHO "$ofile" | sed 's%^.*/%%'` - Provide generalized library-building support services.
 # Generated automatically by $as_me ($PACKAGE) $VERSION
 # Libtool was configured on host `(hostname || uname -n) 2>/dev/null | sed 1q`:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
+
+# Provide generalized library-building support services.
+# Written by Gordon Matzigkeit, 1996
+
+# Copyright (C) 2014 Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.  There is NO
+# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+# GNU Libtool is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of of the License, or
+# (at your option) any later version.
 #
-#   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
-#                 2006, 2007, 2008, 2009, 2010, 2011 Free Software
-#                 Foundation, Inc.
-#   Written by Gordon Matzigkeit, 1996
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program or library that is built
+# using GNU Libtool, you may include this file under the  same
+# distribution terms that you use for the rest of that program.
 #
-#   This file is part of GNU Libtool.
-#
-# GNU Libtool is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 2 of
-# the License, or (at your option) any later version.
-#
-# As a special exception to the GNU General Public License,
-# if you distribute this file as part of a program or library that
-# is built using GNU Libtool, you may include this file under the
-# same distribution terms that you use for the rest of that program.
-#
-# GNU Libtool is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# GNU Libtool is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Libtool; see the file COPYING.  If not, a copy
-# can be downloaded from http://www.gnu.org/licenses/gpl.html, or
-# obtained by writing to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 # The names of the tagged configurations supported by this script.
@@ -25002,6 +25069,9 @@ nm_file_list_spec=$lt_nm_file_list_spec
 
 # The root where to search for dependent libraries,and where our libraries should be installed.
 lt_sysroot=$lt_sysroot
+
+# Command to truncate a binary pipe.
+lt_truncate_bin=$lt_lt_cv_truncate_bin
 
 # The name of the directory that contains temporary libtool files.
 objdir=$objdir
