@@ -674,7 +674,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
     char * const *av;
-    char *buf, *cp;
+    char *cp, static_buf[4096], *buf = static_buf;
     size_t plen;
 
     if (sudo_debug_last_instance == -1)
@@ -706,7 +706,6 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
     if (subsys > instance->max_subsystem)
 	goto out;
 
-    /* XXX - use static buffer if possible */
     SLIST_FOREACH(output, &instance->outputs, entries) {
 	bool log_envp = false;
 
@@ -733,9 +732,11 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 		buflen += strlen(*av) + 1;
 	    buflen--;
 	}
-	buf = malloc(buflen + 1);
-	if (buf == NULL)
-	    goto out;
+	if (buflen >= (int)sizeof(static_buf)) {
+	    buf = malloc(buflen + 1);
+	    if (buf == NULL)
+		goto out;
+	}
 
 	/* Copy prefix and command. */
 	memcpy(buf, EXEC_PREFIX, sizeof(EXEC_PREFIX) - 1);
@@ -771,7 +772,10 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	*cp = '\0';
 
 	sudo_debug_write(output->fd, buf, buflen, 0);
-	free(buf);
+	if (buf != static_buf) {
+	    sudo_efree(buf);
+	    buf = static_buf;
+	}
     }
 out:
     errno = saved_errno;
