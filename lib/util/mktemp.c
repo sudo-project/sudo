@@ -50,35 +50,57 @@
 #define INT_MAX	0x7fffffff
 #endif
 
-#ifdef HAVE_RANDOM
-# define RAND		random
-# define SRAND		srandom
+#if defined(HAVE_ARC4RANDOM)
+# define RAND()		arc4random()
 # define SEED_T		unsigned int
+#elif defined(HAVE_RANDOM)
+# define RAND()		random()
+# define SRAND(_x)	srandom((_x))
+# define SEED_T		unsigned int
+#elif defined(HAVE_LRAND48)
+# define RAND()		lrand48()
+# define SRAND(_x)	srand48((_x))
+# define SEED_T		long
 #else
-# ifdef HAVE_LRAND48
-#  define RAND		lrand48
-#  define SRAND		srand48
-#  define SEED_T	long
-# else
-#  define RAND		rand
-#  define SRAND		srand
-#  define SEED_T	unsigned int
-# endif
+# define RAND()		rand()
+# define SRAND(_x)	srand((_x))
+# define SEED_T		unsigned int
 #endif
 
 static void
 seed_random(void)
 {
-	SEED_T seed;
+#ifdef SRAND
 	struct timeval tv;
+	SEED_T seed;
+	int fd;
 
 	/*
-	 * Seed from time of day and process id multiplied by small primes.
+	 * Seed from /dev/urandom if possible.
 	 */
-	(void) gettimeofday(&tv, NULL);
-	seed = (tv.tv_sec % 10000) * 523 + tv.tv_usec * 13 +
-	    (getpid() % 1000) * 983;
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd != -1) {
+	    ssize_t nread;
+
+	    do {
+		nread = read(fd, &seed, sizeof(seed));
+	    } while (nread == -1 && errno == EINTR);
+	    close(fd);
+	    if (nread != (ssize_t)sizeof(seed))
+		fd = -1;
+	}
+
+	/*
+	 * If no /dev/urandom, seed from time of day and process id
+	 * multiplied by small primes.
+	 */
+	if (fd == -1) {
+	    (void) gettimeofday(&tv, NULL);
+	    seed = (tv.tv_sec % 10000) * 523 + tv.tv_usec * 13 +
+		(getpid() % 1000) * 983;
+	}
 	SRAND(seed);
+#endif
 }
 
 static unsigned int
@@ -98,7 +120,7 @@ static int
 mktemp_internal(char *path, int slen, int mode)
 {
 	char *start, *cp, *ep;
-	const char *tempchars = TEMPCHARS;
+	const char tempchars[] = TEMPCHARS;
 	unsigned int r, tries;
 	int fd;
 

@@ -52,6 +52,9 @@
 /* Define to 1 if you use AIX general authentication. */
 #undef HAVE_AIXAUTH
 
+/* Define to 1 if you have the `arc4random' function. */
+#undef HAVE_ARC4RANDOM
+
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
