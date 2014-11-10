@@ -209,7 +209,7 @@ sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
 	*-no-install*) \
 	    $(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module;; \
 	*) \
-	    $(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so;; \
+	    $(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so;; \
 	esac
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)

@@ -108,7 +108,7 @@ libsudo_z.la: $(LTOBJS) @LT_LDDEP@
 	*-no-install*) \
 	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS);; \
 	*) \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo;; \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo;; \
 	esac
 
 pre-install:

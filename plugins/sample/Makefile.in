@@ -112,7 +112,7 @@ $(shlib_opt): $(shlib_exp)
 	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
 sample_plugin.la: $(OBJS) @LT_LDDEP@
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
 
 pre-install:
 
