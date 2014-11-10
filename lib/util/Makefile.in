@@ -120,10 +120,7 @@ all: libsudo_util.la
 Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file lib/util/Makefile)
 
-.SUFFIXES: .o .c .h .lo
-
-.c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
+.SUFFIXES: .c .h .lo
 
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
