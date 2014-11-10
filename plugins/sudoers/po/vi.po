@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.8.11b1\n"
+"Project-Id-Version: sudoers-1.8.12b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-07-30 09:37-0600\n"
-"PO-Revision-Date: 2014-08-11 15:46+0700\n"
+"POT-Creation-Date: 2014-10-23 07:54-0600\n"
+"PO-Revision-Date: 2014-11-09 08:35+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -22,15 +22,27 @@ msgstr ""
 "X-Poedit-Language: Vietnamese\n"
 "X-Poedit-Country: VIET NAM\n"
 
+#: confstr.sh:1
+msgid "syntax error"
+msgstr "lỗi cú pháp"
+
 #: confstr.sh:2
-msgid "Password:"
-msgstr "Mật khẩu:"
+msgid "%p's password: "
+msgstr "Mật khẩu của %p: "
 
 #: confstr.sh:3
+msgid "[sudo] password for %p: "
+msgstr "[sudo] mật khẩu dành cho %p: "
+
+#: confstr.sh:4
+msgid "Password: "
+msgstr "Mật khẩu: "
+
+#: confstr.sh:5
 msgid "*** SECURITY information for %h ***"
 msgstr "*** Thông tin AN NINH cho %h ***"
 
-#: confstr.sh:4
+#: confstr.sh:6
 msgid "Sorry, try again."
 msgstr "Rất tiếc, hãy thử lại."
 
@@ -50,7 +62,7 @@ msgstr "không thể khởi chạy xác thực kiểu bsd"
 
 #: plugins/sudoers/auth/bsdauth.c:88
 msgid "invalid authentication type"
-msgstr "kiểu xác thực sai"
+msgstr "kiểu xác thực không hợp lệ"
 
 #: plugins/sudoers/auth/bsdauth.c:97
 msgid "unable to initialize BSD authentication"
@@ -190,27 +202,31 @@ msgstr "không hiểu lỗi SecurID"
 msgid "invalid passcode length for SecurID"
 msgstr "sai chiều dài passcode cho SecurID"
 
-#: plugins/sudoers/auth/sia.c:105
+#: plugins/sudoers/auth/sia.c:123
 msgid "unable to initialize SIA session"
 msgstr "không thể khởi tạo phiên SIA"
 
-#: plugins/sudoers/auth/sudo_auth.c:117
+#: plugins/sudoers/auth/sudo_auth.c:115
 msgid "invalid authentication methods"
 msgstr "Phương thức xác thực không hợp lệ"
 
-#: plugins/sudoers/auth/sudo_auth.c:119
+#: plugins/sudoers/auth/sudo_auth.c:117
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
 msgstr "Phương thức xác thực không hợp lệ được biên dịch vào trong sudo! Bạn không thể pha trộn kiểu xác thực giữa standalone và non-standalone"
 
-#: plugins/sudoers/auth/sudo_auth.c:188
+#: plugins/sudoers/auth/sudo_auth.c:203 plugins/sudoers/auth/sudo_auth.c:252
 msgid "no authentication methods"
 msgstr "chưa có phương thức xác thực"
 
-#: plugins/sudoers/auth/sudo_auth.c:190
+#: plugins/sudoers/auth/sudo_auth.c:205
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
 msgstr "Ở đây không có phương thức xác thực nào được dịch vào trong sudo! Nếu bạn muốn tắt xác thực, sử dụng tùy chọn cấu hình --disable-authentication"
 
-#: plugins/sudoers/auth/sudo_auth.c:360
+#: plugins/sudoers/auth/sudo_auth.c:254
+msgid "Unable to initialize authentication methods."
+msgstr "Không thể khởi tạo phương thức xác thực."
+
+#: plugins/sudoers/auth/sudo_auth.c:412
 msgid "Authentication methods:"
 msgstr "Phương thức xác thực:"
 
@@ -248,7 +264,7 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr "không biết mã số người dùng: %u"
 
-#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:671
+#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:710
 #: plugins/sudoers/sudoers.c:918 plugins/sudoers/testsudoers.c:211
 #: plugins/sudoers/testsudoers.c:363
 #, c-format
@@ -400,7 +416,7 @@ msgstr "Thời gian chờ dấu vết thời gian xác thực tối đa: %.1f  p
 #: plugins/sudoers/def_data.c:163
 #, c-format
 msgid "Password prompt timeout: %.1f minutes"
-msgstr "Thời gian chờ nhắc mật khẩu tối đa: %.1f  phút"
+msgstr "Thời gian chờ nhắc mật khẩu tối đa: %.1f phút"
 
 #: plugins/sudoers/def_data.c:167
 #, c-format
@@ -684,21 +700,21 @@ msgstr "giá trị cho “%s” phải bắt đầu bằng dấu “/”"
 msgid "option `%s' does not take a value"
 msgstr "tùy chọn “%s” không nhận giá trị"
 
-#: plugins/sudoers/env.c:274 plugins/sudoers/env.c:281
-#: plugins/sudoers/env.c:384 plugins/sudoers/linux_audit.c:89
-#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:468
-#: plugins/sudoers/policy.c:477 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/env.c:276 plugins/sudoers/env.c:283
+#: plugins/sudoers/env.c:386 plugins/sudoers/linux_audit.c:89
+#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:475
+#: plugins/sudoers/policy.c:484 plugins/sudoers/prompt.c:161
 #: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:241
 #: plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "lỗi nội bộ, %s bị tràn"
 
-#: plugins/sudoers/env.c:357
+#: plugins/sudoers/env.c:359
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp sai hỏng, chiều dài không khớp"
 
-#: plugins/sudoers/env.c:1051
+#: plugins/sudoers/env.c:1054
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "rất tiếc, bạn không được phép đặt các biến môi trường sau đây: %1s"
@@ -713,7 +729,7 @@ msgstr "%s phải được sở hữu bởi uid %d"
 msgid "%s must only be writable by owner"
 msgstr "%s phải là những thứ chỉ có thể ghi bởi chủ sở hữu"
 
-#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:252
+#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "không thể tải %s: %s"
@@ -850,8 +866,8 @@ msgstr ""
 msgid "    Order: %s\n"
 msgstr "      Thứ tự: %s\n"
 
-#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:506
-#: plugins/sudoers/sssd.c:1298
+#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:512
+#: plugins/sudoers/sssd.c:1297
 #, c-format
 msgid "    Commands:\n"
 msgstr "        Lệnh:\n"
@@ -870,7 +886,7 @@ msgstr "start_tls được chỉ ra nhưng thư viện LDAP không hỗ trợ ld
 msgid "invalid sudoOrder attribute: %s"
 msgstr "thuộc tính sudoOrder không hợp lệ: %s"
 
-#: plugins/sudoers/linux_audit.c:61
+#: plugins/sudoers/linux_audit.c:63
 msgid "unable to open audit system"
 msgstr "không thể mở hệ thống audit"
 
@@ -1008,17 +1024,17 @@ msgstr "%s: lỗi đọc"
 msgid "digest for %s (%s) is not in %s form"
 msgstr "tóm lược cho %s (%s) không ở dạng thức %s"
 
-#: plugins/sudoers/parse.c:116
+#: plugins/sudoers/parse.c:123
 #, c-format
 msgid "parse error in %s near line %d"
 msgstr "lỗi phân tích trong %s gần dòng %d"
 
-#: plugins/sudoers/parse.c:119
+#: plugins/sudoers/parse.c:126
 #, c-format
 msgid "parse error in %s"
 msgstr "gặp lỗi phân tích trong %s"
 
-#: plugins/sudoers/parse.c:453
+#: plugins/sudoers/parse.c:459
 #, c-format
 msgid ""
 "\n"
@@ -1027,26 +1043,26 @@ msgstr ""
 "\n"
 "Mục Sudoers:\n"
 
-#: plugins/sudoers/parse.c:454
+#: plugins/sudoers/parse.c:460
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    ChạyVớiTưCáchNgườiDùng: "
 
-#: plugins/sudoers/parse.c:468
+#: plugins/sudoers/parse.c:474
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    ChạyVớiTưCáchNhóm: "
 
-#: plugins/sudoers/parse.c:477
+#: plugins/sudoers/parse.c:483
 #, c-format
 msgid "    Options: "
 msgstr "    Tùy chọn:"
 
-#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:118
-#: plugins/sudoers/policy.c:127 plugins/sudoers/policy.c:151
-#: plugins/sudoers/policy.c:267 plugins/sudoers/policy.c:287
-#: plugins/sudoers/policy.c:296 plugins/sudoers/policy.c:326
-#: plugins/sudoers/policy.c:336 plugins/sudoers/policy.c:345
+#: plugins/sudoers/policy.c:111 plugins/sudoers/policy.c:120
+#: plugins/sudoers/policy.c:129 plugins/sudoers/policy.c:153
+#: plugins/sudoers/policy.c:270 plugins/sudoers/policy.c:294
+#: plugins/sudoers/policy.c:303 plugins/sudoers/policy.c:333
+#: plugins/sudoers/policy.c:343 plugins/sudoers/policy.c:352
 #: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
 #: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
 #: plugins/sudoers/set_perms.c:1523
@@ -1054,22 +1070,22 @@ msgstr "    Tùy chọn:"
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: plugins/sudoers/policy.c:559 plugins/sudoers/visudo.c:767
+#: plugins/sudoers/policy.c:575 plugins/sudoers/visudo.c:767
 #, c-format
 msgid "unable to execute %s"
 msgstr "không thể thực thi %s"
 
-#: plugins/sudoers/policy.c:689
+#: plugins/sudoers/policy.c:733
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Phiên bản của phần bổ xung chính sách Sudoers %s\n"
 
-#: plugins/sudoers/policy.c:691
+#: plugins/sudoers/policy.c:735
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Phiên bản ngữ pháp tập tin Sudoers %d\n"
 
-#: plugins/sudoers/policy.c:695
+#: plugins/sudoers/policy.c:739
 #, c-format
 msgid ""
 "\n"
@@ -1078,17 +1094,17 @@ msgstr ""
 "\n"
 "Đường dẫn Sudoers: %s\n"
 
-#: plugins/sudoers/policy.c:698
+#: plugins/sudoers/policy.c:742
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "đường dẫn nsswitch: %s\n"
 
-#: plugins/sudoers/policy.c:700
+#: plugins/sudoers/policy.c:744
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "đường dẫn ldap.conf: %s\n"
 
-#: plugins/sudoers/policy.c:701
+#: plugins/sudoers/policy.c:745
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "đường dẫn ldap.secret: %s\n"
@@ -1127,7 +1143,7 @@ msgstr "không thể phân tích nhóm cho %s"
 #: plugins/sudoers/set_perms.c:850 plugins/sudoers/set_perms.c:1147
 #: plugins/sudoers/set_perms.c:1439
 msgid "perm stack overflow"
-msgstr "stack perm bị tràn"
+msgstr "ngăn xếp perm bị tràn"
 
 #: plugins/sudoers/set_perms.c:130 plugins/sudoers/set_perms.c:378
 #: plugins/sudoers/set_perms.c:455 plugins/sudoers/set_perms.c:717
@@ -1135,12 +1151,12 @@ msgstr "stack perm bị tràn"
 #: plugins/sudoers/set_perms.c:1155 plugins/sudoers/set_perms.c:1372
 #: plugins/sudoers/set_perms.c:1447 plugins/sudoers/set_perms.c:1536
 msgid "perm stack underflow"
-msgstr "perm stack tràn ngầm"
+msgstr "ngăn xếp stack tràn ngầm"
 
 #: plugins/sudoers/set_perms.c:189 plugins/sudoers/set_perms.c:502
 #: plugins/sudoers/set_perms.c:1206 plugins/sudoers/set_perms.c:1479
 msgid "unable to change to root gid"
-msgstr "không thể thay đổi chỉ số nhóm gid của siêu người dùng root"
+msgstr "không thể thay đổi mã số nhóm của siêu người dùng root"
 
 #: plugins/sudoers/set_perms.c:278 plugins/sudoers/set_perms.c:599
 #: plugins/sudoers/set_perms.c:987 plugins/sudoers/set_perms.c:1283
@@ -1168,51 +1184,51 @@ msgstr "không thể thay đổi thành gid sudoers"
 msgid "too many processes"
 msgstr "quá nhiều tiến trình"
 
-#: plugins/sudoers/solaris_audit.c:48
+#: plugins/sudoers/solaris_audit.c:47
 msgid "unable to get current working directory"
 msgstr "không thể lấy thư mục làm việc hiện tại"
 
-#: plugins/sudoers/solaris_audit.c:56
+#: plugins/sudoers/solaris_audit.c:55
 #, c-format
 msgid "truncated audit path user_cmnd: %s"
 msgstr "đã cắt ngắn đường dẫn audit user_cmnd: %s"
 
-#: plugins/sudoers/solaris_audit.c:63
+#: plugins/sudoers/solaris_audit.c:62
 #, c-format
 msgid "truncated audit path argv[0]: %s"
 msgstr "đã cắt ngắn đường dẫn audit argv[0]: %s"
 
-#: plugins/sudoers/solaris_audit.c:112
+#: plugins/sudoers/solaris_audit.c:111
 msgid "audit_failure message too long"
 msgstr "thông điệp audit_failure quá dài"
 
-#: plugins/sudoers/sssd.c:253
+#: plugins/sudoers/sssd.c:252
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "không thể khởi tạo nguồn SSS. SSSD đã được cài đặt trên máy của bạn chưa vậy?"
 
-#: plugins/sudoers/sssd.c:260 plugins/sudoers/sssd.c:268
-#: plugins/sudoers/sssd.c:276 plugins/sudoers/sssd.c:284
-#: plugins/sudoers/sssd.c:292
+#: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
+#: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
+#: plugins/sudoers/sssd.c:291
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "không thể tìm thấy ký hiệu “%s” trong %s"
 
-#: plugins/sudoers/sudo_nss.c:285
+#: plugins/sudoers/sudo_nss.c:296
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr "Các mục mặc định khớp cho %s trên máy %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:298
+#: plugins/sudoers/sudo_nss.c:309
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr "Runas và Đặc-tả-lệnh mặc định cho %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:311
+#: plugins/sudoers/sudo_nss.c:322
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr "Người dùng %s có thể chạy những lệnh sau trên máy %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:320
+#: plugins/sudoers/sudo_nss.c:331
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Tài khoản %s không được phép thi hành sudo trên %s.\n"
@@ -1263,7 +1279,7 @@ msgstr "lệnh quá dài"
 #: plugins/sudoers/visudo.c:593
 #, c-format
 msgid "unable to stat %s"
-msgstr "không thể lấy trạng thái về %s"
+msgstr "không thể lấy thống kê %s"
 
 #: plugins/sudoers/sudoers.c:783
 #, c-format
@@ -1273,7 +1289,7 @@ msgstr "%s không phải tập tin thường"
 #: plugins/sudoers/sudoers.c:787 plugins/sudoers/timestamp.c:289 toke.l:945
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
-msgstr "%s được sở hữu bởi uid %u, nên là %u"
+msgstr "%s được sở hữu bởi người dùng mang mã số %u, nên là %u"
 
 #: plugins/sudoers/sudoers.c:791 toke.l:952
 #, c-format
@@ -1283,7 +1299,7 @@ msgstr "%s ai ghi cũng được"
 #: plugins/sudoers/sudoers.c:795 toke.l:957
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
-msgstr "%s được sở hữu bởi gid %u, nên là %u"
+msgstr "%s được sở hữu bởi nhóm mang mã số %u, nên là %u"
 
 #: plugins/sudoers/sudoers.c:826
 #, c-format
@@ -1743,6 +1759,9 @@ msgstr "%s: các tập tin đầu vào và đầu ra phải khác nhau"
 msgid "too many levels of includes"
 msgstr "quá nhiều cấp bao gồm (include)"
 
+#~ msgid "Password:"
+#~ msgstr "Mật khẩu:"
+
 #~ msgid "internal error: insufficient space for log line"
 #~ msgstr "lỗi nội bộ: thiếu khoảng trống cho dòng ghi nhật ký"
 
@@ -1817,9 +1836,6 @@ msgstr "quá nhiều cấp bao gồm (include)"
 
 #~ msgid "pam_authenticate: %s"
 #~ msgstr "pam_authenticate: %s"
-
-#~ msgid "Password: "
-#~ msgstr "Mật khẩu: "
 
 #~ msgid "getauid failed"
 #~ msgstr "getauid gặp lỗi"
