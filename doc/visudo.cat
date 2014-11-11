@@ -83,18 +83,19 @@ DDEESSCCRRIIPPTTIIOONN
                  The various values have explicit types which removes much of
                  the ambiguity of the _s_u_d_o_e_r_s format.
 
-   UUssiinngg ssuuddoo..ccoonnff wwiitthh vviissuuddoo
+   DDeebbuuggggiinngg aanndd ssuuddooeerrss pplluuggiinn aarrgguummeennttss
      vviissuuddoo versions 1.8.4 and higher support a flexible debugging framework
-     that is configured via Debug lines in the sudo.conf(4) file.  Starting
-     with ssuuddoo 1.8.12, vviissuuddoo will also parse the arguments to the _s_u_d_o_e_r_s
-     plugin to override the default _s_u_d_o_e_r_s path name, UID, GID and file mode.
-     These arguments, if present, should be listed after the path to the
-     plugin (i.e. after _s_u_d_o_e_r_s_._s_o).  Multiple arguments may be specified,
-     separated by white space.  For example:
+     that is configured via Debug lines in the sudo.conf(4) file.
+
+     Starting with ssuuddoo 1.8.12, vviissuuddoo will also parse the arguments to the
+     _s_u_d_o_e_r_s plugin to override the default _s_u_d_o_e_r_s path name, UID, GID and
+     file mode.  These arguments, if present, should be listed after the path
+     to the plugin (i.e. after _s_u_d_o_e_r_s_._s_o).  Multiple arguments may be
+     specified, separated by white space.  For example:
 
            Plugin sudoers_policy sudoers.so sudoers_mode=0400
 
-     The following plugin arguments are supported:
+     The following arguments are supported:
 
      sudoers_file=pathname
                The _s_u_d_o_e_r_s___f_i_l_e argument can be used to override the default
@@ -166,7 +167,7 @@ DDIIAAGGNNOOSSTTIICCSS
            path name as the _s_u_d_o_e_r_s file to export.
 
 SSEEEE AALLSSOO
-     vi(1), sudoers(4), sudo(1m), vipw(1m)
+     vi(1), sudo.conf(4), sudoers(4), sudo(1m), vipw(1m)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of

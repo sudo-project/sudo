@@ -225,7 +225,7 @@ ambiguity of the
 .Em sudoers
 format.
 .El
-.Ss Using sudo.conf with visudo
+.Ss Debugging and sudoers plugin arguments
 .Nm visudo
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
@@ -233,6 +233,7 @@ that is configured via
 lines in the
 .Xr sudo.conf @mansectform@
 file.
+.Pp
 Starting with
 .Nm sudo
 1.8.12,
@@ -358,6 +359,7 @@ file to export.
 .El
 .Sh SEE ALSO
 .Xr vi 1 ,
+.Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@ ,
 .Xr vipw @mansectsu@

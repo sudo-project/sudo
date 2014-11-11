@@ -233,7 +233,7 @@ The various values have explicit types which removes much of the
 ambiguity of the
 \fIsudoers\fR
 format.
-.SS "Using sudo.conf with visudo"
+.SS "Debugging and sudoers plugin arguments"
 \fBvisudo\fR
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
@@ -241,6 +241,7 @@ that is configured via
 lines in the
 sudo.conf(@mansectform@)
 file.
+.PP
 Starting with
 \fBsudo\fR
 1.8.12,
@@ -262,7 +263,7 @@ Plugin sudoers_policy sudoers.so sudoers_mode=0400
 .RE
 .fi
 .PP
-The following plugin arguments are supported:
+The following arguments are supported:
 .TP 10n
 sudoers_file=pathname
 The
@@ -376,6 +377,7 @@ has the same path name as the
 file to export.
 .SH "SEE ALSO"
 vi(1),
+sudo.conf(@mansectform@),
 sudoers(@mansectform@),
 sudo(@mansectsu@),
 vipw(@mansectsu@)
