@@ -109,6 +109,7 @@ static bool install_sudoers(struct sudoersfile *, bool);
 static int print_unused(void *, void *);
 static bool reparse_sudoers(char *, char *, bool, bool);
 static int run_command(char *, char **);
+static void parse_sudoers_options(void);
 static void setup_signals(void);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
@@ -169,9 +170,14 @@ main(int argc, char *argv[])
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(visudo_cleanup);
 
+    /* Read debug and plugin sections of sudo.conf. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS);
+
     /* Initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
     sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
+
+    /* Parse sudoers plugin options, if any. */
+    parse_sudoers_options();
 
     /*
      * Arg handling.
@@ -1275,6 +1281,59 @@ print_unused(void *v1, void *v2)
     sudo_warnx_nodebug(U_("Warning: unused %s `%s'"),
 	alias_type_to_string(a->type), a->name);
     return 0;
+}
+
+static void
+parse_sudoers_options(void)
+{
+    struct plugin_info_list *plugins;
+    debug_decl(parse_sudoers_options, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+
+    plugins = sudo_conf_plugins();
+    if (plugins) {
+	struct plugin_info *info;
+
+	TAILQ_FOREACH(info, plugins, entries) {
+	    if (strcmp(info->symbol_name, "sudoers_policy") == 0)
+		break;
+	}
+	if (info != NULL && info->options != NULL) {
+	    char * const *cur;
+
+#define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
+	    for (cur = info->options; *cur != NULL; cur++) {
+		const char *errstr, *p;
+		id_t id;
+
+		if (MATCHES(*cur, "sudoers_file=")) {
+		    sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+		    continue;
+		}
+		if (MATCHES(*cur, "sudoers_uid=")) {
+		    p = *cur + sizeof("sudoers_uid=") - 1;
+		    id = sudo_strtoid(p, NULL, NULL, &errstr);
+		    if (errstr == NULL)
+			sudoers_uid = (uid_t) id;
+		    continue;
+		}
+		if (MATCHES(*cur, "sudoers_gid=")) {
+		    p = *cur + sizeof("sudoers_gid=") - 1;
+		    id = sudo_strtoid(p, NULL, NULL, &errstr);
+		    if (errstr == NULL)
+			sudoers_gid = (gid_t) id;
+		    continue;
+		}
+		if (MATCHES(*cur, "sudoers_mode=")) {
+		    p = *cur + sizeof("sudoers_mode=") - 1;
+		    id = (id_t) sudo_strtomode(p, &errstr);
+		    if (errstr == NULL)
+			sudoers_mode = (mode_t) id;
+		    continue;
+		}
+	    }
+	}
+    }
+    debug_return;
 }
 
 /*
