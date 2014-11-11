@@ -199,7 +199,16 @@ DDEESSCCRRIIPPTTIIOONN
      which is probably not what was intended.  This will be addressed in a
      future version of ssuuddoorreeppllaayy.
 
+   DDeebbuuggggiinngg ssuuddoorreeppllaayy
+     ssuuddoorreeppllaayy versions 1.8.4 and higher support a flexible debugging
+     framework that is configured via Debug lines in the sudo.conf(4) file.
+
+     For more information on configuring sudo.conf(4), please refer to its
+     manual.
+
 FFIILLEESS
+     _/_e_t_c_/_s_u_d_o_._c_o_n_f            Debugging framework configuration
+
      _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o          The default I/O log directory.
 
      _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_l_o_g
@@ -244,7 +253,7 @@ EEXXAAMMPPLLEESS
            # sudoreplay -l ( user jeff or user bob ) tty console
 
 SSEEEE AALLSSOO
-     sudo(1m), script(1)
+     sudo.conf(4), sudo(1m), script(1)
 
 AAUUTTHHOORRSS
      Todd C. Miller

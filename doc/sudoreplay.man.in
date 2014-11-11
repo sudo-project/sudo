@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "February 15, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "8" "February 15, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -330,7 +330,22 @@ will result in a time exactly two weeks from now, which is probably
 not what was intended.
 This will be addressed in a future version of
 \fBsudoreplay\fR.
+.SS "Debugging sudoreplay"
+\fBsudoreplay\fR
+versions 1.8.4 and higher support a flexible debugging framework
+that is configured via
+\fRDebug\fR
+lines in the
+sudo.conf(@mansectform@)
+file.
+.PP
+For more information on configuring
+sudo.conf(@mansectform@),
+please refer to its manual.
 .SH "FILES"
+.TP 26n
+\fI@sysconfdir@/sudo.conf\fR
+Debugging framework configuration
 .TP 26n
 \fI@iolog_dir@\fR
 The default I/O log directory.
@@ -402,6 +417,7 @@ List sessions run by jeff or bob on the console:
 .RE
 .fi
 .SH "SEE ALSO"
+sudo.conf(@mansectform@),
 sudo(@mansectsu@),
 script(1)
 .SH "AUTHORS"

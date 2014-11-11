@@ -297,8 +297,22 @@ will result in a time exactly two weeks from now, which is probably
 not what was intended.
 This will be addressed in a future version of
 .Nm sudoreplay .
+.Ss Debugging sudoreplay
+.Nm sudoreplay
+versions 1.8.4 and higher support a flexible debugging framework
+that is configured via
+.Li Debug
+lines in the
+.Xr sudo.conf @mansectform@
+file.
+.Pp
+For more information on configuring
+.Xr sudo.conf @mansectform@ ,
+please refer to its manual.
 .Sh FILES
 .Bl -tag -width 24n
+.It Pa @sysconfdir@/sudo.conf
+Debugging framework configuration
 .It Pa @iolog_dir@
 The default I/O log directory.
 .It Pa @iolog_dir@/00/00/01/log
@@ -351,6 +365,7 @@ List sessions run by jeff or bob on the console:
 # sudoreplay -l ( user jeff or user bob ) tty console
 .Ed
 .Sh SEE ALSO
+.Xr sudo.conf @mansectform@ ,
 .Xr sudo @mansectsu@ ,
 .Xr script 1
 .Sh AUTHORS
