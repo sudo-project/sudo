@@ -644,13 +644,13 @@ syntax depends on
 the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
 .TP 6n
-\fBo\fR
+\fB\(bu\fR
 Group in the same domain: "%:Group Name"
 .TP 6n
-\fBo\fR
+\fB\(bu\fR
 Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 .TP 6n
-\fBo\fR
+\fB\(bu\fR
 Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 .PP
 See
