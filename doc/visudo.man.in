@@ -112,7 +112,7 @@ option should be used with extreme care because if
 believes there to be a parse error, so will
 \fBsudo\fR
 and no one
-will be able to
+will be able to run
 \fBsudo\fR
 again until the error is fixed.
 If

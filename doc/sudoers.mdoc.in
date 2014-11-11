@@ -27,7 +27,7 @@
 .Nd default sudo security policy plugin
 .Sh DESCRIPTION
 The
-.Em sudoers
+.Nm
 policy plugin determines a user's
 .Nm sudo
 privileges.
@@ -56,12 +56,12 @@ If no
 file is present, or if it contains no
 .Li Plugin
 lines,
-.Nm sudoers
+.Nm
 will be used for policy decisions and I/O logging.
 To explicitly configure
 .Xr sudo.conf @mansectform@
 to use the
-.Nm sudoers
+.Nm
 plugin, the following configuration can be used.
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so
@@ -71,7 +71,7 @@ Plugin sudoers_io sudoers.so
 Starting with
 .Nm sudo
 1.8.5, it is possible to specify optional arguments to the
-.Nm sudoers
+.Nm
 plugin in the
 .Xr sudo.conf @mansectform@
 file.
@@ -361,7 +361,7 @@ variables in the PAM environment may be merged in to the environment.
 If a variable in the PAM environment is already present in the
 user's environment, the value will only be overridden if the variable
 was not preserved by
-.Nm sudoers.
+.Nm .
 When
 .Em env_reset
 is enabled, variables preserved from the invoking user's environment
@@ -1906,7 +1906,7 @@ In the
 file, the first host name of the entry is considered to be the
 .Dq canonical
 name; subsequent names are aliases that are not used by
-.Nm sudoers .
+.Nm .
 For example, the following hosts file line for the machine
 .Dq xyzzy
 has the fully-qualified domain name as the
@@ -1922,7 +1922,7 @@ option will not be effective if it is queried before DNS.
 Beware that when using DNS for host name resolution, turning on
 .Em fqdn
 requires
-.Nm sudoers
+.Nm
 to make DNS lookups which renders
 .Nm sudo
 unusable if DNS stops working (for example if the machine is disconnected
@@ -2766,7 +2766,7 @@ Once the local sequence number reaches the value of
 it will
 .Dq roll over
 to zero, after which
-.Nm sudoers
+.Nm
 will truncate and re-use any existing I/O log path names.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
@@ -3229,7 +3229,7 @@ option.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The
-.Nm sudoers
+.Nm
 plugin supports its own plugin interface to allow non-Unix
 group lookups which can query a group source other
 than the standard Unix group database.
@@ -3283,7 +3283,7 @@ Defaults group_plugin=system_group.so
 The group provider plugin API is described in detail in
 .Xr sudo_plugin @mansectsu@ .
 .Sh LOG FORMAT
-.Nm sudoers
+.Nm
 can log events using either
 .Xr syslog 3
 or a simple log file.
@@ -3397,13 +3397,13 @@ were not allowed by
 .El
 .Ss Error log entries
 If an error occurs,
-.Nm sudoers
+.Nm
 will log a message and, in most cases, send a message to the
 administrator via email.
 Possible errors include:
 .Bl -tag -width 4
 .It parse error in @sysconfdir@/sudoers near line N
-.Nm sudoers
+.Nm
 encountered an error when parsing the specified file.
 In some cases, the actual error may be one line above or below the
 line number listed, depending on the type of error.
@@ -3430,7 +3430,7 @@ This can happen when the
 file is located on a remote file system that maps user ID 0 to
 a different value.
 Normally,
-.Nm sudoers
+.Nm
 tries to open
 .Em sudoers
 using group permissions to avoid this problem.
@@ -3443,7 +3443,7 @@ or adding an argument like
 is the user ID that owns the
 .Em sudoers
 file) to the end of the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3469,7 +3469,7 @@ file owner, please add
 is the user ID that owns the
 .Em sudoers
 file) to the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3485,7 +3485,7 @@ is 0440 (readable by owner and group, writable by none).
 The default mode may be changed via the
 .Dq sudoers_mode
 option to the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3503,7 +3503,7 @@ file group ownership, please add
 is the group ID that owns the
 .Em sudoers
 file) to the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3556,7 +3556,7 @@ On most systems,
 .Xr syslog 3
 has a relatively small log buffer.
 To prevent the command line arguments from being truncated,
-.Nm sudoers
+.Nm
 will split up log messages that are larger than 960 characters
 (not including the date, hostname, and the string
 .Dq sudo ) .
@@ -4256,7 +4256,7 @@ without entering a password when logging out and back in again
 on the same terminal.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
-.Nm sudoers
+.Nm
 plugin support a flexible debugging framework that can help track
 down what the plugin is doing internally if there is a problem.
 This can be configured in the
@@ -4264,14 +4264,14 @@ This can be configured in the
 file.
 .Pp
 The
-.Nm sudoers
+.Nm
 plugin uses the same debug flag format as the
 .Nm sudo
 front-end:
 .Em subsystem Ns @ Ns Em priority .
 .Pp
 The priorities used by
-.Nm sudoers ,
+.Nm ,
 in order of decreasing severity,
 are:
 .Em crit , err , warn , notice , diag , info , trace
@@ -4286,7 +4286,7 @@ would include debug messages logged at
 and higher.
 .Pp
 The following subsystems are used by the
-.Nm sudoers
+.Nm
 plugin:
 .Bl -tag -width 8n
 .It Em alias

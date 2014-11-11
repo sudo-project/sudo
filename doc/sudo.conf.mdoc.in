@@ -30,7 +30,7 @@ It specifies the security policy and I/O logging plugins, debug flags
 as well as plugin-agnostic path names and settings.
 .Pp
 The
-.Nm sudo.conf
+.Nm
 file supports the following directives, described in detail below.
 .Bl -tag -width 8n
 .It Plugin
@@ -73,7 +73,7 @@ or
 are silently ignored.
 .Pp
 The
-.Nm sudo.conf
+.Nm
 file is always parsed in the
 .Dq Li C
 locale.
@@ -86,7 +86,7 @@ logging plugins to work seamlessly with the
 .Nm sudo
 front end.
 Plugins are dynamically loaded based on the contents of
-.Nm sudo.conf .
+.Nm .
 .Pp
 A
 .Li Plugin
@@ -154,7 +154,7 @@ policy plugin may be specified.
 This limitation does not apply to I/O plugins.
 .Pp
 If no
-.Nm sudo.conf
+.Nm
 file is present, or if it contains no
 .Li Plugin
 lines, the
@@ -235,7 +235,7 @@ The default value is
 .El
 .Ss Other settings
 The
-.Nm sudo.conf
+.Nm
 file also supports the following front end settings:
 .Bl -tag -width 8n
 .It disable_coredump
@@ -247,7 +247,7 @@ To aid in debugging
 crashes, you may wish to re-enable core dumps by setting
 .Dq disable_coredump
 to false in
-.Nm sudo.conf
+.Nm
 as follows:
 .Bd -literal -offset indent
 Set disable_coredump false

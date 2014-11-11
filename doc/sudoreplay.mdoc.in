@@ -29,17 +29,17 @@
 .Op Fl s Ar num
 ID
 .Pp
-.Nm sudoreplay
+.Nm
 .Op Fl h
 .Op Fl d Ar dir
 .Fl l
 .Op search expression
 .Sh DESCRIPTION
-.Nm sudoreplay
+.Nm
 plays back or lists the output logs created by
 .Nm sudo .
 When replaying,
-.Nm sudoreplay
+.Nm
 can play the session back in real-time, or the playback speed may be
 adjusted (faster or slower) based on the command line options.
 .Pp
@@ -71,12 +71,12 @@ may also be determined using
 list mode.
 .Pp
 In list mode,
-.Nm sudoreplay
+.Nm
 can be used to find the ID of a session based on a number of criteria
 such as the user, tty or command run.
 .Pp
 In replay mode, if the standard output has not been redirected,
-.Nm sudoreplay
+.Nm
 will act on the following keys:
 .Bl -tag -width 12n
 .It So Li \en Sc No or So Li \er Sc
@@ -99,7 +99,7 @@ instead of the default,
 .It Fl f Ar filter , Fl -filter Ns = Ns Ar filter
 Select which I/O type(s) to display.
 By default,
-.Nm sudoreplay
+.Nm
 will display the command's standard output, standard error and tty output.
 The
 .Ar filter
@@ -114,7 +114,7 @@ Display a short help message to the standard output and exit.
 Enable
 .Dq list mode .
 In this mode,
-.Nm sudoreplay
+.Nm
 will list available sessions in a format similar to the
 .Nm sudo
 log file format, sorted by file name (or sequence number).
@@ -198,13 +198,13 @@ unless separated by an
 .It Fl m , -max-wait Ar max_wait
 Specify an upper bound on how long to wait between key presses or output data.
 By default,
-.Nm sudoreplay
+.Nm
 will accurately reproduce the delays between key presses or program output.
 However, this can be tedious when the session includes long pauses.
 When the
 .Fl m
 option is specified,
-.Nm sudoreplay
+.Nm
 will limit these pauses to at most
 .Em max_wait
 seconds.
@@ -212,7 +212,7 @@ The value may be specified as a floating point number, e.g.\&
 .Em 2.5 .
 .It Fl s , -speed Ar speed_factor
 This option causes
-.Nm sudoreplay
+.Nm
 to adjust the number of seconds it will wait between key presses or
 program output.
 This can be used to slow down or speed up the display.
@@ -227,7 +227,7 @@ of
 would make the output twice as slow.
 .It Fl V , -version
 Print the
-.Nm sudoreplay
+.Nm
 versions version number and exit.
 .El
 .Ss Date and time format
@@ -296,9 +296,9 @@ For example,
 will result in a time exactly two weeks from now, which is probably
 not what was intended.
 This will be addressed in a future version of
-.Nm sudoreplay .
+.Nm .
 .Ss Debugging sudoreplay
-.Nm sudoreplay
+.Nm
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
 .Li Debug
@@ -372,14 +372,14 @@ List sessions run by jeff or bob on the console:
 Todd C. Miller
 .Sh BUGS
 If you feel you have found a bug in
-.Nm sudoreplay ,
+.Nm ,
 please submit a bug report at http://www.sudo.ws/sudo/bugs/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .Sh DISCLAIMER
-.Nm sudoreplay
+.Nm
 is provided
 .Dq AS IS
 and any express or implied warranties, including, but not limited

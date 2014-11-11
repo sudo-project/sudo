@@ -30,7 +30,7 @@ DDEESSCCRRIIPPTTIIOONN
      may enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
      changes, or `Q' to quit and save changes.  The `Q' option should be used
      with extreme care because if vviissuuddoo believes there to be a parse error,
-     so will ssuuddoo and no one will be able to ssuuddoo again until the error is
+     so will ssuuddoo and no one will be able to run ssuuddoo again until the error is
      fixed.  If `e' is typed to edit the _s_u_d_o_e_r_s file after a parse error has
      been detected, the cursor will be placed on the line where the error
      occurred (if the editor supports this feature).

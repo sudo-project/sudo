@@ -4,7 +4,7 @@ NNAAMMEE
      ssuuddooeerrss - default sudo security policy plugin
 
 DDEESSCCRRIIPPTTIIOONN
-     The _s_u_d_o_e_r_s policy plugin determines a user's ssuuddoo privileges.  It is the
+     The ssuuddooeerrss policy plugin determines a user's ssuuddoo privileges.  It is the
      default ssuuddoo policy plugin.  The policy is driven by the _/_e_t_c_/_s_u_d_o_e_r_s
      file or, optionally in LDAP.  The policy format is described in detail in
      the _S_U_D_O_E_R_S _F_I_L_E _F_O_R_M_A_T section.  For information on storing _s_u_d_o_e_r_s
@@ -155,9 +155,9 @@ DDEESSCCRRIIPPTTIIOONN
      variables in the PAM environment may be merged in to the environment.  If
      a variable in the PAM environment is already present in the user's
      environment, the value will only be overridden if the variable was not
-     preserved by ssuuddooeerrss.. When _e_n_v___r_e_s_e_t is enabled, variables preserved from
-     the invoking user's environment by the _e_n_v___k_e_e_p list take precedence over
-     those in the PAM environment.  When _e_n_v___r_e_s_e_t is disabled, variables
+     preserved by ssuuddooeerrss.  When _e_n_v___r_e_s_e_t is enabled, variables preserved
+     from the invoking user's environment by the _e_n_v___k_e_e_p list take precedence
+     over those in the PAM environment.  When _e_n_v___r_e_s_e_t is disabled, variables
      present the invoking user's environment take precedence over those in the
      PAM environment unless they match a pattern in the _e_n_v___d_e_l_e_t_e list.
 

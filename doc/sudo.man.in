@@ -636,37 +636,37 @@ option was specified).
 .PP
 The following parameters may be specified by security policy:
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 real and effective user ID
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 real and effective group ID
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 supplementary group IDs
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 the environment list
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 current working directory
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 file creation mode mask (umask)
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 SELinux role and type
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 Solaris project
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 Solaris privileges
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 BSD login class
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 scheduling priority (aka nice value)
 .SS "Process model"
 When

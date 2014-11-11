@@ -31,12 +31,12 @@
 .Op Fl f Ar sudoers
 .Op Fl x Ar output_file
 .Sh DESCRIPTION
-.Nm visudo
+.Nm
 edits the
 .Em sudoers
 file in a safe fashion, analogous to
 .Xr vipw @mansectsu@ .
-.Nm visudo
+.Nm
 locks the
 .Em sudoers
 file against multiple simultaneous edits, provides basic sanity checks,
@@ -46,7 +46,7 @@ If the
 file is currently being edited you will receive a message to try again later.
 .Pp
 There is a hard-coded list of one or more editors that
-.Nm visudo
+.Nm
 will use set at compile-time that may be overridden via the
 .Em editor
 .Em sudoers
@@ -55,7 +55,7 @@ variable.
 This list defaults to
 .Li "@editor@" .
 Normally,
-.Nm visudo
+.Nm
 does not honor the
 .Ev VISUAL
 or
@@ -63,7 +63,7 @@ or
 environment variables unless they contain an editor in the aforementioned
 editors list.
 However, if
-.Nm visudo
+.Nm
 is configured with the
 .Li --with-env-editor
 option or the
@@ -71,7 +71,7 @@ option or the
 .Li Default
 variable is set in
 .Em sudoers ,
-.Nm visudo
+.Nm
 will use any the editor defines by
 .Ev VISUAL
 or
@@ -82,13 +82,13 @@ execute any program they wish simply by setting
 or
 .Ev EDITOR .
 .Pp
-.Nm visudo
+.Nm
 parses the
 .Em sudoers
 file after the edit and will
 not save the changes if there is a syntax error.
 Upon finding an error,
-.Nm visudo
+.Nm
 will print a message stating the line number(s)
 where the error occurred and the user will receive the
 .Dq What now?
@@ -105,11 +105,11 @@ to quit and save changes.
 The
 .Ql Q
 option should be used with extreme care because if
-.Nm visudo
+.Nm
 believes there to be a parse error, so will
 .Nm sudo
 and no one
-will be able to
+will be able to run
 .Nm sudo
 again until the error is fixed.
 If
@@ -135,17 +135,17 @@ unless the
 .Fl q
 option was specified.
 If the check completes successfully,
-.Nm visudo
+.Nm
 will exit with a value of 0.
 If an error is encountered,
-.Nm visudo
+.Nm
 will exit with a value of 1.
 .It Fl f Ar sudoers , Fl -file Ns = Ns Ar sudoers
 Specify an alternate
 .Em sudoers
 file location.
 With this option,
-.Nm visudo
+.Nm
 will edit (or check) the
 .Em sudoers
 file of your choice,
@@ -183,7 +183,7 @@ checking of the
 .Em sudoers
 file.
 If an alias is used before it is defined,
-.Nm visudo
+.Nm
 will consider this a parse error.
 Note that it is not possible to differentiate between an
 alias and a host name or user name that consists solely of uppercase
@@ -192,7 +192,7 @@ letters, digits, and the underscore
 character.
 .It Fl V , -version
 Print the
-.Nm visudo
+.Nm
 and
 .Em sudoers
 grammar versions and exit.
@@ -226,7 +226,7 @@ ambiguity of the
 format.
 .El
 .Ss Debugging and sudoers plugin arguments
-.Nm visudo
+.Nm
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
 .Li Debug
@@ -237,7 +237,7 @@ file.
 Starting with
 .Nm sudo
 1.8.12,
-.Nm visudo
+.Nm
 will also parse the arguments to the
 .Em sudoers
 plugin to override the default
@@ -291,11 +291,11 @@ settings:
 .Bl -tag -width 15n
 .It Ev VISUAL
 Invoked by
-.Nm visudo
+.Nm
 as the editor to use
 .It Ev EDITOR
 Used by
-.Nm visudo
+.Nm
 if
 .Ev VISUAL
 is not set
@@ -317,7 +317,7 @@ Someone else is currently editing the
 file.
 .It Li @sysconfdir@/sudoers.tmp: Permission denied
 You didn't run
-.Nm visudo
+.Nm
 as root.
 .It Li Can't find you in the passwd database
 Your user ID does not appear in the system passwd file.
@@ -379,18 +379,18 @@ exhaustive list of people who have contributed to
 .Sh CAVEATS
 There is no easy way to prevent a user from gaining a root shell if
 the editor used by
-.Nm visudo
+.Nm
 allows shell escapes.
 .Sh BUGS
 If you feel you have found a bug in
-.Nm visudo ,
+.Nm ,
 please submit a bug report at http://www.sudo.ws/sudo/bugs/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .Sh DISCLAIMER
-.Nm visudo
+.Nm
 is provided
 .Dq AS IS
 and any express or implied warranties, including, but not limited

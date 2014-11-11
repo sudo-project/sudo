@@ -29,7 +29,7 @@
 \- default sudo security policy plugin
 .SH "DESCRIPTION"
 The
-\fIsudoers\fR
+\fBsudoers\fR
 policy plugin determines a user's
 \fBsudo\fR
 privileges.
@@ -375,7 +375,7 @@ variables in the PAM environment may be merged in to the environment.
 If a variable in the PAM environment is already present in the
 user's environment, the value will only be overridden if the variable
 was not preserved by
-\fBsudoers.\fR
+\fBsudoers\fR.
 When
 \fIenv_reset\fR
 is enabled, variables preserved from the invoking user's environment
