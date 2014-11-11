@@ -83,6 +83,41 @@ DDEESSCCRRIIPPTTIIOONN
                  The various values have explicit types which removes much of
                  the ambiguity of the _s_u_d_o_e_r_s format.
 
+   UUssiinngg ssuuddoo..ccoonnff wwiitthh vviissuuddoo
+     vviissuuddoo versions 1.8.4 and higher support a flexible debugging framework
+     that is configured via Debug lines in the sudo.conf(4) file.  Starting
+     with ssuuddoo 1.8.12, vviissuuddoo will also parse the arguments to the _s_u_d_o_e_r_s
+     plugin to override the default _s_u_d_o_e_r_s path name, UID, GID and file mode.
+     These arguments, if present, should be listed after the path to the
+     plugin (i.e. after _s_u_d_o_e_r_s_._s_o).  Multiple arguments may be specified,
+     separated by white space.  For example:
+
+           Plugin sudoers_policy sudoers.so sudoers_mode=0400
+
+     The following plugin arguments are supported:
+
+     sudoers_file=pathname
+               The _s_u_d_o_e_r_s___f_i_l_e argument can be used to override the default
+               path to the _s_u_d_o_e_r_s file.
+
+     sudoers_uid=uid
+               The _s_u_d_o_e_r_s___u_i_d argument can be used to override the default
+               owner of the sudoers file.  It should be specified as a numeric
+               user ID.
+
+     sudoers_gid=gid
+               The _s_u_d_o_e_r_s___g_i_d argument can be used to override the default
+               group of the sudoers file.  It must be specified as a numeric
+               group ID (not a group name).
+
+     sudoers_mode=mode
+               The _s_u_d_o_e_r_s___m_o_d_e argument can be used to override the default
+               file mode for the sudoers file.  It should be specified as an
+               octal value.
+
+     For more information on configuring sudo.conf(4), please refer to its
+     manual.
+
 EENNVVIIRROONNMMEENNTT
      The following environment variables may be consulted depending on the
      value of the _e_d_i_t_o_r and _e_n_v___e_d_i_t_o_r _s_u_d_o_e_r_s settings:
@@ -92,6 +127,8 @@ EENNVVIIRROONNMMEENNTT
      EDITOR           Used by vviissuuddoo if VISUAL is not set
 
 FFIILLEESS
+     _/_e_t_c_/_s_u_d_o_._c_o_n_f            Sudo front end configuration
+
      _/_e_t_c_/_s_u_d_o_e_r_s              List of who can run what
 
      _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p          Lock file for visudo
@@ -161,4 +198,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.11                      July 12, 2014                     Sudo 1.8.11
+Sudo 1.8.12                    November 11, 2014                   Sudo 1.8.12

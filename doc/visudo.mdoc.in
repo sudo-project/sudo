@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 12, 2014
+.Dd November 11, 2014
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -225,6 +225,60 @@ ambiguity of the
 .Em sudoers
 format.
 .El
+.Ss Using sudo.conf with visudo
+.Nm visudo
+versions 1.8.4 and higher support a flexible debugging framework
+that is configured via
+.Li Debug
+lines in the
+.Xr sudo.conf @mansectform@
+file.
+Starting with
+.Nm sudo
+1.8.12,
+.Nm visudo
+will also parse the arguments to the
+.Em sudoers
+plugin to override the default
+.Em sudoers
+path name, UID, GID and file mode.
+These arguments, if present, should be listed after the path to the plugin
+(i.e.\& after
+.Pa sudoers.so ) .
+Multiple arguments may be specified, separated by white space.
+For example:
+.Bd -literal -offset indent
+Plugin sudoers_policy sudoers.so sudoers_mode=0400
+.Ed
+.Pp
+The following arguments are supported:
+.Bl -tag -width 8n
+.It sudoers_file=pathname
+The
+.Em sudoers_file
+argument can be used to override the default path to the
+.Em sudoers
+file.
+.It sudoers_uid=uid
+The
+.Em sudoers_uid
+argument can be used to override the default owner of the sudoers file.
+It should be specified as a numeric user ID.
+.It sudoers_gid=gid
+The
+.Em sudoers_gid
+argument can be used to override the default group of the sudoers file.
+It must be specified as a numeric group ID (not a group name).
+.It sudoers_mode=mode
+The
+.Em sudoers_mode
+argument can be used to override the default file mode for the sudoers file.
+It should be specified as an octal value.
+.El
+.Pp
+For more information on configuring
+.Xr sudo.conf @mansectform@ ,
+please refer to its manual.
 .Sh ENVIRONMENT
 The following environment variables may be consulted depending on
 the value of the
@@ -247,6 +301,8 @@ is not set
 .El
 .Sh FILES
 .Bl -tag -width 24n
+.It Pa @sysconfdir@/sudo.conf
+Sudo front end configuration
 .It Pa @sysconfdir@/sudoers
 List of who can run what
 .It Pa @sysconfdir@/sudoers.tmp

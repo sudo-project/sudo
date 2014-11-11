@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "July 12, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "8" "November 11, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -233,6 +233,65 @@ The various values have explicit types which removes much of the
 ambiguity of the
 \fIsudoers\fR
 format.
+.SS "Using sudo.conf with visudo"
+\fBvisudo\fR
+versions 1.8.4 and higher support a flexible debugging framework
+that is configured via
+\fRDebug\fR
+lines in the
+sudo.conf(@mansectform@)
+file.
+Starting with
+\fBsudo\fR
+1.8.12,
+\fBvisudo\fR
+will also parse the arguments to the
+\fIsudoers\fR
+plugin to override the default
+\fIsudoers\fR
+path name, UID, GID and file mode.
+These arguments, if present, should be listed after the path to the plugin
+(i.e.\& after
+\fIsudoers.so\fR).
+Multiple arguments may be specified, separated by white space.
+For example:
+.nf
+.sp
+.RS 6n
+Plugin sudoers_policy sudoers.so sudoers_mode=0400
+.RE
+.fi
+.PP
+The following plugin arguments are supported:
+.TP 10n
+sudoers_file=pathname
+The
+\fIsudoers_file\fR
+argument can be used to override the default path to the
+\fIsudoers\fR
+file.
+.TP 10n
+sudoers_uid=uid
+The
+\fIsudoers_uid\fR
+argument can be used to override the default owner of the sudoers file.
+It should be specified as a numeric user ID.
+.TP 10n
+sudoers_gid=gid
+The
+\fIsudoers_gid\fR
+argument can be used to override the default group of the sudoers file.
+It must be specified as a numeric group ID (not a group name).
+.TP 10n
+sudoers_mode=mode
+The
+\fIsudoers_mode\fR
+argument can be used to override the default file mode for the sudoers file.
+It should be specified as an octal value.
+.PP
+For more information on configuring
+sudo.conf(@mansectform@),
+please refer to its manual.
 .SH "ENVIRONMENT"
 The following environment variables may be consulted depending on
 the value of the
@@ -254,6 +313,9 @@ if
 \fRVISUAL\fR
 is not set
 .SH "FILES"
+.TP 26n
+\fI@sysconfdir@/sudo.conf\fR
+Sudo front end configuration
 .TP 26n
 \fI@sysconfdir@/sudoers\fR
 List of who can run what
