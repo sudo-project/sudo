@@ -864,19 +864,26 @@ set_loginclass(struct passwd *pw)
 #endif
 
 /*
- * Look up the fully qualified domain name and set user_host and user_shost.
+ * Look up the fully qualified domain name of user_host and user_runhost.
+ * Sets user_host, user_shost, user_runhost and user_srunhost.
  * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  */
 static void
 set_fqdn(void)
 {
     struct addrinfo *res0, hint;
+    bool remote;
     char *p;
     debug_decl(set_fqdn, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+
+    /* If the -h flag was given we need to resolve both host and runhost. */
+    remote = strcmp(user_runhost, user_host) != 0;
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_FQDN;
+
+    /* First resolve user_host, sets user_host and user_shost. */
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
 	log_warningx(SLOG_SEND_MAIL|SLOG_RAW_MSG,
 	    N_("unable to resolve host %s"), user_host);
@@ -884,13 +891,43 @@ set_fqdn(void)
 	if (user_shost != user_host)
 	    sudo_efree(user_shost);
 	sudo_efree(user_host);
-	user_host = sudo_estrdup(res0->ai_canonname);
+	user_host = user_shost = sudo_estrdup(res0->ai_canonname);
 	freeaddrinfo(res0);
 	if ((p = strchr(user_host, '.')) != NULL)
 	    user_shost = sudo_estrndup(user_host, (size_t)(p - user_host));
-	else
-	    user_shost = user_host;
     }
+
+    /* Next resolve user_runhost, sets user_runhost and user_srunhost. */
+    if (remote) {
+	if (getaddrinfo(user_runhost, NULL, &hint, &res0) != 0) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_RAW_MSG,
+		N_("unable to resolve host %s"), user_runhost);
+	} else {
+	    if (user_srunhost != user_runhost)
+		sudo_efree(user_srunhost);
+	    sudo_efree(user_runhost);
+	    user_runhost = user_srunhost = sudo_estrdup(res0->ai_canonname);
+	    freeaddrinfo(res0);
+	    if ((p = strchr(user_runhost, '.'))) {
+		user_srunhost =
+		    sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
+	    }
+	}
+    } else {
+	/* Not remote, just use user_host. */
+	if (user_srunhost != user_runhost)
+	    sudo_efree(user_srunhost);
+	sudo_efree(user_runhost);
+	user_runhost = user_srunhost = sudo_estrdup(user_host);
+	if ((p = strchr(user_runhost, '.'))) {
+	    user_srunhost =
+		sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
+	}
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"host %s, shost %s, runhost %s, srunhost %s",
+	user_host, user_shost, user_runhost, user_srunhost);
     debug_return;
 }
 
