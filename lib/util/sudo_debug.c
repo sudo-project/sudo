@@ -585,7 +585,6 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
     char static_buf[1024], *buf = static_buf;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
-    va_list ap2;
 
     if (sudo_debug_last_instance == -1)
 	goto out;
@@ -617,11 +616,19 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
     SLIST_FOREACH(output, &instance->outputs, entries) {
 	/* Make sure we want debug info at this level. */
 	if (subsys <= instance->max_subsystem && output->settings[subsys] >= pri) {
+	    va_list ap2;
+
+	    /* Operate on a copy of ap to support multiple outputs. */
 	    va_copy(ap2, ap);
-	    buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap) : 0;
+	    buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap2) : 0;
+	    va_end(ap2);
 	    if (buflen >= (int)sizeof(static_buf)) {
+		va_list ap3;
+
 		/* Not enough room in static buf, allocate dynamically. */
-		buflen = vasprintf(&buf, fmt, ap2);
+		va_copy(ap3, ap);
+		buflen = vasprintf(&buf, fmt, ap3);
+		va_end(ap3);
 	    }
 	    if (buflen != -1) {
 		int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
@@ -634,7 +641,6 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
 		    buf = static_buf;
 		}
 	    }
-	    va_end(ap2);
 	}
     }
 out:
