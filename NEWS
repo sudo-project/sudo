@@ -33,6 +33,10 @@ What's new in Sudo 1.8.12
  * Fixed a problem on DragonFly BSD where SIGCHLD could be ignored,
    preventing sudo from exiting.  Bug #676
 
+ * Visudo will now use the optional sudoers_file, sudoers_mode,
+   sudoers_uid and sudoers_gid arguments if specified on the
+   sudoers.so Plugin line in the sudo.conf file.
+
  * Fixed a problem introduced in sudo 1.8.8 that prevented the full
    host name from being used when the "fqdn" sudoers option is used.
    Bug #678
