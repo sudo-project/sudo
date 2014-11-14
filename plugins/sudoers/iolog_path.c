@@ -275,9 +275,10 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    *dst = '\0';
 	}
     }
-    if (slashp)
+    if (slash != NULL)
+	*slash = '/';
+    if (slashp != NULL)
 	*slashp = slash;
-    *slash = '/';
 
     debug_return_str(path);
 bad:
