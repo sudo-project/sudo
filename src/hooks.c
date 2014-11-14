@@ -74,7 +74,7 @@ process_hooks_setenv(const char *name, const char *value, int overwrite)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_setenv_list, entries) {
 	rc = hook->u.setenv_fn(name, value, overwrite, hook->closure);
-	if (rc == SUDO_HOOK_RET_STOP || SUDO_HOOK_RET_ERROR)
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
 	    break;
     }
     return rc;
@@ -90,7 +90,7 @@ process_hooks_putenv(char *string)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_putenv_list, entries) {
 	rc = hook->u.putenv_fn(string, hook->closure);
-	if (rc == SUDO_HOOK_RET_STOP || SUDO_HOOK_RET_ERROR)
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
 	    break;
     }
     return rc;
@@ -107,7 +107,7 @@ process_hooks_getenv(const char *name, char **value)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_getenv_list, entries) {
 	rc = hook->u.getenv_fn(name, &val, hook->closure);
-	if (rc == SUDO_HOOK_RET_STOP || SUDO_HOOK_RET_ERROR)
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
 	    break;
     }
     if (val != NULL)
@@ -125,7 +125,7 @@ process_hooks_unsetenv(const char *name)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_unsetenv_list, entries) {
 	rc = hook->u.unsetenv_fn(name, hook->closure);
-	if (rc == SUDO_HOOK_RET_STOP || SUDO_HOOK_RET_ERROR)
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
 	    break;
     }
     return rc;
