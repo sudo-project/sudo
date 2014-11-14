@@ -62,9 +62,9 @@ alias_compare(const void *v1, const void *v2)
     int res;
     debug_decl(alias_compare, SUDOERS_DEBUG_ALIAS, sudoers_debug_instance)
 
-    if (v1 == NULL)
+    if (a1 == NULL)
 	res = -1;
-    else if (v2 == NULL)
+    else if (a2 == NULL)
 	res = 1;
     else if ((res = strcmp(a1->name, a2->name)) == 0)
 	res = a1->type - a2->type;
