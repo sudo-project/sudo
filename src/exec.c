@@ -119,6 +119,8 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #else
     sa.sa_handler = handler;
 #endif
+    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
     if (sudo_sigaction(SIGCONT, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGCONT);
 #ifdef SA_SIGINFO
@@ -126,13 +128,6 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #endif
     if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
-
-    /*
-     * The policy plugin's session init must be run before we fork
-     * or certain pam modules won't be able to track their state.
-     */
-    if (policy_init_session(details) != true)
-	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     cmnd_pid = sudo_debug_fork();
     switch (cmnd_pid) {
@@ -406,7 +401,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sudo_fatal(U_("unable to create sockets"));
 
     /*
-     * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).
+     * Signals to forward to the child process (excluding SIGALRM).
      * We block all other signals while running the signal handler.
      * Note: HP-UX select() will not be interrupted if SA_RESTART set.
      */
@@ -423,8 +418,6 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTERM);
     if (sudo_sigaction(SIGALRM, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGALRM);
-    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
     if (sudo_sigaction(SIGPIPE, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
     if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0)
@@ -455,6 +448,13 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGINT);
     if (sudo_sigaction(SIGQUIT, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGQUIT);
+
+    /*
+     * The policy plugin's session init must be run before we fork
+     * or certain pam modules won't be able to track their state.
+     */
+    if (policy_init_session(details) != true)
+	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     /*
      * Child will run the command in the pty, parent will pass data

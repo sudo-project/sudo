@@ -816,6 +816,8 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 #else
     sa.sa_handler = handler;
 #endif
+    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
     if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
 
@@ -836,13 +838,6 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 		sudo_fatal(U_("unable to set terminal to raw mode"));
 	}
     }
-
-    /*
-     * The policy plugin's session init must be run before we fork
-     * or certain pam modules won't be able to track their state.
-     */
-    if (policy_init_session(details) != true)
-	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     /*
      * Block some signals until cmnd_pid is set in the parent to avoid a

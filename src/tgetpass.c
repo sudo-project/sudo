@@ -26,6 +26,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -210,17 +211,18 @@ sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
     sigaction_t sa, saved_sa_pipe;
-    int pfd[2];
-    pid_t pid;
+    int pfd[2], status;
+    pid_t child;
     debug_decl(sudo_askpass, SUDO_DEBUG_CONV, sudo_debug_instance)
 
     if (pipe(pfd) == -1)
 	sudo_fatal(U_("unable to create pipe"));
 
-    if ((pid = fork()) == -1)
+    child = sudo_debug_fork();
+    if (child == -1)
 	sudo_fatal(U_("unable to fork"));
 
-    if (pid == 0) {
+    if (child == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
 	if (dup2(pfd[1], STDOUT_FILENO) == -1) {
 	    sudo_warn("dup2");
@@ -254,6 +256,10 @@ sudo_askpass(const char *askpass, const char *prompt)
     pass = getln(pfd[0], buf, sizeof(buf), 0);
     (void) close(pfd[0]);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
+
+    /* Wait for child to exit. */
+    while (waitpid(child, &status, 0) == -1 && errno == EINTR)
+	continue;
 
     if (pass == NULL)
 	errno = EINTR;	/* make cancel button simulate ^C */
