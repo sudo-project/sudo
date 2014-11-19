@@ -41,6 +41,15 @@ What's new in Sudo 1.8.12
    host name from being used when the "fqdn" sudoers option is used.
    Bug #678
 
+ * French translation for sudoers from translationproject.org.
+
+ * Sudo now installs a handler for SIGCHLD signal handler immediately
+   before stating the process that will execute the command (or
+   start the monitor).  The handler used to be installed earlier
+   but this causes problems with poorly behaved PAM modules that
+   install their own SIGCHLD signal handler and neglect to restore
+   sudo's original handler.  Bug #657
+
 What's new in Sudo 1.8.11p2
 
  * Fixed a bug where dynamic shared objects loaded from a plugin
