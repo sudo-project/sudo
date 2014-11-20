@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.12\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-10-27 12:35-0600\n"
+"POT-Creation-Date: 2014-11-20 13:33-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,86 +66,86 @@ msgstr ""
 msgid "value too small"
 msgstr ""
 
-#: lib/util/sudo_conf.c:181
+#: lib/util/sudo_conf.c:201
 #, c-format
 msgid "invalid Path value `%s' in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:335 lib/util/sudo_conf.c:388
+#: lib/util/sudo_conf.c:338 lib/util/sudo_conf.c:391
 #, c-format
 msgid "invalid value for %s `%s' in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:356
+#: lib/util/sudo_conf.c:359
 #, c-format
 msgid "unsupported group source `%s' in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:372
+#: lib/util/sudo_conf.c:375
 #, c-format
 msgid "invalid max groups `%s' in %s, line %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:522
+#: lib/util/sudo_conf.c:525
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
 
-#: lib/util/sudo_conf.c:525
+#: lib/util/sudo_conf.c:528
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: lib/util/sudo_conf.c:528
+#: lib/util/sudo_conf.c:531
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: lib/util/sudo_conf.c:532
+#: lib/util/sudo_conf.c:535
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: lib/util/sudo_conf.c:535
+#: lib/util/sudo_conf.c:538
 #, c-format
 msgid "%s is group writable"
 msgstr ""
 
-#: lib/util/sudo_conf.c:545 src/selinux.c:196 src/selinux.c:209 src/sudo.c:341
+#: lib/util/sudo_conf.c:548 src/selinux.c:196 src/selinux.c:209 src/sudo.c:341
 #, c-format
 msgid "unable to open %s"
 msgstr ""
 
-#: src/exec.c:123 src/exec.c:128 src/exec.c:423 src/exec.c:425 src/exec.c:427
-#: src/exec.c:429 src/exec.c:431 src/exec.c:433 src/exec.c:436 src/exec.c:453
-#: src/exec.c:455 src/exec.c:457 src/exec.c:605 src/exec.c:800
+#: src/exec.c:123 src/exec.c:125 src/exec.c:130 src/exec.c:418 src/exec.c:420
+#: src/exec.c:422 src/exec.c:424 src/exec.c:426 src/exec.c:429 src/exec.c:446
+#: src/exec.c:448 src/exec.c:450 src/exec.c:605 src/exec.c:800
 #: src/exec_pty.c:480 src/exec_pty.c:736 src/exec_pty.c:806 src/exec_pty.c:808
-#: src/exec_pty.c:820 src/exec_pty.c:1308 src/exec_pty.c:1310
-#: src/exec_pty.c:1315 src/exec_pty.c:1317 src/exec_pty.c:1331
-#: src/exec_pty.c:1342 src/exec_pty.c:1344 src/exec_pty.c:1346
-#: src/exec_pty.c:1348 src/exec_pty.c:1350 src/exec_pty.c:1352
-#: src/exec_pty.c:1354 src/signal.c:156
+#: src/exec_pty.c:820 src/exec_pty.c:822 src/exec_pty.c:1303
+#: src/exec_pty.c:1305 src/exec_pty.c:1310 src/exec_pty.c:1312
+#: src/exec_pty.c:1326 src/exec_pty.c:1337 src/exec_pty.c:1339
+#: src/exec_pty.c:1341 src/exec_pty.c:1343 src/exec_pty.c:1345
+#: src/exec_pty.c:1347 src/exec_pty.c:1349 src/signal.c:156
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr ""
 
-#: src/exec.c:135 src/exec_pty.c:845
-msgid "policy plugin failed session initialization"
-msgstr ""
-
-#: src/exec.c:140 src/exec_pty.c:861 src/exec_pty.c:1392 src/tgetpass.c:221
+#: src/exec.c:135 src/exec_pty.c:856 src/exec_pty.c:1387 src/tgetpass.c:223
 msgid "unable to fork"
 msgstr ""
 
-#: src/exec.c:318 src/exec.c:326 src/exec.c:877 src/exec_pty.c:604
-#: src/exec_pty.c:609 src/exec_pty.c:667 src/exec_pty.c:674 src/exec_pty.c:965
-#: src/exec_pty.c:975 src/exec_pty.c:1020 src/exec_pty.c:1027
-#: src/exec_pty.c:1457 src/exec_pty.c:1464 src/exec_pty.c:1471
+#: src/exec.c:313 src/exec.c:321 src/exec.c:877 src/exec_pty.c:604
+#: src/exec_pty.c:609 src/exec_pty.c:667 src/exec_pty.c:674 src/exec_pty.c:960
+#: src/exec_pty.c:970 src/exec_pty.c:1015 src/exec_pty.c:1022
+#: src/exec_pty.c:1452 src/exec_pty.c:1459 src/exec_pty.c:1466
 msgid "unable to add event to queue"
 msgstr ""
 
-#: src/exec.c:406
+#: src/exec.c:401
 msgid "unable to create sockets"
+msgstr ""
+
+#: src/exec.c:457
+msgid "policy plugin failed session initialization"
 msgstr ""
 
 #: src/exec.c:502
@@ -161,7 +161,7 @@ msgstr ""
 msgid "unable to restore handler for signal %d"
 msgstr ""
 
-#: src/exec.c:731 src/exec_pty.c:1199
+#: src/exec.c:731 src/exec_pty.c:1194
 msgid "error reading from signal pipe"
 msgstr ""
 
@@ -174,28 +174,28 @@ msgid "unable to allocate pty"
 msgstr ""
 
 #: src/exec_pty.c:780 src/exec_pty.c:789 src/exec_pty.c:797
-#: src/exec_pty.c:1300 src/exec_pty.c:1389 src/signal.c:137 src/tgetpass.c:218
+#: src/exec_pty.c:1295 src/exec_pty.c:1384 src/signal.c:137 src/tgetpass.c:219
 msgid "unable to create pipe"
 msgstr ""
 
-#: src/exec_pty.c:836
+#: src/exec_pty.c:838
 msgid "unable to set terminal to raw mode"
 msgstr ""
 
-#: src/exec_pty.c:1232
+#: src/exec_pty.c:1227
 msgid "error reading from pipe"
 msgstr ""
 
-#: src/exec_pty.c:1257
+#: src/exec_pty.c:1252
 msgid "error reading from socketpair"
 msgstr ""
 
-#: src/exec_pty.c:1266
+#: src/exec_pty.c:1261
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
 
-#: src/exec_pty.c:1368
+#: src/exec_pty.c:1363
 msgid "unable to set controlling tty"
 msgstr ""
 
@@ -530,12 +530,12 @@ msgstr ""
 msgid "requires at least one argument"
 msgstr ""
 
-#: src/sesh.c:109
+#: src/sesh.c:108
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr ""
 
-#: src/sesh.c:114 src/sudo.c:1186
+#: src/sesh.c:113 src/sudo.c:1186
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -775,25 +775,25 @@ msgstr ""
 msgid "plugin error: missing file list for sudoedit"
 msgstr ""
 
-#: src/tgetpass.c:90
+#: src/tgetpass.c:91
 msgid "no tty present and no askpass program specified"
 msgstr ""
 
-#: src/tgetpass.c:99
+#: src/tgetpass.c:100
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr ""
 
-#: src/tgetpass.c:232
+#: src/tgetpass.c:234
 #, c-format
 msgid "unable to set gid to %u"
 msgstr ""
 
-#: src/tgetpass.c:236
+#: src/tgetpass.c:238
 #, c-format
 msgid "unable to set uid to %u"
 msgstr ""
 
-#: src/tgetpass.c:241
+#: src/tgetpass.c:243
 #, c-format
 msgid "unable to run %s"
 msgstr ""
