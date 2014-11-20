@@ -375,9 +375,12 @@ digcmnd		:	opcmnd {
 			    $$ = $1;
 			}
 		|	digest opcmnd {
+			    if ($2->type != COMMAND) {
+				sudoerserror(N_("a digest requires a path name"));
+				YYERROR;
+			    }
 			    /* XXX - yuck */
-			    struct sudo_command *c = (struct sudo_command *)($2->name);
-			    c->digest = $1;
+			    ((struct sudo_command *) $2->name)->digest = $1;
 			    $$ = $2;
 			}
 		;
