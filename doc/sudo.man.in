@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "November 27, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "December 4, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1080,7 +1080,7 @@ visudo(@mansectsu@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/sudo/history.html) for a brief
+distribution (http://www.sudo.ws/history.html) for a brief
 history of sudo.
 .SH "AUTHORS"
 Many people have worked on
@@ -1093,7 +1093,7 @@ Todd C. Miller
 .PP
 See the CONTRIBUTORS file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/sudo/contributors.html) for an
+distribution (http://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "CAVEATS"
@@ -1148,4 +1148,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 \fBsudo\fR
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.

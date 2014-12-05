@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 27, 2014
+.Dd December 4, 2014
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -373,7 +373,7 @@ Todd C. Miller
 .Pp
 See the CONTRIBUTORS file in the
 .Nm sudo
-distribution (http://www.sudo.ws/sudo/contributors.html) for an
+distribution (http://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh CAVEATS
@@ -398,4 +398,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm sudo
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "November 27, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO" "5" "December 4, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -661,7 +661,7 @@ sudo_plugin(@mansectsu@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/sudo/history.html) for a brief
+distribution (http://www.sudo.ws/history.html) for a brief
 history of sudo.
 .SH "AUTHORS"
 Many people have worked on
@@ -674,7 +674,7 @@ Todd C. Miller
 .PP
 See the CONTRIBUTORS file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/sudo/contributors.html) for an
+distribution (http://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
@@ -694,4 +694,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 \fBsudo\fR
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.

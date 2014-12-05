@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 27, 2014
+.Dd December 4, 2014
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1266,4 +1266,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm sudo
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.
