@@ -83,7 +83,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <limits.h>
 
 #include "sudo_compat.h"
 #include "compat/charclass.h"
@@ -283,9 +282,6 @@ int sudo_fnmatch(const char *pattern, const char *string, int flags)
     const char *strstartseg = NULL;
     const char *mismatch = NULL;
     int matchlen = 0;
-
-    if (strlen(pattern) > PATH_MAX || strlen(string) > PATH_MAX)
-	return FNM_NOMATCH;
 
     if (*pattern == '*')
         goto firstsegment;
