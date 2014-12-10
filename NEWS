@@ -50,6 +50,11 @@ What's new in Sudo 1.8.12
    install their own SIGCHLD signal handler and neglect to restore
    sudo's original handler.  Bug #657
 
+ * Removed a limit on the length of command line arguments expanded
+   by a wild card using sudo's version of the fnmatch() function.
+   This limit was introduced when sudo's version of fnmatch()
+   was replaced in sudo 1.8.4.
+
 What's new in Sudo 1.8.11p2
 
  * Fixed a bug where dynamic shared objects loaded from a plugin
