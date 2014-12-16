@@ -785,7 +785,7 @@ match(Char *name, Char *pat, Char *patend)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END) {
 				if ((c & M_MASK) == M_CLASS) {
-					int idx = *pat & M_MASK;
+					Char idx = *pat & M_MASK;
 					if (idx < NCCLASSES &&
 					    cclasses[idx].isctype(k))
 						ok = 1;
