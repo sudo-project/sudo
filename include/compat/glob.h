@@ -1,5 +1,3 @@
-/*	$OpenBSD: glob.h,v 1.8 2003/06/02 19:34:12 millert Exp $	*/
-
 /*
  * Copyright (c) 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -58,16 +56,16 @@ typedef struct {
 #define	GLOB_NOESCAPE	0x0040	/* Disable backslash escaping. */
 
 /* Non-POSIX extensions */
-#define	GLOB_MAGCHAR	0x0080	/* Pattern had globbing characters. */
-#define	GLOB_BRACE	0x0100	/* Expand braces ala csh. */
+#define	GLOB_BRACE	0x0080	/* Expand braces ala csh. */
+#define	GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
 #define	GLOB_TILDE	0x0200	/* Expand tilde names from the passwd file. */
+#define	GLOB_LIMIT	0x0400	/* Limit pattern match output to ARG_MAX */
 
 /* Error values returned by glob(3) */
 #define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
 #define	GLOB_ABORTED	(-2)	/* Unignored error. */
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
 #define	GLOB_NOSYS	(-4)	/* Function not supported. */
-#define GLOB_ABEND	GLOB_ABORTED
 
 __dso_public int  sudo_glob(const char *, int, int (*)(const char *, int), glob_t *);
 __dso_public void sudo_globfree(glob_t *);
