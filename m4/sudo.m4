@@ -338,7 +338,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <pwd.h>
 #include <limits.h>
 #include <sys/types.h>
-#include <sys/param.h>
 main() {
   FILE *f;
   char b[1024];
