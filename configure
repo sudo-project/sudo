@@ -20360,6 +20360,208 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+ac_fn_c_check_decl "$LINENO" "OPEN_MAX" "ac_cv_have_decl_OPEN_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_OPEN_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_OPEN_MAX $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "LLONG_MAX" "ac_cv_have_decl_LLONG_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_LLONG_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_LLONG_MAX $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "LLONG_MIN" "ac_cv_have_decl_LLONG_MIN" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_LLONG_MIN" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_LLONG_MIN $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "ULLONG_MAX" "ac_cv_have_decl_ULLONG_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_ULLONG_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_ULLONG_MAX $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "SIZE_MAX" "ac_cv_have_decl_SIZE_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_SIZE_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_SIZE_MAX $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "PATH_MAX" "ac_cv_have_decl_PATH_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_PATH_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_PATH_MAX $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "HOST_NAME_MAX" "ac_cv_have_decl_HOST_NAME_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_HOST_NAME_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_HOST_NAME_MAX $ac_have_decl
+_ACEOF
+
+if test "$ac_cv_have_decl_LLONG_MAX" != "yes"; then
+    ac_fn_c_check_decl "$LINENO" "QUAD_MAX" "ac_cv_have_decl_QUAD_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_QUAD_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_QUAD_MAX $ac_have_decl
+_ACEOF
+
+fi
+if test "$ac_cv_have_decl_LLONG_MIN" != "yes"; then
+    ac_fn_c_check_decl "$LINENO" "QUAD_MIN" "ac_cv_have_decl_QUAD_MIN" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_QUAD_MIN" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_QUAD_MIN $ac_have_decl
+_ACEOF
+
+fi
+if test "$ac_cv_have_decl_ULLONG_MAX" != "yes"; then
+    ac_fn_c_check_decl "$LINENO" "UQUAD_MAX" "ac_cv_have_decl_UQUAD_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_UQUAD_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_UQUAD_MAX $ac_have_decl
+_ACEOF
+
+fi
+if test "$ac_cv_have_decl_SIZE_MAX" != "yes"; then
+    ac_fn_c_check_decl "$LINENO" "SIZE_T_MAX" "ac_cv_have_decl_SIZE_T_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl_SIZE_T_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_SIZE_T_MAX $ac_have_decl
+_ACEOF
+
+fi
+if test "$ac_cv_have_decl_PATH_MAX" != "yes"; then
+    ac_fn_c_check_decl "$LINENO" "_POSIX_PATH_MAX" "ac_cv_have_decl__POSIX_PATH_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl__POSIX_PATH_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__POSIX_PATH_MAX $ac_have_decl
+_ACEOF
+
+fi
+if test "$ac_cv_have_decl_HOST_NAME_MAX" != "yes"; then
+    ac_fn_c_check_decl "$LINENO" "_POSIX_HOST_NAME_MAX" "ac_cv_have_decl__POSIX_HOST_NAME_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+"
+if test "x$ac_cv_have_decl__POSIX_HOST_NAME_MAX" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__POSIX_HOST_NAME_MAX $ac_have_decl
+_ACEOF
+
+fi
+
 for ac_func in strsignal
 do :
   ac_fn_c_check_func "$LINENO" "strsignal" "ac_cv_func_strsignal"

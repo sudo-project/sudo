@@ -2946,6 +2946,53 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
+dnl Check for incomplete limits.h
+dnl
+AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, SIZE_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
+#include <sys/types.h>
+#include <limits.h>
+])
+dnl
+dnl Try to find equivalents for missing types
+dnl
+if test "$ac_cv_have_decl_LLONG_MAX" != "yes"; then
+    AC_CHECK_DECLS([QUAD_MAX], [], [], [[
+#include <sys/types.h>
+#include <limits.h>
+    ]])
+fi
+if test "$ac_cv_have_decl_LLONG_MIN" != "yes"; then
+    AC_CHECK_DECLS([QUAD_MIN], [], [], [[
+#include <sys/types.h>
+#include <limits.h>
+    ]])
+fi
+if test "$ac_cv_have_decl_ULLONG_MAX" != "yes"; then
+    AC_CHECK_DECLS([UQUAD_MAX], [], [], [[
+#include <sys/types.h>
+#include <limits.h>
+    ]])
+fi
+if test "$ac_cv_have_decl_SIZE_MAX" != "yes"; then
+    AC_CHECK_DECLS([SIZE_T_MAX], [], [], [[
+#include <sys/types.h>
+#include <limits.h>
+    ]])
+fi
+if test "$ac_cv_have_decl_PATH_MAX" != "yes"; then
+    AC_CHECK_DECLS([_POSIX_PATH_MAX], [], [], [[
+#include <sys/types.h>
+#include <limits.h>
+    ]])
+fi
+if test "$ac_cv_have_decl_HOST_NAME_MAX" != "yes"; then
+    AC_CHECK_DECLS([_POSIX_HOST_NAME_MAX], [], [], [[
+#include <sys/types.h>
+#include <limits.h>
+    ]])
+fi
+
+dnl
 dnl Check for strsignal() or sys_siglist
 dnl
 AC_CHECK_FUNCS(strsignal, [], [

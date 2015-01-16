@@ -120,52 +120,52 @@
 /*
  * Some systems lack full limit definitions.
  */
-#ifndef OPEN_MAX
+#if defined(HAVE_DECL_OPEN_MAX) && !HAVE_DECL_OPEN_MAX
 # define OPEN_MAX	256
 #endif
 
-#ifndef LLONG_MAX
-# if defined(QUAD_MAX)
+#if defined(HAVE_DECL_LLONG_MAX) && !HAVE_DECL_LLONG_MAX
+# if defined(HAVE_DECL_QUAD_MAX) && HAVE_DECL_QUAD_MAX
 #  define LLONG_MAX	QUAD_MAX
 # else
 #  define LLONG_MAX	0x7fffffffffffffffLL
 # endif
 #endif
 
-#ifndef LLONG_MIN
-# if defined(QUAD_MIN)
+#if defined(HAVE_DECL_LLONG_MIN) && !HAVE_DECL_LLONG_MIN
+# if defined(HAVE_DECL_QUAD_MIN) && HAVE_DECL_QUAD_MIN
 #  define LLONG_MIN	QUAD_MIN
 # else
 #  define LLONG_MIN	(-0x7fffffffffffffffLL-1)
 # endif
 #endif
 
-#ifndef ULLONG_MAX
-# if defined(UQUAD_MAX)
+#if defined(HAVE_DECL_ULLONG_MAX) && !HAVE_DECL_ULLONG_MAX
+# if defined(HAVE_DECL_UQUAD_MAX) && HAVE_DECL_UQUAD_MAX
 #  define ULLONG_MAX	UQUAD_MAX
 # else
 #  define ULLONG_MAX	0xffffffffffffffffULL
 # endif
 #endif
 
-#ifndef SIZE_MAX
-# ifdef SIZE_T_MAX
+#if defined(HAVE_DECL_SIZE_MAX) && !HAVE_DECL_SIZE_MAX
+# if defined(HAVE_DECL_SIZE_T_MAX) && HAVE_DECL_SIZE_T_MAX
 #  define SIZE_MAX	SIZE_T_MAX
 # else
 #  define SIZE_MAX	ULONG_MAX
-# endif /* SIZE_T_MAX */
-#endif /* SIZE_MAX */
+# endif
+#endif
 
-#ifndef PATH_MAX
-# ifdef _POSIX_PATH_MAX
+#if defined(HAVE_DECL_PATH_MAX) && !HAVE_DECL_PATH_MAX
+# if defined(HAVE_DECL__POSIX_PATH_MAX) && HAVE_DECL__POSIX_PATH_MAX
 #  define PATH_MAX		_POSIX_PATH_MAX
 # else
 #  define PATH_MAX		256
 # endif
 #endif
 
-#ifndef HOST_NAME_MAX
-# ifdef _POSIX_HOST_NAME_MAX
+#if defined(HAVE_DECL_HOST_NAME_MAX) && !HAVE_DECL_HOST_NAME_MAX
+# if defined(HAVE_DECL__POSIX_HOST_NAME_MAX) && HAVE_DECL__POSIX_HOST_NAME_MAX
 #  define HOST_NAME_MAX		_POSIX_HOST_NAME_MAX
 # else
 #  define HOST_NAME_MAX		255
@@ -319,7 +319,7 @@ extern int errno;
 #endif
 
 /* For sig2str() */
-#ifndef SIG2STR_MAX
+#ifndef HAVE_SIG2STR
 # define SIG2STR_MAX 32
 #endif
 

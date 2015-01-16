@@ -89,9 +89,45 @@
    */
 #undef HAVE_DECL_ERRNO
 
+/* Define to 1 if you have the declaration of `HOST_NAME_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_HOST_NAME_MAX
+
 /* Define to 1 if you have the declaration of `h_errno', and to 0 if you
    don't. */
 #undef HAVE_DECL_H_ERRNO
+
+/* Define to 1 if you have the declaration of `LLONG_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LLONG_MAX
+
+/* Define to 1 if you have the declaration of `LLONG_MIN', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LLONG_MIN
+
+/* Define to 1 if you have the declaration of `OPEN_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_OPEN_MAX
+
+/* Define to 1 if you have the declaration of `PATH_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_PATH_MAX
+
+/* Define to 1 if you have the declaration of `QUAD_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_QUAD_MAX
+
+/* Define to 1 if you have the declaration of `QUAD_MIN', and to 0 if you
+   don't. */
+#undef HAVE_DECL_QUAD_MIN
+
+/* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SIZE_MAX
+
+/* Define to 1 if you have the declaration of `SIZE_T_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SIZE_T_MAX
 
 /* Define to 1 if you have the declaration of `sys_sigabbrev', and to 0 if you
    don't. */
@@ -104,6 +140,22 @@
 /* Define to 1 if you have the declaration of `sys_signame', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGNAME
+
+/* Define to 1 if you have the declaration of `ULLONG_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ULLONG_MAX
+
+/* Define to 1 if you have the declaration of `UQUAD_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_UQUAD_MAX
+
+/* Define to 1 if you have the declaration of `_POSIX_HOST_NAME_MAX', and to 0
+   if you don't. */
+#undef HAVE_DECL__POSIX_HOST_NAME_MAX
+
+/* Define to 1 if you have the declaration of `_POSIX_PATH_MAX', and to 0 if
+   you don't. */
+#undef HAVE_DECL__POSIX_PATH_MAX
 
 /* Define to 1 if you have the declaration of `_sys_siglist', and to 0 if you
    don't. */
