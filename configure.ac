@@ -1666,7 +1666,7 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		AC_CHECK_FUNCS(priv_set, [PSMAN=1])
+		AC_CHECK_FUNCS([priv_set], [PSMAN=1])
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1680,7 +1680,7 @@ case "$host" in
 		    fi
 		else
 		    if test X"$with_aixauth" = X""; then
-			AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
+			AC_CHECK_FUNCS([authenticate], [AUTH_EXCL_DEF="AIX_AUTH"])
 		    fi
 		fi
 
@@ -1709,7 +1709,7 @@ case "$host" in
 		RC_LINK=/etc/rc.d/rc2.d/S90sudo
 
 		# AIX-specific functions
-		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
+		AC_CHECK_FUNCS([getuserattr setauthdb setrlimit64])
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
 		;;
@@ -1726,7 +1726,7 @@ case "$host" in
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
 
-		AC_CHECK_FUNCS(pstat_getproc)
+		AC_CHECK_FUNCS([pstat_getproc])
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
@@ -1815,7 +1815,7 @@ case "$host" in
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
-		AC_CHECK_FUNCS(pstat_getproc)
+		AC_CHECK_FUNCS([pstat_getproc])
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
@@ -1968,7 +1968,7 @@ case "$host" in
 		SKIP_SETREUID=yes
 		# Check for newer BSD auth API
 		if test -z "$with_bsdauth"; then
-		    AC_CHECK_FUNCS(auth_challenge, [AUTH_EXCL_DEF="BSD_AUTH"])
+		    AC_CHECK_FUNCS([auth_challenge], [AUTH_EXCL_DEF="BSD_AUTH"])
 		fi
 		;;
     *-*-freebsd*)
@@ -2178,9 +2178,9 @@ AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS(malloc.h netgroup.h paths.h spawn.h utime.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h)
+AC_CHECK_HEADERS_ONCE([malloc.h netgroup.h paths.h spawn.h utime.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
-AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS(_ttyname_dev)], [], [AC_INCLUDES_DEFAULT
+AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
 #include <procfs.h>
 #endif
@@ -2223,7 +2223,7 @@ if test "$ac_cv_sys_posix_termios" != "yes"; then
 fi
 SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
-    AC_CHECK_HEADERS(login_cap.h, [LOGINCAP_USAGE='[[-c class]] '; LCMAN=1
+    AC_CHECK_HEADERS([login_cap.h], [LOGINCAP_USAGE='[[-c class]] '; LCMAN=1
 	case "$OS" in
 	    freebsd|netbsd)
 		SUDO_LIBS="${SUDO_LIBS} -lutil"
@@ -2329,24 +2329,23 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(killpg nl_langinfo regcomp strftime strrchr strtoll \
-	       sysconf tzset)
-AC_CHECK_FUNCS(getgrouplist, [], [
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo regcomp strftime strrchr strtoll sysconf tzset])
+AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
-	AC_CHECK_FUNCS(getgrset)
+	AC_CHECK_FUNCS([getgrset])
 	;;
     *)
-	AC_CHECK_FUNC(nss_search, [
-	    AC_CHECK_FUNC(_nss_XbyY_buf_alloc, [
+	AC_CHECK_FUNC([nss_search], [
+	    AC_CHECK_FUNC([_nss_XbyY_buf_alloc], [
 		# Solaris
-		AC_CHECK_FUNC(_nss_initf_group, [
-		    AC_CHECK_HEADERS(nss_dbdefs.h)
+		AC_CHECK_FUNC([_nss_initf_group], [
+		    AC_CHECK_HEADERS([nss_dbdefs.h])
 		    AC_DEFINE([HAVE_NSS_SEARCH])
 		    AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
 		    AC_DEFINE([HAVE__NSS_INITF_GROUP])
 		], [
-		    AC_CHECK_HEADERS(nss_dbdefs.h, [
+		    AC_CHECK_HEADERS([nss_dbdefs.h], [
 			# Older Solaris does not export _nss_initf_group
 			# but we can use our own.
 			AC_DEFINE([HAVE_NSS_SEARCH])
@@ -2355,9 +2354,9 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 		])
 	    ], [
 		# HP-UX
-		AC_CHECK_FUNC(__nss_XbyY_buf_alloc, [
-		    AC_CHECK_FUNC(__nss_initf_group, [
-			AC_CHECK_HEADERS(nss_dbdefs.h)
+		AC_CHECK_FUNC([__nss_XbyY_buf_alloc], [
+		    AC_CHECK_FUNC([__nss_initf_group], [
+			AC_CHECK_HEADERS([nss_dbdefs.h])
 			AC_DEFINE([HAVE_NSS_SEARCH])
 			AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
 			AC_DEFINE([HAVE___NSS_INITF_GROUP])
@@ -2370,10 +2369,10 @@ AC_CHECK_FUNCS(getgrouplist, [], [
     AC_LIBOBJ(getgrouplist)
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
-AC_CHECK_FUNCS(getline, [], [
+AC_CHECK_FUNCS([getline], [], [
     AC_LIBOBJ(getline)
     SUDO_APPEND_COMPAT_EXP(sudo_getline)
-    AC_CHECK_FUNCS(fgetln)
+    AC_CHECK_FUNCS([fgetln])
 ])
 dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
@@ -2381,20 +2380,20 @@ dnl
 if test "$enable_hardening" != "no"; then
     O_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
-    AC_CHECK_FUNC(__sprintf_chk, [
+    AC_CHECK_FUNC([__sprintf_chk], [
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
     ], [])
     CPPFLAGS="$O_CPPFLAGS"
 fi
 
 utmp_style=LEGACY
-AC_CHECK_FUNCS(getutxid getutid, [utmp_style=POSIX; break])
+AC_CHECK_FUNCS([getutxid getutid], [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
-    AC_CHECK_FUNCS(getttyent ttyslot, [break])
-    AC_CHECK_FUNCS(fseeko)
+    AC_CHECK_FUNCS([getttyent ttyslot], [break])
+    AC_CHECK_FUNCS([fseeko])
 fi
 
-AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],
+AC_CHECK_FUNCS([sysctl], [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],
     [
 	AC_CHECK_MEMBERS([struct kinfo_proc2.p_tdev], [], [
 	    AC_CHECK_MEMBERS([struct kinfo_proc.p_tdev], [], [
@@ -2419,47 +2418,47 @@ AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],
     ])
 ])
 
-AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])], [
+AC_CHECK_FUNCS([openpty], [AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])], [
     AC_CHECK_LIB(util, openpty, [
-	AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])
+	AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])
 	case "$SUDO_LIBS" in
 	    *-lutil*) ;;
 	    *) SUDO_LIBS="${SUDO_LIBS} -lutil";;
 	esac
 	AC_DEFINE(HAVE_OPENPTY)
     ], [
-	AC_CHECK_FUNCS(_getpty, [], [
-	    AC_CHECK_FUNCS(grantpt, [
-		AC_CHECK_FUNCS(posix_openpt)
+	AC_CHECK_FUNCS([_getpty], [], [
+	    AC_CHECK_FUNCS([grantpt], [
+		AC_CHECK_FUNCS([posix_openpt])
 	    ], [
-		AC_CHECK_FUNCS(revoke)
+		AC_CHECK_FUNCS([revoke])
 	    ])
 	])
     ])
 ])
-AC_CHECK_FUNCS(unsetenv, [SUDO_FUNC_UNSETENV_VOID], [])
+AC_CHECK_FUNCS([unsetenv], [SUDO_FUNC_UNSETENV_VOID], [])
 SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then
-    AC_CHECK_FUNCS(setresuid, [
+    AC_CHECK_FUNCS([setresuid], [
 	SKIP_SETREUID=yes
-	AC_CHECK_FUNCS(getresuid)
+	AC_CHECK_FUNCS([getresuid])
     ])
 fi
 if test -z "$SKIP_SETREUID"; then
-    AC_CHECK_FUNCS(setreuid)
+    AC_CHECK_FUNCS([setreuid])
 fi
-AC_CHECK_FUNCS(seteuid)
+AC_CHECK_FUNCS_ONCE([seteuid])
 if test X"$with_interfaces" != X"no"; then
-    AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
+    AC_CHECK_FUNCS([getifaddrs], [AC_CHECK_FUNCS([freeifaddrs])])
 fi
-AC_CHECK_FUNCS(lockf flock, [break])
-AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
-AC_CHECK_FUNCS(utimes, [
-    AC_CHECK_FUNCS(futimes futimesat, [break])
+AC_CHECK_FUNCS([lockf flock], [break])
+AC_CHECK_FUNCS([innetgr _innetgr], [AC_CHECK_FUNCS([getdomainname]) [break]])
+AC_CHECK_FUNCS([utimes], [
+    AC_CHECK_FUNCS([futimes futimesat], [break])
 ], [
     AC_LIBOBJ(utimes)
     SUDO_APPEND_COMPAT_EXP(sudo_utimes)
-    AC_CHECK_FUNCS(futime, [SUDO_APPEND_COMPAT_EXP(sudo_futimes)])
+    AC_CHECK_FUNCS([futime], [SUDO_APPEND_COMPAT_EXP(sudo_futimes)])
 ])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
     AC_LIBOBJ(fnmatch)
@@ -2467,31 +2466,31 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_CHECK_FUNCS(glob, [], [
+AC_CHECK_FUNCS([glob], [], [
     AC_LIBOBJ(glob)
     SUDO_APPEND_COMPAT_EXP(sudo_glob sudo_globfree)
 ])
-AC_CHECK_FUNCS(memrchr, [], [
+AC_CHECK_FUNCS([memrchr], [], [
     AC_LIBOBJ(memrchr)
     SUDO_APPEND_COMPAT_EXP(sudo_memrchr)
 ])
-AC_CHECK_FUNCS(memset_s, [], [
+AC_CHECK_FUNCS([memset_s], [], [
     AC_LIBOBJ(memset_s)
     SUDO_APPEND_COMPAT_EXP(sudo_memset_s)
 ])
-AC_CHECK_FUNCS(pw_dup, [], [
+AC_CHECK_FUNCS([pw_dup], [], [
     AC_LIBOBJ(pw_dup)
     SUDO_APPEND_COMPAT_EXP(sudo_pw_dup)
 ])
-AC_CHECK_FUNCS(strlcpy, [], [
+AC_CHECK_FUNCS([strlcpy], [], [
     AC_LIBOBJ(strlcpy)
     SUDO_APPEND_COMPAT_EXP(sudo_strlcpy)
 ])
-AC_CHECK_FUNCS(strlcat, [], [
+AC_CHECK_FUNCS([strlcat], [], [
     AC_LIBOBJ(strlcat)
     SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
 ])
-AC_CHECK_FUNCS(clock_gettime, [], [
+AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
@@ -2501,7 +2500,7 @@ AC_CHECK_FUNCS(clock_gettime, [], [
 	SUDO_APPEND_COMPAT_EXP(sudo_clock_gettime)
     ])
 ])
-AC_CHECK_FUNCS(getopt_long, [], [
+AC_CHECK_FUNCS([getopt_long], [], [
     AC_LIBOBJ(getopt_long)
     SUDO_APPEND_COMPAT_EXP(sudo_getopt_long sudo_getopt_long_only)
     AC_MSG_CHECKING([for optreset])
@@ -2512,15 +2511,15 @@ AC_CHECK_FUNCS(getopt_long, [], [
     fi
     AC_MSG_RESULT($sudo_cv_optreset)
 ])
-AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
+AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     SUDO_APPEND_COMPAT_EXP(closefrom_fallback sudo_closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
 #	include <limits.h>
 #	include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemps mkdtemp, [], [break])
+AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
 if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
-    AC_CHECK_FUNCS(arc4random random lrand48, [break])
+    AC_CHECK_FUNCS([arc4random random lrand48], [break])
     AC_LIBOBJ(mktemp)
     # If either mkdtemp() or mkstemps() is missing, replace both.
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
@@ -2528,11 +2527,11 @@ fi
 AX_FUNC_SNPRINTF
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
     # System has a C99-compliant v?snprintf(), check for v?asprintf()
-    AC_CHECK_FUNCS(asprintf, [], [
+    AC_CHECK_FUNCS([asprintf], [], [
 	AC_LIBOBJ(snprintf)
 	SUDO_APPEND_COMPAT_EXP(sudo_asprintf)
     ])
-    AC_CHECK_FUNCS(vasprintf, [], [
+    AC_CHECK_FUNCS([vasprintf], [], [
 	AC_LIBOBJ(snprintf)
 	SUDO_APPEND_COMPAT_EXP(sudo_vasprintf)
     ])
@@ -2541,7 +2540,7 @@ else
     SUDO_APPEND_COMPAT_EXP(sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf)
 fi
 # We wrap OpenBSD's strtonum() to get translatable error strings.
-AC_CHECK_FUNCS(strtonum)
+AC_CHECK_FUNCS([strtonum])
 AC_LIBOBJ(strtonum)
 SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
@@ -2552,7 +2551,7 @@ fi
 FOUND_SHA2=no
 AC_CHECK_HEADER([sha2.h], [
     FOUND_SHA2=yes
-    AC_CHECK_FUNCS(SHA224Update, [SUDO_FUNC_SHA2_VOID_PTR], [
+    AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
 	# On some systems, SHA224Update is in libmd
 	AC_CHECK_LIB(md, SHA224Update, [
 	    AC_DEFINE(HAVE_SHA224UPDATE)
@@ -2575,43 +2574,43 @@ if test X"$with_noexec" != X"no"; then
     # Check for underscore versions of standard exec functions
     # unless we are using dyld symbole interposition
     if test X"$dlyld_interpose" != X"yes"; then
-	AC_CHECK_FUNCS(_execl __execl)
-	AC_CHECK_FUNCS(_execle __execle)
-	AC_CHECK_FUNCS(_execlp __execlp)
-	AC_CHECK_FUNCS(_execv __execv)
-	AC_CHECK_FUNCS(_execve __execve)
-	AC_CHECK_FUNCS(_execvp __execvp)
+	AC_CHECK_FUNCS([_execl __execl])
+	AC_CHECK_FUNCS([_execle __execle])
+	AC_CHECK_FUNCS([_execlp __execlp])
+	AC_CHECK_FUNCS([_execv __execv])
+	AC_CHECK_FUNCS([_execve __execve])
+	AC_CHECK_FUNCS([_execvp __execvp])
     fi
     # Check for non-standard exec functions including underscore versions
-    AC_CHECK_FUNCS(exect, [
+    AC_CHECK_FUNCS([exect], [
 	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS(_exect __exect)
+	    AC_CHECK_FUNCS([_exect __exect])
 	fi
     ])
-    AC_CHECK_FUNCS(execvP, [
+    AC_CHECK_FUNCS([execvP], [
 	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS(_execvP __execvP)
+	    AC_CHECK_FUNCS([_execvP __execvP])
 	fi
     ])
-    AC_CHECK_FUNCS(execvpe, [
+    AC_CHECK_FUNCS([execvpe], [
 	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS(_execvpe __execvpe)
+	    AC_CHECK_FUNCS([_execvpe __execvpe])
 	fi
     ])
-    AC_CHECK_FUNCS(fexecve, [
+    AC_CHECK_FUNCS([fexecve], [
 	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS(_fexecve __fexecve)
+	    AC_CHECK_FUNCS([_fexecve __fexecve])
 	fi
     ])
     # Check for posix_spawn, posix_spawnp and any underscore versions
-    AC_CHECK_FUNCS(posix_spawn, [
+    AC_CHECK_FUNCS([posix_spawn], [
 	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS(_posix_spawn __posix_spawn)
+	    AC_CHECK_FUNCS([_posix_spawn __posix_spawn])
 	fi
     ])
-    AC_CHECK_FUNCS(posix_spawnp, [
+    AC_CHECK_FUNCS([posix_spawnp], [
 	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS(_posix_spawnp __posix_spawnp)
+	    AC_CHECK_FUNCS([_posix_spawnp __posix_spawnp])
 	fi
     ])
 fi
@@ -2632,7 +2631,7 @@ dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
-AC_CHECK_FUNC(socket, [], [
+AC_CHECK_FUNC([socket], [], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
 	_libs=
 	for lib in $libs; do
@@ -2657,7 +2656,7 @@ dnl
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
 found=false
-AC_CHECK_FUNC(inet_ntop, [
+AC_CHECK_FUNC([inet_ntop], [
     found=true
     AC_DEFINE(HAVE_INET_NTOP)
 ], [
@@ -2695,7 +2694,7 @@ OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
 found=false
 INET_PTON_LIBS=
-AC_CHECK_FUNC(inet_pton, [
+AC_CHECK_FUNC([inet_pton], [
     found=true
     AC_DEFINE(HAVE_INET_PTON)
 ], [
@@ -2730,7 +2729,7 @@ dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
-AC_CHECK_FUNC(syslog, [], [
+AC_CHECK_FUNC([syslog], [], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
 	_libs=
 	for lib in $libs; do
@@ -2763,7 +2762,7 @@ case " $LIBOBJS " in
 	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
 	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
 	fi
-	AC_CHECK_FUNC(gethostbyname, [], [
+	AC_CHECK_FUNC([gethostbyname], [], [
 	    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
 		_libs=
 		for lib in $libs; do
@@ -2794,7 +2793,7 @@ LIBS="$OLIBS"
 dnl
 dnl Check for getprogname() or __progname
 dnl
-AC_CHECK_FUNCS(getprogname, [AC_CHECK_FUNCS(setprogname)], [
+AC_CHECK_FUNCS([getprogname], [AC_CHECK_FUNCS([setprogname])], [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
@@ -2859,7 +2858,7 @@ if test "$enable_nls" != "no"; then
 	eval gettext_result="\$$gettext_name"
 	AC_MSG_RESULT($gettext_result)
 	if test "$gettext_result" = "yes"; then
-	    AC_CHECK_FUNCS(ngettext)
+	    AC_CHECK_FUNCS([ngettext])
 	    break
 	fi
     done
@@ -2892,7 +2891,7 @@ dnl
 case "$enable_zlib" in
     yes)
 	AC_CHECK_LIB(z, gzdopen, [
-	    AC_CHECK_HEADERS(zlib.h, [ZLIB="-lz"], [enable_zlib=builtin])
+	    AC_CHECK_HEADERS([zlib.h], [ZLIB="-lz"], [enable_zlib=builtin])
 	])
 	;;
     no)
@@ -2995,7 +2994,7 @@ fi
 dnl
 dnl Check for strsignal() or sys_siglist
 dnl
-AC_CHECK_FUNCS(strsignal, [], [
+AC_CHECK_FUNCS([strsignal], [], [
     AC_LIBOBJ(strsignal)
     SUDO_APPEND_COMPAT_EXP(sudo_strsignal)
     HAVE_SIGLIST="false"
@@ -3014,7 +3013,7 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for sig2str(), sys_signame or sys_sigabbrev
 dnl
-AC_CHECK_FUNCS(sig2str, [], [
+AC_CHECK_FUNCS([sig2str], [], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"
@@ -3113,7 +3112,7 @@ if test ${with_pam-"no"} != "no"; then
 	# Older PAM implementations lack pam_getenvlist
 	OLIBS="$LIBS"
 	LIBS="$LIBS -lpam $lt_cv_dlopen_libs"
-	AC_CHECK_FUNCS(pam_getenvlist)
+	AC_CHECK_FUNCS([pam_getenvlist])
 	LIBS="$OLIBS"
 
 	# We already link with -ldl if needed (see LIBDL below)
@@ -3181,7 +3180,7 @@ dnl
 dnl SIA authentication for Tru64 Unix
 dnl
 if test ${CHECKSIA-'false'} = "true"; then
-    AC_CHECK_FUNCS(sia_ses_init, [found=true], [found=false])
+    AC_CHECK_FUNCS([sia_ses_init], [found=true], [found=false])
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.lo"
@@ -3298,8 +3297,8 @@ if test ${with_kerb5-'no'} != "no"; then
     fi
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDOERS_LIBS}"
-    AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
-    AC_CHECK_FUNCS(krb5_get_init_creds_opt_alloc, [
+    AC_CHECK_FUNCS([krb5_verify_user krb5_init_secure_context])
+    AC_CHECK_FUNCS([krb5_get_init_creds_opt_alloc], [
 	AC_CACHE_CHECK([whether krb5_get_init_creds_opt_free takes a context],
 	    sudo_cv_krb5_get_init_creds_opt_free_two_args, [
 		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]],
@@ -3511,10 +3510,10 @@ if test ${with_passwd-'no'} != "no"; then
     if test -n "$SECUREWARE"; then
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
-	AC_CHECK_FUNCS(bigcrypt)
+	AC_CHECK_FUNCS([bigcrypt])
 	AUTH_OBJS="$AUTH_OBJS secureware.lo"
 	# set_auth_parameters() and initprivs() are called from sudo.c
-	AC_CHECK_FUNCS(set_auth_parameters initprivs, [test -n "$shadow_libs" && SUDO_LIBS="$SUDO_LIBS $shadow_libs"])
+	AC_CHECK_FUNCS([set_auth_parameters initprivs], [test -n "$shadow_libs" && SUDO_LIBS="$SUDO_LIBS $shadow_libs"])
 	LIBS="$_LIBS"
     fi
 fi
@@ -3523,7 +3522,7 @@ dnl
 dnl Choose event subsystem backend: poll or select
 dnl
 if test X"$enable_poll" = X""; then
-    AC_CHECK_FUNCS(poll, [enable_poll=yes], [enable_poll=no])
+    AC_CHECK_FUNCS([poll], [enable_poll=yes], [enable_poll=no])
 elif test X"$enable_poll" = X"yes"; then
     AC_DEFINE(HAVE_POLL)
 fi
@@ -3585,12 +3584,12 @@ if test ${with_ldap-'no'} != "no"; then
     AC_DEFINE(HAVE_LBER_H)])
 
     AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
-	AC_CHECK_FUNCS(ldap_sasl_interactive_bind_s)
+	AC_CHECK_FUNCS([ldap_sasl_interactive_bind_s])
 	break
     ])
     AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
-    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_init ldap_ssl_client_init ldap_start_tls_s_np)
-    AC_CHECK_FUNCS(ldap_search_ext_s ldap_search_st, [break])
+    AC_CHECK_FUNCS([ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_init ldap_ssl_client_init ldap_start_tls_s_np])
+    AC_CHECK_FUNCS([ldap_search_ext_s ldap_search_st], [break])
 
     if test X"$check_gss_krb5_ccache_name" = X"yes"; then
 	AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,

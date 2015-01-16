@@ -633,6 +633,8 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
+ac_header_list=
+ac_func_list=
 ac_c_werror_flag=
 ac_subst_vars='LTLIBOBJS
 KRB5CONFIG
@@ -2800,6 +2802,26 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
+as_fn_append ac_header_list " malloc.h"
+as_fn_append ac_header_list " netgroup.h"
+as_fn_append ac_header_list " paths.h"
+as_fn_append ac_header_list " spawn.h"
+as_fn_append ac_header_list " utime.h"
+as_fn_append ac_header_list " utmpx.h"
+as_fn_append ac_header_list " sys/sockio.h"
+as_fn_append ac_header_list " sys/bsdtypes.h"
+as_fn_append ac_header_list " sys/select.h"
+as_fn_append ac_header_list " sys/stropts.h"
+as_fn_append ac_header_list " sys/sysmacros.h"
+as_fn_append ac_func_list " killpg"
+as_fn_append ac_func_list " nl_langinfo"
+as_fn_append ac_func_list " regcomp"
+as_fn_append ac_func_list " strftime"
+as_fn_append ac_func_list " strrchr"
+as_fn_append ac_func_list " strtoll"
+as_fn_append ac_func_list " sysconf"
+as_fn_append ac_func_list " tzset"
+as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -16238,10 +16260,14 @@ fi
   fi
 fi
 
-for ac_header in malloc.h netgroup.h paths.h spawn.h utime.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h
+
+
+
+  for ac_header in $ac_header_list
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
@@ -16250,6 +16276,29 @@ _ACEOF
 fi
 
 done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 for ac_header in endian.h sys/endian.h machine/endian.h
 do :
@@ -17573,8 +17622,10 @@ $as_echo "#define HAVE_GETGROUPS 1" >>confdefs.h
 fi
 LIBS=$ac_save_LIBS
 
-for ac_func in killpg nl_langinfo regcomp strftime strrchr strtoll \
-	       sysconf tzset
+
+
+
+  for ac_func in $ac_func_list
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -17585,6 +17636,23 @@ _ACEOF
 
 fi
 done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 for ac_func in getgrouplist
 do :
@@ -18171,16 +18239,8 @@ fi
 done
 
 fi
-for ac_func in seteuid
-do :
-  ac_fn_c_check_func "$LINENO" "seteuid" "ac_cv_func_seteuid"
-if test "x$ac_cv_func_seteuid" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SETEUID 1
-_ACEOF
 
-fi
-done
+
 
 if test X"$with_interfaces" != X"no"; then
     for ac_func in getifaddrs
