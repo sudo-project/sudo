@@ -65,7 +65,7 @@
 static void do_syslog(int, char *);
 static void do_logfile(char *);
 static bool send_mail(const char *fmt, ...);
-static int should_mail(int);
+static bool should_mail(int);
 static void mysyslog(int, const char *, ...);
 static char *new_logline(const char *, int);
 
@@ -751,7 +751,7 @@ send_mail(const char *fmt, ...)
 /*
  * Determine whether we should send mail based on "status" and defaults options.
  */
-static int
+static bool
 should_mail(int status)
 {
     debug_decl(should_mail, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
