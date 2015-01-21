@@ -114,9 +114,8 @@ struct sudo_user {
  * Note: cannot use '0' as a value here.
  */
 /* XXX - VALIDATE_SUCCESS and VALIDATE_FAILURE instead? */
-#define VALIDATE_ERROR          0x001
-#define VALIDATE_OK		0x002
-#define VALIDATE_NOT_OK		0x004
+#define VALIDATE_OK		0x001
+#define VALIDATE_NOT_OK		0x002
 #define FLAG_CHECK_USER		0x010
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
