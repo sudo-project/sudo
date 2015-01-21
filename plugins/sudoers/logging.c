@@ -358,7 +358,7 @@ log_auth_failure(int status, unsigned int tries)
      * so if we are going to send an email about the denial, that takes
      * precedence.
      */
-    if (ISSET(status, VALIDATE_OK)) {
+    if (ISSET(status, VALIDATE_SUCCESS)) {
 	/* Command allowed, auth failed; do we need to send mail? */
 	if (def_mail_badpass || def_mail_always)
 	    SET(flags, SLOG_SEND_MAIL);
@@ -759,7 +759,7 @@ should_mail(int status)
     debug_return_bool(def_mail_always ||
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
-	(def_mail_no_perms && !ISSET(status, VALIDATE_OK)));
+	(def_mail_no_perms && !ISSET(status, VALIDATE_SUCCESS)));
 }
 
 #define	LL_TTY_STR	"TTY="

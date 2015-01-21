@@ -1015,8 +1015,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	    }
 	}
 	if (matched || user_uid == 0) {
-	    SET(ret, VALIDATE_OK);
-	    CLR(ret, VALIDATE_NOT_OK);
+	    SET(ret, VALIDATE_SUCCESS);
+	    CLR(ret, VALIDATE_FAILURE);
 	    if (def_authenticate) {
 		switch (pwcheck) {
 		    case always:
@@ -1065,11 +1065,11 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		    if (user_type == NULL)
 			user_type = def_type;
 #endif /* HAVE_SELINUX */
-		    SET(ret, VALIDATE_OK);
-		    CLR(ret, VALIDATE_NOT_OK);
+		    SET(ret, VALIDATE_SUCCESS);
+		    CLR(ret, VALIDATE_FAILURE);
 		} else {
-		    SET(ret, VALIDATE_NOT_OK);
-		    CLR(ret, VALIDATE_OK);
+		    SET(ret, VALIDATE_FAILURE);
+		    CLR(ret, VALIDATE_SUCCESS);
 		}
 		break;
 	    }
@@ -1078,7 +1078,7 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 done:
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
-    if (!ISSET(ret, VALIDATE_OK)) {
+    if (!ISSET(ret, VALIDATE_SUCCESS)) {
 	/* No matching entries. */
 	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);

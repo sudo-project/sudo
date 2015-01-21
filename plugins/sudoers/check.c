@@ -105,7 +105,7 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	sudo_efree(prompt);
     }
     /* Only update timestamp if user was validated. */
-    if (rval == true && ISSET(validated, VALIDATE_OK) &&
+    if (rval == true && ISSET(validated, VALIDATE_SUCCESS) &&
 	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
 	update_timestamp(auth_pw);
 done:

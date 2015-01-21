@@ -201,9 +201,9 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	}
 	if (match == ALLOW || user_uid == 0) {
 	    /* User has an entry for this host. */
-	    SET(validated, VALIDATE_OK);
+	    SET(validated, VALIDATE_SUCCESS);
 	} else if (match == DENY)
-	    SET(validated, VALIDATE_NOT_OK);
+	    SET(validated, VALIDATE_FAILURE);
 	if (pwcheck == always && def_authenticate)
 	    SET(validated, FLAG_CHECK_USER);
 	else if (pwcheck == never || nopass == true)
@@ -267,8 +267,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     }
     matched2:
     if (match == ALLOW) {
-	SET(validated, VALIDATE_OK);
-	CLR(validated, VALIDATE_NOT_OK);
+	SET(validated, VALIDATE_SUCCESS);
+	CLR(validated, VALIDATE_FAILURE);
 	if (tags != NULL) {
 	    if (tags->nopasswd != UNSPEC)
 		def_authenticate = !tags->nopasswd;
@@ -282,8 +282,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 		def_log_output = tags->log_output;
 	}
     } else if (match == DENY) {
-	SET(validated, VALIDATE_NOT_OK);
-	CLR(validated, VALIDATE_OK);
+	SET(validated, VALIDATE_FAILURE);
+	CLR(validated, VALIDATE_SUCCESS);
 	if (tags != NULL && tags->nopasswd != UNSPEC)
 	    def_authenticate = !tags->nopasswd;
     }

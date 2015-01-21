@@ -160,6 +160,7 @@ sudoers_policy_init(void *info, char * const envp[])
 		    N_("problem with defaults entries"));
 	    }
         } else {
+	    /* XXX - used to send mail for sudoers parse errors. */
 	    TAILQ_REMOVE(snl, nss, entries);
         }
     }
@@ -289,7 +290,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
-	if (ISSET(validated, VALIDATE_OK)) {
+	if (ISSET(validated, VALIDATE_SUCCESS)) {
 	    /* Handle [SUCCESS=return] */
 	    if (nss->ret_if_found)
 		break;
@@ -368,7 +369,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     rval = check_user(validated, sudo_mode);
     if (rval != true) {
 	/* Note: log_denial() calls audit for us. */
-	if (!ISSET(validated, VALIDATE_OK))
+	if (!ISSET(validated, VALIDATE_SUCCESS))
 	    log_denial(validated, false);
 	goto done;
     }
@@ -388,7 +389,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* If the user was not allowed to run the command we are done. */
-    if (!ISSET(validated, VALIDATE_OK)) {
+    if (!ISSET(validated, VALIDATE_SUCCESS)) {
 	/* Note: log_failure() calls audit for us. */
 	log_failure(validated, cmnd_status);
 	goto bad;
