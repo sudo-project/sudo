@@ -2075,7 +2075,7 @@ by default.
 .It mail_always
 Send mail to the
 .Em mailto
-user every time a users runs
+user every time a user runs
 .Nm sudo .
 This flag is
 .Em off

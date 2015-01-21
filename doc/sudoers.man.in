@@ -2218,7 +2218,7 @@ by default.
 mail_always
 Send mail to the
 \fImailto\fR
-user every time a users runs
+user every time a user runs
 \fBsudo\fR.
 This flag is
 \fIoff\fR
@@ -3854,20 +3854,20 @@ uses a format similar to
 syslog(3),
 with a few important differences:
 .TP 5n
-1.
+1.\&
 The
 \fIprogname\fR
 and
 \fIhostname\fR
 fields are not present.
 .TP 5n
-2.
+2.\&
 If the
 \fIlog_year\fR
 option is enabled,
 the date will also include the year.
 .TP 5n
-3.
+3.\&
 Lines that are longer than
 \fIloglinelen\fR
 characters (80 by default) are word-wrapped and continued on the

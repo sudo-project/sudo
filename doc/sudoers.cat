@@ -1047,7 +1047,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        some people find it more convenient.  This flag is _o_f_f
                        by default.
 
-     mail_always       Send mail to the _m_a_i_l_t_o user every time a users runs
+     mail_always       Send mail to the _m_a_i_l_t_o user every time a user runs
                        ssuuddoo.  This flag is _o_f_f by default.
 
      mail_badpass      Send mail to the _m_a_i_l_t_o user if the user running ssuuddoo
