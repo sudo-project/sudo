@@ -222,7 +222,8 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
  * parses settings string from sudo.conf and opens debugfile.
  * If subsystem names are specified they override the default values.
  * NOTE: subsystems must not be freed by caller unless deregistered.
- * Returns instance index on success or -1 if cannot open debugfile.
+ * Returns instance index on success or SUDO_DEBUG_INSTANCE_INITIALIZER
+ * on failure.
  */
 int
 sudo_debug_register_v1(const char *program, const char *const subsystems[],
@@ -234,14 +235,14 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
     int idx, free_idx = -1;
 
     if (debug_files == NULL)
-	return -1;
+	return SUDO_DEBUG_INSTANCE_INITIALIZER;
 
     /* Use default subsystem names if none are provided. */
     if (subsystems == NULL) {
 	subsystems = sudo_debug_default_subsystems;
     } else if (ids == NULL) {
 	/* If subsystems are specified we must have ids[] too. */
-	return -1;
+	return SUDO_DEBUG_INSTANCE_INITIALIZER;
     }
 
     /* Search for existing instance. */
@@ -279,11 +280,11 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	if (idx == SUDO_DEBUG_INSTANCE_MAX) {
 	    /* XXX - realloc? */
 	    sudo_warnx_nodebug("too many debug instances (max %d)", SUDO_DEBUG_INSTANCE_MAX);
-	    return -1;
+	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
 	}
 	if (idx != sudo_debug_last_instance + 1 && idx != free_idx) {
 	    sudo_warnx_nodebug("%s: instance number mismatch: expected %d or %d, got %d", __func__, sudo_debug_last_instance + 1, free_idx, idx);
-	    return -1;
+	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
 	}
 	instance = sudo_emalloc(sizeof(*instance));
 	instance->program = sudo_estrdup(program);
@@ -800,7 +801,7 @@ sudo_debug_get_default_instance_v1(void)
 /*
  * Sets a new default instance, returning the old one.
  * Note that the old instance may be SUDO_DEBUG_INSTANCE_INITIALIZER
- * of this is the only instance.
+ * if this is the only instance.
  */
 int
 sudo_debug_set_default_instance_v1(int inst)
