@@ -135,6 +135,20 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 } while (0)
 #endif
 
+/* Macros for checking strlcpy/strlcat/sudo_ldap_value_cat return value. */
+#define CHECK_STRLCPY(d, s, l) do {					       \
+	if (strlcpy((d), (s), (l)) >= (l))				       \
+	    goto overflow;						       \
+} while (0);
+#define CHECK_STRLCAT(d, s, l) do {					       \
+	if (strlcat((d), (s), (l)) >= (l))				       \
+	    goto overflow;						       \
+} while (0);
+#define CHECK_LDAP_VCAT(d, s, l) do {					       \
+	if (sudo_ldap_value_cat((d), (s), (l)) >= (l))			       \
+	    goto overflow;						       \
+} while (0);
+
 #define CONF_BOOL	0
 #define CONF_INT	1
 #define CONF_STR	2
@@ -408,18 +422,14 @@ sudo_ldap_conf_add_ports(void)
     }
 
     for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
-	if (hostbuf[0] != '\0') {
-	    if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
-		goto toobig;
-	}
+	if (hostbuf[0] != '\0')
+	    CHECK_STRLCAT(hostbuf, " ", sizeof(hostbuf));
+	CHECK_STRLCAT(hostbuf, host, sizeof(hostbuf));
 
-	if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
-	    goto toobig;
 	/* Append port if there is not one already. */
 	if ((port = strrchr(host, ':')) == NULL ||
 	    !isdigit((unsigned char)port[1])) {
-	    if (strlcat(hostbuf, defport, sizeof(hostbuf)) >= sizeof(hostbuf))
-		goto toobig;
+	    CHECK_STRLCAT(hostbuf, defport, sizeof(hostbuf));
 	}
     }
 
@@ -427,8 +437,8 @@ sudo_ldap_conf_add_ports(void)
     ldap_conf.host = sudo_estrdup(hostbuf);
     debug_return_bool(true);
 
-toobig:
-    sudo_warnx(U_("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_bool(false);
 }
 #endif
@@ -470,23 +480,19 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 		*cp = '\0';
 	    }
 
-	    if (hostbuf[0] != '\0') {
-		if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
-		    goto toobig;
-	    }
+	    if (hostbuf[0] != '\0')
+		CHECK_STRLCAT(hostbuf, " ", sizeof(hostbuf));
 
 	    if (*host == '\0')
 		host = "localhost";		/* no host specified, use localhost */
 
-	    if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
-		goto toobig;
+	    CHECK_STRLCAT(hostbuf, host, sizeof(hostbuf));
 
 	    /* If using SSL and no port specified, add port 636 */
 	    if (nldaps) {
 		if ((port = strrchr(host, ':')) == NULL ||
 		    !isdigit((unsigned char)port[1]))
-		    if (strlcat(hostbuf, ":636", sizeof(hostbuf)) >= sizeof(hostbuf))
-			goto toobig;
+		    CHECK_STRLCAT(hostbuf, ":636", sizeof(hostbuf));
 	    }
 	}
 
@@ -513,8 +519,8 @@ done:
     sudo_efree(buf);
     debug_return_int(rc);
 
-toobig:
-    sudo_warnx(U_("sudo_ldap_parse_uri: out of space building hostbuf"));
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_int(-1);
 }
 #else
@@ -1274,44 +1280,44 @@ sudo_ldap_build_pass1(struct passwd *pw)
      * contain the search filter, search criteria, and time restriction.
      */
     if (ldap_conf.timed || ldap_conf.search_filter)
-	(void) strlcpy(buf, "(&", sz);
+	CHECK_STRLCPY(buf, "(&", sz);
 
     if (ldap_conf.search_filter)
-	(void) strlcat(buf, ldap_conf.search_filter, sz);
+	CHECK_STRLCAT(buf, ldap_conf.search_filter, sz);
 
     /* Global OR + sudoUser=user_name filter */
-    (void) strlcat(buf, "(|(sudoUser=", sz);
-    (void) sudo_ldap_value_cat(buf, pw->pw_name, sz);
-    (void) strlcat(buf, ")", sz);
+    CHECK_STRLCAT(buf, "(|(sudoUser=", sz);
+    CHECK_LDAP_VCAT(buf, pw->pw_name, sz);
+    CHECK_STRLCAT(buf, ")", sz);
 
     /* Append primary group and gid */
     if (grp != NULL) {
-	(void) strlcat(buf, "(sudoUser=%", sz);
-	(void) sudo_ldap_value_cat(buf, grp->gr_name, sz);
-	(void) strlcat(buf, ")", sz);
+	CHECK_STRLCAT(buf, "(sudoUser=%", sz);
+	CHECK_LDAP_VCAT(buf, grp->gr_name, sz);
+	CHECK_STRLCAT(buf, ")", sz);
     }
     (void) snprintf(gidbuf, sizeof(gidbuf), "%u", (unsigned int)pw->pw_gid);
-    (void) strlcat(buf, "(sudoUser=%#", sz);
-    (void) strlcat(buf, gidbuf, sz);
-    (void) strlcat(buf, ")", sz);
+    CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
+    CHECK_STRLCAT(buf, gidbuf, sz);
+    CHECK_STRLCAT(buf, ")", sz);
 
     /* Append supplementary groups and gids */
     if (grlist != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
-	    (void) strlcat(buf, "(sudoUser=%", sz);
-	    (void) sudo_ldap_value_cat(buf, grlist->groups[i], sz);
-	    (void) strlcat(buf, ")", sz);
+	    CHECK_STRLCAT(buf, "(sudoUser=%", sz);
+	    CHECK_LDAP_VCAT(buf, grlist->groups[i], sz);
+	    CHECK_STRLCAT(buf, ")", sz);
 	}
 	for (i = 0; i < grlist->ngids; i++) {
 	    if (pw->pw_gid == grlist->gids[i])
 		continue;
 	    (void) snprintf(gidbuf, sizeof(gidbuf), "%u",
 		(unsigned int)grlist->gids[i]);
-	    (void) strlcat(buf, "(sudoUser=%#", sz);
-	    (void) strlcat(buf, gidbuf, sz);
-	    (void) strlcat(buf, ")", sz);
+	    CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
+	    CHECK_STRLCAT(buf, gidbuf, sz);
+	    CHECK_STRLCAT(buf, ")", sz);
 	}
     }
 
@@ -1322,22 +1328,22 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	sudo_gr_delref(grp);
 
     /* Add ALL to list and end the global OR */
-    if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz) {
-	sudo_warnx(U_("sudo_ldap_build_pass1 allocation mismatch"));
-	debug_return_str(NULL);
-    }
+    CHECK_STRLCAT(buf, "(sudoUser=ALL)", sz);
 
     /* Add the time restriction, or simply end the global OR. */
     if (ldap_conf.timed) {
-	strlcat(buf, ")", sz); /* closes the global OR */
+	CHECK_STRLCAT(buf, ")", sz); /* closes the global OR */
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
-	strlcat(buf, timebuffer, sz);
+	CHECK_STRLCAT(buf, timebuffer, sz);
     } else if (ldap_conf.search_filter) {
-	strlcat(buf, ")", sz); /* closes the global OR */
+	CHECK_STRLCAT(buf, ")", sz); /* closes the global OR */
     }
-    strlcat(buf, ")", sz); /* closes the global OR or the global AND */
+    CHECK_STRLCAT(buf, ")", sz); /* closes the global OR or the global AND */
 
     debug_return_str(buf);
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    debug_return_str(NULL);
 }
 
 /*
