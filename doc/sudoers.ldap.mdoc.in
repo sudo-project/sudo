@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2003-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 4, 2014
+.Dd January 26, 2015
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -493,71 +493,6 @@ as the last character on the line.
 Note that leading white space is removed from the beginning of lines
 even when the continuation character is used.
 .Bl -tag -width 4n
-.It Sy URI Ar ldap[s]://[hostname[:port]] ...
-Specifies a white space-delimited list of one or more URIs describing
-the LDAP server(s) to connect to.
-The
-.Em protocol
-may be either
-.Em ldap
-.Em ldaps ,
-the latter being for servers that support TLS (SSL) encryption.
-If no
-.Em port
-is specified, the default is port 389 for
-.Li ldap://
-or port 636 for
-.Li ldaps:// .
-If no
-.Em hostname
-is specified,
-.Nm sudo
-will connect to
-.Em localhost .
-Multiple
-.Sy URI
-lines are treated identically to a
-.Sy URI
-line containing multiple entries.
-Only systems using the OpenSSL libraries support the mixing of
-.Li ldap://
-and
-.Li ldaps://
-URIs.
-Both the Netscape-derived and Tivoli LDAP libraries used on most commercial
-versions of Unix are only capable of supporting one or the other.
-.It Sy HOST Ar name[:port] ...
-If no
-.Sy URI
-is specified, the
-.Sy HOST
-parameter specifies a white space-delimited list of LDAP servers to connect to.
-Each host may include an optional
-.Em port
-separated by a colon
-.Pq Ql :\& .
-The
-.Sy HOST
-parameter is deprecated in favor of the
-.Sy URI
-specification and is included for backwards compatibility.
-.It Sy PORT Ar port_number
-If no
-.Sy URI
-is specified, the
-.Sy PORT
-parameter specifies the default port to connect to on the LDAP server if a
-.Sy HOST
-parameter does not specify the port itself.
-If no
-.Sy PORT
-parameter is used, the default is port 389 for LDAP and port 636 for LDAP
-over TLS (SSL).
-The
-.Sy PORT
-parameter is deprecated in favor of the
-.Sy URI
-specification and is included for backwards compatibility.
 .It Sy BIND_TIMELIMIT Ar seconds
 The
 .Sy BIND_TIMELIMIT
@@ -569,81 +504,6 @@ or
 .Sy HOST Ns s
 are specified, this is the amount of time to wait before trying
 the next one in the list.
-.It Sy NETWORK_TIMEOUT Ar seconds
-An alias for
-.Sy BIND_TIMELIMIT
-for OpenLDAP compatibility.
-.It Sy TIMELIMIT Ar seconds
-The
-.Sy TIMELIMIT
-parameter specifies the amount of time, in seconds, to wait for a
-response to an LDAP query.
-.It Sy TIMEOUT Ar seconds
-The
-.Sy TIMEOUT
-parameter specifies the amount of time, in seconds, to wait for a
-response from the various LDAP APIs.
-.It Sy SUDOERS_BASE Ar base
-The base DN to use when performing
-.Nm sudo
-LDAP queries.
-Typically this is of the form
-.Li ou=SUDOers,dc=example,dc=com
-for the domain
-.Li example.com .
-Multiple
-.Sy SUDOERS_BASE
-lines may be specified, in which case they are queried in the order specified.
-.It Sy SUDOERS_SEARCH_FILTER Ar ldap_filter
-An LDAP filter which is used to restrict the set of records returned
-when performing a
-.Nm sudo
-LDAP query.
-Typically, this is of the
-form
-.Li attribute=value
-or
-.Li (&(attribute=value)(attribute2=value2)) .
-The default search filter is:
-.Li objectClass=sudoRole .
-If
-.Ar ldap_filter
-is omitted, no search filter will be used.
-.It Sy SUDOERS_TIMED Ar on/true/yes/off/false/no
-Whether or not to evaluate the
-.Li sudoNotBefore
-and
-.Li sudoNotAfter
-attributes that implement time-dependent sudoers entries.
-.It Sy SUDOERS_DEBUG Ar debug_level
-This sets the debug level for
-.Nm sudo
-LDAP queries.
-Debugging information is printed to the standard error.
-A value of 1 results in a moderate amount of debugging information.
-A value of 2 shows the results of the matches themselves.
-This parameter should not be set in a production environment as the
-extra information is likely to confuse users.
-.Pp
-The
-.Sy SUDOERS_DEBUG
-parameter is deprecated and will be removed in a future release.
-The same information is now logged via the
-.Nm sudo
-debugging framework using the
-.Dq ldap
-subsystem at priorities
-.Em diag
-and
-.Em info
-for
-.Em debug_level
-values 1 and 2 respectively.
-See the
-.Xr sudo.conf @mansectform@
-manual for details on how to configure
-.Nm sudo
-debugging.
 .It Sy BINDDN Ar DN
 The
 .Sy BINDDN
@@ -674,6 +534,54 @@ Plain text passwords may not include the comment character
 and the escaping of special characters with a backslash
 .Pq Ql \e
 is not supported.
+.It Sy DEREF Ar never/searching/finding/always
+How alias dereferencing is to be performed when searching.
+See the
+.Xr ldap.conf @mansectsu@
+manual for a full description of this option.
+.It Sy HOST Ar name[:port] ...
+If no
+.Sy URI
+is specified (see below), the
+.Sy HOST
+parameter specifies a white space-delimited list of LDAP servers to connect to.
+Each host may include an optional
+.Em port
+separated by a colon
+.Pq Ql :\& .
+The
+.Sy HOST
+parameter is deprecated in favor of the
+.Sy URI
+specification and is included for backwards compatibility only.
+.It Sy KRB5_CCNAME Ar file name
+The path to the Kerberos 5 credential cache to use when authenticating
+with the remote server.
+This option is only relevant when using SASL authentication (see below).
+.It Sy LDAP_VERSION Ar number
+The version of the LDAP protocol to use when connecting to the server.
+The default value is protocol version 3.
+.It Sy NETWORK_TIMEOUT Ar seconds
+An alias for
+.Sy BIND_TIMELIMIT
+provided for OpenLDAP compatibility.
+.It Sy PORT Ar port_number
+If no
+.Sy URI
+is specified, the
+.Sy PORT
+parameter specifies the default port to connect to on the LDAP server if a
+.Sy HOST
+parameter does not specify the port itself.
+If no
+.Sy PORT
+parameter is used, the default is port 389 for LDAP and port 636 for LDAP
+over TLS (SSL).
+The
+.Sy PORT
+parameter is deprecated in favor of the
+.Sy URI
+specification and is included for backwards compatibility only.
 .It Sy ROOTBINDDN Ar DN
 The
 .Sy ROOTBINDDN
@@ -693,9 +601,24 @@ If no
 is specified, the
 .Sy BINDDN
 identity is used (if any).
-.It Sy LDAP_VERSION Ar number
-The version of the LDAP protocol to use when connecting to the server.
-The default value is protocol version 3.
+.It Sy ROOTUSE_SASL Ar on/true/yes/off/false/no
+Enable
+.Sy ROOTUSE_SASL
+to enable SASL authentication when connecting
+to an LDAP server from a privileged process, such as
+.Nm sudo .
+.It Sy SASL_AUTH_ID Ar identity
+The SASL user name to use when connecting to the LDAP server.
+By default,
+.Nm sudo
+will use an anonymous connection.
+This option is only relevant when using SASL authentication.
+.It Sy SASL_SECPROPS Ar none/properties
+SASL security properties or
+.Em none
+for no properties.
+See the SASL programmer's manual for details.
+This option is only relevant when using SASL authentication.
 .It Sy SSL Ar on/true/yes/off/false/no
 If the
 .Sy SSL
@@ -718,22 +641,77 @@ communications.
 This parameter is only supported by LDAP servers that honor the
 .Em start_tls
 extension, such as the OpenLDAP and Tivoli Directory servers.
-.It Sy TLS_CHECKPEER Ar on/true/yes/off/false/no
-If enabled,
-.Sy TLS_CHECKPEER
-will cause the LDAP server's TLS certificated to be verified.
-If the server's TLS certificate cannot be verified (usually because it
-is signed by an unknown certificate authority),
+.It Sy SUDOERS_BASE Ar base
+The base DN to use when performing
 .Nm sudo
-will be unable to connect to it.
+LDAP queries.
+Typically this is of the form
+.Li ou=SUDOers,dc=example,dc=com
+for the domain
+.Li example.com .
+Multiple
+.Sy SUDOERS_BASE
+lines may be specified, in which case they are queried in the order specified.
+.It Sy SUDOERS_DEBUG Ar debug_level
+This sets the debug level for
+.Nm sudo
+LDAP queries.
+Debugging information is printed to the standard error.
+A value of 1 results in a moderate amount of debugging information.
+A value of 2 shows the results of the matches themselves.
+This parameter should not be set in a production environment as the
+extra information is likely to confuse users.
+.Pp
+The
+.Sy SUDOERS_DEBUG
+parameter is deprecated and will be removed in a future release.
+The same information is now logged via the
+.Nm sudo
+debugging framework using the
+.Dq ldap
+subsystem at priorities
+.Em diag
+and
+.Em info
+for
+.Em debug_level
+values 1 and 2 respectively.
+See the
+.Xr sudo.conf @mansectform@
+manual for details on how to configure
+.Nm sudo
+debugging.
+.It Sy SUDOERS_SEARCH_FILTER Ar ldap_filter
+An LDAP filter which is used to restrict the set of records returned
+when performing a
+.Nm sudo
+LDAP query.
+Typically, this is of the
+form
+.Li attribute=value
+or
+.Li (&(attribute=value)(attribute2=value2)) .
+The default search filter is:
+.Li objectClass=sudoRole .
 If
-.Sy TLS_CHECKPEER
-is disabled, no check is made.
-Note that disabling the check creates an opportunity for man-in-the-middle
-attacks since the server's identity will not be authenticated.
-If possible, the CA's certificate should be installed locally so it can
-be verified.
-This option is not supported by the Tivoli Directory Server LDAP libraries.
+.Ar ldap_filter
+is omitted, no search filter will be used.
+.It Sy SUDOERS_TIMED Ar on/true/yes/off/false/no
+Whether or not to evaluate the
+.Li sudoNotBefore
+and
+.Li sudoNotAfter
+attributes that implement time-dependent sudoers entries.
+.It Sy TIMELIMIT Ar seconds
+The
+.Sy TIMELIMIT
+parameter specifies the amount of time, in seconds, to wait for a
+response to an LDAP query.
+.It Sy TIMEOUT Ar seconds
+The
+.Sy TIMEOUT
+parameter specifies the amount of time, in seconds, to wait for a
+response from the various LDAP APIs.
 .It Sy TLS_CACERT Ar file name
 An alias for
 .Sy TLS_CACERTFILE
@@ -774,6 +752,22 @@ contains both keys and certificates.
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
 .El
+.It Sy TLS_CHECKPEER Ar on/true/yes/off/false/no
+If enabled,
+.Sy TLS_CHECKPEER
+will cause the LDAP server's TLS certificated to be verified.
+If the server's TLS certificate cannot be verified (usually because it
+is signed by an unknown certificate authority),
+.Nm sudo
+will be unable to connect to it.
+If
+.Sy TLS_CHECKPEER
+is disabled, no check is made.
+Note that disabling the check creates an opportunity for man-in-the-middle
+attacks since the server's identity will not be authenticated.
+If possible, the CA's certificate should be installed locally so it can
+be verified.
+This option is not supported by the Tivoli Directory Server LDAP libraries.
 .It Sy TLS_KEY Ar file name
 The path to a file containing the private key which matches the
 certificate specified by
@@ -790,6 +784,14 @@ The key type depends on the LDAP libraries used.
 .El
 When using Tivoli LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
+.It Sy TLS_CIPHERS Ar cipher list
+The
+.Sy TLS_CIPHERS
+parameter allows the administer to restrict which encryption algorithms
+may be used for TLS (SSL) connections.
+See the OpenLDAP or Tivoli Directory Server manual for a list of valid
+ciphers.
+This option is not supported by Netscape-derived libraries.
 .It Sy TLS_KEYPW Ar secret
 The
 .Sy TLS_KEYPW
@@ -852,46 +854,47 @@ It is generally used in conjunction with
 or
 .Em egd .
 This option is only supported by the OpenLDAP libraries.
-.It Sy TLS_CIPHERS Ar cipher list
+.It Sy URI Ar ldap[s]://[hostname[:port]] ...
+Specifies a white space-delimited list of one or more URIs describing
+the LDAP server(s) to connect to.
 The
-.Sy TLS_CIPHERS
-parameter allows the administer to restrict which encryption algorithms
-may be used for TLS (SSL) connections.
-See the OpenLDAP or Tivoli Directory Server manual for a list of valid
-ciphers.
-This option is not supported by Netscape-derived libraries.
+.Em protocol
+may be either
+.Em ldap
+.Em ldaps ,
+the latter being for servers that support TLS (SSL) encryption.
+If no
+.Em port
+is specified, the default is port 389 for
+.Li ldap://
+or port 636 for
+.Li ldaps:// .
+If no
+.Em hostname
+is specified,
+.Nm sudo
+will connect to
+.Em localhost .
+Multiple
+.Sy URI
+lines are treated identically to a
+.Sy URI
+line containing multiple entries.
+Only systems using the OpenSSL libraries support the mixing of
+.Li ldap://
+and
+.Li ldaps://
+URIs.
+Both the Netscape-derived and Tivoli LDAP libraries used on most commercial
+versions of Unix are only capable of supporting one or the other.
 .It Sy USE_SASL Ar on/true/yes/off/false/no
 Enable
 .Sy USE_SASL
 for LDAP servers that support SASL authentication.
-.It Sy SASL_AUTH_ID Ar identity
-The SASL user name to use when connecting to the LDAP server.
-By default,
-.Nm sudo
-will use an anonymous connection.
-.It Sy ROOTUSE_SASL Ar on/true/yes/off/false/no
-Enable
-.Sy ROOTUSE_SASL
-to enable SASL authentication when connecting
-to an LDAP server from a privileged process, such as
-.Nm sudo .
 .It Sy ROOTSASL_AUTH_ID Ar identity
 The SASL user name to use when
 .Sy ROOTUSE_SASL
 is enabled.
-.It Sy SASL_SECPROPS Ar none/properties
-SASL security properties or
-.Em none
-for no properties.
-See the SASL programmer's manual for details.
-.It Sy KRB5_CCNAME Ar file name
-The path to the Kerberos 5 credential cache to use when authenticating
-with the remote server.
-.It Sy DEREF Ar never/searching/finding/always
-How alias dereferencing is to be performed when searching.
-See the
-.Xr ldap.conf @mansectsu@
-manual for a full description of this option.
 .El
 .Pp
 See the
