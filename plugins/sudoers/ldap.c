@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -162,6 +162,9 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 /* Default search filter. */
 #define DEFAULT_SEARCH_FILTER	"(objectClass=sudoRole)"
 
+/* Default netgroup search filter. */
+#define DEFAULT_NETGROUP_SEARCH_FILTER	"(objectClass=nisNetgroup)"
+
 /* The TIMEFILTER_LENGTH is the length of the filter when timed entries
    are used. The length is computed as follows:
        81       for the filter itself
@@ -207,6 +210,16 @@ struct ldap_result {
 };
 #define	ALLOCATION_INCREMENT	100
 
+/*
+ * The ldap_netgroup structure implements a singly-linked tail queue of
+ * netgroups a user is a member of when querying netgroups directly.
+ */
+struct ldap_netgroup {
+    STAILQ_ENTRY(ldap_netgroup) entries;
+    char *name;
+};
+STAILQ_HEAD(ldap_netgroup_list, ldap_netgroup);
+
 struct ldap_config_table {
     const char *conf_str;	/* config file string */
     int type;			/* CONF_BOOL, CONF_INT, CONF_STR */
@@ -218,7 +231,6 @@ struct ldap_config_str {
     STAILQ_ENTRY(ldap_config_str) entries;
     char val[1];
 };
-
 STAILQ_HEAD(ldap_config_str_list, ldap_config_str);
 
 /* LDAP configuration structure */
@@ -242,7 +254,9 @@ static struct ldap_config {
     char *bindpw;
     char *rootbinddn;
     struct ldap_config_str_list base;
+    struct ldap_config_str_list netgroup_base;
     char *search_filter;
+    char *netgroup_search_filter;
     char *ssl;
     char *tls_cacertfile;
     char *tls_cacertdir;
@@ -315,6 +329,8 @@ static struct ldap_config_table ldap_conf_global[] = {
     { "sudoers_base", CONF_LIST_STR, -1, &ldap_conf.base },
     { "sudoers_timed", CONF_BOOL, -1, &ldap_conf.timed },
     { "sudoers_search_filter", CONF_STR, -1, &ldap_conf.search_filter },
+    { "netgroup_base", CONF_LIST_STR, -1, &ldap_conf.netgroup_base },
+    { "netgroup_search_filter", CONF_STR, -1, &ldap_conf.netgroup_search_filter },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, -1, &ldap_conf.use_sasl },
     { "sasl_auth_id", CONF_STR, -1, &ldap_conf.sasl_auth_id },
@@ -408,7 +424,6 @@ struct sudo_nss sudo_nss_ldap = {
 static bool
 sudo_ldap_conf_add_ports(void)
 {
-
     char *host, *port, defport[13];
     char hostbuf[LINE_MAX * 2];
     int len;
@@ -744,18 +759,18 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 
     /*
      * BUG:
-     * 
+     *
      * if runas is not specified on the command line, the only information
      * as to which user to run as is in the runas_default option.  We should
      * check to see if we have the local option present.  Unfortunately we
      * don't parse these options until after this routine says yes or no.
      * The query has already returned, so we could peek at the attribute
      * values here though.
-     * 
+     *
      * For now just require users to always use -u option unless its set
      * in the global defaults. This behaviour is no different than the global
      * /etc/sudoers.
-     * 
+     *
      * Sigh - maybe add this feature later
      */
 
@@ -1228,17 +1243,196 @@ done:
 }
 
 /*
+ * Check the netgroups list beginning at "start" for nesting.
+ * Parent nodes with a memberNisNetgroup that match one of the
+ * netgroups are added to the list and checked for further nesting.
+ * Return true on success or false if there was an internal overflow.
+ */
+static bool
+sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
+    struct ldap_netgroup_list *netgroups, struct ldap_netgroup *start)
+{
+    struct ldap_netgroup *ng, *old_tail;
+    LDAPMessage *entry, *result;
+    size_t filt_len;
+    char *filt;
+    int rc;
+    debug_decl(sudo_netgroup_lookup_nested, SUDOERS_DEBUG_LDAP, sudoers_debug_instance);
+
+    DPRINTF1("Checking for nested netgroups from netgroup_base '%s'", base);
+    do {
+	old_tail = STAILQ_LAST(netgroups, ldap_netgroup, entries);
+	filt_len = strlen(ldap_conf.netgroup_search_filter) + 7;
+	for (ng = start; ng != NULL; ng = STAILQ_NEXT(ng, entries)) {
+	    filt_len += sudo_ldap_value_len(ng->name) + 20;
+	}
+	filt = sudo_emalloc(filt_len);
+	CHECK_STRLCPY(filt, "(&", filt_len);
+	CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
+	CHECK_STRLCAT(filt, "(|", filt_len);
+	for (ng = start; ng != NULL; ng = STAILQ_NEXT(ng, entries)) {
+	    CHECK_STRLCAT(filt, "(memberNisNetgroup=", filt_len);
+	    CHECK_LDAP_VCAT(filt, ng->name, filt_len);
+	    CHECK_STRLCAT(filt, ")", filt_len);
+	}
+	CHECK_STRLCAT(filt, "))", filt_len);
+	DPRINTF1("ldap netgroup search filter: '%s'", filt);
+	result = NULL;
+	rc = ldap_search_ext_s(ld, base, LDAP_SCOPE_SUBTREE, filt,
+	    NULL, 0, NULL, NULL, timeout, 0, &result);
+	if (rc == LDAP_SUCCESS) {
+	    LDAP_FOREACH(entry, ld, result) {
+		struct berval **bv;
+
+		bv = ldap_get_values_len(ld, entry, "cn");
+		if (bv != NULL) {
+		    /* Don't add a netgroup twice. */
+		    STAILQ_FOREACH(ng, netgroups, entries) {
+			/* Assumes only one cn per entry. */
+			if (strcasecmp(ng->name, (*bv)->bv_val) == 0)
+			    break;
+		    }
+		    if (ng == NULL) {
+			ng = sudo_emalloc(sizeof(*ng));
+			ng->name = sudo_estrdup((*bv)->bv_val);
+			STAILQ_INSERT_TAIL(netgroups, ng, entries);
+			DPRINTF1("Found new netgroup %s for %s", ng->name, base);
+		    }
+		    ldap_value_free_len(bv);
+		}
+	    }
+	}
+	if (result)
+	    ldap_msgfree(result);
+	sudo_efree(filt);
+
+	/* Check for nested netgroups in what we added. */
+	start = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
+    } while (start != NULL);
+
+    debug_return_bool(true);
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    debug_return_bool(false);
+}
+
+/*
+ * Look up netgroups that the specified user is a member of.
+ * Appends new entries to the netgroups list.
+ * Return true on success or false if there was an internal overflow.
+ */
+static bool
+sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
+    struct ldap_netgroup_list *netgroups)
+{
+    struct ldap_config_str *base;
+    struct ldap_netgroup *ng, *old_tail;
+    struct timeval tv, *tvp = NULL;
+    LDAPMessage *entry, *result;
+    size_t filt_len;
+    char *filt;
+    int rc;
+    debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP, sudoers_debug_instance);
+
+    if (ldap_conf.timeout > 0) {
+	tv.tv_sec = ldap_conf.timeout;
+	tv.tv_usec = 0;
+	tvp = &tv;
+    }
+
+    STAILQ_FOREACH(base, &ldap_conf.netgroup_base, entries) {
+	/* Build query. */
+	filt_len = 2 + strlen(ldap_conf.netgroup_search_filter) +
+	    24 + (2 * sudo_ldap_value_len(pw->pw_name)) + 26 +
+	    sudo_ldap_value_len(user_shost) + 1 + 7 + 1;
+	if (user_host != user_shost) {
+	    filt_len += 26 + sudo_ldap_value_len(user_host) + 1 +
+		sudo_ldap_value_len(pw->pw_name);
+	}
+	filt = sudo_emalloc(filt_len);
+	DPRINTF1("searching from netgroup_base '%s'", base->val);
+	CHECK_STRLCPY(filt, "(&", filt_len);
+	CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
+	CHECK_STRLCAT(filt, "(|(nisNetgroupTriple=\\(,", filt_len);
+	CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	CHECK_STRLCAT(filt, ",*\\))(nisNetgroupTriple=\\(", filt_len);
+	CHECK_LDAP_VCAT(filt, user_shost, filt_len);
+	CHECK_STRLCAT(filt, ",", filt_len);
+	CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	if (user_host != user_shost) {
+	    CHECK_STRLCAT(filt, ",*\\))(nisNetgroupTriple=\\(", filt_len);
+	    CHECK_LDAP_VCAT(filt, user_host, filt_len);
+	    CHECK_STRLCAT(filt, ",", filt_len);
+	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	}
+	CHECK_STRLCAT(filt, ",*\\))))", filt_len);
+
+	DPRINTF1("ldap netgroup search filter: '%s'", filt);
+	result = NULL;
+	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
+	    NULL, 0, NULL, NULL, tvp, 0, &result);
+	if (rc != LDAP_SUCCESS) {
+	    DPRINTF1("nothing found for '%s'", filt);
+	    if (result)
+		ldap_msgfree(result);
+	    sudo_efree(filt);
+	    continue;
+	}
+	sudo_efree(filt);
+
+	old_tail = STAILQ_LAST(netgroups, ldap_netgroup, entries);
+	LDAP_FOREACH(entry, ld, result) {
+	    struct berval **bv;
+
+	    bv = ldap_get_values_len(ld, entry, "cn");
+	    if (bv != NULL) {
+		/* Don't add a netgroup twice. */
+		STAILQ_FOREACH(ng, netgroups, entries) {
+		    /* Assumes only one cn per entry. */
+		    if (strcasecmp(ng->name, (*bv)->bv_val) == 0)
+			break;
+		}
+		if (ng == NULL) {
+		    ng = sudo_emalloc(sizeof(*ng));
+		    ng->name = sudo_estrdup((*bv)->bv_val);
+		    STAILQ_INSERT_TAIL(netgroups, ng, entries);
+		    DPRINTF1("Found new netgroup %s for %s", ng->name,
+			base->val);
+		}
+		ldap_value_free_len(bv);
+	    }
+	}
+	ldap_msgfree(result);
+
+	/* Check for nested netgroups in what we added. */
+	ng = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
+	if (ng != NULL) {
+	    if (!sudo_netgroup_lookup_nested(ld, base->val, tvp, netgroups, ng))
+		debug_return_bool(false);
+	}
+    }
+    debug_return_bool(true);
+overflow:
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    debug_return_bool(false);
+}
+
+/*
  * Builds up a filter to check against LDAP.
  */
 static char *
-sudo_ldap_build_pass1(struct passwd *pw)
+sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 {
-    struct group *grp;
     char *buf, timebuffer[TIMEFILTER_LENGTH + 1], gidbuf[MAX_UID_T_LEN + 1];
+    struct ldap_netgroup_list netgroups;
+    struct ldap_netgroup *ng, *nextng;
     struct group_list *grlist;
+    struct group *grp;
     size_t sz = 0;
     int i;
     debug_decl(sudo_ldap_build_pass1, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+
+    STAILQ_INIT(&netgroups);
 
     /* If there is a filter, allocate space for the global AND. */
     if (ldap_conf.timed || ldap_conf.search_filter)
@@ -1266,6 +1460,23 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	    if (pw->pw_gid == grlist->gids[i])
 		continue;
 	    sz += 13 + MAX_UID_T_LEN;
+	}
+    }
+
+    /* Add space for user netgroups if netgroup_base specified. */
+    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base)) {
+	DPRINTF1("Looking up netgroups for %s", pw->pw_name);
+	if (sudo_netgroup_lookup(ld, pw, &netgroups)) {
+	    STAILQ_FOREACH(ng, &netgroups, entries) {
+		sz += 14 + strlen(ng->name);
+	    }
+	} else {
+	    /* sudo_netgroup_lookup() failed, clean up. */
+	    STAILQ_FOREACH_SAFE(ng, &netgroups, entries, nextng) {
+		sudo_efree(ng->name);
+		sudo_efree(ng);
+	    }
+	    STAILQ_INIT(&netgroups);
 	}
     }
 
@@ -1327,7 +1538,16 @@ sudo_ldap_build_pass1(struct passwd *pw)
     if (grp != NULL)
 	sudo_gr_delref(grp);
 
-    /* Add ALL to list and end the global OR */
+    /* Add netgroups (if any), freeing the list as we go. */
+    STAILQ_FOREACH_SAFE(ng, &netgroups, entries, nextng) {
+	CHECK_STRLCAT(buf, "(sudoUser=+", sz);
+	CHECK_LDAP_VCAT(buf, ng->name, sz);
+	CHECK_STRLCAT(buf, ")", sz);
+	sudo_efree(ng->name);
+	sudo_efree(ng);
+    }
+
+    /* Add ALL to list and end the global OR. */
     CHECK_STRLCAT(buf, "(sudoUser=ALL)", sz);
 
     /* Add the time restriction, or simply end the global OR. */
@@ -1354,32 +1574,36 @@ static char *
 sudo_ldap_build_pass2(void)
 {
     char *filt, timebuffer[TIMEFILTER_LENGTH + 1];
+    bool query_netgroups = def_use_netgroups;
     debug_decl(sudo_ldap_build_pass2, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
 
-    /* Short circuit if no non-Unix group support. */
-    if (!def_use_netgroups && !def_group_plugin) {
+    /* No need to query netgroups if using netgroup_base. */
+    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
+	query_netgroups = false;
+
+    /* Short circuit if no netgroups and no non-Unix groups. */
+    if (!query_netgroups && !def_group_plugin)
 	debug_return_str(NULL);
-    }
 
     if (ldap_conf.timed)
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
 
     /*
      * Match all sudoUsers beginning with '+' or '%:'.
-     * If a search filter or time restriction is specified, 
+     * If a search filter or time restriction is specified,
      * those get ANDed in to the expression.
      */
-    if (def_group_plugin) {
-	sudo_easprintf(&filt, "%s%s(|(sudoUser=%s*)(sudoUser=%%:*))%s%s",
+    if (query_netgroups && def_group_plugin) {
+	sudo_easprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=%%:*))%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
-	    def_use_netgroups ? "+" : "",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
-	sudo_easprintf(&filt, "%s%s(sudoUser=*)(sudoUser=+*)%s%s",
+	sudo_easprintf(&filt, "%s%s(sudoUser=*)(sudoUser=%s*)%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
+	    query_netgroups ? "+" : "%:",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     }
@@ -1559,9 +1783,10 @@ sudo_check_krb5_ccname(const char *ccname)
 static bool
 sudo_ldap_read_config(void)
 {
-    FILE *fp;
     char *cp, *keyword, *value, *line = NULL;
+    struct ldap_config_str *conf_str;
     size_t linesize = 0;
+    FILE *fp;
     debug_decl(sudo_ldap_read_config, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
 
     /* defaults */
@@ -1575,8 +1800,10 @@ sudo_ldap_read_config(void)
     ldap_conf.rootuse_sasl = -1;
     ldap_conf.deref = -1;
     ldap_conf.search_filter = sudo_estrdup(DEFAULT_SEARCH_FILTER);
+    ldap_conf.netgroup_search_filter = sudo_estrdup(DEFAULT_NETGROUP_SEARCH_FILTER);
     STAILQ_INIT(&ldap_conf.uri);
     STAILQ_INIT(&ldap_conf.base);
+    STAILQ_INIT(&ldap_conf.netgroup_base);
 
     if ((fp = fopen(path_ldap_conf, "r")) == NULL)
 	debug_return_bool(false);
@@ -1610,10 +1837,8 @@ sudo_ldap_read_config(void)
     DPRINTF1("LDAP Config Summary");
     DPRINTF1("===================");
     if (!STAILQ_EMPTY(&ldap_conf.uri)) {
-	struct ldap_config_str *uri;
-
-	STAILQ_FOREACH(uri, &ldap_conf.uri, entries) {
-	    DPRINTF1("uri              %s", uri->val);
+	STAILQ_FOREACH(conf_str, &ldap_conf.uri, entries) {
+	    DPRINTF1("uri              %s", conf_str->val);
 	}
     } else {
 	DPRINTF1("host             %s",
@@ -1623,15 +1848,24 @@ sudo_ldap_read_config(void)
     DPRINTF1("ldap_version     %d", ldap_conf.version);
 
     if (!STAILQ_EMPTY(&ldap_conf.base)) {
-	struct ldap_config_str *base;
-	STAILQ_FOREACH(base, &ldap_conf.base, entries) {
-	    DPRINTF1("sudoers_base     %s", base->val);
+	STAILQ_FOREACH(conf_str, &ldap_conf.base, entries) {
+	    DPRINTF1("sudoers_base     %s", conf_str->val);
 	}
     } else {
 	DPRINTF1("sudoers_base     %s", "(NONE: LDAP disabled)");
     }
     if (ldap_conf.search_filter) {
 	DPRINTF1("search_filter    %s", ldap_conf.search_filter);
+    }
+    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base)) {
+	STAILQ_FOREACH(conf_str, &ldap_conf.netgroup_base, entries) {
+	    DPRINTF1("netgroup_base    %s", conf_str->val);
+	}
+    } else {
+	DPRINTF1("netgroup_base %s", "(NONE: will use nsswitch)");
+    }
+    if (ldap_conf.netgroup_search_filter) {
+        DPRINTF1("netgroup_search_filter %s", ldap_conf.netgroup_search_filter);
     }
     DPRINTF1("binddn           %s",
 	ldap_conf.binddn ? ldap_conf.binddn : "(anonymous)");
@@ -2706,7 +2940,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     if (pwflag) {
 	int doauth = UNSPEC;
 	int matched = UNSPEC;
-	enum def_tuple pwcheck = 
+	enum def_tuple pwcheck =
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
 	DPRINTF1("perform search for pwflag %d", pwflag);
@@ -2949,7 +3183,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      */
     lres = sudo_ldap_result_alloc();
     for (pass = 0; pass < 2; pass++) {
-	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
+	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(ld, pw);
 	if (filt != NULL) {
 	    DPRINTF1("ldap search '%s'", filt);
 	    STAILQ_FOREACH(base, &ldap_conf.base, entries) {

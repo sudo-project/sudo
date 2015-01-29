@@ -367,13 +367,52 @@ the user belongs to.
 \fRALL\fR
 tag is matched in this query too.)
 If no match is returned for the user's name and groups, a third
-query returns all entries containing user netgroups and checks
-to see if the user belongs to any of them.
+query returns all entries containing user netgroups and other
+non-Unix groups and checks to see if the user belongs to any of them.
 .PP
 If timed entries are enabled with the
 \fBSUDOERS_TIMED\fR
 configuration directive, the LDAP queries include a sub-filter that
 limits retrieval to entries that satisfy the time constraints, if any.
+.PP
+If the
+\fBNETGROUP_BASE\fR
+configuration directive is present, queries are performed to determine
+the list of netgroups the user belongs to before the sudoers query.
+This makes it possible to include netgroups in the sudoers query
+string in the same manner as Unix groups.
+The third query mentioned above is not performed unless a group provider
+plugin is also configured.
+The actual LDAP queries performed by
+\fBsudo\fR
+are as follows:
+.TP 5n
+1.\&
+Match all
+\fRnisNetgroup\fR
+records with a
+\fRnisNetgroupTriple\fR
+containing the user and host.
+The query will match
+\fRnisNetgroupTriple\fR
+entries with either the short or long form of the host name or
+no host name specified in the tuple.
+A wildcard is used to match any domain name but be aware that the
+NIS schema used by some LDAP servers may not support wild cards for
+\fRnisNetgroupTriple\fR.
+.TP 5n
+2.\&
+Repeated queries are performed to find any nested
+\fRnisNetgroup\fR
+records with a
+\fRmemberNisNetgroup\fR
+entry that refers to an already-matched record.
+.PP
+For sites with a large number of netgroups, using
+\fBNETGROUP_BASE\fR
+can significantly speed up
+\fBsudo\fR's
+execution time.
 .SS "Differences between LDAP and non-LDAP sudoers"
 There are some subtle differences in the way sudoers is handled
 once in LDAP.
@@ -600,6 +639,61 @@ This option is only relevant when using SASL authentication (see below).
 \fBLDAP_VERSION\fR \fInumber\fR
 The version of the LDAP protocol to use when connecting to the server.
 The default value is protocol version 3.
+.TP 6n
+\fBNETGROUP_BASE\fR \fIbase\fR
+The base DN to use when performing LDAP netgroup queries.
+Typically this is of the form
+\fRou=netgroup,dc=example,dc=com\fR
+for the domain
+\fRexample.com\fR.
+Multiple
+\fBNETGROUP_BASE\fR
+lines may be specified, in which case they are queried in the order specified.
+.sp
+This option can be used to query a user's netgroups directly via LDAP
+which is usually faster than fetching every
+\fRsudoRole\fR
+object containing a
+\fRsudoUser\fR
+that begins with a
+\(oq+\(cq
+prefix.
+The NIS schema used by some LDAP servers need a modificaton to
+support querying the
+\fRnisNetgroup\fR
+object by its
+\fRnisNetgroupTriple\fR
+member.
+OpenLDAP's
+\fBslapd\fR
+requires the following change to the
+\fRnisNetgroupTriple\fR
+attribute:
+.nf
+.sp
+.RS 10n
+attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
+    DESC 'Netgroup triple'
+    EQUALITY caseIgnoreIA5Match
+    SUBSTR caseIgnoreIA5SubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+.RE
+.fi
+.TP 6n
+\fBNETGROUP_SEARCH_FILTER\fR \fIldap_filter\fR
+An LDAP filter which is used to restrict the set of records returned
+when performing an LDAP netgroup query.
+Typically, this is of the
+form
+\fRattribute=value\fR
+or
+\fR(&(attribute=value)(attribute2=value2))\fR.
+The default search filter is:
+\fRobjectClass=nisNetgroup\fR.
+If
+\fIldap_filter\fR
+is omitted, no search filter will be used.
+This option is only when querying netgroups directly via LDAP.
 .TP 6n
 \fBNETWORK_TIMEOUT\fR \fIseconds\fR
 An alias for

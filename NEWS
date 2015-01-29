@@ -55,6 +55,12 @@ What's new in Sudo 1.8.12
    This limit was introduced when sudo's version of fnmatch()
    was replaced in sudo 1.8.4.
 
+ * LDAP-based sudoers can now query an LDAP server for a user's
+   netgroups directly.  This is often much faster than fetching
+   every sudoRole object containing a sudoUser that begins with a
+   `+' prefix and checking whether the user is a member of any of
+   the returned netgroups.
+
 What's new in Sudo 1.8.11p2
 
  * Fixed a bug where dynamic shared objects loaded from a plugin

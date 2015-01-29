@@ -345,13 +345,52 @@ the user belongs to.
 .Li ALL
 tag is matched in this query too.)
 If no match is returned for the user's name and groups, a third
-query returns all entries containing user netgroups and checks
-to see if the user belongs to any of them.
+query returns all entries containing user netgroups and other
+non-Unix groups and checks to see if the user belongs to any of them.
 .Pp
 If timed entries are enabled with the
 .Sy SUDOERS_TIMED
 configuration directive, the LDAP queries include a sub-filter that
 limits retrieval to entries that satisfy the time constraints, if any.
+.Pp
+If the
+.Sy NETGROUP_BASE
+configuration directive is present, queries are performed to determine
+the list of netgroups the user belongs to before the sudoers query.
+This makes it possible to include netgroups in the sudoers query
+string in the same manner as Unix groups.
+The third query mentioned above is not performed unless a group provider
+plugin is also configured.
+The actual LDAP queries performed by
+.Nm sudo
+are as follows:
+.Bl -enum
+.It
+Match all
+.Li nisNetgroup
+records with a
+.Li nisNetgroupTriple
+containing the user and host.
+The query will match
+.Li nisNetgroupTriple
+entries with either the short or long form of the host name or
+no host name specified in the tuple.
+A wildcard is used to match any domain name but be aware that the
+NIS schema used by some LDAP servers may not support wild cards for
+.Li nisNetgroupTriple .
+.It
+Repeated queries are performed to find any nested
+.Li nisNetgroup
+records with a
+.Li memberNisNetgroup
+entry that refers to an already-matched record.
+.El
+.Pp
+For sites with a large number of netgroups, using
+.Sy NETGROUP_BASE
+can significantly speed up
+.Nm sudo Ns 's
+execution time.
 .Ss Differences between LDAP and non-LDAP sudoers
 There are some subtle differences in the way sudoers is handled
 once in LDAP.
@@ -561,6 +600,56 @@ This option is only relevant when using SASL authentication (see below).
 .It Sy LDAP_VERSION Ar number
 The version of the LDAP protocol to use when connecting to the server.
 The default value is protocol version 3.
+.It Sy NETGROUP_BASE Ar base
+The base DN to use when performing LDAP netgroup queries.
+Typically this is of the form
+.Li ou=netgroup,dc=example,dc=com
+for the domain
+.Li example.com .
+Multiple
+.Sy NETGROUP_BASE
+lines may be specified, in which case they are queried in the order specified.
+.Pp
+This option can be used to query a user's netgroups directly via LDAP
+which is usually faster than fetching every
+.Li sudoRole
+object containing a
+.Li sudoUser
+that begins with a
+.Ql +
+prefix.
+The NIS schema used by some LDAP servers need a modificaton to
+support querying the
+.Li nisNetgroup
+object by its
+.Li nisNetgroupTriple
+member.
+OpenLDAP's
+.Sy slapd
+requires the following change to the
+.Li nisNetgroupTriple
+attribute:
+.Bd -literal -offset 4n
+attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
+    DESC 'Netgroup triple'
+    EQUALITY caseIgnoreIA5Match
+    SUBSTR caseIgnoreIA5SubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+.Ed
+.It Sy NETGROUP_SEARCH_FILTER Ar ldap_filter
+An LDAP filter which is used to restrict the set of records returned
+when performing an LDAP netgroup query.
+Typically, this is of the
+form
+.Li attribute=value
+or
+.Li (&(attribute=value)(attribute2=value2)) .
+The default search filter is:
+.Li objectClass=nisNetgroup .
+If
+.Ar ldap_filter
+is omitted, no search filter will be used.
+This option is only when querying netgroups directly via LDAP.
 .It Sy NETWORK_TIMEOUT Ar seconds
 An alias for
 .Sy BIND_TIMELIMIT
