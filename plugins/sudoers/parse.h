@@ -211,6 +211,7 @@ int cmndlist_matches(const struct member_list *list);
 int hostlist_matches(const struct member_list *list);
 int runaslist_matches(const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
 int userlist_matches(const struct passwd *pw, const struct member_list *list);
+const char *sudo_getdomainname(void);
 
 /* toke.c */
 void init_lexer(void);

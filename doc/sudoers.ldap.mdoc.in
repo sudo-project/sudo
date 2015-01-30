@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 26, 2015
+.Dd January 30, 2015
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -355,7 +355,9 @@ limits retrieval to entries that satisfy the time constraints, if any.
 .Pp
 If the
 .Sy NETGROUP_BASE
-configuration directive is present, queries are performed to determine
+configuration directive is present (see
+.Sx Configuring ldap.conf
+below), queries are performed to determine
 the list of netgroups the user belongs to before the sudoers query.
 This makes it possible to include netgroups in the sudoers query
 string in the same manner as Unix groups.
@@ -370,12 +372,16 @@ Match all
 .Li nisNetgroup
 records with a
 .Li nisNetgroupTriple
-containing the user and host.
+containing the user, host and NIS domain.
 The query will match
 .Li nisNetgroupTriple
 entries with either the short or long form of the host name or
 no host name specified in the tuple.
-A wildcard is used to match any domain name but be aware that the
+If the NIS domain is set, the query will match only match entries
+that include the domain or for which there is no domain present.
+If the NIS domain is
+.Em not
+set, a wildcard is used to match any domain name but be aware that the
 NIS schema used by some LDAP servers may not support wild cards for
 .Li nisNetgroupTriple .
 .It

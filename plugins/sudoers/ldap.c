@@ -1329,6 +1329,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     struct ldap_netgroup *ng, *old_tail;
     struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result;
+    const char *domain;
     size_t filt_len;
     char *filt;
     int rc;
@@ -1340,33 +1341,90 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	tvp = &tv;
     }
 
+    /* Use NIS domain if set, else wildcard match. */
+    domain = sudo_getdomainname();
+
     STAILQ_FOREACH(base, &ldap_conf.netgroup_base, entries) {
-	/* Build query. */
-	filt_len = 2 + strlen(ldap_conf.netgroup_search_filter) +
-	    24 + (2 * sudo_ldap_value_len(pw->pw_name)) + 26 +
-	    sudo_ldap_value_len(user_shost) + 1 + 7 + 1;
-	if (user_host != user_shost) {
-	    filt_len += 26 + sudo_ldap_value_len(user_host) + 1 +
-		sudo_ldap_value_len(pw->pw_name);
-	}
-	filt = sudo_emalloc(filt_len);
 	DPRINTF1("searching from netgroup_base '%s'", base->val);
-	CHECK_STRLCPY(filt, "(&", filt_len);
-	CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
-	CHECK_STRLCAT(filt, "(|(nisNetgroupTriple=\\(,", filt_len);
-	CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	CHECK_STRLCAT(filt, ",*\\))(nisNetgroupTriple=\\(", filt_len);
-	CHECK_LDAP_VCAT(filt, user_shost, filt_len);
-	CHECK_STRLCAT(filt, ",", filt_len);
-	CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	if (user_host != user_shost) {
-	    CHECK_STRLCAT(filt, ",*\\))(nisNetgroupTriple=\\(", filt_len);
-	    CHECK_LDAP_VCAT(filt, user_host, filt_len);
+
+	/* Build query, using NIS domain if it is set. */
+	if (domain != NULL) {
+	    filt_len = sizeof("(nisNetgroupTriple=\\(,,\\))") - 1 +
+		sudo_ldap_value_len(pw->pw_name);
+	    if (user_host == user_shost) {
+		filt_len *= 4;
+		filt_len += 2 * sudo_ldap_value_len(user_shost);
+		filt_len += 2 * sudo_ldap_value_len(domain);
+	    } else {
+		filt_len *= 6;
+		filt_len += 2 * sudo_ldap_value_len(user_shost);
+		filt_len += 2 * sudo_ldap_value_len(user_host);
+		filt_len += 3 * sudo_ldap_value_len(domain);
+	    }
+	    filt_len += 7 + strlen(ldap_conf.netgroup_search_filter);
+	    filt = sudo_emalloc(filt_len);
+	    CHECK_STRLCPY(filt, "(&", filt_len);
+	    CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
+	    CHECK_STRLCAT(filt, "(|(nisNetgroupTriple=\\(,", filt_len);
+	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    CHECK_STRLCAT(filt, ",", filt_len);
+	    CHECK_LDAP_VCAT(filt, domain, filt_len);
+	    CHECK_STRLCAT(filt, "\\))(nisNetgroupTriple=\\(", filt_len);
+	    CHECK_LDAP_VCAT(filt, user_shost, filt_len);
 	    CHECK_STRLCAT(filt, ",", filt_len);
 	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    if (user_host != user_shost) {
+		CHECK_STRLCAT(filt, ",", filt_len);
+		CHECK_LDAP_VCAT(filt, domain, filt_len);
+		CHECK_STRLCAT(filt, "\\))(nisNetgroupTriple=\\(", filt_len);
+		CHECK_LDAP_VCAT(filt, user_host, filt_len);
+		CHECK_STRLCAT(filt, ",", filt_len);
+		CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    }
+	    CHECK_STRLCAT(filt, ",", filt_len);
+	    CHECK_LDAP_VCAT(filt, domain, filt_len);
+	    CHECK_STRLCAT(filt, "\\))(nisNetgroupTriple=\\(,", filt_len);
+	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    CHECK_STRLCAT(filt, ",\\))(nisNetgroupTriple=\\(", filt_len);
+	    CHECK_LDAP_VCAT(filt, user_shost, filt_len);
+	    CHECK_STRLCAT(filt, ",", filt_len);
+	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    if (user_host != user_shost) {
+		CHECK_STRLCAT(filt, ",\\))(nisNetgroupTriple=\\(", filt_len);
+		CHECK_LDAP_VCAT(filt, user_host, filt_len);
+		CHECK_STRLCAT(filt, ",", filt_len);
+		CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    }
+	    CHECK_STRLCAT(filt, ",\\))))", filt_len);
+	} else {
+	    filt_len = sizeof("(nisNetgroupTriple=\\(,,*\\))") - 1 +
+		sudo_ldap_value_len(pw->pw_name);
+	    if (user_host == user_shost) {
+		filt_len *= 2;
+		filt_len += sudo_ldap_value_len(user_shost);
+	    } else {
+		filt_len *= 3;
+		filt_len += sudo_ldap_value_len(user_shost);
+		filt_len += sudo_ldap_value_len(user_host);
+	    }
+	    filt_len += 7 + strlen(ldap_conf.netgroup_search_filter);
+	    filt = sudo_emalloc(filt_len);
+	    CHECK_STRLCPY(filt, "(&", filt_len);
+	    CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
+	    CHECK_STRLCAT(filt, "(|(nisNetgroupTriple=\\(,", filt_len);
+	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    CHECK_STRLCAT(filt, ",*\\))(nisNetgroupTriple=\\(", filt_len);
+	    CHECK_LDAP_VCAT(filt, user_shost, filt_len);
+	    CHECK_STRLCAT(filt, ",", filt_len);
+	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    if (user_host != user_shost) {
+		CHECK_STRLCAT(filt, ",*\\))(nisNetgroupTriple=\\(", filt_len);
+		CHECK_LDAP_VCAT(filt, user_host, filt_len);
+		CHECK_STRLCAT(filt, ",", filt_len);
+		CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
+	    }
+	    CHECK_STRLCAT(filt, ",*\\))))", filt_len);
 	}
-	CHECK_STRLCAT(filt, ",*\\))))", filt_len);
-
 	DPRINTF1("ldap netgroup search filter: '%s'", filt);
 	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "January 26, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "January 30, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -377,7 +377,9 @@ limits retrieval to entries that satisfy the time constraints, if any.
 .PP
 If the
 \fBNETGROUP_BASE\fR
-configuration directive is present, queries are performed to determine
+configuration directive is present (see
+\fIConfiguring ldap.conf\fR
+below), queries are performed to determine
 the list of netgroups the user belongs to before the sudoers query.
 This makes it possible to include netgroups in the sudoers query
 string in the same manner as Unix groups.
@@ -392,12 +394,16 @@ Match all
 \fRnisNetgroup\fR
 records with a
 \fRnisNetgroupTriple\fR
-containing the user and host.
+containing the user, host and NIS domain.
 The query will match
 \fRnisNetgroupTriple\fR
 entries with either the short or long form of the host name or
 no host name specified in the tuple.
-A wildcard is used to match any domain name but be aware that the
+If the NIS domain is set, the query will match only match entries
+that include the domain or for which there is no domain present.
+If the NIS domain is
+\fInot\fR
+set, a wildcard is used to match any domain name but be aware that the
 NIS schema used by some LDAP servers may not support wild cards for
 \fRnisNetgroupTriple\fR.
 .TP 5n

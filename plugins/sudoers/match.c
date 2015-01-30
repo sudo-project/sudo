@@ -905,19 +905,20 @@ done:
     debug_return_bool(matched);
 }
 
-#ifdef HAVE_INNETGR
 /*
- * Get NIS-style domain name and return a malloc()ed copy or NULL if none.
+ * Get NIS-style domain name and copy from static storage or NULL if none.
  */
-static char *
+const char *
 sudo_getdomainname(void)
 {
     char *domain = NULL;
 #ifdef HAVE_GETDOMAINNAME
-    char *buf, *cp;
+    static char buf[HOST_NAME_MAX + 1];
+    static bool initialized;
 
-    buf = sudo_emalloc(HOST_NAME_MAX + 1);
-    if (getdomainname(buf, HOST_NAME_MAX + 1) == 0 && *buf != '\0') {
+    if (getdomainname(buf, sizeof(buf)) == 0 && buf[0] != '\0') {
+	char *cp;
+
 	domain = buf;
 	for (cp = buf; *cp != '\0'; cp++) {
 	    /* Check for illegal characters, Linux may use "(none)". */
@@ -927,12 +928,10 @@ sudo_getdomainname(void)
 	    }
 	}
     }
-    if (domain == NULL)
-	sudo_efree(buf);
+    initialized = true;
 #endif /* HAVE_GETDOMAINNAME */
     return domain;
 }
-#endif /* HAVE_INNETGR */
 
 /*
  * Returns true if "host" and "user" belong to the netgroup "netgr",
@@ -943,8 +942,7 @@ bool
 netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user)
 {
 #ifdef HAVE_INNETGR
-    static char *domain;
-    static int initialized;
+    const char *domain;
 #endif
     bool rc = false;
     debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
@@ -963,10 +961,7 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
     }
 
     /* get the domain name (if any) */
-    if (!initialized) {
-	domain = sudo_getdomainname();
-	initialized = 1;
-    }
+    domain = sudo_getdomainname();
 
     if (innetgr(netgr, lhost, user, domain))
 	rc = true;
