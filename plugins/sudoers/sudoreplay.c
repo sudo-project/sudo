@@ -487,20 +487,27 @@ replay_session(const double max_wait, const char *decimal)
 	    if (need_nlcr) {
 		size_t remainder = nread;
 		size_t linelen;
-		char *cp = buf;
-		char *ep = buf - 1;
+		char *line = buf;
+		char *nl, *cp = buf;
 
-		/* Handle a "\r\n" pair that spans a buffer. */
-		if (last_char == '\r' && buf[0] == '\n') {
-		    ep++;
+		/*
+		 * Handle a "\r\n" pair that spans a buffer.
+		 * The newline will be written as part of the next line.
+		 */
+		if (last_char == '\r' && *cp == '\n') {
+		    cp++;
 		    remainder--;
 		}
 
 		iovcnt = 0;
-		while ((ep = memchr(ep + 1, '\n', remainder)) != NULL) {
-		    /* Is there already a carriage return? */
-		    if (cp != ep && ep[-1] == '\r') {
-			remainder = (size_t)(&buf[nread - 1] - ep);
+		while ((nl = memchr(cp, '\n', remainder)) != NULL) {
+		    /*
+		     * If there is already a carriage return, keep going.
+		     * We'll include it as part of the next line written.
+		     */
+		    if (cp != nl && nl[-1] == '\r') {
+			remainder = (size_t)(&buf[nread - 1] - nl);
+			cp = nl + 1;
 		    	continue;
 		    }
 
@@ -510,23 +517,23 @@ replay_session(const double max_wait, const char *decimal)
 			    sudo_ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
 			    sudo_emallocarray(iovmax = 32, sizeof(*iov));
 		    }
-		    linelen = (size_t)(ep - cp) + 1;
-		    iov[iovcnt].iov_base = cp;
+		    linelen = (size_t)(nl - line) + 1;
+		    iov[iovcnt].iov_base = line;
 		    iov[iovcnt].iov_len = linelen - 1; /* not including \n */
 		    iovcnt++;
 		    iov[iovcnt].iov_base = "\r\n";
 		    iov[iovcnt].iov_len = 2;
 		    iovcnt++;
-		    cp = ep + 1;
+		    line = cp = nl + 1;
 		    remainder -= linelen;
 		}
-		if ((size_t)(cp - buf) != nread) {
+		if ((size_t)(line - buf) != nread) {
 		    /*
 		     * Partial line without a linefeed or multiple lines
-		     * with \r\n pairs.
+		     * that already had \r\n pairs.
 		     */
-		    iov[iovcnt].iov_base = cp;
-		    iov[iovcnt].iov_len = nread - (cp - buf);
+		    iov[iovcnt].iov_base = line;
+		    iov[iovcnt].iov_len = nread - (line - buf);
 		    iovcnt++;
 		}
 		last_char = buf[nread - 1]; /* stash last char of old buffer */
@@ -550,6 +557,8 @@ replay_session(const double max_wait, const char *decimal)
 	    sudo_ev_add(evbase, output_ev, NULL, false);
 	    sudo_ev_loop(evbase, 0);
 	}
+	if (iov != &iovb)
+	    sudo_efree(iov);
     }
     debug_return;
 }
