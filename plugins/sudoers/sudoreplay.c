@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -576,13 +576,12 @@ static void
 write_output(int fd, int what, void *v)
 {
     struct write_closure *wc = v;
-    ssize_t nwritten;
-    size_t count, remainder;
+    size_t nwritten;
     unsigned int i;
     debug_decl(write_output, SUDO_DEBUG_UTIL, sudoreplay_debug_instance)
 
     nwritten = writev(STDOUT_FILENO, wc->iov, wc->iovcnt);
-    switch (nwritten) {
+    switch ((ssize_t)nwritten) {
     case -1:
 	if (errno != EINTR && errno != EAGAIN)
 	    sudo_fatal(U_("unable to write to %s"), "stdout");
@@ -590,30 +589,24 @@ write_output(int fd, int what, void *v)
     case 0:
 	break;
     default:
-	remainder = wc->nbytes - nwritten;
-	if (remainder == 0) {
+	if (wc->nbytes == nwritten) {
 	    /* writev completed */
 	    debug_return;
 	}
 
 	/* short writev, adjust iov so we can write the remainder. */
-	count = 0;
+	wc->nbytes -= nwritten;
 	i = wc->iovcnt;
 	while (i--) {
-	    count += wc->iov[i].iov_len;
-	    if (count == remainder) {
-		wc->iov += i;
-		wc->iovcnt -= i;
+	    if (wc->iov[0].iov_len > nwritten) {
+		/* Partial write, adjust base and len and reschedule. */
+		wc->iov[0].iov_base = (char *)wc->iov[0].iov_base + nwritten;
+		wc->iov[0].iov_len -= nwritten;
 		break;
 	    }
-	    if (count > remainder) {
-		size_t off = (count - remainder);
-		wc->iov[i].iov_base = (char *)wc->iov[i].iov_base + off;
-		wc->iov[i].iov_len -= off;
-		wc->iov += i;
-		wc->iovcnt -= i;
-		break;
-	    }
+	    nwritten -= wc->iov[0].iov_len;
+	    wc->iov++;
+	    wc->iovcnt--;
 	}
 	break;
     }
