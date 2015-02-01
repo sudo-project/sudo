@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,7 +52,7 @@ sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp
     const char *cp = gidstr;
     const char *errstr;
     char *ep;
-    debug_decl(sudo_parse_gids, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_parse_gids, SUDO_DEBUG_UTIL)
 
     /* Count groups. */
     if (*cp != '\0') {

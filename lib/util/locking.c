@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2009-2014
+ * Copyright (c) 1999-2005, 2007, 2009-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -68,7 +68,7 @@ bool
 sudo_lock_file_v1(int fd, int lockit)
 {
     int op = 0;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     switch (lockit) {
 	case SUDO_LOCK:
@@ -88,7 +88,7 @@ bool
 sudo_lock_file_v1(int fd, int lockit)
 {
     int op = 0;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     switch (lockit) {
 	case SUDO_LOCK:
@@ -110,7 +110,7 @@ sudo_lock_file_v1(int fd, int lockit)
 #ifdef F_SETLK
     int func;
     struct flock lock;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     lock.l_start = 0;
     lock.l_len = 0;

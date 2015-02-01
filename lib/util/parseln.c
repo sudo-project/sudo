@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2013-2014
+ * Copyright (c) 2007, 2013-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -67,7 +67,7 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
     ssize_t len;
     char *cp, *line = NULL;
     bool continued;
-    debug_decl(sudo_parseln, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_parseln, SUDO_DEBUG_UTIL)
 
     do {
 	continued = false;

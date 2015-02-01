@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -93,7 +93,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 {
     struct command_status cstat;
     sigaction_t sa;
-    debug_decl(fork_cmnd, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(fork_cmnd, SUDO_DEBUG_EXEC)
 
     ppgrp = getpgrp();	/* parent's process group */
 
@@ -160,7 +160,7 @@ void
 exec_cmnd(struct command_details *details, struct command_status *cstat,
     int errfd)
 {
-    debug_decl(exec_cmnd, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(exec_cmnd, SUDO_DEBUG_EXEC)
 
     restore_signals();
     if (exec_setup(details, NULL, -1) == true) {
@@ -206,7 +206,7 @@ backchannel_cb(int fd, int what, void *v)
 {
     struct exec_closure *ec = v;
     ssize_t n;
-    debug_decl(backchannel_cb, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(backchannel_cb, SUDO_DEBUG_EXEC)
 
     /* read child status */
     n = recv(fd, ec->cstat, sizeof(struct command_status), MSG_WAITALL);
@@ -298,7 +298,7 @@ static struct sudo_event_base *
 exec_event_setup(int backchannel, struct exec_closure *ec)
 {
     struct sudo_event_base *evbase;
-    debug_decl(exec_event_setup, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(exec_event_setup, SUDO_DEBUG_EXEC)
 
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL)
@@ -349,7 +349,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     sigaction_t sa;
     pid_t child;
     int sv[2];
-    debug_decl(sudo_execute, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
 
     dispatch_pending_signals(cstat);
 
@@ -542,7 +542,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
     int signo, char *signame, struct command_status *cstat)
 {
     int rc = 1;
-    debug_decl(dispatch_signal, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(dispatch_signal, SUDO_DEBUG_EXEC)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: evbase %p, child: %d, signo %s(%d), cstat %p",
@@ -653,7 +653,7 @@ dispatch_signal_pty(struct sudo_event_base *evbase, pid_t child,
     int signo, char *signame, struct command_status *cstat)
 {
     int rc = 1;
-    debug_decl(dispatch_signal_pty, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(dispatch_signal_pty, SUDO_DEBUG_EXEC)
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: evbase %p, child: %d, signo %s(%d), cstat %p",
@@ -712,7 +712,7 @@ signal_pipe_cb(int fd, int what, void *v)
     unsigned char signo;
     ssize_t nread;
     int rc = 0;
-    debug_decl(signal_pipe_cb, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(signal_pipe_cb, SUDO_DEBUG_EXEC)
 
     do {
 	/* read signal pipe */
@@ -760,7 +760,7 @@ dispatch_pending_signals(struct command_status *cstat)
     struct sigaction sa;
     unsigned char signo = 0;
     int rval = 0;
-    debug_decl(dispatch_pending_signals, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(dispatch_pending_signals, SUDO_DEBUG_EXEC)
 
     for (;;) {
 	nread = read(signal_pipe[0], &signo, sizeof(signo));
@@ -815,7 +815,7 @@ forward_signals(int sock, int what, void *v)
     struct sigforward *sigfwd;
     struct command_status cstat;
     ssize_t nsent;
-    debug_decl(forward_signals, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(forward_signals, SUDO_DEBUG_EXEC)
 
     while (!TAILQ_EMPTY(&sigfwd_list)) {
 	sigfwd = TAILQ_FIRST(&sigfwd_list);
@@ -859,7 +859,7 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
 {
     struct sigforward *sigfwd;
     char signame[SIG2STR_MAX];
-    debug_decl(schedule_signal, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(schedule_signal, SUDO_DEBUG_EXEC)
 
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
@@ -979,7 +979,7 @@ int
 pipe_nonblock(int fds[2])
 {
     int flags, rval;
-    debug_decl(pipe_nonblock, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(pipe_nonblock, SUDO_DEBUG_EXEC)
 
     rval = pipe(fds);
     if (rval != -1) {

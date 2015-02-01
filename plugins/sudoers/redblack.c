@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2009-2014
+ * Copyright (c) 2004-2005, 2007, 2009-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -88,7 +88,7 @@ struct rbtree *
 rbcreate(int (*compar)(const void *, const void*))
 {
     struct rbtree *tree;
-    debug_decl(rbcreate, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbcreate, SUDOERS_DEBUG_RBTREE)
 
     tree = (struct rbtree *) sudo_emalloc(sizeof(*tree));
     tree->compar = compar;
@@ -119,7 +119,7 @@ static void
 rotate_left(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *child;
-    debug_decl(rotate_left, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rotate_left, SUDOERS_DEBUG_RBTREE)
 
     child = node->right;
     node->right = child->left;
@@ -145,7 +145,7 @@ static void
 rotate_right(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *child;
-    debug_decl(rotate_right, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rotate_right, SUDOERS_DEBUG_RBTREE)
 
     child = node->left;
     node->left = child->right;
@@ -175,7 +175,7 @@ rbinsert(struct rbtree *tree, void *data)
     struct rbnode *node = rbfirst(tree);
     struct rbnode *parent = rbroot(tree);
     int res;
-    debug_decl(rbinsert, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbinsert, SUDOERS_DEBUG_RBTREE)
 
     /* Find correct insertion point. */
     while (node != rbnil(tree)) {
@@ -267,7 +267,7 @@ rbfind(struct rbtree *tree, void *key)
 {
     struct rbnode *node = rbfirst(tree);
     int res;
-    debug_decl(rbfind, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbfind, SUDOERS_DEBUG_RBTREE)
 
     while (node != rbnil(tree)) {
 	if ((res = tree->compar(key, node->data)) == 0)
@@ -287,7 +287,7 @@ rbapply_node(struct rbtree *tree, struct rbnode *node,
     int (*func)(void *, void *), void *cookie, enum rbtraversal order)
 {
     int error;
-    debug_decl(rbapply_node, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbapply_node, SUDOERS_DEBUG_RBTREE)
 
     if (node != rbnil(tree)) {
 	if (order == preorder)
@@ -314,7 +314,7 @@ static struct rbnode *
 rbsuccessor(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *succ;
-    debug_decl(rbsuccessor, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbsuccessor, SUDOERS_DEBUG_RBTREE)
 
     if ((succ = node->right) != rbnil(tree)) {
 	while (succ->left != rbnil(tree))
@@ -335,7 +335,7 @@ rbsuccessor(struct rbtree *tree, struct rbnode *node)
 static void
 _rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 {
-    debug_decl(_rbdestroy, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(_rbdestroy, SUDOERS_DEBUG_RBTREE)
     if (node != rbnil(tree)) {
 	_rbdestroy(tree, node->left, destroy);
 	_rbdestroy(tree, node->right, destroy);
@@ -353,7 +353,7 @@ _rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 void
 rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
-    debug_decl(rbdestroy, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbdestroy, SUDOERS_DEBUG_RBTREE)
     _rbdestroy(tree, rbfirst(tree), destroy);
     sudo_efree(tree);
     debug_return;
@@ -366,7 +366,7 @@ void *rbdelete(struct rbtree *tree, struct rbnode *z)
 {
     struct rbnode *x, *y;
     void *data = z->data;
-    debug_decl(rbdelete, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbdelete, SUDOERS_DEBUG_RBTREE)
 
     if (z->left == rbnil(tree) || z->right == rbnil(tree))
 	y = z;
@@ -408,7 +408,7 @@ static void
 rbrepair(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *sibling;
-    debug_decl(rbrepair, SUDOERS_DEBUG_RBTREE, sudoers_debug_instance)
+    debug_decl(rbrepair, SUDOERS_DEBUG_RBTREE)
 
     while (node->color == black && node != rbfirst(tree)) {
 	if (node == node->parent->left) {

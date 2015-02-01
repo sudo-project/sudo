@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2009-2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2012, 2014-2015
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -63,7 +64,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
     struct group *gr;
     gid_t ttygid = -1;
     int rval = 0;
-    debug_decl(get_pty, SUDO_DEBUG_PTY, sudo_debug_instance)
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     if ((gr = getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
@@ -82,7 +83,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
     int rval = 0;
-    debug_decl(get_pty, SUDO_DEBUG_PTY, sudo_debug_instance)
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     /* IRIX-style dynamic ptys (may fork) */
     line = _getpty(master, O_RDWR, S_IRUSR|S_IWUSR|S_IWGRP, 0);
@@ -120,7 +121,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
     int rval = 0;
-    debug_decl(get_pty, SUDO_DEBUG_PTY, sudo_debug_instance)
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     *master = posix_openpt(O_RDWR|O_NOCTTY);
     if (*master != -1) {
@@ -162,7 +163,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
     struct group *gr;
     gid_t ttygid = -1;
     int rval = 0;
-    debug_decl(get_pty, SUDO_DEBUG_PTY, sudo_debug_instance)
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     if ((gr = getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;

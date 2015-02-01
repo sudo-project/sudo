@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,7 +46,7 @@ sudo_strtomode_v1(const char *cp, const char **errstr)
 {
     char *ep;
     long lval;
-    debug_decl(sudo_strtomode, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_strtomode, SUDO_DEBUG_UTIL)
 
     errno = 0;
     lval = strtol(cp, &ep, 8);

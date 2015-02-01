@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,7 +62,7 @@ set_interfaces(const char *ai)
 {
     char *addrinfo, *addr, *mask;
     struct interface *ifp;
-    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF, sudoers_debug_instance)
+    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
     addrinfo = sudo_estrdup(ai);
     for (addr = strtok(addrinfo, " \t"); addr != NULL; addr = strtok(NULL, " \t")) {
@@ -109,7 +109,7 @@ void
 dump_interfaces(const char *ai)
 {
     char *cp, *addrinfo;
-    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF, sudoers_debug_instance)
+    debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
     addrinfo = sudo_estrdup(ai);
 

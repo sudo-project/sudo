@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -61,7 +61,7 @@ disable_execute(char *const envp[])
     bool enabled = false;
 # endif
 #endif /* _PATH_SUDO_NOEXEC */
-    debug_decl(disable_execute, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_PRIV_SET
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */

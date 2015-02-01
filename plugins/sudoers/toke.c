@@ -1928,7 +1928,7 @@ char *yytext;
 #define INITIAL 0
 #line 2 "toke.l"
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2014
+ * Copyright (c) 1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -4030,7 +4030,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     int max_paths = 32;
     struct dirent *dent;
     struct path_list **paths = NULL;
-    debug_decl(read_dir_files, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(read_dir_files, SUDOERS_DEBUG_PARSER)
 
     dir = opendir(dirpath);
     if (dir == NULL) {
@@ -4105,7 +4105,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
 {
     struct path_list **paths = NULL;
     int count, i;
-    debug_decl(switch_dir, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(switch_dir, SUDOERS_DEBUG_PARSER)
 
     count = read_dir_files(dirpath, &paths);
     if (count > 0) {
@@ -4133,7 +4133,7 @@ void
 init_lexer(void)
 {
     struct path_list *pl;
-    debug_decl(init_lexer, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(init_lexer, SUDOERS_DEBUG_PARSER)
 
     while (idepth) {
 	idepth--;
@@ -4164,7 +4164,7 @@ _push_include(char *path, bool isdir)
 {
     struct path_list *pl;
     FILE *fp;
-    debug_decl(_push_include, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(_push_include, SUDOERS_DEBUG_PARSER)
 
     /* push current state onto stack */
     if (idepth >= istacksize) {
@@ -4265,7 +4265,7 @@ pop_include(void)
 {
     struct path_list *pl;
     FILE *fp;
-    debug_decl(pop_include, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(pop_include, SUDOERS_DEBUG_PARSER)
 
     if (idepth == 0)
 	debug_return_bool(false);
@@ -4307,7 +4307,7 @@ parse_include(char *base)
     char *cp, *ep, *path, *pp;
     int dirlen = 0, len = 0, subst = 0;
     size_t shost_len = 0;
-    debug_decl(parse_include, SUDOERS_DEBUG_PARSER, sudoers_debug_instance)
+    debug_decl(parse_include, SUDOERS_DEBUG_PARSER)
 
     /* Pull out path from #include line. */
     cp = base + sizeof("#include");

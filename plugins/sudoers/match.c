@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2014
+ * Copyright (c) 1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -119,7 +119,7 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
-    debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	switch (m->type) {
@@ -169,7 +169,7 @@ runaslist_matches(const struct member_list *user_list,
     int rval;
     int user_matched = UNSPEC;
     int group_matched = UNSPEC;
-    debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH)
 
     if (runas_pw != NULL) {
 	/* If no runas user or runas group listed in sudoers, use default. */
@@ -275,7 +275,7 @@ hostlist_matches(const struct member_list *list)
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
-    debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	switch (m->type) {
@@ -319,7 +319,7 @@ cmndlist_matches(const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
-    debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	matched = cmnd_matches(m);
@@ -339,7 +339,7 @@ cmnd_matches(const struct member *m)
     struct alias *a;
     struct sudo_command *c;
     int rval, matched = UNSPEC;
-    debug_decl(cmnd_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(cmnd_matches, SUDOERS_DEBUG_MATCH)
 
     switch (m->type) {
 	case ALL:
@@ -366,7 +366,7 @@ static bool
 command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 {
     int flags = 0;
-    debug_decl(command_args_match, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_args_match, SUDOERS_DEBUG_MATCH)
 
     /*
      * If no args specified in sudoers, any user args are allowed.
@@ -397,7 +397,7 @@ bool
 command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
 {
     bool rc = false;
-    debug_decl(command_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches, SUDOERS_DEBUG_MATCH)
 
     /* Check for pseudo-commands */
     if (sudoers_cmnd[0] != '/') {
@@ -445,7 +445,7 @@ done:
 static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args)
 {
-    debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH)
 
     /*
      * Return true if fnmatch(3) succeeds AND
@@ -473,7 +473,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
     size_t dlen;
     char **ap, *base, *cp;
     glob_t gl;
-    debug_decl(command_matches_glob, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches_glob, SUDOERS_DEBUG_MATCH)
 
     /*
      * First check to see if we can avoid the call to glob(3).
@@ -543,7 +543,7 @@ static bool
 command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
 {
     size_t dlen;
-    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH)
 
     dlen = strlen(sudoers_cmnd);
 
@@ -615,7 +615,7 @@ digest_matches(const char *file, const struct sudo_digest *sd)
     FILE *fp;
     unsigned int i;
     int h;
-    debug_decl(digest_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
     for (i = 0; digest_functions[i].digest_name != NULL; i++) {
 	if (sd->digest_type == i) {
@@ -678,7 +678,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     struct stat sudoers_stat;
     const char *base;
     size_t dlen;
-    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH)
 
     /* If it ends in '/' it is a directory spec. */
     dlen = strlen(sudoers_cmnd);
@@ -725,7 +725,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen)
 {
-    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH)
     debug_return_bool(strncmp(user_cmnd, sudoers_dir, dlen) == 0);
 }
 #else /* !SUDOERS_NAME_MATCH */
@@ -739,7 +739,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
     struct dirent *dent;
     char buf[PATH_MAX];
     DIR *dirp;
-    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH)
 
     /*
      * Grot through directory entries, looking for user_base.
@@ -784,7 +784,7 @@ hostname_matches(const char *shost, const char *lhost, const char *pattern)
 {
     const char *host;
     bool rc;
-    debug_decl(hostname_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(hostname_matches, SUDOERS_DEBUG_MATCH)
 
     host = strchr(pattern, '.') != NULL ? lhost : shost;
     if (has_meta(pattern)) {
@@ -808,7 +808,7 @@ userpw_matches(const char *sudoers_user, const char *user, const struct passwd *
     const char *errstr;
     uid_t uid;
     bool rc;
-    debug_decl(userpw_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(userpw_matches, SUDOERS_DEBUG_MATCH)
 
     if (pw != NULL && *sudoers_user == '#') {
 	uid = (uid_t) sudo_strtoid(sudoers_user + 1, NULL, NULL, &errstr);
@@ -835,7 +835,7 @@ group_matches(const char *sudoers_group, const struct group *gr)
     const char *errstr;
     gid_t gid;
     bool rc;
-    debug_decl(group_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(group_matches, SUDOERS_DEBUG_MATCH)
 
     if (*sudoers_group == '#') {
 	gid = (gid_t) sudo_strtoid(sudoers_group + 1, NULL, NULL, &errstr);
@@ -861,7 +861,7 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
 {
     int matched = false;
     struct passwd *pw0 = NULL;
-    debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH)
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%') {
@@ -945,7 +945,7 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
     const char *domain;
 #endif
     bool rc = false;
-    debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH)
 
     if (!def_use_netgroups) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "netgroups are disabled");

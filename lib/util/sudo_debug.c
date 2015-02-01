@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -131,7 +131,7 @@ static unsigned char *sudo_debug_fds;
 static int sudo_debug_max_fd = -1;
 
 /* Default instance index to use for common utility functions. */
-static int sudo_debug_default_instance = -1;
+static int sudo_debug_active_instance = -1;
 
 /*
  * Create a new output file for the specified debug instance.
@@ -219,9 +219,10 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 
 /*
  * Register a program/plugin with the debug framework,
- * parses settings string from sudo.conf and opens debugfile.
+ * parses settings string from sudo.conf and opens debug_files.
  * If subsystem names are specified they override the default values.
  * NOTE: subsystems must not be freed by caller unless deregistered.
+ * Sets the active instance to the newly registered instance.
  * Returns instance index on success or SUDO_DEBUG_INSTANCE_INITIALIZER
  * on failure.
  */
@@ -271,7 +272,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 		}
 		if (j == NUM_DEF_SUBSYSTEMS)
 		    j = ++max_id;
-		ids[i] = ((j + 1) << 16);
+		ids[i] = ((j + 1) << 6);
 	    }
 	}
 
@@ -311,9 +312,8 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	    SLIST_INSERT_HEAD(&instance->outputs, output, entries);
     }
 
-    /* Set default instance if not already set. */
-    if (sudo_debug_default_instance == -1)
-	sudo_debug_default_instance = idx;
+    /* Set active instance. */
+    sudo_debug_active_instance = idx;
 
     /* Stash the pid string so we only have to format it once. */
     if (sudo_debug_pidlen == 0) {
@@ -322,8 +322,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	sudo_debug_pidlen = strlen(sudo_debug_pidstr);
     }
 
-    /* Convert index to instance. */
-    return SUDO_DEBUG_MKINSTANCE(idx);
+    return idx;
 }
 
 /*
@@ -331,21 +330,19 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
  * and free up any associated data structures.
  */
 int
-sudo_debug_deregister_v1(int instance_id)
+sudo_debug_deregister_v1(int idx)
 {
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output, *next;
-    int idx;
 
-    idx = SUDO_DEBUG_INSTANCE(instance_id);
     if (idx < 0 || idx > sudo_debug_last_instance) {
 	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
 	    __func__, idx, sudo_debug_last_instance);
 	return -1;
     }
-    /* Reset default instance as needed. */
-    if (sudo_debug_default_instance == idx)
-	sudo_debug_default_instance = -1;
+    /* Reset active instance as needed. */
+    if (sudo_debug_active_instance == idx)
+	sudo_debug_active_instance = -1;
 
     instance = sudo_debug_instances[idx];
     if (instance == NULL)
@@ -377,31 +374,9 @@ sudo_debug_get_instance_v1(const char *program)
 	if (sudo_debug_instances[idx] == NULL)
 	    continue;
 	if (strcmp(sudo_debug_instances[idx]->program, program) == 0)
-	    return SUDO_DEBUG_MKINSTANCE(idx);
+	    return idx;
     }
     return SUDO_DEBUG_INSTANCE_INITIALIZER;
-}
-
-int
-sudo_debug_set_output_fd_v1(int level, int ofd, int nfd)
-{
-    struct sudo_debug_instance *instance;
-    struct sudo_debug_output *output;
-    int idx;
-
-    idx = SUDO_DEBUG_INSTANCE(level);
-    if (idx < 0 || idx > sudo_debug_last_instance) {
-	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
-	    __func__, idx, sudo_debug_last_instance);
-	return -1;
-    }
-
-    instance = sudo_debug_instances[idx];
-    SLIST_FOREACH(output, &instance->outputs, entries) {
-	if (output->fd == ofd)
-	    output->fd = nfd;
-    }
-    return 0;
 }
 
 pid_t
@@ -581,36 +556,29 @@ void
 sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level,
     const char *fmt, va_list ap)
 {
-    int buflen, idx, pri, saved_errno = errno;
+    int buflen, pri, saved_errno = errno;
     unsigned int subsys;
     char static_buf[1024], *buf = static_buf;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
 
-    if (sudo_debug_last_instance == -1)
+    if (sudo_debug_active_instance == -1)
 	goto out;
 
-    /* Extract instance index, priority and subsystem from level. */
-    idx = SUDO_DEBUG_INSTANCE(level);
+    /* Extract priority and subsystem from level. */
     pri = SUDO_DEBUG_PRI(level);
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Find matching instance. */
-    if (idx < 0) {
-	/* Check for default instance, else we are not initialized. */
-	if (sudo_debug_default_instance < 0 ||
-	    SUDO_DEBUG_MKINSTANCE(idx) != SUDO_DEBUG_INSTANCE_DEFAULT) {
-	    goto out;
-	}
-	idx = sudo_debug_default_instance;
-    } else if (idx > sudo_debug_last_instance) {
+    if (sudo_debug_active_instance > sudo_debug_last_instance) {
 	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
-	    __func__, idx, sudo_debug_last_instance);
+	    __func__, sudo_debug_active_instance, sudo_debug_last_instance);
 	goto out;
     }
-    instance = sudo_debug_instances[idx];
+    instance = sudo_debug_instances[sudo_debug_active_instance];
     if (instance == NULL) {
-	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__, idx);
+	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__,
+	    sudo_debug_active_instance);
 	goto out;
     }
 
@@ -676,7 +644,7 @@ sudo_debug_printf2_v1(const char *func, const char *file, int lineno, int level,
 void
 sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[])
 {
-    int buflen, idx, pri, saved_errno = errno;
+    int buflen, pri, saved_errno = errno;
     unsigned int subsys;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
@@ -684,30 +652,23 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
     char *cp, static_buf[4096], *buf = static_buf;
     size_t plen;
 
-    if (sudo_debug_last_instance == -1)
+    if (sudo_debug_active_instance == -1)
 	goto out;
 
-    /* Extract instance index, priority and subsystem from level. */
-    idx = SUDO_DEBUG_INSTANCE(level);
+    /* Extract priority and subsystem from level. */
     pri = SUDO_DEBUG_PRI(level);
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Find matching instance. */
-    if (idx < 0) {
-	/* Check for default instance, else we are not initialized. */
-	if (sudo_debug_default_instance < 0 ||
-	    SUDO_DEBUG_MKINSTANCE(idx) != SUDO_DEBUG_INSTANCE_DEFAULT) {
-	    goto out;
-	}
-	idx = sudo_debug_default_instance;
-    } else if (idx > sudo_debug_last_instance) {
+    if (sudo_debug_active_instance > sudo_debug_last_instance) {
 	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
-	    __func__, idx, sudo_debug_last_instance);
+	    __func__, sudo_debug_active_instance, sudo_debug_last_instance);
 	goto out;
     }
-    instance = sudo_debug_instances[idx];
+    instance = sudo_debug_instances[sudo_debug_active_instance];
     if (instance == NULL) {
-	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__, idx);
+	sudo_warnx_nodebug("%s: unregistered instance index %d", __func__,
+	    sudo_debug_active_instance);
 	goto out;
     }
     if (subsys > instance->max_subsystem)
@@ -789,29 +750,28 @@ out:
 }
 
 /*
- * Returns the default instance or SUDO_DEBUG_INSTANCE_INITIALIZER
- * if no default instance is set.
+ * Returns the active instance or SUDO_DEBUG_INSTANCE_INITIALIZER
+ * if no instance is active.
  */
 int
-sudo_debug_get_default_instance_v1(void)
+sudo_debug_get_active_instance_v1(void)
 {
-    return SUDO_DEBUG_MKINSTANCE(sudo_debug_default_instance);
+    return sudo_debug_active_instance;
 }
 
 /*
- * Sets a new default instance, returning the old one.
+ * Sets a new active instance, returning the old one.
  * Note that the old instance may be SUDO_DEBUG_INSTANCE_INITIALIZER
  * if this is the only instance.
  */
 int
-sudo_debug_set_default_instance_v1(int inst)
+sudo_debug_set_active_instance_v1(int idx)
 {
-    const int idx = SUDO_DEBUG_INSTANCE(inst);
-    const int old_idx = sudo_debug_default_instance;
+    const int old_idx = sudo_debug_active_instance;
 
     if (idx >= -1 && idx <= sudo_debug_last_instance)
-	sudo_debug_default_instance = idx;
-    return SUDO_DEBUG_MKINSTANCE(old_idx);
+	sudo_debug_active_instance = idx;
+    return old_idx;
 }
 
 /*

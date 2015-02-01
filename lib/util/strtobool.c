@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,7 +44,7 @@
 int
 sudo_strtobool_v1(const char *str)
 {
-    debug_decl(sudo_strtobool, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_strtobool, SUDO_DEBUG_UTIL)
 
     switch (*str) {
 	case '0':

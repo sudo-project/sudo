@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2010-2012, 2014
+ * Copyright (c) 1996, 1998-2005, 2010-2012, 2014-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -45,7 +45,7 @@ sudo_goodpath(const char *path, struct stat *sbp)
 {
     struct stat sb;
     bool rval = false;
-    debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL)
 
     if (path != NULL && stat(path, &sb) == 0) {
 	/* Make sure path describes an executable regular file. */

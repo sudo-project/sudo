@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,7 @@ writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen)
     char *indent = "";
     char *beg = line;
     char *end;
-    debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING, sudoers_debug_instance)
+    debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING)
 
     /*
      * Print out line with word wrap around maxlen characters.

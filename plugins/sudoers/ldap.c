@@ -427,7 +427,7 @@ sudo_ldap_conf_add_ports(void)
     char *host, *port, defport[13];
     char hostbuf[LINE_MAX * 2];
     int len;
-    debug_decl(sudo_ldap_conf_add_ports, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_conf_add_ports, SUDOERS_DEBUG_LDAP)
 
     hostbuf[0] = '\0';
     len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
@@ -473,7 +473,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
     char hostbuf[LINE_MAX];
     int nldap = 0, nldaps = 0;
     int rc = -1;
-    debug_decl(sudo_ldap_parse_uri, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_parse_uri, SUDOERS_DEBUG_LDAP)
 
     hostbuf[0] = '\0';
     STAILQ_FOREACH(entry, uri_list, entries) {
@@ -545,7 +545,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
     struct ldap_config_str *uri;
     size_t len = 0;
     char *buf, *cp;
-    debug_decl(sudo_ldap_join_uri, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_join_uri, SUDOERS_DEBUG_LDAP)
 
     STAILQ_FOREACH(uri, uri_list, entries) {
 	if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
@@ -577,7 +577,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 {
     LDAP *ld;
     int rc = LDAP_CONNECT_ERROR;
-    debug_decl(sudo_ldap_init, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_init, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAPSSL_INIT
     if (ldap_conf.ssl_mode != SUDO_LDAP_CLEAR) {
@@ -674,7 +674,7 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     struct berval **bv, **p;
     char *val;
     int ret = false;
-    debug_decl(sudo_ldap_check_non_unix_group, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_non_unix_group, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(ret);
@@ -715,7 +715,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
     struct berval **bv, **p;
     char *val;
     bool ret = false;
-    debug_decl(sudo_ldap_check_host, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_host, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(ret);
@@ -747,7 +747,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
     struct berval **bv, **p;
     char *val;
     bool ret = false;
-    debug_decl(sudo_ldap_check_runas_user, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_runas_user, SUDOERS_DEBUG_LDAP)
 
     if (!runas_pw)
 	debug_return_bool(UNSPEC);
@@ -818,7 +818,7 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
     struct berval **bv, **p;
     char *val;
     bool ret = false;
-    debug_decl(sudo_ldap_check_runas_group, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_runas_group, SUDOERS_DEBUG_LDAP)
 
     /* runas_gr is only set if the user specified the -g flag */
     if (!runas_gr)
@@ -851,7 +851,7 @@ static bool
 sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 {
     bool ret;
-    debug_decl(sudo_ldap_check_runas, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_runas, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(false);
@@ -867,7 +867,7 @@ sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
 {
     char *ep, *cp = *cmnd;
     int digest_type = SUDO_DIGEST_INVALID;
-    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP)
 
     /*
      * Check for and extract a digest prefix, e.g.
@@ -933,7 +933,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
     char *allowed_cmnd, *allowed_args, *val;
     bool foundbang;
     int ret = UNSPEC;
-    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(ret);
@@ -1001,7 +1001,7 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
     struct berval **bv, **p;
     char ch, *var;
     int ret = UNSPEC;
-    debug_decl(sudo_ldap_check_bool, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_check_bool, SUDOERS_DEBUG_LDAP)
 
     if (entry == NULL)
 	debug_return_bool(ret);
@@ -1035,7 +1035,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
     char op, *var, *val;
-    debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
 
     if (entry == NULL)
 	debug_return;
@@ -1106,7 +1106,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     time_t now;
     char timebuffer[sizeof("20120727121554.0Z")];
     int bytes = 0;
-    debug_decl(sudo_ldap_timefilter, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_timefilter, SUDOERS_DEBUG_LDAP)
 
     /* Make sure we have a formatted timestamp for __now__. */
     time(&now);
@@ -1140,7 +1140,7 @@ static char *
 sudo_ldap_build_default_filter(void)
 {
     char *filt;
-    debug_decl(sudo_ldap_build_default_filter, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_build_default_filter, SUDOERS_DEBUG_LDAP)
 
     if (ldap_conf.search_filter)
 	sudo_easprintf(&filt, "(&%s(cn=defaults))", ldap_conf.search_filter);
@@ -1257,7 +1257,7 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
     size_t filt_len;
     char *filt;
     int rc;
-    debug_decl(sudo_netgroup_lookup_nested, SUDOERS_DEBUG_LDAP, sudoers_debug_instance);
+    debug_decl(sudo_netgroup_lookup_nested, SUDOERS_DEBUG_LDAP);
 
     DPRINTF1("Checking for nested netgroups from netgroup_base '%s'", base);
     do {
@@ -1333,7 +1333,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     size_t filt_len;
     char *filt;
     int rc;
-    debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP, sudoers_debug_instance);
+    debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP);
 
     if (ldap_conf.timeout > 0) {
 	tv.tv_sec = ldap_conf.timeout;
@@ -1488,7 +1488,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     struct group *grp;
     size_t sz = 0;
     int i;
-    debug_decl(sudo_ldap_build_pass1, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_build_pass1, SUDOERS_DEBUG_LDAP)
 
     STAILQ_INIT(&netgroups);
 
@@ -1633,7 +1633,7 @@ sudo_ldap_build_pass2(void)
 {
     char *filt, timebuffer[TIMEFILTER_LENGTH + 1];
     bool query_netgroups = def_use_netgroups;
-    debug_decl(sudo_ldap_build_pass2, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_build_pass2, SUDOERS_DEBUG_LDAP)
 
     /* No need to query netgroups if using netgroup_base. */
     if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
@@ -1677,7 +1677,7 @@ sudo_ldap_decode_secret(const char *secret)
 {
     unsigned char *result = NULL;
     size_t len, reslen;
-    debug_decl(sudo_ldap_decode_secret, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_decode_secret, SUDOERS_DEBUG_LDAP)
 
     if (strncasecmp(secret, "base64:", sizeof("base64:") - 1) == 0) {
 	/*
@@ -1703,7 +1703,7 @@ sudo_ldap_read_secret(const char *path)
 {
     FILE *fp;
     char buf[LINE_MAX];
-    debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP)
 
     if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
 	if (fgets(buf, sizeof(buf), fp) != NULL) {
@@ -1732,7 +1732,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 {
     struct ldap_config_table *cur;
     const char *errstr;
-    debug_decl(sudo_ldap_parse_keyword, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_parse_keyword, SUDOERS_DEBUG_LDAP)
 
     /* Look up keyword in config tables */
     for (cur = table; cur->conf_str != NULL; cur++) {
@@ -1788,7 +1788,7 @@ static const char *
 sudo_krb5_ccname_path(const char *old_ccname)
 {
     const char *ccname = old_ccname;
-    debug_decl(sudo_krb5_ccname_path, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_krb5_ccname_path, SUDOERS_DEBUG_LDAP)
 
     /* Strip off leading FILE: or WRFILE: prefix. */
     switch (ccname[0]) {
@@ -1815,7 +1815,7 @@ sudo_check_krb5_ccname(const char *ccname)
 {
     int fd = -1;
     const char *ccname_path;
-    debug_decl(sudo_check_krb5_ccname, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_check_krb5_ccname, SUDOERS_DEBUG_LDAP)
 
     /* Strip off prefix to get path name. */
     ccname_path = sudo_krb5_ccname_path(ccname);
@@ -1845,7 +1845,7 @@ sudo_ldap_read_config(void)
     struct ldap_config_str *conf_str;
     size_t linesize = 0;
     FILE *fp;
-    debug_decl(sudo_ldap_read_config, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_read_config, SUDOERS_DEBUG_LDAP)
 
     /* defaults */
     ldap_conf.version = 3;
@@ -2088,7 +2088,7 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
 #ifdef HAVE_LDAP_STR2DN
     char *dn, *rdn = NULL;
     LDAPDN tmpDN;
-    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
 
     if ((dn = ldap_get_dn(ld, entry)) == NULL)
 	debug_return_str(NULL);
@@ -2100,7 +2100,7 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
     debug_return_str(rdn);
 #else
     char *dn, **edn;
-    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
 
     if ((dn = ldap_get_dn(ld, entry)) == NULL)
 	return NULL;
@@ -2125,7 +2125,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     LDAPMessage *entry, *result;
     char *prefix, *filt;
     int rc, count = 0;
-    debug_decl(sudo_ldap_display_defaults, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_display_defaults, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
 	goto done;
@@ -2171,7 +2171,7 @@ static int
 sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
-    debug_decl(sudo_ldap_display_bound_defaults, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_display_bound_defaults, SUDOERS_DEBUG_LDAP)
     debug_return_int(0);
 }
 
@@ -2183,7 +2183,7 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lb
 {
     struct berval **bv, **p;
     int count = 0;
-    debug_decl(sudo_ldap_display_entry_short, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_display_entry_short, SUDOERS_DEBUG_LDAP)
 
     sudo_lbuf_append(lbuf, "    (");
 
@@ -2253,7 +2253,7 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lbu
     struct berval **bv, **p;
     char *rdn;
     int count = 0;
-    debug_decl(sudo_ldap_display_entry_long, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_display_entry_long, SUDOERS_DEBUG_LDAP)
 
     /* extract the dn, only show the first rdn */
     rdn = sudo_ldap_get_first_rdn(ld, entry);
@@ -2338,7 +2338,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct ldap_result *lres;
     LDAPMessage *entry;
     int i, count = 0;
-    debug_decl(sudo_ldap_display_privs, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_display_privs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
 	goto done;
@@ -2369,7 +2369,7 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     LDAPMessage *entry;
     bool found = false;
     int i;
-    debug_decl(sudo_ldap_display_cmnd, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_display_cmnd, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
 	goto done;
@@ -2406,7 +2406,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
     int rc = 0;
     unsigned int junk;
     static bool initialized;
-    debug_decl(sudo_set_krb5_ccache_name, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_set_krb5_ccache_name, SUDOERS_DEBUG_LDAP)
 
     if (!initialized) {
 	sudo_gss_krb5_ccache_name =
@@ -2449,7 +2449,7 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
     ssize_t nread, nwritten = -1;
     static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
     char buf[10240], *ret = NULL;
-    debug_decl(sudo_krb5_copy_cc_file, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_krb5_copy_cc_file, SUDOERS_DEBUG_LDAP)
 
     old_ccname = sudo_krb5_ccname_path(old_ccname);
     if (old_ccname != NULL) {
@@ -2510,7 +2510,7 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
     char *auth_id = (char *)_auth_id;
     sasl_interact_t *interact = (sasl_interact_t *)_interact;
     int rc = LDAP_SUCCESS;
-    debug_decl(sudo_ldap_sasl_interact, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_sasl_interact, SUDOERS_DEBUG_LDAP)
 
     for (; interact->id != SASL_CB_LIST_END; interact++) {
 	if (interact->id != SASL_CB_USER) {
@@ -2552,7 +2552,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
     struct ldap_config_table *cur;
     int ival, rc, errors = 0;
     char *sval;
-    debug_decl(sudo_ldap_set_options_table, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_set_options_table, SUDOERS_DEBUG_LDAP)
 
     for (cur = table; cur->conf_str != NULL; cur++) {
 	if (cur->opt_val == -1)
@@ -2597,7 +2597,7 @@ static int
 sudo_ldap_set_options_global(void)
 {
     int rc;
-    debug_decl(sudo_ldap_set_options_global, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_set_options_global, SUDOERS_DEBUG_LDAP)
 
     /* Set ber options */
 #ifdef LBER_OPT_DEBUG_LEVEL
@@ -2618,7 +2618,7 @@ static int
 sudo_ldap_set_options_conn(LDAP *ld)
 {
     int rc;
-    debug_decl(sudo_ldap_set_options_conn, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_set_options_conn, SUDOERS_DEBUG_LDAP)
 
     /* Parse per-connection LDAP options table. */
     rc = sudo_ldap_set_options_table(ld, ldap_conf_conn);
@@ -2680,7 +2680,7 @@ static struct ldap_result *
 sudo_ldap_result_alloc(void)
 {
     struct ldap_result *result;
-    debug_decl(sudo_ldap_result_alloc, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_alloc, SUDOERS_DEBUG_LDAP)
 
     result = sudo_ecalloc(1, sizeof(*result));
     STAILQ_INIT(&result->searches);
@@ -2695,7 +2695,7 @@ static void
 sudo_ldap_result_free(struct ldap_result *lres)
 {
     struct ldap_search_result *s;
-    debug_decl(sudo_ldap_result_free, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_free, SUDOERS_DEBUG_LDAP)
 
     if (lres != NULL) {
 	if (lres->nentries) {
@@ -2720,7 +2720,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
     LDAPMessage *searchresult)
 {
     struct ldap_search_result *news;
-    debug_decl(sudo_ldap_result_add_search, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_add_search, SUDOERS_DEBUG_LDAP)
 
     /* Create new entry and add it to the end of the chain. */
     news = sudo_ecalloc(1, sizeof(*news));
@@ -2739,7 +2739,7 @@ static int
 sudo_ldap_bind_s(LDAP *ld)
 {
     int rc;
-    debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     if (ldap_conf.rootuse_sasl == true ||
@@ -2835,7 +2835,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     sigaction_t sa, saved_sa_pipe;
     bool ldapnoinit = false;
     struct sudo_ldap_handle *handle;
-    debug_decl(sudo_ldap_open, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_open, SUDOERS_DEBUG_LDAP)
 
     /* Ignore SIGPIPE if we cannot bind to the server. */
     memset(&sa, 0, sizeof(sa));
@@ -2939,7 +2939,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     LDAPMessage *entry, *result;
     char *filt;
     int rc;
-    debug_decl(sudo_ldap_setdefs, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_setdefs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
 	debug_return_int(-1);
@@ -2982,7 +2982,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     LDAPMessage *entry;
     int i, rc, setenv_implied;
     struct ldap_result *lres = NULL;
-    debug_decl(sudo_ldap_lookup, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_lookup, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
 	debug_return_int(ret);
@@ -3101,7 +3101,7 @@ ldap_entry_compare(const void *a, const void *b)
 {
     const struct ldap_entry_wrapper *aw = a;
     const struct ldap_entry_wrapper *bw = b;
-    debug_decl(ldap_entry_compare, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(ldap_entry_compare, SUDOERS_DEBUG_LDAP)
 
     debug_return_int(bw->order < aw->order ? -1 :
 	(bw->order > aw->order ? 1 : 0));
@@ -3114,7 +3114,7 @@ ldap_entry_compare(const void *a, const void *b)
 static struct ldap_search_result *
 sudo_ldap_result_last_search(struct ldap_result *lres)
 {
-    debug_decl(sudo_ldap_result_last_search, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_last_search, SUDOERS_DEBUG_LDAP)
 
     debug_return_ptr(STAILQ_LAST(&lres->searches, ldap_search_result, entries));
 }
@@ -3129,7 +3129,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
     struct berval **bv;
     double order = 0.0;
     char *ep;
-    debug_decl(sudo_ldap_result_add_entry, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_add_entry, SUDOERS_DEBUG_LDAP)
 
     /* Determine whether the entry has the sudoOrder attribute. */
     last = sudo_ldap_result_last_search(lres);
@@ -3172,7 +3172,7 @@ static void
 sudo_ldap_result_free_nss(struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    debug_decl(sudo_ldap_result_free_nss, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_free_nss, SUDOERS_DEBUG_LDAP)
 
     if (handle->result != NULL) {
 	DPRINTF1("removing reusable search result");
@@ -3202,7 +3202,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     LDAP *ld = handle->ld;
     int pass, rc;
     char *filt;
-    debug_decl(sudo_ldap_result_get, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_result_get, SUDOERS_DEBUG_LDAP)
 
     /*
      * If we already have a cached result, return it so we don't have to
@@ -3298,7 +3298,7 @@ static int
 sudo_ldap_close(struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    debug_decl(sudo_ldap_close, SUDOERS_DEBUG_LDAP, sudoers_debug_instance)
+    debug_decl(sudo_ldap_close, SUDOERS_DEBUG_LDAP)
 
     if (handle != NULL) {
 	/* Free the result before unbinding; it may use the LDAP connection. */

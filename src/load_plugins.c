@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,7 +52,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     size_t pathsize, struct stat *sb)
 {
     int status = -1;
-    debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN, sudo_debug_instance)
+    debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN)
 
     if (info->path[0] == '/') {
 	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
@@ -136,7 +136,7 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
     struct stat sb;
     int rval = false;
-    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN, sudo_debug_instance)
+    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
@@ -165,7 +165,7 @@ done:
 static bool
 sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
-    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN, sudo_debug_instance)
+    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
     (void)strlcpy(fullpath, info->path, pathsize);
     debug_return_bool(true);
 }
@@ -183,7 +183,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     char path[PATH_MAX];
     bool rval = false;
     void *handle;
-    debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN, sudo_debug_instance)
+    debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
 
     /* Sanity check plugin and fill in path */
     if (!sudo_check_plugin(info, path, sizeof(path)))
@@ -295,7 +295,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_info_list *plugins;
     struct plugin_info *info, *next;
     bool rval = false;
-    debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN, sudo_debug_instance)
+    debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN)
 
     /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
@@ -342,7 +342,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     }
 
     /* Install hooks (XXX - later). */
-    sudo_debug_set_default_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
+    sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
     if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
 	if (policy_plugin->u.policy->register_hooks != NULL)
 	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
@@ -353,7 +353,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
 	}
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
 done:
     debug_return_bool(rval);

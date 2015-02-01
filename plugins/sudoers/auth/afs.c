@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2001-2005, 2007, 2010-2012, 2014
+ * Copyright (c) 1999, 2001-2005, 2007, 2010-2012, 2014-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -53,7 +53,7 @@ sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;
-    debug_decl(sudo_afs_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_afs_verify, SUDOERS_DEBUG_AUTH)
 
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);

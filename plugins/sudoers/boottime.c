@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -72,7 +72,7 @@ get_boottime(struct timeval *tv)
     bool found = false;
     ssize_t len;
     FILE *fp;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
 
     /* read btime from /proc/stat */
     fp = fopen("/proc/stat", "r");
@@ -102,7 +102,7 @@ get_boottime(struct timeval *tv)
 {
     size_t size;
     int mib[2];
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
@@ -119,7 +119,7 @@ bool
 get_boottime(struct timeval *tv)
 {
     struct utmpx *ut, key;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
@@ -138,7 +138,7 @@ bool
 get_boottime(struct timeval *tv)
 {
     struct utmp *ut, key;
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
@@ -156,7 +156,7 @@ get_boottime(struct timeval *tv)
 bool
 get_boottime(struct timeval *tv)
 {
-    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
     debug_return_bool(false);
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -88,7 +88,7 @@ struct sudo_event_base *
 sudo_ev_base_alloc_v1(void)
 {
     struct sudo_event_base *base;
-    debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
     base = sudo_ecalloc(1, sizeof(*base));
     TAILQ_INIT(&base->events);
@@ -105,7 +105,7 @@ void
 sudo_ev_base_free_v1(struct sudo_event_base *base)
 {
     struct sudo_event *ev, *next;
-    debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT)
 
     /* Remove any existing events before freeing the base. */
     TAILQ_FOREACH_SAFE(ev, &base->events, entries, next) {
@@ -121,7 +121,7 @@ struct sudo_event *
 sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure)
 {
     struct sudo_event *ev;
-    debug_decl(sudo_ev_alloc, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_alloc, SUDO_DEBUG_EVENT)
 
     /* XXX - sanity check events value */
 
@@ -138,7 +138,7 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
 void
 sudo_ev_free_v1(struct sudo_event *ev)
 {
-    debug_decl(sudo_ev_free, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_free, SUDO_DEBUG_EVENT)
 
     /* Make sure ev is not in use before freeing it. */
     if (ISSET(ev->flags, SUDO_EVQ_INSERTED))
@@ -151,7 +151,7 @@ int
 sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
     struct timeval *timo, bool tohead)
 {
-    debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
 
     /* If no base specified, use existing one. */
     if (base == NULL) {
@@ -216,7 +216,7 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 int
 sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
 {
-    debug_decl(sudo_ev_del, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_del, SUDO_DEBUG_EVENT)
 
     /* Make sure event is really in the queue. */
     if (!ISSET(ev->flags, SUDO_EVQ_INSERTED)) {
@@ -276,7 +276,7 @@ sudo_ev_loop_v1(struct sudo_event_base *base, int flags)
     struct timeval now;
     struct sudo_event *ev;
     int nready, rc = 0;
-    debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
 
     /*
      * If sudo_ev_loopexit() was called when events were not running
@@ -372,7 +372,7 @@ done:
 void
 sudo_ev_loopexit_v1(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_loopexit, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_loopexit, SUDO_DEBUG_EVENT)
     /* SUDO_EVBASE_LOOPBREAK trumps SUDO_EVBASE_LOOPEXIT */
     if (!ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
 	/* SUDO_EVBASE_LOOPEXIT trumps SUDO_EVBASE_LOOPCONT */
@@ -385,7 +385,7 @@ sudo_ev_loopexit_v1(struct sudo_event_base *base)
 void
 sudo_ev_loopbreak_v1(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_loopbreak, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_loopbreak, SUDO_DEBUG_EVENT)
     /* SUDO_EVBASE_LOOPBREAK trumps SUDO_EVBASE_LOOP{CONT,EXIT,ONCE}. */
     CLR(base->flags, (SUDO_EVBASE_LOOPCONT|SUDO_EVBASE_LOOPEXIT|SUDO_EVBASE_LOOPONCE));
     SET(base->flags, SUDO_EVBASE_LOOPBREAK);
@@ -395,7 +395,7 @@ sudo_ev_loopbreak_v1(struct sudo_event_base *base)
 void
 sudo_ev_loopcontinue_v1(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_loopcontinue, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_loopcontinue, SUDO_DEBUG_EVENT)
     /* SUDO_EVBASE_LOOP{BREAK,EXIT} trumps SUDO_EVBASE_LOOPCONT */
     if (!ISSET(base->flags, SUDO_EVBASE_LOOPONCE|SUDO_EVBASE_LOOPBREAK)) {
 	SET(base->flags, SUDO_EVBASE_LOOPCONT);
@@ -406,14 +406,14 @@ sudo_ev_loopcontinue_v1(struct sudo_event_base *base)
 bool
 sudo_ev_got_exit_v1(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_got_exit, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_got_exit, SUDO_DEBUG_EVENT)
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_EXIT));
 }
 
 bool
 sudo_ev_got_break_v1(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_got_break, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_got_break, SUDO_DEBUG_EVENT)
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_BREAK));
 }
 
@@ -421,7 +421,7 @@ int
 sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv)
 {
     struct timeval now;
-    debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT)
 
     if (!ISSET(ev->flags, SUDO_EVQ_TIMEOUTS)) {
 	sudo_timevalclear(tv);

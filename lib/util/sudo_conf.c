@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -144,7 +144,7 @@ parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 {
     struct sudo_conf_table *var;
     bool rval;
-    debug_decl(parse_variable, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_variable, SUDO_DEBUG_UTIL)
 
     for (var = sudo_conf_var_table; var->name != NULL; var++) {
 	if (strncmp(entry, var->name, var->namelen) == 0 &&
@@ -172,7 +172,7 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 {
     const char *name, *path;
     struct sudo_conf_path_table *cur;
-    debug_decl(parse_path, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_path, SUDO_DEBUG_UTIL)
 
     /* Parse Path line */
     name = entry;
@@ -213,7 +213,7 @@ parse_debug(const char *progname, const char *conf_file, unsigned int lineno)
     struct sudo_debug_file *debug_file;
     const char *path, *flags, *cp = progname;
     size_t pathlen, prognamelen;
-    debug_decl(parse_debug, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_debug, SUDO_DEBUG_UTIL)
 
     /* Parse progname. */
     while (*cp != '\0' && !isblank((unsigned char)*cp))
@@ -275,7 +275,7 @@ parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
     char **options = NULL;
     size_t pathlen, symlen;
     unsigned int nopts;
-    debug_decl(parse_plugin, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(parse_plugin, SUDO_DEBUG_UTIL)
 
     /* Parse symbol. */
     if (*cp == '\0')
@@ -332,7 +332,7 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
     int val = sudo_strtobool(strval);
-    debug_decl(set_var_disable_coredump, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(set_var_disable_coredump, SUDO_DEBUG_UTIL)
 
     if (val == -1) {
 	sudo_warnx(U_("invalid value for %s `%s' in %s, line %u"),
@@ -347,7 +347,7 @@ static bool
 set_var_group_source(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
-    debug_decl(set_var_group_source, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(set_var_group_source, SUDO_DEBUG_UTIL)
 
     if (strcasecmp(strval, "adaptive") == 0) {
 	sudo_conf_data.group_source = GROUP_SOURCE_ADAPTIVE;
@@ -368,7 +368,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
     int max_groups;
-    debug_decl(set_var_max_groups, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(set_var_max_groups, SUDO_DEBUG_UTIL)
 
     max_groups = strtonum(strval, 1, INT_MAX, NULL);
     if (max_groups <= 0) {
@@ -385,7 +385,7 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
     int val = sudo_strtobool(strval);
-    debug_decl(set_var_probe_interfaces, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(set_var_probe_interfaces, SUDO_DEBUG_UTIL)
 
     if (val == -1) {
 	sudo_warnx(U_("invalid value for %s `%s' in %s, line %u"),
@@ -455,7 +455,7 @@ sudo_conf_debug_files_v1(const char *progname)
     struct sudo_conf_debug *debug_spec;
     size_t prognamelen, progbaselen;
     const char *progbase = progname;
-    debug_decl(sudo_conf_debug_files, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_conf_debug_files, SUDO_DEBUG_UTIL)
 
     /* Determine basename if program is fully qualified (like for plugins). */
     prognamelen = progbaselen = strlen(progname);
@@ -508,7 +508,7 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
     char *prev_locale = sudo_estrdup(setlocale(LC_ALL, NULL));
     unsigned int conf_lineno = 0;
     size_t linesize = 0;
-    debug_decl(sudo_conf_read, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_conf_read, SUDO_DEBUG_UTIL)
 
     /* Parse sudo.conf in the "C" locale. */
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')

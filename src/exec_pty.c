@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -119,7 +119,7 @@ static void check_foreground(void);
 static void
 pty_cleanup(void)
 {
-    debug_decl(cleanup, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
     if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1)
 	sudo_term_restore(io_fds[SFD_USERTTY], 0);
@@ -191,7 +191,7 @@ mon_handler(int s)
 void
 pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 {
-    debug_decl(pty_setup, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(pty_setup, SUDO_DEBUG_EXEC);
 
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (io_fds[SFD_USERTTY] != -1) {
@@ -213,14 +213,14 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
     struct plugin_container *plugin;
     sigset_t omask;
     bool rval = true;
-    debug_decl(log_ttyin, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin) {
 	    int rc;
 
-	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    rc = plugin->u.io->log_ttyin(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
@@ -232,7 +232,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
     debug_return_bool(rval);
@@ -245,14 +245,14 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
     struct plugin_container *plugin;
     sigset_t omask;
     bool rval = true;
-    debug_decl(log_stdin, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(log_stdin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdin) {
 	    int rc;
 
-	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    rc = plugin->u.io->log_stdin(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
@@ -264,7 +264,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
     debug_return_bool(rval);
@@ -277,14 +277,14 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
     struct plugin_container *plugin;
     sigset_t omask;
     bool rval = true;
-    debug_decl(log_ttyout, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyout) {
 	    int rc;
 
-	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    rc = plugin->u.io->log_ttyout(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
@@ -296,7 +296,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -321,14 +321,14 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
     struct plugin_container *plugin;
     sigset_t omask;
     bool rval = true;
-    debug_decl(log_stdout, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(log_stdout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdout) {
 	    int rc;
 
-	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    rc = plugin->u.io->log_stdout(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
@@ -340,7 +340,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -365,14 +365,14 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     struct plugin_container *plugin;
     sigset_t omask;
     bool rval = true;
-    debug_decl(log_stderr, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(log_stderr, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stderr) {
 	    int rc;
 
-	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    rc = plugin->u.io->log_stderr(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
@@ -384,7 +384,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -410,7 +410,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 static void
 check_foreground(void)
 {
-    debug_decl(check_foreground, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
     if (io_fds[SFD_USERTTY] != -1) {
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
@@ -436,7 +436,7 @@ suspend_parent(int signo)
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
     int n, rval = 0;
-    debug_decl(suspend_parent, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
     case SIGTTOU:
@@ -526,7 +526,7 @@ suspend_parent(int signo)
 void
 terminate_command(pid_t pid, bool use_pgrp)
 {
-    debug_decl(terminate_command, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(terminate_command, SUDO_DEBUG_EXEC);
 
     /*
      * Note that SIGCHLD will interrupt the sleep()
@@ -561,7 +561,7 @@ io_callback(int fd, int what, void *v)
     struct io_buffer *iob = v;
     struct sudo_event_base *evbase;
     int n;
-    debug_decl(io_callback, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(io_callback, SUDO_DEBUG_EXEC);
 
     if (ISSET(what, SUDO_EV_READ)) {
 	evbase = sudo_ev_get_base(iob->revent);
@@ -684,7 +684,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct i
 {
     int n;
     struct io_buffer *iob;
-    debug_decl(io_buf_new, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
 
     /* Set non-blocking mode. */
     n = fcntl(rfd, F_GETFL, 0);
@@ -722,7 +722,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     sigaction_t sa;
     sigset_t mask;
     pid_t child;
-    debug_decl(fork_pty, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(fork_pty, SUDO_DEBUG_EXEC);
 
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
 
@@ -892,7 +892,7 @@ pty_close(struct command_status *cstat)
 {
     struct io_buffer *iob;
     int n;
-    debug_decl(pty_close, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
     /* Flush any remaining output (the plugin already got it) */
     if (io_fds[SFD_USERTTY] != -1) {
@@ -941,7 +941,7 @@ void
 add_io_events(struct sudo_event_base *evbase)
 {
     struct io_buffer *iob;
-    debug_decl(add_io_events, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(add_io_events, SUDO_DEBUG_EXEC);
 
     /*
      * Schedule all readers as long as the buffer is not full.
@@ -983,7 +983,7 @@ del_io_events(void)
 {
     struct io_buffer *iob;
     struct sudo_event_base *evbase;
-    debug_decl(del_io_events, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(del_io_events, SUDO_DEBUG_EXEC);
 
     /* Remove iobufs from existing event base. */
     SLIST_FOREACH(iob, &iobufs, entries) {
@@ -1047,7 +1047,7 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
 {
     char signame[SIG2STR_MAX];
     int status;
-    debug_decl(deliver_signal, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
@@ -1096,7 +1096,7 @@ static int
 send_status(int fd, struct command_status *cstat)
 {
     int n = -1;
-    debug_decl(send_status, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(send_status, SUDO_DEBUG_EXEC);
 
     if (cstat->type != CMD_INVALID) {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1126,7 +1126,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     bool alive = true;
     int status;
     pid_t pid;
-    debug_decl(handle_sigchld, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
     /* read command status */
     do {
@@ -1183,7 +1183,7 @@ mon_signal_pipe_cb(int fd, int what, void *v)
     struct monitor_closure *mc = v;
     unsigned char signo;
     ssize_t nread;
-    debug_decl(mon_signal_pipe_cb, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(mon_signal_pipe_cb, SUDO_DEBUG_EXEC);
 
     nread = read(fd, &signo, sizeof(signo));
     if (nread <= 0) {
@@ -1218,7 +1218,7 @@ mon_errpipe_cb(int fd, int what, void *v)
 {
     struct monitor_closure *mc = v;
     ssize_t n;
-    debug_decl(mon_errpipe_cb, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(mon_errpipe_cb, SUDO_DEBUG_EXEC);
 
     /* read errno or EOF from command pipe */
     n = read(fd, mc->cstat, sizeof(struct command_status));
@@ -1241,7 +1241,7 @@ mon_backchannel_cb(int fd, int what, void *v)
     struct monitor_closure *mc = v;
     struct command_status cstmp;
     ssize_t n;
-    debug_decl(mon_backchannel_cb, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(mon_backchannel_cb, SUDO_DEBUG_EXEC);
 
     /* read command from backchannel, should be a signal */
     n = recv(fd, &cstmp, sizeof(cstmp), MSG_WAITALL);
@@ -1279,7 +1279,7 @@ exec_monitor(struct command_details *details, int backchannel)
     struct monitor_closure mc;
     sigaction_t sa;
     int errpipe[2], n;
-    debug_decl(exec_monitor, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
     /* Close unused fds. */
     if (io_fds[SFD_MASTER] != -1)
@@ -1496,7 +1496,7 @@ exec_pty(struct command_details *details,
     struct command_status *cstat, int errfd)
 {
     pid_t self = getpid();
-    debug_decl(exec_pty, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /* Register cleanup function */
     sudo_fatal_callback_register(pty_cleanup);
@@ -1541,7 +1541,7 @@ sync_ttysize(int src, int dst)
 #ifdef TIOCGWINSZ
     struct winsize wsize;
     pid_t pgrp;
-    debug_decl(sync_ttysize, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
 
     if (ioctl(src, TIOCGWINSZ, &wsize) == 0) {
 	    ioctl(dst, TIOCSWINSZ, &wsize);
@@ -1573,7 +1573,7 @@ static void
 ev_free_by_fd(struct sudo_event_base *evbase, int fd)
 {
     struct io_buffer *iob;
-    debug_decl(ev_free_by_fd, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(ev_free_by_fd, SUDO_DEBUG_EXEC);
 
     /* Deschedule any users of the fd and free up the events. */
     SLIST_FOREACH(iob, &iobufs, entries) {
@@ -1608,7 +1608,7 @@ ev_free_by_fd(struct sudo_event_base *evbase, int fd)
 static int
 safe_close(int fd)
 {
-    debug_decl(safe_close, SUDO_DEBUG_EXEC, sudo_debug_instance);
+    debug_decl(safe_close, SUDO_DEBUG_EXEC);
 
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {

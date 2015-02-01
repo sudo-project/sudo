@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,7 +44,7 @@ static int
 linux_audit_open(void)
 {
     static int au_fd = -1;
-    debug_decl(linux_audit_open, SUDOERS_DEBUG_AUDIT, sudoers_debug_instance)
+    debug_decl(linux_audit_open, SUDOERS_DEBUG_AUDIT)
 
     if (au_fd != -1)
 	debug_return_int(au_fd);
@@ -67,7 +67,7 @@ linux_audit_command(char *argv[], int result)
     int au_fd, rc = -1;
     char *command, *cp, **av;
     size_t size, n;
-    debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT, sudoers_debug_instance)
+    debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT)
 
     /* Don't return an error if auditing is not configured. */
     if ((au_fd = linux_audit_open()) < 0)

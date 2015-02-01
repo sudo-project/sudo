@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,7 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, stru
 {
     struct stat sb;
     int rval = SUDO_PATH_MISSING;
-    debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL)
 
     if (path != NULL && stat(path, &sb) == 0) {
 	if ((sb.st_mode & _S_IFMT) != type) {

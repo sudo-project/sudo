@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2012, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,7 +43,7 @@ int
 sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
 {
     int maxgids, rval;
-    debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL)
 
     rval = setgroups(ngids, (GETGROUPS_T *)gids);
     if (rval == -1 && errno == EINVAL) {

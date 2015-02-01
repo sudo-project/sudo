@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,7 +44,7 @@
 
 #include "sudoers.h"
 
-int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+static int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 
 static const char *const sudoers_subsystem_names[] = {
     "alias",
@@ -136,7 +136,7 @@ sudoers_debug_register(const char *program,
 void
 sudoers_debug_deregister(void)
 {
-    debug_decl(sudoers_debug_deregister, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_debug_deregister, SUDOERS_DEBUG_PLUGIN)
     if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER) {
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
         sudo_debug_deregister(sudoers_debug_instance);

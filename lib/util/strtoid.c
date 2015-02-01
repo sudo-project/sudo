@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -61,7 +61,7 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
     char *ep;
     id_t rval = 0;
     bool valid = false;
-    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
 
     /* skip leading space so we can pick up the sign, if any */
     while (isspace((unsigned char)*p))

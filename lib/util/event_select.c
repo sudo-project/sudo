@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -61,7 +61,7 @@
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT)
 
     base->maxfd = NFDBITS - 1;
     base->readfds_in = sudo_ecalloc(1, sizeof(fd_mask));
@@ -75,7 +75,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
-    debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
     sudo_efree(base->readfds_in);
     sudo_efree(base->writefds_in);
     sudo_efree(base->readfds_out);
@@ -86,7 +86,7 @@ sudo_ev_base_free_impl(struct sudo_event_base *base)
 int
 sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
-    debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT)
 
     /* If out of space in fd sets, realloc. */
     if (ev->fd > base->maxfd) {
@@ -119,7 +119,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 int
 sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
-    debug_decl(sudo_ev_del_impl, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_del_impl, SUDO_DEBUG_EVENT)
 
     /* Remove from readfds and writefds and adjust high fd. */
     if (ISSET(ev->events, SUDO_EV_READ)) {
@@ -152,7 +152,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     struct sudo_event *ev;
     size_t setsize;
     int nready;
-    debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
 	gettimeofday(&now, NULL);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,7 +70,7 @@ void
 save_signals(void)
 {
     struct signal_state *ss;
-    debug_decl(save_signals, SUDO_DEBUG_MAIN, sudo_debug_instance)
+    debug_decl(save_signals, SUDO_DEBUG_MAIN)
 
     for (ss = saved_signals; ss->signo != -1; ss++) {
 	if (sigaction(ss->signo, NULL, &ss->sa) != 0)
@@ -87,7 +87,7 @@ void
 restore_signals(void)
 {
     struct signal_state *ss;
-    debug_decl(restore_signals, SUDO_DEBUG_MAIN, sudo_debug_instance)
+    debug_decl(restore_signals, SUDO_DEBUG_MAIN)
 
     for (ss = saved_signals; ss->signo != -1; ss++) {
 	if (ss->restore) {
@@ -127,7 +127,7 @@ init_signals(void)
 {
     struct sigaction sa;
     struct signal_state *ss;
-    debug_decl(init_signals, SUDO_DEBUG_MAIN, sudo_debug_instance)
+    debug_decl(init_signals, SUDO_DEBUG_MAIN)
 
     /*
      * We use a pipe to atomically handle signal notification within
@@ -172,7 +172,7 @@ sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
 {
     struct signal_state *ss;
     int rval;
-    debug_decl(sudo_sigaction, SUDO_DEBUG_MAIN, sudo_debug_instance)
+    debug_decl(sudo_sigaction, SUDO_DEBUG_MAIN)
 
     for (ss = saved_signals; ss->signo > 0; ss++) {
 	if (ss->signo == signo) {

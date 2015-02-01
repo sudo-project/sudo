@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2010-2012, 2014
+ * Copyright (c) 1996, 1998-2005, 2010-2012, 2014-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -74,7 +74,7 @@ sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
     boolean32			reset_passwd;
     sec_login_auth_src_t	auth_src;
     error_status_t		status;
-    debug_decl(sudo_dce_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_dce_verify, SUDOERS_DEBUG_AUTH)
 
     /*
      * Create the local context of the DCE principal necessary
@@ -188,7 +188,7 @@ check_dce_status(error_status_t input_status, char *comment)
 {
     int error_stat;
     unsigned char error_string[dce_c_error_string_len];
-    debug_decl(check_dce_status, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(check_dce_status, SUDOERS_DEBUG_AUTH)
 
     if (input_status == rpc_s_ok)
 	debug_return_bool(0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2008, 2010-2014
+ * Copyright (c) 2000-2005, 2007-2008, 2010-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -63,7 +63,7 @@ int
 bsdauth_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct bsdauth_state state;
-    debug_decl(bsdauth_init, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(bsdauth_init, SUDOERS_DEBUG_AUTH)
 
     /* Get login class based on auth user, which may not be invoking user. */
     if (pw->pw_class && *pw->pw_class)
@@ -113,7 +113,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     int authok = 0;
     sigaction_t sa, osa;
     auth_session_t *as = ((struct bsdauth_state *) auth->data)->as;
-    debug_decl(bsdauth_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(bsdauth_verify, SUDOERS_DEBUG_AUTH)
 
     /* save old signal handler */
     sigemptyset(&sa.sa_mask);
@@ -174,7 +174,7 @@ int
 bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     struct bsdauth_state *state = auth->data;
-    debug_decl(bsdauth_cleanup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(bsdauth_cleanup, SUDOERS_DEBUG_AUTH)
 
     if (state != NULL) {
 	auth_close(state->as);

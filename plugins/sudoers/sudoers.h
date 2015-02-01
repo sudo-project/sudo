@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2014
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -348,7 +348,6 @@ void sudoers_cleanup(void);
 void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
 void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
 void sudoers_debug_deregister(void);
-extern int sudoers_debug_instance;
 
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);

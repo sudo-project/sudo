@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -71,7 +71,7 @@ set_project(struct passwd *pw)
     struct project proj;
     char buf[PROJECT_BUFSZ];
     int errval;
-    debug_decl(set_project, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(set_project, SUDO_DEBUG_UTIL)
 
     /*
      * Collect the default project for the user and settaskid

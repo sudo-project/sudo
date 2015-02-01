@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -79,7 +79,7 @@ set_tmpdir(void)
     const char *tdir;
     struct stat sb;
     size_t len;
-    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT)
 
     if (stat(_PATH_VARTMP, &sb) == 0 && S_ISDIR(sb.st_mode)) {
 	tdir = _PATH_VARTMP;
@@ -107,7 +107,7 @@ static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
     int serrno = errno;
-    debug_decl(switch_user, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(switch_user, SUDO_DEBUG_EDIT)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"set uid:gid to %u:%u(%u)", euid, egid, ngroups ? groups[0] : egid);
@@ -142,7 +142,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
 {
     const char *cp, *suff;
     int tfd;
-    debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(sudo_edit_mktemp, SUDO_DEBUG_EDIT)
 
     if ((cp = strrchr(ofile, '/')) != NULL)
 	cp++;
@@ -176,7 +176,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
     ssize_t nwritten, nread;
     struct timeval times[2];
     struct stat sb;
-    debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT)
 
     /*
      * For each file specified by the user, make a temporary version
@@ -271,7 +271,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     ssize_t nwritten, nread;
     struct timeval tv;
     struct stat sb;
-    debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT)
 
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
@@ -358,7 +358,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     int i, rc, sesh_nargs;
     struct stat sb;
     struct command_details saved_command_details;
-    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT)
     
     /* Prepare selinux stuff (setexeccon) */
     if (selinux_setup(command_details->selinux_role,
@@ -449,7 +449,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     struct command_details saved_command_details;
     struct timeval tv;
     struct stat sb;
-    debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT)
     
     /* Prepare selinux stuff (setexeccon) */
     if (selinux_setup(command_details->selinux_role,
@@ -539,7 +539,7 @@ sudo_edit(struct command_details *command_details)
     int editor_argc = 0, nfiles = 0;
     struct timeval times[2];
     struct tempfile *tf = NULL;
-    debug_decl(sudo_edit, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
 
     if (!set_tmpdir())
 	goto cleanup;
@@ -654,7 +654,7 @@ cleanup:
 int
 sudo_edit(struct command_details *command_details)
 {
-    debug_decl(sudo_edit, SUDO_DEBUG_EDIT, sudo_debug_instance)
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
     debug_return_int(1);
 }
 

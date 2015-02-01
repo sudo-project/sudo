@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -152,7 +152,7 @@ main(int argc, char *argv[], char *envp[])
     struct sudo_settings *settings;
     struct plugin_container *plugin, *next;
     sigset_t mask;
-    debug_decl(main, SUDO_DEBUG_MAIN, sudo_debug_instance)
+    debug_decl(main, SUDO_DEBUG_MAIN)
 
     /* Make sure fds 0-2 are open and do OS-specific initialization. */
     fix_fds();
@@ -327,7 +327,7 @@ static void
 fix_fds(void)
 {
     int miss[3], devnull = -1;
-    debug_decl(fix_fds, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(fix_fds, SUDO_DEBUG_UTIL)
 
     /*
      * stdin, stdout and stderr must be open; set them to /dev/null
@@ -359,7 +359,7 @@ static int
 fill_group_list(struct user_details *ud, int system_maxgroups)
 {
     int tries, rval = -1;
-    debug_decl(fill_group_list, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
     /*
      * If user specified a max number of groups, use it, otherwise keep
@@ -395,7 +395,7 @@ get_user_groups(struct user_details *ud)
     char *cp, *gid_list = NULL;
     size_t glsize;
     int i, len, maxgroups, group_source;
-    debug_decl(get_user_groups, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
     maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
@@ -452,7 +452,7 @@ get_user_info(struct user_details *ud)
     char *cp, **user_info, cwd[PATH_MAX], host[HOST_NAME_MAX + 1];
     struct passwd *pw;
     int fd, i = 0;
-    debug_decl(get_user_info, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
     user_info = sudo_emallocarray(32, sizeof(char *));
@@ -545,7 +545,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     id_t id;
     char *cp;
     const char *errstr;
-    debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
@@ -749,7 +749,7 @@ sudo_check_suid(const char *sudo)
     char pathbuf[PATH_MAX];
     struct stat sb;
     bool qualified;
-    debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
 
     if (geteuid() != 0) {
 	/* Search for sudo binary in PATH if not fully qualified. */
@@ -808,7 +808,7 @@ disable_coredumps(void)
 {
 #if defined(RLIMIT_CORE)
     struct rlimit rl;
-    debug_decl(disable_coredumps, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(disable_coredumps, SUDO_DEBUG_UTIL)
 
     /*
      * Turn off core dumps?
@@ -833,7 +833,7 @@ unlimit_nproc(void)
 {
 #ifdef __linux__
     struct rlimit rl;
-    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
 
     (void) getrlimit(RLIMIT_NPROC, &nproclimit);
     rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
@@ -853,7 +853,7 @@ static void
 restore_nproc(void)
 {
 #ifdef __linux__
-    debug_decl(restore_nproc, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
 
     (void) setrlimit(RLIMIT_NPROC, &nproclimit);
 
@@ -869,7 +869,7 @@ bool
 exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 {
     bool rval = false;
-    debug_decl(exec_setup, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(exec_setup, SUDO_DEBUG_EXEC)
 
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
@@ -1039,7 +1039,7 @@ run_command(struct command_details *details)
     struct plugin_container *plugin;
     struct command_status cstat;
     int exitcode = 1;
-    debug_decl(run_command, SUDO_DEBUG_EXEC, sudo_debug_instance)
+    debug_decl(run_command, SUDO_DEBUG_EXEC)
 
     cstat.type = CMD_INVALID;
     cstat.val = 0;
@@ -1097,7 +1097,7 @@ format_plugin_settings(struct plugin_container *plugin,
     struct sudo_debug_file *debug_file;
     struct sudo_settings *setting;
     char **plugin_settings;
-    debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
     /* XXX - should use exact plugin_settings_size */
     /* Determine sudo_settings array size (including plugin_path and NULL) */
@@ -1142,7 +1142,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
 {
     char **plugin_settings;
     int rval;
-    debug_decl(policy_open, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_open, SUDO_DEBUG_PCOMM)
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
@@ -1152,7 +1152,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     /*
      * Backwards compatibility for older API versions
      */
-    sudo_debug_set_default_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
+    sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
     case SUDO_API_MKVERSION(1, 1):
@@ -1167,8 +1167,8 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     }
 
     /* Stash plugin debug instance ID if set in open() function. */
-    plugin->debug_instance = sudo_debug_get_default_instance();
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    plugin->debug_instance = sudo_debug_get_active_instance();
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
     debug_return_bool(rval);
 }
@@ -1176,11 +1176,11 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
 static void
 policy_close(struct plugin_container *plugin, int exit_status, int error_code)
 {
-    debug_decl(policy_close, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_close, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->close != NULL) {
-	sudo_debug_set_default_instance(plugin->debug_instance);
+	sudo_debug_set_active_instance(plugin->debug_instance);
 	plugin->u.policy->close(exit_status, error_code);
-	sudo_debug_set_default_instance(sudo_debug_instance);
+	sudo_debug_set_active_instance(sudo_debug_instance);
     } else if (error_code) {
 	errno = error_code;
 	sudo_warn(U_("unable to execute %s"), command_details.command);
@@ -1192,13 +1192,13 @@ static int
 policy_show_version(struct plugin_container *plugin, int verbose)
 {
     int rval;
-    debug_decl(policy_show_version, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.policy->show_version == NULL)
 	debug_return_bool(true);
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->show_version(verbose);
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_bool(rval);
 }
 
@@ -1208,16 +1208,16 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     char **user_env_out[])
 {
     int rval;
-    debug_decl(policy_check, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_check, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.policy->check_policy == NULL) {
 	sudo_fatalx(U_("policy plugin %s is missing the `check_policy' method"),
 	    plugin->name);
     }
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->check_policy(argc, argv, env_add, command_info,
 	argv_out, user_env_out);
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_bool(rval);
 }
 
@@ -1226,16 +1226,16 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     int verbose, const char *list_user)
 {
     int rval;
-    debug_decl(policy_list, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_list, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.policy->list == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
 	debug_return_bool(false);
     }
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->list(argc, argv, verbose, list_user);
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_bool(rval);
 }
 
@@ -1243,30 +1243,30 @@ static int
 policy_validate(struct plugin_container *plugin)
 {
     int rval;
-    debug_decl(policy_validate, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_validate, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.policy->validate == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support the -v option"),
 	    plugin->name);
 	debug_return_bool(false);
     }
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->validate();
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_bool(rval);
 }
 
 static void
 policy_invalidate(struct plugin_container *plugin, int remove)
 {
-    debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->invalidate == NULL) {
 	sudo_fatalx(U_("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     plugin->u.policy->invalidate(remove);
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return;
 }
 
@@ -1274,13 +1274,13 @@ int
 policy_init_session(struct command_details *details)
 {
     int rval = true;
-    debug_decl(policy_init_session, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
 
     if (policy_plugin.u.policy->init_session) {
 	/*
 	 * Backwards compatibility for older API versions
 	 */
-	sudo_debug_set_default_instance(policy_plugin.debug_instance);
+	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	switch (policy_plugin.u.generic->version) {
 	case SUDO_API_MKVERSION(1, 0):
 	case SUDO_API_MKVERSION(1, 1):
@@ -1290,7 +1290,7 @@ policy_init_session(struct command_details *details)
 	    rval = policy_plugin.u.policy->init_session(details->pw,
 		&details->envp);
 	}
-	sudo_debug_set_default_instance(sudo_debug_instance);
+	sudo_debug_set_active_instance(sudo_debug_instance);
     }
     debug_return_bool(rval);
 }
@@ -1302,7 +1302,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 {
     char **plugin_settings;
     int rval;
-    debug_decl(iolog_open, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(iolog_open, SUDO_DEBUG_PCOMM)
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
@@ -1312,7 +1312,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
     /*
      * Backwards compatibility for older API versions
      */
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
 	rval = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
@@ -1329,19 +1329,19 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 	    sudo_conversation_printf, plugin_settings, user_info, command_info,
 	    argc, argv, user_env, plugin->options);
     }
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_bool(rval);
 }
 
 static void
 iolog_close(struct plugin_container *plugin, int exit_status, int error_code)
 {
-    debug_decl(iolog_close, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(iolog_close, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.io->close != NULL) {
-	sudo_debug_set_default_instance(plugin->debug_instance);
+	sudo_debug_set_active_instance(plugin->debug_instance);
 	plugin->u.io->close(exit_status, error_code);
-	sudo_debug_set_default_instance(sudo_debug_instance);
+	sudo_debug_set_active_instance(sudo_debug_instance);
     }
     debug_return;
 }
@@ -1350,14 +1350,14 @@ static int
 iolog_show_version(struct plugin_container *plugin, int verbose)
 {
     int rval;
-    debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.io->show_version == NULL)
 	debug_return_bool(true);
 
-    sudo_debug_set_default_instance(plugin->debug_instance);
+    sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.io->show_version(verbose);
-    sudo_debug_set_default_instance(sudo_debug_instance);
+    sudo_debug_set_active_instance(sudo_debug_instance);
     debug_return_bool(rval);
 }
 
@@ -1368,15 +1368,15 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
 static void
 iolog_unlink(struct plugin_container *plugin)
 {
-    debug_decl(iolog_unlink, SUDO_DEBUG_PCOMM, sudo_debug_instance)
+    debug_decl(iolog_unlink, SUDO_DEBUG_PCOMM)
 
     /* Deregister hooks, if any. */
     if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
 	if (plugin->u.io->deregister_hooks != NULL) {
-	    sudo_debug_set_default_instance(plugin->debug_instance);
+	    sudo_debug_set_active_instance(plugin->debug_instance);
 	    plugin->u.io->deregister_hooks(SUDO_HOOK_VERSION,
 		deregister_hook);
-	    sudo_debug_set_default_instance(sudo_debug_instance);
+	    sudo_debug_set_active_instance(sudo_debug_instance);
 	}
     }
     /* Remove from io_plugins list and free. */

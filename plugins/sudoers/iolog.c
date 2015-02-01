@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -92,7 +92,7 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
     gid_t parent_gid = 0;
     char *slash = path;
     bool ok = true;
-    debug_decl(io_mkdirs, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(io_mkdirs, SUDOERS_DEBUG_UTIL)
 
     /* Fast path: not a temporary and already exists. */
     if (!is_temp && stat(path, &sb) == 0) {
@@ -155,7 +155,7 @@ io_set_max_sessid(const char *maxval)
 {
     const char *errstr;
     unsigned int value;
-    debug_decl(io_set_max_sessid, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(io_set_max_sessid, SUDOERS_DEBUG_UTIL)
 
     value = strtonum(maxval, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
@@ -187,7 +187,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     ssize_t nread;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    debug_decl(io_nextid, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(io_nextid, SUDOERS_DEBUG_UTIL)
 
     /*
      * Create I/O log directory if it doesn't already exist.
@@ -297,7 +297,7 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     size_t len;
     bool is_temp = false;
-    debug_decl(mkdir_iopath, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(mkdir_iopath, SUDOERS_DEBUG_UTIL)
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
     if (len >= pathsize) {
@@ -328,7 +328,7 @@ static bool
 open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 {
     int fd;
-    debug_decl(open_io_fd, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(open_io_fd, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
@@ -370,7 +370,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     id_t id;
     uid_t runas_uid = 0;
     gid_t runas_gid = 0;
-    debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL)
 
     details->lines = 24;
     details->cols = 80;
@@ -536,7 +536,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     char * const *av;
     FILE *fp;
     int fd;
-    debug_decl(write_info_log, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
@@ -574,7 +574,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     const char *plugin_path = NULL;
     size_t len;
     int i, rval = -1;
-    debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
 
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
@@ -677,7 +677,7 @@ static void
 sudoers_io_close(int exit_status, int error)
 {
     int i;
-    debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN)
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (io_log_files[i].fd.v == NULL)
@@ -698,7 +698,7 @@ sudoers_io_close(int exit_status, int error)
 static int
 sudoers_io_version(int verbose)
 {
-    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
 
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
@@ -714,7 +714,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
     int rval = true;
-    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN, sudoers_debug_instance)
+    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
 
     gettimeofday(&now, NULL);
 

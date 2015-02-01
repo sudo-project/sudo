@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2012, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,7 +51,7 @@ sudo_new_key_val_v1(const char *key, const char *val)
     size_t key_len = strlen(key);
     size_t val_len = strlen(val);
     char *cp, *str;
-    debug_decl(sudo_new_key_val, SUDO_DEBUG_UTIL, SUDO_DEBUG_INSTANCE_DEFAULT)
+    debug_decl(sudo_new_key_val, SUDO_DEBUG_UTIL)
 
     cp = str = malloc(key_len + 1 + val_len + 1);
     if (str != NULL) {

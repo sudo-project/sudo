@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,7 +51,7 @@ base64_decode(const char *str, unsigned char *dst, size_t dsize)
     unsigned char ch[4];
     char *pos;
     int i;
-    debug_decl(base64_decode, SUDOERS_DEBUG_MATCH, sudoers_debug_instance)
+    debug_decl(base64_decode, SUDOERS_DEBUG_MATCH)
 
     /*
      * Convert from base64 to binary.  Each base64 char holds 6 bits of data

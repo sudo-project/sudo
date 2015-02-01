@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -55,7 +55,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
     int rval = AUTH_SUCCESS;
-    debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH)
 
     do {
 	pass = auth_getpass(prompt, def_passwd_timeout * 60,
@@ -90,7 +90,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 int
 sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(sudo_aix_cleanup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_aix_cleanup, SUDOERS_DEBUG_AUTH)
 
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     if (sudo_unsetenv("AUTHSTATE") == -1)

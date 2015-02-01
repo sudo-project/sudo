@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2014
+ * Copyright (c) 1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -88,7 +88,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
     struct cache_item_pw *pwitem;
     struct passwd *pw, *newpw;
-    debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS)
 
     /* Look up by name or uid. */
     pw = name ? getpwnam(name) : getpwuid(uid);
@@ -162,7 +162,7 @@ sudo_make_gritem(gid_t gid, const char *name)
     size_t nsize, psize, nmem, total, len;
     struct cache_item_gr *gritem;
     struct group *gr, *newgr;
-    debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS)
 
     /* Look up by name or gid. */
     gr = name ? getgrnam(name) : getgrgid(gid);
@@ -235,7 +235,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     GETGROUPS_T *gids;
     struct group *grp;
     int i, ngids, groupname_len;
-    debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS, sudoers_debug_instance)
+    debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS)
 
     if (pw == sudo_user.pw && sudo_user.gids != NULL) {
 	gids = user_gids;

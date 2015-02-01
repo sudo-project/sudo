@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2014
+ * Copyright (c) 1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -74,7 +74,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
     int i, input, output, save_errno, neednl = 0, need_restart;
-    debug_decl(tgetpass, SUDO_DEBUG_CONV, sudo_debug_instance)
+    debug_decl(tgetpass, SUDO_DEBUG_CONV)
 
     (void) fflush(stdout);
 
@@ -213,7 +213,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     sigaction_t sa, saved_sa_pipe;
     int pfd[2], status;
     pid_t child;
-    debug_decl(sudo_askpass, SUDO_DEBUG_CONV, sudo_debug_instance)
+    debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
 
     if (pipe(pfd) == -1)
 	sudo_fatal(U_("unable to create pipe"));
@@ -276,7 +276,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
     ssize_t nr = -1;
     char *cp = buf;
     char c = '\0';
-    debug_decl(getln, SUDO_DEBUG_CONV, sudo_debug_instance)
+    debug_decl(getln, SUDO_DEBUG_CONV)
 
     if (left == 0) {
 	errno = EINVAL;
@@ -333,7 +333,7 @@ int
 tty_present(void)
 {
     int fd;
-    debug_decl(tty_present, SUDO_DEBUG_UTIL, sudo_debug_instance)
+    debug_decl(tty_present, SUDO_DEBUG_UTIL)
 
     if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
 	close(fd);

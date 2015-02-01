@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,7 +64,7 @@ group_plugin_load(char *plugin_info)
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
-    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL)
 
     /*
      * Fill in .so path and split out args (if any).
@@ -161,7 +161,7 @@ done:
 void
 group_plugin_unload(void)
 {
-    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL)
 
     if (group_plugin != NULL) {
 	(group_plugin->cleanup)();
@@ -178,7 +178,7 @@ int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
-    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
 
     if (group_plugin == NULL)
 	debug_return_bool(false);
@@ -194,14 +194,14 @@ group_plugin_query(const char *user, const char *group,
 int
 group_plugin_load(char *plugin_info)
 {
-    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL)
     debug_return_bool(false);
 }
 
 void
 group_plugin_unload(void)
 {
-    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(group_plugin_unload, SUDOERS_DEBUG_UTIL)
     debug_return;
 }
 
@@ -209,7 +209,7 @@ int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
-    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL, sudoers_debug_instance)
+    debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
     debug_return_bool(false);
 }
 

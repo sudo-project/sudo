@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1998-2005, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,12 +56,12 @@ sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
 {
 #ifdef __alpha
     extern int crypt_type;
-    debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH)
 
     if (crypt_type == INT_MAX)
 	debug_return_int(AUTH_FAILURE);			/* no shadow */
 #else
-    debug_decl(secureware_init, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(secureware_init, SUDOERS_DEBUG_AUTH)
 #endif
     sudo_setspent();
     auth->data = sudo_getepw(pw);
@@ -74,7 +74,7 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     char *pw_epasswd = auth->data;
     char *epass = NULL;
-    debug_decl(sudo_secureware_verify, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_secureware_verify, SUDOERS_DEBUG_AUTH)
 #ifdef __alpha
     {
 	extern int crypt_type;
@@ -103,7 +103,7 @@ sudo_secureware_cleanup(pw, auth)
     sudo_auth *auth;
 {
     char *pw_epasswd = auth->data;
-    debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH, sudoers_debug_instance)
+    debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH)
 
     if (pw_epasswd != NULL) {
 	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
