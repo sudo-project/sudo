@@ -916,19 +916,21 @@ sudo_getdomainname(void)
     static char buf[HOST_NAME_MAX + 1];
     static bool initialized;
 
-    if (getdomainname(buf, sizeof(buf)) == 0 && buf[0] != '\0') {
-	char *cp;
+    if (!initialized) {
+	if (getdomainname(buf, sizeof(buf)) == 0 && buf[0] != '\0') {
+	    char *cp;
 
-	domain = buf;
-	for (cp = buf; *cp != '\0'; cp++) {
-	    /* Check for illegal characters, Linux may use "(none)". */
-	    if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
-		domain = NULL;
-		break;
+	    domain = buf;
+	    for (cp = buf; *cp != '\0'; cp++) {
+		/* Check for illegal characters, Linux may use "(none)". */
+		if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
+		    domain = NULL;
+		    break;
+		}
 	    }
 	}
+	initialized = true;
     }
-    initialized = true;
 #endif /* HAVE_GETDOMAINNAME */
     return domain;
 }
