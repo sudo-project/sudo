@@ -61,6 +61,9 @@ What's new in Sudo 1.8.12
    `+' prefix and checking whether the user is a member of any of
    the returned netgroups.
 
+ * The mail_always sudoers option no longer sends mail for "sudo -l"
+   or "sudo -v" unless the user is unable to authenticate themselves.
+
 What's new in Sudo 1.8.11p2
 
  * Fixed a bug where dynamic shared objects loaded from a plugin

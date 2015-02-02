@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2014
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2015
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 4, 2014
+.Dd January 21, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -160,17 +160,25 @@ Defaults entry
 (described later) and defaults to
 .Li @mailto@ .
 .Pp
-Note that mail will not be sent if an unauthorized user tries to
-run
+Note that no mail will be sent if an unauthorized user tries to run
 .Nm sudo
 with the
 .Fl l
 or
 .Fl v
-option.
+option unless there is an authentication error and
+either the
+.Em mail_always
+or
+.Em mail_badpass
+flags are enabled.
 This allows users to
 determine for themselves whether or not they are allowed to use
 .Nm sudo .
+All attempts to run
+.Nm sudo
+(successful or not)
+will be logged, regardless of whether or not mail is sent.
 .Pp
 If
 .Nm sudo
@@ -426,7 +434,7 @@ are also
 included.
 On BSD systems, if the
 .Em use_loginclass
-option is
+flag is
 enabled, the
 .Em path
 and
@@ -2075,8 +2083,16 @@ by default.
 .It mail_always
 Send mail to the
 .Em mailto
-user every time a user runs
+user every time a user attempts to run a command via
 .Nm sudo .
+Mail will be sent for both successful and unsuccessful attempts.
+No mail will be sent if the user runs
+.Nm sudo
+with the
+.Fl l
+or
+.Fl v
+option unless there is an authentication error.
 This flag is
 .Em off
 by default.

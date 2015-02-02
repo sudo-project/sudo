@@ -75,9 +75,12 @@ DDEESSCCRRIIPPTTIIOONN
      mail is configurable via the _m_a_i_l_t_o Defaults entry (described later) and
      defaults to root.
 
-     Note that mail will not be sent if an unauthorized user tries to run ssuuddoo
-     with the --ll or --vv option.  This allows users to determine for themselves
-     whether or not they are allowed to use ssuuddoo.
+     Note that no mail will be sent if an unauthorized user tries to run ssuuddoo
+     with the --ll or --vv option unless there is an authentication error and
+     either the _m_a_i_l___a_l_w_a_y_s or _m_a_i_l___b_a_d_p_a_s_s flags are enabled.  This allows
+     users to determine for themselves whether or not they are allowed to use
+     ssuuddoo.  All attempts to run ssuuddoo (successful or not) will be logged,
+     regardless of whether or not mail is sent.
 
      If ssuuddoo is run by root and the SUDO_USER environment variable is set, the
      _s_u_d_o_e_r_s policy will use this value to determine who the actual user is.
@@ -174,7 +177,7 @@ DDEESSCCRRIIPPTTIIOONN
      _e_n_v___r_e_s_e_t.  The DISPLAY, PATH and TERM variables remain unchanged; HOME,
      MAIL, SHELL, USER, and LOGNAME are set based on the target user.  On AIX
      (and Linux systems without PAM), the contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t are
-     also included.  On BSD systems, if the _u_s_e___l_o_g_i_n_c_l_a_s_s option is enabled,
+     also included.  On BSD systems, if the _u_s_e___l_o_g_i_n_c_l_a_s_s flag is enabled,
      the _p_a_t_h and _s_e_t_e_n_v variables in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f are also applied.  All
      other environment variables are removed.
 
@@ -1047,8 +1050,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        some people find it more convenient.  This flag is _o_f_f
                        by default.
 
-     mail_always       Send mail to the _m_a_i_l_t_o user every time a user runs
-                       ssuuddoo.  This flag is _o_f_f by default.
+     mail_always       Send mail to the _m_a_i_l_t_o user every time a user attempts
+                       to run a command via ssuuddoo.  Mail will be sent for both
+                       successful and unsuccessful attempts.  No mail will be
+                       sent if the user runs ssuuddoo with the --ll or --vv option
+                       unless there is an authentication error.  This flag is
+                       _o_f_f by default.
 
      mail_badpass      Send mail to the _m_a_i_l_t_o user if the user running ssuuddoo
                        does not enter the correct password.  If the command
@@ -2356,4 +2363,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.12                    December 4, 2014                    Sudo 1.8.12
+Sudo 1.8.12                    January 21, 2015                    Sudo 1.8.12
