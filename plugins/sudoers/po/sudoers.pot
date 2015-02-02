@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.12\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-11-20 13:33-0700\n"
+"POT-Creation-Date: 2015-02-02 13:53-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -254,13 +254,13 @@ msgid ""
 msgstr ""
 
 #: plugins/sudoers/check.c:240 plugins/sudoers/check.c:250
-#: plugins/sudoers/sudoers.c:599 plugins/sudoers/sudoers.c:628
+#: plugins/sudoers/sudoers.c:600 plugins/sudoers/sudoers.c:629
 #, c-format
 msgid "unknown uid: %u"
 msgstr ""
 
 #: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:683
-#: plugins/sudoers/sudoers.c:955 plugins/sudoers/testsudoers.c:212
+#: plugins/sudoers/sudoers.c:956 plugins/sudoers/testsudoers.c:212
 #: plugins/sudoers/testsudoers.c:364
 #, c-format
 msgid "unknown user: %s"
@@ -699,11 +699,13 @@ msgid "option `%s' does not take a value"
 msgstr ""
 
 #: plugins/sudoers/env.c:276 plugins/sudoers/env.c:283
-#: plugins/sudoers/env.c:386 plugins/sudoers/linux_audit.c:83
-#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:461
-#: plugins/sudoers/policy.c:470 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:242
-#: plugins/sudoers/toke_util.c:174
+#: plugins/sudoers/env.c:386 plugins/sudoers/ldap.c:456
+#: plugins/sudoers/ldap.c:538 plugins/sudoers/ldap.c:1315
+#: plugins/sudoers/ldap.c:1474 plugins/sudoers/ldap.c:1623
+#: plugins/sudoers/linux_audit.c:83 plugins/sudoers/logging.c:918
+#: plugins/sudoers/policy.c:461 plugins/sudoers/policy.c:470
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:709
+#: plugins/sudoers/testsudoers.c:242 plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
 msgstr ""
@@ -760,22 +762,22 @@ msgstr ""
 msgid "unable to mkdir %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:764
-#: plugins/sudoers/sudoreplay.c:348 plugins/sudoers/sudoreplay.c:819
-#: plugins/sudoers/sudoreplay.c:1016 plugins/sudoers/timestamp.c:357
+#: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:765
+#: plugins/sudoers/sudoreplay.c:346 plugins/sudoers/sudoreplay.c:816
+#: plugins/sudoers/sudoreplay.c:1013 plugins/sudoers/timestamp.c:357
 #: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1025
 #: plugins/sudoers/visudo_json.c:1038
 #, c-format
 msgid "unable to open %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:768
-#: plugins/sudoers/sudoreplay.c:1123
+#: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:769
+#: plugins/sudoers/sudoreplay.c:1120
 #, c-format
 msgid "unable to read %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:588
+#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:591
 #: plugins/sudoers/timestamp.c:186 plugins/sudoers/timestamp.c:189
 #, c-format
 msgid "unable to write to %s"
@@ -786,99 +788,87 @@ msgstr ""
 msgid "unable to create %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:406
+#: plugins/sudoers/ldap.c:435
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:431
-msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
-msgstr ""
-
-#: plugins/sudoers/ldap.c:464
+#: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:495
+#: plugins/sudoers/ldap.c:516
 msgid "unable to mix ldap and ldaps URIs"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:499 plugins/sudoers/ldap.c:532
+#: plugins/sudoers/ldap.c:520 plugins/sudoers/ldap.c:553
 msgid "starttls not supported when using ldaps"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:517
-msgid "sudo_ldap_parse_uri: out of space building hostbuf"
-msgstr ""
-
-#: plugins/sudoers/ldap.c:599
+#: plugins/sudoers/ldap.c:620
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:602
+#: plugins/sudoers/ldap.c:623
 #, c-format
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1093
+#: plugins/sudoers/ldap.c:1114
 msgid "unable to get GMT time"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1099
+#: plugins/sudoers/ldap.c:1120
 msgid "unable to format timestamp"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1107
+#: plugins/sudoers/ldap.c:1128
 msgid "unable to build time filter"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1326
-msgid "sudo_ldap_build_pass1 allocation mismatch"
-msgstr ""
-
-#: plugins/sudoers/ldap.c:1469
+#: plugins/sudoers/ldap.c:1757
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1963
+#: plugins/sudoers/ldap.c:2261
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1965
+#: plugins/sudoers/ldap.c:2263
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: UNKNOWN\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2012
+#: plugins/sudoers/ldap.c:2310
 #, c-format
 msgid "    Order: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:512
+#: plugins/sudoers/ldap.c:2318 plugins/sudoers/parse.c:512
 #: plugins/sudoers/sssd.c:1297
 #, c-format
 msgid "    Commands:\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2570
+#: plugins/sudoers/ldap.c:2868
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2612
+#: plugins/sudoers/ldap.c:2910
 msgid ""
 "start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
 "ldap_start_tls_s_np()"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2845
+#: plugins/sudoers/ldap.c:3143
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
@@ -951,15 +941,15 @@ msgstr ""
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr ""
 
-#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:407
-#: plugins/sudoers/sudoers.c:409 plugins/sudoers/sudoers.c:411
-#: plugins/sudoers/sudoers.c:413 plugins/sudoers/sudoers.c:1128
-#: plugins/sudoers/sudoers.c:1129
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:408
+#: plugins/sudoers/sudoers.c:410 plugins/sudoers/sudoers.c:412
+#: plugins/sudoers/sudoers.c:414 plugins/sudoers/sudoers.c:1129
+#: plugins/sudoers/sudoers.c:1130
 #, c-format
 msgid "%s: command not found"
 msgstr ""
 
-#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:403
+#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:404
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
@@ -1225,242 +1215,242 @@ msgstr ""
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:160 plugins/sudoers/sudoers.c:201
-#: plugins/sudoers/sudoers.c:726
+#: plugins/sudoers/sudoers.c:160 plugins/sudoers/sudoers.c:202
+#: plugins/sudoers/sudoers.c:727
 msgid "problem with defaults entries"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:167
+#: plugins/sudoers/sudoers.c:168
 msgid "no valid sudoers sources found, quitting"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:233
+#: plugins/sudoers/sudoers.c:234
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:278
+#: plugins/sudoers/sudoers.c:279
 msgid "you are not permitted to use the -C option"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:336
+#: plugins/sudoers/sudoers.c:337
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:350
+#: plugins/sudoers/sudoers.c:351
 msgid "no tty"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:351
+#: plugins/sudoers/sudoers.c:352
 msgid "sorry, you must have a tty to run sudo"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:402
+#: plugins/sudoers/sudoers.c:403
 msgid "command in current directory"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:422
+#: plugins/sudoers/sudoers.c:423
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:674
+#: plugins/sudoers/sudoers.c:675
 msgid "command too long"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:779 plugins/sudoers/visudo.c:333
+#: plugins/sudoers/sudoers.c:780 plugins/sudoers/visudo.c:333
 #: plugins/sudoers/visudo.c:599
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:783
+#: plugins/sudoers/sudoers.c:784
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:787 plugins/sudoers/timestamp.c:289 toke.l:945
+#: plugins/sudoers/sudoers.c:788 plugins/sudoers/timestamp.c:289 toke.l:945
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:791 toke.l:952
+#: plugins/sudoers/sudoers.c:792 toke.l:952
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:795 toke.l:957
+#: plugins/sudoers/sudoers.c:796 toke.l:957
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:826
+#: plugins/sudoers/sudoers.c:827
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:845
+#: plugins/sudoers/sudoers.c:846
 #, c-format
 msgid "unknown login class: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:889 plugins/sudoers/sudoers.c:904
+#: plugins/sudoers/sudoers.c:890 plugins/sudoers/sudoers.c:905
 #, c-format
 msgid "unable to resolve host %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:986 plugins/sudoers/testsudoers.c:388
+#: plugins/sudoers/sudoers.c:987 plugins/sudoers/testsudoers.c:388
 #, c-format
 msgid "unknown group: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:280
+#: plugins/sudoers/sudoreplay.c:278
 #, c-format
 msgid "invalid filter option: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:293
+#: plugins/sudoers/sudoreplay.c:291
 #, c-format
 msgid "invalid max wait: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:299
+#: plugins/sudoers/sudoreplay.c:297
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:302 plugins/sudoers/visudo.c:190
+#: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/visudo.c:190
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:334
+#: plugins/sudoers/sudoreplay.c:332
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:340
+#: plugins/sudoers/sudoreplay.c:338
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:356
+#: plugins/sudoers/sudoreplay.c:354
 #, c-format
 msgid "Replaying sudo session: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:362
+#: plugins/sudoers/sudoreplay.c:360
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:363
+#: plugins/sudoers/sudoreplay.c:361
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:418
+#: plugins/sudoers/sudoreplay.c:413
 msgid "unable to set tty to raw mode"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:449
+#: plugins/sudoers/sudoreplay.c:444
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:655 plugins/sudoers/sudoreplay.c:680
+#: plugins/sudoers/sudoreplay.c:652 plugins/sudoers/sudoreplay.c:677
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:702
+#: plugins/sudoers/sudoreplay.c:699
 msgid "unmatched ')' in expression"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:706
+#: plugins/sudoers/sudoreplay.c:703
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:720
+#: plugins/sudoers/sudoreplay.c:717
 #, c-format
 msgid "%s requires an argument"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:724 plugins/sudoers/sudoreplay.c:1096
+#: plugins/sudoers/sudoreplay.c:721 plugins/sudoers/sudoreplay.c:1093
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:730
+#: plugins/sudoers/sudoreplay.c:727
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:739
+#: plugins/sudoers/sudoreplay.c:736
 msgid "unmatched '(' in expression"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:741
+#: plugins/sudoers/sudoreplay.c:738
 msgid "illegal trailing \"or\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:743
+#: plugins/sudoers/sudoreplay.c:740
 msgid "illegal trailing \"!\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:796
+#: plugins/sudoers/sudoreplay.c:793
 #, c-format
 msgid "unknown search type %d"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:833
+#: plugins/sudoers/sudoreplay.c:830
 #, c-format
 msgid "%s: invalid log file"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:851
+#: plugins/sudoers/sudoreplay.c:848
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:858
+#: plugins/sudoers/sudoreplay.c:855
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:865
+#: plugins/sudoers/sudoreplay.c:862
 #, c-format
 msgid "%s: user field is missing"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:873
+#: plugins/sudoers/sudoreplay.c:870
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:881
+#: plugins/sudoers/sudoreplay.c:878
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:1236
+#: plugins/sudoers/sudoreplay.c:1233
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:1239
+#: plugins/sudoers/sudoreplay.c:1236
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:1248
+#: plugins/sudoers/sudoreplay.c:1245
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:1250
+#: plugins/sudoers/sudoreplay.c:1247
 msgid ""
 "\n"
 "Options:\n"
