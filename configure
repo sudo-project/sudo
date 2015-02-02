@@ -20538,6 +20538,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $OSDEFS"
 ac_fn_c_check_decl "$LINENO" "OPEN_MAX" "ac_cv_have_decl_OPEN_MAX" "
 #include <sys/types.h>
 #include <limits.h>
@@ -20640,6 +20642,7 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_SIZE_MAX $ac_have_decl
 _ACEOF
 
+CFLAGS="$_CFLAGS"
 if test "$ac_cv_have_decl_LLONG_MAX" != "yes"; then
     ac_fn_c_check_decl "$LINENO" "QUAD_MAX" "ac_cv_have_decl_QUAD_MAX" "
 #include <sys/types.h>

@@ -2946,7 +2946,10 @@ AC_INCLUDES_DEFAULT
 
 dnl
 dnl Check for incomplete limits.h and missing SIZE_MAX
+dnl We need to add OSDEFS to CFLAGS to expose LLONG_MAX et al on glibc.
 dnl
+_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $OSDEFS"
 AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
@@ -2957,6 +2960,7 @@ AC_CHECK_DECLS([SIZE_MAX], [], [], [
 # include <inttypes.h>
 #endif
 ])
+CFLAGS="$_CFLAGS"
 dnl
 dnl Try to find equivalents for missing types
 dnl
