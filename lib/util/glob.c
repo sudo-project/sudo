@@ -78,6 +78,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
 #include <ctype.h>
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>
