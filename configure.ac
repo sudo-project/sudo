@@ -1,7 +1,7 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
 AC_INIT([sudo], [1.8.12], [http://www.sudo.ws/bugs/], [sudo])
@@ -2945,11 +2945,17 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
-dnl Check for incomplete limits.h
+dnl Check for incomplete limits.h and missing SIZE_MAX
 dnl
-AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, SIZE_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
+AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
+])
+AC_CHECK_DECLS([SIZE_MAX], [], [], [
+#include <sys/types.h>
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
 ])
 dnl
 dnl Try to find equivalents for missing types
