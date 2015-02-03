@@ -2452,7 +2452,10 @@ if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS([getifaddrs], [AC_CHECK_FUNCS([freeifaddrs])])
 fi
 AC_CHECK_FUNCS([lockf flock], [break])
-AC_CHECK_FUNCS([innetgr _innetgr], [AC_CHECK_FUNCS([getdomainname]) [break]])
+AC_CHECK_FUNCS([innetgr _innetgr], [break])
+AC_CHECK_FUNCS([getdomainname], [], [
+    AC_CHECK_FUNCS([sysinfo], [AC_CHECK_HEADERS([sys/systeminfo.h])])
+])
 AC_CHECK_FUNCS([utimes], [
     AC_CHECK_FUNCS([futimes futimesat], [break])
 ], [

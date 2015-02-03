@@ -25,6 +25,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_SYSTEMINFO_H
+# include <sys/systeminfo.h>
+#endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -912,12 +915,20 @@ const char *
 sudo_getdomainname(void)
 {
     char *domain = NULL;
-#ifdef HAVE_GETDOMAINNAME
+#if defined(HAVE_GETDOMAINNAME) || defined(SI_SRPC_DOMAIN)
     static char buf[HOST_NAME_MAX + 1];
     static bool initialized;
 
     if (!initialized) {
-	if (getdomainname(buf, sizeof(buf)) == 0 && buf[0] != '\0') {
+	int rval;
+
+# ifdef SI_SRPC_DOMAIN
+	buf[0] = '\0';
+	rval = sysinfo(SI_SRPC_DOMAIN, buf, sizeof(buf));
+# else
+	rval = getdomainname(buf, sizeof(buf));
+# endif
+	if (rval != -1 && buf[0] != '\0') {
 	    char *cp;
 
 	    domain = buf;
@@ -931,7 +942,7 @@ sudo_getdomainname(void)
 	}
 	initialized = true;
     }
-#endif /* HAVE_GETDOMAINNAME */
+#endif /* HAVE_GETDOMAINNAME || SI_SRPC_DOMAIN */
     return domain;
 }
 
