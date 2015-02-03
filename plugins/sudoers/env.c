@@ -41,7 +41,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_INTTYPES_H
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
 #ifdef HAVE_LOGIN_CAP_H

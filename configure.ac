@@ -2970,7 +2970,9 @@ AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_
 AC_CHECK_DECLS([SIZE_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
-#ifdef HAVE_INTTYPES_H
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
 ])

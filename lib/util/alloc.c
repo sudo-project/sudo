@@ -43,7 +43,9 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#ifdef HAVE_INTTYPES_H
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
 #include <limits.h>

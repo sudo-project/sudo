@@ -46,7 +46,9 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_INTTYPES_H
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
 #ifdef TIME_WITH_SYS_TIME
@@ -118,7 +120,7 @@ static int	yyerror(const char *s);
 static int	yylex(void);
        int	yyparse(void);
 
-#line 111 "getdate.y"
+#line 113 "getdate.y"
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -126,7 +128,7 @@ typedef union {
     enum _MERIDIAN	Meridian;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 129 "getdate.c"
+#line 131 "getdate.c"
 #define tAGO 257
 #define tDAY 258
 #define tDAYZONE 259
@@ -141,11 +143,7 @@ typedef union {
 #define tZONE 268
 #define tDST 269
 #define YYERRCODE 256
-#if defined(__cplusplus) || defined(__STDC__)
 const short yylhs[] =
-#else
-short yylhs[] =
-#endif
 	{                                        -1,
     0,    0,    2,    2,    2,    2,    2,    2,    3,    3,
     3,    3,    3,    4,    4,    4,    6,    6,    6,    5,
@@ -153,11 +151,7 @@ short yylhs[] =
     9,    9,    9,    9,    9,    9,    9,    9,    8,    1,
     1,
 };
-#if defined(__cplusplus) || defined(__STDC__)
 const short yylen[] =
-#else
-short yylen[] =
-#endif
 	{                                         2,
     0,    2,    1,    1,    1,    1,    1,    1,    2,    4,
     4,    6,    6,    1,    1,    2,    1,    2,    2,    3,
@@ -165,11 +159,7 @@ short yylen[] =
     2,    1,    2,    2,    1,    2,    2,    1,    1,    0,
     1,
 };
-#if defined(__cplusplus) || defined(__STDC__)
 const short yydefred[] =
-#else
-short yydefred[] =
-#endif
 	{                                      1,
     0,    0,   15,   32,    0,   38,   35,    0,    0,    0,
     2,    3,    4,    5,    6,    7,    8,    0,   18,    0,
@@ -177,50 +167,30 @@ short yydefred[] =
     0,    0,   16,   28,    0,   23,   27,   22,    0,    0,
    25,   41,   11,    0,   10,    0,    0,   21,   13,   12,
 };
-#if defined(__cplusplus) || defined(__STDC__)
 const short yydgoto[] =
-#else
-short yydgoto[] =
-#endif
 	{                                       1,
    45,   11,   12,   13,   14,   15,   16,   17,   18,
 };
-#if defined(__cplusplus) || defined(__STDC__)
 const short yysindex[] =
-#else
-short yysindex[] =
-#endif
 	{                                      0,
  -249,  -38,    0,    0, -260,    0,    0, -240,  -47, -248,
     0,    0,    0,    0,    0,    0,    0, -237,    0,  -18,
     0,    0,    0,    0,    0,    0, -262,    0,    0, -239,
  -238, -236,    0,    0, -235,    0,    0,    0,  -56,  -19,
     0,    0,    0, -234,    0, -232, -258,    0,    0,    0,};
-#if defined(__cplusplus) || defined(__STDC__)
 const short yyrindex[] =
-#else
-short yyrindex[] =
-#endif
 	{                                      0,
     0,    1,    0,    0,    0,    0,    0,    0,   69,   12,
     0,    0,    0,    0,    0,    0,    0,   23,    0,   34,
     0,    0,    0,    0,    0,    0,   67,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,   56,   45,
     0,    0,    0,    0,    0,    0,   56,    0,    0,    0,};
-#if defined(__cplusplus) || defined(__STDC__)
 const short yygindex[] =
-#else
-short yygindex[] =
-#endif
 	{                                      0,
   -17,    0,    0,    0,    0,    0,    0,    0,    0,
 };
 #define YYTABLESIZE 337
-#if defined(__cplusplus) || defined(__STDC__)
 const short yytable[] =
-#else
-short yytable[] =
-#endif
 	{                                      32,
    17,   44,   42,   36,   37,   19,   20,   49,    2,    3,
    31,   14,    4,    5,    6,    7,    8,    9,   10,   34,
@@ -257,11 +227,7 @@ short yytable[] =
    40,    0,   40,   40,   26,   26,    0,   39,   26,   26,
    26,   26,    0,    0,   26,   39,   39,
 };
-#if defined(__cplusplus) || defined(__STDC__)
 const short yycheck[] =
-#else
-short yycheck[] =
-#endif
 	{                                      47,
     0,   58,  261,  266,  267,   44,  267,  266,  258,  259,
    58,    0,  262,  263,  264,  265,  266,  267,  268,  257,
@@ -304,11 +270,7 @@ short yycheck[] =
 #endif
 #define YYMAXTOKEN 269
 #if YYDEBUG
-#if defined(__cplusplus) || defined(__STDC__)
 const char * const yyname[] =
-#else
-char *yyname[] =
-#endif
 	{
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,"','",0,0,"'/'",0,0,0,0,0,0,0,0,0,0,"':'",0,0,0,0,0,0,0,0,0,
@@ -320,11 +282,7 @@ char *yyname[] =
 "tDAYZONE","tID","tMERIDIAN","tMINUTE_UNIT","tMONTH","tMONTH_UNIT","tSEC_UNIT",
 "tSNUMBER","tUNUMBER","tZONE","tDST",
 };
-#if defined(__cplusplus) || defined(__STDC__)
 const char * const yyrule[] =
-#else
-char *yyrule[] =
-#endif
 	{"$accept : spec",
 "spec :",
 "spec : spec item",
@@ -394,7 +352,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 unsigned int yystacksize;
-#line 330 "getdate.y"
+#line 332 "getdate.y"
 
 /* Month and day table. */
 static TABLE const MonthDayTable[] = {
@@ -1016,13 +974,9 @@ main(int argc, char *argv[])
     /* NOTREACHED */
 }
 #endif	/* TEST */
-#line 967 "getdate.c"
+#line 969 "getdate.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
-#if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
-#else
-static int yygrowstack()
-#endif
 {
     unsigned int newsize;
     long sslen;
@@ -1035,24 +989,22 @@ static int yygrowstack()
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
+    sslen = yyssp - yyss;
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
-#ifdef __STDC__
 #define YY_SIZE_MAX 0xffffffffU
-#else
-#define YY_SIZE_MAX (unsigned int)0xffffffff
 #endif
-#endif
-    if (YY_SIZE_MAX / newsize < sizeof *newss)
+    if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
-    sslen = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + sslen;
+    if (newsize && YY_SIZE_MAX / newsize < sizeof *newvs)
+        goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
@@ -1078,19 +1030,11 @@ bail:
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
 int
-#if defined(__cplusplus) || defined(__STDC__)
 yyparse(void)
-#else
-yyparse()
-#endif
 {
     int yym, yyn, yystate;
 #if YYDEBUG
-#if defined(__cplusplus) || defined(__STDC__)
     const char *yys;
-#else /* !(defined(__cplusplus) || defined(__STDC__)) */
-    char *yys;
-#endif /* !(defined(__cplusplus) || defined(__STDC__)) */
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -1225,37 +1169,37 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 129 "getdate.y"
+#line 131 "getdate.y"
 {
 	    yyHaveTime++;
 	}
 break;
 case 4:
-#line 132 "getdate.y"
+#line 134 "getdate.y"
 {
 	    yyHaveZone++;
 	}
 break;
 case 5:
-#line 135 "getdate.y"
+#line 137 "getdate.y"
 {
 	    yyHaveDate++;
 	}
 break;
 case 6:
-#line 138 "getdate.y"
+#line 140 "getdate.y"
 {
 	    yyHaveDay++;
 	}
 break;
 case 7:
-#line 141 "getdate.y"
+#line 143 "getdate.y"
 {
 	    yyHaveRel++;
 	}
 break;
 case 9:
-#line 147 "getdate.y"
+#line 149 "getdate.y"
 {
 	    yyHour = yyvsp[-1].Number;
 	    yyMinutes = 0;
@@ -1264,7 +1208,7 @@ case 9:
 	}
 break;
 case 10:
-#line 153 "getdate.y"
+#line 155 "getdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1273,7 +1217,7 @@ case 10:
 	}
 break;
 case 11:
-#line 159 "getdate.y"
+#line 161 "getdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1283,7 +1227,7 @@ case 11:
 	}
 break;
 case 12:
-#line 166 "getdate.y"
+#line 168 "getdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1292,7 +1236,7 @@ case 12:
 	}
 break;
 case 13:
-#line 172 "getdate.y"
+#line 174 "getdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1303,56 +1247,56 @@ case 13:
 	}
 break;
 case 14:
-#line 182 "getdate.y"
+#line 184 "getdate.y"
 {
 	    yyTimezone = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 15:
-#line 186 "getdate.y"
+#line 188 "getdate.y"
 {
 	    yyTimezone = yyvsp[0].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 16:
-#line 191 "getdate.y"
+#line 193 "getdate.y"
 {
 	    yyTimezone = yyvsp[-1].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 17:
-#line 197 "getdate.y"
+#line 199 "getdate.y"
 {
 	    yyDayOrdinal = 1;
 	    yyDayNumber = yyvsp[0].Number;
 	}
 break;
 case 18:
-#line 201 "getdate.y"
+#line 203 "getdate.y"
 {
 	    yyDayOrdinal = 1;
 	    yyDayNumber = yyvsp[-1].Number;
 	}
 break;
 case 19:
-#line 205 "getdate.y"
+#line 207 "getdate.y"
 {
 	    yyDayOrdinal = yyvsp[-1].Number;
 	    yyDayNumber = yyvsp[0].Number;
 	}
 break;
 case 20:
-#line 211 "getdate.y"
+#line 213 "getdate.y"
 {
 	    yyMonth = yyvsp[-2].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 21:
-#line 215 "getdate.y"
+#line 217 "getdate.y"
 {
 	    if (yyvsp[-4].Number >= 100) {
 		yyYear = yyvsp[-4].Number;
@@ -1366,7 +1310,7 @@ case 21:
 	}
 break;
 case 22:
-#line 226 "getdate.y"
+#line 228 "getdate.y"
 {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
 	    yyYear = yyvsp[-2].Number;
@@ -1375,7 +1319,7 @@ case 22:
 	}
 break;
 case 23:
-#line 232 "getdate.y"
+#line 234 "getdate.y"
 {
 	    /* e.g. 17-JUN-1992.  */
 	    yyDay = yyvsp[-2].Number;
@@ -1384,14 +1328,14 @@ case 23:
 	}
 break;
 case 24:
-#line 238 "getdate.y"
+#line 240 "getdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 25:
-#line 242 "getdate.y"
+#line 244 "getdate.y"
 {
 	    yyMonth = yyvsp[-3].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1399,14 +1343,14 @@ case 25:
 	}
 break;
 case 26:
-#line 247 "getdate.y"
+#line 249 "getdate.y"
 {
 	    yyMonth = yyvsp[0].Number;
 	    yyDay = yyvsp[-1].Number;
 	}
 break;
 case 27:
-#line 251 "getdate.y"
+#line 253 "getdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1414,68 +1358,68 @@ case 27:
 	}
 break;
 case 28:
-#line 258 "getdate.y"
+#line 260 "getdate.y"
 {
 	    yyRelSeconds = -yyRelSeconds;
 	    yyRelMonth = -yyRelMonth;
 	}
 break;
 case 30:
-#line 265 "getdate.y"
+#line 267 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number * 60L;
 	}
 break;
 case 31:
-#line 268 "getdate.y"
+#line 270 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number * 60L;
 	}
 break;
 case 32:
-#line 271 "getdate.y"
+#line 273 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[0].Number * 60L;
 	}
 break;
 case 33:
-#line 274 "getdate.y"
+#line 276 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number;
 	}
 break;
 case 34:
-#line 277 "getdate.y"
+#line 279 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number;
 	}
 break;
 case 35:
-#line 280 "getdate.y"
+#line 282 "getdate.y"
 {
 	    yyRelSeconds++;
 	}
 break;
 case 36:
-#line 283 "getdate.y"
+#line 285 "getdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 37:
-#line 286 "getdate.y"
+#line 288 "getdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 38:
-#line 289 "getdate.y"
+#line 291 "getdate.y"
 {
 	    yyRelMonth += yyvsp[0].Number;
 	}
 break;
 case 39:
-#line 294 "getdate.y"
+#line 296 "getdate.y"
 {
 	    if (yyHaveTime && yyHaveDate && !yyHaveRel)
 		yyYear = yyvsp[0].Number;
@@ -1503,18 +1447,18 @@ case 39:
 	}
 break;
 case 40:
-#line 321 "getdate.y"
+#line 323 "getdate.y"
 {
 	    yyval.Meridian = MER24;
 	}
 break;
 case 41:
-#line 324 "getdate.y"
+#line 326 "getdate.y"
 {
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1465 "getdate.c"
+#line 1453 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
