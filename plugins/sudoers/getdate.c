@@ -143,7 +143,11 @@ typedef union {
 #define tZONE 268
 #define tDST 269
 #define YYERRCODE 256
+#if defined(__cplusplus) || defined(__STDC__)
 const short yylhs[] =
+#else
+short yylhs[] =
+#endif
 	{                                        -1,
     0,    0,    2,    2,    2,    2,    2,    2,    3,    3,
     3,    3,    3,    4,    4,    4,    6,    6,    6,    5,
@@ -151,7 +155,11 @@ const short yylhs[] =
     9,    9,    9,    9,    9,    9,    9,    9,    8,    1,
     1,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short yylen[] =
+#else
+short yylen[] =
+#endif
 	{                                         2,
     0,    2,    1,    1,    1,    1,    1,    1,    2,    4,
     4,    6,    6,    1,    1,    2,    1,    2,    2,    3,
@@ -159,7 +167,11 @@ const short yylen[] =
     2,    1,    2,    2,    1,    2,    2,    1,    1,    0,
     1,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short yydefred[] =
+#else
+short yydefred[] =
+#endif
 	{                                      1,
     0,    0,   15,   32,    0,   38,   35,    0,    0,    0,
     2,    3,    4,    5,    6,    7,    8,    0,   18,    0,
@@ -167,30 +179,50 @@ const short yydefred[] =
     0,    0,   16,   28,    0,   23,   27,   22,    0,    0,
    25,   41,   11,    0,   10,    0,    0,   21,   13,   12,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short yydgoto[] =
+#else
+short yydgoto[] =
+#endif
 	{                                       1,
    45,   11,   12,   13,   14,   15,   16,   17,   18,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short yysindex[] =
+#else
+short yysindex[] =
+#endif
 	{                                      0,
  -249,  -38,    0,    0, -260,    0,    0, -240,  -47, -248,
     0,    0,    0,    0,    0,    0,    0, -237,    0,  -18,
     0,    0,    0,    0,    0,    0, -262,    0,    0, -239,
  -238, -236,    0,    0, -235,    0,    0,    0,  -56,  -19,
     0,    0,    0, -234,    0, -232, -258,    0,    0,    0,};
+#if defined(__cplusplus) || defined(__STDC__)
 const short yyrindex[] =
+#else
+short yyrindex[] =
+#endif
 	{                                      0,
     0,    1,    0,    0,    0,    0,    0,    0,   69,   12,
     0,    0,    0,    0,    0,    0,    0,   23,    0,   34,
     0,    0,    0,    0,    0,    0,   67,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,   56,   45,
     0,    0,    0,    0,    0,    0,   56,    0,    0,    0,};
+#if defined(__cplusplus) || defined(__STDC__)
 const short yygindex[] =
+#else
+short yygindex[] =
+#endif
 	{                                      0,
   -17,    0,    0,    0,    0,    0,    0,    0,    0,
 };
 #define YYTABLESIZE 337
+#if defined(__cplusplus) || defined(__STDC__)
 const short yytable[] =
+#else
+short yytable[] =
+#endif
 	{                                      32,
    17,   44,   42,   36,   37,   19,   20,   49,    2,    3,
    31,   14,    4,    5,    6,    7,    8,    9,   10,   34,
@@ -227,7 +259,11 @@ const short yytable[] =
    40,    0,   40,   40,   26,   26,    0,   39,   26,   26,
    26,   26,    0,    0,   26,   39,   39,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short yycheck[] =
+#else
+short yycheck[] =
+#endif
 	{                                      47,
     0,   58,  261,  266,  267,   44,  267,  266,  258,  259,
    58,    0,  262,  263,  264,  265,  266,  267,  268,  257,
@@ -270,7 +306,11 @@ const short yycheck[] =
 #endif
 #define YYMAXTOKEN 269
 #if YYDEBUG
+#if defined(__cplusplus) || defined(__STDC__)
 const char * const yyname[] =
+#else
+char *yyname[] =
+#endif
 	{
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,"','",0,0,"'/'",0,0,0,0,0,0,0,0,0,0,"':'",0,0,0,0,0,0,0,0,0,
@@ -282,7 +322,11 @@ const char * const yyname[] =
 "tDAYZONE","tID","tMERIDIAN","tMINUTE_UNIT","tMONTH","tMONTH_UNIT","tSEC_UNIT",
 "tSNUMBER","tUNUMBER","tZONE","tDST",
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const char * const yyrule[] =
+#else
+char *yyrule[] =
+#endif
 	{"$accept : spec",
 "spec :",
 "spec : spec item",
@@ -976,7 +1020,11 @@ main(int argc, char *argv[])
 #endif	/* TEST */
 #line 969 "getdate.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
+#if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
+#else
+static int yygrowstack()
+#endif
 {
     unsigned int newsize;
     long sslen;
@@ -989,22 +1037,24 @@ static int yygrowstack(void)
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
-    sslen = yyssp - yyss;
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
+#ifdef __STDC__
 #define YY_SIZE_MAX 0xffffffffU
+#else
+#define YY_SIZE_MAX (unsigned int)0xffffffff
 #endif
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
+#endif
+    if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
+    sslen = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + sslen;
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newvs)
-        goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
@@ -1030,11 +1080,19 @@ bail:
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
 int
+#if defined(__cplusplus) || defined(__STDC__)
 yyparse(void)
+#else
+yyparse()
+#endif
 {
     int yym, yyn, yystate;
 #if YYDEBUG
+#if defined(__cplusplus) || defined(__STDC__)
     const char *yys;
+#else /* !(defined(__cplusplus) || defined(__STDC__)) */
+    char *yys;
+#endif /* !(defined(__cplusplus) || defined(__STDC__)) */
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -1458,7 +1516,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1453 "getdate.c"
+#line 1467 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

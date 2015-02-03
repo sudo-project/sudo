@@ -173,7 +173,11 @@ typedef union {
 #define SHA384_TOK 294
 #define SHA512_TOK 295
 #define YYERRCODE 256
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoerslhs[] =
+#else
+short sudoerslhs[] =
+#endif
 	{                                        -1,
     0,    0,   30,   30,   31,   31,   31,   31,   31,   31,
    31,   31,   31,   31,   31,   31,    4,    4,    3,    3,
@@ -188,7 +192,11 @@ const short sudoerslhs[] =
    13,   13,   13,   13,   17,   17,   15,   15,   16,   16,
    16,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoerslen[] =
+#else
+short sudoerslen[] =
+#endif
 	{                                         2,
     0,    1,    1,    2,    1,    2,    2,    2,    2,    2,
     2,    2,    3,    3,    3,    3,    1,    3,    1,    2,
@@ -203,7 +211,11 @@ const short sudoerslen[] =
     1,    1,    1,    1,    1,    3,    1,    2,    1,    1,
     1,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoersdefred[] =
+#else
+short sudoersdefred[] =
+#endif
 	{                                      0,
     0,  100,  102,  103,  104,    0,    0,    0,    0,    0,
   101,    5,    0,    0,    0,    0,    0,    0,   96,   98,
@@ -224,14 +236,22 @@ const short sudoersdefred[] =
   106,   52,   53,   67,   68,   69,   70,   71,   72,   73,
    74,   75,   76,   36,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoersdgoto[] =
+#else
+short sudoersdgoto[] =
+#endif
 	{                                      18,
   119,  120,   27,   28,   48,   49,   50,   51,   35,   67,
    37,   19,   20,   21,  136,  137,  138,  121,  125,   68,
    69,  158,  129,  130,  131,  146,  147,  148,   52,   22,
    23,   60,   54,   57,   63,   55,   58,   64,   61,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoerssindex[] =
+#else
+short sudoerssindex[] =
+#endif
 	{                                    -33,
  -277,    0,    0,    0,    0,  -13,   75,  105,  105,  -15,
     0,    0, -246, -241, -217, -210, -226,    0,    0,    0,
@@ -251,7 +271,11 @@ const short sudoerssindex[] =
     0,  135,   54,    0,    0, -159, -158,  585,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,};
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoersrindex[] =
+#else
+short sudoersrindex[] =
+#endif
 	{                                    106,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -271,7 +295,11 @@ const short sudoersrindex[] =
     0,    0,   74,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,};
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoersgindex[] =
+#else
+short sudoersgindex[] =
+#endif
 	{                                      0,
   -10,    0,   47,   17,   80,   65,  -84,   27,   92,   -4,
    48,   62,  112,    2,  -25,   10,   -9,    0,    0,   33,
@@ -279,7 +307,11 @@ const short sudoersgindex[] =
   111,    0,    0,    0,    0,   50,   51,   52,   53,
 };
 #define YYTABLESIZE 970
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoerstable[] =
+#else
+short sudoerstable[] =
+#endif
 	{                                      17,
    19,  109,   36,   24,   26,   40,   41,  127,  128,   38,
    39,   53,   43,   26,   74,   77,   56,   43,   26,   26,
@@ -379,7 +411,11 @@ const short sudoerstable[] =
    56,   56,   56,   56,   56,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,   56,   56,   56,   56,
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const short sudoerscheck[] =
+#else
+short sudoerscheck[] =
+#endif
 	{                                      33,
     0,   86,    7,  281,   33,  257,  258,  287,  288,    8,
     9,  258,   33,   33,  259,   44,  258,   33,   33,   33,
@@ -485,7 +521,11 @@ const short sudoerscheck[] =
 #endif
 #define YYMAXTOKEN 295
 #if YYDEBUG
+#if defined(__cplusplus) || defined(__STDC__)
 const char * const sudoersname[] =
+#else
+char *sudoersname[] =
+#endif
 	{
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 "'!'",0,0,0,0,0,0,"'('","')'",0,"'+'","','","'-'",0,0,0,0,0,0,0,0,0,0,0,0,"':'",
@@ -501,7 +541,11 @@ const char * const sudoersname[] =
 "CMNDALIAS","USERALIAS","RUNASALIAS","ERROR","TYPE","ROLE","PRIVS","LIMITPRIVS",
 "MYSELF","SHA224_TOK","SHA256_TOK","SHA384_TOK","SHA512_TOK",
 };
+#if defined(__cplusplus) || defined(__STDC__)
 const char * const sudoersrule[] =
+#else
+char *sudoersrule[] =
+#endif
 	{"$accept : file",
 "file :",
 "file : line",
@@ -902,7 +946,11 @@ init_parser(const char *path, bool quiet)
 }
 #line 895 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
+#if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
+#else
+static int yygrowstack()
+#endif
 {
     unsigned int newsize;
     long sslen;
@@ -915,22 +963,24 @@ static int yygrowstack(void)
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
-    sslen = yyssp - yyss;
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
+#ifdef __STDC__
 #define YY_SIZE_MAX 0xffffffffU
+#else
+#define YY_SIZE_MAX (unsigned int)0xffffffff
 #endif
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
+#endif
+    if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
+    sslen = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + sslen;
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newvs)
-        goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
@@ -956,11 +1006,19 @@ bail:
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
 int
+#if defined(__cplusplus) || defined(__STDC__)
 yyparse(void)
+#else
+yyparse()
+#endif
 {
     int yym, yyn, yystate;
 #if YYDEBUG
+#if defined(__cplusplus) || defined(__STDC__)
     const char *yys;
+#else /* !(defined(__cplusplus) || defined(__STDC__)) */
+    char *yys;
+#endif /* !(defined(__cplusplus) || defined(__STDC__)) */
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -1781,7 +1839,7 @@ case 111:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1776 "gram.c"
+#line 1790 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
