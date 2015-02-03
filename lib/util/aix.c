@@ -135,6 +135,14 @@ aix_setlimits(char *user)
 }
 
 #ifdef HAVE_SETAUTHDB
+
+# if defined(HAVE_DECL_SETAUTHDB) && !HAVE_DECL_SETAUTHDB
+int setauthdb(char *new, char *old);
+# endif
+# if defined(HAVE_DECL_USRINFO) && !HAVE_DECL_USRINFO
+int usrinfo(int cmd, char *buf, int count);
+# endif
+
 /*
  * Look up administrative domain for user (SYSTEM in /etc/security/user) and
  * set it as the default for the process.  This ensures that password and

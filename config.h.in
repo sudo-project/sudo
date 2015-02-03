@@ -121,6 +121,10 @@
    don't. */
 #undef HAVE_DECL_QUAD_MIN
 
+/* Define to 1 if you have the declaration of `setauthdb', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SETAUTHDB
+
 /* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_SIZE_MAX
@@ -148,6 +152,10 @@
 /* Define to 1 if you have the declaration of `UQUAD_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_UQUAD_MAX
+
+/* Define to 1 if you have the declaration of `usrinfo', and to 0 if you
+   don't. */
+#undef HAVE_DECL_USRINFO
 
 /* Define to 1 if you have the declaration of `_POSIX_HOST_NAME_MAX', and to 0
    if you don't. */

@@ -1712,6 +1712,16 @@ case "$host" in
 		AC_CHECK_FUNCS([getuserattr setauthdb setrlimit64])
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
+
+		# These prototypes may be missing
+		AC_CHECK_DECLS([usrinfo], [], [], [
+#include <sys/types.h>
+#include <uinfo.h>
+		])
+		AC_CHECK_DECLS([setauthdb], [], [], [
+#include <sys/types.h>
+#include <usersec.h>
+		])
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
