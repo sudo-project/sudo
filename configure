@@ -20935,6 +20935,7 @@ _ACEOF
 
 ac_fn_c_check_decl "$LINENO" "SIZE_MAX" "ac_cv_have_decl_SIZE_MAX" "
 #include <sys/types.h>
+#include <limits.h>
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
