@@ -227,7 +227,7 @@ still allow people to get their work done."
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
-	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
+	    extradirs="$extradirs `dirname $docdir` `dirname $exampledir` `dirname $rundir` `dirname $vardir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
 		    while test "$dir" != "/"; do
