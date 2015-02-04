@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.12b1\n"
+"Project-Id-Version: sudoers 1.8.12b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-10-23 07:54-0600\n"
-"PO-Revision-Date: 2014-11-10 14:59+0200\n"
+"POT-Creation-Date: 2014-11-20 13:33-0700\n"
+"PO-Revision-Date: 2014-11-24 08:54+0200\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
@@ -40,6 +40,10 @@ msgstr "*** TURVALLISUUS-tietoja kohteelle %h ***"
 #: confstr.sh:6
 msgid "Sorry, try again."
 msgstr "Yritä uudelleen."
+
+#: gram.y:379
+msgid "a digest requires a path name"
+msgstr "tiiviste vaatii polkunimen"
 
 #: plugins/sudoers/alias.c:136
 #, c-format
@@ -161,7 +165,7 @@ msgstr "Tili vanhentunut tai PAM-asetuksista puuttuu ”account”-lohko sudo-ko
 msgid "PAM authentication error: %s"
 msgstr "PAM-todentamisvirhe: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:222
+#: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:228
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "ei ole olemassa %s-tietokannassa"
@@ -226,11 +230,11 @@ msgstr "Todentamismenetelmien alustaminen epäonnistui."
 msgid "Authentication methods:"
 msgstr "Todennusmenetelmät:"
 
-#: plugins/sudoers/bsm_audit.c:100 plugins/sudoers/bsm_audit.c:189
+#: plugins/sudoers/bsm_audit.c:95 plugins/sudoers/bsm_audit.c:184
 msgid "Could not determine audit condition"
 msgstr "Audit-ehdon määrittely epäonnistui"
 
-#: plugins/sudoers/bsm_audit.c:161 plugins/sudoers/bsm_audit.c:249
+#: plugins/sudoers/bsm_audit.c:156 plugins/sudoers/bsm_audit.c:244
 msgid "unable to commit audit record"
 msgstr "commit-toiminnon suorittaminen audit-tietueelle epäonnistui"
 
@@ -260,9 +264,9 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr "tuntematon uid-käyttäjätunniste: %u"
 
-#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:710
-#: plugins/sudoers/sudoers.c:918 plugins/sudoers/testsudoers.c:211
-#: plugins/sudoers/testsudoers.c:363
+#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:683
+#: plugins/sudoers/sudoers.c:955 plugins/sudoers/testsudoers.c:212
+#: plugins/sudoers/testsudoers.c:364
 #, c-format
 msgid "unknown user: %s"
 msgstr "tuntematon käyttäjä: %s"
@@ -700,10 +704,10 @@ msgid "option `%s' does not take a value"
 msgstr "valitsin ”%s” ei ota arvoa"
 
 #: plugins/sudoers/env.c:276 plugins/sudoers/env.c:283
-#: plugins/sudoers/env.c:386 plugins/sudoers/linux_audit.c:89
-#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:475
-#: plugins/sudoers/policy.c:484 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:241
+#: plugins/sudoers/env.c:386 plugins/sudoers/linux_audit.c:83
+#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:461
+#: plugins/sudoers/policy.c:470 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:242
 #: plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
@@ -763,9 +767,9 @@ msgstr "käskyn mkdir %s suorittaminen epäonnistui"
 
 #  Avaamisen kohde voi olla timestamp file, sudoers file tai pathbuf
 #: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:764
-#: plugins/sudoers/sudoreplay.c:344 plugins/sudoers/sudoreplay.c:815
-#: plugins/sudoers/sudoreplay.c:1012 plugins/sudoers/timestamp.c:357
-#: plugins/sudoers/visudo.c:826 plugins/sudoers/visudo_json.c:1025
+#: plugins/sudoers/sudoreplay.c:348 plugins/sudoers/sudoreplay.c:819
+#: plugins/sudoers/sudoreplay.c:1016 plugins/sudoers/timestamp.c:357
+#: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1025
 #: plugins/sudoers/visudo_json.c:1038
 #, c-format
 msgid "unable to open %s"
@@ -773,13 +777,13 @@ msgstr "kohteen %s avaaminen epäonnistui"
 
 #  Parametrinä on sudoers-tiedosto tai pathbuf
 #: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:768
-#: plugins/sudoers/sudoreplay.c:1119
+#: plugins/sudoers/sudoreplay.c:1123
 #, c-format
 msgid "unable to read %s"
 msgstr "kohteen %s lukeminen epäonnistui"
 
 #  Kirjoittamisen kohde voi olla timestamp file tai pathbuf
-#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:584
+#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:588
 #: plugins/sudoers/timestamp.c:186 plugins/sudoers/timestamp.c:189
 #, c-format
 msgid "unable to write to %s"
@@ -891,11 +895,11 @@ msgstr "start_tls määritelty, mutta LDAP-kirjastot ei tue funktiota ldap_start
 msgid "invalid sudoOrder attribute: %s"
 msgstr "virheellinen sudoOrder-attribuutti: %s"
 
-#: plugins/sudoers/linux_audit.c:63
+#: plugins/sudoers/linux_audit.c:57
 msgid "unable to open audit system"
 msgstr "audit-järjestelmän avaaminen epäonnistui"
 
-#: plugins/sudoers/linux_audit.c:100
+#: plugins/sudoers/linux_audit.c:94
 msgid "unable to send audit message"
 msgstr "audit-viestin lähettäminen epäonnistui"
 
@@ -961,8 +965,8 @@ msgstr "Käyttäjän %s ei sallita suorittaa ’%s%s%s’ käyttäjänä %s%s%s 
 
 #: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:407
 #: plugins/sudoers/sudoers.c:409 plugins/sudoers/sudoers.c:411
-#: plugins/sudoers/sudoers.c:413 plugins/sudoers/sudoers.c:1091
-#: plugins/sudoers/sudoers.c:1092
+#: plugins/sudoers/sudoers.c:413 plugins/sudoers/sudoers.c:1128
+#: plugins/sudoers/sudoers.c:1129
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: komentoa ei löytynyt"
@@ -1064,11 +1068,11 @@ msgstr "    SuoritaRyhmänä: "
 msgid "    Options: "
 msgstr "    Valitsimet: "
 
-#: plugins/sudoers/policy.c:111 plugins/sudoers/policy.c:120
-#: plugins/sudoers/policy.c:129 plugins/sudoers/policy.c:153
-#: plugins/sudoers/policy.c:270 plugins/sudoers/policy.c:294
-#: plugins/sudoers/policy.c:303 plugins/sudoers/policy.c:333
-#: plugins/sudoers/policy.c:343 plugins/sudoers/policy.c:352
+#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:118
+#: plugins/sudoers/policy.c:127 plugins/sudoers/policy.c:151
+#: plugins/sudoers/policy.c:263 plugins/sudoers/policy.c:283
+#: plugins/sudoers/policy.c:292 plugins/sudoers/policy.c:322
+#: plugins/sudoers/policy.c:332 plugins/sudoers/policy.c:341
 #: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
 #: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
 #: plugins/sudoers/set_perms.c:1523
@@ -1077,22 +1081,22 @@ msgid "%s: %s"
 msgstr "%s: %s"
 
 #  Parametri on path, mutta saattaa sisältää suoritettavan ohjelman
-#: plugins/sudoers/policy.c:575 plugins/sudoers/visudo.c:767
+#: plugins/sudoers/policy.c:569 plugins/sudoers/visudo.c:773
 #, c-format
 msgid "unable to execute %s"
 msgstr "kohteen %s suorittaminen epäonnistui"
 
-#: plugins/sudoers/policy.c:733
+#: plugins/sudoers/policy.c:701
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Sudoers-menettelytapalisäosaversio %s\n"
 
-#: plugins/sudoers/policy.c:735
+#: plugins/sudoers/policy.c:703
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Sudoers-tiedostokielioppiversio %d\n"
 
-#: plugins/sudoers/policy.c:739
+#: plugins/sudoers/policy.c:707
 #, c-format
 msgid ""
 "\n"
@@ -1101,17 +1105,17 @@ msgstr ""
 "\n"
 "Sudoers-polku: %s\n"
 
-#: plugins/sudoers/policy.c:742
+#: plugins/sudoers/policy.c:710
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "nsswitch-polku: %s\n"
 
-#: plugins/sudoers/policy.c:744
+#: plugins/sudoers/policy.c:712
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "ldap.conf-polku: %s\n"
 
-#: plugins/sudoers/policy.c:745
+#: plugins/sudoers/policy.c:713
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "ldap.secret-polku: %s\n"
@@ -1284,8 +1288,8 @@ msgstr "ympäristöä ei ole lupa säilyttää"
 msgid "command too long"
 msgstr "komento on liian pitkä"
 
-#: plugins/sudoers/sudoers.c:779 plugins/sudoers/visudo.c:327
-#: plugins/sudoers/visudo.c:593
+#: plugins/sudoers/sudoers.c:779 plugins/sudoers/visudo.c:333
+#: plugins/sudoers/visudo.c:599
 #, c-format
 msgid "unable to stat %s"
 msgstr "funktion stat %s kutsuminen epäonnistui"
@@ -1320,157 +1324,157 @@ msgstr "vain root-käyttäjä voi käyttää valitsinta ”-c %s”"
 msgid "unknown login class: %s"
 msgstr "tuntematon kirjautumisluokka: %s"
 
-#: plugins/sudoers/sudoers.c:882
+#: plugins/sudoers/sudoers.c:889 plugins/sudoers/sudoers.c:904
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "tietokoneen %s ratkaiseminen epäonnistui"
 
-#: plugins/sudoers/sudoers.c:949 plugins/sudoers/testsudoers.c:387
+#: plugins/sudoers/sudoers.c:986 plugins/sudoers/testsudoers.c:388
 #, c-format
 msgid "unknown group: %s"
 msgstr "tuntematon ryhmä: %s"
 
-#: plugins/sudoers/sudoreplay.c:276
+#: plugins/sudoers/sudoreplay.c:280
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "virheellinen suodatinvalitsin: %s"
 
-#: plugins/sudoers/sudoreplay.c:289
+#: plugins/sudoers/sudoreplay.c:293
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "virheellinen enimmäisodotusaika: %s"
 
-#: plugins/sudoers/sudoreplay.c:295
+#: plugins/sudoers/sudoreplay.c:299
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "virheellinen nopeustekijä: %s"
 
-#: plugins/sudoers/sudoreplay.c:298 plugins/sudoers/visudo.c:184
+#: plugins/sudoers/sudoreplay.c:302 plugins/sudoers/visudo.c:190
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s versio %s\n"
 
-#: plugins/sudoers/sudoreplay.c:330
+#: plugins/sudoers/sudoreplay.c:334
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/ajoitus: %s"
 
-#: plugins/sudoers/sudoreplay.c:336
+#: plugins/sudoers/sudoreplay.c:340
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/ajoitus: %s"
 
-#: plugins/sudoers/sudoreplay.c:352
+#: plugins/sudoers/sudoreplay.c:356
 #, c-format
 msgid "Replaying sudo session: %s\n"
 msgstr "Toistetaan sudo-istunto: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:358
+#: plugins/sudoers/sudoreplay.c:362
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr "Varoitus: pääteikkunasi on liian pieni tämän lokin toistamiseksi oikein.\n"
 
-#: plugins/sudoers/sudoreplay.c:359
+#: plugins/sudoers/sudoreplay.c:363
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Lokigeometria on %d x %d, pääteikkunasi geometria on %d x %d."
 
-#: plugins/sudoers/sudoreplay.c:414
+#: plugins/sudoers/sudoreplay.c:418
 msgid "unable to set tty to raw mode"
 msgstr "tty:n asettaminen raakatilaan epäonnistui"
 
-#: plugins/sudoers/sudoreplay.c:445
+#: plugins/sudoers/sudoreplay.c:449
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "virheellinen ajoitustiedostorivi: %s"
 
-#: plugins/sudoers/sudoreplay.c:651 plugins/sudoers/sudoreplay.c:676
+#: plugins/sudoers/sudoreplay.c:655 plugins/sudoers/sudoreplay.c:680
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "monimerkityksellinen lauseke ”%s”"
 
-#: plugins/sudoers/sudoreplay.c:698
+#: plugins/sudoers/sudoreplay.c:702
 msgid "unmatched ')' in expression"
 msgstr "täsmäämätön ’)’ lausekkeessa"
 
-#: plugins/sudoers/sudoreplay.c:702
+#: plugins/sudoers/sudoreplay.c:706
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "tuntematon hakutermi ”%s”"
 
-#: plugins/sudoers/sudoreplay.c:716
+#: plugins/sudoers/sudoreplay.c:720
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s vaatii argumentin"
 
-#: plugins/sudoers/sudoreplay.c:720 plugins/sudoers/sudoreplay.c:1092
+#: plugins/sudoers/sudoreplay.c:724 plugins/sudoers/sudoreplay.c:1096
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "virheellinen säännöllinen lauseke: %s"
 
-#: plugins/sudoers/sudoreplay.c:726
+#: plugins/sudoers/sudoreplay.c:730
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "päivämäärän ”%s” jäsentäminen epäonnistui"
 
-#: plugins/sudoers/sudoreplay.c:735
+#: plugins/sudoers/sudoreplay.c:739
 msgid "unmatched '(' in expression"
 msgstr "täsmäämätön ’(’ lausekkeessa"
 
-#: plugins/sudoers/sudoreplay.c:737
+#: plugins/sudoers/sudoreplay.c:741
 msgid "illegal trailing \"or\""
 msgstr "virheellinen jäljessä oleva ”or”"
 
-#: plugins/sudoers/sudoreplay.c:739
+#: plugins/sudoers/sudoreplay.c:743
 msgid "illegal trailing \"!\""
 msgstr "virheellinen jäljessä oleva ”!”"
 
-#: plugins/sudoers/sudoreplay.c:792
+#: plugins/sudoers/sudoreplay.c:796
 #, c-format
 msgid "unknown search type %d"
 msgstr "tuntematon hakutyyppi %d"
 
-#: plugins/sudoers/sudoreplay.c:829
+#: plugins/sudoers/sudoreplay.c:833
 #, c-format
 msgid "%s: invalid log file"
 msgstr "%s: virheellinen lokitiedosto"
 
-#: plugins/sudoers/sudoreplay.c:847
+#: plugins/sudoers/sudoreplay.c:851
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr "%s: aikaleimakenttä puuttuu"
 
-#: plugins/sudoers/sudoreplay.c:854
+#: plugins/sudoers/sudoreplay.c:858
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr "%s: aikaleima %s: %s"
 
-#: plugins/sudoers/sudoreplay.c:861
+#: plugins/sudoers/sudoreplay.c:865
 #, c-format
 msgid "%s: user field is missing"
 msgstr "%s: käyttäjäkenttä puuttuu"
 
-#: plugins/sudoers/sudoreplay.c:869
+#: plugins/sudoers/sudoreplay.c:873
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr "%s: suorita käyttäjänä-kenttä puuttuu"
 
-#: plugins/sudoers/sudoreplay.c:877
+#: plugins/sudoers/sudoreplay.c:881
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr "%s: suorita ryhmänä-kenttä puuttuu"
 
-#: plugins/sudoers/sudoreplay.c:1232
+#: plugins/sudoers/sudoreplay.c:1236
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "käyttö: %s [-h] [-d hakemisto] [-m numero] [-s numero] ID-tunniste\n"
 
-#: plugins/sudoers/sudoreplay.c:1235
+#: plugins/sudoers/sudoreplay.c:1239
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "käyttö: %s [-h] [-d hakemisto] -l [hakulauseke]\n"
 
-#: plugins/sudoers/sudoreplay.c:1244
+#: plugins/sudoers/sudoreplay.c:1248
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1479,7 +1483,7 @@ msgstr ""
 "%s - toista sudo-istuntolokit\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1246
+#: plugins/sudoers/sudoreplay.c:1250
 msgid ""
 "\n"
 "Options:\n"
@@ -1501,11 +1505,11 @@ msgstr ""
 "  -s, --speed=numero         nopeustekijä  nopeuta tai hidasta tulostusta\n"
 "  -V, --version              näytä versiotiedot ja poistu"
 
-#: plugins/sudoers/testsudoers.c:326
+#: plugins/sudoers/testsudoers.c:327
 msgid "\thost  unmatched"
 msgstr "\ttietokone täsmäämätön"
 
-#: plugins/sudoers/testsudoers.c:329
+#: plugins/sudoers/testsudoers.c:330
 msgid ""
 "\n"
 "Command allowed"
@@ -1513,7 +1517,7 @@ msgstr ""
 "\n"
 "Komento sallittu"
 
-#: plugins/sudoers/testsudoers.c:330
+#: plugins/sudoers/testsudoers.c:331
 msgid ""
 "\n"
 "Command denied"
@@ -1521,7 +1525,7 @@ msgstr ""
 "\n"
 "Komento kielletty"
 
-#: plugins/sudoers/testsudoers.c:330
+#: plugins/sudoers/testsudoers.c:331
 msgid ""
 "\n"
 "Command unmatched"
@@ -1558,85 +1562,85 @@ msgstr "aikaleima liian kaukana tulevaisuudessa: %20.20s"
 msgid "lecture status path too long: %s/%s"
 msgstr "luentotilapolku on liian pitkä: %s/%s"
 
-#: plugins/sudoers/visudo.c:186
+#: plugins/sudoers/visudo.c:192
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr "%s kielioppiversio %d\n"
 
-#: plugins/sudoers/visudo.c:257 plugins/sudoers/visudo.c:546
+#: plugins/sudoers/visudo.c:263 plugins/sudoers/visudo.c:552
 #, c-format
 msgid "press return to edit %s: "
 msgstr "muokkaa %s painamalla enter-painiketta: "
 
-#: plugins/sudoers/visudo.c:343 plugins/sudoers/visudo.c:349
+#: plugins/sudoers/visudo.c:349 plugins/sudoers/visudo.c:355
 msgid "write error"
 msgstr "kirjoitusvirhe"
 
-#: plugins/sudoers/visudo.c:433
+#: plugins/sudoers/visudo.c:439
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "funktion stat kutsuminen tilapäiselle tiedostolle (%s) epäonnistui, %s ennallaan"
 
-#: plugins/sudoers/visudo.c:438
+#: plugins/sudoers/visudo.c:444
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "nollapituinen tilapäinen tiedosto (%s), %s ennallaan"
 
-#: plugins/sudoers/visudo.c:444
+#: plugins/sudoers/visudo.c:450
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "editori (%s) epäonnistui, %s ennallaan"
 
-#: plugins/sudoers/visudo.c:466
+#: plugins/sudoers/visudo.c:472
 #, c-format
 msgid "%s unchanged"
 msgstr "%s ennallaan"
 
-#: plugins/sudoers/visudo.c:491
+#: plugins/sudoers/visudo.c:497
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "tilapäisen tiedoston (%s) avaaminen uudelleen epäonnistui, %s ennallaan."
 
-#: plugins/sudoers/visudo.c:501
+#: plugins/sudoers/visudo.c:507
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "tilapäisen tiedoston (%s) jäsentäminen epäonnistui, tuntematon virhe"
 
-#: plugins/sudoers/visudo.c:537
+#: plugins/sudoers/visudo.c:543
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "sisäinen virhe, kohteen %s löytäminen luettelosta epäonnistui!"
 
-#: plugins/sudoers/visudo.c:595 plugins/sudoers/visudo.c:604
+#: plugins/sudoers/visudo.c:601 plugins/sudoers/visudo.c:610
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "kohteen %s (uid, gid) asettaminen arvoihin (%u, %u) epäonnistui"
 
-#: plugins/sudoers/visudo.c:599 plugins/sudoers/visudo.c:609
+#: plugins/sudoers/visudo.c:605 plugins/sudoers/visudo.c:615
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "tilan %s vaihtaminen arvoon 0%o epäonnistui"
 
-#: plugins/sudoers/visudo.c:626
+#: plugins/sudoers/visudo.c:632
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s ja %s eivät ole samassa tiedostojärjestelmässä, käytetään komentoa mv uudelleennimeämiseen"
 
-#: plugins/sudoers/visudo.c:640
+#: plugins/sudoers/visudo.c:646
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "komento epäonnistui: ’%s %s %s’, %s ennallaan"
 
-#: plugins/sudoers/visudo.c:650
+#: plugins/sudoers/visudo.c:656
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "virhe nimettäessä %s uudelleen, %s ennallaan"
 
-#: plugins/sudoers/visudo.c:712
+#: plugins/sudoers/visudo.c:718
 msgid "What now? "
 msgstr "Mitä nyt?"
 
-#: plugins/sudoers/visudo.c:726
+#: plugins/sudoers/visudo.c:732
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1649,87 +1653,87 @@ msgstr ""
 "  (Q) poistu ja tallenna muutokset sudoers-tiedostoon (VAARA!)\n"
 
 #  Parametri on path, mutta saattaa sisältää suoritettavan ohjelman
-#: plugins/sudoers/visudo.c:774
+#: plugins/sudoers/visudo.c:780
 #, c-format
 msgid "unable to run %s"
 msgstr "kohteen %s suorittaminen epäonnistui"
 
-#: plugins/sudoers/visudo.c:800
+#: plugins/sudoers/visudo.c:806
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: väärä omistaja (uid, gid), pitäisi olla (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:807
+#: plugins/sudoers/visudo.c:813
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: väärät käyttöoikeudet, pitäisi olla tila 0%o\n"
 
-#: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1045
+#: plugins/sudoers/visudo.c:838 plugins/sudoers/visudo_json.c:1045
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "tiedoston %s jäsentäminen epäonnistui, tuntematon virhe"
 
-#: plugins/sudoers/visudo.c:848 plugins/sudoers/visudo_json.c:1054
+#: plugins/sudoers/visudo.c:854 plugins/sudoers/visudo_json.c:1054
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "jäsentämisvirhe tiedostossa %s lähellä riviä %d\n"
 
-#: plugins/sudoers/visudo.c:851 plugins/sudoers/visudo_json.c:1057
+#: plugins/sudoers/visudo.c:857 plugins/sudoers/visudo_json.c:1057
 #, c-format
 msgid "parse error in %s\n"
 msgstr "jäsentämisvirhe tiedostossa %s\n"
 
-#: plugins/sudoers/visudo.c:859 plugins/sudoers/visudo.c:866
+#: plugins/sudoers/visudo.c:865 plugins/sudoers/visudo.c:872
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: jäsentäminen valmis\n"
 
-#: plugins/sudoers/visudo.c:912
+#: plugins/sudoers/visudo.c:918
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s varattu, yritä myöhemmin uudelleen"
 
-#: plugins/sudoers/visudo.c:956
+#: plugins/sudoers/visudo.c:962
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "määritelty editori (%s) ei ole olemassa"
 
-#: plugins/sudoers/visudo.c:979
+#: plugins/sudoers/visudo.c:985
 #, c-format
 msgid "unable to stat editor (%s)"
 msgstr "funktion stat editor (%s) kutsuminen epäonnistui"
 
-#: plugins/sudoers/visudo.c:1027
+#: plugins/sudoers/visudo.c:1033
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "editoria ei löytynyt (editoripolku = %s)"
 
-#: plugins/sudoers/visudo.c:1130
+#: plugins/sudoers/visudo.c:1136
 #, c-format
 msgid "Error: cycle in %s `%s'"
 msgstr "Virhe: jakso kohteessa %s ”%s”"
 
-#: plugins/sudoers/visudo.c:1131
+#: plugins/sudoers/visudo.c:1137
 #, c-format
 msgid "Warning: cycle in %s `%s'"
 msgstr "Varoitus: jakso kohteessa %s ”%s”"
 
-#: plugins/sudoers/visudo.c:1135
+#: plugins/sudoers/visudo.c:1141
 #, c-format
 msgid "Error: %s `%s' referenced but not defined"
 msgstr "Virhe: %s ”%s” uudelleenviitattu, mutta ei määritelty"
 
-#: plugins/sudoers/visudo.c:1136
+#: plugins/sudoers/visudo.c:1142
 #, c-format
 msgid "Warning: %s `%s' referenced but not defined"
 msgstr "Varoitus: %s ”%s” uudelleenviitattu, mutta ei määritelty"
 
-#: plugins/sudoers/visudo.c:1275
+#: plugins/sudoers/visudo.c:1281
 #, c-format
 msgid "Warning: unused %s `%s'"
 msgstr "Varoitus: käyttämätön %s ”%s”"
 
-#: plugins/sudoers/visudo.c:1335
+#: plugins/sudoers/visudo.c:1394
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1738,7 +1742,7 @@ msgstr ""
 "%s - muokkaa sudoers-tiedostoa turvallisesti\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1337
+#: plugins/sudoers/visudo.c:1396
 msgid ""
 "\n"
 "Options:\n"
