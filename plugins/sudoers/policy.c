@@ -246,10 +246,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 #endif /* HAVE_BSD_AUTH_H */
-	if (MATCHES(*cur, "progname=")) {
-	    initprogname(*cur + sizeof("progname=") - 1);
-	    continue;
-	}
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
 	    set_interfaces(interfaces_string);
