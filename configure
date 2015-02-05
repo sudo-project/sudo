@@ -18610,6 +18610,17 @@ if test "x$ac_cv_func_setresuid" = xyes; then :
 _ACEOF
 
 	SKIP_SETREUID=yes
+	ac_fn_c_check_decl "$LINENO" "setresuid" "ac_cv_have_decl_setresuid" "$ac_includes_default"
+if test "x$ac_cv_have_decl_setresuid" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_SETRESUID $ac_have_decl
+_ACEOF
+
 	for ac_func in getresuid
 do :
   ac_fn_c_check_func "$LINENO" "getresuid" "ac_cv_func_getresuid"
@@ -18677,15 +18688,67 @@ _ACEOF
 fi
 done
 
-for ac_func in innetgr _innetgr
+for ac_func in innetgr
 do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  ac_fn_c_check_func "$LINENO" "innetgr" "ac_cv_func_innetgr"
+if test "x$ac_cv_func_innetgr" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+#define HAVE_INNETGR 1
 _ACEOF
- break
+
+    ac_fn_c_check_decl "$LINENO" "innetgr" "ac_cv_have_decl_innetgr" "
+$ac_includes_default
+#ifdef HAVE_NETGROUP_H
+# include <netgroup.h>
+#else
+# include <netdb.h>
+#endif /* HAVE_NETGROUP_H */
+
+"
+if test "x$ac_cv_have_decl_innetgr" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_INNETGR $ac_have_decl
+_ACEOF
+
+else
+
+    for ac_func in _innetgr
+do :
+  ac_fn_c_check_func "$LINENO" "_innetgr" "ac_cv_func__innetgr"
+if test "x$ac_cv_func__innetgr" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE__INNETGR 1
+_ACEOF
+
+	ac_fn_c_check_decl "$LINENO" "_innetgr" "ac_cv_have_decl__innetgr" "
+$ac_includes_default
+#ifdef HAVE_NETGROUP_H
+# include <netgroup.h>
+#else
+# include <netdb.h>
+#endif /* HAVE_NETGROUP_H */
+
+"
+if test "x$ac_cv_have_decl__innetgr" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__INNETGR $ac_have_decl
+_ACEOF
+
+
+fi
+done
+
+
 fi
 done
 
@@ -18696,6 +18759,18 @@ if test "x$ac_cv_func_getdomainname" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GETDOMAINNAME 1
 _ACEOF
+
+    ac_fn_c_check_decl "$LINENO" "getdomainname" "ac_cv_have_decl_getdomainname" "$ac_includes_default"
+if test "x$ac_cv_have_decl_getdomainname" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETDOMAINNAME $ac_have_decl
+_ACEOF
+
 
 else
 

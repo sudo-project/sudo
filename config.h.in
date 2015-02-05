@@ -89,6 +89,10 @@
    */
 #undef HAVE_DECL_ERRNO
 
+/* Define to 1 if you have the declaration of `getdomainname', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETDOMAINNAME
+
 /* Define to 1 if you have the declaration of `HOST_NAME_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_HOST_NAME_MAX
@@ -96,6 +100,10 @@
 /* Define to 1 if you have the declaration of `h_errno', and to 0 if you
    don't. */
 #undef HAVE_DECL_H_ERRNO
+
+/* Define to 1 if you have the declaration of `innetgr', and to 0 if you
+   don't. */
+#undef HAVE_DECL_INNETGR
 
 /* Define to 1 if you have the declaration of `LLONG_MAX', and to 0 if you
    don't. */
@@ -124,6 +132,10 @@
 /* Define to 1 if you have the declaration of `setauthdb', and to 0 if you
    don't. */
 #undef HAVE_DECL_SETAUTHDB
+
+/* Define to 1 if you have the declaration of `setresuid', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SETRESUID
 
 /* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
    don't. */
@@ -156,6 +168,10 @@
 /* Define to 1 if you have the declaration of `usrinfo', and to 0 if you
    don't. */
 #undef HAVE_DECL_USRINFO
+
+/* Define to 1 if you have the declaration of `_innetgr', and to 0 if you
+   don't. */
+#undef HAVE_DECL__INNETGR
 
 /* Define to 1 if you have the declaration of `_POSIX_HOST_NAME_MAX', and to 0
    if you don't. */

@@ -2451,6 +2451,7 @@ SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS([setresuid], [
 	SKIP_SETREUID=yes
+	AC_CHECK_DECLS([setresuid])
 	AC_CHECK_FUNCS([getresuid])
     ])
 fi
@@ -2462,8 +2463,29 @@ if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS([getifaddrs], [AC_CHECK_FUNCS([freeifaddrs])])
 fi
 AC_CHECK_FUNCS([lockf flock], [break])
-AC_CHECK_FUNCS([innetgr _innetgr], [break])
-AC_CHECK_FUNCS([getdomainname], [], [
+AC_CHECK_FUNCS([innetgr], [
+    AC_CHECK_DECLS([innetgr], [], [], [
+AC_INCLUDES_DEFAULT
+#ifdef HAVE_NETGROUP_H
+# include <netgroup.h>
+#else
+# include <netdb.h>
+#endif /* HAVE_NETGROUP_H */
+])], [
+    AC_CHECK_FUNCS([_innetgr], [
+	AC_CHECK_DECLS([_innetgr], [], [], [
+AC_INCLUDES_DEFAULT
+#ifdef HAVE_NETGROUP_H
+# include <netgroup.h>
+#else
+# include <netdb.h>
+#endif /* HAVE_NETGROUP_H */
+	])
+    ])
+])
+AC_CHECK_FUNCS([getdomainname], [
+    AC_CHECK_DECLS([getdomainname])
+], [
     AC_CHECK_FUNCS([sysinfo], [AC_CHECK_HEADERS([sys/systeminfo.h])])
 ])
 AC_CHECK_FUNCS([utimes], [

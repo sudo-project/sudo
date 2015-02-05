@@ -340,13 +340,24 @@ extern int errno;
 #endif /* HAVE_SETEUID */
 
 /*
+ * Older HP-UX does not declare setresuid() or setresgid().
+ */
+#if defined(HAVE_DECL_SETRESUID) && !HAVE_DECL_SETRESUID
+int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
+#endif
+
+/*
  * HP-UX does not declare innetgr() or getdomainname().
  * Solaris does not declare getdomainname().
  */
-#if defined(__hpux)
+#if defined(HAVE_DECL_INNETGR) && !HAVE_DECL_INNETGR
 int innetgr(const char *, const char *, const char *, const char *);
 #endif
-#if defined(__hpux) || defined(__sun)
+#if defined(HAVE_DECL__INNETGR) && !HAVE_DECL__INNETGR
+int _innetgr(const char *, const char *, const char *, const char *);
+#endif
+#if defined(HAVE_DECL_GETDOMAINNAME) && !HAVE_DECL_GETDOMAINNAME
 int getdomainname(char *, size_t);
 #endif
 
