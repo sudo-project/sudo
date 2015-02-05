@@ -1589,9 +1589,11 @@ runas_setgroups(void)
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
-    if (sudo_setgroups(grlist->ngids, grlist->gids) < 0) {
-	sudo_grlist_delref(grlist);
-	grlist = NULL;
+    if (grlist != NULL) {
+	if (sudo_setgroups(grlist->ngids, grlist->gids) < 0) {
+	    sudo_grlist_delref(grlist);
+	    grlist = NULL;
+	}
     }
     debug_return_ptr(grlist);
 }
