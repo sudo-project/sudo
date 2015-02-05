@@ -2829,8 +2829,6 @@ as_fn_append ac_header_list " sys/sysmacros.h"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
 as_fn_append ac_func_list " strftime"
-as_fn_append ac_func_list " strrchr"
-as_fn_append ac_func_list " strtoll"
 as_fn_append ac_func_list " sysconf"
 as_fn_append ac_func_list " tzset"
 as_fn_append ac_func_list " seteuid"
@@ -18035,10 +18033,6 @@ _ACEOF
 
 fi
 done
-
-
-
-
 
 
 

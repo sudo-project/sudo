@@ -660,14 +660,8 @@
 /* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
 
-/* Define to 1 if you have the `strrchr' function. */
-#undef HAVE_STRRCHR
-
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
-
-/* Define to 1 if you have the `strtoll' function. */
-#undef HAVE_STRTOLL
 
 /* Define to 1 if you have the `strtonum' function. */
 #undef HAVE_STRTONUM
