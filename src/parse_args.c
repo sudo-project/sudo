@@ -379,8 +379,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     }
     env_add[nenv] = NULL;
 
-    argc -= optind;
-    argv += optind;
+    if (argc > 0) {
+	argc -= optind;
+	argv += optind;
+    }
 
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */

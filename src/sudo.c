@@ -183,7 +183,7 @@ main(int argc, char *argv[], char *envp[])
 	NULL, NULL, sudo_conf_debug_files(getprogname()));
 
     /* Make sure we are setuid root. */
-    sudo_check_suid(argv[0]);
+    sudo_check_suid(argc > 0 ? argv[0] : "sudo");
 
     /* Reset signal mask, save signal state and make sure fds 0-2 are open. */
     (void) sigemptyset(&mask);
