@@ -128,7 +128,7 @@ sudo_getpwuid(uid_t uid)
 
     key.k.uid = uid;
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
-	item = (struct cache_item *) node->data;
+	item = node->data;
 	goto done;
     }
     /*
@@ -171,7 +171,7 @@ sudo_getpwnam(const char *name)
 
     key.k.name = (char *) name;
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
-	item = (struct cache_item *) node->data;
+	item = node->data;
 	goto done;
     }
     /*
@@ -263,7 +263,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	}
 	if ((node = rbinsert(pwcache, item)) != NULL) {
 	    /* Already exists. */
-	    item = (struct cache_item *) node->data;
+	    item = node->data;
 	    if (item->d.pw == NULL) {
 		/* Negative cache entry, replace with ours. */
 		sudo_pw_delref_item(item);
@@ -390,7 +390,7 @@ sudo_getgrgid(gid_t gid)
 
     key.k.gid = gid;
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
-	item = (struct cache_item *) node->data;
+	item = node->data;
 	goto done;
     }
     /*
@@ -427,7 +427,7 @@ sudo_getgrnam(const char *name)
 
     key.k.name = (char *) name;
     if ((node = rbfind(grcache_byname, &key)) != NULL) {
-	item = (struct cache_item *) node->data;
+	item = node->data;
 	goto done;
     }
     /*
@@ -499,7 +499,7 @@ sudo_fakegrnam(const char *group)
 	}
 	if ((node = rbinsert(grcache, item)) != NULL) {
 	    /* Already exists. */
-	    item = (struct cache_item *) node->data;
+	    item = node->data;
 	    if (item->d.gr == NULL) {
 		/* Negative cache entry, replace with ours. */
 		sudo_gr_delref_item(item);
@@ -600,7 +600,7 @@ sudo_get_grlist(const struct passwd *pw)
 
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) != NULL) {
-	item = (struct cache_item *) node->data;
+	item = node->data;
 	goto done;
     }
     /*
