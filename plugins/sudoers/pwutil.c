@@ -211,8 +211,8 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
     const char *shell)
 {
     struct cache_item_pw *pwitem;
+    struct cache_item *item;
     struct passwd *pw;
-    struct rbnode *node;
     size_t len, name_len, home_len, shell_len;
     int i;
     debug_decl(sudo_mkpwent, SUDOERS_DEBUG_NSS)
@@ -231,6 +231,9 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	home_len + 1 /* pw_dir */ + shell_len + 1 /* pw_shell */;
 
     for (i = 0; i < 2; i++) {
+	struct rbtree *pwcache;
+	struct rbnode *node;
+
 	pwitem = sudo_ecalloc(1, len);
 	pw = &pwitem->pw;
 	pw->pw_uid = uid;
@@ -246,28 +249,33 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	pw->pw_shell = pw->pw_dir + home_len + 1;
 	memcpy(pw->pw_shell, shell, shell_len + 1);
 
-	pwitem->cache.refcnt = 1;
-	pwitem->cache.d.pw = pw;
+	item = &pwitem->cache;
+	item->refcnt = 1;
+	item->d.pw = pw;
 	if (i == 0) {
 	    /* Store by uid if it doesn't already exist. */
-	    pwitem->cache.k.uid = pw->pw_uid;
-	    if ((node = rbinsert(pwcache_byuid, &pwitem->cache)) != NULL) {
-		/* Already exists, free the item we created. */
-		sudo_efree(pwitem);
-		pwitem = (struct cache_item_pw *) node->data;
-	    }
+	    item->k.uid = pw->pw_uid;
+	    pwcache = pwcache_byuid;
 	} else {
 	    /* Store by name if it doesn't already exist. */
-	    pwitem->cache.k.name = pw->pw_name;
-	    if ((node = rbinsert(pwcache_byname, &pwitem->cache)) != NULL) {
-		/* Already exists, free the item we created. */
+	    item->k.name = pw->pw_name;
+	    pwcache = pwcache_byname;
+	}
+	if ((node = rbinsert(pwcache, item)) != NULL) {
+	    /* Already exists. */
+	    item = (struct cache_item *) node->data;
+	    if (item->d.pw == NULL) {
+		/* Negative cache entry, replace with ours. */
+		sudo_pw_delref_item(item);
+		item = node->data = &pwitem->cache;
+	    } else {
+		/* Good entry, discard our fake one. */
 		sudo_efree(pwitem);
-		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	}
     }
-    pwitem->cache.refcnt++;
-    debug_return_ptr(&pwitem->pw);
+    item->refcnt++;
+    debug_return_ptr(item->d.pw);
 }
 
 /*
@@ -451,9 +459,9 @@ struct group *
 sudo_fakegrnam(const char *group)
 {
     struct cache_item_gr *gritem;
+    struct cache_item *item;
     const char *errstr;
     struct group *gr;
-    struct rbnode *node;
     size_t len, name_len;
     int i;
     debug_decl(sudo_fakegrnam, SUDOERS_DEBUG_NSS)
@@ -462,6 +470,9 @@ sudo_fakegrnam(const char *group)
     len = sizeof(*gritem) + name_len + 1;
 
     for (i = 0; i < 2; i++) {
+	struct rbtree *grcache;
+	struct rbnode *node;
+
 	gritem = sudo_ecalloc(1, len);
 	gr = &gritem->gr;
 	gr->gr_gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
@@ -474,28 +485,33 @@ sudo_fakegrnam(const char *group)
 	    debug_return_ptr(NULL);
 	}
 
-	gritem->cache.refcnt = 1;
-	gritem->cache.d.gr = gr;
+	item = &gritem->cache;
+	item->refcnt = 1;
+	item->d.gr = gr;
 	if (i == 0) {
 	    /* Store by gid if it doesn't already exist. */
-	    gritem->cache.k.gid = gr->gr_gid;
-	    if ((node = rbinsert(grcache_bygid, &gritem->cache)) != NULL) {
-		/* Already exists, free the item we created. */
-		sudo_efree(gritem);
-		gritem = (struct cache_item_gr *) node->data;
-	    }
+	    item->k.gid = gr->gr_gid;
+	    grcache = grcache_bygid;
 	} else {
 	    /* Store by name, overwriting cached version. */
 	    gritem->cache.k.name = gr->gr_name;
-	    if ((node = rbinsert(grcache_byname, &gritem->cache)) != NULL) {
-		/* Already exists, free the item we created. */
+	    grcache = grcache_byname;
+	}
+	if ((node = rbinsert(grcache, item)) != NULL) {
+	    /* Already exists. */
+	    item = (struct cache_item *) node->data;
+	    if (item->d.gr == NULL) {
+		/* Negative cache entry, replace with ours. */
+		sudo_gr_delref_item(item);
+		item = node->data = &gritem->cache;
+	    } else {
+		/* Good entry, discard our fake one. */
 		sudo_efree(gritem);
-		gritem = (struct cache_item_gr *) node->data;
 	    }
 	}
     }
-    gritem->cache.refcnt++;
-    debug_return_ptr(&gritem->gr);
+    item->refcnt++;
+    debug_return_ptr(item->d.gr);
 }
 
 void
