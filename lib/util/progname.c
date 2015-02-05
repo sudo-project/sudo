@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,10 +42,19 @@ void
 initprogname(const char *name)
 {
 # ifdef HAVE_SETPROGNAME
+    const char *progname;
+
+    /* Fall back on "name" if getprogname() returns an empty string. */
+    if ((progname = getprogname()) != NULL && *progname != '\0')
+	name = progname;
+
     /* Check for libtool prefix and strip it if present. */
-    name = getprogname();
     if (name[0] == 'l' && name[1] == 't' && name[2] == '-' && name[3] != '\0')
-	setprogname(name + 3);
+	name += 3;
+
+    /* Update internal progname if needed. */
+    if (name != progname)
+	setprogname(name);
 # endif
     return;
 }
@@ -60,15 +69,17 @@ initprogname(const char *name)
 # ifdef HAVE___PROGNAME
     extern const char *__progname;
 
-    progname = __progname;
-# else
+    if (__progname != NULL && *__progname != '\0')
+	progname = __progname;
+    else
+# endif
     if ((progname = strrchr(name, '/')) != NULL) {
 	progname++;
     } else {
 	progname = name;
     }
-#endif
 
+    /* Check for libtool prefix and strip it if present. */
     if (progname[0] == 'l' && progname[1] == 't' && progname[2] == '-' &&
 	progname[3] != '\0')
 	progname += 3;
