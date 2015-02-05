@@ -2339,7 +2339,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo regcomp strftime strrchr strtoll sysconf tzset])
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime strrchr strtoll sysconf tzset])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)

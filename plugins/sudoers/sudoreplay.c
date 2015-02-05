@@ -69,18 +69,16 @@
 #  include <ndir.h>
 # endif
 #endif
-#ifdef HAVE_REGCOMP
-# include <regex.h>
-#endif
-#ifdef HAVE_ZLIB_H
-# include <zlib.h>
-#endif
-#include <signal.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#include <regex.h>
+#include <signal.h>
+#ifdef HAVE_ZLIB_H
+# include <zlib.h>
+#endif
 
 #include <pathnames.h>
 
@@ -151,11 +149,7 @@ struct search_node {
     bool negated;
     bool or;
     union {
-#ifdef HAVE_REGCOMP
 	regex_t cmdre;
-#else
-	char *pattern;
-#endif
 	time_t tstamp;
 	char *cwd;
 	char *tty;
@@ -204,12 +198,6 @@ static void sudoreplay_cleanup(void);
 static void sudoreplay_handler(int);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
-
-#ifdef HAVE_REGCOMP
-# define REGEX_T	regex_t
-#else
-# define REGEX_T	char
-#endif
 
 #define VALID_ID(s) (isalnum((unsigned char)(s)[0]) && \
     isalnum((unsigned char)(s)[1]) && isalnum((unsigned char)(s)[2]) && \
@@ -715,13 +703,10 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	} else {
 	    if (*(++av) == NULL)
 		sudo_fatalx(U_("%s requires an argument"), av[-1]);
-#ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
 		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
 		    sudo_fatalx(U_("invalid regular expression: %s"), *av);
-	    } else
-#endif
-	    if (type == ST_TODATE || type == ST_FROMDATE) {
+	    } else if (type == ST_TODATE || type == ST_FROMDATE) {
 		sn->u.tstamp = get_date(*av);
 		if (sn->u.tstamp == -1)
 		    sudo_fatalx(U_("could not parse date \"%s\""), *av);
@@ -771,7 +756,6 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 	    res = strcmp(sn->u.user, log->user) == 0;
 	    break;
 	case ST_PATTERN:
-#ifdef HAVE_REGCOMP
 	    rc = regexec(&sn->u.cmdre, log->cmd, 0, NULL, 0);
 	    if (rc && rc != REG_NOMATCH) {
 		char buf[BUFSIZ];
@@ -779,9 +763,6 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 		sudo_fatalx("%s", buf);
 	    }
 	    res = rc == REG_NOMATCH ? 0 : 1;
-#else
-	    res = strstr(log.cmd, sn->u.pattern) != NULL;
-#endif
 	    break;
 	case ST_FROMDATE:
 	    res = log->tstamp >= sn->u.tstamp;
@@ -935,7 +916,7 @@ free_log_info(struct log_info *li)
 }
 
 static int
-list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
+list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
     const char *timestr;
@@ -992,7 +973,7 @@ session_compare(const void *v1, const void *v2)
 
 /* XXX - always returns 0, calls sudo_fatal() on failure */
 static int
-find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
+find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 {
     DIR *d;
     struct dirent *dp;
@@ -1079,22 +1060,18 @@ static int
 list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
 {
-    REGEX_T rebuf, *re = NULL;
+    regex_t rebuf, *re = NULL;
     debug_decl(list_sessions, SUDO_DEBUG_UTIL)
 
     /* Parse search expression if present */
     parse_expr(&search_expr, argv, false);
 
-#ifdef HAVE_REGCOMP
     /* optional regex */
     if (pattern) {
 	re = &rebuf;
 	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
 	    sudo_fatalx(U_("invalid regular expression: %s"), pattern);
     }
-#else
-    re = (char *) pattern;
-#endif /* HAVE_REGCOMP */
 
     debug_return_int(find_sessions(session_dir, re, user, tty));
 }
