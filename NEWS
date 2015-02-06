@@ -64,6 +64,11 @@ What's new in Sudo 1.8.12
  * The mail_always sudoers option no longer sends mail for "sudo -l"
    or "sudo -v" unless the user is unable to authenticate themselves.
 
+ * Fixed a crash when sudo is run with an empty argument vector.
+
+ * Fixed two potential crashes when sudo is run with very low
+   resource limits.
+
 What's new in Sudo 1.8.11p2
 
  * Fixed a bug where dynamic shared objects loaded from a plugin
