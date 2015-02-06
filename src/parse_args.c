@@ -180,6 +180,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
 
+    /* Is someone trying something funny? */
+    if (argc <= 0)
+	usage(1);
+
     env_add = sudo_emallocarray(env_size, sizeof(char *));
 
     /* Pass progname to plugin so it can call initprogname() */
@@ -379,10 +383,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     }
     env_add[nenv] = NULL;
 
-    if (argc > 0) {
-	argc -= optind;
-	argv += optind;
-    }
+    argc -= optind;
+    argv += optind;
 
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
