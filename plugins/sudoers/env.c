@@ -187,6 +187,7 @@ static const char *initial_checkenv_table[] = {
     "LC_*",
     "LINGUAS",
     "TERM",
+    "TZ",
     NULL
 };
 
@@ -202,7 +203,6 @@ static const char *initial_keepenv_table[] = {
     "PATH",
     "PS1",
     "PS2",
-    "TZ",
     "XAUTHORITY",
     "XAUTHORIZATION",
     NULL
@@ -588,6 +588,54 @@ matches_env_delete(const char *var)
 }
 
 /*
+ * Sanity-check the TZ environment variable.
+ * On many systems it is possible to set this to a pathname.
+ */
+static bool
+tz_is_sane(const char *tzval)
+{
+    const char *cp;
+    char lastch;
+    debug_decl(tz_is_sane, SUDOERS_DEBUG_ENV)
+
+    /* tzcode treats a value beginning with a ':' as a path. */
+    if (tzval[0] == ':')
+	tzval++;
+
+    /* Reject fully-qualified TZ that doesn't being with the zoneinfo dir. */
+    if (tzval[0] == '/') {
+#ifdef _PATH_ZONEINFO
+	if (strncmp(tzval, _PATH_ZONEINFO, sizeof(_PATH_ZONEINFO) - 1) != 0 ||
+	    tzval[sizeof(_PATH_ZONEINFO) - 1] != '/')
+	    debug_return_bool(false);
+#else
+	/* Assume the worst. */
+	debug_return_bool(false);
+#endif
+    }
+
+    /*
+     * Make sure TZ only contains printable non-space characters
+     * and does not contain a '..' path element.
+     */
+    lastch = '/';
+    for (cp = tzval; *cp != '\0'; cp++) {
+	if (isspace((unsigned char)*cp) || !isprint((unsigned char)*cp))
+	    debug_return_bool(false);
+	if (lastch == '/' && cp[0] == '.' && cp[1] == '.' &&
+	    (cp[2] == '/' || cp[2] == '\0'))
+	    debug_return_bool(false);
+	lastch = *cp;
+    }
+
+    /* Reject extra long TZ values (even if not a path). */
+    if ((size_t)(cp - tzval) >= PATH_MAX)
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+/*
  * Apply the env_check list.
  * Returns true if the variable is allowed, false if denied
  * or -1 if no match.
@@ -600,9 +648,14 @@ matches_env_check(const char *var, bool *full_match)
 
     /* Skip anything listed in env_check that includes '/' or '%'. */
     if (matches_env_list(var, &def_env_check, full_match)) {
-	const char *val = strchr(var, '=');
-	if (val != NULL)
-	    keepit = !strpbrk(++val, "/%");
+	if (strncmp(var, "TZ=", 3) == 0) {
+	    /* Special case for TZ */
+	    keepit = tz_is_sane(var + 3);
+	} else {
+	    const char *val = strchr(var, '=');
+	    if (val != NULL)
+		keepit = !strpbrk(++val, "/%");
+	}
     }
     debug_return_bool(keepit);
 }

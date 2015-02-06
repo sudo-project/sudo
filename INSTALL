@@ -145,6 +145,16 @@ Directory and file names:
 	    /var/db, /var/lib, /var/adm, /usr/adm
 	This directory should not be cleared when the system boots.
 
+  --with-tzdir=DIR
+        Set the directory to the system's time zone data files.  This 
+	is only used when sanitizing the TZ environment variable to
+	allow for fully-qualified paths in TZ.
+        By default, configure will look for an existing "zoneinfo"
+	directory in the following locations:
+	    /usr/share /usr/share/lib /usr/lib /etc
+	If no zoneinfo directory is found, the TZ variable may not
+	contain a fully-qualified path.
+
 Compilation options:
   --disable-hardening
 	Disable the use of compiler/linker exploit mitigation options

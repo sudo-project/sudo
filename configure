@@ -889,6 +889,7 @@ with_timedir
 with_rundir
 with_vardir
 with_iologdir
+with_tzdir
 with_sendmail
 with_sudoers_mode
 with_sudoers_uid
@@ -1686,6 +1687,7 @@ Optional Packages:
   --with-rundir=DIR       path to the sudo time stamp parent dir
   --with-vardir=DIR       path to the sudo var dir
   --with-iologdir=DIR     directory to store sudo I/O log files in
+  --with-tzdir=DIR        path to the time zone data directory
   --with-sendmail         set path to sendmail
   --without-sendmail      do not send mail at all
   --with-sudoers-mode     mode of sudoers file (defaults to 0440)
@@ -4823,6 +4825,16 @@ if test "${with_iologdir+set}" = set; then :
     yes)    ;;
     no)     as_fn_error $? "\"--without-iologdir not supported.\"" "$LINENO" 5
 	    ;;
+esac
+fi
+
+
+
+# Check whether --with-tzdir was given.
+if test "${with_tzdir+set}" = set; then :
+  withval=$with_tzdir; case $with_tzdir in
+    yes)	as_fn_error $? "\"must give --with-tzdir an argument.\"" "$LINENO" 5
+		;;
 esac
 fi
 
@@ -23366,6 +23378,27 @@ EOF
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $iolog_dir" >&5
 $as_echo "$iolog_dir" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking time zone data directory" >&5
+$as_echo_n "checking time zone data directory... " >&6; }
+tzdir="$with_tzdir"
+if test -z "$tzdir"; then
+    tzdir=no
+    for d in /usr/share /usr/share/lib /usr/lib /etc; do
+	if test -d "$d/zoneinfo"; then
+	    tzdir="$d/zoneinfo"
+	    break
+	fi
+    done
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $tzdir" >&5
+$as_echo "$tzdir" >&6; }
+if test "${tzdir}" != "no"; then
+    cat >>confdefs.h <<EOF
+#define _PATH_ZONEINFO "$tzdir"
+EOF
+
+fi
 
 
 

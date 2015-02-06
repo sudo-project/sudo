@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 21, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 6, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3415,13 +3415,44 @@ The default value is
 .TP 18n
 env_check
 Environment variables to be removed from the user's environment if
-the variable's value contains
+unless they are considered
+\(lqsafe\(rq.
+For all variables except
+\fRTZ\fR,
+\(lqsafe\(rq
+means that the variable's value does not contain any
 \(oq%\(cq
 or
 \(oq/\(cq
 characters.
 This can be used to guard against printf-style format vulnerabilities
 in poorly-written programs.
+The
+\fRTZ\fR
+variable is considerd unsafe if any of the following are true:
+.PP
+.RS 18n
+.PD 0
+.TP 4n
+\fB\(bu\fR
+It consists of a fully-qualified path name that does not match
+the location of the
+\fIzoneinfo\fR
+directory.
+.PD
+.TP 4n
+\fB\(bu\fR
+It contains a
+\fI..\fR
+path element.
+.TP 4n
+\fB\(bu\fR
+It contains white space or non-printable characters.
+.TP 4n
+\fB\(bu\fR
+It is longer than the value of
+\fRPATH_MAX\fR.
+.PP
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using
@@ -3443,6 +3474,7 @@ is run by root with
 the
 \fB\-V\fR
 option.
+.RE
 .TP 18n
 env_delete
 Environment variables to be removed from the user's environment when the

@@ -69,6 +69,9 @@ What's new in Sudo 1.8.12
  * Fixed two potential crashes when sudo is run with very low
    resource limits.
 
+ * The TZ environment variable is now checked for safety instead
+   of simply being copied to the environment of the command.
+
 What's new in Sudo 1.8.11p2
 
  * Fixed a bug where dynamic shared objects loaded from a plugin

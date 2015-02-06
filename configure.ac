@@ -828,6 +828,12 @@ AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store
 	    ;;
 esac])
 
+AC_ARG_WITH(tzdir, [AS_HELP_STRING([--with-tzdir=DIR], [path to the time zone data directory])],
+[case $with_tzdir in
+    yes)	AC_MSG_ERROR(["must give --with-tzdir an argument."])
+		;;
+esac])
+
 AC_ARG_WITH(sendmail, [AS_HELP_STRING([--with-sendmail], [set path to sendmail])
 AS_HELP_STRING([--without-sendmail], [do not send mail at all])],
 [case $with_sendmail in
@@ -3757,6 +3763,7 @@ SUDO_LOGFILE
 SUDO_RUNDIR
 SUDO_VARDIR
 SUDO_IO_LOGDIR
+SUDO_TZDIR
 
 dnl
 dnl Turn warnings into errors.

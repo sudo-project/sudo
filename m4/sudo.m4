@@ -1,6 +1,6 @@
 dnl Local m4 macros for autoconf (used by sudo)
 dnl
-dnl Copyright (c) 1994-1996, 1998-2005, 2007-2014
+dnl Copyright (c) 1994-1996, 1998-2005, 2007-2015
 dnl	Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 dnl XXX - should cache values in all cases!!!
@@ -79,6 +79,26 @@ elif test -d "/usr/adm"; then
     SUDO_DEFINE(_PATH_SUDO_LOGFILE, "/usr/adm/sudo.log")
 else
     AC_MSG_RESULT(unknown, you will have to set _PATH_SUDO_LOGFILE by hand)
+fi
+])dnl
+
+dnl
+dnl Detect time zone file directory, if any.
+dnl
+AC_DEFUN([SUDO_TZDIR], [AC_MSG_CHECKING(time zone data directory)
+tzdir="$with_tzdir"
+if test -z "$tzdir"; then
+    tzdir=no
+    for d in /usr/share /usr/share/lib /usr/lib /etc; do
+	if test -d "$d/zoneinfo"; then
+	    tzdir="$d/zoneinfo"
+	    break
+	fi
+    done
+fi
+AC_MSG_RESULT([$tzdir])
+if test "${tzdir}" != "no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_ZONEINFO, "$tzdir")
 fi
 ])dnl
 
