@@ -18631,6 +18631,16 @@ if test "x$ac_cv_func_getresuid" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GETRESUID 1
 _ACEOF
+ ac_fn_c_check_decl "$LINENO" "getresuid" "ac_cv_have_decl_getresuid" "$ac_includes_default"
+if test "x$ac_cv_have_decl_getresuid" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETRESUID $ac_have_decl
+_ACEOF
 
 fi
 done
@@ -18763,7 +18773,11 @@ if test "x$ac_cv_func_getdomainname" = xyes; then :
 #define HAVE_GETDOMAINNAME 1
 _ACEOF
 
-    ac_fn_c_check_decl "$LINENO" "getdomainname" "ac_cv_have_decl_getdomainname" "$ac_includes_default"
+    ac_fn_c_check_decl "$LINENO" "getdomainname" "ac_cv_have_decl_getdomainname" "
+$ac_includes_default
+#include <netdb.h>
+
+"
 if test "x$ac_cv_have_decl_getdomainname" = xyes; then :
   ac_have_decl=1
 else

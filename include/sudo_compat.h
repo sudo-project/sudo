@@ -343,8 +343,12 @@ extern int errno;
  * Older HP-UX does not declare setresuid() or setresgid().
  */
 #if defined(HAVE_DECL_SETRESUID) && !HAVE_DECL_SETRESUID
-int setresuid(uid_t ruid, uid_t euid, uid_t suid);
-int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
+int setresuid(uid_t, uid_t, uid_t);
+int setresgid(gid_t, gid_t, gid_t);
+#endif
+#if defined(HAVE_DECL_GETRESUID) && !HAVE_DECL_GETRESUID
+int getresuid(uid_t *, uid_t *, uid_t *);
+int getresgid(gid_t *, gid_t *, gid_t *);
 #endif
 
 /*

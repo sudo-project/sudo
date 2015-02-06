@@ -2458,7 +2458,7 @@ if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS([setresuid], [
 	SKIP_SETREUID=yes
 	AC_CHECK_DECLS([setresuid])
-	AC_CHECK_FUNCS([getresuid])
+	AC_CHECK_FUNCS([getresuid], [AC_CHECK_DECLS([getresuid])])
     ])
 fi
 if test -z "$SKIP_SETREUID"; then
@@ -2490,7 +2490,10 @@ AC_INCLUDES_DEFAULT
     ])
 ])
 AC_CHECK_FUNCS([getdomainname], [
-    AC_CHECK_DECLS([getdomainname])
+    AC_CHECK_DECLS([getdomainname], [], [], [
+AC_INCLUDES_DEFAULT
+#include <netdb.h>
+    ])
 ], [
     AC_CHECK_FUNCS([sysinfo], [AC_CHECK_HEADERS([sys/systeminfo.h])])
 ])

@@ -93,6 +93,10 @@
    don't. */
 #undef HAVE_DECL_GETDOMAINNAME
 
+/* Define to 1 if you have the declaration of `getresuid', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETRESUID
+
 /* Define to 1 if you have the declaration of `HOST_NAME_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_HOST_NAME_MAX
