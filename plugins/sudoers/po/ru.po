@@ -2,21 +2,22 @@
 # This file is put in the public domain.
 # This file is distributed under the same license as the sudo package.
 #
-# Artem Vorotnikov <artem@vorotnikov.me>, 2015
+# Artem Vorotnikov <artem@vorotnikov.me>, 2015.
+# Pavel Maryanov <acid@jack.kiev.ua>, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.8.12b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2014-11-20 13:33-0700\n"
-"PO-Revision-Date: 2015-02-07 01:10+0300\n"
-"Last-Translator: Artem Vorotnikov <artem@vorotnikov.me>\n"
+"PO-Revision-Date: 2015-02-07 15:54+0200\n"
+"Last-Translator: Pavel Maryanov <acid@jack.kiev.ua>\n"
 "Language-Team: Russian <gnu@mx.ru>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 1.7.3\n"
+"X-Generator: Poedit 1.6.5\n"
 
 #: confstr.sh:1
 msgid "syntax error"
@@ -36,7 +37,7 @@ msgstr "Пароль: "
 
 #: confstr.sh:5
 msgid "*** SECURITY information for %h ***"
-msgstr "*** Инфо о БЕЗОПАСНОСТИ для %h ***"
+msgstr "*** Данные БЕЗОПАСНОСТИ для %h ***"
 
 #: confstr.sh:6
 msgid "Sorry, try again."
@@ -49,16 +50,16 @@ msgstr ""
 #: plugins/sudoers/alias.c:136
 #, c-format
 msgid "Alias `%s' already defined"
-msgstr "Прозвище `%s' уже определено"
+msgstr "Псевдоним «%s» уже определён"
 
 #: plugins/sudoers/auth/bsdauth.c:75
 #, c-format
 msgid "unable to get login class for user %s"
-msgstr "невозможно получить класс логина для пользователя %s"
+msgstr "не удаётся получить класс логина для пользователя %s"
 
 #: plugins/sudoers/auth/bsdauth.c:80
 msgid "unable to begin bsd authentication"
-msgstr "невозможно начать bsd-аутентификацию"
+msgstr "не удаётся начать BSD-аутентификацию"
 
 #: plugins/sudoers/auth/bsdauth.c:88
 msgid "invalid authentication type"
@@ -66,15 +67,15 @@ msgstr "некорректный тип аутентификации"
 
 #: plugins/sudoers/auth/bsdauth.c:97
 msgid "unable to initialize BSD authentication"
-msgstr "невозможно запустить BSD-аутентификацию"
+msgstr "не удаётся запустить BSD-аутентификацию"
 
 #: plugins/sudoers/auth/fwtk.c:59
 msgid "unable to read fwtk config"
-msgstr "невозможно прочитать конфигурацию ftwk"
+msgstr "не удаётся прочитать конфигурацию ftwk"
 
 #: plugins/sudoers/auth/fwtk.c:64
 msgid "unable to connect to authentication server"
-msgstr "невозможно связаться с сервером аутентификации"
+msgstr "не удаётся связаться с сервером аутентификации"
 
 #: plugins/sudoers/auth/fwtk.c:70 plugins/sudoers/auth/fwtk.c:94
 #: plugins/sudoers/auth/fwtk.c:127
@@ -93,72 +94,72 @@ msgstr ""
 #: plugins/sudoers/auth/kerb5.c:116
 #, c-format
 msgid "%s: unable to convert principal to string ('%s'): %s"
-msgstr "%s: невозможно преобразовать принципал в строку ('%s'): %s"
+msgstr "%s: не удаётся преобразовать принципал в строку ('%s'): %s"
 
 #: plugins/sudoers/auth/kerb5.c:158
 #, c-format
 msgid "%s: unable to parse '%s': %s"
-msgstr "%s: ошибка чтения '%s': %s"
+msgstr "%s: не удаётся прочитать '%s': %s"
 
 #: plugins/sudoers/auth/kerb5.c:167
 #, c-format
 msgid "%s: unable to resolve credential cache: %s"
-msgstr "%s: ошибка разбора кэша учётных данных: %s"
+msgstr "%s: не удаётся разрешить кэш учётных данных: %s"
 
 #: plugins/sudoers/auth/kerb5.c:214
 #, c-format
 msgid "%s: unable to allocate options: %s"
-msgstr "%s: ошибка выделения опций: %s"
+msgstr "%s: не удаётся выделить параметры: %s"
 
 #: plugins/sudoers/auth/kerb5.c:229
 #, c-format
 msgid "%s: unable to get credentials: %s"
-msgstr "%s: ошибка получения учётных данных: %s"
+msgstr "%s: не удаётся получить учётные данные: %s"
 
 #: plugins/sudoers/auth/kerb5.c:242
 #, c-format
 msgid "%s: unable to initialize credential cache: %s"
-msgstr "%s: ошибка инициализации кеша учётных данных: %s"
+msgstr "%s: не удаётся инициализировать кэш учётных данных: %s"
 
 #: plugins/sudoers/auth/kerb5.c:245
 #, c-format
 msgid "%s: unable to store credential in cache: %s"
-msgstr "%s: ошибка сохранения учётных данных в кэше: %s"
+msgstr "%s: не удаётся сохранить учётные данные в кэше: %s"
 
 #: plugins/sudoers/auth/kerb5.c:309
 #, c-format
 msgid "%s: unable to get host principal: %s"
-msgstr "%s: ошибка получения принципала хоста: %s"
+msgstr "%s: не удаётся получить принципал хоста: %s"
 
 #: plugins/sudoers/auth/kerb5.c:323
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr "%s: Ошибка проверки TGT! Нас атакуют?!: %s"
+msgstr "%s: Не удаётся проверить TGT. Нас атакуют?!: %s"
 
 #: plugins/sudoers/auth/pam.c:98
 msgid "unable to initialize PAM"
-msgstr "ошибка запуска PAM"
+msgstr "не удаётся инициализировать PAM"
 
 #: plugins/sudoers/auth/pam.c:149
 msgid "account validation failure, is your account locked?"
-msgstr "ошибка валидации учётной записи - она заблокирована?"
+msgstr "ошибка проверки учётной записи. Она заблокирована?"
 
 #: plugins/sudoers/auth/pam.c:153
 msgid "Account or password is expired, reset your password and try again"
-msgstr "Учётные данные устарели, сбросьте пароль и попробуйте ещё раз"
+msgstr "Учётные данные устарели. Сбросьте пароль и попробуйте ещё раз"
 
 #: plugins/sudoers/auth/pam.c:161
 #, c-format
 msgid "unable to change expired password: %s"
-msgstr "ошибка смены устаревшего пароля: %s"
+msgstr "не удаётся сменить устаревший пароль: %s"
 
 #: plugins/sudoers/auth/pam.c:166
 msgid "Password expired, contact your system administrator"
-msgstr "Пароль устарел, свяжитесь с системным администратором"
+msgstr "Пароль устарел. Обратитесь к системному администратору"
 
 #: plugins/sudoers/auth/pam.c:170
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
-msgstr "Учётная запись истекла или в настройках PAM нет раздела \"account\" для sudo, свяжитесь с системным администратором"
+msgstr "Срок действия учётной записи истёк или в настройках PAM нет раздела «account» для sudo. Обратитесь к системному администратору"
 
 #: plugins/sudoers/auth/pam.c:187
 #, c-format
