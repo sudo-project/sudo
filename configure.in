@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.10p8], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.10p9], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h zlib/zconf.h)
 dnl
 dnl Note: this must come after AC_INIT
@@ -727,6 +727,12 @@ AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store
 [case $with_iologdir in
     yes)	;;
     no)		;;
+esac])
+
+AC_ARG_WITH(tzdir, [AS_HELP_STRING([--with-tzdir=DIR], [path to the time zone data directory])],
+[case $with_tzdir in
+    yes)	AC_MSG_ERROR(["must give --with-tzdir an argument."])
+		;;
 esac])
 
 AC_ARG_WITH(sendmail, [AS_HELP_STRING([--with-sendmail], [set path to sendmail])
@@ -2976,6 +2982,7 @@ dnl
 SUDO_LOGFILE
 SUDO_TIMEDIR
 SUDO_IO_LOGDIR
+SUDO_TZDIR
 
 dnl
 dnl If I/O logging is enabled, build sudoreplay and exec_pty get_pty.o iolog.o

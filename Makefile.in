@@ -547,7 +547,7 @@ sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 sudo.cat: $(srcdir)/sudo.cat
@@ -575,7 +575,7 @@ visudo.mdoc: $(srcdir)/visudo.mdoc.in
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 visudo.cat: $(srcdir)/visudo.cat
@@ -606,7 +606,7 @@ sudoers.mdoc: $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 sudoers.cat: $(srcdir)/sudoers.cat
@@ -634,7 +634,7 @@ sudoers.ldap.mdoc: $(srcdir)/sudoers.ldap.mdoc.in
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 sudoers.ldap.cat: $(srcdir)/sudoers.ldap.cat
@@ -662,7 +662,7 @@ sudoreplay.mdoc: $(srcdir)/sudoreplay.mdoc.in
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 sudoreplay.cat: $(srcdir)/sudoreplay.cat

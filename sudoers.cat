@@ -1,4 +1,4 @@
-SUDOERS(4)                    Programmer's Manual                   SUDOERS(4)
+SUDOERS(4)                    File Formats Manual                   SUDOERS(4)
 
 NNAAMMEE
      ssuuddooeerrss - list of which users may execute what
@@ -102,11 +102,11 @@ DDEESSCCRRIIPPTTIIOONN
      implementation.  For instance, the QAS AD backend supports the following
      formats:
 
-     oo     Group in the same domain: "%:Group Name"
+     ++oo     Group in the same domain: "%:Group Name"
 
-     oo     Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
+     ++oo     Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 
-     oo     Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
+     ++oo     Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 
      Note that quotes around group names are optional.  Unquoted strings must
      use a backslash (`\') to escape spaces and special characters.  See _O_t_h_e_r
@@ -1185,19 +1185,35 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      LLiissttss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
      env_check         Environment variables to be removed from the user's
-                       environment if the variable's value contains `%' or `/'
-                       characters.  This can be used to guard against printf-
-                       style format vulnerabilities in poorly-written
-                       programs.  The argument may be a double-quoted, space-
-                       separated list or a single value without double-quotes.
-                       The list can be replaced, added to, deleted from, or
-                       disabled by using the =, +=, -=, and ! operators
-                       respectively.  Regardless of whether the env_reset
-                       option is enabled or disabled, variables specified by
-                       env_check will be preserved in the environment if they
-                       pass the aforementioned check.  The default list of
-                       environment variables to check is displayed when ssuuddoo
-                       is run by root with the --VV option.
+                       environment unless they are considered ``safe''.  For
+                       all variables except Li TZ , ``safe'' means that the
+                       variable's value does not contain any the variable's
+                       value contains `%' or `/' characters.  This can be used
+                       to guard against printf-style format vulnerabilities in
+                       poorly-written programs.  The TZ variable is considerd
+                       unsafe if any of the following are true:
+
+                       ++oo   It consists of a fully-qualified path name that
+                           does not match the location of the _z_o_n_e_i_n_f_o
+                           directory.
+
+                       ++oo   It contains a _._. path element.
+
+                       ++oo   It contains white space or non-printable
+                           characters.
+
+                       ++oo   It is longer than the value of PATH_MAX.
+
+                       The argument may be a double-quoted, space-separated
+                       list or a single value without double-quotes.  The list
+                       can be replaced, added to, deleted from, or disabled by
+                       using the =, +=, -=, and ! operators respectively.
+                       Regardless of whether the env_reset option is enabled
+                       or disabled, variables specified by env_check will be
+                       preserved in the environment if they pass the
+                       aforementioned check.  The default list of environment
+                       variables to check is displayed when ssuuddoo is run by
+                       root with the --VV option.
 
      env_delete        Environment variables to be removed from the user's
                        environment when the _e_n_v___r_e_s_e_t option is not in effect.
@@ -1535,4 +1551,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.7.10                      March 1, 2014                     Sudo 1.7.10
+Sudo 1.7.10p8                  February 9, 2015                  Sudo 1.7.10p8
