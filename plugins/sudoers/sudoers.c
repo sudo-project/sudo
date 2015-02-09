@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -120,7 +120,7 @@ sudoers_policy_init(void *info, char * const envp[])
     volatile int sources = 0;
     struct sudo_nss *nss, *nss_next;
     int rval = -1;
-    debug_decl(sudoers_policy_init, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_init, SUDOERS_DEBUG_PLUGIN)
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -160,6 +160,7 @@ sudoers_policy_init(void *info, char * const envp[])
 		    N_("problem with defaults entries"));
 	    }
         } else {
+	    /* XXX - used to send mail for sudoers parse errors. */
 	    TAILQ_REMOVE(snl, nss, entries);
         }
     }
@@ -225,7 +226,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     struct sudo_nss *nss;
     int cmnd_status = -1, oldlocale, validated;
     volatile int rval = true;
-    debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
@@ -289,7 +290,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
-	if (ISSET(validated, VALIDATE_OK)) {
+	if (ISSET(validated, VALIDATE_SUCCESS)) {
 	    /* Handle [SUCCESS=return] */
 	    if (nss->ret_if_found)
 		break;
@@ -368,7 +369,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     rval = check_user(validated, sudo_mode);
     if (rval != true) {
 	/* Note: log_denial() calls audit for us. */
-	if (!ISSET(validated, VALIDATE_OK))
+	if (!ISSET(validated, VALIDATE_SUCCESS))
 	    log_denial(validated, false);
 	goto done;
     }
@@ -388,7 +389,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* If the user was not allowed to run the command we are done. */
-    if (!ISSET(validated, VALIDATE_OK)) {
+    if (!ISSET(validated, VALIDATE_SUCCESS)) {
 	/* Note: log_failure() calls audit for us. */
 	log_failure(validated, cmnd_status);
 	goto bad;
@@ -560,7 +561,7 @@ init_vars(char * const envp[])
 {
     char * const * ep;
     bool unknown_user = false;
-    debug_decl(init_vars, SUDO_DEBUG_PLUGIN)
+    debug_decl(init_vars, SUDOERS_DEBUG_PLUGIN)
 
     sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale);
 
@@ -641,7 +642,7 @@ set_cmnd(void)
 {
     int rval = FOUND;
     char *path = user_path;
-    debug_decl(set_cmnd, SUDO_DEBUG_PLUGIN)
+    debug_decl(set_cmnd, SUDOERS_DEBUG_PLUGIN)
 
     /* Allocate user_stat for find_path() and match functions. */
     user_stat = sudo_ecalloc(1, sizeof(struct stat));
@@ -738,7 +739,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
-    debug_decl(open_sudoers, SUDO_DEBUG_PLUGIN)
+    debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN)
 
     if (!set_perms(PERM_SUDOERS))
 	debug_return_ptr(NULL);
@@ -816,7 +817,7 @@ set_loginclass(struct passwd *pw)
     const int errflags = SLOG_RAW_MSG;
     login_cap_t *lc;
     bool rval = true;
-    debug_decl(set_loginclass, SUDO_DEBUG_PLUGIN)
+    debug_decl(set_loginclass, SUDOERS_DEBUG_PLUGIN)
 
     if (!def_use_loginclass)
 	goto done;
@@ -864,19 +865,26 @@ set_loginclass(struct passwd *pw)
 #endif
 
 /*
- * Look up the fully qualified domain name and set user_host and user_shost.
+ * Look up the fully qualified domain name of user_host and user_runhost.
+ * Sets user_host, user_shost, user_runhost and user_srunhost.
  * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  */
 static void
 set_fqdn(void)
 {
     struct addrinfo *res0, hint;
+    bool remote;
     char *p;
-    debug_decl(set_fqdn, SUDO_DEBUG_PLUGIN)
+    debug_decl(set_fqdn, SUDOERS_DEBUG_PLUGIN)
+
+    /* If the -h flag was given we need to resolve both host and runhost. */
+    remote = strcmp(user_runhost, user_host) != 0;
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_FQDN;
+
+    /* First resolve user_host, sets user_host and user_shost. */
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
 	log_warningx(SLOG_SEND_MAIL|SLOG_RAW_MSG,
 	    N_("unable to resolve host %s"), user_host);
@@ -884,13 +892,43 @@ set_fqdn(void)
 	if (user_shost != user_host)
 	    sudo_efree(user_shost);
 	sudo_efree(user_host);
-	user_host = sudo_estrdup(res0->ai_canonname);
+	user_host = user_shost = sudo_estrdup(res0->ai_canonname);
 	freeaddrinfo(res0);
 	if ((p = strchr(user_host, '.')) != NULL)
 	    user_shost = sudo_estrndup(user_host, (size_t)(p - user_host));
-	else
-	    user_shost = user_host;
     }
+
+    /* Next resolve user_runhost, sets user_runhost and user_srunhost. */
+    if (remote) {
+	if (getaddrinfo(user_runhost, NULL, &hint, &res0) != 0) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_RAW_MSG,
+		N_("unable to resolve host %s"), user_runhost);
+	} else {
+	    if (user_srunhost != user_runhost)
+		sudo_efree(user_srunhost);
+	    sudo_efree(user_runhost);
+	    user_runhost = user_srunhost = sudo_estrdup(res0->ai_canonname);
+	    freeaddrinfo(res0);
+	    if ((p = strchr(user_runhost, '.'))) {
+		user_srunhost =
+		    sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
+	    }
+	}
+    } else {
+	/* Not remote, just use user_host. */
+	if (user_srunhost != user_runhost)
+	    sudo_efree(user_srunhost);
+	sudo_efree(user_runhost);
+	user_runhost = user_srunhost = sudo_estrdup(user_host);
+	if ((p = strchr(user_runhost, '.'))) {
+	    user_srunhost =
+		sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
+	}
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"host %s, shost %s, runhost %s, srunhost %s",
+	user_host, user_shost, user_runhost, user_srunhost);
     debug_return;
 }
 
@@ -902,7 +940,7 @@ static bool
 set_runaspw(const char *user, bool quiet)
 {
     struct passwd *pw = NULL;
-    debug_decl(set_runaspw, SUDO_DEBUG_PLUGIN)
+    debug_decl(set_runaspw, SUDOERS_DEBUG_PLUGIN)
 
     if (*user == '#') {
 	const char *errstr;
@@ -933,7 +971,7 @@ static bool
 set_runasgr(const char *group, bool quiet)
 {
     struct group *gr = NULL;
-    debug_decl(set_runasgr, SUDO_DEBUG_PLUGIN)
+    debug_decl(set_runasgr, SUDOERS_DEBUG_PLUGIN)
 
     if (*group == '#') {
 	const char *errstr;
@@ -985,7 +1023,7 @@ void
 sudoers_cleanup(void)
 {
     struct sudo_nss *nss;
-    debug_decl(sudoers_cleanup, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_cleanup, SUDOERS_DEBUG_PLUGIN)
 
     if (snl != NULL) {
 	TAILQ_FOREACH(nss, snl, entries) {
@@ -1006,7 +1044,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, int *argc
     char *cp, **nargv, *editor, *editor_path = NULL;
     int ac, i, nargc;
     bool wasblank;
-    debug_decl(resolve_editor, SUDO_DEBUG_PLUGIN)
+    debug_decl(resolve_editor, SUDOERS_DEBUG_PLUGIN)
 
     /* Note: editor becomes part of argv_out and is not freed. */
     editor = sudo_emalloc(edlen + 1);
@@ -1060,7 +1098,7 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
     const char *cp, *ep, *editor;
     char *editor_path = NULL, **ev, *ev0[4];
     size_t len;
-    debug_decl(find_editor, SUDO_DEBUG_PLUGIN)
+    debug_decl(find_editor, SUDOERS_DEBUG_PLUGIN)
 
     /*
      * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.
@@ -1101,7 +1139,7 @@ create_admin_success_flag(void)
     struct stat statbuf;
     char flagfile[PATH_MAX];
     int fd, n;
-    debug_decl(create_admin_success_flag, SUDO_DEBUG_PLUGIN)
+    debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN)
 
     /* Check whether the user is in the admin group. */
     if (!user_in_group(sudo_user.pw, "admin"))

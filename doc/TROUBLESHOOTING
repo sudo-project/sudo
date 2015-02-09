@@ -42,9 +42,9 @@ A) The owner and permissions on the sudo binary appear to be OK but when
 Q) Sudo never gives me a chance to enter a password using PAM, it just
    says 'Sorry, try again.' three times and exits.
 A) You didn't setup PAM to work with sudo.  On RedHat Linux or Fedora
-   Core this generally means installing sample.pam as /etc/pam.d/sudo.
-   See the sample.pam file for hints on what to use for other Linux
-   systems.
+   Core this generally means installing the sample pam.conf file as
+   /etc/pam.d/sudo.  See the example pam.conf file for hints on what
+   to use for other Linux systems.
 
 Q) Sudo says 'Account expired or PAM config lacks an "account"
    section for sudo, contact your system administrator' and exits
@@ -57,7 +57,7 @@ A) Your PAM config lacks an "account" specification.  On Linux this
 Q) Sudo is setup to log via syslog(3) but I'm not getting any log
    messages.
 A) Make sure you have an entry in your syslog.conf file to save
-   the sudo messages (see the sample.syslog.conf file).  The default
+   the sudo messages (see the example syslog.conf file).  The default
    log facility is authpriv (changeable via configure or in sudoers).
    Don't forget to send a SIGHUP to your syslogd so that it re-reads
    its conf file.  Also, remember that syslogd does *not* create
@@ -143,7 +143,7 @@ A) Sudo removes the following "dangerous" environment variables
 Q) How can I keep sudo from asking for a password?
 A) To specify this on a per-user (and per-command) basis, use the
    'NOPASSWD' tag right before the command list in sudoers.  See
-   the sudoers man page and sample.sudoers for details.  To disable
+   the sudoers man page and examples/sudoers for details.  To disable
    passwords completely, add !authenticate" to the Defaults line
    in /etc/sudoers.  You can also turn off authentication on a
    per-user or per-host basis using a user or host-specific Defaults

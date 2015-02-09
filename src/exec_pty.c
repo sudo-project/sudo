@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -147,7 +147,7 @@ mon_handler(int s, siginfo_t *info, void *context)
      * itself.  This can happen with, e.g., BSD-derived versions of
      * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (USER_SIGNALED(info)) {
+    if (s != SIGCHLD && USER_SIGNALED(info)) {
 	pid_t si_pgrp = getpgid(info->si_pid);
 	if (si_pgrp != (pid_t)-1) {
 	    if (si_pgrp == cmnd_pgrp)
@@ -218,7 +218,10 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin) {
-	    int rc = plugin->u.io->log_ttyin(buf, n);
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_ttyin(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -229,6 +232,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
     debug_return_bool(rval);
@@ -246,7 +250,10 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdin) {
-	    int rc = plugin->u.io->log_stdin(buf, n);
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_stdin(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -257,6 +264,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
     debug_return_bool(rval);
@@ -274,7 +282,10 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyout) {
-	    int rc = plugin->u.io->log_ttyout(buf, n);
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_ttyout(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -285,6 +296,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_active_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -314,7 +326,10 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdout) {
-	    int rc = plugin->u.io->log_stdout(buf, n);
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_stdout(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -325,6 +340,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_active_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -354,7 +370,10 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stderr) {
-	    int rc = plugin->u.io->log_stderr(buf, n);
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_stderr(buf, n);
 	    if (rc <= 0) {
 		if (rc < 0) {
 		    /* Error: disable plugin's I/O function. */
@@ -365,6 +384,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	    }
 	}
     }
+    sudo_debug_set_active_instance(sudo_debug_instance);
     if (!rval) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
@@ -796,6 +816,8 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 #else
     sa.sa_handler = handler;
 #endif
+    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
     if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
 
@@ -816,13 +838,6 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 		sudo_fatal(U_("unable to set terminal to raw mode"));
 	}
     }
-
-    /*
-     * The policy plugin's session init must be run before we fork
-     * or certain pam modules won't be able to track their state.
-     */
-    if (policy_init_session(details) != true)
-	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     /*
      * Block some signals until cmnd_pid is set in the parent to avoid a

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2009 Christian S.J. Peron
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -30,12 +30,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_debug.h"
+#include "sudoers.h"
 #include "bsm_audit.h"
 
 /*
@@ -54,7 +49,7 @@ audit_sudo_selected(int sorf)
 	auditinfo_addr_t ainfo_addr;
 	struct au_mask *mask;
 	int rc;
-	debug_decl(audit_sudo_selected, SUDO_DEBUG_AUDIT)
+	debug_decl(audit_sudo_selected, SUDOERS_DEBUG_AUDIT)
 
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
 		if (errno == ENOSYS) {
@@ -89,7 +84,7 @@ bsm_audit_success(char *exec_args[])
 	long au_cond;
 	int aufd, selected;
 	pid_t pid;
-	debug_decl(bsm_audit_success, SUDO_DEBUG_AUDIT)
+	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT)
 
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
@@ -178,7 +173,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	au_id_t auid;
 	pid_t pid;
 	int aufd;
-	debug_decl(bsm_audit_success, SUDO_DEBUG_AUDIT)
+	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT)
 
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.

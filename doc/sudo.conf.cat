@@ -238,10 +238,13 @@ DDEESSCCRRIIPPTTIIOONN
      would log all debugging statements at the _w_a_r_n level and higher in
      addition to those at the _i_n_f_o level for the plugin subsystem.
 
-     Currently, only one Debug entry per program is supported.  The ssuuddoo Debug
-     entry is shared by the ssuuddoo front end, ssuuddooeeddiitt and the plugins.  A
-     future release may add support for per-plugin Debug lines and/or support
-     for multiple debugging files for a single program.
+     As of ssuuddoo 1.8.12, multiple Debug entries may be specified per program.
+     Older versions of ssuuddoo only support a single Debug entry per program.
+     Plugin-specific Debug entries are also supported starting with ssuuddoo
+     1.8.12 and are matched by either the base name of the plugin that was
+     loaded (for example sudoers.so) or by the plugin's fully-qualified path
+     name.  Previously, the ssuuddooeerrss plugin shared the same Debug entry as the
+     ssuuddoo front end and could not be configured separately.
 
      The following priorities are supported, in order of decreasing severity:
      _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.  Each priority,
@@ -377,7 +380,7 @@ SSEEEE AALLSSOO
 
 HHIISSTTOORRYY
      See the HISTORY file in the ssuuddoo distribution
-     (http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
+     (http://www.sudo.ws/history.html) for a brief history of sudo.
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
@@ -386,12 +389,12 @@ AAUUTTHHOORRSS
            Todd C. Miller
 
      See the CONTRIBUTORS file in the ssuuddoo distribution
-     (http://www.sudo.ws/sudo/contributors.html) for an exhaustive list of
-     people who have contributed to ssuuddoo.
+     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     who have contributed to ssuuddoo.
 
 BBUUGGSS
      If you feel you have found a bug in ssuuddoo, please submit a bug report at
-     http://www.sudo.ws/sudo/bugs/
+     http://bugzilla.sudo.ws/
 
 SSUUPPPPOORRTT
      Limited free support is available via the sudo-users mailing list, see
@@ -402,7 +405,7 @@ DDIISSCCLLAAIIMMEERR
      ssuuddoo is provided ``AS IS'' and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
-     file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
+     file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.11                      July 24, 2014                     Sudo 1.8.11
+Sudo 1.8.12                    December 4, 2014                    Sudo 1.8.12

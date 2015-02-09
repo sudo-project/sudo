@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -358,7 +358,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     int i, rc, sesh_nargs;
     struct stat sb;
     struct command_details saved_command_details;
-    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
+    debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT)
     
     /* Prepare selinux stuff (setexeccon) */
     if (selinux_setup(command_details->selinux_role,

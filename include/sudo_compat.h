@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_MISSING_H
-#define _SUDO_MISSING_H
+#ifndef _SUDO_COMPAT_H
+#define _SUDO_COMPAT_H
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -120,52 +120,52 @@
 /*
  * Some systems lack full limit definitions.
  */
-#ifndef OPEN_MAX
+#if defined(HAVE_DECL_OPEN_MAX) && !HAVE_DECL_OPEN_MAX
 # define OPEN_MAX	256
 #endif
 
-#ifndef LLONG_MAX
-# if defined(QUAD_MAX)
+#if defined(HAVE_DECL_LLONG_MAX) && !HAVE_DECL_LLONG_MAX
+# if defined(HAVE_DECL_QUAD_MAX) && HAVE_DECL_QUAD_MAX
 #  define LLONG_MAX	QUAD_MAX
 # else
 #  define LLONG_MAX	0x7fffffffffffffffLL
 # endif
 #endif
 
-#ifndef LLONG_MIN
-# if defined(QUAD_MIN)
+#if defined(HAVE_DECL_LLONG_MIN) && !HAVE_DECL_LLONG_MIN
+# if defined(HAVE_DECL_QUAD_MIN) && HAVE_DECL_QUAD_MIN
 #  define LLONG_MIN	QUAD_MIN
 # else
 #  define LLONG_MIN	(-0x7fffffffffffffffLL-1)
 # endif
 #endif
 
-#ifndef ULLONG_MAX
-# if defined(UQUAD_MAX)
+#if defined(HAVE_DECL_ULLONG_MAX) && !HAVE_DECL_ULLONG_MAX
+# if defined(HAVE_DECL_UQUAD_MAX) && HAVE_DECL_UQUAD_MAX
 #  define ULLONG_MAX	UQUAD_MAX
 # else
 #  define ULLONG_MAX	0xffffffffffffffffULL
 # endif
 #endif
 
-#ifndef SIZE_MAX
-# ifdef SIZE_T_MAX
+#if defined(HAVE_DECL_SIZE_MAX) && !HAVE_DECL_SIZE_MAX
+# if defined(HAVE_DECL_SIZE_T_MAX) && HAVE_DECL_SIZE_T_MAX
 #  define SIZE_MAX	SIZE_T_MAX
 # else
 #  define SIZE_MAX	ULONG_MAX
-# endif /* SIZE_T_MAX */
-#endif /* SIZE_MAX */
+# endif
+#endif
 
-#ifndef PATH_MAX
-# ifdef _POSIX_PATH_MAX
+#if defined(HAVE_DECL_PATH_MAX) && !HAVE_DECL_PATH_MAX
+# if defined(HAVE_DECL__POSIX_PATH_MAX) && HAVE_DECL__POSIX_PATH_MAX
 #  define PATH_MAX		_POSIX_PATH_MAX
 # else
 #  define PATH_MAX		256
 # endif
 #endif
 
-#ifndef HOST_NAME_MAX
-# ifdef _POSIX_HOST_NAME_MAX
+#if defined(HAVE_DECL_HOST_NAME_MAX) && !HAVE_DECL_HOST_NAME_MAX
+# if defined(HAVE_DECL__POSIX_HOST_NAME_MAX) && HAVE_DECL__POSIX_HOST_NAME_MAX
 #  define HOST_NAME_MAX		_POSIX_HOST_NAME_MAX
 # else
 #  define HOST_NAME_MAX		255
@@ -319,7 +319,7 @@ extern int errno;
 #endif
 
 /* For sig2str() */
-#ifndef SIG2STR_MAX
+#ifndef HAVE_SIG2STR
 # define SIG2STR_MAX 32
 #endif
 
@@ -340,13 +340,28 @@ extern int errno;
 #endif /* HAVE_SETEUID */
 
 /*
+ * Older HP-UX does not declare setresuid() or setresgid().
+ */
+#if defined(HAVE_DECL_SETRESUID) && !HAVE_DECL_SETRESUID
+int setresuid(uid_t, uid_t, uid_t);
+int setresgid(gid_t, gid_t, gid_t);
+#endif
+#if defined(HAVE_DECL_GETRESUID) && !HAVE_DECL_GETRESUID
+int getresuid(uid_t *, uid_t *, uid_t *);
+int getresgid(gid_t *, gid_t *, gid_t *);
+#endif
+
+/*
  * HP-UX does not declare innetgr() or getdomainname().
  * Solaris does not declare getdomainname().
  */
-#if defined(__hpux)
+#if defined(HAVE_DECL_INNETGR) && !HAVE_DECL_INNETGR
 int innetgr(const char *, const char *, const char *, const char *);
 #endif
-#if defined(__hpux) || defined(__sun)
+#if defined(HAVE_DECL__INNETGR) && !HAVE_DECL__INNETGR
+int _innetgr(const char *, const char *, const char *, const char *);
+#endif
+#if defined(HAVE_DECL_GETDOMAINNAME) && !HAVE_DECL_GETDOMAINNAME
 int getdomainname(char *, size_t);
 #endif
 
@@ -433,16 +448,14 @@ __dso_public errno_t sudo_memset_s(void *v, rsize_t smax, int c, rsize_t n);
 # undef memset_s
 # define memset_s(_a, _b, _c, _d) sudo_memset_s((_a), (_b), (_c), (_d))
 #endif /* HAVE_MEMSET_S */
-#ifndef HAVE_MKDTEMP
+#if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKSTEMPS)
 __dso_public char *sudo_mkdtemp(char *path);
 # undef mkdtemp
 # define mkdtemp(_a) sudo_mkdtemp((_a))
-#endif /* HAVE_MKDTEMP */
-#ifndef HAVE_MKSTEMPS
 __dso_public int sudo_mkstemps(char *path, int slen);
 # undef mkstemps
 # define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
-#endif /* HAVE_MKSTEMPS */
+#endif /* !HAVE_MKDTEMP || !HAVE_MKSTEMPS */
 #ifndef HAVE_PW_DUP
 __dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
 # undef pw_dup
@@ -467,6 +480,11 @@ __dso_public int sudo_clock_gettime(clockid_t clock_id, struct timespec *tp);
 # undef clock_gettime
 # define clock_gettime(_a, _b) sudo_clock_gettime((_a), (_b))
 #endif /* HAVE_CLOCK_GETTIME */
+#if !defined(HAVE_INET_NTOP) && defined(_SUDO_NET_IFS_C)
+__dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
+# undef inet_ntop
+# define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))
+#endif /* HAVE_INET_NTOP */
 #ifndef HAVE_INET_PTON
 __dso_public int sudo_inet_pton(int af, const char *src, void *dst);
 # undef inet_pton
@@ -478,4 +496,4 @@ __dso_public const char *sudo_getprogname(void);
 # define getprogname() sudo_getprogname()
 #endif /* HAVE_GETPROGNAME */
 
-#endif /* _SUDO_MISSING_H */
+#endif /* _SUDO_COMPAT_H */

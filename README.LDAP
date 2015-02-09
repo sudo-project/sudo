@@ -136,7 +136,7 @@ and re-add objects.  (You can, but this is tedious).
 I recommend using any of the following LDAP browsers to administer your SUDOers.
   * GQ - The gentleman's LDAP client - Open Source - I use this a lot on Linux
     and since it is Schema aware, I don't need to create a sudoRole template.
-	http://biot.com/gq/
+	http://sourceforge.net/projects/gqclient/
 
   * phpQLAdmin - Open Source - phpQLAdmin is an administration tool,
     originally for QmailLDAP, that supports editing sudoRole objects

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -119,6 +119,8 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #else
     sa.sa_handler = handler;
 #endif
+    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
+	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
     if (sudo_sigaction(SIGCONT, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGCONT);
 #ifdef SA_SIGINFO
@@ -126,13 +128,6 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #endif
     if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
-
-    /*
-     * The policy plugin's session init must be run before we fork
-     * or certain pam modules won't be able to track their state.
-     */
-    if (policy_init_session(details) != true)
-	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     cmnd_pid = sudo_debug_fork();
     switch (cmnd_pid) {
@@ -173,10 +168,15 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
 	sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
 	    details->argv, details->envp);
 	if (details->closefrom >= 0) {
-	    /* Preserve debug fd and error pipe as needed. */
-	    int debug_fd = sudo_debug_fd_get();
-	    if (debug_fd != -1)
-		add_preserved_fd(&details->preserved_fds, debug_fd);
+	    int fd, maxfd;
+	    unsigned char *debug_fds;
+
+	    /* Preserve debug fds and error pipe as needed. */
+	    maxfd = sudo_debug_get_fds(&debug_fds);
+	    for (fd = 0; fd <= maxfd; fd++) {
+		if (sudo_isset(debug_fds, fd))
+		    add_preserved_fd(&details->preserved_fds, fd);
+	    }
 	    if (errfd != -1)
 		add_preserved_fd(&details->preserved_fds, errfd);
 
@@ -401,7 +401,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sudo_fatal(U_("unable to create sockets"));
 
     /*
-     * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).
+     * Signals to forward to the child process (excluding SIGALRM).
      * We block all other signals while running the signal handler.
      * Note: HP-UX select() will not be interrupted if SA_RESTART set.
      */
@@ -418,8 +418,6 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTERM);
     if (sudo_sigaction(SIGALRM, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGALRM);
-    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
     if (sudo_sigaction(SIGPIPE, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
     if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0)
@@ -450,6 +448,13 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGINT);
     if (sudo_sigaction(SIGQUIT, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGQUIT);
+
+    /*
+     * The policy plugin's session init must be run before we fork
+     * or certain pam modules won't be able to track their state.
+     */
+    if (policy_init_session(details) != true)
+	sudo_fatalx(U_("policy plugin failed session initialization"));
 
     /*
      * Child will run the command in the pty, parent will pass data
@@ -890,7 +895,7 @@ handler(int s, siginfo_t *info, void *context)
      * kill itself.  For example, this can happen with some versions of
      * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (USER_SIGNALED(info)) {
+    if (s != SIGCHLD && USER_SIGNALED(info)) {
 	pid_t si_pgrp = getpgid(info->si_pid);
 	if (si_pgrp != (pid_t)-1) {
 	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)

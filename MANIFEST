@@ -21,10 +21,6 @@ doc/TROUBLESHOOTING
 doc/UPGRADE
 doc/fixman.sh
 doc/fixmdoc.sh
-doc/sample.pam
-doc/sample.sudo.conf
-doc/sample.sudoers
-doc/sample.syslog.conf
 doc/schema.ActiveDirectory
 doc/schema.OpenLDAP
 doc/schema.iPlanet
@@ -49,6 +45,11 @@ doc/sudoreplay.mdoc.in
 doc/visudo.cat
 doc/visudo.man.in
 doc/visudo.mdoc.in
+examples/Makefile.in
+examples/pam.conf
+examples/sudo.conf
+examples/sudoers
+examples/syslog.conf
 include/Makefile.in
 include/compat/charclass.h
 include/compat/endian.h
@@ -94,6 +95,7 @@ lib/util/getline.c
 lib/util/getopt_long.c
 lib/util/gidlist.c
 lib/util/glob.c
+lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c
@@ -123,6 +125,7 @@ lib/util/regress/sudo_conf/test2.in
 lib/util/regress/sudo_conf/test2.out.ok
 lib/util/regress/sudo_conf/test3.in
 lib/util/regress/sudo_conf/test3.out.ok
+lib/util/regress/sudo_conf/test4.err.ok
 lib/util/regress/sudo_conf/test4.in
 lib/util/regress/sudo_conf/test4.out.ok
 lib/util/regress/sudo_conf/test5.err.ok
@@ -130,6 +133,8 @@ lib/util/regress/sudo_conf/test5.in
 lib/util/regress/sudo_conf/test5.out.ok
 lib/util/regress/sudo_conf/test6.in
 lib/util/regress/sudo_conf/test6.out.ok
+lib/util/regress/sudo_conf/test7.in
+lib/util/regress/sudo_conf/test7.out.ok
 lib/util/regress/sudo_parseln/parseln_test.c
 lib/util/regress/sudo_parseln/test1.in
 lib/util/regress/sudo_parseln/test1.out.ok
@@ -160,7 +165,6 @@ lib/util/strtonum.c
 lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
-lib/util/sudo_printf.c
 lib/util/term.c
 lib/util/ttysize.c
 lib/util/util.exp.in
@@ -189,6 +193,7 @@ lib/zlib/trees.c
 lib/zlib/trees.h
 lib/zlib/uncompr.c
 lib/zlib/zconf.h.in
+lib/zlib/zlib.exp
 lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
@@ -295,6 +300,8 @@ plugins/sudoers/po/eu.mo
 plugins/sudoers/po/eu.po
 plugins/sudoers/po/fi.mo
 plugins/sudoers/po/fi.po
+plugins/sudoers/po/fr.mo
+plugins/sudoers/po/fr.po
 plugins/sudoers/po/hr.mo
 plugins/sudoers/po/hr.po
 plugins/sudoers/po/it.mo
@@ -311,6 +318,8 @@ plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
 plugins/sudoers/po/pt_BR.mo
 plugins/sudoers/po/pt_BR.po
+plugins/sudoers/po/ru.mo
+plugins/sudoers/po/ru.po
 plugins/sudoers/po/sl.mo
 plugins/sudoers/po/sl.po
 plugins/sudoers/po/sr.mo
@@ -428,11 +437,14 @@ plugins/sudoers/solaris_audit.h
 plugins/sudoers/sssd.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
+plugins/sudoers/sudo_printf.c
 plugins/sudoers/sudoers.c
 plugins/sudoers/sudoers.exp
 plugins/sudoers/sudoers.h
 plugins/sudoers/sudoers.in
 plugins/sudoers/sudoers2ldif
+plugins/sudoers/sudoers_debug.c
+plugins/sudoers/sudoers_debug.h
 plugins/sudoers/sudoers_version.h
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c

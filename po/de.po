@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.11b4\n"
+"Project-Id-Version: sudo 1.8.12b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-09-04 10:15-0600\n"
-"PO-Revision-Date: 2014-09-12 21:50+0100\n"
+"POT-Creation-Date: 2014-10-27 12:35-0600\n"
+"PO-Revision-Date: 2014-11-08 19:39+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: de\n"
@@ -31,31 +31,20 @@ msgstr "Es konnte nicht zur Registrierungsdatenbank »%s« von %s gewechselt wer
 msgid "unable to restore registry"
 msgstr "Registrierungsdatenbank konnte nicht wiederhergestellt werden"
 
-#: lib/util/alloc.c:82 lib/util/alloc.c:99 lib/util/alloc.c:120
-#: lib/util/alloc.c:142 lib/util/alloc.c:161 lib/util/alloc.c:184
+#: lib/util/alloc.c:68 lib/util/alloc.c:85 lib/util/alloc.c:106
+#: lib/util/alloc.c:128 lib/util/alloc.c:147 lib/util/alloc.c:170
 msgid "internal error, tried allocate zero bytes"
 msgstr "Interner Fehler: Es wurde versucht, 0 Bytes zuzuweisen"
 
-#: lib/util/alloc.c:101 lib/util/alloc.c:123 lib/util/alloc.c:163
-#: lib/util/alloc.c:186 src/net_ifs.c:162 src/net_ifs.c:171 src/net_ifs.c:183
-#: src/net_ifs.c:192 src/net_ifs.c:307 src/net_ifs.c:329
+#: lib/util/alloc.c:87 lib/util/alloc.c:109 lib/util/alloc.c:149
+#: lib/util/alloc.c:172 src/net_ifs.c:174 src/net_ifs.c:191 src/net_ifs.c:325
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "Interner Fehler: %s-Überlauf"
 
-#: lib/util/fatal.c:144
-#, c-format
-msgid "%s: %s: %s\n"
-msgstr "%s: %s: %s\n"
-
-#: lib/util/fatal.c:148 lib/util/fatal.c:153
-#, c-format
-msgid "%s: %s\n"
-msgstr "%s: %s\n"
-
-#: lib/util/gidlist.c:78 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:559 src/sudo.c:578 src/sudo.c:605 src/sudo.c:614 src/sudo.c:623
-#: src/sudo.c:640 src/sudo.c:687 src/sudo.c:697
+#: lib/util/gidlist.c:78 src/load_plugins.c:61 src/load_plugins.c:74
+#: src/sudo.c:572 src/sudo.c:591 src/sudo.c:618 src/sudo.c:627 src/sudo.c:636
+#: src/sudo.c:653 src/sudo.c:700 src/sudo.c:710
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -79,92 +68,102 @@ msgstr "Wert zu groß"
 msgid "value too small"
 msgstr "Wert zu klein"
 
-#: lib/util/sudo_conf.c:178
+#: lib/util/sudo_conf.c:181
 #, c-format
-msgid "unsupported group source `%s' in %s, line %d"
-msgstr "Nicht unterstützte Gruppenquelle »%s« in %s, Zeile %d"
+msgid "invalid Path value `%s' in %s, line %u"
+msgstr "Ungültiger Pfad-Wert »%s« in %s, Zeile %u"
 
-#: lib/util/sudo_conf.c:192
+#: lib/util/sudo_conf.c:335 lib/util/sudo_conf.c:388
 #, c-format
-msgid "invalid max groups `%s' in %s, line %d"
-msgstr "Ungültige Maximalzahl an Gruppen »%s« in %s, Zeile %d"
+msgid "invalid value for %s `%s' in %s, line %u"
+msgstr "Ungültiger Wert für %s »%s« in %s, Zeile %u"
 
-#: lib/util/sudo_conf.c:407
+#: lib/util/sudo_conf.c:356
+#, c-format
+msgid "unsupported group source `%s' in %s, line %u"
+msgstr "Nicht unterstützte Gruppenquelle »%s« in %s, Zeile %u"
+
+#: lib/util/sudo_conf.c:372
+#, c-format
+msgid "invalid max groups `%s' in %s, line %u"
+msgstr "Ungültige Maximalzahl an Gruppen »%s« in %s, Zeile %u"
+
+#: lib/util/sudo_conf.c:522
 #, c-format
 msgid "unable to stat %s"
 msgstr "stat konnte nicht auf %s angewandt werden"
 
-#: lib/util/sudo_conf.c:410
+#: lib/util/sudo_conf.c:525
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s ist keine reguläre Datei"
 
-#: lib/util/sudo_conf.c:413
+#: lib/util/sudo_conf.c:528
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s gehört Benutzer mit UID %u, sollte allerdings %u gehören"
 
-#: lib/util/sudo_conf.c:417
+#: lib/util/sudo_conf.c:532
 #, c-format
 msgid "%s is world writable"
 msgstr "%s kann von allen verändert werden"
 
-#: lib/util/sudo_conf.c:420
+#: lib/util/sudo_conf.c:535
 #, c-format
 msgid "%s is group writable"
 msgstr "%s kann von der Gruppe verändert werden"
 
-#: lib/util/sudo_conf.c:430 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
+#: lib/util/sudo_conf.c:545 src/selinux.c:196 src/selinux.c:209 src/sudo.c:341
 #, c-format
 msgid "unable to open %s"
 msgstr "%s konnte nicht geöffnet werden"
 
-#: src/exec.c:123 src/exec.c:128 src/exec.c:418 src/exec.c:420 src/exec.c:422
-#: src/exec.c:424 src/exec.c:426 src/exec.c:428 src/exec.c:431 src/exec.c:448
-#: src/exec.c:450 src/exec.c:452 src/exec.c:600 src/exec.c:795
-#: src/exec_pty.c:460 src/exec_pty.c:716 src/exec_pty.c:786 src/exec_pty.c:788
-#: src/exec_pty.c:800 src/exec_pty.c:1288 src/exec_pty.c:1290
-#: src/exec_pty.c:1295 src/exec_pty.c:1297 src/exec_pty.c:1311
-#: src/exec_pty.c:1322 src/exec_pty.c:1324 src/exec_pty.c:1326
-#: src/exec_pty.c:1328 src/exec_pty.c:1330 src/exec_pty.c:1332
-#: src/exec_pty.c:1334 src/signal.c:156
+#: src/exec.c:123 src/exec.c:128 src/exec.c:423 src/exec.c:425 src/exec.c:427
+#: src/exec.c:429 src/exec.c:431 src/exec.c:433 src/exec.c:436 src/exec.c:453
+#: src/exec.c:455 src/exec.c:457 src/exec.c:605 src/exec.c:800
+#: src/exec_pty.c:480 src/exec_pty.c:736 src/exec_pty.c:806 src/exec_pty.c:808
+#: src/exec_pty.c:820 src/exec_pty.c:1308 src/exec_pty.c:1310
+#: src/exec_pty.c:1315 src/exec_pty.c:1317 src/exec_pty.c:1331
+#: src/exec_pty.c:1342 src/exec_pty.c:1344 src/exec_pty.c:1346
+#: src/exec_pty.c:1348 src/exec_pty.c:1350 src/exec_pty.c:1352
+#: src/exec_pty.c:1354 src/signal.c:156
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "Handler für Signal %d konnte nicht gesetzt werden"
 
-#: src/exec.c:135 src/exec_pty.c:825
+#: src/exec.c:135 src/exec_pty.c:845
 msgid "policy plugin failed session initialization"
 msgstr "Regelwerks-Plugin konnte Sitzung nicht initialisieren"
 
-#: src/exec.c:140 src/exec_pty.c:841 src/exec_pty.c:1372 src/tgetpass.c:221
+#: src/exec.c:140 src/exec_pty.c:861 src/exec_pty.c:1392 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr "Es konnte nicht geforkt werden"
 
-#: src/exec.c:313 src/exec.c:321 src/exec.c:872 src/exec_pty.c:584
-#: src/exec_pty.c:589 src/exec_pty.c:647 src/exec_pty.c:654 src/exec_pty.c:945
-#: src/exec_pty.c:955 src/exec_pty.c:1000 src/exec_pty.c:1007
-#: src/exec_pty.c:1437 src/exec_pty.c:1444 src/exec_pty.c:1451
+#: src/exec.c:318 src/exec.c:326 src/exec.c:877 src/exec_pty.c:604
+#: src/exec_pty.c:609 src/exec_pty.c:667 src/exec_pty.c:674 src/exec_pty.c:965
+#: src/exec_pty.c:975 src/exec_pty.c:1020 src/exec_pty.c:1027
+#: src/exec_pty.c:1457 src/exec_pty.c:1464 src/exec_pty.c:1471
 msgid "unable to add event to queue"
 msgstr "Ereignis konnte nicht zur Warteschlange hinzugefügt werden"
 
-#: src/exec.c:401
+#: src/exec.c:406
 msgid "unable to create sockets"
 msgstr "Sockets konnten nicht hergestellt werden"
 
-#: src/exec.c:497
+#: src/exec.c:502
 msgid "error in event loop"
 msgstr "Fehler in Ereignisschleife"
 
-#: src/exec.c:515
+#: src/exec.c:520
 msgid "unable to restore tty label"
 msgstr "TTY-Kennzeichnung konnte nicht wiederhergestellt werden"
 
-#: src/exec.c:608 src/exec_pty.c:494 src/signal.c:95
+#: src/exec.c:613 src/exec_pty.c:514 src/signal.c:95
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr "Handler für Signal %d konnte nicht wiederhergestellt werden"
 
-#: src/exec.c:726 src/exec_pty.c:1179
+#: src/exec.c:731 src/exec_pty.c:1199
 msgid "error reading from signal pipe"
 msgstr "Fehler beim Lesen der Signal-Pipe"
 
@@ -176,95 +175,95 @@ msgstr "PRIV_PROC_EXEC konnte nicht von PRIV_LIMIT entfernt werden"
 msgid "unable to allocate pty"
 msgstr "PTY konnte nicht vergeben werden"
 
-#: src/exec_pty.c:760 src/exec_pty.c:769 src/exec_pty.c:777
-#: src/exec_pty.c:1280 src/exec_pty.c:1369 src/signal.c:137 src/tgetpass.c:218
+#: src/exec_pty.c:780 src/exec_pty.c:789 src/exec_pty.c:797
+#: src/exec_pty.c:1300 src/exec_pty.c:1389 src/signal.c:137 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr "Weiterleitung konnte nicht erstellt werden"
 
-#: src/exec_pty.c:816
+#: src/exec_pty.c:836
 msgid "unable to set terminal to raw mode"
 msgstr "Terminal konnte nicht in den Rohmodus gesetzt werden"
 
-#: src/exec_pty.c:1212
+#: src/exec_pty.c:1232
 msgid "error reading from pipe"
 msgstr "Fehler beim Lesen der Pipe"
 
-#: src/exec_pty.c:1237
+#: src/exec_pty.c:1257
 msgid "error reading from socketpair"
 msgstr "Fehler beim Lesen des Socket-Paars"
 
-#: src/exec_pty.c:1246
+#: src/exec_pty.c:1266
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "Unerwarteter Antworttyp auf Rückmeldungskanal: %d"
 
-#: src/exec_pty.c:1348
+#: src/exec_pty.c:1368
 msgid "unable to set controlling tty"
 msgstr "Kontrollierendes TTY konnte nicht gesetzt werden"
 
-#: src/load_plugins.c:61 src/load_plugins.c:74 src/load_plugins.c:91
-#: src/load_plugins.c:144 src/load_plugins.c:150 src/load_plugins.c:156
-#: src/load_plugins.c:197 src/load_plugins.c:204 src/load_plugins.c:211
-#: src/load_plugins.c:217
+#: src/load_plugins.c:59 src/load_plugins.c:72 src/load_plugins.c:89
+#: src/load_plugins.c:142 src/load_plugins.c:148 src/load_plugins.c:154
+#: src/load_plugins.c:195 src/load_plugins.c:202 src/load_plugins.c:209
+#: src/load_plugins.c:215
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
 msgstr "Fehler in %s, Zeile %d, während Plugin »%s« geladen wurde"
 
-#: src/load_plugins.c:93
+#: src/load_plugins.c:91
 #, c-format
 msgid "%s%s: %s"
 msgstr "%s%s: %s"
 
-#: src/load_plugins.c:152
+#: src/load_plugins.c:150
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s muss Benutzer mit UID %d gehören"
 
-#: src/load_plugins.c:158
+#: src/load_plugins.c:156
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr "%s darf nur vom Besitzer beschreibbar sein"
 
-#: src/load_plugins.c:199
+#: src/load_plugins.c:197
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "»%s« konnte nicht geladen werden: %s"
 
-#: src/load_plugins.c:206
+#: src/load_plugins.c:204
 #, c-format
 msgid "unable to find symbol `%s' in %s"
 msgstr "Symbol »%s« konnte in %s nicht gefunden werden"
 
-#: src/load_plugins.c:213
+#: src/load_plugins.c:211
 #, c-format
 msgid "unknown policy type %d found in %s"
 msgstr "Unbekannter Regelwerktyp %d wurde in %s gefunden"
 
-#: src/load_plugins.c:219
+#: src/load_plugins.c:217
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "Inkompatible Hauptversion %d des Regelwerks (%d erwartet) wurde in %s gefunden"
 
-#: src/load_plugins.c:228
+#: src/load_plugins.c:226
 #, c-format
 msgid "ignoring policy plugin `%s' in %s, line %d"
 msgstr "Regelwerks-Plugin »%s« in %s, Zeile %d, wird ignoriert"
 
-#: src/load_plugins.c:230
+#: src/load_plugins.c:228
 msgid "only a single policy plugin may be specified"
 msgstr "Nur ein einziges Regelwerks-Plugin kann geladen werden"
 
-#: src/load_plugins.c:233
+#: src/load_plugins.c:231
 #, c-format
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
 msgstr "Doppelt vorhandenes Regelwerks-Plugin »%s« in %s, Zeile %d, wird ignoriert"
 
-#: src/load_plugins.c:248
+#: src/load_plugins.c:249
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
 msgstr "Doppelt vorhandenes E/A-Plugin »%s« in %s, Zeile %d, wird ignoriert"
 
-#: src/load_plugins.c:319
+#: src/load_plugins.c:338
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "Das Regelwerks-Plugin %s enthält keine check_policy-Methode"
@@ -273,43 +272,43 @@ msgstr "Das Regelwerks-Plugin %s enthält keine check_policy-Methode"
 msgid "unable to open socket"
 msgstr "Socket konnte nicht geöffnet werden"
 
-#: src/parse_args.c:247
+#: src/parse_args.c:241
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "Das Argument für -C muss eine Zahl größer oder gleich 3 sein"
 
-#: src/parse_args.c:409
+#: src/parse_args.c:403
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "Die Optionen »-i« und »-s« können nicht gemeinsam benutzt werden"
 
-#: src/parse_args.c:413
+#: src/parse_args.c:407
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "Die Optionen »-i« und »-E« können nicht gemeinsam benutzt werden"
 
-#: src/parse_args.c:423
+#: src/parse_args.c:417
 msgid "the `-E' option is not valid in edit mode"
 msgstr "Die Option »-E« ist im Bearbeiten-Modus ungültig"
 
-#: src/parse_args.c:425
+#: src/parse_args.c:419
 msgid "you may not specify environment variables in edit mode"
 msgstr "Im Bearbeiten-Modus können keine Umgebungsvariablen gesetzt werden"
 
-#: src/parse_args.c:433
+#: src/parse_args.c:427
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "Die »-U«-Option kann nur zusammen mit »-l« benutzt werden"
 
-#: src/parse_args.c:437
+#: src/parse_args.c:431
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "Die Optionen »-A« und »-S« können nicht gemeinsam benutzt werden"
 
-#: src/parse_args.c:520
+#: src/parse_args.c:497
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit ist auf dieser Plattform nicht verfügbar"
 
-#: src/parse_args.c:593
+#: src/parse_args.c:570
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Nur eine der Optionen -e, -h, -i, -K, -l, -s, -v oder -V darf angegeben werden"
 
-#: src/parse_args.c:607
+#: src/parse_args.c:584
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -318,7 +317,7 @@ msgstr ""
 "%s - Dateien als anderer Benutzer verändern\n"
 "\n"
 
-#: src/parse_args.c:609
+#: src/parse_args.c:586
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -327,7 +326,7 @@ msgstr ""
 "%s - Einen Befehl als anderer Benutzer ausführen\n"
 "\n"
 
-#: src/parse_args.c:614
+#: src/parse_args.c:591
 #, c-format
 msgid ""
 "\n"
@@ -336,111 +335,111 @@ msgstr ""
 "\n"
 "Optionen:\n"
 
-#: src/parse_args.c:616
+#: src/parse_args.c:593
 msgid "use a helper program for password prompting"
 msgstr "Hilfsprogramm zum Eingeben des Passworts verwenden"
 
-#: src/parse_args.c:619
+#: src/parse_args.c:596
 msgid "use specified BSD authentication type"
 msgstr "Angegebenen BSD-Legitimierungstypen verwenden"
 
-#: src/parse_args.c:622
+#: src/parse_args.c:599
 msgid "run command in the background"
 msgstr "Befehl im Hintergrund ausführen"
 
-#: src/parse_args.c:624
+#: src/parse_args.c:601
 msgid "close all file descriptors >= num"
 msgstr "Alle Dateideskriptoren >= num schließen"
 
-#: src/parse_args.c:627
+#: src/parse_args.c:604
 msgid "run command with the specified BSD login class"
 msgstr "Befehl unter angegebener Login-Klasse ausführen"
 
-#: src/parse_args.c:630
+#: src/parse_args.c:607
 msgid "preserve user environment when running command"
 msgstr "Benutzerumgebung beim Starten des Befehls beibehalten"
 
-#: src/parse_args.c:632
+#: src/parse_args.c:609
 msgid "edit files instead of running a command"
 msgstr "Dateien bearbeiten, statt einen Befehl auszuführen"
 
-#: src/parse_args.c:634
+#: src/parse_args.c:611
 msgid "run command as the specified group name or ID"
 msgstr "Befehl unter angegebenem Gruppennamen oder Gruppen-ID ausführen"
 
-#: src/parse_args.c:636
+#: src/parse_args.c:613
 msgid "set HOME variable to target user's home dir"
 msgstr "HOME-Variable als Home-Verzeichnis des Zielbenutzers setzen"
 
-#: src/parse_args.c:638
+#: src/parse_args.c:615
 msgid "display help message and exit"
 msgstr "Hilfe ausgeben und beenden"
 
-#: src/parse_args.c:640
+#: src/parse_args.c:617
 msgid "run command on host (if supported by plugin)"
 msgstr "Befehl auf entferntem System ausführen (falls vom Plugin unterstützt)"
 
-#: src/parse_args.c:642
+#: src/parse_args.c:619
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "Anmeldeshell als Zielbenutzer starten; es kann auch ein Befehl angegeben werden"
 
-#: src/parse_args.c:644
+#: src/parse_args.c:621
 msgid "remove timestamp file completely"
 msgstr "Zeitstempeldateien komplett entfernen"
 
-#: src/parse_args.c:646
+#: src/parse_args.c:623
 msgid "invalidate timestamp file"
 msgstr "Zeitstempeldatei ungültig machen"
 
-#: src/parse_args.c:648
+#: src/parse_args.c:625
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "Benutzerrechte aufzählen oder einen bestimmten Befehl testen; für ein längeres Format zweimal angeben"
 
-#: src/parse_args.c:650
+#: src/parse_args.c:627
 msgid "non-interactive mode, no prompts are used"
 msgstr "Nicht-interaktiver Modus, es werden keine Prompts verwendet"
 
-#: src/parse_args.c:652
+#: src/parse_args.c:629
 msgid "preserve group vector instead of setting to target's"
 msgstr "Gruppen-Vektor beibehalten, statt auf den des Zielbenutzers zu setzen"
 
-#: src/parse_args.c:654
+#: src/parse_args.c:631
 msgid "use the specified password prompt"
 msgstr "Angegebenen Passwort-Prompt benutzen"
 
-#: src/parse_args.c:657
+#: src/parse_args.c:634
 msgid "create SELinux security context with specified role"
 msgstr "SELinux-Sicherheitskontext mit angegebener Funktion erstellen"
 
-#: src/parse_args.c:660
+#: src/parse_args.c:637
 msgid "read password from standard input"
 msgstr "Passwort von der Standardeingabe lesen"
 
-#: src/parse_args.c:662
+#: src/parse_args.c:639
 msgid "run shell as the target user; a command may also be specified"
 msgstr "Shell als Zielbenutzer ausführen; es kann auch ein Befehl angegeben werden"
 
-#: src/parse_args.c:665
+#: src/parse_args.c:642
 msgid "create SELinux security context with specified type"
 msgstr "SELinux-Sicherheitskontext mit angegebenem Typ erstellen"
 
-#: src/parse_args.c:668
+#: src/parse_args.c:645
 msgid "in list mode, display privileges for user"
 msgstr "im Aufzählungsmodus, Rechte des Benutzers anzeigen"
 
-#: src/parse_args.c:670
+#: src/parse_args.c:647
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "Befehl oder Datei unter angegebenem Benutzernamen oder Benutzer-ID ausführen bzw. ändern"
 
-#: src/parse_args.c:672
+#: src/parse_args.c:649
 msgid "display version information and exit"
 msgstr "Versionsinformation anzeigen und beenden"
 
-#: src/parse_args.c:674
+#: src/parse_args.c:651
 msgid "update user's timestamp without running a command"
 msgstr "Den Zeitstempel des Benutzers erneuern, ohne einen Befehl auszuführen"
 
-#: src/parse_args.c:676
+#: src/parse_args.c:653
 msgid "stop processing command line arguments"
 msgstr "Aufhören, die Befehlszeilenargumente zu verarbeiten"
 
@@ -536,16 +535,16 @@ msgstr "Ausführungskontext konnte nicht auf »%s« gesetzt werden"
 msgid "unable to set key creation context to %s"
 msgstr "Kontext der Schüsselerstellung konnte nicht auf %s festgelegt werden."
 
-#: src/sesh.c:78
+#: src/sesh.c:80
 msgid "requires at least one argument"
 msgstr "Benötigt mindestens ein Argument"
 
-#: src/sesh.c:104
+#: src/sesh.c:109
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "%s konnte nicht als Anmeldeshell ausgeführt werden"
 
-#: src/sesh.c:109 src/sudo.c:1106
+#: src/sesh.c:114 src/sudo.c:1186
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s konnte nicht ausgeführt werden"
@@ -598,121 +597,121 @@ msgstr "»setproject« schlug für Projekt »%s« fehl"
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "Warnung: Ressourcenkontrolle von Projekt »%s« konnte nicht zugewiesen werden"
 
-#: src/sudo.c:196
+#: src/sudo.c:209
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo-Version %s\n"
 
-#: src/sudo.c:198
+#: src/sudo.c:211
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Optionen für »configure«: %s\n"
 
-#: src/sudo.c:203
+#: src/sudo.c:216
 msgid "fatal error, unable to load plugins"
 msgstr "Schwerwiegender Fehler, Plugins konnten nicht geladen werden"
 
-#: src/sudo.c:211
+#: src/sudo.c:224
 msgid "unable to initialize policy plugin"
 msgstr "Regelwerks-Plugin konnte nicht initialisiert werden"
 
-#: src/sudo.c:267
+#: src/sudo.c:280
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "E/A-Plugin %s konnte nicht initialisiert werden"
 
-#: src/sudo.c:293
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "Unerwarteter sudo-Modus 0x%x"
 
-#: src/sudo.c:413
+#: src/sudo.c:426
 msgid "unable to get group vector"
 msgstr "Gruppenvektor konnte nicht geholt werden"
 
-#: src/sudo.c:465
+#: src/sudo.c:478
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "Unbekannte UID %u: Wer sind Sie?"
 
-#: src/sudo.c:772
+#: src/sudo.c:785
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s muss dem Benutzer mit UID %d gehören und das »setuid«-Bit gesetzt haben"
 
-#: src/sudo.c:775
+#: src/sudo.c:788
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "Effektive UID ist nicht %d. Liegt %s auf einem Dateisystem mit gesetzter »nosuid«-Option oder auf einem NFS-Dateisystem ohne Root-Rechte?"
 
-#: src/sudo.c:781
+#: src/sudo.c:794
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "Effektive UID ist nicht %d. Wurde sudo mit »setuid root« installiert?"
 
-#: src/sudo.c:910
+#: src/sudo.c:923
 #, c-format
 msgid "unknown login class %s"
 msgstr "Unbekannte Anmeldungsklasse %s"
 
-#: src/sudo.c:923
+#: src/sudo.c:936
 msgid "unable to set user context"
 msgstr "Benutzerkontext konnte nicht gesetzt werden"
 
-#: src/sudo.c:937
+#: src/sudo.c:950
 msgid "unable to set supplementary group IDs"
 msgstr "Zusätzliche Gruppenkennungen konnten nicht gesetzt werden"
 
-#: src/sudo.c:944
+#: src/sudo.c:957
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "Effektive GID konnte nicht auf »runas«-GID %u gesetzt werden"
 
-#: src/sudo.c:950
+#: src/sudo.c:963
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "GID konnte nicht auf »runas«-GID %u gesetzt werden"
 
-#: src/sudo.c:957
+#: src/sudo.c:970
 msgid "unable to set process priority"
 msgstr "Prozesspriorität konnte nicht gesetzt werden"
 
-#: src/sudo.c:965
+#: src/sudo.c:978
 #, c-format
 msgid "unable to change root to %s"
 msgstr "Wurzelverzeichnis konnte nicht zu %s geändert werden"
 
-#: src/sudo.c:978 src/sudo.c:984 src/sudo.c:990
+#: src/sudo.c:991 src/sudo.c:997 src/sudo.c:1003
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "Es konnte nicht zu »runas«-GID gewechselt werden (%u, %u)"
 
-#: src/sudo.c:1007
+#: src/sudo.c:1021
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "In Verzeichnis »%s« konnte nicht gewechselt werden"
 
-#: src/sudo.c:1068
+#: src/sudo.c:1082
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "Unerwartete Abbruchbedingung eines Unterprozesses: %d"
 
-#: src/sudo.c:1127
+#: src/sudo.c:1214
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "Dem Regelwerks-Plugin %s fehlt die »check_policy«-Methode"
 
-#: src/sudo.c:1140
+#: src/sudo.c:1232
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "Regelwerks-Plugin %s unterstützt das Auflisten von Privilegien nicht"
 
-#: src/sudo.c:1152
+#: src/sudo.c:1249
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "Regelwerks-Plugin %s unterstützt die Option -v nicht"
 
-#: src/sudo.c:1164
+#: src/sudo.c:1264
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "Regelwerks-Plugin %s unterstützt die Optionen -k und -K nicht"
@@ -816,6 +815,12 @@ msgstr "dup2 konnte nicht auf die Standardeingabe angewandt werden"
 #: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "Standardeingabe konnte nicht wiederhergestellt werden"
+
+#~ msgid "%s: %s: %s\n"
+#~ msgstr "%s: %s: %s\n"
+
+#~ msgid "%s: %s\n"
+#~ msgstr "%s: %s\n"
 
 #~ msgid "internal error, tried to emalloc2(0)"
 #~ msgstr "Interner Fehler: Es wurde versucht, emalloc2(0) auszuführen"

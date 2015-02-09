@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -69,18 +69,16 @@
 #  include <ndir.h>
 # endif
 #endif
-#ifdef HAVE_REGCOMP
-# include <regex.h>
-#endif
-#ifdef HAVE_ZLIB_H
-# include <zlib.h>
-#endif
-#include <signal.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#include <regex.h>
+#include <signal.h>
+#ifdef HAVE_ZLIB_H
+# include <zlib.h>
+#endif
 
 #include <pathnames.h>
 
@@ -151,11 +149,7 @@ struct search_node {
     bool negated;
     bool or;
     union {
-#ifdef HAVE_REGCOMP
 	regex_t cmdre;
-#else
-	char *pattern;
-#endif
 	time_t tstamp;
 	char *cwd;
 	char *tty;
@@ -205,12 +199,6 @@ static void sudoreplay_handler(int);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
 
-#ifdef HAVE_REGCOMP
-# define REGEX_T	regex_t
-#else
-# define REGEX_T	char
-#endif
-
 #define VALID_ID(s) (isalnum((unsigned char)(s)[0]) && \
     isalnum((unsigned char)(s)[1]) && isalnum((unsigned char)(s)[2]) && \
     isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
@@ -254,8 +242,10 @@ main(int argc, char *argv[])
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(sudoreplay_cleanup);
 
-    /* Read sudo.conf. */
-    sudo_conf_read(NULL);
+    /* Read sudo.conf and initialize the debug subsystem. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    sudo_debug_register(getprogname(), NULL, NULL,
+	sudo_conf_debug_files(getprogname()));
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -407,9 +397,6 @@ replay_session(const double max_wait, const char *decimal)
     /* Set stdin to raw mode if it is a tty */
     interactive = isatty(STDIN_FILENO);
     if (interactive) {
-	idx = fcntl(STDIN_FILENO, F_GETFL, 0);
-	if (idx != -1)
-	    (void) fcntl(STDIN_FILENO, F_SETFL, idx | O_NONBLOCK);
 	if (!sudo_term_raw(STDIN_FILENO, 1))
 	    sudo_fatal(U_("unable to set tty to raw mode"));
     }
@@ -483,20 +470,27 @@ replay_session(const double max_wait, const char *decimal)
 	    if (need_nlcr) {
 		size_t remainder = nread;
 		size_t linelen;
-		char *cp = buf;
-		char *ep = buf - 1;
+		char *line = buf;
+		char *nl, *cp = buf;
 
-		/* Handle a "\r\n" pair that spans a buffer. */
-		if (last_char == '\r' && buf[0] == '\n') {
-		    ep++;
+		/*
+		 * Handle a "\r\n" pair that spans a buffer.
+		 * The newline will be written as part of the next line.
+		 */
+		if (last_char == '\r' && *cp == '\n') {
+		    cp++;
 		    remainder--;
 		}
 
 		iovcnt = 0;
-		while ((ep = memchr(ep + 1, '\n', remainder)) != NULL) {
-		    /* Is there already a carriage return? */
-		    if (cp != ep && ep[-1] == '\r') {
-			remainder = (size_t)(&buf[nread - 1] - ep);
+		while ((nl = memchr(cp, '\n', remainder)) != NULL) {
+		    /*
+		     * If there is already a carriage return, keep going.
+		     * We'll include it as part of the next line written.
+		     */
+		    if (cp != nl && nl[-1] == '\r') {
+			remainder = (size_t)(&buf[nread - 1] - nl);
+			cp = nl + 1;
 		    	continue;
 		    }
 
@@ -506,23 +500,23 @@ replay_session(const double max_wait, const char *decimal)
 			    sudo_ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
 			    sudo_emallocarray(iovmax = 32, sizeof(*iov));
 		    }
-		    linelen = (size_t)(ep - cp) + 1;
-		    iov[iovcnt].iov_base = cp;
+		    linelen = (size_t)(nl - line) + 1;
+		    iov[iovcnt].iov_base = line;
 		    iov[iovcnt].iov_len = linelen - 1; /* not including \n */
 		    iovcnt++;
 		    iov[iovcnt].iov_base = "\r\n";
 		    iov[iovcnt].iov_len = 2;
 		    iovcnt++;
-		    cp = ep + 1;
+		    line = cp = nl + 1;
 		    remainder -= linelen;
 		}
-		if ((size_t)(cp - buf) != nread) {
+		if ((size_t)(line - buf) != nread) {
 		    /*
 		     * Partial line without a linefeed or multiple lines
-		     * with \r\n pairs.
+		     * that already had \r\n pairs.
 		     */
-		    iov[iovcnt].iov_base = cp;
-		    iov[iovcnt].iov_len = nread - (cp - buf);
+		    iov[iovcnt].iov_base = line;
+		    iov[iovcnt].iov_len = nread - (line - buf);
 		    iovcnt++;
 		}
 		last_char = buf[nread - 1]; /* stash last char of old buffer */
@@ -546,6 +540,8 @@ replay_session(const double max_wait, const char *decimal)
 	    sudo_ev_add(evbase, output_ev, NULL, false);
 	    sudo_ev_loop(evbase, 0);
 	}
+	if (iov != &iovb)
+	    sudo_efree(iov);
     }
     debug_return;
 }
@@ -572,13 +568,12 @@ static void
 write_output(int fd, int what, void *v)
 {
     struct write_closure *wc = v;
-    ssize_t nwritten;
-    size_t count, remainder;
+    size_t nwritten;
     unsigned int i;
     debug_decl(write_output, SUDO_DEBUG_UTIL)
 
     nwritten = writev(STDOUT_FILENO, wc->iov, wc->iovcnt);
-    switch (nwritten) {
+    switch ((ssize_t)nwritten) {
     case -1:
 	if (errno != EINTR && errno != EAGAIN)
 	    sudo_fatal(U_("unable to write to %s"), "stdout");
@@ -586,30 +581,24 @@ write_output(int fd, int what, void *v)
     case 0:
 	break;
     default:
-	remainder = wc->nbytes - nwritten;
-	if (remainder == 0) {
+	if (wc->nbytes == nwritten) {
 	    /* writev completed */
 	    debug_return;
 	}
 
 	/* short writev, adjust iov so we can write the remainder. */
-	count = 0;
+	wc->nbytes -= nwritten;
 	i = wc->iovcnt;
 	while (i--) {
-	    count += wc->iov[i].iov_len;
-	    if (count == remainder) {
-		wc->iov += i;
-		wc->iovcnt -= i;
+	    if (wc->iov[0].iov_len > nwritten) {
+		/* Partial write, adjust base and len and reschedule. */
+		wc->iov[0].iov_base = (char *)wc->iov[0].iov_base + nwritten;
+		wc->iov[0].iov_len -= nwritten;
 		break;
 	    }
-	    if (count > remainder) {
-		size_t off = (count - remainder);
-		wc->iov[i].iov_base = (char *)wc->iov[i].iov_base + off;
-		wc->iov[i].iov_len -= off;
-		wc->iov += i;
-		wc->iovcnt -= i;
-		break;
-	    }
+	    nwritten -= wc->iov[0].iov_len;
+	    wc->iov++;
+	    wc->iovcnt--;
 	}
 	break;
     }
@@ -714,13 +703,10 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	} else {
 	    if (*(++av) == NULL)
 		sudo_fatalx(U_("%s requires an argument"), av[-1]);
-#ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
 		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
 		    sudo_fatalx(U_("invalid regular expression: %s"), *av);
-	    } else
-#endif
-	    if (type == ST_TODATE || type == ST_FROMDATE) {
+	    } else if (type == ST_TODATE || type == ST_FROMDATE) {
 		sn->u.tstamp = get_date(*av);
 		if (sn->u.tstamp == -1)
 		    sudo_fatalx(U_("could not parse date \"%s\""), *av);
@@ -770,7 +756,6 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 	    res = strcmp(sn->u.user, log->user) == 0;
 	    break;
 	case ST_PATTERN:
-#ifdef HAVE_REGCOMP
 	    rc = regexec(&sn->u.cmdre, log->cmd, 0, NULL, 0);
 	    if (rc && rc != REG_NOMATCH) {
 		char buf[BUFSIZ];
@@ -778,9 +763,6 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 		sudo_fatalx("%s", buf);
 	    }
 	    res = rc == REG_NOMATCH ? 0 : 1;
-#else
-	    res = strstr(log.cmd, sn->u.pattern) != NULL;
-#endif
 	    break;
 	case ST_FROMDATE:
 	    res = log->tstamp >= sn->u.tstamp;
@@ -934,7 +916,7 @@ free_log_info(struct log_info *li)
 }
 
 static int
-list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
+list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
     const char *timestr;
@@ -991,7 +973,7 @@ session_compare(const void *v1, const void *v2)
 
 /* XXX - always returns 0, calls sudo_fatal() on failure */
 static int
-find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
+find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 {
     DIR *d;
     struct dirent *dp;
@@ -1078,22 +1060,18 @@ static int
 list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
 {
-    REGEX_T rebuf, *re = NULL;
+    regex_t rebuf, *re = NULL;
     debug_decl(list_sessions, SUDO_DEBUG_UTIL)
 
     /* Parse search expression if present */
     parse_expr(&search_expr, argv, false);
 
-#ifdef HAVE_REGCOMP
     /* optional regex */
     if (pattern) {
 	re = &rebuf;
 	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
 	    sudo_fatalx(U_("invalid regular expression: %s"), pattern);
     }
-#else
-    re = (char *) pattern;
-#endif /* HAVE_REGCOMP */
 
     debug_return_int(find_sessions(session_dir, re, user, tty));
 }

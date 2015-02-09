@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,10 +70,10 @@
 # endif
 #endif
 #if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
-# include <sys/param.h>
+# include <sys/param.h>		/* for makedev/major/minor */
 # include <sys/sysctl.h>
 #elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
-# include <sys/param.h>
+# include <sys/param.h>		/* for makedev/major/minor */
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
@@ -83,7 +83,7 @@
 # include <sys/procfs.h>
 #endif
 #ifdef HAVE_PSTAT_GETPROC
-# include <sys/param.h>
+# include <sys/param.h>		/* for makedev/major/minor */
 # include <sys/pstat.h>
 #endif
 

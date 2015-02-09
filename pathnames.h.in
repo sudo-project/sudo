@@ -179,6 +179,10 @@
 # undef	_PATH_NETSVC_CONF
 #endif /* _PATH_NETSVC_CONF */
 
+#ifndef _PATH_ZONEINFO
+# undef	_PATH_ZONEINFO
+#endif /* _PATH_ZONEINFO */
+
 /* On AIX, _PATH_BSHELL in paths.h is /usr/bin/bsh but we want /usr/bin/sh */
 #ifndef _PATH_SUDO_BSHELL
 # if defined(_AIX) && defined(HAVE_PATHS_H)

@@ -55,11 +55,11 @@ For most systems and configurations it is possible simply to:
        install-doc, and install-sudoers make targets.
 
     6) Edit the sudoers file with `visudo' as necessary for your
-       site.  You will probably want to refer the sample.sudoers
+       site.  You will probably want to refer the example sudoers
        file and sudoers man page included with the sudo package.
 
     7) If you want to use syslogd(8) to do the logging, you'll need
-       to update your /etc/syslog.conf file.  See the sample.syslog.conf
+       to update your /etc/syslog.conf file.  See the example syslog.conf
        file included in the distribution for an example.
 
 Available configure options
@@ -145,6 +145,16 @@ Directory and file names:
 	    /var/db, /var/lib, /var/adm, /usr/adm
 	This directory should not be cleared when the system boots.
 
+  --with-tzdir=DIR
+        Set the directory to the system's time zone data files.  This 
+	is only used when sanitizing the TZ environment variable to
+	allow for fully-qualified paths in TZ.
+        By default, configure will look for an existing "zoneinfo"
+	directory in the following locations:
+	    /usr/share /usr/share/lib /usr/lib /etc
+	If no zoneinfo directory is found, the TZ variable may not
+	contain a fully-qualified path.
+
 Compilation options:
   --disable-hardening
 	Disable the use of compiler/linker exploit mitigation options
@@ -206,11 +216,13 @@ Compilation options:
 	Enable the use of the zlib compress library when storing
 	I/O log files.  If specified, location is the base directory
 	containing the zlib include and lib directories.  The special
-	values "system" and "builtin" can be used to indicate that
-	the system version of zlib should be used or that the version
-	of zlib shipped with sudo should be used instead.
-	If this option is not specified, configure will use the
-	system zlib if it is present.
+	values "system", "builtin", "shared" and "static" can be
+	used to indicate that the system version of zlib should be
+	used or that the version of zlib shipped with sudo should
+	be used instead.  If "static" is specified, sudo will
+	statically link the builtin zlib and not install it.  If
+	this option is not specified, configure will use the system
+	zlib if it is present, falling back on the sudo version.
 
   --with-incpath=DIR
 	Adds the specified directory (or directories) to CPPFLAGS
@@ -425,8 +437,8 @@ Authentication options:
 	Linux, Solaris and HP-UX (version 11 and higher).
 
 	NOTE: on RedHat Linux and Fedora you *must* have an /etc/pam.d/sudo
-	file install.  You may either use the sample.pam file included with
-	sudo or use /etc/pam.d/su as a reference.  The sample.pam file
+	file install.  You may either use the example pam.conf file included
+	with sudo or use /etc/pam.d/su as a reference.  The pam.conf file
 	included with sudo may or may not work with other Linux distributions.
 	On Solaris and HP-UX 11 systems you should check (and understand)
 	the contents of /etc/pam.conf.  Do a "man pam.conf" for more
@@ -676,7 +688,7 @@ Options that set runtime-changeable default values:
 	How you want to do your logging.  You may choose "syslog",
 	"file", or "both".  Setting this to "syslog" is nice because
 	you can keep all of your sudo logs in one place (see the
-	sample.syslog.conf file).  The default is "syslog".
+	example syslog.conf file).  The default is "syslog".
 	Sudoers options: syslog and logfile
 
   --with-loglen=NUMBER

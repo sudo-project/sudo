@@ -128,9 +128,9 @@ o Upgrading from a version prior to 1.8.0:
 
     The sudo.conf file, usually stored in /etc, is used to configure
     plugins.  This file is optional--if no plugins are specified
-    in sudo.conf, the "sudoers" plugin is used.  See the sample.sudo.conf
-    file in the doc directory or refer to the updated sudo manual
-    to see how to configure sudo.conf.
+    in sudo.conf, the "sudoers" plugin is used.  See the example
+    sudo.conf file in the doc directory or refer to the updated
+    sudo manual to see how to configure sudo.conf.
 
     The "askpass" setting has moved from the sudoers file to the
     sudo.conf file.  If you have a sudoers file that uses the

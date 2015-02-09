@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -54,7 +54,6 @@
 #include "parse.h"
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
-#include "sudo_debug.h"
 
 /* SSSD <--> SUDO interface - do not change */
 struct sss_sudo_attr {
@@ -125,7 +124,7 @@ static void
 sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
 {
      unsigned int i;
-     debug_decl(sudo_sss_attrcpy, SUDO_DEBUG_SSSD)
+     debug_decl(sudo_sss_attrcpy, SUDOERS_DEBUG_SSSD)
 
      sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
      sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_emalloc: cnt=%d", src->num_values);
@@ -144,7 +143,7 @@ static void
 sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
 {
      unsigned int i;
-     debug_decl(sudo_sss_rulecpy, SUDO_DEBUG_SSSD)
+     debug_decl(sudo_sss_rulecpy, SUDOERS_DEBUG_SSSD)
 
      sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
      sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_emalloc: cnt=%d", src->num_attrs);
@@ -173,7 +172,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     struct sss_sudo_result *out_res;
     unsigned int i, l;
     int r;
-    debug_decl(sudo_sss_filter_result, SUDO_DEBUG_SSSD)
+    debug_decl(sudo_sss_filter_result, SUDOERS_DEBUG_SSSD)
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "in_res=%p, count=%u, act=%s",
 	in_res, in_res ? in_res->num_rules : 0,
@@ -241,7 +240,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle;
     static const char path[] = _PATH_SSSD_LIB"/libsss_sudo.so";
-    debug_decl(sudo_sss_open, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_open, SUDOERS_DEBUG_SSSD);
 
     /* Create a handle container. */
     handle = sudo_emalloc(sizeof(struct sudo_sss_handle));
@@ -307,7 +306,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
 static int sudo_sss_close(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle;
-    debug_decl(sudo_sss_close, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_close, SUDOERS_DEBUG_SSSD);
 
     if (nss && nss->handle) {
 	handle = nss->handle;
@@ -320,7 +319,7 @@ static int sudo_sss_close(struct sudo_nss *nss)
 // ok
 static int sudo_sss_parse(struct sudo_nss *nss)
 {
-    debug_decl(sudo_sss_parse, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
     debug_return_int(0);
 }
 
@@ -332,7 +331,7 @@ static int sudo_sss_setdefs(struct sudo_nss *nss)
     struct sss_sudo_rule   *sss_rule;
     uint32_t sss_error;
     unsigned int i;
-    debug_decl(sudo_sss_setdefs, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_setdefs, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
 	debug_return_int(-1);
@@ -369,7 +368,7 @@ static int sudo_sss_setdefs(struct sudo_nss *nss)
 static int sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
-    debug_decl(sudo_sss_checkpw, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_checkpw, SUDOERS_DEBUG_SSSD);
 
     if (pw->pw_name != handle->pw->pw_name ||
 	pw->pw_uid  != handle->pw->pw_uid) {
@@ -390,7 +389,7 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
     char **val_array = NULL;
     char *val;
     int ret = false, i;
-    debug_decl(sudo_sss_check_runas_user, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_runas_user, SUDOERS_DEBUG_SSSD);
 
     if (!runas_pw)
 	debug_return_int(UNSPEC);
@@ -493,7 +492,7 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
     char **val_array = NULL;
     char *val;
     int ret = false, i;
-    debug_decl(sudo_sss_check_runas_group, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_runas_group, SUDOERS_DEBUG_SSSD);
 
     /* runas_gr is only set if the user specified the -g flag */
     if (!runas_gr)
@@ -537,7 +536,7 @@ static bool
 sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     bool ret;
-    debug_decl(sudo_sss_check_runas, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_runas, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	 debug_return_bool(false);
@@ -554,7 +553,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     char **val_array, *val;
     bool ret = false;
     int i;
-    debug_decl(sudo_sss_check_host, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_host, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	debug_return_bool(ret);
@@ -606,7 +605,7 @@ sudo_sss_filter_user_netgroup(struct sudo_sss_handle *handle, struct sss_sudo_ru
     bool ret = false, netgroup_spec_found = false;
     char **val_array, *val;
     int i;
-    debug_decl(sudo_sss_filter_user_netgroup, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_filter_user_netgroup, SUDOERS_DEBUG_SSSD);
 
     if (!handle || !rule)
 	debug_return_bool(ret);
@@ -646,7 +645,7 @@ sudo_sss_result_filterp(struct sudo_sss_handle *handle,
     struct sss_sudo_rule *rule, void *unused)
 {
     (void)unused;
-    debug_decl(sudo_sss_result_filterp, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_result_filterp, SUDOERS_DEBUG_SSSD);
 
     if (sudo_sss_check_host(handle, rule) &&
         sudo_sss_filter_user_netgroup(handle, rule))
@@ -661,7 +660,7 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *u_sss_result, *f_sss_result;
     uint32_t sss_error = 0, ret;
-    debug_decl(sudo_sss_result_get, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_result_get, SUDOERS_DEBUG_SSSD);
 
     if (sudo_sss_checkpw(nss, pw) != 0)
 	debug_return_ptr(NULL);
@@ -739,7 +738,7 @@ sudo_sss_check_bool(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
 {
     char ch, *var, **val_array = NULL;
     int i, ret = UNSPEC;
-    debug_decl(sudo_sss_check_bool, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_bool, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	debug_return_int(ret);
@@ -781,7 +780,7 @@ sudo_sss_extract_digest(char **cmnd, struct sudo_digest *digest)
 {
     char *ep, *cp = *cmnd;
     int digest_type = SUDO_DIGEST_INVALID;
-    debug_decl(sudo_sss_check_command, SUDO_DEBUG_LDAP)
+    debug_decl(sudo_sss_check_command, SUDOERS_DEBUG_LDAP)
 
     /*
      * Check for and extract a digest prefix, e.g.
@@ -850,7 +849,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     bool foundbang;
     unsigned int i;
     struct sudo_digest digest, *allowed_digest = NULL;
-    debug_decl(sudo_sss_check_command, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_command, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	debug_return_int(ret);
@@ -925,7 +924,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
     int i;
     char op, *v, *val;
     char **val_array = NULL;
-    debug_decl(sudo_sss_parse_options, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	debug_return;
@@ -983,7 +982,7 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
     struct sss_sudo_result *sss_result = NULL;
     struct sss_sudo_rule   *rule;
     uint32_t i, state = 0;
-    debug_decl(sudo_sss_lookup, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_lookup, SUDOERS_DEBUG_SSSD);
 
     /* Fetch list of sudoRole entries that match user and host. */
     sss_result = sudo_sss_result_get(nss, sudo_user.pw, &state);
@@ -1016,8 +1015,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	    }
 	}
 	if (matched || user_uid == 0) {
-	    SET(ret, VALIDATE_OK);
-	    CLR(ret, VALIDATE_NOT_OK);
+	    SET(ret, VALIDATE_SUCCESS);
+	    CLR(ret, VALIDATE_FAILURE);
 	    if (def_authenticate) {
 		switch (pwcheck) {
 		    case always:
@@ -1066,11 +1065,11 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		    if (user_type == NULL)
 			user_type = def_type;
 #endif /* HAVE_SELINUX */
-		    SET(ret, VALIDATE_OK);
-		    CLR(ret, VALIDATE_NOT_OK);
+		    SET(ret, VALIDATE_SUCCESS);
+		    CLR(ret, VALIDATE_FAILURE);
 		} else {
-		    SET(ret, VALIDATE_NOT_OK);
-		    CLR(ret, VALIDATE_OK);
+		    SET(ret, VALIDATE_FAILURE);
+		    CLR(ret, VALIDATE_SUCCESS);
 		}
 		break;
 	    }
@@ -1079,7 +1078,7 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 done:
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
-    if (!ISSET(ret, VALIDATE_OK)) {
+    if (!ISSET(ret, VALIDATE_SUCCESS)) {
 	/* No matching entries. */
 	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);
@@ -1104,7 +1103,7 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     struct sss_sudo_rule *rule;
     unsigned int i;
     bool found = false;
-    debug_decl(sudo_sss_display_cmnd, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_display_cmnd, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
 	goto done;
@@ -1153,7 +1152,7 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     char *prefix, *val, **val_array = NULL;
     unsigned int i, j;
     int count = 0;
-    debug_decl(sudo_sss_display_defaults, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_display_defaults, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
 	goto done;
@@ -1215,7 +1214,7 @@ static int
 sudo_sss_display_bound_defaults(struct sudo_nss *nss,
     struct passwd *pw, struct sudo_lbuf *lbuf)
 {
-    debug_decl(sudo_sss_display_bound_defaults, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_display_bound_defaults, SUDOERS_DEBUG_SSSD);
     debug_return_int(0);
 }
 
@@ -1225,7 +1224,7 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 {
     char **val_array = NULL;
     int count = 0, i;
-    debug_decl(sudo_sss_display_entry_long, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_display_entry_long, SUDOERS_DEBUG_SSSD);
 
     /* get the RunAsUser Values from the entry */
     sudo_lbuf_append(lbuf, "    RunAsUsers: ");
@@ -1320,7 +1319,7 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 {
     char **val_array = NULL;
     int count = 0, i;
-    debug_decl(sudo_sss_display_entry_short, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_display_entry_short, SUDOERS_DEBUG_SSSD);
 
     sudo_lbuf_append(lbuf, "    (");
 
@@ -1433,7 +1432,7 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sss_sudo_result *sss_result = NULL;
     struct sss_sudo_rule *rule;
     unsigned int i, count = 0;
-    debug_decl(sudo_sss_display_privs, SUDO_DEBUG_SSSD);
+    debug_decl(sudo_sss_display_privs, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
 	debug_return_int(-1);

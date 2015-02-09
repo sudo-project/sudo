@@ -111,3 +111,29 @@ err:
 
     return -1;
 }
+
+int
+sudo_conversation_printf(int msg_type, const char *fmt, ...)
+{
+    va_list ap;
+    int len;
+
+    switch (msg_type) {
+    case SUDO_CONV_INFO_MSG:
+	va_start(ap, fmt);
+	len = vfprintf(stdout, fmt, ap);
+	va_end(ap);
+	break;
+    case SUDO_CONV_ERROR_MSG:
+	va_start(ap, fmt);
+	len = vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	break;
+    default:
+	len = -1;
+	errno = EINVAL;
+	break;
+    }
+
+    return len;
+}

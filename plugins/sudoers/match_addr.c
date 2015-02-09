@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -58,7 +58,7 @@ addr_matches_if(const char *n)
     unsigned int j;
 #endif
     unsigned int family;
-    debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
+    debug_decl(addr_matches_if, SUDOERS_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
     if (inet_pton(AF_INET6, n, &addr.ip6) == 1) {
@@ -111,7 +111,7 @@ addr_matches_if_netmask(const char *n, const char *m)
 #endif
     unsigned int family;
     const char *errstr;
-    debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
+    debug_decl(addr_matches_if, SUDOERS_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
     if (inet_pton(AF_INET6, n, &addr.ip6) == 1)
@@ -132,26 +132,20 @@ addr_matches_if_netmask(const char *n, const char *m)
 		debug_return_bool(false);
 	    }
 	} else {
-	    i = strtonum(m, 0, 32, &errstr);
+	    i = strtonum(m, 1, 32, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "IPv4 netmask %s: %s", m, errstr);
 		debug_return_bool(false);
 	    }
-	    if (i == 0)
-		mask.ip4.s_addr = 0;
-	    else if (i == 32)
-		mask.ip4.s_addr = 0xffffffff;
-	    else
-		mask.ip4.s_addr = 0xffffffff - (1 << (32 - i)) + 1;
-	    mask.ip4.s_addr = htonl(mask.ip4.s_addr);
+	    mask.ip4.s_addr = htonl(0xffffffffU << (32 - i));
 	}
 	addr.ip4.s_addr &= mask.ip4.s_addr;
     }
 #ifdef HAVE_STRUCT_IN6_ADDR
     else {
 	if (inet_pton(AF_INET6, m, &mask.ip6) != 1) {
-	    j = strtonum(m, 0, 128, &errstr);
+	    j = strtonum(m, 1, 128, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "IPv6 netmask %s: %s", m, errstr);
@@ -203,7 +197,7 @@ addr_matches(char *n)
 {
     char *m;
     bool rc;
-    debug_decl(addr_matches, SUDO_DEBUG_MATCH)
+    debug_decl(addr_matches, SUDOERS_DEBUG_MATCH)
 
     /* If there's an explicit netmask, use it. */
     if ((m = strchr(n, '/'))) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2013
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -84,6 +84,12 @@
 #define TGP_ASKPASS	0x04		/* read from askpass helper program */
 #define TGP_MASK	0x08		/* mask user input when reading */
 #define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
+
+/* name/value pairs for command line settings. */
+struct sudo_settings {
+    const char *name;
+    const char *value;
+};
 
 struct user_details {
     pid_t pid;
@@ -186,7 +192,7 @@ int sudo_execute(struct command_details *details, struct command_status *cstat);
 
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
-    char ***settingsp, char ***env_addp);
+    struct sudo_settings **settingsp, char ***env_addp);
 extern int tgetpass_flags;
 
 /* get_pty.c */
@@ -199,6 +205,7 @@ int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 extern const char *list_user;
 extern struct user_details user_details;
+extern int sudo_debug_instance;
 
 /* sudo_edit.c */
 int sudo_edit(struct command_details *details);

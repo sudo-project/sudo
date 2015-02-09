@@ -1,6 +1,6 @@
 dnl Local m4 macros for autoconf (used by sudo)
 dnl
-dnl Copyright (c) 1994-1996, 1998-2005, 2007-2014
+dnl Copyright (c) 1994-1996, 1998-2005, 2007-2015
 dnl	Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 dnl XXX - should cache values in all cases!!!
@@ -10,73 +10,37 @@ dnl checks for programs
 dnl
 dnl check for sendmail in well-known locations
 dnl
-AC_DEFUN([SUDO_PROG_SENDMAIL], [AC_MSG_CHECKING([for sendmail])
-found=no
-for p in "/usr/sbin/sendmail" "/usr/lib/sendmail" "/usr/etc/sendmail" "/usr/ucblib/sendmail" "/usr/local/lib/sendmail" "/usr/local/bin/sendmail"; do
-    if test -f "$p"; then
-	found=yes
-	AC_MSG_RESULT([$p])
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SENDMAIL, "$p")
-	break
-    fi
-done
-if test X"$found" != X"yes"; then
-    AC_MSG_RESULT([not found])
-fi
+AC_ARG_VAR([SENDMAILPROG], [The fully-qualified path to the sendmail program to use.])
+AC_DEFUN([SUDO_PROG_SENDMAIL], [
+    AC_PATH_PROG([SENDMAILPROG], [sendmail], [], [/usr/sbin$PATH_SEPARATOR/usr/lib$PATH_SEPARATOR/usr/etc$PATH_SEPARATOR/usr/ucblib$PATH_SEPARATOR/usr/local/lib$PATH_SEPARATOR/usr/local/bin])
+    test -n "${ac_cv_path_SENDMAILPROG}" && SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SENDMAIL, "${ac_cv_path_SENDMAILPROG}")
 ])dnl
 
 dnl
 dnl check for vi in well-known locations
 dnl
-AC_DEFUN([SUDO_PROG_VI], [AC_MSG_CHECKING([for vi])
-found=no
-for editor in "/usr/bin/vi" "/bin/vi" "/usr/ucb/vi" "/usr/bsd/vi" "/usr/local/bin/vi"; do
-    if test -f "$editor"; then
-	found=yes
-	AC_MSG_RESULT([$editor])
-	SUDO_DEFINE_UNQUOTED(_PATH_VI, "$editor")
-	break
-    fi
-done
-if test X"$found" != X"yes"; then
-    AC_MSG_RESULT([not found])
-fi
+AC_ARG_VAR([VIPROG], [The fully-qualified path to the vi program to use.])
+AC_DEFUN([SUDO_PROG_VI], [
+    AC_PATH_PROG([VIPROG], [vi], [], [/usr/bin$PATH_SEPARATOR/bin$PATH_SEPARATOR/usr/ucb$PATH_SEPARATOR/usr/bsd$PATH_SEPARATOR/usr/local/bin])
+    test -n "${ac_cv_path_VIPROG}" && SUDO_DEFINE_UNQUOTED(_PATH_VI, "${ac_cv_path_VIPROG}")
 ])dnl
 
 dnl
 dnl check for mv in well-known locations
 dnl
-AC_DEFUN([SUDO_PROG_MV], [AC_MSG_CHECKING([for mv])
-found=no
-for p in "/usr/bin/mv" "/bin/mv" "/usr/ucb/mv" "/usr/sbin/mv"; do
-    if test -f "$p"; then
-	found=yes
-	AC_MSG_RESULT([$p])
-	SUDO_DEFINE_UNQUOTED(_PATH_MV, "$p")
-	break
-    fi
-done
-if test X"$found" != X"yes"; then
-    AC_MSG_RESULT([not found])
-fi
+AC_ARG_VAR([MVPROG], [The fully-qualified path to the mv program to use.])
+AC_DEFUN([SUDO_PROG_MV], [
+    AC_PATH_PROG([MVPROG], [mv], [], [/usr/bin$PATH_SEPARATOR/bin$PATH_SEPARATOR/usr/ucb$PATH_SEPARATOR/usr/local/bin])
+    test -n "${ac_cv_path_MVPROG}" && SUDO_DEFINE_UNQUOTED(_PATH_MV, "${ac_cv_path_MVPROG}")
 ])dnl
 
 dnl
 dnl check for bourne shell in well-known locations
 dnl
-AC_DEFUN([SUDO_PROG_BSHELL], [AC_MSG_CHECKING([for bourne shell])
-found=no
-for p in "/usr/bin/sh" "/bin/sh" "/usr/sbin/sh" "/sbin/sh" "/usr/bin/ksh" "/bin/ksh" "/usr/bin/bash" "/bin/bash"; do
-    if test -f "$p"; then
-	found=yes
-	AC_MSG_RESULT([$p])
-	SUDO_DEFINE_UNQUOTED(_PATH_BSHELL, "$p")
-	break
-    fi
-done
-if test X"$found" != X"yes"; then
-    AC_MSG_RESULT([not found])
-fi
+AC_ARG_VAR([BSHELLPROG], [The fully-qualified path to the Bourne shell to use.])
+AC_DEFUN([SUDO_PROG_BSHELL], [
+    AC_PATH_PROG([BSHELLPROG], [sh], [/usr/bin$PATH_SEPARATOR/bin$PATH_SEPARATOR/usr/sbin$PATH_SEPARATOR/sbin])
+    test -n "${ac_cv_path_BSHELLPROG}" && SUDO_DEFINE_UNQUOTED(_PATH_BSHELL, "${ac_cv_path_BSHELLPROG}")
 ])dnl
 
 dnl
@@ -115,6 +79,26 @@ elif test -d "/usr/adm"; then
     SUDO_DEFINE(_PATH_SUDO_LOGFILE, "/usr/adm/sudo.log")
 else
     AC_MSG_RESULT(unknown, you will have to set _PATH_SUDO_LOGFILE by hand)
+fi
+])dnl
+
+dnl
+dnl Detect time zone file directory, if any.
+dnl
+AC_DEFUN([SUDO_TZDIR], [AC_MSG_CHECKING(time zone data directory)
+tzdir="$with_tzdir"
+if test -z "$tzdir"; then
+    tzdir=no
+    for d in /usr/share /usr/share/lib /usr/lib /etc; do
+	if test -d "$d/zoneinfo"; then
+	    tzdir="$d/zoneinfo"
+	    break
+	fi
+    done
+fi
+AC_MSG_RESULT([$tzdir])
+if test "${tzdir}" != "no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_ZONEINFO, "$tzdir")
 fi
 ])dnl
 
@@ -338,7 +322,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <pwd.h>
 #include <limits.h>
 #include <sys/types.h>
-#include <sys/param.h>
 main() {
   FILE *f;
   char b[1024];

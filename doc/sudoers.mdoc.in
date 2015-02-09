@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2014
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2015
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 16, 2014
+.Dd February 6, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -27,7 +27,7 @@
 .Nd default sudo security policy plugin
 .Sh DESCRIPTION
 The
-.Em sudoers
+.Nm
 policy plugin determines a user's
 .Nm sudo
 privileges.
@@ -56,12 +56,12 @@ If no
 file is present, or if it contains no
 .Li Plugin
 lines,
-.Nm sudoers
+.Nm
 will be used for policy decisions and I/O logging.
 To explicitly configure
 .Xr sudo.conf @mansectform@
 to use the
-.Nm sudoers
+.Nm
 plugin, the following configuration can be used.
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so
@@ -71,7 +71,7 @@ Plugin sudoers_io sudoers.so
 Starting with
 .Nm sudo
 1.8.5, it is possible to specify optional arguments to the
-.Nm sudoers
+.Nm
 plugin in the
 .Xr sudo.conf @mansectform@
 file.
@@ -160,17 +160,25 @@ Defaults entry
 (described later) and defaults to
 .Li @mailto@ .
 .Pp
-Note that mail will not be sent if an unauthorized user tries to
-run
+Note that no mail will be sent if an unauthorized user tries to run
 .Nm sudo
 with the
 .Fl l
 or
 .Fl v
-option.
+option unless there is an authentication error and
+either the
+.Em mail_always
+or
+.Em mail_badpass
+flags are enabled.
 This allows users to
 determine for themselves whether or not they are allowed to use
 .Nm sudo .
+All attempts to run
+.Nm sudo
+(successful or not)
+will be logged, regardless of whether or not mail is sent.
 .Pp
 If
 .Nm sudo
@@ -299,9 +307,9 @@ are removed unless both the name and value parts are matched by
 .Em env_keep
 or
 .Em env_check ,
-as they could be interpreted as
+as they will be interpreted as functions by older versions of the
 .Sy bash
-functions.
+shell.
 Prior to version 1.8.11, such variables were always removed.
 .Pp
 If, however, the
@@ -331,25 +339,27 @@ By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 .Pq Ql =\& ,
 both the variables name and value must match.
-For example, a
+For example, an old-style (pre-shellshock)
 .Sy bash
-function could be matched as follows:
+shell function could be matched as follows:
 .Bd -literal -offset 4n
 env_keep += "my_func=()*"
 .Ed
 .Pp
 Without the
 .Dq Li =()*
-suffix, this would not match, as
+suffix, this would not match, as old-style
 .Sy bash
-functions are not preserved by default.
+shell functions are not preserved by default.
 .Pp
-The list of environment variables that
+The complete list of environment variables that
 .Nm sudo
-allows or denies is
-contained in the output of
+allows or denies is contained in the output of
 .Dq Li sudo -V
 when run as root.
+Please note that this list varies based on the operating system
+.Nm sudo
+is running on.
 .Pp
 On systems that support PAM where the
 .Sy pam_env
@@ -359,7 +369,7 @@ variables in the PAM environment may be merged in to the environment.
 If a variable in the PAM environment is already present in the
 user's environment, the value will only be overridden if the variable
 was not preserved by
-.Nm sudoers.
+.Nm .
 When
 .Em env_reset
 is enabled, variables preserved from the invoking user's environment
@@ -424,7 +434,7 @@ are also
 included.
 On BSD systems, if the
 .Em use_loginclass
-option is
+flag is
 enabled, the
 .Em path
 and
@@ -1904,7 +1914,7 @@ In the
 file, the first host name of the entry is considered to be the
 .Dq canonical
 name; subsequent names are aliases that are not used by
-.Nm sudoers .
+.Nm .
 For example, the following hosts file line for the machine
 .Dq xyzzy
 has the fully-qualified domain name as the
@@ -1920,7 +1930,7 @@ option will not be effective if it is queried before DNS.
 Beware that when using DNS for host name resolution, turning on
 .Em fqdn
 requires
-.Nm sudoers
+.Nm
 to make DNS lookups which renders
 .Nm sudo
 unusable if DNS stops working (for example if the machine is disconnected
@@ -2073,8 +2083,16 @@ by default.
 .It mail_always
 Send mail to the
 .Em mailto
-user every time a users runs
+user every time a user attempts to run a command via
 .Nm sudo .
+Mail will be sent for both successful and unsuccessful attempts.
+No mail will be sent if the user runs
+.Nm sudo
+with the
+.Fl l
+or
+.Fl v
+option unless there is an authentication error.
 This flag is
 .Em off
 by default.
@@ -2764,7 +2782,7 @@ Once the local sequence number reaches the value of
 it will
 .Dq roll over
 to zero, after which
-.Nm sudoers
+.Nm
 will truncate and re-use any existing I/O log path names.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
@@ -3153,13 +3171,38 @@ The default value is
 .Bl -tag -width 16n
 .It env_check
 Environment variables to be removed from the user's environment if
-the variable's value contains
+unless they are considered
+.Dq safe .
+For all variables except
+.Li TZ ,
+.Dq safe
+means that the variable's value does not contain any
 .Ql %
 or
 .Ql /
 characters.
 This can be used to guard against printf-style format vulnerabilities
 in poorly-written programs.
+The
+.Li TZ 
+variable is considered unsafe if any of the following are true:
+.Bl -bullet
+.It
+It consists of a fully-qualified path name that does not match
+the location of the
+.Pa zoneinfo
+directory.
+.It
+It contains a
+.Pa ..
+path element.
+.It
+It contains white space or non-printable characters.
+.It
+It is longer than the value of
+.Li PATH_MAX .
+.El
+.Pp
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using
@@ -3227,7 +3270,7 @@ option.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The
-.Nm sudoers
+.Nm
 plugin supports its own plugin interface to allow non-Unix
 group lookups which can query a group source other
 than the standard Unix group database.
@@ -3281,7 +3324,7 @@ Defaults group_plugin=system_group.so
 The group provider plugin API is described in detail in
 .Xr sudo_plugin @mansectsu@ .
 .Sh LOG FORMAT
-.Nm sudoers
+.Nm
 can log events using either
 .Xr syslog 3
 or a simple log file.
@@ -3395,13 +3438,13 @@ were not allowed by
 .El
 .Ss Error log entries
 If an error occurs,
-.Nm sudoers
+.Nm
 will log a message and, in most cases, send a message to the
 administrator via email.
 Possible errors include:
 .Bl -tag -width 4
 .It parse error in @sysconfdir@/sudoers near line N
-.Nm sudoers
+.Nm
 encountered an error when parsing the specified file.
 In some cases, the actual error may be one line above or below the
 line number listed, depending on the type of error.
@@ -3428,7 +3471,7 @@ This can happen when the
 file is located on a remote file system that maps user ID 0 to
 a different value.
 Normally,
-.Nm sudoers
+.Nm
 tries to open
 .Em sudoers
 using group permissions to avoid this problem.
@@ -3441,7 +3484,7 @@ or adding an argument like
 is the user ID that owns the
 .Em sudoers
 file) to the end of the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3467,7 +3510,7 @@ file owner, please add
 is the user ID that owns the
 .Em sudoers
 file) to the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3483,7 +3526,7 @@ is 0440 (readable by owner and group, writable by none).
 The default mode may be changed via the
 .Dq sudoers_mode
 option to the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3501,7 +3544,7 @@ file group ownership, please add
 is the group ID that owns the
 .Em sudoers
 file) to the
-.Nm sudoers
+.Nm
 .Li Plugin
 line in the
 .Xr sudo.conf @mansectform@
@@ -3554,7 +3597,7 @@ On most systems,
 .Xr syslog 3
 has a relatively small log buffer.
 To prevent the command line arguments from being truncated,
-.Nm sudoers
+.Nm
 will split up log messages that are larger than 960 characters
 (not including the date, hostname, and the string
 .Dq sudo ) .
@@ -4254,7 +4297,7 @@ without entering a password when logging out and back in again
 on the same terminal.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
-.Nm sudoers
+.Nm
 plugin support a flexible debugging framework that can help track
 down what the plugin is doing internally if there is a problem.
 This can be configured in the
@@ -4262,14 +4305,14 @@ This can be configured in the
 file.
 .Pp
 The
-.Nm sudoers
+.Nm
 plugin uses the same debug flag format as the
 .Nm sudo
 front-end:
 .Em subsystem Ns @ Ns Em priority .
 .Pp
 The priorities used by
-.Nm sudoers ,
+.Nm ,
 in order of decreasing severity,
 are:
 .Em crit , err , warn , notice , diag , info , trace
@@ -4284,7 +4327,7 @@ would include debug messages logged at
 and higher.
 .Pp
 The following subsystems are used by the
-.Nm sudoers
+.Nm
 plugin:
 .Bl -tag -width 8n
 .It Em alias
@@ -4385,7 +4428,7 @@ option in
 .Sh BUGS
 If you feel you have found a bug in
 .Nm sudo ,
-please submit a bug report at http://www.sudo.ws/sudo/bugs/
+please submit a bug report at http://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -4399,4 +4442,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm sudo
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -65,57 +65,52 @@ static void usage_excl(int);
 /*
  * Mapping of command line flags to name/value settings.
  */
-static struct sudo_settings {
-    const char *name;
-    const char *value;
-} sudo_settings[] = {
+static struct sudo_settings sudo_settings[] = {
 #define ARG_BSDAUTH_TYPE 0
     { "bsdauth_type" },
 #define ARG_LOGIN_CLASS 1
     { "login_class" },
-#define ARG_DEBUG_FLAGS 2
-    { "debug_flags" },
-#define ARG_PRESERVE_ENVIRONMENT 3
+#define ARG_PRESERVE_ENVIRONMENT 2
     { "preserve_environment" },
-#define ARG_RUNAS_GROUP 4
+#define ARG_RUNAS_GROUP 3
     { "runas_group" },
-#define ARG_SET_HOME 5
+#define ARG_SET_HOME 4
     { "set_home" },
-#define ARG_USER_SHELL 6
+#define ARG_USER_SHELL 5
     { "run_shell" },
-#define ARG_LOGIN_SHELL 7
+#define ARG_LOGIN_SHELL 6
     { "login_shell" },
-#define ARG_IGNORE_TICKET 8
+#define ARG_IGNORE_TICKET 7
     { "ignore_ticket" },
-#define ARG_PROMPT 9
+#define ARG_PROMPT 8
     { "prompt" },
-#define ARG_SELINUX_ROLE 10
+#define ARG_SELINUX_ROLE 9
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 11
+#define ARG_SELINUX_TYPE 10
     { "selinux_type" },
-#define ARG_RUNAS_USER 12
+#define ARG_RUNAS_USER 11
     { "runas_user" },
-#define ARG_PROGNAME 13
+#define ARG_PROGNAME 12
     { "progname" },
-#define ARG_IMPLIED_SHELL 14
+#define ARG_IMPLIED_SHELL 13
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 15
+#define ARG_PRESERVE_GROUPS 14
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 16
+#define ARG_NONINTERACTIVE 15
     { "noninteractive" },
-#define ARG_SUDOEDIT 17
+#define ARG_SUDOEDIT 16
     { "sudoedit" },
-#define ARG_CLOSEFROM 18
+#define ARG_CLOSEFROM 17
     { "closefrom" },
-#define ARG_NET_ADDRS 19
+#define ARG_NET_ADDRS 18
     { "network_addrs" },
-#define ARG_MAX_GROUPS 20
+#define ARG_MAX_GROUPS 19
     { "max_groups" },
-#define ARG_PLUGIN_DIR 21
+#define ARG_PLUGIN_DIR 20
     { "plugin_dir" },
-#define ARG_REMOTE_HOST 22
+#define ARG_REMOTE_HOST 21
     { "remote_host" },
-#define NUM_SETTINGS 23
+#define NUM_SETTINGS 22
     { NULL }
 };
 
@@ -169,22 +164,25 @@ static struct option long_opts[] = {
  * for the command to be run (if we are running one).
  */
 int
-parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
-    char ***env_addp)
+parse_args(int argc, char **argv, int *nargc, char ***nargv,
+    struct sudo_settings **settingsp, char ***env_addp)
 {
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
-    int ch, i, j;
-    char *cp, **env_add, **settings;
+    int ch, i;
+    char *cp, **env_add;
     const char *runas_user = NULL;
     const char *runas_group = NULL;
-    const char *debug_flags;
     const char *progname;
     int proglen;
     int nenv = 0;
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
+
+    /* Is someone trying something funny? */
+    if (argc <= 0)
+	usage(1);
 
     env_add = sudo_emallocarray(env_size, sizeof(char *));
 
@@ -203,11 +201,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /* Load local IP addresses and masks. */
     if (get_net_ifs(&cp) > 0)
 	sudo_settings[ARG_NET_ADDRS].value = cp;
-
-    /* Set debug file and flags from sudo.conf. */
-    debug_flags = sudo_conf_debug_flags();
-    if (debug_flags != NULL)
-	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
 
     /* Set max_groups from sudo.conf. */
     i = sudo_conf_max_groups();
@@ -449,6 +442,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 	sudo_settings[ARG_IMPLIED_SHELL].value = "true";
     }
+#ifdef _PATH_SUDO_PLUGIN_DIR
+    sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
+#endif
 
     if (mode == MODE_HELP)
 	help();
@@ -495,26 +491,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	argc = ac;
     }
 
-    /*
-     * Format setting_pairs into settings array.
-     */
-#ifdef _PATH_SUDO_PLUGIN_DIR
-    sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
-#endif
-    settings = sudo_emallocarray(NUM_SETTINGS + 1, sizeof(char *));
-    for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
-	if (sudo_settings[i].value) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
-		sudo_settings[i].name, sudo_settings[i].value);
-	    settings[j] = sudo_new_key_val(sudo_settings[i].name,
-		sudo_settings[i].value);
-	    if (settings[j] == NULL)
-		sudo_fatal(NULL);
-	    j++;
-	}
-    }
-    settings[j] = NULL;
-
     if (mode == MODE_EDIT) {
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 	/* Must have the command in argv[0]. */
@@ -526,7 +502,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #endif
     }
 
-    *settingsp = settings;
+    *settingsp = sudo_settings;
     *env_addp = env_add;
     *nargc = argc;
     *nargv = argv;

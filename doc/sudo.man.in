@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "February 15, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "December 4, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -636,37 +636,37 @@ option was specified).
 .PP
 The following parameters may be specified by security policy:
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 real and effective user ID
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 real and effective group ID
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 supplementary group IDs
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 the environment list
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 current working directory
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 file creation mode mask (umask)
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 SELinux role and type
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 Solaris project
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 Solaris privileges
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 BSD login class
 .TP 4n
-\fBo\fR
+\fB\(bu\fR
 scheduling priority (aka nice value)
 .SS "Process model"
 When
@@ -1080,7 +1080,7 @@ visudo(@mansectsu@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/sudo/history.html) for a brief
+distribution (http://www.sudo.ws/history.html) for a brief
 history of sudo.
 .SH "AUTHORS"
 Many people have worked on
@@ -1093,7 +1093,7 @@ Todd C. Miller
 .PP
 See the CONTRIBUTORS file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/sudo/contributors.html) for an
+distribution (http://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "CAVEATS"
@@ -1134,7 +1134,7 @@ setuid shell scripts are generally safe).
 .SH "BUGS"
 If you feel you have found a bug in
 \fBsudo\fR,
-please submit a bug report at http://www.sudo.ws/sudo/bugs/
+please submit a bug report at http://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -1148,4 +1148,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 \fBsudo\fR
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.

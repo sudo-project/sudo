@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -69,6 +69,7 @@ struct sudoers_exec_args {
 static int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
+sudo_printf_t sudo_printf;
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
 
@@ -90,7 +91,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
     int flags = 0;
-    debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN)
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
 
@@ -245,10 +246,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 #endif /* HAVE_BSD_AUTH_H */
-	if (MATCHES(*cur, "progname=")) {
-	    initprogname(*cur + sizeof("progname=") - 1);
-	    continue;
-	}
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
 	    set_interfaces(interfaces_string);
@@ -362,7 +359,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     user_umask = umask(SUDO_UMASK);
     umask(user_umask);
 
-    /* Settings and user info debug. */
+    /* Dump settings and user info (XXX - plugin args) */
     for (cur = info->settings; *cur != NULL; cur++)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
     for (cur = info->user_info; *cur != NULL; cur++)
@@ -388,7 +385,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     char **command_info;
     int info_len = 0;
     int rval = -1;
-    debug_decl(sudoers_policy_exec_setup, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN)
 
     /* Increase the length of command_info as needed, it is *not* checked. */
     command_info = sudo_ecalloc(32, sizeof(char **));
@@ -522,8 +519,11 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const envp[], char * const args[])
 {
+    struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     struct sudoers_policy_open_info info;
-    debug_decl(sudoers_policy_open, SUDO_DEBUG_PLUGIN)
+    const char *plugin_path = NULL;
+    char * const *cur;
+    debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN)
 
     sudo_version = version;
     sudo_conv = conversation;
@@ -532,6 +532,20 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Plugin args are only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	args = NULL;
+
+    /* Initialize the debug subsystem.  */
+    for (cur = settings; *cur != NULL; cur++) {
+	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    sudoers_debug_parse_flags(&debug_files,
+		*cur + sizeof("debug_flags=") - 1);
+	    continue;
+	}
+	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = *cur + sizeof("plugin_path=") - 1;
+	    continue;
+	}
+    }
+    sudoers_debug_register(plugin_path, &debug_files);
 
     /* Call the sudoers init function. */
     info.settings = settings;
@@ -543,7 +557,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
-    debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_close, SUDOERS_DEBUG_PLUGIN)
 
     /* We do not currently log the exit status. */
     if (error_code) {
@@ -575,7 +589,9 @@ sudoers_policy_close(int exit_status, int error_code)
     sudo_efree(user_gids);
     user_gids = NULL;
 
-    debug_return;
+    sudoers_debug_deregister();
+
+    return;
 }
 
 /*
@@ -586,7 +602,7 @@ sudoers_policy_close(int exit_status, int error_code)
 static int
 sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 {
-    debug_decl(sudoers_policy_init_session, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_init_session, SUDOERS_DEBUG_PLUGIN)
 
     /* user_env is only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
@@ -601,7 +617,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 {
     struct sudoers_exec_args exec_args;
     int rval;
-    debug_decl(sudoers_policy_check, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN)
 
     if (!ISSET(sudo_mode, MODE_EDIT))
 	SET(sudo_mode, MODE_RUN);
@@ -623,7 +639,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(void)
 {
-    debug_decl(sudoers_policy_validate, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN)
 
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
@@ -634,7 +650,7 @@ sudoers_policy_validate(void)
 static void
 sudoers_policy_invalidate(int remove)
 {
-    debug_decl(sudoers_policy_invalidate, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN)
 
     user_cmnd = "kill";
     remove_timestamp(remove);
@@ -648,7 +664,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
     int rval;
-    debug_decl(sudoers_policy_list, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN)
 
     user_cmnd = "list";
     if (argc)
@@ -676,7 +692,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 static int
 sudoers_policy_version(int verbose)
 {
-    debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_version, SUDOERS_DEBUG_PLUGIN)
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
 	PACKAGE_VERSION);
@@ -703,6 +719,10 @@ sudoers_policy_version(int verbose)
     debug_return_bool(true);
 }
 
+/*
+ * Register environment function hooks.
+ * Note that we have not registered sudoers with the debug subsystem yet.
+ */
 static void
 sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook *hook))
 {

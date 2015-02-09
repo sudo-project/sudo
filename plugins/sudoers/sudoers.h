@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2014
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -41,8 +41,9 @@
 #include "logging.h"
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
-#include "sudo_debug.h"
+#include "sudo_conf.h"
 #include "sudo_util.h"
+#include "sudoers_debug.h"
 
 /*
  * Password db and supplementary group IDs with associated group names.
@@ -112,10 +113,8 @@ struct sudo_user {
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
  * Note: cannot use '0' as a value here.
  */
-/* XXX - VALIDATE_SUCCESS and VALIDATE_FAILURE instead? */
-#define VALIDATE_ERROR          0x001
-#define VALIDATE_OK		0x002
-#define VALIDATE_NOT_OK		0x004
+#define VALIDATE_SUCCESS	0x001
+#define VALIDATE_FAILURE	0x002
 #define FLAG_CHECK_USER		0x010
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
@@ -345,6 +344,11 @@ int sudoers_policy_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
 void sudoers_cleanup(void);
 
+/* sudoers_debug.c */
+void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
+void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
+void sudoers_debug_deregister(void);
+
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
 int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
@@ -364,6 +368,7 @@ extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
+extern sudo_printf_t sudo_printf;
 #endif
 
 #endif /* _SUDOERS_SUDOERS_H */

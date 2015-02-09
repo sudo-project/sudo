@@ -1,6 +1,6 @@
 Sudo is distributed under the following license:
 
-   Copyright (c) 1994-1996, 1998-2014
+   Copyright (c) 1994-1996, 1998-2015
         Todd C. Miller <Todd.Miller@courtesan.com>
 
    Permission to use, copy, modify, and distribute this software for any
@@ -149,7 +149,7 @@ The file inet_pton.c bears the following license:
 
 The embedded copy of zlib bears the following license:
 
-  Copyright (C) 1995-2012 Jean-loup Gailly and Mark Adler
+  Copyright (C) 1995-2013 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages

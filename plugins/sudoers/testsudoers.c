@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -123,7 +123,7 @@ main(int argc, char *argv[])
     const char *errstr;
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     malloc_options = "AFGJPR";
@@ -138,8 +138,9 @@ main(int argc, char *argv[])
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
-    /* Read sudo.conf. */
-    sudo_conf_read(NULL);
+    /* Initialize the debug subsystem. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
 
     dflag = 0;
     grfile = pwfile = NULL;
@@ -348,7 +349,7 @@ static void
 set_runaspw(const char *user)
 {
     struct passwd *pw = NULL;
-    debug_decl(set_runaspw, SUDO_DEBUG_UTIL)
+    debug_decl(set_runaspw, SUDOERS_DEBUG_UTIL)
 
     if (*user == '#') {
 	const char *errstr;
@@ -372,7 +373,7 @@ static void
 set_runasgr(const char *group)
 {
     struct group *gr = NULL;
-    debug_decl(set_runasgr, SUDO_DEBUG_UTIL)
+    debug_decl(set_runasgr, SUDOERS_DEBUG_UTIL)
 
     if (*group == '#') {
 	const char *errstr;
@@ -422,7 +423,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
     struct stat sb;
     FILE *fp = NULL;
     char *sudoers_base;
-    debug_decl(open_sudoers, SUDO_DEBUG_UTIL)
+    debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL)
 
     sudoers_base = strrchr(sudoers, '/');
     if (sudoers_base != NULL)
@@ -479,7 +480,7 @@ void
 print_member(struct member *m)
 {
     struct sudo_command *c;
-    debug_decl(print_member, SUDO_DEBUG_UTIL)
+    debug_decl(print_member, SUDOERS_DEBUG_UTIL)
 
     if (m->negated)
 	putchar('!');
@@ -501,7 +502,7 @@ print_defaults(void)
 {
     struct defaults *d;
     struct member *m;
-    debug_decl(print_defaults, SUDO_DEBUG_UTIL)
+    debug_decl(print_defaults, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH(d, &defaults, entries) {
 	(void) fputs("Defaults", stdout);
@@ -540,7 +541,7 @@ print_alias(void *v1, void *v2)
     struct alias *a = (struct alias *)v1;
     struct member *m;
     struct sudo_command *c;
-    debug_decl(print_alias, SUDO_DEBUG_UTIL)
+    debug_decl(print_alias, SUDOERS_DEBUG_UTIL)
 
     switch (a->type) {
 	case HOSTALIAS:
@@ -579,7 +580,7 @@ print_privilege(struct privilege *priv)
     struct cmndspec *cs;
     struct member *m;
     struct cmndtag tags;
-    debug_decl(print_privilege, SUDO_DEBUG_UTIL)
+    debug_decl(print_privilege, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH(m, &priv->hostlist, entries) {
 	if (m != TAILQ_FIRST(&priv->hostlist))
@@ -643,7 +644,7 @@ print_userspecs(void)
     struct member *m;
     struct userspec *us;
     struct privilege *priv;
-    debug_decl(print_userspecs, SUDO_DEBUG_UTIL)
+    debug_decl(print_userspecs, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH(us, &userspecs, entries) {
 	TAILQ_FOREACH(m, &us->users, entries) {
@@ -665,7 +666,7 @@ print_userspecs(void)
 void
 dump_sudoers(void)
 {
-    debug_decl(dump_sudoers, SUDO_DEBUG_UTIL)
+    debug_decl(dump_sudoers, SUDOERS_DEBUG_UTIL)
 
     print_defaults();
 

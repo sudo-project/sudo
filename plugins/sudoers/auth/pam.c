@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -78,7 +78,7 @@
 
 static int converse(int, PAM_CONST struct pam_message **,
 		    struct pam_response **, void *);
-static char *def_prompt = "Password:";
+static char *def_prompt = PASSPROMPT;
 static int getpass_error;
 static pam_handle_t *pamh;
 
@@ -87,7 +87,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct pam_conv pam_conv;
     static int pam_status;
-    debug_decl(sudo_pam_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
     /* Initial PAM setup */
     auth->data = (void *) &pam_status;
@@ -133,7 +133,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     const char *s;
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH)
 
     def_prompt = prompt;	/* for converse */
 
@@ -193,7 +193,7 @@ int
 sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_cleanup, SUDOERS_DEBUG_AUTH)
 
     /* If successful, we can't close the session until sudo_pam_end_session() */
     if (*pam_status != PAM_SUCCESS || auth->end_session == NULL) {
@@ -208,7 +208,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     int status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
-    debug_decl(sudo_pam_begin_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_begin_session, SUDOERS_DEBUG_AUTH)
 
     /*
      * If there is no valid user we cannot open a PAM session.
@@ -279,7 +279,7 @@ int
 sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = AUTH_SUCCESS;
-    debug_decl(sudo_pam_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_end_session, SUDOERS_DEBUG_AUTH)
 
     if (pamh != NULL) {
 	/*
@@ -300,6 +300,18 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
     debug_return_int(status);
 }
 
+#define PROMPT_IS_PASSWORD(_p) \
+    (strncmp((_p), "Password:", 9) == 0 && \
+	((_p)[9] == '\0' || ((_p)[9] == ' ' && (_p)[10] == '\0')))
+
+#ifdef PAM_TEXT_DOMAIN
+# define PAM_PROMPT_IS_PASSWORD(_p) \
+    (strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password: ")) == 0 || \
+	strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password:")) == 0)
+#else
+# define PAM_PROMPT_IS_PASSWORD(_p)	PROMPT_IS_PASSWORD(_p)
+#endif /* PAM_TEXT_DOMAIN */
+
 /*
  * ``Conversation function'' for PAM.
  * XXX - does not handle PAM_BINARY_PROMPT
@@ -312,9 +324,9 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     PAM_CONST struct pam_message *pm;
     const char *prompt;
     char *pass;
-    int n, type, std_prompt;
+    int n, type;
     int ret = PAM_AUTH_ERR;
-    debug_decl(converse, SUDO_DEBUG_AUTH)
+    debug_decl(converse, SUDOERS_DEBUG_AUTH)
 
     if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL)
 	debug_return_int(PAM_SYSTEM_ERR);
@@ -326,29 +338,29 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		type = SUDO_CONV_PROMPT_ECHO_ON;
 		/* FALLTHROUGH */
 	    case PAM_PROMPT_ECHO_OFF:
-		prompt = def_prompt;
-
 		/* Error out if the last password read was interrupted. */
 		if (getpass_error)
 		    goto done;
 
-		/* Is the sudo prompt standard? (If so, we'll just use PAM's) */
-		std_prompt =  strncmp(def_prompt, "Password:", 9) == 0 &&
-		    (def_prompt[9] == '\0' ||
-		    (def_prompt[9] == ' ' && def_prompt[10] == '\0'));
-
-		/* Only override PAM prompt if it matches /^Password: ?/ */
-#if defined(PAM_TEXT_DOMAIN) && defined(HAVE_LIBINTL_H)
-		if (!def_passprompt_override && (std_prompt ||
-		    (strcmp(pm->msg, dgt(PAM_TEXT_DOMAIN, "Password: ")) &&
-		    strcmp(pm->msg, dgt(PAM_TEXT_DOMAIN, "Password:")))))
-		    prompt = pm->msg;
-#else
-		if (!def_passprompt_override && (std_prompt ||
-		    strncmp(pm->msg, "Password:", 9) || (pm->msg[9] != '\0'
-		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0'))))
-		    prompt = pm->msg;
-#endif
+		/*
+		 * We use the PAM prompt in preference to sudo's as long
+		 * as passprompt_override is not set and:
+		 *  a) the (translated) sudo prompt matches /^Password: ?/
+		 * or:
+		 *  b) the PAM prompt itself *doesn't* match /^Password: ?/
+		 *
+		 * The intent is to use the PAM prompt for things like
+		 * challenge-response, otherwise use sudo's prompt.
+		 * There may also be cases where a localized translation
+		 * of "Password: " exists for PAM but not for sudo.
+		 */
+		prompt = def_prompt;
+		if (!def_passprompt_override) {
+		    if (PROMPT_IS_PASSWORD(def_prompt))
+			prompt = pm->msg;
+		    else if (!PAM_PROMPT_IS_PASSWORD(pm->msg))
+			prompt = pm->msg;
+		}
 		/* Read the password unless interrupted. */
 		pass = auth_getpass(prompt, def_passwd_timeout * 60, type);
 		if (pass == NULL) {

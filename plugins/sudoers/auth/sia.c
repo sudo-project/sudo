@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2010-2014
+ * Copyright (c) 1999-2005, 2007, 2010-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -55,6 +55,10 @@ static char *def_prompt;
 static char **sudo_argv;
 static int sudo_argc;
 
+#define PROMPT_IS_PASSWORD(_p) \
+    (strncmp((_p), "Password:", 9) == 0 && \
+	((_p)[9] == '\0' || ((_p)[9] == ' ' && (_p)[10] == '\0')))
+
 /*
  * Collection routine (callback) for limiting the timeouts in SIA
  * prompts and (possibly) setting a custom prompt.
@@ -65,7 +69,7 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 {
     int rval;
     sigset_t mask, omask;
-    debug_decl(sudo_collect, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_collect, SUDOERS_DEBUG_AUTH)
 
     switch (rendition) {
 	case SIAFORM:
@@ -77,8 +81,8 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 	     * and b) the SIA prompt is "Password:" (so we know it is safe).
 	     * This keeps us from overwriting things like S/Key challenges.
 	     */
-	    if (strcmp((char *)prompts[0].prompt, "Password:") == 0 &&
-		strcmp(def_prompt, "Password:") != 0)
+	    if (!PROMPT_IS_PASSWORD(def_prompt) &&
+		PROMPT_IS_PASSWORD((char *)prompts[0].prompt))
 		prompts[0].prompt = (unsigned char *)def_prompt;
 	    break;
 	default:
@@ -104,7 +108,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah = NULL;
     int i;
-    debug_decl(sudo_sia_setup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_sia_setup, SUDOERS_DEBUG_AUTH)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
@@ -128,7 +132,7 @@ int
 sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
-    debug_decl(sudo_sia_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH)
 
     def_prompt = prompt;		/* for sudo_collect */
 
@@ -143,7 +147,7 @@ int
 sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
-    debug_decl(sudo_sia_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
     sudo_efree(sudo_argv);

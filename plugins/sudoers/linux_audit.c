@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,13 +31,7 @@
 #include <string.h>
 #include <libaudit.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "sudo_gettext.h"	/* must be included before sudo_compat.h */
-
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_alloc.h"
-#include "sudo_debug.h"
+#include "sudoers.h"
 #include "linux_audit.h"
 
 #define AUDIT_NOT_CONFIGURED	-2
@@ -50,17 +44,17 @@ static int
 linux_audit_open(void)
 {
     static int au_fd = -1;
-    debug_decl(linux_audit_open, SUDO_DEBUG_AUDIT)
+    debug_decl(linux_audit_open, SUDOERS_DEBUG_AUDIT)
 
     if (au_fd != -1)
 	debug_return_int(au_fd);
     au_fd = audit_open();
     if (au_fd == -1) {
 	/* Kernel may not have audit support. */
-	if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT) {
-	    sudo_warn(U_("unable to open audit system"));
+	if (errno == EINVAL || errno == EPROTONOSUPPORT || errno == EAFNOSUPPORT)
 	    au_fd = AUDIT_NOT_CONFIGURED;
-	}
+	else
+	    sudo_warn(U_("unable to open audit system"));
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
     }
@@ -73,7 +67,7 @@ linux_audit_command(char *argv[], int result)
     int au_fd, rc = -1;
     char *command, *cp, **av;
     size_t size, n;
-    debug_decl(linux_audit_command, SUDO_DEBUG_AUDIT)
+    debug_decl(linux_audit_command, SUDOERS_DEBUG_AUDIT)
 
     /* Don't return an error if auditing is not configured. */
     if ((au_fd = linux_audit_open()) < 0)

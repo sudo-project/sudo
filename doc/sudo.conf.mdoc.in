@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 24, 2014
+.Dd December 4, 2014
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -30,7 +30,7 @@ It specifies the security policy and I/O logging plugins, debug flags
 as well as plugin-agnostic path names and settings.
 .Pp
 The
-.Nm sudo.conf
+.Nm
 file supports the following directives, described in detail below.
 .Bl -tag -width 8n
 .It Plugin
@@ -73,7 +73,7 @@ or
 are silently ignored.
 .Pp
 The
-.Nm sudo.conf
+.Nm
 file is always parsed in the
 .Dq Li C
 locale.
@@ -86,7 +86,7 @@ logging plugins to work seamlessly with the
 .Nm sudo
 front end.
 Plugins are dynamically loaded based on the contents of
-.Nm sudo.conf .
+.Nm .
 .Pp
 A
 .Li Plugin
@@ -154,7 +154,7 @@ policy plugin may be specified.
 This limitation does not apply to I/O plugins.
 .Pp
 If no
-.Nm sudo.conf
+.Nm
 file is present, or if it contains no
 .Li Plugin
 lines, the
@@ -235,7 +235,7 @@ The default value is
 .El
 .Ss Other settings
 The
-.Nm sudo.conf
+.Nm
 file also supports the following front end settings:
 .Bl -tag -width 8n
 .It disable_coredump
@@ -247,7 +247,7 @@ To aid in debugging
 crashes, you may wish to re-enable core dumps by setting
 .Dq disable_coredump
 to false in
-.Nm sudo.conf
+.Nm
 as follows:
 .Bd -literal -offset indent
 Set disable_coredump false
@@ -413,19 +413,31 @@ level and higher in addition to those at the
 .Em info
 level for the plugin subsystem.
 .Pp
-Currently, only one
-.Li Debug
-entry per program is supported.  The
+As of
 .Nm sudo
+1.8.12, multiple
 .Li Debug
-entry is shared by the
+entries may be specified per program.
+Older versions of
 .Nm sudo
-front end,
-.Nm sudoedit
-and the plugins.  A future release may add support for per-plugin
+only support a single
 .Li Debug
-lines and/or support for multiple debugging files for a single
-program.
+entry per program.
+Plugin-specific
+.Li Debug
+entries are also supported starting with
+.Nm sudo
+1.8.12 and are matched by either the base name of the plugin that was loaded
+(for example
+.Li sudoers.so )
+or by the plugin's fully-qualified path name.
+Previously, the
+.Nm sudoers
+plugin shared the same
+.Li Debug
+entry as the
+.Nm sudo
+front end and could not be configured separately.
 .Pp
 The following priorities are supported, in order of decreasing severity:
 .Em crit , err , warn , notice , diag , info , trace
@@ -586,7 +598,7 @@ Plugin sudoers_io sudoers.so
 .Sh HISTORY
 See the HISTORY file in the
 .Nm sudo
-distribution (http://www.sudo.ws/sudo/history.html) for a brief
+distribution (http://www.sudo.ws/history.html) for a brief
 history of sudo.
 .Sh AUTHORS
 Many people have worked on
@@ -598,13 +610,13 @@ Todd C. Miller
 .Pp
 See the CONTRIBUTORS file in the
 .Nm sudo
-distribution (http://www.sudo.ws/sudo/contributors.html) for an
+distribution (http://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh BUGS
 If you feel you have found a bug in
 .Nm sudo ,
-please submit a bug report at http://www.sudo.ws/sudo/bugs/
+please submit a bug report at http://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
@@ -618,4 +630,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm sudo
-or http://www.sudo.ws/sudo/license.html for complete details.
+or http://www.sudo.ws/license.html for complete details.

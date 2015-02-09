@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -77,8 +77,10 @@ main(int argc, char *argv[], char *envp[])
     if (argc < 2)
 	sudo_fatalx(U_("requires at least one argument"));
 
-    /* Read sudo.conf. */
-    sudo_conf_read(NULL);
+    /* Read sudo.conf and initialize the debug subsystem. */
+    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    sudo_debug_register(getprogname(), NULL, NULL,
+	sudo_conf_debug_files(getprogname()));
 
     if (strcmp(argv[1], "-e") == 0) {
 	ret = sesh_sudoedit(argc, argv);
@@ -121,7 +123,7 @@ sesh_sudoedit(int argc, char *argv[])
     struct stat sb;
     struct timeval times[2];
     char buf[BUFSIZ];
-    debug_decl(sesh_sudoedit, SUDO_DEBUG_MAIN)
+    debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
 
     if (argc < 3)
 	debug_return_int(SESH_ERR_FAILURE);

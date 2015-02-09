@@ -52,6 +52,9 @@
 /* Define to 1 if you use AIX general authentication. */
 #undef HAVE_AIXAUTH
 
+/* Define to 1 if you have the `arc4random' function. */
+#undef HAVE_ARC4RANDOM
+
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
@@ -86,9 +89,65 @@
    */
 #undef HAVE_DECL_ERRNO
 
+/* Define to 1 if you have the declaration of `getdomainname', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETDOMAINNAME
+
+/* Define to 1 if you have the declaration of `getresuid', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETRESUID
+
+/* Define to 1 if you have the declaration of `HOST_NAME_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_HOST_NAME_MAX
+
 /* Define to 1 if you have the declaration of `h_errno', and to 0 if you
    don't. */
 #undef HAVE_DECL_H_ERRNO
+
+/* Define to 1 if you have the declaration of `innetgr', and to 0 if you
+   don't. */
+#undef HAVE_DECL_INNETGR
+
+/* Define to 1 if you have the declaration of `LLONG_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LLONG_MAX
+
+/* Define to 1 if you have the declaration of `LLONG_MIN', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LLONG_MIN
+
+/* Define to 1 if you have the declaration of `OPEN_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_OPEN_MAX
+
+/* Define to 1 if you have the declaration of `PATH_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_PATH_MAX
+
+/* Define to 1 if you have the declaration of `QUAD_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_QUAD_MAX
+
+/* Define to 1 if you have the declaration of `QUAD_MIN', and to 0 if you
+   don't. */
+#undef HAVE_DECL_QUAD_MIN
+
+/* Define to 1 if you have the declaration of `setauthdb', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SETAUTHDB
+
+/* Define to 1 if you have the declaration of `setresuid', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SETRESUID
+
+/* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SIZE_MAX
+
+/* Define to 1 if you have the declaration of `SIZE_T_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SIZE_T_MAX
 
 /* Define to 1 if you have the declaration of `sys_sigabbrev', and to 0 if you
    don't. */
@@ -101,6 +160,30 @@
 /* Define to 1 if you have the declaration of `sys_signame', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGNAME
+
+/* Define to 1 if you have the declaration of `ULLONG_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ULLONG_MAX
+
+/* Define to 1 if you have the declaration of `UQUAD_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_UQUAD_MAX
+
+/* Define to 1 if you have the declaration of `usrinfo', and to 0 if you
+   don't. */
+#undef HAVE_DECL_USRINFO
+
+/* Define to 1 if you have the declaration of `_innetgr', and to 0 if you
+   don't. */
+#undef HAVE_DECL__INNETGR
+
+/* Define to 1 if you have the declaration of `_POSIX_HOST_NAME_MAX', and to 0
+   if you don't. */
+#undef HAVE_DECL__POSIX_HOST_NAME_MAX
+
+/* Define to 1 if you have the declaration of `_POSIX_PATH_MAX', and to 0 if
+   you don't. */
+#undef HAVE_DECL__POSIX_PATH_MAX
 
 /* Define to 1 if you have the declaration of `_sys_siglist', and to 0 if you
    don't. */
@@ -259,8 +342,8 @@
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
 
-/* Define to 1 if you have the `inet_ntoa' function. */
-#undef HAVE_INET_NTOA
+/* Define to 1 if you have the `inet_ntop' function. */
+#undef HAVE_INET_NTOP
 
 /* Define to 1 if you have the `inet_pton' function. */
 #undef HAVE_INET_PTON
@@ -478,9 +561,6 @@
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 
-/* Define to 1 if you have the `regcomp' function. */
-#undef HAVE_REGCOMP
-
 /* Define to 1 if you have the `revoke' function. */
 #undef HAVE_REVOKE
 
@@ -584,14 +664,8 @@
 /* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
 
-/* Define to 1 if you have the `strrchr' function. */
-#undef HAVE_STRRCHR
-
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
-
-/* Define to 1 if you have the `strtoll' function. */
-#undef HAVE_STRTOLL
 
 /* Define to 1 if you have the `strtonum' function. */
 #undef HAVE_STRTONUM
@@ -686,6 +760,9 @@
 /* Define to 1 if you have the `sysctl' function. */
 #undef HAVE_SYSCTL
 
+/* Define to 1 if you have the `sysinfo' function. */
+#undef HAVE_SYSINFO
+
 /* Define to 1 if you have the <sys/bsdtypes.h> header file. */
 #undef HAVE_SYS_BSDTYPES_H
 
@@ -720,6 +797,9 @@
 
 /* Define to 1 if you have the <sys/sysmacros.h> header file. */
 #undef HAVE_SYS_SYSMACROS_H
+
+/* Define to 1 if you have the <sys/systeminfo.h> header file. */
+#undef HAVE_SYS_SYSTEMINFO_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H

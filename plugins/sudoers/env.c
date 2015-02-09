@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2014
+ * Copyright (c) 2000-2005, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -41,7 +41,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_INTTYPES_H
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
 #ifdef HAVE_LOGIN_CAP_H
@@ -171,6 +173,7 @@ static const char *initial_badenv_table[] = {
     "RUBYLIB",			/* ruby, library load path */
     "RUBYOPT",			/* ruby, extra command line options */
     "BASH_FUNC_*",		/* new-style bash functions */
+    "__BASH_FUNC<*",		/* new-style bash functions (Apple) */
     NULL
 };
 
@@ -184,6 +187,7 @@ static const char *initial_checkenv_table[] = {
     "LC_*",
     "LINGUAS",
     "TERM",
+    "TZ",
     NULL
 };
 
@@ -199,7 +203,6 @@ static const char *initial_keepenv_table[] = {
     "PATH",
     "PS1",
     "PS2",
-    "TZ",
     "XAUTHORITY",
     "XAUTHORIZATION",
     NULL
@@ -213,7 +216,7 @@ env_init(char * const envp[])
 {
     char * const *ep;
     size_t len;
-    debug_decl(env_init, SUDO_DEBUG_ENV)
+    debug_decl(env_init, SUDOERS_DEBUG_ENV)
 
     if (envp == NULL) {
 	/* Reset to initial state but keep a pointer to what we allocated. */
@@ -347,7 +350,7 @@ static int
 sudo_putenv(char *str, bool dupcheck, bool overwrite)
 {
     int rval;
-    debug_decl(sudo_putenv, SUDO_DEBUG_ENV)
+    debug_decl(sudo_putenv, SUDOERS_DEBUG_ENV)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_putenv: %s", str);
 
@@ -372,7 +375,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     char *estring;
     size_t esize;
     int rval = -1;
-    debug_decl(sudo_setenv2, SUDO_DEBUG_ENV)
+    debug_decl(sudo_setenv2, SUDOERS_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
     estring = sudo_emalloc(esize);
@@ -487,7 +490,7 @@ int
 sudo_unsetenv(const char *name)
 {
     int rval;
-    debug_decl(sudo_unsetenv, SUDO_DEBUG_ENV)
+    debug_decl(sudo_unsetenv, SUDOERS_DEBUG_ENV)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_unsetenv: %s", name);
 
@@ -527,7 +530,7 @@ char *
 sudo_getenv(const char *name)
 {
     char *val;
-    debug_decl(sudo_getenv, SUDO_DEBUG_ENV)
+    debug_decl(sudo_getenv, SUDOERS_DEBUG_ENV)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_getenv: %s", name);
 
@@ -545,7 +548,7 @@ matches_env_list(const char *var, struct list_members *list, bool *full_match)
 {
     struct list_member *cur;
     bool match = false;
-    debug_decl(matches_env_list, SUDO_DEBUG_ENV)
+    debug_decl(matches_env_list, SUDOERS_DEBUG_ENV)
 
     SLIST_FOREACH(cur, list, entries) {
 	size_t sep_pos, len = strlen(cur->value);
@@ -578,10 +581,58 @@ static bool
 matches_env_delete(const char *var)
 {
     bool full_match;	/* unused */
-    debug_decl(matches_env_delete, SUDO_DEBUG_ENV)
+    debug_decl(matches_env_delete, SUDOERS_DEBUG_ENV)
 
     /* Skip anything listed in env_delete. */
     debug_return_bool(matches_env_list(var, &def_env_delete, &full_match));
+}
+
+/*
+ * Sanity-check the TZ environment variable.
+ * On many systems it is possible to set this to a pathname.
+ */
+static bool
+tz_is_sane(const char *tzval)
+{
+    const char *cp;
+    char lastch;
+    debug_decl(tz_is_sane, SUDOERS_DEBUG_ENV)
+
+    /* tzcode treats a value beginning with a ':' as a path. */
+    if (tzval[0] == ':')
+	tzval++;
+
+    /* Reject fully-qualified TZ that doesn't being with the zoneinfo dir. */
+    if (tzval[0] == '/') {
+#ifdef _PATH_ZONEINFO
+	if (strncmp(tzval, _PATH_ZONEINFO, sizeof(_PATH_ZONEINFO) - 1) != 0 ||
+	    tzval[sizeof(_PATH_ZONEINFO) - 1] != '/')
+	    debug_return_bool(false);
+#else
+	/* Assume the worst. */
+	debug_return_bool(false);
+#endif
+    }
+
+    /*
+     * Make sure TZ only contains printable non-space characters
+     * and does not contain a '..' path element.
+     */
+    lastch = '/';
+    for (cp = tzval; *cp != '\0'; cp++) {
+	if (isspace((unsigned char)*cp) || !isprint((unsigned char)*cp))
+	    debug_return_bool(false);
+	if (lastch == '/' && cp[0] == '.' && cp[1] == '.' &&
+	    (cp[2] == '/' || cp[2] == '\0'))
+	    debug_return_bool(false);
+	lastch = *cp;
+    }
+
+    /* Reject extra long TZ values (even if not a path). */
+    if ((size_t)(cp - tzval) >= PATH_MAX)
+	debug_return_bool(false);
+
+    debug_return_bool(true);
 }
 
 /*
@@ -593,13 +644,18 @@ static int
 matches_env_check(const char *var, bool *full_match)
 {
     int keepit = -1;
-    debug_decl(matches_env_check, SUDO_DEBUG_ENV)
+    debug_decl(matches_env_check, SUDOERS_DEBUG_ENV)
 
     /* Skip anything listed in env_check that includes '/' or '%'. */
     if (matches_env_list(var, &def_env_check, full_match)) {
-	const char *val = strchr(var, '=');
-	if (val != NULL)
-	    keepit = !strpbrk(++val, "/%");
+	if (strncmp(var, "TZ=", 3) == 0) {
+	    /* Special case for TZ */
+	    keepit = tz_is_sane(var + 3);
+	} else {
+	    const char *val = strchr(var, '=');
+	    if (val != NULL)
+		keepit = !strpbrk(++val, "/%");
+	}
     }
     debug_return_bool(keepit);
 }
@@ -612,7 +668,7 @@ static bool
 matches_env_keep(const char *var, bool *full_match)
 {
     bool keepit = false;
-    debug_decl(matches_env_keep, SUDO_DEBUG_ENV)
+    debug_decl(matches_env_keep, SUDOERS_DEBUG_ENV)
 
     /* Preserve SHELL variable for "sudo -s". */
     if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0) {
@@ -633,7 +689,7 @@ env_should_delete(const char *var)
     const char *cp;
     int delete_it;
     bool full_match = false;
-    debug_decl(env_should_delete, SUDO_DEBUG_ENV);
+    debug_decl(env_should_delete, SUDOERS_DEBUG_ENV);
 
     /* Skip variables with values beginning with () (bash functions) */
     if ((cp = strchr(var, '=')) != NULL) {
@@ -663,7 +719,7 @@ env_should_keep(const char *var)
     int keepit;
     bool full_match = false;
     const char *cp;
-    debug_decl(env_should_keep, SUDO_DEBUG_ENV)
+    debug_decl(env_should_keep, SUDOERS_DEBUG_ENV)
 
     keepit = matches_env_check(var, &full_match);
     if (keepit == -1)
@@ -693,7 +749,7 @@ env_merge(char * const envp[])
 {
     char * const *ep;
     bool rval = true;
-    debug_decl(env_merge, SUDO_DEBUG_ENV)
+    debug_decl(env_merge, SUDOERS_DEBUG_ENV)
 
     for (ep = envp; *ep != NULL; ep++) {
 	/* XXX - avoid checking value here, should only check name */
@@ -758,7 +814,7 @@ rebuild_env(void)
     char idbuf[MAX_UID_T_LEN + 1];
     unsigned int didvar;
     bool reset_home = false;
-    debug_decl(rebuild_env, SUDO_DEBUG_ENV)
+    debug_decl(rebuild_env, SUDOERS_DEBUG_ENV)
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -984,7 +1040,7 @@ insert_env_vars(char * const envp[])
 {
     char * const *ep;
     bool rval = true;
-    debug_decl(insert_env_vars, SUDO_DEBUG_ENV)
+    debug_decl(insert_env_vars, SUDOERS_DEBUG_ENV)
 
     /* Add user-specified environment variables. */
     if (envp != NULL) {
@@ -1012,7 +1068,7 @@ validate_env_vars(char * const env_vars[])
     char *eq, *bad = NULL;
     size_t len, blen = 0, bsize = 0;
     bool okvar, rval = true;
-    debug_decl(validate_env_vars, SUDO_DEBUG_ENV)
+    debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV)
 
     if (env_vars == NULL)
 	debug_return_bool(true);	/* nothing to do */
@@ -1074,7 +1130,7 @@ read_env_file(const char *path, int overwrite)
     bool rval = true;
     char *cp, *var, *val, *line = NULL;
     size_t var_len, val_len, linesize = 0;
-    debug_decl(read_env_file, SUDO_DEBUG_ENV)
+    debug_decl(read_env_file, SUDOERS_DEBUG_ENV)
 
     if ((fp = fopen(path, "r")) == NULL) {
 	if (errno != ENOENT)

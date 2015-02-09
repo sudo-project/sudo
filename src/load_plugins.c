@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,9 +41,7 @@
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include "sudo_conf.h"
 #include "sudo_dso.h"
-#include "sudo_debug.h"
 
 /* We always use the same name for the sudoers plugin, regardless of the OS */
 #define SUDOERS_PLUGIN	"sudoers.so"
@@ -237,9 +235,12 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	}
 	if (handle != NULL) {
 	    policy_plugin->handle = handle;
+	    policy_plugin->path = sudo_estrdup(path);
 	    policy_plugin->name = info->symbol_name;
 	    policy_plugin->options = info->options;
+	    policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    policy_plugin->u.generic = plugin;
+	    policy_plugin->debug_files = sudo_conf_debug_files(path);
 	}
     } else if (plugin->type == SUDO_IO_PLUGIN) {
 	/* Check for duplicate entries. */
@@ -255,16 +256,32 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	if (handle != NULL) {
 	    container = sudo_ecalloc(1, sizeof(*container));
 	    container->handle = handle;
+	    container->path = sudo_estrdup(path);
 	    container->name = info->symbol_name;
 	    container->options = info->options;
+	    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    container->u.generic = plugin;
+	    policy_plugin->debug_files = sudo_conf_debug_files(path);
 	    TAILQ_INSERT_TAIL(io_plugins, container, entries);
 	}
     }
 
+    /* Zero out info strings that we now own (see above). */
+    info->symbol_name = NULL;
+    info->options = NULL;
+
     rval = true;
 done:
     debug_return_bool(rval);
+}
+
+static void
+free_plugin_info(struct plugin_info *info)
+{
+    sudo_efree(info->path);
+    sudo_efree(info->options);
+    sudo_efree(info->symbol_name);
+    sudo_efree(info);
 }
 
 /*
@@ -276,17 +293,19 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 {
     struct plugin_container *container;
     struct plugin_info_list *plugins;
-    struct plugin_info *info;
+    struct plugin_info *info, *next;
     bool rval = false;
     debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN)
 
-    /* Walk the plugin list from sudo.conf, if any. */
+    /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
-    TAILQ_FOREACH(info, plugins, entries) {
+    TAILQ_FOREACH_SAFE(info, plugins, entries, next) {
 	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
 	if (!rval)
 	    goto done;
+	free_plugin_info(info);
     }
+    TAILQ_INIT(plugins);
 
     /*
      * If no policy plugin, fall back to the default (sudoers).
@@ -323,6 +342,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     }
 
     /* Install hooks (XXX - later). */
+    sudo_debug_set_active_instance(SUDO_DEBUG_INSTANCE_INITIALIZER);
     if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
 	if (policy_plugin->u.policy->register_hooks != NULL)
 	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
@@ -333,6 +353,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
 	}
     }
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
 done:
     debug_return_bool(rval);

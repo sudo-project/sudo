@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,8 +39,6 @@
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include "sudo_debug.h"
-#include "sudo_queue.h"
 
 /* Singly linked hook list. */
 struct sudo_hook_entry {
@@ -76,18 +74,9 @@ process_hooks_setenv(const char *name, const char *value, int overwrite)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_setenv_list, entries) {
 	rc = hook->u.setenv_fn(name, value, overwrite, hook->closure);
-	switch (rc) {
-	    case SUDO_HOOK_RET_NEXT:
-		break;
-	    case SUDO_HOOK_RET_ERROR:
-	    case SUDO_HOOK_RET_STOP:
-		goto done;
-	    default:
-		sudo_warnx_nodebug("invalid setenv hook return value: %d", rc);
-		break;
-	}
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
+	    break;
     }
-done:
     return rc;
 }
 
@@ -101,18 +90,9 @@ process_hooks_putenv(char *string)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_putenv_list, entries) {
 	rc = hook->u.putenv_fn(string, hook->closure);
-	switch (rc) {
-	    case SUDO_HOOK_RET_NEXT:
-		break;
-	    case SUDO_HOOK_RET_ERROR:
-	    case SUDO_HOOK_RET_STOP:
-		goto done;
-	    default:
-		sudo_warnx_nodebug("invalid putenv hook return value: %d", rc);
-		break;
-	}
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
+	    break;
     }
-done:
     return rc;
 }
 
@@ -127,18 +107,9 @@ process_hooks_getenv(const char *name, char **value)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_getenv_list, entries) {
 	rc = hook->u.getenv_fn(name, &val, hook->closure);
-	switch (rc) {
-	    case SUDO_HOOK_RET_NEXT:
-		break;
-	    case SUDO_HOOK_RET_ERROR:
-	    case SUDO_HOOK_RET_STOP:
-		goto done;
-	    default:
-		sudo_warnx_nodebug("invalid getenv hook return value: %d", rc);
-		break;
-	}
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
+	    break;
     }
-done:
     if (val != NULL)
 	*value = val;
     return rc;
@@ -154,18 +125,9 @@ process_hooks_unsetenv(const char *name)
     /* First process the hooks. */
     SLIST_FOREACH(hook, &sudo_hook_unsetenv_list, entries) {
 	rc = hook->u.unsetenv_fn(name, hook->closure);
-	switch (rc) {
-	    case SUDO_HOOK_RET_NEXT:
-		break;
-	    case SUDO_HOOK_RET_ERROR:
-	    case SUDO_HOOK_RET_STOP:
-		goto done;
-	    default:
-		sudo_warnx_nodebug("invalid unsetenv hook return value: %d", rc);
-		break;
-	}
+	if (rc == SUDO_HOOK_RET_STOP || rc == SUDO_HOOK_RET_ERROR)
+	    break;
     }
-done:
     return rc;
 }
 

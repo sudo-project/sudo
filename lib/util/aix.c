@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -135,6 +135,14 @@ aix_setlimits(char *user)
 }
 
 #ifdef HAVE_SETAUTHDB
+
+# if defined(HAVE_DECL_SETAUTHDB) && !HAVE_DECL_SETAUTHDB
+int setauthdb(char *new, char *old);
+# endif
+# if defined(HAVE_DECL_USRINFO) && !HAVE_DECL_USRINFO
+int usrinfo(int cmd, char *buf, int count);
+# endif
+
 /*
  * Look up administrative domain for user (SYSTEM in /etc/security/user) and
  * set it as the default for the process.  This ensures that password and

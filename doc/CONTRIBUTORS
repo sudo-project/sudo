@@ -28,6 +28,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Bussjaeger, Andreas
     Calvin, Gary
     Campbell, Aaron
+    Chazelas, Stephane
     Čížek, Vítězslav
     Coleman, Chris
     Corzine, Deven T.
@@ -45,7 +46,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Frysinger, Mike
     G., Daniel Richard
     Gailly, Jean-loup
-    García-Fontes, Walter
     Gelman, Stephen
     Gerraty, Simon J.
     Graber, Stephane
@@ -133,6 +133,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Slemko, Marc
     Smith, Andy
     Sobrado, Igor
+    Soulen, Steven
     Spangler, Aaron
     Spradling, Cloyce D.
     Stier, Matthew
@@ -172,10 +173,12 @@ languages:
     Chornoivan, Yuri
     Diéguez, Francisco
     Ferreira, Rafael
+    García-Fontes, Walter
     Gezer, Volkan
     Hamasaki, Takeshi
     Hamming, Peter
     Hansen, Joe
+    Hantrais, Frédéric
     Hein, Jochen
     Jerovšek, Damir
     Karvonen, Jorma
@@ -197,4 +200,5 @@ languages:
     Spingos, Dimitris
     Taniguchi, Yasuaki
     Uranga, Mikel Olasagasti
+    Vorotnikov, Artem
     Wang, Wylmer

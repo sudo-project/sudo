@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,9 +82,12 @@ struct io_plugin_1_1 {
  */
 struct plugin_container {
     TAILQ_ENTRY(plugin_container) entries;
+    struct sudo_conf_debug_file_list *debug_files;
     const char *name;
+    const char *path;
     char * const *options;
     void *handle;
+    int debug_instance;
     union {
 	struct generic_plugin *generic;
 	struct policy_plugin *policy;
@@ -101,7 +104,7 @@ extern struct plugin_container_list io_plugins;
 
 int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[]);
-int _sudo_printf(int msg_type, const char *fmt, ...);
+int sudo_conversation_printf(int msg_type, const char *fmt, ...);
 
 bool sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins);
