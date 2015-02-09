@@ -127,7 +127,7 @@ DDEESSCCRRIIPPTTIIOONN
      _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.  This is effectively a whitelist for
      environment variables.  Environment variables with a value beginning with
      () are removed unless both the name and value parts are matched by
-     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they will be interpreted as fuctions by older
+     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they will be interpreted as functions by older
      versions of the bbaasshh shell.  Prior to version 1.8.11, such variables were
      always removed.
 
@@ -1667,7 +1667,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        variable's value does not contain any `%' or `/'
                        characters.  This can be used to guard against printf-
                        style format vulnerabilities in poorly-written
-                       programs.  The TZ variable is considerd unsafe if any
+                       programs.  The TZ variable is considered unsafe if any
                        of the following are true:
 
                        ++oo   It consists of a fully-qualified path name that

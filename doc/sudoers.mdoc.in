@@ -307,7 +307,7 @@ are removed unless both the name and value parts are matched by
 .Em env_keep
 or
 .Em env_check ,
-as they will be interpreted as fuctions by older versions of the
+as they will be interpreted as functions by older versions of the
 .Sy bash
 shell.
 Prior to version 1.8.11, such variables were always removed.
@@ -3185,7 +3185,7 @@ This can be used to guard against printf-style format vulnerabilities
 in poorly-written programs.
 The
 .Li TZ 
-variable is considerd unsafe if any of the following are true:
+variable is considered unsafe if any of the following are true:
 .Bl -bullet
 .It
 It consists of a fully-qualified path name that does not match

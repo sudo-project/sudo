@@ -318,7 +318,7 @@ are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
 or
 \fIenv_check\fR,
-as they will be interpreted as fuctions by older versions of the
+as they will be interpreted as functions by older versions of the
 \fBbash\fR
 shell.
 Prior to version 1.8.11, such variables were always removed.
@@ -3429,7 +3429,7 @@ This can be used to guard against printf-style format vulnerabilities
 in poorly-written programs.
 The
 \fRTZ\fR
-variable is considerd unsafe if any of the following are true:
+variable is considered unsafe if any of the following are true:
 .PP
 .RS 18n
 .PD 0
