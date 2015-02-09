@@ -3414,7 +3414,7 @@ The default value is
 \fBLists that can be used in a boolean context\fR:
 .TP 18n
 env_check
-Environment variables to be removed from the user's environment if
+Environment variables to be removed from the user's environment
 unless they are considered
 \(lqsafe\(rq.
 For all variables except

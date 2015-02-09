@@ -3170,7 +3170,7 @@ The default value is
 .Sy Lists that can be used in a boolean context :
 .Bl -tag -width 16n
 .It env_check
-Environment variables to be removed from the user's environment if
+Environment variables to be removed from the user's environment
 unless they are considered
 .Dq safe .
 For all variables except
