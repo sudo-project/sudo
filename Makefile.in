@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,7 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 docdir = @docdir@
-exampledir = $(datarootdir)/examples/$(PACKAGE_TARNAME)
+exampledir = $(docdir)/examples
 mandir = @mandir@
 rundir = @rundir@
 vardir = @vardir@

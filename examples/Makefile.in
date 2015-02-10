@@ -20,7 +20,8 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
-exampledir = $(datarootdir)/examples/$(PACKAGE_TARNAME)
+docdir = @docdir@
+exampledir = $(docdir)/examples
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
