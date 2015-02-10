@@ -266,6 +266,15 @@ A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
 	    innateprivs = PV_DAC_GID,PV_DAC_O,PV_DAC_R,PV_DAC_UID,PV_DAC_W,PV_DAC_X,PV_FS_CHOWN,PV_PROC_ENV,PV_PROC_PRIO,PV_PROC_RAC
 	    secflags = FSF_EPS
 
+Q) Sudo configures and builds without error but when I run it I get
+   a Segmentation fault.
+A) If you are on a Linux system, the first thing to try is to run
+   configure with the --disable-pie option, then "make clean" and
+   "make".  If that fixes the problem then your operating system
+   does not properly support position independent executables.
+   Please send a message to sudo@sudo.ws with system details such
+   as the Linux distro, kernel version and CPU architecture.
+
 Q) How do you pronounce `sudo'?
 A) The official pronunciation is soo-doo (for su "do").  However, an
    alternate pronunciation, a homophone of "pseudo", is also common.

@@ -3,6 +3,10 @@ What's new in Sudo 1.7.10p9?
  * The TZ environment variable is now checked for safety instead
    of simply being copied to the environment of the command.
 
+ * Sudo now only builds Position Independent Executables (PIE)
+   by default on Linux systems and verifies that a trivial test
+   program builds and runs.
+
 What's new in Sudo 1.7.10p8?
 
  * Sudo's exit code now indicates a failure if the user does not

@@ -1339,8 +1339,7 @@ AC_ARG_ENABLE(hardening,
 [], [enable_hardening=yes])
 
 AC_ARG_ENABLE(pie,
-[AS_HELP_STRING([--disable-pie], [Do not build position independent executables, even if the compiler/linker supports them])],
-[], [enable_pie=yes])
+[AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
@@ -1827,11 +1826,6 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
-		# PIE is broken on FreeBSD/ia64
-		case "$host_cpu" in
-		ia64*)
-			enable_pie=no;;
-		esac
 		;;
     *-*-*openbsd*)
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
@@ -3031,19 +3025,53 @@ if test "${with_iologdir-yes}" != "no"; then
 fi
 
 dnl
+dnl Turn warnings into errors.
+dnl All compiler/loader tests after this point will fail if
+dnl a warning is displayed (nornally, warnings are not fata).
+dnl
+AC_LANG_WERROR
+
+dnl
 dnl Check for PIE executable support if using gcc.
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test "$enable_pie" != "no" -a -n "$GCC"; then
-    AX_CHECK_COMPILE_FLAG([-fPIE], [
-	_CFLAGS="$CFLAGS"
-	CFLAGS="$CFLAGS -fPIE"
-	AX_CHECK_LINK_FLAG([-pie], [
-	    PIE_CFLAGS="-fPIE"
-	    PIE_LDFLAGS="-pie"
-	])
-	CFLAGS="$_CFLAGS"
-    ])
+if test -n "$GCC"; then
+    if test -z "$enable_pie"; then
+	case "$host_os" in
+	    linux*)
+		# Attempt to build with PIE support
+		enable_pie="maybe"
+		;;
+	esac
+    fi
+    if test -n "$enable_pie"; then
+	if test "$enable_pie" = "no"; then
+	    AX_CHECK_COMPILE_FLAG([-fno-pie], [
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS -fno-pie"
+		AX_CHECK_LINK_FLAG([-nopie], [
+		    PIE_CFLAGS="-fno-pie"
+		    PIE_LDFLAGS="-nopie"
+		])
+		CFLAGS="$_CFLAGS"
+	    ])
+	else
+	    AX_CHECK_COMPILE_FLAG([-fPIE], [
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS -fPIE"
+		AX_CHECK_LINK_FLAG([-pie], [
+		    if test "$enable_pie" = "maybe"; then
+			SUDO_WORKING_PIE([enable_pie=yes], [])
+		    fi
+		    if test "$enable_pie" = "yes"; then
+			PIE_CFLAGS="-fPIE"
+			PIE_LDFLAGS="-fPIE -pie"
+		    fi
+		])
+		CFLAGS="$_CFLAGS"
+	    ])
+	fi
+    fi
 fi
 
 dnl
@@ -3052,7 +3080,6 @@ dnl This must be towards the end as it turns warnings
 dnl into fatal errors (and there is no way to undo that)
 dnl
 if test "$enable_hardening" != "no"; then
-    AC_LANG_WERROR
     if test -n "$GCC"; then
 	AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
 	    AX_CHECK_LINK_FLAG([-fstack-protector-all], [
