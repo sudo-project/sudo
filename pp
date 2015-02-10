@@ -5665,7 +5665,6 @@ pp_backend_rpm () {
 	pp_rpm_label "Vendor"   "${pp_rpm_vendor:-$vendor}" >>$specfile
 	pp_rpm_label "Packager" "$pp_rpm_packager"          >>$specfile
 	pp_rpm_label "Provides" "$pp_rpm_provides"          >>$specfile
-	pp_rpm_label "Requires" "$pp_rpm_requires"          >>$specfile
 
 	test -n "$pp_rpm_serial" && pp_warn "pp_rpm_serial deprecated"
 	if test -n "$pp_rpm_epoch"; then
