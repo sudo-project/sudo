@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 6, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 10, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3435,9 +3435,9 @@ variable is considered unsafe if any of the following are true:
 .PD 0
 .TP 4n
 \fB\(bu\fR
-It consists of a fully-qualified path name
-(optionally prefixed with a colon
-\(oq:\&\(cq)
+It consists of a fully-qualified path name,
+optionally prefixed with a colon
+(\(oq:\&\(cq),
 that does not match the location of the
 \fIzoneinfo\fR
 directory.

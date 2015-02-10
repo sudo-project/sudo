@@ -1670,8 +1670,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        programs.  The TZ variable is considered unsafe if any
                        of the following are true:
 
-                       ++oo   It consists of a fully-qualified path name
-                           (optionally prefixed with a colon `:') that does
+                       ++oo   It consists of a fully-qualified path name,
+                           optionally prefixed with a colon (`:'), that does
                            not match the location of the _z_o_n_e_i_n_f_o directory.
 
                        ++oo   It contains a _._. path element.
@@ -2379,4 +2379,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.12                    February 6, 2015                    Sudo 1.8.12
+Sudo 1.8.12                    February 10, 2015                   Sudo 1.8.12
