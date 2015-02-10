@@ -1670,9 +1670,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        programs.  The TZ variable is considered unsafe if any
                        of the following are true:
 
-                       ++oo   It consists of a fully-qualified path name that
-                           does not match the location of the _z_o_n_e_i_n_f_o
-                           directory.
+                       ++oo   It consists of a fully-qualified path name
+                           (optionally prefixed with a colon `:') that does
+                           not match the location of the _z_o_n_e_i_n_f_o directory.
 
                        ++oo   It contains a _._. path element.
 

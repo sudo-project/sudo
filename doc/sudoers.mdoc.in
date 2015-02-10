@@ -3188,8 +3188,10 @@ The
 variable is considered unsafe if any of the following are true:
 .Bl -bullet
 .It
-It consists of a fully-qualified path name that does not match
-the location of the
+It consists of a fully-qualified path name
+(optionally prefixed with a colon
+.Ql :\& )
+that does not match the location of the
 .Pa zoneinfo
 directory.
 .It

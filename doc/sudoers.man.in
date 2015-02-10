@@ -3435,8 +3435,10 @@ variable is considered unsafe if any of the following are true:
 .PD 0
 .TP 4n
 \fB\(bu\fR
-It consists of a fully-qualified path name that does not match
-the location of the
+It consists of a fully-qualified path name
+(optionally prefixed with a colon
+\(oq:\&\(cq)
+that does not match the location of the
 \fIzoneinfo\fR
 directory.
 .PD
