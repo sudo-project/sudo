@@ -1050,19 +1050,23 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        some people find it more convenient.  This flag is _o_f_f
                        by default.
 
-     mail_always       Send mail to the _m_a_i_l_t_o user every time a user attempts
-                       to run a command via ssuuddoo.  Mail will be sent for both
-                       successful and unsuccessful attempts.  No mail will be
-                       sent if the user runs ssuuddoo with the --ll or --vv option
-                       unless there is an authentication error.  This flag is
-                       _o_f_f by default.
+     mail_all_cmnds    Send mail to the _m_a_i_l_t_o user every time a user attempts
+                       to run a command via ssuuddoo (this includes ssuuddooeeddiitt).  No
+                       mail will be sent if the user runs ssuuddoo with the --ll or
+                       --vv option unless there is an authentication error and
+                       the _m_a_i_l___b_a_d_p_a_s_s flag is also set.  This flag is _o_f_f by
+                       default.
+
+     mail_always       Send mail to the _m_a_i_l_t_o user every time a user runs
+                       ssuuddoo.  This flag is _o_f_f by default.
 
      mail_badpass      Send mail to the _m_a_i_l_t_o user if the user running ssuuddoo
                        does not enter the correct password.  If the command
                        the user is attempting to run is not permitted by
-                       _s_u_d_o_e_r_s and one of the _m_a_i_l___a_l_w_a_y_s, _m_a_i_l___n_o___h_o_s_t,
-                       _m_a_i_l___n_o___p_e_r_m_s or _m_a_i_l___n_o___u_s_e_r flags are set, this flag
-                       will have no effect.  This flag is _o_f_f by default.
+                       _s_u_d_o_e_r_s and one of the _m_a_i_l___a_l_l___c_m_n_d_s, _m_a_i_l___a_l_w_a_y_s,
+                       _m_a_i_l___n_o___h_o_s_t, _m_a_i_l___n_o___p_e_r_m_s or _m_a_i_l___n_o___u_s_e_r flags are
+                       set, this flag will have no effect.  This flag is _o_f_f
+                       by default.
 
      mail_no_host      If set, mail will be sent to the _m_a_i_l_t_o user if the
                        invoking user exists in the _s_u_d_o_e_r_s file, but is not

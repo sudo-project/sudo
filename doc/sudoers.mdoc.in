@@ -2080,19 +2080,30 @@ It's not as pretty as the default but some people find it more convenient.
 This flag is
 .Em @long_otp_prompt@
 by default.
-.It mail_always
+.It mail_all_cmnds
 Send mail to the
 .Em mailto
 user every time a user attempts to run a command via
-.Nm sudo .
-Mail will be sent for both successful and unsuccessful attempts.
+.Nm sudo
+(this includes
+.Nm sudoedit ) .
 No mail will be sent if the user runs
 .Nm sudo
 with the
 .Fl l
 or
 .Fl v
-option unless there is an authentication error.
+option unless there is an authentication error and the
+.Em mail_badpass
+flag is also set.
+This flag is
+.Em off
+by default.
+.It mail_always
+Send mail to the
+.Em mailto
+user every time a user runs
+.Nm sudo .
 This flag is
 .Em off
 by default.
@@ -2105,6 +2116,7 @@ does not enter the correct password.
 If the command the user is attempting to run is not permitted by
 .Em sudoers
 and one of the
+.Em mail_all_cmnds ,
 .Em mail_always ,
 .Em mail_no_host ,
 .Em mail_no_perms

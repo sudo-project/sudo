@@ -2223,19 +2223,31 @@ This flag is
 \fI@long_otp_prompt@\fR
 by default.
 .TP 18n
-mail_always
+mail_all_cmnds
 Send mail to the
 \fImailto\fR
 user every time a user attempts to run a command via
-\fBsudo\fR.
-Mail will be sent for both successful and unsuccessful attempts.
+\fBsudo\fR
+(this includes
+\fBsudoedit\fR).
 No mail will be sent if the user runs
 \fBsudo\fR
 with the
 \fB\-l\fR
 or
 \fB\-v\fR
-option unless there is an authentication error.
+option unless there is an authentication error and the
+\fImail_badpass\fR
+flag is also set.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
+mail_always
+Send mail to the
+\fImailto\fR
+user every time a user runs
+\fBsudo\fR.
 This flag is
 \fIoff\fR
 by default.
@@ -2249,6 +2261,7 @@ does not enter the correct password.
 If the command the user is attempting to run is not permitted by
 \fIsudoers\fR
 and one of the
+\fImail_all_cmnds\fR,
 \fImail_always\fR,
 \fImail_no_host\fR,
 \fImail_no_perms\fR

@@ -40,6 +40,9 @@ mail_no_host
 mail_no_perms
 	T_FLAG
 	"Send mail if the user is not allowed to run a command"
+mail_all_cmnds
+	T_FLAG
+	"Send mail if the user tries to run a command"
 tty_tickets
 	T_FLAG
 	"Use a separate timestamp for each user/tty combo"
