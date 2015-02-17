@@ -219,6 +219,7 @@ COMPAT_EXP=
 dnl
 dnl Other vaiables
 dnl
+WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
 shadow_libs=
@@ -2150,6 +2151,9 @@ dnl
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_VOLATILE
+if test "$enable_shared_libutil" = "yes"; then
+    AX_SYS_WEAK_ALIAS
+fi
 AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 AC_INCLUDES_DEFAULT
@@ -2923,6 +2927,18 @@ if test "$enable_nls" != "no"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	LIBINTL="-lintl -liconv"
+    fi
+fi
+
+dnl
+dnl If the system has weak symbol support, use it for
+dnl sudo_warn_strerror_v1() and sudo_warn_gettext_v1().
+dnl
+if test X"$WEAK_ALIAS" != X"no"; then
+    COMMON_OBJS="${COMMON_OBJS} locale_weak.lo"
+    SUDO_APPEND_COMPAT_EXP(sudo_warn_strerror_v1)
+    if test X"$SUDO_NLS" = X"enabled"; then
+	SUDO_APPEND_COMPAT_EXP(sudo_warn_gettext_v1)
     fi
 fi
 

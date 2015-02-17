@@ -100,6 +100,7 @@ lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c
 lib/util/lbuf.c
+lib/util/locale_weak.c
 lib/util/locking.c
 lib/util/memrchr.c
 lib/util/memset_s.c

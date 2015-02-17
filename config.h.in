@@ -804,6 +804,25 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define this if your system can create weak aliases */
+#undef HAVE_SYS_WEAK_ALIAS
+
+/* Define this if weak aliases may be created with __attribute__ */
+#undef HAVE_SYS_WEAK_ALIAS_ATTRIBUTE
+
+/* Define this if weak aliases may be created with #pragma _CRI duplicate */
+#undef HAVE_SYS_WEAK_ALIAS_CRIDUPLICATE
+
+/* Define this if weak aliases in other files are honored */
+#undef HAVE_SYS_WEAK_ALIAS_CROSSFILE
+
+/* Define this if weak aliases may be created with #pragma _HP_SECONDARY_DEF
+   */
+#undef HAVE_SYS_WEAK_ALIAS_HPSECONDARY
+
+/* Define this if weak aliases may be created with #pragma weak */
+#undef HAVE_SYS_WEAK_ALIAS_PRAGMA
+
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
 
