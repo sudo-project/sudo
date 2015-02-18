@@ -227,7 +227,7 @@ still allow people to get their work done."
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
-	    extradirs="$extradirs `dirname $docdir` `dirname $exampledir` `dirname $rundir` `dirname $vardir`"
+	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
 		    while test "$dir" != "/"; do
@@ -278,9 +278,8 @@ still allow people to get their work done."
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-	$docdir/*		0644
-	$exampledir/		0755
-	$exampledir/*		0644
+	$exampledir/		0755 ignore-others
+	$docdir/**		0644
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional
 	$localedir/*/LC_MESSAGES/* 0644    optional
