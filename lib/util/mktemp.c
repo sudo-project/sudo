@@ -140,7 +140,7 @@ mktemp_internal(char *path, int slen, int mode)
 	tries *= 2;
 
 	do {
-		for (cp = start; *cp; cp++) {
+		for (cp = start; cp != ep; cp++) {
 			r = get_random() % NUM_CHARS;
 			*cp = tempchars[r];
 		}
