@@ -76,27 +76,25 @@ secureware_verify(pw, pass, auth)
     sudo_auth *auth;
 {
     char *pw_epasswd = auth->data;
+    char *epass = NULL;
 #ifdef __alpha
     extern int crypt_type;
 
-#  ifdef HAVE_DISPCRYPT
-    if (strcmp(pw_epasswd, dispcrypt(pass, pw_epasswd, crypt_type)) == 0)
-	return AUTH_SUCCESS;
-#  else
-    if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
-	if (strcmp(pw_epasswd, bigcrypt(pass, pw_epasswd)) == 0)
-	    return AUTH_SUCCESS;
-    } else if (crypt_type == AUTH_CRYPT_CRYPT16) {
-	if (strcmp(pw_epasswd, crypt(pass, pw_epasswd)) == 0)
-	    return AUTH_SUCCESS;
-    }
-#  endif /* HAVE_DISPCRYPT */
+# ifdef HAVE_DISPCRYPT
+    epass = dispcrypt(pass, pw_epasswd, crypt_type);
+# else
+    if (crypt_type == AUTH_CRYPT_BIGCRYPT)
+	epass = bigcrypt(pass, pw_epasswd);
+    else if (crypt_type == AUTH_CRYPT_CRYPT16)
+	epass = crypt(pass, pw_epasswd);
+# endif /* HAVE_DISPCRYPT */
 #elif defined(HAVE_BIGCRYPT)
-    if (strcmp(pw_epasswd, bigcrypt(pass, pw_epasswd)) == 0)
-	return AUTH_SUCCESS;
+    epass = bigcrypt(pass, pw_epasswd);
 #endif /* __alpha */
 
-	return AUTH_FAILURE;
+    if (epass != NULL && strcmp(pw_epasswd, epass) == 0)
+	return AUTH_SUCCESS;
+    return AUTH_FAILURE;
 }
 
 int
