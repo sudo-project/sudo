@@ -71,7 +71,9 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     int matched = 0;
     debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH)
 
-    pw_len = strlen(pw_epasswd);
+    /* An empty plain-text password must match an empty encrypted password. */
+    if (pass[0] == '\0')
+	debug_return_int(pw_epasswd[0] ? AUTH_FAILURE : AUTH_SUCCESS);
 
 #ifdef HAVE_GETAUTHUID
     /* Ultrix shadow passwords may use crypt16() */
@@ -85,6 +87,7 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
      * If this turns out not to be safe we will have to use OS #ifdef's (sigh).
      */
     sav = pass[8];
+    pw_len = strlen(pw_epasswd);
     if (pw_len == DESLEN || HAS_AGEINFO(pw_epasswd, pw_len))
 	pass[8] = '\0';
 
