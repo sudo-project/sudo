@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005,2008,2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2005,2008,2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,10 +46,6 @@
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
-
-#ifndef LINE_MAX
-# define LINE_MAX 2048
-#endif
 
 #undef GRMEM_MAX
 #define GRMEM_MAX 200
