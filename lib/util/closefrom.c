@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2010, 2012-2014
+ * Copyright (c) 2004-2005, 2007, 2010, 2012-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -55,6 +55,10 @@
 
 #include "sudo_compat.h"
 
+#ifndef _POSIX_OPEN_MAX
+# define _POSIX_OPEN_MAX	20
+#endif
+
 #if defined(HAVE_FCNTL_CLOSEM) && !defined(HAVE_DIRFD)
 # define sudo_closefrom	closefrom_fallback
 #endif
@@ -69,17 +73,13 @@ closefrom_fallback(int lowfd)
     long fd, maxfd;
 
     /*
-     * Fall back on sysconf() or getdtablesize().  We avoid checking
+     * Fall back on sysconf(_SC_OPEN_MAX).  We avoid checking
      * resource limits since it is possible to open a file descriptor
      * and then drop the rlimit such that it is below the open fd.
      */
-#ifdef HAVE_SYSCONF
     maxfd = sysconf(_SC_OPEN_MAX);
-#else
-    maxfd = getdtablesize();
-#endif /* HAVE_SYSCONF */
     if (maxfd < 0)
-	maxfd = OPEN_MAX;
+	maxfd = _POSIX_OPEN_MAX;
 
     for (fd = lowfd; fd < maxfd; fd++) {
 #ifdef __APPLE__

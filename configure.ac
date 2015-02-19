@@ -2349,7 +2349,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime sysconf tzset])
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime tzset])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -3010,7 +3010,7 @@ dnl We need to add OSDEFS to CFLAGS to expose LLONG_MAX et al on glibc.
 dnl
 _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
-AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
+AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
 ])

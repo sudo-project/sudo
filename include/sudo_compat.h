@@ -120,10 +120,6 @@
 /*
  * Some systems lack full limit definitions.
  */
-#if defined(HAVE_DECL_OPEN_MAX) && !HAVE_DECL_OPEN_MAX
-# define OPEN_MAX	256
-#endif
-
 #if defined(HAVE_DECL_LLONG_MAX) && !HAVE_DECL_LLONG_MAX
 # if defined(HAVE_DECL_QUAD_MAX) && HAVE_DECL_QUAD_MAX
 #  define LLONG_MAX	QUAD_MAX

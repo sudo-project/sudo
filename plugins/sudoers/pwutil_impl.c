@@ -248,10 +248,8 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
 	} else {
-#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
 	    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
 	    if (ngids < 0)
-#endif
 		ngids = NGROUPS_MAX * 2;
 	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
@@ -271,7 +269,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     aix_setauthdb((char *) pw->pw_name);
 #endif
 
-#if defined(HAVE_SYSCONF) && defined(_SC_LOGIN_NAME_MAX)
+#ifdef _SC_LOGIN_NAME_MAX
     groupname_len = MAX((int)sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);

@@ -2833,7 +2833,6 @@ as_fn_append ac_header_list " sys/sysmacros.h"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
 as_fn_append ac_func_list " strftime"
-as_fn_append ac_func_list " sysconf"
 as_fn_append ac_func_list " tzset"
 as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
@@ -18381,8 +18380,6 @@ done
 
 
 
-
-
 for ac_func in getgrouplist
 do :
   ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
@@ -21284,20 +21281,6 @@ _ACEOF
 
 _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
-ac_fn_c_check_decl "$LINENO" "OPEN_MAX" "ac_cv_have_decl_OPEN_MAX" "
-#include <sys/types.h>
-#include <limits.h>
-
-"
-if test "x$ac_cv_have_decl_OPEN_MAX" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_OPEN_MAX $ac_have_decl
-_ACEOF
 ac_fn_c_check_decl "$LINENO" "LLONG_MAX" "ac_cv_have_decl_LLONG_MAX" "
 #include <sys/types.h>
 #include <limits.h>

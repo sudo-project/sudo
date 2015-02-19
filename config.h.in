@@ -117,10 +117,6 @@
    don't. */
 #undef HAVE_DECL_LLONG_MIN
 
-/* Define to 1 if you have the declaration of `OPEN_MAX', and to 0 if you
-   don't. */
-#undef HAVE_DECL_OPEN_MAX
-
 /* Define to 1 if you have the declaration of `PATH_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_PATH_MAX
@@ -753,9 +749,6 @@
 
 /* Define to 1 if your struct stat uses an st__tim union. */
 #undef HAVE_ST__TIM
-
-/* Define to 1 if you have the `sysconf' function. */
-#undef HAVE_SYSCONF
 
 /* Define to 1 if you have the `sysctl' function. */
 #undef HAVE_SYSCTL

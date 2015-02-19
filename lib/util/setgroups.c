@@ -48,10 +48,8 @@ sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
     rval = setgroups(ngids, (GETGROUPS_T *)gids);
     if (rval == -1 && errno == EINVAL) {
 	/* Too many groups, try again with fewer. */
-#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
 	maxgids = (int)sysconf(_SC_NGROUPS_MAX);
 	if (maxgids == -1)
-#endif
 	    maxgids = NGROUPS_MAX;
 	if (ngids > maxgids)
 	    rval = setgroups(maxgids, (GETGROUPS_T *)gids);

@@ -397,10 +397,8 @@ get_user_groups(struct user_details *ud)
     int i, len, maxgroups, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
-#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
     maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
     if (maxgroups < 0)
-#endif
 	maxgroups = NGROUPS_MAX;
 
     ud->groups = NULL;
