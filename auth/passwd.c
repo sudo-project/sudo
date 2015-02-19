@@ -75,7 +75,9 @@ passwd_verify(pw, pass, auth)
     size_t pw_len;
     int matched = 0;
 
-    pw_len = strlen(pw_epasswd);
+    /* An empty plain-text password must match an empty encrypted password. */
+    if (pass[0] == '\0')
+	return pw_epasswd[0] ? AUTH_FAILURE : AUTH_SUCCESS;
 
 #ifdef HAVE_GETAUTHUID
     /* Ultrix shadow passwords may use crypt16() */
@@ -89,6 +91,7 @@ passwd_verify(pw, pass, auth)
      * If this turns out not to be safe we will have to use OS #ifdef's (sigh).
      */
     sav = pass[8];
+    pw_len = strlen(pw_epasswd);
     if (pw_len == DESLEN || HAS_AGEINFO(pw_epasswd, pw_len))
 	pass[8] = '\0';
 

@@ -80,6 +80,10 @@ secureware_verify(pw, pass, auth)
 #ifdef __alpha
     extern int crypt_type;
 
+    /* An empty plain-text password must match an empty encrypted password. */
+    if (pass[0] == '\0')
+	return pw_epasswd[0] ? AUTH_FAILURE : AUTH_SUCCESS;
+
 # ifdef HAVE_DISPCRYPT
     epass = dispcrypt(pass, pw_epasswd, crypt_type);
 # else
