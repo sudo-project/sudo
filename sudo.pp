@@ -278,7 +278,7 @@ still allow people to get their work done."
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-	$exampledir/		0755 ignore-others
+	$docdir/examples/	0755 ignore-others
 	$docdir/**		0644
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional

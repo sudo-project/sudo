@@ -32,7 +32,6 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 docdir = @docdir@
-exampledir = $(docdir)/examples
 mandir = @mandir@
 rundir = @rundir@
 vardir = @vardir@
@@ -306,7 +305,6 @@ package: $(srcdir)/sudo.pp
 	    mandir=$(mandir) \
 	    localedir=$(localedir) \
 	    docdir=$(docdir) \
-	    exampledir=$(exampledir) \
 	    sysconfdir=$(sysconfdir) \
 	    sudoersdir=$(sudoersdir) \
 	    sudoers_uid=$(sudoers_uid) \
