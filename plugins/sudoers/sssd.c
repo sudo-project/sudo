@@ -1382,13 +1382,16 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 		cp++;
 	    if (strcmp(cp, "authenticate") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-			    "NOPASSWD: " : "PASSWD: ");
+		    "NOPASSWD: " : "PASSWD: ");
 	    else if (strcmp(cp, "noexec") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-			    "EXEC: " : "NOEXEC: ");
+		    "EXEC: " : "NOEXEC: ");
 	    else if (strcmp(cp, "setenv") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-			    "NOSETENV: " : "SETENV: ");
+		    "NOSETENV: " : "SETENV: ");
+	    else if (strcmp(cp, "mail_all_cmnds") == 0 || strcmp(cp, "mail_always") == 0)
+		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
+		    "NOMAIL: " : "MAIL: ");
 	}
 	handle->fn_free_values(val_array);
 	break;

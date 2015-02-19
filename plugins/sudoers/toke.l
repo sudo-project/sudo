@@ -465,6 +465,16 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    	LEXRETURN(NOLOG_INPUT);
 			}
 
+MAIL[[:blank:]]*:	{
+			    	LEXTRACE("MAIL ");
+			    	LEXRETURN(MAIL);
+			}
+
+NOMAIL[[:blank:]]*:	{
+			    	LEXTRACE("NOMAIL ");
+			    	LEXRETURN(NOMAIL);
+			}
+
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
 			    /* empty group or netgroup */
 			    LEXTRACE("ERROR ");

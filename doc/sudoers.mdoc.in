@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 10, 2015
+.Dd February 17, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -910,7 +910,7 @@ Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
 Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
               'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:')
+              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:')
 .Ed
 .Pp
 A
@@ -1139,9 +1139,11 @@ ten possible tag values:
 .Li NOSETENV ,
 .Li LOG_INPUT ,
 .Li NOLOG_INPUT ,
-.Li LOG_OUTPUT
+.Li LOG_OUTPUT ,
+.Li NOLOG_OUTPUT ,
+.Li MAIL
 and
-.Li NOLOG_OUTPUT .
+.Li NOMAIL .
 Once a tag is set on a
 .Li Cmnd ,
 subsequent
@@ -1293,6 +1295,35 @@ These tags override the value of the
 option on a per-command basis.
 For more information, see the description of
 .Em log_output
+in the
+.Sx SUDOERS OPTIONS
+section below.
+.It Em MAIL No and Em NOMAIL
+.sp
+These tags provide fine-grained control over whether
+mail will be sent when a user runs a command by
+overriding the value of the
+.Em mail_all_cmnds
+option on a per-command basis.
+They have no effect when
+.Nm sudo
+is run with the
+.Fl l
+or
+.Fl v
+options.
+A
+.Em NOMAIL
+tag will also override the
+.Em mail_always
+and
+.Em mail_no_perms
+options.
+For more information, see the descriptions of
+.Em mail_all_cmnds ,
+.Em mail_always ,
+and
+.Em mail_no_perms
 in the
 .Sx SUDOERS OPTIONS
 section below.

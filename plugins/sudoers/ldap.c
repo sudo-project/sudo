@@ -2226,6 +2226,9 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lb
 	    else if (strcmp(cp, "setenv") == 0)
 		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "NOSETENV: " : "SETENV: ");
+	    else if (strcmp(cp, "mail_all_cmnds") == 0 || strcmp(cp, "mail_always") == 0)
+		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		    "NOMAIL: " : "MAIL: ");
 	}
 	ldap_value_free_len(bv);
     }

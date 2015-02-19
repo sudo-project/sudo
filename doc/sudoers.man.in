@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 10, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 17, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -957,7 +957,7 @@ Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
 Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
               'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:')
+              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:')
 .RE
 .fi
 .PP
@@ -1216,9 +1216,11 @@ ten possible tag values:
 \fRNOSETENV\fR,
 \fRLOG_INPUT\fR,
 \fRNOLOG_INPUT\fR,
-\fRLOG_OUTPUT\fR
+\fRLOG_OUTPUT\fR,
+\fRNOLOG_OUTPUT\fR,
+\fRMAIL\fR
 and
-\fRNOLOG_OUTPUT\fR.
+\fRNOMAIL\fR.
 Once a tag is set on a
 \fRCmnd\fR,
 subsequent
@@ -1387,6 +1389,36 @@ These tags override the value of the
 option on a per-command basis.
 For more information, see the description of
 \fIlog_output\fR
+in the
+\fISUDOERS OPTIONS\fR
+section below.
+.TP 2n
+\fIMAIL\fR and \fINOMAIL\fR
+.sp
+These tags provide fine-grained control over whether
+mail will be sent when a user runs a command by
+overriding the value of the
+\fImail_all_cmnds\fR
+option on a per-command basis.
+They have no effect when
+\fBsudo\fR
+is run with the
+\fB\-l\fR
+or
+\fB\-v\fR
+options.
+A
+\fINOMAIL\fR
+tag will also override the
+\fImail_always\fR
+and
+\fImail_no_perms\fR
+options.
+For more information, see the descriptions of
+\fImail_all_cmnds\fR,
+\fImail_always\fR,
+and
+\fImail_no_perms\fR
 in the
 \fISUDOERS OPTIONS\fR
 section below.

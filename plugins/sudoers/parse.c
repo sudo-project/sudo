@@ -280,12 +280,32 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 		def_log_input = tags->log_input;
 	    if (tags->log_output != UNSPEC)
 		def_log_output = tags->log_output;
+	    if (tags->send_mail != UNSPEC) {
+		if (tags->send_mail) {
+		    def_mail_all_cmnds = true;
+		} else {
+		    def_mail_all_cmnds = false;
+		    def_mail_always = false;
+		    def_mail_no_perms = false;
+		}
+	    }
 	}
     } else if (match == DENY) {
 	SET(validated, VALIDATE_FAILURE);
 	CLR(validated, VALIDATE_SUCCESS);
-	if (tags != NULL && tags->nopasswd != UNSPEC)
-	    def_authenticate = !tags->nopasswd;
+	if (tags != NULL) {
+	    if (tags->nopasswd != UNSPEC)
+		def_authenticate = !tags->nopasswd;
+	    if (tags->send_mail != UNSPEC) {
+		if (tags->send_mail) {
+		    def_mail_all_cmnds = true;
+		} else {
+		    def_mail_all_cmnds = false;
+		    def_mail_always = false;
+		    def_mail_no_perms = false;
+		}
+	    }
+	}
     }
     (void) restore_perms();
     debug_return_int(validated);
@@ -335,6 +355,10 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
 	tags->log_output = cs->tags.log_output;
     }
+    if (TAG_CHANGED(send_mail)) {
+	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
+	tags->send_mail = cs->tags.send_mail;
+    }
     print_member(lbuf, cs->cmnd, CMNDALIAS);
     debug_return;
 }
@@ -355,11 +379,12 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     debug_decl(sudo_file_display_priv_short, SUDOERS_DEBUG_NSS)
 
     /* gcc -Wuninitialized false positive */
-    tags.noexec = UNSPEC;
-    tags.setenv = UNSPEC;
-    tags.nopasswd = UNSPEC;
     tags.log_input = UNSPEC;
     tags.log_output = UNSPEC;
+    tags.noexec = UNSPEC;
+    tags.nopasswd = UNSPEC;
+    tags.send_mail = UNSPEC;
+    tags.setenv = UNSPEC;
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
 	    continue;
