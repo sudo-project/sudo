@@ -908,9 +908,9 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-              'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:')
+Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
+              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
+	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
 .Ed
 .Pp
 A
@@ -1131,19 +1131,19 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-.Li NOPASSWD ,
-.Li PASSWD ,
 .Li NOEXEC ,
 .Li EXEC ,
-.Li SETENV ,
-.Li NOSETENV ,
 .Li LOG_INPUT ,
 .Li NOLOG_INPUT ,
 .Li LOG_OUTPUT ,
 .Li NOLOG_OUTPUT ,
-.Li MAIL
+.Li MAIL ,
+.Li NOMAIL ,
+.Li NOPASSWD ,
+.Li PASSWD ,
+.Li SETENV ,
 and
-.Li NOMAIL .
+.Li NOSETENV .
 Once a tag is set on a
 .Li Cmnd ,
 subsequent
@@ -1159,6 +1159,82 @@ and
 overrides
 .Li EXEC ) .
 .Bl -hang -width 0n
+.It Em NOEXEC No and Em EXEC
+.sp
+If
+.Nm sudo
+has been compiled with
+.Em noexec
+support and the underlying operating system supports it, the
+.Li NOEXEC
+tag can be used to prevent a dynamically-linked executable from
+running further commands itself.
+.Pp
+In the following example, user
+.Sy aaron
+may run
+.Pa /usr/bin/more
+and
+.Pa /usr/bin/vi
+but shell escapes will be disabled.
+.Bd -literal
+aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.Ed
+.Pp
+See the
+.Sx Preventing shell escapes
+section below for more details on how
+.Li NOEXEC
+works and whether or not it will work on your system.
+.It Em LOG_INPUT No and Em NOLOG_INPUT
+.sp
+These tags override the value of the
+.Em log_input
+option on a per-command basis.
+For more information, see the description of
+.Em log_input
+in the
+.Sx SUDOERS OPTIONS
+section below.
+.It Em LOG_OUTPUT No and Em NOLOG_OUTPUT
+.sp
+These tags override the value of the
+.Em log_output
+option on a per-command basis.
+For more information, see the description of
+.Em log_output
+in the
+.Sx SUDOERS OPTIONS
+section below.
+.It Em MAIL No and Em NOMAIL
+.sp
+These tags provide fine-grained control over whether
+mail will be sent when a user runs a command by
+overriding the value of the
+.Em mail_all_cmnds
+option on a per-command basis.
+They have no effect when
+.Nm sudo
+is run with the
+.Fl l
+or
+.Fl v
+options.
+A
+.Em NOMAIL
+tag will also override the
+.Em mail_always
+and
+.Em mail_no_perms
+options.
+For more information, see the descriptions of
+.Em mail_all_cmnds ,
+.Em mail_always ,
+and
+.Em mail_no_perms
+in the
+.Sx SUDOERS OPTIONS
+section below.
 .It Em NOPASSWD No and Em PASSWD
 .sp
 By default,
@@ -1225,33 +1301,6 @@ This behavior may be overridden via the
 and
 .Em listpw
 options.
-.It Em NOEXEC No and Em EXEC
-.sp
-If
-.Nm sudo
-has been compiled with
-.Em noexec
-support and the underlying operating system supports it, the
-.Li NOEXEC
-tag can be used to prevent a dynamically-linked executable from
-running further commands itself.
-.Pp
-In the following example, user
-.Sy aaron
-may run
-.Pa /usr/bin/more
-and
-.Pa /usr/bin/vi
-but shell escapes will be disabled.
-.Bd -literal
-aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-.Ed
-.Pp
-See the
-.Sx Preventing shell escapes
-section below for more details on how
-.Li NOEXEC
-works and whether or not it will work on your system.
 .It Em SETENV No and Em NOSETENV
 .sp
 These tags override the value of the
@@ -1278,55 +1327,6 @@ the
 tag is implied for that command; this default may be overridden by use of the
 .Li NOSETENV
 tag.
-.It Em LOG_INPUT No and Em NOLOG_INPUT
-.sp
-These tags override the value of the
-.Em log_input
-option on a per-command basis.
-For more information, see the description of
-.Em log_input
-in the
-.Sx SUDOERS OPTIONS
-section below.
-.It Em LOG_OUTPUT No and Em NOLOG_OUTPUT
-.sp
-These tags override the value of the
-.Em log_output
-option on a per-command basis.
-For more information, see the description of
-.Em log_output
-in the
-.Sx SUDOERS OPTIONS
-section below.
-.It Em MAIL No and Em NOMAIL
-.sp
-These tags provide fine-grained control over whether
-mail will be sent when a user runs a command by
-overriding the value of the
-.Em mail_all_cmnds
-option on a per-command basis.
-They have no effect when
-.Nm sudo
-is run with the
-.Fl l
-or
-.Fl v
-options.
-A
-.Em NOMAIL
-tag will also override the
-.Em mail_always
-and
-.Em mail_no_perms
-options.
-For more information, see the descriptions of
-.Em mail_all_cmnds ,
-.Em mail_always ,
-and
-.Em mail_no_perms
-in the
-.Sx SUDOERS OPTIONS
-section below.
 .El
 .Ss Wildcards
 .Nm sudo

@@ -461,9 +461,9 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-     Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-                   'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-                   'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:')
+     Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
+                   'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
+                   'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
 
      A uusseerr ssppeecciiffiiccaattiioonn determines which commands a user may run (and as
      what user) on specified hosts.  By default, commands are run as rroooott, but
@@ -577,11 +577,47 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  There are ten
-     possible tag values: NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV, NOSETENV,
-     LOG_INPUT, NOLOG_INPUT, LOG_OUTPUT, NOLOG_OUTPUT, MAIL and NOMAIL.  Once
+     possible tag values: NOEXEC, EXEC, LOG_INPUT, NOLOG_INPUT, LOG_OUTPUT,
+     NOLOG_OUTPUT, MAIL, NOMAIL, NOPASSWD, PASSWD, SETENV, and NOSETENV.  Once
      a tag is set on a Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit
      the tag unless it is overridden by the opposite tag (in other words,
      PASSWD overrides NOPASSWD and NOEXEC overrides EXEC).
+
+     _N_O_E_X_E_C and _E_X_E_C
+
+       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
+       operating system supports it, the NOEXEC tag can be used to prevent a
+       dynamically-linked executable from running further commands itself.
+
+       In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e and
+       _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
+
+       aaron   shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+       See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
+       NOEXEC works and whether or not it will work on your system.
+
+     _L_O_G___I_N_P_U_T and _N_O_L_O_G___I_N_P_U_T
+
+       These tags override the value of the _l_o_g___i_n_p_u_t option on a per-command
+       basis.  For more information, see the description of _l_o_g___i_n_p_u_t in the
+       _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
+
+     _L_O_G___O_U_T_P_U_T and _N_O_L_O_G___O_U_T_P_U_T
+
+       These tags override the value of the _l_o_g___o_u_t_p_u_t option on a per-command
+       basis.  For more information, see the description of _l_o_g___o_u_t_p_u_t in the
+       _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
+
+     _M_A_I_L and _N_O_M_A_I_L
+
+       These tags provide fine-grained control over whether mail will be sent
+       when a user runs a command by overriding the value of the
+       _m_a_i_l___a_l_l___c_m_n_d_s option on a per-command basis.  They have no effect when
+       ssuuddoo is run with the --ll or --vv options.  A _N_O_M_A_I_L tag will also override
+       the _m_a_i_l___a_l_w_a_y_s and _m_a_i_l___n_o___p_e_r_m_s options.  For more information, see
+       the descriptions of _m_a_i_l___a_l_l___c_m_n_d_s, _m_a_i_l___a_l_w_a_y_s, and _m_a_i_l___n_o___p_e_r_m_s in
+       the _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
 
      _N_O_P_A_S_S_W_D and _P_A_S_S_W_D
 
@@ -610,20 +646,6 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        entries that pertain to the current host.  This behavior may be
        overridden via the _v_e_r_i_f_y_p_w and _l_i_s_t_p_w options.
 
-     _N_O_E_X_E_C and _E_X_E_C
-
-       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
-       operating system supports it, the NOEXEC tag can be used to prevent a
-       dynamically-linked executable from running further commands itself.
-
-       In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e and
-       _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
-
-       aaron   shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-
-       See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
-       NOEXEC works and whether or not it will work on your system.
-
      _S_E_T_E_N_V and _N_O_S_E_T_E_N_V
 
        These tags override the value of the _s_e_t_e_n_v option on a per-command
@@ -635,28 +657,6 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        variables in this manner.  If the command matched is AALLLL, the SETENV
        tag is implied for that command; this default may be overridden by use
        of the NOSETENV tag.
-
-     _L_O_G___I_N_P_U_T and _N_O_L_O_G___I_N_P_U_T
-
-       These tags override the value of the _l_o_g___i_n_p_u_t option on a per-command
-       basis.  For more information, see the description of _l_o_g___i_n_p_u_t in the
-       _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
-
-     _L_O_G___O_U_T_P_U_T and _N_O_L_O_G___O_U_T_P_U_T
-
-       These tags override the value of the _l_o_g___o_u_t_p_u_t option on a per-command
-       basis.  For more information, see the description of _l_o_g___o_u_t_p_u_t in the
-       _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
-
-     _M_A_I_L and _N_O_M_A_I_L
-
-       These tags provide fine-grained control over whether mail will be sent
-       when a user runs a command by overriding the value of the
-       _m_a_i_l___a_l_l___c_m_n_d_s option on a per-command basis.  They have no effect when
-       ssuuddoo is run with the --ll or --vv options.  A _N_O_M_A_I_L tag will also override
-       the _m_a_i_l___a_l_w_a_y_s and _m_a_i_l___n_o___p_e_r_m_s options.  For more information, see
-       the descriptions of _m_a_i_l___a_l_l___c_m_n_d_s, _m_a_i_l___a_l_w_a_y_s, and _m_a_i_l___n_o___p_e_r_m_s in
-       the _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
 
    WWiillddccaarrddss
      ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be

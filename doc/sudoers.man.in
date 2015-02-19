@@ -955,9 +955,9 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-              'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:')
+Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
+              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
+	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
 .RE
 .fi
 .PP
@@ -1208,19 +1208,19 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-\fRNOPASSWD\fR,
-\fRPASSWD\fR,
 \fRNOEXEC\fR,
 \fREXEC\fR,
-\fRSETENV\fR,
-\fRNOSETENV\fR,
 \fRLOG_INPUT\fR,
 \fRNOLOG_INPUT\fR,
 \fRLOG_OUTPUT\fR,
 \fRNOLOG_OUTPUT\fR,
-\fRMAIL\fR
+\fRMAIL\fR,
+\fRNOMAIL\fR,
+\fRNOPASSWD\fR,
+\fRPASSWD\fR,
+\fRSETENV\fR,
 and
-\fRNOMAIL\fR.
+\fRNOSETENV\fR.
 Once a tag is set on a
 \fRCmnd\fR,
 subsequent
@@ -1235,6 +1235,91 @@ and
 \fRNOEXEC\fR
 overrides
 \fREXEC\fR).
+.TP 2n
+\fINOEXEC\fR and \fIEXEC\fR
+.sp
+If
+\fBsudo\fR
+has been compiled with
+\fInoexec\fR
+support and the underlying operating system supports it, the
+\fRNOEXEC\fR
+tag can be used to prevent a dynamically-linked executable from
+running further commands itself.
+.sp
+In the following example, user
+\fBaaron\fR
+may run
+\fI/usr/bin/more\fR
+and
+\fI/usr/bin/vi\fR
+but shell escapes will be disabled.
+.nf
+.sp
+.RS 2n
+aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.RE
+.fi
+.RS 2n
+.sp
+See the
+\fIPreventing shell escapes\fR
+section below for more details on how
+\fRNOEXEC\fR
+works and whether or not it will work on your system.
+.RE
+.TP 2n
+\fILOG_INPUT\fR and \fINOLOG_INPUT\fR
+.sp
+These tags override the value of the
+\fIlog_input\fR
+option on a per-command basis.
+For more information, see the description of
+\fIlog_input\fR
+in the
+\fISUDOERS OPTIONS\fR
+section below.
+.TP 2n
+\fILOG_OUTPUT\fR and \fINOLOG_OUTPUT\fR
+.sp
+These tags override the value of the
+\fIlog_output\fR
+option on a per-command basis.
+For more information, see the description of
+\fIlog_output\fR
+in the
+\fISUDOERS OPTIONS\fR
+section below.
+.TP 2n
+\fIMAIL\fR and \fINOMAIL\fR
+.sp
+These tags provide fine-grained control over whether
+mail will be sent when a user runs a command by
+overriding the value of the
+\fImail_all_cmnds\fR
+option on a per-command basis.
+They have no effect when
+\fBsudo\fR
+is run with the
+\fB\-l\fR
+or
+\fB\-v\fR
+options.
+A
+\fINOMAIL\fR
+tag will also override the
+\fImail_always\fR
+and
+\fImail_no_perms\fR
+options.
+For more information, see the descriptions of
+\fImail_all_cmnds\fR,
+\fImail_always\fR,
+and
+\fImail_no_perms\fR
+in the
+\fISUDOERS OPTIONS\fR
+section below.
 .TP 2n
 \fINOPASSWD\fR and \fIPASSWD\fR
 .sp
@@ -1311,39 +1396,6 @@ and
 options.
 .RE
 .TP 2n
-\fINOEXEC\fR and \fIEXEC\fR
-.sp
-If
-\fBsudo\fR
-has been compiled with
-\fInoexec\fR
-support and the underlying operating system supports it, the
-\fRNOEXEC\fR
-tag can be used to prevent a dynamically-linked executable from
-running further commands itself.
-.sp
-In the following example, user
-\fBaaron\fR
-may run
-\fI/usr/bin/more\fR
-and
-\fI/usr/bin/vi\fR
-but shell escapes will be disabled.
-.nf
-.sp
-.RS 2n
-aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-.RE
-.fi
-.RS 2n
-.sp
-See the
-\fIPreventing shell escapes\fR
-section below for more details on how
-\fRNOEXEC\fR
-works and whether or not it will work on your system.
-.RE
-.TP 2n
 \fISETENV\fR and \fINOSETENV\fR
 .sp
 These tags override the value of the
@@ -1370,58 +1422,6 @@ the
 tag is implied for that command; this default may be overridden by use of the
 \fRNOSETENV\fR
 tag.
-.TP 2n
-\fILOG_INPUT\fR and \fINOLOG_INPUT\fR
-.sp
-These tags override the value of the
-\fIlog_input\fR
-option on a per-command basis.
-For more information, see the description of
-\fIlog_input\fR
-in the
-\fISUDOERS OPTIONS\fR
-section below.
-.TP 2n
-\fILOG_OUTPUT\fR and \fINOLOG_OUTPUT\fR
-.sp
-These tags override the value of the
-\fIlog_output\fR
-option on a per-command basis.
-For more information, see the description of
-\fIlog_output\fR
-in the
-\fISUDOERS OPTIONS\fR
-section below.
-.TP 2n
-\fIMAIL\fR and \fINOMAIL\fR
-.sp
-These tags provide fine-grained control over whether
-mail will be sent when a user runs a command by
-overriding the value of the
-\fImail_all_cmnds\fR
-option on a per-command basis.
-They have no effect when
-\fBsudo\fR
-is run with the
-\fB\-l\fR
-or
-\fB\-v\fR
-options.
-A
-\fINOMAIL\fR
-tag will also override the
-\fImail_always\fR
-and
-\fImail_no_perms\fR
-options.
-For more information, see the descriptions of
-\fImail_all_cmnds\fR,
-\fImail_always\fR,
-and
-\fImail_no_perms\fR
-in the
-\fISUDOERS OPTIONS\fR
-section below.
 .SS "Wildcards"
 \fBsudo\fR
 allows shell-style
