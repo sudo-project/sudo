@@ -103,6 +103,8 @@ LTOBJS = alloc.lo event.lo fatal.lo key_val.lo gethostname.lo gidlist.lo \
 
 ATOFOO_TEST_OBJS = atofoo_test.lo locale_stub.lo
 
+MKTEMP_TEST_OBJS = mktemp_test.lo locale_stub.lo
+
 PARSELN_TEST_OBJS = parseln_test.lo locale_stub.lo
 
 PROGNAME_TEST_OBJS = progname_test.lo progname.lo
@@ -176,6 +178,9 @@ globtest: $(GLOBTEST_OBJS) libsudo_util.la
 hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+mktemp_test: $(MKTEMP_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(MKTEMP_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 parseln_test: $(PARSELN_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
@@ -224,6 +229,9 @@ check: $(TEST_PROGS)
 		chmod 0711 `grep '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
 		./globtest $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
 		rm -rf fake; \
+	    fi; \
+	    if test -f mktemp_test; then \
+		./mktemp_test || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    ./atofoo_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
@@ -347,7 +355,6 @@ fatal.lo: $(srcdir)/fatal.c $(incdir)/compat/stdbool.h $(incdir)/sudo_alloc.h \
 fnm_test.lo: $(srcdir)/regress/fnmatch/fnm_test.c $(incdir)/compat/fnmatch.h \
              $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/fnmatch/fnm_test.c
-fnm_test.o: fnm_test.lo
 fnmatch.lo: $(srcdir)/fnmatch.c $(incdir)/compat/charclass.h \
             $(incdir)/compat/fnmatch.h $(incdir)/sudo_compat.h \
             $(top_builddir)/config.h
@@ -383,12 +390,14 @@ glob.lo: $(srcdir)/glob.c $(incdir)/compat/charclass.h $(incdir)/compat/glob.h \
 globtest.lo: $(srcdir)/regress/glob/globtest.c $(incdir)/compat/glob.h \
              $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/glob/globtest.c
-globtest.o: globtest.lo
 hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/tailq/hltq_test.c
+inet_pton.lo: $(srcdir)/inet_pton.c $(incdir)/sudo_compat.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/inet_pton.c
 isblank.lo: $(srcdir)/isblank.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/isblank.c
 key_val.lo: $(srcdir)/key_val.c $(incdir)/compat/stdbool.h \
@@ -426,6 +435,11 @@ mksigname.lo: $(srcdir)/mksigname.c $(incdir)/sudo_compat.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mksigname.c
 mktemp.lo: $(srcdir)/mktemp.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mktemp.c
+mktemp_test.lo: $(srcdir)/regress/mktemp/mktemp_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/mktemp/mktemp_test.c
 parseln.lo: $(srcdir)/parseln.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

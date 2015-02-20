@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2014
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -30,6 +30,12 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -45,6 +51,7 @@
 
 #define TEMPCHARS	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 #define NUM_CHARS	(sizeof(TEMPCHARS) - 1)
+#define MIN_X		6
 
 #ifndef INT_MAX
 #define INT_MAX	0x7fffffff
@@ -122,15 +129,15 @@ mktemp_internal(char *path, int slen, int mode)
 	char *start, *cp, *ep;
 	const char tempchars[] = TEMPCHARS;
 	unsigned int r, tries;
+	size_t len;
 	int fd;
 
-	for (ep = path; *ep; ep++)
-		;
-	if (path + slen >= ep) {
+	len = strlen(path);
+	if (len < MIN_X || slen < 0 || (size_t)slen > len - MIN_X) {
 		errno = EINVAL;
 		return -1;
 	}
-	ep -= slen;
+	ep = path + len - slen;
 
 	tries = 1;
 	for (start = ep; start > path && start[-1] == 'X'; start--) {
@@ -138,6 +145,10 @@ mktemp_internal(char *path, int slen, int mode)
 			tries *= NUM_CHARS;
 	}
 	tries *= 2;
+	if (ep - start < MIN_X) {
+		errno = EINVAL;
+		return -1;
+	}
 
 	do {
 		for (cp = start; cp != ep; cp++) {

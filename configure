@@ -19651,6 +19651,7 @@ esac
 "
     done
 
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 fi
 for ac_func in snprintf vsnprintf
 do :

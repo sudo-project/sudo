@@ -2571,6 +2571,7 @@ if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_LIBOBJ(mktemp)
     # If either mkdtemp() or mkstemps() is missing, replace both.
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 fi
 AX_FUNC_SNPRINTF
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
