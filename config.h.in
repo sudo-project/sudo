@@ -1035,7 +1035,7 @@
    ones. */
 #undef PC_INSULTS
 
-/* Enable replacement getcwd if system getcwd is broken. */
+/* Define to 1 to enable replacement getcwd if system getcwd is broken. */
 #undef PREFER_PORTABLE_GETCWD
 
 /* Enable replacement (v)snprintf if system (v)snprintf is broken. */
@@ -1066,7 +1066,7 @@
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
 
-/* Define to 1 to override the user's path with a built-in one. */
+/* A colon-separated list of directories to override the user's PATH with. */
 #undef SECURE_PATH
 
 /* Define to 1 to send mail when the user is not allowed to run a command. */
