@@ -65,6 +65,7 @@ sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1
 sudo_fatalx_nodebug_v1
 sudo_get_ttysize_v1
+sudo_gethostname_v1
 sudo_lbuf_append_quoted_v1
 sudo_lbuf_append_v1
 sudo_lbuf_destroy_v1

@@ -160,14 +160,6 @@
 # endif
 #endif
 
-#if defined(HAVE_DECL_HOST_NAME_MAX) && !HAVE_DECL_HOST_NAME_MAX
-# if defined(HAVE_DECL__POSIX_HOST_NAME_MAX) && HAVE_DECL__POSIX_HOST_NAME_MAX
-#  define HOST_NAME_MAX		_POSIX_HOST_NAME_MAX
-# else
-#  define HOST_NAME_MAX		255
-# endif
-#endif
-
 /*
  * Posix versions for those without...
  */

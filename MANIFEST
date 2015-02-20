@@ -91,6 +91,7 @@ lib/util/fnmatch.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
 lib/util/getgrouplist.c
+lib/util/gethostname.c
 lib/util/getline.c
 lib/util/getopt_long.c
 lib/util/gidlist.c

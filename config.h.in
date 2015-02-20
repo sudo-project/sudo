@@ -97,10 +97,6 @@
    don't. */
 #undef HAVE_DECL_GETRESUID
 
-/* Define to 1 if you have the declaration of `HOST_NAME_MAX', and to 0 if you
-   don't. */
-#undef HAVE_DECL_HOST_NAME_MAX
-
 /* Define to 1 if you have the declaration of `h_errno', and to 0 if you
    don't. */
 #undef HAVE_DECL_H_ERRNO
@@ -172,10 +168,6 @@
 /* Define to 1 if you have the declaration of `_innetgr', and to 0 if you
    don't. */
 #undef HAVE_DECL__INNETGR
-
-/* Define to 1 if you have the declaration of `_POSIX_HOST_NAME_MAX', and to 0
-   if you don't. */
-#undef HAVE_DECL__POSIX_HOST_NAME_MAX
 
 /* Define to 1 if you have the declaration of `_POSIX_PATH_MAX', and to 0 if
    you don't. */

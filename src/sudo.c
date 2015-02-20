@@ -447,7 +447,7 @@ get_user_groups(struct user_details *ud)
 static char **
 get_user_info(struct user_details *ud)
 {
-    char *cp, **user_info, cwd[PATH_MAX], host[HOST_NAME_MAX + 1];
+    char *cp, **user_info, cwd[PATH_MAX];
     struct passwd *pw;
     int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
@@ -515,14 +515,12 @@ get_user_info(struct user_details *ud)
 	sudo_efree(cp);
     }
 
-    if (gethostname(host, sizeof(host)) == 0)
-	host[sizeof(host) - 1] = '\0';
-    else
-	strlcpy(host, "localhost", sizeof(host));
-    user_info[++i] = sudo_new_key_val("host", host);
+    cp = sudo_gethostname();
+    user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
     if (user_info[i] == NULL)
 	sudo_fatal(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
+    sudo_efree(cp);
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
     sudo_easprintf(&user_info[++i], "lines=%d", ud->ts_lines);

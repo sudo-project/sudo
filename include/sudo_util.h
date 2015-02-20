@@ -144,6 +144,10 @@ __dso_public int aix_restoreauthdb_v1(void);
 __dso_public int aix_setauthdb_v1(char *user);
 #define aix_setauthdb(_a) aix_setauthdb_v1((_a))
 
+/* gethostname.c */
+__dso_public char *sudo_gethostname_v1(void);
+#define sudo_gethostname() sudo_gethostname_v1()
+
 /* gidlist.c */
 __dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 #define sudo_parse_gids(_a, _b, _c) sudo_parse_gids_v1((_a), (_b), (_c))

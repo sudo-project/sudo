@@ -119,7 +119,6 @@ main(int argc, char *argv[])
     struct privilege *priv;
     struct userspec *us;
     char *p, *grfile, *pwfile;
-    char hbuf[HOST_NAME_MAX + 1];
     const char *errstr;
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
@@ -212,10 +211,8 @@ main(int argc, char *argv[])
 	sudo_fatalx(U_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
-	if (gethostname(hbuf, sizeof(hbuf)) != 0)
+	if ((user_host = sudo_gethostname()) == NULL)
 	    sudo_fatal("gethostname");
-	hbuf[sizeof(hbuf) - 1] = '\0';
-	user_host = hbuf;
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';

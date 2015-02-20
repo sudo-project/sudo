@@ -21337,20 +21337,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_PATH_MAX $ac_have_decl
 _ACEOF
-ac_fn_c_check_decl "$LINENO" "HOST_NAME_MAX" "ac_cv_have_decl_HOST_NAME_MAX" "
-#include <sys/types.h>
-#include <limits.h>
-
-"
-if test "x$ac_cv_have_decl_HOST_NAME_MAX" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_HOST_NAME_MAX $ac_have_decl
-_ACEOF
 
 ac_fn_c_check_decl "$LINENO" "SIZE_MAX" "ac_cv_have_decl_SIZE_MAX" "
 #include <sys/types.h>
@@ -21455,23 +21441,6 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL__POSIX_PATH_MAX $ac_have_decl
-_ACEOF
-
-fi
-if test "$ac_cv_have_decl_HOST_NAME_MAX" != "yes"; then
-    ac_fn_c_check_decl "$LINENO" "_POSIX_HOST_NAME_MAX" "ac_cv_have_decl__POSIX_HOST_NAME_MAX" "
-#include <sys/types.h>
-#include <limits.h>
-
-"
-if test "x$ac_cv_have_decl__POSIX_HOST_NAME_MAX" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL__POSIX_HOST_NAME_MAX $ac_have_decl
 _ACEOF
 
 fi

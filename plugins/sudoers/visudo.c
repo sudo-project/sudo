@@ -1062,13 +1062,10 @@ get_args(char *cmnd)
 static void
 get_hostname(void)
 {
-    char *p, thost[HOST_NAME_MAX + 1];
+    char *p;
     debug_decl(get_hostname, SUDOERS_DEBUG_UTIL)
 
-    if (gethostname(thost, sizeof(thost)) != -1) {
-	thost[sizeof(thost) - 1] = '\0';
-	user_host = sudo_estrdup(thost);
-
+    if ((user_host = sudo_gethostname()) != NULL) {
 	if ((p = strchr(user_host, '.'))) {
 	    *p = '\0';
 	    user_shost = sudo_estrdup(user_host);

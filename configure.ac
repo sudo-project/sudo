@@ -3010,7 +3010,7 @@ dnl We need to add OSDEFS to CFLAGS to expose LLONG_MAX et al on glibc.
 dnl
 _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
-AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
+AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
 ])
@@ -3053,12 +3053,6 @@ if test "$ac_cv_have_decl_SIZE_MAX" != "yes"; then
 fi
 if test "$ac_cv_have_decl_PATH_MAX" != "yes"; then
     AC_CHECK_DECLS([_POSIX_PATH_MAX], [], [], [[
-#include <sys/types.h>
-#include <limits.h>
-    ]])
-fi
-if test "$ac_cv_have_decl_HOST_NAME_MAX" != "yes"; then
-    AC_CHECK_DECLS([_POSIX_HOST_NAME_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])

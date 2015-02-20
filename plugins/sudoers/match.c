@@ -911,40 +911,57 @@ done:
 /*
  * Get NIS-style domain name and copy from static storage or NULL if none.
  */
+#if defined(HAVE_GETDOMAINNAME) || defined(SI_SRPC_DOMAIN)
 const char *
 sudo_getdomainname(void)
 {
-    char *domain = NULL;
-#if defined(HAVE_GETDOMAINNAME) || defined(SI_SRPC_DOMAIN)
-    static char buf[HOST_NAME_MAX + 1];
+    static char *domain;
     static bool initialized;
+    debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH)
 
     if (!initialized) {
+	size_t host_name_max;
 	int rval;
 
-# ifdef SI_SRPC_DOMAIN
-	buf[0] = '\0';
-	rval = sysinfo(SI_SRPC_DOMAIN, buf, sizeof(buf));
-# else
-	rval = getdomainname(buf, sizeof(buf));
+# ifdef _SC_HOST_NAME_MAX
+	host_name_max = (size_t)sysconf(_SC_HOST_NAME_MAX);
+	if (host_name_max == (size_t)-1)
 # endif
-	if (rval != -1 && buf[0] != '\0') {
-	    char *cp;
+	    host_name_max = 255;    /* POSIX and historic BSD */
 
-	    domain = buf;
-	    for (cp = buf; *cp != '\0'; cp++) {
-		/* Check for illegal characters, Linux may use "(none)". */
-		if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
-		    domain = NULL;
-		    break;
+	domain = malloc(host_name_max + 1);
+	if (domain != NULL) {
+# ifdef SI_SRPC_DOMAIN
+	    domain[0] = '\0';
+	    rval = sysinfo(SI_SRPC_DOMAIN, domain, host_name_max + 1);
+# else
+	    rval = getdomainname(domain, host_name_max + 1);
+# endif
+	    if (rval != -1 && domain[0] != '\0') {
+		const char *cp;
+
+		for (cp = domain; *cp != '\0'; cp++) {
+		    /* Check for illegal characters, Linux may use "(none)". */
+		    if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
+			sudo_efree(domain);
+			domain = NULL;
+			break;
+		    }
 		}
 	    }
 	}
 	initialized = true;
     }
-#endif /* HAVE_GETDOMAINNAME || SI_SRPC_DOMAIN */
-    return domain;
+    debug_return_str(domain);
 }
+#else
+const char *
+sudo_getdomainname(void)
+{
+    debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH)
+    debug_return_ptr(NULL);
+}
+#endif /* HAVE_GETDOMAINNAME || SI_SRPC_DOMAIN */
 
 /*
  * Returns true if "host" and "user" belong to the netgroup "netgr",
