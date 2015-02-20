@@ -1,3 +1,29 @@
+What's new in Sudo 1.8.13
+
+ * The examples directory is now a subdirectory of the doc dir to
+   conform to Debian guidelines.  Bug #682.
+
+ * Fixed a compilation error for siglist.c and signame.c on some
+   systems.  Bug #686
+
+ * Weak symbols are now used for sudo_warn_gettext() and
+   sudo_warn_strerror() in libsudo_util to avoid link errors
+   when -Wl,--no-undefined is used in LDFLAGS.
+
+ * Fixed a bug in sudo's mkstemps() replacement function that
+   prevented the file extension from being preserved in sudoedit.
+
+ * A new mail_all_cmnds sudoers flag will send mail when a user runs
+   a command (or tries to). The behavior of the mail_always flag has
+   been restored to always send mail when sudo is run.
+
+ * New "MAIL" and "NOMAIL" command tags have been added to toggle
+   mail sending behavior on a per-command (or Cmnd_Alias) basis.
+
+ * Fixed matching of empty passwords when sudo is configured to
+   use passwd (or shadow) file authentication on systems where the
+   crypt() function returns NULL for invalid salts.
+
 What's new in Sudo 1.8.12
 
  * The embedded copy of zlib has been upgraded to version 1.2.8 and
