@@ -1089,9 +1089,6 @@
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
 
-/* The size of `long int', as computed by sizeof. */
-#undef SIZEOF_LONG_INT
-
 /* Define to 1 to compile the sudoers plugin statically into the sudo binary.
    */
 #undef STATIC_SUDOERS_PLUGIN
@@ -1175,11 +1172,17 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef ino_t
 
+/* Define to `long long' if <sys/types.h> does not define. */
+#undef intmax_t
+
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
 /* Define to an OS-specific initialization function or `os_init_common'. */
 #undef os_init
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef ptrdiff_t
 
 /* Define to `size_t' if <sys/types.h> does not define. */
 #undef rsize_t
@@ -1207,6 +1210,9 @@
 
 /* Define to `unsigned char' if <sys/types.h> does not define. */
 #undef uint8_t
+
+/* Define to `unsigned long long' if <sys/types.h> does not define. */
+#undef uintmax_t
 
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
