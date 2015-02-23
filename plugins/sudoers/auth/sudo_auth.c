@@ -49,6 +49,9 @@
 
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */
+#ifdef HAVE_AIXAUTH
+    AUTH_ENTRY("aixauth", FLAG_STANDALONE, sudo_aix_init, NULL, sudo_aix_verify, sudo_aix_cleanup, NULL, NULL)
+#endif
 #ifdef HAVE_PAM
     AUTH_ENTRY("pam", FLAG_STANDALONE, sudo_pam_init, NULL, sudo_pam_verify, sudo_pam_cleanup, sudo_pam_begin_session, sudo_pam_end_session)
 #endif
@@ -57,9 +60,6 @@ static sudo_auth auth_switch[] = {
 #endif
 #ifdef HAVE_SIA_SES_INIT
     AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, NULL, NULL)
-#endif
-#ifdef HAVE_AIXAUTH
-    AUTH_ENTRY("aixauth", FLAG_STANDALONE, NULL, NULL, sudo_aix_verify, sudo_aix_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_FWTK
     AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, sudo_fwtk_cleanup, NULL, NULL)
@@ -109,20 +109,6 @@ sudo_auth_init(struct passwd *pw)
     if (auth_switch[0].name == NULL)
 	debug_return_int(0);
 
-    /* Make sure we haven't mixed standalone and shared auth methods. */
-    standalone = IS_STANDALONE(&auth_switch[0]);
-    if (standalone && auth_switch[1].name != NULL) {
-	audit_failure(NewArgc, NewArgv, N_("invalid authentication methods"));
-    	log_warningx(SLOG_SEND_MAIL,
-	    N_("Invalid authentication methods compiled into sudo!  "
-	    "You may not mix standalone and non-standalone authentication."));
-	debug_return_int(-1);
-    }
-
-    /* Set FLAG_ONEANDONLY if there is only one auth method. */
-    if (auth_switch[1].name == NULL)
-	SET(auth_switch[0].flags, FLAG_ONEANDONLY);
-
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->init && !IS_DISABLED(auth)) {
@@ -134,6 +120,50 @@ sudo_auth_init(struct passwd *pw)
 		break;		/* assume error msg already printed */
 	}
     }
+
+    /*
+     * Make sure we haven't mixed standalone and shared auth methods.
+     * If there are multiple standalone methods, only use the first one.
+     */
+    if ((standalone = IS_STANDALONE(&auth_switch[0]))) {
+	bool found = false;
+	for (auth = auth_switch; auth->name; auth++) {
+	    if (IS_DISABLED(auth))
+		continue;
+	    if (!IS_STANDALONE(auth)) {
+		audit_failure(NewArgc, NewArgv,
+		    N_("invalid authentication methods"));
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("Invalid authentication methods compiled into sudo!  "
+		    "You may not mix standalone and non-standalone authentication."));
+		debug_return_int(-1);
+	    }
+	    if (!found) {
+		/* Found first standalone method. */
+		found = true;
+		continue;
+	    }
+	    /* Disable other standalone methods. */
+	    SET(auth->flags, FLAG_DISABLED);
+	}
+    }
+
+    /* Set FLAG_ONEANDONLY if there is only one auth method. */
+    for (auth = auth_switch; auth->name; auth++) {
+	/* Find first enabled auth method. */
+	if (!IS_DISABLED(auth)) {
+	    sudo_auth *first = auth;
+	    /* Check for others. */
+	    for (; auth->name; auth++) {
+		if (!IS_DISABLED(auth))
+		    break;
+	    }
+	    if (auth->name == NULL)
+		SET(first->flags, FLAG_ONEANDONLY);
+	    break;
+	}
+    }
+
     debug_return_int(status == AUTH_FATAL ? -1 : 0);
 }
 

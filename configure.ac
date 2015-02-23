@@ -1680,15 +1680,11 @@ case "$host" in
 		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
-		# On AIX 6 and higher default to PAM, else default to LAM
-		if test $OSMAJOR -ge 6; then
-		    if test X"$with_pam" = X""; then
-			AUTH_EXCL_DEF="PAM"
-		    fi
-		else
-		    if test X"$with_aixauth" = X""; then
-			AC_CHECK_FUNCS([authenticate], [AUTH_EXCL_DEF="AIX_AUTH"])
-		    fi
+		# For AIX we build in support for both LAM and PAM
+		# and choose which to use based on auth_type in
+		# /etc/security/login.cfg
+		if test X"${with_pam}${with_aixauth}" = X""; then
+		    AUTH_EXCL_DEF="AIX_AUTH PAM"
 		fi
 
 		# AIX analog of nsswitch.conf, enabled by default
@@ -2104,10 +2100,6 @@ dnl
 AUTH_REG=${AUTH_REG# }
 AUTH_EXCL=${AUTH_EXCL# }
 if test -n "$AUTH_EXCL"; then
-    set -- $AUTH_EXCL
-    if test $# != 1; then
-	AC_MSG_ERROR([More than one mutually exclusive authentication method specified: $AUTH_EXCL])
-    fi
     if test -n "$AUTH_REG"; then
 	AC_MSG_ERROR([Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods])
     fi
@@ -3222,10 +3214,12 @@ fi
 
 dnl
 dnl AIX general authentication
-dnl If set to "maybe" only enable if no other exclusive method in use.
+dnl We may build in support for both AIX LAM and PAM and select
+dnl which one to use at run-time.
 dnl
 if test ${with_aixauth-'no'} != "no"; then
-    if test X"$with_aixauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+    AC_CHECK_FUNCS([authenticate], [with_aixauth=yes])
+    if test "${with_aixauth}" = "yes"; then
 	AC_MSG_NOTICE([using AIX general authentication])
 	AC_DEFINE(HAVE_AIXAUTH)
 	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";

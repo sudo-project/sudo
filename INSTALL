@@ -381,10 +381,11 @@ Authentication options:
 	link without it.
 
   --with-aixauth
-	Enable support for the AIX 4.x general authentication function.
-	This will use the authentication scheme specified for the user
-	on the machine.  It is on by default for AIX systems that
-	support it.
+        Enable support for the AIX general authentication function.
+        This will use the authentication scheme specified for the
+        user on the machine.  By default, sudo will use either AIX
+        authentication or PAM depending on the value of the auth_type
+        setting in the /etc/security/login.cfg file.
 
   --with-bsdauth
 	Enable support for BSD authentication.  This is the default

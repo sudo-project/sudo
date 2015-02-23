@@ -39,6 +39,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <ctype.h>
 #include <pwd.h>
 #include <usersec.h>
 
@@ -49,6 +50,90 @@
  * For a description of the AIX authentication API, see
  * http://publib16.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf1/authenticate.htm
  */
+
+#define AIX_AUTH_UNKNOWN	0
+#define AIX_AUTH_STD		1
+#define AIX_AUTH_PAM		2
+
+static int
+sudo_aix_authtype(void)
+{
+    size_t linesize = 0;
+    ssize_t len;
+    char *cp, *line = NULL;
+    bool in_stanza = false;
+    int authtype = AIX_AUTH_UNKNOWN;
+    FILE *fp;
+    debug_decl(sudo_aix_authtype, SUDOERS_DEBUG_AUTH)
+
+    if ((fp = fopen("/etc/security/login.cfg", "r")) != NULL) {
+	while (authtype == AIX_AUTH_UNKNOWN && (len = getline(&line, &linesize, fp)) != -1) {
+	    /* First remove comments. */
+	    if ((cp = strchr(line, '#')) != NULL) {
+		*cp = '\0';
+		len = (ssize_t)(cp - line);
+	    }
+
+	    /* Next remove trailing newlines and whitespace. */
+	    while (len > 0 && isspace((unsigned char)line[len - 1]))
+		line[--len] = '\0';
+
+	    /* Skip blank lines. */
+	    if (len == 0)
+		continue;
+
+	    /* Match start of the usw stanza. */
+	    if (!in_stanza) {
+		if (strncmp(line, "usw:", 4) == 0)
+		    in_stanza = true;
+		continue;
+	    }
+
+	    /* Check for end of the usw stanza. */
+	    if (!isblank((unsigned char)line[0])) {
+		in_stanza = false;
+		break;
+	    }
+
+	    /* Skip leading blanks. */
+	    cp = line;
+	    do {
+		cp++;
+	    } while (isblank((unsigned char)*cp));
+
+	    /* Match "auth_type = (PAM_AUTH|STD_AUTH)". */
+	    if (strncmp(cp, "auth_type", 9) != 0)
+		continue;
+	    cp += 9;
+	    while (isblank((unsigned char)*cp))
+		cp++;
+	    if (*cp++ != '=')
+		continue;
+	    while (isblank((unsigned char)*cp))
+		cp++;
+	    if (strcmp(cp, "PAM_AUTH") == 0)
+		authtype = AIX_AUTH_PAM;
+	    else if (strcmp(cp, "STD_AUTH") == 0)
+		authtype = AIX_AUTH_STD;
+	}
+	free(line);
+        fclose(fp);
+    }
+
+    debug_return_int(authtype);
+}
+
+int
+sudo_aix_init(struct passwd *pw, sudo_auth *auth)
+{
+    debug_decl(sudo_aix_init, SUDOERS_DEBUG_AUTH)
+
+    /* Check auth_type in /etc/security/login.cfg. */
+    if (sudo_aix_authtype() == AIX_AUTH_PAM)
+	debug_return_int(AUTH_FAILURE);
+    debug_return_int(AUTH_SUCCESS);
+}
+
 int
 sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {

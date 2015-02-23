@@ -14514,25 +14514,11 @@ done
 		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
-		# On AIX 6 and higher default to PAM, else default to LAM
-		if test $OSMAJOR -ge 6; then
-		    if test X"$with_pam" = X""; then
-			AUTH_EXCL_DEF="PAM"
-		    fi
-		else
-		    if test X"$with_aixauth" = X""; then
-			for ac_func in authenticate
-do :
-  ac_fn_c_check_func "$LINENO" "authenticate" "ac_cv_func_authenticate"
-if test "x$ac_cv_func_authenticate" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_AUTHENTICATE 1
-_ACEOF
- AUTH_EXCL_DEF="AIX_AUTH"
-fi
-done
-
-		    fi
+		# For AIX we build in support for both LAM and PAM
+		# and choose which to use based on auth_type in
+		# /etc/security/login.cfg
+		if test X"${with_pam}${with_aixauth}" = X""; then
+		    AUTH_EXCL_DEF="AIX_AUTH PAM"
 		fi
 
 		# AIX analog of nsswitch.conf, enabled by default
@@ -15210,10 +15196,6 @@ fi
 AUTH_REG=${AUTH_REG# }
 AUTH_EXCL=${AUTH_EXCL# }
 if test -n "$AUTH_EXCL"; then
-    set -- $AUTH_EXCL
-    if test $# != 1; then
-	as_fn_error $? "More than one mutually exclusive authentication method specified: $AUTH_EXCL" "$LINENO" 5
-    fi
     if test -n "$AUTH_REG"; then
 	as_fn_error $? "Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods" "$LINENO" 5
     fi
@@ -21693,7 +21675,18 @@ fi
 fi
 
 if test ${with_aixauth-'no'} != "no"; then
-    if test X"$with_aixauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+    for ac_func in authenticate
+do :
+  ac_fn_c_check_func "$LINENO" "authenticate" "ac_cv_func_authenticate"
+if test "x$ac_cv_func_authenticate" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_AUTHENTICATE 1
+_ACEOF
+ with_aixauth=yes
+fi
+done
+
+    if test "${with_aixauth}" = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: using AIX general authentication" >&5
 $as_echo "$as_me: using AIX general authentication" >&6;}
 	$as_echo "#define HAVE_AIXAUTH 1" >>confdefs.h
