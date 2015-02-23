@@ -134,6 +134,19 @@ static int sudo_debug_max_fd = -1;
 static int sudo_debug_active_instance = -1;
 
 /*
+ * Free the specified output structure.
+ */
+static void
+sudo_debug_free_output(struct sudo_debug_output *output)
+{
+    sudo_efree(output->filename);
+    sudo_efree(output->settings);
+    if (output->fd != -1)
+	close(output->fd);
+    sudo_efree(output);
+}
+
+/*
  * Create a new output file for the specified debug instance.
  */
 static struct sudo_debug_output *
@@ -163,8 +176,10 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    output->fd = open(output->filename, O_WRONLY|O_APPEND|O_CREAT,
 		S_IRUSR|S_IWUSR);
 	}
-	if (output->fd == -1)
+	if (output->fd == -1) {
+	    sudo_debug_free_output(output);
 	    return NULL;
+	}
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
     (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
@@ -180,10 +195,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	sudo_debug_max_fd = output->fd;
 
     /* Parse Debug conf string. */
-    if ((buf = strdup(debug_file->debug_flags)) == NULL) {
-	/* XXX - free output on error or make non-destructive */
-	return NULL;
-    }
+    buf = sudo_estrdup(debug_file->debug_flags);
     for ((cp = strtok(buf, ",")); cp != NULL; (cp = strtok(NULL, ","))) {
 	/* Should be in the form subsys@pri. */
 	subsys = cp;
@@ -429,9 +441,8 @@ void
 sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
     int subsys, size_t rval)
 {
-    /* XXX - should use %zu but our snprintf.c doesn't support it */
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %lu", func, file, line, (unsigned long)rval);
+	"<- %s @ %s:%d := %zu", func, file, line, rval);
 }
 
 /* We use int, not bool, here for functions that return -1 on error. */
