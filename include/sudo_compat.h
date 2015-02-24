@@ -460,8 +460,10 @@ __dso_public int sudo_sig2str(int signo, char *signame);
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
 #ifndef HAVE_CLOCK_GETTIME
-# define CLOCK_REALTIME 0
-# ifdef __MACH__
+# if !defined(CLOCK_REALTIME)
+#  define CLOCK_REALTIME 0
+# endif
+# if defined(__MACH__) && !defined(CLOCK_MONOTONIC)
 #  define CLOCK_MONOTONIC 1
 # endif
 __dso_public int sudo_clock_gettime(clockid_t clock_id, struct timespec *tp);

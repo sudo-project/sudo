@@ -345,7 +345,10 @@ update_timestamp(struct passwd *pw)
 
     /* Fill in time stamp. */
     memcpy(&entry, &timestamp_key, sizeof(struct timestamp_entry));
-    clock_gettime(SUDO_CLOCK_MONOTONIC, &entry.ts);
+    if (clock_gettime(SUDO_CLOCK_MONOTONIC, &entry.ts) == -1) {
+	log_warning(0, "clock_gettime(%d)", SUDO_CLOCK_MONOTONIC);
+	goto done;
+    }
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
@@ -427,7 +430,10 @@ timestamp_status(struct passwd *pw)
 	    timestamp_key.u.ppid = getppid();
 	}
     }
-    clock_gettime(SUDO_CLOCK_MONOTONIC, &timestamp_key.ts);
+    if (clock_gettime(SUDO_CLOCK_MONOTONIC, &timestamp_key.ts) == -1) {
+	log_warning(0, "clock_gettime(%d)", SUDO_CLOCK_MONOTONIC);
+	status = TS_ERROR;
+    }
 
     /* If the time stamp dir is missing there is nothing to do. */
     if (status == TS_MISSING)
