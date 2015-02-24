@@ -19297,21 +19297,6 @@ if test "x$ac_cv_lib_rt_clock_gettime" = xyes; then :
 
 	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
 
-else
-
-	case " $LIBOBJS " in
-  *" clock_gettime.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS clock_gettime.$ac_objext"
- ;;
-esac
-
-
-    for _sym in sudo_clock_gettime; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-
 fi
 
 

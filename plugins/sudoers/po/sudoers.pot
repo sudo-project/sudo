@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.12\n"
+"Project-Id-Version: sudo 1.8.13b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-02-20 06:33-0700\n"
+"POT-Creation-Date: 2015-02-24 11:20-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,34 +132,34 @@ msgstr ""
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:98
+#: plugins/sudoers/auth/pam.c:97
 msgid "unable to initialize PAM"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:149
+#: plugins/sudoers/auth/pam.c:153
 msgid "account validation failure, is your account locked?"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:153
+#: plugins/sudoers/auth/pam.c:157
 msgid "Account or password is expired, reset your password and try again"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:161
+#: plugins/sudoers/auth/pam.c:165
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:166
+#: plugins/sudoers/auth/pam.c:170
 msgid "Password expired, contact your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:170
+#: plugins/sudoers/auth/pam.c:174
 msgid ""
 "Account expired or PAM config lacks an \"account\" section for sudo, contact "
 "your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:187
+#: plugins/sudoers/auth/pam.c:186
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr ""
@@ -205,31 +205,31 @@ msgstr ""
 msgid "unable to initialize SIA session"
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:115
+#: plugins/sudoers/auth/sudo_auth.c:135
 msgid "invalid authentication methods"
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:117
+#: plugins/sudoers/auth/sudo_auth.c:137
 msgid ""
 "Invalid authentication methods compiled into sudo!  You may not mix "
 "standalone and non-standalone authentication."
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:203 plugins/sudoers/auth/sudo_auth.c:252
+#: plugins/sudoers/auth/sudo_auth.c:233 plugins/sudoers/auth/sudo_auth.c:282
 msgid "no authentication methods"
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:205
+#: plugins/sudoers/auth/sudo_auth.c:235
 msgid ""
 "There are no authentication methods compiled into sudo!  If you want to turn "
 "off authentication, use the --disable-authentication configure option."
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:254
+#: plugins/sudoers/auth/sudo_auth.c:284
 msgid "Unable to initialize authentication methods."
 msgstr ""
 
-#: plugins/sudoers/auth/sudo_auth.c:412
+#: plugins/sudoers/auth/sudo_auth.c:442
 msgid "Authentication methods:"
 msgstr ""
 
@@ -754,21 +754,21 @@ msgid "Local IP address and netmask pairs:\n"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:101 plugins/sudoers/iolog.c:119
-#: plugins/sudoers/timestamp.c:233
+#: plugins/sudoers/timestamp.c:224
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:112 plugins/sudoers/iolog.c:133
-#: plugins/sudoers/iolog.c:140 plugins/sudoers/timestamp.c:227
-#: plugins/sudoers/timestamp.c:248
+#: plugins/sudoers/iolog.c:140 plugins/sudoers/timestamp.c:218
+#: plugins/sudoers/timestamp.c:239
 #, c-format
 msgid "unable to mkdir %s"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:765
 #: plugins/sudoers/sudoreplay.c:330 plugins/sudoers/sudoreplay.c:793
-#: plugins/sudoers/sudoreplay.c:990 plugins/sudoers/timestamp.c:357
+#: plugins/sudoers/sudoreplay.c:990 plugins/sudoers/timestamp.c:351
 #: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1035
 #: plugins/sudoers/visudo_json.c:1048
 #, c-format
@@ -782,7 +782,7 @@ msgid "unable to read %s"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:575
-#: plugins/sudoers/timestamp.c:186 plugins/sudoers/timestamp.c:189
+#: plugins/sudoers/timestamp.c:177 plugins/sudoers/timestamp.c:180
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
@@ -1272,7 +1272,7 @@ msgstr ""
 msgid "%s is not a regular file"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:788 plugins/sudoers/timestamp.c:289 toke.l:955
+#: plugins/sudoers/sudoers.c:788 plugins/sudoers/timestamp.c:280 toke.l:955
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
@@ -1489,31 +1489,35 @@ msgid ""
 "Command unmatched"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:197
+#: plugins/sudoers/timestamp.c:188
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:297
+#: plugins/sudoers/timestamp.c:288
 #, c-format
 msgid "%s is group writable"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:318
+#: plugins/sudoers/timestamp.c:309
 #, c-format
 msgid "timestamp path too long: %s/%s"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:498
+#: plugins/sudoers/timestamp.c:340 plugins/sudoers/timestamp.c:425
+msgid "unable to read the clock"
+msgstr ""
+
+#: plugins/sudoers/timestamp.c:495
 msgid "ignoring time stamp from the future"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:510
+#: plugins/sudoers/timestamp.c:507
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:613 plugins/sudoers/timestamp.c:634
+#: plugins/sudoers/timestamp.c:610 plugins/sudoers/timestamp.c:631
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr ""

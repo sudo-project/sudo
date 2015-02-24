@@ -81,7 +81,6 @@ install-sh
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/alloc.c
-lib/util/clock_gettime.c
 lib/util/closefrom.c
 lib/util/event.c
 lib/util/event_poll.c
@@ -258,6 +257,7 @@ plugins/sudoers/find_path.c
 plugins/sudoers/getdate.c
 plugins/sudoers/getdate.y
 plugins/sudoers/getspwuid.c
+plugins/sudoers/gettime.c
 plugins/sudoers/goodpath.c
 plugins/sudoers/gram.c
 plugins/sudoers/gram.h

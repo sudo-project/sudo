@@ -239,6 +239,10 @@ char *expand_prompt(const char *old_prompt, const char *auth_user);
 void remove_timestamp(bool);
 bool set_lectured(void);
 
+/* gettime.c */
+int sudo_gettime_real(struct timespec *ts);
+int sudo_gettime_mono(struct timespec *ts);
+
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);
 int verify_user(struct passwd *pw, char *prompt, int validated);

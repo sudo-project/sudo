@@ -51,15 +51,6 @@
 #include "sudoers.h"
 #include "check.h"
 
-/* On Linux, CLOCK_MONOTONIC does not run while suspended. */
-#if defined(CLOCK_BOOTTIME)
-# define SUDO_CLOCK_MONOTONIC	CLOCK_BOOTTIME
-#elif defined(CLOCK_MONOTONIC)
-# define SUDO_CLOCK_MONOTONIC	CLOCK_MONOTONIC
-#else
-# define SUDO_CLOCK_MONOTONIC	CLOCK_REALTIME
-#endif
-
 static char timestamp_file[PATH_MAX];
 static off_t timestamp_hint = (off_t)-1;
 static struct timestamp_entry timestamp_key;
@@ -345,8 +336,8 @@ update_timestamp(struct passwd *pw)
 
     /* Fill in time stamp. */
     memcpy(&entry, &timestamp_key, sizeof(struct timestamp_entry));
-    if (clock_gettime(SUDO_CLOCK_MONOTONIC, &entry.ts) == -1) {
-	log_warning(0, "clock_gettime(%d)", SUDO_CLOCK_MONOTONIC);
+    if (sudo_gettime_mono(&entry.ts) == -1) {
+	log_warning(0, N_("unable to read the clock"));
 	goto done;
     }
 
@@ -430,8 +421,8 @@ timestamp_status(struct passwd *pw)
 	    timestamp_key.u.ppid = getppid();
 	}
     }
-    if (clock_gettime(SUDO_CLOCK_MONOTONIC, &timestamp_key.ts) == -1) {
-	log_warning(0, "clock_gettime(%d)", SUDO_CLOCK_MONOTONIC);
+    if (sudo_gettime_mono(&timestamp_key.ts) == -1) {
+	log_warning(0, N_("unable to read the clock"));
 	status = TS_ERROR;
     }
 

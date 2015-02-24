@@ -459,17 +459,6 @@ __dso_public int sudo_sig2str(int signo, char *signame);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
-#ifndef HAVE_CLOCK_GETTIME
-# if !defined(CLOCK_REALTIME)
-#  define CLOCK_REALTIME 0
-# endif
-# if defined(__MACH__) && !defined(CLOCK_MONOTONIC)
-#  define CLOCK_MONOTONIC 1
-# endif
-__dso_public int sudo_clock_gettime(clockid_t clock_id, struct timespec *tp);
-# undef clock_gettime
-# define clock_gettime(_a, _b) sudo_clock_gettime((_a), (_b))
-#endif /* HAVE_CLOCK_GETTIME */
 #if !defined(HAVE_INET_NTOP) && defined(_SUDO_NET_IFS_C)
 __dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop
