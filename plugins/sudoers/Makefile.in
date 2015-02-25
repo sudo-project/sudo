@@ -307,6 +307,7 @@ install-dirs:
 	    `echo $(DESTDIR)$(vardir)|$(SED) 's,/[^/]*$$,,'`
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(rundir)
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(vardir)
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0700 $(DESTDIR)$(vardir)/lectured
 
 install-binaries: visudo sudoreplay install-dirs
 	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay

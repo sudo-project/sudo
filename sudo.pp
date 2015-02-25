@@ -272,6 +272,7 @@ still allow people to get their work done."
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$rundir/		0711 root:
 	$vardir/		0711 root: ignore-others
+	$vardir/lectured/	0700 root:
 	$docdir/		0755
 	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]
@@ -398,6 +399,15 @@ still allow people to get their work done."
 		;;
 	esac
 
+%post [rpm,deb]
+	# Create /usr/lib/tmpfiles.d/sudo.conf if /lib/systemd exists
+	if [ -d /lib/systemd ]; then
+		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
+		d %{rundir} 0711 root root
+		d %{rundir}/ts 0700 root root
+		EOF
+	fi
+
 %post [aix]
 	# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
 	if [ -d /etc/rc.d ]; then
@@ -423,12 +433,19 @@ still allow people to get their work done."
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
+
+	# Remove systemd tmpfile config
+	rm -f /usr/lib/tmpfiles.d/sudo.conf
 %endif
 %if [rpm]
 	case "%{pp_rpm_distro}" in
 	aix*)
 		# Remove /etc/rc.d/rc2.d/S90sudo link
 		rm -f /etc/rc.d/rc2.d/S90sudo
+		;;
+	*)
+		# Remove systemd tmpfile config
+		rm -f /usr/lib/tmpfiles.d/sudo.conf
 		;;
 	esac
 %endif
