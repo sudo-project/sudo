@@ -429,9 +429,16 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
      *  XPG4 specifies that vi's exit value is a function of the
      *  number of errors during editing (?!?!).
      */
-    gettimeofday(&times[0], NULL);
+    if (gettimeofday(&times[0], NULL) == -1) {
+	sudo_warn(U_("unable to read the clock"));
+	goto done;
+    }
+
     if (run_command(editor, av) != -1) {
-	gettimeofday(&times[1], NULL);
+	if (gettimeofday(&times[1], NULL) == -1) {
+	    sudo_warn(U_("unable to read the clock"));
+	    goto done;
+	}
 	/*
 	 * Sanity checks.
 	 */

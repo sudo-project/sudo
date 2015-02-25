@@ -600,7 +600,10 @@ sudo_edit(struct command_details *command_details)
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    gettimeofday(&times[0], NULL);
+    if (gettimeofday(&times[0], NULL) == -1) {
+	sudo_warn(U_("unable to read the clock"));
+	goto cleanup;
+    }
     memcpy(&saved_command_details, command_details, sizeof(struct command_details));
     command_details->uid = user_details.uid;
     command_details->euid = user_details.uid;
@@ -610,7 +613,10 @@ sudo_edit(struct command_details *command_details)
     command_details->groups = user_details.groups;
     command_details->argv = nargv;
     rval = run_command(command_details);
-    gettimeofday(&times[1], NULL);
+    if (gettimeofday(&times[1], NULL) == -1) {
+	sudo_warn(U_("unable to read the clock"));
+	goto cleanup;
+    }
 
     /* Restore saved command_details. */
     command_details->uid = saved_command_details.uid;
