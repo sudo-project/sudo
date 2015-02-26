@@ -404,7 +404,7 @@ still allow people to get their work done."
 	if [ -d /lib/systemd ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
 		d %{rundir} 0711 root root
-		d %{rundir}/ts 0700 root root
+		D %{rundir}/ts 0700 root root
 		EOF
 	fi
 
