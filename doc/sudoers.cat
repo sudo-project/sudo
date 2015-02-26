@@ -252,6 +252,10 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 
+     It is a syntax error to redefine an existing _a_l_i_a_s.  It is possible to
+     use the same name for _a_l_i_a_s_e_s of different types, but this is not
+     recommended.
+
      The definitions of what constitutes a valid _a_l_i_a_s member follow.
 
      User_List ::= User |
@@ -776,7 +780,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Note that unlike files included via #include, vviissuuddoo will not edit the
      files in a #includedir directory unless one of them contains a syntax
      error.  It is still possible to run vviissuuddoo with the --ff flag to edit the
-     files directly.
+     files directly, but this will not catch the redefinition of an _a_l_i_a_s that
+     is also present in a different file.
 
    OOtthheerr ssppeecciiaall cchhaarraacctteerrss aanndd rreesseerrvveedd wwoorrddss
      The pound sign (`#') is used to indicate a comment (unless it is part of
@@ -2393,4 +2398,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.12                    February 17, 2015                   Sudo 1.8.12
+Sudo 1.8.13                    February 26, 2015                   Sudo 1.8.13

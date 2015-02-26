@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 17, 2015
+.Dd February 26, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -557,6 +557,12 @@ E.g.,
 .Bd -literal
 Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 .Ed
+.Pp
+It is a syntax error to redefine an existing
+.Em alias .
+It is possible to use the same name for
+.Em aliases
+of different types, but this is not recommended.
 .Pp
 The definitions of what constitutes a valid
 .Em alias
@@ -1570,7 +1576,10 @@ It is still possible to run
 .Nm visudo
 with the
 .Fl f
-flag to edit the files directly.
+flag to edit the files directly, but this will not catch the
+redefinition of an
+.Em alias
+that is also present in a different file.
 .Ss Other special characters and reserved words
 The pound sign
 .Pq Ql #
