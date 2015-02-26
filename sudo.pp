@@ -400,8 +400,8 @@ still allow people to get their work done."
 	esac
 
 %post [rpm,deb]
-	# Create /usr/lib/tmpfiles.d/sudo.conf if /lib/systemd exists
-	if [ -d /lib/systemd ]; then
+	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
+	if [ -r /usr/lib/tmpfiles.d/systemd.conf ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
 		d %{rundir} 0711 root root
 		D %{rundir}/ts 0700 root root
