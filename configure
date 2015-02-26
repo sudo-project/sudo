@@ -24472,7 +24472,11 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+if test X"$INIT_SCRIPT" != X""; then
+    ac_config_files="$ac_config_files init.d/$INIT_SCRIPT"
+
+fi
+ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -25462,12 +25466,11 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "lib/zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/zlib/zconf.h" ;;
     "lib/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/zlib/Makefile" ;;
+    "init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES init.d/$INIT_SCRIPT" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
-    "init.d/aix.sh") CONFIG_FILES="$CONFIG_FILES init.d/aix.sh" ;;
-    "init.d/hpux.sh") CONFIG_FILES="$CONFIG_FILES init.d/hpux.sh" ;;
     "lib/util/Makefile") CONFIG_FILES="$CONFIG_FILES lib/util/Makefile" ;;
     "lib/util/util.exp") CONFIG_FILES="$CONFIG_FILES lib/util/util.exp" ;;
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;

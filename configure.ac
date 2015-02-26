@@ -4132,7 +4132,10 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+if test X"$INIT_SCRIPT" != X""; then
+    AC_CONFIG_FILES([init.d/$INIT_SCRIPT])
+fi
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
