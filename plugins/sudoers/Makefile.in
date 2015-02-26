@@ -654,9 +654,15 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getspwuid.c
-gettime.lo: $(srcdir)/gettime.c $(incdir)/compat/stdbool.h \
-            $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
-            $(incdir)/sudo_util.h $(top_builddir)/config.h
+gettime.lo: $(srcdir)/gettime.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/compat/timespec.h \
+            $(incdir)/sudo_alloc.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/gettime.c
 goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_alloc.h \
