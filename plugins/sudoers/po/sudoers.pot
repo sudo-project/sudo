@@ -5,7 +5,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.13b2\n"
+"Project-Id-Version: sudo 1.8.13\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2015-02-24 11:20-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
