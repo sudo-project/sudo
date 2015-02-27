@@ -67,6 +67,10 @@
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+
 /*
  * Function Prototypes
  */
@@ -106,7 +110,7 @@ static char *runas_group, *runas_user;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
 #endif
-#ifdef YYDEBUG
+#if YYDEBUG
 extern int sudoersdebug;
 #endif
 
@@ -127,7 +131,7 @@ main(int argc, char *argv[])
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     malloc_options = "AFGJPR";
 #endif
-#ifdef YYDEBUG
+#if YYDEBUG
     sudoersdebug = 1;
 #endif
 
