@@ -244,7 +244,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	 */
 	times[0].tv_sec = times[1].tv_sec = tf[j].omtim.tv_sec;
 	times[0].tv_usec = times[1].tv_usec = tf[j].omtim.tv_usec;
-#ifdef HAVE_FUTIMES
+#if defined(HAVE_FUTIMES) || defined(HAVE_FUTIME)
 	(void) futimes(tfd, times);
 #else
 	(void) utimes(tf[j].tfile, times);

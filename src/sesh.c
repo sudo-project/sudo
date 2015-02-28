@@ -209,7 +209,7 @@ sesh_sudoedit(int argc, char *argv[])
 		mtim_get(&sb, &times[0]);
 		times[1].tv_sec = times[0].tv_sec;
 		times[1].tv_usec = times[0].tv_usec;
-#ifdef HAVE_FUTIMES
+#if defined(HAVE_FUTIMES) || defined(HAVE_FUTIME)
 		(void) futimes(fd_dst, times);
 #else
 	        (void) utimes(path_dst, times);
