@@ -36,6 +36,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 #if !defined(HAVE_FUTIMES) && defined(HAVE_FUTIMESAT)
 # define futimes(_f, _tv)	futimesat(_f, NULL, _tv)
@@ -120,7 +121,7 @@ sudo_futimens(int fd, const struct timespec *ts)
  * Emulate futimens() via futime()
  */
 int
-sudo_futimens(int fd, const struct timeval *ts)
+sudo_futimens(int fd, const struct timespec *ts)
 {
     struct utimbuf utb, *times = NULL;
 
@@ -140,7 +141,7 @@ sudo_futimens(int fd, const struct timeval *ts)
  * Nothing to do but fail.
  */
 int
-sudo_futimens(int fd, const struct timeval *ts)
+sudo_futimens(int fd, const struct timespec *ts)
 {
     errno = ENOSYS;
     return -1;
