@@ -1,4 +1,4 @@
-/*	$OpenBSD: strlcpy.c,v 1.5 2001/05/13 15:40:16 deraadt Exp $	*/
+/*	$OpenBSD: strlcpy.c,v 1.12 2015/01/15 03:54:12 millert Exp $	*/
 
 /*
  * Copyright (c) 1998, 2003-2005, 2010-2011, 2013-2015
