@@ -189,6 +189,19 @@
 # define S_IRWXU		0000700		/* rwx for owner */
 #endif /* S_IRWXU */
 
+/* For futimens() and utimensat() emulation. */
+#if !defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)
+# ifndef UTIME_OMIT
+#  define UTIME_OMIT	-1L
+# endif
+# ifndef UTIME_NOW
+#  define UTIME_NOW	-2L
+# endif
+# ifndef AT_FDCWD
+#  define AT_FDCWD	-100
+# endif
+#endif
+
 /*
  * These should be defined in <unistd.h> but not everyone has them.
  */
@@ -274,14 +287,6 @@ typedef struct sigaction sigaction_t;
 #if !defined(HAVE_DIRFD) && defined(HAVE_DD_FD)
 # define dirfd(_d)	((_d)->dd_fd)
 # define HAVE_DIRFD
-#endif
-
-/*
- * Define futimes() in terms of futimesat() if needed.
- */
-#if !defined(HAVE_FUTIMES) && defined(HAVE_FUTIMESAT)
-# define futimes(_f, _tv)	futimesat(_f, NULL, _tv)
-# define HAVE_FUTIMES
 #endif
 
 #if !defined(HAVE_KILLPG) && !defined(killpg)
@@ -386,16 +391,16 @@ __dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
 # undef getline
 # define getline(_a, _b, _c) sudo_getline((_a), (_b), (_c))
 #endif /* HAVE_GETLINE */
-#ifndef HAVE_UTIMES
-__dso_public int sudo_utimes(const char *file, const struct timeval *times);
-# undef utimes
-# define utimes(_a, _b) sudo_utimes((_a), (_b))
-#endif /* HAVE_UTIMES */
-#ifdef HAVE_FUTIME
-__dso_public int sudo_futimes(int fd, const struct timeval *times);
-# undef futimes
-# define futimes(_a, _b) sudo_futimes((_a), (_b))
-#endif /* HAVE_FUTIME */
+#ifndef HAVE_UTIMENSAT
+__dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
+# undef utimensat
+# define utimensat(_a, _b, _c, _d) sudo_utimensat((_a), (_b), (_c), (_d))
+#endif /* HAVE_UTIMENSAT */
+#ifndef HAVE_FUTIMENS
+__dso_public int sudo_futimens(int fd, const struct timespec *times);
+# undef futimens
+# define futimens(_a, _b) sudo_futimens((_a), (_b))
+#endif /* HAVE_FUTIMENS */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 __dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) __printflike(3, 4);
 # undef snprintf

@@ -244,6 +244,9 @@
 /* Define to 1 if you have the `futime' function. */
 #undef HAVE_FUTIME
 
+/* Define to 1 if you have the `futimens' function. */
+#undef HAVE_FUTIMENS
+
 /* Define to 1 if you have the `futimes' function. */
 #undef HAVE_FUTIMES
 
@@ -825,6 +828,9 @@
 
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
+
+/* Define to 1 if you have the `utimensat' function. */
+#undef HAVE_UTIMENSAT
 
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES

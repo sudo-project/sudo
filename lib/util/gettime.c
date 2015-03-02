@@ -44,7 +44,9 @@
 # include <mach/clock.h>
 #endif
 
-#include "sudoers.h"
+#include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
 
 /* On Linux, CLOCK_MONOTONIC does not run while suspended. */
 #if defined(CLOCK_BOOTTIME)
@@ -55,9 +57,9 @@
 
 #if defined(HAVE_CLOCK_GETTIME)
 int
-sudo_gettime_real(struct timespec *ts)
+sudo_gettime_real_v1(struct timespec *ts)
 {
-    debug_decl(sudo_gettime_real, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_gettime_real, SUDO_DEBUG_UTIL)
 
     if (clock_gettime(CLOCK_REALTIME, ts) == -1) {
 	struct timeval tv;
@@ -72,10 +74,10 @@ sudo_gettime_real(struct timespec *ts)
 }
 #else
 int
-sudo_gettime_real(struct timespec *ts)
+sudo_gettime_real_v1(struct timespec *ts)
 {
     struct timeval tv;
-    debug_decl(sudo_gettime_real, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_gettime_real, SUDO_DEBUG_UTIL)
 
     if (gettimeofday(&tv, NULL) == -1)
 	debug_return_int(-1);
@@ -86,10 +88,10 @@ sudo_gettime_real(struct timespec *ts)
 
 #if defined(HAVE_CLOCK_GETTIME) && defined(SUDO_CLOCK_MONOTONIC)
 int
-sudo_gettime_mono(struct timespec *ts)
+sudo_gettime_mono_v1(struct timespec *ts)
 {
     static int has_monoclock = -1;
-    debug_decl(sudo_gettime_mono, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
 
     /* Check whether the kernel/libc actually supports CLOCK_MONOTONIC. */
 # ifdef _SC_MONOTONIC_CLOCK
@@ -108,11 +110,11 @@ sudo_gettime_mono(struct timespec *ts)
 }
 #elif defined(__MACH__)
 int
-sudo_gettime_mono(struct timespec *ts)
+sudo_gettime_mono_v1(struct timespec *ts)
 {
     uint64_t abstime, nsec;
     static mach_timebase_info_data_t timebase_info;
-    debug_decl(sudo_gettime_mono, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
 
     if (timebase_info.denom == 0)
 	(void) mach_timebase_info(&timebase_info);
@@ -124,7 +126,7 @@ sudo_gettime_mono(struct timespec *ts)
 }
 #else
 int
-sudo_gettime_mono(struct timespec *ts)
+sudo_gettime_mono_v1(struct timespec *ts)
 {
     /* No monotonic clock available, use wall clock. */
     return sudo_gettime_real(ts);

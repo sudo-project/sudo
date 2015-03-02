@@ -59,13 +59,13 @@
 #include "sudoers.h"
 
 /*
- * Fill in a struct timeval with the time the system booted.
+ * Fill in a struct timespec with the time the system booted.
  * Returns 1 on success and 0 on failure.
  */
 
 #if defined(__linux__)
 bool
-get_boottime(struct timeval *tv)
+get_boottime(struct timespec *ts)
 {
     char *line = NULL;
     size_t linesize = 0;
@@ -81,8 +81,8 @@ get_boottime(struct timeval *tv)
 	    if (strncmp(line, "btime ", 6) == 0) {
 		long long llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
 		if (llval > 0) {
-		    tv->tv_sec = (time_t)llval;
-		    tv->tv_usec = 0;
+		    ts->tv_sec = (time_t)llval;
+		    ts->tv_nsec = 0;
 		    found = true;
 		    break;
 		}
@@ -98,17 +98,20 @@ get_boottime(struct timeval *tv)
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
 
 bool
-get_boottime(struct timeval *tv)
+get_boottime(struct timespec *ts)
 {
     size_t size;
     int mib[2];
+    struct timeval tv;
     debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
-    size = sizeof(*tv);
-    if (sysctl(mib, 2, tv, &size, NULL, 0) != -1)
+    size = sizeof(tv);
+    if (sysctl(mib, 2, &tv, &size, NULL, 0) != -1) {
+	TIMEVAL_TO_TIMESPEC(&tv, ts);
 	debug_return_bool(true);
+    }
 
     debug_return_bool(false);
 }
@@ -116,7 +119,7 @@ get_boottime(struct timeval *tv)
 #elif defined(HAVE_GETUTXID)
 
 bool
-get_boottime(struct timeval *tv)
+get_boottime(struct timespec *ts)
 {
     struct utmpx *ut, key;
     debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
@@ -124,10 +127,8 @@ get_boottime(struct timeval *tv)
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
     setutxent();
-    if ((ut = getutxid(&key)) != NULL) {
-	tv->tv_sec = ut->ut_tv.tv_sec;
-	tv->tv_usec = ut->ut_tv.tv_usec;
-    }
+    if ((ut = getutxid(&key)) != NULL)
+	TIMEVAL_TO_TIMESPEC(&ut->ut_tv, ts);
     endutxent();
     debug_return_bool(ut != NULL);
 }
@@ -135,7 +136,7 @@ get_boottime(struct timeval *tv)
 #elif defined(HAVE_GETUTID)
 
 bool
-get_boottime(struct timeval *tv)
+get_boottime(struct timespec *ts)
 {
     struct utmp *ut, key;
     debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
@@ -144,8 +145,8 @@ get_boottime(struct timeval *tv)
     key.ut_type = BOOT_TIME;
     setutent();
     if ((ut = getutid(&key)) != NULL) {
-	tv->tv_sec = ut->ut_time;
-	tv->tv_usec = 0;
+	ts->tv_sec = ut->ut_time;
+	ts->tv_nsec = 0;
     }
     endutent();
     debug_return_bool(ut != NULL);
@@ -154,7 +155,7 @@ get_boottime(struct timeval *tv)
 #else
 
 bool
-get_boottime(struct timeval *tv)
+get_boottime(struct timespec *ts)
 {
     debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
     debug_return_bool(false);

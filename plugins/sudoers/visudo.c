@@ -70,6 +70,9 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifndef HAVE_STRUCT_TIMESPEC
+# include "compat/timespec.h"
+#endif
 
 #include "sudoers.h"
 #include "parse.h"
@@ -321,8 +324,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     char *cp;				/* scratch char pointer */
     char buf[PATH_MAX*2];		/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
-    struct timeval tv, times[2];	/* time before and after edit */
-    struct timeval orig_mtim;		/* starting mtime of sudoers file */
+    struct timespec ts, times[2];	/* time before and after edit */
+    struct timespec orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
     ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
@@ -332,7 +335,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     if (fstat(sp->fd, &sb) == -1)
 	sudo_fatal(U_("unable to stat %s"), sp->path);
     orig_size = sb.st_size;
-    mtim_get(&sb, &orig_mtim);
+    mtim_get(&sb, orig_mtim);
 
     /* Create the temp file if needed and set timestamp. */
     if (sp->tpath == NULL) {
@@ -358,8 +361,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	(void) close(tfd);
     }
     times[0].tv_sec = times[1].tv_sec = orig_mtim.tv_sec;
-    times[0].tv_usec = times[1].tv_usec = orig_mtim.tv_usec;
-    (void) utimes(sp->tpath, times);
+    times[0].tv_nsec = times[1].tv_nsec = orig_mtim.tv_nsec;
+    (void) utimensat(AT_FDCWD, sp->tpath, times, 0);
 
     /* Does the editor support +lineno? */
     if (lineno > 0)
@@ -429,13 +432,13 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
      *  XPG4 specifies that vi's exit value is a function of the
      *  number of errors during editing (?!?!).
      */
-    if (gettimeofday(&times[0], NULL) == -1) {
+    if (sudo_gettime_real(&times[0]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
 	goto done;
     }
 
     if (run_command(editor, av) != -1) {
-	if (gettimeofday(&times[1], NULL) == -1) {
+	if (sudo_gettime_real(&times[1]) == -1) {
 	    sudo_warn(U_("unable to read the clock"));
 	    goto done;
 	}
@@ -460,13 +463,13 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 
     /* Set modified bit if the user changed the file. */
     modified = true;
-    mtim_get(&sb, &tv);
-    if (orig_size == sb.st_size && sudo_timevalcmp(&orig_mtim, &tv, ==)) {
+    mtim_get(&sb, ts);
+    if (orig_size == sb.st_size && sudo_timespeccmp(&orig_mtim, &ts, ==)) {
 	/*
 	 * If mtime and size match but the user spent no measurable
 	 * time in the editor we can't tell if the file was changed.
 	 */
-	if (sudo_timevalcmp(&times[0], &times[1], !=))
+	if (sudo_timespeccmp(&times[0], &times[1], !=))
 	    modified = false;
     }
 

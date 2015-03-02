@@ -121,7 +121,7 @@ sesh_sudoedit(int argc, char *argv[])
     int fd_src, fd_dst, i, oflags_dst, post, ret = SESH_ERR_FAILURE;
     ssize_t nread, nwritten;
     struct stat sb;
-    struct timeval times[2];
+    struct timespec times[2];
     char buf[BUFSIZ];
     debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
 
@@ -206,14 +206,13 @@ sesh_sudoedit(int argc, char *argv[])
 		if (fd_src == -1 || fstat(fd_src, &sb) != 0)
 		    memset(&sb, 0, sizeof(sb));
 		/* Make mtime on temp file match src. */
-		mtim_get(&sb, &times[0]);
+		mtim_get(&sb, times[0]);
 		times[1].tv_sec = times[0].tv_sec;
-		times[1].tv_usec = times[0].tv_usec;
-#if defined(HAVE_FUTIMES) || defined(HAVE_FUTIME)
-		(void) futimes(fd_dst, times);
-#else
-	        (void) utimes(path_dst, times);
-#endif
+		times[1].tv_nsec = times[0].tv_nsec;
+		if (futimens(fd_dst, times) == -1) {
+		    if (utimensat(AT_FDCWD, path_dst, times, 0) == -1)
+			sudo_warn("%s", path_dst);
+		}
 	    }
 	    close(fd_dst);
 	}

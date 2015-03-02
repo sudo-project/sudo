@@ -239,10 +239,6 @@ char *expand_prompt(const char *old_prompt, const char *auth_user);
 void remove_timestamp(bool);
 bool set_lectured(void);
 
-/* gettime.c */
-int sudo_gettime_real(struct timespec *ts);
-int sudo_gettime_mono(struct timespec *ts);
-
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);
 int verify_user(struct passwd *pw, char *prompt, int validated);
@@ -315,7 +311,7 @@ void sudo_setspent(void);
 char *get_timestr(time_t, int);
 
 /* boottime.c */
-bool get_boottime(struct timeval *);
+bool get_boottime(struct timespec *);
 
 /* iolog.c */
 bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);

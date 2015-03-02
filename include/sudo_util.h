@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -104,24 +104,32 @@
 #endif
 
 /*
- * Macros to extract ctime and mtime as timevals.
+ * The timespec version of st_mtime may vary on different platforms.
  */
-#ifdef HAVE_ST_MTIM
-# ifdef HAVE_ST__TIM
-#  define ctim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_ctim.st__tim)
-#  define mtim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_mtim.st__tim)
+#if defined(HAVE_ST_MTIM)
+# if defined(HAVE_ST__TIM)
+#  define SUDO_ST_MTIM		st_mtim.st__tim
 # else
-#  define ctim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_ctim)
-#  define mtim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_mtim)
+#  define SUDO_ST_MTIM		st_mtim
+# endif
+#elif defined(HAVE_ST_MTIMESPEC)
+# define SUDO_ST_MTIM		st_mtimespec
+#endif
+
+/*
+ * Macro to extract mtime as timespec.
+ * If there is no way to set the timestamp using nanosecond precision,
+ * we only fetch microsecond precision.  Otherwise there is a mismatch
+ * between the timestamp we read and the one we wrote.
+ */
+#if defined(SUDO_ST_MTIM)
+# if defined(HAVE_FUTIMENS) && defined(HAVE_UTIMENSAT)
+#  define mtim_get(_x, _y)	((_y) = (_x)->SUDO_ST_MTIM)
+# else
+#  define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->SUDO_ST_MTIM.tv_sec; (_y).tv_nsec = ((_x)->SUDO_ST_MTIM.tv_nsec / 1000) * 1000; } while (0)
 # endif
 #else
-# ifdef HAVE_ST_MTIMESPEC
-#  define ctim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_ctimespec)
-#  define mtim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_mtimespec)
-# else
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
-# endif /* HAVE_ST_MTIMESPEC */
+# define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->st_mtime; (_y).tv_nsec = 0; } while (0)
 #endif /* HAVE_ST_MTIM */
 
 /*
@@ -147,6 +155,12 @@ __dso_public int aix_setauthdb_v1(char *user);
 /* gethostname.c */
 __dso_public char *sudo_gethostname_v1(void);
 #define sudo_gethostname() sudo_gethostname_v1()
+
+/* gettime.c */
+__dso_public int sudo_gettime_mono_v1(struct timespec *ts);
+#define sudo_gettime_mono(_a) sudo_gettime_mono_v1((_a))
+__dso_public int sudo_gettime_real_v1(struct timespec *ts);
+#define sudo_gettime_real(_a) sudo_gettime_real_v1((_a))
 
 /* gidlist.c */
 __dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);

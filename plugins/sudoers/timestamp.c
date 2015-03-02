@@ -444,10 +444,10 @@ timestamp_status(struct passwd *pw)
 
     /* Ignore and clear time stamp file if mtime predates boot time. */
     if (fstat(fd, &sb) == 0) {
-	struct timeval boottime, mtime;
+	struct timespec boottime, mtime;
 
-	mtim_get(&sb, &mtime);
-	if (get_boottime(&boottime) && sudo_timevalcmp(&mtime, &boottime, <)) {
+	mtim_get(&sb, mtime);
+	if (get_boottime(&boottime) && sudo_timespeccmp(&mtime, &boottime, <)) {
 	    ignore_result(ftruncate(fd, (off_t)0));
 	    status = TS_MISSING;
 	    goto done;

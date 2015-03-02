@@ -93,6 +93,7 @@ lib/util/getgrouplist.c
 lib/util/gethostname.c
 lib/util/getline.c
 lib/util/getopt_long.c
+lib/util/gettime.c
 lib/util/gidlist.c
 lib/util/glob.c
 lib/util/inet_ntop.c
@@ -170,7 +171,7 @@ lib/util/sudo_dso.c
 lib/util/term.c
 lib/util/ttysize.c
 lib/util/util.exp.in
-lib/util/utimes.c
+lib/util/utimens.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c
 lib/zlib/compress.c
@@ -257,7 +258,6 @@ plugins/sudoers/find_path.c
 plugins/sudoers/getdate.c
 plugins/sudoers/getdate.y
 plugins/sudoers/getspwuid.c
-plugins/sudoers/gettime.c
 plugins/sudoers/goodpath.c
 plugins/sudoers/gram.c
 plugins/sudoers/gram.h

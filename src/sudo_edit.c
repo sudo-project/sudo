@@ -48,6 +48,9 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifndef HAVE_STRUCT_TIMESPEC
+# include "compat/timespec.h"
+#endif
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
@@ -63,7 +66,7 @@
 struct tempfile {
     char *tfile;
     char *ofile;
-    struct timeval omtim;
+    struct timespec omtim;
     off_t osize;
 };
 
@@ -174,7 +177,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
     int i, j, tfd, ofd, rc;
     char buf[BUFSIZ];
     ssize_t nwritten, nread;
-    struct timeval times[2];
+    struct timespec times[2];
     struct stat sb;
     debug_decl(sudo_edit_create_tfiles, SUDO_DEBUG_EDIT)
 
@@ -207,7 +210,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	}
 	tf[j].ofile = files[i];
 	tf[j].osize = sb.st_size;
-	mtim_get(&sb, &tf[j].omtim);
+	mtim_get(&sb, tf[j].omtim);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
@@ -239,19 +242,18 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	 * We always update the stashed mtime because the time
 	 * resolution of the filesystem the temporary file is on may
 	 * not match that of the filesystem where the file to be edited
-	 * resides.  It is OK if futimes() fails since we only use the
+	 * resides.  It is OK if futimens() fails since we only use the
 	 * info to determine whether or not a file has been modified.
 	 */
 	times[0].tv_sec = times[1].tv_sec = tf[j].omtim.tv_sec;
-	times[0].tv_usec = times[1].tv_usec = tf[j].omtim.tv_usec;
-#if defined(HAVE_FUTIMES) || defined(HAVE_FUTIME)
-	(void) futimes(tfd, times);
-#else
-	(void) utimes(tf[j].tfile, times);
-#endif
+	times[0].tv_nsec = times[1].tv_nsec = tf[j].omtim.tv_nsec;
+	if (futimens(tfd, times) == -1) {
+	    if (utimensat(AT_FDCWD, tf[j].tfile, times, 0) == -1)
+		sudo_warn("%s", tf[j].tfile);
+	}
 	rc = fstat(tfd, &sb);
 	if (!rc)
-	    mtim_get(&sb, &tf[j].omtim);
+	    mtim_get(&sb, tf[j].omtim);
 	close(tfd);
 	j++;
     }
@@ -264,12 +266,12 @@ sudo_edit_create_tfiles(struct command_details *command_details,
  */
 static int
 sudo_edit_copy_tfiles(struct command_details *command_details,
-    struct tempfile *tf, int nfiles, struct timeval *times)
+    struct tempfile *tf, int nfiles, struct timespec *times)
 {
     int i, tfd, ofd, rc, errors = 0;
     char buf[BUFSIZ];
     ssize_t nwritten, nread;
-    struct timeval tv;
+    struct timespec ts;
     struct stat sb;
     debug_decl(sudo_edit_copy_tfiles, SUDO_DEBUG_EDIT)
 
@@ -298,13 +300,13 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    errors++;
 	    continue;
 	}
-	mtim_get(&sb, &tv);
-	if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
+	mtim_get(&sb, ts);
+	if (tf[i].osize == sb.st_size && sudo_timespeccmp(&tf[i].omtim, &ts, ==)) {
 	    /*
 	     * If mtime and size match but the user spent no measurable
 	     * time in the editor we can't tell if the file was changed.
 	     */
-	    if (sudo_timevalcmp(&times[0], &times[1], !=)) {
+	    if (sudo_timespeccmp(&times[0], &times[1], !=)) {
 		sudo_warnx(U_("%s unchanged"), tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);
@@ -387,7 +389,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	if (stat(ofile, &sb) == -1)
 	    memset(&sb, 0, sizeof(sb));		/* new file */
 	tf[i].osize = sb.st_size;
-	mtim_get(&sb, &tf[i].omtim);
+	mtim_get(&sb, tf[i].omtim);
 	/*
 	 * The temp file must be created by the sesh helper,
 	 * which uses O_EXCL | O_NOFOLLOW to make this safe.
@@ -442,12 +444,12 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 
 static int
 selinux_edit_copy_tfiles(struct command_details *command_details,
-    struct tempfile *tf, int nfiles, struct timeval *times)
+    struct tempfile *tf, int nfiles, struct timespec *times)
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs, rval = 1;
     struct command_details saved_command_details;
-    struct timeval tv;
+    struct timespec ts;
     struct stat sb;
     debug_decl(selinux_edit_copy_tfiles, SUDO_DEBUG_EDIT)
     
@@ -473,13 +475,13 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     /* Construct args for sesh -e 1 */
     for (i = 0; i < nfiles; i++) {
 	if (stat(tf[i].tfile, &sb) == 0) {
-	    mtim_get(&sb, &tv);
-	    if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
+	    mtim_get(&sb, ts);
+	    if (tf[i].osize == sb.st_size && sudo_timespeccmp(&tf[i].omtim, &ts, ==)) {
 		/*
 		 * If mtime and size match but the user spent no measurable
 		 * time in the editor we can't tell if the file was changed.
 		 */
-		if (sudo_timevalcmp(&times[0], &times[1], !=)) {
+		if (sudo_timespeccmp(&times[0], &times[1], !=)) {
 		    sudo_warnx(U_("%s unchanged"), tf[i].ofile);
 		    unlink(tf[i].tfile);
 		    continue;
@@ -537,7 +539,7 @@ sudo_edit(struct command_details *command_details)
     char **nargv = NULL, **ap, **files = NULL;
     int errors, i, ac, nargc, rval;
     int editor_argc = 0, nfiles = 0;
-    struct timeval times[2];
+    struct timespec times[2];
     struct tempfile *tf = NULL;
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
 
@@ -600,7 +602,7 @@ sudo_edit(struct command_details *command_details)
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    if (gettimeofday(&times[0], NULL) == -1) {
+    if (sudo_gettime_real(&times[0]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
 	goto cleanup;
     }
@@ -613,7 +615,7 @@ sudo_edit(struct command_details *command_details)
     command_details->groups = user_details.groups;
     command_details->argv = nargv;
     rval = run_command(command_details);
-    if (gettimeofday(&times[1], NULL) == -1) {
+    if (sudo_gettime_real(&times[1]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
 	goto cleanup;
     }

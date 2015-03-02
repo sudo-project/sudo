@@ -18939,7 +18939,29 @@ done
 fi
 done
 
-for ac_func in utimes
+for ac_func in utimensat
+do :
+  ac_fn_c_check_func "$LINENO" "utimensat" "ac_cv_func_utimensat"
+if test "x$ac_cv_func_utimensat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UTIMENSAT 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" utimens.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS utimens.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_utimensat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    for ac_func in utimes
 do :
   ac_fn_c_check_func "$LINENO" "utimes" "ac_cv_func_utimes"
 if test "x$ac_cv_func_utimes" = xyes; then :
@@ -18947,7 +18969,36 @@ if test "x$ac_cv_func_utimes" = xyes; then :
 #define HAVE_UTIMES 1
 _ACEOF
 
-    for ac_func in futimes futimesat
+fi
+done
+
+
+fi
+done
+
+for ac_func in futimens
+do :
+  ac_fn_c_check_func "$LINENO" "futimens" "ac_cv_func_futimens"
+if test "x$ac_cv_func_futimens" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FUTIMENS 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" utimens.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS utimens.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_futimens; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    for ac_func in futimes futimesat futime
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -18956,37 +19007,6 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
  break
-fi
-done
-
-
-else
-
-    case " $LIBOBJS " in
-  *" utimes.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS utimes.$ac_objext"
- ;;
-esac
-
-
-    for _sym in sudo_utimes; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-    for ac_func in futime
-do :
-  ac_fn_c_check_func "$LINENO" "futime" "ac_cv_func_futime"
-if test "x$ac_cv_func_futime" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FUTIME 1
-_ACEOF
-
-    for _sym in sudo_futimes; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
 fi
 done
 
@@ -19295,7 +19315,7 @@ if test "x$ac_cv_lib_rt_clock_gettime" = xyes; then :
 
 	$as_echo "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
 
-	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
+	LIBS="${LIBS} -lrt"
 
 fi
 

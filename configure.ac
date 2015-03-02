@@ -2495,12 +2495,15 @@ AC_INCLUDES_DEFAULT
 ], [
     AC_CHECK_FUNCS([sysinfo], [AC_CHECK_HEADERS([sys/systeminfo.h])])
 ])
-AC_CHECK_FUNCS([utimes], [
-    AC_CHECK_FUNCS([futimes futimesat], [break])
-], [
-    AC_LIBOBJ(utimes)
-    SUDO_APPEND_COMPAT_EXP(sudo_utimes)
-    AC_CHECK_FUNCS([futime], [SUDO_APPEND_COMPAT_EXP(sudo_futimes)])
+AC_CHECK_FUNCS([utimensat], [], [
+    AC_LIBOBJ(utimens)
+    SUDO_APPEND_COMPAT_EXP(sudo_utimensat)
+    AC_CHECK_FUNCS([utimes])
+])
+AC_CHECK_FUNCS([futimens], [], [
+    AC_LIBOBJ(utimens)
+    SUDO_APPEND_COMPAT_EXP(sudo_futimens)
+    AC_CHECK_FUNCS([futimes futimesat futime], [break])
 ])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
     AC_LIBOBJ(fnmatch)
@@ -2536,7 +2539,7 @@ AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
-	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
+	LIBS="${LIBS} -lrt"
     ])
 ])
 AC_CHECK_FUNCS([getopt_long], [], [
