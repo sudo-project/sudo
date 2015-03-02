@@ -620,7 +620,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	}
 	if (chmod(sp->tpath, sudoers_mode) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
-		sudoers_mode);
+		(unsigned int)sudoers_mode);
 	    goto done;
 	}
     }
@@ -818,7 +818,7 @@ check_owner(const char *path, bool quiet)
 	    ok = false;
 	    if (!quiet) {
 		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),
-		    path, sudoers_mode);
+		    path, (unsigned int)sudoers_mode);
 	    }
 	}
     }
