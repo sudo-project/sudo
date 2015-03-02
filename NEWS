@@ -28,6 +28,12 @@ What's new in Sudo 1.8.13
    /etc/security/login.cfg to determine whether to use LAM or PAM
    for user authentication.
 
+ * The "all" setting for listpw and verifypw now works correctly
+   with LDAP and sssd sudoers.
+
+ * The sudo timestamp directory is now created at boot time on
+   platforms that use systemd.
+
 What's new in Sudo 1.8.12
 
  * The embedded copy of zlib has been upgraded to version 1.2.8 and
