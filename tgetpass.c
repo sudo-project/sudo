@@ -155,7 +155,7 @@ restore:
     (void) sigaction(SIGTSTP, &savetstp, NULL);
     (void) sigaction(SIGTTIN, &savettin, NULL);
     (void) sigaction(SIGTTOU, &savettou, NULL);
-    (void) sigaction(SIGTTOU, &savepipe, NULL);
+    (void) sigaction(SIGPIPE, &savepipe, NULL);
     if (input != STDIN_FILENO)
 	(void) close(input);
 
