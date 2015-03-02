@@ -1002,8 +1002,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	    for (i = 0; i < sss_result->num_rules; i++) {
 		rule = sss_result->rules + i;
 		if ((pwcheck == any && doauth != false) ||
-		    (pwcheck == all && doauth == false)) {
-		    doauth = sudo_sss_check_bool(handle, rule, "authenticate");
+		    (pwcheck == all && doauth != true)) {
+		    doauth = !!sudo_sss_check_bool(handle, rule, "authenticate");
 		}
 		/* Only check the command when listing another user. */
 		if (user_uid == 0 || list_pw == NULL ||
