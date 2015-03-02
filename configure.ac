@@ -74,6 +74,7 @@ AC_SUBST([ZLIB_SRC])
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
+AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
 AC_SUBST([LIBMD])
 AC_SUBST([SUDO_NLS])
@@ -2539,7 +2540,7 @@ AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
-	LIBS="${LIBS} -lrt"
+	LIBRT="-lrt"
     ])
 ])
 AC_CHECK_FUNCS([getopt_long], [], [

@@ -738,6 +738,7 @@ LOCALEDIR_SUFFIX
 SUDO_NLS
 LIBMD
 LIBINTL
+LIBRT
 LIBDL
 CONFIGURE_ARGS
 LIBTOOL_DEPS
@@ -2725,6 +2726,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -19315,7 +19317,7 @@ if test "x$ac_cv_lib_rt_clock_gettime" = xyes; then :
 
 	$as_echo "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
 
-	LIBS="${LIBS} -lrt"
+	LIBRT="-lrt"
 
 fi
 
