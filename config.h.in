@@ -835,9 +835,6 @@
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
 
-/* Define to 1 if you have the <utime.h> header file. */
-#undef HAVE_UTIME_H
-
 /* Define to 1 if you have the <utmpx.h> header file. */
 #undef HAVE_UTMPX_H
 

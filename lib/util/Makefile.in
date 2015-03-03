@@ -535,7 +535,7 @@ ttysize.lo: $(srcdir)/ttysize.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
             $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/ttysize.c
-utimens.lo: $(srcdir)/utimens.c $(incdir)/compat/timespec.h \
-            $(incdir)/compat/utime.h $(incdir)/sudo_compat.h \
-            $(top_builddir)/config.h
+utimens.lo: $(srcdir)/utimens.c $(incdir)/compat/stdbool.h \
+            $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/utimens.c

@@ -2641,7 +2641,6 @@ as_fn_append ac_header_list " malloc.h"
 as_fn_append ac_header_list " netgroup.h"
 as_fn_append ac_header_list " paths.h"
 as_fn_append ac_header_list " spawn.h"
-as_fn_append ac_header_list " utime.h"
 as_fn_append ac_header_list " utmpx.h"
 as_fn_append ac_header_list " sys/sockio.h"
 as_fn_append ac_header_list " sys/bsdtypes.h"
@@ -16811,8 +16810,6 @@ _ACEOF
 fi
 
 done
-
-
 
 
 

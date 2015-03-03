@@ -29,10 +29,8 @@
 #ifndef HAVE_STRUCT_TIMESPEC
 # include "compat/timespec.h"
 #endif
-#ifdef HAVE_UTIME_H
+#if !defined(HAVE_UTIMES) || defined(HAVE_FUTIME)
 # include <utime.h>
-#else
-# include "compat/utime.h"
 #endif
 
 #include "sudo_compat.h"
