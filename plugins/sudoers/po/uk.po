@@ -1,13 +1,13 @@
 # Ukrainian translation for sudoers.
 # This file is put in the public domain.
 #
-# Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012, 2013, 2014.
+# Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012, 2013, 2014, 2015.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.12b3\n"
+"Project-Id-Version: sudoers 1.8.13b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2014-11-20 13:33-0700\n"
-"PO-Revision-Date: 2014-11-22 09:12+0200\n"
+"POT-Creation-Date: 2015-02-24 11:20-0700\n"
+"PO-Revision-Date: 2015-03-05 07:24+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -41,7 +41,7 @@ msgstr "*** Дані щодо ЗАХИСТУ %h ***"
 msgid "Sorry, try again."
 msgstr "Вибачте, повторіть спробу."
 
-#: gram.y:379
+#: gram.y:385
 msgid "a digest requires a path name"
 msgstr "для контрольної суми слід вказати шлях"
 
@@ -134,32 +134,32 @@ msgstr "%s: не вдалося отримати реєстраційний за
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s: спроба перевірки TGT зазнала невдачі! Ймовірно, вас атаковано: %s"
 
-#: plugins/sudoers/auth/pam.c:98
+#: plugins/sudoers/auth/pam.c:97
 msgid "unable to initialize PAM"
 msgstr "не вдалося ініціалізувати PAM"
 
-#: plugins/sudoers/auth/pam.c:149
+#: plugins/sudoers/auth/pam.c:153
 msgid "account validation failure, is your account locked?"
 msgstr "помилка під час спроби перевірки облікового запису. Ваш обліковий запис заблоковано?"
 
-#: plugins/sudoers/auth/pam.c:153
+#: plugins/sudoers/auth/pam.c:157
 msgid "Account or password is expired, reset your password and try again"
 msgstr "Строк дії облікового запису або пароля збіг, визначте новий пароль і повторіть спробу"
 
-#: plugins/sudoers/auth/pam.c:161
+#: plugins/sudoers/auth/pam.c:165
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "не вдалося змінити пароль, строк дії якого завершився: %s"
 
-#: plugins/sudoers/auth/pam.c:166
+#: plugins/sudoers/auth/pam.c:170
 msgid "Password expired, contact your system administrator"
 msgstr "Строк дії пароля збіг, зверніться до адміністратора вашої системи щодо поновлення пароля"
 
-#: plugins/sudoers/auth/pam.c:170
+#: plugins/sudoers/auth/pam.c:174
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "Строк дії облікового запису збіг або у файлі налаштувань PAM немає розділу \"account\" для sudo. Повідомте про це адміністратора вашої системи."
 
-#: plugins/sudoers/auth/pam.c:187
+#: plugins/sudoers/auth/pam.c:186
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr "Помилка розпізнавання PAM: %s"
@@ -205,27 +205,27 @@ msgstr "некоректна довжина коду пароля для SecurID
 msgid "unable to initialize SIA session"
 msgstr "не вдалося ініціалізувати сеанс SIA"
 
-#: plugins/sudoers/auth/sudo_auth.c:115
+#: plugins/sudoers/auth/sudo_auth.c:135
 msgid "invalid authentication methods"
 msgstr "некоректні способи розпізнавання"
 
-#: plugins/sudoers/auth/sudo_auth.c:117
+#: plugins/sudoers/auth/sudo_auth.c:137
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
 msgstr "sudo зібрано з підтримкою некоректних способів розпізнавання! Не можна змішувати власні і зовнішні способи розпізнавання."
 
-#: plugins/sudoers/auth/sudo_auth.c:203 plugins/sudoers/auth/sudo_auth.c:252
+#: plugins/sudoers/auth/sudo_auth.c:233 plugins/sudoers/auth/sudo_auth.c:282
 msgid "no authentication methods"
 msgstr "немає способів розпізнавання"
 
-#: plugins/sudoers/auth/sudo_auth.c:205
+#: plugins/sudoers/auth/sudo_auth.c:235
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
 msgstr "sudo зібрано без можливостей з взаємодії з інструментами розпізнавання! Якщо ви хочете вимкнути розпізнавання, скористайтеся параметром налаштування --disable-authentication."
 
-#: plugins/sudoers/auth/sudo_auth.c:254
+#: plugins/sudoers/auth/sudo_auth.c:284
 msgid "Unable to initialize authentication methods."
 msgstr "Не вдалося ініціалізувати методи розпізнавання."
 
-#: plugins/sudoers/auth/sudo_auth.c:412
+#: plugins/sudoers/auth/sudo_auth.c:442
 msgid "Authentication methods:"
 msgstr "Способи розпізнавання:"
 
@@ -258,14 +258,14 @@ msgstr ""
 "\n"
 
 #: plugins/sudoers/check.c:240 plugins/sudoers/check.c:250
-#: plugins/sudoers/sudoers.c:599 plugins/sudoers/sudoers.c:628
+#: plugins/sudoers/sudoers.c:600 plugins/sudoers/sudoers.c:629
 #, c-format
 msgid "unknown uid: %u"
 msgstr "невідоме значення uid: %u"
 
-#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:683
-#: plugins/sudoers/sudoers.c:955 plugins/sudoers/testsudoers.c:212
-#: plugins/sudoers/testsudoers.c:364
+#: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:679
+#: plugins/sudoers/sudoers.c:956 plugins/sudoers/testsudoers.c:211
+#: plugins/sudoers/testsudoers.c:361
 #, c-format
 msgid "unknown user: %s"
 msgstr "невідомий користувач: %s"
@@ -314,354 +314,358 @@ msgid "Send mail if the user is not allowed to run a command"
 msgstr "Надсилати листа, якщо користувачеві заборонено виконувати команду"
 
 #: plugins/sudoers/def_data.c:67
+msgid "Send mail if the user tries to run a command"
+msgstr "Надсилати листа, якщо користувач намагається віддати команду"
+
+#: plugins/sudoers/def_data.c:71
 msgid "Use a separate timestamp for each user/tty combo"
 msgstr "Окремий часовий штамп для кожної комбінації користувач/tty"
 
-#: plugins/sudoers/def_data.c:71
+#: plugins/sudoers/def_data.c:75
 msgid "Lecture user the first time they run sudo"
 msgstr "Показувати настанови користувачеві під час першого запуску sudo"
 
-#: plugins/sudoers/def_data.c:75
+#: plugins/sudoers/def_data.c:79
 #, c-format
 msgid "File containing the sudo lecture: %s"
 msgstr "Файл з настановами щодо sudo: %s"
 
-#: plugins/sudoers/def_data.c:79
+#: plugins/sudoers/def_data.c:83
 msgid "Require users to authenticate by default"
 msgstr "Типово, вимагати розпізнавання"
 
-#: plugins/sudoers/def_data.c:83
+#: plugins/sudoers/def_data.c:87
 msgid "Root may run sudo"
 msgstr "Root може виконувати sudo"
 
-#: plugins/sudoers/def_data.c:87
+#: plugins/sudoers/def_data.c:91
 msgid "Log the hostname in the (non-syslog) log file"
 msgstr "Записувати назву вузла до файла журналу (не syslog)"
 
-#: plugins/sudoers/def_data.c:91
+#: plugins/sudoers/def_data.c:95
 msgid "Log the year in the (non-syslog) log file"
 msgstr "Записувати рік до файла журналу (не syslog)"
 
-#: plugins/sudoers/def_data.c:95
+#: plugins/sudoers/def_data.c:99
 msgid "If sudo is invoked with no arguments, start a shell"
 msgstr "Якщо sudo викликано без параметрів, запускати командну оболонку"
 
-#: plugins/sudoers/def_data.c:99
+#: plugins/sudoers/def_data.c:103
 msgid "Set $HOME to the target user when starting a shell with -s"
 msgstr "Встановлювати $HOME відповідно до вказаного користувача для запуску оболонки з -s"
 
-#: plugins/sudoers/def_data.c:103
+#: plugins/sudoers/def_data.c:107
 msgid "Always set $HOME to the target user's home directory"
 msgstr "Завжди встановлювати значенням $HOME домашній каталог вказаного користувача"
 
-#: plugins/sudoers/def_data.c:107
+#: plugins/sudoers/def_data.c:111
 msgid "Allow some information gathering to give useful error messages"
 msgstr "Дозволити збирання даних з метою формування зрозумілих повідомлень про помилки"
 
-#: plugins/sudoers/def_data.c:111
+#: plugins/sudoers/def_data.c:115
 msgid "Require fully-qualified hostnames in the sudoers file"
 msgstr "У файлі sudoers слід вказати повні назви вузлів"
 
-#: plugins/sudoers/def_data.c:115
+#: plugins/sudoers/def_data.c:119
 msgid "Insult the user when they enter an incorrect password"
 msgstr "Знущатися з користувача, якщо введено помилковий пароль"
 
-#: plugins/sudoers/def_data.c:119
+#: plugins/sudoers/def_data.c:123
 msgid "Only allow the user to run sudo if they have a tty"
 msgstr "Дозволяти користувачеві виконувати sudo, лише якщо з ним пов’язано tty"
 
-#: plugins/sudoers/def_data.c:123
+#: plugins/sudoers/def_data.c:127
 msgid "Visudo will honor the EDITOR environment variable"
 msgstr "Visudo зважатимwill honor the EDITOR environment variable"
 
-#: plugins/sudoers/def_data.c:127
+#: plugins/sudoers/def_data.c:131
 msgid "Prompt for root's password, not the users's"
 msgstr "Надсилати запит на пароль root, а не користувача"
 
-#: plugins/sudoers/def_data.c:131
+#: plugins/sudoers/def_data.c:135
 msgid "Prompt for the runas_default user's password, not the users's"
 msgstr "Надсилати запит щодо пароля runas_default, але пароля самого користувача"
 
-#: plugins/sudoers/def_data.c:135
+#: plugins/sudoers/def_data.c:139
 msgid "Prompt for the target user's password, not the users's"
 msgstr "Надсилати запит щодо пароля потрібного користувача, але пароля самого користувача"
 
-#: plugins/sudoers/def_data.c:139
+#: plugins/sudoers/def_data.c:143
 msgid "Apply defaults in the target user's login class if there is one"
 msgstr "Застосовувати типові параметри у класі вказаного користувача, якщо такий клас є"
 
-#: plugins/sudoers/def_data.c:143
+#: plugins/sudoers/def_data.c:147
 msgid "Set the LOGNAME and USER environment variables"
 msgstr "Встановити значення змінних середовища LOGNAME і USER"
 
-#: plugins/sudoers/def_data.c:147
+#: plugins/sudoers/def_data.c:151
 msgid "Only set the effective uid to the target user, not the real uid"
 msgstr "Встановлювати для потрібного користувача ефективний uid, а не справжній uid"
 
-#: plugins/sudoers/def_data.c:151
+#: plugins/sudoers/def_data.c:155
 msgid "Don't initialize the group vector to that of the target user"
 msgstr "Не ініціалізувати вектор групи відповідно до вказаного користувача"
 
-#: plugins/sudoers/def_data.c:155
+#: plugins/sudoers/def_data.c:159
 #, c-format
 msgid "Length at which to wrap log file lines (0 for no wrap): %u"
 msgstr "Позиція, на якій слід переносити рядки файла журналу (0 — без перенесення): %u"
 
-#: plugins/sudoers/def_data.c:159
+#: plugins/sudoers/def_data.c:163
 #, c-format
 msgid "Authentication timestamp timeout: %.1f minutes"
 msgstr "Час очікування на часовий штамп розпізнавання: %.1f хвилина"
 
-#: plugins/sudoers/def_data.c:163
+#: plugins/sudoers/def_data.c:167
 #, c-format
 msgid "Password prompt timeout: %.1f minutes"
 msgstr "Час очікування на введення пароля: %.1f хвилина"
 
-#: plugins/sudoers/def_data.c:167
+#: plugins/sudoers/def_data.c:171
 #, c-format
 msgid "Number of tries to enter a password: %u"
 msgstr "Кількість спроб введення пароля: %u"
 
-#: plugins/sudoers/def_data.c:171
+#: plugins/sudoers/def_data.c:175
 #, c-format
 msgid "Umask to use or 0777 to use user's: 0%o"
 msgstr "Потрібне значення umask або 0777 для користувачевого: 0%o"
 
-#: plugins/sudoers/def_data.c:175
+#: plugins/sudoers/def_data.c:179
 #, c-format
 msgid "Path to log file: %s"
 msgstr "Шлях до файла журналу: %s"
 
-#: plugins/sudoers/def_data.c:179
+#: plugins/sudoers/def_data.c:183
 #, c-format
 msgid "Path to mail program: %s"
 msgstr "Шлях до програми ел. пошти: %s"
 
-#: plugins/sudoers/def_data.c:183
+#: plugins/sudoers/def_data.c:187
 #, c-format
 msgid "Flags for mail program: %s"
 msgstr "Параметри програми ел. пошти: %s"
 
-#: plugins/sudoers/def_data.c:187
+#: plugins/sudoers/def_data.c:191
 #, c-format
 msgid "Address to send mail to: %s"
 msgstr "Адреса, на яку надсилатимуться листи: %s"
 
-#: plugins/sudoers/def_data.c:191
+#: plugins/sudoers/def_data.c:195
 #, c-format
 msgid "Address to send mail from: %s"
 msgstr "Адреса, з якої надсилатимуться листи: %s"
 
-#: plugins/sudoers/def_data.c:195
+#: plugins/sudoers/def_data.c:199
 #, c-format
 msgid "Subject line for mail messages: %s"
 msgstr "Тема листів: %s"
 
-#: plugins/sudoers/def_data.c:199
+#: plugins/sudoers/def_data.c:203
 #, c-format
 msgid "Incorrect password message: %s"
 msgstr "Повідомлення про помилковий пароль: %s"
 
-#: plugins/sudoers/def_data.c:203
+#: plugins/sudoers/def_data.c:207
 #, c-format
 msgid "Path to lecture status dir: %s"
 msgstr "Шлях до каталогу стану отримання настанов: %s"
 
-#: plugins/sudoers/def_data.c:207
+#: plugins/sudoers/def_data.c:211
 #, c-format
 msgid "Path to authentication timestamp dir: %s"
 msgstr "Шлях до каталогу часових штампів розпізнавання: %s"
 
-#: plugins/sudoers/def_data.c:211
+#: plugins/sudoers/def_data.c:215
 #, c-format
 msgid "Owner of the authentication timestamp dir: %s"
 msgstr "Власник каталогу часових штампів розпізнавання: %s"
 
-#: plugins/sudoers/def_data.c:215
+#: plugins/sudoers/def_data.c:219
 #, c-format
 msgid "Users in this group are exempt from password and PATH requirements: %s"
 msgstr "Користувачів цієї групи звільнено від потреби у введенні пароля і PATH: %s"
 
-#: plugins/sudoers/def_data.c:219
+#: plugins/sudoers/def_data.c:223
 #, c-format
 msgid "Default password prompt: %s"
 msgstr "Типовий запит пароля: %s"
 
-#: plugins/sudoers/def_data.c:223
+#: plugins/sudoers/def_data.c:227
 msgid "If set, passprompt will override system prompt in all cases."
 msgstr "Якщо встановлено, запит щодо паролю замінюватиме запит системи."
 
-#: plugins/sudoers/def_data.c:227
+#: plugins/sudoers/def_data.c:231
 #, c-format
 msgid "Default user to run commands as: %s"
 msgstr "Типовий користувач для запуску команд: %s"
 
-#: plugins/sudoers/def_data.c:231
+#: plugins/sudoers/def_data.c:235
 #, c-format
 msgid "Value to override user's $PATH with: %s"
 msgstr "Значення для заміни $PATH користувача: %s"
 
-#: plugins/sudoers/def_data.c:235
+#: plugins/sudoers/def_data.c:239
 #, c-format
 msgid "Path to the editor for use by visudo: %s"
 msgstr "Шлях до редактора, який використовуватиме visudo: %s"
 
-#: plugins/sudoers/def_data.c:239
+#: plugins/sudoers/def_data.c:243
 #, c-format
 msgid "When to require a password for 'list' pseudocommand: %s"
 msgstr "Умови запиту пароля для псевдокоманди «list»: %s"
 
-#: plugins/sudoers/def_data.c:243
+#: plugins/sudoers/def_data.c:247
 #, c-format
 msgid "When to require a password for 'verify' pseudocommand: %s"
 msgstr "Умови запиту пароля для псевдокоманди «verify»: %s"
 
-#: plugins/sudoers/def_data.c:247
+#: plugins/sudoers/def_data.c:251
 msgid "Preload the dummy exec functions contained in the sudo_noexec library"
 msgstr "Попередньо завантажувати фіктивні функції виконання з бібліотеки sudo_noexec"
 
-#: plugins/sudoers/def_data.c:251
+#: plugins/sudoers/def_data.c:255
 msgid "If LDAP directory is up, do we ignore local sudoers file"
 msgstr "Чи слід ігнорувати локальний файл sudoers, якщо є доступ до каталогу LDAP"
 
-#: plugins/sudoers/def_data.c:255
+#: plugins/sudoers/def_data.c:259
 #, c-format
 msgid "File descriptors >= %d will be closed before executing a command"
 msgstr "Дескриптори файлів >= %d буде закрито перед виконанням команди"
 
-#: plugins/sudoers/def_data.c:259
+#: plugins/sudoers/def_data.c:263
 msgid "If set, users may override the value of `closefrom' with the -C option"
 msgstr "Якщо встановлено, користувачі можуть перевизначати значення «closefrom» за допомогою параметра -C"
 
-#: plugins/sudoers/def_data.c:263
+#: plugins/sudoers/def_data.c:267
 msgid "Allow users to set arbitrary environment variables"
 msgstr "Дозволити користувачам встановлювати значення довільних змінних середовища"
 
-#: plugins/sudoers/def_data.c:267
+#: plugins/sudoers/def_data.c:271
 msgid "Reset the environment to a default set of variables"
 msgstr "Відновити типовий набір змінних середовища"
 
-#: plugins/sudoers/def_data.c:271
+#: plugins/sudoers/def_data.c:275
 msgid "Environment variables to check for sanity:"
 msgstr "Змінні середовища, коректність яких слід перевіряти:"
 
-#: plugins/sudoers/def_data.c:275
+#: plugins/sudoers/def_data.c:279
 msgid "Environment variables to remove:"
 msgstr "Змінні середовища, які слід вилучити:"
 
-#: plugins/sudoers/def_data.c:279
+#: plugins/sudoers/def_data.c:283
 msgid "Environment variables to preserve:"
 msgstr "Змінні середовища, які слід зберегти:"
 
-#: plugins/sudoers/def_data.c:283
+#: plugins/sudoers/def_data.c:287
 #, c-format
 msgid "SELinux role to use in the new security context: %s"
 msgstr "Роль SELinux, яку слід використати у новому контексті захисту: %s"
 
-#: plugins/sudoers/def_data.c:287
+#: plugins/sudoers/def_data.c:291
 #, c-format
 msgid "SELinux type to use in the new security context: %s"
 msgstr "Тип SELinux, який слід використати у новому контексті захисту: %s"
 
-#: plugins/sudoers/def_data.c:291
+#: plugins/sudoers/def_data.c:295
 #, c-format
 msgid "Path to the sudo-specific environment file: %s"
 msgstr "Шлях до специфічного для sudo файла середовища: %s"
 
-#: plugins/sudoers/def_data.c:295
+#: plugins/sudoers/def_data.c:299
 #, c-format
 msgid "Locale to use while parsing sudoers: %s"
 msgstr "Локаль, яку слід використати під час обробки sudoers: %s"
 
-#: plugins/sudoers/def_data.c:299
+#: plugins/sudoers/def_data.c:303
 msgid "Allow sudo to prompt for a password even if it would be visible"
 msgstr "Дозволити sudo надсилати запит щодо пароля, навіть якщо цей пароль буде видимим"
 
-#: plugins/sudoers/def_data.c:303
+#: plugins/sudoers/def_data.c:307
 msgid "Provide visual feedback at the password prompt when there is user input"
 msgstr "Супроводжувати введення користувачем пароля показом замінників символів пароля"
 
-#: plugins/sudoers/def_data.c:307
+#: plugins/sudoers/def_data.c:311
 msgid "Use faster globbing that is less accurate but does not access the filesystem"
 msgstr "Швидше встановлення відповідності, менш точне, але без доступу до файлової системи"
 
-#: plugins/sudoers/def_data.c:311
+#: plugins/sudoers/def_data.c:315
 msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
 msgstr "Значення umask, вказане у sudoers, перевизначатиме значення користувача, навіть якщо це значення відкриває ширший доступ"
 
-#: plugins/sudoers/def_data.c:315
+#: plugins/sudoers/def_data.c:319
 msgid "Log user's input for the command being run"
 msgstr "Записувати дані, вказані користувачем під час виконання команди"
 
-#: plugins/sudoers/def_data.c:319
+#: plugins/sudoers/def_data.c:323
 msgid "Log the output of the command being run"
 msgstr "Записувати дані, виведені командою під час виконання"
 
-#: plugins/sudoers/def_data.c:323
+#: plugins/sudoers/def_data.c:327
 msgid "Compress I/O logs using zlib"
 msgstr "Стискати журнали за допомогою zlib"
 
-#: plugins/sudoers/def_data.c:327
+#: plugins/sudoers/def_data.c:331
 msgid "Always run commands in a pseudo-tty"
 msgstr "Завжди запускати команди у псевдо-tty"
 
-#: plugins/sudoers/def_data.c:331
+#: plugins/sudoers/def_data.c:335
 #, c-format
 msgid "Plugin for non-Unix group support: %s"
 msgstr "Додаток для підтримки не-Unix груп: %s"
 
-#: plugins/sudoers/def_data.c:335
+#: plugins/sudoers/def_data.c:339
 #, c-format
 msgid "Directory in which to store input/output logs: %s"
 msgstr "Каталог, у якому слід зберігати журнали введення/виведення: %s"
 
-#: plugins/sudoers/def_data.c:339
+#: plugins/sudoers/def_data.c:343
 #, c-format
 msgid "File in which to store the input/output log: %s"
 msgstr "Файл, у якому слід зберігати журнал введення/виведення даних: %s"
 
-#: plugins/sudoers/def_data.c:343
+#: plugins/sudoers/def_data.c:347
 msgid "Add an entry to the utmp/utmpx file when allocating a pty"
 msgstr "Додати запис до файла utmp/utmpx під час розміщення pty"
 
-#: plugins/sudoers/def_data.c:347
+#: plugins/sudoers/def_data.c:351
 msgid "Set the user in utmp to the runas user, not the invoking user"
 msgstr "Встановити користувача у utmp у значення користувача, від імені якого виконується команда"
 
-#: plugins/sudoers/def_data.c:351
+#: plugins/sudoers/def_data.c:355
 msgid "Set of permitted privileges"
 msgstr "Набір дозвільних прав доступу"
 
-#: plugins/sudoers/def_data.c:355
+#: plugins/sudoers/def_data.c:359
 msgid "Set of limit privileges"
 msgstr "Набір обмежувальних прав доступу"
 
-#: plugins/sudoers/def_data.c:359
+#: plugins/sudoers/def_data.c:363
 msgid "Run commands on a pty in the background"
 msgstr "Виконувати команди у pty у фоновому режимі"
 
-#: plugins/sudoers/def_data.c:363
+#: plugins/sudoers/def_data.c:367
 msgid "PAM service name to use"
 msgstr "Назва служби PAM, якою слід скористатися"
 
-#: plugins/sudoers/def_data.c:367
+#: plugins/sudoers/def_data.c:371
 msgid "PAM service name to use for login shells"
 msgstr "Назва служби PAM, якою слід скористатися для оболонок входу до системи"
 
-#: plugins/sudoers/def_data.c:371
+#: plugins/sudoers/def_data.c:375
 msgid "Attempt to establish PAM credentials for the target user"
 msgstr "Спробувати встановити реєстраційні дані PAM для користувача, від імені якого виконуватимуться дії"
 
-#: plugins/sudoers/def_data.c:375
+#: plugins/sudoers/def_data.c:379
 msgid "Create a new PAM session for the command to run in"
 msgstr "Створити сеанс PAM для виконання команди"
 
-#: plugins/sudoers/def_data.c:379
+#: plugins/sudoers/def_data.c:383
 #, c-format
 msgid "Maximum I/O log sequence number: %u"
 msgstr "Максимальний номер у послідовності журналу введення-виведення: %u"
 
-#: plugins/sudoers/def_data.c:383
+#: plugins/sudoers/def_data.c:387
 msgid "Enable sudoers netgroup support"
 msgstr "Увімкнути підтримку мережевих груп у sudoers"
 
@@ -699,21 +703,23 @@ msgstr "значення для «%s» має починатися з «/»"
 msgid "option `%s' does not take a value"
 msgstr "параметру «%s» не потрібно передавати значення"
 
-#: plugins/sudoers/env.c:276 plugins/sudoers/env.c:283
-#: plugins/sudoers/env.c:386 plugins/sudoers/linux_audit.c:83
-#: plugins/sudoers/logging.c:918 plugins/sudoers/policy.c:461
-#: plugins/sudoers/policy.c:470 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:708 plugins/sudoers/testsudoers.c:242
-#: plugins/sudoers/toke_util.c:174
+#: plugins/sudoers/env.c:278 plugins/sudoers/env.c:285
+#: plugins/sudoers/env.c:388 plugins/sudoers/ldap.c:456
+#: plugins/sudoers/ldap.c:538 plugins/sudoers/ldap.c:1315
+#: plugins/sudoers/ldap.c:1474 plugins/sudoers/ldap.c:1623
+#: plugins/sudoers/linux_audit.c:83 plugins/sudoers/logging.c:919
+#: plugins/sudoers/policy.c:457 plugins/sudoers/policy.c:466
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:709
+#: plugins/sudoers/testsudoers.c:239 plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "внутрішня помилка, переповнення %s"
 
-#: plugins/sudoers/env.c:359
+#: plugins/sudoers/env.c:361
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: помилкове значення envp, невідповідність довжин"
 
-#: plugins/sudoers/env.c:1054
+#: plugins/sudoers/env.c:1109
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "вибачте, вам не дозволено встановлювати такі змінні середовища: %s"
@@ -748,35 +754,35 @@ msgid "Local IP address and netmask pairs:\n"
 msgstr "Пари локальних IP-адрес і масок мережі:\n"
 
 #: plugins/sudoers/iolog.c:101 plugins/sudoers/iolog.c:119
-#: plugins/sudoers/timestamp.c:233
+#: plugins/sudoers/timestamp.c:224
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "%s існує, але не є каталогом (0%o)"
 
 #: plugins/sudoers/iolog.c:112 plugins/sudoers/iolog.c:133
-#: plugins/sudoers/iolog.c:140 plugins/sudoers/timestamp.c:227
-#: plugins/sudoers/timestamp.c:248
+#: plugins/sudoers/iolog.c:140 plugins/sudoers/timestamp.c:218
+#: plugins/sudoers/timestamp.c:239
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "не вдалося створити каталог %s"
 
-#: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:764
-#: plugins/sudoers/sudoreplay.c:348 plugins/sudoers/sudoreplay.c:819
-#: plugins/sudoers/sudoreplay.c:1016 plugins/sudoers/timestamp.c:357
-#: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1025
-#: plugins/sudoers/visudo_json.c:1038
+#: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:765
+#: plugins/sudoers/sudoreplay.c:330 plugins/sudoers/sudoreplay.c:793
+#: plugins/sudoers/sudoreplay.c:990 plugins/sudoers/timestamp.c:351
+#: plugins/sudoers/visudo.c:832 plugins/sudoers/visudo_json.c:1035
+#: plugins/sudoers/visudo_json.c:1048
 #, c-format
 msgid "unable to open %s"
 msgstr "не вдалося відкрити %s"
 
-#: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:768
-#: plugins/sudoers/sudoreplay.c:1123
+#: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:769
+#: plugins/sudoers/sudoreplay.c:1093
 #, c-format
 msgid "unable to read %s"
 msgstr "не вдалося прочитати %s"
 
-#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:588
-#: plugins/sudoers/timestamp.c:186 plugins/sudoers/timestamp.c:189
+#: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:575
+#: plugins/sudoers/timestamp.c:177 plugins/sudoers/timestamp.c:180
 #, c-format
 msgid "unable to write to %s"
 msgstr "не вдалося виконати запис до %s"
@@ -786,63 +792,51 @@ msgstr "не вдалося виконати запис до %s"
 msgid "unable to create %s"
 msgstr "не вдалося створити %s"
 
-#: plugins/sudoers/ldap.c:406
+#: plugins/sudoers/ldap.c:435
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: занадто великий номер порту"
 
-#: plugins/sudoers/ldap.c:431
-msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
-msgstr "sudo_ldap_conf_add_ports: вихід за межі розширеного буфера вузла"
-
-#: plugins/sudoers/ldap.c:464
+#: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "непідтримуваний тип адреси LDAP: %s"
 
-#: plugins/sudoers/ldap.c:495
+#: plugins/sudoers/ldap.c:516
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "не можна використовувати суміш з адрес ldap і ldaps"
 
-#: plugins/sudoers/ldap.c:499 plugins/sudoers/ldap.c:532
+#: plugins/sudoers/ldap.c:520 plugins/sudoers/ldap.c:553
 msgid "starttls not supported when using ldaps"
 msgstr "підтримки starttls, якщо використовується ldaps, не передбачено"
 
-#: plugins/sudoers/ldap.c:517
-msgid "sudo_ldap_parse_uri: out of space building hostbuf"
-msgstr "sudo_ldap_parse_uri: вихід за межі пам’яті під час побудови буфера вузла"
-
-#: plugins/sudoers/ldap.c:599
+#: plugins/sudoers/ldap.c:620
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "не вдалося ініціалізувати базу даних сертифікатів і ключів SSL: %s"
 
-#: plugins/sudoers/ldap.c:602
+#: plugins/sudoers/ldap.c:623
 #, c-format
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "щоб скористатися SSL, вам слід встановити для TLS_CERT значення %s"
 
-#: plugins/sudoers/ldap.c:1093
+#: plugins/sudoers/ldap.c:1114
 msgid "unable to get GMT time"
 msgstr "не вдалося отримати гринвіцький час"
 
-#: plugins/sudoers/ldap.c:1099
+#: plugins/sudoers/ldap.c:1120
 msgid "unable to format timestamp"
 msgstr "не вдалося виконати форматування часового штампа"
 
-#: plugins/sudoers/ldap.c:1107
+#: plugins/sudoers/ldap.c:1128
 msgid "unable to build time filter"
 msgstr "не вдалося побудувати фільтр часу"
 
-#: plugins/sudoers/ldap.c:1326
-msgid "sudo_ldap_build_pass1 allocation mismatch"
-msgstr "sudo_ldap_build_pass1: невідповідність розміщення"
-
-#: plugins/sudoers/ldap.c:1469
+#: plugins/sudoers/ldap.c:1757
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/ldap.c:1963
+#: plugins/sudoers/ldap.c:2264
 #, c-format
 msgid ""
 "\n"
@@ -851,7 +845,7 @@ msgstr ""
 "\n"
 "Роль LDAP: %s\n"
 
-#: plugins/sudoers/ldap.c:1965
+#: plugins/sudoers/ldap.c:2266
 #, c-format
 msgid ""
 "\n"
@@ -860,27 +854,27 @@ msgstr ""
 "\n"
 "Роль у LDAP: НЕВІДОМА\n"
 
-#: plugins/sudoers/ldap.c:2012
+#: plugins/sudoers/ldap.c:2313
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Порядок: %s\n"
 
-#: plugins/sudoers/ldap.c:2020 plugins/sudoers/parse.c:512
+#: plugins/sudoers/ldap.c:2321 plugins/sudoers/parse.c:537
 #: plugins/sudoers/sssd.c:1297
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Команди:\n"
 
-#: plugins/sudoers/ldap.c:2570
+#: plugins/sudoers/ldap.c:2871
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "не вдалося ініціалізувати LDAP: %s"
 
-#: plugins/sudoers/ldap.c:2612
+#: plugins/sudoers/ldap.c:2913
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls вказано, але у бібліотеках LDAP не передбачено підтримки ldap_start_tls_s() або ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2845
+#: plugins/sudoers/ldap.c:3146
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "некоректний атрибут sudoOrder: %s"
@@ -953,15 +947,15 @@ msgstr "Вибачте, користувач %s не має права вико�
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "Вибачте, користувач %s не має права виконувати «%s%s%s» від імені %s%s%s на %s.\n"
 
-#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:407
-#: plugins/sudoers/sudoers.c:409 plugins/sudoers/sudoers.c:411
-#: plugins/sudoers/sudoers.c:413 plugins/sudoers/sudoers.c:1128
-#: plugins/sudoers/sudoers.c:1129
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:408
+#: plugins/sudoers/sudoers.c:410 plugins/sudoers/sudoers.c:412
+#: plugins/sudoers/sudoers.c:414 plugins/sudoers/sudoers.c:1129
+#: plugins/sudoers/sudoers.c:1130
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: команду не знайдено"
 
-#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:403
+#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:404
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
@@ -1011,17 +1005,17 @@ msgstr "не вдалося здублювати stdin: %m"
 msgid "unable to execute %s: %m"
 msgstr "не вдалося виконати %s: %m"
 
-#: plugins/sudoers/match.c:627
+#: plugins/sudoers/match.c:630
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "непідтримуваний тип контрольної суми, %d, для %s"
 
-#: plugins/sudoers/match.c:656
+#: plugins/sudoers/match.c:659
 #, c-format
 msgid "%s: read error"
 msgstr "%s: помилка читання"
 
-#: plugins/sudoers/match.c:670
+#: plugins/sudoers/match.c:673
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "контрольну суму для %s (%s) подано не у формі %s"
@@ -1036,7 +1030,7 @@ msgstr "помилка обробки у %s поблизу рядка %d"
 msgid "parse error in %s"
 msgstr "помилка обробки у %s"
 
-#: plugins/sudoers/parse.c:459
+#: plugins/sudoers/parse.c:484
 #, c-format
 msgid ""
 "\n"
@@ -1045,26 +1039,26 @@ msgstr ""
 "\n"
 "Запис sudoers:\n"
 
-#: plugins/sudoers/parse.c:460
+#: plugins/sudoers/parse.c:485
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    Користувачі для запуску: "
 
-#: plugins/sudoers/parse.c:474
+#: plugins/sudoers/parse.c:499
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    Групи для запуску: "
 
-#: plugins/sudoers/parse.c:483
+#: plugins/sudoers/parse.c:508
 #, c-format
 msgid "    Options: "
 msgstr "    Параметри: "
 
 #: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:118
 #: plugins/sudoers/policy.c:127 plugins/sudoers/policy.c:151
-#: plugins/sudoers/policy.c:263 plugins/sudoers/policy.c:283
-#: plugins/sudoers/policy.c:292 plugins/sudoers/policy.c:322
-#: plugins/sudoers/policy.c:332 plugins/sudoers/policy.c:341
+#: plugins/sudoers/policy.c:259 plugins/sudoers/policy.c:279
+#: plugins/sudoers/policy.c:288 plugins/sudoers/policy.c:318
+#: plugins/sudoers/policy.c:328 plugins/sudoers/policy.c:337
 #: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
 #: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
 #: plugins/sudoers/set_perms.c:1523
@@ -1072,22 +1066,22 @@ msgstr "    Параметри: "
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: plugins/sudoers/policy.c:569 plugins/sudoers/visudo.c:773
+#: plugins/sudoers/policy.c:565 plugins/sudoers/visudo.c:773
 #, c-format
 msgid "unable to execute %s"
 msgstr "не вдалося виконати %s"
 
-#: plugins/sudoers/policy.c:701
+#: plugins/sudoers/policy.c:697
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Додаток правил sudoers версії %s\n"
 
-#: plugins/sudoers/policy.c:703
+#: plugins/sudoers/policy.c:699
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Граматична перевірка файла sudoers версії %d\n"
 
-#: plugins/sudoers/policy.c:707
+#: plugins/sudoers/policy.c:703
 #, c-format
 msgid ""
 "\n"
@@ -1096,17 +1090,17 @@ msgstr ""
 "\n"
 "Шлях до sudoers: %s\n"
 
-#: plugins/sudoers/policy.c:710
+#: plugins/sudoers/policy.c:706
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "Шлях до nsswitch: %s\n"
 
-#: plugins/sudoers/policy.c:712
+#: plugins/sudoers/policy.c:708
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "Шлях до ldap.conf: %s\n"
 
-#: plugins/sudoers/policy.c:713
+#: plugins/sudoers/policy.c:709
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "Шлях до ldap.secret: %s\n"
@@ -1121,22 +1115,22 @@ msgstr "не вдалося кешувати uid %u, запис вже існу�
 msgid "unable to cache user %s, already exists"
 msgstr "не вдалося кешувати користувача %s, запис вже існує"
 
-#: plugins/sudoers/pwutil.c:400
+#: plugins/sudoers/pwutil.c:408
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "не вдалося кешувати gid %u, запис вже існує"
 
-#: plugins/sudoers/pwutil.c:439
+#: plugins/sudoers/pwutil.c:447
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "не вдалося кешувати групу %s, запис вже існує"
 
-#: plugins/sudoers/pwutil.c:605 plugins/sudoers/pwutil.c:631
+#: plugins/sudoers/pwutil.c:621 plugins/sudoers/pwutil.c:647
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "не вдалося кешувати список груп %s, запис вже існує"
 
-#: plugins/sudoers/pwutil.c:627
+#: plugins/sudoers/pwutil.c:643
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "не вдалося обробити записи груп %s"
@@ -1235,235 +1229,235 @@ msgstr "Користувач %s має право виконувати на %s �
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Користувач %s не має права виконувати sudo на %s.\n"
 
-#: plugins/sudoers/sudoers.c:160 plugins/sudoers/sudoers.c:201
-#: plugins/sudoers/sudoers.c:726
+#: plugins/sudoers/sudoers.c:160 plugins/sudoers/sudoers.c:202
+#: plugins/sudoers/sudoers.c:727
 msgid "problem with defaults entries"
 msgstr "проблема з типовими записами"
 
-#: plugins/sudoers/sudoers.c:167
+#: plugins/sudoers/sudoers.c:168
 msgid "no valid sudoers sources found, quitting"
 msgstr "не знайдено коректних джерел даних sudoers, завершення роботи"
 
-#: plugins/sudoers/sudoers.c:233
+#: plugins/sudoers/sudoers.c:234
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "sudoers вказує, що sudo не можна користуватися для виконання команд від  root"
 
-#: plugins/sudoers/sudoers.c:278
+#: plugins/sudoers/sudoers.c:279
 msgid "you are not permitted to use the -C option"
 msgstr "вам не дозволено використовувати параметр -C"
 
-#: plugins/sudoers/sudoers.c:336
+#: plugins/sudoers/sudoers.c:337
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "власник часового штампа (%s): не знайдено користувача з таким іменем"
 
-#: plugins/sudoers/sudoers.c:350
+#: plugins/sudoers/sudoers.c:351
 msgid "no tty"
 msgstr "немає tty"
 
-#: plugins/sudoers/sudoers.c:351
+#: plugins/sudoers/sudoers.c:352
 msgid "sorry, you must have a tty to run sudo"
 msgstr "вибачте, для виконання sudo вашому користувачеві потрібен tty"
 
-#: plugins/sudoers/sudoers.c:402
+#: plugins/sudoers/sudoers.c:403
 msgid "command in current directory"
 msgstr "команда у поточному каталозі"
 
-#: plugins/sudoers/sudoers.c:422
+#: plugins/sudoers/sudoers.c:423
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "вибачте, вам не дозволено зберігати середовище"
 
-#: plugins/sudoers/sudoers.c:674
+#: plugins/sudoers/sudoers.c:675
 msgid "command too long"
 msgstr "надто довга команда"
 
-#: plugins/sudoers/sudoers.c:779 plugins/sudoers/visudo.c:333
+#: plugins/sudoers/sudoers.c:780 plugins/sudoers/visudo.c:333
 #: plugins/sudoers/visudo.c:599
 #, c-format
 msgid "unable to stat %s"
 msgstr "не вдалося виконати stat для %s"
 
-#: plugins/sudoers/sudoers.c:783
+#: plugins/sudoers/sudoers.c:784
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s не є звичайним файлом"
 
-#: plugins/sudoers/sudoers.c:787 plugins/sudoers/timestamp.c:289 toke.l:945
+#: plugins/sudoers/sudoers.c:788 plugins/sudoers/timestamp.c:280 toke.l:955
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s належить uid %u, має належати %u"
 
-#: plugins/sudoers/sudoers.c:791 toke.l:952
+#: plugins/sudoers/sudoers.c:792 toke.l:962
 #, c-format
 msgid "%s is world writable"
 msgstr "Запис до «%s» можливий для довільного користувача"
 
-#: plugins/sudoers/sudoers.c:795 toke.l:957
+#: plugins/sudoers/sudoers.c:796 toke.l:967
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s належить gid %u, має належати %u"
 
-#: plugins/sudoers/sudoers.c:826
+#: plugins/sudoers/sudoers.c:827
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr "використовувати «-c %s» може лише root"
 
-#: plugins/sudoers/sudoers.c:845
+#: plugins/sudoers/sudoers.c:846
 #, c-format
 msgid "unknown login class: %s"
 msgstr "невідомий клас входу: %s"
 
-#: plugins/sudoers/sudoers.c:889 plugins/sudoers/sudoers.c:904
+#: plugins/sudoers/sudoers.c:890 plugins/sudoers/sudoers.c:905
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "не вдалося визначити адресу вузла %s"
 
-#: plugins/sudoers/sudoers.c:986 plugins/sudoers/testsudoers.c:388
+#: plugins/sudoers/sudoers.c:987 plugins/sudoers/testsudoers.c:385
 #, c-format
 msgid "unknown group: %s"
 msgstr "невідома група: %s"
 
-#: plugins/sudoers/sudoreplay.c:280
+#: plugins/sudoers/sudoreplay.c:262
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "некоректний параметр фільтрування: %s"
 
-#: plugins/sudoers/sudoreplay.c:293
+#: plugins/sudoers/sudoreplay.c:275
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "некоректне значення макс. очікування: %s"
 
-#: plugins/sudoers/sudoreplay.c:299
+#: plugins/sudoers/sudoreplay.c:281
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "некоректний коефіцієнт швидкості: %s"
 
-#: plugins/sudoers/sudoreplay.c:302 plugins/sudoers/visudo.c:190
+#: plugins/sudoers/sudoreplay.c:284 plugins/sudoers/visudo.c:190
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s, версія %s\n"
 
-#: plugins/sudoers/sudoreplay.c:334
+#: plugins/sudoers/sudoreplay.c:316
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/timing: %s"
 
-#: plugins/sudoers/sudoreplay.c:340
+#: plugins/sudoers/sudoreplay.c:322
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/timing: %s"
 
-#: plugins/sudoers/sudoreplay.c:356
+#: plugins/sudoers/sudoreplay.c:338
 #, c-format
 msgid "Replaying sudo session: %s\n"
 msgstr "Відтворення сеансу sudo: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:362
+#: plugins/sudoers/sudoreplay.c:344
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr "Попередження: розміри вашого термінала є замалими для належного показу журналу.\n"
 
-#: plugins/sudoers/sudoreplay.c:363
+#: plugins/sudoers/sudoreplay.c:345
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Встановлено формат журналу %d x %d, тоді як формат термінала — %d x %d."
 
-#: plugins/sudoers/sudoreplay.c:418
+#: plugins/sudoers/sudoreplay.c:397
 msgid "unable to set tty to raw mode"
 msgstr "не вдалося перевести tty у режим без обробки даних"
 
-#: plugins/sudoers/sudoreplay.c:449
+#: plugins/sudoers/sudoreplay.c:428
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "некоректний рядок у файлі timing: %s"
 
-#: plugins/sudoers/sudoreplay.c:655 plugins/sudoers/sudoreplay.c:680
+#: plugins/sudoers/sudoreplay.c:636 plugins/sudoers/sudoreplay.c:661
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "неоднозначний вираз «%s»"
 
-#: plugins/sudoers/sudoreplay.c:702
+#: plugins/sudoers/sudoreplay.c:683
 msgid "unmatched ')' in expression"
 msgstr "зайва дужка, «)», у виразі"
 
-#: plugins/sudoers/sudoreplay.c:706
+#: plugins/sudoers/sudoreplay.c:687
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "невідомий ключ пошуку «%s»"
 
-#: plugins/sudoers/sudoreplay.c:720
+#: plugins/sudoers/sudoreplay.c:701
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s потребує визначення аргументу"
 
-#: plugins/sudoers/sudoreplay.c:724 plugins/sudoers/sudoreplay.c:1096
+#: plugins/sudoers/sudoreplay.c:704 plugins/sudoers/sudoreplay.c:1069
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "некоректний формальний вираз: %s"
 
-#: plugins/sudoers/sudoreplay.c:730
+#: plugins/sudoers/sudoreplay.c:708
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "не вдалося обробити дату «%s»"
 
-#: plugins/sudoers/sudoreplay.c:739
+#: plugins/sudoers/sudoreplay.c:717
 msgid "unmatched '(' in expression"
 msgstr "зайва дужка, «(», у виразі"
 
-#: plugins/sudoers/sudoreplay.c:741
+#: plugins/sudoers/sudoreplay.c:719
 msgid "illegal trailing \"or\""
 msgstr "помилкове завершальне «or»"
 
-#: plugins/sudoers/sudoreplay.c:743
+#: plugins/sudoers/sudoreplay.c:721
 msgid "illegal trailing \"!\""
 msgstr "помилкове завершальне «!»"
 
-#: plugins/sudoers/sudoreplay.c:796
+#: plugins/sudoers/sudoreplay.c:770
 #, c-format
 msgid "unknown search type %d"
 msgstr "невідомий тип пошуку %d"
 
-#: plugins/sudoers/sudoreplay.c:833
+#: plugins/sudoers/sudoreplay.c:807
 #, c-format
 msgid "%s: invalid log file"
 msgstr "%s: некоректний файл журналу"
 
-#: plugins/sudoers/sudoreplay.c:851
+#: plugins/sudoers/sudoreplay.c:825
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr "%s: не вказано даних щодо часової позначки"
 
-#: plugins/sudoers/sudoreplay.c:858
+#: plugins/sudoers/sudoreplay.c:832
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr "%s: часова позначка %s: %s"
 
-#: plugins/sudoers/sudoreplay.c:865
+#: plugins/sudoers/sudoreplay.c:839
 #, c-format
 msgid "%s: user field is missing"
 msgstr "%s: не вказано даних щодо користувача"
 
-#: plugins/sudoers/sudoreplay.c:873
+#: plugins/sudoers/sudoreplay.c:847
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr "%s: не вказано даних щодо користувача, від імені якого відбуватиметься виконання"
 
-#: plugins/sudoers/sudoreplay.c:881
+#: plugins/sudoers/sudoreplay.c:855
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr "%s: не вказано даних щодо групи, від імені якої відбуватиметься виконання"
 
-#: plugins/sudoers/sudoreplay.c:1236
+#: plugins/sudoers/sudoreplay.c:1206
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "користування: %s [-h] [-d каталог] [-m число] [-s число] ідентифікатор\n"
 
-#: plugins/sudoers/sudoreplay.c:1239
+#: plugins/sudoers/sudoreplay.c:1209
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "використання: %s [-h] [-d каталог] -l [вираз для пошуку]\n"
 
-#: plugins/sudoers/sudoreplay.c:1248
+#: plugins/sudoers/sudoreplay.c:1218
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1472,7 +1466,7 @@ msgstr ""
 "%s — відтворення журналів сеансів sudo\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1250
+#: plugins/sudoers/sudoreplay.c:1220
 msgid ""
 "\n"
 "Options:\n"
@@ -1494,11 +1488,11 @@ msgstr ""
 "  -s, --speed=коеф_швидк   коефіцієнт прискорення або сповільнення виводу даних\n"
 "  -V, --version            показати дані щодо версії і завершити роботу"
 
-#: plugins/sudoers/testsudoers.c:327
+#: plugins/sudoers/testsudoers.c:324
 msgid "\thost  unmatched"
 msgstr "\tвідповідника вузла не знайдено"
 
-#: plugins/sudoers/testsudoers.c:330
+#: plugins/sudoers/testsudoers.c:327
 msgid ""
 "\n"
 "Command allowed"
@@ -1506,7 +1500,7 @@ msgstr ""
 "\n"
 "Команду дозволено"
 
-#: plugins/sudoers/testsudoers.c:331
+#: plugins/sudoers/testsudoers.c:328
 msgid ""
 "\n"
 "Command denied"
@@ -1514,7 +1508,7 @@ msgstr ""
 "\n"
 "Команду заборонено"
 
-#: plugins/sudoers/testsudoers.c:331
+#: plugins/sudoers/testsudoers.c:328
 msgid ""
 "\n"
 "Command unmatched"
@@ -1522,31 +1516,35 @@ msgstr ""
 "\n"
 "Не знайдено відповідника команди"
 
-#: plugins/sudoers/timestamp.c:197
+#: plugins/sudoers/timestamp.c:188
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "не вдалося обрізати файл часової позначки до %lld байтів"
 
-#: plugins/sudoers/timestamp.c:297
+#: plugins/sudoers/timestamp.c:288
 #, c-format
 msgid "%s is group writable"
 msgstr "%s доступний до запису учасниками групи"
 
-#: plugins/sudoers/timestamp.c:318
+#: plugins/sudoers/timestamp.c:309
 #, c-format
 msgid "timestamp path too long: %s/%s"
 msgstr "надто довгий шлях до часової позначки: %s/%s"
 
-#: plugins/sudoers/timestamp.c:498
+#: plugins/sudoers/timestamp.c:340 plugins/sudoers/timestamp.c:425
+msgid "unable to read the clock"
+msgstr "не вдалося прочитати час на годиннику"
+
+#: plugins/sudoers/timestamp.c:495
 msgid "ignoring time stamp from the future"
 msgstr "ігноруємо часову позначку з майбутнього"
 
-#: plugins/sudoers/timestamp.c:510
+#: plugins/sudoers/timestamp.c:507
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "занадто далека часова позначка у майбутньому: %20.20s"
 
-#: plugins/sudoers/timestamp.c:613 plugins/sudoers/timestamp.c:634
+#: plugins/sudoers/timestamp.c:610 plugins/sudoers/timestamp.c:631
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "шлях до даних щодо стану отримання настанов є занадто довгим: %s/%s"
@@ -1656,17 +1654,17 @@ msgstr "%s: помилковий власник (uid, gid), має бути (%u,
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: помилкові права доступу, режим доступу має бути 0%o\n"
 
-#: plugins/sudoers/visudo.c:838 plugins/sudoers/visudo_json.c:1045
+#: plugins/sudoers/visudo.c:838 plugins/sudoers/visudo_json.c:1055
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "не вдалося обробити файл %s, невідома помилка"
 
-#: plugins/sudoers/visudo.c:854 plugins/sudoers/visudo_json.c:1054
+#: plugins/sudoers/visudo.c:854 plugins/sudoers/visudo_json.c:1064
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "помилка обробки у %s поблизу рядка %d\n"
 
-#: plugins/sudoers/visudo.c:857 plugins/sudoers/visudo_json.c:1057
+#: plugins/sudoers/visudo.c:857 plugins/sudoers/visudo_json.c:1067
 #, c-format
 msgid "parse error in %s\n"
 msgstr "помилка обробки у %s\n"
@@ -1696,32 +1694,32 @@ msgstr "не вдалося виконати stat для редактора (%s)
 msgid "no editor found (editor path = %s)"
 msgstr "не знайдено жодного редактора (шлях до редактора = %s)"
 
-#: plugins/sudoers/visudo.c:1136
+#: plugins/sudoers/visudo.c:1133
 #, c-format
 msgid "Error: cycle in %s `%s'"
 msgstr "Помилка: цикл у %s «%s»"
 
-#: plugins/sudoers/visudo.c:1137
+#: plugins/sudoers/visudo.c:1134
 #, c-format
 msgid "Warning: cycle in %s `%s'"
 msgstr "Попередження: цикл у %s «%s»"
 
-#: plugins/sudoers/visudo.c:1141
+#: plugins/sudoers/visudo.c:1138
 #, c-format
 msgid "Error: %s `%s' referenced but not defined"
 msgstr "Помилка: виявлено посилання %s «%s», яке не визначено"
 
-#: plugins/sudoers/visudo.c:1142
+#: plugins/sudoers/visudo.c:1139
 #, c-format
 msgid "Warning: %s `%s' referenced but not defined"
 msgstr "Попередження: виявлено посилання %s «%s», яке не визначено"
 
-#: plugins/sudoers/visudo.c:1281
+#: plugins/sudoers/visudo.c:1278
 #, c-format
 msgid "Warning: unused %s `%s'"
 msgstr "Попередження: не використано %s «%s»"
 
-#: plugins/sudoers/visudo.c:1394
+#: plugins/sudoers/visudo.c:1391
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1730,7 +1728,7 @@ msgstr ""
 "%s — безпечне редагування файла sudoers\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1396
+#: plugins/sudoers/visudo.c:1393
 msgid ""
 "\n"
 "Options:\n"
@@ -1752,14 +1750,23 @@ msgstr ""
 "  -V, --version            показати дані щодо версії і завершити роботу\n"
 "  -x, --export=файл        експортувати sudoers у форматі JSON до файла"
 
-#: plugins/sudoers/visudo_json.c:1031
+#: plugins/sudoers/visudo_json.c:1041
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr "%s: файли вхідних і вихідних даних мають бути різними файлами"
 
-#: toke.l:915
+#: toke.l:925
 msgid "too many levels of includes"
 msgstr "занадто високий рівень вкладеності"
+
+#~ msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
+#~ msgstr "sudo_ldap_conf_add_ports: вихід за межі розширеного буфера вузла"
+
+#~ msgid "sudo_ldap_parse_uri: out of space building hostbuf"
+#~ msgstr "sudo_ldap_parse_uri: вихід за межі пам’яті під час побудови буфера вузла"
+
+#~ msgid "sudo_ldap_build_pass1 allocation mismatch"
+#~ msgstr "sudo_ldap_build_pass1: невідповідність розміщення"
 
 #~ msgid "Password:"
 #~ msgstr "Пароль:"
