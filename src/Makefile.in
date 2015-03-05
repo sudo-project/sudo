@@ -131,7 +131,7 @@ sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
 sudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
