@@ -25,22 +25,7 @@
 #   checked in turn, and the first one found is prefered. Note that only one
 #   of the mentioned preprocessor macros will be defined!
 #
-#   1. Function attributes
-#
-#   This scheme was first introduced by the GNU C compiler, and attaches
-#   attributes to particular functions. It is among the easiest to use, and
-#   so is the first one checked. If this scheme is detected, the
-#   preprocessor macro HAVE_SYS_WEAK_ALIAS_ATTRIBUTE will be defined to 1.
-#   This scheme is used as in the following code fragment:
-#
-#     void __weakf(int c)
-#     {
-#       /* Function definition... */
-#     }
-#
-#     void weakf(int c) __attribute__((weak, alias("__weakf")));
-#
-#   2. #pragma weak
+#   1. #pragma weak
 #
 #   This scheme is in use by many compilers other than the GNU C compiler.
 #   It is also particularly easy to use, and fairly portable -- well, as
@@ -55,7 +40,7 @@
 #       /* Function definition... */
 #     }
 #
-#   3. #pragma _HP_SECONDARY_DEF
+#   2. #pragma _HP_SECONDARY_DEF
 #
 #   This scheme appears to be in use by the HP compiler. As it is rather
 #   specialized, this is one of the last schemes checked. If it is the first
@@ -70,7 +55,7 @@
 #       /* Function definition... */
 #     }
 #
-#   4. #pragma _CRI duplicate
+#   3. #pragma _CRI duplicate
 #
 #   This scheme appears to be in use by the Cray compiler. As it is rather
 #   specialized, it too is one of the last schemes checked. If it is the
@@ -84,6 +69,22 @@
 #     {
 #       /* Function definition... */
 #     }
+#
+#   4. Function attributes
+#
+#   This scheme was first introduced by the GNU C compiler, and attaches
+#   attributes to particular functions. However, since some compilers
+#   simply ignore unsupported attributes, this scheme is tried last.
+#   If this scheme is detected, the preprocessor macro
+#   HAVE_SYS_WEAK_ALIAS_ATTRIBUTE will be defined to 1.
+#   This scheme is used as in the following code fragment:
+#
+#     void __weakf(int c)
+#     {
+#       /* Function definition... */
+#     }
+#
+#     void weakf(int c) __attribute__((weak, alias("__weakf")));
 #
 #   In addition to the preprocessor macros listed above, if any scheme is
 #   found, the preprocessor macro HAVE_SYS_WEAK_ALIAS will also be defined
@@ -118,10 +119,10 @@ AC_DEFUN([AX_SYS_WEAK_ALIAS], [
   ax_sys_weak_alias=no
 
   # Figure out what kind of aliasing may be supported...
-  _AX_SYS_WEAK_ALIAS_ATTRIBUTE
   _AX_SYS_WEAK_ALIAS_PRAGMA
   _AX_SYS_WEAK_ALIAS_HPSECONDARY
   _AX_SYS_WEAK_ALIAS_CRIDUPLICATE
+  _AX_SYS_WEAK_ALIAS_ATTRIBUTE
 
   # Do we actually support aliasing?
   AC_CACHE_CHECK([how to create weak aliases with $CC],
