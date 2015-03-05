@@ -15649,65 +15649,6 @@ if test "$enable_shared_libutil" = "yes"; then
   ax_sys_weak_alias=no
 
   # Figure out what kind of aliasing may be supported...
-   # Test whether compiler accepts __attribute__ form of weak aliasing
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC accepts function __attribute__((weak,alias()))" >&5
-$as_echo_n "checking whether $CC accepts function __attribute__((weak,alias()))... " >&6; }
-if ${ax_cv_sys_weak_alias_attribute+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    # We add -Werror if it's gcc to force an error exit if the weak attribute
-    # isn't understood
-    if test $GCC = yes; then :
-
-      save_CFLAGS=$CFLAGS
-      CFLAGS=-Werror
-fi
-
-    # Try linking with a weak alias...
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-void __weakf(int c) {}
-void weakf(int c) __attribute__((weak, alias("__weakf")));
-int
-main ()
-{
-weakf(0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_sys_weak_alias_attribute=yes
-else
-  ax_cv_sys_weak_alias_attribute=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-    # Restore original CFLAGS
-    if test $GCC = yes; then :
-
-      CFLAGS=$save_CFLAGS
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_attribute" >&5
-$as_echo "$ax_cv_sys_weak_alias_attribute" >&6; }
-
-  # What was the result of the test?
-  if test $ax_sys_weak_alias = no &&
-         test $ax_cv_sys_weak_alias_attribute = yes; then :
-
-    ax_sys_weak_alias=attribute
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS_ATTRIBUTE 1" >>confdefs.h
-
-
-fi
-
    # Test whether compiler accepts #pragma form of weak aliasing
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports #pragma weak" >&5
 $as_echo_n "checking whether $CC supports #pragma weak... " >&6; }
@@ -15845,6 +15786,65 @@ $as_echo "$ax_cv_sys_weak_alias_criduplicate" >&6; }
     ax_sys_weak_alias=criduplicate
 
 $as_echo "#define HAVE_SYS_WEAK_ALIAS_CRIDUPLICATE 1" >>confdefs.h
+
+
+fi
+
+   # Test whether compiler accepts __attribute__ form of weak aliasing
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC accepts function __attribute__((weak,alias()))" >&5
+$as_echo_n "checking whether $CC accepts function __attribute__((weak,alias()))... " >&6; }
+if ${ax_cv_sys_weak_alias_attribute+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    # We add -Werror if it's gcc to force an error exit if the weak attribute
+    # isn't understood
+    if test $GCC = yes; then :
+
+      save_CFLAGS=$CFLAGS
+      CFLAGS=-Werror
+fi
+
+    # Try linking with a weak alias...
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+void __weakf(int c) {}
+void weakf(int c) __attribute__((weak, alias("__weakf")));
+int
+main ()
+{
+weakf(0)
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_sys_weak_alias_attribute=yes
+else
+  ax_cv_sys_weak_alias_attribute=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+    # Restore original CFLAGS
+    if test $GCC = yes; then :
+
+      CFLAGS=$save_CFLAGS
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_attribute" >&5
+$as_echo "$ax_cv_sys_weak_alias_attribute" >&6; }
+
+  # What was the result of the test?
+  if test $ax_sys_weak_alias = no &&
+         test $ax_cv_sys_weak_alias_attribute = yes; then :
+
+    ax_sys_weak_alias=attribute
+
+$as_echo "#define HAVE_SYS_WEAK_ALIAS_ATTRIBUTE 1" >>confdefs.h
 
 
 fi
