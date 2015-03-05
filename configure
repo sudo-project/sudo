@@ -948,6 +948,7 @@ enable_nls
 enable_rpath
 enable_static_sudoers
 enable_shared_libutil
+enable_weak_symbols
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1623,6 +1624,8 @@ Optional Features:
                           binary instead as a plugin
   --disable-shared-libutil
                           Disable use of the libsudo_util shared library.
+  --disable-weak-symbols  Disable use of weak symbols in the libsudo_util
+                          shared library.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -5667,6 +5670,14 @@ if test "${enable_shared_libutil+set}" = set; then :
   enableval=$enable_shared_libutil;
 else
   enable_shared_libutil=yes
+fi
+
+
+# Check whether --enable-weak_symbols was given.
+if test "${enable_weak_symbols+set}" = set; then :
+  enableval=$enable_weak_symbols;
+else
+  enable_weak_symbols=yes
 fi
 
 
@@ -15643,7 +15654,7 @@ $as_echo "#define volatile /**/" >>confdefs.h
 
 fi
 
-if test "$enable_shared_libutil" = "yes"; then
+if test "$enable_shared_libutil$enable_weak_symbols" = "yesyes"; then
 
   # starting point: no aliasing scheme yet...
   ax_sys_weak_alias=no

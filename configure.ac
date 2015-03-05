@@ -1463,6 +1463,10 @@ AC_ARG_ENABLE(shared_libutil,
 [AS_HELP_STRING([--disable-shared-libutil], [Disable use of the libsudo_util shared library.])],
 [], [enable_shared_libutil=yes])
 
+AC_ARG_ENABLE(weak_symbols,
+[AS_HELP_STRING([--disable-weak-symbols], [Disable use of weak symbols in the libsudo_util shared library.])],
+[], [enable_weak_symbols=yes])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -2144,7 +2148,7 @@ dnl
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_VOLATILE
-if test "$enable_shared_libutil" = "yes"; then
+if test "$enable_shared_libutil$enable_weak_symbols" = "yesyes"; then
     AX_SYS_WEAK_ALIAS
 fi
 AC_MSG_CHECKING([for variadic macro support in cpp])
