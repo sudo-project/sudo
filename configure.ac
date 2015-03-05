@@ -2609,7 +2609,7 @@ AC_CHECK_HEADER([sha2.h], [
 ])
 if test X"$FOUND_SHA2" = X"no"; then
     AC_LIBOBJ(sha2)
-    SUDO_APPEND_COMPAT_EXP(SHA224Final SHA224Init SHA224Pad SHA224Transform SHA224Update SHA256Final SHA256Init SHA256Pad SHA256Transform SHA256Update SHA384Final SHA384Init SHA384Pad SHA384Transform SHA384Update SHA512Final SHA512Init SHA512Pad SHA512Transform SHA512Update)
+    SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
 fi
 dnl
 dnl Function checks for sudo_noexec
