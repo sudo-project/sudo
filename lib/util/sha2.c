@@ -57,6 +57,7 @@
 #else
 # include "compat/endian.h"
 #endif
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "compat/sha2.h"
