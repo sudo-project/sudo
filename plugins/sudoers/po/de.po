@@ -3,12 +3,13 @@
 # Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013
 # Hendrik Knackstedt <hendrik.knackstedt@t-online.de>, 2013
 # Jochen Hein <jochen@jochen.org>, 2001-2015.
+# Mario Blättermann  <mario.blaettermann@gmail.com>, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.8.13b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2015-02-24 11:20-0700\n"
-"PO-Revision-Date: 2015-03-05 17:33+0100\n"
+"PO-Revision-Date: 2015-03-15 06:23+0100\n"
 "Last-Translator: Jochen Hein <jochen@jochen.org>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: German\n"
@@ -19,7 +20,7 @@ msgstr ""
 
 #: confstr.sh:1
 msgid "syntax error"
-msgstr "Syntax Fehler"
+msgstr "Syntax-Fehler"
 
 #: confstr.sh:2
 msgid "%p's password: "
@@ -44,7 +45,7 @@ msgstr "Das hat nicht funktioniert, bitte nochmal probieren."
 
 #: gram.y:385
 msgid "a digest requires a path name"
-msgstr "Ein Digest erfordert ein Pfadname"
+msgstr "Eine Prüfsumme erfordert einen Pfadnamen"
 
 #: plugins/sudoers/alias.c:136
 #, c-format
@@ -54,27 +55,27 @@ msgstr "Alias »%s« ist bereits definiert"
 #: plugins/sudoers/auth/bsdauth.c:75
 #, c-format
 msgid "unable to get login class for user %s"
-msgstr "Kann die Login-Klasse des Benutzers »%s« nicht lesen"
+msgstr "Die Anmeldeklasse des Benutzers »%s« kann nicht gelesen werden"
 
 #: plugins/sudoers/auth/bsdauth.c:80
 msgid "unable to begin bsd authentication"
-msgstr "Kann die BSD-Authentisierung nicht beginnen"
+msgstr "Die BSD-Authentifizierung kann nicht begonnen werden"
 
 #: plugins/sudoers/auth/bsdauth.c:88
 msgid "invalid authentication type"
-msgstr "ungültiger Authentisierungstyp"
+msgstr "Ungültiger Authentifizierungstyp"
 
 #: plugins/sudoers/auth/bsdauth.c:97
 msgid "unable to initialize BSD authentication"
-msgstr "Kann die BSD-Authentisierung nicht beginnen"
+msgstr "Die BSD-Authentifizierung kann nicht begonnen werden"
 
 #: plugins/sudoers/auth/fwtk.c:59
 msgid "unable to read fwtk config"
-msgstr "Kann die fwtk-Konfiguration nicht lesen"
+msgstr "Die fwtk-Konfiguration kann nicht gelesen werden"
 
 #: plugins/sudoers/auth/fwtk.c:64
 msgid "unable to connect to authentication server"
-msgstr "Kann nicht zum Authentisierungsserver verbinden"
+msgstr "Verbindung zum Authentifizierungsserver kann nicht aufgebaut werden"
 
 #: plugins/sudoers/auth/fwtk.c:70 plugins/sudoers/auth/fwtk.c:94
 #: plugins/sudoers/auth/fwtk.c:127
@@ -87,156 +88,156 @@ msgid ""
 "authentication server error:\n"
 "%s"
 msgstr ""
-"Fehler des Authentisierungsservers:\n"
+"Fehler des Authentifizierungsservers:\n"
 "%s"
 
 #: plugins/sudoers/auth/kerb5.c:116
 #, c-format
 msgid "%s: unable to convert principal to string ('%s'): %s"
-msgstr "%s: kann den Principal nicht in eine Zeichenkette konvertieren (»%s«): %s"
+msgstr "%s: Principal kann nicht in eine Zeichenkette umgewandelt werden (»%s«): %s"
 
 #: plugins/sudoers/auth/kerb5.c:158
 #, c-format
 msgid "%s: unable to parse '%s': %s"
-msgstr "%s: kann »%s« nicht parsen: %s"
+msgstr "%s: »%s« kann nicht ausgewertet werden: %s"
 
 # XXX check source?
 #: plugins/sudoers/auth/kerb5.c:167
 #, c-format
 msgid "%s: unable to resolve credential cache: %s"
-msgstr "%s: kann den Credential-Cache nicht auflösen: %s"
+msgstr "%s: Anmeldedaten-Zwischenspeicher kann nicht aufgelöst werden: %s"
 
 #: plugins/sudoers/auth/kerb5.c:214
 #, c-format
 msgid "%s: unable to allocate options: %s"
-msgstr "%s: kann die Optionen nicht allozieren: %s"
+msgstr "%s: Optionen können nicht zugewiesen werden: %s"
 
 #: plugins/sudoers/auth/kerb5.c:229
 #, c-format
 msgid "%s: unable to get credentials: %s"
-msgstr "%s: kann die Credentials nicht bekommen: %s"
+msgstr "%s: Anmeldedaten können nicht bekommen werden: %s"
 
 #: plugins/sudoers/auth/kerb5.c:242
 #, c-format
 msgid "%s: unable to initialize credential cache: %s"
-msgstr "%s: kann den Credential-Cache nicht initialisieren: %s"
+msgstr "%s: Anmeldedaten-Zwischenspeicher kann nicht initialisiert werden: %s"
 
 #: plugins/sudoers/auth/kerb5.c:245
 #, c-format
 msgid "%s: unable to store credential in cache: %s"
-msgstr "%s: kann die Credentials nicht im Credential-Cache speichern: %s"
+msgstr "%s: Anmeldedaten können nicht im Zwischenspeicher abgelegt werden: %s"
 
 #: plugins/sudoers/auth/kerb5.c:309
 #, c-format
 msgid "%s: unable to get host principal: %s"
-msgstr "%s: kann das Rechner-Principal nicht bekommen: %s"
+msgstr "%s: Rechner-Principal kann nicht bekommen werden: %s"
 
 #: plugins/sudoers/auth/kerb5.c:323
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr "%s: kann das TGT nicht verifizieren! Möglicher Angriff!: %s"
+msgstr "%s: TGT kann nicht verifiziert werden! Möglicher Angriff!: %s"
 
 #: plugins/sudoers/auth/pam.c:97
 msgid "unable to initialize PAM"
-msgstr "Kann PAM nicht initialisieren"
+msgstr "PAM kann nicht initialisiert werden"
 
 # XXX wie account übersetzen?
 #: plugins/sudoers/auth/pam.c:153
 msgid "account validation failure, is your account locked?"
-msgstr "Fehler bei der Validierung des Zugangs, ist der Zugang gesperrt?"
+msgstr "Fehler bei der Validierung des Kontos, ist das Konto gesperrt?"
 
 #: plugins/sudoers/auth/pam.c:157
 msgid "Account or password is expired, reset your password and try again"
-msgstr "Zugang oder Password ist abgelaufen, bitte Passwort zurücksetzen und nochmal probieren"
+msgstr "Konto oder Passwort ist abgelaufen, bitte Passwort zurücksetzen und nochmal probieren"
 
 #: plugins/sudoers/auth/pam.c:165
 #, c-format
 msgid "unable to change expired password: %s"
-msgstr "kann das abgelaufene Passwort nicht ändern: %s«"
+msgstr "Das abgelaufene Passwort kann nicht geändert werden: %s«"
 
 #: plugins/sudoers/auth/pam.c:170
 msgid "Password expired, contact your system administrator"
-msgstr "Dass Passwort ist abgelaufen, bitte wenden Sie sich an den Systemadministrator"
+msgstr "Das Passwort ist abgelaufen, bitte wenden Sie sich an den Systemadministrator"
 
 #: plugins/sudoers/auth/pam.c:174
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
-msgstr "Der Zugang ist abgelaufen oder in der PAM-Konfiguration fehlt der »account«-Abschnitt für sudo.  Bitte wenden Sie sich an den Systemadministrator"
+msgstr "Das Konto ist abgelaufen oder in der PAM-Konfiguration fehlt der »account«-Abschnitt für sudo.  Bitte wenden Sie sich an den Systemadministrator"
 
 #: plugins/sudoers/auth/pam.c:186
 #, c-format
 msgid "PAM authentication error: %s"
-msgstr "Fehler bei der PAM-Authentisierung: %s"
+msgstr "Fehler bei der PAM-Authentifizierung: %s"
 
 # XXX Karl fragen
 #: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:228
 #, c-format
 msgid "you do not exist in the %s database"
-msgstr "Der Benutzer existiert nicht in der %s Datenbank"
+msgstr "Der Benutzer existiert in der %s-Datenbank nicht"
 
 #: plugins/sudoers/auth/securid5.c:80
 msgid "failed to initialise the ACE API library"
-msgstr "Die ACE API Bibliothen konnte nicht initialisiert werden"
+msgstr "Die ACE-API-Bibliothek konnte nicht initialisiert werden"
 
 #: plugins/sudoers/auth/securid5.c:106
 msgid "unable to contact the SecurID server"
-msgstr "Kann den SecurID-Server nicht erreichen"
+msgstr "SecurID-Server kann nicht erreicht werden"
 
 #: plugins/sudoers/auth/securid5.c:115
 msgid "User ID locked for SecurID Authentication"
-msgstr "Benutzer-ID ist für SecurID-Authentisierung gesperrt"
+msgstr "Benutzer-ID ist für SecurID-Authentifizierung gesperrt"
 
 #: plugins/sudoers/auth/securid5.c:119 plugins/sudoers/auth/securid5.c:170
 msgid "invalid username length for SecurID"
-msgstr "ungültige Länge des Benutzernamens für SecurID"
+msgstr "Ungültige Länge des Benutzernamens für SecurID"
 
 #: plugins/sudoers/auth/securid5.c:123 plugins/sudoers/auth/securid5.c:175
 msgid "invalid Authentication Handle for SecurID"
-msgstr "ungültiges Authentication Handle für SecurID"
+msgstr "Ungültiges Authentifizierungs-Handle für SecurID"
 
 #: plugins/sudoers/auth/securid5.c:127
 msgid "SecurID communication failed"
-msgstr "SecurID Kommunikation fehlgeschlagen"
+msgstr "SecurID-Kommunikation fehlgeschlagen"
 
 #: plugins/sudoers/auth/securid5.c:131 plugins/sudoers/auth/securid5.c:214
 msgid "unknown SecurID error"
-msgstr "unbekannter SecurID Fehler"
+msgstr "Unbekannter SecurID-Fehler"
 
 #: plugins/sudoers/auth/securid5.c:165
 msgid "invalid passcode length for SecurID"
-msgstr "ungültige Passcode Länge für SecurID"
+msgstr "Ungültige Länge des Passcodes für SecurID"
 
 #: plugins/sudoers/auth/sia.c:123
 msgid "unable to initialize SIA session"
-msgstr "kann die SIA Sitzung nicht initialisieren"
+msgstr "Die SIA-Sitzung kann nicht initialisiert werden"
 
 #: plugins/sudoers/auth/sudo_auth.c:135
 msgid "invalid authentication methods"
-msgstr "ungültige Authentisierungsmethoden"
+msgstr "Ungültige Authentifizierungsmethoden"
 
 #: plugins/sudoers/auth/sudo_auth.c:137
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
-msgstr "Ungültige Authentifizierungsmethoden sind in sudo einkompiliert!  Standalone und nicht-standalone Authentifizierung können nicht zusammen verwendet werden."
+msgstr "Ungültige Authentifizierungsmethoden sind in sudo einkompiliert! Standalone- und Nicht-Standalone-Authentifizierung können nicht zusammen verwendet werden."
 
 #: plugins/sudoers/auth/sudo_auth.c:233 plugins/sudoers/auth/sudo_auth.c:282
 msgid "no authentication methods"
-msgstr "keine Authentisierungsmethoden"
+msgstr "Keine Authentifizierungsmethoden"
 
 #: plugins/sudoers/auth/sudo_auth.c:235
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
-msgstr "Es sind keine Authentifizierungsmethoden in sudo einkompiliert!  Wenn Sie Authentifizierung wirklich abschalten wollen, verwenden Sie bitte die configure-Option »--disable-athentication«."
+msgstr "Es sind keine Authentifizierungsmethoden in sudo einkompiliert! Wenn Sie die Authentifizierung wirklich abschalten wollen, verwenden Sie bitte die configure-Option »--disable-authentication«."
 
 #: plugins/sudoers/auth/sudo_auth.c:284
 msgid "Unable to initialize authentication methods."
-msgstr "Kann die Authentisierungsmethoden nicht initialisieren."
+msgstr "Die Authentifizierungsmethoden können nicht initialisiert werden."
 
 #: plugins/sudoers/auth/sudo_auth.c:442
 msgid "Authentication methods:"
-msgstr "Authentisierungsmethoden:"
+msgstr "Authentifizierungsmethoden:"
 
 # XXX unklar
 #: plugins/sudoers/bsm_audit.c:95 plugins/sudoers/bsm_audit.c:184
 msgid "Could not determine audit condition"
-msgstr "Kann den Audit-Zustand nicht bestimmen"
+msgstr "Der Audit-Zustand kann nicht bestimmt werden"
 
 # XXX error at close
 #: plugins/sudoers/bsm_audit.c:156 plugins/sudoers/bsm_audit.c:244
@@ -259,7 +260,7 @@ msgstr ""
 "Regeln erklärt hat.  Normalerweise läuft es auf drei Regeln hinaus:\n"
 "\n"
 "    #1) Respektieren Sie die Privatsphäre anderer.\n"
-"    #2) Denken Sie nach bevor Sie tippen.\n"
+"    #2) Denken Sie nach, bevor Sie tippen.\n"
 "    #3) Mit großer Macht kommt große Verantwortung.\n"
 "\n"
 
@@ -267,69 +268,69 @@ msgstr ""
 #: plugins/sudoers/sudoers.c:600 plugins/sudoers/sudoers.c:629
 #, c-format
 msgid "unknown uid: %u"
-msgstr "unbekannte uid: %u"
+msgstr "Unbekannte Benutzer-ID: %u"
 
 #: plugins/sudoers/check.c:245 plugins/sudoers/policy.c:679
 #: plugins/sudoers/sudoers.c:956 plugins/sudoers/testsudoers.c:211
 #: plugins/sudoers/testsudoers.c:361
 #, c-format
 msgid "unknown user: %s"
-msgstr "unbekannter Benutzer: %s"
+msgstr "Unbekannter Benutzer: %s"
 
 #: plugins/sudoers/def_data.c:27
 #, c-format
 msgid "Syslog facility if syslog is being used for logging: %s"
-msgstr "Syslog Facility wenn syslog für Protokollierung verwendet wird: %s"
+msgstr "Syslog Facility, wenn syslog für Protokollierung verwendet wird: %s"
 
 #: plugins/sudoers/def_data.c:31
 #, c-format
 msgid "Syslog priority to use when user authenticates successfully: %s"
-msgstr "Syslog Priorität wenn der Benutzer sich erfolgreich authentifiziert: %s"
+msgstr "Syslog-Priorität, wenn sich der Benutzer erfolgreich authentifiziert: %s"
 
 #: plugins/sudoers/def_data.c:35
 #, c-format
 msgid "Syslog priority to use when user authenticates unsuccessfully: %s"
-msgstr "Syslog Priorität wenn der Benutzer sich nicht erfolgreich authentifiziert: %s"
+msgstr "Syslog-Priorität, wenn sich der Benutzer nicht erfolgreich authentifiziert: %s"
 
 #: plugins/sudoers/def_data.c:39
 msgid "Put OTP prompt on its own line"
-msgstr "Schreibe den OTP (One-Time-Passwords) Prompt in eine eigene Zeile"
+msgstr "Die OTP-Eingabeaufforderung (One-Time-Passwords) in eine eigene Zeile schreiben"
 
 #: plugins/sudoers/def_data.c:43
 msgid "Ignore '.' in $PATH"
-msgstr "Ignoriere ».« in $PATH"
+msgstr "».« in $PATH ignorieren"
 
 #: plugins/sudoers/def_data.c:47
 msgid "Always send mail when sudo is run"
-msgstr "Sende immer eine Mail wenn sudo gestartet wird"
+msgstr "Immer eine Mail senden, wenn sudo gestartet wird"
 
 #: plugins/sudoers/def_data.c:51
 msgid "Send mail if user authentication fails"
-msgstr "Sende eine Mail wenn die Authentifizierung des Benutzers fehlschlägt"
+msgstr "Eine Mail senden, wenn die Authentifizierung des Benutzers fehlschlägt"
 
 #: plugins/sudoers/def_data.c:55
 msgid "Send mail if the user is not in sudoers"
-msgstr "Sende eine Mail wenn der Benutzer nicht in der sudoers Datei steht"
+msgstr "Eine Mail senden, wenn der Benutzer nicht in der sudoers-Datei steht"
 
 #: plugins/sudoers/def_data.c:59
 msgid "Send mail if the user is not in sudoers for this host"
-msgstr "Sende eine Mail wenn der Benutzer nicht in der sudoers Datei für diesen Rechner steht"
+msgstr "Eine Mail senden, wenn der Benutzer nicht in der sudoers-Datei für diesen Rechner steht"
 
 #: plugins/sudoers/def_data.c:63
 msgid "Send mail if the user is not allowed to run a command"
-msgstr "Sende eine Mail wenn der Benutzer nicht berechtigt ist ein Kommando auszuführen"
+msgstr "Eine Mail senden, wenn der Benutzer nicht berechtigt ist, einen Befehl auszuführen"
 
 #: plugins/sudoers/def_data.c:67
 msgid "Send mail if the user tries to run a command"
-msgstr "Sende eine Mail wenn der Benutzer versucht ein Kommando auszuführen"
+msgstr "Eine Mail senden, wenn der Benutzer versucht, einen Befehl auszuführen"
 
 #: plugins/sudoers/def_data.c:71
 msgid "Use a separate timestamp for each user/tty combo"
-msgstr "Verwende getrennte Zeitstempel für jede Benutzer/tty Kombination"
+msgstr "Getrennte Zeitstempel für jede Benutzer/tty-Kombination verwenden"
 
 #: plugins/sudoers/def_data.c:75
 msgid "Lecture user the first time they run sudo"
-msgstr "Belehre den Benutzer beim ersten Aufruf von sudo"
+msgstr "Den Benutzer beim ersten Aufruf von sudo belehren"
 
 #: plugins/sudoers/def_data.c:79
 #, c-format
@@ -338,7 +339,7 @@ msgstr "Datei mit der sudo-Belehrung: %s"
 
 #: plugins/sudoers/def_data.c:83
 msgid "Require users to authenticate by default"
-msgstr "Standardmäßig muss der Benutzer sich authentifizieren"
+msgstr "Standardmäßig muss sich der Benutzer authentifizieren"
 
 #: plugins/sudoers/def_data.c:87
 msgid "Root may run sudo"
@@ -346,19 +347,19 @@ msgstr "Root darf sudo verwenden"
 
 #: plugins/sudoers/def_data.c:91
 msgid "Log the hostname in the (non-syslog) log file"
-msgstr "Protokolliere den Hostname in der (nicht-syslog) Log-Datei"
+msgstr "Den Hostnamen in der (nicht-syslog-)Protokolldatei speichern"
 
 #: plugins/sudoers/def_data.c:95
 msgid "Log the year in the (non-syslog) log file"
-msgstr "Protokolliere das Jahr in der (nicht-syslog) Log-Datei"
+msgstr "Das Jahr in der (nicht-syslog-)Protokolldatei speichern"
 
 #: plugins/sudoers/def_data.c:99
 msgid "If sudo is invoked with no arguments, start a shell"
-msgstr "Starte eine Shell, wenn sudo ohne Parameter aufgerufen wird"
+msgstr "Eine Shell starten, wenn sudo ohne Parameter aufgerufen wird"
 
 #: plugins/sudoers/def_data.c:103
 msgid "Set $HOME to the target user when starting a shell with -s"
-msgstr "Setze die Umgebungsvariable $HOME beim Starten einer Shell mit »-s«"
+msgstr "Die Umgebungsvariable $HOME beim Starten einer Shell mit »-s« setzen"
 
 #: plugins/sudoers/def_data.c:107
 msgid "Always set $HOME to the target user's home directory"
@@ -366,11 +367,11 @@ msgstr "Immer die Variable $HOME auf das Home-Verzeichnis des Ziel-Benutzers set
 
 #: plugins/sudoers/def_data.c:111
 msgid "Allow some information gathering to give useful error messages"
-msgstr "Erlaube Informationssammlung für nützliche Fehlermeldungen"
+msgstr "Informationssammlung für nützliche Fehlermeldungen erlauben"
 
 #: plugins/sudoers/def_data.c:115
 msgid "Require fully-qualified hostnames in the sudoers file"
-msgstr "Sind voll qualifizierte Hostnamen in der sudoers-Datei notwendig"
+msgstr "Vollständige Hostnamen in der sudoers-Datei erfordern"
 
 #: plugins/sudoers/def_data.c:119
 msgid "Insult the user when they enter an incorrect password"
@@ -378,7 +379,7 @@ msgstr "»Beschimpfung« bei Eingabe eines falschen Passwortes"
 
 #: plugins/sudoers/def_data.c:123
 msgid "Only allow the user to run sudo if they have a tty"
-msgstr "Der Benutzer darf sudo nur aufrufen wenn ein tty vorhanden ist"
+msgstr "Der Benutzer darf sudo nur aufrufen, wenn ein tty vorhanden ist"
 
 #: plugins/sudoers/def_data.c:127
 msgid "Visudo will honor the EDITOR environment variable"
@@ -386,15 +387,15 @@ msgstr "Visudo beachtet die Umgebungsvariable »EDITOR«"
 
 #: plugins/sudoers/def_data.c:131
 msgid "Prompt for root's password, not the users's"
-msgstr "Frage nach dem root-Passwort, nicht dem Passwort des Benutzers"
+msgstr "Nach dem root-Passwort fragen, nicht nach dem Passwort des Benutzers"
 
 #: plugins/sudoers/def_data.c:135
 msgid "Prompt for the runas_default user's password, not the users's"
-msgstr "Frage nach dem Passwort des Benutzers »runas_default«, nicht dem Passwort des aufrufenden Benutzers"
+msgstr "Nach dem Passwort des Benutzers »runas_default« fragen, nicht nach dem Passwort des aufrufenden Benutzers"
 
 #: plugins/sudoers/def_data.c:139
 msgid "Prompt for the target user's password, not the users's"
-msgstr "Frage nach dem Passwort des Ziel-Benutzers, nicht dem Passwort des aufrufenden Benutzers"
+msgstr "Nach dem Passwort des Ziel-Benutzers fragen, nicht nach dem Passwort des aufrufenden Benutzers"
 
 #: plugins/sudoers/def_data.c:143
 msgid "Apply defaults in the target user's login class if there is one"
@@ -402,11 +403,11 @@ msgstr "Standards auf die Anmeldeklasse des Zielbenutzers anwenden, falls diese 
 
 #: plugins/sudoers/def_data.c:147
 msgid "Set the LOGNAME and USER environment variables"
-msgstr "Setze die Umgebungsvariablen »LOGNAME« und »USER«"
+msgstr "Die Umgebungsvariablen »LOGNAME« und »USER« setzen"
 
 #: plugins/sudoers/def_data.c:151
 msgid "Only set the effective uid to the target user, not the real uid"
-msgstr "Setze nur die effektive UID auf den Ziel-Benutzer, nicht die reale UID"
+msgstr "Nur die effektive UID auf den Ziel-Benutzer setzen, nicht die reale UID"
 
 # XXX Keep the group list of the logged in user?
 #: plugins/sudoers/def_data.c:155
@@ -416,7 +417,7 @@ msgstr "Die sekundären Gruppen nicht auf die Gruppen des Ziel-Benutzers setzen"
 #: plugins/sudoers/def_data.c:159
 #, c-format
 msgid "Length at which to wrap log file lines (0 for no wrap): %u"
-msgstr "Zeilenlänge des Logdatei für Zeilenumbruch (0 für keinen Zeilenumbruch): %u"
+msgstr "Zeilenlänge der Protokolldatei für Zeilenumbruch (0 für keinen Zeilenumbruch): %u"
 
 #: plugins/sudoers/def_data.c:163
 #, c-format
@@ -441,7 +442,7 @@ msgstr "Zu verwendende Umask oder 0777, um die Umask des Benutzers zu verwenden:
 #: plugins/sudoers/def_data.c:179
 #, c-format
 msgid "Path to log file: %s"
-msgstr "Pfad zur Log-Datei: %s"
+msgstr "Pfad zur Protokolldatei: %s"
 
 #: plugins/sudoers/def_data.c:183
 #, c-format
@@ -466,7 +467,7 @@ msgstr "Mail-Adresse des Absenders: %s"
 #: plugins/sudoers/def_data.c:199
 #, c-format
 msgid "Subject line for mail messages: %s"
-msgstr "Subject:-Zeile für Mails: %s"
+msgstr "Betreffzeile für Mails: %s"
 
 #: plugins/sudoers/def_data.c:203
 #, c-format
@@ -496,7 +497,7 @@ msgstr "Benutzer in dieser Gruppe sind von Passwort- und PATH-Anforderungen ausg
 #: plugins/sudoers/def_data.c:223
 #, c-format
 msgid "Default password prompt: %s"
-msgstr "Standard Passwort-Prompt: %s"
+msgstr "Standard-Eingabeaufforderung für das Passwort: %s"
 
 #: plugins/sudoers/def_data.c:227
 msgid "If set, passprompt will override system prompt in all cases."
@@ -510,12 +511,12 @@ msgstr "Standardbenutzer, unter dem die Befehle ausgeführt werden: %s"
 #: plugins/sudoers/def_data.c:235
 #, c-format
 msgid "Value to override user's $PATH with: %s"
-msgstr "Wert, mit dem der $PATH des Benutzers überschrieben werden soll: %s"
+msgstr "Wert, mit dem der Inhalt von $PATH des Benutzers überschrieben werden soll: %s"
 
 #: plugins/sudoers/def_data.c:239
 #, c-format
 msgid "Path to the editor for use by visudo: %s"
-msgstr "Pfad zum Editor, den visudo verwendenden soll: %s"
+msgstr "Pfad zum Editor, den visudo verwenden soll: %s"
 
 #: plugins/sudoers/def_data.c:243
 #, c-format
@@ -538,7 +539,7 @@ msgstr "Wenn das LDAP-Verzeichnis erreichbar ist, wird die lokale sudoers-Datei 
 #: plugins/sudoers/def_data.c:259
 #, c-format
 msgid "File descriptors >= %d will be closed before executing a command"
-msgstr "Datei-Deskriptoren >= %d werden geschlossen, bevor ein Kommando ausgeführt wird"
+msgstr "Datei-Deskriptoren >= %d werden geschlossen, bevor ein Befehl ausgeführt wird"
 
 #: plugins/sudoers/def_data.c:263
 msgid "If set, users may override the value of `closefrom' with the -C option"
@@ -546,23 +547,23 @@ msgstr "Benutzer können den Wert für »closeform« mit der der Option -C über
 
 #: plugins/sudoers/def_data.c:267
 msgid "Allow users to set arbitrary environment variables"
-msgstr "Erlaube Benutzern beliebige Umgebungsvariablen zu setzen"
+msgstr "Benutzern das Setzen beliebiger Umgebungsvariablen erlauben"
 
 #: plugins/sudoers/def_data.c:271
 msgid "Reset the environment to a default set of variables"
-msgstr "Setze die Umgebung auf eine Standard-Menge an Variablen zurück"
+msgstr "Die Umgebung auf einen Standardsatz an Variablen zurücksetzen"
 
 #: plugins/sudoers/def_data.c:275
 msgid "Environment variables to check for sanity:"
-msgstr "Prüfe folgende Umgebungsvariablen:"
+msgstr "Folgende Umgebungsvariablen prüfen:"
 
 #: plugins/sudoers/def_data.c:279
 msgid "Environment variables to remove:"
-msgstr "Lösche folgende Umgebungsvariablen:"
+msgstr "Folgende Umgebungsvariablen löschen:"
 
 #: plugins/sudoers/def_data.c:283
 msgid "Environment variables to preserve:"
-msgstr "Erhalte folgende Umgebungsvariablen:"
+msgstr "Folgende Umgebungsvariablen bewahren:"
 
 #: plugins/sudoers/def_data.c:287
 #, c-format
@@ -582,11 +583,11 @@ msgstr "Pfad zur sudo-spezifischen »environment«-Datei: %s"
 #: plugins/sudoers/def_data.c:299
 #, c-format
 msgid "Locale to use while parsing sudoers: %s"
-msgstr "Beim Parsen der sudoers-Datei wird diese Locale verwendet: %s"
+msgstr "Beim Auswerten der sudoers-Datei wird diese Locale verwendet: %s"
 
 #: plugins/sudoers/def_data.c:303
 msgid "Allow sudo to prompt for a password even if it would be visible"
-msgstr "Erlaube sudo nach einem Passwort zu fragen, auch wenn das Passwort sichtbar wird"
+msgstr "sudo erlauben, nach einem Passwort zu fragen, auch wenn das Passwort sichtbar wird"
 
 #: plugins/sudoers/def_data.c:307
 msgid "Provide visual feedback at the password prompt when there is user input"
@@ -611,35 +612,35 @@ msgstr "Die Ausgabe des ausgeführten Befehls protokollieren"
 # XXX use input/output logs
 #: plugins/sudoers/def_data.c:327
 msgid "Compress I/O logs using zlib"
-msgstr "Komprimiere Ein-/Ausgabe-Logs mittels lib"
+msgstr "Ein-/Ausgabe-Protokolle mittels zlib protokollieren"
 
 #: plugins/sudoers/def_data.c:331
 msgid "Always run commands in a pseudo-tty"
-msgstr "Starte Kommandos immer in einem Pseudo-TTY"
+msgstr "Befehle immer in einem Pseudo-TTY ausführen"
 
 #: plugins/sudoers/def_data.c:335
 #, c-format
 msgid "Plugin for non-Unix group support: %s"
-msgstr "Pluginh für nicht-Unix Gruppen-Unterstützung: %s"
+msgstr "Plugin für Unterstützung von Nicht-Unix-Gruppen: %s"
 
 #: plugins/sudoers/def_data.c:339
 #, c-format
 msgid "Directory in which to store input/output logs: %s"
-msgstr "Verzeichnis zur Speicherung der Ein-/Ausgabe-Logs: %s"
+msgstr "Verzeichnis zur Speicherung der Ein-/Ausgabe-Protokolle: %s"
 
 #: plugins/sudoers/def_data.c:343
 #, c-format
 msgid "File in which to store the input/output log: %s"
-msgstr "Datei zur Speicherung der Ein-/Ausgabe-Logs: %s"
+msgstr "Datei zur Speicherung der Ein-/Ausgabe-Protokolle: %s"
 
 # XXX pty -> pseudo TTY?
 #: plugins/sudoers/def_data.c:347
 msgid "Add an entry to the utmp/utmpx file when allocating a pty"
-msgstr "Füge einen Eintrag in die utmp/utmpx-Datei ein, wenn ein Pseudo-TTY erzeugt wird"
+msgstr "Einen Eintrag in die utmp/utmpx-Datei einfügen, wenn ein Pseudo-TTY erzeugt wird"
 
 #: plugins/sudoers/def_data.c:351
 msgid "Set the user in utmp to the runas user, not the invoking user"
-msgstr "Verwende für den Eintrag in der utmp-Datei den runas-Benutzer, nicht den aufrufenden Benutzer"
+msgstr "Für den Eintrag in der utmp-Datei den runas-Benutzer verwenden, nicht den aufrufenden Benutzer"
 
 #: plugins/sudoers/def_data.c:355
 msgid "Set of permitted privileges"
@@ -652,33 +653,33 @@ msgstr "Menge der eingeschränkten Privilegien"
 
 #: plugins/sudoers/def_data.c:363
 msgid "Run commands on a pty in the background"
-msgstr "Starte Kommandos mit einem Pseudo-TTY im Hintergrund"
+msgstr "Befehle mit einem Pseudo-TTY im Hintergrund starten"
 
 #: plugins/sudoers/def_data.c:367
 msgid "PAM service name to use"
-msgstr "Verwende den PAM Service-Name"
+msgstr "Den PAM-Service-Namen verwenden"
 
 #: plugins/sudoers/def_data.c:371
 msgid "PAM service name to use for login shells"
-msgstr "Verwende den PAM Service-Name für Login-Shells"
+msgstr "Den PAM-Service-Namen für Anmelde-Shells verwenden"
 
 #: plugins/sudoers/def_data.c:375
 msgid "Attempt to establish PAM credentials for the target user"
-msgstr "Versuche die PAM-Credentials für den Ziel-Benutzer zu bekommen"
+msgstr "Versuchen, die PAM-Anmeldedaten für den Ziel-Benutzer zu bekommen"
 
 #: plugins/sudoers/def_data.c:379
 msgid "Create a new PAM session for the command to run in"
-msgstr "Erzeuge eine neue PAM-Sitzung, um das Kommando auszuführen"
+msgstr "Eine neue PAM-Sitzung erzeugen, um den Befehl auszuführen"
 
 #: plugins/sudoers/def_data.c:383
 #, c-format
 msgid "Maximum I/O log sequence number: %u"
-msgstr "Maximale Ein-/Ausgabe-Log Sequenznummer: %u"
+msgstr "Maximale Sequenznummer des Ein-/Ausgabe-Protokolls: %u"
 
 # XXX vector?
 #: plugins/sudoers/def_data.c:387
 msgid "Enable sudoers netgroup support"
-msgstr "Support für netgroups in sudoers aktivieren"
+msgstr "Unterstützung für netgroups in sudoers aktivieren"
 
 #: plugins/sudoers/defaults.c:210 plugins/sudoers/defaults.c:601
 #: plugins/sudoers/visudo_json.c:642 plugins/sudoers/visudo_json.c:677
@@ -724,16 +725,16 @@ msgstr "Die Option »%s« wird ohne Wert verwendet"
 #: plugins/sudoers/testsudoers.c:239 plugins/sudoers/toke_util.c:174
 #, c-format
 msgid "internal error, %s overflow"
-msgstr "interner Fehler, %s Überlauf"
+msgstr "Interner Fehler, %s-Überlauf"
 
 #: plugins/sudoers/env.c:361
 msgid "sudo_putenv: corrupted envp, length mismatch"
-msgstr "sudo_putenv: envp ist korrupt, die Längen passen nicht"
+msgstr "sudo_putenv: envp ist beschädigt, die Längen passen nicht"
 
 #: plugins/sudoers/env.c:1109
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
-msgstr "Tut mir leid, die folgenden Umgebungsvariablen dürfen nicht gesetzt werden: %s"
+msgstr "Leider dürfen die folgenden Umgebungsvariablen nicht gesetzt werden: %s"
 
 #: plugins/sudoers/group_plugin.c:94
 #, c-format
@@ -748,12 +749,12 @@ msgstr "%s darf nur für den Eigentümer der Datei schreibbar sein"
 #: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
 #, c-format
 msgid "unable to load %s: %s"
-msgstr "laden für %s fehlgeschlagen: %s"
+msgstr "Laden von %s fehlgeschlagen: %s"
 
 #: plugins/sudoers/group_plugin.c:110
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
-msgstr "kann das Symbol \"group_plugin\" in %s nicht finden"
+msgstr "Das Symbol »group_plugin« kann in %s nicht gefunden werden"
 
 #: plugins/sudoers/group_plugin.c:115
 #, c-format
@@ -775,7 +776,7 @@ msgstr "%s existiert, aber ist kein Verzeichnis (0%o)"
 #: plugins/sudoers/timestamp.c:239
 #, c-format
 msgid "unable to mkdir %s"
-msgstr "kann das Verzeichnis »%s« nicht erstellen"
+msgstr "Das Verzeichnis »%s« kann nicht erstellt werden"
 
 #: plugins/sudoers/iolog.c:209 plugins/sudoers/sudoers.c:765
 #: plugins/sudoers/sudoreplay.c:330 plugins/sudoers/sudoreplay.c:793
@@ -784,24 +785,24 @@ msgstr "kann das Verzeichnis »%s« nicht erstellen"
 #: plugins/sudoers/visudo_json.c:1048
 #, c-format
 msgid "unable to open %s"
-msgstr "kann die Datei »%s« nicht öffnen"
+msgstr "Die Datei »%s« kann nicht geöffnet werden"
 
 #: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:769
 #: plugins/sudoers/sudoreplay.c:1093
 #, c-format
 msgid "unable to read %s"
-msgstr "kann die Datei »%s« nicht lesen"
+msgstr "Die Datei »%s« kann nicht gelesen werden"
 
 #: plugins/sudoers/iolog.c:282 plugins/sudoers/sudoreplay.c:575
 #: plugins/sudoers/timestamp.c:177 plugins/sudoers/timestamp.c:180
 #, c-format
 msgid "unable to write to %s"
-msgstr "kann die Datei »%s« nicht schreiben"
+msgstr "In die Datei »%s« kann nicht geschrieben werden"
 
 #: plugins/sudoers/iolog.c:347 plugins/sudoers/iolog.c:545
 #, c-format
 msgid "unable to create %s"
-msgstr "kann die Datei »%s« nicht erstellen"
+msgstr "Die Datei »%s« kann nicht erstellt werden"
 
 #: plugins/sudoers/ldap.c:435
 msgid "sudo_ldap_conf_add_ports: port too large"
@@ -810,11 +811,11 @@ msgstr "sudo_ldap_conf_add_ports: Port ist zu groß"
 #: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "unsupported LDAP uri type: %s"
-msgstr "LDAP uri Typ ist nicht unterstützt: %s"
+msgstr "LDAP-Adresstyp wird nicht unterstützt: %s"
 
 #: plugins/sudoers/ldap.c:516
 msgid "unable to mix ldap and ldaps URIs"
-msgstr "ldap und ldaps URIs können nicht zusammen verwendet werden"
+msgstr "ldap- und ldaps-Adressen können nicht zusammen verwendet werden"
 
 #: plugins/sudoers/ldap.c:520 plugins/sudoers/ldap.c:553
 msgid "starttls not supported when using ldaps"
@@ -823,25 +824,25 @@ msgstr "starttls wird für ldaps nicht unterstützt"
 #: plugins/sudoers/ldap.c:620
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
-msgstr "kann die Zertifikat- und Schlüsseldatenbank für SSL nicht initialisieren: %s"
+msgstr "Die Zertifikat- und Schlüsseldatenbank für SSL kann nicht initialisiert werden: %s"
 
 #: plugins/sudoers/ldap.c:623
 #, c-format
 msgid "you must set TLS_CERT in %s to use SSL"
-msgstr "In der Datei »%s« muss »TLS_CERT« angegeben sein um SSL zu nutzen"
+msgstr "In der Datei »%s« muss »TLS_CERT« angegeben sein, um SSL zu nutzen"
 
 #: plugins/sudoers/ldap.c:1114
 msgid "unable to get GMT time"
-msgstr "kann die GMT-Zeit nicht bekommen"
+msgstr "Die GMT-Zeit kann nicht bekommen werden"
 
 #: plugins/sudoers/ldap.c:1120
 msgid "unable to format timestamp"
-msgstr "kann den Zeitstempel nicht formatieren"
+msgstr "Der Zeitstempel kann nicht formatiert werden"
 
 # XXX ?
 #: plugins/sudoers/ldap.c:1128
 msgid "unable to build time filter"
-msgstr "Kann den Filter beim Kompilieren nicht erstellen"
+msgstr "Filter für die Kompilierung kann nicht erstellt werden"
 
 #: plugins/sudoers/ldap.c:1757
 #, c-format
@@ -875,12 +876,12 @@ msgstr "    Reihenfolge: %s\n"
 #: plugins/sudoers/sssd.c:1297
 #, c-format
 msgid "    Commands:\n"
-msgstr "    Kommandos:\n"
+msgstr "    Befehle:\n"
 
 #: plugins/sudoers/ldap.c:2871
 #, c-format
 msgid "unable to initialize LDAP: %s"
-msgstr "Kann LDAP nicht initialisieren: %s"
+msgstr "LDAP kann nicht initialisiert werden: %s"
 
 #: plugins/sudoers/ldap.c:2913
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
@@ -889,15 +890,15 @@ msgstr "start_tls ist angegeben, aber die LDAP-Bibliotheken unterstützen ldap_s
 #: plugins/sudoers/ldap.c:3146
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
-msgstr "ungültiges »sudoOrder« Attribut: %s"
+msgstr "Ungültiges »sudoOrder« Attribut: %s"
 
 #: plugins/sudoers/linux_audit.c:57
 msgid "unable to open audit system"
-msgstr "Kann das Audit-System nicht öffnen"
+msgstr "Das Audit-System kann nicht geöffnet werden"
 
 #: plugins/sudoers/linux_audit.c:94
 msgid "unable to send audit message"
-msgstr "Kann die Audit-Nachricht nicht senden"
+msgstr "Die Audit-Nachricht kann nicht gesendet werden"
 
 #: plugins/sudoers/logging.c:134
 #, c-format
@@ -907,17 +908,17 @@ msgstr "%8s : %s"
 #: plugins/sudoers/logging.c:162
 #, c-format
 msgid "%8s : (command continued) %s"
-msgstr "%8s : (Kommando fortgesetzt) %s"
+msgstr "%8s : (Befehl fortgesetzt) %s"
 
 #: plugins/sudoers/logging.c:187
 #, c-format
 msgid "unable to open log file: %s: %s"
-msgstr "Kann die Log-Datei nicht öffnen: %s: %s"
+msgstr "Die Protokolldatei kann nicht geöffnet werden: %s: %s"
 
 #: plugins/sudoers/logging.c:190
 #, c-format
 msgid "unable to lock log file: %s: %s"
-msgstr "Kann die Log-Datei nicht sperren: %s: %s"
+msgstr "Die Protokolldatei kann nicht gesperrt werden: %s: %s"
 
 #: plugins/sudoers/logging.c:242
 msgid "No user or host"
@@ -929,35 +930,35 @@ msgstr "Fehler bei der Validierung"
 
 #: plugins/sudoers/logging.c:251
 msgid "user NOT in sudoers"
-msgstr "Der Benutzer ist NICHT in der sudoers"
+msgstr "Der Benutzer ist NICHT in der sudoers-Datei enthalten"
 
 #: plugins/sudoers/logging.c:253
 msgid "user NOT authorized on host"
-msgstr "Der Benutzer ist NICHT auf dem Rechner authorisiert"
+msgstr "Der Benutzer ist NICHT auf dem Rechner autorisiert"
 
 #: plugins/sudoers/logging.c:255
 msgid "command not allowed"
-msgstr "Das Kommando ist nicht erlaubt"
+msgstr "Der Befehl ist nicht erlaubt"
 
 #: plugins/sudoers/logging.c:288
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
-msgstr "%s ist nicht in der sudoers-Datei.  Dieser Vorfall wird gemeldet.\n"
+msgstr "%s ist nicht in der sudoers-Datei. Dieser Vorfall wird gemeldet.\n"
 
 #: plugins/sudoers/logging.c:291
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
-msgstr "%s darf sudo für %s nicht verwenden.  Dieser Vorfall wird gemeldet.\n"
+msgstr "%s darf sudo für %s nicht verwenden. Dieser Vorfall wird gemeldet.\n"
 
 #: plugins/sudoers/logging.c:295
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
-msgstr "Tut mir leid, der Benutzer %s darf sudo für %s nicht verwenden.\n"
+msgstr "Leider darf der Benutzer %s sudo für %s nicht verwenden.\n"
 
 #: plugins/sudoers/logging.c:298
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
-msgstr "Tut mir leid, der Benutzer %s darf '%s%s%s' als %s%s%s auf %s nicht ausführen.\n"
+msgstr "Leider darf der Benutzer %s »%s%s%s« als %s%s%s auf %s nicht ausführen.\n"
 
 #: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:408
 #: plugins/sudoers/sudoers.c:410 plugins/sudoers/sudoers.c:412
@@ -965,7 +966,7 @@ msgstr "Tut mir leid, der Benutzer %s darf '%s%s%s' als %s%s%s auf %s nicht ausf
 #: plugins/sudoers/sudoers.c:1130
 #, c-format
 msgid "%s: command not found"
-msgstr "%s: Kommando nicht gefunden"
+msgstr "%s: Befehl nicht gefunden"
 
 #: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:404
 #, c-format
@@ -973,12 +974,12 @@ msgid ""
 "ignoring `%s' found in '.'\n"
 "Use `sudo ./%s' if this is the `%s' you wish to run."
 msgstr ""
-"ignoriere `%s' im aktuellen Verzeichnis ».«\n"
-"Verwende »sudo ./%s«, wenn dies das gewünschte Kommando »%s« ist."
+"Im aktuellen Verzeichnis ».« gefundenes »%s« wird ignoriert.\n"
+"Verwenden Sie »sudo ./%s«, wenn dies der gewünschte Befehl »%s« ist."
 
 #: plugins/sudoers/logging.c:353
 msgid "authentication failure"
-msgstr "Fehler bei der Authentisierung"
+msgstr "Fehler bei der Authentifizierung"
 
 #: plugins/sudoers/logging.c:379
 msgid "a password is required"
@@ -1003,23 +1004,23 @@ msgstr "Fehler bei fork(): %m"
 #: plugins/sudoers/logging.c:638
 #, c-format
 msgid "unable to open pipe: %m"
-msgstr "Kann die Pipe nicht öffnen: %m"
+msgstr "Die Pipe kann nicht geöffnet werden: %m"
 
 # XXX ?
 #: plugins/sudoers/logging.c:663
 #, c-format
 msgid "unable to dup stdin: %m"
-msgstr "Kann stdin nicht duplizieren"
+msgstr "Die Standardeingabe kann nicht dupliziert werden: %m"
 
 #: plugins/sudoers/logging.c:698
 #, c-format
 msgid "unable to execute %s: %m"
-msgstr "Kann %s nicht ausführen: %m"
+msgstr "%s kann nicht ausgeführt werden: %m"
 
 #: plugins/sudoers/match.c:630
 #, c-format
 msgid "unsupported digest type %d for %s"
-msgstr "Digest Typ %d ist nicht unterstützt für %s"
+msgstr "Prüfsummentyp %d wird für %s nicht unterstützt"
 
 #: plugins/sudoers/match.c:659
 #, c-format
@@ -1029,7 +1030,7 @@ msgstr "%s: Fehler beim Lesen"
 #: plugins/sudoers/match.c:673
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
-msgstr "Digest für %s (%s) ist nicht in der %s Form"
+msgstr "Prüfsumme für %s (%s) ist nicht in der Form %s"
 
 #: plugins/sudoers/parse.c:123
 #, c-format
@@ -1048,7 +1049,7 @@ msgid ""
 "Sudoers entry:\n"
 msgstr ""
 "\n"
-"Sudoers Eintrag:\n"
+"Sudoers-Eintrag:\n"
 
 #: plugins/sudoers/parse.c:485
 #, c-format
@@ -1080,17 +1081,17 @@ msgstr "%s: %s"
 #: plugins/sudoers/policy.c:565 plugins/sudoers/visudo.c:773
 #, c-format
 msgid "unable to execute %s"
-msgstr "kann %s nicht ausführen"
+msgstr "%s kann nicht ausgeführt werden"
 
 #: plugins/sudoers/policy.c:697
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
-msgstr "Sudoers Policy-Plugin Version %s\n"
+msgstr "Sudoers-Policy-Plugin Version %s\n"
 
 #: plugins/sudoers/policy.c:699
 #, c-format
 msgid "Sudoers file grammar version %d\n"
-msgstr "Sudoers-Datei Grammatik-Version %d\n"
+msgstr "Sudoers-Datei-Grammatik-Version %d\n"
 
 #: plugins/sudoers/policy.c:703
 #, c-format
@@ -1099,59 +1100,59 @@ msgid ""
 "Sudoers path: %s\n"
 msgstr ""
 "\n"
-"Sudoers Pfad: %s\n"
+"Sudoers-Pfad: %s\n"
 
 #: plugins/sudoers/policy.c:706
 #, c-format
 msgid "nsswitch path: %s\n"
-msgstr "nsswitch Pfad: %s\n"
+msgstr "nsswitch-Pfad: %s\n"
 
 #: plugins/sudoers/policy.c:708
 #, c-format
 msgid "ldap.conf path: %s\n"
-msgstr "ldap.conf Pfad: %s\n"
+msgstr "ldap.conf-Pfad: %s\n"
 
 #: plugins/sudoers/policy.c:709
 #, c-format
 msgid "ldap.secret path: %s\n"
-msgstr "ldap.secret Pfad: %s\n"
+msgstr "ldap.secret-Pfad: %s\n"
 
 #: plugins/sudoers/pwutil.c:149
 #, c-format
 msgid "unable to cache uid %u, already exists"
-msgstr "kann die uid %u nicht cachen, sie existiert bereits"
+msgstr "Die Benutzer-ID %u kann nicht zwischengespeichert werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:194
 #, c-format
 msgid "unable to cache user %s, already exists"
-msgstr "Kann den Benutzer %s nicht in den Cache aufnehmen, er existiert bereits"
+msgstr "Der Benutzer %s kann nicht in den Zwischenspeicher aufgenommen werden, er existiert bereits"
 
 #: plugins/sudoers/pwutil.c:408
 #, c-format
 msgid "unable to cache gid %u, already exists"
-msgstr "Kann die gid %u nicht in den Cache aufnehmen, sie existiert bereits"
+msgstr "Die Gruppen-ID %u kann nicht in den Zwischenspeicher aufgenommen werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:447
 #, c-format
 msgid "unable to cache group %s, already exists"
-msgstr "Kann die Gruppe %s nicht in den Cache aufnehmen, sie existiert bereits"
+msgstr "Die Gruppe %s kann nicht in den Zwischenspeicher aufgenommen werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:621 plugins/sudoers/pwutil.c:647
 #, c-format
 msgid "unable to cache group list for %s, already exists"
-msgstr "Kann die Gruppen-Liste für %s nicht in den Cache aufnehmen, sie existiert bereits"
+msgstr "Die Gruppen-Liste für %s kann nicht in den Zwischenspeicher aufgenommen werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:643
 #, c-format
 msgid "unable to parse groups for %s"
-msgstr "Kann die Gruppen für %s nicht parsen"
+msgstr "Die Gruppen für %s können nicht eingelesen werden"
 
 # XXX ?
 #: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:447
 #: plugins/sudoers/set_perms.c:850 plugins/sudoers/set_perms.c:1147
 #: plugins/sudoers/set_perms.c:1439
 msgid "perm stack overflow"
-msgstr "Stack-Überlauf der Permissions"
+msgstr "Stack-Überlauf der Zugriffsrechte"
 
 #: plugins/sudoers/set_perms.c:130 plugins/sudoers/set_perms.c:378
 #: plugins/sudoers/set_perms.c:455 plugins/sudoers/set_perms.c:717
@@ -1159,37 +1160,37 @@ msgstr "Stack-Überlauf der Permissions"
 #: plugins/sudoers/set_perms.c:1155 plugins/sudoers/set_perms.c:1372
 #: plugins/sudoers/set_perms.c:1447 plugins/sudoers/set_perms.c:1536
 msgid "perm stack underflow"
-msgstr "Stack-Bereichsunterschreitung der Permissions"
+msgstr "Stack-Bereichsunterschreitung der Zugriffsrechte"
 
 # XXX ?
 #: plugins/sudoers/set_perms.c:189 plugins/sudoers/set_perms.c:502
 #: plugins/sudoers/set_perms.c:1206 plugins/sudoers/set_perms.c:1479
 msgid "unable to change to root gid"
-msgstr "Kann nicht zur root GID wechseln"
+msgstr "Wechsel zur root-GID ist nicht möglich"
 
 # XXX ?
 #: plugins/sudoers/set_perms.c:278 plugins/sudoers/set_perms.c:599
 #: plugins/sudoers/set_perms.c:987 plugins/sudoers/set_perms.c:1283
 msgid "unable to change to runas gid"
-msgstr "Kann nicht zur runas UID wechseln"
+msgstr "Wechsel zur runas-UID ist nicht möglich"
 
 # XXX vector?
 #: plugins/sudoers/set_perms.c:283 plugins/sudoers/set_perms.c:604
 #: plugins/sudoers/set_perms.c:992 plugins/sudoers/set_perms.c:1288
 msgid "unable to set runas group vector"
-msgstr "Kann die runas Gruppen nicht setzen"
+msgstr "Die runas-Gruppen können nicht gesetzt werden"
 
 # XXX ?
 #: plugins/sudoers/set_perms.c:294 plugins/sudoers/set_perms.c:615
 #: plugins/sudoers/set_perms.c:1001 plugins/sudoers/set_perms.c:1297
 msgid "unable to change to runas uid"
-msgstr "Kann nicht zur runas GID wechseln"
+msgstr "Wechsel zur runas-GID ist nicht möglich"
 
 # XXX ?
 #: plugins/sudoers/set_perms.c:312 plugins/sudoers/set_perms.c:633
 #: plugins/sudoers/set_perms.c:1017 plugins/sudoers/set_perms.c:1313
 msgid "unable to change to sudoers gid"
-msgstr "Kann nicht zur sudoers GID wechseln"
+msgstr "Wechsel zur sudoers-GID ist nicht möglich"
 
 #: plugins/sudoers/set_perms.c:365 plugins/sudoers/set_perms.c:704
 #: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1359
@@ -1200,7 +1201,7 @@ msgstr "Zu viele Prozesse"
 # XXX vector?
 #: plugins/sudoers/solaris_audit.c:47
 msgid "unable to get current working directory"
-msgstr "Kann das aktuelle Arbeitsverzeichnis nicht bestimmen"
+msgstr "Das aktuelle Arbeitsverzeichnis kann nicht bestimmt werden"
 
 #: plugins/sudoers/solaris_audit.c:55
 #, c-format
@@ -1214,18 +1215,18 @@ msgstr "Audit-Pfad argv[0] abgeschnitten: %s"
 
 #: plugins/sudoers/solaris_audit.c:111
 msgid "audit_failure message too long"
-msgstr "audit_failure Meldung ist zu lang"
+msgstr "audit_failure-Meldung ist zu lang"
 
 #: plugins/sudoers/sssd.c:252
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
-msgstr "Kann die SSS_Quelle nicht initialisieren. Ist SSSD auf dem Rechner installiert?"
+msgstr "Die SSS-Quelle kann nicht initialisiert werden. Ist SSSD auf dem Rechner installiert?"
 
 #: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
 #: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
 #: plugins/sudoers/sssd.c:291
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
-msgstr "Kann das Symbol »%s« nicht in %s finden"
+msgstr "Das Symbol »%s« kann in %s nicht gefunden werden"
 
 #: plugins/sudoers/sudo_nss.c:296
 #, c-format
@@ -1235,12 +1236,12 @@ msgstr "Passende Defaults-Einträge für %s auf %s:\n"
 #: plugins/sudoers/sudo_nss.c:309
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
-msgstr "Runas und Kommando-spezifische Standardwerte für %s:\n"
+msgstr "Runas und befehlsspezifische Standardwerte für %s:\n"
 
 #: plugins/sudoers/sudo_nss.c:322
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
-msgstr "Der Benutzer %s darf die folgenden Kommandos auf %s ausführen:\n"
+msgstr "Der Benutzer %s darf die folgenden Befehle auf %s ausführen:\n"
 
 #: plugins/sudoers/sudo_nss.c:331
 #, c-format
@@ -1262,7 +1263,7 @@ msgstr "sudoers gibt an, dass root sudo nicht verwenden darf"
 
 #: plugins/sudoers/sudoers.c:279
 msgid "you are not permitted to use the -C option"
-msgstr "Sie dürfen die -C Option nicht verwenden"
+msgstr "Sie dürfen die Option -C nicht verwenden"
 
 #: plugins/sudoers/sudoers.c:337
 #, c-format
@@ -1275,26 +1276,26 @@ msgstr "Kein tty"
 
 #: plugins/sudoers/sudoers.c:352
 msgid "sorry, you must have a tty to run sudo"
-msgstr "Uh, Sie müssen ein TTY haben, um sudo zu verwenden"
+msgstr "Sie müssen ein TTY haben, um sudo zu verwenden"
 
 # XXX ?
 #: plugins/sudoers/sudoers.c:403
 msgid "command in current directory"
-msgstr "Kommando ist im aktuellen Verzeichnis"
+msgstr "Befehl ist im aktuellen Verzeichnis"
 
 #: plugins/sudoers/sudoers.c:423
 msgid "sorry, you are not allowed to preserve the environment"
-msgstr "Uh, Sie dürfen das Environment nicht erhalten"
+msgstr "Sie dürfen das Environment nicht erhalten"
 
 #: plugins/sudoers/sudoers.c:675
 msgid "command too long"
-msgstr "Das Kommando ist zu lang"
+msgstr "Der Befehl ist zu lang"
 
 #: plugins/sudoers/sudoers.c:780 plugins/sudoers/visudo.c:333
 #: plugins/sudoers/visudo.c:599
 #, c-format
 msgid "unable to stat %s"
-msgstr "stat konnte nicht auf %s angewandt werden"
+msgstr "stat konnte nicht auf %s angewendet werden"
 
 #: plugins/sudoers/sudoers.c:784
 #, c-format
@@ -1314,7 +1315,7 @@ msgstr "%s ist für alle beschreibbar (world writable)"
 #: plugins/sudoers/sudoers.c:796 toke.l:967
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
-msgstr "%s gehört gid %u, sollte allerdings %u gehören"
+msgstr "%s gehört GID %u, sollte allerdings %u gehören"
 
 #: plugins/sudoers/sudoers.c:827
 #, c-format
@@ -1324,7 +1325,7 @@ msgstr "Nur root kann »-c %s« verwenden"
 #: plugins/sudoers/sudoers.c:846
 #, c-format
 msgid "unknown login class: %s"
-msgstr "unbekannte Login-Klasse: %s"
+msgstr "Unbekannte Anmeldeklasse: %s"
 
 # XXX
 #: plugins/sudoers/sudoers.c:890 plugins/sudoers/sudoers.c:905
@@ -1335,7 +1336,7 @@ msgstr "Hostname %s kann nicht aufgelöst werden"
 #: plugins/sudoers/sudoers.c:987 plugins/sudoers/testsudoers.c:385
 #, c-format
 msgid "unknown group: %s"
-msgstr "unbekannte Gruppe: %s"
+msgstr "Unbekannte Gruppe: %s"
 
 #: plugins/sudoers/sudoreplay.c:262
 #, c-format
@@ -1386,7 +1387,7 @@ msgstr "Protokollgeometrie ist %d x %d, die Geometrie Ihres Terminals ist %d x %
 
 #: plugins/sudoers/sudoreplay.c:397
 msgid "unable to set tty to raw mode"
-msgstr "TTY konnte nicht in den Raw-Mode versetzt werden"
+msgstr "TTY konnte nicht in den Raw-Modus versetzt werden"
 
 # XXX
 #: plugins/sudoers/sudoreplay.c:428
@@ -1443,7 +1444,7 @@ msgstr "Unbekannter Suchtyp %d"
 #: plugins/sudoers/sudoreplay.c:807
 #, c-format
 msgid "%s: invalid log file"
-msgstr "%s: ungültige Log-Datei"
+msgstr "%s: ungültige Protokolldatei"
 
 #: plugins/sudoers/sudoreplay.c:825
 #, c-format
@@ -1479,7 +1480,7 @@ msgstr "Aufruf: %s [-h] [-d Verzeichnis] [-m Max_Wartezeit] [-s Geschwindigkeits
 #: plugins/sudoers/sudoreplay.c:1209
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
-msgstr "Aufruf: %s [-h] [-d Verzeichnis] -l [search Ausdruck]\n"
+msgstr "Aufruf: %s [-h] [-d Verzeichnis] -l [Suchausdruck]\n"
 
 #: plugins/sudoers/sudoreplay.c:1218
 #, c-format
@@ -1504,13 +1505,17 @@ msgid ""
 msgstr ""
 "\n"
 "Optionen:\n"
-"  -d, --directory=Verzeichnis  Geben Sie ein Verzeichnis für die Sitzungsprotokolle an\n"
-"  -f, --filter=Filter          Geben Sie an, welcher E/A-Typ angezeigt werden soll\n"
-"  -h, --help                   Hilfetext anzeigen und beenden\n"
-"  -l, --list                   Verfügbare Sitzungs-IDs anzeigen, die mit dem Ausdruck übereinstimmen\n"
-"  -m, --max-wait=Zahl          Maximale Wartezeit zwischen Ereignissen in Sekunden\n"
-"  -s, --speed=Zahl             Ausgabe beschleunigen oder verlangsamen\n"
-"  -V, --version                Versionsinformationen anzeigen und beenden"
+"  -d, --directory=Verzeichnis  gibt ein Verzeichnis für Sitzungsprotokolle an\n"
+"  -f, --filter=Filter          gibt an, welcher E/A-Typ angezeigt werden soll\n"
+"  -h, --help                   zeigt einen Hilfetext an und beendet\n"
+"                                 das Programm\n"
+"  -l, --list                   zeigt verfügbare Sitzungs-IDs an, die mit dem\n"
+"                                 Ausdruck übereinstimmen\n"
+"  -m, --max-wait=Zahl          gibt die maximale Wartezeit zwischen Ereignissen\n"
+"                                 in Sekunden an\n"
+"  -s, --speed=Zahl             beschleunigt oder verlangsamt die Wiedergabe\n"
+"  -V, --version                zeigt Versionsinformationen an und beendet\n"
+"                                 das Programm"
 
 #: plugins/sudoers/testsudoers.c:324
 msgid "\thost  unmatched"
@@ -1522,7 +1527,7 @@ msgid ""
 "Command allowed"
 msgstr ""
 "\n"
-"Kommando erlaubt"
+"Befehl erlaubt"
 
 #: plugins/sudoers/testsudoers.c:328
 msgid ""
@@ -1530,7 +1535,7 @@ msgid ""
 "Command denied"
 msgstr ""
 "\n"
-"Kommando verweigert"
+"Befehl verweigert"
 
 # XXX
 #: plugins/sudoers/testsudoers.c:328
@@ -1544,7 +1549,7 @@ msgstr ""
 #: plugins/sudoers/timestamp.c:188
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
-msgstr "kann die Zeitstempeldatei nicht auf %lld Bytes abschneiden"
+msgstr "Die Zeitstempeldatei kann nicht auf %lld Bytes abgeschnitten werden"
 
 #: plugins/sudoers/timestamp.c:288
 #, c-format
@@ -1558,11 +1563,11 @@ msgstr "Zeitstempelpfad zu lang: %s/%s"
 
 #: plugins/sudoers/timestamp.c:340 plugins/sudoers/timestamp.c:425
 msgid "unable to read the clock"
-msgstr "Kann die Uhrzeit nicht auslesen"
+msgstr "Die Uhrzeit kann nicht ausgelesen werden"
 
 #: plugins/sudoers/timestamp.c:495
 msgid "ignoring time stamp from the future"
-msgstr "ignoriere Zeitstempel aus der Zukunft"
+msgstr "Zeitstempel aus der Zukunft wird ignoriert"
 
 #: plugins/sudoers/timestamp.c:507
 #, c-format
@@ -1641,12 +1646,12 @@ msgstr "%s und %s befinden sich nicht im gleichen Dateisystem, werden mit mv umb
 #: plugins/sudoers/visudo.c:646
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
-msgstr "Kommando gescheitert: »%s %s %s«, %s unverändert"
+msgstr "Befehl gescheitert: »%s %s %s«, %s unverändert"
 
 #: plugins/sudoers/visudo.c:656
 #, c-format
 msgid "error renaming %s, %s unchanged"
-msgstr "Fehler beim Umbennenen von %s, %s unverändert"
+msgstr "Fehler beim Umbenennen von %s, %s unverändert"
 
 #: plugins/sudoers/visudo.c:718
 msgid "What now? "
@@ -1672,12 +1677,12 @@ msgstr "%s konnte nicht ausgeführt werden"
 #: plugins/sudoers/visudo.c:806
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
-msgstr "%s: Falsche Besitzer-(uid, gid) sollte (%u, %u) sein\n"
+msgstr "%s: Falsche Besitzer-(uid, gid), sollte (%u, %u) sein\n"
 
 #: plugins/sudoers/visudo.c:813
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
-msgstr "%s: Falsche Zugriffsrechte, sollten Modus 0%o sein\n"
+msgstr "%s: Falsche Zugriffsrechte, sollte Modus 0%o sein\n"
 
 #: plugins/sudoers/visudo.c:838 plugins/sudoers/visudo_json.c:1055
 #, c-format
@@ -1774,7 +1779,7 @@ msgstr ""
 "  -q, --quiet                 weniger ausführliche Syntaxfehler-Meldungen\n"
 "  -s, --strict                strikte Syntax-Prüfung\n"
 "  -V, --version               Versionsinformation anzeigen und beenden\n"
-"  -x, --export=ausgabedatei   exportiere sudoers im JSON-Format"
+"  -x, --export=ausgabedatei   sudoers im JSON-Format exportieren"
 
 #: plugins/sudoers/visudo_json.c:1041
 #, c-format
@@ -1783,4 +1788,4 @@ msgstr "%s: Eingabe- und Ausgabedatei müssen unterschiedlich sein"
 
 #: toke.l:925
 msgid "too many levels of includes"
-msgstr "Zu viele geschachtelte include Einträge"
+msgstr "Zu viele geschachtelte include-Einträge"
