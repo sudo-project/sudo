@@ -101,8 +101,8 @@
 #define KEPT_MAX    	0xff00
 
 struct environment {
-    char * const *old_envp;	/* pointer the environment we passed back */
     char **envp;		/* pointer to the new environment */
+    char **old_envp;		/* pointer the old environment we allocated */
     size_t env_size;		/* size of new_environ in char **'s */
     size_t env_len;		/* number of slots used, not counting NULL */
 };
@@ -219,10 +219,14 @@ env_init(char * const envp[])
     debug_decl(env_init, SUDOERS_DEBUG_ENV)
 
     if (envp == NULL) {
+	/* Free the old envp we allocated, if any. */
+	sudo_efree(env.old_envp);
+
 	/* Reset to initial state but keep a pointer to what we allocated. */
-	envp = env.envp;
-	memset(&env, 0, sizeof(env));
-	env.old_envp = envp;
+	env.old_envp = env.envp;
+	env.envp = NULL;
+	env.env_size = 0;
+	env.env_len = 0;
     } else {
 	/* Make private copy of envp. */
 	for (ep = envp; *ep != NULL; ep++)
@@ -239,8 +243,8 @@ env_init(char * const envp[])
 	env.envp[len] = NULL;
 
 	/* Free the old envp we allocated, if any. */
-	if (env.old_envp != NULL)
-	    sudo_efree((void *)env.old_envp);
+	sudo_efree(env.old_envp);
+	env.old_envp = NULL;
     }
 
     debug_return;
@@ -253,6 +257,22 @@ char **
 env_get(void)
 {
     return env.envp;
+}
+
+/*
+ * Swap the old and new copies of the environment.
+ */
+bool
+env_swap_old(void)
+{
+    char **old_envp;
+
+    if (env.old_envp == NULL)
+	return false;
+    old_envp = env.old_envp;
+    env.old_envp = env.envp;
+    env.envp = old_envp;
+    return true;
 }
 
 /*
@@ -810,7 +830,7 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 bool
 rebuild_env(void)
 {
-    char **old_envp, **ep, *cp, *ps1;
+    char **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN + 1];
     unsigned int didvar;
     bool reset_home = false;
@@ -823,7 +843,8 @@ rebuild_env(void)
     didvar = 0;
     env.env_len = 0;
     env.env_size = 128;
-    old_envp = env.envp;
+    sudo_efree(env.old_envp);
+    env.old_envp = env.envp;
     env.envp = sudo_emallocarray(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
@@ -867,7 +888,7 @@ rebuild_env(void)
 	}
 
 	/* Pull in vars we want to keep from the old environment. */
-	for (ep = old_envp; *ep; ep++) {
+	for (ep = env.old_envp; *ep; ep++) {
 	    bool keepit;
 
 	    /*
@@ -943,7 +964,7 @@ rebuild_env(void)
 	 * Copy environ entries as long as they don't match env_delete or
 	 * env_check.
 	 */
-	for (ep = old_envp; *ep; ep++) {
+	for (ep = env.old_envp; *ep; ep++) {
 	    /* Add variable unless it matches a black list. */
 	    if (!env_should_delete(*ep)) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
@@ -970,7 +991,7 @@ rebuild_env(void)
      * they have already been set) or sudoedit (because we want the editor
      * to find the invoking user's startup files).
      */
-    if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL|MODE_EDIT)) {
+    if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
 	    sudo_setenv2("LOGNAME", runas_pw->pw_name, true, true);
 	if (!ISSET(didvar, KEPT_USER))
@@ -1020,9 +1041,6 @@ rebuild_env(void)
     snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
     if (sudo_setenv2("SUDO_GID", idbuf, true, true) == -1)
 	goto bad;
-
-    /* Free old environment. */
-    sudo_efree(old_envp);
 
     debug_return_bool(true);
 

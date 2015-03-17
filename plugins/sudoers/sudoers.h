@@ -324,6 +324,7 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 /* env.c */
 char **env_get(void);
 bool env_merge(char * const envp[]);
+bool env_swap_old(void);
 void env_init(char * const envp[]);
 void init_envtables(void);
 bool insert_env_vars(char * const envp[]);

@@ -525,6 +525,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc, &edit_argv);
 	if (safe_cmnd == NULL || audit_success(edit_argc, edit_argv) != 0)
 	    goto bad;
+
+	/* We want to run the editor with the unmodified environment. */
+	env_swap_old();
     } else {
 	if (audit_success(NewArgc, NewArgv) != 0)
 	    goto bad;
