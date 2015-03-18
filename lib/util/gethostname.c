@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,8 +12,6 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <config.h>
@@ -28,31 +26,39 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#include <errno.h>
-#include <grp.h>
-#include <limits.h>
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
+# include <malloc.h>
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <unistd.h>
 
 #include "sudo_compat.h"
-#include "sudo_debug.h"
 #include "sudo_util.h"
 
-int
-sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
+/*
+ * Return a malloc()ed copy of the system hostname, or NULL if 
+ * malloc() or gethostname() fails.
+ */
+char *
+sudo_gethostname_v1(void)
 {
-    int maxgids, rval;
-    debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL)
+    char *hname;
+    size_t host_name_max;
 
-    rval = setgroups(ngids, (GETGROUPS_T *)gids);
-    if (rval == -1 && errno == EINVAL) {
-	/* Too many groups, try again with fewer. */
-	maxgids = (int)sysconf(_SC_NGROUPS_MAX);
-	if (maxgids == -1)
-	    maxgids = NGROUPS_MAX;
-	if (ngids > maxgids)
-	    rval = setgroups(maxgids, (GETGROUPS_T *)gids);
+#ifdef _SC_HOST_NAME_MAX
+    host_name_max = (size_t)sysconf(_SC_HOST_NAME_MAX);
+    if (host_name_max == (size_t)-1)
+#endif
+	host_name_max = 255;	/* POSIX and historic BSD */
+
+    hname = malloc(host_name_max + 1);
+    if (hname != NULL) {
+	if (gethostname(hname, host_name_max + 1) == 0) {
+	    /* Old gethostname() may not NUL-terminate if there is no room. */
+	    hname[host_name_max] = '\0';
+	} else {
+	    free(hname);
+	    hname = NULL;
+	}
     }
-    debug_return_int(rval);
+    return hname;
 }

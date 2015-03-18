@@ -63,6 +63,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Send mail if the user is not allowed to run a command"),
 	NULL,
     }, {
+	"mail_all_cmnds", T_FLAG,
+	N_("Send mail if the user tries to run a command"),
+	NULL,
+    }, {
 	"tty_tickets", T_FLAG,
 	N_("Use a separate timestamp for each user/tty combo"),
 	NULL,

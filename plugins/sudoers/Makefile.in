@@ -307,6 +307,7 @@ install-dirs:
 	    `echo $(DESTDIR)$(vardir)|$(SED) 's,/[^/]*$$,,'`
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(rundir)
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(vardir)
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0700 $(DESTDIR)$(vardir)/lectured
 
 install-binaries: visudo sudoreplay install-dirs
 	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
@@ -1080,14 +1081,14 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
 visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
-          $(incdir)/sudo_alloc.h $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-          $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(incdir)/compat/timespec.h $(incdir)/sudo_alloc.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo.c
 visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_alloc.h \

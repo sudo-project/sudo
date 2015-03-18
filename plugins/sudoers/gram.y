@@ -117,6 +117,8 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <tok>	 NOLOG_INPUT		/* don't log user's cmnd input */
 %token <tok>	 LOG_OUTPUT		/* log cmnd output */
 %token <tok>	 NOLOG_OUTPUT		/* don't log cmnd output */
+%token <tok>	 MAIL			/* mail log message */
+%token <tok>	 NOMAIL			/* don't mail log message */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -312,6 +314,8 @@ cmndspeclist	:	cmndspec
 				$3->tags.log_input = prev->tags.log_input;
 			    if ($3->tags.log_output == UNSPEC)
 				$3->tags.log_output = prev->tags.log_output;
+			    if ($3->tags.send_mail == UNSPEC)
+				$3->tags.send_mail = prev->tags.send_mail;
 			    if (($3->runasuserlist == NULL &&
 				 $3->runasgrouplist == NULL) &&
 				(prev->runasuserlist != NULL ||
@@ -496,8 +500,8 @@ runaslist	:	/* empty */ {
 		;
 
 cmndtag		:	/* empty */ {
-			    $$.nopasswd = $$.noexec = $$.setenv =
-				$$.log_input = $$.log_output = UNSPEC;
+			    $$.log_input = $$.log_output = $$.noexec =
+				$$.nopasswd = $$.send_mail = $$.setenv = UNSPEC;
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = true;
@@ -528,6 +532,12 @@ cmndtag		:	/* empty */ {
 			}
 		|	cmndtag NOLOG_OUTPUT {
 			    $$.log_output = false;
+			}
+		|	cmndtag MAIL {
+			    $$.send_mail = true;
+			}
+		|	cmndtag NOMAIL {
+			    $$.send_mail = false;
 			}
 		;
 

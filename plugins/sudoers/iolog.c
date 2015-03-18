@@ -636,7 +636,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
 
     /* Write log file with user and command details. */
-    gettimeofday(&last_time, NULL);
+    if (gettimeofday(&last_time, NULL) == -1)
+	goto done;
     write_info_log(pathbuf, len, &details, argv, &last_time);
 
     /* Create the timing and I/O log files. */

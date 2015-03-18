@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2012, 2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,6 +44,9 @@ main(int argc, char *argv[])
 
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");
+    printf("#ifdef HAVE_UNISTD_H\n");
+    printf("# include <unistd.h>\n");
+    printf("#endif /* HAVE_UNISTD_H */\n");
     printf("#include \"sudo_compat.h\"\n\n");
     printf("const char *const sudo_sys_signame[NSIG] = {\n");
     for (i = 0; i < NSIG; i++) {

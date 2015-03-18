@@ -78,20 +78,19 @@
 
 static int converse(int, PAM_CONST struct pam_message **,
 		    struct pam_response **, void *);
+static struct pam_conv pam_conv = { converse, NULL };
 static char *def_prompt = PASSPROMPT;
-static int getpass_error;
+static bool getpass_error;
 static pam_handle_t *pamh;
 
 int
 sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 {
-    static struct pam_conv pam_conv;
     static int pam_status;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
     /* Initial PAM setup */
     auth->data = (void *) &pam_status;
-    pam_conv.conv = converse;
     pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
 	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
@@ -136,9 +135,14 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH)
 
     def_prompt = prompt;	/* for converse */
+    getpass_error = false;	/* set by converse if user presses ^C */
 
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, PAM_SILENT);
+    if (getpass_error) {
+	/* error or ^C from tgetpass() */
+	debug_return_int(AUTH_INTR);
+    }
     switch (*pam_status) {
 	case PAM_SUCCESS:
 	    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
@@ -174,11 +178,6 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    /* FALLTHROUGH */
 	case PAM_AUTH_ERR:
 	case PAM_AUTHINFO_UNAVAIL:
-	    if (getpass_error) {
-		/* error or ^C from tgetpass() */
-		debug_return_int(AUTH_INTR);
-	    }
-	    /* FALLTHROUGH */
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
 	    debug_return_int(AUTH_FAILURE);
@@ -262,7 +261,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	    /* Merge pam env with user env. */
 	    env_init(*user_envp);
 	    if (!env_merge(pam_envp))
-		status = PAM_SYSTEM_ERR;
+		status = AUTH_FAILURE;
 	    *user_envp = env_get();
 	    env_init(NULL);
 	    sudo_efree(pam_envp);
@@ -325,11 +324,14 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     const char *prompt;
     char *pass;
     int n, type;
-    int ret = PAM_AUTH_ERR;
+    int ret = PAM_SUCCESS;
     debug_decl(converse, SUDOERS_DEBUG_AUTH)
 
+    if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG)
+	debug_return_int(PAM_CONV_ERR);
+
     if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL)
-	debug_return_int(PAM_SYSTEM_ERR);
+	debug_return_int(PAM_BUF_ERR);
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
@@ -365,12 +367,12 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		pass = auth_getpass(prompt, def_passwd_timeout * 60, type);
 		if (pass == NULL) {
 		    /* Error (or ^C) reading password, don't try again. */
-		    getpass_error = 1;
-#if (defined(__darwin__) || defined(__APPLE__)) && !defined(OPENPAM_VERSION)
-		    pass = "";
-#else
+		    getpass_error = true;
 		    goto done;
-#endif
+		}
+		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
+		    ret = PAM_CONV_ERR;
+		    goto done;
 		}
 		pr->resp = sudo_estrdup(pass);
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
@@ -390,7 +392,6 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		goto done;
 	}
     }
-    ret = PAM_SUCCESS;
 
 done:
     if (ret != PAM_SUCCESS) {

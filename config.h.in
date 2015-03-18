@@ -97,10 +97,6 @@
    don't. */
 #undef HAVE_DECL_GETRESUID
 
-/* Define to 1 if you have the declaration of `HOST_NAME_MAX', and to 0 if you
-   don't. */
-#undef HAVE_DECL_HOST_NAME_MAX
-
 /* Define to 1 if you have the declaration of `h_errno', and to 0 if you
    don't. */
 #undef HAVE_DECL_H_ERRNO
@@ -116,10 +112,6 @@
 /* Define to 1 if you have the declaration of `LLONG_MIN', and to 0 if you
    don't. */
 #undef HAVE_DECL_LLONG_MIN
-
-/* Define to 1 if you have the declaration of `OPEN_MAX', and to 0 if you
-   don't. */
-#undef HAVE_DECL_OPEN_MAX
 
 /* Define to 1 if you have the declaration of `PATH_MAX', and to 0 if you
    don't. */
@@ -176,10 +168,6 @@
 /* Define to 1 if you have the declaration of `_innetgr', and to 0 if you
    don't. */
 #undef HAVE_DECL__INNETGR
-
-/* Define to 1 if you have the declaration of `_POSIX_HOST_NAME_MAX', and to 0
-   if you don't. */
-#undef HAVE_DECL__POSIX_HOST_NAME_MAX
 
 /* Define to 1 if you have the declaration of `_POSIX_PATH_MAX', and to 0 if
    you don't. */
@@ -255,6 +243,9 @@
 
 /* Define to 1 if you have the `futime' function. */
 #undef HAVE_FUTIME
+
+/* Define to 1 if you have the `futimens' function. */
+#undef HAVE_FUTIMENS
 
 /* Define to 1 if you have the `futimes' function. */
 #undef HAVE_FUTIMES
@@ -754,9 +745,6 @@
 /* Define to 1 if your struct stat uses an st__tim union. */
 #undef HAVE_ST__TIM
 
-/* Define to 1 if you have the `sysconf' function. */
-#undef HAVE_SYSCONF
-
 /* Define to 1 if you have the `sysctl' function. */
 #undef HAVE_SYSCTL
 
@@ -804,6 +792,25 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define this if your system can create weak aliases */
+#undef HAVE_SYS_WEAK_ALIAS
+
+/* Define this if weak aliases may be created with __attribute__ */
+#undef HAVE_SYS_WEAK_ALIAS_ATTRIBUTE
+
+/* Define this if weak aliases may be created with #pragma _CRI duplicate */
+#undef HAVE_SYS_WEAK_ALIAS_CRIDUPLICATE
+
+/* Define this if weak aliases in other files are honored */
+#undef HAVE_SYS_WEAK_ALIAS_CROSSFILE
+
+/* Define this if weak aliases may be created with #pragma _HP_SECONDARY_DEF
+   */
+#undef HAVE_SYS_WEAK_ALIAS_HPSECONDARY
+
+/* Define this if weak aliases may be created with #pragma weak */
+#undef HAVE_SYS_WEAK_ALIAS_PRAGMA
+
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
 
@@ -822,11 +829,11 @@
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
 
+/* Define to 1 if you have the `utimensat' function. */
+#undef HAVE_UTIMENSAT
+
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
-
-/* Define to 1 if you have the <utime.h> header file. */
-#undef HAVE_UTIME_H
 
 /* Define to 1 if you have the <utmpx.h> header file. */
 #undef HAVE_UTMPX_H
@@ -1031,7 +1038,7 @@
    ones. */
 #undef PC_INSULTS
 
-/* Enable replacement getcwd if system getcwd is broken. */
+/* Define to 1 to enable replacement getcwd if system getcwd is broken. */
 #undef PREFER_PORTABLE_GETCWD
 
 /* Enable replacement (v)snprintf if system (v)snprintf is broken. */
@@ -1062,7 +1069,7 @@
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
 
-/* Define to 1 to override the user's path with a built-in one. */
+/* A colon-separated list of directories to override the user's PATH with. */
 #undef SECURE_PATH
 
 /* Define to 1 to send mail when the user is not allowed to run a command. */
@@ -1084,9 +1091,6 @@
 
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
-
-/* The size of `long int', as computed by sizeof. */
-#undef SIZEOF_LONG_INT
 
 /* Define to 1 to compile the sudoers plugin statically into the sudo binary.
    */
@@ -1171,11 +1175,17 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef ino_t
 
+/* Define to `long long' if <sys/types.h> does not define. */
+#undef intmax_t
+
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
 /* Define to an OS-specific initialization function or `os_init_common'. */
 #undef os_init
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef ptrdiff_t
 
 /* Define to `size_t' if <sys/types.h> does not define. */
 #undef rsize_t
@@ -1203,6 +1213,9 @@
 
 /* Define to `unsigned char' if <sys/types.h> does not define. */
 #undef uint8_t
+
+/* Define to `unsigned long long' if <sys/types.h> does not define. */
+#undef uintmax_t
 
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */

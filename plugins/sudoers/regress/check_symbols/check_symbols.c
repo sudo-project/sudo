@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,10 +42,6 @@
 #include "sudo_dso.h"
 #include "sudo_util.h"
 #include "sudo_fatal.h"
-
-#ifndef LINE_MAX
-# define LINE_MAX 2048
-#endif
 
 __dso_public int main(int argc, char *argv[]);
 

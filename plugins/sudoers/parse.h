@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2014
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -58,6 +58,7 @@ struct cmndtag {
     signed int setenv: 3;
     signed int log_input: 3;
     signed int log_output: 3;
+    signed int send_mail: 3;
 };
 
 /*

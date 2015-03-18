@@ -75,6 +75,11 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     char *pw_epasswd = auth->data;
     char *epass = NULL;
     debug_decl(sudo_secureware_verify, SUDOERS_DEBUG_AUTH)
+
+    /* An empty plain-text password must match an empty encrypted password. */
+    if (pass[0] == '\0')
+	debug_return_int(pw_epasswd[0] ? AUTH_FAILURE : AUTH_SUCCESS);
+
 #ifdef __alpha
     {
 	extern int crypt_type;

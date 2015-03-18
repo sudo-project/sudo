@@ -6,3 +6,5 @@ user1 ALL = LOG_INPUT: LOG_OUTPUT: /usr/bin/su -:\
       ALL = NOLOG_INPUT: NOLOG_OUTPUT: /usr/bin/id
 user2 ALL = NOPASSWD: NOEXEC: SETENV: /usr/bin/vi:\
       ALL = PASSWD: EXEC: NOSETENV: /usr/bin/echo
+user3 ALL = MAIL: /bin/sh:\
+      ALL = NOMAIL: /usr/bin/id

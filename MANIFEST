@@ -61,7 +61,6 @@ include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
 include/compat/timespec.h
-include/compat/utime.h
 include/sudo_alloc.h
 include/sudo_compat.h
 include/sudo_conf.h
@@ -81,7 +80,6 @@ install-sh
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/alloc.c
-lib/util/clock_gettime.c
 lib/util/closefrom.c
 lib/util/event.c
 lib/util/event_poll.c
@@ -91,8 +89,10 @@ lib/util/fnmatch.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
 lib/util/getgrouplist.c
+lib/util/gethostname.c
 lib/util/getline.c
 lib/util/getopt_long.c
+lib/util/gettime.c
 lib/util/gidlist.c
 lib/util/glob.c
 lib/util/inet_ntop.c
@@ -100,6 +100,7 @@ lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c
 lib/util/lbuf.c
+lib/util/locale_weak.c
 lib/util/locking.c
 lib/util/memrchr.c
 lib/util/memset_s.c
@@ -117,6 +118,7 @@ lib/util/regress/fnmatch/fnm_test.in
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
+lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/progname/progname_test.c
 lib/util/regress/sudo_conf/conf_test.c
 lib/util/regress/sudo_conf/test1.in
@@ -168,7 +170,7 @@ lib/util/sudo_dso.c
 lib/util/term.c
 lib/util/ttysize.c
 lib/util/util.exp.in
-lib/util/utimes.c
+lib/util/utimens.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c
 lib/zlib/compress.c

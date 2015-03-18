@@ -311,7 +311,7 @@ void sudo_setspent(void);
 char *get_timestr(time_t, int);
 
 /* boottime.c */
-bool get_boottime(struct timeval *);
+bool get_boottime(struct timespec *);
 
 /* iolog.c */
 bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
@@ -324,6 +324,7 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 /* env.c */
 char **env_get(void);
 bool env_merge(char * const envp[]);
+bool env_swap_old(void);
 void env_init(char * const envp[]);
 void init_envtables(void);
 bool insert_env_vars(char * const envp[]);

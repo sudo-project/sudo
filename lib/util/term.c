@@ -119,7 +119,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
 bool
 sudo_term_restore_v1(int fd, bool flush)
 {
-    debug_decl(term_restore, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_term_restore, SUDO_DEBUG_UTIL)
 
     if (changed) {
 	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
@@ -137,7 +137,7 @@ sudo_term_restore_v1(int fd, bool flush)
 bool
 sudo_term_noecho_v1(int fd)
 {
-    debug_decl(term_noecho, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_term_noecho, SUDO_DEBUG_UTIL)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -147,7 +147,7 @@ again:
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	changed = 1;
 	debug_return_bool(true);
     }
@@ -167,7 +167,7 @@ bool
 sudo_term_raw_v1(int fd, int isig)
 {
     struct termios term;
-    debug_decl(term_raw, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_term_raw, SUDO_DEBUG_UTIL)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -181,7 +181,7 @@ again:
     CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
-    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	changed = 1;
     	debug_return_bool(true);
     }
@@ -200,7 +200,7 @@ again:
 bool
 sudo_term_cbreak_v1(int fd)
 {
-    debug_decl(term_cbreak, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -216,7 +216,7 @@ again:
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	sudo_term_erase = term.c_cc[VERASE];
 	sudo_term_kill = term.c_cc[VKILL];
 	changed = 1;
@@ -238,15 +238,15 @@ bool
 sudo_term_copy_v1(int src, int dst)
 {
     struct termios tt;
-    debug_decl(term_copy, SUDO_DEBUG_UTIL)
+    debug_decl(sudo_term_copy, SUDO_DEBUG_UTIL)
 
 again:
     if (tcgetattr(src, &tt) != 0)
 	debug_return_bool(false);
-    if (tcsetattr_nobg(dst, TCSANOW|TCSASOFT, &tt) == 0)
+    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt) == 0)
 	debug_return_bool(true);
     if (got_sigttou) {
-	/* We were in the background, so oterm is probably bogus. */
+	/* We were in the background, so tt is probably bogus. */
 	kill(getpid(), SIGTTOU);
 	goto again;
     }

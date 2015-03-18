@@ -56,6 +56,7 @@ extern sudo_conv_t sudo_conv;
 int bsdauth_init(struct passwd *pw, sudo_auth *auth);
 int bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
 int bsdauth_cleanup(struct passwd *pw, sudo_auth *auth);
+int sudo_aix_init(struct passwd *pw, sudo_auth *auth);
 int sudo_aix_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 int sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_fwtk_init(struct passwd *pw, sudo_auth *auth);

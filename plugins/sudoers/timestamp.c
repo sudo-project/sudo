@@ -51,15 +51,6 @@
 #include "sudoers.h"
 #include "check.h"
 
-/* On Linux, CLOCK_MONOTONIC does not run while suspended. */
-#if defined(CLOCK_BOOTTIME)
-# define SUDO_CLOCK_MONOTONIC	CLOCK_BOOTTIME
-#elif defined(CLOCK_MONOTONIC)
-# define SUDO_CLOCK_MONOTONIC	CLOCK_MONOTONIC
-#else
-# define SUDO_CLOCK_MONOTONIC	CLOCK_REALTIME
-#endif
-
 static char timestamp_file[PATH_MAX];
 static off_t timestamp_hint = (off_t)-1;
 static struct timestamp_entry timestamp_key;
@@ -345,7 +336,10 @@ update_timestamp(struct passwd *pw)
 
     /* Fill in time stamp. */
     memcpy(&entry, &timestamp_key, sizeof(struct timestamp_entry));
-    clock_gettime(SUDO_CLOCK_MONOTONIC, &entry.ts);
+    if (sudo_gettime_mono(&entry.ts) == -1) {
+	log_warning(0, N_("unable to read the clock"));
+	goto done;
+    }
 
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
@@ -427,7 +421,10 @@ timestamp_status(struct passwd *pw)
 	    timestamp_key.u.ppid = getppid();
 	}
     }
-    clock_gettime(SUDO_CLOCK_MONOTONIC, &timestamp_key.ts);
+    if (sudo_gettime_mono(&timestamp_key.ts) == -1) {
+	log_warning(0, N_("unable to read the clock"));
+	status = TS_ERROR;
+    }
 
     /* If the time stamp dir is missing there is nothing to do. */
     if (status == TS_MISSING)
@@ -447,10 +444,10 @@ timestamp_status(struct passwd *pw)
 
     /* Ignore and clear time stamp file if mtime predates boot time. */
     if (fstat(fd, &sb) == 0) {
-	struct timeval boottime, mtime;
+	struct timespec boottime, mtime;
 
-	mtim_get(&sb, &mtime);
-	if (get_boottime(&boottime) && sudo_timevalcmp(&mtime, &boottime, <)) {
+	mtim_get(&sb, mtime);
+	if (get_boottime(&boottime) && sudo_timespeccmp(&mtime, &boottime, <)) {
 	    ignore_result(ftruncate(fd, (off_t)0));
 	    status = TS_MISSING;
 	    goto done;

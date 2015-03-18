@@ -757,11 +757,12 @@ print_aliases_json(FILE *fp, int indent, bool need_comma)
 	((tt) != UNSPEC && (tt) != IMPLIED)
 
 #define TAGS_CHANGED(ot, nt) \
-	((TAG_SET((nt).setenv) && (nt).setenv != (ot).setenv) || \
+	((TAG_SET((nt).log_input) && (nt).log_input != (ot).log_input) || \
+	 (TAG_SET((nt).log_output) && (nt).log_output != (ot).log_output) || \
 	 (TAG_SET((nt).noexec) && (nt).noexec != (ot).noexec) || \
 	 (TAG_SET((nt).nopasswd) && (nt).nopasswd != (ot).nopasswd) || \
-	 (TAG_SET((nt).log_input) && (nt).log_input != (ot).log_input) || \
-	 (TAG_SET((nt).log_output) && (nt).log_output != (ot).log_output))
+	 (TAG_SET((nt).setenv) && (nt).setenv != (ot).setenv) || \
+	 (TAG_SET((nt).send_mail) && (nt).send_mail != (ot).send_mail))
 
 /*
  * Print a Cmnd_Spec in JSON format at the specified indent level.
@@ -807,26 +808,35 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     }
 
     /* Print tags */
-    if (cs->tags.nopasswd != UNSPEC || cs->tags.noexec != UNSPEC ||
-	cs->tags.setenv != UNSPEC || cs->tags.log_input != UNSPEC ||
-	cs->tags.log_output != UNSPEC) {
+    if (cs->tags.log_input != UNSPEC || cs->tags.log_output != UNSPEC ||
+	cs->tags.noexec != UNSPEC || cs->tags.nopasswd != UNSPEC ||
+	cs->tags.send_mail != UNSPEC || cs->tags.setenv != UNSPEC) {
 	fprintf(fp, "%*s\"Options\": [\n", indent, "");
 	indent += 4;
 	if (cs->tags.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = !cs->tags.nopasswd;
 	    last_one = cs->tags.noexec == UNSPEC &&
-		cs->tags.setenv == UNSPEC && cs->tags.log_input == UNSPEC &&
-		cs->tags.log_output == UNSPEC;
+		cs->tags.send_mail == UNSPEC && cs->tags.setenv == UNSPEC &&
+		cs->tags.log_input == UNSPEC && cs->tags.log_output == UNSPEC;
 	    print_pair_json(fp, "{ ", "authenticate", &value,
 		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.noexec != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.noexec;
+	    last_one = cs->tags.send_mail == UNSPEC &&
+		cs->tags.setenv == UNSPEC && cs->tags.log_input == UNSPEC &&
+		cs->tags.log_output == UNSPEC;
+	    print_pair_json(fp, "{ ", "noexec", &value,
+		last_one ? " }\n" : " },\n", indent);
+	}
+	if (cs->tags.send_mail != UNSPEC) {
+	    value.type = JSON_BOOL;
+	    value.u.boolean = cs->tags.send_mail;
 	    last_one = cs->tags.setenv == UNSPEC &&
 		cs->tags.log_input == UNSPEC && cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, "{ ", "noexec", &value,
+	    print_pair_json(fp, "{ ", "send_mail", &value,
 		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.setenv != UNSPEC) {

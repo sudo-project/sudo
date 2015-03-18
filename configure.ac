@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.12], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.13], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -74,6 +74,7 @@ AC_SUBST([ZLIB_SRC])
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
+AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
 AC_SUBST([LIBMD])
 AC_SUBST([SUDO_NLS])
@@ -219,6 +220,7 @@ COMPAT_EXP=
 dnl
 dnl Other vaiables
 dnl
+WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
 shadow_libs=
@@ -1461,6 +1463,10 @@ AC_ARG_ENABLE(shared_libutil,
 [AS_HELP_STRING([--disable-shared-libutil], [Disable use of the libsudo_util shared library.])],
 [], [enable_shared_libutil=yes])
 
+AC_ARG_ENABLE(weak_symbols,
+[AS_HELP_STRING([--disable-weak-symbols], [Disable use of weak symbols in the libsudo_util shared library.])],
+[], [enable_weak_symbols=yes])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -1679,15 +1685,11 @@ case "$host" in
 		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
-		# On AIX 6 and higher default to PAM, else default to LAM
-		if test $OSMAJOR -ge 6; then
-		    if test X"$with_pam" = X""; then
-			AUTH_EXCL_DEF="PAM"
-		    fi
-		else
-		    if test X"$with_aixauth" = X""; then
-			AC_CHECK_FUNCS([authenticate], [AUTH_EXCL_DEF="AIX_AUTH"])
-		    fi
+		# For AIX we build in support for both LAM and PAM
+		# and choose which to use based on auth_type in
+		# /etc/security/login.cfg
+		if test X"${with_pam}${with_aixauth}" = X""; then
+		    AUTH_EXCL_DEF="AIX_AUTH PAM"
 		fi
 
 		# AIX analog of nsswitch.conf, enabled by default
@@ -2103,10 +2105,6 @@ dnl
 AUTH_REG=${AUTH_REG# }
 AUTH_EXCL=${AUTH_EXCL# }
 if test -n "$AUTH_EXCL"; then
-    set -- $AUTH_EXCL
-    if test $# != 1; then
-	AC_MSG_ERROR([More than one mutually exclusive authentication method specified: $AUTH_EXCL])
-    fi
     if test -n "$AUTH_REG"; then
 	AC_MSG_ERROR([Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods])
     fi
@@ -2150,6 +2148,9 @@ dnl
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_VOLATILE
+if test "$enable_shared_libutil$enable_weak_symbols" = "yesyes"; then
+    AX_SYS_WEAK_ALIAS
+fi
 AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 AC_INCLUDES_DEFAULT
@@ -2194,7 +2195,7 @@ AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([malloc.h netgroup.h paths.h spawn.h utime.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
+AC_CHECK_HEADERS_ONCE([malloc.h netgroup.h paths.h spawn.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2280,12 +2281,14 @@ AC_TYPE_LONG_LONG_INT
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
     AC_MSG_ERROR(["C compiler does not appear to support the long long int type"])
 fi
-AC_CHECK_SIZEOF([long int])
 AC_CHECK_TYPE(id_t, unsigned int)
 AC_CHECK_TYPE(size_t, unsigned int)
 AC_CHECK_TYPE(ssize_t, int)
 AC_CHECK_TYPE(dev_t, int)
 AC_CHECK_TYPE(ino_t, unsigned int)
+AC_CHECK_TYPE(ptrdiff_t, long)
+AC_CHECK_TYPE(intmax_t, long long)
+AC_CHECK_TYPE(uintmax_t, unsigned long long)
 AC_CHECK_TYPE(uint8_t, unsigned char)
 AC_CHECK_TYPE(uint32_t, unsigned int)
 AC_CHECK_TYPE(uint64_t, unsigned long long)
@@ -2345,7 +2348,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime sysconf tzset])
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime tzset])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2497,12 +2500,15 @@ AC_INCLUDES_DEFAULT
 ], [
     AC_CHECK_FUNCS([sysinfo], [AC_CHECK_HEADERS([sys/systeminfo.h])])
 ])
-AC_CHECK_FUNCS([utimes], [
-    AC_CHECK_FUNCS([futimes futimesat], [break])
-], [
-    AC_LIBOBJ(utimes)
-    SUDO_APPEND_COMPAT_EXP(sudo_utimes)
-    AC_CHECK_FUNCS([futime], [SUDO_APPEND_COMPAT_EXP(sudo_futimes)])
+AC_CHECK_FUNCS([utimensat], [], [
+    AC_LIBOBJ(utimens)
+    SUDO_APPEND_COMPAT_EXP(sudo_utimensat)
+    AC_CHECK_FUNCS([utimes])
+])
+AC_CHECK_FUNCS([futimens], [], [
+    AC_LIBOBJ(utimens)
+    SUDO_APPEND_COMPAT_EXP(sudo_futimens)
+    AC_CHECK_FUNCS([futimes futimesat futime], [break])
 ])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [
     AC_LIBOBJ(fnmatch)
@@ -2538,10 +2544,7 @@ AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
-	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
-    ], [
-	AC_LIBOBJ(clock_gettime)
-	SUDO_APPEND_COMPAT_EXP(sudo_clock_gettime)
+	LIBRT="-lrt"
     ])
 ])
 AC_CHECK_FUNCS([getopt_long], [], [
@@ -2567,6 +2570,7 @@ if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_LIBOBJ(mktemp)
     # If either mkdtemp() or mkstemps() is missing, replace both.
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 fi
 AX_FUNC_SNPRINTF
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
@@ -2609,7 +2613,7 @@ AC_CHECK_HEADER([sha2.h], [
 ])
 if test X"$FOUND_SHA2" = X"no"; then
     AC_LIBOBJ(sha2)
-    SUDO_APPEND_COMPAT_EXP(SHA224Final SHA224Init SHA224Pad SHA224Transform SHA224Update SHA256Final SHA256Init SHA256Pad SHA256Transform SHA256Update SHA384Final SHA384Init SHA384Pad SHA384Transform SHA384Update SHA512Final SHA512Init SHA512Pad SHA512Transform SHA512Update)
+    SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
 fi
 dnl
 dnl Function checks for sudo_noexec
@@ -2927,6 +2931,18 @@ if test "$enable_nls" != "no"; then
 fi
 
 dnl
+dnl If the system has weak symbol support, use it for
+dnl sudo_warn_strerror_v1() and sudo_warn_gettext_v1().
+dnl
+if test X"$WEAK_ALIAS" != X"no"; then
+    COMMON_OBJS="${COMMON_OBJS} locale_weak.lo"
+    SUDO_APPEND_COMPAT_EXP(sudo_warn_strerror_v1)
+    if test X"$SUDO_NLS" = X"enabled"; then
+	SUDO_APPEND_COMPAT_EXP(sudo_warn_gettext_v1)
+    fi
+fi
+
+dnl
 dnl Deferred zlib option processing.
 dnl By default we use the system zlib if it is present.
 dnl If a directory was specified for zlib (or we are use sudo's version),
@@ -2994,7 +3010,7 @@ dnl We need to add OSDEFS to CFLAGS to expose LLONG_MAX et al on glibc.
 dnl
 _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
-AC_CHECK_DECLS([OPEN_MAX, LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, HOST_NAME_MAX], [], [], [
+AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
 ])
@@ -3037,12 +3053,6 @@ if test "$ac_cv_have_decl_SIZE_MAX" != "yes"; then
 fi
 if test "$ac_cv_have_decl_PATH_MAX" != "yes"; then
     AC_CHECK_DECLS([_POSIX_PATH_MAX], [], [], [[
-#include <sys/types.h>
-#include <limits.h>
-    ]])
-fi
-if test "$ac_cv_have_decl_HOST_NAME_MAX" != "yes"; then
-    AC_CHECK_DECLS([_POSIX_HOST_NAME_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])
@@ -3209,10 +3219,12 @@ fi
 
 dnl
 dnl AIX general authentication
-dnl If set to "maybe" only enable if no other exclusive method in use.
+dnl We may build in support for both AIX LAM and PAM and select
+dnl which one to use at run-time.
 dnl
 if test ${with_aixauth-'no'} != "no"; then
-    if test X"$with_aixauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+    AC_CHECK_FUNCS([authenticate], [with_aixauth=yes])
+    if test "${with_aixauth}" = "yes"; then
 	AC_MSG_NOTICE([using AIX general authentication])
 	AC_DEFINE(HAVE_AIXAUTH)
 	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
@@ -4128,7 +4140,10 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+if test X"$INIT_SCRIPT" != X""; then
+    AC_CONFIG_FILES([init.d/$INIT_SCRIPT])
+fi
+AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
@@ -4237,8 +4252,8 @@ AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(NO_TTY_TICKETS, [Define to 1 if you want a single ticket file instead of per-tty files.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
-AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Enable replacement getcwd if system getcwd is broken.])
-AH_TEMPLATE(SECURE_PATH, [Define to 1 to override the user's path with a built-in one.])
+AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Define to 1 to enable replacement getcwd if system getcwd is broken.])
+AH_TEMPLATE(SECURE_PATH, [A colon-separated list of directories to override the user's PATH with.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is not allowed to run sudo on this host.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_USER, [Define to 1 to send mail when the user is not in the sudoers file.])

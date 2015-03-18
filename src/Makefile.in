@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -103,7 +103,7 @@ OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_pty.o \
        preserve_fds.o signal.o sudo.o sudo_edit.o tgetpass.o ttyname.o \
        utmp.o @SUDO_OBJS@
 
-SESH_OBJS = sesh.o locale_stub.o exec_common.o
+SESH_OBJS = sesh.o exec_common.o locale_stub.o
 
 CHECK_TTYNAME_OBJS = check_ttyname.o locale_stub.o ttyname.o
 
@@ -131,7 +131,7 @@ sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
 sudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
@@ -349,12 +349,12 @@ sudo.o: $(srcdir)/sudo.c $(incdir)/compat/stdbool.h $(incdir)/sudo_alloc.h \
         $(top_builddir)/pathnames.h ./sudo_usage.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
-             $(incdir)/sudo_alloc.h $(incdir)/sudo_compat.h \
-             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
-             $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(incdir)/compat/timespec.h $(incdir)/sudo_alloc.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+             $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_edit.c
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/sudo_compat.h \
                 $(top_builddir)/config.h

@@ -102,10 +102,6 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-#ifndef LINE_MAX
-# define LINE_MAX 2048
-#endif
-
 /*
  * Info present in the I/O log file
  */

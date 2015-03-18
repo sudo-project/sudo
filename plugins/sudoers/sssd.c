@@ -1002,8 +1002,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	    for (i = 0; i < sss_result->num_rules; i++) {
 		rule = sss_result->rules + i;
 		if ((pwcheck == any && doauth != false) ||
-		    (pwcheck == all && doauth == false)) {
-		    doauth = sudo_sss_check_bool(handle, rule, "authenticate");
+		    (pwcheck == all && doauth != true)) {
+		    doauth = !!sudo_sss_check_bool(handle, rule, "authenticate");
 		}
 		/* Only check the command when listing another user. */
 		if (user_uid == 0 || list_pw == NULL ||
@@ -1382,13 +1382,16 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 		cp++;
 	    if (strcmp(cp, "authenticate") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-			    "NOPASSWD: " : "PASSWD: ");
+		    "NOPASSWD: " : "PASSWD: ");
 	    else if (strcmp(cp, "noexec") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-			    "EXEC: " : "NOEXEC: ");
+		    "EXEC: " : "NOEXEC: ");
 	    else if (strcmp(cp, "setenv") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-			    "NOSETENV: " : "SETENV: ");
+		    "NOSETENV: " : "SETENV: ");
+	    else if (strcmp(cp, "mail_all_cmnds") == 0 || strcmp(cp, "mail_always") == 0)
+		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
+		    "NOMAIL: " : "MAIL: ");
 	}
 	handle->fn_free_values(val_array);
 	break;

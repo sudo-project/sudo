@@ -67,6 +67,10 @@
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+
 /*
  * Function Prototypes
  */
@@ -106,7 +110,7 @@ static char *runas_group, *runas_user;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
 #endif
-#ifdef YYDEBUG
+#if YYDEBUG
 extern int sudoersdebug;
 #endif
 
@@ -119,7 +123,6 @@ main(int argc, char *argv[])
     struct privilege *priv;
     struct userspec *us;
     char *p, *grfile, *pwfile;
-    char hbuf[HOST_NAME_MAX + 1];
     const char *errstr;
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
@@ -128,7 +131,7 @@ main(int argc, char *argv[])
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     malloc_options = "AFGJPR";
 #endif
-#ifdef YYDEBUG
+#if YYDEBUG
     sudoersdebug = 1;
 #endif
 
@@ -212,10 +215,8 @@ main(int argc, char *argv[])
 	sudo_fatalx(U_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
-	if (gethostname(hbuf, sizeof(hbuf)) != 0)
+	if ((user_host = sudo_gethostname()) == NULL)
 	    sudo_fatal("gethostname");
-	hbuf[sizeof(hbuf) - 1] = '\0';
-	user_host = hbuf;
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
@@ -574,6 +575,12 @@ print_alias(void *v1, void *v2)
     debug_return_int(0);
 }
 
+#define TAG_SET(tt) \
+    ((tt) != UNSPEC && (tt) != IMPLIED)
+
+#define TAG_CHANGED(t) \
+    (TAG_SET(cs->tags.t) && cs->tags.t != tags.t)
+
 void
 print_privilege(struct privilege *priv)
 {
@@ -588,8 +595,12 @@ print_privilege(struct privilege *priv)
 	print_member(m);
     }
     fputs(" = ", stdout);
-    tags.nopasswd = UNSPEC;
+    tags.log_input = UNSPEC;
+    tags.log_output = UNSPEC;
     tags.noexec = UNSPEC;
+    tags.nopasswd = UNSPEC;
+    tags.send_mail = UNSPEC;
+    tags.setenv = UNSPEC;
     TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	if (cs != TAILQ_FIRST(&priv->cmndlist))
 	    fputs(", ", stdout);
@@ -628,10 +639,18 @@ print_privilege(struct privilege *priv)
 	if (cs->limitprivs)
 	    printf("LIMITPRIVS=%s ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
-	if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
-	    printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
-	if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
+	if (TAG_CHANGED(log_input))
+	    printf("%sLOG_INPUT: ", cs->tags.log_input ? "" : "NO");
+	if (TAG_CHANGED(log_output))
+	    printf("%sLOG_OUTPUT: ", cs->tags.log_output ? "" : "NO");
+	if (TAG_CHANGED(noexec))
 	    printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
+	if (TAG_CHANGED(nopasswd))
+	    printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
+	if (TAG_CHANGED(send_mail))
+	    printf("%sMAIL: ", cs->tags.send_mail ? "" : "NO");
+	if (TAG_CHANGED(setenv))
+	    printf("%sSETENV: ", cs->tags.setenv ? "" : "NO");
 	print_member(cs->cmnd);
 	memcpy(&tags, &cs->tags, sizeof(tags));
     }

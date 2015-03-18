@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,6 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 docdir = @docdir@
-exampledir = $(datarootdir)/examples/$(PACKAGE_TARNAME)
 mandir = @mandir@
 rundir = @rundir@
 vardir = @vardir@
@@ -306,7 +305,6 @@ package: $(srcdir)/sudo.pp
 	    mandir=$(mandir) \
 	    localedir=$(localedir) \
 	    docdir=$(docdir) \
-	    exampledir=$(exampledir) \
 	    sysconfdir=$(sysconfdir) \
 	    sudoersdir=$(sudoersdir) \
 	    sudoers_uid=$(sudoers_uid) \

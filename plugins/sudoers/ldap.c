@@ -2226,6 +2226,9 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lb
 	    else if (strcmp(cp, "setenv") == 0)
 		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "NOSETENV: " : "SETENV: ");
+	    else if (strcmp(cp, "mail_all_cmnds") == 0 || strcmp(cp, "mail_always") == 0)
+		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		    "NOMAIL: " : "MAIL: ");
 	}
 	ldap_value_free_len(bv);
     }
@@ -3005,8 +3008,8 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	for (i = 0; i < lres->nentries; i++) {
 	    entry = lres->entries[i].entry;
 	    if ((pwcheck == any && doauth != false) ||
-		(pwcheck == all && doauth == false)) {
-		doauth = sudo_ldap_check_bool(ld, entry, "authenticate");
+		(pwcheck == all && doauth != true)) {
+		doauth = !!sudo_ldap_check_bool(ld, entry, "authenticate");
 	    }
 	    /* Only check the command when listing another user. */
 	    if (user_uid == 0 || list_pw == NULL ||

@@ -12,7 +12,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="(c) 1993-1996,1998-2014 Todd C. Miller"
+	copyright="(c) 1993-1996,1998-2015 Todd C. Miller"
 	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
@@ -227,7 +227,7 @@ still allow people to get their work done."
 	# Package parent directories when not installing under /usr
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
-	    extradirs="$extradirs `dirname $docdir` `dirname $exampledir` `dirname $rundir` `dirname $vardir`"
+	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
 		    while test "$dir" != "/"; do
@@ -272,15 +272,15 @@ still allow people to get their work done."
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$rundir/		0711 root:
 	$vardir/		0711 root: ignore-others
+	$vardir/lectured/	0700 root:
 	$docdir/		0755
 	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-	$docdir/*		0644
-	$exampledir/		0755
-	$exampledir/*		0644
+	$docdir/examples/	0755 ignore-others
+	$docdir/**		0644
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional
 	$localedir/*/LC_MESSAGES/* 0644    optional
@@ -399,6 +399,15 @@ still allow people to get their work done."
 		;;
 	esac
 
+%post [rpm,deb]
+	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
+	if [ -r /usr/lib/tmpfiles.d/systemd.conf ]; then
+		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
+		d %{rundir} 0711 root root
+		D %{rundir}/ts 0700 root root
+		EOF
+	fi
+
 %post [aix]
 	# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
 	if [ -d /etc/rc.d ]; then
@@ -424,12 +433,19 @@ still allow people to get their work done."
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
+
+	# Remove systemd tmpfile config
+	rm -f /usr/lib/tmpfiles.d/sudo.conf
 %endif
 %if [rpm]
 	case "%{pp_rpm_distro}" in
 	aix*)
 		# Remove /etc/rc.d/rc2.d/S90sudo link
 		rm -f /etc/rc.d/rc2.d/S90sudo
+		;;
+	*)
+		# Remove systemd tmpfile config
+		rm -f /usr/lib/tmpfiles.d/sudo.conf
 		;;
 	esac
 %endif

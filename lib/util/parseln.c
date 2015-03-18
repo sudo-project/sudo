@@ -84,7 +84,7 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 	/* Remove comments or check for line continuation (but not both) */
 	if ((cp = strchr(line, '#')) != NULL) {
 	    *cp = '\0';
-	    len = (size_t)(cp - line);
+	    len = (ssize_t)(cp - line);
 	} else if (len > 0 && line[len - 1] == '\\' && (len == 1 || line[len - 2] != '\\')) {
 	    line[--len] = '\0';
 	    continued = true;

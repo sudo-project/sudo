@@ -126,14 +126,14 @@ utmp_settime(sudo_utmp_t *ut)
     struct timeval tv;
     debug_decl(utmp_settime, SUDO_DEBUG_UTMP)
 
-    gettimeofday(&tv, NULL);
-
+    if (gettimeofday(&tv, NULL) == 0) {
 #if defined(HAVE_STRUCT_UTMP_UT_TV) || defined(HAVE_STRUCT_UTMPX_UT_TV)
-    ut->ut_tv.tv_sec = tv.tv_sec;
-    ut->ut_tv.tv_usec = tv.tv_usec;
+	ut->ut_tv.tv_sec = tv.tv_sec;
+	ut->ut_tv.tv_usec = tv.tv_usec;
 #else
-    ut->ut_time = tv.tv_sec;
+	ut->ut_time = tv.tv_sec;
 #endif
+    }
 
     debug_return;
 }

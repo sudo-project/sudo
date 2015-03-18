@@ -364,7 +364,7 @@ log_auth_failure(int status, unsigned int tries)
 	    SET(flags, SLOG_SEND_MAIL);
     } else {
 	/* Command denied, auth failed; make sure we don't send mail twice. */
-	if ((def_mail_badpass || def_mail_always) && !should_mail(status))
+	if (def_mail_badpass && !should_mail(status))
 	    SET(flags, SLOG_SEND_MAIL);
 	/* Don't log the bad password message, we'll log a denial instead. */
 	SET(flags, SLOG_NO_LOG);
@@ -756,11 +756,8 @@ should_mail(int status)
 {
     debug_decl(should_mail, SUDOERS_DEBUG_LOGGING)
 
-    /* Never send mail about the "sudo -l" and "sudo -v" pseudo-commands. */
-    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
-	debug_return_bool(false);
-
     debug_return_bool(def_mail_always ||
+	(def_mail_all_cmnds && ISSET(sudo_mode, (MODE_RUN|MODE_EDIT))) ||
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
 	(def_mail_no_perms && !ISSET(status, VALIDATE_SUCCESS)));

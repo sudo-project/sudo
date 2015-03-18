@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 6, 2015
+.Dd February 26, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -558,6 +558,12 @@ E.g.,
 Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 .Ed
 .Pp
+It is a syntax error to redefine an existing
+.Em alias .
+It is possible to use the same name for
+.Em aliases
+of different types, but this is not recommended.
+.Pp
 The definitions of what constitutes a valid
 .Em alias
 member follow.
@@ -908,9 +914,9 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-              'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:')
+Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
+              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
+	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
 .Ed
 .Pp
 A
@@ -1131,17 +1137,19 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-.Li NOPASSWD ,
-.Li PASSWD ,
 .Li NOEXEC ,
 .Li EXEC ,
-.Li SETENV ,
-.Li NOSETENV ,
 .Li LOG_INPUT ,
 .Li NOLOG_INPUT ,
-.Li LOG_OUTPUT
+.Li LOG_OUTPUT ,
+.Li NOLOG_OUTPUT ,
+.Li MAIL ,
+.Li NOMAIL ,
+.Li NOPASSWD ,
+.Li PASSWD ,
+.Li SETENV ,
 and
-.Li NOLOG_OUTPUT .
+.Li NOSETENV .
 Once a tag is set on a
 .Li Cmnd ,
 subsequent
@@ -1157,6 +1165,82 @@ and
 overrides
 .Li EXEC ) .
 .Bl -hang -width 0n
+.It Em NOEXEC No and Em EXEC
+.sp
+If
+.Nm sudo
+has been compiled with
+.Em noexec
+support and the underlying operating system supports it, the
+.Li NOEXEC
+tag can be used to prevent a dynamically-linked executable from
+running further commands itself.
+.Pp
+In the following example, user
+.Sy aaron
+may run
+.Pa /usr/bin/more
+and
+.Pa /usr/bin/vi
+but shell escapes will be disabled.
+.Bd -literal
+aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.Ed
+.Pp
+See the
+.Sx Preventing shell escapes
+section below for more details on how
+.Li NOEXEC
+works and whether or not it will work on your system.
+.It Em LOG_INPUT No and Em NOLOG_INPUT
+.sp
+These tags override the value of the
+.Em log_input
+option on a per-command basis.
+For more information, see the description of
+.Em log_input
+in the
+.Sx SUDOERS OPTIONS
+section below.
+.It Em LOG_OUTPUT No and Em NOLOG_OUTPUT
+.sp
+These tags override the value of the
+.Em log_output
+option on a per-command basis.
+For more information, see the description of
+.Em log_output
+in the
+.Sx SUDOERS OPTIONS
+section below.
+.It Em MAIL No and Em NOMAIL
+.sp
+These tags provide fine-grained control over whether
+mail will be sent when a user runs a command by
+overriding the value of the
+.Em mail_all_cmnds
+option on a per-command basis.
+They have no effect when
+.Nm sudo
+is run with the
+.Fl l
+or
+.Fl v
+options.
+A
+.Em NOMAIL
+tag will also override the
+.Em mail_always
+and
+.Em mail_no_perms
+options.
+For more information, see the descriptions of
+.Em mail_all_cmnds ,
+.Em mail_always ,
+and
+.Em mail_no_perms
+in the
+.Sx SUDOERS OPTIONS
+section below.
 .It Em NOPASSWD No and Em PASSWD
 .sp
 By default,
@@ -1223,33 +1307,6 @@ This behavior may be overridden via the
 and
 .Em listpw
 options.
-.It Em NOEXEC No and Em EXEC
-.sp
-If
-.Nm sudo
-has been compiled with
-.Em noexec
-support and the underlying operating system supports it, the
-.Li NOEXEC
-tag can be used to prevent a dynamically-linked executable from
-running further commands itself.
-.Pp
-In the following example, user
-.Sy aaron
-may run
-.Pa /usr/bin/more
-and
-.Pa /usr/bin/vi
-but shell escapes will be disabled.
-.Bd -literal
-aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-.Ed
-.Pp
-See the
-.Sx Preventing shell escapes
-section below for more details on how
-.Li NOEXEC
-works and whether or not it will work on your system.
 .It Em SETENV No and Em NOSETENV
 .sp
 These tags override the value of the
@@ -1276,26 +1333,6 @@ the
 tag is implied for that command; this default may be overridden by use of the
 .Li NOSETENV
 tag.
-.It Em LOG_INPUT No and Em NOLOG_INPUT
-.sp
-These tags override the value of the
-.Em log_input
-option on a per-command basis.
-For more information, see the description of
-.Em log_input
-in the
-.Sx SUDOERS OPTIONS
-section below.
-.It Em LOG_OUTPUT No and Em NOLOG_OUTPUT
-.sp
-These tags override the value of the
-.Em log_output
-option on a per-command basis.
-For more information, see the description of
-.Em log_output
-in the
-.Sx SUDOERS OPTIONS
-section below.
 .El
 .Ss Wildcards
 .Nm sudo
@@ -1539,7 +1576,10 @@ It is still possible to run
 .Nm visudo
 with the
 .Fl f
-flag to edit the files directly.
+flag to edit the files directly, but this will not catch the
+redefinition of an
+.Em alias
+that is also present in a different file.
 .Ss Other special characters and reserved words
 The pound sign
 .Pq Ql #
@@ -2080,19 +2120,30 @@ It's not as pretty as the default but some people find it more convenient.
 This flag is
 .Em @long_otp_prompt@
 by default.
-.It mail_always
+.It mail_all_cmnds
 Send mail to the
 .Em mailto
 user every time a user attempts to run a command via
-.Nm sudo .
-Mail will be sent for both successful and unsuccessful attempts.
+.Nm sudo
+(this includes
+.Nm sudoedit ) .
 No mail will be sent if the user runs
 .Nm sudo
 with the
 .Fl l
 or
 .Fl v
-option unless there is an authentication error.
+option unless there is an authentication error and the
+.Em mail_badpass
+flag is also set.
+This flag is
+.Em off
+by default.
+.It mail_always
+Send mail to the
+.Em mailto
+user every time a user runs
+.Nm sudo .
 This flag is
 .Em off
 by default.
@@ -2105,6 +2156,7 @@ does not enter the correct password.
 If the command the user is attempting to run is not permitted by
 .Em sudoers
 and one of the
+.Em mail_all_cmnds ,
 .Em mail_always ,
 .Em mail_no_host ,
 .Em mail_no_perms
@@ -3170,7 +3222,7 @@ The default value is
 .Sy Lists that can be used in a boolean context :
 .Bl -tag -width 16n
 .It env_check
-Environment variables to be removed from the user's environment if
+Environment variables to be removed from the user's environment
 unless they are considered
 .Dq safe .
 For all variables except
@@ -3188,8 +3240,10 @@ The
 variable is considered unsafe if any of the following are true:
 .Bl -bullet
 .It
-It consists of a fully-qualified path name that does not match
-the location of the
+It consists of a fully-qualified path name,
+optionally prefixed with a colon
+.Pq Ql :\& ,
+that does not match the location of the
 .Pa zoneinfo
 directory.
 .It
