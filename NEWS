@@ -7,8 +7,9 @@ What's new in Sudo 1.8.13
    systems.  Bug #686
 
  * Weak symbols are now used for sudo_warn_gettext() and
-   sudo_warn_strerror() in libsudo_util to avoid link errors
-   when -Wl,--no-undefined is used in LDFLAGS.
+   sudo_warn_strerror() in libsudo_util to avoid link errors when
+   -Wl,--no-undefined is used in LDFLAGS.  The --disable-weak-symbols
+   configure option can be used to disable the user of weak symbols.
 
  * Fixed a bug in sudo's mkstemps() replacement function that
    prevented the file extension from being preserved in sudoedit.
@@ -33,6 +34,22 @@ What's new in Sudo 1.8.13
 
  * The sudo timestamp directory is now created at boot time on
    platforms that use systemd.
+
+ * Sudo will now restore the value of the SIGPIPE handler before
+   executing the command.
+
+ * Sudo now uses "struct timespec" instead of "struct timeval" for
+   time keeping when possible.  If supported, sudoedit and visudo
+   now use nanosecond granularity time stamps.
+
+ * Fixed a symbol name collision with systems that have their own
+   SHA2 implementation.  This fixes a problem where PAM could use
+   the wrong SHA2 implementation on Solaris 10 systems configured
+   to use SHA512 for passwords.
+
+ * The editor invoked by sudoedit once again uses an unmodified
+   copy of the user's environment as per the documentation.  This
+   was inadvertantly changed in sudo 1.8.0.  Bug #688.
 
 What's new in Sudo 1.8.12
 
