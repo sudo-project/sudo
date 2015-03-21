@@ -501,6 +501,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	    sudo_warnx_nodebug(ngettext("%u incorrect password attempt",
 		"%u incorrect password attempts", tries), tries);
 	} else {
+	    errno = serrno;
 	    if (ISSET(flags, SLOG_USE_ERRNO))
 		sudo_vwarn_nodebug(_(fmt), ap2);
 	    else
