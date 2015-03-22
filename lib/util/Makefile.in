@@ -79,7 +79,7 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 
 # Regression tests
 TEST_PROGS = atofoo_test conf_test hltq_test parseln_test progname_test @COMPAT_TEST_PROGS@
-TEST_LIBS = @LIBS@ @LIBINTL@
+TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
 # User and group ids the installed files should be "owned" by
@@ -136,9 +136,9 @@ $(shlib_opt): $(shlib_exp)
 libsudo_util.la: $(LTOBJS) @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LIBDL@ @LIBRT@;; \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LIBINTL@ @LIBDL@ @LIBRT@;; \
 	*) \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBDL@ @LIBRT@;; \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBDL@ @LIBRT@;; \
 	esac
 
 siglist.c: mksiglist

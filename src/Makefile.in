@@ -37,7 +37,7 @@ INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
-LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ @LIBINTL@ $(LT_LIBS)
+LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ $(LT_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
@@ -86,7 +86,7 @@ INIT_SCRIPT=@INIT_SCRIPT@
 RC_LINK=@RC_LINK@
 
 TEST_PROGS = check_ttyname
-TEST_LIBS = @LIBS@ @LIBINTL@ $(LT_LIBS)
+TEST_LIBS = @LIBS@ $(LT_LIBS)
 TEST_LDFLAGS = @LDFLAGS@
 
 # OS dependent defines
@@ -133,8 +133,8 @@ sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
 
-sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
+sesh: $(SESH_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
