@@ -4837,9 +4837,23 @@ mktemp(3),
 strftime(3),
 sudo.conf(@mansectform@),
 sudoers.ldap(@mansectform@),
-sudo_plugin(@mansectsu@),
 sudo(@mansectsu@),
+sudo_plugin(@mansectsu@),
 visudo(@mansectsu@)
+.SH "AUTHORS"
+Many people have worked on
+\fBsudo\fR
+over the years; this version consists of code written primarily by:
+.sp
+.RS 6n
+Todd C. Miller
+.RE
+.PP
+See the CONTRIBUTORS file in the
+\fBsudo\fR
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+\fBsudo\fR.
 .SH "CAVEATS"
 The
 \fIsudoers\fR

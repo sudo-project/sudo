@@ -871,6 +871,16 @@ EEXXAAMMPPLLEESS
 SSEEEE AALLSSOO
      ldap.conf(4), sssd-sudo(4), sudo.conf(4), sudoers(1m)
 
+AAUUTTHHOORRSS
+     Many people have worked on ssuuddoo over the years; this version consists of
+     code written primarily by:
+
+           Todd C. Miller
+
+     See the CONTRIBUTORS file in the ssuuddoo distribution
+     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     who have contributed to ssuuddoo.
+
 CCAAVVEEAATTSS
      Note that there are differences in the way that LDAP-based _s_u_d_o_e_r_s is
      parsed compared to file-based _s_u_d_o_e_r_s.  See the _D_i_f_f_e_r_e_n_c_e_s _b_e_t_w_e_e_n _L_D_A_P
@@ -892,4 +902,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.12                    January 30, 2015                    Sudo 1.8.12
+Sudo 1.8.13                    January 30, 2015                    Sudo 1.8.13

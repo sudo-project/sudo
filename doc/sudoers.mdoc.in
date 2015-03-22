@@ -3236,7 +3236,7 @@ characters.
 This can be used to guard against printf-style format vulnerabilities
 in poorly-written programs.
 The
-.Li TZ 
+.Li TZ
 variable is considered unsafe if any of the following are true:
 .Bl -bullet
 .It
@@ -4450,9 +4450,22 @@ manual.
 .Xr strftime 3 ,
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
-.Xr sudo_plugin @mansectsu@ ,
 .Xr sudo @mansectsu@ ,
+.Xr sudo_plugin @mansectsu@ ,
 .Xr visudo @mansectsu@
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
 .Sh CAVEATS
 The
 .Em sudoers

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -605,7 +605,7 @@ Many people have worked on
 .Nm sudo
 over the years; this version consists of code written primarily by:
 .Bd -ragged -offset indent
-Todd C. Miller
+.An Todd C. Miller
 .Ed
 .Pp
 See the CONTRIBUTORS file in the

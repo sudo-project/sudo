@@ -2369,7 +2369,17 @@ DDEEBBUUGGGGIINNGG
 
 SSEEEE AALLSSOO
      ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3), sudo.conf(4),
-     sudoers.ldap(4), sudo_plugin(1m), sudo(1m), visudo(1m)
+     sudoers.ldap(4), sudo(1m), sudo_plugin(1m), visudo(1m)
+
+AAUUTTHHOORRSS
+     Many people have worked on ssuuddoo over the years; this version consists of
+     code written primarily by:
+
+           Todd C. Miller
+
+     See the CONTRIBUTORS file in the ssuuddoo distribution
+     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     who have contributed to ssuuddoo.
 
 CCAAVVEEAATTSS
      The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo command which

@@ -1482,6 +1482,16 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
+AAUUTTHHOORRSS
+     Many people have worked on ssuuddoo over the years; this version consists of
+     code written primarily by:
+
+           Todd C. Miller
+
+     See the CONTRIBUTORS file in the ssuuddoo distribution
+     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     who have contributed to ssuuddoo.
+
 BBUUGGSS
      If you feel you have found a bug in ssuuddoo, please submit a bug report at
      http://bugzilla.sudo.ws/
@@ -1498,4 +1508,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.12                    December 4, 2014                    Sudo 1.8.12
+Sudo 1.8.13                    December 4, 2014                    Sudo 1.8.13

@@ -1125,7 +1125,7 @@ back end.
 Please see
 .Xr sssd-sudo @mansectform@
 for more information on configuring
-.Nm sudo 
+.Nm sudo
 to work with SSSD.
 .Sh FILES
 .Bl -tag -width 24n
@@ -1339,6 +1339,19 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
 .Xr sssd-sudo @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectsu@
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
 .Sh CAVEATS
 Note that there are differences in the way that LDAP-based
 .Em sudoers
