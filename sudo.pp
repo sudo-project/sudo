@@ -314,6 +314,10 @@ still allow people to get their work done."
 	/sbin/init.d/		ignore
 	/sbin/init.d/sudo	0755 root:
 %endif
+%if -d ${pp_destdir}/usr/lib/tmpfiles.d
+	/usr/lib/tmpfiles.d/	ignore
+	/usr/lib/tmpfiles.d/*	ignore
+%endif
 
 %files [!aix]
 	$mandir/man*/*		0644
