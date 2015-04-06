@@ -90,6 +90,7 @@ AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
 AC_SUBST([COMPAT_EXP])
+AC_SUBST([exampledir])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -185,6 +186,7 @@ dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
 INSTALL_NOEXEC=
+exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
 : ${MANDIRTYPE='man'}
@@ -817,9 +819,9 @@ esac])
 
 AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [path to the sudo var dir])],
 [case $with_vardir in
-    yes)	AC_MSG_ERROR(["must give --with-vardirdir an argument."])
+    yes)	AC_MSG_ERROR(["must give --with-vardir an argument."])
 		;;
-    no)		AC_MSG_ERROR(["--without-vardirdir not supported."])
+    no)		AC_MSG_ERROR(["--without-vardir not supported."])
 		;;
 esac])
 
@@ -1195,6 +1197,15 @@ if test X"$with_askpass" != X"no"; then
 else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, NULL)
 fi
+
+AC_ARG_WITH(exampledir, [AS_HELP_STRING([--with-exampledir=DIR], [path to install sudo examples in])],
+[case $with_exampledir in
+    yes)	AC_MSG_ERROR(["must give --with-exampledir an argument."])
+		;;
+    no)		AC_MSG_ERROR(["--without-exampledir not supported."])
+		;;
+    *)		exampledir="$with_exampledir"
+esac])
 
 AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
@@ -2004,6 +2015,11 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*openbsd*)
 		# OpenBSD-specific initialization
@@ -2022,6 +2038,11 @@ case "$host" in
 		    fi
 		fi
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
@@ -2033,6 +2054,11 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-dragonfly*)
 		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
@@ -2042,9 +2068,18 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*bsd*)
 		CHECKSHADOW="false"
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-darwin*)
 		# Darwin has a real setreuid(2) starting with 9.0
@@ -2064,6 +2099,11 @@ case "$host" in
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-nextstep*)
 		# lockf() is broken on the NeXT -- use flock instead

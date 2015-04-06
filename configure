@@ -723,6 +723,7 @@ timeout
 vardir
 rundir
 iolog_dir
+exampledir
 COMPAT_EXP
 RC_LINK
 INIT_DIR
@@ -922,6 +923,7 @@ with_secure_path
 with_interfaces
 with_stow
 with_askpass
+with_exampledir
 with_plugindir
 with_man
 with_mdoc
@@ -1730,6 +1732,7 @@ Optional Packages:
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             deprecated
   --with-askpass=PATH     Fully qualified pathname of askpass helper
+  --with-exampledir=DIR   path to install sudo examples in
   --with-plugindir=DIR    set directory to load plugins from
   --with-man              manual pages use man macros
   --with-mdoc             manual pages use mdoc macros
@@ -2841,6 +2844,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2889,6 +2893,7 @@ PLUGINDIR=/usr/local/libexec/sudo
 # End initial values for man page substitution
 #
 INSTALL_NOEXEC=
+exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
 : ${MANDIRTYPE='man'}
@@ -4633,9 +4638,9 @@ fi
 # Check whether --with-vardir was given.
 if test "${with_vardir+set}" = set; then :
   withval=$with_vardir; case $with_vardir in
-    yes)	as_fn_error $? "\"must give --with-vardirdir an argument.\"" "$LINENO" 5
+    yes)	as_fn_error $? "\"must give --with-vardir an argument.\"" "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-vardirdir not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "\"--without-vardir not supported.\"" "$LINENO" 5
 		;;
 esac
 fi
@@ -5246,6 +5251,19 @@ else
 EOF
 
 fi
+
+
+# Check whether --with-exampledir was given.
+if test "${with_exampledir+set}" = set; then :
+  withval=$with_exampledir; case $with_exampledir in
+    yes)	as_fn_error $? "\"must give --with-exampledir an argument.\"" "$LINENO" 5
+		;;
+    no)		as_fn_error $? "\"--without-exampledir not supported.\"" "$LINENO" 5
+		;;
+    *)		exampledir="$with_exampledir"
+esac
+fi
+
 
 
 # Check whether --with-plugindir was given.
@@ -15100,6 +15118,11 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*openbsd*)
 		# OpenBSD-specific initialization
@@ -15118,6 +15141,11 @@ done
 		    fi
 		fi
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
@@ -15129,6 +15157,11 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-dragonfly*)
 		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
@@ -15138,9 +15171,18 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*bsd*)
 		CHECKSHADOW="false"
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-darwin*)
 		# Darwin has a real setreuid(2) starting with 9.0
@@ -15161,6 +15203,11 @@ done
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-nextstep*)
 		# lockf() is broken on the NeXT -- use flock instead

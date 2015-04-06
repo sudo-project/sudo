@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 26, 2015
+.Dd March 24, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4256,6 +4256,21 @@ is a built-in command, it must be specified in
 .Em sudoers
 without a leading path.
 However, it may take command line arguments just as a normal command does.
+Wildcards used in
+.Em sudoedit
+command line arguments are expected to be path names, so a forward slash
+.Pq Ql /
+will not be matched by a wildcard.
+.Pp
+Unlike other
+.Nm sudo
+commands, the editor is run with the permissions of the invoking
+user and with the environment unmodified.
+More information may be found in the description of the
+.Fl e
+option in
+.Xr sudo @mansectsu@ .
+.Pp
 For example, to allow user operator to edit the
 .Dq message of the day
 file:

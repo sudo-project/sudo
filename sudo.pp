@@ -125,8 +125,12 @@ still allow people to get their work done."
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
-		mv ${pp_destdir}/${docdir} ${pp_destdir}/${docdir}-${version}-${pp_rpm_release}
-		docdir=${docdir}-${version}-${pp_rpm_release}
+		rhel_docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
+		if test "`dirname ${exampledir}`" = "${docdir}"; then
+		    exampledir="${rhel_docdir}/`basename ${exampledir}`"
+		fi
+		mv "${pp_destdir}/${docdir}" "${pp_destdir}/${rhel_docdir}"
+		docdir="${rhel_docdir}"
 		;;
 	esac
 
@@ -228,6 +232,7 @@ still allow people to get their work done."
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
 	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
+	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
 		    while test "$dir" != "/"; do
@@ -279,8 +284,9 @@ still allow people to get their work done."
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-	$docdir/examples/	0755 ignore-others
-	$docdir/**		0644
+	$exampledir/		0755 ignore-others
+	$exampledir/*		0644
+	$docdir/*		0644
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional
 	$localedir/*/LC_MESSAGES/* 0644    optional

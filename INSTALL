@@ -122,6 +122,9 @@ Directory and file names:
   --docdir=DIR
 	Install other sudo documentation in DIR [DATAROOTDIR/doc/sudo]
 
+  --with-exampledir=DIR
+	Install sudo example files in DIR [DATAROOTDIR/doc/sudo/examples]
+
   --with-plugindir=DIR
 	Set the directory that sudo looks in to find the policy and I/O
 	logging plugins.  Defaults to the LIBEXEC/sudo.
