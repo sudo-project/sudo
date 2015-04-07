@@ -90,6 +90,7 @@ AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
 AC_SUBST([COMPAT_EXP])
+AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -226,6 +227,7 @@ WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
 shadow_libs=
+TMPFILES_D=
 CONFIGURE_ARGS="$@"
 
 dnl
@@ -1477,6 +1479,18 @@ AC_ARG_ENABLE(shared_libutil,
 AC_ARG_ENABLE(weak_symbols,
 [AS_HELP_STRING([--disable-weak-symbols], [Disable use of weak symbols in the libsudo_util shared library.])],
 [], [enable_weak_symbols=yes])
+
+AC_ARG_ENABLE(tmpfiles.d,
+[AS_HELP_STRING([--enable-tmpfiles.d=DIR], [Set the path to the systemd tmpfiles.d directory.])],
+[case $enableval in
+    yes)	TMPFILES_D=/usr/lib/tmpfiles.d
+		;;
+    no)		TMPFILES_D=
+		;;
+    *)		TMPFILES_D="$enableval"
+esac], [
+    test -f /usr/lib/tmpfiles.d/systemd.conf && TMPFILES_D=/usr/lib/tmpfiles.d
+])
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
@@ -4182,6 +4196,8 @@ dnl Substitute into the Makefile and man pages
 dnl
 if test X"$INIT_SCRIPT" != X""; then
     AC_CONFIG_FILES([init.d/$INIT_SCRIPT])
+elif test X"$TMPFILES_D" != X""; then
+    AC_CONFIG_FILES([init.d/sudo.conf])
 fi
 AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT

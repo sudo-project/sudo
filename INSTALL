@@ -198,14 +198,6 @@ Compilation options:
         binary itself.  This will also disable the noexec option
         as it too relies on dynamic shared object support.
 
-  --enable-static-sudoers
-        By default, the sudoers plugin is built and installed as a
-        dynamic shared object.  When the --enable-static-sudoers
-        option is specified, the sudoers plugin is compiled directly
-        into the sudo binary.  Unlike --disable-shared, this does
-        not prevent other plugins from being used and the noexec
-        option will continue to function.
-
   --disable-shared-libutil
         Disable the use of the dynamic libsudo_util library.  By
         default, sudo, the sudoers plugin and the associated sudo
@@ -214,6 +206,22 @@ Compilation options:
         static version of the libsudo_util library will be used
         instead.  This option may only be used in conjunction with
         the --enable-static-sudoers option.
+
+  --enable-static-sudoers
+        By default, the sudoers plugin is built and installed as a
+        dynamic shared object.  When the --enable-static-sudoers
+        option is specified, the sudoers plugin is compiled directly
+        into the sudo binary.  Unlike --disable-shared, this does
+        not prevent other plugins from being used and the noexec
+        option will continue to function.
+
+  --enable-tmpfiles.d=DIR
+        Set the directory to be used when installing the sudo
+        tmpfiles.d file.  This is used to create (or clear) the
+        sudo time stamp directory on operating systems that use
+        systemd.  If this option is not specified, configure will
+        use the /usr/lib/tmpfiles.d directory if the file
+        /usr/lib/tmpfiles.d/systemd.conf exists.
 
   --disable-weak-symbols
         Disable the use of weak symbols in the libsudo_util library.

@@ -76,6 +76,7 @@ include/sudo_util.h
 indent.pro
 init.d/aix.sh.in
 init.d/hpux.sh.in
+init.d/sudo.conf.in
 install-sh
 lib/util/Makefile.in
 lib/util/aix.c

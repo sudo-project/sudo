@@ -73,6 +73,7 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
+tmpfiles_d = @TMPFILES_D@
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0
@@ -147,21 +148,20 @@ install: install-binaries install-rc @INSTALL_NOEXEC@
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
-	@if [ -r /usr/lib/tmpfiles.d/systemd.conf ]; then \
-	    mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d; \
-	fi
-
-install-rc:
-	@if [ -n "$(INIT_SCRIPT)" ]; then \
+	if test -n "$(INIT_SCRIPT)"; then \
 	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR) \
 		`echo $(DESTDIR)$(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
+	elif test -n "$(tmpfiles_d)"; then \
+	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(tmpfiles_d); \
+	fi
+
+install-rc: install-dirs
+	if [ -n "$(INIT_SCRIPT)" ]; then \
 	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_srcdir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
 	    rm -f $(DESTDIR)$(RC_LINK); \
 	    ln -s $(INIT_DIR)/sudo $(DESTDIR)$(RC_LINK); \
-	fi
-	@if [ -r /usr/lib/tmpfiles.d/systemd.conf ]; then \
-	    echo "d $(DESTDIR)$(rundir) 0711 root root" > $(DESTDIR)/usr/lib/tmpfiles.d/sudo.conf; \
-	    echo "D $(DESTDIR)$(rundir)/ts 0700 root root" >> $(DESTDIR)/usr/lib/tmpfiles.d/sudo.conf; \
+	elif test -n "$(tmpfiles_d)"; then \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_srcdir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
 	fi
 
 install-binaries: install-dirs $(PROGS)
@@ -190,9 +190,8 @@ uninstall:
 		$(DESTDIR)$(libexecdir)/sudo/sesh~ \
 		$(DESTDIR)$(noexecdir)/sudo_noexec.so~ \
 		$(DESTDIR)/usr/lib/tmpfiles.d/sudo.conf
-	@if [ -n "$(INIT_SCRIPT)" ]; then \
-	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo; \
-	fi
+	-test -n "$(INIT_SCRIPT)" && \
+	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo
 
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c

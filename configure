@@ -724,6 +724,7 @@ vardir
 rundir
 iolog_dir
 exampledir
+TMPFILES_D
 COMPAT_EXP
 RC_LINK
 INIT_DIR
@@ -951,6 +952,7 @@ enable_rpath
 enable_static_sudoers
 enable_shared_libutil
 enable_weak_symbols
+enable_tmpfiles_d
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1628,6 +1630,7 @@ Optional Features:
                           Disable use of the libsudo_util shared library.
   --disable-weak-symbols  Disable use of weak symbols in the libsudo_util
                           shared library.
+  --enable-tmpfiles.d=DIR Set the path to the systemd tmpfiles.d directory.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -2845,6 +2848,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2930,6 +2934,7 @@ WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
 shadow_libs=
+TMPFILES_D=
 CONFIGURE_ARGS="$@"
 
 RTLD_PRELOAD_VAR="LD_PRELOAD"
@@ -5696,6 +5701,22 @@ if test "${enable_weak_symbols+set}" = set; then :
   enableval=$enable_weak_symbols;
 else
   enable_weak_symbols=yes
+fi
+
+
+# Check whether --enable-tmpfiles.d was given.
+if test "${enable_tmpfiles_d+set}" = set; then :
+  enableval=$enable_tmpfiles_d; case $enableval in
+    yes)	TMPFILES_D=/usr/lib/tmpfiles.d
+		;;
+    no)		TMPFILES_D=
+		;;
+    *)		TMPFILES_D="$enableval"
+esac
+else
+
+    test -f /usr/lib/tmpfiles.d/systemd.conf && TMPFILES_D=/usr/lib/tmpfiles.d
+
 fi
 
 
@@ -24552,6 +24573,9 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 if test X"$INIT_SCRIPT" != X""; then
     ac_config_files="$ac_config_files init.d/$INIT_SCRIPT"
 
+elif test X"$TMPFILES_D" != X""; then
+    ac_config_files="$ac_config_files init.d/sudo.conf"
+
 fi
 ac_config_files="$ac_config_files Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
@@ -25544,6 +25568,7 @@ do
     "lib/zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/zlib/zconf.h" ;;
     "lib/zlib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/zlib/Makefile" ;;
     "init.d/$INIT_SCRIPT") CONFIG_FILES="$CONFIG_FILES init.d/$INIT_SCRIPT" ;;
+    "init.d/sudo.conf") CONFIG_FILES="$CONFIG_FILES init.d/sudo.conf" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;

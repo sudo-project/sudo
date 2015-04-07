@@ -320,10 +320,6 @@ still allow people to get their work done."
 	/sbin/init.d/		ignore
 	/sbin/init.d/sudo	0755 root:
 %endif
-%if -d ${pp_destdir}/usr/lib/tmpfiles.d
-	/usr/lib/tmpfiles.d/	ignore
-	/usr/lib/tmpfiles.d/*	ignore
-%endif
 
 %files [!aix]
 	$mandir/man*/*		0644
@@ -411,7 +407,7 @@ still allow people to get their work done."
 
 %post [rpm,deb]
 	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
-	if [ -r /usr/lib/tmpfiles.d/systemd.conf ]; then
+	if [ -f /usr/lib/tmpfiles.d/systemd.conf ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
 		d %{rundir} 0711 root root
 		D %{rundir}/ts 0700 root root

@@ -300,6 +300,9 @@ case "$osversion" in
 	;;
 esac
 
+# The postinstall script will create tmpfiles.d/sudo.conf for us
+configure_opts="${configure_opts}${configure_opts+$tab}--disable-tmpfiles.d"
+
 # Remove spaces from IFS when setting $@ so that passprompt may include them
 OIFS="$IFS"
 IFS="	$nl"
