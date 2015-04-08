@@ -163,7 +163,6 @@ case "$osversion" in
 	# XXX - SuSE uses secure path but only for env_reset
 	configure_opts="--prefix=/usr
 		--libexecdir=/usr/$libexec
-		--docdir='$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 		--with-logging=syslog
 		--with-logfac=auth
 		--with-all-insults
@@ -179,7 +178,7 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 
-	#make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
+	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
 	# Man pages should be compressed in .deb files
