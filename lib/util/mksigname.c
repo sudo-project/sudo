@@ -43,10 +43,8 @@ main(int argc, char *argv[])
 #include "mksigname.h"
 
     printf("#include <config.h>\n");
+    printf("#include <sys/types.h>\n");
     printf("#include <signal.h>\n");
-    printf("#ifdef HAVE_UNISTD_H\n");
-    printf("# include <unistd.h>\n");
-    printf("#endif /* HAVE_UNISTD_H */\n");
     printf("#include \"sudo_compat.h\"\n\n");
     printf("const char *const sudo_sys_signame[NSIG] = {\n");
     for (i = 0; i < NSIG; i++) {

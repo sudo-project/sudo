@@ -52,6 +52,7 @@
 
 #include <config.h>
 
+#include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
