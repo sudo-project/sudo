@@ -409,6 +409,10 @@ still allow people to get their work done."
 	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
 	if [ -f /usr/lib/tmpfiles.d/systemd.conf ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
+		# Create an empty sudo time stamp directory on OSes using systemd.
+		# Sudo will create the directory itself but this can cause problems
+		# on systems that have SELinux enabled since the directories will be
+		# created with the user's security context.
 		d %{rundir} 0711 root root
 		D %{rundir}/ts 0700 root root
 		EOF
