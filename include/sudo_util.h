@@ -124,7 +124,7 @@
  */
 #if defined(SUDO_ST_MTIM)
 # if defined(HAVE_FUTIMENS) && defined(HAVE_UTIMENSAT)
-#  define mtim_get(_x, _y)	((_y) = (_x)->SUDO_ST_MTIM)
+#  define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->SUDO_ST_MTIM.tv_sec; (_y).tv_nsec = (_x)->SUDO_ST_MTIM.tv_nsec; } while (0)
 # else
 #  define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->SUDO_ST_MTIM.tv_sec; (_y).tv_nsec = ((_x)->SUDO_ST_MTIM.tv_nsec / 1000) * 1000; } while (0)
 # endif
