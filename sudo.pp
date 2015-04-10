@@ -285,8 +285,8 @@ still allow people to get their work done."
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
 	$exampledir/		0755 ignore-others
-	$exampledir/*		0644
-	$docdir/*		0644
+	$exampledir/*		0644 ignore-others
+	$docdir/**		0644
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional
 	$localedir/*/LC_MESSAGES/* 0644    optional
