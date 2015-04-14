@@ -609,7 +609,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		}
 	    }
 	    if (retry) {
-		DPRINTF2("ldapssl_clientauth_init(%s, %s)",
+		DPRINTF2("retry ldapssl_clientauth_init(%s, %s)",
 		    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
 		    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL");
 		rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
@@ -1348,6 +1348,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	DPRINTF1("searching from netgroup_base '%s'", base->val);
 
 	/* Build query, using NIS domain if it is set. */
+	/* XXX - move outside foreach */
 	if (domain != NULL) {
 	    filt_len = sizeof("(nisNetgroupTriple=\\(,,\\))") - 1 +
 		sudo_ldap_value_len(pw->pw_name);
@@ -1430,7 +1431,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 	    NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc != LDAP_SUCCESS) {
-	    DPRINTF1("nothing found for '%s'", filt);
+	    DPRINTF1("ldap netgroup search failed: %s", ldap_err2string(rc));
 	    if (result)
 		ldap_msgfree(result);
 	    sudo_efree(filt);
@@ -2863,20 +2864,18 @@ sudo_ldap_open(struct sudo_nss *nss)
 #ifdef HAVE_LDAP_INITIALIZE
     if (!STAILQ_EMPTY(&ldap_conf.uri)) {
 	char *buf = sudo_ldap_join_uri(&ldap_conf.uri);
-	if (buf != NULL) {
-	    DPRINTF2("ldap_initialize(ld, %s)", buf);
-	    rc = ldap_initialize(&ld, buf);
-	    sudo_efree(buf);
-	    if (rc != LDAP_SUCCESS) {
-		sudo_warnx(U_("unable to initialize LDAP: %s"),
-		    ldap_err2string(rc));
-	    }
-	}
+	if (buf == NULL)
+	    goto done;
+	DPRINTF2("ldap_initialize(ld, %s)", buf);
+	rc = ldap_initialize(&ld, buf);
+	sudo_efree(buf);
     } else
 #endif
 	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
-    if (rc != LDAP_SUCCESS)
+    if (rc != LDAP_SUCCESS) {
+	sudo_warnx(U_("unable to initialize LDAP: %s"), ldap_err2string(rc));
 	goto done;
+    }
 
     /* Set LDAP per-connection options */
     rc = sudo_ldap_set_options_conn(ld);
@@ -3259,7 +3258,8 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 		    NULL, 0, NULL, NULL, tvp, 0, &result);
 		if (rc != LDAP_SUCCESS) {
-		    DPRINTF1("nothing found for '%s'", filt);
+		    DPRINTF1("ldap search pass %d failed: %s", pass + 1,
+			ldap_err2string(rc));
 		    continue;
 		}
 		lres->user_matches = true;
