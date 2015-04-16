@@ -357,7 +357,7 @@ set_runaspw(const char *user)
 	uid_t uid = sudo_strtoid(user + 1, NULL, NULL, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
-		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
+		pw = sudo_fakepwnam(user, user_gid);
 	}
     }
     if (pw == NULL) {
