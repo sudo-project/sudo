@@ -174,9 +174,6 @@ main(int argc, char *argv[], char *envp[])
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-    /* Use conversation function for sudo_(warn|fatal)x?. */
-    sudo_warn_set_conversation(sudo_conversation);
-
     /* Initialize the debug subsystem. */
     sudo_conf_read(NULL, SUDO_CONF_DEBUG);
     sudo_debug_instance = sudo_debug_register(getprogname(),
@@ -185,7 +182,7 @@ main(int argc, char *argv[], char *envp[])
     /* Make sure we are setuid root. */
     sudo_check_suid(argc > 0 ? argv[0] : "sudo");
 
-    /* Reset signal mask, save signal state and make sure fds 0-2 are open. */
+    /* Reset signal mask and save signal state. */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
     save_signals();
@@ -210,6 +207,9 @@ main(int argc, char *argv[], char *envp[])
 	if (user_details.uid == ROOT_UID)
 	    (void) printf(_("Configure options: %s\n"), CONFIGURE_ARGS);
     }
+
+    /* Use conversation function for sudo_(warn|fatal)x? for plugins. */
+    sudo_warn_set_conversation(sudo_conversation);
 
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
