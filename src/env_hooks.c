@@ -45,8 +45,13 @@
 extern char **environ;		/* global environment pointer */
 static char **priv_environ;	/* private environment pointer */
 
-static char *
-rpl_getenv(const char *name)
+/*
+ * NOTE: we don't use dlsym() to find the libc getenv()
+ *	 since this may allocate memory on some systems (glibc)
+ *	 which leads to a hang if malloc() calls getenv (jemalloc).
+ */
+char *
+getenv_unhooked(const char *name)
 {
     char **ep, *val = NULL;
     size_t namelen = 0;
@@ -61,19 +66,6 @@ rpl_getenv(const char *name)
 	}
     }
     return val;
-}
-
-typedef char * (*sudo_fn_getenv_t)(const char *);
-
-char *
-getenv_unhooked(const char *name)
-{
-    sudo_fn_getenv_t fn;
-
-    fn = (sudo_fn_getenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "getenv");
-    if (fn != NULL)
-	return fn(name);
-    return rpl_getenv(name);
 }
 
 __dso_public char *
