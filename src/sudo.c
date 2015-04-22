@@ -152,7 +152,7 @@ main(int argc, char *argv[], char *envp[])
     struct sudo_settings *settings;
     struct plugin_container *plugin, *next;
     sigset_t mask;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
     /* Make sure fds 0-2 are open and do OS-specific initialization. */
     fix_fds();
