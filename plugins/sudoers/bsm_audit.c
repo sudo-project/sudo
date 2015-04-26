@@ -43,6 +43,14 @@
 # define AUDIT_NOT_CONFIGURED	ENOSYS
 #endif
 
+/*
+ * Darwin defines AUE_sudo but au_preselect() only accepts AUE_DARWIN_sudo.
+ */
+#if defined(__APPLE__) && defined(AUE_DARWIN_sudo)
+# undef AUE_sudo
+# define AUE_sudo AUE_DARWIN_sudo
+#endif
+
 static int
 audit_sudo_selected(int sorf)
 {
@@ -68,6 +76,8 @@ audit_sudo_selected(int sorf)
 		mask = &ainfo_addr.ai_mask;
 	}
 	rc = au_preselect(AUE_sudo, mask, sorf, AU_PRS_REREAD);
+	if (rc == -1)
+		sudo_warn("au_preselect");
         debug_return_int(rc);
 }
 
