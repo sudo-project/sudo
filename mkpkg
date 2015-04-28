@@ -217,8 +217,8 @@ case "$osversion" in
 	;;
     macos*)
 	case "$osversion" in
-	    *i386|*x86_64)
-		# Build intel-only universal binaries
+	    macos10[0-6]i386|macos10[0-6]x86_64)
+		# Build intel universal binaries for 10.6 and below
 		ARCH_FLAGS="-arch i386 -arch x86_64"
 		;;
 	esac
