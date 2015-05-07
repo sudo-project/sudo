@@ -135,7 +135,7 @@ static bool
 sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
     struct stat sb;
-    int rval = false;
+    bool rval = false;
     debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
