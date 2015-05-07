@@ -195,7 +195,7 @@ int parse_args(int argc, char **argv, int *nargc, char ***nargv,
 extern int tgetpass_flags;
 
 /* get_pty.c */
-int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
+bool get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
 
 /* sudo.c */
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
