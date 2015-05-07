@@ -149,7 +149,7 @@ AC_DEFUN([_AX_SYS_WEAK_ALIAS_ATTRIBUTE],
   [ax_cv_sys_weak_alias_attribute], [
     # We add -Werror if it's gcc to force an error exit if the weak attribute
     # isn't understood
-    AS_IF([test $GCC = yes], [
+    AS_IF([test "$GCC" = yes], [
       save_CFLAGS=$CFLAGS
       CFLAGS=-Werror])
 
@@ -163,7 +163,7 @@ void weakf(int c) __attribute__((weak, alias("__weakf")));],
       [ax_cv_sys_weak_alias_attribute=no])
 
     # Restore original CFLAGS
-    AS_IF([test $GCC = yes], [
+    AS_IF([test "$GCC" = yes], [
       CFLAGS=$save_CFLAGS])
   ])
 
