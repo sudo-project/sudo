@@ -862,7 +862,7 @@ done:
 bool
 usergr_matches(const char *group, const char *user, const struct passwd *pw)
 {
-    int matched = false;
+    bool matched = false;
     struct passwd *pw0 = NULL;
     debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH)
 
@@ -874,7 +874,8 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
     }
 
     if (*group == ':' && def_group_plugin) {
-	matched = group_plugin_query(user, group + 1, pw);
+	if (group_plugin_query(user, group + 1, pw) == true)
+	    matched = true;
 	goto done;
     }
 
@@ -894,7 +895,7 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
     }
 
     /* not a Unix group, could be an external group */
-    if (def_group_plugin && group_plugin_query(user, group, pw)) {
+    if (def_group_plugin && group_plugin_query(user, group, pw) == true) {
 	matched = true;
 	goto done;
     }
