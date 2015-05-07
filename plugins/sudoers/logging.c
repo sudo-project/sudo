@@ -576,14 +576,14 @@ send_mail(const char *fmt, ...)
 
     /* Make sure the mailer exists and is a regular file. */
     if (stat(def_mailerpath, &sb) != 0 || !S_ISREG(sb.st_mode))
-	debug_return_int(false);
+	debug_return_bool(false);
 
     /* Fork and return, child will daemonize. */
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
 	    sudo_warn(U_("unable to fork"));
-	    debug_return_int(false);
+	    debug_return_bool(false);
 	    break;
 	case 0:
 	    /* Child. */
