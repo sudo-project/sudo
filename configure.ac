@@ -3134,7 +3134,10 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for sig2str(), sys_signame or sys_sigabbrev
 dnl
-AC_CHECK_FUNCS([sig2str], [], [
+AC_CHECK_FUNCS([sig2str], [
+    AC_CHECK_DECLS(SIG2STR_MAX, [], [], [
+#	include <signal.h>
+])], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"

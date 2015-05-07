@@ -312,7 +312,7 @@ extern int errno;
 #endif
 
 /* For sig2str() */
-#ifndef HAVE_SIG2STR
+#ifndef HAVE_DECL_SIG2STR_MAX
 # define SIG2STR_MAX 32
 #endif
 

@@ -133,6 +133,10 @@
    don't. */
 #undef HAVE_DECL_SETRESUID
 
+/* Define to 1 if you have the declaration of `SIG2STR_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SIG2STR_MAX
+
 /* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_SIZE_MAX
