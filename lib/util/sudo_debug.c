@@ -28,11 +28,6 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# include "compat/stdbool.h"
-#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -54,8 +49,8 @@
 #include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_plugin.h"
-#include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_conf.h"
 #include "sudo_util.h"
 
 /*
@@ -445,18 +440,12 @@ sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
 	"<- %s @ %s:%d := %zu", func, file, line, rval);
 }
 
-/* We use int, not bool, here for functions that return -1 on error. */
 void
 sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
-    int subsys, int rval)
+    int subsys, bool rval)
 {
-    if (rval == true || rval == false) {
-	sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	    "<- %s @ %s:%d := %s", func, file, line, rval ? "true" : "false");
-    } else {
-	sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	    "<- %s @ %s:%d := %d", func, file, line, rval);
-    }
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %s", func, file, line, rval ? "true" : "false");
 }
 
 void

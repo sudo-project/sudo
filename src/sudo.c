@@ -1143,7 +1143,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
     if (plugin_settings == NULL)
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     /*
      * Backwards compatibility for older API versions
@@ -1166,7 +1166,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     plugin->debug_instance = sudo_debug_get_active_instance();
     sudo_debug_set_active_instance(sudo_debug_instance);
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -1191,11 +1191,11 @@ policy_show_version(struct plugin_container *plugin, int verbose)
     debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.policy->show_version == NULL)
-	debug_return_bool(true);
+	debug_return_int(true);
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->show_version(verbose);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1214,7 +1214,7 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     rval = plugin->u.policy->check_policy(argc, argv, env_add, command_info,
 	argv_out, user_env_out);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1227,12 +1227,12 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     if (plugin->u.policy->list == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->list(argc, argv, verbose, list_user);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1244,12 +1244,12 @@ policy_validate(struct plugin_container *plugin)
     if (plugin->u.policy->validate == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support the -v option"),
 	    plugin->name);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->validate();
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -1288,7 +1288,7 @@ policy_init_session(struct command_details *details)
 	}
 	sudo_debug_set_active_instance(sudo_debug_instance);
     }
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1303,7 +1303,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
     if (plugin_settings == NULL)
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     /*
      * Backwards compatibility for older API versions
@@ -1326,7 +1326,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 	    argc, argv, user_env, plugin->options);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -1349,12 +1349,12 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.io->show_version == NULL)
-	debug_return_bool(true);
+	debug_return_int(true);
 
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.io->show_version(verbose);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 /*

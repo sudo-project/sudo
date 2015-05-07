@@ -511,7 +511,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     rval = true;
 
 done:
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -551,7 +551,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    debug_return_bool(sudoers_policy_init(&info, envp));
+    debug_return_int(sudoers_policy_init(&info, envp));
 }
 
 static void
@@ -608,7 +608,7 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	user_env = NULL;
 
-    debug_return_bool(sudo_auth_begin_session(pwd, user_env));
+    debug_return_int(sudo_auth_begin_session(pwd, user_env));
 }
 
 static int
@@ -633,7 +633,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -644,7 +644,7 @@ sudoers_policy_validate(void)
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
 
-    debug_return_bool(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL));
+    debug_return_int(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL));
 }
 
 static void
@@ -677,7 +677,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
 	    sudo_warnx(U_("unknown user: %s"), list_user);
-	    debug_return_bool(-1);
+	    debug_return_int(-1);
 	}
     }
     rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
@@ -686,7 +686,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = NULL;
     }
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -716,7 +716,7 @@ sudoers_policy_version(int verbose)
 	    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 	}
     }
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 /*

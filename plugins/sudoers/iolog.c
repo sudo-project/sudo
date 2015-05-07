@@ -581,7 +581,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
-	debug_return_bool(true);
+	debug_return_int(true);
 
     memset(&details, 0, sizeof(details));
 
@@ -671,7 +671,7 @@ done:
 	sudo_gr_delref(details.runas_gr);
     sudo_endgrent();
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -704,7 +704,7 @@ sudoers_io_version(int verbose)
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
 
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 /*
@@ -745,7 +745,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int

@@ -154,7 +154,7 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
 	if (matched != UNSPEC)
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 /*
@@ -310,7 +310,7 @@ hostlist_matches(const struct member_list *list)
 	if (matched != UNSPEC)
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 /*
@@ -329,7 +329,7 @@ cmndlist_matches(const struct member_list *list)
 	if (matched != UNSPEC)
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 /*
@@ -362,7 +362,7 @@ cmnd_matches(const struct member *m)
 		matched = !m->negated;
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 static bool

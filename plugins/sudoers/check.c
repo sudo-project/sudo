@@ -109,7 +109,7 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
 	update_timestamp(auth_pw);
 done:
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 /*
@@ -160,7 +160,7 @@ done:
     sudo_auth_cleanup(auth_pw);
     sudo_pw_delref(auth_pw);
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 /*

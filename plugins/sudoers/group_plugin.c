@@ -155,7 +155,7 @@ done:
 	}
     }
 
-    debug_return_bool(rc);
+    debug_return_int(rc);
 }
 
 void
@@ -181,8 +181,8 @@ group_plugin_query(const char *user, const char *group,
     debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
 
     if (group_plugin == NULL)
-	debug_return_bool(false);
-    debug_return_bool((group_plugin->query)(user, group, pwd));
+	debug_return_int(false);
+    debug_return_int((group_plugin->query)(user, group, pwd));
 }
 
 #else /* !HAVE_DLOPEN && !HAVE_SHL_LOAD */
@@ -195,7 +195,7 @@ int
 group_plugin_load(char *plugin_info)
 {
     debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL)
-    debug_return_bool(false);
+    debug_return_int(false);
 }
 
 void
@@ -210,7 +210,7 @@ group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
     debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
-    debug_return_bool(false);
+    debug_return_int(false);
 }
 
 #endif /* HAVE_DLOPEN || HAVE_SHL_LOAD */

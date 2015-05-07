@@ -750,7 +750,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
     debug_decl(sudo_ldap_check_runas_user, SUDOERS_DEBUG_LDAP)
 
     if (!runas_pw)
-	debug_return_bool(UNSPEC);
+	debug_return_int(UNSPEC);
 
     /* get the runas user from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
@@ -779,7 +779,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
      * what the user specified on the command line.
      */
     if (bv == NULL)
-	debug_return_bool(!strcasecmp(runas_pw->pw_name, def_runas_default));
+	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
 
     /* walk through values returned, looking for a match */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -809,7 +809,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_bool(ret);
+    debug_return_int(ret);
 }
 
 static int
@@ -822,12 +822,12 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 
     /* runas_gr is only set if the user specified the -g flag */
     if (!runas_gr)
-	debug_return_bool(UNSPEC);
+	debug_return_int(UNSPEC);
 
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv == NULL)
-	debug_return_bool(ret);
+	debug_return_int(ret);
 
     /* walk through values returned, looking for a match */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -840,7 +840,7 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_bool(ret);
+    debug_return_int(ret);
 }
 
 /*
@@ -936,11 +936,11 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
     debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
-	debug_return_bool(ret);
+	debug_return_int(ret);
 
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv == NULL)
-	debug_return_bool(ret);
+	debug_return_int(ret);
 
     for (p = bv; *p != NULL && ret != false; p++) {
 	val = (*p)->bv_val;
@@ -988,7 +988,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 
     ldap_value_free_len(bv);	/* more cleanup */
 
-    debug_return_bool(ret);
+    debug_return_int(ret);
 }
 
 /*
@@ -1004,11 +1004,11 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
     debug_decl(sudo_ldap_check_bool, SUDOERS_DEBUG_LDAP)
 
     if (entry == NULL)
-	debug_return_bool(ret);
+	debug_return_int(ret);
 
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv == NULL)
-	debug_return_bool(ret);
+	debug_return_int(ret);
 
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
@@ -1023,7 +1023,7 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
 
     ldap_value_free_len(bv);
 
-    debug_return_bool(ret);
+    debug_return_int(ret);
 }
 
 /*
@@ -2398,7 +2398,7 @@ done:
     if (found)
 	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
-   debug_return_bool(!found);
+   debug_return_int(!found);
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S

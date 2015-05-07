@@ -191,8 +191,8 @@ check_dce_status(error_status_t input_status, char *comment)
     debug_decl(check_dce_status, SUDOERS_DEBUG_AUTH)
 
     if (input_status == rpc_s_ok)
-	debug_return_bool(0);
+	debug_return_int(0);
     dce_error_inq_text(input_status, error_string, &error_stat);
     (void) fprintf(stderr, "%s %s\n", comment, error_string);
-    debug_return_bool(1);
+    debug_return_int(1);
 }

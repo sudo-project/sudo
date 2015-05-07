@@ -139,17 +139,17 @@ sudoers_policy_init(void *info, char * const envp[])
     /* Parse info from front-end. */
     sudo_mode = sudoers_policy_deserialize_info(info, &runas_user, &runas_group);
     if (ISSET(sudo_mode, MODE_ERROR))
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     if (!init_vars(envp))
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     /* Parse nsswitch.conf for sudoers order. */
     snl = sudo_read_nss();
 
     /* LDAP or NSS may modify the euid so we need to be root for the open. */
     if (!set_perms(PERM_ROOT))
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     /* Open and parse sudoers, set global defaults */
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
@@ -213,7 +213,7 @@ cleanup:
     if (!restore_perms())
 	rval = -1;
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 int
@@ -553,7 +553,7 @@ done:
     sudo_endpwent();
     sudo_endgrent();
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 /*

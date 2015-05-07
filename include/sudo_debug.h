@@ -18,6 +18,11 @@
 #define _SUDO_DEBUG_H
 
 #include <stdarg.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #include "sudo_queue.h"
 
 /* Number of bits in a byte. */
@@ -154,7 +159,7 @@ struct sudo_conf_debug_file_list;
 
 #define debug_return_bool(rval)						       \
     do {								       \
-	int sudo_debug_rval = (rval);					       \
+	bool sudo_debug_rval = (rval);					       \
 	sudo_debug_exit_bool(__func__, __FILE__, __LINE__, sudo_debug_subsys,  \
 	    sudo_debug_rval);						       \
 	return sudo_debug_rval;						       \
@@ -226,7 +231,7 @@ __dso_public int sudo_debug_deregister_v1(int instance_id);
 __dso_public void sudo_debug_enter_v1(const char *func, const char *file, int line, int subsys);
 __dso_public void sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[]);
 __dso_public void sudo_debug_exit_v1(const char *func, const char *file, int line, int subsys);
-__dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, int subsys, int rval);
+__dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, int subsys, bool rval);
 __dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int line, int subsys, int rval);
 __dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, int subsys, long rval);
 __dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, int subsys, const void *rval);

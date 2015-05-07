@@ -677,7 +677,7 @@ matches_env_check(const char *var, bool *full_match)
 		keepit = !strpbrk(++val, "/%");
 	}
     }
-    debug_return_bool(keepit);
+    debug_return_int(keepit);
 }
 
 /*
