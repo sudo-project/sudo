@@ -673,7 +673,7 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     char *val;
-    int ret = false;
+    bool ret = false;
     debug_decl(sudo_ldap_check_non_unix_group, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
