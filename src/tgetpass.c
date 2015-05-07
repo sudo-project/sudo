@@ -58,6 +58,7 @@
 
 static volatile sig_atomic_t signo[NSIG];
 
+static bool tty_present(void);
 static void tgetpass_handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
@@ -329,7 +330,7 @@ tgetpass_handler(int s)
 	signo[s] = 1;
 }
 
-int
+static bool
 tty_present(void)
 {
     int fd;

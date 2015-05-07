@@ -184,7 +184,6 @@ void cleanup(int);
 
 /* tgetpass.c */
 char *tgetpass(const char *, int, int);
-int tty_present(void);
 
 /* exec.c */
 int pipe_nonblock(int fds[2]);
