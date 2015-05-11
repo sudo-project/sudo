@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -91,6 +91,17 @@ VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(DEVDOCS) $(DOCS)
+
+lint: all
+	@if [ "$(mantype)" != "mdoc" ]; then \
+	    echo "make lint only supported for mdoc manuals" 1>&2; \
+	    exit 1; \
+	else \
+	    for m in $(DOCS); do \
+		echo $(MANDOC) -Tlint $$m; \
+		$(MANDOC) -Tlint $$m; \
+	    done; \
+	fi
 
 Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file doc/Makefile)
