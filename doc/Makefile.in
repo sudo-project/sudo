@@ -128,13 +128,13 @@ $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in
 sudo.man.sed: $(srcdir)/fixman.sh
 	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
-$(mansrcdir)/sudo.man: $(srcdir)/sudo.man.in sudo.man.sed
+$(mansrcdir)/sudo.man: $(top_builddir)/config.status $(srcdir)/sudo.man.in sudo.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.man.in | $(SED) -f $@.sed > $@
 
 sudo.mdoc.sed: $(srcdir)/fixmdoc.sh
 	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
-$(mansrcdir)/sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
+$(mansrcdir)/sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.mdoc.in | $(SED) -f $@.sed > $@
 
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
@@ -154,10 +154,10 @@ $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
 	fi
 
-$(mansrcdir)/visudo.man: $(srcdir)/visudo.man.in
+$(mansrcdir)/visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-$(mansrcdir)/visudo.mdoc: $(srcdir)/visudo.mdoc.in
+$(mansrcdir)/visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
@@ -177,10 +177,10 @@ $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
 	fi
 
-$(mansrcdir)/sudo.conf.man: $(srcdir)/sudo.conf.man.in
+$(mansrcdir)/sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-$(mansrcdir)/sudo.conf.mdoc: $(srcdir)/sudo.conf.mdoc.in
+$(mansrcdir)/sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
@@ -203,13 +203,13 @@ $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
 sudoers.man.sed: $(srcdir)/fixman.sh
 	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
-$(mansrcdir)/sudoers.man: $(srcdir)/sudoers.man.in sudoers.man.sed
+$(mansrcdir)/sudoers.man: $(top_builddir)/config.status $(srcdir)/sudoers.man.in sudoers.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.man.in | $(SED) -f $@.sed > $@
 
 sudoers.mdoc.sed: $(srcdir)/fixmdoc.sh
 	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
-$(mansrcdir)/sudoers.mdoc: $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
+$(mansrcdir)/sudoers.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.mdoc.in | $(SED) -f $@.sed > $@
 
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
@@ -229,10 +229,10 @@ $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
 	fi
 
-$(mansrcdir)/sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in
+$(mansrcdir)/sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-$(mansrcdir)/sudoers.ldap.mdoc: $(srcdir)/sudoers.ldap.mdoc.in
+$(mansrcdir)/sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
@@ -252,10 +252,10 @@ $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
 	fi
 
-$(mansrcdir)/sudoreplay.man: $(srcdir)/sudoreplay.man.in
+$(mansrcdir)/sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-$(mansrcdir)/sudoreplay.mdoc: $(srcdir)/sudoreplay.mdoc.in
+$(mansrcdir)/sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
@@ -275,10 +275,10 @@ $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
 	fi
 
-$(mansrcdir)/sudo_plugin.man: $(srcdir)/sudo_plugin.man.in
+$(mansrcdir)/sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-$(mansrcdir)/sudo_plugin.mdoc: $(srcdir)/sudo_plugin.mdoc.in
+$(mansrcdir)/sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
