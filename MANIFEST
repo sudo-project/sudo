@@ -101,7 +101,6 @@ lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c
 lib/util/lbuf.c
-lib/util/locale_weak.c
 lib/util/locking.c
 lib/util/memrchr.c
 lib/util/memset_s.c
@@ -205,7 +204,6 @@ m4/ax_check_compile_flag.m4
 m4/ax_check_link_flag.m4
 m4/ax_func_getaddrinfo.m4
 m4/ax_func_snprintf.m4
-m4/ax_sys_weak_alias.m4
 m4/libtool.m4
 m4/ltoptions.m4
 m4/ltsugar.m4
@@ -527,7 +525,6 @@ src/exec_pty.c
 src/get_pty.c
 src/hooks.c
 src/load_plugins.c
-src/locale_stub.c
 src/net_ifs.c
 src/openbsd.c
 src/parse_args.c

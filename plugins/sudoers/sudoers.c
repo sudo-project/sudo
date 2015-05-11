@@ -228,6 +228,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     volatile int rval = true;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
 
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
+
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
 	/* Not an audit event. */
@@ -552,6 +554,8 @@ done:
     /* Close the password and group files and free up memory. */
     sudo_endpwent();
     sudo_endgrent();
+
+    sudo_warn_set_locale_func(NULL);
 
     debug_return_int(rval);
 }

@@ -105,9 +105,9 @@ OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_pty.o \
        preserve_fds.o signal.o sudo.o sudo_edit.o tgetpass.o ttyname.o \
        utmp.o @SUDO_OBJS@
 
-SESH_OBJS = sesh.o exec_common.o locale_stub.o
+SESH_OBJS = sesh.o exec_common.o
 
-CHECK_TTYNAME_OBJS = check_ttyname.o locale_stub.o ttyname.o
+CHECK_TTYNAME_OBJS = check_ttyname.o ttyname.o
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -287,10 +287,6 @@ load_plugins.o: $(srcdir)/load_plugins.c $(incdir)/compat/stdbool.h \
                 $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
-locale_stub.o: $(srcdir)/locale_stub.c $(incdir)/sudo_compat.h \
-               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-               $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/locale_stub.c
 net_ifs.o: $(srcdir)/net_ifs.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_alloc.h $(incdir)/sudo_compat.h \
            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \

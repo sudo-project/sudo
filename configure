@@ -641,8 +641,6 @@ KRB5CONFIG
 FLEX
 YFLAGS
 YACC
-WEAK_ALIAS_CROSSFILE
-WEAK_ALIAS
 LIBOBJS
 NROFFPROG
 MANDOCPROG
@@ -951,7 +949,6 @@ enable_nls
 enable_rpath
 enable_static_sudoers
 enable_shared_libutil
-enable_weak_symbols
 enable_tmpfiles_d
 with_selinux
 enable_gss_krb5_ccache_name
@@ -1628,8 +1625,6 @@ Optional Features:
                           binary instead as a plugin
   --disable-shared-libutil
                           Disable use of the libsudo_util shared library.
-  --disable-weak-symbols  Disable use of weak symbols in the libsudo_util
-                          shared library.
   --enable-tmpfiles.d=DIR Set the path to the systemd tmpfiles.d directory.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
@@ -5693,14 +5688,6 @@ if test "${enable_shared_libutil+set}" = set; then :
   enableval=$enable_shared_libutil;
 else
   enable_shared_libutil=yes
-fi
-
-
-# Check whether --enable-weak_symbols was given.
-if test "${enable_weak_symbols+set}" = set; then :
-  enableval=$enable_weak_symbols;
-else
-  enable_weak_symbols=yes
 fi
 
 
@@ -15722,329 +15709,6 @@ $as_echo "#define volatile /**/" >>confdefs.h
 
 fi
 
-if test "$enable_shared_libutil$enable_weak_symbols" = "yesyes"; then
-
-  # starting point: no aliasing scheme yet...
-  ax_sys_weak_alias=no
-
-  # Figure out what kind of aliasing may be supported...
-   # Test whether compiler accepts #pragma form of weak aliasing
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports #pragma weak" >&5
-$as_echo_n "checking whether $CC supports #pragma weak... " >&6; }
-if ${ax_cv_sys_weak_alias_pragma+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-
-    # Try linking with a weak alias...
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-extern void weakf(int c);
-#pragma weak weakf = __weakf
-void __weakf(int c) {}
-int
-main ()
-{
-weakf(0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_sys_weak_alias_pragma=yes
-else
-  ax_cv_sys_weak_alias_pragma=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_pragma" >&5
-$as_echo "$ax_cv_sys_weak_alias_pragma" >&6; }
-
-  # What was the result of the test?
-  if test $ax_sys_weak_alias = no &&
-         test $ax_cv_sys_weak_alias_pragma = yes; then :
-
-    ax_sys_weak_alias=pragma
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS_PRAGMA 1" >>confdefs.h
-
-
-fi
-
-   # Test whether compiler accepts _HP_SECONDARY_DEF pragma from HP...
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports #pragma _HP_SECONDARY_DEF" >&5
-$as_echo_n "checking whether $CC supports #pragma _HP_SECONDARY_DEF... " >&6; }
-if ${ax_cv_sys_weak_alias_hpsecondary+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-
-    # Try linking with a weak alias...
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-extern void weakf(int c);
-#pragma _HP_SECONDARY_DEF __weakf weakf
-void __weakf(int c) {}
-int
-main ()
-{
-weakf(0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_sys_weak_alias_hpsecondary=yes
-else
-  ax_cv_sys_weak_alias_hpsecondary=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_hpsecondary" >&5
-$as_echo "$ax_cv_sys_weak_alias_hpsecondary" >&6; }
-
-  # What was the result of the test?
-  if test $ax_sys_weak_alias = no &&
-         test $ax_cv_sys_weak_alias_hpsecondary = yes; then :
-
-    ax_sys_weak_alias=hpsecondary
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS_HPSECONDARY 1" >>confdefs.h
-
-
-fi
-
-   # Test whether compiler accepts "_CRI duplicate" pragma from Cray
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports #pragma _CRI duplicate" >&5
-$as_echo_n "checking whether $CC supports #pragma _CRI duplicate... " >&6; }
-if ${ax_cv_sys_weak_alias_criduplicate+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-
-    # Try linking with a weak alias...
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-extern void weakf(int c);
-#pragma _CRI duplicate weakf as __weakf
-void __weakf(int c) {}
-int
-main ()
-{
-weakf(0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_sys_weak_alias_criduplicate=yes
-else
-  ax_cv_sys_weak_alias_criduplicate=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_criduplicate" >&5
-$as_echo "$ax_cv_sys_weak_alias_criduplicate" >&6; }
-
-  # What was the result of the test?
-  if test $ax_sys_weak_alias = no &&
-         test $ax_cv_sys_weak_alias_criduplicate = yes; then :
-
-    ax_sys_weak_alias=criduplicate
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS_CRIDUPLICATE 1" >>confdefs.h
-
-
-fi
-
-   # Test whether compiler accepts __attribute__ form of weak aliasing
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC accepts function __attribute__((weak,alias()))" >&5
-$as_echo_n "checking whether $CC accepts function __attribute__((weak,alias()))... " >&6; }
-if ${ax_cv_sys_weak_alias_attribute+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    # We add -Werror if it's gcc to force an error exit if the weak attribute
-    # isn't understood
-    if test "$GCC" = yes; then :
-
-      save_CFLAGS=$CFLAGS
-      CFLAGS=-Werror
-fi
-
-    # Try linking with a weak alias...
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-void __weakf(int c) {}
-void weakf(int c) __attribute__((weak, alias("__weakf")));
-int
-main ()
-{
-weakf(0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_sys_weak_alias_attribute=yes
-else
-  ax_cv_sys_weak_alias_attribute=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-    # Restore original CFLAGS
-    if test "$GCC" = yes; then :
-
-      CFLAGS=$save_CFLAGS
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_attribute" >&5
-$as_echo "$ax_cv_sys_weak_alias_attribute" >&6; }
-
-  # What was the result of the test?
-  if test $ax_sys_weak_alias = no &&
-         test $ax_cv_sys_weak_alias_attribute = yes; then :
-
-    ax_sys_weak_alias=attribute
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS_ATTRIBUTE 1" >>confdefs.h
-
-
-fi
-
-
-  # Do we actually support aliasing?
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to create weak aliases with $CC" >&5
-$as_echo_n "checking how to create weak aliases with $CC... " >&6; }
-if ${ax_cv_sys_weak_alias+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ax_cv_sys_weak_alias=$ax_sys_weak_alias
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias" >&5
-$as_echo "$ax_cv_sys_weak_alias" >&6; }
-
-  # OK, set a #define
-  if test $ax_cv_sys_weak_alias != no; then :
-
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS 1" >>confdefs.h
-
-
-fi
-
-  # Can aliases cross object file boundaries?
-   # Check to see if weak aliases can cross object file boundaries
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports weak aliases across object file boundaries" >&5
-$as_echo_n "checking whether $CC supports weak aliases across object file boundaries... " >&6; }
-if ${ax_cv_sys_weak_alias_crossfile+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    if test $ax_cv_sys_weak_alias = no; then :
-  ax_cv_sys_weak_alias_crossfile=no
-else
-
-      # conftest1 contains our weak alias definition...
-      cat >conftest1.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-      cat confdefs.h >>conftest1.$ac_ext
-      cat >>conftest1.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#ifndef HAVE_SYS_WEAK_ALIAS_ATTRIBUTE
-extern void weakf(int c);
-#endif
-#if defined(HAVE_SYS_WEAK_ALIAS_PRAGMA)
-#pragma weak weakf = __weakf
-#elif defined(HAVE_SYS_WEAK_ALIAS_HPSECONDARY)
-#pragma _HP_SECONDARY_DEF __weakf weakf
-#elif defined(HAVE_SYS_WEAK_ALIAS_CRIDUPLICATE)
-#pragma _CRI duplicate weakf as __weakf
-#endif
-void __weakf(int c) {}
-#ifdef HAVE_SYS_WEAK_ALIAS_ATTRIBUTE
-void weakf(int c) __attribute((weak, alias("__weakf")));
-#endif
-_ACEOF
-      # And conftest2 contains our main routine that calls it
-      cat >conftest2.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-      cat confdefs.h >> conftest2.$ac_ext
-      cat >>conftest2.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-extern void weakf(int c);
-int
-main ()
-{
-  weakf(0);
-  return 0;
-}
-_ACEOF
-      # We must remove the object files (if any) ourselves...
-      rm -f conftest2.$ac_objext conftest$ac_exeext
-
-      # Change ac_link to compile *2* files together
-      save_aclink=$ac_link
-      ac_link=`echo "$ac_link" | \
-               sed -e 's/conftest\(\.\$ac_ext\)/conftest1\1 conftest2\1/'`
-      # Since we created the files ourselves, don't use SOURCE argument
-      if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_sys_weak_alias_crossfile=yes
-else
-  ax_cv_sys_weak_alias_crossfile=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-      # Restore ac_link
-      ac_link=$save_aclink
-
-      # We must remove the object files (if any) and C files ourselves...
-      rm -f conftest1.$ac_ext conftest2.$ac_ext \
-            conftest1.$ac_objext conftest2.$ac_objext
-
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_sys_weak_alias_crossfile" >&5
-$as_echo "$ax_cv_sys_weak_alias_crossfile" >&6; }
-
-  # What were the results of the test?
-  if test $ax_cv_sys_weak_alias_crossfile = yes; then :
-
-
-$as_echo "#define HAVE_SYS_WEAK_ALIAS_CROSSFILE 1" >>confdefs.h
-
-
-fi
-
-
-  # OK, remember the results
-  WEAK_ALIAS=$ax_cv_sys_weak_alias
-
-  WEAK_ALIAS_CROSSFILE=$ax_cv_sys_weak_alias_crossfile
-
-
-fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for variadic macro support in cpp" >&5
 $as_echo_n "checking for variadic macro support in cpp... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -20972,35 +20636,21 @@ done
     LIBS="$OLIBS"
 
     if test "$sudo_cv_gettext" = "yes"; then
-	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
 	SUDO_NLS=enabled
 	# For Solaris we need links from lang to lang.UTF-8 in localedir
 	case "$host_os" in
 	    solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
 	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
-	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
 	SUDO_NLS=enabled
 	LIBINTL="-lintl"
     elif test "$sudo_cv_gettext_lintl_liconv" = "yes"; then
-	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
 	SUDO_NLS=enabled
 	LIBINTL="-lintl -liconv"
     fi
-fi
-
-if test X"$WEAK_ALIAS" != X"no"; then
-    COMMON_OBJS="${COMMON_OBJS} locale_weak.lo"
-
-    for _sym in sudo_warn_strerror_v1; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
     if test X"$SUDO_NLS" = X"enabled"; then
+	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
 
     for _sym in sudo_warn_gettext_v1; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
@@ -23385,7 +23035,6 @@ case "$lt_cv_dlopen" in
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
-	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -23400,7 +23049,6 @@ case "$lt_cv_dlopen" in
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
-	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;

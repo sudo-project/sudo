@@ -1476,10 +1476,6 @@ AC_ARG_ENABLE(shared_libutil,
 [AS_HELP_STRING([--disable-shared-libutil], [Disable use of the libsudo_util shared library.])],
 [], [enable_shared_libutil=yes])
 
-AC_ARG_ENABLE(weak_symbols,
-[AS_HELP_STRING([--disable-weak-symbols], [Disable use of weak symbols in the libsudo_util shared library.])],
-[], [enable_weak_symbols=yes])
-
 AC_ARG_ENABLE(tmpfiles.d,
 [AS_HELP_STRING([--enable-tmpfiles.d=DIR], [Set the path to the systemd tmpfiles.d directory.])],
 [case $enableval in
@@ -2202,9 +2198,6 @@ dnl
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_VOLATILE
-if test "$enable_shared_libutil$enable_weak_symbols" = "yesyes"; then
-    AX_SYS_WEAK_ALIAS
-fi
 AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 AC_INCLUDES_DEFAULT
@@ -2967,31 +2960,20 @@ if test "$enable_nls" != "no"; then
     LIBS="$OLIBS"
 
     if test "$sudo_cv_gettext" = "yes"; then
-	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	# For Solaris we need links from lang to lang.UTF-8 in localedir
 	case "$host_os" in
 	    solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
 	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
-	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	LIBINTL="-lintl"
     elif test "$sudo_cv_gettext_lintl_liconv" = "yes"; then
-	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	LIBINTL="-lintl -liconv"
     fi
-fi
-
-dnl
-dnl If the system has weak symbol support, use it for
-dnl sudo_warn_strerror_v1() and sudo_warn_gettext_v1().
-dnl
-if test X"$WEAK_ALIAS" != X"no"; then
-    COMMON_OBJS="${COMMON_OBJS} locale_weak.lo"
-    SUDO_APPEND_COMPAT_EXP(sudo_warn_strerror_v1)
     if test X"$SUDO_NLS" = X"enabled"; then
+	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_APPEND_COMPAT_EXP(sudo_warn_gettext_v1)
     fi
 fi
@@ -3763,7 +3745,6 @@ case "$lt_cv_dlopen" in
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
-	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -3776,7 +3757,6 @@ case "$lt_cv_dlopen" in
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
-	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;

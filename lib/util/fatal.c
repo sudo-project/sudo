@@ -46,6 +46,8 @@ SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
 static struct sudo_fatal_callback_list callbacks = SLIST_HEAD_INITIALIZER(&callbacks);
 static sudo_conv_t sudo_warn_conversation;
+static bool (*sudo_warn_setlocale)(bool, int *);
+static bool (*sudo_warn_setlocale_prev)(bool, int *);
 
 static void _warning(int errnum, const char *fmt, va_list ap);
 
@@ -136,6 +138,12 @@ sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
 static void
 _warning(int errnum, const char *fmt, va_list ap)
 {
+    int cookie;
+
+    /* Set user locale if setter was specified. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(false, &cookie);
+
     if (sudo_warn_conversation != NULL) {
 	struct sudo_conv_message msgs[6];
 	int nmsgs = 0;
@@ -155,7 +163,7 @@ _warning(int errnum, const char *fmt, va_list ap)
 	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	    msgs[nmsgs++].msg = ": ";
 	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-	    msgs[nmsgs++].msg = sudo_warn_strerror(errnum);
+	    msgs[nmsgs++].msg = strerror(errnum);
         }
 	msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	msgs[nmsgs++].msg = "\n";
@@ -170,10 +178,14 @@ _warning(int errnum, const char *fmt, va_list ap)
         }
         if (errnum) {
             fputs(": ", stderr);
-            fputs(sudo_warn_strerror(errnum), stderr);
+            fputs(strerror(errnum), stderr);
         }
         putc('\n', stderr);
     }
+
+    /* Restore old locale as needed. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(true, &cookie);
 }
 
 /*
@@ -232,3 +244,35 @@ sudo_warn_set_conversation_v1(sudo_conv_t conv)
 {
     sudo_warn_conversation = conv;
 }
+
+/*
+ * Set the locale function so the plugin can use a non-default
+ * locale for user warnings.
+ */
+void
+sudo_warn_set_locale_func_v1(bool (*func)(bool, int *))
+{
+    sudo_warn_setlocale_prev = sudo_warn_setlocale;
+    sudo_warn_setlocale = func;
+}
+
+#ifdef HAVE_LIBINTL_H
+char *
+sudo_warn_gettext_v1(const char *msgid)
+{
+    int cookie;
+    char *msg;
+
+    /* Set user locale if setter was specified. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(false, &cookie);
+
+    msg = gettext(msgid);
+
+    /* Restore old locale as needed. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(true, &cookie);
+
+    return msg;
+}
+#endif /* HAVE_LIBINTL_H */

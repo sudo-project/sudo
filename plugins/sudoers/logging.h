@@ -64,6 +64,7 @@ extern int NewArgc;
 extern char **NewArgv;
 #endif
 
+bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);
 int audit_success(int argc, char *argv[]);

@@ -110,30 +110,10 @@ sudoers_setlocale(int newlocale, int *prevlocale)
     return res ? true : false;
 }
 
-#ifdef HAVE_LIBINTL_H
-char *
-sudo_warn_gettext_v1(const char *msgid)
+bool
+sudoers_warn_setlocale(bool restore, int *cookie)
 {
-    int warning_locale;
-    char *msg;
-
-    sudoers_setlocale(SUDOERS_LOCALE_USER, &warning_locale);
-    msg = gettext(msgid);
-    sudoers_setlocale(warning_locale, NULL);
-
-    return msg;
-}
-#endif /* HAVE_LIBINTL_H */
-
-char *
-sudo_warn_strerror_v1(int errnum)
-{
-    int warning_locale;
-    char *errmsg;
-
-    sudoers_setlocale(SUDOERS_LOCALE_USER, &warning_locale);
-    errmsg = strerror(errnum);
-    sudoers_setlocale(warning_locale, NULL);
-
-    return errmsg;
+    if (restore)
+	return sudoers_setlocale(*cookie, NULL);
+    return sudoers_setlocale(SUDOERS_LOCALE_USER, cookie);
 }

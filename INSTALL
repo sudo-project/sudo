@@ -223,14 +223,6 @@ Compilation options:
         use the /usr/lib/tmpfiles.d directory if the file
         /usr/lib/tmpfiles.d/systemd.conf exists.
 
-  --disable-weak-symbols
-        Disable the use of weak symbols in the libsudo_util library.
-        By default, libsudo_util will provide weak symbols for the
-        sudo_warn_gettext() amd sudo_warn_strerror() functions which
-        may be overridden.  If weak symbols are disabled, these
-        functions will be omitted from the library and must be
-        provided by any binary that links against libsudo_util.
-
   --enable-zlib[=location]
 	Enable the use of the zlib compress library when storing
 	I/O log files.  If specified, location is the base directory
