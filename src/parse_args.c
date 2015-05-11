@@ -596,7 +596,7 @@ help(void)
     sudo_lbuf_append(&lbuf, "  -A, --askpass               %s\n",
 	_("use a helper program for password prompting"));
 #ifdef HAVE_BSD_AUTH_H
-    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type   %s\n",
+    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type        %s\n",
 	_("use specified BSD authentication type"));
 #endif
     sudo_lbuf_append(&lbuf, "  -b, --background            %s\n",
