@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 26, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 24, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4617,6 +4617,21 @@ is a built-in command, it must be specified in
 \fIsudoers\fR
 without a leading path.
 However, it may take command line arguments just as a normal command does.
+Wildcards used in
+\fIsudoedit\fR
+command line arguments are expected to be path names, so a forward slash
+(\(oq/\(cq)
+will not be matched by a wildcard.
+.PP
+Unlike other
+\fBsudo\fR
+commands, the editor is run with the permissions of the invoking
+user and with the environment unmodified.
+More information may be found in the description of the
+\fB\-e\fR
+option in
+sudo(@mansectsu@).
+.PP
 For example, to allow user operator to edit the
 \(Lqmessage of the day\(Rq
 file:
