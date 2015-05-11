@@ -1,3 +1,43 @@
+What's new in Sudo 1.8.14
+
+ * Log messages on Mac OS X now respect sudoers_locale just like
+   on other platforms.
+
+ * The sudo manual pages now pass "mandoc -Tlint" with no warnings.
+
+ * Fixed a compilation problem on systems with the sig2str() function
+   that do not define SIG2STR_MAX in signal.h.
+
+ * Worked around a compiler bug that resulted in unexpected behavior
+   when returning an int from a function declared to return bool
+   without an explicit cast.
+
+ * Worked around a bug in Mac OS X 10.10 BSD auditing where the
+   au_preselect() fails for AUE_sudo events but succeeds for
+   AUE_DARWIN_sudo.
+
+ * Fixed a hang on Linux systems with glibc when sudo is linked with
+   jemalloc.
+
+ * When the user runs a command as a user ID that is not present in
+   the password database via the -u flag, the command is now run
+   with the group ID of the invoking user instead of group ID 0.
+
+ * Fixed a compilation problem on systems that don't pull in
+   definitions of uid_t and gid_t without sys/types.h or unistd.h.
+
+ * Fixed a compilation problem on newer AIX systems which use a
+   struct st_timespec for time stamps in struct stat that differs
+   from struct timespec.
+
+ * The example directory is now configurable via --with-exampledir
+   and defaults to DATAROOTDIR/examples/sudo on BSD systems.
+
+ * The /usr/lib/tmpfiles.d/sudo.conf file is now installed as part
+   of "make install" when systemd is in use.
+
+ * Fixed a linker problem on some systems with libintl.  Bug #690.
+
 What's new in Sudo 1.8.13
 
  * The examples directory is now a subdirectory of the doc dir to
