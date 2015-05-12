@@ -124,7 +124,7 @@ struct sudo_conv_reply;
 
 __dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
 __dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
-__dso_public char *sudo_warn_gettext_v1(const char *msgid) __format_arg(1);
+__dso_public char *sudo_warn_gettext_v1(const char *domainname, const char *msgid) __format_arg(2);
 __dso_public void sudo_warn_set_locale_func_v1(bool (*func)(bool, int *));
 __dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) __printf0like(1, 2) __attribute__((__noreturn__));
 __dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) __printflike(1, 2) __attribute__((__noreturn__));
@@ -138,7 +138,6 @@ __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const 
 
 #define sudo_fatal_callback_deregister(_a) sudo_fatal_callback_deregister_v1((_a))
 #define sudo_fatal_callback_register(_a) sudo_fatal_callback_register_v1((_a))
-#define sudo_warn_gettext(_a) sudo_warn_gettext_v1((_a))
 #define sudo_warn_set_locale_func(_a) sudo_warn_set_locale_func_v1((_a))
 #define sudo_fatal_nodebug sudo_fatal_nodebug_v1
 #define sudo_fatalx_nodebug sudo_fatalx_nodebug_v1
@@ -150,5 +149,11 @@ __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const 
 #define sudo_vwarnx_nodebug(_a, _b) sudo_vwarnx_nodebug_v1((_a), (_b))
 #define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
 #define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
+
+#ifdef DEFAULT_TEXT_DOMAIN
+# define sudo_warn_gettext(_a) sudo_warn_gettext_v1(DEFAULT_TEXT_DOMAIN, (_a))
+#else
+# define sudo_warn_gettext(_a) sudo_warn_gettext_v1(NULL, (_a))
+#endif
 
 #endif /* _SUDO_FATAL_H_ */

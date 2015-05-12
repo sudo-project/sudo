@@ -258,7 +258,7 @@ sudo_warn_set_locale_func_v1(bool (*func)(bool, int *))
 
 #ifdef HAVE_LIBINTL_H
 char *
-sudo_warn_gettext_v1(const char *msgid)
+sudo_warn_gettext_v1(const char *domainname, const char *msgid)
 {
     int cookie;
     char *msg;
@@ -267,7 +267,7 @@ sudo_warn_gettext_v1(const char *msgid)
     if (sudo_warn_setlocale != NULL)
 	sudo_warn_setlocale(false, &cookie);
 
-    msg = gettext(msgid);
+    msg = dgettext(domainname, msgid);
 
     /* Restore old locale as needed. */
     if (sudo_warn_setlocale != NULL)
