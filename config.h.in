@@ -556,6 +556,9 @@
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 
+/* Define to 1 if you have the `reallocarray' function. */
+#undef HAVE_REALLOCARRAY
+
 /* Define to 1 if you have the `revoke' function. */
 #undef HAVE_REVOKE
 

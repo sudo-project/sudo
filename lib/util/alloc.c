@@ -48,6 +48,7 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+#include <errno.h>
 #include <limits.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
@@ -257,3 +258,17 @@ sudo_evasprintf_v1(char **ret, const char *fmt, va_list args)
 	sudo_fatal_nodebug(NULL);
     return len;
 }
+
+#ifndef HAVE_REALLOCARRAY
+void *
+sudo_reallocarray(void *ptr, size_t nmemb, size_t size)
+{
+    if (nmemb > SIZE_MAX / size) {
+	errno = EOVERFLOW;
+	return NULL;
+    }
+
+    size *= nmemb;
+    return ptr ? realloc(ptr, size) : malloc(size);
+}
+#endif /* HAVE_REALLOCARRAY */

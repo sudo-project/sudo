@@ -368,7 +368,7 @@ __dso_public long long sudo_strtonum(const char *, long long, long long, const c
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
  */
 
-struct timeval;
+struct passwd;
 struct timespec;
 
 #ifndef HAVE_CLOSEFROM
@@ -479,5 +479,10 @@ __dso_public const char *sudo_getprogname(void);
 # undef getprogname
 # define getprogname() sudo_getprogname()
 #endif /* HAVE_GETPROGNAME */
+#ifndef HAVE_REALLOCARRAY
+__dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
+# undef reallocarray
+# define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
+#endif /* HAVE_REALLOCARRAY */
 
 #endif /* _SUDO_COMPAT_H */
