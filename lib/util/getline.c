@@ -89,10 +89,10 @@ sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
 	len = strlen(buf);
 	if (!len || buf[len - 1] == '\n' || feof(fp))
 	    break;
-	bufsize *= 2;
-	cp = realloc(buf, bufsize);
+	cp = reallocarray(buf, bufsize, 2);
 	if (cp == NULL)
 	    return -1;
+	bufsize *= 2;
 	buf = cp;
     }
     *bufp = buf;

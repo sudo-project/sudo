@@ -165,8 +165,9 @@ sudo_getcwd(char *pt, size_t size)
 		if (bup + 3  + MAXNAMLEN + 1 >= eup) {
 			char *nup;
 
-			if ((nup = realloc(up, upsize *= 2)) == NULL)
+			if ((nup = reallocarray(up, upsize, 2)) == NULL)
 				goto err;
+			upsize *= 2;
 			up = nup;
 			bup = up;
 			eup = up + upsize;
@@ -228,8 +229,9 @@ sudo_getcwd(char *pt, size_t size)
 			}
 			off = bpt - pt;
 			len = ept - bpt;
-			if ((npt = realloc(pt, ptsize *= 2)) == NULL)
+			if ((npt = reallocarray(pt, ptsize, 2)) == NULL)
 				goto err;
+			ptsize *= 2;
 			pt = npt;
 			bpt = pt + off;
 			ept = pt + ptsize;

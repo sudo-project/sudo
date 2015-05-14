@@ -307,7 +307,7 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	    errno = EOVERFLOW;
 	    return -1;
 	}
-	nenvp = realloc(env.envp, nsize * sizeof(char *));
+	nenvp = reallocarray(env.envp, nsize, sizeof(char *));
 	if (nenvp == NULL) {
 	    errno = ENOMEM;
 	    return -1;

@@ -4090,7 +4090,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	if (count >= max_paths) {
 	    struct path_list **tmp;
 	    max_paths <<= 1;
-	    tmp = realloc(paths, sizeof(*paths) * max_paths);
+	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
 		sudo_efree(path);
 		sudo_efree(pl);
@@ -4197,8 +4197,7 @@ _push_include(char *path, bool isdir)
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
-	new_istack = (struct include_stack *) realloc(istack,
-	    sizeof(*istack) * istacksize);
+	new_istack = reallocarray(istack, istacksize, sizeof(*istack));
 	if (new_istack == NULL) {
 	    sudo_warn(NULL);
 	    sudoerserror(NULL);

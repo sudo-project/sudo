@@ -779,7 +779,7 @@ globextend(const Char *path, glob_t *pglob, struct glob_lim *limitp,
 		return GLOB_NOSPACE;
 	}
 
-	pathv = realloc(pglob->gl_pathv, newn * sizeof(*pathv));
+	pathv = reallocarray(pglob->gl_pathv, newn, sizeof(*pathv));
 	if (pathv == NULL)
 		goto nospace;
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
