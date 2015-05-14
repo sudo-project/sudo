@@ -197,7 +197,7 @@ sudo_estrdup_v1(const char *src)
 
     if (src != NULL) {
 	len = strlen(src);
-	dst = (char *) sudo_emalloc(len + 1);
+	dst = sudo_emalloc(len + 1);
 	(void) memcpy(dst, src, len);
 	dst[len] = '\0';
     }
@@ -219,7 +219,7 @@ sudo_estrndup_v1(const char *src, size_t maxlen)
 	    len++;
 	    maxlen--;
 	}
-	dst = (char *) sudo_emalloc(len + 1);
+	dst = sudo_emalloc(len + 1);
 	(void) memcpy(dst, src, len);
 	dst[len] = '\0';
     }

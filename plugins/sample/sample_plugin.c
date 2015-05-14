@@ -286,7 +286,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
     }
     if (editor_path != editor)
 	free(editor);
-    nargv = (char **) malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
+    nargv = malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
     if (nargv == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
 	free(editor_path);

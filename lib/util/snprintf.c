@@ -370,7 +370,7 @@ xxxprintf(char **strp, size_t strsize, int alloc, const char *fmt0, va_list ap)
 		if (alloc && str >= estr) { \
 			char *t; \
 			strsize = (strsize << 1) + 1; \
-			if (!(t = (char *)realloc(*strp, strsize))) { \
+			if (!(t = realloc(*strp, strsize))) { \
 				free(str); \
 				*strp = NULL; \
 				ret = -1; \

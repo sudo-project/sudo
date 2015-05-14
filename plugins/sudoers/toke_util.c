@@ -116,7 +116,7 @@ fill_cmnd(const char *src, int len)
 
     arg_len = arg_size = 0;
 
-    dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
+    dst = sudoerslval.command.cmnd = malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
 	sudo_warn(NULL);
 	sudoerserror(NULL);
@@ -155,8 +155,7 @@ fill_args(const char *s, int len, int addspace)
 	    ;
 
 	p = sudoerslval.command.args ?
-	    (char *) realloc(sudoerslval.command.args, arg_size) :
-	    (char *) malloc(arg_size);
+	    realloc(sudoerslval.command.args, arg_size) : malloc(arg_size);
 	if (p == NULL) {
 	    sudo_efree(sudoerslval.command.args);
 	    sudo_warn(NULL);

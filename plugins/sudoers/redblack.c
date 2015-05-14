@@ -90,7 +90,7 @@ rbcreate(int (*compar)(const void *, const void*))
     struct rbtree *tree;
     debug_decl(rbcreate, SUDOERS_DEBUG_RBTREE)
 
-    tree = (struct rbtree *) sudo_emalloc(sizeof(*tree));
+    tree = sudo_emalloc(sizeof(*tree));
     tree->compar = compar;
 
     /*
@@ -185,7 +185,7 @@ rbinsert(struct rbtree *tree, void *data)
 	node = res < 0 ? node->left : node->right;
     }
 
-    node = (struct rbnode *) sudo_emalloc(sizeof(*node));
+    node = sudo_emalloc(sizeof(*node));
     node->data = data;
     node->left = node->right = rbnil(tree);
     node->parent = parent;
