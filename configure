@@ -792,6 +792,7 @@ LT_LDFLAGS
 ZLIB_LDFLAGS
 LIBUTIL_LDFLAGS
 SUDOERS_LDFLAGS
+SUDO_LDFLAGS
 LDFLAGS
 CPPFLAGS
 PROGS
@@ -2730,6 +2731,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -15212,6 +15214,45 @@ done
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# We need to force a flat namespace to make libc
+		# symbol hooking work like it does on ELF.
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-force_flat_namespace" >&5
+$as_echo_n "checking whether the linker accepts -Wl,-force_flat_namespace... " >&6; }
+if ${ax_cv_check_ldflags___Wl__force_flat_namespace+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-force_flat_namespace"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___Wl__force_flat_namespace=yes
+else
+  ax_cv_check_ldflags___Wl__force_flat_namespace=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__force_flat_namespace" >&5
+$as_echo "$ax_cv_check_ldflags___Wl__force_flat_namespace" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__force_flat_namespace" = xyes; then :
+  SUDO_LDFLAGS="${SUDO_LDFLAGS}${SUDO_LDFLAGS+ }-Wl,-force_flat_namespace"
+else
+  :
+fi
+
 
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then

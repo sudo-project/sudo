@@ -20,6 +20,7 @@ AC_SUBST([CFLAGS])
 AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
+AC_SUBST([SUDO_LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
 AC_SUBST([LIBUTIL_LDFLAGS])
 AC_SUBST([ZLIB_LDFLAGS])
@@ -2109,6 +2110,10 @@ case "$host" in
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# We need to force a flat namespace to make libc
+		# symbol hooking work like it does on ELF.
+		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS="${SUDO_LDFLAGS}${SUDO_LDFLAGS+ }-Wl,-force_flat_namespace"])
 
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then

@@ -48,6 +48,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
+SUDO_LDFLAGS = $(LDFLAGS) @SUDO_LDFLAGS@
 LT_LDFLAGS = @LT_LDFLAGS@
 
 # PIE flags
@@ -130,7 +131,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
 
 sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
