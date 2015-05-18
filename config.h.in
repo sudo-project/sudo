@@ -802,9 +802,6 @@
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
 
-/* Define to 1 if you have the `tzset' function. */
-#undef HAVE_TZSET
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
