@@ -2654,7 +2654,6 @@ as_fn_append ac_header_list " sys/stropts.h"
 as_fn_append ac_header_list " sys/sysmacros.h"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
-as_fn_append ac_func_list " reallocarray"
 as_fn_append ac_func_list " strftime"
 as_fn_append ac_func_list " tzset"
 as_fn_append ac_func_list " seteuid"
@@ -17963,8 +17962,6 @@ done
 
 
 
-
-
 for ac_func in getgrouplist
 do :
   ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
@@ -18133,6 +18130,26 @@ _ACEOF
 
 fi
 done
+
+
+fi
+done
+
+for ac_func in reallocarray
+do :
+  ac_fn_c_check_func "$LINENO" "reallocarray" "ac_cv_func_reallocarray"
+if test "x$ac_cv_func_reallocarray" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_REALLOCARRAY 1
+_ACEOF
+
+else
+
+
+    for _sym in sudo_reallocarray; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
 
 fi

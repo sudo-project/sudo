@@ -2400,7 +2400,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo reallocarray strftime tzset])
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime tzset])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2444,6 +2444,9 @@ AC_CHECK_FUNCS([getline], [], [
     AC_LIBOBJ(getline)
     SUDO_APPEND_COMPAT_EXP(sudo_getline)
     AC_CHECK_FUNCS([fgetln])
+])
+AC_CHECK_FUNCS([reallocarray], [], [
+    SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
 ])
 dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
