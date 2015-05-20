@@ -82,7 +82,9 @@ static krb5_error_code
 krb5_get_init_creds_opt_alloc(krb5_context context,
     krb5_get_init_creds_opt **opts)
 {
-    *opts = sudo_emalloc(sizeof(krb5_get_init_creds_opt));
+    *opts = malloc(sizeof(krb5_get_init_creds_opt));
+    if (*opts == NULL)
+	return KRB5_CC_NOMEM;
     krb5_get_init_creds_opt_init(*opts);
     return 0;
 }
