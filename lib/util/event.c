@@ -44,13 +44,10 @@
 #include <errno.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_util.h"
-
-/* XXX - use non-exiting allocators? */
 
 /*
  * Add an event to the base's active queue and mark it active.
@@ -90,12 +87,14 @@ sudo_ev_base_alloc_v1(void)
     struct sudo_event_base *base;
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
-    base = sudo_ecalloc(1, sizeof(*base));
-    TAILQ_INIT(&base->events);
-    TAILQ_INIT(&base->timeouts);
-    if (sudo_ev_base_alloc_impl(base) != 0) {
-	sudo_efree(base);
-	base = NULL;
+    base = calloc(1, sizeof(*base));
+    if (base != NULL) {
+	TAILQ_INIT(&base->events);
+	TAILQ_INIT(&base->timeouts);
+	if (sudo_ev_base_alloc_impl(base) != 0) {
+	    free(base);
+	    base = NULL;
+	}
     }
 
     debug_return_ptr(base);
@@ -112,7 +111,7 @@ sudo_ev_base_free_v1(struct sudo_event_base *base)
 	sudo_ev_del(base, ev);
     }
     sudo_ev_base_free_impl(base);
-    sudo_efree(base);
+    free(base);
 
     debug_return;
 }
@@ -125,12 +124,14 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
 
     /* XXX - sanity check events value */
 
-    ev = sudo_ecalloc(1, sizeof(*ev));
-    ev->fd = fd;
-    ev->events = events;
-    ev->pfd_idx = -1;
-    ev->callback = callback;
-    ev->closure = closure;
+    ev = calloc(1, sizeof(*ev));
+	if (ev != NULL) {
+	ev->fd = fd;
+	ev->events = events;
+	ev->pfd_idx = -1;
+	ev->callback = callback;
+	ev->closure = closure;
+    }
 
     debug_return_ptr(ev);
 }

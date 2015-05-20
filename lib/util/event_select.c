@@ -50,13 +50,10 @@
 #include <errno.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_util.h"
-
-/* XXX - use non-exiting allocators? */
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
@@ -64,11 +61,19 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
     debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT)
 
     base->maxfd = NFDBITS - 1;
-    base->readfds_in = sudo_ecalloc(1, sizeof(fd_mask));
-    base->writefds_in = sudo_ecalloc(1, sizeof(fd_mask));
-    base->readfds_out = sudo_ecalloc(1, sizeof(fd_mask));
-    base->writefds_out = sudo_ecalloc(1, sizeof(fd_mask));
+    base->readfds_in = calloc(1, sizeof(fd_mask));
+    base->writefds_in = calloc(1, sizeof(fd_mask));
+    base->readfds_out = calloc(1, sizeof(fd_mask));
+    base->writefds_out = calloc(1, sizeof(fd_mask));
 
+    if (base->readfds_in == NULL || base->writefds_in == NULL ||
+	base->readfds_out == NULL || base->writefds_out == NULL) {
+	free(base->readfds_in);
+	free(base->writefds_in);
+	free(base->readfds_out);
+	free(base->writefds_out);
+	debug_return_int(-1);
+    }
     debug_return_int(0);
 }
 
@@ -76,10 +81,10 @@ void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
-    sudo_efree(base->readfds_in);
-    sudo_efree(base->writefds_in);
-    sudo_efree(base->readfds_out);
-    sudo_efree(base->writefds_out);
+    free(base->readfds_in);
+    free(base->writefds_in);
+    free(base->readfds_out);
+    free(base->writefds_out);
     debug_return;
 }
 
@@ -92,10 +97,21 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ev->fd > base->maxfd) {
 	const int o = (base->maxfd + 1) / NFDBITS;
 	const int n = howmany(ev->fd + 1, NFDBITS);
-	base->readfds_in = sudo_erecalloc(base->readfds_in, o, n, sizeof(fd_mask));
-	base->writefds_in = sudo_erecalloc(base->writefds_in, o, n, sizeof(fd_mask));
-	base->readfds_out = sudo_erecalloc(base->readfds_out, o, n, sizeof(fd_mask));
-	base->writefds_out = sudo_erecalloc(base->writefds_out, o, n, sizeof(fd_mask));
+	const size_t used_bytes = o * sizeof(fd_mask);
+	const size_t new_bytes = (n - o) * sizeof(fd_mask);
+
+	base->readfds_in = reallocarray(base->readfds_in, n, sizeof(fd_mask));
+	memset((char *)base->readfds_in + used_bytes, 0, new_bytes);
+
+	base->writefds_in = reallocarray(base->writefds_in, n, sizeof(fd_mask));
+	memset((char *)base->writefds_in + used_bytes, 0, new_bytes);
+
+	base->readfds_out = reallocarray(base->readfds_out, n, sizeof(fd_mask));
+	memset((char *)base->readfds_out + used_bytes, 0, new_bytes);
+
+	base->writefds_out = reallocarray(base->writefds_out, n, sizeof(fd_mask));
+	memset((char *)base->writefds_out + used_bytes, 0, new_bytes);
+
 	base->maxfd = (n * NFDBITS) - 1;
     }
 
