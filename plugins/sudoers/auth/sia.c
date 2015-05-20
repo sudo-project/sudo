@@ -114,7 +114,11 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
-    sudo_argv = sudo_emallocarray(sudo_argc + 1, sizeof(char *));
+    sudo_argv = reallocarray(NULL, sudo_argc + 1, sizeof(char *));
+    if (sudo_argv == NULL) {
+	log_warning(0, N_("unable to allocate memory"));
+	debug_return_int(AUTH_FATAL);
+    }
     sudo_argv[0] = "sudo";
     for (i = 0; i < NewArgc; i++)
 	sudo_argv[i + 1] = NewArgv[i];
@@ -152,7 +156,7 @@ sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
-    sudo_efree(sudo_argv);
+    free(sudo_argv);
     debug_return_int(AUTH_SUCCESS);
 }
 
