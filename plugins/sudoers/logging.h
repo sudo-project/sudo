@@ -58,11 +58,9 @@
  */
 #define LOG_INDENT	"    "
 
-#ifndef SUDO_MAIN
 /* XXX - needed for auditing */
 extern int NewArgc;
 extern char **NewArgv;
-#endif
 
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int newlocale, int *prevlocale);

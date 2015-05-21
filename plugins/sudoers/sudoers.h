@@ -344,6 +344,13 @@ FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
 void sudoers_cleanup(void);
+extern struct sudo_user sudo_user;
+extern struct passwd *list_pw;
+extern int long_list;
+extern int sudo_mode;
+extern uid_t timestamp_uid;
+extern sudo_conv_t sudo_conv;
+extern sudo_printf_t sudo_printf;
 
 /* sudoers_debug.c */
 void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
@@ -361,15 +368,5 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
-
-#ifndef SUDO_MAIN
-extern struct sudo_user sudo_user;
-extern struct passwd *list_pw;
-extern int long_list;
-extern int sudo_mode;
-extern uid_t timestamp_uid;
-extern sudo_conv_t sudo_conv;
-extern sudo_printf_t sudo_printf;
-#endif
 
 #endif /* SUDOERS_SUDOERS_H */
