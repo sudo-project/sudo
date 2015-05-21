@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_SUDO_H
-#define _SUDO_SUDO_H
+#ifndef SUDO_SUDO_H
+#define SUDO_SUDO_H
 
 #include <limits.h>
 #include <pathnames.h>
@@ -261,4 +261,4 @@ int add_preserved_fd(struct preserved_fd_list *pfds, int fd);
 void closefrom_except(int startfd, struct preserved_fd_list *pfds);
 void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 
-#endif /* _SUDO_SUDO_H */
+#endif /* SUDO_SUDO_H */

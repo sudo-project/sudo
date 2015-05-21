@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_DSO_H
-#define _SUDO_DSO_H
+#ifndef SUDO_DSO_H
+#define SUDO_DSO_H
 
 /* Values for sudo_dso_load() mode. */
 #define SUDO_DSO_LAZY	 0x1
@@ -52,4 +52,4 @@ __dso_public void sudo_dso_preload_table_v1(struct sudo_preload_table *table);
 #define sudo_dso_load(_a, _b) sudo_dso_load_v1((_a), (_b))
 #define sudo_dso_preload_table(_a) sudo_dso_preload_table_v1((_a))
 
-#endif /* _SUDO_DSO_H */
+#endif /* SUDO_DSO_H */

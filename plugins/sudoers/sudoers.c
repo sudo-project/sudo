@@ -18,7 +18,7 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#define _SUDO_MAIN
+#define SUDO_MAIN
 
 #ifdef __TANDEM
 # include <floss.h>

@@ -14,10 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_SOLARIS_AUDIT_H
-#define	_SUDOERS_SOLARIS_AUDIT_H
+#ifndef SUDOERS_SOLARIS_AUDIT_H
+#define	SUDOERS_SOLARIS_AUDIT_H
 
 int	solaris_audit_success(int argc, char *argv[]);
 int	solaris_audit_failure(int argc, char *argv[], char const *const fmt, va_list);
 
-#endif /* _SUDOERS_SOLARIS_AUDIT_H */
+#endif /* SUDOERS_SOLARIS_AUDIT_H */

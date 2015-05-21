@@ -97,7 +97,7 @@ static bool continued, sawspace;
 static int prev_state;
 static int digest_len;
 
-static bool _push_include(char *, bool);
+static bool push_include_int(char *, bool);
 static bool pop_include(void);
 static char *parse_include(char *);
 
@@ -110,8 +110,8 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
 
-#define	push_include(_p)	(_push_include((_p), false))
-#define	push_includedir(_p)	(_push_include((_p), true))
+#define	push_include(_p)	(push_include_int((_p), false))
+#define	push_includedir(_p)	(push_include_int((_p), true))
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -911,11 +911,11 @@ init_lexer(void)
 }
 
 static bool
-_push_include(char *path, bool isdir)
+push_include_int(char *path, bool isdir)
 {
     struct path_list *pl;
     FILE *fp;
-    debug_decl(_push_include, SUDOERS_DEBUG_PARSER)
+    debug_decl(push_include_int, SUDOERS_DEBUG_PARSER)
 
     /* push current state onto stack */
     if (idepth >= istacksize) {

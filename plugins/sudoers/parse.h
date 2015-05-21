@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_PARSE_H
-#define _SUDOERS_PARSE_H
+#ifndef SUDOERS_PARSE_H
+#define SUDOERS_PARSE_H
 
 #undef UNSPEC
 #define UNSPEC	-1
@@ -223,4 +223,4 @@ int hexchar(const char *s);
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
-#endif /* _SUDOERS_PARSE_H */
+#endif /* SUDOERS_PARSE_H */

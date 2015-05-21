@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _FNMATCH_H
-#define _FNMATCH_H
+#ifndef COMPAT_FNMATCH_H
+#define COMPAT_FNMATCH_H
 
 #define	FNM_NOMATCH	1		/* String does not match pattern */
 
@@ -29,4 +29,4 @@ __dso_public int sudo_fnmatch(const char *pattern, const char *string, int flags
 
 #define fnmatch(_a, _b, _c)	sudo_fnmatch((_a), (_b), (_c))
 
-#endif /* _FNMATCH_H */
+#endif /* COMPAT_FNMATCH_H */

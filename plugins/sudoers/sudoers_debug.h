@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_DEBUG_H
-#define _SUDOERS_DEBUG_H
+#ifndef SUDOERS_DEBUG_H
+#define SUDOERS_DEBUG_H
 
 #include "sudo_debug.h"
 
@@ -43,4 +43,4 @@ extern unsigned int sudoers_subsystem_ids[];
 #define SUDOERS_DEBUG_SSSD	(sudoers_subsystem_ids[16]) /* sudoers SSSD */
 #define SUDOERS_DEBUG_UTIL	(sudoers_subsystem_ids[17]) /* utility functions */
 
-#endif /* _SUDOERS_DEBUG_H */
+#endif /* SUDOERS_DEBUG_H */

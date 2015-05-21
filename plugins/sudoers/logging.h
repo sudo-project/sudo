@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_LOGGING_H
-#define _SUDOERS_LOGGING_H
+#ifndef SUDOERS_LOGGING_H
+#define SUDOERS_LOGGING_H
 
 #include <syslog.h>
 #ifdef __STDC__
@@ -58,7 +58,7 @@
  */
 #define LOG_INDENT	"    "
 
-#ifndef _SUDO_MAIN
+#ifndef SUDO_MAIN
 /* XXX - needed for auditing */
 extern int NewArgc;
 extern char **NewArgv;
@@ -78,4 +78,4 @@ void log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
-#endif /* _SUDOERS_LOGGING_H */
+#endif /* SUDOERS_LOGGING_H */

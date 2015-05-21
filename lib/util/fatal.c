@@ -49,7 +49,7 @@ static sudo_conv_t sudo_warn_conversation;
 static bool (*sudo_warn_setlocale)(bool, int *);
 static bool (*sudo_warn_setlocale_prev)(bool, int *);
 
-static void _warning(int errnum, const char *fmt, va_list ap);
+static void warning(int errnum, const char *fmt, va_list ap);
 
 static void
 do_cleanup(void)
@@ -70,7 +70,7 @@ sudo_fatal_nodebug_v1(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
     va_end(ap);
     do_cleanup();
     exit(EXIT_FAILURE);
@@ -82,7 +82,7 @@ sudo_fatalx_nodebug_v1(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
     va_end(ap);
     do_cleanup();
     exit(EXIT_FAILURE);
@@ -91,7 +91,7 @@ sudo_fatalx_nodebug_v1(const char *fmt, ...)
 void
 sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
     do_cleanup();
     exit(EXIT_FAILURE);
 }
@@ -99,7 +99,7 @@ sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 void
 sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
     do_cleanup();
     exit(EXIT_FAILURE);
 }
@@ -110,7 +110,7 @@ sudo_warn_nodebug_v1(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
     va_end(ap);
 }
 
@@ -119,24 +119,24 @@ sudo_warnx_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
     va_end(ap);
 }
 
 void
 sudo_vwarn_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
 }
 
 void
 sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
 }
 
 static void
-_warning(int errnum, const char *fmt, va_list ap)
+warning(int errnum, const char *fmt, va_list ap)
 {
     int cookie;
 

@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_ALLOC_H
-#define _SUDO_ALLOC_H
+#ifndef SUDO_ALLOC_H
+#define SUDO_ALLOC_H
 
 #include <stdarg.h>
 
@@ -45,4 +45,4 @@ __dso_public char *sudo_estrndup_v1(const char *src, size_t maxlen) __malloc_lik
 #define sudo_estrdup(_a) sudo_estrdup_v1((_a))
 #define sudo_estrndup(_a, _b) sudo_estrndup_v1((_a), (_b))
 
-#endif /* _SUDO_ALLOC_H */
+#endif /* SUDO_ALLOC_H */

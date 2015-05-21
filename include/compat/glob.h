@@ -32,8 +32,8 @@
  *	@(#)glob.h	8.1 (Berkeley) 6/2/93
  */
 
-#ifndef _GLOB_H_
-#define	_GLOB_H_
+#ifndef COMPAT_GLOB_H
+#define	COMPAT_GLOB_H
 
 struct stat;
 typedef struct {
@@ -73,4 +73,4 @@ __dso_public void sudo_globfree(glob_t *);
 #define glob(_a, _b, _c, _d) sudo_glob((_a), (_b), (_c), (_d))
 #define globfree(_a) sudo_globfree((_a))
 
-#endif /* !_GLOB_H_ */
+#endif /* !COMPAT_GLOB_H */

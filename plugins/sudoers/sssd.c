@@ -159,11 +159,11 @@ sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
      debug_return;
 }
 
-#define _SUDO_SSS_FILTER_INCLUDE 0
-#define _SUDO_SSS_FILTER_EXCLUDE 1
+#define SUDO_SSS_FILTER_INCLUDE 0
+#define SUDO_SSS_FILTER_EXCLUDE 1
 
-#define _SUDO_SSS_STATE_HOSTMATCH 0x01
-#define _SUDO_SSS_STATE_USERMATCH 0x02
+#define SUDO_SSS_STATE_HOSTMATCH 0x01
+#define SUDO_SSS_STATE_USERMATCH 0x02
 
 static struct sss_sudo_result *
 sudo_sss_filter_result(struct sudo_sss_handle *handle,
@@ -178,7 +178,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "in_res=%p, count=%u, act=%s",
 	in_res, in_res ? in_res->num_rules : 0,
-	act == _SUDO_SSS_FILTER_EXCLUDE ? "EXCLUDE" : "INCLUDE");
+	act == SUDO_SSS_FILTER_EXCLUDE ? "EXCLUDE" : "INCLUDE");
 
     if (in_res == NULL)
 	debug_return_ptr(NULL);
@@ -193,11 +193,11 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     for (i = l = 0; i < in_res->num_rules; ++i) {
 	 r = filterp(handle, in_res->rules + i, filterp_arg);
 
-	 if (( r && act == _SUDO_SSS_FILTER_INCLUDE) ||
-	     (!r && act == _SUDO_SSS_FILTER_EXCLUDE)) {
+	 if (( r && act == SUDO_SSS_FILTER_INCLUDE) ||
+	     (!r && act == SUDO_SSS_FILTER_EXCLUDE)) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"COPY (%s): %p[%u] => %p[%u] (= %p)",
-		act == _SUDO_SSS_FILTER_EXCLUDE ? "not excluded" : "included",
+		act == SUDO_SSS_FILTER_EXCLUDE ? "not excluded" : "included",
 		in_res->rules, i, out_res->rules, l, in_res->rules + i);
 
 	    sudo_sss_rulecpy(out_res->rules + l, in_res->rules + i);
@@ -683,7 +683,7 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
 	    if (u_sss_result != NULL) {
 		if (state != NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_DEBUG, "state |= USERMATCH");
-		    *state |= _SUDO_SSS_STATE_USERMATCH;
+		    *state |= SUDO_SSS_STATE_USERMATCH;
 		}
 		sudo_debug_printf(SUDO_DEBUG_INFO, "Received %u rule(s)",
 		    u_sss_result->num_rules);
@@ -707,13 +707,13 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
     }
 
     f_sss_result = sudo_sss_filter_result(handle, u_sss_result,
-	sudo_sss_result_filterp, _SUDO_SSS_FILTER_INCLUDE, NULL);
+	sudo_sss_result_filterp, SUDO_SSS_FILTER_INCLUDE, NULL);
 
     if (f_sss_result != NULL) {
 	if (f_sss_result->num_rules > 0) {
 	    if (state != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "state |= HOSTMATCH");
-		*state |= _SUDO_SSS_STATE_HOSTMATCH;
+		*state |= SUDO_SSS_STATE_HOSTMATCH;
 	    }
 	}
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
@@ -1086,9 +1086,9 @@ done:
 	    SET(ret, FLAG_NO_CHECK);
     }
 
-    if (state & _SUDO_SSS_STATE_USERMATCH)
+    if (state & SUDO_SSS_STATE_USERMATCH)
 	CLR(ret, FLAG_NO_USER);
-    if (state & _SUDO_SSS_STATE_HOSTMATCH)
+    if (state & SUDO_SSS_STATE_HOSTMATCH)
 	CLR(ret, FLAG_NO_HOST);
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_sss_lookup(%d)=0x%02x",

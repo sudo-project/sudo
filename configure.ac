@@ -4336,12 +4336,12 @@ AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl
-AH_TOP([#ifndef _SUDO_CONFIG_H
-#define _SUDO_CONFIG_H])
+AH_TOP([#ifndef SUDO_CONFIG_H
+#define SUDO_CONFIG_H])
 
 AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
 #endif /* __svr4__ */
 
-#endif /* _SUDO_CONFIG_H */])
+#endif /* SUDO_CONFIG_H */])

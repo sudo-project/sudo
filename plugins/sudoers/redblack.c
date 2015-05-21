@@ -60,7 +60,7 @@
 static void rbrepair(struct rbtree *, struct rbnode *);
 static void rotate_left(struct rbtree *, struct rbnode *);
 static void rotate_right(struct rbtree *, struct rbnode *);
-static void _rbdestroy(struct rbtree *, struct rbnode *, void (*)(void *));
+static void rbdestroy_int(struct rbtree *, struct rbnode *, void (*)(void *));
 
 /*
  * Red-Black tree, see http://en.wikipedia.org/wiki/Red-black_tree
@@ -333,12 +333,12 @@ rbsuccessor(struct rbtree *tree, struct rbnode *node)
  * Recursive portion of rbdestroy().
  */
 static void
-_rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
+rbdestroy_int(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 {
-    debug_decl(_rbdestroy, SUDOERS_DEBUG_RBTREE)
+    debug_decl(rbdestroy_int, SUDOERS_DEBUG_RBTREE)
     if (node != rbnil(tree)) {
-	_rbdestroy(tree, node->left, destroy);
-	_rbdestroy(tree, node->right, destroy);
+	rbdestroy_int(tree, node->left, destroy);
+	rbdestroy_int(tree, node->right, destroy);
 	if (destroy != NULL)
 	    destroy(node->data);
 	sudo_efree(node);
@@ -354,7 +354,7 @@ void
 rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
     debug_decl(rbdestroy, SUDOERS_DEBUG_RBTREE)
-    _rbdestroy(tree, rbfirst(tree), destroy);
+    rbdestroy_int(tree, rbfirst(tree), destroy);
     sudo_efree(tree);
     debug_return;
 }

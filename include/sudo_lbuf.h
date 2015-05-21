@@ -17,8 +17,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SUDO_LBUF_H
-#define _SUDO_LBUF_H
+#ifndef SUDO_LBUF_H
+#define SUDO_LBUF_H
 
 /*
  * Line buffer struct.
@@ -47,4 +47,4 @@ __dso_public void sudo_lbuf_print_v1(struct sudo_lbuf *lbuf);
 #define sudo_lbuf_append_quoted sudo_lbuf_append_quoted_v1
 #define sudo_lbuf_print(_a) sudo_lbuf_print_v1((_a))
 
-#endif /* _SUDO_LBUF_H */
+#endif /* SUDO_LBUF_H */

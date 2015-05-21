@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_UTIL_H
-#define _SUDO_UTIL_H
+#ifndef SUDO_UTIL_H
+#define SUDO_UTIL_H
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -232,4 +232,4 @@ __dso_public bool sudo_term_restore_v1(int fd, bool flush);
 __dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
 
-#endif /* _SUDO_UTIL_H */
+#endif /* SUDO_UTIL_H */

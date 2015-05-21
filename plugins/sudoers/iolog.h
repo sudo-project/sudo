@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_IOLOG_H
-#define _SUDOERS_IOLOG_H
+#ifndef SUDOERS_IOLOG_H
+#define SUDOERS_IOLOG_H
 
 /*
  * I/O log fd numbers as stored in the timing file.
@@ -56,4 +56,4 @@ static struct io_log_file io_log_files[] = {
     { false, NULL }		/* IOFD_MAX */
 };
 
-#endif /* _SUDOERS_IOLOG_H */
+#endif /* SUDOERS_IOLOG_H */

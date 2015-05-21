@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_COMPAT_H
-#define _SUDO_COMPAT_H
+#ifndef SUDO_COMPAT_H
+#define SUDO_COMPAT_H
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -464,7 +464,7 @@ __dso_public int sudo_sig2str(int signo, char *signame);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
-#if !defined(HAVE_INET_NTOP) && defined(_SUDO_NET_IFS_C)
+#if !defined(HAVE_INET_NTOP) && defined(SUDO_NET_IFS_C)
 __dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop
 # define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))
@@ -485,4 +485,4 @@ __dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
 
-#endif /* _SUDO_COMPAT_H */
+#endif /* SUDO_COMPAT_H */

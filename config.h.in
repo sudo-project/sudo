@@ -1,7 +1,7 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-#ifndef _SUDO_CONFIG_H
-#define _SUDO_CONFIG_H
+#ifndef SUDO_CONFIG_H
+#define SUDO_CONFIG_H
 
 /* Define to 1 if the `syslog' function returns a non-zero int to denote
    failure. */
@@ -1211,4 +1211,4 @@
 # define BSD_COMP
 #endif /* __svr4__ */
 
-#endif /* _SUDO_CONFIG_H */
+#endif /* SUDO_CONFIG_H */

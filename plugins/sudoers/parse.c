@@ -63,7 +63,7 @@ static int sudo_file_open(struct sudo_nss *);
 static int sudo_file_parse(struct sudo_nss *);
 static int sudo_file_setdefs(struct sudo_nss *);
 static void print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type);
-static void print_member2(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
+static void print_member_sep(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
 
 /* sudo_nss implementation */
 struct sudo_nss sudo_nss_file = {
@@ -537,7 +537,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }
 	    sudo_lbuf_append(lbuf, "\t");
-	    print_member2(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
+	    print_member_sep(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
 	    sudo_lbuf_append(lbuf, "\n");
 	    prev_cs = cs;
 	    nfound++;
@@ -752,13 +752,13 @@ done:
  * Print the contents of a struct member to stdout
  */
 static void
-_print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
+print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
     const char *separator, int alias_type)
 {
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
-    debug_decl(_print_member, SUDOERS_DEBUG_NSS)
+    debug_decl(print_member_int, SUDOERS_DEBUG_NSS)
 
     switch (type) {
 	case ALL:
@@ -782,7 +782,7 @@ _print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 		TAILQ_FOREACH(m, &a->members, entries) {
 		    if (m != TAILQ_FIRST(&a->members))
 			sudo_lbuf_append(lbuf, "%s", separator);
-		    _print_member(lbuf, m->name, m->type,
+		    print_member_int(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, separator,
 			alias_type);
 		}
@@ -800,12 +800,12 @@ _print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 static void
 print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type)
 {
-    _print_member(lbuf, m->name, m->type, m->negated, ", ", alias_type);
+    print_member_int(lbuf, m->name, m->type, m->negated, ", ", alias_type);
 }
 
 static void
-print_member2(struct sudo_lbuf *lbuf, struct member *m, const char *separator,
-    int alias_type)
+print_member_sep(struct sudo_lbuf *lbuf, struct member *m,
+    const char *separator, int alias_type)
 {
-    _print_member(lbuf, m->name, m->type, m->negated, separator, alias_type);
+    print_member_int(lbuf, m->name, m->type, m->negated, separator, alias_type);
 }

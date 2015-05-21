@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_NSS_H
-#define _SUDOERS_NSS_H
+#ifndef SUDOERS_NSS_H
+#define SUDOERS_NSS_H
 
 struct sudo_lbuf;
 struct passwd;
@@ -40,4 +40,4 @@ TAILQ_HEAD(sudo_nss_list, sudo_nss);
 
 struct sudo_nss_list *sudo_read_nss(void);
 
-#endif /* _SUDOERS_NSS_H */
+#endif /* SUDOERS_NSS_H */

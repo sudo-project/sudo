@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_DEBUG_H
-#define _SUDO_DEBUG_H
+#ifndef SUDO_DEBUG_H
+#define SUDO_DEBUG_H
 
 #include <stdarg.h>
 #ifdef HAVE_STDBOOL_H
@@ -273,4 +273,4 @@ __dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *fil
 #define sudo_debug_vprintf2(_a, _b, _c, _d, _e, _f) sudo_debug_vprintf2_v1((_a), (_b), (_c), (_d), (_e), (_f))
 #define sudo_debug_write2(_a, _b, _c, _d, _e, _f, _g) sudo_debug_write2_v1((_a), (_b), (_c), (_d), (_e), (_f), (_g))
 
-#endif /* _SUDO_DEBUG_H */
+#endif /* SUDO_DEBUG_H */

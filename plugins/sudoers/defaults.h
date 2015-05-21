@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDOERS_DEFAULTS_H
-#define _SUDOERS_DEFAULTS_H
+#ifndef SUDOERS_DEFAULTS_H
+#define SUDOERS_DEFAULTS_H
 
 #include <def_data.h>
 
@@ -117,4 +117,4 @@ bool check_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
 
-#endif /* _SUDOERS_DEFAULTS_H */
+#endif /* SUDOERS_DEFAULTS_H */

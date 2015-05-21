@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_GETTEXT_H
-#define _SUDO_GETTEXT_H
+#ifndef SUDO_GETTEXT_H
+#define SUDO_GETTEXT_H
 
 /*
  * Solaris locale.h includes libintl.h which causes problems when we
@@ -72,4 +72,4 @@
 
 #endif /* HAVE_LIBINTL_H */
 
-#endif /* _SUDO_GETTEXT_H */
+#endif /* SUDO_GETTEXT_H */

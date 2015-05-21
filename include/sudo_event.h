@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_EVENT_H
-#define _SUDO_EVENT_H
+#ifndef SUDO_EVENT_H
+#define SUDO_EVENT_H
 
 #include "sudo_queue.h"
 
@@ -160,4 +160,4 @@ int sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev);
 int sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev);
 int sudo_ev_scan_impl(struct sudo_event_base *base, int flags);
 
-#endif /* _SUDO_EVENT_H */
+#endif /* SUDO_EVENT_H */

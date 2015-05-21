@@ -34,7 +34,7 @@
 #include "sudo_debug.h"
 
 static int
-_sudo_printf(int msg_type, const char *fmt, ...)
+sudo_printf_int(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     int len;
@@ -59,4 +59,4 @@ _sudo_printf(int msg_type, const char *fmt, ...)
     return len;
 }
 
-sudo_printf_t sudo_printf = _sudo_printf;
+sudo_printf_t sudo_printf = sudo_printf_int;

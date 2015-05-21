@@ -20,8 +20,8 @@
  * work.
  */
 
-#ifndef _COMPAT_GETADDRINFO_H
-#define _COMPAT_GETADDRINFO_H
+#ifndef COMPAT_GETADDRINFO_H
+#define COMPAT_GETADDRINFO_H
 
 #include <config.h>
 
@@ -80,4 +80,4 @@ __dso_public const char *sudo_gai_strerror(int ecode);
 #define gai_strerror(_a) sudo_gai_strerror((_a))
 
 #endif /* !HAVE_GETADDRINFO */
-#endif /* _COMPAT_GETADDRINFO_H */
+#endif /* COMPAT_GETADDRINFO_H */

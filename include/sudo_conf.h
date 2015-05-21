@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_CONF_H
-#define _SUDO_CONF_H
+#ifndef SUDO_CONF_H
+#define SUDO_CONF_H
 
 #include "sudo_queue.h"
 
@@ -78,4 +78,4 @@ __dso_public int sudo_conf_max_groups_v1(void);
 #define sudo_conf_group_source() sudo_conf_group_source_v1()
 #define sudo_conf_max_groups() sudo_conf_max_groups_v1()
 
-#endif /* _SUDO_CONF_H */
+#endif /* SUDO_CONF_H */

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_TOKE_H
-#define _SUDOERS_TOKE_H
+#ifndef SUDOERS_TOKE_H
+#define SUDOERS_TOKE_H
 
 bool append(const char *, int);
 bool fill_args(const char *, int, int);
@@ -39,4 +39,4 @@ extern int (*trace_print)(const char *msg);
 	(*trace_print)(msg);						\
 } while (0);
 
-#endif /* _SUDOERS_TOKE_H */
+#endif /* SUDOERS_TOKE_H */
