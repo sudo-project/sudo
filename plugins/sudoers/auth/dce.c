@@ -35,6 +35,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_DCE
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -196,3 +198,5 @@ check_dce_status(error_status_t input_status, char *comment)
     (void) fprintf(stderr, "%s %s\n", comment, error_string);
     debug_return_int(1);
 }
+
+#endif /* HAVE_DCE */

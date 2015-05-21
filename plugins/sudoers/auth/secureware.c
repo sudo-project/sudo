@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_GETPRPWNAM
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -116,3 +118,5 @@ sudo_secureware_cleanup(pw, auth)
     }
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_GETPRPWNAM */

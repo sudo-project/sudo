@@ -24,6 +24,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_KERB5
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -326,3 +328,5 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
     debug_return_int(error);
 }
 #endif
+
+#endif /* HAVE_KERB5 */

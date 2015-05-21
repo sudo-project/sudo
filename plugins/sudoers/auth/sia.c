@@ -23,6 +23,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_SIA_SES_INIT
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -153,3 +155,5 @@ sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
     sudo_efree(sudo_argv);
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_SIA_SES_INIT */

@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_AIXAUTH
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -183,3 +185,5 @@ sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
 
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_AIXAUTH */

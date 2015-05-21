@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_AFS
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -81,3 +83,5 @@ sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 
     debug_return_int(AUTH_FAILURE);
 }
+
+#endif HAVE_AFS

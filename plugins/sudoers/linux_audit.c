@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_LINUX_AUDIT
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -103,3 +105,5 @@ done:
 
     debug_return_int(rc);
 }
+
+#endif /* HAVE_LINUX_AUDIT */

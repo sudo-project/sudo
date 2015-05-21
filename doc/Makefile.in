@@ -338,6 +338,8 @@ uninstall:
 		$(DESTDIR)$(mandirform)/sudoers.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 
+splint:
+
 cppcheck:
 
 check:

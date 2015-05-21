@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_PAM
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -408,3 +410,5 @@ done:
     }
     debug_return_int(ret);
 }
+
+#endif /* HAVE_PAM */

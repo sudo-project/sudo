@@ -86,6 +86,9 @@ XGETTEXT_OPTS = -F -k_ -kN_ -kU_ --copyright-holder="Todd C. Miller" \
 # Default cppcheck options when run from the top-level Makefile
 CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -Dva_copy=va_copy -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -U__NBBY -DNSIG=64
 
+# Default splint options when run from the top-level Makefile
+SPLINT_OPTS = -D__restrict= -checks
+
 all: config.status
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
@@ -103,6 +106,14 @@ cppcheck: config.status
 	for d in $(SUBDIRS); do \
 	    echo checking $$d; \
 	    (cd $$d && exec $(MAKE) CPPCHECK_OPTS="$(CPPCHECK_OPTS)" $@) || rval=`expr $$rval + $$?`; \
+	done; \
+	exit $$rval
+
+splint: config.status
+	rval=0; \
+	for d in $(SUBDIRS); do \
+	    echo splinting $$d; \
+	    (cd $$d && exec $(MAKE) SPLINT_OPTS="$(SPLINT_OPTS)" $@) || rval=`expr $$rval + $$?`; \
 	done; \
 	exit $$rval
 

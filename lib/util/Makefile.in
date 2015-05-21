@@ -77,6 +77,9 @@ SHLIB_VERSION = 0:0:0
 # cppcheck options, usually set in the top-level Makefile
 CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -Dva_copy=va_copy -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -U__NBBY -DNSIG=64
 
+# splint options, usually set in the top-level Makefile
+SPLINT_OPTS = -D__restrict= -checks
+
 # Regression tests
 TEST_PROGS = atofoo_test conf_test hltq_test parseln_test progname_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
@@ -210,6 +213,9 @@ install-plugin:
 
 uninstall:
 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.la
+
+splint:
+	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c

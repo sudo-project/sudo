@@ -17,6 +17,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_BSM_AUDIT
+
 #include <sys/types.h>
 
 #include <bsm/audit.h>
@@ -260,3 +262,5 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	}
 	debug_return_int(0);
 }
+
+#endif /* HAVE_BSM_AUDIT */

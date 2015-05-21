@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_FWTK
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -152,3 +154,5 @@ sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth)
     auth_close();
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_FWTK */

@@ -134,6 +134,8 @@ install-plugin:
 uninstall:
 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_z.la
 
+splint:
+
 cppcheck:
 
 check:

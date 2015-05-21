@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_SSSD
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -1463,3 +1465,5 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
 
     debug_return_int(count);
 }
+
+#endif /* HAVE_SSSD */

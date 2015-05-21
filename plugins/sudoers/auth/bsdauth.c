@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_BSD_AUTH_H
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -183,3 +185,5 @@ bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_BSD_AUTH_H */

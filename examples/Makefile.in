@@ -77,6 +77,8 @@ install-plugin:
 uninstall:
 	-rm -rf	$(DESTDIR)$(exampledir)
 
+splint:
+
 cppcheck:
 
 check:

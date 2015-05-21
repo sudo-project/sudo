@@ -26,6 +26,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_SELINUX
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
@@ -418,3 +420,5 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
     errno = serrno;
     debug_return;
 }
+
+#endif /* HAVE_SELINUX */

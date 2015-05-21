@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#if defined(HAVE_SKEY) || defined(HAVE_OPIE)
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -133,3 +135,5 @@ sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     else
 	debug_return_int(AUTH_FAILURE);
 }
+
+#endif /* HAVE_SKEY || HAVE_OPIE */

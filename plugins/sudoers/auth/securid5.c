@@ -25,6 +25,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_SECURID
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -222,3 +224,5 @@ then enter the new token code.\n", \
     /* Return stored state to calling process */
     debug_return_int(rval);
 }
+
+#endif /* HAVE_SECURID */
