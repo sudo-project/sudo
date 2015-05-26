@@ -431,11 +431,16 @@ __dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
 # undef strlcpy
 # define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
 #endif /* HAVE_STRLCPY */
-#if !defined(HAVE_GLOB) && !defined(HAVE_STRNLEN)
+#ifndef HAVE_STRNDUP
+__dso_public char *sudo_strndup(const char *str, size_t maxlen);
+# undef strndup
+# define strndup(_a, _b) sudo_strndup((_a), (_b))
+#endif /* HAVE_STRNDUP */
+#ifndef HAVE_STRNLEN
 __dso_public size_t sudo_strnlen(char *str, size_t maxlen);
 # undef strnlen
 # define strnlen(_a, _b) sudo_strnlen((_a), (_b))
-#endif /* !HAVE_GLOB && !HAVE_STRNLEN */
+#endif /* HAVE_STRNLEN */
 #ifndef HAVE_MEMRCHR
 __dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr

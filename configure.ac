@@ -2574,10 +2574,6 @@ SUDO_FUNC_ISBLANK
 AC_CHECK_FUNCS([glob], [], [
     AC_LIBOBJ(glob)
     SUDO_APPEND_COMPAT_EXP(sudo_glob sudo_globfree)
-    AC_CHECK_FUNCS([strnlen], [], [
-	AC_LIBOBJ(strnlen)
-	SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
-    ])
 ])
 AC_CHECK_FUNCS([memrchr], [], [
     AC_LIBOBJ(memrchr)
@@ -2598,6 +2594,14 @@ AC_CHECK_FUNCS([strlcpy], [], [
 AC_CHECK_FUNCS([strlcat], [], [
     AC_LIBOBJ(strlcat)
     SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
+])
+AC_CHECK_FUNCS([strndup], [], [
+    AC_LIBOBJ(strndup)
+    SUDO_APPEND_COMPAT_EXP(sudo_strndup)
+])
+AC_CHECK_FUNCS([strnlen], [], [
+    AC_LIBOBJ(strnlen)
+    SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
 ])
 AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
