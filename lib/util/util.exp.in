@@ -80,6 +80,7 @@ sudo_parseln_v1
 sudo_secure_dir_v1
 sudo_secure_file_v1
 sudo_setgroups_v1
+sudo_strsplit_v1
 sudo_strtobool_v1
 sudo_strtoid_v1
 sudo_strtomode_v1

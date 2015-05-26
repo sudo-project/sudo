@@ -162,6 +162,7 @@ lib/util/strlcpy.c
 lib/util/strndup.c
 lib/util/strnlen.c
 lib/util/strsignal.c
+lib/util/strsplit.c
 lib/util/strtobool.c
 lib/util/strtoid.c
 lib/util/strtomode.c

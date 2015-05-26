@@ -201,6 +201,10 @@ __dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, str
 __dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
 #define sudo_setgroups(_a, _b) sudo_setgroups_v1((_a), (_b))
 
+/* strsplit.c */
+__dso_public const char *sudo_strsplit_v1(const char *str, const char *endstr, const char *sep, const char **last);
+#define sudo_strsplit(_a, _b, _c, _d) sudo_strsplit_v1(_a, _b, _c, _d)
+
 /* strtobool.c */
 __dso_public int sudo_strtobool_v1(const char *str);
 #define sudo_strtobool(_a) sudo_strtobool_v1((_a))

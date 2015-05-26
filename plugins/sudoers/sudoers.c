@@ -1046,48 +1046,60 @@ sudoers_cleanup(void)
 }
 
 static char *
-resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, int *argc_out, char ***argv_out)
+resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
+    int *argc_out, char ***argv_out)
 {
-    char *cp, **nargv, *editor, *editor_path = NULL;
-    int ac, i, nargc;
-    bool wasblank;
+    char **nargv, *editor, *editor_path = NULL;
+    const char *cp, *ep, *tmp;
+    const char *edend = ed + edlen;
+    int nargc;
     debug_decl(resolve_editor, SUDOERS_DEBUG_PLUGIN)
 
-    /* Note: editor becomes part of argv_out and is not freed. */
-    editor = sudo_emalloc(edlen + 1);
-    memcpy(editor, ed, edlen);
-    editor[edlen] = '\0';
-
     /*
-     * Split editor into an argument vector; editor is reused (do not free).
+     * Split editor into an argument vector, including files to edit.
      * The EDITOR and VISUAL environment variables may contain command
      * line args so look for those and alloc space for them too.
      */
-    nargc = 1;
-    for (wasblank = false, cp = editor; *cp != '\0'; cp++) {
-	if (isblank((unsigned char) *cp))
-	    wasblank = true;
-	else if (wasblank) {
-	    wasblank = false;
-	    nargc++;
-	}
-    }
-    /* If we can't find the editor in the user's PATH, give up. */
-    cp = strtok(editor, " \t");
-    if (cp == NULL ||
-	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
-	sudo_efree(editor);
+    cp = sudo_strsplit(ed, edend, " \t", &ep);
+    if (cp == NULL)
+	debug_return_str(NULL);
+    editor = strndup(cp, (size_t)(ep - cp));
+    if (editor == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
 	debug_return_str(NULL);
     }
-    nargv = (char **) sudo_emallocarray(nargc + 1 + nfiles + 1, sizeof(char *));
-    for (ac = 0; cp != NULL && ac < nargc; ac++) {
-	nargv[ac] = cp;
-	cp = strtok(NULL, " \t");
+
+    /* If we can't find the editor in the user's PATH, give up. */
+    if (find_path(editor, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
+	free(editor);
+	errno = ENOENT;
+	debug_return_str(NULL);
     }
-    nargv[ac++] = "--";
-    for (i = 0; i < nfiles; )
-	nargv[ac++] = files[i++];
-    nargv[ac] = NULL;
+
+    /* Count rest of arguments and allocate editor argv. */
+    for (nargc = 1, tmp = ep; sudo_strsplit(NULL, edend, " \t", &tmp) != NULL; )
+	nargc++;
+    nargv = reallocarray(NULL, nargc + 1 + nfiles + 1, sizeof(char *));
+    if (nargv == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	free(editor);
+	debug_return_str(NULL);
+    }
+
+    /* Fill in editor argv (assumes files[] is NULL-terminated). */
+    nargv[0] = editor;
+    for (nargc = 1; (cp = sudo_strsplit(NULL, edend, " \t", &ep)) != NULL; nargc++) {
+	nargv[nargc] = strndup(cp, (size_t)(ep - cp));
+	if (nargv[nargc] == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    while (nargc--)
+		free(nargv[nargc]);
+	    debug_return_str(NULL);
+	}
+    }
+    nargv[nargc++] = "--";
+    while ((nargv[nargc++] = *files++) != NULL)
+	continue;
 
     *argc_out = nargc;
     *argv_out = nargv;
@@ -1118,6 +1130,8 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
 	    editor_path = resolve_editor(editor, strlen(editor), nfiles,
 		files, argc_out, argv_out);
+	    if (editor_path == NULL && errno != ENOENT)
+		debug_return_str(NULL);
 	}
     }
     if (editor_path == NULL) {
@@ -1129,6 +1143,8 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 	    else
 		len = strlen(cp);
 	    editor_path = resolve_editor(cp, len, nfiles, files, argc_out, argv_out);
+	    if (editor_path == NULL && errno != ENOENT)
+		debug_return_str(NULL);
 	    cp = ep + 1;
 	} while (ep != NULL && editor_path == NULL);
     }
