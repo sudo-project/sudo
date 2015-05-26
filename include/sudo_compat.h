@@ -437,7 +437,7 @@ __dso_public char *sudo_strndup(const char *str, size_t maxlen);
 # define strndup(_a, _b) sudo_strndup((_a), (_b))
 #endif /* HAVE_STRNDUP */
 #ifndef HAVE_STRNLEN
-__dso_public size_t sudo_strnlen(char *str, size_t maxlen);
+__dso_public size_t sudo_strnlen(const char *str, size_t maxlen);
 # undef strnlen
 # define strnlen(_a, _b) sudo_strnlen((_a), (_b))
 #endif /* HAVE_STRNLEN */
