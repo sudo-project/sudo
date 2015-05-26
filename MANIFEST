@@ -159,6 +159,7 @@ lib/util/siglist.in
 lib/util/snprintf.c
 lib/util/strlcat.c
 lib/util/strlcpy.c
+lib/util/strnlen.c
 lib/util/strsignal.c
 lib/util/strtobool.c
 lib/util/strtoid.c

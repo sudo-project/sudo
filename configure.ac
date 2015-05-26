@@ -2574,6 +2574,10 @@ SUDO_FUNC_ISBLANK
 AC_CHECK_FUNCS([glob], [], [
     AC_LIBOBJ(glob)
     SUDO_APPEND_COMPAT_EXP(sudo_glob sudo_globfree)
+    AC_CHECK_FUNCS([strnlen], [], [
+	AC_LIBOBJ(strnlen)
+	SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
+    ])
 ])
 AC_CHECK_FUNCS([memrchr], [], [
     AC_LIBOBJ(memrchr)
