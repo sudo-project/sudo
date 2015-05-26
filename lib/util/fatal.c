@@ -32,7 +32,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
@@ -146,18 +145,31 @@ warning(int errnum, const char *fmt, va_list ap)
 
     if (sudo_warn_conversation != NULL) {
 	struct sudo_conv_message msgs[6];
+	char static_buf[1024], *buf = static_buf;
 	int nmsgs = 0;
-	char *str = NULL;
 
 	/* Use conversation function. */
         msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	msgs[nmsgs++].msg = getprogname();
         if (fmt != NULL) {
-		sudo_evasprintf(&str, fmt, ap);
+		va_list ap2;
+		int buflen;
+
+		/* Use static buffer if possible, else dynamic. */
+		va_copy(ap2, ap);
+		buflen = snprintf(static_buf, sizeof(static_buf), fmt, ap2);
+		va_end(ap2);
+		if (buflen >= (int)sizeof(static_buf)) {
+		    buf = malloc(++buflen);
+		    if (buf != NULL)
+			(void)snprintf(buf, buflen, fmt, ap);
+		    else
+			buf = static_buf;
+		}
 		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 		msgs[nmsgs++].msg = ": ";
 		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-		msgs[nmsgs++].msg = str;
+		msgs[nmsgs++].msg = buf;
         }
         if (errnum) {
 	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
@@ -168,7 +180,8 @@ warning(int errnum, const char *fmt, va_list ap)
 	msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	msgs[nmsgs++].msg = "\n";
 	sudo_warn_conversation(nmsgs, msgs, NULL);
-	sudo_efree(str);
+	if (buf != static_buf)
+	    free(buf);
     } else {
 	/* Write to the standard error. */
         fputs(getprogname(), stderr);
