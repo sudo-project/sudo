@@ -451,10 +451,12 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	    goto done;
 	}
 	if (sb.st_size == 0 && orig_size != 0) {
-	    sudo_warnx(U_("zero length temporary file (%s), %s unchanged"),
-		sp->tpath, sp->path);
-	    sp->modified = true;
-	    goto done;
+	    /* Avoid accidental zeroing of main sudoers file. */
+	    if (sp == TAILQ_FIRST(&sudoerslist)) {
+		sudo_warnx(U_("zero length temporary file (%s), %s unchanged"),
+		    sp->tpath, sp->path);
+		goto done;
+	    }
 	}
     } else {
 	sudo_warnx(U_("editor (%s) failed, %s unchanged"), editor, sp->path);
