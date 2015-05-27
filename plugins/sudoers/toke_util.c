@@ -157,7 +157,7 @@ fill_args(const char *s, int len, int addspace)
 	p = sudoerslval.command.args ?
 	    realloc(sudoerslval.command.args, arg_size) : malloc(arg_size);
 	if (p == NULL) {
-	    sudo_efree(sudoerslval.command.args);
+	    free(sudoerslval.command.args);
 	    sudo_warn(NULL);
 	    sudoerserror(NULL);
 	    debug_return_bool(false);

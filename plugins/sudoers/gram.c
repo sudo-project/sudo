@@ -109,8 +109,8 @@ struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
 /*
  * Local protoypes
  */
-static void  add_defaults(int, struct member *, struct defaults *);
-static void  add_userspec(struct member *, struct privilege *);
+static bool add_defaults(int, struct member *, struct defaults *);
+static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, int);
 static struct member *new_member(char *, int);
 static struct sudo_digest *new_digest(int, const char *);
@@ -709,7 +709,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 unsigned int yystacksize;
-#line 687 "gram.y"
+#line 858 "gram.y"
 void
 sudoerserror(const char *s)
 {
@@ -722,7 +722,7 @@ sudoerserror(const char *s)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno;
-	errorfile = sudo_estrdup(sudoers);
+	errorfile = sudoers;
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -748,13 +748,15 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDOERS_DEBUG_PARSER)
 
-    d = sudo_ecalloc(1, sizeof(struct defaults));
-    d->var = var;
-    d->val = val;
-    /* d->type = 0; */
-    d->op = op;
-    /* d->binding = NULL */
-    HLTQ_INIT(d, entries);
+    d = calloc(1, sizeof(struct defaults));
+    if (d != NULL) {
+	d->var = var;
+	d->val = val;
+	/* d->type = 0; */
+	d->op = op;
+	/* d->binding = NULL */
+	HLTQ_INIT(d, entries);
+    }
 
     debug_return_ptr(d);
 }
@@ -765,10 +767,12 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDOERS_DEBUG_PARSER)
 
-    m = sudo_ecalloc(1, sizeof(struct member));
-    m->name = name;
-    m->type = type;
-    HLTQ_INIT(m, entries);
+    m = calloc(1, sizeof(struct member));
+    if (m != NULL) {
+	m->name = name;
+	m->type = type;
+	HLTQ_INIT(m, entries);
+    }
 
     debug_return_ptr(m);
 }
@@ -779,9 +783,15 @@ new_digest(int digest_type, const char *digest_str)
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER)
 
-    dig = sudo_emalloc(sizeof(*dig));
-    dig->digest_type = digest_type;
-    dig->digest_str = sudo_estrdup(digest_str);
+    dig = malloc(sizeof(*dig));
+    if (dig != NULL) {
+	dig->digest_type = digest_type;
+	dig->digest_str = strdup(digest_str);
+	if (dig->digest_str == NULL) {
+	    free(dig);
+	    dig = NULL;
+	}
+    }
 
     debug_return_ptr(dig);
 }
@@ -791,7 +801,7 @@ new_digest(int digest_type, const char *digest_str)
  * The binding, if non-NULL, specifies a list of hosts, users, or
  * runas users the entries apply to (specified by the type).
  */
-static void
+static bool
 add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d;
@@ -802,7 +812,8 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	/*
 	 * We use a single binding for each entry in defs.
 	 */
-	binding = sudo_emalloc(sizeof(*binding));
+	if ((binding = malloc(sizeof(*binding))) == NULL)
+	    debug_return_bool(false);
 	if (bmem != NULL)
 	    HLTQ_TO_TAILQ(binding, bmem, entries);
 	else
@@ -819,25 +830,26 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
  * Allocate a new struct userspec, populate it, and insert it at the
  * end of the userspecs list.
  */
-static void
+static bool
 add_userspec(struct member *members, struct privilege *privs)
 {
     struct userspec *u;
     debug_decl(add_userspec, SUDOERS_DEBUG_PARSER)
 
-    u = sudo_ecalloc(1, sizeof(*u));
+    if ((u = calloc(1, sizeof(*u))) == NULL)
+	debug_return_bool(false);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
@@ -858,8 +870,8 @@ init_parser(const char *path, bool quiet)
 	struct privilege *priv, *priv_next;
 
 	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
-	    sudo_efree(m->name);
-	    sudo_efree(m);
+	    free(m->name);
+	    free(m);
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
 	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
@@ -872,62 +884,62 @@ init_parser(const char *path, bool quiet)
 #endif /* HAVE_PRIV_SET */
 
 	    TAILQ_FOREACH_SAFE(m, &priv->hostlist, entries, m_next) {
-		sudo_efree(m->name);
-		sudo_efree(m);
+		free(m->name);
+		free(m);
 	    }
 	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
 #ifdef HAVE_SELINUX
 		/* Only free the first instance of a role/type. */
 		if (cs->role != role) {
 		    role = cs->role;
-		    sudo_efree(cs->role);
+		    free(cs->role);
 		}
 		if (cs->type != type) {
 		    type = cs->type;
-		    sudo_efree(cs->type);
+		    free(cs->type);
 		}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 		/* Only free the first instance of privs/limitprivs. */
 		if (cs->privs != privs) {
 		    privs = cs->privs;
-		    sudo_efree(cs->privs);
+		    free(cs->privs);
 		}
 		if (cs->limitprivs != limitprivs) {
 		    limitprivs = cs->limitprivs;
-		    sudo_efree(cs->limitprivs);
+		    free(cs->limitprivs);
 		}
 #endif /* HAVE_PRIV_SET */
 		/* Only free the first instance of runas user/group lists. */
 		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
 		    runasuserlist = cs->runasuserlist;
 		    TAILQ_FOREACH_SAFE(m, runasuserlist, entries, m_next) {
-			sudo_efree(m->name);
-			sudo_efree(m);
+			free(m->name);
+			free(m);
 		    }
-		    sudo_efree(runasuserlist);
+		    free(runasuserlist);
 		}
 		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
 		    runasgrouplist = cs->runasgrouplist;
 		    TAILQ_FOREACH_SAFE(m, runasgrouplist, entries, m_next) {
-			sudo_efree(m->name);
-			sudo_efree(m);
+			free(m->name);
+			free(m);
 		    }
-		    sudo_efree(runasgrouplist);
+		    free(runasgrouplist);
 		}
 		if (cs->cmnd->type == COMMAND) {
 			struct sudo_command *c =
 			    (struct sudo_command *) cs->cmnd->name;
-			sudo_efree(c->cmnd);
-			sudo_efree(c->args);
+			free(c->cmnd);
+			free(c->args);
 		}
-		sudo_efree(cs->cmnd->name);
-		sudo_efree(cs->cmnd);
-		sudo_efree(cs);
+		free(cs->cmnd->name);
+		free(cs->cmnd);
+		free(cs);
 	    }
-	    sudo_efree(priv);
+	    free(priv);
 	}
-	sudo_efree(us);
+	free(us);
     }
     TAILQ_INIT(&userspecs);
 
@@ -941,17 +953,17 @@ init_parser(const char *path, bool quiet)
 		if (m->type == COMMAND) {
 			struct sudo_command *c =
 			    (struct sudo_command *) m->name;
-			sudo_efree(c->cmnd);
-			sudo_efree(c->args);
+			free(c->cmnd);
+			free(c->args);
 		}
-		sudo_efree(m->name);
-		sudo_efree(m);
+		free(m->name);
+		free(m);
 	    }
-	    sudo_efree(d->binding);
+	    free(d->binding);
 	}
-	sudo_efree(d->var);
-	sudo_efree(d->val);
-	sudo_efree(d);
+	free(d->var);
+	free(d->val);
+	free(d);
     }
     TAILQ_INIT(&defaults);
 
@@ -979,7 +991,7 @@ init_parser(const char *path, bool quiet)
 
     debug_return_bool(rval);
 }
-#line 930 "gram.c"
+#line 942 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1206,111 +1218,153 @@ break;
 case 7:
 #line 187 "gram.y"
 {
-			    add_userspec(yyvsp[-1].member, yyvsp[0].privilege);
+			    if (!add_userspec(yyvsp[-1].member, yyvsp[0].privilege)) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 8:
-#line 190 "gram.y"
-{
-			    ;
-			}
-break;
-case 9:
 #line 193 "gram.y"
 {
 			    ;
 			}
 break;
-case 10:
+case 9:
 #line 196 "gram.y"
 {
 			    ;
 			}
 break;
-case 11:
+case 10:
 #line 199 "gram.y"
 {
 			    ;
 			}
 break;
-case 12:
+case 11:
 #line 202 "gram.y"
 {
-			    add_defaults(DEFAULTS, NULL, yyvsp[0].defaults);
+			    ;
+			}
+break;
+case 12:
+#line 205 "gram.y"
+{
+			    if (!add_defaults(DEFAULTS, NULL, yyvsp[0].defaults)) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 13:
-#line 205 "gram.y"
+#line 211 "gram.y"
 {
-			    add_defaults(DEFAULTS_USER, yyvsp[-1].member, yyvsp[0].defaults);
+			    if (!add_defaults(DEFAULTS_USER, yyvsp[-1].member, yyvsp[0].defaults)) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 14:
-#line 208 "gram.y"
+#line 217 "gram.y"
 {
-			    add_defaults(DEFAULTS_RUNAS, yyvsp[-1].member, yyvsp[0].defaults);
+			    if (!add_defaults(DEFAULTS_RUNAS, yyvsp[-1].member, yyvsp[0].defaults)) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 15:
-#line 211 "gram.y"
+#line 223 "gram.y"
 {
-			    add_defaults(DEFAULTS_HOST, yyvsp[-1].member, yyvsp[0].defaults);
+			    if (!add_defaults(DEFAULTS_HOST, yyvsp[-1].member, yyvsp[0].defaults)) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 16:
-#line 214 "gram.y"
+#line 229 "gram.y"
 {
-			    add_defaults(DEFAULTS_CMND, yyvsp[-1].member, yyvsp[0].defaults);
+			    if (!add_defaults(DEFAULTS_CMND, yyvsp[-1].member, yyvsp[0].defaults)) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 18:
-#line 220 "gram.y"
+#line 238 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].defaults, yyvsp[0].defaults, entries);
 			    yyval.defaults = yyvsp[-2].defaults;
 			}
 break;
 case 19:
-#line 226 "gram.y"
+#line 244 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, true);
+			    if (yyval.defaults == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 20:
-#line 229 "gram.y"
+#line 251 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, false);
+			    if (yyval.defaults == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 21:
-#line 232 "gram.y"
+#line 258 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, true);
+			    if (yyval.defaults == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 22:
-#line 235 "gram.y"
+#line 265 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '+');
+			    if (yyval.defaults == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 23:
-#line 238 "gram.y"
+#line 272 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '-');
+			    if (yyval.defaults == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 25:
-#line 244 "gram.y"
+#line 282 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].privilege, yyvsp[0].privilege, entries);
 			    yyval.privilege = yyvsp[-2].privilege;
 			}
 break;
 case 26:
-#line 250 "gram.y"
+#line 288 "gram.y"
 {
-			    struct privilege *p = sudo_ecalloc(1, sizeof(*p));
+			    struct privilege *p = calloc(1, sizeof(*p));
+			    if (p == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			    HLTQ_TO_TAILQ(&p->hostlist, yyvsp[-2].member, entries);
 			    HLTQ_TO_TAILQ(&p->cmndlist, yyvsp[0].cmndspec, entries);
 			    HLTQ_INIT(p, entries);
@@ -1318,51 +1372,71 @@ case 26:
 			}
 break;
 case 27:
-#line 259 "gram.y"
+#line 301 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 28:
-#line 263 "gram.y"
+#line 305 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 29:
-#line 269 "gram.y"
+#line 311 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 30:
-#line 272 "gram.y"
+#line 318 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 31:
-#line 275 "gram.y"
+#line 325 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 32:
-#line 278 "gram.y"
+#line 332 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NTWKADDR);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 33:
-#line 281 "gram.y"
+#line 339 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 35:
-#line 287 "gram.y"
+#line 349 "gram.y"
 {
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST(yyvsp[-2].cmndspec, cmndspec, entries);
@@ -1406,23 +1480,35 @@ case 35:
 			}
 break;
 case 36:
-#line 330 "gram.y"
+#line 392 "gram.y"
 {
-			    struct cmndspec *cs = sudo_ecalloc(1, sizeof(*cs));
+			    struct cmndspec *cs = calloc(1, sizeof(*cs));
+			    if (cs == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			    if (yyvsp[-4].runas != NULL) {
 				if (yyvsp[-4].runas->runasusers != NULL) {
 				    cs->runasuserlist =
-					sudo_emalloc(sizeof(*cs->runasuserlist));
+					malloc(sizeof(*cs->runasuserlist));
+				    if (cs->runasuserlist == NULL) {
+					sudoerserror(N_("unable to allocate memory"));
+					YYERROR;
+				    }
 				    HLTQ_TO_TAILQ(cs->runasuserlist,
 					yyvsp[-4].runas->runasusers, entries);
 				}
 				if (yyvsp[-4].runas->runasgroups != NULL) {
 				    cs->runasgrouplist =
-					sudo_emalloc(sizeof(*cs->runasgrouplist));
+					malloc(sizeof(*cs->runasgrouplist));
+				    if (cs->runasgrouplist == NULL) {
+					sudoerserror(N_("unable to allocate memory"));
+					YYERROR;
+				    }
 				    HLTQ_TO_TAILQ(cs->runasgrouplist,
 					yyvsp[-4].runas->runasgroups, entries);
 				}
-				sudo_efree(yyvsp[-4].runas);
+				free(yyvsp[-4].runas);
 			    }
 #ifdef HAVE_SELINUX
 			    cs->role = yyvsp[-3].seinfo.role;
@@ -1443,37 +1529,53 @@ case 36:
 			}
 break;
 case 37:
-#line 366 "gram.y"
+#line 440 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA224, yyvsp[0].string);
+			    if (yyval.digest == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 38:
-#line 369 "gram.y"
+#line 447 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA256, yyvsp[0].string);
+			    if (yyval.digest == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 39:
-#line 372 "gram.y"
+#line 454 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA384, yyvsp[0].string);
+			    if (yyval.digest == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 40:
-#line 375 "gram.y"
+#line 461 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA512, yyvsp[0].string);
+			    if (yyval.digest == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 41:
-#line 380 "gram.y"
+#line 470 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			}
 break;
 case 42:
-#line 383 "gram.y"
+#line 473 "gram.y"
 {
 			    if (yyvsp[0].member->type != COMMAND) {
 				sudoerserror(N_("a digest requires a path name"));
@@ -1485,267 +1587,316 @@ case 42:
 			}
 break;
 case 43:
-#line 394 "gram.y"
+#line 484 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 44:
-#line 398 "gram.y"
+#line 488 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 45:
-#line 404 "gram.y"
+#line 494 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 46:
-#line 409 "gram.y"
+#line 499 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 47:
-#line 414 "gram.y"
+#line 504 "gram.y"
 {
 			    yyval.seinfo.role = NULL;
 			    yyval.seinfo.type = NULL;
 			}
 break;
 case 48:
-#line 418 "gram.y"
+#line 508 "gram.y"
 {
 			    yyval.seinfo.role = yyvsp[0].string;
 			    yyval.seinfo.type = NULL;
 			}
 break;
 case 49:
-#line 422 "gram.y"
+#line 512 "gram.y"
 {
 			    yyval.seinfo.type = yyvsp[0].string;
 			    yyval.seinfo.role = NULL;
 			}
 break;
 case 50:
-#line 426 "gram.y"
+#line 516 "gram.y"
 {
 			    yyval.seinfo.role = yyvsp[-1].string;
 			    yyval.seinfo.type = yyvsp[0].string;
 			}
 break;
 case 51:
-#line 430 "gram.y"
+#line 520 "gram.y"
 {
 			    yyval.seinfo.type = yyvsp[-1].string;
 			    yyval.seinfo.role = yyvsp[0].string;
 			}
 break;
 case 52:
-#line 436 "gram.y"
+#line 526 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 53:
-#line 440 "gram.y"
+#line 530 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 54:
-#line 445 "gram.y"
+#line 535 "gram.y"
 {
 			    yyval.privinfo.privs = NULL;
 			    yyval.privinfo.limitprivs = NULL;
 			}
 break;
 case 55:
-#line 449 "gram.y"
+#line 539 "gram.y"
 {
 			    yyval.privinfo.privs = yyvsp[0].string;
 			    yyval.privinfo.limitprivs = NULL;
 			}
 break;
 case 56:
-#line 453 "gram.y"
+#line 543 "gram.y"
 {
 			    yyval.privinfo.privs = NULL;
 			    yyval.privinfo.limitprivs = yyvsp[0].string;
 			}
 break;
 case 57:
-#line 457 "gram.y"
+#line 547 "gram.y"
 {
 			    yyval.privinfo.privs = yyvsp[-1].string;
 			    yyval.privinfo.limitprivs = yyvsp[0].string;
 			}
 break;
 case 58:
-#line 461 "gram.y"
+#line 551 "gram.y"
 {
 			    yyval.privinfo.limitprivs = yyvsp[-1].string;
 			    yyval.privinfo.privs = yyvsp[0].string;
 			}
 break;
 case 59:
-#line 467 "gram.y"
+#line 557 "gram.y"
 {
 			    yyval.runas = NULL;
 			}
 break;
 case 60:
-#line 470 "gram.y"
+#line 560 "gram.y"
 {
 			    yyval.runas = yyvsp[-1].runas;
 			}
 break;
 case 61:
-#line 475 "gram.y"
+#line 565 "gram.y"
 {
-			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
-			    yyval.runas->runasusers = new_member(NULL, MYSELF);
-			    /* $$->runasgroups = NULL; */
+			    yyval.runas = calloc(1, sizeof(struct runascontainer));
+			    if (yyval.runas != NULL) {
+				yyval.runas->runasusers = new_member(NULL, MYSELF);
+				/* $$->runasgroups = NULL; */
+				if (yyval.runas->runasusers == NULL) {
+				    free(yyval.runas);
+				    yyval.runas = NULL;
+				}
+			    }
+			    if (yyval.runas == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 62:
-#line 480 "gram.y"
+#line 580 "gram.y"
 {
-			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = calloc(1, sizeof(struct runascontainer));
+			    if (yyval.runas == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			    yyval.runas->runasusers = yyvsp[0].member;
 			    /* $$->runasgroups = NULL; */
 			}
 break;
 case 63:
-#line 485 "gram.y"
+#line 589 "gram.y"
 {
-			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = calloc(1, sizeof(struct runascontainer));
+			    if (yyval.runas == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			    yyval.runas->runasusers = yyvsp[-2].member;
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
 case 64:
-#line 490 "gram.y"
+#line 598 "gram.y"
 {
-			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
+			    yyval.runas = calloc(1, sizeof(struct runascontainer));
+			    if (yyval.runas == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			    /* $$->runasusers = NULL; */
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
 case 65:
-#line 495 "gram.y"
+#line 607 "gram.y"
 {
-			    yyval.runas = sudo_ecalloc(1, sizeof(struct runascontainer));
-			    yyval.runas->runasusers = new_member(NULL, MYSELF);
-			    /* $$->runasgroups = NULL; */
+			    yyval.runas = calloc(1, sizeof(struct runascontainer));
+			    if (yyval.runas != NULL) {
+				yyval.runas->runasusers = new_member(NULL, MYSELF);
+				/* $$->runasgroups = NULL; */
+				if (yyval.runas->runasusers == NULL) {
+				    free(yyval.runas);
+				    yyval.runas = NULL;
+				}
+			    }
+			    if (yyval.runas == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 66:
-#line 502 "gram.y"
+#line 624 "gram.y"
 {
 			    yyval.tag.log_input = yyval.tag.log_output = yyval.tag.noexec =
 				yyval.tag.nopasswd = yyval.tag.send_mail = yyval.tag.setenv = UNSPEC;
 			}
 break;
 case 67:
-#line 506 "gram.y"
+#line 628 "gram.y"
 {
 			    yyval.tag.nopasswd = true;
 			}
 break;
 case 68:
-#line 509 "gram.y"
+#line 631 "gram.y"
 {
 			    yyval.tag.nopasswd = false;
 			}
 break;
 case 69:
-#line 512 "gram.y"
+#line 634 "gram.y"
 {
 			    yyval.tag.noexec = true;
 			}
 break;
 case 70:
-#line 515 "gram.y"
+#line 637 "gram.y"
 {
 			    yyval.tag.noexec = false;
 			}
 break;
 case 71:
-#line 518 "gram.y"
+#line 640 "gram.y"
 {
 			    yyval.tag.setenv = true;
 			}
 break;
 case 72:
-#line 521 "gram.y"
+#line 643 "gram.y"
 {
 			    yyval.tag.setenv = false;
 			}
 break;
 case 73:
-#line 524 "gram.y"
+#line 646 "gram.y"
 {
 			    yyval.tag.log_input = true;
 			}
 break;
 case 74:
-#line 527 "gram.y"
+#line 649 "gram.y"
 {
 			    yyval.tag.log_input = false;
 			}
 break;
 case 75:
-#line 530 "gram.y"
+#line 652 "gram.y"
 {
 			    yyval.tag.log_output = true;
 			}
 break;
 case 76:
-#line 533 "gram.y"
+#line 655 "gram.y"
 {
 			    yyval.tag.log_output = false;
 			}
 break;
 case 77:
-#line 536 "gram.y"
+#line 658 "gram.y"
 {
 			    yyval.tag.send_mail = true;
 			}
 break;
 case 78:
-#line 539 "gram.y"
+#line 661 "gram.y"
 {
 			    yyval.tag.send_mail = false;
 			}
 break;
 case 79:
-#line 544 "gram.y"
+#line 666 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 80:
-#line 547 "gram.y"
+#line 673 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 81:
-#line 550 "gram.y"
+#line 680 "gram.y"
 {
-			    struct sudo_command *c = sudo_ecalloc(1, sizeof(*c));
+			    struct sudo_command *c = calloc(1, sizeof(*c));
+			    if (c == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			    c->cmnd = yyvsp[0].command.cmnd;
 			    c->args = yyvsp[0].command.args;
 			    yyval.member = new_member((char *)c, COMMAND);
+			    if (yyval.member == NULL) {
+				free(c);
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 84:
-#line 562 "gram.y"
+#line 701 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, HOSTALIAS, yyvsp[0].member)) != NULL) {
@@ -1755,14 +1906,14 @@ case 84:
 			}
 break;
 case 86:
-#line 572 "gram.y"
+#line 711 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 89:
-#line 582 "gram.y"
+#line 721 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, CMNDALIAS, yyvsp[0].member)) != NULL) {
@@ -1772,14 +1923,14 @@ case 89:
 			}
 break;
 case 91:
-#line 592 "gram.y"
+#line 731 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 94:
-#line 602 "gram.y"
+#line 741 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, RUNASALIAS, yyvsp[0].member)) != NULL) {
@@ -1789,7 +1940,7 @@ case 94:
 			}
 break;
 case 97:
-#line 615 "gram.y"
+#line 754 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, USERALIAS, yyvsp[0].member)) != NULL) {
@@ -1799,96 +1950,128 @@ case 97:
 			}
 break;
 case 99:
-#line 625 "gram.y"
+#line 764 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 100:
-#line 631 "gram.y"
+#line 770 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 101:
-#line 635 "gram.y"
+#line 774 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 102:
-#line 641 "gram.y"
+#line 780 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 103:
-#line 644 "gram.y"
+#line 787 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 104:
-#line 647 "gram.y"
+#line 794 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 105:
-#line 650 "gram.y"
+#line 801 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 106:
-#line 653 "gram.y"
+#line 808 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 108:
-#line 659 "gram.y"
+#line 818 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 109:
-#line 665 "gram.y"
+#line 824 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 110:
-#line 669 "gram.y"
+#line 828 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 111:
-#line 675 "gram.y"
+#line 834 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 112:
-#line 678 "gram.y"
+#line 841 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
 case 113:
-#line 681 "gram.y"
+#line 848 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
+			    if (yyval.member == NULL) {
+				sudoerserror(N_("unable to allocate memory"));
+				YYERROR;
+			    }
 			}
 break;
-#line 1839 "gram.c"
+#line 2022 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

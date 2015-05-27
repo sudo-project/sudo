@@ -127,7 +127,11 @@ alias_add(char *name, int type, struct member *members)
     struct alias *a;
     debug_decl(alias_add, SUDOERS_DEBUG_ALIAS)
 
-    a = sudo_ecalloc(1, sizeof(*a));
+    a = calloc(1, sizeof(*a));
+    if (a == NULL) {
+	strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
+	debug_return_str(errbuf);
+    }
     a->name = name;
     a->type = type;
     /* a->used = false; */
