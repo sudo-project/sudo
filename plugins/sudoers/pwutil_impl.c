@@ -43,6 +43,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <errno.h>
 #include <limits.h>
 #include <pwd.h>
 #include <grp.h>
@@ -79,6 +80,8 @@ do {							\
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
  * uid is the key.  Fills in datum from struct password.
+ * Returns NULL on malloc error or unknown name/id, setting errno
+ * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
 sudo_make_pwitem(uid_t uid, const char *name)
@@ -92,8 +95,10 @@ sudo_make_pwitem(uid_t uid, const char *name)
 
     /* Look up by name or uid. */
     pw = name ? getpwnam(name) : getpwuid(uid);
-    if (pw == NULL)
+    if (pw == NULL) {
+	errno = ENOENT;
 	debug_return_ptr(NULL);
+    }
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
     pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
@@ -116,7 +121,8 @@ sudo_make_pwitem(uid_t uid, const char *name)
 	total += strlen(name) + 1;
 
     /* Allocate space for struct item, struct passwd and the strings. */
-    pwitem = sudo_ecalloc(1, total);
+    if ((pwitem = calloc(1, total)) == NULL)
+	debug_return_ptr(NULL);
     newpw = &pwitem->pw;
 
     /*
@@ -154,6 +160,8 @@ sudo_make_pwitem(uid_t uid, const char *name)
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
  * gid is the key.  Fills in datum from struct group.
+ * Returns NULL on malloc error or unknown name/id, setting errno
+ * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
 sudo_make_gritem(gid_t gid, const char *name)
@@ -166,8 +174,10 @@ sudo_make_gritem(gid_t gid, const char *name)
 
     /* Look up by name or gid. */
     gr = name ? getgrnam(name) : getgrgid(gid);
-    if (gr == NULL)
+    if (gr == NULL) {
+	errno = ENOENT;
 	debug_return_ptr(NULL);
+    }
 
     /* Allocate in one big chunk for easy freeing. */
     nsize = psize = nmem = 0;
@@ -183,7 +193,8 @@ sudo_make_gritem(gid_t gid, const char *name)
     if (name != NULL)
 	total += strlen(name) + 1;
 
-    gritem = sudo_ecalloc(1, total);
+    if ((gritem = calloc(1, total)) == NULL)
+	debug_return_ptr(NULL);
 
     /*
      * Copy in group contents and make strings relative to space
@@ -233,7 +244,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     struct cache_item_grlist *grlitem;
     struct group_list *grlist;
     GETGROUPS_T *gids;
-    struct group *grp;
+    struct group *grp = NULL;
     int i, ngids, groupname_len;
     debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS)
 
@@ -245,29 +256,32 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     } else {
 	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
-	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
+	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	    if (gids == NULL)
+		debug_return_ptr(NULL);
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
 	} else {
 	    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
 	    if (ngids < 0)
 		ngids = NGROUPS_MAX * 2;
-	    gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
+	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	    if (gids == NULL)
+		debug_return_ptr(NULL);
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-		sudo_efree(gids);
-		gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
+		free(gids);
+		gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+		if (gids == NULL)
+		    debug_return_ptr(NULL);
 		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
 		    ngids = -1;
 	    }
 	}
     }
     if (ngids <= 0) {
-	sudo_efree(gids);
+	free(gids);
+	errno = ENOENT;
 	debug_return_ptr(NULL);
     }
-
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb((char *) pw->pw_name);
-#endif
 
 #ifdef _SC_LOGIN_NAME_MAX
     groupname_len = MAX((int)sysconf(_SC_LOGIN_NAME_MAX), 32);
@@ -283,7 +297,10 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     total += groupname_len * ngids;
 
 again:
-    grlitem = sudo_ecalloc(1, total);
+    if ((grlitem = calloc(1, total)) == NULL) {
+	free(gids);
+	debug_return_ptr(NULL);
+    }
 
     /*
      * Copy in group list and make pointers relative to space
@@ -314,13 +331,17 @@ again:
     /*
      * Resolve and store group names by ID.
      */
+#ifdef HAVE_SETAUTHDB
+    if (grp == NULL)
+	aix_setauthdb((char *) pw->pw_name);
+#endif
     ngroups = 0;
     for (i = 0; i < ngids; i++) {
 	if ((grp = sudo_getgrgid(gids[i])) != NULL) {
 	    len = strlen(grp->gr_name) + 1;
 	    if (cp - (char *)grlitem + len > total) {
 		total += len + groupname_len;
-		sudo_efree(grlitem);
+		free(grlitem);
 		sudo_gr_delref(grp);
 		goto again;
 	    }
@@ -331,7 +352,7 @@ again:
 	}
     }
     grlist->ngroups = ngroups;
-    sudo_efree(gids);
+    free(gids);
 
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();

@@ -28,6 +28,7 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#include <errno.h>
 #include <usersec.h>
 #include <uinfo.h>
 
@@ -147,43 +148,53 @@ int usrinfo(int cmd, char *buf, int count);
  * Look up administrative domain for user (SYSTEM in /etc/security/user) and
  * set it as the default for the process.  This ensures that password and
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
+ * Does not modify errno even on error since callers do not check rval.
  */
 int
 aix_setauthdb_v1(char *user)
 {
     char *registry;
+    int serrno = errno;
+    int rval = -1;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (user != NULL) {
 	if (setuserdb(S_READ) != 0) {
 	    sudo_warn(U_("unable to open userdb"));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
 	    if (setauthdb(registry, NULL) != 0) {
 		sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
 		    registry, user);
-		debug_return_int(-1);
+		goto done;
 	    }
 	}
 	enduserdb();
     }
-    debug_return_int(0);
+    rval = 0;
+done:
+    errno = serrno;
+    debug_return_int(rval);
 }
 
 /*
  * Restore the saved administrative domain, if any.
+ * Does not modify errno even on error since callers do not check rval.
  */
 int
 aix_restoreauthdb_v1(void)
 {
+    int serrno = errno;
+    int rval = 0;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (setauthdb(NULL, NULL) != 0) {
 	sudo_warn(U_("unable to restore registry"));
-	debug_return_int(-1);
+	rval = -1;
     }
-    debug_return_int(0);
+    errno = serrno;
+    debug_return_int(rval);
 }
 #endif
 
