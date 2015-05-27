@@ -157,12 +157,12 @@ warning(int errnum, const char *fmt, va_list ap)
 
 		/* Use static buffer if possible, else dynamic. */
 		va_copy(ap2, ap);
-		buflen = snprintf(static_buf, sizeof(static_buf), fmt, ap2);
+		buflen = vsnprintf(static_buf, sizeof(static_buf), fmt, ap2);
 		va_end(ap2);
 		if (buflen >= (int)sizeof(static_buf)) {
 		    buf = malloc(++buflen);
 		    if (buf != NULL)
-			(void)snprintf(buf, buflen, fmt, ap);
+			(void)vsnprintf(buf, buflen, fmt, ap);
 		    else
 			buf = static_buf;
 		}
