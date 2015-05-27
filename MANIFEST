@@ -119,7 +119,9 @@ lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
 lib/util/regress/mktemp/mktemp_test.c
+lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
+lib/util/regress/strsplit/strsplit_test.c
 lib/util/regress/sudo_conf/conf_test.c
 lib/util/regress/sudo_conf/test1.in
 lib/util/regress/sudo_conf/test1.out.ok

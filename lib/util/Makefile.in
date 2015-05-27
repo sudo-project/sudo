@@ -81,7 +81,8 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 SPLINT_OPTS = -D__restrict= -checks
 
 # Regression tests
-TEST_PROGS = atofoo_test conf_test hltq_test parseln_test progname_test @COMPAT_TEST_PROGS@
+TEST_PROGS = atofoo_test conf_test hltq_test parseln_test progname_test \
+	     strsplit_test parse_gids_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -120,6 +121,10 @@ HLTQ_TEST_OBJS = hltq_test.lo
 FNM_TEST_OBJS = fnm_test.lo
 
 GLOBTEST_OBJS = globtest.lo
+
+STRSPLIT_TEST_OBJS = strsplit_test.lo
+
+PARSE_GIDS_TEST_OBJS = parse_gids_test.lo
 
 all: libsudo_util.la
 
@@ -191,6 +196,12 @@ parseln_test: $(PARSELN_TEST_OBJS) libsudo_util.la
 progname_test: $(PROGNAME_TEST_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(PROGNAME_TEST_OBJS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+parse_gids_test: $(PARSE_GIDS_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSE_GIDS_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+strsplit_test: $(STRSPLIT_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(STRSPLIT_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 pre-install:
 
 install: install-dirs
@@ -225,6 +236,12 @@ cppcheck:
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    rval=0; \
+	    if test -f parse_gids_test; then \
+		./parse_gids_test || rval=`expr $$rval + $$?`; \
+	    fi; \
+	    if test -f strsplit_test; then \
+		./strsplit_test || rval=`expr $$rval + $$?`; \
+	    fi; \
 	    if test -f fnm_test; then \
 		./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
 	    fi; \
@@ -440,6 +457,11 @@ mktemp_test.lo: $(srcdir)/regress/mktemp/mktemp_test.c \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/mktemp/mktemp_test.c
+parse_gids_test.lo: $(srcdir)/regress/parse_gids/parse_gids_test.c \
+                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                    $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parse_gids/parse_gids_test.c
 parseln.lo: $(srcdir)/parseln.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
@@ -497,6 +519,11 @@ strsplit.lo: $(srcdir)/strsplit.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strsplit.c
+strsplit_test.lo: $(srcdir)/regress/strsplit/strsplit_test.c \
+                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                  $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                  $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/strsplit/strsplit_test.c
 strtobool.lo: $(srcdir)/strtobool.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
