@@ -192,10 +192,10 @@ struct alias *alias_remove(char *name, int type);
 void alias_apply(int (*func)(void *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);
-void init_aliases(void);
+bool init_aliases(void);
 
 /* gram.c */
-void init_parser(const char *, bool);
+bool init_parser(const char *, bool);
 
 /* match_addr.c */
 bool addr_matches(char *n);

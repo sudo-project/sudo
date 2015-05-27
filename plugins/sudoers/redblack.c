@@ -82,7 +82,8 @@ static void rbdestroy_int(struct rbtree *, struct rbnode *, void (*)(void *));
 
 /*
  * Create a red black tree struct using the specified compare routine.
- * Allocates and returns the initialized (empty) tree.
+ * Allocates and returns the initialized (empty) tree or NULL if
+ * memory cannot be allocated.
  */
 struct rbtree *
 rbcreate(int (*compar)(const void *, const void*))
@@ -90,24 +91,25 @@ rbcreate(int (*compar)(const void *, const void*))
     struct rbtree *tree;
     debug_decl(rbcreate, SUDOERS_DEBUG_RBTREE)
 
-    tree = sudo_emalloc(sizeof(*tree));
-    tree->compar = compar;
+    if ((tree = malloc(sizeof(*tree))) != NULL) {
+	tree->compar = compar;
 
-    /*
-     * We use a self-referencing sentinel node called nil to simplify the
-     * code by avoiding the need to check for NULL pointers.
-     */
-    tree->nil.left = tree->nil.right = tree->nil.parent = &tree->nil;
-    tree->nil.color = black;
-    tree->nil.data = NULL;
+	/*
+	 * We use a self-referencing sentinel node called nil to simplify the
+	 * code by avoiding the need to check for NULL pointers.
+	 */
+	tree->nil.left = tree->nil.right = tree->nil.parent = &tree->nil;
+	tree->nil.color = black;
+	tree->nil.data = NULL;
 
-    /*
-     * Similarly, the fake root node keeps us from having to worry
-     * about splitting the root.
-     */
-    tree->root.left = tree->root.right = tree->root.parent = &tree->nil;
-    tree->root.color = black;
-    tree->root.data = NULL;
+	/*
+	 * Similarly, the fake root node keeps us from having to worry
+	 * about splitting the root.
+	 */
+	tree->root.left = tree->root.right = tree->root.parent = &tree->nil;
+	tree->root.color = black;
+	tree->root.data = NULL;
+    }
 
     debug_return_ptr(tree);
 }
@@ -166,11 +168,11 @@ rotate_right(struct rbtree *tree, struct rbnode *node)
 
 /*
  * Insert data pointer into a redblack tree.
- * Returns a NULL pointer on success.  If a node matching "data"
- * already exists, a pointer to the existant node is returned.
+ * Returns a 0 on success, 1 if a node matching "data" already exists
+ * (filling in "existing" if not NULL), or -1 on malloc() failure.
  */
-struct rbnode *
-rbinsert(struct rbtree *tree, void *data)
+int
+rbinsert(struct rbtree *tree, void *data, struct rbnode **existing)
 {
     struct rbnode *node = rbfirst(tree);
     struct rbnode *parent = rbroot(tree);
@@ -180,12 +182,17 @@ rbinsert(struct rbtree *tree, void *data)
     /* Find correct insertion point. */
     while (node != rbnil(tree)) {
 	parent = node;
-	if ((res = tree->compar(data, node->data)) == 0)
-	    debug_return_ptr(node);
+	if ((res = tree->compar(data, node->data)) == 0) {
+	    if (existing != NULL)
+		*existing = node;
+	    debug_return_int(1);
+	}
 	node = res < 0 ? node->left : node->right;
     }
 
-    node = sudo_emalloc(sizeof(*node));
+    node = malloc(sizeof(*node));
+    if (node == NULL)
+	debug_return_int(-1);
     node->data = data;
     node->left = node->right = rbnil(tree);
     node->parent = parent;
@@ -255,7 +262,7 @@ rbinsert(struct rbtree *tree, void *data)
 	}
     }
     rbfirst(tree)->color = black;	/* first node is always black */
-    debug_return_ptr(NULL);
+    debug_return_int(0);
 }
 
 /*
@@ -341,13 +348,13 @@ rbdestroy_int(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 	rbdestroy_int(tree, node->right, destroy);
 	if (destroy != NULL)
 	    destroy(node->data);
-	sudo_efree(node);
+	free(node);
     }
     debug_return;
 }
 
 /*
- * Destroy the specified tree, calling the destructor destroy
+ * Destroy the specified tree, calling the destructor "destroy"
  * for each node and then freeing the tree itself.
  */
 void
@@ -355,7 +362,7 @@ rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
     debug_decl(rbdestroy, SUDOERS_DEBUG_RBTREE)
     rbdestroy_int(tree, rbfirst(tree), destroy);
-    sudo_efree(tree);
+    free(tree);
     debug_return;
 }
 

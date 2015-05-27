@@ -818,12 +818,13 @@ add_userspec(struct member *members, struct privilege *privs)
  * Free up space used by data structures from a previous parser run and sets
  * the current sudoers file to path.
  */
-void
+bool
 init_parser(const char *path, bool quiet)
 {
     struct member_list *binding;
     struct defaults *d, *d_next;
     struct userspec *us, *us_next;
+    bool rval = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
     TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
@@ -928,17 +929,27 @@ init_parser(const char *path, bool quiet)
     }
     TAILQ_INIT(&defaults);
 
-    init_aliases();
-
     init_lexer();
 
-    sudo_efree(sudoers);
-    sudoers = path ? sudo_estrdup(path) : NULL;
+    if (!init_aliases()) {
+	sudo_warnx(U_("unable to allocate memory"));
+	rval = false;
+    }
+
+    free(sudoers);
+    if (path != NULL) {
+	if ((sudoers = strdup(path)) == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    rval = false;
+	}
+    } else {
+	sudoers = NULL;
+    }
 
     parse_error = false;
     errorlineno = -1;
     errorfile = sudoers;
     sudoers_warnings = !quiet;
 
-    debug_return;
+    debug_return_bool(rval);
 }

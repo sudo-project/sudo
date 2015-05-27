@@ -132,8 +132,13 @@ alias_add(char *name, int type, struct member *members)
     a->type = type;
     /* a->used = false; */
     HLTQ_TO_TAILQ(&a->members, members, entries);
-    if (rbinsert(aliases, a)) {
+    switch (rbinsert(aliases, a, NULL)) {
+    case 1:
 	snprintf(errbuf, sizeof(errbuf), N_("Alias `%s' already defined"), name);
+	alias_free(a);
+	debug_return_str(errbuf);
+    case -1:
+	strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
 	alias_free(a);
 	debug_return_str(errbuf);
     }
@@ -209,7 +214,7 @@ alias_remove(char *name, int type)
     debug_return_ptr(rbdelete(aliases, node));
 }
 
-void
+bool
 init_aliases(void)
 {
     debug_decl(init_aliases, SUDOERS_DEBUG_ALIAS)
@@ -218,5 +223,5 @@ init_aliases(void)
 	rbdestroy(aliases, alias_free);
     aliases = rbcreate(alias_compare);
 
-    debug_return;
+    debug_return_bool(aliases != NULL);
 }

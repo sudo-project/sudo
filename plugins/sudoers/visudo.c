@@ -222,8 +222,8 @@ main(int argc, char *argv[])
     if (argc - optind != 0)
 	usage(1);
 
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
+	sudo_fatalx(U_("unable to allocate memory"));
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
@@ -1106,7 +1106,8 @@ alias_remove_recursive(char *name, int type)
 		    rval = false;
 	    }
 	}
-	rbinsert(alias_freelist, a);
+	if (rbinsert(alias_freelist, a, NULL) != 0)
+	    rval = false;
     }
     debug_return_bool(rval);
 }
@@ -1172,6 +1173,10 @@ check_aliases(bool strict, bool quiet)
     debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS)
 
     alias_freelist = rbcreate(alias_compare);
+    if (alias_freelist == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
 
     /* Forward check. */
     TAILQ_FOREACH(us, &userspecs, entries) {

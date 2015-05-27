@@ -51,7 +51,7 @@ void *rbdelete(struct rbtree *, struct rbnode *);
 int rbapply_node(struct rbtree *, struct rbnode *,
 	int (*)(void *, void *), void *, enum rbtraversal);
 struct rbnode *rbfind(struct rbtree *, void *);
-struct rbnode *rbinsert(struct rbtree *, void *);
+int rbinsert(struct rbtree *, void *, struct rbnode **);
 struct rbtree *rbcreate(int (*)(const void *, const void *));
 void rbdestroy(struct rbtree *, void (*)(void *));
 

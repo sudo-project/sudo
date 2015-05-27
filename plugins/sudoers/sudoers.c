@@ -124,8 +124,10 @@ sudoers_policy_init(void *info, char * const envp[])
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
 
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(sudoers_cleanup);

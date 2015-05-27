@@ -193,8 +193,8 @@ main(int argc, char *argv[])
 	setgrfile(grfile);
     if (pwfile)
 	setpwfile(pwfile);
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
+	sudo_fatalx(U_("unable to allocate memory"));
 
     if (argc < 2) {
 	if (!dflag)

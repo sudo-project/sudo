@@ -587,8 +587,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
 
     /* Initialize the debug subsystem.  */
     for (cur = settings; *cur != NULL; cur++) {
