@@ -441,7 +441,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    log_allowed(validated);
+    if (!log_allowed(validated))
+	goto bad;
     if (ISSET(sudo_mode, MODE_CHECK))
 	rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
     else if (ISSET(sudo_mode, MODE_LIST))

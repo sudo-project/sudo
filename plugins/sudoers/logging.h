@@ -67,12 +67,12 @@ bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);
 int audit_success(int argc, char *argv[]);
 int audit_failure(int argc, char *argv[], char const *const fmt, ...) __printflike(3, 4);
-void log_allowed(int status);
-void log_auth_failure(int status, unsigned int tries);
-void log_denial(int status, bool inform_user);
-void log_failure(int status, int flags);
-void log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
-void log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
+bool log_allowed(int status);
+bool log_auth_failure(int status, unsigned int tries);
+bool log_denial(int status, bool inform_user);
+bool log_failure(int status, int flags);
+bool log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
+bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
 void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
