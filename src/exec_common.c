@@ -54,7 +54,7 @@ static char * const *
 disable_execute(char *const envp[])
 {
 #ifdef _PATH_SUDO_NOEXEC
-    char *preload, **nenvp = NULL;
+    char *preload = NULL, **nenvp = NULL;
     int env_len, env_size;
     int preload_idx = -1;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -107,7 +107,7 @@ disable_execute(char *const envp[])
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
     if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
 	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif

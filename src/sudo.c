@@ -1087,10 +1087,10 @@ static char **
 format_plugin_settings(struct plugin_container *plugin,
     struct sudo_settings *sudo_settings)
 {
-    size_t plugin_settings_size, num_plugin_settings = 0;
+    size_t plugin_settings_size;
     struct sudo_debug_file *debug_file;
     struct sudo_settings *setting;
-    char **plugin_settings;
+    char **plugin_settings, **ps;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
     /* XXX - should use exact plugin_settings_size */
@@ -1104,28 +1104,29 @@ format_plugin_settings(struct plugin_container *plugin,
     }
 
     /* Allocate and fill in. */
-    plugin_settings = sudo_emallocarray(plugin_settings_size, sizeof(char *));
-    plugin_settings[num_plugin_settings++] =
-	sudo_new_key_val("plugin_path", plugin->path);
+    plugin_settings = ps =
+	reallocarray(NULL, plugin_settings_size, sizeof(char *));
+    if (plugin_settings == NULL)
+	sudo_fatal(NULL);
+    if ((*ps++ = sudo_new_key_val("plugin_path", plugin->path)) == NULL)
+	sudo_fatal(NULL);
     for (setting = sudo_settings; setting->name != NULL; setting++) {
         if (setting->value != NULL) {
             sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
                 setting->name, setting->value);
-            plugin_settings[num_plugin_settings] =
-		sudo_new_key_val(setting->name, setting->value);
-            if (plugin_settings[num_plugin_settings] == NULL)
+	    if ((*ps++ = sudo_new_key_val(setting->name, setting->value)) == NULL)
                 sudo_fatal(NULL);
-            num_plugin_settings++;
         }
     }
     if (plugin->debug_files != NULL) {
 	TAILQ_FOREACH(debug_file, plugin->debug_files, entries) {
 	    /* XXX - quote filename? */
-	    sudo_easprintf(&plugin_settings[num_plugin_settings++],
-		"debug_flags=%s %s", debug_file->debug_file, debug_file->debug_flags);
+	    if (asprintf(ps++, "debug_flags=%s %s", debug_file->debug_file,
+		debug_file->debug_flags) == -1)
+		sudo_fatal(NULL);
 	}
     }
-    plugin_settings[num_plugin_settings] = NULL;
+    *ps = NULL;
 
     debug_return_ptr(plugin_settings);
 }
