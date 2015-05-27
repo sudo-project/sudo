@@ -2446,6 +2446,7 @@ AC_CHECK_FUNCS([getline], [], [
     AC_CHECK_FUNCS([fgetln])
 ])
 AC_CHECK_FUNCS([reallocarray], [], [
+    AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
 ])
 dnl
