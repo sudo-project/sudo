@@ -560,7 +560,7 @@ hostaliases	:	hostalias
 		;
 
 hostalias	:	ALIAS '=' hostlist {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add($1, HOSTALIAS, $3)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -580,7 +580,7 @@ cmndaliases	:	cmndalias
 		;
 
 cmndalias	:	ALIAS '=' cmndlist {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add($1, CMNDALIAS, $3)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -600,7 +600,7 @@ runasaliases	:	runasalias
 		;
 
 runasalias	:	ALIAS '=' userlist {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add($1, RUNASALIAS, $3)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -613,7 +613,7 @@ useraliases	:	useralias
 		;
 
 useralias	:	ALIAS '=' userlist {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add($1, USERALIAS, $3)) != NULL) {
 				sudoerserror(s);
 				YYERROR;

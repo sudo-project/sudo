@@ -120,7 +120,7 @@ alias_put(struct alias *a)
  * Add an alias to the aliases redblack tree.
  * Returns NULL on success and an error string on failure.
  */
-char *
+const char *
 alias_add(char *name, int type, struct member *members)
 {
     static char errbuf[512];

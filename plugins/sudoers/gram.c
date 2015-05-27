@@ -1736,7 +1736,7 @@ break;
 case 84:
 #line 562 "gram.y"
 {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, HOSTALIAS, yyvsp[0].member)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -1753,7 +1753,7 @@ break;
 case 89:
 #line 582 "gram.y"
 {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, CMNDALIAS, yyvsp[0].member)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -1770,7 +1770,7 @@ break;
 case 94:
 #line 602 "gram.y"
 {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, RUNASALIAS, yyvsp[0].member)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -1780,7 +1780,7 @@ break;
 case 97:
 #line 615 "gram.y"
 {
-			    char *s;
+			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, USERALIAS, yyvsp[0].member)) != NULL) {
 				sudoerserror(s);
 				YYERROR;
