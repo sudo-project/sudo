@@ -1083,8 +1083,7 @@ bool
 validate_env_vars(char * const env_vars[])
 {
     char * const *ep;
-    char *eq, *bad = NULL;
-    size_t len, blen = 0, bsize = 0;
+    char *eq, errbuf[4096];
     bool okvar, rval = true;
     debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV)
 
@@ -1092,6 +1091,7 @@ validate_env_vars(char * const env_vars[])
 	debug_return_bool(true);	/* nothing to do */
 
     /* Add user-specified environment variables. */
+    errbuf[0] = '\0';
     for (ep = env_vars; *ep != NULL; ep++) {
 	if (def_secure_path && !user_is_exempt() &&
 	    strncmp(*ep, "PATH=", 5) == 0) {
@@ -1105,27 +1105,20 @@ validate_env_vars(char * const env_vars[])
 	    /* Not allowed, add to error string, allocating as needed. */
 	    if ((eq = strchr(*ep, '=')) != NULL)
 		*eq = '\0';
-	    len = strlen(*ep) + 2;
-	    if (blen + len >= bsize) {
-		do {
-		    bsize += 1024;
-		} while (blen + len >= bsize);
-		bad = sudo_erealloc(bad, bsize);
-		bad[blen] = '\0';
+	    if (errbuf[0] != '\0')
+		(void)strlcat(errbuf, ", ", sizeof(errbuf));
+	    if (strlcat(errbuf, *ep, sizeof(errbuf)) >= sizeof(errbuf)) {
+		errbuf[sizeof(errbuf) - 4] = '\0';
+		(void)strlcat(errbuf, "...", sizeof(errbuf));
 	    }
-	    strlcat(bad, *ep, bsize);
-	    strlcat(bad, ", ", bsize);
-	    blen += len;
 	    if (eq != NULL)
 		*eq = '=';
 	}
     }
-    if (bad != NULL) {
-	bad[blen - 2] = '\0';		/* remove trailing ", " */
+    if (errbuf[0] != '\0') {
 	/* XXX - audit? */
 	log_warningx(0,
-	    N_("sorry, you are not allowed to set the following environment variables: %s"), bad);
-	sudo_efree(bad);
+	    N_("sorry, you are not allowed to set the following environment variables: %s"), errbuf);
 	rval = false;
     }
     debug_return_bool(rval);
