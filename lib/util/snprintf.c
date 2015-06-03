@@ -1566,8 +1566,12 @@ sudo_snprintf(char *str, size_t n, char const *fmt, ...)
 int
 sudo_vasprintf(char **str, const char *fmt, va_list ap)
 {
+	int ret;
 
-	return xxxprintf(str, 0, 1, fmt, ap);
+	ret = xxxprintf(str, 0, 1, fmt, ap);
+	if (ret == -1)
+		*str = NULL;
+	return ret;
 }
 #endif /* !HAVE_VASPRINTF || PREFER_PORTABLE_SNPRINTF */
 
@@ -1581,6 +1585,8 @@ sudo_asprintf(char **str, char const *fmt, ...)
 	va_start(ap, fmt);
 	ret = xxxprintf(str, 0, 1, fmt, ap);
 	va_end(ap);
+	if (ret == -1)
+		*str = NULL;
 	return ret;
 }
 #endif /* !HAVE_ASPRINTF || PREFER_PORTABLE_SNPRINTF */
