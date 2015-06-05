@@ -68,10 +68,9 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     if (base->readfds_in == NULL || base->writefds_in == NULL ||
 	base->readfds_out == NULL || base->writefds_out == NULL) {
-	free(base->readfds_in);
-	free(base->writefds_in);
-	free(base->readfds_out);
-	free(base->writefds_out);
+	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to calloc(1, %zu)",
+	    __func__, sizeof(fd_mask));
+	sudo_ev_base_free_impl(base);
 	debug_return_int(-1);
     }
     debug_return_int(0);
@@ -99,19 +98,34 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	const int n = howmany(ev->fd + 1, NFDBITS);
 	const size_t used_bytes = o * sizeof(fd_mask);
 	const size_t new_bytes = (n - o) * sizeof(fd_mask);
+	fd_set *rfds_in, *wfds_in, *rfds_out, *wfds_out;
 
-	base->readfds_in = reallocarray(base->readfds_in, n, sizeof(fd_mask));
-	memset((char *)base->readfds_in + used_bytes, 0, new_bytes);
+	rfds_in = reallocarray(base->readfds_in, n, sizeof(fd_mask));
+	wfds_in = reallocarray(base->writefds_in, n, sizeof(fd_mask));
+	rfds_out = reallocarray(base->readfds_out, n, sizeof(fd_mask));
+	wfds_out = reallocarray(base->writefds_out, n, sizeof(fd_mask));
+	if (rfds_in == NULL || wfds_in == NULL ||
+	    rfds_out == NULL || wfds_out == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"%s: unable to reallocarray(%d, %zu)",
+		__func__, n, sizeof(fd_mask));
+	    free(rfds_in);
+	    free(wfds_in);
+	    free(rfds_out);
+	    debug_return_int(-1);
+	}
 
-	base->writefds_in = reallocarray(base->writefds_in, n, sizeof(fd_mask));
-	memset((char *)base->writefds_in + used_bytes, 0, new_bytes);
+	/* Clear newly allocated space. */
+	memset((char *)rfds_in + used_bytes, 0, new_bytes);
+	memset((char *)wfds_in + used_bytes, 0, new_bytes);
+	memset((char *)rfds_out + used_bytes, 0, new_bytes);
+	memset((char *)wfds_out + used_bytes, 0, new_bytes);
 
-	base->readfds_out = reallocarray(base->readfds_out, n, sizeof(fd_mask));
-	memset((char *)base->readfds_out + used_bytes, 0, new_bytes);
-
-	base->writefds_out = reallocarray(base->writefds_out, n, sizeof(fd_mask));
-	memset((char *)base->writefds_out + used_bytes, 0, new_bytes);
-
+	/* Update base. */
+	base->readfds_in = rfds_in;
+	base->writefds_in = wfds_in;
+	base->readfds_out = rfds_out;
+	base->writefds_out = wfds_out;
 	base->maxfd = (n * NFDBITS) - 1;
     }
 

@@ -88,13 +88,18 @@ sudo_ev_base_alloc_v1(void)
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
     base = calloc(1, sizeof(*base));
-    if (base != NULL) {
-	TAILQ_INIT(&base->events);
-	TAILQ_INIT(&base->timeouts);
-	if (sudo_ev_base_alloc_impl(base) != 0) {
-	    free(base);
-	    base = NULL;
-	}
+    if (base == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: unable to allocate base", __func__);
+	debug_return_ptr(NULL);
+    }
+    TAILQ_INIT(&base->events);
+    TAILQ_INIT(&base->timeouts);
+    if (sudo_ev_base_alloc_impl(base) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: unable to allocate impl base", __func__);
+	free(base);
+	base = NULL;
     }
 
     debug_return_ptr(base);
@@ -125,13 +130,16 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
     /* XXX - sanity check events value */
 
     ev = calloc(1, sizeof(*ev));
-	if (ev != NULL) {
-	ev->fd = fd;
-	ev->events = events;
-	ev->pfd_idx = -1;
-	ev->callback = callback;
-	ev->closure = closure;
+    if (ev == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: unable to allocate event", __func__);
+	debug_return_ptr(NULL);
     }
+    ev->fd = fd;
+    ev->events = events;
+    ev->pfd_idx = -1;
+    ev->callback = callback;
+    ev->closure = closure;
 
     debug_return_ptr(ev);
 }
