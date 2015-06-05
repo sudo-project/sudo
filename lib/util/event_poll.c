@@ -45,12 +45,9 @@
 #include <poll.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
-
-/* XXX - use non-exiting allocators? */
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
@@ -60,7 +57,13 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     base->pfd_high = -1;
     base->pfd_max = 32;
-    base->pfds = sudo_ereallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
+    base->pfds = reallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
+    if (base->pfds == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: unable to allocate %d pollfds", __func__, base->pfd_max);
+	base->pfd_max = 0;
+	debug_return_int(-1);
+    }
     for (i = 0; i < base->pfd_max; i++) {
 	base->pfds[i].fd = -1;
     }
@@ -72,7 +75,7 @@ void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
-    sudo_efree(base->pfds);
+    free(base->pfds);
     debug_return;
 }
 
@@ -84,10 +87,18 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 
     /* If out of space in pfds array, realloc. */
     if (base->pfd_free == base->pfd_max) {
+	struct pollfd *pfds;
 	int i;
-	base->pfd_max <<= 1;
-	base->pfds =
-	    sudo_ereallocarray(base->pfds, base->pfd_max, sizeof(struct pollfd));
+
+	pfds =
+	    reallocarray(base->pfds, base->pfd_max, 2 * sizeof(struct pollfd));
+	if (pfds == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%s: unable to allocate %d pollfds", __func__, base->pfd_max * 2);
+	    debug_return_int(-1);
+	}
+	base->pfds = pfds;
+	base->pfd_max *= 2;
 	for (i = base->pfd_free; i < base->pfd_max; i++) {
 	    base->pfds[i].fd = -1;
 	}
