@@ -113,8 +113,9 @@ struct sudo_user {
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
  * Note: cannot use '0' as a value here.
  */
-#define VALIDATE_SUCCESS	0x001
-#define VALIDATE_FAILURE	0x002
+#define VALIDATE_ERROR		0x001
+#define VALIDATE_SUCCESS	0x002
+#define VALIDATE_FAILURE	0x004
 #define FLAG_CHECK_USER		0x010
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040

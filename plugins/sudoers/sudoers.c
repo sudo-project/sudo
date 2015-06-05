@@ -294,7 +294,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
-	if (ISSET(validated, VALIDATE_SUCCESS)) {
+	if (ISSET(validated, VALIDATE_ERROR)) {
+	    /* The lookup function should have printed an error. */
+	    rval = -1;
+	    goto done;
+	} else if (ISSET(validated, VALIDATE_SUCCESS)) {
 	    /* Handle [SUCCESS=return] */
 	    if (nss->ret_if_found)
 		break;

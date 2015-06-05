@@ -770,7 +770,7 @@ should_mail(int status)
 {
     debug_decl(should_mail, SUDOERS_DEBUG_LOGGING)
 
-    debug_return_bool(def_mail_always ||
+    debug_return_bool(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
 	(def_mail_all_cmnds && ISSET(sudo_mode, (MODE_RUN|MODE_EDIT))) ||
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
