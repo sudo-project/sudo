@@ -103,29 +103,6 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 		    errno = serrno;
 	    }
 	}
-# ifdef __hpux
-	/* Try .sl instead of .so on HP-UX for backwards compatibility. */
-	if (status != 0) {
-	    size_t len = strlen(info->path);
-	    if (len >= 3 && info->path[len - 3] == '.' &&
-		info->path[len - 2] == 's' && info->path[len - 1] == 'o') {
-		const char *sopath = info->path;
-		char *slpath = sudo_estrdup(info->path);
-		int serrno = errno;
-
-		slpath[len - 1] = 'l';
-		info->path = slpath;
-		status = sudo_stat_plugin(info, fullpath, pathsize, sb);
-		if (status == 0) {
-		    sudo_efree((void *)sopath);
-		} else {
-		    sudo_efree(slpath);
-		    info->path = sopath;
-		    errno = serrno;
-		}
-	    }
-	}
-# endif /* __hpux */
     }
 done:
     debug_return_int(status);
