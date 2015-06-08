@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "December 4, 2014" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "June 8, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -544,7 +544,7 @@ privilege on the current host to use this option.
 \fB\-u\fR \fIuser\fR, \fB\--user\fR=\fIuser\fR
 Run the command as a user other than the default target user
 (usually
-\fIroot ).\fR
+\fIroot\fR).
 The
 \fIuser\fR
 may be either a user name or a numeric user ID

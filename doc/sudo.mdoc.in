@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 4, 2014
+.Dd June 8, 2015
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -490,7 +490,7 @@ privilege on the current host to use this option.
 .It Fl u Ar user , Fl -user Ns = Ns Ar user
 Run the command as a user other than the default target user
 (usually
-.Em root ).
+.Em root ) .
 The
 .Ar user
 may be either a user name or a numeric user ID
