@@ -27,6 +27,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -110,9 +111,53 @@ static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
 
+#ifdef __linux__
+static struct rlimit nproclimit;
+#endif
+
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
 char **NewArgv;
+
+/*
+ * Unlimit the number of processes since Linux's setuid() will
+ * apply resource limits when changing uid and return EAGAIN if
+ * nproc would be exceeded by the uid switch.
+ */
+static void
+unlimit_nproc(void)
+{
+#ifdef __linux__
+    struct rlimit rl;
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+
+    if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	    sudo_warn("getrlimit");
+    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
+    if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
+	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
+	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
+	    sudo_warn("setrlimit");
+    }
+    debug_return;
+#endif /* __linux__ */
+}
+
+/*
+ * Restore saved value of RLIMIT_NPROC.
+ */
+static void
+restore_nproc(void)
+{
+#ifdef __linux__
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+
+    if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("setrlimit");
+
+    debug_return;
+#endif /* __linux__ */
+}
 
 int
 sudoers_policy_init(void *info, char * const envp[])
@@ -231,6 +276,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
 
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
+
+    unlimit_nproc();
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
@@ -557,6 +604,8 @@ bad:
 done:
     if (!rewind_perms())
 	rval = -1;
+
+    restore_nproc();
 
     /* Close the password and group files and free up memory. */
     sudo_endpwent();

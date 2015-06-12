@@ -829,12 +829,13 @@ unlimit_nproc(void)
     struct rlimit rl;
     debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
 
-    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
+    if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("getrlimit");
     rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
     if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
-	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
-	rl.rlim_cur = rl.rlim_max;
-	(void)setrlimit(RLIMIT_NPROC, &rl);
+	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
+	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
+	    sudo_warn("setrlimit");
     }
     debug_return;
 #endif /* __linux__ */
@@ -849,7 +850,8 @@ restore_nproc(void)
 #ifdef __linux__
     debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
 
-    (void) setrlimit(RLIMIT_NPROC, &nproclimit);
+    if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("setrlimit");
 
     debug_return;
 #endif /* __linux__ */
