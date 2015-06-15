@@ -481,6 +481,9 @@ progname_test.lo: $(srcdir)/regress/progname/progname_test.c \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/progname/progname_test.c
 pw_dup.lo: $(srcdir)/pw_dup.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/pw_dup.c
+reallocarray.lo: $(srcdir)/reallocarray.c $(incdir)/sudo_compat.h \
+                 $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/reallocarray.c
 secure_path.lo: $(srcdir)/secure_path.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

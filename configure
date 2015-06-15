@@ -18142,6 +18142,12 @@ _ACEOF
 
 else
 
+    case " $LIBOBJS " in
+  *" reallocarray.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS reallocarray.$ac_objext"
+ ;;
+esac
+
 
     for _sym in sudo_reallocarray; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
