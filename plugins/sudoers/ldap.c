@@ -1161,13 +1161,15 @@ done:
 static char *
 sudo_ldap_build_default_filter(void)
 {
-    char *filt = NULL;
+    char *filt;
     debug_decl(sudo_ldap_build_default_filter, SUDOERS_DEBUG_LDAP)
 
-    if (ldap_conf.search_filter)
-	(void)asprintf(&filt, "(&%s(cn=defaults))", ldap_conf.search_filter);
-    else
-	filt = strdup("cn=defaults");
+    if (!ldap_conf.search_filter)
+	debug_return_str(strdup("cn=defaults"));
+
+    if (asprintf(&filt, "(&%s(cn=defaults))", ldap_conf.search_filter) == -1)
+	debug_return_str(NULL);
+
     debug_return_str(filt);
 }
 
@@ -1686,8 +1688,9 @@ overflow:
 static char *
 sudo_ldap_build_pass2(void)
 {
-    char *filt = NULL, timebuffer[TIMEFILTER_LENGTH + 1];
+    char *filt, timebuffer[TIMEFILTER_LENGTH + 1];
     bool query_netgroups = def_use_netgroups;
+    int len;
     debug_decl(sudo_ldap_build_pass2, SUDOERS_DEBUG_LDAP)
 
     /* No need to query netgroups if using netgroup_base. */
@@ -1711,20 +1714,20 @@ sudo_ldap_build_pass2(void)
      * those get ANDed in to the expression.
      */
     if (query_netgroups && def_group_plugin) {
-	(void)asprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=%%:*))%s%s",
+	len = asprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=%%:*))%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
-	(void)asprintf(&filt, "%s%s(sudoUser=*)(sudoUser=%s*)%s%s",
+	len = asprintf(&filt, "%s%s(sudoUser=*)(sudoUser=%s*)%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    query_netgroups ? "+" : "%:",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     }
-    if (filt == NULL)
+    if (len == -1)
 	sudo_warnx(U_("unable to allocate memory"));
 
     debug_return_str(filt);

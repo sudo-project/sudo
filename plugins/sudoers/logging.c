@@ -428,9 +428,10 @@ static bool
 vlog_warning(int flags, const char *fmt, va_list ap)
 {
     int oldlocale, serrno = errno;
-    char *logline, *message = NULL;
+    char *logline, *message;
     bool uid_changed, rval = true;
     va_list ap2;
+    int len;
     debug_decl(vlog_error, SUDOERS_DEBUG_LOGGING)
 
     /* Need extra copy of ap for sudo_vwarn()/sudo_vwarnx() below. */
@@ -442,12 +443,12 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     /* Expand printf-style format + args (with a special case). */
     if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
 	unsigned int tries = va_arg(ap, unsigned int);
-	(void)asprintf(&message, ngettext("%u incorrect password attempt",
+	len = asprintf(&message, ngettext("%u incorrect password attempt",
 	    "%u incorrect password attempts", tries), tries);
     } else {
-	(void)vasprintf(&message, _(fmt), ap);
+	len = vasprintf(&message, _(fmt), ap);
     }
-    if (message == NULL) {
+    if (len == -1) {
 	rval = false;
 	goto done;
     }
