@@ -61,7 +61,6 @@ include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
 include/compat/timespec.h
-include/sudo_alloc.h
 include/sudo_compat.h
 include/sudo_conf.h
 include/sudo_debug.h
@@ -80,7 +79,6 @@ init.d/sudo.conf.in
 install-sh
 lib/util/Makefile.in
 lib/util/aix.c
-lib/util/alloc.c
 lib/util/closefrom.c
 lib/util/event.c
 lib/util/event_poll.c

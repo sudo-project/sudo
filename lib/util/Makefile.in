@@ -100,7 +100,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LTOBJS = alloc.lo event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
+LTOBJS = event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
 	 gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo secure_path.lo \
 	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
 	 sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo ttysize.lo \
@@ -332,10 +332,6 @@ aix.lo: $(srcdir)/aix.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
         $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/aix.c
-alloc.lo: $(srcdir)/alloc.c $(incdir)/compat/stdbool.h $(incdir)/sudo_alloc.h \
-          $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/alloc.c
 atofoo_test.lo: $(srcdir)/regress/atofoo/atofoo_test.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
