@@ -237,17 +237,57 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			tags = &cs->tags;
 #ifdef HAVE_SELINUX
 			/* Set role and type if not specified on command line. */
-			if (user_role == NULL)
-			    user_role = cs->role ? sudo_estrdup(cs->role) : def_role;
-			if (user_type == NULL)
-			    user_type = cs->type ? sudo_estrdup(cs->type) : def_type;
+			if (user_role == NULL) {
+			    if (cs->role != NULL) {
+				user_role = strdup(cs->role);
+				if (user_role == NULL) {
+				    sudo_warnx(U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				user_role = def_role;
+			    }
+			}
+			if (user_type == NULL) {
+			    if (cs->type != NULL) {
+				user_type = strdup(cs->type);
+				if (user_type == NULL) {
+				    sudo_warnx(U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				user_type = def_type;
+			    }
+			}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			/* Set Solaris privilege sets */
-			if (runas_privs == NULL)
-			    runas_privs = cs->privs ? sudo_estrdup(cs->privs) : def_privs;
-			if (runas_limitprivs == NULL)
-			    runas_limitprivs = cs->limitprivs ? sudo_estrdup(cs->limitprivs) : def_limitprivs;
+			if (runas_privs == NULL) {
+			    if (cs->privs != NULL) {
+				runas_privs = strdup(cs->privs);
+				if (runas_privs == NULL) {
+				    sudo_warnx(U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				runas_privs = def_privs;
+			    }
+			}
+			if (runas_limitprivs == NULL) {
+			    if (cs->limitprivs != NULL) {
+				runas_limitprivs = strdup(cs->limitprivs);
+				if (runas_limitprivs == NULL) {
+				    sudo_warnx(U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				runas_limitprivs = def_limitprivs;
+			    }
+			}
 #endif /* HAVE_PRIV_SET */
 			/*
 			 * If user is running command as himself,
@@ -307,6 +347,9 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    }
 	}
     }
+#if defined(HAVE_SELINUX) || defined(HAVE_PRIV_SET)
+done:
+#endif
     (void) restore_perms();
     debug_return_int(validated);
 }

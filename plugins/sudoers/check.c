@@ -102,7 +102,7 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	rval = verify_user(auth_pw, prompt, validated);
 	if (rval == true && lectured)
 	    set_lectured();
-	sudo_efree(prompt);
+	free(prompt);
     }
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_SUCCESS) &&

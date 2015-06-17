@@ -149,7 +149,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    SUDO_CONV_PROMPT_ECHO_OFF);
 	if (pass == NULL)
 	    break;
-	sudo_efree(message);
+	free(message);
 	message = NULL;
 	result = authenticate(pw->pw_name, pass, &reenter, &message);
 	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
@@ -170,7 +170,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	}
 	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }
-    sudo_efree(message);
+    free(message);
     debug_return_int(rval);
 }
 

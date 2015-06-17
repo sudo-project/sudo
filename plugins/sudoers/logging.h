@@ -73,7 +73,7 @@ bool log_denial(int status, bool inform_user);
 bool log_failure(int status, int flags);
 bool log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
 bool log_warningx(int flags, const char *fmt, ...) __printflike(2, 3);
-void sudoers_initlocale(const char *ulocale, const char *slocale);
+bool sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
 #endif /* SUDOERS_LOGGING_H */

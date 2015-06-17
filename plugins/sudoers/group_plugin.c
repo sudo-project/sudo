@@ -135,7 +135,11 @@ group_plugin_load(char *plugin_info)
             }
         }
 	if (ac != 0) 	{
-	    argv = sudo_emallocarray(ac, sizeof(char *));
+	    argv = reallocarray(NULL, ac, sizeof(char *));
+	    if (argv == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		goto done;
+	    }
 	    ac = 0;
 	    for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
 		argv[ac++] = cp;
@@ -145,7 +149,7 @@ group_plugin_load(char *plugin_info)
     rc = (group_plugin->init)(GROUP_API_VERSION, sudo_printf, argv);
 
 done:
-    sudo_efree(argv);
+    free(argv);
 
     if (rc != true) {
 	if (group_handle != NULL) {

@@ -77,7 +77,7 @@ unsigned int sudoers_subsystem_ids[NUM_SUBSYSTEMS];
  * Parse the "filename flags,..." debug_flags entry and insert a new
  * sudo_debug_file struct into debug_files.
  */
-void
+bool
 sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files,
     const char *entry)
 {
@@ -87,22 +87,33 @@ sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files,
 
     /* Already initialized? */
     if (sudoers_debug_instance != SUDO_DEBUG_INSTANCE_INITIALIZER)
-	return;
+	return true;
 
-    /* Process new-style debug flags: filename flags,... */
+    /* Only process new-style debug flags: filename flags,... */
     filename = entry;
     if (*filename != '/' || (flags = strpbrk(filename, " \t")) == NULL)
-	return;
+	return true;
     namelen = (size_t)(flags - filename);
     while (isblank((unsigned char)*flags))
 	flags++;
-    if (*flags == '\0')
-	return;
-
-    debug_file = sudo_emalloc(sizeof(*debug_file));
-    debug_file->debug_file = sudo_estrndup(filename, namelen);
-    debug_file->debug_flags = sudo_estrdup(flags);
-    TAILQ_INSERT_TAIL(debug_files, debug_file, entries);
+    if (*flags != '\0') {
+	if ((debug_file = calloc(1, sizeof(*debug_file))) == NULL)
+	    goto oom;
+	if ((debug_file->debug_file = strndup(filename, namelen)) == NULL)
+	    goto oom;
+	if ((debug_file->debug_flags = strdup(flags)) == NULL)
+	    goto oom;
+	TAILQ_INSERT_TAIL(debug_files, debug_file, entries);
+    }
+    return true;
+oom:
+    if (debug_file != NULL) {
+	free(debug_file->debug_file);
+	free(debug_file->debug_flags);
+	free(debug_file);
+    }
+    sudo_warnx_nodebug(U_("unable to allocate memory"));
+    return false;
 }
 
 /*
@@ -123,9 +134,9 @@ sudoers_debug_register(const char *program,
 	}
 	TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
 	    TAILQ_REMOVE(debug_files, debug_file, entries);
-	    sudo_efree(debug_file->debug_file);
-	    sudo_efree(debug_file->debug_flags);
-	    sudo_efree(debug_file);
+	    free(debug_file->debug_file);
+	    free(debug_file->debug_flags);
+	    free(debug_file);
 	}
     }
 }

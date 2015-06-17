@@ -80,6 +80,8 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 
     path = expand_iolog_path(NULL, dir_in, file_in, &slash);
+    if (path == NULL)
+	sudo_fatalx("unable to expand I/O log path");
     *slash = '\0';
     if (strcmp(path, dir_out) != 0) {
 	sudo_warnx("%s: expected %s, got %s", dir_in, dir_out, path);

@@ -131,7 +131,10 @@ main(int argc, char *argv[])
 	    continue;
 
 	if (strncmp(line, "interfaces:", sizeof("interfaces:") - 1) == 0) {
-	    set_interfaces(line + sizeof("interfaces:") - 1);
+	    if (!set_interfaces(line + sizeof("interfaces:") - 1)) {
+		sudo_warn("unable to parse interfaces list");
+		errors++;
+	    }
 	} else if (strncmp(line, "address:", sizeof("address:") - 1) == 0) {
 	    errors += check_addr(line + sizeof("address:") - 1);
 	    ntests++;

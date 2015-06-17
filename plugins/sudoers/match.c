@@ -413,8 +413,7 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	if (strcmp(sudoers_cmnd, "sudoedit") == 0 &&
 	    strcmp(user_cmnd, "sudoedit") == 0 &&
 	    command_args_match(sudoers_cmnd, sudoers_args)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
+	    /* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	    rc = true;
 	}
 	goto done;
@@ -460,9 +459,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args)
     if (fnmatch(sudoers_cmnd, user_cmnd, FNM_PATHNAME) != 0)
 	debug_return_bool(false);
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	if (safe_cmnd)
-	    free(safe_cmnd);
-	safe_cmnd = sudo_estrdup(user_cmnd);
+	/* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -523,8 +520,11 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(cp);
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(cp)) == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		cp = NULL;		/* fail closed */
+	    }
 	    break;
 	}
     }
@@ -533,8 +533,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	debug_return_bool(false);
 
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	sudo_efree(safe_cmnd);
-	safe_cmnd = sudo_estrdup(user_cmnd);
+	/* safe_cmnd was set above. */
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -556,9 +555,10 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 
     if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
-	    debug_return_bool(true);
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(sudoers_cmnd)) != NULL)
+		debug_return_bool(true);
+	    sudo_warnx(U_("unable to allocate memory"));
 	}
     }
     debug_return_bool(false);
@@ -714,8 +714,11 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	/* XXX - log functions not available but we should log very loudly */
 	debug_return_bool(false);
     }
-    sudo_efree(safe_cmnd);
-    safe_cmnd = sudo_estrdup(sudoers_cmnd);
+    free(safe_cmnd);
+    if ((safe_cmnd = strdup(sudoers_cmnd)) == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
     debug_return_bool(true);
 }
 #endif /* SUDOERS_NAME_MATCH */
@@ -768,8 +771,11 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(buf);
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(buf)) == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		dent = NULL;
+	    }
 	    break;
 	}
     }
@@ -944,7 +950,7 @@ sudo_getdomainname(void)
 		for (cp = domain; *cp != '\0'; cp++) {
 		    /* Check for illegal characters, Linux may use "(none)". */
 		    if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
-			sudo_efree(domain);
+			free(domain);
 			domain = NULL;
 			break;
 		    }

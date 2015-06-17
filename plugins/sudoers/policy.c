@@ -248,7 +248,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #endif /* HAVE_BSD_AUTH_H */
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
-	    set_interfaces(interfaces_string);
+	    if (!set_interfaces(interfaces_string)) {
+		sudo_warn(U_("unable to parse network address list"));
+		goto bad;
+	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "max_groups=")) {
@@ -269,7 +272,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
-	    user_name = sudo_estrdup(*cur + sizeof("user=") - 1);
+	    if ((user_name = strdup(*cur + sizeof("user=") - 1)) == NULL)
+		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "uid=")) {
@@ -295,19 +299,28 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "cwd=")) {
-	    user_cwd = sudo_estrdup(*cur + sizeof("cwd=") - 1);
+	    if ((user_cwd = strdup(*cur + sizeof("cwd=") - 1)) == NULL)
+		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "tty=")) {
-	    user_tty = user_ttypath = sudo_estrdup(*cur + sizeof("tty=") - 1);
+	    if ((user_ttypath = strdup(*cur + sizeof("tty=") - 1)) == NULL)
+		goto oom;
+	    user_tty = user_ttypath;
 	    if (strncmp(user_tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 		user_tty += sizeof(_PATH_DEV) - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "host=")) {
-	    user_host = user_shost = sudo_estrdup(*cur + sizeof("host=") - 1);
-	    if ((p = strchr(user_host, '.')))
-		user_shost = sudo_estrndup(user_host, (size_t)(p - user_host));
+	    if ((user_host = strdup(*cur + sizeof("host=") - 1)) == NULL)
+		goto oom;
+	    if ((p = strchr(user_host, '.')) != NULL) {
+		user_shost = strndup(user_host, (size_t)(p - user_host));
+		if (user_shost == NULL)
+		    goto oom;
+	    } else {
+		user_shost = user_host;
+	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "lines=")) {
@@ -340,13 +353,24 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
     }
-    user_runhost = user_srunhost = sudo_estrdup(remhost ? remhost : user_host);
-    if ((p = strchr(user_runhost, '.')))
-	user_srunhost = sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
-    if (user_cwd == NULL)
-	user_cwd = sudo_estrdup("unknown");
-    if (user_tty == NULL)
-	user_tty = sudo_estrdup("unknown"); /* user_ttypath remains NULL */
+    if ((user_runhost = strdup(remhost ? remhost : user_host)) == NULL)
+	goto oom;
+    if ((p = strchr(user_runhost, '.')) != NULL) {
+	user_srunhost = strndup(user_runhost, (size_t)(p - user_runhost));
+	if (user_srunhost == NULL)
+	    goto oom;
+    } else {
+	user_srunhost = user_runhost;
+    }
+    if (user_cwd == NULL) {
+	if ((user_cwd = strdup("unknown")) == NULL)
+	    goto oom;
+    }
+    if (user_tty == NULL) {
+	if ((user_tty = strdup("unknown")) == NULL)
+	    goto oom;
+	/* user_ttypath remains NULL */
+    }
 
     if (groups != NULL && groups[0] != '\0') {
 	/* sudo_parse_gids() will print a warning on error. */
@@ -368,6 +392,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #undef MATCHES
     debug_return_int(flags);
 
+oom:
+    sudo_warnx(U_("unable to allocate memory"));
 bad:
     debug_return_int(MODE_ERROR);
 }
@@ -573,7 +599,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 {
     struct sudo_conf_debug_file_list debug_files = TAILQ_HEAD_INITIALIZER(debug_files);
     struct sudoers_policy_open_info info;
-    const char *plugin_path = NULL;
+    const char *cp, *plugin_path = NULL;
     char * const *cur;
     debug_decl(sudoers_policy_open, SUDOERS_DEBUG_PLUGIN)
 
@@ -586,14 +612,15 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	args = NULL;
 
     /* Initialize the debug subsystem.  */
-    for (cur = settings; *cur != NULL; cur++) {
-	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
-	    sudoers_debug_parse_flags(&debug_files,
-		*cur + sizeof("debug_flags=") - 1);
+    for (cur = settings; (cp = *cur) != NULL; cur++) {
+	if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    cp += sizeof("debug_flags=") - 1;
+	    if (!sudoers_debug_parse_flags(&debug_files, cp))
+		debug_return_int(-1);
 	    continue;
 	}
-	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
-	    plugin_path = *cur + sizeof("plugin_path=") - 1;
+	if (strncmp(cp, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = cp + sizeof("plugin_path=") - 1;
 	    continue;
 	}
     }
@@ -771,6 +798,14 @@ sudoers_policy_version(int verbose)
     debug_return_int(true);
 }
 
+static struct sudo_hook sudoers_hooks[] = {
+    { SUDO_HOOK_VERSION, SUDO_HOOK_SETENV, sudoers_hook_setenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_UNSETENV, sudoers_hook_unsetenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_GETENV, sudoers_hook_getenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_PUTENV, sudoers_hook_putenv, NULL },
+    { -1, -1, NULL, NULL }
+};
+
 /*
  * Register environment function hooks.
  * Note that we have not registered sudoers with the debug subsystem yet.
@@ -778,26 +813,16 @@ sudoers_policy_version(int verbose)
 static void
 sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook *hook))
 {
-    struct sudo_hook hook;
+    struct sudo_hook *hook;
 
-    memset(&hook, 0, sizeof(hook));
-    hook.hook_version = SUDO_HOOK_VERSION;
-
-    hook.hook_type = SUDO_HOOK_SETENV;
-    hook.hook_fn = sudoers_hook_setenv;
-    register_hook(&hook);
-
-    hook.hook_type = SUDO_HOOK_UNSETENV;
-    hook.hook_fn = sudoers_hook_unsetenv;
-    register_hook(&hook);
-
-    hook.hook_type = SUDO_HOOK_GETENV;
-    hook.hook_fn = sudoers_hook_getenv;
-    register_hook(&hook);
-
-    hook.hook_type = SUDO_HOOK_PUTENV;
-    hook.hook_fn = sudoers_hook_putenv;
-    register_hook(&hook);
+    for (hook = sudoers_hooks; hook->hook_fn != NULL; hook++) {
+	if (register_hook(hook) != 0) {
+	    sudo_warn_nodebug(
+		U_("unable to register hook of type %d (version %d.%d)"),
+		hook->hook_type,SUDO_HOOK_VERSION_GET_MAJOR(hook->hook_version),
+		SUDO_HOOK_VERSION_GET_MINOR(hook->hook_version));
+	}
+    }
 }
 
 __dso_public struct policy_plugin sudoers_policy = {

@@ -571,7 +571,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char pathbuf[PATH_MAX], sessid[7];
     char *tofree = NULL;
     char * const *cur;
-    const char *plugin_path = NULL;
+    const char *cp, *plugin_path = NULL;
     size_t len;
     int i, rval = -1;
     debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
@@ -593,10 +593,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     }
 
     /* Initialize the debug subsystem.  */
-    for (cur = settings; *cur != NULL; cur++) {
-	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
-	    sudoers_debug_parse_flags(&debug_files,
-		*cur + sizeof("debug_flags=") - 1);
+    for (cur = settings; (cp = *cur) != NULL; cur++) {
+	if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    cp += sizeof("debug_flags=") - 1;
+	    if (!sudoers_debug_parse_flags(&debug_files, cp))
+		debug_return_int(-1);
 	    continue;
 	}
 	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
@@ -617,7 +618,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If no I/O log path defined we need to figure it out ourselves. */
     if (details.iolog_path == NULL) {
 	/* Get next session ID and convert it into a path. */
-	tofree = sudo_emalloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
+	tofree = malloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
+	if (tofree == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    goto done;
+	}
 	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
 	if (!io_nextid(tofree, NULL, sessid)) {
 	    rval = false;
@@ -665,7 +670,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     rval = true;
 
 done:
-    sudo_efree(tofree);
+    free(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
     sudo_endpwent();

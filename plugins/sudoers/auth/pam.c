@@ -261,12 +261,11 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	char **pam_envp = pam_getenvlist(pamh);
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env. */
-	    env_init(*user_envp);
-	    if (!env_merge(pam_envp))
+	    if (!env_init(*user_envp) || !env_merge(pam_envp))
 		status = AUTH_FAILURE;
 	    *user_envp = env_get();
-	    env_init(NULL);
-	    sudo_efree(pam_envp);
+	    (void)env_init(NULL);
+	    free(pam_envp);
 	    /* XXX - we leak any duplicates that were in pam_envp */
 	}
     }
@@ -376,7 +375,11 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    ret = PAM_CONV_ERR;
 		    goto done;
 		}
-		pr->resp = sudo_estrdup(pass);
+		if ((pr->resp = strdup(pass)) == NULL) {
+		    sudo_warnx(U_("unable to allocate memory"));
+		    ret = PAM_BUF_ERR;
+		    goto done;
+		}
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case PAM_TEXT_INFO:

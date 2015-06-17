@@ -137,7 +137,8 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "testsudoers");
 
-    sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale);
+    if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
+	sudo_fatalx(U_("unable to allocate memory"));
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
@@ -220,7 +221,8 @@ main(int argc, char *argv[])
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
-	user_shost = sudo_estrdup(user_host);
+	if ((user_shost = strdup(user_host)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	*p = '.';
     } else {
 	user_shost = user_host;
@@ -236,7 +238,8 @@ main(int argc, char *argv[])
 	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
-	user_args = sudo_emalloc(size);
+	if ((user_args = malloc(size)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
@@ -248,14 +251,17 @@ main(int argc, char *argv[])
     }
 
     /* Initialize default values. */
-    init_defaults();
+    if (!init_defaults())
+	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
     /* Load ip addr/mask for each interface. */
-    if (get_net_ifs(&p) > 0)
-	set_interfaces(p);
+    if (get_net_ifs(&p) > 0) {
+	if (!set_interfaces(p))
+	    sudo_fatal(U_("unable to parse network address list"));
+    }
 
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
@@ -459,10 +465,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
     debug_return_ptr(fp);
 }
 
-void
+bool
 init_envtables(void)
 {
-    return;
+    return(true);
 }
 
 bool

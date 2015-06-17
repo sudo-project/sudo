@@ -146,7 +146,10 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    len = strlen(prompt) - 1;
 	    while (isspace(prompt[len]) || prompt[len] == ':')
 		prompt[len--] = '\0';
-	    sudo_easprintf(&s, "%s [echo on]: ", prompt);
+	    if (asprintf(&s, "%s [echo on]: ", prompt) == -1) {
+		log_warningx(0, N_("unable to allocate memory"));
+		debug_return_int(AUTH_FATAL);
+	    }
 	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
 		SUDO_CONV_PROMPT_ECHO_ON);
 	    free(s);

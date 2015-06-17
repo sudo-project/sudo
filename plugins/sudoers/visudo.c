@@ -163,7 +163,8 @@ main(int argc, char *argv[])
 #endif
 
     initprogname(argc > 0 ? argv[0] : "visudo");
-    sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale);
+    if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
+	sudo_fatalx(U_("unable to allocate memory"));
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
@@ -232,7 +233,8 @@ main(int argc, char *argv[])
     get_hostname();
 
     /* Setup defaults data structures. */
-    init_defaults();
+    if (!init_defaults())
+	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
 	exitcode = check_syntax(sudoers_file, quiet, strict, oldperms) ? 0 : 1;
@@ -339,7 +341,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 
     /* Create the temp file if needed and set timestamp. */
     if (sp->tpath == NULL) {
-	sudo_easprintf(&sp->tpath, "%s.tmp", sp->path);
+	if (asprintf(&sp->tpath, "%s.tmp", sp->path) == -1)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	tfd = open(sp->tpath, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (tfd < 0)
 	    sudo_fatal("%s", sp->tpath);
@@ -409,7 +412,9 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     }
 
     /* Build up argument vector for the command */
-    av = sudo_emallocarray(ac, sizeof(char *));
+    av = reallocarray(NULL, ac, sizeof(char *));
+    if (av == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
     if ((av[0] = strrchr(editor, '/')) != NULL)
 	av[0]++;
     else
@@ -510,7 +515,8 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		sp->tpath, sp->path);
 
 	/* Clean slate for each parse */
-	init_defaults();
+	if (!init_defaults())
+	    sudo_fatalx(U_("unable to initialize sudoers default values"));
 	init_parser(sp->path, quiet);
 
 	/* Parse the sudoers temp file(s) */
@@ -636,7 +642,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
      * mv(1) in case sp->tpath and sp->path are on different file systems.
      */
     if (rename(sp->tpath, sp->path) == 0) {
-	sudo_efree(sp->tpath);
+	free(sp->tpath);
 	sp->tpath = NULL;
     } else {
 	if (errno == EXDEV) {
@@ -658,11 +664,11 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 		sudo_warnx(U_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		(void) unlink(sp->tpath);
-		sudo_efree(sp->tpath);
+		free(sp->tpath);
 		sp->tpath = NULL;
 		goto done;
 	    }
-	    sudo_efree(sp->tpath);
+	    free(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
 	    sudo_warn(U_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
@@ -676,10 +682,10 @@ done:
 }
 
 /* STUB */
-void
+bool
 init_envtables(void)
 {
-    return;
+    return true;
 }
 
 /* STUB */
@@ -915,15 +921,16 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
-	entry = sudo_ecalloc(1, sizeof(*entry));
-	entry->path = sudo_estrdup(path);
+	entry = calloc(1, sizeof(*entry));
+	if (entry == NULL || (entry->path = strdup(path)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	/* entry->modified = 0; */
 	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	/* entry->tpath = NULL; */
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
 	    sudo_warn("%s", entry->path);
-	    sudo_efree(entry);
+	    free(entry);
 	    debug_return_ptr(NULL);
 	}
 	if (!checkonly && !sudo_lock_file(entry->fd, SUDO_TLOCK))
@@ -996,7 +1003,8 @@ get_editor(char **args)
 	    /* Should never happen since we already checked above. */
 	    sudo_fatal(U_("unable to stat editor (%s)"), UserEditor);
 	}
-	EditorPath = sudo_estrdup(def_editor);
+	if ((EditorPath = strdup(def_editor)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	Editor = strtok(EditorPath, ":");
 	do {
 	    EditorArgs = get_args(Editor);
@@ -1031,8 +1039,9 @@ get_editor(char **args)
      * find one that exists, is regular, and is executable.
      */
     if (Editor == NULL || *Editor == '\0') {
-	sudo_efree(EditorPath);
-	EditorPath = sudo_estrdup(def_editor);
+	free(EditorPath);
+	if ((EditorPath = strdup(def_editor)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	Editor = strtok(EditorPath, ":");
 	do {
 	    EditorArgs = get_args(Editor);
@@ -1080,7 +1089,8 @@ get_hostname(void)
     if ((user_host = sudo_gethostname()) != NULL) {
 	if ((p = strchr(user_host, '.'))) {
 	    *p = '\0';
-	    user_shost = sudo_estrdup(user_host);
+	    if ((user_shost = strdup(user_host)) == NULL)
+		sudo_fatalx(U_("unable to allocate memory"));
 	    *p = '.';
 	} else {
 	    user_shost = user_host;

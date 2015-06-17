@@ -57,14 +57,16 @@ static struct interface_list interfaces;
  * Parse a space-delimited list of IP address/netmask pairs and
  * store in a list of interface structures.
  */
-void
+bool
 set_interfaces(const char *ai)
 {
     char *addrinfo, *addr, *mask;
     struct interface *ifp;
+    bool rval = false;
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
-    addrinfo = sudo_estrdup(ai);
+    if ((addrinfo = strdup(ai)) == NULL)
+	debug_return_bool(false);
     for (addr = strtok(addrinfo, " \t"); addr != NULL; addr = strtok(NULL, " \t")) {
 	/* Separate addr and mask. */
 	if ((mask = strchr(addr, '/')) == NULL)
@@ -72,7 +74,8 @@ set_interfaces(const char *ai)
 	*mask++ = '\0';
 
 	/* Parse addr and store in list. */
-	ifp = sudo_ecalloc(1, sizeof(*ifp));
+	if ((ifp = calloc(1, sizeof(*ifp))) == NULL)
+	    goto done;
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
 #ifdef HAVE_STRUCT_IN6_ADDR
@@ -81,7 +84,7 @@ set_interfaces(const char *ai)
 		inet_pton(AF_INET6, mask, &ifp->netmask.ip6) != 1)
 #endif
 	    {
-		sudo_efree(ifp);
+		free(ifp);
 		continue;
 	    }
 	} else {
@@ -89,14 +92,17 @@ set_interfaces(const char *ai)
 	    ifp->family = AF_INET;
 	    if (inet_pton(AF_INET, addr, &ifp->addr.ip4) != 1 ||
 		inet_pton(AF_INET, mask, &ifp->netmask.ip4) != 1) {
-		sudo_efree(ifp);
+		free(ifp);
 		continue;
 	    }
 	}
 	SLIST_INSERT_HEAD(&interfaces, ifp, entries);
     }
-    sudo_efree(addrinfo);
-    debug_return;
+    rval = true;
+
+done:
+    free(addrinfo);
+    debug_return_bool(rval);
 }
 
 struct interface_list *
@@ -111,12 +117,15 @@ dump_interfaces(const char *ai)
     char *cp, *addrinfo;
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
-    addrinfo = sudo_estrdup(ai);
+    if ((addrinfo = strdup(ai)) == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+    } else {
+	sudo_printf(SUDO_CONV_INFO_MSG,
+	    _("Local IP address and netmask pairs:\n"));
+	for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))
+	    sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
 
-    sudo_printf(SUDO_CONV_INFO_MSG, _("Local IP address and netmask pairs:\n"));
-    for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))
-	sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
-
-    sudo_efree(addrinfo);
+	free(addrinfo);
+    }
     debug_return;
 }

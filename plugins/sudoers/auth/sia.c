@@ -116,7 +116,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     sudo_argc = NewArgc + 1;
     sudo_argv = reallocarray(NULL, sudo_argc + 1, sizeof(char *));
     if (sudo_argv == NULL) {
-	log_warning(0, N_("unable to allocate memory"));
+	log_warningx(0, N_("unable to allocate memory"));
 	debug_return_int(AUTH_FATAL);
     }
     sudo_argv[0] = "sudo";

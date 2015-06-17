@@ -53,15 +53,14 @@
  * but it is in '.' and IGNORE_DOT is set.
  */
 int
-find_path(char *infile, char **outfile, struct stat *sbp, char *path,
-    int ignore_dot)
+find_path(const char *infile, char **outfile, struct stat *sbp,
+    const char *path, int ignore_dot)
 {
-    static char command[PATH_MAX]; /* qualified filename */
-    char *n;			/* for traversing path */
-    char *origpath;		/* so we can free path later */
-    bool found = false;		/* did we find the command? */
-    bool checkdot = false;	/* check current dir? */
-    int len;			/* length parameter */
+    static char command[PATH_MAX];
+    const char *cp, *ep, *pathend;
+    bool found = false;
+    bool checkdot = false;
+    int len;
     debug_decl(find_path, SUDOERS_DEBUG_UTIL)
 
     if (strlen(infile) >= PATH_MAX) {
@@ -73,7 +72,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
      * If we were given a fully qualified or relative path
      * there is no need to look at $PATH.
      */
-    if (strchr(infile, '/')) {
+    if (strchr(infile, '/') != NULL) {
 	strlcpy(command, infile, sizeof(command));	/* paranoia */
 	if (sudo_goodpath(command, sbp)) {
 	    *outfile = command;
@@ -84,39 +83,32 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 
     if (path == NULL)
 	debug_return_int(NOT_FOUND);
-    path = sudo_estrdup(path);
-    origpath = path;
 
-    do {
-	if ((n = strchr(path, ':')))
-	    *n = '\0';
+    pathend = path + strlen(path);
+    for (cp = sudo_strsplit(path, pathend, ":", &ep); cp != NULL;
+	cp = sudo_strsplit(NULL, pathend, ":", &ep)) {
 
 	/*
-	 * Search current dir last if it is in PATH This will miss sneaky
-	 * things like using './' or './/'
+	 * Search current dir last if it is in PATH.
+	 * This will miss sneaky things like using './' or './/' (XXX)
 	 */
-	if (*path == '\0' || (*path == '.' && *(path + 1) == '\0')) {
+	if (cp == ep || (*cp == '.' && cp + 1 == ep)) {
 	    checkdot = 1;
-	    path = n + 1;
 	    continue;
 	}
 
 	/*
 	 * Resolve the path and exit the loop if found.
 	 */
-	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
+	len = snprintf(command, sizeof(command), "%.*s/%s",
+	    (int)(ep - cp), cp, infile);
 	if (len <= 0 || (size_t)len >= sizeof(command)) {
-	    sudo_efree(origpath);
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
 	if ((found = sudo_goodpath(command, sbp)))
 	    break;
-
-	path = n + 1;
-
-    } while (n);
-    sudo_efree(origpath);
+    }
 
     /*
      * Check current dir if dot was in the PATH

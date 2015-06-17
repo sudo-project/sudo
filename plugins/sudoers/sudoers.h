@@ -35,7 +35,6 @@
 #include <pathnames.h>
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
-#include "sudo_alloc.h"
 #include "sudo_queue.h"
 #include "defaults.h"
 #include "logging.h"
@@ -227,7 +226,7 @@ struct timeval;
 bool sudo_goodpath(const char *, struct stat *);
 
 /* findpath.c */
-int find_path(char *, char **, struct stat *, char *, int);
+int find_path(const char *, char **, struct stat *, const char *, int);
 
 /* check.c */
 int check_user(int validate, int mode);
@@ -326,8 +325,8 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 char **env_get(void);
 bool env_merge(char * const envp[]);
 bool env_swap_old(void);
-void env_init(char * const envp[]);
-void init_envtables(void);
+bool env_init(char * const envp[]);
+bool init_envtables(void);
 bool insert_env_vars(char * const envp[]);
 bool read_env_file(const char *, int);
 bool rebuild_env(void);
@@ -354,7 +353,7 @@ extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 
 /* sudoers_debug.c */
-void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
+bool sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
 void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
 void sudoers_debug_deregister(void);
 

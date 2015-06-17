@@ -184,17 +184,17 @@ alias_free(void *v)
     void *next;
     debug_decl(alias_free, SUDOERS_DEBUG_ALIAS)
 
-    sudo_efree(a->name);
+    free(a->name);
     TAILQ_FOREACH_SAFE(m, &a->members, entries, next) {
 	if (m->type == COMMAND) {
 		c = (struct sudo_command *) m->name;
-		sudo_efree(c->cmnd);
-		sudo_efree(c->args);
+		free(c->cmnd);
+		free(c->args);
 	}
-	sudo_efree(m->name);
-	sudo_efree(m);
+	free(m->name);
+	free(m);
     }
-    sudo_efree(a);
+    free(a);
 
     debug_return;
 }

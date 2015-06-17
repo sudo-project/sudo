@@ -49,7 +49,7 @@ SLIST_HEAD(interface_list, interface);
  */
 int get_net_ifs(char **addrinfo);
 void dump_interfaces(const char *);
-void set_interfaces(const char *);
+bool set_interfaces(const char *);
 struct interface_list *get_interfaces(void);
 
 #endif /* SUDOERS_INTERFACES_H */

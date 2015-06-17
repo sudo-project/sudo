@@ -59,7 +59,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
     sudo_setspent();
     auth->data = sudo_getepw(pw);
     sudo_endspent();
-    debug_return_int(AUTH_SUCCESS);
+    debug_return_int(auth->data ? AUTH_SUCCESS : AUTH_FATAL);
 }
 
 int
@@ -118,7 +118,7 @@ sudo_passwd_cleanup(pw, auth)
 
     if (pw_epasswd != NULL) {
 	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
-	sudo_efree(pw_epasswd);
+	free(pw_epasswd);
     }
     debug_return_int(AUTH_SUCCESS);
 }

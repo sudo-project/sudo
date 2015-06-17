@@ -124,7 +124,11 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
 	/* Only rewrite prompt if user didn't specify their own. */
 	/*if (!strcmp(prompt, PASSPROMPT)) { */
-	    sudo_easprintf(&krb5_prompt, "Password for %s: ", pname);
+	    if (asprintf(&krb5_prompt, "Password for %s: ", pname) == -1) {
+		log_warningx(0, N_("unable to allocate memory"));
+		free(pname);
+		debug_return_int(AUTH_FATAL);
+	    }
 	/*}*/
 	free(pname);
     }
@@ -144,8 +148,12 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
     if (sudo_krb5_instance != NULL) {
-	sudo_easprintf(&pname, "%s%s%s", pw->pw_name,
+	int len = asprintf(&pname, "%s%s%s", pw->pw_name,
 	    sudo_krb5_instance[0] != '/' ? "/" : "", sudo_krb5_instance);
+	if (len == -1) {
+	    log_warningx(0, N_("unable to allocate memory"));
+	    debug_return_int(AUTH_FATAL);
+	}
     }
 
 #ifdef HAVE_KRB5_INIT_SECURE_CONTEXT
@@ -175,7 +183,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 
 done:
     if (sudo_krb5_instance != NULL)
-	sudo_efree(pname);
+	free(pname);
     debug_return_int(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 

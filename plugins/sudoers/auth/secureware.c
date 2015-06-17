@@ -53,22 +53,24 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 
+#ifdef __alpha
+extern int crypt_type;
+#endif
+
 int
 sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
 {
-#ifdef __alpha
-    extern int crypt_type;
     debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH)
 
+#ifdef __alpha
     if (crypt_type == INT_MAX)
 	debug_return_int(AUTH_FAILURE);			/* no shadow */
-#else
-    debug_decl(secureware_init, SUDOERS_DEBUG_AUTH)
 #endif
+
     sudo_setspent();
     auth->data = sudo_getepw(pw);
     sudo_endspent();
-    debug_return_int(AUTH_SUCCESS);
+    debug_return_int(auth->data ? AUTH_SUCCESS : AUTH_FATAL);
 }
 
 int
@@ -82,10 +84,7 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     if (pass[0] == '\0')
 	debug_return_int(pw_epasswd[0] ? AUTH_FAILURE : AUTH_SUCCESS);
 
-#ifdef __alpha
-    {
-	extern int crypt_type;
-
+#if defined(__alpha)
 # ifdef HAVE_DISPCRYPT
 	epass = dispcrypt(pass, pw_epasswd, crypt_type);
 # else
@@ -94,7 +93,6 @@ sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 	else if (crypt_type == AUTH_CRYPT_CRYPT16)
 	    epass = crypt(pass, pw_epasswd);
 # endif /* HAVE_DISPCRYPT */
-    }
 #elif defined(HAVE_BIGCRYPT)
     epass = bigcrypt(pass, pw_epasswd);
 #endif /* __alpha */
@@ -114,7 +112,7 @@ sudo_secureware_cleanup(pw, auth)
 
     if (pw_epasswd != NULL) {
 	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
-	sudo_efree(pw_epasswd);
+	free(pw_epasswd);
     }
     debug_return_int(AUTH_SUCCESS);
 }

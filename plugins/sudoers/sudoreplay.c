@@ -85,7 +85,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "logging.h"
 #include "iolog.h"
@@ -493,8 +492,10 @@ replay_session(const double max_wait, const char *decimal)
 		    /* Store the line in iov followed by \r\n pair. */
 		    if (iovcnt + 3 > iovmax) {
 			iov = iovmax ?
-			    sudo_ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
-			    sudo_emallocarray(iovmax = 32, sizeof(*iov));
+			    reallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
+			    reallocarray(NULL, iovmax = 32, sizeof(*iov));
+			if (iov == NULL)
+			    sudo_fatalx(U_("unable to allocate memory"));
 		    }
 		    linelen = (size_t)(nl - line) + 1;
 		    iov[iovcnt].iov_base = line;
@@ -537,7 +538,7 @@ replay_session(const double max_wait, const char *decimal)
 	    sudo_ev_loop(evbase, 0);
 	}
 	if (iov != &iovb)
-	    sudo_efree(iov);
+	    free(iov);
     }
     debug_return;
 }
@@ -689,7 +690,8 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	}
 
 	/* Allocate new search node */
-	sn = sudo_ecalloc(1, sizeof(*sn));
+	if ((sn = calloc(1, sizeof(*sn))) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	sn->type = type;
 	sn->or = or;
 	sn->negated = not;
@@ -800,7 +802,8 @@ parse_logfile(char *logfile)
      *  2) cwd
      *  3) command with args
      */
-    li = sudo_ecalloc(1, sizeof(*li));
+    if ((li = calloc(1, sizeof(*li))) == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
     if (getline(&buf, &bufsize, fp) == -1 ||
 	getline(&li->cwd, &cwdsize, fp) == -1 ||
 	getline(&li->cmd, &cmdsize, fp) == -1) {
@@ -839,7 +842,8 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: user field is missing"), logfile);
 	goto bad;
     }
-    li->user = sudo_estrndup(cp, (size_t)(ep - cp));
+    if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
 
     /* runas user */
     cp = ep + 1;
@@ -847,7 +851,8 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: runas user field is missing"), logfile);
 	goto bad;
     }
-    li->runas_user = sudo_estrndup(cp, (size_t)(ep - cp));
+    if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
 
     /* runas group */
     cp = ep + 1;
@@ -855,17 +860,21 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: runas group field is missing"), logfile);
 	goto bad;
     }
-    if (cp != ep)
-	li->runas_group = sudo_estrndup(cp, (size_t)(ep - cp));
+    if (cp != ep) {
+	if ((li->runas_group = strndup(cp, (size_t)(ep - cp))) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
+    }
 
     /* tty, followed by optional rows + columns */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
-	li->tty = sudo_estrdup(cp);
+	if ((li->tty = strdup(cp)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
     } else {
 	/* tty followed by rows + columns */
-	li->tty = sudo_estrndup(cp, (size_t)(ep - cp));
+	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	cp = ep + 1;
 	/* need to NULL out separator to use strtonum() */
 	if ((ep = strchr(cp, ':')) != NULL) {
@@ -886,13 +895,13 @@ parse_logfile(char *logfile)
 	}
     }
     fclose(fp);
-    sudo_efree(buf);
+    free(buf);
     debug_return_ptr(li);
 
 bad:
     if (fp != NULL)
 	fclose(fp);
-    sudo_efree(buf);
+    free(buf);
     free_log_info(li);
     debug_return_ptr(NULL);
 }
@@ -901,13 +910,13 @@ static void
 free_log_info(struct log_info *li)
 {
     if (li != NULL) {
-	sudo_efree(li->cwd);
-	sudo_efree(li->user);
-	sudo_efree(li->runas_user);
-	sudo_efree(li->runas_group);
-	sudo_efree(li->tty);
-	sudo_efree(li->cmd);
-	sudo_efree(li);
+	free(li->cwd);
+	free(li->user);
+	free(li->runas_user);
+	free(li->runas_group);
+	free(li->tty);
+	free(li->cmd);
+	free(li);
     }
 }
 
@@ -974,7 +983,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     DIR *d;
     struct dirent *dp;
     struct stat sb;
-    size_t sdlen, sessions_len = 0, sessions_size = 36*36;
+    size_t sdlen, sessions_len = 0, sessions_size = 0;
     unsigned int i;
     int len;
     char pathbuf[PATH_MAX], **sessions = NULL;
@@ -999,7 +1008,6 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     pathbuf[sdlen] = '\0';
 
     /* Store potential session dirs for sorting. */
-    sessions = sudo_emallocarray(sessions_size, sizeof(char *));
     while ((dp = readdir(d)) != NULL) {
 	/* Skip "." and ".." */
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
@@ -1018,10 +1026,16 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 
 	/* Add name to session list. */
 	if (sessions_len + 1 > sessions_size) {
-	    sessions_size <<= 1;
-	    sessions = sudo_ereallocarray(sessions, sessions_size, sizeof(char *));
+	    if (sessions_size == 0)
+		sessions_size = 36 * 36 / 2;
+	    sessions = reallocarray(sessions, sessions_size, 2 * sizeof(char *));
+	    if (sessions == NULL)
+		sudo_fatalx(U_("unable to allocate memory"));
+	    sessions_size *= 2;
 	}
-	sessions[sessions_len++] = sudo_estrdup(dp->d_name);
+	if ((sessions[sessions_len] = strdup(dp->d_name)) == NULL)
+	    sudo_fatalx(U_("unable to allocate memory"));
+	sessions_len++;
     }
     closedir(d);
 
@@ -1034,7 +1048,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 	    errno = ENAMETOOLONG;
 	    sudo_fatal("%s/%s/log", dir, sessions[i]);
 	}
-	sudo_efree(sessions[i]);
+	free(sessions[i]);
 
 	/* Check for dir with a log file. */
 	if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
@@ -1046,7 +1060,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 		find_sessions(pathbuf, re, user, tty);
 	}
     }
-    sudo_efree(sessions);
+    free(sessions);
 
     debug_return_int(0);
 }

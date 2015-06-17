@@ -67,6 +67,7 @@ int
 sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     char challenge[256];
+    size_t challenge_len;
     static char *orig_prompt = NULL, *new_prompt = NULL;
     static int op_len, np_size;
     static struct RFC1938 rfc1938;
@@ -110,9 +111,15 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     }
 
     /* Get space for new prompt with embedded challenge */
-    if (np_size < op_len + strlen(challenge) + 7) {
-	np_size = op_len + strlen(challenge) + 7;
-	new_prompt = sudo_erealloc(new_prompt, np_size);
+    challenge_len = strlen(challenge);
+    if (np_size < op_len + challenge_len + 7) {
+	char *p = realloc(new_prompt, op_len + challenge_len + 7);
+	if (p == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    debug_return_int(AUTH_FATAL);
+	}
+	np_size = op_len + challenge_len + 7;
+	new_prompt = p;
     }
 
     if (def_long_otp_prompt)

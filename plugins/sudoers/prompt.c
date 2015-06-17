@@ -96,8 +96,12 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 	}
     }
 
+    if ((new_prompt = malloc(++len)) == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_str(NULL);
+    }
+
     if (subst) {
-	new_prompt = sudo_emalloc(++len);
 	endp = new_prompt + len;
 	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (p[0] =='%') {
@@ -151,13 +155,16 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 		goto oflow;
 	}
 	*np = '\0';
-    } else
-	new_prompt = sudo_estrdup(old_prompt);
+    } else {
+	/* Nothing to expand. */
+	memcpy(new_prompt, old_prompt, len);	/* len includes NUL */
+    }
 
     debug_return_str(new_prompt);
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
+    free(new_prompt);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_str(NULL);
 }

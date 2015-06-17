@@ -88,7 +88,7 @@ static bool cb_sudoers_locale(const char *);
 static int set_cmnd(void);
 static void create_admin_success_flag(void);
 static bool init_vars(char * const *);
-static void set_fqdn(void);
+static bool set_fqdn(void);
 static bool set_loginclass(struct passwd *);
 static bool set_runasgr(const char *, bool);
 static bool set_runaspw(const char *, bool);
@@ -178,10 +178,14 @@ sudoers_policy_init(void *info, char * const envp[])
     sudo_fatal_callback_register(sudoers_cleanup);
 
     /* Initialize environment functions (including replacements). */
-    env_init(envp);
+    if (!env_init(envp))
+	debug_return_int(-1);
 
     /* Setup defaults data structures. */
-    init_defaults();
+    if (!init_defaults()) {
+	sudo_warnx(U_("unable to initialize sudoers default values"));
+	debug_return_int(-1);
+    }
 
     /* Parse info from front-end. */
     sudo_mode = sudoers_policy_deserialize_info(info, &runas_user, &runas_group);
@@ -299,17 +303,34 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     if (argc == 0) {
 	NewArgc = 1;
-	NewArgv = sudo_emallocarray(NewArgc + 1, sizeof(char *));
+	NewArgv = reallocarray(NULL, NewArgc + 1, sizeof(char *));
+	if (NewArgv == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    rval = -1;
+	    goto done;
+	}
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
 	/* Must leave an extra slot before NewArgv for bash's --login */
 	NewArgc = argc;
-	NewArgv = sudo_emallocarray(NewArgc + 2, sizeof(char *));
+	NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
+	if (NewArgv == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    rval = -1;
+	    goto done;
+	}
 	memcpy(++NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL)
-	    NewArgv[0] = sudo_estrdup(runas_pw->pw_shell);
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
+	    NewArgv[0] = strdup(runas_pw->pw_shell);
+	    if (NewArgv[0] == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		free(NewArgv);
+		rval = -1;
+		goto done;
+	    }
+	}
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -359,8 +380,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Restore user's locale. */
     sudoers_setlocale(oldlocale, NULL);
 
-    if (safe_cmnd == NULL)
-	safe_cmnd = sudo_estrdup(user_cmnd);
+    if (safe_cmnd == NULL) {
+	if ((safe_cmnd = strdup(user_cmnd)) == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    rval = -1;
+	    goto done;
+	}
+    }
 
     /* If only a group was specified, set runas_pw based on invoking user. */
     if (runas_pw == NULL) {
@@ -488,6 +514,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    const char prefix[] = "iolog_path=";
 	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
 		def_iolog_file, &sudo_user.iolog_file);
+	    if (iolog_path == NULL)
+		goto bad;
 	    sudo_user.iolog_file++;
 	}
     }
@@ -577,7 +605,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	int edit_argc;
 
-	sudo_efree(safe_cmnd);
+	free(safe_cmnd);
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc, &edit_argv);
 	if (safe_cmnd == NULL || audit_success(edit_argc, edit_argv) != 0)
 	    goto bad;
@@ -594,7 +622,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	env_get(), cmnd_umask, iolog_path, closure);
 
     /* Zero out stashed copy of environment, it is owned by the front-end. */
-    env_init(NULL);
+    (void)env_init(NULL);
 
     goto done;
 
@@ -626,7 +654,10 @@ init_vars(char * const envp[])
     bool unknown_user = false;
     debug_decl(init_vars, SUDOERS_DEBUG_PLUGIN)
 
-    sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale);
+    if (!sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale)) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
 
     for (ep = envp; *ep; ep++) {
 	/* XXX - don't fill in if empty string */
@@ -708,7 +739,11 @@ set_cmnd(void)
     debug_decl(set_cmnd, SUDOERS_DEBUG_PLUGIN)
 
     /* Allocate user_stat for find_path() and match functions. */
-    user_stat = sudo_ecalloc(1, sizeof(struct stat));
+    user_stat = calloc(1, sizeof(struct stat));
+    if (user_stat == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_int(NOT_FOUND_ERROR);
+    }
 
     /* Default value for cmnd, overridden below. */
     if (user_cmnd == NULL)
@@ -749,7 +784,10 @@ set_cmnd(void)
 	    /* Alloc and build up user_args. */
 	    for (size = 0, av = NewArgv + 1; *av; av++)
 		size += strlen(*av) + 1;
-	    user_args = sudo_emalloc(size);
+	    if (size == 0 || (user_args = malloc(size)) == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		debug_return_int(-1);
+	    }
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
 		/*
 		 * When running a command via a shell, the sudo front-end
@@ -928,71 +966,104 @@ set_loginclass(struct passwd *pw)
 #endif
 
 /*
- * Look up the fully qualified domain name of user_host and user_runhost.
- * Sets user_host, user_shost, user_runhost and user_srunhost.
- * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
+ * Look up the fully qualified domain name of host.
+ * Returns true on success, setting longp and shortp.
+ * Returns false on failure, longp and shortp are unchanged.
  */
-static void
-set_fqdn(void)
+static bool
+resolve_host(const char *host, char **longp, char **shortp)
 {
     struct addrinfo *res0, hint;
-    bool remote;
-    char *p;
-    debug_decl(set_fqdn, SUDOERS_DEBUG_PLUGIN)
-
-    /* If the -h flag was given we need to resolve both host and runhost. */
-    remote = strcmp(user_runhost, user_host) != 0;
+    char *cp, *lname, *sname;
+    debug_decl(resolve_host, SUDOERS_DEBUG_PLUGIN)
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_FQDN;
 
-    /* First resolve user_host, sets user_host and user_shost. */
-    if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_RAW_MSG,
-	    N_("unable to resolve host %s"), user_host);
-    } else {
-	if (user_shost != user_host)
-	    sudo_efree(user_shost);
-	sudo_efree(user_host);
-	user_host = user_shost = sudo_estrdup(res0->ai_canonname);
+    if (getaddrinfo(host, NULL, &hint, &res0) != 0)
+	debug_return_bool(false);
+    if ((lname = strdup(res0->ai_canonname)) == NULL) {
 	freeaddrinfo(res0);
-	if ((p = strchr(user_host, '.')) != NULL)
-	    user_shost = sudo_estrndup(user_host, (size_t)(p - user_host));
+	debug_return_bool(false);
     }
-
-    /* Next resolve user_runhost, sets user_runhost and user_srunhost. */
-    if (remote) {
-	if (getaddrinfo(user_runhost, NULL, &hint, &res0) != 0) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_RAW_MSG,
-		N_("unable to resolve host %s"), user_runhost);
-	} else {
-	    if (user_srunhost != user_runhost)
-		sudo_efree(user_srunhost);
-	    sudo_efree(user_runhost);
-	    user_runhost = user_srunhost = sudo_estrdup(res0->ai_canonname);
+    if ((cp = strchr(lname, '.')) != NULL) {
+	sname = strndup(lname, (size_t)(cp - lname));
+	if (sname == NULL) {
+	    free(lname);
 	    freeaddrinfo(res0);
-	    if ((p = strchr(user_runhost, '.'))) {
-		user_srunhost =
-		    sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
-	    }
+	    debug_return_bool(false);
 	}
+    } else {
+	sname = lname;
+    }
+    freeaddrinfo(res0);
+    *longp = lname;
+    *shortp = sname;
+
+    debug_return_bool(true);
+}
+
+/*
+ * Look up the fully qualified domain name of user_host and user_runhost.
+ * Sets user_host, user_shost, user_runhost and user_srunhost.
+ * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
+ */
+static bool
+set_fqdn(void)
+{
+    bool remote;
+    char *lhost, *shost;
+    debug_decl(set_fqdn, SUDOERS_DEBUG_PLUGIN)
+
+    /* If the -h flag was given we need to resolve both host and runhost. */
+    remote = strcmp(user_runhost, user_host) != 0;
+
+    /* First resolve user_host, setting user_host and user_shost. */
+    if (!resolve_host(user_host, &lhost, &shost)) {
+	if (!resolve_host(user_runhost, &lhost, &shost)) {
+	    log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG,
+		N_("unable to resolve host %s"), user_host);
+	    debug_return_bool(false);
+	}
+    }
+    if (user_shost != user_host)
+	free(user_shost);
+    free(user_host);
+    user_host = lhost;
+    user_shost = shost;
+
+    /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
+    lhost = shost = NULL;
+    if (remote) {
+	/* Failure checked below. */
+	(void)resolve_host(user_runhost, &lhost, &shost);
     } else {
 	/* Not remote, just use user_host. */
-	if (user_srunhost != user_runhost)
-	    sudo_efree(user_srunhost);
-	sudo_efree(user_runhost);
-	user_runhost = user_srunhost = sudo_estrdup(user_host);
-	if ((p = strchr(user_runhost, '.'))) {
-	    user_srunhost =
-		sudo_estrndup(user_runhost, (size_t)(p - user_runhost));
+	if ((lhost = strdup(user_host)) != NULL) {
+	    if (user_shost != user_host)
+		shost = strdup(lhost);
+	    else
+		shost = lhost;
 	}
     }
+    if (lhost == NULL || shost == NULL) {
+	free(lhost);
+	free(shost);
+	log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG,
+	    N_("unable to resolve host %s"), user_runhost);
+	debug_return_bool(false);
+    }
+    if (user_srunhost != user_runhost)
+	free(user_srunhost);
+    free(user_runhost);
+    user_runhost = lhost;
+    user_srunhost = shost;
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"host %s, shost %s, runhost %s, srunhost %s",
 	user_host, user_shost, user_runhost, user_srunhost);
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
@@ -1075,8 +1146,7 @@ cb_runas_default(const char *user)
 static bool
 cb_sudoers_locale(const char *locale)
 {
-    sudoers_initlocale(NULL, locale);
-    return true;
+    return sudoers_initlocale(NULL, locale);
 }
 
 /*
