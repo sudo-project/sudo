@@ -140,15 +140,15 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #define CHECK_STRLCPY(d, s, l) do {					       \
 	if (strlcpy((d), (s), (l)) >= (l))				       \
 	    goto overflow;						       \
-} while (0);
+} while (0)
 #define CHECK_STRLCAT(d, s, l) do {					       \
 	if (strlcat((d), (s), (l)) >= (l))				       \
 	    goto overflow;						       \
-} while (0);
+} while (0)
 #define CHECK_LDAP_VCAT(d, s, l) do {					       \
 	if (sudo_ldap_value_cat((d), (s), (l)) >= (l))			       \
 	    goto overflow;						       \
-} while (0);
+} while (0)
 
 #define CONF_BOOL	0
 #define CONF_INT	1
