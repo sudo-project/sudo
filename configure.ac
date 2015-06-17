@@ -244,6 +244,11 @@ dnl libc replacement functions live in libsudo_util.a
 dnl
 AC_CONFIG_LIBOBJ_DIR(lib/util)
 
+dnl
+dnl We must call AC_USE_SYSTEM_EXTENSIONS before the compiler is run.
+dnl
+AC_USE_SYSTEM_EXTENSIONS
+
 #
 # Prior to sudo 1.8.7, sudo stored libexec files in $libexecdir.
 # Starting with sudo 1.8.7, $libexecdir/sudo is used so strip
@@ -1691,8 +1696,6 @@ case "$host" in
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
-		# To get the crypt(3) prototype (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
@@ -1704,7 +1707,7 @@ case "$host" in
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
+		OSDEFS="${OSDEFS} -D_LINUX_SOURCE_COMPAT"
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
 		# For AIX we build in support for both LAM and PAM
@@ -1942,12 +1945,10 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-linux*|*-*-k*bsd*-gnu)
-		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		shadow_funcs="getspnam"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
     *-*-gnu*)
-		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		# lockf() is broken on the Hurd -- use flock instead
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
@@ -2019,7 +2020,6 @@ case "$host" in
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
@@ -2040,7 +2040,6 @@ case "$host" in
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
 		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
-		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		CHECKSHADOW="false"
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
@@ -2072,7 +2071,6 @@ case "$host" in
 		fi
 		;;
     *-*-dragonfly*)
-		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
@@ -2134,9 +2132,6 @@ case "$host" in
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		;;
-    *-gnu*)
-		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		;;
 esac
 
@@ -2354,11 +2349,9 @@ SUDO_SOCK_SA_LEN
 SUDO_SOCK_SIN_LEN
 dnl
 dnl Check for utmp/utmpx struct members.
-dnl We need to include OSDEFS for glibc which only has __e_termination
-dnl visible when _GNU_SOURCE is *not* defined.
+dnl We need to have already defined _GNU_SOURCE on glibc which only has
+dnl __e_termination visible when _GNU_SOURCE is *not* defined.
 dnl
-_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
 #	include <sys/types.h>
@@ -2394,7 +2387,6 @@ else
 #	include <utmp.h>
     ])
 fi
-CFLAGS="$_CFLAGS"
 
 dnl
 dnl Function checks
@@ -2596,14 +2588,20 @@ AC_CHECK_FUNCS([strlcat], [], [
     AC_LIBOBJ(strlcat)
     SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
 ])
-AC_CHECK_FUNCS([strndup], [], [
+AC_FUNC_STRNLEN
+if test X"$ac_cv_func_strnlen_working" = X"yes"; then
+    AC_DEFINE(HAVE_STRNLEN)
+    AC_CHECK_FUNCS([strndup], [], [
+	AC_LIBOBJ(strndup)
+	SUDO_APPEND_COMPAT_EXP(sudo_strndup)
+    ])
+else
+    # Broken libc strnlen, use our own.
+    SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
+    # Avoid libc strndup() since it is usually implemented using strnlen()
     AC_LIBOBJ(strndup)
     SUDO_APPEND_COMPAT_EXP(sudo_strndup)
-])
-AC_CHECK_FUNCS([strnlen], [], [
-    AC_LIBOBJ(strnlen)
-    SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
-])
+fi
 AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
@@ -3059,10 +3057,7 @@ AC_INCLUDES_DEFAULT
 
 dnl
 dnl Check for incomplete limits.h and missing SIZE_MAX.
-dnl We need to add OSDEFS to CFLAGS to expose LLONG_MAX et al on glibc.
 dnl
-_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS $OSDEFS"
 AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
@@ -3076,7 +3071,6 @@ AC_CHECK_DECLS([SIZE_MAX], [], [], [
 # include <inttypes.h>
 #endif
 ])
-CFLAGS="$_CFLAGS"
 dnl
 dnl Try to find equivalents for missing types
 dnl
@@ -4341,6 +4335,7 @@ AH_TEMPLATE(HAVE__NSS_INITF_GROUP, [Define to 1 if you have the `_nss_initf_grou
 AH_TEMPLATE(HAVE___NSS_INITF_GROUP, [Define to 1 if you have the `__nss_initf_group' function.])
 AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
+AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the `strnlen' function.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
