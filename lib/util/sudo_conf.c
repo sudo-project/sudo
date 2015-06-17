@@ -51,7 +51,6 @@
 #define SUDO_ERROR_WRAP	0
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "pathnames.h"
 #include "sudo_plugin.h"
@@ -68,7 +67,7 @@
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
-    bool (*parser)(const char *entry, const char *conf_file, unsigned int lineno);
+    int (*parser)(const char *entry, const char *conf_file, unsigned int lineno);
 };
 
 struct sudo_conf_path_table {
@@ -77,10 +76,10 @@ struct sudo_conf_path_table {
     const char *pval;
 };
 
-static bool parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
-static bool parse_path(const char *entry, const char *conf_file, unsigned int lineno);
-static bool parse_plugin(const char *entry, const char *conf_file, unsigned int lineno);
-static bool parse_variable(const char *entry, const char *conf_file, unsigned int lineno);
+static int parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
+static int parse_path(const char *entry, const char *conf_file, unsigned int lineno);
+static int parse_plugin(const char *entry, const char *conf_file, unsigned int lineno);
+static int parse_variable(const char *entry, const char *conf_file, unsigned int lineno);
 
 static struct sudo_conf_table sudo_conf_table[] = {
     { "Debug", sizeof("Debug") - 1, parse_debug },
@@ -90,10 +89,10 @@ static struct sudo_conf_table sudo_conf_table[] = {
     { NULL }
 };
 
-static bool set_var_disable_coredump(const char *entry, const char *conf_file, unsigned int);
-static bool set_var_group_source(const char *entry, const char *conf_file, unsigned int);
-static bool set_var_max_groups(const char *entry, const char *conf_file, unsigned int);
-static bool set_var_probe_interfaces(const char *entry, const char *conf_file, unsigned int);
+static int set_var_disable_coredump(const char *entry, const char *conf_file, unsigned int);
+static int set_var_group_source(const char *entry, const char *conf_file, unsigned int);
+static int set_var_max_groups(const char *entry, const char *conf_file, unsigned int);
+static int set_var_probe_interfaces(const char *entry, const char *conf_file, unsigned int);
 
 static struct sudo_conf_table sudo_conf_var_table[] = {
     { "disable_coredump", sizeof("disable_coredump") - 1, set_var_disable_coredump },
@@ -139,11 +138,11 @@ static struct sudo_conf_data {
 /*
  * "Set variable_name value"
  */
-static bool
+static int
 parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 {
     struct sudo_conf_table *var;
-    bool rval;
+    int rval;
     debug_decl(parse_variable, SUDO_DEBUG_UTIL)
 
     for (var = sudo_conf_var_table; var->name != NULL; var++) {
@@ -156,18 +155,18 @@ parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 	    sudo_debug_printf(rval ? SUDO_DEBUG_INFO : SUDO_DEBUG_ERROR,
 		"%s: %s:%u: Set %s %s", __func__, conf_file,
 		lineno, var->name, entry);
-	    debug_return_bool(rval);
+	    debug_return_int(rval);
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_WARN, "%s: %s:%u: unknown setting %s",
 	__func__, conf_file, lineno, entry);
-    debug_return_bool(false);
+    debug_return_int(false);
 }
 
 /*
  * "Path name /path/to/file"
  */
-static bool
+static int
 parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 {
     const char *name, *path;
@@ -188,29 +187,33 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
     for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
 	if (strncasecmp(name, cur->pname, cur->pnamelen) == 0 &&
 	    isblank((unsigned char)name[cur->pnamelen])) {
-	    cur->pval = sudo_estrdup(path);
+	    if ((cur->pval = strdup(path)) == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		debug_return_int(-1);
+		break;
+	    }
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%u: Path %s %s",
 		__func__, conf_file, lineno, cur->pname, cur->pval);
-	    debug_return_bool(true);
+	    debug_return_int(true);
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_WARN, "%s: %s:%u: unknown path %s",
 	__func__, conf_file, lineno, entry);
-    debug_return_bool(false);
+    debug_return_int(false);
 bad:
     sudo_warnx(U_("invalid Path value `%s' in %s, line %u"),
 	entry, conf_file, lineno);
-    debug_return_bool(false);
+    debug_return_int(false);
 }
 
 /*
  * "Debug program /path/to/log flags,..."
  */
-static bool
+static int
 parse_debug(const char *progname, const char *conf_file, unsigned int lineno)
 {
     struct sudo_conf_debug *debug_spec;
-    struct sudo_debug_file *debug_file;
+    struct sudo_debug_file *debug_file = NULL;
     const char *path, *flags, *cp = progname;
     size_t pathlen, prognamelen;
     debug_decl(parse_debug, SUDO_DEBUG_UTIL)
@@ -219,26 +222,26 @@ parse_debug(const char *progname, const char *conf_file, unsigned int lineno)
     while (*cp != '\0' && !isblank((unsigned char)*cp))
 	cp++;
     if (*cp == '\0')
-	debug_return_bool(false);	/* not enough fields */
+	debug_return_int(false);	/* not enough fields */
     prognamelen = (size_t)(cp - progname);
     do {
 	cp++;
     } while (isblank((unsigned char)*cp));
     if (*cp == '\0')
-	debug_return_bool(false);	/* not enough fields */
+	debug_return_int(false);	/* not enough fields */
 
     /* Parse path. */
     path = cp;
     while (*cp != '\0' && !isblank((unsigned char)*cp))
 	cp++;
     if (*cp == '\0')
-	debug_return_bool(false);	/* not enough fields */
+	debug_return_int(false);	/* not enough fields */
     pathlen = (size_t)(cp - path);
     do {
 	cp++;
     } while (isblank((unsigned char)*cp));
     if (*cp == '\0')
-	debug_return_bool(false);	/* not enough fields */
+	debug_return_int(false);	/* not enough fields */
 
     /* Remainder is flags (freeform). */
     flags = cp;
@@ -251,26 +254,47 @@ parse_debug(const char *progname, const char *conf_file, unsigned int lineno)
 	    break;
     }
     if (debug_spec == NULL) {
-	debug_spec = sudo_emalloc(sizeof(*debug_spec));
-	debug_spec->progname = sudo_estrndup(progname, prognamelen);
+	debug_spec = malloc(sizeof(*debug_spec));
+	if (debug_spec == NULL)
+	    goto oom;
+	debug_spec->progname = strndup(progname, prognamelen);
+	if (debug_spec->progname == NULL) {
+	    free(debug_spec);
+	    debug_spec = NULL;
+	    goto oom;
+	}
 	TAILQ_INIT(&debug_spec->debug_files);
 	TAILQ_INSERT_TAIL(&sudo_conf_data.debugging, debug_spec, entries);
     }
-    debug_file = sudo_emalloc(sizeof(*debug_file));
-    debug_file->debug_file = sudo_estrndup(path, pathlen);
-    debug_file->debug_flags = sudo_estrdup(flags);
+    debug_file = calloc(1, sizeof(*debug_file));
+    if (debug_file == NULL)
+	goto oom;
+    debug_file->debug_file = strndup(path, pathlen);
+    if (debug_file->debug_file == NULL)
+	goto oom;
+    debug_file->debug_flags = strdup(flags);
+    if (debug_file->debug_flags == NULL)
+	goto oom;
     TAILQ_INSERT_TAIL(&debug_spec->debug_files, debug_file, entries);
 
-    debug_return_bool(true);
+    debug_return_int(true);
+oom:
+    sudo_warnx(U_("unable to allocate memory"));
+    if (debug_file != NULL) {
+	free(debug_file->debug_file);
+	free(debug_file->debug_flags);
+	free(debug_file);
+    }
+    debug_return_int(-1);
 }
 
 /*
  * "Plugin symbol /path/to/log args..."
  */
-static bool
+static int
 parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
 {
-    struct plugin_info *info;
+    struct plugin_info *info = NULL;
     const char *ep, *path, *symbol;
     char **options = NULL;
     size_t pathlen, symlen;
@@ -279,7 +303,7 @@ parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
 
     /* Parse symbol. */
     if (*cp == '\0')
-	debug_return_bool(false);	/* not enough fields */
+	debug_return_int(false);	/* not enough fields */
     symbol = cp;
     while (*cp != '\0' && !isblank((unsigned char)*cp))
 	cp++;
@@ -289,7 +313,7 @@ parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
 
     /* Parse path. */
     if (*cp == '\0')
-	debug_return_bool(false);	/* not enough fields */
+	debug_return_int(false);	/* not enough fields */
     path = cp;
     while (*cp != '\0' && !isblank((unsigned char)*cp))
 	cp++;
@@ -298,36 +322,56 @@ parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
 	cp++;
 
     /* Split options into an array if present. */
-    /* XXX - consider as separate function */
+    /* XXX - use sudo_strsplit */
     if (*cp != '\0') {
 	/* Count number of options and allocate array. */
 	for (ep = cp, nopts = 1; (ep = strpbrk(ep, " \t")) != NULL; nopts++) {
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	}
-	options = sudo_emallocarray(nopts + 1, sizeof(*options));
+	options = reallocarray(NULL, nopts + 1, sizeof(*options));
+	if (options == NULL)
+	    goto oom;
 	/* Fill in options array, there is at least one element. */
-	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
-	    options[nopts++] = sudo_estrndup(cp, (size_t)(ep - cp));
+	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; nopts++) {
+	    options[nopts] = strndup(cp, (size_t)(ep - cp));
+	    if (options[nopts] == NULL)
+		goto oom;
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	    cp = ep;
 	}
-	options[nopts++] = sudo_estrdup(cp);
-	options[nopts] = NULL;
+	options[nopts] = strdup(cp);
+	if (options[nopts] == NULL)
+	    goto oom;
+	options[++nopts] = NULL;
     }
 
-    info = sudo_emalloc(sizeof(*info));
-    info->symbol_name = sudo_estrndup(symbol, symlen);
-    info->path = sudo_estrndup(path, pathlen);
+    info = calloc(sizeof(*info), 1);
+    if (info == NULL)
+	    goto oom;
+    info->symbol_name = strndup(symbol, symlen);
+    if (info->symbol_name == NULL)
+	    goto oom;
+    info->path = strndup(path, pathlen);
+    if (info->path == NULL)
+	    goto oom;
     info->options = options;
     info->lineno = lineno;
     TAILQ_INSERT_TAIL(&sudo_conf_data.plugins, info, entries);
 
-    debug_return_bool(true);
+    debug_return_int(true);
+oom:
+    sudo_warnx(U_("unable to allocate memory"));
+    if (info != NULL) {
+	free(info->symbol_name);
+	free(info->path);
+	free(info);
+    }
+    debug_return_int(-1);
 }
 
-static bool
+static int
 set_var_disable_coredump(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
@@ -343,7 +387,7 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
     debug_return_bool(true);
 }
 
-static bool
+static int
 set_var_group_source(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
@@ -363,7 +407,7 @@ set_var_group_source(const char *strval, const char *conf_file,
     debug_return_bool(true);
 }
 
-static bool
+static int
 set_var_max_groups(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
@@ -380,7 +424,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
     debug_return_bool(true);
 }
 
-static bool
+static int
 set_var_probe_interfaces(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
@@ -499,16 +543,22 @@ sudo_conf_probe_interfaces_v1(void)
 /*
  * Reads in /etc/sudo.conf and populates sudo_conf_data.
  */
-void
+int
 sudo_conf_read_v1(const char *conf_file, int conf_types)
 {
     struct stat sb;
-    FILE *fp;
-    char *line = NULL;
-    char *prev_locale = sudo_estrdup(setlocale(LC_ALL, NULL));
+    FILE *fp = NULL;
+    int ret = false;
+    char *prev_locale, *line = NULL;
     unsigned int conf_lineno = 0;
     size_t linesize = 0;
     debug_decl(sudo_conf_read, SUDO_DEBUG_UTIL)
+
+    prev_locale = strdup(setlocale(LC_ALL, NULL));
+    if (prev_locale == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
 
     /* Parse sudo.conf in the "C" locale. */
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
@@ -564,7 +614,9 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 		    cp += cur->namelen;
 		    while (isblank((unsigned char)*cp))
 			cp++;
-		    cur->parser(cp, conf_file, conf_lineno);
+		    ret = cur->parser(cp, conf_file, conf_lineno);
+		    if (ret == -1)
+			goto done;
 		}
 		break;
 	    }
@@ -575,13 +627,16 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 		conf_lineno, line);
 	}
     }
-    fclose(fp);
-    free(line);
+    ret = true;
 
 done:
+    if (fp != NULL)
+	fclose(fp);
+    free(line);
+
     /* Restore locale if needed. */
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
         setlocale(LC_ALL, prev_locale);
-    sudo_efree(prev_locale);
-    debug_return;
+    free(prev_locale);
+    debug_return_int(ret);
 }

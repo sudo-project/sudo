@@ -36,7 +36,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
@@ -206,10 +205,14 @@ aix_prep_user_v1(char *user, const char *tty)
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     /* set usrinfo, like login(1) does */
-    len = sudo_easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
+    len = asprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
 	user, '\0', user, '\0', user, '\0', tty ? tty : "", '\0');
+    if (len == -1) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
     (void)usrinfo(SETUINFO, info, len);
-    sudo_efree(info);
+    free(info);
 
 #ifdef HAVE_SETAUTHDB
     /* set administrative domain */

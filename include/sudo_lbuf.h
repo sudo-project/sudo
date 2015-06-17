@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2010, 2011, 2013, 2014
+ * Copyright (c) 2007, 2010, 2011, 2013-2015
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -37,8 +37,8 @@ typedef int (*sudo_lbuf_output_t)(const char *);
 
 __dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output, int indent, const char *continuation, int cols);
 __dso_public void sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf);
-__dso_public void sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...) __printflike(2, 3);
-__dso_public void sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...) __printflike(3, 4);
+__dso_public bool sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...) __printflike(2, 3);
+__dso_public bool sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...) __printflike(3, 4);
 __dso_public void sudo_lbuf_print_v1(struct sudo_lbuf *lbuf);
 
 #define sudo_lbuf_init(_a, _b, _c, _d, _e) sudo_lbuf_init_v1((_a), (_b), (_c), (_d), (_e))

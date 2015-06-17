@@ -46,7 +46,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
@@ -134,15 +133,16 @@ static int sudo_debug_active_instance = -1;
 static void
 sudo_debug_free_output(struct sudo_debug_output *output)
 {
-    sudo_efree(output->filename);
-    sudo_efree(output->settings);
+    free(output->filename);
+    free(output->settings);
     if (output->fd != -1)
 	close(output->fd);
-    sudo_efree(output);
+    free(output);
 }
 
 /*
  * Create a new output file for the specified debug instance.
+ * Returns NULL if the file cannot be opened or memory cannot be allocated.
  */
 static struct sudo_debug_output *
 sudo_debug_new_output(struct sudo_debug_instance *instance,
@@ -154,9 +154,17 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 
     /* Create new output for the instance. */
     /* XXX - reuse fd for existing filename? */
-    output = sudo_emalloc(sizeof(*output));
-    output->settings = sudo_emallocarray(instance->max_subsystem + 1, sizeof(int));
-    output->filename = sudo_estrdup(debug_file->debug_file);
+    output = calloc(1, sizeof(*output));
+    if (output == NULL)
+	goto bad;
+    output->fd = -1;
+    output->settings = reallocarray(NULL, instance->max_subsystem + 1,
+	sizeof(int));
+    if (output->settings == NULL)
+	goto bad;
+    output->filename = strdup(debug_file->debug_file);
+    if (output->filename == NULL)
+	goto bad;
     output->fd = -1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
@@ -171,26 +179,32 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	    output->fd = open(output->filename, O_WRONLY|O_APPEND|O_CREAT,
 		S_IRUSR|S_IWUSR);
 	}
-	if (output->fd == -1) {
-	    sudo_debug_free_output(output);
-	    return NULL;
-	}
+	if (output->fd == -1)
+	    goto bad;
 	ignore_result(fchown(output->fd, (uid_t)-1, 0));
     }
     (void)fcntl(output->fd, F_SETFD, FD_CLOEXEC);
     if (sudo_debug_fds_size < output->fd) {
 	/* Bump fds size to the next multiple of 4 * NBBY. */
-	const int new_size = round_nfds(output->fd);
-	sudo_debug_fds = sudo_erecalloc(sudo_debug_fds,
-	    sudo_debug_fds_size / NBBY, new_size / NBBY, sizeof(char));
-	sudo_debug_fds_size = new_size;
+	const int old_size = sudo_debug_fds_size / NBBY;
+	const int new_size = round_nfds(output->fd) / NBBY;
+	unsigned char *new_fds;
+
+	new_fds = realloc(sudo_debug_fds, new_size);
+	if (new_fds == NULL)
+	    goto bad;
+	memset(new_fds + old_size, 0, new_size - old_size);
+	sudo_debug_fds = new_fds;
+	sudo_debug_fds_size = new_size * NBBY;
     }
     sudo_setbit(sudo_debug_fds, output->fd);
     if (output->fd > sudo_debug_max_fd)
 	sudo_debug_max_fd = output->fd;
 
     /* Parse Debug conf string. */
-    buf = sudo_estrdup(debug_file->debug_flags);
+    buf = strdup(debug_file->debug_flags);
+    if (buf == NULL)
+	goto bad;
     for ((cp = strtok(buf, ",")); cp != NULL; (cp = strtok(NULL, ","))) {
 	/* Should be in the form subsys@pri. */
 	subsys = cp;
@@ -222,6 +236,11 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     free(buf);
 
     return output;
+bad:
+    sudo_warn_nodebug(NULL);
+    if (output != NULL)
+	sudo_debug_free_output(output);
+    return NULL;
 }
 
 /*
@@ -294,8 +313,12 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	    sudo_warnx_nodebug("%s: instance number mismatch: expected %d or %d, got %d", __func__, sudo_debug_last_instance + 1, free_idx, idx);
 	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
 	}
-	instance = sudo_emalloc(sizeof(*instance));
-	instance->program = sudo_estrdup(program);
+	if ((instance = malloc(sizeof(*instance))) == NULL)
+	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	if ((instance->program = strdup(program)) == NULL) {
+	    free(instance);
+	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	}
 	instance->subsystems = subsystems;
 	instance->subsystem_ids = ids;
 	instance->max_subsystem = max_id;
@@ -359,12 +382,12 @@ sudo_debug_deregister_v1(int idx)
     sudo_debug_instances[idx] = NULL;
     SLIST_FOREACH_SAFE(output, &instance->outputs, entries, next) {
 	close(output->fd);
-	sudo_efree(output->filename);
-	sudo_efree(output->settings);
-	sudo_efree(output);
+	free(output->filename);
+	free(output->settings);
+	free(output);
     }
-    sudo_efree(instance->program);
-    sudo_efree(instance);
+    free(instance->program);
+    free(instance);
 
     if (idx == sudo_debug_last_instance)
 	sudo_debug_last_instance--;
@@ -606,7 +629,7 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
 		else
 		    sudo_debug_write2(output->fd, NULL, NULL, 0, buf, buflen, errcode);
 		if (buf != static_buf) {
-		    sudo_efree(buf);
+		    free(buf);
 		    buf = static_buf;
 		}
 	    }
@@ -741,7 +764,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 
 	sudo_debug_write(output->fd, buf, buflen, 0);
 	if (buf != static_buf) {
-	    sudo_efree(buf);
+	    free(buf);
 	    buf = static_buf;
 	}
     }
