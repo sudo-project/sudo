@@ -39,7 +39,6 @@
 #include <errno.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_util.h"
 #include "sudo_debug.h"
@@ -89,6 +88,6 @@ main(int argc, char *argv[])
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
     }
 
-    sudo_efree(tty_sudo);
+    free(tty_sudo);
     exit(rval);
 }

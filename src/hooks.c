@@ -35,6 +35,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <errno.h>
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -132,51 +133,54 @@ process_hooks_unsetenv(const char *name)
 }
 
 /* Hook registration internals. */
-static void
+static int
 register_hook_internal(struct sudo_hook_list *head,
     int (*hook_fn)(), void *closure)
 {
     struct sudo_hook_entry *hook;
     debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS)
 
-    hook = sudo_ecalloc(1, sizeof(*hook));
+    if ((hook = calloc(1, sizeof(*hook))) == NULL)
+	debug_return_int(-1);
     hook->u.generic_fn = hook_fn;
     hook->closure = closure;
     SLIST_INSERT_HEAD(head, hook, entries);
 
-    debug_return;
+    debug_return_int(0);
 }
 
 /* Register the specified hook. */
 int
 register_hook(struct sudo_hook *hook)
 {
-    int rval = 0;
+    int rval;
     debug_decl(register_hook, SUDO_DEBUG_HOOKS)
 
     if (SUDO_HOOK_VERSION_GET_MAJOR(hook->hook_version) != SUDO_HOOK_VERSION_MAJOR) {
 	/* Major versions must match. */
+	errno = EINVAL;
 	rval = -1;
     } else {
 	switch (hook->hook_type) {
 	    case SUDO_HOOK_GETENV:
-		register_hook_internal(&sudo_hook_getenv_list, hook->hook_fn,
-		    hook->closure);
+		rval = register_hook_internal(&sudo_hook_getenv_list,
+		    hook->hook_fn, hook->closure);
 		break;
 	    case SUDO_HOOK_PUTENV:
-		register_hook_internal(&sudo_hook_putenv_list, hook->hook_fn,
-		    hook->closure);
+		rval = register_hook_internal(&sudo_hook_putenv_list,
+		    hook->hook_fn, hook->closure);
 		break;
 	    case SUDO_HOOK_SETENV:
-		register_hook_internal(&sudo_hook_setenv_list, hook->hook_fn,
-		    hook->closure);
+		rval = register_hook_internal(&sudo_hook_setenv_list,
+		    hook->hook_fn, hook->closure);
 		break;
 	    case SUDO_HOOK_UNSETENV:
-		register_hook_internal(&sudo_hook_unsetenv_list, hook->hook_fn,
-		    hook->closure);
+		rval = register_hook_internal(&sudo_hook_unsetenv_list,
+		    hook->hook_fn, hook->closure);
 		break;
 	    default:
 		/* XXX - use define for unknown value */
+		errno = ENOTSUP;
 		rval = 1;
 		break;
 	}
@@ -200,7 +204,7 @@ deregister_hook_internal(struct sudo_hook_list *head,
 		SLIST_REMOVE_HEAD(head, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
-	    sudo_efree(hook);
+	    free(hook);
 	    break;
 	}
 	prev = hook;

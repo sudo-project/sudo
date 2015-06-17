@@ -79,13 +79,15 @@ audit_role_change(const security_context_t old_context,
             sudo_fatal(U_("unable to open audit system"));
     } else {
 	/* audit role change using the same format as newrole(1) */
-	sudo_easprintf(&message, "newrole: old-context=%s new-context=%s",
+	rc = asprintf(&message, "newrole: old-context=%s new-context=%s",
 	    old_context, new_context);
+	if (rc == -1)
+	    sudo_fatalx(U_("unable to allocate memory"));
 	rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
 	    message, NULL, NULL, ttyn, result);
 	if (rc <= 0)
 	    sudo_warn(U_("unable to send audit message"));
-	sudo_efree(message);
+	free(message);
 	close(au_fd);
     }
 
@@ -286,7 +288,10 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     /*
      * Convert "context" back into a string and verify it.
      */
-    new_context = sudo_estrdup(context_str(context));
+    if ((new_context = strdup(context_str(context))) == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	goto bad;
+    }
     if (security_check_context(new_context) < 0) {
 	sudo_warnx(U_("%s is not a valid context"), new_context);
 	errno = EINVAL;
@@ -301,7 +306,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     debug_return_ptr(new_context);
 
 bad:
-    sudo_efree(typebuf);
+    free(typebuf);
     context_free(context);
     freecon(new_context);
     debug_return_ptr(NULL);
@@ -405,7 +410,11 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
-    nargv = sudo_emallocarray(argc + 2, sizeof(char *));
+    nargv = reallocarray(NULL, argc + 2, sizeof(char *));
+    if (nargv == NULL) {
+	sudo_warnx(U_("unable to allocate memory"));
+	debug_return;
+    }
     if (noexec)
 	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
     else

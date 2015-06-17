@@ -115,7 +115,9 @@ rpl_putenv(PUTENV_CONST char *string)
     /* Append at the end if not already found. */
     if (!found) {
 	size_t env_len = (size_t)(ep - environ);
-	char **envp = sudo_ereallocarray(priv_environ, env_len + 2, sizeof(char *));
+	char **envp = reallocarray(priv_environ, env_len + 2, sizeof(char *));
+	if (envp == NULL)
+	    return -1;
 	if (environ != priv_environ)
 	    memcpy(envp, environ, env_len * sizeof(char *));
 	envp[env_len++] = (char *)string;
@@ -190,7 +192,11 @@ rpl_setenv(const char *var, const char *val, int overwrite)
 	free(envstr);
 	return 0;
     }
-    return rpl_putenv(envstr);
+    if (rpl_putenv(envstr) == -1) {
+	free(envstr);
+	return -1;
+    }
+    return 0;
 }
 
 typedef int (*sudo_fn_setenv_t)(const char *, const char *, int);

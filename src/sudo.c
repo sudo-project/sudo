@@ -189,8 +189,8 @@ main(int argc, char *argv[], char *envp[])
     sudo_conf_read(NULL, SUDO_CONF_ALL & ~SUDO_CONF_DEBUG);
 
     /* Fill in user_info with user name, uid, cwd, etc. */
-    memset(&user_details, 0, sizeof(user_details));
-    user_info = get_user_info(&user_details);
+    if ((user_info = get_user_info(&user_details)) == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
 
     /* Disable core dumps if not enabled in sudo.conf. */
     disable_coredumps();
@@ -365,7 +365,11 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
      */
     ud->ngroups = sudo_conf_max_groups();
     if (ud->ngroups > 0) {
-	ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+	ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
+	if (ud->groups == NULL) {
+	    sudo_warnx(U_("unable to allocate memory"));
+	    goto done;
+	}
 	/* No error on insufficient space if user specified max_groups. */
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	rval = 0;
@@ -379,11 +383,16 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	ud->ngroups = system_maxgroups << 1;
 	for (tries = 0; tries < 10 && rval == -1; tries++) {
 	    ud->ngroups <<= 1;
-	    sudo_efree(ud->groups);
-	    ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+	    free(ud->groups);
+	    ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
+	    if (ud->groups == NULL) {
+		sudo_warnx(U_("unable to allocate memory"));
+		goto done;
+	    }
 	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
     }
+done:
     debug_return_int(rval);
 }
 
@@ -395,6 +404,8 @@ get_user_groups(struct user_details *ud)
     int i, len, maxgroups, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
+    memset(ud, 0, sizeof(*ud));
+
     maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
     if (maxgroups < 0)
 	maxgroups = NGROUPS_MAX;
@@ -405,9 +416,11 @@ get_user_groups(struct user_details *ud)
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
 	    /* Use groups from kernel if not too many or source is static. */
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
+		if (ud->groups == NULL)
+		    goto oom;
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
-		    sudo_efree(ud->groups);
+		    free(ud->groups);
 		    ud->groups = NULL;
 		}
 	    }
@@ -426,16 +439,20 @@ get_user_groups(struct user_details *ud)
      * Format group list as a comma-separated string of gids.
      */
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
-    gid_list = sudo_emalloc(glsize);
+    if ((gid_list = malloc(glsize)) == NULL)
+	goto oom;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
-	/* XXX - check rval */
 	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
 	    i ? "," : "", (unsigned int)ud->groups[i]);
+	if (len <= 0 || (size_t)len >= glsize - (cp - gid_list))
+	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
     }
     debug_return_str(gid_list);
+oom:
+    sudo_fatalx(U_("unable to allocate memory"));
 }
 
 /*
@@ -451,7 +468,9 @@ get_user_info(struct user_details *ud)
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
-    user_info = sudo_emallocarray(32, sizeof(char *));
+    user_info = reallocarray(NULL, 32, sizeof(char *));
+    if (user_info == NULL)
+	goto bad;
 
     ud->pid = getpid();
     ud->ppid = getppid();
@@ -475,25 +494,34 @@ get_user_info(struct user_details *ud)
 
     user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
-	sudo_fatal(NULL);
+	goto bad;
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
     if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
 	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_SUDO_BSHELL;
     }
-    ud->shell = sudo_estrdup(ud->shell);
+    if ((ud->shell = strdup(ud->shell)) == NULL)
+	goto bad;
 
-    sudo_easprintf(&user_info[++i], "pid=%d", (int)ud->pid);
-    sudo_easprintf(&user_info[++i], "ppid=%d", (int)ud->ppid);
-    sudo_easprintf(&user_info[++i], "pgid=%d", (int)ud->pgid);
-    sudo_easprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid);
-    sudo_easprintf(&user_info[++i], "sid=%d", (int)ud->sid);
-
-    sudo_easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
-    sudo_easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);
-    sudo_easprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid);
-    sudo_easprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid);
+    if (asprintf(&user_info[++i], "pid=%d", (int)ud->pid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "ppid=%d", (int)ud->ppid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid) == -1)
+	goto bad;
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
@@ -501,32 +529,43 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = sudo_new_key_val("cwd", cwd);
 	if (user_info[i] == NULL)
-	    sudo_fatal(NULL);
+	    goto bad;
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
-    if ((cp = get_process_ttyname()) != NULL) {
+    if ((cp = get_process_ttyname()) == NULL) {
+	/* tty may not always be present */
+	if (errno == ENOMEM)
+	    goto bad;
+    } else {
 	user_info[++i] = sudo_new_key_val("tty", cp);
 	if (user_info[i] == NULL)
-	    sudo_fatal(NULL);
+	    goto bad;
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
-	sudo_efree(cp);
+	free(cp);
     }
 
     cp = sudo_gethostname();
     user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
     if (user_info[i] == NULL)
-	sudo_fatal(NULL);
+	goto bad;
     ud->host = user_info[i] + sizeof("host=") - 1;
-    sudo_efree(cp);
+    free(cp);
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
-    sudo_easprintf(&user_info[++i], "lines=%d", ud->ts_lines);
-    sudo_easprintf(&user_info[++i], "cols=%d", ud->ts_cols);
+    if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
+	goto bad;
 
     user_info[++i] = NULL;
 
     debug_return_ptr(user_info);
+bad:
+    while (i--)
+	free(user_info[i]);
+    free(user_info);
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -751,14 +790,14 @@ sudo_check_suid(const char *sudo)
 	if (!qualified) {
 	    char *path = getenv_unhooked("PATH");
 	    if (path != NULL) {
-		int len;
-		char *cp, *colon;
+		const char *cp, *ep;
+		const char *pathend = path + strlen(path);
 
-		cp = path = sudo_estrdup(path);
-		do {
-		    if ((colon = strchr(cp, ':')))
-			*colon = '\0';
-		    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", cp, sudo);
+		for (cp = sudo_strsplit(path, pathend, ":", &ep); cp != NULL;
+		    cp = sudo_strsplit(NULL, pathend, ":", &ep)) {
+
+		    int len = snprintf(pathbuf, sizeof(pathbuf), "%.*s/%s",
+			(int)(ep - cp), cp, sudo);
 		    if (len <= 0 || (size_t)len >= sizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
@@ -766,9 +805,7 @@ sudo_check_suid(const char *sudo)
 			qualified = true;
 			break;
 		    }
-		    cp = colon + 1;
-		} while (colon);
-		sudo_efree(path);
+		}
 	    }
 	}
 
@@ -1378,7 +1415,7 @@ iolog_unlink(struct plugin_container *plugin)
     }
     /* Remove from io_plugins list and free. */
     TAILQ_REMOVE(&io_plugins, plugin, entries);
-    sudo_efree(plugin);
+    free(plugin);
 
     debug_return;
 }

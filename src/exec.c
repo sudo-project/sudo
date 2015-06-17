@@ -527,7 +527,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     sudo_ev_free(signal_event);
     sudo_ev_free(backchannel_event);
     TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
-	sudo_efree(sigfwd);
+	free(sigfwd);
     }
     TAILQ_INIT(&sigfwd_list);
 done:
@@ -833,7 +833,7 @@ forward_signals(int sock, int what, void *v)
 	    nsent = send(sock, &cstat, sizeof(cstat), 0);
 	} while (nsent == -1 && errno == EINTR);
 	TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
-	sudo_efree(sigfwd);
+	free(sigfwd);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
 		struct sigforward *sigfwd_next;
@@ -841,7 +841,7 @@ forward_signals(int sock, int what, void *v)
 		    "broken pipe writing to child over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
 		TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
-		    sudo_efree(sigfwd);
+		    free(sigfwd);
 		}
 		TAILQ_INIT(&sigfwd_list);
 		/* XXX - child (monitor) is dead, we should exit too? */
@@ -869,7 +869,8 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
 	snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for child", signame);
 
-    sigfwd = sudo_ecalloc(1, sizeof(*sigfwd));
+    if ((sigfwd = calloc(1, sizeof(*sigfwd))) == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
     sigfwd->signo = signo;
     TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 

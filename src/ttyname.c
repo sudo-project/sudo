@@ -132,13 +132,17 @@ sudo_ttyname_dev(dev_t tdev)
 	if (*dev != '/') {
 	    /* devname() doesn't use the /dev/ prefix, add one... */
 	    size_t len = sizeof(_PATH_DEV) + strlen(dev);
-	    tty = sudo_emalloc(len);
-	    strlcpy(tty, _PATH_DEV, len);
-	    strlcat(tty, dev, len);
+	    if ((tty = malloc(len)) != NULL) {
+		strlcpy(tty, _PATH_DEV, len);
+		strlcat(tty, dev, len);
+	    }
 	} else {
 	    /* Should not happen but just in case... */
-	    tty = sudo_estrdup(dev);
+	    tty = strdup(dev);
 	}
+    } else {
+	/* Not all versions of devname() set errno. */
+	errno = ENOENT;
     }
     debug_return_str(tty);
 }
@@ -158,7 +162,7 @@ sudo_ttyname_dev(dev_t tdev)
 
     tty = _ttyname_dev(tdev, buf, sizeof(buf));
 
-    debug_return_str(sudo_estrdup(tty));
+    debug_return_str(tty ? strdup(tty) : NULL);
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
 /*
@@ -262,15 +266,24 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	    if (!builtin) {
 		/* Add to list of subdirs to search. */
 		if (num_subdirs + 1 > max_subdirs) {
+		    char **new_subdirs;
+
+		    new_subdirs = reallocarray(subdirs, max_subdirs + 64,
+			sizeof(char *));
+		    if (new_subdirs == NULL)
+			goto done;
+		    subdirs = new_subdirs;
 		    max_subdirs += 64;
-		    subdirs = sudo_ereallocarray(subdirs, max_subdirs, sizeof(char *));
 		}
-		subdirs[num_subdirs++] = sudo_estrdup(pathbuf);
+		subdirs[num_subdirs] = strdup(pathbuf);
+		if (subdirs[num_subdirs] == NULL)
+		    goto done;
+		num_subdirs++;
 	    }
 	    continue;
 	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
-	    devname = sudo_estrdup(pathbuf);
+	    devname = strdup(pathbuf);
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "resolved dev %u as %s",
 		(unsigned int)rdev, pathbuf);
 	    goto done;
@@ -285,8 +298,8 @@ done:
     if (d != NULL)
 	closedir(d);
     for (i = 0; i < num_subdirs; i++)
-	sudo_efree(subdirs[i]);
-    sudo_efree(subdirs);
+	free(subdirs[i]);
+    free(subdirs);
     debug_return_str(devname);
 }
 
@@ -306,7 +319,7 @@ sudo_ttyname_dev(dev_t rdev)
     /*
      * First check search_devs for common tty devices.
      */
-    for (sd = search_devs; tty == NULL && (devname = *sd) != NULL; sd++) {
+    for (sd = search_devs; (devname = *sd) != NULL; sd++) {
 	len = strlen(devname);
 	if (devname[len - 1] == '/') {
 	    if (strcmp(devname, "/dev/pts/") == 0) {
@@ -314,19 +327,25 @@ sudo_ttyname_dev(dev_t rdev)
 		(void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
 		    (unsigned int)minor(rdev));
 		if (stat(buf, &sb) == 0) {
-		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
-			tty = sudo_estrdup(buf);
+		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+			tty = strdup(buf);
+			goto done;
+		    }
 		}
 		sudo_debug_printf(SUDO_DEBUG_INFO, "comparing dev %u to %s: %s",
 		    (unsigned int)rdev, buf, tty ? "yes" : "no");
 	    } else {
 		/* Traverse directory */
 		tty = sudo_ttyname_scan(devname, rdev, true);
+		if (tty != NULL || errno == ENOMEM)
+		    goto done;
 	    }
 	} else {
 	    if (stat(devname, &sb) == 0) {
-		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
-		    tty = sudo_estrdup(devname);
+		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+		    tty = strdup(devname);
+		    goto done;
+		}
 	    }
 	}
     }
@@ -334,9 +353,9 @@ sudo_ttyname_dev(dev_t rdev)
     /*
      * Not found?  Do a breadth-first traversal of /dev/.
      */
-    if (tty == NULL)
-	tty = sudo_ttyname_scan(_PATH_DEV, rdev, false);
+    tty = sudo_ttyname_scan(_PATH_DEV, rdev, false);
 
+done:
     debug_return_str(tty);
 }
 #endif
@@ -366,8 +385,14 @@ get_process_ttyname(void)
     mib[4] = sizeof(*ki_proc);
     mib[5] = 1;
     do {
+	struct sudo_kinfo_proc *kp;
+
 	size += size / 10;
-	ki_proc = sudo_erealloc(ki_proc, size);
+	if ((kp = realloc(ki_proc, size)) == NULL) {
+	    rc = -1;
+	    break;		/* really out of memory. */
+	}
+	ki_proc = kp;
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
@@ -383,7 +408,7 @@ get_process_ttyname(void)
 	sudo_debug_printf(SUDO_DEBUG_WARN,
 	    "unable to resolve tty via KERN_PROC: %s", strerror(errno));
     }
-    sudo_efree(ki_proc);
+    free(ki_proc);
 
     debug_return_str(tty);
 }
@@ -416,6 +441,10 @@ get_process_ttyname(void)
 		tty = sudo_ttyname_dev(rdev);
 	}
     }
+
+    if (tty == NULL)
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via %s: %s", path, strerror(errno));
 
     debug_return_str(tty);
 }
@@ -461,8 +490,12 @@ get_process_ttyname(void)
 		}
 	    }
 	}
-	sudo_efree(line);
+	free(line);
     }
+
+    if (tty == NULL)
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via %s: %s", path, strerror(errno));
 
     debug_return_str(tty);
 }
@@ -490,6 +523,10 @@ get_process_ttyname(void)
 		pstat.pst_term.psd_minor));
 	}
     }
+    if (tty == NULL)
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via pstat: %s", strerror(errno));
+
     debug_return_str(tty);
 }
 #else
@@ -507,7 +544,12 @@ get_process_ttyname(void)
 	if ((tty = ttyname(STDOUT_FILENO)) == NULL)
 	    tty = ttyname(STDERR_FILENO);
     }
+    if (tty == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via ttyname: %s", strerror(errno));
+	debug_return_str(NULL);
+    }
 
-    debug_return_str(sudo_estrdup(tty));
+    debug_return_str(strdup(tty));
 }
 #endif

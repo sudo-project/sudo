@@ -695,7 +695,8 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct i
 	(void) fcntl(wfd, F_SETFL, n | O_NONBLOCK);
 
     /* Allocate and add to head of list. */
-    iob = sudo_emalloc(sizeof(*iob));
+    if ((iob = malloc(sizeof(*iob))) == NULL)
+	sudo_fatalx(U_("unable to allocate memory"));
     iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, io_callback, iob);
     iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, io_callback, iob);
     iob->len = 0;
@@ -703,7 +704,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct i
     iob->action = action;
     iob->buf[0] = '\0';
     if (iob->revent == NULL || iob->wevent == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("unable to allocate memory"));
     SLIST_INSERT_HEAD(head, iob, entries);
 
     debug_return;
@@ -907,7 +908,7 @@ pty_close(struct command_status *cstat)
     /* Free I/O buffers. */
     while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
 	SLIST_REMOVE_HEAD(&iobufs, entries);
-	sudo_efree(iob);
+	free(iob);
     }
 
     /* Restore terminal settings. */

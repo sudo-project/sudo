@@ -90,7 +90,6 @@ struct rtentry;
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -111,7 +110,7 @@ struct rtentry;
 
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
- * and return the number of interfaces found.
+ * and return the number of interfaces found.  Returns -1 on error.
  */
 int
 get_net_ifs(char **addrinfo)
@@ -128,8 +127,11 @@ get_net_ifs(char **addrinfo)
     char *cp;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
 
-    if (!sudo_conf_probe_interfaces() || getifaddrs(&ifaddrs) != 0)
+    if (!sudo_conf_probe_interfaces())
 	debug_return_int(0);
+
+    if (getifaddrs(&ifaddrs) == -1)
+	debug_return_int(-1);
 
     /* Allocate space for the interfaces info string. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -150,7 +152,9 @@ get_net_ifs(char **addrinfo)
     if (num_interfaces == 0)
 	debug_return_int(0);
     ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = sudo_emalloc(ailen);
+    if ((cp = malloc(ailen)) == NULL)
+	debug_return_int(-1);
+    *addrinfo = cp;
 
     /* Store the IP addr/netmask pairs. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -201,7 +205,7 @@ done:
 #ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
 #else
-    sudo_efree(ifaddrs);
+    free(ifaddrs);
 #endif
     debug_return_int(num_interfaces);
 }
@@ -209,8 +213,8 @@ done:
 #elif defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
 
 /*
- * Allocate and fill in the interfaces global variable with the
- * machine's ip addresses and netmasks.
+ * Fill in the interfaces string with the machine's ip addresses and netmasks
+ * and return the number of interfaces found.  Returns -1 on error.
  */
 int
 get_net_ifs(char **addrinfo)
@@ -233,13 +237,16 @@ get_net_ifs(char **addrinfo)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
-	sudo_fatal(U_("unable to open socket"));
+	debug_return_int(-1);
 
     /*
      * Get interface configuration or return.
      */
     for (;;) {
-	ifconf_buf = sudo_emalloc(buflen);
+	if ((ifconf_buf = malloc(buflen)) == NULL) {
+	    num_interfaces = -1;
+	    goto done;
+	}
 	ifconf = (struct ifconf *) ifconf_buf;
 	ifconf->ifc_len = buflen - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
@@ -257,14 +264,18 @@ get_net_ifs(char **addrinfo)
 	if (ifconf->ifc_len + sizeof(struct ifreq) < buflen)
 	    break;
 	buflen += BUFSIZ;
-	sudo_efree(ifconf_buf);
+	free(ifconf_buf);
     }
 
     /* Allocate space for the maximum number of interfaces that could exist. */
     if ((n = ifconf->ifc_len / sizeof(struct ifreq)) == 0)
-	debug_return_int(0);
+	goto done;
     ailen = n * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = sudo_emalloc(ailen);
+    if ((cp = malloc(ailen)) == NULL) {
+	num_interfaces = -1;
+	goto done;
+    }
+    *addrinfo = cp;
 
     /* For each interface, store the ip address and netmask. */
     for (i = 0; i < ifconf->ifc_len; ) {
@@ -333,7 +344,7 @@ get_net_ifs(char **addrinfo)
     }
 
 done:
-    sudo_efree(ifconf_buf);
+    free(ifconf_buf);
     (void) close(sock);
 
     debug_return_int(num_interfaces);
