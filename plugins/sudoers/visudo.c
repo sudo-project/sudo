@@ -23,8 +23,6 @@
  * Lock the sudoers file for safe editing (ala vipw) and check for parse errors.
  */
 
-#define SUDO_MAIN
-
 #ifdef __TANDEM
 # include <floss.h>
 #endif

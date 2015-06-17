@@ -21,8 +21,6 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#define SUDO_MAIN
-
 #include <config.h>
 
 #include <sys/types.h>
