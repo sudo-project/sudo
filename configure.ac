@@ -40,7 +40,6 @@ AC_SUBST([NET_LIBS])
 AC_SUBST([AFS_LIBS])
 AC_SUBST([REPLAY_LIBS])
 AC_SUBST([GETGROUPS_LIB])
-AC_SUBST([OSDEFS])
 AC_SUBST([AUTH_OBJS])
 AC_SUBST([MANTYPE])
 AC_SUBST([MANDIRTYPE])
@@ -286,7 +285,7 @@ dnl
 AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 [case $with_devel in
     yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
-		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
+		SUDO_APPEND_CPPFLAGS(-DSUDO_DEVEL)
 		DEVEL="true"
 		devdir=.
 		;;
@@ -1683,7 +1682,7 @@ case "$host" in
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
-		    OSDEFS="${OSDEFS} -D__USE_FIXED_PROTOTYPES__"
+		    AC_DEFINE([__USE_FIXED_PROTOTYPES__])
 		fi
 
 		shadow_funcs="getpwanam issecure"
@@ -1707,7 +1706,7 @@ case "$host" in
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D_LINUX_SOURCE_COMPAT"
+		AC_DEFINE([_LINUX_SOURCE_COMPAT])
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
 		# For AIX we build in support for both LAM and PAM
@@ -1913,7 +1912,7 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-irix*)
-		OSDEFS="${OSDEFS} -D_BSD_TYPES"
+		AC_DEFINE([_BSD_TYPES])
 		if test -z "$NROFFPROG"; then
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
@@ -1962,12 +1961,12 @@ case "$host" in
 		LIBS="${LIBS} -lsun -lbsd"
 		SUDO_APPEND_CPPFLAGS(-I/usr/include)
 		SUDO_APPEND_CPPFLAGS(-I/usr/include/bsd)
-		OSDEFS="${OSDEFS} -D_MIPS"
+		SUDO_APPEND_CPPFLAGS(-D_MIPS)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
     *-*-isc*)
-		OSDEFS="${OSDEFS} -D_ISC"
+		SUDO_APPEND_CPPFLAGS(-D_ISC)
 		LIB_CRYPT=1
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
 
@@ -2013,6 +2012,8 @@ case "$host" in
 		fi
 		;;
     *-*-freebsd*)
+		AC_DEFINE([_BSD_SOURCE])
+
 		# FreeBSD has a real setreuid(2) starting with 2.1 and
 		# backported to 2.0.5.  We just take 2.1 and above...
 		case "$OSREV" in
@@ -2033,6 +2034,8 @@ case "$host" in
 		fi
 		;;
     *-*-*openbsd*)
+		AC_DEFINE([_BSD_SOURCE])
+
 		# OpenBSD-specific initialization
 		OS_INIT=os_init_openbsd
 		SUDO_OBJS="${SUDO_OBJS} openbsd.o"
@@ -2071,6 +2074,8 @@ case "$host" in
 		fi
 		;;
     *-*-dragonfly*)
+		AC_DEFINE([_BSD_SOURCE])
+
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
@@ -2276,8 +2281,7 @@ case "$host_os" in
 	    [sudo_cv_xopen_source_extended=error])
 	])])
 	if test "$sudo_cv_xopen_source_extended" = "yes"; then
-	    OSDEFS="${OSDEFS} -D_XOPEN_SOURCE_EXTENDED"
-	    SUDO_DEFINE(_XOPEN_SOURCE_EXTENDED)
+	    AC_DEFINE([_XOPEN_SOURCE_EXTENDED])
 	fi
 	;;
 esac
@@ -2308,7 +2312,7 @@ dnl
 dnl typedef checks
 dnl We need to define __STDC_WANT_LIB_EXT1__ for errno_t and rsize_t
 dnl
-SUDO_APPEND_CPPFLAGS(-D__STDC_WANT_LIB_EXT1__=1)
+AC_DEFINE([__STDC_WANT_LIB_EXT1__])
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types.h>
@@ -2445,12 +2449,15 @@ dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
 dnl
 if test "$enable_hardening" != "no"; then
+    found=false
     O_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
     AC_CHECK_FUNC([__sprintf_chk], [
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [found=true], [])
     ], [])
-    CPPFLAGS="$O_CPPFLAGS"
+    if test X"$found" != X"true"; then
+	CPPFLAGS="$O_CPPFLAGS"
+    fi
 fi
 
 utmp_style=LEGACY
@@ -3812,7 +3819,6 @@ fi
 case "$host_os" in
     hpux*)
 	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
-	OSDEFS="${OSDEFS} -D_REENTRANT"
 	;;
 esac
 
@@ -4346,6 +4352,36 @@ AH_TOP([#ifndef SUDO_CONFIG_H
 AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
-#endif /* __svr4__ */
+#endif
+
+/* Enable BSD extensions on systems that have them.  */
+#ifndef _BSD_SOURCE
+# undef _BSD_SOURCE
+#endif
+
+/* Enable BSD types on IRIX.  */
+#ifndef _BSD_TYPES
+# undef _BSD_TYPES
+#endif
+
+/* Enable Linux-compatible extensions on AIX.  */
+#ifndef _LINUX_SOURCE_COMPAT
+# undef _LINUX_SOURCE_COMPAT
+#endif
+
+/* Enable prototypes in GCC fixed includes on older systems.  */
+#ifndef __USE_FIXED_PROTOTYPES__
+# undef __USE_FIXED_PROTOTYPES__
+#endif
+
+/* Enable XPG4v2 extensions to POSIX, needed for MSG_WAITALL on older HP-UX.  */
+#ifndef _XOPEN_SOURCE_EXTENDED
+# undef _XOPEN_SOURCE_EXTENDED
+#endif
+
+/* Enable "safer" versions of the standard C API (ISO C11).  */
+#ifndef __STDC_WANT_LIB_EXT1__
+# undef __STDC_WANT_LIB_EXT1__
+#endif
 
 #endif /* SUDO_CONFIG_H */])

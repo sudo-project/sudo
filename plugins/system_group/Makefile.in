@@ -86,9 +86,6 @@ shlib_opt = system_group.opt
 install_uid = 0
 install_gid = 0
 
-# OS dependent defines
-DEFS = @OSDEFS@
-
 #### End of system configuration section. ####
 
 SHELL = @SHELL@
@@ -107,7 +104,7 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .o .c .h .lo
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -168,4 +165,4 @@ system_group.lo: $(srcdir)/system_group.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/system_group.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/system_group.c

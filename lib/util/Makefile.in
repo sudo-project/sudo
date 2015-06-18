@@ -53,8 +53,11 @@ AWK = @AWK@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 
+# C preprocessor defines
+CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
+
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) $(CPPDEFS) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -89,9 +92,6 @@ TEST_LDFLAGS = @LDFLAGS@
 # User and group ids the installed files should be "owned" by
 install_uid = 0
 install_gid = 0
-
-# OS dependent defines
-DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 
 # Set to non-empty for development mode
 DEVEL = @DEVEL@
@@ -134,7 +134,7 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .c .h .lo
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -157,10 +157,10 @@ signame.c: mksigname
 	./mksigname > $@
 
 mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksiglist.c -o $@
 
 mksigname: $(srcdir)/mksigname.c $(srcdir)/mksigname.h $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksigname.c -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(srcdir)/mksigname.c -o $@
 
 $(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -331,241 +331,241 @@ cleandir: realclean
 aix.lo: $(srcdir)/aix.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
         $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/aix.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/aix.c
 atofoo_test.lo: $(srcdir)/regress/atofoo/atofoo_test.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/atofoo/atofoo_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/atofoo/atofoo_test.c
 closefrom.lo: $(srcdir)/closefrom.c $(incdir)/sudo_compat.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/closefrom.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/closefrom.c
 conf_test.lo: $(srcdir)/regress/sudo_conf/conf_test.c \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/sudo_conf/conf_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/sudo_conf/conf_test.c
 event.lo: $(srcdir)/event.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/event.c
 event_poll.lo: $(srcdir)/event_poll.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
                $(incdir)/sudo_queue.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event_poll.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/event_poll.c
 event_select.lo: $(srcdir)/event_select.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event_select.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/event_select.c
 fatal.lo: $(srcdir)/fatal.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
           $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/fatal.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/fatal.c
 fnm_test.lo: $(srcdir)/regress/fnmatch/fnm_test.c $(incdir)/compat/fnmatch.h \
              $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/fnmatch/fnm_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fnmatch/fnm_test.c
 fnmatch.lo: $(srcdir)/fnmatch.c $(incdir)/compat/charclass.h \
             $(incdir)/compat/fnmatch.h $(incdir)/sudo_compat.h \
             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/fnmatch.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/fnmatch.c
 getaddrinfo.lo: $(srcdir)/getaddrinfo.c $(incdir)/compat/getaddrinfo.h \
                 $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getaddrinfo.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getaddrinfo.c
 getcwd.lo: $(srcdir)/getcwd.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getcwd.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getcwd.c
 getgrouplist.lo: $(srcdir)/getgrouplist.c $(incdir)/compat/nss_dbdefs.h \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getgrouplist.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getgrouplist.c
 gethostname.lo: $(srcdir)/gethostname.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/gethostname.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gethostname.c
 getline.lo: $(srcdir)/getline.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getline.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getline.c
 getopt_long.lo: $(srcdir)/getopt_long.c $(incdir)/compat/getopt.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getopt_long.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getopt_long.c
 gettime.lo: $(srcdir)/gettime.c $(incdir)/compat/stdbool.h \
             $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/gettime.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gettime.c
 gidlist.lo: $(srcdir)/gidlist.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/gidlist.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gidlist.c
 glob.lo: $(srcdir)/glob.c $(incdir)/compat/charclass.h $(incdir)/compat/glob.h \
          $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/glob.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/glob.c
 globtest.lo: $(srcdir)/regress/glob/globtest.c $(incdir)/compat/glob.h \
              $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/glob/globtest.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/glob/globtest.c
 hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/tailq/hltq_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/tailq/hltq_test.c
 inet_pton.lo: $(srcdir)/inet_pton.c $(incdir)/sudo_compat.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/inet_pton.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/inet_pton.c
 isblank.lo: $(srcdir)/isblank.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/isblank.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/isblank.c
 key_val.lo: $(srcdir)/key_val.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/key_val.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/key_val.c
 lbuf.lo: $(srcdir)/lbuf.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_debug.h $(incdir)/sudo_lbuf.h $(incdir)/sudo_queue.h \
          $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/lbuf.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/lbuf.c
 locking.lo: $(srcdir)/locking.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/locking.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/locking.c
 memrchr.lo: $(srcdir)/memrchr.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/memrchr.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/memrchr.c
 memset_s.lo: $(srcdir)/memset_s.c $(incdir)/sudo_compat.h \
              $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/memset_s.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/memset_s.c
 mksiglist.lo: $(srcdir)/mksiglist.c $(incdir)/sudo_compat.h \
               $(srcdir)/mksiglist.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mksiglist.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/mksiglist.c
 mksigname.lo: $(srcdir)/mksigname.c $(incdir)/sudo_compat.h \
               $(srcdir)/mksigname.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mksigname.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/mksigname.c
 mktemp.lo: $(srcdir)/mktemp.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mktemp.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/mktemp.c
 mktemp_test.lo: $(srcdir)/regress/mktemp/mktemp_test.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/mktemp/mktemp_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/mktemp/mktemp_test.c
 parse_gids_test.lo: $(srcdir)/regress/parse_gids/parse_gids_test.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                     $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parse_gids/parse_gids_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parse_gids/parse_gids_test.c
 parseln.lo: $(srcdir)/parseln.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/parseln.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/parseln.c
 parseln_test.lo: $(srcdir)/regress/sudo_parseln/parseln_test.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/sudo_parseln/parseln_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/sudo_parseln/parseln_test.c
 progname.lo: $(srcdir)/progname.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/progname.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/progname.c
 progname_test.lo: $(srcdir)/regress/progname/progname_test.c \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/progname/progname_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/progname/progname_test.c
 pw_dup.lo: $(srcdir)/pw_dup.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/pw_dup.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pw_dup.c
 reallocarray.lo: $(srcdir)/reallocarray.c $(incdir)/sudo_compat.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/reallocarray.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/reallocarray.c
 secure_path.lo: $(srcdir)/secure_path.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/secure_path.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/secure_path.c
 setgroups.lo: $(srcdir)/setgroups.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/setgroups.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/setgroups.c
 sha2.lo: $(srcdir)/sha2.c $(incdir)/compat/endian.h $(incdir)/compat/sha2.h \
          $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sha2.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sha2.c
 sig2str.lo: $(srcdir)/sig2str.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sig2str.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sig2str.c
 siglist.lo: siglist.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) siglist.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) siglist.c
 signame.lo: signame.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) signame.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) signame.c
 snprintf.lo: $(srcdir)/snprintf.c $(incdir)/sudo_compat.h \
              $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/snprintf.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/snprintf.c
 strlcat.lo: $(srcdir)/strlcat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strlcat.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strlcat.c
 strlcpy.lo: $(srcdir)/strlcpy.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strlcpy.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strlcpy.c
 strndup.lo: $(srcdir)/strndup.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strndup.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strndup.c
 strnlen.lo: $(srcdir)/strnlen.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strnlen.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strnlen.c
 strsignal.lo: $(srcdir)/strsignal.c $(incdir)/sudo_compat.h \
               $(incdir)/sudo_gettext.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strsignal.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strsignal.c
 strsplit.lo: $(srcdir)/strsplit.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strsplit.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strsplit.c
 strsplit_test.lo: $(srcdir)/regress/strsplit/strsplit_test.c \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                   $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/strsplit/strsplit_test.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/strsplit/strsplit_test.c
 strtobool.lo: $(srcdir)/strtobool.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtobool.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strtobool.c
 strtoid.lo: $(srcdir)/strtoid.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtoid.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strtoid.c
 strtomode.lo: $(srcdir)/strtomode.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtomode.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strtomode.c
 strtonum.lo: $(srcdir)/strtonum.c $(incdir)/sudo_compat.h \
              $(incdir)/sudo_gettext.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtonum.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strtonum.c
 sudo_conf.lo: $(srcdir)/sudo_conf.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_conf.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_conf.c
 sudo_debug.lo: $(srcdir)/sudo_debug.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_debug.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_debug.c
 sudo_dso.lo: $(srcdir)/sudo_dso.c $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
              $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_dso.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_dso.c
 term.lo: $(srcdir)/term.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/term.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/term.c
 ttysize.lo: $(srcdir)/ttysize.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/ttysize.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/ttysize.c
 utimens.lo: $(srcdir)/utimens.c $(incdir)/compat/stdbool.h \
             $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/utimens.c
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/utimens.c

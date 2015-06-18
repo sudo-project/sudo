@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1996, 1998-2005, 2007-2014
+# Copyright (c) 1996, 1998-2005, 2007-2015
 #       Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -58,8 +58,15 @@ REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
 VISUDO_LIBS = $(NET_LIBS) @LIBMD@
 TESTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@
 
+# C preprocessor defines
+CPPDEFS = -DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
+	  -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" \
+	  -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
+	  -DSUDOERS_MODE=$(sudoers_mode)
+
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) -DLIBDIR=\"$(libdir)\" @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) \
+	   -I$(top_srcdir) $(CPPDEFS) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -121,11 +128,6 @@ sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 
-# Pass in paths and uid/gid + OS dependent defines
-DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" \
-       -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
-       -DSUDOERS_MODE=$(sudoers_mode) -DLOCALEDIR=\"$(localedir)\"
-
 # Set to non-empty for development mode
 DEVEL = @DEVEL@
 
@@ -185,10 +187,10 @@ all: $(PROGS)
 .SUFFIXES: .o .c .h .l .y .lo
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -471,7 +473,7 @@ afs.lo: $(authdir)/afs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/afs.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/afs.c
 aix_auth.lo: $(authdir)/aix_auth.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -481,7 +483,7 @@ aix_auth.lo: $(authdir)/aix_auth.c $(devdir)/def_data.h \
              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/aix_auth.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/aix_auth.c
 alias.lo: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -490,7 +492,7 @@ alias.lo: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/alias.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/alias.c
 audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -499,7 +501,7 @@ audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/logging.h $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/audit.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/audit.c
 base64.lo: $(srcdir)/base64.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -508,7 +510,7 @@ base64.lo: $(srcdir)/base64.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/base64.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/base64.c
 base64.o: base64.lo
 boottime.lo: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -519,7 +521,7 @@ boottime.lo: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/boottime.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/boottime.c
 bsdauth.lo: $(authdir)/bsdauth.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -528,7 +530,7 @@ bsdauth.lo: $(authdir)/bsdauth.c $(devdir)/def_data.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/bsdauth.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/bsdauth.c
 bsm_audit.lo: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -538,7 +540,7 @@ bsm_audit.lo: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/bsm_audit.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/bsm_audit.c
 check.lo: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -546,7 +548,7 @@ check.lo: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/check.h $(srcdir)/defaults.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/check.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/check.c
 check_addr.o: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -557,23 +559,23 @@ check_addr.o: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_addr.c
 check_base64.o: $(srcdir)/regress/parser/check_base64.c \
                 $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_base64.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_base64.c
 check_digest.o: $(srcdir)/regress/parser/check_digest.c \
                 $(incdir)/compat/sha2.h $(incdir)/sudo_compat.h \
                 $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_digest.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_digest.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/parse.h $(srcdir)/toke.h \
               $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_fill.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_fill.c
 check_hexchar.o: $(srcdir)/regress/parser/check_hexchar.c \
                  $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_hexchar.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_hexchar.c
 check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(devdir)/def_data.c $(devdir)/def_data.h \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -584,17 +586,17 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                     $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                     $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/iolog_path/check_iolog_path.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_path/check_iolog_path.c
 check_symbols.o: $(srcdir)/regress/check_symbols/check_symbols.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_dso.h $(incdir)/sudo_fatal.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/check_symbols/check_symbols.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/check_symbols/check_symbols.c
 check_wrap.o: $(srcdir)/regress/logging/check_wrap.c \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/logging/check_wrap.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/logging/check_wrap.c
 dce.lo: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -602,7 +604,7 @@ dce.lo: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/dce.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/dce.c
 defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(devdir)/gram.h $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -612,7 +614,7 @@ defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/defaults.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/defaults.c
 env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -620,7 +622,7 @@ env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/env.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/env.c
 find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -630,7 +632,7 @@ find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/find_path.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/find_path.c
 find_path.o: find_path.lo
 fwtk.lo: $(authdir)/fwtk.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -639,9 +641,9 @@ fwtk.lo: $(authdir)/fwtk.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/fwtk.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/fwtk.c
 getdate.o: $(devdir)/getdate.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(devdir)/getdate.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(devdir)/getdate.c
 getspwuid.lo: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -651,7 +653,7 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/getspwuid.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getspwuid.c
 goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -661,7 +663,7 @@ goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/goodpath.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/goodpath.c
 goodpath.o: goodpath.lo
 gram.lo: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -670,7 +672,7 @@ gram.lo: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(devdir)/gram.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(devdir)/gram.c
 group_plugin.lo: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -680,7 +682,7 @@ group_plugin.lo: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/group_plugin.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/group_plugin.c
 group_plugin.o: group_plugin.lo
 hexchar.lo: $(srcdir)/hexchar.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -690,7 +692,7 @@ hexchar.lo: $(srcdir)/hexchar.c $(devdir)/def_data.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/hexchar.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/hexchar.c
 hexchar.o: hexchar.lo
 interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -701,7 +703,7 @@ interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/interfaces.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/interfaces.c
 interfaces.o: interfaces.lo
 iolog.lo: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -710,7 +712,7 @@ iolog.lo: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/defaults.h $(srcdir)/iolog.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/iolog.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog.c
 iolog_path.lo: $(srcdir)/iolog_path.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -720,7 +722,7 @@ iolog_path.lo: $(srcdir)/iolog_path.c $(devdir)/def_data.h \
                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/iolog_path.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_path.c
 iolog_path.o: iolog_path.lo
 kerb5.lo: $(authdir)/kerb5.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -729,7 +731,7 @@ kerb5.lo: $(authdir)/kerb5.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/kerb5.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/kerb5.c
 ldap.lo: $(srcdir)/ldap.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_dso.h $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -738,7 +740,7 @@ ldap.lo: $(srcdir)/ldap.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
          $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/ldap.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/ldap.c
 linux_audit.lo: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -749,11 +751,11 @@ linux_audit.lo: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/linux_audit.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/linux_audit.c
 locale.lo: $(srcdir)/locale.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(srcdir)/logging.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/locale.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/locale.c
 locale.o: locale.lo
 logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -763,7 +765,7 @@ logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/logging.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logging.c
 logwrap.lo: $(srcdir)/logwrap.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -772,7 +774,7 @@ logwrap.lo: $(srcdir)/logwrap.c $(devdir)/def_data.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/logwrap.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logwrap.c
 logwrap.o: logwrap.lo
 match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/fnmatch.h $(incdir)/compat/glob.h \
@@ -783,7 +785,7 @@ match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/match.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/match.c
 match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -793,14 +795,14 @@ match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/match_addr.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/match_addr.c
 match_addr.o: match_addr.lo
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
            $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(top_srcdir)/src/net_ifs.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(top_srcdir)/src/net_ifs.c
 pam.lo: $(authdir)/pam.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -808,7 +810,7 @@ pam.lo: $(authdir)/pam.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/pam.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/pam.c
 parse.lo: $(srcdir)/parse.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -817,7 +819,7 @@ parse.lo: $(srcdir)/parse.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/parse.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/parse.c
 passwd.lo: $(authdir)/passwd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -826,7 +828,7 @@ passwd.lo: $(authdir)/passwd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/passwd.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/passwd.c
 policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -836,7 +838,7 @@ policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/policy.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/policy.c
 prompt.lo: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -845,7 +847,7 @@ prompt.lo: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/prompt.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/prompt.c
 pwutil.lo: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -854,7 +856,7 @@ pwutil.lo: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/logging.h $(srcdir)/pwutil.h $(srcdir)/redblack.h \
            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/pwutil.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pwutil.c
 pwutil.o: pwutil.lo
 pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -865,7 +867,7 @@ pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/pwutil_impl.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pwutil_impl.c
 pwutil_impl.o: pwutil_impl.lo
 redblack.lo: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -876,7 +878,7 @@ redblack.lo: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/redblack.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/redblack.c
 redblack.o: redblack.lo
 rfc1938.lo: $(authdir)/rfc1938.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -886,7 +888,7 @@ rfc1938.lo: $(authdir)/rfc1938.c $(devdir)/def_data.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/rfc1938.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/rfc1938.c
 secureware.lo: $(authdir)/secureware.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -896,7 +898,7 @@ secureware.lo: $(authdir)/secureware.c $(devdir)/def_data.h \
                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/secureware.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/secureware.c
 securid5.lo: $(authdir)/securid5.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -906,7 +908,7 @@ securid5.lo: $(authdir)/securid5.c $(devdir)/def_data.h \
              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/securid5.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/securid5.c
 set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -916,7 +918,7 @@ set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/set_perms.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/set_perms.c
 sia.lo: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -924,7 +926,7 @@ sia.lo: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/sia.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/sia.c
 solaris_audit.lo: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -935,7 +937,7 @@ solaris_audit.lo: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/solaris_audit.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/solaris_audit.c
 sssd.lo: $(srcdir)/sssd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_dso.h $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -944,7 +946,7 @@ sssd.lo: $(srcdir)/sssd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
          $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sssd.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sssd.c
 sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -956,7 +958,7 @@ sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/sudo_auth.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/sudo_auth.c
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -966,12 +968,12 @@ sudo_nss.lo: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_nss.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_nss.c
 sudo_printf.o: $(srcdir)/sudo_printf.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_printf.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_printf.c
 sudoers.lo: $(srcdir)/sudoers.c $(devdir)/def_data.h \
             $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -982,7 +984,7 @@ sudoers.lo: $(srcdir)/sudoers.c $(devdir)/def_data.h \
             $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoers.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoers.c
 sudoers_debug.lo: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -992,7 +994,7 @@ sudoers_debug.lo: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
                   $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoers_debug.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoers_debug.c
 sudoers_debug.o: sudoers_debug.lo
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/compat/stdbool.h $(incdir)/compat/timespec.h \
@@ -1002,7 +1004,7 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/iolog.h $(srcdir)/logging.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/fnmatch.h $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -1013,7 +1015,7 @@ testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/testsudoers.c
 timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/compat/timespec.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -1023,9 +1025,9 @@ timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/timestamp.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timestamp.c
 timestr.lo: $(srcdir)/timestr.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/timestr.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timestr.c
 toke.lo: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/sha2.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1034,7 +1036,7 @@ toke.lo: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(devdir)/toke.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(devdir)/toke.c
 toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1044,7 +1046,7 @@ toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/toke_util.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/toke_util.c
 toke_util.o: toke_util.lo
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1055,7 +1057,7 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tsgetgrpw.c
 visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
           $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
@@ -1066,7 +1068,7 @@ visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
           $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo.c
 visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1076,4 +1078,4 @@ visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo_json.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo_json.c

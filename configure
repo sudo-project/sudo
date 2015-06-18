@@ -773,7 +773,6 @@ MANCOMPRESS
 MANDIRTYPE
 MANTYPE
 AUTH_OBJS
-OSDEFS
 GETGROUPS_LIB
 REPLAY_LIBS
 AFS_LIBS
@@ -2844,7 +2843,6 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
-
 #
 # Begin initial values for man page substitution
 #
@@ -4234,7 +4232,19 @@ if test "${with_devel+set}" = set; then :
   withval=$with_devel; case $with_devel in
     yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: Setting up for development: -Wall, flex, yacc" >&5
 $as_echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
-		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
+
+    case "${CPPFLAGS}" in
+	*"-DSUDO_DEVEL"|*"-DSUDO_DEVEL ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-DSUDO_DEVEL"
+	    else
+		CPPFLAGS="${CPPFLAGS} -DSUDO_DEVEL"
+	    fi
+	    ;;
+    esac
+
 		DEVEL="true"
 		devdir=.
 		;;
@@ -14713,7 +14723,8 @@ esac
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
-		    OSDEFS="${OSDEFS} -D__USE_FIXED_PROTOTYPES__"
+		    $as_echo "#define __USE_FIXED_PROTOTYPES__ 1" >>confdefs.h
+
 		fi
 
 		shadow_funcs="getpwanam issecure"
@@ -14747,7 +14758,8 @@ done
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D_LINUX_SOURCE_COMPAT"
+		$as_echo "#define _LINUX_SOURCE_COMPAT 1" >>confdefs.h
+
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
 		# For AIX we build in support for both LAM and PAM
@@ -15096,7 +15108,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 		: ${mansectform='4'}
 		;;
     *-*-irix*)
-		OSDEFS="${OSDEFS} -D_BSD_TYPES"
+		$as_echo "#define _BSD_TYPES 1" >>confdefs.h
+
 		if test -z "$NROFFPROG"; then
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
@@ -15208,12 +15221,36 @@ fi
 	    ;;
     esac
 
-		OSDEFS="${OSDEFS} -D_MIPS"
+
+    case "${CPPFLAGS}" in
+	*"-D_MIPS"|*"-D_MIPS ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-D_MIPS"
+	    else
+		CPPFLAGS="${CPPFLAGS} -D_MIPS"
+	    fi
+	    ;;
+    esac
+
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
     *-*-isc*)
-		OSDEFS="${OSDEFS} -D_ISC"
+
+    case "${CPPFLAGS}" in
+	*"-D_ISC"|*"-D_ISC ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-D_ISC"
+	    else
+		CPPFLAGS="${CPPFLAGS} -D_ISC"
+	    fi
+	    ;;
+    esac
+
 		LIB_CRYPT=1
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
 
@@ -15308,6 +15345,9 @@ done
 		fi
 		;;
     *-*-freebsd*)
+		$as_echo "#define _BSD_SOURCE 1" >>confdefs.h
+
+
 		# FreeBSD has a real setreuid(2) starting with 2.1 and
 		# backported to 2.0.5.  We just take 2.1 and above...
 		case "$OSREV" in
@@ -15328,6 +15368,9 @@ done
 		fi
 		;;
     *-*-*openbsd*)
+		$as_echo "#define _BSD_SOURCE 1" >>confdefs.h
+
+
 		# OpenBSD-specific initialization
 		OS_INIT=os_init_openbsd
 		SUDO_OBJS="${SUDO_OBJS} openbsd.o"
@@ -15366,6 +15409,9 @@ done
 		fi
 		;;
     *-*-dragonfly*)
+		$as_echo "#define _BSD_SOURCE 1" >>confdefs.h
+
+
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
@@ -17116,10 +17162,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_xopen_source_extended" >&5
 $as_echo "$sudo_cv_xopen_source_extended" >&6; }
 	if test "$sudo_cv_xopen_source_extended" = "yes"; then
-	    OSDEFS="${OSDEFS} -D_XOPEN_SOURCE_EXTENDED"
-	    cat >>confdefs.h <<\EOF
-#define _XOPEN_SOURCE_EXTENDED 1
-EOF
+	    $as_echo "#define _XOPEN_SOURCE_EXTENDED 1" >>confdefs.h
 
 	fi
 	;;
@@ -17293,18 +17336,7 @@ fi
 
 
 fi
-
-    case "${CPPFLAGS}" in
-	*"-D__STDC_WANT_LIB_EXT1__=1"|*"-D__STDC_WANT_LIB_EXT1__=1 ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-D__STDC_WANT_LIB_EXT1__=1"
-	    else
-		CPPFLAGS="${CPPFLAGS} -D__STDC_WANT_LIB_EXT1__=1"
-	    fi
-	    ;;
-    esac
+$as_echo "#define __STDC_WANT_LIB_EXT1__ 1" >>confdefs.h
 
 ac_fn_c_check_type "$LINENO" "mode_t" "ac_cv_type_mode_t" "$ac_includes_default"
 if test "x$ac_cv_type_mode_t" = xyes; then :
@@ -18345,8 +18377,21 @@ fi
 done
 
 if test "$enable_hardening" != "no"; then
+    found=false
     O_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+
+    case "${CPPFLAGS}" in
+	*"-D_FORTIFY_SOURCE=2"|*"-D_FORTIFY_SOURCE=2 ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-D_FORTIFY_SOURCE=2"
+	    else
+		CPPFLAGS="${CPPFLAGS} -D_FORTIFY_SOURCE=2"
+	    fi
+	    ;;
+    esac
+
     ac_fn_c_check_func "$LINENO" "__sprintf_chk" "ac_cv_func___sprintf_chk"
 if test "x$ac_cv_func___sprintf_chk" = xyes; then :
 
@@ -18362,14 +18407,16 @@ char buf[4]; (void)sprintf(buf, "%s", "foo");
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"
+  found=true
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 fi
 
-    CPPFLAGS="$O_CPPFLAGS"
+    if test X"$found" != X"true"; then
+	CPPFLAGS="$O_CPPFLAGS"
+    fi
 fi
 
 utmp_style=LEGACY
@@ -23482,7 +23529,6 @@ if test "x$ac_cv_lib_pthread_main" = xyes; then :
   SUDO_LIBS="${SUDO_LIBS} -lpthread"
 fi
 
-	OSDEFS="${OSDEFS} -D_REENTRANT"
 	;;
 esac
 
