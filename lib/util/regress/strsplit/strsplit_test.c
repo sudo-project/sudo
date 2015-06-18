@@ -65,12 +65,15 @@ static const char test3_in[] = "vi -r  -R abc\tdef ";
 static const char *test3_out[] = { "vi", "-r", "-R", "abc", "def", NULL };
 static const char test4_in[] = "vi -r  -R abc\tdef ";
 static const char *test4_out[] = { "vi", "-r", "-R", "abc", NULL };
+static const char test5_in[] = "";
+static const char *test5_out[] = { NULL };
 
 static struct strsplit_test test_data[] = {
     { test1_in, sizeof(test1_in) - 1, test1_out },
     { test2_in, sizeof(test2_in) - 1, test2_out },
     { test3_in, sizeof(test3_in) - 1, test3_out },
     { test4_in, sizeof(test4_in) - 5, test4_out },
+    { test5_in, sizeof(test5_in) - 1, test5_out },
     { NULL, 0, NULL }
 };
 
