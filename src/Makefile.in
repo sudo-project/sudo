@@ -29,7 +29,7 @@ cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ --tag=disable-static
+LIBTOOL = @LIBTOOL@
 SED = @SED@
 
 # Our install program supports extra flags...
@@ -54,6 +54,9 @@ CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 SUDO_LDFLAGS = $(LDFLAGS) @SUDO_LDFLAGS@
 LT_LDFLAGS = @LT_LDFLAGS@
+
+# Flags to pass to libtool
+LTFLAGS = --tag=disable-static
 
 # PIE flags
 PIE_CFLAGS = @PIE_CFLAGS@
@@ -132,19 +135,19 @@ Makefile: $(srcdir)/Makefile.in
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OBJS) $(SUDO_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
 sudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) $(SSP_LDFLAGS) -o $@ sudo_noexec.lo -module -avoid-version -rpath $(noexecdir) -shrext .so
 
 sesh: $(SESH_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
 
@@ -170,11 +173,11 @@ install-rc: install-dirs
 	fi
 
 install-binaries: install-dirs $(PROGS)
-	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 04755 sudo $(DESTDIR)$(bindir)/sudo
+	INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 04755 sudo $(DESTDIR)$(bindir)/sudo
 	rm -f $(DESTDIR)$(bindir)/sudoedit
 	ln -s sudo $(DESTDIR)$(bindir)/sudoedit
 	if [ -f sesh ]; then \
-	    INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sesh $(DESTDIR)$(libexecdir)/sudo/sesh; \
+	    INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sesh $(DESTDIR)$(libexecdir)/sudo/sesh; \
 	fi
 
 install-doc:
@@ -182,12 +185,12 @@ install-doc:
 install-includes:
 
 install-noexec: install-dirs sudo_noexec.la
-	INSTALL_BACKUP='~' $(LIBTOOL) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_noexec.la $(DESTDIR)$(noexecdir)
+	INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudo_noexec.la $(DESTDIR)$(noexecdir)
 
 install-plugin:
 
 uninstall:
-	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
+	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
 	-rm -f	$(DESTDIR)$(bindir)/sudo \
 		$(DESTDIR)$(bindir)/sudo~ \
 		$(DESTDIR)$(bindir)/sudoedit \
@@ -210,7 +213,7 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 
@@ -367,7 +370,7 @@ sudo_edit.o: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_edit.c
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/sudo_compat.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_noexec.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_noexec.c
 tgetpass.o: $(srcdir)/tgetpass.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
