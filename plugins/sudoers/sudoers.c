@@ -604,7 +604,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	int edit_argc;
 
 	free(safe_cmnd);
-	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc, &edit_argv);
+	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
+	    &edit_argv);
 	if (safe_cmnd == NULL || audit_success(edit_argc, edit_argv) != 0)
 	    goto bad;
 
@@ -754,7 +755,7 @@ set_cmnd(void)
 	    if (!set_perms(PERM_RUNAS))
 		debug_return_int(-1);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
-		def_ignore_dot);
+		def_ignore_dot, NULL);
 	    if (!restore_perms())
 		debug_return_int(-1);
 	    if (rval == NOT_FOUND) {
@@ -762,7 +763,7 @@ set_cmnd(void)
 		if (!set_perms(PERM_USER))
 		    debug_return_int(-1);
 		rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
-		    def_ignore_dot);
+		    def_ignore_dot, NULL);
 		if (!restore_perms())
 		    debug_return_int(-1);
 	    }
@@ -1169,78 +1170,18 @@ sudoers_cleanup(void)
     debug_return;
 }
 
-static char *
-resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
-    int *argc_out, char ***argv_out)
-{
-    char **nargv, *editor, *editor_path = NULL;
-    const char *cp, *ep, *tmp;
-    const char *edend = ed + edlen;
-    int nargc;
-    debug_decl(resolve_editor, SUDOERS_DEBUG_PLUGIN)
-
-    /*
-     * Split editor into an argument vector, including files to edit.
-     * The EDITOR and VISUAL environment variables may contain command
-     * line args so look for those and alloc space for them too.
-     */
-    cp = sudo_strsplit(ed, edend, " \t", &ep);
-    if (cp == NULL)
-	debug_return_str(NULL);
-    editor = strndup(cp, (size_t)(ep - cp));
-    if (editor == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
-	debug_return_str(NULL);
-    }
-
-    /* If we can't find the editor in the user's PATH, give up. */
-    if (find_path(editor, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
-	free(editor);
-	errno = ENOENT;
-	debug_return_str(NULL);
-    }
-
-    /* Count rest of arguments and allocate editor argv. */
-    for (nargc = 1, tmp = ep; sudo_strsplit(NULL, edend, " \t", &tmp) != NULL; )
-	nargc++;
-    nargv = reallocarray(NULL, nargc + 1 + nfiles + 1, sizeof(char *));
-    if (nargv == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
-	free(editor);
-	debug_return_str(NULL);
-    }
-
-    /* Fill in editor argv (assumes files[] is NULL-terminated). */
-    nargv[0] = editor;
-    for (nargc = 1; (cp = sudo_strsplit(NULL, edend, " \t", &ep)) != NULL; nargc++) {
-	nargv[nargc] = strndup(cp, (size_t)(ep - cp));
-	if (nargv[nargc] == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
-	    while (nargc--)
-		free(nargv[nargc]);
-	    debug_return_str(NULL);
-	}
-    }
-    nargv[nargc++] = "--";
-    while ((nargv[nargc++] = *files++) != NULL)
-	continue;
-
-    *argc_out = nargc;
-    *argv_out = nargv;
-    debug_return_str(editor_path);
-}
-
 /*
  * Determine which editor to use.  We don't need to worry about restricting
  * this to a "safe" editor since it runs with the uid of the invoking user,
  * not the runas (privileged) user.
+ * Returns a fully-qualified path to the editor on success and fills
+ * in argc_out and argv_out accordingly.  Returns NULL on failure.
  */
 static char *
 find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 {
-    const char *cp, *ep, *editor;
+    const char *cp, *ep, *editor = NULL;
     char *editor_path = NULL, **ev, *ev0[4];
-    size_t len;
     debug_decl(find_editor, SUDOERS_DEBUG_PLUGIN)
 
     /*
@@ -1252,29 +1193,27 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
     ev0[3] = NULL;
     for (ev = ev0; editor_path == NULL && *ev != NULL; ev++) {
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
-	    editor_path = resolve_editor(editor, strlen(editor), nfiles,
-		files, argc_out, argv_out);
+	    editor_path = resolve_editor(editor, strlen(editor),
+		nfiles, files, argc_out, argv_out, NULL);
 	    if (editor_path == NULL && errno != ENOENT)
 		debug_return_str(NULL);
 	}
     }
     if (editor_path == NULL) {
 	/* def_editor could be a path, split it up, avoiding strtok() */
-	cp = editor = def_editor;
-	do {
-	    if ((ep = strchr(cp, ':')) != NULL)
-		len = ep - cp;
-	    else
-		len = strlen(cp);
-	    editor_path = resolve_editor(cp, len, nfiles, files, argc_out, argv_out);
+	const char *def_editor_end = def_editor + strlen(def_editor);
+	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
+	    editor_path = resolve_editor(cp, (size_t)(ep - cp), nfiles,
+		files, argc_out, argv_out, NULL);
 	    if (editor_path == NULL && errno != ENOENT)
 		debug_return_str(NULL);
-	    cp = ep + 1;
 	} while (ep != NULL && editor_path == NULL);
     }
     if (!editor_path) {
-	audit_failure(NewArgc, NewArgv, N_("%s: command not found"), editor);
-	sudo_warnx(U_("%s: command not found"), editor);
+	audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+	    editor ? editor : def_editor);
+	sudo_warnx(U_("%s: command not found"), editor ? editor : def_editor);
     }
     debug_return_str(editor_path);
 }

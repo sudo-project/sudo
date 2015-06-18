@@ -256,6 +256,7 @@ plugins/sudoers/def_data.h
 plugins/sudoers/def_data.in
 plugins/sudoers/defaults.c
 plugins/sudoers/defaults.h
+plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/find_path.c
 plugins/sudoers/getdate.c

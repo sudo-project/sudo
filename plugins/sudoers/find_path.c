@@ -46,39 +46,81 @@
 #include "sudoers.h"
 
 /*
+ * Check the given command against the specified whitelist (NULL-terminated).
+ * On success, rewrites cmnd based on the whitelist and returns true.
+ * On failure, returns false.
+ */
+static bool
+cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
+    char * const *whitelist)
+{
+    const char *cmnd_base;
+    char * const *wl;
+    debug_decl(cmnd_allowed, SUDOERS_DEBUG_UTIL)
+
+    if (!sudo_goodpath(cmnd, cmnd_sbp))
+	debug_return_bool(false);
+
+    if (whitelist == NULL)
+	debug_return_bool(true);	/* nothing to check */
+
+    /* We compare the base names to avoid excessive stat()ing. */
+    if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
+	debug_return_bool(false);	/* can't happen */
+    cmnd_base++;
+
+    for (wl = whitelist; *wl != NULL; wl++) {
+	struct stat sb;
+	const char *base;
+
+	if ((base = strrchr(*wl, '/')) == NULL)
+	    continue;		/* XXX - warn? */
+	base++;
+
+	if (strcmp(cmnd_base, base) != 0)
+	    continue;
+
+	if (sudo_goodpath(*wl, &sb) &&
+	    sb.st_dev == cmnd_sbp->st_dev && sb.st_ino == cmnd_sbp->st_ino) {
+	    /* Overwrite cmnd with safe version from whitelist. */
+	    if (strlcpy(cmnd, *wl, cmnd_size) < cmnd_size)
+		return true;
+		debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
+}
+
+/*
  * This function finds the full pathname for a command and
  * stores it in a statically allocated array, filling in a pointer
  * to the array.  Returns FOUND if the command was found, NOT_FOUND
  * if it was not found, or NOT_FOUND_DOT if it would have been found
  * but it is in '.' and IGNORE_DOT is set.
+ * The caller is responsible for freeing the output file.
  */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot)
+    const char *path, int ignore_dot, char * const *whitelist)
 {
-    static char command[PATH_MAX];
+    char command[PATH_MAX];
     const char *cp, *ep, *pathend;
     bool found = false;
     bool checkdot = false;
     int len;
     debug_decl(find_path, SUDOERS_DEBUG_UTIL)
 
-    if (strlen(infile) >= PATH_MAX) {
-	errno = ENAMETOOLONG;
-	debug_return_int(NOT_FOUND_ERROR);
-    }
-
     /*
      * If we were given a fully qualified or relative path
      * there is no need to look at $PATH.
      */
     if (strchr(infile, '/') != NULL) {
-	strlcpy(command, infile, sizeof(command));	/* paranoia */
-	if (sudo_goodpath(command, sbp)) {
-	    *outfile = command;
-	    debug_return_int(FOUND);
-	} else
-	    debug_return_int(NOT_FOUND);
+	if (strlcpy(command, infile, sizeof(command)) >= sizeof(command)) {
+	    errno = ENAMETOOLONG;
+	    debug_return_int(NOT_FOUND_ERROR);
+	}
+	found = cmnd_allowed(command, sizeof(command), sbp, whitelist);
+	goto done;
     }
 
     if (path == NULL)
@@ -106,7 +148,8 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	if ((found = sudo_goodpath(command, sbp)))
+	found = cmnd_allowed(command, sizeof(command), sbp, whitelist);
+	if (found)
 	    break;
     }
 
@@ -119,14 +162,16 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = sudo_goodpath(command, sbp);
+	found = cmnd_allowed(command, sizeof(command), sbp, whitelist);
 	if (found && ignore_dot)
 	    debug_return_int(NOT_FOUND_DOT);
     }
 
+done:
     if (found) {
-	*outfile = command;
+	if ((*outfile = strdup(command)) == NULL)
+	    debug_return_int(NOT_FOUND_ERROR);
 	debug_return_int(FOUND);
-    } else
-	debug_return_int(NOT_FOUND);
+    }
+    debug_return_int(NOT_FOUND);
 }

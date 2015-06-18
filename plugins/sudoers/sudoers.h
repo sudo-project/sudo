@@ -130,6 +130,7 @@ struct sudo_user {
 #define NOT_FOUND		1
 #define NOT_FOUND_DOT		2
 #define NOT_FOUND_ERROR		3
+#define NOT_FOUND_PATH		4
 
 /*
  * Various modes sudo can be in (based on arguments) in hex
@@ -223,10 +224,11 @@ struct timeval;
 #define YY_DECL int sudoerslex(void)
 
 /* goodpath.c */
-bool sudo_goodpath(const char *, struct stat *);
+bool sudo_goodpath(const char *path, struct stat *sbp);
 
 /* findpath.c */
-int find_path(const char *, char **, struct stat *, const char *, int);
+int find_path(const char *infile, char **outfile, struct stat *sbp,
+    const char *path, int ignore_dot, char * const *whitelist);
 
 /* check.c */
 int check_user(int validate, int mode);
@@ -368,5 +370,9 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
+
+/* editor.c */
+char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
+    int *argc_out, char ***argv_out, char * const *whitelist);
 
 #endif /* SUDOERS_SUDOERS_H */
