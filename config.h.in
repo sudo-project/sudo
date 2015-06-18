@@ -3,10 +3,6 @@
 #ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H
 
-/* Define to 1 if the `syslog' function returns a non-zero int to denote
-   failure. */
-#undef BROKEN_SYSLOG
-
 /* Define to 1 if you want the insults from the "classic" version sudo. */
 #undef CLASSIC_INSULTS
 

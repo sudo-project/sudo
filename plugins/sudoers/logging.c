@@ -77,37 +77,18 @@ static char *new_logline(const char *, int);
  * own nefarious purposes and may call openlog(3) and closelog(3).
  * Note that because we don't want to assume that all systems have
  * vsyslog(3) (HP-UX doesn't) "%m" will not be expanded.
- * Sadly this is a maze of #ifdefs.
  */
 static void
 mysyslog(int pri, const char *fmt, ...)
 {
-#ifdef BROKEN_SYSLOG
-    int i;
-#endif
     char buf[MAXSYSLOGLEN+1];
     va_list ap;
     debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
 
     va_start(ap, fmt);
-#ifdef LOG_NFACILITIES
     openlog("sudo", 0, def_syslog);
-#else
-    openlog("sudo", 0);
-#endif
     vsnprintf(buf, sizeof(buf), fmt, ap);
-#ifdef BROKEN_SYSLOG
-    /*
-     * Some versions of syslog(3) don't guarantee success and return
-     * an int (notably HP-UX < 10.0).  So, if at first we don't succeed,
-     * try, try again...
-     */
-    for (i = 0; i < MAXSYSLOGTRIES; i++)
-	if (syslog(pri, "%s", buf) == 0)
-	    break;
-#else
     syslog(pri, "%s", buf);
-#endif /* BROKEN_SYSLOG */
     va_end(ap);
     closelog();
     debug_return;

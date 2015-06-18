@@ -1828,12 +1828,7 @@ case "$host" in
 		esac
 
 		case "$host_os" in
-			hpux[[1-8]].*)
-			    AC_DEFINE(BROKEN_SYSLOG)
-			;;
 			hpux9.*)
-			    AC_DEFINE(BROKEN_SYSLOG)
-
 			    shadow_funcs="getspwuid"
 
 			    # DCE support (requires ANSI C compiler)
@@ -4237,7 +4232,6 @@ fi
 dnl
 dnl Autoheader templates
 dnl
-AH_TEMPLATE(BROKEN_SYSLOG, [Define to 1 if the `syslog' function returns a non-zero int to denote failure.])
 AH_TEMPLATE(CLASSIC_INSULTS, [Define to 1 if you want the insults from the "classic" version sudo.])
 AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twisted minds of CSOps.])
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])

@@ -55,7 +55,6 @@ struct strmap {
     int num;
 };
 
-#ifdef LOG_NFACILITIES
 static struct strmap facilities[] = {
 #ifdef LOG_AUTHPRIV
 	{ "authpriv",	LOG_AUTHPRIV },
@@ -73,7 +72,6 @@ static struct strmap facilities[] = {
 	{ "local7",	LOG_LOCAL7 },
 	{ NULL,		-1 }
 };
-#endif /* LOG_NFACILITIES */
 
 static struct strmap priorities[] = {
 	{ "alert",	LOG_ALERT },
@@ -777,7 +775,6 @@ store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.ival = false;
 	debug_return_bool(true);
     }
-#ifdef LOG_NFACILITIES
     if (!val)
 	debug_return_bool(false);
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
@@ -786,25 +783,18 @@ store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 	debug_return_bool(false);		/* not found */
 
     def->sd_un.ival = fac->num;
-#else
-    def->sd_un.ival = -1;
-#endif /* LOG_NFACILITIES */
     debug_return_bool(true);
 }
 
 static const char *
 logfac2str(int n)
 {
-#ifdef LOG_NFACILITIES
     struct strmap *fac;
     debug_decl(logfac2str, SUDOERS_DEBUG_DEFAULTS)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
 	;
     debug_return_const_str(fac->name);
-#else
-    return "default";
-#endif /* LOG_NFACILITIES */
 }
 
 static bool

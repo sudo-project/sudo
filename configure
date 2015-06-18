@@ -14959,14 +14959,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 		esac
 
 		case "$host_os" in
-			hpux[1-8].*)
-			    $as_echo "#define BROKEN_SYSLOG 1" >>confdefs.h
-
-			;;
 			hpux9.*)
-			    $as_echo "#define BROKEN_SYSLOG 1" >>confdefs.h
-
-
 			    shadow_funcs="getspwuid"
 
 			    # DCE support (requires ANSI C compiler)
@@ -26748,7 +26741,6 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
 
 
 
