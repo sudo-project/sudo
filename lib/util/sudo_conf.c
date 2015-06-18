@@ -169,24 +169,27 @@ parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 static int
 parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 {
-    const char *name, *path;
+    const char *entry_end = entry + strlen(entry);
+    const char *ep, *name, *path;
     struct sudo_conf_path_table *cur;
+    size_t namelen;
     debug_decl(parse_path, SUDO_DEBUG_UTIL)
 
-    /* Parse Path line */
-    name = entry;
-    path = strpbrk(entry, " \t");
+    /* Parse name. */
+    name = sudo_strsplit(entry, entry_end, " \t", &ep);
+    if (name == NULL)
+	goto bad;
+    namelen = (size_t)(ep - name);
+
+    /* Parse path. */
+    path = sudo_strsplit(NULL, entry_end, " \t", &ep);
     if (path == NULL)
 	goto bad;
-    while (isblank((unsigned char)*path))
-	path++;
-    if (*path != '/')
-	goto bad;
 
-    /* Match supported paths, ignore the rest. */
+    /* Match supported paths, ignoring unknown paths. */
     for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
-	if (strncasecmp(name, cur->pname, cur->pnamelen) == 0 &&
-	    isblank((unsigned char)name[cur->pnamelen])) {
+	if (namelen == cur->pnamelen &&
+	    strncasecmp(name, cur->pname, cur->pnamelen) == 0) {
 	    if ((cur->pval = strdup(path)) == NULL) {
 		sudo_warnx(U_("unable to allocate memory"));
 		debug_return_int(-1);
@@ -210,47 +213,36 @@ bad:
  * "Debug program /path/to/log flags,..."
  */
 static int
-parse_debug(const char *progname, const char *conf_file, unsigned int lineno)
+parse_debug(const char *entry, const char *conf_file, unsigned int lineno)
 {
     struct sudo_conf_debug *debug_spec;
     struct sudo_debug_file *debug_file = NULL;
-    const char *path, *flags, *cp = progname;
+    const char *ep, *path, *progname, *flags;
+    const char *entry_end = entry + strlen(entry);
     size_t pathlen, prognamelen;
     debug_decl(parse_debug, SUDO_DEBUG_UTIL)
 
     /* Parse progname. */
-    while (*cp != '\0' && !isblank((unsigned char)*cp))
-	cp++;
-    if (*cp == '\0')
+    progname = sudo_strsplit(entry, entry_end, " \t", &ep);
+    if (progname == NULL)
 	debug_return_int(false);	/* not enough fields */
-    prognamelen = (size_t)(cp - progname);
-    do {
-	cp++;
-    } while (isblank((unsigned char)*cp));
-    if (*cp == '\0')
-	debug_return_int(false);	/* not enough fields */
+    prognamelen = (size_t)(ep - progname);
 
     /* Parse path. */
-    path = cp;
-    while (*cp != '\0' && !isblank((unsigned char)*cp))
-	cp++;
-    if (*cp == '\0')
+    path = sudo_strsplit(NULL, entry_end, " \t", &ep);
+    if (path == NULL)
 	debug_return_int(false);	/* not enough fields */
-    pathlen = (size_t)(cp - path);
-    do {
-	cp++;
-    } while (isblank((unsigned char)*cp));
-    if (*cp == '\0')
-	debug_return_int(false);	/* not enough fields */
+    pathlen = (size_t)(ep - path);
 
     /* Remainder is flags (freeform). */
-    flags = cp;
+    flags = sudo_strsplit(NULL, entry_end, " \t", &ep);
+    if (flags == NULL)
+	debug_return_int(false);	/* not enough fields */
 
     /* If progname already exists, use it, else alloc a new one. */
     TAILQ_FOREACH(debug_spec, &sudo_conf_data.debugging, entries) {
 	if (strncmp(debug_spec->progname, progname, prognamelen) == 0 &&
-	    debug_spec->progname[prognamelen] == '\0' &&
-	    isblank((unsigned char)debug_spec->progname[prognamelen]))
+	    debug_spec->progname[prognamelen] == '\0')
 	    break;
     }
     if (debug_spec == NULL) {
@@ -292,59 +284,53 @@ oom:
  * "Plugin symbol /path/to/log args..."
  */
 static int
-parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
+parse_plugin(const char *entry, const char *conf_file, unsigned int lineno)
 {
     struct plugin_info *info = NULL;
     const char *ep, *path, *symbol;
+    const char *entry_end = entry + strlen(entry);
     char **options = NULL;
     size_t pathlen, symlen;
-    unsigned int nopts;
+    unsigned int nopts = 0;
     debug_decl(parse_plugin, SUDO_DEBUG_UTIL)
 
     /* Parse symbol. */
-    if (*cp == '\0')
+    symbol = sudo_strsplit(entry, entry_end, " \t", &ep);
+    if (symbol == NULL)
 	debug_return_int(false);	/* not enough fields */
-    symbol = cp;
-    while (*cp != '\0' && !isblank((unsigned char)*cp))
-	cp++;
-    symlen = (size_t)(cp - symbol);
-    while (isblank((unsigned char)*cp))
-	cp++;
+    symlen = (size_t)(ep - symbol);
 
     /* Parse path. */
-    if (*cp == '\0')
+    path = sudo_strsplit(NULL, entry_end, " \t", &ep);
+    if (path == NULL)
 	debug_return_int(false);	/* not enough fields */
-    path = cp;
-    while (*cp != '\0' && !isblank((unsigned char)*cp))
-	cp++;
-    pathlen = (size_t)(cp - path);
-    while (isblank((unsigned char)*cp))
-	cp++;
+    pathlen = (size_t)(ep - path);
 
     /* Split options into an array if present. */
-    /* XXX - use sudo_strsplit */
-    if (*cp != '\0') {
+    while (isblank((unsigned char)*ep))
+	ep++;
+    if (*ep != '\0') {
 	/* Count number of options and allocate array. */
-	for (ep = cp, nopts = 1; (ep = strpbrk(ep, " \t")) != NULL; nopts++) {
-	    while (isblank((unsigned char)*ep))
-		ep++;
+	const char *cp, *opt = ep;
+
+	/* Count and allocate options array. */
+	for (nopts = 0, cp = sudo_strsplit(opt, entry_end, " \t", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, entry_end, " \t", &ep)) {
+	    nopts++;
 	}
 	options = reallocarray(NULL, nopts + 1, sizeof(*options));
 	if (options == NULL)
 	    goto oom;
-	/* Fill in options array, there is at least one element. */
-	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; nopts++) {
+
+	/* Fill in options array. */
+	for (nopts = 0, cp = sudo_strsplit(opt, entry_end, " \t", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, entry_end, " \t", &ep)) {
 	    options[nopts] = strndup(cp, (size_t)(ep - cp));
 	    if (options[nopts] == NULL)
 		goto oom;
-	    while (isblank((unsigned char)*ep))
-		ep++;
-	    cp = ep;
+	    nopts++;
 	}
-	options[nopts] = strdup(cp);
-	if (options[nopts] == NULL)
-	    goto oom;
-	options[++nopts] = NULL;
+	options[nopts] = NULL;
     }
 
     info = calloc(sizeof(*info), 1);
@@ -363,6 +349,11 @@ parse_plugin(const char *cp, const char *conf_file, unsigned int lineno)
     debug_return_int(true);
 oom:
     sudo_warnx(U_("unable to allocate memory"));
+    if (options != NULL) {
+	while (nopts--)
+	    free(options[nopts]);
+	free(options);
+    }
     if (info != NULL) {
 	free(info->symbol_name);
 	free(info->path);
