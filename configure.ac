@@ -2590,7 +2590,7 @@ AC_CHECK_FUNCS([strlcat], [], [
     AC_LIBOBJ(strlcat)
     SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
 ])
-AC_FUNC_STRNLEN
+AC_CHECK_FUNC([strnlen], [AC_FUNC_STRNLEN], [AC_LIBOBJ(strnlen)])
 if test X"$ac_cv_func_strnlen_working" = X"yes"; then
     AC_DEFINE(HAVE_STRNLEN)
     AC_CHECK_FUNCS([strndup], [], [
@@ -2598,7 +2598,7 @@ if test X"$ac_cv_func_strnlen_working" = X"yes"; then
 	SUDO_APPEND_COMPAT_EXP(sudo_strndup)
     ])
 else
-    # Broken libc strnlen, use our own.
+    # Broken or missing strnlen, use our own.
     SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
     # Avoid libc strndup() since it is usually implemented using strnlen()
     AC_LIBOBJ(strndup)
