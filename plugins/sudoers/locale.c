@@ -84,7 +84,9 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		current_locale = SUDOERS_LOCALE_USER;
 		res = setlocale(LC_ALL, user_locale ? user_locale : "");
 		if (res != NULL && user_locale == NULL) {
-		    user_locale = strdup(setlocale(LC_ALL, NULL));
+		    user_locale = setlocale(LC_ALL, NULL);
+		    if (user_locale != NULL)
+			user_locale = strdup(user_locale);
 		    if (user_locale == NULL)
 			res = NULL;
 		}

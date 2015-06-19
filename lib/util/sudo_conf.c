@@ -539,8 +539,11 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
     size_t linesize = 0;
     debug_decl(sudo_conf_read, SUDO_DEBUG_UTIL)
 
-    prev_locale = strdup(setlocale(LC_ALL, NULL));
-    if (prev_locale == NULL) {
+    if ((prev_locale = setlocale(LC_ALL, NULL)) == NULL) {
+	sudo_warn("setlocale(LC_ALL, NULL)");
+	debug_return_int(-1);
+    }
+    if ((prev_locale = strdup(prev_locale)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
