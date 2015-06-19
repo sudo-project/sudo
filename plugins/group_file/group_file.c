@@ -34,9 +34,6 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
