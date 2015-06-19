@@ -57,7 +57,7 @@ main(int argc, char *argv[])
 {
     size_t len;
     FILE *fp;
-    char *cp, *dash, *line, lines[2][2048];
+    char *line, lines[2][2048];
     int lineno = 0;
     int which = 0;
 
@@ -78,14 +78,18 @@ main(int argc, char *argv[])
      * 60-80,40
      */
     while ((line = fgets(lines[which], sizeof(lines[which]), fp)) != NULL) {
+	char *cp, *last;
+
 	len = strcspn(line, "\n");
 	line[len] = '\0';
 
 	/* If we read the 2nd line, parse list of line lengths and check. */
 	if (which) {
 	    lineno++;
-	    for (cp = strtok(lines[1], ","); cp != NULL; cp = strtok(NULL, ",")) {
+	    for (cp = strtok_r(lines[1], ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
+		char *dash;
 		size_t maxlen;
+
 		/* May be either a number or a range. */
 		dash = strchr(cp, '-');
 		if (dash != NULL) {

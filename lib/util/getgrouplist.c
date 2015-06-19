@@ -72,8 +72,10 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     aix_setauthdb((char *) name);
 #endif
     if ((grset = getgrset(name)) != NULL) {
+	char *last;
 	const char *errstr;
-	for (cp = strtok(grset, ","); cp != NULL; cp = strtok(NULL, ",")) {
+
+	for (cp = strtok_r(grset, ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
 	    gid = sudo_strtoid(cp, NULL, NULL, &errstr);
 	    if (errstr == NULL && gid != basegid) {
 		if (ngroups == grpsize)

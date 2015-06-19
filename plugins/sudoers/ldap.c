@@ -425,7 +425,7 @@ struct sudo_nss sudo_nss_ldap = {
 static bool
 sudo_ldap_conf_add_ports(void)
 {
-    char *host, *port, defport[13];
+    char *host, *last, *port, defport[13];
     char hostbuf[LINE_MAX * 2];
     int len;
     debug_decl(sudo_ldap_conf_add_ports, SUDOERS_DEBUG_LDAP)
@@ -437,7 +437,7 @@ sudo_ldap_conf_add_ports(void)
 	debug_return_bool(false);
     }
 
-    for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
+    for ((host = strtok_r(ldap_conf.host, " \t", &last)); host; (host = strtok_r(NULL, " \t", &last))) {
 	if (hostbuf[0] != '\0')
 	    CHECK_STRLCAT(hostbuf, " ", sizeof(hostbuf));
 	CHECK_STRLCAT(hostbuf, host, sizeof(hostbuf));
@@ -471,20 +471,21 @@ static int
 sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 {
     const struct ldap_config_str *entry;
-    char *buf, *uri, *host, *cp, *port;
-    char hostbuf[LINE_MAX];
+    char *buf, hostbuf[LINE_MAX];
     int nldap = 0, nldaps = 0;
     int rc = -1;
     debug_decl(sudo_ldap_parse_uri, SUDOERS_DEBUG_LDAP)
 
     hostbuf[0] = '\0';
     STAILQ_FOREACH(entry, uri_list, entries) {
+	char *cp, *host, *last, *port, *uri;
+
 	buf = strdup(entry->val);
 	if (buf == NULL) {
 	    sudo_warnx(U_("unable to allocate memory"));
 	    goto done;
 	}
-	for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
+	for ((uri = strtok_r(buf, " \t", &last)); uri != NULL; (uri = strtok_r(NULL, " \t", &last))) {
 	    if (strncasecmp(uri, "ldap://", 7) == 0) {
 		nldap++;
 		host = uri + 7;

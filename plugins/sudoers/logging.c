@@ -646,7 +646,7 @@ send_mail(const char *fmt, ...)
 	    break;
 	case 0:
 	    {
-		char *argv[MAX_MAILFLAGS + 1];
+		char *last, *argv[MAX_MAILFLAGS + 1];
 		char *mflags, *mpath = def_mailerpath;
 		int i;
 
@@ -673,10 +673,10 @@ send_mail(const char *fmt, ...)
 		    argv[0] = mpath;
 
 		i = 1;
-		if ((p = strtok(mflags, " \t"))) {
+		if ((p = strtok_r(mflags, " \t", &last))) {
 		    do {
 			argv[i] = p;
-		    } while (++i < MAX_MAILFLAGS && (p = strtok(NULL, " \t")));
+		    } while (++i < MAX_MAILFLAGS && (p = strtok_r(NULL, " \t", &last)));
 		}
 		argv[i] = NULL;
 

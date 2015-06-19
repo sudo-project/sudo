@@ -125,13 +125,15 @@ group_plugin_load(char *plugin_info)
             }
         }
 	if (ac != 0) 	{
+	    char *last;
+
 	    argv = malloc(ac * sizeof(char *));
 	    if (argv == NULL) {
 		perror(NULL);
 		return -1;
 	    }
 	    ac = 0;
-	    for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
+	    for ((cp = strtok_r(args, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last)))
 		argv[ac++] = cp;
 	}
     }

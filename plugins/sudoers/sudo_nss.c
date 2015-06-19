@@ -69,7 +69,7 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     FILE *fp;
-    char *cp, *line = NULL;
+    char *line = NULL;
     size_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
@@ -86,6 +86,8 @@ sudo_read_nss(void)
 	goto nomatch;
 
     while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+	char *cp, *last;
+
 	/* Skip blank or comment lines */
 	if (*line == '\0')
 	    continue;
@@ -95,7 +97,7 @@ sudo_read_nss(void)
 	    continue;
 
 	/* Parse line */
-	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
+	for ((cp = strtok_r(line + 8, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		SUDO_NSS_CHECK_UNUSED(sudo_nss_file, "files");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
@@ -149,7 +151,7 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     FILE *fp;
-    char *cp, *ep, *line = NULL;
+    char *cp, *ep, *last, *line = NULL;
     size_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
@@ -178,7 +180,7 @@ sudo_read_nss(void)
 	    continue;
 
 	/* Parse line */
-	for ((cp = strtok(cp, ",")); cp != NULL; (cp = strtok(NULL, ","))) {
+	for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
 	    /* Trim leading whitespace. */
 	    while (isspace((unsigned char)*cp))
 		cp++;

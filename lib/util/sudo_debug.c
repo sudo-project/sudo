@@ -148,7 +148,7 @@ static struct sudo_debug_output *
 sudo_debug_new_output(struct sudo_debug_instance *instance,
     struct sudo_debug_file *debug_file)
 {
-    char *buf, *cp, *subsys, *pri;
+    char *buf, *cp, *last, *subsys, *pri;
     struct sudo_debug_output *output;
     unsigned int i, j;
 
@@ -205,7 +205,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     buf = strdup(debug_file->debug_flags);
     if (buf == NULL)
 	goto bad;
-    for ((cp = strtok(buf, ",")); cp != NULL; (cp = strtok(NULL, ","))) {
+    for ((cp = strtok_r(buf, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
 	/* Should be in the form subsys@pri. */
 	subsys = cp;
 	if ((pri = strchr(cp, '@')) == NULL)

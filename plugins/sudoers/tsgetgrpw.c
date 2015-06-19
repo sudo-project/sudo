@@ -274,11 +274,13 @@ next_entry:
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';
     if (*colon != '\0') {
+	char *last;
+
 	gr.gr_mem = gr_mem;
-	cp = strtok(colon, ",");
+	cp = strtok_r(colon, ",", &last);
 	for (n = 0; cp != NULL && n < GRMEM_MAX; n++) {
 	    gr.gr_mem[n] = cp;
-	    cp = strtok(NULL, ",");
+	    cp = strtok_r(NULL, ",", &last);
 	}
 	gr.gr_mem[n++] = NULL;
     } else

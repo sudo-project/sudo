@@ -247,7 +247,7 @@ main(int argc, char *argv[])
 	case 'f':
 	    /* Set the replay filter. */
 	    def_filter = false;
-	    for (cp = strtok(optarg, ","); cp; cp = strtok(NULL, ",")) {
+	    for (cp = strtok_r(optarg, ",", &ep); cp; cp = strtok_r(NULL, ",", &ep)) {
 		if (strcmp(cp, "stdout") == 0)
 		    io_log_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)

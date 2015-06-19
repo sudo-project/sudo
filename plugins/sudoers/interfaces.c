@@ -57,14 +57,14 @@ static struct interface_list interfaces;
 bool
 set_interfaces(const char *ai)
 {
-    char *addrinfo, *addr, *mask;
+    char *addrinfo, *addr, *mask, *last;
     struct interface *ifp;
     bool rval = false;
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
     if ((addrinfo = strdup(ai)) == NULL)
 	debug_return_bool(false);
-    for (addr = strtok(addrinfo, " \t"); addr != NULL; addr = strtok(NULL, " \t")) {
+    for (addr = strtok_r(addrinfo, " \t", &last); addr != NULL; addr = strtok_r(NULL, " \t", &last)) {
 	/* Separate addr and mask. */
 	if ((mask = strchr(addr, '/')) == NULL)
 	    continue;

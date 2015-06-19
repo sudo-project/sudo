@@ -124,7 +124,7 @@ group_plugin_load(char *plugin_info)
     if (args != NULL) {
 	int ac = 0;
 	bool wasblank = true;
-	char *cp;
+	char *cp, *last;
 
         for (cp = args; *cp != '\0'; cp++) {
             if (isblank((unsigned char)*cp)) {
@@ -134,14 +134,14 @@ group_plugin_load(char *plugin_info)
                 ac++;
             }
         }
-	if (ac != 0) 	{
+	if (ac != 0) {
 	    argv = reallocarray(NULL, ac, sizeof(char *));
 	    if (argv == NULL) {
 		sudo_warnx(U_("unable to allocate memory"));
 		goto done;
 	    }
 	    ac = 0;
-	    for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
+	    for ((cp = strtok_r(args, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last)))
 		argv[ac++] = cp;
 	}
     }
