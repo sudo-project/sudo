@@ -111,18 +111,17 @@ get_interfaces(void)
 void
 dump_interfaces(const char *ai)
 {
-    char *cp, *addrinfo;
+    const char *cp, *ep;
+    const char *ai_end = ai + strlen(ai);
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
-    if ((addrinfo = strdup(ai)) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
-    } else {
-	sudo_printf(SUDO_CONV_INFO_MSG,
-	    _("Local IP address and netmask pairs:\n"));
-	for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))
-	    sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
-
-	free(addrinfo);
+    sudo_printf(SUDO_CONV_INFO_MSG,
+	_("Local IP address and netmask pairs:\n"));
+    cp = sudo_strsplit(ai, ai_end, " \t", &ep);
+    while (cp != NULL) {
+	sudo_printf(SUDO_CONV_INFO_MSG, "\t%.*s\n", (int)(ep - cp), cp);
+	cp = sudo_strsplit(NULL, ai_end, " \t", &ep);
     }
+
     debug_return;
 }
