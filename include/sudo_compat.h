@@ -23,9 +23,7 @@
 #define SUDO_COMPAT_H
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stddef.h>
-#endif
+#include <stddef.h>
 #include <stdarg.h>
 
 /*

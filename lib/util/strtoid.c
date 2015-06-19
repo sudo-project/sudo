@@ -19,14 +19,8 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
+#include <stddef.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)

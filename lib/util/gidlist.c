@@ -19,14 +19,8 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
+#include <stddef.h>
 #include <grp.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"

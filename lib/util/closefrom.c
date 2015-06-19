@@ -22,14 +22,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
+#include <stddef.h>
 #include <fcntl.h>
 #include <limits.h>
 #ifdef HAVE_PSTAT_GETPROC
