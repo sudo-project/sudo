@@ -2641,7 +2641,6 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
-as_fn_append ac_header_list " malloc.h"
 as_fn_append ac_header_list " netgroup.h"
 as_fn_append ac_header_list " paths.h"
 as_fn_append ac_header_list " spawn.h"
@@ -16821,8 +16820,6 @@ _ACEOF
 fi
 
 done
-
-
 
 
 

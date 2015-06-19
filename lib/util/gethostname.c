@@ -26,9 +26,6 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <unistd.h>
 
 #include "sudo_compat.h"

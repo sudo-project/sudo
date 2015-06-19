@@ -28,9 +28,6 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
