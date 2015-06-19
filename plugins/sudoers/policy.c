@@ -384,7 +384,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     debug_return_int(flags);
 
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     debug_return_int(MODE_ERROR);
 }
@@ -575,7 +575,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     debug_return_int(true);
 
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     while (info_len--)
 	free(command_info[info_len]);

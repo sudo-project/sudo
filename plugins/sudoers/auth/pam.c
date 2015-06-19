@@ -370,7 +370,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    goto done;
 		}
 		if ((pr->resp = strdup(pass)) == NULL) {
-		    sudo_warnx(U_("unable to allocate memory"));
+		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		    ret = PAM_BUF_ERR;
 		    goto done;
 		}

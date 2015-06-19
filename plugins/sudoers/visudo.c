@@ -155,7 +155,7 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "visudo");
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
@@ -215,7 +215,7 @@ main(int argc, char *argv[])
 	usage(1);
 
     if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
@@ -299,13 +299,13 @@ get_editor(int *editor_argc, char ***editor_argv)
 	}
 	whitelist = reallocarray(NULL, whitelist_len + 1, sizeof(char *));
 	if (whitelist == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	whitelist_len = 0;
 	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
 	    whitelist[whitelist_len] = strndup(cp, (size_t)(ep - cp));
 	    if (whitelist[whitelist_len] == NULL)
-		sudo_fatalx(U_("unable to allocate memory"));
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    whitelist_len++;
 	}
 	whitelist[whitelist_len] = NULL;
@@ -435,7 +435,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     /* Create the temp file if needed and set timestamp. */
     if (sp->tpath == NULL) {
 	if (asprintf(&sp->tpath, "%s.tmp", sp->path) == -1)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	tfd = open(sp->tpath, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (tfd < 0)
 	    sudo_fatal("%s", sp->tpath);
@@ -971,7 +971,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     if (entry == NULL) {
 	entry = calloc(1, sizeof(*entry));
 	if (entry == NULL || (entry->path = strdup(path)) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	/* entry->modified = 0; */
 	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	/* entry->tpath = NULL; */
@@ -1015,7 +1015,7 @@ get_hostname(void)
 	if ((p = strchr(user_host, '.'))) {
 	    *p = '\0';
 	    if ((user_shost = strdup(user_host)) == NULL)
-		sudo_fatalx(U_("unable to allocate memory"));
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    *p = '.';
 	} else {
 	    user_shost = user_host;
@@ -1111,7 +1111,7 @@ check_aliases(bool strict, bool quiet)
 
     alias_freelist = rbcreate(alias_compare);
     if (alias_freelist == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
 

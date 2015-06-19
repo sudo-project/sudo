@@ -181,7 +181,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Fill in user_info with user name, uid, cwd, etc. */
     if ((user_info = get_user_info(&user_details)) == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Disable core dumps if not enabled in sudo.conf. */
     disable_coredumps();
@@ -358,7 +358,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
     if (ud->ngroups > 0) {
 	ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
 	if (ud->groups == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	/* No error on insufficient space if user specified max_groups. */
@@ -377,7 +377,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	    free(ud->groups);
 	    ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
 	    if (ud->groups == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		goto done;
 	    }
 	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
@@ -443,7 +443,7 @@ get_user_groups(struct user_details *ud)
     }
     debug_return_str(gid_list);
 oom:
-    sudo_fatalx(U_("unable to allocate memory"));
+    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 }
 
 /*

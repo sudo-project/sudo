@@ -1109,14 +1109,14 @@ init_parser(const char *path, bool quiet)
     init_lexer();
 
     if (!init_aliases()) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rval = false;
     }
 
     free(sudoers);
     if (path != NULL) {
 	if ((sudoers = strdup(path)) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    rval = false;
 	}
     } else {

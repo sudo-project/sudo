@@ -235,7 +235,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			    if (cs->role != NULL) {
 				user_role = strdup(cs->role);
 				if (user_role == NULL) {
-				    sudo_warnx(U_("unable to allocate memory"));
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 				    SET(validated, VALIDATE_ERROR);
 				    goto done;
 				}
@@ -247,7 +247,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			    if (cs->type != NULL) {
 				user_type = strdup(cs->type);
 				if (user_type == NULL) {
-				    sudo_warnx(U_("unable to allocate memory"));
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 				    SET(validated, VALIDATE_ERROR);
 				    goto done;
 				}
@@ -262,7 +262,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			    if (cs->privs != NULL) {
 				runas_privs = strdup(cs->privs);
 				if (runas_privs == NULL) {
-				    sudo_warnx(U_("unable to allocate memory"));
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 				    SET(validated, VALIDATE_ERROR);
 				    goto done;
 				}
@@ -274,7 +274,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			    if (cs->limitprivs != NULL) {
 				runas_limitprivs = strdup(cs->limitprivs);
 				if (runas_limitprivs == NULL) {
-				    sudo_warnx(U_("unable to allocate memory"));
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 				    SET(validated, VALIDATE_ERROR);
 				    goto done;
 				}

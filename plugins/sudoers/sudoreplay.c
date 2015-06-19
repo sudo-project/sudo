@@ -486,7 +486,7 @@ replay_session(const double max_wait, const char *decimal)
 			    reallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
 			    reallocarray(NULL, iovmax = 32, sizeof(*iov));
 			if (iov == NULL)
-			    sudo_fatalx(U_("unable to allocate memory"));
+			    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		    }
 		    linelen = (size_t)(nl - line) + 1;
 		    iov[iovcnt].iov_base = line;
@@ -682,7 +682,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 
 	/* Allocate new search node */
 	if ((sn = calloc(1, sizeof(*sn))) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sn->type = type;
 	sn->or = or;
 	sn->negated = not;
@@ -794,7 +794,7 @@ parse_logfile(char *logfile)
      *  3) command with args
      */
     if ((li = calloc(1, sizeof(*li))) == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (getline(&buf, &bufsize, fp) == -1 ||
 	getline(&li->cwd, &cwdsize, fp) == -1 ||
 	getline(&li->cmd, &cmdsize, fp) == -1) {
@@ -834,7 +834,7 @@ parse_logfile(char *logfile)
 	goto bad;
     }
     if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* runas user */
     cp = ep + 1;
@@ -843,7 +843,7 @@ parse_logfile(char *logfile)
 	goto bad;
     }
     if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* runas group */
     cp = ep + 1;
@@ -853,7 +853,7 @@ parse_logfile(char *logfile)
     }
     if (cp != ep) {
 	if ((li->runas_group = strndup(cp, (size_t)(ep - cp))) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
 
     /* tty, followed by optional rows + columns */
@@ -861,11 +861,11 @@ parse_logfile(char *logfile)
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
 	if ((li->tty = strdup(cp)) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     } else {
 	/* tty followed by rows + columns */
 	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	cp = ep + 1;
 	/* need to NULL out separator to use strtonum() */
 	if ((ep = strchr(cp, ':')) != NULL) {
@@ -1021,11 +1021,11 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 		sessions_size = 36 * 36 / 2;
 	    sessions = reallocarray(sessions, sessions_size, 2 * sizeof(char *));
 	    if (sessions == NULL)
-		sudo_fatalx(U_("unable to allocate memory"));
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sessions_size *= 2;
 	}
 	if ((sessions[sessions_len] = strdup(dp->d_name)) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sessions_len++;
     }
     closedir(d);

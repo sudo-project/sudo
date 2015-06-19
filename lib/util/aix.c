@@ -202,7 +202,7 @@ aix_prep_user_v1(char *user, const char *tty)
     len = asprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
 	user, '\0', user, '\0', user, '\0', tty ? tty : "", '\0');
     if (len == -1) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
     (void)usrinfo(SETUINFO, info, len);

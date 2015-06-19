@@ -159,7 +159,7 @@ sudoers_policy_init(void *info, char * const envp[])
     bindtextdomain("sudoers", LOCALEDIR);
 
     if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
 
@@ -294,7 +294,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	NewArgc = 1;
 	NewArgv = reallocarray(NULL, NewArgc + 1, sizeof(char *));
 	if (NewArgv == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    rval = -1;
 	    goto done;
 	}
@@ -305,7 +305,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	NewArgc = argc;
 	NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
 	if (NewArgv == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    rval = -1;
 	    goto done;
 	}
@@ -314,7 +314,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
 	    NewArgv[0] = strdup(runas_pw->pw_shell);
 	    if (NewArgv[0] == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		free(NewArgv);
 		rval = -1;
 		goto done;
@@ -371,7 +371,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     if (safe_cmnd == NULL) {
 	if ((safe_cmnd = strdup(user_cmnd)) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    rval = -1;
 	    goto done;
 	}
@@ -645,7 +645,7 @@ init_vars(char * const envp[])
     debug_decl(init_vars, SUDOERS_DEBUG_PLUGIN)
 
     if (!sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale)) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_bool(false);
     }
 
@@ -731,7 +731,7 @@ set_cmnd(void)
     /* Allocate user_stat for find_path() and match functions. */
     user_stat = calloc(1, sizeof(struct stat));
     if (user_stat == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(NOT_FOUND_ERROR);
     }
 
@@ -775,7 +775,7 @@ set_cmnd(void)
 	    for (size = 0, av = NewArgv + 1; *av; av++)
 		size += strlen(*av) + 1;
 	    if (size == 0 || (user_args = malloc(size)) == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		debug_return_int(-1);
 	    }
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {

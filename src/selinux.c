@@ -82,7 +82,7 @@ audit_role_change(const security_context_t old_context,
 	rc = asprintf(&message, "newrole: old-context=%s new-context=%s",
 	    old_context, new_context);
 	if (rc == -1)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
 	    message, NULL, NULL, ttyn, result);
 	if (rc <= 0)
@@ -289,7 +289,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
      * Convert "context" back into a string and verify it.
      */
     if ((new_context = strdup(context_str(context))) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
     if (security_check_context(new_context) < 0) {
@@ -412,7 +412,7 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
 	continue;
     nargv = reallocarray(NULL, argc + 2, sizeof(char *));
     if (nargv == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
     }
     if (noexec)

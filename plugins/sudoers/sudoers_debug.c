@@ -106,7 +106,8 @@ oom:
 	free(debug_file->debug_flags);
 	free(debug_file);
     }
-    sudo_warnx_nodebug(U_("unable to allocate memory"));
+    sudo_warnx_nodebug(U_("%s: %s"), "sudoers_debug_parse_flags",
+	U_("unable to allocate memory"));
     return false;
 }
 

@@ -445,7 +445,7 @@ sudo_ldap_conf_add_ports(void)
 
     free(ldap_conf.host);
     if ((ldap_conf.host = strdup(hostbuf)) == NULL)
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     debug_return_bool(ldap_conf.host != NULL);
 
 overflow:
@@ -476,7 +476,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 
 	buf = strdup(entry->val);
 	if (buf == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	for ((uri = strtok_r(buf, " \t", &last)); uri != NULL; (uri = strtok_r(NULL, " \t", &last))) {
@@ -528,7 +528,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
     /* Store parsed URI(s) in host for ldap_create() or ldap_init(). */
     free(ldap_conf.host);
     if ((ldap_conf.host = strdup(hostbuf)) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
 
@@ -561,7 +561,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 	len += strlen(uri->val) + 1;
     }
     if (len == 0 || (buf = malloc(len)) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     } else {
 	char *cp = buf;
 
@@ -913,7 +913,7 @@ sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
 		    digest->digest_type = digest_type;
 		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
 		    if (digest->digest_str == NULL) {
-			sudo_warnx(U_("unable to allocate memory"));
+			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			debug_return_ptr(NULL);
 		    }
 		    cp = ep + 1;
@@ -1059,7 +1059,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
 	if ((var = strdup((*p)->bv_val)) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	DPRINTF2("ldap sudoOption: '%s'", var);
@@ -1338,7 +1338,7 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
 
     debug_return_bool(true);
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (result)
 	ldap_msgfree(result);
     debug_return_bool(false);
@@ -1511,7 +1511,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     }
     debug_return_bool(true);
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     ldap_msgfree(result);
     debug_return_bool(false);
 overflow:
@@ -1587,7 +1587,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     if (ldap_conf.timed)
 	sz += TIMEFILTER_LENGTH;
     if ((buf = malloc(sz)) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_str(NULL);
     }
     *buf = '\0';
@@ -1723,7 +1723,7 @@ sudo_ldap_build_pass2(void)
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     }
     if (len == -1)
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     debug_return_str(filt);
 }
@@ -1747,7 +1747,7 @@ sudo_ldap_decode_secret(const char *secret)
 	reslen = ((strlen(secret) + 3) / 4 * 3);
 	result = malloc(reslen + 1);
 	if (result == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	} else {
 	    len = base64_decode(secret, result, reslen);
 	    if (len == (size_t)-1) {
@@ -1777,7 +1777,7 @@ sudo_ldap_read_secret(const char *path)
 	    ldap_conf.bindpw = sudo_ldap_decode_secret(buf);
 	    if (ldap_conf.bindpw == NULL) {
 		if ((ldap_conf.bindpw = strdup(buf)) == NULL)
-		    sudo_warnx(U_("unable to allocate memory"));
+		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    }
 	    free(ldap_conf.binddn);
 	    ldap_conf.binddn = ldap_conf.rootbinddn;
@@ -1830,7 +1830,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 
 		    free(*(char **)(cur->valp));
 		    if (*value && (cp = strdup(value)) == NULL) {
-			sudo_warnx(U_("unable to allocate memory"));
+			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			debug_return_bool(false);
 		    }
 		    *(char **)(cur->valp) = cp;
@@ -1845,7 +1845,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		    if (len > 0) {
 			head = (struct ldap_config_str_list *)cur->valp;
 			if ((str = malloc(sizeof(*str) + len)) == NULL) {
-			    sudo_warnx(U_("unable to allocate memory"));
+			    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			    debug_return_bool(false);
 			}
 			memcpy(str->val, value, len + 1);
@@ -1941,7 +1941,7 @@ sudo_ldap_read_config(void)
     STAILQ_INIT(&ldap_conf.netgroup_base);
 
     if (ldap_conf.search_filter == NULL || ldap_conf.netgroup_search_filter == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_bool(false);
     }
 
@@ -1974,7 +1974,7 @@ sudo_ldap_read_config(void)
     if (!ldap_conf.host) {
 	ldap_conf.host = strdup("localhost");
 	if (ldap_conf.host == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
     }
@@ -2127,7 +2127,7 @@ sudo_ldap_read_config(void)
 	cp = ldap_conf.search_filter;
 	ldap_conf.search_filter = malloc(len + 3);
 	if (ldap_conf.search_filter == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
 	ldap_conf.search_filter[0] = '(';
@@ -2224,7 +2224,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
     STAILQ_FOREACH(base, &ldap_conf.base, entries) {
@@ -3021,7 +3021,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     /* Create a handle container. */
     handle = calloc(1, sizeof(struct sudo_ldap_handle));
     if (handle == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rc = -1;
 	goto done;
     }
@@ -3054,7 +3054,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
     DPRINTF1("Looking for cn=defaults: %s", filt);
@@ -3367,7 +3367,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      */
     lres = sudo_ldap_result_alloc();
     if (lres == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_ptr(NULL);
     }
     for (pass = 0; pass < 2; pass++) {
@@ -3395,7 +3395,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		/* Add the seach result to list of search results. */
 		DPRINTF1("adding search result");
 		if (sudo_ldap_result_add_search(lres, ld, result) == NULL) {
-		    sudo_warnx(U_("unable to allocate memory"));
+		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		    free(filt);
 		    sudo_ldap_result_free(lres);
 		    debug_return_ptr(NULL);
@@ -3406,7 +3406,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 			sudo_ldap_check_host(ld, entry)) {
 			lres->host_matches = true;
 			if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
-			    sudo_warnx(U_("unable to allocate memory"));
+			    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			    free(filt);
 			    sudo_ldap_result_free(lres);
 			    debug_return_ptr(NULL);
@@ -3494,7 +3494,7 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
      */
     result = sudo_ldap_result_alloc();
     if (result == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_ptr(NULL);
     }
 
@@ -3510,7 +3510,7 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
      */
     LDAP_FOREACH(entry, last->ldap, last->searchresult) {
 	if (sudo_ldap_result_add_entry(result, entry) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudo_ldap_result_free(result);
 	    result = NULL;
 	    break;

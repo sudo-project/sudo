@@ -188,7 +188,7 @@ do_logfile(const char *msg)
 	    if (!ferror(fp))
 		rval = true;
 	} else {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
 	(void) fclose(fp);
     }
@@ -912,7 +912,7 @@ new_logline(const char *message, int serrno)
     debug_return_str(line);
 oom:
     free(evstr);
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     debug_return_str(NULL);
 toobig:
     free(evstr);

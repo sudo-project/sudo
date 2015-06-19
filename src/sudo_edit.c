@@ -153,7 +153,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
 	len = asprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, cp);
     }
     if (len == -1)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     tfd = mkstemps(*tfile, suff ? strlen(suff) : 0);
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"%s -> %s, fd %d", ofile, *tfile, tfd);
@@ -374,7 +374,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     sesh_nargs = 3 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
     *sesh_ap++ = "sesh";
@@ -469,7 +469,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     sesh_nargs = 3 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
     *sesh_ap++ = "sesh";
@@ -581,7 +581,7 @@ sudo_edit(struct command_details *command_details)
     /* Copy editor files to temporaries. */
     tf = calloc(nfiles, sizeof(*tf));
     if (tf == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto cleanup;
     }
 #ifdef HAVE_SELINUX
@@ -601,7 +601,7 @@ sudo_edit(struct command_details *command_details)
     nargc = editor_argc + nfiles;
     nargv = reallocarray(NULL, nargc + 1, sizeof(char *));
     if (nargv == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto cleanup;
     }
     for (ac = 0; ac < editor_argc; ac++)

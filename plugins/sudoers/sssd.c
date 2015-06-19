@@ -160,7 +160,7 @@ sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
 
     debug_return_bool(true);
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     sudo_sss_attrfree(dst);
     debug_return_bool(false);
 }
@@ -192,13 +192,13 @@ sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
     dst->num_attrs = 0;
     dst->attrs = reallocarray(NULL, src->num_attrs, sizeof(struct sss_sudo_attr));
     if (dst->attrs == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_bool(false);
     }
 
     for (i = 0; i < src->num_attrs; ++i) {
 	if (!sudo_sss_attrcpy(dst->attrs + i, src->attrs + i)) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    dst->num_attrs = i;
 	    sudo_sss_rulefree(dst);
 	    debug_return_bool(false);
@@ -236,14 +236,14 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "malloc: cnt=%d", in_res->num_rules);
 
     if ((out_res = calloc(1, sizeof(struct sss_sudo_result))) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_ptr(NULL);
     }
     if (in_res->num_rules > 0) {
 	out_res->rules =
 	    reallocarray(NULL, in_res->num_rules, sizeof(struct sss_sudo_rule));
 	if (out_res->rules == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(out_res);
 	    debug_return_ptr(NULL);
 	}
@@ -279,7 +279,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	    struct sss_sudo_rule *rules =
 		reallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
 	    if (out_res->rules == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		while (l--) {
 		    sudo_sss_rulefree(out_res->rules + l);
 		}
@@ -324,7 +324,7 @@ sudo_sss_open(struct sudo_nss *nss)
     /* Create a handle container. */
     handle = malloc(sizeof(struct sudo_sss_handle));
     if (handle == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(ENOMEM);
     }
 
@@ -916,7 +916,7 @@ sudo_sss_extract_digest(char **cmnd, struct sudo_digest *digest)
 		    digest->digest_type = digest_type;
 		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
 		    if (digest->digest_str == NULL) {
-			sudo_warnx(U_("unable to allocate memory"));
+			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			debug_return_ptr(NULL);
 		    }
 		    cp = ep + 1;
@@ -1049,7 +1049,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'",
 	 val_array[i]);
 	if ((v = strdup(val_array[i])) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 

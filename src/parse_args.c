@@ -180,7 +180,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 
     env_add = reallocarray(NULL, env_size, sizeof(char *));
     if (env_add == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Pass progname to plugin so it can call initprogname() */
     progname = getprogname();
@@ -202,7 +202,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     i = sudo_conf_max_groups();
     if (i != -1) {
 	if (asprintf(&cp, "%d", i) == -1)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudo_settings[ARG_MAX_GROUPS].value = cp;
     }
 
@@ -370,7 +370,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 
 		tmp = reallocarray(env_add, env_size, 2 * sizeof(char *));
 		if (tmp == NULL)
-		    sudo_fatalx(U_("unable to allocate memory"));
+		    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		env_add = tmp;
 		env_size *= 2;
 	    }
@@ -466,7 +466,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 
 	    cmnd = dst = reallocarray(NULL, cmnd_size, 2);
 	    if (cmnd == NULL)
-		sudo_fatalx(U_("unable to allocate memory"));
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
@@ -485,7 +485,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 
 	av = reallocarray(NULL, ac + 1, sizeof(char *));
 	if (av == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = "-c";

@@ -96,7 +96,7 @@ disable_execute(char *const envp[])
 #endif
     nenvp = reallocarray(NULL, env_size, sizeof(*envp));
     if (nenvp == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     memcpy(nenvp, envp, env_len * sizeof(*envp));
     nenvp[env_len] = NULL;
 
@@ -108,14 +108,14 @@ disable_execute(char *const envp[])
 	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {
 	int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
 	    sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
 	if (len == -1)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	nenvp[preload_idx] = preload;
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR

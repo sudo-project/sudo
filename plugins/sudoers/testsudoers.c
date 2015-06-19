@@ -130,7 +130,7 @@ main(int argc, char *argv[])
     initprogname(argc > 0 ? argv[0] : "testsudoers");
 
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
@@ -187,7 +187,7 @@ main(int argc, char *argv[])
     if (pwfile)
 	setpwfile(pwfile);
     if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (argc < 2) {
 	if (!dflag)
@@ -214,7 +214,7 @@ main(int argc, char *argv[])
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
 	if ((user_shost = strdup(user_host)) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	*p = '.';
     } else {
 	user_shost = user_host;
@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 	    size += strlen(*from) + 1;
 
 	if ((user_args = malloc(size)) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))

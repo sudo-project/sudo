@@ -62,7 +62,7 @@ sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp
     if (ngids != 0) {
 	gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
 	if (gids == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_int(-1);
 	}
 	ngids = 0;

@@ -52,7 +52,7 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 
     pfd_new = malloc(sizeof(*pfd));
     if (pfd_new == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     pfd_new->lowfd = fd;
     pfd_new->highfd = fd;
     pfd_new->flags = fcntl(fd, F_GETFD);
@@ -135,7 +135,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     /* Create bitmap of preserved (relocated) fds.  */
     fdsp = calloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
     if (fdsp == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     TAILQ_FOREACH(pfd, pfds, entries) {
 	FD_SET(pfd->lowfd, fdsp);
     }

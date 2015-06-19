@@ -516,7 +516,7 @@ init_defaults(void)
 
     debug_return_bool(true);
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     debug_return_bool(false);
 }
 
@@ -720,7 +720,7 @@ store_str(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.str = NULL;
     } else {
 	if ((def->sd_un.str = strdup(val)) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_int(-1);
 	}
     }
@@ -880,7 +880,7 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
     if (op == add) {
 	cur = calloc(1, sizeof(struct list_member));
 	if (cur == NULL || (cur->value = strndup(val, len)) == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(cur);
 	    debug_return_bool(false);
 	}

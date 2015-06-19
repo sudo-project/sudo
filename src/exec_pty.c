@@ -687,7 +687,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct i
 
     /* Allocate and add to head of list. */
     if ((iob = malloc(sizeof(*iob))) == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, io_callback, iob);
     iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, io_callback, iob);
     iob->len = 0;
@@ -695,7 +695,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct i
     iob->action = action;
     iob->buf[0] = '\0';
     if (iob->revent == NULL || iob->wevent == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     SLIST_INSERT_HEAD(head, iob, entries);
 
     debug_return;

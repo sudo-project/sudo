@@ -165,7 +165,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	prelen = strlen(prefix);
     dst = path = malloc(prelen + PATH_MAX);
     if (path == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
     *path = '\0';

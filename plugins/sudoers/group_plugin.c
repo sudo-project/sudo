@@ -131,7 +131,7 @@ group_plugin_load(char *plugin_info)
 	if (ac != 0) {
 	    argv = reallocarray(NULL, ac, sizeof(char *));
 	    if (argv == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		goto done;
 	    }
 	    ac = 0;

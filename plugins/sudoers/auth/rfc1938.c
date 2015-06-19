@@ -109,7 +109,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     if (np_size < op_len + challenge_len + 7) {
 	char *p = realloc(new_prompt, op_len + challenge_len + 7);
 	if (p == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_int(AUTH_FATAL);
 	}
 	np_size = op_len + challenge_len + 7;

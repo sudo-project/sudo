@@ -233,7 +233,7 @@ env_init(char * const envp[])
 	if (env.envp == NULL) {
 	    env.env_size = 0;
 	    env.env_len = 0;
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
 #ifdef ENV_DEBUG

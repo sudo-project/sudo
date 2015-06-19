@@ -74,7 +74,7 @@ linux_audit_command(char *argv[], int result)
 	size += strlen(*av) + 1;
     command = cp = malloc(size);
     if (command == NULL) {
-	sudo_warn(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
     for (av = argv; *av != NULL; av++) {

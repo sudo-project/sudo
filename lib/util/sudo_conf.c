@@ -185,7 +185,7 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 	if (namelen == cur->pnamelen &&
 	    strncasecmp(name, cur->pname, cur->pnamelen) == 0) {
 	    if ((cur->pval = strdup(path)) == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		debug_return_int(-1);
 		break;
 	    }
@@ -265,7 +265,7 @@ parse_debug(const char *entry, const char *conf_file, unsigned int lineno)
 
     debug_return_int(true);
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (debug_file != NULL) {
 	free(debug_file->debug_file);
 	free(debug_file->debug_flags);
@@ -342,7 +342,7 @@ parse_plugin(const char *entry, const char *conf_file, unsigned int lineno)
 
     debug_return_int(true);
 oom:
-    sudo_warnx(U_("unable to allocate memory"));
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (options != NULL) {
 	while (nopts--)
 	    free(options[nopts]);
@@ -541,7 +541,7 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 
     prev_locale = strdup(setlocale(LC_ALL, NULL));
     if (prev_locale == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
 

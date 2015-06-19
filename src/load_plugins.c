@@ -206,7 +206,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    policy_plugin->handle = handle;
 	    policy_plugin->path = strdup(path);
 	    if (policy_plugin->path == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		goto bad;
 	    }
 	    policy_plugin->name = info->symbol_name;
@@ -229,7 +229,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	if (handle != NULL) {
 	    container = calloc(1, sizeof(*container));
 	    if (container == NULL || (container->path = strdup(path)) == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		goto bad;
 	    }
 	    container->handle = handle;
@@ -294,7 +294,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	/* Default policy plugin */
 	info = calloc(1, sizeof(*info));
 	if (info == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	info->symbol_name = "sudoers_policy";
@@ -309,7 +309,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	if (TAILQ_EMPTY(io_plugins)) {
 	    info = calloc(1, sizeof(*info));
 	    if (info == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		goto done;
 	    }
 	    info->symbol_name = "sudoers_io";

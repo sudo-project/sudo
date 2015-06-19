@@ -864,7 +864,7 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for child", signame);
 
     if ((sigfwd = calloc(1, sizeof(*sigfwd))) == NULL)
-	sudo_fatalx(U_("unable to allocate memory"));
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     sigfwd->signo = signo;
     TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 

@@ -71,8 +71,10 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		pass = tgetpass(msg->msg, msg->timeout, flags);
 		if (pass == NULL)
 		    goto err;
-		if ((repl->reply = strdup(pass)) == NULL)
-		    sudo_fatalx_nodebug(U_("unable to allocate memory"));
+		if ((repl->reply = strdup(pass)) == NULL) {
+		    sudo_fatalx_nodebug(U_("%s: %s"), "sudo_conversation",
+			U_("unable to allocate memory"));
+		}
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case SUDO_CONV_INFO_MSG:

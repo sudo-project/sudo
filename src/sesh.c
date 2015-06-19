@@ -98,7 +98,7 @@ main(int argc, char *argv[], char *envp[])
 	argv++;
 	argc--;
 	if ((cmnd = strdup(argv[0])) == NULL)
-	    sudo_fatalx(U_("unable to allocate memory"));
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 	/* If invoked as a login shell, modify argv[0] accordingly. */
 	if (login_shell) {

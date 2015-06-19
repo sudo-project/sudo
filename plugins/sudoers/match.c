@@ -516,7 +516,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(cp)) == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		cp = NULL;		/* fail closed */
 	    }
 	    break;
@@ -552,7 +552,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(sudoers_cmnd)) != NULL)
 		debug_return_bool(true);
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
     }
     debug_return_bool(false);
@@ -710,7 +710,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     }
     free(safe_cmnd);
     if ((safe_cmnd = strdup(sudoers_cmnd)) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -767,7 +767,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(buf)) == NULL) {
-		sudo_warnx(U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		dent = NULL;
 	    }
 	    break;

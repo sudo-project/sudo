@@ -91,7 +91,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
     }
 
     if ((new_prompt = malloc(++len)) == NULL) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_str(NULL);
     }
 

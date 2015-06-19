@@ -582,7 +582,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     bindtextdomain("sudoers", LOCALEDIR);
 
     if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
-	sudo_warnx(U_("unable to allocate memory"));
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
 
@@ -614,7 +614,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	/* Get next session ID and convert it into a path. */
 	tofree = malloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
 	if (tofree == NULL) {
-	    sudo_warnx(U_("unable to allocate memory"));
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
