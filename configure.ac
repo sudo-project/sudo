@@ -1836,7 +1836,7 @@ case "$host" in
 				# order of libs in 9.X is important. -lc_r must be last
 				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
-				SUDO_APPEND_CPPFLAGS(-D_REENTRANT)
+				AC_DEFINE(_REENTRANT)
 				SUDO_APPEND_CPPFLAGS(-I/usr/include/reentrant)
 			    fi
 			;;
@@ -3814,6 +3814,7 @@ fi
 case "$host_os" in
     hpux*)
 	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
+	AC_DEFINE(_REENTRANT)
 	;;
 esac
 
@@ -4371,6 +4372,11 @@ AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 /* Enable XPG4v2 extensions to POSIX, needed for MSG_WAITALL on older HP-UX.  */
 #ifndef _XOPEN_SOURCE_EXTENDED
 # undef _XOPEN_SOURCE_EXTENDED
+#endif
+
+/* Enable reentrant versions of the standard C API (obsolete).  */
+#ifndef _REENTRANT
+# undef _REENTRANT
 #endif
 
 /* Enable "safer" versions of the standard C API (ISO C11).  */

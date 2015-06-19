@@ -14966,18 +14966,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 				# order of libs in 9.X is important. -lc_r must be last
 				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
-
-    case "${CPPFLAGS}" in
-	*"-D_REENTRANT"|*"-D_REENTRANT ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-D_REENTRANT"
-	    else
-		CPPFLAGS="${CPPFLAGS} -D_REENTRANT"
-	    fi
-	    ;;
-    esac
+				$as_echo "#define _REENTRANT 1" >>confdefs.h
 
 
     case "${CPPFLAGS}" in
@@ -23529,6 +23518,8 @@ $as_echo "$ac_cv_lib_pthread_main" >&6; }
 if test "x$ac_cv_lib_pthread_main" = xyes; then :
   SUDO_LIBS="${SUDO_LIBS} -lpthread"
 fi
+
+	$as_echo "#define _REENTRANT 1" >>confdefs.h
 
 	;;
 esac
