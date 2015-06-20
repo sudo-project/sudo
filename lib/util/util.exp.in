@@ -37,15 +37,6 @@ sudo_dso_load_v1
 sudo_dso_preload_table_v1
 sudo_dso_strerror_v1
 sudo_dso_unload_v1
-sudo_easprintf_v1
-sudo_ecalloc_v1
-sudo_emalloc_v1
-sudo_emallocarray_v1
-sudo_erealloc_v1
-sudo_ereallocarray_v1
-sudo_erecalloc_v1
-sudo_estrdup_v1
-sudo_estrndup_v1
 sudo_ev_add_v1
 sudo_ev_alloc_v1
 sudo_ev_base_alloc_v1
