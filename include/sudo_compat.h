@@ -68,15 +68,6 @@
 # endif
 #endif
 
-/* Hint to compiler that returned pointer is unique (malloc but not realloc). */
-#ifndef __malloc_like
-# if __GNUC_PREREQ__(2, 96)
-#  define __malloc_like 	__attribute__((__malloc__))
-# else
-#  define __malloc_like
-# endif
-#endif
-
 /*
  * Given the pointer x to the member m of the struct s, return
  * a pointer to the containing structure.
