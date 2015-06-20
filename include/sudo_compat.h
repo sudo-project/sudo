@@ -23,7 +23,6 @@
 #define SUDO_COMPAT_H
 
 #include <stdio.h>
-#include <stddef.h>
 #include <stdarg.h>
 
 /*
@@ -230,17 +229,6 @@
 #define CLR(t, f)	((t) &= ~(f))
 #undef ISSET
 #define ISSET(t, f)     ((t) & (f))
-
-/*
- * Older systems may be missing stddef.h and/or offsetof macro
- */
-#ifndef offsetof
-# ifdef __offsetof
-#  define offsetof(type, field) __offsetof(type, field)
-# else
-#  define offsetof(type, field) ((size_t)(&((type *)0)->field))
-# endif
-#endif
 
 /*
  * Simple isblank() macro and function for systems without it.

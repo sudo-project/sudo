@@ -20,7 +20,6 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else

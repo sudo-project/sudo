@@ -26,7 +26,6 @@
 #endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else

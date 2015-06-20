@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <errno.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"

@@ -26,7 +26,6 @@
 # include <sys/file.h>
 #endif /* HAVE_FLOCK */
 #include <stdlib.h>
-#include <stddef.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */

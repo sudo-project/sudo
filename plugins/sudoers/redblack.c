@@ -46,7 +46,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 
 #include "sudoers.h"
 #include "redblack.h"
