@@ -307,10 +307,8 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	    return -1;
 	}
 	nenvp = reallocarray(env.envp, nsize, sizeof(char *));
-	if (nenvp == NULL) {
-	    errno = ENOMEM;
+	if (nenvp == NULL)
 	    return -1;
-	}
 	env.envp = nenvp;
 	env.env_size = nsize;
 #ifdef ENV_DEBUG
@@ -453,10 +451,8 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
     }
 
     /* Allocate and fill in estring. */
-    if ((estring = ep = malloc(esize)) == NULL) {
-	errno = ENOMEM;
+    if ((estring = ep = malloc(esize)) == NULL)
 	goto done;
-    }
     for (cp = var; *cp && *cp != '='; cp++)
 	*ep++ = *cp;
     *ep++ = '=';
