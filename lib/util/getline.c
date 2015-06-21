@@ -45,7 +45,7 @@ sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
 	bufsize = *bufp ? *bufsizep : 0;
 	if (bufsize == 0 || bufsize - 1 < len) {
 	    bufsize = len + 1;
-	    cp = *bufp ? realloc(*bufp, bufsize) : malloc(bufsize);
+	    cp = realloc(*bufp, bufsize);
 	    if (cp == NULL)
 		return -1;
 	    *bufp = cp;
@@ -68,7 +68,7 @@ sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
     bufsize = *bufsizep;
     if (buf == NULL || bufsize == 0) {
 	bufsize = LINE_MAX;
-	cp = buf ? realloc(buf, bufsize) : malloc(bufsize);
+	cp = realloc(buf, bufsize);
 	if (cp == NULL)
 	    return -1;
 	buf = cp;

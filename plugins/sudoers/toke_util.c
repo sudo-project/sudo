@@ -142,10 +142,9 @@ fill_args(const char *s, int len, int addspace)
     if (new_len >= arg_size) {
 	/* Allocate more space than we need for subsequent args */
 	while (new_len >= (arg_size += COMMANDARGINC))
-	    ;
+	    continue;
 
-	p = sudoerslval.command.args ?
-	    realloc(sudoerslval.command.args, arg_size) : malloc(arg_size);
+	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
 	    free(sudoerslval.command.args);
 	    sudo_warn(NULL);
