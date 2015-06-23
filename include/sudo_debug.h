@@ -25,21 +25,6 @@
 #endif
 #include "sudo_queue.h"
 
-/* Number of bits in a byte. */
-#ifndef NBBY
-# ifdef __NBBY
-#  define NBBY __NBBY
-# else
-#  define NBBY 8
-# endif
-#endif
-
-/* Bit map macros. */
-#define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))
-#define sudo_clrbit(_a, _i)	((_a)[(_i) / NBBY] &= ~(1<<((_i) % NBBY)))
-#define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
-#define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
- 
 /*
  * List of debug files and flags for use in registration.
  */

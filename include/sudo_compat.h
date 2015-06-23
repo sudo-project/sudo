@@ -297,6 +297,15 @@ extern int errno;
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
+/* Number of bits in a byte. */
+#ifndef NBBY
+# ifdef __NBBY
+#  define NBBY __NBBY
+# else
+#  define NBBY 8
+# endif
+#endif
+
 #ifndef HAVE_SETEUID
 #  if defined(HAVE_SETRESUID)
 #    define seteuid(u)	setresuid(-1, (u), -1)

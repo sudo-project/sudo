@@ -16,13 +16,6 @@
 
 #include <config.h>
 
-#include <sys/param.h>		/* for howmany() on Linux */
-#ifdef HAVE_SYS_SYSMACROS_H
-# include <sys/sysmacros.h>	/* for howmany() on Solaris */
-#endif /* HAVE_SYS_SYSMACROS_H */
-#ifdef HAVE_SYS_SELECT_H
-# include <sys/select.h>	/* for FD_* macros */
-#endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -93,7 +86,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 {
     int fd, lastfd = -1;
     struct preserved_fd *pfd, *pfd_next;
-    fd_set *fdsp;
+    unsigned char *fdbits;
     debug_decl(closefrom_except, SUDO_DEBUG_UTIL)
 
     /* First, relocate preserved fds to be as contiguous as possible.  */
@@ -132,18 +125,18 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     }
 
     /* Create bitmap of preserved (relocated) fds.  */
-    fdsp = calloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
-    if (fdsp == NULL)
+    fdbits = calloc((lastfd + NBBY) / NBBY, 1);
+    if (fdbits == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     TAILQ_FOREACH(pfd, pfds, entries) {
-	FD_SET(pfd->lowfd, fdsp);
+	sudo_setbit(fdbits, pfd->lowfd);
     }
 
     /*
      * Close any unpreserved fds [startfd,lastfd]
      */
     for (fd = startfd; fd <= lastfd; fd++) {
-	if (!FD_ISSET(fd, fdsp)) {
+	if (!sudo_isset(fdbits, fd)) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"closing fd %d", fd);
 #ifdef __APPLE__
@@ -154,7 +147,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 #endif
 	}
     }
-    free(fdsp);
+    free(fdbits);
 
     /* Let closefrom() do the rest for us. */
     if (lastfd + 1 > startfd)
