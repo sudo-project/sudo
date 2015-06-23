@@ -118,7 +118,8 @@ main(int argc, char *argv[], char *envp[])
 static int
 sesh_sudoedit(int argc, char *argv[])
 {
-    int fd_src, fd_dst, i, oflags_dst, post, ret = SESH_ERR_FAILURE;
+    int i, oflags_dst, post, ret = SESH_ERR_FAILURE;
+    int fd_src = -1, fd_dst = -1;
     ssize_t nread, nwritten;
     struct stat sb;
     struct timespec times[2];
