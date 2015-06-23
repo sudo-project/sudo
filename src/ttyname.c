@@ -184,9 +184,8 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 {
     DIR *d = NULL;
     char pathbuf[PATH_MAX], **subdirs = NULL, *devname = NULL;
-    size_t sdlen, d_len, len, num_subdirs = 0, max_subdirs = 0;
+    size_t sdlen, num_subdirs = 0, max_subdirs = 0;
     struct dirent *dp;
-    struct stat sb;
     unsigned int i;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
 
@@ -209,6 +208,9 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
     pathbuf[sdlen] = '\0';
 
     while ((dp = readdir(d)) != NULL) {
+	struct stat sb;
+	size_t d_len, len;
+
 	/* Skip anything starting with "." */
 	if (dp->d_name[0] == '.')
 	    continue;
@@ -246,9 +248,10 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	 * We can't use it for links (since we want to follow them) or
 	 * char devs (since we need st_rdev to compare the device number).
 	 */
-	if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_LNK && dp->d_type != DT_CHR)
+	if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_LNK && dp->d_type != DT_CHR) {
 	    sb.st_mode = DTTOIF(dp->d_type);
-	else
+	    sb.st_rdev = 0;		/* quiet ccc-analyzer false positive */
+	} else
 # endif
 	if (stat(pathbuf, &sb) == -1)
 	    continue;
