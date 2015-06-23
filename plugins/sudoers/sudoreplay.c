@@ -1030,27 +1030,30 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     closedir(d);
 
     /* Sort and list the sessions. */
-    qsort(sessions, sessions_len, sizeof(char *), session_compare);
-    for (i = 0; i < sessions_len; i++) {
-	len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
-	    "%s/log", sessions[i]);
-	if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
-	    errno = ENAMETOOLONG;
-	    sudo_fatal("%s/%s/log", dir, sessions[i]);
-	}
-	free(sessions[i]);
+    if (sessions != NULL) {
+	qsort(sessions, sessions_len, sizeof(char *), session_compare);
+	for (i = 0; i < sessions_len; i++) {
+	    len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
+		"%s/log", sessions[i]);
+	    if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
+		errno = ENAMETOOLONG;
+		sudo_fatal("%s/%s/log", dir, sessions[i]);
+	    }
+	    free(sessions[i]);
 
-	/* Check for dir with a log file. */
-	if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
-	    list_session(pathbuf, re, user, tty);
-	} else {
-	    /* Strip off "/log" and recurse if a dir. */
-	    pathbuf[sdlen + len - 4] = '\0';
-	    if (checked_type || (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
-		find_sessions(pathbuf, re, user, tty);
+	    /* Check for dir with a log file. */
+	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
+		list_session(pathbuf, re, user, tty);
+	    } else {
+		/* Strip off "/log" and recurse if a dir. */
+		pathbuf[sdlen + len - 4] = '\0';
+		if (checked_type ||
+		    (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
+		    find_sessions(pathbuf, re, user, tty);
+	    }
 	}
+	free(sessions);
     }
-    free(sessions);
 
     debug_return_int(0);
 }
