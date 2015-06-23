@@ -180,7 +180,7 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     if (sudo_debug_fds_size < output->fd) {
 	/* Bump fds size to the next multiple of 4 * NBBY. */
 	const int old_size = sudo_debug_fds_size / NBBY;
-	const int new_size = round_nfds(output->fd) / NBBY;
+	const int new_size = round_nfds(output->fd + 1) / NBBY;
 	unsigned char *new_fds;
 
 	new_fds = realloc(sudo_debug_fds, new_size);
