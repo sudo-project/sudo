@@ -198,10 +198,10 @@ struct ldap_entry_wrapper {
 struct ldap_result {
     struct ldap_search_list searches;
     struct ldap_entry_wrapper *entries;
-    int allocated_entries;
-    int nentries;
-    int user_matches;
-    int host_matches;
+    unsigned int allocated_entries;
+    unsigned int nentries;
+    bool user_matches;
+    bool host_matches;
 };
 #define	ALLOCATION_INCREMENT	100
 
@@ -2435,7 +2435,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     LDAP *ld;
     struct ldap_result *lres;
     LDAPMessage *entry;
-    int i, count = 0;
+    unsigned int i, count = 0;
     debug_decl(sudo_ldap_display_privs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -2468,7 +2468,7 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     struct ldap_result *lres;
     LDAPMessage *entry;
     bool found = false;
-    int i;
+    unsigned int i;
     debug_decl(sudo_ldap_display_cmnd, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -3100,7 +3100,8 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
     LDAPMessage *entry;
-    int i, rc, setenv_implied;
+    int rc, setenv_implied;
+    unsigned int i;
     struct ldap_result *lres = NULL;
     debug_decl(sudo_ldap_lookup, SUDOERS_DEBUG_LDAP)
 
@@ -3201,8 +3202,8 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 
 done:
     DPRINTF1("done with LDAP searches");
-    DPRINTF1("user_matches=%d", lres->user_matches);
-    DPRINTF1("host_matches=%d", lres->host_matches);
+    DPRINTF1("user_matches=%s", lres->user_matches ? "true" : "false");
+    DPRINTF1("host_matches=%s", lres->host_matches ? "true" : "false");
 
     if (!ISSET(ret, VALIDATE_SUCCESS)) {
 	/* No matching entries. */
@@ -3424,9 +3425,11 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     }
 
     /* Sort the entries by the sudoOrder attribute. */
-    DPRINTF1("sorting remaining %d entries", lres->nentries);
-    qsort(lres->entries, lres->nentries, sizeof(lres->entries[0]),
-	ldap_entry_compare);
+    if (lres->nentries != 0) {
+	DPRINTF1("sorting remaining %d entries", lres->nentries);
+	qsort(lres->entries, lres->nentries, sizeof(lres->entries[0]),
+	    ldap_entry_compare);
+    }
 
     /* Store everything in the sudo_nss handle. */
     /* XXX - store pw and take a reference to it. */
