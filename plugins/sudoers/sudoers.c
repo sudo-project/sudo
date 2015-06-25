@@ -150,8 +150,8 @@ restore_nproc(void)
 int
 sudoers_policy_init(void *info, char * const envp[])
 {
-    volatile int sources = 0;
     struct sudo_nss *nss, *nss_next;
+    int sources = 0;
     int rval = -1;
     debug_decl(sudoers_policy_init, SUDOERS_DEBUG_PLUGIN)
 
@@ -264,7 +264,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     mode_t cmnd_umask = 0777;
     struct sudo_nss *nss;
     int cmnd_status = -1, oldlocale, validated;
-    volatile int rval = true;
+    int rval = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
 
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
@@ -294,7 +294,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	NewArgv = reallocarray(NULL, NewArgc + 1, sizeof(char *));
 	if (NewArgv == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    rval = -1;
 	    goto done;
 	}
 	NewArgv[0] = user_cmnd;
@@ -305,7 +304,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
 	if (NewArgv == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    rval = -1;
 	    goto done;
 	}
 	memcpy(++NewArgv, argv, argc * sizeof(char *));
@@ -315,7 +313,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    if (NewArgv[0] == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		free(NewArgv);
-		rval = -1;
 		goto done;
 	    }
 	}
@@ -327,10 +324,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Find command in path and apply per-command Defaults. */
     cmnd_status = set_cmnd();
-    if (cmnd_status == NOT_FOUND_ERROR) {
-	rval = -1;
+    if (cmnd_status == NOT_FOUND_ERROR)
 	goto done;
-    }
 
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
@@ -352,7 +347,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 	if (ISSET(validated, VALIDATE_ERROR)) {
 	    /* The lookup function should have printed an error. */
-	    rval = -1;
 	    goto done;
 	} else if (ISSET(validated, VALIDATE_SUCCESS)) {
 	    /* Handle [SUCCESS=return] */
@@ -371,7 +365,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (safe_cmnd == NULL) {
 	if ((safe_cmnd = strdup(user_cmnd)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    rval = -1;
 	    goto done;
 	}
     }
@@ -379,7 +372,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If only a group was specified, set runas_pw based on invoking user. */
     if (runas_pw == NULL) {
 	if (!set_runaspw(user_name, false)) {
-	    rval = -1;
 	    goto done;
 	}
     }
@@ -438,8 +430,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     rval = check_user(validated, sudo_mode);
     if (rval != true) {
 	/* Note: log_denial() calls audit for us. */
-	if (!ISSET(validated, VALIDATE_SUCCESS))
-	    log_denial(validated, false);
+	if (!ISSET(validated, VALIDATE_SUCCESS)) {
+	    if (!log_denial(validated, false))
+		rval = -1;
+	}
 	goto done;
     }
 
@@ -460,13 +454,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If the user was not allowed to run the command we are done. */
     if (!ISSET(validated, VALIDATE_SUCCESS)) {
 	/* Note: log_failure() calls audit for us. */
-	log_failure(validated, cmnd_status);
+	if (!log_failure(validated, cmnd_status))
+	    goto done;
 	goto bad;
     }
 
     /* Create Ubuntu-style dot file to indicate sudo was successful. */
     if (create_admin_success_flag() == -1)
-	goto bad;
+	goto done;
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
@@ -504,17 +499,34 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
 		def_iolog_file, &sudo_user.iolog_file);
 	    if (iolog_path == NULL)
-		goto bad;
+		goto done;
 	    sudo_user.iolog_file++;
 	}
     }
 
     if (!log_allowed(validated))
 	goto bad;
-    if (ISSET(sudo_mode, MODE_CHECK))
-	rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
-    else if (ISSET(sudo_mode, MODE_LIST))
-	display_privs(snl, list_pw ? list_pw : sudo_user.pw); /* XXX - return val */
+
+    switch (sudo_mode & MODE_MASK) {
+	case MODE_CHECK:
+	    rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
+	    break;
+	case MODE_LIST:
+	    rval = display_privs(snl, list_pw ? list_pw : sudo_user.pw);
+	    break;
+	case MODE_VALIDATE:
+	    /* Nothing to do. */
+	    rval = true;
+	    break;
+	case MODE_RUN:
+	case MODE_EDIT:
+	    /* rval set by sudoers_policy_exec_setup() below. */
+	    break;
+	default:
+	    /* Should not happen. */
+	    sudo_warnx("internal error, unexpected sudo mode 0x%x", sudo_mode);
+	    goto done;
+    }
 
     /* Cleanup sudoers sources */
     TAILQ_FOREACH(nss, snl, entries) {
@@ -588,7 +600,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Insert user-specified environment variables. */
     if (!insert_env_vars(sudo_user.env_vars))
-	goto bad;
+	goto done;
 
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
@@ -597,14 +609,19 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	free(safe_cmnd);
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
 	    &edit_argv);
-	if (safe_cmnd == NULL || audit_success(edit_argc, edit_argv) != 0)
+	if (safe_cmnd == NULL) {
+	    if (errno != ENOENT)
+		goto done;
 	    goto bad;
+	}
+	if (audit_success(edit_argc, edit_argv) != 0)
+	    goto done;
 
 	/* We want to run the editor with the unmodified environment. */
 	env_swap_old();
     } else {
 	if (audit_success(NewArgc, NewArgv) != 0)
-	    goto bad;
+	    goto done;
     }
 
     /* Setup execution environment to pass back to front-end. */

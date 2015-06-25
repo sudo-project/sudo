@@ -272,7 +272,7 @@ output(const char *buf)
  * Print out privileges for the specified user.
  * We only get here if the user is allowed to run something.
  */
-void
+bool
 display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
@@ -332,7 +332,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     sudo_lbuf_destroy(&defs);
     sudo_lbuf_destroy(&privs);
 
-    debug_return;
+    debug_return_bool(true);	/* XXX */
 }
 
 /*
