@@ -238,8 +238,8 @@ bool user_is_exempt(void);
 char *expand_prompt(const char *old_prompt, const char *auth_user);
 
 /* timestamp.c */
-void remove_timestamp(bool);
-bool set_lectured(void);
+int remove_timestamp(bool);
+int set_lectured(void);
 
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);

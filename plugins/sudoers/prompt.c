@@ -36,8 +36,8 @@
 #include "sudoers.h"
 
 /*
- * Expand %h and %u escapes in the prompt and pass back the dynamically
- * allocated result.  Returns the same string if there are no escapes.
+ * Expand %h and %u escapes (if present) in the prompt and pass back
+ * the dynamically allocated result.
  */
 char *
 expand_prompt(const char *old_prompt, const char *auth_user)

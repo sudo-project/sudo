@@ -28,6 +28,7 @@
 #define TS_MISSING		2
 #define TS_NOFILE		3
 #define TS_ERROR		4
+#define TS_FATAL		5
 
 /*
  * Time stamps are now stored in a single file which contains multiple
@@ -61,7 +62,7 @@ struct timestamp_entry {
 };
 
 bool  already_lectured(int status);
-bool  update_timestamp(struct passwd *pw);
+int   update_timestamp(struct passwd *pw);
 int   build_timestamp(struct passwd *pw);
 int   timestamp_status(struct passwd *pw);
 

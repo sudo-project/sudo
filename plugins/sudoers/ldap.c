@@ -2858,6 +2858,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	if (ldap_conf.krb5_ccname == NULL && user_ccname != NULL) {
 	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(user_ccname);
 	    if (tmp_ccname == NULL) {
+		/* XXX - fatal error */
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "unable to copy user ccache %s", user_ccname);
 	    }

@@ -343,7 +343,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 #if defined(HAVE_SELINUX) || defined(HAVE_PRIV_SET)
 done:
 #endif
-    (void) restore_perms();
+    if (!restore_perms())
+	SET(validated, VALIDATE_ERROR);
     debug_return_int(validated);
 }
 

@@ -44,6 +44,9 @@
 #include "sudoers.h"
 #include "check.h"
 
+#define TIMESTAMP_OPEN_ERROR	-1
+#define TIMESTAMP_PERM_ERROR	-2
+
 static char timestamp_file[PATH_MAX];
 static off_t timestamp_hint = (off_t)-1;
 static struct timestamp_entry timestamp_key;
@@ -307,16 +310,44 @@ build_timestamp(struct passwd *pw)
 }
 
 /*
- * Update the time on the timestamp file/dir or create it if necessary.
- * Returns true on success or false on failure.
+ * Open and lock the specified timestamp file.
+ * Returns 0 on success or -1 on failure.
  */
-bool
+static int
+open_timestamp(const char *path, int flags)
+{
+    bool uid_changed = false;
+    int fd;
+    debug_decl(open_timestamp, SUDOERS_DEBUG_AUTH)
+
+    if (timestamp_uid != 0)
+	uid_changed = set_perms(PERM_TIMESTAMP);
+    fd = open(timestamp_file, flags, 0600);
+    if (uid_changed && !restore_perms()) {
+	/* Unable to restore permissions, should not happen. */
+	if (fd != -1) {
+	    int serrno = errno;
+	    close(fd);
+	    errno = serrno;
+	    fd = TIMESTAMP_PERM_ERROR;
+	}
+    }
+    if (fd >= 0)
+	sudo_lock_file(fd, SUDO_LOCK);
+
+    debug_return_int(fd);
+}
+
+/*
+ * Update the time on the timestamp file/dir or create it if necessary.
+ * Returns true on success, false on failure or -1 on setuid failure.
+ */
+int
 update_timestamp(struct passwd *pw)
 {
     struct timestamp_entry entry;
-    bool uid_changed = false;
-    bool rval = false;
-    int fd;
+    int rval = false;
+    int fd = -1;
     debug_decl(update_timestamp, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't update the time stamp file. */
@@ -335,25 +366,25 @@ update_timestamp(struct passwd *pw)
     }
 
     /* Open time stamp file and lock it for exclusive access. */
-    if (timestamp_uid != 0)
-	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(timestamp_file, O_RDWR|O_CREAT, 0600);
-    if (uid_changed)
-	(void) restore_perms();
-    if (fd == -1) {
+    fd = open_timestamp(timestamp_file, O_RDWR|O_CREAT);
+    switch (fd) {
+    case TIMESTAMP_OPEN_ERROR:
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), timestamp_file);
+	goto done;
+    case TIMESTAMP_PERM_ERROR:
+	/* Already logged set_perms/restore_perms error. */
+	rval = -1;
 	goto done;
     }
 
     /* Update record or append a new one. */
-    sudo_lock_file(fd, SUDO_LOCK);
     ts_update_record(fd, &entry, timestamp_hint);
     close(fd);
 
     rval = true;
 
 done:
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 /*
@@ -365,7 +396,6 @@ timestamp_status(struct passwd *pw)
 {
     struct timestamp_entry entry;
     struct timespec diff, timeout;
-    bool uid_changed = false;
     int status = TS_ERROR;		/* assume the worst */
     struct stat sb;
     int fd = -1;
@@ -424,16 +454,16 @@ timestamp_status(struct passwd *pw)
 	goto done;
 
     /* Open time stamp file and lock it for exclusive access. */
-    if (timestamp_uid != 0)
-	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(timestamp_file, O_RDWR);
-    if (uid_changed)
-	(void) restore_perms();
-    if (fd == -1) {
+    fd = open_timestamp(timestamp_file, O_RDWR);
+    switch (fd) {
+    case TIMESTAMP_OPEN_ERROR:
 	status = TS_MISSING;
 	goto done;
+    case TIMESTAMP_PERM_ERROR:
+	/* Already logged set_perms/restore_perms error. */
+	status = TS_FATAL;
+	goto done;
     }
-    sudo_lock_file(fd, SUDO_LOCK);
 
     /* Ignore and clear time stamp file if mtime predates boot time. */
     if (fstat(fd, &sb) == 0) {
@@ -516,22 +546,25 @@ done:
 
 /*
  * Remove the timestamp entry or file if unlink_it is set.
+ * Returns true on success, false on failure or -1 on setuid failure.
+ * A missing timestamp entry is not considered an error.
  */
-void
+int
 remove_timestamp(bool unlink_it)
 {
     struct timestamp_entry entry;
-    bool uid_changed = false;
-    int fd = -1;
+    int fd, rval = true;
     debug_decl(remove_timestamp, SUDOERS_DEBUG_AUTH)
 
-    if (build_timestamp(NULL) == -1)
-	debug_return;
+    if (build_timestamp(NULL) == -1) {
+	rval = -1;
+	goto done;
+    }
 
     /* For "sudo -K" simply unlink the time stamp file. */
     if (unlink_it) {
-	(void) unlink(timestamp_file);
-	debug_return;
+	rval = unlink(timestamp_file) ? -1 : true;
+	goto done;
     }
 
     /*
@@ -556,14 +589,17 @@ remove_timestamp(bool unlink_it)
     }
 
     /* Open time stamp file and lock it for exclusive access. */
-    if (timestamp_uid != 0)
-	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(timestamp_file, O_RDWR);
-    if (uid_changed)
-	(void) restore_perms();
-    if (fd == -1)
+    fd = open_timestamp(timestamp_file, O_RDWR);
+    switch (fd) {
+    case TIMESTAMP_OPEN_ERROR:
+	if (errno != ENOENT)
+	    rval = false;
 	goto done;
-    sudo_lock_file(fd, SUDO_LOCK);
+    case TIMESTAMP_PERM_ERROR:
+	/* Already logged set_perms/restore_perms error. */
+	rval = -1;
+	goto done;
+    }
 
     /*
      * Find matching entries and invalidate them.
@@ -575,12 +611,13 @@ remove_timestamp(bool unlink_it)
 	    timestamp_hint -= (off_t)entry.size;
 	/* Disable the entry. */
 	SET(entry.flags, TS_DISABLED);
-	ts_update_record(fd, &entry, timestamp_hint);
+	if (!ts_update_record(fd, &entry, timestamp_hint))
+	    rval = false;
     }
     close(fd);
 
 done:
-    debug_return;
+    debug_return_int(rval);
 }
 
 /*
@@ -608,14 +645,13 @@ already_lectured(int unused)
 
 /*
  * Create the lecture status file.
- * Returns true on success or false on failure.
+ * Returns true on success, false on failure or -1 on setuid failure.
  */
-bool
+int
 set_lectured(void)
 {
     char lecture_status[PATH_MAX];
-    bool uid_changed = false;
-    int len, fd = -1;
+    int len, fd, rval = false;
     debug_decl(set_lectured, SUDOERS_DEBUG_AUTH)
 
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
@@ -631,14 +667,22 @@ set_lectured(void)
 	goto done;
 
     /* Create lecture file. */
-    if (timestamp_uid != 0)
-	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(lecture_status, O_WRONLY|O_CREAT|O_TRUNC, 0600);
-    if (uid_changed)
-	(void) restore_perms();
-    if (fd != -1)
+    fd = open_timestamp(lecture_status, O_RDWR|O_CREAT|O_TRUNC);
+    switch (fd) {
+    case TIMESTAMP_OPEN_ERROR:
+	/* Failed to open, not a fatal error. */
+	break;
+    case TIMESTAMP_PERM_ERROR:
+	/* Already logged set_perms/restore_perms error. */
+	rval = -1;
+	break;
+    default:
+	/* Success. */
 	close(fd);
+	rval = true;
+	break;
+    }
 
 done:
-    debug_return_bool(fd != -1 ? true : false);
+    debug_return_int(rval);
 }

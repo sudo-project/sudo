@@ -55,29 +55,37 @@ static struct passwd *get_authpw(int);
 static int
 check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 {
-    int status, rval = true;
+    int status, rval = -1;
+    char *prompt;
+    bool lectured;
     debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH)
 
     /* Always need a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET))
 	SET(validated, FLAG_CHECK_USER);
 
-    if (build_timestamp(auth_pw) == -1) {
-	rval = -1;
+    if (build_timestamp(auth_pw) == -1)
 	goto done;
-    }
 
     status = timestamp_status(auth_pw);
+    switch (status) {
+    case TS_FATAL:
+	/* Fatal error (usually setuid failure), unsafe to proceed. */
+	goto done;
 
-    if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
-	char *prompt;
-	bool lectured;
+    case TS_CURRENT:
+	/* Time stamp file is valid and current. */
+	if (!ISSET(validated, FLAG_CHECK_USER)) {
+	    rval = true;
+	    break;
+	}
+	/* FALLTHROUGH */
 
+    default:
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
 	    validated |= FLAG_NON_INTERACTIVE;
 	    log_auth_failure(validated, 0);
-	    rval = -1;
 	    goto done;
 	}
 
@@ -87,20 +95,24 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    auth_pw->pw_name);
-	if (prompt == NULL) {
-	    rval = -1;
+	if (prompt == NULL)
 	    goto done;
-	}
 
 	rval = verify_user(auth_pw, prompt, validated);
-	if (rval == true && lectured)
-	    set_lectured();
+	if (rval == true && lectured) {
+	    if (set_lectured() == -1)
+		rval = -1;
+	}
 	free(prompt);
+	break;
     }
+
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_SUCCESS) &&
-	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
-	update_timestamp(auth_pw);
+	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR) {
+	if (update_timestamp(auth_pw) == -1)
+	    rval = -1;
+    }
 done:
     debug_return_int(rval);
 }

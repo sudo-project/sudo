@@ -243,8 +243,10 @@ log_denial(int status, bool inform_user)
     if (def_logfile && !do_logfile(logline))
 	rval = false;
 
-    if (uid_changed)
-	restore_perms();
+    if (uid_changed) {
+	if (!restore_perms())
+	    rval = false;		/* XXX - return -1 instead? */
+    }
 
     free(logline);
 
@@ -385,8 +387,10 @@ log_allowed(int status)
     if (def_logfile && !do_logfile(logline))
 	rval = false;
 
-    if (uid_changed)
-	restore_perms();
+    if (uid_changed) {
+	if (!restore_perms())
+	    rval = false;		/* XXX - return -1 instead? */
+    }
 
     free(logline);
 

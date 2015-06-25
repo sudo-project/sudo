@@ -74,7 +74,7 @@ static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_o
 static bool cb_runas_default(const char *);
 static bool cb_sudoers_locale(const char *);
 static int set_cmnd(void);
-static void create_admin_success_flag(void);
+static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
 static bool set_fqdn(void);
 static bool set_loginclass(struct passwd *);
@@ -465,7 +465,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Create Ubuntu-style dot file to indicate sudo was successful. */
-    create_admin_success_flag();
+    if (create_admin_success_flag() == -1)
+	goto bad;
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
@@ -1209,39 +1210,42 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 }
 
 #ifdef USE_ADMIN_FLAG
-static void
+static int
 create_admin_success_flag(void)
 {
     struct stat statbuf;
     char flagfile[PATH_MAX];
-    int fd, n;
+    int len, fd = -1;
     debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN)
 
     /* Check whether the user is in the admin group. */
     if (!user_in_group(sudo_user.pw, "admin"))
-	debug_return;
+	debug_return_int(true);
 
     /* Build path to flag file. */
-    n = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
+    len = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
 	user_dir);
-    if (n <= 0 || (size_t)n >= sizeof(flagfile))
-	debug_return;
+    if (len <= 0 || (size_t)len >= sizeof(flagfile))
+	debug_return_int(false);
 
     /* Create admin flag file if it doesn't already exist. */
     if (set_perms(PERM_USER)) {
 	if (stat(flagfile, &statbuf) != 0) {
 	    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
-	    close(fd);
+	    if (fd != -1)
+		close(fd);
 	}
-	(void) restore_perms();
+	if (!restore_perms())
+	    debug_return_int(-1);
     }
-    debug_return;
+    debug_return_int(fd != -1);
 }
 #else /* !USE_ADMIN_FLAG */
-static void
+static int
 create_admin_success_flag(void)
 {
     /* STUB */
+    return true;
 }
 #endif /* USE_ADMIN_FLAG */
 
