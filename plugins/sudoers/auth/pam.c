@@ -299,8 +299,9 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 
 #ifdef PAM_TEXT_DOMAIN
 # define PAM_PROMPT_IS_PASSWORD(_p) \
-    (strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password: ")) == 0 || \
-	strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password:")) == 0)
+    (strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password:")) == 0 || \
+	strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password: ")) == 0 || \
+	PROMPT_IS_PASSWORD(_p))
 #else
 # define PAM_PROMPT_IS_PASSWORD(_p)	PROMPT_IS_PASSWORD(_p)
 #endif /* PAM_TEXT_DOMAIN */
