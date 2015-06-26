@@ -2225,6 +2225,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	count = -1;
 	goto done;
     }
     STAILQ_FOREACH(base, &ldap_conf.base, entries) {
@@ -2256,6 +2257,8 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     }
     free(filt);
 done:
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(count);
 }
 
@@ -2457,6 +2460,8 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     }
 
 done:
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(count);
 }
 

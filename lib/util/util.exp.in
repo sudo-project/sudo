@@ -61,7 +61,9 @@ sudo_gettime_mono_v1
 sudo_gettime_real_v1
 sudo_lbuf_append_quoted_v1
 sudo_lbuf_append_v1
+sudo_lbuf_clearerr_v1
 sudo_lbuf_destroy_v1
+sudo_lbuf_error_v1
 sudo_lbuf_init_v1
 sudo_lbuf_print_v1
 sudo_lock_file_v1

@@ -293,12 +293,17 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	count += nss->display_defaults(nss, pw, &defs);
+	const int n = nss->display_defaults(nss, pw, &defs);
+	if (n == -1)
+	    goto bad;
+	count += n;
     }
-    if (count)
+    if (count) {
 	sudo_lbuf_append(&defs, "\n\n");
-    else
+    } else {
+	/* Undo Defaults header. */
 	defs.len = 0;
+    }
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
     olen = defs.len;
@@ -306,12 +311,17 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	count += nss->display_bound_defaults(nss, pw, &defs);
+	const int n = nss->display_bound_defaults(nss, pw, &defs);
+	if (n == -1)
+	    goto bad;
+	count += n;
     }
-    if (count)
+    if (count) {
 	sudo_lbuf_append(&defs, "\n\n");
-    else
+    } else {
+	/* Undo Defaults header. */
 	defs.len = olen;
+    }
 
     /* Display privileges from all sources. */
     sudo_lbuf_append(&privs,
@@ -319,14 +329,21 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	count += nss->display_privs(nss, pw, &privs);
+	const int n = nss->display_privs(nss, pw, &privs);
+	if (n == -1)
+	    goto bad;
+	count += n;
     }
     if (count == 0) {
 	defs.len = 0;
 	privs.len = 0;
-	sudo_lbuf_append(&privs, _("User %s is not allowed to run sudo on %s.\n"),
+	sudo_lbuf_append(&privs,
+	    _("User %s is not allowed to run sudo on %s.\n"),
 	    pw->pw_name, user_shost);
     }
+    if (sudo_lbuf_error(&defs) || sudo_lbuf_error(&privs))
+	goto bad;
+
     sudo_lbuf_print(&defs);
     sudo_lbuf_print(&privs);
 
@@ -334,6 +351,11 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     sudo_lbuf_destroy(&privs);
 
     debug_return_int(count > 0);
+bad:
+    sudo_lbuf_destroy(&defs);
+    sudo_lbuf_destroy(&privs);
+
+    debug_return_int(-1);
 }
 
 /*
@@ -348,9 +370,14 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
     debug_decl(display_cmnd, SUDOERS_DEBUG_NSS)
 
     /* XXX - display_cmnd return value is backwards */
+    /* XXX - doesn't handle commands allowed by one backend denied by another. */
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->display_cmnd(nss, pw) == 0)
-	    debug_return_int(true);
+	switch (nss->display_cmnd(nss, pw)) {
+	    case 0:
+		debug_return_int(true);
+	    case -1:
+		debug_return_int(-1);
+	}
     }
     debug_return_int(false);
 }

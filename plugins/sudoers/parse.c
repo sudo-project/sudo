@@ -354,7 +354,7 @@ done:
 #define	TAG_CHANGED(t) \
 	(TAG_SET(cs->tags.t) && cs->tags.t != tags->t)
 
-static void
+static bool
 sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     struct sudo_lbuf *lbuf)
 {
@@ -373,31 +373,31 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
     if (TAG_CHANGED(setenv)) {
-	sudo_lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
 	tags->setenv = cs->tags.setenv;
+	sudo_lbuf_append(lbuf, tags->setenv ? "SETENV: " : "NOSETENV: ");
     }
     if (TAG_CHANGED(noexec)) {
-	sudo_lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
 	tags->noexec = cs->tags.noexec;
+	sudo_lbuf_append(lbuf, tags->noexec ? "NOEXEC: " : "EXEC: ");
     }
     if (TAG_CHANGED(nopasswd)) {
-	sudo_lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
 	tags->nopasswd = cs->tags.nopasswd;
+	sudo_lbuf_append(lbuf, tags->nopasswd ? "NOPASSWD: " : "PASSWD: ");
     }
     if (TAG_CHANGED(log_input)) {
-	sudo_lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
 	tags->log_input = cs->tags.log_input;
+	sudo_lbuf_append(lbuf, tags->log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
     }
     if (TAG_CHANGED(log_output)) {
-	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
 	tags->log_output = cs->tags.log_output;
+	sudo_lbuf_append(lbuf, tags->log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
     }
     if (TAG_CHANGED(send_mail)) {
-	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
 	tags->send_mail = cs->tags.send_mail;
+	sudo_lbuf_append(lbuf, tags->send_mail ? "MAIL: " : "NOMAIL: ");
     }
     print_member(lbuf, cs->cmnd, CMNDALIAS);
-    debug_return;
+    debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 
 #define	RUNAS_CHANGED(cs1, cs2) \
@@ -451,11 +451,12 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-		tags.noexec = UNSPEC;
-		tags.setenv = UNSPEC;
-		tags.nopasswd = UNSPEC;
 		tags.log_input = UNSPEC;
 		tags.log_output = UNSPEC;
+		tags.noexec = UNSPEC;
+		tags.nopasswd = UNSPEC;
+		tags.send_mail = UNSPEC;
+		tags.setenv = UNSPEC;
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		sudo_lbuf_append(lbuf, ", ");
 	    }
@@ -606,6 +607,8 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	else
 	    nfound += sudo_file_display_priv_short(pw, us, lbuf);
     }
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
 done:
     debug_return_int(nfound);
 }
@@ -659,6 +662,8 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	prefix = ", ";
 	nfound++;
     }
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
 done:
     debug_return_int(nfound);
 }
@@ -677,6 +682,8 @@ sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     nfound += display_bound_defaults(DEFAULTS_RUNAS, lbuf);
     nfound += display_bound_defaults(DEFAULTS_CMND, lbuf);
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(nfound);
 }
 
@@ -738,6 +745,8 @@ display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
 	    sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
     }
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(nfound);
 }
 
@@ -783,9 +792,9 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     }
     matched:
     if (match != NULL && !match->negated) {
-	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
 	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
-	rval = 0;
+	rval = len == -1 ? -1 : 0;
     }
 done:
     debug_return_int(rval);

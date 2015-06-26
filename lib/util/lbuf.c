@@ -46,6 +46,7 @@ sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
     lbuf->continuation = continuation;
     lbuf->indent = indent;
     lbuf->cols = cols;
+    lbuf->error = 0;
     lbuf->len = 0;
     lbuf->size = 0;
     lbuf->buf = NULL;
@@ -74,8 +75,10 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 	do {
 	    new_size += 256;
 	} while (lbuf->len + extra + 1 >= new_size);
-	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL)
+	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
+	    lbuf->error = 1;
 	    return false;
+	}
 	lbuf->buf = new_buf;
 	lbuf->size = new_size;
     }
@@ -94,6 +97,9 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
     char *cp, *s;
     va_list ap;
     debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL)
+
+    if (sudo_lbuf_error(lbuf))
+	debug_return_bool(false);
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
@@ -150,6 +156,9 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
     char *s;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL)
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_bool(false);
+
     va_start(ap, fmt);
     while (*fmt != '\0') {
 	if (fmt[0] == '%' && fmt[1] == 's') {
@@ -179,6 +188,7 @@ done:
     debug_return_bool(ret);
 }
 
+/* XXX - check output function return value */
 static void
 sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
 {
@@ -240,6 +250,7 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
 /*
  * Print the buffer with word wrap based on the tty width.
  * The lbuf is reset on return.
+ * XXX - check output function return value
  */
 void
 sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
@@ -280,6 +291,22 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 
 done:
     lbuf->len = 0;		/* reset the buffer for re-use. */
+    lbuf->error = 0;
 
     debug_return;
+}
+
+bool
+sudo_lbuf_error_v1(struct sudo_lbuf *lbuf)
+{
+    if (lbuf != NULL && lbuf->error != 0)
+	return true;
+    return false;
+}
+
+void
+sudo_lbuf_clearerr_v1(struct sudo_lbuf *lbuf)
+{
+    if (lbuf != NULL)
+	lbuf->error = 0;
 }

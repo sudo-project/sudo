@@ -1317,6 +1317,8 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 
     handle->fn_free_result(sss_result);
 done:
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(count);
 }
 
@@ -1572,6 +1574,8 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     if (sss_result != NULL)
 	handle->fn_free_result(sss_result);
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(count);
 }
 
