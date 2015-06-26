@@ -270,9 +270,10 @@ output(const char *buf)
 
 /*
  * Print out privileges for the specified user.
- * We only get here if the user is allowed to run something.
+ * Returns true if the user is allowed to run commands, false if not
+ * or -1 on error.
  */
-bool
+int
 display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
@@ -332,23 +333,24 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     sudo_lbuf_destroy(&defs);
     sudo_lbuf_destroy(&privs);
 
-    debug_return_bool(true);	/* XXX */
+    debug_return_int(count > 0);
 }
 
 /*
  * Check user_cmnd against sudoers and print the matching entry if the
  * command is allowed.
- * Returns true if the command is allowed, else false.
+ * Returns true if the command is allowed, false if not or -1 on error.
  */
-bool
+int
 display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
     debug_decl(display_cmnd, SUDOERS_DEBUG_NSS)
 
+    /* XXX - display_cmnd return value is backwards */
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->display_cmnd(nss, pw) == 0)
-	    debug_return_bool(true);
+	    debug_return_int(true);
     }
-    debug_return_bool(false);
+    debug_return_int(false);
 }

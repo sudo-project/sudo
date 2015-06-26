@@ -282,8 +282,8 @@ void dump_auth_methods(void);
 char *sudo_getepw(const struct passwd *);
 
 /* sudo_nss.c */
-bool display_privs(struct sudo_nss_list *, struct passwd *);
-bool display_cmnd(struct sudo_nss_list *, struct passwd *);
+int display_privs(struct sudo_nss_list *, struct passwd *);
+int display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
 __dso_public struct group *sudo_getgrgid(gid_t);

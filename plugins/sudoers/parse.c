@@ -583,6 +583,9 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     debug_return_int(nfound);
 }
 
+/*
+ * Returns the number of matching privileges or -1 on error.
+ */
 int
 sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
@@ -738,6 +741,9 @@ display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
     debug_return_int(nfound);
 }
 
+/*
+ * Returns 0 if the command is allowed, 1 if not or -1 on error.
+ */
 int
 sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 {
