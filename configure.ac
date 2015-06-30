@@ -2761,43 +2761,6 @@ AC_CHECK_FUNC([socket], [], [
 ])
 LIBS="$OLIBS"
 dnl
-dnl If inet_ntop(3) not in libc, check -lnsl and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl Some systems may have inet_ntop() in libresolv.
-dnl
-OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
-found=false
-AC_CHECK_FUNC([inet_ntop], [
-    found=true
-    AC_DEFINE(HAVE_INET_NTOP)
-], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)		_libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_ntop, [
-	    found=true
-	    AC_DEFINE(HAVE_INET_NTOP)
-	    NET_LIBS="${NET_LIBS} $libs"
-	    break
-	], [], [$extralibs])
-    done
-])
-LIBS="$OLIBS"
-if test X"$found" != X"true"; then
-    AC_LIBOBJ(inet_ntop)
-    SUDO_APPEND_COMPAT_EXP(sudo_inet_ntop)
-fi
-dnl
 dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems may have inet_pton() in libresolv.
@@ -2835,6 +2798,43 @@ LIBS="$OLIBS"
 if test X"$found" != X"true"; then
     AC_LIBOBJ(inet_pton)
     SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
+fi
+dnl
+dnl If inet_ntop(3) not in libc, check -lnsl and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems may have inet_ntop() in libresolv.
+dnl
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
+found=false
+AC_CHECK_FUNC([inet_ntop], [
+    found=true
+    AC_DEFINE(HAVE_INET_NTOP)
+], [
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	SUDO_CHECK_LIB($lib, inet_ntop, [
+	    found=true
+	    AC_DEFINE(HAVE_INET_NTOP)
+	    NET_LIBS="${NET_LIBS} $libs"
+	    break
+	], [], [$extralibs])
+    done
+])
+LIBS="$OLIBS"
+if test X"$found" != X"true"; then
+    AC_LIBOBJ(inet_ntop)
+    SUDO_APPEND_COMPAT_EXP(sudo_inet_ntop)
 fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
