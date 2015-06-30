@@ -253,6 +253,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
     struct sudo_debug_output *output;
     struct sudo_debug_file *debug_file;
     int idx, free_idx = -1;
+    debug_decl_func(sudo_debug_register);
 
     if (debug_files == NULL)
 	return SUDO_DEBUG_INSTANCE_INITIALIZER;
@@ -357,6 +358,7 @@ sudo_debug_deregister_v1(int idx)
 {
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output, *next;
+    debug_decl_func(sudo_debug_deregister);
 
     if (idx < 0 || idx > sudo_debug_last_instance) {
 	sudo_warnx_nodebug("%s: invalid instance ID %d, max %d",
@@ -577,6 +579,7 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
     char static_buf[1024], *buf = static_buf;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
+    debug_decl_func(sudo_debug_vprintf2);
 
     if (sudo_debug_active_instance == -1)
 	goto out;
@@ -667,6 +670,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
     char * const *av;
     char *cp, static_buf[4096], *buf = static_buf;
     size_t plen;
+    debug_decl_func(sudo_debug_execve2);
 
     if (sudo_debug_active_instance == -1)
 	goto out;

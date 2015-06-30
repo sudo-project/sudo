@@ -98,12 +98,15 @@ struct sudo_conf_debug_file_list;
  * and sets sudo_debug_subsys for sudo_debug_exit().
  */
 #ifdef HAVE___FUNC__
+# define debug_decl_func(funcname)
 # define debug_decl_vars(funcname, subsys)				       \
     const int sudo_debug_subsys = (subsys);
 #else
+# define debug_decl_func(funcname)					       \
+    const char __func__[] = #funcname;
 # define debug_decl_vars(funcname, subsys)				       \
     const int sudo_debug_subsys = (subsys);				       \
-    const char __func__[] = #funcname;
+    debug_decl_func(funcname);
 #endif
 #define debug_decl(funcname, subsys)					       \
     debug_decl_vars((funcname), (subsys))				       \
