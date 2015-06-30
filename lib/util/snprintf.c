@@ -72,6 +72,7 @@
 #ifdef PRINTF_WIDE_CHAR
 # include <wchar.h>
 #endif
+#include <fcntl.h>
 
 #include "sudo_compat.h"
 
