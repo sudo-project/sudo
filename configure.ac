@@ -2197,6 +2197,7 @@ dnl C compiler checks (to be done after os checks)
 dnl
 AC_PROG_CC_STDC
 AC_C_CONST
+AC_C_INLINE
 AC_C_VOLATILE
 AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
