@@ -38,6 +38,21 @@ What's new in Sudo 1.8.14
 
  * Fixed a linker problem on some systems with libintl.  Bug #690.
 
+ * Fixed compilation with compilers that don't support __func__
+   or __FUNCTION__.
+
+ * Sudo no longer needs to uses weak symbols to support localization
+   in the warning functions.  A registration function is used instead.
+
+ * Fixed a setresuid() failure in sudoers on Linux kernels where
+   uid changes take the nproc resource limit into account.
+
+ * Fixed LDAP netgroup queries on AIX.
+
+ * Sudo will now display the custom prompt on Linux systems with PAM
+   even if the "Password: " prompt is not localized by the PAM module. 
+   Bug #701.
+
 What's new in Sudo 1.8.13
 
  * The examples directory is now a subdirectory of the doc dir to
