@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stddef.h>	/* for rsize_t */
 
 /*
  * Macros and functions that may be missing on some operating systems.
