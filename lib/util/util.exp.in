@@ -50,7 +50,6 @@ sudo_ev_loop_v1
 sudo_ev_loopbreak_v1
 sudo_ev_loopcontinue_v1
 sudo_ev_loopexit_v1
-sudo_evasprintf_v1
 sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1
