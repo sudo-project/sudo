@@ -667,6 +667,9 @@
 /* Define to 1 if you have the `strtonum' function. */
 #undef HAVE_STRTONUM
 
+/* Define to 1 if `d_namlen' is a member of `struct dirent'. */
+#undef HAVE_STRUCT_DIRENT_D_NAMLEN
+
 /* Define to 1 if `d_type' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE
 

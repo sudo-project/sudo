@@ -2733,7 +2733,7 @@ dnl
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <$ac_header_dirent>]], [[DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);]])], [AC_DEFINE(HAVE_DD_FD)], [])])
-AC_CHECK_MEMBERS([struct dirent.d_type], [], [], [
+AC_CHECK_MEMBERS([struct dirent.d_type, struct dirent.d_namlen], [], [], [
 AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])

@@ -41,22 +41,7 @@
 # include <inttypes.h>
 #endif
 #include <unistd.h>
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <dirent.h>
 #include <errno.h>
 #include <ctype.h>
 #include "sudoers.h"
@@ -69,6 +54,12 @@
 # include <sha2.h>
 #else
 # include "compat/sha2.h"
+#endif
+
+#if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
+# define NAMLEN(dirent)	(dirent)->d_namlen
+#else
+# define NAMLEN(dirent)	strlen((dirent)->d_name)
 #endif
 
 int sudolineno;			/* current sudoers line number. */

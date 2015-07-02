@@ -20187,6 +20187,19 @@ _ACEOF
 
 
 fi
+ac_fn_c_check_member "$LINENO" "struct dirent" "d_namlen" "ac_cv_member_struct_dirent_d_namlen" "
+$ac_includes_default
+#include <$ac_header_dirent>
+
+"
+if test "x$ac_cv_member_struct_dirent_d_namlen" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_DIRENT_D_NAMLEN 1
+_ACEOF
+
+
+fi
 
 OLIBS="$LIBS"
 LIBS="${LIBS} ${NET_LIBS}"
