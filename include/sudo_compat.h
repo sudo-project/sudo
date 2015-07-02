@@ -150,7 +150,7 @@
 #endif
 
 /*
- * Posix versions for those without...
+ * POSIX versions for those without...
  */
 #ifndef _S_IFMT
 # define _S_IFMT		S_IFMT
@@ -171,13 +171,6 @@
 # define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
 #endif /* S_ISDIR */
 
-/*
- * Some OS's may not have this.
- */
-#ifndef S_IRWXU
-# define S_IRWXU		0000700		/* rwx for owner */
-#endif /* S_IRWXU */
-
 /* For futimens() and utimensat() emulation. */
 #if !defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)
 # ifndef UTIME_OMIT
@@ -189,19 +182,6 @@
 # ifndef AT_FDCWD
 #  define AT_FDCWD	-100
 # endif
-#endif
-
-/*
- * These should be defined in <unistd.h> but not everyone has them.
- */
-#ifndef STDIN_FILENO
-# define	STDIN_FILENO	0
-#endif
-#ifndef STDOUT_FILENO
-# define	STDOUT_FILENO	1
-#endif
-#ifndef STDERR_FILENO
-# define	STDERR_FILENO	2
 #endif
 
 /*
@@ -237,13 +217,6 @@ __dso_public int isblank(int);
 # define innetgr(n, h, u, d)	(_innetgr(n, h, u, d))
 # define HAVE_INNETGR 1
 #endif /* HAVE__INNETGR */
-
-/*
- * On POSIX systems, O_NOCTTY is the default so some OS's may lack this define.
- */
-#ifndef O_NOCTTY
-# define O_NOCTTY	0
-#endif /* O_NOCTTY */
 
 /*
  * Add IRIX-like sigaction_t for those without it.
@@ -294,6 +267,7 @@ extern int errno;
 # define SIG2STR_MAX 32
 #endif
 
+/* WCOREDUMP is not POSIX, this usually works (verified on AIX). */
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
