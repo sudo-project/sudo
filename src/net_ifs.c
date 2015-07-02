@@ -50,9 +50,7 @@ struct rtentry;
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <netdb.h>
 #include <errno.h>
 #ifdef _ISC

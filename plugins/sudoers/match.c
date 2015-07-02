@@ -41,9 +41,7 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifndef SUDOERS_NAME_MATCH
 # ifdef HAVE_GLOB
 #  include <glob.h>

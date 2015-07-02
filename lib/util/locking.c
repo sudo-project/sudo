@@ -33,9 +33,7 @@
 # include <strings.h>
 #endif /* HAVE_STRING_H */
 #include <ctype.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <fcntl.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
