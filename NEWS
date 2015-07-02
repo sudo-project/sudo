@@ -28,7 +28,7 @@ What's new in Sudo 1.8.14
 
  * Fixed a compilation problem on newer AIX systems which use a
    struct st_timespec for time stamps in struct stat that differs
-   from struct timespec.
+   from struct timespec.  Bug #702.
 
  * The example directory is now configurable via --with-exampledir
    and defaults to DATAROOTDIR/examples/sudo on BSD systems.
