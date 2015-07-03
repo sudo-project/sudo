@@ -659,7 +659,7 @@ send_mail(const char *fmt, ...)
 
 		/* Build up an argv based on the mailer path and flags */
 		if ((mflags = strdup(def_mailerflags)) == NULL) {
-		    mysyslog(LOG_ERR, _("unable allocate memory"));
+		    mysyslog(LOG_ERR, _("unable to allocate memory"));
 		    _exit(127);
 		}
 		if ((argv[0] = strrchr(mpath, '/')))
