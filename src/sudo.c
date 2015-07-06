@@ -392,8 +392,6 @@ get_user_groups(struct user_details *ud)
     int i, len, maxgroups, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
-    memset(ud, 0, sizeof(*ud));
-
     maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
     if (maxgroups < 0)
 	maxgroups = NGROUPS_MAX;
@@ -454,6 +452,8 @@ get_user_info(struct user_details *ud)
     struct passwd *pw;
     int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
+
+    memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
     user_info = reallocarray(NULL, 32, sizeof(char *));
