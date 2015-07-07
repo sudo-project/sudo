@@ -132,7 +132,8 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
+	exit(EXIT_FAILURE);
     sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
 
     dflag = 0;

@@ -163,7 +163,8 @@ main(int argc, char *argv[])
     sudo_fatal_callback_register(visudo_cleanup);
 
     /* Read debug and plugin sections of sudo.conf. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
+	exit(EXIT_FAILURE);
 
     /* Initialize the debug subsystem. */
     sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));

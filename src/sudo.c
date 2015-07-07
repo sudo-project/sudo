@@ -161,7 +161,8 @@ main(int argc, char *argv[], char *envp[])
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     /* Initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
+	exit(EXIT_FAILURE);
     sudo_debug_instance = sudo_debug_register(getprogname(),
 	NULL, NULL, sudo_conf_debug_files(getprogname()));
 
