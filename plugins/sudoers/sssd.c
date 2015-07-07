@@ -1021,9 +1021,9 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int i;
+    int i, op;
     bool ret = false;
-    char op, *v, *val;
+    char *v, *val;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
@@ -1054,15 +1054,23 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	val = strchr(v, '=');
 	if (val > v) {
 	    *val++ = '\0';	/* split on = and truncate var */
-	    op = *(val - 2);	/* peek for += or -= cases */
+	    op = val[-2];	/* peek for += or -= cases */
 	    if (op == '+' || op == '-') {
-		*(val - 2) = '\0';	/* found, remove extra char */
 		/* case var+=val or var-=val */
-		set_default(v, val, (int) op);
+		val[-2] = '\0';	/* remove extra + or - char */
 	    } else {
 		/* case var=val */
-		set_default(v, val, true);
+		op = true;
 	    }
+	    /* Strip double quotes if present. */
+	    if (*val == '"') {
+		char *ep = val + strlen(val);
+		if (ep != val && ep[-1] == '"') {
+		    val++;
+		    ep[-1] = '\0';
+		}
+	    }
+	    set_default(v, val, op);
 	} else if (*v == '!') {
 	    /* case !var Boolean False */
 	    set_default(v + 1, NULL, false);

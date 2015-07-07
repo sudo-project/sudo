@@ -1046,7 +1046,8 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char op, *var, *val;
+    char *var, *val;
+    int op;
     bool rc = false;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
 
@@ -1066,15 +1067,23 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	val = strchr(var, '=');
 	if (val > var) {
 	    *val++ = '\0';	/* split on = and truncate var */
-	    op = *(val - 2);	/* peek for += or -= cases */
+	    op = val[-2];	/* peek for += or -= cases */
 	    if (op == '+' || op == '-') {
-		*(val - 2) = '\0';	/* found, remove extra char */
 		/* case var+=val or var-=val */
-		set_default(var, val, (int) op);
+		val[-2] = '\0';	/* remove extra + or - char */
 	    } else {
 		/* case var=val */
-		set_default(var, val, true);
+		op = true;
 	    }
+	    /* Strip double quotes if present. */
+	    if (*val == '"') {
+		char *ep = val + strlen(val);
+		if (ep != val && ep[-1] == '"') {
+		    val++;
+		    ep[-1] = '\0';
+		}
+	    }
+	    set_default(var, val, op);
 	} else if (*var == '!') {
 	    /* case !var Boolean False */
 	    set_default(var + 1, NULL, false);
