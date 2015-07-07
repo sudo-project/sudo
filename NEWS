@@ -53,6 +53,9 @@ What's new in Sudo 1.8.14
    even if the "Password: " prompt is not localized by the PAM module. 
    Bug #701.
 
+ * Double-quoted values in an LDAP sudoOption are now supported
+   for consistency with file-based sudoers.
+
 What's new in Sudo 1.8.13
 
  * The examples directory is now a subdirectory of the doc dir to
