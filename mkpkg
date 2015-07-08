@@ -194,8 +194,10 @@ case "$osversion" in
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
 		--with-ldap-conf-file=/etc/sudo-ldap.conf"
+	else
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd
+		--with-sssd-lib=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
 	fi
-	configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	configure_opts="--prefix=/usr
 		--with-all-insults
 		--with-pam
@@ -212,7 +214,8 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
 		--libexecdir=/usr/lib
-		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
+		--with-selinux
+		--with-linux-audit
 		$configure_opts"
 	;;
     macos*)

@@ -195,6 +195,8 @@ still allow people to get their work done."
 	/Locale settings/+1,s/^# //
 	/X11 resource/+1,s/^# //
 	/^# \%sudo/,s/^# //
+	/^# Defaults secure_path/,s/^# //
+	/^# Defaults mail_badpass/,s/^# //
 	w
 	q
 	EOF
@@ -244,7 +246,7 @@ still allow people to get their work done."
 	fi
 
 %depend [deb]
-	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
+	libc6, libpam0g, libpam-modules, zlib1g, libselinux1, libaudit1
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap depedency as needed.
