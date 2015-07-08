@@ -551,54 +551,6 @@ io_callback(int fd, int what, void *v)
     int n;
     debug_decl(io_callback, SUDO_DEBUG_EXEC);
 
-    if (ISSET(what, SUDO_EV_READ)) {
-	evbase = sudo_ev_get_base(iob->revent);
-	do {
-	    n = read(fd, iob->buf + iob->len, sizeof(iob->buf) - iob->len);
-	} while (n == -1 && errno == EINTR);
-	switch (n) {
-	    case -1:
-		if (errno == EAGAIN)
-		    break;
-		/* treat read error as fatal and close the fd */
-		sudo_debug_printf(SUDO_DEBUG_ERROR,
-		    "error reading fd %d: %s", fd, strerror(errno));
-		/* FALLTHROUGH */
-	    case 0:
-		/* got EOF or pty has gone away */
-		if (n == 0) {
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"read EOF from fd %d", fd);
-		}
-		safe_close(fd);
-		ev_free_by_fd(evbase, fd);
-		/* If writer already consumed the buffer, close it too. */
-		if (iob->wevent != NULL && iob->off == iob->len) {
-		    safe_close(sudo_ev_get_fd(iob->wevent));
-		    ev_free_by_fd(evbase, sudo_ev_get_fd(iob->wevent));
-		    iob->off = iob->len = 0;
-		}
-		break;
-	    default:
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "read %d bytes from fd %d", n, fd);
-		if (!iob->action(iob->buf + iob->len, n, iob))
-		    terminate_command(cmnd_pid, true);
-		iob->len += n;
-		/* Enable writer if not /dev/tty or we are foreground pgrp. */
-		if (iob->wevent != NULL &&
-		    (foreground || !USERTTY_EVENT(iob->wevent))) {
-		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-			sudo_fatal(U_("unable to add event to queue"));
-		}
-		/* Re-enable reader if buffer is not full. */
-		if (iob->len != sizeof(iob->buf)) {
-		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-			sudo_fatal(U_("unable to add event to queue"));
-		}
-		break;
-	}
-    }
     if (ISSET(what, SUDO_EV_WRITE)) {
 	evbase = sudo_ev_get_base(iob->wevent);
 	do {
@@ -615,6 +567,7 @@ io_callback(int fd, int what, void *v)
 		    "unable to write %d bytes to fd %d",
 		    iob->len - iob->off, fd);
 		if (iob->revent != NULL) {
+		    CLR(what, SUDO_EV_READ);
 		    safe_close(sudo_ev_get_fd(iob->revent));
 		    ev_free_by_fd(evbase, sudo_ev_get_fd(iob->revent));
 		}
@@ -662,6 +615,54 @@ io_callback(int fd, int what, void *v)
 			sudo_fatal(U_("unable to add event to queue"));
 		}
 	    }
+	}
+    }
+    if (ISSET(what, SUDO_EV_READ)) {
+	evbase = sudo_ev_get_base(iob->revent);
+	do {
+	    n = read(fd, iob->buf + iob->len, sizeof(iob->buf) - iob->len);
+	} while (n == -1 && errno == EINTR);
+	switch (n) {
+	    case -1:
+		if (errno == EAGAIN)
+		    break;
+		/* treat read error as fatal and close the fd */
+		sudo_debug_printf(SUDO_DEBUG_ERROR,
+		    "error reading fd %d: %s", fd, strerror(errno));
+		/* FALLTHROUGH */
+	    case 0:
+		/* got EOF or pty has gone away */
+		if (n == 0) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"read EOF from fd %d", fd);
+		}
+		safe_close(fd);
+		ev_free_by_fd(evbase, fd);
+		/* If writer already consumed the buffer, close it too. */
+		if (iob->wevent != NULL && iob->off == iob->len) {
+		    safe_close(sudo_ev_get_fd(iob->wevent));
+		    ev_free_by_fd(evbase, sudo_ev_get_fd(iob->wevent));
+		    iob->off = iob->len = 0;
+		}
+		break;
+	    default:
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "read %d bytes from fd %d", n, fd);
+		if (!iob->action(iob->buf + iob->len, n, iob))
+		    terminate_command(cmnd_pid, true);
+		iob->len += n;
+		/* Enable writer if not /dev/tty or we are foreground pgrp. */
+		if (iob->wevent != NULL &&
+		    (foreground || !USERTTY_EVENT(iob->wevent))) {
+		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
+			sudo_fatal(U_("unable to add event to queue"));
+		}
+		/* Re-enable reader if buffer is not full. */
+		if (iob->len != sizeof(iob->buf)) {
+		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
+			sudo_fatal(U_("unable to add event to queue"));
+		}
+		break;
 	}
     }
 }
