@@ -60,6 +60,7 @@ get_boottime(struct timespec *ts)
     char *line = NULL;
     size_t linesize = 0;
     bool found = false;
+    long long llval;
     ssize_t len;
     FILE *fp;
     debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
@@ -69,7 +70,9 @@ get_boottime(struct timespec *ts)
     if (fp != NULL) {
 	while ((len = getline(&line, &linesize, fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
-		long long llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
+		if (line[len - 1] == '\n')
+		    line[len - 1] = '\0';
+		llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
 		if (llval > 0) {
 		    ts->tv_sec = (time_t)llval;
 		    ts->tv_nsec = 0;
