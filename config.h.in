@@ -975,6 +975,10 @@
    */
 #undef MAX_UID_T_LEN
 
+/* Define to 1 if resolv.h must be included to get the `inet_ntop' or
+   `inet_pton' function prototypes. */
+#undef NEED_RESOLV_H
+
 /* Define to 1 if you don't want sudo to prompt for a password by default. */
 #undef NO_AUTHENTICATION
 

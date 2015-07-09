@@ -2790,6 +2790,11 @@ AC_CHECK_FUNC([inet_pton], [
 	    AC_DEFINE(HAVE_INET_PTON)
 	    NET_LIBS="${NET_LIBS} $libs"
 	    INET_PTON_LIBS="$libs"
+	    case "$libs" in
+		*-lresolv*)
+		    AC_DEFINE(NEED_RESOLV_H)
+		    ;;
+	    esac
 	    break
 	], [], [$extralibs])
     done
@@ -4336,6 +4341,7 @@ AH_TEMPLATE(HAVE__NSS_INITF_GROUP, [Define to 1 if you have the `_nss_initf_grou
 AH_TEMPLATE(HAVE___NSS_INITF_GROUP, [Define to 1 if you have the `__nss_initf_group' function.])
 AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
+AH_TEMPLATE(NEED_RESOLV_H, [Define to 1 if resolv.h must be included to get the `inet_ntop' or `inet_pton' function prototypes.])
 AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the `strnlen' function.])
 
 dnl

@@ -51,6 +51,10 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#ifdef NEED_RESOLV_H
+# include <arpa/nameser.h>
+# include <resolv.h>
+#endif /* NEED_RESOLV_H */
 
 #include "sudo_compat.h"
 #include "compat/getaddrinfo.h"

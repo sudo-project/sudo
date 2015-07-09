@@ -20349,6 +20349,12 @@ $as_echo "yes" >&6; }
 
 	    NET_LIBS="${NET_LIBS} $libs"
 	    INET_PTON_LIBS="$libs"
+	    case "$libs" in
+		*-lresolv*)
+		    $as_echo "#define NEED_RESOLV_H 1" >>confdefs.h
+
+		    ;;
+	    esac
 	    break
 
     else
@@ -26683,6 +26689,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

@@ -67,6 +67,10 @@ struct rtentry;
 #endif /* _MIPS */
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef NEED_RESOLV_H
+# include <arpa/nameser.h>
+# include <resolv.h>
+#endif /* NEED_RESOLV_H */
 #include <net/if.h>
 #ifdef HAVE_GETIFADDRS
 # include <ifaddrs.h>

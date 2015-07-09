@@ -36,6 +36,10 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef NEED_RESOLV_H
+# include <arpa/nameser.h>
+# include <resolv.h>
+#endif /* NEED_RESOLV_H */
 
 #include "sudoers.h"
 #include "interfaces.h"
