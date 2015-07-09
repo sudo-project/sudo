@@ -56,6 +56,9 @@ What's new in Sudo 1.8.14
  * Double-quoted values in an LDAP sudoOption are now supported
    for consistency with file-based sudoers.
 
+ * Fixed a bug that prevented the btime entry in /proc/stat from
+   being parsed on Linux.
+
 What's new in Sudo 1.8.13
 
  * The examples directory is now a subdirectory of the doc dir to
