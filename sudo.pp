@@ -250,7 +250,7 @@ still allow people to get their work done."
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap depedency as needed.
-	DEPENDS="${linux_audit}"
+	DEPENDS="%{linux_audit}"
 	if test -z "%{flavor}"; then
 	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
