@@ -223,7 +223,7 @@ case "$osversion" in
 		--with-linux-audit
 		$configure_opts"
 	# Use correct libaudit dependency
-	linux_audit=`dpkg-query -S /lib/$MULTIARCH/libaudit.so.[0-9]* | sed -e 's/:.*//' -e q`
+	linux_audit=`dpkg-query -S /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* | sed -e 's/:.*//' -e q`
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
 	;;
     macos*)
