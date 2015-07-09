@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -223,7 +223,16 @@ case "$osversion" in
 		--with-linux-audit
 		$configure_opts"
 	# Use correct libaudit dependency
-	linux_audit=`dpkg-query -S /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* | sed -e 's/:.*//' -e q`
+	for f in /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
+	    if test -f "$f"; then
+		linux_audit=`dpkg-query -S "$f" 2>/dev/null | sed -n 's/:.*//p'`
+		test -n "$linux_audit" && break;
+	    fi
+	done
+	if [ -z "linux_audit" ]; then
+	    echo "unable to determine package for libaudit" 1>&2
+	    exit 1
+	fi
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
 	;;
     macos*)
