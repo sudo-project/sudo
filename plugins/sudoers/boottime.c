@@ -32,6 +32,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <errno.h>
 #include <limits.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
@@ -77,7 +78,12 @@ get_boottime(struct timespec *ts)
 		    ts->tv_sec = (time_t)llval;
 		    ts->tv_nsec = 0;
 		    found = true;
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			"found btime in /proc/stat: %lld", llval);
 		    break;
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"invalid btime in /proc/stat: %s", line);
 		}
 	    }
 	}
@@ -102,10 +108,14 @@ get_boottime(struct timespec *ts)
     mib[1] = KERN_BOOTTIME;
     size = sizeof(tv);
     if (sysctl(mib, 2, &tv, &size, NULL, 0) != -1) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "KERN_BOOTTIME: %lld, %ld", (long long)tv.tv_sec, (long)tv.tv_usec);
 	TIMEVAL_TO_TIMESPEC(&tv, ts);
 	debug_return_bool(true);
     }
 
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"KERN_BOOTTIME: %s", strerror(errno));
     debug_return_bool(false);
 }
 
@@ -120,8 +130,12 @@ get_boottime(struct timespec *ts)
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
     setutxent();
-    if ((ut = getutxid(&key)) != NULL)
+    if ((ut = getutxid(&key)) != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "BOOT_TIME: %lld, %ld", (long long)ut->ut_tv.tv_sec,
+	    (long)ut->ut_tv.tv_usec);
 	TIMEVAL_TO_TIMESPEC(&ut->ut_tv, ts);
+    }
     endutxent();
     debug_return_bool(ut != NULL);
 }
@@ -138,6 +152,8 @@ get_boottime(struct timespec *ts)
     key.ut_type = BOOT_TIME;
     setutent();
     if ((ut = getutid(&key)) != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "BOOT_TIME: %lld", (long long)ut->ut_time);
 	ts->tv_sec = ut->ut_time;
 	ts->tv_nsec = 0;
     }
