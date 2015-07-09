@@ -191,7 +191,7 @@ case "$osversion" in
 		;;
 	esac
 	# Newer Debian uses arch-specific lib dirs
-	MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+	MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null`
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
