@@ -246,10 +246,11 @@ still allow people to get their work done."
 	fi
 
 %depend [deb]
-	libc6, libpam0g, libpam-modules, zlib1g, libselinux1, libaudit1
+	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap depedency as needed.
+	DEPENDS="${linux_audit}"
 	if test -z "%{flavor}"; then
 	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
@@ -257,10 +258,11 @@ still allow people to get their work done."
 	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Provides: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
-	    cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	    sed 's/^\(Depends:.*\) *$/\1, libldap-2.4-2/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
-	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	    DEPENDS="${DEPENDS}, libldap-2.4-2"
 	fi
+	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	echo "Homepage: http://www.sudo.ws/sudo/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: http://www.sudo.ws/bugs/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
