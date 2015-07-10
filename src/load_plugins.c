@@ -159,9 +159,11 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     /* Open plugin and map in symbol */
     handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!handle) {
+	const char *errstr = sudo_dso_strerror();
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	sudo_warnx(U_("unable to load %s: %s"), path,
+	    errstr ? errstr : "unknown error");
 	goto bad;
     }
     plugin = sudo_dso_findsym(handle, info->symbol_name);

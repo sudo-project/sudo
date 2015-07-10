@@ -93,7 +93,9 @@ group_plugin_load(char *plugin_info)
     /* Open plugin and map in symbol. */
     group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!group_handle) {
-	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	const char *errstr = sudo_dso_strerror();
+	sudo_warnx(U_("unable to load %s: %s"), path,
+	    errstr ? errstr : "unknown error");
 	goto done;
     }
     group_plugin = sudo_dso_findsym(group_handle, "group_plugin");

@@ -60,8 +60,11 @@ main(int argc, char *argv[])
     symbols_file = argv[2];
 
     handle = sudo_dso_load(plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
-    if (handle == NULL)
-	sudo_fatalx_nodebug("unable to load %s: %s", plugin_path, sudo_dso_strerror());
+    if (handle == NULL) {
+	const char *errstr = sudo_dso_strerror();
+	sudo_fatalx_nodebug("unable to load %s: %s", plugin_path,
+	    errstr ? errstr : "unknown error");
+    }
 
     fp = fopen(symbols_file, "r");
     if (fp == NULL)
@@ -73,8 +76,9 @@ main(int argc, char *argv[])
 	    *cp = '\0';
 	sym = sudo_dso_findsym(handle, line);
 	if (sym == NULL) {
+	    const char *errstr = sudo_dso_strerror();
 	    printf("%s: test %d: unable to resolve symbol %s: %s\n",
-		getprogname(), ntests, line, sudo_dso_strerror());
+		getprogname(), ntests, line, errstr ? errstr : "unknown error");
 	    errors++;
 	}
     }
