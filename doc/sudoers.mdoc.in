@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 24, 2015
+.Dd July 10, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1697,13 +1697,13 @@ option is used).
 This effectively means that the
 .Fl H
 option is always implied.
-Note that
+Note that by default,
 .Ev HOME
-is already set when the
+will be set to the home directory of the target user when the
 .Em env_reset
 option is enabled, so
 .Em always_set_home
-is only effective for configurations where either
+only has an effect for configurations where either
 .Em env_reset
 is disabled or
 .Ev HOME

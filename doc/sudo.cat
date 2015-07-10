@@ -455,13 +455,16 @@ EENNVVIIRROONNMMEENNTT
      EDITOR           Default editor to use in --ee (sudoedit) mode if neither
                       SUDO_EDITOR nor VISUAL is set.
 
-     MAIL             In --ii mode or when _e_n_v___r_e_s_e_t is enabled in _s_u_d_o_e_r_s, set
-                      to the mail spool of the target user.
+     MAIL             Set to the mail spool of the target user when the --ii
+                      option is specified or when _e_n_v___r_e_s_e_t is enabled in
+                      _s_u_d_o_e_r_s (unless MAIL is present in the _e_n_v___k_e_e_p list).
 
-     HOME             Set to the home directory of the target user if --ii or --HH
-                      are specified, _e_n_v___r_e_s_e_t or _a_l_w_a_y_s___s_e_t___h_o_m_e are set in
-                      _s_u_d_o_e_r_s, or when the --ss option is specified and _s_e_t___h_o_m_e
-                      is set in _s_u_d_o_e_r_s.
+     HOME             Set to the home directory of the target user when the --ii
+                      or --HH options are specified, when the --ss option is
+                      specified and _s_e_t___h_o_m_e is set in _s_u_d_o_e_r_s, when
+                      _a_l_w_a_y_s___s_e_t___h_o_m_e is enabled in _s_u_d_o_e_r_s, or when _e_n_v___r_e_s_e_t
+                      is enabled in _s_u_d_o_e_r_s and _H_O_M_E is not present in the
+                      _e_n_v___k_e_e_p list.
 
      PATH             May be overridden by the security policy.
 
@@ -582,4 +585,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.14                      June 8, 2015                      Sudo 1.8.14
+Sudo 1.8.14                      July 10, 2015                     Sudo 1.8.14

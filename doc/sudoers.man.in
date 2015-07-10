@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 24, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "July 10, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1825,13 +1825,13 @@ option is used).
 This effectively means that the
 \fB\-H\fR
 option is always implied.
-Note that
+Note that by default,
 \fRHOME\fR
-is already set when the
+will be set to the home directory of the target user when the
 \fIenv_reset\fR
 option is enabled, so
 \fIalways_set_home\fR
-is only effective for configurations where either
+only has an effect for configurations where either
 \fIenv_reset\fR
 is disabled or
 \fRHOME\fR

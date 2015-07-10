@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd June 8, 2015
+.Dd July 10, 2015
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -851,30 +851,41 @@ nor
 .Ev VISUAL
 is set.
 .It Ev MAIL
-In
+Set to the mail spool of the target user when the
 .Fl i
-mode or when
+option is specified or when
 .Em env_reset
 is enabled in
-.Em sudoers ,
-set to the mail spool of the target user.
+.Em sudoers
+(unless
+.Ev MAIL
+is present in the
+.Em env_keep
+list).
 .It Ev HOME
-Set to the home directory of the target user if
+Set to the home directory of the target user when the
 .Fl i
 or
 .Fl H
-are specified,
-.Em env_reset
-or
-.Em always_set_home
-are set in
-.Em sudoers ,
-or when the
+options are specified, when the
 .Fl s
 option is specified and
 .Em set_home
 is set in
-.Em sudoers .
+.Em sudoers ,
+when
+.Em always_set_home
+is enabled in
+.Em sudoers ,
+or when
+.Em env_reset
+is enabled in
+.Em sudoers
+and
+.Em HOME
+is not present in the
+.Em env_keep
+list.
 .It Ev PATH
 May be overridden by the security policy.
 .It Ev SHELL

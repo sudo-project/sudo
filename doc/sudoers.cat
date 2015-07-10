@@ -837,9 +837,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      always_set_home   If enabled, ssuuddoo will set the HOME environment variable
                        to the home directory of the target user (which is root
                        unless the --uu option is used).  This effectively means
-                       that the --HH option is always implied.  Note that HOME
-                       is already set when the _e_n_v___r_e_s_e_t option is enabled, so
-                       _a_l_w_a_y_s___s_e_t___h_o_m_e is only effective for configurations
+                       that the --HH option is always implied.  Note that by
+                       default, HOME will be set to the home directory of the
+                       target user when the _e_n_v___r_e_s_e_t option is enabled, so
+                       _a_l_w_a_y_s___s_e_t___h_o_m_e only has an effect for configurations
                        where either _e_n_v___r_e_s_e_t is disabled or HOME is present
                        in the _e_n_v___k_e_e_p list.  This flag is _o_f_f by default.
 
@@ -2416,4 +2417,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.14                     March 24, 2015                     Sudo 1.8.14
+Sudo 1.8.14                      July 10, 2015                     Sudo 1.8.14

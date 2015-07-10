@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "June 8, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "July 10, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -920,31 +920,42 @@ nor
 is set.
 .TP 17n
 \fRMAIL\fR
-In
+Set to the mail spool of the target user when the
 \fB\-i\fR
-mode or when
+option is specified or when
 \fIenv_reset\fR
 is enabled in
-\fIsudoers\fR,
-set to the mail spool of the target user.
+\fIsudoers\fR
+(unless
+\fRMAIL\fR
+is present in the
+\fIenv_keep\fR
+list).
 .TP 17n
 \fRHOME\fR
-Set to the home directory of the target user if
+Set to the home directory of the target user when the
 \fB\-i\fR
 or
 \fB\-H\fR
-are specified,
-\fIenv_reset\fR
-or
-\fIalways_set_home\fR
-are set in
-\fIsudoers\fR,
-or when the
+options are specified, when the
 \fB\-s\fR
 option is specified and
 \fIset_home\fR
 is set in
-\fIsudoers\fR.
+\fIsudoers\fR,
+when
+\fIalways_set_home\fR
+is enabled in
+\fIsudoers\fR,
+or when
+\fIenv_reset\fR
+is enabled in
+\fIsudoers\fR
+and
+\fIHOME\fR
+is not present in the
+\fIenv_keep\fR
+list.
 .TP 17n
 \fRPATH\fR
 May be overridden by the security policy.
