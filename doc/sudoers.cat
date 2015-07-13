@@ -924,12 +924,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        Any variables in the caller's environment that match
                        the env_keep and env_check lists are then added,
                        followed by any variables present in the file specified
-                       by the _e_n_v___f_i_l_e option (if any).  The default contents
-                       of the env_keep and env_check lists are displayed when
-                       ssuuddoo is run by root with the --VV option.  If the
-                       _s_e_c_u_r_e___p_a_t_h option is set, its value will be used for
-                       the PATH environment variable.  This flag is _o_n by
-                       default.
+                       by the _e_n_v___f_i_l_e option (if any).  The contents of the
+                       env_keep and env_check lists, as modified by global
+                       Defaults parameters in _s_u_d_o_e_r_s, are displayed when ssuuddoo
+                       is run by root with the --VV option.  If the _s_e_c_u_r_e___p_a_t_h
+                       option is set, its value will be used for the PATH
+                       environment variable.  This flag is _o_n by default.
 
      fast_glob         Normally, ssuuddoo uses the glob(3) function to do shell-
                        style globbing when matching path names.  However,
@@ -1708,7 +1708,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        Regardless of whether the env_reset option is enabled
                        or disabled, variables specified by env_check will be
                        preserved in the environment if they pass the
-                       aforementioned check.  The default list of environment
+                       aforementioned check.  The global list of environment
                        variables to check is displayed when ssuuddoo is run by
                        root with the --VV option.
 
@@ -1718,7 +1718,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        list or a single value without double-quotes.  The list
                        can be replaced, added to, deleted from, or disabled by
                        using the =, +=, -=, and ! operators respectively.  The
-                       default list of environment variables to remove is
+                       global list of environment variables to remove is
                        displayed when ssuuddoo is run by root with the --VV option.
                        Note that many operating systems will remove
                        potentially dangerous variables from the environment of
@@ -1731,7 +1731,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        be a double-quoted, space-separated list or a single
                        value without double-quotes.  The list can be replaced,
                        added to, deleted from, or disabled by using the =, +=,
-                       -=, and ! operators respectively.  The default list of
+                       -=, and ! operators respectively.  The global list of
                        variables to keep is displayed when ssuuddoo is run by root
                        with the --VV option.
 

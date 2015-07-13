@@ -1866,11 +1866,13 @@ lists are then added, followed by any variables present in the file
 specified by the
 .Em env_file
 option (if any).
-The default contents of the
+The contents of the
 .Li env_keep
 and
 .Li env_check
-lists are displayed when
+lists, as modified by global Defaults parameters in
+.Em sudoers ,
+are displayed when
 .Nm sudo
 is run by root with the
 .Fl V
@@ -3272,7 +3274,7 @@ Regardless of whether the
 option is enabled or disabled, variables specified by
 .Li env_check
 will be preserved in the environment if they pass the aforementioned check.
-The default list of environment variables to check is displayed when
+The global list of environment variables to check is displayed when
 .Nm sudo
 is run by root with
 the
@@ -3291,7 +3293,7 @@ The list can be replaced, added to, deleted from, or disabled by using the
 and
 .Li \&!
 operators respectively.
-The default list of environment variables to remove is displayed when
+The global list of environment variables to remove is displayed when
 .Nm sudo
 is run by root with the
 .Fl V
@@ -3315,7 +3317,7 @@ The list can be replaced, added to, deleted from, or disabled by using the
 and
 .Li \&!
 operators respectively.
-The default list of variables to keep
+The global list of variables to keep
 is displayed when
 .Nm sudo
 is run by root with the

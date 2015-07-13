@@ -2001,11 +2001,13 @@ lists are then added, followed by any variables present in the file
 specified by the
 \fIenv_file\fR
 option (if any).
-The default contents of the
+The contents of the
 \fRenv_keep\fR
 and
 \fRenv_check\fR
-lists are displayed when
+lists, as modified by global Defaults parameters in
+\fIsudoers\fR,
+are displayed when
 \fBsudo\fR
 is run by root with the
 \fB\-V\fR
@@ -3524,7 +3526,7 @@ Regardless of whether the
 option is enabled or disabled, variables specified by
 \fRenv_check\fR
 will be preserved in the environment if they pass the aforementioned check.
-The default list of environment variables to check is displayed when
+The global list of environment variables to check is displayed when
 \fBsudo\fR
 is run by root with
 the
@@ -3545,7 +3547,7 @@ The list can be replaced, added to, deleted from, or disabled by using the
 and
 \fR\&!\fR
 operators respectively.
-The default list of environment variables to remove is displayed when
+The global list of environment variables to remove is displayed when
 \fBsudo\fR
 is run by root with the
 \fB\-V\fR
@@ -3570,7 +3572,7 @@ The list can be replaced, added to, deleted from, or disabled by using the
 and
 \fR\&!\fR
 operators respectively.
-The default list of variables to keep
+The global list of variables to keep
 is displayed when
 \fBsudo\fR
 is run by root with the
