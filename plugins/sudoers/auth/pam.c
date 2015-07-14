@@ -320,11 +320,16 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     int ret = PAM_SUCCESS;
     debug_decl(converse, SUDOERS_DEBUG_AUTH)
 
-    if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG)
+    if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid number of PAM messages: %d", num_msg);
 	debug_return_int(PAM_CONV_ERR);
+    }
 
-    if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL)
+    if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(PAM_BUF_ERR);
+    }
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
@@ -364,6 +369,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    goto done;
 		}
 		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"password longer than %d", PAM_MAX_RESP_SIZE);
 		    ret = PAM_CONV_ERR;
 		    goto done;
 		}
