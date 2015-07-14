@@ -2797,7 +2797,8 @@ sudo_ldap_result_alloc(void)
     debug_decl(sudo_ldap_result_alloc, SUDOERS_DEBUG_LDAP)
 
     result = calloc(1, sizeof(*result));
-    STAILQ_INIT(&result->searches);
+    if (result != NULL)
+	STAILQ_INIT(&result->searches);
 
     debug_return_ptr(result);
 }
