@@ -50,7 +50,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
     base->pfd_max = 32;
     base->pfds = reallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
     if (base->pfds == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate %d pollfds", __func__, base->pfd_max);
 	base->pfd_max = 0;
 	debug_return_int(-1);
@@ -84,7 +84,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	pfds =
 	    reallocarray(base->pfds, base->pfd_max, 2 * sizeof(struct pollfd));
 	if (pfds == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to allocate %d pollfds", __func__, base->pfd_max * 2);
 	    debug_return_int(-1);
 	}

@@ -59,8 +59,8 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     if (base->readfds_in == NULL || base->writefds_in == NULL ||
 	base->readfds_out == NULL || base->writefds_out == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to calloc(1, %zu)",
-	    __func__, sizeof(fd_mask));
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: unable to calloc(1, %zu)", __func__, sizeof(fd_mask));
 	sudo_ev_base_free_impl(base);
 	debug_return_int(-1);
     }
@@ -97,7 +97,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	wfds_out = reallocarray(base->writefds_out, n, sizeof(fd_mask));
 	if (rfds_in == NULL || wfds_in == NULL ||
 	    rfds_out == NULL || wfds_out == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_WARN,
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to reallocarray(%d, %zu)",
 		__func__, n, sizeof(fd_mask));
 	    free(rfds_in);

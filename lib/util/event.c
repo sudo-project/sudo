@@ -80,7 +80,7 @@ sudo_ev_base_alloc_v1(void)
 
     base = calloc(1, sizeof(*base));
     if (base == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate base", __func__);
 	debug_return_ptr(NULL);
     }
@@ -122,7 +122,7 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
 
     ev = calloc(1, sizeof(*ev));
     if (ev == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate event", __func__);
 	debug_return_ptr(NULL);
     }
