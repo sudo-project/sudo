@@ -40,7 +40,7 @@
 
 /*
  * Read a line of input, honoring line continuation chars.
- * Remove comments and strips off leading and trailing spaces.
+ * Remove comments and strip off leading and trailing spaces.
  * Returns the line length and updates the buf and bufsize pointers.
  * XXX - just use a struct w/ state, including getline buffer?
  *       could also make comment char and line continuation configurable
@@ -99,8 +99,13 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 		size |= size >> 16;
 		size++;
 	    }
-	    if ((tmp = realloc(*bufp, size)) == NULL)
+	    if ((tmp = realloc(*bufp, size)) == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		len = -1;
+		total = 0;
 		break;
+	    }
 	    *bufp = tmp;
 	    *bufsizep = size;
 	}
