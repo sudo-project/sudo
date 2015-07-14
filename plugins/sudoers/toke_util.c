@@ -53,7 +53,7 @@ fill_txt(const char *src, int len, int olen)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	sudo_warn(NULL);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -106,7 +106,7 @@ fill_cmnd(const char *src, int len)
 
     dst = sudoerslval.command.cmnd = malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
-	sudo_warn(NULL);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -144,9 +144,9 @@ fill_args(const char *s, int len, int addspace)
 
 	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
-	    free(sudoerslval.command.args);
-	    sudo_warn(NULL);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
+	    free(sudoerslval.command.args);
 	    debug_return_bool(false);
 	} else
 	    sudoerslval.command.args = p;

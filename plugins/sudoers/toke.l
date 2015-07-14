@@ -770,9 +770,11 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	}
 	goto bad;
     }
-    paths = malloc(sizeof(*paths) * max_paths);
-    if (paths == NULL)
+    paths = reallocarray(NULL, max_paths, sizeof(*paths));
+    if (paths == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
+    }
     while ((dent = readdir(dir)) != NULL) {
 	struct path_list *pl;
 	struct stat sb;
@@ -791,6 +793,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(path);
 	    goto bad;
 	}
@@ -800,6 +803,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    max_paths <<= 1;
 	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		free(path);
 		free(pl);
 		goto bad;
@@ -907,7 +911,7 @@ push_include_int(char *path, bool isdir)
 	istacksize += SUDOERS_STACK_INCREMENT;
 	new_istack = reallocarray(istack, istacksize, sizeof(*istack));
 	if (new_istack == NULL) {
-	    sudo_warn(NULL);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
@@ -1065,7 +1069,7 @@ parse_include(char *base)
     len += (int)(ep - cp);
     path = pp = malloc(len + dirlen + 1);
     if (path == NULL) {
-	sudo_warn(NULL);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_str(NULL);
     }
