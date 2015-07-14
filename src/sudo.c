@@ -458,8 +458,11 @@ get_user_info(struct user_details *ud)
 
     /* XXX - bound check number of entries */
     user_info = reallocarray(NULL, 32, sizeof(char *));
-    if (user_info == NULL)
+    if (user_info == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	goto bad;
+    }
 
     ud->pid = getpid();
     ud->ppid = getppid();
@@ -753,7 +756,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -1135,15 +1138,15 @@ format_plugin_settings(struct plugin_container *plugin,
     plugin_settings = ps =
 	reallocarray(NULL, plugin_settings_size, sizeof(char *));
     if (plugin_settings == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if ((*ps++ = sudo_new_key_val("plugin_path", plugin->path)) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     for (setting = sudo_settings; setting->name != NULL; setting++) {
         if (setting->value != NULL) {
             sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
                 setting->name, setting->value);
 	    if ((*ps++ = sudo_new_key_val(setting->name, setting->value)) == NULL)
-                sudo_fatal(NULL);
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
         }
     }
     if (plugin->debug_files != NULL) {
@@ -1151,7 +1154,7 @@ format_plugin_settings(struct plugin_container *plugin,
 	    /* XXX - quote filename? */
 	    if (asprintf(ps++, "debug_flags=%s %s", debug_file->debug_file,
 		debug_file->debug_flags) == -1)
-		sudo_fatal(NULL);
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
     }
     *ps = NULL;

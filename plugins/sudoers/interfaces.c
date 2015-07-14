@@ -66,8 +66,11 @@ set_interfaces(const char *ai)
 	*mask++ = '\0';
 
 	/* Parse addr and store in list. */
-	if ((ifp = calloc(1, sizeof(*ifp))) == NULL)
+	if ((ifp = calloc(1, sizeof(*ifp))) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    goto done;
+	}
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
 #ifdef HAVE_STRUCT_IN6_ADDR

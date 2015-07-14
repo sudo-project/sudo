@@ -84,25 +84,29 @@ rbcreate(int (*compar)(const void *, const void*))
     struct rbtree *tree;
     debug_decl(rbcreate, SUDOERS_DEBUG_RBTREE)
 
-    if ((tree = malloc(sizeof(*tree))) != NULL) {
-	tree->compar = compar;
-
-	/*
-	 * We use a self-referencing sentinel node called nil to simplify the
-	 * code by avoiding the need to check for NULL pointers.
-	 */
-	tree->nil.left = tree->nil.right = tree->nil.parent = &tree->nil;
-	tree->nil.color = black;
-	tree->nil.data = NULL;
-
-	/*
-	 * Similarly, the fake root node keeps us from having to worry
-	 * about splitting the root.
-	 */
-	tree->root.left = tree->root.right = tree->root.parent = &tree->nil;
-	tree->root.color = black;
-	tree->root.data = NULL;
+    if ((tree = malloc(sizeof(*tree))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_ptr(NULL);
     }
+
+    tree->compar = compar;
+
+    /*
+     * We use a self-referencing sentinel node called nil to simplify the
+     * code by avoiding the need to check for NULL pointers.
+     */
+    tree->nil.left = tree->nil.right = tree->nil.parent = &tree->nil;
+    tree->nil.color = black;
+    tree->nil.data = NULL;
+
+    /*
+     * Similarly, the fake root node keeps us from having to worry
+     * about splitting the root.
+     */
+    tree->root.left = tree->root.right = tree->root.parent = &tree->nil;
+    tree->root.color = black;
+    tree->root.data = NULL;
 
     debug_return_ptr(tree);
 }
@@ -184,8 +188,11 @@ rbinsert(struct rbtree *tree, void *data, struct rbnode **existing)
     }
 
     node = malloc(sizeof(*node));
-    if (node == NULL)
+    if (node == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	debug_return_int(-1);
+    }
     node->data = data;
     node->left = node->right = rbnil(tree);
     node->parent = parent;

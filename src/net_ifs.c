@@ -144,8 +144,11 @@ get_net_ifs(char **addrinfo)
     if (num_interfaces == 0)
 	debug_return_int(0);
     ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
-    if ((cp = malloc(ailen)) == NULL)
+    if ((cp = malloc(ailen)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	debug_return_int(-1);
+    }
     *addrinfo = cp;
 
     /* Store the IP addr/netmask pairs. */
@@ -236,6 +239,8 @@ get_net_ifs(char **addrinfo)
      */
     for (;;) {
 	if ((ifconf_buf = malloc(buflen)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    num_interfaces = -1;
 	    goto done;
 	}
@@ -264,6 +269,8 @@ get_net_ifs(char **addrinfo)
 	goto done;
     ailen = n * 2 * INET6_ADDRSTRLEN;
     if ((cp = malloc(ailen)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	num_interfaces = -1;
 	goto done;
     }

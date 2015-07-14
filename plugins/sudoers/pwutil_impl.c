@@ -109,8 +109,11 @@ sudo_make_pwitem(uid_t uid, const char *name)
 	total += strlen(name) + 1;
 
     /* Allocate space for struct item, struct passwd and the strings. */
-    if ((pwitem = calloc(1, total)) == NULL)
+    if ((pwitem = calloc(1, total)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	debug_return_ptr(NULL);
+    }
     newpw = &pwitem->pw;
 
     /*
@@ -181,8 +184,11 @@ sudo_make_gritem(gid_t gid, const char *name)
     if (name != NULL)
 	total += strlen(name) + 1;
 
-    if ((gritem = calloc(1, total)) == NULL)
+    if ((gritem = calloc(1, total)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	debug_return_ptr(NULL);
+    }
 
     /*
      * Copy in group contents and make strings relative to space
@@ -245,21 +251,30 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
 	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
-	    if (gids == NULL)
+	    if (gids == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
 		debug_return_ptr(NULL);
+	    }
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
 	} else {
 	    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
 	    if (ngids < 0)
 		ngids = NGROUPS_MAX * 2;
 	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
-	    if (gids == NULL)
+	    if (gids == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
 		debug_return_ptr(NULL);
+	    }
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
 		free(gids);
 		gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
-		if (gids == NULL)
+		if (gids == NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable to allocate memory");
 		    debug_return_ptr(NULL);
+		}
 		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
 		    ngids = -1;
 	    }
@@ -286,6 +301,8 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
 
 again:
     if ((grlitem = calloc(1, total)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	free(gids);
 	debug_return_ptr(NULL);
     }

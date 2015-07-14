@@ -740,15 +740,18 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDOERS_DEBUG_PARSER)
 
-    d = calloc(1, sizeof(struct defaults));
-    if (d != NULL) {
-	d->var = var;
-	d->val = val;
-	/* d->type = 0; */
-	d->op = op;
-	/* d->binding = NULL */
-	HLTQ_INIT(d, entries);
+    if ((d = calloc(1, sizeof(struct defaults))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_ptr(NULL);
     }
+
+    d->var = var;
+    d->val = val;
+    /* d->type = 0; */
+    d->op = op;
+    /* d->binding = NULL */
+    HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
 }
@@ -759,12 +762,15 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDOERS_DEBUG_PARSER)
 
-    m = calloc(1, sizeof(struct member));
-    if (m != NULL) {
-	m->name = name;
-	m->type = type;
-	HLTQ_INIT(m, entries);
+    if ((m = calloc(1, sizeof(struct member))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_ptr(NULL);
     }
+
+    m->name = name;
+    m->type = type;
+    HLTQ_INIT(m, entries);
 
     debug_return_ptr(m);
 }
@@ -775,14 +781,19 @@ new_digest(int digest_type, const char *digest_str)
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER)
 
-    dig = malloc(sizeof(*dig));
-    if (dig != NULL) {
-	dig->digest_type = digest_type;
-	dig->digest_str = strdup(digest_str);
-	if (dig->digest_str == NULL) {
-	    free(dig);
-	    dig = NULL;
-	}
+    if ((dig = malloc(sizeof(*dig))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_ptr(NULL);
+    }
+
+    dig->digest_type = digest_type;
+    dig->digest_str = strdup(digest_str);
+    if (dig->digest_str == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	free(dig);
+	dig = NULL;
     }
 
     debug_return_ptr(dig);
@@ -804,8 +815,11 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	/*
 	 * We use a single binding for each entry in defs.
 	 */
-	if ((binding = malloc(sizeof(*binding))) == NULL)
+	if ((binding = malloc(sizeof(*binding))) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    debug_return_bool(false);
+	}
 	if (bmem != NULL)
 	    HLTQ_TO_TAILQ(binding, bmem, entries);
 	else
@@ -835,8 +849,11 @@ add_userspec(struct member *members, struct privilege *privs)
     struct userspec *u;
     debug_decl(add_userspec, SUDOERS_DEBUG_PARSER)
 
-    if ((u = calloc(1, sizeof(*u))) == NULL)
+    if ((u = calloc(1, sizeof(*u))) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	debug_return_bool(false);
+    }
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
@@ -983,7 +1000,7 @@ init_parser(const char *path, bool quiet)
 
     debug_return_bool(rval);
 }
-#line 934 "gram.c"
+#line 951 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2063,7 +2080,7 @@ case 113:
 			    }
 			}
 break;
-#line 2014 "gram.c"
+#line 2031 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -932,6 +932,10 @@ sudo_getdomainname(void)
 		    }
 		}
 	    }
+	} else {
+	    /* XXX - want to pass error back to caller */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	}
 	initialized = true;
     }

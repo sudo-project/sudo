@@ -66,6 +66,8 @@ sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 static bool
 sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 {
+    debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL)
+
     if (lbuf->len + extra + 1 >= lbuf->size) {
 	char *new_buf;
 	int new_size = lbuf->size;
@@ -74,13 +76,15 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 	    new_size += 256;
 	} while (lbuf->len + extra + 1 >= new_size);
 	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    lbuf->error = 1;
-	    return false;
+	    debug_return_bool(false);
 	}
 	lbuf->buf = new_buf;
 	lbuf->size = new_size;
     }
-    return true;
+    debug_return_bool(true);
 }
 
 /*

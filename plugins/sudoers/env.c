@@ -393,8 +393,11 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     debug_decl(sudo_setenv2, SUDOERS_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
-    if ((estring = malloc(esize)) == NULL)
+    if ((estring = malloc(esize)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	debug_return_int(-1);
+    }
 
     /* Build environment string and insert it. */
     if (strlcpy(estring, var, esize) >= esize ||
@@ -851,6 +854,8 @@ rebuild_env(void)
     env.old_envp = env.envp;
     env.envp = reallocarray(NULL, env.env_size, sizeof(char *));
     if (env.envp == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
 	env.env_size = 0;
 	goto bad;
     }
@@ -1178,6 +1183,8 @@ read_env_file(const char *path, int overwrite)
 	}
 
 	if ((cp = malloc(var_len + 1 + val_len + 1)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    /* XXX - no undo on failure */
 	    rval = false;
 	    break;
@@ -1208,6 +1215,8 @@ init_envtables(void)
     for (p = initial_badenv_table; *p; p++) {
 	cur = calloc(1, sizeof(struct list_member));
 	if (cur == NULL || (cur->value = strdup(*p)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    free(cur);
 	    debug_return_bool(false);
 	}
@@ -1218,6 +1227,8 @@ init_envtables(void)
     for (p = initial_checkenv_table; *p; p++) {
 	cur = calloc(1, sizeof(struct list_member));
 	if (cur == NULL || (cur->value = strdup(*p)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    free(cur);
 	    debug_return_bool(false);
 	}
@@ -1228,6 +1239,8 @@ init_envtables(void)
     for (p = initial_keepenv_table; *p; p++) {
 	cur = calloc(1, sizeof(struct list_member));
 	if (cur == NULL || (cur->value = strdup(*p)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	    free(cur);
 	    debug_return_bool(false);
 	}
