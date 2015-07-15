@@ -26,26 +26,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <unistd.h>
 #include <errno.h>
 
 #include "sudoers.h"
@@ -65,7 +53,7 @@ fill_txt(const char *src, int len, int olen)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	sudo_warn(NULL);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -116,9 +104,9 @@ fill_cmnd(const char *src, int len)
 
     arg_len = arg_size = 0;
 
-    dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
+    dst = sudoerslval.command.cmnd = malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
-	sudo_warn(NULL);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
@@ -152,15 +140,13 @@ fill_args(const char *s, int len, int addspace)
     if (new_len >= arg_size) {
 	/* Allocate more space than we need for subsequent args */
 	while (new_len >= (arg_size += COMMANDARGINC))
-	    ;
+	    continue;
 
-	p = sudoerslval.command.args ?
-	    (char *) realloc(sudoerslval.command.args, arg_size) :
-	    (char *) malloc(arg_size);
+	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
-	    sudo_efree(sudoerslval.command.args);
-	    sudo_warn(NULL);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
+	    free(sudoerslval.command.args);
 	    debug_return_bool(false);
 	} else
 	    sudoerslval.command.args = p;

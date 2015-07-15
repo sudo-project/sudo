@@ -21,14 +21,7 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -52,7 +45,7 @@ sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
 	bufsize = *bufp ? *bufsizep : 0;
 	if (bufsize == 0 || bufsize - 1 < len) {
 	    bufsize = len + 1;
-	    cp = *bufp ? realloc(*bufp, bufsize) : malloc(bufsize);
+	    cp = realloc(*bufp, bufsize);
 	    if (cp == NULL)
 		return -1;
 	    *bufp = cp;
@@ -75,7 +68,7 @@ sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
     bufsize = *bufsizep;
     if (buf == NULL || bufsize == 0) {
 	bufsize = LINE_MAX;
-	cp = buf ? realloc(buf, bufsize) : malloc(bufsize);
+	cp = realloc(buf, bufsize);
 	if (cp == NULL)
 	    return -1;
 	buf = cp;
@@ -89,10 +82,10 @@ sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
 	len = strlen(buf);
 	if (!len || buf[len - 1] == '\n' || feof(fp))
 	    break;
-	bufsize *= 2;
-	cp = realloc(buf, bufsize);
+	cp = reallocarray(buf, bufsize, 2);
 	if (cp == NULL)
 	    return -1;
+	bufsize *= 2;
 	buf = cp;
     }
     *bufp = buf;

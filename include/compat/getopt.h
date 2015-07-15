@@ -31,8 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SUDO_GETOPT_H_
-#define _SUDO_GETOPT_H_
+#ifndef COMPAT_GETOPT_H
+#define COMPAT_GETOPT_H
 
 /*
  * GNU-like getopt_long()/getopt_long_only() with 4.4BSD optreset extension.
@@ -78,4 +78,4 @@ extern	int optind;
 extern	int optopt;
 extern	int optreset;
  
-#endif /* !_SUDO_GETOPT_H_ */
+#endif /* !COMPAT_GETOPT_H */

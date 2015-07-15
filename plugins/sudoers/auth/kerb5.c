@@ -24,25 +24,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_KERB5
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 #include <krb5.h>
 #ifdef HAVE_HEIMDAL
@@ -80,7 +73,9 @@ static krb5_error_code
 krb5_get_init_creds_opt_alloc(krb5_context context,
     krb5_get_init_creds_opt **opts)
 {
-    *opts = sudo_emalloc(sizeof(krb5_get_init_creds_opt));
+    *opts = malloc(sizeof(krb5_get_init_creds_opt));
+    if (*opts == NULL)
+	return KRB5_CC_NOMEM;
     krb5_get_init_creds_opt_init(*opts);
     return 0;
 }
@@ -120,7 +115,11 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
 	/* Only rewrite prompt if user didn't specify their own. */
 	/*if (!strcmp(prompt, PASSPROMPT)) { */
-	    sudo_easprintf(&krb5_prompt, "Password for %s: ", pname);
+	    if (asprintf(&krb5_prompt, "Password for %s: ", pname) == -1) {
+		log_warningx(0, N_("unable to allocate memory"));
+		free(pname);
+		debug_return_int(AUTH_FATAL);
+	    }
 	/*}*/
 	free(pname);
     }
@@ -140,8 +139,12 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
     if (sudo_krb5_instance != NULL) {
-	sudo_easprintf(&pname, "%s%s%s", pw->pw_name,
+	int len = asprintf(&pname, "%s%s%s", pw->pw_name,
 	    sudo_krb5_instance[0] != '/' ? "/" : "", sudo_krb5_instance);
+	if (len == -1) {
+	    log_warningx(0, N_("unable to allocate memory"));
+	    debug_return_int(AUTH_FATAL);
+	}
     }
 
 #ifdef HAVE_KRB5_INIT_SECURE_CONTEXT
@@ -171,7 +174,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 
 done:
     if (sudo_krb5_instance != NULL)
-	sudo_efree(pname);
+	free(pname);
     debug_return_int(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 
@@ -326,3 +329,5 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
     debug_return_int(error);
 }
 #endif
+
+#endif /* HAVE_KERB5 */

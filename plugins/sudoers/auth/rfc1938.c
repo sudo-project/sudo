@@ -21,25 +21,18 @@
 
 #include <config.h>
 
+#if defined(HAVE_SKEY) || defined(HAVE_OPIE)
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 
 #if defined(HAVE_SKEY)
@@ -65,6 +58,7 @@ int
 sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     char challenge[256];
+    size_t challenge_len;
     static char *orig_prompt = NULL, *new_prompt = NULL;
     static int op_len, np_size;
     static struct RFC1938 rfc1938;
@@ -108,9 +102,15 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     }
 
     /* Get space for new prompt with embedded challenge */
-    if (np_size < op_len + strlen(challenge) + 7) {
-	np_size = op_len + strlen(challenge) + 7;
-	new_prompt = (char *) sudo_erealloc(new_prompt, np_size);
+    challenge_len = strlen(challenge);
+    if (np_size < op_len + challenge_len + 7) {
+	char *p = realloc(new_prompt, op_len + challenge_len + 7);
+	if (p == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(AUTH_FATAL);
+	}
+	np_size = op_len + challenge_len + 7;
+	new_prompt = p;
     }
 
     if (def_long_otp_prompt)
@@ -133,3 +133,5 @@ sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     else
 	debug_return_int(AUTH_FAILURE);
 }
+
+#endif /* HAVE_SKEY || HAVE_OPIE */

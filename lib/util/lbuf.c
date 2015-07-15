@@ -20,30 +20,17 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_debug.h"
 #include "sudo_lbuf.h"
 
@@ -57,6 +44,7 @@ sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
     lbuf->continuation = continuation;
     lbuf->indent = indent;
     lbuf->cols = cols;
+    lbuf->error = 0;
     lbuf->len = 0;
     lbuf->size = 0;
     lbuf->buf = NULL;
@@ -69,43 +57,61 @@ sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_lbuf_destroy, SUDO_DEBUG_UTIL)
 
-    sudo_efree(lbuf->buf);
+    free(lbuf->buf);
     lbuf->buf = NULL;
 
     debug_return;
 }
 
-static void
+static bool
 sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 {
+    debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL)
+
     if (lbuf->len + extra + 1 >= lbuf->size) {
+	char *new_buf;
+	int new_size = lbuf->size;
+
 	do {
-	    lbuf->size += 256;
-	} while (lbuf->len + extra + 1 >= lbuf->size);
-	lbuf->buf = sudo_erealloc(lbuf->buf, lbuf->size);
+	    new_size += 256;
+	} while (lbuf->len + extra + 1 >= new_size);
+	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    lbuf->error = 1;
+	    debug_return_bool(false);
+	}
+	lbuf->buf = new_buf;
+	lbuf->size = new_size;
     }
+    debug_return_bool(true);
 }
 
 /*
  * Parse the format and append strings, only %s and %% escapes are supported.
  * Any characters in set are quoted with a backslash.
  */
-void
+bool
 sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
 {
-    va_list ap;
-    int len;
+    int len, saved_len = lbuf->len;
+    bool ret = false;
     char *cp, *s;
+    va_list ap;
     debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL)
+
+    if (sudo_lbuf_error(lbuf))
+	debug_return_bool(false);
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
 	if (fmt[0] == '%' && fmt[1] == 's') {
 	    if ((s = va_arg(ap, char *)) == NULL)
-		goto done;
+		s = "(NULL)";
 	    while ((cp = strpbrk(s, set)) != NULL) {
 		len = (int)(cp - s);
-		sudo_lbuf_expand(lbuf, len + 2);
+		if (!sudo_lbuf_expand(lbuf, len + 2))
+		    goto done;
 		memcpy(lbuf->buf + lbuf->len, s, len);
 		lbuf->len += len;
 		lbuf->buf[lbuf->len++] = '\\';
@@ -114,60 +120,77 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
 	    }
 	    if (*s != '\0') {
 		len = strlen(s);
-		sudo_lbuf_expand(lbuf, len);
+		if (!sudo_lbuf_expand(lbuf, len))
+		    goto done;
 		memcpy(lbuf->buf + lbuf->len, s, len);
 		lbuf->len += len;
 	    }
 	    fmt += 2;
 	    continue;
 	}
-	sudo_lbuf_expand(lbuf, 2);
+	if (!sudo_lbuf_expand(lbuf, 2))
+	    goto done;
 	if (strchr(set, *fmt) != NULL)
 	    lbuf->buf[lbuf->len++] = '\\';
 	lbuf->buf[lbuf->len++] = *fmt++;
     }
+    ret = true;
+
 done:
+    if (!ret)
+	lbuf->len = saved_len;
     if (lbuf->size != 0)
 	lbuf->buf[lbuf->len] = '\0';
     va_end(ap);
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*
  * Parse the format and append strings, only %s and %% escapes are supported.
  */
-void
+bool
 sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 {
+    int len, saved_len = lbuf->len;
+    bool ret = false;
     va_list ap;
-    int len;
     char *s;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL)
+
+    if (sudo_lbuf_error(lbuf))
+	debug_return_bool(false);
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
 	if (fmt[0] == '%' && fmt[1] == 's') {
 	    if ((s = va_arg(ap, char *)) == NULL)
-		goto done;
+		s = "(NULL)";
 	    len = strlen(s);
-	    sudo_lbuf_expand(lbuf, len);
+	    if (!sudo_lbuf_expand(lbuf, len))
+		goto done;
 	    memcpy(lbuf->buf + lbuf->len, s, len);
 	    lbuf->len += len;
 	    fmt += 2;
 	    continue;
 	}
-	sudo_lbuf_expand(lbuf, 1);
+	if (!sudo_lbuf_expand(lbuf, 1))
+	    goto done;
 	lbuf->buf[lbuf->len++] = *fmt++;
     }
+    ret = true;
+
 done:
+    if (!ret)
+	lbuf->len = saved_len;
     if (lbuf->size != 0)
 	lbuf->buf[lbuf->len] = '\0';
     va_end(ap);
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
+/* XXX - check output function return value */
 static void
 sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
 {
@@ -229,6 +252,7 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
 /*
  * Print the buffer with word wrap based on the tty width.
  * The lbuf is reset on return.
+ * XXX - check output function return value
  */
 void
 sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
@@ -269,6 +293,22 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 
 done:
     lbuf->len = 0;		/* reset the buffer for re-use. */
+    lbuf->error = 0;
 
     debug_return;
+}
+
+bool
+sudo_lbuf_error_v1(struct sudo_lbuf *lbuf)
+{
+    if (lbuf != NULL && lbuf->error != 0)
+	return true;
+    return false;
+}
+
+void
+sudo_lbuf_clearerr_v1(struct sudo_lbuf *lbuf)
+{
+    if (lbuf != NULL)
+	lbuf->error = 0;
 }

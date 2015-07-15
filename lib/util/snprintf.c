@@ -54,14 +54,8 @@
 #endif
 #include <limits.h>
 #include <stdarg.h>
-#ifdef STDC_HEADERS
-# include <stddef.h>
-# include <stdlib.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
+#include <stddef.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
@@ -69,21 +63,16 @@
 #endif
 #include <stdio.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <unistd.h>
 #ifdef PRINTF_WIDE_CHAR
 # include <wchar.h>
 #endif
+#include <fcntl.h>
 
 #include "sudo_compat.h"
 
@@ -370,7 +359,7 @@ xxxprintf(char **strp, size_t strsize, int alloc, const char *fmt0, va_list ap)
 		if (alloc && str >= estr) { \
 			char *t; \
 			strsize = (strsize << 1) + 1; \
-			if (!(t = (char *)realloc(*strp, strsize))) { \
+			if (!(t = realloc(*strp, strsize))) { \
 				free(str); \
 				*strp = NULL; \
 				ret = -1; \
@@ -1566,8 +1555,12 @@ sudo_snprintf(char *str, size_t n, char const *fmt, ...)
 int
 sudo_vasprintf(char **str, const char *fmt, va_list ap)
 {
+	int ret;
 
-	return xxxprintf(str, 0, 1, fmt, ap);
+	ret = xxxprintf(str, 0, 1, fmt, ap);
+	if (ret == -1)
+		*str = NULL;
+	return ret;
 }
 #endif /* !HAVE_VASPRINTF || PREFER_PORTABLE_SNPRINTF */
 
@@ -1581,6 +1574,8 @@ sudo_asprintf(char **str, char const *fmt, ...)
 	va_start(ap, fmt);
 	ret = xxxprintf(str, 0, 1, fmt, ap);
 	va_end(ap);
+	if (ret == -1)
+		*str = NULL;
 	return ret;
 }
 #endif /* !HAVE_ASPRINTF || PREFER_PORTABLE_SNPRINTF */

@@ -41,8 +41,8 @@ still allow people to get their work done."
 
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
-	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)' \| 0 \) + 1`"
-	pp_rpm_version="`expr $version : '\(.*\)p[0-9][0-9]*'`"
+	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)$' \| 0 \) + 1`"
+	pp_rpm_version="`expr \( $version : '\(.*\)p[0-9][0-9]*$' \| $version \)`"
 	pp_rpm_license="BSD"
 	pp_rpm_url="http://www.sudo.ws/"
 	pp_rpm_group="Applications/System"
@@ -125,8 +125,12 @@ still allow people to get their work done."
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
-		mv ${pp_destdir}/${docdir} ${pp_destdir}/${docdir}-${version}-${pp_rpm_release}
-		docdir=${docdir}-${version}-${pp_rpm_release}
+		rhel_docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
+		if test "`dirname ${exampledir}`" = "${docdir}"; then
+		    exampledir="${rhel_docdir}/`basename ${exampledir}`"
+		fi
+		mv "${pp_destdir}/${docdir}" "${pp_destdir}/${rhel_docdir}"
+		docdir="${rhel_docdir}"
 		;;
 	esac
 
@@ -191,6 +195,8 @@ still allow people to get their work done."
 	/Locale settings/+1,s/^# //
 	/X11 resource/+1,s/^# //
 	/^# \%sudo/,s/^# //
+	/^# Defaults secure_path/,s/^# //
+	/^# Defaults mail_badpass/,s/^# //
 	w
 	q
 	EOF
@@ -228,6 +234,7 @@ still allow people to get their work done."
 	if test "${prefix}" != "/usr"; then
 	    extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
 	    extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
+	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
 		    while test "$dir" != "/"; do
@@ -243,6 +250,7 @@ still allow people to get their work done."
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap depedency as needed.
+	DEPENDS="%{linux_audit}"
 	if test -z "%{flavor}"; then
 	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
@@ -250,10 +258,11 @@ still allow people to get their work done."
 	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Provides: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
-	    cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	    sed 's/^\(Depends:.*\) *$/\1, libldap-2.4-2/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
-	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	    DEPENDS="${DEPENDS}, libldap-2.4-2"
 	fi
+	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	echo "Homepage: http://www.sudo.ws/sudo/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: http://www.sudo.ws/bugs/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
@@ -279,7 +288,8 @@ still allow people to get their work done."
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-	$docdir/examples/	0755 ignore-others
+	$exampledir/		0755 ignore-others
+	$exampledir/*		0644 ignore-others
 	$docdir/**		0644
 	$localedir/*/		-    optional
 	$localedir/*/LC_MESSAGES/ -    optional
@@ -401,8 +411,12 @@ still allow people to get their work done."
 
 %post [rpm,deb]
 	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
-	if [ -r /usr/lib/tmpfiles.d/systemd.conf ]; then
+	if [ -f /usr/lib/tmpfiles.d/systemd.conf ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
+		# Create an empty sudo time stamp directory on OSes using systemd.
+		# Sudo will create the directory itself but this can cause problems
+		# on systems that have SELinux enabled since the directories will be
+		# created with the user's security context.
 		d %{rundir} 0711 root root
 		D %{rundir}/ts 0700 root root
 		EOF

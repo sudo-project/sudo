@@ -27,26 +27,14 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -152,7 +140,7 @@ main(int argc, char *argv[], char *envp[])
     struct sudo_settings *settings;
     struct plugin_container *plugin, *next;
     sigset_t mask;
-    debug_decl(main, SUDO_DEBUG_MAIN)
+    debug_decl_vars(main, SUDO_DEBUG_MAIN)
 
     /* Make sure fds 0-2 are open and do OS-specific initialization. */
     fix_fds();
@@ -162,9 +150,7 @@ main(int argc, char *argv[], char *envp[])
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
 
-#ifdef HAVE_TZSET
     (void) tzset();
-#endif /* HAVE_TZSET */
 
     /* Must be done before we do any password lookups */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
@@ -174,18 +160,16 @@ main(int argc, char *argv[], char *envp[])
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-    /* Use conversation function for sudo_(warn|fatal)x?. */
-    sudo_warn_set_conversation(sudo_conversation);
-
     /* Initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
+	exit(EXIT_FAILURE);
     sudo_debug_instance = sudo_debug_register(getprogname(),
 	NULL, NULL, sudo_conf_debug_files(getprogname()));
 
     /* Make sure we are setuid root. */
     sudo_check_suid(argc > 0 ? argv[0] : "sudo");
 
-    /* Reset signal mask, save signal state and make sure fds 0-2 are open. */
+    /* Reset signal mask and save signal state. */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
     save_signals();
@@ -194,8 +178,8 @@ main(int argc, char *argv[], char *envp[])
     sudo_conf_read(NULL, SUDO_CONF_ALL & ~SUDO_CONF_DEBUG);
 
     /* Fill in user_info with user name, uid, cwd, etc. */
-    memset(&user_details, 0, sizeof(user_details));
-    user_info = get_user_info(&user_details);
+    if ((user_info = get_user_info(&user_details)) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Disable core dumps if not enabled in sudo.conf. */
     disable_coredumps();
@@ -210,6 +194,9 @@ main(int argc, char *argv[], char *envp[])
 	if (user_details.uid == ROOT_UID)
 	    (void) printf(_("Configure options: %s\n"), CONFIGURE_ARGS);
     }
+
+    /* Use conversation function for sudo_(warn|fatal)x? for plugins. */
+    sudo_warn_set_conversation(sudo_conversation);
 
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
@@ -367,7 +354,11 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
      */
     ud->ngroups = sudo_conf_max_groups();
     if (ud->ngroups > 0) {
-	ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+	ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
+	if (ud->groups == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 	/* No error on insufficient space if user specified max_groups. */
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	rval = 0;
@@ -381,11 +372,16 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	ud->ngroups = system_maxgroups << 1;
 	for (tries = 0; tries < 10 && rval == -1; tries++) {
 	    ud->ngroups <<= 1;
-	    sudo_efree(ud->groups);
-	    ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+	    free(ud->groups);
+	    ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
+	    if (ud->groups == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		goto done;
+	    }
 	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
     }
+done:
     debug_return_int(rval);
 }
 
@@ -407,9 +403,11 @@ get_user_groups(struct user_details *ud)
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
 	    /* Use groups from kernel if not too many or source is static. */
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		ud->groups = sudo_emallocarray(ud->ngroups, sizeof(GETGROUPS_T));
+		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
+		if (ud->groups == NULL)
+		    goto oom;
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
-		    sudo_efree(ud->groups);
+		    free(ud->groups);
 		    ud->groups = NULL;
 		}
 	    }
@@ -428,16 +426,20 @@ get_user_groups(struct user_details *ud)
      * Format group list as a comma-separated string of gids.
      */
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
-    gid_list = sudo_emalloc(glsize);
+    if ((gid_list = malloc(glsize)) == NULL)
+	goto oom;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
-	/* XXX - check rval */
 	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
 	    i ? "," : "", (unsigned int)ud->groups[i]);
+	if (len <= 0 || (size_t)len >= glsize - (cp - gid_list))
+	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
     }
     debug_return_str(gid_list);
+oom:
+    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 }
 
 /*
@@ -452,8 +454,15 @@ get_user_info(struct user_details *ud)
     int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
+    memset(ud, 0, sizeof(*ud));
+
     /* XXX - bound check number of entries */
-    user_info = sudo_emallocarray(32, sizeof(char *));
+    user_info = reallocarray(NULL, 32, sizeof(char *));
+    if (user_info == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	goto bad;
+    }
 
     ud->pid = getpid();
     ud->ppid = getppid();
@@ -477,25 +486,34 @@ get_user_info(struct user_details *ud)
 
     user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
-	sudo_fatal(NULL);
+	goto bad;
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
     if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
 	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_SUDO_BSHELL;
     }
-    ud->shell = sudo_estrdup(ud->shell);
+    if ((ud->shell = strdup(ud->shell)) == NULL)
+	goto bad;
 
-    sudo_easprintf(&user_info[++i], "pid=%d", (int)ud->pid);
-    sudo_easprintf(&user_info[++i], "ppid=%d", (int)ud->ppid);
-    sudo_easprintf(&user_info[++i], "pgid=%d", (int)ud->pgid);
-    sudo_easprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid);
-    sudo_easprintf(&user_info[++i], "sid=%d", (int)ud->sid);
-
-    sudo_easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
-    sudo_easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);
-    sudo_easprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid);
-    sudo_easprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid);
+    if (asprintf(&user_info[++i], "pid=%d", (int)ud->pid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "ppid=%d", (int)ud->ppid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid) == -1)
+	goto bad;
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
@@ -503,32 +521,43 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = sudo_new_key_val("cwd", cwd);
 	if (user_info[i] == NULL)
-	    sudo_fatal(NULL);
+	    goto bad;
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
-    if ((cp = get_process_ttyname()) != NULL) {
+    if ((cp = get_process_ttyname()) == NULL) {
+	/* tty may not always be present */
+	if (errno == ENOMEM)
+	    goto bad;
+    } else {
 	user_info[++i] = sudo_new_key_val("tty", cp);
 	if (user_info[i] == NULL)
-	    sudo_fatal(NULL);
+	    goto bad;
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
-	sudo_efree(cp);
+	free(cp);
     }
 
     cp = sudo_gethostname();
     user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
     if (user_info[i] == NULL)
-	sudo_fatal(NULL);
+	goto bad;
     ud->host = user_info[i] + sizeof("host=") - 1;
-    sudo_efree(cp);
+    free(cp);
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
-    sudo_easprintf(&user_info[++i], "lines=%d", ud->ts_lines);
-    sudo_easprintf(&user_info[++i], "cols=%d", ud->ts_cols);
+    if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
+	goto bad;
+    if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
+	goto bad;
 
     user_info[++i] = NULL;
 
     debug_return_ptr(user_info);
+bad:
+    while (i--)
+	free(user_info[i]);
+    free(user_info);
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -727,7 +756,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -753,14 +782,14 @@ sudo_check_suid(const char *sudo)
 	if (!qualified) {
 	    char *path = getenv_unhooked("PATH");
 	    if (path != NULL) {
-		int len;
-		char *cp, *colon;
+		const char *cp, *ep;
+		const char *pathend = path + strlen(path);
 
-		cp = path = sudo_estrdup(path);
-		do {
-		    if ((colon = strchr(cp, ':')))
-			*colon = '\0';
-		    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", cp, sudo);
+		for (cp = sudo_strsplit(path, pathend, ":", &ep); cp != NULL;
+		    cp = sudo_strsplit(NULL, pathend, ":", &ep)) {
+
+		    int len = snprintf(pathbuf, sizeof(pathbuf), "%.*s/%s",
+			(int)(ep - cp), cp, sudo);
 		    if (len <= 0 || (size_t)len >= sizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
@@ -768,9 +797,7 @@ sudo_check_suid(const char *sudo)
 			qualified = true;
 			break;
 		    }
-		    cp = colon + 1;
-		} while (colon);
-		sudo_efree(path);
+		}
 	    }
 	}
 
@@ -831,12 +858,13 @@ unlimit_nproc(void)
     struct rlimit rl;
     debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
 
-    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
+    if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("getrlimit");
     rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
     if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
-	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
-	rl.rlim_cur = rl.rlim_max;
-	(void)setrlimit(RLIMIT_NPROC, &rl);
+	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
+	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
+	    sudo_warn("setrlimit");
     }
     debug_return;
 #endif /* __linux__ */
@@ -851,7 +879,8 @@ restore_nproc(void)
 #ifdef __linux__
     debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
 
-    (void) setrlimit(RLIMIT_NPROC, &nproclimit);
+    if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("setrlimit");
 
     debug_return;
 #endif /* __linux__ */
@@ -1089,10 +1118,10 @@ static char **
 format_plugin_settings(struct plugin_container *plugin,
     struct sudo_settings *sudo_settings)
 {
-    size_t plugin_settings_size, num_plugin_settings = 0;
+    size_t plugin_settings_size;
     struct sudo_debug_file *debug_file;
     struct sudo_settings *setting;
-    char **plugin_settings;
+    char **plugin_settings, **ps;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
     /* XXX - should use exact plugin_settings_size */
@@ -1106,28 +1135,29 @@ format_plugin_settings(struct plugin_container *plugin,
     }
 
     /* Allocate and fill in. */
-    plugin_settings = sudo_emallocarray(plugin_settings_size, sizeof(char *));
-    plugin_settings[num_plugin_settings++] =
-	sudo_new_key_val("plugin_path", plugin->path);
+    plugin_settings = ps =
+	reallocarray(NULL, plugin_settings_size, sizeof(char *));
+    if (plugin_settings == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((*ps++ = sudo_new_key_val("plugin_path", plugin->path)) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     for (setting = sudo_settings; setting->name != NULL; setting++) {
         if (setting->value != NULL) {
             sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
                 setting->name, setting->value);
-            plugin_settings[num_plugin_settings] =
-		sudo_new_key_val(setting->name, setting->value);
-            if (plugin_settings[num_plugin_settings] == NULL)
-                sudo_fatal(NULL);
-            num_plugin_settings++;
+	    if ((*ps++ = sudo_new_key_val(setting->name, setting->value)) == NULL)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
         }
     }
     if (plugin->debug_files != NULL) {
 	TAILQ_FOREACH(debug_file, plugin->debug_files, entries) {
 	    /* XXX - quote filename? */
-	    sudo_easprintf(&plugin_settings[num_plugin_settings++],
-		"debug_flags=%s %s", debug_file->debug_file, debug_file->debug_flags);
+	    if (asprintf(ps++, "debug_flags=%s %s", debug_file->debug_file,
+		debug_file->debug_flags) == -1)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
     }
-    plugin_settings[num_plugin_settings] = NULL;
+    *ps = NULL;
 
     debug_return_ptr(plugin_settings);
 }
@@ -1143,7 +1173,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
     if (plugin_settings == NULL)
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     /*
      * Backwards compatibility for older API versions
@@ -1166,7 +1196,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     plugin->debug_instance = sudo_debug_get_active_instance();
     sudo_debug_set_active_instance(sudo_debug_instance);
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -1191,11 +1221,11 @@ policy_show_version(struct plugin_container *plugin, int verbose)
     debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.policy->show_version == NULL)
-	debug_return_bool(true);
+	debug_return_int(true);
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->show_version(verbose);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1214,7 +1244,7 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     rval = plugin->u.policy->check_policy(argc, argv, env_add, command_info,
 	argv_out, user_env_out);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1227,12 +1257,12 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     if (plugin->u.policy->list == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->list(argc, argv, verbose, list_user);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1244,12 +1274,12 @@ policy_validate(struct plugin_container *plugin)
     if (plugin->u.policy->validate == NULL) {
 	sudo_warnx(U_("policy plugin %s does not support the -v option"),
 	    plugin->name);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.policy->validate();
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -1288,7 +1318,7 @@ policy_init_session(struct command_details *details)
 	}
 	sudo_debug_set_active_instance(sudo_debug_instance);
     }
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int
@@ -1303,7 +1333,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
     if (plugin_settings == NULL)
-	debug_return_bool(-1);
+	debug_return_int(-1);
 
     /*
      * Backwards compatibility for older API versions
@@ -1326,7 +1356,7 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 	    argc, argv, user_env, plugin->options);
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -1349,12 +1379,12 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
 
     if (plugin->u.io->show_version == NULL)
-	debug_return_bool(true);
+	debug_return_int(true);
 
     sudo_debug_set_active_instance(plugin->debug_instance);
     rval = plugin->u.io->show_version(verbose);
     sudo_debug_set_active_instance(sudo_debug_instance);
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 /*
@@ -1377,7 +1407,7 @@ iolog_unlink(struct plugin_container *plugin)
     }
     /* Remove from io_plugins list and free. */
     TAILQ_REMOVE(&io_plugins, plugin, entries);
-    sudo_efree(plugin);
+    free(plugin);
 
     debug_return;
 }

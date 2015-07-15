@@ -23,14 +23,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -43,8 +36,8 @@
 #include "sudoers.h"
 
 /*
- * Expand %h and %u escapes in the prompt and pass back the dynamically
- * allocated result.  Returns the same string if there are no escapes.
+ * Expand %h and %u escapes (if present) in the prompt and pass back
+ * the dynamically allocated result.
  */
 char *
 expand_prompt(const char *old_prompt, const char *auth_user)
@@ -96,8 +89,12 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 	}
     }
 
+    if ((new_prompt = malloc(++len)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_str(NULL);
+    }
+
     if (subst) {
-	new_prompt = sudo_emalloc(++len);
 	endp = new_prompt + len;
 	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (p[0] =='%') {
@@ -151,13 +148,16 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 		goto oflow;
 	}
 	*np = '\0';
-    } else
-	new_prompt = sudo_estrdup(old_prompt);
+    } else {
+	/* Nothing to expand. */
+	memcpy(new_prompt, old_prompt, len);	/* len includes NUL */
+    }
 
     debug_return_str(new_prompt);
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
+    free(new_prompt);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_str(NULL);
 }

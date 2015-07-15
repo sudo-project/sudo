@@ -23,26 +23,14 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
@@ -53,22 +41,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <fcntl.h>
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <dirent.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -85,7 +58,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "logging.h"
 #include "iolog.h"
@@ -239,7 +211,8 @@ main(int argc, char *argv[])
     sudo_fatal_callback_register(sudoreplay_cleanup);
 
     /* Read sudo.conf and initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
+	exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
 	sudo_conf_debug_files(getprogname()));
 
@@ -251,7 +224,7 @@ main(int argc, char *argv[])
 	case 'f':
 	    /* Set the replay filter. */
 	    def_filter = false;
-	    for (cp = strtok(optarg, ","); cp; cp = strtok(NULL, ",")) {
+	    for (cp = strtok_r(optarg, ",", &ep); cp; cp = strtok_r(NULL, ",", &ep)) {
 		if (strcmp(cp, "stdout") == 0)
 		    io_log_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)
@@ -493,8 +466,10 @@ replay_session(const double max_wait, const char *decimal)
 		    /* Store the line in iov followed by \r\n pair. */
 		    if (iovcnt + 3 > iovmax) {
 			iov = iovmax ?
-			    sudo_ereallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
-			    sudo_emallocarray(iovmax = 32, sizeof(*iov));
+			    reallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
+			    reallocarray(NULL, iovmax = 32, sizeof(*iov));
+			if (iov == NULL)
+			    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		    }
 		    linelen = (size_t)(nl - line) + 1;
 		    iov[iovcnt].iov_base = line;
@@ -537,7 +512,7 @@ replay_session(const double max_wait, const char *decimal)
 	    sudo_ev_loop(evbase, 0);
 	}
 	if (iov != &iovb)
-	    sudo_efree(iov);
+	    free(iov);
     }
     debug_return;
 }
@@ -689,7 +664,8 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	}
 
 	/* Allocate new search node */
-	sn = sudo_ecalloc(1, sizeof(*sn));
+	if ((sn = calloc(1, sizeof(*sn))) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sn->type = type;
 	sn->or = or;
 	sn->negated = not;
@@ -800,7 +776,8 @@ parse_logfile(char *logfile)
      *  2) cwd
      *  3) command with args
      */
-    li = sudo_ecalloc(1, sizeof(*li));
+    if ((li = calloc(1, sizeof(*li))) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (getline(&buf, &bufsize, fp) == -1 ||
 	getline(&li->cwd, &cwdsize, fp) == -1 ||
 	getline(&li->cmd, &cmdsize, fp) == -1) {
@@ -839,7 +816,8 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: user field is missing"), logfile);
 	goto bad;
     }
-    li->user = sudo_estrndup(cp, (size_t)(ep - cp));
+    if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* runas user */
     cp = ep + 1;
@@ -847,7 +825,8 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: runas user field is missing"), logfile);
 	goto bad;
     }
-    li->runas_user = sudo_estrndup(cp, (size_t)(ep - cp));
+    if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* runas group */
     cp = ep + 1;
@@ -855,17 +834,21 @@ parse_logfile(char *logfile)
 	sudo_warn(U_("%s: runas group field is missing"), logfile);
 	goto bad;
     }
-    if (cp != ep)
-	li->runas_group = sudo_estrndup(cp, (size_t)(ep - cp));
+    if (cp != ep) {
+	if ((li->runas_group = strndup(cp, (size_t)(ep - cp))) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    }
 
     /* tty, followed by optional rows + columns */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
 	/* just the tty */
-	li->tty = sudo_estrdup(cp);
+	if ((li->tty = strdup(cp)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     } else {
 	/* tty followed by rows + columns */
-	li->tty = sudo_estrndup(cp, (size_t)(ep - cp));
+	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	cp = ep + 1;
 	/* need to NULL out separator to use strtonum() */
 	if ((ep = strchr(cp, ':')) != NULL) {
@@ -886,13 +869,13 @@ parse_logfile(char *logfile)
 	}
     }
     fclose(fp);
-    sudo_efree(buf);
+    free(buf);
     debug_return_ptr(li);
 
 bad:
     if (fp != NULL)
 	fclose(fp);
-    sudo_efree(buf);
+    free(buf);
     free_log_info(li);
     debug_return_ptr(NULL);
 }
@@ -901,13 +884,13 @@ static void
 free_log_info(struct log_info *li)
 {
     if (li != NULL) {
-	sudo_efree(li->cwd);
-	sudo_efree(li->user);
-	sudo_efree(li->runas_user);
-	sudo_efree(li->runas_group);
-	sudo_efree(li->tty);
-	sudo_efree(li->cmd);
-	sudo_efree(li);
+	free(li->cwd);
+	free(li->user);
+	free(li->runas_user);
+	free(li->runas_group);
+	free(li->tty);
+	free(li->cmd);
+	free(li);
     }
 }
 
@@ -974,7 +957,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     DIR *d;
     struct dirent *dp;
     struct stat sb;
-    size_t sdlen, sessions_len = 0, sessions_size = 36*36;
+    size_t sdlen, sessions_len = 0, sessions_size = 0;
     unsigned int i;
     int len;
     char pathbuf[PATH_MAX], **sessions = NULL;
@@ -999,7 +982,6 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     pathbuf[sdlen] = '\0';
 
     /* Store potential session dirs for sorting. */
-    sessions = sudo_emallocarray(sessions_size, sizeof(char *));
     while ((dp = readdir(d)) != NULL) {
 	/* Skip "." and ".." */
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
@@ -1018,35 +1000,44 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 
 	/* Add name to session list. */
 	if (sessions_len + 1 > sessions_size) {
-	    sessions_size <<= 1;
-	    sessions = sudo_ereallocarray(sessions, sessions_size, sizeof(char *));
+	    if (sessions_size == 0)
+		sessions_size = 36 * 36 / 2;
+	    sessions = reallocarray(sessions, sessions_size, 2 * sizeof(char *));
+	    if (sessions == NULL)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    sessions_size *= 2;
 	}
-	sessions[sessions_len++] = sudo_estrdup(dp->d_name);
+	if ((sessions[sessions_len] = strdup(dp->d_name)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	sessions_len++;
     }
     closedir(d);
 
     /* Sort and list the sessions. */
-    qsort(sessions, sessions_len, sizeof(char *), session_compare);
-    for (i = 0; i < sessions_len; i++) {
-	len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
-	    "%s/log", sessions[i]);
-	if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
-	    errno = ENAMETOOLONG;
-	    sudo_fatal("%s/%s/log", dir, sessions[i]);
-	}
-	sudo_efree(sessions[i]);
+    if (sessions != NULL) {
+	qsort(sessions, sessions_len, sizeof(char *), session_compare);
+	for (i = 0; i < sessions_len; i++) {
+	    len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
+		"%s/log", sessions[i]);
+	    if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
+		errno = ENAMETOOLONG;
+		sudo_fatal("%s/%s/log", dir, sessions[i]);
+	    }
+	    free(sessions[i]);
 
-	/* Check for dir with a log file. */
-	if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
-	    list_session(pathbuf, re, user, tty);
-	} else {
-	    /* Strip off "/log" and recurse if a dir. */
-	    pathbuf[sdlen + len - 4] = '\0';
-	    if (checked_type || (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
-		find_sessions(pathbuf, re, user, tty);
+	    /* Check for dir with a log file. */
+	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
+		list_session(pathbuf, re, user, tty);
+	    } else {
+		/* Strip off "/log" and recurse if a dir. */
+		pathbuf[sdlen + len - 4] = '\0';
+		if (checked_type ||
+		    (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
+		    find_sessions(pathbuf, re, user, tty);
+	    }
 	}
+	free(sessions);
     }
-    sudo_efree(sessions);
 
     debug_return_int(0);
 }

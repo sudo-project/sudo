@@ -20,14 +20,7 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #include <signal.h>
 
 #include "sudo_compat.h"
@@ -43,10 +36,8 @@ main(int argc, char *argv[])
 #include "mksiglist.h"
 
     printf("#include <config.h>\n");
+    printf("#include <sys/types.h>\n");
     printf("#include <signal.h>\n");
-    printf("#ifdef HAVE_UNISTD_H\n");
-    printf("# include <unistd.h>\n");
-    printf("#endif /* HAVE_UNISTD_H */\n");
     printf("#include \"sudo_compat.h\"\n\n");
     printf("const char *const sudo_sys_siglist[NSIG] = {\n");
     for (i = 0; i < NSIG; i++) {

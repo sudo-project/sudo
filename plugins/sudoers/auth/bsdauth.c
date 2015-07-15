@@ -21,25 +21,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_BSD_AUTH_H
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 #include <pwd.h>
 #include <signal.h>
@@ -144,7 +137,10 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    len = strlen(prompt) - 1;
 	    while (isspace(prompt[len]) || prompt[len] == ':')
 		prompt[len--] = '\0';
-	    sudo_easprintf(&s, "%s [echo on]: ", prompt);
+	    if (asprintf(&s, "%s [echo on]: ", prompt) == -1) {
+		log_warningx(0, N_("unable to allocate memory"));
+		debug_return_int(AUTH_FATAL);
+	    }
 	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
 		SUDO_CONV_PROMPT_ECHO_ON);
 	    free(s);
@@ -183,3 +179,5 @@ bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_BSD_AUTH_H */

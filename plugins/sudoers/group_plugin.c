@@ -20,23 +20,14 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
@@ -102,7 +93,9 @@ group_plugin_load(char *plugin_info)
     /* Open plugin and map in symbol. */
     group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!group_handle) {
-	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	const char *errstr = sudo_dso_strerror();
+	sudo_warnx(U_("unable to load %s: %s"), path,
+	    errstr ? errstr : "unknown error");
 	goto done;
     }
     group_plugin = sudo_dso_findsym(group_handle, "group_plugin");
@@ -124,7 +117,7 @@ group_plugin_load(char *plugin_info)
     if (args != NULL) {
 	int ac = 0;
 	bool wasblank = true;
-	char *cp;
+	char *cp, *last;
 
         for (cp = args; *cp != '\0'; cp++) {
             if (isblank((unsigned char)*cp)) {
@@ -134,10 +127,14 @@ group_plugin_load(char *plugin_info)
                 ac++;
             }
         }
-	if (ac != 0) 	{
-	    argv = sudo_emallocarray(ac, sizeof(char *));
+	if (ac != 0) {
+	    argv = reallocarray(NULL, ac, sizeof(char *));
+	    if (argv == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		goto done;
+	    }
 	    ac = 0;
-	    for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
+	    for ((cp = strtok_r(args, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last)))
 		argv[ac++] = cp;
 	}
     }
@@ -145,7 +142,7 @@ group_plugin_load(char *plugin_info)
     rc = (group_plugin->init)(GROUP_API_VERSION, sudo_printf, argv);
 
 done:
-    sudo_efree(argv);
+    free(argv);
 
     if (rc != true) {
 	if (group_handle != NULL) {
@@ -155,7 +152,7 @@ done:
 	}
     }
 
-    debug_return_bool(rc);
+    debug_return_int(rc);
 }
 
 void
@@ -181,8 +178,8 @@ group_plugin_query(const char *user, const char *group,
     debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
 
     if (group_plugin == NULL)
-	debug_return_bool(false);
-    debug_return_bool((group_plugin->query)(user, group, pwd));
+	debug_return_int(false);
+    debug_return_int((group_plugin->query)(user, group, pwd));
 }
 
 #else /* !HAVE_DLOPEN && !HAVE_SHL_LOAD */
@@ -195,7 +192,7 @@ int
 group_plugin_load(char *plugin_info)
 {
     debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL)
-    debug_return_bool(false);
+    debug_return_int(false);
 }
 
 void
@@ -210,7 +207,7 @@ group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
     debug_decl(group_plugin_query, SUDOERS_DEBUG_UTIL)
-    debug_return_bool(false);
+    debug_return_int(false);
 }
 
 #endif /* HAVE_DLOPEN || HAVE_SHL_LOAD */

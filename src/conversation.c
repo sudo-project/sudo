@@ -22,26 +22,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <errno.h>
 
 #include "sudo.h"
@@ -80,7 +68,10 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		pass = tgetpass(msg->msg, msg->timeout, flags);
 		if (pass == NULL)
 		    goto err;
-		repl->reply = sudo_estrdup(pass);
+		if ((repl->reply = strdup(pass)) == NULL) {
+		    sudo_fatalx_nodebug(U_("%s: %s"), "sudo_conversation",
+			U_("unable to allocate memory"));
+		}
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case SUDO_CONV_INFO_MSG:

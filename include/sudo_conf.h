@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_CONF_H
-#define _SUDO_CONF_H
+#ifndef SUDO_CONF_H
+#define SUDO_CONF_H
 
 #include "sudo_queue.h"
 
@@ -36,9 +36,9 @@ TAILQ_HEAD(sudo_conf_debug_file_list, sudo_debug_file);
 
 struct plugin_info {
     TAILQ_ENTRY(plugin_info) entries;
-    const char *path;
-    const char *symbol_name;
-    char * const * options;
+    char *path;
+    char *symbol_name;
+    char **options;
     unsigned int lineno;
 };
 TAILQ_HEAD(plugin_info_list, plugin_info);
@@ -51,7 +51,7 @@ struct sudo_conf_debug {
 TAILQ_HEAD(sudo_conf_debug_list, sudo_conf_debug);
 
 /* Read main sudo.conf file. */
-__dso_public void sudo_conf_read_v1(const char *conf_file, int conf_types);
+__dso_public int sudo_conf_read_v1(const char *conf_file, int conf_types);
 #define sudo_conf_read(_a, _b) sudo_conf_read_v1((_a), (_b))
 
 /* Accessor functions. */
@@ -78,4 +78,4 @@ __dso_public int sudo_conf_max_groups_v1(void);
 #define sudo_conf_group_source() sudo_conf_group_source_v1()
 #define sudo_conf_max_groups() sudo_conf_max_groups_v1()
 
-#endif /* _SUDO_CONF_H */
+#endif /* SUDO_CONF_H */

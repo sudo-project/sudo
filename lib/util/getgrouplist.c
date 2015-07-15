@@ -21,14 +21,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -72,8 +65,10 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     aix_setauthdb((char *) name);
 #endif
     if ((grset = getgrset(name)) != NULL) {
+	char *last;
 	const char *errstr;
-	for (cp = strtok(grset, ","); cp != NULL; cp = strtok(NULL, ",")) {
+
+	for (cp = strtok_r(grset, ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
 	    gid = sudo_strtoid(cp, NULL, NULL, &errstr);
 	    if (errstr == NULL && gid != basegid) {
 		if (ngroups == grpsize)

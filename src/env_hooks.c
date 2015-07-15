@@ -19,23 +19,13 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <errno.h>
 
 #include "sudo.h"
@@ -45,8 +35,13 @@
 extern char **environ;		/* global environment pointer */
 static char **priv_environ;	/* private environment pointer */
 
-static char *
-rpl_getenv(const char *name)
+/*
+ * NOTE: we don't use dlsym() to find the libc getenv()
+ *	 since this may allocate memory on some systems (glibc)
+ *	 which leads to a hang if malloc() calls getenv (jemalloc).
+ */
+char *
+getenv_unhooked(const char *name)
 {
     char **ep, *val = NULL;
     size_t namelen = 0;
@@ -61,19 +56,6 @@ rpl_getenv(const char *name)
 	}
     }
     return val;
-}
-
-typedef char * (*sudo_fn_getenv_t)(const char *);
-
-char *
-getenv_unhooked(const char *name)
-{
-    sudo_fn_getenv_t fn;
-
-    fn = (sudo_fn_getenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "getenv");
-    if (fn != NULL)
-	return fn(name);
-    return rpl_getenv(name);
 }
 
 __dso_public char *
@@ -123,7 +105,9 @@ rpl_putenv(PUTENV_CONST char *string)
     /* Append at the end if not already found. */
     if (!found) {
 	size_t env_len = (size_t)(ep - environ);
-	char **envp = sudo_ereallocarray(priv_environ, env_len + 2, sizeof(char *));
+	char **envp = reallocarray(priv_environ, env_len + 2, sizeof(char *));
+	if (envp == NULL)
+	    return -1;
 	if (environ != priv_environ)
 	    memcpy(envp, environ, env_len * sizeof(char *));
 	envp[env_len++] = (char *)string;
@@ -198,7 +182,11 @@ rpl_setenv(const char *var, const char *val, int overwrite)
 	free(envstr);
 	return 0;
     }
-    return rpl_putenv(envstr);
+    if (rpl_putenv(envstr) == -1) {
+	free(envstr);
+	return -1;
+    }
+    return 0;
 }
 
 typedef int (*sudo_fn_setenv_t)(const char *, const char *, int);

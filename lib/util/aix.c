@@ -20,14 +20,8 @@
 #include <sys/resource.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
+#include <errno.h>
 #include <usersec.h>
 #include <uinfo.h>
 
@@ -35,7 +29,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
@@ -147,43 +140,53 @@ int usrinfo(int cmd, char *buf, int count);
  * Look up administrative domain for user (SYSTEM in /etc/security/user) and
  * set it as the default for the process.  This ensures that password and
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
+ * Does not modify errno even on error since callers do not check rval.
  */
 int
 aix_setauthdb_v1(char *user)
 {
     char *registry;
+    int serrno = errno;
+    int rval = -1;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (user != NULL) {
 	if (setuserdb(S_READ) != 0) {
 	    sudo_warn(U_("unable to open userdb"));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
 	    if (setauthdb(registry, NULL) != 0) {
 		sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
 		    registry, user);
-		debug_return_int(-1);
+		goto done;
 	    }
 	}
 	enduserdb();
     }
-    debug_return_int(0);
+    rval = 0;
+done:
+    errno = serrno;
+    debug_return_int(rval);
 }
 
 /*
  * Restore the saved administrative domain, if any.
+ * Does not modify errno even on error since callers do not check rval.
  */
 int
 aix_restoreauthdb_v1(void)
 {
+    int serrno = errno;
+    int rval = 0;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (setauthdb(NULL, NULL) != 0) {
 	sudo_warn(U_("unable to restore registry"));
-	debug_return_int(-1);
+	rval = -1;
     }
-    debug_return_int(0);
+    errno = serrno;
+    debug_return_int(rval);
 }
 #endif
 
@@ -195,10 +198,14 @@ aix_prep_user_v1(char *user, const char *tty)
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     /* set usrinfo, like login(1) does */
-    len = sudo_easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
+    len = asprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
 	user, '\0', user, '\0', user, '\0', tty ? tty : "", '\0');
+    if (len == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
     (void)usrinfo(SETUINFO, info, len);
-    sudo_efree(info);
+    free(info);
 
 #ifdef HAVE_SETAUTHDB
     /* set administrative domain */

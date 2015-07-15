@@ -1,11 +1,7 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-#ifndef _SUDO_CONFIG_H
-#define _SUDO_CONFIG_H
-
-/* Define to 1 if the `syslog' function returns a non-zero int to denote
-   failure. */
-#undef BROKEN_SYSLOG
+#ifndef SUDO_CONFIG_H
+#define SUDO_CONFIG_H
 
 /* Define to 1 if you want the insults from the "classic" version sudo. */
 #undef CLASSIC_INSULTS
@@ -132,6 +128,10 @@
 /* Define to 1 if you have the declaration of `setresuid', and to 0 if you
    don't. */
 #undef HAVE_DECL_SETRESUID
+
+/* Define to 1 if you have the declaration of `SIG2STR_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SIG2STR_MAX
 
 /* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
    don't. */
@@ -456,9 +456,6 @@
 /* Define to 1 if you have the <maillock.h> header file. */
 #undef HAVE_MAILLOCK_H
 
-/* Define to 1 if you have the <malloc.h> header file. */
-#undef HAVE_MALLOC_H
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -551,6 +548,9 @@
 
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
+
+/* Define to 1 if you have the `reallocarray' function. */
+#undef HAVE_REALLOCARRAY
 
 /* Define to 1 if you have the `revoke' function. */
 #undef HAVE_REVOKE
@@ -655,11 +655,20 @@
 /* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
 
+/* Define to 1 if you have the `strndup' function. */
+#undef HAVE_STRNDUP
+
+/* Define to 1 if you have the `strnlen' function. */
+#undef HAVE_STRNLEN
+
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
 
 /* Define to 1 if you have the `strtonum' function. */
 #undef HAVE_STRTONUM
+
+/* Define to 1 if `d_namlen' is a member of `struct dirent'. */
+#undef HAVE_STRUCT_DIRENT_D_NAMLEN
 
 /* Define to 1 if `d_type' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE
@@ -792,30 +801,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define this if your system can create weak aliases */
-#undef HAVE_SYS_WEAK_ALIAS
-
-/* Define this if weak aliases may be created with __attribute__ */
-#undef HAVE_SYS_WEAK_ALIAS_ATTRIBUTE
-
-/* Define this if weak aliases may be created with #pragma _CRI duplicate */
-#undef HAVE_SYS_WEAK_ALIAS_CRIDUPLICATE
-
-/* Define this if weak aliases in other files are honored */
-#undef HAVE_SYS_WEAK_ALIAS_CROSSFILE
-
-/* Define this if weak aliases may be created with #pragma _HP_SECONDARY_DEF
-   */
-#undef HAVE_SYS_WEAK_ALIAS_HPSECONDARY
-
-/* Define this if weak aliases may be created with #pragma weak */
-#undef HAVE_SYS_WEAK_ALIAS_PRAGMA
-
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
-
-/* Define to 1 if you have the `tzset' function. */
-#undef HAVE_TZSET
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
@@ -988,6 +975,10 @@
    */
 #undef MAX_UID_T_LEN
 
+/* Define to 1 if resolv.h must be included to get the `inet_ntop' or
+   `inet_pton' function prototypes. */
+#undef NEED_RESOLV_H
+
 /* Define to 1 if you don't want sudo to prompt for a password by default. */
 #undef NO_AUTHENTICATION
 
@@ -1136,6 +1127,28 @@
 /* Define to 1 if you use GNU stow packaging. */
 #undef USE_STOW
 
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# undef _POSIX_PTHREAD_SEMANTICS
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# undef _TANDEM_SOURCE
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# undef __EXTENSIONS__
+#endif
+
+
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
 
@@ -1149,6 +1162,16 @@
 
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
+
+/* Define to 1 if on MINIX. */
+#undef _MINIX
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+#undef _POSIX_1_SOURCE
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+#undef _POSIX_SOURCE
 
 /* Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not
    __func__ */
@@ -1171,6 +1194,12 @@
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef id_t
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef ino_t
@@ -1224,6 +1253,41 @@
 /* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
-#endif /* __svr4__ */
+#endif
 
-#endif /* _SUDO_CONFIG_H */
+/* Enable BSD extensions on systems that have them.  */
+#ifndef _BSD_SOURCE
+# undef _BSD_SOURCE
+#endif
+
+/* Enable BSD types on IRIX.  */
+#ifndef _BSD_TYPES
+# undef _BSD_TYPES
+#endif
+
+/* Enable Linux-compatible extensions on AIX.  */
+#ifndef _LINUX_SOURCE_COMPAT
+# undef _LINUX_SOURCE_COMPAT
+#endif
+
+/* Enable prototypes in GCC fixed includes on older systems.  */
+#ifndef __USE_FIXED_PROTOTYPES__
+# undef __USE_FIXED_PROTOTYPES__
+#endif
+
+/* Enable XPG4v2 extensions to POSIX, needed for MSG_WAITALL on older HP-UX.  */
+#ifndef _XOPEN_SOURCE_EXTENDED
+# undef _XOPEN_SOURCE_EXTENDED
+#endif
+
+/* Enable reentrant versions of the standard C API (obsolete).  */
+#ifndef _REENTRANT
+# undef _REENTRANT
+#endif
+
+/* Enable "safer" versions of the standard C API (ISO C11).  */
+#ifndef __STDC_WANT_LIB_EXT1__
+# undef __STDC_WANT_LIB_EXT1__
+#endif
+
+#endif /* SUDO_CONFIG_H */

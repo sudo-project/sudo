@@ -25,18 +25,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
@@ -277,11 +267,13 @@ next_entry:
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';
     if (*colon != '\0') {
+	char *last;
+
 	gr.gr_mem = gr_mem;
-	cp = strtok(colon, ",");
+	cp = strtok_r(colon, ",", &last);
 	for (n = 0; cp != NULL && n < GRMEM_MAX; n++) {
 	    gr.gr_mem[n] = cp;
-	    cp = strtok(NULL, ",");
+	    cp = strtok_r(NULL, ",", &last);
 	}
 	gr.gr_mem[n++] = NULL;
     } else

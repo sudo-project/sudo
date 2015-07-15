@@ -20,25 +20,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_PAM
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 #include <errno.h>
 
@@ -259,12 +252,11 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	char **pam_envp = pam_getenvlist(pamh);
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env. */
-	    env_init(*user_envp);
-	    if (!env_merge(pam_envp))
+	    if (!env_init(*user_envp) || !env_merge(pam_envp))
 		status = AUTH_FAILURE;
 	    *user_envp = env_get();
-	    env_init(NULL);
-	    sudo_efree(pam_envp);
+	    (void)env_init(NULL);
+	    free(pam_envp);
 	    /* XXX - we leak any duplicates that were in pam_envp */
 	}
     }
@@ -305,8 +297,9 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 
 #ifdef PAM_TEXT_DOMAIN
 # define PAM_PROMPT_IS_PASSWORD(_p) \
-    (strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password: ")) == 0 || \
-	strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password:")) == 0)
+    (strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password:")) == 0 || \
+	strcmp((_p), dgt(PAM_TEXT_DOMAIN, "Password: ")) == 0 || \
+	PROMPT_IS_PASSWORD(_p))
 #else
 # define PAM_PROMPT_IS_PASSWORD(_p)	PROMPT_IS_PASSWORD(_p)
 #endif /* PAM_TEXT_DOMAIN */
@@ -327,11 +320,16 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     int ret = PAM_SUCCESS;
     debug_decl(converse, SUDOERS_DEBUG_AUTH)
 
-    if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG)
+    if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid number of PAM messages: %d", num_msg);
 	debug_return_int(PAM_CONV_ERR);
+    }
 
-    if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL)
+    if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(PAM_BUF_ERR);
+    }
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
@@ -371,10 +369,16 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    goto done;
 		}
 		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"password longer than %d", PAM_MAX_RESP_SIZE);
 		    ret = PAM_CONV_ERR;
 		    goto done;
 		}
-		pr->resp = sudo_estrdup(pass);
+		if ((pr->resp = strdup(pass)) == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		    ret = PAM_BUF_ERR;
+		    goto done;
+		}
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case PAM_TEXT_INFO:
@@ -408,3 +412,5 @@ done:
     }
     debug_return_int(ret);
 }
+
+#endif /* HAVE_PAM */

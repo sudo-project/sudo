@@ -21,7 +21,7 @@
 
 srcdir = @srcdir@
 docdir = @docdir@
-exampledir = $(docdir)/examples
+exampledir = @exampledir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
@@ -76,6 +76,8 @@ install-plugin:
 
 uninstall:
 	-rm -rf	$(DESTDIR)$(exampledir)
+
+splint:
 
 cppcheck:
 

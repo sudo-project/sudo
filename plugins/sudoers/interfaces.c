@@ -19,28 +19,20 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <netinet/in.h>  
 #include <arpa/inet.h>
+#ifdef NEED_RESOLV_H
+# include <arpa/nameser.h>
+# include <resolv.h>
+#endif /* NEED_RESOLV_H */
 #include <netdb.h>
 #include <errno.h>
 
@@ -57,22 +49,28 @@ static struct interface_list interfaces;
  * Parse a space-delimited list of IP address/netmask pairs and
  * store in a list of interface structures.
  */
-void
+bool
 set_interfaces(const char *ai)
 {
-    char *addrinfo, *addr, *mask;
+    char *addrinfo, *addr, *mask, *last;
     struct interface *ifp;
+    bool rval = false;
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
-    addrinfo = sudo_estrdup(ai);
-    for (addr = strtok(addrinfo, " \t"); addr != NULL; addr = strtok(NULL, " \t")) {
+    if ((addrinfo = strdup(ai)) == NULL)
+	debug_return_bool(false);
+    for (addr = strtok_r(addrinfo, " \t", &last); addr != NULL; addr = strtok_r(NULL, " \t", &last)) {
 	/* Separate addr and mask. */
 	if ((mask = strchr(addr, '/')) == NULL)
 	    continue;
 	*mask++ = '\0';
 
 	/* Parse addr and store in list. */
-	ifp = sudo_ecalloc(1, sizeof(*ifp));
+	if ((ifp = calloc(1, sizeof(*ifp))) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    goto done;
+	}
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
 #ifdef HAVE_STRUCT_IN6_ADDR
@@ -81,7 +79,7 @@ set_interfaces(const char *ai)
 		inet_pton(AF_INET6, mask, &ifp->netmask.ip6) != 1)
 #endif
 	    {
-		sudo_efree(ifp);
+		free(ifp);
 		continue;
 	    }
 	} else {
@@ -89,14 +87,17 @@ set_interfaces(const char *ai)
 	    ifp->family = AF_INET;
 	    if (inet_pton(AF_INET, addr, &ifp->addr.ip4) != 1 ||
 		inet_pton(AF_INET, mask, &ifp->netmask.ip4) != 1) {
-		sudo_efree(ifp);
+		free(ifp);
 		continue;
 	    }
 	}
 	SLIST_INSERT_HEAD(&interfaces, ifp, entries);
     }
-    sudo_efree(addrinfo);
-    debug_return;
+    rval = true;
+
+done:
+    free(addrinfo);
+    debug_return_bool(rval);
 }
 
 struct interface_list *
@@ -108,15 +109,17 @@ get_interfaces(void)
 void
 dump_interfaces(const char *ai)
 {
-    char *cp, *addrinfo;
+    const char *cp, *ep;
+    const char *ai_end = ai + strlen(ai);
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
-    addrinfo = sudo_estrdup(ai);
+    sudo_printf(SUDO_CONV_INFO_MSG,
+	_("Local IP address and netmask pairs:\n"));
+    cp = sudo_strsplit(ai, ai_end, " \t", &ep);
+    while (cp != NULL) {
+	sudo_printf(SUDO_CONV_INFO_MSG, "\t%.*s\n", (int)(ep - cp), cp);
+	cp = sudo_strsplit(NULL, ai_end, " \t", &ep);
+    }
 
-    sudo_printf(SUDO_CONV_INFO_MSG, _("Local IP address and netmask pairs:\n"));
-    for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))
-	sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
-
-    sudo_efree(addrinfo);
     debug_return;
 }

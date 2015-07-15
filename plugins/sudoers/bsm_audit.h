@@ -15,10 +15,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_BSM_AUDIT_H
-#define	_SUDOERS_BSM_AUDIT_H
+#ifndef SUDOERS_BSM_AUDIT_H
+#define	SUDOERS_BSM_AUDIT_H
 
 int	bsm_audit_success(char *argv[]);
 int	bsm_audit_failure(char *argv[], char const * const, va_list);
 
-#endif /* _SUDOERS_BSM_AUDIT_H */
+#endif /* SUDOERS_BSM_AUDIT_H */

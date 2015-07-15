@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 26, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "July 10, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1825,13 +1825,13 @@ option is used).
 This effectively means that the
 \fB\-H\fR
 option is always implied.
-Note that
+Note that by default,
 \fRHOME\fR
-is already set when the
+will be set to the home directory of the target user when the
 \fIenv_reset\fR
 option is enabled, so
 \fIalways_set_home\fR
-is only effective for configurations where either
+only has an effect for configurations where either
 \fIenv_reset\fR
 is disabled or
 \fRHOME\fR
@@ -2001,11 +2001,13 @@ lists are then added, followed by any variables present in the file
 specified by the
 \fIenv_file\fR
 option (if any).
-The default contents of the
+The contents of the
 \fRenv_keep\fR
 and
 \fRenv_check\fR
-lists are displayed when
+lists, as modified by global Defaults parameters in
+\fIsudoers\fR,
+are displayed when
 \fBsudo\fR
 is run by root with the
 \fB\-V\fR
@@ -3524,7 +3526,7 @@ Regardless of whether the
 option is enabled or disabled, variables specified by
 \fRenv_check\fR
 will be preserved in the environment if they pass the aforementioned check.
-The default list of environment variables to check is displayed when
+The global list of environment variables to check is displayed when
 \fBsudo\fR
 is run by root with
 the
@@ -3545,7 +3547,7 @@ The list can be replaced, added to, deleted from, or disabled by using the
 and
 \fR\&!\fR
 operators respectively.
-The default list of environment variables to remove is displayed when
+The global list of environment variables to remove is displayed when
 \fBsudo\fR
 is run by root with the
 \fB\-V\fR
@@ -3570,7 +3572,7 @@ The list can be replaced, added to, deleted from, or disabled by using the
 and
 \fR\&!\fR
 operators respectively.
-The default list of variables to keep
+The global list of variables to keep
 is displayed when
 \fBsudo\fR
 is run by root with the
@@ -4617,6 +4619,21 @@ is a built-in command, it must be specified in
 \fIsudoers\fR
 without a leading path.
 However, it may take command line arguments just as a normal command does.
+Wildcards used in
+\fIsudoedit\fR
+command line arguments are expected to be path names, so a forward slash
+(\(oq/\(cq)
+will not be matched by a wildcard.
+.PP
+Unlike other
+\fBsudo\fR
+commands, the editor is run with the permissions of the invoking
+user and with the environment unmodified.
+More information may be found in the description of the
+\fB\-e\fR
+option in
+sudo(@mansectsu@).
+.PP
 For example, to allow user operator to edit the
 \(Lqmessage of the day\(Rq
 file:
@@ -4837,9 +4854,23 @@ mktemp(3),
 strftime(3),
 sudo.conf(@mansectform@),
 sudoers.ldap(@mansectform@),
-sudo_plugin(@mansectsu@),
 sudo(@mansectsu@),
+sudo_plugin(@mansectsu@),
 visudo(@mansectsu@)
+.SH "AUTHORS"
+Many people have worked on
+\fBsudo\fR
+over the years; this version consists of code written primarily by:
+.sp
+.RS 6n
+Todd C. Miller
+.RE
+.PP
+See the CONTRIBUTORS file in the
+\fBsudo\fR
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+\fBsudo\fR.
 .SH "CAVEATS"
 The
 \fIsudoers\fR

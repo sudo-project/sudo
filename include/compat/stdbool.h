@@ -5,8 +5,8 @@
  * Public domain.
  */
 
-#ifndef	_COMPAT_STDBOOL_H_
-#define	_COMPAT_STDBOOL_H_	
+#ifndef	COMPAT_STDBOOL_H
+#define	COMPAT_STDBOOL_H
 
 #ifndef __cplusplus
 
@@ -41,4 +41,4 @@ typedef enum {
 /* Inform that everything is fine */
 #define __bool_true_false_are_defined 1
 
-#endif /* _COMPAT_STDBOOL_H_ */
+#endif /* COMPAT_STDBOOL_H */

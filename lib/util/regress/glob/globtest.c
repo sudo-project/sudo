@@ -6,6 +6,7 @@
 
 #include <config.h>
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -117,7 +118,7 @@ main(int argc, char **argv)
 			}
 			*ep = '\0';
 			entry.flags = 0;
-			for ((cp = strtok(cp, "|")); cp != NULL; (cp = strtok(NULL, "|"))) {
+			for ((cp = strtok_r(cp, "|", &ep)); cp != NULL; (cp = strtok_r(NULL, "|", &ep))) {
 				if (strcmp(cp, "GLOB_APPEND") == 0)
 					entry.flags |= GLOB_APPEND;
 				else if (strcmp(cp, "GLOB_DOOFFS") == 0)

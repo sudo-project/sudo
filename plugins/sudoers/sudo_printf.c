@@ -18,14 +18,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 
@@ -34,7 +27,7 @@
 #include "sudo_debug.h"
 
 static int
-_sudo_printf(int msg_type, const char *fmt, ...)
+sudo_printf_int(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     int len;
@@ -59,4 +52,4 @@ _sudo_printf(int msg_type, const char *fmt, ...)
     return len;
 }
 
-sudo_printf_t sudo_printf = _sudo_printf;
+sudo_printf_t sudo_printf = sudo_printf_int;

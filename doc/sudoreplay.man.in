@@ -120,7 +120,7 @@ Display a short help message to the standard output and exit.
 .TP 12n
 \fB\-l\fR, \fB\--list\fR [\fIsearch expression\fR]
 Enable
-\(lqlist mode\(rq.
+\(Lqlist mode\(Rq.
 In this mode,
 \fBsudoreplay\fR
 will list available sessions in a format similar to the
@@ -288,13 +288,13 @@ yesterday
 next Friday
 The first second of the Friday in the next (upcoming) week.
 Not to be confused with
-\(lqthis friday\(rq
+\(Lqthis friday\(Rq
 which would match the friday of the current week.
 .TP 8n
 last week
 The current time but 7 days ago.
 This is equivalent to
-\(lqa week ago\(rq.
+\(Lqa week ago\(Rq.
 .TP 8n
 a fortnight ago
 The current time but 14 days ago.
@@ -316,13 +316,13 @@ The current time but 14 days ago.
 .PP
 Note that relative time specifications do not always work as expected.
 For example, the
-\(lqnext\(rq
+\(Lqnext\(Rq
 qualifier is intended to be used in conjunction with a day such as
-\(lqnext Monday\(rq.
+\(Lqnext Monday\(Rq.
 When used with units of weeks, months, years, etc
 the result will be one more than expected.
 For example,
-\(lqnext week\(rq
+\(Lqnext week\(Rq
 will result in a time exactly two weeks from now, which is probably
 not what was intended.
 This will be addressed in a future version of
@@ -414,11 +414,23 @@ List sessions run by jeff or bob on the console:
 .RE
 .fi
 .SH "SEE ALSO"
+script(1),
 sudo.conf(@mansectform@),
-sudo(@mansectsu@),
-script(1)
+sudo(@mansectsu@)
 .SH "AUTHORS"
+Many people have worked on
+\fBsudo\fR
+over the years; this version consists of code written primarily by:
+.sp
+.RS 6n
 Todd C. Miller
+.RE
+.PP
+See the CONTRIBUTORS file in the
+\fBsudo\fR
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+\fBsudo\fR.
 .SH "BUGS"
 If you feel you have found a bug in
 \fBsudoreplay\fR,
@@ -430,7 +442,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudoreplay\fR
 is provided
-\(lqAS IS\(rq
+\(LqAS IS\(Rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

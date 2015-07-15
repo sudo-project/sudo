@@ -20,25 +20,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_AIXAUTH
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 #include <pwd.h>
 #include <usersec.h>
@@ -147,7 +140,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    SUDO_CONV_PROMPT_ECHO_OFF);
 	if (pass == NULL)
 	    break;
-	sudo_efree(message);
+	free(message);
 	message = NULL;
 	result = authenticate(pw->pw_name, pass, &reenter, &message);
 	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
@@ -168,7 +161,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	}
 	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }
-    sudo_efree(message);
+    free(message);
     debug_return_int(rval);
 }
 
@@ -183,3 +176,5 @@ sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
 
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_AIXAUTH */

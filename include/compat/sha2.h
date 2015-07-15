@@ -19,8 +19,8 @@
  * by Steve Reid and Wei Dai respectively.
  */
 
-#ifndef _SUDOERS_SHA2_H
-#define _SUDOERS_SHA2_H
+#ifndef COMPAT_SHA2_H
+#define COMPAT_SHA2_H
 
 #define	SHA224_BLOCK_LENGTH		64
 #define	SHA224_DIGEST_LENGTH		28
@@ -95,4 +95,4 @@ __dso_public void sudo_SHA512Final(uint8_t digest[SHA512_DIGEST_LENGTH], SHA2_CT
 #define SHA512Update		sudo_SHA512Update
 #define SHA512Final		sudo_SHA512Final
 
-#endif /* _SUDOERS_SHA2_H */
+#endif /* COMPAT_SHA2_H */

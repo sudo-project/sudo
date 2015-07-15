@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_INS_2001_H
-#define _SUDOERS_INS_2001_H
+#ifndef SUDOERS_INS_2001_H
+#define SUDOERS_INS_2001_H
 
     /*
      * HAL insults (paraphrased) from 2001.
@@ -30,4 +30,4 @@
     "This mission is too important for me to allow you to jeopardize it.",
     "I feel much better now.",
 
-#endif /* _SUDOERS_INS_2001_H */
+#endif /* SUDOERS_INS_2001_H */

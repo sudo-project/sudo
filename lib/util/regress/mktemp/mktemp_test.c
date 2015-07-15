@@ -24,6 +24,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <fcntl.h>
 #include <unistd.h>
 
 #define SUDO_ERROR_WRAP 0

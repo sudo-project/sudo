@@ -20,28 +20,19 @@
 #include <sys/time.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <errno.h>
 #include <limits.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
@@ -70,6 +61,7 @@ get_boottime(struct timespec *ts)
     char *line = NULL;
     size_t linesize = 0;
     bool found = false;
+    long long llval;
     ssize_t len;
     FILE *fp;
     debug_decl(get_boottime, SUDOERS_DEBUG_UTIL)
@@ -79,12 +71,19 @@ get_boottime(struct timespec *ts)
     if (fp != NULL) {
 	while ((len = getline(&line, &linesize, fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
-		long long llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
+		if (line[len - 1] == '\n')
+		    line[len - 1] = '\0';
+		llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
 		if (llval > 0) {
 		    ts->tv_sec = (time_t)llval;
 		    ts->tv_nsec = 0;
 		    found = true;
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			"found btime in /proc/stat: %lld", llval);
 		    break;
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"invalid btime in /proc/stat: %s", line);
 		}
 	    }
 	}
@@ -109,10 +108,14 @@ get_boottime(struct timespec *ts)
     mib[1] = KERN_BOOTTIME;
     size = sizeof(tv);
     if (sysctl(mib, 2, &tv, &size, NULL, 0) != -1) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "KERN_BOOTTIME: %lld, %ld", (long long)tv.tv_sec, (long)tv.tv_usec);
 	TIMEVAL_TO_TIMESPEC(&tv, ts);
 	debug_return_bool(true);
     }
 
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"KERN_BOOTTIME: %s", strerror(errno));
     debug_return_bool(false);
 }
 
@@ -127,8 +130,12 @@ get_boottime(struct timespec *ts)
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
     setutxent();
-    if ((ut = getutxid(&key)) != NULL)
+    if ((ut = getutxid(&key)) != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "BOOT_TIME: %lld, %ld", (long long)ut->ut_tv.tv_sec,
+	    (long)ut->ut_tv.tv_usec);
 	TIMEVAL_TO_TIMESPEC(&ut->ut_tv, ts);
+    }
     endutxent();
     debug_return_bool(ut != NULL);
 }
@@ -145,6 +152,8 @@ get_boottime(struct timespec *ts)
     key.ut_type = BOOT_TIME;
     setutent();
     if ((ut = getutid(&key)) != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "BOOT_TIME: %lld", (long long)ut->ut_time);
 	ts->tv_sec = ut->ut_time;
 	ts->tv_nsec = 0;
     }

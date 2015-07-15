@@ -21,31 +21,19 @@
 #include <sys/wait.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -246,7 +234,7 @@ build_command_info(const char *command)
 static char *
 find_editor(int nfiles, char * const files[], char **argv_out[])
 {
-    char *cp, **ep, **nargv, *editor, *editor_path;
+    char *cp, *last, **ep, **nargv, *editor, *editor_path;
     int ac, i, nargc, wasblank;
 
     /* Lookup EDITOR in user's environment. */
@@ -278,7 +266,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
 	}
     }
     /* If we can't find the editor in the user's PATH, give up. */
-    cp = strtok(editor, " \t");
+    cp = strtok_r(editor, " \t", &last);
     if (cp == NULL ||
 	(editor_path = find_in_path(editor, plugin_state.envp)) == NULL) {
 	free(editor);
@@ -286,7 +274,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
     }
     if (editor_path != editor)
 	free(editor);
-    nargv = (char **) malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
+    nargv = malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
     if (nargv == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
 	free(editor_path);
@@ -294,7 +282,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
     }
     for (ac = 0; cp != NULL && ac < nargc; ac++) {
 	nargv[ac] = cp;
-	cp = strtok(NULL, " \t");
+	cp = strtok_r(NULL, " \t", &last);
     }
     nargv[ac++] = "--";
     for (i = 0; i < nfiles; )

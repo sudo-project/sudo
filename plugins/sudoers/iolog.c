@@ -20,23 +20,14 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
@@ -571,7 +562,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char pathbuf[PATH_MAX], sessid[7];
     char *tofree = NULL;
     char * const *cur;
-    const char *plugin_path = NULL;
+    const char *cp, *plugin_path = NULL;
     size_t len;
     int i, rval = -1;
     debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
@@ -581,20 +572,23 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
-	debug_return_bool(true);
+	debug_return_int(true);
 
     memset(&details, 0, sizeof(details));
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
 
     /* Initialize the debug subsystem.  */
-    for (cur = settings; *cur != NULL; cur++) {
-	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
-	    sudoers_debug_parse_flags(&debug_files,
-		*cur + sizeof("debug_flags=") - 1);
+    for (cur = settings; (cp = *cur) != NULL; cur++) {
+	if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {
+	    cp += sizeof("debug_flags=") - 1;
+	    if (!sudoers_debug_parse_flags(&debug_files, cp))
+		debug_return_int(-1);
 	    continue;
 	}
 	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
@@ -615,7 +609,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If no I/O log path defined we need to figure it out ourselves. */
     if (details.iolog_path == NULL) {
 	/* Get next session ID and convert it into a path. */
-	tofree = sudo_emalloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
+	tofree = malloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
+	if (tofree == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
 	if (!io_nextid(tofree, NULL, sessid)) {
 	    rval = false;
@@ -663,7 +661,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     rval = true;
 
 done:
-    sudo_efree(tofree);
+    free(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
     sudo_endpwent();
@@ -671,7 +669,7 @@ done:
 	sudo_gr_delref(details.runas_gr);
     sudo_endgrent();
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static void
@@ -704,7 +702,7 @@ sudoers_io_version(int verbose)
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
 
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 /*
@@ -745,7 +743,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
-    debug_return_bool(rval);
+    debug_return_int(rval);
 }
 
 static int

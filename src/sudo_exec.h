@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_EXEC_H
-#define _SUDO_EXEC_H
+#ifndef SUDO_EXEC_H
+#define SUDO_EXEC_H
 
 /*
  * Older systems may not support MSG_WAITALL but it shouldn't really be needed.
@@ -99,4 +99,4 @@ bool utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user);
 bool utmp_logout(const char *line, int status);
 
-#endif /* _SUDO_EXEC_H */
+#endif /* SUDO_EXEC_H */

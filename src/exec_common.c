@@ -18,23 +18,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifdef HAVE_PRIV_SET
 # include <priv.h>
 #endif
@@ -54,7 +45,7 @@ static char * const *
 disable_execute(char *const envp[])
 {
 #ifdef _PATH_SUDO_NOEXEC
-    char *preload, **nenvp = NULL;
+    char *preload = NULL, **nenvp = NULL;
     int env_len, env_size;
     int preload_idx = -1;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -100,23 +91,28 @@ disable_execute(char *const envp[])
     if (!enabled)
 	env_size++;
 #endif
-    nenvp = sudo_emallocarray(env_size, sizeof(*envp));
+    nenvp = reallocarray(NULL, env_size, sizeof(*envp));
+    if (nenvp == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     memcpy(nenvp, envp, env_len * sizeof(*envp));
     nenvp[env_len] = NULL;
 
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
     if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
 	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
-	    sudo_fatal(NULL);
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {
-	sudo_easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
+	int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
+	    sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
+	if (len == -1)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	nenvp[preload_idx] = preload;
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -151,12 +147,14 @@ sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexe
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
-	nargv = sudo_emallocarray(argc + 2, sizeof(char *));
-	nargv[0] = "sh";
-	nargv[1] = (char *)path;
-	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
-	execve(_PATH_SUDO_BSHELL, nargv, envp);
-	sudo_efree(nargv);
+	nargv = reallocarray(NULL, argc + 2, sizeof(char *));
+	if (nargv != NULL) {
+	    nargv[0] = "sh";
+	    nargv[1] = (char *)path;
+	    memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
+	    execve(_PATH_SUDO_BSHELL, nargv, envp);
+	    free(nargv);
+	}
     }
     return -1;
 }

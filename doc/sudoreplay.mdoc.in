@@ -362,11 +362,22 @@ List sessions run by jeff or bob on the console:
 # sudoreplay -l ( user jeff or user bob ) tty console
 .Ed
 .Sh SEE ALSO
+.Xr script 1 ,
 .Xr sudo.conf @mansectform@ ,
-.Xr sudo @mansectsu@ ,
-.Xr script 1
+.Xr sudo @mansectsu@
 .Sh AUTHORS
-Todd C. Miller
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
 .Sh BUGS
 If you feel you have found a bug in
 .Nm ,

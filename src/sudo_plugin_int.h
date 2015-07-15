@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_PLUGIN_INT_H
-#define _SUDO_PLUGIN_INT_H
+#ifndef SUDO_PLUGIN_INT_H
+#define SUDO_PLUGIN_INT_H
 
 /*
  * All plugin structures start with a type and a version.
@@ -109,4 +109,4 @@ int sudo_conversation_printf(int msg_type, const char *fmt, ...);
 bool sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins);
 
-#endif /* _SUDO_PLUGIN_INT_H */
+#endif /* SUDO_PLUGIN_INT_H */

@@ -29,14 +29,7 @@
 # include <sys/systeminfo.h>
 #endif
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -48,9 +41,7 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifndef SUDOERS_NAME_MATCH
 # ifdef HAVE_GLOB
 #  include <glob.h>
@@ -63,22 +54,7 @@
 #else
 # include <netdb.h>
 #endif /* HAVE_NETGROUP_H */
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <dirent.h>
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
@@ -154,7 +130,7 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
 	if (matched != UNSPEC)
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 /*
@@ -310,7 +286,7 @@ hostlist_matches(const struct member_list *list)
 	if (matched != UNSPEC)
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 /*
@@ -329,7 +305,7 @@ cmndlist_matches(const struct member_list *list)
 	if (matched != UNSPEC)
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 /*
@@ -362,7 +338,7 @@ cmnd_matches(const struct member *m)
 		matched = !m->negated;
 	    break;
     }
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
 
 static bool
@@ -413,8 +389,7 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct
 	if (strcmp(sudoers_cmnd, "sudoedit") == 0 &&
 	    strcmp(user_cmnd, "sudoedit") == 0 &&
 	    command_args_match(sudoers_cmnd, sudoers_args)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
+	    /* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	    rc = true;
 	}
 	goto done;
@@ -460,9 +435,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args)
     if (fnmatch(sudoers_cmnd, user_cmnd, FNM_PATHNAME) != 0)
 	debug_return_bool(false);
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	if (safe_cmnd)
-	    free(safe_cmnd);
-	safe_cmnd = sudo_estrdup(user_cmnd);
+	/* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -523,8 +496,11 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(cp);
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(cp)) == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		cp = NULL;		/* fail closed */
+	    }
 	    break;
 	}
     }
@@ -533,8 +509,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	debug_return_bool(false);
 
     if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	sudo_efree(safe_cmnd);
-	safe_cmnd = sudo_estrdup(user_cmnd);
+	/* safe_cmnd was set above. */
 	debug_return_bool(true);
     }
     debug_return_bool(false);
@@ -556,9 +531,10 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 
     if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(sudoers_cmnd);
-	    debug_return_bool(true);
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(sudoers_cmnd)) != NULL)
+		debug_return_bool(true);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
     }
     debug_return_bool(false);
@@ -714,8 +690,11 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	/* XXX - log functions not available but we should log very loudly */
 	debug_return_bool(false);
     }
-    sudo_efree(safe_cmnd);
-    safe_cmnd = sudo_estrdup(sudoers_cmnd);
+    free(safe_cmnd);
+    if ((safe_cmnd = strdup(sudoers_cmnd)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
     debug_return_bool(true);
 }
 #endif /* SUDOERS_NAME_MATCH */
@@ -768,8 +747,11 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    sudo_efree(safe_cmnd);
-	    safe_cmnd = sudo_estrdup(buf);
+	    free(safe_cmnd);
+	    if ((safe_cmnd = strdup(buf)) == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		dent = NULL;
+	    }
 	    break;
 	}
     }
@@ -862,7 +844,7 @@ done:
 bool
 usergr_matches(const char *group, const char *user, const struct passwd *pw)
 {
-    int matched = false;
+    bool matched = false;
     struct passwd *pw0 = NULL;
     debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH)
 
@@ -874,7 +856,8 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
     }
 
     if (*group == ':' && def_group_plugin) {
-	matched = group_plugin_query(user, group + 1, pw);
+	if (group_plugin_query(user, group + 1, pw) == true)
+	    matched = true;
 	goto done;
     }
 
@@ -894,7 +877,7 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
     }
 
     /* not a Unix group, could be an external group */
-    if (def_group_plugin && group_plugin_query(user, group, pw)) {
+    if (def_group_plugin && group_plugin_query(user, group, pw) == true) {
 	matched = true;
 	goto done;
     }
@@ -943,12 +926,16 @@ sudo_getdomainname(void)
 		for (cp = domain; *cp != '\0'; cp++) {
 		    /* Check for illegal characters, Linux may use "(none)". */
 		    if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
-			sudo_efree(domain);
+			free(domain);
 			domain = NULL;
 			break;
 		    }
 		}
 	    }
+	} else {
+	    /* XXX - want to pass error back to caller */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
 	}
 	initialized = true;
     }

@@ -23,25 +23,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_SIA_SES_INIT
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 #include <signal.h>
 #include <siad.h>
@@ -112,7 +105,11 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
-    sudo_argv = sudo_emallocarray(sudo_argc + 1, sizeof(char *));
+    sudo_argv = reallocarray(NULL, sudo_argc + 1, sizeof(char *));
+    if (sudo_argv == NULL) {
+	log_warningx(0, N_("unable to allocate memory"));
+	debug_return_int(AUTH_FATAL);
+    }
     sudo_argv[0] = "sudo";
     for (i = 0; i < NewArgc; i++)
 	sudo_argv[i + 1] = NewArgv[i];
@@ -150,6 +147,8 @@ sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
-    sudo_efree(sudo_argv);
+    free(sudo_argv);
     debug_return_int(AUTH_SUCCESS);
 }
+
+#endif /* HAVE_SIA_SES_INIT */

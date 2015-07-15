@@ -15,6 +15,10 @@
  */
 
 #include <config.h>
+
+#ifdef HAVE_SOLARIS_AUDIT
+
+#include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -121,3 +125,5 @@ solaris_audit_failure(int argc, char *argv[], char const *const fmt, va_list ap)
 
 	return 0;
 }
+
+#endif /* HAVE_SOLARIS_AUDIT */

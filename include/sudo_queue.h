@@ -30,8 +30,8 @@
  * $FreeBSD: head/sys/sys/queue.h 251887 2013-06-18 02:57:56Z lstewart $
  */
 
-#ifndef _SUDO_QUEUE_H_
-#define	_SUDO_QUEUE_H_
+#ifndef SUDO_QUEUE_H
+#define	SUDO_QUEUE_H
 
 /*
  * This file defines four types of data structures: singly-linked lists,
@@ -803,4 +803,4 @@ struct {								\
 	(head)->tqh_last = last;					\
 } while (0)
 
-#endif /* !_SUDO_QUEUE_H_ */
+#endif /* !SUDO_QUEUE_H */

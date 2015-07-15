@@ -19,23 +19,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <errno.h>
 
 #include "sudo.h"
@@ -103,29 +94,6 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 		    errno = serrno;
 	    }
 	}
-# ifdef __hpux
-	/* Try .sl instead of .so on HP-UX for backwards compatibility. */
-	if (status != 0) {
-	    size_t len = strlen(info->path);
-	    if (len >= 3 && info->path[len - 3] == '.' &&
-		info->path[len - 2] == 's' && info->path[len - 1] == 'o') {
-		const char *sopath = info->path;
-		char *slpath = sudo_estrdup(info->path);
-		int serrno = errno;
-
-		slpath[len - 1] = 'l';
-		info->path = slpath;
-		status = sudo_stat_plugin(info, fullpath, pathsize, sb);
-		if (status == 0) {
-		    sudo_efree((void *)sopath);
-		} else {
-		    sudo_efree(slpath);
-		    info->path = sopath;
-		    errno = serrno;
-		}
-	    }
-	}
-# endif /* __hpux */
     }
 done:
     debug_return_int(status);
@@ -135,7 +103,7 @@ static bool
 sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
     struct stat sb;
-    int rval = false;
+    bool rval = false;
     debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
@@ -178,38 +146,39 @@ static bool
 sudo_load_plugin(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins, struct plugin_info *info)
 {
-    struct plugin_container *container;
+    struct plugin_container *container = NULL;
     struct generic_plugin *plugin;
     char path[PATH_MAX];
-    bool rval = false;
-    void *handle;
+    void *handle = NULL;
     debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
 
     /* Sanity check plugin and fill in path */
     if (!sudo_check_plugin(info, path, sizeof(path)))
-	goto done;
+	goto bad;
 
     /* Open plugin and map in symbol */
     handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!handle) {
+	const char *errstr = sudo_dso_strerror();
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
-	goto done;
+	sudo_warnx(U_("unable to load %s: %s"), path,
+	    errstr ? errstr : "unknown error");
+	goto bad;
     }
     plugin = sudo_dso_findsym(handle, info->symbol_name);
     if (!plugin) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	sudo_warnx(U_("unable to find symbol `%s' in %s"), info->symbol_name, path);
-	goto done;
+	goto bad;
     }
 
     if (plugin->type != SUDO_POLICY_PLUGIN && plugin->type != SUDO_IO_PLUGIN) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	sudo_warnx(U_("unknown policy type %d found in %s"), plugin->type, path);
-	goto done;
+	goto bad;
     }
     if (SUDO_API_VERSION_GET_MAJOR(plugin->version) != SUDO_API_VERSION_MAJOR) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
@@ -217,25 +186,28 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	sudo_warnx(U_("incompatible plugin major version %d (expected %d) found in %s"),
 	    SUDO_API_VERSION_GET_MAJOR(plugin->version),
 	    SUDO_API_VERSION_MAJOR, path);
-	goto done;
+	goto bad;
     }
     if (plugin->type == SUDO_POLICY_PLUGIN) {
-	if (policy_plugin->handle) {
+	if (policy_plugin->handle != NULL) {
 	    /* Ignore duplicate entries. */
 	    if (strcmp(policy_plugin->name, info->symbol_name) != 0) {
 		sudo_warnx(U_("ignoring policy plugin `%s' in %s, line %d"),
 		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
 		sudo_warnx(U_("only a single policy plugin may be specified"));
-		goto done;
+		goto bad;
 	    }
 	    sudo_warnx(U_("ignoring duplicate policy plugin `%s' in %s, line %d"),
 		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-	    sudo_dso_unload(handle);
-	    handle = NULL;
+	    goto bad;
 	}
 	if (handle != NULL) {
 	    policy_plugin->handle = handle;
-	    policy_plugin->path = sudo_estrdup(path);
+	    policy_plugin->path = strdup(path);
+	    if (policy_plugin->path == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		goto bad;
+	    }
 	    policy_plugin->name = info->symbol_name;
 	    policy_plugin->options = info->options;
 	    policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
@@ -254,9 +226,12 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    }
 	}
 	if (handle != NULL) {
-	    container = sudo_ecalloc(1, sizeof(*container));
+	    container = calloc(1, sizeof(*container));
+	    if (container == NULL || (container->path = strdup(path)) == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		goto bad;
+	    }
 	    container->handle = handle;
-	    container->path = sudo_estrdup(path);
 	    container->name = info->symbol_name;
 	    container->options = info->options;
 	    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
@@ -270,18 +245,21 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     info->symbol_name = NULL;
     info->options = NULL;
 
-    rval = true;
-done:
-    debug_return_bool(rval);
+    debug_return_bool(true);
+bad:
+    free(container);
+    if (handle != NULL)
+	sudo_dso_unload(handle);
+    debug_return_bool(false);
 }
 
 static void
 free_plugin_info(struct plugin_info *info)
 {
-    sudo_efree(info->path);
-    sudo_efree(info->options);
-    sudo_efree(info->symbol_name);
-    sudo_efree(info);
+    free(info->path);
+    free(info->options);
+    free(info->symbol_name);
+    free(info);
 }
 
 /*
@@ -313,23 +291,31 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
      */
     if (policy_plugin->handle == NULL) {
 	/* Default policy plugin */
-	info = sudo_ecalloc(1, sizeof(*info));
+	info = calloc(1, sizeof(*info));
+	if (info == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
 	/* info->options = NULL; */
 	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
-	sudo_efree(info);
+	free(info);
 	if (!rval)
 	    goto done;
 
 	/* Default I/O plugin */
 	if (TAILQ_EMPTY(io_plugins)) {
-	    info = sudo_ecalloc(1, sizeof(*info));
+	    info = calloc(1, sizeof(*info));
+	    if (info == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		goto done;
+	    }
 	    info->symbol_name = "sudoers_io";
 	    info->path = SUDOERS_PLUGIN;
 	    /* info->options = NULL; */
 	    rval = sudo_load_plugin(policy_plugin, io_plugins, info);
-	    sudo_efree(info);
+	    free(info);
 	    if (!rval)
 		goto done;
 	}

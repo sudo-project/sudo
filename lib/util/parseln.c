@@ -18,30 +18,15 @@
 #include <config.h>
 
 #include <sys/types.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <fcntl.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -55,7 +40,7 @@
 
 /*
  * Read a line of input, honoring line continuation chars.
- * Remove comments and strips off leading and trailing spaces.
+ * Remove comments and strip off leading and trailing spaces.
  * Returns the line length and updates the buf and bufsize pointers.
  * XXX - just use a struct w/ state, including getline buffer?
  *       could also make comment char and line continuation configurable
@@ -114,8 +99,13 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 		size |= size >> 16;
 		size++;
 	    }
-	    if ((tmp = realloc(*bufp, size)) == NULL)
+	    if ((tmp = realloc(*bufp, size)) == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		len = -1;
+		total = 0;
 		break;
+	    }
 	    *bufp = tmp;
 	    *bufsizep = size;
 	}

@@ -24,23 +24,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
@@ -211,7 +202,7 @@ static const char *initial_keepenv_table[] = {
 /*
  * Initialize env based on envp.
  */
-void
+bool
 env_init(char * const envp[])
 {
     char * const *ep;
@@ -220,7 +211,7 @@ env_init(char * const envp[])
 
     if (envp == NULL) {
 	/* Free the old envp we allocated, if any. */
-	sudo_efree(env.old_envp);
+	free(env.old_envp);
 
 	/* Reset to initial state but keep a pointer to what we allocated. */
 	env.old_envp = env.envp;
@@ -235,7 +226,13 @@ env_init(char * const envp[])
 
 	env.env_len = len;
 	env.env_size = len + 1 + 128;
-	env.envp = sudo_emallocarray(env.env_size, sizeof(char *));
+	env.envp = reallocarray(NULL, env.env_size, sizeof(char *));
+	if (env.envp == NULL) {
+	    env.env_size = 0;
+	    env.env_len = 0;
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_bool(false);
+	}
 #ifdef ENV_DEBUG
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
@@ -243,11 +240,11 @@ env_init(char * const envp[])
 	env.envp[len] = NULL;
 
 	/* Free the old envp we allocated, if any. */
-	sudo_efree(env.old_envp);
+	free(env.old_envp);
 	env.old_envp = NULL;
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
@@ -307,11 +304,9 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	    errno = EOVERFLOW;
 	    return -1;
 	}
-	nenvp = realloc(env.envp, nsize * sizeof(char *));
-	if (nenvp == NULL) {
-	    errno = ENOMEM;
+	nenvp = reallocarray(env.envp, nsize, sizeof(char *));
+	if (nenvp == NULL)
 	    return -1;
-	}
 	env.envp = nenvp;
 	env.env_size = nsize;
 #ifdef ENV_DEBUG
@@ -398,7 +393,11 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     debug_decl(sudo_setenv2, SUDOERS_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
-    estring = sudo_emalloc(esize);
+    if ((estring = malloc(esize)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_int(-1);
+    }
 
     /* Build environment string and insert it. */
     if (strlcpy(estring, var, esize) >= esize ||
@@ -411,7 +410,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	rval = sudo_putenv(estring, dupcheck, overwrite);
     }
     if (rval == -1)
-	sudo_efree(estring);
+	free(estring);
     debug_return_int(rval);
 }
 
@@ -453,10 +452,8 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
     }
 
     /* Allocate and fill in estring. */
-    if ((estring = ep = malloc(esize)) == NULL) {
-	errno = ENOMEM;
+    if ((estring = ep = malloc(esize)) == NULL)
 	goto done;
-    }
     for (cp = var; *cp && *cp != '='; cp++)
 	*ep++ = *cp;
     *ep++ = '=';
@@ -677,7 +674,7 @@ matches_env_check(const char *var, bool *full_match)
 		keepit = !strpbrk(++val, "/%");
 	}
     }
-    debug_return_bool(keepit);
+    debug_return_int(keepit);
 }
 
 /*
@@ -821,6 +818,16 @@ env_update_didvar(const char *ep, unsigned int *didvar)
     }
 }
 
+#define CHECK_PUTENV(a, b, c)	do {					       \
+    if (sudo_putenv((a), (b), (c)) == -1)				       \
+	goto bad;							       \
+} while (0)
+
+#define CHECK_SETENV2(a, b, c, d)	do {				       \
+    if (sudo_setenv2((a), (b), (c), (d)) == -1)				       \
+	goto bad;							       \
+} while (0)
+
 /*
  * Build a new environment and ether clear potentially dangerous
  * variables from the old one or start with a clean slate.
@@ -843,9 +850,15 @@ rebuild_env(void)
     didvar = 0;
     env.env_len = 0;
     env.env_size = 128;
-    sudo_efree(env.old_envp);
+    free(env.old_envp);
     env.old_envp = env.envp;
-    env.envp = sudo_emallocarray(env.env_size, sizeof(char *));
+    env.envp = reallocarray(NULL, env.env_size, sizeof(char *));
+    if (env.envp == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	env.env_size = 0;
+	goto bad;
+    }
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
 #else
@@ -905,8 +918,7 @@ rebuild_env(void)
 
 	    if (keepit) {
 		/* Preserve variable. */
-		if (sudo_putenv(*ep, false, false) == -1)
-		    goto bad;
+		CHECK_PUTENV(*ep, false, false);
 		env_update_didvar(*ep, &didvar);
 	    }
 	}
@@ -918,25 +930,25 @@ rebuild_env(void)
 	 * on sudoers options).
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    sudo_setenv2("SHELL", runas_pw->pw_shell,
+	    CHECK_SETENV2("SHELL", runas_pw->pw_shell,
 		ISSET(didvar, DID_SHELL), true);
-	    sudo_setenv2("LOGNAME", runas_pw->pw_name,
+	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name,
 		ISSET(didvar, DID_LOGNAME), true);
-	    sudo_setenv2("USER", runas_pw->pw_name,
+	    CHECK_SETENV2("USER", runas_pw->pw_name,
 		ISSET(didvar, DID_USER), true);
-	    sudo_setenv2("USERNAME", runas_pw->pw_name,
+	    CHECK_SETENV2("USERNAME", runas_pw->pw_name,
 		ISSET(didvar, DID_USERNAME), true);
 	} else {
 	    if (!ISSET(didvar, DID_SHELL))
-		sudo_setenv2("SHELL", sudo_user.pw->pw_shell, false, true);
+		CHECK_SETENV2("SHELL", sudo_user.pw->pw_shell, false, true);
 	    /* We will set LOGNAME later in the !def_set_logname case. */
 	    if (!def_set_logname) {
 		if (!ISSET(didvar, DID_LOGNAME))
-		    sudo_setenv2("LOGNAME", user_name, false, true);
+		    CHECK_SETENV2("LOGNAME", user_name, false, true);
 		if (!ISSET(didvar, DID_USER))
-		    sudo_setenv2("USER", user_name, false, true);
+		    CHECK_SETENV2("USER", user_name, false, true);
 		if (!ISSET(didvar, DID_USERNAME))
-		    sudo_setenv2("USERNAME", user_name, false, true);
+		    CHECK_SETENV2("USERNAME", user_name, false, true);
 	    }
 	}
 
@@ -950,10 +962,13 @@ rebuild_env(void)
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
 	    cp = _PATH_MAILDIR;
-	    if (cp[sizeof(_PATH_MAILDIR) - 2] == '/')
-		sudo_easprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name);
-	    else
-		sudo_easprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name);
+	    if (cp[sizeof(_PATH_MAILDIR) - 2] == '/') {
+		if (asprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name) == -1)
+		    goto bad;
+	    } else {
+		if (asprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name) == -1)
+		    goto bad;
+	    }
 	    if (sudo_putenv(cp, ISSET(didvar, DID_MAIL), true) == -1) {
 		free(cp);
 		goto bad;
@@ -973,15 +988,13 @@ rebuild_env(void)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
 		    SET(didvar, DID_TERM);
-		if (sudo_putenv(*ep, false, false) == -1)
-		    goto bad;
+		CHECK_PUTENV(*ep, false, false);
 	    }
 	}
     }
     /* Replace the PATH envariable with a secure one? */
     if (def_secure_path && !user_is_exempt()) {
-	if (sudo_setenv2("PATH", def_secure_path, true, true) == -1)
-	    goto bad;
+	CHECK_SETENV2("PATH", def_secure_path, true, true);
 	SET(didvar, DID_PATH);
     }
 
@@ -993,58 +1006,50 @@ rebuild_env(void)
      */
     if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
-	    sudo_setenv2("LOGNAME", runas_pw->pw_name, true, true);
+	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name, true, true);
 	if (!ISSET(didvar, KEPT_USER))
-	    sudo_setenv2("USER", runas_pw->pw_name, true, true);
+	    CHECK_SETENV2("USER", runas_pw->pw_name, true, true);
 	if (!ISSET(didvar, KEPT_USERNAME))
-	    sudo_setenv2("USERNAME", runas_pw->pw_name, true, true);
+	    CHECK_SETENV2("USERNAME", runas_pw->pw_name, true, true);
     }
 
     /* Set $HOME to target user if not preserving user's value. */
     if (reset_home)
-	sudo_setenv2("HOME", runas_pw->pw_dir, true, true);
+	CHECK_SETENV2("HOME", runas_pw->pw_dir, true, true);
 
     /* Provide default values for $TERM and $PATH if they are not set. */
-    if (!ISSET(didvar, DID_TERM)) {
-	if (sudo_putenv("TERM=unknown", false, false) == -1)
-	    goto bad;
-    }
-    if (!ISSET(didvar, DID_PATH)) {
-	if (sudo_setenv2("PATH", _PATH_STDPATH, false, true) == -1)
-	    goto bad;
-    }
+    if (!ISSET(didvar, DID_TERM))
+	CHECK_PUTENV("TERM=unknown", false, false);
+    if (!ISSET(didvar, DID_PATH))
+	CHECK_SETENV2("PATH", _PATH_STDPATH, false, true);
 
     /* Set PS1 if SUDO_PS1 is set. */
-    if (ps1 != NULL) {
-	if (sudo_putenv(ps1, true, true) == -1)
-	    goto bad;
-    }
+    if (ps1 != NULL)
+	CHECK_PUTENV(ps1, true, true);
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	sudo_easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
+	if (asprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args) == -1)
+	    goto bad;
 	if (sudo_putenv(cp, true, true) == -1) {
-	    sudo_efree(cp);
+	    free(cp);
 	    goto bad;
 	}
     } else {
-	if (sudo_setenv2("SUDO_COMMAND", user_cmnd, true, true) == -1)
-	    goto bad;
+	CHECK_SETENV2("SUDO_COMMAND", user_cmnd, true, true);
     }
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
-    if (sudo_setenv2("SUDO_USER", user_name, true, true) == -1)
-	goto bad;
+    CHECK_SETENV2("SUDO_USER", user_name, true, true);
     snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_uid);
-    if (sudo_setenv2("SUDO_UID", idbuf, true, true) == -1)
-	goto bad;
+    CHECK_SETENV2("SUDO_UID", idbuf, true, true);
     snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
-    if (sudo_setenv2("SUDO_GID", idbuf, true, true) == -1)
-	goto bad;
+    CHECK_SETENV2("SUDO_GID", idbuf, true, true);
 
     debug_return_bool(true);
 
 bad:
+    sudo_warn(U_("unable to rebuild the environment"));
     debug_return_bool(false);
 }
 
@@ -1083,8 +1088,7 @@ bool
 validate_env_vars(char * const env_vars[])
 {
     char * const *ep;
-    char *eq, *bad = NULL;
-    size_t len, blen = 0, bsize = 0;
+    char *eq, errbuf[4096];
     bool okvar, rval = true;
     debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV)
 
@@ -1092,6 +1096,7 @@ validate_env_vars(char * const env_vars[])
 	debug_return_bool(true);	/* nothing to do */
 
     /* Add user-specified environment variables. */
+    errbuf[0] = '\0';
     for (ep = env_vars; *ep != NULL; ep++) {
 	if (def_secure_path && !user_is_exempt() &&
 	    strncmp(*ep, "PATH=", 5) == 0) {
@@ -1105,27 +1110,20 @@ validate_env_vars(char * const env_vars[])
 	    /* Not allowed, add to error string, allocating as needed. */
 	    if ((eq = strchr(*ep, '=')) != NULL)
 		*eq = '\0';
-	    len = strlen(*ep) + 2;
-	    if (blen + len >= bsize) {
-		do {
-		    bsize += 1024;
-		} while (blen + len >= bsize);
-		bad = sudo_erealloc(bad, bsize);
-		bad[blen] = '\0';
+	    if (errbuf[0] != '\0')
+		(void)strlcat(errbuf, ", ", sizeof(errbuf));
+	    if (strlcat(errbuf, *ep, sizeof(errbuf)) >= sizeof(errbuf)) {
+		errbuf[sizeof(errbuf) - 4] = '\0';
+		(void)strlcat(errbuf, "...", sizeof(errbuf));
 	    }
-	    strlcat(bad, *ep, bsize);
-	    strlcat(bad, ", ", bsize);
-	    blen += len;
 	    if (eq != NULL)
 		*eq = '=';
 	}
     }
-    if (bad != NULL) {
-	bad[blen - 2] = '\0';		/* remove trailing ", " */
+    if (errbuf[0] != '\0') {
 	/* XXX - audit? */
 	log_warningx(0,
-	    N_("sorry, you are not allowed to set the following environment variables: %s"), bad);
-	sudo_efree(bad);
+	    N_("sorry, you are not allowed to set the following environment variables: %s"), errbuf);
 	rval = false;
     }
     debug_return_bool(rval);
@@ -1184,7 +1182,13 @@ read_env_file(const char *path, int overwrite)
 	    val_len -= 2;
 	}
 
-	cp = sudo_emalloc(var_len + 1 + val_len + 1);
+	if ((cp = malloc(var_len + 1 + val_len + 1)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    /* XXX - no undo on failure */
+	    rval = false;
+	    break;
+	}
 	memcpy(cp, var, var_len + 1); /* includes '=' */
 	memcpy(cp + var_len + 1, val, val_len + 1); /* includes NUL */
 
@@ -1200,32 +1204,49 @@ read_env_file(const char *path, int overwrite)
     debug_return_bool(rval);
 }
 
-void
+bool
 init_envtables(void)
 {
     struct list_member *cur;
     const char **p;
+    debug_decl(init_envtables, SUDOERS_DEBUG_ENV)
 
     /* Fill in the "env_delete" list. */
     for (p = initial_badenv_table; *p; p++) {
-	cur = sudo_ecalloc(1, sizeof(struct list_member));
-	cur->value = sudo_estrdup(*p);
+	cur = calloc(1, sizeof(struct list_member));
+	if (cur == NULL || (cur->value = strdup(*p)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    free(cur);
+	    debug_return_bool(false);
+	}
 	SLIST_INSERT_HEAD(&def_env_delete, cur, entries);
     }
 
     /* Fill in the "env_check" list. */
     for (p = initial_checkenv_table; *p; p++) {
-	cur = sudo_ecalloc(1, sizeof(struct list_member));
-	cur->value = sudo_estrdup(*p);
+	cur = calloc(1, sizeof(struct list_member));
+	if (cur == NULL || (cur->value = strdup(*p)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    free(cur);
+	    debug_return_bool(false);
+	}
 	SLIST_INSERT_HEAD(&def_env_check, cur, entries);
     }
 
     /* Fill in the "env_keep" list. */
     for (p = initial_keepenv_table; *p; p++) {
-	cur = sudo_ecalloc(1, sizeof(struct list_member));
-	cur->value = sudo_estrdup(*p);
+	cur = calloc(1, sizeof(struct list_member));
+	if (cur == NULL || (cur->value = strdup(*p)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    free(cur);
+	    debug_return_bool(false);
+	}
 	SLIST_INSERT_HEAD(&def_env_keep, cur, entries);
     }
+    debug_return_bool(true);
 }
 
 int

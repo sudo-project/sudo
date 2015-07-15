@@ -1,6 +1,14 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.14:
+
+    On HP-UX, sudo will no longer check for "plugin.sl" if "plugin.so"
+    is specified but does not exist.  This was a temporary hack for
+    backwards compatibility with Sudo 1.8.6 and below when the
+    plugin path name was not listed in sudo.conf.  A plugin path
+    name that explicitly ends in ".sl" will still work as expected.
+
 o Upgrading from a version prior to 1.8.10:
 
     The time stamp file format has changed in sudo 1.8.10.  There

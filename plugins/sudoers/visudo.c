@@ -23,8 +23,6 @@
  * Lock the sudoers file for safe editing (ala vipw) and check for parse errors.
  */
 
-#define _SUDO_MAIN
-
 #ifdef __TANDEM
 # include <floss.h>
 #endif
@@ -41,23 +39,14 @@
 #endif
 #include <sys/wait.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* HAVE_UNISTD_H */
 #include <stdarg.h>
 #include <ctype.h>
 #include <pwd.h>
@@ -101,16 +90,15 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
  * Function prototypes
  */
 static void quit(int);
-static char *get_args(char *);
-static char *get_editor(char **);
 static void get_hostname(void);
 static int whatnow(void);
 static int check_aliases(bool, bool);
+static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool);
-static bool edit_sudoers(struct sudoersfile *, char *, char *, int);
+static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool);
 static int print_unused(void *, void *);
-static bool reparse_sudoers(char *, char *, bool, bool);
+static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(char *, char **);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
@@ -149,8 +137,8 @@ int
 main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
-    char *args, *editor;
-    int ch, exitcode = 0;
+    char *editor, **editor_argv;
+    int ch, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
     const char *export_path;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
@@ -163,7 +151,8 @@ main(int argc, char *argv[])
 #endif
 
     initprogname(argc > 0 ? argv[0] : "visudo");
-    sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale);
+    if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
@@ -174,7 +163,8 @@ main(int argc, char *argv[])
     sudo_fatal_callback_register(visudo_cleanup);
 
     /* Read debug and plugin sections of sudo.conf. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
+	exit(EXIT_FAILURE);
 
     /* Initialize the debug subsystem. */
     sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
@@ -222,8 +212,8 @@ main(int argc, char *argv[])
     if (argc - optind != 0)
 	usage(1);
 
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
@@ -232,7 +222,8 @@ main(int argc, char *argv[])
     get_hostname();
 
     /* Setup defaults data structures. */
-    init_defaults();
+    if (!init_defaults())
+	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
 	exitcode = check_syntax(sudoers_file, quiet, strict, oldperms) ? 0 : 1;
@@ -253,7 +244,7 @@ main(int argc, char *argv[])
     sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
 
-    editor = get_editor(&args);
+    editor = get_editor(&editor_argc, &editor_argv);
 
     /* Install signal handlers to clean up temp files if we are killed. */
     setup_signals();
@@ -267,14 +258,14 @@ main(int argc, char *argv[])
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
 	}
-	edit_sudoers(sp, editor, args, -1);
+	edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
     }
 
     /*
      * Check edited files for a parse error, re-edit any that fail
      * and install the edited files as needed.
      */
-    if (reparse_sudoers(editor, args, strict, quiet)) {
+    if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	    if (sp->doedit)
 		(void) install_sudoers(sp, oldperms);
@@ -284,6 +275,75 @@ main(int argc, char *argv[])
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
+}
+
+static char *
+get_editor(int *editor_argc, char ***editor_argv)
+{
+    char *editor, *editor_path = NULL, **whitelist = NULL;
+    static char *files[] = { "+1", "sudoers" };
+    unsigned int whitelist_len = 0;
+    debug_decl(get_editor, SUDOERS_DEBUG_UTIL)
+
+    /* Build up editor whitelist from def_editor unless env_editor is set. */
+    if (!def_env_editor) {
+	const char *cp, *ep;
+	const char *def_editor_end = def_editor + strlen(def_editor);
+
+	/* Count number of entries in whitelist and split into a list. */
+	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
+	    whitelist_len++;
+	}
+	whitelist = reallocarray(NULL, whitelist_len + 1, sizeof(char *));
+	if (whitelist == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	whitelist_len = 0;
+	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
+	    whitelist[whitelist_len] = strndup(cp, (size_t)(ep - cp));
+	    if (whitelist[whitelist_len] == NULL)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    whitelist_len++;
+	}
+	whitelist[whitelist_len] = NULL;
+    }
+
+    /* First try to use user's VISUAL or EDITOR environment vars. */
+    if ((editor = getenv("VISUAL")) == NULL || *editor == '\0')
+	editor = getenv("EDITOR");
+    if (editor && *editor == '\0')
+	editor = NULL;
+    if (editor != NULL) {
+	editor_path = resolve_editor(editor, strlen(editor), 2, files,
+	    editor_argc, editor_argv, whitelist);
+	if (def_env_editor && editor_path == NULL) {
+	    /* If we are honoring $EDITOR this is a fatal error. */
+	    sudo_fatalx(U_("specified editor (%s) doesn't exist"), editor);
+	}
+    }
+    if (editor_path == NULL) {
+	/* def_editor could be a path, split it up, avoiding strtok() */
+	const char *def_editor_end = def_editor + strlen(def_editor);
+	const char *cp, *ep;
+	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
+	    editor_path = resolve_editor(cp, (size_t)(ep - cp), 2, files,
+		editor_argc, editor_argv, whitelist);
+	    if (editor_path == NULL && errno != ENOENT)
+		debug_return_str(NULL);
+	} while (ep != NULL && editor_path == NULL);
+    }
+    if (editor_path == NULL)
+	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
+
+    if (whitelist != NULL) {
+	while (whitelist_len--)
+	    free(whitelist[whitelist_len]);
+	free(whitelist);
+    }
+
+    debug_return_str(editor_path);
 }
 
 /*
@@ -311,18 +371,51 @@ static char *lineno_editors[] = {
 };
 
 /*
+ * Check whether or not the specified editor matched lineno_editors[].
+ * Returns true if yes, false if no.
+ */
+static bool
+editor_supports_plus(const char *editor)
+{
+    const char *editor_base = strrchr(editor, '/');
+    const char *cp;
+    char **av;
+    debug_decl(editor_supports_plus, SUDOERS_DEBUG_UTIL)
+
+    if (editor_base != NULL)
+	editor_base++;
+    else
+	editor_base = editor;
+    if (*editor_base == 'r')
+	editor_base++;
+
+    for (av = lineno_editors; (cp = *av) != NULL; av++) {
+	/* We only handle a leading '*' wildcard. */
+	if (*cp == '*') {
+	    size_t blen = strlen(editor_base);
+	    size_t clen = strlen(++cp);
+	    if (blen >= clen) {
+		if (strcmp(cp, editor_base + blen - clen) == 0)
+		    break;
+	    }
+	} else if (strcmp(cp, editor_base) == 0)
+	    break;
+    }
+    debug_return_bool(cp != NULL);
+}
+
+/*
  * Edit each sudoers file.
  * Returns true on success, else false.
  */
 static bool
-edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
+edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
+    char **editor_argv, int lineno)
 {
     int tfd;				/* sudoers temp file descriptor */
     bool modified;			/* was the file modified? */
     int ac;				/* argument count */
-    char **av;				/* argument vector for run_command */
-    char *cp;				/* scratch char pointer */
-    char buf[PATH_MAX*2];		/* buffer used for copying files */
+    char buf[4096];			/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
     struct timespec ts, times[2];	/* time before and after edit */
     struct timespec orig_mtim;		/* starting mtime of sudoers file */
@@ -339,7 +432,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 
     /* Create the temp file if needed and set timestamp. */
     if (sp->tpath == NULL) {
-	sudo_easprintf(&sp->tpath, "%s.tmp", sp->path);
+	if (asprintf(&sp->tpath, "%s.tmp", sp->path) == -1)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	tfd = open(sp->tpath, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (tfd < 0)
 	    sudo_fatal("%s", sp->tpath);
@@ -364,67 +458,21 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     times[0].tv_nsec = times[1].tv_nsec = orig_mtim.tv_nsec;
     (void) utimensat(AT_FDCWD, sp->tpath, times, 0);
 
-    /* Does the editor support +lineno? */
-    if (lineno > 0)
-    {
-	char *editor_base = strrchr(editor, '/');
-	if (editor_base != NULL)
-	    editor_base++;
-	else
-	    editor_base = editor;
-	if (*editor_base == 'r')
-	    editor_base++;
-
-	for (av = lineno_editors; (cp = *av) != NULL; av++) {
-	    /* We only handle a leading '*' wildcard. */
-	    if (*cp == '*') {
-		size_t blen = strlen(editor_base);
-		size_t clen = strlen(++cp);
-		if (blen >= clen) {
-		    if (strcmp(cp, editor_base + blen - clen) == 0)
-			break;
-		}
-	    } else if (strcmp(cp, editor_base) == 0)
-		break;
-	}
-	/* Disable +lineno if editor doesn't support it. */
-	if (cp == NULL)
+    /* Disable +lineno if editor doesn't support it. */
+    if (lineno > 0 && !editor_supports_plus(editor))
 	    lineno = -1;
-    }
 
-    /* Find the length of the argument vector */
-    ac = 3 + (lineno > 0);
-    if (args) {
-        bool wasblank;
-
-        ac++;
-        for (wasblank = false, cp = args; *cp; cp++) {
-            if (isblank((unsigned char) *cp))
-                wasblank = true;
-            else if (wasblank) {
-                wasblank = false;
-                ac++;
-            }
-        }
-    }
-
-    /* Build up argument vector for the command */
-    av = sudo_emallocarray(ac, sizeof(char *));
-    if ((av[0] = strrchr(editor, '/')) != NULL)
-	av[0]++;
-    else
-	av[0] = editor;
-    ac = 1;
+    /*
+     * We pre-allocated 2 extra spaces for "+n filename" in argv.
+     * Replace those placeholders with the real values.
+     */
+    ac = editor_argc - 2;
     if (lineno > 0) {
-	(void) snprintf(linestr, sizeof(linestr), "+%d", lineno);
-	av[ac++] = linestr;
+	(void)snprintf(linestr, sizeof(linestr), "+%d", lineno);
+	editor_argv[ac++] = linestr;
     }
-    if (args) {
-	for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
-	    av[ac++] = cp;
-    }
-    av[ac++] = sp->tpath;
-    av[ac++] = NULL;
+    editor_argv[ac++] = sp->tpath;
+    editor_argv[ac++] = NULL;
 
     /*
      * Do the edit:
@@ -437,7 +485,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	goto done;
     }
 
-    if (run_command(editor, av) != -1) {
+    if (run_command(editor, editor_argv) != -1) {
 	if (sudo_gettime_real(&times[1]) == -1) {
 	    sudo_warn(U_("unable to read the clock"));
 	    goto done;
@@ -451,10 +499,12 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	    goto done;
 	}
 	if (sb.st_size == 0 && orig_size != 0) {
-	    sudo_warnx(U_("zero length temporary file (%s), %s unchanged"),
-		sp->tpath, sp->path);
-	    sp->modified = true;
-	    goto done;
+	    /* Avoid accidental zeroing of main sudoers file. */
+	    if (sp == TAILQ_FIRST(&sudoerslist)) {
+		sudo_warnx(U_("zero length temporary file (%s), %s unchanged"),
+		    sp->tpath, sp->path);
+		goto done;
+	    }
 	}
     } else {
 	sudo_warnx(U_("editor (%s) failed, %s unchanged"), editor, sp->path);
@@ -490,7 +540,8 @@ done:
  * Parse sudoers after editing and re-edit any ones that caused a parse error.
  */
 static bool
-reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
+reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
+    bool strict, bool quiet)
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
@@ -508,7 +559,8 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		sp->tpath, sp->path);
 
 	/* Clean slate for each parse */
-	init_defaults();
+	if (!init_defaults())
+	    sudo_fatalx(U_("unable to initialize sudoers default values"));
 	init_parser(sp->path, quiet);
 
 	/* Parse the sudoers temp file(s) */
@@ -544,7 +596,8 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		/* Edit file with the parse error */
 		TAILQ_FOREACH(sp, &sudoerslist, entries) {
 		    if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
-			edit_sudoers(sp, editor, args, errorlineno);
+			edit_sudoers(sp, editor, editor_argc, editor_argv,
+			    errorlineno);
 			if (errorfile != NULL)
 			    break;
 		    }
@@ -562,7 +615,8 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	    printf(_("press return to edit %s: "), sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
-	    edit_sudoers(sp, editor, args, errorlineno);
+	    edit_sudoers(sp, editor, editor_argc, editor_argv,
+		errorlineno);
 	}
 
 	/* If all sudoers files parsed OK we are done. */
@@ -634,7 +688,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
      * mv(1) in case sp->tpath and sp->path are on different file systems.
      */
     if (rename(sp->tpath, sp->path) == 0) {
-	sudo_efree(sp->tpath);
+	free(sp->tpath);
 	sp->tpath = NULL;
     } else {
 	if (errno == EXDEV) {
@@ -656,11 +710,11 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 		sudo_warnx(U_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		(void) unlink(sp->tpath);
-		sudo_efree(sp->tpath);
+		free(sp->tpath);
 		sp->tpath = NULL;
 		goto done;
 	    }
-	    sudo_efree(sp->tpath);
+	    free(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
 	    sudo_warn(U_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
@@ -674,10 +728,10 @@ done:
 }
 
 /* STUB */
-void
+bool
 init_envtables(void)
 {
-    return;
+    return true;
 }
 
 /* STUB */
@@ -913,15 +967,16 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
-	entry = sudo_ecalloc(1, sizeof(*entry));
-	entry->path = sudo_estrdup(path);
+	entry = calloc(1, sizeof(*entry));
+	if (entry == NULL || (entry->path = strdup(path)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	/* entry->modified = 0; */
 	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	/* entry->tpath = NULL; */
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
 	    sudo_warn("%s", entry->path);
-	    sudo_efree(entry);
+	    free(entry);
 	    debug_return_ptr(NULL);
 	}
 	if (!checkonly && !sudo_lock_file(entry->fd, SUDO_TLOCK))
@@ -945,127 +1000,6 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     debug_return_ptr(fp);
 }
 
-static char *
-get_editor(char **args)
-{
-    char *Editor, *EditorArgs, *EditorPath, *UserEditor, *UserEditorArgs;
-    debug_decl(get_editor, SUDOERS_DEBUG_UTIL)
-
-    /*
-     * Check VISUAL and EDITOR environment variables to see which editor
-     * the user wants to use (we may not end up using it though).
-     * If the path is not fully-qualified, make it so and check that
-     * the specified executable actually exists.
-     */
-    UserEditorArgs = NULL;
-    if ((UserEditor = getenv("VISUAL")) == NULL || *UserEditor == '\0')
-	UserEditor = getenv("EDITOR");
-    if (UserEditor && *UserEditor == '\0')
-	UserEditor = NULL;
-    else if (UserEditor) {
-	UserEditorArgs = get_args(UserEditor);
-	if (find_path(UserEditor, &Editor, NULL, getenv("PATH"), 0) == FOUND) {
-	    UserEditor = Editor;
-	} else {
-	    if (def_env_editor) {
-		/* If we are honoring $EDITOR this is a fatal error. */
-		sudo_fatalx(U_("specified editor (%s) doesn't exist"), UserEditor);
-	    } else {
-		/* Otherwise, just ignore $EDITOR. */
-		UserEditor = NULL;
-	    }
-	}
-    }
-
-    /*
-     * See if we can use the user's choice of editors either because
-     * we allow any $EDITOR or because $EDITOR is in the allowable list.
-     */
-    Editor = EditorArgs = EditorPath = NULL;
-    if (def_env_editor && UserEditor) {
-	Editor = UserEditor;
-	EditorArgs = UserEditorArgs;
-    } else if (UserEditor) {
-	struct stat editor_sb;
-	struct stat user_editor_sb;
-	char *base, *userbase;
-
-	if (stat(UserEditor, &user_editor_sb) != 0) {
-	    /* Should never happen since we already checked above. */
-	    sudo_fatal(U_("unable to stat editor (%s)"), UserEditor);
-	}
-	EditorPath = sudo_estrdup(def_editor);
-	Editor = strtok(EditorPath, ":");
-	do {
-	    EditorArgs = get_args(Editor);
-	    /*
-	     * Both Editor and UserEditor should be fully qualified but
-	     * check anyway...
-	     */
-	    if ((base = strrchr(Editor, '/')) == NULL)
-		continue;
-	    if ((userbase = strrchr(UserEditor, '/')) == NULL) {
-		Editor = NULL;
-		break;
-	    }
-	    base++, userbase++;
-
-	    /*
-	     * We compare the basenames first and then use stat to match
-	     * for sure.
-	     */
-	    if (strcmp(base, userbase) == 0) {
-		if (stat(Editor, &editor_sb) == 0 && S_ISREG(editor_sb.st_mode)
-		    && (editor_sb.st_mode & 0000111) &&
-		    editor_sb.st_dev == user_editor_sb.st_dev &&
-		    editor_sb.st_ino == user_editor_sb.st_ino)
-		    break;
-	    }
-	} while ((Editor = strtok(NULL, ":")));
-    }
-
-    /*
-     * Can't use $EDITOR, try each element of def_editor until we
-     * find one that exists, is regular, and is executable.
-     */
-    if (Editor == NULL || *Editor == '\0') {
-	sudo_efree(EditorPath);
-	EditorPath = sudo_estrdup(def_editor);
-	Editor = strtok(EditorPath, ":");
-	do {
-	    EditorArgs = get_args(Editor);
-	    if (sudo_goodpath(Editor, NULL))
-		break;
-	} while ((Editor = strtok(NULL, ":")));
-
-	/* Bleah, none of the editors existed! */
-	if (Editor == NULL || *Editor == '\0')
-	    sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
-    }
-    *args = EditorArgs;
-    debug_return_str(Editor);
-}
-
-/*
- * Split out any command line arguments and return them.
- */
-static char *
-get_args(char *cmnd)
-{
-    char *args;
-    debug_decl(get_args, SUDOERS_DEBUG_UTIL)
-
-    args = cmnd;
-    while (*args && !isblank((unsigned char) *args))
-	args++;
-    if (*args) {
-	*args++ = '\0';
-	while (*args && isblank((unsigned char) *args))
-	    args++;
-    }
-    debug_return_str(*args ? args : NULL);
-}
-
 /*
  * Look up the hostname and set user_host and user_shost.
  */
@@ -1078,7 +1012,8 @@ get_hostname(void)
     if ((user_host = sudo_gethostname()) != NULL) {
 	if ((p = strchr(user_host, '.'))) {
 	    *p = '\0';
-	    user_shost = sudo_estrdup(user_host);
+	    if ((user_shost = strdup(user_host)) == NULL)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    *p = '.';
 	} else {
 	    user_shost = user_host;
@@ -1106,7 +1041,8 @@ alias_remove_recursive(char *name, int type)
 		    rval = false;
 	    }
 	}
-	rbinsert(alias_freelist, a);
+	if (rbinsert(alias_freelist, a, NULL) != 0)
+	    rval = false;
     }
     debug_return_bool(rval);
 }
@@ -1172,6 +1108,10 @@ check_aliases(bool strict, bool quiet)
     debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS)
 
     alias_freelist = rbcreate(alias_compare);
+    if (alias_freelist == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
 
     /* Forward check. */
     TAILQ_FOREACH(us, &userspecs, entries) {

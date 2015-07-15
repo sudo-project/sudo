@@ -16,16 +16,11 @@
 
 #include <config.h>
 
+#ifdef HAVE_LINUX_AUDIT
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -76,7 +71,11 @@ linux_audit_command(char *argv[], int result)
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
 	size += strlen(*av) + 1;
-    command = cp = sudo_emalloc(size);
+    command = cp = malloc(size);
+    if (command == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {
@@ -99,7 +98,9 @@ linux_audit_command(char *argv[], int result)
     rc = 0;
 
 done:
-    sudo_efree(command);
+    free(command);
 
     debug_return_int(rc);
 }
+
+#endif /* HAVE_LINUX_AUDIT */

@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDOERS_SUDOERS_H
-#define _SUDOERS_SUDOERS_H
+#ifndef SUDOERS_SUDOERS_H
+#define SUDOERS_SUDOERS_H
 
 #include <limits.h>
 #ifdef HAVE_STDBOOL_H
@@ -35,7 +35,6 @@
 #include <pathnames.h>
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
-#include "sudo_alloc.h"
 #include "sudo_queue.h"
 #include "defaults.h"
 #include "logging.h"
@@ -113,8 +112,9 @@ struct sudo_user {
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
  * Note: cannot use '0' as a value here.
  */
-#define VALIDATE_SUCCESS	0x001
-#define VALIDATE_FAILURE	0x002
+#define VALIDATE_ERROR		0x001
+#define VALIDATE_SUCCESS	0x002
+#define VALIDATE_FAILURE	0x004
 #define FLAG_CHECK_USER		0x010
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
@@ -130,6 +130,7 @@ struct sudo_user {
 #define NOT_FOUND		1
 #define NOT_FOUND_DOT		2
 #define NOT_FOUND_ERROR		3
+#define NOT_FOUND_PATH		4
 
 /*
  * Various modes sudo can be in (based on arguments) in hex
@@ -223,10 +224,11 @@ struct timeval;
 #define YY_DECL int sudoerslex(void)
 
 /* goodpath.c */
-bool sudo_goodpath(const char *, struct stat *);
+bool sudo_goodpath(const char *path, struct stat *sbp);
 
 /* findpath.c */
-int find_path(char *, char **, struct stat *, char *, int);
+int find_path(const char *infile, char **outfile, struct stat *sbp,
+    const char *path, int ignore_dot, char * const *whitelist);
 
 /* check.c */
 int check_user(int validate, int mode);
@@ -236,8 +238,8 @@ bool user_is_exempt(void);
 char *expand_prompt(const char *old_prompt, const char *auth_user);
 
 /* timestamp.c */
-void remove_timestamp(bool);
-bool set_lectured(void);
+int remove_timestamp(bool);
+int set_lectured(void);
 
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);
@@ -280,8 +282,8 @@ void dump_auth_methods(void);
 char *sudo_getepw(const struct passwd *);
 
 /* sudo_nss.c */
-void display_privs(struct sudo_nss_list *, struct passwd *);
-bool display_cmnd(struct sudo_nss_list *, struct passwd *);
+int display_privs(struct sudo_nss_list *, struct passwd *);
+int display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
 __dso_public struct group *sudo_getgrgid(gid_t);
@@ -303,8 +305,8 @@ void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
 int  sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids);
-void sudo_setgrent(void);
-void sudo_setpwent(void);
+int sudo_setgrent(void);
+int sudo_setpwent(void);
 void sudo_setspent(void);
 
 /* timestr.c */
@@ -325,8 +327,8 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 char **env_get(void);
 bool env_merge(char * const envp[]);
 bool env_swap_old(void);
-void env_init(char * const envp[]);
-void init_envtables(void);
+bool env_init(char * const envp[]);
+bool init_envtables(void);
 bool insert_env_vars(char * const envp[]);
 bool read_env_file(const char *, int);
 bool rebuild_env(void);
@@ -344,9 +346,16 @@ FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
 void sudoers_cleanup(void);
+extern struct sudo_user sudo_user;
+extern struct passwd *list_pw;
+extern int long_list;
+extern int sudo_mode;
+extern uid_t timestamp_uid;
+extern sudo_conv_t sudo_conv;
+extern sudo_printf_t sudo_printf;
 
 /* sudoers_debug.c */
-void sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
+bool sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
 void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
 void sudoers_debug_deregister(void);
 
@@ -362,14 +371,8 @@ void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
 
-#ifndef _SUDO_MAIN
-extern struct sudo_user sudo_user;
-extern struct passwd *list_pw;
-extern int long_list;
-extern int sudo_mode;
-extern uid_t timestamp_uid;
-extern sudo_conv_t sudo_conv;
-extern sudo_printf_t sudo_printf;
-#endif
+/* editor.c */
+char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
+    int *argc_out, char ***argv_out, char * const *whitelist);
 
-#endif /* _SUDOERS_SUDOERS_H */
+#endif /* SUDOERS_SUDOERS_H */

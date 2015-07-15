@@ -38,18 +38,8 @@ struct rtentry;
 # include <sys/sockio.h>
 #endif
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
@@ -60,9 +50,7 @@ struct rtentry;
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <netdb.h>
 #include <errno.h>
 #ifdef _ISC
@@ -79,18 +67,21 @@ struct rtentry;
 #endif /* _MIPS */
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef NEED_RESOLV_H
+# include <arpa/nameser.h>
+# include <resolv.h>
+#endif /* NEED_RESOLV_H */
 #include <net/if.h>
 #ifdef HAVE_GETIFADDRS
 # include <ifaddrs.h>
 #endif
 
-#define _SUDO_NET_IFS_C		/* to expose sudo_inet_ntop in sudo_compat.h */
+#define SUDO_NET_IFS_C		/* to expose sudo_inet_ntop in sudo_compat.h */
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -111,7 +102,7 @@ struct rtentry;
 
 /*
  * Fill in the interfaces string with the machine's ip addresses and netmasks
- * and return the number of interfaces found.
+ * and return the number of interfaces found.  Returns -1 on error.
  */
 int
 get_net_ifs(char **addrinfo)
@@ -128,8 +119,11 @@ get_net_ifs(char **addrinfo)
     char *cp;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
 
-    if (!sudo_conf_probe_interfaces() || getifaddrs(&ifaddrs) != 0)
+    if (!sudo_conf_probe_interfaces())
 	debug_return_int(0);
+
+    if (getifaddrs(&ifaddrs) == -1)
+	debug_return_int(-1);
 
     /* Allocate space for the interfaces info string. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -150,7 +144,12 @@ get_net_ifs(char **addrinfo)
     if (num_interfaces == 0)
 	debug_return_int(0);
     ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = sudo_emalloc(ailen);
+    if ((cp = malloc(ailen)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	debug_return_int(-1);
+    }
+    *addrinfo = cp;
 
     /* Store the IP addr/netmask pairs. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -201,7 +200,7 @@ done:
 #ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
 #else
-    sudo_efree(ifaddrs);
+    free(ifaddrs);
 #endif
     debug_return_int(num_interfaces);
 }
@@ -209,8 +208,8 @@ done:
 #elif defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
 
 /*
- * Allocate and fill in the interfaces global variable with the
- * machine's ip addresses and netmasks.
+ * Fill in the interfaces string with the machine's ip addresses and netmasks
+ * and return the number of interfaces found.  Returns -1 on error.
  */
 int
 get_net_ifs(char **addrinfo)
@@ -233,13 +232,18 @@ get_net_ifs(char **addrinfo)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
-	sudo_fatal(U_("unable to open socket"));
+	debug_return_int(-1);
 
     /*
      * Get interface configuration or return.
      */
     for (;;) {
-	ifconf_buf = sudo_emalloc(buflen);
+	if ((ifconf_buf = malloc(buflen)) == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
+	    num_interfaces = -1;
+	    goto done;
+	}
 	ifconf = (struct ifconf *) ifconf_buf;
 	ifconf->ifc_len = buflen - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
@@ -257,14 +261,20 @@ get_net_ifs(char **addrinfo)
 	if (ifconf->ifc_len + sizeof(struct ifreq) < buflen)
 	    break;
 	buflen += BUFSIZ;
-	sudo_efree(ifconf_buf);
+	free(ifconf_buf);
     }
 
     /* Allocate space for the maximum number of interfaces that could exist. */
     if ((n = ifconf->ifc_len / sizeof(struct ifreq)) == 0)
-	debug_return_int(0);
+	goto done;
     ailen = n * 2 * INET6_ADDRSTRLEN;
-    *addrinfo = cp = sudo_emalloc(ailen);
+    if ((cp = malloc(ailen)) == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	num_interfaces = -1;
+	goto done;
+    }
+    *addrinfo = cp;
 
     /* For each interface, store the ip address and netmask. */
     for (i = 0; i < ifconf->ifc_len; ) {
@@ -333,7 +343,7 @@ get_net_ifs(char **addrinfo)
     }
 
 done:
-    sudo_efree(ifconf_buf);
+    free(ifconf_buf);
     (void) close(sock);
 
     debug_return_int(num_interfaces);

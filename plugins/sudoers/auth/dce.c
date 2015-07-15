@@ -35,25 +35,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_DCE
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 
 #include <dce/rpc.h>
@@ -191,8 +184,10 @@ check_dce_status(error_status_t input_status, char *comment)
     debug_decl(check_dce_status, SUDOERS_DEBUG_AUTH)
 
     if (input_status == rpc_s_ok)
-	debug_return_bool(0);
+	debug_return_int(0);
     dce_error_inq_text(input_status, error_string, &error_stat);
     (void) fprintf(stderr, "%s %s\n", comment, error_string);
-    debug_return_bool(1);
+    debug_return_int(1);
 }
+
+#endif /* HAVE_DCE */

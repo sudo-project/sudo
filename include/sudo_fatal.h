@@ -14,10 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_FATAL_H_
-#define	_SUDO_FATAL_H_
+#ifndef SUDO_FATAL_H
+#define	SUDO_FATAL_H
 
 #include <stdarg.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 /*
  * We wrap fatal/fatalx and warn/warnx so that the same output can
@@ -119,8 +124,8 @@ struct sudo_conv_reply;
 
 __dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
 __dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
-__dso_public char *sudo_warn_gettext_v1(const char *msgid) __format_arg(1);
-__dso_public char *sudo_warn_strerror_v1(int errnum);
+__dso_public char *sudo_warn_gettext_v1(const char *domainname, const char *msgid) __format_arg(2);
+__dso_public void sudo_warn_set_locale_func_v1(bool (*func)(bool, int *));
 __dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) __printf0like(1, 2) __attribute__((__noreturn__));
 __dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) __printflike(1, 2) __attribute__((__noreturn__));
 __dso_public void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
@@ -133,8 +138,7 @@ __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const 
 
 #define sudo_fatal_callback_deregister(_a) sudo_fatal_callback_deregister_v1((_a))
 #define sudo_fatal_callback_register(_a) sudo_fatal_callback_register_v1((_a))
-#define sudo_warn_gettext(_a) sudo_warn_gettext_v1((_a))
-#define sudo_warn_strerror(_a) sudo_warn_strerror_v1((_a))
+#define sudo_warn_set_locale_func(_a) sudo_warn_set_locale_func_v1((_a))
 #define sudo_fatal_nodebug sudo_fatal_nodebug_v1
 #define sudo_fatalx_nodebug sudo_fatalx_nodebug_v1
 #define sudo_vfatal_nodebug(_a, _b) sudo_vfatal_nodebug_v1((_a), (_b))
@@ -144,5 +148,12 @@ __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const 
 #define sudo_vwarn_nodebug(_a, _b) sudo_vwarn_nodebug_v1((_a), (_b))
 #define sudo_vwarnx_nodebug(_a, _b) sudo_vwarnx_nodebug_v1((_a), (_b))
 #define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
+#define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
 
-#endif /* _SUDO_FATAL_H_ */
+#ifdef DEFAULT_TEXT_DOMAIN
+# define sudo_warn_gettext(_a) sudo_warn_gettext_v1(DEFAULT_TEXT_DOMAIN, (_a))
+#else
+# define sudo_warn_gettext(_a) sudo_warn_gettext_v1(NULL, (_a))
+#endif
+
+#endif /* SUDO_FATAL_H */

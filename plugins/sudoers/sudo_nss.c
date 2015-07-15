@@ -20,23 +20,14 @@
 #include <sys/stat.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
 #include <ctype.h>
@@ -69,7 +60,7 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     FILE *fp;
-    char *cp, *line = NULL;
+    char *line = NULL;
     size_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
@@ -86,6 +77,8 @@ sudo_read_nss(void)
 	goto nomatch;
 
     while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+	char *cp, *last;
+
 	/* Skip blank or comment lines */
 	if (*line == '\0')
 	    continue;
@@ -95,7 +88,7 @@ sudo_read_nss(void)
 	    continue;
 
 	/* Parse line */
-	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
+	for ((cp = strtok_r(line + 8, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		SUDO_NSS_CHECK_UNUSED(sudo_nss_file, "files");
 		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
@@ -149,7 +142,7 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     FILE *fp;
-    char *cp, *ep, *line = NULL;
+    char *cp, *ep, *last, *line = NULL;
     size_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
@@ -178,7 +171,7 @@ sudo_read_nss(void)
 	    continue;
 
 	/* Parse line */
-	for ((cp = strtok(cp, ",")); cp != NULL; (cp = strtok(NULL, ","))) {
+	for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
 	    /* Trim leading whitespace. */
 	    while (isspace((unsigned char)*cp))
 		cp++;
@@ -275,9 +268,10 @@ output(const char *buf)
 
 /*
  * Print out privileges for the specified user.
- * We only get here if the user is allowed to run something.
+ * Returns true if the user is allowed to run commands, false if not
+ * or -1 on error.
  */
-void
+int
 display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
@@ -297,12 +291,17 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	count += nss->display_defaults(nss, pw, &defs);
+	const int n = nss->display_defaults(nss, pw, &defs);
+	if (n == -1)
+	    goto bad;
+	count += n;
     }
-    if (count)
+    if (count) {
 	sudo_lbuf_append(&defs, "\n\n");
-    else
+    } else {
+	/* Undo Defaults header. */
 	defs.len = 0;
+    }
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
     olen = defs.len;
@@ -310,12 +309,17 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	count += nss->display_bound_defaults(nss, pw, &defs);
+	const int n = nss->display_bound_defaults(nss, pw, &defs);
+	if (n == -1)
+	    goto bad;
+	count += n;
     }
-    if (count)
+    if (count) {
 	sudo_lbuf_append(&defs, "\n\n");
-    else
+    } else {
+	/* Undo Defaults header. */
 	defs.len = olen;
+    }
 
     /* Display privileges from all sources. */
     sudo_lbuf_append(&privs,
@@ -323,37 +327,55 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	count += nss->display_privs(nss, pw, &privs);
+	const int n = nss->display_privs(nss, pw, &privs);
+	if (n == -1)
+	    goto bad;
+	count += n;
     }
     if (count == 0) {
 	defs.len = 0;
 	privs.len = 0;
-	sudo_lbuf_append(&privs, _("User %s is not allowed to run sudo on %s.\n"),
+	sudo_lbuf_append(&privs,
+	    _("User %s is not allowed to run sudo on %s.\n"),
 	    pw->pw_name, user_shost);
     }
+    if (sudo_lbuf_error(&defs) || sudo_lbuf_error(&privs))
+	goto bad;
+
     sudo_lbuf_print(&defs);
     sudo_lbuf_print(&privs);
 
     sudo_lbuf_destroy(&defs);
     sudo_lbuf_destroy(&privs);
 
-    debug_return;
+    debug_return_int(count > 0);
+bad:
+    sudo_lbuf_destroy(&defs);
+    sudo_lbuf_destroy(&privs);
+
+    debug_return_int(-1);
 }
 
 /*
  * Check user_cmnd against sudoers and print the matching entry if the
  * command is allowed.
- * Returns true if the command is allowed, else false.
+ * Returns true if the command is allowed, false if not or -1 on error.
  */
-bool
+int
 display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
     debug_decl(display_cmnd, SUDOERS_DEBUG_NSS)
 
+    /* XXX - display_cmnd return value is backwards */
+    /* XXX - doesn't handle commands allowed by one backend denied by another. */
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->display_cmnd(nss, pw) == 0)
-	    debug_return_bool(true);
+	switch (nss->display_cmnd(nss, pw)) {
+	    case 0:
+		debug_return_int(true);
+	    case -1:
+		debug_return_int(-1);
+	}
     }
-    debug_return_bool(false);
+    debug_return_int(false);
 }

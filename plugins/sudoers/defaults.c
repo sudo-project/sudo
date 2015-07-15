@@ -23,23 +23,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-# ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 #include <ctype.h>
 
@@ -55,7 +46,6 @@ struct strmap {
     int num;
 };
 
-#ifdef LOG_NFACILITIES
 static struct strmap facilities[] = {
 #ifdef LOG_AUTHPRIV
 	{ "authpriv",	LOG_AUTHPRIV },
@@ -73,7 +63,6 @@ static struct strmap facilities[] = {
 	{ "local7",	LOG_LOCAL7 },
 	{ NULL,		-1 }
 };
-#endif /* LOG_NFACILITIES */
 
 static struct strmap priorities[] = {
 	{ "alert",	LOG_ALERT },
@@ -93,13 +82,13 @@ static struct strmap priorities[] = {
 static bool store_int(char *, struct sudo_defs_types *, int);
 static bool store_list(char *, struct sudo_defs_types *, int);
 static bool store_mode(char *, struct sudo_defs_types *, int);
-static bool store_str(char *, struct sudo_defs_types *, int);
+static int  store_str(char *, struct sudo_defs_types *, int);
 static bool store_syslogfac(char *, struct sudo_defs_types *, int);
 static bool store_syslogpri(char *, struct sudo_defs_types *, int);
 static bool store_tuple(char *, struct sudo_defs_types *, int);
 static bool store_uint(char *, struct sudo_defs_types *, int);
 static bool store_float(char *, struct sudo_defs_types *, int);
-static void list_op(char *, size_t, struct sudo_defs_types *, enum list_ops);
+static bool list_op(char *, size_t, struct sudo_defs_types *, enum list_ops);
 static const char *logfac2str(int);
 static const char *logpri2str(int);
 
@@ -244,8 +233,14 @@ set_default(char *var, char *val, int op)
 		sudo_warnx(U_("values for `%s' must start with a '/'"), var);
 		debug_return_bool(false);
 	    }
-	    if (!store_str(val, cur, op)) {
+	    switch (store_str(val, cur, op)) {
+	    case true:
+		/* OK */
+		break;
+	    case false:
 		sudo_warnx(U_("value `%s' is invalid for option `%s'"), val, var);
+		/* FALLTHROUGH */
+	    default:
 		debug_return_bool(false);
 	    }
 	    break;
@@ -340,7 +335,7 @@ set_default(char *var, char *val, int op)
  * Set default options to compiled-in values.
  * Any of these may be overridden at runtime by a "Defaults" file.
  */
-void
+bool
 init_defaults(void)
 {
     static int firsttime = 1;
@@ -352,11 +347,11 @@ init_defaults(void)
 	for (def = sudo_defs_table; def->name; def++) {
 	    switch (def->type & T_MASK) {
 		case T_STR:
-		    sudo_efree(def->sd_un.str);
+		    free(def->sd_un.str);
 		    def->sd_un.str = NULL;
 		    break;
 		case T_LIST:
-		    list_op(NULL, 0, def, freeall);
+		    (void)list_op(NULL, 0, def, freeall);
 		    break;
 	    }
 	    memset(&def->sd_un, 0, sizeof(def->sd_un));
@@ -418,17 +413,23 @@ init_defaults(void)
 #ifdef UMASK_OVERRIDE
     def_umask_override = true;
 #endif
-    def_iolog_file = sudo_estrdup("%{seq}");
-    def_iolog_dir = sudo_estrdup(_PATH_SUDO_IO_LOGDIR);
-    def_sudoers_locale = sudo_estrdup("C");
+    if ((def_iolog_file = strdup("%{seq}")) == NULL)
+	goto oom;
+    if ((def_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR)) == NULL)
+	goto oom;
+    if ((def_sudoers_locale = strdup("C")) == NULL)
+	goto oom;
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
-    def_pam_service = sudo_estrdup("sudo");
+    if ((def_pam_service = strdup("sudo")) == NULL)
+	goto oom;
 #ifdef HAVE_PAM_LOGIN
-    def_pam_login_service = sudo_estrdup("sudo-i");
+    if ((def_pam_login_service = strdup("sudo-i")) == NULL)
+	goto oom;
 #else
-    def_pam_login_service = sudo_estrdup("sudo");
+    if ((def_pam_login_service = strdup("sudo")) == NULL)
+	goto oom;
 #endif
 #ifdef NO_PAM_SESSION
     def_pam_session = false;
@@ -467,36 +468,53 @@ init_defaults(void)
 #endif
 
     /* Now do the strings */
-    def_mailto = sudo_estrdup(MAILTO);
-    def_mailsub = sudo_estrdup(N_(MAILSUBJECT));
-    def_badpass_message = sudo_estrdup(_(INCORRECT_PASSWORD));
-    def_lecture_status_dir = sudo_estrdup(_PATH_SUDO_LECTURE_DIR);
-    def_timestampdir = sudo_estrdup(_PATH_SUDO_TIMEDIR);
-    def_passprompt = sudo_estrdup(_(PASSPROMPT));
-    def_runas_default = sudo_estrdup(RUNAS_DEFAULT);
+    if ((def_mailto = strdup(MAILTO)) == NULL)
+	goto oom;
+    if ((def_mailsub = strdup(N_(MAILSUBJECT))) == NULL)
+	goto oom;
+    if ((def_badpass_message = strdup(_(INCORRECT_PASSWORD))) == NULL)
+	goto oom;
+    if ((def_lecture_status_dir = strdup(_PATH_SUDO_LECTURE_DIR)) == NULL)
+	goto oom;
+    if ((def_timestampdir = strdup(_PATH_SUDO_TIMEDIR)) == NULL)
+	goto oom;
+    if ((def_passprompt = strdup(_(PASSPROMPT))) == NULL)
+	goto oom;
+    if ((def_runas_default = strdup(RUNAS_DEFAULT)) == NULL)
+	goto oom;
 #ifdef _PATH_SUDO_SENDMAIL
-    def_mailerpath = sudo_estrdup(_PATH_SUDO_SENDMAIL);
-    def_mailerflags = sudo_estrdup("-t");
+    if ((def_mailerpath = strdup(_PATH_SUDO_SENDMAIL)) == NULL)
+	goto oom;
+    if ((def_mailerflags = strdup("-t")) == NULL)
+	goto oom;
 #endif
 #if (LOGGING & SLOG_FILE)
-    def_logfile = sudo_estrdup(_PATH_SUDO_LOGFILE);
+    if ((def_logfile = strdup(_PATH_SUDO_LOGFILE)) == NULL)
+	goto oom;
 #endif
 #ifdef EXEMPTGROUP
-    def_exempt_group = sudo_estrdup(EXEMPTGROUP);
+    if ((def_exempt_group = strdup(EXEMPTGROUP)) == NULL)
+	goto oom;
 #endif
 #ifdef SECURE_PATH
-    def_secure_path = sudo_estrdup(SECURE_PATH);
+    if ((def_secure_path = strdup(SECURE_PATH)) == NULL)
+	goto oom;
 #endif
-    def_editor = sudo_estrdup(EDITOR);
+    if ((def_editor = strdup(EDITOR)) == NULL)
+	goto oom;
     def_set_utmp = true;
     def_pam_setcred = true;
 
     /* Finally do the lists (currently just environment tables). */
-    init_envtables();
+    if (!init_envtables())
+	goto oom;
 
     firsttime = 0;
 
-    debug_return;
+    debug_return_bool(true);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_bool(false);
 }
 
 /*
@@ -518,21 +536,10 @@ update_defaults(int what)
 		    rc = false;
 		break;
 	    case DEFAULTS_USER:
-#if 1
-		if (ISSET(what, SETDEF_USER)) {
-		    int m;
-		    m = userlist_matches(sudo_user.pw, def->binding);
-		    if (m == ALLOW) {
-			if (!set_default(def->var, def->val, def->op))
-			    rc = false;
-		    }
-		}
-#else
 		if (ISSET(what, SETDEF_USER) &&
 		    userlist_matches(sudo_user.pw, def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
-#endif
 		break;
 	    case DEFAULTS_RUNAS:
 		if (ISSET(what, SETDEF_RUNAS) &&
@@ -700,19 +707,23 @@ store_tuple(char *val, struct sudo_defs_types *def, int op)
     debug_return_bool(true);
 }
 
-static bool
+static int
 store_str(char *val, struct sudo_defs_types *def, int op)
 {
     debug_decl(store_str, SUDOERS_DEBUG_DEFAULTS)
 
-    sudo_efree(def->sd_un.str);
-    if (op == false)
+    free(def->sd_un.str);
+    if (op == false) {
 	def->sd_un.str = NULL;
-    else
-	def->sd_un.str = sudo_estrdup(val);
+    } else {
+	if ((def->sd_un.str = strdup(val)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(-1);
+	}
+    }
     if (def->callback)
-	debug_return_bool(def->callback(val));
-    debug_return_bool(true);
+	debug_return_int(def->callback(val));
+    debug_return_int(true);
 }
 
 static bool
@@ -723,7 +734,7 @@ store_list(char *str, struct sudo_defs_types *def, int op)
 
     /* Remove all old members. */
     if (op == false || op == true)
-	list_op(NULL, 0, def, freeall);
+	(void)list_op(NULL, 0, def, freeall);
 
     /* Split str into multiple space-separated words and act on each one. */
     if (op != false) {
@@ -738,7 +749,8 @@ store_list(char *str, struct sudo_defs_types *def, int op)
 	    /* Find end position and perform operation. */
 	    for (end = start; *end && !isblank((unsigned char)*end); end++)
 		;
-	    list_op(start, end - start, def, op == '-' ? delete : add);
+	    if (!list_op(start, end - start, def, op == '-' ? delete : add))
+		debug_return_bool(false);
 	} while (*end++ != '\0');
     }
     debug_return_bool(true);
@@ -754,7 +766,6 @@ store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.ival = false;
 	debug_return_bool(true);
     }
-#ifdef LOG_NFACILITIES
     if (!val)
 	debug_return_bool(false);
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
@@ -763,25 +774,18 @@ store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 	debug_return_bool(false);		/* not found */
 
     def->sd_un.ival = fac->num;
-#else
-    def->sd_un.ival = -1;
-#endif /* LOG_NFACILITIES */
     debug_return_bool(true);
 }
 
 static const char *
 logfac2str(int n)
 {
-#ifdef LOG_NFACILITIES
     struct strmap *fac;
     debug_decl(logfac2str, SUDOERS_DEBUG_DEFAULTS)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
 	;
     debug_return_const_str(fac->name);
-#else
-    return "default";
-#endif /* LOG_NFACILITIES */
 }
 
 static bool
@@ -836,7 +840,7 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
     debug_return_bool(true);
 }
 
-static void
+static bool
 list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 {
     struct list_member *cur, *prev = NULL;
@@ -845,25 +849,25 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
     if (op == freeall) {
 	while ((cur = SLIST_FIRST(&def->sd_un.list)) != NULL) {
 	    SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
-	    sudo_efree(cur->value);
-	    sudo_efree(cur);
+	    free(cur->value);
+	    free(cur);
 	}
-	debug_return;
+	debug_return_bool(true);
     }
 
     SLIST_FOREACH(cur, &def->sd_un.list, entries) {
 	if ((strncmp(cur->value, val, len) == 0 && cur->value[len] == '\0')) {
 
 	    if (op == add)
-		debug_return;		/* already exists */
+		debug_return_bool(true); /* already exists */
 
 	    /* Delete node */
 	    if (prev == NULL)
 		SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
-	    sudo_efree(cur->value);
-	    sudo_efree(cur);
+	    free(cur->value);
+	    free(cur);
 	    break;
 	}
 	prev = cur;
@@ -871,9 +875,13 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 
     /* Add new node to the head of the list. */
     if (op == add) {
-	cur = sudo_ecalloc(1, sizeof(struct list_member));
-	cur->value = sudo_estrndup(val, len);
+	cur = calloc(1, sizeof(struct list_member));
+	if (cur == NULL || (cur->value = strndup(val, len)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(cur);
+	    debug_return_bool(false);
+	}
 	SLIST_INSERT_HEAD(&def->sd_un.list, cur, entries);
     }
-    debug_return;
+    debug_return_bool(true);
 }

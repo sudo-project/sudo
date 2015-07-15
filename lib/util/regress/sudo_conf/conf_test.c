@@ -18,18 +18,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
@@ -61,12 +51,13 @@ main(int argc, char *argv[])
     initprogname(argc > 0 ? argv[0] : "conf_test");
     if (argc != 2) {
 	fprintf(stderr, "usage: %s conf_file\n", getprogname());
-	exit(1);
+	exit(EXIT_FAILURE);
     }
-    sudo_conf_read(argv[1], SUDO_CONF_ALL);
+    if (sudo_conf_read(argv[1], SUDO_CONF_ALL) == -1)
+	exit(EXIT_FAILURE);
     sudo_conf_dump();
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 static void

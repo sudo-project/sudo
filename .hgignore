@@ -23,6 +23,7 @@ Makefile$
 ^doc/varsub$
 
 ^init.d/.*.sh$
+^init.d/sudo.conf$
 
 ^pathnames\.h$
 ^src/sudo$

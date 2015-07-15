@@ -58,46 +58,21 @@
 #include <sys/stat.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
 #include <ctype.h>
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-#else
-# define dirent direct
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <dirent.h>
 #include <errno.h>
 #include <limits.h>
 #include <pwd.h>
@@ -203,9 +178,6 @@ sudo_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
 	Char *bufnext, *bufend, patbuf[PATH_MAX];
 	struct glob_lim limit = { 0, 0, 0 };
 
-	if (strnlen(pattern, PATH_MAX) == PATH_MAX)
-		return GLOB_NOMATCH;
-
 	patnext = (unsigned char *) pattern;
 	if (!(flags & GLOB_APPEND)) {
 		pglob->gl_pathc = 0;
@@ -221,6 +193,9 @@ sudo_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
 	    pglob->gl_offs >= INT_MAX || pglob->gl_pathc >= INT_MAX ||
 	    pglob->gl_pathc >= INT_MAX - pglob->gl_offs - 1)
 		return GLOB_NOSPACE;
+
+	if (strnlen(pattern, PATH_MAX) == PATH_MAX)
+		return GLOB_NOMATCH;
 
 	bufnext = patbuf;
 	bufend = bufnext + PATH_MAX - 1;
@@ -779,7 +754,7 @@ globextend(const Char *path, glob_t *pglob, struct glob_lim *limitp,
 		return GLOB_NOSPACE;
 	}
 
-	pathv = realloc(pglob->gl_pathv, newn * sizeof(*pathv));
+	pathv = reallocarray(pglob->gl_pathv, newn, sizeof(*pathv));
 	if (pathv == NULL)
 		goto nospace;
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {

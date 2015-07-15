@@ -19,14 +19,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -38,19 +31,14 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <errno.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_util.h"
-
-/* XXX - use non-exiting allocators? */
 
 /*
  * Add an event to the base's active queue and mark it active.
@@ -90,11 +78,18 @@ sudo_ev_base_alloc_v1(void)
     struct sudo_event_base *base;
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
-    base = sudo_ecalloc(1, sizeof(*base));
+    base = calloc(1, sizeof(*base));
+    if (base == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: unable to allocate base", __func__);
+	debug_return_ptr(NULL);
+    }
     TAILQ_INIT(&base->events);
     TAILQ_INIT(&base->timeouts);
     if (sudo_ev_base_alloc_impl(base) != 0) {
-	sudo_efree(base);
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: unable to allocate impl base", __func__);
+	free(base);
 	base = NULL;
     }
 
@@ -112,7 +107,7 @@ sudo_ev_base_free_v1(struct sudo_event_base *base)
 	sudo_ev_del(base, ev);
     }
     sudo_ev_base_free_impl(base);
-    sudo_efree(base);
+    free(base);
 
     debug_return;
 }
@@ -125,7 +120,12 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
 
     /* XXX - sanity check events value */
 
-    ev = sudo_ecalloc(1, sizeof(*ev));
+    ev = calloc(1, sizeof(*ev));
+    if (ev == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: unable to allocate event", __func__);
+	debug_return_ptr(NULL);
+    }
     ev->fd = fd;
     ev->events = events;
     ev->pfd_idx = -1;

@@ -28,14 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -47,28 +40,8 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <unistd.h>
+#include <dirent.h>
 #include <errno.h>
 #include <ctype.h>
 #include "sudoers.h"
@@ -81,6 +54,12 @@
 # include <sha2.h>
 #else
 # include "compat/sha2.h"
+#endif
+
+#if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
+# define NAMLEN(dirent)	(dirent)->d_namlen
+#else
+# define NAMLEN(dirent)	strlen((dirent)->d_name)
 #endif
 
 int sudolineno;			/* current sudoers line number. */
@@ -97,7 +76,7 @@ static bool continued, sawspace;
 static int prev_state;
 static int digest_len;
 
-static bool _push_include(char *, bool);
+static bool push_include_int(char *, bool);
 static bool pop_include(void);
 static char *parse_include(char *);
 
@@ -110,8 +89,8 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
 
-#define	push_include(_p)	(_push_include((_p), false))
-#define	push_includedir(_p)	(_push_include((_p), true))
+#define	push_include(_p)	(push_include_int((_p), false))
+#define	push_includedir(_p)	(push_include_int((_p), true))
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -791,9 +770,11 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	}
 	goto bad;
     }
-    paths = malloc(sizeof(*paths) * max_paths);
-    if (paths == NULL)
+    paths = reallocarray(NULL, max_paths, sizeof(*paths));
+    if (paths == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
+    }
     while ((dent = readdir(dir)) != NULL) {
 	struct path_list *pl;
 	struct stat sb;
@@ -807,22 +788,24 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1)
 	    goto bad;
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
-	    sudo_efree(path);
+	    free(path);
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
-	    sudo_efree(path);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(path);
 	    goto bad;
 	}
 	pl->path = path;
 	if (count >= max_paths) {
 	    struct path_list **tmp;
 	    max_paths <<= 1;
-	    tmp = realloc(paths, sizeof(*paths) * max_paths);
+	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
-		sudo_efree(path);
-		sudo_efree(pl);
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		free(path);
+		free(pl);
 		goto bad;
 	    }
 	    paths = tmp;
@@ -831,7 +814,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     }
     closedir(dir);
     if (count == 0) {
-	sudo_efree(paths);
+	free(paths);
 	paths = NULL;
     }
     *pathsp = paths;
@@ -840,10 +823,10 @@ bad:
     if (dir != NULL)
 	closedir(dir);
     for (i = 0; i < count; i++) {
-	sudo_efree(paths[i]->path);
-	sudo_efree(paths[i]);
+	free(paths[i]->path);
+	free(paths[i]);
     }
-    sudo_efree(paths);
+    free(paths);
     debug_return_int(-1);
 }
 
@@ -867,7 +850,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
 	for (i = 0; i < count; i++) {
 	    SLIST_INSERT_HEAD(&stack->more, paths[i], entries);
 	}
-	sudo_efree(paths);
+	free(paths);
     }
 
     debug_return_int(count);
@@ -890,15 +873,15 @@ init_lexer(void)
 	idepth--;
 	while ((pl = SLIST_FIRST(&istack[idepth].more)) != NULL) {
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
-	    sudo_efree(pl->path);
-	    sudo_efree(pl);
+	    free(pl->path);
+	    free(pl);
 	}
-	sudo_efree(istack[idepth].path);
+	free(istack[idepth].path);
 	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
 	sudoers_delete_buffer(istack[idepth].bs);
     }
-    sudo_efree(istack);
+    free(istack);
     istack = NULL;
     istacksize = idepth = 0;
     sudolineno = 1;
@@ -911,11 +894,11 @@ init_lexer(void)
 }
 
 static bool
-_push_include(char *path, bool isdir)
+push_include_int(char *path, bool isdir)
 {
     struct path_list *pl;
     FILE *fp;
-    debug_decl(_push_include, SUDOERS_DEBUG_PARSER)
+    debug_decl(push_include_int, SUDOERS_DEBUG_PARSER)
 
     /* push current state onto stack */
     if (idepth >= istacksize) {
@@ -926,10 +909,9 @@ _push_include(char *path, bool isdir)
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
-	new_istack = (struct include_stack *) realloc(istack,
-	    sizeof(*istack) * istacksize);
+	new_istack = reallocarray(istack, istacksize, sizeof(*istack));
 	if (new_istack == NULL) {
-	    sudo_warn(NULL);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
@@ -976,20 +958,20 @@ _push_include(char *path, bool isdir)
 	count = switch_dir(&istack[idepth], path);
 	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
-	    sudo_efree(path);
+	    free(path);
 	    debug_return_bool(count ? false : true);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
 	do {
-	    sudo_efree(path);
+	    free(path);
 	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL) {
 		/* Unable to open any files in include dir, not an error. */
 		debug_return_bool(true);
 	    }
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    path = pl->path;
-	    sudo_efree(pl);
+	    free(pl);
 	} while ((fp = open_sudoers(path, false, &keepopen)) == NULL);
     } else {
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
@@ -1029,22 +1011,22 @@ pop_include(void)
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
-	    sudo_efree(sudoers);
+	    free(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
 	    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
-	    sudo_efree(pl);
+	    free(pl);
 	    break;
 	}
 	/* Unable to open path in include dir, go to next one. */
-	sudo_efree(pl->path);
-	sudo_efree(pl);
+	free(pl->path);
+	free(pl);
     }
     /* If no path list, just pop the last dir on the stack. */
     if (pl == NULL) {
 	idepth--;
 	sudoers_switch_to_buffer(istack[idepth].bs);
-	sudo_efree(sudoers);
+	free(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;
@@ -1087,7 +1069,7 @@ parse_include(char *base)
     len += (int)(ep - cp);
     path = pp = malloc(len + dirlen + 1);
     if (path == NULL) {
-	sudo_warn(NULL);
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_str(NULL);
     }

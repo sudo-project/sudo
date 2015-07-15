@@ -28,26 +28,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 #include <errno.h>
 #include <signal.h>
@@ -58,6 +46,7 @@
 
 static volatile sig_atomic_t signo[NSIG];
 
+static bool tty_present(void);
 static void tgetpass_handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
@@ -329,13 +318,18 @@ tgetpass_handler(int s)
 	signo[s] = 1;
 }
 
-int
+static bool
 tty_present(void)
 {
+#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
+    debug_decl(tty_present, SUDO_DEBUG_UTIL)
+    debug_return_bool(user_details.tty != NULL);
+#else
     int fd;
     debug_decl(tty_present, SUDO_DEBUG_UTIL)
 
     if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
 	close(fd);
     debug_return_bool(fd != -1);
+#endif
 }

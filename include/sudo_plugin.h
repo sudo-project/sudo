@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_PLUGIN_H
-#define _SUDO_PLUGIN_H
+#ifndef SUDO_PLUGIN_H
+#define SUDO_PLUGIN_H
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
@@ -192,4 +192,4 @@ struct sudoers_group_plugin {
     int (*query)(const char *user, const char *group, const struct passwd *pwd);
 };
 
-#endif /* _SUDO_PLUGIN_H */
+#endif /* SUDO_PLUGIN_H */

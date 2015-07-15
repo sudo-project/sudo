@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.13], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.14], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -20,6 +20,7 @@ AC_SUBST([CFLAGS])
 AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
+AC_SUBST([SUDO_LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
 AC_SUBST([LIBUTIL_LDFLAGS])
 AC_SUBST([ZLIB_LDFLAGS])
@@ -39,7 +40,6 @@ AC_SUBST([NET_LIBS])
 AC_SUBST([AFS_LIBS])
 AC_SUBST([REPLAY_LIBS])
 AC_SUBST([GETGROUPS_LIB])
-AC_SUBST([OSDEFS])
 AC_SUBST([AUTH_OBJS])
 AC_SUBST([MANTYPE])
 AC_SUBST([MANDIRTYPE])
@@ -90,6 +90,8 @@ AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
 AC_SUBST([COMPAT_EXP])
+AC_SUBST([TMPFILES_D])
+AC_SUBST([exampledir])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -185,6 +187,7 @@ dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
 INSTALL_NOEXEC=
+exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
 : ${MANDIRTYPE='man'}
@@ -224,6 +227,7 @@ WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
 shadow_libs=
+TMPFILES_D=
 CONFIGURE_ARGS="$@"
 
 dnl
@@ -238,6 +242,11 @@ dnl
 dnl libc replacement functions live in libsudo_util.a
 dnl
 AC_CONFIG_LIBOBJ_DIR(lib/util)
+
+dnl
+dnl We must call AC_USE_SYSTEM_EXTENSIONS before the compiler is run.
+dnl
+AC_USE_SYSTEM_EXTENSIONS
 
 #
 # Prior to sudo 1.8.7, sudo stored libexec files in $libexecdir.
@@ -276,7 +285,7 @@ dnl
 AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 [case $with_devel in
     yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
-		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
+		SUDO_APPEND_CPPFLAGS(-DSUDO_DEVEL)
 		DEVEL="true"
 		devdir=.
 		;;
@@ -817,9 +826,9 @@ esac])
 
 AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [path to the sudo var dir])],
 [case $with_vardir in
-    yes)	AC_MSG_ERROR(["must give --with-vardirdir an argument."])
+    yes)	AC_MSG_ERROR(["must give --with-vardir an argument."])
 		;;
-    no)		AC_MSG_ERROR(["--without-vardirdir not supported."])
+    no)		AC_MSG_ERROR(["--without-vardir not supported."])
 		;;
 esac])
 
@@ -1196,6 +1205,15 @@ else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, NULL)
 fi
 
+AC_ARG_WITH(exampledir, [AS_HELP_STRING([--with-exampledir=DIR], [path to install sudo examples in])],
+[case $with_exampledir in
+    yes)	AC_MSG_ERROR(["must give --with-exampledir an argument."])
+		;;
+    no)		AC_MSG_ERROR(["--without-exampledir not supported."])
+		;;
+    *)		exampledir="$with_exampledir"
+esac])
+
 AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
     no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
@@ -1463,9 +1481,17 @@ AC_ARG_ENABLE(shared_libutil,
 [AS_HELP_STRING([--disable-shared-libutil], [Disable use of the libsudo_util shared library.])],
 [], [enable_shared_libutil=yes])
 
-AC_ARG_ENABLE(weak_symbols,
-[AS_HELP_STRING([--disable-weak-symbols], [Disable use of weak symbols in the libsudo_util shared library.])],
-[], [enable_weak_symbols=yes])
+AC_ARG_ENABLE(tmpfiles.d,
+[AS_HELP_STRING([--enable-tmpfiles.d=DIR], [Set the path to the systemd tmpfiles.d directory.])],
+[case $enableval in
+    yes)	TMPFILES_D=/usr/lib/tmpfiles.d
+		;;
+    no)		TMPFILES_D=
+		;;
+    *)		TMPFILES_D="$enableval"
+esac], [
+    test -f /usr/lib/tmpfiles.d/systemd.conf && TMPFILES_D=/usr/lib/tmpfiles.d
+])
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
@@ -1656,7 +1682,7 @@ case "$host" in
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
-		    OSDEFS="${OSDEFS} -D__USE_FIXED_PROTOTYPES__"
+		    AC_DEFINE([__USE_FIXED_PROTOTYPES__])
 		fi
 
 		shadow_funcs="getpwanam issecure"
@@ -1669,8 +1695,6 @@ case "$host" in
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
-		# To get the crypt(3) prototype (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
@@ -1682,7 +1706,7 @@ case "$host" in
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
+		AC_DEFINE([_LINUX_SOURCE_COMPAT])
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
 		# For AIX we build in support for both LAM and PAM
@@ -1804,12 +1828,7 @@ case "$host" in
 		esac
 
 		case "$host_os" in
-			hpux[[1-8]].*)
-			    AC_DEFINE(BROKEN_SYSLOG)
-			;;
 			hpux9.*)
-			    AC_DEFINE(BROKEN_SYSLOG)
-
 			    shadow_funcs="getspwuid"
 
 			    # DCE support (requires ANSI C compiler)
@@ -1817,7 +1836,7 @@ case "$host" in
 				# order of libs in 9.X is important. -lc_r must be last
 				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
-				SUDO_APPEND_CPPFLAGS(-D_REENTRANT)
+				AC_DEFINE(_REENTRANT)
 				SUDO_APPEND_CPPFLAGS(-I/usr/include/reentrant)
 			    fi
 			;;
@@ -1888,7 +1907,7 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-irix*)
-		OSDEFS="${OSDEFS} -D_BSD_TYPES"
+		AC_DEFINE([_BSD_TYPES])
 		if test -z "$NROFFPROG"; then
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
@@ -1920,12 +1939,10 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-linux*|*-*-k*bsd*-gnu)
-		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		shadow_funcs="getspnam"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
     *-*-gnu*)
-		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		# lockf() is broken on the Hurd -- use flock instead
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
@@ -1939,12 +1956,12 @@ case "$host" in
 		LIBS="${LIBS} -lsun -lbsd"
 		SUDO_APPEND_CPPFLAGS(-I/usr/include)
 		SUDO_APPEND_CPPFLAGS(-I/usr/include/bsd)
-		OSDEFS="${OSDEFS} -D_MIPS"
+		SUDO_APPEND_CPPFLAGS(-D_MIPS)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
     *-*-isc*)
-		OSDEFS="${OSDEFS} -D_ISC"
+		SUDO_APPEND_CPPFLAGS(-D_ISC)
 		LIB_CRYPT=1
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
 
@@ -1990,6 +2007,8 @@ case "$host" in
 		fi
 		;;
     *-*-freebsd*)
+		AC_DEFINE([_BSD_SOURCE])
+
 		# FreeBSD has a real setreuid(2) starting with 2.1 and
 		# backported to 2.0.5.  We just take 2.1 and above...
 		case "$OSREV" in
@@ -1997,15 +2016,21 @@ case "$host" in
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*openbsd*)
+		AC_DEFINE([_BSD_SOURCE])
+
 		# OpenBSD-specific initialization
 		OS_INIT=os_init_openbsd
 		SUDO_OBJS="${SUDO_OBJS} openbsd.o"
@@ -2013,7 +2038,6 @@ case "$host" in
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
 		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
-		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		CHECKSHADOW="false"
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
@@ -2022,6 +2046,11 @@ case "$host" in
 		    fi
 		fi
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
@@ -2033,18 +2062,33 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-dragonfly*)
-		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
+		AC_DEFINE([_BSD_SOURCE])
+
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-*bsd*)
 		CHECKSHADOW="false"
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-darwin*)
 		# Darwin has a real setreuid(2) starting with 9.0
@@ -2064,6 +2108,15 @@ case "$host" in
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# We need to force a flat namespace to make libc
+		# symbol hooking work like it does on ELF.
+		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS="${SUDO_LDFLAGS}${SUDO_LDFLAGS+ }-Wl,-force_flat_namespace"])
+
+		# Examples go in share/examples/sudo
+		if test X"$with_exampledir" = X""; then
+		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
+		fi
 		;;
     *-*-nextstep*)
 		# lockf() is broken on the NeXT -- use flock instead
@@ -2079,9 +2132,6 @@ case "$host" in
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		;;
-    *-gnu*)
-		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		;;
 esac
 
@@ -2147,10 +2197,8 @@ dnl C compiler checks (to be done after os checks)
 dnl
 AC_PROG_CC_STDC
 AC_C_CONST
+AC_C_INLINE
 AC_C_VOLATILE
-if test "$enable_shared_libutil$enable_weak_symbols" = "yesyes"; then
-    AX_SYS_WEAK_ALIAS
-fi
 AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 AC_INCLUDES_DEFAULT
@@ -2190,12 +2238,11 @@ AC_MSG_RESULT($logfac)
 dnl
 dnl Header file checks
 dnl
-AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([malloc.h netgroup.h paths.h spawn.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
+AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2229,8 +2276,7 @@ case "$host_os" in
 	    [sudo_cv_xopen_source_extended=error])
 	])])
 	if test "$sudo_cv_xopen_source_extended" = "yes"; then
-	    OSDEFS="${OSDEFS} -D_XOPEN_SOURCE_EXTENDED"
-	    SUDO_DEFINE(_XOPEN_SOURCE_EXTENDED)
+	    AC_DEFINE([_XOPEN_SOURCE_EXTENDED])
 	fi
 	;;
 esac
@@ -2261,7 +2307,7 @@ dnl
 dnl typedef checks
 dnl We need to define __STDC_WANT_LIB_EXT1__ for errno_t and rsize_t
 dnl
-SUDO_APPEND_CPPFLAGS(-D__STDC_WANT_LIB_EXT1__=1)
+AC_DEFINE([__STDC_WANT_LIB_EXT1__])
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types.h>
@@ -2302,11 +2348,9 @@ SUDO_SOCK_SA_LEN
 SUDO_SOCK_SIN_LEN
 dnl
 dnl Check for utmp/utmpx struct members.
-dnl We need to include OSDEFS for glibc which only has __e_termination
-dnl visible when _GNU_SOURCE is *not* defined.
+dnl We need to have already defined _GNU_SOURCE on glibc which only has
+dnl __e_termination visible when _GNU_SOURCE is *not* defined.
 dnl
-_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
 #	include <sys/types.h>
@@ -2342,13 +2386,12 @@ else
 #	include <utmp.h>
     ])
 fi
-CFLAGS="$_CFLAGS"
 
 dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime tzset])
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2393,16 +2436,23 @@ AC_CHECK_FUNCS([getline], [], [
     SUDO_APPEND_COMPAT_EXP(sudo_getline)
     AC_CHECK_FUNCS([fgetln])
 ])
+AC_CHECK_FUNCS([reallocarray], [], [
+    AC_LIBOBJ(reallocarray)
+    SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
+])
 dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
 dnl
 if test "$enable_hardening" != "no"; then
+    found=false
     O_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
     AC_CHECK_FUNC([__sprintf_chk], [
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [found=true], [])
     ], [])
-    CPPFLAGS="$O_CPPFLAGS"
+    if test X"$found" != X"true"; then
+	CPPFLAGS="$O_CPPFLAGS"
+    fi
 fi
 
 utmp_style=LEGACY
@@ -2540,6 +2590,20 @@ AC_CHECK_FUNCS([strlcat], [], [
     AC_LIBOBJ(strlcat)
     SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
 ])
+AC_CHECK_FUNC([strnlen], [AC_FUNC_STRNLEN], [AC_LIBOBJ(strnlen)])
+if test X"$ac_cv_func_strnlen_working" = X"yes"; then
+    AC_DEFINE(HAVE_STRNLEN)
+    AC_CHECK_FUNCS([strndup], [], [
+	AC_LIBOBJ(strndup)
+	SUDO_APPEND_COMPAT_EXP(sudo_strndup)
+    ])
+else
+    # Broken or missing strnlen, use our own.
+    SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
+    # Avoid libc strndup() since it is usually implemented using strnlen()
+    AC_LIBOBJ(strndup)
+    SUDO_APPEND_COMPAT_EXP(sudo_strndup)
+fi
 AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB(rt, clock_gettime, [
@@ -2669,7 +2733,7 @@ dnl
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <$ac_header_dirent>]], [[DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);]])], [AC_DEFINE(HAVE_DD_FD)], [])])
-AC_CHECK_MEMBERS([struct dirent.d_type], [], [], [
+AC_CHECK_MEMBERS([struct dirent.d_type, struct dirent.d_namlen], [], [], [
 AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])
@@ -2696,6 +2760,50 @@ AC_CHECK_FUNC([socket], [], [
     done
 ])
 LIBS="$OLIBS"
+dnl
+dnl If inet_pton(3) not in libc, check -lnsl and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems may have inet_pton() in libresolv.
+dnl
+OLIBS="$LIBS"
+LIBS="${LIBS} ${NET_LIBS}"
+found=false
+INET_PTON_LIBS=
+AC_CHECK_FUNC([inet_pton], [
+    found=true
+    AC_DEFINE(HAVE_INET_PTON)
+], [
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	SUDO_CHECK_LIB($lib, inet_pton, [
+	    found=true
+	    AC_DEFINE(HAVE_INET_PTON)
+	    NET_LIBS="${NET_LIBS} $libs"
+	    INET_PTON_LIBS="$libs"
+	    case "$libs" in
+		*-lresolv*)
+		    AC_DEFINE(NEED_RESOLV_H)
+		    ;;
+	    esac
+	    break
+	], [], [$extralibs])
+    done
+])
+LIBS="$OLIBS"
+if test X"$found" != X"true"; then
+    AC_LIBOBJ(inet_pton)
+    SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
+fi
 dnl
 dnl If inet_ntop(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
@@ -2732,45 +2840,6 @@ LIBS="$OLIBS"
 if test X"$found" != X"true"; then
     AC_LIBOBJ(inet_ntop)
     SUDO_APPEND_COMPAT_EXP(sudo_inet_ntop)
-fi
-dnl
-dnl If inet_pton(3) not in libc, check -lnsl and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl Some systems may have inet_pton() in libresolv.
-dnl
-OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
-found=false
-INET_PTON_LIBS=
-AC_CHECK_FUNC([inet_pton], [
-    found=true
-    AC_DEFINE(HAVE_INET_PTON)
-], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)		_libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_pton, [
-	    found=true
-	    AC_DEFINE(HAVE_INET_PTON)
-	    NET_LIBS="${NET_LIBS} $libs"
-	    INET_PTON_LIBS="$libs"
-	    break
-	], [], [$extralibs])
-    done
-])
-LIBS="$OLIBS"
-if test X"$found" != X"true"; then
-    AC_LIBOBJ(inet_pton)
-    SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
 fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
@@ -2913,31 +2982,20 @@ if test "$enable_nls" != "no"; then
     LIBS="$OLIBS"
 
     if test "$sudo_cv_gettext" = "yes"; then
-	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	# For Solaris we need links from lang to lang.UTF-8 in localedir
 	case "$host_os" in
 	    solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
 	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
-	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	LIBINTL="-lintl"
     elif test "$sudo_cv_gettext_lintl_liconv" = "yes"; then
-	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	LIBINTL="-lintl -liconv"
     fi
-fi
-
-dnl
-dnl If the system has weak symbol support, use it for
-dnl sudo_warn_strerror_v1() and sudo_warn_gettext_v1().
-dnl
-if test X"$WEAK_ALIAS" != X"no"; then
-    COMMON_OBJS="${COMMON_OBJS} locale_weak.lo"
-    SUDO_APPEND_COMPAT_EXP(sudo_warn_strerror_v1)
     if test X"$SUDO_NLS" = X"enabled"; then
+	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_APPEND_COMPAT_EXP(sudo_warn_gettext_v1)
     fi
 fi
@@ -3006,10 +3064,7 @@ AC_INCLUDES_DEFAULT
 
 dnl
 dnl Check for incomplete limits.h and missing SIZE_MAX.
-dnl We need to add OSDEFS to CFLAGS to expose LLONG_MAX et al on glibc.
 dnl
-_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS $OSDEFS"
 AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
@@ -3023,7 +3078,6 @@ AC_CHECK_DECLS([SIZE_MAX], [], [], [
 # include <inttypes.h>
 #endif
 ])
-CFLAGS="$_CFLAGS"
 dnl
 dnl Try to find equivalents for missing types
 dnl
@@ -3080,7 +3134,10 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for sig2str(), sys_signame or sys_sigabbrev
 dnl
-AC_CHECK_FUNCS([sig2str], [], [
+AC_CHECK_FUNCS([sig2str], [
+    AC_CHECK_DECLS(SIG2STR_MAX, [], [], [
+#	include <signal.h>
+])], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"
@@ -3706,7 +3763,6 @@ case "$lt_cv_dlopen" in
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
-	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -3719,7 +3775,6 @@ case "$lt_cv_dlopen" in
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
-	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	    LT_STATIC="--tag=disable-static"
 	fi
 	;;
@@ -3764,7 +3819,7 @@ fi
 case "$host_os" in
     hpux*)
 	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
-	OSDEFS="${OSDEFS} -D_REENTRANT"
+	AC_DEFINE(_REENTRANT)
 	;;
 esac
 
@@ -4142,6 +4197,8 @@ dnl Substitute into the Makefile and man pages
 dnl
 if test X"$INIT_SCRIPT" != X""; then
     AC_CONFIG_FILES([init.d/$INIT_SCRIPT])
+elif test X"$TMPFILES_D" != X""; then
+    AC_CONFIG_FILES([init.d/sudo.conf])
 fi
 AC_CONFIG_FILES([Makefile doc/Makefile examples/Makefile include/Makefile lib/util/Makefile lib/util/util.exp src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
@@ -4181,7 +4238,6 @@ fi
 dnl
 dnl Autoheader templates
 dnl
-AH_TEMPLATE(BROKEN_SYSLOG, [Define to 1 if the `syslog' function returns a non-zero int to denote failure.])
 AH_TEMPLATE(CLASSIC_INSULTS, [Define to 1 if you want the insults from the "classic" version sudo.])
 AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twisted minds of CSOps.])
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
@@ -4285,16 +4341,53 @@ AH_TEMPLATE(HAVE__NSS_INITF_GROUP, [Define to 1 if you have the `_nss_initf_grou
 AH_TEMPLATE(HAVE___NSS_INITF_GROUP, [Define to 1 if you have the `__nss_initf_group' function.])
 AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
+AH_TEMPLATE(NEED_RESOLV_H, [Define to 1 if resolv.h must be included to get the `inet_ntop' or `inet_pton' function prototypes.])
+AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the `strnlen' function.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl
-AH_TOP([#ifndef _SUDO_CONFIG_H
-#define _SUDO_CONFIG_H])
+AH_TOP([#ifndef SUDO_CONFIG_H
+#define SUDO_CONFIG_H])
 
 AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
-#endif /* __svr4__ */
+#endif
 
-#endif /* _SUDO_CONFIG_H */])
+/* Enable BSD extensions on systems that have them.  */
+#ifndef _BSD_SOURCE
+# undef _BSD_SOURCE
+#endif
+
+/* Enable BSD types on IRIX.  */
+#ifndef _BSD_TYPES
+# undef _BSD_TYPES
+#endif
+
+/* Enable Linux-compatible extensions on AIX.  */
+#ifndef _LINUX_SOURCE_COMPAT
+# undef _LINUX_SOURCE_COMPAT
+#endif
+
+/* Enable prototypes in GCC fixed includes on older systems.  */
+#ifndef __USE_FIXED_PROTOTYPES__
+# undef __USE_FIXED_PROTOTYPES__
+#endif
+
+/* Enable XPG4v2 extensions to POSIX, needed for MSG_WAITALL on older HP-UX.  */
+#ifndef _XOPEN_SOURCE_EXTENDED
+# undef _XOPEN_SOURCE_EXTENDED
+#endif
+
+/* Enable reentrant versions of the standard C API (obsolete).  */
+#ifndef _REENTRANT
+# undef _REENTRANT
+#endif
+
+/* Enable "safer" versions of the standard C API (ISO C11).  */
+#ifndef __STDC_WANT_LIB_EXT1__
+# undef __STDC_WANT_LIB_EXT1__
+#endif
+
+#endif /* SUDO_CONFIG_H */])

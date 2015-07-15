@@ -37,15 +37,6 @@ sudo_dso_load_v1
 sudo_dso_preload_table_v1
 sudo_dso_strerror_v1
 sudo_dso_unload_v1
-sudo_easprintf_v1
-sudo_ecalloc_v1
-sudo_emalloc_v1
-sudo_emallocarray_v1
-sudo_erealloc_v1
-sudo_ereallocarray_v1
-sudo_erecalloc_v1
-sudo_estrdup_v1
-sudo_estrndup_v1
 sudo_ev_add_v1
 sudo_ev_alloc_v1
 sudo_ev_base_alloc_v1
@@ -59,7 +50,6 @@ sudo_ev_loop_v1
 sudo_ev_loopbreak_v1
 sudo_ev_loopcontinue_v1
 sudo_ev_loopexit_v1
-sudo_evasprintf_v1
 sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1
@@ -70,7 +60,9 @@ sudo_gettime_mono_v1
 sudo_gettime_real_v1
 sudo_lbuf_append_quoted_v1
 sudo_lbuf_append_v1
+sudo_lbuf_clearerr_v1
 sudo_lbuf_destroy_v1
+sudo_lbuf_error_v1
 sudo_lbuf_init_v1
 sudo_lbuf_print_v1
 sudo_lock_file_v1
@@ -80,6 +72,7 @@ sudo_parseln_v1
 sudo_secure_dir_v1
 sudo_secure_file_v1
 sudo_setgroups_v1
+sudo_strsplit_v1
 sudo_strtobool_v1
 sudo_strtoid_v1
 sudo_strtomode_v1
@@ -96,4 +89,5 @@ sudo_vwarn_nodebug_v1
 sudo_vwarnx_nodebug_v1
 sudo_warn_nodebug_v1
 sudo_warn_set_conversation_v1
+sudo_warn_set_locale_func_v1
 sudo_warnx_nodebug_v1

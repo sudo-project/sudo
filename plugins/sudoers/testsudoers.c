@@ -21,31 +21,20 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#define _SUDO_MAIN
-
 #include <config.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
@@ -137,12 +126,14 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "testsudoers");
 
-    sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale);
+    if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
     /* Initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
+	exit(EXIT_FAILURE);
     sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
 
     dflag = 0;
@@ -193,8 +184,8 @@ main(int argc, char *argv[])
 	setgrfile(grfile);
     if (pwfile)
 	setpwfile(pwfile);
-    sudo_setpwent();
-    sudo_setgrent();
+    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (argc < 2) {
 	if (!dflag)
@@ -220,7 +211,8 @@ main(int argc, char *argv[])
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
-	user_shost = sudo_estrdup(user_host);
+	if ((user_shost = strdup(user_host)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	*p = '.';
     } else {
 	user_shost = user_host;
@@ -236,7 +228,8 @@ main(int argc, char *argv[])
 	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
-	user_args = (char *) sudo_emalloc(size);
+	if ((user_args = malloc(size)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
@@ -248,14 +241,17 @@ main(int argc, char *argv[])
     }
 
     /* Initialize default values. */
-    init_defaults();
+    if (!init_defaults())
+	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
     /* Load ip addr/mask for each interface. */
-    if (get_net_ifs(&p) > 0)
-	set_interfaces(p);
+    if (get_net_ifs(&p) > 0) {
+	if (!set_interfaces(p))
+	    sudo_fatal(U_("unable to parse network address list"));
+    }
 
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
@@ -357,7 +353,7 @@ set_runaspw(const char *user)
 	uid_t uid = sudo_strtoid(user + 1, NULL, NULL, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
-		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
+		pw = sudo_fakepwnam(user, user_gid);
 	}
     }
     if (pw == NULL) {
@@ -459,10 +455,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
     debug_return_ptr(fp);
 }
 
-void
+bool
 init_envtables(void)
 {
-    return;
+    return(true);
 }
 
 bool

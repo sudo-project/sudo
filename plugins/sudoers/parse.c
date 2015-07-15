@@ -20,23 +20,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
@@ -63,7 +54,7 @@ static int sudo_file_open(struct sudo_nss *);
 static int sudo_file_parse(struct sudo_nss *);
 static int sudo_file_setdefs(struct sudo_nss *);
 static void print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type);
-static void print_member2(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
+static void print_member_sep(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
 
 /* sudo_nss implementation */
 struct sudo_nss sudo_nss_file = {
@@ -237,17 +228,57 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			tags = &cs->tags;
 #ifdef HAVE_SELINUX
 			/* Set role and type if not specified on command line. */
-			if (user_role == NULL)
-			    user_role = cs->role ? sudo_estrdup(cs->role) : def_role;
-			if (user_type == NULL)
-			    user_type = cs->type ? sudo_estrdup(cs->type) : def_type;
+			if (user_role == NULL) {
+			    if (cs->role != NULL) {
+				user_role = strdup(cs->role);
+				if (user_role == NULL) {
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				user_role = def_role;
+			    }
+			}
+			if (user_type == NULL) {
+			    if (cs->type != NULL) {
+				user_type = strdup(cs->type);
+				if (user_type == NULL) {
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				user_type = def_type;
+			    }
+			}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			/* Set Solaris privilege sets */
-			if (runas_privs == NULL)
-			    runas_privs = cs->privs ? sudo_estrdup(cs->privs) : def_privs;
-			if (runas_limitprivs == NULL)
-			    runas_limitprivs = cs->limitprivs ? sudo_estrdup(cs->limitprivs) : def_limitprivs;
+			if (runas_privs == NULL) {
+			    if (cs->privs != NULL) {
+				runas_privs = strdup(cs->privs);
+				if (runas_privs == NULL) {
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				runas_privs = def_privs;
+			    }
+			}
+			if (runas_limitprivs == NULL) {
+			    if (cs->limitprivs != NULL) {
+				runas_limitprivs = strdup(cs->limitprivs);
+				if (runas_limitprivs == NULL) {
+				    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+				    SET(validated, VALIDATE_ERROR);
+				    goto done;
+				}
+			    } else {
+				runas_limitprivs = def_limitprivs;
+			    }
+			}
 #endif /* HAVE_PRIV_SET */
 			/*
 			 * If user is running command as himself,
@@ -307,7 +338,11 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    }
 	}
     }
-    (void) restore_perms();
+#if defined(HAVE_SELINUX) || defined(HAVE_PRIV_SET)
+done:
+#endif
+    if (!restore_perms())
+	SET(validated, VALIDATE_ERROR);
     debug_return_int(validated);
 }
 
@@ -317,7 +352,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 #define	TAG_CHANGED(t) \
 	(TAG_SET(cs->tags.t) && cs->tags.t != tags->t)
 
-static void
+static bool
 sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     struct sudo_lbuf *lbuf)
 {
@@ -336,31 +371,31 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
     if (TAG_CHANGED(setenv)) {
-	sudo_lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
 	tags->setenv = cs->tags.setenv;
+	sudo_lbuf_append(lbuf, tags->setenv ? "SETENV: " : "NOSETENV: ");
     }
     if (TAG_CHANGED(noexec)) {
-	sudo_lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
 	tags->noexec = cs->tags.noexec;
+	sudo_lbuf_append(lbuf, tags->noexec ? "NOEXEC: " : "EXEC: ");
     }
     if (TAG_CHANGED(nopasswd)) {
-	sudo_lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
 	tags->nopasswd = cs->tags.nopasswd;
+	sudo_lbuf_append(lbuf, tags->nopasswd ? "NOPASSWD: " : "PASSWD: ");
     }
     if (TAG_CHANGED(log_input)) {
-	sudo_lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
 	tags->log_input = cs->tags.log_input;
+	sudo_lbuf_append(lbuf, tags->log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
     }
     if (TAG_CHANGED(log_output)) {
-	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
 	tags->log_output = cs->tags.log_output;
+	sudo_lbuf_append(lbuf, tags->log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
     }
     if (TAG_CHANGED(send_mail)) {
-	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
 	tags->send_mail = cs->tags.send_mail;
+	sudo_lbuf_append(lbuf, tags->send_mail ? "MAIL: " : "NOMAIL: ");
     }
     print_member(lbuf, cs->cmnd, CMNDALIAS);
-    debug_return;
+    debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 
 #define	RUNAS_CHANGED(cs1, cs2) \
@@ -414,11 +449,12 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-		tags.noexec = UNSPEC;
-		tags.setenv = UNSPEC;
-		tags.nopasswd = UNSPEC;
 		tags.log_input = UNSPEC;
 		tags.log_output = UNSPEC;
+		tags.noexec = UNSPEC;
+		tags.nopasswd = UNSPEC;
+		tags.send_mail = UNSPEC;
+		tags.setenv = UNSPEC;
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		sudo_lbuf_append(lbuf, ", ");
 	    }
@@ -537,7 +573,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }
 	    sudo_lbuf_append(lbuf, "\t");
-	    print_member2(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
+	    print_member_sep(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
 	    sudo_lbuf_append(lbuf, "\n");
 	    prev_cs = cs;
 	    nfound++;
@@ -546,6 +582,9 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     debug_return_int(nfound);
 }
 
+/*
+ * Returns the number of matching privileges or -1 on error.
+ */
 int
 sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
@@ -566,6 +605,8 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	else
 	    nfound += sudo_file_display_priv_short(pw, us, lbuf);
     }
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
 done:
     debug_return_int(nfound);
 }
@@ -619,6 +660,8 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	prefix = ", ";
 	nfound++;
     }
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
 done:
     debug_return_int(nfound);
 }
@@ -637,6 +680,8 @@ sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     nfound += display_bound_defaults(DEFAULTS_RUNAS, lbuf);
     nfound += display_bound_defaults(DEFAULTS_CMND, lbuf);
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(nfound);
 }
 
@@ -698,9 +743,14 @@ display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
 	    sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
     }
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(nfound);
 }
 
+/*
+ * Returns 0 if the command is allowed, 1 if not or -1 on error.
+ */
 int
 sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 {
@@ -740,9 +790,9 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     }
     matched:
     if (match != NULL && !match->negated) {
-	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
 	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
-	rval = 0;
+	rval = len == -1 ? -1 : 0;
     }
 done:
     debug_return_int(rval);
@@ -752,13 +802,13 @@ done:
  * Print the contents of a struct member to stdout
  */
 static void
-_print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
+print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
     const char *separator, int alias_type)
 {
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
-    debug_decl(_print_member, SUDOERS_DEBUG_NSS)
+    debug_decl(print_member_int, SUDOERS_DEBUG_NSS)
 
     switch (type) {
 	case ALL:
@@ -782,7 +832,7 @@ _print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 		TAILQ_FOREACH(m, &a->members, entries) {
 		    if (m != TAILQ_FIRST(&a->members))
 			sudo_lbuf_append(lbuf, "%s", separator);
-		    _print_member(lbuf, m->name, m->type,
+		    print_member_int(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, separator,
 			alias_type);
 		}
@@ -800,12 +850,12 @@ _print_member(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 static void
 print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type)
 {
-    _print_member(lbuf, m->name, m->type, m->negated, ", ", alias_type);
+    print_member_int(lbuf, m->name, m->type, m->negated, ", ", alias_type);
 }
 
 static void
-print_member2(struct sudo_lbuf *lbuf, struct member *m, const char *separator,
-    int alias_type)
+print_member_sep(struct sudo_lbuf *lbuf, struct member *m,
+    const char *separator, int alias_type)
 {
-    _print_member(lbuf, m->name, m->type, m->negated, separator, alias_type);
+    print_member_int(lbuf, m->name, m->type, m->negated, separator, alias_type);
 }

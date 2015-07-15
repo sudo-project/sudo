@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_UTIL_H
-#define _SUDO_UTIL_H
+#ifndef SUDO_UTIL_H
+#define SUDO_UTIL_H
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -124,13 +124,19 @@
  */
 #if defined(SUDO_ST_MTIM)
 # if defined(HAVE_FUTIMENS) && defined(HAVE_UTIMENSAT)
-#  define mtim_get(_x, _y)	((_y) = (_x)->SUDO_ST_MTIM)
+#  define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->SUDO_ST_MTIM.tv_sec; (_y).tv_nsec = (_x)->SUDO_ST_MTIM.tv_nsec; } while (0)
 # else
 #  define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->SUDO_ST_MTIM.tv_sec; (_y).tv_nsec = ((_x)->SUDO_ST_MTIM.tv_nsec / 1000) * 1000; } while (0)
 # endif
 #else
 # define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->st_mtime; (_y).tv_nsec = 0; } while (0)
 #endif /* HAVE_ST_MTIM */
+
+/* Bit map macros. */
+#define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))
+#define sudo_clrbit(_a, _i)	((_a)[(_i) / NBBY] &= ~(1<<((_i) % NBBY)))
+#define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
+#define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
 
 /*
  * Macros to quiet gcc's warn_unused_result attribute.
@@ -201,6 +207,10 @@ __dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, str
 __dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
 #define sudo_setgroups(_a, _b) sudo_setgroups_v1((_a), (_b))
 
+/* strsplit.c */
+__dso_public const char *sudo_strsplit_v1(const char *str, const char *endstr, const char *sep, const char **last);
+#define sudo_strsplit(_a, _b, _c, _d) sudo_strsplit_v1(_a, _b, _c, _d)
+
 /* strtobool.c */
 __dso_public int sudo_strtobool_v1(const char *str);
 #define sudo_strtobool(_a) sudo_strtobool_v1((_a))
@@ -232,4 +242,4 @@ __dso_public bool sudo_term_restore_v1(int fd, bool flush);
 __dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
 
-#endif /* _SUDO_UTIL_H */
+#endif /* SUDO_UTIL_H */

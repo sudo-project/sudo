@@ -30,45 +30,18 @@
 # include <sys/sysmacros.h>
 #endif
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <dirent.h>
 #if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
 # include <sys/param.h>		/* for makedev/major/minor */
 # include <sys/sysctl.h>
@@ -88,6 +61,12 @@
 #endif
 
 #include "sudo.h"
+
+#if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
+# define NAMLEN(dirent)	(dirent)->d_namlen
+#else
+# define NAMLEN(dirent)	strlen((dirent)->d_name)
+#endif
 
 /*
  * How to access the tty device number in struct kinfo_proc.
@@ -132,13 +111,17 @@ sudo_ttyname_dev(dev_t tdev)
 	if (*dev != '/') {
 	    /* devname() doesn't use the /dev/ prefix, add one... */
 	    size_t len = sizeof(_PATH_DEV) + strlen(dev);
-	    tty = sudo_emalloc(len);
-	    strlcpy(tty, _PATH_DEV, len);
-	    strlcat(tty, dev, len);
+	    if ((tty = malloc(len)) != NULL) {
+		strlcpy(tty, _PATH_DEV, len);
+		strlcat(tty, dev, len);
+	    }
 	} else {
 	    /* Should not happen but just in case... */
-	    tty = sudo_estrdup(dev);
+	    tty = strdup(dev);
 	}
+    } else {
+	/* Not all versions of devname() set errno. */
+	errno = ENOENT;
     }
     debug_return_str(tty);
 }
@@ -158,7 +141,7 @@ sudo_ttyname_dev(dev_t tdev)
 
     tty = _ttyname_dev(tdev, buf, sizeof(buf));
 
-    debug_return_str(sudo_estrdup(tty));
+    debug_return_str(tty ? strdup(tty) : NULL);
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
 /*
@@ -190,9 +173,8 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 {
     DIR *d = NULL;
     char pathbuf[PATH_MAX], **subdirs = NULL, *devname = NULL;
-    size_t sdlen, d_len, len, num_subdirs = 0, max_subdirs = 0;
+    size_t sdlen, num_subdirs = 0, max_subdirs = 0;
     struct dirent *dp;
-    struct stat sb;
     unsigned int i;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
 
@@ -215,6 +197,9 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
     pathbuf[sdlen] = '\0';
 
     while ((dp = readdir(d)) != NULL) {
+	struct stat sb;
+	size_t d_len, len;
+
 	/* Skip anything starting with "." */
 	if (dp->d_name[0] == '.')
 	    continue;
@@ -252,9 +237,10 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	 * We can't use it for links (since we want to follow them) or
 	 * char devs (since we need st_rdev to compare the device number).
 	 */
-	if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_LNK && dp->d_type != DT_CHR)
+	if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_LNK && dp->d_type != DT_CHR) {
 	    sb.st_mode = DTTOIF(dp->d_type);
-	else
+	    sb.st_rdev = 0;		/* quiet ccc-analyzer false positive */
+	} else
 # endif
 	if (stat(pathbuf, &sb) == -1)
 	    continue;
@@ -262,15 +248,24 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	    if (!builtin) {
 		/* Add to list of subdirs to search. */
 		if (num_subdirs + 1 > max_subdirs) {
+		    char **new_subdirs;
+
+		    new_subdirs = reallocarray(subdirs, max_subdirs + 64,
+			sizeof(char *));
+		    if (new_subdirs == NULL)
+			goto done;
+		    subdirs = new_subdirs;
 		    max_subdirs += 64;
-		    subdirs = sudo_ereallocarray(subdirs, max_subdirs, sizeof(char *));
 		}
-		subdirs[num_subdirs++] = sudo_estrdup(pathbuf);
+		subdirs[num_subdirs] = strdup(pathbuf);
+		if (subdirs[num_subdirs] == NULL)
+		    goto done;
+		num_subdirs++;
 	    }
 	    continue;
 	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
-	    devname = sudo_estrdup(pathbuf);
+	    devname = strdup(pathbuf);
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "resolved dev %u as %s",
 		(unsigned int)rdev, pathbuf);
 	    goto done;
@@ -285,8 +280,8 @@ done:
     if (d != NULL)
 	closedir(d);
     for (i = 0; i < num_subdirs; i++)
-	sudo_efree(subdirs[i]);
-    sudo_efree(subdirs);
+	free(subdirs[i]);
+    free(subdirs);
     debug_return_str(devname);
 }
 
@@ -306,7 +301,7 @@ sudo_ttyname_dev(dev_t rdev)
     /*
      * First check search_devs for common tty devices.
      */
-    for (sd = search_devs; tty == NULL && (devname = *sd) != NULL; sd++) {
+    for (sd = search_devs; (devname = *sd) != NULL; sd++) {
 	len = strlen(devname);
 	if (devname[len - 1] == '/') {
 	    if (strcmp(devname, "/dev/pts/") == 0) {
@@ -314,19 +309,25 @@ sudo_ttyname_dev(dev_t rdev)
 		(void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
 		    (unsigned int)minor(rdev));
 		if (stat(buf, &sb) == 0) {
-		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
-			tty = sudo_estrdup(buf);
+		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+			tty = strdup(buf);
+			goto done;
+		    }
 		}
 		sudo_debug_printf(SUDO_DEBUG_INFO, "comparing dev %u to %s: %s",
 		    (unsigned int)rdev, buf, tty ? "yes" : "no");
 	    } else {
 		/* Traverse directory */
 		tty = sudo_ttyname_scan(devname, rdev, true);
+		if (tty != NULL || errno == ENOMEM)
+		    goto done;
 	    }
 	} else {
 	    if (stat(devname, &sb) == 0) {
-		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
-		    tty = sudo_estrdup(devname);
+		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+		    tty = strdup(devname);
+		    goto done;
+		}
 	    }
 	}
     }
@@ -334,9 +335,9 @@ sudo_ttyname_dev(dev_t rdev)
     /*
      * Not found?  Do a breadth-first traversal of /dev/.
      */
-    if (tty == NULL)
-	tty = sudo_ttyname_scan(_PATH_DEV, rdev, false);
+    tty = sudo_ttyname_scan(_PATH_DEV, rdev, false);
 
+done:
     debug_return_str(tty);
 }
 #endif
@@ -366,8 +367,14 @@ get_process_ttyname(void)
     mib[4] = sizeof(*ki_proc);
     mib[5] = 1;
     do {
+	struct sudo_kinfo_proc *kp;
+
 	size += size / 10;
-	ki_proc = sudo_erealloc(ki_proc, size);
+	if ((kp = realloc(ki_proc, size)) == NULL) {
+	    rc = -1;
+	    break;		/* really out of memory. */
+	}
+	ki_proc = kp;
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
@@ -383,7 +390,7 @@ get_process_ttyname(void)
 	sudo_debug_printf(SUDO_DEBUG_WARN,
 	    "unable to resolve tty via KERN_PROC: %s", strerror(errno));
     }
-    sudo_efree(ki_proc);
+    free(ki_proc);
 
     debug_return_str(tty);
 }
@@ -416,6 +423,10 @@ get_process_ttyname(void)
 		tty = sudo_ttyname_dev(rdev);
 	}
     }
+
+    if (tty == NULL)
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via %s: %s", path, strerror(errno));
 
     debug_return_str(tty);
 }
@@ -461,8 +472,12 @@ get_process_ttyname(void)
 		}
 	    }
 	}
-	sudo_efree(line);
+	free(line);
     }
+
+    if (tty == NULL)
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via %s: %s", path, strerror(errno));
 
     debug_return_str(tty);
 }
@@ -490,6 +505,10 @@ get_process_ttyname(void)
 		pstat.pst_term.psd_minor));
 	}
     }
+    if (tty == NULL)
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via pstat: %s", strerror(errno));
+
     debug_return_str(tty);
 }
 #else
@@ -507,7 +526,12 @@ get_process_ttyname(void)
 	if ((tty = ttyname(STDOUT_FILENO)) == NULL)
 	    tty = ttyname(STDERR_FILENO);
     }
+    if (tty == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via ttyname: %s", strerror(errno));
+	debug_return_str(NULL);
+    }
 
-    debug_return_str(sudo_estrdup(tty));
+    debug_return_str(strdup(tty));
 }
 #endif

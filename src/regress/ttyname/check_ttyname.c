@@ -18,18 +18,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
@@ -39,7 +29,6 @@
 #include <errno.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_util.h"
 #include "sudo_debug.h"
@@ -89,6 +78,6 @@ main(int argc, char *argv[])
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
     }
 
-    sudo_efree(tty_sudo);
+    free(tty_sudo);
     exit(rval);
 }

@@ -21,23 +21,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <errno.h>
 
 #include "sudoers.h"
@@ -120,20 +111,29 @@ alias_put(struct alias *a)
  * Add an alias to the aliases redblack tree.
  * Returns NULL on success and an error string on failure.
  */
-char *
+const char *
 alias_add(char *name, int type, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
     debug_decl(alias_add, SUDOERS_DEBUG_ALIAS)
 
-    a = sudo_ecalloc(1, sizeof(*a));
+    a = calloc(1, sizeof(*a));
+    if (a == NULL) {
+	strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
+	debug_return_str(errbuf);
+    }
     a->name = name;
     a->type = type;
     /* a->used = false; */
     HLTQ_TO_TAILQ(&a->members, members, entries);
-    if (rbinsert(aliases, a)) {
+    switch (rbinsert(aliases, a, NULL)) {
+    case 1:
 	snprintf(errbuf, sizeof(errbuf), N_("Alias `%s' already defined"), name);
+	alias_free(a);
+	debug_return_str(errbuf);
+    case -1:
+	strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
 	alias_free(a);
 	debug_return_str(errbuf);
     }
@@ -175,17 +175,17 @@ alias_free(void *v)
     void *next;
     debug_decl(alias_free, SUDOERS_DEBUG_ALIAS)
 
-    sudo_efree(a->name);
+    free(a->name);
     TAILQ_FOREACH_SAFE(m, &a->members, entries, next) {
 	if (m->type == COMMAND) {
 		c = (struct sudo_command *) m->name;
-		sudo_efree(c->cmnd);
-		sudo_efree(c->args);
+		free(c->cmnd);
+		free(c->args);
 	}
-	sudo_efree(m->name);
-	sudo_efree(m);
+	free(m->name);
+	free(m);
     }
-    sudo_efree(a);
+    free(a);
 
     debug_return;
 }
@@ -209,7 +209,7 @@ alias_remove(char *name, int type)
     debug_return_ptr(rbdelete(aliases, node));
 }
 
-void
+bool
 init_aliases(void)
 {
     debug_decl(init_aliases, SUDOERS_DEBUG_ALIAS)
@@ -218,5 +218,5 @@ init_aliases(void)
 	rbdestroy(aliases, alias_free);
     aliases = rbcreate(alias_compare);
 
-    debug_return;
+    debug_return_bool(aliases != NULL);
 }

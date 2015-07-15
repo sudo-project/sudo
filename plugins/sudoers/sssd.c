@@ -19,27 +19,20 @@
 
 #include <config.h>
 
+#ifdef HAVE_SSSD
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
@@ -101,7 +94,7 @@ struct sudo_sss_handle {
 static int sudo_sss_open(struct sudo_nss *nss);
 static int sudo_sss_close(struct sudo_nss *nss);
 static int sudo_sss_parse(struct sudo_nss *nss);
-static void sudo_sss_parse_options(struct sudo_sss_handle *handle,
+static bool sudo_sss_parse_options(struct sudo_sss_handle *handle,
 				   struct sss_sudo_rule *rule);
 static int sudo_sss_setdefs(struct sudo_nss *nss);
 static int sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag);
@@ -121,47 +114,103 @@ static struct sss_sudo_result *sudo_sss_result_get(struct sudo_nss *nss,
 						   uint32_t *state);
 
 static void
+sudo_sss_attrfree(struct sss_sudo_attr *attr)
+{
+    unsigned int i;
+    debug_decl(sudo_sss_attrfree, SUDOERS_DEBUG_SSSD)
+
+    free(attr->name);
+    attr->name = NULL;
+    if (attr->values != NULL) {
+	for (i = 0; i < attr->num_values; ++i)
+	    free(attr->values[i]);
+	free(attr->values);
+	attr->values = NULL;
+    }
+    attr->num_values = 0;
+
+    debug_return;
+}
+
+static bool
 sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
 {
-     unsigned int i;
-     debug_decl(sudo_sss_attrcpy, SUDOERS_DEBUG_SSSD)
+    unsigned int i = 0;
+    debug_decl(sudo_sss_attrcpy, SUDOERS_DEBUG_SSSD)
 
-     sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
-     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_emalloc: cnt=%d", src->num_values);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "malloc: cnt=%d", src->num_values);
 
-     dst->name = sudo_estrdup(src->name);
-     dst->num_values = src->num_values;
-     dst->values = sudo_emallocarray(dst->num_values, sizeof(char *));
+    dst->name = strdup(src->name);
+    dst->values = reallocarray(NULL, dst->num_values, sizeof(char *));
+    if (dst->name == NULL || dst->values == NULL)
+	goto oom;
+    dst->num_values = src->num_values;
 
-     for (i = 0; i < dst->num_values; ++i)
-	  dst->values[i] = sudo_estrdup(src->values[i]);
+    for (i = 0; i < dst->num_values; ++i) {
+	dst->values[i] = strdup(src->values[i]);
+	if (dst->values[i] == NULL) {
+	    dst->num_values = i;
+	    goto oom;
+	}
+    }
 
-     debug_return;
+    debug_return_bool(true);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_sss_attrfree(dst);
+    debug_return_bool(false);
 }
 
 static void
-sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
+sudo_sss_rulefree(struct sss_sudo_rule *rule)
 {
-     unsigned int i;
-     debug_decl(sudo_sss_rulecpy, SUDOERS_DEBUG_SSSD)
+    unsigned int i;
+    debug_decl(sudo_sss_rulefree, SUDOERS_DEBUG_SSSD)
 
-     sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
-     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_emalloc: cnt=%d", src->num_attrs);
+    for (i = 0; i < rule->num_attrs; ++i)
+	sudo_sss_attrfree(rule->attrs + i);
+    free(rule->attrs);
+    rule->attrs = NULL;
+    rule->num_attrs = 0;
 
-     dst->num_attrs = src->num_attrs;
-     dst->attrs = sudo_emallocarray(dst->num_attrs, sizeof(struct sss_sudo_attr));
-
-     for (i = 0; i < dst->num_attrs; ++i)
-	  sudo_sss_attrcpy(dst->attrs + i, src->attrs + i);
-
-     debug_return;
+    debug_return;
 }
 
-#define _SUDO_SSS_FILTER_INCLUDE 0
-#define _SUDO_SSS_FILTER_EXCLUDE 1
+static bool
+sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
+{
+    unsigned int i;
+    debug_decl(sudo_sss_rulecpy, SUDOERS_DEBUG_SSSD)
 
-#define _SUDO_SSS_STATE_HOSTMATCH 0x01
-#define _SUDO_SSS_STATE_USERMATCH 0x02
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "malloc: cnt=%d", src->num_attrs);
+
+    dst->num_attrs = 0;
+    dst->attrs = reallocarray(NULL, src->num_attrs, sizeof(struct sss_sudo_attr));
+    if (dst->attrs == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+
+    for (i = 0; i < src->num_attrs; ++i) {
+	if (!sudo_sss_attrcpy(dst->attrs + i, src->attrs + i)) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    dst->num_attrs = i;
+	    sudo_sss_rulefree(dst);
+	    debug_return_bool(false);
+	}
+    }
+    dst->num_attrs = i;
+
+    debug_return_bool(true);
+}
+
+#define SUDO_SSS_FILTER_INCLUDE 0
+#define SUDO_SSS_FILTER_EXCLUDE 1
+
+#define SUDO_SSS_STATE_HOSTMATCH 0x01
+#define SUDO_SSS_STATE_USERMATCH 0x02
 
 static struct sss_sudo_result *
 sudo_sss_filter_result(struct sudo_sss_handle *handle,
@@ -176,29 +225,45 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "in_res=%p, count=%u, act=%s",
 	in_res, in_res ? in_res->num_rules : 0,
-	act == _SUDO_SSS_FILTER_EXCLUDE ? "EXCLUDE" : "INCLUDE");
+	act == SUDO_SSS_FILTER_EXCLUDE ? "EXCLUDE" : "INCLUDE");
 
     if (in_res == NULL)
 	debug_return_ptr(NULL);
 
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_emalloc: cnt=%d", in_res->num_rules);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "malloc: cnt=%d", in_res->num_rules);
 
-    out_res = sudo_emalloc(sizeof(struct sss_sudo_result));
-    out_res->rules = in_res->num_rules > 0 ?
-	sudo_emallocarray(in_res->num_rules, sizeof(struct sss_sudo_rule)) : NULL;
-    out_res->num_rules = 0;
+    if ((out_res = calloc(1, sizeof(struct sss_sudo_result))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_ptr(NULL);
+    }
+    if (in_res->num_rules > 0) {
+	out_res->rules =
+	    reallocarray(NULL, in_res->num_rules, sizeof(struct sss_sudo_rule));
+	if (out_res->rules == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(out_res);
+	    debug_return_ptr(NULL);
+	}
+    }
 
     for (i = l = 0; i < in_res->num_rules; ++i) {
 	 r = filterp(handle, in_res->rules + i, filterp_arg);
 
-	 if (( r && act == _SUDO_SSS_FILTER_INCLUDE) ||
-	     (!r && act == _SUDO_SSS_FILTER_EXCLUDE)) {
+	 if (( r && act == SUDO_SSS_FILTER_INCLUDE) ||
+	     (!r && act == SUDO_SSS_FILTER_EXCLUDE)) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"COPY (%s): %p[%u] => %p[%u] (= %p)",
-		act == _SUDO_SSS_FILTER_EXCLUDE ? "not excluded" : "included",
+		act == SUDO_SSS_FILTER_EXCLUDE ? "not excluded" : "included",
 		in_res->rules, i, out_res->rules, l, in_res->rules + i);
 
-	    sudo_sss_rulecpy(out_res->rules + l, in_res->rules + i);
+	    if (!sudo_sss_rulecpy(out_res->rules + l, in_res->rules + i)) {
+		while (l--) {
+		    sudo_sss_rulefree(out_res->rules + l);
+		}
+		free(out_res->rules);
+		free(out_res);
+		debug_return_ptr(NULL);
+	    }
 	    ++l;
 	}
     }
@@ -208,10 +273,20 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	    "reallocating result: %p (count: %u -> %u)", out_res->rules,
 	    in_res->num_rules, l);
 	if (l > 0) {
-	    out_res->rules =
-		sudo_ereallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
+	    struct sss_sudo_rule *rules =
+		reallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
+	    if (out_res->rules == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		while (l--) {
+		    sudo_sss_rulefree(out_res->rules + l);
+		}
+		free(out_res->rules);
+		free(out_res);
+		debug_return_ptr(NULL);
+	    }
+	    out_res->rules = rules;
 	} else {
-	    sudo_efree(out_res->rules);
+	    free(out_res->rules);
 	    out_res->rules = NULL;
 	}
     }
@@ -236,20 +311,28 @@ struct sudo_nss sudo_nss_sss = {
 
 /* sudo_nss implementation */
 // ok
-static int sudo_sss_open(struct sudo_nss *nss)
+static int
+sudo_sss_open(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle;
     static const char path[] = _PATH_SSSD_LIB"/libsss_sudo.so";
     debug_decl(sudo_sss_open, SUDOERS_DEBUG_SSSD);
 
     /* Create a handle container. */
-    handle = sudo_emalloc(sizeof(struct sudo_sss_handle));
+    handle = malloc(sizeof(struct sudo_sss_handle));
+    if (handle == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(ENOMEM);
+    }
 
     /* Load symbols */
     handle->ssslib = sudo_dso_load(path, SUDO_DSO_LAZY);
     if (handle->ssslib == NULL) {
-	sudo_warnx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
+	const char *errstr = sudo_dso_strerror();
+	sudo_warnx(U_("unable to load %s: %s"), path,
+	    errstr ? errstr : "unknown error");
 	sudo_warnx(U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
+	free(handle);
 	debug_return_int(EFAULT);
     }
 
@@ -258,6 +341,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     if (handle->fn_send_recv == NULL) {
 	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv");
+	free(handle);
 	debug_return_int(EFAULT);
     }
 
@@ -266,6 +350,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     if (handle->fn_send_recv_defaults == NULL) {
 	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv_defaults");
+	free(handle);
 	debug_return_int(EFAULT);
     }
 
@@ -274,6 +359,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     if (handle->fn_free_result == NULL) {
 	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_result");
+	free(handle);
 	debug_return_int(EFAULT);
     }
 
@@ -282,6 +368,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     if (handle->fn_get_values == NULL) {
 	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_get_values");
+	free(handle);
 	debug_return_int(EFAULT);
     }
 
@@ -290,6 +377,7 @@ static int sudo_sss_open(struct sudo_nss *nss)
     if (handle->fn_free_values == NULL) {
 	sudo_warnx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_values");
+	free(handle);
 	debug_return_int(EFAULT);
     }
 
@@ -303,7 +391,8 @@ static int sudo_sss_open(struct sudo_nss *nss)
 }
 
 // ok
-static int sudo_sss_close(struct sudo_nss *nss)
+static int
+sudo_sss_close(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle;
     debug_decl(sudo_sss_close, SUDOERS_DEBUG_SSSD);
@@ -311,22 +400,23 @@ static int sudo_sss_close(struct sudo_nss *nss)
     if (nss && nss->handle) {
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
-	sudo_efree(nss->handle);
+	free(nss->handle);
     }
     debug_return_int(0);
 }
 
 // ok
-static int sudo_sss_parse(struct sudo_nss *nss)
+static int
+sudo_sss_parse(struct sudo_nss *nss)
 {
     debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
     debug_return_int(0);
 }
 
-static int sudo_sss_setdefs(struct sudo_nss *nss)
+static int
+sudo_sss_setdefs(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
-
     struct sss_sudo_result *sss_result;
     struct sss_sudo_rule   *sss_rule;
     uint32_t sss_error;
@@ -345,27 +435,34 @@ static int sudo_sss_setdefs(struct sudo_nss *nss)
 	    "handle->fn_send_recv_defaults: != 0, sss_error=%u", sss_error);
 	debug_return_int(-1);
     }
-
-    if (sss_error == ENOENT) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "The user was not found in SSSD.");
-	debug_return_int(0);
-    } else if(sss_error != 0) {
+    if (sss_error != 0) {
+	if (sss_error == ENOENT) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"The user was not found in SSSD.");
+	    goto done;
+	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sss_error=%u\n", sss_error);
-	debug_return_int(-1);
+	goto bad;
     }
 
     for (i = 0; i < sss_result->num_rules; ++i) {
 	 sudo_debug_printf(SUDO_DEBUG_DIAG,
 	    "Parsing cn=defaults, %d/%d", i, sss_result->num_rules);
 	 sss_rule = sss_result->rules + i;
-	 sudo_sss_parse_options(handle, sss_rule);
+	 if (!sudo_sss_parse_options(handle, sss_rule))
+	    goto bad;
     }
 
+done:
     handle->fn_free_result(sss_result);
     debug_return_int(0);
+bad:
+    handle->fn_free_result(sss_result);
+    debug_return_int(-1);
 }
 
-static int sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
+static int
+sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     debug_decl(sudo_sss_checkpw, SUDOERS_DEBUG_SSSD);
@@ -681,7 +778,7 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
 	    if (u_sss_result != NULL) {
 		if (state != NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_DEBUG, "state |= USERMATCH");
-		    *state |= _SUDO_SSS_STATE_USERMATCH;
+		    *state |= SUDO_SSS_STATE_USERMATCH;
 		}
 		sudo_debug_printf(SUDO_DEBUG_INFO, "Received %u rule(s)",
 		    u_sss_result->num_rules);
@@ -705,13 +802,13 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
     }
 
     f_sss_result = sudo_sss_filter_result(handle, u_sss_result,
-	sudo_sss_result_filterp, _SUDO_SSS_FILTER_INCLUDE, NULL);
+	sudo_sss_result_filterp, SUDO_SSS_FILTER_INCLUDE, NULL);
 
     if (f_sss_result != NULL) {
 	if (f_sss_result->num_rules > 0) {
 	    if (state != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "state |= HOSTMATCH");
-		*state |= _SUDO_SSS_STATE_HOSTMATCH;
+		*state |= SUDO_SSS_STATE_HOSTMATCH;
 	    }
 	}
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
@@ -816,7 +913,11 @@ sudo_sss_extract_digest(char **cmnd, struct sudo_digest *digest)
 		    ep++;
 		if (*ep != '\0') {
 		    digest->digest_type = digest_type;
-		    digest->digest_str = sudo_estrndup(cp, (size_t)(ep - cp));
+		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
+		    if (digest->digest_str == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+			debug_return_ptr(NULL);
+		    }
 		    cp = ep + 1;
 		    while (isblank((unsigned char)*cp))
 			cp++;
@@ -886,10 +987,10 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	/* check for !command */
 	if (*val == '!') {
 	    foundbang = true;
-	    allowed_cmnd = sudo_estrdup(1 + val);	/* !command */
+	    allowed_cmnd = val + 1;	/* !command */
 	} else {
 	    foundbang = false;
-	    allowed_cmnd = sudo_estrdup(val);	/* command */
+	    allowed_cmnd = val;		/* command */
 	}
 
 	/* split optional args away from command */
@@ -905,12 +1006,13 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	     */
 	    ret = foundbang ? false : true;
 	}
+	if (allowed_args != NULL)
+	    allowed_args[-1] = ' ';	/* restore val */
 
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoCommand '%s' ... %s",
 	    val, ret == true ? "MATCH!" : "not");
-	sudo_efree(allowed_cmnd);	/* cleanup */
 	if (allowed_digest != NULL)
-	    sudo_efree(allowed_digest->digest_str);
+	    free(allowed_digest->digest_str);
     }
 
     handle->fn_free_values(val_array); /* more cleanup */
@@ -918,47 +1020,59 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     debug_return_int(ret);
 }
 
-static void
+static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int i;
-    char op, *v, *val;
+    int i, op;
+    bool ret = false;
+    char *v, *val;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
-	debug_return;
+	debug_return_bool(true);
 
     switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
     case 0:
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	debug_return;
+	debug_return_bool(true);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoOption): != 0");
-	debug_return;
+	debug_return_bool(false);
     }
 
     /* walk through options */
     for (i = 0; val_array[i] != NULL; i++) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'",
 	 val_array[i]);
-	v = sudo_estrdup(val_array[i]);
+	if ((v = strdup(val_array[i])) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 
 	/* check for equals sign past first char */
 	val = strchr(v, '=');
 	if (val > v) {
 	    *val++ = '\0';	/* split on = and truncate var */
-	    op = *(val - 2);	/* peek for += or -= cases */
+	    op = val[-2];	/* peek for += or -= cases */
 	    if (op == '+' || op == '-') {
-		*(val - 2) = '\0';	/* found, remove extra char */
 		/* case var+=val or var-=val */
-		set_default(v, val, (int) op);
+		val[-2] = '\0';	/* remove extra + or - char */
 	    } else {
 		/* case var=val */
-		set_default(v, val, true);
+		op = true;
 	    }
+	    /* Strip double quotes if present. */
+	    if (*val == '"') {
+		char *ep = val + strlen(val);
+		if (ep != val && ep[-1] == '"') {
+		    val++;
+		    ep[-1] = '\0';
+		}
+	    }
+	    set_default(v, val, op);
 	} else if (*v == '!') {
 	    /* case !var Boolean False */
 	    set_default(v + 1, NULL, false);
@@ -966,11 +1080,13 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    /* case var Boolean True */
 	    set_default(v, NULL, true);
 	}
-	sudo_efree(v);
+	free(v);
     }
+    ret = true;
 
+done:
     handle->fn_free_values(val_array);
-    debug_return;
+    debug_return_bool(ret);
 }
 
 static int
@@ -1057,16 +1173,19 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		    /* Apply entry-specific options. */
 		    if (setenv_implied)
 			def_setenv = true;
-		    sudo_sss_parse_options(handle, rule);
+		    if (sudo_sss_parse_options(handle, rule)) {
 #ifdef HAVE_SELINUX
-		    /* Set role and type if not specified on command line. */
-		    if (user_role == NULL)
-			user_role = def_role;
-		    if (user_type == NULL)
-			user_type = def_type;
+			/* Set role/type if not specified on command line. */
+			if (user_role == NULL)
+			    user_role = def_role;
+			if (user_type == NULL)
+			    user_type = def_type;
 #endif /* HAVE_SELINUX */
-		    SET(ret, VALIDATE_SUCCESS);
-		    CLR(ret, VALIDATE_FAILURE);
+			SET(ret, VALIDATE_SUCCESS);
+			CLR(ret, VALIDATE_FAILURE);
+		    } else {
+			SET(ret, VALIDATE_ERROR);
+		    }
 		} else {
 		    SET(ret, VALIDATE_FAILURE);
 		    CLR(ret, VALIDATE_SUCCESS);
@@ -1084,9 +1203,9 @@ done:
 	    SET(ret, FLAG_NO_CHECK);
     }
 
-    if (state & _SUDO_SSS_STATE_USERMATCH)
+    if (state & SUDO_SSS_STATE_USERMATCH)
 	CLR(ret, FLAG_NO_USER);
-    if (state & _SUDO_SSS_STATE_HOSTMATCH)
+    if (state & SUDO_SSS_STATE_HOSTMATCH)
 	CLR(ret, FLAG_NO_HOST);
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_sss_lookup(%d)=0x%02x",
@@ -1206,6 +1325,8 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 
     handle->fn_free_result(sss_result);
 done:
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(count);
 }
 
@@ -1461,5 +1582,9 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     if (sss_result != NULL)
 	handle->fn_free_result(sss_result);
 
+    if (sudo_lbuf_error(lbuf))
+	debug_return_int(-1);
     debug_return_int(count);
 }
+
+#endif /* HAVE_SSSD */

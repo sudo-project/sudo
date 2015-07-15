@@ -14,27 +14,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_DEBUG_H
-#define _SUDO_DEBUG_H
+#ifndef SUDO_DEBUG_H
+#define SUDO_DEBUG_H
 
 #include <stdarg.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #include "sudo_queue.h"
 
-/* Number of bits in a byte. */
-#ifndef NBBY
-# ifdef __NBBY
-#  define NBBY __NBBY
-# else
-#  define NBBY 8
-# endif
-#endif
-
-/* Bit map macros. */
-#define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))
-#define sudo_clrbit(_a, _i)	((_a)[(_i) / NBBY] &= ~(1<<((_i) % NBBY)))
-#define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
-#define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
- 
 /*
  * List of debug files and flags for use in registration.
  */
@@ -108,15 +98,19 @@ struct sudo_conf_debug_file_list;
  * and sets sudo_debug_subsys for sudo_debug_exit().
  */
 #ifdef HAVE___FUNC__
-# define debug_decl(funcname, subsys)					       \
-    const int sudo_debug_subsys = (subsys);				       \
-    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+# define debug_decl_func(funcname)
+# define debug_decl_vars(funcname, subsys)				       \
+    const int sudo_debug_subsys = (subsys);
 #else
-# define debug_decl(funcname, subsys)					       \
+# define debug_decl_func(funcname)					       \
+    const char __func__[] = #funcname;
+# define debug_decl_vars(funcname, subsys)				       \
     const int sudo_debug_subsys = (subsys);				       \
-    const char __func__[] = #funcname;					       \
-    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+    debug_decl_func(funcname);
 #endif
+#define debug_decl(funcname, subsys)					       \
+    debug_decl_vars((funcname), (subsys))				       \
+    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 
 /*
  * Wrappers for sudo_debug_exit() and friends.
@@ -153,7 +147,7 @@ struct sudo_conf_debug_file_list;
 
 #define debug_return_bool(rval)						       \
     do {								       \
-	int sudo_debug_rval = (rval);					       \
+	bool sudo_debug_rval = (rval);					       \
 	sudo_debug_exit_bool(__func__, __FILE__, __LINE__, sudo_debug_subsys,  \
 	    sudo_debug_rval);						       \
 	return sudo_debug_rval;						       \
@@ -225,7 +219,7 @@ __dso_public int sudo_debug_deregister_v1(int instance_id);
 __dso_public void sudo_debug_enter_v1(const char *func, const char *file, int line, int subsys);
 __dso_public void sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[]);
 __dso_public void sudo_debug_exit_v1(const char *func, const char *file, int line, int subsys);
-__dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, int subsys, int rval);
+__dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, int subsys, bool rval);
 __dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int line, int subsys, int rval);
 __dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, int subsys, long rval);
 __dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, int subsys, const void *rval);
@@ -267,4 +261,4 @@ __dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *fil
 #define sudo_debug_vprintf2(_a, _b, _c, _d, _e, _f) sudo_debug_vprintf2_v1((_a), (_b), (_c), (_d), (_e), (_f))
 #define sudo_debug_write2(_a, _b, _c, _d, _e, _f, _g) sudo_debug_write2_v1((_a), (_b), (_c), (_d), (_e), (_f), (_g))
 
-#endif /* _SUDO_DEBUG_H */
+#endif /* SUDO_DEBUG_H */

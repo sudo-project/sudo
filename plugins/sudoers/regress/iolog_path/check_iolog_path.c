@@ -18,18 +18,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
-# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
-#  include <memory.h>
-# endif
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
@@ -41,7 +31,6 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#define _SUDO_MAIN
 #include "sudoers.h"
 #include "def_data.c"
 
@@ -80,6 +69,8 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 
     path = expand_iolog_path(NULL, dir_in, file_in, &slash);
+    if (path == NULL)
+	sudo_fatalx("unable to expand I/O log path");
     *slash = '\0';
     if (strcmp(path, dir_out) != 0) {
 	sudo_warnx("%s: expected %s, got %s", dir_in, dir_out, path);

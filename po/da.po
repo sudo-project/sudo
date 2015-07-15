@@ -11,10 +11,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.13b3\n"
+"Project-Id-Version: sudo 1.8.14b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-02-27 14:47-0700\n"
-"PO-Revision-Date: 2015-03-08 23:06+0100\n"
+"POT-Creation-Date: 2015-06-19 16:49-0600\n"
+"PO-Revision-Date: 2015-07-07 23:06+0100\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
@@ -22,53 +22,68 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/util/aix.c:92 lib/util/aix.c:159
+#: lib/util/aix.c:86 lib/util/aix.c:156
 msgid "unable to open userdb"
 msgstr "kan ikke åbne userdb"
 
-#: lib/util/aix.c:164
+#: lib/util/aix.c:161
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr "kan ikke skifte til register »%s« for %s"
 
-#: lib/util/aix.c:183
+#: lib/util/aix.c:186
 msgid "unable to restore registry"
 msgstr "kan ikke gendanne register"
 
-#: lib/util/alloc.c:70 lib/util/alloc.c:87 lib/util/alloc.c:108
-#: lib/util/alloc.c:130 lib/util/alloc.c:149 lib/util/alloc.c:172
-msgid "internal error, tried allocate zero bytes"
-msgstr "intern fejl, forsøgte at allokere nul byte"
-
-#: lib/util/alloc.c:89 lib/util/alloc.c:111 lib/util/alloc.c:151
-#: lib/util/alloc.c:174 src/net_ifs.c:174 src/net_ifs.c:191 src/net_ifs.c:325
-#, c-format
-msgid "internal error, %s overflow"
-msgstr "intern fejl, %s-overløb"
-
-#: lib/util/gidlist.c:78 src/load_plugins.c:61 src/load_plugins.c:74
-#: src/sudo.c:568 src/sudo.c:587 src/sudo.c:614 src/sudo.c:623 src/sudo.c:632
-#: src/sudo.c:649 src/sudo.c:696 src/sudo.c:706
+#: lib/util/aix.c:205 lib/util/gidlist.c:65 lib/util/gidlist.c:75
+#: lib/util/sudo_conf.c:188 lib/util/sudo_conf.c:268 lib/util/sudo_conf.c:345
+#: lib/util/sudo_conf.c:547 src/conversation.c:75 src/exec.c:867
+#: src/exec_common.c:99 src/exec_common.c:111 src/exec_common.c:118
+#: src/exec_pty.c:690 src/exec_pty.c:698 src/load_plugins.c:55
+#: src/load_plugins.c:68 src/load_plugins.c:209 src/load_plugins.c:232
+#: src/load_plugins.c:297 src/load_plugins.c:312 src/parse_args.c:183
+#: src/parse_args.c:205 src/parse_args.c:373 src/parse_args.c:469
+#: src/parse_args.c:488 src/preserve_fds.c:55 src/preserve_fds.c:138
+#: src/selinux.c:85 src/selinux.c:292 src/selinux.c:415 src/sesh.c:101
+#: src/sudo.c:184 src/sudo.c:361 src/sudo.c:380 src/sudo.c:446 src/sudo.c:596
+#: src/sudo.c:615 src/sudo.c:642 src/sudo.c:651 src/sudo.c:660 src/sudo.c:677
+#: src/sudo.c:724 src/sudo.c:734 src/sudo_edit.c:156 src/sudo_edit.c:377
+#: src/sudo_edit.c:472 src/sudo_edit.c:584 src/sudo_edit.c:604
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
+
+#: lib/util/aix.c:205 lib/util/gidlist.c:65 lib/util/sudo_conf.c:188
+#: lib/util/sudo_conf.c:268 lib/util/sudo_conf.c:345 lib/util/sudo_conf.c:547
+#: src/conversation.c:76 src/exec.c:867 src/exec_common.c:99
+#: src/exec_common.c:111 src/exec_common.c:118 src/exec_pty.c:690
+#: src/exec_pty.c:698 src/load_plugins.c:209 src/load_plugins.c:232
+#: src/load_plugins.c:297 src/load_plugins.c:312 src/parse_args.c:183
+#: src/parse_args.c:205 src/parse_args.c:373 src/parse_args.c:469
+#: src/parse_args.c:488 src/preserve_fds.c:55 src/preserve_fds.c:138
+#: src/selinux.c:85 src/selinux.c:292 src/selinux.c:415 src/sesh.c:101
+#: src/sudo.c:184 src/sudo.c:361 src/sudo.c:380 src/sudo.c:446
+#: src/sudo_edit.c:156 src/sudo_edit.c:377 src/sudo_edit.c:472
+#: src/sudo_edit.c:584 src/sudo_edit.c:604
+msgid "unable to allocate memory"
+msgstr "kunne ikke allokere hukommelse"
 
 #: lib/util/strsignal.c:50
 msgid "Unknown signal"
 msgstr "ukendt signal"
 
-#: lib/util/strtoid.c:83 lib/util/strtoid.c:111 lib/util/strtomode.c:55
-#: lib/util/strtonum.c:65 lib/util/strtonum.c:183
+#: lib/util/strtoid.c:77 lib/util/strtoid.c:105 lib/util/strtomode.c:49
+#: lib/util/strtonum.c:59 lib/util/strtonum.c:177
 msgid "invalid value"
 msgstr "ugyldig værdi"
 
-#: lib/util/strtoid.c:90 lib/util/strtoid.c:118 lib/util/strtomode.c:61
-#: lib/util/strtonum.c:68 lib/util/strtonum.c:195
+#: lib/util/strtoid.c:84 lib/util/strtoid.c:112 lib/util/strtomode.c:55
+#: lib/util/strtonum.c:62 lib/util/strtonum.c:189
 msgid "value too large"
 msgstr "værdi for stor"
 
-#: lib/util/strtoid.c:96 lib/util/strtomode.c:61 lib/util/strtonum.c:68
-#: lib/util/strtonum.c:189
+#: lib/util/strtoid.c:90 lib/util/strtomode.c:55 lib/util/strtonum.c:62
+#: lib/util/strtonum.c:183
 msgid "value too small"
 msgstr "værdi for lille"
 
@@ -77,243 +92,244 @@ msgstr "værdi for lille"
 msgid "invalid Path value `%s' in %s, line %u"
 msgstr "ugyldig stiværdi »%s« i %s, linje %u"
 
-#: lib/util/sudo_conf.c:338 lib/util/sudo_conf.c:391
+#: lib/util/sudo_conf.c:367 lib/util/sudo_conf.c:420
 #, c-format
 msgid "invalid value for %s `%s' in %s, line %u"
 msgstr "ugyldig værdi for %s »%s« i %s, linje %u"
 
-#: lib/util/sudo_conf.c:359
+#: lib/util/sudo_conf.c:388
 #, c-format
 msgid "unsupported group source `%s' in %s, line %u"
 msgstr "ikke understøttet gruppekilde »%s« i %s, linje %u"
 
-#: lib/util/sudo_conf.c:375
+#: lib/util/sudo_conf.c:404
 #, c-format
 msgid "invalid max groups `%s' in %s, line %u"
 msgstr "ugyldigt maks. for grupper »%s« i %s, linje %u"
 
-#: lib/util/sudo_conf.c:525
+#: lib/util/sudo_conf.c:563
 #, c-format
 msgid "unable to stat %s"
 msgstr "kan ikke køre stat %s"
 
-#: lib/util/sudo_conf.c:528
+#: lib/util/sudo_conf.c:566
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s er ikke en regulær fil"
 
-#: lib/util/sudo_conf.c:531
+#: lib/util/sudo_conf.c:569
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s er ejet af uid %u, burde være %u"
 
-#: lib/util/sudo_conf.c:535
+#: lib/util/sudo_conf.c:573
 #, c-format
 msgid "%s is world writable"
 msgstr "%s er skrivbar for alle"
 
-#: lib/util/sudo_conf.c:538
+#: lib/util/sudo_conf.c:576
 #, c-format
 msgid "%s is group writable"
 msgstr "%s er skrivbar for gruppe"
 
-#: lib/util/sudo_conf.c:548 src/selinux.c:196 src/selinux.c:209 src/sudo.c:341
+#: lib/util/sudo_conf.c:586 src/selinux.c:200 src/selinux.c:213 src/sudo.c:330
 #, c-format
 msgid "unable to open %s"
 msgstr "kan ikke åbne %s"
 
-#: src/exec.c:123 src/exec.c:125 src/exec.c:130 src/exec.c:418 src/exec.c:420
-#: src/exec.c:422 src/exec.c:424 src/exec.c:426 src/exec.c:429 src/exec.c:446
-#: src/exec.c:448 src/exec.c:450 src/exec.c:605 src/exec.c:800
-#: src/exec_pty.c:480 src/exec_pty.c:736 src/exec_pty.c:806 src/exec_pty.c:808
-#: src/exec_pty.c:820 src/exec_pty.c:822 src/exec_pty.c:1303
-#: src/exec_pty.c:1305 src/exec_pty.c:1310 src/exec_pty.c:1312
-#: src/exec_pty.c:1326 src/exec_pty.c:1337 src/exec_pty.c:1339
-#: src/exec_pty.c:1341 src/exec_pty.c:1343 src/exec_pty.c:1345
-#: src/exec_pty.c:1347 src/exec_pty.c:1349 src/signal.c:156
+#: src/exec.c:117 src/exec.c:119 src/exec.c:124 src/exec.c:412 src/exec.c:414
+#: src/exec.c:416 src/exec.c:418 src/exec.c:420 src/exec.c:423 src/exec.c:440
+#: src/exec.c:442 src/exec.c:444 src/exec.c:599 src/exec.c:794
+#: src/exec_pty.c:471 src/exec_pty.c:728 src/exec_pty.c:798 src/exec_pty.c:800
+#: src/exec_pty.c:812 src/exec_pty.c:814 src/exec_pty.c:1295
+#: src/exec_pty.c:1297 src/exec_pty.c:1302 src/exec_pty.c:1304
+#: src/exec_pty.c:1318 src/exec_pty.c:1329 src/exec_pty.c:1331
+#: src/exec_pty.c:1333 src/exec_pty.c:1335 src/exec_pty.c:1337
+#: src/exec_pty.c:1339 src/exec_pty.c:1341 src/signal.c:150
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "kan ikke angive håndtering for signal %d"
 
-#: src/exec.c:135 src/exec_pty.c:856 src/exec_pty.c:1387 src/tgetpass.c:223
+#: src/exec.c:129 src/exec_pty.c:848 src/exec_pty.c:1379 src/tgetpass.c:215
 msgid "unable to fork"
 msgstr "kunne ikke forgrene"
 
-#: src/exec.c:313 src/exec.c:321 src/exec.c:877 src/exec_pty.c:604
-#: src/exec_pty.c:609 src/exec_pty.c:667 src/exec_pty.c:674 src/exec_pty.c:960
-#: src/exec_pty.c:970 src/exec_pty.c:1015 src/exec_pty.c:1022
-#: src/exec_pty.c:1452 src/exec_pty.c:1459 src/exec_pty.c:1466
+#: src/exec.c:307 src/exec.c:315 src/exec.c:872 src/exec_pty.c:595
+#: src/exec_pty.c:600 src/exec_pty.c:658 src/exec_pty.c:665 src/exec_pty.c:952
+#: src/exec_pty.c:962 src/exec_pty.c:1007 src/exec_pty.c:1014
+#: src/exec_pty.c:1444 src/exec_pty.c:1451 src/exec_pty.c:1458
 msgid "unable to add event to queue"
 msgstr "kan ikke tilføje hændelse til kø"
 
-#: src/exec.c:401
+#: src/exec.c:395
 msgid "unable to create sockets"
 msgstr "kunne ikke oprette sokler"
 
-#: src/exec.c:457
+#: src/exec.c:451
 msgid "policy plugin failed session initialization"
 msgstr "udvidelsesmodul for politik mislykkedes i sessionsinitialisering"
 
-#: src/exec.c:502
+#: src/exec.c:496
 msgid "error in event loop"
 msgstr "fejl i hændelsesloop"
 
-#: src/exec.c:520
+#: src/exec.c:514
 msgid "unable to restore tty label"
 msgstr "kunne ikke gendanne tty-etiket"
 
-#: src/exec.c:613 src/exec_pty.c:514 src/signal.c:95
+#: src/exec.c:607 src/exec_pty.c:505 src/signal.c:89
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr "kan ikke gendanne håndtering for signal %d"
 
-#: src/exec.c:731 src/exec_pty.c:1194
+#: src/exec.c:725 src/exec_pty.c:1186
 msgid "error reading from signal pipe"
 msgstr "fejl under læsning fra signaldatakanal"
 
-#: src/exec_common.c:73
+#: src/exec_common.c:67
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "kan ikke fjerne PRIV_PROC_EXEC fra PRIV_LIMIT"
 
-#: src/exec_pty.c:200
+#: src/exec_pty.c:191
 msgid "unable to allocate pty"
 msgstr "kunne ikke allokere pty"
 
-#: src/exec_pty.c:780 src/exec_pty.c:789 src/exec_pty.c:797
-#: src/exec_pty.c:1295 src/exec_pty.c:1384 src/signal.c:137 src/tgetpass.c:219
+#: src/exec_pty.c:772 src/exec_pty.c:781 src/exec_pty.c:789
+#: src/exec_pty.c:1287 src/exec_pty.c:1376 src/signal.c:131 src/tgetpass.c:211
 msgid "unable to create pipe"
 msgstr "kunne ikke oprette datakanal (pipe)"
 
-#: src/exec_pty.c:838
+#: src/exec_pty.c:830
 msgid "unable to set terminal to raw mode"
 msgstr "kunne ikke angive terminal til tilstanden rå (raw)"
 
-#: src/exec_pty.c:1227
+#: src/exec_pty.c:1219
 msgid "error reading from pipe"
 msgstr "fejl ved læsning fra datakanal"
 
-#: src/exec_pty.c:1252
+#: src/exec_pty.c:1244
 msgid "error reading from socketpair"
 msgstr "fejl ved læsning fra socketpair"
 
-#: src/exec_pty.c:1261
+#: src/exec_pty.c:1253
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "uventet svartype på bagkanal (backchannel): %d"
 
-#: src/exec_pty.c:1363
+#: src/exec_pty.c:1355
 msgid "unable to set controlling tty"
 msgstr "kunne ikke angive kontrollerende tty"
 
-#: src/load_plugins.c:59 src/load_plugins.c:72 src/load_plugins.c:89
-#: src/load_plugins.c:142 src/load_plugins.c:148 src/load_plugins.c:154
-#: src/load_plugins.c:195 src/load_plugins.c:202 src/load_plugins.c:209
-#: src/load_plugins.c:215
+#: src/load_plugins.c:53 src/load_plugins.c:66 src/load_plugins.c:83
+#: src/load_plugins.c:113 src/load_plugins.c:119 src/load_plugins.c:125
+#: src/load_plugins.c:165 src/load_plugins.c:172 src/load_plugins.c:179
+#: src/load_plugins.c:185
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
 msgstr "fejl i %s, linje %d under indlæsning af udvidelsesmodulet »%s«"
 
-#: src/load_plugins.c:91
+#: src/load_plugins.c:85
 #, c-format
 msgid "%s%s: %s"
 msgstr "%s%s: %s"
 
-#: src/load_plugins.c:150
+#: src/load_plugins.c:121
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s skal være ejet af uid %d"
 
 # engelsk fejl be dobbelt?
-#: src/load_plugins.c:156
+#: src/load_plugins.c:127
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr "%s må kun være skrivbar for ejeren"
 
-#: src/load_plugins.c:197
+#: src/load_plugins.c:167
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "kunne ikke indlæse %s: %s"
 
-#: src/load_plugins.c:204
+#: src/load_plugins.c:174
 #, c-format
 msgid "unable to find symbol `%s' in %s"
 msgstr "kunne ikke finde symbol »%s« i %s"
 
-#: src/load_plugins.c:211
+#: src/load_plugins.c:181
 #, c-format
 msgid "unknown policy type %d found in %s"
 msgstr "ukendt politiktype %d fundet i %s"
 
-#: src/load_plugins.c:217
+#: src/load_plugins.c:187
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "inkompatibelt udvidelsesmodul for hovedversion %d (forventede %d) fundet i %s"
 
-#: src/load_plugins.c:226
+#: src/load_plugins.c:196
 #, c-format
 msgid "ignoring policy plugin `%s' in %s, line %d"
 msgstr "ignorerer politikudvidelsesmodul »%s« i %s, linje %d"
 
-#: src/load_plugins.c:228
+#: src/load_plugins.c:198
 msgid "only a single policy plugin may be specified"
 msgstr "kun et udvidelsesmodul for politik må være angivet"
 
-#: src/load_plugins.c:231
+#: src/load_plugins.c:201
 #, c-format
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
 msgstr "ignorerer duplikat politikudvidelsesmodul »%s« i %s, linje %d"
 
-#: src/load_plugins.c:249
+#: src/load_plugins.c:222
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
 msgstr "ignorerer duplikat I/O-udvidelsesmodul »%s« i %s, linje %d"
 
-#: src/load_plugins.c:338
+#: src/load_plugins.c:325
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "politikudvidelsesmodulet %s inkluderer ikke en metode for check_policy"
 
-#: src/net_ifs.c:236
-msgid "unable to open socket"
-msgstr "kunne ikke åbne sokkel"
+#: src/net_ifs.c:169 src/net_ifs.c:186 src/net_ifs.c:327 src/sudo.c:441
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "intern fejl, %s-overløb"
 
-#: src/parse_args.c:245
+#: src/parse_args.c:242
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "argumentet for -C skal være et tal større end eller lig 3"
 
-#: src/parse_args.c:407
+#: src/parse_args.c:409
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "du kan ikke samtidig angive tilvalgene »-i« og »-s«"
 
-#: src/parse_args.c:411
+#: src/parse_args.c:413
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "du kan ikke samtidig angive tilvalgende »-i« og »-E«"
 
-#: src/parse_args.c:421
+#: src/parse_args.c:423
 msgid "the `-E' option is not valid in edit mode"
 msgstr "tilvalget »-E« er ikke gyldigt i redigeringstilstand"
 
-#: src/parse_args.c:423
+#: src/parse_args.c:425
 msgid "you may not specify environment variables in edit mode"
 msgstr "du må ikke angive miljøvariabler i redigeringstilstand"
 
-#: src/parse_args.c:431
+#: src/parse_args.c:433
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "tilvalget »-U« må kun bruges med tilvalget »-l«"
 
-#: src/parse_args.c:435
+#: src/parse_args.c:437
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "tilvalgene »-A« og »-S« må ikke bruges sammen"
 
-#: src/parse_args.c:501
+#: src/parse_args.c:507
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit er ikke understøttet på denne platform"
 
-#: src/parse_args.c:574
+#: src/parse_args.c:580
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Kun et af tilvalgene -e, -h, -i, -K, -l, -s, -v eller -V må angives"
 
-#: src/parse_args.c:588
+#: src/parse_args.c:594
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -322,7 +338,7 @@ msgstr ""
 "%s - rediger filer som en anden bruger\n"
 "\n"
 
-#: src/parse_args.c:590
+#: src/parse_args.c:596
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -331,7 +347,7 @@ msgstr ""
 "%s - udfør en kommando som en anden bruger\n"
 "\n"
 
-#: src/parse_args.c:595
+#: src/parse_args.c:601
 #, c-format
 msgid ""
 "\n"
@@ -340,204 +356,204 @@ msgstr ""
 "\n"
 "Tilvalg:\n"
 
-#: src/parse_args.c:597
+#: src/parse_args.c:603
 msgid "use a helper program for password prompting"
 msgstr "brug et hjælpeprogram for indhentelse af adgangskode"
 
-#: src/parse_args.c:600
+#: src/parse_args.c:606
 msgid "use specified BSD authentication type"
 msgstr "brug angivet BSD-godkendelsestype"
 
-#: src/parse_args.c:603
+#: src/parse_args.c:609
 msgid "run command in the background"
 msgstr "kør kommando i baggrunden"
 
-#: src/parse_args.c:605
+#: src/parse_args.c:611
 msgid "close all file descriptors >= num"
 msgstr "luk alle filbeskrivelser >= num"
 
-#: src/parse_args.c:608
+#: src/parse_args.c:614
 msgid "run command with the specified BSD login class"
 msgstr "kør kommando med angivet BSD-logindklasse"
 
-#: src/parse_args.c:611
+#: src/parse_args.c:617
 msgid "preserve user environment when running command"
 msgstr "bevar brugermiljø når kommando udføres"
 
-#: src/parse_args.c:613
+#: src/parse_args.c:619
 msgid "edit files instead of running a command"
 msgstr "rediger filer i stedet for at køre en kommando"
 
-#: src/parse_args.c:615
+#: src/parse_args.c:621
 msgid "run command as the specified group name or ID"
 msgstr "udfør kommando som det angivne gruppenavn eller ID"
 
-#: src/parse_args.c:617
+#: src/parse_args.c:623
 msgid "set HOME variable to target user's home dir"
 msgstr "angiv HOME-variabel til målbrugers hjemmemappe"
 
-#: src/parse_args.c:619
+#: src/parse_args.c:625
 msgid "display help message and exit"
 msgstr "vis hjælpetekst og afslut"
 
-#: src/parse_args.c:621
+#: src/parse_args.c:627
 msgid "run command on host (if supported by plugin)"
 msgstr "kør kommando på vært (hvis understøttet af udvidelsesmodul)"
 
-#: src/parse_args.c:623
+#: src/parse_args.c:629
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "kør en logindskal som målbrugeren; en kommando kan også angives"
 
-#: src/parse_args.c:625
+#: src/parse_args.c:631
 msgid "remove timestamp file completely"
 msgstr "fjern tidsstempelfil fuldstændig"
 
-#: src/parse_args.c:627
+#: src/parse_args.c:633
 msgid "invalidate timestamp file"
 msgstr "ugyldiggør tidsstempelfil"
 
-#: src/parse_args.c:629
+#: src/parse_args.c:635
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "vis brugers privilegier eller kontroller en specifik kommando; brug to gange for længere format"
 
-#: src/parse_args.c:631
+#: src/parse_args.c:637
 msgid "non-interactive mode, no prompts are used"
 msgstr "ikkeinteraktiv tilstand, vil ikke spørge bruger"
 
-#: src/parse_args.c:633
+#: src/parse_args.c:639
 msgid "preserve group vector instead of setting to target's"
 msgstr "bevar gruppevektor i stedet for at sætte til målets"
 
-#: src/parse_args.c:635
+#: src/parse_args.c:641
 msgid "use the specified password prompt"
 msgstr "brug angivet logind for adgangskode"
 
-#: src/parse_args.c:638
+#: src/parse_args.c:644
 msgid "create SELinux security context with specified role"
 msgstr "opret SELinux-sikkerhedskontekt med angivet rolle"
 
-#: src/parse_args.c:641
+#: src/parse_args.c:647
 msgid "read password from standard input"
 msgstr "læs adgangskode fra standardinddata"
 
-#: src/parse_args.c:643
+#: src/parse_args.c:649
 msgid "run shell as the target user; a command may also be specified"
 msgstr "kør skal som målbruger; en kommando kan også specificeres"
 
-#: src/parse_args.c:646
+#: src/parse_args.c:652
 msgid "create SELinux security context with specified type"
 msgstr "opret SELinux-sikkerhedskontekt med angivet type"
 
-#: src/parse_args.c:649
+#: src/parse_args.c:655
 msgid "in list mode, display privileges for user"
 msgstr "i vis-tilstand, vis privilegier for bruger"
 
-#: src/parse_args.c:651
+#: src/parse_args.c:657
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "kør kommando (eller rediger fil) som angivet brugernavn eller ID"
 
-#: src/parse_args.c:653
+#: src/parse_args.c:659
 msgid "display version information and exit"
 msgstr "vis versionsinformation og afslut"
 
-#: src/parse_args.c:655
+#: src/parse_args.c:661
 msgid "update user's timestamp without running a command"
 msgstr "opdater brugers tidsstempel uden at køre en kommando"
 
-#: src/parse_args.c:657
+#: src/parse_args.c:663
 msgid "stop processing command line arguments"
 msgstr "stop behandling af parametre for kommandolinjen"
 
-#: src/selinux.c:77
+#: src/selinux.c:79
 msgid "unable to open audit system"
 msgstr "kunne ikke åbne overvågningssystem"
 
-#: src/selinux.c:85
+#: src/selinux.c:89
 msgid "unable to send audit message"
 msgstr "kunne ikke sende overvågningsbesked"
 
-#: src/selinux.c:113
+#: src/selinux.c:117
 #, c-format
 msgid "unable to fgetfilecon %s"
 msgstr "kunne ikke fgetfilecon %s"
 
-#: src/selinux.c:118
+#: src/selinux.c:122
 #, c-format
 msgid "%s changed labels"
 msgstr "%s ændrede etiketter"
 
-#: src/selinux.c:123
+#: src/selinux.c:127
 #, c-format
 msgid "unable to restore context for %s"
 msgstr "kan ikke gendanne kontekst for %s"
 
-#: src/selinux.c:163
+#: src/selinux.c:167
 #, c-format
 msgid "unable to open %s, not relabeling tty"
 msgstr "kan ikke åbne %s, giver ikke ny etiket til tty"
 
-#: src/selinux.c:172
+#: src/selinux.c:176
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "kan ikke indhente aktuel tty-kontekst, giver ikke ny etiket til tty"
 
-#: src/selinux.c:179
+#: src/selinux.c:183
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "kan ikke indhente ny tty-kontekst, giver ikke nyt etiket til tty"
 
-#: src/selinux.c:186
+#: src/selinux.c:190
 msgid "unable to set new tty context"
 msgstr "kan ikke angive ny tty-kontekst"
 
-#: src/selinux.c:252
+#: src/selinux.c:256
 #, c-format
 msgid "you must specify a role for type %s"
 msgstr "du skal angive en rolle for type %s"
 
-#: src/selinux.c:258
+#: src/selinux.c:262
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "kan ikke indhente standardtype for rolle %s"
 
-#: src/selinux.c:276
+#: src/selinux.c:280
 #, c-format
 msgid "failed to set new role %s"
 msgstr "kunne ikke angive ny rolle %s"
 
-#: src/selinux.c:280
+#: src/selinux.c:284
 #, c-format
 msgid "failed to set new type %s"
 msgstr "kunne ikke angive ny type %s"
 
-#: src/selinux.c:289
+#: src/selinux.c:296
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s er ikke en gyldig kontekst"
 
-#: src/selinux.c:324
+#: src/selinux.c:331
 msgid "failed to get old_context"
 msgstr "kunne ikke indhente gammel_kontekst (old_context)"
 
-#: src/selinux.c:330
+#: src/selinux.c:337
 msgid "unable to determine enforcing mode."
 msgstr "kunne ikke bestemme tilstanden gennemtving (enforcing)."
 
-#: src/selinux.c:347
+#: src/selinux.c:354
 #, c-format
 msgid "unable to set tty context to %s"
 msgstr "kunne ikke angive tty-kontekst for %s"
 
-#: src/selinux.c:386
+#: src/selinux.c:393
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "kunne ikke angive kørselskontekt til %s"
 
 # engelsk: mangler vist lidt info her tast eller nøgle. mon ikke det er nøgle
-#: src/selinux.c:393
+#: src/selinux.c:400
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "kunne ikke angive nøgleoprettelseskontekst til %s"
 
-#: src/sesh.c:78
+#: src/sesh.c:77
 msgid "requires at least one argument"
 msgstr "kræver mindst et argument"
 
@@ -546,281 +562,287 @@ msgstr "kræver mindst et argument"
 msgid "unable to run %s as a login shell"
 msgstr "kan ikke køre %s som en indlogningsskal"
 
-#: src/sesh.c:111 src/sudo.c:1182
+#: src/sesh.c:111 src/sudo.c:1211
 #, c-format
 msgid "unable to execute %s"
 msgstr "kan ikke køre %s"
 
-#: src/signal.c:77
+#: src/signal.c:71
 #, c-format
 msgid "unable to save handler for signal %d"
 msgstr "kan ikke gemme håndtering for signal %d"
 
-#: src/solaris.c:88
+#: src/solaris.c:79
 msgid "resource control limit has been reached"
 msgstr "grænse for ressourcekontrol er nået"
 
-#: src/solaris.c:91
+#: src/solaris.c:82
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "bruger »%s« er ikke medlem af projektet »%s«"
 
-#: src/solaris.c:95
+#: src/solaris.c:86
 msgid "the invoking task is final"
 msgstr "start af opgave er færdig"
 
-#: src/solaris.c:98
+#: src/solaris.c:89
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "kunne ikke slutte til projekt »%s«"
 
-#: src/solaris.c:103
+#: src/solaris.c:94
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "ingen ressourcekø som accepterer standardbindinger findes for projekt »%s«"
 
-#: src/solaris.c:107
+#: src/solaris.c:98
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "angivet ressourcekø findes ikke for projekt »%s«"
 
-#: src/solaris.c:111
+#: src/solaris.c:102
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "kunne ikke binde til standardressourcekø for projekt »%s«"
 
-#: src/solaris.c:117
+#: src/solaris.c:108
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "setproject fejlede for projekt »%s«"
 
-#: src/solaris.c:119
+#: src/solaris.c:110
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "advarsel, ressourcekontroltildeling fejlede for projekt »%s«"
 
-#: src/sudo.c:209
+#: src/sudo.c:195
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo version %s\n"
 
-#: src/sudo.c:211
+#: src/sudo.c:197
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Konfigurationsindstillinger: %s\n"
 
-#: src/sudo.c:216
+#: src/sudo.c:205
 msgid "fatal error, unable to load plugins"
 msgstr "fatal fejl, kan ikke indlæse udvidelsesmoduler"
 
-#: src/sudo.c:224
+#: src/sudo.c:213
 msgid "unable to initialize policy plugin"
 msgstr "kan ikke initialisere udvidelsesmodul for politik"
 
-#: src/sudo.c:280
+#: src/sudo.c:269
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "fejl under initialisering af I/O-udvidelsesmodulet %s"
 
-#: src/sudo.c:306
+#: src/sudo.c:295
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "uventet sudo-tilstand 0x%x"
 
-#: src/sudo.c:424
+#: src/sudo.c:426
 msgid "unable to get group vector"
 msgstr "kan ikke indhente gruppevektor"
 
-#: src/sudo.c:476
+#: src/sudo.c:484
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "ukendt uid %u: hvem er du?"
 
-#: src/sudo.c:781
+#: src/sudo.c:807
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s skal være ejet af uid %d og have setuid bit angivet"
 
-#: src/sudo.c:784
+#: src/sudo.c:810
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "effektiv uid er ikke %d, er %s på et filsystem med indstillingen »nosuid« angivet eller et NFS-filsytsem uden administratorprivilegier (root)?"
 
-#: src/sudo.c:790
+#: src/sudo.c:816
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "effektiv uid er ikke %d, er sudo installeret setuid root?"
 
-#: src/sudo.c:919
+#: src/sudo.c:947
 #, c-format
 msgid "unknown login class %s"
 msgstr "ukendt logindklasse %s"
 
-#: src/sudo.c:932
+#: src/sudo.c:960
 msgid "unable to set user context"
 msgstr "kan ikke angive brugerkontekst"
 
-#: src/sudo.c:946
+#: src/sudo.c:974
 msgid "unable to set supplementary group IDs"
 msgstr "kunne ikke angive supplerende gruppe-id'er"
 
-#: src/sudo.c:953
+#: src/sudo.c:981
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "kan ikke angive effektiv gid til runas gid %u"
 
-#: src/sudo.c:959
+#: src/sudo.c:987
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "kunne ikke angive gid til runas gid %u"
 
-#: src/sudo.c:966
+#: src/sudo.c:994
 msgid "unable to set process priority"
 msgstr "kunne ikke angive procesprioritet"
 
-#: src/sudo.c:974
+#: src/sudo.c:1002
 #, c-format
 msgid "unable to change root to %s"
 msgstr "kunne ikke ændre administrator (root) til %s"
 
-#: src/sudo.c:987 src/sudo.c:993 src/sudo.c:999
+#: src/sudo.c:1015 src/sudo.c:1021 src/sudo.c:1027
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "kunne ikke ændre til runas uid (%u, %u)"
 
-#: src/sudo.c:1017
+#: src/sudo.c:1045
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "kunne ikke ændre mappe til %s"
 
-#: src/sudo.c:1078
+#: src/sudo.c:1106
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "uventet underbetingelse for terminering: %d"
 
-#: src/sudo.c:1210
+#: src/sudo.c:1239
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "politikudvidelsesmodulet %s mangler i metoden »check_policy«"
 
-#: src/sudo.c:1228
+#: src/sudo.c:1257
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "politikudvidelsesmodul %s understøter ikke listning af privilegier"
 
-#: src/sudo.c:1245
+#: src/sudo.c:1274
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "politikudvidelsesmodul %s understøtter ikke tilvalget -v"
 
-#: src/sudo.c:1260
+#: src/sudo.c:1289
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "politikudvidelsesmodul %s understøtter ikke tilvalget -k/-K"
 
-#: src/sudo_edit.c:203 src/sudo_edit.c:294
+#: src/sudo_edit.c:202 src/sudo_edit.c:292
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: ikke en regulær fil"
 
-#: src/sudo_edit.c:230 src/sudo_edit.c:332
+#: src/sudo_edit.c:229 src/sudo_edit.c:330
 #, c-format
 msgid "%s: short write"
 msgstr "%s: kort skrivning"
 
-#: src/sudo_edit.c:295
+#: src/sudo_edit.c:293
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s tilbage uændrede"
 
-#: src/sudo_edit.c:308 src/sudo_edit.c:483
+#: src/sudo_edit.c:306 src/sudo_edit.c:489
 #, c-format
 msgid "%s unchanged"
 msgstr "%s uændrede"
 
-#: src/sudo_edit.c:321 src/sudo_edit.c:343
+#: src/sudo_edit.c:319 src/sudo_edit.c:341
 #, c-format
 msgid "unable to write to %s"
 msgstr "kan ikke skrive til %s"
 
-#: src/sudo_edit.c:322 src/sudo_edit.c:341 src/sudo_edit.c:344
-#: src/sudo_edit.c:508 src/sudo_edit.c:512
+#: src/sudo_edit.c:320 src/sudo_edit.c:339 src/sudo_edit.c:342
+#: src/sudo_edit.c:514 src/sudo_edit.c:518
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "indhold fra redigeringssession tilbage i %s"
 
-#: src/sudo_edit.c:340
+#: src/sudo_edit.c:338
 msgid "unable to read temporary file"
 msgstr "kan ikke læse midlertidig fil"
 
-#: src/sudo_edit.c:417
+#: src/sudo_edit.c:419
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: intern fejl: forkert antal stier"
 
-#: src/sudo_edit.c:419
+#: src/sudo_edit.c:421
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: kan ikke oprette midlertidige filer"
 
-#: src/sudo_edit.c:421 src/sudo_edit.c:515
+#: src/sudo_edit.c:423 src/sudo_edit.c:521
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: ukendt fejl %d"
 
-#: src/sudo_edit.c:507
+#: src/sudo_edit.c:513
 msgid "unable to copy temporary files back to their original location"
 msgstr "kan ikke kopiere midlertidige filer tilbage til deres originale placering"
 
-#: src/sudo_edit.c:511
+#: src/sudo_edit.c:517
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "kan ikke kopiere nogle af de midlertidige filer tilbage til deres originale placering"
 
-#: src/sudo_edit.c:554
+#: src/sudo_edit.c:560
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "kunne ikke ændre uid til root (%u)"
 
-#: src/sudo_edit.c:571
+#: src/sudo_edit.c:577
 msgid "plugin error: missing file list for sudoedit"
 msgstr "fejl i udvidelsesmodul: mangler filliste for sudoedit"
 
-#: src/sudo_edit.c:604 src/sudo_edit.c:617
+#: src/sudo_edit.c:618 src/sudo_edit.c:631
 msgid "unable to read the clock"
 msgstr "kunne ikke læse uret"
 
-#: src/tgetpass.c:91
+#: src/tgetpass.c:83
 msgid "no tty present and no askpass program specified"
 msgstr "ingen tty til stede og intet askpass-program angivet"
 
-#: src/tgetpass.c:100
+#: src/tgetpass.c:92
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "intet askpass-program angivet, forsøg at angive SUDO_ASKPASS"
 
-#: src/tgetpass.c:234
+#: src/tgetpass.c:226
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "kan ikke angive gid til %u"
 
-#: src/tgetpass.c:238
+#: src/tgetpass.c:230
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "kan ikke angive uid til %u"
 
-#: src/tgetpass.c:243
+#: src/tgetpass.c:235
 #, c-format
 msgid "unable to run %s"
 msgstr "kan ikke køre %s"
 
-#: src/utmp.c:278
+#: src/utmp.c:269
 msgid "unable to save stdin"
 msgstr "kan ikke gemme til stdin"
 
-#: src/utmp.c:280
+#: src/utmp.c:271
 msgid "unable to dup2 stdin"
 msgstr "kan ikke dup2 stdin"
 
-#: src/utmp.c:283
+#: src/utmp.c:274
 msgid "unable to restore stdin"
 msgstr "kan ikke gendanne stdin"
+
+#~ msgid "internal error, tried allocate zero bytes"
+#~ msgstr "intern fejl, forsøgte at allokere nul byte"
+
+#~ msgid "unable to open socket"
+#~ msgstr "kunne ikke åbne sokkel"
 
 #~ msgid "%s: %s: %s\n"
 #~ msgstr "%s: %s: %s\n"

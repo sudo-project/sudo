@@ -172,7 +172,7 @@ If a command name is preceded by an exclamation point,
 the user will be prohibited from running that command.
 .sp
 The built-in command
-\(lq\fRsudoedit\fR\(rq
+\(Lq\fRsudoedit\fR\(Rq
 is used to permit a user to run
 \fBsudo\fR
 with the
@@ -181,7 +181,7 @@ option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
 Note that
-\(lq\fRsudoedit\fR\(rq
+\(Lq\fRsudoedit\fR\(Rq
 is a command built into
 \fBsudo\fR
 itself and must be specified in without a leading path.
@@ -320,7 +320,7 @@ If multiple entries match, the entry with the highest
 \fRsudoOrder\fR
 attribute is chosen.
 This corresponds to the
-\(lqlast match\(rq
+\(Lqlast match\(Rq
 behavior of the sudoers file.
 If the
 \fRsudoOrder\fR
@@ -596,7 +596,7 @@ parameter.
 The
 \fIsecret\fR
 may be a plain text password or a base64-encoded string with a
-\(lqbase64:\(rq
+\(Lqbase64:\(Rq
 prefix.
 For example:
 .nf
@@ -817,7 +817,7 @@ parameter is deprecated and will be removed in a future release.
 The same information is now logged via the
 \fBsudo\fR
 debugging framework using the
-\(lqldap\(rq
+\(Lqldap\(Rq
 subsystem at priorities
 \fIdiag\fR
 and
@@ -979,7 +979,7 @@ using the Tivoli Directory Server LDAP library.
 The
 \fIsecret\fR
 may be a plain text password or a base64-encoded string with a
-\(lqbase64:\(rq
+\(Lqbase64:\(Rq
 prefix.
 For example:
 .nf
@@ -1462,6 +1462,20 @@ ldap.conf(@mansectform@),
 sssd-sudo(@mansectform@),
 sudo.conf(@mansectform@),
 sudoers(@mansectsu@)
+.SH "AUTHORS"
+Many people have worked on
+\fBsudo\fR
+over the years; this version consists of code written primarily by:
+.sp
+.RS 6n
+Todd C. Miller
+.RE
+.PP
+See the CONTRIBUTORS file in the
+\fBsudo\fR
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+\fBsudo\fR.
 .SH "CAVEATS"
 Note that there are differences in the way that LDAP-based
 \fIsudoers\fR
@@ -1481,7 +1495,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-\(lqAS IS\(rq
+\(LqAS IS\(Rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

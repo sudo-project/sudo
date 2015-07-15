@@ -17,6 +17,8 @@
 
 #include <config.h>
 
+#ifdef HAVE_BSM_AUDIT
+
 #include <sys/types.h>
 
 #include <bsm/audit.h>
@@ -43,6 +45,8 @@
 # define AUDIT_NOT_CONFIGURED	ENOSYS
 #endif
 
+static au_event_t sudo_audit_event = AUE_sudo;
+
 static int
 audit_sudo_selected(int sorf)
 {
@@ -67,7 +71,19 @@ audit_sudo_selected(int sorf)
         } else {
 		mask = &ainfo_addr.ai_mask;
 	}
-	rc = au_preselect(AUE_sudo, mask, sorf, AU_PRS_REREAD);
+	rc = au_preselect(sudo_audit_event, mask, sorf, AU_PRS_REREAD);
+	if (rc == -1) {
+#if defined(__APPLE__) && defined(AUE_DARWIN_sudo)
+	    /*
+	     * Mac OS X 10.10 au_preselect() only accepts AUE_DARWIN_sudo.
+	     */
+	    sudo_audit_event = AUE_DARWIN_sudo;
+	    rc = au_preselect(sudo_audit_event, mask, sorf, AU_PRS_REREAD);
+	    if (rc == -1)
+#endif
+
+		sudo_warn("au_preselect");
+	}
         debug_return_int(rc);
 }
 
@@ -148,9 +164,9 @@ bsm_audit_success(char *exec_args[])
 	}
 	au_write(aufd, tok);
 #ifdef __sun
-	if (au_close(aufd, 1, AUE_sudo, 0) == -1)
+	if (au_close(aufd, 1, sudo_audit_event, 0) == -1)
 #else
-	if (au_close(aufd, 1, AUE_sudo) == -1)
+	if (au_close(aufd, 1, sudo_audit_event) == -1)
 #endif
 	{
 		sudo_warn(U_("unable to commit audit record"));
@@ -236,9 +252,9 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	}
 	au_write(aufd, tok);
 #ifdef __sun
-	if (au_close(aufd, 1, AUE_sudo, PAD_FAILURE) == -1)
+	if (au_close(aufd, 1, sudo_audit_event, PAD_FAILURE) == -1)
 #else
-	if (au_close(aufd, 1, AUE_sudo) == -1)
+	if (au_close(aufd, 1, sudo_audit_event) == -1)
 #endif
 	{
 		sudo_warn(U_("unable to commit audit record"));
@@ -246,3 +262,5 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	}
 	debug_return_int(0);
 }
+
+#endif /* HAVE_BSM_AUDIT */

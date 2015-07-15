@@ -65,9 +65,9 @@
  * 44	sudo 1.8.13, added MAIL/NOMAIL tags.
 */
 
-#ifndef _SUDOERS_VERSION_H
-#define	_SUDOERS_VERSION_H
+#ifndef SUDOERS_VERSION_H
+#define	SUDOERS_VERSION_H
 
 #define SUDOERS_GRAMMAR_VERSION	44
 
-#endif /* _SUDOERS_VERSION_H */
+#endif /* SUDOERS_VERSION_H */

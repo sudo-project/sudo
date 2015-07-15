@@ -19,14 +19,12 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_COMPAT_H
-#define _SUDO_COMPAT_H
+#ifndef SUDO_COMPAT_H
+#define SUDO_COMPAT_H
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stddef.h>
-#endif
 #include <stdarg.h>
+#include <stddef.h>	/* for rsize_t */
 
 /*
  * Macros and functions that may be missing on some operating systems.
@@ -68,15 +66,6 @@
 #  define __format_arg(f) 	__attribute__((__format_arg__ (f)))
 # else
 #  define __format_arg(f)
-# endif
-#endif
-
-/* Hint to compiler that returned pointer is unique (malloc but not realloc). */
-#ifndef __malloc_like
-# if __GNUC_PREREQ__(2, 96)
-#  define __malloc_like 	__attribute__((__malloc__))
-# else
-#  define __malloc_like
 # endif
 #endif
 
@@ -161,7 +150,7 @@
 #endif
 
 /*
- * Posix versions for those without...
+ * POSIX versions for those without...
  */
 #ifndef _S_IFMT
 # define _S_IFMT		S_IFMT
@@ -182,13 +171,6 @@
 # define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
 #endif /* S_ISDIR */
 
-/*
- * Some OS's may not have this.
- */
-#ifndef S_IRWXU
-# define S_IRWXU		0000700		/* rwx for owner */
-#endif /* S_IRWXU */
-
 /* For futimens() and utimensat() emulation. */
 #if !defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)
 # ifndef UTIME_OMIT
@@ -200,19 +182,6 @@
 # ifndef AT_FDCWD
 #  define AT_FDCWD	-100
 # endif
-#endif
-
-/*
- * These should be defined in <unistd.h> but not everyone has them.
- */
-#ifndef STDIN_FILENO
-# define	STDIN_FILENO	0
-#endif
-#ifndef STDOUT_FILENO
-# define	STDOUT_FILENO	1
-#endif
-#ifndef STDERR_FILENO
-# define	STDERR_FILENO	2
 #endif
 
 /*
@@ -234,17 +203,6 @@
 #define ISSET(t, f)     ((t) & (f))
 
 /*
- * Older systems may be missing stddef.h and/or offsetof macro
- */
-#ifndef offsetof
-# ifdef __offsetof
-#  define offsetof(type, field) __offsetof(type, field)
-# else
-#  define offsetof(type, field) ((size_t)(&((type *)0)->field))
-# endif
-#endif
-
-/*
  * Simple isblank() macro and function for systems without it.
  */
 #ifndef HAVE_ISBLANK
@@ -259,13 +217,6 @@ __dso_public int isblank(int);
 # define innetgr(n, h, u, d)	(_innetgr(n, h, u, d))
 # define HAVE_INNETGR 1
 #endif /* HAVE__INNETGR */
-
-/*
- * On POSIX systems, O_NOCTTY is the default so some OS's may lack this define.
- */
-#ifndef O_NOCTTY
-# define O_NOCTTY	0
-#endif /* O_NOCTTY */
 
 /*
  * Add IRIX-like sigaction_t for those without it.
@@ -312,12 +263,22 @@ extern int errno;
 #endif
 
 /* For sig2str() */
-#ifndef HAVE_SIG2STR
+#if !defined(HAVE_DECL_SIG2STR_MAX) || !HAVE_DECL_SIG2STR_MAX
 # define SIG2STR_MAX 32
 #endif
 
+/* WCOREDUMP is not POSIX, this usually works (verified on AIX). */
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
+#endif
+
+/* Number of bits in a byte. */
+#ifndef NBBY
+# ifdef __NBBY
+#  define NBBY __NBBY
+# else
+#  define NBBY 8
+# endif
 #endif
 
 #ifndef HAVE_SETEUID
@@ -368,7 +329,7 @@ __dso_public long long sudo_strtonum(const char *, long long, long long, const c
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
  */
 
-struct timeval;
+struct passwd;
 struct timespec;
 
 #ifndef HAVE_CLOSEFROM
@@ -431,6 +392,16 @@ __dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
 # undef strlcpy
 # define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
 #endif /* HAVE_STRLCPY */
+#ifndef HAVE_STRNDUP
+__dso_public char *sudo_strndup(const char *str, size_t maxlen);
+# undef strndup
+# define strndup(_a, _b) sudo_strndup((_a), (_b))
+#endif /* HAVE_STRNDUP */
+#ifndef HAVE_STRNLEN
+__dso_public size_t sudo_strnlen(const char *str, size_t maxlen);
+# undef strnlen
+# define strnlen(_a, _b) sudo_strnlen((_a), (_b))
+#endif /* HAVE_STRNLEN */
 #ifndef HAVE_MEMRCHR
 __dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr
@@ -464,7 +435,7 @@ __dso_public int sudo_sig2str(int signo, char *signame);
 # undef sig2str
 # define sig2str(_a, _b) sudo_sig2str((_a), (_b))
 #endif /* HAVE_SIG2STR */
-#if !defined(HAVE_INET_NTOP) && defined(_SUDO_NET_IFS_C)
+#if !defined(HAVE_INET_NTOP) && defined(SUDO_NET_IFS_C)
 __dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
 # undef inet_ntop
 # define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))
@@ -479,5 +450,10 @@ __dso_public const char *sudo_getprogname(void);
 # undef getprogname
 # define getprogname() sudo_getprogname()
 #endif /* HAVE_GETPROGNAME */
+#ifndef HAVE_REALLOCARRAY
+__dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
+# undef reallocarray
+# define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
+#endif /* HAVE_REALLOCARRAY */
 
-#endif /* _SUDO_COMPAT_H */
+#endif /* SUDO_COMPAT_H */

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _COMPAT_NSS_DBDEFS_H
-#define _COMPAT_NSS_DBDEFS_H
+#ifndef COMPAT_NSS_DBDEFS_H
+#define COMPAT_NSS_DBDEFS_H
 
 /*
  * Bits of nss_dbdefs.h and nss_common.h needed to implement
@@ -103,4 +103,4 @@ extern nss_status_t nss_search(nss_db_root_t *, nss_db_initf_t, int, void *);
 extern nss_XbyY_buf_t *_nss_XbyY_buf_alloc(int, int);
 extern void _nss_XbyY_buf_free(nss_XbyY_buf_t *);
 
-#endif /* _COMPAT_NSS_DBDEFS_H */
+#endif /* COMPAT_NSS_DBDEFS_H */

@@ -32,7 +32,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
@@ -46,8 +45,10 @@ SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
 
 static struct sudo_fatal_callback_list callbacks = SLIST_HEAD_INITIALIZER(&callbacks);
 static sudo_conv_t sudo_warn_conversation;
+static bool (*sudo_warn_setlocale)(bool, int *);
+static bool (*sudo_warn_setlocale_prev)(bool, int *);
 
-static void _warning(int errnum, const char *fmt, va_list ap);
+static void warning(int errnum, const char *fmt, va_list ap);
 
 static void
 do_cleanup(void)
@@ -68,7 +69,7 @@ sudo_fatal_nodebug_v1(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
     va_end(ap);
     do_cleanup();
     exit(EXIT_FAILURE);
@@ -80,7 +81,7 @@ sudo_fatalx_nodebug_v1(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
     va_end(ap);
     do_cleanup();
     exit(EXIT_FAILURE);
@@ -89,7 +90,7 @@ sudo_fatalx_nodebug_v1(const char *fmt, ...)
 void
 sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
     do_cleanup();
     exit(EXIT_FAILURE);
 }
@@ -97,7 +98,7 @@ sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 void
 sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
     do_cleanup();
     exit(EXIT_FAILURE);
 }
@@ -108,7 +109,7 @@ sudo_warn_nodebug_v1(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
     va_end(ap);
 }
 
@@ -117,50 +118,70 @@ sudo_warnx_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
     va_end(ap);
 }
 
 void
 sudo_vwarn_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(errno, fmt, ap);
+    warning(errno, fmt, ap);
 }
 
 void
 sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
 {
-    _warning(0, fmt, ap);
+    warning(0, fmt, ap);
 }
 
 static void
-_warning(int errnum, const char *fmt, va_list ap)
+warning(int errnum, const char *fmt, va_list ap)
 {
+    int cookie;
+
+    /* Set user locale if setter was specified. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(false, &cookie);
+
     if (sudo_warn_conversation != NULL) {
 	struct sudo_conv_message msgs[6];
+	char static_buf[1024], *buf = static_buf;
 	int nmsgs = 0;
-	char *str = NULL;
 
 	/* Use conversation function. */
         msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	msgs[nmsgs++].msg = getprogname();
         if (fmt != NULL) {
-		sudo_evasprintf(&str, fmt, ap);
+		va_list ap2;
+		int buflen;
+
+		/* Use static buffer if possible, else dynamic. */
+		va_copy(ap2, ap);
+		buflen = vsnprintf(static_buf, sizeof(static_buf), fmt, ap2);
+		va_end(ap2);
+		if (buflen >= (int)sizeof(static_buf)) {
+		    buf = malloc(++buflen);
+		    if (buf != NULL)
+			(void)vsnprintf(buf, buflen, fmt, ap);
+		    else
+			buf = static_buf;
+		}
 		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 		msgs[nmsgs++].msg = ": ";
 		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-		msgs[nmsgs++].msg = str;
+		msgs[nmsgs++].msg = buf;
         }
         if (errnum) {
 	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	    msgs[nmsgs++].msg = ": ";
 	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-	    msgs[nmsgs++].msg = sudo_warn_strerror(errnum);
+	    msgs[nmsgs++].msg = strerror(errnum);
         }
 	msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	msgs[nmsgs++].msg = "\n";
 	sudo_warn_conversation(nmsgs, msgs, NULL);
-	sudo_efree(str);
+	if (buf != static_buf)
+	    free(buf);
     } else {
 	/* Write to the standard error. */
         fputs(getprogname(), stderr);
@@ -170,10 +191,14 @@ _warning(int errnum, const char *fmt, va_list ap)
         }
         if (errnum) {
             fputs(": ", stderr);
-            fputs(sudo_warn_strerror(errnum), stderr);
+            fputs(strerror(errnum), stderr);
         }
         putc('\n', stderr);
     }
+
+    /* Restore old locale as needed. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(true, &cookie);
 }
 
 /*
@@ -232,3 +257,35 @@ sudo_warn_set_conversation_v1(sudo_conv_t conv)
 {
     sudo_warn_conversation = conv;
 }
+
+/*
+ * Set the locale function so the plugin can use a non-default
+ * locale for user warnings.
+ */
+void
+sudo_warn_set_locale_func_v1(bool (*func)(bool, int *))
+{
+    sudo_warn_setlocale_prev = sudo_warn_setlocale;
+    sudo_warn_setlocale = func;
+}
+
+#ifdef HAVE_LIBINTL_H
+char *
+sudo_warn_gettext_v1(const char *domainname, const char *msgid)
+{
+    int cookie;
+    char *msg;
+
+    /* Set user locale if setter was specified. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(false, &cookie);
+
+    msg = dgettext(domainname, msgid);
+
+    /* Restore old locale as needed. */
+    if (sudo_warn_setlocale != NULL)
+	sudo_warn_setlocale(true, &cookie);
+
+    return msg;
+}
+#endif /* HAVE_LIBINTL_H */

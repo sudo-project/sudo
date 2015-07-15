@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDOERS_PARSE_H
-#define _SUDOERS_PARSE_H
+#ifndef SUDOERS_PARSE_H
+#define SUDOERS_PARSE_H
 
 #undef UNSPEC
 #define UNSPEC	-1
@@ -185,17 +185,17 @@ extern struct defaults_list defaults;
 
 /* alias.c */
 bool no_aliases(void);
-char *alias_add(char *name, int type, struct member *members);
+const char *alias_add(char *name, int type, struct member *members);
 int alias_compare(const void *a1, const void *a2);
 struct alias *alias_get(char *name, int type);
 struct alias *alias_remove(char *name, int type);
 void alias_apply(int (*func)(void *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);
-void init_aliases(void);
+bool init_aliases(void);
 
 /* gram.c */
-void init_parser(const char *, bool);
+bool init_parser(const char *, bool);
 
 /* match_addr.c */
 bool addr_matches(char *n);
@@ -223,4 +223,4 @@ int hexchar(const char *s);
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
-#endif /* _SUDOERS_PARSE_H */
+#endif /* SUDOERS_PARSE_H */

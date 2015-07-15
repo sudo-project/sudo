@@ -14,12 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_TIMESPEC_H
-#define _SUDO_TIMESPEC_H
+#ifndef COMPAT_TIMESPEC_H
+#define COMPAT_TIMESPEC_H
 
 struct timespec {
     time_t	tv_sec;
     long	tv_nsec;
 };
 
-#endif /* _SUDO_TIMESPEC_H */
+#endif /* COMPAT_TIMESPEC_H */

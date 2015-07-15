@@ -23,23 +23,14 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <ctype.h>
 #include <grp.h>
 #include <pwd.h>
@@ -184,7 +175,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     if (argc <= 0)
 	usage(1);
 
-    env_add = sudo_emallocarray(env_size, sizeof(char *));
+    env_add = reallocarray(NULL, env_size, sizeof(char *));
+    if (env_add == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Pass progname to plugin so it can call initprogname() */
     progname = getprogname();
@@ -205,7 +198,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     /* Set max_groups from sudo.conf. */
     i = sudo_conf_max_groups();
     if (i != -1) {
-	sudo_easprintf(&cp, "%d", i);
+	if (asprintf(&cp, "%d", i) == -1)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudo_settings[ARG_MAX_GROUPS].value = cp;
     }
 
@@ -369,8 +363,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	    }
 	} else if (!got_end_of_args && is_envar) {
 	    if (nenv == env_size - 2) {
+		char **tmp;
+
+		tmp = reallocarray(env_add, env_size, 2 * sizeof(char *));
+		if (tmp == NULL)
+		    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		env_add = tmp;
 		env_size *= 2;
-		env_add = sudo_ereallocarray(env_add, env_size, sizeof(char *));
 	    }
 	    env_add[nenv++] = argv[optind];
 
@@ -462,7 +461,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
 		strlen(argv[argc - 1]) + 1;
 
-	    cmnd = dst = sudo_emallocarray(cmnd_size, 2);
+	    cmnd = dst = reallocarray(NULL, cmnd_size, 2);
+	    if (cmnd == NULL)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
@@ -479,7 +480,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	    ac += 2; /* -c cmnd */
 	}
 
-	av = sudo_emallocarray(ac + 1, sizeof(char *));
+	av = reallocarray(NULL, ac + 1, sizeof(char *));
+	if (av == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = "-c";
@@ -596,7 +599,7 @@ help(void)
     sudo_lbuf_append(&lbuf, "  -A, --askpass               %s\n",
 	_("use a helper program for password prompting"));
 #ifdef HAVE_BSD_AUTH_H
-    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type   %s\n",
+    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type        %s\n",
 	_("use specified BSD authentication type"));
 #endif
     sudo_lbuf_append(&lbuf, "  -b, --background            %s\n",

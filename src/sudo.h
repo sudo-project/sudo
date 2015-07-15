@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_SUDO_H
-#define _SUDO_SUDO_H
+#ifndef SUDO_SUDO_H
+#define SUDO_SUDO_H
 
 #include <limits.h>
 #include <pathnames.h>
@@ -33,7 +33,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -184,7 +183,6 @@ void cleanup(int);
 
 /* tgetpass.c */
 char *tgetpass(const char *, int, int);
-int tty_present(void);
 
 /* exec.c */
 int pipe_nonblock(int fds[2]);
@@ -196,7 +194,7 @@ int parse_args(int argc, char **argv, int *nargc, char ***nargv,
 extern int tgetpass_flags;
 
 /* get_pty.c */
-int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
+bool get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
 
 /* sudo.c */
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
@@ -262,4 +260,4 @@ int add_preserved_fd(struct preserved_fd_list *pfds, int fd);
 void closefrom_except(int startfd, struct preserved_fd_list *pfds);
 void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 
-#endif /* _SUDO_SUDO_H */
+#endif /* SUDO_SUDO_H */

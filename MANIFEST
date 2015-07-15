@@ -61,7 +61,6 @@ include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
 include/compat/timespec.h
-include/sudo_alloc.h
 include/sudo_compat.h
 include/sudo_conf.h
 include/sudo_debug.h
@@ -76,10 +75,10 @@ include/sudo_util.h
 indent.pro
 init.d/aix.sh.in
 init.d/hpux.sh.in
+init.d/sudo.conf.in
 install-sh
 lib/util/Makefile.in
 lib/util/aix.c
-lib/util/alloc.c
 lib/util/closefrom.c
 lib/util/event.c
 lib/util/event_poll.c
@@ -100,7 +99,6 @@ lib/util/inet_pton.c
 lib/util/isblank.c
 lib/util/key_val.c
 lib/util/lbuf.c
-lib/util/locale_weak.c
 lib/util/locking.c
 lib/util/memrchr.c
 lib/util/memset_s.c
@@ -112,6 +110,7 @@ lib/util/mktemp.c
 lib/util/parseln.c
 lib/util/progname.c
 lib/util/pw_dup.c
+lib/util/reallocarray.c
 lib/util/regress/atofoo/atofoo_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
@@ -119,7 +118,9 @@ lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
 lib/util/regress/mktemp/mktemp_test.c
+lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
+lib/util/regress/strsplit/strsplit_test.c
 lib/util/regress/sudo_conf/conf_test.c
 lib/util/regress/sudo_conf/test1.in
 lib/util/regress/sudo_conf/test1.out.ok
@@ -159,7 +160,10 @@ lib/util/siglist.in
 lib/util/snprintf.c
 lib/util/strlcat.c
 lib/util/strlcpy.c
+lib/util/strndup.c
+lib/util/strnlen.c
 lib/util/strsignal.c
+lib/util/strsplit.c
 lib/util/strtobool.c
 lib/util/strtoid.c
 lib/util/strtomode.c
@@ -252,6 +256,7 @@ plugins/sudoers/def_data.h
 plugins/sudoers/def_data.in
 plugins/sudoers/defaults.c
 plugins/sudoers/defaults.h
+plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/find_path.c
 plugins/sudoers/getdate.c
@@ -525,7 +530,6 @@ src/exec_pty.c
 src/get_pty.c
 src/hooks.c
 src/load_plugins.c
-src/locale_stub.c
 src/net_ifs.c
 src/openbsd.c
 src/parse_args.c

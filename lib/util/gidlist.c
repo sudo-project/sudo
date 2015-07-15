@@ -19,21 +19,13 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #include <grp.h>
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
@@ -67,7 +59,11 @@ sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp
 	ngids++;
     /* Allocate and fill in array. */
     if (ngids != 0) {
-	gids = sudo_emallocarray(ngids, sizeof(GETGROUPS_T));
+	gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	if (gids == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(-1);
+	}
 	ngids = 0;
 	if (basegid != NULL)
 	    gids[ngids++] = *basegid;

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -211,7 +211,7 @@ Prior to
 so the value was always the same as that used by the
 .Nm sudo
 front end and did not include a path name, only the flags themselves.
-As of version 1.7 of the plugin interface, 
+As of version 1.7 of the plugin interface,
 .Nm sudo
 will only pass
 .Em debug_flags
@@ -2315,6 +2315,19 @@ times if there are multiple plugin-specific Debug lines in the
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (http://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
 .Sh BUGS
 If you feel you have found a bug in
 .Nm sudo ,

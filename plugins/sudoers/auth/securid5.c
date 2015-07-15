@@ -25,25 +25,18 @@
 
 #include <config.h>
 
+#ifdef HAVE_SECURID
+
 #include <sys/types.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <pwd.h>
 
 /* Needed for SecurID v5.0 Authentication on UNIX */
@@ -222,3 +215,5 @@ then enter the new token code.\n", \
     /* Return stored state to calling process */
     debug_return_int(rval);
 }
+
+#endif /* HAVE_SECURID */

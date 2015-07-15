@@ -41,7 +41,6 @@
 #include "sudo_gettext.h"	/* must be included before sudo_compat.h */
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -78,7 +77,8 @@ main(int argc, char *argv[], char *envp[])
 	sudo_fatalx(U_("requires at least one argument"));
 
     /* Read sudo.conf and initialize the debug subsystem. */
-    sudo_conf_read(NULL, SUDO_CONF_DEBUG);
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
+	exit(EXIT_FAILURE);
     sudo_debug_register(getprogname(), NULL, NULL,
 	sudo_conf_debug_files(getprogname()));
 
@@ -98,7 +98,8 @@ main(int argc, char *argv[], char *envp[])
 	/* Shift argv and make a copy of the command to execute. */
 	argv++;
 	argc--;
-	cmnd = sudo_estrdup(argv[0]);
+	if ((cmnd = strdup(argv[0])) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 	/* If invoked as a login shell, modify argv[0] accordingly. */
 	if (login_shell) {
@@ -118,7 +119,8 @@ main(int argc, char *argv[], char *envp[])
 static int
 sesh_sudoedit(int argc, char *argv[])
 {
-    int fd_src, fd_dst, i, oflags_dst, post, ret = SESH_ERR_FAILURE;
+    int i, oflags_dst, post, ret = SESH_ERR_FAILURE;
+    int fd_src = -1, fd_dst = -1;
     ssize_t nread, nwritten;
     struct stat sb;
     struct timespec times[2];

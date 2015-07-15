@@ -36,48 +36,27 @@
 
 #include <errno.h>
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include <unistd.h>
+#include <dirent.h>
 
 #include "sudo_compat.h"
 
 #define	ISDOT(dp) \
 	(dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
+
+#if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
+# define NAMLEN(dirent)	(dirent)->d_namlen
+#else
+# define NAMLEN(dirent)	strlen((dirent)->d_name)
+#endif
 
 char *
 sudo_getcwd(char *pt, size_t size)
@@ -165,8 +144,9 @@ sudo_getcwd(char *pt, size_t size)
 		if (bup + 3  + MAXNAMLEN + 1 >= eup) {
 			char *nup;
 
-			if ((nup = realloc(up, upsize *= 2)) == NULL)
+			if ((nup = reallocarray(up, upsize, 2)) == NULL)
 				goto err;
+			upsize *= 2;
 			up = nup;
 			bup = up;
 			eup = up + upsize;
@@ -228,8 +208,9 @@ sudo_getcwd(char *pt, size_t size)
 			}
 			off = bpt - pt;
 			len = ept - bpt;
-			if ((npt = realloc(pt, ptsize *= 2)) == NULL)
+			if ((npt = reallocarray(pt, ptsize, 2)) == NULL)
 				goto err;
+			ptsize *= 2;
 			pt = npt;
 			bpt = pt + off;
 			ept = pt + ptsize;

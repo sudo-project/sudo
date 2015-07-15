@@ -25,14 +25,7 @@
 # include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
+#include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -44,19 +37,14 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <unistd.h>
 #include <errno.h>
 
 #include "sudo_compat.h"
-#include "sudo_alloc.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_util.h"
-
-/* XXX - use non-exiting allocators? */
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
@@ -64,11 +52,18 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
     debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT)
 
     base->maxfd = NFDBITS - 1;
-    base->readfds_in = sudo_ecalloc(1, sizeof(fd_mask));
-    base->writefds_in = sudo_ecalloc(1, sizeof(fd_mask));
-    base->readfds_out = sudo_ecalloc(1, sizeof(fd_mask));
-    base->writefds_out = sudo_ecalloc(1, sizeof(fd_mask));
+    base->readfds_in = calloc(1, sizeof(fd_mask));
+    base->writefds_in = calloc(1, sizeof(fd_mask));
+    base->readfds_out = calloc(1, sizeof(fd_mask));
+    base->writefds_out = calloc(1, sizeof(fd_mask));
 
+    if (base->readfds_in == NULL || base->writefds_in == NULL ||
+	base->readfds_out == NULL || base->writefds_out == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: unable to calloc(1, %zu)", __func__, sizeof(fd_mask));
+	sudo_ev_base_free_impl(base);
+	debug_return_int(-1);
+    }
     debug_return_int(0);
 }
 
@@ -76,10 +71,10 @@ void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
-    sudo_efree(base->readfds_in);
-    sudo_efree(base->writefds_in);
-    sudo_efree(base->readfds_out);
-    sudo_efree(base->writefds_out);
+    free(base->readfds_in);
+    free(base->writefds_in);
+    free(base->readfds_out);
+    free(base->writefds_out);
     debug_return;
 }
 
@@ -92,10 +87,36 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ev->fd > base->maxfd) {
 	const int o = (base->maxfd + 1) / NFDBITS;
 	const int n = howmany(ev->fd + 1, NFDBITS);
-	base->readfds_in = sudo_erecalloc(base->readfds_in, o, n, sizeof(fd_mask));
-	base->writefds_in = sudo_erecalloc(base->writefds_in, o, n, sizeof(fd_mask));
-	base->readfds_out = sudo_erecalloc(base->readfds_out, o, n, sizeof(fd_mask));
-	base->writefds_out = sudo_erecalloc(base->writefds_out, o, n, sizeof(fd_mask));
+	const size_t used_bytes = o * sizeof(fd_mask);
+	const size_t new_bytes = (n - o) * sizeof(fd_mask);
+	fd_set *rfds_in, *wfds_in, *rfds_out, *wfds_out;
+
+	rfds_in = reallocarray(base->readfds_in, n, sizeof(fd_mask));
+	wfds_in = reallocarray(base->writefds_in, n, sizeof(fd_mask));
+	rfds_out = reallocarray(base->readfds_out, n, sizeof(fd_mask));
+	wfds_out = reallocarray(base->writefds_out, n, sizeof(fd_mask));
+	if (rfds_in == NULL || wfds_in == NULL ||
+	    rfds_out == NULL || wfds_out == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: unable to reallocarray(%d, %zu)",
+		__func__, n, sizeof(fd_mask));
+	    free(rfds_in);
+	    free(wfds_in);
+	    free(rfds_out);
+	    debug_return_int(-1);
+	}
+
+	/* Clear newly allocated space. */
+	memset((char *)rfds_in + used_bytes, 0, new_bytes);
+	memset((char *)wfds_in + used_bytes, 0, new_bytes);
+	memset((char *)rfds_out + used_bytes, 0, new_bytes);
+	memset((char *)wfds_out + used_bytes, 0, new_bytes);
+
+	/* Update base. */
+	base->readfds_in = rfds_in;
+	base->writefds_in = wfds_in;
+	base->readfds_out = rfds_out;
+	base->writefds_out = wfds_out;
 	base->maxfd = (n * NFDBITS) - 1;
     }
 

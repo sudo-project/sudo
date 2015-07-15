@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _COMPAT_ENDIAN_H
-#define _COMPAT_ENDIAN_H
+#ifndef COMPAT_ENDIAN_H
+#define COMPAT_ENDIAN_H
 
 #ifndef BYTE_ORDER
 # undef LITTLE_ENDIAN
@@ -69,4 +69,4 @@
 # endif
 #endif /* BYTE_ORDER */
 
-#endif /* _COMPAT_ENDIAN_H */
+#endif /* COMPAT_ENDIAN_H */
