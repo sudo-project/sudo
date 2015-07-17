@@ -142,7 +142,7 @@ sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
     sudo_debug_printf(SUDO_DEBUG_INFO, "malloc: cnt=%d", src->num_values);
 
     dst->name = strdup(src->name);
-    dst->values = reallocarray(NULL, dst->num_values, sizeof(char *));
+    dst->values = reallocarray(NULL, src->num_values, sizeof(char *));
     if (dst->name == NULL || dst->values == NULL)
 	goto oom;
     dst->num_values = src->num_values;
@@ -195,7 +195,6 @@ sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
 
     for (i = 0; i < src->num_attrs; ++i) {
 	if (!sudo_sss_attrcpy(dst->attrs + i, src->attrs + i)) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    dst->num_attrs = i;
 	    sudo_sss_rulefree(dst);
 	    debug_return_bool(false);

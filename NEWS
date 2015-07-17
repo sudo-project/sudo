@@ -1,3 +1,8 @@
+What's new in Sudo 1.8.14p1
+
+ * Fixed a bug introduced in sudo 1.8.14 that prevented the sssd
+   backend from working.  Bug #703.
+
 What's new in Sudo 1.8.14
 
  * Log messages on Mac OS X now respect sudoers_locale when sudo
