@@ -242,7 +242,7 @@ char *getenv_unhooked(const char *name);
 int get_net_ifs(char **addrinfo);
 
 /* ttyname.c */
-char *get_process_ttyname(void);
+char *get_process_ttyname(char *name, size_t namelen);
 
 /* signal.c */
 struct sigaction;
