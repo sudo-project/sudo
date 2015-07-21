@@ -446,7 +446,7 @@ get_process_ttyname(char *name, size_t namelen)
 	if (nread == (ssize_t)sizeof(psinfo)) {
 	    dev_t rdev = (dev_t)psinfo.pr_ttydev;
 #if defined(_AIX) && defined(DEVNO64)
-	    if (psinfo.pr_ttydev & DEVNO64)
+	    if ((psinfo.pr_ttydev & DEVNO64) && sizeof(dev_t) == 4)
 		rdev = makedev(major64(psinfo.pr_ttydev), minor64(psinfo.pr_ttydev));
 #endif
 	    if (rdev != (dev_t)-1)
