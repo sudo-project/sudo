@@ -308,8 +308,9 @@ build_timestamp(struct passwd *pw)
 }
 
 /*
- * Open and lock the specified timestamp file.
- * Returns 0 on success or -1 on failure.
+ * Open and lock the specified timestamp or lecture file.
+ * Returns open and locked file descriptor on success.
+ * Returns TIMESTAMP_OPEN_ERROR or TIMESTAMP_PERM_ERROR on error.
  */
 static int
 open_timestamp(const char *path, int flags)
@@ -320,7 +321,7 @@ open_timestamp(const char *path, int flags)
 
     if (timestamp_uid != 0)
 	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(timestamp_file, flags, 0600);
+    fd = open(path, flags, 0600);
     if (uid_changed && !restore_perms()) {
 	/* Unable to restore permissions, should not happen. */
 	if (fd != -1) {
