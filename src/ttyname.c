@@ -382,8 +382,8 @@ get_process_ttyname(char *name, size_t namelen)
 {
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
+    int mib[6], rc, serrno = errno;
     char *rval = NULL;
-    int mib[6], rc;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /*
@@ -407,8 +407,10 @@ get_process_ttyname(char *name, size_t namelen)
 	ki_proc = kp;
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
+    errno = ENOENT;
     if (rc != -1) {
 	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
+	    errno = serrno;
 	    rval = sudo_ttyname_dev(ki_proc->sudo_kp_tdev, name, namelen);
 	    if (rval == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -435,7 +437,7 @@ get_process_ttyname(char *name, size_t namelen)
     char path[PATH_MAX], *rval = NULL;
     struct psinfo psinfo;
     ssize_t nread;
-    int fd;
+    int fd, serrno = errno;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
@@ -449,11 +451,16 @@ get_process_ttyname(char *name, size_t namelen)
 	    if ((psinfo.pr_ttydev & DEVNO64) && sizeof(dev_t) == 4)
 		rdev = makedev(major64(psinfo.pr_ttydev), minor64(psinfo.pr_ttydev));
 #endif
-	    if (rdev != (dev_t)-1)
+	    if (rdev != (dev_t)-1) {
+		errno = serrno;
 		rval = sudo_ttyname_dev(rdev, name, namelen);
+		got done;
+	    }
 	}
     }
+    errno = ENOENT;
 
+done:
     if (rval == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
@@ -471,6 +478,7 @@ get_process_ttyname(char *name, size_t namelen)
     char path[PATH_MAX], *line = NULL;
     char *rval = NULL;
     size_t linesize = 0;
+    int serrno = errno;
     ssize_t len;
     FILE *fp;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
@@ -495,8 +503,11 @@ get_process_ttyname(char *name, size_t namelen)
 			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				"%s: tty device %s: %s", path, cp, errstr);
 			}
-			if (tdev > 0)
+			if (tdev > 0) {
+			    errno = serrno;
 			    rval = sudo_ttyname_dev(tdev, name, namelen);
+			    goto done;
+			}
 			break;
 		    }
 		    cp = ep + 1;
@@ -505,7 +516,9 @@ get_process_ttyname(char *name, size_t namelen)
 	}
 	free(line);
     }
+    errno = ENOENT;
 
+done:
     if (rval == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
@@ -522,7 +535,7 @@ get_process_ttyname(char *name, size_t namelen)
 {
     struct pst_status pstat;
     char *rval = NULL;
-    int rc;
+    int rc, serrno = errno;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /*
@@ -532,10 +545,15 @@ get_process_ttyname(char *name, size_t namelen)
     rc = pstat_getproc(&pstat, sizeof(pstat), (size_t)0, (int)getpid());
     if (rc != -1 || errno == EOVERFLOW) {
 	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
+	    errno = serrno;
 	    rval = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
 		pstat.pst_term.psd_minor), name, namelen);
+	    goto done;
 	}
     }
+    errno = ENOENT;
+
+done:
     if (rval == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via pstat");
