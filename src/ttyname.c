@@ -454,7 +454,7 @@ get_process_ttyname(char *name, size_t namelen)
 	    if (rdev != (dev_t)-1) {
 		errno = serrno;
 		rval = sudo_ttyname_dev(rdev, name, namelen);
-		got done;
+		goto done;
 	    }
 	}
     }
