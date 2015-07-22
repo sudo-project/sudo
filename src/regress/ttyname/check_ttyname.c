@@ -26,6 +26,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
+#include <limits.h>
 #include <errno.h>
 
 #include "sudo_compat.h"
@@ -36,18 +37,20 @@
 __dso_public int main(int argc, char *argv[]);
 
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-extern char *get_process_ttyname(void);
+extern char *get_process_ttyname(char *name, size_t namelen);
 
 int
 main(int argc, char *argv[])
 {
-    char *tty_libc = NULL, *tty_sudo;
+    char *tty_libc = NULL, *tty_sudo = NULL;
+    char pathbuf[PATH_MAX];
     int rval = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
 
     /* Lookup tty name using kernel info if possible. */
-    tty_sudo = get_process_ttyname();
+    if (get_process_ttyname(pathbuf, sizeof(pathbuf)) != NULL)
+	tty_sudo = pathbuf;
 
 #if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || \
     defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || \
@@ -78,6 +81,5 @@ main(int argc, char *argv[])
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
     }
 
-    free(tty_sudo);
     exit(rval);
 }

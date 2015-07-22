@@ -449,7 +449,7 @@ oom:
 static char **
 get_user_info(struct user_details *ud)
 {
-    char *cp, **user_info, cwd[PATH_MAX];
+    char *cp, **user_info, path[PATH_MAX];
     struct passwd *pw;
     int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
@@ -518,23 +518,22 @@ get_user_info(struct user_details *ud)
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
 
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-	user_info[++i] = sudo_new_key_val("cwd", cwd);
+    if (getcwd(path, sizeof(path)) != NULL) {
+	user_info[++i] = sudo_new_key_val("cwd", path);
 	if (user_info[i] == NULL)
 	    goto bad;
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
-    if ((cp = get_process_ttyname()) == NULL) {
-	/* tty may not always be present */
-	if (errno == ENOMEM)
-	    goto bad;
-    } else {
-	user_info[++i] = sudo_new_key_val("tty", cp);
+    if (get_process_ttyname(path, sizeof(path)) != NULL) {
+	user_info[++i] = sudo_new_key_val("tty", path);
 	if (user_info[i] == NULL)
 	    goto bad;
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
-	free(cp);
+    } else {
+	/* tty may not always be present */
+	if (errno != ENOENT)
+	    goto bad;
     }
 
     cp = sudo_gethostname();
