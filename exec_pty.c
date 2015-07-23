@@ -228,11 +228,8 @@ suspend_parent(signo)
 	flush_output();
 
 	/* Restore original tty mode before suspending. */
-	if (oldmode != TERM_COOKED) {
-	    do {
-		n = term_restore(io_fds[SFD_USERTTY], 0);
-	    } while (!n && errno == EINTR);
-	}
+	if (oldmode != TERM_COOKED)
+	    term_restore(io_fds[SFD_USERTTY], 0);
 
 	/* Suspend self and continue command when we resume. */
 	if (signo != SIGSTOP) {
@@ -594,14 +591,8 @@ pty_close(cstat)
     }
     flush_output();
 
-    if (io_fds[SFD_USERTTY] != -1) {
-	check_foreground();
-	if (foreground) {
-	    do {
-		n = term_restore(io_fds[SFD_USERTTY], 0);
-	    } while (!n && errno == EINTR);
-	}
-    }
+    if (io_fds[SFD_USERTTY] != -1)
+	term_restore(io_fds[SFD_USERTTY], 0);
 
     /* If child was signalled, write the reason to stdout like the shell. */
     if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
@@ -1181,9 +1172,6 @@ void
 cleanup_pty(gotsignal)
     int gotsignal;
 {
-    if (io_fds[SFD_USERTTY] != -1) {
-	check_foreground();
-	if (foreground)
-	    term_restore(io_fds[SFD_USERTTY], 0);
-    }
+    if (io_fds[SFD_USERTTY] != -1)
+	term_restore(io_fds[SFD_USERTTY], 0);
 }

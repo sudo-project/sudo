@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <errno.h>
+#include <signal.h>
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #else
@@ -47,6 +48,9 @@
 #  include <sys/ioctl.h>
 # endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 
 #include "sudo.h"
 
@@ -106,24 +110,52 @@ static int changed;
 int term_erase;
 int term_kill;
 
+static volatile sig_atomic_t got_sigttou;
+
 /*
- * Like tcsetattr() but restarts on EINTR.
+ * SIGTTOU signal handler for term_restore that just sets a flag.
+ */
+static void
+sigttou(signo)
+    int signo;
+{
+    got_sigttou = 1;
+}
+
+/*
+ * Like tcsetattr() but restarts on EINTR _except_ for SIGTTOU.
  * Returns 0 on success or -1 on failure, setting errno.
+ * Sets got_sigttou on failure if interrupted by SIGTTOU.
  */
 static int
-tcsetattr_nointr(int fd, int flags, struct termios *tp)
+tcsetattr_nobg(fd, flags, tp)
+    int fd;
+    int flags;
+    struct termios *tp;
 {
+    sigaction_t sa, osa;
     int rc;
 
+    /*
+     * If we receive SIGTTOU from tcsetattr() it means we are
+     * not in the foreground process group.
+     * This should be less racy than using tcgetpgrp().
+     */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = sigttou;
+    got_sigttou = 0;
+    sigaction(SIGTTOU, &sa, &osa);
     do {
 	rc = tcsetattr(fd, flags, tp);
-    } while (rc != 0 && errno == EINTR);
+    } while (rc != 0 && errno == EINTR && !got_sigttou);
+    sigaction(SIGTTOU, &osa, NULL);
 
     return rc;
 }
 
 /*
- * Restore saved terminal settings.
+ * Restore saved terminal settings if we are in the foreground process group.
  * Returns 1 on success or 0 on failure.
  */
 int
@@ -133,7 +165,7 @@ term_restore(fd, flush)
 {
     if (changed) {
 	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
-	if (tcsetattr_nointr(fd, flags, &oterm) != 0)
+	if (tcsetattr_nobg(fd, flags, &oterm) != 0)
 	    return 0;
 	changed = 0;
     }
@@ -148,6 +180,7 @@ int
 term_noecho(fd)
     int fd;
 {
+again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -155,9 +188,14 @@ term_noecho(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
 	return 1;
+    }
+    if (got_sigttou) {
+	/* We were in the background, so oterm is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
     }
     return 0;
 }
@@ -175,6 +213,7 @@ term_raw(fd, isig)
 {
     struct termios term;
 
+again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -186,9 +225,14 @@ term_raw(fd, isig)
     CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
-    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return 1;
+    }
+    if (got_sigttou) {
+	/* We were in the background, so oterm is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
     }
     return 0;
 }
@@ -201,6 +245,7 @@ int
 term_cbreak(fd)
     int fd;
 {
+again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -212,11 +257,16 @@ term_cbreak(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
 	return 1;
+    }
+    if (got_sigttou) {
+	/* We were in the background, so oterm is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
     }
     return 0;
 }
@@ -232,15 +282,23 @@ term_copy(src, dst)
 {
     struct termios tt;
 
+again:
     if (tcgetattr(src, &tt) != 0)
 	return 0;
     /* XXX - add TCSANOW compat define */
-    if (tcsetattr_nointr(dst, TCSANOW|TCSASOFT, &tt) != 0)
-	return 0;
-    return 1;
+    if (tcsetattr_nobg(dst, TCSANOW|TCSASOFT, &tt) == 0)
+	return 1;
+    if (got_sigttou) {
+	/* We were in the background, so tt is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
+    }
+    return 0;
 }
 
 #else /* SGTTY */
+
+#define ioctl_nobg(f, r, s)	tcsetattr_nobg((f), (r), (s))
 
 /*
  * Set terminal to raw mode.
@@ -251,6 +309,7 @@ term_raw(fd, isig)
     int fd;
     int isig;
 {
+again:
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
 	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -258,9 +317,14 @@ term_raw(fd, isig)
     /* XXX - how to support isig? */
     CLR(term.c_lflag, ECHO);
     SET(term.sg_flags, RAW);
-    if (ioctl(fd, TIOCSETP, &term) == 0) {
+    if (ioctl_nobg(fd, TIOCSETP, &term) == 0) {
 	changed = 1;
 	return 1;
+    }
+    if (got_sigttou) {
+	/* We were in the background, so oterm is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
     }
     return 0;
 }
@@ -273,17 +337,23 @@ int
 term_cbreak(fd)
     int fd;
 {
+again:
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
 	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     CLR(term.c_lflag, ECHO);
     SET(term.sg_flags, CBREAK);
-    if (ioctl(fd, TIOCSETP, &term) == 0) {
+    if (ioctl_nobg(fd, TIOCSETP, &term) == 0) {
 	term_erase = term.sg_erase;
 	term_kill = term.sg_kill;
 	changed = 1;
 	return 1;
+    }
+    if (got_sigttou) {
+	/* We were in the background, so oterm is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
     }
     return 0;
 }
@@ -302,15 +372,23 @@ term_copy(src, dst)
     struct ltchars lc;
     int l, lb;
 
+again:
     if (ioctl(src, TIOCGETP, &b) != 0 || ioctl(src, TIOCGETC, &tc) != 0 ||
 	ioctl(src, TIOCGETD, &l) != 0 || ioctl(src, TIOCGLTC, &lc) != 0 ||
 	ioctl(src, TIOCLGET, &lb)) {
 	return 0;
     }
-    if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
-	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
-	ioctl(dst, TIOCSETD, &l) != 0) {
+    if (ioctl_nobg(dst, TIOCSETP, &b) != 0 ||
+	ioctl_nobg(dst, TIOCSETC, &tc) != 0 ||
+	ioctl_nobg(dst, TIOCSLTC, &lc) != 0 ||
+	ioctl_nobg(dst, TIOCLSET, &lb) != 0 ||
+	ioctl_nobg(dst, TIOCSETD, &l) != 0) {
 	return 0;
+    }
+    if (got_sigttou) {
+	/* We were in the background, so oterm is probably bogus. */
+	kill(getpid(), SIGTTOU);
+	goto again;
     }
     return 1;
 }
