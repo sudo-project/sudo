@@ -108,6 +108,7 @@ int term_kill;
 
 /*
  * Like tcsetattr() but restarts on EINTR.
+ * Returns 0 on success or -1 on failure, setting errno.
  */
 static int
 tcsetattr_nointr(int fd, int flags, struct termios *tp)
@@ -123,6 +124,7 @@ tcsetattr_nointr(int fd, int flags, struct termios *tp)
 
 /*
  * Restore saved terminal settings.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_restore(fd, flush)
@@ -140,6 +142,7 @@ term_restore(fd, flush)
 
 /*
  * Disable terminal echo.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_noecho(fd)
@@ -163,6 +166,7 @@ term_noecho(fd)
 
 /*
  * Set terminal to raw mode.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_raw(fd, isig)
@@ -191,6 +195,7 @@ term_raw(fd, isig)
 
 /*
  * Set terminal to cbreak mode.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_cbreak(fd)
@@ -218,6 +223,7 @@ term_cbreak(fd)
 
 /*
  * Copy terminal settings from one descriptor to another.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_copy(src, dst)
@@ -238,6 +244,7 @@ term_copy(src, dst)
 
 /*
  * Set terminal to raw mode.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_raw(fd, isig)
@@ -260,6 +267,7 @@ term_raw(fd, isig)
 
 /*
  * Set terminal to cbreak mode.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_cbreak(fd)
@@ -282,6 +290,7 @@ term_cbreak(fd)
 
 /*
  * Copy terminal settings from one descriptor to another.
+ * Returns 1 on success or 0 on failure.
  */
 int
 term_copy(src, dst)
