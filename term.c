@@ -188,7 +188,7 @@ again:
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	changed = 1;
 	return 1;
     }
@@ -225,7 +225,7 @@ again:
     CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
-    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	changed = 1;
     	return 1;
     }
@@ -257,7 +257,7 @@ again:
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
@@ -285,8 +285,7 @@ term_copy(src, dst)
 again:
     if (tcgetattr(src, &tt) != 0)
 	return 0;
-    /* XXX - add TCSANOW compat define */
-    if (tcsetattr_nobg(dst, TCSANOW|TCSASOFT, &tt) == 0)
+    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt) == 0)
 	return 1;
     if (got_sigttou) {
 	/* We were in the background, so tt is probably bogus. */
