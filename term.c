@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,6 +36,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <errno.h>
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #else
@@ -100,24 +101,46 @@ typedef struct termios sudo_term_t;
 
 static sudo_term_t term, oterm;
 static int changed;
+
+/* tgetpass() needs to know the erase and kill chars for cbreak mode. */
 int term_erase;
 int term_kill;
 
+/*
+ * Like tcsetattr() but restarts on EINTR.
+ */
+static int
+tcsetattr_nointr(int fd, int flags, struct termios *tp)
+{
+    int rc;
+
+    do {
+	rc = tcsetattr(fd, flags, tp);
+    } while (rc != 0 && errno == EINTR);
+
+    return rc;
+}
+
+/*
+ * Restore saved terminal settings.
+ */
 int
 term_restore(fd, flush)
     int fd;
     int flush;
 {
     if (changed) {
-	int flags = TCSASOFT;
-	flags |= flush ? TCSAFLUSH : TCSADRAIN;
-	if (tcsetattr(fd, flags, &oterm) != 0)
+	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
+	if (tcsetattr_nointr(fd, flags, &oterm) != 0)
 	    return 0;
 	changed = 0;
     }
     return 1;
 }
 
+/*
+ * Disable terminal echo.
+ */
 int
 term_noecho(fd)
     int fd;
@@ -129,7 +152,7 @@ term_noecho(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
 	return 1;
     }
@@ -138,6 +161,9 @@ term_noecho(fd)
 
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
+/*
+ * Set terminal to raw mode.
+ */
 int
 term_raw(fd, isig)
     int fd;
@@ -156,13 +182,16 @@ term_raw(fd, isig)
     CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
-    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return 1;
     }
     return 0;
 }
 
+/*
+ * Set terminal to cbreak mode.
+ */
 int
 term_cbreak(fd)
     int fd;
@@ -178,7 +207,7 @@ term_cbreak(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
@@ -187,6 +216,9 @@ term_cbreak(fd)
     return 0;
 }
 
+/*
+ * Copy terminal settings from one descriptor to another.
+ */
 int
 term_copy(src, dst)
     int src;
@@ -197,13 +229,16 @@ term_copy(src, dst)
     if (tcgetattr(src, &tt) != 0)
 	return 0;
     /* XXX - add TCSANOW compat define */
-    if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
+    if (tcsetattr_nointr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	return 0;
     return 1;
 }
 
 #else /* SGTTY */
 
+/*
+ * Set terminal to raw mode.
+ */
 int
 term_raw(fd, isig)
     int fd;
@@ -223,6 +258,9 @@ term_raw(fd, isig)
     return 0;
 }
 
+/*
+ * Set terminal to cbreak mode.
+ */
 int
 term_cbreak(fd)
     int fd;
@@ -242,6 +280,9 @@ term_cbreak(fd)
     return 0;
 }
 
+/*
+ * Copy terminal settings from one descriptor to another.
+ */
 int
 term_copy(src, dst)
     int src;
