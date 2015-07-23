@@ -161,7 +161,7 @@ sudo_term_raw_v1(int fd, int isig)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return 0;
+	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     term.c_cc[VMIN] = 1;
@@ -194,7 +194,7 @@ sudo_term_cbreak_v1(int fd)
 
 again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return 0;
+	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     term.c_cc[VMIN] = 1;
