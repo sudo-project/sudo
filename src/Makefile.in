@@ -165,11 +165,11 @@ install-dirs:
 
 install-rc: install-dirs
 	if [ -n "$(INIT_SCRIPT)" ]; then \
-	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_srcdir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
 	    rm -f $(DESTDIR)$(RC_LINK); \
 	    ln -s $(INIT_DIR)/sudo $(DESTDIR)$(RC_LINK); \
 	elif test -n "$(tmpfiles_d)"; then \
-	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_srcdir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
+	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
 	fi
 
 install-binaries: install-dirs $(PROGS)
