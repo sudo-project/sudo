@@ -125,6 +125,10 @@ case "$osversion" in
 	if [ $osrelease -ge 60 ]; then
 	    # RHEL 6 and above builds sudo with SSSD support
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
+	    if test "`getconf LONG_BIT`" = "64"; then
+		# SSSD backend needs to know where to find the sssd lib
+		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib64"
+	    fi
 	    # RHEL 6 and above use /etc/sudo-ldap.conf
 	    if test "$flavor" = "ldap"; then
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
