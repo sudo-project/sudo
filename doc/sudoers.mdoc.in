@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 10, 2015
+.Dd August 4, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2606,6 +2606,32 @@ option can be used to specify a different file descriptor at which
 to start closing.
 The default is
 .Li 3 .
+.It maxseq
+The maximum sequence number that will be substituted for the
+.Dq Li %{seq}
+escape in the I/O log file (see the
+.Em iolog_dir
+description above for more information).
+While the value substituted for
+.Dq Li %{seq}
+is in base 36,
+.Em maxseq
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+.Dq ZZZZZZ )
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.Pp
+Once the local sequence number reaches the value of
+.Em maxseq ,
+it will
+.Dq roll over
+to zero, after which
+.Nm
+will truncate and re-use any existing I/O log path names.
+.Pp
+This setting is only supported by version 1.8.7 or higher.
 .It passwd_tries
 The number of tries a user gets to enter his/her password before
 .Nm sudo
@@ -2814,32 +2840,6 @@ The escape
 will expand to the host name of the machine.
 Default is
 .Dq Li @mailsub@ .
-.It maxseq
-The maximum sequence number that will be substituted for the
-.Dq Li %{seq}
-escape in the I/O log file (see the
-.Em iolog_dir
-description above for more information).
-While the value substituted for
-.Dq Li %{seq}
-is in base 36,
-.Em maxseq
-itself should be expressed in decimal.
-Values larger than 2176782336 (which corresponds to the
-base 36 sequence number
-.Dq ZZZZZZ )
-will be silently truncated to 2176782336.
-The default value is 2176782336.
-.Pp
-Once the local sequence number reaches the value of
-.Em maxseq ,
-it will
-.Dq roll over
-to zero, after which
-.Nm
-will truncate and re-use any existing I/O log path names.
-.Pp
-This setting is only supported by version 1.8.7 or higher.
 .It noexec_file
 As of
 .Nm sudo

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "July 10, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 4, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2779,6 +2779,33 @@ to start closing.
 The default is
 \fR3\fR.
 .TP 18n
+maxseq
+The maximum sequence number that will be substituted for the
+\(Lq\fR%{seq}\fR\(Rq
+escape in the I/O log file (see the
+\fIiolog_dir\fR
+description above for more information).
+While the value substituted for
+\(Lq\fR%{seq}\fR\(Rq
+is in base 36,
+\fImaxseq\fR
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+\(LqZZZZZZ\(Rq)
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.sp
+Once the local sequence number reaches the value of
+\fImaxseq\fR,
+it will
+\(Lqroll over\(Rq
+to zero, after which
+\fBsudoers\fR
+will truncate and re-use any existing I/O log path names.
+.sp
+This setting is only supported by version 1.8.7 or higher.
+.TP 18n
 passwd_tries
 The number of tries a user gets to enter his/her password before
 \fBsudo\fR
@@ -3005,33 +3032,6 @@ The escape
 will expand to the host name of the machine.
 Default is
 \(Lq\fR@mailsub@\fR\(Rq.
-.TP 18n
-maxseq
-The maximum sequence number that will be substituted for the
-\(Lq\fR%{seq}\fR\(Rq
-escape in the I/O log file (see the
-\fIiolog_dir\fR
-description above for more information).
-While the value substituted for
-\(Lq\fR%{seq}\fR\(Rq
-is in base 36,
-\fImaxseq\fR
-itself should be expressed in decimal.
-Values larger than 2176782336 (which corresponds to the
-base 36 sequence number
-\(LqZZZZZZ\(Rq)
-will be silently truncated to 2176782336.
-The default value is 2176782336.
-.sp
-Once the local sequence number reaches the value of
-\fImaxseq\fR,
-it will
-\(Lqroll over\(Rq
-to zero, after which
-\fBsudoers\fR
-will truncate and re-use any existing I/O log path names.
-.sp
-This setting is only supported by version 1.8.7 or higher.
 .TP 18n
 noexec_file
 As of

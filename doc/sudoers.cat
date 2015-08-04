@@ -1306,6 +1306,24 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        file descriptor at which to start closing.  The default
                        is 3.
 
+     maxseq            The maximum sequence number that will be substituted
+                       for the ``%{seq}'' escape in the I/O log file (see the
+                       _i_o_l_o_g___d_i_r description above for more information).
+                       While the value substituted for ``%{seq}'' is in base
+                       36, _m_a_x_s_e_q itself should be expressed in decimal.
+                       Values larger than 2176782336 (which corresponds to the
+                       base 36 sequence number ``ZZZZZZ'') will be silently
+                       truncated to 2176782336.  The default value is
+                       2176782336.
+
+                       Once the local sequence number reaches the value of
+                       _m_a_x_s_e_q, it will ``roll over'' to zero, after which
+                       ssuuddooeerrss will truncate and re-use any existing I/O log
+                       path names.
+
+                       This setting is only supported by version 1.8.7 or
+                       higher.
+
      passwd_tries      The number of tries a user gets to enter his/her
                        password before ssuuddoo logs the failure and exits.  The
                        default is 3.
@@ -1440,24 +1458,6 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      mailsub           Subject of the mail sent to the _m_a_i_l_t_o user.  The
                        escape %h will expand to the host name of the machine.
                        Default is ``*** SECURITY information for %h ***''.
-
-     maxseq            The maximum sequence number that will be substituted
-                       for the ``%{seq}'' escape in the I/O log file (see the
-                       _i_o_l_o_g___d_i_r description above for more information).
-                       While the value substituted for ``%{seq}'' is in base
-                       36, _m_a_x_s_e_q itself should be expressed in decimal.
-                       Values larger than 2176782336 (which corresponds to the
-                       base 36 sequence number ``ZZZZZZ'') will be silently
-                       truncated to 2176782336.  The default value is
-                       2176782336.
-
-                       Once the local sequence number reaches the value of
-                       _m_a_x_s_e_q, it will ``roll over'' to zero, after which
-                       ssuuddooeerrss will truncate and re-use any existing I/O log
-                       path names.
-
-                       This setting is only supported by version 1.8.7 or
-                       higher.
 
      noexec_file       As of ssuuddoo version 1.8.1 this option is no longer
                        supported.  The path to the noexec file should now be
@@ -2417,4 +2417,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.14                      July 10, 2015                     Sudo 1.8.14
+Sudo 1.8.14                     August 4, 2015                     Sudo 1.8.14
