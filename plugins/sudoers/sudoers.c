@@ -972,6 +972,7 @@ set_loginclass(struct passwd *pw)
 
 /*
  * Look up the fully qualified domain name of host.
+ * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  * Returns true on success, setting longp and shortp.
  * Returns false on failure, longp and shortp are unchanged.
  */
@@ -1012,7 +1013,6 @@ resolve_host(const char *host, char **longp, char **shortp)
 /*
  * Look up the fully qualified domain name of user_host and user_runhost.
  * Sets user_host, user_shost, user_runhost and user_srunhost.
- * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  */
 static bool
 set_fqdn(void)
