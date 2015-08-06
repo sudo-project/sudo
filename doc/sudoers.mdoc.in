@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 4, 2015
+.Dd August 6, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -914,9 +914,10 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
-	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
+Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
+              'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
+              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
 .Ed
 .Pp
 A
@@ -1137,16 +1138,18 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-.Li NOEXEC ,
 .Li EXEC ,
+.Li NOEXEC ,
+.Li FOLLOW ,
+.Li NOFOLLOW ,
 .Li LOG_INPUT ,
 .Li NOLOG_INPUT ,
 .Li LOG_OUTPUT ,
 .Li NOLOG_OUTPUT ,
 .Li MAIL ,
 .Li NOMAIL ,
-.Li NOPASSWD ,
 .Li PASSWD ,
+.Li NOPASSWD ,
 .Li SETENV ,
 and
 .Li NOSETENV .
@@ -1165,7 +1168,7 @@ and
 overrides
 .Li EXEC ) .
 .Bl -hang -width 0n
-.It Em NOEXEC No and Em EXEC
+.It Em EXEC No and Em NOEXEC
 .sp
 If
 .Nm sudo
@@ -1192,6 +1195,23 @@ See the
 section below for more details on how
 .Li NOEXEC
 works and whether or not it will work on your system.
+.It Em FOLLOW No and Em NOFOLLOW
+Starting with version 1.8.15,
+.Nm sudoedit
+will not follow symbolic links when opening files unless the
+.Em sudoedit_follow
+option is enabled.
+The
+.Em FOLLOW
+and
+.Em NOFOLLOW
+tags override the value of
+.Em sudoedit_follow
+and can be used to permit (or deny) the editing of symbolic links
+on a per-command basis.
+These tags are only effective for the
+.Em sudoedit
+command and are ignored for all other commands.
 .It Em LOG_INPUT No and Em NOLOG_INPUT
 .sp
 These tags override the value of the
@@ -1241,7 +1261,7 @@ and
 in the
 .Sx SUDOERS OPTIONS
 section below.
-.It Em NOPASSWD No and Em PASSWD
+.It Em PASSWD No and Em NOPASSWD
 .sp
 By default,
 .Nm sudo
@@ -2493,6 +2513,25 @@ system call.
 This flag is
 .Em off
 by default.
+.It sudoedit_follow
+By default,
+.Nm sudoedit
+will not follow symbolic links when opening files.
+The
+.Em sudoedit_follow
+option can be enabled to allow
+.Nm sudoedit
+to open symbolic links.
+It may be overridden on a per-command basis by the
+.Em FOLLOW
+and
+.Em NOFOLLOW
+tags.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.15 or higher.
 .It targetpw
 If set,
 .Nm sudo

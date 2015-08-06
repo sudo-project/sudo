@@ -180,6 +180,8 @@
 #define I_MAXSEQ                89
 #define def_use_netgroups       (sudo_defs_table[90].sd_un.flag)
 #define I_USE_NETGROUPS         90
+#define def_sudoedit_follow     (sudo_defs_table[91].sd_un.flag)
+#define I_SUDOEDIT_FOLLOW       91
 
 enum def_tuple {
 	never,

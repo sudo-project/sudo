@@ -438,6 +438,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	if ((command_info[info_len++] = strdup("sudoedit=true")) == NULL)
 	    goto oom;
+	if (def_sudoedit_follow) {
+	    if ((command_info[info_len++] = strdup("sudoedit_follow=true")) == NULL)
+		goto oom;
+	}
     }
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */

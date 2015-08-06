@@ -111,6 +111,8 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <tok>	 NOLOG_OUTPUT		/* don't log cmnd output */
 %token <tok>	 MAIL			/* mail log message */
 %token <tok>	 NOMAIL			/* don't mail log message */
+%token <tok>	 FOLLOW			/* follow symbolic links */
+%token <tok>	 NOFOLLOW		/* don't follow symbolic links */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -370,6 +372,8 @@ cmndspeclist	:	cmndspec
 				$3->tags.log_output = prev->tags.log_output;
 			    if ($3->tags.send_mail == UNSPEC)
 				$3->tags.send_mail = prev->tags.send_mail;
+			    if ($3->tags.follow == UNSPEC)
+				$3->tags.follow = prev->tags.follow;
 			    if (($3->runasuserlist == NULL &&
 				 $3->runasgrouplist == NULL) &&
 				(prev->runasuserlist != NULL ||
@@ -614,8 +618,7 @@ runaslist	:	/* empty */ {
 		;
 
 cmndtag		:	/* empty */ {
-			    $$.log_input = $$.log_output = $$.noexec =
-				$$.nopasswd = $$.send_mail = $$.setenv = UNSPEC;
+			    TAGS_INIT($$);
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = true;
@@ -646,6 +649,12 @@ cmndtag		:	/* empty */ {
 			}
 		|	cmndtag NOLOG_OUTPUT {
 			    $$.log_output = false;
+			}
+		|	cmndtag FOLLOW {
+			    $$.follow = true;
+			}
+		|	cmndtag NOFOLLOW {
+			    $$.follow = false;
 			}
 		|	cmndtag MAIL {
 			    $$.send_mail = true;

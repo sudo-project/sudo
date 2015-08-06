@@ -454,6 +454,16 @@ NOMAIL[[:blank:]]*:	{
 			    	LEXRETURN(NOMAIL);
 			}
 
+FOLLOW[[:blank:]]*:	{
+			    	LEXTRACE("FOLLOW ");
+			    	LEXRETURN(FOLLOW);
+			}
+
+NOFOLLOW[[:blank:]]*:	{
+			    	LEXTRACE("NOFOLLOW ");
+			    	LEXRETURN(NOFOLLOW);
+			}
+
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
 			    /* empty group or netgroup */
 			    LEXTRACE("ERROR ");

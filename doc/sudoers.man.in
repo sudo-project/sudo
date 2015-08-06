@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "August 4, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 6, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -961,9 +961,10 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
-	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
+Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
+              'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
+              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
 .RE
 .fi
 .PP
@@ -1214,16 +1215,18 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-\fRNOEXEC\fR,
 \fREXEC\fR,
+\fRNOEXEC\fR,
+\fRFOLLOW\fR,
+\fRNOFOLLOW\fR,
 \fRLOG_INPUT\fR,
 \fRNOLOG_INPUT\fR,
 \fRLOG_OUTPUT\fR,
 \fRNOLOG_OUTPUT\fR,
 \fRMAIL\fR,
 \fRNOMAIL\fR,
-\fRNOPASSWD\fR,
 \fRPASSWD\fR,
+\fRNOPASSWD\fR,
 \fRSETENV\fR,
 and
 \fRNOSETENV\fR.
@@ -1242,7 +1245,7 @@ and
 overrides
 \fREXEC\fR).
 .TP 2n
-\fINOEXEC\fR and \fIEXEC\fR
+\fIEXEC\fR and \fINOEXEC\fR
 .sp
 If
 \fBsudo\fR
@@ -1274,6 +1277,24 @@ section below for more details on how
 \fRNOEXEC\fR
 works and whether or not it will work on your system.
 .RE
+.TP 2n
+\fIFOLLOW\fR and \fINOFOLLOW\fR
+Starting with version 1.8.15,
+\fBsudoedit\fR
+will not follow symbolic links when opening files unless the
+\fIsudoedit_follow\fR
+option is enabled.
+The
+\fIFOLLOW\fR
+and
+\fINOFOLLOW\fR
+tags override the value of
+\fIsudoedit_follow\fR
+and can be used to permit (or deny) the editing of symbolic links
+on a per-command basis.
+These tags are only effective for the
+\fIsudoedit\fR
+command and are ignored for all other commands.
 .TP 2n
 \fILOG_INPUT\fR and \fINOLOG_INPUT\fR
 .sp
@@ -1327,7 +1348,7 @@ in the
 \fISUDOERS OPTIONS\fR
 section below.
 .TP 2n
-\fINOPASSWD\fR and \fIPASSWD\fR
+\fIPASSWD\fR and \fINOPASSWD\fR
 .sp
 By default,
 \fBsudo\fR
@@ -2659,6 +2680,26 @@ system call.
 This flag is
 \fIoff\fR
 by default.
+.TP 18n
+sudoedit_follow
+By default,
+\fBsudoedit\fR
+will not follow symbolic links when opening files.
+The
+\fIsudoedit_follow\fR
+option can be enabled to allow
+\fBsudoedit\fR
+to open symbolic links.
+It may be overridden on a per-command basis by the
+\fIFOLLOW\fR
+and
+\fINOFOLLOW\fR
+tags.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.15 or higher.
 .TP 18n
 targetpw
 If set,

@@ -1,6 +1,13 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.15:
+
+    When editing files with sudoedit, symbolic links will no longer
+    be followed by default.  The old behavior can be restored by
+    enabling the sudoedit_follow option in sudoers or on a per-command
+    basis with the FOLLOW and NOFOLLOW tags.
+
 o Upgrading from a version prior to 1.8.14:
 
     On HP-UX, sudo will no longer check for "plugin.sl" if "plugin.so"

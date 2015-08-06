@@ -113,6 +113,42 @@
                     ]
                 }
             ]
+        },
+        {
+            "User_List": [
+                { "username": "user4" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "sudoedit_follow": true }
+                    ],
+                    "Commands": [
+                        { "command": "sudoedit \/etc\/motd" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user4" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "sudoedit_follow": false }
+                    ],
+                    "Commands": [
+                        { "command": "sudoedit \/home\/*\/*" }
+                    ]
+                }
+            ]
         }
     ]
 }

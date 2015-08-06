@@ -57,8 +57,8 @@
 struct tempfile {
     char *tfile;
     char *ofile;
-    struct timespec omtim;
     off_t osize;
+    struct timespec omtim;
 };
 
 static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
@@ -157,6 +157,50 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     debug_return_int(tfd);
 }
 
+#ifdef O_NOFOLLOW
+static int
+sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
+{
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
+	oflags |= O_NOFOLLOW;
+    return open(path, oflags, mode);
+}
+#else
+static int
+sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
+{
+    struct stat sb1, sb2;
+    int fd;
+
+    fd = open(path, oflags, mode);
+    if (fd == -1 || ISSET(sflags, CD_SUDOEDIT_FOLLOW))
+	return fd;
+
+    /*
+     * Treat [fl]stat() failure like an open() failure.
+     */
+    if (fstat(fd, &sb1) == -1 || lstat(path, &sb2) == -1) {
+	const int serrno = errno;
+	close(fd);
+	errno = serrno;
+	return -1;
+    }
+
+    /*
+     * Make sure we did not open a link and that what we opened
+     * matches what is currently on the file system.
+     */
+    if (S_ISLNK(sb2.st_mode) ||
+	sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
+	close(fd);
+	errno = ELOOP;
+	return -1;
+    }
+
+    return fd;
+}
+#endif /* O_NOFOLLOW */
+
 /*
  * Create temporary copies of files[] and store the temporary path name
  * along with the original name, size and mtime in tf.
@@ -182,7 +226,8 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	rc = -1;
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
-	if ((ofd = open(files[i], O_RDONLY, 0644)) != -1 || errno == ENOENT) {
+	ofd = sudo_edit_open(files[i], O_RDONLY, 0644, command_details->flags);
+	if (ofd != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
 		memset(&sb, 0, sizeof(sb));		/* new file */
 		rc = 0;
@@ -192,11 +237,17 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	}
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
-	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
-	    if (rc)
-		sudo_warn("%s", files[i]);
+	if (ofd != -1 && !S_ISREG(sb.st_mode)) {
+	    sudo_warnx(U_("%s: not a regular file"), files[i]);
+	    close(ofd);
+	    continue;
+	}
+	if (rc == -1) {
+	    /* open() or fstat() error. */
+	    if (ofd == -1 && errno == ELOOP)
+		sudo_warnx(U_("%s: is a symbolic link"), files[i]);
 	    else
-		sudo_warnx(U_("%s: not a regular file"), files[i]);
+		sudo_warn("%s", files[i]);
 	    if (ofd != -1)
 		close(ofd);
 	    continue;
@@ -275,9 +326,9 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
-	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
+	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY, 0644, 0);
+	if (tfd != -1)
 	    rc = fstat(tfd, &sb);
-	}
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
@@ -309,7 +360,8 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	}
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
-	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644,
+	    command_details->flags);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
@@ -368,7 +420,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     command_details->command = _PATH_SUDO_SESH;
     command_details->flags |= CD_SUDOEDIT_COPY;
     
-    sesh_nargs = 3 + (nfiles * 2) + 1;
+    sesh_nargs = 4 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -376,6 +428,8 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     }
     *sesh_ap++ = "sesh";
     *sesh_ap++ = "-e";
+    if (!ISSET(command_details->flags, CD_SUDOEDIT_FOLLOW))
+	*sesh_ap++ = "-h";
     *sesh_ap++ = "0";
 
     for (i = 0; i < nfiles; i++) {
@@ -406,7 +460,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     }
     *sesh_ap = NULL;
 
-    /* Run sesh -e 0 <o1> <t1> ... <on> <tn> */
+    /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
     command_details->argv = sesh_args;
     rc = run_command(command_details);
     switch (rc) {

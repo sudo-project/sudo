@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "December 4, 2014" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "August 6, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -998,6 +998,20 @@ This allows the plugin to perform command substitution and transparently
 enable
 \fIsudoedit\fR
 when the user attempts to run an editor.
+.TP 6n
+sudoedit_follow=bool
+Set to true to allow
+\fBsudoedit\fR
+to edit files that are symbolic links.
+By default,
+\fBsudoedit\fR
+1.8.15 and higher will refuse to open a symbolic link.
+The
+\fIsudoedit_follow\fR
+option can be used to restore the older behavior and allow
+\fBsudoedit\fR
+to open symbolic links.
+Only available starting with API version 1.8.
 .TP 6n
 timeout=int
 Command timeout.
@@ -2641,6 +2655,13 @@ The
 entry now starts with a debug file path name and may occur multiple
 times if there are multiple plugin-specific Debug lines in the
 sudo.conf(@mansectform@) file.
+.TP 6n
+Version 1.8 (sudo 1.8.15)
+The
+\fIsudoedit_follow\fR
+entry was added to the
+\fRcommand_info\fR
+list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

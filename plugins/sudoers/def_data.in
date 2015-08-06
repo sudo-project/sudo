@@ -286,3 +286,6 @@ maxseq
 use_netgroups
 	T_FLAG
 	"Enable sudoers netgroup support"
+sudoedit_follow
+	T_FLAG
+	"Follow symbolic links when editing files with sudoedit"

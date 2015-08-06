@@ -63,11 +63,12 @@
  * 42	sudo 1.8.6, Support for empty Runas_List (with or without a colon) to mean the invoking user.  Support for Solaris Privilege Sets (PRIVS= and LIMITPRIVS=).
  * 43	sudo 1.8.7, Support for specifying a digest along with the command.
  * 44	sudo 1.8.13, added MAIL/NOMAIL tags.
+ * 45	sudo 1.8.15, added FOLLOW/NOFOLLOW tags and sudoedit_follow Default.
 */
 
 #ifndef SUDOERS_VERSION_H
 #define	SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	44
+#define SUDOERS_GRAMMAR_VERSION	45
 
 #endif /* SUDOERS_VERSION_H */

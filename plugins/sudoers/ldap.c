@@ -2325,6 +2325,9 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lb
 	    if (strcmp(cp, "authenticate") == 0)
 		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "NOPASSWD: " : "PASSWD: ");
+	    else if (strcmp(cp, "sudoedit_follow") == 0)
+		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		    "FOLLOW: " : "NOFOLLOW: ");
 	    else if (strcmp(cp, "noexec") == 0)
 		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
 		    "EXEC: " : "NOEXEC: ");

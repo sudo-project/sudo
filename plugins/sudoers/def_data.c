@@ -387,6 +387,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Enable sudoers netgroup support"),
 	NULL,
     }, {
+	"sudoedit_follow", T_FLAG,
+	N_("Follow symbolic links when editing files with sudoedit"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

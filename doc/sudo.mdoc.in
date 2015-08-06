@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 10, 2015
+.Dd August 6, 2015
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -264,6 +264,15 @@ option is used.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
 .El
+.Pp
+Unless explicitly allowed by the security policy, symbolic links
+will not be opened.
+This helps prevent the editing of unauthorized files when the file
+is located in a user-writable directory.
+Versions of
+.Nm
+prior to 1.8.15 do not have this restriction.
+Users are never allowed to edit device special files.
 .Pp
 If the specified file does not exist, it will be created.
 Note that unlike most commands run by

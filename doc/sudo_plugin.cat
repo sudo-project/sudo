@@ -606,6 +606,14 @@ DDEESSCCRRIIPPTTIIOONN
                        substitution and transparently enable _s_u_d_o_e_d_i_t when the
                        user attempts to run an editor.
 
+                 sudoedit_follow=bool
+                       Set to true to allow ssuuddooeeddiitt to edit files that are
+                       symbolic links.  By default, ssuuddooeeddiitt 1.8.15 and higher
+                       will refuse to open a symbolic link.  The
+                       _s_u_d_o_e_d_i_t___f_o_l_l_o_w option can be used to restore the older
+                       behavior and allow ssuuddooeeddiitt to open symbolic links.
+                       Only available starting with API version 1.8.
+
                  timeout=int
                        Command timeout.  If non-zero then when the timeout
                        expires the command will be killed.
@@ -1479,6 +1487,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            may occur multiple times if there are multiple plugin-specific
            Debug lines in the sudo.conf(4) file.
 
+     Version 1.8 (sudo 1.8.15)
+           The _s_u_d_o_e_d_i_t___f_o_l_l_o_w entry was added to the command_info list.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1508,4 +1519,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.14                    December 4, 2014                    Sudo 1.8.14
+Sudo 1.8.15                     August 6, 2015                     Sudo 1.8.15

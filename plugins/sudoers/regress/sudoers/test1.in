@@ -8,3 +8,5 @@ user2 ALL = NOPASSWD: NOEXEC: SETENV: /usr/bin/vi:\
       ALL = PASSWD: EXEC: NOSETENV: /usr/bin/echo
 user3 ALL = MAIL: /bin/sh:\
       ALL = NOMAIL: /usr/bin/id
+user4 ALL = FOLLOW: sudoedit /etc/motd:\
+      ALL = NOFOLLOW: sudoedit /home/*/*

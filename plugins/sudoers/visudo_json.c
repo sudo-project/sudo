@@ -667,7 +667,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	    if (type == -1) {
 		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
 		/* XXX - just pass it through as a string anyway? */
-		break;;
+		break;
 	    }
 	    fputs(",\n", fp);
 	}
@@ -738,23 +738,6 @@ print_aliases_json(FILE *fp, int indent, bool need_comma)
     debug_return_bool(need_comma);
 }
 
-/* XXX these are all duplicated w/ parse.c */
-#define RUNAS_CHANGED(cs1, cs2) \
-	(cs1 == NULL || cs2 == NULL || \
-	 cs1->runasuserlist != cs2->runasuserlist || \
-	 cs1->runasgrouplist != cs2->runasgrouplist)
-
-#define TAG_SET(tt) \
-	((tt) != UNSPEC && (tt) != IMPLIED)
-
-#define TAGS_CHANGED(ot, nt) \
-	((TAG_SET((nt).log_input) && (nt).log_input != (ot).log_input) || \
-	 (TAG_SET((nt).log_output) && (nt).log_output != (ot).log_output) || \
-	 (TAG_SET((nt).noexec) && (nt).noexec != (ot).noexec) || \
-	 (TAG_SET((nt).nopasswd) && (nt).nopasswd != (ot).nopasswd) || \
-	 (TAG_SET((nt).setenv) && (nt).setenv != (ot).setenv) || \
-	 (TAG_SET((nt).send_mail) && (nt).send_mail != (ot).send_mail))
-
 /*
  * Print a Cmnd_Spec in JSON format at the specified indent level.
  * A pointer to the next Cmnd_Spec is passed in to make it possible to
@@ -799,56 +782,59 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     }
 
     /* Print tags */
-    if (cs->tags.log_input != UNSPEC || cs->tags.log_output != UNSPEC ||
-	cs->tags.noexec != UNSPEC || cs->tags.nopasswd != UNSPEC ||
-	cs->tags.send_mail != UNSPEC || cs->tags.setenv != UNSPEC) {
+    if (TAGS_SET(cs->tags)) {
+	struct cmndtag tag = cs->tags;
+
 	fprintf(fp, "%*s\"Options\": [\n", indent, "");
 	indent += 4;
-	if (cs->tags.nopasswd != UNSPEC) {
+	if (tag.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
-	    value.u.boolean = !cs->tags.nopasswd;
-	    last_one = cs->tags.noexec == UNSPEC &&
-		cs->tags.send_mail == UNSPEC && cs->tags.setenv == UNSPEC &&
-		cs->tags.log_input == UNSPEC && cs->tags.log_output == UNSPEC;
+	    value.u.boolean = !tag.nopasswd;
+	    tag.nopasswd = UNSPEC;
 	    print_pair_json(fp, "{ ", "authenticate", &value,
-		last_one ? " }\n" : " },\n", indent);
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
 	}
-	if (cs->tags.noexec != UNSPEC) {
+	if (tag.noexec != UNSPEC) {
 	    value.type = JSON_BOOL;
-	    value.u.boolean = cs->tags.noexec;
-	    last_one = cs->tags.send_mail == UNSPEC &&
-		cs->tags.setenv == UNSPEC && cs->tags.log_input == UNSPEC &&
-		cs->tags.log_output == UNSPEC;
+	    value.u.boolean = tag.noexec;
+	    tag.noexec = UNSPEC;
 	    print_pair_json(fp, "{ ", "noexec", &value,
-		last_one ? " }\n" : " },\n", indent);
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
 	}
-	if (cs->tags.send_mail != UNSPEC) {
+	if (tag.send_mail != UNSPEC) {
 	    value.type = JSON_BOOL;
-	    value.u.boolean = cs->tags.send_mail;
-	    last_one = cs->tags.setenv == UNSPEC &&
-		cs->tags.log_input == UNSPEC && cs->tags.log_output == UNSPEC;
+	    value.u.boolean = tag.send_mail;
+	    tag.send_mail = UNSPEC;
 	    print_pair_json(fp, "{ ", "send_mail", &value,
-		last_one ? " }\n" : " },\n", indent);
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
 	}
-	if (cs->tags.setenv != UNSPEC) {
+	if (tag.setenv != UNSPEC) {
 	    value.type = JSON_BOOL;
-	    value.u.boolean = cs->tags.setenv;
-	    last_one = cs->tags.log_input == UNSPEC &&
-		cs->tags.log_output == UNSPEC;
+	    value.u.boolean = tag.setenv;
+	    tag.setenv = UNSPEC;
 	    print_pair_json(fp, "{ ", "setenv", &value,
-		last_one ? " }\n" : " },\n", indent);
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
 	}
-	if (cs->tags.log_input != UNSPEC) {
+	if (tag.follow != UNSPEC) {
 	    value.type = JSON_BOOL;
-	    value.u.boolean = cs->tags.log_input;
-	    last_one = cs->tags.log_output == UNSPEC;
+	    value.u.boolean = tag.follow;
+	    tag.follow = UNSPEC;
+	    print_pair_json(fp, "{ ", "sudoedit_follow", &value,
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	}
+	if (tag.log_input != UNSPEC) {
+	    value.type = JSON_BOOL;
+	    value.u.boolean = tag.log_input;
+	    tag.log_input = UNSPEC;
 	    print_pair_json(fp, "{ ", "log_input", &value,
-		last_one ? " }\n" : " },\n", indent);
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
 	}
-	if (cs->tags.log_output != UNSPEC) {
+	if (tag.log_output != UNSPEC) {
 	    value.type = JSON_BOOL;
-	    value.u.boolean = cs->tags.log_output;
-	    print_pair_json(fp, "{ ", "log_output", &value, " }\n", indent);
+	    value.u.boolean = tag.log_output;
+	    tag.log_output = UNSPEC;
+	    print_pair_json(fp, "{ ", "log_output", &value,
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
 	}
 	indent -= 4;
 	fprintf(fp, "%*s],\n", indent, "");
