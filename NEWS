@@ -1,3 +1,19 @@
+What's new in Sudo 1.8.15
+
+ * Fixed a bug that prevented sudo from building outside the source tree
+   on some platforms.  Bug #708.
+
+ * Fixed the location of the sssd library in the RHEL/Centos packages.
+   Bug #710.
+
+ * Fixed a build problem on systems that don't implicitly include
+   sys/types.h from other header files.  Bug #711.
+
+ * When editing files with sudoedit, symbolic links will no longer
+   be followed by default.  The old behavior can be restored by
+   enabling the sudoedit_follow option in sudoers or on a per-command
+   basis with the FOLLOW and NOFOLLOW tags.  Bug #707.
+
 What's new in Sudo 1.8.14p3
 
  * Fixed a bug introduced in sudo 1.8.14p2 that prevented sudo
