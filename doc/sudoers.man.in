@@ -4724,6 +4724,25 @@ The editor will run as the operator user, not root, on a temporary copy of
 After the file has been edited,
 \fI/etc/motd\fR
 will be updated with the contents of the temporary copy.
+.PP
+Users should never be granted
+\fBsudoedit\fR
+permission to edit a file that resides in a directory the user
+has write access to, either directly or via a wildcard.
+If the user has write access to the directory it is possible to
+replace the legitimate file with a link to another file,
+allowing the editing of arbitrary files.
+Starting with version 1.8.15,
+\fBsudoedit\fR
+will refuse to open a symbolic link unless either the
+\fIsudoedit_follow\fR
+Defaults option is enabled or the
+\fIsudoedit\fR
+command is prefixed with the
+\fRFOLLOW\fR
+tag.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
 .SS "Time stamp file checks"
 \fIsudoers\fR
 will check the ownership of its time stamp directory

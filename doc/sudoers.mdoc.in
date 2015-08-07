@@ -4356,6 +4356,25 @@ The editor will run as the operator user, not root, on a temporary copy of
 After the file has been edited,
 .Pa /etc/motd
 will be updated with the contents of the temporary copy.
+.Pp
+Users should never be granted
+.Nm sudoedit
+permission to edit a file that resides in a directory the user
+has write access to, either directly or via a wildcard.
+If the user has write access to the directory it is possible to
+replace the legitimate file with a link to another file,
+allowing the editing of arbitrary files.
+Starting with version 1.8.15,
+.Nm sudoedit
+will refuse to open a symbolic link unless either the
+.Em sudoedit_follow
+Defaults option is enabled or the
+.Em sudoedit
+command is prefixed with the
+.Li FOLLOW
+tag.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
 .Ss Time stamp file checks
 .Em sudoers
 will check the ownership of its time stamp directory
