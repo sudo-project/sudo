@@ -1418,7 +1418,7 @@ Note that a forward slash
 will
 .Sy not
 be matched by
-wildcards used in the path name.
+wildcards used in the file name portion of the command.
 This is to make a path like:
 .Bd -literal -offset 4n
 /usr/bin/*
@@ -1434,13 +1434,18 @@ When matching the command line arguments, however, a slash
 get matched by wildcards since command line arguments may contain
 arbitrary strings and not just path names.
 .Pp
+.Bf -symbolic
 Wildcards in command line arguments should be used with care.
-Because command line arguments are matched as a single, concatenated
-string, a wildcard such as
+.Ef
+.br
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard such as
 .Ql \&?
 or
 .Ql *
-can match multiple words.
+will match
+.Em multiple
+words.
 For example, while a sudoers entry like:
 .Bd -literal -offset 4n
 %operator ALL = /bin/cat /var/log/messages*
@@ -3981,9 +3986,24 @@ is allowed to change anyone's password except for
 root on the
 .Em HPPA
 machines.
-Note that this assumes
+Because command line arguments are matched as a single,
+concatenated string, the
+.Ql *
+wildcard will match
+.Em multiple
+words.
+This example assumes that
 .Xr passwd 1
 does not take multiple user names on the command line.
+Note that on GNU systems, options to
+.Xr passwd 1
+may be specified after the user argument.
+As a result, this rule will also allow:
+.Bd -literal -offset 4n
+passwd username --expire
+.Ed
+.Pp
+which may not be desirable.
 .Bd -literal
 bob		SPARC = (OP) ALL : SGI = (OP) ALL
 .Ed

@@ -698,7 +698,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Would match any file name beginning with a letter.
 
      Note that a forward slash (`/') will nnoott be matched by wildcards used in
-     the path name.  This is to make a path like:
+     the file name portion of the command.  This is to make a path like:
 
          /usr/bin/*
 
@@ -708,10 +708,10 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      matched by wildcards since command line arguments may contain arbitrary
      strings and not just path names.
 
-     Wildcards in command line arguments should be used with care.  Because
-     command line arguments are matched as a single, concatenated string, a
-     wildcard such as `?' or `*' can match multiple words.  For example, while
-     a sudoers entry like:
+     WWiillddccaarrddss iinn ccoommmmaanndd lliinnee aarrgguummeennttss sshhoouulldd bbee uusseedd wwiitthh ccaarree..
+     Command line arguments are matched as a single, concatenated string.
+     This mean a wildcard such as `?' or `*' will match _m_u_l_t_i_p_l_e words.  For
+     example, while a sudoers entry like:
 
          %operator ALL = /bin/cat /var/log/messages*
 
@@ -2112,8 +2112,16 @@ EEXXAAMMPPLLEESS
      with any group in the _A_D_M_I_N_G_R_P Runas_Alias (the aaddmm and ooppeerr groups).
 
      The user ppeettee is allowed to change anyone's password except for root on
-     the _H_P_P_A machines.  Note that this assumes passwd(1) does not take
-     multiple user names on the command line.
+     the _H_P_P_A machines.  Because command line arguments are matched as a
+     single, concatenated string, the `*' wildcard will match _m_u_l_t_i_p_l_e words.
+     This example assumes that passwd(1) does not take multiple user names on
+     the command line.  Note that on GNU systems, options to passwd(1) may be
+     specified after the user argument.  As a result, this rule will also
+     allow:
+
+         passwd username --expire
+
+     which may not be desirable.
 
      bob             SPARC = (OP) ALL : SGI = (OP) ALL
 

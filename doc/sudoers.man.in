@@ -1519,7 +1519,7 @@ Note that a forward slash
 will
 \fBnot\fR
 be matched by
-wildcards used in the path name.
+wildcards used in the file name portion of the command.
 This is to make a path like:
 .nf
 .sp
@@ -1538,13 +1538,16 @@ When matching the command line arguments, however, a slash
 get matched by wildcards since command line arguments may contain
 arbitrary strings and not just path names.
 .PP
-Wildcards in command line arguments should be used with care.
-Because command line arguments are matched as a single, concatenated
-string, a wildcard such as
+\fBWildcards in command line arguments should be used with care.\fR
+.br
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard such as
 \(oq\&?\(cq
 or
 \(oq*\(cq
-can match multiple words.
+will match
+\fImultiple\fR
+words.
 For example, while a sudoers entry like:
 .nf
 .sp
@@ -4304,9 +4307,27 @@ is allowed to change anyone's password except for
 root on the
 \fIHPPA\fR
 machines.
-Note that this assumes
+Because command line arguments are matched as a single,
+concatenated string, the
+\(oq*\(cq
+wildcard will match
+\fImultiple\fR
+words.
+This example assumes that
 passwd(1)
 does not take multiple user names on the command line.
+Note that on GNU systems, options to
+passwd(1)
+may be specified after the user argument.
+As a result, this rule will also allow:
+.nf
+.sp
+.RS 4n
+passwd username --expire
+.RE
+.fi
+.PP
+which may not be desirable.
 .nf
 .sp
 .RS 0n
