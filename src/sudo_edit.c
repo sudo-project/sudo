@@ -244,10 +244,12 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	}
 	if (rc == -1) {
 	    /* open() or fstat() error. */
-	    if (ofd == -1 && errno == ELOOP)
-		sudo_warnx(U_("%s: is a symbolic link"), files[i]);
-	    else
+	    if (ofd == -1 && errno == ELOOP) {
+		sudo_warnx(U_("%s: editing symbolic links is not permitted"),
+		    files[i]);
+	    } else {
 		sudo_warn("%s", files[i]);
+	    }
 	    if (ofd != -1)
 		close(ofd);
 	    continue;

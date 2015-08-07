@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.15\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-08-06 13:21-0600\n"
+"POT-Creation-Date: 2015-08-07 07:08-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,8 +42,8 @@ msgstr ""
 #: src/sudo.c:182 src/sudo.c:359 src/sudo.c:378 src/sudo.c:442 src/sudo.c:596
 #: src/sudo.c:615 src/sudo.c:642 src/sudo.c:651 src/sudo.c:660 src/sudo.c:677
 #: src/sudo.c:729 src/sudo.c:739 src/sudo.c:763 src/sudo.c:1145 src/sudo.c:1147
-#: src/sudo.c:1153 src/sudo.c:1161 src/sudo_edit.c:153 src/sudo_edit.c:426
-#: src/sudo_edit.c:523 src/sudo_edit.c:635 src/sudo_edit.c:655
+#: src/sudo.c:1153 src/sudo.c:1161 src/sudo_edit.c:153 src/sudo_edit.c:428
+#: src/sudo_edit.c:525 src/sudo_edit.c:637 src/sudo_edit.c:657
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -59,8 +59,8 @@ msgstr ""
 #: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
 #: src/sudo.c:182 src/sudo.c:359 src/sudo.c:378 src/sudo.c:442 src/sudo.c:763
 #: src/sudo.c:1145 src/sudo.c:1147 src/sudo.c:1153 src/sudo.c:1161
-#: src/sudo_edit.c:153 src/sudo_edit.c:426 src/sudo_edit.c:523
-#: src/sudo_edit.c:635 src/sudo_edit.c:655
+#: src/sudo_edit.c:153 src/sudo_edit.c:428 src/sudo_edit.c:525
+#: src/sudo_edit.c:637 src/sudo_edit.c:657
 msgid "unable to allocate memory"
 msgstr ""
 
@@ -727,78 +727,78 @@ msgstr ""
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
 
-#: src/sudo_edit.c:241 src/sudo_edit.c:340
+#: src/sudo_edit.c:241 src/sudo_edit.c:342
 #, c-format
 msgid "%s: not a regular file"
 msgstr ""
 
 #: src/sudo_edit.c:248
 #, c-format
-msgid "%s: is a symbolic link"
+msgid "%s: editing symbolic links is not permitted"
 msgstr ""
 
-#: src/sudo_edit.c:277 src/sudo_edit.c:379
+#: src/sudo_edit.c:279 src/sudo_edit.c:381
 #, c-format
 msgid "%s: short write"
 msgstr ""
 
-#: src/sudo_edit.c:341
+#: src/sudo_edit.c:343
 #, c-format
 msgid "%s left unmodified"
 msgstr ""
 
-#: src/sudo_edit.c:354 src/sudo_edit.c:540
+#: src/sudo_edit.c:356 src/sudo_edit.c:542
 #, c-format
 msgid "%s unchanged"
 msgstr ""
 
-#: src/sudo_edit.c:368 src/sudo_edit.c:390
+#: src/sudo_edit.c:370 src/sudo_edit.c:392
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: src/sudo_edit.c:369 src/sudo_edit.c:388 src/sudo_edit.c:391
-#: src/sudo_edit.c:565 src/sudo_edit.c:569
+#: src/sudo_edit.c:371 src/sudo_edit.c:390 src/sudo_edit.c:393
+#: src/sudo_edit.c:567 src/sudo_edit.c:571
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr ""
 
-#: src/sudo_edit.c:387
+#: src/sudo_edit.c:389
 msgid "unable to read temporary file"
 msgstr ""
 
-#: src/sudo_edit.c:470
+#: src/sudo_edit.c:472
 msgid "sesh: internal error: odd number of paths"
 msgstr ""
 
-#: src/sudo_edit.c:472
+#: src/sudo_edit.c:474
 msgid "sesh: unable to create temporary files"
 msgstr ""
 
-#: src/sudo_edit.c:474 src/sudo_edit.c:572
+#: src/sudo_edit.c:476 src/sudo_edit.c:574
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr ""
 
-#: src/sudo_edit.c:564
+#: src/sudo_edit.c:566
 msgid "unable to copy temporary files back to their original location"
 msgstr ""
 
-#: src/sudo_edit.c:568
+#: src/sudo_edit.c:570
 msgid ""
 "unable to copy some of the temporary files back to their original location"
 msgstr ""
 
-#: src/sudo_edit.c:611
+#: src/sudo_edit.c:613
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr ""
 
-#: src/sudo_edit.c:628
+#: src/sudo_edit.c:630
 msgid "plugin error: missing file list for sudoedit"
 msgstr ""
 
-#: src/sudo_edit.c:669 src/sudo_edit.c:682
+#: src/sudo_edit.c:671 src/sudo_edit.c:684
 msgid "unable to read the clock"
 msgstr ""
 
