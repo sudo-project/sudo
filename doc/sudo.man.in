@@ -869,13 +869,17 @@ modified and is passed unchanged to the program that
 \fBsudo\fR
 executes.
 .PP
-Users should not be granted
+Users should
+\fInever\fR
+be granted
 \fBsudo\fR
 privileges to execute files that are writable by the user or
 that reside in a directory that is writable by the user.
 If the user can modify or replace the command there is no way
 to limit what additional commands they can run.
-Likewise, users should not be granted
+Likewise, users should
+\fInever\fR
+be granted
 \fBsudoedit\fR
 permission to edit a file that resides in a directory the user has
 write access to.

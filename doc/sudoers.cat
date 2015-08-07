@@ -2310,7 +2310,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      of _/_e_t_c_/_m_o_t_d.  After the file has been edited, _/_e_t_c_/_m_o_t_d will be updated
      with the contents of the temporary copy.
 
-     Users should never be granted ssuuddooeeddiitt permission to edit a file that
+     Users should _n_e_v_e_r be granted ssuuddooeeddiitt permission to edit a file that
      resides in a directory the user has write access to, either directly or
      via a wildcard.  If the user has write access to the directory it is
      possible to replace the legitimate file with a link to another file,
