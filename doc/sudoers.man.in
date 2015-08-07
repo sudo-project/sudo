@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "August 6, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 7, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1508,7 +1508,7 @@ For example:
 .nf
 .sp
 .RS 4n
-/bin/ls [[:\&alpha:\&]]*
+/bin/ls [[\e:\&alpha\e:\&]]*
 .RE
 .fi
 .PP
