@@ -675,43 +675,47 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be
      used in host names, path names and command line arguments in the _s_u_d_o_e_r_s
      file.  Wildcard matching is done via the glob(3) and fnmatch(3) functions
-     as specified by IEEE Std 1003.1 (``POSIX.1'').  Note that these are _n_o_t
-     regular expressions.
+     as specified by IEEE Std 1003.1 (``POSIX.1'').
 
-     *         Matches any set of zero or more characters.
+     *         Matches any set of zero or more characters (including white
+               space).
 
-     ?         Matches any single character.
+     ?         Matches any single character (including white space).
 
      [...]     Matches any character in the specified range.
 
-     [!...]    Matches any character nnoott in the specified range.
+     [!...]    Matches any character _n_o_t in the specified range.
 
      \x        For any character `x', evaluates to `x'.  This is used to
                escape special characters such as: `*', `?', `[', and `]'.
 
-     Character classes may also be used if your system's glob(3) and
-     fnmatch(3) functions support them.  However, because the `:' character
-     has special meaning in _s_u_d_o_e_r_s, it must be escaped.  For example:
+     NNoottee tthhaatt tthheessee aarree nnoott rreegguullaarr eexxpprreessssiioonnss..  Unlike a regular expression
+     there is no way to match one or more characters within a range.
+
+     Character classes may be used if your system's glob(3) and fnmatch(3)
+     functions support them.  However, because the `:' character has special
+     meaning in _s_u_d_o_e_r_s, it must be escaped.  For example:
 
          /bin/ls [[\:alpha\:]]*
 
      Would match any file name beginning with a letter.
 
-     Note that a forward slash (`/') will nnoott be matched by wildcards used in
+     Note that a forward slash (`/') will _n_o_t be matched by wildcards used in
      the file name portion of the command.  This is to make a path like:
 
          /usr/bin/*
 
      match _/_u_s_r_/_b_i_n_/_w_h_o but not _/_u_s_r_/_b_i_n_/_X_1_1_/_x_t_e_r_m.
 
-     When matching the command line arguments, however, a slash ddooeess get
+     When matching the command line arguments, however, a slash _d_o_e_s get
      matched by wildcards since command line arguments may contain arbitrary
      strings and not just path names.
 
      WWiillddccaarrddss iinn ccoommmmaanndd lliinnee aarrgguummeennttss sshhoouulldd bbee uusseedd wwiitthh ccaarree..
      Command line arguments are matched as a single, concatenated string.
-     This mean a wildcard such as `?' or `*' will match _m_u_l_t_i_p_l_e words.  For
-     example, while a sudoers entry like:
+     This mean a wildcard character such as `?' or `*' will match across word
+     boundaries, which may be unexpected.  For example, while a sudoers entry
+     like:
 
          %operator ALL = /bin/cat /var/log/messages*
 
@@ -723,14 +727,15 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
          $ sudo cat /var/log/messages /etc/shadow
 
-     which is probably not what was intended.
+     which is probably not what was intended.  In most cases it is better to
+     do command line processing outside of _s_u_d_o_e_r_s in a scripting language.
 
    EExxcceeppttiioonnss ttoo wwiillddccaarrdd rruulleess
      The following exceptions apply to the above rules:
 
      ""        If the empty string "" is the only command line argument in the
                _s_u_d_o_e_r_s entry it means that command is not allowed to be run
-               with aannyy arguments.
+               with _a_n_y arguments.
 
      sudoedit  Command line arguments to the _s_u_d_o_e_d_i_t built-in command should
                always be path names, so a forward slash (`/') will not be
@@ -782,7 +787,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      manager or editor temporary/backup files.  Files are parsed in sorted
      lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is lexical,
-     not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
+     not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded _a_f_t_e_r
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes in
      the file names can be used to avoid such problems.
 
@@ -804,7 +809,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      User_Alias, Runas_Alias, or Host_Alias.  You should not try to define
      your own _a_l_i_a_s called AALLLL as the built-in alias will be used in
      preference to your own.  Please note that using AALLLL can be dangerous
-     since in a command context, it allows the user to run aannyy command on the
+     since in a command context, it allows the user to run _a_n_y command on the
      system.
 
      An exclamation point (`!') can be used as a logical _n_o_t operator in a

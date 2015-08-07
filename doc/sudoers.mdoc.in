@@ -1368,19 +1368,16 @@ and
 .Xr fnmatch 3
 functions as specified by
 .St -p1003.1 .
-Note that these are
-.Em not
-regular expressions.
 .Bl -tag -width 8n
 .It Li *
-Matches any set of zero or more characters.
+Matches any set of zero or more characters (including white space).
 .It Li \&?
-Matches any single character.
+Matches any single character (including white space).
 .It Li [...]
 Matches any character in the specified range.
 .It Li [!...]
 Matches any character
-.Sy not
+.Em not
 in the specified range.
 .It Li \ex
 For any character
@@ -1395,7 +1392,13 @@ and
 .Ql ]\& .
 .El
 .Pp
-Character classes may also be used if your system's
+.Bf -symbolic
+Note that these are not regular expressions.
+.Ef
+Unlike a regular expression there is no way to match one or more
+characters within a range.
+.Pp
+Character classes may be used if your system's
 .Xr glob 3
 and
 .Xr fnmatch 3
@@ -1416,7 +1419,7 @@ Would match any file name beginning with a letter.
 Note that a forward slash
 .Pq Ql /
 will
-.Sy not
+.Em not
 be matched by
 wildcards used in the file name portion of the command.
 This is to make a path like:
@@ -1430,7 +1433,7 @@ but not
 .Pa /usr/bin/X11/xterm .
 .Pp
 When matching the command line arguments, however, a slash
-.Sy does
+.Em does
 get matched by wildcards since command line arguments may contain
 arbitrary strings and not just path names.
 .Pp
@@ -1439,13 +1442,11 @@ Wildcards in command line arguments should be used with care.
 .Ef
 .br
 Command line arguments are matched as a single, concatenated string.
-This mean a wildcard such as
+This mean a wildcard character such as
 .Ql \&?
 or
 .Ql *
-will match
-.Em multiple
-words.
+will match across word boundaries, which may be unexpected.
 For example, while a sudoers entry like:
 .Bd -literal -offset 4n
 %operator ALL = /bin/cat /var/log/messages*
@@ -1462,6 +1463,10 @@ $ sudo cat /var/log/messages /etc/shadow
 .Ed
 .Pp
 which is probably not what was intended.
+In most cases it is better to do command line processing
+outside of
+.Em sudoers
+in a scripting language.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
@@ -1471,7 +1476,7 @@ If the empty string
 is the only command line argument in the
 .Em sudoers
 entry it means that command is not allowed to be run with
-.Sy any
+.Em any
 arguments.
 .It sudoedit
 Command line arguments to the
@@ -1586,7 +1591,7 @@ will be parsed before
 Be aware that because the sorting is lexical, not numeric,
 .Pa /etc/sudoers.d/1_whoops
 would be loaded
-.Sy after
+.Em after
 .Pa /etc/sudoers.d/10_second .
 Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
@@ -1634,7 +1639,7 @@ as the built-in alias will be used in preference to your own.
 Please note that using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
-.Sy any
+.Em any
 command on the system.
 .Pp
 An exclamation point

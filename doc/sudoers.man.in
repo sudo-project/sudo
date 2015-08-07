@@ -1463,22 +1463,19 @@ and
 fnmatch(3)
 functions as specified by
 IEEE Std 1003.1 (\(LqPOSIX.1\(Rq).
-Note that these are
-\fInot\fR
-regular expressions.
 .TP 10n
 \fR*\fR
-Matches any set of zero or more characters.
+Matches any set of zero or more characters (including white space).
 .TP 10n
 \fR\&?\fR
-Matches any single character.
+Matches any single character (including white space).
 .TP 10n
 \fR[...]\fR
 Matches any character in the specified range.
 .TP 10n
 \fR[!...]\fR
 Matches any character
-\fBnot\fR
+\fInot\fR
 in the specified range.
 .TP 10n
 \fR\ex\fR
@@ -1493,7 +1490,11 @@ This is used to escape special characters such as:
 and
 \(oq]\&\(cq.
 .PP
-Character classes may also be used if your system's
+\fBNote that these are not regular expressions.\fR
+Unlike a regular expression there is no way to match one or more
+characters within a range.
+.PP
+Character classes may be used if your system's
 glob(3)
 and
 fnmatch(3)
@@ -1517,7 +1518,7 @@ Would match any file name beginning with a letter.
 Note that a forward slash
 (\(oq/\(cq)
 will
-\fBnot\fR
+\fInot\fR
 be matched by
 wildcards used in the file name portion of the command.
 This is to make a path like:
@@ -1534,20 +1535,18 @@ but not
 \fI/usr/bin/X11/xterm\fR.
 .PP
 When matching the command line arguments, however, a slash
-\fBdoes\fR
+\fIdoes\fR
 get matched by wildcards since command line arguments may contain
 arbitrary strings and not just path names.
 .PP
 \fBWildcards in command line arguments should be used with care.\fR
 .br
 Command line arguments are matched as a single, concatenated string.
-This mean a wildcard such as
+This mean a wildcard character such as
 \(oq\&?\(cq
 or
 \(oq*\(cq
-will match
-\fImultiple\fR
-words.
+will match across word boundaries, which may be unexpected.
 For example, while a sudoers entry like:
 .nf
 .sp
@@ -1573,6 +1572,10 @@ $ sudo cat /var/log/messages /etc/shadow
 .fi
 .PP
 which is probably not what was intended.
+In most cases it is better to do command line processing
+outside of
+\fIsudoers\fR
+in a scripting language.
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
@@ -1582,7 +1585,7 @@ If the empty string
 is the only command line argument in the
 \fIsudoers\fR
 entry it means that command is not allowed to be run with
-\fBany\fR
+\fIany\fR
 arguments.
 .TP 10n
 sudoedit
@@ -1709,7 +1712,7 @@ will be parsed before
 Be aware that because the sorting is lexical, not numeric,
 \fI/etc/sudoers.d/1_whoops\fR
 would be loaded
-\fBafter\fR
+\fIafter\fR
 \fI/etc/sudoers.d/10_second\fR.
 Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
@@ -1757,7 +1760,7 @@ as the built-in alias will be used in preference to your own.
 Please note that using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
-\fBany\fR
+\fIany\fR
 command on the system.
 .PP
 An exclamation point
