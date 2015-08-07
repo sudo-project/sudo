@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "August 6, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "August 7, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -868,6 +868,25 @@ environment variable is
 modified and is passed unchanged to the program that
 \fBsudo\fR
 executes.
+.PP
+Users should not be granted
+\fBsudo\fR
+privileges to execute files that are writable by the user or
+that reside in a directory that is writable by the user.
+If the user can modify or replace the command there is no way
+to limit what additional commands they can run.
+Likewise, users should not be granted
+\fBsudoedit\fR
+permission to edit a file that resides in a directory the user has
+write access to.
+A user with directory write access could replace the legitimate
+file with a link to some other, arbitrary, file.
+Starting with version 1.8.15,
+\fBsudoedit\fR
+will refuse to open a symbolic link unless the security policy
+explicitly permits it.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
 .PP
 Please note that
 \fBsudo\fR
