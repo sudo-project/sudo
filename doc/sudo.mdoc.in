@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 7, 2015
+.Dd August 9, 2015
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -854,6 +854,8 @@ To prevent the disclosure of potentially sensitive information,
 .Nm
 disables core dumps by default while it is executing (they are
 re-enabled for the command that is run).
+This historical practice dates from a time when most operating
+systems allowed setuid processes to dump core by default.
 To aid in debugging
 .Nm
 crashes, you may wish to re-enable core dumps by setting

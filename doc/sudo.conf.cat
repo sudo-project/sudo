@@ -120,18 +120,20 @@ DDEESSCCRRIIPPTTIIOONN
      The ssuuddoo..ccoonnff file also supports the following front end settings:
 
      disable_coredump
-               Core dumps of ssuuddoo itself are disabled by default.  To aid in
+               Core dumps of ssuuddoo itself are disabled by default to prevent
+               the disclosure of potentially sensitive information.  To aid in
                debugging ssuuddoo crashes, you may wish to re-enable core dumps by
                setting ``disable_coredump'' to false in ssuuddoo..ccoonnff as follows:
 
                      Set disable_coredump false
 
-               Note that most operating systems disable core dumps from setuid
-               programs, including ssuuddoo.  To actually get a ssuuddoo core file you
-               will likely need to enable core dumps for setuid processes.  On
-               BSD and Linux systems this is accomplished in the sysctl
-               command.  On Solaris, the coreadm command is used to configure
-               core dump behavior.
+               All modern operating systems place restrictions on core dumps
+               from setuid processes like ssuuddoo so this option can be enabled
+               without compromising security.  To actually get a ssuuddoo core
+               file you will likely need to enable core dumps for setuid
+               processes.  On BSD and Linux systems this is accomplished in
+               the sysctl command.  On Solaris, the coreadm command is used to
+               configure core dump behavior.
 
                This setting is only available in ssuuddoo version 1.8.4 and
                higher.

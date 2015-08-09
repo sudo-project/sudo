@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 4, 2014
+.Dd August 9, 2015
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -241,7 +241,8 @@ file also supports the following front end settings:
 .It disable_coredump
 Core dumps of
 .Nm sudo
-itself are disabled by default.
+itself are disabled by default to prevent the disclosure of potentially
+sensitive information.
 To aid in debugging
 .Nm sudo
 crashes, you may wish to re-enable core dumps by setting
@@ -253,9 +254,10 @@ as follows:
 Set disable_coredump false
 .Ed
 .Pp
-Note that most operating systems disable core dumps from setuid programs,
-including
-.Nm sudo .
+All modern operating systems place restrictions on core dumps
+from setuid processes like
+.Nm sudo
+so this option can be enabled without compromising security.
 To actually get a
 .Nm sudo
 core file you will likely need to enable core dumps for setuid processes.

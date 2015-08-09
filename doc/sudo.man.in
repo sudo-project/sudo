@@ -919,6 +919,8 @@ To prevent the disclosure of potentially sensitive information,
 \fBsudo\fR
 disables core dumps by default while it is executing (they are
 re-enabled for the command that is run).
+This historical practice dates from a time when most operating
+systems allowed setuid processes to dump core by default.
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting

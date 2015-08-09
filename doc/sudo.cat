@@ -459,9 +459,11 @@ SSEECCUURRIITTYY NNOOTTEESS
 
      To prevent the disclosure of potentially sensitive information, ssuuddoo
      disables core dumps by default while it is executing (they are re-enabled
-     for the command that is run).  To aid in debugging ssuuddoo crashes, you may
-     wish to re-enable core dumps by setting ``disable_coredump'' to false in
-     the sudo.conf(4) file as follows:
+     for the command that is run).  This historical practice dates from a time
+     when most operating systems allowed setuid processes to dump core by
+     default.  To aid in debugging ssuuddoo crashes, you may wish to re-enable
+     core dumps by setting ``disable_coredump'' to false in the sudo.conf(4)
+     file as follows:
 
            Set disable_coredump false
 

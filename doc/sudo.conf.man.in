@@ -265,7 +265,8 @@ file also supports the following front end settings:
 disable_coredump
 Core dumps of
 \fBsudo\fR
-itself are disabled by default.
+itself are disabled by default to prevent the disclosure of potentially
+sensitive information.
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
@@ -281,9 +282,10 @@ Set disable_coredump false
 .fi
 .RS 10n
 .sp
-Note that most operating systems disable core dumps from setuid programs,
-including
-\fBsudo\fR.
+All modern operating systems place restrictions on core dumps
+from setuid processes like
+\fBsudo\fR
+so this option can be enabled without compromising security.
 To actually get a
 \fBsudo\fR
 core file you will likely need to enable core dumps for setuid processes.
