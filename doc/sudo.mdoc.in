@@ -77,6 +77,10 @@ allows a permitted user to execute a
 .Ar command
 as the superuser or another user, as specified by the security
 policy.
+The invoking user's real
+.No ( Em not
+effective) user ID is used to determine the user name with which
+to query the security policy.
 .Pp
 .Nm
 supports a plugin architecture for security policies and input/output

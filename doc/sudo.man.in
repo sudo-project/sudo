@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "August 7, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "August 9, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -89,6 +89,10 @@ allows a permitted user to execute a
 \fIcommand\fR
 as the superuser or another user, as specified by the security
 policy.
+The invoking user's real
+(\fInot\fR
+effective) user ID is used to determine the user name with which
+to query the security policy.
 .PP
 \fBsudo\fR
 supports a plugin architecture for security policies and input/output
