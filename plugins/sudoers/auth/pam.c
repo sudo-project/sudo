@@ -80,6 +80,7 @@ int
 sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 {
     static int pam_status;
+    int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
     /* Initial PAM setup */
@@ -95,9 +96,21 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
      * Set PAM_RUSER to the invoking user (the "from" user).
      * We set PAM_RHOST to avoid a bug in Solaris 7 and below.
      */
-    (void) pam_set_item(pamh, PAM_RUSER, user_name);
+    rc = pam_set_item(pamh, PAM_RUSER, user_name);
+    if (rc != PAM_SUCCESS) {
+	const char *errstr = pam_strerror(pamh, rc);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "pam_set_item(pamh, PAM_RUSER, %s): %s", user_name,
+	    errstr ? errstr : "unknown error");
+    }
 #ifdef __sun__
-    (void) pam_set_item(pamh, PAM_RHOST, user_host);
+    rc = pam_set_item(pamh, PAM_RHOST, user_host);
+    if (rc != PAM_SUCCESS) {
+	const char *errstr = pam_strerror(pamh, rc);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "pam_set_item(pamh, PAM_RHOST, %s): %s", user_host,
+	    errstr ? errstr : "unknown error");
+    }
 #endif
 
     /*
@@ -105,10 +118,13 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
      * will cause a crash if PAM_TTY is not set so if
      * there is no tty, set PAM_TTY to the empty string.
      */
-    if (user_ttypath == NULL)
-	(void) pam_set_item(pamh, PAM_TTY, "");
-    else
-	(void) pam_set_item(pamh, PAM_TTY, user_ttypath);
+    rc = pam_set_item(pamh, PAM_TTY, user_ttypath ? user_ttypath : "");
+    if (rc != PAM_SUCCESS) {
+	const char *errstr = pam_strerror(pamh, rc);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "pam_set_item(pamh, PAM_TTY, %s): %s",
+	    user_ttypath ? user_ttypath : "", errstr ? errstr : "unknown error");
+    }
 
     /*
      * If PAM session and setcred support is disabled we don't
@@ -173,6 +189,8 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	case PAM_AUTHINFO_UNAVAIL:
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"pam_acct_mgmt: %d", *pam_status);
 	    debug_return_int(AUTH_FAILURE);
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)) != NULL)
@@ -198,7 +216,7 @@ sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 int
 sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
-    int status = AUTH_SUCCESS;
+    int rc, status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
     debug_decl(sudo_pam_begin_session, SUDOERS_DEBUG_AUTH)
 
@@ -209,7 +227,12 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      */
     if (pw == NULL) {
 	if (pamh != NULL) {
-	    (void) pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	    rc = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	    if (rc != PAM_SUCCESS) {
+		const char *errstr = pam_strerror(pamh, rc);
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "pam_end: %s", errstr ? errstr : "unknown error");
+	    }
 	    pamh = NULL;
 	}
 	goto done;
@@ -219,7 +242,13 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      * Update PAM_USER to reference the user we are running the command
      * as, as opposed to the user we authenticated as.
      */
-    (void) pam_set_item(pamh, PAM_USER, pw->pw_name);
+    rc = pam_set_item(pamh, PAM_USER, pw->pw_name);
+    if (rc != PAM_SUCCESS) {
+	const char *errstr = pam_strerror(pamh, rc);
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name,
+	    errstr ? errstr : "unknown error");
+    }
 
     /*
      * Reinitialize credentials when changing the user.
@@ -229,13 +258,26 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      * pam_unix will fail but pam_ldap or pam_sss may succeed, but if
      * pam_unix is first in the stack, pam_setcred() will fail.
      */
-    if (def_pam_setcred)
-	(void) pam_setcred(pamh, PAM_REINITIALIZE_CRED);
+    if (def_pam_setcred) {
+	rc = pam_setcred(pamh, PAM_REINITIALIZE_CRED);
+	if (rc != PAM_SUCCESS) {
+	    const char *errstr = pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_setcred: %s", errstr ? errstr : "unknown error");
+	}
+    }
 
     if (def_pam_session) {
 	*pam_status = pam_open_session(pamh, 0);
 	if (*pam_status != PAM_SUCCESS) {
-	    (void) pam_end(pamh, *pam_status | PAM_DATA_SILENT);
+	    const char *errstr = pam_strerror(pamh, *pam_status);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_open_session: %s", errstr ? errstr : "unknown error");
+	    rc = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
+	    if (rc != PAM_SUCCESS) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "pam_end: %s", errstr ? errstr : "unknown error");
+	    }
 	    pamh = NULL;
 	    status = AUTH_FAILURE;
 	    goto done;
@@ -269,7 +311,7 @@ done:
 int
 sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
-    int status = AUTH_SUCCESS;
+    int rc, status = AUTH_SUCCESS;
     debug_decl(sudo_pam_end_session, SUDOERS_DEBUG_AUTH)
 
     if (pamh != NULL) {
@@ -278,13 +320,36 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	 * as, as opposed to the user we authenticated as.
 	 * XXX - still needed now that session init is in parent?
 	 */
-	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
-	if (def_pam_session)
-	    (void) pam_close_session(pamh, PAM_SILENT);
-	if (def_pam_setcred)
-	    (void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
-	if (pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT) != PAM_SUCCESS)
+	rc = pam_set_item(pamh, PAM_USER, pw->pw_name);
+	if (rc != PAM_SUCCESS) {
+	    const char *errstr = pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name,
+		errstr ? errstr : "unknown error");
+	}
+	if (def_pam_session) {
+	    rc = pam_close_session(pamh, PAM_SILENT);
+	    if (rc != PAM_SUCCESS) {
+		const char *errstr = pam_strerror(pamh, rc);
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "pam_close_session: %s", errstr ? errstr : "unknown error");
+	    }
+	}
+	if (def_pam_setcred) {
+	    rc = pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
+	    if (rc != PAM_SUCCESS) {
+		const char *errstr = pam_strerror(pamh, rc);
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "pam_setcred: %s", errstr ? errstr : "unknown error");
+	    }
+	}
+	rc = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	if (rc != PAM_SUCCESS) {
+	    const char *errstr = pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_end: %s", errstr ? errstr : "unknown error");
 	    status = AUTH_FAILURE;
+	}
 	pamh = NULL;
     }
 
@@ -392,6 +457,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		}
 		break;
 	    default:
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unsupported message style: %d", pm->msg_style);
 		ret = PAM_CONV_ERR;
 		goto done;
 	}
