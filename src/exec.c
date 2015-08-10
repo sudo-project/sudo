@@ -887,7 +887,7 @@ handler(int s, siginfo_t *info, void *context)
      * kill itself.  For example, this can happen with some versions of
      * reboot that call kill(-1, SIGTERM) to kill all other processes.
      */
-    if (s != SIGCHLD && USER_SIGNALED(info)) {
+    if (s != SIGCHLD && USER_SIGNALED(info) && info->si_pid != 0) {
 	pid_t si_pgrp = getpgid(info->si_pid);
 	if (si_pgrp != (pid_t)-1) {
 	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
@@ -934,7 +934,6 @@ static void
 handler_user_only(int s, siginfo_t *info, void *context)
 {
     unsigned char signo = (unsigned char)s;
-    pid_t si_pgrp;
 
     /*
      * Only forward user-generated signals not sent by a process in
@@ -945,11 +944,14 @@ handler_user_only(int s, siginfo_t *info, void *context)
      */
     if (!USER_SIGNALED(info))
 	return;
-    if ((si_pgrp = getpgid(info->si_pid)) != (pid_t)-1) {
-	if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
+    if (info->si_pid != 0) {
+	pid_t si_pgrp = getpgid(info->si_pid);
+	if (si_pgrp != (pid_t)-1) {
+	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
+		return;
+	} else if (info->si_pid == cmnd_pid) {
 	    return;
-    } else if (info->si_pid == cmnd_pid) {
-	    return;
+	}
     }
 
     /*
