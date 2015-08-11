@@ -279,7 +279,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 		    "pam_end: %s", errstr ? errstr : "unknown error");
 	    }
 	    pamh = NULL;
-	    status = AUTH_FAILURE;
+	    status = AUTH_FATAL;
 	    goto done;
 	}
     }
@@ -295,7 +295,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env. */
 	    if (!env_init(*user_envp) || !env_merge(pam_envp))
-		status = AUTH_FAILURE;
+		status = AUTH_FATAL;
 	    *user_envp = env_get();
 	    (void)env_init(NULL);
 	    free(pam_envp);
@@ -348,7 +348,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	    const char *errstr = pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"pam_end: %s", errstr ? errstr : "unknown error");
-	    status = AUTH_FAILURE;
+	    status = AUTH_FATAL;
 	}
 	pamh = NULL;
     }

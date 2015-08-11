@@ -342,11 +342,11 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
 	    status = (auth->begin_session)(pw, user_env, auth);
-	    if (status == AUTH_FATAL)
+	    if (status != AUTH_SUCCESS)
 		break;		/* assume error msg already printed */
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : 1);
+    debug_return_int(status == AUTH_SUCCESS ? 1 : -1);
 }
 
 bool
