@@ -1214,7 +1214,7 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 		files, argc_out, argv_out, NULL);
 	    if (editor_path == NULL && errno != ENOENT)
 		debug_return_str(NULL);
-	} while (ep != NULL && editor_path == NULL);
+	}
     }
     if (!editor_path) {
 	audit_failure(NewArgc, NewArgv, N_("%s: command not found"),

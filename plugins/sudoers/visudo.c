@@ -332,7 +332,7 @@ get_editor(int *editor_argc, char ***editor_argv)
 		editor_argc, editor_argv, whitelist);
 	    if (editor_path == NULL && errno != ENOENT)
 		debug_return_str(NULL);
-	} while (ep != NULL && editor_path == NULL);
+	}
     }
     if (editor_path == NULL)
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
