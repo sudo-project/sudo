@@ -415,12 +415,10 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     int tfd;				/* sudoers temp file descriptor */
     bool modified;			/* was the file modified? */
     int ac;				/* argument count */
-    char buf[4096];			/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
     struct timespec ts, times[2];	/* time before and after edit */
     struct timespec orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
-    ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
     bool rval = false;			/* return value */
     debug_decl(edit_sudoers, SUDOERS_DEBUG_UTIL)
@@ -440,15 +438,20 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 
 	/* Copy sp->path -> sp->tpath and reset the mtime. */
 	if (orig_size != 0) {
+	    char buf[4096], lastch = '\0';
+	    ssize_t nread;
+
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
-	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0)
+	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0) {
 		if (write(tfd, buf, nread) != nread)
 		    sudo_fatal(U_("write error"));
+		lastch = buf[nread - 1];
+	    }
 
 	    /* Add missing newline at EOF if needed. */
-	    if (nread > 0 && buf[nread - 1] != '\n') {
-		buf[0] = '\n';
-		if (write(tfd, buf, 1) != 1)
+	    if (lastch != '\n') {
+		lastch = '\n';
+		if (write(tfd, &lastch, 1) != 1)
 		    sudo_fatal(U_("write error"));
 	    }
 	}
@@ -460,7 +463,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 
     /* Disable +lineno if editor doesn't support it. */
     if (lineno > 0 && !editor_supports_plus(editor))
-	    lineno = -1;
+	lineno = -1;
 
     /*
      * We pre-allocated 2 extra spaces for "+n filename" in argv.
