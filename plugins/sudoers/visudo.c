@@ -330,7 +330,9 @@ get_editor(int *editor_argc, char ***editor_argv)
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
 	    editor_path = resolve_editor(cp, (size_t)(ep - cp), 2, files,
 		editor_argc, editor_argv, whitelist);
-	    if (editor_path == NULL && errno != ENOENT)
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
 		debug_return_str(NULL);
 	}
     }

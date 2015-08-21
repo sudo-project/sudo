@@ -1201,7 +1201,9 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
 	    editor_path = resolve_editor(editor, strlen(editor),
 		nfiles, files, argc_out, argv_out, NULL);
-	    if (editor_path == NULL && errno != ENOENT)
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
 		debug_return_str(NULL);
 	}
     }
