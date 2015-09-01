@@ -39,10 +39,16 @@ extern size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
 __dso_public int main(int argc, char *argv[]);
 
+static char bstring1[] = { 0xea, 0xb8, 0xa2, 0x71, 0xef, 0x67, 0xc1, 0xcd, 0x0d, 0xd9, 0xa6, 0xaa, 0xa8, 0x24, 0x77, 0x2a, 0xfc, 0x6f, 0x76, 0x37, 0x1b, 0xed, 0x9e, 0x1a, 0x90, 0x5f, 0xcf, 0xbc, 0x00 };
+
 struct base64_test {
     const char *ascii;
     const char *encoded;
 } test_strings[] = {
+    {
+	bstring1,
+	"6riice9nwc0N2aaqqCR3Kvxvdjcb7Z4akF/PvA=="
+    },
     {
 	"any carnal pleasure.",
 	"YW55IGNhcm5hbCBwbGVhc3VyZS4="

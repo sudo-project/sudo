@@ -617,8 +617,12 @@ digest_matches(const char *file, const struct sudo_digest *sd)
     } else {
 	size_t len = base64_decode(sd->digest_str, sudoers_digest,
 	    sizeof(sudoers_digest));
-	if (len != func->digest_len)
+	if (len != func->digest_len) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"incorrect length for digest, expected %u, got %zu",
+		func->digest_len, len);
 	    goto bad_format;
+	}
     }
 
     if ((fp = fopen(file, "r")) == NULL) {
