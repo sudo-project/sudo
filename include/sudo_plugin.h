@@ -78,8 +78,8 @@ typedef int (*sudo_hook_fn_unsetenv_t)(const char *name, void *closure);
 
 /* Hook structure definition. */
 struct sudo_hook {
-    int hook_version;
-    int hook_type;
+    unsigned int hook_version;
+    unsigned int hook_type;
     sudo_hook_fn_t hook_fn;
     void *closure;
 };

@@ -1126,8 +1126,8 @@ DDEESSCCRRIIPPTTIIOONN
      typedef int (*sudo_hook_fn_t)();
 
      struct sudo_hook {
-         int hook_version;
-         int hook_type;
+         unsigned int hook_version;
+         unsigned int hook_type;
          sudo_hook_fn_t hook_fn;
          void *closure;
      };
