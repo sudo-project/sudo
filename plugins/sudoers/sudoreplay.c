@@ -366,8 +366,11 @@ replay_session(const double max_wait, const char *decimal)
     /* Set stdin to raw mode if it is a tty */
     interactive = isatty(STDIN_FILENO);
     if (interactive) {
-	if (!sudo_term_raw(STDIN_FILENO, 1))
-	    sudo_fatal(U_("unable to set tty to raw mode"));
+	while (!sudo_term_raw(STDIN_FILENO, 1)) {
+	    if (errno != EINTR)
+		sudo_fatal(U_("unable to set tty to raw mode"));
+	    kill(getpid(), SIGTTOU);
+	}
     }
 
     /* Setup event base and input/output events. */

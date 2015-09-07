@@ -51,6 +51,24 @@ static void tgetpass_handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
 
+static int
+suspend(int signo, struct sudo_conv_callback *callback)
+{
+    int rval = 0;
+    debug_decl(suspend, SUDO_DEBUG_CONV)
+
+    if (callback != NULL && callback->on_suspend != NULL) {
+	if (callback->on_suspend(signo, callback->closure) == -1)
+	    rval = -1;
+    }
+    kill(getpid(), signo);
+    if (callback != NULL && callback->on_resume != NULL) {
+	if (callback->on_resume(signo, callback->closure) == -1)
+	    rval = -1;
+    }
+    debug_return_int(rval);
+}
+
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
@@ -106,13 +124,23 @@ restart:
 
     /*
      * If we are using a tty but are not the foreground pgrp this will
-     * generate SIGTTOU, so do it *before* installing the signal handlers.
+     * return EINTR.  We send ourself SIGTTOU bracketed by callbacks.
      */
     if (!ISSET(flags, TGP_ECHO)) {
-	if (ISSET(flags, TGP_MASK))
-	    neednl = sudo_term_cbreak(input);
-	else
-	    neednl = sudo_term_noecho(input);
+	for (;;) {
+	    if (ISSET(flags, TGP_MASK))
+		neednl = sudo_term_cbreak(input);
+	    else
+		neednl = sudo_term_noecho(input);
+	    if (neednl || errno != EINTR)
+		break;
+	    /* Received SIGTTOU, suspend the process. */
+	    if (suspend(SIGTTOU, callback) == -1) {
+		if (input != STDIN_FILENO)
+		    (void) close(input);
+		debug_return_ptr(NULL);
+	    }
+	}
     }
 
     /*
@@ -154,8 +182,19 @@ restart:
 
 restore:
     /* Restore old tty settings and signals. */
-    if (!ISSET(flags, TGP_ECHO))
-	sudo_term_restore(input, 1);
+    if (!ISSET(flags, TGP_ECHO)) {
+	for (;;) {
+	    /* Restore old tty settings if possible. */
+	    if (sudo_term_restore(input, 1) || errno != EINTR)
+		break;
+	    /* Received SIGTTOU, suspend the process. */
+	    if (suspend(SIGTTOU, callback) == -1) {
+		if (input != STDIN_FILENO)
+		    (void) close(input);
+		debug_return_ptr(NULL);
+	    }
+	}
+    }
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
@@ -178,18 +217,11 @@ restore:
 		case SIGTSTP:
 		case SIGTTIN:
 		case SIGTTOU:
-		    if (callback != NULL && callback->on_suspend != NULL)
-			callback->on_suspend(i, callback->closure);
+		    if (suspend(i, callback) == 0)
+			need_restart = 1;
 		    break;
-	    }
-	    kill(getpid(), i);
-	    switch (i) {
-		case SIGTSTP:
-		case SIGTTIN:
-		case SIGTTOU:
-		    if (callback != NULL && callback->on_resume != NULL)
-			callback->on_resume(i, callback->closure);
-		    need_restart = 1;
+		default:
+		    kill(getpid(), i);
 		    break;
 	    }
 	}

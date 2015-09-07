@@ -129,7 +129,6 @@ sudo_term_noecho_v1(int fd)
 {
     debug_decl(sudo_term_noecho, SUDO_DEBUG_UTIL)
 
-again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -140,11 +139,6 @@ again:
     if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	changed = 1;
 	debug_return_bool(true);
-    }
-    if (got_sigttou) {
-	/* We were in the background, so oterm is probably bogus. */
-	kill(getpid(), SIGTTOU);
-	goto again;
     }
     debug_return_bool(false);
 }
@@ -159,7 +153,6 @@ sudo_term_raw_v1(int fd, int isig)
     struct termios term;
     debug_decl(sudo_term_raw, SUDO_DEBUG_UTIL)
 
-again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -175,11 +168,6 @@ again:
 	changed = 1;
     	debug_return_bool(true);
     }
-    if (got_sigttou) {
-	/* We were in the background, so oterm is probably bogus. */
-	kill(getpid(), SIGTTOU);
-	goto again;
-    }
     debug_return_bool(false);
 }
 
@@ -192,7 +180,6 @@ sudo_term_cbreak_v1(int fd)
 {
     debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL)
 
-again:
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -212,11 +199,6 @@ again:
 	changed = 1;
 	debug_return_bool(true);
     }
-    if (got_sigttou) {
-	/* We were in the background, so oterm is probably bogus. */
-	kill(getpid(), SIGTTOU);
-	goto again;
-    }
     debug_return_bool(false);
 }
 
@@ -230,15 +212,9 @@ sudo_term_copy_v1(int src, int dst)
     struct termios tt;
     debug_decl(sudo_term_copy, SUDO_DEBUG_UTIL)
 
-again:
     if (tcgetattr(src, &tt) != 0)
 	debug_return_bool(false);
     if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt) == 0)
 	debug_return_bool(true);
-    if (got_sigttou) {
-	/* We were in the background, so tt is probably bogus. */
-	kill(getpid(), SIGTTOU);
-	goto again;
-    }
     debug_return_bool(false);
 }
