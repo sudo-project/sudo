@@ -126,7 +126,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
     debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH)

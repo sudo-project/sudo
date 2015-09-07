@@ -179,7 +179,7 @@ warning(int errnum, const char *fmt, va_list ap)
         }
 	msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
 	msgs[nmsgs++].msg = "\n";
-	sudo_warn_conversation(nmsgs, msgs, NULL);
+	sudo_warn_conversation(nmsgs, msgs, NULL, NULL);
 	if (buf != static_buf)
 	    free(buf);
     } else {

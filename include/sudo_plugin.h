@@ -61,8 +61,27 @@ struct sudo_conv_reply {
     char *reply;
 };
 
+/* Conversation callback API version major/minor */
+#define SUDO_CONV_CALLBACK_VERSION_MAJOR	1
+#define SUDO_CONV_CALLBACK_VERSION_MINOR	0
+#define SUDO_CONV_CALLBACK_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_CONV_CALLBACK_VERSION SUDO_CONV_CALLBACK_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, SUDO_CONV_CALLBACK_VERSION_MINOR)
+
+/*
+ * Callback struct to be passed to the conversation function.
+ * Can be used to perform operations on suspend/resume such
+ * as dropping/acquiring locks.
+ */
+typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
+struct sudo_conv_callback {
+    unsigned int version;
+    void *closure;
+    sudo_conv_callback_fn_t on_suspend;
+    sudo_conv_callback_fn_t on_resume;
+};
+
 typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
-	struct sudo_conv_reply replies[]);
+	struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
 /*

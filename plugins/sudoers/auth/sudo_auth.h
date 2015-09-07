@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,7 @@ typedef struct sudo_auth {
     void *data;			/* method-specific data pointer */
     int (*init)(struct passwd *pw, struct sudo_auth *auth);
     int (*setup)(struct passwd *pw, char **prompt, struct sudo_auth *auth);
-    int (*verify)(struct passwd *pw, char *p, struct sudo_auth *auth);
+    int (*verify)(struct passwd *pw, char *p, struct sudo_auth *auth, struct sudo_conv_callback *callback);
     int (*cleanup)(struct passwd *pw, struct sudo_auth *auth);
     int (*begin_session)(struct passwd *pw, char **user_env[], struct sudo_auth *auth);
     int (*end_session)(struct passwd *pw, struct sudo_auth *auth);
@@ -47,47 +47,48 @@ typedef struct sudo_auth {
 #define IS_ONEANDONLY(x)	((x)->flags & FLAG_ONEANDONLY)
 
 /* Like tgetpass() but uses conversation function */
-char *auth_getpass(const char *prompt, int timeout, int type);
+char *auth_getpass(const char *prompt, int timeout, int type,
+    struct sudo_conv_callback *callback);
 
 /* Pointer to conversation function to use with auth_getpass(). */
 extern sudo_conv_t sudo_conv;
 
 /* Prototypes for standalone methods */
 int bsdauth_init(struct passwd *pw, sudo_auth *auth);
-int bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int bsdauth_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_aix_init(struct passwd *pw, sudo_auth *auth);
-int sudo_aix_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_aix_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_fwtk_init(struct passwd *pw, sudo_auth *auth);
-int sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_init(struct passwd *pw, sudo_auth *auth);
-int sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_begin_session(struct passwd *pw, char **user_env[], sudo_auth *auth);
 int sudo_pam_end_session(struct passwd *pw, sudo_auth *auth);
 int sudo_securid_init(struct passwd *pw, sudo_auth *auth);
 int sudo_securid_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
-int sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_sia_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
-int sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth);
 
 /* Prototypes for normal methods */
-int sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth);
-int sudo_dce_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
+int sudo_dce_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_krb5_init(struct passwd *pw, sudo_auth *auth);
 int sudo_krb5_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
-int sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_passwd_init(struct passwd *pw, sudo_auth *auth);
-int sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_rfc1938_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
-int sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_secureware_init(struct passwd *pw, sudo_auth *auth);
-int sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_secureware_cleanup(struct passwd *pw, sudo_auth *auth);
 
 /* Fields: name, flags, init, setup, verify, cleanup, begin_sess, end_sess */

@@ -55,7 +55,8 @@ static char *sudo_askpass(const char *, const char *);
  * Like getpass(3) but with timeout and echo flags.
  */
 char *
-tgetpass(const char *prompt, int timeout, int flags)
+tgetpass(const char *prompt, int timeout, int flags,
+    struct sudo_conv_callback *callback)
 {
     sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
     sigaction_t savetstp, savettin, savettou, savepipe;
@@ -173,11 +174,21 @@ restore:
      */
     for (i = 0; i < NSIG; i++) {
 	if (signo[i]) {
+	    switch (i) {
+		case SIGTSTP:
+		case SIGTTIN:
+		case SIGTTOU:
+		    if (callback != NULL && callback->on_suspend != NULL)
+			callback->on_suspend(i, callback->closure);
+		    break;
+	    }
 	    kill(getpid(), i);
 	    switch (i) {
 		case SIGTSTP:
 		case SIGTTIN:
 		case SIGTTOU:
+		    if (callback != NULL && callback->on_resume != NULL)
+			callback->on_resume(i, callback->closure);
 		    need_restart = 1;
 		    break;
 	    }

@@ -98,7 +98,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;
     char *s;
@@ -121,9 +121,9 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
      * S/Key.
      */
     if ((s = auth_challenge(as)) == NULL) {
-	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
+	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else {
-	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
+	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
@@ -142,7 +142,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 		debug_return_int(AUTH_FATAL);
 	    }
 	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
-		SUDO_CONV_PROMPT_ECHO_ON);
+		SUDO_CONV_PROMPT_ECHO_ON, callback);
 	    free(s);
 	}
     }

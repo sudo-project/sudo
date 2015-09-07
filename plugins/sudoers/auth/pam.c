@@ -71,7 +71,8 @@
 
 static int converse(int, PAM_CONST struct pam_message **,
 		    struct pam_response **, void *);
-static struct pam_conv pam_conv = { converse, NULL };
+static struct sudo_conv_callback *conv_callback;
+static struct pam_conv pam_conv = { converse, &conv_callback };
 static char *def_prompt = PASSPROMPT;
 static bool getpass_error;
 static pam_handle_t *pamh;
@@ -137,7 +138,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     const char *s;
     int *pam_status = (int *) auth->data;
@@ -145,6 +146,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 
     def_prompt = prompt;	/* for converse */
     getpass_error = false;	/* set by converse if user presses ^C */
+    conv_callback = callback;	/* passed to conversation function */
 
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, PAM_SILENT);
@@ -375,7 +377,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
  */
 static int
 converse(int num_msg, PAM_CONST struct pam_message **msg,
-    struct pam_response **response, void *appdata_ptr)
+    struct pam_response **response, void *callback)
 {
     struct pam_response *pr;
     PAM_CONST struct pam_message *pm;
@@ -427,7 +429,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 			prompt = pm->msg;
 		}
 		/* Read the password unless interrupted. */
-		pass = auth_getpass(prompt, def_passwd_timeout * 60, type);
+		pass = auth_getpass(prompt, def_passwd_timeout * 60, type, callback);
 		if (pass == NULL) {
 		    /* Error (or ^C) reading password, don't try again. */
 		    getpass_error = true;

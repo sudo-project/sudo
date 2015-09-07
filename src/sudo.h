@@ -183,7 +183,8 @@ struct timeval;
 void cleanup(int);
 
 /* tgetpass.c */
-char *tgetpass(const char *, int, int);
+char *tgetpass(const char *prompt, int timeout, int flags,
+    struct sudo_conv_callback *callback);
 
 /* exec.c */
 int pipe_nonblock(int fds[2]);

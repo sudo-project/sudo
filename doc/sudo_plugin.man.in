@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "August 6, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "September 2, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2293,9 +2293,26 @@ struct sudo_conv_reply {
     char *reply;
 };
 
+/* Conversation callback API version major/minor */
+#define SUDO_CONV_CALLBACK_VERSION_MAJOR 1
+#define SUDO_CONV_CALLBACK_VERSION_MINOR 0
+#define SUDO_CONV_CALLBACK_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_CONV_CALLBACK_VERSION \e
+    SUDO_CONV_CALLBACK_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, \e
+    SUDO_CONV_CALLBACK_VERSION_MINOR)
+
+typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
+struct sudo_conv_callback {
+    unsigned int version;
+    void *closure;
+    sudo_conv_callback_fn_t on_suspend;
+    sudo_conv_callback_fn_t on_resume;
+};
+
 typedef int (*sudo_conv_t)(int num_msgs,
              const struct sudo_conv_message msgs[],
-             struct sudo_conv_reply replies[]);
+             struct sudo_conv_reply replies[],
+	     struct sudo_conv_callback *callback);
 
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 .RE
@@ -2323,6 +2340,23 @@ and
 \fRstruct sudo_conv_reply\fR
 for
 each message in the conversation.
+The
+\fRstruct sudo_conv_callback\fR
+pointer, if not
+\fRNULL\fR,
+contains function pointers that are called when the
+\fBsudo\fR
+process is suspended and/or resumed during conversation input.
+The functions are passed the signal that caused
+\fBsudo\fR
+to be suspended and the
+\fIclosure\fR
+pointer.
+This allows the plugin to release resources such as locks that
+should not be held indefinitely on suspend and reacquire them
+on resume.
+Note that the functions are not actually invoked from within a signal handler.
+.PP
 The plugin is responsible for freeing the reply buffer located in each
 \fRstruct sudo_conv_reply\fR,
 if it is not
@@ -2662,6 +2696,17 @@ The
 entry was added to the
 \fRcommand_info\fR
 list.
+.sp
+The sudo
+\fIconversation\fR
+function now takes a pointer to a
+\fRstruct sudo_conv_callback\fR
+as its fourth argument.
+The
+\fRsudo_conv_t\fR
+definition has been updated to match.
+The plugin must specify that it supports plugin API version 1.8 or higher
+to receive a conversation function pointer that supports this argument.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

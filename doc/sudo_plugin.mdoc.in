@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 6, 2015
+.Dd September 2, 2015
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1999,9 +1999,26 @@ struct sudo_conv_reply {
     char *reply;
 };
 
+/* Conversation callback API version major/minor */
+#define SUDO_CONV_CALLBACK_VERSION_MAJOR 1
+#define SUDO_CONV_CALLBACK_VERSION_MINOR 0
+#define SUDO_CONV_CALLBACK_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_CONV_CALLBACK_VERSION \e
+    SUDO_CONV_CALLBACK_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, \e
+    SUDO_CONV_CALLBACK_VERSION_MINOR)
+
+typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
+struct sudo_conv_callback {
+    unsigned int version;
+    void *closure;
+    sudo_conv_callback_fn_t on_suspend;
+    sudo_conv_callback_fn_t on_resume;
+};
+
 typedef int (*sudo_conv_t)(int num_msgs,
              const struct sudo_conv_message msgs[],
-             struct sudo_conv_reply replies[]);
+             struct sudo_conv_reply replies[],
+	     struct sudo_conv_callback *callback);
 
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 .Ed
@@ -2028,6 +2045,23 @@ and
 .Li struct sudo_conv_reply
 for
 each message in the conversation.
+The
+.Li struct sudo_conv_callback
+pointer, if not
+.Dv NULL ,
+contains function pointers that are called when the
+.Nm sudo
+process is suspended and/or resumed during conversation input.
+The functions are passed the signal that caused
+.Nm sudo
+to be suspended and the
+.Fa closure
+pointer.
+This allows the plugin to release resources such as locks that
+should not be held indefinitely on suspend and reacquire them
+on resume.
+Note that the functions are not actually invoked from within a signal handler.
+.Pp
 The plugin is responsible for freeing the reply buffer located in each
 .Li struct sudo_conv_reply ,
 if it is not
@@ -2329,6 +2363,17 @@ The
 entry was added to the
 .Li command_info
 list.
+.Pp
+The sudo
+.Em conversation
+function now takes a pointer to a
+.Li struct sudo_conv_callback
+as its fourth argument.
+The
+.Li sudo_conv_t
+definition has been updated to match.
+The plugin must specify that it supports plugin API version 1.8 or higher
+to receive a conversation function pointer that supports this argument.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

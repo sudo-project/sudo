@@ -1187,7 +1187,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     case SUDO_API_MKVERSION(1, 0):
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, sudo_conversation_printf, plugin_settings,
+	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, user_env);
 	break;
     default:
@@ -1346,12 +1346,12 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
 	rval = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, sudo_conversation_printf, plugin_settings,
+	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, argc, argv, user_env);
 	break;
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
-	    sudo_conversation, sudo_conversation_printf, plugin_settings,
+	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, command_info, argc, argv, user_env);
 	break;
     default:

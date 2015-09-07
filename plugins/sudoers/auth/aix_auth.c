@@ -128,7 +128,7 @@ sudo_aix_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
@@ -137,7 +137,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 
     do {
 	pass = auth_getpass(prompt, def_passwd_timeout * 60,
-	    SUDO_CONV_PROMPT_ECHO_OFF);
+	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass == NULL)
 	    break;
 	free(message);
@@ -157,7 +157,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    msg.msg_type = SUDO_CONV_ERROR_MSG;
 	    msg.msg = message;
 	    memset(&repl, 0, sizeof(repl));
-	    sudo_conv(1, &msg, &repl);
+	    sudo_conv(1, &msg, &repl, NULL);
 	}
 	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }

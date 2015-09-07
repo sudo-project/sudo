@@ -209,7 +209,8 @@ user_interrupted(void)
  * Returns true if verified, false if not or -1 on error.
  */
 int
-verify_user(struct passwd *pw, char *prompt, int validated)
+verify_user(struct passwd *pw, char *prompt, int validated,
+    struct sudo_conv_callback *callback)
 {
     unsigned int ntries;
     int rval, status, success = AUTH_FAILURE;
@@ -281,7 +282,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	    p = prompt;
 	} else {
 	    p = auth_getpass(prompt, def_passwd_timeout * 60,
-		SUDO_CONV_PROMPT_ECHO_OFF);
+		SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	    if (p == NULL)
 		break;
 	}
@@ -291,7 +292,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	    if (IS_DISABLED(auth))
 		continue;
 
-	    success = auth->status = (auth->verify)(pw, p, auth);
+	    success = auth->status = (auth->verify)(pw, p, auth, callback);
 	    if (success != AUTH_FAILURE)
 		break;
 	}
@@ -387,7 +388,8 @@ sudo_auth_end_session(struct passwd *pw)
 }
 
 char *
-auth_getpass(const char *prompt, int timeout, int type)
+auth_getpass(const char *prompt, int timeout, int type,
+    struct sudo_conv_callback *callback)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
@@ -415,7 +417,7 @@ auth_getpass(const char *prompt, int timeout, int type)
     msg.timeout = def_passwd_timeout * 60;
     msg.msg = prompt;
     memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
+    sudo_conv(1, &msg, &repl, callback);
     /* XXX - check for ENOTTY? */
 
     /* Restore previous signal mask. */

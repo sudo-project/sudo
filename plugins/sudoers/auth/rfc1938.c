@@ -124,7 +124,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     debug_decl(sudo_rfc1938_verify, SUDOERS_DEBUG_AUTH)
 

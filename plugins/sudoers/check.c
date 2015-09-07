@@ -96,7 +96,7 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	if (prompt == NULL)
 	    goto done;
 
-	rval = verify_user(auth_pw, prompt, validated);
+	rval = verify_user(auth_pw, prompt, validated, NULL); /* XXX */
 	if (rval == true && lectured) {
 	    if (set_lectured() == -1)
 		rval = -1;
@@ -192,7 +192,7 @@ display_lecture(int status)
 	    buf[nread] = '\0';
 	    msg.msg_type = SUDO_CONV_ERROR_MSG;
 	    msg.msg = buf;
-	    sudo_conv(1, &msg, &repl);
+	    sudo_conv(1, &msg, &repl, NULL);
 	}
 	fclose(fp);
     } else {
@@ -203,7 +203,7 @@ display_lecture(int status)
 	    "    #1) Respect the privacy of others.\n"
 	    "    #2) Think before you type.\n"
 	    "    #3) With great power comes great responsibility.\n\n");
-	sudo_conv(1, &msg, &repl);
+	sudo_conv(1, &msg, &repl, NULL);
     }
     debug_return_bool(true);
 }

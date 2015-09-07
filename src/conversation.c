@@ -43,7 +43,7 @@ extern int tgetpass_flags; /* XXX */
  */
 int
 sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
-    struct sudo_conv_reply replies[])
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
     struct sudo_conv_reply *repl;
     const struct sudo_conv_message *msg;
@@ -65,7 +65,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		if (ISSET(msg->msg_type, SUDO_CONV_PROMPT_ECHO_OK))
 		    SET(flags, TGP_NOECHO_TRY);
 		/* Read the password unless interrupted. */
-		pass = tgetpass(msg->msg, msg->timeout, flags);
+		pass = tgetpass(msg->msg, msg->timeout, flags, callback);
 		if (pass == NULL)
 		    goto err;
 		if ((repl->reply = strdup(pass)) == NULL) {
@@ -101,6 +101,13 @@ err:
     } while (n--);
 
     return -1;
+}
+
+int
+sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[])
+{
+    return sudo_conversation(num_msgs, msgs, replies, NULL);
 }
 
 int
