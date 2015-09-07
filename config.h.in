@@ -525,6 +525,9 @@
 /* Define to 1 if you have the `posix_spawnp' function. */
 #undef HAVE_POSIX_SPAWNP
 
+/* Define to 1 if you have the `pread' function. */
+#undef HAVE_PREAD
+
 /* Define to 1 if you have the `priv_set' function. */
 #undef HAVE_PRIV_SET
 
@@ -539,6 +542,9 @@
 
 /* Define to 1 if you have the <pty.h> header file. */
 #undef HAVE_PTY_H
+
+/* Define to 1 if you have the `pwrite' function. */
+#undef HAVE_PWRITE
 
 /* Define to 1 if you have the `pw_dup' function. */
 #undef HAVE_PW_DUP

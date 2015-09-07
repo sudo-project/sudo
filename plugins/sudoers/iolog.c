@@ -269,7 +269,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     sessid[6] = '\0';
 
     /* Rewind and overwrite old seq file, including the NUL byte. */
-    if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7) {
+#ifdef HAVE_PWRITE
+    if (pwrite(fd, buf, 7, 0) != 7) {
+#else
+    if (lseek(fd, 0, SEEK_SET) == -1 || write(fd, buf, 7) != 7) {
+#endif
 	log_warning(SLOG_SEND_MAIL, N_("unable to write to %s"), pathbuf);
 	debug_return_bool(false);
     }

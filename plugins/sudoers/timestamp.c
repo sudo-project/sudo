@@ -61,8 +61,6 @@
  * The TS_LOCKEXCL entry must be unlocked before locking the actual record.
  */
 
-/* TODO: use pread/pwrite when possible */
-
 struct ts_cookie {
     char *fname;
     int fd;
@@ -274,14 +272,29 @@ ts_open(const char *path, int flags)
 }
 
 static ssize_t
-ts_write(int fd, const char *fname, struct timestamp_entry *entry)
+ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 {
     ssize_t nwritten;
     off_t old_eof;
     debug_decl(ts_write, SUDOERS_DEBUG_AUTH)
 
-    old_eof = lseek(fd, (off_t)0, SEEK_CUR);
-    nwritten = write(fd, entry, entry->size);
+    if (offset == -1) {
+	old_eof = lseek(fd, 0, SEEK_CUR);
+	nwritten = write(fd, entry, entry->size);
+    } else {
+	old_eof = offset;
+#ifdef HAVE_PWRITE
+	nwritten = pwrite(fd, entry, entry->size, offset);
+#else
+	if (lseek(fd, offset, SEEK_SET) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to seek to %lld", offset);
+	    nwritten = -1;
+	} else {
+	    nwritten = write(fd, entry, entry->size);
+	}
+#endif
+    }
     if ((size_t)nwritten != entry->size) {
 	if (nwritten == -1) {
 	    log_warning(SLOG_SEND_MAIL,
@@ -500,12 +513,16 @@ ts_read(struct ts_cookie *cookie, struct timestamp_entry *entry)
     }
 
     /* Seek to the record position and read it.  */
+#ifdef HAVE_PREAD
+    nread = pread(cookie->fd, entry, sizeof(*entry), cookie->pos);
+#else
     if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "unable to seek to %lld", (long long)cookie->pos);
 	goto done;
     }
     nread = read(cookie->fd, entry, sizeof(*entry));
+#endif
     if (nread != sizeof(*entry)) {
 	/* short read, should not happen */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -559,14 +576,14 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	entry.version = TS_VERSION;
 	entry.size = sizeof(entry);
 	entry.type = TS_LOCKEXCL;
-	if (ts_write(cookie->fd, cookie->fname, &entry) == -1)
+	if (ts_write(cookie->fd, cookie->fname, &entry, -1) == -1)
 	    debug_return_bool(false);
     } else if (entry.type != TS_LOCKEXCL) {
 	/* Old sudo record, convert it to TS_LOCKEXCL. */
 	entry.type = TS_LOCKEXCL;
 	memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
 	    nread - offsetof(struct timestamp_entry, type));
-	if (ts_write(cookie->fd, cookie->fname, &entry) == -1)
+	if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
 	    debug_return_bool(false);
     }
 
@@ -582,7 +599,7 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "appending new tty time stamp record");
 	lock_pos = lseek(cookie->fd, 0, SEEK_CUR);
-	if (ts_write(cookie->fd, cookie->fname, &cookie->key) == -1)
+	if (ts_write(cookie->fd, cookie->fname, &cookie->key, -1) == -1)
 	    debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
@@ -607,9 +624,9 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	    cookie->pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"appending new globbal record");
+		"appending new global record");
 	    cookie->pos = lseek(cookie->fd, 0, SEEK_CUR);
-	    if (ts_write(cookie->fd, cookie->fname, &cookie->key) == -1)
+	    if (ts_write(cookie->fd, cookie->fname, &cookie->key, -1) == -1)
 		debug_return_bool(false);
 	}
     }
@@ -724,7 +741,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
 		N_("ignoring time stamp from the future"));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_write(cookie->fd, cookie->fname, &entry);
+	    ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #else
 	/* Check for bogus (future) time in the stampfile. */
@@ -737,7 +754,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
 		4 + ctime(&tv_sec));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_write(cookie->fd, cookie->fname, &entry);
+	    ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #endif /* CLOCK_MONOTONIC */
     } else {
@@ -779,15 +796,10 @@ timestamp_update(void *vcookie, struct passwd *pw)
     }
 
     /* Write out the locked record. */
-    if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to seek to %lld", (long long)cookie->pos);
-	goto done;
-    }
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"writing %zu byte record at %lld", sizeof(cookie->key),
 	(long long)cookie->pos);
-    if (ts_write(cookie->fd, cookie->fname, &cookie->key) != -1)
+    if (ts_write(cookie->fd, cookie->fname, &cookie->key, cookie->pos) != -1)
 	rval = true;
 
 done:
@@ -845,9 +857,9 @@ timestamp_remove(bool unlink_it)
     while (ts_find_record(fd, &key, &entry)) {
 	/* Back up and disable the entry. */
 	if (!ISSET(entry.flags, TS_DISABLED)) {
-	    lseek(fd, (off_t)0 - sizeof(entry), SEEK_CUR);
 	    SET(entry.flags, TS_DISABLED);
-	    if (ts_write(fd, fname, &entry) == -1)
+	    lseek(fd, 0 - sizeof(entry), SEEK_CUR);
+	    if (ts_write(fd, fname, &entry, -1) == -1)
 		rval = false;
 	}
     }
