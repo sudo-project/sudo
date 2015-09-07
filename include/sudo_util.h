@@ -182,6 +182,8 @@ __dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
 #define SUDO_UNLOCK	4		/* unlock a file */
 __dso_public bool sudo_lock_file_v1(int fd, int action);
 #define sudo_lock_file(_a, _b) sudo_lock_file_v1((_a), (_b))
+__dso_public bool sudo_lock_region_v1(int fd, int action, off_t len);
+#define sudo_lock_region(_a, _b, _c) sudo_lock_region_v1((_a), (_b), (_c))
 
 /* parseln.c */
 __dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);

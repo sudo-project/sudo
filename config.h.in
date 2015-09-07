@@ -229,9 +229,6 @@
 /* Define to 1 if you have the `fgetln' function. */
 #undef HAVE_FGETLN
 
-/* Define to 1 if you have the `flock' function. */
-#undef HAVE_FLOCK
-
 /* Define to 1 if you have the `fnmatch' function. */
 #undef HAVE_FNMATCH
 

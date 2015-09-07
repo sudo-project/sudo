@@ -22,9 +22,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#ifdef HAVE_FLOCK
-# include <sys/file.h>
-#endif /* HAVE_FLOCK */
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -46,16 +43,22 @@
 #include "sudo_debug.h"
 
 /*
- * Lock/unlock a file.
+ * Lock/unlock all or part of a file.
  */
 #ifdef HAVE_LOCKF
 bool
-sudo_lock_file_v1(int fd, int lockit)
+sudo_lock_file_v1(int fd, int type)
 {
-    int op = 0;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
+    return sudo_lock_region_v1(fd, type, 0);
+}
 
-    switch (lockit) {
+bool
+sudo_lock_region_v1(int fd, int type, off_t len)
+{
+    int op;
+    debug_decl(sudo_lock_region, SUDO_DEBUG_UTIL)
+
+    switch (type) {
 	case SUDO_LOCK:
 	    op = F_LOCK;
 	    break;
@@ -65,48 +68,32 @@ sudo_lock_file_v1(int fd, int lockit)
 	case SUDO_UNLOCK:
 	    op = F_ULOCK;
 	    break;
+	default:
+	    debug_return_bool(false);
     }
-    debug_return_bool(lockf(fd, op, 0) == 0);
-}
-#elif defined(HAVE_FLOCK)
-bool
-sudo_lock_file_v1(int fd, int lockit)
-{
-    int op = 0;
-    debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
-
-    switch (lockit) {
-	case SUDO_LOCK:
-	    op = LOCK_EX;
-	    break;
-	case SUDO_TLOCK:
-	    op = LOCK_EX | LOCK_NB;
-	    break;
-	case SUDO_UNLOCK:
-	    op = LOCK_UN;
-	    break;
-    }
-    debug_return_bool(flock(fd, op) == 0);
+    debug_return_bool(lockf(fd, op, len) == 0);
 }
 #else
 bool
-sudo_lock_file_v1(int fd, int lockit)
+sudo_lock_file_v1(int fd, int type)
 {
-#ifdef F_SETLK
+    return sudo_lock_region_v1(fd, type, 0);
+}
+
+bool
+sudo_lock_region_v1(int fd, int type, off_t len)
+{
     int func;
     struct flock lock;
     debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
     lock.l_start = 0;
-    lock.l_len = 0;
-    lock.l_pid = getpid();
-    lock.l_type = (lockit == SUDO_UNLOCK) ? F_UNLCK : F_WRLCK;
-    lock.l_whence = SEEK_SET;
-    func = (lockit == SUDO_LOCK) ? F_SETLKW : F_SETLK;
+    lock.l_len = len;
+    lock.l_pid = 0;
+    lock.l_type = (type == SUDO_UNLOCK) ? F_UNLCK : F_WRLCK;
+    lock.l_whence = len ? SEEK_CUR : SEEK_SET;
+    func = (type == SUDO_LOCK) ? F_SETLKW : F_SETLK;
 
     debug_return_bool(fcntl(fd, func, &lock) == 0);
-#else
-    return true;
-#endif
 }
 #endif

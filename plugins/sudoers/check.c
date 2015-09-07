@@ -48,13 +48,15 @@ static struct passwd *get_authpw(int);
 
 /*
  * Returns true if the user successfully authenticates, false if not
- * or -1 on error.
+ * or -1 on fatal error.
  */
 static int
 check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 {
-    int status, rval = -1;
+    int status = TS_ERROR;
+    int rval = -1;
     char *prompt;
+    void *cookie;
     bool lectured;
     debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH)
 
@@ -62,10 +64,11 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
     if (ISSET(mode, MODE_IGNORE_TICKET))
 	SET(validated, FLAG_CHECK_USER);
 
-    if (build_timestamp(auth_pw) == -1)
-	goto done;
+    /* Open timestamp file and check its status. */
+    cookie = timestamp_open(user_name, user_sid);
+    if (timestamp_lock(cookie, auth_pw))
+	status = timestamp_status(cookie, auth_pw);
 
-    status = timestamp_status(auth_pw);
     switch (status) {
     case TS_FATAL:
 	/* Fatal error (usually setuid failure), unsafe to proceed. */
@@ -97,21 +100,23 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	    goto done;
 
 	rval = verify_user(auth_pw, prompt, validated, NULL); /* XXX */
-	if (rval == true && lectured) {
-	    if (set_lectured() == -1)
-		rval = -1;
-	}
+	if (rval == true && lectured)
+	    (void)set_lectured();	/* lecture error not fatal */
 	free(prompt);
 	break;
     }
 
-    /* Only update timestamp if user was validated. */
+    /*
+     * Only update timestamp if user was validated.
+     * Failure to update the timestamp is not a fatal error.
+     */
     if (rval == true && ISSET(validated, VALIDATE_SUCCESS) &&
 	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR) {
-	if (update_timestamp(auth_pw) == -1)
-	    rval = -1;
+	(void)timestamp_update(cookie, auth_pw);
     }
 done:
+    if (cookie != NULL)
+	timestamp_close(cookie);
     debug_return_int(rval);
 }
 

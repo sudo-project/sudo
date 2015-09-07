@@ -66,6 +66,7 @@ sudo_lbuf_error_v1
 sudo_lbuf_init_v1
 sudo_lbuf_print_v1
 sudo_lock_file_v1
+sudo_lock_region_v1
 sudo_new_key_val_v1
 sudo_parse_gids_v1
 sudo_parseln_v1

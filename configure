@@ -15165,9 +15165,8 @@ fi
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
     *-*-gnu*)
-		# lockf() is broken on the Hurd -- use flock instead
+		# lockf() is broken on the Hurd
 		ac_cv_func_lockf=no
-		ac_cv_func_flock=yes
 		;;
     *-*-ultrix*)
 		OS="ultrix"
@@ -15477,9 +15476,8 @@ fi
 		fi
 		;;
     *-*-nextstep*)
-		# lockf() is broken on the NeXT -- use flock instead
+		# lockf() is broken on the NeXT
 		ac_cv_func_lockf=no
-		ac_cv_func_flock=yes
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
@@ -18759,13 +18757,12 @@ fi
 done
 
 fi
-for ac_func in lockf flock
+for ac_func in lockf
 do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  ac_fn_c_check_func "$LINENO" "lockf" "ac_cv_func_lockf"
+if test "x$ac_cv_func_lockf" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+#define HAVE_LOCKF 1
 _ACEOF
  break
 fi

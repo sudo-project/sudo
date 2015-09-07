@@ -1943,9 +1943,8 @@ case "$host" in
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
     *-*-gnu*)
-		# lockf() is broken on the Hurd -- use flock instead
+		# lockf() is broken on the Hurd
 		ac_cv_func_lockf=no
-		ac_cv_func_flock=yes
 		;;
     *-*-ultrix*)
 		OS="ultrix"
@@ -2119,9 +2118,8 @@ case "$host" in
 		fi
 		;;
     *-*-nextstep*)
-		# lockf() is broken on the NeXT -- use flock instead
+		# lockf() is broken on the NeXT
 		ac_cv_func_lockf=no
-		ac_cv_func_flock=yes
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
@@ -2521,7 +2519,7 @@ AC_CHECK_FUNCS_ONCE([seteuid])
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS([getifaddrs], [AC_CHECK_FUNCS([freeifaddrs])])
 fi
-AC_CHECK_FUNCS([lockf flock], [break])
+AC_CHECK_FUNCS([lockf], [break])
 AC_CHECK_FUNCS([innetgr], [
     AC_CHECK_DECLS([innetgr], [], [], [
 AC_INCLUDES_DEFAULT

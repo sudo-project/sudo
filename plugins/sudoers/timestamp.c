@@ -21,6 +21,11 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -45,12 +50,30 @@
 #define TIMESTAMP_OPEN_ERROR	-1
 #define TIMESTAMP_PERM_ERROR	-2
 
-static char timestamp_file[PATH_MAX];
-static off_t timestamp_hint = (off_t)-1;
-static struct timestamp_entry timestamp_key;
+/*
+ * Each user has a single time stamp file that contains multiple records.
+ * Records are locked to ensure that changes are serialized.
+ *
+ * The first record is of type TS_LOCKEXCL and is used to gain exclusive
+ * access to create new records.  This is a short-term lock and sudo
+ * should not sleep while holding it (or the user will not be able to sudo).
+ * The TS_LOCKEXCL entry must be unlocked before locking the actual record.
+ */
+
+/* TODO: unlock on suspend, make locking interruptible */
+/* TODO: use pread/pwrite when possible */
+
+struct ts_cookie {
+    int fd;
+    pid_t sid;
+    off_t pos;
+    char *fname;
+    struct timestamp_entry key;
+};
 
 /*
  * Returns true if entry matches key, else false.
+ * We don't match on the sid or actual time stamp.
  */
 static bool
 ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
@@ -98,8 +121,7 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
     debug_decl(ts_find_record, SUDOERS_DEBUG_AUTH)
 
     /*
-     * Look for a matching record.
-     * We don't match on the sid or actual time stamp.
+     * Find a matching record (does not match sid or time stamp value).
      */
     while (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
 	if (cur.size != sizeof(cur)) {
@@ -117,73 +139,6 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 	    debug_return_bool(true);
 	}
     }
-    debug_return_bool(false);
-}
-
-/*
- * Find matching record to update or append a new one.
- * Returns true if the entry was written successfully, else false.
- */
-static bool
-ts_update_record(int fd, struct timestamp_entry *entry, off_t timestamp_hint)
-{
-    struct timestamp_entry cur;
-    ssize_t nwritten;
-    off_t old_eof = (off_t)-1;
-    debug_decl(ts_update_record, SUDOERS_DEBUG_AUTH)
-
-    /* First try the hint if one is given. */
-    if (timestamp_hint != (off_t)-1) {
-	if (lseek(fd, timestamp_hint, SEEK_SET) != -1) {
-	    if (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
-		if (ts_match_record(entry, &cur)) {
-		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-			"found existing time stamp record using hint");
-		    goto found_it;
-		}
-	    }
-	}
-    }
-
-    /* Search for matching record. */
-    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"searching for time stamp record");
-    lseek(fd, (off_t)0, SEEK_SET);
-    if (ts_find_record(fd, entry, &cur)) {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "found existing time stamp record");
-found_it:
-	/* back up over old record */
-	lseek(fd, (off_t)0 - (off_t)cur.size, SEEK_CUR);
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "appending new time stamp record");
-	old_eof = lseek(fd, (off_t)0, SEEK_CUR);
-    }
-
-    /* Overwrite existing record or append to end. */
-    nwritten = write(fd, entry, sizeof(struct timestamp_entry));
-    if ((size_t)nwritten == sizeof(struct timestamp_entry))
-	debug_return_bool(true);
-
-    if (nwritten == -1) {
-	log_warning(SLOG_SEND_MAIL,
-	    N_("unable to write to %s"), timestamp_file);
-    } else {
-	log_warningx(SLOG_SEND_MAIL,
-	    N_("unable to write to %s"), timestamp_file);
-    }
-
-    /* Truncate on partial write to be safe. */
-    if (nwritten > 0 && old_eof != (off_t)-1) {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "short write, truncating partial time stamp record");
-	if (ftruncate(fd, old_eof) != 0) {
-	    sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
-		(long long)old_eof);
-	}
-    }
-
     debug_return_bool(false);
 }
 
@@ -287,37 +242,17 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 }
 
 /*
- * Fills in the timestamp_file[] global variable.
- * Returns the length of timestamp_file.
- */
-int
-build_timestamp(struct passwd *pw)
-{
-    int len;
-    debug_decl(build_timestamp, SUDOERS_DEBUG_AUTH)
-
-    len = snprintf(timestamp_file, sizeof(timestamp_file), "%s/%s",
-	def_timestampdir, user_name);
-    if (len <= 0 || (size_t)len >= sizeof(timestamp_file)) {
-	log_warningx(SLOG_SEND_MAIL,
-	    N_("timestamp path too long: %s/%s"), def_timestampdir, user_name);
-	len = -1;
-    }
-
-    debug_return_int(len);
-}
-
-/*
- * Open and lock the specified timestamp or lecture file.
- * Returns open and locked file descriptor on success.
+ * Open the specified timestamp or lecture file and set the
+ * close on exec flag.
+ * Returns open file descriptor on success.
  * Returns TIMESTAMP_OPEN_ERROR or TIMESTAMP_PERM_ERROR on error.
  */
 static int
-open_timestamp(const char *path, int flags)
+ts_open(const char *path, int flags)
 {
     bool uid_changed = false;
     int fd;
-    debug_decl(open_timestamp, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_open, SUDOERS_DEBUG_AUTH)
 
     if (timestamp_uid != 0)
 	uid_changed = set_perms(PERM_TIMESTAMP);
@@ -332,179 +267,320 @@ open_timestamp(const char *path, int flags)
 	}
     }
     if (fd >= 0)
-	sudo_lock_file(fd, SUDO_LOCK);
+	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 
     debug_return_int(fd);
 }
 
-/*
- * Update the time on the timestamp file/dir or create it if necessary.
- * Returns true on success, false on failure or -1 on setuid failure.
- */
-int
-update_timestamp(struct passwd *pw)
+static ssize_t
+ts_write(int fd, const char *fname, struct timestamp_entry *entry)
 {
-    struct timestamp_entry entry;
-    int rval = false;
-    int fd = -1;
-    debug_decl(update_timestamp, SUDOERS_DEBUG_AUTH)
+    ssize_t nwritten;
+    off_t old_eof;
+    debug_decl(ts_write, SUDOERS_DEBUG_AUTH)
 
-    /* Zero timeout means don't update the time stamp file. */
-    if (def_timestamp_timeout == 0)
-	goto done;
+    old_eof = lseek(fd, (off_t)0, SEEK_CUR);
+    nwritten = write(fd, entry, entry->size);
+    if ((size_t)nwritten != entry->size) {
+	if (nwritten == -1) {
+	    log_warning(SLOG_SEND_MAIL,
+		N_("unable to write to %s"), fname);
+	} else {
+	    log_warningx(SLOG_SEND_MAIL,
+		N_("unable to write to %s"), fname);
+	}
 
-    /* Check/create parent directories as needed. */
-    if (!ts_secure_dir(def_timestampdir, true, false))
-	goto done;
-
-    /* Fill in time stamp. */
-    memcpy(&entry, &timestamp_key, sizeof(struct timestamp_entry));
-    if (sudo_gettime_mono(&entry.ts) == -1) {
-	log_warning(0, N_("unable to read the clock"));
-	goto done;
+	/* Truncate on partial write to be safe (assumes end of file). */
+	if (nwritten > 0) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"short write, truncating partial time stamp record");
+	    if (ftruncate(fd, old_eof) != 0) {
+		sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
+		    (long long)old_eof);
+	    }
+	}
+	debug_return_size_t(-1);
     }
-
-    /* Open time stamp file and lock it for exclusive access. */
-    fd = open_timestamp(timestamp_file, O_RDWR|O_CREAT);
-    switch (fd) {
-    case TIMESTAMP_OPEN_ERROR:
-	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), timestamp_file);
-	goto done;
-    case TIMESTAMP_PERM_ERROR:
-	/* Already logged set_perms/restore_perms error. */
-	rval = -1;
-	goto done;
-    }
-
-    /* Update record or append a new one. */
-    ts_update_record(fd, &entry, timestamp_hint);
-    close(fd);
-
-    rval = true;
-
-done:
-    debug_return_int(rval);
+    debug_return_size_t(nwritten);
 }
 
 /*
- * Check the timestamp file and directory and return their status.
- * Returns one of TS_CURRENT, TS_OLD, TS_MISSING, TS_NOFILE, TS_ERROR.
+ * Full in struct timestamp_entry with the specified flags
+ * based on auth user pw.  Does not set the time stamp.
  */
-int
-timestamp_status(struct passwd *pw)
+static void
+ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
-    struct timestamp_entry entry;
-    struct timespec diff, timeout;
-    int status = TS_ERROR;		/* assume the worst */
     struct stat sb;
-    int fd = -1;
-    debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_fill, SUDOERS_DEBUG_AUTH)
 
-    /* Reset time stamp offset hint. */
-    timestamp_hint = (off_t)-1;
-
-    /* Zero timeout means ignore time stamp files. */
-    if (def_timestamp_timeout == 0) {
-	status = TS_OLD;	/* XXX - could also be TS_MISSING */
-	goto done;
-    }
-
-    /* Ignore time stamp files in an insecure directory. */
-    if (!ts_secure_dir(def_timestampdir, false, false)) {
-	if (errno != ENOENT) {
-	    status = TS_ERROR;
-	    goto done;
-	}
-	status = TS_MISSING;	/* not insecure, just missing */
-    }
-
-    /*
-     * Create a key used for matching entries in the time stamp file.
-     * The actual time stamp in the key is used below as the time "now".
-     */
-    memset(&timestamp_key, 0, sizeof(timestamp_key));
-    timestamp_key.version = TS_VERSION;
-    timestamp_key.size = sizeof(timestamp_key);
-    timestamp_key.type = TS_GLOBAL;	/* may be overriden below */
+    memset(entry, 0, sizeof(*entry));
+    entry->version = TS_VERSION;
+    entry->size = sizeof(*entry);
+    entry->type = TS_GLOBAL;	/* may be overriden below */
+    entry->flags = flags;
     if (pw != NULL) {
-	timestamp_key.auth_uid = pw->pw_uid;
+	entry->auth_uid = pw->pw_uid;
     } else {
-	timestamp_key.flags = TS_ANYUID;
+	entry->flags |= TS_ANYUID;
     }
-    timestamp_key.sid = user_sid;
+    entry->sid = user_sid;
     if (def_tty_tickets) {
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
-	    timestamp_key.type = TS_TTY;
-	    timestamp_key.u.ttydev = sb.st_rdev;
+	    entry->type = TS_TTY;
+	    entry->u.ttydev = sb.st_rdev;
 	} else {
 	    /* ppid-based time stamp */
-	    timestamp_key.type = TS_PPID;
-	    timestamp_key.u.ppid = getppid();
+	    entry->type = TS_PPID;
+	    entry->u.ppid = getppid();
 	}
     }
-    if (sudo_gettime_mono(&timestamp_key.ts) == -1) {
-	log_warning(0, N_("unable to read the clock"));
-	status = TS_ERROR;
+
+    debug_return;
+}
+
+/*
+ * Open the user's time stamp file.
+ * Returns a cookie or NULL on error, does not lock the file.
+ */
+void *
+timestamp_open(const char *user, pid_t sid)
+{
+    struct ts_cookie *cookie = NULL;
+    char *fname = NULL;
+    int fd = -1;
+    debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
+
+    /* Zero timeout means don't use the time stamp file. */
+    if (def_timestamp_timeout == 0) {
+	errno = ENOENT;
+	goto bad;
     }
 
-    /* If the time stamp dir is missing there is nothing to do. */
-    if (status == TS_MISSING)
-	goto done;
+    /* Sanity check timestamp dir and create if missing. */
+    if (!ts_secure_dir(def_timestampdir, true, false))
+	goto bad;
 
-    /* Open time stamp file and lock it for exclusive access. */
-    fd = open_timestamp(timestamp_file, O_RDWR);
+    /* Open time stamp file. */
+    if (asprintf(&fname, "%s/%s", def_timestampdir, user) == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
+    fd = ts_open(fname, O_RDWR|O_CREAT);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
-	status = TS_MISSING;
-	goto done;
+	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), fname);
+	goto bad;
     case TIMESTAMP_PERM_ERROR:
 	/* Already logged set_perms/restore_perms error. */
-	status = TS_FATAL;
+	goto bad;
+    }
+
+    /* XXX - if mtime on file predates boot time ignore/unlink? */
+
+    /* Allocate and fill in cookie to store state. */
+    cookie = malloc(sizeof(*cookie));
+    if (cookie == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
+    cookie->fd = fd;
+    cookie->fname = fname;
+    cookie->sid = sid;
+    cookie->pos = -1;
+
+    debug_return_ptr(cookie);
+bad:
+    if (fd != -1)
+	close(fd);
+    free(cookie);
+    free(fname);
+    debug_return_ptr(NULL);
+}
+
+/*
+ * Lock a record in the time stamp file for exclusive access.
+ * If the record does not exist, it is created (as disabled).
+ */
+bool
+timestamp_lock(void *vcookie, struct passwd *pw)
+{
+    struct ts_cookie *cookie = vcookie;
+    struct timestamp_entry entry;
+    ssize_t nread;
+    debug_decl(timestamp_lock, SUDOERS_DEBUG_AUTH)
+
+    if (cookie == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "called with a NULL cookie!");
+	debug_return_bool(false);
+    }
+
+    /*
+     * Take a lock on the "write" record (the first record in the file).
+     * This will let us seek for the record or extend as needed
+     * without colliding with anyone else.
+     */
+    if (lseek(cookie->fd, 0, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek to %lld", (long long)cookie->pos);
+	debug_return_bool(false);
+    }
+    sudo_lock_region(cookie->fd, SUDO_LOCK, sizeof(struct timestamp_entry));
+
+    /* Make sure the first record is of type TS_LOCKEXCL. */
+    memset(&entry, 0, sizeof(entry));
+    nread = read(cookie->fd, &entry, sizeof(entry));
+    if (nread == 0) {
+	/* New file, add TS_LOCKEXCL record. */
+	entry.version = TS_VERSION;
+	entry.size = sizeof(entry);
+	entry.type = TS_LOCKEXCL;
+	if (ts_write(cookie->fd, cookie->fname, &entry) == -1)
+	    debug_return_bool(false);
+    } else if (entry.type != TS_LOCKEXCL) {
+	/* Old sudo record, convert it to TS_LOCKEXCL. */
+	entry.type = TS_LOCKEXCL;
+	memset((char *)&entry + offsetof(struct timestamp_entry, type), 0,
+	    nread - offsetof(struct timestamp_entry, type));
+	if (ts_write(cookie->fd, cookie->fname, &entry) == -1)
+	    debug_return_bool(false);
+    }
+
+    /* Search for record that matches the key or append a new one. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"searching for time stamp record");
+    ts_fill(&cookie->key, pw, TS_DISABLED);
+    if (ts_find_record(cookie->fd, &cookie->key, &entry)) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "found existing time stamp record");
+	cookie->pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "appending new time stamp record");
+	cookie->pos = lseek(cookie->fd, 0, SEEK_CUR);
+	if (ts_write(cookie->fd, cookie->fname, &cookie->key) == -1)
+	    debug_return_bool(false);
+    }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"time stamp position is %lld", (long long)cookie->pos);
+
+    /* Unlock the TS_LOCKEXCL record. */
+    lseek(cookie->fd, 0, SEEK_SET);
+    sudo_lock_region(cookie->fd, SUDO_UNLOCK, sizeof(struct timestamp_entry));
+
+    /* Lock the real record (may sleep). */
+    lseek(cookie->fd, cookie->pos, SEEK_SET);
+    sudo_lock_region(cookie->fd, SUDO_LOCK, (off_t)entry.size);
+
+    debug_return_bool(true);
+}
+
+void
+timestamp_close(void *vcookie)
+{
+    struct ts_cookie *cookie = vcookie;
+    debug_decl(timestamp_close, SUDOERS_DEBUG_AUTH)
+
+    if (cookie != NULL) {
+	close(cookie->fd);
+	free(cookie->fname);
+	free(cookie);
+    }
+
+    debug_return;
+}
+
+/*
+ * Check the time stamp file and directory and return their status.
+ * Called with the file position before the locked record to read.
+ * Returns one of TS_CURRENT, TS_OLD, TS_MISSING, TS_ERROR, TS_FATAL.
+ * Fills in fdp with an open file descriptor positioned at the
+ * appropriate (and locked) record.
+ */
+int
+timestamp_status(void *vcookie, struct passwd *pw)
+{
+    struct ts_cookie *cookie = vcookie;
+    struct timestamp_entry entry;
+    struct timespec diff, now, timeout;
+    int status = TS_ERROR;		/* assume the worst */
+    ssize_t nread;
+    debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH)
+
+    /* Zero timeout means don't use time stamp files. */
+    if (def_timestamp_timeout == 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "timestamps disabled");
+	status = TS_OLD;
+	goto done;
+    }
+    if (cookie == NULL || cookie->pos < 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "NULL cookie or invalid position");
+	status = TS_OLD;
 	goto done;
     }
 
-    /* Ignore and clear time stamp file if mtime predates boot time. */
-    if (fstat(fd, &sb) == 0) {
-	struct timespec boottime, mtime;
-
-	mtim_get(&sb, mtime);
-	if (get_boottime(&boottime) && sudo_timespeccmp(&mtime, &boottime, <)) {
-	    ignore_result(ftruncate(fd, (off_t)0));
-	    status = TS_MISSING;
-	    goto done;
-	}
+    /*
+     * Seek to the record position and read it.
+     * If the file was truncated we might get all zeroes,
+     * in which case we need to unlock and try again (XXX - todo)
+     */
+    if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek to %lld", (long long)cookie->pos);
+	debug_return_int(TS_ERROR);
+    }
+    nread = read(cookie->fd, &entry, sizeof(entry));
+    if (nread != sizeof(entry)) {
+	/* short read, should not happen */
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "short read (%zd vs %zu), truncated time stamp file?",
+	    nread, sizeof(entry));
+	/* XXX - could this happen if truncated?  check. */
+	debug_return_int(TS_ERROR);
     }
 
-    /* Read existing record, if any. */
-    if (!ts_find_record(fd, &timestamp_key, &entry)) {
-	status = TS_MISSING;
+    /* Make sure what we read matched the expected record. */
+    if (entry.version != TS_VERSION || entry.size != nread) {
+	/* do something else? */
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "invalid time stamp file @ %lld", (long long)cookie->pos);
+	status = TS_OLD;
 	goto done;
     }
-
-    /* Set record position hint for use by update_timestamp() */
-    timestamp_hint = lseek(fd, (off_t)0, SEEK_CUR);
-    if (timestamp_hint != (off_t)-1)
-	timestamp_hint -= entry.size;
 
     if (ISSET(entry.flags, TS_DISABLED)) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "time stamp record disabled");
 	status = TS_OLD;	/* disabled via sudo -k */
 	goto done;
     }
 
-    if (entry.type != TS_GLOBAL && entry.sid != timestamp_key.sid) {
+    if (entry.type != TS_GLOBAL && entry.sid != cookie->sid) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "time stamp record sid mismatch");
 	status = TS_OLD;	/* belongs to different session */
 	goto done;
     }
 
     /* Negative timeouts only expire manually (sudo -k).  */
     if (def_timestamp_timeout < 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "time stamp record does not expire");
 	status = TS_CURRENT;
 	goto done;
     }
 
     /* Compare stored time stamp with current time. */
-    sudo_timespecsub(&timestamp_key.ts, &entry.ts, &diff);
+    if (sudo_gettime_mono(&now) == -1) {
+        log_warning(0, N_("unable to read the clock"));
+        status = TS_ERROR;
+	goto done;
+    }
+    sudo_timespecsub(&now, &entry.ts, &diff);
     timeout.tv_sec = 60 * def_timestamp_timeout;
     timeout.tv_nsec = ((60.0 * def_timestamp_timeout) - (double)timeout.tv_sec)
 	* 1000000000.0;
@@ -517,11 +593,11 @@ timestamp_status(struct passwd *pw)
 		N_("ignoring time stamp from the future"));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_update_record(fd, &entry, timestamp_hint);
+	    ts_write(cookie->fd, cookie->fname, &entry);
 	}
 #else
 	/* Check for bogus (future) time in the stampfile. */
-	sudo_timespecsub(&entry.ts, &timestamp_key.ts, &diff);
+	sudo_timespecsub(&entry.ts, &now, &diff);
 	timeout.tv_sec *= 2;
 	if (sudo_timespeccmp(&diff, &timeout, >)) {
 	    time_t tv_sec = (time_t)entry.ts.tv_sec;
@@ -530,7 +606,7 @@ timestamp_status(struct passwd *pw)
 		4 + ctime(&tv_sec));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_update_record(fd, &entry, timestamp_hint);
+	    ts_write(cookie->fd, cookie->fname, &entry);
 	}
 #endif /* CLOCK_MONOTONIC */
     } else {
@@ -538,9 +614,50 @@ timestamp_status(struct passwd *pw)
     }
 
 done:
-    if (fd != -1)
-	close(fd);
     debug_return_int(status);
+}
+
+/*
+ * Update the time on the time stamp file/dir or create it if necessary.
+ * Returns true on success, false on failure or -1 on setuid failure.
+ */
+bool
+timestamp_update(void *vcookie, struct passwd *pw)
+{
+    struct ts_cookie *cookie = vcookie;
+    int rval = false;
+    debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH)
+
+    /* Zero timeout means don't use time stamp files. */
+    if (def_timestamp_timeout == 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "timestamps disabled");
+	goto done;
+    }
+    if (cookie == NULL || cookie->pos < 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "NULL cookie or invalid position");
+	goto done;
+    }
+
+    /* Update timestamp in key and enable it. */
+    CLR(cookie->key.flags, TS_DISABLED);
+    if (sudo_gettime_mono(&cookie->key.ts) == -1) {
+        log_warning(0, N_("unable to read the clock"));
+	goto done;
+    }
+
+    /* Write out the locked record. */
+    if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek to %lld", (long long)cookie->pos);
+	goto done;
+    }
+    if (ts_write(cookie->fd, cookie->fname, &cookie->key) != -1)
+	rval = true;
+
+done:
+    debug_return_int(rval);
 }
 
 /*
@@ -549,46 +666,27 @@ done:
  * A missing timestamp entry is not considered an error.
  */
 int
-remove_timestamp(bool unlink_it)
+timestamp_remove(bool unlink_it)
 {
-    struct timestamp_entry entry;
-    int fd, rval = true;
-    debug_decl(remove_timestamp, SUDOERS_DEBUG_AUTH)
+    struct timestamp_entry key, entry;
+    int fd = -1, rval = true;
+    char *fname = NULL;
+    debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH)
 
-    if (build_timestamp(NULL) == -1) {
+    if (asprintf(&fname, "%s/%s", def_timestampdir, user_name) == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rval = -1;
 	goto done;
     }
 
     /* For "sudo -K" simply unlink the time stamp file. */
     if (unlink_it) {
-	rval = unlink(timestamp_file) ? -1 : true;
+	rval = unlink(fname) ? -1 : true;
 	goto done;
     }
 
-    /*
-     * Create a key used for matching entries in the time stamp file.
-     */
-    memset(&timestamp_key, 0, sizeof(timestamp_key));
-    timestamp_key.version = TS_VERSION;
-    timestamp_key.size = sizeof(timestamp_key);
-    timestamp_key.type = TS_GLOBAL;	/* may be overriden below */
-    timestamp_key.flags = TS_ANYUID;
-    if (def_tty_tickets) {
-	struct stat sb;
-	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
-	    /* tty-based time stamp */
-	    timestamp_key.type = TS_TTY;
-	    timestamp_key.u.ttydev = sb.st_rdev;
-	} else {
-	    /* ppid-based time stamp */
-	    timestamp_key.type = TS_PPID;
-	    timestamp_key.u.ppid = getppid();
-	}
-    }
-
     /* Open time stamp file and lock it for exclusive access. */
-    fd = open_timestamp(timestamp_file, O_RDWR);
+    fd = ts_open(fname, O_RDWR);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	if (errno != ENOENT)
@@ -599,23 +697,25 @@ remove_timestamp(bool unlink_it)
 	rval = -1;
 	goto done;
     }
+    /* Lock first record to gain exclusive access. */
+    sudo_lock_region(fd, SUDO_LOCK, sizeof(struct timestamp_entry));
 
     /*
      * Find matching entries and invalidate them.
      */
-    while (ts_find_record(fd, &timestamp_key, &entry)) {
-	/* Set record position hint for use by update_timestamp() */
-	timestamp_hint = lseek(fd, (off_t)0, SEEK_CUR);
-	if (timestamp_hint != (off_t)-1)
-	    timestamp_hint -= (off_t)entry.size;
-	/* Disable the entry. */
+    ts_fill(&key, NULL, TS_DISABLED);
+    while (ts_find_record(fd, &key, &entry)) {
+	/* Back up and disable the entry. */
+	lseek(fd, (off_t)0 - sizeof(entry), SEEK_CUR);
 	SET(entry.flags, TS_DISABLED);
-	if (!ts_update_record(fd, &entry, timestamp_hint))
+	if (ts_write(fd, fname, &entry) == -1)
 	    rval = false;
     }
-    close(fd);
 
 done:
+    if (fd != -1)
+	close(fd);
+    free(fname);
     debug_return_int(rval);
 }
 
@@ -666,7 +766,7 @@ set_lectured(void)
 	goto done;
 
     /* Create lecture file. */
-    fd = open_timestamp(lecture_status, O_RDWR|O_CREAT|O_TRUNC);
+    fd = ts_open(lecture_status, O_WRONLY|O_CREAT|O_EXCL);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	/* Failed to open, not a fatal error. */

@@ -725,7 +725,7 @@ sudoers_policy_invalidate(int remove)
 
     user_cmnd = "kill";
     /* XXX - plugin API should support a return value for fatal errors. */
-    remove_timestamp(remove);
+    timestamp_remove(remove);
     sudoers_cleanup();
 
     debug_return;
