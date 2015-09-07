@@ -423,7 +423,7 @@ suspend_parent(int signo)
 {
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
-    int n, rval = 0;
+    int rval = 0;
     debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
@@ -437,10 +437,8 @@ suspend_parent(int signo)
 	    check_foreground();
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
-		do {
-		    n = sudo_term_raw(io_fds[SFD_USERTTY], 0);
-		} while (!n && errno == EINTR);
-		ttymode = TERM_RAW;
+		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		    ttymode = TERM_RAW;
 	    }
 	    rval = SIGCONT_FG; /* resume command in foreground */
 	    break;
@@ -488,10 +486,8 @@ suspend_parent(int signo)
 
 	if (foreground) {
 	    /* Foreground process, set tty to raw mode. */
-	    do {
-		n = sudo_term_raw(io_fds[SFD_USERTTY], 0);
-	    } while (!n && errno == EINTR);
-	    ttymode = TERM_RAW;
+	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		ttymode = TERM_RAW;
 	} else {
 	    /* Background process, no access to tty. */
 	    ttymode = TERM_COOKED;
@@ -708,7 +704,7 @@ int
 fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 {
     struct command_status cstat;
-    int io_pipe[3][2], n;
+    int io_pipe[3][2];
     sigaction_t sa;
     sigset_t mask;
     pid_t child;
@@ -820,12 +816,8 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 
 	/* Start out in raw mode unless part of a pipeline or backgrounded. */
 	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
-	    ttymode = TERM_RAW;
-	    do {
-		n = sudo_term_raw(io_fds[SFD_USERTTY], 0);
-	    } while (!n && errno == EINTR);
-	    if (!n)
-		sudo_fatal(U_("unable to set terminal to raw mode"));
+	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		ttymode = TERM_RAW;
 	}
     }
 
