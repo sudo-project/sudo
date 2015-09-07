@@ -61,14 +61,14 @@
  * The TS_LOCKEXCL entry must be unlocked before locking the actual record.
  */
 
-/* TODO: unlock on suspend, make locking interruptible */
 /* TODO: use pread/pwrite when possible */
 
 struct ts_cookie {
+    char *fname;
     int fd;
     pid_t sid;
+    bool locked;
     off_t pos;
-    char *fname;
     struct timestamp_entry key;
 };
 
@@ -310,10 +310,10 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry)
  * based on auth user pw.  Does not set the time stamp.
  */
 static void
-ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
+ts_fill4(struct timestamp_entry *entry, struct passwd *pw, int flags, bool tty_tickets)
 {
     struct stat sb;
-    debug_decl(ts_fill, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_fill4, SUDOERS_DEBUG_AUTH)
 
     memset(entry, 0, sizeof(*entry));
     entry->version = TS_VERSION;
@@ -326,7 +326,7 @@ ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
 	entry->flags |= TS_ANYUID;
     }
     entry->sid = user_sid;
-    if (def_tty_tickets) {
+    if (tty_tickets) {
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
@@ -339,6 +339,18 @@ ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
     }
 
     debug_return;
+}
+
+static void
+ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
+{
+    return ts_fill4(entry, pw, flags, def_tty_tickets);
+}
+
+static void
+ts_fill_tty(struct timestamp_entry *entry, struct passwd *pw, int flags)
+{
+    return ts_fill4(entry, pw, flags, true);
 }
 
 /*
@@ -471,6 +483,48 @@ timestamp_unlock_record(int fd, off_t pos, off_t len)
 }
 
 /*
+ * Seek to the record's position and read it, locking as needed.
+ */
+static ssize_t
+ts_read(struct ts_cookie *cookie, struct timestamp_entry *entry)
+{
+    ssize_t nread = -1;
+    bool should_unlock = false;
+    debug_decl(ts_read, SUDOERS_DEBUG_AUTH)
+
+    /* If the record is not already locked, lock it now.  */
+    if (!cookie->locked) {
+	if (!timestamp_lock_record(cookie->fd, cookie->pos, sizeof(*entry)))
+	    goto done;
+	should_unlock = true;
+    }
+
+    /* Seek to the record position and read it.  */
+    if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek to %lld", (long long)cookie->pos);
+	goto done;
+    }
+    nread = read(cookie->fd, entry, sizeof(*entry));
+    if (nread != sizeof(*entry)) {
+	/* short read, should not happen */
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "short read (%zd vs %zu), truncated time stamp file?",
+	    nread, sizeof(*entry));
+	goto done;
+    }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"read %zd byte record at %lld", nread, (long long)cookie->pos);
+
+done:
+    /* If the record was not locked initially, unlock it. */
+    if (should_unlock)
+	timestamp_unlock_record(cookie->fd, cookie->pos, sizeof(*entry));
+
+    debug_return_size_t(nread);
+}
+
+/*
  * Lock a record in the time stamp file for exclusive access.
  * If the record does not exist, it is created (as disabled).
  */
@@ -479,6 +533,7 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
     struct timestamp_entry entry;
+    off_t lock_pos;
     ssize_t nread;
     debug_decl(timestamp_lock, SUDOERS_DEBUG_AUTH)
 
@@ -515,29 +570,55 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	    debug_return_bool(false);
     }
 
-    /* Search for record that matches the key or append a new one. */
+    /* Search for a tty-based record or append a new one. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"searching for time stamp record");
-    ts_fill(&cookie->key, pw, TS_DISABLED);
+	"searching for tty time stamp record");
+    ts_fill_tty(&cookie->key, pw, TS_DISABLED);
     if (ts_find_record(cookie->fd, &cookie->key, &entry)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "found existing time stamp record");
-	cookie->pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
+	    "found existing tty time stamp record");
+	lock_pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "appending new time stamp record");
-	cookie->pos = lseek(cookie->fd, 0, SEEK_CUR);
+	    "appending new tty time stamp record");
+	lock_pos = lseek(cookie->fd, 0, SEEK_CUR);
 	if (ts_write(cookie->fd, cookie->fname, &cookie->key) == -1)
 	    debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"time stamp position is %lld", (long long)cookie->pos);
+	"tty time stamp position is %lld", (long long)lock_pos);
+
+    if (def_tty_tickets) {
+	/* For tty tickets the tty lock is the same as the record lock. */
+	cookie->pos = lock_pos;
+	cookie->locked = true;
+    } else {
+	/*
+	 * For non-tty tickets we use a separate record lock that we
+	 * cannot hold long-term since it is shared between all ttys.
+	 */
+	cookie->locked = false;
+	cookie->key.type = TS_GLOBAL;	/* find a non-tty record */
+
+	(void)lseek(cookie->fd, 0, SEEK_SET);
+	if (ts_find_record(cookie->fd, &cookie->key, &entry)) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"found existing global record");
+	    cookie->pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"appending new globbal record");
+	    cookie->pos = lseek(cookie->fd, 0, SEEK_CUR);
+	    if (ts_write(cookie->fd, cookie->fname, &cookie->key) == -1)
+		debug_return_bool(false);
+	}
+    }
 
     /* Unlock the TS_LOCKEXCL record. */
     timestamp_unlock_record(cookie->fd, 0, sizeof(struct timestamp_entry));
 
-    /* Lock the real record (may sleep). */
-    if (!timestamp_lock_record(cookie->fd, cookie->pos, (off_t)entry.size))
+    /* Lock the per-tty record (may sleep). */
+    if (!timestamp_lock_record(cookie->fd, lock_pos, sizeof(struct timestamp_entry)))
 	debug_return_bool(false);
 
     debug_return_bool(true);
@@ -589,25 +670,9 @@ timestamp_status(void *vcookie, struct passwd *pw)
 	goto done;
     }
 
-    /*
-     * Seek to the record position and read it.
-     * If the file was truncated we might get all zeroes,
-     * in which case we need to unlock and try again (XXX - todo)
-     */
-    if (lseek(cookie->fd, cookie->pos, SEEK_SET) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to seek to %lld", (long long)cookie->pos);
-	debug_return_int(TS_ERROR);
-    }
-    nread = read(cookie->fd, &entry, sizeof(entry));
-    if (nread != sizeof(entry)) {
-	/* short read, should not happen */
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "short read (%zd vs %zu), truncated time stamp file?",
-	    nread, sizeof(entry));
-	/* XXX - could this happen if truncated?  check. */
-	debug_return_int(TS_ERROR);
-    }
+    /* Read the record at the correct position. */
+    if ((nread = ts_read(cookie, &entry)) != sizeof(entry))
+	goto done;
 
     /* Make sure what we read matched the expected record. */
     if (entry.version != TS_VERSION || entry.size != nread) {
@@ -719,6 +784,9 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	    "unable to seek to %lld", (long long)cookie->pos);
 	goto done;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"writing %zu byte record at %lld", sizeof(cookie->key),
+	(long long)cookie->pos);
     if (ts_write(cookie->fd, cookie->fname, &cookie->key) != -1)
 	rval = true;
 
@@ -773,13 +841,15 @@ timestamp_remove(bool unlink_it)
     /*
      * Find matching entries and invalidate them.
      */
-    ts_fill(&key, NULL, TS_DISABLED);
+    ts_fill(&key, NULL, 0);
     while (ts_find_record(fd, &key, &entry)) {
 	/* Back up and disable the entry. */
-	lseek(fd, (off_t)0 - sizeof(entry), SEEK_CUR);
-	SET(entry.flags, TS_DISABLED);
-	if (ts_write(fd, fname, &entry) == -1)
-	    rval = false;
+	if (!ISSET(entry.flags, TS_DISABLED)) {
+	    lseek(fd, (off_t)0 - sizeof(entry), SEEK_CUR);
+	    SET(entry.flags, TS_DISABLED);
+	    if (ts_write(fd, fname, &entry) == -1)
+		rval = false;
+	}
     }
 
 done:
