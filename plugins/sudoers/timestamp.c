@@ -375,7 +375,7 @@ timestamp_open(const char *user, pid_t sid)
 {
     struct ts_cookie *cookie = NULL;
     char *fname = NULL;
-    int fd = -1;
+    int tries, fd = -1;
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use the time stamp file. */
@@ -393,17 +393,35 @@ timestamp_open(const char *user, pid_t sid)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
-    fd = ts_open(fname, O_RDWR|O_CREAT);
-    switch (fd) {
-    case TIMESTAMP_OPEN_ERROR:
-	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), fname);
-	goto bad;
-    case TIMESTAMP_PERM_ERROR:
-	/* Already logged set_perms/restore_perms error. */
-	goto bad;
-    }
+    for (tries = 1; ; tries++) {
+	struct stat sb;
 
-    /* XXX - if mtime on file predates boot time ignore/unlink? */
+	fd = ts_open(fname, O_RDWR|O_CREAT);
+	switch (fd) {
+	case TIMESTAMP_OPEN_ERROR:
+	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), fname);
+	    goto bad;
+	case TIMESTAMP_PERM_ERROR:
+	    /* Already logged set_perms/restore_perms error. */
+	    goto bad;
+	}
+
+	/* Remove time stamp file if its mtime predates boot time. */
+	if (tries == 1 && fstat(fd, &sb) == 0) {
+	    struct timespec boottime, mtime;
+
+	    mtim_get(&sb, mtime);
+	    if (get_boottime(&boottime)) {
+		if (sudo_timespeccmp(&mtime, &boottime, <)) {
+		    /* Time stamp file too old, remove it. */
+		    close(fd);
+		    unlink(fname);
+		    continue;
+		}
+	    }
+	}
+	break;
+    }
 
     /* Allocate and fill in cookie to store state. */
     cookie = malloc(sizeof(*cookie));
