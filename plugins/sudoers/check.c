@@ -87,23 +87,34 @@ getpass_resume(int signo, void *vclosure)
 static int
 check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 {
-    struct sudo_conv_callback callback;
+    struct sudo_conv_callback cb, *callback = NULL;
     struct getpass_closure closure;
+    void *cookie = NULL;
     int status = TS_ERROR;
     int rval = -1;
     char *prompt;
     bool lectured;
     debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH)
 
-    /* Always need a password when -k was specified with the command. */
-    if (ISSET(mode, MODE_IGNORE_TICKET))
-	SET(validated, FLAG_CHECK_USER);
+    /* Open, lock and read time stamp file if we are using it. */
+    if (!ISSET(mode, MODE_IGNORE_TICKET)) {
+	/* Open time stamp file and check its status. */
+	cookie = timestamp_open(user_name, user_sid);
+	if (timestamp_lock(cookie, auth_pw))
+	    status = timestamp_status(cookie, auth_pw);
 
-    /* Open timestamp file and check its status. */
-    closure.auth_pw = auth_pw;
-    closure.cookie = timestamp_open(user_name, user_sid);
-    if (timestamp_lock(closure.cookie, auth_pw))
-	status = timestamp_status(closure.cookie, auth_pw);
+	/* Construct callback for getpass function. */
+	memset(&cb, 0, sizeof(cb));
+	cb.version = SUDO_CONV_CALLBACK_VERSION;
+	cb.closure = &closure;
+	cb.on_suspend = getpass_suspend;
+	cb.on_resume = getpass_resume;
+	callback = &cb;
+
+	/* Closure for getpass_{suspend,resume} */
+	closure.auth_pw = auth_pw;
+	closure.cookie = cookie;
+    }
 
     switch (status) {
     case TS_FATAL:
@@ -135,14 +146,7 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	if (prompt == NULL)
 	    goto done;
 
-	/* Construct callback for getpass function. */
-	memset(&callback, 0, sizeof(callback));
-	callback.version = SUDO_CONV_CALLBACK_VERSION;
-	callback.closure = &closure;
-	callback.on_suspend = getpass_suspend;
-	callback.on_resume = getpass_resume;
-
-	rval = verify_user(auth_pw, prompt, validated, &callback);
+	rval = verify_user(auth_pw, prompt, validated, callback);
 	if (rval == true && lectured)
 	    (void)set_lectured();	/* lecture error not fatal */
 	free(prompt);
@@ -150,16 +154,14 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
     }
 
     /*
-     * Only update timestamp if user was validated.
-     * Failure to update the timestamp is not a fatal error.
+     * Only update time stamp if user was validated.
+     * Failure to update the time stamp is not a fatal error.
      */
-    if (rval == true && ISSET(validated, VALIDATE_SUCCESS) &&
-	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR) {
-	(void)timestamp_update(closure.cookie, auth_pw);
-    }
+    if (rval == true && ISSET(validated, VALIDATE_SUCCESS) && status != TS_ERROR)
+	(void)timestamp_update(cookie, auth_pw);
 done:
-    if (closure.cookie != NULL)
-	timestamp_close(closure.cookie);
+    if (cookie != NULL)
+	timestamp_close(cookie);
     debug_return_int(rval);
 }
 
