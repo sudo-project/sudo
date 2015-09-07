@@ -43,6 +43,7 @@
 #include <fcntl.h>
 #include <pwd.h>
 #include <grp.h>
+#include <signal.h>
 
 #include "sudoers.h"
 #include "check.h"
@@ -399,6 +400,76 @@ bad:
     debug_return_ptr(NULL);
 }
 
+static volatile sig_atomic_t got_signal;
+
+static void
+timestamp_handler(int s)
+{
+    got_signal = s;
+}
+
+/*
+ * Wrapper for sudo_lock_region() that is interruptible.
+ */
+static bool
+timestamp_lock_record(int fd, off_t pos, off_t len)
+{
+    struct sigaction sa, saveint, savequit;
+    sigset_t mask, omask;
+    bool rval;
+    debug_decl(timestamp_lock_record, SUDOERS_DEBUG_AUTH)
+
+    if (pos >= 0 && lseek(fd, pos, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek to %lld", (long long)pos);
+	debug_return_bool(false);
+    }
+
+    /* Allow SIGINT and SIGQUIT to interrupt a lock. */
+    got_signal = 0;
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_INTERRUPT; /* don't restart system calls */
+    sa.sa_handler = timestamp_handler;
+    (void) sigaction(SIGINT, &sa, &saveint);
+    (void) sigaction(SIGQUIT, &sa, &savequit);
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    (void) sigprocmask(SIG_UNBLOCK, &mask, &omask);
+
+    rval = sudo_lock_region(fd, SUDO_LOCK, len);
+    if (!rval) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "failed to lock fd %d [%lld, %lld]", fd,
+	    (long long)pos, (long long)len);
+    }
+
+    /* Restore the old mask (SIGINT and SIGQUIT blocked) and handlers. */
+    (void) sigprocmask(SIG_SETMASK, &omask, NULL);
+    (void) sigaction(SIGINT, &saveint, NULL);
+    (void) sigaction(SIGQUIT, &savequit, NULL);
+
+    /* Re-deliver the signal that interrupted the lock, if any. */
+    if (!rval && got_signal)
+	kill(getpid(), got_signal);
+
+    debug_return_bool(rval);
+}
+
+static bool
+timestamp_unlock_record(int fd, off_t pos, off_t len)
+{
+    debug_decl(timestamp_unlock_record, SUDOERS_DEBUG_AUTH)
+
+    if (pos >= 0 && lseek(fd, pos, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to seek to %lld", (long long)pos);
+	debug_return_bool(false);
+    }
+    debug_return_bool(sudo_lock_region(fd, SUDO_UNLOCK, len));
+}
+
 /*
  * Lock a record in the time stamp file for exclusive access.
  * If the record does not exist, it is created (as disabled).
@@ -422,12 +493,8 @@ timestamp_lock(void *vcookie, struct passwd *pw)
      * This will let us seek for the record or extend as needed
      * without colliding with anyone else.
      */
-    if (lseek(cookie->fd, 0, SEEK_SET) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to seek to %lld", (long long)cookie->pos);
+    if (!timestamp_lock_record(cookie->fd, 0, sizeof(struct timestamp_entry)))
 	debug_return_bool(false);
-    }
-    sudo_lock_region(cookie->fd, SUDO_LOCK, sizeof(struct timestamp_entry));
 
     /* Make sure the first record is of type TS_LOCKEXCL. */
     memset(&entry, 0, sizeof(entry));
@@ -467,12 +534,11 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	"time stamp position is %lld", (long long)cookie->pos);
 
     /* Unlock the TS_LOCKEXCL record. */
-    lseek(cookie->fd, 0, SEEK_SET);
-    sudo_lock_region(cookie->fd, SUDO_UNLOCK, sizeof(struct timestamp_entry));
+    timestamp_unlock_record(cookie->fd, 0, sizeof(struct timestamp_entry));
 
     /* Lock the real record (may sleep). */
-    lseek(cookie->fd, cookie->pos, SEEK_SET);
-    sudo_lock_region(cookie->fd, SUDO_LOCK, (off_t)entry.size);
+    if (!timestamp_lock_record(cookie->fd, cookie->pos, (off_t)entry.size))
+	debug_return_bool(false);
 
     debug_return_bool(true);
 }
@@ -698,7 +764,11 @@ timestamp_remove(bool unlink_it)
 	goto done;
     }
     /* Lock first record to gain exclusive access. */
-    sudo_lock_region(fd, SUDO_LOCK, sizeof(struct timestamp_entry));
+    if (!timestamp_lock_record(fd, -1, sizeof(struct timestamp_entry))) {
+	sudo_warn(U_("unable to lock time stamp file %s"), fname);
+	rval = -1;
+	goto done;
+    }
 
     /*
      * Find matching entries and invalidate them.
