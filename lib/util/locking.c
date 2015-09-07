@@ -29,14 +29,15 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRING_H */
-#include <ctype.h>
-#include <unistd.h>
-#include <fcntl.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
@@ -69,6 +70,7 @@ sudo_lock_region_v1(int fd, int type, off_t len)
 	    op = F_ULOCK;
 	    break;
 	default:
+	    errno = EINVAL;
 	    debug_return_bool(false);
     }
     debug_return_bool(lockf(fd, op, len) == 0);
@@ -83,16 +85,31 @@ sudo_lock_file_v1(int fd, int type)
 bool
 sudo_lock_region_v1(int fd, int type, off_t len)
 {
-    int func;
     struct flock lock;
+    int func;
     debug_decl(sudo_lock_file, SUDO_DEBUG_UTIL)
 
+    switch (type) {
+	case SUDO_LOCK:
+	    lock.l_type = F_WRLCK;
+	    func = F_SETLKW;
+	    break;
+	case SUDO_TLOCK:
+	    lock.l_type = F_WRLCK;
+	    func = F_SETLK;
+	    break;
+	case SUDO_UNLOCK:
+	    lock.l_type = F_UNLCK;
+	    func = F_SETLK;
+	    break;
+	default:
+	    errno = EINVAL;
+	    debug_return_bool(false);
+    }
     lock.l_start = 0;
     lock.l_len = len;
     lock.l_pid = 0;
-    lock.l_type = (type == SUDO_UNLOCK) ? F_UNLCK : F_WRLCK;
     lock.l_whence = len ? SEEK_CUR : SEEK_SET;
-    func = (type == SUDO_LOCK) ? F_SETLKW : F_SETLK;
 
     debug_return_bool(fcntl(fd, func, &lock) == 0);
 }
