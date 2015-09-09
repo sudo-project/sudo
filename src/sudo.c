@@ -1015,10 +1015,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      */
     unlimit_nproc();
 
-#ifdef HAVE_SETRESUID
+#if defined(HAVE_SETRESUID)
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"), details->uid,
-	    details->euid);
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #elif defined(HAVE_SETREUID)
@@ -1029,8 +1029,8 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #else
     if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"), details->uid,
-	    details->euid);
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
