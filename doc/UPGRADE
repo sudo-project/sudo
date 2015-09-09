@@ -8,6 +8,17 @@ o Upgrading from a version prior to 1.8.15:
     enabling the sudoedit_follow option in sudoers or on a per-command
     basis with the FOLLOW and NOFOLLOW tags.
 
+    Locking of the time stamp file has changed in sudo 1.8.15.
+    Previously, the user's entire time stamp file was locked while
+    retrieving and updating a time stamp record.  Now, only a single
+    record, specific to the tty or parent process ID, is locked.
+    This lock is held while the user enters their password.  If
+    sudo is suspended at the password prompt (or run in the
+    background), the lock is dropped until sudo is resumed, at which
+    point it will be reacquired.  This allows sudo to be used in a
+    pipeline even when a password is required--only one instance
+    of sudo will prompt for a password.
+
 o Upgrading from a version prior to 1.8.14:
 
     On HP-UX, sudo will no longer check for "plugin.sl" if "plugin.so"
@@ -25,18 +36,18 @@ o Upgrading from a version prior to 1.8.10:
     authentication users.  On systems that support it, monotonic
     time is stored instead of wall clock time.  As a result, it is
     important that the time stamp files not persist when the system
-    reboots.  For this reason, ther default location for the time
+    reboots.  For this reason, the default location for the time
     stamp files has changed back to a directory located in /var/run.
     Systems that do not have /var/run (e.g. AIX) or that do not clear
     it on boot (e.g. HP-UX) will need to clear the time stamp
-    directory via a startup script.  Such a script is installed by
+    directory via a start up script.  Such a script is installed by
     default on AIX and HP-UX systems.
 
     Because there is now a single time stamp file per user, the -K
     option will remove all of the user's time stamps, not just the
     time stamp for the current terminal.
 
-    Lecture status is now stored separatedly from the time stamps
+    Lecture status is now stored separately from the time stamps
     in a separate directory: /var/db/sudo/lectured, /var/lib/sudo/lectured
     or /var/adm/sudo/lectured depending on what is present on the
     system.
