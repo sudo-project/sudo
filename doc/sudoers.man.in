@@ -4490,7 +4490,7 @@ to www.
 .sp
 .RS 0n
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\e
-		/sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+		/sbin/mount -o nosuid\e,nodev /dev/cd0a /CDROM
 .RE
 .fi
 .PP

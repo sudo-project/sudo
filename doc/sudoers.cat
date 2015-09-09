@@ -2184,7 +2184,7 @@ EEXXAAMMPPLLEESS
      simply su(1) to www.
 
      ALL             CDROM = NOPASSWD: /sbin/umount /CDROM,\
-                     /sbin/mount -o nosuid,nodev /dev/cd0a /CDROM
+                     /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
 
      Any user may mount or unmount a CD-ROM on the machines in the CDROM
      Host_Alias (orion, perseus, hercules) without entering a password.  This
