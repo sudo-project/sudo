@@ -9,14 +9,34 @@ What's new in Sudo 1.8.15
  * Fixed a build problem on systems that don't implicitly include
    sys/types.h from other header files.  Bug #711.
 
+ * Fixed a problem on Linux using containers where sudo would ignore
+   signals sent by a process in a different container.
+
+ * Sudo now refuses to run a command if the PAM session module
+   returns an error.
+
  * When editing files with sudoedit, symbolic links will no longer
    be followed by default.  The old behavior can be restored by
    enabling the sudoedit_follow option in sudoers or on a per-command
    basis with the FOLLOW and NOFOLLOW tags.  Bug #707.
 
- * Fixed a bug introduced in versino 1.8.14 that caused the last
+ * Fixed a bug introduced in version 1.8.14 that caused the last
    valid editor in the sudoers "editor" list to be used by visudo
    and sudoedit instead of the first.  Bug #714.
+
+ * Fixed a bug in visudo that prevented the addition of a final
+   newline to edited files without one.
+
+ * Fixed a bug decoding certain base64 digests in sudoers when the
+   intermediate format included a '=' character.
+
+ * Individual records are now locked in the time stamp file instead
+   of the entire file.  This allows sudo to avoid prompting for a
+   password multiple times on the same terminal when used in a
+   pipeline.  In other words, "sudo cat foo | sudo grep bar" now
+   only prompts for the password once.  Previously, both sudo
+   processes would prompt for a password, often making it impossible
+   to enter.
 
 What's new in Sudo 1.8.14p3
 
