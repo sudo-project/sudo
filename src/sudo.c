@@ -1028,9 +1028,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	goto done;
     }
 #else
-    if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
+    /* Cannot support real user ID that is different from effective user ID. */
+    if (setuid(details->euid) != 0) {
 	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->uid, (unsigned int)details->euid);
+	    (unsigned int)details->euid, (unsigned int)details->euid);
 	goto done;
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
