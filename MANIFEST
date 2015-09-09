@@ -60,7 +60,6 @@ include/compat/glob.h
 include/compat/nss_dbdefs.h
 include/compat/sha2.h
 include/compat/stdbool.h
-include/compat/timespec.h
 include/sudo_compat.h
 include/sudo_conf.h
 include/sudo_debug.h

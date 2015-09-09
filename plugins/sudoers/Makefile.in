@@ -1021,13 +1021,13 @@ sudoers_debug.lo: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoers_debug.c
 sudoers_debug.o: sudoers_debug.lo
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
-              $(incdir)/compat/stdbool.h $(incdir)/compat/timespec.h \
-              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(srcdir)/iolog.h $(srcdir)/logging.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
+              $(srcdir)/logging.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/fnmatch.h $(incdir)/compat/stdbool.h \
@@ -1041,14 +1041,14 @@ testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/testsudoers.c
 timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
-              $(incdir)/compat/stdbool.h $(incdir)/compat/timespec.h \
-              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-              $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/check.h \
-              $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/check.h $(srcdir)/defaults.h \
+              $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timestamp.c
 timestr.lo: $(srcdir)/timestr.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timestr.c
@@ -1084,14 +1084,13 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tsgetgrpw.c
 visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
-          $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
-          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo.c
 visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \

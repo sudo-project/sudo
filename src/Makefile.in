@@ -361,12 +361,11 @@ sudo.o: $(srcdir)/sudo.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
         $(top_builddir)/pathnames.h ./sudo_usage.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
-             $(incdir)/compat/timespec.h $(incdir)/sudo_compat.h \
-             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
-             $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+             $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_edit.c
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/sudo_compat.h \
                 $(top_builddir)/config.h

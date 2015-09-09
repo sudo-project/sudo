@@ -700,9 +700,6 @@
 /* Define if your struct sockaddr has an sa_len field. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
 
-/* Define to 1 if the system has the type `struct timespec'. */
-#undef HAVE_STRUCT_TIMESPEC
-
 /* Define to 1 if `ut_exit' is a member of `struct utmpx'. */
 #undef HAVE_STRUCT_UTMPX_UT_EXIT
 

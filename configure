@@ -17320,21 +17320,6 @@ _ACEOF
 
 fi
 
-ac_fn_c_check_type "$LINENO" "struct timespec" "ac_cv_type_struct_timespec" "#include <sys/types.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-#endif
-#include <time.h>
-"
-if test "x$ac_cv_type_struct_timespec" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_TIMESPEC 1
-_ACEOF
-
-
-fi
-
 ac_fn_c_check_type "$LINENO" "struct in6_addr" "ac_cv_type_struct_in6_addr" "#include <sys/types.h>
 #include <netinet/in.h>
 "
@@ -19728,12 +19713,11 @@ esac
 "
     done
 
-if test X"$ac_cv_type_struct_timespec" != X"no"; then
-    ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim" "ac_cv_member_struct_stat_st_mtim" "$ac_includes_default"
+ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim" "ac_cv_member_struct_stat_st_mtim" "$ac_includes_default"
 if test "x$ac_cv_member_struct_stat_st_mtim" = xyes; then :
   $as_echo "#define HAVE_ST_MTIM 1" >>confdefs.h
 
-	ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim.st__tim" "ac_cv_member_struct_stat_st_mtim_st__tim" "$ac_includes_default"
+    ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim.st__tim" "ac_cv_member_struct_stat_st_mtim_st__tim" "$ac_includes_default"
 if test "x$ac_cv_member_struct_stat_st_mtim_st__tim" = xyes; then :
   $as_echo "#define HAVE_ST__TIM 1" >>confdefs.h
 
@@ -19748,7 +19732,6 @@ fi
 
 fi
 
-fi
 FOUND_SHA2=no
 ac_fn_c_check_header_mongrel "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
 if test "x$ac_cv_header_sha2_h" = xyes; then :

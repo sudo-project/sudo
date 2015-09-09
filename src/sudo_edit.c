@@ -39,9 +39,6 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifndef HAVE_STRUCT_TIMESPEC
-# include "compat/timespec.h"
-#endif
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
