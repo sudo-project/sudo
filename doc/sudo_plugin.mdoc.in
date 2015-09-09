@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd September 2, 2015
+.Dd September 9, 2015
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2055,6 +2055,9 @@ to be suspended and the
 .Fa closure
 pointer from the
 .Li struct sudo_conv_callback .
+These functions should return 0 on success and \-1 on error.
+On error, the conversation will end and the conversation function
+will return a value of \-1.
 The intended use is to allow the plugin to release resources, such as locks,
 that should not be held indefinitely while suspended and then reacquire them
 when the process is resumed.
