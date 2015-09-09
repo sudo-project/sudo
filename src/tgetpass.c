@@ -189,20 +189,7 @@ restart:
     }
 
 restore:
-    /* Restore old tty settings and signals. */
-    if (!ISSET(flags, TGP_ECHO)) {
-	for (;;) {
-	    /* Restore old tty settings if possible. */
-	    if (sudo_term_restore(input, 1) || errno != EINTR)
-		break;
-	    /* Received SIGTTOU, suspend the process. */
-	    if (suspend(SIGTTOU, callback) == -1) {
-		if (input != STDIN_FILENO)
-		    (void) close(input);
-		debug_return_ptr(NULL);
-	    }
-	}
-    }
+    /* Restore old signal handlers. */
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
@@ -212,6 +199,21 @@ restore:
     (void) sigaction(SIGTTIN, &savettin, NULL);
     (void) sigaction(SIGTTOU, &savettou, NULL);
     (void) sigaction(SIGPIPE, &savepipe, NULL);
+
+    /* Restore old tty settings. */
+    if (!ISSET(flags, TGP_ECHO)) {
+	for (;;) {
+	    /* Restore old tty settings if possible. */
+	    if (sudo_term_restore(input, 1) || errno != EINTR)
+		break;
+	    /* Received SIGTTOU, suspend the process. */
+	    signo[SIGTTOU] = 0;
+	    if (suspend(SIGTTOU, callback) == -1) {
+		pass = NULL;
+		break;
+	    }
+	}
+    }
     if (input != STDIN_FILENO)
 	(void) close(input);
 
