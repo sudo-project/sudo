@@ -184,11 +184,11 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
 	    sudo_execve(details->command, details->argv, details->envp,
 		ISSET(details->flags, CD_NOEXEC));
 	}
-	cstat->type = CMD_ERRNO;
-	cstat->val = errno;
-	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
-	    details->command, strerror(errno));
     }
+    cstat->type = CMD_ERRNO;
+    cstat->val = errno;
+    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
+	details->command, strerror(errno));
     debug_return;
 }
 
