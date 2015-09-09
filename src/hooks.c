@@ -150,7 +150,7 @@ register_hook(struct sudo_hook *hook)
     int rval;
     debug_decl(register_hook, SUDO_DEBUG_HOOKS)
 
-    if (SUDO_HOOK_VERSION_GET_MAJOR(hook->hook_version) != SUDO_HOOK_VERSION_MAJOR) {
+    if (SUDO_API_VERSION_GET_MAJOR(hook->hook_version) != SUDO_HOOK_VERSION_MAJOR) {
 	/* Major versions must match. */
 	errno = EINVAL;
 	rval = -1;
@@ -214,7 +214,7 @@ deregister_hook(struct sudo_hook *hook)
     int rval = 0;
     debug_decl(deregister_hook, SUDO_DEBUG_HOOKS)
 
-    if (SUDO_HOOK_VERSION_GET_MAJOR(hook->hook_version) != SUDO_HOOK_VERSION_MAJOR) {
+    if (SUDO_API_VERSION_GET_MAJOR(hook->hook_version) != SUDO_HOOK_VERSION_MAJOR) {
 	/* Major versions must match. */
 	rval = -1;
     } else {

@@ -23,7 +23,7 @@
 #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
-/* Getters and setters for API version */
+/* Getters and setters for plugin API versions */
 #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
 #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
 #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -64,8 +64,7 @@ struct sudo_conv_reply {
 /* Conversation callback API version major/minor */
 #define SUDO_CONV_CALLBACK_VERSION_MAJOR	1
 #define SUDO_CONV_CALLBACK_VERSION_MINOR	0
-#define SUDO_CONV_CALLBACK_MKVERSION(x, y) ((x << 16) | y)
-#define SUDO_CONV_CALLBACK_VERSION SUDO_CONV_CALLBACK_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, SUDO_CONV_CALLBACK_VERSION_MINOR)
+#define SUDO_CONV_CALLBACK_VERSION SUDO_API_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, SUDO_CONV_CALLBACK_VERSION_MINOR)
 
 /*
  * Callback struct to be passed to the conversation function.
@@ -106,18 +105,7 @@ struct sudo_hook {
 /* Hook API version major/minor */
 #define SUDO_HOOK_VERSION_MAJOR	1
 #define SUDO_HOOK_VERSION_MINOR	0
-#define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
-#define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR, SUDO_HOOK_VERSION_MINOR)
-
-/* Getters and setters for hook API version */
-#define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
-} while(0)
-#define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
-    *(vp) = (*(vp) & 0xffff0000) | (n); \
-} while(0)
+#define SUDO_HOOK_VERSION SUDO_API_MKVERSION(SUDO_HOOK_VERSION_MAJOR, SUDO_HOOK_VERSION_MINOR)
 
 /*
  * Hook function return values.
@@ -185,17 +173,13 @@ struct io_plugin {
 /* Sudoers group plugin version major/minor */
 #define GROUP_API_VERSION_MAJOR 1
 #define GROUP_API_VERSION_MINOR 0
-#define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | GROUP_API_VERSION_MINOR)
+#define GROUP_API_VERSION SUDO_API_MKVERSION(GROUP_API_VERSION_MAJOR, GROUP_API_VERSION_MINOR)
 
-/* Getters and setters for group version */
-#define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
-} while(0)
-#define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
-    *(vp) = (*(vp) & 0xffff0000) | (n); \
-} while(0)
+/* Getters and setters for group version (for source compat only) */
+#define GROUP_API_VERSION_GET_MAJOR(v) SUDO_API_VERSION_GET_MAJOR(v)
+#define GROUP_API_VERSION_GET_MINOR(v) SUDO_API_VERSION_GET_MINOR(v)
+#define GROUP_API_VERSION_SET_MAJOR(vp, n) SUDO_API_VERSION_SET_MAJOR(vp, n)
+#define GROUP_API_VERSION_SET_MINOR(vp, n) SUDO_API_VERSION_SET_MINOR(vp, n)
 
 /*
  * version: for compatibility checking

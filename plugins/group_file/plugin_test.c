@@ -100,10 +100,10 @@ group_plugin_load(char *plugin_info)
 	return -1;
     }
 
-    if (GROUP_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
+    if (SUDO_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
 	fprintf(stderr,
 	    "%s: incompatible group plugin major version %d, expected %d\n",
-	    path, GROUP_API_VERSION_GET_MAJOR(group_plugin->version),
+	    path, SUDO_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
 	return -1;
     }

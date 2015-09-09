@@ -799,7 +799,7 @@ DDEESSCCRRIIPPTTIIOONN
      #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
          *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
      } while(0)
-     #define SUDO_VERSION_SET_MINOR(vp, n) do { \
+     #define SUDO_API_VERSION_SET_MINOR(vp, n) do { \
          *(vp) = (*(vp) & 0xffff0000) | (n); \
      } while(0)
 
@@ -1232,19 +1232,10 @@ DDEESSCCRRIIPPTTIIOONN
      /* Hook API version major/minor */
      #define SUDO_HOOK_VERSION_MAJOR 1
      #define SUDO_HOOK_VERSION_MINOR 0
-     #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
-     #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
+     #define SUDO_HOOK_VERSION SUDO_API_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
                                                    SUDO_HOOK_VERSION_MINOR)
 
-     /* Getters and setters for hook API version */
-     #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
-     #define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
-     #define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
-         *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
-     } while(0)
-     #define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
-         *(vp) = (*(vp) & 0xffff0000) | (n); \
-     } while(0)
+     For getters and setters see the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I.
 
    RReemmoottee ccoommmmaanndd eexxeeccuuttiioonn
      The ssuuddoo front end does not have native support for running remote
@@ -1279,6 +1270,11 @@ DDEESSCCRRIIPPTTIIOONN
      informational or error messages to the user, which is usually more
      convenient for simple messages where no use input is required.
 
+     _C_o_n_v_e_r_s_a_t_i_o_n _f_u_n_c_t_i_o_n _s_t_r_u_c_t_u_r_e_s
+
+     The conversation function takes as arguments pointers to the following
+     structures:
+
      struct sudo_conv_message {
      #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
      #define SUDO_CONV_PROMPT_ECHO_ON   0x0002 /* echo user input */
@@ -1297,14 +1293,6 @@ DDEESSCCRRIIPPTTIIOONN
          char *reply;
      };
 
-     /* Conversation callback API version major/minor */
-     #define SUDO_CONV_CALLBACK_VERSION_MAJOR 1
-     #define SUDO_CONV_CALLBACK_VERSION_MINOR 0
-     #define SUDO_CONV_CALLBACK_MKVERSION(x, y) ((x << 16) | y)
-     #define SUDO_CONV_CALLBACK_VERSION \
-         SUDO_CONV_CALLBACK_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, \
-         SUDO_CONV_CALLBACK_VERSION_MINOR)
-
      typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
      struct sudo_conv_callback {
          unsigned int version;
@@ -1313,6 +1301,11 @@ DDEESSCCRRIIPPTTIIOONN
          sudo_conv_callback_fn_t on_resume;
      };
 
+     Pointers to the ccoonnvveerrssaattiioonn() and pprriinnttff()-style functions are passed in
+     to the plugin's ooppeenn() function when the plugin is initialized.  The
+     following type definitions can be used in the declaration of the ooppeenn()
+     function:
+
      typedef int (*sudo_conv_t)(int num_msgs,
                   const struct sudo_conv_message msgs[],
                   struct sudo_conv_reply replies[],
@@ -1320,20 +1313,18 @@ DDEESSCCRRIIPPTTIIOONN
 
      typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
-     Pointers to the ccoonnvveerrssaattiioonn() and pprriinnttff()-style functions are passed in
-     to the plugin's ooppeenn() function when the plugin is initialized.
-
      To use the ccoonnvveerrssaattiioonn() function, the plugin must pass an array of
      sudo_conv_message and sudo_conv_reply structures.  There must be a struct
      sudo_conv_message and struct sudo_conv_reply for each message in the
-     conversation.  The struct sudo_conv_callback pointer, if not NULL,
-     contains function pointers that are called when the ssuuddoo process is
-     suspended and/or resumed during conversation input.  The functions are
-     passed the signal that caused ssuuddoo to be suspended and the _c_l_o_s_u_r_e
-     pointer.  This allows the plugin to release resources such as locks that
-     should not be held indefinitely on suspend and reacquire them on resume.
-     Note that the functions are not actually invoked from within a signal
-     handler.
+     conversation.  The struct sudo_conv_callback pointer, if not NULL, should
+     contain function pointers to be called when the ssuuddoo process is suspended
+     and/or resumed during conversation input.  The _o_n___s_u_s_p_e_n_d and _o_n___r_e_s_u_m_e
+     functions are called with the signal that caused ssuuddoo to be suspended and
+     the _c_l_o_s_u_r_e pointer from the struct sudo_conv_callback.  The intended use
+     is to allow the plugin to release resources, such as locks, that should
+     not be held indefinitely while suspended and then reacquire them when the
+     process is resumed.  Note that the functions are not actually invoked
+     from within a signal handler.
 
      The plugin is responsible for freeing the reply buffer located in each
      struct sudo_conv_reply, if it is not NULL.  SUDO_CONV_REPL_MAX represents
@@ -1440,16 +1431,7 @@ DDEESSCCRRIIPPTTIIOONN
      #define GROUP_API_VERSION_MINOR 0
      #define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | \
                                 GROUP_API_VERSION_MINOR)
-
-     /* Getters and setters for group version */
-     #define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-     #define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-     #define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \
-         *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
-     } while(0)
-     #define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
-         *(vp) = (*(vp) & 0xffff0000) | (n); \
-     } while(0)
+     For getters and setters see the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I.
 
 PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
      The following revisions have been made to the Sudo Plugin API.

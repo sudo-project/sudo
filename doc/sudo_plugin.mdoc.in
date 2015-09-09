@@ -1228,7 +1228,7 @@ will not be called.
 #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \e
     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
 } while(0)
-#define SUDO_VERSION_SET_MINOR(vp, n) do { \e
+#define SUDO_API_VERSION_SET_MINOR(vp, n) do { \e
     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 } while(0)
 .Ed
@@ -1910,20 +1910,12 @@ return SUDO_HOOK_RET_STOP;
 /* Hook API version major/minor */
 #define SUDO_HOOK_VERSION_MAJOR 1
 #define SUDO_HOOK_VERSION_MINOR 0
-#define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
-#define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\e
+#define SUDO_HOOK_VERSION SUDO_API_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\e
                                               SUDO_HOOK_VERSION_MINOR)
-
-/* Getters and setters for hook API version */
-#define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
-} while(0)
-#define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0xffff0000) | (n); \e
-} while(0)
 .Ed
+.Pp
+For getters and setters see the
+.Sx Policy plugin API .
 .Ss Remote command execution
 The
 .Nm sudo
@@ -1980,6 +1972,11 @@ A
 function is also available that can be used to display informational
 or error messages to the user, which is usually more convenient for
 simple messages where no use input is required.
+.Pp
+.Em Conversation function structures
+.Pp
+The conversation function takes as arguments pointers to the following
+structures:
 .Bd -literal
 struct sudo_conv_message {
 #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
@@ -1999,14 +1996,6 @@ struct sudo_conv_reply {
     char *reply;
 };
 
-/* Conversation callback API version major/minor */
-#define SUDO_CONV_CALLBACK_VERSION_MAJOR 1
-#define SUDO_CONV_CALLBACK_VERSION_MINOR 0
-#define SUDO_CONV_CALLBACK_MKVERSION(x, y) ((x << 16) | y)
-#define SUDO_CONV_CALLBACK_VERSION \e
-    SUDO_CONV_CALLBACK_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, \e
-    SUDO_CONV_CALLBACK_VERSION_MINOR)
-
 typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
 struct sudo_conv_callback {
     unsigned int version;
@@ -2014,13 +2003,6 @@ struct sudo_conv_callback {
     sudo_conv_callback_fn_t on_suspend;
     sudo_conv_callback_fn_t on_resume;
 };
-
-typedef int (*sudo_conv_t)(int num_msgs,
-             const struct sudo_conv_message msgs[],
-             struct sudo_conv_reply replies[],
-	     struct sudo_conv_callback *callback);
-
-typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 .Ed
 .Pp
 Pointers to the
@@ -2031,6 +2013,17 @@ functions are passed
 in to the plugin's
 .Fn open
 function when the plugin is initialized.
+The following type definitions can be used in the declaration of the
+.Fn open
+function:
+.Bd -literal
+typedef int (*sudo_conv_t)(int num_msgs,
+             const struct sudo_conv_message msgs[],
+             struct sudo_conv_reply replies[],
+	     struct sudo_conv_callback *callback);
+
+typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+.Ed
 .Pp
 To use the
 .Fn conversation
@@ -2049,17 +2042,22 @@ The
 .Li struct sudo_conv_callback
 pointer, if not
 .Dv NULL ,
-contains function pointers that are called when the
+should contain function pointers to be called when the
 .Nm sudo
 process is suspended and/or resumed during conversation input.
-The functions are passed the signal that caused
+The
+.Fa on_suspend
+and
+.Fa on_resume
+functions are called with the signal that caused
 .Nm sudo
 to be suspended and the
 .Fa closure
-pointer.
-This allows the plugin to release resources such as locks that
-should not be held indefinitely on suspend and reacquire them
-on resume.
+pointer from the
+.Li struct sudo_conv_callback .
+The intended use is to allow the plugin to release resources, such as locks,
+that should not be held indefinitely while suspended and then reacquire them
+when the process is resumed.
 Note that the functions are not actually invoked from within a signal handler.
 .Pp
 The plugin is responsible for freeing the reply buffer located in each
@@ -2239,17 +2237,9 @@ will be
 #define GROUP_API_VERSION_MINOR 0
 #define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | \e
                            GROUP_API_VERSION_MINOR)
-
-/* Getters and setters for group version */
-#define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
-} while(0)
-#define GROUP_API_VERSION_SET_MINOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0xffff0000) | (n); \e
-} while(0)
 .Ed
+For getters and setters see the
+.Sx Policy plugin API .
 .Sh PLUGIN API CHANGELOG
 The following revisions have been made to the Sudo Plugin API.
 .Bl -tag -width 4n

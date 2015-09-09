@@ -104,9 +104,9 @@ group_plugin_load(char *plugin_info)
 	goto done;
     }
 
-    if (GROUP_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
+    if (SUDO_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
 	sudo_warnx(U_("%s: incompatible group plugin major version %d, expected %d"),
-	    path, GROUP_API_VERSION_GET_MAJOR(group_plugin->version),
+	    path, SUDO_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
 	goto done;
     }
