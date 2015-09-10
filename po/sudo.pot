@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.15\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-08-07 07:08-0600\n"
+"POT-Creation-Date: 2015-09-10 14:28-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 #: lib/util/sudo_conf.c:185 lib/util/sudo_conf.c:265 lib/util/sudo_conf.c:342
 #: lib/util/sudo_conf.c:544 src/conversation.c:72 src/exec.c:864
 #: src/exec_common.c:96 src/exec_common.c:108 src/exec_common.c:115
-#: src/exec_pty.c:688 src/exec_pty.c:696 src/load_plugins.c:52
+#: src/exec_pty.c:684 src/exec_pty.c:692 src/load_plugins.c:52
 #: src/load_plugins.c:65 src/load_plugins.c:208 src/load_plugins.c:231
 #: src/load_plugins.c:296 src/load_plugins.c:311 src/parse_args.c:180
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
@@ -41,9 +41,9 @@ msgstr ""
 #: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
 #: src/sudo.c:182 src/sudo.c:359 src/sudo.c:378 src/sudo.c:442 src/sudo.c:596
 #: src/sudo.c:615 src/sudo.c:642 src/sudo.c:651 src/sudo.c:660 src/sudo.c:677
-#: src/sudo.c:729 src/sudo.c:739 src/sudo.c:763 src/sudo.c:1145 src/sudo.c:1147
-#: src/sudo.c:1153 src/sudo.c:1161 src/sudo_edit.c:153 src/sudo_edit.c:428
-#: src/sudo_edit.c:525 src/sudo_edit.c:637 src/sudo_edit.c:657
+#: src/sudo.c:729 src/sudo.c:739 src/sudo.c:763 src/sudo.c:1146 src/sudo.c:1148
+#: src/sudo.c:1154 src/sudo.c:1162 src/sudo_edit.c:150 src/sudo_edit.c:425
+#: src/sudo_edit.c:522 src/sudo_edit.c:634 src/sudo_edit.c:654
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -51,16 +51,16 @@ msgstr ""
 #: lib/util/aix.c:204 lib/util/gidlist.c:64 lib/util/sudo_conf.c:185
 #: lib/util/sudo_conf.c:265 lib/util/sudo_conf.c:342 lib/util/sudo_conf.c:544
 #: src/conversation.c:73 src/exec.c:864 src/exec_common.c:96
-#: src/exec_common.c:108 src/exec_common.c:115 src/exec_pty.c:688
-#: src/exec_pty.c:696 src/load_plugins.c:208 src/load_plugins.c:231
+#: src/exec_common.c:108 src/exec_common.c:115 src/exec_pty.c:684
+#: src/exec_pty.c:692 src/load_plugins.c:208 src/load_plugins.c:231
 #: src/load_plugins.c:296 src/load_plugins.c:311 src/parse_args.c:180
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
 #: src/parse_args.c:485 src/preserve_fds.c:47 src/preserve_fds.c:130
 #: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
 #: src/sudo.c:182 src/sudo.c:359 src/sudo.c:378 src/sudo.c:442 src/sudo.c:763
-#: src/sudo.c:1145 src/sudo.c:1147 src/sudo.c:1153 src/sudo.c:1161
-#: src/sudo_edit.c:153 src/sudo_edit.c:428 src/sudo_edit.c:525
-#: src/sudo_edit.c:637 src/sudo_edit.c:657
+#: src/sudo.c:1146 src/sudo.c:1148 src/sudo.c:1154 src/sudo.c:1162
+#: src/sudo_edit.c:150 src/sudo_edit.c:425 src/sudo_edit.c:522
+#: src/sudo_edit.c:634 src/sudo_edit.c:654
 msgid "unable to allocate memory"
 msgstr ""
 
@@ -136,24 +136,24 @@ msgstr ""
 #: src/exec.c:114 src/exec.c:116 src/exec.c:121 src/exec.c:409 src/exec.c:411
 #: src/exec.c:413 src/exec.c:415 src/exec.c:417 src/exec.c:420 src/exec.c:437
 #: src/exec.c:439 src/exec.c:441 src/exec.c:596 src/exec.c:791
-#: src/exec_pty.c:468 src/exec_pty.c:726 src/exec_pty.c:796 src/exec_pty.c:798
-#: src/exec_pty.c:810 src/exec_pty.c:812 src/exec_pty.c:1293
-#: src/exec_pty.c:1295 src/exec_pty.c:1300 src/exec_pty.c:1302
-#: src/exec_pty.c:1316 src/exec_pty.c:1327 src/exec_pty.c:1329
-#: src/exec_pty.c:1331 src/exec_pty.c:1333 src/exec_pty.c:1335
-#: src/exec_pty.c:1337 src/exec_pty.c:1339 src/signal.c:147
+#: src/exec_pty.c:466 src/exec_pty.c:722 src/exec_pty.c:792 src/exec_pty.c:794
+#: src/exec_pty.c:806 src/exec_pty.c:808 src/exec_pty.c:1285
+#: src/exec_pty.c:1287 src/exec_pty.c:1292 src/exec_pty.c:1294
+#: src/exec_pty.c:1308 src/exec_pty.c:1319 src/exec_pty.c:1321
+#: src/exec_pty.c:1323 src/exec_pty.c:1325 src/exec_pty.c:1327
+#: src/exec_pty.c:1329 src/exec_pty.c:1331 src/signal.c:147
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr ""
 
-#: src/exec.c:126 src/exec_pty.c:846 src/exec_pty.c:1377 src/tgetpass.c:212
+#: src/exec.c:126 src/exec_pty.c:838 src/exec_pty.c:1369 src/tgetpass.c:265
 msgid "unable to fork"
 msgstr ""
 
-#: src/exec.c:304 src/exec.c:312 src/exec.c:869 src/exec_pty.c:608
-#: src/exec_pty.c:615 src/exec_pty.c:658 src/exec_pty.c:663 src/exec_pty.c:950
-#: src/exec_pty.c:960 src/exec_pty.c:1005 src/exec_pty.c:1012
-#: src/exec_pty.c:1442 src/exec_pty.c:1449 src/exec_pty.c:1456
+#: src/exec.c:304 src/exec.c:312 src/exec.c:869 src/exec_pty.c:604
+#: src/exec_pty.c:611 src/exec_pty.c:654 src/exec_pty.c:659 src/exec_pty.c:942
+#: src/exec_pty.c:952 src/exec_pty.c:997 src/exec_pty.c:1004
+#: src/exec_pty.c:1434 src/exec_pty.c:1441 src/exec_pty.c:1448
 msgid "unable to add event to queue"
 msgstr ""
 
@@ -173,12 +173,12 @@ msgstr ""
 msgid "unable to restore tty label"
 msgstr ""
 
-#: src/exec.c:604 src/exec_pty.c:502 src/signal.c:86
+#: src/exec.c:604 src/exec_pty.c:498 src/signal.c:86
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr ""
 
-#: src/exec.c:722 src/exec_pty.c:1184
+#: src/exec.c:722 src/exec_pty.c:1176
 msgid "error reading from signal pipe"
 msgstr ""
 
@@ -190,29 +190,25 @@ msgstr ""
 msgid "unable to allocate pty"
 msgstr ""
 
-#: src/exec_pty.c:770 src/exec_pty.c:779 src/exec_pty.c:787 src/exec_pty.c:1285
-#: src/exec_pty.c:1374 src/signal.c:128 src/tgetpass.c:208
+#: src/exec_pty.c:766 src/exec_pty.c:775 src/exec_pty.c:783 src/exec_pty.c:1277
+#: src/exec_pty.c:1366 src/signal.c:128 src/tgetpass.c:261
 msgid "unable to create pipe"
 msgstr ""
 
-#: src/exec_pty.c:828
-msgid "unable to set terminal to raw mode"
-msgstr ""
-
-#: src/exec_pty.c:1217
+#: src/exec_pty.c:1209
 msgid "error reading from pipe"
 msgstr ""
 
-#: src/exec_pty.c:1242
+#: src/exec_pty.c:1234
 msgid "error reading from socketpair"
 msgstr ""
 
-#: src/exec_pty.c:1251
+#: src/exec_pty.c:1243
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
 
-#: src/exec_pty.c:1353
+#: src/exec_pty.c:1345
 msgid "unable to set controlling tty"
 msgstr ""
 
@@ -553,7 +549,7 @@ msgstr ""
 msgid "unable to run %s as a login shell"
 msgstr ""
 
-#: src/sesh.c:112 src/sudo.c:1216
+#: src/sesh.c:112 src/sudo.c:1217
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -692,135 +688,135 @@ msgstr ""
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:1020 src/sudo.c:1026 src/sudo.c:1032
+#: src/sudo.c:1020 src/sudo.c:1026 src/sudo.c:1033
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1050
+#: src/sudo.c:1051
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1111
+#: src/sudo.c:1112
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1244
+#: src/sudo.c:1245
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr ""
 
-#: src/sudo.c:1262
+#: src/sudo.c:1263
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1279
+#: src/sudo.c:1280
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1294
+#: src/sudo.c:1295
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
 
-#: src/sudo_edit.c:241 src/sudo_edit.c:342
+#: src/sudo_edit.c:238 src/sudo_edit.c:339
 #, c-format
 msgid "%s: not a regular file"
 msgstr ""
 
-#: src/sudo_edit.c:248
+#: src/sudo_edit.c:245
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr ""
 
-#: src/sudo_edit.c:279 src/sudo_edit.c:381
+#: src/sudo_edit.c:276 src/sudo_edit.c:378
 #, c-format
 msgid "%s: short write"
 msgstr ""
 
-#: src/sudo_edit.c:343
+#: src/sudo_edit.c:340
 #, c-format
 msgid "%s left unmodified"
 msgstr ""
 
-#: src/sudo_edit.c:356 src/sudo_edit.c:542
+#: src/sudo_edit.c:353 src/sudo_edit.c:539
 #, c-format
 msgid "%s unchanged"
 msgstr ""
 
-#: src/sudo_edit.c:370 src/sudo_edit.c:392
+#: src/sudo_edit.c:367 src/sudo_edit.c:389
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: src/sudo_edit.c:371 src/sudo_edit.c:390 src/sudo_edit.c:393
-#: src/sudo_edit.c:567 src/sudo_edit.c:571
+#: src/sudo_edit.c:368 src/sudo_edit.c:387 src/sudo_edit.c:390
+#: src/sudo_edit.c:564 src/sudo_edit.c:568
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr ""
 
-#: src/sudo_edit.c:389
+#: src/sudo_edit.c:386
 msgid "unable to read temporary file"
 msgstr ""
 
-#: src/sudo_edit.c:472
+#: src/sudo_edit.c:469
 msgid "sesh: internal error: odd number of paths"
 msgstr ""
 
-#: src/sudo_edit.c:474
+#: src/sudo_edit.c:471
 msgid "sesh: unable to create temporary files"
 msgstr ""
 
-#: src/sudo_edit.c:476 src/sudo_edit.c:574
+#: src/sudo_edit.c:473 src/sudo_edit.c:571
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr ""
 
-#: src/sudo_edit.c:566
+#: src/sudo_edit.c:563
 msgid "unable to copy temporary files back to their original location"
 msgstr ""
 
-#: src/sudo_edit.c:570
+#: src/sudo_edit.c:567
 msgid ""
 "unable to copy some of the temporary files back to their original location"
 msgstr ""
 
-#: src/sudo_edit.c:613
+#: src/sudo_edit.c:610
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr ""
 
-#: src/sudo_edit.c:630
+#: src/sudo_edit.c:627
 msgid "plugin error: missing file list for sudoedit"
 msgstr ""
 
-#: src/sudo_edit.c:671 src/sudo_edit.c:684
+#: src/sudo_edit.c:668 src/sudo_edit.c:681
 msgid "unable to read the clock"
 msgstr ""
 
-#: src/tgetpass.c:80
+#: src/tgetpass.c:107
 msgid "no tty present and no askpass program specified"
 msgstr ""
 
-#: src/tgetpass.c:89
+#: src/tgetpass.c:116
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr ""
 
-#: src/tgetpass.c:223
+#: src/tgetpass.c:276
 #, c-format
 msgid "unable to set gid to %u"
 msgstr ""
 
-#: src/tgetpass.c:227
+#: src/tgetpass.c:280
 #, c-format
 msgid "unable to set uid to %u"
 msgstr ""
 
-#: src/tgetpass.c:232
+#: src/tgetpass.c:285
 #, c-format
 msgid "unable to run %s"
 msgstr ""
