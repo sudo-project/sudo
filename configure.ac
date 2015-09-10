@@ -3110,7 +3110,7 @@ AC_CHECK_FUNCS([strsignal], [], [
     AC_LIBOBJ(strsignal)
     SUDO_APPEND_COMPAT_EXP(sudo_strsignal)
     HAVE_SIGLIST="false"
-    AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], [
+    AC_CHECK_DECLS([sys_siglist, _sys_siglist], [
 	HAVE_SIGLIST="true"
 	break
     ], [ ], [
@@ -3132,7 +3132,7 @@ AC_CHECK_FUNCS([sig2str], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"
-    AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
+    AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
 	break
     ], [ ], [

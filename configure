@@ -21368,26 +21368,6 @@ if test $ac_have_decl = 1; then :
 	break
 
 fi
-ac_fn_c_check_decl "$LINENO" "__sys_siglist" "ac_cv_have_decl___sys_siglist" "
-$ac_includes_default
-#include <signal.h>
-
-"
-if test "x$ac_cv_have_decl___sys_siglist" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL___SYS_SIGLIST $ac_have_decl
-_ACEOF
-if test $ac_have_decl = 1; then :
-
-	HAVE_SIGLIST="true"
-	break
-
-fi
 
     if test "$HAVE_SIGLIST" != "true"; then
 	case " $LIBOBJS " in
@@ -21472,26 +21452,6 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL__SYS_SIGNAME $ac_have_decl
-_ACEOF
-if test $ac_have_decl = 1; then :
-
-	HAVE_SIGNAME="true"
-	break
-
-fi
-ac_fn_c_check_decl "$LINENO" "__sys_signame" "ac_cv_have_decl___sys_signame" "
-$ac_includes_default
-#include <signal.h>
-
-"
-if test "x$ac_cv_have_decl___sys_signame" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL___SYS_SIGNAME $ac_have_decl
 _ACEOF
 if test $ac_have_decl = 1; then :
 

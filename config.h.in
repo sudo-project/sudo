@@ -181,14 +181,6 @@
    don't. */
 #undef HAVE_DECL__SYS_SIGNAME
 
-/* Define to 1 if you have the declaration of `__sys_siglist', and to 0 if you
-   don't. */
-#undef HAVE_DECL___SYS_SIGLIST
-
-/* Define to 1 if you have the declaration of `__sys_signame', and to 0 if you
-   don't. */
-#undef HAVE_DECL___SYS_SIGNAME
-
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
