@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 9, 2015
+.Dd September 15, 2015
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -666,7 +666,6 @@ process,
 .Nm
 will relay signals it receives to the command.
 Unless the command is being run in a new pty, the
-.Dv SIGHUP ,
 .Dv SIGINT
 and
 .Dv SIGQUIT

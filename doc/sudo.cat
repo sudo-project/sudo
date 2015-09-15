@@ -375,9 +375,9 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
    SSiiggnnaall hhaannddlliinngg
      When the command is run as a child of the ssuuddoo process, ssuuddoo will relay
      signals it receives to the command.  Unless the command is being run in a
-     new pty, the SIGHUP, SIGINT and SIGQUIT signals are not relayed unless
-     they are sent by a user process, not the kernel.  Otherwise, the command
-     would receive SIGINT twice every time the user entered control-C.  Some
+     new pty, the SIGINT and SIGQUIT signals are not relayed unless they are
+     sent by a user process, not the kernel.  Otherwise, the command would
+     receive SIGINT twice every time the user entered control-C.  Some
      signals, such as SIGSTOP and SIGKILL, cannot be caught and thus will not
      be relayed to the command.  As a general rule, SIGTSTP should be used
      instead of SIGSTOP when you wish to suspend a command being run by ssuuddoo.
@@ -608,4 +608,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.15                     August 9, 2015                     Sudo 1.8.15
+Sudo 1.8.15                   September 15, 2015                   Sudo 1.8.15
