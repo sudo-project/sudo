@@ -1,8 +1,5 @@
 What's new in Sudo 1.8.15
 
- * Fixed a bug introduced in sudo 1.8.14 that prevented visudo from
-   re-editing the correct file when a syntax error was detected.
-
  * Fixed a bug that prevented sudo from building outside the source tree
    on some platforms.  Bug #708.
 
@@ -44,6 +41,13 @@ What's new in Sudo 1.8.15
  * Fixed a bug where sudo would fail to run commands as a non-root
    user on systems that lack both setresuid() and setreuid().
    Bug #713.
+
+ * Fixed a bug introduced in sudo 1.8.14 that prevented visudo from
+   re-editing the correct file when a syntax error was detected.
+
+ * Fixed a bug where sudo would not relay a SIGHUP signal to the
+   command when the terminal is closed and the command is not run
+   in its own pseudo-tty.  Bug #719
 
 What's new in Sudo 1.8.14p3
 
