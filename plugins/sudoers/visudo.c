@@ -465,14 +465,15 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	lineno = -1;
 
     /*
-     * We pre-allocated 2 extra spaces for "+n filename" in argv.
+     * The last 3 slots in the editor argv are: "-- +1 sudoers"
      * Replace those placeholders with the real values.
      */
-    ac = editor_argc - 2;
+    ac = editor_argc - 3;
     if (lineno > 0) {
 	(void)snprintf(linestr, sizeof(linestr), "+%d", lineno);
 	editor_argv[ac++] = linestr;
     }
+    editor_argv[ac++] = "--";
     editor_argv[ac++] = sp->tpath;
     editor_argv[ac++] = NULL;
 
