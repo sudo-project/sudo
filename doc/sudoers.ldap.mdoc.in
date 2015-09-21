@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 30, 2015
+.Dd September 21, 2015
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -143,6 +143,8 @@ or non-Unix group name or ID (prefixed with
 or
 .Ql %:#
 respectively).
+User netgroups are matched using the user and domain members only;
+the host member is not used when matching.
 Non-Unix group support is only available when an appropriate
 .Em group_plugin
 is defined in the global
@@ -155,6 +157,8 @@ A host name, IP address, IP network, or host netgroup (prefixed with a
 The special value
 .Li ALL
 will match any host.
+Host netgroups are matched using the host (both qualified and unqualified)
+and domain members only; the user member is not used when matching.
 .It Sy sudoCommand
 A fully-qualified Unix command name with optional command line arguments,
 potentially including globbing characters (aka wild cards).

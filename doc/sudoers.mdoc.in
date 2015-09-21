@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 7, 2015
+.Dd September 21, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -605,6 +605,8 @@ An odd number of
 .Ql \&!
 operators negate the value of
 the item; an even number just cancel each other out.
+User netgroups are matched using the user and domain members only;
+the host member is not used when matching.
 .Pp
 A
 .Li user name ,
@@ -700,13 +702,14 @@ and other aliases.
 Again, the value of an item may be negated with the
 .Ql \&!
 operator.
-If you do not specify a netmask along with the network number,
+Host netgroups are matched using the host (both qualified and unqualified)
+and domain members only; the user member is not used when matching.
+If you specify a network number without a netmask,
 .Nm sudo
 will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
-interfaces, the corresponding netmask will be used.
-The netmask
-may be specified either in standard IP address notation
+interfaces, will use the netmask of that interface.
+The netmask may be specified either in standard IP address notation
 (e.g.\& 255.255.255.0 or ffff:ffff:ffff:ffff::),
 or CIDR notation (number of bits, e.g.\& 24 or 64).
 A host name may include shell-style wildcards (see the
@@ -1782,7 +1785,11 @@ If set, netgroups (prefixed with
 .Ql + ) ,
 may be used in place of a user or host.
 For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server.
+substring match on the server unless the
+.Sy NETGROUP_BASE
+directive is present in the
+.Pa @ldap_conf@
+file.
 If netgroups are not needed, this option can be disabled to reduce the
 load on the LDAP server.
 This flag is
