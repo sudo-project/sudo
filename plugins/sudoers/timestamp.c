@@ -873,7 +873,7 @@ timestamp_remove(bool unlink_it)
 	/* Back up and disable the entry. */
 	if (!ISSET(entry.flags, TS_DISABLED)) {
 	    SET(entry.flags, TS_DISABLED);
-	    lseek(fd, 0 - sizeof(entry), SEEK_CUR);
+	    lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR);
 	    if (ts_write(fd, fname, &entry, -1) == -1)
 		rval = false;
 	}
