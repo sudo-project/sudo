@@ -20,17 +20,17 @@
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
 #define SUDO_API_VERSION_MINOR 8
-#define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
 /* Getters and setters for plugin API versions */
 #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+#define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffffU)
 #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+    *(vp) = (*(vp) & 0x0000ffffU) | ((n) << 16); \
 } while(0)
 #define SUDO_API_VERSION_SET_MINOR(vp, n) do { \
-    *(vp) = (*(vp) & 0xffff0000) | (n); \
+    *(vp) = (*(vp) & 0xffff0000U) | (n); \
 } while(0)
 
 /* Conversation function types and defines */
