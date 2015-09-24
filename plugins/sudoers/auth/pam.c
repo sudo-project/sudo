@@ -377,9 +377,10 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
  */
 static int
 converse(int num_msg, PAM_CONST struct pam_message **msg,
-    struct pam_response **response, void *callback)
+    struct pam_response **response, void *vcallback)
 {
     struct pam_response *pr;
+    struct sudo_conv_callback *callback = NULL;
     PAM_CONST struct pam_message *pm;
     const char *prompt;
     char *pass;
@@ -397,6 +398,9 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(PAM_BUF_ERR);
     }
+
+    if (vcallback != NULL)
+	callback = *((struct sudo_conv_callback **)vcallback);
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
