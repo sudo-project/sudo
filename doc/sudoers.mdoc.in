@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 21, 2015
+.Dd September 25, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2454,12 +2454,18 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that if the
+Note that
+.Em set_logname
+will have no effect
+if the
 .Em env_reset
-option has not been disabled, entries in the
+option has not been disabled and the
 .Em env_keep
-list will override the value of
-.Em set_logname .
+list contains
+.Ev LOGNAME ,
+.Ev USER
+or
+.Ev USERNAME .
 This flag is
 .Em on
 by default.

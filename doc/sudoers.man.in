@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "September 21, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "September 25, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2613,12 +2613,18 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that if the
+Note that
+\fIset_logname\fR
+will have no effect
+if the
 \fIenv_reset\fR
-option has not been disabled, entries in the
+option has not been disabled and the
 \fIenv_keep\fR
-list will override the value of
-\fIset_logname\fR.
+list contains
+\fRLOGNAME\fR,
+\fRUSER\fR
+or
+\fRUSERNAME\fR.
 This flag is
 \fIon\fR
 by default.
