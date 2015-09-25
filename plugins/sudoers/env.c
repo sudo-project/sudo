@@ -941,7 +941,7 @@ rebuild_env(void)
 	} else {
 	    if (!ISSET(didvar, DID_SHELL))
 		CHECK_SETENV2("SHELL", sudo_user.pw->pw_shell, false, true);
-	    /* We will set LOGNAME later in the !def_set_logname case. */
+	    /* We will set LOGNAME later in the def_set_logname case. */
 	    if (!def_set_logname) {
 		if (!ISSET(didvar, DID_LOGNAME))
 		    CHECK_SETENV2("LOGNAME", user_name, false, true);
@@ -1001,16 +1001,38 @@ rebuild_env(void)
     /*
      * Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is not
      * disabled.  We skip this if we are running a login shell (because
-     * they have already been set) or sudoedit (because we want the editor
-     * to find the invoking user's startup files).
+     * they have already been set).
      */
     if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	if (!ISSET(didvar, KEPT_LOGNAME))
+	if (!ISSET(didvar, (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME))) {
+	    /* Nothing preserved, set all three. */
 	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name, true, true);
-	if (!ISSET(didvar, KEPT_USER))
 	    CHECK_SETENV2("USER", runas_pw->pw_name, true, true);
-	if (!ISSET(didvar, KEPT_USERNAME))
 	    CHECK_SETENV2("USERNAME", runas_pw->pw_name, true, true);
+	} else if ((didvar & (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)) !=
+	    (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)) {
+	    /*
+	     * Preserved some of LOGNAME, USER, USERNAME but not all.
+	     * Make the unset ones match so we don't end up with some
+	     * set to the invoking user and others set to the runas user.
+	     */
+	    if (ISSET(didvar, KEPT_LOGNAME))
+		cp = sudo_getenv("LOGNAME");
+	    else if (ISSET(didvar, KEPT_USER))
+		cp = sudo_getenv("USER");
+	    else if (ISSET(didvar, KEPT_USERNAME))
+		cp = sudo_getenv("USERNAME");
+	    else
+		cp = NULL;
+	    if (cp != NULL) {
+		if (!ISSET(didvar, KEPT_LOGNAME))
+		    CHECK_SETENV2("LOGNAME", cp, true, true);
+		if (!ISSET(didvar, KEPT_USER))
+		    CHECK_SETENV2("USER", cp, true, true);
+		if (!ISSET(didvar, KEPT_USERNAME))
+		    CHECK_SETENV2("USERNAME", cp, true, true);
+	    }
+	}
     }
 
     /* Set $HOME to target user if not preserving user's value. */
