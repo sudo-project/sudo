@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "September 15, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "September 27, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -824,9 +824,12 @@ manual for more information about the
 \fBsudo\fR
 plugin architecture.
 .SH "EXIT VALUE"
-Upon successful execution of a program, the exit status from
-\fIsudo\fR
-will simply be the exit status of the program that was executed.
+Upon successful execution of a command, the exit status from
+\fBsudo\fR
+will be the exit status of the program that was executed.
+If the command terminated due to receipt of a signal,
+\fBsudo\fR
+will send itself the signal that terminated the command.
 .PP
 Otherwise,
 \fBsudo\fR
@@ -834,14 +837,14 @@ exits with a value of 1 if there is a configuration/permission
 problem or if
 \fBsudo\fR
 cannot execute the given command.
-In the latter case the error string is printed to the standard error.
+In the latter case, the error string is printed to the standard error.
 If
 \fBsudo\fR
 cannot
 stat(2)
 one or more entries in the user's
 \fRPATH\fR,
-an error is printed on stderr.
+an error is printed to the standard error.
 (If the directory does not exist or if it is not really a directory,
 the entry is ignored and no error is printed.)
 This should not happen under normal circumstances.
