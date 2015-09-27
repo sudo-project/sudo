@@ -926,6 +926,22 @@ and
 is not present in the
 .Em env_keep
 list.
+.It Ev LOGNAME
+Set to the login name of the target user when the
+.Fl i
+option is specified, when the
+.Em set_logname
+option is enabled in
+.Em sudoers
+or when the
+.Em env_reset
+option is enabled in
+.Em sudoers
+(unless
+.Ev LOGNAME
+is present in the
+.Em env_keep
+list).
 .It Ev PATH
 May be overridden by the security policy.
 .It Ev SHELL
@@ -956,9 +972,12 @@ Set to the user ID of the user who invoked sudo.
 .It Ev SUDO_USER
 Set to the login name of the user who invoked sudo.
 .It Ev USER
-Set to the target user (root unless the
-.Fl u
-option is specified).
+Set to the same value as
+.Ev LOGNAME ,
+described above.
+.It Ev USERNAME
+Same as
+.Ev USER .
 .It Ev VISUAL
 Default editor to use in
 .Fl e

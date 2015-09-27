@@ -491,6 +491,12 @@ EENNVVIIRROONNMMEENNTT
                       is enabled in _s_u_d_o_e_r_s and _H_O_M_E is not present in the
                       _e_n_v___k_e_e_p list.
 
+     LOGNAME          Set to the login name of the target user when the --ii
+                      option is specified, when the _s_e_t___l_o_g_n_a_m_e option is
+                      enabled in _s_u_d_o_e_r_s or when the _e_n_v___r_e_s_e_t option is
+                      enabled in _s_u_d_o_e_r_s (unless LOGNAME is present in the
+                      _e_n_v___k_e_e_p list).
+
      PATH             May be overridden by the security policy.
 
      SHELL            Used to determine shell to run with --ss option.
@@ -514,8 +520,9 @@ EENNVVIIRROONNMMEENNTT
 
      SUDO_USER        Set to the login name of the user who invoked sudo.
 
-     USER             Set to the target user (root unless the --uu option is
-                      specified).
+     USER             Set to the same value as LOGNAME, described above.
+
+     USERNAME         Same as USER.
 
      VISUAL           Default editor to use in --ee (sudoedit) mode if
                       SUDO_EDITOR is not set.
