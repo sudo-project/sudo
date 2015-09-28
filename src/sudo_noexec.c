@@ -20,6 +20,8 @@
 
 #include <errno.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #ifdef HAVE_SPAWN_H
 #include <spawn.h>
@@ -97,10 +99,10 @@ INTERPOSE(fn)
 DUMMY_VA(execl, const char *, const char *)
 DUMMY_VA(execle, const char *, const char *)
 DUMMY_VA(execlp, const char *, const char *)
-DUMMY1(system, const char *)
 DUMMY2(execv, const char *, char * const *)
 DUMMY2(execvp, const char *, char * const *)
 DUMMY3(execve, const char *, char * const *, char * const *)
+DUMMY1(system, const char *)
 
 /*
  * Private versions of the above.
@@ -207,3 +209,12 @@ DUMMY6(_posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *,
 #ifdef HAVE_POSIX___SPAWNP
 DUMMY6(__posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
 #endif
+
+/* popen(3) returns FILE *, not int so we can't use a wrapper. */
+__dso_public FILE *
+FN_NAME(popen)(const char *c, const char *t)
+{
+    errno = EACCES;
+    return NULL;
+}
+INTERPOSE(popen)
