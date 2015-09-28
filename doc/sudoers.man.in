@@ -2390,8 +2390,8 @@ tag has been set, unless overridden by an
 \fREXEC\fR
 tag.
 See the description of
-\fINOEXEC and EXEC\fR
-below as well as the
+\fIEXEC and NOEXEC\fR
+above as well as the
 \fIPreventing shell escapes\fR
 section at the end of this manual.
 This flag is

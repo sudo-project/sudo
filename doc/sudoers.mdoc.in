@@ -2243,8 +2243,8 @@ tag has been set, unless overridden by an
 .Li EXEC
 tag.
 See the description of
-.Em NOEXEC and EXEC
-below as well as the
+.Em EXEC and NOEXEC
+above as well as the
 .Sx Preventing shell escapes
 section at the end of this manual.
 This flag is

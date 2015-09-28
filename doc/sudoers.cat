@@ -1119,7 +1119,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      noexec            If set, all commands run via ssuuddoo will behave as if the
                        NOEXEC tag has been set, unless overridden by an EXEC
-                       tag.  See the description of _N_O_E_X_E_C _a_n_d _E_X_E_C below as
+                       tag.  See the description of _E_X_E_C _a_n_d _N_O_E_X_E_C above as
                        well as the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section at the end
                        of this manual.  This flag is _o_f_f by default.
 
