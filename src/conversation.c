@@ -49,6 +49,9 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     const struct sudo_conv_message *msg;
     char *pass;
     int n, flags = tgetpass_flags;
+    const int conv_debug_instance = sudo_debug_get_active_instance();
+
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
     for (n = 0; n < num_msgs; n++) {
 	msg = &msgs[n];
@@ -87,6 +90,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 	}
     }
 
+    sudo_debug_set_active_instance(conv_debug_instance);
     return 0;
 
 err:
@@ -100,6 +104,7 @@ err:
 	}
     } while (n--);
 
+    sudo_debug_set_active_instance(conv_debug_instance);
     return -1;
 }
 
@@ -115,6 +120,9 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     int len;
+    const int conv_debug_instance = sudo_debug_get_active_instance();
+
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
     switch (msg_type) {
     case SUDO_CONV_INFO_MSG:
@@ -133,5 +141,6 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 	break;
     }
 
+    sudo_debug_set_active_instance(conv_debug_instance);
     return len;
 }
