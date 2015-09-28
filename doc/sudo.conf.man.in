@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "August 9, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO" "5" "September 28, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -229,10 +229,21 @@ environment variable.
 noexec
 The fully-qualified path to a shared library containing dummy
 versions of the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexect\fR(),
 \fBexecv\fR(),
-\fBexecve\fR()
+\fBexecve\fR(),
+\fBexecvP\fR(),
+\fBexecvp\fR(),
+\fBexecvpe\fR(),
+\fBfexecve\fR(),
+\fBpopen\fR(),
+\fBposix_spawn\fR(),
+\fBposix_spawnp\fR(),
 and
-\fBfexecve\fR()
+\fBsystem\fR()
 library functions that just return an error.
 This is used to implement the
 \fInoexec\fR

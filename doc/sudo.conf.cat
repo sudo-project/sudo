@@ -101,10 +101,12 @@ DDEESSCCRRIIPPTTIIOONN
                variable.
 
      noexec    The fully-qualified path to a shared library containing dummy
-               versions of the eexxeeccvv(), eexxeeccvvee() and ffeexxeeccvvee() library
-               functions that just return an error.  This is used to implement
-               the _n_o_e_x_e_c functionality on systems that support LD_PRELOAD or
-               its equivalent.  The default value is:
+               versions of the eexxeeccll(), eexxeeccllee(), eexxeeccllpp(), eexxeecctt(), eexxeeccvv(),
+               eexxeeccvvee(), eexxeeccvvPP(), eexxeeccvvpp(), eexxeeccvvppee(), ffeexxeeccvvee(), ppooppeenn(),
+               ppoossiixx__ssppaawwnn(), ppoossiixx__ssppaawwnnpp(), and ssyysstteemm() library functions
+               that just return an error.  This is used to implement the
+               _n_o_e_x_e_c functionality on systems that support LD_PRELOAD or its
+               equivalent.  The default value is:
                _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o_/_s_u_d_o___n_o_e_x_e_c_._s_o.
 
      plugin_dir
@@ -410,4 +412,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.15                     August 9, 2015                     Sudo 1.8.15
+Sudo 1.8.15                   September 28, 2015                   Sudo 1.8.15
