@@ -61,6 +61,12 @@ typedef struct interpose_s {
     return -1;					\
 }
 
+#define DUMMY1(fn, t1)				\
+__dso_public int				\
+FN_NAME(fn)(t1 a1)				\
+DUMMY_BODY					\
+INTERPOSE(fn)
+
 #define DUMMY2(fn, t1, t2)			\
 __dso_public int				\
 FN_NAME(fn)(t1 a1, t2 a2)			\
@@ -91,6 +97,7 @@ INTERPOSE(fn)
 DUMMY_VA(execl, const char *, const char *)
 DUMMY_VA(execle, const char *, const char *)
 DUMMY_VA(execlp, const char *, const char *)
+DUMMY1(system, const char *)
 DUMMY2(execv, const char *, char * const *)
 DUMMY2(execvp, const char *, char * const *)
 DUMMY3(execve, const char *, char * const *, char * const *)
