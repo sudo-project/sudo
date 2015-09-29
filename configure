@@ -19887,10 +19887,8 @@ esac
 
 fi
 if test X"$with_noexec" != X"no"; then
-    # Check for underscore versions of standard exec functions
-    # unless we are using dyld symbole interposition
-    if test X"$dlyld_interpose" != X"yes"; then
-	for ac_func in _execl __execl
+    # Check for non-standard exec functions
+    for ac_func in exect execvP execvpe
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -19902,7 +19900,8 @@ _ACEOF
 fi
 done
 
-	for ac_func in _execle __execle
+    # Check for fexecve, posix_spawn, and posix_spawnp
+    for ac_func in fexecve posix_spawn posix_spawnp
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -19910,213 +19909,6 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
-
-fi
-done
-
-	for ac_func in _execlp __execlp
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	for ac_func in _execv __execv
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	for ac_func in _execve __execve
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	for ac_func in _execvp __execvp
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-    fi
-    # Check for non-standard exec functions including underscore versions
-    for ac_func in exect
-do :
-  ac_fn_c_check_func "$LINENO" "exect" "ac_cv_func_exect"
-if test "x$ac_cv_func_exect" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_EXECT 1
-_ACEOF
-
-	if test X"$dlyld_interpose" != X"yes"; then
-	    for ac_func in _exect __exect
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	fi
-
-fi
-done
-
-    for ac_func in execvP
-do :
-  ac_fn_c_check_func "$LINENO" "execvP" "ac_cv_func_execvP"
-if test "x$ac_cv_func_execvP" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_EXECVP 1
-_ACEOF
-
-	if test X"$dlyld_interpose" != X"yes"; then
-	    for ac_func in _execvP __execvP
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	fi
-
-fi
-done
-
-    for ac_func in execvpe
-do :
-  ac_fn_c_check_func "$LINENO" "execvpe" "ac_cv_func_execvpe"
-if test "x$ac_cv_func_execvpe" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_EXECVPE 1
-_ACEOF
-
-	if test X"$dlyld_interpose" != X"yes"; then
-	    for ac_func in _execvpe __execvpe
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	fi
-
-fi
-done
-
-    for ac_func in fexecve
-do :
-  ac_fn_c_check_func "$LINENO" "fexecve" "ac_cv_func_fexecve"
-if test "x$ac_cv_func_fexecve" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FEXECVE 1
-_ACEOF
-
-	if test X"$dlyld_interpose" != X"yes"; then
-	    for ac_func in _fexecve __fexecve
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	fi
-
-fi
-done
-
-    # Check for posix_spawn, posix_spawnp and any underscore versions
-    for ac_func in posix_spawn
-do :
-  ac_fn_c_check_func "$LINENO" "posix_spawn" "ac_cv_func_posix_spawn"
-if test "x$ac_cv_func_posix_spawn" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_POSIX_SPAWN 1
-_ACEOF
-
-	if test X"$dlyld_interpose" != X"yes"; then
-	    for ac_func in _posix_spawn __posix_spawn
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	fi
-
-fi
-done
-
-    for ac_func in posix_spawnp
-do :
-  ac_fn_c_check_func "$LINENO" "posix_spawnp" "ac_cv_func_posix_spawnp"
-if test "x$ac_cv_func_posix_spawnp" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_POSIX_SPAWNP 1
-_ACEOF
-
-	if test X"$dlyld_interpose" != X"yes"; then
-	    for ac_func in _posix_spawnp __posix_spawnp
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-	fi
 
 fi
 done

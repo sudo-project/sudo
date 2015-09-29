@@ -829,33 +829,6 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
-/* Define to 1 if you have the `_execl' function. */
-#undef HAVE__EXECL
-
-/* Define to 1 if you have the `_execle' function. */
-#undef HAVE__EXECLE
-
-/* Define to 1 if you have the `_execlp' function. */
-#undef HAVE__EXECLP
-
-/* Define to 1 if you have the `_exect' function. */
-#undef HAVE__EXECT
-
-/* Define to 1 if you have the `_execv' function. */
-#undef HAVE__EXECV
-
-/* Define to 1 if you have the `_execve' function. */
-#undef HAVE__EXECVE
-
-/* Define to 1 if you have the `_execvP' function. */
-#undef HAVE__EXECVP
-
-/* Define to 1 if you have the `_execvpe' function. */
-#undef HAVE__EXECVPE
-
-/* Define to 1 if you have the `_fexecve' function. */
-#undef HAVE__FEXECVE
-
 /* Define to 1 if you have the `_getpty' function. */
 #undef HAVE__GETPTY
 
@@ -868,41 +841,8 @@
 /* Define to 1 if you have the `_nss_XbyY_buf_alloc' function. */
 #undef HAVE__NSS_XBYY_BUF_ALLOC
 
-/* Define to 1 if you have the `_posix_spawn' function. */
-#undef HAVE__POSIX_SPAWN
-
-/* Define to 1 if you have the `_posix_spawnp' function. */
-#undef HAVE__POSIX_SPAWNP
-
 /* Define to 1 if you have the `_ttyname_dev' function. */
 #undef HAVE__TTYNAME_DEV
-
-/* Define to 1 if you have the `__execl' function. */
-#undef HAVE___EXECL
-
-/* Define to 1 if you have the `__execle' function. */
-#undef HAVE___EXECLE
-
-/* Define to 1 if you have the `__execlp' function. */
-#undef HAVE___EXECLP
-
-/* Define to 1 if you have the `__exect' function. */
-#undef HAVE___EXECT
-
-/* Define to 1 if you have the `__execv' function. */
-#undef HAVE___EXECV
-
-/* Define to 1 if you have the `__execve' function. */
-#undef HAVE___EXECVE
-
-/* Define to 1 if you have the `__execvP' function. */
-#undef HAVE___EXECVP
-
-/* Define to 1 if you have the `__execvpe' function. */
-#undef HAVE___EXECVPE
-
-/* Define to 1 if you have the `__fexecve' function. */
-#undef HAVE___FEXECVE
 
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
@@ -915,12 +855,6 @@
 
 /* Define to 1 if you have the `__nss_XbyY_buf_alloc' function. */
 #undef HAVE___NSS_XBYY_BUF_ALLOC
-
-/* Define to 1 if you have the `__posix_spawn' function. */
-#undef HAVE___POSIX_SPAWN
-
-/* Define to 1 if you have the `__posix_spawnp' function. */
-#undef HAVE___POSIX_SPAWNP
 
 /* Define to 1 if your crt0.o defines the __progname symbol for you. */
 #undef HAVE___PROGNAME

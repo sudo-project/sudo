@@ -2674,48 +2674,10 @@ dnl
 dnl Function checks for sudo_noexec
 dnl
 if test X"$with_noexec" != X"no"; then
-    # Check for underscore versions of standard exec functions
-    # unless we are using dyld symbole interposition
-    if test X"$dlyld_interpose" != X"yes"; then
-	AC_CHECK_FUNCS([_execl __execl])
-	AC_CHECK_FUNCS([_execle __execle])
-	AC_CHECK_FUNCS([_execlp __execlp])
-	AC_CHECK_FUNCS([_execv __execv])
-	AC_CHECK_FUNCS([_execve __execve])
-	AC_CHECK_FUNCS([_execvp __execvp])
-    fi
-    # Check for non-standard exec functions including underscore versions
-    AC_CHECK_FUNCS([exect], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_exect __exect])
-	fi
-    ])
-    AC_CHECK_FUNCS([execvP], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_execvP __execvP])
-	fi
-    ])
-    AC_CHECK_FUNCS([execvpe], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_execvpe __execvpe])
-	fi
-    ])
-    AC_CHECK_FUNCS([fexecve], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_fexecve __fexecve])
-	fi
-    ])
-    # Check for posix_spawn, posix_spawnp and any underscore versions
-    AC_CHECK_FUNCS([posix_spawn], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_posix_spawn __posix_spawn])
-	fi
-    ])
-    AC_CHECK_FUNCS([posix_spawnp], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_posix_spawnp __posix_spawnp])
-	fi
-    ])
+    # Check for non-standard exec functions
+    AC_CHECK_FUNCS([exect execvP execvpe])
+    # Check for fexecve, posix_spawn, and posix_spawnp
+    AC_CHECK_FUNCS([fexecve posix_spawn posix_spawnp])
 fi
 
 dnl
