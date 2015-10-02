@@ -849,9 +849,13 @@ run_command(char *path, char **argv)
 	    break;	/* NOTREACHED */
     }
 
-    do {
+    for (;;) {
 	rv = waitpid(pid, &status, 0);
-    } while (rv == -1 && errno == EINTR);
+	if (rv == -1 && errno != EINTR)
+	    break;
+	if (rv != -1 && !WIFSTOPPED(status))
+	    break;
+    }
 
     if (rv != -1)
 	rv = WIFEXITED(status) ? WEXITSTATUS(status) : -1;

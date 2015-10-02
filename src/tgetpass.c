@@ -300,8 +300,13 @@ sudo_askpass(const char *askpass, const char *prompt)
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
     /* Wait for child to exit. */
-    while (waitpid(child, &status, 0) == -1 && errno == EINTR)
-	continue;
+    for (;;) {
+	pid_t rv = waitpid(child, &status, 0);
+	if (rv == -1 && errno != EINTR)
+	    break;
+	if (rv != -1 && !WIFSTOPPED(status))
+	    break;
+    }
 
     if (pass == NULL)
 	errno = EINTR;	/* make cancel button simulate ^C */

@@ -591,9 +591,13 @@ send_mail(const char *fmt, ...)
 	    break;
 	default:
 	    /* Parent. */
-	    do {
+	    for (;;) {
 		rv = waitpid(pid, &status, 0);
-	    } while (rv == -1 && errno == EINTR);
+		if (rv == -1 && errno != EINTR)
+		    break;
+		if (rv != -1 && !WIFSTOPPED(status))
+		    break;
+	    }
 	    return true; /* not debug */
     }
 
@@ -732,9 +736,13 @@ send_mail(const char *fmt, ...)
     fputs("\n\n", mail);
 
     fclose(mail);
-    do {
-        rv = waitpid(pid, &status, 0);
-    } while (rv == -1 && errno == EINTR);
+    for (;;) {
+	rv = waitpid(pid, &status, 0);
+	if (rv == -1 && errno != EINTR)
+	    break;
+	if (rv != -1 && !WIFSTOPPED(status))
+	    break;
+    }
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     _exit(0);
 }
