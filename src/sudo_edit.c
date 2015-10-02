@@ -158,9 +158,22 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
 static int
 sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
 {
+    int fd;
+    struct stat sb;
+
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
 	oflags |= O_NOFOLLOW;
-    return open(path, oflags, mode);
+    fd = open(path, oflags|O_NONBLOCK, mode);
+    if (fd != -1) {
+	if (!ISSET(oflags, O_NONBLOCK))
+	    (void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+	if (fstat(fd, &sb) == -1 || !S_ISREG(sb.st_mode)) {
+	    close(fd);
+	    fd = -1;
+	    errno = EINVAL;
+	}
+    }
+    return fd;
 }
 #else
 static int
@@ -169,9 +182,10 @@ sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
     struct stat sb1, sb2;
     int fd;
 
-    fd = open(path, oflags, mode);
-    if (fd == -1 || ISSET(sflags, CD_SUDOEDIT_FOLLOW))
-	return fd;
+    if ((fd = open(path, oflags|O_NONBLOCK, mode)) == -1)
+	return -1;
+    if (!ISSET(oflags, O_NONBLOCK))
+	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
     /*
      * Treat [fl]stat() failure like an open() failure.
@@ -184,14 +198,25 @@ sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
     }
 
     /*
+     * Only open regular files.
+     */
+    if (!S_ISREG(sb1.st_mode)) {
+	close(fd);
+	errno = EINVAL;
+	return -1;
+    }
+
+    /*
      * Make sure we did not open a link and that what we opened
      * matches what is currently on the file system.
      */
-    if (S_ISLNK(sb2.st_mode) ||
-	sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
-	close(fd);
-	errno = ELOOP;
-	return -1;
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW)) {
+	if (S_ISLNK(sb2.st_mode) ||
+	    sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
+	    close(fd);
+	    errno = ELOOP;
+	    return -1;
+	}
     }
 
     return fd;
