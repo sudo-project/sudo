@@ -159,20 +159,12 @@ static int
 sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
 {
     int fd;
-    struct stat sb;
 
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
 	oflags |= O_NOFOLLOW;
     fd = open(path, oflags|O_NONBLOCK, mode);
-    if (fd != -1) {
-	if (!ISSET(oflags, O_NONBLOCK))
-	    (void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
-	if (fstat(fd, &sb) == -1 || !S_ISREG(sb.st_mode)) {
-	    close(fd);
-	    fd = -1;
-	    errno = EINVAL;
-	}
-    }
+    if (fd != -1 && !ISSET(oflags, O_NONBLOCK))
+	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
     return fd;
 }
 #else
@@ -194,15 +186,6 @@ sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
 	const int serrno = errno;
 	close(fd);
 	errno = serrno;
-	return -1;
-    }
-
-    /*
-     * Only open regular files.
-     */
-    if (!S_ISREG(sb1.st_mode)) {
-	close(fd);
-	errno = EINVAL;
 	return -1;
     }
 
