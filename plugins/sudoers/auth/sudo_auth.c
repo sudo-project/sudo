@@ -50,7 +50,7 @@ static sudo_auth auth_switch[] = {
     AUTH_ENTRY("SecurId", FLAG_STANDALONE, sudo_securid_init, sudo_securid_setup, sudo_securid_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_SIA_SES_INIT
-    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, NULL, NULL)
+    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, sudo_sia_begin_session, NULL)
 #endif
 #ifdef HAVE_FWTK
     AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, sudo_fwtk_cleanup, NULL, NULL)

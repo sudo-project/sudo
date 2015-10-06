@@ -42,64 +42,13 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 
-static int sudo_collect(int, int, uchar_t *, int, prompt_t *);
-
-static char *def_prompt;
 static char **sudo_argv;
 static int sudo_argc;
-
-#define PROMPT_IS_PASSWORD(_p) \
-    (strncmp((_p), "Password:", 9) == 0 && \
-	((_p)[9] == '\0' || ((_p)[9] == ' ' && (_p)[10] == '\0')))
-
-/*
- * Collection routine (callback) for limiting the timeouts in SIA
- * prompts and (possibly) setting a custom prompt.
- */
-static int
-sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
-    prompt_t *prompts)
-{
-    int rval;
-    sigset_t mask, omask;
-    debug_decl(sudo_collect, SUDOERS_DEBUG_AUTH)
-
-    switch (rendition) {
-	case SIAFORM:
-	case SIAONELINER:
-	    if (timeout <= 0 || timeout > def_passwd_timeout * 60)
-		timeout = def_passwd_timeout * 60;
-	    /*
-	     * Substitute custom prompt if a) the sudo prompt is not "Password:"
-	     * and b) the SIA prompt is "Password:" (so we know it is safe).
-	     * This keeps us from overwriting things like S/Key challenges.
-	     */
-	    if (!PROMPT_IS_PASSWORD(def_prompt) &&
-		PROMPT_IS_PASSWORD((char *)prompts[0].prompt))
-		prompts[0].prompt = (unsigned char *)def_prompt;
-	    break;
-	default:
-	    break;
-    }
-
-    /* Unblock SIGINT and SIGQUIT during password entry. */
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGINT);
-    sigaddset(&mask, SIGQUIT);
-    sigprocmask(SIG_UNBLOCK, &mask, &omask);
-
-    rval = sia_collect_trm(timeout, rendition, title, nprompts, prompts);
-
-    /* Restore previous signal mask. */
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return_int(rval);
-}
 
 int
 sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
-    SIAENTITY *siah = NULL;
+    SIAENTITY *siah;
     int i;
     debug_decl(sudo_sia_setup, SUDOERS_DEBUG_AUTH)
 
@@ -115,40 +64,90 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	sudo_argv[i + 1] = NewArgv[i];
     sudo_argv[sudo_argc] = NULL;
 
-    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ttypath, 1, NULL) != SIASUCCESS) {
-
+    /* We don't let SIA prompt the user for input. */
+    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ttypath, 0, NULL) != SIASUCCESS) {
 	log_warning(0, N_("unable to initialize SIA session"));
 	debug_return_int(AUTH_FATAL);
     }
 
-    auth->data = (void *) siah;
+    auth->data = siah;
     debug_return_int(AUTH_SUCCESS);
 }
 
 int
-sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth,
+    struct sudo_conv_callback *callback)
 {
-    SIAENTITY *siah = (SIAENTITY *) auth->data;
+    SIAENTITY *siah = auth->data;
+    char *pass;
+    int rc;
     debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH)
 
-    def_prompt = prompt;		/* for sudo_collect */
+    /* Get password, return AUTH_INTR if we got ^C */
+    pass = auth_getpass(prompt, def_passwd_timeout * 60,
+        SUDO_CONV_PROMPT_ECHO_OFF, callback);
+    if (pass == NULL)
+	debug_return_int(AUTH_INTR);
 
-    /* XXX - need a way to detect user hitting ^C or EOF at prompt */
-    if (sia_ses_reauthent(sudo_collect, siah) == SIASUCCESS)
+    /* Check password and zero out plaintext copy. */
+    rc = sia_ses_authent(NULL, pass, siah);
+    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+
+    if (rc == SIASUCCESS)
 	debug_return_int(AUTH_SUCCESS);
-    else
-	debug_return_int(AUTH_FAILURE);
+    if (ISSET(rc, SIASTOP))
+	debug_return_int(AUTH_FATAL);
+    debug_return_int(AUTH_FAILURE);
 }
 
 int
 sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
-    SIAENTITY *siah = (SIAENTITY *) auth->data;
+    SIAENTITY *siah = auth->data;
     debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
+    auth->data = NULL;
     free(sudo_argv);
     debug_return_int(AUTH_SUCCESS);
+}
+
+int
+sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
+{
+    SIAENTITY *siah;
+    int status = AUTH_FATAL;
+    debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH)
+
+    /* Re-init sia for the target user's session. */
+    if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, user_ttypath, 0, NULL) != SIASUCCESS) {
+	log_warning(0, N_("unable to initialize SIA session"));
+	goto done;
+    }
+
+    if (sia_make_entity_pwd(pw, siah) != SIASUCCESS) {
+	sudo_warn("sia_make_entity_pwd");
+	goto done;
+    }
+
+    status = AUTH_FAILURE;		/* no more fatal errors. */
+
+    siah->authtype = SIA_A_NONE;
+    if (sia_ses_estab(sia_collect_trm, siah) != SIASUCCESS) {
+	sudo_warn("sia_ses_estab");
+	goto done;
+    }
+
+    if (sia_ses_launch(sia_collect_trm, siah) != SIASUCCESS) {
+	sudo_warn("sia_ses_launch");
+	goto done;
+    }
+
+    status = AUTH_SUCCESS;
+
+done:
+    (void) sia_ses_release(&siah);
+    debug_return_int(status);
 }
 
 #endif /* HAVE_SIA_SES_INIT */
