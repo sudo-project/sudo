@@ -3,6 +3,12 @@ Notes on upgrading from an older release
 
 o Upgrading from a version prior to 1.8.15:
 
+    Prior to version 1.8.15, when env_reset was enabled (the default)
+    and the -s option was not used, the SHELL environment variable
+    was set to the shell of the invoking user.  In 1.8.15 and above,
+    when env_reset is enabled and the -s option is not used, SHELL
+    is set based on the target user.
+
     When editing files with sudoedit, symbolic links will no longer
     be followed by default.  The old behavior can be restored by
     enabling the sudoedit_follow option in sudoers or on a per-command

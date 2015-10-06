@@ -939,8 +939,6 @@ rebuild_env(void)
 	    CHECK_SETENV2("USERNAME", runas_pw->pw_name,
 		ISSET(didvar, DID_USERNAME), true);
 	} else {
-	    if (!ISSET(didvar, DID_SHELL))
-		CHECK_SETENV2("SHELL", sudo_user.pw->pw_shell, false, true);
 	    /* We will set LOGNAME later in the def_set_logname case. */
 	    if (!def_set_logname) {
 		if (!ISSET(didvar, DID_LOGNAME))
@@ -984,6 +982,8 @@ rebuild_env(void)
 	    if (!env_should_delete(*ep)) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;
+		else if (strncmp(*ep, "SHELL=", 6) == 0)
+		    SET(didvar, DID_SHELL);
 		else if (strncmp(*ep, "PATH=", 5) == 0)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
@@ -1039,7 +1039,9 @@ rebuild_env(void)
     if (reset_home)
 	CHECK_SETENV2("HOME", runas_pw->pw_dir, true, true);
 
-    /* Provide default values for $TERM and $PATH if they are not set. */
+    /* Provide default values for $SHELL, $TERM and $PATH if not set. */
+    if (!ISSET(didvar, DID_SHELL))
+	CHECK_SETENV2("SHELL", runas_pw->pw_shell, false, false);
     if (!ISSET(didvar, DID_TERM))
 	CHECK_PUTENV("TERM=unknown", false, false);
     if (!ISSET(didvar, DID_PATH))
