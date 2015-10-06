@@ -123,7 +123,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
     if ((s = auth_challenge(as)) == NULL) {
 	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else {
-	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(s, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
@@ -141,7 +141,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 		log_warningx(0, N_("unable to allocate memory"));
 		debug_return_int(AUTH_FATAL);
 	    }
-	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
+	    pass = auth_getpass(s, def_passwd_timeout * 60,
 		SUDO_CONV_PROMPT_ECHO_ON, callback);
 	    free(s);
 	}
