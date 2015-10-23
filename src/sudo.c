@@ -727,6 +727,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_SUDOEDIT);
 		    break;
 		}
+		if (strncmp("sudoedit_checkdir=", info[i], sizeof("sudoedit_checkdir=") - 1) == 0) {
+		    if (sudo_strtobool(info[i] + sizeof("sudoedit_checkdir=") - 1) == true)
+			SET(details->flags, CD_SUDOEDIT_CHECKDIR);
+		    break;
+		}
 		if (strncmp("sudoedit_follow=", info[i], sizeof("sudoedit_follow=") - 1) == 0) {
 		    if (sudo_strtobool(info[i] + sizeof("sudoedit_follow=") - 1) == true)
 			SET(details->flags, CD_SUDOEDIT_FOLLOW);

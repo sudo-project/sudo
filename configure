@@ -2655,6 +2655,7 @@ as_fn_append ac_func_list " nl_langinfo"
 as_fn_append ac_func_list " strftime"
 as_fn_append ac_func_list " pread"
 as_fn_append ac_func_list " pwrite"
+as_fn_append ac_func_list " openat"
 as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
 # value.
@@ -18063,6 +18064,8 @@ _ACEOF
 
 fi
 done
+
+
 
 
 

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "September 25, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 23, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2696,6 +2696,18 @@ setreuid(2)
 or
 setresuid(2)
 system call.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
+sudoedit_checkdir
+.br
+If set,
+\fBsudoedit\fR
+will refuse to edit files located in a directory that is writable
+by the invoking user unless it is run by root.
+On many systems, this option requires that the parent directory
+of the file to be edited be readable by the target user.
 This flag is
 \fIoff\fR
 by default.

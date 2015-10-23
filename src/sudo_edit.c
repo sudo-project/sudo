@@ -31,6 +31,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
 #include <grp.h>
 #include <pwd.h>
 #include <signal.h>
@@ -154,28 +155,180 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     debug_return_int(tfd);
 }
 
+static bool
+group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
+{
+    int i;
+    debug_decl(group_matches, SUDO_DEBUG_EDIT)
+
+    if (target == gid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user gid %u matches directory gid %u", (unsigned int)gid,
+	    (unsigned int)target);
+	debug_return_bool(true);
+    }
+    for (i = 0; i < ngroups; i++) {
+	if (target == groups[i]) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"user gid %u matches directory gid %u", (unsigned int)gid,
+		(unsigned int)target);
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
+}
+
+#ifndef HAVE_OPENAT
+/* This does not support AT_FDCWD... */
+static int
+sudo_openat(int dfd, const char *path, int flags, mode_t mode)
+{
+    int fd, odfd;
+    debug_decl(sudo_openat, SUDO_DEBUG_EDIT)
+
+    /* Save cwd */
+    if ((odfd = open(".", O_RDONLY)) == -1)
+	debug_return_int(-1);
+
+    if (fchdir(dfd) == -1) {
+	close(odfd);
+	debug_return_int(-1);
+    }
+
+    fd = open(path, flags, mode);
+
+    /* Restore cwd */
+    if (fchdir(odfd) == -1)
+	sudo_fatal(_("unable to restore current working directory"));
+    close(odfd);
+
+    debug_return_int(fd);
+}
+#define openat sudo_openat
+#endif /* HAVE_OPENAT */
+
+/*
+ * Returns true if the directory described by sb is writable
+ * by the user.  We treat directories with the sticky bit as
+ * unwritable unless they are owned by the user.
+ */
+static bool
+dir_is_writable(struct stat *sb, uid_t uid, gid_t gid, int ngroups,
+    GETGROUPS_T *groups)
+{
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+
+    /* If the user owns the dir we always consider it writable. */
+    if (sb->st_uid == uid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user uid %u matches directory uid %u", (unsigned int)uid,
+	    (unsigned int)sb->st_uid);
+	debug_return_bool(true);
+    }
+
+    /* Other writable? */
+    if (ISSET(sb->st_mode, S_IWOTH)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "directory is writable by other");
+	debug_return_bool(true);
+    }
+
+    /* Group writable? */
+    if (ISSET(sb->st_mode, S_IWGRP)) {
+	if (group_matches(sb->st_gid, gid, ngroups, groups)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"directory is writable by one of the user's groups");
+	    debug_return_bool(true);
+	}
+    }
+
+    debug_return_bool(false);
+}
+
+static int
+sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode)
+{
+    char *base, *dir;
+    struct stat sb;
+    int dfd, fd;
+    debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT)
+
+    base = strrchr(path, '/');
+    if (base != NULL) {
+	*base++ = '\0';
+	dir = path;
+    } else {
+	base = path;
+	dir = ".";
+    }
+#ifdef O_PATH
+    if ((dfd = open(dir, O_PATH)) != -1) {
+	/* Linux kernels < 3.6 can't do fstat on O_PATH fds. */
+	if (fstat(dfd, &sb) == -1) {
+	    close(dfd);
+	    dfd = open(dir, O_RDONLY);
+	    if (fstat(dfd, &sb) == -1) {
+		close(dfd);
+		dfd = -1;
+	    }
+	}
+    }
+#else
+    if ((dfd = open(dir, O_RDONLY)) != -1) {
+	if (fstat(dfd, &sb) == -1) {
+	    close(dfd);
+	    dfd = -1;
+	}
+    }
+#endif
+    if (base != path)
+	base[-1] = '/';			/* restore path */
+    if (dfd == -1)
+	debug_return_int(-1);
+
+    if (dir_is_writable(&sb, user_details.uid, user_details.gid,
+	user_details.ngroups, user_details.groups)) {
+	close(dfd);
+	errno = ENOTDIR;
+	debug_return_int(-1);
+    }
+
+    fd = openat(dfd, path, oflags, mode);
+    close(dfd);
+    debug_return_int(fd);
+}
+
 #ifdef O_NOFOLLOW
 static int
-sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
+sudo_edit_open(char *path, int oflags, mode_t mode, int sflags)
 {
     int fd;
+    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
 
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
 	oflags |= O_NOFOLLOW;
-    fd = open(path, oflags|O_NONBLOCK, mode);
+    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_details.uid != 0)
+	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode);
+    else
+	fd = open(path, oflags|O_NONBLOCK, mode);
     if (fd != -1 && !ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
-    return fd;
+    debug_return_int(fd);
 }
 #else
 static int
-sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
+sudo_edit_open(char *path, int oflags, mode_t mode, int sflags)
 {
     struct stat sb1, sb2;
     int fd;
+    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
 
-    if ((fd = open(path, oflags|O_NONBLOCK, mode)) == -1)
-	return -1;
+    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_details.uid != 0)
+	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode);
+    else
+	fd = open(path, oflags|O_NONBLOCK, mode);
+    if (fd == -1)
+	debug_return_int(-1);
     if (!ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
@@ -186,7 +339,7 @@ sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
 	const int serrno = errno;
 	close(fd);
 	errno = serrno;
-	return -1;
+	debug_return_int(-1);
     }
 
     /*
@@ -198,11 +351,11 @@ sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
 	    sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
 	    close(fd);
 	    errno = ELOOP;
-	    return -1;
+	    debug_return_int(-1);
 	}
     }
 
-    return fd;
+    debug_return_int(fd);
 }
 #endif /* O_NOFOLLOW */
 
@@ -214,7 +367,7 @@ sudo_edit_open(const char *path, int oflags, mode_t mode, int sflags)
  */
 static int
 sudo_edit_create_tfiles(struct command_details *command_details,
-    struct tempfile *tf, char * const files[], int nfiles)
+    struct tempfile *tf, char *files[], int nfiles)
 {
     int i, j, tfd, ofd, rc;
     char buf[BUFSIZ];
@@ -251,6 +404,9 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    /* open() or fstat() error. */
 	    if (ofd == -1 && errno == ELOOP) {
 		sudo_warnx(U_("%s: editing symbolic links is not permitted"),
+		    files[i]);
+	    } else if (ofd == -1 && errno == ENOTDIR) {
+		sudo_warnx(U_("%s: editing files in a writable directory is not permitted"),
 		    files[i]);
 	    } else {
 		sudo_warn("%s", files[i]);
@@ -406,7 +562,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 #ifdef HAVE_SELINUX
 static int
 selinux_edit_create_tfiles(struct command_details *command_details,
-    struct tempfile *tf, char * const files[], int nfiles)
+    struct tempfile *tf, char *files[], int nfiles)
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs;

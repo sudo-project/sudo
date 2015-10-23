@@ -481,6 +481,9 @@
 /* Define to 1 if you have the `nss_search' function. */
 #undef HAVE_NSS_SEARCH
 
+/* Define to 1 if you have the `openat' function. */
+#undef HAVE_OPENAT
+
 /* Define to 1 if you have the `openpty' function. */
 #undef HAVE_OPENPTY
 

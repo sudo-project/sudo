@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 25, 2015
+.Dd October 23, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2533,6 +2533,16 @@ This option is only effective on systems that support either the
 or
 .Xr setresuid 2
 system call.
+This flag is
+.Em off
+by default.
+.It sudoedit_checkdir
+If set,
+.Nm sudoedit
+will refuse to edit files located in a directory that is writable
+by the invoking user unless it is run by root.
+On many systems, this option requires that the parent directory
+of the file to be edited be readable by the target user.
 This flag is
 .Em off
 by default.
