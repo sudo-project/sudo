@@ -387,8 +387,21 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	ofd = sudo_edit_open(files[i], O_RDONLY, 0644, command_details->flags);
 	if (ofd != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
-		memset(&sb, 0, sizeof(sb));		/* new file */
-		rc = 0;
+		/* New file, verify parent dir exists unless in cwd. */
+		char *slash = strrchr(files[i], '/');
+		if (slash != NULL && slash != files[i]) {
+		    int serrno = errno;
+		    *slash = '\0';
+		    if (stat(files[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
+			memset(&sb, 0, sizeof(sb));
+			rc = 0;
+		    }
+		    *slash = '/';
+		    errno = serrno;
+		} else {
+		    memset(&sb, 0, sizeof(sb));
+		    rc = 0;
+		}
 	    } else {
 		rc = fstat(ofd, &sb);
 	    }
