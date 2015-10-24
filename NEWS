@@ -74,8 +74,14 @@ What's new in Sudo 1.8.15
 
  * Fixed challenge/response style BSD authentication.
 
- * Added a sudoers option to prevent sudoedit from editing files
-   located in a directory that is writable by the invoking user.
+ * Added the sudoedit_checkdir Defaults option to prevent sudoedit
+   from editing files located in a directory that is writable by
+   the invoking user.
+
+ * Added the always_query_group_plugin Defaults option to control
+   whether groups not found in the system group database are passed
+   to the group plugin.  Previously, unknown system groups were
+   always passed to the group plugin.
 
 What's new in Sudo 1.8.14p3
 

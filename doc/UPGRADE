@@ -14,6 +14,13 @@ o Upgrading from a version prior to 1.8.15:
     enabling the sudoedit_follow option in sudoers or on a per-command
     basis with the FOLLOW and NOFOLLOW tags.
 
+    Prior to version 1.8.15, groups listed in sudoers that were not
+    found in the system group database were passed to the group
+    plugin, if any.  Starting with 1.8.15, only groups of the form
+    %:group are resolved via the group plugin by default.  The old
+    behavior can be restored by using the always_query_group_plugin
+    sudoers option.
+
     Locking of the time stamp file has changed in sudo 1.8.15.
     Previously, the user's entire time stamp file was locked while
     retrieving and updating a time stamp record.  Now, only a single

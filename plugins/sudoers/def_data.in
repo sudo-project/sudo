@@ -292,3 +292,6 @@ sudoedit_checkdir
 sudoedit_follow
 	T_FLAG
 	"Follow symbolic links when editing files with sudoedit"
+always_query_group_plugin
+	T_FLAG
+	"Query the group plugin for unknown system groups"

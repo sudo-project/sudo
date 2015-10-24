@@ -395,6 +395,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Follow symbolic links when editing files with sudoedit"),
 	NULL,
     }, {
+	"always_query_group_plugin", T_FLAG,
+	N_("Query the group plugin for unknown system groups"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

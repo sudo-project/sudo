@@ -184,6 +184,8 @@
 #define I_SUDOEDIT_CHECKDIR     91
 #define def_sudoedit_follow     (sudo_defs_table[92].sd_un.flag)
 #define I_SUDOEDIT_FOLLOW       92
+#define def_always_query_group_plugin (sudo_defs_table[93].sd_un.flag)
+#define I_ALWAYS_QUERY_GROUP_PLUGIN93
 
 enum def_tuple {
 	never,

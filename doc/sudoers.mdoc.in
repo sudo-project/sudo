@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 23, 2015
+.Dd October 24, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1718,6 +1718,16 @@ A list of all supported Defaults parameters, grouped by type, are listed below.
 .Pp
 .Sy Boolean Flags :
 .Bl -tag -width 16n
+.It always_query_group_plugin
+If a
+.Em group_plugin
+is configured, use it to resolve groups of the form %group as long
+as there is not also a system group of the same name.
+Normally, only groups of the form %:group are passed to the
+.Em group_plugin .
+This flag is
+.Em off
+by default.
 .It always_set_home
 If enabled,
 .Nm sudo

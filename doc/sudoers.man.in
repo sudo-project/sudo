@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "October 23, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 24, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1842,6 +1842,17 @@ lines, as explained earlier.
 A list of all supported Defaults parameters, grouped by type, are listed below.
 .PP
 \fBBoolean Flags\fR:
+.TP 18n
+always_query_group_plugin
+If a
+\fIgroup_plugin\fR
+is configured, use it to resolve groups of the form %group as long
+as there is not also a system group of the same name.
+Normally, only groups of the form %:group are passed to the
+\fIgroup_plugin\fR.
+This flag is
+\fIoff\fR
+by default.
 .TP 18n
 always_set_home
 If enabled,
