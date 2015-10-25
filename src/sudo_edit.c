@@ -289,7 +289,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode)
     if (dir_is_writable(&sb, user_details.uid, user_details.gid,
 	user_details.ngroups, user_details.groups)) {
 	close(dfd);
-	errno = ENOTDIR;
+	errno = EISDIR;
 	debug_return_int(-1);
     }
 
@@ -418,7 +418,7 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    if (ofd == -1 && errno == ELOOP) {
 		sudo_warnx(U_("%s: editing symbolic links is not permitted"),
 		    files[i]);
-	    } else if (ofd == -1 && errno == ENOTDIR) {
+	    } else if (ofd == -1 && errno == EISDIR) {
 		sudo_warnx(U_("%s: editing files in a writable directory is not permitted"),
 		    files[i]);
 	    } else {
