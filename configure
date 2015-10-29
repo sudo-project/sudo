@@ -23926,7 +23926,7 @@ else
 	    _CFLAGS="$CFLAGS"
 	    _LDFLAGS="$LDFLAGS"
 	    CFLAGS="-fstack-protector-strong"
-	    LDFLAGS="-fstack-protector-strong"
+	    LDFLAGS="$_LDFLAGS -fstack-protector-strong"
 	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23947,7 +23947,7 @@ if ac_fn_c_try_compile "$LINENO"; then :
 else
 
 		CFLAGS="-fstack-protector-all"
-		LDFLAGS="-fstack-protector-all"
+		LDFLAGS="$_LDFLAGS -fstack-protector-all"
 		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23968,7 +23968,7 @@ if ac_fn_c_try_compile "$LINENO"; then :
 else
 
 		    CFLAGS="-fstack-protector"
-		    LDFLAGS="-fstack-protector"
+		    LDFLAGS="$_LDFLAGS -fstack-protector"
 		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 

@@ -3985,7 +3985,7 @@ if test "$enable_hardening" != "no"; then
 	    _CFLAGS="$CFLAGS"
 	    _LDFLAGS="$LDFLAGS"
 	    CFLAGS="-fstack-protector-strong"
-	    LDFLAGS="-fstack-protector-strong"
+	    LDFLAGS="$_LDFLAGS -fstack-protector-strong"
 	    AC_COMPILE_IFELSE([
 		AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 		[[char buf[1024]; buf[1023] = '\0';]])
@@ -3993,7 +3993,7 @@ if test "$enable_hardening" != "no"; then
 		sudo_cv_var_stack_protector="-fstack-protector-strong"
 	    ], [
 		CFLAGS="-fstack-protector-all"
-		LDFLAGS="-fstack-protector-all"
+		LDFLAGS="$_LDFLAGS -fstack-protector-all"
 		AC_COMPILE_IFELSE([
 		    AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 		    [[char buf[1024]; buf[1023] = '\0';]])
@@ -4001,7 +4001,7 @@ if test "$enable_hardening" != "no"; then
 		    sudo_cv_var_stack_protector="-fstack-protector-all"
 		], [
 		    CFLAGS="-fstack-protector"
-		    LDFLAGS="-fstack-protector"
+		    LDFLAGS="$_LDFLAGS -fstack-protector"
 		    AC_COMPILE_IFELSE([
 			AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 			[[char buf[1024]; buf[1023] = '\0';]])
