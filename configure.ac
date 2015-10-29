@@ -3978,29 +3978,45 @@ dnl Check for -fstack-protector and -z relro support
 dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_hardening" != "no"; then
-    if test -n "$GCC"; then
-	AX_CHECK_COMPILE_FLAG([-fstack-protector-strong], [
-	    AX_CHECK_LINK_FLAG([-fstack-protector-strong], [
-		SSP_CFLAGS="-fstack-protector-strong"
-		SSP_LDFLAGS="-Wc,-fstack-protector-strong"
-	    ])
-	])
-	if test -z "$SSP_CFLAGS"; then
-	    AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
-		AX_CHECK_LINK_FLAG([-fstack-protector-all], [
-		    SSP_CFLAGS="-fstack-protector-all"
-		    SSP_LDFLAGS="-Wc,-fstack-protector-all"
+    AC_CACHE_CHECK([for compiler stack protector support],
+	[sudo_cv_var_stack_protector],
+	[
+	    sudo_cv_var_stack_protector=no
+	    _CFLAGS="$CFLAGS"
+	    _LDFLAGS="$LDFLAGS"
+	    CFLAGS="-fstack-protector-strong"
+	    LDFLAGS="-fstack-protector-strong"
+	    AC_COMPILE_IFELSE([
+		AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+		[[char buf[1024]; buf[1023] = '\0';]])
+	    ], [
+		sudo_cv_var_stack_protector="-fstack-protector-strong"
+	    ], [
+		CFLAGS="-fstack-protector-all"
+		LDFLAGS="-fstack-protector-all"
+		AC_COMPILE_IFELSE([
+		    AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+		    [[char buf[1024]; buf[1023] = '\0';]])
+		], [
+		    sudo_cv_var_stack_protector="-fstack-protector-all"
+		], [
+		    CFLAGS="-fstack-protector"
+		    LDFLAGS="-fstack-protector"
+		    AC_COMPILE_IFELSE([
+			AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+			[[char buf[1024]; buf[1023] = '\0';]])
+		    ], [
+			sudo_cv_var_stack_protector="-fstack-protector"
+		    ], [])
 		])
 	    ])
-	    if test -z "$SSP_CFLAGS"; then
-		AX_CHECK_COMPILE_FLAG([-fstack-protector], [
-		    AX_CHECK_LINK_FLAG([-fstack-protector], [
-			SSP_CFLAGS="-fstack-protector"
-			SSP_LDFLAGS="-Wc,-fstack-protector"
-		    ])
-		])
-	    fi
-	fi
+	    CFLAGS="$_CFLAGS"
+	    LDFLAGS="$_LDFLAGS"
+	]
+    )
+    if test X"$sudo_cv_var_stack_protector" != X"no"; then
+	SSP_CFLAGS="$sudo_cv_var_stack_protector"
+	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
 fi
