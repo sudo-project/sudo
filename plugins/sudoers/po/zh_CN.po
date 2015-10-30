@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.15b1\n"
+"Project-Id-Version: sudoers 1.8.15rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-09-10 14:28-0600\n"
-"PO-Revision-Date: 2015-09-16 07:52+0800\n"
+"POT-Creation-Date: 2015-10-24 06:26-0600\n"
+"PO-Revision-Date: 2015-10-29 21:02+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -49,9 +49,9 @@ msgstr "对不起，请重试。"
 #: gram.y:805 gram.y:812 gram.y:838 gram.y:845 gram.y:852 gram.y:1136
 #: gram.y:1143 plugins/sudoers/alias.c:123 plugins/sudoers/alias.c:136
 #: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
-#: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:397
-#: plugins/sudoers/auth/pam.c:445 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:110 plugins/sudoers/defaults.c:516
+#: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:398
+#: plugins/sudoers/auth/pam.c:449 plugins/sudoers/auth/rfc1938.c:109
+#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/defaults.c:516
 #: plugins/sudoers/defaults.c:720 plugins/sudoers/defaults.c:880
 #: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
 #: plugins/sudoers/editor.c:92 plugins/sudoers/env.c:233
@@ -70,13 +70,13 @@ msgstr "对不起，请重试。"
 #: plugins/sudoers/ldap.c:3388 plugins/sudoers/ldap.c:3416
 #: plugins/sudoers/ldap.c:3427 plugins/sudoers/ldap.c:3517
 #: plugins/sudoers/ldap.c:3533 plugins/sudoers/linux_audit.c:76
-#: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:662
-#: plugins/sudoers/logging.c:916 plugins/sudoers/match.c:501
+#: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:666
+#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:501
 #: plugins/sudoers/match.c:537 plugins/sudoers/match.c:699
 #: plugins/sudoers/match.c:756 plugins/sudoers/parse.c:235
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
 #: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:384
-#: plugins/sudoers/policy.c:579 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/policy.c:583 plugins/sudoers/prompt.c:93
 #: plugins/sudoers/sssd.c:160 plugins/sudoers/sssd.c:192
 #: plugins/sudoers/sssd.c:235 plugins/sudoers/sssd.c:242
 #: plugins/sudoers/sssd.c:278 plugins/sudoers/sssd.c:323
@@ -98,8 +98,8 @@ msgstr "对不起，请重试。"
 #: plugins/sudoers/toke_util.c:147 plugins/sudoers/visudo.c:152
 #: plugins/sudoers/visudo.c:213 plugins/sudoers/visudo.c:297
 #: plugins/sudoers/visudo.c:303 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:974 plugins/sudoers/visudo.c:1018
-#: plugins/sudoers/visudo.c:1114 toke.l:785 toke.l:806 toke.l:816 toke.l:924
+#: plugins/sudoers/visudo.c:979 plugins/sudoers/visudo.c:1023
+#: plugins/sudoers/visudo.c:1119 toke.l:785 toke.l:806 toke.l:816 toke.l:924
 #: toke.l:1082
 msgid "unable to allocate memory"
 msgstr "无法分配内存"
@@ -108,8 +108,8 @@ msgstr "无法分配内存"
 msgid "a digest requires a path name"
 msgstr "摘要需要路径参数"
 
-#: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:397
-#: plugins/sudoers/auth/pam.c:445 plugins/sudoers/auth/rfc1938.c:109
+#: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:398
+#: plugins/sudoers/auth/pam.c:449 plugins/sudoers/auth/rfc1938.c:109
 #: plugins/sudoers/defaults.c:516 plugins/sudoers/defaults.c:720
 #: plugins/sudoers/defaults.c:880 plugins/sudoers/editor.c:64
 #: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:92
@@ -129,7 +129,7 @@ msgstr "摘要需要路径参数"
 #: plugins/sudoers/ldap.c:3416 plugins/sudoers/ldap.c:3427
 #: plugins/sudoers/ldap.c:3517 plugins/sudoers/ldap.c:3533
 #: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:188
-#: plugins/sudoers/logging.c:916 plugins/sudoers/match.c:501
+#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:501
 #: plugins/sudoers/match.c:537 plugins/sudoers/match.c:699
 #: plugins/sudoers/match.c:756 plugins/sudoers/parse.c:235
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
@@ -139,7 +139,7 @@ msgstr "摘要需要路径参数"
 #: plugins/sudoers/policy.c:271 plugins/sudoers/policy.c:280
 #: plugins/sudoers/policy.c:319 plugins/sudoers/policy.c:329
 #: plugins/sudoers/policy.c:338 plugins/sudoers/policy.c:384
-#: plugins/sudoers/policy.c:579 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/policy.c:583 plugins/sudoers/prompt.c:93
 #: plugins/sudoers/set_perms.c:356 plugins/sudoers/set_perms.c:695
 #: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1350
 #: plugins/sudoers/set_perms.c:1514 plugins/sudoers/sssd.c:160
@@ -163,8 +163,8 @@ msgstr "摘要需要路径参数"
 #: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:147
 #: plugins/sudoers/visudo.c:152 plugins/sudoers/visudo.c:213
 #: plugins/sudoers/visudo.c:297 plugins/sudoers/visudo.c:303
-#: plugins/sudoers/visudo.c:433 plugins/sudoers/visudo.c:974
-#: plugins/sudoers/visudo.c:1018 plugins/sudoers/visudo.c:1114 toke.l:785
+#: plugins/sudoers/visudo.c:433 plugins/sudoers/visudo.c:979
+#: plugins/sudoers/visudo.c:1023 plugins/sudoers/visudo.c:1119 toke.l:785
 #: toke.l:806 toke.l:816 toke.l:924 toke.l:1082
 #, c-format
 msgid "%s: %s"
@@ -326,7 +326,7 @@ msgstr "未知的 SecurID 错误"
 msgid "invalid passcode length for SecurID"
 msgstr "无效的 SecurID 密码长度"
 
-#: plugins/sudoers/auth/sia.c:120
+#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
 msgid "unable to initialize SIA session"
 msgstr "无法初始化 SIA 会话"
 
@@ -362,7 +362,7 @@ msgstr "无法确定审核条件"
 msgid "unable to commit audit record"
 msgstr "无法提交审核记录"
 
-#: plugins/sudoers/check.c:250
+#: plugins/sudoers/check.c:252
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -382,13 +382,13 @@ msgstr ""
 "    #3) 权力越大，责任越大。\n"
 "\n"
 
-#: plugins/sudoers/check.c:293 plugins/sudoers/check.c:303
+#: plugins/sudoers/check.c:295 plugins/sudoers/check.c:305
 #: plugins/sudoers/sudoers.c:699 plugins/sudoers/sudoers.c:728
 #, c-format
 msgid "unknown uid: %u"
 msgstr "未知的用户 ID：%u"
 
-#: plugins/sudoers/check.c:298 plugins/sudoers/policy.c:751
+#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:755
 #: plugins/sudoers/sudoers.c:1095 plugins/sudoers/testsudoers.c:206
 #: plugins/sudoers/testsudoers.c:361
 #, c-format
@@ -795,8 +795,16 @@ msgid "Enable sudoers netgroup support"
 msgstr "启用 support netgroup 支持"
 
 #: plugins/sudoers/def_data.c:391
+msgid "Check the parent directory for writability when editing files with sudoedit"
+msgstr "在使用 sudoedit 编辑文件时检查上级目录是否可写"
+
+#: plugins/sudoers/def_data.c:395
 msgid "Follow symbolic links when editing files with sudoedit"
 msgstr "使用 sudoedit 编辑文件时循符号连接(定位到原文件)"
+
+#: plugins/sudoers/def_data.c:399
+msgid "Query the group plugin for unknown system groups"
+msgstr ""
 
 #: plugins/sudoers/defaults.c:199 plugins/sudoers/defaults.c:608
 #: plugins/sudoers/visudo_json.c:633 plugins/sudoers/visudo_json.c:668
@@ -837,8 +845,8 @@ msgstr "“%s”选项不带值"
 #: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1152
 #: plugins/sudoers/ldap.c:1354 plugins/sudoers/ldap.c:1526
 #: plugins/sudoers/ldap.c:1682 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/logging.c:921 plugins/sudoers/policy.c:498
-#: plugins/sudoers/policy.c:507 plugins/sudoers/prompt.c:161
+#: plugins/sudoers/logging.c:929 plugins/sudoers/policy.c:502
+#: plugins/sudoers/policy.c:511 plugins/sudoers/prompt.c:161
 #: plugins/sudoers/sudoers.c:815 plugins/sudoers/testsudoers.c:236
 #: plugins/sudoers/toke_util.c:160
 #, c-format
@@ -849,11 +857,11 @@ msgstr "内部错误，%s 溢出"
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv：envp 损坏，长度不符"
 
-#: plugins/sudoers/env.c:1052
+#: plugins/sudoers/env.c:1076
 msgid "unable to rebuild the environment"
 msgstr "无法重建环境"
 
-#: plugins/sudoers/env.c:1126
+#: plugins/sudoers/env.c:1150
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "对不起，您无权设置以下环境变量：%s"
@@ -903,7 +911,7 @@ msgstr "无法创建目录 %s"
 #: plugins/sudoers/iolog.c:200 plugins/sudoers/sudoers.c:871
 #: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/sudoreplay.c:769
 #: plugins/sudoers/sudoreplay.c:973 plugins/sudoers/timestamp.c:399
-#: plugins/sudoers/visudo.c:898 plugins/sudoers/visudo_json.c:1012
+#: plugins/sudoers/visudo.c:903 plugins/sudoers/visudo_json.c:1012
 #: plugins/sudoers/visudo_json.c:1025
 #, c-format
 msgid "unable to open %s"
@@ -1112,22 +1120,22 @@ msgstr[0] "%u 次错误密码尝试"
 msgid "unable to fork"
 msgstr "无法执行 fork"
 
-#: plugins/sudoers/logging.c:580 plugins/sudoers/logging.c:636
+#: plugins/sudoers/logging.c:580 plugins/sudoers/logging.c:640
 #, c-format
 msgid "unable to fork: %m"
 msgstr "无法执行 fork：%m"
 
-#: plugins/sudoers/logging.c:626
+#: plugins/sudoers/logging.c:630
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "无法打开管道：%m"
 
-#: plugins/sudoers/logging.c:651
+#: plugins/sudoers/logging.c:655
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "无法 dup stdin：%m"
 
-#: plugins/sudoers/logging.c:689
+#: plugins/sudoers/logging.c:693
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "无法执行 %s：%m"
@@ -1185,22 +1193,22 @@ msgstr "    选项："
 msgid "unable to parse network address list"
 msgstr "无法解析网络地址列表"
 
-#: plugins/sudoers/policy.c:636 plugins/sudoers/visudo.c:839
+#: plugins/sudoers/policy.c:640 plugins/sudoers/visudo.c:840
 #, c-format
 msgid "unable to execute %s"
 msgstr "无法执行 %s"
 
-#: plugins/sudoers/policy.c:769
+#: plugins/sudoers/policy.c:773
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Sudoers 策略插件版本 %s\n"
 
-#: plugins/sudoers/policy.c:771
+#: plugins/sudoers/policy.c:775
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Sudoers 文件语法版本 %d\n"
 
-#: plugins/sudoers/policy.c:775
+#: plugins/sudoers/policy.c:779
 #, c-format
 msgid ""
 "\n"
@@ -1209,22 +1217,22 @@ msgstr ""
 "\n"
 "Sudoers 路径：%s\n"
 
-#: plugins/sudoers/policy.c:778
+#: plugins/sudoers/policy.c:782
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "nsswitch 路径：%s\n"
 
-#: plugins/sudoers/policy.c:780
+#: plugins/sudoers/policy.c:784
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "ldap.conf 路径：%s\n"
 
-#: plugins/sudoers/policy.c:781
+#: plugins/sudoers/policy.c:785
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "ldap.secret 路径：%s\n"
 
-#: plugins/sudoers/policy.c:814
+#: plugins/sudoers/policy.c:818
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "无法注册类型为 %d 的钩子(hook)(版本 %d.%d)"
@@ -1381,7 +1389,7 @@ msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "用户 %s 无权在 %s 上运行 sudo。\n"
 
 #: plugins/sudoers/sudoers.c:172 plugins/sudoers/testsudoers.c:245
-#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:565
+#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:566
 msgid "unable to initialize sudoers default values"
 msgstr "无法初始化 sudoers 默认值"
 
@@ -1428,7 +1436,7 @@ msgid "command too long"
 msgstr "命令过长"
 
 #: plugins/sudoers/sudoers.c:886 plugins/sudoers/visudo.c:426
-#: plugins/sudoers/visudo.c:665
+#: plugins/sudoers/visudo.c:666
 #, c-format
 msgid "unable to stat %s"
 msgstr "无法 stat %s"
@@ -1683,7 +1691,7 @@ msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "无法将时间戳文件截短为 %lld 字节"
 
 #: plugins/sudoers/timestamp.c:742 plugins/sudoers/timestamp.c:809
-#: plugins/sudoers/visudo.c:486 plugins/sudoers/visudo.c:492
+#: plugins/sudoers/visudo.c:487 plugins/sudoers/visudo.c:493
 msgid "unable to read the clock"
 msgstr "无法读取时钟"
 
@@ -1711,7 +1719,7 @@ msgstr "致辞(lecture)状态路径过长：%s/%s"
 msgid "%s grammar version %d\n"
 msgstr "%s 语法版本 %d\n"
 
-#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:617
+#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:618
 #, c-format
 msgid "press return to edit %s: "
 msgstr "按回车键编辑 %s："
@@ -1730,71 +1738,71 @@ msgstr "未找到编辑器(编辑器路径 = %s)"
 msgid "write error"
 msgstr "写错误"
 
-#: plugins/sudoers/visudo.c:499
+#: plugins/sudoers/visudo.c:500
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "无法 stat 临时文件(%s)，%s 未更改"
 
-#: plugins/sudoers/visudo.c:506
+#: plugins/sudoers/visudo.c:507
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "零长度的临时文件(%s)，%s 未更改"
 
-#: plugins/sudoers/visudo.c:512
+#: plugins/sudoers/visudo.c:513
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "编辑器(%s)失败，%s 未更改"
 
-#: plugins/sudoers/visudo.c:534
+#: plugins/sudoers/visudo.c:535
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 未更改"
 
-#: plugins/sudoers/visudo.c:560
+#: plugins/sudoers/visudo.c:561
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "无法重新打开临时文件(%s)，%s 未更改"
 
-#: plugins/sudoers/visudo.c:571
+#: plugins/sudoers/visudo.c:572
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "无法解析临时文件(%s)，未知错误"
 
-#: plugins/sudoers/visudo.c:608
+#: plugins/sudoers/visudo.c:609
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "内部错误，在列表中找不到 %s！"
 
-#: plugins/sudoers/visudo.c:667 plugins/sudoers/visudo.c:676
+#: plugins/sudoers/visudo.c:668 plugins/sudoers/visudo.c:677
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "无法将 %s 的 (uid, gid) 设为 (%u, %u)"
 
-#: plugins/sudoers/visudo.c:671 plugins/sudoers/visudo.c:681
+#: plugins/sudoers/visudo.c:672 plugins/sudoers/visudo.c:682
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "无法将 %s 的模式更改为 0%o"
 
-#: plugins/sudoers/visudo.c:698
+#: plugins/sudoers/visudo.c:699
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s 和 %s 不在同一个文件系统，使用 mv 进行重命名"
 
-#: plugins/sudoers/visudo.c:712
+#: plugins/sudoers/visudo.c:713
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "命令失败：“%s %s %s”，%s 未更改"
 
-#: plugins/sudoers/visudo.c:722
+#: plugins/sudoers/visudo.c:723
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "重命名 %s 出错，%s 未更改"
 
-#: plugins/sudoers/visudo.c:784
+#: plugins/sudoers/visudo.c:785
 msgid "What now? "
 msgstr "现在做什么？"
 
-#: plugins/sudoers/visudo.c:798
+#: plugins/sudoers/visudo.c:799
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1806,72 +1814,72 @@ msgstr ""
 "  退出，不保存对 sudoers 文件的更改(x)\n"
 "  退出并将更改保存到 sudoers 文件(危险！)(Q)\n"
 
-#: plugins/sudoers/visudo.c:846
+#: plugins/sudoers/visudo.c:847
 #, c-format
 msgid "unable to run %s"
 msgstr "无法运行 %s"
 
-#: plugins/sudoers/visudo.c:872
+#: plugins/sudoers/visudo.c:877
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s：错误的所有者(uid, gid)，应为 (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:879
+#: plugins/sudoers/visudo.c:884
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s：权限不正确，模式应该是 0%o\n"
 
-#: plugins/sudoers/visudo.c:904 plugins/sudoers/visudo_json.c:1032
+#: plugins/sudoers/visudo.c:909 plugins/sudoers/visudo_json.c:1032
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "解析 %s 文件失败，未知错误"
 
-#: plugins/sudoers/visudo.c:920 plugins/sudoers/visudo_json.c:1041
+#: plugins/sudoers/visudo.c:925 plugins/sudoers/visudo_json.c:1041
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "%s 中第 %d 行附近出现解析错误\n"
 
-#: plugins/sudoers/visudo.c:923 plugins/sudoers/visudo_json.c:1044
+#: plugins/sudoers/visudo.c:928 plugins/sudoers/visudo_json.c:1044
 #, c-format
 msgid "parse error in %s\n"
 msgstr "%s 中出现解析错误\n"
 
-#: plugins/sudoers/visudo.c:931 plugins/sudoers/visudo.c:938
+#: plugins/sudoers/visudo.c:936 plugins/sudoers/visudo.c:943
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s：解析正确\n"
 
-#: plugins/sudoers/visudo.c:985
+#: plugins/sudoers/visudo.c:990
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s 忙，请稍后重试"
 
-#: plugins/sudoers/visudo.c:1081
+#: plugins/sudoers/visudo.c:1086
 #, c-format
 msgid "Error: cycle in %s `%s'"
 msgstr "错误：在 %s “%s”中循环"
 
-#: plugins/sudoers/visudo.c:1082
+#: plugins/sudoers/visudo.c:1087
 #, c-format
 msgid "Warning: cycle in %s `%s'"
 msgstr "警告：在 %s “%s”中循环"
 
-#: plugins/sudoers/visudo.c:1086
+#: plugins/sudoers/visudo.c:1091
 #, c-format
 msgid "Error: %s `%s' referenced but not defined"
 msgstr "错误：引用了 %s “%s”但尚未定义"
 
-#: plugins/sudoers/visudo.c:1087
+#: plugins/sudoers/visudo.c:1092
 #, c-format
 msgid "Warning: %s `%s' referenced but not defined"
 msgstr "警告：引用了 %s “%s”但尚未定义"
 
-#: plugins/sudoers/visudo.c:1230
+#: plugins/sudoers/visudo.c:1235
 #, c-format
 msgid "Warning: unused %s `%s'"
 msgstr "警告：%s “%s”未使用"
 
-#: plugins/sudoers/visudo.c:1343
+#: plugins/sudoers/visudo.c:1348
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1880,7 +1888,7 @@ msgstr ""
 "%s - 安全地编辑 sudoers 文件\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1345
+#: plugins/sudoers/visudo.c:1350
 msgid ""
 "\n"
 "Options:\n"

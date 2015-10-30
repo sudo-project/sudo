@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.15b1\n"
+"Project-Id-Version: sudo 1.8.15rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-09-10 14:28-0600\n"
-"PO-Revision-Date: 2015-09-15 14:57+0700\n"
+"POT-Creation-Date: 2015-10-24 06:26-0600\n"
+"PO-Revision-Date: 2015-10-26 08:44+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -37,7 +37,7 @@ msgstr "không thể phục hồi sổ đăng ký"
 
 #: lib/util/aix.c:204 lib/util/gidlist.c:64 lib/util/gidlist.c:74
 #: lib/util/sudo_conf.c:185 lib/util/sudo_conf.c:265 lib/util/sudo_conf.c:342
-#: lib/util/sudo_conf.c:544 src/conversation.c:72 src/exec.c:864
+#: lib/util/sudo_conf.c:544 src/conversation.c:75 src/exec.c:863
 #: src/exec_common.c:96 src/exec_common.c:108 src/exec_common.c:115
 #: src/exec_pty.c:684 src/exec_pty.c:692 src/load_plugins.c:52
 #: src/load_plugins.c:65 src/load_plugins.c:208 src/load_plugins.c:231
@@ -45,33 +45,33 @@ msgstr "không thể phục hồi sổ đăng ký"
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
 #: src/parse_args.c:485 src/preserve_fds.c:47 src/preserve_fds.c:130
 #: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
-#: src/sudo.c:182 src/sudo.c:359 src/sudo.c:378 src/sudo.c:442 src/sudo.c:596
-#: src/sudo.c:615 src/sudo.c:642 src/sudo.c:651 src/sudo.c:660 src/sudo.c:677
-#: src/sudo.c:729 src/sudo.c:739 src/sudo.c:763 src/sudo.c:1146
-#: src/sudo.c:1148 src/sudo.c:1154 src/sudo.c:1162 src/sudo_edit.c:150
-#: src/sudo_edit.c:425 src/sudo_edit.c:522 src/sudo_edit.c:634
-#: src/sudo_edit.c:654
+#: src/sudo.c:182 src/sudo.c:371 src/sudo.c:390 src/sudo.c:454 src/sudo.c:608
+#: src/sudo.c:627 src/sudo.c:654 src/sudo.c:663 src/sudo.c:672 src/sudo.c:689
+#: src/sudo.c:746 src/sudo.c:756 src/sudo.c:780 src/sudo.c:1160
+#: src/sudo.c:1162 src/sudo.c:1168 src/sudo.c:1176 src/sudo_edit.c:151
+#: src/sudo_edit.c:602 src/sudo_edit.c:699 src/sudo_edit.c:811
+#: src/sudo_edit.c:831
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
 #: lib/util/aix.c:204 lib/util/gidlist.c:64 lib/util/sudo_conf.c:185
 #: lib/util/sudo_conf.c:265 lib/util/sudo_conf.c:342 lib/util/sudo_conf.c:544
-#: src/conversation.c:73 src/exec.c:864 src/exec_common.c:96
+#: src/conversation.c:76 src/exec.c:863 src/exec_common.c:96
 #: src/exec_common.c:108 src/exec_common.c:115 src/exec_pty.c:684
 #: src/exec_pty.c:692 src/load_plugins.c:208 src/load_plugins.c:231
 #: src/load_plugins.c:296 src/load_plugins.c:311 src/parse_args.c:180
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
 #: src/parse_args.c:485 src/preserve_fds.c:47 src/preserve_fds.c:130
 #: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
-#: src/sudo.c:182 src/sudo.c:359 src/sudo.c:378 src/sudo.c:442 src/sudo.c:763
-#: src/sudo.c:1146 src/sudo.c:1148 src/sudo.c:1154 src/sudo.c:1162
-#: src/sudo_edit.c:150 src/sudo_edit.c:425 src/sudo_edit.c:522
-#: src/sudo_edit.c:634 src/sudo_edit.c:654
+#: src/sudo.c:182 src/sudo.c:371 src/sudo.c:390 src/sudo.c:454 src/sudo.c:780
+#: src/sudo.c:1160 src/sudo.c:1162 src/sudo.c:1168 src/sudo.c:1176
+#: src/sudo_edit.c:151 src/sudo_edit.c:602 src/sudo_edit.c:699
+#: src/sudo_edit.c:811 src/sudo_edit.c:831
 msgid "unable to allocate memory"
-msgstr "không thể cấp phát vùng nhớ"
+msgstr "không thể cấp phát bộ nhớ"
 
-#: lib/util/strsignal.c:50
+#: lib/util/strsignal.c:48
 msgid "Unknown signal"
 msgstr "Không hiểu tín hiệu"
 
@@ -135,14 +135,14 @@ msgstr "%s là ai ghi cũng được"
 msgid "%s is group writable"
 msgstr "%s là nhóm có thể ghi"
 
-#: lib/util/sudo_conf.c:583 src/selinux.c:199 src/selinux.c:212 src/sudo.c:328
+#: lib/util/sudo_conf.c:583 src/selinux.c:199 src/selinux.c:212 src/sudo.c:340
 #, c-format
 msgid "unable to open %s"
 msgstr "không thể mở “%s”"
 
 #: src/exec.c:114 src/exec.c:116 src/exec.c:121 src/exec.c:409 src/exec.c:411
-#: src/exec.c:413 src/exec.c:415 src/exec.c:417 src/exec.c:420 src/exec.c:437
-#: src/exec.c:439 src/exec.c:441 src/exec.c:596 src/exec.c:791
+#: src/exec.c:413 src/exec.c:415 src/exec.c:417 src/exec.c:419 src/exec.c:422
+#: src/exec.c:438 src/exec.c:440 src/exec.c:595 src/exec.c:790
 #: src/exec_pty.c:466 src/exec_pty.c:722 src/exec_pty.c:792 src/exec_pty.c:794
 #: src/exec_pty.c:806 src/exec_pty.c:808 src/exec_pty.c:1285
 #: src/exec_pty.c:1287 src/exec_pty.c:1292 src/exec_pty.c:1294
@@ -157,7 +157,7 @@ msgstr "không thể đặt bộ tiếp hợp cho tín hiệu %d"
 msgid "unable to fork"
 msgstr "không thể tạo tiến trình con"
 
-#: src/exec.c:304 src/exec.c:312 src/exec.c:869 src/exec_pty.c:604
+#: src/exec.c:304 src/exec.c:312 src/exec.c:868 src/exec_pty.c:604
 #: src/exec_pty.c:611 src/exec_pty.c:654 src/exec_pty.c:659 src/exec_pty.c:942
 #: src/exec_pty.c:952 src/exec_pty.c:997 src/exec_pty.c:1004
 #: src/exec_pty.c:1434 src/exec_pty.c:1441 src/exec_pty.c:1448
@@ -168,24 +168,24 @@ msgstr "không thể thêm sự kiện vào hàng đợi"
 msgid "unable to create sockets"
 msgstr "không thể tạo các ổ cắm mạng"
 
-#: src/exec.c:448
+#: src/exec.c:447
 msgid "policy plugin failed session initialization"
-msgstr "phần bổ xung chính sách gặp lỗi khi khởi tạo phiên"
+msgstr "phần bổ sung chính sách gặp lỗi khi khởi tạo phiên"
 
-#: src/exec.c:493
+#: src/exec.c:492
 msgid "error in event loop"
 msgstr "có lỗi trong vòng lặp sự kiện"
 
-#: src/exec.c:511
+#: src/exec.c:510
 msgid "unable to restore tty label"
 msgstr "không thể phục hồi nhãn cho tty"
 
-#: src/exec.c:604 src/exec_pty.c:498 src/signal.c:86
+#: src/exec.c:603 src/exec_pty.c:498 src/signal.c:86
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr "không thể phục hồi bộ tiếp hợp cho tín hiệu %d"
 
-#: src/exec.c:722 src/exec_pty.c:1176
+#: src/exec.c:721 src/exec_pty.c:1176
 msgid "error reading from signal pipe"
 msgstr "lỗi khi đọc từ đường ống dẫn tín hiệu"
 
@@ -265,28 +265,28 @@ msgstr "không tương thích số hiệu phiên bản lớn %d (cần %d) tìm 
 #: src/load_plugins.c:195
 #, c-format
 msgid "ignoring policy plugin `%s' in %s, line %d"
-msgstr "lờ đi phần bổ xung chính sách “%s” trong %s, dòng %d"
+msgstr "lờ đi phần bổ sung chính sách “%s” trong %s, dòng %d"
 
 #: src/load_plugins.c:197
 msgid "only a single policy plugin may be specified"
-msgstr "chỉ được phép chỉ định một phần bổ xung chính sách"
+msgstr "chỉ được phép chỉ định một phần bổ sung chính sách"
 
 #: src/load_plugins.c:200
 #, c-format
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
-msgstr "lờ đi phần bổ xung chính sách bị trùng lặp “%s” trong %s, dòng %d"
+msgstr "lờ đi phần bổ sung chính sách bị trùng lặp “%s” trong %s, dòng %d"
 
 #: src/load_plugins.c:221
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
-msgstr "lờ đi phần bổ xung I/O trùng lặp “%s” trong %s, dòng %d"
+msgstr "lờ đi phần bổ sung I/O trùng lặp “%s” trong %s, dòng %d"
 
 #: src/load_plugins.c:324
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
-msgstr "phần bổ xung chính sách %s không bao gồm phương thức kiểm tra chính sách"
+msgstr "phần bổ sung chính sách %s không bao gồm phương thức kiểm tra chính sách"
 
-#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:437
+#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:449
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "lỗi nội bộ, %s bị tràn"
@@ -396,7 +396,7 @@ msgstr "hiển thị trợ giúp này rồi thoát"
 
 #: src/parse_args.c:624
 msgid "run command on host (if supported by plugin)"
-msgstr "chạy câu lệnh trên máy chủ (nếu được hỗ trợ bởi phần bổ xung)"
+msgstr "chạy câu lệnh trên máy chủ (nếu được hỗ trợ bởi phần bổ sung)"
 
 #: src/parse_args.c:626
 msgid "run login shell as the target user; a command may also be specified"
@@ -559,7 +559,7 @@ msgstr "cần thiết ít nhất một đối số"
 msgid "unable to run %s as a login shell"
 msgstr "không thể chạy %s như là hệ vỏ đăng nhập"
 
-#: src/sesh.c:112 src/sudo.c:1217
+#: src/sesh.c:112 src/sudo.c:1231
 #, c-format
 msgid "unable to execute %s"
 msgstr "không thể thực thi %s"
@@ -624,11 +624,11 @@ msgstr "Các tùy chọn cấu hình: %s\n"
 
 #: src/sudo.c:203
 msgid "fatal error, unable to load plugins"
-msgstr "lỗi nghiêm trọng, không thể tải plugins"
+msgstr "lỗi nghiêm trọng, không thể tải các phần bổ sung"
 
 #: src/sudo.c:211
 msgid "unable to initialize policy plugin"
-msgstr "không thể khởi tạo phần bổ xung chính sách"
+msgstr "không thể khởi tạo phần bổ sung chính sách"
 
 #: src/sudo.c:267
 #, c-format
@@ -640,168 +640,177 @@ msgstr "Gặp lỗi khi nạp phần bổ sung I/O %s"
 msgid "unexpected sudo mode 0x%x"
 msgstr "không mong đợi chế độ sudo 0x%x"
 
-#: src/sudo.c:422
+#: src/sudo.c:434
 msgid "unable to get group vector"
 msgstr "không thể lấy véc-tơ nhóm"
 
-#: src/sudo.c:485
+#: src/sudo.c:497
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "không hiểu mã số người dùng %u: bạn là ai?"
 
-#: src/sudo.c:812
+#: src/sudo.c:829
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s phải được sở hữu bởi uid %d và bít setuid phải được đặt"
 
-#: src/sudo.c:815
+#: src/sudo.c:832
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "uid chịu tác động hiện tại không phải là %d, có phải là %s trên hệ thống tập tin với tùy chọn  “nosuid” được đặt, hay một hệ thống tập tin NFS không có đặc quyền của root không?"
 
-#: src/sudo.c:821
+#: src/sudo.c:838
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "uid chịu tác động hiện tại không phải là %d, chương trình sudo có được cài với setuid root không?"
 
-#: src/sudo.c:952
+#: src/sudo.c:969
 #, c-format
 msgid "unknown login class %s"
 msgstr "không hiểu lớp đăng nhập %s"
 
-#: src/sudo.c:965
+#: src/sudo.c:982
 msgid "unable to set user context"
 msgstr "không thể đặt ngữ cảnh người dùng"
 
-#: src/sudo.c:979
+#: src/sudo.c:996
 msgid "unable to set supplementary group IDs"
 msgstr "không thể đặt nhóm phụ IDs"
 
-#: src/sudo.c:986
+#: src/sudo.c:1003
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "không thể đặt hiệu ứng gid chạy như là gid %u"
 
-#: src/sudo.c:992
+#: src/sudo.c:1009
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "không thể thay đổi gid thành runas gid %u"
 
-#: src/sudo.c:999
+#: src/sudo.c:1016
 msgid "unable to set process priority"
 msgstr "không thể đặt ưu tiên cho quá trình"
 
-#: src/sudo.c:1007
+#: src/sudo.c:1024
 #, c-format
 msgid "unable to change root to %s"
 msgstr "không thể chuyển đổi thư mục gốc thành %s"
 
-#: src/sudo.c:1020 src/sudo.c:1026 src/sudo.c:1033
+#: src/sudo.c:1037 src/sudo.c:1043 src/sudo.c:1050
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "không thể thay đổi thành chạy như là mã người dùng này (%u, %u)"
 
-#: src/sudo.c:1051
+#: src/sudo.c:1068
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "không thể thay đổi thư mục thành %s"
 
-#: src/sudo.c:1112
+#: src/sudo.c:1126
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "biểu thức điều kiện con kết thúc không như mong đợi: %d"
 
-#: src/sudo.c:1245
+#: src/sudo.c:1259
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
-msgstr "phần bổ xung chính sách %s bị thiếu phương thức kiểm tra chính sách “check_policy”"
+msgstr "phần bổ sung chính sách %s bị thiếu phương thức kiểm tra chính sách “check_policy”"
 
-#: src/sudo.c:1263
+#: src/sudo.c:1277
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
-msgstr "phần bổ xung chính sách %s không hỗ trợ liệt kê đặc quyền"
+msgstr "phần bổ sung chính sách %s không hỗ trợ liệt kê đặc quyền"
 
-#: src/sudo.c:1280
+#: src/sudo.c:1294
 #, c-format
 msgid "policy plugin %s does not support the -v option"
-msgstr "phần bổ xung chính sách %s không hỗ trợ tùy chọn -v"
+msgstr "phần bổ sung chính sách %s không hỗ trợ tùy chọn -v"
 
-#: src/sudo.c:1295
+#: src/sudo.c:1309
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
-msgstr "phần bổ xung chính sách %s không hỗ trợ tùy chọn -k/-K"
+msgstr "phần bổ sung chính sách %s không hỗ trợ tùy chọn -k/-K"
 
-#: src/sudo_edit.c:238 src/sudo_edit.c:339
+#: src/sudo_edit.c:202
+msgid "unable to restore current working directory"
+msgstr "không thể phục hồi thư mục làm việc hiện tại"
+
+#: src/sudo_edit.c:412 src/sudo_edit.c:516
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: không phải là tập tin thường"
 
-#: src/sudo_edit.c:245
+#: src/sudo_edit.c:419
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr "%s: sửa các liên kết mềm là không được phép"
 
-#: src/sudo_edit.c:276 src/sudo_edit.c:378
+#: src/sudo_edit.c:422
+#, c-format
+msgid "%s: editing files in a writable directory is not permitted"
+msgstr "%s: sửa các tập tin trong thư mục ghi được là là không được phép"
+
+#: src/sudo_edit.c:453 src/sudo_edit.c:555
 #, c-format
 msgid "%s: short write"
 msgstr "%s: ghi ngắn"
 
-#: src/sudo_edit.c:340
+#: src/sudo_edit.c:517
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s còn lại chưa thay đổi"
 
-#: src/sudo_edit.c:353 src/sudo_edit.c:539
+#: src/sudo_edit.c:530 src/sudo_edit.c:716
 #, c-format
 msgid "%s unchanged"
 msgstr "%s không thay đổi"
 
-#: src/sudo_edit.c:367 src/sudo_edit.c:389
+#: src/sudo_edit.c:544 src/sudo_edit.c:566
 #, c-format
 msgid "unable to write to %s"
 msgstr "không thể ghi vào %s"
 
-#: src/sudo_edit.c:368 src/sudo_edit.c:387 src/sudo_edit.c:390
-#: src/sudo_edit.c:564 src/sudo_edit.c:568
+#: src/sudo_edit.c:545 src/sudo_edit.c:564 src/sudo_edit.c:567
+#: src/sudo_edit.c:741 src/sudo_edit.c:745
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "nội dung của phiên chỉnh sửa chỉ còn %s"
 
-#: src/sudo_edit.c:386
+#: src/sudo_edit.c:563
 msgid "unable to read temporary file"
 msgstr "không thể đọc tập tin tạm thời"
 
-#: src/sudo_edit.c:469
+#: src/sudo_edit.c:646
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: lỗi nội tại: số cũ của đường dẫn"
 
-#: src/sudo_edit.c:471
+#: src/sudo_edit.c:648
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: không thể tạo tập tin tạm thời"
 
-#: src/sudo_edit.c:473 src/sudo_edit.c:571
+#: src/sudo_edit.c:650 src/sudo_edit.c:748
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: không hiểu lỗi %d"
 
-#: src/sudo_edit.c:563
+#: src/sudo_edit.c:740
 msgid "unable to copy temporary files back to their original location"
 msgstr "không thể chép các tập tin tạm trở lại vị trí gốc của chúng"
 
-#: src/sudo_edit.c:567
+#: src/sudo_edit.c:744
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "không thể chép một số tập tin tạm trở lại vị trí gốc của chúng"
 
-#: src/sudo_edit.c:610
+#: src/sudo_edit.c:787
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "không thể thay đổi uid thành root (%u)"
 
-#: src/sudo_edit.c:627
+#: src/sudo_edit.c:804
 msgid "plugin error: missing file list for sudoedit"
-msgstr "lỗi phần bổ xung: thiếu danh sách tập tin cho sudoedit"
+msgstr "lỗi phần bổ sung: thiếu danh sách tập tin cho sudoedit"
 
-#: src/sudo_edit.c:668 src/sudo_edit.c:681
+#: src/sudo_edit.c:845 src/sudo_edit.c:858
 msgid "unable to read the clock"
 msgstr "không thể đọc khóa"
 
