@@ -23922,12 +23922,14 @@ if ${sudo_cv_var_stack_protector+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-	    # Avoid using CFLAGS since the compiler might optimize away our
-	    # test.  We don't want LIBS to interfere with the test but keep
-	    # LDFLAGS as it may have an rpath needed to find the ssp lib.
+	    # Avoid CFLAGS since the compiler might optimize away our test.
+	    # We don't want CPPFLAGS or LIBS to interfere with the test but
+	    # keep LDFLAGS as it may have an rpath needed to find the ssp lib.
+	    _CPPFLAGS="$CPPFLAGS"
 	    _CFLAGS="$CFLAGS"
 	    _LDFLAGS="$LDFLAGS"
 	    _LIBS="$LIBS"
+	    CPPFLAGS=
 	    LIBS=
 
 	    sudo_cv_var_stack_protector="-fstack-protector-strong"
@@ -24003,6 +24005,7 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+	    CPPFLAGS="$_CPPFLAGS"
 	    CFLAGS="$_CFLAGS"
 	    LDFLAGS="$_LDFLAGS"
 	    LIBS="$_LIBS"

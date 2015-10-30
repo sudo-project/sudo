@@ -3791,7 +3791,7 @@ SUDO_TZDIR
 dnl
 dnl Turn warnings into errors.
 dnl All compiler/loader tests after this point will fail if
-dnl a warning is displayed (nornally, warnings are not fata).
+dnl a warning is displayed (normally, warnings are not fatal).
 dnl
 AC_LANG_WERROR
 
@@ -3981,12 +3981,14 @@ if test "$enable_hardening" != "no"; then
     AC_CACHE_CHECK([for compiler stack protector support],
 	[sudo_cv_var_stack_protector],
 	[
-	    # Avoid using CFLAGS since the compiler might optimize away our
-	    # test.  We don't want LIBS to interfere with the test but keep
-	    # LDFLAGS as it may have an rpath needed to find the ssp lib.
+	    # Avoid CFLAGS since the compiler might optimize away our test.
+	    # We don't want CPPFLAGS or LIBS to interfere with the test but
+	    # keep LDFLAGS as it may have an rpath needed to find the ssp lib.
+	    _CPPFLAGS="$CPPFLAGS"
 	    _CFLAGS="$CFLAGS"
 	    _LDFLAGS="$LDFLAGS"
 	    _LIBS="$LIBS"
+	    CPPFLAGS=
 	    LIBS=
 
 	    sudo_cv_var_stack_protector="-fstack-protector-strong"
@@ -4014,6 +4016,7 @@ if test "$enable_hardening" != "no"; then
 		    ])
 		])
 	    ])
+	    CPPFLAGS="$_CPPFLAGS"
 	    CFLAGS="$_CFLAGS"
 	    LDFLAGS="$_LDFLAGS"
 	    LIBS="$_LIBS"
