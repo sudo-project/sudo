@@ -3981,37 +3981,42 @@ if test "$enable_hardening" != "no"; then
     AC_CACHE_CHECK([for compiler stack protector support],
 	[sudo_cv_var_stack_protector],
 	[
-	    sudo_cv_var_stack_protector=no
+	    # Avoid using CFLAGS since the compiler might optimize away our
+	    # test.  We don't want LIBS to interfere with the test but keep
+	    # LDFLAGS as it may have an rpath needed to find the ssp lib.
 	    _CFLAGS="$CFLAGS"
 	    _LDFLAGS="$LDFLAGS"
-	    CFLAGS="-fstack-protector-strong"
-	    LDFLAGS="$_LDFLAGS -fstack-protector-strong"
-	    AC_COMPILE_IFELSE([
+	    _LIBS="$LIBS"
+	    LIBS=
+
+	    sudo_cv_var_stack_protector="-fstack-protector-strong"
+	    CFLAGS="$sudo_cv_var_stack_protector"
+	    LDFLAGS="$_LDFLAGS $sudo_cv_var_stack_protector"
+	    AC_LINK_IFELSE([
 		AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 		[[char buf[1024]; buf[1023] = '\0';]])
-	    ], [
-		sudo_cv_var_stack_protector="-fstack-protector-strong"
-	    ], [
-		CFLAGS="-fstack-protector-all"
-		LDFLAGS="$_LDFLAGS -fstack-protector-all"
-		AC_COMPILE_IFELSE([
+	    ], [], [
+		sudo_cv_var_stack_protector="-fstack-protector-all"
+		CFLAGS="$sudo_cv_var_stack_protector"
+		LDFLAGS="$_LDFLAGS $sudo_cv_var_stack_protector"
+		AC_LINK_IFELSE([
 		    AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 		    [[char buf[1024]; buf[1023] = '\0';]])
-		], [
-		    sudo_cv_var_stack_protector="-fstack-protector-all"
-		], [
-		    CFLAGS="-fstack-protector"
-		    LDFLAGS="$_LDFLAGS -fstack-protector"
-		    AC_COMPILE_IFELSE([
+		], [], [
+		    sudo_cv_var_stack_protector="-fstack-protector"
+		    CFLAGS="$sudo_cv_var_stack_protector"
+		    LDFLAGS="$_LDFLAGS $sudo_cv_var_stack_protector"
+		    AC_LINK_IFELSE([
 			AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 			[[char buf[1024]; buf[1023] = '\0';]])
-		    ], [
-			sudo_cv_var_stack_protector="-fstack-protector"
-		    ], [])
+		    ], [], [
+			sudo_cv_var_stack_protector=no
+		    ])
 		])
 	    ])
 	    CFLAGS="$_CFLAGS"
 	    LDFLAGS="$_LDFLAGS"
+	    LIBS="$_LIBS"
 	]
     )
     if test X"$sudo_cv_var_stack_protector" != X"no"; then
