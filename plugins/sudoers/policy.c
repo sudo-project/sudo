@@ -438,6 +438,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	if ((command_info[info_len++] = strdup("sudoedit=true")) == NULL)
 	    goto oom;
+	if (def_sudoedit_checkdir) {
+	    if ((command_info[info_len++] = strdup("sudoedit_checkdir=true")) == NULL)
+		goto oom;
+	}
+	if (def_sudoedit_follow) {
+	    if ((command_info[info_len++] = strdup("sudoedit_follow=true")) == NULL)
+		goto oom;
+	}
     }
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
@@ -721,7 +729,7 @@ sudoers_policy_invalidate(int remove)
 
     user_cmnd = "kill";
     /* XXX - plugin API should support a return value for fatal errors. */
-    remove_timestamp(remove);
+    timestamp_remove(remove);
     sudoers_cleanup();
 
     debug_return;
@@ -808,8 +816,8 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
 	if (register_hook(hook) != 0) {
 	    sudo_warn_nodebug(
 		U_("unable to register hook of type %d (version %d.%d)"),
-		hook->hook_type,SUDO_HOOK_VERSION_GET_MAJOR(hook->hook_version),
-		SUDO_HOOK_VERSION_GET_MINOR(hook->hook_version));
+		hook->hook_type, SUDO_API_VERSION_GET_MAJOR(hook->hook_version),
+		SUDO_API_VERSION_GET_MINOR(hook->hook_version));
 	}
     }
 }

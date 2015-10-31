@@ -43,29 +43,32 @@ extern int tgetpass_flags; /* XXX */
  */
 int
 sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
-    struct sudo_conv_reply replies[])
+    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
-    struct sudo_conv_reply *repl;
-    const struct sudo_conv_message *msg;
     char *pass;
-    int n, flags = tgetpass_flags;
+    int n;
+    const int conv_debug_instance = sudo_debug_get_active_instance();
+
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
     for (n = 0; n < num_msgs; n++) {
-	msg = &msgs[n];
-	repl = &replies[n];
+	const struct sudo_conv_message *msg = &msgs[n];
+	struct sudo_conv_reply *repl = &replies[n];
+	int flags = tgetpass_flags;
+
 	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
+		SET(flags, TGP_ECHO);
+		goto read_pass;
 	    case SUDO_CONV_PROMPT_MASK:
-		if (msg->msg_type == SUDO_CONV_PROMPT_ECHO_ON)
-		    SET(flags, TGP_ECHO);
-		else
-		    SET(flags, TGP_MASK);
+		SET(flags, TGP_MASK);
 		/* FALLTHROUGH */
 	    case SUDO_CONV_PROMPT_ECHO_OFF:
 		if (ISSET(msg->msg_type, SUDO_CONV_PROMPT_ECHO_OK))
 		    SET(flags, TGP_NOECHO_TRY);
+	    read_pass:
 		/* Read the password unless interrupted. */
-		pass = tgetpass(msg->msg, msg->timeout, flags);
+		pass = tgetpass(msg->msg, msg->timeout, flags, callback);
 		if (pass == NULL)
 		    goto err;
 		if ((repl->reply = strdup(pass)) == NULL) {
@@ -87,12 +90,13 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 	}
     }
 
+    sudo_debug_set_active_instance(conv_debug_instance);
     return 0;
 
 err:
     /* Zero and free allocated memory and return an error. */
     do {
-	repl = &replies[n];
+	struct sudo_conv_reply *repl = &replies[n];
 	if (repl->reply != NULL) {
 	    memset_s(repl->reply, SUDO_CONV_REPL_MAX, 0, strlen(repl->reply));
 	    free(repl->reply);
@@ -100,7 +104,15 @@ err:
 	}
     } while (n--);
 
+    sudo_debug_set_active_instance(conv_debug_instance);
     return -1;
+}
+
+int
+sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
+    struct sudo_conv_reply replies[])
+{
+    return sudo_conversation(num_msgs, msgs, replies, NULL);
 }
 
 int
@@ -108,6 +120,9 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     int len;
+    const int conv_debug_instance = sudo_debug_get_active_instance();
+
+    sudo_debug_set_active_instance(sudo_debug_instance);
 
     switch (msg_type) {
     case SUDO_CONV_INFO_MSG:
@@ -126,5 +141,6 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 	break;
     }
 
+    sudo_debug_set_active_instance(conv_debug_instance);
     return len;
 }

@@ -972,6 +972,7 @@ set_loginclass(struct passwd *pw)
 
 /*
  * Look up the fully qualified domain name of host.
+ * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  * Returns true on success, setting longp and shortp.
  * Returns false on failure, longp and shortp are unchanged.
  */
@@ -1012,7 +1013,6 @@ resolve_host(const char *host, char **longp, char **shortp)
 /*
  * Look up the fully qualified domain name of user_host and user_runhost.
  * Sets user_host, user_shost, user_runhost and user_srunhost.
- * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  */
 static bool
 set_fqdn(void)
@@ -1201,7 +1201,9 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
 	    editor_path = resolve_editor(editor, strlen(editor),
 		nfiles, files, argc_out, argv_out, NULL);
-	    if (editor_path == NULL && errno != ENOENT)
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
 		debug_return_str(NULL);
 	}
     }
@@ -1214,7 +1216,7 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 		files, argc_out, argv_out, NULL);
 	    if (editor_path == NULL && errno != ENOENT)
 		debug_return_str(NULL);
-	} while (ep != NULL && editor_path == NULL);
+	}
     }
     if (!editor_path) {
 	audit_failure(NewArgc, NewArgv, N_("%s: command not found"),

@@ -51,11 +51,38 @@ static void tgetpass_handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
 
+static int
+suspend(int signo, struct sudo_conv_callback *callback)
+{
+    int rval = 0;
+    debug_decl(suspend, SUDO_DEBUG_CONV)
+
+    if (callback != NULL && SUDO_API_VERSION_GET_MAJOR(callback->version) != SUDO_CONV_CALLBACK_VERSION_MAJOR) {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "callback major version mismatch, expected %u, got %u",
+	    SUDO_CONV_CALLBACK_VERSION_MAJOR,
+	    SUDO_API_VERSION_GET_MAJOR(callback->version));
+	callback = NULL;
+    }
+
+    if (callback != NULL && callback->on_suspend != NULL) {
+	if (callback->on_suspend(signo, callback->closure) == -1)
+	    rval = -1;
+    }
+    kill(getpid(), signo);
+    if (callback != NULL && callback->on_resume != NULL) {
+	if (callback->on_resume(signo, callback->closure) == -1)
+	    rval = -1;
+    }
+    debug_return_int(rval);
+}
+
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
 char *
-tgetpass(const char *prompt, int timeout, int flags)
+tgetpass(const char *prompt, int timeout, int flags,
+    struct sudo_conv_callback *callback)
 {
     sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
     sigaction_t savetstp, savettin, savettou, savepipe;
@@ -105,13 +132,23 @@ restart:
 
     /*
      * If we are using a tty but are not the foreground pgrp this will
-     * generate SIGTTOU, so do it *before* installing the signal handlers.
+     * return EINTR.  We send ourself SIGTTOU bracketed by callbacks.
      */
     if (!ISSET(flags, TGP_ECHO)) {
-	if (ISSET(flags, TGP_MASK))
-	    neednl = sudo_term_cbreak(input);
-	else
-	    neednl = sudo_term_noecho(input);
+	for (;;) {
+	    if (ISSET(flags, TGP_MASK))
+		neednl = sudo_term_cbreak(input);
+	    else
+		neednl = sudo_term_noecho(input);
+	    if (neednl || errno != EINTR)
+		break;
+	    /* Received SIGTTOU, suspend the process. */
+	    if (suspend(SIGTTOU, callback) == -1) {
+		if (input != STDIN_FILENO)
+		    (void) close(input);
+		debug_return_ptr(NULL);
+	    }
+	}
     }
 
     /*
@@ -152,9 +189,7 @@ restart:
     }
 
 restore:
-    /* Restore old tty settings and signals. */
-    if (!ISSET(flags, TGP_ECHO))
-	sudo_term_restore(input, 1);
+    /* Restore old signal handlers. */
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
@@ -164,6 +199,21 @@ restore:
     (void) sigaction(SIGTTIN, &savettin, NULL);
     (void) sigaction(SIGTTOU, &savettou, NULL);
     (void) sigaction(SIGPIPE, &savepipe, NULL);
+
+    /* Restore old tty settings. */
+    if (!ISSET(flags, TGP_ECHO)) {
+	for (;;) {
+	    /* Restore old tty settings if possible. */
+	    if (sudo_term_restore(input, 1) || errno != EINTR)
+		break;
+	    /* Received SIGTTOU, suspend the process. */
+	    signo[SIGTTOU] = 0;
+	    if (suspend(SIGTTOU, callback) == -1) {
+		pass = NULL;
+		break;
+	    }
+	}
+    }
     if (input != STDIN_FILENO)
 	(void) close(input);
 
@@ -173,12 +223,15 @@ restore:
      */
     for (i = 0; i < NSIG; i++) {
 	if (signo[i]) {
-	    kill(getpid(), i);
 	    switch (i) {
 		case SIGTSTP:
 		case SIGTTIN:
 		case SIGTTOU:
-		    need_restart = 1;
+		    if (suspend(i, callback) == 0)
+			need_restart = 1;
+		    break;
+		default:
+		    kill(getpid(), i);
 		    break;
 	    }
 	}
@@ -247,8 +300,13 @@ sudo_askpass(const char *askpass, const char *prompt)
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
     /* Wait for child to exit. */
-    while (waitpid(child, &status, 0) == -1 && errno == EINTR)
-	continue;
+    for (;;) {
+	pid_t rv = waitpid(child, &status, 0);
+	if (rv == -1 && errno != EINTR)
+	    break;
+	if (rv != -1 && !WIFSTOPPED(status))
+	    break;
+    }
 
     if (pass == NULL)
 	errno = EINTR;	/* make cancel button simulate ^C */

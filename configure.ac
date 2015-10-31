@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.14p3], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.15], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -1943,9 +1943,8 @@ case "$host" in
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		;;
     *-*-gnu*)
-		# lockf() is broken on the Hurd -- use flock instead
+		# lockf() is broken on the Hurd
 		ac_cv_func_lockf=no
-		ac_cv_func_flock=yes
 		;;
     *-*-ultrix*)
 		OS="ultrix"
@@ -2119,9 +2118,8 @@ case "$host" in
 		fi
 		;;
     *-*-nextstep*)
-		# lockf() is broken on the NeXT -- use flock instead
+		# lockf() is broken on the NeXT
 		ac_cv_func_lockf=no
-		ac_cv_func_flock=yes
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
@@ -2316,11 +2314,6 @@ AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys
 #include <signal.h>])
 AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
 #include <signal.h>])
-AC_CHECK_TYPES([struct timespec], [], [], [#include <sys/types.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-#endif
-#include <time.h>])
 AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
@@ -2391,7 +2384,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime])
+AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime pread pwrite openat])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2521,7 +2514,7 @@ AC_CHECK_FUNCS_ONCE([seteuid])
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS([getifaddrs], [AC_CHECK_FUNCS([freeifaddrs])])
 fi
-AC_CHECK_FUNCS([lockf flock], [break])
+AC_CHECK_FUNCS([lockf], [break])
 AC_CHECK_FUNCS([innetgr], [
     AC_CHECK_DECLS([innetgr], [], [], [
 AC_INCLUDES_DEFAULT
@@ -2655,11 +2648,9 @@ fi
 AC_CHECK_FUNCS([strtonum])
 AC_LIBOBJ(strtonum)
 SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
-if test X"$ac_cv_type_struct_timespec" != X"no"; then
-    AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
-	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
-	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
-fi
+AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
+    [AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
+    [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
 FOUND_SHA2=no
 AC_CHECK_HEADER([sha2.h], [
     FOUND_SHA2=yes
@@ -2683,48 +2674,10 @@ dnl
 dnl Function checks for sudo_noexec
 dnl
 if test X"$with_noexec" != X"no"; then
-    # Check for underscore versions of standard exec functions
-    # unless we are using dyld symbole interposition
-    if test X"$dlyld_interpose" != X"yes"; then
-	AC_CHECK_FUNCS([_execl __execl])
-	AC_CHECK_FUNCS([_execle __execle])
-	AC_CHECK_FUNCS([_execlp __execlp])
-	AC_CHECK_FUNCS([_execv __execv])
-	AC_CHECK_FUNCS([_execve __execve])
-	AC_CHECK_FUNCS([_execvp __execvp])
-    fi
-    # Check for non-standard exec functions including underscore versions
-    AC_CHECK_FUNCS([exect], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_exect __exect])
-	fi
-    ])
-    AC_CHECK_FUNCS([execvP], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_execvP __execvP])
-	fi
-    ])
-    AC_CHECK_FUNCS([execvpe], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_execvpe __execvpe])
-	fi
-    ])
-    AC_CHECK_FUNCS([fexecve], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_fexecve __fexecve])
-	fi
-    ])
-    # Check for posix_spawn, posix_spawnp and any underscore versions
-    AC_CHECK_FUNCS([posix_spawn], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_posix_spawn __posix_spawn])
-	fi
-    ])
-    AC_CHECK_FUNCS([posix_spawnp], [
-	if test X"$dlyld_interpose" != X"yes"; then
-	    AC_CHECK_FUNCS([_posix_spawnp __posix_spawnp])
-	fi
-    ])
+    # Check for non-standard exec functions
+    AC_CHECK_FUNCS([exect execvP execvpe])
+    # Check for fexecve, posix_spawn, and posix_spawnp
+    AC_CHECK_FUNCS([fexecve posix_spawn posix_spawnp])
 fi
 
 dnl
@@ -3119,7 +3072,7 @@ AC_CHECK_FUNCS([strsignal], [], [
     AC_LIBOBJ(strsignal)
     SUDO_APPEND_COMPAT_EXP(sudo_strsignal)
     HAVE_SIGLIST="false"
-    AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], [
+    AC_CHECK_DECLS([sys_siglist, _sys_siglist], [
 	HAVE_SIGLIST="true"
 	break
     ], [ ], [
@@ -3141,7 +3094,7 @@ AC_CHECK_FUNCS([sig2str], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
     HAVE_SIGNAME="false"
-    AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
+    AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
 	break
     ], [ ], [
@@ -3838,7 +3791,7 @@ SUDO_TZDIR
 dnl
 dnl Turn warnings into errors.
 dnl All compiler/loader tests after this point will fail if
-dnl a warning is displayed (nornally, warnings are not fata).
+dnl a warning is displayed (normally, warnings are not fatal).
 dnl
 AC_LANG_WERROR
 
@@ -4025,29 +3978,53 @@ dnl Check for -fstack-protector and -z relro support
 dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_hardening" != "no"; then
-    if test -n "$GCC"; then
-	AX_CHECK_COMPILE_FLAG([-fstack-protector-strong], [
-	    AX_CHECK_LINK_FLAG([-fstack-protector-strong], [
-		SSP_CFLAGS="-fstack-protector-strong"
-		SSP_LDFLAGS="-Wc,-fstack-protector-strong"
-	    ])
-	])
-	if test -z "$SSP_CFLAGS"; then
-	    AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
-		AX_CHECK_LINK_FLAG([-fstack-protector-all], [
-		    SSP_CFLAGS="-fstack-protector-all"
-		    SSP_LDFLAGS="-Wc,-fstack-protector-all"
-		])
-	    ])
-	    if test -z "$SSP_CFLAGS"; then
-		AX_CHECK_COMPILE_FLAG([-fstack-protector], [
-		    AX_CHECK_LINK_FLAG([-fstack-protector], [
-			SSP_CFLAGS="-fstack-protector"
-			SSP_LDFLAGS="-Wc,-fstack-protector"
+    AC_CACHE_CHECK([for compiler stack protector support],
+	[sudo_cv_var_stack_protector],
+	[
+	    # Avoid CFLAGS since the compiler might optimize away our test.
+	    # We don't want CPPFLAGS or LIBS to interfere with the test but
+	    # keep LDFLAGS as it may have an rpath needed to find the ssp lib.
+	    _CPPFLAGS="$CPPFLAGS"
+	    _CFLAGS="$CFLAGS"
+	    _LDFLAGS="$LDFLAGS"
+	    _LIBS="$LIBS"
+	    CPPFLAGS=
+	    LIBS=
+
+	    sudo_cv_var_stack_protector="-fstack-protector-strong"
+	    CFLAGS="$sudo_cv_var_stack_protector"
+	    LDFLAGS="$_LDFLAGS $sudo_cv_var_stack_protector"
+	    AC_LINK_IFELSE([
+		AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+		[[char buf[1024]; buf[1023] = '\0';]])
+	    ], [], [
+		sudo_cv_var_stack_protector="-fstack-protector-all"
+		CFLAGS="$sudo_cv_var_stack_protector"
+		LDFLAGS="$_LDFLAGS $sudo_cv_var_stack_protector"
+		AC_LINK_IFELSE([
+		    AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+		    [[char buf[1024]; buf[1023] = '\0';]])
+		], [], [
+		    sudo_cv_var_stack_protector="-fstack-protector"
+		    CFLAGS="$sudo_cv_var_stack_protector"
+		    LDFLAGS="$_LDFLAGS $sudo_cv_var_stack_protector"
+		    AC_LINK_IFELSE([
+			AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+			[[char buf[1024]; buf[1023] = '\0';]])
+		    ], [], [
+			sudo_cv_var_stack_protector=no
 		    ])
 		])
-	    fi
-	fi
+	    ])
+	    CPPFLAGS="$_CPPFLAGS"
+	    CFLAGS="$_CFLAGS"
+	    LDFLAGS="$_LDFLAGS"
+	    LIBS="$_LIBS"
+	]
+    )
+    if test X"$sudo_cv_var_stack_protector" != X"no"; then
+	SSP_CFLAGS="$sudo_cv_var_stack_protector"
+	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
 fi

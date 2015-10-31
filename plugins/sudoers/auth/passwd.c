@@ -54,7 +54,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char sav, *epass;
     char *pw_epasswd = auth->data;

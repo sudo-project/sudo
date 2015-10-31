@@ -32,8 +32,6 @@
 # define sudo_sys_siglist	sys_siglist
 #elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1
 # define sudo_sys_siglist	_sys_siglist
-#elif defined(HAVE_DECL___SYS_SIGLIST) && HAVE_DECL___SYS_SIGLIST == 1
-# define sudo_sys_siglist	__sys_siglist
 #else
 extern const char *const sudo_sys_siglist[NSIG];
 #endif

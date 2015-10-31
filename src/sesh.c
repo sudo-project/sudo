@@ -120,12 +120,19 @@ static int
 sesh_sudoedit(int argc, char *argv[])
 {
     int i, oflags_dst, post, ret = SESH_ERR_FAILURE;
-    int fd_src = -1, fd_dst = -1;
+    int fd_src = -1, fd_dst = -1, follow = 0;
     ssize_t nread, nwritten;
     struct stat sb;
     struct timespec times[2];
     char buf[BUFSIZ];
     debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT)
+
+    /* Check for -h flag (don't follow links). */
+    if (strcmp(argv[2], "-h") == 0) {
+	argv++;
+	argc--;
+	follow = O_NOFOLLOW;
+    }
 
     if (argc < 3)
 	debug_return_int(SESH_ERR_FAILURE);
@@ -160,7 +167,7 @@ sesh_sudoedit(int argc, char *argv[])
      * so that it's ensured that the temporary files are
      * created by us and that we are not opening any symlinks.
      */
-    oflags_dst = O_WRONLY|O_TRUNC|O_CREAT|(post ? 0 : O_EXCL);
+    oflags_dst = O_WRONLY|O_TRUNC|O_CREAT|(post ? follow : O_EXCL);
     for (i = 0; i < argc - 1; i += 2) {
 	const char *path_src = argv[i];
 	const char *path_dst = argv[i + 1];
@@ -169,7 +176,7 @@ sesh_sudoedit(int argc, char *argv[])
 	 * doesn't exist, that's OK, we'll create an empty
 	 * destination file.
 	 */
-	if ((fd_src = open(path_src, O_RDONLY, 0600)) < 0) {
+	if ((fd_src = open(path_src, O_RDONLY|follow, 0600)) < 0) {
 	    if (errno != ENOENT) {
 		sudo_warn("%s", path_src);
 		if (post) {

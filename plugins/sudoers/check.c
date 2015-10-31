@@ -46,26 +46,76 @@
 static bool display_lecture(int);
 static struct passwd *get_authpw(int);
 
+struct getpass_closure {
+    void *cookie;
+    struct passwd *auth_pw;
+};
+
+/*
+ * Called when getpass is suspended so we can drop the lock.
+ */
+static int
+getpass_suspend(int signo, void *vclosure)
+{
+    struct getpass_closure *closure = vclosure;
+
+    timestamp_close(closure->cookie);
+    closure->cookie = NULL;
+    return 0;
+}
+
+/*
+ * Called when getpass is resumed so we can reacquire the lock.
+ */
+static int
+getpass_resume(int signo, void *vclosure)
+{
+    struct getpass_closure *closure = vclosure;
+
+    closure->cookie = timestamp_open(user_name, user_sid);
+    if (closure->cookie == NULL)
+	return -1;
+    if (!timestamp_lock(closure->cookie, closure->auth_pw))
+	return -1;
+    return 0;
+}
+
 /*
  * Returns true if the user successfully authenticates, false if not
- * or -1 on error.
+ * or -1 on fatal error.
  */
 static int
 check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 {
-    int status, rval = -1;
+    struct sudo_conv_callback cb, *callback = NULL;
+    struct getpass_closure closure;
+    int status = TS_ERROR;
+    int rval = -1;
     char *prompt;
     bool lectured;
     debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH)
 
-    /* Always need a password when -k was specified with the command. */
-    if (ISSET(mode, MODE_IGNORE_TICKET))
-	SET(validated, FLAG_CHECK_USER);
+    /* Setup closure for getpass_{suspend,resume} */
+    closure.auth_pw = auth_pw;
+    closure.cookie = NULL;
+    sudo_pw_addref(closure.auth_pw);
 
-    if (build_timestamp(auth_pw) == -1)
-	goto done;
+    /* Open, lock and read time stamp file if we are using it. */
+    if (!ISSET(mode, MODE_IGNORE_TICKET)) {
+	/* Open time stamp file and check its status. */
+	closure.cookie = timestamp_open(user_name, user_sid);
+	if (timestamp_lock(closure.cookie, closure.auth_pw))
+	    status = timestamp_status(closure.cookie, closure.auth_pw);
 
-    status = timestamp_status(auth_pw);
+	/* Construct callback for getpass function. */
+	memset(&cb, 0, sizeof(cb));
+	cb.version = SUDO_CONV_CALLBACK_VERSION;
+	cb.closure = &closure;
+	cb.on_suspend = getpass_suspend;
+	cb.on_resume = getpass_resume;
+	callback = &cb;
+    }
+
     switch (status) {
     case TS_FATAL:
 	/* Fatal error (usually setuid failure), unsafe to proceed. */
@@ -92,26 +142,28 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
-	    auth_pw->pw_name);
+	    closure.auth_pw->pw_name);
 	if (prompt == NULL)
 	    goto done;
 
-	rval = verify_user(auth_pw, prompt, validated);
-	if (rval == true && lectured) {
-	    if (set_lectured() == -1)
-		rval = -1;
-	}
+	rval = verify_user(closure.auth_pw, prompt, validated, callback);
+	if (rval == true && lectured)
+	    (void)set_lectured();	/* lecture error not fatal */
 	free(prompt);
 	break;
     }
 
-    /* Only update timestamp if user was validated. */
-    if (rval == true && ISSET(validated, VALIDATE_SUCCESS) &&
-	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR) {
-	if (update_timestamp(auth_pw) == -1)
-	    rval = -1;
-    }
+    /*
+     * Only update time stamp if user was validated.
+     * Failure to update the time stamp is not a fatal error.
+     */
+    if (rval == true && ISSET(validated, VALIDATE_SUCCESS) && status != TS_ERROR)
+	(void)timestamp_update(closure.cookie, closure.auth_pw);
 done:
+    if (closure.cookie != NULL)
+	timestamp_close(closure.cookie);
+    sudo_pw_delref(closure.auth_pw);
+
     debug_return_int(rval);
 }
 
@@ -192,7 +244,7 @@ display_lecture(int status)
 	    buf[nread] = '\0';
 	    msg.msg_type = SUDO_CONV_ERROR_MSG;
 	    msg.msg = buf;
-	    sudo_conv(1, &msg, &repl);
+	    sudo_conv(1, &msg, &repl, NULL);
 	}
 	fclose(fp);
     } else {
@@ -203,7 +255,7 @@ display_lecture(int status)
 	    "    #1) Respect the privacy of others.\n"
 	    "    #2) Think before you type.\n"
 	    "    #3) With great power comes great responsibility.\n\n");
-	sudo_conv(1, &msg, &repl);
+	sudo_conv(1, &msg, &repl, NULL);
     }
     debug_return_bool(true);
 }

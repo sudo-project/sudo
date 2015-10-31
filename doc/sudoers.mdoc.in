@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 10, 2015
+.Dd October 24, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -605,6 +605,8 @@ An odd number of
 .Ql \&!
 operators negate the value of
 the item; an even number just cancel each other out.
+User netgroups are matched using the user and domain members only;
+the host member is not used when matching.
 .Pp
 A
 .Li user name ,
@@ -700,13 +702,14 @@ and other aliases.
 Again, the value of an item may be negated with the
 .Ql \&!
 operator.
-If you do not specify a netmask along with the network number,
+Host netgroups are matched using the host (both qualified and unqualified)
+and domain members only; the user member is not used when matching.
+If you specify a network number without a netmask,
 .Nm sudo
 will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
-interfaces, the corresponding netmask will be used.
-The netmask
-may be specified either in standard IP address notation
+interfaces, will use the netmask of that interface.
+The netmask may be specified either in standard IP address notation
 (e.g.\& 255.255.255.0 or ffff:ffff:ffff:ffff::),
 or CIDR notation (number of bits, e.g.\& 24 or 64).
 A host name may include shell-style wildcards (see the
@@ -914,9 +917,10 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
-	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
+Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
+              'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
+              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
 .Ed
 .Pp
 A
@@ -1137,16 +1141,18 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-.Li NOEXEC ,
 .Li EXEC ,
+.Li NOEXEC ,
+.Li FOLLOW ,
+.Li NOFOLLOW ,
 .Li LOG_INPUT ,
 .Li NOLOG_INPUT ,
 .Li LOG_OUTPUT ,
 .Li NOLOG_OUTPUT ,
 .Li MAIL ,
 .Li NOMAIL ,
-.Li NOPASSWD ,
 .Li PASSWD ,
+.Li NOPASSWD ,
 .Li SETENV ,
 and
 .Li NOSETENV .
@@ -1165,7 +1171,7 @@ and
 overrides
 .Li EXEC ) .
 .Bl -hang -width 0n
-.It Em NOEXEC No and Em EXEC
+.It Em EXEC No and Em NOEXEC
 .sp
 If
 .Nm sudo
@@ -1192,6 +1198,23 @@ See the
 section below for more details on how
 .Li NOEXEC
 works and whether or not it will work on your system.
+.It Em FOLLOW No and Em NOFOLLOW
+Starting with version 1.8.15,
+.Nm sudoedit
+will not follow symbolic links when opening files unless the
+.Em sudoedit_follow
+option is enabled.
+The
+.Em FOLLOW
+and
+.Em NOFOLLOW
+tags override the value of
+.Em sudoedit_follow
+and can be used to permit (or deny) the editing of symbolic links
+on a per-command basis.
+These tags are only effective for the
+.Em sudoedit
+command and are ignored for all other commands.
 .It Em LOG_INPUT No and Em NOLOG_INPUT
 .sp
 These tags override the value of the
@@ -1241,7 +1264,7 @@ and
 in the
 .Sx SUDOERS OPTIONS
 section below.
-.It Em NOPASSWD No and Em PASSWD
+.It Em PASSWD No and Em NOPASSWD
 .sp
 By default,
 .Nm sudo
@@ -1348,19 +1371,16 @@ and
 .Xr fnmatch 3
 functions as specified by
 .St -p1003.1 .
-Note that these are
-.Em not
-regular expressions.
 .Bl -tag -width 8n
 .It Li *
-Matches any set of zero or more characters.
+Matches any set of zero or more characters (including white space).
 .It Li \&?
-Matches any single character.
+Matches any single character (including white space).
 .It Li [...]
 Matches any character in the specified range.
 .It Li [!...]
 Matches any character
-.Sy not
+.Em not
 in the specified range.
 .It Li \ex
 For any character
@@ -1375,7 +1395,13 @@ and
 .Ql ]\& .
 .El
 .Pp
-Character classes may also be used if your system's
+.Bf -symbolic
+Note that these are not regular expressions.
+.Ef
+Unlike a regular expression there is no way to match one or more
+characters within a range.
+.Pp
+Character classes may be used if your system's
 .Xr glob 3
 and
 .Xr fnmatch 3
@@ -1388,7 +1414,7 @@ it must be
 escaped.
 For example:
 .Bd -literal -offset 4n
-/bin/ls [[:\&alpha:\&]]*
+/bin/ls [[\e:\&alpha\e:\&]]*
 .Ed
 .Pp
 Would match any file name beginning with a letter.
@@ -1396,9 +1422,9 @@ Would match any file name beginning with a letter.
 Note that a forward slash
 .Pq Ql /
 will
-.Sy not
+.Em not
 be matched by
-wildcards used in the path name.
+wildcards used in the file name portion of the command.
 This is to make a path like:
 .Bd -literal -offset 4n
 /usr/bin/*
@@ -1410,17 +1436,20 @@ but not
 .Pa /usr/bin/X11/xterm .
 .Pp
 When matching the command line arguments, however, a slash
-.Sy does
+.Em does
 get matched by wildcards since command line arguments may contain
 arbitrary strings and not just path names.
 .Pp
+.Bf -symbolic
 Wildcards in command line arguments should be used with care.
-Because command line arguments are matched as a single, concatenated
-string, a wildcard such as
+.Ef
+.br
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard character such as
 .Ql \&?
 or
 .Ql *
-can match multiple words.
+will match across word boundaries, which may be unexpected.
 For example, while a sudoers entry like:
 .Bd -literal -offset 4n
 %operator ALL = /bin/cat /var/log/messages*
@@ -1437,6 +1466,10 @@ $ sudo cat /var/log/messages /etc/shadow
 .Ed
 .Pp
 which is probably not what was intended.
+In most cases it is better to do command line processing
+outside of
+.Em sudoers
+in a scripting language.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
@@ -1446,7 +1479,7 @@ If the empty string
 is the only command line argument in the
 .Em sudoers
 entry it means that command is not allowed to be run with
-.Sy any
+.Em any
 arguments.
 .It sudoedit
 Command line arguments to the
@@ -1561,7 +1594,7 @@ will be parsed before
 Be aware that because the sorting is lexical, not numeric,
 .Pa /etc/sudoers.d/1_whoops
 would be loaded
-.Sy after
+.Em after
 .Pa /etc/sudoers.d/10_second .
 Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
@@ -1609,7 +1642,7 @@ as the built-in alias will be used in preference to your own.
 Please note that using
 .Sy ALL
 can be dangerous since in a command context, it allows the user to run
-.Sy any
+.Em any
 command on the system.
 .Pp
 An exclamation point
@@ -1685,6 +1718,16 @@ A list of all supported Defaults parameters, grouped by type, are listed below.
 .Pp
 .Sy Boolean Flags :
 .Bl -tag -width 16n
+.It always_query_group_plugin
+If a
+.Em group_plugin
+is configured, use it to resolve groups of the form %group as long
+as there is not also a system group of the same name.
+Normally, only groups of the form %:group are passed to the
+.Em group_plugin .
+This flag is
+.Em off
+by default.
 .It always_set_home
 If enabled,
 .Nm sudo
@@ -1752,7 +1795,11 @@ If set, netgroups (prefixed with
 .Ql + ) ,
 may be used in place of a user or host.
 For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server.
+substring match on the server unless the
+.Sy NETGROUP_BASE
+directive is present in the
+.Pa @ldap_conf@
+file.
 If netgroups are not needed, this option can be disabled to reduce the
 load on the LDAP server.
 This flag is
@@ -2206,8 +2253,8 @@ tag has been set, unless overridden by an
 .Li EXEC
 tag.
 See the description of
-.Em NOEXEC and EXEC
-below as well as the
+.Em EXEC and NOEXEC
+above as well as the
 .Sx Preventing shell escapes
 section at the end of this manual.
 This flag is
@@ -2417,12 +2464,18 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that if the
+Note that
+.Em set_logname
+will have no effect
+if the
 .Em env_reset
-option has not been disabled, entries in the
+option has not been disabled and the
 .Em env_keep
-list will override the value of
-.Em set_logname .
+list contains
+.Ev LOGNAME ,
+.Ev USER
+or
+.Ev USERNAME .
 This flag is
 .Em on
 by default.
@@ -2493,6 +2546,35 @@ system call.
 This flag is
 .Em off
 by default.
+.It sudoedit_checkdir
+If set,
+.Nm sudoedit
+will refuse to edit files located in a directory that is writable
+by the invoking user unless it is run by root.
+On many systems, this option requires that the parent directory
+of the file to be edited be readable by the target user.
+This flag is
+.Em off
+by default.
+.It sudoedit_follow
+By default,
+.Nm sudoedit
+will not follow symbolic links when opening files.
+The
+.Em sudoedit_follow
+option can be enabled to allow
+.Nm sudoedit
+to open symbolic links.
+It may be overridden on a per-command basis by the
+.Em FOLLOW
+and
+.Em NOFOLLOW
+tags.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.15 or higher.
 .It targetpw
 If set,
 .Nm sudo
@@ -2606,6 +2688,32 @@ option can be used to specify a different file descriptor at which
 to start closing.
 The default is
 .Li 3 .
+.It maxseq
+The maximum sequence number that will be substituted for the
+.Dq Li %{seq}
+escape in the I/O log file (see the
+.Em iolog_dir
+description above for more information).
+While the value substituted for
+.Dq Li %{seq}
+is in base 36,
+.Em maxseq
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+.Dq ZZZZZZ )
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.Pp
+Once the local sequence number reaches the value of
+.Em maxseq ,
+it will
+.Dq roll over
+to zero, after which
+.Nm
+will truncate and re-use any existing I/O log path names.
+.Pp
+This setting is only supported by version 1.8.7 or higher.
 .It passwd_tries
 The number of tries a user gets to enter his/her password before
 .Nm sudo
@@ -2814,32 +2922,6 @@ The escape
 will expand to the host name of the machine.
 Default is
 .Dq Li @mailsub@ .
-.It maxseq
-The maximum sequence number that will be substituted for the
-.Dq Li %{seq}
-escape in the I/O log file (see the
-.Em iolog_dir
-description above for more information).
-While the value substituted for
-.Dq Li %{seq}
-is in base 36,
-.Em maxseq
-itself should be expressed in decimal.
-Values larger than 2176782336 (which corresponds to the
-base 36 sequence number
-.Dq ZZZZZZ )
-will be silently truncated to 2176782336.
-The default value is 2176782336.
-.Pp
-Once the local sequence number reaches the value of
-.Em maxseq ,
-it will
-.Dq roll over
-to zero, after which
-.Nm
-will truncate and re-use any existing I/O log path names.
-.Pp
-This setting is only supported by version 1.8.7 or higher.
 .It noexec_file
 As of
 .Nm sudo
@@ -3942,9 +4024,24 @@ is allowed to change anyone's password except for
 root on the
 .Em HPPA
 machines.
-Note that this assumes
+Because command line arguments are matched as a single,
+concatenated string, the
+.Ql *
+wildcard will match
+.Em multiple
+words.
+This example assumes that
 .Xr passwd 1
 does not take multiple user names on the command line.
+Note that on GNU systems, options to
+.Xr passwd 1
+may be specified after the user argument.
+As a result, this rule will also allow:
+.Bd -literal -offset 4n
+passwd username --expire
+.Ed
+.Pp
+which may not be desirable.
 .Bd -literal
 bob		SPARC = (OP) ALL : SGI = (OP) ALL
 .Ed
@@ -4076,7 +4173,7 @@ web pages) or simply
 to www.
 .Bd -literal
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\e
-		/sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+		/sbin/mount -o nosuid\e,nodev /dev/cd0a /CDROM
 .Ed
 .Pp
 Any user may mount or unmount a CD-ROM on the machines in the CDROM
@@ -4292,6 +4389,27 @@ The editor will run as the operator user, not root, on a temporary copy of
 After the file has been edited,
 .Pa /etc/motd
 will be updated with the contents of the temporary copy.
+.Pp
+Users should
+.Em never
+be granted
+.Nm sudoedit
+permission to edit a file that resides in a directory the user
+has write access to, either directly or via a wildcard.
+If the user has write access to the directory it is possible to
+replace the legitimate file with a link to another file,
+allowing the editing of arbitrary files.
+Starting with version 1.8.15,
+.Nm sudoedit
+will refuse to open a symbolic link unless either the
+.Em sudoedit_follow
+Defaults option is enabled or the
+.Em sudoedit
+command is prefixed with the
+.Li FOLLOW
+tag.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
 .Ss Time stamp file checks
 .Em sudoers
 will check the ownership of its time stamp directory

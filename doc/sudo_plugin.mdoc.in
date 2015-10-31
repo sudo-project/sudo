@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 4, 2014
+.Dd September 9, 2015
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -881,6 +881,19 @@ This allows the plugin to perform command substitution and transparently
 enable
 .Em sudoedit
 when the user attempts to run an editor.
+.It sudoedit_follow=bool
+Set to true to allow
+.Nm sudoedit
+to edit files that are symbolic links.
+By default,
+.Nm sudoedit
+1.8.15 and higher will refuse to open a symbolic link.
+The
+.Em sudoedit_follow
+option can be used to restore the older behavior and allow
+.Nm sudoedit
+to open symbolic links.
+Only available starting with API version 1.8.
 .It timeout=int
 Command timeout.
 If non-zero then when the timeout expires the command will be killed.
@@ -1215,7 +1228,7 @@ will not be called.
 #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \e
     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
 } while(0)
-#define SUDO_VERSION_SET_MINOR(vp, n) do { \e
+#define SUDO_API_VERSION_SET_MINOR(vp, n) do { \e
     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 } while(0)
 .Ed
@@ -1743,8 +1756,8 @@ are described by the following structure:
 typedef int (*sudo_hook_fn_t)();
 
 struct sudo_hook {
-    int hook_version;
-    int hook_type;
+    unsigned int hook_version;
+    unsigned int hook_type;
     sudo_hook_fn_t hook_fn;
     void *closure;
 };
@@ -1897,20 +1910,12 @@ return SUDO_HOOK_RET_STOP;
 /* Hook API version major/minor */
 #define SUDO_HOOK_VERSION_MAJOR 1
 #define SUDO_HOOK_VERSION_MINOR 0
-#define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
-#define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\e
+#define SUDO_HOOK_VERSION SUDO_API_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\e
                                               SUDO_HOOK_VERSION_MINOR)
-
-/* Getters and setters for hook API version */
-#define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
-} while(0)
-#define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0xffff0000) | (n); \e
-} while(0)
 .Ed
+.Pp
+For getters and setters see the
+.Sx Policy plugin API .
 .Ss Remote command execution
 The
 .Nm sudo
@@ -1967,6 +1972,11 @@ A
 function is also available that can be used to display informational
 or error messages to the user, which is usually more convenient for
 simple messages where no use input is required.
+.Pp
+.Em Conversation function structures
+.Pp
+The conversation function takes as arguments pointers to the following
+structures:
 .Bd -literal
 struct sudo_conv_message {
 #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
@@ -1986,11 +1996,13 @@ struct sudo_conv_reply {
     char *reply;
 };
 
-typedef int (*sudo_conv_t)(int num_msgs,
-             const struct sudo_conv_message msgs[],
-             struct sudo_conv_reply replies[]);
-
-typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
+struct sudo_conv_callback {
+    unsigned int version;
+    void *closure;
+    sudo_conv_callback_fn_t on_suspend;
+    sudo_conv_callback_fn_t on_resume;
+};
 .Ed
 .Pp
 Pointers to the
@@ -2001,6 +2013,17 @@ functions are passed
 in to the plugin's
 .Fn open
 function when the plugin is initialized.
+The following type definitions can be used in the declaration of the
+.Fn open
+function:
+.Bd -literal
+typedef int (*sudo_conv_t)(int num_msgs,
+             const struct sudo_conv_message msgs[],
+             struct sudo_conv_reply replies[],
+	     struct sudo_conv_callback *callback);
+
+typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+.Ed
 .Pp
 To use the
 .Fn conversation
@@ -2015,6 +2038,31 @@ and
 .Li struct sudo_conv_reply
 for
 each message in the conversation.
+The
+.Li struct sudo_conv_callback
+pointer, if not
+.Dv NULL ,
+should contain function pointers to be called when the
+.Nm sudo
+process is suspended and/or resumed during conversation input.
+The
+.Fa on_suspend
+and
+.Fa on_resume
+functions are called with the signal that caused
+.Nm sudo
+to be suspended and the
+.Fa closure
+pointer from the
+.Li struct sudo_conv_callback .
+These functions should return 0 on success and \-1 on error.
+On error, the conversation will end and the conversation function
+will return a value of \-1.
+The intended use is to allow the plugin to release resources, such as locks,
+that should not be held indefinitely while suspended and then reacquire them
+when the process is resumed.
+Note that the functions are not actually invoked from within a signal handler.
+.Pp
 The plugin is responsible for freeing the reply buffer located in each
 .Li struct sudo_conv_reply ,
 if it is not
@@ -2192,17 +2240,9 @@ will be
 #define GROUP_API_VERSION_MINOR 0
 #define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | \e
                            GROUP_API_VERSION_MINOR)
-
-/* Getters and setters for group version */
-#define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
-} while(0)
-#define GROUP_API_VERSION_SET_MINOR(vp, n) do { \e
-    *(vp) = (*(vp) & 0xffff0000) | (n); \e
-} while(0)
 .Ed
+For getters and setters see the
+.Sx Policy plugin API .
 .Sh PLUGIN API CHANGELOG
 The following revisions have been made to the Sudo Plugin API.
 .Bl -tag -width 4n
@@ -2310,6 +2350,23 @@ The
 entry now starts with a debug file path name and may occur multiple
 times if there are multiple plugin-specific Debug lines in the
 .Xr sudo.conf @mansectform@ file.
+.It Version 1.8 (sudo 1.8.15)
+The
+.Em sudoedit_follow
+entry was added to the
+.Li command_info
+list.
+.Pp
+The sudo
+.Em conversation
+function now takes a pointer to a
+.Li struct sudo_conv_callback
+as its fourth argument.
+The
+.Li sudo_conv_t
+definition has been updated to match.
+The plugin must specify that it supports plugin API version 1.8 or higher
+to receive a conversation function pointer that supports this argument.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

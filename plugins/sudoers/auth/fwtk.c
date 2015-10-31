@@ -72,7 +72,7 @@ sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;				/* Password from the user */
     char buf[SUDO_CONV_REPL_MAX + 12];	/* General prupose buffer */
@@ -91,17 +91,17 @@ restart:
     /* Get the password/response from the user. */
     if (strncmp(resp, "challenge ", 10) == 0) {
 	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
-	pass = auth_getpass(buf, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
+	pass = auth_getpass(buf, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass && *pass == '\0') {
 	    pass = auth_getpass("Response [echo on]: ",
-		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_ON);
+		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_ON, callback);
 	}
     } else if (strncmp(resp, "chalnecho ", 10) == 0) {
 	pass = auth_getpass(&resp[10], def_passwd_timeout * 60,
-	    SUDO_CONV_PROMPT_ECHO_OFF);
+	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else if (strncmp(resp, "password", 8) == 0) {
 	pass = auth_getpass(prompt, def_passwd_timeout * 60,
-	    SUDO_CONV_PROMPT_ECHO_OFF);
+	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else if (strncmp(resp, "display ", 8) == 0) {
 	fprintf(stderr, "%s\n", &resp[8]);
 	strlcpy(buf, "response dummy", sizeof(buf));

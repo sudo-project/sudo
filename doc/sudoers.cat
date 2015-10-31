@@ -276,7 +276,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      IDs (prefixed with `%:' and `%:#' respectively) and User_Aliases. Each
      list item may be prefixed with zero or more `!' operators.  An odd number
      of `!' operators negate the value of the item; an even number just cancel
-     each other out.
+     each other out.  User netgroups are matched using the user and domain
+     members only; the host member is not used when matching.
 
      A user name, uid, group, gid, netgroup, nonunix_group or nonunix_gid may
      be enclosed in double quotes to avoid the need for escaping special
@@ -331,17 +332,19 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      A Host_List is made up of one or more host names, IP addresses, network
      numbers, netgroups (prefixed with `+') and other aliases.  Again, the
-     value of an item may be negated with the `!' operator.  If you do not
-     specify a netmask along with the network number, ssuuddoo will query each of
-     the local host's network interfaces and, if the network number
-     corresponds to one of the hosts's network interfaces, the corresponding
-     netmask will be used.  The netmask may be specified either in standard IP
-     address notation (e.g. 255.255.255.0 or ffff:ffff:ffff:ffff::), or CIDR
-     notation (number of bits, e.g. 24 or 64).  A host name may include shell-
-     style wildcards (see the _W_i_l_d_c_a_r_d_s section below), but unless the host
-     name command on your machine returns the fully qualified host name,
-     you'll need to use the _f_q_d_n option for wildcards to be useful.  Note that
-     ssuuddoo only inspects actual network interfaces; this means that IP address
+     value of an item may be negated with the `!' operator.  Host netgroups
+     are matched using the host (both qualified and unqualified) and domain
+     members only; the user member is not used when matching.  If you specify
+     a network number without a netmask, ssuuddoo will query each of the local
+     host's network interfaces and, if the network number corresponds to one
+     of the hosts's network interfaces, will use the netmask of that
+     interface.  The netmask may be specified either in standard IP address
+     notation (e.g. 255.255.255.0 or ffff:ffff:ffff:ffff::), or CIDR notation
+     (number of bits, e.g. 24 or 64).  A host name may include shell-style
+     wildcards (see the _W_i_l_d_c_a_r_d_s section below), but unless the host name
+     command on your machine returns the fully qualified host name, you'll
+     need to use the _f_q_d_n option for wildcards to be useful.  Note that ssuuddoo
+     only inspects actual network interfaces; this means that IP address
      127.0.0.1 (localhost) will never match.  Also, the host name
      ``localhost'' will only match if that is the actual host name, which is
      usually only the case for non-networked systems.
@@ -465,9 +468,10 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-     Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-                   'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
-                   'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
+     Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
+                   'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
+                   'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
+                   'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
 
      A uusseerr ssppeecciiffiiccaattiioonn determines which commands a user may run (and as
      what user) on specified hosts.  By default, commands are run as rroooott, but
@@ -581,13 +585,14 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  There are ten
-     possible tag values: NOEXEC, EXEC, LOG_INPUT, NOLOG_INPUT, LOG_OUTPUT,
-     NOLOG_OUTPUT, MAIL, NOMAIL, NOPASSWD, PASSWD, SETENV, and NOSETENV.  Once
-     a tag is set on a Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit
-     the tag unless it is overridden by the opposite tag (in other words,
-     PASSWD overrides NOPASSWD and NOEXEC overrides EXEC).
+     possible tag values: EXEC, NOEXEC, FOLLOW, NOFOLLOW, LOG_INPUT,
+     NOLOG_INPUT, LOG_OUTPUT, NOLOG_OUTPUT, MAIL, NOMAIL, PASSWD, NOPASSWD,
+     SETENV, and NOSETENV.  Once a tag is set on a Cmnd, subsequent Cmnds in
+     the Cmnd_Spec_List, inherit the tag unless it is overridden by the
+     opposite tag (in other words, PASSWD overrides NOPASSWD and NOEXEC
+     overrides EXEC).
 
-     _N_O_E_X_E_C and _E_X_E_C
+     _E_X_E_C and _N_O_E_X_E_C
 
        If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
        operating system supports it, the NOEXEC tag can be used to prevent a
@@ -600,6 +605,13 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
        See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
        NOEXEC works and whether or not it will work on your system.
+
+     _F_O_L_L_O_W and _N_O_F_O_L_L_O_W Starting with version 1.8.15, ssuuddooeeddiitt will not
+       follow symbolic links when opening files unless the _s_u_d_o_e_d_i_t___f_o_l_l_o_w
+       option is enabled.  The _F_O_L_L_O_W and _N_O_F_O_L_L_O_W tags override the value of
+       _s_u_d_o_e_d_i_t___f_o_l_l_o_w and can be used to permit (or deny) the editing of
+       symbolic links on a per-command basis.  These tags are only effective
+       for the _s_u_d_o_e_d_i_t command and are ignored for all other commands.
 
      _L_O_G___I_N_P_U_T and _N_O_L_O_G___I_N_P_U_T
 
@@ -623,7 +635,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        the descriptions of _m_a_i_l___a_l_l___c_m_n_d_s, _m_a_i_l___a_l_w_a_y_s, and _m_a_i_l___n_o___p_e_r_m_s in
        the _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
 
-     _N_O_P_A_S_S_W_D and _P_A_S_S_W_D
+     _P_A_S_S_W_D and _N_O_P_A_S_S_W_D
 
        By default, ssuuddoo requires that a user authenticate him or herself
        before running a command.  This behavior can be modified via the
@@ -666,43 +678,47 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be
      used in host names, path names and command line arguments in the _s_u_d_o_e_r_s
      file.  Wildcard matching is done via the glob(3) and fnmatch(3) functions
-     as specified by IEEE Std 1003.1 (``POSIX.1'').  Note that these are _n_o_t
-     regular expressions.
+     as specified by IEEE Std 1003.1 (``POSIX.1'').
 
-     *         Matches any set of zero or more characters.
+     *         Matches any set of zero or more characters (including white
+               space).
 
-     ?         Matches any single character.
+     ?         Matches any single character (including white space).
 
      [...]     Matches any character in the specified range.
 
-     [!...]    Matches any character nnoott in the specified range.
+     [!...]    Matches any character _n_o_t in the specified range.
 
      \x        For any character `x', evaluates to `x'.  This is used to
                escape special characters such as: `*', `?', `[', and `]'.
 
-     Character classes may also be used if your system's glob(3) and
-     fnmatch(3) functions support them.  However, because the `:' character
-     has special meaning in _s_u_d_o_e_r_s, it must be escaped.  For example:
+     NNoottee tthhaatt tthheessee aarree nnoott rreegguullaarr eexxpprreessssiioonnss..  Unlike a regular expression
+     there is no way to match one or more characters within a range.
 
-         /bin/ls [[:alpha:]]*
+     Character classes may be used if your system's glob(3) and fnmatch(3)
+     functions support them.  However, because the `:' character has special
+     meaning in _s_u_d_o_e_r_s, it must be escaped.  For example:
+
+         /bin/ls [[\:alpha\:]]*
 
      Would match any file name beginning with a letter.
 
-     Note that a forward slash (`/') will nnoott be matched by wildcards used in
-     the path name.  This is to make a path like:
+     Note that a forward slash (`/') will _n_o_t be matched by wildcards used in
+     the file name portion of the command.  This is to make a path like:
 
          /usr/bin/*
 
      match _/_u_s_r_/_b_i_n_/_w_h_o but not _/_u_s_r_/_b_i_n_/_X_1_1_/_x_t_e_r_m.
 
-     When matching the command line arguments, however, a slash ddooeess get
+     When matching the command line arguments, however, a slash _d_o_e_s get
      matched by wildcards since command line arguments may contain arbitrary
      strings and not just path names.
 
-     Wildcards in command line arguments should be used with care.  Because
-     command line arguments are matched as a single, concatenated string, a
-     wildcard such as `?' or `*' can match multiple words.  For example, while
-     a sudoers entry like:
+     WWiillddccaarrddss iinn ccoommmmaanndd lliinnee aarrgguummeennttss sshhoouulldd bbee uusseedd wwiitthh ccaarree..
+     Command line arguments are matched as a single, concatenated string.
+     This mean a wildcard character such as `?' or `*' will match across word
+     boundaries, which may be unexpected.  For example, while a sudoers entry
+     like:
 
          %operator ALL = /bin/cat /var/log/messages*
 
@@ -714,14 +730,15 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
          $ sudo cat /var/log/messages /etc/shadow
 
-     which is probably not what was intended.
+     which is probably not what was intended.  In most cases it is better to
+     do command line processing outside of _s_u_d_o_e_r_s in a scripting language.
 
    EExxcceeppttiioonnss ttoo wwiillddccaarrdd rruulleess
      The following exceptions apply to the above rules:
 
      ""        If the empty string "" is the only command line argument in the
                _s_u_d_o_e_r_s entry it means that command is not allowed to be run
-               with aannyy arguments.
+               with _a_n_y arguments.
 
      sudoedit  Command line arguments to the _s_u_d_o_e_d_i_t built-in command should
                always be path names, so a forward slash (`/') will not be
@@ -773,7 +790,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      manager or editor temporary/backup files.  Files are parsed in sorted
      lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is lexical,
-     not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
+     not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded _a_f_t_e_r
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes in
      the file names can be used to avoid such problems.
 
@@ -795,7 +812,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      User_Alias, Runas_Alias, or Host_Alias.  You should not try to define
      your own _a_l_i_a_s called AALLLL as the built-in alias will be used in
      preference to your own.  Please note that using AALLLL can be dangerous
-     since in a command context, it allows the user to run aannyy command on the
+     since in a command context, it allows the user to run _a_n_y command on the
      system.
 
      An exclamation point (`!') can be used as a logical _n_o_t operator in a
@@ -834,6 +851,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      BBoooolleeaann FFllaaggss:
 
+     always_query_group_plugin
+                       If a _g_r_o_u_p___p_l_u_g_i_n is configured, use it to resolve
+                       groups of the form %group as long as there is not also
+                       a system group of the same name.  Normally, only groups
+                       of the form %:group are passed to the _g_r_o_u_p___p_l_u_g_i_n.
+                       This flag is _o_f_f by default.
+
      always_set_home   If enabled, ssuuddoo will set the HOME environment variable
                        to the home directory of the target user (which is root
                        unless the --uu option is used).  This effectively means
@@ -864,9 +888,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      use_netgroups     If set, netgroups (prefixed with `+'), may be used in
                        place of a user or host.  For LDAP-based sudoers,
                        netgroup support requires an expensive substring match
-                       on the server.  If netgroups are not needed, this
-                       option can be disabled to reduce the load on the LDAP
-                       server.  This flag is _o_n by default.
+                       on the server unless the NNEETTGGRROOUUPP__BBAASSEE directive is
+                       present in the _/_e_t_c_/_l_d_a_p_._c_o_n_f file.  If netgroups are
+                       not needed, this option can be disabled to reduce the
+                       load on the LDAP server.  This flag is _o_n by default.
 
      exec_background   By default, ssuuddoo runs a command as the foreground
                        process as long as ssuuddoo itself is running in the
@@ -1101,7 +1126,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      noexec            If set, all commands run via ssuuddoo will behave as if the
                        NOEXEC tag has been set, unless overridden by an EXEC
-                       tag.  See the description of _N_O_E_X_E_C _a_n_d _E_X_E_C below as
+                       tag.  See the description of _E_X_E_C _a_n_d _N_O_E_X_E_C above as
                        well as the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section at the end
                        of this manual.  This flag is _o_f_f by default.
 
@@ -1210,9 +1235,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        system) use LOGNAME to determine the real identity of
                        the user, it may be desirable to change this behavior.
                        This can be done by negating the set_logname option.
-                       Note that if the _e_n_v___r_e_s_e_t option has not been
-                       disabled, entries in the _e_n_v___k_e_e_p list will override
-                       the value of _s_e_t___l_o_g_n_a_m_e.  This flag is _o_n by default.
+                       Note that _s_e_t___l_o_g_n_a_m_e will have no effect if the
+                       _e_n_v___r_e_s_e_t option has not been disabled and the _e_n_v___k_e_e_p
+                       list contains LOGNAME, USER or USERNAME.  This flag is
+                       _o_n by default.
 
      set_utmp          When enabled, ssuuddoo will create an entry in the utmp (or
                        utmpx) file when a pseudo-tty is allocated.  A pseudo-
@@ -1247,6 +1273,23 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        run setuid.  This option is only effective on systems
                        that support either the setreuid(2) or setresuid(2)
                        system call.  This flag is _o_f_f by default.
+
+     sudoedit_checkdir
+                       If set, ssuuddooeeddiitt will refuse to edit files located in a
+                       directory that is writable by the invoking user unless
+                       it is run by root.  On many systems, this option
+                       requires that the parent directory of the file to be
+                       edited be readable by the target user.  This flag is
+                       _o_f_f by default.
+
+     sudoedit_follow   By default, ssuuddooeeddiitt will not follow symbolic links
+                       when opening files.  The _s_u_d_o_e_d_i_t___f_o_l_l_o_w option can be
+                       enabled to allow ssuuddooeeddiitt to open symbolic links.  It
+                       may be overridden on a per-command basis by the _F_O_L_L_O_W
+                       and _N_O_F_O_L_L_O_W tags.  This flag is _o_f_f by default.
+
+                       This setting is only supported by version 1.8.15 or
+                       higher.
 
      targetpw          If set, ssuuddoo will prompt for the password of the user
                        specified by the --uu option (defaults to root) instead
@@ -1305,6 +1348,24 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        The _c_l_o_s_e_f_r_o_m option can be used to specify a different
                        file descriptor at which to start closing.  The default
                        is 3.
+
+     maxseq            The maximum sequence number that will be substituted
+                       for the ``%{seq}'' escape in the I/O log file (see the
+                       _i_o_l_o_g___d_i_r description above for more information).
+                       While the value substituted for ``%{seq}'' is in base
+                       36, _m_a_x_s_e_q itself should be expressed in decimal.
+                       Values larger than 2176782336 (which corresponds to the
+                       base 36 sequence number ``ZZZZZZ'') will be silently
+                       truncated to 2176782336.  The default value is
+                       2176782336.
+
+                       Once the local sequence number reaches the value of
+                       _m_a_x_s_e_q, it will ``roll over'' to zero, after which
+                       ssuuddooeerrss will truncate and re-use any existing I/O log
+                       path names.
+
+                       This setting is only supported by version 1.8.7 or
+                       higher.
 
      passwd_tries      The number of tries a user gets to enter his/her
                        password before ssuuddoo logs the failure and exits.  The
@@ -1440,24 +1501,6 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      mailsub           Subject of the mail sent to the _m_a_i_l_t_o user.  The
                        escape %h will expand to the host name of the machine.
                        Default is ``*** SECURITY information for %h ***''.
-
-     maxseq            The maximum sequence number that will be substituted
-                       for the ``%{seq}'' escape in the I/O log file (see the
-                       _i_o_l_o_g___d_i_r description above for more information).
-                       While the value substituted for ``%{seq}'' is in base
-                       36, _m_a_x_s_e_q itself should be expressed in decimal.
-                       Values larger than 2176782336 (which corresponds to the
-                       base 36 sequence number ``ZZZZZZ'') will be silently
-                       truncated to 2176782336.  The default value is
-                       2176782336.
-
-                       Once the local sequence number reaches the value of
-                       _m_a_x_s_e_q, it will ``roll over'' to zero, after which
-                       ssuuddooeerrss will truncate and re-use any existing I/O log
-                       path names.
-
-                       This setting is only supported by version 1.8.7 or
-                       higher.
 
      noexec_file       As of ssuuddoo version 1.8.1 this option is no longer
                        supported.  The path to the noexec file should now be
@@ -2094,8 +2137,16 @@ EEXXAAMMPPLLEESS
      with any group in the _A_D_M_I_N_G_R_P Runas_Alias (the aaddmm and ooppeerr groups).
 
      The user ppeettee is allowed to change anyone's password except for root on
-     the _H_P_P_A machines.  Note that this assumes passwd(1) does not take
-     multiple user names on the command line.
+     the _H_P_P_A machines.  Because command line arguments are matched as a
+     single, concatenated string, the `*' wildcard will match _m_u_l_t_i_p_l_e words.
+     This example assumes that passwd(1) does not take multiple user names on
+     the command line.  Note that on GNU systems, options to passwd(1) may be
+     specified after the user argument.  As a result, this rule will also
+     allow:
+
+         passwd username --expire
+
+     which may not be desirable.
 
      bob             SPARC = (OP) ALL : SGI = (OP) ALL
 
@@ -2153,7 +2204,7 @@ EEXXAAMMPPLLEESS
      simply su(1) to www.
 
      ALL             CDROM = NOPASSWD: /sbin/umount /CDROM,\
-                     /sbin/mount -o nosuid,nodev /dev/cd0a /CDROM
+                     /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
 
      Any user may mount or unmount a CD-ROM on the machines in the CDROM
      Host_Alias (orion, perseus, hercules) without entering a password.  This
@@ -2278,6 +2329,17 @@ SSEECCUURRIITTYY NNOOTTEESS
      The editor will run as the operator user, not root, on a temporary copy
      of _/_e_t_c_/_m_o_t_d.  After the file has been edited, _/_e_t_c_/_m_o_t_d will be updated
      with the contents of the temporary copy.
+
+     Users should _n_e_v_e_r be granted ssuuddooeeddiitt permission to edit a file that
+     resides in a directory the user has write access to, either directly or
+     via a wildcard.  If the user has write access to the directory it is
+     possible to replace the legitimate file with a link to another file,
+     allowing the editing of arbitrary files.  Starting with version 1.8.15,
+     ssuuddooeeddiitt will refuse to open a symbolic link unless either the
+     _s_u_d_o_e_d_i_t___f_o_l_l_o_w Defaults option is enabled or the _s_u_d_o_e_d_i_t command is
+     prefixed with the FOLLOW tag.  However, it is still possible to create a
+     hard link if the directory is writable and the link target resides on the
+     same file system.
 
    TTiimmee ssttaammpp ffiillee cchheecckkss
      _s_u_d_o_e_r_s will check the ownership of its time stamp directory
@@ -2417,4 +2479,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.14                      July 10, 2015                     Sudo 1.8.14
+Sudo 1.8.15                    October 24, 2015                    Sudo 1.8.15

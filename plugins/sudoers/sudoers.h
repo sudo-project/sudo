@@ -238,12 +238,11 @@ bool user_is_exempt(void);
 char *expand_prompt(const char *old_prompt, const char *auth_user);
 
 /* timestamp.c */
-int remove_timestamp(bool);
-int set_lectured(void);
+int timestamp_remove(bool unlinkit);
 
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);
-int verify_user(struct passwd *pw, char *prompt, int validated);
+int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv_callback *callback);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);

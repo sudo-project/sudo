@@ -53,27 +53,19 @@ base64_decode(const char *str, unsigned char *dst, size_t dsize)
      */
     while (*str != '\0') {
 	for (i = 0; i < 4; i++) {
-	    switch (*str) {
-	    case '=':
-		str++;
-		/* FALLTHROUGH */
-	    case '\0':
-		ch[i] = '=';
+	    if (*str == '=' || *str == '\0')
 		break;
-	    default:
-		if ((pos = strchr(b64, *str++)) == NULL)
-		    debug_return_size_t((size_t)-1);
-		ch[i] = (unsigned char)(pos - b64);
-		break;
-	    }
+	    if ((pos = strchr(b64, *str++)) == NULL)
+		debug_return_size_t((size_t)-1);
+	    ch[i] = (unsigned char)(pos - b64);
 	}
-	if (ch[0] == '=' || ch[1] == '=' || dst == dend)
+	if (i == 0 || i == 1 || dst == dend)
 	    break;
 	*dst++ = (ch[0] << 2) | ((ch[1] & 0x30) >> 4);
-	if (ch[2] == '=' || dst == dend)
+	if (i == 2 || dst == dend)
 	    break;
 	*dst++ = ((ch[1] & 0x0f) << 4) | ((ch[2] & 0x3c) >> 2);
-	if (ch[3] == '=' || dst == dend)
+	if (i == 3 || dst == dend)
 	    break;
 	*dst++ = ((ch[2] & 0x03) << 6) | ch[3];
     }

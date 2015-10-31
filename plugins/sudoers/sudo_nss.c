@@ -261,7 +261,7 @@ output(const char *buf)
     msg.msg_type = SUDO_CONV_INFO_MSG;
     msg.msg = buf;
     memset(&repl, 0, sizeof(repl));
-    if (sudo_conv(1, &msg, &repl) == -1)
+    if (sudo_conv(1, &msg, &repl, NULL) == -1)
 	debug_return_int(0);
     debug_return_int(strlen(buf));
 }

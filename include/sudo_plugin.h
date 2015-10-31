@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,18 +19,18 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 7
-#define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_API_VERSION_MINOR 8
+#define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
-/* Getters and setters for API version */
+/* Getters and setters for plugin API versions */
 #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+#define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffffU)
 #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+    *(vp) = (*(vp) & 0x0000ffffU) | ((n) << 16); \
 } while(0)
 #define SUDO_API_VERSION_SET_MINOR(vp, n) do { \
-    *(vp) = (*(vp) & 0xffff0000) | (n); \
+    *(vp) = (*(vp) & 0xffff0000U) | (n); \
 } while(0)
 
 /* Conversation function types and defines */
@@ -61,8 +61,26 @@ struct sudo_conv_reply {
     char *reply;
 };
 
+/* Conversation callback API version major/minor */
+#define SUDO_CONV_CALLBACK_VERSION_MAJOR	1
+#define SUDO_CONV_CALLBACK_VERSION_MINOR	0
+#define SUDO_CONV_CALLBACK_VERSION SUDO_API_MKVERSION(SUDO_CONV_CALLBACK_VERSION_MAJOR, SUDO_CONV_CALLBACK_VERSION_MINOR)
+
+/*
+ * Callback struct to be passed to the conversation function.
+ * Can be used to perform operations on suspend/resume such
+ * as dropping/acquiring locks.
+ */
+typedef int (*sudo_conv_callback_fn_t)(int signo, void *closure);
+struct sudo_conv_callback {
+    unsigned int version;
+    void *closure;
+    sudo_conv_callback_fn_t on_suspend;
+    sudo_conv_callback_fn_t on_resume;
+};
+
 typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
-	struct sudo_conv_reply replies[]);
+	struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
 /*
@@ -78,8 +96,8 @@ typedef int (*sudo_hook_fn_unsetenv_t)(const char *name, void *closure);
 
 /* Hook structure definition. */
 struct sudo_hook {
-    int hook_version;
-    int hook_type;
+    unsigned int hook_version;
+    unsigned int hook_type;
     sudo_hook_fn_t hook_fn;
     void *closure;
 };
@@ -87,18 +105,7 @@ struct sudo_hook {
 /* Hook API version major/minor */
 #define SUDO_HOOK_VERSION_MAJOR	1
 #define SUDO_HOOK_VERSION_MINOR	0
-#define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
-#define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR, SUDO_HOOK_VERSION_MINOR)
-
-/* Getters and setters for hook API version */
-#define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
-} while(0)
-#define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
-    *(vp) = (*(vp) & 0xffff0000) | (n); \
-} while(0)
+#define SUDO_HOOK_VERSION SUDO_API_MKVERSION(SUDO_HOOK_VERSION_MAJOR, SUDO_HOOK_VERSION_MINOR)
 
 /*
  * Hook function return values.
@@ -166,17 +173,13 @@ struct io_plugin {
 /* Sudoers group plugin version major/minor */
 #define GROUP_API_VERSION_MAJOR 1
 #define GROUP_API_VERSION_MINOR 0
-#define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | GROUP_API_VERSION_MINOR)
+#define GROUP_API_VERSION SUDO_API_MKVERSION(GROUP_API_VERSION_MAJOR, GROUP_API_VERSION_MINOR)
 
-/* Getters and setters for group version */
-#define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-#define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-#define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \
-    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
-} while(0)
-#define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
-    *(vp) = (*(vp) & 0xffff0000) | (n); \
-} while(0)
+/* Getters and setters for group version (for source compat only) */
+#define GROUP_API_VERSION_GET_MAJOR(v) SUDO_API_VERSION_GET_MAJOR(v)
+#define GROUP_API_VERSION_GET_MINOR(v) SUDO_API_VERSION_GET_MINOR(v)
+#define GROUP_API_VERSION_SET_MAJOR(vp, n) SUDO_API_VERSION_SET_MAJOR(vp, n)
+#define GROUP_API_VERSION_SET_MINOR(vp, n) SUDO_API_VERSION_SET_MINOR(vp, n)
 
 /*
  * version: for compatibility checking

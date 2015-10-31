@@ -139,14 +139,14 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
  *                   incorrect authentication, fatal on errors
  */
 int
-sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int rval;
     debug_decl(sudo_securid_verify, SUDOERS_DEBUG_AUTH)
 
     pass = auth_getpass("Enter your PASSCODE: ",
-	def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
+	def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
@@ -181,7 +181,7 @@ sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 !!! ATTENTION !!!\n\
 Wait for the token code to change, \n\
 then enter the new token code.\n", \
-		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
+		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 
 		if (SD_Next(*sd, pass) == ACM_OK) {
 			rval = AUTH_SUCCESS;

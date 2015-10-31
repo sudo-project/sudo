@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "January 30, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "September 21, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -150,6 +150,8 @@ or non-Unix group name or ID (prefixed with
 or
 \(oq%:#\(cq
 respectively).
+User netgroups are matched using the user and domain members only;
+the host member is not used when matching.
 Non-Unix group support is only available when an appropriate
 \fIgroup_plugin\fR
 is defined in the global
@@ -163,6 +165,8 @@ A host name, IP address, IP network, or host netgroup (prefixed with a
 The special value
 \fRALL\fR
 will match any host.
+Host netgroups are matched using the host (both qualified and unqualified)
+and domain members only; the user member is not used when matching.
 .TP 6n
 \fBsudoCommand\fR
 A fully-qualified Unix command name with optional command line arguments,

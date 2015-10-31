@@ -38,8 +38,6 @@
 #  define sudo_sys_signame	sys_signame
 #elif defined(HAVE_DECL__SYS_SIGNAME) && HAVE_DECL__SYS_SIGNAME == 1
 #  define sudo_sys_signame	_sys_signame
-#elif defined(HAVE_DECL___SYS_SIGNAME) && HAVE_DECL___SYS_SIGNAME == 1
-#  define sudo_sys_signame	__sys_signame
 #elif defined(HAVE_DECL_SYS_SIGABBREV) && HAVE_DECL_SYS_SIGABBREV == 1
 #  define sudo_sys_signame	sys_sigabbrev
 #else

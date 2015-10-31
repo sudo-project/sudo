@@ -42,7 +42,7 @@
 #include "sudo_auth.h"
 
 int
-sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;

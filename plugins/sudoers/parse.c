@@ -320,6 +320,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 		    def_mail_no_perms = false;
 		}
 	    }
+	    if (tags->follow != UNSPEC)
+		def_sudoedit_follow = tags->follow;
 	}
     } else if (match == DENY) {
 	SET(validated, VALIDATE_FAILURE);
@@ -345,9 +347,6 @@ done:
 	SET(validated, VALIDATE_ERROR);
     debug_return_int(validated);
 }
-
-#define	TAG_SET(tt) \
-	((tt) != UNSPEC && (tt) != IMPLIED)
 
 #define	TAG_CHANGED(t) \
 	(TAG_SET(cs->tags.t) && cs->tags.t != tags->t)
@@ -394,13 +393,13 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	tags->send_mail = cs->tags.send_mail;
 	sudo_lbuf_append(lbuf, tags->send_mail ? "MAIL: " : "NOMAIL: ");
     }
+    if (TAG_CHANGED(follow)) {
+	tags->follow = cs->tags.follow;
+	sudo_lbuf_append(lbuf, tags->follow ? "FOLLOW: " : "NOFOLLOW: ");
+    }
     print_member(lbuf, cs->cmnd, CMNDALIAS);
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
-
-#define	RUNAS_CHANGED(cs1, cs2) \
-	(cs1->runasuserlist != cs2->runasuserlist || \
-	 cs1->runasgrouplist != cs2->runasgrouplist)
 
 static int
 sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
@@ -414,12 +413,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     debug_decl(sudo_file_display_priv_short, SUDOERS_DEBUG_NSS)
 
     /* gcc -Wuninitialized false positive */
-    tags.log_input = UNSPEC;
-    tags.log_output = UNSPEC;
-    tags.noexec = UNSPEC;
-    tags.nopasswd = UNSPEC;
-    tags.send_mail = UNSPEC;
-    tags.setenv = UNSPEC;
+    TAGS_INIT(tags);
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
 	    continue;
@@ -449,12 +443,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-		tags.log_input = UNSPEC;
-		tags.log_output = UNSPEC;
-		tags.noexec = UNSPEC;
-		tags.nopasswd = UNSPEC;
-		tags.send_mail = UNSPEC;
-		tags.setenv = UNSPEC;
+		TAGS_INIT(tags);
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		sudo_lbuf_append(lbuf, ", ");
 	    }
@@ -466,13 +455,6 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     }
     debug_return_int(nfound);
 }
-
-#define	TAGS_CHANGED(ot, nt) \
-	((TAG_SET((nt).setenv) && (nt).setenv != (ot).setenv) || \
-	 (TAG_SET((nt).noexec) && (nt).noexec != (ot).noexec) || \
-	 (TAG_SET((nt).nopasswd) && (nt).nopasswd != (ot).nopasswd) || \
-	 (TAG_SET((nt).log_input) && (nt).log_input != (ot).log_input) || \
-	 (TAG_SET((nt).log_output) && (nt).log_output != (ot).log_output))
 
 /*
  * Compare the current cmndspec with the previous one to determine

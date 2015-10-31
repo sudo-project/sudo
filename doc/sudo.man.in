@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "July 10, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "September 27, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -89,6 +89,10 @@ allows a permitted user to execute a
 \fIcommand\fR
 as the superuser or another user, as specified by the security
 policy.
+The invoking user's real
+(\fInot\fR
+effective) user ID is used to determine the user name with which
+to query the security policy.
 .PP
 \fBsudo\fR
 supports a plugin architecture for security policies and input/output
@@ -291,6 +295,15 @@ If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
 .RE
 .RS 12n
+.sp
+Unless explicitly allowed by the security policy, symbolic links
+will not be opened.
+This helps prevent the editing of unauthorized files when the file
+is located in a user-writable directory.
+Versions of
+\fBsudo\fR
+prior to 1.8.15 do not have this restriction.
+Users are never allowed to edit device special files.
 .sp
 If the specified file does not exist, it will be created.
 Note that unlike most commands run by
@@ -718,7 +731,6 @@ process,
 \fBsudo\fR
 will relay signals it receives to the command.
 Unless the command is being run in a new pty, the
-\fRSIGHUP\fR,
 \fRSIGINT\fR
 and
 \fRSIGQUIT\fR
@@ -812,9 +824,12 @@ manual for more information about the
 \fBsudo\fR
 plugin architecture.
 .SH "EXIT VALUE"
-Upon successful execution of a program, the exit status from
-\fIsudo\fR
-will simply be the exit status of the program that was executed.
+Upon successful execution of a command, the exit status from
+\fBsudo\fR
+will be the exit status of the program that was executed.
+If the command terminated due to receipt of a signal,
+\fBsudo\fR
+will send itself the signal that terminated the command.
 .PP
 Otherwise,
 \fBsudo\fR
@@ -822,14 +837,14 @@ exits with a value of 1 if there is a configuration/permission
 problem or if
 \fBsudo\fR
 cannot execute the given command.
-In the latter case the error string is printed to the standard error.
+In the latter case, the error string is printed to the standard error.
 If
 \fBsudo\fR
 cannot
 stat(2)
 one or more entries in the user's
 \fRPATH\fR,
-an error is printed on stderr.
+an error is printed to the standard error.
 (If the directory does not exist or if it is not really a directory,
 the entry is ignored and no error is printed.)
 This should not happen under normal circumstances.
@@ -860,6 +875,29 @@ modified and is passed unchanged to the program that
 \fBsudo\fR
 executes.
 .PP
+Users should
+\fInever\fR
+be granted
+\fBsudo\fR
+privileges to execute files that are writable by the user or
+that reside in a directory that is writable by the user.
+If the user can modify or replace the command there is no way
+to limit what additional commands they can run.
+Likewise, users should
+\fInever\fR
+be granted
+\fBsudoedit\fR
+permission to edit a file that resides in a directory the user has
+write access to.
+A user with directory write access could replace the legitimate
+file with a link to some other, arbitrary, file.
+Starting with version 1.8.15,
+\fBsudoedit\fR
+will refuse to open a symbolic link unless the security policy
+explicitly permits it.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
+.PP
 Please note that
 \fBsudo\fR
 will normally only log the command it explicitly runs.
@@ -887,6 +925,8 @@ To prevent the disclosure of potentially sensitive information,
 \fBsudo\fR
 disables core dumps by default while it is executing (they are
 re-enabled for the command that is run).
+This historical practice dates from a time when most operating
+systems allowed setuid processes to dump core by default.
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
@@ -957,6 +997,23 @@ is not present in the
 \fIenv_keep\fR
 list.
 .TP 17n
+\fRLOGNAME\fR
+Set to the login name of the target user when the
+\fB\-i\fR
+option is specified, when the
+\fIset_logname\fR
+option is enabled in
+\fIsudoers\fR
+or when the
+\fIenv_reset\fR
+option is enabled in
+\fIsudoers\fR
+(unless
+\fRLOGNAME\fR
+is present in the
+\fIenv_keep\fR
+list).
+.TP 17n
 \fRPATH\fR
 May be overridden by the security policy.
 .TP 17n
@@ -997,9 +1054,13 @@ Set to the user ID of the user who invoked sudo.
 Set to the login name of the user who invoked sudo.
 .TP 17n
 \fRUSER\fR
-Set to the target user (root unless the
-\fB\-u\fR
-option is specified).
+Set to the same value as
+\fRLOGNAME\fR,
+described above.
+.TP 17n
+\fRUSERNAME\fR
+Same as
+\fRUSER\fR.
 .TP 17n
 \fRVISUAL\fR
 Default editor to use in

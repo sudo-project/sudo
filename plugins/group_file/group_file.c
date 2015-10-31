@@ -62,10 +62,10 @@ sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 
     sudo_log = sudo_printf;
 
-    if (GROUP_API_VERSION_GET_MAJOR(version) != GROUP_API_VERSION_MAJOR) {
+    if (SUDO_API_VERSION_GET_MAJOR(version) != GROUP_API_VERSION_MAJOR) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
 	    "group_file: incompatible major version %d, expected %d\n",
-	    GROUP_API_VERSION_GET_MAJOR(version),
+	    SUDO_API_VERSION_GET_MAJOR(version),
 	    GROUP_API_VERSION_MAJOR);
 	return -1;
     }

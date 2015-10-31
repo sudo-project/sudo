@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 10, 2015
+.Dd September 27, 2015
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -77,6 +77,10 @@ allows a permitted user to execute a
 .Ar command
 as the superuser or another user, as specified by the security
 policy.
+The invoking user's real
+.No ( Em not
+effective) user ID is used to determine the user name with which
+to query the security policy.
 .Pp
 .Nm
 supports a plugin architecture for security policies and input/output
@@ -264,6 +268,15 @@ option is used.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
 .El
+.Pp
+Unless explicitly allowed by the security policy, symbolic links
+will not be opened.
+This helps prevent the editing of unauthorized files when the file
+is located in a user-writable directory.
+Versions of
+.Nm
+prior to 1.8.15 do not have this restriction.
+Users are never allowed to edit device special files.
 .Pp
 If the specified file does not exist, it will be created.
 Note that unlike most commands run by
@@ -653,7 +666,6 @@ process,
 .Nm
 will relay signals it receives to the command.
 Unless the command is being run in a new pty, the
-.Dv SIGHUP ,
 .Dv SIGINT
 and
 .Dv SIGQUIT
@@ -747,9 +759,12 @@ manual for more information about the
 .Nm
 plugin architecture.
 .Sh EXIT VALUE
-Upon successful execution of a program, the exit status from
-.Em sudo
-will simply be the exit status of the program that was executed.
+Upon successful execution of a command, the exit status from
+.Nm
+will be the exit status of the program that was executed.
+If the command terminated due to receipt of a signal,
+.Nm
+will send itself the signal that terminated the command.
 .Pp
 Otherwise,
 .Nm
@@ -757,14 +772,14 @@ exits with a value of 1 if there is a configuration/permission
 problem or if
 .Nm
 cannot execute the given command.
-In the latter case the error string is printed to the standard error.
+In the latter case, the error string is printed to the standard error.
 If
 .Nm
 cannot
 .Xr stat 2
 one or more entries in the user's
 .Ev PATH ,
-an error is printed on stderr.
+an error is printed to the standard error.
 (If the directory does not exist or if it is not really a directory,
 the entry is ignored and no error is printed.)
 This should not happen under normal circumstances.
@@ -795,6 +810,29 @@ modified and is passed unchanged to the program that
 .Nm
 executes.
 .Pp
+Users should
+.Em never
+be granted
+.Nm
+privileges to execute files that are writable by the user or
+that reside in a directory that is writable by the user.
+If the user can modify or replace the command there is no way
+to limit what additional commands they can run.
+Likewise, users should
+.Em never
+be granted
+.Nm sudoedit
+permission to edit a file that resides in a directory the user has
+write access to.
+A user with directory write access could replace the legitimate
+file with a link to some other, arbitrary, file.
+Starting with version 1.8.15,
+.Nm sudoedit
+will refuse to open a symbolic link unless the security policy
+explicitly permits it.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
+.Pp
 Please note that
 .Nm
 will normally only log the command it explicitly runs.
@@ -822,6 +860,8 @@ To prevent the disclosure of potentially sensitive information,
 .Nm
 disables core dumps by default while it is executing (they are
 re-enabled for the command that is run).
+This historical practice dates from a time when most operating
+systems allowed setuid processes to dump core by default.
 To aid in debugging
 .Nm
 crashes, you may wish to re-enable core dumps by setting
@@ -886,6 +926,22 @@ and
 is not present in the
 .Em env_keep
 list.
+.It Ev LOGNAME
+Set to the login name of the target user when the
+.Fl i
+option is specified, when the
+.Em set_logname
+option is enabled in
+.Em sudoers
+or when the
+.Em env_reset
+option is enabled in
+.Em sudoers
+(unless
+.Ev LOGNAME
+is present in the
+.Em env_keep
+list).
 .It Ev PATH
 May be overridden by the security policy.
 .It Ev SHELL
@@ -916,9 +972,12 @@ Set to the user ID of the user who invoked sudo.
 .It Ev SUDO_USER
 Set to the login name of the user who invoked sudo.
 .It Ev USER
-Set to the target user (root unless the
-.Fl u
-option is specified).
+Set to the same value as
+.Ev LOGNAME ,
+described above.
+.It Ev USERNAME
+Same as
+.Ev USER .
 .It Ev VISUAL
 Default editor to use in
 .Fl e

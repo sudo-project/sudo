@@ -180,6 +180,12 @@
 #define I_MAXSEQ                89
 #define def_use_netgroups       (sudo_defs_table[90].sd_un.flag)
 #define I_USE_NETGROUPS         90
+#define def_sudoedit_checkdir   (sudo_defs_table[91].sd_un.flag)
+#define I_SUDOEDIT_CHECKDIR     91
+#define def_sudoedit_follow     (sudo_defs_table[92].sd_un.flag)
+#define I_SUDOEDIT_FOLLOW       92
+#define def_always_query_group_plugin (sudo_defs_table[93].sd_un.flag)
+#define I_ALWAYS_QUERY_GROUP_PLUGIN93
 
 enum def_tuple {
 	never,

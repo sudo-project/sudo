@@ -31,6 +31,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
 #include <grp.h>
 #include <pwd.h>
 #include <signal.h>
@@ -38,9 +39,6 @@
 #include <fcntl.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
-#endif
-#ifndef HAVE_STRUCT_TIMESPEC
-# include "compat/timespec.h"
 #endif
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
@@ -57,8 +55,8 @@
 struct tempfile {
     char *tfile;
     char *ofile;
-    struct timespec omtim;
     off_t osize;
+    struct timespec omtim;
 };
 
 static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
@@ -157,6 +155,210 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     debug_return_int(tfd);
 }
 
+static bool
+group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
+{
+    int i;
+    debug_decl(group_matches, SUDO_DEBUG_EDIT)
+
+    if (target == gid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user gid %u matches directory gid %u", (unsigned int)gid,
+	    (unsigned int)target);
+	debug_return_bool(true);
+    }
+    for (i = 0; i < ngroups; i++) {
+	if (target == groups[i]) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"user gid %u matches directory gid %u", (unsigned int)gid,
+		(unsigned int)target);
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
+}
+
+#ifndef HAVE_OPENAT
+/* This does not support AT_FDCWD... */
+static int
+sudo_openat(int dfd, const char *path, int flags, mode_t mode)
+{
+    int fd, odfd;
+    debug_decl(sudo_openat, SUDO_DEBUG_EDIT)
+
+    /* Save cwd */
+    if ((odfd = open(".", O_RDONLY)) == -1)
+	debug_return_int(-1);
+
+    if (fchdir(dfd) == -1) {
+	close(odfd);
+	debug_return_int(-1);
+    }
+
+    fd = open(path, flags, mode);
+
+    /* Restore cwd */
+    if (fchdir(odfd) == -1)
+	sudo_fatal(_("unable to restore current working directory"));
+    close(odfd);
+
+    debug_return_int(fd);
+}
+#define openat sudo_openat
+#endif /* HAVE_OPENAT */
+
+/*
+ * Returns true if the directory described by sb is writable
+ * by the user.  We treat directories with the sticky bit as
+ * unwritable unless they are owned by the user.
+ */
+static bool
+dir_is_writable(struct stat *sb, uid_t uid, gid_t gid, int ngroups,
+    GETGROUPS_T *groups)
+{
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+
+    /* If the user owns the dir we always consider it writable. */
+    if (sb->st_uid == uid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user uid %u matches directory uid %u", (unsigned int)uid,
+	    (unsigned int)sb->st_uid);
+	debug_return_bool(true);
+    }
+
+    /* Other writable? */
+    if (ISSET(sb->st_mode, S_IWOTH)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "directory is writable by other");
+	debug_return_bool(true);
+    }
+
+    /* Group writable? */
+    if (ISSET(sb->st_mode, S_IWGRP)) {
+	if (group_matches(sb->st_gid, gid, ngroups, groups)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"directory is writable by one of the user's groups");
+	    debug_return_bool(true);
+	}
+    }
+
+    debug_return_bool(false);
+}
+
+static int
+sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode)
+{
+    char *base, *dir;
+    struct stat sb;
+    int dfd, fd;
+    debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT)
+
+    base = strrchr(path, '/');
+    if (base != NULL) {
+	*base++ = '\0';
+	dir = path;
+    } else {
+	base = path;
+	dir = ".";
+    }
+#ifdef O_PATH
+    if ((dfd = open(dir, O_PATH)) != -1) {
+	/* Linux kernels < 3.6 can't do fstat on O_PATH fds. */
+	if (fstat(dfd, &sb) == -1) {
+	    close(dfd);
+	    dfd = open(dir, O_RDONLY);
+	    if (fstat(dfd, &sb) == -1) {
+		close(dfd);
+		dfd = -1;
+	    }
+	}
+    }
+#else
+    if ((dfd = open(dir, O_RDONLY)) != -1) {
+	if (fstat(dfd, &sb) == -1) {
+	    close(dfd);
+	    dfd = -1;
+	}
+    }
+#endif
+    if (base != path)
+	base[-1] = '/';			/* restore path */
+    if (dfd == -1)
+	debug_return_int(-1);
+
+    if (dir_is_writable(&sb, user_details.uid, user_details.gid,
+	user_details.ngroups, user_details.groups)) {
+	close(dfd);
+	errno = EISDIR;
+	debug_return_int(-1);
+    }
+
+    fd = openat(dfd, path, oflags, mode);
+    close(dfd);
+    debug_return_int(fd);
+}
+
+#ifdef O_NOFOLLOW
+static int
+sudo_edit_open(char *path, int oflags, mode_t mode, int sflags)
+{
+    int fd;
+    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
+
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW))
+	oflags |= O_NOFOLLOW;
+    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_details.uid != 0)
+	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode);
+    else
+	fd = open(path, oflags|O_NONBLOCK, mode);
+    if (fd != -1 && !ISSET(oflags, O_NONBLOCK))
+	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+    debug_return_int(fd);
+}
+#else
+static int
+sudo_edit_open(char *path, int oflags, mode_t mode, int sflags)
+{
+    struct stat sb1, sb2;
+    int fd;
+    debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
+
+    if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_details.uid != 0)
+	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode);
+    else
+	fd = open(path, oflags|O_NONBLOCK, mode);
+    if (fd == -1)
+	debug_return_int(-1);
+    if (!ISSET(oflags, O_NONBLOCK))
+	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+
+    /*
+     * Treat [fl]stat() failure like an open() failure.
+     */
+    if (fstat(fd, &sb1) == -1 || lstat(path, &sb2) == -1) {
+	const int serrno = errno;
+	close(fd);
+	errno = serrno;
+	debug_return_int(-1);
+    }
+
+    /*
+     * Make sure we did not open a link and that what we opened
+     * matches what is currently on the file system.
+     */
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW)) {
+	if (S_ISLNK(sb2.st_mode) ||
+	    sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
+	    close(fd);
+	    errno = ELOOP;
+	    debug_return_int(-1);
+	}
+    }
+
+    debug_return_int(fd);
+}
+#endif /* O_NOFOLLOW */
+
 /*
  * Create temporary copies of files[] and store the temporary path name
  * along with the original name, size and mtime in tf.
@@ -165,7 +367,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
  */
 static int
 sudo_edit_create_tfiles(struct command_details *command_details,
-    struct tempfile *tf, char * const files[], int nfiles)
+    struct tempfile *tf, char *files[], int nfiles)
 {
     int i, j, tfd, ofd, rc;
     char buf[BUFSIZ];
@@ -182,21 +384,46 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	rc = -1;
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
-	if ((ofd = open(files[i], O_RDONLY, 0644)) != -1 || errno == ENOENT) {
+	ofd = sudo_edit_open(files[i], O_RDONLY, 0644, command_details->flags);
+	if (ofd != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
-		memset(&sb, 0, sizeof(sb));		/* new file */
-		rc = 0;
+		/* New file, verify parent dir exists unless in cwd. */
+		char *slash = strrchr(files[i], '/');
+		if (slash != NULL && slash != files[i]) {
+		    int serrno = errno;
+		    *slash = '\0';
+		    if (stat(files[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
+			memset(&sb, 0, sizeof(sb));
+			rc = 0;
+		    }
+		    *slash = '/';
+		    errno = serrno;
+		} else {
+		    memset(&sb, 0, sizeof(sb));
+		    rc = 0;
+		}
 	    } else {
 		rc = fstat(ofd, &sb);
 	    }
 	}
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
-	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
-	    if (rc)
+	if (ofd != -1 && !S_ISREG(sb.st_mode)) {
+	    sudo_warnx(U_("%s: not a regular file"), files[i]);
+	    close(ofd);
+	    continue;
+	}
+	if (rc == -1) {
+	    /* open() or fstat() error. */
+	    if (ofd == -1 && errno == ELOOP) {
+		sudo_warnx(U_("%s: editing symbolic links is not permitted"),
+		    files[i]);
+	    } else if (ofd == -1 && errno == EISDIR) {
+		sudo_warnx(U_("%s: editing files in a writable directory is not permitted"),
+		    files[i]);
+	    } else {
 		sudo_warn("%s", files[i]);
-	    else
-		sudo_warnx(U_("%s: not a regular file"), files[i]);
+	    }
 	    if (ofd != -1)
 		close(ofd);
 	    continue;
@@ -275,9 +502,9 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
-	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
+	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY, 0644, 0);
+	if (tfd != -1)
 	    rc = fstat(tfd, &sb);
-	}
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", ROOT_UID);
 	if (seteuid(ROOT_UID) != 0)
@@ -309,7 +536,8 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	}
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
-	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644,
+	    command_details->flags);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
@@ -347,7 +575,7 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 #ifdef HAVE_SELINUX
 static int
 selinux_edit_create_tfiles(struct command_details *command_details,
-    struct tempfile *tf, char * const files[], int nfiles)
+    struct tempfile *tf, char *files[], int nfiles)
 {
     char **sesh_args, **sesh_ap;
     int i, rc, sesh_nargs;
@@ -368,7 +596,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     command_details->command = _PATH_SUDO_SESH;
     command_details->flags |= CD_SUDOEDIT_COPY;
     
-    sesh_nargs = 3 + (nfiles * 2) + 1;
+    sesh_nargs = 4 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -376,6 +604,8 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     }
     *sesh_ap++ = "sesh";
     *sesh_ap++ = "-e";
+    if (!ISSET(command_details->flags, CD_SUDOEDIT_FOLLOW))
+	*sesh_ap++ = "-h";
     *sesh_ap++ = "0";
 
     for (i = 0; i < nfiles; i++) {
@@ -406,7 +636,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     }
     *sesh_ap = NULL;
 
-    /* Run sesh -e 0 <o1> <t1> ... <on> <tn> */
+    /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
     command_details->argv = sesh_args;
     rc = run_command(command_details);
     switch (rc) {

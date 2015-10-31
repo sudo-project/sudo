@@ -591,12 +591,7 @@ print_privilege(struct privilege *priv)
 	print_member(m);
     }
     fputs(" = ", stdout);
-    tags.log_input = UNSPEC;
-    tags.log_output = UNSPEC;
-    tags.noexec = UNSPEC;
-    tags.nopasswd = UNSPEC;
-    tags.send_mail = UNSPEC;
-    tags.setenv = UNSPEC;
+    TAGS_INIT(tags);
     TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	if (cs != TAILQ_FIRST(&priv->cmndlist))
 	    fputs(", ", stdout);
@@ -635,6 +630,8 @@ print_privilege(struct privilege *priv)
 	if (cs->limitprivs)
 	    printf("LIMITPRIVS=%s ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
+	if (TAG_CHANGED(follow))
+	    printf("%sFOLLOW: ", cs->tags.follow ? "" : "NO");
 	if (TAG_CHANGED(log_input))
 	    printf("%sLOG_INPUT: ", cs->tags.log_input ? "" : "NO");
 	if (TAG_CHANGED(log_output))

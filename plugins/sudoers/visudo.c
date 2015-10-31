@@ -59,9 +59,6 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifndef HAVE_STRUCT_TIMESPEC
-# include "compat/timespec.h"
-#endif
 
 #include "sudoers.h"
 #include "parse.h"
@@ -330,9 +327,11 @@ get_editor(int *editor_argc, char ***editor_argv)
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
 	    editor_path = resolve_editor(cp, (size_t)(ep - cp), 2, files,
 		editor_argc, editor_argv, whitelist);
-	    if (editor_path == NULL && errno != ENOENT)
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
 		debug_return_str(NULL);
-	} while (ep != NULL && editor_path == NULL);
+	}
     }
     if (editor_path == NULL)
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
@@ -415,12 +414,10 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     int tfd;				/* sudoers temp file descriptor */
     bool modified;			/* was the file modified? */
     int ac;				/* argument count */
-    char buf[4096];			/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
     struct timespec ts, times[2];	/* time before and after edit */
     struct timespec orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
-    ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
     bool rval = false;			/* return value */
     debug_decl(edit_sudoers, SUDOERS_DEBUG_UTIL)
@@ -440,15 +437,20 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 
 	/* Copy sp->path -> sp->tpath and reset the mtime. */
 	if (orig_size != 0) {
+	    char buf[4096], lastch = '\0';
+	    ssize_t nread;
+
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
-	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0)
+	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0) {
 		if (write(tfd, buf, nread) != nread)
 		    sudo_fatal(U_("write error"));
+		lastch = buf[nread - 1];
+	    }
 
 	    /* Add missing newline at EOF if needed. */
-	    if (nread > 0 && buf[nread - 1] != '\n') {
-		buf[0] = '\n';
-		if (write(tfd, buf, 1) != 1)
+	    if (lastch != '\n') {
+		lastch = '\n';
+		if (write(tfd, &lastch, 1) != 1)
 		    sudo_fatal(U_("write error"));
 	    }
 	}
@@ -460,17 +462,18 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 
     /* Disable +lineno if editor doesn't support it. */
     if (lineno > 0 && !editor_supports_plus(editor))
-	    lineno = -1;
+	lineno = -1;
 
     /*
-     * We pre-allocated 2 extra spaces for "+n filename" in argv.
+     * The last 3 slots in the editor argv are: "-- +1 sudoers"
      * Replace those placeholders with the real values.
      */
-    ac = editor_argc - 2;
+    ac = editor_argc - 3;
     if (lineno > 0) {
 	(void)snprintf(linestr, sizeof(linestr), "+%d", lineno);
 	editor_argv[ac++] = linestr;
     }
+    editor_argv[ac++] = "--";
     editor_argv[ac++] = sp->tpath;
     editor_argv[ac++] = NULL;
 
@@ -846,9 +849,13 @@ run_command(char *path, char **argv)
 	    break;	/* NOTREACHED */
     }
 
-    do {
+    for (;;) {
 	rv = waitpid(pid, &status, 0);
-    } while (rv == -1 && errno == EINTR);
+	if (rv == -1 && errno != EINTR)
+	    break;
+	if (rv != -1 && !WIFSTOPPED(status))
+	    break;
+    }
 
     if (rv != -1)
 	rv = WIFEXITED(status) ? WEXITSTATUS(status) : -1;

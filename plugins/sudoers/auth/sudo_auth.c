@@ -50,7 +50,7 @@ static sudo_auth auth_switch[] = {
     AUTH_ENTRY("SecurId", FLAG_STANDALONE, sudo_securid_init, sudo_securid_setup, sudo_securid_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_SIA_SES_INIT
-    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, NULL, NULL)
+    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, sudo_sia_begin_session, NULL)
 #endif
 #ifdef HAVE_FWTK
     AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, sudo_fwtk_cleanup, NULL, NULL)
@@ -209,7 +209,8 @@ user_interrupted(void)
  * Returns true if verified, false if not or -1 on error.
  */
 int
-verify_user(struct passwd *pw, char *prompt, int validated)
+verify_user(struct passwd *pw, char *prompt, int validated,
+    struct sudo_conv_callback *callback)
 {
     unsigned int ntries;
     int rval, status, success = AUTH_FAILURE;
@@ -281,7 +282,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	    p = prompt;
 	} else {
 	    p = auth_getpass(prompt, def_passwd_timeout * 60,
-		SUDO_CONV_PROMPT_ECHO_OFF);
+		SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	    if (p == NULL)
 		break;
 	}
@@ -291,7 +292,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	    if (IS_DISABLED(auth))
 		continue;
 
-	    success = auth->status = (auth->verify)(pw, p, auth);
+	    success = auth->status = (auth->verify)(pw, p, auth, callback);
 	    if (success != AUTH_FAILURE)
 		break;
 	}
@@ -342,11 +343,11 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
 	    status = (auth->begin_session)(pw, user_env, auth);
-	    if (status == AUTH_FATAL)
+	    if (status != AUTH_SUCCESS)
 		break;		/* assume error msg already printed */
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : 1);
+    debug_return_int(status == AUTH_SUCCESS ? 1 : -1);
 }
 
 bool
@@ -387,7 +388,8 @@ sudo_auth_end_session(struct passwd *pw)
 }
 
 char *
-auth_getpass(const char *prompt, int timeout, int type)
+auth_getpass(const char *prompt, int timeout, int type,
+    struct sudo_conv_callback *callback)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
@@ -415,7 +417,7 @@ auth_getpass(const char *prompt, int timeout, int type)
     msg.timeout = def_passwd_timeout * 60;
     msg.msg = prompt;
     memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
+    sudo_conv(1, &msg, &repl, callback);
     /* XXX - check for ENOTTY? */
 
     /* Restore previous signal mask. */

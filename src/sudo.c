@@ -134,7 +134,7 @@ __dso_public int main(int argc, char *argv[], char *envp[]);
 int
 main(int argc, char *argv[], char *envp[])
 {
-    int nargc, ok, exitcode = 0;
+    int nargc, ok, status = 0;
     char **nargv, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct sudo_settings *settings;
@@ -283,17 +283,29 @@ main(int argc, char *argv[], char *envp[])
 		(void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE */
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
-		exitcode = sudo_edit(&command_details);
+		status = sudo_edit(&command_details);
 	    } else {
-		exitcode = run_command(&command_details);
+		status = run_command(&command_details);
 	    }
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
 	    sudo_fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
     }
-    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
-    exit(exitcode);
+    if (WIFSIGNALED(status)) {
+	sigaction_t sa;
+
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = SIG_DFL;
+	sigaction(SIGINT, &sa, NULL);
+	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
+	    WTERMSIG(status) | 128);                
+	kill(getpid(), WTERMSIG(status));
+    }
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
+	WEXITSTATUS(status));
+    exit(WEXITSTATUS(status));
 }
 
 int
@@ -715,6 +727,16 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_SUDOEDIT);
 		    break;
 		}
+		if (strncmp("sudoedit_checkdir=", info[i], sizeof("sudoedit_checkdir=") - 1) == 0) {
+		    if (sudo_strtobool(info[i] + sizeof("sudoedit_checkdir=") - 1) == true)
+			SET(details->flags, CD_SUDOEDIT_CHECKDIR);
+		    break;
+		}
+		if (strncmp("sudoedit_follow=", info[i], sizeof("sudoedit_follow=") - 1) == 0) {
+		    if (sudo_strtobool(info[i] + sizeof("sudoedit_follow=") - 1) == true)
+			SET(details->flags, CD_SUDOEDIT_FOLLOW);
+		    break;
+		}
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
@@ -1010,10 +1032,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      */
     unlimit_nproc();
 
-#ifdef HAVE_SETRESUID
+#if defined(HAVE_SETRESUID)
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"), details->uid,
-	    details->euid);
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #elif defined(HAVE_SETREUID)
@@ -1023,9 +1045,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	goto done;
     }
 #else
-    if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"), details->uid,
-	    details->euid);
+    /* Cannot support real user ID that is different from effective user ID. */
+    if (setuid(details->euid) != 0) {
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->euid, (unsigned int)details->euid);
 	goto done;
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
@@ -1062,7 +1085,7 @@ run_command(struct command_details *details)
 {
     struct plugin_container *plugin;
     struct command_status cstat;
-    int exitcode = 1;
+    int status = 1;
     debug_decl(run_command, SUDO_DEBUG_EXEC)
 
     cstat.type = CMD_INVALID;
@@ -1081,32 +1104,29 @@ run_command(struct command_details *details)
 		"calling I/O close with errno %d", cstat.val);
 	    iolog_close(plugin, 0, cstat.val);
 	}
-	exitcode = 1;
+	status = 1;
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
-	if (WIFEXITED(cstat.val))
-	    exitcode = WEXITSTATUS(cstat.val);
-	else if (WIFSIGNALED(cstat.val))
-	    exitcode = WTERMSIG(cstat.val) | 128;
+	status = cstat.val;
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_SUDOEDIT_COPY))
 	    break;
 #endif
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "calling policy close with wait status %d", cstat.val);
-	policy_close(&policy_plugin, cstat.val, 0);
+	    "calling policy close with wait status %d", status);
+	policy_close(&policy_plugin, status, 0);
 	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		"calling I/O close with wait status %d", cstat.val);
-	    iolog_close(plugin, cstat.val, 0);
+		"calling I/O close with wait status %d", status);
+	    iolog_close(plugin, status, 0);
 	}
 	break;
     default:
 	sudo_warnx(U_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
-    debug_return_int(exitcode);
+    debug_return_int(status);
 }
 
 /*
@@ -1182,7 +1202,7 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
     case SUDO_API_MKVERSION(1, 0):
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, sudo_conversation_printf, plugin_settings,
+	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, user_env);
 	break;
     default:
@@ -1341,12 +1361,12 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
 	rval = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
-	    sudo_conversation, sudo_conversation_printf, plugin_settings,
+	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, argc, argv, user_env);
 	break;
     case SUDO_API_MKVERSION(1, 1):
 	rval = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
-	    sudo_conversation, sudo_conversation_printf, plugin_settings,
+	    sudo_conversation_1_7, sudo_conversation_printf, plugin_settings,
 	    user_info, command_info, argc, argv, user_env);
 	break;
     default:

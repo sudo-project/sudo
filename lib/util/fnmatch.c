@@ -188,6 +188,8 @@ static int fnmatch_ch(const char **pattern, const char **string, int flags)
                 result = 0;
                 continue;
             }
+            if (!**pattern)
+                break;
 
 leadingclosebrace:
             /* Look at only well-formed range patterns; 

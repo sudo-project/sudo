@@ -121,6 +121,7 @@ typedef void (*sudo_fatal_callback_t)(void);
 
 struct sudo_conv_message;
 struct sudo_conv_reply;
+struct sudo_conv_callback;
 
 __dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func);
 __dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
@@ -134,7 +135,7 @@ __dso_public void sudo_warn_nodebug_v1(const char *fmt, ...) __printf0like(1, 2)
 __dso_public void sudo_warnx_nodebug_v1(const char *fmt, ...) __printflike(1, 2);
 __dso_public void sudo_vwarn_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0);
 __dso_public void sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0);
-__dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const struct sudo_conv_message *msgs, struct sudo_conv_reply *replies));
+__dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const struct sudo_conv_message *msgs, struct sudo_conv_reply *replies, struct sudo_conv_callback *callback));
 
 #define sudo_fatal_callback_deregister(_a) sudo_fatal_callback_deregister_v1((_a))
 #define sudo_fatal_callback_register(_a) sudo_fatal_callback_register_v1((_a))
@@ -147,7 +148,6 @@ __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const 
 #define sudo_warnx_nodebug sudo_warnx_nodebug_v1
 #define sudo_vwarn_nodebug(_a, _b) sudo_vwarn_nodebug_v1((_a), (_b))
 #define sudo_vwarnx_nodebug(_a, _b) sudo_vwarnx_nodebug_v1((_a), (_b))
-#define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
 #define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
 
 #ifdef DEFAULT_TEXT_DOMAIN

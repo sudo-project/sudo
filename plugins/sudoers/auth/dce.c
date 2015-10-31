@@ -59,7 +59,7 @@
 static int check_dce_status(error_status_t, char *);
 
 int
-sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
+sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     struct passwd		temp_pw;
     sec_passwd_rec_t		password_rec;

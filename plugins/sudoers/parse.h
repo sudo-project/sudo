@@ -27,6 +27,54 @@
 #undef IMPLIED
 #define IMPLIED	 2
 
+/*
+ * Initialize all tags to UNSPEC.
+ */
+#define TAGS_INIT(t)	do {						       \
+    (t).follow = UNSPEC;						       \
+    (t).log_input = UNSPEC;						       \
+    (t).log_output = UNSPEC;						       \
+    (t).noexec = UNSPEC;						       \
+    (t).nopasswd = UNSPEC;						       \
+    (t).send_mail = UNSPEC;						       \
+    (t).setenv = UNSPEC;						       \
+} while (0)
+
+/*
+ * Returns true if any tag are not UNSPEC, else false.
+ */
+#define TAGS_SET(t)							       \
+    ((t).follow != UNSPEC || (t).log_input != UNSPEC ||			       \
+     (t).log_output != UNSPEC || (t).noexec != UNSPEC ||		       \
+     (t).nopasswd != UNSPEC || (t).send_mail != UNSPEC ||		       \
+     (t).setenv != UNSPEC)
+
+/*
+ * Returns true if the specified tag is not UNSPEC or IMPLIED, else false.
+ */
+#define TAG_SET(tt) \
+    ((tt) != UNSPEC && (tt) != IMPLIED)
+
+/*
+ * Returns true if any tags set in nt differ between ot and nt, else false.
+ */
+#define TAGS_CHANGED(ot, nt) \
+    ((TAG_SET((nt).follow) && (nt).follow != (ot).follow) || \
+    (TAG_SET((nt).log_input) && (nt).log_input != (ot).log_input) || \
+    (TAG_SET((nt).log_output) && (nt).log_output != (ot).log_output) || \
+    (TAG_SET((nt).noexec) && (nt).noexec != (ot).noexec) || \
+    (TAG_SET((nt).nopasswd) && (nt).nopasswd != (ot).nopasswd) || \
+    (TAG_SET((nt).setenv) && (nt).setenv != (ot).setenv) || \
+    (TAG_SET((nt).send_mail) && (nt).send_mail != (ot).send_mail))
+
+/*
+ * Returns true if the runas user and group lists match, else false.
+ */
+#define RUNAS_CHANGED(cs1, cs2) \
+    ((cs1) == NULL || (cs2) == NULL || \
+     (cs1)->runasuserlist != (cs2)->runasuserlist || \
+     (cs1)->runasgrouplist != (cs2)->runasgrouplist)
+
 #define SUDO_DIGEST_SHA224	0
 #define SUDO_DIGEST_SHA256	1
 #define SUDO_DIGEST_SHA384	2
@@ -59,6 +107,7 @@ struct cmndtag {
     signed int log_input: 3;
     signed int log_output: 3;
     signed int send_mail: 3;
+    signed int follow: 3;
 };
 
 /*

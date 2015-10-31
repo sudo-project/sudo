@@ -170,6 +170,9 @@
 #ifndef S_ISDIR
 # define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
 #endif /* S_ISDIR */
+#ifndef S_ISLNK
+# define S_ISLNK(m)		(((m) & _S_IFMT) == _S_IFLNK)
+#endif /* S_ISLNK */
 
 /* For futimens() and utimensat() emulation. */
 #if !defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)

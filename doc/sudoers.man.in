@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "July 10, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 24, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -632,6 +632,8 @@ An odd number of
 \(oq\&!\(cq
 operators negate the value of
 the item; an even number just cancel each other out.
+User netgroups are matched using the user and domain members only;
+the host member is not used when matching.
 .PP
 A
 \fRuser name\fR,
@@ -734,13 +736,14 @@ and other aliases.
 Again, the value of an item may be negated with the
 \(oq\&!\(cq
 operator.
-If you do not specify a netmask along with the network number,
+Host netgroups are matched using the host (both qualified and unqualified)
+and domain members only; the user member is not used when matching.
+If you specify a network number without a netmask,
 \fBsudo\fR
 will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
-interfaces, the corresponding netmask will be used.
-The netmask
-may be specified either in standard IP address notation
+interfaces, will use the netmask of that interface.
+The netmask may be specified either in standard IP address notation
 (e.g.\& 255.255.255.0 or ffff:ffff:ffff:ffff::),
 or CIDR notation (number of bits, e.g.\& 24 or 64).
 A host name may include shell-style wildcards (see the
@@ -961,9 +964,10 @@ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
-Tag_Spec ::= ('NOEXEC:' | 'EXEC:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
-              'LOG_OUTPUT:' | 'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' |
-	      'NOPASSWD:' | 'PASSWD:' | 'SETENV:' | 'NOSETENV:')
+Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
+              'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
+              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'PASSWD:' |
+              'NOPASSWD:' | 'SETENV:' | 'NOSETENV:')
 .RE
 .fi
 .PP
@@ -1214,16 +1218,18 @@ character.
 A command may have zero or more tags associated with it.
 There are
 ten possible tag values:
-\fRNOEXEC\fR,
 \fREXEC\fR,
+\fRNOEXEC\fR,
+\fRFOLLOW\fR,
+\fRNOFOLLOW\fR,
 \fRLOG_INPUT\fR,
 \fRNOLOG_INPUT\fR,
 \fRLOG_OUTPUT\fR,
 \fRNOLOG_OUTPUT\fR,
 \fRMAIL\fR,
 \fRNOMAIL\fR,
-\fRNOPASSWD\fR,
 \fRPASSWD\fR,
+\fRNOPASSWD\fR,
 \fRSETENV\fR,
 and
 \fRNOSETENV\fR.
@@ -1242,7 +1248,7 @@ and
 overrides
 \fREXEC\fR).
 .TP 2n
-\fINOEXEC\fR and \fIEXEC\fR
+\fIEXEC\fR and \fINOEXEC\fR
 .sp
 If
 \fBsudo\fR
@@ -1274,6 +1280,24 @@ section below for more details on how
 \fRNOEXEC\fR
 works and whether or not it will work on your system.
 .RE
+.TP 2n
+\fIFOLLOW\fR and \fINOFOLLOW\fR
+Starting with version 1.8.15,
+\fBsudoedit\fR
+will not follow symbolic links when opening files unless the
+\fIsudoedit_follow\fR
+option is enabled.
+The
+\fIFOLLOW\fR
+and
+\fINOFOLLOW\fR
+tags override the value of
+\fIsudoedit_follow\fR
+and can be used to permit (or deny) the editing of symbolic links
+on a per-command basis.
+These tags are only effective for the
+\fIsudoedit\fR
+command and are ignored for all other commands.
 .TP 2n
 \fILOG_INPUT\fR and \fINOLOG_INPUT\fR
 .sp
@@ -1327,7 +1351,7 @@ in the
 \fISUDOERS OPTIONS\fR
 section below.
 .TP 2n
-\fINOPASSWD\fR and \fIPASSWD\fR
+\fIPASSWD\fR and \fINOPASSWD\fR
 .sp
 By default,
 \fBsudo\fR
@@ -1442,22 +1466,19 @@ and
 fnmatch(3)
 functions as specified by
 IEEE Std 1003.1 (\(LqPOSIX.1\(Rq).
-Note that these are
-\fInot\fR
-regular expressions.
 .TP 10n
 \fR*\fR
-Matches any set of zero or more characters.
+Matches any set of zero or more characters (including white space).
 .TP 10n
 \fR\&?\fR
-Matches any single character.
+Matches any single character (including white space).
 .TP 10n
 \fR[...]\fR
 Matches any character in the specified range.
 .TP 10n
 \fR[!...]\fR
 Matches any character
-\fBnot\fR
+\fInot\fR
 in the specified range.
 .TP 10n
 \fR\ex\fR
@@ -1472,7 +1493,11 @@ This is used to escape special characters such as:
 and
 \(oq]\&\(cq.
 .PP
-Character classes may also be used if your system's
+\fBNote that these are not regular expressions.\fR
+Unlike a regular expression there is no way to match one or more
+characters within a range.
+.PP
+Character classes may be used if your system's
 glob(3)
 and
 fnmatch(3)
@@ -1487,7 +1512,7 @@ For example:
 .nf
 .sp
 .RS 4n
-/bin/ls [[:\&alpha:\&]]*
+/bin/ls [[\e:\&alpha\e:\&]]*
 .RE
 .fi
 .PP
@@ -1496,9 +1521,9 @@ Would match any file name beginning with a letter.
 Note that a forward slash
 (\(oq/\(cq)
 will
-\fBnot\fR
+\fInot\fR
 be matched by
-wildcards used in the path name.
+wildcards used in the file name portion of the command.
 This is to make a path like:
 .nf
 .sp
@@ -1513,17 +1538,18 @@ but not
 \fI/usr/bin/X11/xterm\fR.
 .PP
 When matching the command line arguments, however, a slash
-\fBdoes\fR
+\fIdoes\fR
 get matched by wildcards since command line arguments may contain
 arbitrary strings and not just path names.
 .PP
-Wildcards in command line arguments should be used with care.
-Because command line arguments are matched as a single, concatenated
-string, a wildcard such as
+\fBWildcards in command line arguments should be used with care.\fR
+.br
+Command line arguments are matched as a single, concatenated string.
+This mean a wildcard character such as
 \(oq\&?\(cq
 or
 \(oq*\(cq
-can match multiple words.
+will match across word boundaries, which may be unexpected.
 For example, while a sudoers entry like:
 .nf
 .sp
@@ -1549,6 +1575,10 @@ $ sudo cat /var/log/messages /etc/shadow
 .fi
 .PP
 which is probably not what was intended.
+In most cases it is better to do command line processing
+outside of
+\fIsudoers\fR
+in a scripting language.
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
@@ -1558,7 +1588,7 @@ If the empty string
 is the only command line argument in the
 \fIsudoers\fR
 entry it means that command is not allowed to be run with
-\fBany\fR
+\fIany\fR
 arguments.
 .TP 10n
 sudoedit
@@ -1685,7 +1715,7 @@ will be parsed before
 Be aware that because the sorting is lexical, not numeric,
 \fI/etc/sudoers.d/1_whoops\fR
 would be loaded
-\fBafter\fR
+\fIafter\fR
 \fI/etc/sudoers.d/10_second\fR.
 Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
@@ -1733,7 +1763,7 @@ as the built-in alias will be used in preference to your own.
 Please note that using
 \fBALL\fR
 can be dangerous since in a command context, it allows the user to run
-\fBany\fR
+\fIany\fR
 command on the system.
 .PP
 An exclamation point
@@ -1813,6 +1843,17 @@ A list of all supported Defaults parameters, grouped by type, are listed below.
 .PP
 \fBBoolean Flags\fR:
 .TP 18n
+always_query_group_plugin
+If a
+\fIgroup_plugin\fR
+is configured, use it to resolve groups of the form %group as long
+as there is not also a system group of the same name.
+Normally, only groups of the form %:group are passed to the
+\fIgroup_plugin\fR.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
 always_set_home
 If enabled,
 \fBsudo\fR
@@ -1884,7 +1925,11 @@ If set, netgroups (prefixed with
 \(oq+\(cq),
 may be used in place of a user or host.
 For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server.
+substring match on the server unless the
+\fBNETGROUP_BASE\fR
+directive is present in the
+\fI@ldap_conf@\fR
+file.
 If netgroups are not needed, this option can be disabled to reduce the
 load on the LDAP server.
 This flag is
@@ -2356,8 +2401,8 @@ tag has been set, unless overridden by an
 \fREXEC\fR
 tag.
 See the description of
-\fINOEXEC and EXEC\fR
-below as well as the
+\fIEXEC and NOEXEC\fR
+above as well as the
 \fIPreventing shell escapes\fR
 section at the end of this manual.
 This flag is
@@ -2579,12 +2624,18 @@ However, since some programs (including the RCS revision control system) use
 to determine the real identity of the user, it may be desirable to
 change this behavior.
 This can be done by negating the set_logname option.
-Note that if the
+Note that
+\fIset_logname\fR
+will have no effect
+if the
 \fIenv_reset\fR
-option has not been disabled, entries in the
+option has not been disabled and the
 \fIenv_keep\fR
-list will override the value of
-\fIset_logname\fR.
+list contains
+\fRLOGNAME\fR,
+\fRUSER\fR
+or
+\fRUSERNAME\fR.
 This flag is
 \fIon\fR
 by default.
@@ -2659,6 +2710,38 @@ system call.
 This flag is
 \fIoff\fR
 by default.
+.TP 18n
+sudoedit_checkdir
+.br
+If set,
+\fBsudoedit\fR
+will refuse to edit files located in a directory that is writable
+by the invoking user unless it is run by root.
+On many systems, this option requires that the parent directory
+of the file to be edited be readable by the target user.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
+sudoedit_follow
+By default,
+\fBsudoedit\fR
+will not follow symbolic links when opening files.
+The
+\fIsudoedit_follow\fR
+option can be enabled to allow
+\fBsudoedit\fR
+to open symbolic links.
+It may be overridden on a per-command basis by the
+\fIFOLLOW\fR
+and
+\fINOFOLLOW\fR
+tags.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.15 or higher.
 .TP 18n
 targetpw
 If set,
@@ -2778,6 +2861,33 @@ option can be used to specify a different file descriptor at which
 to start closing.
 The default is
 \fR3\fR.
+.TP 18n
+maxseq
+The maximum sequence number that will be substituted for the
+\(Lq\fR%{seq}\fR\(Rq
+escape in the I/O log file (see the
+\fIiolog_dir\fR
+description above for more information).
+While the value substituted for
+\(Lq\fR%{seq}\fR\(Rq
+is in base 36,
+\fImaxseq\fR
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+\(LqZZZZZZ\(Rq)
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.sp
+Once the local sequence number reaches the value of
+\fImaxseq\fR,
+it will
+\(Lqroll over\(Rq
+to zero, after which
+\fBsudoers\fR
+will truncate and re-use any existing I/O log path names.
+.sp
+This setting is only supported by version 1.8.7 or higher.
 .TP 18n
 passwd_tries
 The number of tries a user gets to enter his/her password before
@@ -3005,33 +3115,6 @@ The escape
 will expand to the host name of the machine.
 Default is
 \(Lq\fR@mailsub@\fR\(Rq.
-.TP 18n
-maxseq
-The maximum sequence number that will be substituted for the
-\(Lq\fR%{seq}\fR\(Rq
-escape in the I/O log file (see the
-\fIiolog_dir\fR
-description above for more information).
-While the value substituted for
-\(Lq\fR%{seq}\fR\(Rq
-is in base 36,
-\fImaxseq\fR
-itself should be expressed in decimal.
-Values larger than 2176782336 (which corresponds to the
-base 36 sequence number
-\(LqZZZZZZ\(Rq)
-will be silently truncated to 2176782336.
-The default value is 2176782336.
-.sp
-Once the local sequence number reaches the value of
-\fImaxseq\fR,
-it will
-\(Lqroll over\(Rq
-to zero, after which
-\fBsudoers\fR
-will truncate and re-use any existing I/O log path names.
-.sp
-This setting is only supported by version 1.8.7 or higher.
 .TP 18n
 noexec_file
 As of
@@ -4263,9 +4346,27 @@ is allowed to change anyone's password except for
 root on the
 \fIHPPA\fR
 machines.
-Note that this assumes
+Because command line arguments are matched as a single,
+concatenated string, the
+\(oq*\(cq
+wildcard will match
+\fImultiple\fR
+words.
+This example assumes that
 passwd(1)
 does not take multiple user names on the command line.
+Note that on GNU systems, options to
+passwd(1)
+may be specified after the user argument.
+As a result, this rule will also allow:
+.nf
+.sp
+.RS 4n
+passwd username --expire
+.RE
+.fi
+.PP
+which may not be desirable.
 .nf
 .sp
 .RS 0n
@@ -4425,7 +4526,7 @@ to www.
 .sp
 .RS 0n
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\e
-		/sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+		/sbin/mount -o nosuid\e,nodev /dev/cd0a /CDROM
 .RE
 .fi
 .PP
@@ -4659,6 +4760,27 @@ The editor will run as the operator user, not root, on a temporary copy of
 After the file has been edited,
 \fI/etc/motd\fR
 will be updated with the contents of the temporary copy.
+.PP
+Users should
+\fInever\fR
+be granted
+\fBsudoedit\fR
+permission to edit a file that resides in a directory the user
+has write access to, either directly or via a wildcard.
+If the user has write access to the directory it is possible to
+replace the legitimate file with a link to another file,
+allowing the editing of arbitrary files.
+Starting with version 1.8.15,
+\fBsudoedit\fR
+will refuse to open a symbolic link unless either the
+\fIsudoedit_follow\fR
+Defaults option is enabled or the
+\fIsudoedit\fR
+command is prefixed with the
+\fRFOLLOW\fR
+tag.
+However, it is still possible to create a hard link if the directory
+is writable and the link target resides on the same file system.
 .SS "Time stamp file checks"
 \fIsudoers\fR
 will check the ownership of its time stamp directory
