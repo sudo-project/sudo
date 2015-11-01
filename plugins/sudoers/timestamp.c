@@ -310,9 +310,9 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 		    (long long)old_eof);
 	    }
 	}
-	debug_return_size_t(-1);
+	debug_return_ssize_t(-1);
     }
-    debug_return_size_t(nwritten);
+    debug_return_ssize_t(nwritten);
 }
 
 /*
@@ -553,7 +553,7 @@ done:
     if (should_unlock)
 	timestamp_unlock_record(cookie->fd, cookie->pos, sizeof(*entry));
 
-    debug_return_size_t(nread);
+    debug_return_ssize_t(nread);
 }
 
 /*

@@ -137,6 +137,14 @@ struct sudo_conf_debug_file_list;
 	return sudo_debug_rval;						       \
     } while (0)
 
+#define debug_return_ssize_t(rval)					       \
+    do {								       \
+	ssize_t sudo_debug_rval = (rval);				       \
+	sudo_debug_exit_ssize_t(__func__, __FILE__, __LINE__, sudo_debug_subsys,\
+	    sudo_debug_rval);						       \
+	return sudo_debug_rval;						       \
+    } while (0)
+
 #define debug_return_long(rval)						       \
     do {								       \
 	long sudo_debug_rval = (rval);					       \
@@ -224,6 +232,7 @@ __dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int
 __dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, int subsys, long rval);
 __dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, int subsys, const void *rval);
 __dso_public void sudo_debug_exit_size_t_v1(const char *func, const char *file, int line, int subsys, size_t rval);
+__dso_public void sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line, int subsys, ssize_t rval);
 __dso_public void sudo_debug_exit_str_v1(const char *func, const char *file, int line, int subsys, const char *rval);
 __dso_public void sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line, int subsys, const char *rval);
 __dso_public pid_t sudo_debug_fork_v1(void);
@@ -247,6 +256,7 @@ __dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *fil
 #define sudo_debug_exit_long(_a, _b, _c, _d, _e) sudo_debug_exit_long_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_ptr(_a, _b, _c, _d, _e) sudo_debug_exit_ptr_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_size_t(_a, _b, _c, _d, _e) sudo_debug_exit_size_t_v1((_a), (_b), (_c), (_d), (_e))
+#define sudo_debug_exit_ssize_t(_a, _b, _c, _d, _e) sudo_debug_exit_ssize_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_str(_a, _b, _c, _d, _e) sudo_debug_exit_str_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_str_masked(_a, _b, _c, _d, _e) sudo_debug_exit_str_masked_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_fork() sudo_debug_fork_v1()

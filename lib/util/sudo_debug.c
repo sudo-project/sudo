@@ -457,6 +457,14 @@ sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
 }
 
 void
+sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
+    int subsys, ssize_t rval)
+{
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %zd", func, file, line, rval);
+}
+
+void
 sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
     int subsys, bool rval)
 {

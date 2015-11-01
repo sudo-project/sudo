@@ -114,6 +114,6 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
     } while (continued);
     free(line);
     if (len == -1 && total == 0)
-	debug_return_size_t((size_t)-1);
-    debug_return_size_t(total);
+	debug_return_ssize_t(-1);
+    debug_return_ssize_t(total);
 }
