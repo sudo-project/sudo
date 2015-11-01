@@ -354,13 +354,13 @@ ts_fill4(struct timestamp_entry *entry, struct passwd *pw, int flags, bool tty_t
 static void
 ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
-    return ts_fill4(entry, pw, flags, def_tty_tickets);
+    ts_fill4(entry, pw, flags, def_tty_tickets);
 }
 
 static void
 ts_fill_tty(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
-    return ts_fill4(entry, pw, flags, true);
+    ts_fill4(entry, pw, flags, true);
 }
 
 /*
