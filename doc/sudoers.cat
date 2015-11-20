@@ -2449,7 +2449,7 @@ AAUUTTHHOORRSS
            Todd C. Miller
 
      See the CONTRIBUTORS file in the ssuuddoo distribution
-     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     (https://www.sudo.ws/contributors.html) for an exhaustive list of people
      who have contributed to ssuuddoo.
 
 CCAAVVEEAATTSS
@@ -2465,18 +2465,18 @@ CCAAVVEEAATTSS
 
 BBUUGGSS
      If you feel you have found a bug in ssuuddoo, please submit a bug report at
-     http://bugzilla.sudo.ws/
+     https://bugzilla.sudo.ws/
 
 SSUUPPPPOORRTT
      Limited free support is available via the sudo-users mailing list, see
-     http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search the
-     archives.
+     https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
+     the archives.
 
 DDIISSCCLLAAIIMMEERR
      ssuuddoo is provided ``AS IS'' and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
-     file distributed with ssuuddoo or http://www.sudo.ws/license.html for
+     file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.15                    October 24, 2015                    Sudo 1.8.15
+Sudo 1.8.16                    November 20, 2015                   Sudo 1.8.16

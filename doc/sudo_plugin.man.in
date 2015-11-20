@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "September 9, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 20, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2718,16 +2718,16 @@ Todd C. Miller
 .PP
 See the CONTRIBUTORS file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
 If you feel you have found a bug in
 \fBsudo\fR,
-please submit a bug report at http://bugzilla.sudo.ws/
+please submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
-see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
@@ -2738,4 +2738,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 \fBsudo\fR
-or http://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/license.html for complete details.

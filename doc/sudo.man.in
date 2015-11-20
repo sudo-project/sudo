@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "September 27, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "November 20, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1152,7 +1152,7 @@ visudo(@mansectsu@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/history.html) for a brief
+distribution (https://www.sudo.ws/history.html) for a brief
 history of sudo.
 .SH "AUTHORS"
 Many people have worked on
@@ -1165,7 +1165,7 @@ Todd C. Miller
 .PP
 See the CONTRIBUTORS file in the
 \fBsudo\fR
-distribution (http://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "CAVEATS"
@@ -1206,10 +1206,10 @@ setuid shell scripts are generally safe).
 .SH "BUGS"
 If you feel you have found a bug in
 \fBsudo\fR,
-please submit a bug report at http://bugzilla.sudo.ws/
+please submit a bug report at https://bugzilla.sudo.ws/
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
-see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
@@ -1220,4 +1220,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 \fBsudo\fR
-or http://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/license.html for complete details.
