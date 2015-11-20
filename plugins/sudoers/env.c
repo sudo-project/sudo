@@ -918,7 +918,7 @@ rebuild_env(void)
 
 	    if (keepit) {
 		/* Preserve variable. */
-		CHECK_PUTENV(*ep, false, false);
+		CHECK_PUTENV(*ep, true, false);
 		env_update_didvar(*ep, &didvar);
 	    }
 	}
@@ -988,7 +988,7 @@ rebuild_env(void)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
 		    SET(didvar, DID_TERM);
-		CHECK_PUTENV(*ep, false, false);
+		CHECK_PUTENV(*ep, true, false);
 	    }
 	}
     }
