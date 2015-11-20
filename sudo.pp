@@ -44,7 +44,7 @@ still allow people to get their work done."
 	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)$' \| 0 \) + 1`"
 	pp_rpm_version="`expr \( $version : '\(.*\)p[0-9][0-9]*$' \| $version \)`"
 	pp_rpm_license="BSD"
-	pp_rpm_url="http://www.sudo.ws/"
+	pp_rpm_url="https://www.sudo.ws/"
 	pp_rpm_group="Applications/System"
 	pp_rpm_packager="Todd C. Miller <Todd.Miller@courtesan.com>"
 	if test -n "$linux_audit"; then
@@ -263,8 +263,8 @@ still allow people to get their work done."
 	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
 	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	echo "Homepage: http://www.sudo.ws/sudo/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
-	echo "Bugs: http://www.sudo.ws/bugs/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	echo "Homepage: https://www.sudo.ws/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %files
 %if X"$parentdirs" != X""
