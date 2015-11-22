@@ -45,7 +45,7 @@ static int arg_len = 0;
 static int arg_size = 0;
 
 bool
-fill_txt(const char *src, int len, int olen)
+fill_txt(const char *src, size_t len, size_t olen)
 {
     char *dst;
     int h;
@@ -81,7 +81,7 @@ fill_txt(const char *src, int len, int olen)
 }
 
 bool
-append(const char *src, int len)
+append(const char *src, size_t len)
 {
     int olen = 0;
     debug_decl(append, SUDOERS_DEBUG_PARSER)
@@ -96,10 +96,10 @@ append(const char *src, int len)
     ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
 
 bool
-fill_cmnd(const char *src, int len)
+fill_cmnd(const char *src, size_t len)
 {
     char *dst;
-    int i;
+    size_t i;
     debug_decl(fill_cmnd, SUDOERS_DEBUG_PARSER)
 
     arg_len = arg_size = 0;
@@ -125,7 +125,7 @@ fill_cmnd(const char *src, int len)
 }
 
 bool
-fill_args(const char *s, int len, int addspace)
+fill_args(const char *s, size_t len, int addspace)
 {
     int new_len;
     char *p;
