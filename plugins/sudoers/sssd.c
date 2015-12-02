@@ -1202,13 +1202,13 @@ done:
 	    SET(ret, FLAG_NO_CHECK);
     }
 
-    if (state & SUDO_SSS_STATE_USERMATCH)
+    if (pwflag || ISSET(state, SUDO_SSS_STATE_USERMATCH))
 	CLR(ret, FLAG_NO_USER);
-    if (state & SUDO_SSS_STATE_HOSTMATCH)
+    if (pwflag || ISSET(state, SUDO_SSS_STATE_HOSTMATCH))
 	CLR(ret, FLAG_NO_HOST);
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_sss_lookup(%d)=0x%02x",
-     pwflag, ret);
+	pwflag, ret);
 
     debug_return_int(ret);
 }

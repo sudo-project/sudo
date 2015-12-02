@@ -3227,9 +3227,9 @@ done:
 	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);
     }
-    if (lres->user_matches)
+    if (pwflag || lres->user_matches)
 	CLR(ret, FLAG_NO_USER);
-    if (lres->host_matches)
+    if (pwflag || lres->host_matches)
 	CLR(ret, FLAG_NO_HOST);
     DPRINTF1("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret);
 
