@@ -3132,8 +3132,8 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	debug_return_int(ret);
 
     /*
-     * The following queries are only determine whether or not a
-     * password is required, so the order of the entries doesn't matter.
+     * The following queries only determine whether or not a password
+     * is required, so the order of the entries doesn't matter.
      */
     if (pwflag) {
 	int doauth = UNSPEC;
@@ -3408,27 +3408,31 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 			ldap_err2string(rc));
 		    continue;
 		}
-		lres->user_matches = true;
 
-		/* Add the seach result to list of search results. */
+		/* Add the search result to list of search results. */
 		DPRINTF1("adding search result");
 		if (sudo_ldap_result_add_search(lres, ld, result) == NULL) {
-		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
 		    free(filt);
 		    sudo_ldap_result_free(lres);
 		    debug_return_ptr(NULL);
 		}
 		LDAP_FOREACH(entry, ld, result) {
-		    if ((!pass ||
-			sudo_ldap_check_non_unix_group(ld, entry, pw)) &&
-			sudo_ldap_check_host(ld, entry)) {
-			lres->host_matches = true;
-			if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
-			    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-			    free(filt);
-			    sudo_ldap_result_free(lres);
-			    debug_return_ptr(NULL);
-			}
+		    /* Check user or non-unix group. */
+		    if (pass && !sudo_ldap_check_non_unix_group(ld, entry, pw))
+			continue;
+		    lres->user_matches = true;
+		    /* Check host. */
+		    if (!sudo_ldap_check_host(ld, entry))
+			continue;
+		    lres->host_matches = true;
+		    if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			free(filt);
+			sudo_ldap_result_free(lres);
+			debug_return_ptr(NULL);
 		    }
 		}
 		DPRINTF1("result now has %d entries", lres->nentries);
