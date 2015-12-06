@@ -850,9 +850,6 @@ is prefixed with a
 \fRDigest_Spec\fR,
 the command will only match successfully if it can be verified
 using the specified SHA-2 digest.
-This may be useful in situations where the user invoking
-\fBsudo\fR
-has write access to the command or its parent directory.
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
@@ -876,6 +873,13 @@ $ openssl dgst -binary -sha224 /bin/ls | openssl base64
 EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
 .RE
 .fi
+.PP
+If the user has write access to either the command itself or the
+directory in which the command is located (directly or via a
+\fBsudo\fR
+command) it may be possible for the user to replace the command
+after the digest check has been performed but before the command
+is executed.
 .PP
 Command digests are only supported by version 1.8.7 or higher.
 .SS "Defaults"
