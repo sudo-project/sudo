@@ -58,12 +58,12 @@ while (<>){
   # ignore blank lines
   next if /^\s*$/;
 
-  if (/^Defaults\s+/i) {
-    my $opt=$';
-    $opt=~s/\s+$//; # remove trailing whitespace
-    push @options,$opt;
+  if (s/^Defaults\s+//) {
+    s/\s+$//; # remove trailing whitespace
+    # remove spaces between '!', '=', '+=' and '-='
+    s/^(\S+)\s*([\+-]?=)\s*(\S.*)$/$1$2$3/ unless s/^!\s*(\S.*)$/!$1/;
+    push @options, $_;
   } elsif (/^(\S+)\s+([^=]+)=\s*(.*)/) {
-
     # Aliases or Definitions
     my ($p1,$p2,$p3)=($1,$2,$3);
     $p2=~s/\s+$//; # remove trailing whitespace
@@ -117,7 +117,6 @@ while (<>){
       printf "sudoOrder: %d\n", ++$order;
       print "\n";
     }
-
   } else {
     print "parse error: $_\n";
   }
