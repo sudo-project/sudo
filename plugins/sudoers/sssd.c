@@ -1024,7 +1024,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 {
     int i, op;
     bool ret = false;
-    char *v, *val;
+    char *cp, *v;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
@@ -1052,17 +1052,25 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	}
 
 	/* check for equals sign past first char */
-	val = strchr(v, '=');
-	if (val > v) {
-	    *val++ = '\0';	/* split on = and truncate var */
-	    op = val[-2];	/* peek for += or -= cases */
+	cp = strchr(v, '=');
+	if (cp > v) {
+	    char *val = cp + 1;
+	    op = cp[-1];	/* peek for += or -= cases */
 	    if (op == '+' || op == '-') {
 		/* case var+=val or var-=val */
-		val[-2] = '\0';	/* remove extra + or - char */
+		cp--;
 	    } else {
 		/* case var=val */
 		op = true;
 	    }
+	    /* Trim whitespace between var and operator. */
+	    while (cp > v && isblank((unsigned char)cp[-1]))
+		cp--;
+	    /* Truncate variable name. */
+	    *cp = '\0';
+	    /* Trim leading whitespace from val. */
+	    while (isblank((unsigned char)*val))
+		val++;
 	    /* Strip double quotes if present. */
 	    if (*val == '"') {
 		char *ep = val + strlen(val);
@@ -1074,7 +1082,10 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    set_default(v, val, op);
 	} else if (*v == '!') {
 	    /* case !var Boolean False */
-	    set_default(v + 1, NULL, false);
+	    do {
+		v++;
+	    } while (isblank((unsigned char)*v));
+	    set_default(v, NULL, false);
 	} else {
 	    /* case var Boolean True */
 	    set_default(v, NULL, true);

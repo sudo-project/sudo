@@ -1046,7 +1046,7 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char *var, *val;
+    char *cp, *var;
     int op;
     bool rc = false;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
@@ -1064,17 +1064,25 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	DPRINTF2("ldap sudoOption: '%s'", var);
 
 	/* check for equals sign past first char */
-	val = strchr(var, '=');
-	if (val > var) {
-	    *val++ = '\0';	/* split on = and truncate var */
-	    op = val[-2];	/* peek for += or -= cases */
+	cp = strchr(var, '=');
+	if (cp > var) {
+	    char *val = cp + 1;
+	    op = cp[-1];	/* peek for += or -= cases */
 	    if (op == '+' || op == '-') {
 		/* case var+=val or var-=val */
-		val[-2] = '\0';	/* remove extra + or - char */
+		cp--;
 	    } else {
 		/* case var=val */
 		op = true;
 	    }
+	    /* Trim whitespace between var and operator. */
+	    while (cp > var && isblank((unsigned char)cp[-1]))
+		cp--;
+	    /* Truncate variable name. */
+	    *cp = '\0';
+	    /* Trim leading whitespace from val. */
+	    while (isblank((unsigned char)*val))
+		val++;
 	    /* Strip double quotes if present. */
 	    if (*val == '"') {
 		char *ep = val + strlen(val);
@@ -1086,7 +1094,10 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    set_default(var, val, op);
 	} else if (*var == '!') {
 	    /* case !var Boolean False */
-	    set_default(var + 1, NULL, false);
+	    do {
+		var++;
+	    } while (isblank((unsigned char)*var));
+	    set_default(var, NULL, false);
 	} else {
 	    /* case var Boolean True */
 	    set_default(var, NULL, true);
