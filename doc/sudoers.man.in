@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "November 20, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "December 11, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2233,7 +2233,7 @@ log_input
 If set,
 \fBsudo\fR
 will run the command in a
-\fIpseudo tty\fR
+\fIpseudo-tty\fR
 and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
@@ -2254,6 +2254,18 @@ log line, prefixed with
 The
 \fIiolog_file\fR
 option may be used to control the format of the session ID.
+Input from the user's tty is logged to the
+\fIttyin\fR
+file.
+Input from a pipe or file is logged to the
+\fIstdin\fR
+file.
+These files are in gzip (compressed) format unless the
+\fIcompress_io\fR
+option has been disabled.
+Due to buffering, the I/O log data will not be complete until the
+\fBsudo\fR
+command has completed.
 .sp
 Note that user input may contain sensitive information such as
 passwords (even if they are not echoed to the screen), which will
@@ -2266,7 +2278,7 @@ log_output
 If set,
 \fBsudo\fR
 will run the command in a
-\fIpseudo tty\fR
+\fIpseudo-tty\fR
 and log all output that is sent to the screen, similar to the
 script(1)
 command.
@@ -2290,6 +2302,20 @@ log line, prefixed with
 The
 \fIiolog_file\fR
 option may be used to control the format of the session ID.
+Output from the pseudo-tty is logged to the
+\fIttyout\fR
+file.
+Output to a pipe or redirected to a file is logged to the either the
+\fIstdout\fR
+or
+\fIstderr\fR
+files.
+These files are in gzip (compressed) format unless the
+\fIcompress_io\fR
+option has been disabled.
+Due to buffering, the I/O log data will not be complete until the
+\fBsudo\fR
+command has completed.
 .sp
 Output logs may be viewed with the
 sudoreplay(@mansectsu@)

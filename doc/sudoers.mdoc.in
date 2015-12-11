@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 20, 2015
+.Dd December 11, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2091,7 +2091,7 @@ by default.
 If set,
 .Nm sudo
 will run the command in a
-.Em pseudo tty
+.Em pseudo-tty
 and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
@@ -2114,6 +2114,18 @@ log line, prefixed with
 The
 .Em iolog_file
 option may be used to control the format of the session ID.
+Input from the user's tty is logged to the
+.Pa ttyin
+file.
+Input from a pipe or file is logged to the
+.Pa stdin
+file.
+These files are in gzip (compressed) format unless the
+.Em compress_io
+option has been disabled.
+Due to buffering, the I/O log data will not be complete until the
+.Nm sudo
+command has completed.
 .Pp
 Note that user input may contain sensitive information such as
 passwords (even if they are not echoed to the screen), which will
@@ -2125,7 +2137,7 @@ is all that is required.
 If set,
 .Nm sudo
 will run the command in a
-.Em pseudo tty
+.Em pseudo-tty
 and log all output that is sent to the screen, similar to the
 .Xr script 1
 command.
@@ -2151,6 +2163,20 @@ log line, prefixed with
 The
 .Em iolog_file
 option may be used to control the format of the session ID.
+Output from the pseudo-tty is logged to the
+.Pa ttyout
+file.
+Output to a pipe or redirected to a file is logged to the either the
+.Pa stdout
+or
+.Pa stderr
+files.
+These files are in gzip (compressed) format unless the
+.Em compress_io
+option has been disabled.
+Due to buffering, the I/O log data will not be complete until the
+.Nm sudo
+command has completed.
 .Pp
 Output logs may be viewed with the
 .Xr sudoreplay @mansectsu@
