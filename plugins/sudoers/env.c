@@ -145,7 +145,8 @@ static const char *initial_badenv_table[] = {
     "BASH_ENV",			/* bash, file to source before script runs */
     "PS4",			/* bash, prefix for lines in xtrace mode */
     "GLOBIGNORE",		/* bash, globbing patterns to ignore */
-    "SHELLOPTS",		/* bash, extra command line options */
+    "BASHOPTS",			/* bash, initial "shopt -s" options */
+    "SHELLOPTS",		/* bash, initial "set -o" options */
     "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
     "PERLIO_DEBUG ",		/* perl, debugging output file */
     "PERLLIB",			/* perl, search path for modules/includes */
