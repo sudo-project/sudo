@@ -303,7 +303,7 @@ esac])
 AC_ARG_WITH(rpath, [AS_HELP_STRING([--with-rpath], [deprecated, use --disable-rpath])],
 [AC_MSG_WARN([--with-rpath deprecated, rpath is now the default])])
 
-AC_ARG_WITH(blibpath, [AS_HELP_STRING([--with-blibpath[=PATH]], [deprecated])],
+AC_ARG_WITH(blibpath, [AS_HELP_STRING([--with-blibpath[[=PATH]]], [deprecated])],
 [AC_MSG_WARN([--with-blibpath deprecated, use --with-libpath])])
 
 dnl
@@ -445,7 +445,7 @@ AC_ARG_WITH(passwd, [AS_HELP_STRING([--without-passwd], [don't use passwd/shadow
 		;;
 esac])
 
-AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[=DIR]], [enable S/Key support ])],
+AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[[=DIR]]], [enable S/Key support ])],
 [case $with_skey in
     no)		;;
     *)		AC_DEFINE(HAVE_SKEY)
@@ -455,7 +455,7 @@ AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[=DIR]], [enable S/Key support ])]
 		;;
 esac])
 
-AC_ARG_WITH(opie, [AS_HELP_STRING([--with-opie[=DIR]], [enable OPIE support ])],
+AC_ARG_WITH(opie, [AS_HELP_STRING([--with-opie[[=DIR]]], [enable OPIE support ])],
 [case $with_opie in
     no)		;;
     *)		AC_DEFINE(HAVE_OPIE)
@@ -1594,7 +1594,7 @@ LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
 
 AC_MSG_CHECKING(path to sudo_noexec.so)
-AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
+AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[[=PATH]]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
     yes)	with_noexec="$libexecdir/sudo/sudo_noexec.so"
 		;;

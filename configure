@@ -1647,7 +1647,7 @@ Optional Packages:
   --with-devel            add development options
   --with-CC               C compiler to use
   --with-rpath            deprecated, use --disable-rpath
-  --with-blibpath=PATH    deprecated
+  --with-blibpath[=PATH]  deprecated
   --with-bsm-audit        enable BSM audit support
   --with-linux-audit      enable Linux audit support
   --with-solaris-audit    enable Solaris audit support
@@ -1659,8 +1659,8 @@ Optional Packages:
   --with-efence           link with -lefence for malloc() debugging
   --with-csops            add CSOps standard options
   --without-passwd        don't use passwd/shadow file for authentication
-  --with-skey=DIR         enable S/Key support
-  --with-opie=DIR         enable OPIE support
+  --with-skey[=DIR]       enable S/Key support
+  --with-opie[=DIR]       enable OPIE support
   --with-long-otp-prompt  use a two line OTP (skey/opie) prompt
   --with-SecurID[=DIR]    enable SecurID support
   --with-fwtk[=DIR]       enable FWTK AuthSRV support
@@ -1744,7 +1744,7 @@ Optional Packages:
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
   --with-libtool=PATH     specify path to libtool
-  --with-noexec=PATH      fully qualified pathname of sudo_noexec.so
+  --with-noexec[=PATH]    fully qualified pathname of sudo_noexec.so
   --with-netsvc[=PATH]    path to netsvc.conf
   --with-pam-login        enable specific PAM session for sudo -i
 
