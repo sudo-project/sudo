@@ -222,7 +222,7 @@ int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
     int ttyfd);
 void selinux_execve(const char *path, char *const argv[], char *const envp[],
-    int noexec);
+    bool noexec);
 
 /* solaris.c */
 void set_project(struct passwd *);

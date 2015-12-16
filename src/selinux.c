@@ -374,7 +374,7 @@ done:
 
 void
 selinux_execve(const char *path, char *const argv[], char *const envp[],
-    int noexec)
+    bool noexec)
 {
     char **nargv;
     const char *sesh;
