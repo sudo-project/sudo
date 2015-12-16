@@ -36,37 +36,25 @@
 #include "sudo.h"
 #include "sudo_exec.h"
 
-/*
- * Disable execution of child processes in the command we are about
- * to run.  On systems with privilege sets, we can remove the exec
- * privilege.  On other systems we use LD_PRELOAD and the like.
- */
-static char * const *
-disable_execute(char *const envp[])
-{
 #ifdef _PATH_SUDO_NOEXEC
-    char *preload = NULL, **nenvp = NULL;
-    int env_len, env_size;
+/*
+ * Add a DSO file to LD_PRELOAD or the system equivalent.
+ */
+static char **
+preload_dso(char *envp[], const char *dso_file)
+{
+    char *preload = NULL;
+    int env_len;
     int preload_idx = -1;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
     bool enabled = false;
+# else
+    const bool enabled = true;
 # endif
-#endif /* _PATH_SUDO_NOEXEC */
-    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
+    debug_decl(preload_dso, SUDO_DEBUG_UTIL)
 
-#ifdef HAVE_PRIV_SET
-    /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
-    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_READ", NULL);
-    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_WRITE", NULL);
-    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_SEARCH", NULL);
-    if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
-	debug_return_const_ptr(envp);
-    sudo_warn(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
-#endif /* HAVE_PRIV_SET */
-
-#ifdef _PATH_SUDO_NOEXEC
     /*
-     * Preload a noexec file.  For a list of LD_PRELOAD-alikes, see
+     * Preload a DSO file.  For a list of LD_PRELOAD-alikes, see
      * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
      * XXX - need to support 32-bit and 64-bit variants
      */
@@ -77,56 +65,85 @@ disable_execute(char *const envp[])
 	    preload_idx = env_len;
 	    continue;
 	}
-#ifdef RTLD_PRELOAD_ENABLE_VAR
+# ifdef RTLD_PRELOAD_ENABLE_VAR
 	if (strncmp(envp[env_len], RTLD_PRELOAD_ENABLE_VAR "=", sizeof(RTLD_PRELOAD_ENABLE_VAR)) == 0) {
 	    enabled = true;
 	    continue;
 	}
-#endif
+# endif
     }
 
-    /* Make a new copy of envp as needed. */
-    env_size = env_len + 1 + (preload_idx == -1);
-#ifdef RTLD_PRELOAD_ENABLE_VAR
-    if (!enabled)
-	env_size++;
-#endif
-    nenvp = reallocarray(NULL, env_size, sizeof(*envp));
-    if (nenvp == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    memcpy(nenvp, envp, env_len * sizeof(*envp));
-    nenvp[env_len] = NULL;
+    /*
+     * Make a new copy of envp as needed.
+     * It would be nice to realloc the old envp[] but we don't know
+     * whether it was dynamically allocated. [TODO: plugin API]
+     */
+    if (preload_idx == -1 || !enabled) {
+	const int env_size = env_len + 1 + (preload_idx == -1) + enabled;
+
+	char **nenvp = reallocarray(NULL, env_size, sizeof(*envp));
+	if (nenvp == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	memcpy(nenvp, envp, env_len * sizeof(*envp));
+	nenvp[env_len] = NULL;
+	envp = nenvp;
+    }
 
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
     if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, dso_file,
+	    RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
-	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
+	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
 # endif
 	if (preload == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	nenvp[env_len++] = preload;
-	nenvp[env_len] = NULL;
+	envp[env_len++] = preload;
+	envp[env_len] = NULL;
     } else {
 	int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
-	    sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
+	    dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
 	if (len == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	nenvp[preload_idx] = preload;
+	envp[preload_idx] = preload;
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR
     if (!enabled) {
-	nenvp[env_len++] = RTLD_PRELOAD_ENABLE_VAR "=";
-	nenvp[env_len] = NULL;
+	envp[env_len++] = RTLD_PRELOAD_ENABLE_VAR "=";
+	envp[env_len] = NULL;
     }
 # endif
 
-    /* Install new env pointer. */
-    envp = nenvp;
+    debug_return_ptr(envp);
+}
 #endif /* _PATH_SUDO_NOEXEC */
 
-    debug_return_const_ptr(envp);
+/*
+ * Disable execution of child processes in the command we are about
+ * to run.  On systems with privilege sets, we can remove the exec
+ * privilege.  On other systems we use LD_PRELOAD and the like.
+ */
+static char **
+disable_execute(char *envp[])
+{
+    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
+
+#ifdef HAVE_PRIV_SET
+    /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
+    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_READ", NULL);
+    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_WRITE", NULL);
+    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_SEARCH", NULL);
+    if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
+	debug_return_ptr(envp);
+    sudo_warn(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
+#endif /* HAVE_PRIV_SET */
+
+#ifdef _PATH_SUDO_NOEXEC
+    envp = preload_dso(envp, sudo_conf_noexec_path());
+#endif /* _PATH_SUDO_NOEXEC */
+
+    debug_return_ptr(envp);
 }
 
 /*
@@ -134,7 +151,7 @@ disable_execute(char *const envp[])
  * ala execvp(3) if we get ENOEXEC.
  */
 int
-sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexec)
+sudo_execve(const char *path, char *const argv[], char *envp[], bool noexec)
 {
     /* Modify the environment as needed to disable further execve(). */
     if (noexec)
