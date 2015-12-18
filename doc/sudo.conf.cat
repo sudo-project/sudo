@@ -88,6 +88,10 @@ DDEESSCCRRIIPPTTIIOONN
            Path noexec /usr/local/libexec/sudo/sudo_noexec.so
            Path askpass /usr/X11R6/bin/ssh-askpass
 
+     If no path name is specified, features relying on the specified setting
+     will be disabled.  Disabling Path settings is only supported in ssuuddoo
+     version 1.8.16 and higher.
+
      The following plugin-agnostic paths may be set in the _/_e_t_c_/_s_u_d_o_._c_o_n_f
      file:
 

@@ -184,6 +184,14 @@ Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
 .Ed
 .Pp
+If no path name is specified, features relying on the specified
+setting will be disabled.
+Disabling
+.Li Path
+settings is only supported in
+.Nm sudo
+version 1.8.16 and higher.
+.Pp
 The following plugin-agnostic paths may be set in the
 .Pa @sysconfdir@/sudo.conf
 file:

@@ -140,7 +140,8 @@ disable_execute(char *envp[])
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC
-    envp = preload_dso(envp, sudo_conf_noexec_path());
+    if (sudo_conf_noexec_path() != NULL)
+	envp = preload_dso(envp, sudo_conf_noexec_path());
 #endif /* _PATH_SUDO_NOEXEC */
 
     debug_return_ptr(envp);

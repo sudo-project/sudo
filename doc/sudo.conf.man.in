@@ -206,6 +206,14 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
 .fi
 .PP
+If no path name is specified, features relying on the specified
+setting will be disabled.
+Disabling
+\fRPath\fR
+settings is only supported in
+\fBsudo\fR
+version 1.8.16 and higher.
+.PP
 The following plugin-agnostic paths may be set in the
 \fI@sysconfdir@/sudo.conf\fR
 file:

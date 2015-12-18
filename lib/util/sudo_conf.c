@@ -64,7 +64,7 @@ struct sudo_conf_table {
 struct sudo_conf_path_table {
     const char *pname;
     unsigned int pnamelen;
-    const char *pval;
+    char **pval;
 };
 
 static int parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
@@ -93,7 +93,36 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
     { NULL }
 };
 
-/* XXX - it would be nice to make this local to sudo_conf_read */
+/*
+ * Using designated struct initializers would be clearer here but
+ * we want to avoid relying on C99 features for now.
+ */
+static struct sudo_conf_paths {
+    char *askpass;
+    char *sesh;
+    char *nodump;
+    char *noexec;
+    char *plugin_dir;
+} sudo_conf_paths = {
+    _PATH_SUDO_ASKPASS,
+    _PATH_SUDO_SESH,
+#ifdef _PATH_SUDO_NODUMP
+    _PATH_SUDO_NODUMP,
+#else
+    NULL,
+#endif
+#ifdef _PATH_SUDO_NOEXEC
+    _PATH_SUDO_NOEXEC,
+#else
+    NULL,
+#endif
+#ifdef _PATH_SUDO_PLUGIN_DIR
+    _PATH_SUDO_PLUGIN_DIR,
+#else
+    NULL,
+#endif
+};
+
 static struct sudo_conf_data {
     bool disable_coredump;
     bool probe_interfaces;
@@ -110,18 +139,10 @@ static struct sudo_conf_data {
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
-#define SUDO_CONF_ASKPASS_IDX	0
-	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
-#define SUDO_CONF_SESH_IDX	1
-	{ "sesh", sizeof("sesh") - 1, _PATH_SUDO_SESH },
-#ifdef _PATH_SUDO_NOEXEC
-#define SUDO_CONF_NOEXEC_IDX	2
-	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
-#endif
-#ifdef _PATH_SUDO_PLUGIN_DIR
-#define SUDO_CONF_PLUGIN_IDX	3
-	{ "plugin", sizeof("plugin") - 1, _PATH_SUDO_PLUGIN_DIR },
-#endif
+	{ "askpass", sizeof("askpass") - 1, &sudo_conf_paths.askpass },
+	{ "sesh", sizeof("sesh") - 1, &sudo_conf_paths.sesh },
+	{ "noexec", sizeof("noexec") - 1, &sudo_conf_paths.noexec },
+	{ "plugin", sizeof("plugin") - 1, &sudo_conf_paths.plugin_dir },
 	{ NULL }
     }
 };
@@ -156,6 +177,7 @@ parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 
 /*
  * "Path name /path/to/file"
+ * If path is missing it will be set to the NULL pointer.
  */
 static int
 parse_path(const char *entry, const char *conf_file, unsigned int lineno)
@@ -172,22 +194,25 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 	goto bad;
     namelen = (size_t)(ep - name);
 
-    /* Parse path. */
+    /* Parse path (if present). */
     path = sudo_strsplit(NULL, entry_end, " \t", &ep);
-    if (path == NULL)
-	goto bad;
 
     /* Match supported paths, ignoring unknown paths. */
     for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
 	if (namelen == cur->pnamelen &&
 	    strncasecmp(name, cur->pname, cur->pnamelen) == 0) {
-	    if ((cur->pval = strdup(path)) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		debug_return_int(-1);
-		break;
+	    char *pval = NULL;
+	    if (path != NULL) {
+		if ((pval = strdup(path)) == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		    debug_return_int(-1);
+		}
 	    }
+	    *cur->pval = pval;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%u: Path %s %s",
-		__func__, conf_file, lineno, cur->pname, cur->pval);
+		__func__, conf_file, lineno, cur->pname,
+		pval ? pval : "(none)");
 	    debug_return_int(true);
 	}
     }
@@ -425,20 +450,20 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
 const char *
 sudo_conf_askpass_path_v1(void)
 {
-    return sudo_conf_data.path_table[SUDO_CONF_ASKPASS_IDX].pval;
+    return sudo_conf_paths.askpass;
 }
 
 const char *
 sudo_conf_sesh_path_v1(void)
 {
-    return sudo_conf_data.path_table[SUDO_CONF_SESH_IDX].pval;
+    return sudo_conf_paths.sesh;
 }
 
 #ifdef _PATH_SUDO_NOEXEC
 const char *
 sudo_conf_noexec_path_v1(void)
 {
-    return sudo_conf_data.path_table[SUDO_CONF_NOEXEC_IDX].pval;
+    return sudo_conf_paths.noexec;
 }
 #endif
 
@@ -446,7 +471,7 @@ sudo_conf_noexec_path_v1(void)
 const char *
 sudo_conf_plugin_dir_path_v1(void)
 {
-    return sudo_conf_data.path_table[SUDO_CONF_PLUGIN_IDX].pval;
+    return sudo_conf_paths.plugin_dir;
 }
 #endif
 
