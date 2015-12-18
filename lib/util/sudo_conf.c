@@ -142,7 +142,7 @@ static struct sudo_conf_data {
 	{ "askpass", sizeof("askpass") - 1, &sudo_conf_paths.askpass },
 	{ "sesh", sizeof("sesh") - 1, &sudo_conf_paths.sesh },
 	{ "noexec", sizeof("noexec") - 1, &sudo_conf_paths.noexec },
-	{ "plugin", sizeof("plugin") - 1, &sudo_conf_paths.plugin_dir },
+	{ "plugin_dir", sizeof("plugin_dir") - 1, &sudo_conf_paths.plugin_dir },
 	{ NULL }
     }
 };
