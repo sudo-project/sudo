@@ -369,6 +369,7 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
+extern const char *path_plugin_dir;
 
 /* editor.c */
 char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,

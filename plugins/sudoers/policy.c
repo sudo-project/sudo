@@ -256,6 +256,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    remhost = *cur + sizeof("remote_host=") - 1;
 	    continue;
 	}
+	if (MATCHES(*cur, "plugin_dir=")) {
+	    path_plugin_dir = *cur + sizeof("plugin_dir=") - 1;
+	    continue;
+	}
     }
 
     for (cur = info->user_info; *cur != NULL; cur++) {

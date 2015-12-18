@@ -74,12 +74,17 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	}
 #endif /* STATIC_SUDOERS_PLUGIN */
 
-	len = snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
+	if (sudo_conf_plugin_dir_path() == NULL) {
+	    errno = ENOENT;
+	    goto done;
+	}
+
+	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
 	    info->path);
 	if (len <= 0 || (size_t)len >= pathsize) {
 	    sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    sudo_warnx(U_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
+	    sudo_warnx(U_("%s%s: %s"), sudo_conf_plugin_dir_path(), info->path,
 		strerror(ENAMETOOLONG));
 	    goto done;
 	}
@@ -109,7 +114,9 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
 	sudo_warnx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	sudo_warn("%s%s", _PATH_SUDO_PLUGIN_DIR, info->path);
+	sudo_warn("%s%s",
+	    sudo_conf_plugin_dir_path() ? sudo_conf_plugin_dir_path() : "",
+	    info->path);
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {

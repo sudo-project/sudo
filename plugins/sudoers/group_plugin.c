@@ -38,6 +38,8 @@
 #include "sudoers.h"
 #include "sudo_dso.h"
 
+const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
+
 #if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 
 static void *group_handle;
@@ -62,17 +64,17 @@ group_plugin_load(char *plugin_info)
      */
     if ((args = strpbrk(plugin_info, " \t")) != NULL) {
 	len = snprintf(path, sizeof(path), "%s%.*s",
-	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "",
+	    (*plugin_info != '/') ? path_plugin_dir : "",
 	    (int)(args - plugin_info), plugin_info);
 	args++;
     } else {
 	len = snprintf(path, sizeof(path), "%s%s",
-	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
+	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
     }
     if (len <= 0 || (size_t)len >= sizeof(path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s%s",
-	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
+	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
 	goto done;
     }
 
