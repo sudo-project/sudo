@@ -730,15 +730,15 @@ When the command is run as a child of the
 process,
 \fBsudo\fR
 will relay signals it receives to the command.
-Unless the command is being run in a new pty, the
+The
 \fRSIGINT\fR
 and
 \fRSIGQUIT\fR
-signals are not relayed unless they are sent by a user process,
-not the kernel.
-Otherwise, the command would receive
+signals are only relayed when the command is being run in a new pty
+or when the signal was sent by a user process, not the kernel.
+This prevents the command from receiving
 \fRSIGINT\fR
-twice every time the user entered control-C.
+twice each time the user enters control-C.
 Some signals, such as
 \fRSIGSTOP\fR
 and
