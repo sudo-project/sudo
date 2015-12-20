@@ -46,6 +46,7 @@ preload_dso(char *envp[], const char *dso_file)
     char *preload = NULL;
     int env_len;
     int preload_idx = -1;
+    bool present = false;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
     bool enabled = false;
 # else
@@ -61,7 +62,27 @@ preload_dso(char *envp[], const char *dso_file)
 
     /* Count entries in envp, looking for LD_PRELOAD as we go. */
     for (env_len = 0; envp[env_len] != NULL; env_len++) {
-	if (strncmp(envp[env_len], RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
+	if (preload_idx == -1 && strncmp(envp[env_len], RTLD_PRELOAD_VAR "=",
+	    sizeof(RTLD_PRELOAD_VAR)) == 0) {
+	    const char *cp = envp[env_len] + sizeof(RTLD_PRELOAD_VAR);
+	    const char *end = cp + strlen(cp);
+	    const char *ep;
+	    const size_t dso_len = strlen(dso_file);
+
+	    /* Check to see if dso_file is already present. */
+	    for (cp = sudo_strsplit(cp, end, RTLD_PRELOAD_DELIM, &ep);
+		cp != NULL; cp = sudo_strsplit(NULL, end, RTLD_PRELOAD_DELIM,
+		&ep)) {
+		if ((size_t)(ep - cp) == dso_len) {
+		    if (memcmp(cp, dso_file, dso_len) == 0) {
+			/* already present */
+			present = true;
+			break;
+		    }
+		}
+	    }
+
+	    /* Save index of existing LD_PRELOAD variable. */
 	    preload_idx = env_len;
 	    continue;
 	}
@@ -90,23 +111,29 @@ preload_dso(char *envp[], const char *dso_file)
     }
 
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
-    if (preload_idx == -1) {
+    if (!present) {
+	if (preload_idx == -1) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, dso_file,
-	    RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	    asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, dso_file,
+		RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 # else
-	preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
+	    preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
 # endif
-	if (preload == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	envp[env_len++] = preload;
-	envp[env_len] = NULL;
-    } else {
-	int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
-	    dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
-	if (len == -1)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	envp[preload_idx] = preload;
+	    if (preload == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    envp[env_len++] = preload;
+	    envp[env_len] = NULL;
+	} else {
+	    int len = asprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR,
+		dso_file, RTLD_PRELOAD_DELIM, envp[preload_idx]);
+	    if (len == -1) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    envp[preload_idx] = preload;
+	}
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR
     if (!enabled) {
