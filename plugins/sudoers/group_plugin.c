@@ -38,12 +38,11 @@
 #include "sudoers.h"
 #include "sudo_dso.h"
 
-const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
-
 #if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 
 static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
+const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 
 /*
  * Load the specified plugin and run its init function.
