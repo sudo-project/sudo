@@ -293,7 +293,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode)
 	debug_return_int(-1);
     }
 
-    fd = openat(dfd, path, oflags, mode);
+    fd = openat(dfd, base, oflags, mode);
     close(dfd);
     debug_return_int(fd);
 }
