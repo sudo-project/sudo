@@ -408,10 +408,12 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      $ openssl dgst -binary -sha224 /bin/ls | openssl base64
      EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
 
-     If the user has write access to either the command itself or the
-     directory in which the command is located (directly or via a ssuuddoo
-     command) it may be possible for the user to replace the command after the
-     digest check has been performed but before the command is executed.
+     Warning, if the user has write access to the command itself (directly or
+     via a ssuuddoo command), it may be possible for the user to replace the
+     command after the digest check has been performed but before the command
+     is executed.  A similar race condition exists on systems that lack the
+     fexecve(2) system call when the directory in which the command is located
+     is writable by the user.
 
      Command digests are only supported by version 1.8.7 or higher.
 
@@ -2493,4 +2495,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    December 11, 2015                   Sudo 1.8.16
+Sudo 1.8.16                     January 4, 2015                    Sudo 1.8.16

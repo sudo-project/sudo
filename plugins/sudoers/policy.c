@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -377,6 +377,9 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     user_umask = umask(SUDO_UMASK);
     umask(user_umask);
 
+    /* Some systems support fexecve() which we use for digest matches. */
+    cmnd_fd = -1;
+
     /* Dump settings and user info (XXX - plugin args) */
     for (cur = info->settings; *cur != NULL; cur++)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
@@ -550,6 +553,16 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     if (cmnd_umask != 0777) {
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
 	    goto oom;
+    }
+    if (cmnd_fd != -1) {
+	if (sudo_version < SUDO_API_MKVERSION(1, 9)) {
+	    /* execfd only supported by plugin API 1.9 and higher */
+	    close(cmnd_fd);
+	    cmnd_fd = -1;
+	} else {
+	    if (asprintf(&command_info[info_len++], "execfd=%d", cmnd_fd) == -1)
+		goto oom;
+	}
     }
 #ifdef HAVE_LOGIN_CAP_H
     if (def_use_loginclass) {

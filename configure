@@ -2650,6 +2650,7 @@ as_fn_append ac_header_list " sys/bsdtypes.h"
 as_fn_append ac_header_list " sys/select.h"
 as_fn_append ac_header_list " sys/stropts.h"
 as_fn_append ac_header_list " sys/sysmacros.h"
+as_fn_append ac_func_list " fexecve"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
 as_fn_append ac_func_list " strftime"
@@ -18078,6 +18079,8 @@ done
 
 
 
+
+
 for ac_func in getgrouplist
 do :
   ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
@@ -19903,8 +19906,8 @@ _ACEOF
 fi
 done
 
-    # Check for fexecve, posix_spawn, and posix_spawnp
-    for ac_func in fexecve posix_spawn posix_spawnp
+    # Check for posix_spawn, and posix_spawnp
+    for ac_func in posix_spawn posix_spawnp
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -585,6 +585,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
+    details->execfd = -1;
     TAILQ_INIT(&details->preserved_fds);
 
 #define SET_STRING(s, n) \
@@ -613,6 +614,21 @@ command_info_to_details(char * const info[], struct command_details *details)
 		if (strncmp("exec_background=", info[i], sizeof("exec_background=") - 1) == 0) {
 		    if (sudo_strtobool(info[i] + sizeof("exec_background=") - 1) == true)
 			SET(details->flags, CD_EXEC_BG);
+		    break;
+		}
+		if (strncmp("execfd=", info[i], sizeof("execfd=") - 1) == 0) {
+		    cp = info[i] + sizeof("execfd=") - 1;
+		    details->execfd = strtonum(cp, 0, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
+#ifdef HAVE_FEXECVE
+		    /* Must keep fd open during exec. */
+		    add_preserved_fd(&details->preserved_fds, details->execfd);
+#else
+		    /* Plugin thinks we support fexecve() but we don't. */
+		    fcntl(details->execfd, F_SETFD, FD_CLOEXEC);
+		    details->execfd = -1;
+#endif
 		    break;
 		}
 		break;

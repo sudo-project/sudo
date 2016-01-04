@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -74,7 +74,7 @@
 
 /* exec.c */
 struct sudo_event_base;
-int sudo_execve(const char *path, char *const argv[], char *envp[], bool noexec);
+int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec);
 extern volatile pid_t cmnd_pid;
 
 /* exec_pty.c */

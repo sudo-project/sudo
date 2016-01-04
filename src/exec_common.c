@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -179,14 +179,19 @@ disable_execute(char *envp[])
  * ala execvp(3) if we get ENOEXEC.
  */
 int
-sudo_execve(const char *path, char *const argv[], char *envp[], bool noexec)
+sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec)
 {
     /* Modify the environment as needed to disable further execve(). */
     if (noexec)
 	envp = disable_execute(envp);
 
-    execve(path, argv, envp);
-    if (errno == ENOEXEC) {
+#ifdef HAVE_FEXECVE
+    if (fd != -1)
+	    fexecve(fd, argv, envp);
+    else
+#endif
+	    execve(path, argv, envp);
+    if (fd == -1 && errno == ENOEXEC) {
 	int argc;
 	char **nargv;
 

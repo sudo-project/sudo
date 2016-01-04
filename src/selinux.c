@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *
  * Borrowed heavily from newrole source code
@@ -373,7 +373,7 @@ done:
 }
 
 void
-selinux_execve(const char *path, char *const argv[], char *const envp[],
+selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
     bool noexec)
 {
     char **nargv;
@@ -409,6 +409,8 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
+    if (fd != -1)
+	argc++;
     nargv = reallocarray(NULL, argc + 2, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -418,11 +420,16 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
 	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
     else
 	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
-    nargv[1] = (char *)path;
-    memcpy(&nargv[2], &argv[1], argc * sizeof(char *)); /* copies NULL */
+    argc = 1;
+    if (fd != -1 && asprintf(&nargv[argc++], "--execfd=%d", fd) == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return;
+    }
+    nargv[argc] = (char *)path;
+    memcpy(&nargv[argc + 1], &argv[argc], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
-    sudo_execve(sesh, nargv, envp, false);
+    sudo_execve(-1, sesh, nargv, envp, false);
     serrno = errno;
     free(nargv);
     errno = serrno;

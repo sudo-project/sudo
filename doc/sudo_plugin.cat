@@ -499,6 +499,11 @@ DDEESSCCRRIIPPTTIIOONN
                        This setting has no effect unless I/O logging is
                        enabled or _u_s_e___p_t_y is enabled.
 
+                 execfd=number
+                       If specified, ssuuddoo will use the fexecve(2) system call
+                       to execute the command instead of execve(2).  The
+                       specified _n_u_m_b_e_r must refer to an open file descriptor.
+
                  iolog_compress=bool
                        Set to true if the I/O logging plugins, if any, should
                        compress the log data.  This is a hint to the I/O
@@ -1505,6 +1510,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            it supports plugin API version 1.8 or higher to receive a
            conversation function pointer that supports this argument.
 
+     Version 1.9 (sudo 1.8.16)
+           The _e_x_e_c_f_d entry was added to the command_info list.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1534,4 +1542,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    November 20, 2015                   Sudo 1.8.16
+Sudo 1.8.16                     January 4, 2016                    Sudo 1.8.16

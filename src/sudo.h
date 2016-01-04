@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2014
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -149,6 +149,7 @@ struct command_details {
     int ngroups;
     int closefrom;
     int flags;
+    int execfd;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     GETGROUPS_T *groups;
@@ -221,8 +222,8 @@ int os_init_openbsd(int argc, char *argv[], char *envp[]);
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
     int ttyfd);
-void selinux_execve(const char *path, char *const argv[], char *const envp[],
-    bool noexec);
+void selinux_execve(int fd, const char *path, char *const argv[],
+    char *envp[], bool noexec);
 
 /* solaris.c */
 void set_project(struct passwd *);

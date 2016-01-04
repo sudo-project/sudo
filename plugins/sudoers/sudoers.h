@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2015
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -90,6 +90,7 @@ struct sudo_user {
     const char *cwd;
     char *iolog_file;
     GETGROUPS_T *gids;
+    int   execfd;
     int   ngids;
     int   closefrom;
     int   lines;
@@ -197,6 +198,7 @@ struct sudo_user {
 #define user_srunhost		(sudo_user.srunhost)
 #define user_ccname		(sudo_user.krb5_ccname)
 #define safe_cmnd		(sudo_user.cmnd_safe)
+#define cmnd_fd			(sudo_user.execfd)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)
 #define runas_gr		(sudo_user._runas_gr)

@@ -1,7 +1,7 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
 AC_INIT([sudo], [1.8.16], [https://bugzilla.sudo.ws/], [sudo])
@@ -2384,7 +2384,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime pread pwrite openat])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat])
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2676,8 +2676,8 @@ dnl
 if test X"$with_noexec" != X"no"; then
     # Check for non-standard exec functions
     AC_CHECK_FUNCS([exect execvP execvpe])
-    # Check for fexecve, posix_spawn, and posix_spawnp
-    AC_CHECK_FUNCS([fexecve posix_spawn posix_spawnp])
+    # Check for posix_spawn, and posix_spawnp
+    AC_CHECK_FUNCS([posix_spawn posix_spawnp])
 fi
 
 dnl

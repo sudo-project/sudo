@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2015
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2016
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 11, 2015
+.Dd January 4, 2015
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -831,12 +831,14 @@ $ openssl dgst -binary -sha224 /bin/ls | openssl base64
 EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
 .Ed
 .Pp
-If the user has write access to either the command itself or the
-directory in which the command is located (directly or via a
+Warning, if the user has write access to the command itself (directly or via a
 .Nm sudo
-command) it may be possible for the user to replace the command
-after the digest check has been performed but before the command
-is executed.
+command), it may be possible for the user to replace the command after the
+digest check has been performed but before the command is executed.
+A similar race condition exists on systems that lack the
+.Xr fexecve 2
+system call when the directory in which the command is located
+is writable by the user.
 .Pp
 Command digests are only supported by version 1.8.7 or higher.
 .Ss Defaults
