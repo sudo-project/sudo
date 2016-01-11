@@ -1361,8 +1361,8 @@ oom:
 	ldap_msgfree(result);
     debug_return_bool(false);
 overflow:
-    free(filt);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(filt);
     debug_return_bool(false);
 }
 
@@ -1533,8 +1533,8 @@ oom:
     ldap_msgfree(result);
     debug_return_bool(false);
 overflow:
-    free(filt);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(filt);
     debug_return_bool(false);
 }
 
@@ -1689,8 +1689,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 
     debug_return_str(buf);
 overflow:
-    free(buf);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(buf);
     debug_return_str(NULL);
 }
 
