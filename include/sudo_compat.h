@@ -182,6 +182,8 @@
 # ifndef UTIME_NOW
 #  define UTIME_NOW	-2L
 # endif
+#endif
+#if !defined(HAVE_OPENAT) || (!defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT))
 # ifndef AT_FDCWD
 #  define AT_FDCWD	-100
 # endif

@@ -179,12 +179,14 @@ group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
 }
 
 #ifndef HAVE_OPENAT
-/* This does not support AT_FDCWD... */
 static int
 sudo_openat(int dfd, const char *path, int flags, mode_t mode)
 {
     int fd, odfd;
     debug_decl(sudo_openat, SUDO_DEBUG_EDIT)
+
+    if (dfd == AT_FDCWD)
+	debug_return_int(open(path, flags, mode));
 
     /* Save cwd */
     if ((odfd = open(".", O_RDONLY)) == -1)
@@ -206,6 +208,64 @@ sudo_openat(int dfd, const char *path, int flags, mode_t mode)
 }
 #define openat sudo_openat
 #endif /* HAVE_OPENAT */
+
+#ifdef O_NOFOLLOW
+static int
+sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
+{
+    debug_decl(sudo_edit_open_nofollow, SUDO_DEBUG_EDIT)
+
+    debug_return_int(openat(dfd, path, oflags|O_NOFOLLOW, mode));
+}
+#else
+/*
+ * Returns true if fd and path don't match or path is a symlink.
+ * Used on older systems without O_NOFOLLOW.
+ */
+static bool
+sudo_edit_is_symlink(int fd, char *path)
+{
+    struct stat sb1, sb2;
+    debug_decl(sudo_edit_is_symlink, SUDO_DEBUG_EDIT)
+
+    /*
+     * Treat [fl]stat() failure like there was a symlink.
+     */
+    if (fstat(fd, &sb1) == -1 || lstat(path, &sb2) == -1)
+	debug_return_bool(true);
+
+    /*
+     * Make sure we did not open a link and that what we opened
+     * matches what is currently on the file system.
+     */
+    if (S_ISLNK(sb2.st_mode) ||
+	sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
+	debug_return_bool(true);
+    }
+
+    debug_return_bool(false);
+}
+
+static int
+sudo_edit_openat_nofollow(char *path, int oflags, mode_t mode)
+{
+    struct stat sb1, sb2;
+    int fd;
+    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
+
+    fd = openat(dfd, path, oflags, mode);
+    if (fd == -1)
+	debug_return_int(-1);
+
+    if (sudo_edit_is_symlink(fd, path)) {
+	close(fd);
+	fd = -1;
+	errno = ELOOP;
+    }
+
+    debug_return_int(fd);
+}
+#endif /* O_NOFOLLOW */
 
 /*
  * Returns true if the directory described by sb is writable
@@ -245,55 +305,100 @@ dir_is_writable(struct stat *sb, uid_t uid, gid_t gid, int ngroups,
     debug_return_bool(false);
 }
 
+/*
+ * Directory open flags for use with openat(2) and fstat(2).
+ * Use O_PATH and O_DIRECTORY where possible.
+ */
+#if defined(O_PATH) && defined(O_DIRECTORY)
+# define DIR_OPEN_FLAGS	(O_PATH|O_DIRECTORY)
+#elif defined(O_PATH) && !defined(O_DIRECTORY)
+# define DIR_OPEN_FLAGS	O_PATH
+#elif !defined(O_PATH) && defined(O_DIRECTORY)
+# define DIR_OPEN_FLAGS	(O_RDONLY|O_DIRECTORY)
+#else
+# define DIR_OPEN_FLAGS	(O_RDONLY|O_NONBLOCK)
+#endif
+
 static int
 sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode)
 {
-    char *base, *dir;
+    int dfd, fd, dflags = DIR_OPEN_FLAGS;
+#if defined(__linux__) && defined(O_PATH)
+    char *opath = path;
+#endif
+    bool is_writable;
     struct stat sb;
-    int dfd, fd;
     debug_decl(sudo_edit_open_nonwritable, SUDO_DEBUG_EDIT)
 
-    base = strrchr(path, '/');
-    if (base != NULL) {
-	*base++ = '\0';
-	dir = path;
-    } else {
-	base = path;
-	dir = ".";
-    }
-#ifdef O_PATH
-    if ((dfd = open(dir, O_PATH)) != -1) {
-	/* Linux kernels < 3.6 can't do fstat on O_PATH fds. */
-	if (fstat(dfd, &sb) == -1) {
-	    close(dfd);
-	    dfd = open(dir, O_RDONLY);
-	    if (fstat(dfd, &sb) == -1) {
-		close(dfd);
-		dfd = -1;
-	    }
-	}
-    }
-#else
-    if ((dfd = open(dir, O_RDONLY)) != -1) {
-	if (fstat(dfd, &sb) == -1) {
-	    close(dfd);
-	    dfd = -1;
-	}
-    }
+#if defined(__linux__) && defined(O_PATH)
+restart:
 #endif
-    if (base != path)
-	base[-1] = '/';			/* restore path */
+    if (path[0] == '/') {
+	dfd = open("/", dflags);
+	path++;
+    } else {
+	dfd = open(".", dflags);
+	if (path[0] == '.' && path[1] == '/')
+	    path += 2;
+    }
     if (dfd == -1)
 	debug_return_int(-1);
 
-    if (dir_is_writable(&sb, user_details.uid, user_details.gid,
-	user_details.ngroups, user_details.groups)) {
+    for (;;) {
+	char *slash;
+	int subdfd;
+
+	/*
+	 * Look up one component at a time, avoiding symbolic links in
+	 * writable directories.
+	 */
+	if (fstat(dfd, &sb) == -1) {
+	    close(dfd);
+#if defined(__linux__) && defined(O_PATH)
+	    /* Linux prior to 3.6 can't fstat an O_PATH fd */
+	    if (ISSET(dflags, O_PATH)) {
+		CLR(dflags, O_PATH);
+		path = opath;
+		goto restart;
+	    }
+#endif
+	    debug_return_int(-1);
+	}
+#ifndef O_DIRECTORY
+	if (!S_ISDIR(sb.st_mode)) {
+	    close(dfd);
+	    errno = ENOTDIR;
+	    debug_return_int(-1);
+	}
+#endif
+	is_writable = dir_is_writable(&sb, user_details.uid, user_details.gid,
+	    user_details.ngroups, user_details.groups);
+
+	while (path[0] == '/')
+	    path++;
+	slash = strchr(path, '/');
+	if (slash == NULL)
+	    break;
+	*slash = '\0';
+	if (is_writable)
+	    subdfd = sudo_edit_openat_nofollow(dfd, path, dflags, 0);
+	else
+	    subdfd = openat(dfd, path, dflags, 0);
+	*slash = '/';			/* restore path */
+	close(dfd);
+	if (subdfd == -1)
+	    debug_return_int(-1);
+	path = slash + 1;
+	dfd = subdfd;
+    }
+
+    if (is_writable) {
 	close(dfd);
 	errno = EISDIR;
 	debug_return_int(-1);
     }
 
-    fd = openat(dfd, base, oflags, mode);
+    fd = openat(dfd, path, oflags, mode);
     close(dfd);
     debug_return_int(fd);
 }
@@ -332,27 +437,10 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags)
     if (!ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
-    /*
-     * Treat [fl]stat() failure like an open() failure.
-     */
-    if (fstat(fd, &sb1) == -1 || lstat(path, &sb2) == -1) {
-	const int serrno = errno;
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW) && sudo_edit_is_symlink(fd, path)) {
 	close(fd);
-	errno = serrno;
-	debug_return_int(-1);
-    }
-
-    /*
-     * Make sure we did not open a link and that what we opened
-     * matches what is currently on the file system.
-     */
-    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW)) {
-	if (S_ISLNK(sb2.st_mode) ||
-	    sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino) {
-	    close(fd);
-	    errno = ELOOP;
-	    debug_return_int(-1);
-	}
+	fd = -1;
+	errno = ELOOP;
     }
 
     debug_return_int(fd);

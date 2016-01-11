@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 4, 2015
+.Dd January 9, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2581,10 +2581,16 @@ by default.
 .It sudoedit_checkdir
 If set,
 .Nm sudoedit
-will refuse to edit files located in a directory that is writable
-by the invoking user unless it is run by root.
-On many systems, this option requires that the parent directory
-of the file to be edited be readable by the target user.
+will check directories in the path to be edited for writability
+by the invoking user.
+Symbolic links will not be followed in writable directories and
+.Nm sudoedit
+will also refuse to edit a file located in a writable directory.
+Theses restrictions are not enforced when
+.Nm sudoedit
+is invoked as root.
+On many systems, this option requires that all directories
+in the path to be edited be readable by the target user.
 This flag is
 .Em off
 by default.

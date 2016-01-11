@@ -1,6 +1,15 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.16:
+
+    The meaning of the sudoedit_checkdir sudoers option has changed
+    in 1.8.16.  Previously, it would only check the parent directory
+    of the file to be edited.  In 1.8.16 and higher all directories
+    in the path to be edited are checked and sudoedit will refuse
+    to follow a symbolic link in a directory that is writable by
+    the invoking user.
+
 o Upgrading from a version prior to 1.8.15:
 
     Prior to version 1.8.15, when env_reset was enabled (the default)
