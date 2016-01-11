@@ -1347,8 +1347,7 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
 		}
 	    }
 	}
-	if (result)
-	    ldap_msgfree(result);
+	ldap_msgfree(result);
 
 	/* Check for nested netgroups in what we added. */
 	start = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
@@ -1357,8 +1356,7 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
     debug_return_bool(true);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (result)
-	ldap_msgfree(result);
+    ldap_msgfree(result);
     debug_return_bool(false);
 overflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
@@ -1486,8 +1484,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	free(filt);
 	if (rc != LDAP_SUCCESS) {
 	    DPRINTF1("ldap netgroup search failed: %s", ldap_err2string(rc));
-	    if (result)
-		ldap_msgfree(result);
+	    ldap_msgfree(result);
 	    continue;
 	}
 
@@ -2270,8 +2267,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		ldap_value_free_len(bv);
 	    }
 	}
-	if (result)
-	    ldap_msgfree(result);
+	ldap_msgfree(result);
     }
     free(filt);
 done:
@@ -3093,10 +3089,8 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 	    tv.tv_usec = 0;
 	    tvp = &tv;
 	}
-	if (result != NULL) {
-	    ldap_msgfree(result);
-	    result = NULL;
-	}
+	ldap_msgfree(result);
+	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
@@ -3112,8 +3106,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     rc = 0;
 
 done:
-    if (result != NULL)
-	ldap_msgfree(result);
+    ldap_msgfree(result);
     free(filt);
 
     debug_return_int(rc);
