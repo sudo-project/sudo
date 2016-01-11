@@ -590,8 +590,10 @@ digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
     unsigned char sudoers_digest[SHA512_DIGEST_LENGTH];
     unsigned char buf[32 * 1024];
     struct digest_function *func = NULL;
+#ifdef HAVE_FEXECVE
     bool first = true;
     bool is_script = false;
+#endif /* HAVE_FEXECVE */
     size_t nread;
     SHA2_CTX ctx;
     FILE *fp;
@@ -635,12 +637,14 @@ digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
 
     func->init(&ctx);
     while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
+#ifdef HAVE_FEXECVE
 	/* Check for #! cookie and set is_script. */
 	if (first) {
 	    first = false;
 	    if (nread >= 2 && buf[0] == '#' && buf[1] == '!')
 		is_script = true;
 	}
+#endif /* HAVE_FEXECVE */
 	func->update(&ctx, buf, nread);
     }
     if (ferror(fp)) {
