@@ -1024,7 +1024,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 {
     int i, op;
     bool ret = false;
-    char *cp, *v;
+    char *copy, *cp, *v;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
@@ -1046,7 +1046,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
     for (i = 0; val_array[i] != NULL; i++) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'",
 	 val_array[i]);
-	if ((v = strdup(val_array[i])) == NULL) {
+	if ((v = copy = strdup(val_array[i])) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -1090,7 +1090,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    /* case var Boolean True */
 	    set_default(v, NULL, true);
 	}
-	free(v);
+	free(copy);
     }
     ret = true;
 
