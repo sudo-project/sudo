@@ -674,8 +674,8 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 
 	/* match any or address or netgroup or hostname */
 	if (!strcmp(val, "ALL") || addr_matches(val) ||
-	    netgr_matches(val, user_host, user_shost, NULL) ||
-	    hostname_matches(user_shost, user_host, val))
+	    netgr_matches(val, user_runhost, user_srunhost, NULL) ||
+	    hostname_matches(user_srunhost, user_runhost, val))
 	    ret = true;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
