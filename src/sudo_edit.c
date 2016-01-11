@@ -247,7 +247,7 @@ sudo_edit_is_symlink(int fd, char *path)
 }
 
 static int
-sudo_edit_openat_nofollow(char *path, int oflags, mode_t mode)
+sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
     struct stat sb1, sb2;
     int fd;
