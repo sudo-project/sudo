@@ -1046,7 +1046,7 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char *cp, *var;
+    char *copy, *cp, *var;
     int op;
     bool rc = false;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
@@ -1057,7 +1057,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
-	if ((var = strdup((*p)->bv_val)) == NULL) {
+	if ((copy = var = strdup((*p)->bv_val)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -1102,7 +1102,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    /* case var Boolean True */
 	    set_default(var, NULL, true);
 	}
-	free(var);
+	free(copy);
     }
     rc = true;
 
