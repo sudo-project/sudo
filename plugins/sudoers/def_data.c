@@ -388,7 +388,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"sudoedit_checkdir", T_FLAG,
-	N_("Check the parent directory for writability when editing files with sudoedit"),
+	N_("Check parent directories for writability when editing files with sudoedit"),
 	NULL,
     }, {
 	"sudoedit_follow", T_FLAG,
