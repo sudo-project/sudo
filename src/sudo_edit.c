@@ -364,13 +364,7 @@ restart:
 #endif
 	    debug_return_int(-1);
 	}
-#ifndef O_DIRECTORY
-	if (!S_ISDIR(sb.st_mode)) {
-	    close(dfd);
-	    errno = ENOTDIR;
-	    debug_return_int(-1);
-	}
-#endif
+
 	is_writable = dir_is_writable(&sb, user_details.uid, user_details.gid,
 	    user_details.ngroups, user_details.groups);
 
