@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 9, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "January 12, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1926,22 +1926,6 @@ is compiled with
 \fBzlib\fR
 support.
 .TP 18n
-use_netgroups
-If set, netgroups (prefixed with
-\(oq+\(cq),
-may be used in place of a user or host.
-For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server unless the
-\fBNETGROUP_BASE\fR
-directive is present in the
-\fI@ldap_conf@\fR
-file.
-If netgroups are not needed, this option can be disabled to reduce the
-load on the LDAP server.
-This flag is
-\fIon\fR
-by default.
-.TP 18n
 exec_background
 By default,
 \fBsudo\fR
@@ -2424,6 +2408,19 @@ This flag is
 \fI@mail_no_user@\fR
 by default.
 .TP 18n
+netgroup_tuple
+If set, netgroup lookups will be performed using the full netgroup
+tuple: host name, user name and domain (if one is set).
+Historically,
+\fBsudo\fR
+only matched the user name and domain for netgroups used in a
+\fRUser_List\fR
+and only matched the host name and domain for netgroups used in a
+\fRHost_List\fR.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
 noexec
 If set, all commands run via
 \fBsudo\fR
@@ -2840,6 +2837,22 @@ is configured with the
 option.
 This flag is
 \fIoff\fR
+by default.
+.TP 18n
+use_netgroups
+If set, netgroups (prefixed with
+\(oq+\(cq),
+may be used in place of a user or host.
+For LDAP-based sudoers, netgroup support requires an expensive
+substring match on the server unless the
+\fBNETGROUP_BASE\fR
+directive is present in the
+\fI@ldap_conf@\fR
+file.
+If netgroups are not needed, this option can be disabled to reduce the
+load on the LDAP server.
+This flag is
+\fIon\fR
 by default.
 .TP 18n
 use_pty

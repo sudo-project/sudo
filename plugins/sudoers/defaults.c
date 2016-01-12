@@ -439,6 +439,7 @@ init_defaults(void)
 #ifdef HAVE_INNETGR
     def_use_netgroups = true;
 #endif
+    def_netgroup_tuple = false;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -549,7 +550,7 @@ update_defaults(int what)
 		break;
 	    case DEFAULTS_HOST:
 		if (ISSET(what, SETDEF_HOST) &&
-		    hostlist_matches(def->binding) == ALLOW &&
+		    hostlist_matches(sudo_user.pw, def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 		break;

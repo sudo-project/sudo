@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 9, 2016
+.Dd January 12, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1796,21 +1796,6 @@ by default when
 is compiled with
 .Sy zlib
 support.
-.It use_netgroups
-If set, netgroups (prefixed with
-.Ql + ) ,
-may be used in place of a user or host.
-For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server unless the
-.Sy NETGROUP_BASE
-directive is present in the
-.Pa @ldap_conf@
-file.
-If netgroups are not needed, this option can be disabled to reduce the
-load on the LDAP server.
-This flag is
-.Em on
-by default.
 .It exec_background
 By default,
 .Nm sudo
@@ -2276,6 +2261,18 @@ file.
 This flag is
 .Em @mail_no_user@
 by default.
+.It netgroup_tuple
+If set, netgroup lookups will be performed using the full netgroup
+tuple: host name, user name and domain (if one is set).
+Historically,
+.Nm sudo
+only matched the user name and domain for netgroups used in a
+.Li User_List
+and only matched the host name and domain for netgroups used in a
+.Li Host_List .
+This flag is
+.Em off
+by default.
 .It noexec
 If set, all commands run via
 .Nm sudo
@@ -2669,6 +2666,21 @@ is configured with the
 option.
 This flag is
 .Em off
+by default.
+.It use_netgroups
+If set, netgroups (prefixed with
+.Ql + ) ,
+may be used in place of a user or host.
+For LDAP-based sudoers, netgroup support requires an expensive
+substring match on the server unless the
+.Sy NETGROUP_BASE
+directive is present in the
+.Pa @ldap_conf@
+file.
+If netgroups are not needed, this option can be disabled to reduce the
+load on the LDAP server.
+This flag is
+.Em on
 by default.
 .It use_pty
 If set,

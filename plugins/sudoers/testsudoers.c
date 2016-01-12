@@ -305,7 +305,7 @@ main(int argc, char *argv[])
 	    putchar('\n');
 	    print_privilege(priv);
 	    putchar('\n');
-	    host_match = hostlist_matches(&priv->hostlist);
+	    host_match = hostlist_matches(sudo_user.pw, &priv->hostlist);
 	    if (host_match == ALLOW) {
 		puts("\thost  matched");
 		TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {

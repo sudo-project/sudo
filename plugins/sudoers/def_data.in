@@ -295,3 +295,6 @@ sudoedit_follow
 always_query_group_plugin
 	T_FLAG
 	"Query the group plugin for unknown system groups"
+netgroup_tuple
+	T_FLAG
+	"Match netgroups based on the entire tuple: user, host and domain"

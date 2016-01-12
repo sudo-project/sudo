@@ -107,7 +107,9 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, NULL, NULL, pw->pw_name))
+		if (netgr_matches(m->name,
+		    def_netgroup_tuple ? user_runhost : NULL,
+		    def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		    matched = !m->negated;
 		break;
 	    case USERGROUP:
@@ -163,7 +165,10 @@ runaslist_matches(const struct member_list *user_list,
 			user_matched = !m->negated;
 			break;
 		    case NETGROUP:
-			if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
+			if (netgr_matches(m->name,
+			    def_netgroup_tuple ? user_runhost : NULL,
+			    def_netgroup_tuple ? user_srunhost : NULL,
+			    runas_pw->pw_name))
 			    user_matched = !m->negated;
 			break;
 		    case USERGROUP:
@@ -250,7 +255,7 @@ runaslist_matches(const struct member_list *user_list,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-hostlist_matches(const struct member_list *list)
+hostlist_matches(const struct passwd *pw, const struct member_list *list)
 {
     struct member *m;
     struct alias *a;
@@ -263,7 +268,8 @@ hostlist_matches(const struct member_list *list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, user_runhost, user_srunhost, NULL))
+		if (netgr_matches(m->name, user_runhost, user_srunhost,
+		    pw->pw_name))
 		    matched = !m->negated;
 		break;
 	    case NTWKADDR:
@@ -272,7 +278,7 @@ hostlist_matches(const struct member_list *list)
 		break;
 	    case ALIAS:
 		if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
-		    rval = hostlist_matches(&a->members);
+		    rval = hostlist_matches(pw, &a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    alias_put(a);

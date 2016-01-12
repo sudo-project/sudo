@@ -694,7 +694,8 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
 	if (*val == '+') {
-	    if (netgr_matches(val, NULL, NULL, pw->pw_name))
+	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s' ... %s", val,
 		ret ? "MATCH!" : "not");
@@ -716,7 +717,7 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 * host match, else false.
 */
 static bool
-sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
+sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     char *val;
@@ -736,7 +737,8 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
 	val = (*p)->bv_val;
 	/* match any or address or netgroup or hostname */
 	if (!strcmp(val, "ALL") || addr_matches(val) ||
-	    netgr_matches(val, user_runhost, user_srunhost, NULL) ||
+	    netgr_matches(val, user_runhost, user_srunhost,
+	    def_netgroup_tuple ? pw->pw_name : NULL) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
 	    ret = true;
 	DPRINTF2("ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
@@ -792,7 +794,8 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 	val = (*p)->bv_val;
 	switch (val[0]) {
 	case '+':
-	    if (netgr_matches(val, NULL, NULL, runas_pw->pw_name))
+	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+		def_netgroup_tuple ? user_srunhost : NULL, runas_pw->pw_name))
 		ret = true;
 	    break;
 	case '%':
@@ -1401,8 +1404,8 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result = NULL;
     const char *domain;
-    char *escaped_domain, *escaped_host, *escaped_shost, *escaped_user;
-    char *filt = NULL;
+    char *escaped_domain = NULL, *escaped_user = NULL;
+    char *escaped_host = NULL, *escaped_shost = NULL, *filt = NULL;
     int filt_len, rc;
     debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP);
 
@@ -1416,29 +1419,70 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     domain = sudo_getdomainname();
 
     /* Escape the domain, host names, and user name per RFC 4515. */
-    escaped_domain = domain ? sudo_ldap_value_dup(domain) : NULL;
-    escaped_host = sudo_ldap_value_dup(user_runhost);
-    if (user_runhost == user_srunhost)
-	escaped_shost = escaped_host;
-    else 
-	escaped_shost = sudo_ldap_value_dup(user_srunhost);
-    escaped_user = sudo_ldap_value_dup(pw->pw_name);
-    if (escaped_domain == NULL || escaped_host == NULL ||
-	escaped_shost == NULL || escaped_user == NULL)
-	goto oom;
+    if (domain != NULL) {
+	if ((escaped_domain = sudo_ldap_value_dup(domain)) == NULL)
+	    goto oom;
+    }
+    if ((escaped_user = sudo_ldap_value_dup(pw->pw_name)) == NULL)
+	    goto oom;
+    if (def_netgroup_tuple) {
+	escaped_host = sudo_ldap_value_dup(user_runhost);
+	if (user_runhost == user_srunhost)
+	    escaped_shost = escaped_host;
+	else 
+	    escaped_shost = sudo_ldap_value_dup(user_srunhost);
+	if (escaped_host == NULL || escaped_shost == NULL)
+	    goto oom;
+    }
 
     /* Build query, using NIS domain if it is set. */
     if (domain != NULL) {
-	if (user_runhost != user_srunhost) {
-	    filt_len = asprintf(&filt, "(&%s(|(nisNetgroupTriple=\\28,%s,%s\\29)(nisNetgroupTriple=\\28%s,%s,%s\\29)(nisNetgroupTriple=\\28%s,%s,%s\\29)(nisNetgroupTriple=\\28,%s,\\29)(nisNetgroupTriple=\\28%s,%s,\\29)(nisNetgroupTriple=\\28%s,%s,\\29)))", ldap_conf.netgroup_search_filter, escaped_user, escaped_domain, escaped_shost, escaped_user, escaped_domain, escaped_host, escaped_user, escaped_domain, escaped_user, escaped_shost, escaped_user, escaped_host, escaped_user);
+	if (escaped_host != escaped_shost) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28,%s,\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user, escaped_domain,
+		escaped_shost, escaped_user, escaped_domain,
+		escaped_host, escaped_user, escaped_domain, escaped_user,
+		escaped_shost, escaped_user, escaped_host, escaped_user);
+	} else if (escaped_shost != NULL) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28,%s,\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user, escaped_domain,
+		escaped_shost, escaped_user, escaped_domain,
+		escaped_user, escaped_shost, escaped_user);
 	} else {
-	    filt_len = asprintf(&filt, "(&%s(|(nisNetgroupTriple=\\28,%s,%s\\29)(nisNetgroupTriple=\\28%s,%s,%s\\29)(nisNetgroupTriple=\\28,%s,\\29)(nisNetgroupTriple=\\28%s,%s,\\29)))", ldap_conf.netgroup_search_filter, escaped_user, escaped_domain, escaped_shost, escaped_user, escaped_domain, escaped_user, escaped_shost, escaped_user);
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28*,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28*,%s,\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user, escaped_domain,
+		escaped_user);
 	}
     } else {
-	if (user_runhost != user_srunhost) {
-	    filt_len = asprintf(&filt, "(&%s(|(nisNetgroupTriple=\\28,%s,*\\29)(nisNetgroupTriple=\\28%s,%s,*\\29)(nisNetgroupTriple=\\28%s,%s,*\\29)))", ldap_conf.netgroup_search_filter, escaped_user, escaped_shost, escaped_user, escaped_host, escaped_user);
+	if (escaped_host != escaped_shost) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,*\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,*\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,*\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user,
+		escaped_shost, escaped_user, escaped_host, escaped_user);
+	} else if (escaped_shost != NULL) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,*\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,*\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user,
+		escaped_shost, escaped_user);
 	} else {
-	    filt_len = asprintf(&filt, "(&%s(|(nisNetgroupTriple=\\28,%s,*\\29)(nisNetgroupTriple=\\28%s,%s,*\\29)))", ldap_conf.netgroup_search_filter, escaped_user, escaped_shost, escaped_user);
+	    filt_len = asprintf(&filt,
+		"(&%s(|(nisNetgroupTriple=\\28*,%s,*\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user);
 	}
     }
     if (filt_len == -1)
@@ -1497,10 +1541,10 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     free(escaped_domain);
+    free(escaped_user);
     free(escaped_host);
     if (escaped_host != escaped_shost)
 	free(escaped_shost);
-    free(escaped_user);
     free(filt);
     ldap_msgfree(result);
     debug_return_bool(false);
@@ -3399,7 +3443,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 			continue;
 		    lres->user_matches = true;
 		    /* Check host. */
-		    if (!sudo_ldap_check_host(ld, entry))
+		    if (!sudo_ldap_check_host(ld, entry, pw))
 			continue;
 		    lres->host_matches = true;
 		    if (sudo_ldap_result_add_entry(lres, entry) == NULL) {

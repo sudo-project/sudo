@@ -544,7 +544,8 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	switch (val[0]) {
 	case '+':
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "netgr_");
-	    if (netgr_matches(val, NULL, NULL, runas_pw->pw_name)) {
+	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+		def_netgroup_tuple ? user_srunhost : NULL, runas_pw->pw_name)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "=> match");
 		ret = true;
 	    }
@@ -655,8 +656,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	debug_return_bool(ret);
 
     /* get the values from the rule */
-    switch (handle->fn_get_values(rule, "sudoHost", &val_array))
-    {
+    switch (handle->fn_get_values(rule, "sudoHost", &val_array)) {
     case 0:
 	break;
     case ENOENT:
@@ -673,8 +673,8 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
 	/* match any or address or netgroup or hostname */
-	if (!strcmp(val, "ALL") || addr_matches(val) ||
-	    netgr_matches(val, user_runhost, user_srunhost, NULL) ||
+	if (!strcmp(val, "ALL") || addr_matches(val) || netgr_matches(val,
+	    user_runhost, user_srunhost, handle->pw->pw_name) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
 	    ret = true;
 
@@ -724,7 +724,9 @@ sudo_sss_filter_user_netgroup(struct sudo_sss_handle *handle, struct sss_sudo_ru
 	    netgroup_spec_found = true;
 	}
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
-	if (strcmp(val, "ALL") == 0 || netgr_matches(val, NULL, NULL, handle->pw->pw_name)) {
+	if (strcmp(val, "ALL") == 0 || netgr_matches(val,
+	    def_netgroup_tuple ? user_runhost : NULL,
+	    def_netgroup_tuple ? user_srunhost : NULL, handle->pw->pw_name)) {
 	    ret = true;
 	    sudo_debug_printf(SUDO_DEBUG_DIAG,
 		"sssd/ldap sudoUser '%s' ... MATCH! (%s)",

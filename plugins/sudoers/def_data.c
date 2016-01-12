@@ -399,6 +399,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Query the group plugin for unknown system groups"),
 	NULL,
     }, {
+	"netgroup_tuple", T_FLAG,
+	N_("Match netgroups based on the entire tuple: user, host and domain"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
