@@ -2385,6 +2385,18 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat])
+case "$host_os" in
+    hpux*)
+	if test X"$ac_cv_func_pread" = X"yes"; then
+	    O_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
+	    AC_CHECK_FUNCS([pread64 pwrite64], [
+		AC_DEFINE([_LARGEFILE64_SOURCE], [1], [Define to 1 to enable 64-bit versions of standard C functions on 32-bit systems.])
+	    ])
+	    CPPFLAGS="$O_CPPFLAGS"
+	fi
+	;;
+esac
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
