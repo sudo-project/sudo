@@ -39,7 +39,6 @@ gzoffset
 gzoffset64
 gzopen
 gzopen64
-gzopen_w
 gzprintf
 gzputc
 gzputs
