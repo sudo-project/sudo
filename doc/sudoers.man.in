@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 12, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "January 16, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -136,7 +136,7 @@ It should be specified as an octal value.
 For more information on configuring
 sudo.conf(@mansectform@),
 please refer to its manual.
-.SS "Authentication and logging"
+.SS "User Authentication"
 The
 \fBsudoers\fR
 security policy requires that most users authenticate
@@ -235,6 +235,7 @@ The
 \fItty_tickets\fR
 option can be disabled to force the use of a
 single time stamp for all of a user's sessions.
+.SS "Logging"
 \fBsudoers\fR
 can log both successful and unsuccessful attempts (as well
 as errors) to
@@ -249,20 +250,28 @@ but this is changeable via the
 and
 \fIlogfile\fR
 Defaults settings.
+See
+\fILOG FORMAT\fR
+for a description of the log file format.
 .PP
-\fIsudoers\fR
-also supports logging a command's input and output
-streams.
+\fBsudoers\fR
+is also capable of running a command in a pseudo-tty and logging all
+input and/or output.
+The standard input, standard output and standard error can be logged
+even when not associated with a terminal.
 I/O logging is not on by default but can be enabled using
 the
 \fIlog_input\fR
 and
 \fIlog_output\fR
-Defaults flags as well as the
+options as well as the
 \fRLOG_INPUT\fR
 and
 \fRLOG_OUTPUT\fR
 command tags.
+See
+\fII/O LOG FILES\fR
+for details on how I/O log files are stored.
 .SS "Command environment"
 Since environment variables can influence program behavior,
 \fBsudoers\fR
@@ -2220,41 +2229,12 @@ will run the command in a pseudo-tty and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
+For more information, see the
+\fII/O LOG FILES\fR
+section.
 This flag is
 \fIoff\fR
 by default.
-.sp
-Input is logged to the directory specified by the
-\fIiolog_dir\fR
-option
-(\fI@iolog_dir@\fR
-by default)
-using a unique session ID that is included in the normal
-\fBsudo\fR
-log line, prefixed with
-\(Lq\fRTSID=\fR\(Rq.
-The
-\fIiolog_file\fR
-option may be used to control the format of the session ID.
-Input from the user's tty is logged to the
-\fIttyin\fR
-file.
-Input from a pipe or file is logged to the
-\fIstdin\fR
-file.
-These files are in gzip (compressed) format unless the
-\fIcompress_io\fR
-option has been disabled.
-Due to buffering, the I/O log data will not be complete until the
-\fBsudo\fR
-command has completed.
-.sp
-Note that user input may contain sensitive information such as
-passwords (even if they are not echoed to the screen), which will
-be stored in the log file unencrypted.
-In most cases, logging the command output via
-\fIlog_output\fR
-is all that is required.
 .TP 18n
 log_output
 If set,
@@ -2263,44 +2243,12 @@ will run the command in a pseudo-tty and log all output that is sent
 to the screen, similar to the
 script(1)
 command.
-If the standard output or standard error is not connected to the
-user's tty, due to I/O redirection or because the command is part
-of a pipeline, that output is also captured and stored in separate
-log files.
+For more information, see the
+\fII/O LOG FILES\fR
+section.
 This flag is
 \fIoff\fR
 by default.
-.sp
-Output is logged to the directory specified by the
-\fIiolog_dir\fR
-option
-(\fI@iolog_dir@\fR
-by default)
-using a unique session ID that is included in the normal
-\fBsudo\fR
-log line, prefixed with
-\(Lq\fRTSID=\fR\(Rq.
-The
-\fIiolog_file\fR
-option may be used to control the format of the session ID.
-Output from the pseudo-tty is logged to the
-\fIttyout\fR
-file.
-Output to a pipe or redirected to a file is logged to the either the
-\fIstdout\fR
-or
-\fIstderr\fR
-files.
-These files are in gzip (compressed) format unless the
-\fIcompress_io\fR
-option has been disabled.
-Due to buffering, the I/O log data will not be complete until the
-\fBsudo\fR
-command has completed.
-.sp
-Output logs may be viewed with the
-sudoreplay(@mansectsu@)
-utility, which can also be used to list or search the available logs.
 .TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -3774,7 +3722,7 @@ sudo_plugin(@mansectsu@).
 can log events using either
 syslog(3)
 or a simple log file.
-In each case the log format is almost identical.
+The log format is almost identical in both cases.
 .SS "Accepted command log entries"
 Commands that sudo runs are logged using the following format (split
 into multiple lines for readability):
@@ -4117,6 +4065,88 @@ If the
 option is set to 0 (or negated with a
 \(oq\&!\(cq),
 word wrap will be disabled.
+.SH "I/O LOG FILES"
+When I/O logging is enabled,
+\fBsudo\fR
+will run the command in a pseudo-tty and log all user input and/or output.
+I/O is logged to the directory specified by the
+\fIiolog_dir\fR
+option
+(\fI@iolog_dir@\fR
+by default)
+using a unique session ID that is included in the
+\fBsudo\fR
+log line, prefixed with
+\(Lq\fRTSID=\fR\(Rq.
+The
+\fIiolog_file\fR
+option may be used to control the format of the session ID.
+.PP
+Each I/O log is stored in a separate directory that contains the
+following files:
+.TP 10n
+\fIlog\fR
+a text file containing the time the command was run, the name of the user
+who ran
+\fBsudo\fR,
+the name of the target user, the name of the target group (optional),
+the terminal that
+\fBsudo\fR
+was run from, the number of rows and columns of the terminal,
+the working directory the command was run from and the path name of
+the command itself (with arguments if present)
+.TP 10n
+\fItiming\fR
+a log of the amount of time between, and the number of bytes in, each
+I/O log entry (used for session playback)
+.TP 10n
+\fIttyin\fR
+input from the user's tty (what the user types)
+.TP 10n
+\fIstdin\fR
+input from a pipe or file
+.TP 10n
+\fIttyout\fR
+output from the pseudo-tty (what the command writes to the screen)
+.TP 10n
+\fIstdout\fR
+standard output to a pipe or redirected to a file
+.TP 10n
+\fIstderr\fR
+standard error to a pipe or redirected to a file
+.PP
+All files other than
+\fIlog\fR
+are compressed in gzip format unless the
+\fIcompress_io\fR
+option has been disabled.
+Due to buffering, the I/O log data will not be complete until the
+\fBsudo\fR
+command has completed.
+The output portion of an I/O log file can be viewed with the
+sudoreplay(@mansectsu@)
+utility, which can also be used to list or search the available logs.
+.PP
+Note that user input may contain sensitive information such as
+passwords (even if they are not echoed to the screen), which will
+be stored in the log file unencrypted.
+In most cases, logging the command output via
+\fIlog_output\fR
+or
+\fRLOG_OUTPUT\fR
+is all that is required.
+.PP
+Since each session's I/O logs are stored in a separate directory,
+traditional log rotation utilities cannot be used to limit the
+number of I/O logs.
+The simplest way to limit the number of I/O is by setting the
+\fImaxseq\fR
+option to the maximum number of logs you wish to store.
+Once the I/O log sequence number reaches
+\fImaxseq\fR,
+it will be reset to zero and
+\fBsudoers\fR
+will truncate and re-use any existing I/O logs.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR

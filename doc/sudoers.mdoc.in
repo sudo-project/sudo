@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 12, 2016
+.Dd January 16, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -124,7 +124,7 @@ It should be specified as an octal value.
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
 please refer to its manual.
-.Ss Authentication and logging
+.Ss User Authentication
 The
 .Nm sudoers
 security policy requires that most users authenticate
@@ -224,6 +224,7 @@ The
 .Em tty_tickets
 option can be disabled to force the use of a
 single time stamp for all of a user's sessions.
+.Ss Logging
 .Nm sudoers
 can log both successful and unsuccessful attempts (as well
 as errors) to
@@ -238,20 +239,28 @@ but this is changeable via the
 and
 .Em logfile
 Defaults settings.
+See
+.Sx "LOG FORMAT"
+for a description of the log file format.
 .Pp
-.Em sudoers
-also supports logging a command's input and output
-streams.
+.Nm sudoers
+is also capable of running a command in a pseudo-tty and logging all
+input and/or output.
+The standard input, standard output and standard error can be logged
+even when not associated with a terminal.
 I/O logging is not on by default but can be enabled using
 the
 .Em log_input
 and
 .Em log_output
-Defaults flags as well as the
+options as well as the
 .Li LOG_INPUT
 and
 .Li LOG_OUTPUT
 command tags.
+See
+.Sx "I/O LOG FILES"
+for details on how I/O log files are stored.
 .Ss Command environment
 Since environment variables can influence program behavior,
 .Nm sudoers
@@ -2079,43 +2088,12 @@ will run the command in a pseudo-tty and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
+For more information, see the
+.Sx "I/O LOG FILES"
+section.
 This flag is
 .Em off
 by default.
-.Pp
-Input is logged to the directory specified by the
-.Em iolog_dir
-option
-.Po
-.Pa @iolog_dir@
-by default
-.Pc
-using a unique session ID that is included in the normal
-.Nm sudo
-log line, prefixed with
-.Dq Li TSID= .
-The
-.Em iolog_file
-option may be used to control the format of the session ID.
-Input from the user's tty is logged to the
-.Pa ttyin
-file.
-Input from a pipe or file is logged to the
-.Pa stdin
-file.
-These files are in gzip (compressed) format unless the
-.Em compress_io
-option has been disabled.
-Due to buffering, the I/O log data will not be complete until the
-.Nm sudo
-command has completed.
-.Pp
-Note that user input may contain sensitive information such as
-passwords (even if they are not echoed to the screen), which will
-be stored in the log file unencrypted.
-In most cases, logging the command output via
-.Em log_output
-is all that is required.
 .It log_output
 If set,
 .Nm sudo
@@ -2123,46 +2101,12 @@ will run the command in a pseudo-tty and log all output that is sent
 to the screen, similar to the
 .Xr script 1
 command.
-If the standard output or standard error is not connected to the
-user's tty, due to I/O redirection or because the command is part
-of a pipeline, that output is also captured and stored in separate
-log files.
+For more information, see the
+.Sx "I/O LOG FILES"
+section.
 This flag is
 .Em off
 by default.
-.Pp
-Output is logged to the directory specified by the
-.Em iolog_dir
-option
-.Po
-.Pa @iolog_dir@
-by default
-.Pc
-using a unique session ID that is included in the normal
-.Nm sudo
-log line, prefixed with
-.Dq Li TSID= .
-The
-.Em iolog_file
-option may be used to control the format of the session ID.
-Output from the pseudo-tty is logged to the
-.Pa ttyout
-file.
-Output to a pipe or redirected to a file is logged to the either the
-.Pa stdout
-or
-.Pa stderr
-files.
-These files are in gzip (compressed) format unless the
-.Em compress_io
-option has been disabled.
-Due to buffering, the I/O log data will not be complete until the
-.Nm sudo
-command has completed.
-.Pp
-Output logs may be viewed with the
-.Xr sudoreplay @mansectsu@
-utility, which can also be used to list or search the available logs.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -3512,7 +3456,7 @@ The group provider plugin API is described in detail in
 can log events using either
 .Xr syslog 3
 or a simple log file.
-In each case the log format is almost identical.
+The log format is almost identical in both cases.
 .Ss Accepted command log entries
 Commands that sudo runs are logged using the following format (split
 into multiple lines for readability):
@@ -3827,6 +3771,85 @@ option is set to 0 (or negated with a
 .Ql \&! ) ,
 word wrap will be disabled.
 .El
+.Sh I/O LOG FILES
+When I/O logging is enabled,
+.Nm sudo
+will run the command in a pseudo-tty and log all user input and/or output.
+I/O is logged to the directory specified by the
+.Em iolog_dir
+option
+.Po
+.Pa @iolog_dir@
+by default
+.Pc
+using a unique session ID that is included in the
+.Nm sudo
+log line, prefixed with
+.Dq Li TSID= .
+The
+.Em iolog_file
+option may be used to control the format of the session ID.
+.Pp
+Each I/O log is stored in a separate directory that contains the
+following files:
+.Bl -tag -width 8n
+.It Pa log
+a text file containing the time the command was run, the name of the user
+who ran
+.Nm sudo ,
+the name of the target user, the name of the target group (optional),
+the terminal that
+.Nm sudo
+was run from, the number of rows and columns of the terminal,
+the working directory the command was run from and the path name of
+the command itself (with arguments if present)
+.It Pa timing
+a log of the amount of time between, and the number of bytes in, each
+I/O log entry (used for session playback)
+.It Pa ttyin
+input from the user's tty (what the user types)
+.It Pa stdin
+input from a pipe or file
+.It Pa ttyout
+output from the pseudo-tty (what the command writes to the screen)
+.It Pa stdout
+standard output to a pipe or redirected to a file
+.It Pa stderr
+standard error to a pipe or redirected to a file
+.El
+.Pp
+All files other than
+.Pa log
+are compressed in gzip format unless the
+.Em compress_io
+option has been disabled.
+Due to buffering, the I/O log data will not be complete until the
+.Nm sudo
+command has completed.
+The output portion of an I/O log file can be viewed with the
+.Xr sudoreplay @mansectsu@
+utility, which can also be used to list or search the available logs.
+.Pp
+Note that user input may contain sensitive information such as
+passwords (even if they are not echoed to the screen), which will
+be stored in the log file unencrypted.
+In most cases, logging the command output via
+.Em log_output
+or
+.Li LOG_OUTPUT
+is all that is required.
+.Pp
+Since each session's I/O logs are stored in a separate directory,
+traditional log rotation utilities cannot be used to limit the
+number of I/O logs.
+The simplest way to limit the number of I/O is by setting the
+.Em maxseq
+option to the maximum number of logs you wish to store.
+Once the I/O log sequence number reaches
+.Em maxseq ,
+it will be reset to zero and
+.Nm
+will truncate and re-use any existing I/O logs.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf

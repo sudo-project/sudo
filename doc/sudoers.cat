@@ -60,7 +60,7 @@ DDEESSCCRRIIPPTTIIOONN
      For more information on configuring sudo.conf(4), please refer to its
      manual.
 
-   AAuutthheennttiiccaattiioonn aanndd llooggggiinngg
+   UUsseerr AAuutthheennttiiccaattiioonn
      The ssuuddooeerrss security policy requires that most users authenticate
      themselves before they can use ssuuddoo.  A password is not required if the
      invoking user is root, if the target user is the same as the invoking
@@ -99,15 +99,19 @@ DDEESSCCRRIIPPTTIIOONN
      record for each tty, which means that a user's login sessions are
      authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
      force the use of a single time stamp for all of a user's sessions.
+
+   LLooggggiinngg
      ssuuddooeerrss can log both successful and unsuccessful attempts (as well as
      errors) to syslog(3), a log file, or both.  By default, ssuuddooeerrss will log
      via syslog(3) but this is changeable via the _s_y_s_l_o_g and _l_o_g_f_i_l_e Defaults
-     settings.
+     settings.  See _L_O_G _F_O_R_M_A_T for a description of the log file format.
 
-     _s_u_d_o_e_r_s also supports logging a command's input and output streams.  I/O
-     logging is not on by default but can be enabled using the _l_o_g___i_n_p_u_t and
-     _l_o_g___o_u_t_p_u_t Defaults flags as well as the LOG_INPUT and LOG_OUTPUT command
-     tags.
+     ssuuddooeerrss is also capable of running a command in a pseudo-tty and logging
+     all input and/or output.  The standard input, standard output and
+     standard error can be logged even when not associated with a terminal.
+     I/O logging is not on by default but can be enabled using the _l_o_g___i_n_p_u_t
+     and _l_o_g___o_u_t_p_u_t options as well as the LOG_INPUT and LOG_OUTPUT command
+     tags.  See _I_/_O _L_O_G _F_I_L_E_S for details on how I/O log files are stored.
 
    CCoommmmaanndd eennvviirroonnmmeenntt
      Since environment variables can influence program behavior, ssuuddooeerrss
@@ -1044,50 +1048,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        connected to the user's tty, due to I/O redirection or
                        because the command is part of a pipeline, that input
                        is also captured and stored in a separate log file.
+                       For more information, see the _I_/_O _L_O_G _F_I_L_E_S section.
                        This flag is _o_f_f by default.
-
-                       Input is logged to the directory specified by the
-                       _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
-                       unique session ID that is included in the normal ssuuddoo
-                       log line, prefixed with ``TSID=''.  The _i_o_l_o_g___f_i_l_e
-                       option may be used to control the format of the session
-                       ID.  Input from the user's tty is logged to the _t_t_y_i_n
-                       file.  Input from a pipe or file is logged to the _s_t_d_i_n
-                       file.  These files are in gzip (compressed) format
-                       unless the _c_o_m_p_r_e_s_s___i_o option has been disabled.  Due
-                       to buffering, the I/O log data will not be complete
-                       until the ssuuddoo command has completed.
-
-                       Note that user input may contain sensitive information
-                       such as passwords (even if they are not echoed to the
-                       screen), which will be stored in the log file
-                       unencrypted.  In most cases, logging the command output
-                       via _l_o_g___o_u_t_p_u_t is all that is required.
 
      log_output        If set, ssuuddoo will run the command in a pseudo-tty and
                        log all output that is sent to the screen, similar to
-                       the script(1) command.  If the standard output or
-                       standard error is not connected to the user's tty, due
-                       to I/O redirection or because the command is part of a
-                       pipeline, that output is also captured and stored in
-                       separate log files.  This flag is _o_f_f by default.
-
-                       Output is logged to the directory specified by the
-                       _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
-                       unique session ID that is included in the normal ssuuddoo
-                       log line, prefixed with ``TSID=''.  The _i_o_l_o_g___f_i_l_e
-                       option may be used to control the format of the session
-                       ID.  Output from the pseudo-tty is logged to the _t_t_y_o_u_t
-                       file.  Output to a pipe or redirected to a file is
-                       logged to the either the _s_t_d_o_u_t or _s_t_d_e_r_r files.  These
-                       files are in gzip (compressed) format unless the
-                       _c_o_m_p_r_e_s_s___i_o option has been disabled.  Due to
-                       buffering, the I/O log data will not be complete until
-                       the ssuuddoo command has completed.
-
-                       Output logs may be viewed with the sudoreplay(1m)
-                       utility, which can also be used to list or search the
-                       available logs.
+                       the script(1) command.  For more information, see the
+                       _I_/_O _L_O_G _F_I_L_E_S section.  This flag is _o_f_f by default.
 
      log_year          If set, the four-digit year will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
@@ -1841,8 +1808,8 @@ GGRROOUUPP PPRROOVVIIDDEERR PPLLUUGGIINNSS
      The group provider plugin API is described in detail in sudo_plugin(1m).
 
 LLOOGG FFOORRMMAATT
-     ssuuddooeerrss can log events using either syslog(3) or a simple log file.  In
-     each case the log format is almost identical.
+     ssuuddooeerrss can log events using either syslog(3) or a simple log file.  The
+     log format is almost identical in both cases.
 
    AAcccceepptteedd ccoommmmaanndd lloogg eennttrriieess
      Commands that sudo runs are logged using the following format (split into
@@ -2020,6 +1987,56 @@ LLOOGG FFOORRMMAATT
           makes it more difficult to use grep(1) on the log files.  If the
           _l_o_g_l_i_n_e_l_e_n option is set to 0 (or negated with a `!'), word wrap
           will be disabled.
+
+II//OO LLOOGG FFIILLEESS
+     When I/O logging is enabled, ssuuddoo will run the command in a pseudo-tty
+     and log all user input and/or output.  I/O is logged to the directory
+     specified by the _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
+     unique session ID that is included in the ssuuddoo log line, prefixed with
+     ``TSID=''.  The _i_o_l_o_g___f_i_l_e option may be used to control the format of
+     the session ID.
+
+     Each I/O log is stored in a separate directory that contains the
+     following files:
+
+     _l_o_g       a text file containing the time the command was run, the name
+               of the user who ran ssuuddoo, the name of the target user, the name
+               of the target group (optional), the terminal that ssuuddoo was run
+               from, the number of rows and columns of the terminal, the
+               working directory the command was run from and the path name of
+               the command itself (with arguments if present)
+
+     _t_i_m_i_n_g    a log of the amount of time between, and the number of bytes
+               in, each I/O log entry (used for session playback)
+
+     _t_t_y_i_n     input from the user's tty (what the user types)
+
+     _s_t_d_i_n     input from a pipe or file
+
+     _t_t_y_o_u_t    output from the pseudo-tty (what the command writes to the
+               screen)
+
+     _s_t_d_o_u_t    standard output to a pipe or redirected to a file
+
+     _s_t_d_e_r_r    standard error to a pipe or redirected to a file
+
+     All files other than _l_o_g are compressed in gzip format unless the
+     _c_o_m_p_r_e_s_s___i_o option has been disabled.  Due to buffering, the I/O log data
+     will not be complete until the ssuuddoo command has completed.  The output
+     portion of an I/O log file can be viewed with the sudoreplay(1m) utility,
+     which can also be used to list or search the available logs.
+
+     Note that user input may contain sensitive information such as passwords
+     (even if they are not echoed to the screen), which will be stored in the
+     log file unencrypted.  In most cases, logging the command output via
+     _l_o_g___o_u_t_p_u_t or LOG_OUTPUT is all that is required.
+
+     Since each session's I/O logs are stored in a separate directory,
+     traditional log rotation utilities cannot be used to limit the number of
+     I/O logs.  The simplest way to limit the number of I/O is by setting the
+     _m_a_x_s_e_q option to the maximum number of logs you wish to store.  Once the
+     I/O log sequence number reaches _m_a_x_s_e_q, it will be reset to zero and
+     ssuuddooeerrss will truncate and re-use any existing I/O logs.
 
 FFIILLEESS
      _/_e_t_c_/_s_u_d_o_._c_o_n_f            Sudo front end configuration
@@ -2507,4 +2524,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    January 12, 2016                    Sudo 1.8.16
+Sudo 1.8.16                    January 16, 2016                    Sudo 1.8.16
