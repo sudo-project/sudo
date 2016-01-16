@@ -44,7 +44,7 @@ The policy format is described in detail in the
 \fISUDOERS FILE FORMAT\fR
 section.
 For information on storing
-\fIsudoers\fR
+\fBsudoers\fR
 policy information
 in LDAP, please see
 sudoers.ldap(@mansectform@).
@@ -138,7 +138,7 @@ sudo.conf(@mansectform@),
 please refer to its manual.
 .SS "Authentication and logging"
 The
-\fIsudoers\fR
+\fBsudoers\fR
 security policy requires that most users authenticate
 themselves before they can use
 \fBsudo\fR.
@@ -149,7 +149,7 @@ user or command.
 Unlike
 su(1),
 when
-\fIsudoers\fR
+\fBsudoers\fR
 requires
 authentication, it validates the invoking user's credentials, not
 the target user's (or root's) credentials.
@@ -198,7 +198,7 @@ is run by root and the
 \fRSUDO_USER\fR
 environment variable
 is set, the
-\fIsudoers\fR
+\fBsudoers\fR
 policy will use this value to determine who
 the actual user is.
 This can be used by a user to log commands
@@ -210,10 +210,10 @@ option to remain useful even when invoked via a
 sudo-run script or program.
 Note, however, that the
 \fIsudoers\fR
-lookup is still done for root, not the user specified by
+file lookup is still done for root, not the user specified by
 \fRSUDO_USER\fR.
 .PP
-\fIsudoers\fR
+\fBsudoers\fR
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the uid that was used to authenticate, the
@@ -228,21 +228,20 @@ minutes unless overridden by the
 option)
 \&.
 By default,
-\fIsudoers\fR
+\fBsudoers\fR
 uses a separate record for each tty, which means that
 a user's login sessions are authenticated separately.
 The
 \fItty_tickets\fR
 option can be disabled to force the use of a
 single time stamp for all of a user's sessions.
-.PP
-\fIsudoers\fR
+\fBsudoers\fR
 can log both successful and unsuccessful attempts (as well
 as errors) to
 syslog(3),
 a log file, or both.
 By default,
-\fIsudoers\fR
+\fBsudoers\fR
 will log via
 syslog(3)
 but this is changeable via the
@@ -266,12 +265,12 @@ and
 command tags.
 .SS "Command environment"
 Since environment variables can influence program behavior,
-\fIsudoers\fR
+\fBsudoers\fR
 provides a means to restrict which variables from the user's
 environment are inherited by the command to be run.
 There are two
 distinct ways
-\fIsudoers\fR
+\fBsudoers\fR
 can deal with environment variables.
 .PP
 By default, the
@@ -424,7 +423,7 @@ As a special case, if
 \fB\-i\fR
 option (initial login) is
 specified,
-\fIsudoers\fR
+\fBsudoers\fR
 will initialize the environment regardless
 of the value of
 \fIenv_reset\fR.
@@ -476,7 +475,7 @@ not necessarily the most specific match).
 .PP
 The
 \fIsudoers\fR
-grammar will be described below in Extended Backus-Naur
+file grammar will be described below in Extended Backus-Naur
 Form (EBNF).
 Don't despair if you are unfamiliar with EBNF; it is fairly simple,
 and the definitions below are annotated.
@@ -840,9 +839,9 @@ Note that
 \(Lq\fRsudoedit\fR\(Rq
 is a command built into
 \fBsudo\fR
-itself and must be specified in
+itself and must be specified in the
 \fIsudoers\fR
-without a leading path.
+file without a leading path.
 .PP
 If a
 \fRcommand name\fR
@@ -1168,7 +1167,7 @@ optionally setting the group to operator or system.
 .SS "SELinux_Spec"
 On systems with SELinux support,
 \fIsudoers\fR
-entries may optionally have an SELinux role and/or type associated
+file entries may optionally have an SELinux role and/or type associated
 with a command.
 If a role or
 type is specified with the command it will override any default values
@@ -1180,7 +1179,7 @@ however, will supersede the values in
 .SS "Solaris_Priv_Spec"
 On Solaris systems,
 \fIsudoers\fR
-entries may optionally specify Solaris privilege set and/or limit
+file entries may optionally specify Solaris privilege set and/or limit
 privilege set associated with a command.
 If privileges or limit privileges are specified with the command
 it will override any default values specified in
@@ -1582,9 +1581,9 @@ $ sudo cat /var/log/messages /etc/shadow
 .PP
 which is probably not what was intended.
 In most cases it is better to do command line processing
-outside of
+outside of the
 \fIsudoers\fR
-in a scripting language.
+file in a scripting language.
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
@@ -1593,7 +1592,7 @@ If the empty string
 \fR\&""\fR
 is the only command line argument in the
 \fIsudoers\fR
-entry it means that command is not allowed to be run with
+file entry it means that command is not allowed to be run with
 \fIany\fR
 arguments.
 .TP 10n
@@ -1619,7 +1618,7 @@ This can be used, for example, to keep a site-wide
 file in addition to a local, per-machine file.
 For the sake of this example the site-wide
 \fIsudoers\fR
-will be
+file will be
 \fI/etc/sudoers\fR
 and the per-machine one will be
 \fI/etc/sudoers.local\fR.
@@ -1694,8 +1693,7 @@ directive can be used to create a
 \fIsudoers.d\fR
 directory that the system package manager can drop
 \fIsudoers\fR
-rules
-into as part of package installation.
+file rules into as part of package installation.
 For example, given:
 .nf
 .sp
@@ -2084,9 +2082,9 @@ This has security implications when path names that include globbing
 characters are used with the negation operator,
 \(oq!\&\(cq,
 as such rules can be trivially bypassed.
-As such, this option should not be used when
+As such, this option should not be used when the
 \fIsudoers\fR
-contains rules that contain negated path names which include globbing
+file contains rules that contain negated path names which include globbing
 characters.
 This flag is
 \fIoff\fR
@@ -2218,9 +2216,7 @@ by default.
 log_input
 If set,
 \fBsudo\fR
-will run the command in a
-\fIpseudo-tty\fR
-and log all user input.
+will run the command in a pseudo-tty and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
@@ -2263,9 +2259,8 @@ is all that is required.
 log_output
 If set,
 \fBsudo\fR
-will run the command in a
-\fIpseudo-tty\fR
-and log all output that is sent to the screen, similar to the
+will run the command in a pseudo-tty and log all output that is sent
+to the screen, similar to the
 script(1)
 command.
 If the standard output or standard error is not connected to the
@@ -2363,7 +2358,7 @@ user if the user running
 \fBsudo\fR
 does not enter the correct password.
 If the command the user is attempting to run is not permitted by
-\fIsudoers\fR
+\fBsudoers\fR
 and one of the
 \fImail_all_cmnds\fR,
 \fImail_always\fR,
@@ -2809,12 +2804,13 @@ by default.
 umask_override
 If set,
 \fBsudo\fR
-will set the umask as specified by
+will set the umask as specified in the
 \fIsudoers\fR
-without modification.
-This makes it possible to specify a more permissive umask in
+file without modification.
+This makes it possible to specify a umask in the
 \fIsudoers\fR
-than the user's own umask and matches historical behavior.
+file that is more permissive than the user's own umask and matches
+historical behavior.
 If
 \fIumask_override\fR
 is not set,
@@ -3272,9 +3268,9 @@ is built on Solaris 10 or higher.
 role
 The default SELinux role to use when constructing a new security
 context to run the command.
-The default role may be overridden on a per-command basis in
+The default role may be overridden on a per-command basis in the
 \fIsudoers\fR
-or via command line options.
+file or via command line options.
 This option is only available when
 \fBsudo\fR
 is built with SELinux support.
@@ -3335,9 +3331,9 @@ The default is
 type
 The default SELinux type to use when constructing a new security
 context to run the command.
-The default type may be overridden on a per-command basis in
+The default type may be overridden on a per-command basis in the
 \fIsudoers\fR
-or via command line options.
+file or via command line options.
 This option is only available when
 \fBsudo\fR
 is built with SELinux support.
@@ -3370,7 +3366,7 @@ This is not set by default.
 .TP 14n
 group_plugin
 A string containing a
-\fIsudoers\fR
+\fBsudoers\fR
 group plugin with optional arguments.
 The string should consist of the plugin
 path, either fully-qualified or relative to the
@@ -3435,7 +3431,7 @@ It has the following possible values:
 all
 All the user's
 \fIsudoers\fR
-entries for the current host must have
+file entries for the current host must have
 the
 \fRNOPASSWD\fR
 flag set to avoid entering a password.
@@ -3449,7 +3445,7 @@ option.
 any
 At least one of the user's
 \fIsudoers\fR
-entries for the current host
+file entries for the current host
 must have the
 \fRNOPASSWD\fR
 flag set to avoid entering a password.
@@ -3569,7 +3565,7 @@ It has the following possible values:
 all
 All the user's
 \fIsudoers\fR
-entries for the current host must have the
+file entries for the current host must have the
 \fRNOPASSWD\fR
 flag set to avoid entering a password.
 .PD
@@ -3582,7 +3578,7 @@ option.
 any
 At least one of the user's
 \fIsudoers\fR
-entries for the current host must have the
+file entries for the current host must have the
 \fRNOPASSWD\fR
 flag set to avoid entering a password.
 .TP 8n
@@ -3941,9 +3937,9 @@ file is located on a remote file system that maps user ID 0 to
 a different value.
 Normally,
 \fBsudoers\fR
-tries to open
+tries to open the
 \fIsudoers\fR
-using group permissions to avoid this problem.
+file using group permissions to avoid this problem.
 Consider either changing the ownership of
 \fI@sysconfdir@/sudoers\fR
 or adding an argument like
@@ -4025,7 +4021,7 @@ sudo.conf(@mansectform@)
 file.
 .TP 3n
 unable to open @rundir@/ts/username
-\fIsudoers\fR
+\fBsudoers\fR
 was unable to read or create the user's time stamp file.
 This can happen when
 \fItimestampowner\fR
@@ -4037,7 +4033,7 @@ The default mode for
 is 0711.
 .TP 3n
 unable to write to @rundir@/ts/username
-\fIsudoers\fR
+\fBsudoers\fR
 was unable to write to the user's time stamp file.
 .TP 3n
 @rundir@/ts is owned by uid X, should be Y
@@ -4046,18 +4042,18 @@ The time stamp directory is owned by a user other than
 This can occur when the value of
 \fItimestampowner\fR
 has been changed.
-\fIsudoers\fR
+\fBsudoers\fR
 will ignore the time stamp directory until the owner is corrected.
 .TP 3n
 @rundir@/ts is group writable
 The time stamp directory is group-writable; it should be writable only by
 \fItimestampowner\fR.
 The default mode for the time stamp directory is 0700.
-\fIsudoers\fR
+\fBsudoers\fR
 will ignore the time stamp directory until the mode is corrected.
 .SS "Notes on logging via syslog"
 By default,
-\fIsudoers\fR
+\fBsudoers\fR
 logs messages via
 syslog(3).
 The
@@ -4066,7 +4062,7 @@ The
 and
 \fIprogname\fR
 fields are added by the syslog daemon, not
-\fIsudoers\fR
+\fBsudoers\fR
 itself.
 As such, they may vary in format on different systems.
 .PP
@@ -4085,11 +4081,11 @@ after the user name and before the continued command line arguments.
 If the
 \fIlogfile\fR
 option is set,
-\fIsudoers\fR
+\fBsudoers\fR
 will log to a local file, such as
 \fI/var/log/sudo\fR.
 When logging to a file,
-\fIsudoers\fR
+\fBsudoers\fR
 uses a format similar to
 syslog(3),
 with a few important differences:
@@ -4140,12 +4136,12 @@ I/O log files
 .TP 26n
 \fI@rundir@/ts\fR
 Directory containing time stamps for the
-\fIsudoers\fR
+\fBsudoers\fR
 security policy
 .TP 26n
 \fI@vardir@/lectured\fR
 Directory containing lecture status files for the
-\fIsudoers\fR
+\fBsudoers\fR
 security policy
 .TP 26n
 \fI/etc/environment\fR
@@ -4155,7 +4151,7 @@ mode on AIX and Linux systems
 .SH "EXAMPLES"
 Below are example
 \fIsudoers\fR
-entries.
+file entries.
 Admittedly, some of these are a bit contrived.
 First, we allow a few environment variables to pass and then define our
 \fIaliases\fR:
@@ -4635,7 +4631,7 @@ it can result in a security issue for rules that subtract or revoke privileges.
 .PP
 For example, given the following
 \fIsudoers\fR
-entry:
+file entry:
 .nf
 .sp
 .RS 0n
@@ -4760,16 +4756,16 @@ user permission to run
 (see below).
 .SS "Secure editing"
 The
-\fIsudoers\fR
+\fBsudoers\fR
 plugin includes
 \fBsudoedit\fR
 support which allows users to securely edit files with the editor
 of their choice.
 As
 \fBsudoedit\fR
-is a built-in command, it must be specified in
+is a built-in command, it must be specified in the
 \fIsudoers\fR
-without a leading path.
+file without a leading path.
 However, it may take command line arguments just as a normal command does.
 Wildcards used in
 \fIsudoedit\fR
@@ -4833,7 +4829,7 @@ tag.
 However, it is still possible to create a hard link if the directory
 is writable and the link target resides on the same file system.
 .SS "Time stamp file checks"
-\fIsudoers\fR
+\fBsudoers\fR
 will check the ownership of its time stamp directory
 (\fI@rundir@/ts\fR
 by default)
@@ -4853,14 +4849,14 @@ be cleared at reboot time, not all systems contain a
 \fI/var/run\fR
 directory.
 To avoid potential problems,
-\fIsudoers\fR
+\fBsudoers\fR
 will ignore time stamp files that date from before the machine booted
 on systems where the boot time is available.
 .PP
 Some systems with graphical desktop environments allow unprivileged
 users to change the system clock.
 Since
-\fIsudoers\fR
+\fBsudoers\fR
 relies on the system clock for time stamp validation, it may be
 possible on such systems for a user to run
 \fBsudo\fR
@@ -4868,16 +4864,16 @@ for longer than
 \fItimestamp_timeout\fR
 by setting the clock back.
 To combat this,
-\fIsudoers\fR
+\fBsudoers\fR
 uses a monotonic clock (which never moves backwards) for its time stamps
 if the system supports it.
 .PP
-\fIsudoers\fR
+\fBsudoers\fR
 will not honor time stamps set far in the future.
 Time stamps with a date greater than current_time + 2 *
 \fRTIMEOUT\fR
 will be ignored and
-\fIsudoers\fR
+\fBsudoers\fR
 will log and complain.
 .PP
 Since time stamp files live in the file system, they can outlive a
@@ -4888,8 +4884,9 @@ after authenticating, logout, login again, and run
 \fBsudo\fR
 without authenticating so long as the record's time stamp is within
 \fR@timeout@\fR
-minutes (or whatever value the timeout is set to in
-\fIsudoers\fR).
+minutes (or whatever value the timeout is set to in the
+\fIsudoers\fR
+file).
 When the
 \fItty_tickets\fR
 option is enabled, the time stamp record includes the device
@@ -4958,6 +4955,7 @@ user authentication
 .TP 10n
 \fIdefaults\fR
 \fIsudoers\fR
+file
 \fIDefaults\fR
 settings
 .TP 10n
@@ -4971,15 +4969,16 @@ LDAP-based sudoers
 logging support
 .TP 10n
 \fImatch\fR
-matching of users, groups, hosts and netgroups in
+matching of users, groups, hosts and netgroups in the
 \fIsudoers\fR
+file
 .TP 10n
 \fInetif\fR
 network interface handling
 .TP 10n
 \fInss\fR
 network service switch handling in
-\fIsudoers\fR
+\fBsudoers\fR
 .TP 10n
 \fIparser\fR
 \fIsudoers\fR
@@ -5053,9 +5052,9 @@ be edited by the
 \fBvisudo\fR
 command which locks the file and does grammatical checking.
 It is
-imperative that
+imperative that the
 \fIsudoers\fR
-be free of syntax errors since
+file be free of syntax errors since
 \fBsudo\fR
 will not run with a syntactically incorrect
 \fIsudoers\fR

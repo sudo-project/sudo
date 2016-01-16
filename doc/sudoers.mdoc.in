@@ -42,7 +42,7 @@ The policy format is described in detail in the
 .Sx SUDOERS FILE FORMAT
 section.
 For information on storing
-.Em sudoers
+.Nm sudoers
 policy information
 in LDAP, please see
 .Xr sudoers.ldap @mansectform@ .
@@ -126,7 +126,7 @@ For more information on configuring
 please refer to its manual.
 .Ss Authentication and logging
 The
-.Em sudoers
+.Nm sudoers
 security policy requires that most users authenticate
 themselves before they can use
 .Nm sudo .
@@ -137,7 +137,7 @@ user or command.
 Unlike
 .Xr su 1 ,
 when
-.Em sudoers
+.Nm sudoers
 requires
 authentication, it validates the invoking user's credentials, not
 the target user's (or root's) credentials.
@@ -186,7 +186,7 @@ is run by root and the
 .Ev SUDO_USER
 environment variable
 is set, the
-.Em sudoers
+.Nm sudoers
 policy will use this value to determine who
 the actual user is.
 This can be used by a user to log commands
@@ -198,10 +198,10 @@ option to remain useful even when invoked via a
 sudo-run script or program.
 Note, however, that the
 .Em sudoers
-lookup is still done for root, not the user specified by
+file lookup is still done for root, not the user specified by
 .Ev SUDO_USER .
 .Pp
-.Em sudoers
+.Nm sudoers
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the uid that was used to authenticate, the
@@ -217,21 +217,20 @@ minutes unless overridden by the
 option
 .Pc .
 By default,
-.Em sudoers
+.Nm sudoers
 uses a separate record for each tty, which means that
 a user's login sessions are authenticated separately.
 The
 .Em tty_tickets
 option can be disabled to force the use of a
 single time stamp for all of a user's sessions.
-.Pp
-.Em sudoers
+.Nm sudoers
 can log both successful and unsuccessful attempts (as well
 as errors) to
 .Xr syslog 3 ,
 a log file, or both.
 By default,
-.Em sudoers
+.Nm sudoers
 will log via
 .Xr syslog 3
 but this is changeable via the
@@ -255,12 +254,12 @@ and
 command tags.
 .Ss Command environment
 Since environment variables can influence program behavior,
-.Em sudoers
+.Nm sudoers
 provides a means to restrict which variables from the user's
 environment are inherited by the command to be run.
 There are two
 distinct ways
-.Em sudoers
+.Nm sudoers
 can deal with environment variables.
 .Pp
 By default, the
@@ -410,7 +409,7 @@ As a special case, if
 .Fl i
 option (initial login) is
 specified,
-.Em sudoers
+.Nm sudoers
 will initialize the environment regardless
 of the value of
 .Em env_reset .
@@ -462,7 +461,7 @@ not necessarily the most specific match).
 .Pp
 The
 .Em sudoers
-grammar will be described below in Extended Backus-Naur
+file grammar will be described below in Extended Backus-Naur
 Form (EBNF).
 Don't despair if you are unfamiliar with EBNF; it is fairly simple,
 and the definitions below are annotated.
@@ -803,9 +802,9 @@ Note that
 .Dq Li sudoedit
 is a command built into
 .Nm sudo
-itself and must be specified in
+itself and must be specified in the
 .Em sudoers
-without a leading path.
+file without a leading path.
 .Pp
 If a
 .Li command name
@@ -1096,7 +1095,7 @@ optionally setting the group to operator or system.
 .Ss SELinux_Spec
 On systems with SELinux support,
 .Em sudoers
-entries may optionally have an SELinux role and/or type associated
+file entries may optionally have an SELinux role and/or type associated
 with a command.
 If a role or
 type is specified with the command it will override any default values
@@ -1108,7 +1107,7 @@ however, will supersede the values in
 .Ss Solaris_Priv_Spec
 On Solaris systems,
 .Em sudoers
-entries may optionally specify Solaris privilege set and/or limit
+file entries may optionally specify Solaris privilege set and/or limit
 privilege set associated with a command.
 If privileges or limit privileges are specified with the command
 it will override any default values specified in
@@ -1473,9 +1472,9 @@ $ sudo cat /var/log/messages /etc/shadow
 .Pp
 which is probably not what was intended.
 In most cases it is better to do command line processing
-outside of
+outside of the
 .Em sudoers
-in a scripting language.
+file in a scripting language.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
@@ -1484,7 +1483,7 @@ If the empty string
 .Li \&""
 is the only command line argument in the
 .Em sudoers
-entry it means that command is not allowed to be run with
+file entry it means that command is not allowed to be run with
 .Em any
 arguments.
 .It sudoedit
@@ -1510,7 +1509,7 @@ This can be used, for example, to keep a site-wide
 file in addition to a local, per-machine file.
 For the sake of this example the site-wide
 .Em sudoers
-will be
+file will be
 .Pa /etc/sudoers
 and the per-machine one will be
 .Pa /etc/sudoers.local .
@@ -1576,8 +1575,7 @@ directive can be used to create a
 .Pa sudoers.d
 directory that the system package manager can drop
 .Em sudoers
-rules
-into as part of package installation.
+file rules into as part of package installation.
 For example, given:
 .Bd -literal -offset 4n
 #includedir /etc/sudoers.d
@@ -1951,9 +1949,9 @@ This has security implications when path names that include globbing
 characters are used with the negation operator,
 .Ql !\& ,
 as such rules can be trivially bypassed.
-As such, this option should not be used when
+As such, this option should not be used when the
 .Em sudoers
-contains rules that contain negated path names which include globbing
+file contains rules that contain negated path names which include globbing
 characters.
 This flag is
 .Em off
@@ -2077,9 +2075,7 @@ by default.
 .It log_input
 If set,
 .Nm sudo
-will run the command in a
-.Em pseudo-tty
-and log all user input.
+will run the command in a pseudo-tty and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
@@ -2123,9 +2119,8 @@ is all that is required.
 .It log_output
 If set,
 .Nm sudo
-will run the command in a
-.Em pseudo-tty
-and log all output that is sent to the screen, similar to the
+will run the command in a pseudo-tty and log all output that is sent
+to the screen, similar to the
 .Xr script 1
 command.
 If the standard output or standard error is not connected to the
@@ -2220,7 +2215,7 @@ user if the user running
 .Nm sudo
 does not enter the correct password.
 If the command the user is attempting to run is not permitted by
-.Em sudoers
+.Nm sudoers
 and one of the
 .Em mail_all_cmnds ,
 .Em mail_always ,
@@ -2639,12 +2634,13 @@ by default.
 .It umask_override
 If set,
 .Nm sudo
-will set the umask as specified by
+will set the umask as specified in the
 .Em sudoers
-without modification.
-This makes it possible to specify a more permissive umask in
+file without modification.
+This makes it possible to specify a umask in the
 .Em sudoers
-than the user's own umask and matches historical behavior.
+file that is more permissive than the user's own umask and matches
+historical behavior.
 If
 .Em umask_override
 is not set,
@@ -3062,9 +3058,9 @@ is built on Solaris 10 or higher.
 .It role
 The default SELinux role to use when constructing a new security
 context to run the command.
-The default role may be overridden on a per-command basis in
+The default role may be overridden on a per-command basis in the
 .Em sudoers
-or via command line options.
+file or via command line options.
 This option is only available when
 .Nm sudo
 is built with SELinux support.
@@ -3118,9 +3114,9 @@ The default is
 .It type
 The default SELinux type to use when constructing a new security
 context to run the command.
-The default type may be overridden on a per-command basis in
+The default type may be overridden on a per-command basis in the
 .Em sudoers
-or via command line options.
+file or via command line options.
 This option is only available when
 .Nm sudo
 is built with SELinux support.
@@ -3152,7 +3148,7 @@ prefix.
 This is not set by default.
 .It group_plugin
 A string containing a
-.Em sudoers
+.Nm sudoers
 group plugin with optional arguments.
 The string should consist of the plugin
 path, either fully-qualified or relative to the
@@ -3205,7 +3201,7 @@ It has the following possible values:
 .It all
 All the user's
 .Em sudoers
-entries for the current host must have
+file entries for the current host must have
 the
 .Li NOPASSWD
 flag set to avoid entering a password.
@@ -3216,7 +3212,7 @@ option.
 .It any
 At least one of the user's
 .Em sudoers
-entries for the current host
+file entries for the current host
 must have the
 .Li NOPASSWD
 flag set to avoid entering a password.
@@ -3324,7 +3320,7 @@ It has the following possible values:
 .It all
 All the user's
 .Em sudoers
-entries for the current host must have the
+file entries for the current host must have the
 .Li NOPASSWD
 flag set to avoid entering a password.
 .It always
@@ -3334,7 +3330,7 @@ option.
 .It any
 At least one of the user's
 .Em sudoers
-entries for the current host must have the
+file entries for the current host must have the
 .Li NOPASSWD
 flag set to avoid entering a password.
 .It never
@@ -3660,9 +3656,9 @@ file is located on a remote file system that maps user ID 0 to
 a different value.
 Normally,
 .Nm
-tries to open
+tries to open the
 .Em sudoers
-using group permissions to avoid this problem.
+file using group permissions to avoid this problem.
 Consider either changing the ownership of
 .Pa @sysconfdir@/sudoers
 or adding an argument like
@@ -3738,7 +3734,7 @@ line in the
 .Xr sudo.conf @mansectform@
 file.
 .It unable to open @rundir@/ts/username
-.Em sudoers
+.Nm sudoers
 was unable to read or create the user's time stamp file.
 This can happen when
 .Em timestampowner
@@ -3749,7 +3745,7 @@ The default mode for
 .Pa @rundir@
 is 0711.
 .It unable to write to @rundir@/ts/username
-.Em sudoers
+.Nm sudoers
 was unable to write to the user's time stamp file.
 .It @rundir@/ts is owned by uid X, should be Y
 The time stamp directory is owned by a user other than
@@ -3757,18 +3753,18 @@ The time stamp directory is owned by a user other than
 This can occur when the value of
 .Em timestampowner
 has been changed.
-.Em sudoers
+.Nm sudoers
 will ignore the time stamp directory until the owner is corrected.
 .It @rundir@/ts is group writable
 The time stamp directory is group-writable; it should be writable only by
 .Em timestampowner .
 The default mode for the time stamp directory is 0700.
-.Em sudoers
+.Nm sudoers
 will ignore the time stamp directory until the mode is corrected.
 .El
 .Ss Notes on logging via syslog
 By default,
-.Em sudoers
+.Nm sudoers
 logs messages via
 .Xr syslog 3 .
 The
@@ -3777,7 +3773,7 @@ The
 and
 .Em progname
 fields are added by the syslog daemon, not
-.Em sudoers
+.Nm sudoers
 itself.
 As such, they may vary in format on different systems.
 .Pp
@@ -3796,11 +3792,11 @@ after the user name and before the continued command line arguments.
 If the
 .Em logfile
 option is set,
-.Em sudoers
+.Nm sudoers
 will log to a local file, such as
 .Pa /var/log/sudo .
 When logging to a file,
-.Em sudoers
+.Nm sudoers
 uses a format similar to
 .Xr syslog 3 ,
 with a few important differences:
@@ -3845,11 +3841,11 @@ List of network groups
 I/O log files
 .It Pa @rundir@/ts
 Directory containing time stamps for the
-.Em sudoers
+.Nm sudoers
 security policy
 .It Pa @vardir@/lectured
 Directory containing lecture status files for the
-.Em sudoers
+.Nm sudoers
 security policy
 .It Pa /etc/environment
 Initial environment for
@@ -3859,7 +3855,7 @@ mode on AIX and Linux systems
 .Sh EXAMPLES
 Below are example
 .Em sudoers
-entries.
+file entries.
 Admittedly, some of these are a bit contrived.
 First, we allow a few environment variables to pass and then define our
 .Em aliases :
@@ -4277,7 +4273,7 @@ it can result in a security issue for rules that subtract or revoke privileges.
 .Pp
 For example, given the following
 .Em sudoers
-entry:
+file entry:
 .Bd -literal
 john	ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,\e
               /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
@@ -4394,16 +4390,16 @@ user permission to run
 (see below).
 .Ss Secure editing
 The
-.Em sudoers
+.Nm sudoers
 plugin includes
 .Nm sudoedit
 support which allows users to securely edit files with the editor
 of their choice.
 As
 .Nm sudoedit
-is a built-in command, it must be specified in
+is a built-in command, it must be specified in the
 .Em sudoers
-without a leading path.
+file without a leading path.
 However, it may take command line arguments just as a normal command does.
 Wildcards used in
 .Em sudoedit
@@ -4461,7 +4457,7 @@ tag.
 However, it is still possible to create a hard link if the directory
 is writable and the link target resides on the same file system.
 .Ss Time stamp file checks
-.Em sudoers
+.Nm sudoers
 will check the ownership of its time stamp directory
 .Po
 .Pa @rundir@/ts
@@ -4483,14 +4479,14 @@ be cleared at reboot time, not all systems contain a
 .Pa /var/run
 directory.
 To avoid potential problems,
-.Em sudoers
+.Nm sudoers
 will ignore time stamp files that date from before the machine booted
 on systems where the boot time is available.
 .Pp
 Some systems with graphical desktop environments allow unprivileged
 users to change the system clock.
 Since
-.Em sudoers
+.Nm sudoers
 relies on the system clock for time stamp validation, it may be
 possible on such systems for a user to run
 .Nm sudo
@@ -4498,16 +4494,16 @@ for longer than
 .Em timestamp_timeout
 by setting the clock back.
 To combat this,
-.Em sudoers
+.Nm sudoers
 uses a monotonic clock (which never moves backwards) for its time stamps
 if the system supports it.
 .Pp
-.Em sudoers
+.Nm sudoers
 will not honor time stamps set far in the future.
 Time stamps with a date greater than current_time + 2 *
 .Li TIMEOUT
 will be ignored and
-.Em sudoers
+.Nm sudoers
 will log and complain.
 .Pp
 Since time stamp files live in the file system, they can outlive a
@@ -4518,8 +4514,9 @@ after authenticating, logout, login again, and run
 .Nm sudo
 without authenticating so long as the record's time stamp is within
 .Li @timeout@
-minutes (or whatever value the timeout is set to in
-.Em sudoers ) .
+minutes (or whatever value the timeout is set to in the
+.Em sudoers
+file).
 When the
 .Em tty_tickets
 option is enabled, the time stamp record includes the device
@@ -4584,6 +4581,7 @@ BSM and Linux audit code
 user authentication
 .It Em defaults
 .Em sudoers
+file
 .Em Defaults
 settings
 .It Em env
@@ -4593,13 +4591,14 @@ LDAP-based sudoers
 .It Em logging
 logging support
 .It Em match
-matching of users, groups, hosts and netgroups in
+matching of users, groups, hosts and netgroups in the
 .Em sudoers
+file
 .It Em netif
 network interface handling
 .It Em nss
 network service switch handling in
-.Em sudoers
+.Nm sudoers
 .It Em parser
 .Em sudoers
 file parsing
@@ -4660,9 +4659,9 @@ be edited by the
 .Nm visudo
 command which locks the file and does grammatical checking.
 It is
-imperative that
+imperative that the
 .Em sudoers
-be free of syntax errors since
+file be free of syntax errors since
 .Nm sudo
 will not run with a syntactically incorrect
 .Em sudoers
