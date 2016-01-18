@@ -254,8 +254,21 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
     debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
     int rc;
 
+    /* Change uid/gid/groups to invoking user, usually needs root perms. */
+    if (cd->euid != ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0)
+	    sudo_fatal("seteuid(ROOT_UID)");
+    }
     switch_user(ud->uid, ud->gid, ud->ngroups, ud->groups);
+
+    /* Access checks are done using the euid/egid and group vector. */
     rc = faccessat(dfd, ".", W_OK, AT_EACCESS);
+
+    /* Change uid/gid/groups back to target user, may need root perms. */
+    if (ud->uid != ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0)
+	    sudo_fatal("seteuid(ROOT_UID)");
+    }
     switch_user(cd->euid, cd->egid, cd->ngroups, cd->groups);
 
     if (rc == 0)
