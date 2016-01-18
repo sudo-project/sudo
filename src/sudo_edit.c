@@ -331,16 +331,24 @@ dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
 
 /*
  * Directory open flags for use with openat(2).
- * Use O_PATH and O_DIRECTORY where possible.
+ * Use O_PATH/O_SEARCH and O_DIRECTORY where possible.
  */
-#if defined(O_PATH) && defined(O_DIRECTORY)
-# define DIR_OPEN_FLAGS	(O_PATH|O_DIRECTORY)
-#elif defined(O_PATH) && !defined(O_DIRECTORY)
-# define DIR_OPEN_FLAGS	O_PATH
-#elif !defined(O_PATH) && defined(O_DIRECTORY)
-# define DIR_OPEN_FLAGS	(O_RDONLY|O_DIRECTORY)
+#if defined(O_PATH)
+# if defined(O_DIRECTORY)
+#  define DIR_OPEN_FLAGS	(O_PATH|O_DIRECTORY)
+# else
+#  define DIR_OPEN_FLAGS	(O_PATH)
+# endif
+#elif defined(O_SEARCH)
+# if defined(O_DIRECTORY)
+#  define DIR_OPEN_FLAGS	(O_SEARCH|O_DIRECTORY)
+# else
+#  define DIR_OPEN_FLAGS	(O_SEARCH)
+# endif
+#elif defined(O_DIRECTORY)
+# define DIR_OPEN_FLAGS		(O_RDONLY|O_DIRECTORY)
 #else
-# define DIR_OPEN_FLAGS	(O_RDONLY|O_NONBLOCK)
+# define DIR_OPEN_FLAGS		(O_RDONLY|O_NONBLOCK)
 #endif
 
 static int
