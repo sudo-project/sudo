@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 16, 2016
+.Dd January 19, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1215,7 +1215,7 @@ works and whether or not it will work on your system.
 .It Em FOLLOW No and Em NOFOLLOW
 Starting with version 1.8.15,
 .Nm sudoedit
-will not follow symbolic links when opening files unless the
+will not open a file that is a symbolic link unless the
 .Em sudoedit_follow
 option is enabled.
 The
@@ -2517,19 +2517,25 @@ by default.
 .It sudoedit_checkdir
 If set,
 .Nm sudoedit
-will check directories in the path to be edited for writability
+will check all directory components of the path to be edited for writability
 by the invoking user.
 Symbolic links will not be followed in writable directories and
 .Nm sudoedit
-will also refuse to edit a file located in a writable directory.
-Theses restrictions are not enforced when
+will refuse to edit a file located in a writable directory.
+These restrictions are not enforced when
 .Nm sudoedit
-is invoked as root.
-On many systems, this option requires that all directories
-in the path to be edited be readable by the target user.
+is run by root.
+On some systems, if all directory components of the path to be edited
+are not readable by the target user,
+.Nm sudoedit
+will be unable to edit the file.
 This flag is
-.Em off
+.Em on
 by default.
+.Pp
+This setting was first introduced in version 1.8.15.
+The check for symbolic links in writable intermediate directories
+was added in version 1.8.16.
 .It sudoedit_follow
 By default,
 .Nm sudoedit
@@ -4468,17 +4474,24 @@ has write access to, either directly or via a wildcard.
 If the user has write access to the directory it is possible to
 replace the legitimate file with a link to another file,
 allowing the editing of arbitrary files.
-Starting with version 1.8.15,
+To prevent this, starting with version 1.8.16, symbolic links will
+not be followed in writable directories and
+.Nm sudoedit
+will refuse to edit a file located in a writable directory
+unless the
+.Em sudoedit_checkdir
+option has been disabled or the invoking user is root.
+Additionally, in version 1.8.15 and higher,
 .Nm sudoedit
 will refuse to open a symbolic link unless either the
 .Em sudoedit_follow
-Defaults option is enabled or the
+option is enabled or the
 .Em sudoedit
 command is prefixed with the
 .Li FOLLOW
-tag.
-However, it is still possible to create a hard link if the directory
-is writable and the link target resides on the same file system.
+tag in the
+.Em sudoers
+file.
 .Ss Time stamp file checks
 .Nm sudoers
 will check the ownership of its time stamp directory

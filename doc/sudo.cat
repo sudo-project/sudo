@@ -126,12 +126,23 @@ DDEESSCCRRIIPPTTIIOONN
                        copied back to their original location and the
                        temporary versions are removed.
 
-                 Unless explicitly allowed by the security policy, symbolic
-                 links will not be opened.  This helps prevent the editing of
-                 unauthorized files when the file is located in a user-
-                 writable directory.  Versions of ssuuddoo prior to 1.8.15 do not
-                 have this restriction.  Users are never allowed to edit
-                 device special files.
+                 To help prevent the editing of unauthorized files, the
+                 following restrictions are enforced unless explicitly allowed
+                 by the security policy:
+
+                  ++oo   Symbolic links may not be edited (version 1.8.15 and
+                      higher).
+
+                  ++oo   Symbolic links along the path to be edited are not
+                      followed when the parent directory is writable by the
+                      invoking user unless that user is root (version 1.8.16
+                      and higher).
+
+                  ++oo   Files located in a directory that is writable by the
+                      invoking user may not be edited unless that user is root
+                      (version 1.8.16 and higher).
+
+                 Users are never allowed to edit device special files.
 
                  If the specified file does not exist, it will be created.
                  Note that unlike most commands run by _s_u_d_o, the editor is run
@@ -440,14 +451,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      Users should _n_e_v_e_r be granted ssuuddoo privileges to execute files that are
      writable by the user or that reside in a directory that is writable by
      the user.  If the user can modify or replace the command there is no way
-     to limit what additional commands they can run.  Likewise, users should
-     _n_e_v_e_r be granted ssuuddooeeddiitt permission to edit a file that resides in a
-     directory the user has write access to.  A user with directory write
-     access could replace the legitimate file with a link to some other,
-     arbitrary, file.  Starting with version 1.8.15, ssuuddooeeddiitt will refuse to
-     open a symbolic link unless the security policy explicitly permits it.
-     However, it is still possible to create a hard link if the directory is
-     writable and the link target resides on the same file system.
+     to limit what additional commands they can run.
 
      Please note that ssuuddoo will normally only log the command it explicitly
      runs.  If a user runs a command such as sudo su or sudo sh, subsequent
@@ -617,4 +621,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    November 20, 2015                   Sudo 1.8.16
+Sudo 1.8.16                    January 19, 2016                    Sudo 1.8.16

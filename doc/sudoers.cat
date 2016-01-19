@@ -614,9 +614,9 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
        NOEXEC works and whether or not it will work on your system.
 
-     _F_O_L_L_O_W and _N_O_F_O_L_L_O_W Starting with version 1.8.15, ssuuddooeeddiitt will not
-       follow symbolic links when opening files unless the _s_u_d_o_e_d_i_t___f_o_l_l_o_w
-       option is enabled.  The _F_O_L_L_O_W and _N_O_F_O_L_L_O_W tags override the value of
+     _F_O_L_L_O_W and _N_O_F_O_L_L_O_W Starting with version 1.8.15, ssuuddooeeddiitt will not open
+       a file that is a symbolic link unless the _s_u_d_o_e_d_i_t___f_o_l_l_o_w option is
+       enabled.  The _F_O_L_L_O_W and _N_O_F_O_L_L_O_W tags override the value of
        _s_u_d_o_e_d_i_t___f_o_l_l_o_w and can be used to permit (or deny) the editing of
        symbolic links on a per-command basis.  These tags are only effective
        for the _s_u_d_o_e_d_i_t command and are ignored for all other commands.
@@ -1257,15 +1257,20 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        system call.  This flag is _o_f_f by default.
 
      sudoedit_checkdir
-                       If set, ssuuddooeeddiitt will check directories in the path to
-                       be edited for writability by the invoking user.
-                       Symbolic links will not be followed in writable
-                       directories and ssuuddooeeddiitt will also refuse to edit a
-                       file located in a writable directory.  Theses
-                       restrictions are not enforced when ssuuddooeeddiitt is invoked
-                       as root.  On many systems, this option requires that
-                       all directories in the path to be edited be readable by
-                       the target user.  This flag is _o_f_f by default.
+                       If set, ssuuddooeeddiitt will check all directory components of
+                       the path to be edited for writability by the invoking
+                       user.  Symbolic links will not be followed in writable
+                       directories and ssuuddooeeddiitt will refuse to edit a file
+                       located in a writable directory.  These restrictions
+                       are not enforced when ssuuddooeeddiitt is run by root.  On some
+                       systems, if all directory components of the path to be
+                       edited are not readable by the target user, ssuuddooeeddiitt
+                       will be unable to edit the file.  This flag is _o_n by
+                       default.
+
+                       This setting was first introduced in version 1.8.15.
+                       The check for symbolic links in writable intermediate
+                       directories was added in version 1.8.16.
 
      sudoedit_follow   By default, ssuuddooeeddiitt will not follow symbolic links
                        when opening files.  The _s_u_d_o_e_d_i_t___f_o_l_l_o_w option can be
@@ -2378,12 +2383,14 @@ SSEECCUURRIITTYY NNOOTTEESS
      resides in a directory the user has write access to, either directly or
      via a wildcard.  If the user has write access to the directory it is
      possible to replace the legitimate file with a link to another file,
-     allowing the editing of arbitrary files.  Starting with version 1.8.15,
+     allowing the editing of arbitrary files.  To prevent this, starting with
+     version 1.8.16, symbolic links will not be followed in writable
+     directories and ssuuddooeeddiitt will refuse to edit a file located in a writable
+     directory unless the _s_u_d_o_e_d_i_t___c_h_e_c_k_d_i_r option has been disabled or the
+     invoking user is root.  Additionally, in version 1.8.15 and higher,
      ssuuddooeeddiitt will refuse to open a symbolic link unless either the
-     _s_u_d_o_e_d_i_t___f_o_l_l_o_w Defaults option is enabled or the _s_u_d_o_e_d_i_t command is
-     prefixed with the FOLLOW tag.  However, it is still possible to create a
-     hard link if the directory is writable and the link target resides on the
-     same file system.
+     _s_u_d_o_e_d_i_t___f_o_l_l_o_w option is enabled or the _s_u_d_o_e_d_i_t command is prefixed
+     with the FOLLOW tag in the _s_u_d_o_e_r_s file.
 
    TTiimmee ssttaammpp ffiillee cchheecckkss
      ssuuddooeerrss will check the ownership of its time stamp directory
@@ -2524,4 +2531,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    January 16, 2016                    Sudo 1.8.16
+Sudo 1.8.16                    January 19, 2016                    Sudo 1.8.16

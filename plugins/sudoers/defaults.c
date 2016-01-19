@@ -440,6 +440,7 @@ init_defaults(void)
     def_use_netgroups = true;
 #endif
     def_netgroup_tuple = false;
+    def_sudoedit_checkdir = true;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
