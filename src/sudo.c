@@ -593,6 +593,22 @@ command_info_to_details(char * const info[], struct command_details *details)
 	details->n = info[i] + sizeof(s) - 1; \
 	break; \
     }
+#define SET_FLAG(s, n) \
+    if (strncmp(s, info[i], sizeof(s) - 1) == 0) { \
+	switch (sudo_strtobool(info[i] + sizeof(s))) { \
+	    case true: \
+		SET(details->flags, n); \
+		break; \
+	    case false: \
+		CLR(details->flags, n); \
+		break; \
+	    default: \
+		sudo_debug_printf(SUDO_DEBUG_ERROR, \
+		    "invalid boolean value for %s", info[i]); \
+		break; \
+	} \
+	break; \
+    }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "command info from plugin:");
     for (i = 0; info[i] != NULL; i++) {
@@ -611,11 +627,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		break;
 	    case 'e':
-		if (strncmp("exec_background=", info[i], sizeof("exec_background=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("exec_background=") - 1) == true)
-			SET(details->flags, CD_EXEC_BG);
-		    break;
-		}
+		SET_FLAG("exec_background=", CD_EXEC_BG)
 		if (strncmp("execfd=", info[i], sizeof("execfd=") - 1) == 0) {
 		    cp = info[i] + sizeof("execfd=") - 1;
 		    details->execfd = strtonum(cp, 0, INT_MAX, &errstr);
@@ -644,18 +656,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
-		if (strncmp("noexec=", info[i], sizeof("noexec=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("noexec=") - 1) == true)
-			SET(details->flags, CD_NOEXEC);
-		    break;
-		}
+		SET_FLAG("noexec=", CD_NOEXEC)
 		break;
 	    case 'p':
-		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("preserve_groups=") - 1) == true)
-			SET(details->flags, CD_PRESERVE_GROUPS);
-		    break;
-		}
+		SET_FLAG("preserve_groups=", CD_PRESERVE_GROUPS)
 		if (strncmp("preserve_fds=", info[i], sizeof("preserve_fds=") - 1) == 0) {
 		    parse_preserved_fds(&details->preserved_fds,
 			info[i] + sizeof("preserve_fds=") - 1);
@@ -733,26 +737,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 's':
 		SET_STRING("selinux_role=", selinux_role)
 		SET_STRING("selinux_type=", selinux_type)
-		if (strncmp("set_utmp=", info[i], sizeof("set_utmp=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("set_utmp=") - 1) == true)
-			SET(details->flags, CD_SET_UTMP);
-		    break;
-		}
-		if (strncmp("sudoedit=", info[i], sizeof("sudoedit=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("sudoedit=") - 1) == true)
-			SET(details->flags, CD_SUDOEDIT);
-		    break;
-		}
-		if (strncmp("sudoedit_checkdir=", info[i], sizeof("sudoedit_checkdir=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("sudoedit_checkdir=") - 1) == true)
-			SET(details->flags, CD_SUDOEDIT_CHECKDIR);
-		    break;
-		}
-		if (strncmp("sudoedit_follow=", info[i], sizeof("sudoedit_follow=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("sudoedit_follow=") - 1) == true)
-			SET(details->flags, CD_SUDOEDIT_FOLLOW);
-		    break;
-		}
+		SET_FLAG("set_utmp=", CD_SET_UTMP)
+		SET_FLAG("sudoedit=", CD_SUDOEDIT)
+		SET_FLAG("sudoedit_checkdir=", CD_SUDOEDIT_CHECKDIR)
+		SET_FLAG("sudoedit_follow=", CD_SUDOEDIT_FOLLOW)
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
@@ -773,11 +761,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
-		if (strncmp("use_pty=", info[i], sizeof("use_pty=") - 1) == 0) {
-		    if (sudo_strtobool(info[i] + sizeof("use_pty=") - 1) == true)
-			SET(details->flags, CD_USE_PTY);
-		    break;
-		}
+		SET_FLAG("use_pty=", CD_USE_PTY)
 		SET_STRING("utmp_user=", utmp_user)
 		break;
 	}
