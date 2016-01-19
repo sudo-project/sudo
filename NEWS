@@ -1,3 +1,41 @@
+What's new in Sudo 1.8.16
+
+ * Fixed a compilation error on Solaris 10 with Stun Studio 12.
+   Bug #727
+
+ * When preserving variables from the invoking user's environment, if
+   there are duplicates sudo now only keeps the first instance.
+
+ * Fixed a bug that could cause warning mail to be sent in list
+   mode (sudo -l) for users without sudo privileges when the
+   LDAP and sssd backends are used.
+
+ * Fixed a bug that prevented the "mail_no_user" option from working
+   properly with the LDAP backend.
+
+ * In the LDAP and sssd backends, white space is now ignored between
+   an operator (!, +, +=, -=) when parsing a sudoOption.
+
+ * It is now possible to disable Path settings in sudo.conf
+   by omitting the path name.
+
+ * The sudoedit_checkdir Defaults option is now enabled by default
+   and has been extended.  When editing files with sudoedit, each
+   directory in the path to be edited is now checked.  If a directory
+   is writable by the invoking user, symbolic links will not be
+   followed.  If the parent directory of the file to be edited is
+   writable, sudoedit will refuse to edit it.
+   Bug #707
+
+ * The netgroup_tuple Defaults option has been added to enable matching
+   of the entire netgroup tuple, not just the host or user portion.
+   Bug #717
+
+ * When matching commands based on the SHA2 digest, sudo will now
+   use fexecve(2) to execute the command if it is available.  This
+   fixes a time of check versus time of use race condition when the
+   directory holding the command is writable by the invoking user.
+
 What's new in Sudo 1.8.15
 
  * Fixed a bug that prevented sudo from building outside the source tree

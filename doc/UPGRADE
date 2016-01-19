@@ -3,12 +3,13 @@ Notes on upgrading from an older release
 
 o Upgrading from a version prior to 1.8.16:
 
-    The meaning of the sudoedit_checkdir sudoers option has changed
-    in 1.8.16.  Previously, it would only check the parent directory
-    of the file to be edited.  In 1.8.16 and higher all directories
-    in the path to be edited are checked and sudoedit will refuse
-    to follow a symbolic link in a directory that is writable by
-    the invoking user.
+    When editing files with sudoedit, files in a directory that is
+    writable by the invoking user may no longer be edited by default.
+    Also, sudoedit will refuse to follow a symbolic link in the
+    path to be edited if that directory containing the link is
+    writable by the user.  This behavior can be disabled by negating
+    the sudoedit_checkdir sudoers option, which is now enabled by
+    default.
 
 o Upgrading from a version prior to 1.8.15:
 
