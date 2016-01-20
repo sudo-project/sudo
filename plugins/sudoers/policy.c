@@ -447,8 +447,8 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	if ((command_info[info_len++] = strdup("sudoedit=true")) == NULL)
 	    goto oom;
-	if (def_sudoedit_checkdir) {
-	    if ((command_info[info_len++] = strdup("sudoedit_checkdir=true")) == NULL)
+	if (!def_sudoedit_checkdir) {
+	    if ((command_info[info_len++] = strdup("sudoedit_checkdir=false")) == NULL)
 		goto oom;
 	}
 	if (def_sudoedit_follow) {
