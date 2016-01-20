@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 19, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "January 20, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2703,7 +2703,8 @@ This flag is
 \fIon\fR
 by default.
 .sp
-This setting was first introduced in version 1.8.15.
+This setting was first introduced in version 1.8.15 but initially
+suffered from a race condition.
 The check for symbolic links in writable intermediate directories
 was added in version 1.8.16.
 .TP 18n
