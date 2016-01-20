@@ -411,7 +411,12 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	debug_return_int(-1);
     }
 
-    fd = openat(dfd, path, oflags, mode);
+    /*
+     * For "sudoedit /" we will receive ENOENT from openat() and sudoedit
+     * will try to create a file with an empty name.  We treat an empty
+     * path as the cwd so sudoedit can give a sensible error message.
+     */
+    fd = openat(dfd, *path ? path : ".", oflags, mode);
     close(dfd);
     debug_return_int(fd);
 }
