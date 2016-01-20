@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "January 4, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "January 20, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1009,6 +1009,24 @@ This allows the plugin to perform command substitution and transparently
 enable
 \fIsudoedit\fR
 when the user attempts to run an editor.
+.TP 6n
+sudoedit_checkdir=bool
+Set to false to disable directory writability checks in
+\fBsudoedit\fR.
+By default,
+\fBsudoedit\fR
+1.8.16 and higher will check all directory components of the path to be
+edited for writability by the invoking user.
+Symbolic links will not be followed in writable directories and
+\fBsudoedit\fR
+will refuse to edit a file located in a writable directory.
+These restrictions are not enforced when
+\fBsudoedit\fR
+is run by root.
+The
+\fIsudoedit_follow\fR
+option can be set to false to disable this check.
+Only available starting with API version 1.8.
 .TP 6n
 sudoedit_follow=bool
 Set to true to allow
@@ -2699,10 +2717,15 @@ sudo.conf(@mansectform@) file.
 .TP 6n
 Version 1.8 (sudo 1.8.15)
 The
+\fIsudoedit_checkdir\fR
+and
 \fIsudoedit_follow\fR
-entry was added to the
+entries were added to the
 \fRcommand_info\fR
 list.
+The default value of
+\fIsudoedit_checkdir\fR
+was changed to true in sudo 1.8.16.
 .sp
 The sudo
 \fIconversation\fR

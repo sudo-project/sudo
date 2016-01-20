@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 4, 2016
+.Dd January 20, 2016
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -891,6 +891,23 @@ This allows the plugin to perform command substitution and transparently
 enable
 .Em sudoedit
 when the user attempts to run an editor.
+.It sudoedit_checkdir=bool
+Set to false to disable directory writability checks in
+.Nm sudoedit .
+By default,
+.Nm sudoedit
+1.8.16 and higher will check all directory components of the path to be
+edited for writability by the invoking user.
+Symbolic links will not be followed in writable directories and
+.Nm sudoedit
+will refuse to edit a file located in a writable directory.
+These restrictions are not enforced when
+.Nm sudoedit
+is run by root.
+The
+.Em sudoedit_follow
+option can be set to false to disable this check.
+Only available starting with API version 1.8.
 .It sudoedit_follow=bool
 Set to true to allow
 .Nm sudoedit
@@ -2362,10 +2379,15 @@ times if there are multiple plugin-specific Debug lines in the
 .Xr sudo.conf @mansectform@ file.
 .It Version 1.8 (sudo 1.8.15)
 The
+.Em sudoedit_checkdir
+and
 .Em sudoedit_follow
-entry was added to the
+entries were added to the
 .Li command_info
 list.
+The default value of
+.Em sudoedit_checkdir
+was changed to true in sudo 1.8.16.
 .Pp
 The sudo
 .Em conversation

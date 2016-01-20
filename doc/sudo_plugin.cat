@@ -611,6 +611,19 @@ DDEESSCCRRIIPPTTIIOONN
                        substitution and transparently enable _s_u_d_o_e_d_i_t when the
                        user attempts to run an editor.
 
+                 sudoedit_checkdir=bool
+                       Set to false to disable directory writability checks in
+                       ssuuddooeeddiitt.  By default, ssuuddooeeddiitt 1.8.16 and higher will
+                       check all directory components of the path to be edited
+                       for writability by the invoking user.  Symbolic links
+                       will not be followed in writable directories and
+                       ssuuddooeeddiitt will refuse to edit a file located in a
+                       writable directory.  These restrictions are not
+                       enforced when ssuuddooeeddiitt is run by root.  The
+                       _s_u_d_o_e_d_i_t___f_o_l_l_o_w option can be set to false to disable
+                       this check.  Only available starting with API version
+                       1.8.
+
                  sudoedit_follow=bool
                        Set to true to allow ssuuddooeeddiitt to edit files that are
                        symbolic links.  By default, ssuuddooeeddiitt 1.8.15 and higher
@@ -1502,7 +1515,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            Debug lines in the sudo.conf(4) file.
 
      Version 1.8 (sudo 1.8.15)
-           The _s_u_d_o_e_d_i_t___f_o_l_l_o_w entry was added to the command_info list.
+           The _s_u_d_o_e_d_i_t___c_h_e_c_k_d_i_r and _s_u_d_o_e_d_i_t___f_o_l_l_o_w entries were added to the
+           command_info list.  The default value of _s_u_d_o_e_d_i_t___c_h_e_c_k_d_i_r was
+           changed to true in sudo 1.8.16.
 
            The sudo _c_o_n_v_e_r_s_a_t_i_o_n function now takes a pointer to a struct
            sudo_conv_callback as its fourth argument.  The sudo_conv_t
@@ -1542,4 +1557,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                     January 4, 2016                    Sudo 1.8.16
+Sudo 1.8.16                    January 20, 2016                    Sudo 1.8.16
