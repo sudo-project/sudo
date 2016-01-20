@@ -596,7 +596,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     }
 #define SET_FLAG(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0) { \
-	switch (sudo_strtobool(info[i] + sizeof(s))) { \
+	switch (sudo_strtobool(info[i] + sizeof(s) - 1)) { \
 	    case true: \
 		SET(details->flags, n); \
 		break; \
