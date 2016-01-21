@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -141,7 +141,8 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 {
     char *buf, *cp, *last, *subsys, *pri;
     struct sudo_debug_output *output;
-    unsigned int i, j;
+    unsigned int j;
+    int i;
 
     /* Create new output for the instance. */
     /* XXX - reuse fd for existing filename? */
@@ -159,8 +160,8 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
     output->fd = -1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
-    for (i = 0; i <= instance->max_subsystem; i++)
-	output->settings[i] = -1;
+    for (j = 0; j <= instance->max_subsystem; j++)
+	output->settings[j] = -1;
 
     /* Open debug file. */
     output->fd = open(output->filename, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
@@ -210,13 +211,15 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 		    if (strcasecmp(subsys, "all") == 0) {
 			const unsigned int idx = instance->subsystem_ids ?
 			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
-			output->settings[idx] = i;
+			if (i > output->settings[idx])
+			    output->settings[idx] = i;
 			continue;
 		    }
 		    if (strcasecmp(subsys, instance->subsystems[j]) == 0) {
 			const unsigned int idx = instance->subsystem_ids ?
 			    SUDO_DEBUG_SUBSYS(instance->subsystem_ids[j]) : j;
-			output->settings[idx] = i;
+			if (i > output->settings[idx])
+			    output->settings[idx] = i;
 			break;
 		    }
 		}
