@@ -54,6 +54,9 @@
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
+/* Define to 1 if the system has the type `authdb_t'. */
+#undef HAVE_AUTHDB_T
+
 /* Define to 1 if you have the `authenticate' function. */
 #undef HAVE_AUTHENTICATE
 

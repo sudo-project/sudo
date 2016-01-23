@@ -129,8 +129,15 @@ aix_setlimits(char *user)
 
 #ifdef HAVE_SETAUTHDB
 
+# ifndef HAVE_AUTHDB_T
+typedef char authdb_t[16];
+# endif
+
+/* The empty string means to access all defined administrative domains. */
+static authdb_t old_registry;
+
 # if defined(HAVE_DECL_SETAUTHDB) && !HAVE_DECL_SETAUTHDB
-int setauthdb(char *new, char *old);
+int setauthdb(authdb_t new, authdb_t old);
 # endif
 # if defined(HAVE_DECL_USRINFO) && !HAVE_DECL_USRINFO
 int usrinfo(int cmd, char *buf, int count);
@@ -156,7 +163,7 @@ aix_setauthdb_v1(char *user)
 	    goto done;
 	}
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
-	    if (setauthdb(registry, NULL) != 0) {
+	    if (setauthdb(registry, old_registry) != 0) {
 		sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
 		    registry, user);
 		goto done;
@@ -181,7 +188,7 @@ aix_restoreauthdb_v1(void)
     int rval = 0;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
-    if (setauthdb(NULL, NULL) != 0) {
+    if (setauthdb(old_registry, NULL) != 0) {
 	sudo_warn(U_("unable to restore registry"));
 	rval = -1;
     }

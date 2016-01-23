@@ -1741,7 +1741,10 @@ case "$host" in
 		RC_LINK=/etc/rc.d/rc2.d/S90sudo
 
 		# AIX-specific functions
-		AC_CHECK_FUNCS([getuserattr setauthdb setrlimit64])
+		AC_CHECK_FUNCS([getuserattr setrlimit64])
+		AC_CHECK_FUNCS([setauthdb],
+		    [AC_CHECK_TYPES([authdb_t], [], [], [#include <usersec.h>])])
+
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
 
