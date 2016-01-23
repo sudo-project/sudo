@@ -119,6 +119,8 @@ sudo_getpwuid(uid_t uid)
     key.k.uid = uid;
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
 	item = node->data;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: uid %u -> user %s (cache hit)",
+	    __func__, (unsigned int)uid, item->d.pw->pw_name);
 	goto done;
     }
     /*
@@ -155,6 +157,9 @@ sudo_getpwuid(uid_t uid)
 	item->refcnt = 0;
 	break;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: uid %u -> user %s (cached)",
+	__func__, (unsigned int)uid,
+	item->d.pw ? item->d.pw->pw_name : "unknown");
 done:
     item->refcnt++;
     debug_return_ptr(item->d.pw);
@@ -173,6 +178,8 @@ sudo_getpwnam(const char *name)
     key.k.name = (char *) name;
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
 	item = node->data;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s -> uid %u (cache hit)",
+	    __func__, name, (unsigned int)item->d.pw->pw_uid);
 	goto done;
     }
     /*
@@ -208,6 +215,8 @@ sudo_getpwnam(const char *name)
 	item->refcnt = 0;
 	break;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s -> uid %d (cached)",
+	__func__, name, item->d.pw ? (int)item->d.pw->pw_uid : -1);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.pw);
@@ -233,6 +242,10 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	home = "/";
     if (shell == NULL)
 	shell = _PATH_BSHELL;
+
+    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	"%s: creating and caching passwd struct for %s:%u:%u:%s:%s", __func__,
+	user, (unsigned int)uid, (unsigned int)gid, home, shell);
 
     name_len = strlen(user);
     home_len = strlen(home);
@@ -312,7 +325,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
 
     uid = (uid_t) sudo_strtoid(user + 1, NULL, NULL, &errstr);
     if (errstr != NULL) {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
+	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "uid %s %s", user, errstr);
 	debug_return_ptr(NULL);
     }
@@ -416,6 +429,8 @@ sudo_getgrgid(gid_t gid)
     key.k.gid = gid;
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
 	item = node->data;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: gid %u -> group %s (cache hit)",
+	    __func__, (unsigned int)gid, item->d.gr->gr_name);
 	goto done;
     }
     /*
@@ -446,6 +461,9 @@ sudo_getgrgid(gid_t gid)
 	item->refcnt = 0;
 	break;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: gid %u -> group %s (cached)",
+	__func__, (unsigned int)gid,
+	item->d.gr ? item->d.gr->gr_name : "unknown");
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -464,6 +482,8 @@ sudo_getgrnam(const char *name)
     key.k.name = (char *) name;
     if ((node = rbfind(grcache_byname, &key)) != NULL) {
 	item = node->data;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: group %s -> gid %u (cache hit)",
+	    __func__, name, (unsigned int)item->d.gr->gr_gid);
 	goto done;
     }
     /*
@@ -493,6 +513,8 @@ sudo_getgrnam(const char *name)
 	item->refcnt = 0;
 	break;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: group %s -> gid %d (cache hit)",
+	__func__, name, item->d.gr ? (int)item->d.gr->gr_gid : -1);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -529,7 +551,7 @@ sudo_fakegrnam(const char *group)
 	gr->gr_name = (char *)(gritem + 1);
 	memcpy(gr->gr_name, group, name_len + 1);
 	if (errstr != NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
+	    sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 		"gid %s %s", group, errstr);
 	    free(gritem);
 	    debug_return_ptr(NULL);
@@ -684,6 +706,14 @@ sudo_get_grlist(const struct passwd *pw)
 	item->refcnt = 0;
 	break;
     }
+    if (item->d.grlist != NULL) {
+	int i;
+	for (i = 0; i < item->d.grlist->ngroups; i++) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"%s: user %s is a member of group %s", __func__,
+		pw->pw_name, item->d.grlist->groups[i]);
+	}
+    }
 done:
     item->refcnt++;
     debug_return_ptr(item->d.grlist);
@@ -738,7 +768,7 @@ user_in_group(const struct passwd *pw, const char *group)
 	if (group[0] == '#') {
 	    gid_t gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
+		sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 		    "gid %s %s", group, errstr);
 	    } else {
 		if (gid == pw->pw_gid) {
@@ -777,5 +807,7 @@ done:
 	    sudo_gr_delref(grp);
 	sudo_grlist_delref(grlist);
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s %sin group %s",
+	__func__, pw->pw_name, matched ? "" : "NOT ", group);
     debug_return_bool(matched);
 }
