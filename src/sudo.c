@@ -258,7 +258,7 @@ main(int argc, char *argv[], char *envp[])
 	    /* Open I/O plugins once policy plugin succeeds. */
 	    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
 		ok = iolog_open(plugin, settings, user_info,
-		    command_info, nargc, nargv, envp);
+		    command_info, nargc, nargv, user_env_out);
 		switch (ok) {
 		case 1:
 		    break;
