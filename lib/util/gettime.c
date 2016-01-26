@@ -90,7 +90,8 @@ sudo_gettime_mono_v1(struct timespec *ts)
 	debug_return_int(sudo_gettime_real(ts));
     if (clock_gettime(SUDO_CLOCK_MONOTONIC, ts) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "clock_gettime(%d) failed, using wall clock", SUDO_CLOCK_MONOTONIC);
+	    "clock_gettime(%d) failed, using wall clock",
+	    (int)SUDO_CLOCK_MONOTONIC);
 	has_monoclock = 0;
 	debug_return_int(sudo_gettime_real(ts));
     }
