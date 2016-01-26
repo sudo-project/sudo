@@ -249,6 +249,12 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		exit(1); /* plugin printed error message */
 	    }
+	    /* Reset nargv/nargc based on argv_out. */
+	    /* XXX - leaks old nargv in shell mode */
+	    for (nargv = argv_out, nargc = 0; nargv[nargc] != NULL; nargc++)
+		continue;
+	    if (nargc == 0)
+		sudo_fatalx(U_("plugin did not return a command to execute"));
 	    /* Open I/O plugins once policy plugin succeeds. */
 	    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
 		ok = iolog_open(plugin, settings, user_info,
