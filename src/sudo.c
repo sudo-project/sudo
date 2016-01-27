@@ -476,11 +476,8 @@ get_user_info(struct user_details *ud)
 
     /* XXX - bound check number of entries */
     user_info = reallocarray(NULL, 32, sizeof(char *));
-    if (user_info == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to allocate memory");
+    if (user_info == NULL)
 	goto bad;
-    }
 
     ud->pid = getpid();
     ud->ppid = getppid();
@@ -1147,10 +1144,10 @@ format_plugin_settings(struct plugin_container *plugin,
     size_t plugin_settings_size;
     struct sudo_debug_file *debug_file;
     struct sudo_settings *setting;
-    char **plugin_settings, **ps;
+    char **plugin_settings;
+    unsigned int i;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
-    /* XXX - should use exact plugin_settings_size */
     /* Determine sudo_settings array size (including plugin_path and NULL) */
     plugin_settings_size = 2;
     for (setting = sudo_settings; setting->name != NULL; setting++)
@@ -1161,31 +1158,38 @@ format_plugin_settings(struct plugin_container *plugin,
     }
 
     /* Allocate and fill in. */
-    plugin_settings = ps =
-	reallocarray(NULL, plugin_settings_size, sizeof(char *));
+    plugin_settings = reallocarray(NULL, plugin_settings_size, sizeof(char *));
     if (plugin_settings == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if ((*ps++ = sudo_new_key_val("plugin_path", plugin->path)) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    plugin_settings[i] = sudo_new_key_val("plugin_path", plugin->path);
+    if (plugin_settings[i] == NULL)
+	goto bad;
     for (setting = sudo_settings; setting->name != NULL; setting++) {
         if (setting->value != NULL) {
             sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
                 setting->name, setting->value);
-	    if ((*ps++ = sudo_new_key_val(setting->name, setting->value)) == NULL)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    plugin_settings[++i] =
+		sudo_new_key_val(setting->name, setting->value);
+	    if (plugin_settings[i] == NULL)
+		goto bad;
         }
     }
     if (plugin->debug_files != NULL) {
 	TAILQ_FOREACH(debug_file, plugin->debug_files, entries) {
 	    /* XXX - quote filename? */
-	    if (asprintf(ps++, "debug_flags=%s %s", debug_file->debug_file,
-		debug_file->debug_flags) == -1)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    if (asprintf(&plugin_settings[++i], "debug_flags=%s %s",
+		debug_file->debug_file, debug_file->debug_flags) == -1)
+		goto bad;
 	}
     }
-    *ps = NULL;
+    plugin_settings[++i] = NULL;
 
     debug_return_ptr(plugin_settings);
+bad:
+    while (i--)
+	free(plugin_settings[i]);
+    free(plugin_settings);
+    debug_return_ptr(NULL);
 }
 
 static int
@@ -1198,8 +1202,10 @@ policy_open(struct plugin_container *plugin, struct sudo_settings *settings,
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
-    if (plugin_settings == NULL)
+    if (plugin_settings == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
+    }
 
     /*
      * Backwards compatibility for older API versions
@@ -1358,8 +1364,10 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 
     /* Convert struct sudo_settings to plugin_settings[] */
     plugin_settings = format_plugin_settings(plugin, settings);
-    if (plugin_settings == NULL)
+    if (plugin_settings == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
+    }
 
     /*
      * Backwards compatibility for older API versions
