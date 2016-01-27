@@ -84,7 +84,7 @@ static sudo_auth auth_switch[] = {
     AUTH_ENTRY(NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL)
 };
 
-static int standalone;
+static bool standalone;
 
 /*
  * Initialize sudoers authentication method(s).
@@ -214,7 +214,6 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 {
     unsigned int ntries;
     int rval, status, success = AUTH_FAILURE;
-    char *p;
     sudo_auth *auth;
     sigset_t mask, omask;
     sigaction_t sa, saved_sigtstp;
@@ -249,6 +248,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 
     for (ntries = 0; ntries < def_passwd_tries; ntries++) {
 	int num_methods = 0;
+	char *pass = NULL;
 
 	/* If user attempted to interrupt password verify, quit now. */
 	if (user_interrupted())
@@ -278,12 +278,10 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	}
 
 	/* Get the password unless the auth function will do it for us */
-	if (standalone) {
-	    p = prompt;
-	} else {
-	    p = auth_getpass(prompt, def_passwd_timeout * 60,
+	if (!standalone) {
+	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
 		SUDO_CONV_PROMPT_ECHO_OFF, callback);
-	    if (p == NULL)
+	    if (pass == NULL)
 		break;
 	}
 
@@ -292,13 +290,15 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	    if (IS_DISABLED(auth))
 		continue;
 
-	    success = auth->status = (auth->verify)(pw, p, auth, callback);
+	    success = auth->status =
+		(auth->verify)(pw, standalone ? prompt : pass, auth, callback);
 	    if (success != AUTH_FAILURE)
 		break;
 	}
 	if (!standalone) {
-	    memset_s(p, SUDO_CONV_REPL_MAX, 0, strlen(p));
-	    free(p);
+	    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+	    free(pass);
+	    pass = NULL;
 	}
 
 	if (success != AUTH_FAILURE)
