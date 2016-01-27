@@ -165,6 +165,14 @@ Compilation options:
 	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
 	and linking with -zrelro, where supported.
 
+  --enable-asan
+        Enable the use of AddressSanitizer if supported by the
+        compiler.  This can help detect common problems such as
+        buffer overflows and user after free bugs as well as behavior
+	undefined by the C standard.  For more information see
+        https://github.com/google/sanitizers/wiki/AddressSanitizer
+	The following compiler flag is used: -fsanitize=address,undefined
+
   --enable-pie
         Build sudo and related programs as as a position independent
         executables (PIE).  This improves the effectiveness of address
