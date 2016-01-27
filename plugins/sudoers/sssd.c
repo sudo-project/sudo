@@ -1238,8 +1238,7 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     debug_decl(sudo_sss_display_cmnd, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
-	goto done;
-
+	debug_return_int(-1);
     if (sudo_sss_checkpw(nss, pw) != 0)
 	debug_return_int(-1);
 
