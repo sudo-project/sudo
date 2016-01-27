@@ -791,6 +791,7 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "The user was not found in SSSD.");
+	    debug_return_ptr(NULL);
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "sss_error=%u\n", sss_error);
 	    debug_return_ptr(NULL);
