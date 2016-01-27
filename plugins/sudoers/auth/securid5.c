@@ -177,6 +177,10 @@ sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_
                 /* Sometimes (when current token close to expire?)
                    ACE challenges for the next token displayed
                    (entered without the PIN) */
+		if (pass != NULL) {
+		    memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
+		    free(pass);
+		}
         	pass = auth_getpass("\
 !!! ATTENTION !!!\n\
 Wait for the token code to change, \n\
@@ -211,6 +215,11 @@ then enter the new token code.\n", \
 
     /* Free resources */
     SD_Close(*sd);
+
+    if (pass != NULL) {
+	memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
+	free(pass);
+    }
 
     /* Return stored state to calling process */
     debug_return_int(rval);

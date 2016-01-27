@@ -92,6 +92,7 @@ sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth,
     /* Check password and zero out plaintext copy. */
     rc = sia_ses_authent(NULL, pass, siah);
     memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+    free(pass);
 
     if (rc == SIASUCCESS)
 	debug_return_int(AUTH_SUCCESS);

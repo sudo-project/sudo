@@ -296,8 +296,10 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	    if (success != AUTH_FAILURE)
 		break;
 	}
-	if (!standalone)
+	if (!standalone) {
 	    memset_s(p, SUDO_CONV_REPL_MAX, 0, strlen(p));
+	    free(p);
+	}
 
 	if (success != AUTH_FAILURE)
 	    goto done;
@@ -387,6 +389,11 @@ sudo_auth_end_session(struct passwd *pw)
     debug_return_int(status == AUTH_FATAL ? -1 : 1);
 }
 
+/*
+ * Prompts the user for a password using the conversation function.
+ * Returns the plaintext password or NULL.
+ * The user is responsible for freeing the returned value.
+ */
 char *
 auth_getpass(const char *prompt, int timeout, int type,
     struct sudo_conv_callback *callback)

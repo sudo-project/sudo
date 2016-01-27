@@ -443,14 +443,10 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"password longer than %d", PAM_MAX_RESP_SIZE);
 		    ret = PAM_CONV_ERR;
+		    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		    goto done;
 		}
-		if ((pr->resp = strdup(pass)) == NULL) {
-		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		    ret = PAM_BUF_ERR;
-		    goto done;
-		}
-		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+		pr->resp = pass;	/* auth_getpass() malloc's a copy */
 		break;
 	    case PAM_TEXT_INFO:
 		if (pm->msg)

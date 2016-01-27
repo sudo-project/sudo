@@ -93,6 +93,7 @@ restart:
 	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
 	pass = auth_getpass(buf, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass && *pass == '\0') {
+	    free(pass);
 	    pass = auth_getpass("Response [echo on]: ",
 		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_ON, callback);
 	}
@@ -132,8 +133,9 @@ restart:
 	sudo_warnx("%s", resp);
     error = AUTH_FAILURE;
 done:
-    memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
     memset_s(buf, sizeof(buf), 0, sizeof(buf));
+    memset_s(pass, SUDO_PASS_MAX, 0, strlen(pass));
+    free(pass);
     debug_return_int(error);
 }
 
