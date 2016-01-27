@@ -87,6 +87,23 @@ int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static struct command_details command_details;
 static int sudo_mode;
 
+struct sudo_gc_entry {
+    SLIST_ENTRY(sudo_gc_entry) entries;
+    enum sudo_gc_types {
+	GC_UNKNOWN,
+	GC_VECTOR,
+	GC_PTR
+    } type;
+    union {
+	char **vec;
+	void *ptr;
+    } u;
+};
+SLIST_HEAD(sudo_gc_list, sudo_gc_entry);
+#ifdef NO_LEAKS
+static struct sudo_gc_list sudo_gc_list = SLIST_HEAD_INITIALIZER(sudo_gc_list);
+#endif
+
 /*
  * Local functions
  */
@@ -96,6 +113,8 @@ static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
+static bool gc_add(enum sudo_gc_types type, void *ptr);
+static void gc_exit(int exit_code) __attribute__((__noreturn__));
 
 /* Policy plugin convenience functions. */
 static int policy_open(struct plugin_container *plugin,
@@ -226,11 +245,11 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
 	    ok = policy_validate(&policy_plugin);
-	    exit(ok != 1);
+	    gc_exit(ok != 1);
 	case MODE_KILL:
 	case MODE_INVALIDATE:
 	    policy_invalidate(&policy_plugin, sudo_mode == MODE_KILL);
-	    exit(0);
+	    gc_exit(0);
 	    break;
 	case MODE_CHECK:
 	case MODE_CHECK|MODE_INVALIDATE:
@@ -238,7 +257,7 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_LIST|MODE_INVALIDATE:
 	    ok = policy_list(&policy_plugin, nargc, nargv,
 		ISSET(sudo_mode, MODE_LONG_LIST), list_user);
-	    exit(ok != 1);
+	    gc_exit(ok != 1);
 	case MODE_EDIT:
 	case MODE_RUN:
 	    ok = policy_check(&policy_plugin, nargc, nargv, env_add,
@@ -247,7 +266,7 @@ main(int argc, char *argv[], char *envp[])
 	    if (ok != 1) {
 		if (ok == -2)
 		    usage(1);
-		exit(1); /* plugin printed error message */
+		gc_exit(1); /* plugin printed error message */
 	    }
 	    /* Reset nargv/nargc based on argv_out. */
 	    /* XXX - leaks old nargv in shell mode */
@@ -298,6 +317,7 @@ main(int argc, char *argv[], char *envp[])
 	default:
 	    sudo_fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
     }
+
     if (WIFSIGNALED(status)) {
 	sigaction_t sa;
 
@@ -311,7 +331,7 @@ main(int argc, char *argv[], char *envp[])
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	WEXITSTATUS(status));
-    exit(WEXITSTATUS(status));
+    gc_exit(WEXITSTATUS(status));
 }
 
 int
@@ -468,8 +488,9 @@ static char **
 get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, path[PATH_MAX];
+    unsigned int i = 0;
     struct passwd *pw;
-    int fd, i = 0;
+    int fd;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     memset(ud, 0, sizeof(*ud));
@@ -565,6 +586,10 @@ get_user_info(struct user_details *ud)
 	goto bad;
 
     user_info[++i] = NULL;
+
+    /* Add to list of vectors to be garbage collected at exit. */
+    if (!gc_add(GC_VECTOR, user_info))
+	goto bad;
 
     debug_return_ptr(user_info);
 bad:
@@ -1145,7 +1170,7 @@ format_plugin_settings(struct plugin_container *plugin,
     struct sudo_debug_file *debug_file;
     struct sudo_settings *setting;
     char **plugin_settings;
-    unsigned int i;
+    unsigned int i = 0;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM)
 
     /* Determine sudo_settings array size (including plugin_path and NULL) */
@@ -1183,6 +1208,10 @@ format_plugin_settings(struct plugin_container *plugin,
 	}
     }
     plugin_settings[++i] = NULL;
+
+    /* Add to list of vectors to be garbage collected at exit. */
+    if (!gc_add(GC_VECTOR, plugin_settings))
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     debug_return_ptr(plugin_settings);
 bad:
@@ -1441,7 +1470,81 @@ iolog_unlink(struct plugin_container *plugin)
     }
     /* Remove from io_plugins list and free. */
     TAILQ_REMOVE(&io_plugins, plugin, entries);
+    free(plugin->path);
     free(plugin);
 
     debug_return;
+}
+
+static bool
+gc_add(enum sudo_gc_types type, void *v)
+{
+#ifdef NO_LEAKS
+    struct sudo_gc_entry *gc;
+    debug_decl(gc_add, SUDO_DEBUG_MAIN)
+
+    gc = calloc(1, sizeof(*gc));
+    if (gc == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+    switch (type) {
+    case GC_PTR:
+	gc->u.ptr = v;
+	break;
+    case GC_VECTOR:
+	gc->u.vec = v;
+	break;
+    default:
+	free(gc);
+	sudo_warnx("unexpected garbage type %d", type);
+	debug_return_bool(false);
+    }
+    gc->type = type;
+    SLIST_INSERT_HEAD(&sudo_gc_list, gc, entries);
+    debug_return_bool(true);
+#else
+    return true;
+#endif /* NO_LEAKS */
+}
+
+static void
+gc_exit(int exit_code)
+{
+#ifdef NO_LEAKS
+    struct plugin_container *plugin;
+    struct sudo_gc_entry *gc;
+    void *next;
+    char **cur;
+    debug_decl(gc_cleanup, SUDO_DEBUG_MAIN)
+
+    /* Collect garbage. */
+    SLIST_FOREACH_SAFE(gc, &sudo_gc_list, entries, next) {
+	switch (gc->type) {
+	case GC_PTR:
+	    free(gc->u.ptr);
+	    free(gc);
+	    break;
+	case GC_VECTOR:
+	    for (cur = gc->u.vec; *cur != NULL; cur++)
+		free(*cur);
+	    free(gc->u.vec);
+	    free(gc);
+	    break;
+	default:
+	    sudo_warnx("unexpected garbage type %d", gc->type);
+	}
+    }
+
+    /* Free plugin structs. */
+    free(policy_plugin.path);
+    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
+	free(plugin->path);
+	free(plugin);
+    }
+
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
+	exit_code);
+#endif /* NO_LEAKS */
+    exit(exit_code);
 }
