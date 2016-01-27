@@ -416,7 +416,7 @@ static int
 sudo_sss_setdefs(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
-    struct sss_sudo_result *sss_result;
+    struct sss_sudo_result *sss_result = NULL;
     struct sss_sudo_rule   *sss_rule;
     uint32_t sss_error;
     unsigned int i;
@@ -1267,8 +1267,7 @@ done:
 	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
 
-    if (sss_result != NULL)
-	handle->fn_free_result(sss_result);
+    handle->fn_free_result(sss_result);
 
     debug_return_int(!found);
 }
@@ -1565,7 +1564,6 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     struct sudo_sss_handle *handle = nss->handle;
-
     struct sss_sudo_result *sss_result = NULL;
     struct sss_sudo_rule *rule;
     unsigned int i, count = 0;
@@ -1592,8 +1590,7 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	    count += sudo_sss_display_entry_short(handle, rule, lbuf);
     }
 
-    if (sss_result != NULL)
-	handle->fn_free_result(sss_result);
+    handle->fn_free_result(sss_result);
 
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
