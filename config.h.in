@@ -923,6 +923,9 @@
 /* Define to 1 if you don't want sudo to prompt for a password by default. */
 #undef NO_AUTHENTICATION
 
+/* Define to 1 if you want sudo to free up memory before exiting. */
+#undef NO_LEAKS
+
 /* Define to 1 if you don't want users to get the lecture the first they user
    sudo. */
 #undef NO_LECTURE

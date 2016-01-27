@@ -943,6 +943,7 @@ enable_warnings
 enable_werror
 enable_hardening
 enable_pie
+enable_asan
 enable_poll
 enable_admin_flag
 enable_nls
@@ -1617,6 +1618,7 @@ Optional Features:
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
   --enable-pie            Build sudo as a position independent executable.
+  --enable-asan           Build sudo with address sanitizer support.
   --disable-poll          Use select() instead of poll().
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
@@ -6109,6 +6111,12 @@ fi
 # Check whether --enable-pie was given.
 if test "${enable_pie+set}" = set; then :
   enableval=$enable_pie;
+fi
+
+
+# Check whether --enable-asan was given.
+if test "${enable_asan+set}" = set; then :
+  enableval=$enable_asan;
 fi
 
 
@@ -23718,6 +23726,123 @@ $as_echo "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
     fi
 fi
 
+if test "$enable_asan" = "yes"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=address,undefined" >&5
+$as_echo_n "checking whether C compiler accepts -fsanitize=address,undefined... " >&6; }
+if ${ax_cv_check_cflags___fsanitize_address_undefined+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fsanitize=address,undefined"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fsanitize_address_undefined=yes
+else
+  ax_cv_check_cflags___fsanitize_address_undefined=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fsanitize_address_undefined" >&5
+$as_echo "$ax_cv_check_cflags___fsanitize_address_undefined" >&6; }
+if test x"$ax_cv_check_cflags___fsanitize_address_undefined" = xyes; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fsanitize=address,undefined" >&5
+$as_echo_n "checking whether the linker accepts -fsanitize=address,undefined... " >&6; }
+if ${ax_cv_check_ldflags___fsanitize_address_undefined+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fsanitize=address,undefined"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___fsanitize_address_undefined=yes
+else
+  ax_cv_check_ldflags___fsanitize_address_undefined=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fsanitize_address_undefined" >&5
+$as_echo "$ax_cv_check_ldflags___fsanitize_address_undefined" >&6; }
+if test x"$ax_cv_check_ldflags___fsanitize_address_undefined" = xyes; then :
+
+	    LDFLAGS="$LDFLAGS -fsanitize=address,undefined"
+	    CFLAGS="$CFLAGS -fsanitize=address,undefined"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
+$as_echo_n "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
+if ${ax_cv_check_cflags___fno_omit_frame_pointer+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fno-omit-frame-pointer"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fno_omit_frame_pointer=yes
+else
+  ax_cv_check_cflags___fno_omit_frame_pointer=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_omit_frame_pointer" >&5
+$as_echo "$ax_cv_check_cflags___fno_omit_frame_pointer" >&6; }
+if test x"$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes; then :
+
+		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
+
+else
+  :
+fi
+
+	    $as_echo "#define NO_LEAKS 1" >>confdefs.h
+
+
+else
+  :
+fi
+
+
+else
+  :
+fi
+
+fi
+
 if test -n "$GCC"; then
     if test -z "$enable_pie"; then
 	case "$host_os" in
@@ -26354,6 +26479,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

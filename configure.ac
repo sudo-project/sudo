@@ -1451,6 +1451,9 @@ AC_ARG_ENABLE(hardening,
 AC_ARG_ENABLE(pie,
 [AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
+AC_ARG_ENABLE(asan,
+[AS_HELP_STRING([--enable-asan], [Build sudo with address sanitizer support.])])
+
 AC_ARG_ENABLE(poll,
 [AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
 
@@ -3938,6 +3941,23 @@ EOF
 fi
 
 dnl
+dnl Check for -fsanitize=address,undefined support
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test "$enable_asan" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-fsanitize=address,undefined], [
+	AX_CHECK_LINK_FLAG([-fsanitize=address,undefined], [
+	    LDFLAGS="$LDFLAGS -fsanitize=address,undefined"
+	    CFLAGS="$CFLAGS -fsanitize=address,undefined"
+	    AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
+		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
+	    ])
+	    AC_DEFINE(NO_LEAKS)
+	])
+    ])
+fi
+
+dnl
 dnl Check for PIE executable support if using gcc.
 dnl This test relies on AC_LANG_WERROR
 dnl
@@ -4294,6 +4314,7 @@ AH_TEMPLATE(IGNORE_DOT_PATH, [Define to 1 if you want to ignore '.' and empty PA
 AH_TEMPLATE(LOGGING, [Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH.])
 AH_TEMPLATE(LONG_OTP_PROMPT, [Define to 1 if you want a two line OTP (S/Key or OPIE) prompt.])
 AH_TEMPLATE(NO_AUTHENTICATION, [Define to 1 if you don't want sudo to prompt for a password by default.])
+AH_TEMPLATE(NO_LEAKS, [Define to 1 if you want sudo to free up memory before exiting.])
 AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first they user sudo.])
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support.])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
