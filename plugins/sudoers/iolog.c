@@ -65,7 +65,7 @@ struct iolog_details {
     int cols;
 };
 
-static int iolog_compress;
+static bool iolog_compress = false;
 static struct timeval last_time;
 static unsigned int sessid_max = SESSID_MAX;
 
