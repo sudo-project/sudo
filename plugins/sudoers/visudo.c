@@ -268,6 +268,7 @@ main(int argc, char *argv[])
 		(void) install_sudoers(sp, oldperms);
 	}
     }
+    free(editor);
 
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
