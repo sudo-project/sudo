@@ -114,7 +114,7 @@ static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
 static bool gc_add(enum sudo_gc_types type, void *ptr);
-static void gc_exit(int exit_code) __attribute__((__noreturn__));
+static void gc_init(void);
 
 /* Policy plugin convenience functions. */
 static int policy_open(struct plugin_container *plugin,
@@ -245,11 +245,11 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
 	    ok = policy_validate(&policy_plugin);
-	    gc_exit(ok != 1);
+	    exit(ok != 1);
 	case MODE_KILL:
 	case MODE_INVALIDATE:
 	    policy_invalidate(&policy_plugin, sudo_mode == MODE_KILL);
-	    gc_exit(0);
+	    exit(0);
 	    break;
 	case MODE_CHECK:
 	case MODE_CHECK|MODE_INVALIDATE:
@@ -257,7 +257,7 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_LIST|MODE_INVALIDATE:
 	    ok = policy_list(&policy_plugin, nargc, nargv,
 		ISSET(sudo_mode, MODE_LONG_LIST), list_user);
-	    gc_exit(ok != 1);
+	    exit(ok != 1);
 	case MODE_EDIT:
 	case MODE_RUN:
 	    ok = policy_check(&policy_plugin, nargc, nargv, env_add,
@@ -266,7 +266,7 @@ main(int argc, char *argv[], char *envp[])
 	    if (ok != 1) {
 		if (ok == -2)
 		    usage(1);
-		gc_exit(1); /* plugin printed error message */
+		exit(1); /* plugin printed error message */
 	    }
 	    /* Reset nargv/nargc based on argv_out. */
 	    /* XXX - leaks old nargv in shell mode */
@@ -331,7 +331,7 @@ main(int argc, char *argv[], char *envp[])
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	WEXITSTATUS(status));
-    gc_exit(WEXITSTATUS(status));
+    exit(WEXITSTATUS(status));
 }
 
 int
@@ -341,6 +341,7 @@ os_init_common(int argc, char *argv[], char *envp[])
 #ifdef STATIC_SUDOERS_PLUGIN
     preload_static_symbols();
 #endif
+    gc_init();
     return 0;
 }
 
@@ -1509,7 +1510,7 @@ gc_add(enum sudo_gc_types type, void *v)
 }
 
 static void
-gc_exit(int exit_code)
+gc_cleanup(void)
 {
 #ifdef NO_LEAKS
     struct plugin_container *plugin;
@@ -1543,8 +1544,14 @@ gc_exit(int exit_code)
 	free(plugin);
     }
 
-    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
-	exit_code);
+    debug_return;
 #endif /* NO_LEAKS */
-    exit(exit_code);
+}
+
+static void
+gc_init(void)
+{
+#ifdef NO_LEAKS
+    atexit(gc_cleanup);
+#endif
 }
