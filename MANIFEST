@@ -259,6 +259,7 @@ plugins/sudoers/defaults.h
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/find_path.c
+plugins/sudoers/gc.c
 plugins/sudoers/getdate.c
 plugins/sudoers/getdate.y
 plugins/sudoers/getspwuid.c

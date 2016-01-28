@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2015
+ * Copyright (c) 2000-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -412,6 +412,8 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     }
     if (rval == -1)
 	free(estring);
+    else
+	sudoers_gc_add(GC_PTR, estring);
     debug_return_int(rval);
 }
 
@@ -468,6 +470,8 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
 done:
     if (rval == -1)
 	free(estring);
+    else
+	sudoers_gc_add(GC_PTR, estring);
     return rval;
 }
 
@@ -972,6 +976,7 @@ rebuild_env(void)
 		free(cp);
 		goto bad;
 	    }
+	    sudoers_gc_add(GC_PTR, cp);
 	}
     } else {
 	/*
@@ -1060,6 +1065,7 @@ rebuild_env(void)
 	    free(cp);
 	    goto bad;
 	}
+	sudoers_gc_add(GC_PTR, cp);
     } else {
 	CHECK_SETENV2("SUDO_COMMAND", user_cmnd, true, true);
     }
@@ -1217,6 +1223,7 @@ read_env_file(const char *path, int overwrite)
 	memcpy(cp, var, var_len + 1); /* includes '=' */
 	memcpy(cp + var_len + 1, val, val_len + 1); /* includes NUL */
 
+	sudoers_gc_add(GC_PTR, cp);
 	if (sudo_putenv(cp, true, overwrite) == -1) {
 	    /* XXX - no undo on failure */
 	    rval = false;

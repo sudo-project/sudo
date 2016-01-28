@@ -377,4 +377,14 @@ extern const char *path_plugin_dir;
 char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *whitelist);
 
+/* gc.c */
+enum sudoers_gc_types {
+    GC_UNKNOWN,
+    GC_VECTOR,
+    GC_PTR
+};
+bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
+bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
+void sudoers_gc_init(void);
+
 #endif /* SUDOERS_SUDOERS_H */
