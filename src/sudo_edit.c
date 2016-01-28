@@ -990,6 +990,8 @@ sudo_edit(struct command_details *command_details)
 #endif
 	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
 
+    for (i = 0; i < nfiles; i++)
+	free(tf[i].tfile);
     free(tf);
     free(nargv);
     debug_return_int(errors ? 1 : rval);
