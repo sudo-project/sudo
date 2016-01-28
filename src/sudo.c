@@ -1484,6 +1484,9 @@ gc_add(enum sudo_gc_types type, void *v)
     struct sudo_gc_entry *gc;
     debug_decl(gc_add, SUDO_DEBUG_MAIN)
 
+    if (v == NULL)
+	debug_return_bool(false);
+
     gc = calloc(1, sizeof(*gc));
     if (gc == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -1509,18 +1512,18 @@ gc_add(enum sudo_gc_types type, void *v)
 #endif /* NO_LEAKS */
 }
 
-static void
-gc_cleanup(void)
-{
 #ifdef NO_LEAKS
+static void
+gc_run(void)
+{
     struct plugin_container *plugin;
     struct sudo_gc_entry *gc;
-    void *next;
     char **cur;
-    debug_decl(gc_cleanup, SUDO_DEBUG_MAIN)
+    debug_decl(gc_run, SUDO_DEBUG_MAIN)
 
     /* Collect garbage. */
-    SLIST_FOREACH_SAFE(gc, &sudo_gc_list, entries, next) {
+    while ((gc = SLIST_FIRST(&sudo_gc_list))) {
+	SLIST_REMOVE_HEAD(&sudo_gc_list, entries);
 	switch (gc->type) {
 	case GC_PTR:
 	    free(gc->u.ptr);
@@ -1539,19 +1542,20 @@ gc_cleanup(void)
 
     /* Free plugin structs. */
     free(policy_plugin.path);
-    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
+    while ((plugin = TAILQ_FIRST(&io_plugins))) {
+	TAILQ_REMOVE(&io_plugins, plugin, entries);
 	free(plugin->path);
 	free(plugin);
     }
 
     debug_return;
-#endif /* NO_LEAKS */
 }
+#endif /* NO_LEAKS */
 
 static void
 gc_init(void)
 {
 #ifdef NO_LEAKS
-    atexit(gc_cleanup);
+    atexit(gc_run);
 #endif
 }
