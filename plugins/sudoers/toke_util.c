@@ -147,6 +147,8 @@ fill_args(const char *s, size_t len, int addspace)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
 	    free(sudoerslval.command.args);
+	    sudoerslval.command.args = NULL;
+	    arg_len = arg_size = 0;
 	    debug_return_bool(false);
 	} else
 	    sudoerslval.command.args = p;
