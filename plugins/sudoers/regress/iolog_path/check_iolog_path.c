@@ -80,6 +80,7 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
 	sudo_warnx("%s: expected %s, got %s", file_in, file_out, slash + 1);
 	error = 1;
     }
+    free(path);
 
     return error;
 }
@@ -158,21 +159,33 @@ main(int argc, char *argv[])
 		sudo_fatalx("group ID %s: %s", line, errstr);
 	    break;
 	case 5:
+	    if (user_shost != NULL)
+		free(user_shost);
 	    user_shost = strdup(line);
 	    break;
 	case 6:
+	    if (user_base != NULL)
+		free(user_base);
 	    user_base = strdup(line);
 	    break;
 	case 7:
+	    if (dir_in != NULL)
+		free(dir_in);
 	    dir_in = strdup(line);
 	    break;
 	case 8:
+	    if (file_in != NULL)
+		free(file_in);
 	    file_in = strdup(line);
 	    break;
 	case 9:
+	    if (dir_out != NULL)
+		free(dir_out);
 	    dir_out = strdup(line);
 	    break;
 	case 10:
+	    if (file_out != NULL)
+		free(file_out);
 	    file_out = strdup(line);
 	    break;
 	case 11:
