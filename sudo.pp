@@ -86,7 +86,7 @@ still allow people to get their work done."
 	# Add distro info to release
 	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,2\}\).*/\1/'`
 	case "$pp_rpm_distro" in
-	centos*|rhel*)
+	centos*|rhel*|fc*)
 		pp_rpm_release="$pp_rpm_release.el${osrelease%%[0-9]}"
 		;;
 	sles*)
@@ -97,7 +97,7 @@ still allow people to get their work done."
 	# Uncomment some Defaults in sudoers
 	# Note that the order must match that of sudoers.
 	case "$pp_rpm_distro" in
-	centos*|rhel*)
+	centos*|rhel*|fc*)
 		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
 		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
@@ -124,7 +124,7 @@ still allow people to get their work done."
 
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
-	centos*|rhel*)
+	centos*|rhel*|fc*)
 		rhel_docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
 		if test "`dirname ${exampledir}`" = "${docdir}"; then
 		    exampledir="${rhel_docdir}/`basename ${exampledir}`"
@@ -136,7 +136,7 @@ still allow people to get their work done."
 
 	# Choose the correct PAM file by distro, must be tab indented for "<<-"
 	case "$pp_rpm_distro" in
-	centos*|rhel*)
+	centos*|rhel*|fc*)
 		mkdir -p ${pp_destdir}/etc/pam.d
 		if test $osrelease -lt 50; then
 			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF

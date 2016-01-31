@@ -110,7 +110,7 @@ fi
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
 case "$osversion" in
-    centos*|rhel*)
+    centos*|rhel*|fc*)
 	if [ $osrelease -ge 40 ]; then
 	    # RHEL 4 and up support SELinux
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
