@@ -1573,13 +1573,7 @@ runas_setgroups(void)
     }
 
     pw = runas_pw ? runas_pw : sudo_user.pw;
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb(pw->pw_name);
-#endif
     grlist = sudo_get_grlist(pw);
-#ifdef HAVE_SETAUTHDB
-    aix_restoreauthdb();
-#endif
     if (grlist != NULL) {
 	if (sudo_setgroups(grlist->ngids, grlist->gids) < 0) {
 	    sudo_grlist_delref(grlist);

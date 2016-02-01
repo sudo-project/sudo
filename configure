@@ -14846,7 +14846,7 @@ done
 
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 
-    for _sym in aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1; do
+    for _sym in aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1 aix_setauthdb_v2 aix_getauthregistry_v1; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done

@@ -68,7 +68,7 @@ do {							\
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
  * uid is the key.  Fills in datum from struct password.
- * Returns NULL on malloc error or unknown name/id, setting errno
+ * Returns NULL on calloc error or unknown name/id, setting errno
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
@@ -151,7 +151,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
  * gid is the key.  Fills in datum from struct group.
- * Returns NULL on malloc error or unknown name/id, setting errno
+ * Returns NULL on calloc error or unknown name/id, setting errno
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
@@ -338,7 +338,7 @@ again:
      */
 #ifdef HAVE_SETAUTHDB
     if (grp == NULL)
-	aix_setauthdb((char *) pw->pw_name);
+	aix_setauthdb((char *) pw->pw_name, NULL);
 #endif
     ngroups = 0;
     for (i = 0; i < ngids; i++) {

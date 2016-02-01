@@ -57,6 +57,18 @@ static int  cmp_grgid(const void *, const void *);
 #define cmp_grnam	cmp_pwnam
 
 /*
+ * AIX has the concept of authentication registries (files, NIS, LDAP, etc).
+ * This allows you to have separate ID <-> name mappings based on which
+ * authentication registries the user was looked up in.
+ * We store the registry as part of the key and use it when matching.
+ */
+#ifdef HAVE_SETAUTHDB
+# define getauthregistry(u, r)	aix_getauthregistry((u), (r))
+#else
+# define getauthregistry(u, r)	((r)[0] = '\0')
+#endif
+
+/*
  * Compare by uid.
  */
 static int
@@ -64,6 +76,8 @@ cmp_pwuid(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
+    if (ci1->k.uid == ci2->k.uid)
+	return strcmp(ci1->registry, ci2->registry);
     return ci1->k.uid - ci2->k.uid;
 }
 
@@ -75,7 +89,10 @@ cmp_pwnam(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
-    return strcmp(ci1->k.name, ci2->k.name);
+    int rval = strcmp(ci1->k.name, ci2->k.name);
+    if (rval == 0)
+	rval = strcmp(ci1->registry, ci2->registry);
+    return rval;
 }
 
 void
@@ -117,17 +134,20 @@ sudo_getpwuid(uid_t uid)
     debug_decl(sudo_getpwuid, SUDOERS_DEBUG_NSS)
 
     key.k.uid = uid;
+    getauthregistry(IDtouser(uid), key.registry);
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: uid %u -> user %s (cache hit)",
-	    __func__, (unsigned int)uid, item->d.pw->pw_name);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: uid %u [%s] -> user %s [%s] (cache hit)", __func__,
+	    (unsigned int)uid, key.registry, item->d.pw->pw_name,
+	    item->registry);
 	goto done;
     }
     /*
      * Cache passwd db entry if it exists or a negative response if not.
      */
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(IDtouser(uid));
+    aix_setauthdb(IDtouser(uid), key.registry);
 #endif
     item = sudo_make_pwitem(uid, NULL);
 #ifdef HAVE_SETAUTHDB
@@ -143,6 +163,7 @@ sudo_getpwuid(uid_t uid)
 	item->k.uid = uid;
 	/* item->d.pw = NULL; */
     }
+    strlcpy(item->registry, key.registry, sizeof(item->registry));
     switch (rbinsert(pwcache_byuid, item, NULL)) {
     case 1:
 	/* should not happen */
@@ -157,9 +178,10 @@ sudo_getpwuid(uid_t uid)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: uid %u -> user %s (cached)",
-	__func__, (unsigned int)uid,
-	item->d.pw ? item->d.pw->pw_name : "unknown");
+    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	"%s: uid %u [%s] -> user %s [%s] (cached)", __func__,
+	(unsigned int)uid, key.registry,
+	item->d.pw ? item->d.pw->pw_name : "unknown", item->registry);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.pw);
@@ -176,17 +198,19 @@ sudo_getpwnam(const char *name)
     debug_decl(sudo_getpwnam, SUDOERS_DEBUG_NSS)
 
     key.k.name = (char *) name;
+    getauthregistry((char *) name, key.registry);
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s -> uid %u (cache hit)",
-	    __func__, name, (unsigned int)item->d.pw->pw_uid);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: user %s [%s] -> uid %u [%s] (cache hit)", __func__, name,
+	    key.registry, (unsigned int)item->d.pw->pw_uid, item->registry);
 	goto done;
     }
     /*
      * Cache passwd db entry if it exists or a negative response if not.
      */
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb((char *) name);
+    aix_setauthdb((char *) name, key.registry);
 #endif
     item = sudo_make_pwitem((uid_t)-1, name);
 #ifdef HAVE_SETAUTHDB
@@ -203,6 +227,7 @@ sudo_getpwnam(const char *name)
 	memcpy(item->k.name, name, len);
 	/* item->d.pw = NULL; */
     }
+    strlcpy(item->registry, key.registry, sizeof(item->registry));
     switch (rbinsert(pwcache_byname, item, NULL)) {
     case 1:
 	/* should not happen */
@@ -215,8 +240,9 @@ sudo_getpwnam(const char *name)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s -> uid %d (cached)",
-	__func__, name, item->d.pw ? (int)item->d.pw->pw_uid : -1);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	"%s: user %s [%s] -> uid %d [%s] (cached)", __func__, name,
+	key.registry, item->d.pw ? (int)item->d.pw->pw_uid : -1, item->registry);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.pw);
@@ -289,6 +315,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 	    item->k.name = pw->pw_name;
 	    pwcache = pwcache_byname;
 	}
+	getauthregistry(NULL, item->registry);
 	switch (rbinsert(pwcache, item, &node)) {
 	case 1:
 	    /* Already exists. */
@@ -385,6 +412,8 @@ cmp_grgid(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
+    if (ci1->k.gid == ci2->k.gid)
+	return strcmp(ci1->registry, ci2->registry);
     return ci1->k.gid - ci2->k.gid;
 }
 
@@ -427,10 +456,13 @@ sudo_getgrgid(gid_t gid)
     debug_decl(sudo_getgrgid, SUDOERS_DEBUG_NSS)
 
     key.k.gid = gid;
+    getauthregistry(NULL, key.registry);
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: gid %u -> group %s (cache hit)",
-	    __func__, (unsigned int)gid, item->d.gr->gr_name);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: gid %u [%s] -> group %s [%s] (cache hit)", __func__,
+	    (unsigned int)gid, key.registry, item->d.gr->gr_name,
+	    item->registry);
 	goto done;
     }
     /*
@@ -447,6 +479,7 @@ sudo_getgrgid(gid_t gid)
 	item->k.gid = gid;
 	/* item->d.gr = NULL; */
     }
+    strlcpy(item->registry, key.registry, sizeof(item->registry));
     switch (rbinsert(grcache_bygid, item, NULL)) {
     case 1:
 	/* should not happen */
@@ -461,9 +494,10 @@ sudo_getgrgid(gid_t gid)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: gid %u -> group %s (cached)",
-	__func__, (unsigned int)gid,
-	item->d.gr ? item->d.gr->gr_name : "unknown");
+    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	"%s: gid %u [%s] -> group %s [%s] (cached)", __func__,
+	(unsigned int)gid, key.registry,
+	item->d.gr ? item->d.gr->gr_name : "unknown", item->registry);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -480,10 +514,12 @@ sudo_getgrnam(const char *name)
     debug_decl(sudo_getgrnam, SUDOERS_DEBUG_NSS)
 
     key.k.name = (char *) name;
+    getauthregistry(NULL, key.registry);
     if ((node = rbfind(grcache_byname, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: group %s -> gid %u (cache hit)",
-	    __func__, name, (unsigned int)item->d.gr->gr_gid);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: group %s [%s] -> gid %u [%s] (cache hit)", __func__, name,
+	    key.registry, (unsigned int)item->d.gr->gr_gid, item->registry);
 	goto done;
     }
     /*
@@ -501,6 +537,7 @@ sudo_getgrnam(const char *name)
 	memcpy(item->k.name, name, len);
 	/* item->d.gr = NULL; */
     }
+    strlcpy(item->registry, key.registry, sizeof(item->registry));
     switch (rbinsert(grcache_byname, item, NULL)) {
     case 1:
 	/* should not happen */
@@ -513,8 +550,9 @@ sudo_getgrnam(const char *name)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: group %s -> gid %d (cache hit)",
-	__func__, name, item->d.gr ? (int)item->d.gr->gr_gid : -1);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	"%s: group %s [%s] -> gid %d [%s] (cache hit)", __func__, name,
+	key.registry, item->d.gr ? (int)item->d.gr->gr_gid : -1, item->registry);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -569,6 +607,7 @@ sudo_fakegrnam(const char *group)
 	    gritem->cache.k.name = gr->gr_name;
 	    grcache = grcache_byname;
 	}
+	getauthregistry(NULL, item->registry);
 	switch (rbinsert(grcache, item, &node)) {
 	case 1:
 	    /* Already exists. */
@@ -680,6 +719,7 @@ sudo_get_grlist(const struct passwd *pw)
     debug_decl(sudo_get_grlist, SUDOERS_DEBUG_NSS)
 
     key.k.name = pw->pw_name;
+    getauthregistry(pw->pw_name, key.registry);
     if ((node = rbfind(grlist_cache, &key)) != NULL) {
 	item = node->data;
 	goto done;
@@ -692,6 +732,7 @@ sudo_get_grlist(const struct passwd *pw)
 	/* Out of memory? */
 	debug_return_ptr(NULL);
     }
+    strlcpy(item->registry, key.registry, sizeof(item->registry));
     switch (rbinsert(grlist_cache, item, NULL)) {
     case 1:
 	/* should not happen */
@@ -730,11 +771,13 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
      * Cache group db entry if it doesn't already exist
      */
     key.k.name = pw->pw_name;
+    getauthregistry(NULL, key.registry);
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
 	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL) {
 	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}
+	strlcpy(item->registry, key.registry, sizeof(item->registry));
 	switch (rbinsert(grlist_cache, item, NULL)) {
 	case 1:
 	    sudo_warnx(U_("unable to cache group list for %s, already exists"),

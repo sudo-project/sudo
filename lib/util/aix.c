@@ -133,7 +133,7 @@ aix_setlimits(char *user)
 typedef char authdb_t[16];
 # endif
 
-/* The empty string means to access all defined administrative domains. */
+/* The empty string means to access all defined authentication registries. */
 static authdb_t old_registry;
 
 # if defined(HAVE_DECL_SETAUTHDB) && !HAVE_DECL_SETAUTHDB
@@ -144,41 +144,93 @@ int usrinfo(int cmd, char *buf, int count);
 # endif
 
 /*
- * Look up administrative domain for user (SYSTEM in /etc/security/user) and
+ * Look up authentication registry for user (SYSTEM in /etc/security/user) and
  * set it as the default for the process.  This ensures that password and
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
  * Does not modify errno even on error since callers do not check rval.
  */
 int
-aix_setauthdb_v1(char *user)
+aix_getauthregistry_v1(char *user, char *saved_registry)
 {
-    char *registry;
     int serrno = errno;
     int rval = -1;
-    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
+    debug_decl(aix_getauthregistry, SUDO_DEBUG_UTIL)
 
+    saved_registry[0] = '\0';
     if (user != NULL) {
+	char *registry;
+
 	if (setuserdb(S_READ) != 0) {
 	    sudo_warn(U_("unable to open userdb"));
 	    goto done;
 	}
-	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
-	    if (setauthdb(registry, old_registry) != 0) {
-		sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
-		    registry, user);
-		goto done;
+	rval = getuserattr(user, S_REGISTRY, &registry, SEC_CHAR);
+	if (rval == 0) {
+	    /* sizeof(authdb_t) is guaranteed to be 16 */
+	    if (strlcpy(saved_registry, registry, 16) >= 16) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "registry for user %s too long: %s", user, registry);
 	    }
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: saved authentication registry for user %s is %s",
+		__func__, user, saved_registry);
 	}
 	enduserdb();
+    } else {
+	/* Get the process-wide registry. */
+	rval = getauthdb(saved_registry);
     }
-    rval = 0;
 done:
     errno = serrno;
     debug_return_int(rval);
 }
 
 /*
- * Restore the saved administrative domain, if any.
+ * Set the specified authentication registry for user (SYSTEM in
+ * /etc/security/user) and set it as the default for the process.
+ * This ensures that password and group lookups are made against
+ * the correct source (files, NIS, LDAP, etc).
+ * If registry is NULL, look it up based on the user name.
+ * Does not modify errno even on error since callers do not check rval.
+ */
+int
+aix_setauthdb_v1(char *user)
+{
+    return aix_setauthdb_v2(user, NULL);
+}
+
+int
+aix_setauthdb_v2(char *user, char *registry)
+{
+    authdb_t regbuf;
+    int serrno = errno;
+    int rval = -1;
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
+
+    if (user != NULL) {
+	/* Look up authentication registry if one is not provided. */
+	if (registry == NULL) {
+	    if (aix_getauthregistry(user, regbuf) != 0)
+		goto done;
+	    registry = regbuf;
+	}
+	rval = setauthdb(registry, old_registry);
+	if (rval != 0) {
+	    sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
+		registry, user);
+	} else {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: setting authentication registry to %s",
+		    __func__, registry);
+	}
+    }
+done:
+    errno = serrno;
+    debug_return_int(rval);
+}
+
+/*
+ * Restore the saved authentication registry, if any.
  * Does not modify errno even on error since callers do not check rval.
  */
 int
@@ -191,7 +243,11 @@ aix_restoreauthdb_v1(void)
     if (setauthdb(old_registry, NULL) != 0) {
 	sudo_warn(U_("unable to restore registry"));
 	rval = -1;
-    }
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: setting authentication registry to %s",
+	    __func__, old_registry);
+}
     errno = serrno;
     debug_return_int(rval);
 }
@@ -215,8 +271,8 @@ aix_prep_user_v1(char *user, const char *tty)
     free(info);
 
 #ifdef HAVE_SETAUTHDB
-    /* set administrative domain */
-    if (aix_setauthdb(user) != 0)
+    /* set authentication registry */
+    if (aix_setauthdb(user, NULL) != 0)
 	debug_return_int(-1);
 #endif
 

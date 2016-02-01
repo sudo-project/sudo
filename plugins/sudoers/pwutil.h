@@ -24,6 +24,7 @@
  */
 struct cache_item {
     unsigned int refcnt;
+    char registry[16];
     /* key */
     union {
 	uid_t uid;

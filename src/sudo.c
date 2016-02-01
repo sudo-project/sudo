@@ -803,7 +803,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	details->egid = details->gid;
 
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(IDtouser(details->euid));
+    aix_setauthdb(IDtouser(details->euid), NULL);
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)

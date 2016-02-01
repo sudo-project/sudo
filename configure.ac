@@ -1749,7 +1749,7 @@ case "$host" in
 		    [AC_CHECK_TYPES([authdb_t], [], [], [#include <usersec.h>])])
 
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
-		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
+		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1 aix_setauthdb_v2 aix_getauthregistry_v1)
 
 		# These prototypes may be missing
 		AC_CHECK_DECLS([usrinfo], [], [], [
