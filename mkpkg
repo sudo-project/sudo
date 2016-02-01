@@ -110,30 +110,55 @@ fi
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
 case "$osversion" in
-    centos*|rhel*|fc*)
-	if [ $osrelease -ge 40 ]; then
-	    # RHEL 4 and up support SELinux
+    centos*|rhel*|f[0-9]*)
+	case "$osversion" in
+	    centos*|rhel*)
+		if [ $osrelease -ge 40 ]; then
+		    # RHEL 4 and up support SELinux
+		    with_selinux=true
+		    if [ $osrelease -ge 50 ]; then
+			# RHEL 5 and up has audit support and uses a
+			# separate PAM config file for "sudo -i".
+			with_linux_audit=true
+			with_pam_login=true
+			if [ $osrelease -ge 60 ]; then
+			    # RHEL 6 and above builds sudo with SSSD support
+			    with_sssd=true
+			    # RHEL 6 and above use /etc/sudo-ldap.conf
+			    with_sudo_ldap_conf=true
+			fi
+		    fi
+		fi
+		;;
+	    f[0-9]*)
+		# XXX - investigate which features were in which fedora version
+		with_selinux=true
+		with_linux_audit=true
+		with_pam_login=true
+		with_sssd=true
+		with_sudo_ldap_conf=true
+		;;
+	esac
+
+	if [ X"$with_selinux" = X"true" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	fi
-	if [ $osrelease -ge 50 ]; then
-	    # RHEL 5 and up has audit support and uses a separate PAM
-	    # config file for "sudo -i".
+	if [ X"$with_linux_audit" = X"true" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-pam-login"
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
 	fi
-	if [ $osrelease -ge 60 ]; then
-	    # RHEL 6 and above builds sudo with SSSD support
+	if [ X"$with_pam_login" = X"true" ]; then
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-pam-login"
+	fi
+	if [ X"$with_sssd" = X"true" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
 	    if test "`getconf LONG_BIT`" = "64"; then
 		# SSSD backend needs to know where to find the sssd lib
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib64"
 	    fi
-	    # RHEL 6 and above use /etc/sudo-ldap.conf
-	    if test "$flavor" = "ldap"; then
-		configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
-		    --with-ldap-conf-file=/etc/sudo-ldap.conf"
-	    fi
+	fi
+	if [ X"$with_sudo_ldap_conf" = X"true" ]; then
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap-conf-file=/etc/sudo-ldap.conf"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--prefix=/usr

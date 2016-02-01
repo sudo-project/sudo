@@ -44,7 +44,7 @@ still allow people to get their work done."
 	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)$' \| 0 \) + 1`"
 	pp_rpm_version="`expr \( $version : '\(.*\)p[0-9][0-9]*$' \| $version \)`"
 	pp_rpm_license="BSD"
-	pp_rpm_url="https://www.sudo.ws/"
+	pp_rpm_url="https://www.sudo.ws"
 	pp_rpm_group="Applications/System"
 	pp_rpm_packager="Todd C. Miller <Todd.Miller@courtesan.com>"
 	if test -n "$linux_audit"; then
@@ -86,7 +86,7 @@ still allow people to get their work done."
 	# Add distro info to release
 	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,2\}\).*/\1/'`
 	case "$pp_rpm_distro" in
-	centos*|rhel*|fc*)
+	centos*|rhel*|f[0-9]*)
 		pp_rpm_release="$pp_rpm_release.el${osrelease%%[0-9]}"
 		;;
 	sles*)
@@ -97,7 +97,7 @@ still allow people to get their work done."
 	# Uncomment some Defaults in sudoers
 	# Note that the order must match that of sudoers.
 	case "$pp_rpm_distro" in
-	centos*|rhel*|fc*)
+	centos*|rhel*|f[0-9]*)
 		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
 		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
@@ -124,7 +124,7 @@ still allow people to get their work done."
 
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
-	centos*|rhel*|fc*)
+	centos*|rhel*|f[0-9]*)
 		rhel_docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
 		if test "`dirname ${exampledir}`" = "${docdir}"; then
 		    exampledir="${rhel_docdir}/`basename ${exampledir}`"
@@ -136,7 +136,7 @@ still allow people to get their work done."
 
 	# Choose the correct PAM file by distro, must be tab indented for "<<-"
 	case "$pp_rpm_distro" in
-	centos*|rhel*|fc*)
+	centos*|rhel*)
 		mkdir -p ${pp_destdir}/etc/pam.d
 		if test $osrelease -lt 50; then
 			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
@@ -165,7 +165,27 @@ still allow people to get their work done."
 			EOF
 		fi
 		;;
-	  sles*)
+	f[0-9]*)
+		# XXX - share with rhel
+		mkdir -p ${pp_destdir}/etc/pam.d
+		cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+		#%PAM-1.0
+		auth       include	system-auth
+		account    include	system-auth
+		password   include	system-auth
+		session    optional	pam_keyinit.so revoke
+		session    required	pam_limits.so
+		EOF
+		cat > ${pp_destdir}/etc/pam.d/sudo-i <<-EOF
+		#%PAM-1.0
+		auth       include	sudo
+		account    include	sudo
+		password   include	sudo
+		session    optional	pam_keyinit.so force revoke
+		session    required	pam_limits.so
+		EOF
+		;;
+	sles*)
 		mkdir -p ${pp_destdir}/etc/pam.d
 		if test $osrelease -lt 10; then
 			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
@@ -263,7 +283,7 @@ still allow people to get their work done."
 	cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	sed "s/^\(Depends:.*\) *$/\1, ${DEPENDS}/" %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
 	rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	echo "Homepage: https://www.sudo.ws/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	echo "Homepage: https://www.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %files
