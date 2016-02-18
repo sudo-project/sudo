@@ -1182,12 +1182,6 @@ AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to re
 		;;
 esac], AC_MSG_RESULT(yes))
 
-AC_ARG_WITH(stow, [AS_HELP_STRING([--with-stow], [deprecated])],
-[case $with_stow in
-    *)		AC_MSG_NOTICE([--with-stow option deprecated, now is defalt behavior])
-		;;
-esac])
-
 AC_MSG_CHECKING(whether to use an askpass helper)
 AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pathname of askpass helper])],
 [case $with_askpass in
@@ -4202,7 +4196,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
-test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
+test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
 dnl Substitute into the Makefile and man pages

@@ -920,7 +920,6 @@ with_ldap_secret_file
 with_pc_insults
 with_secure_path
 with_interfaces
-with_stow
 with_askpass
 with_exampledir
 with_plugindir
@@ -1730,7 +1729,6 @@ Optional Packages:
                           offensive ones
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
-  --with-stow             deprecated
   --with-askpass=PATH     Fully qualified pathname of askpass helper
   --with-exampledir=DIR   path to install sudo examples in
   --with-plugindir=DIR    set directory to load plugins from
@@ -5683,17 +5681,6 @@ esac
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-fi
-
-
-
-# Check whether --with-stow was given.
-if test "${with_stow+set}" = set; then :
-  withval=$with_stow; case $with_stow in
-    *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: --with-stow option deprecated, now is defalt behavior" >&5
-$as_echo "$as_me: --with-stow option deprecated, now is defalt behavior" >&6;}
-		;;
-esac
 fi
 
 
@@ -24362,7 +24349,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
-test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
+test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 if test X"$INIT_SCRIPT" != X""; then
     ac_config_files="$ac_config_files init.d/$INIT_SCRIPT"
