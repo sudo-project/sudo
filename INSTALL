@@ -442,7 +442,8 @@ Authentication options:
         principal name.
 
   --with-solaris-audit
-	Enable audit support for Solaris systems.
+	Enable audit support for Solaris 11 and above.
+	For older versions of Solaris, use --with-bsm-audit
 
   --with-opie[=DIR]
 	Enable NRL OPIE OTP (One Time Password) support.  If specified,
