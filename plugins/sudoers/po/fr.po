@@ -1,13 +1,13 @@
 # This file is put in the public domain.
 # This file is distributed under the same license as the sudo package.
 #
-# Frédéric Hantrais <fhantrais@gmail.com>, 2014, 2015.
+# Frédéric Hantrais <fhantrais@gmail.com>, 2014, 2015, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.8.15rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2015-10-24 06:26-0600\n"
-"PO-Revision-Date: 2015-12-11 08:14-0500\n"
+"PO-Revision-Date: 2016-02-14 08:17-0500\n"
 "Last-Translator: Frédéric Hantrais <fhantrais@gmail.com>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -27,7 +27,7 @@ msgstr "Mot de passe de %p : "
 
 #: confstr.sh:3
 msgid "[sudo] password for %p: "
-msgstr "Mot de passe [sudo] de %p : "
+msgstr "[sudo] Mot de passe de %p : "
 
 #: confstr.sh:4
 msgid "Password: "
