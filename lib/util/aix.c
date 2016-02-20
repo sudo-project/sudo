@@ -138,6 +138,7 @@ static authdb_t old_registry;
 
 # if defined(HAVE_DECL_SETAUTHDB) && !HAVE_DECL_SETAUTHDB
 int setauthdb(authdb_t new, authdb_t old);
+int getauthdb(authdb_t val);
 # endif
 # if defined(HAVE_DECL_USRINFO) && !HAVE_DECL_USRINFO
 int usrinfo(int cmd, char *buf, int count);
