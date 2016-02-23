@@ -36,6 +36,23 @@ What's new in Sudo 1.8.16
    fixes a time of check versus time of use race condition when the
    directory holding the command is writable by the invoking user.
 
+ * On AIX systems, sudo now caches the auth registry string along
+   with password and group information.  This fixes a potential
+   problem when a user or group of the same name exists in multiple
+   auth registries.  For example, local and LDAP.
+
+ * Fixed a crash in the SSSD backend when the invoking user is not
+   found.  Bug #732.
+
+ * Added the --enable-asan configure flag to enable address sanitizer
+   support.  A few minor memory leaks have been plugged to quiet
+   the ASAN leak detector.
+
+ * The value of _PATH_SUDO_CONF may once again be overridden via
+   the Makefile.  Bug #735
+
+ * The sudoers2ldif script now handles multiple roles with same name.
+
 What's new in Sudo 1.8.15
 
  * Fixed a bug that prevented sudo from building outside the source tree
