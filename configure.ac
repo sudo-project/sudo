@@ -2689,7 +2689,9 @@ if test X"$with_noexec" != X"no"; then
     # Check for non-standard exec functions
     AC_CHECK_FUNCS([exect execvP execvpe])
     # Check for posix_spawn, and posix_spawnp
-    AC_CHECK_FUNCS([posix_spawn posix_spawnp])
+    if test X"$ac_cv_header_spawn_h" = X"yes"; then
+	AC_CHECK_FUNCS([posix_spawn posix_spawnp])
+    fi
 fi
 
 dnl
