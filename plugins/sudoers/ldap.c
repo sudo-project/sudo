@@ -3170,12 +3170,12 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	    /* Only check the command when listing another user. */
 	    if (user_uid == 0 || list_pw == NULL ||
 		user_uid == list_pw->pw_uid ||
-		sudo_ldap_check_command(ld, entry, NULL)) {
+		sudo_ldap_check_command(ld, entry, NULL) == true) {
 		matched = true;
 		break;
 	    }
 	}
-	if (matched || user_uid == 0) {
+	if (matched == true || user_uid == 0) {
 	    SET(ret, VALIDATE_SUCCESS);
 	    CLR(ret, VALIDATE_FAILURE);
 	    if (def_authenticate) {
