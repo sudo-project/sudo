@@ -1,7 +1,7 @@
 What's new in Sudo 1.8.16
 
  * Fixed a compilation error on Solaris 10 with Stun Studio 12.
-   Bug #727
+   Bug #727.
 
  * When preserving variables from the invoking user's environment, if
    there are duplicates sudo now only keeps the first instance.
@@ -25,11 +25,11 @@ What's new in Sudo 1.8.16
    is writable by the invoking user, symbolic links will not be
    followed.  If the parent directory of the file to be edited is
    writable, sudoedit will refuse to edit it.
-   Bug #707
+   Bug #707.
 
  * The netgroup_tuple Defaults option has been added to enable matching
    of the entire netgroup tuple, not just the host or user portion.
-   Bug #717
+   Bug #717.
 
  * When matching commands based on the SHA2 digest, sudo will now
    use fexecve(2) to execute the command if it is available.  This
@@ -49,9 +49,16 @@ What's new in Sudo 1.8.16
    the ASAN leak detector.
 
  * The value of _PATH_SUDO_CONF may once again be overridden via
-   the Makefile.  Bug #735
+   the Makefile.  Bug #735.
 
  * The sudoers2ldif script now handles multiple roles with same name.
+
+ * Fixed a compilation error on systems that have the posix_spawn()
+   and posix_spawnp() functions but an unusable spawn.h header.
+   Bug #730.
+
+ * Fixed support for negating character classes in sudo's version
+   of the fnmatch() function.
 
 What's new in Sudo 1.8.15
 
