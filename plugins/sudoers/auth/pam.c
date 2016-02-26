@@ -372,8 +372,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 #endif /* PAM_TEXT_DOMAIN */
 
 /*
- * ``Conversation function'' for PAM.
- * XXX - does not handle PAM_BINARY_PROMPT
+ * ``Conversation function'' for PAM <-> human interaction.
  */
 static int
 converse(int num_msg, PAM_CONST struct pam_message **msg,
@@ -393,6 +392,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	    "invalid number of PAM messages: %d", num_msg);
 	debug_return_int(PAM_CONV_ERR);
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"number of PAM messages: %d", num_msg);
 
     if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
