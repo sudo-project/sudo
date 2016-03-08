@@ -1,12 +1,12 @@
 # Serbian translation for sudoers.
 # This file is put in the public domain.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2014—2015.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2014—2016.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.8.15rc3\n"
-"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-10-24 06:26-0600\n"
-"PO-Revision-Date: 2015-12-26 23:27+0200\n"
+"Project-Id-Version: sudoers-1.8.16b1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2016-02-19 15:48-0700\n"
+"PO-Revision-Date: 2016-03-05 10:21+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -49,37 +49,37 @@ msgstr "Извините, покушајте поново."
 #: gram.y:1143 plugins/sudoers/alias.c:123 plugins/sudoers/alias.c:136
 #: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
 #: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:398
-#: plugins/sudoers/auth/pam.c:449 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/defaults.c:516
-#: plugins/sudoers/defaults.c:720 plugins/sudoers/defaults.c:880
-#: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
-#: plugins/sudoers/editor.c:92 plugins/sudoers/env.c:233
-#: plugins/sudoers/group_plugin.c:133 plugins/sudoers/iolog.c:586
+#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/auth/sia.c:59
+#: plugins/sudoers/defaults.c:518 plugins/sudoers/defaults.c:722
+#: plugins/sudoers/defaults.c:882 plugins/sudoers/editor.c:64
+#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:92
+#: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
+#: plugins/sudoers/group_plugin.c:134 plugins/sudoers/iolog.c:586
 #: plugins/sudoers/iolog.c:618 plugins/sudoers/iolog_path.c:167
 #: plugins/sudoers/ldap.c:446 plugins/sudoers/ldap.c:477
 #: plugins/sudoers/ldap.c:529 plugins/sudoers/ldap.c:562
-#: plugins/sudoers/ldap.c:914 plugins/sudoers/ldap.c:1061
-#: plugins/sudoers/ldap.c:1348 plugins/sudoers/ldap.c:1521
-#: plugins/sudoers/ldap.c:1597 plugins/sudoers/ldap.c:1733
-#: plugins/sudoers/ldap.c:1757 plugins/sudoers/ldap.c:1787
-#: plugins/sudoers/ldap.c:1840 plugins/sudoers/ldap.c:1855
-#: plugins/sudoers/ldap.c:1951 plugins/sudoers/ldap.c:1984
-#: plugins/sudoers/ldap.c:2137 plugins/sudoers/ldap.c:2234
-#: plugins/sudoers/ldap.c:3041 plugins/sudoers/ldap.c:3074
-#: plugins/sudoers/ldap.c:3388 plugins/sudoers/ldap.c:3416
-#: plugins/sudoers/ldap.c:3427 plugins/sudoers/ldap.c:3517
-#: plugins/sudoers/ldap.c:3533 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:917 plugins/sudoers/ldap.c:1064
+#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1542
+#: plugins/sudoers/ldap.c:1620 plugins/sudoers/ldap.c:1756
+#: plugins/sudoers/ldap.c:1780 plugins/sudoers/ldap.c:1810
+#: plugins/sudoers/ldap.c:1863 plugins/sudoers/ldap.c:1878
+#: plugins/sudoers/ldap.c:1974 plugins/sudoers/ldap.c:2007
+#: plugins/sudoers/ldap.c:2160 plugins/sudoers/ldap.c:2257
+#: plugins/sudoers/ldap.c:3063 plugins/sudoers/ldap.c:3096
+#: plugins/sudoers/ldap.c:3407 plugins/sudoers/ldap.c:3435
+#: plugins/sudoers/ldap.c:3451 plugins/sudoers/ldap.c:3540
+#: plugins/sudoers/ldap.c:3556 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:666
-#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:501
-#: plugins/sudoers/match.c:537 plugins/sudoers/match.c:699
-#: plugins/sudoers/match.c:756 plugins/sudoers/parse.c:235
+#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:508
+#: plugins/sudoers/match.c:544 plugins/sudoers/match.c:742
+#: plugins/sudoers/match.c:799 plugins/sudoers/parse.c:235
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
-#: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:384
-#: plugins/sudoers/policy.c:583 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:393
+#: plugins/sudoers/policy.c:602 plugins/sudoers/prompt.c:93
 #: plugins/sudoers/sssd.c:160 plugins/sudoers/sssd.c:192
 #: plugins/sudoers/sssd.c:235 plugins/sudoers/sssd.c:242
 #: plugins/sudoers/sssd.c:278 plugins/sudoers/sssd.c:323
-#: plugins/sudoers/sssd.c:917 plugins/sudoers/sssd.c:1050
+#: plugins/sudoers/sssd.c:920 plugins/sudoers/sssd.c:1053
 #: plugins/sudoers/sudoers.c:159 plugins/sudoers/sudoers.c:294
 #: plugins/sudoers/sudoers.c:304 plugins/sudoers/sudoers.c:312
 #: plugins/sudoers/sudoers.c:365 plugins/sudoers/sudoers.c:663
@@ -95,10 +95,10 @@ msgstr "Извините, покушајте поново."
 #: plugins/sudoers/timestamp.c:426 plugins/sudoers/timestamp.c:838
 #: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
 #: plugins/sudoers/toke_util.c:147 plugins/sudoers/visudo.c:152
-#: plugins/sudoers/visudo.c:213 plugins/sudoers/visudo.c:297
-#: plugins/sudoers/visudo.c:303 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:979 plugins/sudoers/visudo.c:1023
-#: plugins/sudoers/visudo.c:1119 toke.l:785 toke.l:806 toke.l:816 toke.l:924
+#: plugins/sudoers/visudo.c:213 plugins/sudoers/visudo.c:298
+#: plugins/sudoers/visudo.c:304 plugins/sudoers/visudo.c:434
+#: plugins/sudoers/visudo.c:980 plugins/sudoers/visudo.c:1024
+#: plugins/sudoers/visudo.c:1120 toke.l:785 toke.l:806 toke.l:816 toke.l:924
 #: toke.l:1082
 msgid "unable to allocate memory"
 msgstr "не могу да доделим меморију"
@@ -108,44 +108,44 @@ msgid "a digest requires a path name"
 msgstr "зборник захтева назив путање"
 
 #: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:398
-#: plugins/sudoers/auth/pam.c:449 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/defaults.c:516 plugins/sudoers/defaults.c:720
-#: plugins/sudoers/defaults.c:880 plugins/sudoers/editor.c:64
-#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:92
-#: plugins/sudoers/env.c:233 plugins/sudoers/group_plugin.c:133
+#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/defaults.c:518
+#: plugins/sudoers/defaults.c:722 plugins/sudoers/defaults.c:882
+#: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
+#: plugins/sudoers/editor.c:92 plugins/sudoers/env.c:234
+#: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:134
 #: plugins/sudoers/iolog.c:586 plugins/sudoers/iolog.c:618
 #: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:446
 #: plugins/sudoers/ldap.c:477 plugins/sudoers/ldap.c:529
-#: plugins/sudoers/ldap.c:562 plugins/sudoers/ldap.c:914
-#: plugins/sudoers/ldap.c:1061 plugins/sudoers/ldap.c:1348
-#: plugins/sudoers/ldap.c:1521 plugins/sudoers/ldap.c:1597
-#: plugins/sudoers/ldap.c:1733 plugins/sudoers/ldap.c:1757
-#: plugins/sudoers/ldap.c:1787 plugins/sudoers/ldap.c:1840
-#: plugins/sudoers/ldap.c:1855 plugins/sudoers/ldap.c:1951
-#: plugins/sudoers/ldap.c:1984 plugins/sudoers/ldap.c:2137
-#: plugins/sudoers/ldap.c:2234 plugins/sudoers/ldap.c:3041
-#: plugins/sudoers/ldap.c:3074 plugins/sudoers/ldap.c:3388
-#: plugins/sudoers/ldap.c:3416 plugins/sudoers/ldap.c:3427
-#: plugins/sudoers/ldap.c:3517 plugins/sudoers/ldap.c:3533
+#: plugins/sudoers/ldap.c:562 plugins/sudoers/ldap.c:917
+#: plugins/sudoers/ldap.c:1064 plugins/sudoers/ldap.c:1384
+#: plugins/sudoers/ldap.c:1542 plugins/sudoers/ldap.c:1620
+#: plugins/sudoers/ldap.c:1756 plugins/sudoers/ldap.c:1780
+#: plugins/sudoers/ldap.c:1810 plugins/sudoers/ldap.c:1863
+#: plugins/sudoers/ldap.c:1878 plugins/sudoers/ldap.c:1974
+#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2160
+#: plugins/sudoers/ldap.c:2257 plugins/sudoers/ldap.c:3063
+#: plugins/sudoers/ldap.c:3096 plugins/sudoers/ldap.c:3407
+#: plugins/sudoers/ldap.c:3434 plugins/sudoers/ldap.c:3450
+#: plugins/sudoers/ldap.c:3540 plugins/sudoers/ldap.c:3556
 #: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:188
-#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:501
-#: plugins/sudoers/match.c:537 plugins/sudoers/match.c:699
-#: plugins/sudoers/match.c:756 plugins/sudoers/parse.c:235
+#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:508
+#: plugins/sudoers/match.c:544 plugins/sudoers/match.c:742
+#: plugins/sudoers/match.c:799 plugins/sudoers/parse.c:235
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
 #: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:97
 #: plugins/sudoers/policy.c:106 plugins/sudoers/policy.c:115
 #: plugins/sudoers/policy.c:139 plugins/sudoers/policy.c:250
-#: plugins/sudoers/policy.c:271 plugins/sudoers/policy.c:280
-#: plugins/sudoers/policy.c:319 plugins/sudoers/policy.c:329
-#: plugins/sudoers/policy.c:338 plugins/sudoers/policy.c:384
-#: plugins/sudoers/policy.c:583 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/policy.c:277 plugins/sudoers/policy.c:286
+#: plugins/sudoers/policy.c:325 plugins/sudoers/policy.c:335
+#: plugins/sudoers/policy.c:344 plugins/sudoers/policy.c:393
+#: plugins/sudoers/policy.c:602 plugins/sudoers/prompt.c:93
 #: plugins/sudoers/set_perms.c:356 plugins/sudoers/set_perms.c:695
 #: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1350
 #: plugins/sudoers/set_perms.c:1514 plugins/sudoers/sssd.c:160
 #: plugins/sudoers/sssd.c:192 plugins/sudoers/sssd.c:235
 #: plugins/sudoers/sssd.c:242 plugins/sudoers/sssd.c:278
-#: plugins/sudoers/sssd.c:323 plugins/sudoers/sssd.c:917
-#: plugins/sudoers/sssd.c:1050 plugins/sudoers/sudoers.c:159
+#: plugins/sudoers/sssd.c:323 plugins/sudoers/sssd.c:920
+#: plugins/sudoers/sssd.c:1053 plugins/sudoers/sudoers.c:159
 #: plugins/sudoers/sudoers.c:294 plugins/sudoers/sudoers.c:304
 #: plugins/sudoers/sudoers.c:312 plugins/sudoers/sudoers.c:365
 #: plugins/sudoers/sudoers.c:663 plugins/sudoers/sudoers.c:749
@@ -161,9 +161,9 @@ msgstr "зборник захтева назив путање"
 #: plugins/sudoers/timestamp.c:838 plugins/sudoers/toke_util.c:56
 #: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:147
 #: plugins/sudoers/visudo.c:152 plugins/sudoers/visudo.c:213
-#: plugins/sudoers/visudo.c:297 plugins/sudoers/visudo.c:303
-#: plugins/sudoers/visudo.c:433 plugins/sudoers/visudo.c:979
-#: plugins/sudoers/visudo.c:1023 plugins/sudoers/visudo.c:1119 toke.l:785
+#: plugins/sudoers/visudo.c:298 plugins/sudoers/visudo.c:304
+#: plugins/sudoers/visudo.c:434 plugins/sudoers/visudo.c:980
+#: plugins/sudoers/visudo.c:1024 plugins/sudoers/visudo.c:1120 toke.l:785
 #: toke.l:806 toke.l:816 toke.l:924 toke.l:1082
 #, c-format
 msgid "%s: %s"
@@ -200,7 +200,7 @@ msgid "unable to connect to authentication server"
 msgstr "не могу да се повежем на сервер потврђивања идентитета"
 
 #: plugins/sudoers/auth/fwtk.c:63 plugins/sudoers/auth/fwtk.c:87
-#: plugins/sudoers/auth/fwtk.c:120
+#: plugins/sudoers/auth/fwtk.c:121
 msgid "lost connection to authentication server"
 msgstr "изгубио сам везу са сервером потврђивања идентитета"
 
@@ -317,7 +317,7 @@ msgstr "неисправна ручка потврђивања идентите�
 msgid "SecurID communication failed"
 msgstr "Није успело комуницирање безбедног ИБ-а"
 
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:207
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:211
 msgid "unknown SecurID error"
 msgstr "непозната грешка безбедног ИБ-а"
 
@@ -325,7 +325,7 @@ msgstr "непозната грешка безбедног ИБ-а"
 msgid "invalid passcode length for SecurID"
 msgstr "неисправна дужина пропусне шифре за безбедни ИБ"
 
-#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
+#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:125
 msgid "unable to initialize SIA session"
 msgstr "не могу да покренем СИА сесију"
 
@@ -337,11 +337,11 @@ msgstr "неисправни начини потврђивања идентит�
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
 msgstr "Неисправни начини потврђивања идентитета су преведени у судоу!  Не можете мешати самостално и несамостално потврђивање идентитета."
 
-#: plugins/sudoers/auth/sudo_auth.c:225 plugins/sudoers/auth/sudo_auth.c:274
+#: plugins/sudoers/auth/sudo_auth.c:224 plugins/sudoers/auth/sudo_auth.c:274
 msgid "no authentication methods"
 msgstr "нема начина потврђивања идентитета"
 
-#: plugins/sudoers/auth/sudo_auth.c:227
+#: plugins/sudoers/auth/sudo_auth.c:226
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
 msgstr "Нема начина потврђивања идентитета преведених у судоу!  Ако желите да искључите потврђивање идентитета, користите „--disable-authentication“."
 
@@ -349,7 +349,7 @@ msgstr "Нема начина потврђивања идентитета пре
 msgid "Unable to initialize authentication methods."
 msgstr "Не могу да покренем методе потврђивања идентитета."
 
-#: plugins/sudoers/auth/sudo_auth.c:435
+#: plugins/sudoers/auth/sudo_auth.c:442
 msgid "Authentication methods:"
 msgstr "Начини потврђивања идентитета:"
 
@@ -387,7 +387,7 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr "непознат јиб: %u"
 
-#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:755
+#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:774
 #: plugins/sudoers/sudoers.c:1095 plugins/sudoers/testsudoers.c:206
 #: plugins/sudoers/testsudoers.c:361
 #, c-format
@@ -794,7 +794,7 @@ msgid "Enable sudoers netgroup support"
 msgstr "Укључује подршку нетгрупе судоерса"
 
 #: plugins/sudoers/def_data.c:391
-msgid "Check the parent directory for writability when editing files with sudoedit"
+msgid "Check parent directories for writability when editing files with sudoedit"
 msgstr "Проверава родитељски директоријум за уписивошћу када уређује датотеке са „sudoedit“"
 
 #: plugins/sudoers/def_data.c:395
@@ -805,7 +805,11 @@ msgstr "Прати симболичке везе када уређује дат�
 msgid "Query the group plugin for unknown system groups"
 msgstr "Пропитује прикључак групе за непознатим групама система"
 
-#: plugins/sudoers/defaults.c:199 plugins/sudoers/defaults.c:608
+#: plugins/sudoers/def_data.c:403
+msgid "Match netgroups based on the entire tuple: user, host and domain"
+msgstr "Упоређује мрежне групе на основу читавог слога: корисник, домаћин и домен"
+
+#: plugins/sudoers/defaults.c:199 plugins/sudoers/defaults.c:610
 #: plugins/sudoers/visudo_json.c:633 plugins/sudoers/visudo_json.c:668
 #, c-format
 msgid "unknown defaults entry `%s'"
@@ -839,53 +843,52 @@ msgstr "вредност за „%s“ мора да почиње /"
 msgid "option `%s' does not take a value"
 msgstr "опција „%s“ не узима вредност"
 
-#: plugins/sudoers/env.c:295 plugins/sudoers/env.c:302
-#: plugins/sudoers/env.c:407 plugins/sudoers/ldap.c:450
-#: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1152
-#: plugins/sudoers/ldap.c:1354 plugins/sudoers/ldap.c:1526
-#: plugins/sudoers/ldap.c:1682 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/logging.c:929 plugins/sudoers/policy.c:502
-#: plugins/sudoers/policy.c:511 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:815 plugins/sudoers/testsudoers.c:236
-#: plugins/sudoers/toke_util.c:160
+#: plugins/sudoers/env.c:296 plugins/sudoers/env.c:303
+#: plugins/sudoers/env.c:408 plugins/sudoers/ldap.c:450
+#: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1166
+#: plugins/sudoers/ldap.c:1388 plugins/sudoers/ldap.c:1704
+#: plugins/sudoers/linux_audit.c:82 plugins/sudoers/logging.c:929
+#: plugins/sudoers/policy.c:511 plugins/sudoers/policy.c:520
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:815
+#: plugins/sudoers/testsudoers.c:236 plugins/sudoers/toke_util.c:162
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "унутрашња грешка, прекорачење „%s“"
 
-#: plugins/sudoers/env.c:376
+#: plugins/sudoers/env.c:377
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: оштећено стави окружење, дужине не одговарају"
 
-#: plugins/sudoers/env.c:1076
+#: plugins/sudoers/env.c:1083
 msgid "unable to rebuild the environment"
 msgstr "не могу поново да изградим окружење"
 
-#: plugins/sudoers/env.c:1150
+#: plugins/sudoers/env.c:1157
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "извините, није вам дозвољено да подесите следеће променљиве окружења: %s"
 
-#: plugins/sudoers/group_plugin.c:85
+#: plugins/sudoers/group_plugin.c:86
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "„%s“ мора бити у власништву јиб-а %d"
 
-#: plugins/sudoers/group_plugin.c:89
+#: plugins/sudoers/group_plugin.c:90
 #, c-format
 msgid "%s must only be writable by owner"
 msgstr "Само корисник може да пише у „%s“"
 
-#: plugins/sudoers/group_plugin.c:97 plugins/sudoers/sssd.c:331
+#: plugins/sudoers/group_plugin.c:98 plugins/sudoers/sssd.c:331
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "не могу да учитам %s: %s"
 
-#: plugins/sudoers/group_plugin.c:103
+#: plugins/sudoers/group_plugin.c:104
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
 msgstr "не могу да нађем симбол „group_plugin“ у „%s“"
 
-#: plugins/sudoers/group_plugin.c:108
+#: plugins/sudoers/group_plugin.c:109
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
 msgstr "%s: несагласно веће издање прикључка групе %d, очекивано је %d"
@@ -910,7 +913,7 @@ msgstr "не могу да направим директоријум „%s“"
 #: plugins/sudoers/iolog.c:200 plugins/sudoers/sudoers.c:871
 #: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/sudoreplay.c:769
 #: plugins/sudoers/sudoreplay.c:973 plugins/sudoers/timestamp.c:399
-#: plugins/sudoers/visudo.c:903 plugins/sudoers/visudo_json.c:1012
+#: plugins/sudoers/visudo.c:904 plugins/sudoers/visudo_json.c:1012
 #: plugins/sudoers/visudo_json.c:1025
 #, c-format
 msgid "unable to open %s"
@@ -932,6 +935,11 @@ msgstr "не могу да пишем у „%s“"
 #, c-format
 msgid "unable to create %s"
 msgstr "не могу да направим „%s“"
+
+#: plugins/sudoers/iolog.c:723
+#, c-format
+msgid "%s: internal error, file index %d not open"
+msgstr "%s: унутрашња грешка, индекс датотеке %d није отворен"
 
 #: plugins/sudoers/ldap.c:428
 msgid "sudo_ldap_conf_add_ports: port too large"
@@ -960,20 +968,20 @@ msgstr "не могу да покренем ССЛ уверење и бп кљу
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "морате да подесите „TLS_CERT“ у „%s“ да користите ССЛ"
 
-#: plugins/sudoers/ldap.c:1138
+#: plugins/sudoers/ldap.c:1152
 msgid "unable to get GMT time"
 msgstr "не могу да добавим ГМТ време"
 
-#: plugins/sudoers/ldap.c:1144
+#: plugins/sudoers/ldap.c:1158
 msgid "unable to format timestamp"
 msgstr "не могу да обликујем временску ознаку"
 
-#: plugins/sudoers/ldap.c:1830
+#: plugins/sudoers/ldap.c:1853
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/ldap.c:2372
+#: plugins/sudoers/ldap.c:2394
 #, c-format
 msgid ""
 "\n"
@@ -982,7 +990,7 @@ msgstr ""
 "\n"
 "ЛДАП улога: %s\n"
 
-#: plugins/sudoers/ldap.c:2374
+#: plugins/sudoers/ldap.c:2396
 #, c-format
 msgid ""
 "\n"
@@ -991,27 +999,27 @@ msgstr ""
 "\n"
 "ЛДАП улога: НЕПОЗНАТО\n"
 
-#: plugins/sudoers/ldap.c:2421
+#: plugins/sudoers/ldap.c:2443
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Поредак: %s\n"
 
-#: plugins/sudoers/ldap.c:2429 plugins/sudoers/parse.c:555
-#: plugins/sudoers/sssd.c:1417
+#: plugins/sudoers/ldap.c:2451 plugins/sudoers/parse.c:555
+#: plugins/sudoers/sssd.c:1429
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Наредбе:\n"
 
-#: plugins/sudoers/ldap.c:2993
+#: plugins/sudoers/ldap.c:3015
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "не могу да покренем ЛДАП: %s"
 
-#: plugins/sudoers/ldap.c:3029
+#: plugins/sudoers/ldap.c:3051
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "„start_tls“ је наведено али ЛДАП библиотеке не подржавају „ldap_start_tls_s()“ или „ldap_start_tls_s_np()“"
 
-#: plugins/sudoers/ldap.c:3286
+#: plugins/sudoers/ldap.c:3305
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "неисправна особина „sudoOrder“: %s"
@@ -1141,17 +1149,17 @@ msgstr "не могу да удвостручим стандардни улаз:
 msgid "unable to execute %s: %m"
 msgstr "не могу да извршим „%s“: %m"
 
-#: plugins/sudoers/match.c:606
+#: plugins/sudoers/match.c:616
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "неподржана врста прихватања потврђивања иднтитета „%d“ за „%s“"
 
-#: plugins/sudoers/match.c:639
+#: plugins/sudoers/match.c:657
 #, c-format
 msgid "%s: read error"
 msgstr "%s: грешка читања"
 
-#: plugins/sudoers/match.c:653
+#: plugins/sudoers/match.c:692
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "приказ за %s (%s) није у %s облику"
@@ -1194,22 +1202,22 @@ msgstr "    Опције: "
 msgid "unable to parse network address list"
 msgstr "не могу да обрадим списак адреса мреже"
 
-#: plugins/sudoers/policy.c:640 plugins/sudoers/visudo.c:840
+#: plugins/sudoers/policy.c:659 plugins/sudoers/visudo.c:841
 #, c-format
 msgid "unable to execute %s"
 msgstr "не могу да извршим „%s“"
 
-#: plugins/sudoers/policy.c:773
+#: plugins/sudoers/policy.c:792
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Издање %s прикључка политике судоерса\n"
 
-#: plugins/sudoers/policy.c:775
+#: plugins/sudoers/policy.c:794
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Граматика датотеке судоерса издање %d\n"
 
-#: plugins/sudoers/policy.c:779
+#: plugins/sudoers/policy.c:798
 #, c-format
 msgid ""
 "\n"
@@ -1218,79 +1226,79 @@ msgstr ""
 "\n"
 "Путања судоерса: %s\n"
 
-#: plugins/sudoers/policy.c:782
+#: plugins/sudoers/policy.c:801
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "путања нс-прекидача: %s\n"
 
-#: plugins/sudoers/policy.c:784
+#: plugins/sudoers/policy.c:803
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "путања лдап.подешавања: %s\n"
 
-#: plugins/sudoers/policy.c:785
+#: plugins/sudoers/policy.c:804
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "путања лдап.тајне: %s\n"
 
-#: plugins/sudoers/policy.c:818
+#: plugins/sudoers/policy.c:837
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "немогу да региструјем прикачку врсте „%d“ (издање %d.%d)"
 
-#: plugins/sudoers/pwutil.c:136 plugins/sudoers/pwutil.c:153
+#: plugins/sudoers/pwutil.c:158 plugins/sudoers/pwutil.c:176
 #, c-format
 msgid "unable to cache uid %u, out of memory"
 msgstr "не могу да сместим у оставу јиб „%u“, нема више меморије"
 
-#: plugins/sudoers/pwutil.c:147
+#: plugins/sudoers/pwutil.c:170
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "не могу да сместим у оставу јиб „%u“, већ постоји"
 
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:207
-#: plugins/sudoers/pwutil.c:250 plugins/sudoers/pwutil.c:294
+#: plugins/sudoers/pwutil.c:222 plugins/sudoers/pwutil.c:239
+#: plugins/sudoers/pwutil.c:289 plugins/sudoers/pwutil.c:334
 #, c-format
 msgid "unable to cache user %s, out of memory"
 msgstr "не могу да сместим у оставу корисника „%s“, нема више меморије"
 
-#: plugins/sudoers/pwutil.c:202
+#: plugins/sudoers/pwutil.c:234
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "не могу да сместим у оставу корисника „%s“, већ постоји"
 
-#: plugins/sudoers/pwutil.c:427 plugins/sudoers/pwutil.c:444
+#: plugins/sudoers/pwutil.c:474 plugins/sudoers/pwutil.c:492
 #, c-format
 msgid "unable to cache gid %u, out of memory"
 msgstr "не могу да сместим у оставу гиб „%u“, нема више меморије"
 
-#: plugins/sudoers/pwutil.c:438
+#: plugins/sudoers/pwutil.c:486
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "не могу да сместим у оставу гиб „%u“, већ постоји"
 
-#: plugins/sudoers/pwutil.c:476 plugins/sudoers/pwutil.c:492
-#: plugins/sudoers/pwutil.c:524 plugins/sudoers/pwutil.c:565
+#: plugins/sudoers/pwutil.c:532 plugins/sudoers/pwutil.c:549
+#: plugins/sudoers/pwutil.c:584 plugins/sudoers/pwutil.c:626
 #, c-format
 msgid "unable to cache group %s, out of memory"
 msgstr "не могу да сместим у оставу групу „%s“, нема више меморије"
 
-#: plugins/sudoers/pwutil.c:487
+#: plugins/sudoers/pwutil.c:544
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "не могу да сместим у оставу групу „%s“, већ постоји"
 
-#: plugins/sudoers/pwutil.c:676 plugins/sudoers/pwutil.c:710
+#: plugins/sudoers/pwutil.c:739 plugins/sudoers/pwutil.c:783
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "не могу да сместим у оставу списак групе за „%s“, већ постоји"
 
-#: plugins/sudoers/pwutil.c:682 plugins/sudoers/pwutil.c:715
+#: plugins/sudoers/pwutil.c:745 plugins/sudoers/pwutil.c:788
 #, c-format
 msgid "unable to cache group list for %s, out of memory"
 msgstr "не могу да сместим у оставу списак групе за „%s“, нема више меморије"
 
-#: plugins/sudoers/pwutil.c:705
+#: plugins/sudoers/pwutil.c:777
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "не могу да обрадим групе за „%s“"
@@ -1390,7 +1398,7 @@ msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Корисник „%s“ нема права да покрене судо над „%s“.\n"
 
 #: plugins/sudoers/sudoers.c:172 plugins/sudoers/testsudoers.c:245
-#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:566
+#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:567
 msgid "unable to initialize sudoers default values"
 msgstr "не могу да покренем основне вредности судоерса"
 
@@ -1436,8 +1444,8 @@ msgstr "извините, није вам дозвољено да сачуват
 msgid "command too long"
 msgstr "наредба је предуга"
 
-#: plugins/sudoers/sudoers.c:886 plugins/sudoers/visudo.c:426
-#: plugins/sudoers/visudo.c:666
+#: plugins/sudoers/sudoers.c:886 plugins/sudoers/visudo.c:427
+#: plugins/sudoers/visudo.c:667
 #, c-format
 msgid "unable to stat %s"
 msgstr "не могу да добијем податке о „%s“"
@@ -1692,7 +1700,7 @@ msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "не могу да скратим датотеку временске ознаке на %lld бајта"
 
 #: plugins/sudoers/timestamp.c:742 plugins/sudoers/timestamp.c:809
-#: plugins/sudoers/visudo.c:487 plugins/sudoers/visudo.c:493
+#: plugins/sudoers/visudo.c:488 plugins/sudoers/visudo.c:494
 msgid "unable to read the clock"
 msgstr "не могу да прочитам сат"
 
@@ -1720,90 +1728,90 @@ msgstr "путања стања обучавања је предуга: %s/%s"
 msgid "%s grammar version %d\n"
 msgstr "%s граматика издање %d\n"
 
-#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:618
+#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:619
 #, c-format
 msgid "press return to edit %s: "
 msgstr "притисните „унеси“ да уредите „%s“: "
 
-#: plugins/sudoers/visudo.c:319
+#: plugins/sudoers/visudo.c:320
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "наведени уређивач (%s) не постоји"
 
-#: plugins/sudoers/visudo.c:337
+#: plugins/sudoers/visudo.c:338
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "нисам пронашао уређивача (путања уређивача = %s)"
 
-#: plugins/sudoers/visudo.c:446 plugins/sudoers/visudo.c:454
+#: plugins/sudoers/visudo.c:447 plugins/sudoers/visudo.c:455
 msgid "write error"
 msgstr "грешка писања"
 
-#: plugins/sudoers/visudo.c:500
+#: plugins/sudoers/visudo.c:501
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "не могу да добавим податке привремене датотеке (%s), %s је неизмењено"
 
-#: plugins/sudoers/visudo.c:507
+#: plugins/sudoers/visudo.c:508
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "привремена датотека нулте дужине (%s), %s је неизмењено"
 
-#: plugins/sudoers/visudo.c:513
+#: plugins/sudoers/visudo.c:514
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "уређивач (%s) није успео, %s је неизмењено"
 
-#: plugins/sudoers/visudo.c:535
+#: plugins/sudoers/visudo.c:536
 #, c-format
 msgid "%s unchanged"
 msgstr "„%s“ је неизмењено"
 
-#: plugins/sudoers/visudo.c:561
+#: plugins/sudoers/visudo.c:562
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "не могу поново да отворим привремену датотеку (%s), %s је неизмењено."
 
-#: plugins/sudoers/visudo.c:572
+#: plugins/sudoers/visudo.c:573
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "не могу да обрадим привремену датотеку (%s), непозната грешка"
 
-#: plugins/sudoers/visudo.c:609
+#: plugins/sudoers/visudo.c:610
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "унутрашња грешка, не могу да пронађем „%s“ на списку!"
 
-#: plugins/sudoers/visudo.c:668 plugins/sudoers/visudo.c:677
+#: plugins/sudoers/visudo.c:669 plugins/sudoers/visudo.c:678
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "не могу да подесим (јиб, гиб) за %s на (%u, %u)"
 
-#: plugins/sudoers/visudo.c:672 plugins/sudoers/visudo.c:682
+#: plugins/sudoers/visudo.c:673 plugins/sudoers/visudo.c:683
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "не могу да променим режим „%s“ на 0%o"
 
-#: plugins/sudoers/visudo.c:699
+#: plugins/sudoers/visudo.c:700
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "„%s“ и „%s“ нису на истом систему датотека, користим „mv“ за преименовање"
 
-#: plugins/sudoers/visudo.c:713
+#: plugins/sudoers/visudo.c:714
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "наредба није успела: „%s %s %s“, %s је неизмењено"
 
-#: plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:724
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "грешка преименовања „%s“, %s је неизмењено"
 
-#: plugins/sudoers/visudo.c:785
+#: plugins/sudoers/visudo.c:786
 msgid "What now? "
 msgstr "Шта сада?"
 
-#: plugins/sudoers/visudo.c:799
+#: plugins/sudoers/visudo.c:800
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1815,72 +1823,72 @@ msgstr ""
 "  x — излази без чувања измена у датотеци судоерса\n"
 "  Q — прекида и чува измене у датотеци судоерса (ОПАСНО!)\n"
 
-#: plugins/sudoers/visudo.c:847
+#: plugins/sudoers/visudo.c:848
 #, c-format
 msgid "unable to run %s"
 msgstr "не могу да покренем %s"
 
-#: plugins/sudoers/visudo.c:877
+#: plugins/sudoers/visudo.c:878
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: погрешан власник (јиб, гиб) треба бити (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:884
+#: plugins/sudoers/visudo.c:885
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: лоша овлашћења, требају бити у режиму 0%o\n"
 
-#: plugins/sudoers/visudo.c:909 plugins/sudoers/visudo_json.c:1032
+#: plugins/sudoers/visudo.c:910 plugins/sudoers/visudo_json.c:1032
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "нисам успео да обрадим %s датотеку, непозната грешка"
 
-#: plugins/sudoers/visudo.c:925 plugins/sudoers/visudo_json.c:1041
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo_json.c:1041
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "грешка обраде у %s близу реда %d\n"
 
-#: plugins/sudoers/visudo.c:928 plugins/sudoers/visudo_json.c:1044
+#: plugins/sudoers/visudo.c:929 plugins/sudoers/visudo_json.c:1044
 #, c-format
 msgid "parse error in %s\n"
 msgstr "грешка обраде у %s\n"
 
-#: plugins/sudoers/visudo.c:936 plugins/sudoers/visudo.c:943
+#: plugins/sudoers/visudo.c:937 plugins/sudoers/visudo.c:944
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: успешно је обрађено\n"
 
-#: plugins/sudoers/visudo.c:990
+#: plugins/sudoers/visudo.c:991
 #, c-format
 msgid "%s busy, try again later"
 msgstr "„%s“ је заузет, покушајте касније"
 
-#: plugins/sudoers/visudo.c:1086
+#: plugins/sudoers/visudo.c:1087
 #, c-format
 msgid "Error: cycle in %s `%s'"
 msgstr "Грешка: циклус у „%s“ „%s“"
 
-#: plugins/sudoers/visudo.c:1087
+#: plugins/sudoers/visudo.c:1088
 #, c-format
 msgid "Warning: cycle in %s `%s'"
 msgstr "Упозорење: циклус у „%s“ „%s“"
 
-#: plugins/sudoers/visudo.c:1091
+#: plugins/sudoers/visudo.c:1092
 #, c-format
 msgid "Error: %s `%s' referenced but not defined"
 msgstr "Грешка: упута за „%s“ „%s“ постоји али није одређена"
 
-#: plugins/sudoers/visudo.c:1092
+#: plugins/sudoers/visudo.c:1093
 #, c-format
 msgid "Warning: %s `%s' referenced but not defined"
 msgstr "Упозорење: упута за „%s“ „%s“ постоји али није одређена"
 
-#: plugins/sudoers/visudo.c:1235
+#: plugins/sudoers/visudo.c:1236
 #, c-format
 msgid "Warning: unused %s `%s'"
 msgstr "Упозорење: некоришћено „%s“ „%s“"
 
-#: plugins/sudoers/visudo.c:1348
+#: plugins/sudoers/visudo.c:1349
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1889,7 +1897,7 @@ msgstr ""
 "%s — безбедно уређује датотеку судоерса\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1350
+#: plugins/sudoers/visudo.c:1351
 msgid ""
 "\n"
 "Options:\n"

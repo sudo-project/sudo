@@ -1,13 +1,13 @@
 # Japanese messages for sudoers
 # This file is put in the public domain.
 # Yasuaki Taniguchi <yasuakit@gmail.com>, 2011.
-# Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>, 2012, 2015.
+# Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>, 2012, 2015, 2016.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.15rc3\n"
-"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-10-24 06:26-0600\n"
-"PO-Revision-Date: 2015-10-26 23:35+0900\n"
+"Project-Id-Version: sudoers 1.8.16b1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2016-02-19 15:48-0700\n"
+"PO-Revision-Date: 2016-03-03 19:39+0900\n"
 "Last-Translator: Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -15,9 +15,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Poedit-Basepath: /factory/ja-po/sudo/sudo-1.8.13b3\n"
-"X-Generator: Poedit 1.8.5\n"
-"X-Poedit-SearchPath-0: /factory/ja-po/sudo/sudo-1.8.13b3\n"
+"X-Poedit-Basepath: sudo-1.8.16b1\n"
+"X-Generator: Poedit 1.8.7\n"
+"X-Poedit-SearchPath-0: .\n"
 
 #: confstr.sh:1
 msgid "syntax error"
@@ -53,37 +53,37 @@ msgstr "残念、また試してください。"
 #: gram.y:1143 plugins/sudoers/alias.c:123 plugins/sudoers/alias.c:136
 #: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
 #: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:398
-#: plugins/sudoers/auth/pam.c:449 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/defaults.c:516
-#: plugins/sudoers/defaults.c:720 plugins/sudoers/defaults.c:880
-#: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
-#: plugins/sudoers/editor.c:92 plugins/sudoers/env.c:233
-#: plugins/sudoers/group_plugin.c:133 plugins/sudoers/iolog.c:586
+#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/auth/sia.c:59
+#: plugins/sudoers/defaults.c:518 plugins/sudoers/defaults.c:722
+#: plugins/sudoers/defaults.c:882 plugins/sudoers/editor.c:64
+#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:92
+#: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
+#: plugins/sudoers/group_plugin.c:134 plugins/sudoers/iolog.c:586
 #: plugins/sudoers/iolog.c:618 plugins/sudoers/iolog_path.c:167
 #: plugins/sudoers/ldap.c:446 plugins/sudoers/ldap.c:477
 #: plugins/sudoers/ldap.c:529 plugins/sudoers/ldap.c:562
-#: plugins/sudoers/ldap.c:914 plugins/sudoers/ldap.c:1061
-#: plugins/sudoers/ldap.c:1348 plugins/sudoers/ldap.c:1521
-#: plugins/sudoers/ldap.c:1597 plugins/sudoers/ldap.c:1733
-#: plugins/sudoers/ldap.c:1757 plugins/sudoers/ldap.c:1787
-#: plugins/sudoers/ldap.c:1840 plugins/sudoers/ldap.c:1855
-#: plugins/sudoers/ldap.c:1951 plugins/sudoers/ldap.c:1984
-#: plugins/sudoers/ldap.c:2137 plugins/sudoers/ldap.c:2234
-#: plugins/sudoers/ldap.c:3041 plugins/sudoers/ldap.c:3074
-#: plugins/sudoers/ldap.c:3388 plugins/sudoers/ldap.c:3416
-#: plugins/sudoers/ldap.c:3427 plugins/sudoers/ldap.c:3517
-#: plugins/sudoers/ldap.c:3533 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:917 plugins/sudoers/ldap.c:1064
+#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1542
+#: plugins/sudoers/ldap.c:1620 plugins/sudoers/ldap.c:1756
+#: plugins/sudoers/ldap.c:1780 plugins/sudoers/ldap.c:1810
+#: plugins/sudoers/ldap.c:1863 plugins/sudoers/ldap.c:1878
+#: plugins/sudoers/ldap.c:1974 plugins/sudoers/ldap.c:2007
+#: plugins/sudoers/ldap.c:2160 plugins/sudoers/ldap.c:2257
+#: plugins/sudoers/ldap.c:3063 plugins/sudoers/ldap.c:3096
+#: plugins/sudoers/ldap.c:3407 plugins/sudoers/ldap.c:3435
+#: plugins/sudoers/ldap.c:3451 plugins/sudoers/ldap.c:3540
+#: plugins/sudoers/ldap.c:3556 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:666
-#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:501
-#: plugins/sudoers/match.c:537 plugins/sudoers/match.c:699
-#: plugins/sudoers/match.c:756 plugins/sudoers/parse.c:235
+#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:508
+#: plugins/sudoers/match.c:544 plugins/sudoers/match.c:742
+#: plugins/sudoers/match.c:799 plugins/sudoers/parse.c:235
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
-#: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:384
-#: plugins/sudoers/policy.c:583 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:393
+#: plugins/sudoers/policy.c:602 plugins/sudoers/prompt.c:93
 #: plugins/sudoers/sssd.c:160 plugins/sudoers/sssd.c:192
 #: plugins/sudoers/sssd.c:235 plugins/sudoers/sssd.c:242
 #: plugins/sudoers/sssd.c:278 plugins/sudoers/sssd.c:323
-#: plugins/sudoers/sssd.c:917 plugins/sudoers/sssd.c:1050
+#: plugins/sudoers/sssd.c:920 plugins/sudoers/sssd.c:1053
 #: plugins/sudoers/sudoers.c:159 plugins/sudoers/sudoers.c:294
 #: plugins/sudoers/sudoers.c:304 plugins/sudoers/sudoers.c:312
 #: plugins/sudoers/sudoers.c:365 plugins/sudoers/sudoers.c:663
@@ -99,10 +99,10 @@ msgstr "残念、また試してください。"
 #: plugins/sudoers/timestamp.c:426 plugins/sudoers/timestamp.c:838
 #: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
 #: plugins/sudoers/toke_util.c:147 plugins/sudoers/visudo.c:152
-#: plugins/sudoers/visudo.c:213 plugins/sudoers/visudo.c:297
-#: plugins/sudoers/visudo.c:303 plugins/sudoers/visudo.c:433
-#: plugins/sudoers/visudo.c:979 plugins/sudoers/visudo.c:1023
-#: plugins/sudoers/visudo.c:1119 toke.l:785 toke.l:806 toke.l:816 toke.l:924
+#: plugins/sudoers/visudo.c:213 plugins/sudoers/visudo.c:298
+#: plugins/sudoers/visudo.c:304 plugins/sudoers/visudo.c:434
+#: plugins/sudoers/visudo.c:980 plugins/sudoers/visudo.c:1024
+#: plugins/sudoers/visudo.c:1120 toke.l:785 toke.l:806 toke.l:816 toke.l:924
 #: toke.l:1082
 msgid "unable to allocate memory"
 msgstr "メモリ割り当てを行えませんでした"
@@ -112,44 +112,44 @@ msgid "a digest requires a path name"
 msgstr "認証方式にはパスが必要です"
 
 #: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:398
-#: plugins/sudoers/auth/pam.c:449 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/defaults.c:516 plugins/sudoers/defaults.c:720
-#: plugins/sudoers/defaults.c:880 plugins/sudoers/editor.c:64
-#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:92
-#: plugins/sudoers/env.c:233 plugins/sudoers/group_plugin.c:133
+#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/defaults.c:518
+#: plugins/sudoers/defaults.c:722 plugins/sudoers/defaults.c:882
+#: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
+#: plugins/sudoers/editor.c:92 plugins/sudoers/env.c:234
+#: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:134
 #: plugins/sudoers/iolog.c:586 plugins/sudoers/iolog.c:618
 #: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:446
 #: plugins/sudoers/ldap.c:477 plugins/sudoers/ldap.c:529
-#: plugins/sudoers/ldap.c:562 plugins/sudoers/ldap.c:914
-#: plugins/sudoers/ldap.c:1061 plugins/sudoers/ldap.c:1348
-#: plugins/sudoers/ldap.c:1521 plugins/sudoers/ldap.c:1597
-#: plugins/sudoers/ldap.c:1733 plugins/sudoers/ldap.c:1757
-#: plugins/sudoers/ldap.c:1787 plugins/sudoers/ldap.c:1840
-#: plugins/sudoers/ldap.c:1855 plugins/sudoers/ldap.c:1951
-#: plugins/sudoers/ldap.c:1984 plugins/sudoers/ldap.c:2137
-#: plugins/sudoers/ldap.c:2234 plugins/sudoers/ldap.c:3041
-#: plugins/sudoers/ldap.c:3074 plugins/sudoers/ldap.c:3388
-#: plugins/sudoers/ldap.c:3416 plugins/sudoers/ldap.c:3427
-#: plugins/sudoers/ldap.c:3517 plugins/sudoers/ldap.c:3533
+#: plugins/sudoers/ldap.c:562 plugins/sudoers/ldap.c:917
+#: plugins/sudoers/ldap.c:1064 plugins/sudoers/ldap.c:1384
+#: plugins/sudoers/ldap.c:1542 plugins/sudoers/ldap.c:1620
+#: plugins/sudoers/ldap.c:1756 plugins/sudoers/ldap.c:1780
+#: plugins/sudoers/ldap.c:1810 plugins/sudoers/ldap.c:1863
+#: plugins/sudoers/ldap.c:1878 plugins/sudoers/ldap.c:1974
+#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2160
+#: plugins/sudoers/ldap.c:2257 plugins/sudoers/ldap.c:3063
+#: plugins/sudoers/ldap.c:3096 plugins/sudoers/ldap.c:3407
+#: plugins/sudoers/ldap.c:3434 plugins/sudoers/ldap.c:3450
+#: plugins/sudoers/ldap.c:3540 plugins/sudoers/ldap.c:3556
 #: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:188
-#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:501
-#: plugins/sudoers/match.c:537 plugins/sudoers/match.c:699
-#: plugins/sudoers/match.c:756 plugins/sudoers/parse.c:235
+#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:508
+#: plugins/sudoers/match.c:544 plugins/sudoers/match.c:742
+#: plugins/sudoers/match.c:799 plugins/sudoers/parse.c:235
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
 #: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:97
 #: plugins/sudoers/policy.c:106 plugins/sudoers/policy.c:115
 #: plugins/sudoers/policy.c:139 plugins/sudoers/policy.c:250
-#: plugins/sudoers/policy.c:271 plugins/sudoers/policy.c:280
-#: plugins/sudoers/policy.c:319 plugins/sudoers/policy.c:329
-#: plugins/sudoers/policy.c:338 plugins/sudoers/policy.c:384
-#: plugins/sudoers/policy.c:583 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/policy.c:277 plugins/sudoers/policy.c:286
+#: plugins/sudoers/policy.c:325 plugins/sudoers/policy.c:335
+#: plugins/sudoers/policy.c:344 plugins/sudoers/policy.c:393
+#: plugins/sudoers/policy.c:602 plugins/sudoers/prompt.c:93
 #: plugins/sudoers/set_perms.c:356 plugins/sudoers/set_perms.c:695
 #: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1350
 #: plugins/sudoers/set_perms.c:1514 plugins/sudoers/sssd.c:160
 #: plugins/sudoers/sssd.c:192 plugins/sudoers/sssd.c:235
 #: plugins/sudoers/sssd.c:242 plugins/sudoers/sssd.c:278
-#: plugins/sudoers/sssd.c:323 plugins/sudoers/sssd.c:917
-#: plugins/sudoers/sssd.c:1050 plugins/sudoers/sudoers.c:159
+#: plugins/sudoers/sssd.c:323 plugins/sudoers/sssd.c:920
+#: plugins/sudoers/sssd.c:1053 plugins/sudoers/sudoers.c:159
 #: plugins/sudoers/sudoers.c:294 plugins/sudoers/sudoers.c:304
 #: plugins/sudoers/sudoers.c:312 plugins/sudoers/sudoers.c:365
 #: plugins/sudoers/sudoers.c:663 plugins/sudoers/sudoers.c:749
@@ -165,9 +165,9 @@ msgstr "認証方式にはパスが必要です"
 #: plugins/sudoers/timestamp.c:838 plugins/sudoers/toke_util.c:56
 #: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:147
 #: plugins/sudoers/visudo.c:152 plugins/sudoers/visudo.c:213
-#: plugins/sudoers/visudo.c:297 plugins/sudoers/visudo.c:303
-#: plugins/sudoers/visudo.c:433 plugins/sudoers/visudo.c:979
-#: plugins/sudoers/visudo.c:1023 plugins/sudoers/visudo.c:1119 toke.l:785
+#: plugins/sudoers/visudo.c:298 plugins/sudoers/visudo.c:304
+#: plugins/sudoers/visudo.c:434 plugins/sudoers/visudo.c:980
+#: plugins/sudoers/visudo.c:1024 plugins/sudoers/visudo.c:1120 toke.l:785
 #: toke.l:806 toke.l:816 toke.l:924 toke.l:1082
 #, c-format
 msgid "%s: %s"
@@ -204,7 +204,7 @@ msgid "unable to connect to authentication server"
 msgstr "認証サーバーに接続できません"
 
 #: plugins/sudoers/auth/fwtk.c:63 plugins/sudoers/auth/fwtk.c:87
-#: plugins/sudoers/auth/fwtk.c:120
+#: plugins/sudoers/auth/fwtk.c:121
 msgid "lost connection to authentication server"
 msgstr "認証サーバーへの接続が失われました"
 
@@ -321,7 +321,7 @@ msgstr "SecurID 用の認証ハンドルが無効です"
 msgid "SecurID communication failed"
 msgstr "SecurID 通信に失敗しました"
 
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:207
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:211
 msgid "unknown SecurID error"
 msgstr "不明な SecurID エラーです"
 
@@ -329,7 +329,7 @@ msgstr "不明な SecurID エラーです"
 msgid "invalid passcode length for SecurID"
 msgstr "SecurID 用のパスコード長が無効です"
 
-#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
+#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:125
 msgid "unable to initialize SIA session"
 msgstr "SIA セッションを初期化できません"
 
@@ -341,11 +341,11 @@ msgstr "無効な認証方法"
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
 msgstr "無効な認証方法が sudo のコンパイル時に組み込まれています!  スタンドアローンと非スタンドアローン認証を混在させてはいけません。"
 
-#: plugins/sudoers/auth/sudo_auth.c:225 plugins/sudoers/auth/sudo_auth.c:274
+#: plugins/sudoers/auth/sudo_auth.c:224 plugins/sudoers/auth/sudo_auth.c:274
 msgid "no authentication methods"
 msgstr "認証方法がありません"
 
-#: plugins/sudoers/auth/sudo_auth.c:227
+#: plugins/sudoers/auth/sudo_auth.c:226
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
 msgstr "認証方法が sudo のコンパイル時に組み込まれていません!  認証を無効にする場合には、configure オプションで --disable-authentication を指定してください。"
 
@@ -353,7 +353,7 @@ msgstr "認証方法が sudo のコンパイル時に組み込まれていませ
 msgid "Unable to initialize authentication methods."
 msgstr "認証方法を初期化できません。"
 
-#: plugins/sudoers/auth/sudo_auth.c:435
+#: plugins/sudoers/auth/sudo_auth.c:442
 msgid "Authentication methods:"
 msgstr "認証方法:"
 
@@ -391,7 +391,7 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr "不明なユーザーID (uid) です: %u"
 
-#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:755
+#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:774
 #: plugins/sudoers/sudoers.c:1095 plugins/sudoers/testsudoers.c:206
 #: plugins/sudoers/testsudoers.c:361
 #, c-format
@@ -799,7 +799,7 @@ msgid "Enable sudoers netgroup support"
 msgstr "sudoers のネットグループサポートを有効にする"
 
 #: plugins/sudoers/def_data.c:391
-msgid "Check the parent directory for writability when editing files with sudoedit"
+msgid "Check parent directories for writability when editing files with sudoedit"
 msgstr "ファイルを sudoedit で編集するときに親ディレクトリが書き込み可能か確かめる"
 
 #: plugins/sudoers/def_data.c:395
@@ -810,7 +810,11 @@ msgstr "ファイルを sudoedit で編集するときにシンボリックリ�
 msgid "Query the group plugin for unknown system groups"
 msgstr "不明なシステムグループについて、グループプラグインに問い合わせる"
 
-#: plugins/sudoers/defaults.c:199 plugins/sudoers/defaults.c:608
+#: plugins/sudoers/def_data.c:403
+msgid "Match netgroups based on the entire tuple: user, host and domain"
+msgstr "ネットグループについて、すべてのタプル（ユーザー、ホスト、ドメイン）を基に判定する"
+
+#: plugins/sudoers/defaults.c:199 plugins/sudoers/defaults.c:610
 #: plugins/sudoers/visudo_json.c:633 plugins/sudoers/visudo_json.c:668
 #, c-format
 msgid "unknown defaults entry `%s'"
@@ -844,53 +848,52 @@ msgstr "`%s' の値は '/' で開始しなければいけません"
 msgid "option `%s' does not take a value"
 msgstr "オプション `%s' は値をとりません"
 
-#: plugins/sudoers/env.c:295 plugins/sudoers/env.c:302
-#: plugins/sudoers/env.c:407 plugins/sudoers/ldap.c:450
-#: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1152
-#: plugins/sudoers/ldap.c:1354 plugins/sudoers/ldap.c:1526
-#: plugins/sudoers/ldap.c:1682 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/logging.c:929 plugins/sudoers/policy.c:502
-#: plugins/sudoers/policy.c:511 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:815 plugins/sudoers/testsudoers.c:236
-#: plugins/sudoers/toke_util.c:160
+#: plugins/sudoers/env.c:296 plugins/sudoers/env.c:303
+#: plugins/sudoers/env.c:408 plugins/sudoers/ldap.c:450
+#: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1166
+#: plugins/sudoers/ldap.c:1388 plugins/sudoers/ldap.c:1704
+#: plugins/sudoers/linux_audit.c:82 plugins/sudoers/logging.c:929
+#: plugins/sudoers/policy.c:511 plugins/sudoers/policy.c:520
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:815
+#: plugins/sudoers/testsudoers.c:236 plugins/sudoers/toke_util.c:162
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "内部エラー、%s がオーバーフローしました"
 
-#: plugins/sudoers/env.c:376
+#: plugins/sudoers/env.c:377
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp が破損しています。長さが合いません"
 
-#: plugins/sudoers/env.c:1076
+#: plugins/sudoers/env.c:1083
 msgid "unable to rebuild the environment"
 msgstr "環境を再構築できません"
 
-#: plugins/sudoers/env.c:1150
+#: plugins/sudoers/env.c:1157
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "すみませんが、あなたは次の環境変数を設定することを許可されていません: %s"
 
-#: plugins/sudoers/group_plugin.c:85
+#: plugins/sudoers/group_plugin.c:86
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s の所有者は uid %d でなければいけません"
 
-#: plugins/sudoers/group_plugin.c:89
+#: plugins/sudoers/group_plugin.c:90
 #, c-format
 msgid "%s must only be writable by owner"
 msgstr "%s は所有者のみ書き込み可能でなければいけません"
 
-#: plugins/sudoers/group_plugin.c:97 plugins/sudoers/sssd.c:331
+#: plugins/sudoers/group_plugin.c:98 plugins/sudoers/sssd.c:331
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "%s をロードできません: %su"
 
-#: plugins/sudoers/group_plugin.c:103
+#: plugins/sudoers/group_plugin.c:104
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
 msgstr "%s 内にシンボル \"group_plugin\" がありません"
 
-#: plugins/sudoers/group_plugin.c:108
+#: plugins/sudoers/group_plugin.c:109
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
 msgstr "%s: 互換性のないグループプラグインメジャーバージョン %d です。予期されるのは %d です"
@@ -915,7 +918,7 @@ msgstr "ディレクトリ %s を作成できません"
 #: plugins/sudoers/iolog.c:200 plugins/sudoers/sudoers.c:871
 #: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/sudoreplay.c:769
 #: plugins/sudoers/sudoreplay.c:973 plugins/sudoers/timestamp.c:399
-#: plugins/sudoers/visudo.c:903 plugins/sudoers/visudo_json.c:1012
+#: plugins/sudoers/visudo.c:904 plugins/sudoers/visudo_json.c:1012
 #: plugins/sudoers/visudo_json.c:1025
 #, c-format
 msgid "unable to open %s"
@@ -937,6 +940,11 @@ msgstr "%s へ書き込むことができません"
 #, c-format
 msgid "unable to create %s"
 msgstr "%s を作成できません"
+
+#: plugins/sudoers/iolog.c:723
+#, c-format
+msgid "%s: internal error, file index %d not open"
+msgstr "%s: 内部エラー、インデックス %d のファイルを開くことができません"
 
 #: plugins/sudoers/ldap.c:428
 msgid "sudo_ldap_conf_add_ports: port too large"
@@ -965,20 +973,20 @@ msgstr "SSL 証明書と鍵データベースを初期化できません: %s"
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "SSL を使用するためには %s の中の TLS_CERT を設定する必要があります"
 
-#: plugins/sudoers/ldap.c:1138
+#: plugins/sudoers/ldap.c:1152
 msgid "unable to get GMT time"
 msgstr "GMT 時刻を取得できません"
 
-#: plugins/sudoers/ldap.c:1144
+#: plugins/sudoers/ldap.c:1158
 msgid "unable to format timestamp"
 msgstr "タイムスタンプを書式整形できません"
 
-#: plugins/sudoers/ldap.c:1830
+#: plugins/sudoers/ldap.c:1853
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/ldap.c:2372
+#: plugins/sudoers/ldap.c:2394
 #, c-format
 msgid ""
 "\n"
@@ -987,7 +995,7 @@ msgstr ""
 "\n"
 "LDAP 役割: %s\n"
 
-#: plugins/sudoers/ldap.c:2374
+#: plugins/sudoers/ldap.c:2396
 #, c-format
 msgid ""
 "\n"
@@ -996,27 +1004,27 @@ msgstr ""
 "\n"
 "LDAP 役割: 不明\n"
 
-#: plugins/sudoers/ldap.c:2421
+#: plugins/sudoers/ldap.c:2443
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Order: %s\n"
 
-#: plugins/sudoers/ldap.c:2429 plugins/sudoers/parse.c:555
-#: plugins/sudoers/sssd.c:1417
+#: plugins/sudoers/ldap.c:2451 plugins/sudoers/parse.c:555
+#: plugins/sudoers/sssd.c:1429
 #, c-format
 msgid "    Commands:\n"
 msgstr "    コマンド:\n"
 
-#: plugins/sudoers/ldap.c:2993
+#: plugins/sudoers/ldap.c:3015
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "LDAP を初期化できません: %s"
 
-#: plugins/sudoers/ldap.c:3029
+#: plugins/sudoers/ldap.c:3051
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls が指定されていますが、LDAP ライブラリが ldap_start_tls_s() または ldap_start_tls_s_np() をサポートしていません"
 
-#: plugins/sudoers/ldap.c:3286
+#: plugins/sudoers/ldap.c:3305
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "無効な sudoOrder 属性です: %s"
@@ -1144,17 +1152,17 @@ msgstr "標準入力を複製できません: %m"
 msgid "unable to execute %s: %m"
 msgstr "%s を実行できません: %m"
 
-#: plugins/sudoers/match.c:606
+#: plugins/sudoers/match.c:616
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "サポートされてない 認証方式 %d です: %s"
 
-#: plugins/sudoers/match.c:639
+#: plugins/sudoers/match.c:657
 #, c-format
 msgid "%s: read error"
 msgstr "%s: 読み込みエラー"
 
-#: plugins/sudoers/match.c:653
+#: plugins/sudoers/match.c:692
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "%s (%s) の認証方式は %s 形式ではありません"
@@ -1197,22 +1205,22 @@ msgstr "    オプション: "
 msgid "unable to parse network address list"
 msgstr "ネットワークのアドレスリストを解析できません"
 
-#: plugins/sudoers/policy.c:640 plugins/sudoers/visudo.c:840
+#: plugins/sudoers/policy.c:659 plugins/sudoers/visudo.c:841
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s を実行できません"
 
-#: plugins/sudoers/policy.c:773
+#: plugins/sudoers/policy.c:792
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "sudoers ポリシープラグイン  バージョン %s\n"
 
-#: plugins/sudoers/policy.c:775
+#: plugins/sudoers/policy.c:794
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "sudoers ファイル文法バージョン %d\n"
 
-#: plugins/sudoers/policy.c:779
+#: plugins/sudoers/policy.c:798
 #, c-format
 msgid ""
 "\n"
@@ -1221,79 +1229,79 @@ msgstr ""
 "\n"
 "sudoers のパス: %s\n"
 
-#: plugins/sudoers/policy.c:782
+#: plugins/sudoers/policy.c:801
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "nsswitch のパス: %s\n"
 
-#: plugins/sudoers/policy.c:784
+#: plugins/sudoers/policy.c:803
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "ldap.conf のパス: %s\n"
 
-#: plugins/sudoers/policy.c:785
+#: plugins/sudoers/policy.c:804
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "ldap.secret のパス: %s\n"
 
-#: plugins/sudoers/policy.c:818
+#: plugins/sudoers/policy.c:837
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "タイプ %d のフックを登録できません (バージョン %d.%d)"
 
-#: plugins/sudoers/pwutil.c:136 plugins/sudoers/pwutil.c:153
+#: plugins/sudoers/pwutil.c:158 plugins/sudoers/pwutil.c:176
 #, c-format
 msgid "unable to cache uid %u, out of memory"
 msgstr "ユーザーID %u をキャッシュできません。メモリ不足です。"
 
-#: plugins/sudoers/pwutil.c:147
+#: plugins/sudoers/pwutil.c:170
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "ユーザーID %u をキャッシュできません。すでに存在します"
 
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:207
-#: plugins/sudoers/pwutil.c:250 plugins/sudoers/pwutil.c:294
+#: plugins/sudoers/pwutil.c:222 plugins/sudoers/pwutil.c:239
+#: plugins/sudoers/pwutil.c:289 plugins/sudoers/pwutil.c:334
 #, c-format
 msgid "unable to cache user %s, out of memory"
 msgstr "ユーザー %s をキャッシュできません。メモリ不足です。"
 
-#: plugins/sudoers/pwutil.c:202
+#: plugins/sudoers/pwutil.c:234
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "ユーザー %s をキャッシュできません。すでに存在します"
 
-#: plugins/sudoers/pwutil.c:427 plugins/sudoers/pwutil.c:444
+#: plugins/sudoers/pwutil.c:474 plugins/sudoers/pwutil.c:492
 #, c-format
 msgid "unable to cache gid %u, out of memory"
 msgstr "グループID %u をキャッシュできません。メモリ不足です。"
 
-#: plugins/sudoers/pwutil.c:438
+#: plugins/sudoers/pwutil.c:486
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "グループID %u をキャッシュできません。すでに存在します"
 
-#: plugins/sudoers/pwutil.c:476 plugins/sudoers/pwutil.c:492
-#: plugins/sudoers/pwutil.c:524 plugins/sudoers/pwutil.c:565
+#: plugins/sudoers/pwutil.c:532 plugins/sudoers/pwutil.c:549
+#: plugins/sudoers/pwutil.c:584 plugins/sudoers/pwutil.c:626
 #, c-format
 msgid "unable to cache group %s, out of memory"
 msgstr "グループ %s をキャッシュできません。メモリ不足です。"
 
-#: plugins/sudoers/pwutil.c:487
+#: plugins/sudoers/pwutil.c:544
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "グループ %s をキャッシュできません。すでに存在します"
 
-#: plugins/sudoers/pwutil.c:676 plugins/sudoers/pwutil.c:710
+#: plugins/sudoers/pwutil.c:739 plugins/sudoers/pwutil.c:783
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "グループリスト %s をキャッシュできません。すでに存在します"
 
-#: plugins/sudoers/pwutil.c:682 plugins/sudoers/pwutil.c:715
+#: plugins/sudoers/pwutil.c:745 plugins/sudoers/pwutil.c:788
 #, c-format
 msgid "unable to cache group list for %s, out of memory"
 msgstr "グループリスト %s をキャッシュできません。メモリ不足です。"
 
-#: plugins/sudoers/pwutil.c:705
+#: plugins/sudoers/pwutil.c:777
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "%s のグループを解析できません"
@@ -1393,7 +1401,7 @@ msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "ユーザー %s は %s 上で sudo を実行することを許可されていません。\n"
 
 #: plugins/sudoers/sudoers.c:172 plugins/sudoers/testsudoers.c:245
-#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:566
+#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:567
 msgid "unable to initialize sudoers default values"
 msgstr "sudoers のデフォルト値を初期化できません"
 
@@ -1439,8 +1447,8 @@ msgstr "あなたは環境変数を保護することを許可されていませ
 msgid "command too long"
 msgstr "コマンド名が長すぎます"
 
-#: plugins/sudoers/sudoers.c:886 plugins/sudoers/visudo.c:426
-#: plugins/sudoers/visudo.c:666
+#: plugins/sudoers/sudoers.c:886 plugins/sudoers/visudo.c:427
+#: plugins/sudoers/visudo.c:667
 #, c-format
 msgid "unable to stat %s"
 msgstr "%s の状態取得 (stat) ができません"
@@ -1695,7 +1703,7 @@ msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "タイムスタンプファイルを %lld バイトに切り詰めることができません"
 
 #: plugins/sudoers/timestamp.c:742 plugins/sudoers/timestamp.c:809
-#: plugins/sudoers/visudo.c:487 plugins/sudoers/visudo.c:493
+#: plugins/sudoers/visudo.c:488 plugins/sudoers/visudo.c:494
 msgid "unable to read the clock"
 msgstr "時刻を読み込むことができません"
 
@@ -1723,90 +1731,90 @@ msgstr "受講状況格納パスが長すぎます: %s/%s"
 msgid "%s grammar version %d\n"
 msgstr "%s 文法バージョン %d\n"
 
-#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:618
+#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:619
 #, c-format
 msgid "press return to edit %s: "
 msgstr "%s を編集するためにリターンを押してください: "
 
-#: plugins/sudoers/visudo.c:319
+#: plugins/sudoers/visudo.c:320
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "指定したエディター (%s) が存在しません"
 
-#: plugins/sudoers/visudo.c:337
+#: plugins/sudoers/visudo.c:338
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "エディターが見つかりません (エディターのパス = %s)"
 
-#: plugins/sudoers/visudo.c:446 plugins/sudoers/visudo.c:454
+#: plugins/sudoers/visudo.c:447 plugins/sudoers/visudo.c:455
 msgid "write error"
 msgstr "書き込みエラーです"
 
-#: plugins/sudoers/visudo.c:500
+#: plugins/sudoers/visudo.c:501
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "一時ファイル (%s) の状態取得 (stat) ができません。%s は変更されません"
 
-#: plugins/sudoers/visudo.c:507
+#: plugins/sudoers/visudo.c:508
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "一時ファイル (%s) の大きさが 0 です。%s は変更されません"
 
-#: plugins/sudoers/visudo.c:513
+#: plugins/sudoers/visudo.c:514
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "エディター (%s) が異常終了しました。%s は変更されません"
 
-#: plugins/sudoers/visudo.c:535
+#: plugins/sudoers/visudo.c:536
 #, c-format
 msgid "%s unchanged"
 msgstr "%s は変更されません"
 
-#: plugins/sudoers/visudo.c:561
+#: plugins/sudoers/visudo.c:562
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "一時ファイル (%s) を再度開くことができません。%s は変更されません。"
 
-#: plugins/sudoers/visudo.c:572
+#: plugins/sudoers/visudo.c:573
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "一時ファイル (%s) の構文解析ができません。不明なエラーです"
 
-#: plugins/sudoers/visudo.c:609
+#: plugins/sudoers/visudo.c:610
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "内部エラー、リスト内に %s が見つかりません!"
 
-#: plugins/sudoers/visudo.c:668 plugins/sudoers/visudo.c:677
+#: plugins/sudoers/visudo.c:669 plugins/sudoers/visudo.c:678
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "%s の (ユーザーID, グループID) を (%u, %u) に設定できません"
 
-#: plugins/sudoers/visudo.c:672 plugins/sudoers/visudo.c:682
+#: plugins/sudoers/visudo.c:673 plugins/sudoers/visudo.c:683
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "%s のアクセス権限のモードを 0%o に変更できません"
 
-#: plugins/sudoers/visudo.c:699
+#: plugins/sudoers/visudo.c:700
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s と %s は同じファイルシステム上にありません。名前を変更するために mv を使用しています"
 
-#: plugins/sudoers/visudo.c:713
+#: plugins/sudoers/visudo.c:714
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "コマンドの失敗です: '%s %s %s'。%s は変更されません"
 
-#: plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:724
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "%s の名前変更に失敗しました。%s は変更されません"
 
-#: plugins/sudoers/visudo.c:785
+#: plugins/sudoers/visudo.c:786
 msgid "What now? "
 msgstr "次は何でしょうか? "
 
-#: plugins/sudoers/visudo.c:799
+#: plugins/sudoers/visudo.c:800
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1818,72 +1826,72 @@ msgstr ""
 "  x -- sudoers ファイルへの変更を保存せずに終了します\n"
 "  Q -- sudoers ファイルへの変更を保存して終了します (*危険です!*)\n"
 
-#: plugins/sudoers/visudo.c:847
+#: plugins/sudoers/visudo.c:848
 #, c-format
 msgid "unable to run %s"
 msgstr "%s を実行できません"
 
-#: plugins/sudoers/visudo.c:877
+#: plugins/sudoers/visudo.c:878
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: 所有権に誤りがあります。(ユーザーID, グループID) は (%u, %u) であるべきです\n"
 
-#: plugins/sudoers/visudo.c:884
+#: plugins/sudoers/visudo.c:885
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: アクセス権限に誤りがあります。モードは 0%o であるべきです\n"
 
-#: plugins/sudoers/visudo.c:909 plugins/sudoers/visudo_json.c:1032
+#: plugins/sudoers/visudo.c:910 plugins/sudoers/visudo_json.c:1032
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "%s ファイルの構文解析に失敗しました。不明なエラーです"
 
-#: plugins/sudoers/visudo.c:925 plugins/sudoers/visudo_json.c:1041
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo_json.c:1041
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "%s 内 %d 行付近で構文解析エラーが発生しました\n"
 
-#: plugins/sudoers/visudo.c:928 plugins/sudoers/visudo_json.c:1044
+#: plugins/sudoers/visudo.c:929 plugins/sudoers/visudo_json.c:1044
 #, c-format
 msgid "parse error in %s\n"
 msgstr "%s 内で構文解析エラーが発生しました\n"
 
-#: plugins/sudoers/visudo.c:936 plugins/sudoers/visudo.c:943
+#: plugins/sudoers/visudo.c:937 plugins/sudoers/visudo.c:944
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: 正しく構文解析されました\n"
 
-#: plugins/sudoers/visudo.c:990
+#: plugins/sudoers/visudo.c:991
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s がビジー状態です。後で再試行してください"
 
-#: plugins/sudoers/visudo.c:1086
+#: plugins/sudoers/visudo.c:1087
 #, c-format
 msgid "Error: cycle in %s `%s'"
 msgstr "エラー: 循環を発見 %s `%s'"
 
-#: plugins/sudoers/visudo.c:1087
+#: plugins/sudoers/visudo.c:1088
 #, c-format
 msgid "Warning: cycle in %s `%s'"
 msgstr "警告: 循環を発見 %s `%s'"
 
-#: plugins/sudoers/visudo.c:1091
+#: plugins/sudoers/visudo.c:1092
 #, c-format
 msgid "Error: %s `%s' referenced but not defined"
 msgstr "エラー: %s `%s' は参照されていますが定義されていません"
 
-#: plugins/sudoers/visudo.c:1092
+#: plugins/sudoers/visudo.c:1093
 #, c-format
 msgid "Warning: %s `%s' referenced but not defined"
 msgstr "警告: %s `%s' は参照されていますが定義されていません"
 
-#: plugins/sudoers/visudo.c:1235
+#: plugins/sudoers/visudo.c:1236
 #, c-format
 msgid "Warning: unused %s `%s'"
 msgstr "警告: 使われていません %s `%s'"
 
-#: plugins/sudoers/visudo.c:1348
+#: plugins/sudoers/visudo.c:1349
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1892,7 +1900,7 @@ msgstr ""
 "%s - sudoers ファイルを安全に編集する\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1350
+#: plugins/sudoers/visudo.c:1351
 msgid ""
 "\n"
 "Options:\n"
