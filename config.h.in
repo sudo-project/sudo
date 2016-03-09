@@ -963,6 +963,10 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define to 1 if your system uses a Solaris-derived PAM and not Linux-PAM or
+   OpenPAM. */
+#undef PAM_SUN_CODEBASE
+
 /* The default password prompt. */
 #undef PASSPROMPT
 

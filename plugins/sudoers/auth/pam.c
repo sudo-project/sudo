@@ -58,11 +58,17 @@
 #include "sudo_auth.h"
 
 /* Only OpenPAM and Linux PAM use const qualifiers. */
-#if defined(_OPENPAM) || defined(OPENPAM_VERSION) || \
-    defined(__LIBPAM_VERSION) || defined(__LINUX_PAM__)
-# define PAM_CONST	const
-#else
+#ifdef PAM_SUN_CODEBASE
 # define PAM_CONST
+#else
+# define PAM_CONST	const
+#endif
+
+/* Ambiguity in spec: is it an array of pointers or a pointer to an array? */
+#ifdef PAM_SUN_CODEBASE
+# define PAM_MSG_GET(msg, n) (*(msg) + (n))
+#else
+# define PAM_MSG_GET(msg, n) ((msg)[(n)])
 #endif
 
 #ifndef PAM_DATA_SILENT
@@ -376,11 +382,10 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
  */
 static int
 converse(int num_msg, PAM_CONST struct pam_message **msg,
-    struct pam_response **response, void *vcallback)
+    struct pam_response **reply_out, void *vcallback)
 {
-    struct pam_response *pr;
     struct sudo_conv_callback *callback = NULL;
-    PAM_CONST struct pam_message *pm;
+    struct pam_response *reply;
     const char *prompt;
     char *pass;
     int n, type;
@@ -395,15 +400,18 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"number of PAM messages: %d", num_msg);
 
-    if ((*response = calloc(num_msg, sizeof(struct pam_response))) == NULL) {
+    if ((reply = calloc(num_msg, sizeof(struct pam_response))) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(PAM_BUF_ERR);
     }
+    *reply_out = reply;
 
     if (vcallback != NULL)
 	callback = *((struct sudo_conv_callback **)vcallback);
 
-    for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
+    for (n = 0; n < num_msg; n++) {
+	PAM_CONST struct pam_message *pm = PAM_MSG_GET(msg, n);
+
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
@@ -447,7 +455,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		    goto done;
 		}
-		pr->resp = pass;	/* auth_getpass() malloc's a copy */
+		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
 		break;
 	    case PAM_TEXT_INFO:
 		if (pm->msg)
@@ -470,15 +478,17 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 done:
     if (ret != PAM_SUCCESS) {
 	/* Zero and free allocated memory and return an error. */
-	for (pr = *response, n = num_msg; n--; pr++) {
+	for (n = 0; n < num_msg; n++) {
+	    struct pam_response *pr = &reply[n];
+
 	    if (pr->resp != NULL) {
 		memset_s(pr->resp, SUDO_CONV_REPL_MAX, 0, strlen(pr->resp));
 		free(pr->resp);
 		pr->resp = NULL;
 	    }
 	}
-	free(*response);
-	*response = NULL;
+	free(reply);
+	*reply_out = NULL;
     }
     debug_return_int(ret);
 }

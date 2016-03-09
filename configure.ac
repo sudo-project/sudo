@@ -1685,6 +1685,8 @@ case "$host" in
 		shadow_funcs="getpwanam issecure"
 		;;
     *-*-solaris2*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
@@ -1702,6 +1704,8 @@ case "$host" in
 		AC_CHECK_FUNCS([priv_set], [PSMAN=1])
 		;;
     *-*-aix*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		# To get all prototypes (so we pass -Wall)
 		AC_DEFINE([_LINUX_SOURCE_COMPAT])
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
@@ -1756,6 +1760,8 @@ case "$host" in
 		])
 		;;
     *-*-hiuxmpp*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
@@ -1771,6 +1777,8 @@ case "$host" in
 		AC_CHECK_FUNCS([pstat_getproc])
 		;;
     *-*-hpux*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
@@ -4352,6 +4360,7 @@ AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_bu
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(NEED_RESOLV_H, [Define to 1 if resolv.h must be included to get the `inet_ntop' or `inet_pton' function prototypes.])
 AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the `strnlen' function.])
+AH_TEMPLATE(PAM_SUN_CODEBASE, [Define to 1 if your system uses a Solaris-derived PAM and not Linux-PAM or OpenPAM.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

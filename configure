@@ -14729,6 +14729,9 @@ esac
 		shadow_funcs="getpwanam issecure"
 		;;
     *-*-solaris2*)
+		$as_echo "#define PAM_SUN_CODEBASE 1" >>confdefs.h
+
+
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
@@ -14756,6 +14759,9 @@ done
 
 		;;
     *-*-aix*)
+		$as_echo "#define PAM_SUN_CODEBASE 1" >>confdefs.h
+
+
 		# To get all prototypes (so we pass -Wall)
 		$as_echo "#define _LINUX_SOURCE_COMPAT 1" >>confdefs.h
 
@@ -14872,6 +14878,9 @@ _ACEOF
 
 		;;
     *-*-hiuxmpp*)
+		$as_echo "#define PAM_SUN_CODEBASE 1" >>confdefs.h
+
+
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
@@ -14897,6 +14906,9 @@ done
 
 		;;
     *-*-hpux*)
+		$as_echo "#define PAM_SUN_CODEBASE 1" >>confdefs.h
+
+
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
@@ -26468,6 +26480,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

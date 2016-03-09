@@ -63,6 +63,9 @@ What's new in Sudo 1.8.16
  * Fixed a bug in the LDAP and SSSD backends that could allow an
    unauthorized user to list another user's privileges.  Bug #738.
 
+ * The PAM conversation function now works around an ambiguity in the
+   PAM spec with respect to multiple messages.  Bug #726.
+
 What's new in Sudo 1.8.15
 
  * Fixed a bug that prevented sudo from building outside the source tree
