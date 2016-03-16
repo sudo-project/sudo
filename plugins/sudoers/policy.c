@@ -819,7 +819,7 @@ static struct sudo_hook sudoers_hooks[] = {
     { SUDO_HOOK_VERSION, SUDO_HOOK_UNSETENV, sudoers_hook_unsetenv, NULL },
     { SUDO_HOOK_VERSION, SUDO_HOOK_GETENV, sudoers_hook_getenv, NULL },
     { SUDO_HOOK_VERSION, SUDO_HOOK_PUTENV, sudoers_hook_putenv, NULL },
-    { -1, -1, NULL, NULL }
+    { 0, 0, NULL, NULL }
 };
 
 /*
