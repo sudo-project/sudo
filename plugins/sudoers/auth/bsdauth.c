@@ -141,6 +141,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 		log_warningx(0, N_("unable to allocate memory"));
 		debug_return_int(AUTH_FATAL);
 	    }
+	    free(pass);
 	    pass = auth_getpass(s, def_passwd_timeout * 60,
 		SUDO_CONV_PROMPT_ECHO_ON, callback);
 	    free(s);
@@ -150,6 +151,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
     if (pass) {
 	authok = auth_userresponse(as, pass, 1);
 	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
+	free(pass);
     }
 
     /* restore old signal handler */

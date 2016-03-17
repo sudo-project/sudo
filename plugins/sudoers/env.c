@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2015
+ * Copyright (c) 2000-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -145,7 +145,8 @@ static const char *initial_badenv_table[] = {
     "BASH_ENV",			/* bash, file to source before script runs */
     "PS4",			/* bash, prefix for lines in xtrace mode */
     "GLOBIGNORE",		/* bash, globbing patterns to ignore */
-    "SHELLOPTS",		/* bash, extra command line options */
+    "BASHOPTS",			/* bash, initial "shopt -s" options */
+    "SHELLOPTS",		/* bash, initial "set -o" options */
     "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
     "PERLIO_DEBUG ",		/* perl, debugging output file */
     "PERLLIB",			/* perl, search path for modules/includes */
@@ -411,6 +412,8 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
     }
     if (rval == -1)
 	free(estring);
+    else
+	sudoers_gc_add(GC_PTR, estring);
     debug_return_int(rval);
 }
 
@@ -467,6 +470,8 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
 done:
     if (rval == -1)
 	free(estring);
+    else
+	sudoers_gc_add(GC_PTR, estring);
     return rval;
 }
 
@@ -918,7 +923,7 @@ rebuild_env(void)
 
 	    if (keepit) {
 		/* Preserve variable. */
-		CHECK_PUTENV(*ep, false, false);
+		CHECK_PUTENV(*ep, true, false);
 		env_update_didvar(*ep, &didvar);
 	    }
 	}
@@ -971,6 +976,7 @@ rebuild_env(void)
 		free(cp);
 		goto bad;
 	    }
+	    sudoers_gc_add(GC_PTR, cp);
 	}
     } else {
 	/*
@@ -988,7 +994,7 @@ rebuild_env(void)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
 		    SET(didvar, DID_TERM);
-		CHECK_PUTENV(*ep, false, false);
+		CHECK_PUTENV(*ep, true, false);
 	    }
 	}
     }
@@ -1059,6 +1065,7 @@ rebuild_env(void)
 	    free(cp);
 	    goto bad;
 	}
+	sudoers_gc_add(GC_PTR, cp);
     } else {
 	CHECK_SETENV2("SUDO_COMMAND", user_cmnd, true, true);
     }
@@ -1216,6 +1223,7 @@ read_env_file(const char *path, int overwrite)
 	memcpy(cp, var, var_len + 1); /* includes '=' */
 	memcpy(cp + var_len + 1, val, val_len + 1); /* includes NUL */
 
+	sudoers_gc_add(GC_PTR, cp);
 	if (sudo_putenv(cp, true, overwrite) == -1) {
 	    /* XXX - no undo on failure */
 	    rval = false;

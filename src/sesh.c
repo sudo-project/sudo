@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008, 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -87,6 +87,7 @@ main(int argc, char *argv[], char *envp[])
     } else {
 	bool login_shell, noexec = false;
 	char *cp, *cmnd;
+	int fd = -1;
 
 	/* If the first char of argv[0] is '-', we are running a login shell. */
 	login_shell = argv[0][0] == '-';
@@ -94,6 +95,18 @@ main(int argc, char *argv[], char *envp[])
 	/* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
 	if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0])
 	    noexec = strcmp(cp, "-noexec") == 0;
+
+	/* If argv[1] is --execfd=%d, extract the fd to exec with. */
+	if (strncmp(argv[1], "--execfd=", 9) == 0) {
+	    const char *errstr;
+
+	    cp = argv[1] + 9;
+	    fd = strtonum(cp, 0, INT_MAX, &errstr);
+	    if (errstr != NULL)
+		sudo_fatalx(U_("invalid file descriptor number: %s"), cp);
+	    argv++;
+	    argc--;
+	}
 
 	/* Shift argv and make a copy of the command to execute. */
 	argv++;
@@ -108,7 +121,7 @@ main(int argc, char *argv[], char *envp[])
 	    *cp = '-';
 	    argv[0] = cp;
 	}
-	sudo_execve(cmnd, argv, envp, noexec);
+	sudo_execve(fd, cmnd, argv, envp, noexec);
 	sudo_warn(U_("unable to execute %s"), cmnd);
 	ret = SESH_ERR_FAILURE;
     }

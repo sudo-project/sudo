@@ -74,7 +74,7 @@ gid_t sudoers_gid = SUDOERS_GID;
 
 static bool continued, sawspace;
 static int prev_state;
-static int digest_len;
+static yy_size_t digest_len;
 
 static bool push_include_int(char *, bool);
 static bool pop_include(void);
@@ -255,7 +255,7 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[[:xdigit:]]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    if (sudoersleng == digest_len * 2) {
+			    if ((yy_size_t)sudoersleng == digest_len * 2) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;
@@ -268,7 +268,7 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[A-Za-z0-9\+/=]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    int len;
+			    yy_size_t len;
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
 				len = 4 * ((digest_len + 2) / 3);
@@ -276,7 +276,7 @@ DEFVAR			[a-z_]+
 				/* no padding */
 				len = (4 * digest_len + 2) / 3;
 			    }
-			    if (sudoersleng == len) {
+			    if ((yy_size_t)sudoersleng == len) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;

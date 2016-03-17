@@ -1,10 +1,10 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.15], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.16], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -303,7 +303,7 @@ esac])
 AC_ARG_WITH(rpath, [AS_HELP_STRING([--with-rpath], [deprecated, use --disable-rpath])],
 [AC_MSG_WARN([--with-rpath deprecated, rpath is now the default])])
 
-AC_ARG_WITH(blibpath, [AS_HELP_STRING([--with-blibpath[=PATH]], [deprecated])],
+AC_ARG_WITH(blibpath, [AS_HELP_STRING([--with-blibpath[[=PATH]]], [deprecated])],
 [AC_MSG_WARN([--with-blibpath deprecated, use --with-libpath])])
 
 dnl
@@ -445,7 +445,7 @@ AC_ARG_WITH(passwd, [AS_HELP_STRING([--without-passwd], [don't use passwd/shadow
 		;;
 esac])
 
-AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[=DIR]], [enable S/Key support ])],
+AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[[=DIR]]], [enable S/Key support ])],
 [case $with_skey in
     no)		;;
     *)		AC_DEFINE(HAVE_SKEY)
@@ -455,7 +455,7 @@ AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[=DIR]], [enable S/Key support ])]
 		;;
 esac])
 
-AC_ARG_WITH(opie, [AS_HELP_STRING([--with-opie[=DIR]], [enable OPIE support ])],
+AC_ARG_WITH(opie, [AS_HELP_STRING([--with-opie[[=DIR]]], [enable OPIE support ])],
 [case $with_opie in
     no)		;;
     *)		AC_DEFINE(HAVE_OPIE)
@@ -1182,12 +1182,6 @@ AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to re
 		;;
 esac], AC_MSG_RESULT(yes))
 
-AC_ARG_WITH(stow, [AS_HELP_STRING([--with-stow], [deprecated])],
-[case $with_stow in
-    *)		AC_MSG_NOTICE([--with-stow option deprecated, now is defalt behavior])
-		;;
-esac])
-
 AC_MSG_CHECKING(whether to use an askpass helper)
 AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pathname of askpass helper])],
 [case $with_askpass in
@@ -1451,6 +1445,9 @@ AC_ARG_ENABLE(hardening,
 AC_ARG_ENABLE(pie,
 [AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
+AC_ARG_ENABLE(asan,
+[AS_HELP_STRING([--enable-asan], [Build sudo with address sanitizer support.])])
+
 AC_ARG_ENABLE(poll,
 [AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
 
@@ -1594,7 +1591,7 @@ LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
 
 AC_MSG_CHECKING(path to sudo_noexec.so)
-AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
+AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[[=PATH]]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
     yes)	with_noexec="$libexecdir/sudo/sudo_noexec.so"
 		;;
@@ -1688,6 +1685,8 @@ case "$host" in
 		shadow_funcs="getpwanam issecure"
 		;;
     *-*-solaris2*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
@@ -1705,6 +1704,8 @@ case "$host" in
 		AC_CHECK_FUNCS([priv_set], [PSMAN=1])
 		;;
     *-*-aix*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		# To get all prototypes (so we pass -Wall)
 		AC_DEFINE([_LINUX_SOURCE_COMPAT])
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
@@ -1741,9 +1742,12 @@ case "$host" in
 		RC_LINK=/etc/rc.d/rc2.d/S90sudo
 
 		# AIX-specific functions
-		AC_CHECK_FUNCS([getuserattr setauthdb setrlimit64])
+		AC_CHECK_FUNCS([getuserattr setrlimit64])
+		AC_CHECK_FUNCS([setauthdb],
+		    [AC_CHECK_TYPES([authdb_t], [], [], [#include <usersec.h>])])
+
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
-		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1)
+		SUDO_APPEND_COMPAT_EXP(aix_prep_user_v1 aix_restoreauthdb_v1 aix_setauthdb_v1 aix_setauthdb_v2 aix_getauthregistry_v1)
 
 		# These prototypes may be missing
 		AC_CHECK_DECLS([usrinfo], [], [], [
@@ -1756,6 +1760,8 @@ case "$host" in
 		])
 		;;
     *-*-hiuxmpp*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
@@ -1771,6 +1777,8 @@ case "$host" in
 		AC_CHECK_FUNCS([pstat_getproc])
 		;;
     *-*-hpux*)
+		AC_DEFINE([PAM_SUN_CODEBASE])
+
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
@@ -2384,7 +2392,19 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([killpg nl_langinfo strftime pread pwrite openat])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat faccessat])
+case "$host_os" in
+    hpux*)
+	if test X"$ac_cv_func_pread" = X"yes"; then
+	    O_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
+	    AC_CHECK_FUNCS([pread64 pwrite64], [
+		AC_DEFINE([_LARGEFILE64_SOURCE], [1], [Define to 1 to enable 64-bit versions of standard C functions on 32-bit systems.])
+	    ])
+	    CPPFLAGS="$O_CPPFLAGS"
+	fi
+	;;
+esac
 AC_CHECK_FUNCS([getgrouplist], [], [
     case "$host_os" in
     aix*)
@@ -2676,8 +2696,10 @@ dnl
 if test X"$with_noexec" != X"no"; then
     # Check for non-standard exec functions
     AC_CHECK_FUNCS([exect execvP execvpe])
-    # Check for fexecve, posix_spawn, and posix_spawnp
-    AC_CHECK_FUNCS([fexecve posix_spawn posix_spawnp])
+    # Check for posix_spawn, and posix_spawnp
+    if test X"$ac_cv_header_spawn_h" = X"yes"; then
+	AC_CHECK_FUNCS([posix_spawn posix_spawnp])
+    fi
 fi
 
 dnl
@@ -3923,6 +3945,23 @@ EOF
 fi
 
 dnl
+dnl Check for -fsanitize=address,undefined support
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test "$enable_asan" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-fsanitize=address,undefined], [
+	AX_CHECK_LINK_FLAG([-fsanitize=address,undefined], [
+	    LDFLAGS="$LDFLAGS -fsanitize=address,undefined"
+	    CFLAGS="$CFLAGS -fsanitize=address,undefined"
+	    AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
+		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
+	    ])
+	    AC_DEFINE(NO_LEAKS)
+	])
+    ])
+fi
+
+dnl
 dnl Check for PIE executable support if using gcc.
 dnl This test relies on AC_LANG_WERROR
 dnl
@@ -4167,7 +4206,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
-test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
+test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
 dnl Substitute into the Makefile and man pages
@@ -4279,6 +4318,7 @@ AH_TEMPLATE(IGNORE_DOT_PATH, [Define to 1 if you want to ignore '.' and empty PA
 AH_TEMPLATE(LOGGING, [Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH.])
 AH_TEMPLATE(LONG_OTP_PROMPT, [Define to 1 if you want a two line OTP (S/Key or OPIE) prompt.])
 AH_TEMPLATE(NO_AUTHENTICATION, [Define to 1 if you don't want sudo to prompt for a password by default.])
+AH_TEMPLATE(NO_LEAKS, [Define to 1 if you want sudo to free up memory before exiting.])
 AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first they user sudo.])
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support.])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
@@ -4320,6 +4360,7 @@ AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_bu
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(NEED_RESOLV_H, [Define to 1 if resolv.h must be included to get the `inet_ntop' or `inet_pton' function prototypes.])
 AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the `strnlen' function.])
+AH_TEMPLATE(PAM_SUN_CODEBASE, [Define to 1 if your system uses a Solaris-derived PAM and not Linux-PAM or OpenPAM.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

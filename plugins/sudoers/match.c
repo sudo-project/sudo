@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -55,6 +55,7 @@
 # include <netdb.h>
 #endif /* HAVE_NETGROUP_H */
 #include <dirent.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <grp.h>
 #include <errno.h>
@@ -106,7 +107,9 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, NULL, NULL, pw->pw_name))
+		if (netgr_matches(m->name,
+		    def_netgroup_tuple ? user_runhost : NULL,
+		    def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		    matched = !m->negated;
 		break;
 	    case USERGROUP:
@@ -162,7 +165,10 @@ runaslist_matches(const struct member_list *user_list,
 			user_matched = !m->negated;
 			break;
 		    case NETGROUP:
-			if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
+			if (netgr_matches(m->name,
+			    def_netgroup_tuple ? user_runhost : NULL,
+			    def_netgroup_tuple ? user_srunhost : NULL,
+			    runas_pw->pw_name))
 			    user_matched = !m->negated;
 			break;
 		    case USERGROUP:
@@ -249,7 +255,7 @@ runaslist_matches(const struct member_list *user_list,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-hostlist_matches(const struct member_list *list)
+hostlist_matches(const struct passwd *pw, const struct member_list *list)
 {
     struct member *m;
     struct alias *a;
@@ -262,7 +268,8 @@ hostlist_matches(const struct member_list *list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, user_runhost, user_srunhost, NULL))
+		if (netgr_matches(m->name, user_runhost, user_srunhost,
+		    pw->pw_name))
 		    matched = !m->negated;
 		break;
 	    case NTWKADDR:
@@ -271,7 +278,7 @@ hostlist_matches(const struct member_list *list)
 		break;
 	    case ALIAS:
 		if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
-		    rval = hostlist_matches(&a->members);
+		    rval = hostlist_matches(pw, &a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    alias_put(a);
@@ -583,17 +590,20 @@ static struct digest_function {
 };
 
 static bool
-digest_matches(const char *file, const struct sudo_digest *sd)
+digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
 {
     unsigned char file_digest[SHA512_DIGEST_LENGTH];
     unsigned char sudoers_digest[SHA512_DIGEST_LENGTH];
     unsigned char buf[32 * 1024];
     struct digest_function *func = NULL;
+#ifdef HAVE_FEXECVE
+    bool first = true;
+    bool is_script = false;
+#endif /* HAVE_FEXECVE */
     size_t nread;
     SHA2_CTX ctx;
     FILE *fp;
     unsigned int i;
-    int h;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
     for (i = 0; digest_functions[i].digest_name != NULL; i++) {
@@ -609,7 +619,7 @@ digest_matches(const char *file, const struct sudo_digest *sd)
     if (strlen(sd->digest_str) == func->digest_len * 2) {
 	/* Convert the command digest from ascii hex to binary. */
 	for (i = 0; i < func->digest_len; i++) {
-	    h = hexchar(&sd->digest_str[i + i]);
+	    const int h = hexchar(&sd->digest_str[i + i]);
 	    if (h == -1)
 		goto bad_format;
 	    sudoers_digest[i] = (unsigned char)h;
@@ -633,6 +643,14 @@ digest_matches(const char *file, const struct sudo_digest *sd)
 
     func->init(&ctx);
     while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
+#ifdef HAVE_FEXECVE
+	/* Check for #! cookie and set is_script. */
+	if (first) {
+	    first = false;
+	    if (nread >= 2 && buf[0] == '#' && buf[1] == '!')
+		is_script = true;
+	}
+#endif /* HAVE_FEXECVE */
 	func->update(&ctx, buf, nread);
     }
     if (ferror(fp)) {
@@ -640,15 +658,36 @@ digest_matches(const char *file, const struct sudo_digest *sd)
 	fclose(fp);
 	debug_return_bool(false);
     }
-    fclose(fp);
     func->final(file_digest, &ctx);
 
-    if (memcmp(file_digest, sudoers_digest, func->digest_len) == 0)
-	debug_return_bool(true);
-    sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
-	"%s digest mismatch for %s, expecting %s",
-	func->digest_name, file, sd->digest_str);
-    debug_return_bool(false);
+    if (memcmp(file_digest, sudoers_digest, func->digest_len) != 0) {
+	fclose(fp);
+	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
+	    "%s digest mismatch for %s, expecting %s",
+	    func->digest_name, file, sd->digest_str);
+	debug_return_bool(false);
+    }
+
+#ifdef HAVE_FEXECVE
+    /*
+     * On systems with fexecve(2) we can use that to execute the
+     * matching command even when the directory is writable.
+     */
+    if ((*fd = dup(fileno(fp))) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to dup %s: %s",
+	    file, strerror(errno));
+	fclose(fp);
+	debug_return_bool(false);
+    }
+    /*
+     * Shell scripts go through namei twice and so we can't set the close
+     * on exec flag on the fd for fexecve(2).
+     */
+    if (!is_script)
+	fcntl(*fd, F_SETFD, FD_CLOEXEC);
+#endif /* HAVE_FEXECVE */
+    fclose(fp);
+    debug_return_bool(true);
 bad_format:
     sudo_warnx(U_("digest for %s (%s) is not in %s form"), file,
 	sd->digest_str, func->digest_name);
@@ -690,7 +729,11 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	debug_return_bool(false);
     if (!command_args_match(sudoers_cmnd, sudoers_args))
 	debug_return_bool(false);
-    if (digest != NULL && !digest_matches(sudoers_cmnd, digest)) {
+    if (cmnd_fd != -1) {
+	close(cmnd_fd);
+	cmnd_fd = -1;
+    }
+    if (digest != NULL && !digest_matches(sudoers_cmnd, digest, &cmnd_fd)) {
 	/* XXX - log functions not available but we should log very loudly */
 	debug_return_bool(false);
     }

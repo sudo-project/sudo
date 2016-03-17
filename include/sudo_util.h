@@ -151,12 +151,15 @@
 #endif
 
 /* aix.c */
+__dso_public int aix_getauthregistry_v1(char *user, char *saved_registry);
+#define aix_getauthregistry(_a, _b) aix_getauthregistry_v1((_a), (_b))
 __dso_public int aix_prep_user_v1(char *user, const char *tty);
 #define aix_prep_user(_a, _b) aix_prep_user_v1((_a), (_b))
 __dso_public int aix_restoreauthdb_v1(void);
 #define aix_restoreauthdb() aix_restoreauthdb_v1()
 __dso_public int aix_setauthdb_v1(char *user);
-#define aix_setauthdb(_a) aix_setauthdb_v1((_a))
+__dso_public int aix_setauthdb_v2(char *user, char *registry);
+#define aix_setauthdb(_a, _b) aix_setauthdb_v2((_a), (_b))
 
 /* gethostname.c */
 __dso_public char *sudo_gethostname_v1(void);

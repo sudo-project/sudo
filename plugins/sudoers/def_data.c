@@ -388,7 +388,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"sudoedit_checkdir", T_FLAG,
-	N_("Check the parent directory for writability when editing files with sudoedit"),
+	N_("Check parent directories for writability when editing files with sudoedit"),
 	NULL,
     }, {
 	"sudoedit_follow", T_FLAG,
@@ -397,6 +397,10 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"always_query_group_plugin", T_FLAG,
 	N_("Query the group plugin for unknown system groups"),
+	NULL,
+    }, {
+	"netgroup_tuple", T_FLAG,
+	N_("Match netgroups based on the entire tuple: user, host and domain"),
 	NULL,
     }, {
 	NULL, 0, NULL

@@ -115,7 +115,7 @@ unlimit_nproc(void)
 {
 #ifdef __linux__
     struct rlimit rl;
-    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+    debug_decl(unlimit_nproc, SUDOERS_DEBUG_UTIL)
 
     if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
 	    sudo_warn("getrlimit");
@@ -136,7 +136,7 @@ static void
 restore_nproc(void)
 {
 #ifdef __linux__
-    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+    debug_decl(restore_nproc, SUDOERS_DEBUG_UTIL)
 
     if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
 	sudo_warn("setrlimit");

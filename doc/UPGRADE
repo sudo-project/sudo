@@ -1,6 +1,16 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.16:
+
+    When editing files with sudoedit, files in a directory that is
+    writable by the invoking user may no longer be edited by default.
+    Also, sudoedit will refuse to follow a symbolic link in the
+    path to be edited if that directory containing the link is
+    writable by the user.  This behavior can be disabled by negating
+    the sudoedit_checkdir sudoers option, which is now enabled by
+    default.
+
 o Upgrading from a version prior to 1.8.15:
 
     Prior to version 1.8.15, when env_reset was enabled (the default)

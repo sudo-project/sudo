@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2015
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -90,6 +90,7 @@ struct sudo_user {
     const char *cwd;
     char *iolog_file;
     GETGROUPS_T *gids;
+    int   execfd;
     int   ngids;
     int   closefrom;
     int   lines;
@@ -197,6 +198,7 @@ struct sudo_user {
 #define user_srunhost		(sudo_user.srunhost)
 #define user_ccname		(sudo_user.krb5_ccname)
 #define safe_cmnd		(sudo_user.cmnd_safe)
+#define cmnd_fd			(sudo_user.execfd)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)
 #define runas_gr		(sudo_user._runas_gr)
@@ -369,9 +371,20 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
+extern const char *path_plugin_dir;
 
 /* editor.c */
 char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *whitelist);
+
+/* gc.c */
+enum sudoers_gc_types {
+    GC_UNKNOWN,
+    GC_VECTOR,
+    GC_PTR
+};
+bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
+bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
+void sudoers_gc_init(void);
 
 #endif /* SUDOERS_SUDOERS_H */

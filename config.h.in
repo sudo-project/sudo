@@ -54,6 +54,9 @@
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
+/* Define to 1 if the system has the type `authdb_t'. */
+#undef HAVE_AUTHDB_T
+
 /* Define to 1 if you have the `authenticate' function. */
 #undef HAVE_AUTHENTICATE
 
@@ -211,6 +214,9 @@
 
 /* Define to 1 if you have the `execvpe' function. */
 #undef HAVE_EXECVPE
+
+/* Define to 1 if you have the `faccessat' function. */
+#undef HAVE_FACCESSAT
 
 /* Define to 1 if your system has the F_CLOSEM fcntl. */
 #undef HAVE_FCNTL_CLOSEM
@@ -523,6 +529,9 @@
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 
+/* Define to 1 if you have the `pread64' function. */
+#undef HAVE_PREAD64
+
 /* Define to 1 if you have the `priv_set' function. */
 #undef HAVE_PRIV_SET
 
@@ -540,6 +549,9 @@
 
 /* Define to 1 if you have the `pwrite' function. */
 #undef HAVE_PWRITE
+
+/* Define to 1 if you have the `pwrite64' function. */
+#undef HAVE_PWRITE64
 
 /* Define to 1 if you have the `pw_dup' function. */
 #undef HAVE_PW_DUP
@@ -911,6 +923,9 @@
 /* Define to 1 if you don't want sudo to prompt for a password by default. */
 #undef NO_AUTHENTICATION
 
+/* Define to 1 if you want sudo to free up memory before exiting. */
+#undef NO_LEAKS
+
 /* Define to 1 if you don't want users to get the lecture the first they user
    sudo. */
 #undef NO_LECTURE
@@ -947,6 +962,10 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Define to 1 if your system uses a Solaris-derived PAM and not Linux-PAM or
+   OpenPAM. */
+#undef PAM_SUN_CODEBASE
 
 /* The default password prompt. */
 #undef PASSPROMPT
@@ -1088,6 +1107,10 @@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
+
+/* Define to 1 to enable 64-bit versions of standard C functions on 32-bit
+   systems. */
+#undef _LARGEFILE64_SOURCE
 
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES

@@ -26,6 +26,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Copyright (c) 2008, 2016 Todd C. Miller <millert@openbsd.org>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 /* Authored by William A. Rowe Jr. <wrowe; apache.org, vmware.com>, April 2011
  *
  * Derived from The Open Group Base Specifications Issue 7, IEEE Std 1003.1-2008
@@ -183,11 +199,17 @@ static int fnmatch_ch(const char **pattern, const char **string, int flags)
                 break;
 
             /* Match character classes. */
-            if (classmatch(*pattern, **string, nocase, pattern)
-                == RANGE_MATCH) {
+            switch (classmatch(*pattern, **string, nocase, pattern)) {
+	    case RANGE_MATCH:
                 result = 0;
                 continue;
-            }
+	    case RANGE_NOMATCH:
+		/* Valid character class but no match. */
+                continue;
+	    default:
+		/* Not a valid character class. */
+		break;
+	    }
             if (!**pattern)
                 break;
 

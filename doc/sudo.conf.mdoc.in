@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd September 28, 2015
+.Dd November 20, 2015
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -183,6 +183,14 @@ For example:
 Path noexec @noexec_file@
 Path askpass /usr/X11R6/bin/ssh-askpass
 .Ed
+.Pp
+If no path name is specified, features relying on the specified
+setting will be disabled.
+Disabling
+.Li Path
+settings is only supported in
+.Nm sudo
+version 1.8.16 and higher.
 .Pp
 The following plugin-agnostic paths may be set in the
 .Pa @sysconfdir@/sudo.conf
@@ -611,7 +619,7 @@ Plugin sudoers_io sudoers.so
 .Sh HISTORY
 See the HISTORY file in the
 .Nm sudo
-distribution (http://www.sudo.ws/history.html) for a brief
+distribution (https://www.sudo.ws/history.html) for a brief
 history of sudo.
 .Sh AUTHORS
 Many people have worked on
@@ -623,16 +631,16 @@ over the years; this version consists of code written primarily by:
 .Pp
 See the CONTRIBUTORS file in the
 .Nm sudo
-distribution (http://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh BUGS
 If you feel you have found a bug in
 .Nm sudo ,
-please submit a bug report at http://bugzilla.sudo.ws/
+please submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
-see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .Sh DISCLAIMER
 .Nm sudo
@@ -643,4 +651,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm sudo
-or http://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/license.html for complete details.

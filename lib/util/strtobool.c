@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,5 +70,8 @@ sudo_strtobool_v1(const char *str)
 		debug_return_int(0);
 	    break;
     }
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	"invalid boolean value \"%s\"", str);
+
     debug_return_int(-1);
 }

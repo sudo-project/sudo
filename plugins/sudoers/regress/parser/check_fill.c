@@ -99,6 +99,10 @@ static struct fill_test args_data[] = {
 static int
 check_fill(const char *input, int len, int addspace, const char *expect, char **resultp)
 {
+    if (sudoerslval.string != NULL) {
+	free(sudoerslval.string);
+	sudoerslval.string = NULL;
+    }
     if (!fill(input, len))
 	return -1;
     *resultp = sudoerslval.string;
@@ -108,6 +112,10 @@ check_fill(const char *input, int len, int addspace, const char *expect, char **
 static int
 check_fill_cmnd(const char *input, int len, int addspace, const char *expect, char **resultp)
 {
+    if (sudoerslval.command.cmnd != NULL) {
+	free(sudoerslval.command.cmnd);
+	sudoerslval.command.cmnd = NULL;
+    }
     if (!fill_cmnd(input, len))
 	return -1;
     *resultp = sudoerslval.command.cmnd;
@@ -117,6 +125,7 @@ check_fill_cmnd(const char *input, int len, int addspace, const char *expect, ch
 static int
 check_fill_args(const char *input, int len, int addspace, const char *expect, char **resultp)
 {
+    /* Must not free old sudoerslval.command.args as gets appended to. */
     if (!fill_args(input, len, addspace))
 	return -1;
     *resultp = sudoerslval.command.args;

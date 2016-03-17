@@ -76,7 +76,7 @@ MSGFMT = msgfmt
 MSGMERGE = msgmerge
 XGETTEXT = xgettext
 XGETTEXT_OPTS = -F -k_ -kN_ -kU_ --copyright-holder="Todd C. Miller" \
-		"--msgid-bugs-address=http://www.sudo.ws/bugs" \
+		"--msgid-bugs-address=https://bugzilla.sudo.ws" \
 		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
 		--flag warning:1:c-format --flag warningx:1:c-format \
 		--flag fatal:1:c-format --flag fatalx:1:c-format \

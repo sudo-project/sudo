@@ -889,6 +889,10 @@ pty_close(struct command_status *cstat)
     /* Free I/O buffers. */
     while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
 	SLIST_REMOVE_HEAD(&iobufs, entries);
+	if (iob->revent != NULL)
+	    sudo_ev_free(iob->revent);
+	if (iob->wevent != NULL)
+	    sudo_ev_free(iob->wevent);
 	free(iob);
     }
 

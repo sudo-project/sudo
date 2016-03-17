@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -176,13 +176,13 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
 	}
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-	    selinux_execve(details->command, details->argv, details->envp,
-		ISSET(details->flags, CD_NOEXEC));
+	    selinux_execve(details->execfd, details->command, details->argv,
+		details->envp, ISSET(details->flags, CD_NOEXEC));
 	} else
 #endif
 	{
-	    sudo_execve(details->command, details->argv, details->envp,
-		ISSET(details->flags, CD_NOEXEC));
+	    sudo_execve(details->execfd, details->command, details->argv,
+		details->envp, ISSET(details->flags, CD_NOEXEC));
 	}
     }
     cstat->type = CMD_ERRNO;

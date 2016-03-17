@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 4, 2014
+.Dd November 20, 2015
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -373,7 +373,7 @@ over the years; this version consists of code written primarily by:
 .Pp
 See the CONTRIBUTORS file in the
 .Nm sudo
-distribution (http://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 .Nm sudo .
 .Sh CAVEATS
@@ -384,10 +384,10 @@ allows shell escapes.
 .Sh BUGS
 If you feel you have found a bug in
 .Nm ,
-please submit a bug report at http://bugzilla.sudo.ws/
+please submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
-see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .Sh DISCLAIMER
 .Nm
@@ -398,4 +398,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm sudo
-or http://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/license.html for complete details.

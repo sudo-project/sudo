@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2014
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -182,6 +182,8 @@
 # ifndef UTIME_NOW
 #  define UTIME_NOW	-2L
 # endif
+#endif
+#if !defined(HAVE_OPENAT) || (!defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT))
 # ifndef AT_FDCWD
 #  define AT_FDCWD	-100
 # endif
@@ -321,6 +323,21 @@ int _innetgr(const char *, const char *, const char *, const char *);
 #if defined(HAVE_DECL_GETDOMAINNAME) && !HAVE_DECL_GETDOMAINNAME
 int getdomainname(char *, size_t);
 #endif
+
+/*
+ * HP-UX 11.00 has broken pread/pwrite that can't handle a 64-bit off_t
+ * on 32-bit machines.
+ */
+#if defined(__hpux) && !defined(__LP64__)
+# ifdef HAVE_PREAD64
+#  undef pread
+#  define pread(_a, _b, _c, _d) pread64((_a), (_b), (_c), (_d))
+# endif
+# ifdef HAVE_PWRITE64
+#  undef pwrite
+#  define pwrite(_a, _b, _c, _d) pwrite64((_a), (_b), (_c), (_d))
+# endif
+#endif /* __hpux && !__LP64__ */
 
 /* We wrap OpenBSD's strtonum() to get translatable error strings. */
 __dso_public long long sudo_strtonum(const char *, long long, long long, const char **);

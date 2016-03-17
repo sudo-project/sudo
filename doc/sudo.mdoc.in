@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2015
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2016
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 27, 2015
+.Dd January 19, 2016
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -269,13 +269,20 @@ If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
 .El
 .Pp
-Unless explicitly allowed by the security policy, symbolic links
-will not be opened.
-This helps prevent the editing of unauthorized files when the file
-is located in a user-writable directory.
-Versions of
-.Nm
-prior to 1.8.15 do not have this restriction.
+To help prevent the editing of unauthorized files, the following
+restrictions are enforced unless explicitly allowed by the security policy:
+.Bl -bullet -offset 4
+.It
+Symbolic links may not be edited (version 1.8.15 and higher).
+.It
+Symbolic links along the path to be edited are not followed when the
+parent directory is writable by the invoking user unless that user
+is root (version 1.8.16 and higher).
+.It
+Files located in a directory that is writable by the invoking user may
+not be edited unless that user is root (version 1.8.16 and higher).
+.El
+.Pp
 Users are never allowed to edit device special files.
 .Pp
 If the specified file does not exist, it will be created.
@@ -665,15 +672,15 @@ When the command is run as a child of the
 process,
 .Nm
 will relay signals it receives to the command.
-Unless the command is being run in a new pty, the
+The
 .Dv SIGINT
 and
 .Dv SIGQUIT
-signals are not relayed unless they are sent by a user process,
-not the kernel.
-Otherwise, the command would receive
+signals are only relayed when the command is being run in a new pty
+or when the signal was sent by a user process, not the kernel.
+This prevents the command from receiving
 .Dv SIGINT
-twice every time the user entered control-C.
+twice each time the user enters control-C.
 Some signals, such as
 .Dv SIGSTOP
 and
@@ -818,20 +825,6 @@ privileges to execute files that are writable by the user or
 that reside in a directory that is writable by the user.
 If the user can modify or replace the command there is no way
 to limit what additional commands they can run.
-Likewise, users should
-.Em never
-be granted
-.Nm sudoedit
-permission to edit a file that resides in a directory the user has
-write access to.
-A user with directory write access could replace the legitimate
-file with a link to some other, arbitrary, file.
-Starting with version 1.8.15,
-.Nm sudoedit
-will refuse to open a symbolic link unless the security policy
-explicitly permits it.
-However, it is still possible to create a hard link if the directory
-is writable and the link target resides on the same file system.
 .Pp
 Please note that
 .Nm
@@ -1049,7 +1042,7 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Sh HISTORY
 See the HISTORY file in the
 .Nm
-distribution (http://www.sudo.ws/history.html) for a brief
+distribution (https://www.sudo.ws/history.html) for a brief
 history of sudo.
 .Sh AUTHORS
 Many people have worked on
@@ -1061,7 +1054,7 @@ over the years; this version consists of code written primarily by:
 .Pp
 See the CONTRIBUTORS file in the
 .Nm
-distribution (http://www.sudo.ws/contributors.html) for an
+distribution (https://www.sudo.ws/contributors.html) for an
 exhaustive list of people who have contributed to
 .Nm .
 .Sh CAVEATS
@@ -1099,10 +1092,10 @@ setuid shell scripts are generally safe).
 .Sh BUGS
 If you feel you have found a bug in
 .Nm ,
-please submit a bug report at http://bugzilla.sudo.ws/
+please submit a bug report at https://bugzilla.sudo.ws/
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
-see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
 .Sh DISCLAIMER
 .Nm
@@ -1113,4 +1106,4 @@ to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
 See the LICENSE file distributed with
 .Nm
-or http://www.sudo.ws/license.html for complete details.
+or https://www.sudo.ws/license.html for complete details.

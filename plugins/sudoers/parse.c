@@ -176,7 +176,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 		continue;
 	    TAILQ_FOREACH(priv, &us->privileges, entries) {
-		if (hostlist_matches(&priv->hostlist) != ALLOW)
+		if (hostlist_matches(sudo_user.pw, &priv->hostlist) != ALLOW)
 		    continue;
 		TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 		    /* Only check the command when listing another user. */
@@ -212,7 +212,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    continue;
 	CLR(validated, FLAG_NO_USER);
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
-	    host_match = hostlist_matches(&priv->hostlist);
+	    host_match = hostlist_matches(sudo_user.pw, &priv->hostlist);
 	    if (host_match == ALLOW)
 		CLR(validated, FLAG_NO_HOST);
 	    else
@@ -415,7 +415,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     /* gcc -Wuninitialized false positive */
     TAGS_INIT(tags);
     TAILQ_FOREACH(priv, &us->privileges, entries) {
-	if (hostlist_matches(&priv->hostlist) != ALLOW)
+	if (hostlist_matches(pw, &priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
@@ -494,7 +494,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     debug_decl(sudo_file_display_priv_long, SUDOERS_DEBUG_NSS)
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
-	if (hostlist_matches(&priv->hostlist) != ALLOW)
+	if (hostlist_matches(pw, &priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
@@ -616,7 +616,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     TAILQ_FOREACH(d, &defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		if (hostlist_matches(d->binding) != ALLOW)
+		if (hostlist_matches(pw, d->binding) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_USER:
@@ -753,7 +753,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 	    continue;
 
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
-	    host_match = hostlist_matches(&priv->hostlist);
+	    host_match = hostlist_matches(pw, &priv->hostlist);
 	    if (host_match != ALLOW)
 		continue;
 	    TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {

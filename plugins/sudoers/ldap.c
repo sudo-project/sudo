@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -694,7 +694,8 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
 	if (*val == '+') {
-	    if (netgr_matches(val, NULL, NULL, pw->pw_name))
+	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s' ... %s", val,
 		ret ? "MATCH!" : "not");
@@ -716,7 +717,7 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 * host match, else false.
 */
 static bool
-sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
+sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     char *val;
@@ -736,8 +737,9 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
 	val = (*p)->bv_val;
 	/* match any or address or netgroup or hostname */
 	if (!strcmp(val, "ALL") || addr_matches(val) ||
-	    netgr_matches(val, user_host, user_shost, NULL) ||
-	    hostname_matches(user_shost, user_host, val))
+	    netgr_matches(val, user_runhost, user_srunhost,
+	    def_netgroup_tuple ? pw->pw_name : NULL) ||
+	    hostname_matches(user_srunhost, user_runhost, val))
 	    ret = true;
 	DPRINTF2("ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
     }
@@ -792,7 +794,8 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 	val = (*p)->bv_val;
 	switch (val[0]) {
 	case '+':
-	    if (netgr_matches(val, NULL, NULL, runas_pw->pw_name))
+	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+		def_netgroup_tuple ? user_srunhost : NULL, runas_pw->pw_name))
 		ret = true;
 	    break;
 	case '%':
@@ -1046,7 +1049,7 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char *var, *val;
+    char *copy, *cp, *var;
     int op;
     bool rc = false;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
@@ -1057,24 +1060,32 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
-	if ((var = strdup((*p)->bv_val)) == NULL) {
+	if ((copy = var = strdup((*p)->bv_val)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	DPRINTF2("ldap sudoOption: '%s'", var);
 
 	/* check for equals sign past first char */
-	val = strchr(var, '=');
-	if (val > var) {
-	    *val++ = '\0';	/* split on = and truncate var */
-	    op = val[-2];	/* peek for += or -= cases */
+	cp = strchr(var, '=');
+	if (cp > var) {
+	    char *val = cp + 1;
+	    op = cp[-1];	/* peek for += or -= cases */
 	    if (op == '+' || op == '-') {
 		/* case var+=val or var-=val */
-		val[-2] = '\0';	/* remove extra + or - char */
+		cp--;
 	    } else {
 		/* case var=val */
 		op = true;
 	    }
+	    /* Trim whitespace between var and operator. */
+	    while (cp > var && isblank((unsigned char)cp[-1]))
+		cp--;
+	    /* Truncate variable name. */
+	    *cp = '\0';
+	    /* Trim leading whitespace from val. */
+	    while (isblank((unsigned char)*val))
+		val++;
 	    /* Strip double quotes if present. */
 	    if (*val == '"') {
 		char *ep = val + strlen(val);
@@ -1086,12 +1097,15 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    set_default(var, val, op);
 	} else if (*var == '!') {
 	    /* case !var Boolean False */
-	    set_default(var + 1, NULL, false);
+	    do {
+		var++;
+	    } while (isblank((unsigned char)*var));
+	    set_default(var, NULL, false);
 	} else {
 	    /* case var Boolean True */
 	    set_default(var, NULL, true);
 	}
-	free(var);
+	free(copy);
     }
     rc = true;
 
@@ -1269,6 +1283,29 @@ done:
 }
 
 /*
+ * Like strdup() but escapes characters as per RFC 4515.
+ */
+static char *
+sudo_ldap_value_dup(const char *src)
+{
+    char *dst;
+    size_t size;
+
+    size = sudo_ldap_value_len(src) + 1;
+    dst = malloc(size);
+    if (dst == NULL)
+	return NULL;
+
+    *dst = '\0';
+    if (sudo_ldap_value_cat(dst, src, size) >= size) {
+	/* Should not be possible... */
+	free(dst);
+	dst = NULL;
+    }
+    return dst;
+}
+
+/*
  * Check the netgroups list beginning at "start" for nesting.
  * Parent nodes with a memberNisNetgroup that match one of the
  * netgroups are added to the list and checked for further nesting.
@@ -1336,8 +1373,7 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
 		}
 	    }
 	}
-	if (result)
-	    ldap_msgfree(result);
+	ldap_msgfree(result);
 
 	/* Check for nested netgroups in what we added. */
 	start = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
@@ -1346,12 +1382,11 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
     debug_return_bool(true);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (result)
-	ldap_msgfree(result);
+    ldap_msgfree(result);
     debug_return_bool(false);
 overflow:
-    free(filt);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(filt);
     debug_return_bool(false);
 }
 
@@ -1369,9 +1404,9 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result = NULL;
     const char *domain;
-    size_t filt_len;
-    char *filt;
-    int rc;
+    char *escaped_domain = NULL, *escaped_user = NULL;
+    char *escaped_host = NULL, *escaped_shost = NULL, *filt = NULL;
+    int filt_len, rc;
     debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP);
 
     if (ldap_conf.timeout > 0) {
@@ -1383,100 +1418,84 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     /* Use NIS domain if set, else wildcard match. */
     domain = sudo_getdomainname();
 
+    /* Escape the domain, host names, and user name per RFC 4515. */
+    if (domain != NULL) {
+	if ((escaped_domain = sudo_ldap_value_dup(domain)) == NULL)
+	    goto oom;
+    }
+    if ((escaped_user = sudo_ldap_value_dup(pw->pw_name)) == NULL)
+	    goto oom;
+    if (def_netgroup_tuple) {
+	escaped_host = sudo_ldap_value_dup(user_runhost);
+	if (user_runhost == user_srunhost)
+	    escaped_shost = escaped_host;
+	else 
+	    escaped_shost = sudo_ldap_value_dup(user_srunhost);
+	if (escaped_host == NULL || escaped_shost == NULL)
+	    goto oom;
+    }
+
+    /* Build query, using NIS domain if it is set. */
+    if (domain != NULL) {
+	if (escaped_host != escaped_shost) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28,%s,\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user, escaped_domain,
+		escaped_shost, escaped_user, escaped_domain,
+		escaped_host, escaped_user, escaped_domain, escaped_user,
+		escaped_shost, escaped_user, escaped_host, escaped_user);
+	} else if (escaped_shost != NULL) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28,%s,\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user, escaped_domain,
+		escaped_shost, escaped_user, escaped_domain,
+		escaped_user, escaped_shost, escaped_user);
+	} else {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28*,%s,%s\\29)"
+		"(nisNetgroupTriple=\\28*,%s,\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user, escaped_domain,
+		escaped_user);
+	}
+    } else {
+	if (escaped_host != escaped_shost) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,*\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,*\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,*\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user,
+		escaped_shost, escaped_user, escaped_host, escaped_user);
+	} else if (escaped_shost != NULL) {
+	    filt_len = asprintf(&filt, "(&%s(|"
+		"(nisNetgroupTriple=\\28,%s,*\\29)"
+		"(nisNetgroupTriple=\\28%s,%s,*\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user,
+		escaped_shost, escaped_user);
+	} else {
+	    filt_len = asprintf(&filt,
+		"(&%s(|(nisNetgroupTriple=\\28*,%s,*\\29)))",
+		ldap_conf.netgroup_search_filter, escaped_user);
+	}
+    }
+    if (filt_len == -1)
+	goto oom;
+    DPRINTF1("ldap netgroup search filter: '%s'", filt);
+
     STAILQ_FOREACH(base, &ldap_conf.netgroup_base, entries) {
 	DPRINTF1("searching from netgroup_base '%s'", base->val);
-
-	/* Build query, using NIS domain if it is set. */
-	/* XXX - move outside foreach */
-	if (domain != NULL) {
-	    filt_len = sizeof("(nisNetgroupTriple=\\28,,\\29)") - 1 +
-		sudo_ldap_value_len(pw->pw_name);
-	    if (user_host == user_shost) {
-		filt_len *= 4;
-		filt_len += 2 * sudo_ldap_value_len(user_shost);
-		filt_len += 2 * sudo_ldap_value_len(domain);
-	    } else {
-		filt_len *= 6;
-		filt_len += 2 * sudo_ldap_value_len(user_shost);
-		filt_len += 2 * sudo_ldap_value_len(user_host);
-		filt_len += 3 * sudo_ldap_value_len(domain);
-	    }
-	    filt_len += 7 + strlen(ldap_conf.netgroup_search_filter);
-	    if ((filt = malloc(filt_len)) == NULL)
-		goto oom;
-	    CHECK_STRLCPY(filt, "(&", filt_len);
-	    CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
-	    CHECK_STRLCAT(filt, "(|(nisNetgroupTriple=\\28,", filt_len);
-	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    CHECK_STRLCAT(filt, ",", filt_len);
-	    CHECK_LDAP_VCAT(filt, domain, filt_len);
-	    CHECK_STRLCAT(filt, "\\29)(nisNetgroupTriple=\\28", filt_len);
-	    CHECK_LDAP_VCAT(filt, user_shost, filt_len);
-	    CHECK_STRLCAT(filt, ",", filt_len);
-	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    if (user_host != user_shost) {
-		CHECK_STRLCAT(filt, ",", filt_len);
-		CHECK_LDAP_VCAT(filt, domain, filt_len);
-		CHECK_STRLCAT(filt, "\\29)(nisNetgroupTriple=\\28", filt_len);
-		CHECK_LDAP_VCAT(filt, user_host, filt_len);
-		CHECK_STRLCAT(filt, ",", filt_len);
-		CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    }
-	    CHECK_STRLCAT(filt, ",", filt_len);
-	    CHECK_LDAP_VCAT(filt, domain, filt_len);
-	    CHECK_STRLCAT(filt, "\\29)(nisNetgroupTriple=\\28,", filt_len);
-	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    CHECK_STRLCAT(filt, ",\\29)(nisNetgroupTriple=\\28", filt_len);
-	    CHECK_LDAP_VCAT(filt, user_shost, filt_len);
-	    CHECK_STRLCAT(filt, ",", filt_len);
-	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    if (user_host != user_shost) {
-		CHECK_STRLCAT(filt, ",\\29)(nisNetgroupTriple=\\28", filt_len);
-		CHECK_LDAP_VCAT(filt, user_host, filt_len);
-		CHECK_STRLCAT(filt, ",", filt_len);
-		CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    }
-	    CHECK_STRLCAT(filt, ",\\29)))", filt_len);
-	} else {
-	    filt_len = sizeof("(nisNetgroupTriple=\\28,,*\\29)") - 1 +
-		sudo_ldap_value_len(pw->pw_name);
-	    if (user_host == user_shost) {
-		filt_len *= 2;
-		filt_len += sudo_ldap_value_len(user_shost);
-	    } else {
-		filt_len *= 3;
-		filt_len += sudo_ldap_value_len(user_shost);
-		filt_len += sudo_ldap_value_len(user_host);
-	    }
-	    filt_len += 7 + strlen(ldap_conf.netgroup_search_filter);
-	    if ((filt = malloc(filt_len)) == NULL)
-		goto oom;
-	    CHECK_STRLCPY(filt, "(&", filt_len);
-	    CHECK_STRLCAT(filt, ldap_conf.netgroup_search_filter, filt_len);
-	    CHECK_STRLCAT(filt, "(|(nisNetgroupTriple=\\28,", filt_len);
-	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    CHECK_STRLCAT(filt, ",*\\29)(nisNetgroupTriple=\\28", filt_len);
-	    CHECK_LDAP_VCAT(filt, user_shost, filt_len);
-	    CHECK_STRLCAT(filt, ",", filt_len);
-	    CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    if (user_host != user_shost) {
-		CHECK_STRLCAT(filt, ",*\\29)(nisNetgroupTriple=\\28", filt_len);
-		CHECK_LDAP_VCAT(filt, user_host, filt_len);
-		CHECK_STRLCAT(filt, ",", filt_len);
-		CHECK_LDAP_VCAT(filt, pw->pw_name, filt_len);
-	    }
-	    CHECK_STRLCAT(filt, ",*\\29)))", filt_len);
-	}
-	/* XXX - refactor duplicated code */
-	DPRINTF1("ldap netgroup search filter: '%s'", filt);
-	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 	    NULL, 0, NULL, NULL, tvp, 0, &result);
-	free(filt);
 	if (rc != LDAP_SUCCESS) {
 	    DPRINTF1("ldap netgroup search failed: %s", ldap_err2string(rc));
-	    if (result)
-		ldap_msgfree(result);
+	    ldap_msgfree(result);
 	    continue;
 	}
 
@@ -1508,6 +1527,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	    }
 	}
 	ldap_msgfree(result);
+	result = NULL;
 
 	/* Check for nested netgroups in what we added. */
 	ng = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
@@ -1516,14 +1536,17 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 		debug_return_bool(false);
 	}
     }
+    free(filt);
     debug_return_bool(true);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    ldap_msgfree(result);
-    debug_return_bool(false);
-overflow:
+    free(escaped_domain);
+    free(escaped_user);
+    free(escaped_host);
+    if (escaped_host != escaped_shost)
+	free(escaped_shost);
     free(filt);
-    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    ldap_msgfree(result);
     debug_return_bool(false);
 }
 
@@ -1678,8 +1701,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 
     debug_return_str(buf);
 overflow:
-    free(buf);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(buf);
     debug_return_str(NULL);
 }
 
@@ -2259,8 +2282,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		ldap_value_free_len(bv);
 	    }
 	}
-	if (result)
-	    ldap_msgfree(result);
+	ldap_msgfree(result);
     }
     free(filt);
 done:
@@ -3082,10 +3104,8 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 	    tv.tv_usec = 0;
 	    tvp = &tv;
 	}
-	if (result != NULL) {
-	    ldap_msgfree(result);
-	    result = NULL;
-	}
+	ldap_msgfree(result);
+	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
@@ -3101,8 +3121,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     rc = 0;
 
 done:
-    if (result != NULL)
-	ldap_msgfree(result);
+    ldap_msgfree(result);
     free(filt);
 
     debug_return_int(rc);
@@ -3132,8 +3151,8 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	debug_return_int(ret);
 
     /*
-     * The following queries are only determine whether or not a
-     * password is required, so the order of the entries doesn't matter.
+     * The following queries only determine whether or not a password
+     * is required, so the order of the entries doesn't matter.
      */
     if (pwflag) {
 	int doauth = UNSPEC;
@@ -3151,12 +3170,12 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	    /* Only check the command when listing another user. */
 	    if (user_uid == 0 || list_pw == NULL ||
 		user_uid == list_pw->pw_uid ||
-		sudo_ldap_check_command(ld, entry, NULL)) {
+		sudo_ldap_check_command(ld, entry, NULL) == true) {
 		matched = true;
 		break;
 	    }
 	}
-	if (matched || user_uid == 0) {
+	if (matched == true || user_uid == 0) {
 	    SET(ret, VALIDATE_SUCCESS);
 	    CLR(ret, VALIDATE_FAILURE);
 	    if (def_authenticate) {
@@ -3227,9 +3246,9 @@ done:
 	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);
     }
-    if (lres->user_matches)
+    if (pwflag || lres->user_matches)
 	CLR(ret, FLAG_NO_USER);
-    if (lres->host_matches)
+    if (pwflag || lres->host_matches)
 	CLR(ret, FLAG_NO_HOST);
     DPRINTF1("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret);
 
@@ -3408,27 +3427,31 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 			ldap_err2string(rc));
 		    continue;
 		}
-		lres->user_matches = true;
 
-		/* Add the seach result to list of search results. */
+		/* Add the search result to list of search results. */
 		DPRINTF1("adding search result");
 		if (sudo_ldap_result_add_search(lres, ld, result) == NULL) {
-		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
 		    free(filt);
 		    sudo_ldap_result_free(lres);
 		    debug_return_ptr(NULL);
 		}
 		LDAP_FOREACH(entry, ld, result) {
-		    if ((!pass ||
-			sudo_ldap_check_non_unix_group(ld, entry, pw)) &&
-			sudo_ldap_check_host(ld, entry)) {
-			lres->host_matches = true;
-			if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
-			    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-			    free(filt);
-			    sudo_ldap_result_free(lres);
-			    debug_return_ptr(NULL);
-			}
+		    /* Check user or non-unix group. */
+		    if (pass && !sudo_ldap_check_non_unix_group(ld, entry, pw))
+			continue;
+		    lres->user_matches = true;
+		    /* Check host. */
+		    if (!sudo_ldap_check_host(ld, entry, pw))
+			continue;
+		    lres->host_matches = true;
+		    if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			free(filt);
+			sudo_ldap_result_free(lres);
+			debug_return_ptr(NULL);
 		    }
 		}
 		DPRINTF1("result now has %d entries", lres->nentries);

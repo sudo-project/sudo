@@ -186,6 +186,8 @@
 #define I_SUDOEDIT_FOLLOW       92
 #define def_always_query_group_plugin (sudo_defs_table[93].sd_un.flag)
 #define I_ALWAYS_QUERY_GROUP_PLUGIN93
+#define def_netgroup_tuple      (sudo_defs_table[94].sd_un.flag)
+#define I_NETGROUP_TUPLE        94
 
 enum def_tuple {
 	never,

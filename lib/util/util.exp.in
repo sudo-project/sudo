@@ -20,6 +20,7 @@ sudo_debug_exit_int_v1
 sudo_debug_exit_long_v1
 sudo_debug_exit_ptr_v1
 sudo_debug_exit_size_t_v1
+sudo_debug_exit_ssize_t_v1
 sudo_debug_exit_str_v1
 sudo_debug_exit_str_masked_v1
 sudo_debug_fork_v1

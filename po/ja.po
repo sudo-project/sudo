@@ -1,14 +1,14 @@
 # Japanese messages for sudo
 # This file is put in the public domain.
 # Yasuaki Taniguchi <yasuakit@gmail.com>, 2011.
-# Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>, 2012,2015.
+# Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>, 2012, 2015, 2016.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.15rc3\n"
-"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2015-10-24 06:26-0600\n"
-"PO-Revision-Date: 2015-10-26 23:54+0900\n"
+"Project-Id-Version: sudo 1.8.16b1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2016-02-19 15:48-0700\n"
+"PO-Revision-Date: 2016-03-03 19:48+0900\n"
 "Last-Translator: Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -16,56 +16,56 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.8.5\n"
-"X-Poedit-Basepath: sudo-1.8.15rc3\n"
+"X-Generator: Poedit 1.8.7\n"
+"X-Poedit-Basepath: sudo-1.8.16b1\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: lib/util/aix.c:85 lib/util/aix.c:155
+#: lib/util/aix.c:85 lib/util/aix.c:164
 msgid "unable to open userdb"
 msgstr "ユーザーデータベースを開くことができません"
 
-#: lib/util/aix.c:160
+#: lib/util/aix.c:219
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr "%s 用のレジストリー \"%s\" へ切り替えることができません"
 
-#: lib/util/aix.c:185
+#: lib/util/aix.c:244
 msgid "unable to restore registry"
 msgstr "レジストリーを復元できません"
 
-#: lib/util/aix.c:204 lib/util/gidlist.c:64 lib/util/gidlist.c:74
-#: lib/util/sudo_conf.c:185 lib/util/sudo_conf.c:265 lib/util/sudo_conf.c:342
-#: lib/util/sudo_conf.c:544 src/conversation.c:75 src/exec.c:863
-#: src/exec_common.c:96 src/exec_common.c:108 src/exec_common.c:115
+#: lib/util/aix.c:267 lib/util/gidlist.c:64 lib/util/gidlist.c:74
+#: lib/util/sudo_conf.c:207 lib/util/sudo_conf.c:290 lib/util/sudo_conf.c:367
+#: lib/util/sudo_conf.c:569 src/conversation.c:75 src/exec.c:863
+#: src/exec_common.c:107 src/exec_common.c:123 src/exec_common.c:132
 #: src/exec_pty.c:684 src/exec_pty.c:692 src/load_plugins.c:52
-#: src/load_plugins.c:65 src/load_plugins.c:208 src/load_plugins.c:231
-#: src/load_plugins.c:296 src/load_plugins.c:311 src/parse_args.c:180
+#: src/load_plugins.c:65 src/load_plugins.c:215 src/load_plugins.c:238
+#: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:180
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
 #: src/parse_args.c:485 src/preserve_fds.c:47 src/preserve_fds.c:130
-#: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
-#: src/sudo.c:182 src/sudo.c:371 src/sudo.c:390 src/sudo.c:454 src/sudo.c:608
-#: src/sudo.c:627 src/sudo.c:654 src/sudo.c:663 src/sudo.c:672 src/sudo.c:689
-#: src/sudo.c:746 src/sudo.c:756 src/sudo.c:780 src/sudo.c:1160
-#: src/sudo.c:1162 src/sudo.c:1168 src/sudo.c:1176 src/sudo_edit.c:151
-#: src/sudo_edit.c:602 src/sudo_edit.c:699 src/sudo_edit.c:811
-#: src/sudo_edit.c:831
+#: src/selinux.c:84 src/selinux.c:291 src/selinux.c:416 src/selinux.c:425
+#: src/sesh.c:115 src/sudo.c:201 src/sudo.c:398 src/sudo.c:417 src/sudo.c:481
+#: src/sudo.c:655 src/sudo.c:665 src/sudo.c:685 src/sudo.c:704 src/sudo.c:713
+#: src/sudo.c:722 src/sudo.c:739 src/sudo.c:780 src/sudo.c:790 src/sudo.c:810
+#: src/sudo.c:1215 src/sudo.c:1236 src/sudo.c:1398 src/sudo.c:1492
+#: src/sudo_edit.c:151 src/sudo_edit.c:716 src/sudo_edit.c:813
+#: src/sudo_edit.c:925 src/sudo_edit.c:945
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: lib/util/aix.c:204 lib/util/gidlist.c:64 lib/util/sudo_conf.c:185
-#: lib/util/sudo_conf.c:265 lib/util/sudo_conf.c:342 lib/util/sudo_conf.c:544
-#: src/conversation.c:76 src/exec.c:863 src/exec_common.c:96
-#: src/exec_common.c:108 src/exec_common.c:115 src/exec_pty.c:684
-#: src/exec_pty.c:692 src/load_plugins.c:208 src/load_plugins.c:231
-#: src/load_plugins.c:296 src/load_plugins.c:311 src/parse_args.c:180
+#: lib/util/aix.c:267 lib/util/gidlist.c:64 lib/util/sudo_conf.c:208
+#: lib/util/sudo_conf.c:290 lib/util/sudo_conf.c:367 lib/util/sudo_conf.c:569
+#: src/conversation.c:76 src/exec.c:863 src/exec_common.c:107
+#: src/exec_common.c:124 src/exec_common.c:133 src/exec_pty.c:684
+#: src/exec_pty.c:692 src/load_plugins.c:215 src/load_plugins.c:238
+#: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:180
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
 #: src/parse_args.c:485 src/preserve_fds.c:47 src/preserve_fds.c:130
-#: src/selinux.c:84 src/selinux.c:291 src/selinux.c:414 src/sesh.c:102
-#: src/sudo.c:182 src/sudo.c:371 src/sudo.c:390 src/sudo.c:454 src/sudo.c:780
-#: src/sudo.c:1160 src/sudo.c:1162 src/sudo.c:1168 src/sudo.c:1176
-#: src/sudo_edit.c:151 src/sudo_edit.c:602 src/sudo_edit.c:699
-#: src/sudo_edit.c:811 src/sudo_edit.c:831
+#: src/selinux.c:84 src/selinux.c:291 src/selinux.c:416 src/selinux.c:425
+#: src/sesh.c:115 src/sudo.c:201 src/sudo.c:398 src/sudo.c:417 src/sudo.c:481
+#: src/sudo.c:810 src/sudo.c:1215 src/sudo.c:1236 src/sudo.c:1398
+#: src/sudo.c:1492 src/sudo_edit.c:151 src/sudo_edit.c:716 src/sudo_edit.c:813
+#: src/sudo_edit.c:925 src/sudo_edit.c:945
 msgid "unable to allocate memory"
 msgstr "メモリ割り当てを行えませんでした"
 
@@ -88,52 +88,52 @@ msgstr "値が大き過ぎます"
 msgid "value too small"
 msgstr "値が小さ過ぎます"
 
-#: lib/util/sudo_conf.c:198
+#: lib/util/sudo_conf.c:223
 #, c-format
 msgid "invalid Path value `%s' in %s, line %u"
 msgstr "無効な Path の値 `%s' が %s の %u 行目 にあります"
 
-#: lib/util/sudo_conf.c:364 lib/util/sudo_conf.c:417
+#: lib/util/sudo_conf.c:389 lib/util/sudo_conf.c:442
 #, c-format
 msgid "invalid value for %s `%s' in %s, line %u"
 msgstr "無効な %s の値 `%s' が %s の %u 行目 にあります"
 
-#: lib/util/sudo_conf.c:385
+#: lib/util/sudo_conf.c:410
 #, c-format
 msgid "unsupported group source `%s' in %s, line %u"
 msgstr "サポートしていないグループソース `%s' が %s の %u 行目で指定されています"
 
-#: lib/util/sudo_conf.c:401
+#: lib/util/sudo_conf.c:426
 #, c-format
 msgid "invalid max groups `%s' in %s, line %u"
 msgstr "無効な最大グループの値 `%s' が %s の %u 行目 にあります"
 
-#: lib/util/sudo_conf.c:560
+#: lib/util/sudo_conf.c:585
 #, c-format
 msgid "unable to stat %s"
 msgstr "%s の状態取得 (stat) ができません"
 
-#: lib/util/sudo_conf.c:563
+#: lib/util/sudo_conf.c:588
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s は通常ファイルではありません"
 
-#: lib/util/sudo_conf.c:566
+#: lib/util/sudo_conf.c:591
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s はユーザーID %u によって所有されています。これは %u であるべきです"
 
-#: lib/util/sudo_conf.c:570
+#: lib/util/sudo_conf.c:595
 #, c-format
 msgid "%s is world writable"
 msgstr "%s は誰でも書き込み可能です"
 
-#: lib/util/sudo_conf.c:573
+#: lib/util/sudo_conf.c:598
 #, c-format
 msgid "%s is group writable"
 msgstr "%s はグループのメンバーによる書き込みが可能です"
 
-#: lib/util/sudo_conf.c:583 src/selinux.c:199 src/selinux.c:212 src/sudo.c:340
+#: lib/util/sudo_conf.c:608 src/selinux.c:199 src/selinux.c:212 src/sudo.c:367
 #, c-format
 msgid "unable to open %s"
 msgstr "%s を開けません"
@@ -142,23 +142,23 @@ msgstr "%s を開けません"
 #: src/exec.c:413 src/exec.c:415 src/exec.c:417 src/exec.c:419 src/exec.c:422
 #: src/exec.c:438 src/exec.c:440 src/exec.c:595 src/exec.c:790
 #: src/exec_pty.c:466 src/exec_pty.c:722 src/exec_pty.c:792 src/exec_pty.c:794
-#: src/exec_pty.c:806 src/exec_pty.c:808 src/exec_pty.c:1285
-#: src/exec_pty.c:1287 src/exec_pty.c:1292 src/exec_pty.c:1294
-#: src/exec_pty.c:1308 src/exec_pty.c:1319 src/exec_pty.c:1321
-#: src/exec_pty.c:1323 src/exec_pty.c:1325 src/exec_pty.c:1327
-#: src/exec_pty.c:1329 src/exec_pty.c:1331 src/signal.c:147
+#: src/exec_pty.c:806 src/exec_pty.c:808 src/exec_pty.c:1289
+#: src/exec_pty.c:1291 src/exec_pty.c:1296 src/exec_pty.c:1298
+#: src/exec_pty.c:1312 src/exec_pty.c:1323 src/exec_pty.c:1325
+#: src/exec_pty.c:1327 src/exec_pty.c:1329 src/exec_pty.c:1331
+#: src/exec_pty.c:1333 src/exec_pty.c:1335 src/signal.c:147
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "シグナル %d のハンドラを設定できません"
 
-#: src/exec.c:126 src/exec_pty.c:838 src/exec_pty.c:1369 src/tgetpass.c:265
+#: src/exec.c:126 src/exec_pty.c:838 src/exec_pty.c:1373 src/tgetpass.c:265
 msgid "unable to fork"
 msgstr "fork できません"
 
 #: src/exec.c:304 src/exec.c:312 src/exec.c:868 src/exec_pty.c:604
-#: src/exec_pty.c:611 src/exec_pty.c:654 src/exec_pty.c:659 src/exec_pty.c:942
-#: src/exec_pty.c:952 src/exec_pty.c:997 src/exec_pty.c:1004
-#: src/exec_pty.c:1434 src/exec_pty.c:1441 src/exec_pty.c:1448
+#: src/exec_pty.c:611 src/exec_pty.c:654 src/exec_pty.c:659 src/exec_pty.c:946
+#: src/exec_pty.c:956 src/exec_pty.c:1001 src/exec_pty.c:1008
+#: src/exec_pty.c:1438 src/exec_pty.c:1445 src/exec_pty.c:1452
 msgid "unable to add event to queue"
 msgstr "キューにイベントを追加できません"
 
@@ -183,11 +183,11 @@ msgstr "tty ラベルを復旧できません"
 msgid "unable to restore handler for signal %d"
 msgstr "シグナル %d のハンドラを復元できません"
 
-#: src/exec.c:721 src/exec_pty.c:1176
+#: src/exec.c:721 src/exec_pty.c:1180
 msgid "error reading from signal pipe"
 msgstr "シグナルパイプからの読み込み中にエラーが発生しました"
 
-#: src/exec_common.c:64
+#: src/exec_common.c:166
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "PRIV_LIMIT から PRIV_PROC_EXEC を取り除くことができません"
 
@@ -196,95 +196,95 @@ msgid "unable to allocate pty"
 msgstr "pty を割り当てられません"
 
 #: src/exec_pty.c:766 src/exec_pty.c:775 src/exec_pty.c:783
-#: src/exec_pty.c:1277 src/exec_pty.c:1366 src/signal.c:128 src/tgetpass.c:261
+#: src/exec_pty.c:1281 src/exec_pty.c:1370 src/signal.c:128 src/tgetpass.c:261
 msgid "unable to create pipe"
 msgstr "パイプを作成できません"
 
-#: src/exec_pty.c:1209
+#: src/exec_pty.c:1213
 msgid "error reading from pipe"
 msgstr "パイプからの読み込み中にエラーが発生しました"
 
-#: src/exec_pty.c:1234
+#: src/exec_pty.c:1238
 msgid "error reading from socketpair"
 msgstr "ソケットペアからの読み込み中にエラーが発生しました"
 
-#: src/exec_pty.c:1243
+#: src/exec_pty.c:1247
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "バックチャンネルに関する予期しないリプレイタイプです: %d"
 
-#: src/exec_pty.c:1345
+#: src/exec_pty.c:1349
 msgid "unable to set controlling tty"
 msgstr "tty の制御設定ができません"
 
-#: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:80
-#: src/load_plugins.c:110 src/load_plugins.c:116 src/load_plugins.c:122
-#: src/load_plugins.c:163 src/load_plugins.c:171 src/load_plugins.c:178
-#: src/load_plugins.c:184
+#: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:85
+#: src/load_plugins.c:115 src/load_plugins.c:123 src/load_plugins.c:129
+#: src/load_plugins.c:170 src/load_plugins.c:178 src/load_plugins.c:185
+#: src/load_plugins.c:191
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
 msgstr "%s, %d 行目 プラグイン %s をロード中にエラーが発生しました"
 
-#: src/load_plugins.c:82
+#: src/load_plugins.c:87
 #, c-format
 msgid "%s%s: %s"
 msgstr "%s%s: %s"
 
-#: src/load_plugins.c:118
+#: src/load_plugins.c:125
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s の所有者は uid %d でなければいけません"
 
-#: src/load_plugins.c:124
+#: src/load_plugins.c:131
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr "%s は所有者のみ書き込み可能で無ければいけません"
 
-#: src/load_plugins.c:165
+#: src/load_plugins.c:172
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "%s をロードできません: %s"
 
-#: src/load_plugins.c:173
+#: src/load_plugins.c:180
 #, c-format
 msgid "unable to find symbol `%s' in %s"
 msgstr "シンボル `%s' が %s に見つかりません"
 
-#: src/load_plugins.c:180
+#: src/load_plugins.c:187
 #, c-format
 msgid "unknown policy type %d found in %s"
 msgstr "不明なポリシータイプ %d が %s で見つかりました"
 
-#: src/load_plugins.c:186
+#: src/load_plugins.c:193
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "互換性の無いポリシーメジャーバージョン %d （予期されるのは %d）が %s  で見つかりました"
 
-#: src/load_plugins.c:195
+#: src/load_plugins.c:202
 #, c-format
 msgid "ignoring policy plugin `%s' in %s, line %d"
 msgstr "ポリシープラグイン %s を無視します。%s の %d 行目"
 
-#: src/load_plugins.c:197
+#: src/load_plugins.c:204
 msgid "only a single policy plugin may be specified"
 msgstr "1つのポリシープラグインのみ指定できます"
 
-#: src/load_plugins.c:200
+#: src/load_plugins.c:207
 #, c-format
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
 msgstr "重複しているポリシープラグイン %s を無視します。%s の %d 行目"
 
-#: src/load_plugins.c:221
+#: src/load_plugins.c:228
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
 msgstr "重複している I/O プラグイン %s を無視します。%s の %d 行目"
 
-#: src/load_plugins.c:324
+#: src/load_plugins.c:331
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "ポリシープラグイン %s には check_policy メソッドが含まれていません"
 
-#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:449
+#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:476
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "内部エラー、 %s がオーバーフローしました"
@@ -552,12 +552,17 @@ msgstr "キー作成コンテキストを %s へ設定できません"
 msgid "requires at least one argument"
 msgstr "最低でも一つ以上おの引数が必要です"
 
-#: src/sesh.c:107
+#: src/sesh.c:106
+#, c-format
+msgid "invalid file descriptor number: %s"
+msgstr "無効なファイル記述子の番号: %s"
+
+#: src/sesh.c:120
 #, c-format
 msgid "unable to run %s as a login shell"
 msgstr "%s をログインシェルとして実行できません"
 
-#: src/sesh.c:112 src/sudo.c:1231
+#: src/sesh.c:125 src/sudo.c:1274
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s を実行できません"
@@ -610,205 +615,209 @@ msgstr "プロジェクト\"%s\" への setproject に失敗しました"
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告、プロジェクト \"%s\" への資源制御割り当てに失敗しました"
 
-#: src/sudo.c:193
+#: src/sudo.c:212
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo バージョン %s\n"
 
-#: src/sudo.c:195
+#: src/sudo.c:214
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "configure オプション: %s\n"
 
-#: src/sudo.c:203
+#: src/sudo.c:222
 msgid "fatal error, unable to load plugins"
 msgstr "致命的エラー、プラグインをロードできません"
 
-#: src/sudo.c:211
+#: src/sudo.c:230
 msgid "unable to initialize policy plugin"
 msgstr "ポリシープラグインを初期化できません"
 
-#: src/sudo.c:267
+#: src/sudo.c:276
+msgid "plugin did not return a command to execute"
+msgstr "プラグインが実行するべきコマンドを返しませんでした"
+
+#: src/sudo.c:292
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "I/O プラグイン %s を初期化中にエラーが発生しました"
 
-#: src/sudo.c:293
+#: src/sudo.c:318
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "予期しない sudo のモード 0x%x です"
 
-#: src/sudo.c:434
+#: src/sudo.c:461
 msgid "unable to get group vector"
 msgstr "グループベクトルを取得できません"
 
-#: src/sudo.c:497
+#: src/sudo.c:522
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "不明なユーザーID %u です: 誰ですか?"
 
-#: src/sudo.c:829
+#: src/sudo.c:859
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s は所有者が uid %d である必要があり、かつ setuid が設定されている必要があります"
 
-#: src/sudo.c:832
+#: src/sudo.c:862
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "実効 uid が %d ではありません、%s は 'nosuid' が設定されたファイルシステムにあるか、root 権限のないNFSファイルシステムにあるのでは？"
 
-#: src/sudo.c:838
+#: src/sudo.c:868
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "実効 uid が %d ではありません、sudo は setuid root を設定してインストールされていますか？"
 
-#: src/sudo.c:969
+#: src/sudo.c:999
 #, c-format
 msgid "unknown login class %s"
 msgstr "不明なログインクラス %s です"
 
-#: src/sudo.c:982
+#: src/sudo.c:1012
 msgid "unable to set user context"
 msgstr "ユーザーコンテキストを設定できません"
 
-#: src/sudo.c:996
+#: src/sudo.c:1026
 msgid "unable to set supplementary group IDs"
 msgstr "追加のグループIDを設定できません"
 
-#: src/sudo.c:1003
+#: src/sudo.c:1033
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "実行時のグループID (gid) %u を実効グループIDに設定できません"
 
-#: src/sudo.c:1009
+#: src/sudo.c:1039
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "実行時のグループID (gid) %u をグループIDに設定できません"
 
-#: src/sudo.c:1016
+#: src/sudo.c:1046
 msgid "unable to set process priority"
 msgstr "プロセス優先度を設定できません"
 
-#: src/sudo.c:1024
+#: src/sudo.c:1054
 #, c-format
 msgid "unable to change root to %s"
 msgstr "root を %s へ変更できません"
 
-#: src/sudo.c:1037 src/sudo.c:1043 src/sudo.c:1050
+#: src/sudo.c:1067 src/sudo.c:1073 src/sudo.c:1080
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "実行時のユーザーID (uid) (%u, %u) へ変更できません"
 
-#: src/sudo.c:1068
+#: src/sudo.c:1098
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "ディレクトリーを %s に変更できません"
 
-#: src/sudo.c:1126
+#: src/sudo.c:1156
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "予期しない子プロセスの終了コードです: %d"
 
-#: src/sudo.c:1259
+#: src/sudo.c:1302
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "ポリシープラグイン %s には check_policy メソッドが含まれていません"
 
-#: src/sudo.c:1277
+#: src/sudo.c:1320
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "ポリシープラグイン %s は権限の一覧表示をサポートしていません"
 
-#: src/sudo.c:1294
+#: src/sudo.c:1337
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "ポリシープラグイン %s は -v オプションをサポートしません"
 
-#: src/sudo.c:1309
+#: src/sudo.c:1352
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "ポリシープラグイン %s は -k/-K オプションをサポートしません"
 
-#: src/sudo_edit.c:202
+#: src/sudo_edit.c:181
 msgid "unable to restore current working directory"
 msgstr "カレントディレクトリを復元できません"
 
-#: src/sudo_edit.c:412 src/sudo_edit.c:516
+#: src/sudo_edit.c:526 src/sudo_edit.c:630
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: 通常ファイルではありません"
 
-#: src/sudo_edit.c:419
+#: src/sudo_edit.c:533
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr "%s: シンボリックリンクの編集は許可されていません"
 
-#: src/sudo_edit.c:422
+#: src/sudo_edit.c:536
 #, c-format
 msgid "%s: editing files in a writable directory is not permitted"
 msgstr "%s: 書き込み可能なディレクトリ内のファイルの編集は許可されていません"
 
-#: src/sudo_edit.c:453 src/sudo_edit.c:555
+#: src/sudo_edit.c:567 src/sudo_edit.c:669
 #, c-format
 msgid "%s: short write"
 msgstr "%s: 短い書き込みです"
 
-#: src/sudo_edit.c:517
+#: src/sudo_edit.c:631
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s を修正しないままにします"
 
-#: src/sudo_edit.c:530 src/sudo_edit.c:716
+#: src/sudo_edit.c:644 src/sudo_edit.c:830
 #, c-format
 msgid "%s unchanged"
 msgstr "%s を変更しません"
 
-#: src/sudo_edit.c:544 src/sudo_edit.c:566
+#: src/sudo_edit.c:658 src/sudo_edit.c:680
 #, c-format
 msgid "unable to write to %s"
 msgstr "%s へ書き込むことができません"
 
-#: src/sudo_edit.c:545 src/sudo_edit.c:564 src/sudo_edit.c:567
-#: src/sudo_edit.c:741 src/sudo_edit.c:745
+#: src/sudo_edit.c:659 src/sudo_edit.c:678 src/sudo_edit.c:681
+#: src/sudo_edit.c:855 src/sudo_edit.c:859
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "編集セッションの内容が %s 内に残っています"
 
-#: src/sudo_edit.c:563
+#: src/sudo_edit.c:677
 msgid "unable to read temporary file"
 msgstr "一時ファイルを読み込むことができません"
 
-#: src/sudo_edit.c:646
+#: src/sudo_edit.c:760
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: 内部エラー: パスの数がおかしいです"
 
-#: src/sudo_edit.c:648
+#: src/sudo_edit.c:762
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: 一時ファイルを作成することができません"
 
-#: src/sudo_edit.c:650 src/sudo_edit.c:748
+#: src/sudo_edit.c:764 src/sudo_edit.c:862
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: 不明なエラー %d"
 
-#: src/sudo_edit.c:740
+#: src/sudo_edit.c:854
 msgid "unable to copy temporary files back to their original location"
 msgstr "一時ファイルを元の場所に戻すことができません"
 
-#: src/sudo_edit.c:744
+#: src/sudo_edit.c:858
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "一時ファイルのいくつかを元の場所に戻すことができません"
 
-#: src/sudo_edit.c:787
+#: src/sudo_edit.c:901
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "ユーザーID (uid) を root (%u) に変更できません"
 
-#: src/sudo_edit.c:804
+#: src/sudo_edit.c:918
 msgid "plugin error: missing file list for sudoedit"
 msgstr "プラグインエラー: sudoedit 用のファイル一覧がありません"
 
-#: src/sudo_edit.c:845 src/sudo_edit.c:858
+#: src/sudo_edit.c:959 src/sudo_edit.c:972
 msgid "unable to read the clock"
 msgstr "時刻を読み込むことができません"
 

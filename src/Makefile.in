@@ -41,7 +41,8 @@ LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
 LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ $(LT_LIBS)
 
 # C preprocessor defines
-CPPDEFS = -DLOCALEDIR=\"$(localedir)\"
+CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\" \
+	  -DLOCALEDIR=\"$(localedir)\"
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) \

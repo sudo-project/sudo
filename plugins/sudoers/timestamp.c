@@ -310,9 +310,9 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 		    (long long)old_eof);
 	    }
 	}
-	debug_return_size_t(-1);
+	debug_return_ssize_t(-1);
     }
-    debug_return_size_t(nwritten);
+    debug_return_ssize_t(nwritten);
 }
 
 /*
@@ -354,13 +354,13 @@ ts_fill4(struct timestamp_entry *entry, struct passwd *pw, int flags, bool tty_t
 static void
 ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
-    return ts_fill4(entry, pw, flags, def_tty_tickets);
+    ts_fill4(entry, pw, flags, def_tty_tickets);
 }
 
 static void
 ts_fill_tty(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
-    return ts_fill4(entry, pw, flags, true);
+    ts_fill4(entry, pw, flags, true);
 }
 
 /*
@@ -553,7 +553,7 @@ done:
     if (should_unlock)
 	timestamp_unlock_record(cookie->fd, cookie->pos, sizeof(*entry));
 
-    debug_return_size_t(nread);
+    debug_return_ssize_t(nread);
 }
 
 /*

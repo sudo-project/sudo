@@ -65,7 +65,7 @@ struct iolog_details {
     int cols;
 };
 
-static int iolog_compress;
+static bool iolog_compress = false;
 static struct timeval last_time;
 static unsigned int sessid_max = SESSID_MAX;
 
@@ -718,6 +718,12 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     struct timeval now, delay;
     int rval = true;
     debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
+
+    if (io_log_files[idx].fd.v == NULL) {
+	sudo_warnx(U_("%s: internal error, file index %d not open"),
+	    __func__, idx);
+	debug_return_int(-1);
+    }
 
     gettimeofday(&now, NULL);
 

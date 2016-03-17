@@ -62,7 +62,7 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     groups[0] = basegid;
 
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb((char *) name);
+    aix_setauthdb((char *) name, NULL);
 #endif
     if ((grset = getgrset(name)) != NULL) {
 	char *last;

@@ -259,6 +259,7 @@ plugins/sudoers/defaults.h
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/find_path.c
+plugins/sudoers/gc.c
 plugins/sudoers/getdate.c
 plugins/sudoers/getdate.y
 plugins/sudoers/getspwuid.c
@@ -511,6 +512,8 @@ po/gl.mo
 po/gl.po
 po/hr.mo
 po/hr.po
+po/hu.mo
+po/hu.po
 po/it.mo
 po/it.po
 po/ja.mo

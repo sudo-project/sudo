@@ -1,6 +1,6 @@
 #
 # Verify that all command tags are parsed OK.
-# See http://www.sudo.ws/bugs/show_bug.cgi?id=437
+# See https://bugzilla.sudo.ws/show_bug.cgi?id=437
 #
 user1 ALL = LOG_INPUT: LOG_OUTPUT: /usr/bin/su -:\
       ALL = NOLOG_INPUT: NOLOG_OUTPUT: /usr/bin/id

@@ -514,11 +514,11 @@ get_process_ttyname(char *name, size_t namelen)
 		}
 	    }
 	}
-	free(line);
     }
     errno = ENOENT;
 
 done:
+    free(line);
     if (rval == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);

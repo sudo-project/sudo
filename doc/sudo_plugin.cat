@@ -499,6 +499,11 @@ DDEESSCCRRIIPPTTIIOONN
                        This setting has no effect unless I/O logging is
                        enabled or _u_s_e___p_t_y is enabled.
 
+                 execfd=number
+                       If specified, ssuuddoo will use the fexecve(2) system call
+                       to execute the command instead of execve(2).  The
+                       specified _n_u_m_b_e_r must refer to an open file descriptor.
+
                  iolog_compress=bool
                        Set to true if the I/O logging plugins, if any, should
                        compress the log data.  This is a hint to the I/O
@@ -605,6 +610,19 @@ DDEESSCCRRIIPPTTIIOONN
                        ssuuddooeeddiitt.  This allows the plugin to perform command
                        substitution and transparently enable _s_u_d_o_e_d_i_t when the
                        user attempts to run an editor.
+
+                 sudoedit_checkdir=bool
+                       Set to false to disable directory writability checks in
+                       ssuuddooeeddiitt.  By default, ssuuddooeeddiitt 1.8.16 and higher will
+                       check all directory components of the path to be edited
+                       for writability by the invoking user.  Symbolic links
+                       will not be followed in writable directories and
+                       ssuuddooeeddiitt will refuse to edit a file located in a
+                       writable directory.  These restrictions are not
+                       enforced when ssuuddooeeddiitt is run by root.  The
+                       _s_u_d_o_e_d_i_t___f_o_l_l_o_w option can be set to false to disable
+                       this check.  Only available starting with API version
+                       1.8.
 
                  sudoedit_follow=bool
                        Set to true to allow ssuuddooeeddiitt to edit files that are
@@ -1497,13 +1515,18 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            Debug lines in the sudo.conf(4) file.
 
      Version 1.8 (sudo 1.8.15)
-           The _s_u_d_o_e_d_i_t___f_o_l_l_o_w entry was added to the command_info list.
+           The _s_u_d_o_e_d_i_t___c_h_e_c_k_d_i_r and _s_u_d_o_e_d_i_t___f_o_l_l_o_w entries were added to the
+           command_info list.  The default value of _s_u_d_o_e_d_i_t___c_h_e_c_k_d_i_r was
+           changed to true in sudo 1.8.16.
 
            The sudo _c_o_n_v_e_r_s_a_t_i_o_n function now takes a pointer to a struct
            sudo_conv_callback as its fourth argument.  The sudo_conv_t
            definition has been updated to match.  The plugin must specify that
            it supports plugin API version 1.8 or higher to receive a
            conversation function pointer that supports this argument.
+
+     Version 1.9 (sudo 1.8.16)
+           The _e_x_e_c_f_d entry was added to the command_info list.
 
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
@@ -1515,23 +1538,23 @@ AAUUTTHHOORRSS
            Todd C. Miller
 
      See the CONTRIBUTORS file in the ssuuddoo distribution
-     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     (https://www.sudo.ws/contributors.html) for an exhaustive list of people
      who have contributed to ssuuddoo.
 
 BBUUGGSS
      If you feel you have found a bug in ssuuddoo, please submit a bug report at
-     http://bugzilla.sudo.ws/
+     https://bugzilla.sudo.ws/
 
 SSUUPPPPOORRTT
      Limited free support is available via the sudo-users mailing list, see
-     http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search the
-     archives.
+     https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
+     the archives.
 
 DDIISSCCLLAAIIMMEERR
      ssuuddoo is provided ``AS IS'' and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
-     file distributed with ssuuddoo or http://www.sudo.ws/license.html for
+     file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.15                    September 9, 2015                   Sudo 1.8.15
+Sudo 1.8.16                    January 20, 2016                    Sudo 1.8.16

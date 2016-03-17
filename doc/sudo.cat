@@ -126,12 +126,23 @@ DDEESSCCRRIIPPTTIIOONN
                        copied back to their original location and the
                        temporary versions are removed.
 
-                 Unless explicitly allowed by the security policy, symbolic
-                 links will not be opened.  This helps prevent the editing of
-                 unauthorized files when the file is located in a user-
-                 writable directory.  Versions of ssuuddoo prior to 1.8.15 do not
-                 have this restriction.  Users are never allowed to edit
-                 device special files.
+                 To help prevent the editing of unauthorized files, the
+                 following restrictions are enforced unless explicitly allowed
+                 by the security policy:
+
+                  ++oo   Symbolic links may not be edited (version 1.8.15 and
+                      higher).
+
+                  ++oo   Symbolic links along the path to be edited are not
+                      followed when the parent directory is writable by the
+                      invoking user unless that user is root (version 1.8.16
+                      and higher).
+
+                  ++oo   Files located in a directory that is writable by the
+                      invoking user may not be edited unless that user is root
+                      (version 1.8.16 and higher).
+
+                 Users are never allowed to edit device special files.
 
                  If the specified file does not exist, it will be created.
                  Note that unlike most commands run by _s_u_d_o, the editor is run
@@ -374,12 +385,12 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
 
    SSiiggnnaall hhaannddlliinngg
      When the command is run as a child of the ssuuddoo process, ssuuddoo will relay
-     signals it receives to the command.  Unless the command is being run in a
-     new pty, the SIGINT and SIGQUIT signals are not relayed unless they are
-     sent by a user process, not the kernel.  Otherwise, the command would
-     receive SIGINT twice every time the user entered control-C.  Some
-     signals, such as SIGSTOP and SIGKILL, cannot be caught and thus will not
-     be relayed to the command.  As a general rule, SIGTSTP should be used
+     signals it receives to the command.  The SIGINT and SIGQUIT signals are
+     only relayed when the command is being run in a new pty or when the
+     signal was sent by a user process, not the kernel.  This prevents the
+     command from receiving SIGINT twice each time the user enters control-C.
+     Some signals, such as SIGSTOP and SIGKILL, cannot be caught and thus will
+     not be relayed to the command.  As a general rule, SIGTSTP should be used
      instead of SIGSTOP when you wish to suspend a command being run by ssuuddoo.
 
      As a special case, ssuuddoo will not relay signals that were sent by the
@@ -440,14 +451,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      Users should _n_e_v_e_r be granted ssuuddoo privileges to execute files that are
      writable by the user or that reside in a directory that is writable by
      the user.  If the user can modify or replace the command there is no way
-     to limit what additional commands they can run.  Likewise, users should
-     _n_e_v_e_r be granted ssuuddooeeddiitt permission to edit a file that resides in a
-     directory the user has write access to.  A user with directory write
-     access could replace the legitimate file with a link to some other,
-     arbitrary, file.  Starting with version 1.8.15, ssuuddooeeddiitt will refuse to
-     open a symbolic link unless the security policy explicitly permits it.
-     However, it is still possible to create a hard link if the directory is
-     writable and the link target resides on the same file system.
+     to limit what additional commands they can run.
 
      Please note that ssuuddoo will normally only log the command it explicitly
      runs.  If a user runs a command such as sudo su or sudo sh, subsequent
@@ -571,7 +575,7 @@ SSEEEE AALLSSOO
 
 HHIISSTTOORRYY
      See the HISTORY file in the ssuuddoo distribution
-     (http://www.sudo.ws/history.html) for a brief history of sudo.
+     (https://www.sudo.ws/history.html) for a brief history of sudo.
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
@@ -580,7 +584,7 @@ AAUUTTHHOORRSS
            Todd C. Miller
 
      See the CONTRIBUTORS file in the ssuuddoo distribution
-     (http://www.sudo.ws/contributors.html) for an exhaustive list of people
+     (https://www.sudo.ws/contributors.html) for an exhaustive list of people
      who have contributed to ssuuddoo.
 
 CCAAVVEEAATTSS
@@ -603,18 +607,18 @@ CCAAVVEEAATTSS
 
 BBUUGGSS
      If you feel you have found a bug in ssuuddoo, please submit a bug report at
-     http://bugzilla.sudo.ws/
+     https://bugzilla.sudo.ws/
 
 SSUUPPPPOORRTT
      Limited free support is available via the sudo-users mailing list, see
-     http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search the
-     archives.
+     https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
+     the archives.
 
 DDIISSCCLLAAIIMMEERR
      ssuuddoo is provided ``AS IS'' and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
-     file distributed with ssuuddoo or http://www.sudo.ws/license.html for
+     file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.15                   September 27, 2015                   Sudo 1.8.15
+Sudo 1.8.16                    January 19, 2016                    Sudo 1.8.16

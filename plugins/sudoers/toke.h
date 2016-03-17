@@ -17,10 +17,10 @@
 #ifndef SUDOERS_TOKE_H
 #define SUDOERS_TOKE_H
 
-bool append(const char *, int);
-bool fill_args(const char *, int, int);
-bool fill_cmnd(const char *, int);
-bool fill_txt(const char *, int, int);
+bool append(const char *, size_t);
+bool fill_args(const char *, size_t, int);
+bool fill_cmnd(const char *, size_t);
+bool fill_txt(const char *, size_t, size_t);
 bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *msg);
 void sudoerserror(const char *);
