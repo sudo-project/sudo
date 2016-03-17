@@ -15,7 +15,7 @@
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .Dd November 20, 2015
-.Dt SUDO @mansectform@
+.Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudo.conf
