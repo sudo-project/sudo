@@ -83,19 +83,29 @@ static char *def_prompt = PASSPROMPT;
 static bool getpass_error;
 static pam_handle_t *pamh;
 
-int
-sudo_pam_init(struct passwd *pw, sudo_auth *auth)
+static int
+sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 {
-    static int pam_status;
+    static int pam_status = PAM_SUCCESS;
     int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
+    /* Stash pointer to last pam status. */
+    auth->data = &pam_status;
+
+#ifdef _AIX
+    if (pamh != NULL) {
+	/* Already initialized (may happen with AIX). */
+	debug_return_int(AUTH_SUCCESS);
+    }
+#endif /* _AIX */
+
     /* Initial PAM setup */
-    auth->data = (void *) &pam_status;
     pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
 	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
-	log_warning(0, N_("unable to initialize PAM"));
+	if (!quiet)
+	    log_warning(0, N_("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -142,6 +152,20 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 
     debug_return_int(AUTH_SUCCESS);
 }
+
+int
+sudo_pam_init(struct passwd *pw, sudo_auth *auth)
+{
+    return sudo_pam_init2(pw, auth, false);
+}
+
+#ifdef _AIX
+int
+sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth)
+{
+    return sudo_pam_init2(pw, auth, true);
+}
+#endif /* _AIX */
 
 int
 sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)

@@ -64,6 +64,7 @@ int sudo_fwtk_init(struct passwd *pw, sudo_auth *auth);
 int sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_init(struct passwd *pw, sudo_auth *auth);
+int sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_begin_session(struct passwd *pw, char **user_env[], sudo_auth *auth);

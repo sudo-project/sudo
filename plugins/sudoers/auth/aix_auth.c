@@ -44,9 +44,10 @@
  * http://publib16.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf1/authenticate.htm
  */
 
-#define AIX_AUTH_UNKNOWN	0
-#define AIX_AUTH_STD		1
-#define AIX_AUTH_PAM		2
+#ifdef HAVE_PAM
+# define AIX_AUTH_UNKNOWN	0
+# define AIX_AUTH_STD		1
+# define AIX_AUTH_PAM		2
 
 static int
 sudo_aix_authtype(void)
@@ -115,15 +116,22 @@ sudo_aix_authtype(void)
 
     debug_return_int(authtype);
 }
+#endif /* HAVE_PAM */
 
 int
 sudo_aix_init(struct passwd *pw, sudo_auth *auth)
 {
     debug_decl(sudo_aix_init, SUDOERS_DEBUG_AUTH)
 
+#ifdef HAVE_PAM
     /* Check auth_type in /etc/security/login.cfg. */
-    if (sudo_aix_authtype() == AIX_AUTH_PAM)
-	debug_return_int(AUTH_FAILURE);
+    if (sudo_aix_authtype() == AIX_AUTH_PAM) {
+	if (sudo_pam_init_quiet(pw, auth) == AUTH_SUCCESS) {
+	    /* Fail AIX authentication so we can use PAM instead. */
+	    debug_return_int(AUTH_FAILURE);
+	}
+    }
+#endif
     debug_return_int(AUTH_SUCCESS);
 }
 
