@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -261,6 +261,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char *iolog_path = NULL;
     mode_t cmnd_umask = 0777;
     struct sudo_nss *nss;
+    bool nopass = false;
     int cmnd_status = -1, oldlocale, validated;
     int rval = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
@@ -343,6 +344,33 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
+	/*
+	 * The NOPASSWD tag needs special handling among all sources
+	 * in -l or -v mode.
+	 */
+	if (pwflag) {
+	    enum def_tuple pwcheck =
+		(pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
+	    switch (pwcheck) {
+	    case all:
+		if (!ISSET(validated, FLAG_NOPASSWD))
+		    nopass = false;
+		break;
+	    case any:
+		if (ISSET(validated, FLAG_NOPASSWD))
+		    nopass = true;
+		break;
+	    case never:
+		nopass = true;
+		break;
+	    case always:
+		nopass = false;
+		break;
+	    default:
+		break;
+	    }
+	}
+
 	if (ISSET(validated, VALIDATE_ERROR)) {
 	    /* The lookup function should have printed an error. */
 	    goto done;
@@ -356,6 +384,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		break;
 	}
     }
+    if (pwflag && nopass)
+	def_authenticate = false;
 
     /* Restore user's locale. */
     sudoers_setlocale(oldlocale, NULL);

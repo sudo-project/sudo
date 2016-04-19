@@ -123,6 +123,7 @@ struct sudo_user {
 #define FLAG_NON_INTERACTIVE	0x100
 #define FLAG_BAD_PASSWORD	0x200
 #define FLAG_AUTH_ERROR		0x400
+#define FLAG_NOPASSWD		0x800
 
 /*
  * find_path()/set_cmnd() return values

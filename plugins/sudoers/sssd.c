@@ -1146,22 +1146,17 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	if (matched == true || user_uid == 0) {
 	    SET(ret, VALIDATE_SUCCESS);
 	    CLR(ret, VALIDATE_FAILURE);
-	    if (def_authenticate) {
-		switch (pwcheck) {
-		    case always:
-			SET(ret, FLAG_CHECK_USER);
-			break;
-		    case all:
-		    case any:
-			if (doauth == false)
-			    def_authenticate = false;
-			break;
-		    case never:
-			def_authenticate = false;
-			break;
-		    default:
-			break;
-		}
+	    switch (pwcheck) {
+		case always:
+		    SET(ret, FLAG_CHECK_USER);
+		    break;
+		case all:
+		case any:
+		    if (doauth == false)
+			SET(ret, FLAG_NOPASSWD);
+		    break;
+		default:
+		    break;
 	    }
 	}
 	goto done;
