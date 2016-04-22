@@ -542,7 +542,6 @@ send_mail(const char *fmt, ...)
     const char *timestr;
     int fd, pfd[2], status;
     pid_t pid, rv;
-    sigaction_t sa;
     struct stat sb;
     va_list ap;
 #ifndef NO_ROOT_MAILER
@@ -618,13 +617,6 @@ send_mail(const char *fmt, ...)
     sudo_endpwent();
     sudo_endgrent();
     closefrom(STDERR_FILENO + 1);
-
-    /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
-    memset(&sa, 0, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT;
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGPIPE, &sa, NULL);
 
     if (pipe(pfd) == -1) {
 	mysyslog(LOG_ERR, _("unable to open pipe: %m"));

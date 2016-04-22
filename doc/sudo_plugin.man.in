@@ -1978,6 +1978,9 @@ executed:
 \fRSIGINT\fR
 .TP 4n
 \fB\(bu\fR
+\fRSIGPIPE\fR
+.TP 4n
+\fB\(bu\fR
 \fRSIGQUIT\fR
 .TP 4n
 \fB\(bu\fR
@@ -2003,6 +2006,9 @@ This allows for consistent logging of commands killed by a signal
 for plugins that log such information in their
 \fBclose\fR()
 function.
+An exception to this is
+\fRSIGPIPE\fR,
+which is ignored until the command is executed.
 .PP
 A plugin may temporarily install its own signal handlers but must
 restore the original handler before the plugin function returns.

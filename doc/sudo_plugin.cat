@@ -1111,6 +1111,7 @@ DDEESSCCRRIIPPTTIIOONN
      ++oo   SIGALRM
      ++oo   SIGHUP
      ++oo   SIGINT
+     ++oo   SIGPIPE
      ++oo   SIGQUIT
      ++oo   SIGTERM
      ++oo   SIGTSTP
@@ -1121,7 +1122,8 @@ DDEESSCCRRIIPPTTIIOONN
      call the plugin's cclloossee() function with an exit status of 128 plus the
      value of the signal that was received.  This allows for consistent
      logging of commands killed by a signal for plugins that log such
-     information in their cclloossee() function.
+     information in their cclloossee() function.  An exception to this is SIGPIPE,
+     which is ignored until the command is executed.
 
      A plugin may temporarily install its own signal handlers but must restore
      the original handler before the plugin function returns.

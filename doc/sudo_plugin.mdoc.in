@@ -1735,6 +1735,8 @@ executed:
 .It
 .Dv SIGINT
 .It
+.Dv SIGPIPE
+.It
 .Dv SIGQUIT
 .It
 .Dv SIGTERM
@@ -1756,6 +1758,9 @@ This allows for consistent logging of commands killed by a signal
 for plugins that log such information in their
 .Fn close
 function.
+An exception to this is
+.Ev SIGPIPE ,
+which is ignored until the command is executed.
 .Pp
 A plugin may temporarily install its own signal handlers but must
 restore the original handler before the plugin function returns.

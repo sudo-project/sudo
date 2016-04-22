@@ -2975,16 +2975,9 @@ sudo_ldap_open(struct sudo_nss *nss)
 {
     LDAP *ld;
     int rc = -1;
-    sigaction_t sa, saved_sa_pipe;
     bool ldapnoinit = false;
     struct sudo_ldap_handle *handle;
     debug_decl(sudo_ldap_open, SUDOERS_DEBUG_LDAP)
-
-    /* Ignore SIGPIPE if we cannot bind to the server. */
-    memset(&sa, 0, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
 
     if (!sudo_ldap_read_config())
 	goto done;
@@ -3071,7 +3064,6 @@ sudo_ldap_open(struct sudo_nss *nss)
     nss->handle = handle;
 
 done:
-    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
     debug_return_int(rc == LDAP_SUCCESS ? 0 : -1);
 }
 

@@ -85,7 +85,7 @@ tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback)
 {
     sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
-    sigaction_t savetstp, savettin, savettou, savepipe;
+    sigaction_t savetstp, savettin, savettou;
     char *pass;
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
@@ -168,10 +168,6 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
-    /* Ignore SIGPIPE in case stdin is a pipe and TGP_STDIN is set */
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGPIPE, &sa, &savepipe);
-
     if (prompt) {
 	if (write(output, prompt, strlen(prompt)) == -1)
 	    goto restore;
@@ -198,7 +194,6 @@ restore:
     (void) sigaction(SIGTSTP, &savetstp, NULL);
     (void) sigaction(SIGTTIN, &savettin, NULL);
     (void) sigaction(SIGTTOU, &savettou, NULL);
-    (void) sigaction(SIGPIPE, &savepipe, NULL);
 
     /* Restore old tty settings. */
     if (!ISSET(flags, TGP_ECHO)) {
@@ -252,7 +247,6 @@ static char *
 sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
-    sigaction_t sa, saved_sa_pipe;
     int pfd[2], status;
     pid_t child;
     debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
@@ -286,18 +280,10 @@ sudo_askpass(const char *askpass, const char *prompt)
 	_exit(255);
     }
 
-    /* Ignore SIGPIPE in case child exits prematurely */
-    memset(&sa, 0, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT;
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
-
-    /* Get response from child (askpass) and restore SIGPIPE handler */
+    /* Get response from child (askpass). */
     (void) close(pfd[1]);
     pass = getln(pfd[0], buf, sizeof(buf), 0);
     (void) close(pfd[0]);
-    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
     /* Wait for child to exit. */
     for (;;) {

@@ -30,6 +30,7 @@
 #include <signal.h>
 
 #include "sudo.h"
+#include "sudo_exec.h"
 
 int signal_pipe[2];
 
@@ -151,6 +152,13 @@ init_signals(void)
 		break;
 	}
     }
+    /* Ignore SIGPIPE until exec. */
+    if (saved_signals[SAVED_SIGPIPE].sa.sa_handler != SIG_IGN) {
+	sa.sa_handler = SIG_IGN;
+	if (sigaction(SIGPIPE, &sa, NULL) != 0)
+	    sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
+    }
+
     debug_return;
 }
 

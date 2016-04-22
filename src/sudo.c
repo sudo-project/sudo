@@ -188,10 +188,13 @@ main(int argc, char *argv[], char *envp[])
     /* Make sure we are setuid root. */
     sudo_check_suid(argc > 0 ? argv[0] : "sudo");
 
-    /* Reset signal mask and save signal state. */
+    /* Save original signal state and setup default signal handlers. */
+    save_signals();
+    init_signals();
+
+    /* Reset signal mask to the default value (unblock). */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
-    save_signals();
 
     /* Parse the rest of sudo.conf. */
     sudo_conf_read(NULL, SUDO_CONF_ALL & ~SUDO_CONF_DEBUG);
@@ -229,8 +232,6 @@ main(int argc, char *argv[], char *envp[])
 	else
 	    sudo_fatalx(U_("unable to initialize policy plugin"));
     }
-
-    init_signals();
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
