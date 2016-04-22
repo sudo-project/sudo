@@ -38,7 +38,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include <selinux/flask.h>             /* for SECCLASS_CHR_FILE */
 #include <selinux/selinux.h>           /* for is_selinux_enabled() */
 #include <selinux/context.h>           /* for context-mangling functions */
 #include <selinux/get_default_type.h>
@@ -177,11 +176,19 @@ relabel_tty(const char *ttyn, int ptyfd)
 	    goto bad;
     }
 
-    if (tty_con && (security_compute_relabel(se_state.new_context, tty_con,
-	SECCLASS_CHR_FILE, &new_tty_con) < 0)) {
-	sudo_warn(U_("unable to get new tty context, not relabeling tty"));
-	if (se_state.enforcing)
-	    goto bad;
+    if (tty_con) {
+	security_class_t tclass = string_to_security_class("chr_file");
+	if (tclass == 0) {
+	    sudo_warn(U_("unknown security class chr_file, not relabeling tty"));
+	    if (se_state.enforcing)
+		goto bad;
+	}
+	if (security_compute_relabel(se_state.new_context, tty_con,
+	    tclass, &new_tty_con) < 0) {
+	    sudo_warn(U_("unable to get new tty context, not relabeling tty"));
+	    if (se_state.enforcing)
+		goto bad;
+	}
     }
 
     if (new_tty_con != NULL) {
