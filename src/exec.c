@@ -80,7 +80,8 @@ static void handler_user_only(int s, siginfo_t *info, void *context);
  * Fork and execute a command, returns the child's pid.
  * Sends errno back on sv[1] if execve() fails.
  */
-static int fork_cmnd(struct command_details *details, int sv[2])
+static int
+fork_cmnd(struct command_details *details, int sv[2])
 {
     struct command_status cstat;
     sigaction_t sa;
