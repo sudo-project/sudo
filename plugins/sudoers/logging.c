@@ -176,6 +176,7 @@ do_logfile(const char *msg)
 	    if ((size_t)def_loglinelen < sizeof(LOG_INDENT)) {
 		/* Don't pretty-print long log file lines (hard to grep). */
 		(void) fputs(full_line, fp);
+		(void) fputc('\n', fp);
 	    } else {
 		/* Write line with word wrap around def_loglinelen chars. */
 		writeln_wrap(fp, full_line, len, def_loglinelen);
