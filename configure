@@ -18271,48 +18271,6 @@ esac
 fi
 done
 
-if test "$enable_hardening" != "no"; then
-    found=false
-    O_CPPFLAGS="$CPPFLAGS"
-
-    case "${CPPFLAGS}" in
-	*"-D_FORTIFY_SOURCE=2"|*"-D_FORTIFY_SOURCE=2 ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-D_FORTIFY_SOURCE=2"
-	    else
-		CPPFLAGS="${CPPFLAGS} -D_FORTIFY_SOURCE=2"
-	    fi
-	    ;;
-    esac
-
-    ac_fn_c_check_func "$LINENO" "__sprintf_chk" "ac_cv_func___sprintf_chk"
-if test "x$ac_cv_func___sprintf_chk" = xyes; then :
-
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-char buf[4]; (void)sprintf(buf, "%s", "foo");
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  found=true
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-
-    if test X"$found" != X"true"; then
-	CPPFLAGS="$O_CPPFLAGS"
-    fi
-fi
 
 utmp_style=LEGACY
 for ac_func in getutxid getutid
@@ -23345,6 +23303,77 @@ EOF
 
 fi
 
+
+if test "$enable_hardening" != "no"; then
+    O_CPPFLAGS="$CPPFLAGS"
+
+    case "${CPPFLAGS}" in
+	*"-D_FORTIFY_SOURCE=2"|*"-D_FORTIFY_SOURCE=2 ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-D_FORTIFY_SOURCE=2"
+	    else
+		CPPFLAGS="${CPPFLAGS} -D_FORTIFY_SOURCE=2"
+	    fi
+	    ;;
+    esac
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether _FORTIFY_SOURCE may be specified" >&5
+$as_echo_n "checking whether _FORTIFY_SOURCE may be specified... " >&6; }
+if ${sudo_cv_use_fortify_source+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+char buf[4]; (void)sprintf(buf, "%s", "foo");
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv_use_fortify_source=yes
+else
+  sudo_cv_use_fortify_source=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv_use_fortify_source=yes
+else
+  sudo_cv_use_fortify_source=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_use_fortify_source" >&5
+$as_echo "$sudo_cv_use_fortify_source" >&6; }
+    if test "$sudo_cv_use_fortify_source" != yes; then
+	CPPFLAGS="$O_CPPFLAGS"
+    fi
+fi
 
 
 ac_c_werror_flag=yes

@@ -2447,20 +2447,6 @@ AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
 ])
-dnl
-dnl If libc supports _FORTIFY_SOURCE check functions, use it.
-dnl
-if test "$enable_hardening" != "no"; then
-    found=false
-    O_CPPFLAGS="$CPPFLAGS"
-    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
-    AC_CHECK_FUNC([__sprintf_chk], [
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [found=true], [])
-    ], [])
-    if test X"$found" != X"true"; then
-	CPPFLAGS="$O_CPPFLAGS"
-    fi
-fi
 
 utmp_style=LEGACY
 AC_CHECK_FUNCS([getutxid getutid], [utmp_style=POSIX; break])
@@ -3803,6 +3789,35 @@ SUDO_RUNDIR
 SUDO_VARDIR
 SUDO_IO_LOGDIR
 SUDO_TZDIR
+
+dnl
+dnl Attempt to use _FORTIFY_SOURCE with sprintf.  If the headers support
+dnl it but libc does not, __sprintf_chk should be an undefined symbol.
+dnl
+if test "$enable_hardening" != "no"; then
+    O_CPPFLAGS="$CPPFLAGS"
+    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
+    AC_CACHE_CHECK([whether _FORTIFY_SOURCE may be specified],
+	[sudo_cv_use_fortify_source],
+	[AC_LINK_IFELSE([
+		AC_LANG_PROGRAM(
+		    [[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]]
+		)],
+		[sudo_cv_use_fortify_source=yes],
+		[sudo_cv_use_fortify_source=no]
+	    )
+	]
+	[AC_LINK_IFELSE(
+	    [AC_LANG_PROGRAM([[]], [[]])],
+		[sudo_cv_use_fortify_source=yes],
+		[sudo_cv_use_fortify_source=no]
+	    )
+	]
+    )
+    if test "$sudo_cv_use_fortify_source" != yes; then
+	CPPFLAGS="$O_CPPFLAGS"
+    fi
+fi
 
 dnl
 dnl Turn warnings into errors.
