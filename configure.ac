@@ -2328,12 +2328,6 @@ AC_TYPE_LONG_LONG_INT
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
     AC_MSG_ERROR(["C compiler does not appear to support the long long int type"])
 fi
-AC_CHECK_TYPE(id_t, unsigned int)
-AC_CHECK_TYPE(size_t, unsigned int)
-AC_CHECK_TYPE(ssize_t, int)
-AC_CHECK_TYPE(dev_t, int)
-AC_CHECK_TYPE(ino_t, unsigned int)
-AC_CHECK_TYPE(ptrdiff_t, long)
 AC_CHECK_TYPE(intmax_t, long long)
 AC_CHECK_TYPE(uintmax_t, unsigned long long)
 AC_CHECK_TYPE(uint8_t, unsigned char)
