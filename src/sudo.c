@@ -939,7 +939,8 @@ restore_nproc(void)
 }
 
 /*
- * Setup the execution environment immediately prior to the call to execve()
+ * Setup the execution environment immediately prior to the call to execve().
+ * Group setup is performed by policy_init_session(), called earlier.
  * Returns true on success and false on failure.
  */
 bool
@@ -1016,30 +1017,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
-    }
-
-    /*
-     * Set groups, including supplementary group vector.
-     */
-    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-	if (details->ngroups >= 0) {
-	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		sudo_warn(U_("unable to set supplementary group IDs"));
-		goto done;
-	    }
-	}
-    }
-#ifdef HAVE_SETEUID
-    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	sudo_warn(U_("unable to set effective gid to runas gid %u"),
-	    (unsigned int)details->egid);
-	goto done;
-    }
-#endif
-    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	sudo_warn(U_("unable to set gid to runas gid %u"),
-	    (unsigned int)details->gid);
-	goto done;
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
@@ -1365,6 +1342,35 @@ policy_init_session(struct command_details *details)
     int rval = true;
     debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
 
+    /*
+     * We set groups, including supplementary group vector,
+     * as part of the session setup.  This allows for dynamic
+     * groups to be set via pam_group(8) in pam_setcred(3).
+     */
+    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
+	if (details->ngroups >= 0) {
+	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
+		sudo_warn(U_("unable to set supplementary group IDs"));
+		rval = -1;
+		goto done;
+	    }
+	}
+    }
+#ifdef HAVE_SETEUID
+    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
+	sudo_warn(U_("unable to set effective gid to runas gid %u"),
+	    (unsigned int)details->egid);
+	rval = -1;
+	goto done;
+    }
+#endif
+    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
+	sudo_warn(U_("unable to set gid to runas gid %u"),
+	    (unsigned int)details->gid);
+	rval = -1;
+	goto done;
+    }
+
     if (policy_plugin.u.policy->init_session) {
 	/*
 	 * Backwards compatibility for older API versions
@@ -1381,6 +1387,7 @@ policy_init_session(struct command_details *details)
 	}
 	sudo_debug_set_active_instance(sudo_debug_instance);
     }
+done:
     debug_return_int(rval);
 }
 
