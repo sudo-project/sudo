@@ -565,6 +565,12 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 		int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
 		if (fd != -1) {
 		    saved_pgrp = tcgetpgrp(fd);
+		    if (saved_pgrp == -1) {
+			close(fd);
+			fd = -1;
+		    }
+		}
+		if (saved_pgrp != -1) {
 		    /*
 		     * Child was stopped trying to access controlling
 		     * terminal.  If the child has a different pgrp
@@ -605,7 +611,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 			    SIGTSTP);
 		    }
 		}
-		if (fd != -1) {
+		if (saved_pgrp != -1) {
 		    /*
 		     * Restore command's process group if different.
 		     * Otherwise, we cannot resume some shells.
