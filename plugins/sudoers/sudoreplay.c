@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -606,7 +606,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 		goto bad;
 	    not = true;
 	    continue;
-	case 'c': /* command */
+	case 'c': /* cwd or command */
 	    if (av[0][1] == '\0')
 		sudo_fatalx(U_("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "cwd", strlen(*av)) == 0)
@@ -657,8 +657,8 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 	    if (!sub_expr)
 		sudo_fatalx(U_("unmatched ')' in expression"));
 	    debug_return_int(av - argv + 1);
-	bad:
 	default:
+	bad:
 	    sudo_fatalx(U_("unknown search term \"%s\""), *av);
 	    /* NOTREACHED */
 	}
