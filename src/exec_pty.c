@@ -137,7 +137,7 @@ mon_handler(int s, siginfo_t *info, void *context)
      */
     if (s != SIGCHLD && USER_SIGNALED(info) && info->si_pid != 0) {
 	pid_t si_pgrp = getpgid(info->si_pid);
-	if (si_pgrp != (pid_t)-1) {
+	if (si_pgrp != -1) {
 	    if (si_pgrp == cmnd_pgrp)
 		return;
 	} else if (info->si_pid == cmnd_pid) {
