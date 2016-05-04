@@ -4417,4 +4417,9 @@ AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 # undef __STDC_WANT_LIB_EXT1__
 #endif
 
+/* Prevent static analyzers from genering bogus memory leak warnings. */
+#if defined(__COVERITY__) && !defined(NO_LEAKS)
+# define NO_LEAKS
+#endif
+
 #endif /* SUDO_CONFIG_H */])
