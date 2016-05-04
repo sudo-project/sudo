@@ -96,9 +96,7 @@ DDEESSCCRRIIPPTTIIOONN
                          Evaluates to true if the ID matches a command run by
                          _u_s_e_r _n_a_m_e.
 
-                 Predicates may be abbreviated to the shortest unique string
-                 (currently all predicates may be shortened to a single
-                 character).
+                 Predicates may be abbreviated to the shortest unique string.
 
                  Predicates may be combined using _a_n_d, _o_r and _! operators as
                  well as `(' and `)' grouping (note that parentheses must
@@ -278,4 +276,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    November 20, 2015                   Sudo 1.8.16
+Sudo 1.8.16                       May 4, 2016                      Sudo 1.8.16

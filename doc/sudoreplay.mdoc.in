@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 20, 2015
+.Dd May 4, 2016
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -173,8 +173,7 @@ Evaluates to true if the ID matches a command run by
 .Ar user name .
 .El
 .Pp
-Predicates may be abbreviated to the shortest unique string (currently
-all predicates may be shortened to a single character).
+Predicates may be abbreviated to the shortest unique string.
 .Pp
 Predicates may be combined using
 .Em and ,
