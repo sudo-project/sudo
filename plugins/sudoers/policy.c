@@ -331,7 +331,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
 	    sudo_user.cols = strtonum(p, 1, INT_MAX, &errstr);
-	    if (sudo_user.lines == 0) {
+	    if (sudo_user.cols == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
