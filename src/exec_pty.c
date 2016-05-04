@@ -592,10 +592,11 @@ io_callback(int fd, int what, void *v)
 	    /* Reset buffer if fully consumed. */
 	    if (iob->off == iob->len) {
 		iob->off = iob->len = 0;
-		/* Forward the EOF from reader to writer. */
+		/* If reader is gone, close and remove writer; we are done. */
 		if (iob->revent == NULL) {
 		    safe_close(fd);
 		    ev_free_by_fd(evbase, fd);
+		    debug_return;
 		}
 	    }
 	    /* Re-enable writer if buffer is not empty. */
