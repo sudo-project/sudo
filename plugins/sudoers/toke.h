@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013, 2015-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,9 +30,6 @@ extern int (*trace_print)(const char *msg);
 #endif
 
 #define fill(a, b)	fill_txt(a, b, 0)
-
-/* realloc() to size + COMMANDARGINC to make room for command args */
-#define COMMANDARGINC   64
 
 #define LEXTRACE(msg)   do {						\
     if (trace_print != NULL)						\
