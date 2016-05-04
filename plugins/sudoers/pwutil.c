@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -137,10 +137,6 @@ sudo_getpwuid(uid_t uid)
     getauthregistry(IDtouser(uid), key.registry);
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "%s: uid %u [%s] -> user %s [%s] (cache hit)", __func__,
-	    (unsigned int)uid, key.registry,
-	    item->d.pw ? item->d.pw->pw_name : "unknown", item->registry);
 	goto done;
     }
     /*
@@ -178,11 +174,14 @@ sudo_getpwuid(uid_t uid)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	"%s: uid %u [%s] -> user %s [%s] (cached)", __func__,
-	(unsigned int)uid, key.registry,
-	item->d.pw ? item->d.pw->pw_name : "unknown", item->registry);
 done:
+    if (item->refcnt != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: uid %u [%s] -> user %s [%s] (%s)", __func__,
+	    (unsigned int)uid, key.registry,
+	    item->d.pw ? item->d.pw->pw_name : "unknown",
+	    item->registry, node ? "cache hit" : "cached");
+    }
     item->refcnt++;
     debug_return_ptr(item->d.pw);
 }
@@ -201,9 +200,6 @@ sudo_getpwnam(const char *name)
     getauthregistry((char *) name, key.registry);
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "%s: user %s [%s] -> uid %d [%s] (cache hit)", __func__, name,
-	    key.registry, item->d.pw ? (int)item->d.pw->pw_uid : -1, item->registry);
 	goto done;
     }
     /*
@@ -240,10 +236,13 @@ sudo_getpwnam(const char *name)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	"%s: user %s [%s] -> uid %d [%s] (cached)", __func__, name,
-	key.registry, item->d.pw ? (int)item->d.pw->pw_uid : -1, item->registry);
 done:
+    if (item->refcnt != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: user %s [%s] -> uid %d [%s] (%s)", __func__, name,
+	    key.registry, item->d.pw ? (int)item->d.pw->pw_uid : -1,
+	    item->registry, node ? "cache hit" : "cached");
+    }
     item->refcnt++;
     debug_return_ptr(item->d.pw);
 }
@@ -459,10 +458,6 @@ sudo_getgrgid(gid_t gid)
     getauthregistry(NULL, key.registry);
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "%s: gid %u [%s] -> group %s [%s] (cache hit)", __func__,
-	    (unsigned int)gid, key.registry,
-	    item->d.gr ? item->d.gr->gr_name : "unknown", item->registry);
 	goto done;
     }
     /*
@@ -494,11 +489,14 @@ sudo_getgrgid(gid_t gid)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	"%s: gid %u [%s] -> group %s [%s] (cached)", __func__,
-	(unsigned int)gid, key.registry,
-	item->d.gr ? item->d.gr->gr_name : "unknown", item->registry);
 done:
+    if (item->refcnt != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: gid %u [%s] -> group %s [%s] (%s)", __func__,
+	    (unsigned int)gid, key.registry,
+	    item->d.gr ? item->d.gr->gr_name : "unknown",
+	    item->registry, node ? "cache hit" : "cached");
+    }
     item->refcnt++;
     debug_return_ptr(item->d.gr);
 }
@@ -517,9 +515,6 @@ sudo_getgrnam(const char *name)
     getauthregistry(NULL, key.registry);
     if ((node = rbfind(grcache_byname, &key)) != NULL) {
 	item = node->data;
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "%s: group %s [%s] -> gid %u [%s] (cache hit)", __func__, name,
-	    key.registry, (unsigned int)item->d.gr->gr_gid, item->registry);
 	goto done;
     }
     /*
@@ -550,10 +545,13 @@ sudo_getgrnam(const char *name)
 	item->refcnt = 0;
 	break;
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	"%s: group %s [%s] -> gid %d [%s] (cache hit)", __func__, name,
-	key.registry, item->d.gr ? (int)item->d.gr->gr_gid : -1, item->registry);
 done:
+    if (item->refcnt != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: group %s [%s] -> gid %d [%s] (%s)", __func__, name,
+	    key.registry, item->d.gr ? (int)item->d.gr->gr_gid : -1,
+	    item->registry, node ? "cache hit" : "cached");
+    }
     item->refcnt++;
     debug_return_ptr(item->d.gr);
 }
