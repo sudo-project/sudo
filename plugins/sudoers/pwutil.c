@@ -139,8 +139,8 @@ sudo_getpwuid(uid_t uid)
 	item = node->data;
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "%s: uid %u [%s] -> user %s [%s] (cache hit)", __func__,
-	    (unsigned int)uid, key.registry, item->d.pw->pw_name,
-	    item->registry);
+	    (unsigned int)uid, key.registry,
+	    item->d.pw ? item->d.pw->pw_name : "unknown", item->registry);
 	goto done;
     }
     /*
@@ -202,8 +202,8 @@ sudo_getpwnam(const char *name)
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
 	item = node->data;
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "%s: user %s [%s] -> uid %u [%s] (cache hit)", __func__, name,
-	    key.registry, (unsigned int)item->d.pw->pw_uid, item->registry);
+	    "%s: user %s [%s] -> uid %d [%s] (cache hit)", __func__, name,
+	    key.registry, item->d.pw ? (int)item->d.pw->pw_uid : -1, item->registry);
 	goto done;
     }
     /*
@@ -461,8 +461,8 @@ sudo_getgrgid(gid_t gid)
 	item = node->data;
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "%s: gid %u [%s] -> group %s [%s] (cache hit)", __func__,
-	    (unsigned int)gid, key.registry, item->d.gr->gr_name,
-	    item->registry);
+	    (unsigned int)gid, key.registry,
+	    item->d.gr ? item->d.gr->gr_name : "unknown", item->registry);
 	goto done;
     }
     /*
