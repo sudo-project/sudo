@@ -131,7 +131,7 @@ fill_args(const char *s, size_t len, int addspace)
     char *p;
     debug_decl(fill_args, SUDOERS_DEBUG_PARSER)
 
-    if (sudoerslval.command.args == NULL) {
+    if (arg_size == 0) {
 	addspace = 0;
 	new_len = len;
     } else
