@@ -1062,7 +1062,7 @@ export_sudoers(const char *sudoers_path, const char *export_path,
     fputs("\n}\n", export_fp);
 
 done:
-    if (export_fp != stdout)
+    if (export_fp != stdout && export_fp != NULL)
 	fclose(export_fp);
     debug_return_bool(ok);
 }
