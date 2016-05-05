@@ -125,7 +125,12 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"wrong sized record, got %hu, expected %zu",
 		cur.size, sizeof(cur));
-	    lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR);
+	    if (lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "unable to seek forward %lld",
+		    (off_t)cur.size - (off_t)sizeof(cur));
+		break;
+	    }
 	    if (cur.size == 0)
 		break;			/* size must be non-zero */
 	    continue;
@@ -632,7 +637,11 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	cookie->locked = false;
 	cookie->key.type = TS_GLOBAL;	/* find a non-tty record */
 
-	(void)lseek(cookie->fd, 0, SEEK_SET);
+	if (lseek(cookie->fd, 0, SEEK_SET) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to rewind fd");
+	    debug_return_bool(false);
+	}
 	if (ts_find_record(cookie->fd, &cookie->key, &entry)) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"found existing global record");
@@ -873,9 +882,10 @@ timestamp_remove(bool unlink_it)
 	/* Back up and disable the entry. */
 	if (!ISSET(entry.flags, TS_DISABLED)) {
 	    SET(entry.flags, TS_DISABLED);
-	    lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR);
-	    if (ts_write(fd, fname, &entry, -1) == -1)
-		rval = false;
+	    if (lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR) != -1) {
+		if (ts_write(fd, fname, &entry, -1) == -1)
+		    rval = false;
+	    }
 	}
     }
 
