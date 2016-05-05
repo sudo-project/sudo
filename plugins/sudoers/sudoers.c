@@ -939,8 +939,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 
     if (!restore_perms()) {
 	/* unable to change back to root */
-	fclose(fp);
-	fp = NULL;
+	if (fp != NULL) {
+	    fclose(fp);
+	    fp = NULL;
+	}
     }
 
     debug_return_ptr(fp);
