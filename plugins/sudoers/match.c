@@ -684,7 +684,7 @@ digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
      * on exec flag on the fd for fexecve(2).
      */
     if (!is_script)
-	fcntl(*fd, F_SETFD, FD_CLOEXEC);
+	(void)fcntl(*fd, F_SETFD, FD_CLOEXEC);
 #endif /* HAVE_FEXECVE */
     fclose(fp);
     debug_return_bool(true);

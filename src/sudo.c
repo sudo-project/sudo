@@ -669,7 +669,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    add_preserved_fd(&details->preserved_fds, details->execfd);
 #else
 		    /* Plugin thinks we support fexecve() but we don't. */
-		    fcntl(details->execfd, F_SETFD, FD_CLOEXEC);
+		    (void)fcntl(details->execfd, F_SETFD, FD_CLOEXEC);
 		    details->execfd = -1;
 #endif
 		    break;

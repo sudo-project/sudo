@@ -131,7 +131,7 @@ fork_cmnd(struct command_details *details, int sv[2])
 	close(sv[0]);
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
-	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	exec_cmnd(details, &cstat, sv[1]);
 	send(sv[1], &cstat, sizeof(cstat), 0);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);

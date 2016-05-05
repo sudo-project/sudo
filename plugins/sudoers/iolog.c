@@ -330,7 +330,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     if (iol->enabled) {
 	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 	if (fd != -1) {
-	    fcntl(fd, F_SETFD, FD_CLOEXEC);
+	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
 		iol->fd.g = gzdopen(fd, "w");

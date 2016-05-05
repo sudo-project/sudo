@@ -843,7 +843,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 	close(sv[0]);
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
-	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	sigprocmask(SIG_SETMASK, omask, NULL);
 	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	if (io_pipe[STDIN_FILENO][1])
@@ -1380,7 +1380,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	close(errpipe[0]);
-	fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
+	(void)fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
 	restore_signals();
 
 	/* setup tty and exec command */
