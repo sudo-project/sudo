@@ -964,8 +964,7 @@ rebuild_env(void)
 	 * from user's environment.
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
-	    cp = _PATH_MAILDIR;
-	    if (cp[sizeof(_PATH_MAILDIR) - 2] == '/') {
+	    if (_PATH_MAILDIR[sizeof(_PATH_MAILDIR) - 2] == '/') {
 		if (asprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name) == -1)
 		    goto bad;
 	    } else {
