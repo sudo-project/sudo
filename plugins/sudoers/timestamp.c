@@ -756,7 +756,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
 		N_("ignoring time stamp from the future"));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
+	    (void)ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #else
 	/* Check for bogus (future) time in the stampfile. */
@@ -769,7 +769,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
 		4 + ctime(&tv_sec));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
+	    (void)ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #endif /* CLOCK_MONOTONIC */
     } else {
