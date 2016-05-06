@@ -81,6 +81,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	free(editor);
+	free(editor_path);
 	debug_return_str(NULL);
     }
 
@@ -90,8 +91,10 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
 	nargv[nargc] = strndup(cp, (size_t)(ep - cp));
 	if (nargv[nargc] == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(editor_path);
 	    while (nargc--)
 		free(nargv[nargc]);
+	    free(nargv);
 	    debug_return_str(NULL);
 	}
     }
