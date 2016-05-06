@@ -172,10 +172,10 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 {
     struct stat sb;
     char buf[32], *ep;
-    int fd, i;
+    int i, len, fd = -1;
     unsigned long id = 0;
-    int len;
     ssize_t nread;
+    bool rval = false;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     debug_decl(io_nextid, SUDOERS_DEBUG_UTIL)
@@ -184,7 +184,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
      * Create I/O log directory if it doesn't already exist.
      */
     if (!io_mkdirs(iolog_dir, S_IRWXU, false))
-	debug_return_bool(false);
+	goto done;
 
     /*
      * Open sequence file
@@ -193,12 +193,12 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     if (len <= 0 || (size_t)len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
-	debug_return_bool(false);
+	goto done;
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
-	debug_return_bool(false);
+	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
 
@@ -239,7 +239,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (nread != 0) {
 	    if (nread == -1) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to read %s"), pathbuf);
-		debug_return_bool(false);
+		goto done;
 	    }
 	    if (buf[nread - 1] == '\n')
 		nread--;
@@ -275,11 +275,14 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     if (lseek(fd, 0, SEEK_SET) == -1 || write(fd, buf, 7) != 7) {
 #endif
 	log_warning(SLOG_SEND_MAIL, N_("unable to write to %s"), pathbuf);
-	debug_return_bool(false);
+	goto done;
     }
-    close(fd);
+    rval = true;
 
-    debug_return_bool(true);
+done:
+    if (fd != -1)
+	close(fd);
+    debug_return_bool(rval);
 }
 
 /*
