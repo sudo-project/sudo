@@ -1266,8 +1266,9 @@ create_admin_success_flag(void)
     int len, rval = -1;
     debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN)
 
-    /* Check whether the user is in the admin group. */
-    if (!user_in_group(sudo_user.pw, "admin"))
+    /* Check whether the user is in the sudo or admin group. */
+    if (!user_in_group(sudo_user.pw, "sudo") &&
+	!user_in_group(sudo_user.pw, "admin"))
 	debug_return_int(true);
 
     /* Build path to flag file. */
