@@ -477,8 +477,10 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	    rval = false;
     }
 
-    if (uid_changed)
-	restore_perms();
+    if (uid_changed) {
+	if (!restore_perms())
+	    rval = false;
+    }
 
     free(logline);
 
