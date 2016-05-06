@@ -325,13 +325,12 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 static bool
 open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 {
-    int fd;
     debug_decl(open_io_fd, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 	if (fd != -1) {
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
@@ -340,8 +339,12 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 	    else
 #endif
 		iol->fd.f = fdopen(fd, "w");
+	    if (iol->fd.v == NULL) {
+		close(fd);
+		fd = -1;
+	    }
 	}
-	if (fd == -1 || iol->fd.v == NULL) {
+	if (fd == -1) {
 	    log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	    debug_return_bool(false);
 	}
