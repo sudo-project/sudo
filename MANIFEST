@@ -224,6 +224,7 @@ plugins/group_file/group_file.c
 plugins/group_file/group_file.exp
 plugins/group_file/plugin_test.c
 plugins/sample/Makefile.in
+plugins/sample/README
 plugins/sample/sample_plugin.c
 plugins/sample/sample_plugin.exp
 plugins/sudoers/Makefile.in
