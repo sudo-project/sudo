@@ -143,10 +143,11 @@ do_syslog(int pri, char *msg)
 static bool
 do_logfile(const char *msg)
 {
+    const char *timestr;
+    int len, oldlocale;
+    bool rval = false;
     char *full_line;
     mode_t oldmask;
-    bool rval = false;
-    int len, oldlocale;
     FILE *fp;
     debug_decl(do_logfile, SUDOERS_DEBUG_LOGGING)
 
@@ -158,38 +159,44 @@ do_logfile(const char *msg)
     if (fp == NULL) {
 	send_mail(_("unable to open log file: %s: %s"),
 	    def_logfile, strerror(errno));
-    } else if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
+	goto done;
+    }
+    if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
 	send_mail(_("unable to lock log file: %s: %s"),
 	    def_logfile, strerror(errno));
-    } else {
-	const char *timestr = get_timestr(time(NULL), def_log_year);
-	if (timestr == NULL)
-	    timestr = "invalid date";
-	if (def_log_host) {
-	    len = asprintf(&full_line, "%s : %s : HOST=%s : %s",
-		timestr, user_name, user_srunhost, msg);
-	} else {
-	    len = asprintf(&full_line, "%s : %s : %s",
-		timestr, user_name, msg);
-	}
-	if (len != -1) {
-	    if ((size_t)def_loglinelen < sizeof(LOG_INDENT)) {
-		/* Don't pretty-print long log file lines (hard to grep). */
-		(void) fputs(full_line, fp);
-		(void) fputc('\n', fp);
-	    } else {
-		/* Write line with word wrap around def_loglinelen chars. */
-		writeln_wrap(fp, full_line, len, def_loglinelen);
-	    }
-	    free(full_line);
-	    (void) fflush(fp);
-	    if (!ferror(fp))
-		rval = true;
-	} else {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	}
-	(void) fclose(fp);
+	goto done;
     }
+
+    timestr = get_timestr(time(NULL), def_log_year);
+    if (timestr == NULL)
+	timestr = "invalid date";
+    if (def_log_host) {
+	len = asprintf(&full_line, "%s : %s : HOST=%s : %s",
+	    timestr, user_name, user_srunhost, msg);
+    } else {
+	len = asprintf(&full_line, "%s : %s : %s",
+	    timestr, user_name, msg);
+    }
+    if (len == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    if ((size_t)def_loglinelen < sizeof(LOG_INDENT)) {
+	/* Don't pretty-print long log file lines (hard to grep). */
+	(void) fputs(full_line, fp);
+	(void) fputc('\n', fp);
+    } else {
+	/* Write line with word wrap around def_loglinelen chars. */
+	writeln_wrap(fp, full_line, len, def_loglinelen);
+    }
+    free(full_line);
+    (void) fflush(fp);
+    if (!ferror(fp))
+	rval = true;
+
+done:
+    if (fp != NULL)
+	(void) fclose(fp);
     sudoers_setlocale(oldlocale, NULL);
 
     debug_return_bool(rval);
