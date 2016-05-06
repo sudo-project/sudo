@@ -1203,6 +1203,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	}
     }
 done:
+    handle->fn_free_result(sss_result);
+
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
     if (!ISSET(ret, VALIDATE_SUCCESS)) {
