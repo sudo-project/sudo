@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -127,8 +127,8 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 		cur.size, sizeof(cur));
 	    if (lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "unable to seek forward %lld",
-		    (off_t)cur.size - (off_t)sizeof(cur));
+		    "unable to seek forward %d",
+		    (int)cur.size - (int)sizeof(cur));
 		break;
 	    }
 	    if (cur.size == 0)
@@ -290,7 +290,7 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 #else
 	if (lseek(fd, offset, SEEK_SET) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		"unable to seek to %lld", offset);
+		"unable to seek to %lld", (long long)offset);
 	    nwritten = -1;
 	} else {
 	    nwritten = write(fd, entry, entry->size);
