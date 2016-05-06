@@ -1262,9 +1262,8 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 static int
 create_admin_success_flag(void)
 {
-    struct stat statbuf;
     char flagfile[PATH_MAX];
-    int len, fd = -1;
+    int len, rval = -1;
     debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN)
 
     /* Check whether the user is in the admin group. */
@@ -1279,15 +1278,14 @@ create_admin_success_flag(void)
 
     /* Create admin flag file if it doesn't already exist. */
     if (set_perms(PERM_USER)) {
-	if (stat(flagfile, &statbuf) != 0) {
-	    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
-	    if (fd != -1)
-		close(fd);
-	}
+	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
+	rval = fd != -1 || errno == EEXIST;
+	if (fd != -1)
+	    close(fd);
 	if (!restore_perms())
-	    debug_return_int(-1);
+	    rval = -1;
     }
-    debug_return_int(fd != -1);
+    debug_return_int(rval);
 }
 #else /* !USE_ADMIN_FLAG */
 static int
