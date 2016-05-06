@@ -187,7 +187,7 @@ check_passwd(void)
     msg.msg_type = SUDO_CONV_PROMPT_ECHO_OFF;
     msg.msg = "Password: ";
     memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
+    sudo_conv(1, &msg, &repl, NULL);
     if (repl.reply == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "missing password\n");
 	return false;
@@ -462,7 +462,7 @@ io_log_output(const char *buf, unsigned int len)
     return rval;
 }
 
-struct policy_plugin sample_policy = {
+__dso_public struct policy_plugin sample_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     policy_open,
