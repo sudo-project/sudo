@@ -98,20 +98,29 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
-	if (stat(path, &sb) != 0) {
-	    if (mkdir(path, mode) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "mkdir %s, mode 0%o", path, (unsigned int) mode);
+	if (mkdir(path, mode) == 0) {
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	} else {
+	    if (errno != EEXIST) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
 		ok = false;
 		break;
 	    }
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
-	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s exists but is not a directory (0%o)"),
-		path, (unsigned int) sb.st_mode);
-	    ok = false;
-	    break;
-	} else {
+	    /* Already exists, make sure it is a directory. */
+	    if (stat(path, &sb) != 0) {
+		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
+		ok = false;
+		break;
+	    }
+	    if (!S_ISDIR(sb.st_mode)) {
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("%s exists but is not a directory (0%o)"),
+		    path, (unsigned int) sb.st_mode);
+		ok = false;
+		break;
+	    }
 	    /* Inherit gid of parent dir for ownership. */
 	    parent_gid = sb.st_gid;
 	}
@@ -120,6 +129,8 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
     if (ok) {
 	/* Create final path component. */
 	if (is_temp) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"mkdtemp %s", path);
 	    if (mkdtemp(path) == NULL) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
 		ok = false;
@@ -127,6 +138,8 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 		ignore_result(chown(path, (uid_t)-1, parent_gid));
 	    }
 	} else {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"mkdir %s, mode 0%o", path, (unsigned int) mode);
 	    if (mkdir(path, mode) != 0 && errno != EEXIST) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
 		ok = false;
