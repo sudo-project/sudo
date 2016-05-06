@@ -160,22 +160,29 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
-	if (stat(path, &sb) != 0) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
-	    if (mkdir(path, parent_mode) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
+	if (mkdir(path, parent_mode) == 0) {
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	} else {
+	    if (errno != EEXIST) {
 		if (!quiet)
 		    sudo_warn(U_("unable to mkdir %s"), path);
 		goto done;
 	    }
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
-	} else if (!S_ISDIR(sb.st_mode)) {
-	    if (!quiet) {
-		sudo_warnx(U_("%s exists but is not a directory (0%o)"),
-		    path, (unsigned int) sb.st_mode);
+	    /* Already exists, make sure it is a directory. */
+	    if (stat(path, &sb) != 0) {
+		if (!quiet)
+		    sudo_warn(U_("unable to stat %s"), path);
+		goto done;
 	    }
-	    goto done;
-	} else {
+	    if (!S_ISDIR(sb.st_mode)) {
+		if (!quiet) {
+		    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
+			path, (unsigned int) sb.st_mode);
+		}
+		goto done;
+	    }
 	    /* Inherit gid of parent dir for ownership. */
 	    parent_gid = sb.st_gid;
 	}
