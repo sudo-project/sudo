@@ -558,6 +558,8 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    sudo_fatal("seteuid(ROOT_UID)");
 	if (tfd == -1) {
 	    sudo_warn("mkstemps");
+	    if (ofd != -1)
+		close(ofd);
 	    debug_return_int(-1);
 	}
 	if (ofd != -1) {
