@@ -96,7 +96,7 @@ sudoers_gc_remove(enum sudoers_gc_types type, void *v)
     }
     return false;
 found:
-    if (prev != NULL)
+    if (prev == NULL)
 	SLIST_REMOVE_HEAD(&sudoers_gc_list, entries);
     else
 	SLIST_REMOVE_AFTER(prev, entries);
