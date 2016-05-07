@@ -2587,7 +2587,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
 static char *
 sudo_krb5_copy_cc_file(const char *old_ccname)
 {
-    int ofd, nfd;
+    int nfd, ofd = -1;
     ssize_t nread, nwritten = -1;
     static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
     char buf[10240], *ret = NULL;
@@ -2599,10 +2599,8 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 	if (!set_perms(PERM_USER))
 	    goto done;
 	ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
-	if (!restore_perms()) {
-	    close(ofd);
+	if (!restore_perms())
 	    goto done;
-	}
 
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
@@ -2637,13 +2635,14 @@ write_error:
 		    sudo_warn("unable to create temp file %s", new_ccname);
 		}
 	    }
-	    close(ofd);
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"unable to open %s", old_ccname);
 	}
     }
 done:
+    if (ofd != -1)
+	close(ofd);
     debug_return_str(ret);
 }
 
