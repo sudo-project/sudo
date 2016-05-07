@@ -144,11 +144,7 @@ fill_args(const char *s, size_t len, int addspace)
 	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    sudoerserror(NULL);
-	    free(sudoerslval.command.args);
-	    sudoerslval.command.args = NULL;
-	    arg_len = arg_size = 0;
-	    debug_return_bool(false);
+	    goto bad;
 	} else
 	    sudoerslval.command.args = p;
     }
@@ -159,11 +155,16 @@ fill_args(const char *s, size_t len, int addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != (size_t)len) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
-	sudoerserror(NULL);
-	debug_return_bool(false);
+	goto bad;
     }
     arg_len = new_len;
     debug_return_bool(true);
+bad:
+    sudoerserror(NULL);
+    free(sudoerslval.command.args);
+    sudoerslval.command.args = NULL;
+    arg_len = arg_size = 0;
+    debug_return_bool(false);
 }
 
 /*
