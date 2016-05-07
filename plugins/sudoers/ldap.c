@@ -1407,6 +1407,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     char *escaped_domain = NULL, *escaped_user = NULL;
     char *escaped_host = NULL, *escaped_shost = NULL, *filt = NULL;
     int filt_len, rc;
+    bool rval = false;
     debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP);
 
     if (ldap_conf.timeout > 0) {
@@ -1533,13 +1534,15 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	ng = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
 	if (ng != NULL) {
 	    if (!sudo_netgroup_lookup_nested(ld, base->val, tvp, netgroups, ng))
-		debug_return_bool(false);
+		goto done;
 	}
     }
-    free(filt);
-    debug_return_bool(true);
+    rval = true;
+    goto done;
+
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+done:
     free(escaped_domain);
     free(escaped_user);
     free(escaped_host);
@@ -1547,7 +1550,7 @@ oom:
 	free(escaped_shost);
     free(filt);
     ldap_msgfree(result);
-    debug_return_bool(false);
+    debug_return_bool(rval);
 }
 
 /*
