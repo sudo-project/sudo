@@ -576,10 +576,10 @@ get_user_info(struct user_details *ud)
 
     cp = sudo_gethostname();
     user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
+    free(cp);
     if (user_info[i] == NULL)
 	goto bad;
     ud->host = user_info[i] + sizeof("host=") - 1;
-    free(cp);
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
     if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
