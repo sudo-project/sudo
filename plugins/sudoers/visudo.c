@@ -238,7 +238,7 @@ main(int argc, char *argv[])
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(1);
     init_parser(sudoers_file, false);
-    sudoersparse();
+    (void) sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
 
     editor = get_editor(&editor_argc, &editor_argv);
