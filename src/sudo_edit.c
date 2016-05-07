@@ -384,8 +384,10 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	 * writable directories.
 	 */
 	is_writable = dir_is_writable(dfd, &user_details, command_details);
-	if (is_writable == -1)
+	if (is_writable == -1) {
+	    close(dfd);
 	    debug_return_int(-1);
+	}
 
 	while (path[0] == '/')
 	    path++;
