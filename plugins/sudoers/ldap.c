@@ -2596,8 +2596,10 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 	if (!set_perms(PERM_USER))
 	    goto done;
 	ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
-	if (!restore_perms())
+	if (!restore_perms()) {
+	    close(ofd);
 	    goto done;
+	}
 
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
