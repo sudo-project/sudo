@@ -868,6 +868,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	    break;
 	}
     }
+    free(sesh_args);
 
     /* Restore saved command_details. */
     command_details->command = saved_command_details.command;
