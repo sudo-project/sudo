@@ -331,12 +331,13 @@ get_editor(int *editor_argc, char ***editor_argv)
 	    if (editor_path != NULL)
 		break;
 	    if (errno != ENOENT)
-		debug_return_str(NULL);
+		goto done;
 	}
     }
     if (editor_path == NULL)
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
 
+done:
     if (whitelist != NULL) {
 	while (whitelist_len--)
 	    free(whitelist[whitelist_len]);
