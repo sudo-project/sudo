@@ -562,11 +562,12 @@ io_callback(int fd, int what, void *v)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "unable to write %d bytes to fd %d",
 		    iob->len - iob->off, fd);
+		/* Close reader if there is one. */
 		if (iob->revent != NULL) {
-		    CLR(what, SUDO_EV_READ);
 		    safe_close(sudo_ev_get_fd(iob->revent));
 		    ev_free_by_fd(evbase, sudo_ev_get_fd(iob->revent));
 		}
+		CLR(what, SUDO_EV_READ);
 		safe_close(fd);
 		ev_free_by_fd(evbase, fd);
 		break;
@@ -592,11 +593,11 @@ io_callback(int fd, int what, void *v)
 	    /* Reset buffer if fully consumed. */
 	    if (iob->off == iob->len) {
 		iob->off = iob->len = 0;
-		/* If reader is gone, close and remove writer; we are done. */
+		/* Forward the EOF from reader to writer. */
 		if (iob->revent == NULL) {
+		    CLR(what, SUDO_EV_READ);
 		    safe_close(fd);
 		    ev_free_by_fd(evbase, fd);
-		    debug_return;
 		}
 	    }
 	    /* Re-enable writer if buffer is not empty. */
