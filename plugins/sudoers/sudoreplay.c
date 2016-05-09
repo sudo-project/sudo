@@ -329,6 +329,44 @@ done:
     exit(exitcode);
 }
 
+/*
+ * Call gzread() or fread() for the I/O log file in question.
+ * Return 0 for EOF or -1 on error.
+ */
+static ssize_t
+io_log_read(int idx, char *buf, size_t nbytes)
+{
+    ssize_t nread;
+    debug_decl(io_log_read, SUDO_DEBUG_UTIL)
+
+    if (nbytes > INT_MAX) {
+	errno = EINVAL;
+	debug_return_ssize_t(-1);
+    }
+#ifdef HAVE_ZLIB_H
+    nread = gzread(io_log_files[idx].fd.g, buf, nbytes);
+#else
+    nread = (ssize_t)fread(buf, 1, nbytes, io_log_files[idx].fd.f);
+    if (nread == 0 && ferror(io_log_files[idx].fd.f))
+	nread = -1;
+#endif
+    debug_return_ssize_t(nread);
+}
+
+static char *
+io_log_gets(int idx, char *buf, size_t nbytes)
+{
+    char *str;
+    debug_decl(io_log_gets, SUDO_DEBUG_UTIL)
+
+#ifdef HAVE_ZLIB_H
+    str = gzgets(io_log_files[idx].fd.g, buf, nbytes);
+#else
+    str = fgets(buf, nbytes, io_log_files[idx].fd.f);
+#endif
+    debug_return_str(str);
+}
+
 static void
 replay_session(const double max_wait, const char *decimal)
 {
@@ -385,11 +423,7 @@ replay_session(const double max_wait, const char *decimal)
     /*
      * Read each line of the timing file, displaying the output streams.
      */
-#ifdef HAVE_ZLIB_H
-    while (gzgets(io_log_files[IOFD_TIMING].fd.g, buf, sizeof(buf)) != NULL) {
-#else
-    while (fgets(buf, sizeof(buf), io_log_files[IOFD_TIMING].fd.f) != NULL) {
-#endif
+    while (io_log_gets(IOFD_TIMING, buf, sizeof(buf)) != NULL) {
 	size_t len, nbytes, nread;
 	double seconds, to_wait;
 	struct timeval timeout;
@@ -414,7 +448,7 @@ replay_session(const double max_wait, const char *decimal)
 	sudo_ev_loop(evbase, 0);
 
 	/* Even if we are not replaying, we still have to delay. */
-	if (io_log_files[idx].fd.v == NULL)
+	if (idx >= IOFD_MAX || io_log_files[idx].fd.v == NULL)
 	    continue;
 
 	/* Check whether we need to convert newline to CR LF pairs. */
@@ -428,11 +462,18 @@ replay_session(const double max_wait, const char *decimal)
 		len = sizeof(buf);
 	    else
 		len = nbytes;
-#ifdef HAVE_ZLIB_H
-	    nread = gzread(io_log_files[idx].fd.g, buf, len);
-#else
-	    nread = fread(buf, 1, len, io_log_files[idx].fd.f);
-#endif
+	    nread = io_log_read(idx, buf, len);
+	    if (nread <= 0) {
+		if (nread == 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"%s: premature EOF, expected %zu bytes",
+			io_log_files[idx].suffix, nbytes);
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+			"%s: read error", io_log_files[idx].suffix);
+		}
+		break;
+	    }
 	    nbytes -= nread;
 
 	    /* Convert newline to carriage return + linefeed if needed. */
