@@ -552,9 +552,9 @@ replay_session(const double max_wait, const char *decimal)
 	    sudo_ev_add(evbase, output_ev, NULL, false);
 	    sudo_ev_loop(evbase, 0);
 	}
-	if (iov != &iovb)
-	    free(iov);
     }
+    if (iov != &iovb)
+	free(iov);
     sudo_ev_base_free(evbase);
     sudo_ev_free(input_ev);
     sudo_ev_free(output_ev);
