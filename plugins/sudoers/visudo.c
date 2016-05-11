@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -209,7 +209,7 @@ main(int argc, char *argv[])
     if (argc - optind != 0)
 	usage(1);
 
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
+    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Mock up a fake sudo_user struct. */
@@ -842,8 +842,8 @@ run_command(char *path, char **argv)
 	    sudo_fatal(U_("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
-	    sudo_endpwent();
-	    sudo_endgrent();
+	    sudo_freepwcache();
+	    sudo_freegrcache();
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
@@ -1304,8 +1304,8 @@ visudo_cleanup(void)
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
-    sudo_endpwent();
-    sudo_endgrent();
+    sudo_freepwcache();
+    sudo_freegrcache();
 }
 
 /*

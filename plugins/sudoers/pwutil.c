@@ -359,9 +359,9 @@ sudo_fakepwnam(const char *user, gid_t gid)
 }
 
 int
-sudo_setpwent(void)
+sudo_mkpwcache(void)
 {
-    debug_decl(sudo_setpwent, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_mkpwcache, SUDOERS_DEBUG_NSS)
 
     if (pwcache_byuid == NULL)
 	pwcache_byuid = rbcreate(cmp_pwuid);
@@ -369,8 +369,6 @@ sudo_setpwent(void)
 	pwcache_byname = rbcreate(cmp_pwnam);
     if (pwcache_byuid == NULL || pwcache_byname == NULL)
 	debug_return_int(-1);
-
-    setpwent();
 
     debug_return_int(0);
 }
@@ -388,17 +386,6 @@ sudo_freepwcache(void)
 	rbdestroy(pwcache_byname, sudo_pw_delref_item);
 	pwcache_byname = NULL;
     }
-
-    debug_return;
-}
-
-void
-sudo_endpwent(void)
-{
-    debug_decl(sudo_endpwent, SUDOERS_DEBUG_NSS)
-
-    endpwent();
-    sudo_freepwcache();
 
     debug_return;
 }
@@ -659,9 +646,9 @@ sudo_grlist_delref(struct group_list *grlist)
 }
 
 int
-sudo_setgrent(void)
+sudo_mkgrcache(void)
 {
-    debug_decl(sudo_setgrent, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_mkgrcache, SUDOERS_DEBUG_NSS)
 
     if (grcache_bygid == NULL)
 	grcache_bygid = rbcreate(cmp_grgid);
@@ -671,8 +658,6 @@ sudo_setgrent(void)
 	grlist_cache = rbcreate(cmp_grnam);
     if (grcache_bygid == NULL || grcache_byname == NULL || grlist_cache == NULL)
 	debug_return_int(-1);
-
-    setgrent();
 
     debug_return_int(0);
 }
@@ -694,17 +679,6 @@ sudo_freegrcache(void)
 	rbdestroy(grlist_cache, sudo_grlist_delref_item);
 	grlist_cache = NULL;
     }
-
-    debug_return;
-}
-
-void
-sudo_endgrent(void)
-{
-    debug_decl(sudo_endgrent, SUDOERS_DEBUG_NSS)
-
-    endgrent();
-    sudo_freegrcache();
 
     debug_return;
 }

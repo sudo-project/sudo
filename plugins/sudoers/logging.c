@@ -623,9 +623,7 @@ send_mail(const char *fmt, ...)
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
 
-    /* Close password, group and other fds so we don't leak. */
-    sudo_endpwent();
-    sudo_endgrent();
+    /* Close fds so we don't leak anything. */
     closefrom(STDERR_FILENO + 1);
 
     if (pipe(pfd) == -1) {

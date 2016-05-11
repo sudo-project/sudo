@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -601,7 +601,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
+    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
@@ -687,10 +687,10 @@ done:
     free(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
-    sudo_endpwent();
     if (details.runas_gr)
 	sudo_gr_delref(details.runas_gr);
-    sudo_endgrent();
+    sudo_freepwcache();
+    sudo_freegrcache();
 
     debug_return_int(rval);
 }

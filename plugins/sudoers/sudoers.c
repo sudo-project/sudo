@@ -155,7 +155,7 @@ sudoers_policy_init(void *info, char * const envp[])
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
+    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
@@ -670,9 +670,9 @@ done:
 
     restore_nproc();
 
-    /* Close the password and group files and free up memory. */
-    sudo_endpwent();
-    sudo_endgrent();
+    /* Destroy the password and group caches and free the contents. */
+    sudo_freepwcache();
+    sudo_freegrcache();
 
     sudo_warn_set_locale_func(NULL);
 
@@ -1202,8 +1202,8 @@ sudoers_cleanup(void)
     }
     if (def_group_plugin)
 	group_plugin_unload();
-    sudo_endpwent();
-    sudo_endgrent();
+    sudo_freepwcache();
+    sudo_freegrcache();
 
     debug_return;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
 	setgrfile(grfile);
     if (pwfile)
 	setpwfile(pwfile);
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
+    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (argc < 2) {
@@ -336,8 +336,8 @@ main(int argc, char *argv[])
      */
     exitcode = parse_error ? 1 : (match == ALLOW ? 0 : match + 3);
 done:
-    sudo_endpwent();
-    sudo_endgrent();
+    sudo_freepwcache();
+    sudo_freegrcache();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
 }
