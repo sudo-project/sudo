@@ -133,6 +133,14 @@ sudo_getpwuid(uid_t uid)
     struct rbnode *node;
     debug_decl(sudo_getpwuid, SUDOERS_DEBUG_NSS)
 
+    if (pwcache_byuid == NULL) {
+	pwcache_byuid = rbcreate(cmp_pwuid);
+	if (pwcache_byuid == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
+
     key.k.uid = uid;
     getauthregistry(IDtouser(uid), key.registry);
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
@@ -195,6 +203,14 @@ sudo_getpwnam(const char *name)
     struct cache_item key, *item;
     struct rbnode *node;
     debug_decl(sudo_getpwnam, SUDOERS_DEBUG_NSS)
+
+    if (pwcache_byname == NULL) {
+	pwcache_byname = rbcreate(cmp_pwnam);
+	if (pwcache_byname == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
 
     key.k.name = (char *) name;
     getauthregistry((char *) name, key.registry);
@@ -261,6 +277,15 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
     size_t len, name_len, home_len, shell_len;
     int i;
     debug_decl(sudo_mkpwent, SUDOERS_DEBUG_NSS)
+
+    if (pwcache_byuid == NULL)
+	pwcache_byuid = rbcreate(cmp_pwuid);
+    if (pwcache_byname == NULL)
+	pwcache_byname = rbcreate(cmp_pwnam);
+    if (pwcache_byuid == NULL || pwcache_byname == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_ptr(NULL);
+    }
 
     /* Optional arguments. */
     if (home == NULL)
@@ -358,21 +383,6 @@ sudo_fakepwnam(const char *user, gid_t gid)
     debug_return_ptr(sudo_mkpwent(user, uid, gid, NULL, NULL));
 }
 
-int
-sudo_mkpwcache(void)
-{
-    debug_decl(sudo_mkpwcache, SUDOERS_DEBUG_NSS)
-
-    if (pwcache_byuid == NULL)
-	pwcache_byuid = rbcreate(cmp_pwuid);
-    if (pwcache_byname == NULL)
-	pwcache_byname = rbcreate(cmp_pwnam);
-    if (pwcache_byuid == NULL || pwcache_byname == NULL)
-	debug_return_int(-1);
-
-    debug_return_int(0);
-}
-
 void
 sudo_freepwcache(void)
 {
@@ -441,6 +451,14 @@ sudo_getgrgid(gid_t gid)
     struct rbnode *node;
     debug_decl(sudo_getgrgid, SUDOERS_DEBUG_NSS)
 
+    if (grcache_bygid == NULL) {
+	grcache_bygid = rbcreate(cmp_grgid);
+	if (grcache_bygid == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
+
     key.k.gid = gid;
     getauthregistry(NULL, key.registry);
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
@@ -497,6 +515,14 @@ sudo_getgrnam(const char *name)
     struct cache_item key, *item;
     struct rbnode *node;
     debug_decl(sudo_getgrnam, SUDOERS_DEBUG_NSS)
+
+    if (grcache_byname == NULL) {
+	grcache_byname = rbcreate(cmp_grnam);
+	if (grcache_byname == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
 
     key.k.name = (char *) name;
     getauthregistry(NULL, key.registry);
@@ -556,6 +582,15 @@ sudo_fakegrnam(const char *group)
     size_t len, name_len;
     int i;
     debug_decl(sudo_fakegrnam, SUDOERS_DEBUG_NSS)
+
+    if (grcache_bygid == NULL)
+	grcache_bygid = rbcreate(cmp_grgid);
+    if (grcache_byname == NULL)
+	grcache_byname = rbcreate(cmp_grnam);
+    if (grcache_bygid == NULL || grcache_byname == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_ptr(NULL);
+    }
 
     name_len = strlen(group);
     len = sizeof(*gritem) + name_len + 1;
@@ -645,23 +680,6 @@ sudo_grlist_delref(struct group_list *grlist)
     debug_return;
 }
 
-int
-sudo_mkgrcache(void)
-{
-    debug_decl(sudo_mkgrcache, SUDOERS_DEBUG_NSS)
-
-    if (grcache_bygid == NULL)
-	grcache_bygid = rbcreate(cmp_grgid);
-    if (grcache_byname == NULL)
-	grcache_byname = rbcreate(cmp_grnam);
-    if (grlist_cache == NULL)
-	grlist_cache = rbcreate(cmp_grnam);
-    if (grcache_bygid == NULL || grcache_byname == NULL || grlist_cache == NULL)
-	debug_return_int(-1);
-
-    debug_return_int(0);
-}
-
 void
 sudo_freegrcache(void)
 {
@@ -689,6 +707,14 @@ sudo_get_grlist(const struct passwd *pw)
     struct cache_item key, *item;
     struct rbnode *node;
     debug_decl(sudo_get_grlist, SUDOERS_DEBUG_NSS)
+
+    if (grlist_cache == NULL) {
+	grlist_cache = rbcreate(cmp_grnam);
+	if (grlist_cache == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_ptr(NULL);
+	}
+    }
 
     key.k.name = pw->pw_name;
     getauthregistry(pw->pw_name, key.registry);
@@ -738,6 +764,14 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
     struct cache_item key, *item;
     struct rbnode *node;
     debug_decl(sudo_set_grlist, SUDOERS_DEBUG_NSS)
+
+    if (grlist_cache == NULL) {
+	grlist_cache = rbcreate(cmp_grnam);
+	if (grlist_cache == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_int(-1);
+	}
+    }
 
     /*
      * Cache group db entry if it doesn't already exist

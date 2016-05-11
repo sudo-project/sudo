@@ -601,11 +601,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
-
     /* Initialize the debug subsystem.  */
     for (cur = settings; (cp = *cur) != NULL; cur++) {
 	if (strncmp(cp, "debug_flags=", sizeof("debug_flags=") - 1) == 0) {

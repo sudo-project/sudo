@@ -209,9 +209,6 @@ main(int argc, char *argv[])
     if (argc - optind != 0)
 	usage(1);
 
-    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
@@ -842,8 +839,6 @@ run_command(char *path, char **argv)
 	    sudo_fatal(U_("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
-	    sudo_freepwcache();
-	    sudo_freegrcache();
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
@@ -1304,8 +1299,6 @@ visudo_cleanup(void)
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
-    sudo_freepwcache();
-    sudo_freegrcache();
 }
 
 /*

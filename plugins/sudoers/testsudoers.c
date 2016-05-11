@@ -184,8 +184,6 @@ main(int argc, char *argv[])
 	setgrfile(grfile);
     if (pwfile)
 	setpwfile(pwfile);
-    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (argc < 2) {
 	if (!dflag)

@@ -304,8 +304,6 @@ void sudo_freegrcache(void);
 void sudo_freepwcache(void);
 void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
-int sudo_mkgrcache(void);
-int sudo_mkpwcache(void);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
 int  sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids);

@@ -155,11 +155,6 @@ sudoers_policy_init(void *info, char * const envp[])
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    if (sudo_mkpwcache() == -1 || sudo_mkgrcache() == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
-
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(sudoers_cleanup);
 
