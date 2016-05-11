@@ -379,7 +379,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 {
     char **nargv;
     const char *sesh;
-    int argc, serrno;
+    int argc, nargc, serrno;
     debug_decl(selinux_execve, SUDO_DEBUG_SELINUX)
 
     sesh = sudo_conf_sesh_path();
@@ -410,9 +410,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
-    if (fd != -1)
-	argc++;
-    nargv = reallocarray(NULL, argc + 2, sizeof(char *));
+    nargv = reallocarray(NULL, argc + 3, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
@@ -421,13 +419,13 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
     else
 	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
-    argc = 1;
-    if (fd != -1 && asprintf(&nargv[argc++], "--execfd=%d", fd) == -1) {
+    nargc = 1;
+    if (fd != -1 && asprintf(&nargv[nargc++], "--execfd=%d", fd) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
     }
-    nargv[argc] = (char *)path;
-    memcpy(&nargv[argc + 1], &argv[argc], argc * sizeof(char *)); /* copies NULL */
+    nargv[nargc++] = (char *)path;
+    memcpy(&nargv[nargc], &argv[argc], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
     sudo_execve(-1, sesh, nargv, envp, false);
