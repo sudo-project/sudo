@@ -303,7 +303,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	*pam_status = pam_open_session(pamh, 0);
 	if (*pam_status != PAM_SUCCESS) {
 	    const char *errstr = pam_strerror(pamh, *pam_status);
-	    log_warningx(0, N_("pam_open_session: %s"),
+	    log_warningx(0, N_("%s: %s"), "pam_open_session",
 		errstr ? errstr : "unknown error");
 	    rc = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
 	    if (rc != PAM_SUCCESS) {
