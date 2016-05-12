@@ -177,7 +177,7 @@ relabel_tty(const char *ttyn, int ptyfd)
     if (tty_con) {
 	security_class_t tclass = string_to_security_class("chr_file");
 	if (tclass == 0) {
-	    sudo_warn(U_("unknown security class chr_file, not relabeling tty"));
+	    sudo_warn(U_("unknown security class \"chr_file\", not relabeling tty"));
 	    goto bad;
 	}
 	if (security_compute_relabel(se_state.new_context, tty_con,
