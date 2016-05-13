@@ -774,7 +774,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     if (match != NULL && !match->negated) {
 	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
 	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
-	rval = len == -1 ? -1 : 0;
+	rval = len < 0 ? -1 : 0;
     }
 done:
     debug_return_int(rval);
