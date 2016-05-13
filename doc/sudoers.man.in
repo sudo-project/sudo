@@ -2015,6 +2015,20 @@ or
 \fRVISUAL\fR
 if they match a value specified in
 \fReditor\fR.
+If the
+\fIenv_reset\fR
+flag is enabled, the
+\fREDITOR\fR
+and/or
+\fRVISUAL\fR
+environment variables must be present in the
+\fIenv_keep\fR
+list for the
+\fIenv_editor\fR
+flag to function when
+\fBvisudo\fR
+is invoked via
+\fBsudo\fR.
 This flag is
 \fI@env_editor@\fR
 by default.
@@ -2975,8 +2989,17 @@ separated list of editors allowed to be used with
 \fBvisudo\fR
 will choose the editor that matches the user's
 \fREDITOR\fR
+or
+\fRVISUAL\fR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
+Note that the
+\fREDITOR\fR
+and
+\fRVISUAL\fR
+environment variables are not preserved by default when the
+\fIenv_reset\fR
+option is enabled.
 The default is
 \fI@editor@\fR.
 .TP 18n

@@ -942,7 +942,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        alternative is to place a colon-separated list of
                        editors in the editor variable.  vviissuuddoo will then only
                        use the EDITOR or VISUAL if they match a value
-                       specified in editor.  This flag is _o_f_f by default.
+                       specified in editor.  If the _e_n_v___r_e_s_e_t flag is enabled,
+                       the EDITOR and/or VISUAL environment variables must be
+                       present in the _e_n_v___k_e_e_p list for the _e_n_v___e_d_i_t_o_r flag to
+                       function when vviissuuddoo is invoked via ssuuddoo.  This flag is
+                       _o_f_f by default.
 
      env_reset         If set, ssuuddoo will run the command in a minimal
                        environment containing the TERM, PATH, HOME, MAIL,
@@ -1413,9 +1417,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      editor            A colon (`:') separated list of editors allowed to be
                        used with vviissuuddoo.  vviissuuddoo will choose the editor that
-                       matches the user's EDITOR environment variable if
-                       possible, or the first editor in the list that exists
-                       and is executable.  The default is _v_i.
+                       matches the user's EDITOR or VISUAL environment
+                       variable if possible, or the first editor in the list
+                       that exists and is executable.  Note that the EDITOR
+                       and VISUAL environment variables are not preserved by
+                       default when the _e_n_v___r_e_s_e_t option is enabled.  The
+                       default is _v_i.
 
      iolog_dir         The top-level directory to use when constructing the
                        path name for the input/output log directory.  Only
@@ -2532,4 +2539,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.16                    January 20, 2016                    Sudo 1.8.16
+Sudo 1.8.17                    January 20, 2016                    Sudo 1.8.17

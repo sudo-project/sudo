@@ -1884,6 +1884,20 @@ or
 .Ev VISUAL
 if they match a value specified in
 .Li editor .
+If the
+.Em env_reset
+flag is enabled, the 
+.Ev EDITOR
+and/or
+.Ev VISUAL
+environment variables must be present in the
+.Em env_keep
+list for the
+.Em env_editor
+flag to function when
+.Nm visudo
+is invoked via
+.Nm sudo .
 This flag is
 .Em @env_editor@
 by default.
@@ -2792,8 +2806,17 @@ separated list of editors allowed to be used with
 .Nm visudo
 will choose the editor that matches the user's
 .Ev EDITOR
+or
+.Ev VISUAL
 environment variable if possible, or the first editor in the
 list that exists and is executable.
+Note that the
+.Ev EDITOR
+and
+.Ev VISUAL
+environment variables are not preserved by default when the
+.Em env_reset
+option is enabled.
 The default is
 .Pa @editor@ .
 .It iolog_dir
