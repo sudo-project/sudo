@@ -425,7 +425,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	debug_return;
     }
     nargv[nargc++] = (char *)path;
-    memcpy(&nargv[nargc], &argv[argc], argc * sizeof(char *)); /* copies NULL */
+    memcpy(&nargv[nargc], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
     sudo_execve(-1, sesh, nargv, envp, false);
