@@ -483,14 +483,12 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
 		break;
 	    case PAM_TEXT_INFO:
-		if (pm->msg)
-		    (void) puts(pm->msg);
+		if (pm->msg != NULL)
+		    sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", pm->msg);
 		break;
 	    case PAM_ERROR_MSG:
-		if (pm->msg) {
-		    (void) fputs(pm->msg, stderr);
-		    (void) fputc('\n', stderr);
-		}
+		if (pm->msg != NULL)
+		    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", pm->msg);
 		break;
 	    default:
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,

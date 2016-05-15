@@ -99,7 +99,8 @@ sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth, struct sudo_
 	     * sure that we didn't get spoofed by another DCE server.
 	     */
 	    if (!sec_login_certify_identity(login_context, &status)) {
-		(void) fprintf(stderr, "Whoa! Bogus authentication server!\n");
+		sudo_printf(SUDO_CONV_ERROR_MSG,
+		    "Whoa! Bogus authentication server!\n");
 		(void) check_dce_status(status,"sec_login_certify_identity(1):");
 		debug_return_int(AUTH_FAILURE);
 	    }
@@ -120,13 +121,13 @@ sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth, struct sudo_
 	     * DCE client and DCE security server...
 	     */
 	    if (auth_src != sec_login_auth_src_network) {
-		    (void) fprintf(stderr,
+		    sudo_printf(SUDO_CONV_ERROR_MSG,
 			"You have no network credentials.\n");
 		    debug_return_int(AUTH_FAILURE);
 	    }
 	    /* Check if the password has aged and is thus no good */
 	    if (reset_passwd) {
-		    (void) fprintf(stderr,
+		    sudo_printf(SUDO_CONV_ERROR_MSG,
 			"Your DCE password needs resetting.\n");
 		    debug_return_int(AUTH_FAILURE);
 	    }
@@ -186,7 +187,7 @@ check_dce_status(error_status_t input_status, char *comment)
     if (input_status == rpc_s_ok)
 	debug_return_int(0);
     dce_error_inq_text(input_status, error_string, &error_stat);
-    (void) fprintf(stderr, "%s %s\n", comment, error_string);
+    sudo_printf(SUDO_CONV_ERROR_MSG, "%s %s\n", comment, error_string);
     debug_return_int(1);
 }
 

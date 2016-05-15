@@ -202,8 +202,10 @@ then enter the new token code.\n", \
 		 */
 		/* XXX - Is setting up a new PIN within sudo's scope? */
 		SD_Pin(*sd, "");
-		fprintf(stderr, "Your SecurID access has not yet been set up.\n");
-		fprintf(stderr, "Please set up a PIN before you try to authenticate.\n");
+		sudo_printf(SUDO_CONV_ERROR_MSG, 
+		    "Your SecurID access has not yet been set up.\n");
+		sudo_printf(SUDO_CONV_ERROR_MSG, 
+		    "Please set up a PIN before you try to authenticate.\n");
 		rval = AUTH_FATAL;
 		break;
 
