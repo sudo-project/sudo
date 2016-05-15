@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011, 2014-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,18 +28,19 @@
 
 #include "sudoers.h"
 
-void
-writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen)
+int
+writeln_wrap(FILE *fp, char *line, size_t linelen, size_t maxlen)
 {
     char *indent = "";
     char *beg = line;
     char *end;
+    int len, outlen = 0;
     debug_decl(writeln_wrap, SUDOERS_DEBUG_LOGGING)
 
     /*
      * Print out line with word wrap around maxlen characters.
      */
-    while (len > maxlen) {
+    while (linelen > maxlen) {
 	end = beg + maxlen;
 	while (end != beg && *end != ' ')
 	    end--;
@@ -49,10 +50,13 @@ writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen)
 	    if (end == NULL)
 		break;	/* no word break */
 	}
-	fprintf(fp, "%s%.*s\n", indent, (int)(end - beg), beg);
+	len = fprintf(fp, "%s%.*s\n", indent, (int)(end - beg), beg);
+	if (len < 0)
+	    debug_return_int(-1);
+	outlen += len;
 	while (*end == ' ')
 	    end++;
-	len -= (end - beg);
+	linelen -= (end - beg);
 	beg = end;
 	if (indent[0] == '\0') {
 	    indent = LOG_INDENT;
@@ -60,8 +64,12 @@ writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen)
 	}
     }
     /* Print remainder, if any. */
-    if (len)
-	fprintf(fp, "%s%s\n", indent, beg);
+    if (linelen) {
+	len = fprintf(fp, "%s%s\n", indent, beg);
+	if (len < 0)
+	    debug_return_int(-1);
+	outlen += len;
+    }
 
-    debug_return;
+    debug_return_int(outlen);
 }
