@@ -2534,7 +2534,8 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 
 done:
     if (found)
-	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
+	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	    safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
    debug_return_int(!found);
 }

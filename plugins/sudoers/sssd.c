@@ -1260,7 +1260,8 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 
 done:
     if (found)
-	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
+	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	    safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
 
     handle->fn_free_result(sss_result);
