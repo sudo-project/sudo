@@ -999,7 +999,7 @@ bool
 export_sudoers(const char *sudoers_path, const char *export_path,
     bool quiet, bool strict)
 {
-    bool ok = false, need_comma = false;
+    bool rval = false, need_comma = false;
     const int indent = 4;
     FILE *export_fp = stdout;
     debug_decl(export_sudoers, SUDOERS_DEBUG_UTIL)
@@ -1033,7 +1033,7 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	parse_error = true;
 	errorfile = sudoers_path;
     }
-    ok = !parse_error;
+    rval = !parse_error;
 
     if (parse_error) {
 	if (!quiet) {
@@ -1062,7 +1062,10 @@ export_sudoers(const char *sudoers_path, const char *export_path,
     fputs("\n}\n", export_fp);
 
 done:
+    (void)fflush(export_fp);
+    if (ferror(export_fp))
+	rval = false;
     if (export_fp != stdout && export_fp != NULL)
 	fclose(export_fp);
-    debug_return_bool(ok);
+    debug_return_bool(rval);
 }

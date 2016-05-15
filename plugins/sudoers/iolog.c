@@ -550,6 +550,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     char * const *av;
     FILE *fp;
     int fd;
+    bool rval;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
@@ -571,7 +572,11 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	fputs(*av, fp);
     }
     fputc('\n', fp);
-    debug_return_bool(fclose(fp) == 0);
+    fflush(fp);
+
+    rval = !ferror(fp);
+    fclose(fp);
+    debug_return_bool(rval);
 }
 
 static int
