@@ -506,7 +506,7 @@ get_user_info(struct user_details *ud)
     ud->ppid = getppid();
     ud->pgid = getpgid(0);
     ud->tcpgid = -1;
-    fd = open(_PATH_TTY, O_RDWR|O_NOCTTY|O_NONBLOCK, 0);
+    fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (fd != -1) {
 	ud->tcpgid = tcgetpgrp(fd);
 	close(fd);
