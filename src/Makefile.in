@@ -345,7 +345,8 @@ signal.o: $(srcdir)/signal.c $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+          $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/signal.c
 solaris.o: $(srcdir)/solaris.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
