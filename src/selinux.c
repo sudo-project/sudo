@@ -160,7 +160,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 
     /* If sudo is not allocating a pty for the command, open current tty. */
     if (ptyfd == -1) {
-	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY|O_NONBLOCK);
 	if (se_state.ttyfd == -1) {
 	    sudo_warn(U_("unable to open %s, not relabeling tty"), ttyn);
 	    goto bad;
@@ -208,7 +208,7 @@ relabel_tty(const char *ttyn, int ptyfd)
     } else {
 	/* Re-open tty to get new label and reset std{in,out,err} */
 	close(se_state.ttyfd);
-	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY|O_NONBLOCK);
 	if (se_state.ttyfd == -1) {
 	    sudo_warn(U_("unable to open %s"), ttyn);
 	    goto bad;
