@@ -1298,7 +1298,7 @@ tty_present(void)
 #if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
     return user_ttypath != NULL;
 #else
-    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
+    int fd = open(_PATH_TTY, O_RDWR);
     if (fd != -1)
 	close(fd);
     return fd != -1;

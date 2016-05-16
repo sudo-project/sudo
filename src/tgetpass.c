@@ -125,7 +125,7 @@ restart:
     need_restart = 0;
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if (ISSET(flags, TGP_STDIN) ||
-	(input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
+	(input = output = open(_PATH_TTY, O_RDWR)) == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
     }
@@ -372,7 +372,7 @@ tty_present(void)
     int fd;
     debug_decl(tty_present, SUDO_DEBUG_UTIL)
 
-    if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
+    if ((fd = open(_PATH_TTY, O_RDWR)) != -1)
 	close(fd);
     debug_return_bool(fd != -1);
 #endif

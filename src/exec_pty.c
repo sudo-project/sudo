@@ -181,7 +181,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 {
     debug_decl(pty_setup, SUDO_DEBUG_EXEC);
 
-    io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+    io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR);
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))

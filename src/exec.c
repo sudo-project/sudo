@@ -562,7 +562,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 		sigaction_t sa, osa;
 		pid_t saved_pgrp = -1;
 		int signo = WSTOPSIG(status);
-		int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+		int fd = open(_PATH_TTY, O_RDWR);
 		if (fd != -1) {
 		    saved_pgrp = tcgetpgrp(fd);
 		    if (saved_pgrp == -1) {
