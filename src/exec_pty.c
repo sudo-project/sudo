@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -78,7 +78,7 @@ struct io_buffer {
     sudo_io_action_t action;
     int len; /* buffer length (how much produced) */
     int off; /* write position (how much already consumed) */
-    char buf[32 * 1024];
+    char buf[64 * 1024];
 };
 SLIST_HEAD(io_buffer_list, io_buffer);
 
