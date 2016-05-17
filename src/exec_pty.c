@@ -90,7 +90,7 @@ static pid_t ppgrp, cmnd_pgrp, mon_pgrp;
 static sigset_t ttyblock;
 static struct io_buffer_list iobufs;
 
-static void del_io_events(void);
+static void del_io_events(int flags);
 static int exec_monitor(struct command_details *details, int backchannel);
 static void exec_pty(struct command_details *details,
     struct command_status *cstat, int errfd);
@@ -447,7 +447,7 @@ suspend_parent(int signo)
     case SIGSTOP:
     case SIGTSTP:
 	/* Flush any remaining output and deschedule I/O events. */
-	del_io_events();
+	del_io_events(SUDO_EVLOOP_NONBLOCK);
 
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED)
@@ -885,7 +885,7 @@ pty_close(struct command_status *cstat)
     int n;
     debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
-    /* Flush any remaining output (the plugin already got it) */
+    /* Flush any remaining output (the plugin already got it). */
     if (io_fds[SFD_USERTTY] != -1) {
 	n = fcntl(io_fds[SFD_USERTTY], F_GETFL, 0);
 	if (n != -1 && ISSET(n, O_NONBLOCK)) {
@@ -893,7 +893,7 @@ pty_close(struct command_status *cstat)
 	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, n);
 	}
     }
-    del_io_events();
+    del_io_events(0);
 
     /* Free I/O buffers. */
     while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
@@ -974,7 +974,7 @@ add_io_events(struct sudo_event_base *evbase)
  * than /dev/tty.  Removes I/O events from the event base when done.
  */
 static void
-del_io_events(void)
+del_io_events(int flags)
 {
     struct io_buffer *iob;
     struct sudo_event_base *evbase;
@@ -1019,14 +1019,17 @@ del_io_events(void)
 	}
     }
 
-    (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
+    (void) sudo_ev_loop(evbase, flags);
 
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	if (iob->wevent != NULL) {
-	    if (iob->len > iob->off) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "unflushed data: wevent %p, fd %d, events %d",
-		    iob->wevent, iob->wevent->fd, iob->wevent->events);
+    if (!ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
+	/* In blocking mode we should have flushed all buffers. */
+	SLIST_FOREACH(iob, &iobufs, entries) {
+	    if (iob->wevent != NULL) {
+		if (iob->len > iob->off) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR,
+			"unflushed data: wevent %p, fd %d, events %d",
+			iob->wevent, iob->wevent->fd, iob->wevent->events);
+		}
 	    }
 	}
     }
