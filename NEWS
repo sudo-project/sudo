@@ -31,7 +31,7 @@ What's new in Sudo 1.8.17
  * SELinux support, which was broken in 1.8.16, has been repaired.
 
  * Fixed a bug when logging I/O where all buffers might not get
-   flushed at exit when writing to standard output would block.
+   flushed at exit when reading from standard input.
 
 What's new in Sudo 1.8.16
 
