@@ -90,7 +90,7 @@ static pid_t ppgrp, cmnd_pgrp, mon_pgrp;
 static sigset_t ttyblock;
 static struct io_buffer_list iobufs;
 
-static void del_io_events(int flags);
+static void del_io_events(bool nonblocking);
 static int exec_monitor(struct command_details *details, int backchannel);
 static void exec_pty(struct command_details *details,
     struct command_status *cstat, int errfd);
@@ -189,6 +189,9 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 	/* Add entry to utmp/utmpx? */
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: /dev/tty fd %d, pty master fd %d, pty slave fd %d", __func__,
+	    io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]);
     }
 
     debug_return;
@@ -447,7 +450,7 @@ suspend_parent(int signo)
     case SIGSTOP:
     case SIGTSTP:
 	/* Flush any remaining output and deschedule I/O events. */
-	del_io_events(SUDO_EVLOOP_NONBLOCK);
+	del_io_events(true);
 
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED)
@@ -893,7 +896,7 @@ pty_close(struct command_status *cstat)
 	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, n);
 	}
     }
-    del_io_events(SUDO_EVLOOP_ONCE);
+    del_io_events(false);
 
     /* Free I/O buffers. */
     while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
@@ -974,7 +977,7 @@ add_io_events(struct sudo_event_base *evbase)
  * than /dev/tty.  Removes I/O events from the event base when done.
  */
 static void
-del_io_events(int flags)
+del_io_events(bool nonblocking)
 {
     struct io_buffer *iob;
     struct sudo_event_base *evbase;
@@ -1018,11 +1021,41 @@ del_io_events(int flags)
 	    }
 	}
     }
+    (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
 
-    (void) sudo_ev_loop(evbase, flags);
+    /*
+     * If not in non-blocking mode, make sure we flush pipes completely.
+     * We don't want to read from the pty since that might block and
+     * the command is no longer running anyway.
+     */
+    if (!nonblocking) {
+	/* Clear out iobufs from event base. */
+	SLIST_FOREACH(iob, &iobufs, entries) {
+	    if (iob->revent != NULL && !USERTTY_EVENT(iob->revent))
+		sudo_ev_del(evbase, iob->revent);
+	    if (iob->wevent != NULL)
+		sudo_ev_del(evbase, iob->wevent);
+	}
 
-    if (!ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
-	/* In blocking mode we should have flushed all buffers. */
+	SLIST_FOREACH(iob, &iobufs, entries) {
+	    /* Only flush from stdin (pipe). */
+	    if (iob->revent != NULL && sudo_ev_get_fd(iob->revent) == SFD_STDIN) {
+		if (iob->len != sizeof(iob->buf)) {
+		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
+			sudo_fatal(U_("unable to add event to queue"));
+		}
+	    }
+	    /* Flush any write buffers with data in them. */
+	    if (iob->wevent != NULL) {
+		if (iob->len > iob->off) {
+		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
+			sudo_fatal(U_("unable to add event to queue"));
+		}
+	    }
+	}
+	(void) sudo_ev_loop(evbase, 0);
+     
+	/* We should now have flushed all buffers. */
 	SLIST_FOREACH(iob, &iobufs, entries) {
 	    if (iob->wevent != NULL) {
 		if (iob->len > iob->off) {
