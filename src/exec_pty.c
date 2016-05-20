@@ -893,7 +893,7 @@ pty_close(struct command_status *cstat)
 	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, n);
 	}
     }
-    del_io_events(0);
+    del_io_events(SUDO_EVLOOP_ONCE);
 
     /* Free I/O buffers. */
     while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
