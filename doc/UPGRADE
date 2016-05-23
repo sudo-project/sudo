@@ -50,6 +50,18 @@ o Upgrading from a version prior to 1.8.14:
     plugin path name was not listed in sudo.conf.  A plugin path
     name that explicitly ends in ".sl" will still work as expected.
 
+o Upgrading from a version prior to 1.8.12:
+
+    On Solaris, sudo is now able to determine the NIS domain name.
+    As a result, if you had previously been using netgroups that
+    do not include the domain, you will need to either set the
+    domain in the entry or leave the domain part of the tuple blank.
+
+    For example, the following will no longer work:
+	my-hosts (foo,-,-) (bar,-,-) (baz,-,-)
+    and should be changed to:
+	my-hosts (foo,-,) (bar,-,) (baz,-,)
+
 o Upgrading from a version prior to 1.8.10:
 
     The time stamp file format has changed in sudo 1.8.10.  There
