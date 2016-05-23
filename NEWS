@@ -33,6 +33,10 @@ What's new in Sudo 1.8.17
  * Fixed a bug when logging I/O where all buffers might not get
    flushed at exit when reading from standard input.
 
+ * Forward slashes are no longer escaped in the JSON output of
+   "visudo -x".  This was never required by the standard and not
+   escaping them improves readability of the output.
+
 What's new in Sudo 1.8.16
 
  * Fixed a compilation error on Solaris 10 with Stun Studio 12.
