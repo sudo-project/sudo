@@ -106,7 +106,6 @@ print_string_json_unquoted(FILE *fp, const char *str)
 	switch (ch) {
 	case '"':
 	case '\\':
-	case '/':
 	    putc('\\', fp);
 	    break;
 	case '\b':

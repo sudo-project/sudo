@@ -10,7 +10,7 @@
             "Cmnd_Specs": [
                 {
                     "Commands": [
-                        { "command": "sudoedit \/etc\/motd" }
+                        { "command": "sudoedit /etc/motd" }
                     ]
                 }
             ]
