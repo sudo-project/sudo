@@ -1024,9 +1024,9 @@ del_io_events(bool nonblocking)
     (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
 
     /*
-     * If not in non-blocking mode, make sure we flush pipes completely.
-     * We don't want to read from the pty since that might block and
-     * the command is no longer running anyway.
+     * If not in non-blocking mode, make sure we flush write buffers.
+     * We don't want to read from the pty or stdin since that might block
+     * and the command is no longer running anyway.
      */
     if (!nonblocking) {
 	/* Clear out iobufs from event base. */
@@ -1038,13 +1038,6 @@ del_io_events(bool nonblocking)
 	}
 
 	SLIST_FOREACH(iob, &iobufs, entries) {
-	    /* Only flush from stdin (pipe). */
-	    if (iob->revent != NULL && sudo_ev_get_fd(iob->revent) == SFD_STDIN) {
-		if (iob->len != sizeof(iob->buf)) {
-		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-			sudo_fatal(U_("unable to add event to queue"));
-		}
-	    }
 	    /* Flush any write buffers with data in them. */
 	    if (iob->wevent != NULL) {
 		if (iob->len > iob->off) {
@@ -1055,7 +1048,7 @@ del_io_events(bool nonblocking)
 	}
 	(void) sudo_ev_loop(evbase, 0);
      
-	/* We should now have flushed all buffers. */
+	/* We should now have flushed all write buffers. */
 	SLIST_FOREACH(iob, &iobufs, entries) {
 	    if (iob->wevent != NULL) {
 		if (iob->len > iob->off) {
