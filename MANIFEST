@@ -319,6 +319,8 @@ plugins/sudoers/po/it.mo
 plugins/sudoers/po/it.po
 plugins/sudoers/po/ja.mo
 plugins/sudoers/po/ja.po
+plugins/sudoers/po/ko.mo
+plugins/sudoers/po/ko.po
 plugins/sudoers/po/lt.mo
 plugins/sudoers/po/lt.po
 plugins/sudoers/po/nb.mo
@@ -519,6 +521,8 @@ po/it.mo
 po/it.po
 po/ja.mo
 po/ja.po
+po/ko.mo
+po/ko.po
 po/nb.mo
 po/nb.po
 po/nl.mo
