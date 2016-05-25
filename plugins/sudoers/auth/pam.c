@@ -250,6 +250,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     int rc, status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
+    const char *errstr;
     debug_decl(sudo_pam_begin_session, SUDOERS_DEBUG_AUTH)
 
     /*
@@ -261,7 +262,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	if (pamh != NULL) {
 	    rc = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	    if (rc != PAM_SUCCESS) {
-		const char *errstr = pam_strerror(pamh, rc);
+		errstr = pam_strerror(pamh, rc);
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "pam_end: %s", errstr ? errstr : "unknown error");
 	    }
@@ -276,7 +277,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      */
     rc = pam_set_item(pamh, PAM_USER, pw->pw_name);
     if (rc != PAM_SUCCESS) {
-	const char *errstr = pam_strerror(pamh, rc);
+	errstr = pam_strerror(pamh, rc);
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name,
 	    errstr ? errstr : "unknown error");
@@ -293,16 +294,29 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     if (def_pam_setcred) {
 	rc = pam_setcred(pamh, PAM_REINITIALIZE_CRED);
 	if (rc != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, rc);
+	    errstr = pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"pam_setcred: %s", errstr ? errstr : "unknown error");
 	}
     }
 
     if (def_pam_session) {
-	*pam_status = pam_open_session(pamh, 0);
-	if (*pam_status != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, *pam_status);
+	rc = pam_open_session(pamh, 0);
+	switch (rc) {
+	case PAM_SUCCESS:
+	    break;
+	case PAM_SESSION_ERR:
+	    /* Treat PAM_SESSION_ERR as a non-fatal error. */
+	    errstr = pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_open_session: %s", errstr ? errstr : "unknown error");
+	    /* Avoid closing session that was not opened. */
+	    def_pam_session = false;
+	    break;
+	default:
+	    /* Unexpected session failure, treat as fatal error. */
+	    *pam_status = rc;
+	    errstr = pam_strerror(pamh, *pam_status);
 	    log_warningx(0, N_("%s: %s"), "pam_open_session",
 		errstr ? errstr : "unknown error");
 	    rc = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
