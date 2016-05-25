@@ -78,11 +78,11 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case SUDO_CONV_INFO_MSG:
-		if (msg->msg != NULL && fputs(msg->msg, stdout) != 0)
+		if (msg->msg != NULL && fputs(msg->msg, stdout) == EOF)
 		    goto err;
 		break;
 	    case SUDO_CONV_ERROR_MSG:
-		if (msg->msg != NULL && fputs(msg->msg, stderr) != 0)
+		if (msg->msg != NULL && fputs(msg->msg, stderr) == EOF)
 		    goto err;
 		break;
 	    default:
