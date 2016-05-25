@@ -53,7 +53,6 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 
     for (n = 0; n < num_msgs; n++) {
 	const struct sudo_conv_message *msg = &msgs[n];
-	struct sudo_conv_reply *repl = &replies[n];
 	int flags = tgetpass_flags;
 
 	switch (msg->msg_type & 0xff) {
@@ -71,7 +70,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		pass = tgetpass(msg->msg, msg->timeout, flags, callback);
 		if (pass == NULL)
 		    goto err;
-		if ((repl->reply = strdup(pass)) == NULL) {
+		replies[n].reply = strdup(pass);
+		if (replies[n].reply == NULL) {
 		    sudo_fatalx_nodebug(U_("%s: %s"), "sudo_conversation",
 			U_("unable to allocate memory"));
 		}
@@ -95,14 +95,16 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 
 err:
     /* Zero and free allocated memory and return an error. */
-    do {
-	struct sudo_conv_reply *repl = &replies[n];
-	if (repl->reply != NULL) {
+    if (replies != 0) {
+	do {
+	    struct sudo_conv_reply *repl = &replies[n];
+	    if (repl->reply == NULL)
+		continue;
 	    memset_s(repl->reply, SUDO_CONV_REPL_MAX, 0, strlen(repl->reply));
 	    free(repl->reply);
 	    repl->reply = NULL;
-	}
-    } while (n--);
+	} while (n--);
+    }
 
     sudo_debug_set_active_instance(conv_debug_instance);
     return -1;
