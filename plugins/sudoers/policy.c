@@ -54,7 +54,7 @@ struct sudoers_exec_args {
     char ***info;
 };
 
-static int sudo_version;
+static unsigned int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
