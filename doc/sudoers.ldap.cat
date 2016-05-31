@@ -1,4 +1,4 @@
-SUDOERS.LDAP(1m)             System Manager's Manual            SUDOERS.LDAP(1m)
+SUDOERS.LDAP(4)               File Formats Manual              SUDOERS.LDAP(4)
 
 NNAAMMEE
      ssuuddooeerrss..llddaapp - sudo LDAP configuration
@@ -304,7 +304,7 @@ DDEESSCCRRIIPPTTIIOONN
      Typically, this file is shared between different LDAP-aware clients.  As
      such, most of the settings are not ssuuddoo-specific. Note that ssuuddoo parses
      _/_e_t_c_/_l_d_a_p_._c_o_n_f itself and may support options that differ from those
-     described in the system's ldap.conf(1m) manual.  The path to _l_d_a_p_._c_o_n_f may
+     described in the system's ldap.conf(4) manual.  The path to _l_d_a_p_._c_o_n_f may
      be overridden via the _l_d_a_p___c_o_n_f plugin argument in sudo.conf(4).
 
      Also note that on systems using the OpenLDAP libraries, default values
@@ -349,7 +349,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      DDEERREEFF _n_e_v_e_r_/_s_e_a_r_c_h_i_n_g_/_f_i_n_d_i_n_g_/_a_l_w_a_y_s
            How alias dereferencing is to be performed when searching.  See the
-           ldap.conf(1m) manual for a full description of this option.
+           ldap.conf(4) manual for a full description of this option.
 
      HHOOSSTT _n_a_m_e_[_:_p_o_r_t_] _._._.
            If no UURRII is specified (see below), the HHOOSSTT parameter specifies a
@@ -874,7 +874,7 @@ EEXXAAMMPPLLEESS
           )
 
 SSEEEE AALLSSOO
-     ldap.conf(4), sssd-sudo(4), sudo.conf(4), sudoers(1m)
+     ldap.conf(4), sssd-sudo(4), sudo.conf(4), sudoers(4)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of

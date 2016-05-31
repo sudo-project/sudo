@@ -15,7 +15,7 @@
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .Dd November 20, 2015
-.Dt SUDOERS.LDAP @mansectsu@
+.Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudoers.ldap
@@ -507,7 +507,7 @@ parses
 .Pa @ldap_conf@
 itself and may support options that differ from those described in the
 system's
-.Xr ldap.conf @mansectsu@
+.Xr ldap.conf @mansectform@
 manual.
 The path to
 .Pa ldap.conf
@@ -586,7 +586,7 @@ is not supported.
 .It Sy DEREF Ar never/searching/finding/always
 How alias dereferencing is to be performed when searching.
 See the
-.Xr ldap.conf @mansectsu@
+.Xr ldap.conf @mansectform@
 manual for a full description of this option.
 .It Sy HOST Ar name[:port] ...
 If no
@@ -1342,7 +1342,7 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
 .Xr ldap.conf @mansectform@ ,
 .Xr sssd-sudo @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
-.Xr sudoers @mansectsu@
+.Xr sudoers @mansectform@
 .Sh AUTHORS
 Many people have worked on
 .Nm sudo

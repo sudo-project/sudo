@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "November 20, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOERS.LDAP" "5" "November 20, 2015" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -535,7 +535,7 @@ parses
 \fI@ldap_conf@\fR
 itself and may support options that differ from those described in the
 system's
-ldap.conf(@mansectsu@)
+ldap.conf(@mansectform@)
 manual.
 The path to
 \fIldap.conf\fR
@@ -622,7 +622,7 @@ is not supported.
 \fBDEREF\fR \fInever/searching/finding/always\fR
 How alias dereferencing is to be performed when searching.
 See the
-ldap.conf(@mansectsu@)
+ldap.conf(@mansectform@)
 manual for a full description of this option.
 .TP 6n
 \fBHOST\fR \fIname[:port] ...\fR
@@ -1465,7 +1465,7 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
 ldap.conf(@mansectform@),
 sssd-sudo(@mansectform@),
 sudo.conf(@mansectform@),
-sudoers(@mansectsu@)
+sudoers(@mansectform@)
 .SH "AUTHORS"
 Many people have worked on
 \fBsudo\fR
