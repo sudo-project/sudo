@@ -148,7 +148,7 @@ DDEESSCCRRIIPPTTIIOONN
      ssuuddooNNoottAAfftteerr
            A timestamp in the form yyyymmddHHMMSSZ that indicates an
            expiration date/time, after which the sudoRole will no longer be
-           valid.  If multiple sudoNotBefore entries are present, the last one
+           valid.  If multiple sudoNotAfter entries are present, the last one
            is used.  Note that timestamps must be in Coordinated Universal
            Time (UTC), not the local timezone.  The minute and seconds
            portions are optional, but some LDAP servers require that they be
@@ -163,11 +163,12 @@ DDEESSCCRRIIPPTTIIOONN
            inherent order.  The sudoOrder attribute is an integer (or floating
            point value for LDAP servers that support it) that is used to sort
            the matching entries.  This allows LDAP-based sudoers entries to
-           more closely mimic the behavior of the sudoers file, where the of
-           the entries influences the result.  If multiple entries match, the
-           entry with the highest sudoOrder attribute is chosen.  This
-           corresponds to the ``last match'' behavior of the sudoers file.  If
-           the sudoOrder attribute is not present, a value of 0 is assumed.
+           more closely mimic the behavior of the sudoers file, where the
+           order of the entries influences the result.  If multiple entries
+           match, the entry with the highest sudoOrder attribute is chosen.
+           This corresponds to the ``last match'' behavior of the sudoers
+           file.  If the sudoOrder attribute is not present, a value of 0 is
+           assumed.
 
            The sudoOrder attribute is only available in ssuuddoo versions 1.7.5
            and higher.

@@ -274,7 +274,7 @@ that indicates an expiration date/time, after which the
 .Li sudoRole
 will no longer be valid.
 If multiple
-.Li sudoNotBefore
+.Li sudoNotAfter
 entries are present, the last one is used.
 Note that timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
@@ -299,7 +299,7 @@ The
 attribute is an integer (or floating point value for LDAP servers
 that support it) that is used to sort the matching entries.
 This allows LDAP-based sudoers entries to more closely mimic the behavior
-of the sudoers file, where the of the entries influences the result.
+of the sudoers file, where the order of the entries influences the result.
 If multiple entries match, the entry with the highest
 .Li sudoOrder
 attribute is chosen.
