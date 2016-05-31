@@ -1394,10 +1394,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        fractional component if minute granularity is
                        insufficient, for example 2.5.  The default is 5.  Set
                        this to 0 to always prompt for a password.  If set to a
-                       value less than 0 the user's time stamp will never
-                       expire.  This can be used to allow users to create or
-                       delete their own time stamps via ``sudo -v'' and ``sudo
-                       -k'' respectively.
+                       value less than 0 the user's time stamp will not expire
+                       until the system is rebooted.  This can be used to
+                       allow users to create or delete their own time stamps
+                       via ``sudo -v'' and ``sudo -k'' respectively.
 
      umask             Umask to use when running the command.  Negate this
                        option or set it to 0777 to preserve the user's umask.

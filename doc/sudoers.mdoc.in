@@ -2768,7 +2768,7 @@ Set this to
 to always prompt for a password.
 If set to a value less than
 .Li 0
-the user's time stamp will never expire.
+the user's time stamp will not expire until the system is rebooted.
 This can be used to allow users to create or delete their own time stamps via
 .Dq Li sudo -v
 and
