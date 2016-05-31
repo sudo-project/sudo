@@ -1356,6 +1356,17 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_long, SUDOERS_DEBUG_SSSD);
 
+    switch (handle->fn_get_values(rule, "cn", &val_array)) {
+    case 0:
+	if (val_array[0] != NULL)
+	    sudo_lbuf_append(lbuf, _("\nSSSD Role: %s\n"), val_array[0]);
+	handle->fn_free_values(val_array);
+	val_array = NULL;
+	break;
+    default:
+	sudo_lbuf_append(lbuf, _("\nSSSD Role: UNKNOWN\n"));
+    }
+
     /* get the RunAsUser Values from the entry */
     sudo_lbuf_append(lbuf, "    RunAsUsers: ");
     switch (handle->fn_get_values(rule, "sudoRunAsUser", &val_array)) {
