@@ -185,7 +185,7 @@ DEFVAR			[a-z_]+
 				LEXTRACE("ERROR "); /* empty string */
 				LEXRETURN(ERROR);
 			    }
-			    if (prev_state == INITIAL || prev_state == GOTDEFS) {
+			    if (prev_state == INITIAL) {
 				switch (sudoerslval.string[0]) {
 				case '%':
 				    if (sudoerslval.string[1] == '\0' ||
