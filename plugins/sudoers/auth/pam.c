@@ -485,6 +485,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		if (pass == NULL) {
 		    /* Error (or ^C) reading password, don't try again. */
 		    getpass_error = true;
+		    ret = PAM_CONV_ERR;
 		    goto done;
 		}
 		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
