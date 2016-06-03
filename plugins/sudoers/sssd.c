@@ -668,13 +668,14 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     }
 
     /* walk through values */
-    for (i = 0; val_array[i] != NULL; ++i) {
+    for (i = 0; val_array[i] != NULL && !ret; ++i) {
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
 	/* match any or address or netgroup or hostname */
-	if (strcmp(val, "ALL") == 0 || addr_matches(val) || netgr_matches(val,
-	    user_runhost, user_srunhost, handle->pw->pw_name) ||
+	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
+	    netgr_matches(val, user_runhost, user_srunhost,
+	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
 	    ret = true;
 
