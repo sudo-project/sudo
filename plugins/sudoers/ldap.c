@@ -736,7 +736,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
 	/* match any or address or netgroup or hostname */
-	if (!strcmp(val, "ALL") || addr_matches(val) ||
+	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, user_runhost, user_srunhost,
 	    def_netgroup_tuple ? pw->pw_name : NULL) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
@@ -958,7 +958,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
     for (p = bv; *p != NULL && ret != false; p++) {
 	val = (*p)->bv_val;
 	/* Match against ALL ? */
-	if (!strcmp(val, "ALL")) {
+	if (strcmp(val, "ALL") == 0) {
 	    ret = true;
 	    if (setenv_implied != NULL)
 		*setenv_implied = true;

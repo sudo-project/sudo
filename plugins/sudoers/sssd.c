@@ -673,7 +673,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
 	/* match any or address or netgroup or hostname */
-	if (!strcmp(val, "ALL") || addr_matches(val) || netgr_matches(val,
+	if (strcmp(val, "ALL") == 0 || addr_matches(val) || netgr_matches(val,
 	    user_runhost, user_srunhost, handle->pw->pw_name) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
 	    ret = true;
@@ -991,7 +991,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
 	/* Match against ALL ? */
-	if (!strcmp(val, "ALL")) {
+	if (strcmp(val, "ALL") == 0) {
 	    ret = true;
 	    if (setenv_implied != NULL)
 		*setenv_implied = true;
