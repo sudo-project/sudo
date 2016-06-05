@@ -324,10 +324,13 @@ get_ipa_hostname(char **shostp, char **lhostp)
 	     * Match ipa_hostname = foo
 	     * Note: currently ignores the domain (XXX)
 	     */
-	    if (strncmp(cp, "ipa_hostname", 12) == 0 &&
-		(isblank((unsigned char)cp[12]) || cp[12] == '=')) {
-		cp += 13;
-		while (isblank((unsigned char)*cp) || *cp == '=')
+	    if (strncmp(cp, "ipa_hostname", 12) == 0) {
+		cp += 12;
+		while (isblank((unsigned char)*cp))
+		    cp++;
+		if (*cp++ != '=')
+		    continue;
+		while (isblank((unsigned char)*cp))
 		    cp++;
 		lhost = strdup(cp);
 		if (lhost != NULL && (cp = strchr(lhost, '.')) != NULL) {
@@ -336,6 +339,8 @@ get_ipa_hostname(char **shostp, char **lhostp)
 		    shost = lhost;
 		}
 		if (shost != NULL && lhost != NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"ipa_hostname %s overrides %s", lhost, user_host);
 		    *shostp = shost;
 		    *lhostp = lhost;
 		    ret = true;
@@ -344,8 +349,8 @@ get_ipa_hostname(char **shostp, char **lhostp)
 		    free(lhost);
 		    ret = -1;
 		}
+		break;
 	    }
-	    break;
 	}
 	fclose(fp);
 	free(line);
