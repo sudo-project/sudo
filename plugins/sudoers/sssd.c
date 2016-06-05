@@ -326,12 +326,16 @@ get_ipa_hostname(char **shostp, char **lhostp)
 	     */
 	    if (strncmp(cp, "ipa_hostname", 12) == 0) {
 		cp += 12;
+		/* Trim " = " after "ipa_hostname" */
 		while (isblank((unsigned char)*cp))
 		    cp++;
 		if (*cp++ != '=')
 		    continue;
 		while (isblank((unsigned char)*cp))
 		    cp++;
+		/* Ignore empty value */
+		if (*cp == '\0')
+		    continue;
 		lhost = strdup(cp);
 		if (lhost != NULL && (cp = strchr(lhost, '.')) != NULL) {
 		    shost = strndup(lhost, (size_t)(cp - lhost));
