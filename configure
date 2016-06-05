@@ -852,6 +852,7 @@ with_bsm_audit
 with_linux_audit
 with_solaris_audit
 with_sssd
+with_sssd_conf
 with_sssd_lib
 with_incpath
 with_libpath
@@ -1653,6 +1654,7 @@ Optional Packages:
   --with-linux-audit      enable Linux audit support
   --with-solaris-audit    enable Solaris audit support
   --with-sssd             enable SSSD support
+  --with-sssd-conf        path to the SSSD config file
   --with-sssd-lib         path to the SSSD library
   --with-incpath          additional places to look for include files
   --with-libpath          additional places to look for libraries
@@ -4368,6 +4370,19 @@ if test "${with_sssd+set}" = set; then :
 		;;
 esac
 fi
+
+
+
+# Check whether --with-sssd-conf was given.
+if test "${with_sssd_conf+set}" = set; then :
+  withval=$with_sssd_conf;
+fi
+
+sssd_conf="/etc/sssd/sssd.conf"
+test -n "$with_sssd_conf" && sssd_conf="$with_sssd_conf"
+cat >>confdefs.h <<EOF
+#define _PATH_SSSD_CONF "$sssd_conf"
+EOF
 
 
 

@@ -366,6 +366,11 @@ AC_ARG_WITH(sssd, [AS_HELP_STRING([--with-sssd], [enable SSSD support])],
 		;;
 esac])
 
+AC_ARG_WITH(sssd-conf, [AS_HELP_STRING([--with-sssd-conf], [path to the SSSD config file])])
+sssd_conf="/etc/sssd/sssd.conf"
+test -n "$with_sssd_conf" && sssd_conf="$with_sssd_conf"
+SUDO_DEFINE_UNQUOTED(_PATH_SSSD_CONF, "$sssd_conf", [Path to the SSSD config file])
+
 AC_ARG_WITH(sssd-lib, [AS_HELP_STRING([--with-sssd-lib], [path to the SSSD library])])
 sssd_lib="\"LIBDIR\""
 test -n "$with_sssd_lib" && sssd_lib="$with_sssd_lib"

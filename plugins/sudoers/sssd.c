@@ -82,6 +82,8 @@ typedef void (*sss_sudo_free_values_t)(char**);
 
 struct sudo_sss_handle {
     char *domainname;
+    char *host;
+    char *shost;
     struct passwd *pw;
     void *ssslib;
     sss_sudo_send_recv_t fn_send_recv;
@@ -295,6 +297,62 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     debug_return_ptr(out_res);
 }
 
+static int
+get_ipa_hostname(char **shostp, char **lhostp)
+{
+    size_t linesize = 0;
+    char *lhost = NULL;
+    char *shost = NULL;
+    char *line = NULL;
+    int ret = false;
+    ssize_t len;
+    FILE *fp;
+    debug_decl(get_ipa_hostname, SUDOERS_DEBUG_SSSD)
+
+    fp = fopen(_PATH_SSSD_CONF, "r");
+    if (fp != NULL) {
+	while ((len = getline(&line, &linesize, fp)) != -1) {
+	    char *cp = line;
+
+	    /* Trim trailing and leading spaces. */
+	    while (isspace((unsigned char)line[len - 1]))
+		line[--len] = '\0';
+	    while (isspace((unsigned char)*cp))
+		cp++;
+
+	    /*
+	     * Match ipa_hostname = foo
+	     * Note: currently ignores the domain (XXX)
+	     */
+	    if (strncmp(cp, "ipa_hostname", 12) == 0 &&
+		(isblank((unsigned char)cp[12]) || cp[12] == '=')) {
+		cp += 13;
+		while (isblank((unsigned char)*cp) || *cp == '=')
+		    cp++;
+		lhost = strdup(cp);
+		if (lhost != NULL && (cp = strchr(lhost, '.')) != NULL) {
+		    shost = strndup(lhost, (size_t)(cp - lhost));
+		} else {
+		    shost = lhost;
+		}
+		if (shost != NULL && lhost != NULL) {
+		    *shostp = shost;
+		    *lhostp = lhost;
+		    ret = true;
+		} else {
+		    free(shost);
+		    free(lhost);
+		    ret = -1;
+		}
+	    }
+	    break;
+	}
+	fclose(fp);
+	free(line);
+    }
+    debug_return_int(ret);
+}
+
 struct sudo_nss sudo_nss_sss = {
     { NULL, NULL },
     sudo_sss_open,
@@ -381,8 +439,22 @@ sudo_sss_open(struct sudo_nss *nss)
     }
 
     handle->domainname = NULL;
+    handle->host = user_runhost;
+    handle->shost = user_srunhost;
     handle->pw = sudo_user.pw;
     nss->handle = handle;
+
+    /*
+     * If runhost is the same as the local host, check for ipa_hostname
+     * in sssd.conf and use it in preference to user_runhost.
+     */
+    if (strcmp(user_runhost, user_host) == 0) {
+	if (get_ipa_hostname(&handle->shost, &handle->host) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(handle);
+	    debug_return_int(ENOMEM);
+	}
+    }
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "handle=%p", handle);
 
@@ -544,8 +616,8 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	switch (val[0]) {
 	case '+':
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "netgr_");
-	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
-		def_netgroup_tuple ? user_srunhost : NULL, runas_pw->pw_name)) {
+	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
+		def_netgroup_tuple ? handle->shost : NULL, runas_pw->pw_name)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "=> match");
 		ret = true;
 	    }
@@ -674,9 +746,9 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
-	    netgr_matches(val, user_runhost, user_srunhost,
+	    netgr_matches(val, handle->host, handle->shost,
 	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
-	    hostname_matches(user_srunhost, user_runhost, val))
+	    hostname_matches(handle->shost, handle->host, val))
 	    ret = true;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -729,8 +801,8 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
-	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
-		def_netgroup_tuple ? user_srunhost : NULL, handle->pw->pw_name)) {
+	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
+		def_netgroup_tuple ? handle->shost : NULL, handle->pw->pw_name)) {
 		matched = !negated;
 	    }
 	    break;

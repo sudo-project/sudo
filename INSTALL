@@ -341,6 +341,10 @@ Optional features:
         (SSSD) as a sudoers data source.  For more information on
         SSD, see http://fedorahosted.org/sssd/
 
+  --with-sssd-conf=PATH
+        Specify the path to the SSSD configuration file, if different
+	from the default value of /etc/sssd/sssd.conf.
+
   --with-sssd-lib=PATH
         Specify the path to the SSSD shared library, which is loaded
         at run-time.
