@@ -1,14 +1,14 @@
 # Finnish messages for sudoers.
 # This file is put in the public domain.
 # This file is distributed under the same license as the sudo package.
-# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011-2015.
+# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011-2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.8.17b4\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2016-06-06 10:06-0600\n"
-"PO-Revision-Date: 2016-06-09 15:09+0300\n"
+"PO-Revision-Date: 2016-06-09 17:51+0300\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
