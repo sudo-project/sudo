@@ -157,8 +157,6 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
     restore_signals();
     if (exec_setup(details, NULL, -1) == true) {
 	/* headed for execve() */
-	sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
-	    details->argv, details->envp);
 	if (details->closefrom >= 0) {
 	    int fd, maxfd;
 	    unsigned char *debug_fds;
