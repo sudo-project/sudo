@@ -482,7 +482,28 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	globfree(&gl);
 	debug_return_bool(false);
     }
-    /* For each glob match, compare basename, st_dev and st_ino. */
+    /* If user_cmnd is fully-qualified, check for an exact match. */
+    if (user_cmnd[0] == '/') {
+	for (ap = gl.gl_pathv; (cp = *ap) != NULL; ap++) {
+	    if (strcmp(cp, user_cmnd) != 0 || stat(cp, &sudoers_stat) == -1)
+		continue;
+	    if (user_stat == NULL ||
+		(user_stat->st_dev == sudoers_stat.st_dev &&
+		user_stat->st_ino == sudoers_stat.st_ino)) {
+		free(safe_cmnd);
+		if ((safe_cmnd = strdup(cp)) == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		    cp = NULL;		/* fail closed */
+		}
+	    } else {
+		/* Paths match, but st_dev and st_ino are different. */
+		cp = NULL;		/* fail closed */
+	    }
+	    goto done;
+	}
+    }
+    /* No exact match, compare basename, st_dev and st_ino. */
     for (ap = gl.gl_pathv; (cp = *ap) != NULL; ap++) {
 	/* If it ends in '/' it is a directory spec. */
 	dlen = strlen(cp);
@@ -505,12 +526,14 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args)
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(cp)) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
 		cp = NULL;		/* fail closed */
 	    }
-	    break;
+	    goto done;
 	}
     }
+done:
     globfree(&gl);
     if (cp == NULL)
 	debug_return_bool(false);
@@ -796,7 +819,8 @@ command_matches_dir(const char *sudoers_dir, size_t dlen)
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(buf)) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
 		dent = NULL;
 	    }
 	    break;
