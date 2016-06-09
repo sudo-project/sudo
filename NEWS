@@ -55,6 +55,12 @@ What's new in Sudo 1.8.17
  * Fixed a hang on some systems when the command is being run in
    a pty and it failed to execute.
 
+ * When performing a wildcard match in sudoers, check for an exact
+   string match if the user command was fully-qualified (or resolved
+   via the PATH).  This fixes an issue executing scripts on Linux
+   when there are multiple wildcard matches with the same base name.
+   Bug #746.
+
 What's new in Sudo 1.8.16
 
  * Fixed a compilation error on Solaris 10 with Stun Studio 12.
