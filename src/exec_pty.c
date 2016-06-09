@@ -1156,7 +1156,10 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     do {
 	pid = waitpid(cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
-    if (pid == cmnd_pid) {
+    if (pid != cmnd_pid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "waitpid returned %d, expected pid %d", pid, cmnd_pid);
+    } else {
 	if (cstat->type != CMD_ERRNO) {
 	    char signame[SIG2STR_MAX];
 
@@ -1174,7 +1177,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		if (pid != mon_pgrp)
 		    cmnd_pgrp = pid;
 		if (send_status(backchannel, cstat) == -1)
-		    return alive; /* XXX */
+		    debug_return_bool(alive); /* XXX */
 	    } else if (WIFSIGNALED(status)) {
 		if (sig2str(WTERMSIG(status), signame) == -1)
 		    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
@@ -1184,9 +1187,9 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
 		    WEXITSTATUS(status));
 	    }
-	    if (!WIFSTOPPED(status))
-		alive = false;
 	}
+	if (!WIFSTOPPED(status))
+	    alive = false;
     }
     debug_return_bool(alive);
 }
@@ -1253,6 +1256,8 @@ mon_errpipe_cb(int fd, int what, void *v)
 	}
     } else {
 	/* Got errno or EOF, either way we are done with errpipe. */
+	sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: type: %d, val: %d",
+	    __func__, mc->cstat->type, mc->cstat->val);
 	sudo_ev_del(mc->evbase, mc->errpipe_event);
 	close(fd);
     }
