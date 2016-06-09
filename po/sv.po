@@ -462,11 +462,11 @@ msgstr "sluta behandla kommandoradsargument"
 
 #: src/selinux.c:77
 msgid "unable to open audit system"
-msgstr "kan inte öppna revisionssystem"
+msgstr "kan inte öppna granskningssystem"
 
 #: src/selinux.c:87
 msgid "unable to send audit message"
-msgstr "kan inte skicka revisionsmeddelande"
+msgstr "kan inte skicka granskningsmeddelande"
 
 #: src/selinux.c:115
 #, c-format
