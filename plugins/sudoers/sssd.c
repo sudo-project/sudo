@@ -777,7 +777,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 static bool
 sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int matched = UNSPEC;
+    int ret = false;
     char **val_array;
     int i;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
@@ -798,43 +798,38 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     }
 
     /* Walk through sudoUser values.  */
-    for (i = 0; val_array[i] != NULL && matched != false; ++i) {
-	bool negated = false;
+    for (i = 0; val_array[i] != NULL && !ret; ++i) {
 	const char *val = val_array[i];
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
-	if (*val == '!') {
-	    val++;
-	    negated = true;
-	}
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
 	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
 		def_netgroup_tuple ? handle->shost : NULL, handle->pw->pw_name)) {
-		matched = !negated;
+		ret = true;
 	    }
 	    break;
 	case '%':
 	    /* User group found, check membership. */
 	    if (usergr_matches(val, handle->pw->pw_name, handle->pw)) {
-		matched = !negated;
+		ret = true;
 	    }
 	    break;
 	default:
 	    /* Not a netgroup or user group. */
 	    if (strcmp(val, "ALL") == 0 ||
 		userpw_matches(val, handle->pw->pw_name, handle->pw)) {
-		matched = !negated;
+		ret = true;
 	    }
 	    break;
 	}
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "sssd/ldap sudoUser '%s' ... %s (%s)", val_array[i],
-	    matched == true ? "MATCH!" : "not", handle->pw->pw_name);
+	    "sssd/ldap sudoUser '%s' ... %s (%s)", val,
+	    ret ? "MATCH!" : "not", handle->pw->pw_name);
     }
     handle->fn_free_values(val_array);
-    debug_return_bool(matched == true);
+    debug_return_bool(ret);
 }
 
 static int
