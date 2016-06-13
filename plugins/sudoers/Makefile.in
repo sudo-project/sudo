@@ -459,9 +459,9 @@ check: $(TEST_PROGS) visudo testsudoers
 	fi
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la \
-	    *.a stamp-* core *.core core.* regress/*/*.out regress/*/*.toke \
-	    regress/*/*.err
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
+	    *.lo *.o *.la *.a stamp-* core *.core core.* regress/*/*.out \
+	    regress/*/*.toke regress/*/*.err
 
 mostlyclean: clean
 

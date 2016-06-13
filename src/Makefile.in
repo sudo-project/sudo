@@ -214,7 +214,8 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
+	    *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 
