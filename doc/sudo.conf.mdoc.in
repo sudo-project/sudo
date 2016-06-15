@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 20, 2015
+.Dd June 15, 2016
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -145,6 +145,10 @@ For example, to override the compile-time default sudoers file mode:
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .Ed
+.Pp
+See the
+.Xr sudoers @mansectform@
+manual for a list of supported arguments.
 .Pp
 The same dynamic shared object may contain multiple plugins,
 each with a different symbol name.
