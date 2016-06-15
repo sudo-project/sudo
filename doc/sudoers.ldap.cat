@@ -50,7 +50,7 @@ DDEESSCCRRIIPPTTIIOONN
    SSUUDDOOeerrss LLDDAAPP ccoonnttaaiinneerr
      The _s_u_d_o_e_r_s configuration is contained in the ou=SUDOers LDAP container.
 
-     Sudo first looks for the cn=default entry in the SUDOers container.  If
+     Sudo first looks for the cn=defaults entry in the SUDOers container.  If
      found, the multi-valued sudoOption attribute is parsed in the same manner
      as a global Defaults line in _/_e_t_c_/_s_u_d_o_e_r_s.  In the following example, the
      SSH_AUTH_SOCK variable will be preserved in the environment for all
