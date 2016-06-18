@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,8 +14,8 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 20, 2015
-.Dt SUDOERS.LDAP @mansectsu@
+.Dd June 15, 2016
+.Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudoers.ldap
@@ -105,7 +105,7 @@ configuration is contained in the
 LDAP container.
 .Pp
 Sudo first looks for the
-.Li cn=default
+.Li cn=defaults
 entry in the SUDOers container.
 If found, the multi-valued
 .Li sudoOption
@@ -274,7 +274,7 @@ that indicates an expiration date/time, after which the
 .Li sudoRole
 will no longer be valid.
 If multiple
-.Li sudoNotBefore
+.Li sudoNotAfter
 entries are present, the last one is used.
 Note that timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
@@ -299,7 +299,7 @@ The
 attribute is an integer (or floating point value for LDAP servers
 that support it) that is used to sort the matching entries.
 This allows LDAP-based sudoers entries to more closely mimic the behavior
-of the sudoers file, where the of the entries influences the result.
+of the sudoers file, where the order of the entries influences the result.
 If multiple entries match, the entry with the highest
 .Li sudoOrder
 attribute is chosen.
@@ -507,7 +507,7 @@ parses
 .Pa @ldap_conf@
 itself and may support options that differ from those described in the
 system's
-.Xr ldap.conf @mansectsu@
+.Xr ldap.conf @mansectform@
 manual.
 The path to
 .Pa ldap.conf
@@ -586,7 +586,7 @@ is not supported.
 .It Sy DEREF Ar never/searching/finding/always
 How alias dereferencing is to be performed when searching.
 See the
-.Xr ldap.conf @mansectsu@
+.Xr ldap.conf @mansectform@
 manual for a full description of this option.
 .It Sy HOST Ar name[:port] ...
 If no
@@ -1342,7 +1342,7 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
 .Xr ldap.conf @mansectform@ ,
 .Xr sssd-sudo @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
-.Xr sudoers @mansectsu@
+.Xr sudoers @mansectform@
 .Sh AUTHORS
 Many people have worked on
 .Nm sudo

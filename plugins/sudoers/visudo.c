@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -209,9 +209,6 @@ main(int argc, char *argv[])
     if (argc - optind != 0)
 	usage(1);
 
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
@@ -238,7 +235,7 @@ main(int argc, char *argv[])
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(1);
     init_parser(sudoers_file, false);
-    sudoersparse();
+    (void) sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
 
     editor = get_editor(&editor_argc, &editor_argv);
@@ -331,12 +328,13 @@ get_editor(int *editor_argc, char ***editor_argv)
 	    if (editor_path != NULL)
 		break;
 	    if (errno != ENOENT)
-		debug_return_str(NULL);
+		goto done;
 	}
     }
     if (editor_path == NULL)
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
 
+done:
     if (whitelist != NULL) {
 	while (whitelist_len--)
 	    free(whitelist[whitelist_len]);
@@ -841,8 +839,6 @@ run_command(char *path, char **argv)
 	    sudo_fatal(U_("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
-	    sudo_endpwent();
-	    sudo_endgrent();
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
@@ -1303,8 +1299,6 @@ visudo_cleanup(void)
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
-    sudo_endpwent();
-    sudo_endgrent();
 }
 
 /*

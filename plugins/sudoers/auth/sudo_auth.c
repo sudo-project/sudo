@@ -298,7 +298,6 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	if (!standalone) {
 	    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 	    free(pass);
-	    pass = NULL;
 	}
 
 	if (success != AUTH_FAILURE)

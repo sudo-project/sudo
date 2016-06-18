@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.16], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.17], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -365,6 +365,11 @@ AC_ARG_WITH(sssd, [AS_HELP_STRING([--with-sssd], [enable SSSD support])],
     *)		AC_MSG_ERROR(["--with-sssd does not take an argument."])
 		;;
 esac])
+
+AC_ARG_WITH(sssd-conf, [AS_HELP_STRING([--with-sssd-conf], [path to the SSSD config file])])
+sssd_conf="/etc/sssd/sssd.conf"
+test -n "$with_sssd_conf" && sssd_conf="$with_sssd_conf"
+SUDO_DEFINE_UNQUOTED(_PATH_SSSD_CONF, "$sssd_conf", [Path to the SSSD config file])
 
 AC_ARG_WITH(sssd-lib, [AS_HELP_STRING([--with-sssd-lib], [path to the SSSD library])])
 sssd_lib="\"LIBDIR\""
@@ -2328,12 +2333,6 @@ AC_TYPE_LONG_LONG_INT
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
     AC_MSG_ERROR(["C compiler does not appear to support the long long int type"])
 fi
-AC_CHECK_TYPE(id_t, unsigned int)
-AC_CHECK_TYPE(size_t, unsigned int)
-AC_CHECK_TYPE(ssize_t, int)
-AC_CHECK_TYPE(dev_t, int)
-AC_CHECK_TYPE(ino_t, unsigned int)
-AC_CHECK_TYPE(ptrdiff_t, long)
 AC_CHECK_TYPE(intmax_t, long long)
 AC_CHECK_TYPE(uintmax_t, unsigned long long)
 AC_CHECK_TYPE(uint8_t, unsigned char)
@@ -2453,20 +2452,6 @@ AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
 ])
-dnl
-dnl If libc supports _FORTIFY_SOURCE check functions, use it.
-dnl
-if test "$enable_hardening" != "no"; then
-    found=false
-    O_CPPFLAGS="$CPPFLAGS"
-    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
-    AC_CHECK_FUNC([__sprintf_chk], [
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [found=true], [])
-    ], [])
-    if test X"$found" != X"true"; then
-	CPPFLAGS="$O_CPPFLAGS"
-    fi
-fi
 
 utmp_style=LEGACY
 AC_CHECK_FUNCS([getutxid getutid], [utmp_style=POSIX; break])
@@ -3811,6 +3796,35 @@ SUDO_IO_LOGDIR
 SUDO_TZDIR
 
 dnl
+dnl Attempt to use _FORTIFY_SOURCE with sprintf.  If the headers support
+dnl it but libc does not, __sprintf_chk should be an undefined symbol.
+dnl
+if test "$enable_hardening" != "no"; then
+    O_CPPFLAGS="$CPPFLAGS"
+    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
+    AC_CACHE_CHECK([whether _FORTIFY_SOURCE may be specified],
+	[sudo_cv_use_fortify_source],
+	[AC_LINK_IFELSE([
+		AC_LANG_PROGRAM(
+		    [[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]]
+		)],
+		[sudo_cv_use_fortify_source=yes],
+		[sudo_cv_use_fortify_source=no]
+	    )
+	]
+	[AC_LINK_IFELSE(
+	    [AC_LANG_PROGRAM([[]], [[]])],
+		[sudo_cv_use_fortify_source=yes],
+		[sudo_cv_use_fortify_source=no]
+	    )
+	]
+    )
+    if test "$sudo_cv_use_fortify_source" != yes; then
+	CPPFLAGS="$O_CPPFLAGS"
+    fi
+fi
+
+dnl
 dnl Turn warnings into errors.
 dnl All compiler/loader tests after this point will fail if
 dnl a warning is displayed (normally, warnings are not fatal).
@@ -4406,6 +4420,11 @@ AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 /* Enable "safer" versions of the standard C API (ISO C11).  */
 #ifndef __STDC_WANT_LIB_EXT1__
 # undef __STDC_WANT_LIB_EXT1__
+#endif
+
+/* Prevent static analyzers from genering bogus memory leak warnings. */
+#if defined(__COVERITY__) && !defined(NO_LEAKS)
+# define NO_LEAKS
 #endif
 
 #endif /* SUDO_CONFIG_H */])

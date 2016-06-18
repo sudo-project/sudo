@@ -38,7 +38,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include <selinux/flask.h>             /* for SECCLASS_CHR_FILE */
 #include <selinux/selinux.h>           /* for is_selinux_enabled() */
 #include <selinux/context.h>           /* for context-mangling functions */
 #include <selinux/get_default_type.h>
@@ -161,11 +160,10 @@ relabel_tty(const char *ttyn, int ptyfd)
 
     /* If sudo is not allocating a pty for the command, open current tty. */
     if (ptyfd == -1) {
-	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY|O_NONBLOCK);
 	if (se_state.ttyfd == -1) {
 	    sudo_warn(U_("unable to open %s, not relabeling tty"), ttyn);
-	    if (se_state.enforcing)
-		goto bad;
+	    goto bad;
 	}
 	(void)fcntl(se_state.ttyfd, F_SETFL,
 	    fcntl(se_state.ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
@@ -173,22 +171,26 @@ relabel_tty(const char *ttyn, int ptyfd)
 
     if (fgetfilecon(se_state.ttyfd, &tty_con) < 0) {
 	sudo_warn(U_("unable to get current tty context, not relabeling tty"));
-	if (se_state.enforcing)
-	    goto bad;
+	goto bad;
     }
 
-    if (tty_con && (security_compute_relabel(se_state.new_context, tty_con,
-	SECCLASS_CHR_FILE, &new_tty_con) < 0)) {
-	sudo_warn(U_("unable to get new tty context, not relabeling tty"));
-	if (se_state.enforcing)
+    if (tty_con) {
+	security_class_t tclass = string_to_security_class("chr_file");
+	if (tclass == 0) {
+	    sudo_warn(U_("unknown security class \"chr_file\", not relabeling tty"));
 	    goto bad;
+	}
+	if (security_compute_relabel(se_state.new_context, tty_con,
+	    tclass, &new_tty_con) < 0) {
+	    sudo_warn(U_("unable to get new tty context, not relabeling tty"));
+	    goto bad;
+	}
     }
 
     if (new_tty_con != NULL) {
 	if (fsetfilecon(se_state.ttyfd, new_tty_con) < 0) {
 	    sudo_warn(U_("unable to set new tty context"));
-	    if (se_state.enforcing)
-		goto bad;
+	    goto bad;
 	}
     }
 
@@ -197,8 +199,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY, 0);
 	if (se_state.ttyfd == -1) {
 	    sudo_warn(U_("unable to open %s"), ttyn);
-	    if (se_state.enforcing)
-		goto bad;
+	    goto bad;
 	}
 	if (dup2(se_state.ttyfd, ptyfd) == -1) {
 	    sudo_warn("dup2");
@@ -207,7 +208,7 @@ relabel_tty(const char *ttyn, int ptyfd)
     } else {
 	/* Re-open tty to get new label and reset std{in,out,err} */
 	close(se_state.ttyfd);
-	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY|O_NONBLOCK);
 	if (se_state.ttyfd == -1) {
 	    sudo_warn(U_("unable to open %s"), ttyn);
 	    goto bad;
@@ -235,7 +236,7 @@ bad:
 	se_state.ttyfd = -1;
     }
     freecon(tty_con);
-    debug_return_int(-1);
+    debug_return_int(se_state.enforcing ? -1 : 0);
 }
 
 /*
@@ -378,7 +379,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 {
     char **nargv;
     const char *sesh;
-    int argc, serrno;
+    int argc, nargc, serrno;
     debug_decl(selinux_execve, SUDO_DEBUG_SELINUX)
 
     sesh = sudo_conf_sesh_path();
@@ -409,9 +410,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
-    if (fd != -1)
-	argc++;
-    nargv = reallocarray(NULL, argc + 2, sizeof(char *));
+    nargv = reallocarray(NULL, argc + 3, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
@@ -420,13 +419,13 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
     else
 	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
-    argc = 1;
-    if (fd != -1 && asprintf(&nargv[argc++], "--execfd=%d", fd) == -1) {
+    nargc = 1;
+    if (fd != -1 && asprintf(&nargv[nargc++], "--execfd=%d", fd) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
     }
-    nargv[argc] = (char *)path;
-    memcpy(&nargv[argc + 1], &argv[argc], argc * sizeof(char *)); /* copies NULL */
+    nargv[nargc++] = (char *)path;
+    memcpy(&nargv[nargc], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
     sudo_execve(-1, sesh, nargv, envp, false);

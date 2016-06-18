@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -155,11 +155,6 @@ sudoers_policy_init(void *info, char * const envp[])
 
     bindtextdomain("sudoers", LOCALEDIR);
 
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
-
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(sudoers_cleanup);
 
@@ -261,6 +256,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char *iolog_path = NULL;
     mode_t cmnd_umask = 0777;
     struct sudo_nss *nss;
+    bool nopass = false;
     int cmnd_status = -1, oldlocale, validated;
     int rval = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
@@ -343,6 +339,33 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
+	/*
+	 * The NOPASSWD tag needs special handling among all sources
+	 * in -l or -v mode.
+	 */
+	if (pwflag) {
+	    enum def_tuple pwcheck =
+		(pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
+	    switch (pwcheck) {
+	    case all:
+		if (!ISSET(validated, FLAG_NOPASSWD))
+		    nopass = false;
+		break;
+	    case any:
+		if (ISSET(validated, FLAG_NOPASSWD))
+		    nopass = true;
+		break;
+	    case never:
+		nopass = true;
+		break;
+	    case always:
+		nopass = false;
+		break;
+	    default:
+		break;
+	    }
+	}
+
 	if (ISSET(validated, VALIDATE_ERROR)) {
 	    /* The lookup function should have printed an error. */
 	    goto done;
@@ -356,6 +379,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		break;
 	}
     }
+    if (pwflag && nopass)
+	def_authenticate = false;
 
     /* Restore user's locale. */
     sudoers_setlocale(oldlocale, NULL);
@@ -640,9 +665,9 @@ done:
 
     restore_nproc();
 
-    /* Close the password and group files and free up memory. */
-    sudo_endpwent();
-    sudo_endgrent();
+    /* Destroy the password and group caches and free the contents. */
+    sudo_freepwcache();
+    sudo_freegrcache();
 
     sudo_warn_set_locale_func(NULL);
 
@@ -909,8 +934,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 
     if (!restore_perms()) {
 	/* unable to change back to root */
-	fclose(fp);
-	fp = NULL;
+	if (fp != NULL) {
+	    fclose(fp);
+	    fp = NULL;
+	}
     }
 
     debug_return_ptr(fp);
@@ -1170,8 +1197,8 @@ sudoers_cleanup(void)
     }
     if (def_group_plugin)
 	group_plugin_unload();
-    sudo_endpwent();
-    sudo_endgrent();
+    sudo_freepwcache();
+    sudo_freegrcache();
 
     debug_return;
 }
@@ -1230,13 +1257,13 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 static int
 create_admin_success_flag(void)
 {
-    struct stat statbuf;
     char flagfile[PATH_MAX];
-    int len, fd = -1;
+    int len, rval = -1;
     debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN)
 
-    /* Check whether the user is in the admin group. */
-    if (!user_in_group(sudo_user.pw, "admin"))
+    /* Check whether the user is in the sudo or admin group. */
+    if (!user_in_group(sudo_user.pw, "sudo") &&
+	!user_in_group(sudo_user.pw, "admin"))
 	debug_return_int(true);
 
     /* Build path to flag file. */
@@ -1247,15 +1274,14 @@ create_admin_success_flag(void)
 
     /* Create admin flag file if it doesn't already exist. */
     if (set_perms(PERM_USER)) {
-	if (stat(flagfile, &statbuf) != 0) {
-	    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
-	    if (fd != -1)
-		close(fd);
-	}
+	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
+	rval = fd != -1 || errno == EEXIST;
+	if (fd != -1)
+	    close(fd);
 	if (!restore_perms())
-	    debug_return_int(-1);
+	    rval = -1;
     }
-    debug_return_int(fd != -1);
+    debug_return_int(rval);
 }
 #else /* !USE_ADMIN_FLAG */
 static int
@@ -1272,7 +1298,7 @@ tty_present(void)
 #if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
     return user_ttypath != NULL;
 #else
-    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
+    int fd = open(_PATH_TTY, O_RDWR);
     if (fd != -1)
 	close(fd);
     return fd != -1;

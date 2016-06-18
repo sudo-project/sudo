@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -125,7 +125,12 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"wrong sized record, got %hu, expected %zu",
 		cur.size, sizeof(cur));
-	    lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR);
+	    if (lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "unable to seek forward %d",
+		    (int)cur.size - (int)sizeof(cur));
+		break;
+	    }
 	    if (cur.size == 0)
 		break;			/* size must be non-zero */
 	    continue;
@@ -155,22 +160,29 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
-	if (stat(path, &sb) != 0) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
-	    if (mkdir(path, parent_mode) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
+	if (mkdir(path, parent_mode) == 0) {
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	} else {
+	    if (errno != EEXIST) {
 		if (!quiet)
 		    sudo_warn(U_("unable to mkdir %s"), path);
 		goto done;
 	    }
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
-	} else if (!S_ISDIR(sb.st_mode)) {
-	    if (!quiet) {
-		sudo_warnx(U_("%s exists but is not a directory (0%o)"),
-		    path, (unsigned int) sb.st_mode);
+	    /* Already exists, make sure it is a directory. */
+	    if (stat(path, &sb) != 0) {
+		if (!quiet)
+		    sudo_warn(U_("unable to stat %s"), path);
+		goto done;
 	    }
-	    goto done;
-	} else {
+	    if (!S_ISDIR(sb.st_mode)) {
+		if (!quiet) {
+		    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
+			path, (unsigned int) sb.st_mode);
+		}
+		goto done;
+	    }
 	    /* Inherit gid of parent dir for ownership. */
 	    parent_gid = sb.st_gid;
 	}
@@ -285,7 +297,7 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
 #else
 	if (lseek(fd, offset, SEEK_SET) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		"unable to seek to %lld", offset);
+		"unable to seek to %lld", (long long)offset);
 	    nwritten = -1;
 	} else {
 	    nwritten = write(fd, entry, entry->size);
@@ -632,7 +644,11 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	cookie->locked = false;
 	cookie->key.type = TS_GLOBAL;	/* find a non-tty record */
 
-	(void)lseek(cookie->fd, 0, SEEK_SET);
+	if (lseek(cookie->fd, 0, SEEK_SET) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to rewind fd");
+	    debug_return_bool(false);
+	}
 	if (ts_find_record(cookie->fd, &cookie->key, &entry)) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"found existing global record");
@@ -756,7 +772,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
 		N_("ignoring time stamp from the future"));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
+	    (void)ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #else
 	/* Check for bogus (future) time in the stampfile. */
@@ -769,7 +785,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
 		4 + ctime(&tv_sec));
 	    status = TS_OLD;
 	    SET(entry.flags, TS_DISABLED);
-	    ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
+	    (void)ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #endif /* CLOCK_MONOTONIC */
     } else {
@@ -873,9 +889,10 @@ timestamp_remove(bool unlink_it)
 	/* Back up and disable the entry. */
 	if (!ISSET(entry.flags, TS_DISABLED)) {
 	    SET(entry.flags, TS_DISABLED);
-	    lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR);
-	    if (ts_write(fd, fname, &entry, -1) == -1)
-		rval = false;
+	    if (lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR) != -1) {
+		if (ts_write(fd, fname, &entry, -1) == -1)
+		    rval = false;
+	    }
 	}
     }
 

@@ -78,13 +78,13 @@
             { "username": "foo" }
         ],
         "UA10": [
-            { "nonunixgroup": "C\/non\"UNIX\"0 c" }
+            { "nonunixgroup": "C/non\"UNIX\"0 c" }
         ],
         "UA11": [
-            { "nonunixgroup": "C\/non_UNIX_0 c" }
+            { "nonunixgroup": "C/non_UNIX_0 c" }
         ],
         "UA12": [
-            { "nonunixgroup": "C\/non\\'UNIX_3 c" }
+            { "nonunixgroup": "C/non\\'UNIX_3 c" }
         ],
         "UA2": [
             { "username": "foo.bar" }
@@ -105,10 +105,10 @@
             { "usergroup": "baz.biz" }
         ],
         "UA8": [
-            { "nonunixgroup": "C\/non UNIX 0 c" }
+            { "nonunixgroup": "C/non UNIX 0 c" }
         ],
         "UA9": [
-            { "nonunixgroup": "C\/non\\'UNIX\\'1 c" }
+            { "nonunixgroup": "C/non\\'UNIX\\'1 c" }
         ]
     },
     "Runas_Aliases": {
@@ -275,7 +275,7 @@
         },
         {
             "User_List": [
-                { "nonunixgroup": "C\/non UNIX 0 c" }
+                { "nonunixgroup": "C/non UNIX 0 c" }
             ],
             "Host_List": [
                 { "hostname": "hostc" }
@@ -296,7 +296,7 @@
         },
         {
             "User_List": [
-                { "nonunixgroup": "C\/non\\'UNIX\\'1 c" }
+                { "nonunixgroup": "C/non\\'UNIX\\'1 c" }
             ],
             "Host_List": [
                 { "hostname": "hostd" }
@@ -317,7 +317,7 @@
         },
         {
             "User_List": [
-                { "nonunixgroup": "C\/non\"UNIX\"0 c" }
+                { "nonunixgroup": "C/non\"UNIX\"0 c" }
             ],
             "Host_List": [
                 { "hostname": "hoste" }
@@ -338,7 +338,7 @@
         },
         {
             "User_List": [
-                { "nonunixgroup": "C\/non_UNIX_0 c" }
+                { "nonunixgroup": "C/non_UNIX_0 c" }
             ],
             "Host_List": [
                 { "hostname": "hostf" }
@@ -359,7 +359,7 @@
         },
         {
             "User_List": [
-                { "nonunixgroup": "C\/non\\'UNIX_3 c" }
+                { "nonunixgroup": "C/non\\'UNIX_3 c" }
             ],
             "Host_List": [
                 { "hostname": "hostg" }

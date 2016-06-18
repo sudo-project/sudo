@@ -54,7 +54,7 @@ struct sudoers_exec_args {
     char ***info;
 };
 
-static int sudo_version;
+static unsigned int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
@@ -331,7 +331,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
 	    sudo_user.cols = strtonum(p, 1, INT_MAX, &errstr);
-	    if (sudo_user.lines == 0) {
+	    if (sudo_user.cols == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
@@ -509,6 +509,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    free(gid_list);
 	    goto bad;
 	}
 	cp += len;
@@ -518,6 +519,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 		     (unsigned int) grlist->gids[i]);
 		if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
+		    free(gid_list);
 		    goto bad;
 		}
 		cp += len;

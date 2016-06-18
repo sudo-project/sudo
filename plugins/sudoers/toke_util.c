@@ -131,25 +131,20 @@ fill_args(const char *s, size_t len, int addspace)
     char *p;
     debug_decl(fill_args, SUDOERS_DEBUG_PARSER)
 
-    if (sudoerslval.command.args == NULL) {
+    if (arg_size == 0) {
 	addspace = 0;
 	new_len = len;
     } else
 	new_len = arg_len + len + addspace;
 
     if (new_len >= arg_size) {
-	/* Allocate more space than we need for subsequent args */
-	while (new_len >= (arg_size += COMMANDARGINC))
-	    continue;
+	/* Allocate in increments of 128 bytes to avoid excessive realloc(). */
+	arg_size = (new_len + 127) & ~127;
 
 	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    sudoerserror(NULL);
-	    free(sudoerslval.command.args);
-	    sudoerslval.command.args = NULL;
-	    arg_len = arg_size = 0;
-	    debug_return_bool(false);
+	    goto bad;
 	} else
 	    sudoerslval.command.args = p;
     }
@@ -160,11 +155,16 @@ fill_args(const char *s, size_t len, int addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != (size_t)len) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
-	sudoerserror(NULL);
-	debug_return_bool(false);
+	goto bad;
     }
     arg_len = new_len;
     debug_return_bool(true);
+bad:
+    sudoerserror(NULL);
+    free(sudoerslval.command.args);
+    sudoerslval.command.args = NULL;
+    arg_len = arg_size = 0;
+    debug_return_bool(false);
 }
 
 /*

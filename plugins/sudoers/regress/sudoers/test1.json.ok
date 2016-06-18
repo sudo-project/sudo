@@ -14,7 +14,7 @@
                         { "log_output": true }
                     ],
                     "Commands": [
-                        { "command": "\/usr\/bin\/su -" }
+                        { "command": "/usr/bin/su -" }
                     ]
                 }
             ]
@@ -33,7 +33,7 @@
                         { "log_output": false }
                     ],
                     "Commands": [
-                        { "command": "\/usr\/bin\/id" }
+                        { "command": "/usr/bin/id" }
                     ]
                 }
             ]
@@ -53,7 +53,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "command": "\/usr\/bin\/vi" }
+                        { "command": "/usr/bin/vi" }
                     ]
                 }
             ]
@@ -73,7 +73,7 @@
                         { "setenv": false }
                     ],
                     "Commands": [
-                        { "command": "\/usr\/bin\/echo" }
+                        { "command": "/usr/bin/echo" }
                     ]
                 }
             ]
@@ -91,7 +91,7 @@
                         { "send_mail": true }
                     ],
                     "Commands": [
-                        { "command": "\/bin\/sh" }
+                        { "command": "/bin/sh" }
                     ]
                 }
             ]
@@ -109,7 +109,7 @@
                         { "send_mail": false }
                     ],
                     "Commands": [
-                        { "command": "\/usr\/bin\/id" }
+                        { "command": "/usr/bin/id" }
                     ]
                 }
             ]
@@ -127,7 +127,7 @@
                         { "sudoedit_follow": true }
                     ],
                     "Commands": [
-                        { "command": "sudoedit \/etc\/motd" }
+                        { "command": "sudoedit /etc/motd" }
                     ]
                 }
             ]
@@ -145,7 +145,7 @@
                         { "sudoedit_follow": false }
                     ],
                     "Commands": [
-                        { "command": "sudoedit \/home\/*\/*" }
+                        { "command": "sudoedit /home/*/*" }
                     ]
                 }
             ]

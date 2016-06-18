@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -174,8 +174,9 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 	}
     } else {
 	/* Add event to the base. */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: adding event %p to base %p",
-	    __func__, ev, base);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: adding event %p to base %p, fd %d, events %d",
+	    __func__, ev, base, ev->fd, ev->events);
 	if (ev->events & (SUDO_EV_READ|SUDO_EV_WRITE)) {
 	    if (sudo_ev_add_impl(base, ev) != 0)
 		debug_return_int(-1);
@@ -239,8 +240,9 @@ sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
 	debug_return_int(-1);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: removing event %p from base %p",
-	__func__, ev, base);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: removing event %p from base %p, fd %d, events %d",
+	__func__, ev, base, ev->fd, ev->events);
 
     /* Call backend. */
     if (ev->events & (SUDO_EV_READ|SUDO_EV_WRITE)) {

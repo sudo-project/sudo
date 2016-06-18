@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -98,20 +98,29 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
-	if (stat(path, &sb) != 0) {
-	    if (mkdir(path, mode) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "mkdir %s, mode 0%o", path, (unsigned int) mode);
+	if (mkdir(path, mode) == 0) {
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	} else {
+	    if (errno != EEXIST) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
 		ok = false;
 		break;
 	    }
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
-	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s exists but is not a directory (0%o)"),
-		path, (unsigned int) sb.st_mode);
-	    ok = false;
-	    break;
-	} else {
+	    /* Already exists, make sure it is a directory. */
+	    if (stat(path, &sb) != 0) {
+		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
+		ok = false;
+		break;
+	    }
+	    if (!S_ISDIR(sb.st_mode)) {
+		log_warningx(SLOG_SEND_MAIL,
+		    N_("%s exists but is not a directory (0%o)"),
+		    path, (unsigned int) sb.st_mode);
+		ok = false;
+		break;
+	    }
 	    /* Inherit gid of parent dir for ownership. */
 	    parent_gid = sb.st_gid;
 	}
@@ -120,6 +129,8 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
     if (ok) {
 	/* Create final path component. */
 	if (is_temp) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"mkdtemp %s", path);
 	    if (mkdtemp(path) == NULL) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
 		ok = false;
@@ -127,6 +138,8 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 		ignore_result(chown(path, (uid_t)-1, parent_gid));
 	    }
 	} else {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"mkdir %s, mode 0%o", path, (unsigned int) mode);
 	    if (mkdir(path, mode) != 0 && errno != EEXIST) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
 		ok = false;
@@ -172,10 +185,10 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 {
     struct stat sb;
     char buf[32], *ep;
-    int fd, i;
+    int i, len, fd = -1;
     unsigned long id = 0;
-    int len;
     ssize_t nread;
+    bool rval = false;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     debug_decl(io_nextid, SUDOERS_DEBUG_UTIL)
@@ -184,7 +197,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
      * Create I/O log directory if it doesn't already exist.
      */
     if (!io_mkdirs(iolog_dir, S_IRWXU, false))
-	debug_return_bool(false);
+	goto done;
 
     /*
      * Open sequence file
@@ -193,12 +206,12 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     if (len <= 0 || (size_t)len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
-	debug_return_bool(false);
+	goto done;
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
-	debug_return_bool(false);
+	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
 
@@ -239,7 +252,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (nread != 0) {
 	    if (nread == -1) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to read %s"), pathbuf);
-		debug_return_bool(false);
+		goto done;
 	    }
 	    if (buf[nread - 1] == '\n')
 		nread--;
@@ -275,11 +288,14 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     if (lseek(fd, 0, SEEK_SET) == -1 || write(fd, buf, 7) != 7) {
 #endif
 	log_warning(SLOG_SEND_MAIL, N_("unable to write to %s"), pathbuf);
-	debug_return_bool(false);
+	goto done;
     }
-    close(fd);
+    rval = true;
 
-    debug_return_bool(true);
+done:
+    if (fd != -1)
+	close(fd);
+    debug_return_bool(rval);
 }
 
 /*
@@ -322,23 +338,26 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 static bool
 open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 {
-    int fd;
     debug_decl(open_io_fd, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 	if (fd != -1) {
-	    fcntl(fd, F_SETFD, FD_CLOEXEC);
+	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
 		iol->fd.g = gzdopen(fd, "w");
 	    else
 #endif
 		iol->fd.f = fdopen(fd, "w");
+	    if (iol->fd.v == NULL) {
+		close(fd);
+		fd = -1;
+	    }
 	}
-	if (fd == -1 || iol->fd.v == NULL) {
+	if (fd == -1) {
 	    log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	    debug_return_bool(false);
 	}
@@ -531,6 +550,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     char * const *av;
     FILE *fp;
     int fd;
+    bool rval;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
@@ -552,7 +572,11 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	fputs(*av, fp);
     }
     fputc('\n', fp);
-    debug_return_bool(fclose(fp) == 0);
+    fflush(fp);
+
+    rval = !ferror(fp);
+    fclose(fp);
+    debug_return_bool(rval);
 }
 
 static int
@@ -581,11 +605,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     memset(&details, 0, sizeof(details));
 
     bindtextdomain("sudoers", LOCALEDIR);
-
-    if (sudo_setpwent() == -1 || sudo_setgrent() == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
 
     /* Initialize the debug subsystem.  */
     for (cur = settings; (cp = *cur) != NULL; cur++) {
@@ -668,10 +687,10 @@ done:
     free(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
-    sudo_endpwent();
     if (details.runas_gr)
 	sudo_gr_delref(details.runas_gr);
-    sudo_endgrent();
+    sudo_freepwcache();
+    sudo_freegrcache();
 
     debug_return_int(rval);
 }

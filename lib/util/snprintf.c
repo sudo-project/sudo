@@ -1,6 +1,6 @@
 /*	$OpenBSD: vfprintf.c,v 1.67 2014/12/21 00:23:30 daniel Exp $	*/
 /*-
- * Copyright (c) 1999-2005, 2008, 2010-2015
+ * Copyright (c) 1999-2005, 2008, 2010-2016
  *      Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -1063,7 +1063,7 @@ done:
 	goto finish;
 
 overflow:
-	errno = ENOMEM;
+	errno = EOVERFLOW;
 	ret = -1;
 
 finish:
@@ -1448,7 +1448,7 @@ done:
 	goto finish;
 
 overflow:
-	errno = ENOMEM;
+	errno = EOVERFLOW;
 	ret = -1;
 
 finish:
@@ -1532,7 +1532,11 @@ exponent(char *p0, int exp, int fmtch)
 int
 sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 {
-
+	if (n > INT_MAX) {
+		errno = EOVERFLOW;
+		*str = '\0';
+		return -1;
+	}
 	return xxxprintf(&str, n, 0, fmt, ap);
 }
 #endif /* !HAVE_VSNPRINTF || PREFER_PORTABLE_SNPRINTF */
@@ -1544,6 +1548,11 @@ sudo_snprintf(char *str, size_t n, char const *fmt, ...)
 	int ret;
 	va_list ap;
 
+	if (n > INT_MAX) {
+		errno = EOVERFLOW;
+		*str = '\0';
+		return -1;
+	}
 	va_start(ap, fmt);
 	ret = xxxprintf(&str, n, 0, fmt, ap);
 	va_end(ap);

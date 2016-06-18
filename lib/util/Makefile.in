@@ -316,12 +316,14 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* regress/*/*.out regress/*/*.err
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) *.lo *.o \
+	    *.la *.a stamp-* core *.core core.* regress/*/*.out regress/*/*.err
 
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile .libs $(shlib_exp) $(shlib_map) $(shlib_opt)
+	-rm -rf Makefile mksiglist siglist.c mksigname signame.c .libs \
+	    $(shlib_exp) $(shlib_map) $(shlib_opt)
 
 clobber: distclean
 

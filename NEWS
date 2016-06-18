@@ -1,3 +1,66 @@
+What's new in Sudo 1.8.17
+
+ * On AIX, if /etc/security/login.cfg has auth_type set to PAM_AUTH
+   but pam_start(3) fails, fall back to AIX authentication.
+   Bug #740.
+
+ * Sudo now takes all sudoers sources into account when determining
+   whether or not "sudo -l" or "sudo -b" should prompt for a password.
+   In other words, if both file and ldap sudoers sources are in
+   specified in /etc/nsswitch.conf, "sudo -v" will now require that
+   all entries in both sources be have NOPASSWD (file) or !authenticate
+   (ldap) in the entries.
+
+ * Sudo now ignores SIGPIPE until the command is executed.  Previously,
+   SIGPIPE was only ignored in a few select places.  Bug #739.
+
+ * Fixed a bug introduced in sudo 1.8.14 where (non-syslog) log
+   file entries were missing the newline when loglinelen is set to
+   a non-positive number.  Bug #742.
+
+ * Unix groups are now set before the plugin session intialization
+   code is run.  This makes it possible to use dynamic groups with
+   the Linux-PAM pam_group module.
+
+ * Fixed a bug where a debugging statement could dereference a NULL
+   pointer when looking up a group that doesn't exist.  Bug #743.
+
+ * Sudo has been run through the Coverity code scanner.  A number of
+   minor bugs have been fixed as a result.  None were security issues.
+
+ * SELinux support, which was broken in 1.8.16, has been repaired.
+
+ * Fixed a bug when logging I/O where all output buffers might not
+   get flushed at exit.
+
+ * Forward slashes are no longer escaped in the JSON output of
+   "visudo -x".  This was never required by the standard and not
+   escaping them improves readability of the output.
+
+ * Sudo no longer treats PAM_SESSION_ERR as a fatal error when
+   opening the PAM session.  Other errors from pam_open_session()
+   are still treated as fatal.  This avoids the "policy plugin
+   failed session initialization" error message seen on some systems.
+
+ * Korean translation for sudo and sudoers from translationproject.org.
+
+ * Fixed a bug on AIX where the stack size hard resource limit was
+   being set to 2GB instead of 4GB on 64-bit systems.
+
+ * The SSSD backend now properly supports "sudo -U otheruser -l".
+
+ * The SSSD backend now uses the value of "ipa_hostname"
+   from sssd.conf, if specified, when matching the host name.
+
+ * Fixed a hang on some systems when the command is being run in
+   a pty and it failed to execute.
+
+ * When performing a wildcard match in sudoers, check for an exact
+   string match if the user command was fully-qualified (or resolved
+   via the PATH).  This fixes an issue executing scripts on Linux
+   when there are multiple wildcard matches with the same base name.
+   Bug #746.
+
 What's new in Sudo 1.8.16
 
  * Fixed a compilation error on Solaris 10 with Stun Studio 12.

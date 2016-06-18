@@ -71,8 +71,7 @@
  * Returns true if the runas user and group lists match, else false.
  */
 #define RUNAS_CHANGED(cs1, cs2) \
-    ((cs1) == NULL || (cs2) == NULL || \
-     (cs1)->runasuserlist != (cs2)->runasuserlist || \
+     ((cs1)->runasuserlist != (cs2)->runasuserlist || \
      (cs1)->runasgrouplist != (cs2)->runasgrouplist)
 
 #define SUDO_DIGEST_SHA224	0

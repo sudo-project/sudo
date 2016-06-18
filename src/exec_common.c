@@ -181,6 +181,10 @@ disable_execute(char *envp[])
 int
 sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec)
 {
+    debug_decl(sudo_execve, SUDO_DEBUG_UTIL)
+
+    sudo_debug_execve(SUDO_DEBUG_INFO, path, argv, envp);
+
     /* Modify the environment as needed to disable further execve(). */
     if (noexec)
 	envp = disable_execute(envp);
@@ -206,5 +210,5 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noe
 	    free(nargv);
 	}
     }
-    return -1;
+    debug_return_int(-1);
 }

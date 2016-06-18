@@ -83,19 +83,29 @@ static char *def_prompt = PASSPROMPT;
 static bool getpass_error;
 static pam_handle_t *pamh;
 
-int
-sudo_pam_init(struct passwd *pw, sudo_auth *auth)
+static int
+sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 {
-    static int pam_status;
+    static int pam_status = PAM_SUCCESS;
     int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
+    /* Stash pointer to last pam status. */
+    auth->data = &pam_status;
+
+#ifdef _AIX
+    if (pamh != NULL) {
+	/* Already initialized (may happen with AIX). */
+	debug_return_int(AUTH_SUCCESS);
+    }
+#endif /* _AIX */
+
     /* Initial PAM setup */
-    auth->data = (void *) &pam_status;
     pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
 	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
-	log_warning(0, N_("unable to initialize PAM"));
+	if (!quiet)
+	    log_warning(0, N_("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -142,6 +152,20 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 
     debug_return_int(AUTH_SUCCESS);
 }
+
+int
+sudo_pam_init(struct passwd *pw, sudo_auth *auth)
+{
+    return sudo_pam_init2(pw, auth, false);
+}
+
+#ifdef _AIX
+int
+sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth)
+{
+    return sudo_pam_init2(pw, auth, true);
+}
+#endif /* _AIX */
 
 int
 sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
@@ -226,6 +250,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     int rc, status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
+    const char *errstr;
     debug_decl(sudo_pam_begin_session, SUDOERS_DEBUG_AUTH)
 
     /*
@@ -237,7 +262,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	if (pamh != NULL) {
 	    rc = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	    if (rc != PAM_SUCCESS) {
-		const char *errstr = pam_strerror(pamh, rc);
+		errstr = pam_strerror(pamh, rc);
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "pam_end: %s", errstr ? errstr : "unknown error");
 	    }
@@ -252,7 +277,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      */
     rc = pam_set_item(pamh, PAM_USER, pw->pw_name);
     if (rc != PAM_SUCCESS) {
-	const char *errstr = pam_strerror(pamh, rc);
+	errstr = pam_strerror(pamh, rc);
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "pam_set_item(pamh, PAM_USER, %s): %s", pw->pw_name,
 	    errstr ? errstr : "unknown error");
@@ -269,20 +294,34 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     if (def_pam_setcred) {
 	rc = pam_setcred(pamh, PAM_REINITIALIZE_CRED);
 	if (rc != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, rc);
+	    errstr = pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"pam_setcred: %s", errstr ? errstr : "unknown error");
 	}
     }
 
     if (def_pam_session) {
-	*pam_status = pam_open_session(pamh, 0);
-	if (*pam_status != PAM_SUCCESS) {
-	    const char *errstr = pam_strerror(pamh, *pam_status);
+	rc = pam_open_session(pamh, 0);
+	switch (rc) {
+	case PAM_SUCCESS:
+	    break;
+	case PAM_SESSION_ERR:
+	    /* Treat PAM_SESSION_ERR as a non-fatal error. */
+	    errstr = pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"pam_open_session: %s", errstr ? errstr : "unknown error");
+	    /* Avoid closing session that was not opened. */
+	    def_pam_session = false;
+	    break;
+	default:
+	    /* Unexpected session failure, treat as fatal error. */
+	    *pam_status = rc;
+	    errstr = pam_strerror(pamh, *pam_status);
+	    log_warningx(0, N_("%s: %s"), "pam_open_session",
+		errstr ? errstr : "unknown error");
 	    rc = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
 	    if (rc != PAM_SUCCESS) {
+		errstr = pam_strerror(pamh, rc);
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "pam_end: %s", errstr ? errstr : "unknown error");
 	    }
@@ -446,6 +485,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		if (pass == NULL) {
 		    /* Error (or ^C) reading password, don't try again. */
 		    getpass_error = true;
+		    ret = PAM_CONV_ERR;
 		    goto done;
 		}
 		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
@@ -458,14 +498,12 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
 		break;
 	    case PAM_TEXT_INFO:
-		if (pm->msg)
-		    (void) puts(pm->msg);
+		if (pm->msg != NULL)
+		    sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", pm->msg);
 		break;
 	    case PAM_ERROR_MSG:
-		if (pm->msg) {
-		    (void) fputs(pm->msg, stderr);
-		    (void) fputc('\n', stderr);
-		}
+		if (pm->msg != NULL)
+		    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", pm->msg);
 		break;
 	    default:
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,

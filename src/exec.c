@@ -80,7 +80,8 @@ static void handler_user_only(int s, siginfo_t *info, void *context);
  * Fork and execute a command, returns the child's pid.
  * Sends errno back on sv[1] if execve() fails.
  */
-static int fork_cmnd(struct command_details *details, int sv[2])
+static int
+fork_cmnd(struct command_details *details, int sv[2])
 {
     struct command_status cstat;
     sigaction_t sa;
@@ -130,9 +131,9 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	close(sv[0]);
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
-	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	exec_cmnd(details, &cstat, sv[1]);
-	send(sv[1], &cstat, sizeof(cstat), 0);
+	ignore_result(send(sv[1], &cstat, sizeof(cstat), 0));
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(1);
     }
@@ -156,8 +157,6 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
     restore_signals();
     if (exec_setup(details, NULL, -1) == true) {
 	/* headed for execve() */
-	sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
-	    details->argv, details->envp);
 	if (details->closefrom >= 0) {
 	    int fd, maxfd;
 	    unsigned char *debug_fds;
@@ -559,11 +558,17 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 		 * with SIGTTOU while the command continues to run.
 		 */
 		sigaction_t sa, osa;
-		pid_t saved_pgrp = (pid_t)-1;
+		pid_t saved_pgrp = -1;
 		int signo = WSTOPSIG(status);
-		int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+		int fd = open(_PATH_TTY, O_RDWR);
 		if (fd != -1) {
 		    saved_pgrp = tcgetpgrp(fd);
+		    if (saved_pgrp == -1) {
+			close(fd);
+			fd = -1;
+		    }
+		}
+		if (saved_pgrp != -1) {
 		    /*
 		     * Child was stopped trying to access controlling
 		     * terminal.  If the child has a different pgrp
@@ -604,7 +609,7 @@ dispatch_signal(struct sudo_event_base *evbase, pid_t child,
 			    SIGTSTP);
 		    }
 		}
-		if (fd != -1) {
+		if (saved_pgrp != -1) {
 		    /*
 		     * Restore command's process group if different.
 		     * Otherwise, we cannot resume some shells.
@@ -888,7 +893,7 @@ handler(int s, siginfo_t *info, void *context)
      */
     if (s != SIGCHLD && USER_SIGNALED(info) && info->si_pid != 0) {
 	pid_t si_pgrp = getpgid(info->si_pid);
-	if (si_pgrp != (pid_t)-1) {
+	if (si_pgrp != -1) {
 	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
 		return;
 	} else if (info->si_pid == cmnd_pid) {
@@ -945,7 +950,7 @@ handler_user_only(int s, siginfo_t *info, void *context)
 	return;
     if (info->si_pid != 0) {
 	pid_t si_pgrp = getpgid(info->si_pid);
-	if (si_pgrp != (pid_t)-1) {
+	if (si_pgrp != -1) {
 	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
 		return;
 	} else if (info->si_pid == cmnd_pid) {

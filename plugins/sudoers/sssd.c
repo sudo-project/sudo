@@ -82,6 +82,8 @@ typedef void (*sss_sudo_free_values_t)(char**);
 
 struct sudo_sss_handle {
     char *domainname;
+    char *host;
+    char *shost;
     struct passwd *pw;
     void *ssslib;
     sss_sudo_send_recv_t fn_send_recv;
@@ -295,6 +297,71 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     debug_return_ptr(out_res);
 }
 
+static int
+get_ipa_hostname(char **shostp, char **lhostp)
+{
+    size_t linesize = 0;
+    char *lhost = NULL;
+    char *shost = NULL;
+    char *line = NULL;
+    int ret = false;
+    ssize_t len;
+    FILE *fp;
+    debug_decl(get_ipa_hostname, SUDOERS_DEBUG_SSSD)
+
+    fp = fopen(_PATH_SSSD_CONF, "r");
+    if (fp != NULL) {
+	while ((len = getline(&line, &linesize, fp)) != -1) {
+	    char *cp = line;
+
+	    /* Trim trailing and leading spaces. */
+	    while (isspace((unsigned char)line[len - 1]))
+		line[--len] = '\0';
+	    while (isspace((unsigned char)*cp))
+		cp++;
+
+	    /*
+	     * Match ipa_hostname = foo
+	     * Note: currently ignores the domain (XXX)
+	     */
+	    if (strncmp(cp, "ipa_hostname", 12) == 0) {
+		cp += 12;
+		/* Trim " = " after "ipa_hostname" */
+		while (isblank((unsigned char)*cp))
+		    cp++;
+		if (*cp++ != '=')
+		    continue;
+		while (isblank((unsigned char)*cp))
+		    cp++;
+		/* Ignore empty value */
+		if (*cp == '\0')
+		    continue;
+		lhost = strdup(cp);
+		if (lhost != NULL && (cp = strchr(lhost, '.')) != NULL) {
+		    shost = strndup(lhost, (size_t)(cp - lhost));
+		} else {
+		    shost = lhost;
+		}
+		if (shost != NULL && lhost != NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"ipa_hostname %s overrides %s", lhost, user_host);
+		    *shostp = shost;
+		    *lhostp = lhost;
+		    ret = true;
+		} else {
+		    free(shost);
+		    free(lhost);
+		    ret = -1;
+		}
+		break;
+	    }
+	}
+	fclose(fp);
+	free(line);
+    }
+    debug_return_int(ret);
+}
+
 struct sudo_nss sudo_nss_sss = {
     { NULL, NULL },
     sudo_sss_open,
@@ -381,8 +448,22 @@ sudo_sss_open(struct sudo_nss *nss)
     }
 
     handle->domainname = NULL;
+    handle->host = user_runhost;
+    handle->shost = user_srunhost;
     handle->pw = sudo_user.pw;
     nss->handle = handle;
+
+    /*
+     * If runhost is the same as the local host, check for ipa_hostname
+     * in sssd.conf and use it in preference to user_runhost.
+     */
+    if (strcmp(user_runhost, user_host) == 0) {
+	if (get_ipa_hostname(&handle->shost, &handle->host) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(handle);
+	    debug_return_int(ENOMEM);
+	}
+    }
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "handle=%p", handle);
 
@@ -544,8 +625,8 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	switch (val[0]) {
 	case '+':
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "netgr_");
-	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
-		def_netgroup_tuple ? user_srunhost : NULL, runas_pw->pw_name)) {
+	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
+		def_netgroup_tuple ? handle->shost : NULL, runas_pw->pw_name)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "=> match");
 		ret = true;
 	    }
@@ -668,14 +749,15 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     }
 
     /* walk through values */
-    for (i = 0; val_array[i] != NULL; ++i) {
+    for (i = 0; val_array[i] != NULL && !ret; ++i) {
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
 	/* match any or address or netgroup or hostname */
-	if (!strcmp(val, "ALL") || addr_matches(val) || netgr_matches(val,
-	    user_runhost, user_srunhost, handle->pw->pw_name) ||
-	    hostname_matches(user_srunhost, user_runhost, val))
+	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
+	    netgr_matches(val, handle->host, handle->shost,
+	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
+	    hostname_matches(handle->shost, handle->host, val))
 	    ret = true;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -688,54 +770,66 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 }
 
 /*
- * Look for netgroup specifcations in the sudoUser attribute and
- * if found, filter according to netgroup membership.
- *  returns:
- *   true -> netgroup spec found && netgroup member
- *  false -> netgroup spec found && not a member of netgroup
- *   true -> netgroup spec not found (filtered by SSSD already, netgroups are an exception)
+ * SSSD doesn't handle netgroups, we have to ensure they are correctly filtered
+ * in sudo. The rules may contain mixed sudoUser specification so we have to
+ * check not only for netgroup membership but also for user and group matches.
  */
 static bool
-sudo_sss_filter_user_netgroup(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
+sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    bool ret = false, netgroup_spec_found = false;
-    char **val_array, *val;
+    int ret = false;
+    char **val_array;
     int i;
-    debug_decl(sudo_sss_filter_user_netgroup, SUDOERS_DEBUG_SSSD);
+    debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
 
     if (!handle || !rule)
-	debug_return_bool(ret);
+	debug_return_bool(false);
 
     switch (handle->fn_get_values(rule, "sudoUser", &val_array)) {
-	case 0:
-	    break;
-	case ENOENT:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    debug_return_bool(ret);
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"handle->fn_get_values(sudoUser): != 0");
-	    debug_return_bool(ret);
+    case 0:
+	break;
+    case ENOENT:
+	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
+	debug_return_bool(false);
+    default:
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "handle->fn_get_values(sudoUser): != 0");
+	debug_return_bool(false);
     }
 
+    /* Walk through sudoUser values.  */
     for (i = 0; val_array[i] != NULL && !ret; ++i) {
-	val = val_array[i];
-	if (*val == '+') {
-	    netgroup_spec_found = true;
-	}
+	const char *val = val_array[i];
+
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
-	if (strcmp(val, "ALL") == 0 || netgr_matches(val,
-	    def_netgroup_tuple ? user_runhost : NULL,
-	    def_netgroup_tuple ? user_srunhost : NULL, handle->pw->pw_name)) {
-	    ret = true;
-	    sudo_debug_printf(SUDO_DEBUG_DIAG,
-		"sssd/ldap sudoUser '%s' ... MATCH! (%s)",
-		val, handle->pw->pw_name);
+	switch (*val) {
+	case '+':
+	    /* Netgroup spec found, check membership. */
+	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
+		def_netgroup_tuple ? handle->shost : NULL, handle->pw->pw_name)) {
+		ret = true;
+	    }
+	    break;
+	case '%':
+	    /* User group found, check membership. */
+	    if (usergr_matches(val, handle->pw->pw_name, handle->pw)) {
+		ret = true;
+	    }
+	    break;
+	default:
+	    /* Not a netgroup or user group. */
+	    if (strcmp(val, "ALL") == 0 ||
+		userpw_matches(val, handle->pw->pw_name, handle->pw)) {
+		ret = true;
+	    }
 	    break;
 	}
+	sudo_debug_printf(SUDO_DEBUG_DIAG,
+	    "sssd/ldap sudoUser '%s' ... %s (%s)", val,
+	    ret ? "MATCH!" : "not", handle->pw->pw_name);
     }
     handle->fn_free_values(val_array);
-    debug_return_bool(netgroup_spec_found ? ret : true);
+    debug_return_bool(ret);
 }
 
 static int
@@ -746,7 +840,7 @@ sudo_sss_result_filterp(struct sudo_sss_handle *handle,
     debug_decl(sudo_sss_result_filterp, SUDOERS_DEBUG_SSSD);
 
     if (sudo_sss_check_host(handle, rule) &&
-        sudo_sss_filter_user_netgroup(handle, rule))
+        sudo_sss_check_user(handle, rule))
 	debug_return_int(1);
     else
 	debug_return_int(0);
@@ -974,7 +1068,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
 	/* Match against ALL ? */
-	if (!strcmp(val, "ALL")) {
+	if (strcmp(val, "ALL") == 0) {
 	    ret = true;
 	    if (setenv_implied != NULL)
 		*setenv_implied = true;
@@ -1146,22 +1240,17 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	if (matched == true || user_uid == 0) {
 	    SET(ret, VALIDATE_SUCCESS);
 	    CLR(ret, VALIDATE_FAILURE);
-	    if (def_authenticate) {
-		switch (pwcheck) {
-		    case always:
-			SET(ret, FLAG_CHECK_USER);
-			break;
-		    case all:
-		    case any:
-			if (doauth == false)
-			    def_authenticate = false;
-			break;
-		    case never:
-			def_authenticate = false;
-			break;
-		    default:
-			break;
-		}
+	    switch (pwcheck) {
+		case always:
+		    SET(ret, FLAG_CHECK_USER);
+		    break;
+		case all:
+		case any:
+		    if (doauth == false)
+			SET(ret, FLAG_NOPASSWD);
+		    break;
+		default:
+		    break;
 	    }
 	}
 	goto done;
@@ -1208,6 +1297,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	}
     }
 done:
+    handle->fn_free_result(sss_result);
+
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
     if (!ISSET(ret, VALIDATE_SUCCESS)) {
@@ -1263,7 +1354,8 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 
 done:
     if (found)
-	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
+	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	    safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
 
     handle->fn_free_result(sss_result);
@@ -1357,6 +1449,17 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
     char **val_array = NULL;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_long, SUDOERS_DEBUG_SSSD);
+
+    switch (handle->fn_get_values(rule, "cn", &val_array)) {
+    case 0:
+	if (val_array[0] != NULL)
+	    sudo_lbuf_append(lbuf, _("\nSSSD Role: %s\n"), val_array[0]);
+	handle->fn_free_values(val_array);
+	val_array = NULL;
+	break;
+    default:
+	sudo_lbuf_append(lbuf, _("\nSSSD Role: UNKNOWN\n"));
+    }
 
     /* get the RunAsUser Values from the entry */
     sudo_lbuf_append(lbuf, "    RunAsUsers: ");

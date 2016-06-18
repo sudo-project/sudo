@@ -384,8 +384,10 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 	 * writable directories.
 	 */
 	is_writable = dir_is_writable(dfd, &user_details, command_details);
-	if (is_writable == -1)
+	if (is_writable == -1) {
+	    close(dfd);
 	    debug_return_int(-1);
+	}
 
 	while (path[0] == '/')
 	    path++;
@@ -556,19 +558,26 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    sudo_fatal("seteuid(ROOT_UID)");
 	if (tfd == -1) {
 	    sudo_warn("mkstemps");
+	    if (ofd != -1)
+		close(ofd);
 	    debug_return_int(-1);
 	}
 	if (ofd != -1) {
-	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
+	    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
 		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
 			sudo_warn("%s", tf[j].tfile);
 		    else
 			sudo_warnx(U_("%s: short write"), tf[j].tfile);
-		    close(ofd);
-		    close(tfd);
-		    debug_return_int(-1);
+		    break;
 		}
+	    }
+	    if (nread != 0) {
+		if (nread < 0)
+		    sudo_warn("%s", files[i]);
+		close(ofd);
+		close(tfd);
+		debug_return_int(-1);
 	    }
 	    close(ofd);
 	}
@@ -863,6 +872,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	    break;
 	}
     }
+    free(sesh_args);
 
     /* Restore saved command_details. */
     command_details->command = saved_command_details.command;

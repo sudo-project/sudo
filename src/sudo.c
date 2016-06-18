@@ -188,10 +188,13 @@ main(int argc, char *argv[], char *envp[])
     /* Make sure we are setuid root. */
     sudo_check_suid(argc > 0 ? argv[0] : "sudo");
 
-    /* Reset signal mask and save signal state. */
+    /* Save original signal state and setup default signal handlers. */
+    save_signals();
+    init_signals();
+
+    /* Reset signal mask to the default value (unblock). */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
-    save_signals();
 
     /* Parse the rest of sudo.conf. */
     sudo_conf_read(NULL, SUDO_CONF_ALL & ~SUDO_CONF_DEBUG);
@@ -229,8 +232,6 @@ main(int argc, char *argv[], char *envp[])
 	else
 	    sudo_fatalx(U_("unable to initialize policy plugin"));
     }
-
-    init_signals();
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
@@ -504,8 +505,8 @@ get_user_info(struct user_details *ud)
     ud->pid = getpid();
     ud->ppid = getppid();
     ud->pgid = getpgid(0);
-    ud->tcpgid = (pid_t)-1;
-    fd = open(_PATH_TTY, O_RDWR|O_NOCTTY|O_NONBLOCK, 0);
+    ud->tcpgid = -1;
+    fd = open(_PATH_TTY, O_RDWR);
     if (fd != -1) {
 	ud->tcpgid = tcgetpgrp(fd);
 	close(fd);
@@ -575,10 +576,10 @@ get_user_info(struct user_details *ud)
 
     cp = sudo_gethostname();
     user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
+    free(cp);
     if (user_info[i] == NULL)
 	goto bad;
     ud->host = user_info[i] + sizeof("host=") - 1;
-    free(cp);
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
     if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
@@ -668,7 +669,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    add_preserved_fd(&details->preserved_fds, details->execfd);
 #else
 		    /* Plugin thinks we support fexecve() but we don't. */
-		    fcntl(details->execfd, F_SETFD, FD_CLOEXEC);
+		    (void)fcntl(details->execfd, F_SETFD, FD_CLOEXEC);
 		    details->execfd = -1;
 #endif
 		    break;
@@ -938,7 +939,8 @@ restore_nproc(void)
 }
 
 /*
- * Setup the execution environment immediately prior to the call to execve()
+ * Setup the execution environment immediately prior to the call to execve().
+ * Group setup is performed by policy_init_session(), called earlier.
  * Returns true on success and false on failure.
  */
 bool
@@ -1015,30 +1017,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
-    }
-
-    /*
-     * Set groups, including supplementary group vector.
-     */
-    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-	if (details->ngroups >= 0) {
-	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		sudo_warn(U_("unable to set supplementary group IDs"));
-		goto done;
-	    }
-	}
-    }
-#ifdef HAVE_SETEUID
-    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	sudo_warn(U_("unable to set effective gid to runas gid %u"),
-	    (unsigned int)details->egid);
-	goto done;
-    }
-#endif
-    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	sudo_warn(U_("unable to set gid to runas gid %u"),
-	    (unsigned int)details->gid);
-	goto done;
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
@@ -1364,6 +1342,35 @@ policy_init_session(struct command_details *details)
     int rval = true;
     debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
 
+    /*
+     * We set groups, including supplementary group vector,
+     * as part of the session setup.  This allows for dynamic
+     * groups to be set via pam_group(8) in pam_setcred(3).
+     */
+    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
+	if (details->ngroups >= 0) {
+	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
+		sudo_warn(U_("unable to set supplementary group IDs"));
+		rval = -1;
+		goto done;
+	    }
+	}
+    }
+#ifdef HAVE_SETEUID
+    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
+	sudo_warn(U_("unable to set effective gid to runas gid %u"),
+	    (unsigned int)details->egid);
+	rval = -1;
+	goto done;
+    }
+#endif
+    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
+	sudo_warn(U_("unable to set gid to runas gid %u"),
+	    (unsigned int)details->gid);
+	rval = -1;
+	goto done;
+    }
+
     if (policy_plugin.u.policy->init_session) {
 	/*
 	 * Backwards compatibility for older API versions
@@ -1380,6 +1387,7 @@ policy_init_session(struct command_details *details)
 	}
 	sudo_debug_set_active_instance(sudo_debug_instance);
     }
+done:
     debug_return_int(rval);
 }
 

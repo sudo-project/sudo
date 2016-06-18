@@ -86,7 +86,7 @@ setpwent(void)
     if (pwf == NULL) {
 	pwf = fopen(pwfile, "r");
 	if (pwf != NULL)
-	    fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
+	    (void)fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(pwf);
     }
@@ -163,7 +163,7 @@ getpwnam(const char *name)
     if (pwf == NULL) {
 	if ((pwf = fopen(pwfile, "r")) == NULL)
 	    return NULL;
-	fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
+	(void)fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(pwf);
     }
@@ -186,7 +186,7 @@ getpwuid(uid_t uid)
     if (pwf == NULL) {
 	if ((pwf = fopen(pwfile, "r")) == NULL)
 	    return NULL;
-	fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
+	(void)fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(pwf);
     }
@@ -215,7 +215,7 @@ setgrent(void)
     if (grf == NULL) {
 	grf = fopen(grfile, "r");
 	if (grf != NULL)
-	    fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+	    (void)fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
     }
@@ -289,7 +289,7 @@ getgrnam(const char *name)
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
 	    return NULL;
-	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+	(void)fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
     }
@@ -312,7 +312,7 @@ getgrgid(gid_t gid)
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
 	    return NULL;
-	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+	(void)fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
     }

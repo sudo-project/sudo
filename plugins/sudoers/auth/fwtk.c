@@ -104,7 +104,7 @@ restart:
 	pass = auth_getpass(prompt, def_passwd_timeout * 60,
 	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else if (strncmp(resp, "display ", 8) == 0) {
-	fprintf(stderr, "%s\n", &resp[8]);
+	sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", &resp[8]);
 	strlcpy(buf, "response dummy", sizeof(buf));
 	goto restart;
     } else {

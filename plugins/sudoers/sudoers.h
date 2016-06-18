@@ -123,6 +123,7 @@ struct sudo_user {
 #define FLAG_NON_INTERACTIVE	0x100
 #define FLAG_BAD_PASSWORD	0x200
 #define FLAG_AUTH_ERROR		0x400
+#define FLAG_NOPASSWD		0x800
 
 /*
  * find_path()/set_cmnd() return values
@@ -298,16 +299,14 @@ struct passwd *sudo_fakepwnam(const char *, gid_t);
 struct passwd *sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home, const char *shell);
 struct passwd *sudo_getpwnam(const char *);
 struct passwd *sudo_getpwuid(uid_t);
-void sudo_endgrent(void);
-void sudo_endpwent(void);
 void sudo_endspent(void);
+void sudo_freegrcache(void);
+void sudo_freepwcache(void);
 void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
 int  sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids);
-int sudo_setgrent(void);
-int sudo_setpwent(void);
 void sudo_setspent(void);
 
 /* timestr.c */

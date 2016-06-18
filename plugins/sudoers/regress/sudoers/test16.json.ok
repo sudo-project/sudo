@@ -1,7 +1,7 @@
 {
     "Command_Aliases": {
         "EDIT": [
-            { "command": "sudoedit \/etc\/motd" }
+            { "command": "sudoedit /etc/motd" }
         ]
     },
     "User_Specs": [

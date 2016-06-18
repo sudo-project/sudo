@@ -736,7 +736,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
 	/* match any or address or netgroup or hostname */
-	if (!strcmp(val, "ALL") || addr_matches(val) ||
+	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, user_runhost, user_srunhost,
 	    def_netgroup_tuple ? pw->pw_name : NULL) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
@@ -958,7 +958,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
     for (p = bv; *p != NULL && ret != false; p++) {
 	val = (*p)->bv_val;
 	/* Match against ALL ? */
-	if (!strcmp(val, "ALL")) {
+	if (strcmp(val, "ALL") == 0) {
 	    ret = true;
 	    if (setenv_implied != NULL)
 		*setenv_implied = true;
@@ -1407,6 +1407,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     char *escaped_domain = NULL, *escaped_user = NULL;
     char *escaped_host = NULL, *escaped_shost = NULL, *filt = NULL;
     int filt_len, rc;
+    bool rval = false;
     debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP);
 
     if (ldap_conf.timeout > 0) {
@@ -1533,13 +1534,15 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	ng = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
 	if (ng != NULL) {
 	    if (!sudo_netgroup_lookup_nested(ld, base->val, tvp, netgroups, ng))
-		debug_return_bool(false);
+		goto done;
 	}
     }
-    free(filt);
-    debug_return_bool(true);
+    rval = true;
+    goto done;
+
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+done:
     free(escaped_domain);
     free(escaped_user);
     free(escaped_host);
@@ -1547,7 +1550,7 @@ oom:
 	free(escaped_shost);
     free(filt);
     ldap_msgfree(result);
-    debug_return_bool(false);
+    debug_return_bool(rval);
 }
 
 /*
@@ -2531,7 +2534,8 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 
 done:
     if (found)
-	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
+	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	    safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
    debug_return_int(!found);
 }
@@ -2584,7 +2588,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
 static char *
 sudo_krb5_copy_cc_file(const char *old_ccname)
 {
-    int ofd, nfd;
+    int nfd, ofd = -1;
     ssize_t nread, nwritten = -1;
     static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
     char buf[10240], *ret = NULL;
@@ -2632,13 +2636,14 @@ write_error:
 		    sudo_warn("unable to create temp file %s", new_ccname);
 		}
 	    }
-	    close(ofd);
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"unable to open %s", old_ccname);
 	}
     }
 done:
+    if (ofd != -1)
+	close(ofd);
     debug_return_str(ret);
 }
 
@@ -2975,16 +2980,9 @@ sudo_ldap_open(struct sudo_nss *nss)
 {
     LDAP *ld;
     int rc = -1;
-    sigaction_t sa, saved_sa_pipe;
     bool ldapnoinit = false;
     struct sudo_ldap_handle *handle;
     debug_decl(sudo_ldap_open, SUDOERS_DEBUG_LDAP)
-
-    /* Ignore SIGPIPE if we cannot bind to the server. */
-    memset(&sa, 0, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
 
     if (!sudo_ldap_read_config())
 	goto done;
@@ -3071,7 +3069,6 @@ sudo_ldap_open(struct sudo_nss *nss)
     nss->handle = handle;
 
 done:
-    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
     debug_return_int(rc == LDAP_SUCCESS ? 0 : -1);
 }
 
@@ -3178,22 +3175,17 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	if (matched == true || user_uid == 0) {
 	    SET(ret, VALIDATE_SUCCESS);
 	    CLR(ret, VALIDATE_FAILURE);
-	    if (def_authenticate) {
-		switch (pwcheck) {
-		    case always:
-			SET(ret, FLAG_CHECK_USER);
-			break;
-		    case all:
-		    case any:
-			if (doauth == false)
-			    def_authenticate = false;
-			break;
-		    case never:
-			def_authenticate = false;
-			break;
-		    default:
-			break;
-		}
+	    switch (pwcheck) {
+		case always:
+		    SET(ret, FLAG_CHECK_USER);
+		    break;
+		case all:
+		case any:
+		    if (doauth == false)
+			SET(ret, FLAG_NOPASSWD);
+		    break;
+		default:
+		    break;
 	    }
 	}
 	goto done;
