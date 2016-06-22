@@ -1,3 +1,8 @@
+What's new in Sudo 1.8.17p1
+
+ * Fixed a bug introduced in 1.8.17 where the user's groups were
+   not set on systems that don't use PAM.  Bug #749.
+
 What's new in Sudo 1.8.17
 
  * On AIX, if /etc/security/login.cfg has auth_type set to PAM_AUTH
