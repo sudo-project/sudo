@@ -616,7 +616,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
     details->execfd = -1;
-    details->flags = CD_SUDOEDIT_CHECKDIR;
+    details->flags = CD_SUDOEDIT_CHECKDIR | CD_SET_GROUPS;
     TAILQ_INIT(&details->preserved_fds);
 
 #define SET_STRING(s, n) \
@@ -938,6 +938,39 @@ restore_nproc(void)
 #endif /* __linux__ */
 }
 
+static bool
+set_user_groups(struct command_details *details)
+{
+    bool rval = false;
+    debug_decl(set_user_groups, SUDO_DEBUG_EXEC)
+
+    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
+	if (details->ngroups >= 0) {
+	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
+		sudo_warn(U_("unable to set supplementary group IDs"));
+		goto done;
+	    }
+	}
+    }
+#ifdef HAVE_SETEUID
+    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
+	sudo_warn(U_("unable to set effective gid to runas gid %u"),
+	    (unsigned int)details->egid);
+	goto done;
+    }
+#endif
+    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
+	sudo_warn(U_("unable to set gid to runas gid %u"),
+	    (unsigned int)details->gid);
+	goto done;
+    }
+    rval = true;
+
+done:
+    CLR(details->flags, CD_SET_GROUPS);
+    debug_return_bool(rval);
+}
+
 /*
  * Setup the execution environment immediately prior to the call to execve().
  * Group setup is performed by policy_init_session(), called earlier.
@@ -1017,6 +1050,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
+    }
+
+    if (ISSET(details->flags, CD_SET_GROUPS)) {
+	/* set_user_groups() prints error message on failure. */
+	if (!set_user_groups(details))
+	    goto done;
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
@@ -1347,28 +1386,10 @@ policy_init_session(struct command_details *details)
      * as part of the session setup.  This allows for dynamic
      * groups to be set via pam_group(8) in pam_setcred(3).
      */
-    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-	if (details->ngroups >= 0) {
-	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		sudo_warn(U_("unable to set supplementary group IDs"));
-		rval = -1;
-		goto done;
-	    }
-	}
-    }
-#ifdef HAVE_SETEUID
-    if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	sudo_warn(U_("unable to set effective gid to runas gid %u"),
-	    (unsigned int)details->egid);
-	rval = -1;
-	goto done;
-    }
-#endif
-    if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	sudo_warn(U_("unable to set gid to runas gid %u"),
-	    (unsigned int)details->gid);
-	rval = -1;
-	goto done;
+    if (ISSET(details->flags, CD_SET_GROUPS)) {
+	/* set_user_groups() prints error message on failure. */
+	if (!set_user_groups(details))
+	    goto done;
     }
 
     if (policy_plugin.u.policy->init_session) {
