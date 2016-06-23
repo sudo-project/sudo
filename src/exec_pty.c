@@ -1147,51 +1147,54 @@ send_status(int fd, struct command_status *cstat)
 static bool
 handle_sigchld(int backchannel, struct command_status *cstat)
 {
-    bool alive = true;
+    char signame[SIG2STR_MAX];
     int status;
     pid_t pid;
     debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
-    /* read command status */
+    /* Read command status. */
     do {
 	pid = waitpid(cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
-    if (pid != cmnd_pid) {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
+    if (pid <= 0) {
+	sudo_debug_printf(SUDO_DEBUG_DIAG,
 	    "waitpid returned %d, expected pid %d", pid, cmnd_pid);
-    } else {
-	if (cstat->type != CMD_ERRNO) {
-	    char signame[SIG2STR_MAX];
-
-	    cstat->type = CMD_WSTATUS;
-	    cstat->val = status;
-	    if (WIFSTOPPED(status)) {
-		if (sig2str(WSTOPSIG(status), signame) == -1)
-		    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "command stopped, SIG%s", signame);
-		/* Saved the foreground pgid so we can restore it later. */
-		do {
-		    pid = tcgetpgrp(io_fds[SFD_SLAVE]);
-		} while (pid == -1 && errno == EINTR);
-		if (pid != mon_pgrp)
-		    cmnd_pgrp = pid;
-		if (send_status(backchannel, cstat) == -1)
-		    debug_return_bool(alive); /* XXX */
-	    } else if (WIFSIGNALED(status)) {
-		if (sig2str(WTERMSIG(status), signame) == -1)
-		    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "command killed, SIG%s", signame);
-	    } else {
-		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
-		    WEXITSTATUS(status));
-	    }
-	}
-	if (!WIFSTOPPED(status))
-	    alive = false;
+	debug_return_bool(false);
     }
-    debug_return_bool(alive);
+
+    if (WIFSTOPPED(status)) {
+	if (sig2str(WSTOPSIG(status), signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command stopped, SIG%s", signame);
+    } else if (WIFSIGNALED(status)) {
+	if (sig2str(WTERMSIG(status), signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command killed, SIG%s", signame);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
+	    WEXITSTATUS(status));
+    }
+
+    /* Don't overwrite execve() failure with child exit status. */
+    if (cstat->type != CMD_ERRNO) {
+	/*
+	 * Store wait status in cstat and forward to parent if stopped.
+	 */
+	cstat->type = CMD_WSTATUS;
+	cstat->val = status;
+	if (WIFSTOPPED(status)) {
+	    /* Save the foreground pgid so we can restore it later. */
+	    do {
+		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+	    } while (pid == -1 && errno == EINTR);
+	    if (pid != mon_pgrp)
+	    send_status(backchannel, cstat);
+	    debug_return_bool(true);
+	}
+    }
+
+    /* It's dead, Jim. */
+    debug_return_bool(false);
 }
 
 struct monitor_closure {
@@ -1272,7 +1275,7 @@ mon_backchannel_cb(int fd, int what, void *v)
     ssize_t n;
     debug_decl(mon_backchannel_cb, SUDO_DEBUG_EXEC);
 
-    /* read command from backchannel, should be a signal */
+    /* Read command from backchannel, should be a signal. */
     n = recv(fd, &cstmp, sizeof(cstmp), MSG_WAITALL);
     if (n != sizeof(cstmp)) {
 	if (n == -1) {
