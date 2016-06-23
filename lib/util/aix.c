@@ -90,7 +90,7 @@ aix_setlimits(char *user)
      * For each resource limit, get the soft/hard values for the user
      * and set those values via setrlimit64().  Must be run as euid 0.
      */
-    for (n = 0; n < sizeof(aix_limits) / sizeof(aix_limits[0]); n++) {
+    for (n = 0; n < nitems(aix_limits); n++) {
 	/*
 	 * We have two strategies, depending on whether or not the
 	 * hard limit has been defined.

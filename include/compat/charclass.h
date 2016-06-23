@@ -36,4 +36,4 @@ static struct cclass {
 	{ NULL,		NULL }
 };
 
-#define NCCLASSES	(sizeof(cclasses) / sizeof(cclasses[0]) - 1)
+#define NCCLASSES	(nitems(cclasses) - 1)

@@ -81,7 +81,7 @@ static const char *const sudo_debug_default_subsystems[] = {
     NULL
 };
 
-#define NUM_DEF_SUBSYSTEMS	(sizeof(sudo_debug_default_subsystems) / sizeof(sudo_debug_default_subsystems[0]) - 1)
+#define NUM_DEF_SUBSYSTEMS	(nitems(sudo_debug_default_subsystems) - 1)
 
 /*
  * For multiple programs/plugins there is a per-program instance

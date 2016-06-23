@@ -175,13 +175,11 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "check_fill");
 
-    errors += do_tests(check_fill, txt_data, sizeof(txt_data) / sizeof(txt_data[0]));
-    errors += do_tests(check_fill_cmnd, cmd_data, sizeof(cmd_data) / sizeof(cmd_data[0]));
-    errors += do_tests(check_fill_args, args_data, sizeof(args_data) / sizeof(args_data[0]));
+    errors += do_tests(check_fill, txt_data, nitems(txt_data));
+    errors += do_tests(check_fill_cmnd, cmd_data, nitems(cmd_data));
+    errors += do_tests(check_fill_args, args_data, nitems(args_data));
 
-    ntests = sizeof(txt_data) / sizeof(txt_data[0]) +
-	sizeof(cmd_data) / sizeof(cmd_data[0]) +
-	sizeof(args_data) / sizeof(args_data[0]);
+    ntests = nitems(txt_data) + nitems(cmd_data) + nitems(args_data);
     printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);
 

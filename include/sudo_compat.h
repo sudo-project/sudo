@@ -238,6 +238,13 @@ typedef struct sigaction sigaction_t;
 #endif
 
 /*
+ * The nitems macro may be defined in sys/param.h
+ */
+#ifndef nitems
+# define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
+#endif
+
+/*
  * If dirfd() does not exists, hopefully dd_fd does.
  */
 #if !defined(HAVE_DIRFD) && defined(HAVE_DD_FD)
