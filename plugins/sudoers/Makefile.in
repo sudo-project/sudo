@@ -203,8 +203,10 @@ $(shlib_opt): $(shlib_exp)
 
 # Prevent default rules from building .c files from .l and .y files
 .l.c:
+	@true
 
 .y.c:
+	@true
 
 Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile)
