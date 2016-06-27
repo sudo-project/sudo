@@ -2282,7 +2282,8 @@ case "$host_os" in
 	[sudo_cv_xopen_source_extended=no], [
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
 	    AC_INCLUDES_DEFAULT
-#	    include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+#	    include <sys/socket.h>
+#	    include <net/if.h>], [int a = MSG_WAITALL; return a;])],
 	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])

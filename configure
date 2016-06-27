@@ -17097,6 +17097,7 @@ else
 #define _XOPEN_SOURCE_EXTENDED
 	    $ac_includes_default
 #	    include <sys/socket.h>
+#	    include <net/if.h>
 int
 main ()
 {
