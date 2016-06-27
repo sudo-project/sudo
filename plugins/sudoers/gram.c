@@ -762,7 +762,7 @@ new_member(char *name, int type)
     debug_return_ptr(m);
 }
 
-struct sudo_digest *
+static struct sudo_digest *
 new_digest(int digest_type, const char *digest_str)
 {
     struct sudo_digest *dig;
