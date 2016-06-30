@@ -159,7 +159,7 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo find_path.lo \
 VISUDO_OBJS = editor.o find_path.o goodpath.o locale.o sudo_printf.o visudo.o \
 	      visudo_json.o
 
-REPLAY_OBJS = getdate.o locale.o sudoreplay.o
+REPLAY_OBJS = getdate.o sudoreplay.o
 
 TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o \
 	    sudo_printf.o testsudoers.o tsgetgrpw.o
