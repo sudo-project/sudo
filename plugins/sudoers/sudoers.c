@@ -149,7 +149,7 @@ int
 sudoers_policy_init(void *info, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
-    int sources = 0;
+    int oldlocale, sources = 0;
     int rval = -1;
     debug_decl(sudoers_policy_init, SUDOERS_DEBUG_PLUGIN)
 
@@ -183,7 +183,11 @@ sudoers_policy_init(void *info, char * const envp[])
     if (!set_perms(PERM_ROOT))
 	debug_return_int(-1);
 
-    /* Open and parse sudoers, set global defaults */
+    /*
+     * Open and parse sudoers, set global defaults.
+     * Uses the C locale unless another is specified in sudoers.
+     */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
             sources++;
@@ -244,6 +248,9 @@ sudoers_policy_init(void *info, char * const envp[])
 cleanup:
     if (!restore_perms())
 	rval = -1;
+
+    /* Restore user's locale. */
+    sudoers_setlocale(oldlocale, NULL);
 
     debug_return_int(rval);
 }
