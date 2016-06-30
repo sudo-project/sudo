@@ -164,23 +164,23 @@ REPLAY_OBJS = getdate.o sudoreplay.o
 TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o \
 	    sudo_printf.o testsudoers.o tsgetgrpw.o
 
-CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o \
-		  sudoers_debug.o sudo_printf.o
+CHECK_ADDR_OBJS = check_addr.o interfaces.o match_addr.o sudoers_debug.o \
+		  sudo_printf.o
 
-CHECK_BASE64_OBJS = check_base64.o base64.o locale.o sudoers_debug.o
+CHECK_BASE64_OBJS = check_base64.o base64.o sudoers_debug.o
 
-CHECK_DIGEST_OBJS = check_digest.o locale.o
+CHECK_DIGEST_OBJS = check_digest.o
 
-CHECK_FILL_OBJS = check_fill.o hexchar.o locale.o toke_util.o sudoers_debug.o
+CHECK_FILL_OBJS = check_fill.o hexchar.o toke_util.o sudoers_debug.o
 
-CHECK_HEXCHAR_OBJS = check_hexchar.o hexchar.o locale.o sudoers_debug.o
+CHECK_HEXCHAR_OBJS = check_hexchar.o hexchar.o sudoers_debug.o
 
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.o iolog_path.o locale.o \
 			pwutil.o pwutil_impl.o redblack.o sudoers_debug.o
 
-CHECK_SYMBOLS_OBJS = check_symbols.o locale.o
+CHECK_SYMBOLS_OBJS = check_symbols.o
 
-CHECK_WRAP_OBJS = check_wrap.o locale.o logwrap.o sudoers_debug.o
+CHECK_WRAP_OBJS = check_wrap.o logwrap.o sudoers_debug.o
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
