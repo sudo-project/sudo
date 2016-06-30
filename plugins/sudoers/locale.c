@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,6 +36,7 @@
 
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
+#include "sudoers_debug.h"
 #include "logging.h"
 
 static int current_locale = SUDOERS_LOCALE_USER;
@@ -45,23 +46,28 @@ static char *sudoers_locale;
 int
 sudoers_getlocale(void)
 {
-    return current_locale;
+    debug_decl(sudoers_getlocale, SUDOERS_DEBUG_UTIL)
+    debug_return_int(current_locale);
 }
 
 bool
 sudoers_initlocale(const char *ulocale, const char *slocale)
 {
+    debug_decl(sudoers_initlocale, SUDOERS_DEBUG_UTIL)
+
     if (ulocale != NULL) {
 	free(user_locale);
 	if ((user_locale = strdup(ulocale)) == NULL)
-	    return false;
+	    debug_return_bool(false);
     }
     if (slocale != NULL) {
 	free(sudoers_locale);
 	if ((sudoers_locale = strdup(slocale)) == NULL)
-	    return false;
+	    debug_return_bool(false);
     }
-    return true;
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: user locale %s, sudoers locale %s",
+	__func__, user_locale, sudoers_locale);
+    debug_return_bool(true);
 }
 
 /*
@@ -74,6 +80,7 @@ bool
 sudoers_setlocale(int newlocale, int *prevlocale)
 {
     char *res = NULL;
+    debug_decl(sudoers_setlocale, SUDOERS_DEBUG_UTIL)
 
     switch (newlocale) {
 	case SUDOERS_LOCALE_USER:
@@ -81,6 +88,9 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		*prevlocale = current_locale;
 	    if (current_locale != SUDOERS_LOCALE_USER) {
 		current_locale = SUDOERS_LOCALE_USER;
+		sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		    "%s: setting locale to %s (user)", __func__,
+		    user_locale ? user_locale : "");
 		res = setlocale(LC_ALL, user_locale ? user_locale : "");
 		if (res != NULL && user_locale == NULL) {
 		    user_locale = setlocale(LC_ALL, NULL);
@@ -96,6 +106,9 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		*prevlocale = current_locale;
 	    if (current_locale != SUDOERS_LOCALE_SUDOERS) {
 		current_locale = SUDOERS_LOCALE_SUDOERS;
+		sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		    "%s: setting locale to %s (sudoers)", __func__,
+		    sudoers_locale ? sudoers_locale : "C");
 		res = setlocale(LC_ALL, sudoers_locale ? sudoers_locale : "C");
 		if (res == NULL && sudoers_locale != NULL) {
 		    if (strcmp(sudoers_locale, "C") != 0) {
@@ -108,13 +121,15 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 	    }
 	    break;
     }
-    return res ? true : false;
+    debug_return_bool(res ? true : false);
 }
 
 bool
 sudoers_warn_setlocale(bool restore, int *cookie)
 {
+    debug_decl(sudoers_warn_setlocale, SUDOERS_DEBUG_UTIL)
+
     if (restore)
-	return sudoers_setlocale(*cookie, NULL);
-    return sudoers_setlocale(SUDOERS_LOCALE_USER, cookie);
+	debug_return_bool(sudoers_setlocale(*cookie, NULL));
+    debug_return_bool(sudoers_setlocale(SUDOERS_LOCALE_USER, cookie));
 }
