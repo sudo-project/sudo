@@ -1940,7 +1940,7 @@ char *yytext;
 #define INITIAL 0
 #line 2 "toke.l"
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -4057,17 +4057,14 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 
     dir = opendir(dirpath);
     if (dir == NULL) {
-	if (errno != ENOENT) {
-	    sudo_warn("%s", dirpath);
-	    sudoerserror(NULL);
-	}
+	if (errno == ENOENT)
+	    goto done;
+	sudo_warn("%s", dirpath);
 	goto bad;
     }
     paths = reallocarray(NULL, max_paths, sizeof(*paths));
-    if (paths == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto bad;
-    }
+    if (paths == NULL)
+	goto oom;
     while ((dent = readdir(dir)) != NULL) {
 	struct path_list *pl;
 	struct stat sb;
@@ -4079,16 +4076,15 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    continue;
 	}
 	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1)
-	    goto bad;
+	    goto oom;
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
 	    free(path);
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(path);
-	    goto bad;
+	    goto oom;
 	}
 	pl->path = path;
 	if (count >= max_paths) {
@@ -4096,10 +4092,9 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    max_paths <<= 1;
 	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		free(path);
 		free(pl);
-		goto bad;
+		goto oom;
 	    }
 	    paths = tmp;
 	}
@@ -4110,9 +4105,13 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	free(paths);
 	paths = NULL;
     }
+done:
     *pathsp = paths;
     debug_return_int(count);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
+    sudoerserror(NULL);
     if (dir != NULL)
 	closedir(dir);
     for (i = 0; i < count; i++) {
