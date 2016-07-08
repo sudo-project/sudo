@@ -345,10 +345,11 @@ install-sudoers: install-dirs
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
 	-rm -f	$(DESTDIR)$(replaydir)/sudoreplay \
-		$(DESTDIR)$(replaydir)/sudoreplay~ \
-		$(DESTDIR)$(visudodir)/visudo \
-		$(DESTDIR)$(visudodir)/visudo~ \
-		$(DESTDIR)$(plugindir)/sudoers.so~
+		$(DESTDIR)$(visudodir)/visudo
+	-test -z "$(INSTALL_BACKUP)" || \
+		$(DESTDIR)$(replaydir)/sudoreplay$(INSTALL_BACKUP) \
+		$(DESTDIR)$(visudodir)/visudo$(INSTALL_BACKUP) \
+		$(DESTDIR)$(plugindir)/sudoers.so$(INSTALL_BACKUP)
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
 

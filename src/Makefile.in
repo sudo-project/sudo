@@ -194,13 +194,14 @@ install-plugin:
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(noexecdir)/sudo_noexec.la
 	-rm -f	$(DESTDIR)$(bindir)/sudo \
-		$(DESTDIR)$(bindir)/sudo~ \
 		$(DESTDIR)$(bindir)/sudoedit \
 		$(DESTDIR)$(libexecdir)/sudo/sesh \
-		$(DESTDIR)$(libexecdir)/sudo/sesh~ \
-		$(DESTDIR)$(noexecdir)/sudo_noexec.so~ \
 		$(DESTDIR)/usr/lib/tmpfiles.d/sudo.conf
-	-test -n "$(INIT_SCRIPT)" && \
+	-test -z "$(INSTALL_BACKUP)" || \
+	    rm -f $(DESTDIR)$(bindir)/sudo$(INSTALL_BACKUP) \
+		  $(DESTDIR)$(libexecdir)/sudo/sesh$(INSTALL_BACKUP) \
+		  $(DESTDIR)$(noexecdir)/sudo_noexec.so$(INSTALL_BACKUP)
+	-test -z "$(INIT_SCRIPT)" || \
 	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo
 
 splint:

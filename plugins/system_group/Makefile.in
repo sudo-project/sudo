@@ -139,7 +139,8 @@ install-plugin: install-dirs system_group.la
 
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/system_group.la
-	-rm -f $(DESTDIR)$(plugindir)/system_group.so~
+	-test -z "$(INSTALL_BACKUP)" || \
+	    rm -f $(DESTDIR)$(plugindir)/system_group.so$(INSTALL_BACKUP)
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c

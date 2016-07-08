@@ -134,6 +134,8 @@ install-plugin:
 
 uninstall:
 	$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_z.la
+	-test -z "$(INSTALL_BACKUP)" || \
+	    rf -f $(DESTDIR)$(libexecdir)/sudo/libsudo_z.*~
 
 splint:
 

@@ -229,6 +229,8 @@ install-plugin:
 
 uninstall:
 	$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.la
+	-test -z "$(INSTALL_BACKUP)" || \
+	    rf -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.*~
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c

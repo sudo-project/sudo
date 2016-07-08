@@ -138,7 +138,8 @@ install-plugin: install-dirs sample_plugin.la
 
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sample_plugin.la
-	-rm -f $(DESTDIR)$(plugindir)/sample_plugin.so~
+	-test -z "$(INSTALL_BACKUP)" || \
+	    rm -f $(DESTDIR)$(plugindir)/sample_plugin.so$(INSTALL_BACKUP)
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
