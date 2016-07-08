@@ -63,6 +63,7 @@ AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
 AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
+AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_NOEXEC])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
@@ -186,6 +187,7 @@ dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
+INSTALL_BACKUP=
 INSTALL_NOEXEC=
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -1779,6 +1781,9 @@ case "$host" in
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
 
+		# HP-UX won't unlink a shared lib that is open
+		INSTALL_BACKUP='~'
+
 		AC_CHECK_FUNCS([pstat_getproc])
 		;;
     *-*-hpux*)
@@ -1799,6 +1804,9 @@ case "$host" in
 		# HP-UX shared libs must be executable.
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
+
+		# HP-UX won't unlink a shared lib that is open
+		INSTALL_BACKUP='~'
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then

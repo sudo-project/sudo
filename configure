@@ -750,6 +750,7 @@ SELINUX_USAGE
 BSDAUTH_USAGE
 DONT_LEAK_PATH_INFO
 INSTALL_NOEXEC
+INSTALL_BACKUP
 sesh_file
 noexec_file
 NOEXECDIR
@@ -2849,6 +2850,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2896,6 +2898,7 @@ PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
 #
+INSTALL_BACKUP=
 INSTALL_NOEXEC=
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -14908,6 +14911,9 @@ _ACEOF
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
 
+		# HP-UX won't unlink a shared lib that is open
+		INSTALL_BACKUP='~'
+
 		for ac_func in pstat_getproc
 do :
   ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
@@ -14939,6 +14945,9 @@ done
 		# HP-UX shared libs must be executable.
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
+
+		# HP-UX won't unlink a shared lib that is open
+		INSTALL_BACKUP='~'
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then

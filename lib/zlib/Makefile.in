@@ -50,6 +50,7 @@ AWK = @AWK@
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
+INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # C preprocessor flags
 CPPFLAGS = -I. -I$(srcdir)
@@ -117,7 +118,7 @@ install:
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) ;; \
 	*)  if [ X"$(shlib_enable)" = X"yes" ]; then \
-		INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --quiet --mode=install $(INSTALL) $(INSTALL_OWNER) libsudo_z.la $(DESTDIR)$(libexecdir)/sudo; \
+		INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --quiet --mode=install $(INSTALL) $(INSTALL_OWNER) libsudo_z.la $(DESTDIR)$(libexecdir)/sudo; \
 	    fi;; \
 	esac
 

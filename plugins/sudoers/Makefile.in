@@ -48,6 +48,7 @@ PERL = perl
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
+INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
@@ -320,8 +321,8 @@ install-dirs:
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0700 $(DESTDIR)$(vardir)/lectured
 
 install-binaries: visudo sudoreplay install-dirs
-	INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
-	INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 visudo $(DESTDIR)$(visudodir)/visudo
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-includes:
 
@@ -332,7 +333,7 @@ install-plugin: sudoers.la install-dirs
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) ;; \
 	*)  if [ X"$(shlib_enable)" = X"yes" ]; then \
-		INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudoers.la $(DESTDIR)$(plugindir); \
+		INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) sudoers.la $(DESTDIR)$(plugindir); \
 	    fi;; \
 	esac
 

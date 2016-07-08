@@ -35,6 +35,7 @@ AWK = @AWK@
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
+INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
@@ -133,7 +134,7 @@ install-doc:
 
 install-plugin: install-dirs group_file.la
 	if [ X"$(shlib_enable)" = X"yes" ]; then \
-	    INSTALL_BACKUP='~' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) group_file.la $(DESTDIR)$(plugindir); \
+	    INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m $(shlib_mode) group_file.la $(DESTDIR)$(plugindir); \
 	fi
 
 uninstall:
