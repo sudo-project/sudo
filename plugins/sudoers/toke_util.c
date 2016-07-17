@@ -139,7 +139,7 @@ fill_args(const char *s, size_t len, int addspace)
 
     if (new_len >= arg_size) {
 	/* Allocate in increments of 128 bytes to avoid excessive realloc(). */
-	arg_size = (new_len + 127) & ~127;
+	arg_size = (new_len + 1 + 127) & ~127;
 
 	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
