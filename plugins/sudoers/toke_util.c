@@ -154,7 +154,7 @@ fill_args(const char *s, size_t len, int addspace)
     if (addspace)
 	*p++ = ' ';
     len = arg_size - (p - sudoerslval.command.args);
-    if (strlcpy(p, s, len) != len) {
+    if (strlcpy(p, s, len) >= len) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	goto bad;
     }
