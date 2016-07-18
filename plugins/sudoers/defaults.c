@@ -80,6 +80,7 @@ static struct strmap priorities[] = {
  * Defaults values to apply before others.
  */
 static const char *early_defaults[] = {
+    "fqdn",
     "runas_default",
     "sudoers_locale",
     NULL

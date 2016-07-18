@@ -69,12 +69,12 @@
  * Prototypes
  */
 static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
+static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
 static bool cb_sudoers_locale(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
-static bool set_fqdn(void);
 static bool set_loginclass(struct passwd *);
 static bool set_runasgr(const char *, bool);
 static bool set_runaspw(const char *, bool);
@@ -237,9 +237,6 @@ sudoers_policy_init(void *info, char * const envp[])
 	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 	    N_("problem with defaults entries"));
     }
-
-    if (def_fqdn)
-	set_fqdn();	/* deferred until after sudoers is parsed */
 
     /* Set login class if applicable. */
     if (set_loginclass(runas_pw ? runas_pw : sudo_user.pw))
@@ -746,6 +743,9 @@ init_vars(char * const envp[])
     if (!set_perms(PERM_INITIAL))
 	debug_return_bool(false);
 
+    /* Set fqdn callback. */
+    sudo_defs_table[I_FQDN].callback = cb_fqdn;
+
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
@@ -761,6 +761,10 @@ init_vars(char * const envp[])
 	    (unsigned int) user_uid);
 	debug_return_bool(false);
     }
+
+    /* Set fully-qualified domain name if specified. */
+    if (def_fqdn)
+	cb_fqdn(NULL);
 
     debug_return_bool(true);
 }
@@ -1050,11 +1054,11 @@ resolve_host(const char *host, char **longp, char **shortp)
  * Sets user_host, user_shost, user_runhost and user_srunhost.
  */
 static bool
-set_fqdn(void)
+cb_fqdn(const union sudo_defs_val *unused)
 {
     bool remote;
     char *lhost, *shost;
-    debug_decl(set_fqdn, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(cb_fqdn, SUDOERS_DEBUG_PLUGIN)
 
     /* If the -h flag was given we need to resolve both host and runhost. */
     remote = strcmp(user_runhost, user_host) != 0;
