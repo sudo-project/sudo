@@ -312,6 +312,8 @@ set_default(char *var, char *val, int op)
 		debug_return_bool(false);
 	    }
 	    cur->sd_un.flag = op;
+	    if (cur->callback)
+		debug_return_bool(cur->callback(&cur->sd_un));
 	    break;
 	case T_LIST:
 	    if (!val) {
