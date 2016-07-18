@@ -69,8 +69,8 @@
  * Prototypes
  */
 static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
-static bool cb_runas_default(const char *);
-static bool cb_sudoers_locale(const char *);
+static bool cb_runas_default(const union sudo_defs_val *);
+static bool cb_sudoers_locale(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -753,7 +753,7 @@ init_vars(char * const envp[])
     sudo_defs_table[I_SUDOERS_LOCALE].callback = cb_sudoers_locale;
 
     /* Set maxseq callback. */
-    sudo_defs_table[I_MAXSEQ].callback = io_set_max_sessid;
+    sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
@@ -761,6 +761,7 @@ init_vars(char * const envp[])
 	    (unsigned int) user_uid);
 	debug_return_bool(false);
     }
+
     debug_return_bool(true);
 }
 
@@ -1171,11 +1172,11 @@ set_runasgr(const char *group, bool quiet)
  * Callback for runas_default sudoers setting.
  */
 static bool
-cb_runas_default(const char *user)
+cb_runas_default(const union sudo_defs_val *sd_un)
 {
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
-	return set_runaspw(user, true);
+	return set_runaspw(sd_un->str, true);
     return true;
 }
 
@@ -1183,9 +1184,9 @@ cb_runas_default(const char *user)
  * Callback for sudoers_locale sudoers setting.
  */
 static bool
-cb_sudoers_locale(const char *locale)
+cb_sudoers_locale(const union sudo_defs_val *sd_un)
 {
-    return sudoers_initlocale(NULL, locale);
+    return sudoers_initlocale(NULL, sd_un->str);
 }
 
 /*

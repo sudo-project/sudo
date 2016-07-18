@@ -43,6 +43,17 @@ struct def_values {
     enum def_tuple nval;/* numeric value */
 };
 
+union sudo_defs_val {
+    int flag;
+    int ival;
+    unsigned int uival;
+    double fval;
+    enum def_tuple tuple;
+    char *str;
+    mode_t mode;
+    struct list_members list;
+};
+
 /*
  * Structure describing compile-time and run-time options.
  */
@@ -51,17 +62,8 @@ struct sudo_defs_types {
     int type;
     char *desc;
     struct def_values *values;
-    bool (*callback)(const char *);
-    union {
-	int flag;
-	int ival;
-	unsigned int uival;
-	double fval;
-	enum def_tuple tuple;
-	char *str;
-	mode_t mode;
-	struct list_members list;
-    } sd_un;
+    bool (*callback)(const union sudo_defs_val *);
+    union sudo_defs_val sd_un;
 };
 
 /*

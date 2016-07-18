@@ -656,7 +656,7 @@ store_int(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.ival = i;
     }
     if (def->callback)
-	debug_return_bool(def->callback(val));
+	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -679,7 +679,7 @@ store_uint(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.uival = u;
     }
     if (def->callback)
-	debug_return_bool(def->callback(val));
+	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -700,7 +700,7 @@ store_float(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.fval = d;
     }
     if (def->callback)
-	debug_return_bool(def->callback(val));
+	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -728,7 +728,7 @@ store_tuple(char *val, struct sudo_defs_types *def, int op)
 	    debug_return_bool(false);
     }
     if (def->callback)
-	debug_return_bool(def->callback(val));
+	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -747,7 +747,7 @@ store_str(char *val, struct sudo_defs_types *def, int op)
 	}
     }
     if (def->callback)
-	debug_return_int(def->callback(val));
+	debug_return_int(def->callback(&def->sd_un));
     debug_return_int(true);
 }
 
@@ -861,7 +861,7 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.mode = mode;
     }
     if (def->callback)
-	debug_return_bool(def->callback(val));
+	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 

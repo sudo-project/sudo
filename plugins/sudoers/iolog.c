@@ -154,7 +154,7 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 /*
  * Set max session ID (aka sequence number)
  */
-bool
+static bool
 io_set_max_sessid(const char *maxval)
 {
     const char *errstr;
@@ -172,6 +172,19 @@ io_set_max_sessid(const char *maxval)
 	value = SESSID_MAX;
     }
     sessid_max = value;
+    debug_return_bool(true);
+}
+
+/*
+ * Sudoers callback for maxseq Defaults setting.
+ */
+bool
+cb_maxseq(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_maxseq, SUDOERS_DEBUG_UTIL)
+
+    /* Clamp value to SESSID_MAX as documented. */
+    sessid_max = sd_un->uival < SESSID_MAX ? sd_un->uival : SESSID_MAX;
     debug_return_bool(true);
 }
 

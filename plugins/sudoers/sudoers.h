@@ -317,7 +317,7 @@ bool get_boottime(struct timespec *);
 
 /* iolog.c */
 bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
-bool io_set_max_sessid(const char *sessid);
+bool cb_maxseq(const union sudo_defs_val *sd_un);
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
