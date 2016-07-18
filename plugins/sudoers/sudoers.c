@@ -1178,10 +1178,12 @@ set_runasgr(const char *group, bool quiet)
 static bool
 cb_runas_default(const union sudo_defs_val *sd_un)
 {
+    debug_decl(cb_runas_default, SUDOERS_DEBUG_PLUGIN)
+
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
-	return set_runaspw(sd_un->str, true);
-    return true;
+	debug_return_bool(set_runaspw(sd_un->str, true));
+    debug_return_bool(true);
 }
 
 /*
@@ -1190,7 +1192,9 @@ cb_runas_default(const union sudo_defs_val *sd_un)
 static bool
 cb_sudoers_locale(const union sudo_defs_val *sd_un)
 {
-    return sudoers_initlocale(NULL, sd_un->str);
+    debug_decl(cb_sudoers_locale, SUDOERS_DEBUG_PLUGIN)
+
+    debug_return_bool(sudoers_initlocale(NULL, sd_un->str));
 }
 
 /*
