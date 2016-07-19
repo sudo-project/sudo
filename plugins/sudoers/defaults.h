@@ -113,7 +113,7 @@ struct sudo_defs_types {
  */
 void dump_default(void);
 bool init_defaults(void);
-bool set_default(char *var, char *val, int op);
+bool set_default(const char *var, const char *val, int op);
 bool update_defaults(int what);
 bool check_defaults(int what, bool quiet);
 
