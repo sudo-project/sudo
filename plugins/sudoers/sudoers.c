@@ -762,10 +762,6 @@ init_vars(char * const envp[])
 	debug_return_bool(false);
     }
 
-    /* Set fully-qualified domain name if specified. */
-    if (def_fqdn)
-	cb_fqdn(NULL);
-
     debug_return_bool(true);
 }
 

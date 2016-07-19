@@ -79,11 +79,21 @@ static struct strmap priorities[] = {
 /*
  * Defaults values to apply before others.
  */
-static const char *early_defaults[] = {
-    "fqdn",
-    "runas_default",
-    "sudoers_locale",
-    NULL
+struct early_default {
+    const char *var;
+    const char *val;
+    int op;
+};
+
+static struct early_default early_defaults[] = {
+#ifdef FQDN
+    { "fqdn", "true", true },
+#else
+    { "fqdn" },
+#endif
+    { "runas_default" },
+    { "sudoers_locale" },
+    { NULL }
 };
 
 /*
@@ -413,9 +423,6 @@ init_defaults(void)
 #ifndef DONT_LEAK_PATH_INFO
     def_path_info = true;
 #endif
-#ifdef FQDN
-    def_fqdn = true;
-#endif
 #ifdef USE_INSULTS
     def_insults = true;
 #endif
@@ -538,56 +545,71 @@ oom:
 bool
 update_defaults(int what)
 {
+    struct early_default *early;
     struct defaults *def;
     bool rc = true;
-    int pass;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     /*
-     * Run through the Defaulsts list twice.
-     * First, set early defaults, then set the rest.
+     * First set Defaults values marked as early.
+     * We only set early Defaults once (the last instance).
      */
-    for (pass = 0; pass < 2; pass++) {
-	TAILQ_FOREACH(def, &defaults, entries) {
-	    const char **early;
-
-	    /* Only do early defaults in pass 0, skip them in pass 1. */
-	    for (early = early_defaults; *early != NULL; early++) {
-		if (strcmp(def->var, *early) == 0)
-		    break;
-	    }
-	    if (!!*early == pass)
-		continue;
-
-	    switch (def->type) {
-	    case DEFAULTS:
-		if (!ISSET(what, SETDEF_GENERIC))
-		    continue;
-		break;
-	    case DEFAULTS_USER:
-		if (!ISSET(what, SETDEF_USER) ||
-		    userlist_matches(sudo_user.pw, def->binding) != ALLOW)
-		    continue;
-		break;
-	    case DEFAULTS_RUNAS:
-		if (!ISSET(what, SETDEF_RUNAS) ||
-		    runaslist_matches(def->binding, NULL, NULL, NULL) != ALLOW)
-		    continue;
-		break;
-	    case DEFAULTS_HOST:
-		if (!ISSET(what, SETDEF_HOST) ||
-		    hostlist_matches(sudo_user.pw, def->binding) != ALLOW)
-		    continue;
-		break;
-	    case DEFAULTS_CMND:
-		if (!ISSET(what, SETDEF_CMND) ||
-		    cmndlist_matches(def->binding) != ALLOW)
-		    continue;
+    TAILQ_FOREACH(def, &defaults, entries) {
+	for (early = early_defaults; early->var != NULL; early++) {
+	    if (strcmp(def->var, early->var) == 0) {
+		early->val = def->val;
+		early->op = def->op;
 		break;
 	    }
-	    if (!set_default(def->var, def->val, def->op))
+	}
+    }
+    for (early = early_defaults; early->var != NULL; early++) {
+	if (early->val != NULL) {
+	    if (!set_default(early->var, early->val, early->op))
 		rc = false;
 	}
+    }
+
+    /*
+     * Then set the rest of the defaults.
+     */
+    TAILQ_FOREACH(def, &defaults, entries) {
+	/* Skip Defaults marked as early, we already did them. */
+	for (early = early_defaults; early->var != NULL; early++) {
+	    if (strcmp(def->var, early->var) == 0)
+		break;
+	}
+	if (early->val != NULL)
+	    continue;
+
+	switch (def->type) {
+	case DEFAULTS:
+	    if (!ISSET(what, SETDEF_GENERIC))
+		continue;
+	    break;
+	case DEFAULTS_USER:
+	    if (!ISSET(what, SETDEF_USER) ||
+		userlist_matches(sudo_user.pw, def->binding) != ALLOW)
+		continue;
+	    break;
+	case DEFAULTS_RUNAS:
+	    if (!ISSET(what, SETDEF_RUNAS) ||
+		runaslist_matches(def->binding, NULL, NULL, NULL) != ALLOW)
+		continue;
+	    break;
+	case DEFAULTS_HOST:
+	    if (!ISSET(what, SETDEF_HOST) ||
+		hostlist_matches(sudo_user.pw, def->binding) != ALLOW)
+		continue;
+	    break;
+	case DEFAULTS_CMND:
+	    if (!ISSET(what, SETDEF_CMND) ||
+		cmndlist_matches(def->binding) != ALLOW)
+		continue;
+	    break;
+	}
+	if (!set_default(def->var, def->val, def->op))
+	    rc = false;
     }
     debug_return_bool(rc);
 }
