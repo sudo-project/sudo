@@ -1054,11 +1054,15 @@ resolve_host(const char *host, char **longp, char **shortp)
  * Sets user_host, user_shost, user_runhost and user_srunhost.
  */
 static bool
-cb_fqdn(const union sudo_defs_val *unused)
+cb_fqdn(const union sudo_defs_val *sd_un)
 {
     bool remote;
     char *lhost, *shost;
     debug_decl(cb_fqdn, SUDOERS_DEBUG_PLUGIN)
+
+    /* Nothing to do if fqdn flag is disabled. */
+    if (sd_un != NULL && !sd_un->flag)
+	debug_return_bool(true);
 
     /* If the -h flag was given we need to resolve both host and runhost. */
     remote = strcmp(user_runhost, user_host) != 0;
