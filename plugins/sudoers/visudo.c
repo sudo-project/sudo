@@ -135,7 +135,7 @@ main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
     char *editor, **editor_argv;
-    int ch, editor_argc, exitcode = 0;
+    int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
     const char *export_path;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
@@ -150,6 +150,7 @@ main(int argc, char *argv[])
     initprogname(argc > 0 ? argv[0] : "visudo");
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
@@ -238,8 +239,10 @@ main(int argc, char *argv[])
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(1);
     init_parser(sudoers_file, false);
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
+    sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
 
@@ -550,7 +553,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
-    int ch;
+    int ch, oldlocale;
     debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -570,12 +573,14 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 
 	/* Parse the sudoers temp file(s) */
 	sudoersrestart(fp);
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 	if (sudoersparse() && !parse_error) {
 	    sudo_warnx(U_("unabled to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
 	    errorfile = sp->path;
 	}
+	sudoers_setlocale(oldlocale, NULL);
 	fclose(sudoersin);
 	if (!parse_error) {
 	    if (!check_defaults(SETDEF_ALL, quiet) ||
