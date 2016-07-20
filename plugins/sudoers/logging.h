@@ -62,6 +62,8 @@
 extern int NewArgc;
 extern char **NewArgv;
 
+union sudo_defs_val;
+
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int newlocale, int *prevlocale);
 int sudoers_getlocale(void);
