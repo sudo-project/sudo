@@ -159,6 +159,9 @@ main(int argc, char *argv[])
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(visudo_cleanup);
 
+    /* Set sudoers locale callback. */
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
+
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
 	exit(EXIT_FAILURE);

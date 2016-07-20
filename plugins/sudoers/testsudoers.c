@@ -245,6 +245,9 @@ main(int argc, char *argv[])
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
+    /* Set locale callback. */
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
+
     /* Load ip addr/mask for each interface. */
     if (get_net_ifs(&p) > 0) {
 	if (!set_interfaces(p))

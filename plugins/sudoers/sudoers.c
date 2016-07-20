@@ -71,7 +71,6 @@
 static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
 static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
-static bool cb_sudoers_locale(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -750,7 +749,7 @@ init_vars(char * const envp[])
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
     /* Set locale callback. */
-    sudo_defs_table[I_SUDOERS_LOCALE].callback = cb_sudoers_locale;
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
 
     /* Set maxseq callback. */
     sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
@@ -1184,21 +1183,6 @@ cb_runas_default(const union sudo_defs_val *sd_un)
     if (!runas_user && !runas_group)
 	debug_return_bool(set_runaspw(sd_un->str, true));
     debug_return_bool(true);
-}
-
-/*
- * Callback for sudoers_locale sudoers setting.
- */
-static bool
-cb_sudoers_locale(const union sudo_defs_val *sd_un)
-{
-    debug_decl(cb_sudoers_locale, SUDOERS_DEBUG_PLUGIN)
-
-    if (sudoers_initlocale(NULL, sd_un->str)) {
-	if (setlocale(LC_ALL, sd_un->str) != NULL)
-	    debug_return_bool(true);
-    }
-    debug_return_bool(false);
 }
 
 /*

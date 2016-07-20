@@ -37,6 +37,7 @@
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "sudoers_debug.h"
+#include "defaults.h"
 #include "logging.h"
 
 static int current_locale = SUDOERS_LOCALE_USER;
@@ -132,4 +133,19 @@ sudoers_warn_setlocale(bool restore, int *cookie)
     if (restore)
 	debug_return_bool(sudoers_setlocale(*cookie, NULL));
     debug_return_bool(sudoers_setlocale(SUDOERS_LOCALE_USER, cookie));
+}
+
+/*
+ * Callback for sudoers_locale sudoers setting.
+ */
+bool
+sudoers_locale_callback(const union sudo_defs_val *sd_un)
+{
+    debug_decl(sudoers_locale_callback, SUDOERS_DEBUG_UTIL)
+
+    if (sudoers_initlocale(NULL, sd_un->str)) {
+	if (setlocale(LC_ALL, sd_un->str) != NULL)
+	    debug_return_bool(true);
+    }
+    debug_return_bool(false);
 }
