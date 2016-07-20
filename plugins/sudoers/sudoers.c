@@ -187,6 +187,7 @@ sudoers_policy_init(void *info, char * const envp[])
      * Uses the C locale unless another is specified in sudoers.
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
             sources++;
@@ -246,6 +247,7 @@ cleanup:
 	rval = -1;
 
     /* Restore user's locale. */
+    sudo_warn_set_locale_func(NULL);
     sudoers_setlocale(oldlocale, NULL);
 
     debug_return_int(rval);
