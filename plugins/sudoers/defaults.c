@@ -539,6 +539,44 @@ oom:
 }
 
 /*
+ * Check whether a defaults entry matches the specified type.
+ * Returns true if it matches, else false.
+ */
+static bool
+default_type_matches(struct defaults *def, int what)
+{
+    debug_decl(default_type_matches, SUDOERS_DEBUG_DEFAULTS)
+
+    switch (def->type) {
+    case DEFAULTS:
+	if (ISSET(what, SETDEF_GENERIC))
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_USER:
+	if (ISSET(what, SETDEF_USER) &&
+	    userlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_RUNAS:
+	if (ISSET(what, SETDEF_RUNAS) &&
+	    runaslist_matches(def->binding, NULL, NULL, NULL) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_HOST:
+	if (ISSET(what, SETDEF_HOST) &&
+	    hostlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_CMND:
+	if (ISSET(what, SETDEF_CMND) &&
+	    cmndlist_matches(def->binding) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    }
+    debug_return_bool(false);
+}
+
+/*
  * Update the defaults based on what was set by sudoers.
  * Pass in an OR'd list of which default types to update.
  */
@@ -550,15 +588,21 @@ update_defaults(int what)
     bool rc = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"what: 0x%02x", what);
+
     /*
      * First set Defaults values marked as early.
      * We only set early Defaults once (the last instance).
      */
     TAILQ_FOREACH(def, &defaults, entries) {
+	/* Skip any Defaults not marked as early. */
 	for (early = early_defaults; early->var != NULL; early++) {
 	    if (strcmp(def->var, early->var) == 0) {
-		early->val = def->val;
-		early->op = def->op;
+		if (default_type_matches(def, what)) {
+		    early->val = def->val;
+		    early->op = def->op;
+		}
 		break;
 	    }
 	}
@@ -567,6 +611,7 @@ update_defaults(int what)
 	if (early->val != NULL) {
 	    if (!set_default(early->var, early->val, early->op))
 		rc = false;
+	    early->val = NULL;		/* clean state for next run */
 	}
     }
 
@@ -579,35 +624,11 @@ update_defaults(int what)
 	    if (strcmp(def->var, early->var) == 0)
 		break;
 	}
-	if (early->val != NULL)
+	if (early->var != NULL)
 	    continue;
 
-	switch (def->type) {
-	case DEFAULTS:
-	    if (!ISSET(what, SETDEF_GENERIC))
-		continue;
-	    break;
-	case DEFAULTS_USER:
-	    if (!ISSET(what, SETDEF_USER) ||
-		userlist_matches(sudo_user.pw, def->binding) != ALLOW)
-		continue;
-	    break;
-	case DEFAULTS_RUNAS:
-	    if (!ISSET(what, SETDEF_RUNAS) ||
-		runaslist_matches(def->binding, NULL, NULL, NULL) != ALLOW)
-		continue;
-	    break;
-	case DEFAULTS_HOST:
-	    if (!ISSET(what, SETDEF_HOST) ||
-		hostlist_matches(sudo_user.pw, def->binding) != ALLOW)
-		continue;
-	    break;
-	case DEFAULTS_CMND:
-	    if (!ISSET(what, SETDEF_CMND) ||
-		cmndlist_matches(def->binding) != ALLOW)
-		continue;
-	    break;
-	}
+	if (!default_type_matches(def, what))
+	    continue;
 	if (!set_default(def->var, def->val, def->op))
 	    rc = false;
     }
