@@ -1194,7 +1194,11 @@ cb_sudoers_locale(const union sudo_defs_val *sd_un)
 {
     debug_decl(cb_sudoers_locale, SUDOERS_DEBUG_PLUGIN)
 
-    debug_return_bool(sudoers_initlocale(NULL, sd_un->str));
+    if (sudoers_initlocale(NULL, sd_un->str)) {
+	if (setlocale(LC_ALL, sd_un->str) != NULL)
+	    debug_return_bool(true);
+    }
+    debug_return_bool(false);
 }
 
 /*
