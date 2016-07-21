@@ -128,6 +128,7 @@ main(int argc, char *argv[])
 
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
@@ -257,6 +258,7 @@ main(int argc, char *argv[])
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
 
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
     if (sudoersparse() != 0 || parse_error) {
 	parse_error = true;
 	if (errorlineno != -1)
@@ -322,11 +324,11 @@ main(int argc, char *argv[])
 		    }
 		}
 	    } else
-		puts(_("\thost  unmatched"));
+		puts(U_("\thost  unmatched"));
 	}
     }
-    puts(match == ALLOW ? _("\nCommand allowed") :
-	match == DENY ?  _("\nCommand denied") :  _("\nCommand unmatched"));
+    puts(match == ALLOW ? U_("\nCommand allowed") :
+	match == DENY ?  U_("\nCommand denied") :  U_("\nCommand unmatched"));
 
     /*
      * Exit codes:
