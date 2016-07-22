@@ -1176,16 +1176,16 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 		    ep[-1] = '\0';
 		}
 	    }
-	    set_default(v, val, op);
+	    set_default(v, val, op, false);
 	} else if (*v == '!') {
 	    /* case !var Boolean False */
 	    do {
 		v++;
 	    } while (isblank((unsigned char)*v));
-	    set_default(v, NULL, false);
+	    set_default(v, NULL, false, false);
 	} else {
 	    /* case var Boolean True */
-	    set_default(v, NULL, true);
+	    set_default(v, NULL, true, false);
 	}
 	free(copy);
     }

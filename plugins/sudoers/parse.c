@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2007-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -132,7 +132,7 @@ sudo_file_setdefs(struct sudo_nss *nss)
     if (nss->handle == NULL)
 	debug_return_int(-1);
 
-    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER))
+    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, false))
 	debug_return_int(-1);
     debug_return_int(0);
 }

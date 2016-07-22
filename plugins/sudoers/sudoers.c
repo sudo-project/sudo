@@ -233,7 +233,7 @@ sudoers_policy_init(void *info, char * const envp[])
 	    goto cleanup;
     }
 
-    if (!update_defaults(SETDEF_RUNAS)) {
+    if (!update_defaults(SETDEF_RUNAS, false)) {
 	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 	    N_("problem with defaults entries"));
     }
@@ -862,7 +862,7 @@ set_cmnd(void)
     else
 	user_base = user_cmnd;
 
-    if (!update_defaults(SETDEF_CMND)) {
+    if (!update_defaults(SETDEF_CMND, false)) {
 	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 	    N_("problem with defaults entries"));
     }

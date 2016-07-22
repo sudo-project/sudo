@@ -1094,16 +1094,16 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 		    ep[-1] = '\0';
 		}
 	    }
-	    set_default(var, val, op);
+	    set_default(var, val, op, false);
 	} else if (*var == '!') {
 	    /* case !var Boolean False */
 	    do {
 		var++;
 	    } while (isblank((unsigned char)*var));
-	    set_default(var, NULL, false);
+	    set_default(var, NULL, false, false);
 	} else {
 	    /* case var Boolean True */
-	    set_default(var, NULL, true);
+	    set_default(var, NULL, true, false);
 	}
 	free(copy);
     }

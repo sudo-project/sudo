@@ -241,7 +241,7 @@ main(int argc, char *argv[])
     init_parser(sudoers_file, false);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
+    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, true);
     sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
@@ -554,6 +554,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
     struct sudoersfile *sp, *last;
     FILE *fp;
     int ch, oldlocale;
+    bool ok;
     debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -580,11 +581,13 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    parse_error = true;
 	    errorfile = sp->path;
 	}
+	ok = update_defaults(SETDEF_GENERIC|SETDEF_HOST, quiet);
+	if (!check_defaults(SETDEF_ALL & ~(SETDEF_GENERIC|SETDEF_HOST), quiet))
+	    ok = false;
 	sudoers_setlocale(oldlocale, NULL);
 	fclose(sudoersin);
 	if (!parse_error) {
-	    if (!check_defaults(SETDEF_ALL, quiet) ||
-		check_aliases(strict, quiet) != 0) {
+	    if (!ok || check_aliases(strict, quiet) != 0) {
 		parse_error = true;
 		errorfile = NULL;
 	    }
@@ -898,6 +901,7 @@ static bool
 check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 {
     bool ok = false;
+    int oldlocale;
     debug_decl(check_syntax, SUDOERS_DEBUG_UTIL)
 
     if (strcmp(sudoers_file, "-") == 0) {
@@ -908,7 +912,10 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	    sudo_warn(U_("unable to open %s"), sudoers_file);
 	goto done;
     }
+    if (!init_defaults())
+	sudo_fatalx(U_("unable to initialize sudoers default values"));
     init_parser(sudoers_file, quiet);
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_file);
@@ -916,12 +923,14 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	errorfile = sudoers_file;
     }
     if (!parse_error) {
-	if (!check_defaults(SETDEF_ALL, quiet) ||
-	    check_aliases(strict, quiet) != 0) {
+	if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST, quiet) ||
+	    !check_defaults(SETDEF_ALL & ~(SETDEF_GENERIC|SETDEF_HOST), quiet)
+	    || check_aliases(strict, quiet) != 0) {
 	    parse_error = true;
 	    errorfile = NULL;
 	}
     }
+    sudoers_setlocale(oldlocale, NULL);
     ok = !parse_error;
 
     if (parse_error) {

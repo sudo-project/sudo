@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2013
+ * Copyright (c) 1999-2005, 2008-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -113,8 +113,8 @@ struct sudo_defs_types {
  */
 void dump_default(void);
 bool init_defaults(void);
-bool set_default(const char *var, const char *val, int op);
-bool update_defaults(int what);
+bool set_default(const char *var, const char *val, int op, bool quiet);
+bool update_defaults(int what, bool quiet);
 bool check_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
