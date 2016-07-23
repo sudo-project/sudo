@@ -592,23 +592,52 @@ default_type_matches(struct defaults *def, int what)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_USER:
-	if (ISSET(what, SETDEF_USER) &&
-	    userlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	if (ISSET(what, SETDEF_USER))
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (ISSET(what, SETDEF_RUNAS) &&
-	    runaslist_matches(def->binding, NULL, NULL, NULL) == ALLOW)
+	if (ISSET(what, SETDEF_RUNAS))
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
-	if (ISSET(what, SETDEF_HOST) &&
-	    hostlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	if (ISSET(what, SETDEF_HOST))
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_CMND:
-	if (ISSET(what, SETDEF_CMND) &&
-	    cmndlist_matches(def->binding) == ALLOW)
+	if (ISSET(what, SETDEF_CMND))
+	    debug_return_bool(true);
+	break;
+    }
+    debug_return_bool(false);
+}
+
+/*
+ * Check whether a defaults entry's binding matches.
+ * Returns true if it matches, else false.
+ */
+static bool
+default_binding_matches(struct defaults *def, int what)
+{
+    debug_decl(default_binding_matches, SUDOERS_DEBUG_DEFAULTS)
+
+    switch (def->type) {
+    case DEFAULTS:
+	debug_return_bool(true);
+	break;
+    case DEFAULTS_USER:
+	if (userlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_RUNAS:
+	if (runaslist_matches(def->binding, NULL, NULL, NULL) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_HOST:
+	if (hostlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	    debug_return_bool(true);
+	break;
+    case DEFAULTS_CMND:
+	if (cmndlist_matches(def->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     }
@@ -638,7 +667,8 @@ update_defaults(int what, bool quiet)
 	/* Skip any Defaults not marked as early. */
 	for (early = early_defaults; early->var != NULL; early++) {
 	    if (strcmp(def->var, early->var) == 0) {
-		if (default_type_matches(def, what)) {
+		if (default_type_matches(def, what) &&
+		    default_binding_matches(def, what)) {
 		    early->val = def->val;
 		    early->op = def->op;
 		}
@@ -666,7 +696,8 @@ update_defaults(int what, bool quiet)
 	if (early->var != NULL)
 	    continue;
 
-	if (!default_type_matches(def, what))
+	if (!default_type_matches(def, what) ||
+	    !default_binding_matches(def, what))
 	    continue;
 	if (!set_default(def->var, def->val, def->op, quiet))
 	    rc = false;
@@ -687,28 +718,8 @@ check_defaults(int what, bool quiet)
     debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     TAILQ_FOREACH(def, &defaults, entries) {
-	switch (def->type) {
-	    case DEFAULTS:
-		if (!ISSET(what, SETDEF_GENERIC))
-		    continue;
-		break;
-	    case DEFAULTS_USER:
-		if (!ISSET(what, SETDEF_USER))
-		    continue;
-		break;
-	    case DEFAULTS_RUNAS:
-		if (!ISSET(what, SETDEF_RUNAS))
-		    continue;
-		break;
-	    case DEFAULTS_HOST:
-		if (!ISSET(what, SETDEF_HOST))
-		    continue;
-		break;
-	    case DEFAULTS_CMND:
-		if (!ISSET(what, SETDEF_CMND))
-		    continue;
-		break;
-	}
+	if (!default_type_matches(def, what))
+	    continue;
 	for (cur = sudo_defs_table; cur->name != NULL; cur++) {
 	    if (strcmp(def->var, cur->name) == 0)
 		break;
