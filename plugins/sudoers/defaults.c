@@ -197,6 +197,182 @@ dump_defaults(void)
     debug_return;
 }
 
+static bool
+set_default_entry(struct sudo_defs_types *def, const char *val, int op, bool quiet)
+{
+    debug_decl(set_default_entry, SUDOERS_DEBUG_DEFAULTS)
+
+    switch (def->type & T_MASK) {
+	case T_LOGFAC:
+	    if (!store_syslogfac(val, def, op)) {
+		if (!quiet) {
+		    if (val)
+			sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			    val, def->name);
+		    else
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_LOGPRI:
+	    if (!store_syslogpri(val, def, op)) {
+		if (!quiet) {
+		    if (val)
+			sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			    val, def->name);
+		    else
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_STR:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(def->type, T_BOOL) || op != false) {
+		    if (!quiet)
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		    debug_return_bool(false);
+		}
+	    }
+	    if (ISSET(def->type, T_PATH) && val && *val != '/') {
+		if (!quiet) {
+		    sudo_warnx(U_("values for `%s' must start with a '/'"),
+			def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    switch (store_str(val, def, op)) {
+	    case true:
+		/* OK */
+		break;
+	    case false:
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		/* FALLTHROUGH */
+	    default:
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_INT:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(def->type, T_BOOL) || op != false) {
+		    if (!quiet)
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		    debug_return_bool(false);
+		}
+	    }
+	    if (!store_int(val, def, op)) {
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_UINT:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(def->type, T_BOOL) || op != false) {
+		    if (!quiet)
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		    debug_return_bool(false);
+		}
+	    }
+	    if (!store_uint(val, def, op)) {
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_FLOAT:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(def->type, T_BOOL) || op != false) {
+		    if (!quiet)
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		    debug_return_bool(false);
+		}
+	    }
+	    if (!store_float(val, def, op)) {
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_MODE:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(def->type, T_BOOL) || op != false) {
+		    if (!quiet)
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		    debug_return_bool(false);
+		}
+	    }
+	    if (!store_mode(val, def, op)) {
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_FLAG:
+	    if (val) {
+		if (!quiet) {
+		    sudo_warnx(U_("option `%s' does not take a value"),
+			def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    def->sd_un.flag = op;
+	    if (def->callback)
+		debug_return_bool(def->callback(&def->sd_un));
+	    break;
+	case T_LIST:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(def->type, T_BOOL) || op != false) {
+		    if (!quiet)
+			sudo_warnx(U_("no value specified for `%s'"), def->name);
+		    debug_return_bool(false);
+		}
+	    }
+	    if (!store_list(val, def, op)) {
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+	case T_TUPLE:
+	    if (!val && !ISSET(def->type, T_BOOL)) {
+		if (!quiet)
+		    sudo_warnx(U_("no value specified for `%s'"), def->name);
+		debug_return_bool(false);
+	    }
+	    if (!store_tuple(val, def, op)) {
+		if (!quiet) {
+		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
+			val, def->name);
+		}
+		debug_return_bool(false);
+	    }
+	    break;
+    }
+
+    debug_return_bool(true);
+}
+
 /*
  * Sets/clears an entry in the defaults structure
  * If a variable that takes a value is used in a boolean
@@ -221,171 +397,7 @@ set_default(const char *var, const char *val, int op, bool quiet)
 	debug_return_bool(false);
     }
 
-    switch (cur->type & T_MASK) {
-	case T_LOGFAC:
-	    if (!store_syslogfac(val, cur, op)) {
-		if (!quiet) {
-		    if (val)
-			sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			    val, var);
-		    else
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_LOGPRI:
-	    if (!store_syslogpri(val, cur, op)) {
-		if (!quiet) {
-		    if (val)
-			sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			    val, var);
-		    else
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_STR:
-	    if (!val) {
-		/* Check for bogus boolean usage or lack of a value. */
-		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    if (!quiet)
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		    debug_return_bool(false);
-		}
-	    }
-	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
-		if (!quiet)
-		    sudo_warnx(U_("values for `%s' must start with a '/'"), var);
-		debug_return_bool(false);
-	    }
-	    switch (store_str(val, cur, op)) {
-	    case true:
-		/* OK */
-		break;
-	    case false:
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		/* FALLTHROUGH */
-	    default:
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_INT:
-	    if (!val) {
-		/* Check for bogus boolean usage or lack of a value. */
-		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    if (!quiet)
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		    debug_return_bool(false);
-		}
-	    }
-	    if (!store_int(val, cur, op)) {
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_UINT:
-	    if (!val) {
-		/* Check for bogus boolean usage or lack of a value. */
-		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    if (!quiet)
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		    debug_return_bool(false);
-		}
-	    }
-	    if (!store_uint(val, cur, op)) {
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_FLOAT:
-	    if (!val) {
-		/* Check for bogus boolean usage or lack of a value. */
-		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    if (!quiet)
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		    debug_return_bool(false);
-		}
-	    }
-	    if (!store_float(val, cur, op)) {
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_MODE:
-	    if (!val) {
-		/* Check for bogus boolean usage or lack of a value. */
-		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    if (!quiet)
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		    debug_return_bool(false);
-		}
-	    }
-	    if (!store_mode(val, cur, op)) {
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_FLAG:
-	    if (val) {
-		if (!quiet)
-		    sudo_warnx(U_("option `%s' does not take a value"), var);
-		debug_return_bool(false);
-	    }
-	    cur->sd_un.flag = op;
-	    if (cur->callback)
-		debug_return_bool(cur->callback(&cur->sd_un));
-	    break;
-	case T_LIST:
-	    if (!val) {
-		/* Check for bogus boolean usage or lack of a value. */
-		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    if (!quiet)
-			sudo_warnx(U_("no value specified for `%s'"), var);
-		    debug_return_bool(false);
-		}
-	    }
-	    if (!store_list(val, cur, op)) {
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-	case T_TUPLE:
-	    if (!val && !ISSET(cur->type, T_BOOL)) {
-		if (!quiet)
-		    sudo_warnx(U_("no value specified for `%s'"), var);
-		debug_return_bool(false);
-	    }
-	    if (!store_tuple(val, cur, op)) {
-		if (!quiet) {
-		    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-			val, var);
-		}
-		debug_return_bool(false);
-	    }
-	    break;
-    }
-
-    debug_return_bool(true);
+    debug_return_bool(set_default_entry(cur, val, op, quiet));
 }
 
 /*
@@ -712,7 +724,7 @@ update_defaults(int what, bool quiet)
 bool
 check_defaults(int what, bool quiet)
 {
-    struct sudo_defs_types *cur;
+    struct sudo_defs_types *cur, tmp;
     struct defaults *def;
     bool rc = true;
     debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
@@ -729,6 +741,11 @@ check_defaults(int what, bool quiet)
 		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
 	    rc = false;
 	}
+	/* Don't actually set the defaults value, just checking. */
+	tmp = *cur;
+	tmp.callback = NULL;
+	if (!set_default_entry(&tmp, def->val, def->op, quiet))
+	    rc = false;
     }
     debug_return_bool(rc);
 }

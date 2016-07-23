@@ -554,7 +554,6 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
     struct sudoersfile *sp, *last;
     FILE *fp;
     int ch, oldlocale;
-    bool ok;
     debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -581,17 +580,16 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    parse_error = true;
 	    errorfile = sp->path;
 	}
-	ok = update_defaults(SETDEF_GENERIC|SETDEF_HOST, quiet);
-	if (!check_defaults(SETDEF_ALL & ~(SETDEF_GENERIC|SETDEF_HOST), quiet))
-	    ok = false;
-	sudoers_setlocale(oldlocale, NULL);
 	fclose(sudoersin);
 	if (!parse_error) {
-	    if (!ok || check_aliases(strict, quiet) != 0) {
+	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, true);
+	    if (!check_defaults(SETDEF_ALL, quiet) ||
+		check_aliases(strict, quiet) != 0) {
 		parse_error = true;
 		errorfile = NULL;
 	    }
 	}
+	sudoers_setlocale(oldlocale, NULL);
 
 	/*
 	 * Got an error, prompt the user for what to do now.
@@ -923,9 +921,9 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	errorfile = sudoers_file;
     }
     if (!parse_error) {
-	if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST, quiet) ||
-	    !check_defaults(SETDEF_ALL & ~(SETDEF_GENERIC|SETDEF_HOST), quiet)
-	    || check_aliases(strict, quiet) != 0) {
+	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, true);
+	if (!check_defaults(SETDEF_ALL, quiet) ||
+	    check_aliases(strict, quiet) != 0) {
 	    parse_error = true;
 	    errorfile = NULL;
 	}
