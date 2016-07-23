@@ -238,10 +238,10 @@ main(int argc, char *argv[])
      */
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(1);
-    init_parser(sudoers_file, false);
+    init_parser(sudoers_file, quiet);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, true);
+    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, quiet);
     sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
