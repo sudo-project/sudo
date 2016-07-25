@@ -449,8 +449,22 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
     struct command_details *command_details)
 {
     const int sflags = command_details ? command_details->flags : 0;
+    struct stat sb;
     int fd;
     debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
+
+    /*
+     * Check if path is a symlink.  This is racey but we detect whether
+     * we lost the race in sudo_edit_is_symlink() after the file is opened.
+     */
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW)) {
+	if (lstat(path, &sb) == -1 && errno != ENOENT)
+	    debug_return_int(-1);
+	if (S_ISLNK(sb.st_mode)) {
+	    errno = ELOOP;
+	    debug_return_int(-1);
+	}
+    }
 
     if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_details.uid != ROOT_UID) {
 	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode,
@@ -463,6 +477,10 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
     if (!ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
+    /*
+     * Post-open symlink check.  This will leave a zero-length file if
+     * O_CREAT was specified but it is too dangerous to try and remove it.
+     */
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW) && sudo_edit_is_symlink(fd, path)) {
 	close(fd);
 	fd = -1;
