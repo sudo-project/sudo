@@ -190,7 +190,7 @@ sudo_openat(int dfd, const char *path, int flags, mode_t mode)
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
-    debug_decl(sudo_edit_open_nofollow, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
 
     debug_return_int(openat(dfd, path, oflags|O_NOFOLLOW, mode));
 }
@@ -226,7 +226,6 @@ sudo_edit_is_symlink(int fd, char *path)
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
-    struct stat sb1, sb2;
     int fd;
     debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
 
@@ -450,7 +449,6 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
     struct command_details *command_details)
 {
     const int sflags = command_details ? command_details->flags : 0;
-    struct stat sb1, sb2;
     int fd;
     debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
 
