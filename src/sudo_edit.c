@@ -226,17 +226,49 @@ sudo_edit_is_symlink(int fd, char *path)
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
-    int fd;
+    int fd = -1, odfd = -1;
+    struct stat sb;
     debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
 
-    fd = openat(dfd, path, oflags, mode);
-    if (fd == -1)
+    /* Save cwd and chdir to dfd */
+    if ((odfd = open(".", O_RDONLY)) == -1)
 	debug_return_int(-1);
+    if (fchdir(dfd) == -1) {
+	close(odfd);
+	debug_return_int(-1);
+    }
 
+    /*
+     * Check if path is a symlink.  This is racey but we detect whether
+     * we lost the race in sudo_edit_is_symlink() after the open.
+     */
+    if (lstat(path, &sb) == -1 && errno != ENOENT)
+	goto done;
+    if (S_ISLNK(sb.st_mode)) {
+	errno = ELOOP;
+	goto done;
+    }
+
+    fd = open(path, oflags, mode);
+    if (fd == -1)
+	goto done;
+
+    /*
+     * Post-open symlink check.  This will leave a zero-length file if
+     * O_CREAT was specified but it is too dangerous to try and remove it.
+     */
     if (sudo_edit_is_symlink(fd, path)) {
 	close(fd);
 	fd = -1;
 	errno = ELOOP;
+    }
+
+done:
+    /* Restore cwd */
+    if (odfd != -1) {
+	if (fchdir(odfd) == -1)
+	    sudo_fatal(_("unable to restore current working directory"));
+	close(odfd);
     }
 
     debug_return_int(fd);
