@@ -87,7 +87,7 @@ struct early_default {
 
 static struct early_default early_defaults[] = {
 #ifdef FQDN
-    { "fqdn", "true", true },
+    { "fqdn", NULL, true },
 #else
     { "fqdn" },
 #endif
