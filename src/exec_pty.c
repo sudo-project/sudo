@@ -1148,13 +1148,14 @@ static bool
 handle_sigchld(int backchannel, struct command_status *cstat)
 {
     char signame[SIG2STR_MAX];
+    bool alive = true;
     int status;
     pid_t pid;
     debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
     /* Read command status. */
     do {
-	pid = waitpid(cmnd_pid, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     if (pid <= 0) {
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
@@ -1162,17 +1163,23 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	debug_return_bool(false);
     }
 
-    if (WIFSTOPPED(status)) {
+    if (WIFCONTINUED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) resumed", cmnd_pid);
+    } else if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command stopped, SIG%s", signame);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) stopped, SIG%s",
+	    cmnd_pid, signame);
     } else if (WIFSIGNALED(status)) {
 	if (sig2str(WTERMSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command killed, SIG%s", signame);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) killed, SIG%s",
+	    cmnd_pid, signame);
+	alive = false;
     } else {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
-	    WEXITSTATUS(status));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) exited: %d",
+	    cmnd_pid, WEXITSTATUS(status));
+	alive = false;
     }
 
     /* Don't overwrite execve() failure with child exit status. */
@@ -1188,13 +1195,11 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid != mon_pgrp)
-	    send_status(backchannel, cstat);
-	    debug_return_bool(true);
+		send_status(backchannel, cstat);
 	}
     }
 
-    /* It's dead, Jim. */
-    debug_return_bool(false);
+    debug_return_bool(alive);
 }
 
 struct monitor_closure {
