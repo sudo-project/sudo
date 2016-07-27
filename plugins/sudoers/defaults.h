@@ -111,11 +111,15 @@ struct sudo_defs_types {
 /*
  * Prototypes
  */
+struct defaults;
 void dump_default(void);
-bool init_defaults(void);
-bool set_default(const char *var, const char *val, int op, bool quiet);
-bool update_defaults(int what, bool quiet);
+bool apply_early_defaults(bool quiet);
 bool check_defaults(int what, bool quiet);
+bool init_defaults(void);
+bool is_early_default(const char *var);
+bool set_default(const char *var, const char *val, int op, bool quiet);
+bool store_early_default(struct defaults *def, int what);
+bool update_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

@@ -656,6 +656,55 @@ default_binding_matches(struct defaults *def, int what)
     debug_return_bool(false);
 }
 
+bool
+is_early_default(const char *var)
+{
+    struct early_default *early;
+    debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS)
+
+    for (early = early_defaults; early->var != NULL; early++) {
+	if (strcmp(var, early->var) == 0)
+	    debug_return_bool(true);
+    }
+    debug_return_bool(false);
+}
+
+bool
+store_early_default(struct defaults *def, int what)
+{
+    struct early_default *early;
+    debug_decl(store_early_default, SUDOERS_DEBUG_DEFAULTS)
+
+    for (early = early_defaults; early->var != NULL; early++) {
+	if (strcmp(def->var, early->var) == 0) {
+	    if (default_type_matches(def, what) &&
+		default_binding_matches(def, what)) {
+		early->val = def->val;
+		early->op = def->op;
+	    }
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
+}
+
+bool
+apply_early_defaults(bool quiet)
+{
+    struct early_default *early;
+    bool rc = true;
+    debug_decl(apply_early_defaults, SUDOERS_DEBUG_DEFAULTS)
+
+    for (early = early_defaults; early->var != NULL; early++) {
+	if (early->val != NULL) {
+	    if (!set_default(early->var, early->val, early->op, quiet))
+		rc = false;
+	    early->val = NULL;		/* clean state for next run */
+	}
+    }
+    debug_return_bool(rc);
+}
+
 /*
  * Update the defaults based on what was set by sudoers.
  * Pass in an OR'd list of which default types to update.
@@ -663,7 +712,6 @@ default_binding_matches(struct defaults *def, int what)
 bool
 update_defaults(int what, bool quiet)
 {
-    struct early_default *early;
     struct defaults *def;
     bool rc = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS)
@@ -672,40 +720,19 @@ update_defaults(int what, bool quiet)
 	"what: 0x%02x", what);
 
     /*
-     * First set Defaults values marked as early.
+     * First apply Defaults values marked as early.
      * We only set early Defaults once (the last instance).
      */
-    TAILQ_FOREACH(def, &defaults, entries) {
-	/* Skip any Defaults not marked as early. */
-	for (early = early_defaults; early->var != NULL; early++) {
-	    if (strcmp(def->var, early->var) == 0) {
-		if (default_type_matches(def, what) &&
-		    default_binding_matches(def, what)) {
-		    early->val = def->val;
-		    early->op = def->op;
-		}
-		break;
-	    }
-	}
-    }
-    for (early = early_defaults; early->var != NULL; early++) {
-	if (early->val != NULL) {
-	    if (!set_default(early->var, early->val, early->op, quiet))
-		rc = false;
-	    early->val = NULL;		/* clean state for next run */
-	}
-    }
+    TAILQ_FOREACH(def, &defaults, entries)
+	store_early_default(def, what);
+    apply_early_defaults(quiet);
 
     /*
      * Then set the rest of the defaults.
      */
     TAILQ_FOREACH(def, &defaults, entries) {
 	/* Skip Defaults marked as early, we already did them. */
-	for (early = early_defaults; early->var != NULL; early++) {
-	    if (strcmp(def->var, early->var) == 0)
-		break;
-	}
-	if (early->var != NULL)
+	if (is_early_default(def->var))
 	    continue;
 
 	if (!default_type_matches(def, what) ||

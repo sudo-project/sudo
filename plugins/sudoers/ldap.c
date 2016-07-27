@@ -61,6 +61,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "gram.h"	/* for DEFAULTS */
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
 
@@ -1042,6 +1043,67 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
 }
 
 /*
+ * Parse an option string into a defaults structure.
+ * The members of def are pointers into optstr (which is modified).
+ */
+static void
+sudo_ldap_parse_option(char *optstr, struct defaults *def)
+{
+    char *cp, *val = NULL;
+    char *var = optstr;
+    int op;
+    debug_decl(sudo_ldap_parse_option, SUDOERS_DEBUG_LDAP)
+
+    DPRINTF2("ldap sudoOption: '%s'", optstr);
+
+    /* check for equals sign past first char */
+    cp = strchr(var, '=');
+    if (cp > var) {
+	val = cp + 1;
+	op = cp[-1];	/* peek for += or -= cases */
+	if (op == '+' || op == '-') {
+	    /* case var+=val or var-=val */
+	    cp--;
+	} else {
+	    /* case var=val */
+	    op = true;
+	}
+	/* Trim whitespace between var and operator. */
+	while (cp > var && isblank((unsigned char)cp[-1]))
+	    cp--;
+	/* Truncate variable name. */
+	*cp = '\0';
+	/* Trim leading whitespace from val. */
+	while (isblank((unsigned char)*val))
+	    val++;
+	/* Strip double quotes if present. */
+	if (*val == '"') {
+	    char *ep = val + strlen(val);
+	    if (ep != val && ep[-1] == '"') {
+		val++;
+		ep[-1] = '\0';
+	    }
+	}
+    } else {
+	/* Boolean value, either true or false. */
+	op = true;
+	while (*var == '!') {
+	    op = !op;
+	    do {
+		var++;
+	    } while (isblank((unsigned char)*var));
+	}
+    }
+    def->var = var;
+    def->val = val;
+    def->op = op;
+    def->type = DEFAULTS;
+    def->binding = NULL;
+
+    debug_return;
+}
+
+/*
  * Read sudoOption and modify the defaults as we go.  This is used once
  * from the cn=defaults entry and also once when a final sudoRole is matched.
  */
@@ -1049,70 +1111,44 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char *copy, *cp, *var;
-    int op;
-    bool rc = false;
+    struct defaults def;
+    char *copy;
+    bool ret = false;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
 
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv == NULL)
 	debug_return_bool(true);
 
-    /* walk through options */
+    /* walk through options, early ones first */
     for (p = bv; *p != NULL; p++) {
-	if ((copy = var = strdup((*p)->bv_val)) == NULL) {
+	if ((copy = strdup((*p)->bv_val)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	DPRINTF2("ldap sudoOption: '%s'", var);
-
-	/* check for equals sign past first char */
-	cp = strchr(var, '=');
-	if (cp > var) {
-	    char *val = cp + 1;
-	    op = cp[-1];	/* peek for += or -= cases */
-	    if (op == '+' || op == '-') {
-		/* case var+=val or var-=val */
-		cp--;
-	    } else {
-		/* case var=val */
-		op = true;
-	    }
-	    /* Trim whitespace between var and operator. */
-	    while (cp > var && isblank((unsigned char)cp[-1]))
-		cp--;
-	    /* Truncate variable name. */
-	    *cp = '\0';
-	    /* Trim leading whitespace from val. */
-	    while (isblank((unsigned char)*val))
-		val++;
-	    /* Strip double quotes if present. */
-	    if (*val == '"') {
-		char *ep = val + strlen(val);
-		if (ep != val && ep[-1] == '"') {
-		    val++;
-		    ep[-1] = '\0';
-		}
-	    }
-	    set_default(var, val, op, false);
-	} else if (*var == '!') {
-	    /* case !var Boolean False */
-	    do {
-		var++;
-	    } while (isblank((unsigned char)*var));
-	    set_default(var, NULL, false, false);
-	} else {
-	    /* case var Boolean True */
-	    set_default(var, NULL, true, false);
-	}
+	sudo_ldap_parse_option(copy, &def);
+	store_early_default(&def, SETDEF_GENERIC);
 	free(copy);
     }
-    rc = true;
+    apply_early_defaults(false);
+
+    /* walk through options again, skipping early ones */
+    for (p = bv; *p != NULL; p++) {
+	if ((copy = strdup((*p)->bv_val)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	sudo_ldap_parse_option(copy, &def);
+	if (!is_early_default(def.var))
+	    set_default(def.var, def.val, def.op, false);
+	free(copy);
+    }
+    ret = true;
 
 done:
     ldap_value_free_len(bv);
 
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 /*

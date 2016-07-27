@@ -45,6 +45,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "gram.h"	/* for DEFAULTS */
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
 
@@ -1116,12 +1117,74 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     debug_return_int(ret);
 }
 
+/*
+ * Parse an option string into a defaults structure.
+ * The members of def are pointers into optstr (which is modified).
+ */
+static void
+sudo_sss_parse_option(char *optstr, struct defaults *def)
+{
+    char *cp, *val = NULL;
+    char *var = optstr;
+    int op;
+    debug_decl(sudo_sss_parse_option, SUDOERS_DEBUG_SSSD)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'", optstr);
+
+    /* check for equals sign past first char */
+    cp = strchr(var, '=');
+    if (cp > var) {
+	val = cp + 1;
+	op = cp[-1];	/* peek for += or -= cases */
+	if (op == '+' || op == '-') {
+	    /* case var+=val or var-=val */
+	    cp--;
+	} else {
+	    /* case var=val */
+	    op = true;
+	}
+	/* Trim whitespace between var and operator. */
+	while (cp > var && isblank((unsigned char)cp[-1]))
+	    cp--;
+	/* Truncate variable name. */
+	*cp = '\0';
+	/* Trim leading whitespace from val. */
+	while (isblank((unsigned char)*val))
+	    val++;
+	/* Strip double quotes if present. */
+	if (*val == '"') {
+	    char *ep = val + strlen(val);
+	    if (ep != val && ep[-1] == '"') {
+		val++;
+		ep[-1] = '\0';
+	    }
+	}
+    } else {
+	/* Boolean value, either true or false. */
+	op = true;
+	while (*var == '!') {
+	    op = !op;
+	    do {
+		var++;
+	    } while (isblank((unsigned char)*var));
+	}
+    }
+    def->var = var;
+    def->val = val;
+    def->op = op;
+    def->type = DEFAULTS;
+    def->binding = NULL;
+
+    debug_return;
+}
+
 static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int i, op;
+    int i;
+    char *copy;
     bool ret = false;
-    char *copy, *cp, *v;
+    struct defaults def;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
@@ -1139,54 +1202,26 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	debug_return_bool(false);
     }
 
-    /* walk through options */
+    /* walk through options, early ones first */
     for (i = 0; val_array[i] != NULL; i++) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'",
-	 val_array[i]);
-	if ((v = copy = strdup(val_array[i])) == NULL) {
+	if ((copy = strdup(val_array[i])) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	sudo_sss_parse_option(copy, &def);
+	store_early_default(&def, SETDEF_GENERIC);
+	free(copy);
+    }
 
-	/* check for equals sign past first char */
-	cp = strchr(v, '=');
-	if (cp > v) {
-	    char *val = cp + 1;
-	    op = cp[-1];	/* peek for += or -= cases */
-	    if (op == '+' || op == '-') {
-		/* case var+=val or var-=val */
-		cp--;
-	    } else {
-		/* case var=val */
-		op = true;
-	    }
-	    /* Trim whitespace between var and operator. */
-	    while (cp > v && isblank((unsigned char)cp[-1]))
-		cp--;
-	    /* Truncate variable name. */
-	    *cp = '\0';
-	    /* Trim leading whitespace from val. */
-	    while (isblank((unsigned char)*val))
-		val++;
-	    /* Strip double quotes if present. */
-	    if (*val == '"') {
-		char *ep = val + strlen(val);
-		if (ep != val && ep[-1] == '"') {
-		    val++;
-		    ep[-1] = '\0';
-		}
-	    }
-	    set_default(v, val, op, false);
-	} else if (*v == '!') {
-	    /* case !var Boolean False */
-	    do {
-		v++;
-	    } while (isblank((unsigned char)*v));
-	    set_default(v, NULL, false, false);
-	} else {
-	    /* case var Boolean True */
-	    set_default(v, NULL, true, false);
+    /* walk through options again, skipping early ones */
+    for (i = 0; val_array[i] != NULL; i++) {
+	if ((copy = strdup(val_array[i])) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
 	}
+	sudo_sss_parse_option(copy, &def);
+	if (!is_early_default(def.var))
+	    set_default(def.var, def.val, def.op, false);
 	free(copy);
     }
     ret = true;
