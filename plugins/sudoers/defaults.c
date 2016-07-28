@@ -82,7 +82,8 @@ static struct strmap priorities[] = {
 struct early_default {
     const char *var;
     const char *val;
-    int op;
+    short op;
+    short set;
 };
 
 static struct early_default early_defaults[] = {
@@ -681,6 +682,7 @@ store_early_default(struct defaults *def, int what)
 		default_binding_matches(def, what)) {
 		early->val = def->val;
 		early->op = def->op;
+		early->set = true;
 	    }
 	    debug_return_bool(true);
 	}
@@ -696,10 +698,10 @@ apply_early_defaults(bool quiet)
     debug_decl(apply_early_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     for (early = early_defaults; early->var != NULL; early++) {
-	if (early->val != NULL) {
+	if (early->set) {
 	    if (!set_default(early->var, early->val, early->op, quiet))
 		rc = false;
-	    early->val = NULL;		/* clean state for next run */
+	    early->set = false;		/* clean state for next run */
 	}
     }
     debug_return_bool(rc);
