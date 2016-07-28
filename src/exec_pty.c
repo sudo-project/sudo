@@ -1157,9 +1157,14 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     do {
 	pid = waitpid(cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
-    if (pid <= 0) {
+    switch (pid) {
+    case 0:
+	errno = ECHILD;
+	/* FALLTHROUGH */
+    case -1:
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
 	    "waitpid returned %d, expected pid %d", pid, cmnd_pid);
+	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return_bool(false);
     }
 
@@ -1168,18 +1173,22 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     } else if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) stopped, SIG%s",
-	    cmnd_pid, signame);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
+	    __func__, cmnd_pid, signame);
     } else if (WIFSIGNALED(status)) {
 	if (sig2str(WTERMSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) killed, SIG%s",
-	    cmnd_pid, signame);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
+	    __func__, cmnd_pid, signame);
+	alive = false;
+    } else if (WIFEXITED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
+	    __func__, cmnd_pid, WEXITSTATUS(status));
 	alive = false;
     } else {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) exited: %d",
-	    cmnd_pid, WEXITSTATUS(status));
-	alive = false;
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "%s: unexpected wait status %d for command (%d)",
+	    __func__, status, cmnd_pid);
     }
 
     /* Don't overwrite execve() failure with child exit status. */
