@@ -1169,7 +1169,8 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     }
 
     if (WIFCONTINUED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "command (%d) resumed", cmnd_pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
+	    __func__, cmnd_pid);
     } else if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
