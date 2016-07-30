@@ -134,7 +134,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
-    char *editor, **editor_argv;
+    char *user, *editor, **editor_argv;
     int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
     const char *export_path;
@@ -215,8 +215,13 @@ main(int argc, char *argv[])
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
-    if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
-	sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
+    user = getenv("SUDO_USER");
+    if (user != NULL && *user != '\0')
+	sudo_user.pw = sudo_getpwnam(user);
+    if (sudo_user.pw == NULL) {
+	if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
+	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
+    }
     get_hostname();
 
     /* Setup defaults data structures. */
@@ -241,7 +246,7 @@ main(int argc, char *argv[])
     init_parser(sudoers_file, quiet);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, quiet);
+    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
     sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
@@ -582,7 +587,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
-	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, true);
+	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	    if (!check_defaults(SETDEF_ALL, quiet) ||
 		check_aliases(strict, quiet) != 0) {
 		parse_error = true;
@@ -921,7 +926,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	errorfile = sudoers_file;
     }
     if (!parse_error) {
-	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST, true);
+	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	if (!check_defaults(SETDEF_ALL, quiet) ||
 	    check_aliases(strict, quiet) != 0) {
 	    parse_error = true;
