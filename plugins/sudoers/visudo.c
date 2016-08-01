@@ -134,7 +134,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
-    char *user, *editor, **editor_argv;
+    char *editor, **editor_argv;
     int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
     const char *export_path;
@@ -215,9 +215,11 @@ main(int argc, char *argv[])
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
-    user = getenv("SUDO_USER");
-    if (user != NULL && *user != '\0')
-	sudo_user.pw = sudo_getpwnam(user);
+    if (geteuid() == 0) {
+	const char *user = getenv("SUDO_USER");
+	if (user != NULL && *user != '\0')
+	    sudo_user.pw = sudo_getpwnam(user);
+    }
     if (sudo_user.pw == NULL) {
 	if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
 	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
