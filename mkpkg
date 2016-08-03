@@ -94,15 +94,17 @@ osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
 # If using GNU make, set number of jobs
 if make --version 2>&1 | grep GNU >/dev/null; then
-    NJOBS=1
+    NJOBS=0
     case "`uname`" in
 	Darwin)
 	    # Mac OS X
 	    NJOBS=`sysctl -n hw.ncpu`
 	    ;;
 	Linux)
-	    if [ -x /usr/bin/lscpu ]; then
-		NJOBS=`/usr/bin/lscpu -p=cpu | grep -v '^#' | wc -l`
+	    if [ -r /proc/cpuinfo ]; then
+		for c in `sed -n 's/^cpu cores[	 ]*: *//p' /proc/cpuinfo`; do
+		    NJOBS=$(( $NJOBS + $c ))
+		done
 	    fi
 	    ;;
 	SunOS)
