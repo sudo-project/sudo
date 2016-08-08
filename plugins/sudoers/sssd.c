@@ -1204,14 +1204,19 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 
     /* walk through options, early ones first */
     for (i = 0; val_array[i] != NULL; i++) {
+	struct early_default *early;
+
 	if ((copy = strdup(val_array[i])) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	sudo_sss_parse_option(copy, &def);
-	store_early_default(&def, SETDEF_GENERIC);
+	early = is_early_default(def.var);
+	if (early != NULL)
+	    set_early_default(def.var, def.val, def.op, false, early);
 	free(copy);
     }
+    run_early_defaults();
 
     /* walk through options again, skipping early ones */
     for (i = 0; val_array[i] != NULL; i++) {
@@ -1220,7 +1225,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    goto done;
 	}
 	sudo_sss_parse_option(copy, &def);
-	if (!is_early_default(def.var))
+	if (is_early_default(def.var) == NULL)
 	    set_default(def.var, def.val, def.op, false);
 	free(copy);
     }

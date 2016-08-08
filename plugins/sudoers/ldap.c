@@ -1122,15 +1122,19 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 
     /* walk through options, early ones first */
     for (p = bv; *p != NULL; p++) {
+	struct early_default *early;
+
 	if ((copy = strdup((*p)->bv_val)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	sudo_ldap_parse_option(copy, &def);
-	store_early_default(&def, SETDEF_GENERIC);
+	early = is_early_default(def.var);
+	if (early != NULL)
+	    set_early_default(def.var, def.val, def.op, false, early);
 	free(copy);
     }
-    apply_early_defaults(false);
+    run_early_defaults();
 
     /* walk through options again, skipping early ones */
     for (p = bv; *p != NULL; p++) {
@@ -1139,7 +1143,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    goto done;
 	}
 	sudo_ldap_parse_option(copy, &def);
-	if (!is_early_default(def.var))
+	if (is_early_default(def.var) == NULL)
 	    set_default(def.var, def.val, def.op, false);
 	free(copy);
     }

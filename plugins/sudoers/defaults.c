@@ -76,19 +76,9 @@ static struct strmap priorities[] = {
 	{ NULL,		-1 }
 };
 
-/*
- * Defaults values to apply before others.
- */
-struct early_default {
-    const char *var;
-    const char *val;
-    short op;
-    short set;
-};
-
 static struct early_default early_defaults[] = {
 #ifdef FQDN
-    { "fqdn", NULL, true },
+    { "fqdn", &sudo_defs_table[I_FQDN] },
 #else
     { "fqdn" },
 #endif
@@ -199,8 +189,7 @@ dump_defaults(void)
 }
 
 static bool
-set_default_entry(struct sudo_defs_types *def, const char *val, int op,
-    bool quiet)
+set_default_entry(struct sudo_defs_types *def, const char *val, int op, bool quiet, bool do_callback)
 {
     debug_decl(set_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
@@ -369,25 +358,39 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    }
 	    break;
     }
-    if (def->callback)
+    if (do_callback && def->callback)
 	debug_return_bool(def->callback(&def->sd_un));
 
     debug_return_bool(true);
 }
 
+struct early_default *
+is_early_default(const char *var)
+{
+    struct early_default *early;
+    debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS)
+
+    for (early = early_defaults; early->var != NULL; early++) {
+	if (strcmp(var, early->var) == 0)
+	    debug_return_ptr(early);
+    }
+    debug_return_ptr(NULL);
+}
+
 /*
- * Sets/clears an entry in the defaults structure
+ * Sets/clears an entry in the defaults structure.
  * If a variable that takes a value is used in a boolean
  * context with op == 0, disable that variable.
  * Eg. you may want to turn off logging to a file for some hosts.
  * This is only meaningful for variables that are *optional*.
  */
-bool
-set_default(const char *var, const char *val, int op, bool quiet)
+static struct sudo_defs_types *
+set_default_int(const char *var, const char *val, int op, bool quiet,
+    bool do_callback)
 {
     struct sudo_defs_types *cur;
     int num;
-    debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(set_default_int, SUDOERS_DEBUG_DEFAULTS)
 
     for (cur = sudo_defs_table, num = 0; cur->name; cur++, num++) {
 	if (strcmp(var, cur->name) == 0)
@@ -396,10 +399,66 @@ set_default(const char *var, const char *val, int op, bool quiet)
     if (!cur->name) {
 	if (!quiet)
 	    sudo_warnx(U_("unknown defaults entry `%s'"), var);
-	debug_return_bool(false);
+	debug_return_ptr(NULL);
     }
 
-    debug_return_bool(set_default_entry(cur, val, op, quiet));
+    if (!set_default_entry(cur, val, op, quiet, do_callback))
+	debug_return_ptr(NULL);
+    debug_return_ptr(cur);
+}
+
+/*
+ * Sets/clears an entry in the defaults structure.
+ * Runs the callback if present on success.
+ */
+bool
+set_default(const char *var, const char *val, int op, bool quiet)
+{
+    const struct sudo_defs_types *def;
+    debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
+
+    def = set_default_int(var, val, op, quiet, true);
+    debug_return_bool(def != NULL);
+}
+
+/*
+ * Like set_default() but stores the matching default value
+ * and does not run callbacks.
+ */
+bool
+set_early_default(const char *var, const char *val, int op, bool quiet,
+    struct early_default *early)
+{
+    const struct sudo_defs_types *def;
+    debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS)
+
+    def = set_default_int(var, val, op, quiet, false);
+    if (def == NULL)
+	debug_return_bool(false);
+    early->def = def;
+    debug_return_bool(true);
+}
+
+/*
+ * Run callbacks for early defaults.
+ */
+bool
+run_early_defaults(void)
+{
+    struct early_default *early;
+    bool rc = true;
+    debug_decl(run_early_defaults, SUDOERS_DEBUG_DEFAULTS)
+
+    for (early = early_defaults; early->var != NULL; early++) {
+	if (early->def == NULL)
+	    continue;
+	if (early->def->callback != NULL) {
+	    if (!early->def->callback(&early->def->sd_un))
+		rc = false;
+	}
+	early->def = NULL;
+    }
+    debug_return_bool(rc);
 }
 
 /*
@@ -474,6 +533,9 @@ init_defaults(void)
 #endif
 #ifdef USE_INSULTS
     def_insults = true;
+#endif
+#ifdef FQDN
+    def_fqdn = true;
 #endif
 #ifdef ENV_EDITOR
     def_env_editor = true;
@@ -658,56 +720,6 @@ default_binding_matches(struct defaults *def, int what)
     debug_return_bool(false);
 }
 
-bool
-is_early_default(const char *var)
-{
-    struct early_default *early;
-    debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS)
-
-    for (early = early_defaults; early->var != NULL; early++) {
-	if (strcmp(var, early->var) == 0)
-	    debug_return_bool(true);
-    }
-    debug_return_bool(false);
-}
-
-bool
-store_early_default(struct defaults *def, int what)
-{
-    struct early_default *early;
-    debug_decl(store_early_default, SUDOERS_DEBUG_DEFAULTS)
-
-    for (early = early_defaults; early->var != NULL; early++) {
-	if (strcmp(def->var, early->var) == 0) {
-	    if (default_type_matches(def, what) &&
-		default_binding_matches(def, what)) {
-		early->val = def->val;
-		early->op = def->op;
-		early->set = true;
-	    }
-	    debug_return_bool(true);
-	}
-    }
-    debug_return_bool(false);
-}
-
-bool
-apply_early_defaults(bool quiet)
-{
-    struct early_default *early;
-    bool rc = true;
-    debug_decl(apply_early_defaults, SUDOERS_DEBUG_DEFAULTS)
-
-    for (early = early_defaults; early->var != NULL; early++) {
-	if (early->set) {
-	    if (!set_default(early->var, early->val, early->op, quiet))
-		rc = false;
-	    early->set = false;		/* clean state for next run */
-	}
-    }
-    debug_return_bool(rc);
-}
-
 /*
  * Update the defaults based on what was set by sudoers.
  * Pass in an OR'd list of which default types to update.
@@ -724,11 +736,20 @@ update_defaults(int what, bool quiet)
 
     /*
      * First apply Defaults values marked as early.
-     * We only set early Defaults once (the last instance).
      */
-    TAILQ_FOREACH(def, &defaults, entries)
-	store_early_default(def, what);
-    apply_early_defaults(quiet);
+    TAILQ_FOREACH(def, &defaults, entries) {
+	struct early_default *early = is_early_default(def->var);
+	if (early == NULL)
+	    continue;
+
+	if (!default_type_matches(def, what) ||
+	    !default_binding_matches(def, what))
+	    continue;
+	if (!set_early_default(def->var, def->val, def->op, quiet, early))
+	    rc = false;
+    }
+    if (!run_early_defaults())
+	rc = false;
 
     /*
      * Then set the rest of the defaults.
@@ -773,8 +794,7 @@ check_defaults(int what, bool quiet)
 	}
 	/* Don't actually set the defaults value, just checking. */
 	tmp = *cur;
-	tmp.callback = NULL;
-	if (!set_default_entry(&tmp, def->val, def->op, quiet))
+	if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
 	    rc = false;
     }
     debug_return_bool(rc);

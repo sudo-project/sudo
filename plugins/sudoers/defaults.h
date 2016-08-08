@@ -67,6 +67,14 @@ struct sudo_defs_types {
 };
 
 /*
+ * Defaults values to apply before others.
+ */
+struct early_default {
+    const char *var;
+    const struct sudo_defs_types *def;
+};
+
+/*
  * Four types of defaults: strings, integers, and flags.
  * Also, T_INT, T_FLOAT or T_STR may be ANDed with T_BOOL to indicate that
  * a value is not required.  Flags are boolean by nature...
@@ -113,12 +121,12 @@ struct sudo_defs_types {
  */
 struct defaults;
 void dump_default(void);
-bool apply_early_defaults(bool quiet);
 bool check_defaults(int what, bool quiet);
 bool init_defaults(void);
-bool is_early_default(const char *var);
+struct early_default *is_early_default(const char *var);
+bool run_early_defaults(void);
+bool set_early_default(const char *var, const char *val, int op, bool quiet, struct early_default *early);
 bool set_default(const char *var, const char *val, int op, bool quiet);
-bool store_early_default(struct defaults *def, int what);
 bool update_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
