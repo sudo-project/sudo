@@ -199,7 +199,8 @@ dump_defaults(void)
 }
 
 static bool
-set_default_entry(struct sudo_defs_types *def, const char *val, int op, bool quiet)
+set_default_entry(struct sudo_defs_types *def, const char *val, int op,
+    bool quiet)
 {
     debug_decl(set_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
@@ -335,8 +336,6 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op, bool qui
 		debug_return_bool(false);
 	    }
 	    def->sd_un.flag = op;
-	    if (def->callback)
-		debug_return_bool(def->callback(&def->sd_un));
 	    break;
 	case T_LIST:
 	    if (!val) {
@@ -370,6 +369,8 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op, bool qui
 	    }
 	    break;
     }
+    if (def->callback)
+	debug_return_bool(def->callback(&def->sd_un));
 
     debug_return_bool(true);
 }
@@ -797,8 +798,6 @@ store_int(const char *val, struct sudo_defs_types *def, int op)
 	}
 	def->sd_un.ival = i;
     }
-    if (def->callback)
-	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -820,8 +819,6 @@ store_uint(const char *val, struct sudo_defs_types *def, int op)
 	}
 	def->sd_un.uival = u;
     }
-    if (def->callback)
-	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -841,8 +838,6 @@ store_float(const char *val, struct sudo_defs_types *def, int op)
 	/* XXX - should check against HUGE_VAL */
 	def->sd_un.fval = d;
     }
-    if (def->callback)
-	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -869,8 +864,6 @@ store_tuple(const char *val, struct sudo_defs_types *def, int op)
 	if (v->sval == NULL)
 	    debug_return_bool(false);
     }
-    if (def->callback)
-	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
@@ -888,8 +881,6 @@ store_str(const char *val, struct sudo_defs_types *def, int op)
 	    debug_return_int(-1);
 	}
     }
-    if (def->callback)
-	debug_return_int(def->callback(&def->sd_un));
     debug_return_int(true);
 }
 
@@ -1002,8 +993,6 @@ store_mode(const char *val, struct sudo_defs_types *def, int op)
 	}
 	def->sd_un.mode = mode;
     }
-    if (def->callback)
-	debug_return_bool(def->callback(&def->sd_un));
     debug_return_bool(true);
 }
 
