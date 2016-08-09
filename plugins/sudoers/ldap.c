@@ -61,7 +61,6 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "gram.h"	/* for DEFAULTS */
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
 
@@ -1046,8 +1045,8 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
  * Parse an option string into a defaults structure.
  * The members of def are pointers into optstr (which is modified).
  */
-static void
-sudo_ldap_parse_option(char *optstr, struct defaults *def)
+static int
+sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
 {
     char *cp, *val = NULL;
     char *var = optstr;
@@ -1094,13 +1093,10 @@ sudo_ldap_parse_option(char *optstr, struct defaults *def)
 	    } while (isblank((unsigned char)*var));
 	}
     }
-    def->var = var;
-    def->val = val;
-    def->op = op;
-    def->type = DEFAULTS;
-    def->binding = NULL;
+    *varp = var;
+    *valp = val;
 
-    debug_return;
+    debug_return_int(op);
 }
 
 /*
@@ -1111,9 +1107,9 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    struct defaults def;
-    char *copy;
+    char *copy, *var, *val;
     bool ret = false;
+    int op;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
 
     bv = ldap_get_values_len(ld, entry, "sudoOption");
@@ -1128,10 +1124,10 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudo_ldap_parse_option(copy, &def);
-	early = is_early_default(def.var);
+	op = sudo_ldap_parse_option(copy, &var, &val);
+	early = is_early_default(var);
 	if (early != NULL)
-	    set_early_default(def.var, def.val, def.op, false, early);
+	    set_early_default(var, val, op, false, early);
 	free(copy);
     }
     run_early_defaults();
@@ -1142,9 +1138,9 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudo_ldap_parse_option(copy, &def);
-	if (is_early_default(def.var) == NULL)
-	    set_default(def.var, def.val, def.op, false);
+	op = sudo_ldap_parse_option(copy, &var, &val);
+	if (is_early_default(var) == NULL)
+	    set_default(var, val, op, false);
 	free(copy);
     }
     ret = true;

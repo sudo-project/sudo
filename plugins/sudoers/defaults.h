@@ -119,7 +119,6 @@ struct early_default {
 /*
  * Prototypes
  */
-struct defaults;
 void dump_default(void);
 bool check_defaults(int what, bool quiet);
 bool init_defaults(void);

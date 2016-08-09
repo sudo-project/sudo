@@ -45,7 +45,6 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "gram.h"	/* for DEFAULTS */
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
 
@@ -1121,8 +1120,8 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
  * Parse an option string into a defaults structure.
  * The members of def are pointers into optstr (which is modified).
  */
-static void
-sudo_sss_parse_option(char *optstr, struct defaults *def)
+static int
+sudo_sss_parse_option(char *optstr, char **varp, char **valp)
 {
     char *cp, *val = NULL;
     char *var = optstr;
@@ -1169,22 +1168,18 @@ sudo_sss_parse_option(char *optstr, struct defaults *def)
 	    } while (isblank((unsigned char)*var));
 	}
     }
-    def->var = var;
-    def->val = val;
-    def->op = op;
-    def->type = DEFAULTS;
-    def->binding = NULL;
+    *varp = var;
+    *valp = val;
 
-    debug_return;
+    debug_return_int(op);
 }
 
 static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int i;
-    char *copy;
+    int i, op;
+    char *copy, *var, *val;
     bool ret = false;
-    struct defaults def;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
@@ -1210,10 +1205,10 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudo_sss_parse_option(copy, &def);
-	early = is_early_default(def.var);
+	op = sudo_sss_parse_option(copy, &var, &val);
+	early = is_early_default(var);
 	if (early != NULL)
-	    set_early_default(def.var, def.val, def.op, false, early);
+	    set_early_default(var, val, op, false, early);
 	free(copy);
     }
     run_early_defaults();
@@ -1224,9 +1219,9 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	sudo_sss_parse_option(copy, &def);
-	if (is_early_default(def.var) == NULL)
-	    set_default(def.var, def.val, def.op, false);
+	op = sudo_sss_parse_option(copy, &var, &val);
+	if (is_early_default(var) == NULL)
+	    set_default(var, val, op, false);
 	free(copy);
     }
     ret = true;
