@@ -39,6 +39,41 @@ still allow people to get their work done."
 	pp_solaris_pstamp=`/usr/bin/date "+%B %d, %Y"`
 %endif
 
+%if [macos]
+	# System Integrity Protection on Mac OS X won't allow us to write
+	# directly to /etc or /var.  We must install in /private instead.
+	case "$sudoersdir" in
+	/etc|/etc/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/etc; then
+		mv ${pp_destdir}/etc ${pp_destdir}/private/etc
+	    fi
+	    sudoersdir="/private${sudoersdir}"
+	    ;;
+	esac
+	case "$vardir" in
+	/var|/var/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/var; then
+		mv ${pp_destdir}/var ${pp_destdir}/private/var
+	    fi
+	    vardir="/private${vardir}"
+	    ;;
+	esac
+	case "$rundir" in
+	/var|/var/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/var; then
+		mv ${pp_destdir}/var ${pp_destdir}/private/var
+	    fi
+	    rundir="/private${rundir}"
+	    ;;
+	esac
+%endif
+
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
 	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)$' \| 0 \) + 1`"
