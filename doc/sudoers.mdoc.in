@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 20, 2016
+.Dd August 9, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -911,6 +911,13 @@ that does not exist in a list.
 Defaults entries are parsed in the following order: generic, host
 and user Defaults first, then runas Defaults and finally command
 defaults.
+If there are multiple Defaults settings of the same type, the last
+matching setting is used.
+The following Defaults settings are parsed before all others since
+they may affect subsequent entries:
+.Em fqdn ,
+.Em runas_default ,
+.Em sudoers_locale .
 .Pp
 See
 .Sx SUDOERS OPTIONS
