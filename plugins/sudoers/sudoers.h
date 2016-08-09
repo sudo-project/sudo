@@ -370,6 +370,7 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
+bool cb_group_plugin(const union sudo_defs_val *sd_un);
 extern const char *path_plugin_dir;
 
 /* editor.c */

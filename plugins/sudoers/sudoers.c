@@ -208,14 +208,6 @@ sudoers_policy_init(void *info, char * const envp[])
     /* XXX - collect post-sudoers parse settings into a function */
 
     /*
-     * Initialize external group plugin, if any.
-     */
-    if (def_group_plugin) {
-	if (group_plugin_load(def_group_plugin) != true)
-	    def_group_plugin = NULL;
-    }
-
-    /*
      * Set runas passwd/group entries based on command line or sudoers.
      * Note that if runas_group was specified without runas_user we
      * defer setting runas_pw so the match routines know to ignore it.
@@ -746,6 +738,9 @@ init_vars(char * const envp[])
 
     /* Set fqdn callback. */
     sudo_defs_table[I_FQDN].callback = cb_fqdn;
+
+    /* Set group_plugin callback. */
+    sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;

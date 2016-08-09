@@ -916,6 +916,7 @@ matching setting is used.
 The following Defaults settings are parsed before all others since
 they may affect subsequent entries:
 .Em fqdn ,
+.Em group_plugin ,
 .Em runas_default ,
 .Em sudoers_locale .
 .Pp

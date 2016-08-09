@@ -962,6 +962,7 @@ matching setting is used.
 The following Defaults settings are parsed before all others since
 they may affect subsequent entries:
 \fIfqdn\fR,
+\fIgroup_plugin\fR,
 \fIrunas_default\fR,
 \fIsudoers_locale\fR.
 .PP

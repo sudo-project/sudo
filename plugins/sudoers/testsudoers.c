@@ -243,6 +243,9 @@ main(int argc, char *argv[])
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
+    /* Set group_plugin callback. */
+    sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
+
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
@@ -273,9 +276,6 @@ main(int argc, char *argv[])
     if (!update_defaults(SETDEF_ALL, false))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
-
-    if (def_group_plugin && group_plugin_load(def_group_plugin) != true)
-	def_group_plugin = NULL;
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.

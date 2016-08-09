@@ -212,3 +212,19 @@ group_plugin_query(const char *user, const char *group,
 }
 
 #endif /* HAVE_DLOPEN || HAVE_SHL_LOAD */
+
+/*
+ * Group plugin sudoers callback.
+ */
+bool
+cb_group_plugin(const union sudo_defs_val *sd_un)
+{
+    bool rc = true;
+    debug_decl(cb_group_plugin, SUDOERS_DEBUG_PLUGIN)
+
+    /* Unload any existing group plugin before loading a new one. */
+    group_plugin_unload();
+    if (sd_un->str != NULL)
+	rc = group_plugin_load(sd_un->str);
+    debug_return_bool(rc);
+}
