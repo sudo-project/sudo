@@ -261,6 +261,17 @@ main(int argc, char *argv[])
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
 
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * run the command as the invoking user.
+     */
+    if (runas_group != NULL) {
+        set_runasgr(runas_group);
+        set_runaspw(runas_user ? runas_user : user_name);
+    } else
+        set_runaspw(runas_user ? runas_user : def_runas_default);
+
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
     if (sudoersparse() != 0 || parse_error) {
 	parse_error = true;
@@ -276,18 +287,6 @@ main(int argc, char *argv[])
     if (!update_defaults(SETDEF_ALL, false))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
-
-    /*
-     * Set runas passwd/group entries based on command line or sudoers.
-     * Note that if runas_group was specified without runas_user we
-     * defer setting runas_pw so the match routines know to ignore it.
-     */
-    if (runas_group != NULL) {
-        set_runasgr(runas_group);
-        if (runas_user != NULL)
-            set_runaspw(runas_user);
-    } else
-        set_runaspw(runas_user ? runas_user : def_runas_default);
 
     if (dflag) {
 	(void) putchar('\n');

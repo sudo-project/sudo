@@ -132,7 +132,8 @@ sudo_file_setdefs(struct sudo_nss *nss)
     if (nss->handle == NULL)
 	debug_return_int(-1);
 
-    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, false))
+    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS,
+	false))
 	debug_return_int(-1);
     debug_return_int(0);
 }

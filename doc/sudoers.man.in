@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "August 9, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 10, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -954,9 +954,8 @@ It is not an error to use the
 operator to remove an element
 that does not exist in a list.
 .PP
-Defaults entries are parsed in the following order: generic, host
-and user Defaults first, then runas Defaults and finally command
-defaults.
+Defaults entries are parsed in the following order: generic, host,
+user and runas Defaults first, then command defaults.
 If there are multiple Defaults settings of the same type, the last
 matching setting is used.
 The following Defaults settings are parsed before all others since

@@ -205,32 +205,7 @@ sudoers_policy_init(void *info, char * const envp[])
 	goto cleanup;
     }
 
-    /* XXX - collect post-sudoers parse settings into a function */
-
-    /*
-     * Set runas passwd/group entries based on command line or sudoers.
-     * Note that if runas_group was specified without runas_user we
-     * defer setting runas_pw so the match routines know to ignore it.
-     */
-    /* XXX - qpm4u does more here as it may have already set runas_pw */
-    if (runas_group != NULL) {
-	if (!set_runasgr(runas_group, false))
-	    goto cleanup;
-	if (runas_user != NULL) {
-	    if (!set_runaspw(runas_user, false))
-		goto cleanup;
-	}
-    } else {
-	if (!set_runaspw(runas_user ? runas_user : def_runas_default, false))
-	    goto cleanup;
-    }
-
-    if (!update_defaults(SETDEF_RUNAS, false)) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-	    N_("problem with defaults entries"));
-    }
-
-    /* Set login class if applicable. */
+    /* Set login class if applicable (after sudoers is parsed). */
     if (set_loginclass(runas_pw ? runas_pw : sudo_user.pw))
 	rval = true;
 
@@ -385,13 +360,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (safe_cmnd == NULL) {
 	if ((safe_cmnd = strdup(user_cmnd)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-    }
-
-    /* If only a group was specified, set runas_pw based on invoking user. */
-    if (runas_pw == NULL) {
-	if (!set_runaspw(user_name, false)) {
 	    goto done;
 	}
     }
@@ -707,8 +675,8 @@ init_vars(char * const envp[])
     }
 
     /*
-     * Get a local copy of the user's struct passwd if we don't already
-     * have one.
+     * Get a local copy of the user's passwd struct and group list if we
+     * don't already have them.
      */
     if (sudo_user.pw == NULL) {
 	if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL) {
@@ -727,12 +695,10 @@ init_vars(char * const envp[])
 	    unknown_user = true;
 	}
     }
-
-    /*
-     * Get group list and store initialize permissions.
-     */
     if (user_group_list == NULL)
 	user_group_list = sudo_get_grlist(sudo_user.pw);
+
+    /* Store initialize permissions so we can restore them later. */
     if (!set_perms(PERM_INITIAL))
 	debug_return_bool(false);
 
@@ -756,6 +722,21 @@ init_vars(char * const envp[])
 	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),
 	    (unsigned int) user_uid);
 	debug_return_bool(false);
+    }
+
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * run the command as the invoking user.
+     */
+    if (runas_group != NULL) {
+	if (!set_runasgr(runas_group, false))
+	    debug_return_bool(false);
+	if (!set_runaspw(runas_user ? runas_user : user_name, false))
+	    debug_return_bool(false);
+    } else {
+	if (!set_runaspw(runas_user ? runas_user : def_runas_default, false))
+	    debug_return_bool(false);
     }
 
     debug_return_bool(true);
