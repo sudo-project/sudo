@@ -91,15 +91,15 @@ static struct early_default early_defaults[] = {
 /*
  * Local prototypes.
  */
-static bool store_int(const char *, struct sudo_defs_types *, int);
-static bool store_list(const char *, struct sudo_defs_types *, int);
-static bool store_mode(const char *, struct sudo_defs_types *, int);
-static int  store_str(const char *, struct sudo_defs_types *, int);
-static bool store_syslogfac(const char *, struct sudo_defs_types *, int);
-static bool store_syslogpri(const char *, struct sudo_defs_types *, int);
-static bool store_tuple(const char *, struct sudo_defs_types *, int);
-static bool store_uint(const char *, struct sudo_defs_types *, int);
-static bool store_float(const char *, struct sudo_defs_types *, int);
+static bool store_int(const char *, struct sudo_defs_types *);
+static bool store_list(const char *, struct sudo_defs_types *, int op);
+static bool store_mode(const char *, struct sudo_defs_types *);
+static int  store_str(const char *, struct sudo_defs_types *);
+static bool store_syslogfac(const char *, struct sudo_defs_types *);
+static bool store_syslogpri(const char *, struct sudo_defs_types *);
+static bool store_tuple(const char *, struct sudo_defs_types *);
+static bool store_uint(const char *, struct sudo_defs_types *);
+static bool store_float(const char *, struct sudo_defs_types *);
 static bool list_op(const char *, size_t, struct sudo_defs_types *, enum list_ops);
 static const char *logfac2str(int);
 static const char *logpri2str(int);
@@ -207,10 +207,10 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 
     switch (def->type & T_MASK) {
 	case T_LOGFAC:
-	    rc = store_syslogfac(val, def, op);
+	    rc = store_syslogfac(val, def);
 	    break;
 	case T_LOGPRI:
-	    rc = store_syslogpri(val, def, op);
+	    rc = store_syslogpri(val, def);
 	    break;
 	case T_STR:
 	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
@@ -221,19 +221,19 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 		rc = -1;
 		break;
 	    }
-	    rc =  store_str(val, def, op);
+	    rc =  store_str(val, def);
 	    break;
 	case T_INT:
-	    rc = store_int(val, def, op);
+	    rc = store_int(val, def);
 	    break;
 	case T_UINT:
-	    rc = store_uint(val, def, op);
+	    rc = store_uint(val, def);
 	    break;
 	case T_FLOAT:
-	    rc = store_float(val, def, op);
+	    rc = store_float(val, def);
 	    break;
 	case T_MODE:
-	    rc = store_mode(val, def, op);
+	    rc = store_mode(val, def);
 	    break;
 	case T_FLAG:
 	    if (val != NULL) {
@@ -251,7 +251,7 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    rc = store_list(val, def, op);
 	    break;
 	case T_TUPLE:
-	    rc = store_tuple(val, def, op);
+	    rc = store_tuple(val, def);
 	    break;
 	default:
 	    if (!quiet) {
@@ -491,16 +491,14 @@ init_defaults(void)
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
-    (void) store_syslogfac(LOGFAC, &sudo_defs_table[I_SYSLOG], true);
-    (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_SYSLOG_GOODPRI],
-	true);
-    (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_SYSLOG_BADPRI],
-	true);
+    (void) store_syslogfac(LOGFAC, &sudo_defs_table[I_SYSLOG]);
+    (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_SYSLOG_GOODPRI]);
+    (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_SYSLOG_BADPRI]);
 #endif
 
     /* Password flags also have a string and integer component. */
-    (void) store_tuple("any", &sudo_defs_table[I_LISTPW], true);
-    (void) store_tuple("all", &sudo_defs_table[I_VERIFYPW], true);
+    (void) store_tuple("any", &sudo_defs_table[I_LISTPW]);
+    (void) store_tuple("all", &sudo_defs_table[I_VERIFYPW]);
 
     /* Then initialize the int-like things. */
 #ifdef SUDO_UMASK
@@ -720,13 +718,13 @@ check_defaults(int what, bool quiet)
 }
 
 static bool
-store_int(const char *val, struct sudo_defs_types *def, int op)
+store_int(const char *val, struct sudo_defs_types *def)
 {
     const char *errstr;
     int i;
     debug_decl(store_int, SUDOERS_DEBUG_DEFAULTS)
 
-    if (op == false) {
+    if (val == NULL) {
 	def->sd_un.ival = 0;
     } else {
 	i = strtonum(val, INT_MIN, INT_MAX, &errstr);
@@ -741,13 +739,13 @@ store_int(const char *val, struct sudo_defs_types *def, int op)
 }
 
 static bool
-store_uint(const char *val, struct sudo_defs_types *def, int op)
+store_uint(const char *val, struct sudo_defs_types *def)
 {
     const char *errstr;
     unsigned int u;
     debug_decl(store_uint, SUDOERS_DEBUG_DEFAULTS)
 
-    if (op == false) {
+    if (val == NULL) {
 	def->sd_un.uival = 0;
     } else {
 	u = strtonum(val, 0, UINT_MAX, &errstr);
@@ -762,13 +760,13 @@ store_uint(const char *val, struct sudo_defs_types *def, int op)
 }
 
 static bool
-store_float(const char *val, struct sudo_defs_types *def, int op)
+store_float(const char *val, struct sudo_defs_types *def)
 {
     char *endp;
     double d;
     debug_decl(store_float, SUDOERS_DEBUG_DEFAULTS)
 
-    if (op == false) {
+    if (val == NULL) {
 	def->sd_un.fval = 0.0;
     } else {
 	d = strtod(val, &endp);
@@ -781,7 +779,7 @@ store_float(const char *val, struct sudo_defs_types *def, int op)
 }
 
 static bool
-store_tuple(const char *val, struct sudo_defs_types *def, int op)
+store_tuple(const char *val, struct sudo_defs_types *def)
 {
     struct def_values *v;
     debug_decl(store_tuple, SUDOERS_DEBUG_DEFAULTS)
@@ -791,8 +789,8 @@ store_tuple(const char *val, struct sudo_defs_types *def, int op)
      * For negation to work the first element of enum def_tuple
      * must be equivalent to boolean false.
      */
-    if (!val) {
-	def->sd_un.ival = (op == false) ? 0 : 1;
+    if (val == NULL) {
+	def->sd_un.ival = 0;
     } else {
 	for (v = def->values; v->sval != NULL; v++) {
 	    if (strcmp(v->sval, val) == 0) {
@@ -807,12 +805,12 @@ store_tuple(const char *val, struct sudo_defs_types *def, int op)
 }
 
 static int
-store_str(const char *val, struct sudo_defs_types *def, int op)
+store_str(const char *val, struct sudo_defs_types *def)
 {
     debug_decl(store_str, SUDOERS_DEBUG_DEFAULTS)
 
     free(def->sd_un.str);
-    if (op == false) {
+    if (val == NULL) {
 	def->sd_un.str = NULL;
     } else {
 	if ((def->sd_un.str = strdup(val)) == NULL) {
@@ -834,7 +832,7 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 	(void)list_op(NULL, 0, def, freeall);
 
     /* Split str into multiple space-separated words and act on each one. */
-    if (op != false) {
+    if (str != NULL) {
 	end = str;
 	do {
 	    /* Remove leading blanks, if nothing but blanks we are done. */
@@ -854,17 +852,15 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 }
 
 static bool
-store_syslogfac(const char *val, struct sudo_defs_types *def, int op)
+store_syslogfac(const char *val, struct sudo_defs_types *def)
 {
     struct strmap *fac;
     debug_decl(store_syslogfac, SUDOERS_DEBUG_DEFAULTS)
 
-    if (op == false) {
+    if (val == NULL) {
 	def->sd_un.ival = false;
 	debug_return_bool(true);
     }
-    if (!val)
-	debug_return_bool(false);
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
 	;
     if (fac->name == NULL)
@@ -886,12 +882,12 @@ logfac2str(int n)
 }
 
 static bool
-store_syslogpri(const char *val, struct sudo_defs_types *def, int op)
+store_syslogpri(const char *val, struct sudo_defs_types *def)
 {
     struct strmap *pri;
     debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS)
 
-    if (op == false || !val)
+    if (val == NULL)
 	debug_return_bool(false);
 
     for (pri = priorities; pri->name && strcmp(val, pri->name); pri++)
@@ -915,13 +911,13 @@ logpri2str(int n)
 }
 
 static bool
-store_mode(const char *val, struct sudo_defs_types *def, int op)
+store_mode(const char *val, struct sudo_defs_types *def)
 {
     mode_t mode;
     const char *errstr;
     debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
 
-    if (op == false) {
+    if (val == NULL) {
 	def->sd_un.mode = 0777;
     } else {
 	mode = sudo_strtomode(val, &errstr);
