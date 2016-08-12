@@ -122,6 +122,7 @@ aix_setlimits(char *user)
 		    break;
 		case RLIMIT_NOFILE:
 		    rlim.rlim_max = 8196 * aix_limits[n].factor;
+		    break;
 		default:
 		    rlim.rlim_max = RLIM64_INFINITY;
 		    break;
