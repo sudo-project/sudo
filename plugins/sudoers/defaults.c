@@ -196,7 +196,7 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
     int rc;
     debug_decl(set_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL) {
+    if (val == NULL && !ISSET(def->type, T_FLAG)) {
 	/* Check for bogus boolean usage or missing value if non-boolean. */
 	if (!ISSET(def->type, T_BOOL) || op != false) {
 	    if (!quiet)
