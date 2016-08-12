@@ -358,6 +358,12 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op, bool qui
 		debug_return_bool(false);
 	    }
 	    break;
+	default:
+	    if (!quiet) {
+		sudo_warnx(U_("invalid Defaults type 0x%x for option `%s'"),
+		    def->type, def->name);
+	    }
+	    debug_return_bool(false);
     }
     if (do_callback && def->callback)
 	debug_return_bool(def->callback(&def->sd_un));
