@@ -86,6 +86,7 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 
     /* Skip over "tty" in the id if old entry did too. */
     if (old != NULL) {
+	/* cppcheck-suppress uninitdata */
 	if (strncmp(line, "tty", 3) == 0) {
 	    idlen = MIN(sizeof(old->ut_id), 3);
 	    if (strncmp(old->ut_id, "tty", idlen) != 0)
@@ -94,6 +95,7 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
     }
     
     /* Store as much as will fit, skipping parts of the beginning as needed. */
+    /* cppcheck-suppress uninitdata */
     idlen = strlen(line);
     if (idlen > sizeof(new->ut_id)) {
 	line += idlen - sizeof(new->ut_id);
