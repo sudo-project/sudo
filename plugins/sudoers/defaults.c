@@ -245,6 +245,7 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 		break;
 	    }
 	    def->sd_un.flag = op;
+	    rc = true;
 	    break;
 	case T_LIST:
 	    rc = store_list(val, def, op);
