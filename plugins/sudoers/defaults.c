@@ -639,8 +639,10 @@ init_defaults(void)
     def_pam_setcred = true;
 
     /* Reset the locale. */
-    if (!firsttime)
-	sudoers_initlocale(NULL, def_sudoers_locale);
+    if (!firsttime) {
+	if (!sudoers_initlocale(NULL, def_sudoers_locale))
+	    goto oom;
+    }
 
     /* Finally do the lists (currently just environment tables). */
     if (!init_envtables())
