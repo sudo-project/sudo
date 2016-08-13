@@ -45,13 +45,19 @@
 #include "sudoers_debug.h"
 
 /*
- * Password db and supplementary group IDs with associated group names.
+ * Supplementary group IDs for a user.
+ */
+struct gid_list {
+    int ngids;
+    GETGROUPS_T *gids;
+};
+
+/*
+ * Supplementary group names for a user.
  */
 struct group_list {
-    char **groups;
-    GETGROUPS_T *gids;
     int ngroups;
-    int ngids;
+    char **groups;
 };
 
 /*
@@ -77,7 +83,7 @@ struct sudo_user {
     char *cmnd_safe;
     char *class_name;
     char *krb5_ccname;
-    struct group_list *group_list;
+    struct gid_list *gid_list;
     char * const * env_vars;
 #ifdef HAVE_SELINUX
     char *role;
@@ -183,7 +189,7 @@ struct sudo_user {
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_gids		(sudo_user.gids)
 #define user_ngids		(sudo_user.ngids)
-#define user_group_list		(sudo_user.group_list)
+#define user_gid_list		(sudo_user.gid_list)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
@@ -294,6 +300,7 @@ __dso_public void sudo_gr_addref(struct group *);
 __dso_public void sudo_gr_delref(struct group *);
 bool user_in_group(const struct passwd *, const char *);
 struct group *sudo_fakegrnam(const char *);
+struct gid_list *sudo_get_gidlist(const struct passwd *pw);
 struct group_list *sudo_get_grlist(const struct passwd *pw);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
 struct passwd *sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home, const char *shell);
@@ -302,11 +309,14 @@ struct passwd *sudo_getpwuid(uid_t);
 void sudo_endspent(void);
 void sudo_freegrcache(void);
 void sudo_freepwcache(void);
+void sudo_gidlist_addref(struct gid_list *);
+void sudo_gidlist_delref(struct gid_list *);
 void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
-int  sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids);
+int  sudo_set_gidlist(struct passwd *pw, char * const *gids);
+int  sudo_set_grlist(struct passwd *pw, char * const *groups);
 void sudo_setspent(void);
 
 /* timestr.c */

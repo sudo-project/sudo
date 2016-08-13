@@ -695,8 +695,8 @@ init_vars(char * const envp[])
 	    unknown_user = true;
 	}
     }
-    if (user_group_list == NULL)
-	user_group_list = sudo_get_grlist(sudo_user.pw);
+    if (user_gid_list == NULL)
+	user_gid_list = sudo_get_gidlist(sudo_user.pw);
 
     /* Store initialize permissions so we can restore them later. */
     if (!set_perms(PERM_INITIAL))

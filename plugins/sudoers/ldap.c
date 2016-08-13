@@ -392,7 +392,7 @@ struct sudo_ldap_handle {
     LDAP *ld;
     struct ldap_result *result;
     const char *username;
-    struct group_list *grlist;
+    struct gid_list *gidlist;
 };
 
 struct sudo_nss sudo_nss_ldap = {
@@ -1598,6 +1598,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     char *buf, timebuffer[TIMEFILTER_LENGTH + 1], gidbuf[MAX_UID_T_LEN + 1];
     struct ldap_netgroup_list netgroups;
     struct ldap_netgroup *ng, *nextng;
+    struct gid_list *gidlist;
     struct group_list *grlist;
     struct group *grp;
     size_t sz = 0;
@@ -1628,8 +1629,10 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 		continue;
 	    sz += 12 + sudo_ldap_value_len(grlist->groups[i]);
 	}
-	for (i = 0; i < grlist->ngids; i++) {
-	    if (pw->pw_gid == grlist->gids[i])
+    }
+    if ((gidlist = sudo_get_gidlist(pw)) != NULL) {
+	for (i = 0; i < gidlist->ngids; i++) {
+	    if (pw->pw_gid == gidlist->gids[i])
 		continue;
 	    sz += 13 + MAX_UID_T_LEN;
 	}
@@ -1696,11 +1699,13 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	    CHECK_LDAP_VCAT(buf, grlist->groups[i], sz);
 	    CHECK_STRLCAT(buf, ")", sz);
 	}
-	for (i = 0; i < grlist->ngids; i++) {
-	    if (pw->pw_gid == grlist->gids[i])
+    }
+    if (gidlist != NULL) {
+	for (i = 0; i < gidlist->ngids; i++) {
+	    if (pw->pw_gid == gidlist->gids[i])
 		continue;
 	    (void) snprintf(gidbuf, sizeof(gidbuf), "%u",
-		(unsigned int)grlist->gids[i]);
+		(unsigned int)gidlist->gids[i]);
 	    CHECK_STRLCAT(buf, "(sudoUser=%#", sz);
 	    CHECK_STRLCAT(buf, gidbuf, sz);
 	    CHECK_STRLCAT(buf, ")", sz);
@@ -1708,6 +1713,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     }
 
     /* Done with groups. */
+    if (gidlist != NULL)
+	sudo_gidlist_delref(gidlist);
     if (grlist != NULL)
 	sudo_grlist_delref(grlist);
     if (grp != NULL)
@@ -3101,7 +3108,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     handle->ld = ld;
     /* handle->result = NULL; */
     /* handle->username = NULL; */
-    /* handle->grlist = NULL; */
+    /* handle->gidlist = NULL; */
     nss->handle = handle;
 
 done:
@@ -3372,7 +3379,7 @@ sudo_ldap_result_free_nss(struct sudo_nss *nss)
 	DPRINTF1("removing reusable search result");
 	sudo_ldap_result_free(handle->result);
 	handle->username = NULL;
-	handle->grlist = NULL;
+	handle->gidlist = NULL;
 	handle->result = NULL;
     }
     debug_return;
@@ -3400,7 +3407,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      * have to contact the LDAP server again.
      */
     if (handle->result) {
-	if (handle->grlist == user_group_list &&
+	if (handle->gidlist == user_gid_list &&
 	    strcmp(pw->pw_name, handle->username) == 0) {
 	    DPRINTF1("reusing previous result (user %s) with %d entries",
 		handle->username, handle->result->nentries);
@@ -3501,9 +3508,10 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 
     /* Store everything in the sudo_nss handle. */
     /* XXX - store pw and take a reference to it. */
+    /* XXX - take refs for gidlist and grlist */
     handle->result = lres;
     handle->username = pw->pw_name;
-    handle->grlist = user_group_list;
+    handle->gidlist = user_gid_list;
 
     debug_return_ptr(lres);
 }
