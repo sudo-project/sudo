@@ -943,25 +943,25 @@ user_in_group(const struct passwd *pw, const char *group)
     struct group_list *grlist = NULL;
     struct gid_list *gidlist = NULL;
     struct group *grp = NULL;
-    const char *errstr;
-    int i;
     bool matched = false;
+    int i;
     debug_decl(user_in_group, SUDOERS_DEBUG_NSS)
 
-    if ((gidlist = sudo_get_gidlist(pw)) != NULL) {
-	/*
-	 * If it could be a sudo-style group ID check gids first.
-	 */
-	if (group[0] == '#') {
-	    gid_t gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
-	    if (errstr != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
-		    "gid %s %s", group, errstr);
-	    } else {
-		if (gid == pw->pw_gid) {
-		    matched = true;
-		    goto done;
-		}
+    /*
+     * If it could be a sudo-style group ID check gids first.
+     */
+    if (group[0] == '#') {
+	const char *errstr;
+	gid_t gid = (gid_t) sudo_strtoid(group + 1, NULL, NULL, &errstr);
+	if (errstr != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
+		"gid %s %s", group, errstr);
+	} else {
+	    if (gid == pw->pw_gid) {
+		matched = true;
+		goto done;
+	    }
+	    if ((gidlist = sudo_get_gidlist(pw)) != NULL) {
 		for (i = 0; i < gidlist->ngids; i++) {
 		    if (gid == gidlist->gids[i]) {
 			matched = true;
@@ -970,34 +970,37 @@ user_in_group(const struct passwd *pw, const char *group)
 		}
 	    }
 	}
+    }
 
-	/*
-	 * Next check the supplementary group vector.
-	 * It usually includes the password db group too.
-	 */
-	if ((grlist = sudo_get_grlist(pw)) != NULL) {
-	    for (i = 0; i < grlist->ngroups; i++) {
-		if (strcasecmp(group, grlist->groups[i]) == 0) {
-		    matched = true;
-		    goto done;
-		}
-	    }
-	}
-
-	/* Finally check against user's primary (passwd file) group. */
-	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	    if (strcasecmp(group, grp->gr_name) == 0) {
+    /*
+     * Next check the supplementary group vector.
+     * On BSD it includes the password db group too.
+     */
+    if ((grlist = sudo_get_grlist(pw)) != NULL) {
+	for (i = 0; i < grlist->ngroups; i++) {
+	    if (strcasecmp(group, grlist->groups[i]) == 0) {
 		matched = true;
 		goto done;
 	    }
 	}
-done:
-	if (grp != NULL)
-	    sudo_gr_delref(grp);
-	if (grlist != NULL)
-	    sudo_grlist_delref(grlist);
-	sudo_gidlist_delref(gidlist);
     }
+
+    /* Finally check against user's primary (passwd file) group. */
+    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
+	if (strcasecmp(group, grp->gr_name) == 0) {
+	    matched = true;
+	    goto done;
+	}
+    }
+
+done:
+    if (grp != NULL)
+	sudo_gr_delref(grp);
+    if (grlist != NULL)
+	sudo_grlist_delref(grlist);
+    if (gidlist != NULL)
+	sudo_gidlist_delref(gidlist);
+
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s %sin group %s",
 	__func__, pw->pw_name, matched ? "" : "NOT ", group);
     debug_return_bool(matched);
