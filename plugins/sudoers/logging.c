@@ -157,13 +157,21 @@ do_logfile(const char *msg)
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
+	int saved_errno = errno;
+
 	send_mail(_("unable to open log file: %s: %s"),
-	    def_logfile, strerror(errno));
+	    def_logfile, strerror(saved_errno));
+	sudo_warnx(U_("unable to open log file: %s: %s"),
+	    def_logfile, strerror(saved_errno));
 	goto done;
     }
     if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
+	int saved_errno = errno;
+
 	send_mail(_("unable to lock log file: %s: %s"),
-	    def_logfile, strerror(errno));
+	    def_logfile, strerror(saved_errno));
+	sudo_warnx(U_("unable to lock log file: %s: %s"),
+	    def_logfile, strerror(saved_errno));
 	goto done;
     }
 
@@ -191,8 +199,16 @@ do_logfile(const char *msg)
     }
     free(full_line);
     (void) fflush(fp);
-    if (!ferror(fp))
-	rval = true;
+    if (ferror(fp)) {
+	int saved_errno = errno;
+
+	send_mail(_("unable to write log file: %s: %s"),
+	    def_logfile, strerror(saved_errno));
+	sudo_warnx(U_("unable to write log file: %s: %s"),
+	    def_logfile, strerror(saved_errno));
+	goto done;
+    }
+    rval = true;
 
 done:
     if (fp != NULL)
@@ -433,6 +449,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	len = vasprintf(&message, _(fmt), ap);
     }
     if (len == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	rval = false;
 	goto done;
     }
@@ -453,6 +470,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
         free(message);
 	if (logline == NULL) {
 	    rval = false;
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
     }
