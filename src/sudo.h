@@ -130,7 +130,6 @@ struct user_details {
 #define CD_SUDOEDIT_FOLLOW	0x10000
 #define CD_SUDOEDIT_CHECKDIR	0x20000
 #define CD_SET_GROUPS		0x40000
-#define CD_IGNORE_IOLOG_ERRS	0x80000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;

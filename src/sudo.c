@@ -675,9 +675,6 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		break;
-	    case 'i':
-		SET_FLAG("ignore_iolog_errors=", CD_IGNORE_IOLOG_ERRS)
-		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
 		break;
