@@ -22,6 +22,19 @@ What's new in Sudo 1.8.18
    now applied before any other Defaults settings since they can
    change how other Defaults settings are parsed.
 
+ * Sudo will now only resolve a user's group IDs to group names
+   when sudoers includes group-based permissions.  Group lookups
+   can be expensive on some systems where the group database is
+   not local.
+
+ * If the file system holding the sudo log file is full, allow
+   the command to run unless the new ignore_logfile_errors Defaults
+   option is disabled.  Bug #751.
+
+ * The ignore_audit_errors and ignore_iolog_errors Defaults options
+   have been added to control sudo's behavior when it is unable to
+   write to the audit and I/O logs.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
