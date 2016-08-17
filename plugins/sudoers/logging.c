@@ -143,6 +143,7 @@ do_syslog(int pri, char *msg)
 static bool
 do_logfile(const char *msg)
 {
+    static bool warned = false;
     const char *timestr;
     int len, oldlocale;
     bool rval = false;
@@ -157,21 +158,19 @@ do_logfile(const char *msg)
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	int saved_errno = errno;
-
-	send_mail(_("unable to open log file: %s: %s"),
-	    def_logfile, strerror(saved_errno));
-	sudo_warnx(U_("unable to open log file: %s: %s"),
-	    def_logfile, strerror(saved_errno));
+	if (!warned) {
+	    log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
+		N_("unable to open log file: %s"), def_logfile);
+	    warned = true;
+	}
 	goto done;
     }
     if (!sudo_lock_file(fileno(fp), SUDO_LOCK)) {
-	int saved_errno = errno;
-
-	send_mail(_("unable to lock log file: %s: %s"),
-	    def_logfile, strerror(saved_errno));
-	sudo_warnx(U_("unable to lock log file: %s: %s"),
-	    def_logfile, strerror(saved_errno));
+	if (!warned) {
+	    log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
+		N_("unable to lock log file: %s"), def_logfile);
+	    warned = true;
+	}
 	goto done;
     }
 
@@ -200,12 +199,11 @@ do_logfile(const char *msg)
     free(full_line);
     (void) fflush(fp);
     if (ferror(fp)) {
-	int saved_errno = errno;
-
-	send_mail(_("unable to write log file: %s: %s"),
-	    def_logfile, strerror(saved_errno));
-	sudo_warnx(U_("unable to write log file: %s: %s"),
-	    def_logfile, strerror(saved_errno));
+	if (!warned) {
+	    log_warning(SLOG_SEND_MAIL|SLOG_NO_LOG,
+		N_("unable to write log file: %s"), def_logfile);
+	    warned = true;
+	}
 	goto done;
     }
     rval = true;
