@@ -89,6 +89,7 @@ static int ttymode = TERM_COOKED;
 static pid_t ppgrp, cmnd_pgrp, mon_pgrp;
 static sigset_t ttyblock;
 static struct io_buffer_list iobufs;
+static bool ignore_iolog_errors;
 
 static void del_io_events(bool nonblocking);
 static int exec_monitor(struct command_details *details, int backchannel);
@@ -218,7 +219,8 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyin = NULL;
 		}
-		rval = false;
+		if (!ignore_iolog_errors)
+		    rval = false;
 		break;
 	    }
 	}
@@ -250,7 +252,8 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdin = NULL;
 		}
-	    	rval = false;
+		if (!ignore_iolog_errors)
+		    rval = false;
 		break;
 	    }
 	}
@@ -282,7 +285,8 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyout = NULL;
 		}
-	    	rval = false;
+		if (!ignore_iolog_errors)
+		    rval = false;
 		break;
 	    }
 	}
@@ -326,7 +330,8 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdout = NULL;
 		}
-	    	rval = false;
+		if (!ignore_iolog_errors)
+		    rval = false;
 		break;
 	    }
 	}
@@ -370,7 +375,8 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stderr = NULL;
 		}
-	    	rval = false;
+		if (!ignore_iolog_errors)
+		    rval = false;
 		break;
 	    }
 	}
@@ -676,7 +682,8 @@ write_callback(int fd, int what, void *v)
 }
 
 static void
-io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *),
+io_buf_new(int rfd, int wfd,
+    bool (*action)(const char *, unsigned int, struct io_buffer *),
     struct io_buffer_list *head)
 {
     int n;
@@ -741,6 +748,13 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     sigaddset(&ttyblock, SIGTSTP);
     sigaddset(&ttyblock, SIGTTIN);
     sigaddset(&ttyblock, SIGTTOU);
+
+    /*
+     * The security policy may tell us to ignore errors from the
+     * I/O log functions.
+     */
+    if (!ISSET(details->flags, CD_IGNORE_IOLOG_ERRS))
+	ignore_iolog_errors = true;
 
     /*
      * Setup stdin/stdout/stderr for child, to be duped after forking.

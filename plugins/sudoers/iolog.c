@@ -711,6 +711,7 @@ done:
 static void
 sudoers_io_close(int exit_status, int error)
 {
+    const char *errstr = NULL;
     int i;
     debug_decl(sudoers_io_close, SUDOERS_DEBUG_PLUGIN)
 
@@ -718,12 +719,19 @@ sudoers_io_close(int exit_status, int error)
 	if (io_log_files[i].fd.v == NULL)
 	    continue;
 #ifdef HAVE_ZLIB_H
-	if (iolog_compress)
-	    gzclose(io_log_files[i].fd.g);
-	else
+	if (iolog_compress) {
+	    int errnum;
+
+	    if (gzclose(io_log_files[i].fd.g) != Z_OK)
+		errstr = gzerror(io_log_files[i].fd.g, &errnum);
+	} else
 #endif
-	    fclose(io_log_files[i].fd.f);
+	if (fclose(io_log_files[i].fd.f) != 0)
+	    errstr = strerror(errno);
     }
+
+    if (errstr != NULL)
+	sudo_warnx(U_("unable to write to I/O log file: %s"), errstr);
 
     sudoers_debug_deregister();
 
@@ -748,6 +756,8 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
+    static bool warned = false;
+    const char *errstr = NULL;
     int rval = true;
     debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
 
@@ -761,29 +771,47 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 #ifdef HAVE_ZLIB_H
     if (iolog_compress) {
-	if (gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len) != (int)len)
+	if (gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len) != (int)len) {
+	    int errnum;
+
+	    errstr = gzerror(io_log_files[idx].fd.g, &errnum);
 	    rval = -1;
+	}
     } else
 #endif
     {
-	if (fwrite(buf, 1, len, io_log_files[idx].fd.f) != len)
+	if (fwrite(buf, 1, len, io_log_files[idx].fd.f) != len) {
+	    errstr = strerror(errno);
 	    rval = -1;
+	}
     }
     sudo_timevalsub(&now, &last_time, &delay);
 #ifdef HAVE_ZLIB_H
     if (iolog_compress) {
 	if (gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %u\n", idx,
-	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) == 0)
+	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) == 0) {
+	    int errnum;
+
+	    errstr = gzerror(io_log_files[IOFD_TIMING].fd.g, &errnum);
 	    rval = -1;
+	}
     } else
 #endif
     {
 	if (fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %u\n", idx,
-	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) < 0)
+	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) < 0) {
+	    errstr = strerror(errno);
 	    rval = -1;
+	}
     }
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
+
+    if (errstr != NULL && !warned) {
+	/* Only warn about I/O log file errors once. */
+	sudo_warnx(U_("unable to write to I/O log file: %s"), errstr);
+	warned = true;
+    }
 
     debug_return_int(rval);
 }

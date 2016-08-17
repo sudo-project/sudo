@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 10, 2016
+.Dd August 17, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2057,6 +2057,19 @@ aliases from DNS.
 This flag is
 .Em @fqdn@
 by default.
+.It ignore_audit_errors
+Allow commands to be run even if
+.Nm
+cannot write to the audit log.
+If enabled, an audit log write failure is not treated as a fatal error.
+If disabled, a command may only be run after the audit event is successfully
+written.
+This flag is only effective on systems for which
+.Nm
+supports audit logging, including FreeBSD, Linux, Mac OS X and Solaris.
+This flag is
+.Em on
+by default.
 .It ignore_dot
 If set,
 .Nm sudo
@@ -2067,6 +2080,30 @@ environment variable; the
 itself is not modified.
 This flag is
 .Em @ignore_dot@
+by default.
+.It ignore_iolog_errors
+Allow commands to be run even if
+.Nm
+cannot write to the I/O log.
+If enabled, an I/O log write failure is not treated as a fatal error.
+If disabled, the command will be terminated if the I/O log cannot be written to.
+This flag is
+.Em off
+by default.
+.It ignore_logfile_errors
+Allow commands to be run even if
+.Nm
+cannot write to the log file.
+If enabled, a log file write failure is not treated as a fatal error.
+If disabled, a command may only be run after the log file entry is successfully
+written.
+This flag only has an effect when
+.Nm
+is configured to use file-based logging via the
+.Em logfile
+option.
+This flag is
+.Em on
 by default.
 .It ignore_local_sudoers
 If set via LDAP, parsing of

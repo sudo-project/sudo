@@ -188,6 +188,12 @@
 #define I_ALWAYS_QUERY_GROUP_PLUGIN93
 #define def_netgroup_tuple      (sudo_defs_table[94].sd_un.flag)
 #define I_NETGROUP_TUPLE        94
+#define def_ignore_audit_errors (sudo_defs_table[95].sd_un.flag)
+#define I_IGNORE_AUDIT_ERRORS   95
+#define def_ignore_iolog_errors (sudo_defs_table[96].sd_un.flag)
+#define I_IGNORE_IOLOG_ERRORS   96
+#define def_ignore_logfile_errors (sudo_defs_table[97].sd_un.flag)
+#define I_IGNORE_LOGFILE_ERRORS 97
 
 enum def_tuple {
 	never,

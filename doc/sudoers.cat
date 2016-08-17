@@ -1027,10 +1027,36 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
                        This flag is _o_f_f by default.
 
+     ignore_audit_errors
+                       Allow commands to be run even if ssuuddooeerrss cannot write
+                       to the audit log.  If enabled, an audit log write
+                       failure is not treated as a fatal error.  If disabled,
+                       a command may only be run after the audit event is
+                       successfully written.  This flag is only effective on
+                       systems for which ssuuddooeerrss supports audit logging,
+                       including FreeBSD, Linux, Mac OS X and Solaris.  This
+                       flag is _o_n by default.
+
      ignore_dot        If set, ssuuddoo will ignore "." or "" (both denoting
                        current directory) in the PATH environment variable;
                        the PATH itself is not modified.  This flag is _o_f_f by
                        default.
+
+     ignore_iolog_errors
+                       Allow commands to be run even if ssuuddooeerrss cannot write
+                       to the I/O log.  If enabled, an I/O log write failure
+                       is not treated as a fatal error.  If disabled, the
+                       command will be terminated if the I/O log cannot be
+                       written to.  This flag is _o_f_f by default.
+
+     ignore_logfile_errors
+                       Allow commands to be run even if ssuuddooeerrss cannot write
+                       to the log file.  If enabled, a log file write failure
+                       is not treated as a fatal error.  If disabled, a
+                       command may only be run after the log file entry is
+                       successfully written.  This flag only has an effect
+                       when ssuuddooeerrss is configured to use file-based logging
+                       via the _l_o_g_f_i_l_e option.  This flag is _o_n by default.
 
      ignore_local_sudoers
                        If set via LDAP, parsing of _/_e_t_c_/_s_u_d_o_e_r_s will be
@@ -2543,4 +2569,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.18                     August 10, 2016                    Sudo 1.8.18
+Sudo 1.8.18                     August 17, 2016                    Sudo 1.8.18

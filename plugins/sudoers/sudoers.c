@@ -492,7 +492,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-    if (!log_allowed(validated))
+    if (!log_allowed(validated) && !def_ignore_logfile_errors)
 	goto bad;
 
     switch (sudo_mode & MODE_MASK) {
@@ -602,13 +602,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		goto done;
 	    goto bad;
 	}
-	if (audit_success(edit_argc, edit_argv) != 0)
+	if (audit_success(edit_argc, edit_argv) != 0 && !def_ignore_audit_errors)
 	    goto done;
 
 	/* We want to run the editor with the unmodified environment. */
 	env_swap_old();
     } else {
-	if (audit_success(NewArgc, NewArgv) != 0)
+	if (audit_success(NewArgc, NewArgv) != 0 && !def_ignore_audit_errors)
 	    goto done;
     }
 

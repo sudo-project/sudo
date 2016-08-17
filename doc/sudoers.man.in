@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "August 10, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 17, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2194,6 +2194,20 @@ This flag is
 by default.
 .RE
 .TP 18n
+ignore_audit_errors
+Allow commands to be run even if
+\fBsudoers\fR
+cannot write to the audit log.
+If enabled, an audit log write failure is not treated as a fatal error.
+If disabled, a command may only be run after the audit event is successfully
+written.
+This flag is only effective on systems for which
+\fBsudoers\fR
+supports audit logging, including FreeBSD, Linux, Mac OS X and Solaris.
+This flag is
+\fIon\fR
+by default.
+.TP 18n
 ignore_dot
 If set,
 \fBsudo\fR
@@ -2204,6 +2218,32 @@ environment variable; the
 itself is not modified.
 This flag is
 \fI@ignore_dot@\fR
+by default.
+.TP 18n
+ignore_iolog_errors
+Allow commands to be run even if
+\fBsudoers\fR
+cannot write to the I/O log.
+If enabled, an I/O log write failure is not treated as a fatal error.
+If disabled, the command will be terminated if the I/O log cannot be written to.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
+ignore_logfile_errors
+Allow commands to be run even if
+\fBsudoers\fR
+cannot write to the log file.
+If enabled, a log file write failure is not treated as a fatal error.
+If disabled, a command may only be run after the log file entry is successfully
+written.
+This flag only has an effect when
+\fBsudoers\fR
+is configured to use file-based logging via the
+\fIlogfile\fR
+option.
+This flag is
+\fIon\fR
 by default.
 .TP 18n
 ignore_local_sudoers

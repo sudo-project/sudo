@@ -513,6 +513,9 @@ init_defaults(void)
 #ifdef HAVE_ZLIB_H
     def_compress_io = true;
 #endif
+    def_ignore_audit_errors = true;
+    def_ignore_iolog_errors = false;
+    def_ignore_logfile_errors = true;
 
     /* Now do the strings */
     if ((def_mailto = strdup(MAILTO)) == NULL)

@@ -532,6 +532,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if (asprintf(&command_info[info_len++], "closefrom=%d", def_closefrom) == -1)
 	    goto oom;
     }
+    if (def_ignore_iolog_errors) {
+	if ((command_info[info_len++] = strdup("ignore_iolog_errors=true")) == NULL)
+	    goto oom;
+    }
     if (def_noexec) {
 	if ((command_info[info_len++] = strdup("noexec=true")) == NULL)
 	    goto oom;
