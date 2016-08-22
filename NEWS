@@ -16,11 +16,15 @@ What's new in Sudo 1.8.18
    one.
 
  * Fixed a bug introduced in 1.8.17 where sudoers entries with long
-   commands lines could be truncated, preventing a match.  Bug #478.
+   commands lines could be truncated, preventing a match.  Bug #752.
 
  * The fqdn, runas_default and sudoers_locale Defaults settings are
    now applied before any other Defaults settings since they can
    change how other Defaults settings are parsed.
+
+ * On systems without the O_NOFOLLOW open(2) flag, when the NOFOLLOW
+   flag is set, sudoedit now checks whether the file is a symbolic link
+   before opening it as well as after the open.  Bug #753.
 
  * Sudo will now only resolve a user's group IDs to group names
    when sudoers includes group-based permissions.  Group lookups
