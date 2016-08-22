@@ -234,7 +234,7 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 
-	make_opts='${make_opts}${make_opts+ }docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
+	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
 	# Man pages should be compressed in .deb files
