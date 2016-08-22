@@ -1,6 +1,6 @@
 # Norwegian bokmål translation of sudoers.
 # This file is distributed under the same license as the sudo package.
-# Copyright (C) 2014 Free Software Foundation, Inc.
+# Copyright (C) 2016 Free Software Foundation, Inc.
 # Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013.
 # Åka Sikrom <a4@hush.com>, 2014-2016.
 #
@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sudoers-1.8.17b4\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2016-06-06 10:06-0600\n"
-"PO-Revision-Date: 2016-06-08 08:26+0100\n"
+"PO-Revision-Date: 2016-07-29 10:25+0200\n"
 "Last-Translator: Åka Sikrom <a4@hush.com>\n"
 "Language-Team: Norwegian Bokmaal <i18n-nb@lister.ping.uio.no>\n"
 "Language: Norwegian Bokmål\n"
@@ -208,12 +208,12 @@ msgstr "klarte ikke å lese fwtk-innstillinger"
 
 #: plugins/sudoers/auth/fwtk.c:57
 msgid "unable to connect to authentication server"
-msgstr "klarte ikke å koble til autentiseringstjeneren"
+msgstr "klarte ikke å koble til autentiseringstjener"
 
 #: plugins/sudoers/auth/fwtk.c:63 plugins/sudoers/auth/fwtk.c:87
 #: plugins/sudoers/auth/fwtk.c:121
 msgid "lost connection to authentication server"
-msgstr "tilkoblingen til autentiseringstjeneren ble brutt"
+msgstr "tilkobling til autentiseringstjener ble brutt"
 
 #: plugins/sudoers/auth/fwtk.c:67
 #, c-format
@@ -221,7 +221,7 @@ msgid ""
 "authentication server error:\n"
 "%s"
 msgstr ""
-"det oppstod en feil med autentiseringstjeneren:\n"
+"det oppstod en feil med autentiseringstjener:\n"
 "%s"
 
 #: plugins/sudoers/auth/kerb5.c:111
@@ -310,7 +310,7 @@ msgstr "klarte ikke å starte opp ACE API-biblioteket"
 
 #: plugins/sudoers/auth/securid5.c:99
 msgid "unable to contact the SecurID server"
-msgstr "klarte ikke å kontakte SecurID-tjeneren"
+msgstr "klarte ikke å kontakte SecurID-tjener"
 
 #: plugins/sudoers/auth/securid5.c:108
 msgid "User ID locked for SecurID Authentication"
@@ -384,7 +384,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Vi går ut i fra at systemadministratoren din har gitt deg en\n"
+"Vi går ut i fra at systemadministrator har gitt deg en\n"
 "typisk moralpreken om det du gjør. Det koker som regel ned til tre ting:\n"
 "\n"
 "    #1) Ha respekt for andres privatliv og personvern.\n"
@@ -438,11 +438,11 @@ msgstr "Send e-post hvis en bruker mislykkes i å autentisere seg"
 
 #: plugins/sudoers/def_data.c:55
 msgid "Send mail if the user is not in sudoers"
-msgstr "Send e-post hvis brukeren ikke står oppført i sudoers-fila"
+msgstr "Send e-post hvis bruker ikke finnes i sudoers-fil"
 
 #: plugins/sudoers/def_data.c:59
 msgid "Send mail if the user is not in sudoers for this host"
-msgstr "Send e-post hvis brukeren ikke står oppført i sudoers-fila for denne verten"
+msgstr "Send e-post hvis brukeren ikke finnes i sudoers-fil for denne verten"
 
 #: plugins/sudoers/def_data.c:63
 msgid "Send mail if the user is not allowed to run a command"
@@ -454,7 +454,7 @@ msgstr "Send e-post hvis brukeren prøver å kjøre en kommando"
 
 #: plugins/sudoers/def_data.c:71
 msgid "Use a separate timestamp for each user/tty combo"
-msgstr "Bruk et separat tidsstempel for hver kombinasjon av bruker og tty"
+msgstr "Bruk separat tidsstempel for hver kombinasjon av bruker og tty"
 
 #: plugins/sudoers/def_data.c:75
 msgid "Lecture user the first time they run sudo"
@@ -487,11 +487,11 @@ msgstr "Start et skall hvis sudo kjøres uten argumenter"
 
 #: plugins/sudoers/def_data.c:103
 msgid "Set $HOME to the target user when starting a shell with -s"
-msgstr "Velg målbrukerens $HOME når et skall startes med «-s»"
+msgstr "Velg målbrukers $HOME når et skall startes med «-s»"
 
 #: plugins/sudoers/def_data.c:107
 msgid "Always set $HOME to the target user's home directory"
-msgstr "Bruk alltid målbrukerens hjemmemappe som $HOME"
+msgstr "Bruk alltid målbrukers hjemmemappe som $HOME"
 
 #: plugins/sudoers/def_data.c:111
 msgid "Allow some information gathering to give useful error messages"
@@ -499,7 +499,7 @@ msgstr "Tillat informasjonsinnhenting for å gjøre feilmeldingene nyttige"
 
 #: plugins/sudoers/def_data.c:115
 msgid "Require fully-qualified hostnames in the sudoers file"
-msgstr "Krev fullstendige vertsnavn i sudoers-fila"
+msgstr "Krev fullstendige vertsnavn i sudoers-fil"
 
 #: plugins/sudoers/def_data.c:119
 msgid "Insult the user when they enter an incorrect password"
@@ -511,23 +511,23 @@ msgstr "Bare tillat brukere å kjøre sudo hvis de bruker en tty"
 
 #: plugins/sudoers/def_data.c:127
 msgid "Visudo will honor the EDITOR environment variable"
-msgstr "Visudo tar hensyn til EDITOR-miljøvariabelen"
+msgstr "Visudo tar hensyn til miljøvariabelen EDITOR"
 
 #: plugins/sudoers/def_data.c:131
 msgid "Prompt for root's password, not the users's"
-msgstr "Spør etter rotbrukerens passord, i stedet for brukerens eget passord"
+msgstr "Spør etter rotbrukers passord, i stedet for eget passord"
 
 #: plugins/sudoers/def_data.c:135
 msgid "Prompt for the runas_default user's password, not the users's"
-msgstr "Spør etter «runas_default»-brukerens passord, i stedet for eget passord"
+msgstr "Spør etter passord for «runas_default» i stedet for eget passord"
 
 #: plugins/sudoers/def_data.c:139
 msgid "Prompt for the target user's password, not the users's"
-msgstr "Spør etter målbrukerens passord, i stedet for eget passord"
+msgstr "Spør etter målbrukers passord, i stedet for eget passord"
 
 #: plugins/sudoers/def_data.c:143
 msgid "Apply defaults in the target user's login class if there is one"
-msgstr "Bruk standardverdier i målbrukerens innloggingsklasse, hvis den finnes"
+msgstr "Bruk standardverdier i målbrukers innloggingsklasse, hvis den finnes"
 
 #: plugins/sudoers/def_data.c:147
 msgid "Set the LOGNAME and USER environment variables"
@@ -539,7 +539,7 @@ msgstr "Velg målbrukers uid som effektiv uid, i stedet for faktisk uid"
 
 #: plugins/sudoers/def_data.c:155
 msgid "Don't initialize the group vector to that of the target user"
-msgstr "Ikke start opp målbrukerens gruppevektor"
+msgstr "Ikke last inn målbrukers gruppevektor"
 
 #: plugins/sudoers/def_data.c:159
 #, c-format
@@ -564,7 +564,7 @@ msgstr "Antall forsøk på å skrive inn passord: %u"
 #: plugins/sudoers/def_data.c:175
 #, c-format
 msgid "Umask to use or 0777 to use user's: 0%o"
-msgstr "U-maske som skal brukes, eller 0777 for å bruke brukerens egen: 0%o"
+msgstr "U-maske som skal brukes, eller 0777 for å bruke egen maske: 0%o"
 
 #: plugins/sudoers/def_data.c:179
 #, c-format
@@ -628,22 +628,22 @@ msgstr "Standard passord-ledetekst: %s"
 
 #: plugins/sudoers/def_data.c:227
 msgid "If set, passprompt will override system prompt in all cases."
-msgstr "Hvis dette er valgt, overstyrer passordledeteksten alltid systemledeteksten"
+msgstr "Hvis dette er valgt, blir system-ledetekst alltid overstyrt av passord-ledetekst."
 
 #: plugins/sudoers/def_data.c:231
 #, c-format
 msgid "Default user to run commands as: %s"
-msgstr "Standard bruker som kjører kommandoer: %s"
+msgstr "Standardbruker for kjøring av kommandoer: %s"
 
 #: plugins/sudoers/def_data.c:235
 #, c-format
 msgid "Value to override user's $PATH with: %s"
-msgstr "Verdi som overstyrer brukerens $PATH: %s"
+msgstr "Verdi som overstyrer brukerspesifikk $PATH: %s"
 
 #: plugins/sudoers/def_data.c:239
 #, c-format
 msgid "Path to the editor for use by visudo: %s"
-msgstr "Filbane til tekstbehandleren som visudo skal bruke: %s"
+msgstr "Filsti til tekstbehandler som visudo skal bruke: %s"
 
 #: plugins/sudoers/def_data.c:243
 #, c-format
@@ -726,11 +726,11 @@ msgstr "Bruk raskere joker-søking som er mindre presis (og som ikke søker i fi
 
 #: plugins/sudoers/def_data.c:315
 msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
-msgstr "U-maska som er valgt i «sudoers»-fila overstyrer brukerens maske, selv hvis «sudoers»-maska åpner for tilgang som brukermaska ikke gjør"
+msgstr "U-masker som er valgt i sudoers overstyrer brukermasker, selv hvis sudoers åpner for mer tilgang enn brukermaska"
 
 #: plugins/sudoers/def_data.c:319
 msgid "Log user's input for the command being run"
-msgstr "Loggfør brukerens inndata i kommandoen som kjøres"
+msgstr "Loggfør bruker-inndata i kommandoen som kjøres"
 
 #: plugins/sudoers/def_data.c:323
 msgid "Log the output of the command being run"
@@ -761,7 +761,7 @@ msgstr "Fil hvor inn- og utdatalogger skal lagres: %s"
 
 #: plugins/sudoers/def_data.c:347
 msgid "Add an entry to the utmp/utmpx file when allocating a pty"
-msgstr "Legg til en oppføring i utmp-/utmpx-fila når en pty tildeles"
+msgstr "Legg til en oppføring i utmp-/utmpx-fil ved tildeling av pty"
 
 #: plugins/sudoers/def_data.c:351
 msgid "Set the user in utmp to the runas user, not the invoking user"
@@ -1086,7 +1086,7 @@ msgstr "denne kommandoen tillates ikke"
 #: plugins/sudoers/logging.c:267
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
-msgstr "%s er ikke i sudoers-fila. Denne hendelsen blir rapportert.\n"
+msgstr "%s finnes ikke i sudoers-fil. Denne hendelsen blir rapportert.\n"
 
 #: plugins/sudoers/logging.c:270
 #, c-format
@@ -1335,7 +1335,7 @@ msgstr "klarte ikke å endre gid til rotbruker"
 #: plugins/sudoers/set_perms.c:269 plugins/sudoers/set_perms.c:590
 #: plugins/sudoers/set_perms.c:978 plugins/sudoers/set_perms.c:1274
 msgid "unable to change to runas gid"
-msgstr "klarte ikke å endre til kjør som-brukerens gid"
+msgstr "klarte ikke å endre til kjør som-gid"
 
 #: plugins/sudoers/set_perms.c:274 plugins/sudoers/set_perms.c:595
 #: plugins/sudoers/set_perms.c:983 plugins/sudoers/set_perms.c:1279
@@ -1441,7 +1441,7 @@ msgstr "fant ingen gyldig sudoers-kilde. Avslutter."
 
 #: plugins/sudoers/sudoers.c:271
 msgid "sudoers specifies that root is not allowed to sudo"
-msgstr "sudoers-fila tillater ikke rotbrukeren å kjøre sudo"
+msgstr "sudoers-fil tillater ikke rotbruker å kjøre sudo"
 
 #: plugins/sudoers/sudoers.c:328
 msgid "you are not permitted to use the -C option"
@@ -1744,12 +1744,12 @@ msgstr "tidsstempelet er for langt inn i fremtiden: %20.20s"
 #: plugins/sudoers/timestamp.c:879
 #, c-format
 msgid "unable to lock time stamp file %s"
-msgstr "klarte ikke å låse tidsstempel-fila %s"
+msgstr "klarte ikke å låse tidsstempel-fil %s"
 
 #: plugins/sudoers/timestamp.c:923 plugins/sudoers/timestamp.c:943
 #, c-format
 msgid "lecture status path too long: %s/%s"
-msgstr "filbanen «%s/%s» for moralpreken-status er for lang"
+msgstr "filsti for moralpreken-status («%s/%s») er for lang"
 
 #: plugins/sudoers/visudo.c:182
 #, c-format
@@ -1813,7 +1813,7 @@ msgstr "intern feil: fant ikke %s i lista!"
 #: plugins/sudoers/visudo.c:667 plugins/sudoers/visudo.c:676
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
-msgstr "klarte ikke å sette uid og gid for %s til (%u, %u)"
+msgstr "klarte ikke å endre uid og gid for %s til (%u, %u)"
 
 #: plugins/sudoers/visudo.c:671 plugins/sudoers/visudo.c:681
 #, c-format
@@ -1847,9 +1847,9 @@ msgid ""
 "  (Q)uit and save changes to sudoers file (DANGER!)\n"
 msgstr ""
 "Du har følgende valgmuligheter:\n"
-"  r(e)diger sudoers-fila på nytt\n"
-"  (x)avslutt uten å lagre endringene dine til sudoers-fila\n"
-"  (Q)avslutt og lagre endringene dine til sudoers-fila (FARLIG!)\n"
+"  (e) rediger sudoers-fil på nytt\n"
+"  (x) avslutt uten å lagre endringer i sudoers-fil\n"
+"  (Q) avslutt og lagre endringene i sudoers-fil (FARLIG!)\n"
 
 #: plugins/sudoers/visudo.c:844
 #, c-format
@@ -1922,7 +1922,7 @@ msgid ""
 "%s - safely edit the sudoers file\n"
 "\n"
 msgstr ""
-"%s - rediger sudoers-fila på en trygg måte\n"
+"%s - rediger sudoers-fil på en trygg måte\n"
 "\n"
 
 #: plugins/sudoers/visudo.c:1345
@@ -1945,7 +1945,7 @@ msgstr ""
 "  -q, --quiet       mindre detaljerte meldinger om syntaksfeil\n"
 "  -s, --strict      streng syntakskontroll\n"
 "  -V, --version     vis versjon og avslutt\n"
-"  -x, --export=utdatafil eksporter sudoers-fil i JSON-format til utdatafil"
+"  -x, --export=utdatafil skriv sudoers i JSON-format til valgt utdatafil"
 
 #: plugins/sudoers/visudo_json.c:1017
 #, c-format
@@ -1960,7 +1960,7 @@ msgstr "du har for mange nivåer av inkluderte filer"
 #~ msgstr "klarte ikke å tildele minne"
 
 #~ msgid "timestamp path too long: %s/%s"
-#~ msgstr "filbanen «%s/%s» for tidsstempel er for lang"
+#~ msgstr "filstien «%s/%s» for tidsstempel er for lang"
 
 #~ msgid "unable to stat editor (%s)"
 #~ msgstr "klarte ikke å undersøke redigeringsprogrammet (%s)"
