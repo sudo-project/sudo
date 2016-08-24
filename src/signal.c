@@ -154,6 +154,9 @@ init_signals(void)
     }
     /* Ignore SIGPIPE until exec. */
     if (saved_signals[SAVED_SIGPIPE].sa.sa_handler != SIG_IGN) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "will restore signal %d on exec", SIGPIPE);
+	saved_signals[SAVED_SIGPIPE].restore = true;
 	sa.sa_handler = SIG_IGN;
 	if (sigaction(SIGPIPE, &sa, NULL) != 0)
 	    sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
