@@ -718,7 +718,7 @@ check_defaults(int what, bool quiet)
 	}
 	/* Don't actually set the defaults value, just checking. */
 	tmp = *cur;
-	memset(&tmp.sd_un, 0, sizeof(&tmp.sd_un));
+	memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
 	if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
 	    rc = false;
 	free_default(&tmp);
