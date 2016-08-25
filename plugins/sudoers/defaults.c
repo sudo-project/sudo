@@ -378,6 +378,20 @@ run_early_defaults(void)
     debug_return_bool(rc);
 }
 
+static void
+free_default(struct sudo_defs_types *def)
+{
+    switch (def->type & T_MASK) {
+	case T_STR:
+	    free(def->sd_un.str);
+	    break;
+	case T_LIST:
+	    (void)list_op(NULL, 0, def, freeall);
+	    break;
+    }
+    memset(&def->sd_un, 0, sizeof(def->sd_un));
+}
+
 /*
  * Set default options to compiled-in values.
  * Any of these may be overridden at runtime by a "Defaults" file.
@@ -391,18 +405,8 @@ init_defaults(void)
 
     /* Clear any old settings. */
     if (!firsttime) {
-	for (def = sudo_defs_table; def->name; def++) {
-	    switch (def->type & T_MASK) {
-		case T_STR:
-		    free(def->sd_un.str);
-		    def->sd_un.str = NULL;
-		    break;
-		case T_LIST:
-		    (void)list_op(NULL, 0, def, freeall);
-		    break;
-	    }
-	    memset(&def->sd_un, 0, sizeof(def->sd_un));
-	}
+	for (def = sudo_defs_table; def->name != NULL; def++)
+	    free_default(def);
     }
 
     /* First initialize the flags. */
@@ -714,8 +718,10 @@ check_defaults(int what, bool quiet)
 	}
 	/* Don't actually set the defaults value, just checking. */
 	tmp = *cur;
+	memset(&tmp.sd_un, 0, sizeof(&tmp.sd_un));
 	if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
 	    rc = false;
+	free_default(&tmp);
     }
     debug_return_bool(rc);
 }
