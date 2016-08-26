@@ -833,7 +833,6 @@ store_str(const char *val, struct sudo_defs_types *def)
 static bool
 store_list(const char *str, struct sudo_defs_types *def, int op)
 {
-    const char *start, *end;
     debug_decl(store_list, SUDOERS_DEBUG_DEFAULTS)
 
     /* Remove all old members. */
@@ -842,20 +841,15 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 
     /* Split str into multiple space-separated words and act on each one. */
     if (str != NULL) {
-	end = str;
-	do {
-	    /* Remove leading blanks, if nothing but blanks we are done. */
-	    for (start = end; isblank((unsigned char)*start); start++)
-		;
-	    if (*start == '\0')
-		break;
+	const char *cp, *ep;
+	const char *end = str + strlen(str);
+	const enum list_ops lop = op == '-' ? delete : add;
 
-	    /* Find end position and perform operation. */
-	    for (end = start; *end && !isblank((unsigned char)*end); end++)
-		;
-	    if (!list_op(start, end - start, def, op == '-' ? delete : add))
+	for (cp = sudo_strsplit(str, end, " \t", &ep); cp != NULL;
+	    cp = sudo_strsplit(NULL, end, " \t", &ep)) {
+	    if (!list_op(cp, ep - cp, def, lop))
 		debug_return_bool(false);
-	} while (*end++ != '\0');
+	}
     }
     debug_return_bool(true);
 }
