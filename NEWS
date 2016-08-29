@@ -42,6 +42,10 @@ What's new in Sudo 1.8.18
  * Fixed a bug introduced in 1.8.17 where the SIGPIPE signal handler
    was not being restored when sudo directly executes the command.
 
+ * Fixed a bug where "sudo -l command" would indicate that a command
+   was runnable even when denied by sudoers when using the LDAP or
+   SSSD backends.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
