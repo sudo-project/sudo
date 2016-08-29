@@ -1380,8 +1380,9 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 
     for (i = 0; i < sss_result->num_rules; i++) {
 	rule = sss_result->rules + i;
-	if (sudo_sss_check_command(handle, rule, NULL) &&
-	    sudo_sss_check_runas(handle, rule)) {
+	if (!sudo_sss_check_runas(handle, rule))
+	    continue;
+	if (sudo_sss_check_command(handle, rule, NULL) == true) {
 	    found = true;
 	    goto done;
 	}

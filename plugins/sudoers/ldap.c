@@ -2568,8 +2568,9 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 	goto done;
     for (i = 0; i < lres->nentries; i++) {
 	entry = lres->entries[i].entry;
-	if (sudo_ldap_check_command(ld, entry, NULL) &&
-	    sudo_ldap_check_runas(ld, entry)) {
+	if (!sudo_ldap_check_runas(ld, entry))
+	    continue;
+	if (sudo_ldap_check_command(ld, entry, NULL) == true) {
 	    found = true;
 	    goto done;
 	}
