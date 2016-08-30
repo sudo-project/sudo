@@ -415,6 +415,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Allow commands to be run even if sudo cannot write to the log file"),
 	NULL,
     }, {
+	"match_group_by_gid", T_FLAG,
+	N_("Resolve groups in sudoers and match on the group ID, not the name"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -307,3 +307,6 @@ ignore_iolog_errors
 ignore_logfile_errors
 	T_FLAG
 	"Allow commands to be run even if sudo cannot write to the log file"
+match_group_by_gid
+	T_FLAG
+	"Resolve groups in sudoers and match on the group ID, not the name"

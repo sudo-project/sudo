@@ -194,6 +194,8 @@
 #define I_IGNORE_IOLOG_ERRORS   96
 #define def_ignore_logfile_errors (sudo_defs_table[97].sd_un.flag)
 #define I_IGNORE_LOGFILE_ERRORS 97
+#define def_match_group_by_gid  (sudo_defs_table[98].sd_un.flag)
+#define I_MATCH_GROUP_BY_GID    98
 
 enum def_tuple {
 	never,

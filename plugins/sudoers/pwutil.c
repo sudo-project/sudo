@@ -973,23 +973,48 @@ user_in_group(const struct passwd *pw, const char *group)
     }
 
     /*
-     * Next check the supplementary group vector.
-     * On BSD it includes the password db group too.
+     * Next match the group name.  By default, sudoers resolves all the user's
+     * group IDs to names and matches by name.  If match_group_by_gid is
+     * set, each group is sudoers is resolved and matching is by group ID.
      */
-    if ((grlist = sudo_get_grlist(pw)) != NULL) {
+    if (def_match_group_by_gid) {
+	gid_t gid;
+
+	/* Look up the ID of the group in sudoers. */
+	if ((grp = sudo_getgrnam(group)) == NULL)
+	    goto done;
+	gid = grp->gr_gid;
+
+	/* Check against user's primary (passwd file) group ID. */
+	if (gid == pw->pw_gid) {
+	    matched = true;
+	    goto done;
+	}
+
+	/* Check the supplementary group vector. */
+	if (gidlist == NULL && (gidlist = sudo_get_gidlist(pw)) != NULL) {
+	    for (i = 0; i < gidlist->ngids; i++) {
+		if (gid == gidlist->gids[i]) {
+		    matched = true;
+		    goto done;
+		}
+	    }
+	}
+    } else if ((grlist = sudo_get_grlist(pw)) != NULL) {
+	/* Check the supplementary group vector. */
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (strcasecmp(group, grlist->groups[i]) == 0) {
 		matched = true;
 		goto done;
 	    }
 	}
-    }
 
-    /* Finally check against user's primary (passwd file) group. */
-    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	if (strcasecmp(group, grp->gr_name) == 0) {
-	    matched = true;
-	    goto done;
+	/* Check against user's primary (passwd file) group. */
+	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
+	    if (strcasecmp(group, grp->gr_name) == 0) {
+		matched = true;
+		goto done;
+	    }
 	}
     }
 
