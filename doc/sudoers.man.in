@@ -2439,6 +2439,8 @@ file, matching by group ID instead of by group name.
 This flag is
 \fIoff\fR
 by default.
+.sp
+This setting is only supported by version 1.8.18 or higher.
 .TP 18n
 netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup

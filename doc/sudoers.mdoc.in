@@ -2285,6 +2285,8 @@ file, matching by group ID instead of by group name.
 This flag is
 .Em off
 by default.
+.Pp
+This setting is only supported by version 1.8.18 or higher.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
 tuple: host name, user name and domain (if one is set).

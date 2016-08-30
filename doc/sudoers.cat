@@ -1151,6 +1151,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        names listed in the _s_u_d_o_e_r_s file, matching by group ID
                        instead of by group name.  This flag is _o_f_f by default.
 
+                       This setting is only supported by version 1.8.18 or
+                       higher.
+
      netgroup_tuple    If set, netgroup lookups will be performed using the
                        full netgroup tuple: host name, user name and domain
                        (if one is set).  Historically, ssuuddoo only matched the
