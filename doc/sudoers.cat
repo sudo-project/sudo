@@ -1133,6 +1133,24 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        invoking user is not in the _s_u_d_o_e_r_s file.  This flag is
                        _o_n by default.
 
+     match_group_by_gid
+                       By default, when matching groups, ssuuddooeerrss will first
+                       resolve all the user's group IDs to group names and
+                       then compare those group names to any group names
+                       listed in the _s_u_d_o_e_r_s file.  This works well on systems
+                       where the number of groups listed in the _s_u_d_o_e_r_s file
+                       is larger than the number of groups a typical user
+                       belongs to.  On systems where group lookups are slow,
+                       where users may belong to a large number of groups, and
+                       where the number of groups listed in the _s_u_d_o_e_r_s file
+                       is relatively small, it may be prohibitively expensive
+                       and running commands via ssuuddoo may take longer than
+                       normal.  On such systems it may be faster to use the
+                       _m_a_t_c_h___g_r_o_u_p___b_y___g_i_d flag to avoid resolving the user's
+                       group IDs to group names and instead resolve all group
+                       names listed in the _s_u_d_o_e_r_s file, matching by group ID
+                       instead of by group name.  This flag is _o_f_f by default.
+
      netgroup_tuple    If set, netgroup lookups will be performed using the
                        full netgroup tuple: host name, user name and domain
                        (if one is set).  Historically, ssuuddoo only matched the
@@ -2569,4 +2587,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.18                     August 17, 2016                    Sudo 1.8.18
+Sudo 1.8.18                     August 30, 2016                    Sudo 1.8.18

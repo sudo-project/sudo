@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 17, 2016
+.Dd August 30, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2257,6 +2257,33 @@ user if the invoking user is not in the
 file.
 This flag is
 .Em @mail_no_user@
+by default.
+.It match_group_by_gid
+By default, when matching groups,
+.Nm
+will first resolve all the user's group IDs to group names and then
+compare those group names to any group names listed in the
+.Em sudoers
+file.
+This works well on systems where the number of groups listed in the
+.Em sudoers
+file is larger than the number of groups a typical user belongs to.
+On systems where group lookups are slow, where users may belong
+to a large number of groups, and where the number of groups listed
+in the
+.Em sudoers
+file is relatively small, it may be prohibitively expensive and
+running commands via
+.Nm sudo
+may take longer than normal.
+On such systems it may be faster to use the
+.Em match_group_by_gid
+flag to avoid resolving the user's group IDs to group names and
+instead resolve all group names listed in the
+.Em sudoers
+file, matching by group ID instead of by group name.
+This flag is
+.Em off
 by default.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup

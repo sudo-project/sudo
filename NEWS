@@ -46,6 +46,11 @@ What's new in Sudo 1.8.18
    was runnable even when denied by sudoers when using the LDAP or
    SSSD backends.
 
+ * The match_group_by_gid Defaults option has been added to allow
+   sites where group name resolution is slow and where sudoers only
+   contains a small number of groups to match groups by group ID
+   instead of by group name.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
