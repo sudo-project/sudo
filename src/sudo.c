@@ -201,7 +201,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Fill in user_info with user name, uid, cwd, etc. */
     if ((user_info = get_user_info(&user_details)) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	exit(EXIT_FAILURE); /* get_user_info printed error message */
 
     /* Disable core dumps if not enabled in sudo.conf. */
     disable_coredumps();
@@ -267,7 +267,7 @@ main(int argc, char *argv[], char *envp[])
 	    if (ok != 1) {
 		if (ok == -2)
 		    usage(1);
-		exit(1); /* plugin printed error message */
+		exit(EXIT_FAILURE); /* plugin printed error message */
 	    }
 	    /* Reset nargv/nargc based on argv_out. */
 	    /* XXX - leaks old nargv in shell mode */
@@ -500,7 +500,7 @@ get_user_info(struct user_details *ud)
     /* XXX - bound check number of entries */
     user_info = reallocarray(NULL, 32, sizeof(char *));
     if (user_info == NULL)
-	goto bad;
+	goto oom;
 
     ud->pid = getpid();
     ud->ppid = getppid();
@@ -524,7 +524,7 @@ get_user_info(struct user_details *ud)
 
     user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
-	goto bad;
+	goto oom;
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -532,26 +532,26 @@ get_user_info(struct user_details *ud)
 	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_SUDO_BSHELL;
     }
     if ((ud->shell = strdup(ud->shell)) == NULL)
-	goto bad;
+	goto oom;
 
     if (asprintf(&user_info[++i], "pid=%d", (int)ud->pid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "ppid=%d", (int)ud->ppid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "pgid=%d", (int)ud->pgid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "sid=%d", (int)ud->sid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid) == -1)
-	goto bad;
+	goto oom;
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
@@ -559,33 +559,35 @@ get_user_info(struct user_details *ud)
     if (getcwd(path, sizeof(path)) != NULL) {
 	user_info[++i] = sudo_new_key_val("cwd", path);
 	if (user_info[i] == NULL)
-	    goto bad;
+	    goto oom;
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if (get_process_ttyname(path, sizeof(path)) != NULL) {
 	user_info[++i] = sudo_new_key_val("tty", path);
 	if (user_info[i] == NULL)
-	    goto bad;
+	    goto oom;
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
     } else {
 	/* tty may not always be present */
-	if (errno != ENOENT)
+	if (errno != ENOENT) {
+	    sudo_warn(U_("unable to determine tty"));
 	    goto bad;
+	}
     }
 
     cp = sudo_gethostname();
     user_info[++i] = sudo_new_key_val("host", cp ? cp : "localhost");
     free(cp);
     if (user_info[i] == NULL)
-	goto bad;
+	goto oom;
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
     if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
-	goto bad;
+	goto oom;
     if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
-	goto bad;
+	goto oom;
 
     user_info[++i] = NULL;
 
@@ -594,6 +596,8 @@ get_user_info(struct user_details *ud)
 	goto bad;
 
     debug_return_ptr(user_info);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     while (i--)
 	free(user_info[i]);
@@ -730,7 +734,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    details->ngroups = sudo_parse_gids(cp, NULL, &details->groups);
 		    /* sudo_parse_gids() will print a warning on error. */
 		    if (details->ngroups == -1)
-			exit(1);
+			exit(EXIT_FAILURE); /* XXX */
 		    break;
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
