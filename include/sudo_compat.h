@@ -284,6 +284,11 @@ extern int errno;
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
+/* W_EXITCODE is not POSIX but the encoding of wait status is. */
+#ifndef W_EXITCODE
+# define W_EXITCODE(ret, sig)	((ret) << 8 | (sig))
+#endif
+
 /* Number of bits in a byte. */
 #ifndef NBBY
 # ifdef __NBBY

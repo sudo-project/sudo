@@ -1130,13 +1130,14 @@ done:
 
 /*
  * Run the command and wait for it to complete.
+ * Returns wait status suitable for use with the wait(2) macros.
  */
 int
 run_command(struct command_details *details)
 {
     struct plugin_container *plugin;
     struct command_status cstat;
-    int status = 1;
+    int status = W_EXITCODE(1, 0);
     debug_decl(run_command, SUDO_DEBUG_EXEC)
 
     cstat.type = CMD_INVALID;
@@ -1155,7 +1156,6 @@ run_command(struct command_details *details)
 		"calling I/O close with errno %d", cstat.val);
 	    iolog_close(plugin, 0, cstat.val);
 	}
-	status = 1;
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
