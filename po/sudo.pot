@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.18\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2016-08-21 14:10-0600\n"
+"POT-Creation-Date: 2016-08-31 05:48-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,11 +39,11 @@ msgstr ""
 #: src/parse_args.c:180 src/parse_args.c:202 src/parse_args.c:370
 #: src/parse_args.c:466 src/parse_args.c:485 src/preserve_fds.c:47
 #: src/preserve_fds.c:130 src/selinux.c:83 src/selinux.c:292 src/selinux.c:415
-#: src/selinux.c:424 src/sesh.c:115 src/sudo.c:204 src/sudo.c:399
-#: src/sudo.c:418 src/sudo.c:482 src/sudo.c:656 src/sudo.c:666 src/sudo.c:686
-#: src/sudo.c:705 src/sudo.c:714 src/sudo.c:723 src/sudo.c:740 src/sudo.c:781
-#: src/sudo.c:791 src/sudo.c:811 src/sudo.c:1232 src/sudo.c:1253
-#: src/sudo.c:1427 src/sudo.c:1521 src/sudo_edit.c:151 src/sudo_edit.c:773
+#: src/selinux.c:424 src/sesh.c:115 src/sudo.c:399 src/sudo.c:418
+#: src/sudo.c:482 src/sudo.c:600 src/sudo.c:660 src/sudo.c:670 src/sudo.c:690
+#: src/sudo.c:709 src/sudo.c:718 src/sudo.c:727 src/sudo.c:744 src/sudo.c:785
+#: src/sudo.c:795 src/sudo.c:815 src/sudo.c:1236 src/sudo.c:1257
+#: src/sudo.c:1431 src/sudo.c:1525 src/sudo_edit.c:151 src/sudo_edit.c:773
 #: src/sudo_edit.c:870 src/sudo_edit.c:983 src/sudo_edit.c:1003
 #, c-format
 msgid "%s: %s"
@@ -58,9 +58,9 @@ msgstr ""
 #: src/parse_args.c:202 src/parse_args.c:370 src/parse_args.c:466
 #: src/parse_args.c:485 src/preserve_fds.c:47 src/preserve_fds.c:130
 #: src/selinux.c:83 src/selinux.c:292 src/selinux.c:415 src/selinux.c:424
-#: src/sesh.c:115 src/sudo.c:204 src/sudo.c:399 src/sudo.c:418 src/sudo.c:482
-#: src/sudo.c:811 src/sudo.c:1232 src/sudo.c:1253 src/sudo.c:1427
-#: src/sudo.c:1521 src/sudo_edit.c:151 src/sudo_edit.c:773 src/sudo_edit.c:870
+#: src/sesh.c:115 src/sudo.c:399 src/sudo.c:418 src/sudo.c:482 src/sudo.c:600
+#: src/sudo.c:815 src/sudo.c:1236 src/sudo.c:1257 src/sudo.c:1431
+#: src/sudo.c:1525 src/sudo_edit.c:151 src/sudo_edit.c:773 src/sudo_edit.c:870
 #: src/sudo_edit.c:983 src/sudo_edit.c:1003
 msgid "unable to allocate memory"
 msgstr ""
@@ -142,7 +142,7 @@ msgstr ""
 #: src/exec_pty.c:1348 src/exec_pty.c:1353 src/exec_pty.c:1355
 #: src/exec_pty.c:1369 src/exec_pty.c:1380 src/exec_pty.c:1382
 #: src/exec_pty.c:1384 src/exec_pty.c:1386 src/exec_pty.c:1388
-#: src/exec_pty.c:1390 src/exec_pty.c:1392 src/signal.c:148 src/signal.c:159
+#: src/exec_pty.c:1390 src/exec_pty.c:1392 src/signal.c:148 src/signal.c:162
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr ""
@@ -560,7 +560,7 @@ msgstr ""
 msgid "unable to run %s as a login shell"
 msgstr ""
 
-#: src/sesh.c:125 src/sudo.c:1291
+#: src/sesh.c:125 src/sudo.c:1295
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -654,86 +654,90 @@ msgstr ""
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:860
+#: src/sudo.c:574
+msgid "unable to determine tty"
+msgstr ""
+
+#: src/sudo.c:864
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:863
+#: src/sudo.c:867
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:869
+#: src/sudo.c:873
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:950
+#: src/sudo.c:954
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:957
+#: src/sudo.c:961
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:963
+#: src/sudo.c:967
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:1034
+#: src/sudo.c:1038
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:1047
+#: src/sudo.c:1051
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:1063
+#: src/sudo.c:1067
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:1071
+#: src/sudo.c:1075
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:1084 src/sudo.c:1090 src/sudo.c:1097
+#: src/sudo.c:1088 src/sudo.c:1094 src/sudo.c:1101
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1115
+#: src/sudo.c:1119
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1173
+#: src/sudo.c:1177
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1319
+#: src/sudo.c:1323
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr ""
 
-#: src/sudo.c:1337
+#: src/sudo.c:1341
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1354
+#: src/sudo.c:1358
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1369
+#: src/sudo.c:1373
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""

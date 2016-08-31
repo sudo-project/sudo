@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.18\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2016-08-21 14:10-0600\n"
+"POT-Creation-Date: 2016-08-31 05:48-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,8 +51,8 @@ msgstr ""
 #: plugins/sudoers/alias.c:136 plugins/sudoers/auth/bsdauth.c:141
 #: plugins/sudoers/auth/kerb5.c:119 plugins/sudoers/auth/kerb5.c:145
 #: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/defaults.c:572
-#: plugins/sudoers/defaults.c:820 plugins/sudoers/defaults.c:974
+#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/defaults.c:576
+#: plugins/sudoers/defaults.c:826 plugins/sudoers/defaults.c:974
 #: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
 #: plugins/sudoers/editor.c:93 plugins/sudoers/env.c:234
 #: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:134
@@ -66,10 +66,10 @@ msgstr ""
 #: plugins/sudoers/ldap.c:1856 plugins/sudoers/ldap.c:1909
 #: plugins/sudoers/ldap.c:1924 plugins/sudoers/ldap.c:2020
 #: plugins/sudoers/ldap.c:2053 plugins/sudoers/ldap.c:2206
-#: plugins/sudoers/ldap.c:2303 plugins/sudoers/ldap.c:3104
-#: plugins/sudoers/ldap.c:3136 plugins/sudoers/ldap.c:3442
-#: plugins/sudoers/ldap.c:3470 plugins/sudoers/ldap.c:3486
-#: plugins/sudoers/ldap.c:3576 plugins/sudoers/ldap.c:3592
+#: plugins/sudoers/ldap.c:2303 plugins/sudoers/ldap.c:3105
+#: plugins/sudoers/ldap.c:3137 plugins/sudoers/ldap.c:3443
+#: plugins/sudoers/ldap.c:3471 plugins/sudoers/ldap.c:3487
+#: plugins/sudoers/ldap.c:3577 plugins/sudoers/ldap.c:3593
 #: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:188
 #: plugins/sudoers/logging.c:450 plugins/sudoers/logging.c:471
 #: plugins/sudoers/logging.c:682 plugins/sudoers/logging.c:940
@@ -116,7 +116,7 @@ msgstr ""
 
 #: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:320
 #: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/defaults.c:572 plugins/sudoers/defaults.c:820
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
 #: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
 #: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
 #: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
@@ -131,10 +131,10 @@ msgstr ""
 #: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
 #: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
 #: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
-#: plugins/sudoers/ldap.c:3104 plugins/sudoers/ldap.c:3136
-#: plugins/sudoers/ldap.c:3442 plugins/sudoers/ldap.c:3469
-#: plugins/sudoers/ldap.c:3485 plugins/sudoers/ldap.c:3576
-#: plugins/sudoers/ldap.c:3592 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3470
+#: plugins/sudoers/ldap.c:3486 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
 #: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:940
 #: plugins/sudoers/match.c:505 plugins/sudoers/match.c:539
@@ -834,6 +834,10 @@ msgstr ""
 msgid "Allow commands to be run even if sudo cannot write to the log file"
 msgstr ""
 
+#: plugins/sudoers/def_data.c:419
+msgid "Resolve groups in sudoers and match on the group ID, not the name"
+msgstr ""
+
 #: plugins/sudoers/defaults.c:203
 #, c-format
 msgid "no value specified for `%s'"
@@ -859,7 +863,7 @@ msgstr ""
 msgid "value `%s' is invalid for option `%s'"
 msgstr ""
 
-#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:712
+#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:716
 #: plugins/sudoers/visudo_json.c:632 plugins/sudoers/visudo_json.c:667
 #, c-format
 msgid "unknown defaults entry `%s'"
@@ -1029,23 +1033,23 @@ msgid "    Order: %s\n"
 msgstr ""
 
 #: plugins/sudoers/ldap.c:2497 plugins/sudoers/parse.c:556
-#: plugins/sudoers/sssd.c:1567
+#: plugins/sudoers/sssd.c:1568
 #, c-format
 msgid "    Commands:\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:3056
+#: plugins/sudoers/ldap.c:3057
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:3092
+#: plugins/sudoers/ldap.c:3093
 msgid ""
 "start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
 "ldap_start_tls_s_np()"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:3340
+#: plugins/sudoers/ldap.c:3341
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
@@ -1408,14 +1412,14 @@ msgstr ""
 msgid "unable to find symbol \"%s\" in %s"
 msgstr ""
 
-#: plugins/sudoers/sssd.c:1491
+#: plugins/sudoers/sssd.c:1492
 #, c-format
 msgid ""
 "\n"
 "SSSD Role: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sssd.c:1496
+#: plugins/sudoers/sssd.c:1497
 #, c-format
 msgid ""
 "\n"
