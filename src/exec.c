@@ -785,8 +785,7 @@ dispatch_pending_signals(struct command_status *cstat)
 	}
     }
     /* Only stop if we haven't already been terminated. */
-    if (signo == SIGTSTP)
-    {
+    if (signo == SIGTSTP) {
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
