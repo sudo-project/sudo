@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # Generate sudo_defs_table and associated defines
 #
@@ -8,6 +8,8 @@
 #	TYPE
 #	description (or NULL)
 #	array of struct def_values if TYPE == T_TUPLE
+
+use warnings;
 
 # Deal with optional -o (output) argument
 if ($#ARGV > 0 && $ARGV[0] eq "-o") {
@@ -35,7 +37,7 @@ open(CFILE, ">$cfile") || die "$0: can't open $cfile: $!\n";
 $count = 0;
 @tuple_values = ( "never" );
 @records = ();
-while(<IN>) {
+while (<IN>) {
     chomp;
     s/\s*#.*$//;
     next if /^\s*$/;
@@ -102,7 +104,7 @@ for ($i = 0; $i < $count; $i++) {
 # Print each record
 print CFILE "struct sudo_defs_types sudo_defs_table[] = {\n    {\n";
 for ($i = 0; $i < $count; $i++) {
-    &print_record($records[$i], $i);
+    print_record($records[$i], $i);
 }
 print CFILE "\tNULL, 0, NULL\n    }\n};\n";
 
@@ -120,10 +122,15 @@ close(IN);
 close(HEADER);
 close(CFILE);
 
+exit(0);
+
 sub print_record {
     my ($rec, $recnum) = @_;
     my ($i, $v, $defname);
+
     # each variable gets a macro to access its value
+    $defname = "I_" . uc($rec->[0]);
+    printf HEADER "#define %-23s %d\n", $defname, $recnum;
     for ($rec->[1]) {
 	if    (/^T_INT/)    { $v = "ival"; }
 	elsif (/^T_UINT/)   { $v = "uival"; }
@@ -137,13 +144,8 @@ sub print_record {
 	elsif (/^T_FLOAT/)  { $v = "fval"; }
 	else { die "$0: unknown defaults type: $_\n"; }
     }
-    printf HEADER "#define %-23s (sudo_defs_table[$recnum].sd_un.${v})\n",
+    printf HEADER "#define %-23s (sudo_defs_table[$defname].sd_un.${v})\n",
 	"def_$rec->[0]";
-
-    $defname = "I_" . uc($rec->[0]);
-    printf HEADER "#define %-24s%d", $defname, $recnum;
-    #print HEADER "\t/* $rec->[2] */" if defined($rec->[2]);
-    print HEADER "\n";
 
     print CFILE "\t\"$rec->[0]\", $rec->[1],\n\t$rec->[2],\n";
     if (defined($rec->[3])) {
