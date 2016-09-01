@@ -139,8 +139,8 @@
 #define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
 
 /* sudo_parseln() flags */
-#define PARSELN_COMM_BOL	1	/* comments only at begining of line */
-#define PARSELN_CONT_IGN	2	/* ignore line continuation char */
+#define PARSELN_COMM_BOL	0x01	/* comments only at begining of line */
+#define PARSELN_CONT_IGN	0x02	/* ignore line continuation char */
 
 /*
  * Macros to quiet gcc's warn_unused_result attribute.
