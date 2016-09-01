@@ -562,11 +562,7 @@ in a case-independent manner.
 Lines beginning with a pound sign
 (\(oq#\(cq)
 are ignored.
-Long lines can be continued with a backslash
-(\(oq\e\(cq)
-as the last character on the line.
-Note that leading white space is removed from the beginning of lines
-even when the continuation character is used.
+Leading white space is removed from the beginning of lines.
 .TP 6n
 \fBBIND_TIMELIMIT\fR \fIseconds\fR
 The

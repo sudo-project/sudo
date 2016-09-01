@@ -315,10 +315,8 @@ DDEESSCCRRIIPPTTIIOONN
      by ssuuddoo are honored.  Configuration options are listed below in upper
      case but are parsed in a case-independent manner.
 
-     Lines beginning with a pound sign (`#') are ignored.  Long lines can be
-     continued with a backslash (`\') as the last character on the line.  Note
-     that leading white space is removed from the beginning of lines even when
-     the continuation character is used.
+     Lines beginning with a pound sign (`#') are ignored.  Leading white space
+     is removed from the beginning of lines.
 
      BBIINNDD__TTIIMMEELLIIMMIITT _s_e_c_o_n_d_s
            The BBIINNDD__TTIIMMEELLIIMMIITT parameter specifies the amount of time, in

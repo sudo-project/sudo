@@ -534,11 +534,7 @@ in a case-independent manner.
 Lines beginning with a pound sign
 .Pq Ql #
 are ignored.
-Long lines can be continued with a backslash
-.Pq Ql \e
-as the last character on the line.
-Note that leading white space is removed from the beginning of lines
-even when the continuation character is used.
+Leading white space is removed from the beginning of lines.
 .Bl -tag -width 4n
 .It Sy BIND_TIMELIMIT Ar seconds
 The
