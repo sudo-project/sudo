@@ -570,10 +570,8 @@ get_user_info(struct user_details *ud)
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
     } else {
 	/* tty may not always be present */
-	if (errno != ENOENT) {
+	if (errno != ENOENT)
 	    sudo_warn(U_("unable to determine tty"));
-	    goto bad;
-	}
     }
 
     cp = sudo_gethostname();
