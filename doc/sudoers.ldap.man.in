@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "5" "June 15, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "September 1, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -559,11 +559,9 @@ are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .PP
-The pound sign
+Lines beginning with a pound sign
 (\(oq#\(cq)
-is used to indicate a comment.
-Both the comment character and any text after it, up to the end of
-the line, are ignored.
+are ignored.
 Long lines can be continued with a backslash
 (\(oq\e\(cq)
 as the last character on the line.

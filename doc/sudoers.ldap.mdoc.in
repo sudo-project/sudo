@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 15, 2016
+.Dd September 1, 2016
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -531,11 +531,9 @@ are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .Pp
-The pound sign
+Lines beginning with a pound sign
 .Pq Ql #
-is used to indicate a comment.
-Both the comment character and any text after it, up to the end of
-the line, are ignored.
+are ignored.
 Long lines can be continued with a backslash
 .Pq Ql \e
 as the last character on the line.

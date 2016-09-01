@@ -315,11 +315,10 @@ DDEESSCCRRIIPPTTIIOONN
      by ssuuddoo are honored.  Configuration options are listed below in upper
      case but are parsed in a case-independent manner.
 
-     The pound sign (`#') is used to indicate a comment.  Both the comment
-     character and any text after it, up to the end of the line, are ignored.
-     Long lines can be continued with a backslash (`\') as the last character
-     on the line.  Note that leading white space is removed from the beginning
-     of lines even when the continuation character is used.
+     Lines beginning with a pound sign (`#') are ignored.  Long lines can be
+     continued with a backslash (`\') as the last character on the line.  Note
+     that leading white space is removed from the beginning of lines even when
+     the continuation character is used.
 
      BBIINNDD__TTIIMMEELLIIMMIITT _s_e_c_o_n_d_s
            The BBIINNDD__TTIIMMEELLIIMMIITT parameter specifies the amount of time, in
@@ -907,4 +906,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.18                      June 15, 2016                     Sudo 1.8.18
+Sudo 1.8.18                    September 1, 2016                   Sudo 1.8.18
