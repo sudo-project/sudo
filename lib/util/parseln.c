@@ -50,10 +50,11 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
     size_t linesize = 0, total = 0;
     ssize_t len;
     char *cp, *line = NULL;
-    bool continued;
+    bool continued, comment;
     debug_decl(sudo_parseln, SUDO_DEBUG_UTIL)
 
     do {
+	comment = false;
 	continued = false;
 	len = getline(&line, &linesize, fp);
 	if (len == -1)
@@ -70,10 +71,14 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 	    if (cp == line || !ISSET(flags, PARSELN_COMM_BOL)) {
 		*cp = '\0';
 		len = (ssize_t)(cp - line);
+		comment = true;
 	    }
-	} else if (len > 0 && line[len - 1] == '\\' && (len == 1 || line[len - 2] != '\\')) {
-	    line[--len] = '\0';
-	    continued = true;
+	}
+	if (!comment && !ISSET(flags, PARSELN_CONT_IGN)) {
+	    if (len > 0 && line[len - 1] == '\\' && (len == 1 || line[len - 2] != '\\')) {
+		line[--len] = '\0';
+		continued = true;
+	    }
 	}
 
 	/* Trim leading and trailing whitespace */

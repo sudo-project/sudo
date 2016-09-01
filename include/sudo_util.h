@@ -140,6 +140,7 @@
 
 /* sudo_parseln() flags */
 #define PARSELN_COMM_BOL	1	/* comments only at begining of line */
+#define PARSELN_CONT_IGN	2	/* ignore line continuation char */
 
 /*
  * Macros to quiet gcc's warn_unused_result attribute.
