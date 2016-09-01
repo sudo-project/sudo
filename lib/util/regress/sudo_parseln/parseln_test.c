@@ -51,7 +51,7 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "parseln_test");
 
-    while (sudo_parseln(&line, &linesize, &lineno, stdin) != -1)
+    while (sudo_parseln(&line, &linesize, &lineno, stdin, 0) != -1)
 	printf("%6u\t%s\n", lineno, line);
     free(line);
     exit(0);

@@ -76,7 +76,7 @@ sudo_read_nss(void)
     if ((fp = fopen(_PATH_NSSWITCH_CONF, "r")) == NULL)
 	goto nomatch;
 
-    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+    while (sudo_parseln(&line, &linesize, NULL, fp, 0) != -1) {
 	char *cp, *last;
 
 	/* Skip blank or comment lines */
@@ -156,7 +156,7 @@ sudo_read_nss(void)
     if ((fp = fopen(_PATH_NETSVC_CONF, "r")) == NULL)
 	goto nomatch;
 
-    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+    while (sudo_parseln(&line, &linesize, NULL, fp, 0) != -1) {
 	/* Skip blank or comment lines */
 	if (*(cp = line) == '\0')
 	    continue;

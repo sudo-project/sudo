@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -138,6 +138,9 @@
 #define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
 #define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
 
+/* sudo_parseln() flags */
+#define PARSELN_COMM_BOL	1	/* comments only at begining of line */
+
 /*
  * Macros to quiet gcc's warn_unused_result attribute.
  */
@@ -190,7 +193,8 @@ __dso_public bool sudo_lock_region_v1(int fd, int action, off_t len);
 
 /* parseln.c */
 __dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
-#define sudo_parseln(_a, _b, _c, _d) sudo_parseln_v1((_a), (_b), (_c), (_d))
+__dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp, int flags);
+#define sudo_parseln(_a, _b, _c, _d, _e) sudo_parseln_v2((_a), (_b), (_c), (_d), (_e))
 
 /* progname.c */
 __dso_public void initprogname(const char *);

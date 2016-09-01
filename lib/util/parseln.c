@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2007, 2013-2015
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007, 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,7 +45,7 @@
  *       could also make comment char and line continuation configurable
  */
 ssize_t
-sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
+sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, int flags)
 {
     size_t linesize = 0, total = 0;
     ssize_t len;
@@ -68,8 +67,10 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 
 	/* Remove comments or check for line continuation (but not both) */
 	if ((cp = strchr(line, '#')) != NULL) {
-	    *cp = '\0';
-	    len = (ssize_t)(cp - line);
+	    if (cp == line || !ISSET(flags, PARSELN_COMM_BOL)) {
+		*cp = '\0';
+		len = (ssize_t)(cp - line);
+	    }
 	} else if (len > 0 && line[len - 1] == '\\' && (len == 1 || line[len - 2] != '\\')) {
 	    line[--len] = '\0';
 	    continued = true;
@@ -116,4 +117,10 @@ sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
     if (len == -1 && total == 0)
 	debug_return_ssize_t(-1);
     debug_return_ssize_t(total);
+}
+
+ssize_t
+sudo_parseln_v1(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
+{
+    return sudo_parseln_v2(bufp, bufsizep, lineno, fp, 0);
 }

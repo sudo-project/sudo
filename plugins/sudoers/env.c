@@ -1184,7 +1184,7 @@ read_env_file(const char *path, int overwrite)
 	debug_return_bool(rval);
     }
 
-    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+    while (sudo_parseln(&line, &linesize, NULL, fp, 0) != -1) {
 	/* Skip blank or comment lines */
 	if (*(var = line) == '\0')
 	    continue;

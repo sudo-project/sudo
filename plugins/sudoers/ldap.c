@@ -2024,7 +2024,7 @@ sudo_ldap_read_config(void)
     if ((fp = fopen(path_ldap_conf, "r")) == NULL)
 	debug_return_bool(false);
 
-    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+    while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_COMM_BOL) != -1) {
 	if (*line == '\0')
 	    continue;		/* skip empty line */
 

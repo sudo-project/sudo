@@ -609,7 +609,7 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 	goto done;
     }
 
-    while (sudo_parseln(&line, &linesize, &conf_lineno, fp) != -1) {
+    while (sudo_parseln(&line, &linesize, &conf_lineno, fp, 0) != -1) {
 	struct sudo_conf_table *cur;
 	unsigned int i;
 	char *cp;
