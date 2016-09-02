@@ -51,6 +51,14 @@ What's new in Sudo 1.8.18
    contains a small number of groups to match groups by group ID
    instead of by group name.
 
+ * Fixed a bug on Linux where a 32-bit sudo binary could fail with
+   an "unable to allocate memory" error when run on a 64-bit system.
+   Bug #755
+
+ * When parsing ldap.conf, sudo will now only treat a '#' character
+   as the start of a comment when it is at the beginning of the
+   line.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
