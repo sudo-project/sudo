@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,8 +16,8 @@
 
 #include <config.h>
 
-/* Large files not supported by procfs.h */
-#if defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)
+/* Large files not supported by procfs.h on Solaris. */
+#if defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
 # undef _FILE_OFFSET_BITS
 # undef _LARGE_FILES
 #endif
