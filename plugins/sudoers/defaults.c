@@ -82,6 +82,7 @@ static struct early_default early_defaults[] = {
 #else
     { "fqdn" },
 #endif
+    { "match_group_by_gid" },
     { "group_plugin" },
     { "runas_default" },
     { "sudoers_locale" },
