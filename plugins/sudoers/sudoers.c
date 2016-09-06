@@ -415,13 +415,19 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto bad;
 
     /* Require a password if sudoers says so.  */
-    rval = check_user(validated, sudo_mode);
-    if (rval != true) {
+    switch (check_user(validated, sudo_mode)) {
+    case true:
+	/* user authenticated successfully. */
+	break;
+    case false:
 	/* Note: log_denial() calls audit for us. */
 	if (!ISSET(validated, VALIDATE_SUCCESS)) {
 	    if (!log_denial(validated, false))
-		rval = -1;
+		goto done;
 	}
+	goto bad;
+    default:
+	/* some other error, rval is -1. */
 	goto done;
     }
 
