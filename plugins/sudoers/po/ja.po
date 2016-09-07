@@ -4,18 +4,19 @@
 # Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>, 2012, 2015, 2016.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.18b1\n"
+"Project-Id-Version: sudoers 1.8.18b4\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2016-08-21 14:10-0600\n"
-"PO-Revision-Date: 2016-08-23 23:19+0900\n"
+"POT-Creation-Date: 2016-08-31 05:48-0600\n"
+"PO-Revision-Date: 2016-09-04 21:10+0900\n"
 "Last-Translator: Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Poedit-Basepath: sudo-1.8.18b1\n"
+"X-Poedit-Basepath: sudo-1.8.18b4\n"
 "X-Generator: Poedit 1.8.8\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -54,7 +55,7 @@ msgstr "残念、また試してください。"
 #: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
 #: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:443
 #: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/auth/sia.c:59
-#: plugins/sudoers/defaults.c:572 plugins/sudoers/defaults.c:820
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
 #: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
 #: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
 #: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
@@ -69,10 +70,10 @@ msgstr "残念、また試してください。"
 #: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
 #: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
 #: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
-#: plugins/sudoers/ldap.c:3104 plugins/sudoers/ldap.c:3136
-#: plugins/sudoers/ldap.c:3442 plugins/sudoers/ldap.c:3470
-#: plugins/sudoers/ldap.c:3486 plugins/sudoers/ldap.c:3576
-#: plugins/sudoers/ldap.c:3592 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3471
+#: plugins/sudoers/ldap.c:3487 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
 #: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:682
 #: plugins/sudoers/logging.c:940 plugins/sudoers/match.c:506
@@ -118,7 +119,7 @@ msgstr "認証方式にはパスが必要です"
 
 #: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:320
 #: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/defaults.c:572 plugins/sudoers/defaults.c:820
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
 #: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
 #: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
 #: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
@@ -133,10 +134,10 @@ msgstr "認証方式にはパスが必要です"
 #: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
 #: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
 #: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
-#: plugins/sudoers/ldap.c:3104 plugins/sudoers/ldap.c:3136
-#: plugins/sudoers/ldap.c:3442 plugins/sudoers/ldap.c:3469
-#: plugins/sudoers/ldap.c:3485 plugins/sudoers/ldap.c:3576
-#: plugins/sudoers/ldap.c:3592 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3470
+#: plugins/sudoers/ldap.c:3486 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
 #: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:940
 #: plugins/sudoers/match.c:505 plugins/sudoers/match.c:539
@@ -837,6 +838,10 @@ msgstr "I/O ログファイルへの書き込みができなくても、コマ�
 msgid "Allow commands to be run even if sudo cannot write to the log file"
 msgstr "ログファイルへの書き込みができなくても、コマンドの実行を許可する"
 
+#: plugins/sudoers/def_data.c:419
+msgid "Resolve groups in sudoers and match on the group ID, not the name"
+msgstr "グループの照合を sudoers の中で行い、グループ名でなくグループIDを用いる"
+
 #: plugins/sudoers/defaults.c:203
 #, c-format
 msgid "no value specified for `%s'"
@@ -862,7 +867,7 @@ msgstr "0x%x はオプション %s のデフォルトタイプとして無効で
 msgid "value `%s' is invalid for option `%s'"
 msgstr "オプション `%2$s' の値 `%1$s' は無効です"
 
-#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:712
+#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:716
 #: plugins/sudoers/visudo_json.c:632 plugins/sudoers/visudo_json.c:667
 #, c-format
 msgid "unknown defaults entry `%s'"
@@ -1035,21 +1040,21 @@ msgid "    Order: %s\n"
 msgstr "    Order: %s\n"
 
 #: plugins/sudoers/ldap.c:2497 plugins/sudoers/parse.c:556
-#: plugins/sudoers/sssd.c:1567
+#: plugins/sudoers/sssd.c:1568
 #, c-format
 msgid "    Commands:\n"
 msgstr "    コマンド:\n"
 
-#: plugins/sudoers/ldap.c:3056
+#: plugins/sudoers/ldap.c:3057
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "LDAP を初期化できません: %s"
 
-#: plugins/sudoers/ldap.c:3092
+#: plugins/sudoers/ldap.c:3093
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls が指定されていますが、LDAP ライブラリが ldap_start_tls_s() または ldap_start_tls_s_np() をサポートしていません"
 
-#: plugins/sudoers/ldap.c:3340
+#: plugins/sudoers/ldap.c:3341
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "無効な sudoOrder 属性です: %s"
@@ -1417,7 +1422,7 @@ msgstr "SSS のソースを初期化できません。SSSD はあなたのマシ
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "シンボル \"%s\" が %s 内にありません"
 
-#: plugins/sudoers/sssd.c:1491
+#: plugins/sudoers/sssd.c:1492
 #, c-format
 msgid ""
 "\n"
@@ -1426,7 +1431,7 @@ msgstr ""
 "\n"
 "SSSD 役割: %s\n"
 
-#: plugins/sudoers/sssd.c:1496
+#: plugins/sudoers/sssd.c:1497
 #, c-format
 msgid ""
 "\n"
