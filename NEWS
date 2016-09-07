@@ -59,6 +59,9 @@ What's new in Sudo 1.8.18
    as the start of a comment when it is at the beginning of the
    line.
 
+ * Fixed a potential crash when auditing is enabled and the audit
+   function fails with an error.  Bug #756
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
