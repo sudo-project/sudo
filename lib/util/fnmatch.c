@@ -114,7 +114,7 @@ classmatch(const char *pattern, char test, int foldcase, const char **ep)
 	const char * const mismatch = pattern;
 	const char *colon;
 	struct cclass *cc;
-	int rval = RANGE_NOMATCH;
+	int result = RANGE_NOMATCH;
 	size_t len;
 
 	if (pattern[0] != '[' || pattern[1] != ':') {
@@ -135,16 +135,16 @@ classmatch(const char *pattern, char test, int foldcase, const char **ep)
 	for (cc = cclasses; cc->name != NULL; cc++) {
 		if (!strncmp(pattern, cc->name, len) && cc->name[len] == '\0') {
 			if (cc->isctype((unsigned char)test))
-				rval = RANGE_MATCH;
+				result = RANGE_MATCH;
 			break;
 		}
 	}
 	if (cc->name == NULL) {
 		/* invalid character class, treat as normal text */
 		*ep = mismatch;
-		rval = RANGE_ERROR;
+		result = RANGE_ERROR;
 	}
-	return rval;
+	return result;
 }
 
 /* Most MBCS/collation/case issues handled here.  Wildcard '*' is not handled.

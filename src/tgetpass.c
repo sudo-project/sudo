@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -54,7 +54,7 @@ static char *sudo_askpass(const char *, const char *);
 static int
 suspend(int signo, struct sudo_conv_callback *callback)
 {
-    int rval = 0;
+    int ret = 0;
     debug_decl(suspend, SUDO_DEBUG_CONV)
 
     if (callback != NULL && SUDO_API_VERSION_GET_MAJOR(callback->version) != SUDO_CONV_CALLBACK_VERSION_MAJOR) {
@@ -67,14 +67,14 @@ suspend(int signo, struct sudo_conv_callback *callback)
 
     if (callback != NULL && callback->on_suspend != NULL) {
 	if (callback->on_suspend(signo, callback->closure) == -1)
-	    rval = -1;
+	    ret = -1;
     }
     kill(getpid(), signo);
     if (callback != NULL && callback->on_resume != NULL) {
 	if (callback->on_resume(signo, callback->closure) == -1)
-	    rval = -1;
+	    ret = -1;
     }
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*

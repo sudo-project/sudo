@@ -365,19 +365,19 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 static int
 sudo_putenv(char *str, bool dupcheck, bool overwrite)
 {
-    int rval;
+    int ret;
     debug_decl(sudo_putenv, SUDOERS_DEBUG_ENV)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_putenv: %s", str);
 
-    rval = sudo_putenv_nodebug(str, dupcheck, overwrite);
-    if (rval == -1) {
+    ret = sudo_putenv_nodebug(str, dupcheck, overwrite);
+    if (ret == -1) {
 #ifdef ENV_DEBUG
 	if (env.envp[env.env_len] != NULL)
 	    sudo_warnx(U_("sudo_putenv: corrupted envp, length mismatch"));
 #endif
     }
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -390,7 +390,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 {
     char *estring;
     size_t esize;
-    int rval = -1;
+    int ret = -1;
     debug_decl(sudo_setenv2, SUDOERS_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
@@ -408,13 +408,13 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	errno = EOVERFLOW;
     } else {
-	rval = sudo_putenv(estring, dupcheck, overwrite);
+	ret = sudo_putenv(estring, dupcheck, overwrite);
     }
-    if (rval == -1)
+    if (ret == -1)
 	free(estring);
     else
 	sudoers_gc_add(GC_PTR, estring);
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -436,7 +436,7 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
     char *ep, *estring = NULL;
     const char *cp;
     size_t esize;
-    int rval = -1;
+    int ret = -1;
 
     if (var == NULL || *var == '\0') {
 	errno = EINVAL;
@@ -466,13 +466,13 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
     }
     *ep = '\0';
 
-    rval = sudo_putenv_nodebug(estring, true, overwrite);
+    ret = sudo_putenv_nodebug(estring, true, overwrite);
 done:
-    if (rval == -1)
+    if (ret == -1)
 	free(estring);
     else
 	sudoers_gc_add(GC_PTR, estring);
-    return rval;
+    return ret;
 }
 
 /*
@@ -511,14 +511,14 @@ sudo_unsetenv_nodebug(const char *var)
 int
 sudo_unsetenv(const char *name)
 {
-    int rval;
+    int ret;
     debug_decl(sudo_unsetenv, SUDOERS_DEBUG_ENV)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_unsetenv: %s", name);
 
-    rval = sudo_unsetenv_nodebug(name);
+    ret = sudo_unsetenv_nodebug(name);
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -770,7 +770,7 @@ bool
 env_merge(char * const envp[])
 {
     char * const *ep;
-    bool rval = true;
+    bool ret = true;
     debug_decl(env_merge, SUDOERS_DEBUG_ENV)
 
     for (ep = envp; *ep != NULL; ep++) {
@@ -778,11 +778,11 @@ env_merge(char * const envp[])
 	bool overwrite = def_env_reset ? !env_should_keep(*ep) : env_should_delete(*ep);
 	if (sudo_putenv(*ep, true, overwrite) == -1) {
 	    /* XXX cannot undo on failure */
-	    rval = false;
+	    ret = false;
 	    break;
 	}
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 #endif /* HAVE_PAM */
 
@@ -1092,7 +1092,7 @@ bool
 insert_env_vars(char * const envp[])
 {
     char * const *ep;
-    bool rval = true;
+    bool ret = true;
     debug_decl(insert_env_vars, SUDOERS_DEBUG_ENV)
 
     /* Add user-specified environment variables. */
@@ -1100,12 +1100,12 @@ insert_env_vars(char * const envp[])
 	for (ep = envp; *ep != NULL; ep++) {
 	    /* XXX - no undo on failure */
 	    if (sudo_putenv(*ep, true, true) == -1) {
-		rval = false;
+		ret = false;
 		break;
 	    }
 	}
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -1119,7 +1119,7 @@ validate_env_vars(char * const env_vars[])
 {
     char * const *ep;
     char *eq, errbuf[4096];
-    bool okvar, rval = true;
+    bool okvar, ret = true;
     debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV)
 
     if (env_vars == NULL)
@@ -1154,9 +1154,9 @@ validate_env_vars(char * const env_vars[])
 	/* XXX - audit? */
 	log_warningx(0,
 	    N_("sorry, you are not allowed to set the following environment variables: %s"), errbuf);
-	rval = false;
+	ret = false;
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -1173,15 +1173,15 @@ bool
 read_env_file(const char *path, int overwrite)
 {
     FILE *fp;
-    bool rval = true;
+    bool ret = true;
     char *cp, *var, *val, *line = NULL;
     size_t var_len, val_len, linesize = 0;
     debug_decl(read_env_file, SUDOERS_DEBUG_ENV)
 
     if ((fp = fopen(path, "r")) == NULL) {
 	if (errno != ENOENT)
-	    rval = false;
-	debug_return_bool(rval);
+	    ret = false;
+	debug_return_bool(ret);
     }
 
     while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_CONT_IGN) != -1) {
@@ -1216,7 +1216,7 @@ read_env_file(const char *path, int overwrite)
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
 	    /* XXX - no undo on failure */
-	    rval = false;
+	    ret = false;
 	    break;
 	}
 	memcpy(cp, var, var_len + 1); /* includes '=' */
@@ -1225,14 +1225,14 @@ read_env_file(const char *path, int overwrite)
 	sudoers_gc_add(GC_PTR, cp);
 	if (sudo_putenv(cp, true, overwrite) == -1) {
 	    /* XXX - no undo on failure */
-	    rval = false;
+	    ret = false;
 	    break;
 	}
     }
     free(line);
     fclose(fp);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 bool

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2008-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -213,7 +213,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
     struct sudo_conv_callback *callback)
 {
     unsigned int ntries;
-    int rval, status, success = AUTH_FAILURE;
+    int ret, status, success = AUTH_FAILURE;
     sudo_auth *auth;
     sigset_t mask, omask;
     sigaction_t sa, saved_sigtstp;
@@ -311,23 +311,23 @@ done:
 
     switch (success) {
 	case AUTH_SUCCESS:
-	    rval = true;
+	    ret = true;
 	    break;
 	case AUTH_INTR:
 	case AUTH_FAILURE:
 	    if (ntries != 0)
 		validated |= FLAG_BAD_PASSWORD;
 	    log_auth_failure(validated, ntries);
-	    rval = false;
+	    ret = false;
 	    break;
 	case AUTH_FATAL:
 	default:
 	    log_auth_failure(validated | FLAG_AUTH_ERROR, 0);
-	    rval = -1;
+	    ret = -1;
 	    break;
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*

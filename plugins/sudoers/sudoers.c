@@ -149,7 +149,7 @@ sudoers_policy_init(void *info, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
-    int rval = -1;
+    int ret = -1;
     debug_decl(sudoers_policy_init, SUDOERS_DEBUG_PLUGIN)
 
     bindtextdomain("sudoers", LOCALEDIR);
@@ -207,17 +207,17 @@ sudoers_policy_init(void *info, char * const envp[])
 
     /* Set login class if applicable (after sudoers is parsed). */
     if (set_loginclass(runas_pw ? runas_pw : sudo_user.pw))
-	rval = true;
+	ret = true;
 
 cleanup:
     if (!restore_perms())
-	rval = -1;
+	ret = -1;
 
     /* Restore user's locale. */
     sudo_warn_set_locale_func(NULL);
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 int
@@ -230,7 +230,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     struct sudo_nss *nss;
     bool nopass = false;
     int cmnd_status = -1, oldlocale, validated;
-    int rval = -1;
+    int ret = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
 
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
@@ -391,7 +391,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If no command line args and "shell_noargs" is not set, error out. */
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs) {
 	/* Not an audit event. */
-	rval = -2; /* usage error */
+	ret = -2; /* usage error */
 	goto done;
     }
 
@@ -427,7 +427,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
 	goto bad;
     default:
-	/* some other error, rval is -1. */
+	/* some other error, ret is -1. */
 	goto done;
     }
 
@@ -503,18 +503,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_CHECK:
-	    rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
+	    ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
 	    break;
 	case MODE_LIST:
-	    rval = display_privs(snl, list_pw ? list_pw : sudo_user.pw);
+	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw);
 	    break;
 	case MODE_VALIDATE:
 	    /* Nothing to do. */
-	    rval = true;
+	    ret = true;
 	    break;
 	case MODE_RUN:
 	case MODE_EDIT:
-	    /* rval set by sudoers_policy_exec_setup() below. */
+	    /* ret set by sudoers_policy_exec_setup() below. */
 	    break;
 	default:
 	    /* Should not happen. */
@@ -530,7 +530,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	group_plugin_unload();
 
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
-	/* rval already set appropriately */
+	/* ret already set appropriately */
 	goto done;
     }
 
@@ -619,7 +619,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Setup execution environment to pass back to front-end. */
-    rval = sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
+    ret = sudoers_policy_exec_setup(edit_argv ? edit_argv : NewArgv,
 	env_get(), cmnd_umask, iolog_path, closure);
 
     /* Zero out stashed copy of environment, it is owned by the front-end. */
@@ -628,11 +628,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     goto done;
 
 bad:
-    rval = false;
+    ret = false;
 
 done:
     if (!rewind_perms())
-	rval = -1;
+	ret = -1;
 
     restore_nproc();
 
@@ -642,7 +642,7 @@ done:
 
     sudo_warn_set_locale_func(NULL);
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -755,7 +755,7 @@ init_vars(char * const envp[])
 static int
 set_cmnd(void)
 {
-    int rval = FOUND;
+    int ret = FOUND;
     char *path = user_path;
     debug_decl(set_cmnd, SUDOERS_DEBUG_PLUGIN)
 
@@ -776,24 +776,24 @@ set_cmnd(void)
 		path = def_secure_path;
 	    if (!set_perms(PERM_RUNAS))
 		debug_return_int(-1);
-	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+	    ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
 		def_ignore_dot, NULL);
 	    if (!restore_perms())
 		debug_return_int(-1);
-	    if (rval == NOT_FOUND) {
+	    if (ret == NOT_FOUND) {
 		/* Failed as root, try as invoking user. */
 		if (!set_perms(PERM_USER))
 		    debug_return_int(-1);
-		rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+		ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
 		    def_ignore_dot, NULL);
 		if (!restore_perms())
 		    debug_return_int(-1);
 	    }
-	    if (rval == NOT_FOUND_ERROR) {
+	    if (ret == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG)
 		    audit_failure(NewArgc, NewArgv, N_("command too long"));
 		log_warning(0, "%s", NewArgv[0]);
-		debug_return_int(rval);
+		debug_return_int(ret);
 	    }
 	}
 
@@ -849,7 +849,7 @@ set_cmnd(void)
 	    N_("problem with defaults entries"));
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -940,7 +940,7 @@ set_loginclass(struct passwd *pw)
 {
     const int errflags = SLOG_RAW_MSG;
     login_cap_t *lc;
-    bool rval = true;
+    bool ret = true;
     debug_decl(set_loginclass, SUDOERS_DEBUG_PLUGIN)
 
     if (!def_use_loginclass)
@@ -949,7 +949,7 @@ set_loginclass(struct passwd *pw)
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 && pw->pw_uid != 0) {
 	    sudo_warnx(U_("only root can use `-c %s'"), login_class);
-	    rval = false;
+	    ret = false;
 	    goto done;
 	}
     } else {
@@ -970,11 +970,11 @@ set_loginclass(struct passwd *pw)
 	log_warningx(errflags, N_("unknown login class: %s"), login_class);
 	def_use_loginclass = false;
 	if (login_class)
-	    rval = false;
+	    ret = false;
     }
     login_close(lc);
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 #else
 static bool
@@ -1246,7 +1246,7 @@ static int
 create_admin_success_flag(void)
 {
     char flagfile[PATH_MAX];
-    int len, rval = -1;
+    int len, ret = -1;
     debug_decl(create_admin_success_flag, SUDOERS_DEBUG_PLUGIN)
 
     /* Check whether the user is in the sudo or admin group. */
@@ -1263,13 +1263,13 @@ create_admin_success_flag(void)
     /* Create admin flag file if it doesn't already exist. */
     if (set_perms(PERM_USER)) {
 	int fd = open(flagfile, O_CREAT|O_WRONLY|O_NONBLOCK|O_EXCL, 0644);
-	rval = fd != -1 || errno == EEXIST;
+	ret = fd != -1 || errno == EEXIST;
 	if (fd != -1)
 	    close(fd);
 	if (!restore_perms())
-	    rval = -1;
+	    ret = -1;
     }
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 #else /* !USE_ADMIN_FLAG */
 static int

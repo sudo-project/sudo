@@ -323,7 +323,7 @@ int
 selinux_setup(const char *role, const char *type, const char *ttyn,
     int ptyfd)
 {
-    int rval = -1;
+    int ret = -1;
     debug_decl(selinux_setup, SUDO_DEBUG_SELINUX)
 
     /* Store the caller's SID in old_context. */
@@ -367,10 +367,10 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 	se_state.ttyn, 1);
 #endif
 
-    rval = 0;
+    ret = 0;
 
 done:
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 void

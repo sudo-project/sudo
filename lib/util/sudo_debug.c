@@ -437,69 +437,69 @@ sudo_debug_exit_v1(const char *func, const char *file, int line,
 
 void
 sudo_debug_exit_int_v1(const char *func, const char *file, int line,
-    int subsys, int rval)
+    int subsys, int ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %d", func, file, line, rval);
+	"<- %s @ %s:%d := %d", func, file, line, ret);
 }
 
 void
 sudo_debug_exit_long_v1(const char *func, const char *file, int line,
-    int subsys, long rval)
+    int subsys, long ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %ld", func, file, line, rval);
+	"<- %s @ %s:%d := %ld", func, file, line, ret);
 }
 
 void
 sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
-    int subsys, size_t rval)
+    int subsys, size_t ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %zu", func, file, line, rval);
+	"<- %s @ %s:%d := %zu", func, file, line, ret);
 }
 
 void
 sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
-    int subsys, ssize_t rval)
+    int subsys, ssize_t ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %zd", func, file, line, rval);
+	"<- %s @ %s:%d := %zd", func, file, line, ret);
 }
 
 void
 sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
-    int subsys, bool rval)
+    int subsys, bool ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %s", func, file, line, rval ? "true" : "false");
+	"<- %s @ %s:%d := %s", func, file, line, ret ? "true" : "false");
 }
 
 void
 sudo_debug_exit_str_v1(const char *func, const char *file, int line,
-    int subsys, const char *rval)
+    int subsys, const char *ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %s", func, file, line, rval ? rval : "(null)");
+	"<- %s @ %s:%d := %s", func, file, line, ret ? ret : "(null)");
 }
 
 void
 sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line,
-    int subsys, const char *rval)
+    int subsys, const char *ret)
 {
     static const char stars[] = "********************************************************************************";
-    int len = rval ? strlen(rval) : sizeof("(null)") - 1;
+    int len = ret ? strlen(ret) : sizeof("(null)") - 1;
 
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %.*s", func, file, line, len, rval ? stars : "(null)");
+	"<- %s @ %s:%d := %.*s", func, file, line, len, ret ? stars : "(null)");
 }
 
 void
 sudo_debug_exit_ptr_v1(const char *func, const char *file, int line,
-    int subsys, const void *rval)
+    int subsys, const void *ret)
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %p", func, file, line, rval);
+	"<- %s @ %s:%d := %p", func, file, line, ret);
 }
 
 void

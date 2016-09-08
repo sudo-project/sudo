@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -998,7 +998,7 @@ bool
 export_sudoers(const char *sudoers_path, const char *export_path,
     bool quiet, bool strict)
 {
-    bool rval = false, need_comma = false;
+    bool ret = false, need_comma = false;
     const int indent = 4;
     FILE *export_fp = stdout;
     debug_decl(export_sudoers, SUDOERS_DEBUG_UTIL)
@@ -1032,7 +1032,7 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	parse_error = true;
 	errorfile = sudoers_path;
     }
-    rval = !parse_error;
+    ret = !parse_error;
 
     if (parse_error) {
 	if (!quiet) {
@@ -1064,9 +1064,9 @@ done:
     if (export_fp != NULL) {
 	(void)fflush(export_fp);
 	if (ferror(export_fp))
-	    rval = false;
+	    ret = false;
 	if (export_fp != stdout)
 	    fclose(export_fp);
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }

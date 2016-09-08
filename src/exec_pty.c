@@ -203,7 +203,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -225,7 +225,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
     sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin stdin log method. */
@@ -234,7 +234,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_stdin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -256,7 +256,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
     sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin tty output log method. */
@@ -265,7 +265,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -285,7 +285,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!rval) {
+    if (!ret) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
 	 * (user's tty) so we do not display the rejected output.
@@ -299,7 +299,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin stdout log method. */
@@ -308,7 +308,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_stdout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -328,7 +328,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!rval) {
+    if (!ret) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
 	 * (user's stdout) so we do not display the rejected output.
@@ -342,7 +342,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin stderr log method. */
@@ -351,7 +351,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_stderr, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -371,7 +371,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!rval) {
+    if (!ret) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
 	 * (user's stderr) so we do not display the rejected output.
@@ -385,7 +385,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -421,7 +421,7 @@ suspend_parent(int signo)
 {
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
-    int rval = 0;
+    int ret = 0;
     debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
@@ -438,7 +438,7 @@ suspend_parent(int signo)
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 		    ttymode = TERM_RAW;
 	    }
-	    rval = SIGCONT_FG; /* resume command in foreground */
+	    ret = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
 	/* FALLTHROUGH */
@@ -495,11 +495,11 @@ suspend_parent(int signo)
 	    if (sudo_sigaction(signo, &osa, NULL) != 0)
 		sudo_warn(U_("unable to restore handler for signal %d"), signo);
 	}
-	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
+	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*

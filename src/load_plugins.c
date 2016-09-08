@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -108,7 +108,7 @@ static bool
 sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
     struct stat sb;
-    bool rval = false;
+    bool ret = false;
     debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
     if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
@@ -131,10 +131,10 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 	sudo_warnx(U_("%s must be only be writable by owner"), fullpath);
 	goto done;
     }
-    rval = true;
+    ret = true;
 
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 #else
 static bool
@@ -279,14 +279,14 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container *container;
     struct plugin_info_list *plugins;
     struct plugin_info *info, *next;
-    bool rval = false;
+    bool ret = false;
     debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN)
 
     /* Walk the plugin list from sudo.conf, if any and free it. */
     plugins = sudo_conf_plugins();
     TAILQ_FOREACH_SAFE(info, plugins, entries, next) {
-	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
-	if (!rval)
+	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
+	if (!ret)
 	    goto done;
 	free_plugin_info(info);
     }
@@ -306,9 +306,9 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
 	/* info->options = NULL; */
-	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
+	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
 	free(info);
-	if (!rval)
+	if (!ret)
 	    goto done;
 
 	/* Default I/O plugin */
@@ -321,16 +321,16 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    info->symbol_name = "sudoers_io";
 	    info->path = SUDOERS_PLUGIN;
 	    /* info->options = NULL; */
-	    rval = sudo_load_plugin(policy_plugin, io_plugins, info);
+	    ret = sudo_load_plugin(policy_plugin, io_plugins, info);
 	    free(info);
-	    if (!rval)
+	    if (!ret)
 		goto done;
 	}
     }
     if (policy_plugin->u.policy->check_policy == NULL) {
 	sudo_warnx(U_("policy plugin %s does not include a check_policy method"),
 	    policy_plugin->name);
-	rval = false;
+	ret = false;
 	goto done;
     }
 
@@ -349,5 +349,5 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     sudo_debug_set_active_instance(sudo_debug_instance);
 
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }

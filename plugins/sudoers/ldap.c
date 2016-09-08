@@ -1443,7 +1443,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     char *escaped_domain = NULL, *escaped_user = NULL;
     char *escaped_host = NULL, *escaped_shost = NULL, *filt = NULL;
     int filt_len, rc;
-    bool rval = false;
+    bool ret = false;
     debug_decl(sudo_netgroup_lookup, SUDOERS_DEBUG_LDAP);
 
     if (ldap_conf.timeout > 0) {
@@ -1573,7 +1573,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 		goto done;
 	}
     }
-    rval = true;
+    ret = true;
     goto done;
 
 oom:
@@ -1586,7 +1586,7 @@ done:
 	free(escaped_shost);
     free(filt);
     ldap_msgfree(result);
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*

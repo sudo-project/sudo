@@ -155,7 +155,7 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
     struct stat sb;
     gid_t parent_gid = 0;
     char *slash = path;
-    bool rval = false;
+    bool ret = false;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
 
     while ((slash = strchr(slash + 1, '/')) != NULL) {
@@ -197,9 +197,9 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 	goto done;
     }
     ignore_result(chown(path, owner, parent_gid));
-    rval = true;
+    ret = true;
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -212,17 +212,17 @@ static bool
 ts_secure_dir(char *path, bool make_it, bool quiet)
 {
     struct stat sb;
-    bool rval = false;
+    bool ret = false;
     debug_decl(ts_secure_dir, SUDOERS_DEBUG_AUTH)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
     switch (sudo_secure_dir(path, timestamp_uid, -1, &sb)) {
     case SUDO_PATH_SECURE:
-	rval = true;
+	ret = true;
 	break;
     case SUDO_PATH_MISSING:
 	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711, quiet)) {
-	    rval = true;
+	    ret = true;
 	    break;
 	}
 	errno = ENOENT;
@@ -246,7 +246,7 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 	errno = EACCES;
 	break;
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -468,7 +468,7 @@ timestamp_lock_record(int fd, off_t pos, off_t len)
 {
     struct sigaction sa, saveint, savequit;
     sigset_t mask, omask;
-    bool rval;
+    bool ret;
     debug_decl(timestamp_lock_record, SUDOERS_DEBUG_AUTH)
 
     if (pos >= 0 && lseek(fd, pos, SEEK_SET) == -1) {
@@ -490,8 +490,8 @@ timestamp_lock_record(int fd, off_t pos, off_t len)
     sigaddset(&mask, SIGQUIT);
     (void) sigprocmask(SIG_UNBLOCK, &mask, &omask);
 
-    rval = sudo_lock_region(fd, SUDO_LOCK, len);
-    if (!rval) {
+    ret = sudo_lock_region(fd, SUDO_LOCK, len);
+    if (!ret) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "failed to lock fd %d [%lld, %lld]", fd,
 	    (long long)pos, (long long)len);
@@ -503,10 +503,10 @@ timestamp_lock_record(int fd, off_t pos, off_t len)
     (void) sigaction(SIGQUIT, &savequit, NULL);
 
     /* Re-deliver the signal that interrupted the lock, if any. */
-    if (!rval && got_signal)
+    if (!ret && got_signal)
 	kill(getpid(), got_signal);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 static bool
@@ -804,7 +804,7 @@ bool
 timestamp_update(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
-    int rval = false;
+    int ret = false;
     debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
@@ -831,10 +831,10 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	"writing %zu byte record at %lld", sizeof(cookie->key),
 	(long long)cookie->pos);
     if (ts_write(cookie->fd, cookie->fname, &cookie->key, cookie->pos) != -1)
-	rval = true;
+	ret = true;
 
 done:
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -846,19 +846,19 @@ int
 timestamp_remove(bool unlink_it)
 {
     struct timestamp_entry key, entry;
-    int fd = -1, rval = true;
+    int fd = -1, ret = true;
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH)
 
     if (asprintf(&fname, "%s/%s", def_timestampdir, user_name) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	rval = -1;
+	ret = -1;
 	goto done;
     }
 
     /* For "sudo -K" simply unlink the time stamp file. */
     if (unlink_it) {
-	rval = unlink(fname) ? -1 : true;
+	ret = unlink(fname) ? -1 : true;
 	goto done;
     }
 
@@ -867,17 +867,17 @@ timestamp_remove(bool unlink_it)
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	if (errno != ENOENT)
-	    rval = false;
+	    ret = false;
 	goto done;
     case TIMESTAMP_PERM_ERROR:
 	/* Already logged set_perms/restore_perms error. */
-	rval = -1;
+	ret = -1;
 	goto done;
     }
     /* Lock first record to gain exclusive access. */
     if (!timestamp_lock_record(fd, -1, sizeof(struct timestamp_entry))) {
 	sudo_warn(U_("unable to lock time stamp file %s"), fname);
-	rval = -1;
+	ret = -1;
 	goto done;
     }
 
@@ -891,7 +891,7 @@ timestamp_remove(bool unlink_it)
 	    SET(entry.flags, TS_DISABLED);
 	    if (lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR) != -1) {
 		if (ts_write(fd, fname, &entry, -1) == -1)
-		    rval = false;
+		    ret = false;
 	    }
 	}
     }
@@ -900,7 +900,7 @@ done:
     if (fd != -1)
 	close(fd);
     free(fname);
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -934,7 +934,7 @@ int
 set_lectured(void)
 {
     char lecture_status[PATH_MAX];
-    int len, fd, rval = false;
+    int len, fd, ret = false;
     debug_decl(set_lectured, SUDOERS_DEBUG_AUTH)
 
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
@@ -957,15 +957,15 @@ set_lectured(void)
 	break;
     case TIMESTAMP_PERM_ERROR:
 	/* Already logged set_perms/restore_perms error. */
-	rval = -1;
+	ret = -1;
 	break;
     default:
 	/* Success. */
 	close(fd);
-	rval = true;
+	ret = true;
 	break;
     }
 
 done:
-    debug_return_int(rval);
+    debug_return_int(ret);
 }

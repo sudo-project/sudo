@@ -845,7 +845,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
     char **sesh_args, **sesh_ap;
-    int i, rc, sesh_nargs, rval = 1;
+    int i, rc, sesh_nargs, ret = 1;
     struct command_details saved_command_details;
     struct timespec ts;
     struct stat sb;
@@ -905,7 +905,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	rc = run_command(command_details);
 	switch (rc) {
 	case SESH_SUCCESS:
-	    rval = 0;
+	    ret = 0;
 	    break;
 	case SESH_ERR_NO_FILES:
 	    sudo_warnx(_("unable to copy temporary files back to their original location"));
@@ -927,7 +927,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     command_details->flags = saved_command_details.flags;
     command_details->argv = saved_command_details.argv;
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 #endif /* HAVE_SELINUX */
 
@@ -940,7 +940,7 @@ sudo_edit(struct command_details *command_details)
 {
     struct command_details saved_command_details;
     char **nargv = NULL, **ap, **files = NULL;
-    int errors, i, ac, nargc, rval;
+    int errors, i, ac, nargc, rc;
     int editor_argc = 0, nfiles = 0;
     struct timespec times[2];
     struct tempfile *tf = NULL;
@@ -1025,7 +1025,7 @@ sudo_edit(struct command_details *command_details)
     command_details->ngroups = user_details.ngroups;
     command_details->groups = user_details.groups;
     command_details->argv = nargv;
-    rval = run_command(command_details);
+    rc = run_command(command_details);
     if (sudo_gettime_real(&times[1]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
 	goto cleanup;
@@ -1052,7 +1052,7 @@ sudo_edit(struct command_details *command_details)
 	free(tf[i].tfile);
     free(tf);
     free(nargv);
-    debug_return_int(errors ? 1 : rval);
+    debug_return_int(errors ? 1 : rc);
 
 cleanup:
     /* Clean up temp files and return. */

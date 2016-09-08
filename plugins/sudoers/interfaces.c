@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,7 +54,7 @@ set_interfaces(const char *ai)
 {
     char *addrinfo, *addr, *mask, *last;
     struct interface *ifp;
-    bool rval = false;
+    bool ret = false;
     debug_decl(set_interfaces, SUDOERS_DEBUG_NETIF)
 
     if ((addrinfo = strdup(ai)) == NULL)
@@ -93,11 +93,11 @@ set_interfaces(const char *ai)
 	}
 	SLIST_INSERT_HEAD(&interfaces, ifp, entries);
     }
-    rval = true;
+    ret = true;
 
 done:
     free(addrinfo);
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 struct interface_list *

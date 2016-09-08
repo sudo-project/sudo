@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1025,7 +1025,7 @@ init_parser(const char *path, bool quiet)
     struct member_list *binding;
     struct defaults *d, *d_next;
     struct userspec *us, *us_next;
-    bool rval = true;
+    bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
     TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
@@ -1134,14 +1134,14 @@ init_parser(const char *path, bool quiet)
 
     if (!init_aliases()) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	rval = false;
+	ret = false;
     }
 
     free(sudoers);
     if (path != NULL) {
 	if ((sudoers = strdup(path)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    rval = false;
+	    ret = false;
 	}
     } else {
 	sudoers = NULL;
@@ -1152,5 +1152,5 @@ init_parser(const char *path, bool quiet)
     errorfile = sudoers;
     sudoers_warnings = !quiet;
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }

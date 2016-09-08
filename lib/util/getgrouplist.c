@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011, 2013, 2014
+ * Copyright (c) 2010, 2011, 2013-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -53,7 +53,7 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     char *cp, *grset = NULL;
     int ngroups = 1;
     int grpsize = *ngroupsp;
-    int rval = -1;
+    int ret = -1;
     gid_t gid;
 
     /* We support BSD semantics where the first element is the base gid */
@@ -77,7 +77,7 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 	    }
 	}
     }
-    rval = 0;
+    ret = 0;
 
 done:
     free(grset);
@@ -86,7 +86,7 @@ done:
 #endif
     *ngroupsp = ngroups;
 
-    return rval;
+    return ret;
 }
 
 #elif defined(HAVE_NSS_SEARCH)
@@ -196,7 +196,7 @@ static nss_status_t
 process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm)
 {
     const char *user = gbm->username;
-    nss_status_t rval = NSS_NOTFOUND;
+    nss_status_t ret = NSS_NOTFOUND;
     nss_XbyY_buf_t *buf;
     struct group *grp;
     char **gr_mem;
@@ -229,7 +229,7 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm)
     }
 done:
     _nss_XbyY_buf_free(buf);
-    return rval;
+    return ret;
 }
 
 /*
@@ -279,7 +279,7 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 {
     int i, ngroups = 1;
     int grpsize = *ngroupsp;
-    int rval = -1;
+    int ret = -1;
     struct group *grp;
 
     /* We support BSD semantics where the first element is the base gid */
@@ -310,13 +310,13 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 	    groups[ngroups++] = grp->gr_gid;
 	}
     }
-    rval = 0;
+    ret = 0;
 
 done:
     endgrent();
     *ngroupsp = ngroups;
 
-    return rval;
+    return ret;
 }
 #endif /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
 #endif /* HAVE_GETGROUPLIST */

@@ -204,7 +204,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     int i, len, fd = -1;
     unsigned long id = 0;
     ssize_t nread;
-    bool rval = false;
+    bool ret = false;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     debug_decl(io_nextid, SUDOERS_DEBUG_UTIL)
@@ -307,12 +307,12 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	warned = true;
 	goto done;
     }
-    rval = true;
+    ret = true;
 
 done:
     if (fd != -1)
 	close(fd);
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -572,7 +572,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     char * const *av;
     FILE *fp;
     int fd;
-    bool rval;
+    bool ret;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
@@ -596,9 +596,9 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     fputc('\n', fp);
     fflush(fp);
 
-    rval = !ferror(fp);
+    ret = !ferror(fp);
     fclose(fp);
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 static int
@@ -613,7 +613,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const *cur;
     const char *cp, *plugin_path = NULL;
     size_t len;
-    int i, rval = -1;
+    int i, ret = -1;
     debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
 
     sudo_conv = conversation;
@@ -644,7 +644,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
      * Pull iolog settings out of command_info.
      */
     if (!iolog_deserialize_info(&iolog_details, user_info, command_info)) {
-	rval = false;
+	ret = false;
 	goto done;
     }
 
@@ -658,7 +658,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	}
 	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
 	if (!io_nextid(tofree, NULL, sessid)) {
-	    rval = false;
+	    ret = false;
 	    goto done;
 	}
 	snprintf(tofree + sizeof(_PATH_SUDO_IO_LOGDIR), sizeof(sessid) + 2,
@@ -700,7 +700,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (!io_log_files[IOFD_TTYOUT].enabled)
 	sudoers_io.log_ttyout = NULL;
 
-    rval = true;
+    ret = true;
 
 done:
     free(tofree);
@@ -712,10 +712,10 @@ done:
     sudo_freegrcache();
 
     /* Ignore errors if they occur if the policy says so. */
-    if (rval == -1 && iolog_details.ignore_iolog_errors)
-	rval = 0;
+    if (ret == -1 && iolog_details.ignore_iolog_errors)
+	ret = 0;
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static void
@@ -771,7 +771,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
     const char *errstr = NULL;
-    int rval = true;
+    int ret = true;
     debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
 
     if (io_log_files[idx].fd.v == NULL) {
@@ -788,14 +788,14 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	    int errnum;
 
 	    errstr = gzerror(io_log_files[idx].fd.g, &errnum);
-	    rval = -1;
+	    ret = -1;
 	}
     } else
 #endif
     {
 	if (fwrite(buf, 1, len, io_log_files[idx].fd.f) != len) {
 	    errstr = strerror(errno);
-	    rval = -1;
+	    ret = -1;
 	}
     }
     sudo_timevalsub(&now, &last_time, &delay);
@@ -806,7 +806,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	    int errnum;
 
 	    errstr = gzerror(io_log_files[IOFD_TIMING].fd.g, &errnum);
-	    rval = -1;
+	    ret = -1;
 	}
     } else
 #endif
@@ -814,13 +814,13 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	if (fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %u\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) < 0) {
 	    errstr = strerror(errno);
-	    rval = -1;
+	    ret = -1;
 	}
     }
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
-    if (rval == -1) {
+    if (ret == -1) {
 	if (errstr != NULL && !warned) {
 	    /* Only warn about I/O log file errors once. */
 	    log_warning(SLOG_SEND_MAIL,
@@ -830,10 +830,10 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 	/* Ignore errors if they occur if the policy says so. */
 	if (iolog_details.ignore_iolog_errors)
-	    rval = true;
+	    ret = true;
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static int

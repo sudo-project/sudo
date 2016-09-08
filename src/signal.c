@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -173,7 +173,7 @@ int
 sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
 {
     struct signal_state *ss;
-    int rval;
+    int ret;
     debug_decl(sudo_sigaction, SUDO_DEBUG_MAIN)
 
     for (ss = saved_signals; ss->signo > 0; ss++) {
@@ -187,7 +187,7 @@ sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
 	    break;
 	}
     }
-    rval = sigaction(signo, sa, osa);
+    ret = sigaction(signo, sa, osa);
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }

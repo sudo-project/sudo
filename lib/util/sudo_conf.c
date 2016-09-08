@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -154,7 +154,7 @@ static int
 parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 {
     struct sudo_conf_table *var;
-    int rval;
+    int ret;
     debug_decl(parse_variable, SUDO_DEBUG_UTIL)
 
     for (var = sudo_conf_var_table; var->name != NULL; var++) {
@@ -163,11 +163,11 @@ parse_variable(const char *entry, const char *conf_file, unsigned int lineno)
 	    entry += var->namelen + 1;
 	    while (isblank((unsigned char)*entry))
 		entry++;
-	    rval = var->parser(entry, conf_file, lineno);
-	    sudo_debug_printf(rval ? SUDO_DEBUG_INFO : SUDO_DEBUG_ERROR,
+	    ret = var->parser(entry, conf_file, lineno);
+	    sudo_debug_printf(ret ? SUDO_DEBUG_INFO : SUDO_DEBUG_ERROR,
 		"%s: %s:%u: Set %s %s", __func__, conf_file,
 		lineno, var->name, entry);
-	    debug_return_int(rval);
+	    debug_return_int(ret);
 	}
     }
     sudo_debug_printf(SUDO_DEBUG_WARN, "%s: %s:%u: unknown setting %s",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,7 +44,7 @@ main(int argc, char *argv[])
 {
     char *tty_libc = NULL, *tty_sudo = NULL;
     char pathbuf[PATH_MAX];
-    int rval = 1;
+    int ret = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
 
@@ -66,20 +66,20 @@ main(int argc, char *argv[])
     /* Compare libc and kernel ttys. */
     if (tty_libc != NULL && tty_sudo != NULL) {
 	if (strcmp(tty_libc, tty_sudo) == 0)
-	    rval = 0;
+	    ret = 0;
     } else if (tty_libc == NULL && tty_sudo == NULL) {
-	rval = 0;
+	ret = 0;
     }
 
-    if (rval == 0) {
+    if (ret == 0) {
 	printf("%s: OK (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
     } else if (tty_libc == NULL) {
 	printf("%s: SKIP (%s)\n", getprogname(), tty_sudo ? tty_sudo : "none");
-	rval = 0;
+	ret = 0;
     } else {
 	printf("%s: FAIL %s (sudo) vs. %s (libc)\n", getprogname(),
 	    tty_sudo ? tty_sudo : "none", tty_libc ? tty_libc : "none");
     }
 
-    exit(rval);
+    return ret;
 }

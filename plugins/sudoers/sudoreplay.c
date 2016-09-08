@@ -944,7 +944,7 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
     char idbuf[7], *idstr, *cp;
     const char *timestr;
     struct log_info *li;
-    int rval = -1;
+    int ret = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL)
 
     if ((li = parse_logfile(logfile)) == NULL)
@@ -979,11 +979,11 @@ list_session(char *logfile, regex_t *re, const char *user, const char *tty)
 	printf("GROUP=%s ; ", li->runas_group);
     printf("TSID=%s ; COMMAND=%s\n", idstr, li->cmd);
 
-    rval = 0;
+    ret = 0;
 
 done:
     free_log_info(li);
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static int

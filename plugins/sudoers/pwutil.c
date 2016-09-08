@@ -89,10 +89,10 @@ cmp_pwnam(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
-    int rval = strcmp(ci1->k.name, ci2->k.name);
-    if (rval == 0)
-	rval = strcmp(ci1->registry, ci2->registry);
-    return rval;
+    int ret = strcmp(ci1->k.name, ci2->k.name);
+    if (ret == 0)
+	ret = strcmp(ci1->registry, ci2->registry);
+    return ret;
 }
 
 void

@@ -98,7 +98,7 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
 {
     struct member *m;
     struct alias *a;
-    int rval, matched = UNSPEC;
+    int rc, matched = UNSPEC;
     debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
@@ -118,9 +118,9 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
 		break;
 	    case ALIAS:
 		if ((a = alias_get(m->name, USERALIAS)) != NULL) {
-		    rval = userlist_matches(pw, &a->members);
-		    if (rval != UNSPEC)
-			matched = m->negated ? !rval : rval;
+		    rc = userlist_matches(pw, &a->members);
+		    if (rc != UNSPEC)
+			matched = m->negated ? !rc : rc;
 		    alias_put(a);
 		    break;
 		}
@@ -148,7 +148,7 @@ runaslist_matches(const struct member_list *user_list,
 {
     struct member *m;
     struct alias *a;
-    int rval;
+    int rc;
     int user_matched = UNSPEC;
     int group_matched = UNSPEC;
     debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH)
@@ -184,10 +184,10 @@ runaslist_matches(const struct member_list *user_list,
 			break;
 		    case ALIAS:
 			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			    rval = runaslist_matches(&a->members, &empty,
+			    rc = runaslist_matches(&a->members, &empty,
 				matching_user, NULL);
-			    if (rval != UNSPEC)
-				user_matched = m->negated ? !rval : rval;
+			    if (rc != UNSPEC)
+				user_matched = m->negated ? !rc : rc;
 			    alias_put(a);
 			    break;
 			}
@@ -227,10 +227,10 @@ runaslist_matches(const struct member_list *user_list,
 			break;
 		    case ALIAS:
 			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			    rval = runaslist_matches(&empty, &a->members,
+			    rc = runaslist_matches(&empty, &a->members,
 				NULL, matching_group);
-			    if (rval != UNSPEC)
-				group_matched = m->negated ? !rval : rval;
+			    if (rc != UNSPEC)
+				group_matched = m->negated ? !rc : rc;
 			    alias_put(a);
 			    break;
 			}
@@ -269,7 +269,7 @@ hostlist_matches(const struct passwd *pw, const struct member_list *list)
 {
     struct member *m;
     struct alias *a;
-    int rval, matched = UNSPEC;
+    int rc, matched = UNSPEC;
     debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
@@ -288,9 +288,9 @@ hostlist_matches(const struct passwd *pw, const struct member_list *list)
 		break;
 	    case ALIAS:
 		if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
-		    rval = hostlist_matches(pw, &a->members);
-		    if (rval != UNSPEC)
-			matched = m->negated ? !rval : rval;
+		    rc = hostlist_matches(pw, &a->members);
+		    if (rc != UNSPEC)
+			matched = m->negated ? !rc : rc;
 		    alias_put(a);
 		    break;
 		}
@@ -334,7 +334,7 @@ cmnd_matches(const struct member *m)
 {
     struct alias *a;
     struct sudo_command *c;
-    int rval, matched = UNSPEC;
+    int rc, matched = UNSPEC;
     debug_decl(cmnd_matches, SUDOERS_DEBUG_MATCH)
 
     switch (m->type) {
@@ -343,9 +343,9 @@ cmnd_matches(const struct member *m)
 	    break;
 	case ALIAS:
 	    if ((a = alias_get(m->name, CMNDALIAS)) != NULL) {
-		rval = cmndlist_matches(&a->members);
-		if (rval != UNSPEC)
-		    matched = m->negated ? !rval : rval;
+		rc = cmndlist_matches(&a->members);
+		if (rc != UNSPEC)
+		    matched = m->negated ? !rc : rc;
 		alias_put(a);
 	    }
 	    break;
@@ -988,7 +988,7 @@ sudo_getdomainname(void)
 
     if (!initialized) {
 	size_t host_name_max;
-	int rval;
+	int rc;
 
 # ifdef _SC_HOST_NAME_MAX
 	host_name_max = (size_t)sysconf(_SC_HOST_NAME_MAX);
@@ -1000,11 +1000,11 @@ sudo_getdomainname(void)
 	if (domain != NULL) {
 # ifdef SI_SRPC_DOMAIN
 	    domain[0] = '\0';
-	    rval = sysinfo(SI_SRPC_DOMAIN, domain, host_name_max + 1);
+	    rc = sysinfo(SI_SRPC_DOMAIN, domain, host_name_max + 1);
 # else
-	    rval = getdomainname(domain, host_name_max + 1);
+	    rc = getdomainname(domain, host_name_max + 1);
 # endif
-	    if (rval != -1 && domain[0] != '\0') {
+	    if (rc != -1 && domain[0] != '\0') {
 		const char *cp;
 
 		for (cp = domain; *cp != '\0'; cp++) {

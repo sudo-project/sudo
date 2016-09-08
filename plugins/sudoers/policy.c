@@ -716,7 +716,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     struct sudoers_exec_args exec_args;
-    int rval;
+    int ret;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN)
 
     if (!ISSET(sudo_mode, MODE_EDIT))
@@ -726,14 +726,14 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
-    rval = sudoers_policy_main(argc, argv, 0, env_add, &exec_args);
-    if (rval == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
+    ret = sudoers_policy_main(argc, argv, 0, env_add, &exec_args);
+    if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
 	if (!def_log_input && !def_log_output && !def_use_pty &&
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static int
@@ -764,7 +764,7 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
-    int rval;
+    int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN)
 
     user_cmnd = "list";
@@ -781,13 +781,13 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	    debug_return_int(-1);
 	}
     }
-    rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
+    ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
     if (list_user) {
 	sudo_pw_delref(list_pw);
 	list_pw = NULL;
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static int

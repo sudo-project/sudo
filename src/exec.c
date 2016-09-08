@@ -754,7 +754,7 @@ dispatch_pending_signals(struct command_status *cstat)
     ssize_t nread;
     struct sigaction sa;
     unsigned char signo = 0;
-    int rval = 0;
+    int ret = 0;
     debug_decl(dispatch_pending_signals, SUDO_DEBUG_EXEC)
 
     for (;;) {
@@ -773,14 +773,14 @@ dispatch_pending_signals(struct command_status *cstat)
 		strerror(errno));
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
-	    rval = 1;
+	    ret = 1;
 	    break;
 	}
 	/* Take the first terminal signal. */
 	if (signo == SIGINT || signo == SIGQUIT) {
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = signo + 128;
-	    rval = 1;
+	    ret = 1;
 	    break;
 	}
     }
@@ -796,7 +796,7 @@ dispatch_pending_signals(struct command_status *cstat)
 	    sudo_warn("kill(%d, SIGTSTP)", (int)getpid());
 	/* No need to reinstall SIGTSTP handler. */
     }
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -975,24 +975,24 @@ handler_user_only(int s, siginfo_t *info, void *context)
 int
 pipe_nonblock(int fds[2])
 {
-    int flags, rval;
+    int flags, ret;
     debug_decl(pipe_nonblock, SUDO_DEBUG_EXEC)
 
-    rval = pipe(fds);
-    if (rval != -1) {
+    ret = pipe(fds);
+    if (ret != -1) {
 	flags = fcntl(fds[0], F_GETFL, 0);
 	if (flags != -1 && !ISSET(flags, O_NONBLOCK))
-	    rval = fcntl(fds[0], F_SETFL, flags | O_NONBLOCK);
-	if (rval != -1) {
+	    ret = fcntl(fds[0], F_SETFL, flags | O_NONBLOCK);
+	if (ret != -1) {
 	    flags = fcntl(fds[1], F_GETFL, 0);
 	    if (flags != -1 && !ISSET(flags, O_NONBLOCK))
-		rval = fcntl(fds[1], F_SETFL, flags | O_NONBLOCK);
+		ret = fcntl(fds[1], F_SETFL, flags | O_NONBLOCK);
 	}
-	if (rval == -1) {
+	if (ret == -1) {
 	    close(fds[0]);
 	    close(fds[1]);
 	}
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }

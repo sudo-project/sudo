@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2010-2012, 2014-2015
+ * Copyright (c) 1996, 1998-2005, 2010-2012, 2014-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -41,7 +41,7 @@
 bool
 sudo_goodpath(const char *path, struct stat *sbp)
 {
-    bool rval = false;
+    bool ret = false;
     debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL)
 
     if (path != NULL) {
@@ -53,11 +53,11 @@ sudo_goodpath(const char *path, struct stat *sbp)
 	if (stat(path, sbp) == 0) {
 	    /* Make sure path describes an executable regular file. */
 	    if (S_ISREG(sbp->st_mode) && ISSET(sbp->st_mode, 0111))
-		rval = true;
+		ret = true;
 	    else
 		errno = EACCES;
 	}
     }
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }

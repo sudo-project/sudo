@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -176,7 +176,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user)
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
-    bool rval = false;
+    bool ret = false;
     debug_decl(utmp_login, SUDO_DEBUG_UTMP)
 
     /* Strip off /dev/ prefix from line as needed. */
@@ -194,16 +194,16 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     }
     utmp_fill(to_line, user, ut_old, &utbuf);
     if (pututxline(&utbuf) != NULL)
-	rval = true;
+	ret = true;
     endutxent();
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 bool
 utmp_logout(const char *line, int status)
 {
-    bool rval = false;
+    bool ret = false;
     sudo_utmp_t *ut, utbuf;
     debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
 
@@ -224,9 +224,9 @@ utmp_logout(const char *line, int status)
 # endif
 	utmp_settime(ut);
 	if (pututxline(ut) != NULL)
-	    rval = true;
+	    ret = true;
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 #else /* !HAVE_GETUTXID && !HAVE_GETUTID */
@@ -282,7 +282,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user)
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
-    bool rval = false;
+    bool ret = false;
     int slot;
     FILE *fp;
     debug_decl(utmp_login, SUDO_DEBUG_UTMP)
@@ -323,24 +323,24 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     if (fseek(fp, slot * (long)sizeof(utbuf), SEEK_SET) == 0) {
 #endif
 	if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
-	    rval = true;
+	    ret = true;
     }
     fclose(fp);
 
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 bool
 utmp_logout(const char *line, int status)
 {
     sudo_utmp_t utbuf;
-    bool rval = false;
+    bool ret = false;
     FILE *fp;
     debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
 
     if ((fp = fopen(_PATH_UTMP, "r+")) == NULL)
-	debug_return_int(rval);
+	debug_return_int(ret);
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -360,13 +360,13 @@ utmp_logout(const char *line, int status)
 	    if (fseek(fp, 0L - (long)sizeof(utbuf), SEEK_CUR) == 0) {
 #endif
 		if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
-		    rval = true;
+		    ret = true;
 	    }
 	    break;
 	}
     }
     fclose(fp);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 #endif /* HAVE_GETUTXID || HAVE_GETUTID */

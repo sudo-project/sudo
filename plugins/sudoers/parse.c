@@ -741,7 +741,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     struct member *match;
     struct privilege *priv;
     struct userspec *us;
-    int rval = 1;
+    int ret = 1;
     int host_match, runas_match, cmnd_match;
     debug_decl(sudo_file_display_cmnd, SUDOERS_DEBUG_NSS)
 
@@ -775,10 +775,10 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     if (match != NULL && !match->negated) {
 	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
 	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
-	rval = len < 0 ? -1 : 0;
+	ret = len < 0 ? -1 : 0;
     }
 done:
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*

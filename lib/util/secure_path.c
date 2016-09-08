@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012, 2014-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,27 +39,27 @@ static int
 sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp)
 {
     struct stat sb;
-    int rval = SUDO_PATH_MISSING;
+    int ret = SUDO_PATH_MISSING;
     debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL)
 
     if (path != NULL && stat(path, &sb) == 0) {
 	if ((sb.st_mode & _S_IFMT) != type) {
-	    rval = SUDO_PATH_BAD_TYPE;
+	    ret = SUDO_PATH_BAD_TYPE;
 	} else if (uid != (uid_t)-1 && sb.st_uid != uid) {
-	    rval = SUDO_PATH_WRONG_OWNER;
+	    ret = SUDO_PATH_WRONG_OWNER;
 	} else if (sb.st_mode & S_IWOTH) {
-	    rval = SUDO_PATH_WORLD_WRITABLE;
+	    ret = SUDO_PATH_WORLD_WRITABLE;
 	} else if (ISSET(sb.st_mode, S_IWGRP) &&
 	    (gid == (gid_t)-1 || sb.st_gid != gid)) {
-	    rval = SUDO_PATH_GROUP_WRITABLE;
+	    ret = SUDO_PATH_GROUP_WRITABLE;
 	} else {
-	    rval = SUDO_PATH_SECURE;
+	    ret = SUDO_PATH_SECURE;
 	}
 	if (sbp)
 	    (void) memcpy(sbp, &sb, sizeof(struct stat));
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*

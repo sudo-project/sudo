@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012, 2014-2015
+ * Copyright (c) 2009-2012, 2014-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -54,7 +54,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     struct group *gr;
     gid_t ttygid = -1;
-    bool rval = false;
+    bool ret = false;
     debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     if ((gr = getgrnam("tty")) != NULL)
@@ -62,10 +62,10 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 
     if (openpty(master, slave, name, NULL, NULL) == 0) {
 	if (chown(name, ttyuid, ttygid) == 0)
-	    rval = true;
+	    ret = true;
     }
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 #elif defined(HAVE__GETPTY)
@@ -73,7 +73,7 @@ bool
 get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
-    bool rval = false;
+    bool ret = false;
     debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     /* IRIX-style dynamic ptys (may fork) */
@@ -83,13 +83,13 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 	if (*slave != -1) {
 	    (void) chown(line, ttyuid, -1);
 	    strlcpy(name, line, namesz);
-	    rval = true;
+	    ret = true;
 	} else {
 	    close(*master);
 	    *master = -1;
 	}
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 #elif defined(HAVE_GRANTPT)
 # ifndef HAVE_POSIX_OPENPT
@@ -111,7 +111,7 @@ bool
 get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
-    bool rval = false;
+    bool ret = false;
     debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     *master = posix_openpt(O_RDWR|O_NOCTTY);
@@ -137,10 +137,10 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 # endif
 	(void) chown(line, ttyuid, -1);
 	strlcpy(name, line, namesz);
-	rval = true;
+	ret = true;
     }
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 #else /* Old-style BSD ptys */
@@ -153,7 +153,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
     char *bank, *cp;
     struct group *gr;
     gid_t ttygid = -1;
-    bool rval = false;
+    bool ret = false;
     debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     if ((gr = getgrnam("tty")) != NULL)
@@ -178,13 +178,13 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 	    *slave = open(line, O_RDWR|O_NOCTTY, 0);
 	    if (*slave != -1) {
 		    strlcpy(name, line, namesz);
-		    rval = true; /* success */
+		    ret = true; /* success */
 		    goto done;
 	    }
 	    (void) close(*master);
 	}
     }
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 #endif /* HAVE_OPENPTY */

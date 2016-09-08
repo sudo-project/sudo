@@ -174,7 +174,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin, char *name, size_t 
 {
     size_t sdlen, num_subdirs = 0, max_subdirs = 0;
     char pathbuf[PATH_MAX], **subdirs = NULL;
-    char *rval = NULL;
+    char *ret = NULL;
     struct dirent *dp;
     unsigned int i;
     DIR *d = NULL;
@@ -281,7 +281,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin, char *name, size_t 
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"resolved dev %u as %s", (unsigned int)rdev, pathbuf);
 	    if (strlcpy(name, pathbuf, namelen) < namelen) {
-		rval = name;
+		ret = name;
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to store %s, have %zu, need %zu",
@@ -293,8 +293,8 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin, char *name, size_t 
     }
 
     /* Search subdirs if we didn't find it in the root level. */
-    for (i = 0; rval == NULL && i < num_subdirs; i++)
-	rval = sudo_ttyname_scan(subdirs[i], rdev, false, name, namelen);
+    for (i = 0; ret == NULL && i < num_subdirs; i++)
+	ret = sudo_ttyname_scan(subdirs[i], rdev, false, name, namelen);
 
 done:
     if (d != NULL)
@@ -302,7 +302,7 @@ done:
     for (i = 0; i < num_subdirs; i++)
 	free(subdirs[i]);
     free(subdirs);
-    debug_return_str(rval);
+    debug_return_str(ret);
 }
 
 /*
@@ -314,7 +314,7 @@ static char *
 sudo_ttyname_dev(dev_t rdev, char *name, size_t namelen)
 {
     char buf[PATH_MAX], **sd, *devname;
-    char *rval = NULL;
+    char *ret = NULL;
     struct stat sb;
     size_t len;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
@@ -335,7 +335,7 @@ sudo_ttyname_dev(dev_t rdev, char *name, size_t namelen)
 			    "comparing dev %u to %s: match!",
 			    (unsigned int)rdev, buf);
 			if (strlcpy(name, buf, namelen) < namelen)
-			    rval = name;
+			    ret = name;
 			else
 			    errno = ERANGE;
 			goto done;
@@ -345,15 +345,15 @@ sudo_ttyname_dev(dev_t rdev, char *name, size_t namelen)
 		    "comparing dev %u to %s: no", (unsigned int)rdev, buf);
 	    } else {
 		/* Traverse directory */
-		rval = sudo_ttyname_scan(devname, rdev, true, name, namelen);
-		if (rval != NULL || errno == ENOMEM)
+		ret = sudo_ttyname_scan(devname, rdev, true, name, namelen);
+		if (ret != NULL || errno == ENOMEM)
 		    goto done;
 	    }
 	} else {
 	    if (stat(devname, &sb) == 0) {
 		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
 		    if (strlcpy(name, devname, namelen) < namelen)
-			rval = name;
+			ret = name;
 		    else
 			errno = ERANGE;
 		    goto done;
@@ -365,10 +365,10 @@ sudo_ttyname_dev(dev_t rdev, char *name, size_t namelen)
     /*
      * Not found?  Do a breadth-first traversal of /dev/.
      */
-    rval = sudo_ttyname_scan(_PATH_DEV, rdev, false, name, namelen);
+    ret = sudo_ttyname_scan(_PATH_DEV, rdev, false, name, namelen);
 
 done:
-    debug_return_str(rval);
+    debug_return_str(ret);
 }
 #endif
 
@@ -383,7 +383,7 @@ get_process_ttyname(char *name, size_t namelen)
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int mib[6], rc, serrno = errno;
-    char *rval = NULL;
+    char *ret = NULL;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /*
@@ -411,8 +411,8 @@ get_process_ttyname(char *name, size_t namelen)
     if (rc != -1) {
 	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
 	    errno = serrno;
-	    rval = sudo_ttyname_dev(ki_proc->sudo_kp_tdev, name, namelen);
-	    if (rval == NULL) {
+	    ret = sudo_ttyname_dev(ki_proc->sudo_kp_tdev, name, namelen);
+	    if (ret == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		    "unable to map device number %u to name",
 		    ki_proc->sudo_kp_tdev);
@@ -424,7 +424,7 @@ get_process_ttyname(char *name, size_t namelen)
     }
     free(ki_proc);
 
-    debug_return_str(rval);
+    debug_return_str(ret);
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
 /*
@@ -434,7 +434,7 @@ get_process_ttyname(char *name, size_t namelen)
 char *
 get_process_ttyname(char *name, size_t namelen)
 {
-    char path[PATH_MAX], *rval = NULL;
+    char path[PATH_MAX], *ret = NULL;
     struct psinfo psinfo;
     ssize_t nread;
     int fd, serrno = errno;
@@ -453,7 +453,7 @@ get_process_ttyname(char *name, size_t namelen)
 #endif
 	    if (rdev != (dev_t)-1) {
 		errno = serrno;
-		rval = sudo_ttyname_dev(rdev, name, namelen);
+		ret = sudo_ttyname_dev(rdev, name, namelen);
 		goto done;
 	    }
 	}
@@ -461,11 +461,11 @@ get_process_ttyname(char *name, size_t namelen)
     errno = ENOENT;
 
 done:
-    if (rval == NULL)
+    if (ret == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
 
-    debug_return_str(rval);
+    debug_return_str(ret);
 }
 #elif defined(__linux__)
 /*
@@ -476,7 +476,7 @@ char *
 get_process_ttyname(char *name, size_t namelen)
 {
     char path[PATH_MAX], *line = NULL;
-    char *rval = NULL;
+    char *ret = NULL;
     size_t linesize = 0;
     int serrno = errno;
     ssize_t len;
@@ -505,7 +505,7 @@ get_process_ttyname(char *name, size_t namelen)
 			}
 			if (tdev > 0) {
 			    errno = serrno;
-			    rval = sudo_ttyname_dev(tdev, name, namelen);
+			    ret = sudo_ttyname_dev(tdev, name, namelen);
 			    goto done;
 			}
 			break;
@@ -519,11 +519,11 @@ get_process_ttyname(char *name, size_t namelen)
 
 done:
     free(line);
-    if (rval == NULL)
+    if (ret == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
 
-    debug_return_str(rval);
+    debug_return_str(ret);
 }
 #elif defined(HAVE_PSTAT_GETPROC)
 /*
@@ -534,7 +534,7 @@ char *
 get_process_ttyname(char *name, size_t namelen)
 {
     struct pst_status pstat;
-    char *rval = NULL;
+    char *ret = NULL;
     int rc, serrno = errno;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
@@ -546,7 +546,7 @@ get_process_ttyname(char *name, size_t namelen)
     if (rc != -1 || errno == EOVERFLOW) {
 	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
 	    errno = serrno;
-	    rval = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
+	    ret = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
 		pstat.pst_term.psd_minor), name, namelen);
 	    goto done;
 	}
@@ -554,11 +554,11 @@ get_process_ttyname(char *name, size_t namelen)
     errno = ENOENT;
 
 done:
-    if (rval == NULL)
+    if (ret == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via pstat");
 
-    debug_return_str(rval);
+    debug_return_str(ret);
 }
 #else
 /*

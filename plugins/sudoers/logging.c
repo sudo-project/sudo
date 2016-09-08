@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996, 1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -146,7 +146,7 @@ do_logfile(const char *msg)
     static bool warned = false;
     const char *timestr;
     int len, oldlocale;
-    bool rval = false;
+    bool ret = false;
     char *full_line;
     mode_t oldmask;
     FILE *fp;
@@ -206,14 +206,14 @@ do_logfile(const char *msg)
 	}
 	goto done;
     }
-    rval = true;
+    ret = true;
 
 done:
     if (fp != NULL)
 	(void) fclose(fp);
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -225,7 +225,7 @@ log_denial(int status, bool inform_user)
     const char *message;
     char *logline;
     int oldlocale;
-    bool uid_changed, rval = true;
+    bool uid_changed, ret = true;
     debug_decl(log_denial, SUDOERS_DEBUG_LOGGING)
 
     /* Handle auditing first (audit_failure() handles the locale itself). */
@@ -261,11 +261,11 @@ log_denial(int status, bool inform_user)
     if (def_syslog)
 	do_syslog(def_syslog_badpri, logline);
     if (def_logfile && !do_logfile(logline))
-	rval = false;
+	ret = false;
 
     if (uid_changed) {
 	if (!restore_perms())
-	    rval = false;		/* XXX - return -1 instead? */
+	    ret = false;		/* XXX - return -1 instead? */
     }
 
     free(logline);
@@ -298,7 +298,7 @@ log_denial(int status, bool inform_user)
 	}
 	sudoers_setlocale(oldlocale, NULL);
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -307,14 +307,14 @@ log_denial(int status, bool inform_user)
 bool
 log_failure(int status, int flags)
 {
-    bool rval, inform_user = true;
+    bool ret, inform_user = true;
     debug_decl(log_failure, SUDOERS_DEBUG_LOGGING)
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
 	(flags == NOT_FOUND_DOT || flags == NOT_FOUND))
 	inform_user = false;
-    rval = log_denial(status, inform_user);
+    ret = log_denial(status, inform_user);
 
     if (!inform_user) {
 	/*
@@ -330,7 +330,7 @@ log_failure(int status, int flags)
 	    sudo_warnx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
     }
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -340,7 +340,7 @@ bool
 log_auth_failure(int status, unsigned int tries)
 {
     int flags = 0;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING)
 
     /* Handle auditing first. */
@@ -368,11 +368,11 @@ log_auth_failure(int status, unsigned int tries)
      * If sudoers denied the command we'll log that separately.
      */
     if (ISSET(status, FLAG_BAD_PASSWORD))
-	rval = log_warningx(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
+	ret = log_warningx(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
     else if (ISSET(status, FLAG_NON_INTERACTIVE))
-	rval = log_warningx(flags, N_("a password is required"));
+	ret = log_warningx(flags, N_("a password is required"));
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -383,7 +383,7 @@ log_allowed(int status)
 {
     char *logline;
     int oldlocale;
-    bool uid_changed, rval = true;
+    bool uid_changed, ret = true;
     debug_decl(log_allowed, SUDOERS_DEBUG_LOGGING)
 
     /* Log and mail messages should be in the sudoers locale. */
@@ -405,18 +405,18 @@ log_allowed(int status)
     if (def_syslog)
 	do_syslog(def_syslog_goodpri, logline);
     if (def_logfile && !do_logfile(logline))
-	rval = false;
+	ret = false;
 
     if (uid_changed) {
 	if (!restore_perms())
-	    rval = false;		/* XXX - return -1 instead? */
+	    ret = false;		/* XXX - return -1 instead? */
     }
 
     free(logline);
 
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -427,7 +427,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 {
     int oldlocale, serrno = errno;
     char *logline, *message;
-    bool uid_changed, rval = true;
+    bool uid_changed, ret = true;
     va_list ap2;
     int len;
     debug_decl(vlog_error, SUDOERS_DEBUG_LOGGING)
@@ -448,7 +448,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     }
     if (len == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	rval = false;
+	ret = false;
 	goto done;
     }
 
@@ -467,7 +467,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	logline = new_logline(message, ISSET(flags, SLOG_USE_ERRNO) ? serrno : 0);
         free(message);
 	if (logline == NULL) {
-	    rval = false;
+	    ret = false;
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -490,12 +490,12 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	if (def_syslog)
 	    do_syslog(def_syslog_badpri, logline);
 	if (def_logfile && !do_logfile(logline))
-	    rval = false;
+	    ret = false;
     }
 
     if (uid_changed) {
 	if (!restore_perms())
-	    rval = false;
+	    ret = false;
     }
 
     free(logline);
@@ -522,37 +522,37 @@ done:
     va_end(ap2);
     sudoers_setlocale(oldlocale, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 bool
 log_warning(int flags, const char *fmt, ...)
 {
     va_list ap;
-    bool rval;
+    bool ret;
     debug_decl(log_error, SUDOERS_DEBUG_LOGGING)
 
     /* Log the error. */
     va_start(ap, fmt);
-    rval = vlog_warning(flags|SLOG_USE_ERRNO, fmt, ap);
+    ret = vlog_warning(flags|SLOG_USE_ERRNO, fmt, ap);
     va_end(ap);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 bool
 log_warningx(int flags, const char *fmt, ...)
 {
     va_list ap;
-    bool rval;
+    bool ret;
     debug_decl(log_error, SUDOERS_DEBUG_LOGGING)
 
     /* Log the error. */
     va_start(ap, fmt);
-    rval = vlog_warning(flags, fmt, ap);
+    ret = vlog_warning(flags, fmt, ap);
     va_end(ap);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 #define MAX_MAILFLAGS	63

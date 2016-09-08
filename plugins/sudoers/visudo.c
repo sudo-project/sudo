@@ -431,7 +431,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     struct timespec orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
     struct stat sb;			/* stat buffer */
-    bool rval = false;			/* return value */
+    bool ret = false;			/* return value */
     debug_decl(edit_sudoers, SUDOERS_DEBUG_UTIL)
 
     if (fstat(sp->fd, &sb) == -1)
@@ -546,9 +546,9 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     else
 	sudo_warnx(U_("%s unchanged"), sp->tpath);
 
-    rval = true;
+    ret = true;
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -653,7 +653,7 @@ static bool
 install_sudoers(struct sudoersfile *sp, bool oldperms)
 {
     struct stat sb;
-    bool rval = false;
+    bool ret = false;
     debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL)
 
     if (!sp->modified) {
@@ -667,7 +667,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	    if ((sb.st_mode & 0777) != sudoers_mode)
 		ignore_result(chmod(sp->path, sudoers_mode));
 	}
-	rval = true;
+	ret = true;
 	goto done;
     }
 
@@ -740,9 +740,9 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	    goto done;
 	}
     }
-    rval = true;
+    ret = true;
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* STUB */
@@ -1057,20 +1057,20 @@ alias_remove_recursive(char *name, int type)
 {
     struct member *m;
     struct alias *a;
-    bool rval = true;
+    bool ret = true;
     debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
 
     if ((a = alias_remove(name, type)) != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type == ALIAS) {
 		if (!alias_remove_recursive(m->name, type))
-		    rval = false;
+		    ret = false;
 	    }
 	}
 	if (rbinsert(alias_freelist, a, NULL) != 0)
-	    rval = false;
+	    ret = false;
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 static const char *
