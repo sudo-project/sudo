@@ -64,6 +64,9 @@ What's new in Sudo 1.8.18
 
  * Norwegian Nynorsk translation for sudo from translationproject.org.
 
+ * Fixed a typo that broke short host name matching when the fqdn
+   flag is enabled in sudoers.  Bug #757
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
