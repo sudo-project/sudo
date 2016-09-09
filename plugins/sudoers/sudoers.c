@@ -1069,7 +1069,7 @@ cb_fqdn(const union sudo_defs_val *sd_un)
 	/* Not remote, just use user_host. */
 	if ((lhost = strdup(user_host)) != NULL) {
 	    if (user_shost != user_host)
-		shost = strdup(lhost);
+		shost = strdup(user_shost);
 	    else
 		shost = lhost;
 	}
