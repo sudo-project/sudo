@@ -6,19 +6,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.8.18b1\n"
+"Project-Id-Version: sudoers-1.8.18b4\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2016-08-21 14:10-0600\n"
-"PO-Revision-Date: 2016-08-23 09:59+0100\n"
+"POT-Creation-Date: 2016-08-31 05:48-0600\n"
+"PO-Revision-Date: 2016-09-11 12:43+0200\n"
 "Last-Translator: Åka Sikrom <a4@hush.com>\n"
 "Language-Team: Norwegian Bokmaal <i18n-nb@lister.ping.uio.no>\n"
-"Language: Norwegian Bokmål\n"
+"Language: nb\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: /media/a4/a4.hjem/innboks/translationproject.org/fra-launchpad\n"
 
@@ -57,7 +57,7 @@ msgstr "Feil. Prøv igjen."
 #: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
 #: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:443
 #: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/auth/sia.c:59
-#: plugins/sudoers/defaults.c:572 plugins/sudoers/defaults.c:820
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
 #: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
 #: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
 #: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
@@ -72,10 +72,10 @@ msgstr "Feil. Prøv igjen."
 #: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
 #: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
 #: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
-#: plugins/sudoers/ldap.c:3104 plugins/sudoers/ldap.c:3136
-#: plugins/sudoers/ldap.c:3442 plugins/sudoers/ldap.c:3470
-#: plugins/sudoers/ldap.c:3486 plugins/sudoers/ldap.c:3576
-#: plugins/sudoers/ldap.c:3592 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3471
+#: plugins/sudoers/ldap.c:3487 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
 #: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:682
 #: plugins/sudoers/logging.c:940 plugins/sudoers/match.c:506
@@ -121,7 +121,7 @@ msgstr "kontrollsummering krever at du velger et stinavn"
 
 #: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:320
 #: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/defaults.c:572 plugins/sudoers/defaults.c:820
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
 #: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
 #: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
 #: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
@@ -136,10 +136,10 @@ msgstr "kontrollsummering krever at du velger et stinavn"
 #: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
 #: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
 #: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
-#: plugins/sudoers/ldap.c:3104 plugins/sudoers/ldap.c:3136
-#: plugins/sudoers/ldap.c:3442 plugins/sudoers/ldap.c:3469
-#: plugins/sudoers/ldap.c:3485 plugins/sudoers/ldap.c:3576
-#: plugins/sudoers/ldap.c:3592 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3470
+#: plugins/sudoers/ldap.c:3486 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
 #: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
 #: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:940
 #: plugins/sudoers/match.c:505 plugins/sudoers/match.c:539
@@ -839,6 +839,10 @@ msgstr "Tillat kjøring av kommandoer selv om sudo ikke klarer å skrive til I/O
 msgid "Allow commands to be run even if sudo cannot write to the log file"
 msgstr "Tillat kjøring av kommandoer selv om sudo ikke klarer å skrive til loggfil"
 
+#: plugins/sudoers/def_data.c:419
+msgid "Resolve groups in sudoers and match on the group ID, not the name"
+msgstr "Slå opp grupper i sudoers på gruppe-ID i stedet for gruppenavn"
+
 #: plugins/sudoers/defaults.c:203
 #, c-format
 msgid "no value specified for `%s'"
@@ -864,7 +868,7 @@ msgstr "Defaults-type 0x%x for valget «%s» er ugyldig"
 msgid "value `%s' is invalid for option `%s'"
 msgstr "«%s» er en ugyldig verdi for valget «%s»"
 
-#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:712
+#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:716
 #: plugins/sudoers/visudo_json.c:632 plugins/sudoers/visudo_json.c:667
 #, c-format
 msgid "unknown defaults entry `%s'"
@@ -1037,21 +1041,21 @@ msgid "    Order: %s\n"
 msgstr "    Sorter: %s\n"
 
 #: plugins/sudoers/ldap.c:2497 plugins/sudoers/parse.c:556
-#: plugins/sudoers/sssd.c:1567
+#: plugins/sudoers/sssd.c:1568
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Kommandoer:\n"
 
-#: plugins/sudoers/ldap.c:3056
+#: plugins/sudoers/ldap.c:3057
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "klarte ikke å starte opp LDAP. %s"
 
-#: plugins/sudoers/ldap.c:3092
+#: plugins/sudoers/ldap.c:3093
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls er valgt, men LDAP-bibliotekene støtter hverken «ldap_start_tls_s()» eller «ldap_start_tls_s_np()»"
 
-#: plugins/sudoers/ldap.c:3340
+#: plugins/sudoers/ldap.c:3341
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "«%s» er en ugyldig sudoOrder-attributt"
@@ -1420,7 +1424,7 @@ msgstr "klarte ikke å starte opp SSS-kilde. Har du installert SSSD på maskinen
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "fant ikke symbolet «%s» i %s"
 
-#: plugins/sudoers/sssd.c:1491
+#: plugins/sudoers/sssd.c:1492
 #, c-format
 msgid ""
 "\n"
@@ -1429,7 +1433,7 @@ msgstr ""
 "\n"
 "SSSD-rolle: %s\n"
 
-#: plugins/sudoers/sssd.c:1496
+#: plugins/sudoers/sssd.c:1497
 #, c-format
 msgid ""
 "\n"
