@@ -1201,7 +1201,8 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid != mon_pgrp)
-		send_status(backchannel, cstat);
+		cmnd_pgrp = pid;
+	    send_status(backchannel, cstat);
 	}
     }
 
