@@ -975,10 +975,30 @@ done:
     debug_return_bool(matched);
 }
 
+#if defined(HAVE_GETDOMAINNAME) || defined(SI_SRPC_DOMAIN)
+/*
+ * Check the domain for invalid characters.
+ * Linux getdomainname(2) returns (none) if no domain is set.
+ */
+static bool
+valid_domain(const char *domain)
+{
+    const char *cp;
+    debug_decl(valid_domain, SUDOERS_DEBUG_MATCH)
+
+    for (cp = domain; *cp != '\0'; cp++) {
+	/* Check for illegal characters, Linux may use "(none)". */
+	if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ')
+	    break;
+    }
+    if (cp == domain || *cp != '\0')
+	debug_return_bool(false);
+    debug_return_bool(true);
+}
+
 /*
  * Get NIS-style domain name and copy from static storage or NULL if none.
  */
-#if defined(HAVE_GETDOMAINNAME) || defined(SI_SRPC_DOMAIN)
 const char *
 sudo_getdomainname(void)
 {
@@ -998,23 +1018,16 @@ sudo_getdomainname(void)
 
 	domain = malloc(host_name_max + 1);
 	if (domain != NULL) {
-# ifdef SI_SRPC_DOMAIN
 	    domain[0] = '\0';
+# ifdef SI_SRPC_DOMAIN
 	    rc = sysinfo(SI_SRPC_DOMAIN, domain, host_name_max + 1);
 # else
 	    rc = getdomainname(domain, host_name_max + 1);
 # endif
-	    if (rc != -1 && domain[0] != '\0') {
-		const char *cp;
-
-		for (cp = domain; *cp != '\0'; cp++) {
-		    /* Check for illegal characters, Linux may use "(none)". */
-		    if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
-			free(domain);
-			domain = NULL;
-			break;
-		    }
-		}
+	    if (rc == -1 || !valid_domain(domain)) {
+		/* Error or invalid domain name. */
+		free(domain);
+		domain = NULL;
 	    }
 	} else {
 	    /* XXX - want to pass error back to caller */
