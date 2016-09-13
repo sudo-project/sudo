@@ -279,7 +279,7 @@ hostlist_matches(const struct passwd *pw, const struct member_list *list)
 		break;
 	    case NETGROUP:
 		if (netgr_matches(m->name, user_runhost, user_srunhost,
-		    pw->pw_name))
+		    def_netgroup_tuple ? pw->pw_name : NULL))
 		    matched = !m->negated;
 		break;
 	    case NTWKADDR:
