@@ -67,6 +67,9 @@ What's new in Sudo 1.8.18
  * Fixed a typo that broke short host name matching when the fqdn
    flag is enabled in sudoers.  Bug #757
 
+ * Negated sudoHost attributes are now supported by the LDAP and
+   SSSD backends.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
