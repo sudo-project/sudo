@@ -722,6 +722,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     struct berval **bv, **p;
     char *val;
     bool ret = false;
+    bool foundbang = false;
     debug_decl(sudo_ldap_check_host, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
@@ -733,14 +734,20 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 	debug_return_bool(ret);
 
     /* walk through values */
-    for (p = bv; *p != NULL && !ret; p++) {
+    for (p = bv; *p != NULL && !foundbang; p++) {
 	val = (*p)->bv_val;
+
+	if (*val == '!') {
+	    val++;
+	    foundbang = true;
+	}
+
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, user_runhost, user_srunhost,
 	    def_netgroup_tuple ? pw->pw_name : NULL) ||
 	    hostname_matches(user_srunhost, user_runhost, val))
-	    ret = true;
+	    ret = !foundbang;
 	DPRINTF2("ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
     }
 
