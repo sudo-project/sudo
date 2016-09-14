@@ -167,6 +167,13 @@ The special value
 will match any host.
 Host netgroups are matched using the host (both qualified and unqualified)
 and domain members only; the user member is not used when matching.
+If a
+\fRsudoHost\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
 .TP 6n
 \fBsudoCommand\fR
 A fully-qualified Unix command name with optional command line arguments,

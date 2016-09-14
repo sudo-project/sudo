@@ -80,7 +80,9 @@ DDEESSCCRRIIPPTTIIOONN
            with a `+').  The special value ALL will match any host.  Host
            netgroups are matched using the host (both qualified and
            unqualified) and domain members only; the user member is not used
-           when matching.
+           when matching.  If a sudoHost entry is preceded by an exclamation
+           point, `!', and the entry matches, the sudoRole in which it resides
+           will be ignored.
 
      ssuuddooCCoommmmaanndd
            A fully-qualified Unix command name with optional command line

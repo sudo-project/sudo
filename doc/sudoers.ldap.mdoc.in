@@ -159,6 +159,13 @@ The special value
 will match any host.
 Host netgroups are matched using the host (both qualified and unqualified)
 and domain members only; the user member is not used when matching.
+If a
+.Li sudoHost
+entry is preceded by an exclamation point,
+.Ql \&! ,
+and the entry matches, the
+.Li sudoRole
+in which it resides will be ignored.
 .It Sy sudoCommand
 A fully-qualified Unix command name with optional command line arguments,
 potentially including globbing characters (aka wild cards).
