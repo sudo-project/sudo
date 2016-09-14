@@ -730,6 +730,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     char **val_array, *val;
     bool ret = false;
+    bool foundbang = false;
     int i;
     debug_decl(sudo_sss_check_host, SUDOERS_DEBUG_SSSD);
 
@@ -749,16 +750,21 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     }
 
     /* walk through values */
-    for (i = 0; val_array[i] != NULL && !ret; ++i) {
+    for (i = 0; val_array[i] != NULL && !foundbang; ++i) {
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
+
+	if (*val == '!') {
+	    val++;
+	    foundbang = true;
+	}
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, handle->host, handle->shost,
 	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
 	    hostname_matches(handle->shost, handle->host, val))
-	    ret = true;
+	    ret = !foundbang;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "sssd/ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
