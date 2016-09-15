@@ -854,8 +854,8 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 static bool
 sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 {
-    bool user_matched = UNSPEC;
-    bool group_matched = UNSPEC;
+    int user_matched = UNSPEC;
+    int group_matched = UNSPEC;
     debug_decl(sudo_ldap_check_runas, SUDOERS_DEBUG_LDAP)
 
     if (!entry)

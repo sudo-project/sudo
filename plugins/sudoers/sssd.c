@@ -698,8 +698,8 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
 static bool
 sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    bool user_matched = UNSPEC;
-    bool group_matched = UNSPEC;
+    int user_matched = UNSPEC;
+    int group_matched = UNSPEC;
     debug_decl(sudo_sss_check_runas, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
