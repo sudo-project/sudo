@@ -315,7 +315,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
 	    char *cp = line;
 
 	    /* Trim trailing and leading spaces. */
-	    while (isspace((unsigned char)line[len - 1]))
+	    while (len > 0 && isspace((unsigned char)line[len - 1]))
 		line[--len] = '\0';
 	    while (isspace((unsigned char)*cp))
 		cp++;
