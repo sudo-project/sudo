@@ -3,6 +3,9 @@
 # Test sudoers file mode check
 #
 
+# Avoid warnings about memory leaks when there is a syntax error
+ASAN_OPTIONS=detect_leaks=0; export ASAN_OPTIONS
+
 # Create test file
 TESTFILE=`pwd`/regress/testsudoers/test5.inc
 cat >$TESTFILE <<EOF
