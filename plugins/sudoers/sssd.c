@@ -568,35 +568,23 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
     int ret = false, i;
     debug_decl(sudo_sss_check_runas_user, SUDOERS_DEBUG_SSSD);
 
-    if (!runas_user_set())
-	debug_return_int(UNSPEC);
-
     /* get the runas user from the entry */
-    switch (handle->fn_get_values(sss_rule, "sudoRunAsUser", &val_array)) {
+    i = handle->fn_get_values(sss_rule, "sudoRunAsUser", &val_array);
+    if (i == ENOENT) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "sudoRunAsUser: no result, trying sudoRunAs");
+	i = handle->fn_get_values(sss_rule, "sudoRunAs", &val_array);
+    }
+    switch (i) {
     case 0:
 	break;
     case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Trying old style (sudoRunAs)");
-
-	/* try old style */
-	switch (handle->fn_get_values(sss_rule, "sudoRunAs", &val_array)) {
-	case 0:
-	    break;
-	case ENOENT:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Matching against runas_default");
-	    /*
-	     * If there are no runas entries, match runas_default against
-	     * what the user specified on the command line.
-	     */
-	    return !strcasecmp(runas_pw->pw_name, def_runas_default);
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAs): != 0");
-	    debug_return_int(UNSPEC);
-	}
-	break;
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsUser: no result.");
+	debug_return_int(false);
     default:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsUser): != 0");
-	debug_return_int(UNSPEC);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "handle->fn_get_values(sudoRunAsUser): %d", i);
+	debug_return_int(false);
     }
 
     /*
@@ -672,21 +660,18 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
     int ret = false, i;
     debug_decl(sudo_sss_check_runas_group, SUDOERS_DEBUG_SSSD);
 
-    /* runas_gr is only set if the user specified the -g flag */
-    if (!runas_gr)
-	debug_return_int(UNSPEC);
-
     /* get the values from the entry */
-    switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
+    i = handle->fn_get_values(rule, "sudoRunAsGroup", &val_array);
+    switch (i) {
     case 0:
 	break;
     case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsGroup: no result.");
 	debug_return_int(false);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoRunAsGroup): != 0");
-	debug_return_int(UNSPEC);
+	    "handle->fn_get_values(sudoRunAsGroup): %d", i);
+	debug_return_int(false);
     }
 
     /* walk through values returned, looking for a match */
@@ -713,16 +698,28 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
 static bool
 sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    bool ret;
+    bool user_matched = UNSPEC;
+    bool group_matched = UNSPEC;
     debug_decl(sudo_sss_check_runas, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	 debug_return_bool(false);
 
-    ret = sudo_sss_check_runas_user(handle, rule) != false &&
-	 sudo_sss_check_runas_group(handle, rule) != false;
+    if (runas_user_set())
+	user_matched = sudo_sss_check_runas_user(handle, rule);
+    if (runas_gr != NULL)
+	group_matched = sudo_sss_check_runas_group(handle, rule);
 
-    debug_return_bool(ret);
+    /*
+     * If there are no runas entries, match runas_default against
+     * what the user specified on the command line.
+     */
+    if (user_matched == UNSPEC && group_matched == UNSPEC) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against runas_default");
+	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
+    }
+
+    debug_return_bool(group_matched != false && user_matched != false);
 }
 
 static bool

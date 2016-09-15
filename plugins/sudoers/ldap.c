@@ -764,13 +764,12 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
     bool ret = false;
     debug_decl(sudo_ldap_check_runas_user, SUDOERS_DEBUG_LDAP)
 
-    if (!runas_user_set())
-	debug_return_int(UNSPEC);
-
     /* get the runas user from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
     if (bv == NULL)
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs"); /* old style */
+    if (bv == NULL)
+	debug_return_int(false);
 
     /*
      * BUG:
@@ -788,13 +787,6 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
      *
      * Sigh - maybe add this feature later
      */
-
-    /*
-     * If there are no runas entries, match runas_default against
-     * what the user specified on the command line.
-     */
-    if (bv == NULL)
-	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
 
     /* walk through values returned, looking for a match */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -836,10 +828,6 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
     bool ret = false;
     debug_decl(sudo_ldap_check_runas_group, SUDOERS_DEBUG_LDAP)
 
-    /* runas_gr is only set if the user specified the -g flag */
-    if (!runas_gr)
-	debug_return_int(UNSPEC);
-
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv == NULL)
@@ -866,16 +854,26 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 static bool
 sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 {
-    bool ret;
+    bool user_matched = UNSPEC;
+    bool group_matched = UNSPEC;
     debug_decl(sudo_ldap_check_runas, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(false);
 
-    ret = sudo_ldap_check_runas_user(ld, entry) != false &&
-	sudo_ldap_check_runas_group(ld, entry) != false;
+    if (runas_user_set())
+	user_matched = sudo_ldap_check_runas_user(ld, entry);
+    if (runas_gr != NULL)
+	group_matched = sudo_ldap_check_runas_group(ld, entry);
 
-    debug_return_bool(ret);
+    /*
+     * If there are no runas entries, match runas_default against
+     * what the user specified on the command line.
+     */
+    if (user_matched == UNSPEC && group_matched == UNSPEC)
+	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
+
+    debug_return_bool(group_matched != false && user_matched != false); 
 }
 
 static struct sudo_digest *
