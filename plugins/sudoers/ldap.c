@@ -2357,9 +2357,11 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
  * Print a record in the short form, ala file sudoers.
  */
 static int
-sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lbuf)
+sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
+    struct sudo_lbuf *lbuf)
 {
     struct berval **bv, **p;
+    bool no_runas_user = true;
     int count = 0;
     debug_decl(sudo_ldap_display_entry_short, SUDOERS_DEBUG_LDAP)
 
@@ -2374,17 +2376,26 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lb
 	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
-    } else
-	sudo_lbuf_append(lbuf, "%s", def_runas_default);
+	no_runas_user = false;
+    }
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv != NULL) {
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
 	sudo_lbuf_append(lbuf, " : ");
 	for (p = bv; *p != NULL; p++) {
 	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
+    } else {
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
+	}
     }
     sudo_lbuf_append(lbuf, ") ");
 
@@ -2432,9 +2443,11 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lb
  * Print a record in the long form.
  */
 static int
-sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lbuf)
+sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
+    struct sudo_lbuf *lbuf)
 {
     struct berval **bv, **p;
+    bool no_runas_user = true;
     char *rdn;
     int count = 0;
     debug_decl(sudo_ldap_display_entry_long, SUDOERS_DEBUG_LDAP)
@@ -2458,18 +2471,27 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct sudo_lbuf *lbu
 	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
-    } else
-	sudo_lbuf_append(lbuf, "%s", def_runas_default);
-    sudo_lbuf_append(lbuf, "\n");
+	no_runas_user = false;
+    }
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv != NULL) {
-	sudo_lbuf_append(lbuf, "    RunAsGroups: ");
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
+	sudo_lbuf_append(lbuf, "\n    RunAsGroups: ");
 	for (p = bv; *p != NULL; p++) {
 	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
+	sudo_lbuf_append(lbuf, "\n");
+    } else {
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
+	}
 	sudo_lbuf_append(lbuf, "\n");
     }
 
@@ -2537,9 +2559,9 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     for (i = 0; i < lres->nentries; i++) {
 	entry = lres->entries[i].entry;
 	if (long_list)
-	    count += sudo_ldap_display_entry_long(ld, entry, lbuf);
+	    count += sudo_ldap_display_entry_long(ld, entry, pw, lbuf);
 	else
-	    count += sudo_ldap_display_entry_short(ld, entry, lbuf);
+	    count += sudo_ldap_display_entry_short(ld, entry, pw, lbuf);
     }
 
 done:

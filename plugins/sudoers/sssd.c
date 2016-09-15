@@ -1483,9 +1483,10 @@ sudo_sss_display_bound_defaults(struct sudo_nss *nss,
 
 static int
 sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct sudo_lbuf *lbuf)
+    struct sss_sudo_rule *rule, struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     char **val_array = NULL;
+    bool no_runas_user = true;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_long, SUDOERS_DEBUG_SSSD);
 
@@ -1507,6 +1508,7 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	for (i = 0; val_array[i] != NULL; ++i)
 	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
+	no_runas_user = false;
 	break;
     case ENOENT:
 	switch (handle->fn_get_values(rule, "sudoRunAs", &val_array)) {
@@ -1514,10 +1516,10 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	    for (i = 0; val_array[i] != NULL; ++i)
 		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    handle->fn_free_values(val_array);
+	    no_runas_user = false;
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAs): != 0");
@@ -1528,18 +1530,26 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsUser): != 0");
 	debug_return_int(count);
     }
-    sudo_lbuf_append(lbuf, "\n");
 
     /* get the RunAsGroup Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
     case 0:
-	sudo_lbuf_append(lbuf, "    RunAsGroups: ");
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
+	sudo_lbuf_append(lbuf, "\n    RunAsGroups: ");
 	for (i = 0; val_array[i] != NULL; ++i)
 	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	sudo_lbuf_append(lbuf, "\n");
 	break;
     case ENOENT:
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
+	sudo_lbuf_append(lbuf, "\n");
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
 	break;
     default:
@@ -1589,9 +1599,10 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 
 static int
 sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct sudo_lbuf *lbuf)
+    struct sss_sudo_rule *rule, struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     char **val_array = NULL;
+    bool no_runas_user = true;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_short, SUDOERS_DEBUG_SSSD);
 
@@ -1603,6 +1614,7 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	for (i = 0; val_array[i] != NULL; ++i)
 	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
+	no_runas_user = false;
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Trying old style (sudoRunAs).");
@@ -1612,10 +1624,10 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	    for (i = 0; val_array[i] != NULL; ++i)
 		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    handle->fn_free_values(val_array);
+	    no_runas_user = false;
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1632,12 +1644,20 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     /* get the RunAsGroup Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
     case 0:
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
 	sudo_lbuf_append(lbuf, " : ");
 	for (i = 0; val_array[i] != NULL; ++i)
 	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	break;
     case ENOENT:
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
+	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
 	break;
     default:
@@ -1726,9 +1746,9 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     for (i = 0; i < sss_result->num_rules; ++i) {
 	rule = sss_result->rules + i;
 	if (long_list)
-	    count += sudo_sss_display_entry_long(handle, rule, lbuf);
+	    count += sudo_sss_display_entry_long(handle, rule, pw, lbuf);
 	else
-	    count += sudo_sss_display_entry_short(handle, rule, lbuf);
+	    count += sudo_sss_display_entry_short(handle, rule, pw, lbuf);
     }
 
     handle->fn_free_result(sss_result);
