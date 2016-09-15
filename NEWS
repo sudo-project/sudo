@@ -70,6 +70,12 @@ What's new in Sudo 1.8.18
  * Negated sudoHost attributes are now supported by the LDAP and
    SSSD backends.
 
+ * Fixed matching entries in the LDAP and SSSD backends when a
+   RunAsGroup is specified but no RunAsUser is present.
+
+ * Fixed "sudo -l" output in the LDAP and SSSD backends when a
+   RunAsGroup is specified but no RunAsUser is present.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were
