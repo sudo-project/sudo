@@ -216,7 +216,7 @@ runaslist_matches(const struct member_list *user_list,
      */
     if (runas_gr != NULL) {
 	if (user_matched == UNSPEC) {
-	    if (runas_pw == NULL || strcmp(runas_pw->pw_name, user_name) == 0)
+	    if (strcmp(runas_pw->pw_name, user_name) == 0)
 		user_matched = ALLOW;	/* only changing group */
 	}
 	if (group_list != NULL) {
