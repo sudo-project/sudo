@@ -166,6 +166,9 @@ entry is preceded by an exclamation point,
 and the entry matches, the
 .Li sudoRole
 in which it resides will be ignored.
+Negated 
+.Li sudoHost
+entries are only supported by version 1.8.18 or higher.
 .It Sy sudoCommand
 A fully-qualified Unix command name with optional command line arguments,
 potentially including globbing characters (aka wild cards).

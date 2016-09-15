@@ -82,7 +82,8 @@ DDEESSCCRRIIPPTTIIOONN
            unqualified) and domain members only; the user member is not used
            when matching.  If a sudoHost entry is preceded by an exclamation
            point, `!', and the entry matches, the sudoRole in which it resides
-           will be ignored.
+           will be ignored.  Negated sudoHost entries are only supported by
+           version 1.8.18 or higher.
 
      ssuuddooCCoommmmaanndd
            A fully-qualified Unix command name with optional command line
