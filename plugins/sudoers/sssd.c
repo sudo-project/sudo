@@ -716,7 +716,8 @@ sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
      */
     if (user_matched == UNSPEC && group_matched == UNSPEC) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against runas_default");
-	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
+	debug_return_int(userpw_matches(def_runas_default, runas_pw->pw_name,
+	    runas_pw));
     }
 
     debug_return_bool(group_matched != false && user_matched != false);

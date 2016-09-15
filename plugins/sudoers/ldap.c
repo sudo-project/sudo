@@ -870,8 +870,10 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
      * If there are no runas entries, match runas_default against
      * what the user specified on the command line.
      */
-    if (user_matched == UNSPEC && group_matched == UNSPEC)
-	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
+    if (user_matched == UNSPEC && group_matched == UNSPEC) {
+	debug_return_int(userpw_matches(def_runas_default, runas_pw->pw_name,
+	    runas_pw));
+    }
 
     debug_return_bool(group_matched != false && user_matched != false); 
 }
