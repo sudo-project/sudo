@@ -568,7 +568,7 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
     int ret = false, i;
     debug_decl(sudo_sss_check_runas_user, SUDOERS_DEBUG_SSSD);
 
-    if (!runas_pw)
+    if (!runas_user_set())
 	debug_return_int(UNSPEC);
 
     /* get the runas user from the entry */

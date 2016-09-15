@@ -28,6 +28,11 @@
 #define IMPLIED	 2
 
 /*
+ * Returns true if a runas user was specified on the command line.
+ */
+#define runas_user_set()	(runas_pw != sudo_user.pw || runas_gr == NULL)
+
+/*
  * Initialize all tags to UNSPEC.
  */
 #define TAGS_INIT(t)	do {						       \

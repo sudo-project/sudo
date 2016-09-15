@@ -764,7 +764,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
     bool ret = false;
     debug_decl(sudo_ldap_check_runas_user, SUDOERS_DEBUG_LDAP)
 
-    if (!runas_pw)
+    if (!runas_user_set())
 	debug_return_int(UNSPEC);
 
     /* get the runas user from the entry */

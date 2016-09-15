@@ -158,7 +158,7 @@ runaslist_matches(const struct member_list *user_list,
      * and a runas group was specified.
      * This logic assumes that we cache and refcount passwd structs.
      */
-    if (!(runas_pw == sudo_user.pw && runas_gr != NULL)) {
+    if (runas_user_set()) {
 	/* If no runas user or runas group listed in sudoers, use default. */
 	if (user_list == NULL && group_list == NULL) {
 	    debug_return_int(userpw_matches(def_runas_default,
