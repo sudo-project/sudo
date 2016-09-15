@@ -154,6 +154,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'g':
 		runas_group = optarg;
+		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'p':
 		pwfile = optarg;
@@ -171,6 +172,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'u':
 		runas_user = optarg;
+		SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    default:
 		usage();
