@@ -153,12 +153,7 @@ runaslist_matches(const struct member_list *user_list,
     int group_matched = UNSPEC;
     debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH)
 
-    /*
-     * Skip checking runas user if it is the same as the invoking user
-     * and a runas group was specified.
-     * This logic assumes that we cache and refcount passwd structs.
-     */
-    if (runas_user_set()) {
+    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) {
 	/* If no runas user or runas group listed in sudoers, use default. */
 	if (user_list == NULL && group_list == NULL) {
 	    debug_return_int(userpw_matches(def_runas_default,
@@ -214,7 +209,7 @@ runaslist_matches(const struct member_list *user_list,
     /*
      * Skip checking runas group if none was specified.
      */
-    if (runas_gr != NULL) {
+    if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) {
 	if (user_matched == UNSPEC) {
 	    if (strcmp(runas_pw->pw_name, user_name) == 0)
 		user_matched = ALLOW;	/* only changing group */

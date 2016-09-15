@@ -705,9 +705,9 @@ sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     if (rule == NULL)
 	 debug_return_bool(false);
 
-    if (runas_user_set())
+    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	user_matched = sudo_sss_check_runas_user(handle, rule);
-    if (runas_gr != NULL)
+    if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	group_matched = sudo_sss_check_runas_group(handle, rule);
 
     /*

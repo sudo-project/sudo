@@ -861,9 +861,9 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
     if (!entry)
 	debug_return_bool(false);
 
-    if (runas_user_set())
+    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	user_matched = sudo_ldap_check_runas_user(ld, entry);
-    if (runas_gr != NULL)
+    if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	group_matched = sudo_ldap_check_runas_group(ld, entry);
 
     /*
