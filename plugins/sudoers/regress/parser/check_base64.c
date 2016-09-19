@@ -74,7 +74,7 @@ struct base64_test {
 int
 main(int argc, char *argv[])
 {
-    const int ntests = (sizeof(test_strings) / sizeof(test_strings[0]));
+    const int ntests = nitems(test_strings);
     int i, errors = 0;
     unsigned char buf[32];
     size_t len;

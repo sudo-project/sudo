@@ -145,20 +145,13 @@ static const char * const gai_errors[] = {
 #endif
 
 /*
- * Used for iterating through arrays.  ARRAY_SIZE returns the number of
- * elements in the array (useful for a < upper bound in a for loop).
- */
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
-
-
-/*
  * Return a constant string for a given EAI_* error code or a string
  * indicating an unknown error.
  */
 const char *
 sudo_gai_strerror(int ecode)
 {
-    if (ecode < 1 || (size_t) ecode > ARRAY_SIZE(gai_errors))
+    if (ecode < 1 || (size_t) ecode > nitems(gai_errors))
         return "Unknown error";
     else
         return gai_errors[ecode - 1];

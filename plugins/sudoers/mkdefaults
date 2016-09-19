@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # Generate sudo_defs_table and associated defines
 #
@@ -8,6 +8,11 @@
 #	TYPE
 #	description (or NULL)
 #	array of struct def_values if TYPE == T_TUPLE
+
+use warnings;
+use strict;
+
+my ($header, $cfile, $infile);
 
 # Deal with optional -o (output) argument
 if ($#ARGV > 0 && $ARGV[0] eq "-o") {
@@ -32,10 +37,11 @@ open(IN, "<$infile") || die "$0: can't open $infile: $!\n";
 open(HEADER, ">$header") || die "$0: can't open $header: $!\n";
 open(CFILE, ">$cfile") || die "$0: can't open $cfile: $!\n";
 
-$count = 0;
-@tuple_values = ( "never" );
-@records = ();
-while(<IN>) {
+my $count = 0;
+my @tuple_values = ( "never" );
+my @records = ();
+my ($var, $type, $desc, $values, $callback, $field);
+while (<IN>) {
     chomp;
     s/\s*#.*$//;
     next if /^\s*$/;
@@ -74,7 +80,7 @@ while(<IN>) {
 	    } else {
 		die "$0: syntax error near line $.\n" if $type !~ /^T_TUPLE/;
 		$values = [ split ];
-		foreach $v (@$values) {
+		foreach my $v (@$values) {
 		    push(@tuple_values, $v) unless grep(/^$v$/, @tuple_values);
 		}
 	    }
@@ -86,11 +92,12 @@ while(<IN>) {
 $records[$count++] = [$var, $type, $desc, $values, $callback] if defined($var);
 
 # Print out value arrays
-for ($i = 0; $i < $count; $i++) {
+for (my $i = 0; $i < $count; $i++) {
     if (defined($records[$i]->[3])) {
 	die "Values list specified for non-tuple\n" unless
 	    $records[$i]->[1] =~ /^T_TUPLE/;
-	printf CFILE "static struct def_values def_data_%s[] = {\n", $records[$i]->[0];
+	printf CFILE "static struct def_values def_data_%s[] = {\n",
+	    $records[$i]->[0];
 	foreach (@{$records[$i]->[3]}) {
 	    print CFILE "    { \"$_\", $_ },\n";
 	}
@@ -101,15 +108,15 @@ for ($i = 0; $i < $count; $i++) {
 
 # Print each record
 print CFILE "struct sudo_defs_types sudo_defs_table[] = {\n    {\n";
-for ($i = 0; $i < $count; $i++) {
-    &print_record($records[$i], $i);
+for (my $i = 0; $i < $count; $i++) {
+    print_record($records[$i], $i);
 }
 print CFILE "\tNULL, 0, NULL\n    }\n};\n";
 
 # Print out def_tuple
 if (@tuple_values) {
     print HEADER "\nenum def_tuple {\n";
-    for ($i = 0; $i <= $#tuple_values; $i++) {
+    for (my $i = 0; $i <= $#tuple_values; $i++) {
 	printf HEADER "\t%s%s\n", $tuple_values[$i],
 	    $i != $#tuple_values ? "," : "";
     }
@@ -120,10 +127,15 @@ close(IN);
 close(HEADER);
 close(CFILE);
 
+exit(0);
+
 sub print_record {
     my ($rec, $recnum) = @_;
     my ($i, $v, $defname);
+
     # each variable gets a macro to access its value
+    $defname = "I_" . uc($rec->[0]);
+    printf HEADER "#define %-23s %d\n", $defname, $recnum;
     for ($rec->[1]) {
 	if    (/^T_INT/)    { $v = "ival"; }
 	elsif (/^T_UINT/)   { $v = "uival"; }
@@ -137,13 +149,8 @@ sub print_record {
 	elsif (/^T_FLOAT/)  { $v = "fval"; }
 	else { die "$0: unknown defaults type: $_\n"; }
     }
-    printf HEADER "#define %-23s (sudo_defs_table[$recnum].sd_un.${v})\n",
+    printf HEADER "#define %-23s (sudo_defs_table[$defname].sd_un.${v})\n",
 	"def_$rec->[0]";
-
-    $defname = "I_" . uc($rec->[0]);
-    printf HEADER "#define %-24s%d", $defname, $recnum;
-    #print HEADER "\t/* $rec->[2] */" if defined($rec->[2]);
-    print HEADER "\n";
 
     print CFILE "\t\"$rec->[0]\", $rec->[1],\n\t$rec->[2],\n";
     if (defined($rec->[3])) {

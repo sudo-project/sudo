@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "5" "June 15, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "September 1, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -167,6 +167,16 @@ The special value
 will match any host.
 Host netgroups are matched using the host (both qualified and unqualified)
 and domain members only; the user member is not used when matching.
+If a
+\fRsudoHost\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
+Negated
+\fRsudoHost\fR
+entries are only supported by version 1.8.18 or higher.
 .TP 6n
 \fBsudoCommand\fR
 A fully-qualified Unix command name with optional command line arguments,
@@ -559,16 +569,10 @@ are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .PP
-The pound sign
+Lines beginning with a pound sign
 (\(oq#\(cq)
-is used to indicate a comment.
-Both the comment character and any text after it, up to the end of
-the line, are ignored.
-Long lines can be continued with a backslash
-(\(oq\e\(cq)
-as the last character on the line.
-Note that leading white space is removed from the beginning of lines
-even when the continuation character is used.
+are ignored.
+Leading white space is removed from the beginning of lines.
 .TP 6n
 \fBBIND_TIMELIMIT\fR \fIseconds\fR
 The

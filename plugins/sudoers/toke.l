@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -319,8 +319,8 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("INCLUDEDIR\n");
 
 			    /*
-			     * Push current buffer and switch to include file.
-			     * We simply ignore empty directories.
+			     * Push current buffer and switch to include file,
+			     * ignoring missing or empty directories.
 			     */
 			    if (!push_includedir(path))
 				yyterminate();
@@ -774,17 +774,14 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 
     dir = opendir(dirpath);
     if (dir == NULL) {
-	if (errno != ENOENT) {
-	    sudo_warn("%s", dirpath);
-	    sudoerserror(NULL);
-	}
+	if (errno == ENOENT)
+	    goto done;
+	sudo_warn("%s", dirpath);
 	goto bad;
     }
     paths = reallocarray(NULL, max_paths, sizeof(*paths));
-    if (paths == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto bad;
-    }
+    if (paths == NULL)
+	goto oom;
     while ((dent = readdir(dir)) != NULL) {
 	struct path_list *pl;
 	struct stat sb;
@@ -796,16 +793,15 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    continue;
 	}
 	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1)
-	    goto bad;
+	    goto oom;
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
 	    free(path);
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(path);
-	    goto bad;
+	    goto oom;
 	}
 	pl->path = path;
 	if (count >= max_paths) {
@@ -813,10 +809,9 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    max_paths <<= 1;
 	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		free(path);
 		free(pl);
-		goto bad;
+		goto oom;
 	    }
 	    paths = tmp;
 	}
@@ -827,9 +822,13 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	free(paths);
 	paths = NULL;
     }
+done:
     *pathsp = paths;
     debug_return_int(count);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
+    sudoerserror(NULL);
     if (dir != NULL)
 	closedir(dir);
     for (i = 0; i < count; i++) {
@@ -903,6 +902,12 @@ init_lexer(void)
     debug_return;
 }
 
+/*
+ * Open an include file (or file from a directory), push the old
+ * sudoers file buffer and switch to the new one.
+ * A missing or insecure include dir is simply ignored.
+ * Returns false on error, else true.
+ */
 static bool
 push_include_int(char *path, bool isdir)
 {
@@ -930,40 +935,35 @@ push_include_int(char *path, bool isdir)
     SLIST_INIT(&istack[idepth].more);
     if (isdir) {
 	struct stat sb;
-	int count;
-	switch (sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb)) {
-	    case SUDO_PATH_SECURE:
-		break;
-	    case SUDO_PATH_MISSING:
-		debug_return_bool(false);
-	    case SUDO_PATH_BAD_TYPE:
-		errno = ENOTDIR;
-		if (sudoers_warnings) {
+	int count, status;
+
+	status = sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb);
+	if (status != SUDO_PATH_SECURE) {
+	    if (sudoers_warnings) {
+		switch (status) {
+		case SUDO_PATH_BAD_TYPE:
+		    errno = ENOTDIR;
 		    sudo_warn("%s", path);
-		}
-		debug_return_bool(false);
-	    case SUDO_PATH_WRONG_OWNER:
-		if (sudoers_warnings) {
+		    break;
+		case SUDO_PATH_WRONG_OWNER:
 		    sudo_warnx(U_("%s is owned by uid %u, should be %u"),   
 			path, (unsigned int) sb.st_uid,
 			(unsigned int) sudoers_uid);
-		}
-		debug_return_bool(false);
-	    case SUDO_PATH_WORLD_WRITABLE:
-		if (sudoers_warnings) {
+		    break;
+		case SUDO_PATH_WORLD_WRITABLE:
 		    sudo_warnx(U_("%s is world writable"), path);
-		}
-		debug_return_bool(false);
-	    case SUDO_PATH_GROUP_WRITABLE:
-		if (sudoers_warnings) {
+		    break;
+		case SUDO_PATH_GROUP_WRITABLE:
 		    sudo_warnx(U_("%s is owned by gid %u, should be %u"),
 			path, (unsigned int) sb.st_gid,
 			(unsigned int) sudoers_gid);
+		    break;
+		default:
+		    break;
 		}
-		debug_return_bool(false);
-	    default:
-		/* NOTREACHED */
-		debug_return_bool(false);
+	    }
+	    /* A missing or insecure include dir is not a fatal error. */
+	    debug_return_bool(true);
 	}
 	count = switch_dir(&istack[idepth], path);
 	if (count <= 0) {
@@ -1003,6 +1003,11 @@ push_include_int(char *path, bool isdir)
     debug_return_bool(true);
 }
 
+/*
+ * Restore the previous sudoers file and buffer, or, in the case
+ * of an includedir, switch to the next file in the dir.
+ * Returns false if there is nothing to pop, else true.
+ */
 static bool
 pop_include(void)
 {

@@ -12,7 +12,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="(c) 1993-1996,1998-2015 Todd C. Miller"
+	copyright="(c) 1993-1996,1998-2016 Todd C. Miller"
 	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
@@ -37,6 +37,41 @@ still allow people to get their work done."
 %if [solaris]
 	pp_solaris_name="TCM${name}"
 	pp_solaris_pstamp=`/usr/bin/date "+%B %d, %Y"`
+%endif
+
+%if [macos]
+	# System Integrity Protection on Mac OS X won't allow us to write
+	# directly to /etc or /var.  We must install in /private instead.
+	case "$sudoersdir" in
+	/etc|/etc/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/etc; then
+		mv ${pp_destdir}/etc ${pp_destdir}/private/etc
+	    fi
+	    sudoersdir="/private${sudoersdir}"
+	    ;;
+	esac
+	case "$vardir" in
+	/var|/var/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/var; then
+		mv ${pp_destdir}/var ${pp_destdir}/private/var
+	    fi
+	    vardir="/private${vardir}"
+	    ;;
+	esac
+	case "$rundir" in
+	/var|/var/*)
+	    mkdir -p ${pp_destdir}/private
+	    chmod 755 ${pp_destdir}/private
+	    if test -d ${pp_destdir}/var; then
+		mv ${pp_destdir}/var ${pp_destdir}/private/var
+	    fi
+	    rundir="/private${rundir}"
+	    ;;
+	esac
 %endif
 
 %if [rpm,deb]

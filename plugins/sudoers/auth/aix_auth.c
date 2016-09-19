@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -140,7 +140,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 {
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
-    int rval = AUTH_SUCCESS;
+    int ret = AUTH_SUCCESS;
     debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH)
 
     do {
@@ -168,10 +168,10 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 	    memset(&repl, 0, sizeof(repl));
 	    sudo_conv(1, &msg, &repl, NULL);
 	}
-	rval = pass ? AUTH_FAILURE : AUTH_INTR;
+	ret = pass ? AUTH_FAILURE : AUTH_INTR;
     }
     free(message);
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 int

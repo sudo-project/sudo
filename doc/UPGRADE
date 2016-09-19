@@ -136,6 +136,10 @@ o Upgrading from a version prior to 1.8.2:
        lookup by name of the group "fireflies" would have matched
        the "fireflie" group on most systems.
 
+    The legacy group matching behavior may be restored by enabling
+    the match_group_by_gid Defaults option in sudoers available
+    in sudo 1.8.18 and higher.
+
 o Upgrading from a version prior to 1.8.1:
 
     Changes in the sudoers parser could result in parse errors for

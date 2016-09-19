@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -41,8 +41,8 @@
 #include "toke.h"
 #include <gram.h>
 
-static int arg_len = 0;
-static int arg_size = 0;
+static unsigned int arg_len = 0;
+static unsigned int arg_size = 0;
 
 bool
 fill_txt(const char *src, size_t len, size_t olen)
@@ -127,7 +127,7 @@ fill_cmnd(const char *src, size_t len)
 bool
 fill_args(const char *s, size_t len, int addspace)
 {
-    int new_len;
+    unsigned int new_len;
     char *p;
     debug_decl(fill_args, SUDOERS_DEBUG_PARSER)
 
@@ -139,7 +139,7 @@ fill_args(const char *s, size_t len, int addspace)
 
     if (new_len >= arg_size) {
 	/* Allocate in increments of 128 bytes to avoid excessive realloc(). */
-	arg_size = (new_len + 127) & ~127;
+	arg_size = (new_len + 1 + 127) & ~127;
 
 	p = realloc(sudoerslval.command.args, arg_size);
 	if (p == NULL) {
@@ -153,7 +153,8 @@ fill_args(const char *s, size_t len, int addspace)
     p = sudoerslval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
-    if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != (size_t)len) {
+    len = arg_size - (p - sudoerslval.command.args);
+    if (strlcpy(p, s, len) >= len) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	goto bad;
     }

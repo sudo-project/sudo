@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.17p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.18], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -63,6 +63,7 @@ AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
 AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
+AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_NOEXEC])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
@@ -186,6 +187,7 @@ dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
+INSTALL_BACKUP=
 INSTALL_NOEXEC=
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
@@ -1779,6 +1781,9 @@ case "$host" in
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
 
+		# HP-UX won't unlink a shared lib that is open
+		INSTALL_BACKUP='~'
+
 		AC_CHECK_FUNCS([pstat_getproc])
 		;;
     *-*-hpux*)
@@ -1799,6 +1804,9 @@ case "$host" in
 		# HP-UX shared libs must be executable.
 		# Load time is much greater if writable so use 0555.
 		SHLIB_MODE=0555
+
+		# HP-UX won't unlink a shared lib that is open
+		INSTALL_BACKUP='~'
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then
@@ -2282,7 +2290,8 @@ case "$host_os" in
 	[sudo_cv_xopen_source_extended=no], [
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
 	    AC_INCLUDES_DEFAULT
-#	    include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+#	    include <sys/socket.h>
+#	    include <net/if.h>], [int a = MSG_WAITALL; return a;])],
 	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])

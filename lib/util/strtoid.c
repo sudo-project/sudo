@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,7 +52,7 @@ id_t
 sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr)
 {
     char *ep;
-    id_t rval = 0;
+    id_t ret = 0;
     bool valid = false;
     debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
 
@@ -89,7 +89,7 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
 		*errstr = N_("value too small");
 	    goto done;
 	}
-	rval = (id_t)lval;
+	ret = (id_t)lval;
     } else {
 	unsigned long ulval = strtoul(p, &ep, 10);
 	if (ep != p) {
@@ -111,12 +111,12 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
 		*errstr = N_("value too large");
 	    goto done;
 	}
-	rval = (id_t)ulval;
+	ret = (id_t)ulval;
     }
     if (errstr != NULL)
 	*errstr = NULL;
     if (endp != NULL)
 	*endp = ep;
 done:
-    debug_return_int(rval);
+    debug_return_int(ret);
 }

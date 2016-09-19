@@ -315,7 +315,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
 	    char *cp = line;
 
 	    /* Trim trailing and leading spaces. */
-	    while (isspace((unsigned char)line[len - 1]))
+	    while (len > 0 && isspace((unsigned char)line[len - 1]))
 		line[--len] = '\0';
 	    while (isspace((unsigned char)*cp))
 		cp++;
@@ -561,42 +561,51 @@ sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 }
 
 static int
-sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule)
+sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule, int group_matched)
 {
     char **val_array = NULL;
     char *val;
     int ret = false, i;
     debug_decl(sudo_sss_check_runas_user, SUDOERS_DEBUG_SSSD);
 
-    if (!runas_pw)
-	debug_return_int(UNSPEC);
-
     /* get the runas user from the entry */
-    switch (handle->fn_get_values(sss_rule, "sudoRunAsUser", &val_array)) {
+    i = handle->fn_get_values(sss_rule, "sudoRunAsUser", &val_array);
+    if (i == ENOENT) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "sudoRunAsUser: no result, trying sudoRunAs");
+	i = handle->fn_get_values(sss_rule, "sudoRunAs", &val_array);
+    }
+    switch (i) {
     case 0:
 	break;
     case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Trying old style (sudoRunAs)");
-
-	/* try old style */
-	switch (handle->fn_get_values(sss_rule, "sudoRunAs", &val_array)) {
-	case 0:
-	    break;
-	case ENOENT:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Matching against runas_default");
-	    /*
-	     * If there are no runas entries, match runas_default against
-	     * what the user specified on the command line.
-	     */
-	    return !strcasecmp(runas_pw->pw_name, def_runas_default);
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAs): != 0");
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsUser: no result.");
+	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED))
 	    debug_return_int(UNSPEC);
+	switch (group_matched) {
+	case UNSPEC:
+	    /*
+	     * No runas user or group entries.  Match runas_default
+	     * against what the user specified on the command line.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against runas_default");
+	    ret = userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw);
+	    break;
+	case true:
+	    /*
+	     * No runas user entries but have a matching runas group entry.
+	     * If trying to run as the invoking user, allow it.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against user_name");
+	    if (strcmp(user_name, runas_pw->pw_name) == 0)
+		ret = true;
+	    break;
 	}
-	break;
+	debug_return_int(ret);
     default:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsUser): != 0");
-	debug_return_int(UNSPEC);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "handle->fn_get_values(sudoRunAsUser): %d", i);
+	debug_return_int(false);
     }
 
     /*
@@ -672,21 +681,22 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
     int ret = false, i;
     debug_decl(sudo_sss_check_runas_group, SUDOERS_DEBUG_SSSD);
 
-    /* runas_gr is only set if the user specified the -g flag */
-    if (!runas_gr)
-	debug_return_int(UNSPEC);
-
     /* get the values from the entry */
-    switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
+    i = handle->fn_get_values(rule, "sudoRunAsGroup", &val_array);
+    switch (i) {
     case 0:
 	break;
     case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	debug_return_int(false);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsGroup: no result.");
+	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED)) {
+	    if (runas_pw->pw_gid == runas_gr->gr_gid)
+		ret = true;	/* runas group matches passwd db */
+	}
+	debug_return_int(ret);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoRunAsGroup): != 0");
-	debug_return_int(UNSPEC);
+	    "handle->fn_get_values(sudoRunAsGroup): %d", i);
+	debug_return_int(false);
     }
 
     /* walk through values returned, looking for a match */
@@ -713,16 +723,18 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
 static bool
 sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    bool ret;
+    int user_matched = UNSPEC;
+    int group_matched = UNSPEC;
     debug_decl(sudo_sss_check_runas, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
 	 debug_return_bool(false);
 
-    ret = sudo_sss_check_runas_user(handle, rule) != false &&
-	 sudo_sss_check_runas_group(handle, rule) != false;
+    if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
+	group_matched = sudo_sss_check_runas_group(handle, rule);
+    user_matched = sudo_sss_check_runas_user(handle, rule, group_matched);
 
-    debug_return_bool(ret);
+    debug_return_bool(group_matched != false && user_matched != false);
 }
 
 static bool
@@ -730,6 +742,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     char **val_array, *val;
     bool ret = false;
+    bool foundbang = false;
     int i;
     debug_decl(sudo_sss_check_host, SUDOERS_DEBUG_SSSD);
 
@@ -749,16 +762,21 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     }
 
     /* walk through values */
-    for (i = 0; val_array[i] != NULL && !ret; ++i) {
+    for (i = 0; val_array[i] != NULL && !foundbang; ++i) {
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
+
+	if (*val == '!') {
+	    val++;
+	    foundbang = true;
+	}
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, handle->host, handle->shost,
 	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
 	    hostname_matches(handle->shost, handle->host, val))
-	    ret = true;
+	    ret = !foundbang;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "sssd/ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
@@ -1116,12 +1134,70 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     debug_return_int(ret);
 }
 
+/*
+ * Parse an option string into a defaults structure.
+ * The members of def are pointers into optstr (which is modified).
+ */
+static int
+sudo_sss_parse_option(char *optstr, char **varp, char **valp)
+{
+    char *cp, *val = NULL;
+    char *var = optstr;
+    int op;
+    debug_decl(sudo_sss_parse_option, SUDOERS_DEBUG_SSSD)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'", optstr);
+
+    /* check for equals sign past first char */
+    cp = strchr(var, '=');
+    if (cp > var) {
+	val = cp + 1;
+	op = cp[-1];	/* peek for += or -= cases */
+	if (op == '+' || op == '-') {
+	    /* case var+=val or var-=val */
+	    cp--;
+	} else {
+	    /* case var=val */
+	    op = true;
+	}
+	/* Trim whitespace between var and operator. */
+	while (cp > var && isblank((unsigned char)cp[-1]))
+	    cp--;
+	/* Truncate variable name. */
+	*cp = '\0';
+	/* Trim leading whitespace from val. */
+	while (isblank((unsigned char)*val))
+	    val++;
+	/* Strip double quotes if present. */
+	if (*val == '"') {
+	    char *ep = val + strlen(val);
+	    if (ep != val && ep[-1] == '"') {
+		val++;
+		ep[-1] = '\0';
+	    }
+	}
+    } else {
+	/* Boolean value, either true or false. */
+	op = true;
+	while (*var == '!') {
+	    op = !op;
+	    do {
+		var++;
+	    } while (isblank((unsigned char)*var));
+	}
+    }
+    *varp = var;
+    *valp = val;
+
+    debug_return_int(op);
+}
+
 static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     int i, op;
+    char *copy, *var, *val;
     bool ret = false;
-    char *copy, *cp, *v;
     char **val_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
@@ -1139,54 +1215,31 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	debug_return_bool(false);
     }
 
-    /* walk through options */
+    /* walk through options, early ones first */
     for (i = 0; val_array[i] != NULL; i++) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'",
-	 val_array[i]);
-	if ((v = copy = strdup(val_array[i])) == NULL) {
+	struct early_default *early;
+
+	if ((copy = strdup(val_array[i])) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
+	op = sudo_sss_parse_option(copy, &var, &val);
+	early = is_early_default(var);
+	if (early != NULL)
+	    set_early_default(var, val, op, false, early);
+	free(copy);
+    }
+    run_early_defaults();
 
-	/* check for equals sign past first char */
-	cp = strchr(v, '=');
-	if (cp > v) {
-	    char *val = cp + 1;
-	    op = cp[-1];	/* peek for += or -= cases */
-	    if (op == '+' || op == '-') {
-		/* case var+=val or var-=val */
-		cp--;
-	    } else {
-		/* case var=val */
-		op = true;
-	    }
-	    /* Trim whitespace between var and operator. */
-	    while (cp > v && isblank((unsigned char)cp[-1]))
-		cp--;
-	    /* Truncate variable name. */
-	    *cp = '\0';
-	    /* Trim leading whitespace from val. */
-	    while (isblank((unsigned char)*val))
-		val++;
-	    /* Strip double quotes if present. */
-	    if (*val == '"') {
-		char *ep = val + strlen(val);
-		if (ep != val && ep[-1] == '"') {
-		    val++;
-		    ep[-1] = '\0';
-		}
-	    }
-	    set_default(v, val, op);
-	} else if (*v == '!') {
-	    /* case !var Boolean False */
-	    do {
-		v++;
-	    } while (isblank((unsigned char)*v));
-	    set_default(v, NULL, false);
-	} else {
-	    /* case var Boolean True */
-	    set_default(v, NULL, true);
+    /* walk through options again, skipping early ones */
+    for (i = 0; val_array[i] != NULL; i++) {
+	if ((copy = strdup(val_array[i])) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
 	}
+	op = sudo_sss_parse_option(copy, &var, &val);
+	if (is_early_default(var) == NULL)
+	    set_default(var, val, op, false);
 	free(copy);
     }
     ret = true;
@@ -1345,8 +1398,9 @@ sudo_sss_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 
     for (i = 0; i < sss_result->num_rules; i++) {
 	rule = sss_result->rules + i;
-	if (sudo_sss_check_command(handle, rule, NULL) &&
-	    sudo_sss_check_runas(handle, rule)) {
+	if (!sudo_sss_check_runas(handle, rule))
+	    continue;
+	if (sudo_sss_check_command(handle, rule, NULL) == true) {
 	    found = true;
 	    goto done;
 	}
@@ -1444,9 +1498,10 @@ sudo_sss_display_bound_defaults(struct sudo_nss *nss,
 
 static int
 sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct sudo_lbuf *lbuf)
+    struct sss_sudo_rule *rule, struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     char **val_array = NULL;
+    bool no_runas_user = true;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_long, SUDOERS_DEBUG_SSSD);
 
@@ -1468,6 +1523,7 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	for (i = 0; val_array[i] != NULL; ++i)
 	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
+	no_runas_user = false;
 	break;
     case ENOENT:
 	switch (handle->fn_get_values(rule, "sudoRunAs", &val_array)) {
@@ -1475,10 +1531,10 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	    for (i = 0; val_array[i] != NULL; ++i)
 		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    handle->fn_free_values(val_array);
+	    no_runas_user = false;
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAs): != 0");
@@ -1489,18 +1545,26 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsUser): != 0");
 	debug_return_int(count);
     }
-    sudo_lbuf_append(lbuf, "\n");
 
     /* get the RunAsGroup Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
     case 0:
-	sudo_lbuf_append(lbuf, "    RunAsGroups: ");
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
+	sudo_lbuf_append(lbuf, "\n    RunAsGroups: ");
 	for (i = 0; val_array[i] != NULL; ++i)
 	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	sudo_lbuf_append(lbuf, "\n");
 	break;
     case ENOENT:
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
+	sudo_lbuf_append(lbuf, "\n");
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
 	break;
     default:
@@ -1550,9 +1614,10 @@ sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
 
 static int
 sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct sudo_lbuf *lbuf)
+    struct sss_sudo_rule *rule, struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     char **val_array = NULL;
+    bool no_runas_user = true;
     int count = 0, i;
     debug_decl(sudo_sss_display_entry_short, SUDOERS_DEBUG_SSSD);
 
@@ -1564,6 +1629,7 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	for (i = 0; val_array[i] != NULL; ++i)
 	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
+	no_runas_user = false;
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Trying old style (sudoRunAs).");
@@ -1573,10 +1639,10 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	    for (i = 0; val_array[i] != NULL; ++i)
 		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	    handle->fn_free_values(val_array);
+	    no_runas_user = false;
 	    break;
 	case ENOENT:
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1593,12 +1659,20 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     /* get the RunAsGroup Values from the entry */
     switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
     case 0:
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	}
 	sudo_lbuf_append(lbuf, " : ");
 	for (i = 0; val_array[i] != NULL; ++i)
 	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
 	handle->fn_free_values(val_array);
 	break;
     case ENOENT:
+	if (no_runas_user) {
+	    /* finish printing sudoRunAs */
+	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
+	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
 	break;
     default:
@@ -1687,9 +1761,9 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     for (i = 0; i < sss_result->num_rules; ++i) {
 	rule = sss_result->rules + i;
 	if (long_list)
-	    count += sudo_sss_display_entry_long(handle, rule, lbuf);
+	    count += sudo_sss_display_entry_long(handle, rule, pw, lbuf);
 	else
-	    count += sudo_sss_display_entry_short(handle, rule, lbuf);
+	    count += sudo_sss_display_entry_short(handle, rule, pw, lbuf);
     }
 
     handle->fn_free_result(sss_result);

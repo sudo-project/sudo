@@ -492,11 +492,11 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	gid_t egid;
 	size_t glsize;
 	char *cp, *gid_list;
-	struct group_list *grlist = sudo_get_grlist(runas_pw);
+	struct gid_list *gidlist = sudo_get_gidlist(runas_pw);
 
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +
-	    ((grlist->ngids + 1) * (MAX_UID_T_LEN + 1));
+	    ((gidlist->ngids + 1) * (MAX_UID_T_LEN + 1));
 	gid_list = malloc(glsize);
 	if (gid_list == NULL)
 	    goto oom;
@@ -513,10 +513,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    goto bad;
 	}
 	cp += len;
-	for (i = 0; i < grlist->ngids; i++) {
-	    if (grlist->gids[i] != egid) {
+	for (i = 0; i < gidlist->ngids; i++) {
+	    if (gidlist->gids[i] != egid) {
 		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
-		     (unsigned int) grlist->gids[i]);
+		     (unsigned int) gidlist->gids[i]);
 		if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    free(gid_list);
@@ -526,10 +526,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    }
 	}
 	command_info[info_len++] = gid_list;
-	sudo_grlist_delref(grlist);
+	sudo_gidlist_delref(gidlist);
     }
     if (def_closefrom >= 0) {
 	if (asprintf(&command_info[info_len++], "closefrom=%d", def_closefrom) == -1)
+	    goto oom;
+    }
+    if (def_ignore_iolog_errors) {
+	if ((command_info[info_len++] = strdup("ignore_iolog_errors=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {
@@ -678,9 +682,9 @@ sudoers_policy_close(int exit_status, int error_code)
 	sudo_gr_delref(runas_gr);
 	runas_gr = NULL;
     }
-    if (user_group_list != NULL) {
-	sudo_grlist_delref(user_group_list);
-	user_group_list = NULL;
+    if (user_gid_list != NULL) {
+	sudo_gidlist_delref(user_gid_list);
+	user_gid_list = NULL;
     }
     free(user_gids);
     user_gids = NULL;
@@ -712,7 +716,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     struct sudoers_exec_args exec_args;
-    int rval;
+    int ret;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN)
 
     if (!ISSET(sudo_mode, MODE_EDIT))
@@ -722,14 +726,14 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
-    rval = sudoers_policy_main(argc, argv, 0, env_add, &exec_args);
-    if (rval == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
+    ret = sudoers_policy_main(argc, argv, 0, env_add, &exec_args);
+    if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
 	if (!def_log_input && !def_log_output && !def_use_pty &&
 	    !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static int
@@ -760,7 +764,7 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
-    int rval;
+    int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN)
 
     user_cmnd = "list";
@@ -777,13 +781,13 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	    debug_return_int(-1);
 	}
     }
-    rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
+    ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
     if (list_user) {
 	sudo_pw_delref(list_pw);
 	list_pw = NULL;
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 static int

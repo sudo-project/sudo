@@ -42,14 +42,14 @@ char *insults[] = {
 #  include "ins_csops.h"
 # endif
 
-    (char *) 0
+    NULL
 
 };
 
 /*
  * How may I insult you?  Let me count the ways...
  */
-#define NOFINSULTS (sizeof(insults) / sizeof(insults[0]) - 1)
+#define NOFINSULTS (nitems(insults) - 1)
 
 /*
  * return a pseudo-random insult.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008, 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -90,7 +90,7 @@ aix_setlimits(char *user)
      * For each resource limit, get the soft/hard values for the user
      * and set those values via setrlimit64().  Must be run as euid 0.
      */
-    for (n = 0; n < sizeof(aix_limits) / sizeof(aix_limits[0]); n++) {
+    for (n = 0; n < nitems(aix_limits); n++) {
 	/*
 	 * We have two strategies, depending on whether or not the
 	 * hard limit has been defined.
@@ -122,6 +122,7 @@ aix_setlimits(char *user)
 		    break;
 		case RLIMIT_NOFILE:
 		    rlim.rlim_max = 8196 * aix_limits[n].factor;
+		    break;
 		default:
 		    rlim.rlim_max = RLIM64_INFINITY;
 		    break;
@@ -154,13 +155,13 @@ int usrinfo(int cmd, char *buf, int count);
  * Look up authentication registry for user (SYSTEM in /etc/security/user) and
  * set it as the default for the process.  This ensures that password and
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
- * Does not modify errno even on error since callers do not check rval.
+ * Does not modify errno even on error since callers do not check return value.
  */
 int
 aix_getauthregistry_v1(char *user, char *saved_registry)
 {
     int serrno = errno;
-    int rval = -1;
+    int ret = -1;
     debug_decl(aix_getauthregistry, SUDO_DEBUG_UTIL)
 
     saved_registry[0] = '\0';
@@ -171,8 +172,8 @@ aix_getauthregistry_v1(char *user, char *saved_registry)
 	    sudo_warn(U_("unable to open userdb"));
 	    goto done;
 	}
-	rval = getuserattr(user, S_REGISTRY, &registry, SEC_CHAR);
-	if (rval == 0) {
+	ret = getuserattr(user, S_REGISTRY, &registry, SEC_CHAR);
+	if (ret == 0) {
 	    /* sizeof(authdb_t) is guaranteed to be 16 */
 	    if (strlcpy(saved_registry, registry, 16) >= 16) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -185,11 +186,11 @@ aix_getauthregistry_v1(char *user, char *saved_registry)
 	enduserdb();
     } else {
 	/* Get the process-wide registry. */
-	rval = getauthdb(saved_registry);
+	ret = getauthdb(saved_registry);
     }
 done:
     errno = serrno;
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -198,7 +199,7 @@ done:
  * This ensures that password and group lookups are made against
  * the correct source (files, NIS, LDAP, etc).
  * If registry is NULL, look it up based on the user name.
- * Does not modify errno even on error since callers do not check rval.
+ * Does not modify errno even on error since callers do not check return value.
  */
 int
 aix_setauthdb_v1(char *user)
@@ -211,7 +212,7 @@ aix_setauthdb_v2(char *user, char *registry)
 {
     authdb_t regbuf;
     int serrno = errno;
-    int rval = -1;
+    int ret = -1;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (user != NULL) {
@@ -221,8 +222,8 @@ aix_setauthdb_v2(char *user, char *registry)
 		goto done;
 	    registry = regbuf;
 	}
-	rval = setauthdb(registry, old_registry);
-	if (rval != 0) {
+	ret = setauthdb(registry, old_registry);
+	if (ret != 0) {
 	    sudo_warn(U_("unable to switch to registry \"%s\" for %s"),
 		registry, user);
 	} else {
@@ -233,30 +234,30 @@ aix_setauthdb_v2(char *user, char *registry)
     }
 done:
     errno = serrno;
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
  * Restore the saved authentication registry, if any.
- * Does not modify errno even on error since callers do not check rval.
+ * Does not modify errno even on error since callers do not check return value.
  */
 int
 aix_restoreauthdb_v1(void)
 {
     int serrno = errno;
-    int rval = 0;
+    int ret = 0;
     debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (setauthdb(old_registry, NULL) != 0) {
 	sudo_warn(U_("unable to restore registry"));
-	rval = -1;
+	ret = -1;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: setting authentication registry to %s",
 	    __func__, old_registry);
-}
+    }
     errno = serrno;
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 #endif
 

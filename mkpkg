@@ -92,6 +92,33 @@ top_srcdir=`dirname $0`
 test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
+# If using GNU make, set number of jobs
+if make --version 2>&1 | grep GNU >/dev/null; then
+    NJOBS=0
+    case "`uname`" in
+	Darwin)
+	    # Mac OS X
+	    NJOBS=`sysctl -n hw.ncpu`
+	    ;;
+	Linux)
+	    if [ -r /proc/cpuinfo ]; then
+		for c in `sed -n 's/^cpu cores[	 ]*: *//p' /proc/cpuinfo`; do
+		    NJOBS=$(( $NJOBS + $c ))
+		done
+	    fi
+	    ;;
+	SunOS)
+	    # Solaris
+	    if [ -x /usr/sbin/psrinfo ]; then
+		NJOBS=`/usr/sbin/psrinfo | wc -l`
+	    fi
+	    ;;
+    esac
+    if [ $NJOBS -gt 1 ]; then
+	make_opts="-j$NJOBS"
+    fi
+fi
+
 # Choose compiler options by osversion if not cross-compiling.
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
@@ -207,7 +234,7 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 
-	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
+	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
 	# Man pages should be compressed in .deb files

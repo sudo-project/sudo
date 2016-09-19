@@ -462,6 +462,8 @@ plugins/sudoers/regress/visudo/test4.out.ok
 plugins/sudoers/regress/visudo/test4.sh
 plugins/sudoers/regress/visudo/test5.out.ok
 plugins/sudoers/regress/visudo/test5.sh
+plugins/sudoers/regress/visudo/test6.out.ok
+plugins/sudoers/regress/visudo/test6.sh
 plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
@@ -527,6 +529,8 @@ po/nb.mo
 po/nb.po
 po/nl.mo
 po/nl.po
+po/nn.mo
+po/nn.po
 po/pl.mo
 po/pl.po
 po/pt_BR.mo

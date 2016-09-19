@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2007-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -132,7 +132,8 @@ sudo_file_setdefs(struct sudo_nss *nss)
     if (nss->handle == NULL)
 	debug_return_int(-1);
 
-    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER))
+    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS,
+	false))
 	debug_return_int(-1);
     debug_return_int(0);
 }
@@ -740,7 +741,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     struct member *match;
     struct privilege *priv;
     struct userspec *us;
-    int rval = 1;
+    int ret = 1;
     int host_match, runas_match, cmnd_match;
     debug_decl(sudo_file_display_cmnd, SUDOERS_DEBUG_NSS)
 
@@ -774,10 +775,10 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     if (match != NULL && !match->negated) {
 	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
 	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
-	rval = len < 0 ? -1 : 0;
+	ret = len < 0 ? -1 : 0;
     }
 done:
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*

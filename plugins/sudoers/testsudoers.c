@@ -71,7 +71,7 @@ void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
-static bool cb_runas_default(const char *);
+static bool cb_runas_default(const union sudo_defs_val *);
 static int testsudoers_print(const char *msg);
 
 extern void setgrfile(const char *);
@@ -128,6 +128,7 @@ main(int argc, char *argv[])
 
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
@@ -153,6 +154,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'g':
 		runas_group = optarg;
+		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'p':
 		pwfile = optarg;
@@ -170,6 +172,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'u':
 		runas_user = optarg;
+		SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    default:
 		usage();
@@ -242,8 +245,14 @@ main(int argc, char *argv[])
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
+    /* Set group_plugin callback. */
+    sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
+
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
+
+    /* Set locale callback. */
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
 
     /* Load ip addr/mask for each interface. */
     if (get_net_ifs(&p) > 0) {
@@ -254,6 +263,18 @@ main(int argc, char *argv[])
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
 
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * run the command as the invoking user.
+     */
+    if (runas_group != NULL) {
+        set_runasgr(runas_group);
+        set_runaspw(runas_user ? runas_user : user_name);
+    } else
+        set_runaspw(runas_user ? runas_user : def_runas_default);
+
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
     if (sudoersparse() != 0 || parse_error) {
 	parse_error = true;
 	if (errorlineno != -1)
@@ -265,24 +286,9 @@ main(int argc, char *argv[])
 	(void) fputs("Parses OK", stdout);
     }
 
-    if (!update_defaults(SETDEF_ALL))
+    if (!update_defaults(SETDEF_ALL, false))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
-
-    if (def_group_plugin && group_plugin_load(def_group_plugin) != true)
-	def_group_plugin = NULL;
-
-    /*
-     * Set runas passwd/group entries based on command line or sudoers.
-     * Note that if runas_group was specified without runas_user we
-     * defer setting runas_pw so the match routines know to ignore it.
-     */
-    if (runas_group != NULL) {
-        set_runasgr(runas_group);
-        if (runas_user != NULL)
-            set_runaspw(runas_user);
-    } else
-        set_runaspw(runas_user ? runas_user : def_runas_default);
 
     if (dflag) {
 	(void) putchar('\n');
@@ -319,11 +325,11 @@ main(int argc, char *argv[])
 		    }
 		}
 	    } else
-		puts(_("\thost  unmatched"));
+		puts(U_("\thost  unmatched"));
 	}
     }
-    puts(match == ALLOW ? _("\nCommand allowed") :
-	match == DENY ?  _("\nCommand denied") :  _("\nCommand unmatched"));
+    puts(match == ALLOW ? U_("\nCommand allowed") :
+	match == DENY ?  U_("\nCommand denied") :  U_("\nCommand unmatched"));
 
     /*
      * Exit codes:
@@ -392,11 +398,11 @@ set_runasgr(const char *group)
  * Callback for runas_default sudoers setting.
  */
 static bool
-cb_runas_default(const char *user)
+cb_runas_default(const union sudo_defs_val *sd_un)
 {
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
-        set_runaspw(user);
+        set_runaspw(sd_un->str);
     return true;
 }
 

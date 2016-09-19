@@ -190,7 +190,7 @@ sudo_openat(int dfd, const char *path, int flags, mode_t mode)
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
-    debug_decl(sudo_edit_open_nofollow, SUDO_DEBUG_EDIT)
+    debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
 
     debug_return_int(openat(dfd, path, oflags|O_NOFOLLOW, mode));
 }
@@ -226,18 +226,49 @@ sudo_edit_is_symlink(int fd, char *path)
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
-    struct stat sb1, sb2;
-    int fd;
+    int fd = -1, odfd = -1;
+    struct stat sb;
     debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT)
 
-    fd = openat(dfd, path, oflags, mode);
-    if (fd == -1)
+    /* Save cwd and chdir to dfd */
+    if ((odfd = open(".", O_RDONLY)) == -1)
 	debug_return_int(-1);
+    if (fchdir(dfd) == -1) {
+	close(odfd);
+	debug_return_int(-1);
+    }
 
+    /*
+     * Check if path is a symlink.  This is racey but we detect whether
+     * we lost the race in sudo_edit_is_symlink() after the open.
+     */
+    if (lstat(path, &sb) == -1 && errno != ENOENT)
+	goto done;
+    if (S_ISLNK(sb.st_mode)) {
+	errno = ELOOP;
+	goto done;
+    }
+
+    fd = open(path, oflags, mode);
+    if (fd == -1)
+	goto done;
+
+    /*
+     * Post-open symlink check.  This will leave a zero-length file if
+     * O_CREAT was specified but it is too dangerous to try and remove it.
+     */
     if (sudo_edit_is_symlink(fd, path)) {
 	close(fd);
 	fd = -1;
 	errno = ELOOP;
+    }
+
+done:
+    /* Restore cwd */
+    if (odfd != -1) {
+	if (fchdir(odfd) == -1)
+	    sudo_fatal(_("unable to restore current working directory"));
+	close(odfd);
     }
 
     debug_return_int(fd);
@@ -450,9 +481,22 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
     struct command_details *command_details)
 {
     const int sflags = command_details ? command_details->flags : 0;
-    struct stat sb1, sb2;
+    struct stat sb;
     int fd;
     debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT)
+
+    /*
+     * Check if path is a symlink.  This is racey but we detect whether
+     * we lost the race in sudo_edit_is_symlink() after the file is opened.
+     */
+    if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW)) {
+	if (lstat(path, &sb) == -1 && errno != ENOENT)
+	    debug_return_int(-1);
+	if (S_ISLNK(sb.st_mode)) {
+	    errno = ELOOP;
+	    debug_return_int(-1);
+	}
+    }
 
     if (ISSET(sflags, CD_SUDOEDIT_CHECKDIR) && user_details.uid != ROOT_UID) {
 	fd = sudo_edit_open_nonwritable(path, oflags|O_NONBLOCK, mode,
@@ -465,6 +509,10 @@ sudo_edit_open(char *path, int oflags, mode_t mode,
     if (!ISSET(oflags, O_NONBLOCK))
 	(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
+    /*
+     * Post-open symlink check.  This will leave a zero-length file if
+     * O_CREAT was specified but it is too dangerous to try and remove it.
+     */
     if (!ISSET(sflags, CD_SUDOEDIT_FOLLOW) && sudo_edit_is_symlink(fd, path)) {
 	close(fd);
 	fd = -1;
@@ -797,7 +845,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
     char **sesh_args, **sesh_ap;
-    int i, rc, sesh_nargs, rval = 1;
+    int i, rc, sesh_nargs, ret = 1;
     struct command_details saved_command_details;
     struct timespec ts;
     struct stat sb;
@@ -857,7 +905,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	rc = run_command(command_details);
 	switch (rc) {
 	case SESH_SUCCESS:
-	    rval = 0;
+	    ret = 0;
 	    break;
 	case SESH_ERR_NO_FILES:
 	    sudo_warnx(_("unable to copy temporary files back to their original location"));
@@ -879,7 +927,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     command_details->flags = saved_command_details.flags;
     command_details->argv = saved_command_details.argv;
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 #endif /* HAVE_SELINUX */
 
@@ -892,7 +940,7 @@ sudo_edit(struct command_details *command_details)
 {
     struct command_details saved_command_details;
     char **nargv = NULL, **ap, **files = NULL;
-    int errors, i, ac, nargc, rval;
+    int errors, i, ac, nargc, rc;
     int editor_argc = 0, nfiles = 0;
     struct timespec times[2];
     struct tempfile *tf = NULL;
@@ -977,7 +1025,7 @@ sudo_edit(struct command_details *command_details)
     command_details->ngroups = user_details.ngroups;
     command_details->groups = user_details.groups;
     command_details->argv = nargv;
-    rval = run_command(command_details);
+    rc = run_command(command_details);
     if (sudo_gettime_real(&times[1]) == -1) {
 	sudo_warn(U_("unable to read the clock"));
 	goto cleanup;
@@ -1004,7 +1052,7 @@ sudo_edit(struct command_details *command_details)
 	free(tf[i].tfile);
     free(tf);
     free(nargv);
-    debug_return_int(errors ? 1 : rval);
+    debug_return_int(errors ? 1 : rc);
 
 cleanup:
     /* Clean up temp files and return. */

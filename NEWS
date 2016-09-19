@@ -1,3 +1,81 @@
+What's new in Sudo 1.8.18
+
+ * The sudoers locale is now set before parsing the sudoers file.
+   If sudoers_locale is set in sudoers, it is applied before
+   evaluating other Defaults entries.  Previously, sudoers_locale
+   was used when evaluating sudoers but not during the inital parse.
+   Bug #748.
+
+ * A missing or otherwise invalid #includedir is now ignored instead
+   of causing a parse error.
+
+ * During "make install", backup files are only used on HP-UX where
+   it is not possible to unlink a shared object that is in use.
+   This works around a bug in ldconfig on Linux which could create
+   links to the backup shared library file instead of the current
+   one.
+
+ * Fixed a bug introduced in 1.8.17 where sudoers entries with long
+   commands lines could be truncated, preventing a match.  Bug #752.
+
+ * The fqdn, runas_default and sudoers_locale Defaults settings are
+   now applied before any other Defaults settings since they can
+   change how other Defaults settings are parsed.
+
+ * On systems without the O_NOFOLLOW open(2) flag, when the NOFOLLOW
+   flag is set, sudoedit now checks whether the file is a symbolic link
+   before opening it as well as after the open.  Bug #753.
+
+ * Sudo will now only resolve a user's group IDs to group names
+   when sudoers includes group-based permissions.  Group lookups
+   can be expensive on some systems where the group database is
+   not local.
+
+ * If the file system holding the sudo log file is full, allow
+   the command to run unless the new ignore_logfile_errors Defaults
+   option is disabled.  Bug #751.
+
+ * The ignore_audit_errors and ignore_iolog_errors Defaults options
+   have been added to control sudo's behavior when it is unable to
+   write to the audit and I/O logs.
+
+ * Fixed a bug introduced in 1.8.17 where the SIGPIPE signal handler
+   was not being restored when sudo directly executes the command.
+
+ * Fixed a bug where "sudo -l command" would indicate that a command
+   was runnable even when denied by sudoers when using the LDAP or
+   SSSD backends.
+
+ * The match_group_by_gid Defaults option has been added to allow
+   sites where group name resolution is slow and where sudoers only
+   contains a small number of groups to match groups by group ID
+   instead of by group name.
+
+ * Fixed a bug on Linux where a 32-bit sudo binary could fail with
+   an "unable to allocate memory" error when run on a 64-bit system.
+   Bug #755
+
+ * When parsing ldap.conf, sudo will now only treat a '#' character
+   as the start of a comment when it is at the beginning of the
+   line.
+
+ * Fixed a potential crash when auditing is enabled and the audit
+   function fails with an error.  Bug #756
+
+ * Norwegian Nynorsk translation for sudo from translationproject.org.
+
+ * Fixed a typo that broke short host name matching when the fqdn
+   flag is enabled in sudoers.  Bug #757
+
+ * Negated sudoHost attributes are now supported by the LDAP and
+   SSSD backends.
+
+ * Fixed matching entries in the LDAP and SSSD backends when a
+   RunAsGroup is specified but no RunAsUser is present.
+
+ * Fixed "sudo -l" output in the LDAP and SSSD backends when a
+   RunAsGroup is specified but no RunAsUser is present.
+
 What's new in Sudo 1.8.17p1
 
  * Fixed a bug introduced in 1.8.17 where the user's groups were

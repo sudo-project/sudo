@@ -238,6 +238,13 @@ typedef struct sigaction sigaction_t;
 #endif
 
 /*
+ * The nitems macro may be defined in sys/param.h
+ */
+#ifndef nitems
+# define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
+#endif
+
+/*
  * If dirfd() does not exists, hopefully dd_fd does.
  */
 #if !defined(HAVE_DIRFD) && defined(HAVE_DD_FD)
@@ -275,6 +282,11 @@ extern int errno;
 /* WCOREDUMP is not POSIX, this usually works (verified on AIX). */
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
+#endif
+
+/* W_EXITCODE is not POSIX but the encoding of wait status is. */
+#ifndef W_EXITCODE
+# define W_EXITCODE(ret, sig)	((ret) << 8 | (sig))
 #endif
 
 /* Number of bits in a byte. */

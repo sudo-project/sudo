@@ -135,7 +135,7 @@ main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
     char *editor, **editor_argv;
-    int ch, editor_argc, exitcode = 0;
+    int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
     const char *export_path;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
@@ -150,6 +150,7 @@ main(int argc, char *argv[])
     initprogname(argc > 0 ? argv[0] : "visudo");
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
@@ -158,6 +159,9 @@ main(int argc, char *argv[])
 
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(visudo_cleanup);
+
+    /* Set sudoers locale callback. */
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
 
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
@@ -211,8 +215,15 @@ main(int argc, char *argv[])
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
-    if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
-	sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
+    if (geteuid() == 0) {
+	const char *user = getenv("SUDO_USER");
+	if (user != NULL && *user != '\0')
+	    sudo_user.pw = sudo_getpwnam(user);
+    }
+    if (sudo_user.pw == NULL) {
+	if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
+	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
+    }
     get_hostname();
 
     /* Setup defaults data structures. */
@@ -234,9 +245,11 @@ main(int argc, char *argv[])
      */
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(1);
-    init_parser(sudoers_file, false);
+    init_parser(sudoers_file, quiet);
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
+    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
+    sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
 
@@ -418,7 +431,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     struct timespec orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
     struct stat sb;			/* stat buffer */
-    bool rval = false;			/* return value */
+    bool ret = false;			/* return value */
     debug_decl(edit_sudoers, SUDOERS_DEBUG_UTIL)
 
     if (fstat(sp->fd, &sb) == -1)
@@ -533,9 +546,9 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     else
 	sudo_warnx(U_("%s unchanged"), sp->tpath);
 
-    rval = true;
+    ret = true;
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -547,7 +560,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
-    int ch;
+    int ch, oldlocale;
     debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -567,6 +580,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 
 	/* Parse the sudoers temp file(s) */
 	sudoersrestart(fp);
+	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 	if (sudoersparse() && !parse_error) {
 	    sudo_warnx(U_("unabled to parse temporary file (%s), unknown error"),
 		sp->tpath);
@@ -575,12 +589,14 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
+	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	    if (!check_defaults(SETDEF_ALL, quiet) ||
 		check_aliases(strict, quiet) != 0) {
 		parse_error = true;
 		errorfile = NULL;
 	    }
 	}
+	sudoers_setlocale(oldlocale, NULL);
 
 	/*
 	 * Got an error, prompt the user for what to do now.
@@ -637,7 +653,7 @@ static bool
 install_sudoers(struct sudoersfile *sp, bool oldperms)
 {
     struct stat sb;
-    bool rval = false;
+    bool ret = false;
     debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL)
 
     if (!sp->modified) {
@@ -651,7 +667,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	    if ((sb.st_mode & 0777) != sudoers_mode)
 		ignore_result(chmod(sp->path, sudoers_mode));
 	}
-	rval = true;
+	ret = true;
 	goto done;
     }
 
@@ -724,9 +740,9 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	    goto done;
 	}
     }
-    rval = true;
+    ret = true;
 done:
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* STUB */
@@ -890,6 +906,7 @@ static bool
 check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 {
     bool ok = false;
+    int oldlocale;
     debug_decl(check_syntax, SUDOERS_DEBUG_UTIL)
 
     if (strcmp(sudoers_file, "-") == 0) {
@@ -900,7 +917,10 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	    sudo_warn(U_("unable to open %s"), sudoers_file);
 	goto done;
     }
+    if (!init_defaults())
+	sudo_fatalx(U_("unable to initialize sudoers default values"));
     init_parser(sudoers_file, quiet);
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_file);
@@ -908,12 +928,14 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	errorfile = sudoers_file;
     }
     if (!parse_error) {
+	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	if (!check_defaults(SETDEF_ALL, quiet) ||
 	    check_aliases(strict, quiet) != 0) {
 	    parse_error = true;
 	    errorfile = NULL;
 	}
     }
+    sudoers_setlocale(oldlocale, NULL);
     ok = !parse_error;
 
     if (parse_error) {
@@ -1035,20 +1057,20 @@ alias_remove_recursive(char *name, int type)
 {
     struct member *m;
     struct alias *a;
-    bool rval = true;
+    bool ret = true;
     debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
 
     if ((a = alias_remove(name, type)) != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type == ALIAS) {
 		if (!alias_remove_recursive(m->name, type))
-		    rval = false;
+		    ret = false;
 	    }
 	}
 	if (rbinsert(alias_freelist, a, NULL) != 0)
-	    rval = false;
+	    ret = false;
     }
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 static const char *

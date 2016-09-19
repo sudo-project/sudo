@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2013
+ * Copyright (c) 1999-2005, 2008-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -43,6 +43,17 @@ struct def_values {
     enum def_tuple nval;/* numeric value */
 };
 
+union sudo_defs_val {
+    int flag;
+    int ival;
+    unsigned int uival;
+    double fval;
+    enum def_tuple tuple;
+    char *str;
+    mode_t mode;
+    struct list_members list;
+};
+
 /*
  * Structure describing compile-time and run-time options.
  */
@@ -51,17 +62,16 @@ struct sudo_defs_types {
     int type;
     char *desc;
     struct def_values *values;
-    bool (*callback)(const char *);
-    union {
-	int flag;
-	int ival;
-	unsigned int uival;
-	double fval;
-	enum def_tuple tuple;
-	char *str;
-	mode_t mode;
-	struct list_members list;
-    } sd_un;
+    bool (*callback)(const union sudo_defs_val *);
+    union sudo_defs_val sd_un;
+};
+
+/*
+ * Defaults values to apply before others.
+ */
+struct early_default {
+    const char *var;
+    const struct sudo_defs_types *def;
 };
 
 /*
@@ -110,10 +120,13 @@ struct sudo_defs_types {
  * Prototypes
  */
 void dump_default(void);
-bool init_defaults(void);
-bool set_default(char *var, char *val, int op);
-bool update_defaults(int what);
 bool check_defaults(int what, bool quiet);
+bool init_defaults(void);
+struct early_default *is_early_default(const char *var);
+bool run_early_defaults(void);
+bool set_early_default(const char *var, const char *val, int op, bool quiet, struct early_default *early);
+bool set_default(const char *var, const char *val, int op, bool quiet);
+bool update_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 15, 2016
+.Dd September 1, 2016
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -159,6 +159,16 @@ The special value
 will match any host.
 Host netgroups are matched using the host (both qualified and unqualified)
 and domain members only; the user member is not used when matching.
+If a
+.Li sudoHost
+entry is preceded by an exclamation point,
+.Ql \&! ,
+and the entry matches, the
+.Li sudoRole
+in which it resides will be ignored.
+Negated 
+.Li sudoHost
+entries are only supported by version 1.8.18 or higher.
 .It Sy sudoCommand
 A fully-qualified Unix command name with optional command line arguments,
 potentially including globbing characters (aka wild cards).
@@ -531,16 +541,10 @@ are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .Pp
-The pound sign
+Lines beginning with a pound sign
 .Pq Ql #
-is used to indicate a comment.
-Both the comment character and any text after it, up to the end of
-the line, are ignored.
-Long lines can be continued with a backslash
-.Pq Ql \e
-as the last character on the line.
-Note that leading white space is removed from the beginning of lines
-even when the continuation character is used.
+are ignored.
+Leading white space is removed from the beginning of lines.
 .Bl -tag -width 4n
 .It Sy BIND_TIMELIMIT Ar seconds
 The

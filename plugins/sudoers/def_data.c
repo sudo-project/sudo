@@ -403,6 +403,22 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Match netgroups based on the entire tuple: user, host and domain"),
 	NULL,
     }, {
+	"ignore_audit_errors", T_FLAG,
+	N_("Allow commands to be run even if sudo cannot write to the audit log"),
+	NULL,
+    }, {
+	"ignore_iolog_errors", T_FLAG,
+	N_("Allow commands to be run even if sudo cannot write to the I/O log"),
+	NULL,
+    }, {
+	"ignore_logfile_errors", T_FLAG,
+	N_("Allow commands to be run even if sudo cannot write to the log file"),
+	NULL,
+    }, {
+	"match_group_by_gid", T_FLAG,
+	N_("Resolve groups in sudoers and match on the group ID, not the name"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2012, 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2012-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -250,7 +250,7 @@ typedef int (*sudo_fn_unsetenv_t)(const char *);
 static int
 unsetenv_unhooked(const char *var)
 {
-    int rval = 0;
+    int ret = 0;
     sudo_fn_unsetenv_t fn;
 
     fn = (sudo_fn_unsetenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "unsetenv");
@@ -258,12 +258,12 @@ unsetenv_unhooked(const char *var)
 # ifdef UNSETENV_VOID
 	fn(var);
 # else
-	rval = fn(var);
+	ret = fn(var);
 # endif
     } else {
-	rval = rpl_unsetenv(var);
+	ret = rpl_unsetenv(var);
     }
-    return rval;
+    return ret;
 }
 
 #ifdef UNSETENV_VOID
@@ -273,20 +273,20 @@ __dso_public int
 #endif
 unsetenv(const char *var)
 {
-    int rval;
+    int ret;
 
     switch (process_hooks_unsetenv(var)) {
 	case SUDO_HOOK_RET_STOP:
-	    rval = 0;
+	    ret = 0;
 	    break;
 	case SUDO_HOOK_RET_ERROR:
-	    rval = -1;
+	    ret = -1;
 	    break;
 	default:
-	    rval = unsetenv_unhooked(var);
+	    ret = unsetenv_unhooked(var);
 	    break;
     }
 #ifndef UNSETENV_VOID
-    return rval;
+    return ret;
 #endif
 }

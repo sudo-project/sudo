@@ -59,7 +59,7 @@ static const char *const sudoers_subsystem_names[] = {
     NULL
 };
 
-#define NUM_SUBSYSTEMS  (sizeof(sudoers_subsystem_names) / sizeof(sudoers_subsystem_names[0]) - 1)
+#define NUM_SUBSYSTEMS  (nitems(sudoers_subsystem_names) - 1)
 
 /* Subsystem IDs assigned at registration time. */
 unsigned int sudoers_subsystem_ids[NUM_SUBSYSTEMS];

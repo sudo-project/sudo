@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2010-2012, 2014-2015
+ * Copyright (c) 1999-2005, 2007, 2010-2012, 2014-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2002 Michael Stroucken <michael@stroucken.org>
  *
@@ -142,7 +142,7 @@ int
 sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
-    int rval;
+    int ret;
     debug_decl(sudo_securid_verify, SUDOERS_DEBUG_AUTH)
 
     pass = auth_getpass("Enter your PASSCODE: ",
@@ -151,26 +151,26 @@ sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
 	case ACM_OK:
-		rval = AUTH_SUCESS;
+		ret = AUTH_SUCESS;
 		break;
 
 	case ACE_UNDEFINED_PASSCODE:
 		sudo_warnx(U_("invalid passcode length for SecurID"));
-		rval = AUTH_FATAL;
+		ret = AUTH_FATAL;
 		break;
 
 	case ACE_UNDEFINED_USERNAME:
 		sudo_warnx(U_("invalid username length for SecurID"));
-		rval = AUTH_FATAL;
+		ret = AUTH_FATAL;
 		break;
 
 	case ACE_ERR_INVALID_HANDLE:
 		sudo_warnx(U_("invalid Authentication Handle for SecurID"));
-		rval = AUTH_FATAL;
+		ret = AUTH_FATAL;
 		break;
 
 	case ACM_ACCESS_DENIED:
-		rval = AUTH_FAILURE;
+		ret = AUTH_FAILURE;
 		break;
 
 	case ACM_NEXT_CODE_REQUIRED:
@@ -188,11 +188,11 @@ then enter the new token code.\n", \
 		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 
 		if (SD_Next(*sd, pass) == ACM_OK) {
-			rval = AUTH_SUCCESS;
+			ret = AUTH_SUCCESS;
 			break;
 		}
 
-		rval = AUTH_FAILURE;
+		ret = AUTH_FAILURE;
 		break;
 
 	case ACM_NEW_PIN_REQUIRED:
@@ -206,12 +206,12 @@ then enter the new token code.\n", \
 		    "Your SecurID access has not yet been set up.\n");
 		sudo_printf(SUDO_CONV_ERROR_MSG, 
 		    "Please set up a PIN before you try to authenticate.\n");
-		rval = AUTH_FATAL;
+		ret = AUTH_FATAL;
 		break;
 
 	default:
 		sudo_warnx(U_("unknown SecurID error"));
-		rval = AUTH_FATAL;
+		ret = AUTH_FATAL;
 		break;
     }
 
@@ -224,7 +224,7 @@ then enter the new token code.\n", \
     }
 
     /* Return stored state to calling process */
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 #endif /* HAVE_SECURID */

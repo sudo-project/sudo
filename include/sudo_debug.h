@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -121,84 +121,84 @@ struct sudo_conf_debug_file_list;
 	return;								       \
     } while (0)
 
-#define debug_return_int(rval)						       \
+#define debug_return_int(ret)						       \
     do {								       \
-	int sudo_debug_rval = (rval);					       \
+	int sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_size_t(rval)					       \
+#define debug_return_size_t(ret)					       \
     do {								       \
-	size_t sudo_debug_rval = (rval);				       \
+	size_t sudo_debug_ret = (ret);				       \
 	sudo_debug_exit_size_t(__func__, __FILE__, __LINE__, sudo_debug_subsys,\
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_ssize_t(rval)					       \
+#define debug_return_ssize_t(ret)					       \
     do {								       \
-	ssize_t sudo_debug_rval = (rval);				       \
+	ssize_t sudo_debug_ret = (ret);				       \
 	sudo_debug_exit_ssize_t(__func__, __FILE__, __LINE__, sudo_debug_subsys,\
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_long(rval)						       \
+#define debug_return_long(ret)						       \
     do {								       \
-	long sudo_debug_rval = (rval);					       \
+	long sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_long(__func__, __FILE__, __LINE__, sudo_debug_subsys,  \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_bool(rval)						       \
+#define debug_return_bool(ret)						       \
     do {								       \
-	bool sudo_debug_rval = (rval);					       \
+	bool sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_bool(__func__, __FILE__, __LINE__, sudo_debug_subsys,  \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_str(rval)						       \
+#define debug_return_str(ret)						       \
     do {								       \
-	char *sudo_debug_rval = (rval);					       \
+	char *sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_str(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_const_str(rval)					       \
+#define debug_return_const_str(ret)					       \
     do {								       \
-	const char *sudo_debug_rval = (rval);				       \
+	const char *sudo_debug_ret = (ret);				       \
 	sudo_debug_exit_str(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_str_masked(rval)					       \
+#define debug_return_str_masked(ret)					       \
     do {								       \
-	char *sudo_debug_rval = (rval);					       \
+	char *sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_str_masked(__func__, __FILE__, __LINE__,	       \
-	    sudo_debug_subsys, sudo_debug_rval);			       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_subsys, sudo_debug_ret);			       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_ptr(rval)						       \
+#define debug_return_ptr(ret)						       \
     do {								       \
-	void *sudo_debug_rval = (rval);					       \
+	void *sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_ptr(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
-#define debug_return_const_ptr(rval)					       \
+#define debug_return_const_ptr(ret)					       \
     do {								       \
-	const void *sudo_debug_rval = (rval);				       \
+	const void *sudo_debug_ret = (ret);				       \
 	sudo_debug_exit_ptr(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
-	    sudo_debug_rval);						       \
-	return sudo_debug_rval;						       \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
     } while (0)
 
 /*
@@ -227,14 +227,14 @@ __dso_public int sudo_debug_deregister_v1(int instance_id);
 __dso_public void sudo_debug_enter_v1(const char *func, const char *file, int line, int subsys);
 __dso_public void sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[]);
 __dso_public void sudo_debug_exit_v1(const char *func, const char *file, int line, int subsys);
-__dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, int subsys, bool rval);
-__dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int line, int subsys, int rval);
-__dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, int subsys, long rval);
-__dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, int subsys, const void *rval);
-__dso_public void sudo_debug_exit_size_t_v1(const char *func, const char *file, int line, int subsys, size_t rval);
-__dso_public void sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line, int subsys, ssize_t rval);
-__dso_public void sudo_debug_exit_str_v1(const char *func, const char *file, int line, int subsys, const char *rval);
-__dso_public void sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line, int subsys, const char *rval);
+__dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, int subsys, bool ret);
+__dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int line, int subsys, int ret);
+__dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, int subsys, long ret);
+__dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, int subsys, const void *ret);
+__dso_public void sudo_debug_exit_size_t_v1(const char *func, const char *file, int line, int subsys, size_t ret);
+__dso_public void sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line, int subsys, ssize_t ret);
+__dso_public void sudo_debug_exit_str_v1(const char *func, const char *file, int line, int subsys, const char *ret);
+__dso_public void sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line, int subsys, const char *ret);
 __dso_public pid_t sudo_debug_fork_v1(void);
 __dso_public int sudo_debug_get_active_instance_v1(void);
 __dso_public int sudo_debug_get_fds_v1(unsigned char **fds);

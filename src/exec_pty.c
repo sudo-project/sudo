@@ -203,7 +203,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -218,7 +218,6 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyin = NULL;
 		}
-		rval = false;
 		break;
 	    }
 	}
@@ -226,7 +225,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
     sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin stdin log method. */
@@ -235,7 +234,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_stdin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -250,7 +249,6 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdin = NULL;
 		}
-	    	rval = false;
 		break;
 	    }
 	}
@@ -258,7 +256,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
     sudo_debug_set_active_instance(sudo_debug_instance);
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin tty output log method. */
@@ -267,7 +265,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -282,13 +280,12 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyout = NULL;
 		}
-	    	rval = false;
 		break;
 	    }
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!rval) {
+    if (!ret) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
 	 * (user's tty) so we do not display the rejected output.
@@ -302,7 +299,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin stdout log method. */
@@ -311,7 +308,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_stdout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -326,13 +323,12 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdout = NULL;
 		}
-	    	rval = false;
 		break;
 	    }
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!rval) {
+    if (!ret) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
 	 * (user's stdout) so we do not display the rejected output.
@@ -346,7 +342,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /* Call I/O plugin stderr log method. */
@@ -355,7 +351,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    bool rval = true;
+    bool ret = true;
     debug_decl(log_stderr, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
@@ -370,13 +366,12 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stderr = NULL;
 		}
-	    	rval = false;
 		break;
 	    }
 	}
     }
     sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!rval) {
+    if (!ret) {
 	/*
 	 * I/O plugin rejected the output, delete the write event
 	 * (user's stderr) so we do not display the rejected output.
@@ -390,7 +385,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }
 
 /*
@@ -426,7 +421,7 @@ suspend_parent(int signo)
 {
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
-    int rval = 0;
+    int ret = 0;
     debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
@@ -443,7 +438,7 @@ suspend_parent(int signo)
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 		    ttymode = TERM_RAW;
 	    }
-	    rval = SIGCONT_FG; /* resume command in foreground */
+	    ret = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
 	/* FALLTHROUGH */
@@ -500,11 +495,11 @@ suspend_parent(int signo)
 	    if (sudo_sigaction(signo, &osa, NULL) != 0)
 		sudo_warn(U_("unable to restore handler for signal %d"), signo);
 	}
-	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
+	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
 
-    debug_return_int(rval);
+    debug_return_int(ret);
 }
 
 /*
@@ -676,7 +671,8 @@ write_callback(int fd, int what, void *v)
 }
 
 static void
-io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *),
+io_buf_new(int rfd, int wfd,
+    bool (*action)(const char *, unsigned int, struct io_buffer *),
     struct io_buffer_list *head)
 {
     int n;
@@ -1147,50 +1143,69 @@ send_status(int fd, struct command_status *cstat)
 static bool
 handle_sigchld(int backchannel, struct command_status *cstat)
 {
+    char signame[SIG2STR_MAX];
     bool alive = true;
     int status;
     pid_t pid;
     debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
-    /* read command status */
+    /* Read command status. */
     do {
-	pid = waitpid(cmnd_pid, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
-    if (pid != cmnd_pid) {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
+    switch (pid) {
+    case 0:
+	errno = ECHILD;
+	/* FALLTHROUGH */
+    case -1:
+	sudo_debug_printf(SUDO_DEBUG_DIAG,
 	    "waitpid returned %d, expected pid %d", pid, cmnd_pid);
-    } else {
-	if (cstat->type != CMD_ERRNO) {
-	    char signame[SIG2STR_MAX];
-
-	    cstat->type = CMD_WSTATUS;
-	    cstat->val = status;
-	    if (WIFSTOPPED(status)) {
-		if (sig2str(WSTOPSIG(status), signame) == -1)
-		    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "command stopped, SIG%s", signame);
-		/* Saved the foreground pgid so we can restore it later. */
-		do {
-		    pid = tcgetpgrp(io_fds[SFD_SLAVE]);
-		} while (pid == -1 && errno == EINTR);
-		if (pid != mon_pgrp)
-		    cmnd_pgrp = pid;
-		if (send_status(backchannel, cstat) == -1)
-		    debug_return_bool(alive); /* XXX */
-	    } else if (WIFSIGNALED(status)) {
-		if (sig2str(WTERMSIG(status), signame) == -1)
-		    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "command killed, SIG%s", signame);
-	    } else {
-		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
-		    WEXITSTATUS(status));
-	    }
-	}
-	if (!WIFSTOPPED(status))
-	    alive = false;
+	sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	debug_return_bool(false);
     }
+
+    if (WIFCONTINUED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
+	    __func__, cmnd_pid);
+    } else if (WIFSTOPPED(status)) {
+	if (sig2str(WSTOPSIG(status), signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
+	    __func__, cmnd_pid, signame);
+    } else if (WIFSIGNALED(status)) {
+	if (sig2str(WTERMSIG(status), signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
+	    __func__, cmnd_pid, signame);
+	alive = false;
+    } else if (WIFEXITED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
+	    __func__, cmnd_pid, WEXITSTATUS(status));
+	alive = false;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "%s: unexpected wait status %d for command (%d)",
+	    __func__, status, cmnd_pid);
+    }
+
+    /* Don't overwrite execve() failure with child exit status. */
+    if (cstat->type != CMD_ERRNO) {
+	/*
+	 * Store wait status in cstat and forward to parent if stopped.
+	 */
+	cstat->type = CMD_WSTATUS;
+	cstat->val = status;
+	if (WIFSTOPPED(status)) {
+	    /* Save the foreground pgid so we can restore it later. */
+	    do {
+		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+	    } while (pid == -1 && errno == EINTR);
+	    if (pid != mon_pgrp)
+		cmnd_pgrp = pid;
+	    send_status(backchannel, cstat);
+	}
+    }
+
     debug_return_bool(alive);
 }
 
@@ -1272,7 +1287,7 @@ mon_backchannel_cb(int fd, int what, void *v)
     ssize_t n;
     debug_decl(mon_backchannel_cb, SUDO_DEBUG_EXEC);
 
-    /* read command from backchannel, should be a signal */
+    /* Read command from backchannel, should be a signal. */
     n = recv(fd, &cstmp, sizeof(cstmp), MSG_WAITALL);
     if (n != sizeof(cstmp)) {
 	if (n == -1) {

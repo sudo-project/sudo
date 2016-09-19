@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -445,7 +445,7 @@ static int
 io_log_output(const char *buf, unsigned int len)
 {
     const char *cp, *ep;
-    bool rval = true;
+    bool ret = true;
 
     ignore_result(fwrite(buf, len, 1, output));
     /*
@@ -455,11 +455,11 @@ io_log_output(const char *buf, unsigned int len)
      */
     for (cp = buf, ep = buf + len; cp < ep; cp++) {
 	if (cp + 5 < ep && memcmp(cp, "honk!", 5) == 0) {
-	    rval = false;
+	    ret = false;
 	    break;
 	}
     }
-    return rval;
+    return ret;
 }
 
 __dso_public struct policy_plugin sample_policy = {
