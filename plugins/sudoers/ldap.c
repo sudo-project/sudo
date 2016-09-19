@@ -757,7 +757,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 }
 
 static int
-sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
+sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry, int group_matched)
 {
     struct berval **bv, **p;
     char *val;
@@ -768,8 +768,28 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
     if (bv == NULL)
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs"); /* old style */
-    if (bv == NULL)
-	debug_return_int(false);
+    if (bv == NULL) {
+	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED))
+	    debug_return_int(UNSPEC);
+	switch (group_matched) {
+	case UNSPEC:
+	    /*
+	     * No runas user or group entries.  Match runas_default
+	     * against what the user specified on the command line.
+	     */
+	    ret = userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw);
+	    break;
+	case true:
+	    /*
+	     * No runas user entries but have a matching runas group entry.
+	     * If trying to run as the invoking user, allow it.
+	     */
+	    if (strcmp(user_name, runas_pw->pw_name) == 0)
+		ret = true;
+	    break;
+	}
+	debug_return_int(ret);
+    }
 
     /*
      * BUG:
@@ -830,8 +850,13 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
-    if (bv == NULL)
+    if (bv == NULL) {
+	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED)) {
+	    if (runas_pw->pw_gid == runas_gr->gr_gid)
+		ret = true;	/* runas group matches passwd db */
+	}
 	debug_return_int(ret);
+    }
 
     /* walk through values returned, looking for a match */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -861,19 +886,9 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
     if (!entry)
 	debug_return_bool(false);
 
-    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
-	user_matched = sudo_ldap_check_runas_user(ld, entry);
     if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	group_matched = sudo_ldap_check_runas_group(ld, entry);
-
-    /*
-     * If there are no runas entries, match runas_default against
-     * what the user specified on the command line.
-     */
-    if (user_matched == UNSPEC && group_matched == UNSPEC) {
-	debug_return_int(userpw_matches(def_runas_default, runas_pw->pw_name,
-	    runas_pw));
-    }
+    user_matched = sudo_ldap_check_runas_user(ld, entry, group_matched);
 
     debug_return_bool(group_matched != false && user_matched != false); 
 }

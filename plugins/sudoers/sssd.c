@@ -561,7 +561,7 @@ sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 }
 
 static int
-sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule)
+sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule, int group_matched)
 {
     char **val_array = NULL;
     char *val;
@@ -580,7 +580,28 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsUser: no result.");
-	debug_return_int(false);
+	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED))
+	    debug_return_int(UNSPEC);
+	switch (group_matched) {
+	case UNSPEC:
+	    /*
+	     * No runas user or group entries.  Match runas_default
+	     * against what the user specified on the command line.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against runas_default");
+	    ret = userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw);
+	    break;
+	case true:
+	    /*
+	     * No runas user entries but have a matching runas group entry.
+	     * If trying to run as the invoking user, allow it.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against user_name");
+	    if (strcmp(user_name, runas_pw->pw_name) == 0)
+		ret = true;
+	    break;
+	}
+	debug_return_int(ret);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "handle->fn_get_values(sudoRunAsUser): %d", i);
@@ -667,7 +688,11 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsGroup: no result.");
-	debug_return_int(false);
+	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED)) {
+	    if (runas_pw->pw_gid == runas_gr->gr_gid)
+		ret = true;	/* runas group matches passwd db */
+	}
+	debug_return_int(ret);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "handle->fn_get_values(sudoRunAsGroup): %d", i);
@@ -705,20 +730,9 @@ sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     if (rule == NULL)
 	 debug_return_bool(false);
 
-    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
-	user_matched = sudo_sss_check_runas_user(handle, rule);
     if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	group_matched = sudo_sss_check_runas_group(handle, rule);
-
-    /*
-     * If there are no runas entries, match runas_default against
-     * what the user specified on the command line.
-     */
-    if (user_matched == UNSPEC && group_matched == UNSPEC) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against runas_default");
-	debug_return_int(userpw_matches(def_runas_default, runas_pw->pw_name,
-	    runas_pw));
-    }
+    user_matched = sudo_sss_check_runas_user(handle, rule, group_matched);
 
     debug_return_bool(group_matched != false && user_matched != false);
 }
