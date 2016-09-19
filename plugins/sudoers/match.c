@@ -243,7 +243,7 @@ runaslist_matches(const struct member_list *user_list,
 	    }
 	}
 	if (group_matched == UNSPEC) {
-	    if (runas_pw != NULL && runas_pw->pw_gid == runas_gr->gr_gid)
+	    if (runas_pw->pw_gid == runas_gr->gr_gid)
 		group_matched = ALLOW;	/* runas group matches passwd db */
 	}
     }
