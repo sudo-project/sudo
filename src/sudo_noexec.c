@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,8 +26,23 @@
 #ifdef HAVE_SPAWN_H
 #include <spawn.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_WORDEXP_H
+#include <wordexp.h>
+#endif
+#if defined(HAVE_SHL_LOAD)
+# include <dl.h>
+#elif defined(HAVE_DLOPEN)
+# include <dlfcn.h>
+#endif
 
 #include "sudo_compat.h"
+#include "pathnames.h"
 
 #ifdef HAVE___INTERPOSE
 /*
@@ -141,3 +156,51 @@ FN_NAME(popen)(const char *c, const char *t)
     return NULL;
 }
 INTERPOSE(popen)
+
+/*
+ * We can't use a wrapper for wordexp(3) since we still want to call
+ * the real wordexp(3) but with WRDE_NOCMD added to the flags argument.
+ */
+typedef int (*sudo_fn_wordexp_t)(const char *, wordexp_t *, int);
+
+__dso_public int
+FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
+{
+#if defined(HAVE___INTERPOSE)
+    return wordexp(words, we, flags | WRDE_NOCMD);
+#else
+# if defined(HAVE_DLOPEN)
+    void *fn = dlsym(RTLD_NEXT, "wordexp");
+# elif defined(HAVE_SHL_LOAD)
+    const char *name, *myname = _PATH_SUDO_NOEXEC;
+    struct shl_descriptor *desc;
+    void *fn = NULL;
+    int idx = 0;
+
+    name = strrchr(myname, '/');
+    if (name != NULL)
+	myname = name + 1;
+
+    /* Search for wordexp() but skip this shared object. */
+    while (shl_get(idx++, &desc) == 0) {
+	name = strrchr(desc->filename, '/');
+	if (name == NULL)
+		name = desc->filename;
+	else
+		name++;
+	if (strcmp(name, myname) == 0)
+	    continue;
+	if (shl_findsym(&desc->handle, "wordexp", TYPE_PROCEDURE, &fn) == 0)
+	    break;
+    }
+# else
+    void *fn = NULL;
+# endif
+    if (fn == NULL) {
+	errno = EACCES;
+	return -1;
+    }
+    return ((sudo_fn_wordexp_t)fn)(words, we, flags | WRDE_NOCMD);
+#endif /* HAVE___INTERPOSE */
+}
+INTERPOSE(wordexp)

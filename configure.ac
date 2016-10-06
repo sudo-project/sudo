@@ -2261,7 +2261,7 @@ AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
+AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2400,7 +2400,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat faccessat])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat faccessat wordexp])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then

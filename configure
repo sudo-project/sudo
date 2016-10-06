@@ -2648,6 +2648,7 @@ as_fn_append ac_header_list " netgroup.h"
 as_fn_append ac_header_list " paths.h"
 as_fn_append ac_header_list " spawn.h"
 as_fn_append ac_header_list " utmpx.h"
+as_fn_append ac_header_list " wordexp.h"
 as_fn_append ac_header_list " sys/sockio.h"
 as_fn_append ac_header_list " sys/bsdtypes.h"
 as_fn_append ac_header_list " sys/select.h"
@@ -2661,6 +2662,7 @@ as_fn_append ac_func_list " pread"
 as_fn_append ac_func_list " pwrite"
 as_fn_append ac_func_list " openat"
 as_fn_append ac_func_list " faccessat"
+as_fn_append ac_func_list " wordexp"
 as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
 # value.
@@ -16815,6 +16817,8 @@ done
 
 
 
+
+
 for ac_header in endian.h sys/endian.h machine/endian.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -18054,6 +18058,8 @@ _ACEOF
 
 fi
 done
+
+
 
 
 
