@@ -789,9 +789,11 @@ linux_audit.lo: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/linux_audit.c
-locale.lo: $(srcdir)/locale.c $(incdir)/compat/stdbool.h \
-           $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
-           $(incdir)/sudo_gettext.h $(srcdir)/logging.h $(top_builddir)/config.h
+locale.lo: $(srcdir)/locale.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+           $(incdir)/sudo_queue.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/locale.c
 locale.o: locale.lo
 logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
