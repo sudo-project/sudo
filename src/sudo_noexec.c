@@ -18,10 +18,9 @@
 
 #include <sys/types.h>
 
-#if defined(__linux__) && defined(HAVE_PRCTL)
+#if defined(HAVE_DECL_SECCOMP_SET_MODE_FILTER) && HAVE_DECL_SECCOMP_SET_MODE_FILTER
 # include <sys/prctl.h>
 # include <asm/unistd.h>
-# include <linux/audit.h>
 # include <linux/filter.h>
 # include <linux/seccomp.h>
 #endif
@@ -216,7 +215,7 @@ INTERPOSE(wordexp)
 /*
  * On Linux we can use a seccomp() filter to disable exec.
  */
-#if defined(__linux) && defined(HAVE_PRCTL)
+#if defined(HAVE_DECL_SECCOMP_SET_MODE_FILTER) && HAVE_DECL_SECCOMP_SET_MODE_FILTER
 
 /* Older systems may not support execveat(2). */
 #ifndef __NR_execveat
@@ -251,4 +250,4 @@ noexec_ctor(void)
     if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == 0)
 	(void)prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &exec_fprog);
 }
-#endif /* __linux__ && HAVE_PRCTL */
+#endif /* HAVE_DECL_SECCOMP_SET_MODE_FILTER */

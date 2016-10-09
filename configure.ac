@@ -1962,8 +1962,14 @@ case "$host" in
     *-*-linux*|*-*-k*bsd*-gnu)
 		shadow_funcs="getspnam"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		# Check for linux/filter.h and prctl to use seccomp(2)
-		AC_CHECK_HEADER([linux/filter.h], [AC_CHECK_FUNCS([prctl])])
+		# Check for SECCOMP_SET_MODE_FILTER in linux/seccomp.h
+		AC_CHECK_DECLS([SECCOMP_SET_MODE_FILTER], [], [], [
+#include <sys/types.h>
+#include <sys/prctl.h>
+#include <asm/unistd.h>
+#include <linux/seccomp.h>
+#include <linux/filter.h>
+		])
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
