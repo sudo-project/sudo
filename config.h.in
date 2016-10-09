@@ -526,6 +526,9 @@
 /* Define to 1 if you have the `posix_spawnp' function. */
 #undef HAVE_POSIX_SPAWNP
 
+/* Define to 1 if you have the `prctl' function. */
+#undef HAVE_PRCTL
+
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 

@@ -18,6 +18,14 @@
 
 #include <sys/types.h>
 
+#if defined(__linux__) && defined(HAVE_PRCTL)
+# include <sys/prctl.h>
+# include <asm/unistd.h>
+# include <linux/audit.h>
+# include <linux/filter.h>
+# include <linux/seccomp.h>
+#endif
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -204,3 +212,43 @@ FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
 #endif /* HAVE___INTERPOSE */
 }
 INTERPOSE(wordexp)
+
+/*
+ * On Linux we can use a seccomp() filter to disable exec.
+ */
+#if defined(__linux) && defined(HAVE_PRCTL)
+
+/* Older systems may not support execveat(2). */
+#ifndef __NR_execveat
+# define __NR_execveat -1
+#endif
+
+static void noexec_ctor(void) __attribute__((constructor));
+
+static void
+noexec_ctor(void)
+{
+    struct sock_filter exec_filter[] = {
+	/* Load syscall number into the accumulator */
+	BPF_STMT(BPF_LD | BPF_ABS, offsetof(struct seccomp_data, nr)),
+	/* Jump to deny for execve/execveat */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 2, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execveat, 1, 0),
+	/* Allow non-matching syscalls */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
+	/* Deny execve/execveat syscall */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | (EACCES & SECCOMP_RET_DATA))
+    };
+    const struct sock_fprog exec_fprog = {
+	nitems(exec_filter),
+	exec_filter
+    };
+
+    /*
+     * SECCOMP_MODE_FILTER will fail unless the process has
+     * CAP_SYS_ADMIN or the no_new_privs bit is set.
+     */
+    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == 0)
+	(void)prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &exec_fprog);
+}
+#endif /* __linux__ && HAVE_PRCTL */
