@@ -164,7 +164,7 @@ FN_NAME(popen)(const char *c, const char *t)
 }
 INTERPOSE(popen)
 
-#ifdef HAVE_WORDEXP
+#if defined(HAVE_WORDEXP) && (defined(RTLD_NEXT) || defined(HAVE_SHL_LOAD) || defined(HAVE___INTERPOSE))
 /*
  * We can't use a wrapper for wordexp(3) since we still want to call
  * the real wordexp(3) but with WRDE_NOCMD added to the flags argument.
@@ -212,7 +212,7 @@ FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
 #endif /* HAVE___INTERPOSE */
 }
 INTERPOSE(wordexp)
-#endif /* HAVE_WORDEXP */
+#endif /* HAVE_WORDEXP && (RTLD_NEXT || HAVE_SHL_LOAD || HAVE___INTERPOSE) */
 
 /*
  * On Linux we can use a seccomp() filter to disable exec.
