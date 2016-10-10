@@ -1,3 +1,11 @@
+What's new in Sudo 1.8.18p1
+
+ * When sudo_noexec.so is used, the WRDE_NOCMD flag is now added
+   if the wordexp() function is called.
+
+ * On Linux systems, sudo_noexec.so now uses a seccomp filter to
+   disable execute access where it is supported.
+
 What's new in Sudo 1.8.18
 
  * The sudoers locale is now set before parsing the sudoers file.
