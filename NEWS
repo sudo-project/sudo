@@ -1,10 +1,13 @@
 What's new in Sudo 1.8.18p1
 
  * When sudo_noexec.so is used, the WRDE_NOCMD flag is now added
-   if the wordexp() function is called.
+   if the wordexp() function is called.  This prevents commands
+   from being run via wordexp() without disabling it entirely.
 
  * On Linux systems, sudo_noexec.so now uses a seccomp filter to
-   disable execute access where it is supported.
+   disable execute access if the kernel supports seccomp.  This is
+   more robust than the traditional method of using stub functions
+   that return an error.
 
 What's new in Sudo 1.8.18
 
