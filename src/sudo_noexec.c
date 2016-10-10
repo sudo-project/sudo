@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,13 @@
 
 #include <sys/types.h>
 
+#if defined(HAVE_DECL_SECCOMP_SET_MODE_FILTER) && HAVE_DECL_SECCOMP_SET_MODE_FILTER
+# include <sys/prctl.h>
+# include <asm/unistd.h>
+# include <linux/filter.h>
+# include <linux/seccomp.h>
+#endif
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -26,8 +33,23 @@
 #ifdef HAVE_SPAWN_H
 #include <spawn.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_WORDEXP_H
+#include <wordexp.h>
+#endif
+#if defined(HAVE_SHL_LOAD)
+# include <dl.h>
+#elif defined(HAVE_DLOPEN)
+# include <dlfcn.h>
+#endif
 
 #include "sudo_compat.h"
+#include "pathnames.h"
 
 #ifdef HAVE___INTERPOSE
 /*
@@ -141,3 +163,93 @@ FN_NAME(popen)(const char *c, const char *t)
     return NULL;
 }
 INTERPOSE(popen)
+
+#if defined(HAVE_WORDEXP) && (defined(RTLD_NEXT) || defined(HAVE_SHL_LOAD) || defined(HAVE___INTERPOSE))
+/*
+ * We can't use a wrapper for wordexp(3) since we still want to call
+ * the real wordexp(3) but with WRDE_NOCMD added to the flags argument.
+ */
+typedef int (*sudo_fn_wordexp_t)(const char *, wordexp_t *, int);
+
+__dso_public int
+FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
+{
+#if defined(HAVE___INTERPOSE)
+    return wordexp(words, we, flags | WRDE_NOCMD);
+#else
+# if defined(HAVE_DLOPEN)
+    void *fn = dlsym(RTLD_NEXT, "wordexp");
+# elif defined(HAVE_SHL_LOAD)
+    const char *name, *myname = _PATH_SUDO_NOEXEC;
+    struct shl_descriptor *desc;
+    void *fn = NULL;
+    int idx = 0;
+
+    name = strrchr(myname, '/');
+    if (name != NULL)
+	myname = name + 1;
+
+    /* Search for wordexp() but skip this shared object. */
+    while (shl_get(idx++, &desc) == 0) {
+	name = strrchr(desc->filename, '/');
+	if (name == NULL)
+		name = desc->filename;
+	else
+		name++;
+	if (strcmp(name, myname) == 0)
+	    continue;
+	if (shl_findsym(&desc->handle, "wordexp", TYPE_PROCEDURE, &fn) == 0)
+	    break;
+    }
+# else
+    void *fn = NULL;
+# endif
+    if (fn == NULL) {
+	errno = EACCES;
+	return -1;
+    }
+    return ((sudo_fn_wordexp_t)fn)(words, we, flags | WRDE_NOCMD);
+#endif /* HAVE___INTERPOSE */
+}
+INTERPOSE(wordexp)
+#endif /* HAVE_WORDEXP && (RTLD_NEXT || HAVE_SHL_LOAD || HAVE___INTERPOSE) */
+
+/*
+ * On Linux we can use a seccomp() filter to disable exec.
+ */
+#if defined(HAVE_DECL_SECCOMP_SET_MODE_FILTER) && HAVE_DECL_SECCOMP_SET_MODE_FILTER
+
+/* Older systems may not support execveat(2). */
+#ifndef __NR_execveat
+# define __NR_execveat -1
+#endif
+
+static void noexec_ctor(void) __attribute__((constructor));
+
+static void
+noexec_ctor(void)
+{
+    struct sock_filter exec_filter[] = {
+	/* Load syscall number into the accumulator */
+	BPF_STMT(BPF_LD | BPF_ABS, offsetof(struct seccomp_data, nr)),
+	/* Jump to deny for execve/execveat */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 2, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execveat, 1, 0),
+	/* Allow non-matching syscalls */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
+	/* Deny execve/execveat syscall */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | (EACCES & SECCOMP_RET_DATA))
+    };
+    const struct sock_fprog exec_fprog = {
+	nitems(exec_filter),
+	exec_filter
+    };
+
+    /*
+     * SECCOMP_MODE_FILTER will fail unless the process has
+     * CAP_SYS_ADMIN or the no_new_privs bit is set.
+     */
+    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == 0)
+	(void)prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &exec_fprog);
+}
+#endif /* HAVE_DECL_SECCOMP_SET_MODE_FILTER */

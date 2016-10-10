@@ -124,6 +124,10 @@
    don't. */
 #undef HAVE_DECL_QUAD_MIN
 
+/* Define to 1 if you have the declaration of `SECCOMP_SET_MODE_FILTER', and
+   to 0 if you don't. */
+#undef HAVE_DECL_SECCOMP_SET_MODE_FILTER
+
 /* Define to 1 if you have the declaration of `setauthdb', and to 0 if you
    don't. */
 #undef HAVE_DECL_SETAUTHDB
@@ -837,6 +841,12 @@
 
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
+
+/* Define to 1 if you have the `wordexp' function. */
+#undef HAVE_WORDEXP
+
+/* Define to 1 if you have the <wordexp.h> header file. */
+#undef HAVE_WORDEXP_H
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
