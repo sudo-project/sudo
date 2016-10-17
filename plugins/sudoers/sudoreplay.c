@@ -323,7 +323,7 @@ main(int argc, char *argv[])
     /* Replay session corresponding to io_log_files[]. */
     replay_session(max_wait, decimal);
 
-    sudo_term_restore(STDIN_FILENO, 1);
+    sudo_term_restore(STDIN_FILENO, true);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
@@ -1269,7 +1269,7 @@ help(void)
 static void
 sudoreplay_cleanup(void)
 {
-    sudo_term_restore(STDIN_FILENO, 0);
+    sudo_term_restore(STDIN_FILENO, false);
 }
 
 /*
@@ -1279,6 +1279,6 @@ sudoreplay_cleanup(void)
 static void
 sudoreplay_handler(int signo)
 {
-    sudo_term_restore(STDIN_FILENO, 0);
+    sudo_term_restore(STDIN_FILENO, false);
     kill(getpid(), signo);
 }

@@ -199,7 +199,7 @@ restore:
     if (!ISSET(flags, TGP_ECHO)) {
 	for (;;) {
 	    /* Restore old tty settings if possible. */
-	    if (sudo_term_restore(input, 1) || errno != EINTR)
+	    if (sudo_term_restore(input, true) || errno != EINTR)
 		break;
 	    /* Received SIGTTOU, suspend the process. */
 	    signo[SIGTTOU] = 0;

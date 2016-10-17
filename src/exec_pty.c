@@ -110,7 +110,7 @@ pty_cleanup(void)
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
     if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1)
-	sudo_term_restore(io_fds[SFD_USERTTY], 0);
+	sudo_term_restore(io_fds[SFD_USERTTY], false);
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
@@ -449,7 +449,7 @@ suspend_parent(int signo)
 
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED)
-	    sudo_term_restore(io_fds[SFD_USERTTY], 0);
+	    sudo_term_restore(io_fds[SFD_USERTTY], false);
 
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
@@ -906,7 +906,7 @@ pty_close(struct command_status *cstat)
 
     /* Restore terminal settings. */
     if (io_fds[SFD_USERTTY] != -1)
-	sudo_term_restore(io_fds[SFD_USERTTY], 0);
+	sudo_term_restore(io_fds[SFD_USERTTY], false);
 
     /* If child was signalled, write the reason to stdout like the shell. */
     if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
