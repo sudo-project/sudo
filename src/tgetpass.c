@@ -197,17 +197,8 @@ restore:
 
     /* Restore old tty settings. */
     if (!ISSET(flags, TGP_ECHO)) {
-	for (;;) {
-	    /* Restore old tty settings if possible. */
-	    if (sudo_term_restore(input, true) || errno != EINTR)
-		break;
-	    /* Received SIGTTOU, suspend the process. */
-	    signo[SIGTTOU] = 0;
-	    if (suspend(SIGTTOU, callback) == -1) {
-		pass = NULL;
-		break;
-	    }
-	}
+	/* Restore old tty settings if possible. */
+	(void) sudo_term_restore(input, true);
     }
     if (input != STDIN_FILENO)
 	(void) close(input);
