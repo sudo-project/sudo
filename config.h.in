@@ -842,6 +842,9 @@
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
+/* Define to 1 if you have the `vsyslog' function. */
+#undef HAVE_VSYSLOG
+
 /* Define to 1 if you have the `wordexp' function. */
 #undef HAVE_WORDEXP
 

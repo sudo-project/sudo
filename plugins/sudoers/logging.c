@@ -72,18 +72,24 @@ static char *new_logline(const char *, int);
 static void
 mysyslog(int pri, const char *fmt, ...)
 {
-    char *buf;
     va_list ap;
     debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
 
     va_start(ap, fmt);
     openlog("sudo", 0, def_syslog);
-    if (vasprintf(&buf, fmt, ap) == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    } else {
-	syslog(pri, "%s", buf);
-	free(buf);
-    }
+#ifdef HAVE_VSYSLOG
+    vsyslog(pri, fmt, ap);
+#else
+    do {
+	char *buf;
+	if (vasprintf(&buf, fmt, ap) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	} else {
+	    syslog(pri, "%s", buf);
+	    free(buf);
+	}
+    } while (0);
+#endif
     va_end(ap);
     closelog();
     debug_return;
