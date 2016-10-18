@@ -419,6 +419,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Resolve groups in sudoers and match on the group ID, not the name"),
 	NULL,
     }, {
+	"syslog_maxlen", T_UINT,
+	N_("Log entries larger than this value will be split into multiple syslog messages"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

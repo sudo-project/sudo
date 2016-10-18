@@ -559,6 +559,7 @@ init_defaults(void)
 	goto oom;
     def_set_utmp = true;
     def_pam_setcred = true;
+    def_syslog_maxlen = MAXSYSLOGLEN;
 
     /* Reset the locale. */
     if (!firsttime) {

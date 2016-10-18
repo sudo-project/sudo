@@ -72,14 +72,18 @@ static char *new_logline(const char *, int);
 static void
 mysyslog(int pri, const char *fmt, ...)
 {
-    char buf[MAXSYSLOGLEN+1];
+    char *buf;
     va_list ap;
     debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
 
     va_start(ap, fmt);
     openlog("sudo", 0, def_syslog);
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-    syslog(pri, "%s", buf);
+    if (vasprintf(&buf, fmt, ap) == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    } else {
+	syslog(pri, "%s", buf);
+	free(buf);
+    }
     va_end(ap);
     closelog();
     debug_return;
@@ -87,7 +91,7 @@ mysyslog(int pri, const char *fmt, ...)
 
 /*
  * Log a message to syslog, pre-pending the username and splitting the
- * message into parts if it is longer than MAXSYSLOGLEN.
+ * message into parts if it is longer than syslog_maxlen.
  */
 static void
 do_syslog(int pri, char *msg)
@@ -104,7 +108,7 @@ do_syslog(int pri, char *msg)
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
     fmt = _("%8s : %s");
-    maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
+    maxlen = def_syslog_maxlen - (strlen(fmt) - 5 + strlen(user_name));
     for (p = msg; *p != '\0'; ) {
 	len = strlen(p);
 	if (len > maxlen) {
@@ -132,7 +136,7 @@ do_syslog(int pri, char *msg)
 	    p += len;
 	}
 	fmt = _("%8s : (command continued) %s");
-	maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
+	maxlen = def_syslog_maxlen - (strlen(fmt) - 5 + strlen(user_name));
     }
 
     sudoers_setlocale(oldlocale, NULL);

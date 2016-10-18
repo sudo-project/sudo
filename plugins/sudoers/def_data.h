@@ -196,6 +196,8 @@
 #define def_ignore_logfile_errors (sudo_defs_table[I_IGNORE_LOGFILE_ERRORS].sd_un.flag)
 #define I_MATCH_GROUP_BY_GID    98
 #define def_match_group_by_gid  (sudo_defs_table[I_MATCH_GROUP_BY_GID].sd_un.flag)
+#define I_SYSLOG_MAXLEN         99
+#define def_syslog_maxlen       (sudo_defs_table[I_SYSLOG_MAXLEN].sd_un.uival)
 
 enum def_tuple {
 	never,

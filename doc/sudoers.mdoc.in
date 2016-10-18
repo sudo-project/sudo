@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 31, 2016
+.Dd October 18, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3145,6 +3145,27 @@ Defaults to
 See
 .Em syslog_badpri
 for the list of supported syslog priorities.
+.It syslog_maxlen
+On many systems,
+.Xr syslog 3
+has a relatively small log buffer.
+IETF RFC 5424 states that syslog servers must support messages of
+at least 480 bytes and should support messages up to 2048 bytes.
+By default,
+.Nm
+creates log messages up to 980 bytes which corresponds to the
+historic BSD syslog implementation which used a 1024 byte buffer
+to store the message, date, hostname and program name.
+To prevent syslog messages from being truncated,
+.Nm
+will split up log messages that are larger than
+.Em syslog_maxlen
+bytes.
+When a message is split, additional parts will include the string
+.Dq Pq command continued
+after the user name and before the continued command line arguments.
+.Pp
+This setting is only supported by version 1.8.19 or higher.
 .It sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
@@ -3824,22 +3845,20 @@ The
 .Em hostname ,
 and
 .Em progname
-fields are added by the syslog daemon, not
-.Nm sudoers
+fields are added by the system's
+.Fn syslog
+function, not
+.Nm
 itself.
 As such, they may vary in format on different systems.
 .Pp
-On most systems,
-.Xr syslog 3
-has a relatively small log buffer.
-To prevent the command line arguments from being truncated,
-.Nm
-will split up log messages that are larger than 960 characters
-(not including the date, hostname, and the string
-.Dq sudo ) .
-When a message is split, additional parts will include the string
-.Dq Pq command continued
-after the user name and before the continued command line arguments.
+The maximum size of syslog messages varies from system to system.
+The
+.Em syslog_maxlen
+setting can be used to change the maximum syslog message size
+from the default value of 980 bytes.
+For more information, see the description of
+.Em syslog_maxlen .
 .Ss Notes on logging to a file
 If the
 .Em logfile
