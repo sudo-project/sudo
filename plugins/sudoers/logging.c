@@ -66,8 +66,6 @@ static char *new_logline(const char *, int);
  * We do an openlog(3)/closelog(3) for each message because some
  * authentication methods (notably PAM) use syslog(3) for their
  * own nefarious purposes and may call openlog(3) and closelog(3).
- * Note that because we don't want to assume that all systems have
- * vsyslog(3) (HP-UX doesn't) "%m" will not be expanded.
  */
 static void
 mysyslog(int pri, const char *fmt, ...)
@@ -77,19 +75,7 @@ mysyslog(int pri, const char *fmt, ...)
 
     va_start(ap, fmt);
     openlog("sudo", 0, def_syslog);
-#ifdef HAVE_VSYSLOG
     vsyslog(pri, fmt, ap);
-#else
-    do {
-	char *buf;
-	if (vasprintf(&buf, fmt, ap) == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	} else {
-	    syslog(pri, "%s", buf);
-	    free(buf);
-	}
-    } while (0);
-#endif
     va_end(ap);
     closelog();
     debug_return;

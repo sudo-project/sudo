@@ -2408,7 +2408,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat faccessat wordexp vsyslog])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo strftime pread pwrite openat faccessat wordexp])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2692,6 +2692,10 @@ if test X"$FOUND_SHA2" = X"no"; then
     AC_LIBOBJ(sha2)
     SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
 fi
+AC_CHECK_FUNCS([vsyslog], [], [
+    AC_LIBOBJ(vsyslog)
+    SUDO_APPEND_COMPAT_EXP(sudo_vsyslog)
+])
 dnl
 dnl Function checks for sudo_noexec
 dnl

@@ -2663,7 +2663,6 @@ as_fn_append ac_func_list " pwrite"
 as_fn_append ac_func_list " openat"
 as_fn_append ac_func_list " faccessat"
 as_fn_append ac_func_list " wordexp"
-as_fn_append ac_func_list " vsyslog"
 as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
 # value.
@@ -18098,8 +18097,6 @@ done
 
 
 
-
-
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -19894,6 +19891,32 @@ esac
     done
 
 fi
+for ac_func in vsyslog
+do :
+  ac_fn_c_check_func "$LINENO" "vsyslog" "ac_cv_func_vsyslog"
+if test "x$ac_cv_func_vsyslog" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_VSYSLOG 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" vsyslog.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS vsyslog.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_vsyslog; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
 if test X"$with_noexec" != X"no"; then
     # Check for non-standard exec functions
     for ac_func in exect execvP execvpe
