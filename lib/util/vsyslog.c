@@ -35,7 +35,8 @@ void
 sudo_vsyslog(int pri, const char *fmt, va_list ap)
 {
     int saved_errno = errno;
-    char *buf, *cp, *ep, new_fmt[1024];
+    char *cp, *ep, msgbuf[8192], new_fmt[1024];
+    va_list ap2;
     size_t len;
 
     /* Rewrite fmt, replacing %m with an errno string. */
@@ -59,10 +60,19 @@ sudo_vsyslog(int pri, const char *fmt, va_list ap)
     }
     *cp = '\0';
 
-    /* Format message and log it. */
-    if (vasprintf(&buf, new_fmt, ap) != -1) {
-	syslog(pri, "%s", buf);
-	free(buf);
+    /* Format message and log it, using a static buffer if possible. */
+    va_copy(ap2, ap);
+    len = (size_t)snprintf(msgbuf, sizeof(msgbuf), new_fmt, ap2);
+    va_end(ap2);
+    if (len < sizeof(msgbuf)) {
+	syslog(pri, "%s", msgbuf);
+    } else {
+	/* Too big for static buffer? */
+	char *buf;
+	if (vasprintf(&buf, new_fmt, ap) != -1) {
+	    syslog(pri, "%s", buf);
+	    free(buf);
+	}
     }
 }
 #endif /* HAVE_VSYSLOG */
