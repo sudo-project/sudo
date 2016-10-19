@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "October 18, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 19, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1237,8 +1237,7 @@ or
 character.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
-There are
-ten possible tag values:
+The following tag values are supported:
 \fREXEC\fR,
 \fRNOEXEC\fR,
 \fRFOLLOW\fR,

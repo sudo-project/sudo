@@ -596,8 +596,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      with either an `!' or `-' character.
 
    TTaagg__SSppeecc
-     A command may have zero or more tags associated with it.  There are ten
-     possible tag values: EXEC, NOEXEC, FOLLOW, NOFOLLOW, LOG_INPUT,
+     A command may have zero or more tags associated with it.  The following
+     tag values are supported: EXEC, NOEXEC, FOLLOW, NOFOLLOW, LOG_INPUT,
      NOLOG_INPUT, LOG_OUTPUT, NOLOG_OUTPUT, MAIL, NOMAIL, PASSWD, NOPASSWD,
      SETENV, and NOSETENV.  Once a tag is set on a Cmnd, subsequent Cmnds in
      the Cmnd_Spec_List, inherit the tag unless it is overridden by the
@@ -2607,4 +2607,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.18                    October 18, 2016                    Sudo 1.8.18
+Sudo 1.8.18                    October 19, 2016                    Sudo 1.8.18
