@@ -3375,19 +3375,22 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
 
     /* Determine whether the entry has the sudoOrder attribute. */
     last = sudo_ldap_result_last_search(lres);
-    bv = ldap_get_values_len(last->ldap, entry, "sudoOrder");
-    if (bv != NULL) {
-	if (ldap_count_values_len(bv) > 0) {
-	    /* Get the value of this attribute, 0 if not present. */
-	    DPRINTF2("order attribute raw: %s", (*bv)->bv_val);
-	    order = strtod((*bv)->bv_val, &ep);
-	    if (ep == (*bv)->bv_val || *ep != '\0') {
-		sudo_warnx(U_("invalid sudoOrder attribute: %s"), (*bv)->bv_val);
-		order = 0.0;
+    if (last != NULL) {
+	bv = ldap_get_values_len(last->ldap, entry, "sudoOrder");
+	if (bv != NULL) {
+	    if (ldap_count_values_len(bv) > 0) {
+		/* Get the value of this attribute, 0 if not present. */
+		DPRINTF2("order attribute raw: %s", (*bv)->bv_val);
+		order = strtod((*bv)->bv_val, &ep);
+		if (ep == (*bv)->bv_val || *ep != '\0') {
+		    sudo_warnx(U_("invalid sudoOrder attribute: %s"),
+			(*bv)->bv_val);
+		    order = 0.0;
+		}
+		DPRINTF2("order attribute: %f", order);
 	    }
-	    DPRINTF2("order attribute: %f", order);
+	    ldap_value_free_len(bv);
 	}
-	ldap_value_free_len(bv);
     }
 
     /*
