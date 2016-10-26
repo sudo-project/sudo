@@ -866,13 +866,13 @@ store_syslogfac(const char *val, struct sudo_defs_types *def)
 	def->sd_un.ival = false;
 	debug_return_bool(true);
     }
-    for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
-	continue;
-    if (fac->name == NULL)
-	debug_return_bool(false);		/* not found */
-
-    def->sd_un.ival = fac->num;
-    debug_return_bool(true);
+    for (fac = facilities; fac->name != NULL; fac++) {
+	if (strcmp(val, fac->name) != 0) {
+	    def->sd_un.ival = fac->num;
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);		/* not found */
 }
 
 static const char *
@@ -895,13 +895,13 @@ store_syslogpri(const char *val, struct sudo_defs_types *def)
     if (val == NULL)
 	debug_return_bool(false);
 
-    for (pri = priorities; pri->name && strcmp(val, pri->name); pri++)
-	continue;
-    if (pri->name == NULL)
-	debug_return_bool(false); 	/* not found */
-
-    def->sd_un.ival = pri->num;
-    debug_return_bool(true);
+    for (pri = priorities; pri->name != NULL; pri++) {
+	if (strcmp(val, pri->name) != 0) {
+	    def->sd_un.ival = pri->num;
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false); 	/* not found */
 }
 
 static const char *
