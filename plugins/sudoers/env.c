@@ -715,7 +715,7 @@ env_should_delete(const char *var)
 
     /* Skip variables with values beginning with () (bash functions) */
     if ((cp = strchr(var, '=')) != NULL) {
-	if (strncmp(cp, "=() ", 3) == 0) {
+	if (strncmp(cp, "=() ", 4) == 0) {
 	    delete_it = true;
 	    goto done;
 	}
@@ -750,7 +750,7 @@ env_should_keep(const char *var)
     /* Skip bash functions unless we matched on the value as well as name. */
     if (keepit && !full_match) {
 	if ((cp = strchr(var, '=')) != NULL) {
-	    if (strncmp(cp, "=() ", 3) == 0)
+	    if (strncmp(cp, "=() ", 4) == 0)
 		keepit = false;
 	}
     }
