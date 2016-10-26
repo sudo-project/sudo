@@ -1539,7 +1539,7 @@ static void
 exec_pty(struct command_details *details,
     struct command_status *cstat, int errfd)
 {
-    pid_t self = getpid();
+    volatile pid_t self = getpid();
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /* Register cleanup function */
