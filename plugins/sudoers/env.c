@@ -817,7 +817,7 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 	case 'U':
 	    if (strncmp(ep, "USER=", 5) == 0)
 		SET(*didvar, DID_USER);
-	    if (strncmp(ep, "USERNAME=", 5) == 0)
+	    if (strncmp(ep, "USERNAME=", 9) == 0)
 		SET(*didvar, DID_USERNAME);
 	    break;
     }
@@ -918,7 +918,7 @@ rebuild_env(void)
 	     * Do SUDO_PS1 -> PS1 conversion.
 	     * This must happen *after* env_should_keep() is called.
 	     */
-	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
+	    if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		ps1 = *ep + 5;
 
 	    if (keepit) {
