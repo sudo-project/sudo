@@ -388,7 +388,7 @@ timestamp_open(const char *user, pid_t sid)
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use the time stamp file. */
-    if (def_timestamp_timeout == 0) {
+    if (def_timestamp_timeout == 0.0) {
 	errno = ENOENT;
 	goto bad;
     }
@@ -705,7 +705,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
     debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
-    if (def_timestamp_timeout == 0) {
+    if (def_timestamp_timeout == 0.0) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "timestamps disabled");
 	status = TS_OLD;
@@ -808,7 +808,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
     debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
-    if (def_timestamp_timeout == 0) {
+    if (def_timestamp_timeout == 0.0) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "timestamps disabled");
 	goto done;
