@@ -573,13 +573,13 @@ print_defaults_list_json(FILE *fp, struct defaults *def, int indent)
     do {
 	/* Remove leading blanks, must have a non-empty string. */
 	for (start = end; isblank((unsigned char)*start); start++)
-	    ;
+	    continue;
 	if (*start == '\0')
 	    break;
 
 	/* Find the end and print it. */
 	for (end = start; *end && !isblank((unsigned char)*end); end++)
-	    ;
+	    continue;
 	savech = *end;
 	*end = '\0';
 	print_string_json(fp, start);

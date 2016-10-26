@@ -867,7 +867,7 @@ store_syslogfac(const char *val, struct sudo_defs_types *def)
 	debug_return_bool(true);
     }
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
-	;
+	continue;
     if (fac->name == NULL)
 	debug_return_bool(false);		/* not found */
 
@@ -882,7 +882,7 @@ logfac2str(int n)
     debug_decl(logfac2str, SUDOERS_DEBUG_DEFAULTS)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
-	;
+	continue;
     debug_return_const_str(fac->name);
 }
 
@@ -896,7 +896,7 @@ store_syslogpri(const char *val, struct sudo_defs_types *def)
 	debug_return_bool(false);
 
     for (pri = priorities; pri->name && strcmp(val, pri->name); pri++)
-	;
+	continue;
     if (pri->name == NULL)
 	debug_return_bool(false); 	/* not found */
 
@@ -911,7 +911,7 @@ logpri2str(int n)
     debug_decl(logpri2str, SUDOERS_DEBUG_DEFAULTS)
 
     for (pri = priorities; pri->name && pri->num != n; pri++)
-	;
+	continue;
     debug_return_const_str(pri->name);
 }
 

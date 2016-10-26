@@ -1557,7 +1557,7 @@ exec_pty(struct command_details *details,
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
-	    ; /* spin */
+	    continue; /* spin */
     }
 
     /* We have guaranteed that the slave fd is > 2 */

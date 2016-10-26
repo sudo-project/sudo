@@ -122,7 +122,7 @@ do_syslog(int pri, char *msg)
 
 	    /* Advance p and eliminate leading whitespace */
 	    for (p = tmp; *p == ' '; p++)
-		;
+		continue;
 	} else {
 	    mysyslog(pri, fmt, user_name, p);
 	    p += len;

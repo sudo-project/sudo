@@ -160,7 +160,7 @@ rpl_setenv(const char *var, const char *val, int overwrite)
      * just ignores the '=' and anything after it.
      */
     for (src = var; *src != '\0' && *src != '='; src++)
-	;
+	continue;
     esize = (size_t)(src - var) + 2;
     if (val) {
         esize += strlen(val);	/* glibc treats a NULL val as "" */

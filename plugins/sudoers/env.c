@@ -448,7 +448,7 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
      * just ignores the '=' and anything after it.
      */
     for (cp = var; *cp && *cp != '='; cp++)
-	;
+	continue;
     esize = (size_t)(cp - var) + 2;
     if (val) {
 	esize += strlen(val);	/* glibc treats a NULL val as "" */
@@ -1199,7 +1199,7 @@ read_env_file(const char *path, int overwrite)
 
 	/* Must be of the form name=["']value['"] */
 	for (val = var; *val != '\0' && *val != '='; val++)
-	    ;
+	    continue;
 	if (var == val || *val != '=')
 	    continue;
 	var_len = (size_t)(val - var);

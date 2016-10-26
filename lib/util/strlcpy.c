@@ -49,7 +49,7 @@ sudo_strlcpy(char *dst, const char *src, size_t dsize)
 		if (dsize != 0)
 			*dst = '\0';		/* NUL-terminate dst */
 		while (*src++)
-			;
+			continue;
 	}
 
 	return(src - osrc - 1);	/* count does not include NUL */
