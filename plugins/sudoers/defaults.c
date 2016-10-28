@@ -717,13 +717,14 @@ check_defaults(int what, bool quiet)
 	    if (!quiet)
 		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
 	    rc = false;
+	} else {
+	    /* Don't actually set the defaults value, just checking. */
+	    tmp = *cur;
+	    memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
+	    if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
+		rc = false;
+	    free_default(&tmp);
 	}
-	/* Don't actually set the defaults value, just checking. */
-	tmp = *cur;
-	memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
-	if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
-	    rc = false;
-	free_default(&tmp);
     }
     debug_return_bool(rc);
 }
