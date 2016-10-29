@@ -79,59 +79,6 @@ static mode_t iolog_dirmode = S_IRWXU;
 extern __dso_public struct io_plugin sudoers_io;
 
 /*
- * Create path and any parent directories as needed.
- */
-static bool
-io_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode)
-{
-    struct stat sb;
-    gid_t parent_gid;
-    char *slash = path;
-    bool rval = true;
-    debug_decl(io_mkdir_parents, SUDOERS_DEBUG_UTIL)
-
-    /* Create parent directories as needed. */
-    parent_gid = *gidp != (gid_t)-1 ? *gidp : 0;
-    while ((slash = strchr(slash + 1, '/')) != NULL) {
-	*slash = '\0';
-	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %s, mode 0%o, uid %d, gid %d", path, mode,
-	    (int)uid, (int)parent_gid);
-	if (mkdir(path, mode) == 0) {
-	    ignore_result(chown(path, uid, parent_gid));
-	} else {
-	    if (errno != EEXIST) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
-		rval = false;
-		break;
-	    }
-	    /* Already exists, make sure it is a directory. */
-	    if (stat(path, &sb) != 0) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
-		rval = false;
-		break;
-	    }
-	    if (!S_ISDIR(sb.st_mode)) {
-		log_warningx(SLOG_SEND_MAIL,
-		    N_("%s exists but is not a directory (0%o)"),
-		    path, (unsigned int) sb.st_mode);
-		rval = false;
-		break;
-	    }
-	    /* Inherit gid of parent dir for ownership. */
-	    if (*gidp == (gid_t)-1)
-		parent_gid = sb.st_gid;
-	}
-	*slash = '/';
-    }
-
-    /* Return parent gid if none was specified by caller. */
-    if (rval && *gidp == (gid_t)-1)
-	*gidp = parent_gid;
-    debug_return_bool(rval);
-}
-
-/*
  * Create directory and any parent directories as needed.
  */
 static bool
@@ -148,8 +95,7 @@ io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate
 	if (S_ISDIR(sb.st_mode)) {
 	    parent_gid = sb.st_gid;
 	} else {
-	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s exists but is not a directory (0%o)"),
+	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
 	    ok = false;
 	}
@@ -167,7 +113,7 @@ io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate
 	parent_gid = *gidp;
     }
 
-    ok = io_mkdir_parents(path, parent_uid, &parent_gid, parent_mode);
+    ok = sudo_mkdir_parents(path, parent_uid, &parent_gid, parent_mode, false);
     if (ok) {
 	/* Use group ID if specified, else parent gid. */
 	gid_t gid = *gidp != (gid_t)-1 ? *gidp : parent_gid;
@@ -176,7 +122,7 @@ io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o", path, (unsigned int) mode);
 	if (mkdir(path, mode) != 0 && errno != EEXIST) {
-	    log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
+	    sudo_warnx(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
 	    ignore_result(chown(path, uid, gid));
@@ -211,7 +157,7 @@ io_mkdtemp(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediat
 	parent_gid = *gidp;
     }
 
-    ok = io_mkdir_parents(path, parent_uid, &parent_gid, parent_mode);
+    ok = sudo_mkdir_parents(path, parent_uid, &parent_gid, parent_mode, false);
     if (ok) {
 	/* Use group ID if specified, else parent gid. */
 	gid_t gid = *gidp != (gid_t)-1 ? *gidp : parent_gid;
@@ -220,7 +166,7 @@ io_mkdtemp(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediat
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdtemp %s", path);
 	if (mkdtemp(path) == NULL) {
-	    log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
+	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
 	    ignore_result(chown(path, uid, gid));

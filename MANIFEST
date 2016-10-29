@@ -111,7 +111,6 @@ lib/util/parseln.c
 lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/reallocarray.c
-lib/util/vsyslog.c
 lib/util/regress/atofoo/atofoo_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
@@ -176,6 +175,7 @@ lib/util/term.c
 lib/util/ttysize.c
 lib/util/util.exp.in
 lib/util/utimens.c
+lib/util/vsyslog.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c
 lib/zlib/compress.c
@@ -291,6 +291,7 @@ plugins/sudoers/logwrap.c
 plugins/sudoers/match.c
 plugins/sudoers/match_addr.c
 plugins/sudoers/mkdefaults
+plugins/sudoers/mkdir_parents.c
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/po/README

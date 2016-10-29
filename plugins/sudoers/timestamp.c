@@ -152,53 +152,24 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 static bool
 ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 {
-    struct stat sb;
-    gid_t parent_gid = 0;
-    char *slash = path;
-    bool ret = false;
+    gid_t parent_gid = (gid_t)-1;
+    bool ret;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
 
-    while ((slash = strchr(slash + 1, '/')) != NULL) {
-	*slash = '\0';
+    ret = sudo_mkdir_parents(path, owner, &parent_gid, parent_mode, quiet); 
+    if (ret) {
+	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
-	if (mkdir(path, parent_mode) == 0) {
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	    "mkdir %s, mode 0%o, uid %d, gid %d", path, mode,
+	    (int)owner, (int)parent_gid);
+	if (mkdir(path, mode) != 0 && errno != EEXIST) {
+	    if (!quiet)
+		sudo_warn(U_("unable to mkdir %s"), path);
+	    ret = false;
 	} else {
-	    if (errno != EEXIST) {
-		if (!quiet)
-		    sudo_warn(U_("unable to mkdir %s"), path);
-		goto done;
-	    }
-	    /* Already exists, make sure it is a directory. */
-	    if (stat(path, &sb) != 0) {
-		if (!quiet)
-		    sudo_warn(U_("unable to stat %s"), path);
-		goto done;
-	    }
-	    if (!S_ISDIR(sb.st_mode)) {
-		if (!quiet) {
-		    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
-			path, (unsigned int) sb.st_mode);
-		}
-		goto done;
-	    }
-	    /* Inherit gid of parent dir for ownership. */
-	    parent_gid = sb.st_gid;
+	    ignore_result(chown(path, owner, parent_gid));
 	}
-	*slash = '/';
     }
-    /* Create final path component. */
-    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"mkdir %s, mode 0%o", path, (unsigned int) mode);
-    if (mkdir(path, mode) != 0 && errno != EEXIST) {
-	if (!quiet)
-	    sudo_warn(U_("unable to mkdir %s"), path);
-	goto done;
-    }
-    ignore_result(chown(path, owner, parent_gid));
-    ret = true;
-done:
     debug_return_bool(ret);
 }
 
