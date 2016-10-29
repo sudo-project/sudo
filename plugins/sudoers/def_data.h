@@ -198,6 +198,12 @@
 #define def_match_group_by_gid  (sudo_defs_table[I_MATCH_GROUP_BY_GID].sd_un.flag)
 #define I_SYSLOG_MAXLEN         99
 #define def_syslog_maxlen       (sudo_defs_table[I_SYSLOG_MAXLEN].sd_un.uival)
+#define I_IOLOG_USER            100
+#define def_iolog_user          (sudo_defs_table[I_IOLOG_USER].sd_un.str)
+#define I_IOLOG_GROUP           101
+#define def_iolog_group         (sudo_defs_table[I_IOLOG_GROUP].sd_un.str)
+#define I_IOLOG_MODE            102
+#define def_iolog_mode          (sudo_defs_table[I_IOLOG_MODE].sd_un.mode)
 
 enum def_tuple {
 	never,

@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -493,6 +494,7 @@ init_defaults(void)
 #endif
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
+    def_iolog_mode = S_IRUSR|S_IWUSR;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)

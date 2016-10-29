@@ -723,6 +723,15 @@ init_vars(char * const envp[])
     /* Set maxseq callback. */
     sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
 
+    /* Set iolog_user callback. */
+    sudo_defs_table[I_IOLOG_USER].callback = cb_iolog_user;
+
+    /* Set iolog_group callback. */
+    sudo_defs_table[I_IOLOG_GROUP].callback = cb_iolog_group;
+
+    /* Set iolog_mode callback. */
+    sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
+
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
 	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),

@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 19, 2016
+.Dd October 29, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2988,6 +2988,28 @@ overwritten unless
 ends in six or
 more
 .Li X Ns s .
+.It iolog_group
+The group name to look up when setting the group ID on new I/O log
+files and directories.
+By default, I/O log files and directories inherit the group ID of
+the parent directory.
+.Pp
+This setting is only supported by version 1.8.19 or higher.
+.It iolog_mode
+The file permision mode to use when creating I/O log files.
+When creating I/O log directories, search (execute) bits are added
+to to match the read and write bits specified by
+.Em iolog_mode .
+Defaults to 0600.
+.Pp
+This setting is only supported by version 1.8.19 or higher.
+.It iolog_user
+The user name to look up when setting the user ID on new I/O log
+files and directories.
+By default, I/O log files and directories are owned by the superuser
+(user ID 0).
+.Pp
+This setting is only supported by version 1.8.19 or higher.
 .It lecture_status_dir
 The directory in which
 .Nm sudo

@@ -313,3 +313,12 @@ match_group_by_gid
 syslog_maxlen
 	T_UINT
 	"Log entries larger than this value will be split into multiple syslog messages"
+iolog_user
+	T_STR|T_BOOL
+	"User that will own the I/O log files: %s"
+iolog_group
+	T_STR|T_BOOL
+	"Group that will own the I/O log files: %s"
+iolog_mode
+	T_MODE
+	"File mode to use for the I/O log files: 0%o"
