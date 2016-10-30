@@ -106,7 +106,7 @@ io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate
     if (!set_intermediate) {
 	parent_mode = S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH;
 	parent_uid = ROOT_UID;
-	parent_gid = 0;
+	parent_gid = (gid_t)-1;
     } else {
 	parent_mode = mode;
 	parent_uid = uid;
@@ -150,7 +150,7 @@ io_mkdtemp(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediat
     if (!set_intermediate) {
 	parent_mode = S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH;
 	parent_uid = ROOT_UID;
-	parent_gid = 0;
+	parent_gid = (gid_t)-1;
     } else {
 	parent_mode = mode;
 	parent_uid = uid;
