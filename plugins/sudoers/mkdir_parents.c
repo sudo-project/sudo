@@ -40,13 +40,18 @@ bool
 sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet)
 {
     struct stat sb;
-    gid_t parent_gid;
+    gid_t parent_gid = 0;
     char *slash = path;
     bool rval = true;
     debug_decl(sudo_mkdir_parents, SUDOERS_DEBUG_UTIL)
 
+    /* If no gid specified, inherit from parent dir. */
+    if (*gidp != (gid_t)-1)
+	parent_gid = *gidp;
+    else if (stat("/", &sb) == 0)
+	parent_gid = sb.st_gid;
+
     /* Create parent directories as needed. */
-    parent_gid = *gidp != (gid_t)-1 ? *gidp : 0;
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
