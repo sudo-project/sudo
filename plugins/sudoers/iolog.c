@@ -732,8 +732,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 		debug_return_int(-1);
 	    continue;
 	}
-	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
-	    plugin_path = *cur + sizeof("plugin_path=") - 1;
+	if (strncmp(cp, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = cp + sizeof("plugin_path=") - 1;
 	    continue;
 	}
     }
