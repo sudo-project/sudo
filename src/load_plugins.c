@@ -243,7 +243,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    container->options = info->options;
 	    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 	    container->u.generic = plugin;
-	    policy_plugin->debug_files = sudo_conf_debug_files(path);
+	    container->debug_files = sudo_conf_debug_files(path);
 	    TAILQ_INSERT_TAIL(io_plugins, container, entries);
 	}
     }
