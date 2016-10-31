@@ -659,6 +659,9 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
     bool ret = false;
     debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL)
 
+    if (sp->tpath == NULL)
+	goto done;
+
     if (!sp->modified) {
 	/*
 	 * No changes but fix owner/mode if needed.
