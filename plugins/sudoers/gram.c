@@ -93,7 +93,7 @@
 bool sudoers_warnings = true;
 bool parse_error = false;
 int errorlineno = -1;
-const char *errorfile = NULL;
+char *errorfile = NULL;
 
 struct defaults_list defaults = TAILQ_HEAD_INITIALIZER(defaults);
 struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
@@ -702,7 +702,11 @@ sudoerserror(const char *s)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno;
-	errorfile = sudoers;
+	free(errorfile);
+	errorfile = strdup(sudoers);
+	if (errorfile == NULL)
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to allocate memory");
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -983,12 +987,13 @@ init_parser(const char *path, bool quiet)
 
     parse_error = false;
     errorlineno = -1;
-    errorfile = sudoers;
+    free(errorfile);
+    errorfile = NULL;
     sudoers_warnings = !quiet;
 
     debug_return_bool(ret);
 }
-#line 939 "gram.c"
+#line 944 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2081,7 +2086,7 @@ case 115:
 			    }
 			}
 break;
-#line 2032 "gram.c"
+#line 2037 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

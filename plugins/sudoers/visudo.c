@@ -585,7 +585,9 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    sudo_warnx(U_("unabled to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
-	    errorfile = sp->path;
+	    free(errorfile);
+	    if ((errorfile = strdup(sp->path)) == NULL)
+		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
@@ -593,7 +595,8 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    if (!check_defaults(SETDEF_ALL, quiet) ||
 		check_aliases(strict, quiet) != 0) {
 		parse_error = true;
-		errorfile = NULL;
+		free(errorfile);
+		errorfile = NULL;	/* don't know which file */
 	    }
 	}
 	sudoers_setlocale(oldlocale, NULL);
@@ -925,14 +928,17 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_file);
 	parse_error = true;
-	errorfile = sudoers_file;
+	free(errorfile);
+	if ((errorfile = strdup(sudoers_file)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (!parse_error) {
 	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	if (!check_defaults(SETDEF_ALL, quiet) ||
 	    check_aliases(strict, quiet) != 0) {
 	    parse_error = true;
-	    errorfile = NULL;
+	    free(errorfile);
+	    errorfile = NULL;	/* don't know which file */
 	}
     }
     sudoers_setlocale(oldlocale, NULL);

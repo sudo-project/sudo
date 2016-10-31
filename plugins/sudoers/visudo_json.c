@@ -1030,7 +1030,9 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;
-	errorfile = sudoers_path;
+	free(errorfile);
+	if ((errorfile = strdup(sudoers_path)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     ret = !parse_error;
 

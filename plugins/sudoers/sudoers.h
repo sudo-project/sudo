@@ -266,7 +266,7 @@ int pam_prep_user(struct passwd *);
 /* gram.y */
 int sudoersparse(void);
 extern char *login_style;
-extern const char *errorfile;
+extern char *errorfile;
 extern int errorlineno;
 extern bool parse_error;
 extern bool sudoers_warnings;
