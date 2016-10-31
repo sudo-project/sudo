@@ -196,7 +196,6 @@ sudoers_policy_init(void *info, char * const envp[])
 		    N_("problem with defaults entries"));
 	    }
         } else {
-	    /* XXX - used to send mail for sudoers parse errors. */
 	    TAILQ_REMOVE(snl, nss, entries);
         }
     }
