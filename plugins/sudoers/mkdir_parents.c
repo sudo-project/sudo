@@ -42,7 +42,7 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet)
     struct stat sb;
     gid_t parent_gid = 0;
     char *slash = path;
-    bool rval = true;
+    bool ret = true;
     debug_decl(sudo_mkdir_parents, SUDOERS_DEBUG_UTIL)
 
     /* If no gid specified, inherit from parent dir. */
@@ -63,21 +63,21 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet)
 	    if (errno != EEXIST) {
 		if (!quiet)
 		    sudo_warn(U_("unable to mkdir %s"), path);
-		rval = false;
+		ret = false;
 		break;
 	    }
 	    /* Already exists, make sure it is a directory. */
 	    if (stat(path, &sb) != 0) {
 		if (!quiet)
 		    sudo_warn(U_("unable to stat %s"), path);
-		rval = false;
+		ret = false;
 		break;
 	    }
 	    if (!S_ISDIR(sb.st_mode)) {
 		if (!quiet)
 		    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 			path, (unsigned int) sb.st_mode);
-		rval = false;
+		ret = false;
 		break;
 	    }
 	    /* Inherit gid of parent dir for ownership. */
@@ -88,7 +88,7 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet)
     }
 
     /* Return parent gid if none was specified by caller. */
-    if (rval && *gidp == (gid_t)-1)
+    if (ret && *gidp == (gid_t)-1)
 	*gidp = parent_gid;
-    debug_return_bool(rval);
+    debug_return_bool(ret);
 }

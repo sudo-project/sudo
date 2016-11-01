@@ -365,7 +365,7 @@ bool
 run_early_defaults(void)
 {
     struct early_default *early;
-    bool rc = true;
+    bool ret = true;
     debug_decl(run_early_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     for (early = early_defaults; early->var != NULL; early++) {
@@ -373,11 +373,11 @@ run_early_defaults(void)
 	    continue;
 	if (early->def->callback != NULL) {
 	    if (!early->def->callback(&early->def->sd_un))
-		rc = false;
+		ret = false;
 	}
 	early->def = NULL;
     }
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 static void
@@ -656,7 +656,7 @@ bool
 update_defaults(int what, bool quiet)
 {
     struct defaults *def;
-    bool rc = true;
+    bool ret = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -674,10 +674,10 @@ update_defaults(int what, bool quiet)
 	    !default_binding_matches(def, what))
 	    continue;
 	if (!set_early_default(def->var, def->val, def->op, quiet, early))
-	    rc = false;
+	    ret = false;
     }
     if (!run_early_defaults())
-	rc = false;
+	ret = false;
 
     /*
      * Then set the rest of the defaults.
@@ -691,9 +691,9 @@ update_defaults(int what, bool quiet)
 	    !default_binding_matches(def, what))
 	    continue;
 	if (!set_default(def->var, def->val, def->op, quiet))
-	    rc = false;
+	    ret = false;
     }
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 /*
@@ -705,7 +705,7 @@ check_defaults(int what, bool quiet)
 {
     struct sudo_defs_types *cur, tmp;
     struct defaults *def;
-    bool rc = true;
+    bool ret = true;
     debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     TAILQ_FOREACH(def, &defaults, entries) {
@@ -718,17 +718,17 @@ check_defaults(int what, bool quiet)
 	if (cur->name == NULL) {
 	    if (!quiet)
 		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
-	    rc = false;
+	    ret = false;
 	} else {
 	    /* Don't actually set the defaults value, just checking. */
 	    tmp = *cur;
 	    memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
 	    if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
-		rc = false;
+		ret = false;
 	    free_default(&tmp);
 	}
     }
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 static bool
