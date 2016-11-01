@@ -244,6 +244,7 @@ bool init_aliases(void);
 
 /* gram.c */
 bool init_parser(const char *, bool);
+void free_members(struct member_list *members);
 
 /* match_addr.c */
 bool addr_matches(char *n);

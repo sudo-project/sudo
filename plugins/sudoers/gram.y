@@ -1011,6 +1011,26 @@ add_userspec(struct member *members, struct privilege *privs)
 }
 
 /*
+ * Free a tailq of members but not the struct member_list container itself.
+ */
+void
+free_members(struct member_list *members)
+{
+    struct member *m, *next;
+    struct sudo_command *c;
+
+    TAILQ_FOREACH_SAFE(m, members, entries, next) {
+	if (m->type == COMMAND) {
+		c = (struct sudo_command *) m->name;
+		free(c->cmnd);
+		free(c->args);
+	}
+	free(m->name);
+	free(m);
+    }
+}
+
+/*
  * Free up space used by data structures from a previous parser run and sets
  * the current sudoers file to path.
  */
@@ -1104,19 +1124,8 @@ init_parser(const char *path, bool quiet)
     binding = NULL;
     TAILQ_FOREACH_SAFE(d, &defaults, entries, d_next) {
 	if (d->binding != binding) {
-	    struct member *m, *m_next;
-
 	    binding = d->binding;
-	    TAILQ_FOREACH_SAFE(m, d->binding, entries, m_next) {
-		if (m->type == COMMAND) {
-			struct sudo_command *c =
-			    (struct sudo_command *) m->name;
-			free(c->cmnd);
-			free(c->args);
-		}
-		free(m->name);
-		free(m);
-	    }
+	    free_members(d->binding);
 	    free(d->binding);
 	}
 	free(d->var);

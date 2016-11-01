@@ -170,21 +170,10 @@ void
 alias_free(void *v)
 {
     struct alias *a = (struct alias *)v;
-    struct member *m;
-    struct sudo_command *c;
-    void *next;
     debug_decl(alias_free, SUDOERS_DEBUG_ALIAS)
 
     free(a->name);
-    TAILQ_FOREACH_SAFE(m, &a->members, entries, next) {
-	if (m->type == COMMAND) {
-		c = (struct sudo_command *) m->name;
-		free(c->cmnd);
-		free(c->args);
-	}
-	free(m->name);
-	free(m);
-    }
+    free_members(&a->members);
     free(a);
 
     debug_return;
