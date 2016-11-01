@@ -91,6 +91,7 @@
  * Globals
  */
 bool sudoers_warnings = true;
+bool allow_unknown_defaults = true;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
@@ -106,7 +107,7 @@ static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, int);
 static struct member *new_member(char *, int);
 static struct sudo_digest *new_digest(int, const char *);
-#line 73 "gram.y"
+#line 74 "gram.y"
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -124,7 +125,7 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 127 "gram.c"
+#line 128 "gram.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -689,7 +690,7 @@ short *yysslim;
 YYSTYPE *yyvs;
 unsigned int yystacksize;
 int yyparse(void);
-#line 849 "gram.y"
+#line 850 "gram.y"
 void
 sudoerserror(const char *s)
 {
@@ -833,11 +834,13 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 		TAILQ_INSERT_TAIL(&defaults, d, entries);
 	    } else {
 		/* Did not parse, warn and free it. */
-		sudoerserror(N_("problem with defaults entries"));
+		if (!allow_unknown_defaults) {
+		    sudoerserror(N_("problem with defaults entries"));
+		    ret = false;
+		}
 		free(d->var);
 		free(d->val);
 		free(d);
-		ret = false;	/* XXX - only an error for visudo */
 		continue;
 	    }
 	}
@@ -899,7 +902,7 @@ free_members(struct member_list *members)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *path, bool quiet)
+init_parser(const char *path, bool quiet, bool strict_defaults)
 {
     struct member_list *binding;
     struct defaults *d, *d_next;
@@ -1020,10 +1023,11 @@ init_parser(const char *path, bool quiet)
     free(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;
+    allow_unknown_defaults = !strict_defaults;
 
     debug_return_bool(ret);
 }
-#line 974 "gram.c"
+#line 978 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1232,23 +1236,23 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 167 "gram.y"
+#line 168 "gram.y"
 { ; }
 break;
 case 5:
-#line 175 "gram.y"
+#line 176 "gram.y"
 {
 			    ;
 			}
 break;
 case 6:
-#line 178 "gram.y"
+#line 179 "gram.y"
 {
 			    yyerrok;
 			}
 break;
 case 7:
-#line 181 "gram.y"
+#line 182 "gram.y"
 {
 			    if (!add_userspec(yyvsp[-1].member, yyvsp[0].privilege)) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -1257,73 +1261,73 @@ case 7:
 			}
 break;
 case 8:
-#line 187 "gram.y"
+#line 188 "gram.y"
 {
 			    ;
 			}
 break;
 case 9:
-#line 190 "gram.y"
+#line 191 "gram.y"
 {
 			    ;
 			}
 break;
 case 10:
-#line 193 "gram.y"
+#line 194 "gram.y"
 {
 			    ;
 			}
 break;
 case 11:
-#line 196 "gram.y"
+#line 197 "gram.y"
 {
 			    ;
 			}
 break;
 case 12:
-#line 199 "gram.y"
+#line 200 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS, NULL, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 13:
-#line 203 "gram.y"
+#line 204 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_USER, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 14:
-#line 207 "gram.y"
+#line 208 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_RUNAS, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 15:
-#line 211 "gram.y"
+#line 212 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_HOST, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 16:
-#line 215 "gram.y"
+#line 216 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_CMND, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 18:
-#line 222 "gram.y"
+#line 223 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].defaults, yyvsp[0].defaults, entries);
 			    yyval.defaults = yyvsp[-2].defaults;
 			}
 break;
 case 19:
-#line 228 "gram.y"
+#line 229 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, true);
 			    if (yyval.defaults == NULL) {
@@ -1333,7 +1337,7 @@ case 19:
 			}
 break;
 case 20:
-#line 235 "gram.y"
+#line 236 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, false);
 			    if (yyval.defaults == NULL) {
@@ -1343,7 +1347,7 @@ case 20:
 			}
 break;
 case 21:
-#line 242 "gram.y"
+#line 243 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, true);
 			    if (yyval.defaults == NULL) {
@@ -1353,7 +1357,7 @@ case 21:
 			}
 break;
 case 22:
-#line 249 "gram.y"
+#line 250 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '+');
 			    if (yyval.defaults == NULL) {
@@ -1363,7 +1367,7 @@ case 22:
 			}
 break;
 case 23:
-#line 256 "gram.y"
+#line 257 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '-');
 			    if (yyval.defaults == NULL) {
@@ -1373,14 +1377,14 @@ case 23:
 			}
 break;
 case 25:
-#line 266 "gram.y"
+#line 267 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].privilege, yyvsp[0].privilege, entries);
 			    yyval.privilege = yyvsp[-2].privilege;
 			}
 break;
 case 26:
-#line 272 "gram.y"
+#line 273 "gram.y"
 {
 			    struct privilege *p = calloc(1, sizeof(*p));
 			    if (p == NULL) {
@@ -1394,21 +1398,21 @@ case 26:
 			}
 break;
 case 27:
-#line 285 "gram.y"
+#line 286 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 28:
-#line 289 "gram.y"
+#line 290 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 29:
-#line 295 "gram.y"
+#line 296 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -1418,7 +1422,7 @@ case 29:
 			}
 break;
 case 30:
-#line 302 "gram.y"
+#line 303 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -1428,7 +1432,7 @@ case 30:
 			}
 break;
 case 31:
-#line 309 "gram.y"
+#line 310 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			    if (yyval.member == NULL) {
@@ -1438,7 +1442,7 @@ case 31:
 			}
 break;
 case 32:
-#line 316 "gram.y"
+#line 317 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NTWKADDR);
 			    if (yyval.member == NULL) {
@@ -1448,7 +1452,7 @@ case 32:
 			}
 break;
 case 33:
-#line 323 "gram.y"
+#line 324 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			    if (yyval.member == NULL) {
@@ -1458,7 +1462,7 @@ case 33:
 			}
 break;
 case 35:
-#line 333 "gram.y"
+#line 334 "gram.y"
 {
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST(yyvsp[-2].cmndspec, cmndspec, entries);
@@ -1504,7 +1508,7 @@ case 35:
 			}
 break;
 case 36:
-#line 378 "gram.y"
+#line 379 "gram.y"
 {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
@@ -1553,7 +1557,7 @@ case 36:
 			}
 break;
 case 37:
-#line 426 "gram.y"
+#line 427 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA224, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1563,7 +1567,7 @@ case 37:
 			}
 break;
 case 38:
-#line 433 "gram.y"
+#line 434 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA256, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1573,7 +1577,7 @@ case 38:
 			}
 break;
 case 39:
-#line 440 "gram.y"
+#line 441 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA384, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1583,7 +1587,7 @@ case 39:
 			}
 break;
 case 40:
-#line 447 "gram.y"
+#line 448 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA512, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1593,13 +1597,13 @@ case 40:
 			}
 break;
 case 41:
-#line 456 "gram.y"
+#line 457 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			}
 break;
 case 42:
-#line 459 "gram.y"
+#line 460 "gram.y"
 {
 			    if (yyvsp[0].member->type != COMMAND) {
 				sudoerserror(N_("a digest requires a path name"));
@@ -1611,127 +1615,127 @@ case 42:
 			}
 break;
 case 43:
-#line 470 "gram.y"
+#line 471 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 44:
-#line 474 "gram.y"
+#line 475 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 45:
-#line 480 "gram.y"
+#line 481 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 46:
-#line 485 "gram.y"
+#line 486 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 47:
-#line 490 "gram.y"
+#line 491 "gram.y"
 {
 			    yyval.seinfo.role = NULL;
 			    yyval.seinfo.type = NULL;
 			}
 break;
 case 48:
-#line 494 "gram.y"
+#line 495 "gram.y"
 {
 			    yyval.seinfo.role = yyvsp[0].string;
 			    yyval.seinfo.type = NULL;
 			}
 break;
 case 49:
-#line 498 "gram.y"
+#line 499 "gram.y"
 {
 			    yyval.seinfo.type = yyvsp[0].string;
 			    yyval.seinfo.role = NULL;
 			}
 break;
 case 50:
-#line 502 "gram.y"
+#line 503 "gram.y"
 {
 			    yyval.seinfo.role = yyvsp[-1].string;
 			    yyval.seinfo.type = yyvsp[0].string;
 			}
 break;
 case 51:
-#line 506 "gram.y"
+#line 507 "gram.y"
 {
 			    yyval.seinfo.type = yyvsp[-1].string;
 			    yyval.seinfo.role = yyvsp[0].string;
 			}
 break;
 case 52:
-#line 512 "gram.y"
+#line 513 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 53:
-#line 516 "gram.y"
+#line 517 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 54:
-#line 521 "gram.y"
+#line 522 "gram.y"
 {
 			    yyval.privinfo.privs = NULL;
 			    yyval.privinfo.limitprivs = NULL;
 			}
 break;
 case 55:
-#line 525 "gram.y"
+#line 526 "gram.y"
 {
 			    yyval.privinfo.privs = yyvsp[0].string;
 			    yyval.privinfo.limitprivs = NULL;
 			}
 break;
 case 56:
-#line 529 "gram.y"
+#line 530 "gram.y"
 {
 			    yyval.privinfo.privs = NULL;
 			    yyval.privinfo.limitprivs = yyvsp[0].string;
 			}
 break;
 case 57:
-#line 533 "gram.y"
+#line 534 "gram.y"
 {
 			    yyval.privinfo.privs = yyvsp[-1].string;
 			    yyval.privinfo.limitprivs = yyvsp[0].string;
 			}
 break;
 case 58:
-#line 537 "gram.y"
+#line 538 "gram.y"
 {
 			    yyval.privinfo.limitprivs = yyvsp[-1].string;
 			    yyval.privinfo.privs = yyvsp[0].string;
 			}
 break;
 case 59:
-#line 543 "gram.y"
+#line 544 "gram.y"
 {
 			    yyval.runas = NULL;
 			}
 break;
 case 60:
-#line 546 "gram.y"
+#line 547 "gram.y"
 {
 			    yyval.runas = yyvsp[-1].runas;
 			}
 break;
 case 61:
-#line 551 "gram.y"
+#line 552 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas != NULL) {
@@ -1749,7 +1753,7 @@ case 61:
 			}
 break;
 case 62:
-#line 566 "gram.y"
+#line 567 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas == NULL) {
@@ -1761,7 +1765,7 @@ case 62:
 			}
 break;
 case 63:
-#line 575 "gram.y"
+#line 576 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas == NULL) {
@@ -1773,7 +1777,7 @@ case 63:
 			}
 break;
 case 64:
-#line 584 "gram.y"
+#line 585 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas == NULL) {
@@ -1785,7 +1789,7 @@ case 64:
 			}
 break;
 case 65:
-#line 593 "gram.y"
+#line 594 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas != NULL) {
@@ -1803,97 +1807,97 @@ case 65:
 			}
 break;
 case 66:
-#line 610 "gram.y"
+#line 611 "gram.y"
 {
 			    TAGS_INIT(yyval.tag);
 			}
 break;
 case 67:
-#line 613 "gram.y"
+#line 614 "gram.y"
 {
 			    yyval.tag.nopasswd = true;
 			}
 break;
 case 68:
-#line 616 "gram.y"
+#line 617 "gram.y"
 {
 			    yyval.tag.nopasswd = false;
 			}
 break;
 case 69:
-#line 619 "gram.y"
+#line 620 "gram.y"
 {
 			    yyval.tag.noexec = true;
 			}
 break;
 case 70:
-#line 622 "gram.y"
+#line 623 "gram.y"
 {
 			    yyval.tag.noexec = false;
 			}
 break;
 case 71:
-#line 625 "gram.y"
+#line 626 "gram.y"
 {
 			    yyval.tag.setenv = true;
 			}
 break;
 case 72:
-#line 628 "gram.y"
+#line 629 "gram.y"
 {
 			    yyval.tag.setenv = false;
 			}
 break;
 case 73:
-#line 631 "gram.y"
+#line 632 "gram.y"
 {
 			    yyval.tag.log_input = true;
 			}
 break;
 case 74:
-#line 634 "gram.y"
+#line 635 "gram.y"
 {
 			    yyval.tag.log_input = false;
 			}
 break;
 case 75:
-#line 637 "gram.y"
+#line 638 "gram.y"
 {
 			    yyval.tag.log_output = true;
 			}
 break;
 case 76:
-#line 640 "gram.y"
+#line 641 "gram.y"
 {
 			    yyval.tag.log_output = false;
 			}
 break;
 case 77:
-#line 643 "gram.y"
+#line 644 "gram.y"
 {
 			    yyval.tag.follow = true;
 			}
 break;
 case 78:
-#line 646 "gram.y"
+#line 647 "gram.y"
 {
 			    yyval.tag.follow = false;
 			}
 break;
 case 79:
-#line 649 "gram.y"
+#line 650 "gram.y"
 {
 			    yyval.tag.send_mail = true;
 			}
 break;
 case 80:
-#line 652 "gram.y"
+#line 653 "gram.y"
 {
 			    yyval.tag.send_mail = false;
 			}
 break;
 case 81:
-#line 657 "gram.y"
+#line 658 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -1903,7 +1907,7 @@ case 81:
 			}
 break;
 case 82:
-#line 664 "gram.y"
+#line 665 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -1913,7 +1917,7 @@ case 82:
 			}
 break;
 case 83:
-#line 671 "gram.y"
+#line 672 "gram.y"
 {
 			    struct sudo_command *c = calloc(1, sizeof(*c));
 			    if (c == NULL) {
@@ -1931,7 +1935,7 @@ case 83:
 			}
 break;
 case 86:
-#line 692 "gram.y"
+#line 693 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, HOSTALIAS, yyvsp[0].member)) != NULL) {
@@ -1941,14 +1945,14 @@ case 86:
 			}
 break;
 case 88:
-#line 702 "gram.y"
+#line 703 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 91:
-#line 712 "gram.y"
+#line 713 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, CMNDALIAS, yyvsp[0].member)) != NULL) {
@@ -1958,14 +1962,14 @@ case 91:
 			}
 break;
 case 93:
-#line 722 "gram.y"
+#line 723 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 96:
-#line 732 "gram.y"
+#line 733 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, RUNASALIAS, yyvsp[0].member)) != NULL) {
@@ -1975,7 +1979,7 @@ case 96:
 			}
 break;
 case 99:
-#line 745 "gram.y"
+#line 746 "gram.y"
 {
 			    const char *s;
 			    if ((s = alias_add(yyvsp[-2].string, USERALIAS, yyvsp[0].member)) != NULL) {
@@ -1985,28 +1989,28 @@ case 99:
 			}
 break;
 case 101:
-#line 755 "gram.y"
+#line 756 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 102:
-#line 761 "gram.y"
+#line 762 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 103:
-#line 765 "gram.y"
+#line 766 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 104:
-#line 771 "gram.y"
+#line 772 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -2016,7 +2020,7 @@ case 104:
 			}
 break;
 case 105:
-#line 778 "gram.y"
+#line 779 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -2026,7 +2030,7 @@ case 105:
 			}
 break;
 case 106:
-#line 785 "gram.y"
+#line 786 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			    if (yyval.member == NULL) {
@@ -2036,7 +2040,7 @@ case 106:
 			}
 break;
 case 107:
-#line 792 "gram.y"
+#line 793 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
 			    if (yyval.member == NULL) {
@@ -2046,7 +2050,7 @@ case 107:
 			}
 break;
 case 108:
-#line 799 "gram.y"
+#line 800 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			    if (yyval.member == NULL) {
@@ -2056,28 +2060,28 @@ case 108:
 			}
 break;
 case 110:
-#line 809 "gram.y"
+#line 810 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 111:
-#line 815 "gram.y"
+#line 816 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 112:
-#line 819 "gram.y"
+#line 820 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 113:
-#line 825 "gram.y"
+#line 826 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -2087,7 +2091,7 @@ case 113:
 			}
 break;
 case 114:
-#line 832 "gram.y"
+#line 833 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -2097,7 +2101,7 @@ case 114:
 			}
 break;
 case 115:
-#line 839 "gram.y"
+#line 840 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			    if (yyval.member == NULL) {
@@ -2106,7 +2110,7 @@ case 115:
 			    }
 			}
 break;
-#line 2057 "gram.c"
+#line 2061 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -243,7 +243,7 @@ void alias_put(struct alias *a);
 bool init_aliases(void);
 
 /* gram.c */
-bool init_parser(const char *, bool);
+bool init_parser(const char *path, bool quiet, bool strict_defaults);
 void free_members(struct member_list *members);
 
 /* match_addr.c */

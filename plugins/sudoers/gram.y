@@ -53,6 +53,7 @@
  * Globals
  */
 bool sudoers_warnings = true;
+bool allow_unknown_defaults = true;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
@@ -989,11 +990,13 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 		TAILQ_INSERT_TAIL(&defaults, d, entries);
 	    } else {
 		/* Did not parse, warn and free it. */
-		sudoerserror(N_("problem with defaults entries"));
+		if (!allow_unknown_defaults) {
+		    sudoerserror(N_("problem with defaults entries"));
+		    ret = false;
+		}
 		free(d->var);
 		free(d->val);
 		free(d);
-		ret = false;	/* XXX - only an error for visudo */
 		continue;
 	    }
 	}
@@ -1055,7 +1058,7 @@ free_members(struct member_list *members)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *path, bool quiet)
+init_parser(const char *path, bool quiet, bool strict_defaults)
 {
     struct member_list *binding;
     struct defaults *d, *d_next;
@@ -1176,6 +1179,7 @@ init_parser(const char *path, bool quiet)
     free(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;
+    allow_unknown_defaults = !strict_defaults;
 
     debug_return_bool(ret);
 }

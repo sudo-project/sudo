@@ -87,7 +87,7 @@ sudo_file_close(struct sudo_nss *nss)
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
 
     /* Free parser data structures and close sudoers file. */
-    init_parser(NULL, false);
+    init_parser(NULL, false, false);
     if (nss->handle != NULL) {
 	fclose(nss->handle);
 	nss->handle = NULL;
@@ -107,7 +107,7 @@ sudo_file_parse(struct sudo_nss *nss)
     if (nss->handle == NULL)
 	debug_return_int(-1);
 
-    init_parser(sudoers_file, false);
+    init_parser(sudoers_file, false, false);
     sudoersin = nss->handle;
     if (sudoersparse() != 0 || parse_error) {
 	if (errorlineno != -1) {
