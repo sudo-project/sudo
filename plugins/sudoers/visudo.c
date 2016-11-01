@@ -592,8 +592,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	fclose(sudoersin);
 	if (!parse_error) {
 	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
-	    if (!check_defaults(SETDEF_ALL, quiet) ||
-		check_aliases(strict, quiet) != 0) {
+	    if (check_aliases(strict, quiet) != 0) {
 		parse_error = true;
 		free(errorfile);
 		errorfile = NULL;	/* don't know which file */
@@ -937,8 +936,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
     }
     if (!parse_error) {
 	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
-	if (!check_defaults(SETDEF_ALL, quiet) ||
-	    check_aliases(strict, quiet) != 0) {
+	if (check_aliases(strict, quiet) != 0) {
 	    parse_error = true;
 	    free(errorfile);
 	    errorfile = NULL;	/* don't know which file */

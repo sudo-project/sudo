@@ -107,7 +107,7 @@ struct early_default {
 #define T_PATH		0x200
 
 /*
- * Argument to update_defaults() and check_defaults()
+ * Argument to update_defaults()
  */
 #define SETDEF_GENERIC	0x01
 #define	SETDEF_HOST	0x02
@@ -119,8 +119,10 @@ struct early_default {
 /*
  * Prototypes
  */
+struct defaults;	/* in parse.h */
+
 void dump_default(void);
-bool check_defaults(int what, bool quiet);
+bool check_default(struct defaults *def, bool quiet);
 bool init_defaults(void);
 struct early_default *is_early_default(const char *var);
 bool run_early_defaults(void);

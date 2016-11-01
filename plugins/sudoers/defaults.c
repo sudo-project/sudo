@@ -697,36 +697,30 @@ update_defaults(int what, bool quiet)
 }
 
 /*
- * Check the defaults entries without actually setting them.
- * Pass in an OR'd list of which default types to check.
+ * Check a defaults entry without actually setting it.
  */
 bool
-check_defaults(int what, bool quiet)
+check_default(struct defaults *def, bool quiet)
 {
-    struct sudo_defs_types *cur, tmp;
-    struct defaults *def;
+    struct sudo_defs_types *cur;
     bool ret = true;
-    debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(check_default, SUDOERS_DEBUG_DEFAULTS)
 
-    TAILQ_FOREACH(def, &defaults, entries) {
-	if (!default_type_matches(def, what))
-	    continue;
-	for (cur = sudo_defs_table; cur->name != NULL; cur++) {
-	    if (strcmp(def->var, cur->name) == 0)
-		break;
-	}
-	if (cur->name == NULL) {
-	    if (!quiet)
-		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
-	    ret = false;
-	} else {
+    for (cur = sudo_defs_table; cur->name != NULL; cur++) {
+	if (strcmp(def->var, cur->name) == 0) {
 	    /* Don't actually set the defaults value, just checking. */
-	    tmp = *cur;
+	    struct sudo_defs_types tmp = *cur;
 	    memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
 	    if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
 		ret = false;
 	    free_default(&tmp);
+	    break;
 	}
+    }
+    if (cur->name == NULL) {
+	if (!quiet)
+	    sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
+	ret = false;
     }
     debug_return_bool(ret);
 }

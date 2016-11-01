@@ -955,8 +955,10 @@ new_digest(int digest_type, const char *digest_str)
 static bool
 add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
-    struct defaults *d;
+    struct defaults *d, *next;
     struct member_list *binding;
+    bool binding_used = false;
+    bool ret = true;
     debug_decl(add_defaults, SUDOERS_DEBUG_PARSER)
 
     if (defs != NULL) {
@@ -976,16 +978,34 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 
 	/*
 	 * Set type and binding (who it applies to) for new entries.
-	 * Then add to the global defaults list.
+	 * Then add to the global defaults list if it parses.
 	 */
-	HLTQ_FOREACH(d, defs, entries) {
-	    d->type = type;
-	    d->binding = binding;
+	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
+	    if (check_default(d, !sudoers_warnings)) {
+		/* Append to defaults list */
+		d->type = type;
+		d->binding = binding;
+		binding_used = true;
+		TAILQ_INSERT_TAIL(&defaults, d, entries);
+	    } else {
+		/* Did not parse, warn and free it. */
+		sudoerserror(N_("problem with defaults entries"));
+		free(d->var);
+		free(d->val);
+		free(d);
+		ret = false;	/* XXX - only an error for visudo */
+		continue;
+	    }
 	}
-	TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
+
+	if (!binding_used) {
+	    /* No valid Defaults entries, binding unused. */
+	    free_members(binding);
+	    free(binding);
+	}
     }
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 /*
