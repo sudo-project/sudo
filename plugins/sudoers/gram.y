@@ -197,34 +197,24 @@ entry		:	COMMENT {
 			    ;
 			}
 		|	DEFAULTS defaults_list {
-			    if (!add_defaults(DEFAULTS, NULL, $2)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS, NULL, $2))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_USER userlist defaults_list {
-			    if (!add_defaults(DEFAULTS_USER, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_USER, $2, $3))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_RUNAS userlist defaults_list {
-			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_HOST hostlist defaults_list {
-			    if (!add_defaults(DEFAULTS_HOST, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_HOST, $2, $3))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_CMND cmndlist defaults_list {
-			    if (!add_defaults(DEFAULTS_CMND, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
-			    }
 			}
 		;
 
@@ -976,6 +966,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	if ((binding = malloc(sizeof(*binding))) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
+	    sudoerserror(N_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
 	if (bmem != NULL)
