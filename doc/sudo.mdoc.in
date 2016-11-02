@@ -1003,18 +1003,18 @@ To edit the
 .Pa index.html
 file as user www:
 .Bd -literal -offset indent
-$ sudo -u www vi ~www/htdocs/index.html
+$ sudoedit -u www ~www/htdocs/index.html
 .Ed
 .Pp
 To view system logs only accessible to root and users in the adm
 group:
 .Bd -literal -offset indent
-$ sudo -g adm view /var/log/syslog
+$ sudo -g adm more /var/log/syslog
 .Ed
 .Pp
 To run an editor as jim with a different primary group:
 .Bd -literal -offset indent
-$ sudo -u jim -g audio vi ~jim/sound.txt
+$ sudoedit -u jim -g audio ~jim/sound.txt
 .Ed
 .Pp
 To shut down a machine:
