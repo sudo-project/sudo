@@ -90,6 +90,10 @@ static struct early_default early_defaults[] = {
     { NULL }
 };
 
+/* Flags for set_default_entry() and set_default_int() */
+#define	FLAG_DO_CALLBACK	0x01
+#define	FLAG_QUIET		0x02
+
 /*
  * Local prototypes.
  */
@@ -193,7 +197,7 @@ dump_defaults(void)
 
 static bool
 set_default_entry(struct sudo_defs_types *def, const char *val, int op,
-    bool quiet, bool do_callback)
+    const char *file, int lineno, int flags)
 {
     int rc;
     debug_decl(set_default_entry, SUDOERS_DEBUG_DEFAULTS)
@@ -201,8 +205,15 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
     if (val == NULL && !ISSET(def->type, T_FLAG)) {
 	/* Check for bogus boolean usage or missing value if non-boolean. */
 	if (!ISSET(def->type, T_BOOL) || op != false) {
-	    if (!quiet)
-		sudo_warnx(U_("no value specified for `%s'"), def->name);
+	    if (!ISSET(flags, FLAG_QUIET)) {
+		if (lineno > 0) {
+		    sudo_warnx(U_("%s:%d no value specified for `%s'"),
+			file, lineno, def->name);
+		} else {
+		    sudo_warnx(U_("%s: no value specified for `%s'"),
+			file, def->name);
+		}
+	    }
 	    debug_return_bool(false);
 	}
     }
@@ -216,9 +227,14 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_STR:
 	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
-		if (!quiet) {
-		    sudo_warnx(U_("values for `%s' must start with a '/'"),
-			def->name);
+		if (!ISSET(flags, FLAG_QUIET)) {
+		    if (lineno > 0) {
+			sudo_warnx(U_("%s:%d values for `%s' must start with a '/'"),
+			    file, lineno, def->name);
+		    } else {
+			sudo_warnx(U_("%s: values for `%s' must start with a '/'"),
+			    file, def->name);
+		    }
 		}
 		rc = -1;
 		break;
@@ -239,9 +255,14 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_FLAG:
 	    if (val != NULL) {
-		if (!quiet) {
-		    sudo_warnx(U_("option `%s' does not take a value"),
-			def->name);
+		if (!ISSET(flags, FLAG_QUIET)) {
+		    if (lineno > 0) {
+			sudo_warnx(U_("%s:%d option `%s' does not take a value"),
+			    file, lineno, def->name);
+		    } else {
+			sudo_warnx(U_("%s: option `%s' does not take a value"),
+			    file, def->name);
+		    }
 		}
 		rc = -1;
 		break;
@@ -256,9 +277,14 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    rc = store_tuple(val, def);
 	    break;
 	default:
-	    if (!quiet) {
-		sudo_warnx(U_("invalid Defaults type 0x%x for option `%s'"),
-		    def->type, def->name);
+	    if (!ISSET(flags, FLAG_QUIET)) {
+		if (lineno > 0) {
+		    sudo_warnx(U_("%s:%d invalid Defaults type 0x%x for option `%s'"),
+			file, lineno, def->type, def->name);
+		} else {
+		    sudo_warnx(U_("%s: invalid Defaults type 0x%x for option `%s'"),
+			file, def->type, def->name);
+		}
 	    }
 	    rc = -1;
 	    break;
@@ -269,13 +295,18 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	rc = false;
 	break;
     case false:
-	if (!quiet) {
-	    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-		val, def->name);
+	if (!ISSET(flags, FLAG_QUIET)) {
+	    if (lineno > 0) {
+		sudo_warnx(U_("%s:%d value `%s' is invalid for option `%s'"),
+		    file, lineno, val, def->name);
+	    } else {
+		sudo_warnx(U_("%s: value `%s' is invalid for option `%s'"),
+		    file, val, def->name);
+	    }
 	}
 	break;
     case true:
-	if (do_callback && def->callback)
+	if (ISSET(flags, FLAG_DO_CALLBACK) && def->callback)
 	    rc = def->callback(&def->sd_un);
 	break;
     }
@@ -304,8 +335,8 @@ is_early_default(const char *var)
  * This is only meaningful for variables that are *optional*.
  */
 static struct sudo_defs_types *
-set_default_int(const char *var, const char *val, int op, bool quiet,
-    bool do_callback)
+set_default_int(const char *var, const char *val, int op, const char *file,
+    int lineno, int flags)
 {
     struct sudo_defs_types *cur;
     int num;
@@ -316,12 +347,19 @@ set_default_int(const char *var, const char *val, int op, bool quiet,
 	    break;
     }
     if (!cur->name) {
-	if (!quiet)
-	    sudo_warnx(U_("unknown defaults entry `%s'"), var);
+	if (!ISSET(flags, FLAG_QUIET)) {
+	    if (lineno > 0) {
+		sudo_warnx(U_("%s:%d unknown defaults entry `%s'"),
+		    file, lineno, var);
+	    } else {
+		sudo_warnx(U_("%s: unknown defaults entry `%s'"),
+		    file, var);
+	    }
+	}
 	debug_return_ptr(NULL);
     }
 
-    if (!set_default_entry(cur, val, op, quiet, do_callback))
+    if (!set_default_entry(cur, val, op, file, lineno, flags))
 	debug_return_ptr(NULL);
     debug_return_ptr(cur);
 }
@@ -331,12 +369,16 @@ set_default_int(const char *var, const char *val, int op, bool quiet,
  * Runs the callback if present on success.
  */
 bool
-set_default(const char *var, const char *val, int op, bool quiet)
+set_default(const char *var, const char *val, int op, const char *file,
+    int lineno, bool quiet)
 {
     const struct sudo_defs_types *def;
+    int flags = FLAG_DO_CALLBACK;
     debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
 
-    def = set_default_int(var, val, op, quiet, true);
+    if (quiet)
+	SET(flags, FLAG_QUIET);
+    def = set_default_int(var, val, op, file, lineno, flags);
     debug_return_bool(def != NULL);
 }
 
@@ -345,13 +387,16 @@ set_default(const char *var, const char *val, int op, bool quiet)
  * and does not run callbacks.
  */
 bool
-set_early_default(const char *var, const char *val, int op, bool quiet,
-    struct early_default *early)
+set_early_default(const char *var, const char *val, int op, const char *file,
+    int lineno, bool quiet, struct early_default *early)
 {
     const struct sudo_defs_types *def;
+    int flags = 0;
     debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS)
 
-    def = set_default_int(var, val, op, quiet, false);
+    if (quiet)
+	SET(flags, FLAG_QUIET);
+    def = set_default_int(var, val, op, file, lineno, flags);
     if (def == NULL)
 	debug_return_bool(false);
     early->def = def;
@@ -673,7 +718,7 @@ update_defaults(int what, bool quiet)
 	if (!default_type_matches(def, what) ||
 	    !default_binding_matches(def, what))
 	    continue;
-	if (!set_early_default(def->var, def->val, def->op, quiet, early))
+	if (!set_early_default(def->var, def->val, def->op, "sudoers", 0, quiet, early))
 	    ret = false;
     }
     if (!run_early_defaults())
@@ -690,7 +735,7 @@ update_defaults(int what, bool quiet)
 	if (!default_type_matches(def, what) ||
 	    !default_binding_matches(def, what))
 	    continue;
-	if (!set_default(def->var, def->val, def->op, quiet))
+	if (!set_default(def->var, def->val, def->op, "sudoers", 0, quiet))
 	    ret = false;
     }
     debug_return_bool(ret);
@@ -700,26 +745,37 @@ update_defaults(int what, bool quiet)
  * Check a defaults entry without actually setting it.
  */
 bool
-check_default(struct defaults *def, bool quiet)
+check_default(const char *var, const char *val, int op, const char *file,
+    int lineno, bool quiet)
 {
     struct sudo_defs_types *cur;
     bool ret = true;
+    int flags = 0;
     debug_decl(check_default, SUDOERS_DEBUG_DEFAULTS)
 
+    if (quiet)
+	SET(flags, FLAG_QUIET);
     for (cur = sudo_defs_table; cur->name != NULL; cur++) {
-	if (strcmp(def->var, cur->name) == 0) {
+	if (strcmp(var, cur->name) == 0) {
 	    /* Don't actually set the defaults value, just checking. */
 	    struct sudo_defs_types tmp = *cur;
 	    memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
-	    if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
+	    if (!set_default_entry(&tmp, val, op, file, lineno, flags))
 		ret = false;
 	    free_default(&tmp);
 	    break;
 	}
     }
     if (cur->name == NULL) {
-	if (!quiet)
-	    sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
+	if (!quiet) {
+	    if (lineno > 0) {
+		sudo_warnx(U_("%s:%d unknown defaults entry `%s'"),
+		    file, lineno, var);
+	    } else {
+		sudo_warnx(U_("%s: unknown defaults entry `%s'"),
+		    file, var);
+	    }
+	}
 	ret = false;
     }
     debug_return_bool(ret);

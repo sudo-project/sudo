@@ -122,12 +122,12 @@ struct early_default {
 struct defaults;	/* in parse.h */
 
 void dump_default(void);
-bool check_default(struct defaults *def, bool quiet);
+bool check_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet);
 bool init_defaults(void);
 struct early_default *is_early_default(const char *var);
 bool run_early_defaults(void);
-bool set_early_default(const char *var, const char *val, int op, bool quiet, struct early_default *early);
-bool set_default(const char *var, const char *val, int op, bool quiet);
+bool set_early_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet, struct early_default *early);
+bool set_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet);
 bool update_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];

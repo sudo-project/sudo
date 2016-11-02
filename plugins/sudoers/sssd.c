@@ -1196,9 +1196,10 @@ static bool
 sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     int i, op;
-    char *copy, *var, *val;
+    char *copy, *var, *val, *source = NULL;
     bool ret = false;
     char **val_array = NULL;
+    char **cn_array = NULL;
     debug_decl(sudo_sss_parse_options, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
@@ -1215,6 +1216,20 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	debug_return_bool(false);
     }
 
+    /* get the entry's cn for option error reporting */
+    if (handle->fn_get_values(rule, "cn", &cn_array) == 0) {
+	if (cn_array[0] != NULL) {
+	    if (asprintf(&source, "sudoRole %s", cn_array[0]) == -1) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		source = NULL;
+		goto done;
+	    }
+	}
+	handle->fn_free_values(cn_array);
+	cn_array = NULL;
+    }
+
     /* walk through options, early ones first */
     for (i = 0; val_array[i] != NULL; i++) {
 	struct early_default *early;
@@ -1225,8 +1240,10 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	}
 	op = sudo_sss_parse_option(copy, &var, &val);
 	early = is_early_default(var);
-	if (early != NULL)
-	    set_early_default(var, val, op, false, early);
+	if (early != NULL) {
+	    set_early_default(var, val, op,
+		source ? source : "sudoRole UNKNOWN", 0, false, early);
+	}
 	free(copy);
     }
     run_early_defaults();
@@ -1238,13 +1255,16 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    goto done;
 	}
 	op = sudo_sss_parse_option(copy, &var, &val);
-	if (is_early_default(var) == NULL)
-	    set_default(var, val, op, false);
+	if (is_early_default(var) == NULL) {
+	    set_default(var, val, op,
+		source ? source : "sudoRole UNKNOWN", 0, false);
+	}
 	free(copy);
     }
     ret = true;
 
 done:
+    free(source);
     handle->fn_free_values(val_array);
     debug_return_bool(ret);
 }

@@ -982,16 +982,16 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	 * Then add to the global defaults list if it parses.
 	 */
 	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
-	    if (check_default(d, !sudoers_warnings)) {
+	    if (check_default(d->var, d->val, d->op, sudoers, sudolineno, !sudoers_warnings)) {
 		/* Append to defaults list */
 		d->type = type;
 		d->binding = binding;
 		binding_used = true;
 		TAILQ_INSERT_TAIL(&defaults, d, entries);
 	    } else {
-		/* Did not parse, warn and free it. */
+		/* Did not parse */
 		if (!allow_unknown_defaults) {
-		    sudoerserror(N_("problem with defaults entries"));
+		    sudoerserror(NULL);
 		    ret = false;
 		}
 		free(d->var);

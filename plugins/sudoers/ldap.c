@@ -380,6 +380,7 @@ static int sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf);
 static struct ldap_result *sudo_ldap_result_get(struct sudo_nss *nss,
     struct passwd *pw);
+static char *sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry);
 
 /*
  * LDAP sudo_nss handle.
@@ -1129,7 +1130,7 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char *copy, *var, *val;
+    char *cn, *copy, *var, *val, *source = NULL;
     bool ret = false;
     int op;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
@@ -1137,6 +1138,16 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv == NULL)
 	debug_return_bool(true);
+
+    /* get the entry's dn for option error reporting */
+    cn = sudo_ldap_get_first_rdn(ld, entry);
+    if (cn != NULL) {
+	if (asprintf(&source, "sudoRole %s", cn) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    source = NULL;
+	    goto done;
+	}
+    }
 
     /* walk through options, early ones first */
     for (p = bv; *p != NULL; p++) {
@@ -1148,8 +1159,10 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	}
 	op = sudo_ldap_parse_option(copy, &var, &val);
 	early = is_early_default(var);
-	if (early != NULL)
-	    set_early_default(var, val, op, false, early);
+	if (early != NULL) {
+	    set_early_default(var, val, op,
+		source ? source : "sudoRole UNKNOWN", 0, false, early);
+	}
 	free(copy);
     }
     run_early_defaults();
@@ -1161,13 +1174,18 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 	    goto done;
 	}
 	op = sudo_ldap_parse_option(copy, &var, &val);
-	if (is_early_default(var) == NULL)
-	    set_default(var, val, op, false);
+	if (is_early_default(var) == NULL) {
+	    set_default(var, val, op,
+		source ? source : "sudoRole UNKNOWN", 0, false);
+	}
 	free(copy);
     }
     ret = true;
 
 done:
+    free(source);
+    if (cn)
+	ldap_memfree(cn);
     ldap_value_free_len(bv);
 
     debug_return_bool(ret);
