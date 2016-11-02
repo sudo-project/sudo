@@ -207,10 +207,10 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	if (!ISSET(def->type, T_BOOL) || op != false) {
 	    if (!ISSET(flags, FLAG_QUIET)) {
 		if (lineno > 0) {
-		    sudo_warnx(U_("%s:%d no value specified for `%s'"),
+		    sudo_warnx(U_("%s:%d no value specified for \"%s\""),
 			file, lineno, def->name);
 		} else {
-		    sudo_warnx(U_("%s: no value specified for `%s'"),
+		    sudo_warnx(U_("%s: no value specified for \"%s\""),
 			file, def->name);
 		}
 	    }
@@ -229,10 +229,10 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
 		if (!ISSET(flags, FLAG_QUIET)) {
 		    if (lineno > 0) {
-			sudo_warnx(U_("%s:%d values for `%s' must start with a '/'"),
+			sudo_warnx(U_("%s:%d values for \"%s\" must start with a '/'"),
 			    file, lineno, def->name);
 		    } else {
-			sudo_warnx(U_("%s: values for `%s' must start with a '/'"),
+			sudo_warnx(U_("%s: values for \"%s\" must start with a '/'"),
 			    file, def->name);
 		    }
 		}
@@ -257,10 +257,10 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    if (val != NULL) {
 		if (!ISSET(flags, FLAG_QUIET)) {
 		    if (lineno > 0) {
-			sudo_warnx(U_("%s:%d option `%s' does not take a value"),
+			sudo_warnx(U_("%s:%d option \"%s\" does not take a value"),
 			    file, lineno, def->name);
 		    } else {
-			sudo_warnx(U_("%s: option `%s' does not take a value"),
+			sudo_warnx(U_("%s: option \"%s\" does not take a value"),
 			    file, def->name);
 		    }
 		}
@@ -279,10 +279,10 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	default:
 	    if (!ISSET(flags, FLAG_QUIET)) {
 		if (lineno > 0) {
-		    sudo_warnx(U_("%s:%d invalid Defaults type 0x%x for option `%s'"),
+		    sudo_warnx(U_("%s:%d invalid Defaults type 0x%x for option \"%s\""),
 			file, lineno, def->type, def->name);
 		} else {
-		    sudo_warnx(U_("%s: invalid Defaults type 0x%x for option `%s'"),
+		    sudo_warnx(U_("%s: invalid Defaults type 0x%x for option \"%s\""),
 			file, def->type, def->name);
 		}
 	    }
@@ -297,10 +297,10 @@ set_default_entry(struct sudo_defs_types *def, const char *val, int op,
     case false:
 	if (!ISSET(flags, FLAG_QUIET)) {
 	    if (lineno > 0) {
-		sudo_warnx(U_("%s:%d value `%s' is invalid for option `%s'"),
+		sudo_warnx(U_("%s:%d value \"%s\" is invalid for option \"%s\""),
 		    file, lineno, val, def->name);
 	    } else {
-		sudo_warnx(U_("%s: value `%s' is invalid for option `%s'"),
+		sudo_warnx(U_("%s: value \"%s\" is invalid for option \"%s\""),
 		    file, val, def->name);
 	    }
 	}
@@ -349,10 +349,10 @@ set_default_int(const char *var, const char *val, int op, const char *file,
     if (!cur->name) {
 	if (!ISSET(flags, FLAG_QUIET)) {
 	    if (lineno > 0) {
-		sudo_warnx(U_("%s:%d unknown defaults entry `%s'"),
+		sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
 		    file, lineno, var);
 	    } else {
-		sudo_warnx(U_("%s: unknown defaults entry `%s'"),
+		sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
 		    file, var);
 	    }
 	}
@@ -769,10 +769,10 @@ check_default(const char *var, const char *val, int op, const char *file,
     if (cur->name == NULL) {
 	if (!quiet) {
 	    if (lineno > 0) {
-		sudo_warnx(U_("%s:%d unknown defaults entry `%s'"),
+		sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
 		    file, lineno, var);
 	    } else {
-		sudo_warnx(U_("%s: unknown defaults entry `%s'"),
+		sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
 		    file, var);
 	    }
 	}

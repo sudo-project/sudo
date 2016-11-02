@@ -129,7 +129,7 @@ alias_add(char *name, int type, struct member *members)
     HLTQ_TO_TAILQ(&a->members, members, entries);
     switch (rbinsert(aliases, a, NULL)) {
     case 1:
-	snprintf(errbuf, sizeof(errbuf), N_("Alias `%s' already defined"), name);
+	snprintf(errbuf, sizeof(errbuf), N_("Alias \"%s\" already defined"), name);
 	alias_free(a);
 	debug_return_str(errbuf);
     case -1:

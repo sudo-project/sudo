@@ -1109,13 +1109,13 @@ check_alias(char *name, int type, int strict, int quiet)
 	if (!quiet) {
 	    if (errno == ELOOP) {
 		sudo_warnx(strict ?
-		    U_("Error: cycle in %s `%s'") :
-		    U_("Warning: cycle in %s `%s'"),
+		    U_("Error: cycle in %s \"%s\"") :
+		    U_("Warning: cycle in %s \"%s\""),
 		    alias_type_to_string(type), name);
 	    } else {
 		sudo_warnx(strict ?
-		    U_("Error: %s `%s' referenced but not defined") :
-		    U_("Warning: %s `%s' referenced but not defined"),
+		    U_("Error: %s \"%s\" referenced but not defined") :
+		    U_("Warning: %s \"%s\" referenced but not defined"),
 		    alias_type_to_string(type), name);
 	    }
 	}
@@ -1258,7 +1258,7 @@ print_unused(void *v1, void *v2)
 {
     struct alias *a = (struct alias *)v1;
 
-    sudo_warnx_nodebug(U_("Warning: unused %s `%s'"),
+    sudo_warnx_nodebug(U_("Warning: unused %s \"%s\""),
 	alias_type_to_string(a->type), a->name);
     return 0;
 }

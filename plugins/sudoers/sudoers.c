@@ -459,7 +459,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgc, NewArgv, N_("command in current directory"));
-	sudo_warnx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
@@ -645,7 +645,7 @@ done:
 }
 
 /*
- * Initialize timezone and fill in ``sudo_user'' struct.
+ * Initialize timezone and fill in sudo_user struct.
  */
 static bool
 init_vars(char * const envp[])
@@ -956,7 +956,7 @@ set_loginclass(struct passwd *pw)
 
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 && pw->pw_uid != 0) {
-	    sudo_warnx(U_("only root can use `-c %s'"), login_class);
+	    sudo_warnx(U_("only root can use \"-c %s\""), login_class);
 	    ret = false;
 	    goto done;
 	}

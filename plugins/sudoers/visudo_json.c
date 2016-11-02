@@ -629,7 +629,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
-	    sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
+	    sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
 	}
@@ -664,7 +664,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	    def = next;
 	    type = get_defaults_type(def);
 	    if (type == -1) {
-		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
+		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
 		/* XXX - just pass it through as a string anyway? */
 		break;
 	    }

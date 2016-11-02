@@ -220,7 +220,7 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 	__func__, conf_file, lineno, entry);
     debug_return_int(false);
 bad:
-    sudo_warnx(U_("invalid Path value `%s' in %s, line %u"),
+    sudo_warnx(U_("invalid Path value \"%s\" in %s, line %u"),
 	entry, conf_file, lineno);
     debug_return_int(false);
 }
@@ -386,7 +386,7 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
     debug_decl(set_var_disable_coredump, SUDO_DEBUG_UTIL)
 
     if (val == -1) {
-	sudo_warnx(U_("invalid value for %s `%s' in %s, line %u"),
+	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "disable_coredump", strval, conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -407,7 +407,7 @@ set_var_group_source(const char *strval, const char *conf_file,
     } else if (strcasecmp(strval, "dynamic") == 0) {
 	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
     } else {
-	sudo_warnx(U_("unsupported group source `%s' in %s, line %u"), strval,
+	sudo_warnx(U_("unsupported group source \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -423,7 +423,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
 
     max_groups = strtonum(strval, 1, INT_MAX, NULL);
     if (max_groups <= 0) {
-	sudo_warnx(U_("invalid max groups `%s' in %s, line %u"), strval,
+	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -439,7 +439,7 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
     debug_decl(set_var_probe_interfaces, SUDO_DEBUG_UTIL)
 
     if (val == -1) {
-	sudo_warnx(U_("invalid value for %s `%s' in %s, line %u"),
+	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "probe_interfaces", strval, conf_file, lineno);
 	debug_return_bool(false);
     }
