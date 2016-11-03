@@ -1,1 +1,1 @@
-visudo: Error: cycle in User_Alias `FOO'
+visudo: Error: cycle in User_Alias "FOO"
