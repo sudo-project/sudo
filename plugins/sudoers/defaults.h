@@ -119,8 +119,6 @@ struct early_default {
 /*
  * Prototypes
  */
-struct defaults;	/* in parse.h */
-
 void dump_default(void);
 bool check_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet);
 bool init_defaults(void);
