@@ -192,7 +192,8 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 	ret = true;
 	break;
     case SUDO_PATH_MISSING:
-	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711, quiet)) {
+	if (make_it && ts_mkdirs(path, timestamp_uid, S_IRWXU,
+	    S_IRWXU|S_IXGRP|S_IXOTH, quiet)) {
 	    ret = true;
 	    break;
 	}
@@ -235,7 +236,7 @@ ts_open(const char *path, int flags)
 
     if (timestamp_uid != 0)
 	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(path, flags, 0600);
+    fd = open(path, flags, S_IRUSR|S_IWUSR);
     if (uid_changed && !restore_perms()) {
 	/* Unable to restore permissions, should not happen. */
 	if (fd != -1) {

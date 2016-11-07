@@ -535,7 +535,7 @@ init_defaults(void)
 #ifdef SUDO_UMASK
     def_umask = SUDO_UMASK;
 #else
-    def_umask = 0777;
+    def_umask = ACCESSPERMS;
 #endif
     def_loglinelen = MAXLOGFILELEN;
     def_timestamp_timeout = TIMEOUT;
@@ -955,7 +955,7 @@ store_mode(const char *str, union sudo_defs_val *sd_un)
     debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
 
     if (str == NULL) {
-	sd_un->mode = 0777;
+	sd_un->mode = ACCESSPERMS;
     } else {
 	mode = sudo_strtomode(str, &errstr);
 	if (errstr != NULL) {

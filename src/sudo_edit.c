@@ -548,7 +548,8 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	rc = -1;
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
-	ofd = sudo_edit_open(files[i], O_RDONLY, 0644, command_details);
+	ofd = sudo_edit_open(files[i], O_RDONLY,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
 	if (ofd != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
 		/* New file, verify parent dir exists unless in cwd. */
@@ -673,7 +674,8 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	    "seteuid(%u)", user_details.uid);
 	if (seteuid(user_details.uid) != 0)
 	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
-	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY, 0644, NULL);
+	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, NULL);
 	if (tfd != -1)
 	    rc = fstat(tfd, &sb);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -707,8 +709,8 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	}
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
-	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644,
-	    command_details);
+	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details);
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {

@@ -150,7 +150,7 @@ do_logfile(const char *msg)
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    oldmask = umask(077);
+    oldmask = umask(S_IRWXG|S_IRWXO);
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
@@ -627,7 +627,8 @@ send_mail(const char *fmt, ...)
       sudo_warn("setsid");
     if (chdir("/") == -1)
       sudo_warn("chdir(/)");
-    if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
+    fd = open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if (fd != -1) {
 	(void) dup2(fd, STDIN_FILENO);
 	(void) dup2(fd, STDOUT_FILENO);
 	(void) dup2(fd, STDERR_FILENO);

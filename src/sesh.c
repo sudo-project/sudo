@@ -189,7 +189,7 @@ sesh_sudoedit(int argc, char *argv[])
 	 * doesn't exist, that's OK, we'll create an empty
 	 * destination file.
 	 */
-	if ((fd_src = open(path_src, O_RDONLY|follow, 0600)) < 0) {
+	if ((fd_src = open(path_src, O_RDONLY|follow, S_IRUSR|S_IWUSR)) < 0) {
 	    if (errno != ENOENT) {
 		sudo_warn("%s", path_src);
 		if (post) {
@@ -200,7 +200,8 @@ sesh_sudoedit(int argc, char *argv[])
 	    }
 	}
 
-	if ((fd_dst = open(path_dst, oflags_dst, post ? 0644 : 0600)) < 0) {
+	if ((fd_dst = open(path_dst, oflags_dst, post ?
+	    (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH) : (S_IRUSR|S_IWUSR))) < 0) {
 	    /* error - cleanup */
 	    sudo_warn("%s", path_dst);
 	    if (post) {

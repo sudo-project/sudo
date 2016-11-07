@@ -443,7 +443,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     if (sp->tpath == NULL) {
 	if (asprintf(&sp->tpath, "%s.tmp", sp->path) == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	tfd = open(sp->tpath, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+	tfd = open(sp->tpath, O_WRONLY|O_CREAT|O_TRUNC, S_IRWXU|S_IRUSR);
 	if (tfd < 0)
 	    sudo_fatal("%s", sp->tpath);
 
@@ -669,7 +669,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	if (!oldperms && fstat(sp->fd, &sb) != -1) {
 	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid)
 		ignore_result(chown(sp->path, sudoers_uid, sudoers_gid));
-	    if ((sb.st_mode & 0777) != sudoers_mode)
+	    if ((sb.st_mode & ACCESSPERMS) != sudoers_mode)
 		ignore_result(chmod(sp->path, sudoers_mode));
 	}
 	ret = true;
@@ -688,9 +688,9 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
 	}
-	if (chmod(sp->tpath, sb.st_mode & 0777) != 0) {
+	if (chmod(sp->tpath, sb.st_mode & ACCESSPERMS) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
-		(unsigned int)(sb.st_mode & 0777));
+		(unsigned int)(sb.st_mode & ACCESSPERMS));
 	}
     } else {
 	if (chown(sp->tpath, sudoers_uid, sudoers_gid) != 0) {
@@ -896,7 +896,7 @@ check_owner(const char *path, bool quiet)
 		    path, sudoers_uid, sudoers_gid);
 		}
 	}
-	if ((sb.st_mode & 07777) != sudoers_mode) {
+	if ((sb.st_mode & ALLPERMS) != sudoers_mode) {
 	    ok = false;
 	    if (!quiet) {
 		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),

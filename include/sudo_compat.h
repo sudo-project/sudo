@@ -173,6 +173,19 @@
 #ifndef S_ISLNK
 # define S_ISLNK(m)		(((m) & _S_IFMT) == _S_IFLNK)
 #endif /* S_ISLNK */
+#ifndef S_ISTXT
+# define S_ISTXT		0001000
+#endif /* S_ISTXT */
+
+/*
+ * ACCESSPERMS (00777) and ALLPERMS (07777) are handy BSDisms
+ */
+#ifndef ACCESSPERMS
+# define ACCESSPERMS	(S_IRWXU|S_IRWXG|S_IRWXO)
+#endif /* ACCESSPERMS */
+#ifndef ALLPERMS
+# define ALLPERMS	(S_ISUID|S_ISGID|S_ISTXT|S_IRWXU|S_IRWXG|S_IRWXO)
+#endif /* ALLPERMS */
 
 /* For futimens() and utimensat() emulation. */
 #if !defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)

@@ -52,7 +52,7 @@ sudo_goodpath(const char *path, struct stat *sbp)
 
 	if (stat(path, sbp) == 0) {
 	    /* Make sure path describes an executable regular file. */
-	    if (S_ISREG(sbp->st_mode) && ISSET(sbp->st_mode, 0111))
+	    if (S_ISREG(sbp->st_mode) && ISSET(sbp->st_mode, S_IXUSR|S_IXGRP|S_IXOTH))
 		ret = true;
 	    else
 		errno = EACCES;

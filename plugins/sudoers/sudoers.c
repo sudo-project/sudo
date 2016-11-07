@@ -225,7 +225,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 {
     char **edit_argv = NULL;
     char *iolog_path = NULL;
-    mode_t cmnd_umask = 0777;
+    mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
     bool nopass = false;
     int cmnd_status = -1, oldlocale, validated;
@@ -538,7 +538,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * If user's umask is more restrictive, OR in those bits too
      * unless umask_override is set.
      */
-    if (def_umask != 0777) {
+    if (def_umask != ACCESSPERMS) {
 	cmnd_umask = def_umask;
 	if (!def_umask_override)
 	    cmnd_umask |= user_umask;
