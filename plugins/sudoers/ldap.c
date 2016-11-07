@@ -466,7 +466,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
     const struct ldap_config_str *entry;
     char *buf, hostbuf[LINE_MAX];
     int nldap = 0, nldaps = 0;
-    int rc = -1;
+    int ret = -1;
     debug_decl(sudo_ldap_parse_uri, SUDOERS_DEBUG_LDAP)
 
     hostbuf[0] = '\0';
@@ -531,11 +531,11 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 	goto done;
     }
 
-    rc = LDAP_SUCCESS;
+    ret = LDAP_SUCCESS;
 
 done:
     free(buf);
-    debug_return_int(rc);
+    debug_return_int(ret);
 
 overflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
@@ -583,7 +583,7 @@ static int
 sudo_ldap_init(LDAP **ldp, const char *host, int port)
 {
     LDAP *ld;
-    int rc = LDAP_CONNECT_ERROR;
+    int ret = LDAP_CONNECT_ERROR;
     debug_decl(sudo_ldap_init, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAPSSL_INIT
@@ -592,14 +592,14 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	DPRINTF2("ldapssl_clientauth_init(%s, %s)",
 	    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
 	    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL");
-	rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
+	ret = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
 	    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
 	/*
 	 * Starting with version 5.0, Mozilla-derived LDAP SDKs require
 	 * the cert and key paths to be a directory, not a file.
 	 * If the user specified a file and it fails, try the parent dir.
 	 */
-	if (rc != LDAP_SUCCESS) {
+	if (ret != LDAP_SUCCESS) {
 	    bool retry = false;
 	    if (ldap_conf.tls_certfile != NULL) {
 		char *cp = strrchr(ldap_conf.tls_certfile, '/');
@@ -619,13 +619,13 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		DPRINTF2("retry ldapssl_clientauth_init(%s, %s)",
 		    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
 		    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL");
-		rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
+		ret = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
 		    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
 	    }
 	}
-	if (rc != LDAP_SUCCESS) {
+	if (ret != LDAP_SUCCESS) {
 	    sudo_warnx(U_("unable to initialize SSL cert and key db: %s"),
-		ldapssl_err2string(rc));
+		ldapssl_err2string(ret));
 	    if (ldap_conf.tls_certfile == NULL)
 		sudo_warnx(U_("you must set TLS_CERT in %s to use SSL"),
 		    path_ldap_conf);
@@ -634,41 +634,41 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 
 	DPRINTF2("ldapssl_init(%s, %d, %d)", host, port, defsecure);
 	if ((ld = ldapssl_init(host, port, defsecure)) != NULL)
-	    rc = LDAP_SUCCESS;
+	    ret = LDAP_SUCCESS;
     } else
 #elif defined(HAVE_LDAP_SSL_INIT) && defined(HAVE_LDAP_SSL_CLIENT_INIT)
     if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
 	int sslrc;
-	rc = ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw,
+	ret = ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw,
 	    0, &sslrc);
-	if (rc != LDAP_SUCCESS) {
+	if (ret != LDAP_SUCCESS) {
 	    sudo_warnx("ldap_ssl_client_init(): %s (SSL reason code %d)",
-		ldap_err2string(rc), sslrc);
+		ldap_err2string(ret), sslrc);
 	    goto done;
 	}
 	DPRINTF2("ldap_ssl_init(%s, %d, NULL)", host, port);
 	if ((ld = ldap_ssl_init((char *)host, port, NULL)) != NULL)
-	    rc = LDAP_SUCCESS;
+	    ret = LDAP_SUCCESS;
     } else
 #endif
     {
 #ifdef HAVE_LDAP_CREATE
 	DPRINTF2("ldap_create()");
-	if ((rc = ldap_create(&ld)) != LDAP_SUCCESS)
+	if ((ret = ldap_create(&ld)) != LDAP_SUCCESS)
 	    goto done;
 	DPRINTF2("ldap_set_option(LDAP_OPT_HOST_NAME, %s)", host);
-	rc = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
+	ret = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
 #else
 	DPRINTF2("ldap_init(%s, %d)", host, port);
 	if ((ld = ldap_init((char *)host, port)) == NULL)
 	    goto done;
-	rc = LDAP_SUCCESS;
+	ret = LDAP_SUCCESS;
 #endif
     }
 
     *ldp = ld;
 done:
-    debug_return_int(rc);
+    debug_return_int(ret);
 }
 
 /*
@@ -2652,7 +2652,7 @@ static unsigned int (*sudo_gss_krb5_ccache_name)(unsigned int *minor_status, con
 static int
 sudo_set_krb5_ccache_name(const char *name, const char **old_name)
 {
-    int rc = 0;
+    int ret = 0;
     unsigned int junk;
     static bool initialized;
     debug_decl(sudo_set_krb5_ccache_name, SUDOERS_DEBUG_LDAP)
@@ -2669,7 +2669,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
      * gss_krb5_ccache_name().
      */
     if (sudo_gss_krb5_ccache_name != NULL) {
-	rc = sudo_gss_krb5_ccache_name(&junk, name, old_name);
+	ret = sudo_gss_krb5_ccache_name(&junk, name, old_name);
     } else {
 	/* No gss_krb5_ccache_name(), fall back on KRB5CCNAME. */
 	if (old_name != NULL)
@@ -2677,13 +2677,13 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
     }
     if (name != NULL && *name != '\0') {
 	if (sudo_setenv("KRB5CCNAME", name, true) == -1)
-	    rc = -1;
+	    ret = -1;
     } else {
 	if (sudo_unsetenv("KRB5CCNAME") == -1)
-	    rc = -1;
+	    ret = -1;
     }
 
-    debug_return_int(rc);
+    debug_return_int(ret);
 }
 
 /*
@@ -2759,14 +2759,14 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 {
     char *auth_id = (char *)_auth_id;
     sasl_interact_t *interact = (sasl_interact_t *)_interact;
-    int rc = LDAP_SUCCESS;
+    int ret = LDAP_SUCCESS;
     debug_decl(sudo_ldap_sasl_interact, SUDOERS_DEBUG_LDAP)
 
     for (; interact->id != SASL_CB_LIST_END; interact++) {
 	if (interact->id != SASL_CB_USER) {
 	    sudo_warnx("sudo_ldap_sasl_interact: unexpected interact id %lu",
 		interact->id);
-	    rc = LDAP_PARAM_ERROR;
+	    ret = LDAP_PARAM_ERROR;
 	    break;
 	}
 
@@ -2781,14 +2781,14 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 #if SASL_VERSION_MAJOR < 2
 	interact->result = strdup(interact->result);
 	if (interact->result == NULL) {
-	    rc = LDAP_NO_MEMORY;
+	    ret = LDAP_NO_MEMORY;
 	    break;
 	}
 #endif /* SASL_VERSION_MAJOR < 2 */
 	DPRINTF2("sudo_ldap_sasl_interact: SASL_CB_USER %s",
 	    (const char *)interact->result);
     }
-    debug_return_int(rc);
+    debug_return_int(ret);
 }
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
@@ -2846,7 +2846,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 static int
 sudo_ldap_set_options_global(void)
 {
-    int rc;
+    int ret;
     debug_decl(sudo_ldap_set_options_global, SUDOERS_DEBUG_LDAP)
 
     /* Set ber options */
@@ -2856,8 +2856,8 @@ sudo_ldap_set_options_global(void)
 #endif
 
     /* Parse global LDAP options table. */
-    rc = sudo_ldap_set_options_table(NULL, ldap_conf_global);
-    debug_return_int(rc);
+    ret = sudo_ldap_set_options_table(NULL, ldap_conf_global);
+    debug_return_int(ret);
 }
 
 /*
@@ -2991,7 +2991,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
 static int
 sudo_ldap_bind_s(LDAP *ld)
 {
-    int rc;
+    int ret;
     debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -3014,35 +3014,35 @@ sudo_ldap_bind_s(LDAP *ld)
 	}
 
 	if (new_ccname != NULL) {
-	    rc = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
-	    if (rc == 0) {
+	    ret = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
+	    if (ret == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "set ccache name %s -> %s",
 		    old_ccname ? old_ccname : "(none)", new_ccname);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "sudo_set_krb5_ccache_name() failed: %d", rc);
+		    "sudo_set_krb5_ccache_name() failed: %d", ret);
 	    }
 	}
-	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
+	ret = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
 	if (new_ccname != NULL) {
-	    rc = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
-	    if (rc == 0) {
+	    ret = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
+	    if (ret == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "restore ccache name %s -> %s", new_ccname,
 		    old_ccname ? old_ccname : "(none)");
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "sudo_set_krb5_ccache_name() failed: %d", rc);
+		    "sudo_set_krb5_ccache_name() failed: %d", ret);
 	    }
 	    /* Remove temporary copy of user's credential cache. */
 	    if (tmp_ccname != NULL)
 		unlink(tmp_ccname);
 	}
-	if (rc != LDAP_SUCCESS) {
+	if (ret != LDAP_SUCCESS) {
 	    sudo_warnx("ldap_sasl_interactive_bind_s(): %s",
-		ldap_err2string(rc));
+		ldap_err2string(ret));
 	    goto done;
 	}
 	DPRINTF1("ldap_sasl_interactive_bind_s() ok");
@@ -3055,26 +3055,26 @@ sudo_ldap_bind_s(LDAP *ld)
 	bv.bv_val = ldap_conf.bindpw ? ldap_conf.bindpw : "";
 	bv.bv_len = strlen(bv.bv_val);
 
-	rc = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,
+	ret = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,
 	    NULL, NULL, NULL);
-	if (rc != LDAP_SUCCESS) {
-	    sudo_warnx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
+	if (ret != LDAP_SUCCESS) {
+	    sudo_warnx("ldap_sasl_bind_s(): %s", ldap_err2string(ret));
 	    goto done;
 	}
 	DPRINTF1("ldap_sasl_bind_s() ok");
     }
 #else
     {
-	rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
-	if (rc != LDAP_SUCCESS) {
-	    sudo_warnx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
+	ret = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
+	if (ret != LDAP_SUCCESS) {
+	    sudo_warnx("ldap_simple_bind_s(): %s", ldap_err2string(ret));
 	    goto done;
 	}
 	DPRINTF1("ldap_simple_bind_s() ok");
     }
 #endif
 done:
-    debug_return_int(rc);
+    debug_return_int(ret);
 }
 
 /*
@@ -3187,7 +3187,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     LDAP *ld;
     LDAPMessage *entry, *result = NULL;
     char *filt;
-    int rc;
+    int ret;
     debug_decl(sudo_ldap_setdefs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -3209,25 +3209,25 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 	}
 	ldap_msgfree(result);
 	result = NULL;
-	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
+	ret = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
-	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
+	if (ret == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    DPRINTF1("found:%s", ldap_get_dn(ld, entry));
 	    if (!sudo_ldap_parse_options(ld, entry)) {
-		rc = -1;
+		ret = -1;
 		goto done;
 	    }
 	} else {
 	    DPRINTF1("no default options found in %s", base->val);
 	}
     }
-    rc = 0;
+    ret = 0;
 
 done:
     ldap_msgfree(result);
     free(filt);
 
-    debug_return_int(rc);
+    debug_return_int(ret);
 }
 
 /*
