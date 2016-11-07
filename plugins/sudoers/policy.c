@@ -411,7 +411,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN)
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(32, sizeof(char *));
+    command_info = calloc(48, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -554,6 +554,18 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     }
     if (def_utmp_runas) {
 	if ((command_info[info_len++] = sudo_new_key_val("utmp_user", runas_pw->pw_name)) == NULL)
+	    goto oom;
+    }
+    if (def_iolog_mode != (S_IRUSR|S_IWUSR)) {
+	if (asprintf(&command_info[info_len++], "iolog_mode=0%o", (unsigned int)def_iolog_mode) == -1)
+	    goto oom;
+    }
+    if (def_iolog_user != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("iolog_user", def_iolog_user)) == NULL)
+	    goto oom;
+    }
+    if (def_iolog_group != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("iolog_group", def_iolog_group)) == NULL)
 	    goto oom;
     }
     if (cmnd_umask != 0777) {

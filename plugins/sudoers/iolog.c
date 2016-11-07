@@ -73,6 +73,7 @@ static struct timeval last_time;
 static unsigned int sessid_max = SESSID_MAX;
 static uid_t iolog_uid = ROOT_UID;
 static gid_t iolog_gid = (gid_t)-1;
+static mode_t iolog_filemode = S_IRUSR|S_IWUSR;
 static mode_t iolog_dirmode = S_IRWXU;
 
 /* sudoers_io is declared at the end of this file. */
@@ -216,21 +217,21 @@ cb_maxseq(const union sudo_defs_val *sd_un)
 }
 
 /*
- * Sudoers callback for iolog_user Defaults setting.
+ * Look up I/O log user ID from user name.
  */
-bool
-cb_iolog_user(const union sudo_defs_val *sd_un)
+static bool
+iolog_set_uid(const char *name)
 {
     struct passwd *pw;
-    debug_decl(cb_iolog_user, SUDOERS_DEBUG_UTIL)
+    debug_decl(iolog_set_uid, SUDOERS_DEBUG_UTIL)
 
-    if (sd_un->str != NULL) {
-	pw = sudo_getpwnam(sd_un->str);
+    if (name != NULL) {
+	pw = sudo_getpwnam(name);
 	if (pw != NULL) {
 	    iolog_uid = pw->pw_uid;
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
-		N_("unknown user: %s"), sd_un->str);
+		N_("unknown user: %s"), name);
 	}
     } else {
 	iolog_uid = ROOT_UID;
@@ -240,25 +241,66 @@ cb_iolog_user(const union sudo_defs_val *sd_un)
 }
 
 /*
- * Sudoers callback for iolog_group Defaults setting.
+ * Sudoers callback for iolog_user Defaults setting.
  */
 bool
-cb_iolog_group(const union sudo_defs_val *sd_un)
+cb_iolog_user(const union sudo_defs_val *sd_un)
+{
+    return iolog_set_uid(sd_un->str);
+}
+
+/*
+ * Look up I/O log group ID from group name.
+ */
+static bool
+iolog_set_gid(const char *name)
 {
     struct group *gr;
-    debug_decl(cb_iolog_group, SUDOERS_DEBUG_UTIL)
+    debug_decl(iolog_set_gid, SUDOERS_DEBUG_UTIL)
 
-    if (sd_un->str != NULL) {
-	gr = sudo_getgrnam(sd_un->str);
+    if (name != NULL) {
+	gr = sudo_getgrnam(name);
 	if (gr != NULL) {
 	    iolog_gid = gr->gr_gid;
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
-		N_("unknown group: %s"), sd_un->str);
+		N_("unknown group: %s"), name);
 	}
     } else {
 	iolog_gid = (mode_t)-1;
     }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Look up I/O log group ID from group name.
+ */
+bool
+cb_iolog_group(const union sudo_defs_val *sd_un)
+{
+    return iolog_set_gid(sd_un->str);
+}
+
+/*
+ * Set iolog_filemode and iolog_dirmode.
+ */
+static bool
+iolog_set_mode(mode_t mode)
+{
+    debug_decl(iolog_set_mode, SUDOERS_DEBUG_UTIL)
+
+    /* Restrict file mode to a subset of 0666. */
+    iolog_filemode = mode & (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+
+    /* For directory mode, add execute bits as needed. */
+    iolog_dirmode = iolog_filemode;
+    if (iolog_dirmode & (S_IRUSR|S_IWUSR))
+	iolog_dirmode |= S_IXUSR;
+    if (iolog_dirmode & (S_IRGRP|S_IWGRP))
+	iolog_dirmode |= S_IXGRP;
+    if (iolog_dirmode & (S_IROTH|S_IWOTH))
+	iolog_dirmode |= S_IXOTH;
 
     debug_return_bool(true);
 }
@@ -269,18 +311,7 @@ cb_iolog_group(const union sudo_defs_val *sd_un)
 bool
 cb_iolog_mode(const union sudo_defs_val *sd_un)
 {
-    debug_decl(cb_iolog_mode, SUDOERS_DEBUG_UTIL)
-
-    /* Base directory mode on iolog_mode, adding in the X bit as needed */
-    iolog_dirmode = def_iolog_mode;
-    if (iolog_dirmode & (S_IRUSR|S_IWUSR))
-	iolog_dirmode |= S_IXUSR;
-    if (iolog_dirmode & (S_IRGRP|S_IWGRP))
-	iolog_dirmode |= S_IXGRP;
-    if (iolog_dirmode & (S_IROTH|S_IWOTH))
-	iolog_dirmode |= S_IXOTH;
-
-    debug_return_bool(true);
+    return iolog_set_mode(sd_un->mode);
 }
 
 /*
@@ -318,7 +349,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
 	goto done;
     }
-    fd = open(pathbuf, O_RDWR|O_CREAT, def_iolog_mode);
+    fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
     if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
 	goto done;
@@ -338,7 +369,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
-	    int fd2 = open(fallback, O_RDWR|O_CREAT, def_iolog_mode);
+	    int fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
 		ignore_result(fchown(fd2, iolog_uid, gid));
 		nread = read(fd2, buf, sizeof(buf) - 1);
@@ -457,7 +488,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, def_iolog_mode);
+	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
 	if (fd != -1) {
 	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -589,6 +620,20 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    iolog_compress = true; /* must be global */
 		continue;
 	    }
+	    if (strncmp(*cur, "iolog_mode=", sizeof("iolog_mode=") - 1) == 0) {
+		mode_t mode = sudo_strtomode(*cur + sizeof("iolog_mode=") - 1, &errstr);
+		if (errstr == NULL)
+		    iolog_set_mode(mode);
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_group=", sizeof("iolog_group=") - 1) == 0) {
+		iolog_set_gid(*cur + sizeof("iolog_group=") - 1);
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_user=", sizeof("iolog_user=") - 1) == 0) {
+		iolog_set_uid(*cur + sizeof("iolog_user=") - 1);
+		continue;
+	    }
 	    break;
 	case 'm':
 	    if (strncmp(*cur, "maxseq=", sizeof("maxseq=") - 1) == 0) {
@@ -675,7 +720,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
-    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, def_iolog_mode);
+    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);

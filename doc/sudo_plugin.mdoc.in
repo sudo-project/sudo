@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 20, 2016
+.Dd November 7, 2016
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -797,6 +797,15 @@ must refer to an open file descriptor.
 .It iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.It iolog_group=string
+The group that will own newly created I/O log files and directories.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.It iolog_mode=octal
+The file permision mode to use when creating I/O log files and directories.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.It iolog_user=string
+The user that will own newly created I/O log files and directories.
 This is a hint to the I/O logging plugin which may choose to ignore it.
 .It iolog_path=string
 Fully qualified path to the file or directory in which I/O log is

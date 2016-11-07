@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "January 20, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 7, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -895,6 +895,18 @@ must refer to an open file descriptor.
 iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_group=string
+The group that will own newly created I/O log files and directories.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_mode=octal
+The file permision mode to use when creating I/O log files and directories.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_user=string
+The user that will own newly created I/O log files and directories.
 This is a hint to the I/O logging plugin which may choose to ignore it.
 .TP 6n
 iolog_path=string
