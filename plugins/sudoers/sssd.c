@@ -1239,7 +1239,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    goto done;
 	}
 	op = sudo_sss_parse_option(copy, &var, &val);
-	early = is_early_default(var);
+	early = is_early_default_byname(var);
 	if (early != NULL) {
 	    set_early_default(var, val, op,
 		source ? source : "sudoRole UNKNOWN", 0, false, early);
@@ -1255,7 +1255,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    goto done;
 	}
 	op = sudo_sss_parse_option(copy, &var, &val);
-	if (is_early_default(var) == NULL) {
+	if (is_early_default_byname(var) == NULL) {
 	    set_default(var, val, op,
 		source ? source : "sudoRole UNKNOWN", 0, false);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2015
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -214,7 +214,7 @@ struct alias {
 };
 
 /*
- * Structure describing a Defaults entry and a list thereof.
+ * Structure describing a Defaults entry in sudoers.
  */
 struct defaults {
     TAILQ_ENTRY(defaults) entries;
@@ -223,6 +223,8 @@ struct defaults {
     struct member_list *binding;	/* user/host/runas binding */
     int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     int op;				/* true, false, '+', '-' */
+    int idx;				/* index into sudo_defs_table */
+    union sudo_defs_val sd_un;		/* parsed value */
 };
 
 /*

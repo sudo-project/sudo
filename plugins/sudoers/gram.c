@@ -826,7 +826,9 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	 * Then add to the global defaults list if it parses.
 	 */
 	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
-	    if (check_default(d->var, d->val, d->op, sudoers, sudolineno, !sudoers_warnings)) {
+	    d->idx = parse_default(d->var, d->val, d->op, &d->sd_un,
+		sudoers, sudolineno, !sudoers_warnings);
+	    if (d->idx != -1) {
 		/* Append to defaults list */
 		d->type = type;
 		d->binding = binding;
@@ -834,14 +836,13 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 		TAILQ_INSERT_TAIL(&defaults, d, entries);
 	    } else {
 		/* Did not parse */
-		if (!allow_unknown_defaults) {
+		if (ret && !allow_unknown_defaults) {
 		    sudoerserror(NULL);
 		    ret = false;
 		}
 		free(d->var);
 		free(d->val);
 		free(d);
-		continue;
 	    }
 	}
 
@@ -995,6 +996,7 @@ init_parser(const char *path, bool quiet, bool strict_defaults)
 	    free_members(d->binding);
 	    free(d->binding);
 	}
+	/* no need to free sd_un */
 	free(d->var);
 	free(d->val);
 	free(d);
@@ -1027,7 +1029,7 @@ init_parser(const char *path, bool quiet, bool strict_defaults)
 
     debug_return_bool(ret);
 }
-#line 978 "gram.c"
+#line 980 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2110,7 +2112,7 @@ case 115:
 			    }
 			}
 break;
-#line 2061 "gram.c"
+#line 2063 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
