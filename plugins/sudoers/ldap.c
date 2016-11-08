@@ -722,20 +722,21 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     char *val;
-    bool ret = false;
-    bool foundbang = false;
+    int matched = UNSPEC;
     debug_decl(sudo_ldap_check_host, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
-	debug_return_bool(ret);
+	debug_return_bool(false);
 
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoHost");
     if (bv == NULL)
-	debug_return_bool(ret);
+	debug_return_bool(false);
 
     /* walk through values */
-    for (p = bv; *p != NULL && !foundbang; p++) {
+    for (p = bv; *p != NULL && matched != false; p++) {
+	bool foundbang = false;
+
 	val = (*p)->bv_val;
 
 	if (*val == '!') {
@@ -747,14 +748,17 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, user_runhost, user_srunhost,
 	    def_netgroup_tuple ? pw->pw_name : NULL) ||
-	    hostname_matches(user_srunhost, user_runhost, val))
-	    ret = !foundbang;
-	DPRINTF2("ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
+	    hostname_matches(user_srunhost, user_runhost, val)) {
+
+	    matched = foundbang ? false : true;
+	}
+	DPRINTF2("ldap sudoHost '%s' ... %s",
+	    val, matched == true ? "MATCH!" : "not");
     }
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_bool(ret);
+    debug_return_bool(matched == true);
 }
 
 static int

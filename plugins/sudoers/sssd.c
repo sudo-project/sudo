@@ -741,13 +741,12 @@ static bool
 sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     char **val_array, *val;
-    bool ret = false;
-    bool foundbang = false;
+    int matched = UNSPEC;
     int i;
     debug_decl(sudo_sss_check_host, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
-	debug_return_bool(ret);
+	debug_return_bool(false);
 
     /* get the values from the rule */
     switch (handle->fn_get_values(rule, "sudoHost", &val_array)) {
@@ -758,11 +757,13 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	debug_return_bool(false);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoHost): != 0");
-	debug_return_bool(ret);
+	debug_return_bool(false);
     }
 
     /* walk through values */
-    for (i = 0; val_array[i] != NULL && !foundbang; ++i) {
+    for (i = 0; val_array[i] != NULL && matched != false; ++i) {
+	bool foundbang = false;
+
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
@@ -775,16 +776,18 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
 	    netgr_matches(val, handle->host, handle->shost,
 	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
-	    hostname_matches(handle->shost, handle->host, val))
-	    ret = !foundbang;
+	    hostname_matches(handle->shost, handle->host, val)) {
 
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "sssd/ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
+	    matched = foundbang ? false : true;
+	}
+
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoHost '%s' ... %s",
+	    val, matched == true ? "MATCH!" : "not");
     }
 
     handle->fn_free_values(val_array);
 
-    debug_return_bool(ret);
+    debug_return_bool(matched == true);
 }
 
 /*
