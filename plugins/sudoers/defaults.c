@@ -349,6 +349,7 @@ set_default(const char *var, const char *val, int op, const char *file,
     int idx;
     debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
 
+    memset(&sd_un, 0, sizeof(sd_un));
     idx = parse_default(var, val, op, &sd_un, file, lineno, quiet);
     if (idx != -1) {
 	/* Set parsed value in sudo_defs_table and run callback (if any). */
@@ -372,6 +373,7 @@ set_early_default(const char *var, const char *val, int op, const char *file,
     int idx;
     debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS)
 
+    memset(&sd_un, 0, sizeof(sd_un));
     idx = parse_default(var, val, op, &sd_un, file, lineno, quiet);
     if (idx != -1) {
 	/* Set parsed value in sudo_defs_table. */
