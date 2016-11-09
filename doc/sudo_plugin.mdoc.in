@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 7, 2016
+.Dd November 8, 2016
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2417,6 +2417,15 @@ to receive a conversation function pointer that supports this argument.
 The
 .Em execfd
 entry was added to the
+.Li command_info
+list.
+.It Version 1.10 (sudo 1.8.19)
+The
+.Em iolog_group ,
+.Em iolog_mode ,
+and
+.Em iolog_user
+entries were added to the
 .Li command_info
 list.
 .El

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 7, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 8, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2760,6 +2760,16 @@ Version 1.9 (sudo 1.8.16)
 The
 \fIexecfd\fR
 entry was added to the
+\fRcommand_info\fR
+list.
+.TP 6n
+Version 1.10 (sudo 1.8.19)
+The
+\fIiolog_group\fR,
+\fIiolog_mode\fR,
+and
+\fIiolog_user\fR
+entries were added to the
 \fRcommand_info\fR
 list.
 .SH "SEE ALSO"
