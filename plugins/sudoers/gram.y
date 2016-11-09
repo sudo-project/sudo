@@ -53,7 +53,6 @@
  * Globals
  */
 bool sudoers_warnings = true;
-bool allow_unknown_defaults = true;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
@@ -66,7 +65,7 @@ struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
  */
 static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
-static struct defaults *new_default(char *, char *, int);
+static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
 static struct sudo_digest *new_digest(int, const char *);
 %}
@@ -884,7 +883,7 @@ sudoerserror(const char *s)
 }
 
 static struct defaults *
-new_default(char *var, char *val, int op)
+new_default(char *var, char *val, short op)
 {
     struct defaults *d;
     debug_decl(new_default, SUDOERS_DEBUG_PARSER)
@@ -900,6 +899,14 @@ new_default(char *var, char *val, int op)
     /* d->type = 0; */
     d->op = op;
     /* d->binding = NULL */
+    d->lineno = last_token == COMMENT ? sudolineno - 1 : sudolineno;
+    d->file = strdup(sudoers);
+    if (d->file == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to allocate memory");
+	free(d);
+	debug_return_ptr(NULL);
+    }
     HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
@@ -958,7 +965,6 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d, *next;
     struct member_list *binding;
-    bool binding_used = false;
     bool ret = true;
     debug_decl(add_defaults, SUDOERS_DEBUG_PARSER)
 
@@ -979,33 +985,12 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 
 	/*
 	 * Set type and binding (who it applies to) for new entries.
-	 * Then add to the global defaults list if it parses.
+	 * Then add to the global defaults list.
 	 */
 	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
-	    d->idx = parse_default(d->var, d->val, d->op, &d->sd_un,
-		sudoers, sudolineno, !sudoers_warnings);
-	    if (d->idx != -1) {
-		/* Append to defaults list */
-		d->type = type;
-		d->binding = binding;
-		binding_used = true;
-		TAILQ_INSERT_TAIL(&defaults, d, entries);
-	    } else {
-		/* Did not parse */
-		if (ret && !allow_unknown_defaults) {
-		    sudoerserror(NULL);
-		    ret = false;
-		}
-		free(d->var);
-		free(d->val);
-		free(d);
-	    }
-	}
-
-	if (!binding_used) {
-	    /* No valid Defaults entries, binding unused. */
-	    free_members(binding);
-	    free(binding);
+	    d->type = type;
+	    d->binding = binding;
+	    TAILQ_INSERT_TAIL(&defaults, d, entries);
 	}
     }
 
@@ -1059,7 +1044,7 @@ free_members(struct member_list *members)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *path, bool quiet, bool strict_defaults)
+init_parser(const char *path, bool quiet)
 {
     struct member_list *binding;
     struct defaults *d, *d_next;
@@ -1155,6 +1140,7 @@ init_parser(const char *path, bool quiet, bool strict_defaults)
 	/* no need to free sd_un */
 	free(d->var);
 	free(d->val);
+	free(d->file);
 	free(d);
     }
     TAILQ_INIT(&defaults);
@@ -1181,7 +1167,6 @@ init_parser(const char *path, bool quiet, bool strict_defaults)
     free(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;
-    allow_unknown_defaults = !strict_defaults;
 
     debug_return_bool(ret);
 }

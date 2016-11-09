@@ -261,7 +261,7 @@ main(int argc, char *argv[])
     }
 
     /* Allocate space for data structures in the parser. */
-    init_parser("sudoers", false, true);
+    init_parser("sudoers", false);
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.

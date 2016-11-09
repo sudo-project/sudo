@@ -221,10 +221,11 @@ struct defaults {
     char *var;				/* variable name */
     char *val;				/* variable value */
     struct member_list *binding;	/* user/host/runas binding */
-    int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
-    int op;				/* true, false, '+', '-' */
-    int idx;				/* index into sudo_defs_table */
-    union sudo_defs_val sd_un;		/* parsed value */
+    char *file;				/* file Defaults entry was in */
+    short type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
+    char op;				/* true, false, '+', '-' */
+    char error;				/* parse error flag */
+    int lineno;				/* line number of Defaults entry */
 };
 
 /*
@@ -245,7 +246,7 @@ void alias_put(struct alias *a);
 bool init_aliases(void);
 
 /* gram.c */
-bool init_parser(const char *path, bool quiet, bool strict_defaults);
+bool init_parser(const char *path, bool quiet);
 void free_members(struct member_list *members);
 
 /* match_addr.c */

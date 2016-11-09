@@ -191,6 +191,36 @@ dump_defaults(void)
     debug_return;
 }
 
+/*
+ * Find the index of the specified Defaults name in sudo_defs_table[]
+ * On success, returns the matching index or -1 on failure.
+ */
+static int
+find_default(const char *name, const char *file, int lineno, bool quiet)
+{
+    int i;
+    debug_decl(find_default, SUDOERS_DEBUG_DEFAULTS)
+
+    for (i = 0; sudo_defs_table[i].name != NULL; i++) {
+	if (strcmp(name, sudo_defs_table[i].name) == 0)
+	    debug_return_int(i);
+    }
+    if (!quiet) {
+	if (lineno > 0) {
+	    sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
+		file, lineno, name);
+	} else {
+	    sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
+		file, name);
+	}
+    }
+    debug_return_int(-1);
+}
+
+/*
+ * Parse a defaults entry, storing the parsed entry in sd_un.
+ * Returns true on success or false on failure.
+ */
 static bool
 parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     union sudo_defs_val *sd_un, const char *file, int lineno, bool quiet)
@@ -301,23 +331,10 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 }
 
 struct early_default *
-is_early_default(int idx)
+is_early_default(const char *name)
 {
     struct early_default *early;
     debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS)
-
-    for (early = early_defaults; early->idx != -1; early++) {
-	if (idx == early->idx)
-	    debug_return_ptr(early);
-    }
-    debug_return_ptr(NULL);
-}
-
-struct early_default *
-is_early_default_byname(const char *name)
-{
-    struct early_default *early;
-    debug_decl(is_early_default_byname, SUDOERS_DEBUG_DEFAULTS)
 
     for (early = early_defaults; early->idx != -1; early++) {
 	if (strcmp(name, sudo_defs_table[early->idx].name) == 0)
@@ -339,23 +356,20 @@ run_callback(struct sudo_defs_types *def)
 /*
  * Sets/clears an entry in the defaults structure.
  * Runs the callback if present on success.
- * XXX - deprecated, only used by ldap/sssd
  */
 bool
 set_default(const char *var, const char *val, int op, const char *file,
     int lineno, bool quiet)
 {
-    union sudo_defs_val sd_un;
     int idx;
     debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
 
-    memset(&sd_un, 0, sizeof(sd_un));
-    idx = parse_default(var, val, op, &sd_un, file, lineno, quiet);
+    idx = find_default(var, file, lineno, quiet);
     if (idx != -1) {
 	/* Set parsed value in sudo_defs_table and run callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
-	def->sd_un = sd_un;
-	debug_return_bool(run_callback(def));
+	if (parse_default_entry(def, val, op, &def->sd_un, file, lineno, quiet))
+	    debug_return_bool(run_callback(def));
     }
     debug_return_bool(false);
 }
@@ -363,25 +377,22 @@ set_default(const char *var, const char *val, int op, const char *file,
 /*
  * Like set_default() but stores the matching default value
  * and does not run callbacks.
- * XXX - deprecated, only used by ldap/sssd
  */
 bool
 set_early_default(const char *var, const char *val, int op, const char *file,
     int lineno, bool quiet, struct early_default *early)
 {
-    union sudo_defs_val sd_un;
     int idx;
     debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS)
 
-    memset(&sd_un, 0, sizeof(sd_un));
-    idx = parse_default(var, val, op, &sd_un, file, lineno, quiet);
+    idx = find_default(var, file, lineno, quiet);
     if (idx != -1) {
-	/* Set parsed value in sudo_defs_table. */
+	/* Set parsed value in sudo_defs_table but defer callback (if any). */
 	struct sudo_defs_types *def = &sudo_defs_table[idx];
-	def->sd_un = sd_un;
-	/* Defer running callback until all early defaults are set. */
-	early->run_callback = true;
-	debug_return_bool(true);
+	if (parse_default_entry(def, val, op, &def->sd_un, file, lineno, quiet)) {
+	    early->run_callback = true;
+	    debug_return_bool(true);
+	}
     }
     debug_return_bool(false);
 }
@@ -407,17 +418,17 @@ run_early_defaults(void)
 }
 
 static void
-free_default(struct sudo_defs_types *def)
+free_default(int type, union sudo_defs_val *sd_un)
 {
-    switch (def->type & T_MASK) {
+    switch (type & T_MASK) {
 	case T_STR:
-	    free(def->sd_un.str);
+	    free(sd_un->str);
 	    break;
 	case T_LIST:
-	    (void)list_op(NULL, 0, &def->sd_un, freeall);
+	    (void)list_op(NULL, 0, sd_un, freeall);
 	    break;
     }
-    memset(&def->sd_un, 0, sizeof(def->sd_un));
+    memset(sd_un, 0, sizeof(*sd_un));
 }
 
 /*
@@ -434,7 +445,7 @@ init_defaults(void)
     /* Clear any old settings. */
     if (!firsttime) {
 	for (def = sudo_defs_table; def->name != NULL; def++)
-	    free_default(def);
+	    free_default(def->type, &def->sd_un);
     }
 
     /* First initialize the flags. */
@@ -692,7 +703,7 @@ update_defaults(int what, bool quiet)
      * First apply Defaults values marked as early.
      */
     TAILQ_FOREACH(d, &defaults, entries) {
-	struct early_default *early = is_early_default(d->idx);
+	struct early_default *early = is_early_default(d->var);
 	if (early == NULL)
 	    continue;
 
@@ -702,8 +713,9 @@ update_defaults(int what, bool quiet)
 	    continue;
 
 	/* Copy the value to sudo_defs_table and mark as early. */
-	sudo_defs_table[d->idx].sd_un = d->sd_un;
-	early->run_callback = true;
+	if (!set_early_default(d->var, d->val, d->op, d->file, d->lineno,
+	    quiet, early))
+	    ret = false;
     }
     /* Run callbacks for early defaults (if any) */
     if (!run_early_defaults())
@@ -714,7 +726,7 @@ update_defaults(int what, bool quiet)
      */
     TAILQ_FOREACH(d, &defaults, entries) {
 	/* Skip Defaults marked as early, we already did them. */
-	if (is_early_default(d->idx))
+	if (is_early_default(d->var))
 	    continue;
 
 	/* Defaults type and binding must match. */
@@ -723,42 +735,40 @@ update_defaults(int what, bool quiet)
 	    continue;
 
 	/* Copy the value to sudo_defs_table and run callback (if any) */
-	sudo_defs_table[d->idx].sd_un = d->sd_un;
-	if (!run_callback(&sudo_defs_table[d->idx]))
+	if (!set_default(d->var, d->val, d->op, d->file, d->lineno, quiet))
 	    ret = false;
     }
     debug_return_bool(ret);
 }
 
 /*
- * Parse a defaults entry, storing the parsed entry in sd_un.
- * Returns the matching sudo_defs_table[] index on success or -1 on failure.
+ * Check all defaults entries without actually setting them.
  */
-int
-parse_default(const char *var, const char *val, int op,
-    union sudo_defs_val *sd_un, const char *file, int lineno, bool quiet)
+bool
+check_defaults(bool quiet)
 {
-    int i;
-    debug_decl(parse_default, SUDOERS_DEBUG_DEFAULTS)
+    struct defaults *d;
+    bool ret = true;
+    int idx;
+    debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
 
-    for (i = 0; sudo_defs_table[i].name != NULL; i++) {
-	if (strcmp(var, sudo_defs_table[i].name) == 0) {
-	    if (parse_default_entry(&sudo_defs_table[i], val, op,
-		sd_un, file, lineno, quiet))
-		debug_return_int(i);
-	    debug_return_int(-1);
+    TAILQ_FOREACH(d, &defaults, entries) {
+	idx = find_default(d->var, d->file, d->lineno, quiet);
+	if (idx != -1) {
+	    struct sudo_defs_types *def = &sudo_defs_table[idx];
+	    union sudo_defs_val sd_un;
+	    memset(&sd_un, 0, sizeof(sd_un));
+	    if (parse_default_entry(def, d->val, d->op, &sd_un, d->file,
+		d->lineno, quiet)) {
+		free_default(def->type, &sd_un);
+		continue;
+	    }
 	}
+	/* There was an error in the entry, flag it. */
+	d->error = true;
+	ret = false;
     }
-    if (!quiet) {
-	if (lineno > 0) {
-	    sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
-		file, lineno, var);
-	} else {
-	    sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
-		file, var);
-	}
-    }
-    debug_return_int(-1);
+    debug_return_bool(ret);
 }
 
 static bool

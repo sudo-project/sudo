@@ -245,7 +245,7 @@ main(int argc, char *argv[])
      */
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(1);
-    init_parser(sudoers_file, quiet, true);
+    init_parser(sudoers_file, quiet);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
@@ -552,6 +552,39 @@ done:
 }
 
 /*
+ * Check Defaults and Alias entries.
+ * Sets parse_error on error and errorfile/errorlineno if possible.
+ */
+static void
+check_defaults_and_aliases(bool strict, bool quiet)
+{
+    debug_decl(check_defaults_and_aliases, SUDOERS_DEBUG_UTIL)
+
+    if (!check_defaults(quiet)) {
+	struct defaults *d;
+	free(errorfile);
+	errorfile = NULL;
+	/* XXX - should edit all files with errors */
+	TAILQ_FOREACH(d, &defaults, entries) {
+	    if (d->error) {
+		/* Defaults parse error, adopt the file name. */
+		errorfile = d->file;
+		errorlineno = d->lineno;
+		d->file = NULL;
+		d->error = false; /* paranoia */
+		break;
+	    }
+	}
+	parse_error = true;
+    } else if (check_aliases(strict, quiet) != 0) {
+	free(errorfile);
+	errorfile = NULL;	/* don't know which file */
+	parse_error = true;
+    }
+    debug_return;
+}
+
+/*
  * Parse sudoers after editing and re-edit any ones that caused a parse error.
  */
 static bool
@@ -576,7 +609,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx(U_("unable to initialize sudoers default values"));
-	init_parser(sp->path, quiet, true);
+	init_parser(sp->path, quiet);
 
 	/* Parse the sudoers temp file(s) */
 	sudoersrestart(fp);
@@ -592,11 +625,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	fclose(sudoersin);
 	if (!parse_error) {
 	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
-	    if (check_aliases(strict, quiet) != 0) {
-		parse_error = true;
-		free(errorfile);
-		errorfile = NULL;	/* don't know which file */
-	    }
+	    check_defaults_and_aliases(strict, quiet);
 	}
 	sudoers_setlocale(oldlocale, NULL);
 
@@ -924,7 +953,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
     }
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
-    init_parser(sudoers_file, quiet, true);
+    init_parser(sudoers_file, quiet);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
@@ -936,11 +965,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
     }
     if (!parse_error) {
 	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
-	if (check_aliases(strict, quiet) != 0) {
-	    parse_error = true;
-	    free(errorfile);
-	    errorfile = NULL;	/* don't know which file */
-	}
+	check_defaults_and_aliases(strict, quiet);
     }
     sudoers_setlocale(oldlocale, NULL);
     ok = !parse_error;

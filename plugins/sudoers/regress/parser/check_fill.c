@@ -37,7 +37,6 @@
 
 #include "sudo_compat.h"
 #include "sudo_queue.h"
-#include "defaults.h"
 #include "parse.h"
 #include "toke.h"
 #include "sudo_plugin.h"

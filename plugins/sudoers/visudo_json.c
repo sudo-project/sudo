@@ -1025,7 +1025,7 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	    goto done;
 	}
     }
-    init_parser(sudoers_path, quiet, true);
+    init_parser(sudoers_path, quiet);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);

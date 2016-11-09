@@ -121,13 +121,12 @@ struct early_default {
  */
 void dump_default(void);
 bool init_defaults(void);
-struct early_default *is_early_default(int idx);
-struct early_default *is_early_default_byname(const char *name);
+struct early_default *is_early_default(const char *name);
 bool run_early_defaults(void);
 bool set_early_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet, struct early_default *early);
 bool set_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet);
 bool update_defaults(int what, bool quiet);
-int parse_default(const char *var, const char *val, int op, union sudo_defs_val *sd_un, const char *file, int lineno, bool quiet);
+bool check_defaults(bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
 
