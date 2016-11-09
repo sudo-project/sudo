@@ -103,7 +103,7 @@ if make --version 2>&1 | grep GNU >/dev/null; then
 	Linux)
 	    if [ -r /proc/cpuinfo ]; then
 		for c in `sed -n 's/^cpu cores[	 ]*: *//p' /proc/cpuinfo`; do
-		    NJOBS=$(( $NJOBS + $c ))
+		    NJOBS=`expr $NJOBS + $c`
 		done
 	    fi
 	    ;;
