@@ -229,6 +229,7 @@ iolog_set_uid(const char *name)
 	pw = sudo_getpwnam(name);
 	if (pw != NULL) {
 	    iolog_uid = pw->pw_uid;
+	    sudo_pw_delref(pw);
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("unknown user: %s"), name);
@@ -262,6 +263,7 @@ iolog_set_gid(const char *name)
 	gr = sudo_getgrnam(name);
 	if (gr != NULL) {
 	    iolog_gid = gr->gr_gid;
+	    sudo_gr_delref(gr);
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("unknown group: %s"), name);
