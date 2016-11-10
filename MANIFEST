@@ -466,6 +466,11 @@ plugins/sudoers/regress/visudo/test5.out.ok
 plugins/sudoers/regress/visudo/test5.sh
 plugins/sudoers/regress/visudo/test6.out.ok
 plugins/sudoers/regress/visudo/test6.sh
+plugins/sudoers/regress/visudo/test7.out.ok
+plugins/sudoers/regress/visudo/test7.sh
+plugins/sudoers/regress/visudo/test8.err.ok
+plugins/sudoers/regress/visudo/test8.out.ok
+plugins/sudoers/regress/visudo/test8.sh
 plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
