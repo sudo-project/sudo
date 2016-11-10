@@ -180,7 +180,12 @@ struct command_status {
     int val;
 };
 
-struct timeval;
+/* Garbage collector data types. */
+enum sudo_gc_types {
+    GC_UNKNOWN,
+    GC_VECTOR,
+    GC_PTR
+};
 
 /* For fatal() and fatalx() (XXX - needed?) */
 void cleanup(int);
@@ -206,6 +211,7 @@ bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
+bool gc_add(enum sudo_gc_types type, void *v);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;

@@ -464,6 +464,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	    cmnd = dst = reallocarray(NULL, cmnd_size, 2);
 	    if (cmnd == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    if (!gc_add(GC_PTR, cmnd))
+		exit(1);
+
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
@@ -483,6 +486,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	av = reallocarray(NULL, ac + 1, sizeof(char *));
 	if (av == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if (!gc_add(GC_PTR, av))
+	    exit(1);
+
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = "-c";

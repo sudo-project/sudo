@@ -89,11 +89,7 @@ static int sudo_mode;
 
 struct sudo_gc_entry {
     SLIST_ENTRY(sudo_gc_entry) entries;
-    enum sudo_gc_types {
-	GC_UNKNOWN,
-	GC_VECTOR,
-	GC_PTR
-    } type;
+    enum sudo_gc_types type;
     union {
 	char **vec;
 	void *ptr;
@@ -113,7 +109,6 @@ static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
-static bool gc_add(enum sudo_gc_types type, void *ptr);
 static void gc_init(void);
 
 /* Policy plugin convenience functions. */
@@ -1509,7 +1504,7 @@ iolog_unlink(struct plugin_container *plugin)
     debug_return;
 }
 
-static bool
+bool
 gc_add(enum sudo_gc_types type, void *v)
 {
 #ifdef NO_LEAKS
