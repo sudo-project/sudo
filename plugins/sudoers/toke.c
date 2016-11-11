@@ -4068,6 +4068,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     while ((dent = readdir(dir)) != NULL) {
 	struct path_list *pl;
 	struct stat sb;
+	size_t len;
 	char *path;
 
 	/* Ignore files that end in '~' or have a '.' in them. */
@@ -4075,15 +4076,17 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    || strchr(dent->d_name, '.') != NULL) {
 	    continue;
 	}
-	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1)
+	len = strlen(dirpath) + 1 + NAMLEN(dent);
+	if ((path = rcstr_alloc(len)) == NULL)
 	    goto oom;
+	(void)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name);
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
-	    free(path);
+	    rcstr_delref(path);
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
 	if (pl == NULL) {
-	    free(path);
+	    rcstr_delref(path);
 	    goto oom;
 	}
 	pl->path = path;
@@ -4092,7 +4095,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	    max_paths <<= 1;
 	    tmp = reallocarray(paths, max_paths, sizeof(*paths));
 	    if (tmp == NULL) {
-		free(path);
+		rcstr_delref(path);
 		free(pl);
 		goto oom;
 	    }
@@ -4115,7 +4118,7 @@ bad:
     if (dir != NULL)
 	closedir(dir);
     for (i = 0; i < count; i++) {
-	free(paths[i]->path);
+	rcstr_delref(paths[i]->path);
 	free(paths[i]);
     }
     free(paths);
@@ -4165,10 +4168,10 @@ init_lexer(void)
 	idepth--;
 	while ((pl = SLIST_FIRST(&istack[idepth].more)) != NULL) {
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
-	    free(pl->path);
+	    rcstr_delref(pl->path);
 	    free(pl);
 	}
-	free(istack[idepth].path);
+	rcstr_delref(istack[idepth].path);
 	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
 	sudoers_delete_buffer(istack[idepth].bs);
@@ -4251,13 +4254,13 @@ push_include_int(char *path, bool isdir)
 	count = switch_dir(&istack[idepth], path);
 	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
-	    free(path);
+	    rcstr_delref(path);
 	    debug_return_bool(count ? false : true);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
 	do {
-	    free(path);
+	    rcstr_delref(path);
 	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL) {
 		/* Unable to open any files in include dir, not an error. */
 		debug_return_bool(true);
@@ -4274,7 +4277,7 @@ push_include_int(char *path, bool isdir)
 	}
     }
     /* Push the old (current) file and open the new one. */
-    istack[idepth].path = sudoers; /* push old path */
+    istack[idepth].path = sudoers; /* push old path (and its ref) */
     istack[idepth].bs = YY_CURRENT_BUFFER;
     istack[idepth].lineno = sudolineno;
     istack[idepth].keepopen = keepopen;
@@ -4309,7 +4312,7 @@ pop_include(void)
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
-	    free(sudoers);
+	    rcstr_delref(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
 	    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
@@ -4317,14 +4320,14 @@ pop_include(void)
 	    break;
 	}
 	/* Unable to open path in include dir, go to next one. */
-	free(pl->path);
+	rcstr_delref(pl->path);
 	free(pl);
     }
     /* If no path list, just pop the last dir on the stack. */
     if (pl == NULL) {
 	idepth--;
 	sudoers_switch_to_buffer(istack[idepth].bs);
-	free(sudoers);
+	rcstr_delref(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;
@@ -4365,7 +4368,7 @@ parse_include(char *base)
 
     /* Make a copy of the fully-qualified path and return it. */
     len += (int)(ep - cp);
-    path = pp = malloc(len + dirlen + 1);
+    path = pp = rcstr_alloc(len + dirlen);
     if (path == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);

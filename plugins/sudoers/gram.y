@@ -858,11 +858,8 @@ sudoerserror(const char *s)
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno;
-	free(errorfile);
-	errorfile = strdup(sudoers);
-	if (errorfile == NULL)
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
+	rcstr_delref(errorfile);
+	errorfile = rcstr_addref(sudoers);
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -900,13 +897,7 @@ new_default(char *var, char *val, short op)
     d->op = op;
     /* d->binding = NULL */
     d->lineno = last_token == COMMENT ? sudolineno - 1 : sudolineno;
-    d->file = strdup(sudoers);
-    if (d->file == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "unable to allocate memory");
-	free(d);
-	debug_return_ptr(NULL);
-    }
+    d->file = rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
@@ -1137,10 +1128,9 @@ init_parser(const char *path, bool quiet)
 	    free_members(d->binding);
 	    free(d->binding);
 	}
-	/* no need to free sd_un */
+	rcstr_delref(d->file);
 	free(d->var);
 	free(d->val);
-	free(d->file);
 	free(d);
     }
     TAILQ_INIT(&defaults);
@@ -1152,9 +1142,9 @@ init_parser(const char *path, bool quiet)
 	ret = false;
     }
 
-    free(sudoers);
+    rcstr_delref(sudoers);
     if (path != NULL) {
-	if ((sudoers = strdup(path)) == NULL) {
+	if ((sudoers = rcstr_dup(path)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    ret = false;
 	}
@@ -1164,7 +1154,7 @@ init_parser(const char *path, bool quiet)
 
     parse_error = false;
     errorlineno = -1;
-    free(errorfile);
+    rcstr_delref(errorfile);
     errorfile = NULL;
     sudoers_warnings = !quiet;
 

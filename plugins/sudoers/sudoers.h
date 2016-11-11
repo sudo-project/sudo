@@ -403,4 +403,10 @@ bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
 bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
 void sudoers_gc_init(void);
 
+/* rcstr.c */
+char *rcstr_dup(const char *src);
+char *rcstr_alloc(size_t len);
+char *rcstr_addref(const char *s);
+void rcstr_delref(const char *s);
+
 #endif /* SUDOERS_SUDOERS_H */
