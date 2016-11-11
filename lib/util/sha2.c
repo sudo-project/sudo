@@ -255,7 +255,7 @@ SHA256Update(SHA2_CTX *ctx, const uint8_t *data, size_t len)
 	size_t i = 0, j;
 
 	j = (size_t)((ctx->count[0] >> 3) & (SHA256_BLOCK_LENGTH - 1));
-	ctx->count[0] += (len << 3);
+	ctx->count[0] += ((uint64_t)len << 3);
 	if ((j + len) > SHA256_BLOCK_LENGTH - 1) {
 		memcpy(&ctx->buffer[j], data, (i = SHA256_BLOCK_LENGTH - j));
 		SHA256Transform(ctx->state.st32, ctx->buffer);
@@ -466,8 +466,8 @@ SHA512Update(SHA2_CTX *ctx, const uint8_t *data, size_t len)
 	size_t i = 0, j;
 
 	j = (size_t)((ctx->count[0] >> 3) & (SHA512_BLOCK_LENGTH - 1));
-	ctx->count[0] += (len << 3);
-	if (ctx->count[0] < (len << 3))
+	ctx->count[0] += ((uint64_t)len << 3);
+	if (ctx->count[0] < ((uint64_t)len << 3))
 		ctx->count[1]++;
 	if ((j + len) > SHA512_BLOCK_LENGTH - 1) {
 		memcpy(&ctx->buffer[j], data, (i = SHA512_BLOCK_LENGTH - j));
