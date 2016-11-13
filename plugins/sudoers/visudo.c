@@ -564,6 +564,7 @@ check_defaults_and_aliases(bool strict, bool quiet)
 	struct defaults *d;
 	rcstr_delref(errorfile);
 	errorfile = NULL;
+	errorlineno = -1;
 	/* XXX - should edit all files with errors */
 	TAILQ_FOREACH(d, &defaults, entries) {
 	    if (d->error) {
@@ -577,6 +578,7 @@ check_defaults_and_aliases(bool strict, bool quiet)
     } else if (check_aliases(strict, quiet) != 0) {
 	rcstr_delref(errorfile);
 	errorfile = NULL;	/* don't know which file */
+	errorlineno = -1;
 	parse_error = true;
     }
     debug_return;
@@ -662,8 +664,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    printf(_("press return to edit %s: "), sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
-	    edit_sudoers(sp, editor, editor_argc, editor_argv,
-		errorlineno);
+	    edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
 	}
 
 	/* If all sudoers files parsed OK we are done. */
@@ -1114,7 +1115,7 @@ alias_type_to_string(int alias_type)
 }
 
 static int
-check_alias(char *name, int type, char *file, int lineno, bool quiet)
+check_alias(char *name, int type, char *file, int lineno, bool strict, bool quiet)
 {
     struct member *m;
     struct alias *a;
@@ -1126,7 +1127,7 @@ check_alias(char *name, int type, char *file, int lineno, bool quiet)
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type != ALIAS)
 		continue;
-	    errors += check_alias(m->name, type, a->file, a->lineno, quiet);
+	    errors += check_alias(m->name, type, a->file, a->lineno, strict, quiet);
 	}
 	alias_put(a);
     } else {
@@ -1137,6 +1138,10 @@ check_alias(char *name, int type, char *file, int lineno, bool quiet)
 	    } else {
 		sudo_warnx(U_("%s:%d %s \"%s\" referenced but not defined"),
 		    file, lineno, alias_type_to_string(type), name);
+	    }
+	    if (strict && errorfile == NULL) {
+		errorfile = rcstr_addref(file);
+		errorlineno = lineno;
 	    }
 	}
 	errors++;
@@ -1171,14 +1176,14 @@ check_aliases(bool strict, bool quiet)
 	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
 		errors += check_alias(m->name, USERALIAS,
-		    us->file, us->lineno, quiet);
+		    us->file, us->lineno, strict, quiet);
 	    }
 	}
 	TAILQ_FOREACH(priv, &us->privileges, entries) {
 	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
 		if (m->type == ALIAS) {
 		    errors += check_alias(m->name, HOSTALIAS,
-			us->file, us->lineno, quiet);
+			us->file, us->lineno, strict, quiet);
 		}
 	    }
 	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
@@ -1186,7 +1191,7 @@ check_aliases(bool strict, bool quiet)
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m->type == ALIAS) {
 			    errors += check_alias(m->name, RUNASALIAS,
-				us->file, us->lineno, quiet);
+				us->file, us->lineno, strict, quiet);
 			}
 		    }
 		}
@@ -1194,13 +1199,13 @@ check_aliases(bool strict, bool quiet)
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m->type == ALIAS) {
 			    errors += check_alias(m->name, RUNASALIAS,
-				us->file, us->lineno, quiet);
+				us->file, us->lineno, strict, quiet);
 			}
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    errors += check_alias(m->name, CMNDALIAS,
-			us->file, us->lineno, quiet);
+			us->file, us->lineno, strict, quiet);
 		}
 	    }
 	}
