@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2015
+ * Copyright (c) 2004-2005, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -109,10 +109,11 @@ alias_put(struct alias *a)
 
 /*
  * Add an alias to the aliases redblack tree.
+ * Note that "file" must be a reference-counted string.
  * Returns NULL on success and an error string on failure.
  */
 const char *
-alias_add(char *name, int type, struct member *members)
+alias_add(char *name, int type, char *file, int lineno, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
@@ -126,6 +127,8 @@ alias_add(char *name, int type, struct member *members)
     a->name = name;
     a->type = type;
     /* a->used = false; */
+    a->file = rcstr_addref(file);
+    a->lineno = lineno;
     HLTQ_TO_TAILQ(&a->members, members, entries);
     switch (rbinsert(aliases, a, NULL)) {
     case 1:
@@ -173,6 +176,7 @@ alias_free(void *v)
     debug_decl(alias_free, SUDOERS_DEBUG_ALIAS)
 
     free(a->name);
+    rcstr_delref(a->file);
     free_members(&a->members);
     free(a);
 

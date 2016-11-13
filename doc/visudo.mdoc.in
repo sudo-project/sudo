@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 20, 2015
+.Dd November 12, 2016
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -310,6 +310,11 @@ List of who can run what
 Lock file for visudo
 .El
 .Sh DIAGNOSTICS
+In addition to reporting
+.Em sudoers
+parse errors,
+.Nm
+may produce the following messages:
 .Bl -tag -width 4n
 .It Li sudoers file busy, try again later.
 Someone else is currently editing the
@@ -319,9 +324,9 @@ file.
 You didn't run
 .Nm
 as root.
-.It Li Can't find you in the passwd database
-Your user ID does not appear in the system passwd file.
-.It Li Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
+.It Li you do not exist in the passwd database
+Your user ID does not appear in the system passwd database.
+.It Li {User,Runas,Host,Cmnd}_Alias referenced but not defined
 Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias
 or you have a user or host name listed that consists solely of
 uppercase letters, digits, and the underscore
@@ -332,23 +337,43 @@ In the latter case, you can ignore the warnings
 .Nm sudo
 will not complain
 .Pc .
+The message is prefixed with the path name of the
+.Em sudoers
+file and the line number where the undefined alias was used.
 In
 .Fl s
 (strict) mode these are errors, not warnings.
-.It Li Warning: unused {User,Runas,Host,Cmnd}_Alias
+.It Li unused {User,Runas,Host,Cmnd}_Alias
 The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
+The message is prefixed with the path name of the
+.Em sudoers
+file and the line number where the unused alias was defined.
 You may wish to comment out or remove the unused alias.
-.It Li Warning: cycle in {User,Runas,Host,Cmnd}_Alias
+.It Li cycle in {User,Runas,Host,Cmnd}_Alias
 The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
 itself, either directly or through an alias it includes.
-This is only a warning by default as
+The message is prefixed with the path name of the
+.Em sudoers
+file and the line number where the cycle was detected.
+This is only a warning unless
+.Nm
+is run in
+.Fl s
+(strict) mode as
 .Nm sudo
 will ignore cycles when parsing
 the
 .Em sudoers
 file.
-.It Li visudo: @sysconfdir@/sudoers: input and output files must be different
+.It Li unknown defaults entry \&"name\&"
+The
+.Em sudoers
+file contains a
+.Li Defaults
+variable not recognized by
+.Nm .
+.It Li @sysconfdir@/sudoers: input and output files must be different
 The
 .Fl x
 flag was used and the specified

@@ -89,7 +89,7 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
 static void quit(int);
 static void get_hostname(void);
 static int whatnow(void);
-static int check_aliases(bool, bool);
+static int check_aliases(bool strict, bool quiet);
 static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
@@ -1114,7 +1114,7 @@ alias_type_to_string(int alias_type)
 }
 
 static int
-check_alias(char *name, int type, int strict, int quiet)
+check_alias(char *name, int type, char *file, int lineno, bool quiet)
 {
     struct member *m;
     struct alias *a;
@@ -1124,22 +1124,19 @@ check_alias(char *name, int type, int strict, int quiet)
     if ((a = alias_get(name, type)) != NULL) {
 	/* check alias contents */
 	TAILQ_FOREACH(m, &a->members, entries) {
-	    if (m->type == ALIAS)
-		errors += check_alias(m->name, type, strict, quiet);
+	    if (m->type != ALIAS)
+		continue;
+	    errors += check_alias(m->name, type, a->file, a->lineno, quiet);
 	}
 	alias_put(a);
     } else {
 	if (!quiet) {
 	    if (errno == ELOOP) {
-		sudo_warnx(strict ?
-		    U_("Error: cycle in %s \"%s\"") :
-		    U_("Warning: cycle in %s \"%s\""),
-		    alias_type_to_string(type), name);
+		sudo_warnx(U_("%s:%d cycle in %s \"%s\""),
+		    file, lineno, alias_type_to_string(type), name);
 	    } else {
-		sudo_warnx(strict ?
-		    U_("Error: %s \"%s\" referenced but not defined") :
-		    U_("Warning: %s \"%s\" referenced but not defined"),
-		    alias_type_to_string(type), name);
+		sudo_warnx(U_("%s:%d %s \"%s\" referenced but not defined"),
+		    file, lineno, alias_type_to_string(type), name);
 	    }
 	}
 	errors++;
@@ -1173,32 +1170,37 @@ check_aliases(bool strict, bool quiet)
     TAILQ_FOREACH(us, &userspecs, entries) {
 	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
-		errors += check_alias(m->name, USERALIAS, strict, quiet);
+		errors += check_alias(m->name, USERALIAS,
+		    us->file, us->lineno, quiet);
 	    }
 	}
 	TAILQ_FOREACH(priv, &us->privileges, entries) {
 	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
 		if (m->type == ALIAS) {
-		    errors += check_alias(m->name, HOSTALIAS, strict, quiet);
+		    errors += check_alias(m->name, HOSTALIAS,
+			us->file, us->lineno, quiet);
 		}
 	    }
 	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 		if (cs->runasuserlist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m->type == ALIAS) {
-			    errors += check_alias(m->name, RUNASALIAS, strict, quiet);
+			    errors += check_alias(m->name, RUNASALIAS,
+				us->file, us->lineno, quiet);
 			}
 		    }
 		}
 		if (cs->runasgrouplist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m->type == ALIAS) {
-			    errors += check_alias(m->name, RUNASALIAS, strict, quiet);
+			    errors += check_alias(m->name, RUNASALIAS,
+				us->file, us->lineno, quiet);
 			}
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
-		    errors += check_alias(m->name, CMNDALIAS, strict, quiet);
+		    errors += check_alias(m->name, CMNDALIAS,
+			us->file, us->lineno, quiet);
 		}
 	    }
 	}
@@ -1281,8 +1283,8 @@ print_unused(void *v1, void *v2)
 {
     struct alias *a = (struct alias *)v1;
 
-    sudo_warnx_nodebug(U_("Warning: unused %s \"%s\""),
-	alias_type_to_string(a->type), a->name);
+    sudo_warnx_nodebug(U_("%s:%d unused %s \"%s\""),
+	a->file, a->lineno, alias_type_to_string(a->type), a->name);
     return 0;
 }
 

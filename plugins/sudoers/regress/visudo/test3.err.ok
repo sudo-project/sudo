@@ -1,2 +1,2 @@
-visudo: Warning: unused User_Alias "A"
-visudo: Warning: unused User_Alias "B"
+visudo: stdin:1 unused User_Alias "A"
+visudo: stdin:2 unused User_Alias "B"

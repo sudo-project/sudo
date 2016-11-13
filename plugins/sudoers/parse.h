@@ -159,6 +159,8 @@ struct userspec {
     TAILQ_ENTRY(userspec) entries;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
+    int lineno;
+    char *file;
 };
 
 /*
@@ -209,7 +211,9 @@ struct runascontainer {
 struct alias {
     char *name;				/* alias name */
     unsigned short type;		/* {USER,HOST,RUNAS,CMND}ALIAS */
-    bool used;				/* "used" flag for cycle detection */
+    short used;				/* "used" flag for cycle detection */
+    int lineno;				/* line number of alias entry */
+    char *file;				/* file the alias entry was in */
     struct member_list members;		/* list of alias members */
 };
 
@@ -236,7 +240,7 @@ extern struct defaults_list defaults;
 
 /* alias.c */
 bool no_aliases(void);
-const char *alias_add(char *name, int type, struct member *members);
+const char *alias_add(char *name, int type, char *file, int lineno, struct member *members);
 int alias_compare(const void *a1, const void *a2);
 struct alias *alias_get(char *name, int type);
 struct alias *alias_remove(char *name, int type);
