@@ -1840,6 +1840,8 @@ case "$host" in
 			    shadow_libs="-lsec"
 			    # HP-UX 10.20 libc has an incompatible getline
 			    ac_cv_func_getline="no"
+			    # HP-UX 10.x doesn't support LD_PRELOAD
+			    with_noexec=no
 			;;
 			*)
 			    shadow_funcs="getspnam iscomsec"
