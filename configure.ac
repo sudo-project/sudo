@@ -1977,11 +1977,6 @@ case "$host" in
 		# lockf() is broken on the Hurd
 		ac_cv_func_lockf=no
 		;;
-    *-*-ultrix*)
-		OS="ultrix"
-		shadow_funcs="getauthuid"
-		shadow_libs="-lauth"
-		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
 		SUDO_APPEND_CPPFLAGS(-I/usr/include)
@@ -4317,7 +4312,6 @@ AH_TEMPLATE(HAVE_DLOPEN, [Define to 1 if you have the `dlopen' function.])
 AH_TEMPLATE(HAVE_FCNTL_CLOSEM, [Define to 1 if your system has the F_CLOSEM fcntl.])
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
 AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
-AH_TEMPLATE(HAVE_GETAUTHUID, [Define to 1 if you have the `getauthuid' function. (ULTRIX 4.x  shadow passwords).])
 AH_TEMPLATE(HAVE_GETPRPWNAM, [Define to 1 if you have the `getprpwnam' function.  (SecureWare-style shadow passwords).])
 AH_TEMPLATE(HAVE_GETPWANAM, [Define to 1 if you have the `getpwanam' function. (SunOS 4.x shadow passwords).])
 AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR4-style shadow passwords).])

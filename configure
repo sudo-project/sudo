@@ -15321,11 +15321,6 @@ _ACEOF
 		# lockf() is broken on the Hurd
 		ac_cv_func_lockf=no
 		;;
-    *-*-ultrix*)
-		OS="ultrix"
-		shadow_funcs="getauthuid"
-		shadow_libs="-lauth"
-		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
 
@@ -26665,7 +26660,6 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
 
 
 

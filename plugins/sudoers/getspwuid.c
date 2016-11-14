@@ -51,9 +51,6 @@
 # include <sys/audit.h>
 # include <pwdadj.h>
 #endif /* HAVE_GETPWANAM */
-#ifdef HAVE_GETAUTHUID
-# include <auth.h>
-#endif /* HAVE_GETAUTHUID */
 
 #include "sudoers.h"
 
@@ -120,14 +117,6 @@ sudo_getepw(const struct passwd *pw)
 	    epw = spw->pwa_passwd;
     }
 #endif /* HAVE_GETPWANAM */
-#ifdef HAVE_GETAUTHUID
-    {
-	AUTHORIZATION *spw;
-
-	if ((spw = getauthuid(pw->pw_uid)) && spw->a_password)
-	    epw = spw->a_password;
-    }
-#endif /* HAVE_GETAUTHUID */
 
 #if defined(HAVE_ISCOMSEC) || defined(HAVE_ISSECURE)
 done:
@@ -153,9 +142,6 @@ sudo_setspent(void)
 #ifdef HAVE_GETPWANAM
     setpwaent();
 #endif
-#ifdef HAVE_GETAUTHUID
-    setauthent();
-#endif
     debug_return;
 }
 
@@ -175,9 +161,6 @@ sudo_endspent(void)
 #endif
 #ifdef HAVE_GETPWANAM
     endpwaent();
-#endif
-#ifdef HAVE_GETAUTHUID
-    endauthent();
 #endif
     debug_return;
 }
