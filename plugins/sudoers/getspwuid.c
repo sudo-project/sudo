@@ -101,14 +101,6 @@ sudo_getepw(const struct passwd *pw)
 	    epw = spw->sp_pwdp;
     }
 #endif /* HAVE_GETSPNAM */
-#ifdef HAVE_GETSPWUID
-    {
-	struct s_passwd *spw;
-
-	if ((spw = getspwuid(pw->pw_uid)) && spw->pw_passwd)
-	    epw = spw->pw_passwd;
-    }
-#endif /* HAVE_GETSPWUID */
 #ifdef HAVE_GETPWANAM
     {
 	struct passwd_adjunct *spw;
@@ -136,9 +128,6 @@ sudo_setspent(void)
 #ifdef HAVE_GETSPNAM
     setspent();
 #endif
-#ifdef HAVE_GETSPWUID
-    setspwent();
-#endif
 #ifdef HAVE_GETPWANAM
     setpwaent();
 #endif
@@ -155,9 +144,6 @@ sudo_endspent(void)
 #endif
 #ifdef HAVE_GETSPNAM
     endspent();
-#endif
-#ifdef HAVE_GETSPWUID
-    endspwent();
 #endif
 #ifdef HAVE_GETPWANAM
     endpwaent();

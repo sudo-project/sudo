@@ -297,10 +297,6 @@
    passwords). */
 #undef HAVE_GETSPNAM
 
-/* Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow
-   passwords). */
-#undef HAVE_GETSPWUID
-
 /* Define to 1 if you have the `getttyent' function. */
 #undef HAVE_GETTTYENT
 

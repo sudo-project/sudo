@@ -1851,18 +1851,6 @@ case "$host" in
 		esac
 
 		case "$host_os" in
-			hpux9.*)
-			    shadow_funcs="getspwuid"
-
-			    # DCE support (requires ANSI C compiler)
-			    if test "$with_DCE" = "yes"; then
-				# order of libs in 9.X is important. -lc_r must be last
-				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
-				LIBS="${LIBS} -ldce -lM -lc_r"
-				AC_DEFINE(_REENTRANT)
-				SUDO_APPEND_CPPFLAGS(-I/usr/include/reentrant)
-			    fi
-			;;
 			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
@@ -4315,7 +4303,6 @@ AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
 AH_TEMPLATE(HAVE_GETPRPWNAM, [Define to 1 if you have the `getprpwnam' function.  (SecureWare-style shadow passwords).])
 AH_TEMPLATE(HAVE_GETPWANAM, [Define to 1 if you have the `getpwanam' function. (SunOS 4.x shadow passwords).])
 AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR4-style shadow passwords).])
-AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
 AH_TEMPLATE(HAVE_INET_NTOP, [Define to 1 if you have the `inet_ntop' function.])

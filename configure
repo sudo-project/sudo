@@ -15092,31 +15092,6 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 		esac
 
 		case "$host_os" in
-			hpux9.*)
-			    shadow_funcs="getspwuid"
-
-			    # DCE support (requires ANSI C compiler)
-			    if test "$with_DCE" = "yes"; then
-				# order of libs in 9.X is important. -lc_r must be last
-				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
-				LIBS="${LIBS} -ldce -lM -lc_r"
-				$as_echo "#define _REENTRANT 1" >>confdefs.h
-
-
-    case "${CPPFLAGS}" in
-	*"-I/usr/include/reentrant"|*"-I/usr/include/reentrant ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I/usr/include/reentrant"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I/usr/include/reentrant"
-	    fi
-	    ;;
-    esac
-
-			    fi
-			;;
 			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
@@ -26660,7 +26635,6 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
 
 
 
