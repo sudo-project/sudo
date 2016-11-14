@@ -1737,11 +1737,11 @@ case "$host" in
 		fi
 
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
-		if test $OSMAJOR -lt 5; then
-		    with_noexec=no
-		else
-		    RTLD_PRELOAD_VAR="LDR_PRELOAD"
-		fi
+		case "$OSREV" in
+		    [[1-4]].*)	with_noexec=no;;
+		    5.[[1-2]]*)	with_noexec=no;;
+		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
+		esac
 
 		# Remove timedir on boot, AIX does not have /var/run
 		INIT_SCRIPT=aix.sh
