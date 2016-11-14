@@ -151,8 +151,8 @@ preload_dso(char *envp[], const char *dso_file)
  * to run.  On systems with privilege sets, we can remove the exec
  * privilege.  On other systems we use LD_PRELOAD and the like.
  */
-static char **
-disable_execute(char *envp[])
+char **
+disable_execute(char *envp[], const char *dso)
 {
     debug_decl(disable_execute, SUDO_DEBUG_UTIL)
 
@@ -167,8 +167,8 @@ disable_execute(char *envp[])
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC
-    if (sudo_conf_noexec_path() != NULL)
-	envp = preload_dso(envp, sudo_conf_noexec_path());
+    if (dso != NULL)
+	envp = preload_dso(envp, dso);
 #endif /* _PATH_SUDO_NOEXEC */
 
     debug_return_ptr(envp);
@@ -187,7 +187,7 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noe
 
     /* Modify the environment as needed to disable further execve(). */
     if (noexec)
-	envp = disable_execute(envp);
+	envp = disable_execute(envp, sudo_conf_noexec_path());
 
 #ifdef HAVE_FEXECVE
     if (fd != -1)

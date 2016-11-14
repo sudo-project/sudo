@@ -65,6 +65,7 @@ AC_SUBST([noexec_file])
 AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_BACKUP])
 AC_SUBST([INSTALL_NOEXEC])
+AC_SUBST([CHECK_NOEXEC])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
 AC_SUBST([SELINUX_USAGE])
@@ -189,6 +190,7 @@ dnl May be overridden by environment variables..
 dnl
 INSTALL_BACKUP=
 INSTALL_NOEXEC=
+CHECK_NOEXEC=
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
@@ -4179,6 +4181,11 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
     if test X"$with_noexec" != X"no"; then
 	PROGS="${PROGS} sudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
+
+	# Can't use asan with LD_PRELOAD
+	if test "$enable_asan" != "yes"; then
+	    CHECK_NOEXEC=check_sudo_noexec
+	fi
 
 	noexec_file="$with_noexec"
 	_noexec_file=

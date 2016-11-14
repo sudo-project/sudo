@@ -459,13 +459,11 @@ sudo_conf_sesh_path_v1(void)
     return sudo_conf_paths.sesh;
 }
 
-#ifdef _PATH_SUDO_NOEXEC
 const char *
 sudo_conf_noexec_path_v1(void)
 {
     return sudo_conf_paths.noexec;
 }
-#endif
 
 #ifdef _PATH_SUDO_PLUGIN_DIR
 const char *

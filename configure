@@ -750,6 +750,7 @@ LDAP
 SELINUX_USAGE
 BSDAUTH_USAGE
 DONT_LEAK_PATH_INFO
+CHECK_NOEXEC
 INSTALL_NOEXEC
 INSTALL_BACKUP
 sesh_file
@@ -2857,6 +2858,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2906,6 +2908,7 @@ PLUGINDIR=/usr/local/libexec/sudo
 #
 INSTALL_BACKUP=
 INSTALL_NOEXEC=
+CHECK_NOEXEC=
 exampledir='$(docdir)/examples'
 devdir='$(srcdir)'
 PROGS="sudo"
@@ -24405,6 +24408,11 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
     if test X"$with_noexec" != X"no"; then
 	PROGS="${PROGS} sudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
+
+	# Can't use asan with LD_PRELOAD
+	if test "$enable_asan" != "yes"; then
+	    CHECK_NOEXEC=check_sudo_noexec
+	fi
 
 	noexec_file="$with_noexec"
 	_noexec_file=
