@@ -46,11 +46,6 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM */
-#ifdef HAVE_GETPWANAM
-# include <sys/label.h>
-# include <sys/audit.h>
-# include <pwdadj.h>
-#endif /* HAVE_GETPWANAM */
 
 #include "sudoers.h"
 
@@ -76,10 +71,6 @@ sudo_getepw(const struct passwd *pw)
     if (!iscomsec())
 	goto done;
 #endif /* HAVE_ISCOMSEC */
-#ifdef HAVE_ISSECURE
-    if (!issecure())
-	goto done;
-#endif /* HAVE_ISSECURE */
 
 #ifdef HAVE_GETPRPWNAM
     {
@@ -101,16 +92,8 @@ sudo_getepw(const struct passwd *pw)
 	    epw = spw->sp_pwdp;
     }
 #endif /* HAVE_GETSPNAM */
-#ifdef HAVE_GETPWANAM
-    {
-	struct passwd_adjunct *spw;
 
-	if ((spw = getpwanam(pw->pw_name)) && spw->pwa_passwd)
-	    epw = spw->pwa_passwd;
-    }
-#endif /* HAVE_GETPWANAM */
-
-#if defined(HAVE_ISCOMSEC) || defined(HAVE_ISSECURE)
+#if defined(HAVE_ISCOMSEC)
 done:
 #endif
     /* If no shadow password, fall back on regular password. */
@@ -128,9 +111,6 @@ sudo_setspent(void)
 #ifdef HAVE_GETSPNAM
     setspent();
 #endif
-#ifdef HAVE_GETPWANAM
-    setpwaent();
-#endif
     debug_return;
 }
 
@@ -144,9 +124,6 @@ sudo_endspent(void)
 #endif
 #ifdef HAVE_GETSPNAM
     endspent();
-#endif
-#ifdef HAVE_GETPWANAM
-    endpwaent();
 #endif
     debug_return;
 }

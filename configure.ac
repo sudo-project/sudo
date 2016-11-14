@@ -1677,22 +1677,6 @@ else
 fi
 
 case "$host" in
-    *-*-sunos4*)
-		# LD_PRELOAD is space-delimited
-		RTLD_PRELOAD_DELIM=" "
-
-		# getcwd(3) opens a pipe to getpwd(1)!?!
-		AC_LIBOBJ(getcwd)
-		SUDO_APPEND_COMPAT_EXP(sudo_getcwd)
-		AC_DEFINE(PREFER_PORTABLE_GETCWD)
-
-		# system headers lack prototypes but gcc helps...
-		if test -n "$GCC"; then
-		    AC_DEFINE([__USE_FIXED_PROTOTYPES__])
-		fi
-
-		shadow_funcs="getpwanam issecure"
-		;;
     *-*-solaris2*)
 		AC_DEFINE([PAM_SUN_CODEBASE])
 
@@ -4301,14 +4285,12 @@ AH_TEMPLATE(HAVE_FCNTL_CLOSEM, [Define to 1 if your system has the F_CLOSEM fcnt
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
 AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
 AH_TEMPLATE(HAVE_GETPRPWNAM, [Define to 1 if you have the `getprpwnam' function.  (SecureWare-style shadow passwords).])
-AH_TEMPLATE(HAVE_GETPWANAM, [Define to 1 if you have the `getpwanam' function. (SunOS 4.x shadow passwords).])
 AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR4-style shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
 AH_TEMPLATE(HAVE_INET_NTOP, [Define to 1 if you have the `inet_ntop' function.])
 AH_TEMPLATE(HAVE_INET_PTON, [Define to 1 if you have the `inet_pton' function.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled).])
-AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_KERB5, [Define to 1 if you use Kerberos V.])
 AH_TEMPLATE(HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC, [Define to 1 if you have the `krb5_get_init_creds_opt_alloc' function.])
 AH_TEMPLATE(HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS, [Define to 1 if your `krb5_get_init_creds_opt_free' function takes two arguments.])

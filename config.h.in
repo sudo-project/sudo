@@ -286,10 +286,6 @@
    passwords). */
 #undef HAVE_GETPRPWNAM
 
-/* Define to 1 if you have the `getpwanam' function. (SunOS 4.x shadow
-   passwords). */
-#undef HAVE_GETPWANAM
-
 /* Define to 1 if you have the `getresuid' function. */
 #undef HAVE_GETRESUID
 
@@ -345,10 +341,6 @@
 /* Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for
    shadow enabled). */
 #undef HAVE_ISCOMSEC
-
-/* Define to 1 if you have the `issecure' function. (SunOS 4.x check for
-   shadow enabled). */
-#undef HAVE_ISSECURE
 
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5

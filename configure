@@ -638,10 +638,10 @@ ac_func_list=
 ac_c_werror_flag=
 ac_subst_vars='LTLIBOBJS
 KRB5CONFIG
+LIBOBJS
 FLEX
 YFLAGS
 YACC
-LIBOBJS
 NROFFPROG
 MANDOCPROG
 TRPROG
@@ -14794,34 +14794,6 @@ else
 fi
 
 case "$host" in
-    *-*-sunos4*)
-		# LD_PRELOAD is space-delimited
-		RTLD_PRELOAD_DELIM=" "
-
-		# getcwd(3) opens a pipe to getpwd(1)!?!
-		case " $LIBOBJS " in
-  *" getcwd.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getcwd.$ac_objext"
- ;;
-esac
-
-
-    for _sym in sudo_getcwd; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
-		$as_echo "#define PREFER_PORTABLE_GETCWD 1" >>confdefs.h
-
-
-		# system headers lack prototypes but gcc helps...
-		if test -n "$GCC"; then
-		    $as_echo "#define __USE_FIXED_PROTOTYPES__ 1" >>confdefs.h
-
-		fi
-
-		shadow_funcs="getpwanam issecure"
-		;;
     *-*-solaris2*)
 		$as_echo "#define PAM_SUN_CODEBASE 1" >>confdefs.h
 
@@ -26635,8 +26607,6 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
-
 
 
 
