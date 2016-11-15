@@ -84,6 +84,8 @@ AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
 AC_SUBST([SUDOERS_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
+AC_SUBST([ASAN_LDFLAGS])
+AC_SUBST([ASAN_CFLAGS])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
 AC_SUBST([SSP_LDFLAGS])
@@ -3955,10 +3957,10 @@ dnl Check for -fsanitize=address,undefined support
 dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_asan" = "yes"; then
-    AX_CHECK_COMPILE_FLAG([-fsanitize=address,undefined], [
-	AX_CHECK_LINK_FLAG([-fsanitize=address,undefined], [
-	    LDFLAGS="$LDFLAGS -fsanitize=address,undefined"
-	    CFLAGS="$CFLAGS -fsanitize=address,undefined"
+    AX_CHECK_COMPILE_FLAG([-fsanitize=address -fsanitize=undefined], [
+	AX_CHECK_LINK_FLAG([-fsanitize=address -fsanitize=undefined], [
+	    ASAN_LDFLAGS="-Wc,-fsanitize=address -Wc,-fsanitize=undefined"
+	    ASAN_CFLAGS="-fsanitize=address -fsanitize=undefined"
 	    AX_CHECK_COMPILE_FLAG([-fno-omit-frame-pointer], [
 		CFLAGS="$CFLAGS -fno-omit-frame-pointer"
 	    ])

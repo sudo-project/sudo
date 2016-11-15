@@ -732,6 +732,8 @@ SSP_CFLAGS
 SSP_LDFLAGS
 PIE_CFLAGS
 PIE_LDFLAGS
+ASAN_CFLAGS
+ASAN_LDFLAGS
 CROSS_COMPILING
 SUDOERS_TEST_PROGS
 COMPAT_TEST_PROGS
@@ -2742,6 +2744,8 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
+
 
 
 
@@ -23785,14 +23789,14 @@ $as_echo "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
 fi
 
 if test "$enable_asan" = "yes"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=address,undefined" >&5
-$as_echo_n "checking whether C compiler accepts -fsanitize=address,undefined... " >&6; }
-if ${ax_cv_check_cflags___fsanitize_address_undefined+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=address -fsanitize=undefined" >&5
+$as_echo_n "checking whether C compiler accepts -fsanitize=address -fsanitize=undefined... " >&6; }
+if ${ax_cv_check_cflags___fsanitize_address__fsanitize_undefined+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fsanitize=address,undefined"
+  CFLAGS="$CFLAGS  -fsanitize=address -fsanitize=undefined"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23805,25 +23809,25 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags___fsanitize_address_undefined=yes
+  ax_cv_check_cflags___fsanitize_address__fsanitize_undefined=yes
 else
-  ax_cv_check_cflags___fsanitize_address_undefined=no
+  ax_cv_check_cflags___fsanitize_address__fsanitize_undefined=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   CFLAGS=$ax_check_save_flags
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fsanitize_address_undefined" >&5
-$as_echo "$ax_cv_check_cflags___fsanitize_address_undefined" >&6; }
-if test x"$ax_cv_check_cflags___fsanitize_address_undefined" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fsanitize_address__fsanitize_undefined" >&5
+$as_echo "$ax_cv_check_cflags___fsanitize_address__fsanitize_undefined" >&6; }
+if test x"$ax_cv_check_cflags___fsanitize_address__fsanitize_undefined" = xyes; then :
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fsanitize=address,undefined" >&5
-$as_echo_n "checking whether the linker accepts -fsanitize=address,undefined... " >&6; }
-if ${ax_cv_check_ldflags___fsanitize_address_undefined+:} false; then :
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fsanitize=address -fsanitize=undefined" >&5
+$as_echo_n "checking whether the linker accepts -fsanitize=address -fsanitize=undefined... " >&6; }
+if ${ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
   ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -fsanitize=address,undefined"
+  LDFLAGS="$LDFLAGS  -fsanitize=address -fsanitize=undefined"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -23836,20 +23840,20 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_check_ldflags___fsanitize_address_undefined=yes
+  ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined=yes
 else
-  ax_cv_check_ldflags___fsanitize_address_undefined=no
+  ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
   LDFLAGS=$ax_check_save_flags
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fsanitize_address_undefined" >&5
-$as_echo "$ax_cv_check_ldflags___fsanitize_address_undefined" >&6; }
-if test x"$ax_cv_check_ldflags___fsanitize_address_undefined" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined" >&5
+$as_echo "$ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined" >&6; }
+if test x"$ax_cv_check_ldflags___fsanitize_address__fsanitize_undefined" = xyes; then :
 
-	    LDFLAGS="$LDFLAGS -fsanitize=address,undefined"
-	    CFLAGS="$CFLAGS -fsanitize=address,undefined"
+	    ASAN_LDFLAGS="-Wc,-fsanitize=address -Wc,-fsanitize=undefined"
+	    ASAN_CFLAGS="-fsanitize=address -fsanitize=undefined"
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
 $as_echo_n "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if ${ax_cv_check_cflags___fno_omit_frame_pointer+:} false; then :
