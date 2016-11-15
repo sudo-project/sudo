@@ -55,6 +55,14 @@
 # define ROOT_UID	0
 #endif
 
+/* Avoid excessive #ifdefs in the code. */
+#ifndef _PATH_SUDO_NOEXEC
+# define _PATH_SUDO_NOEXEC	NULL
+#endif
+#ifndef _PATH_SUDO_PLUGIN_DIR
+# define _PATH_SUDO_PLUGIN_DIR	NULL
+#endif
+
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
@@ -64,7 +72,7 @@ struct sudo_conf_table {
 struct sudo_conf_path_table {
     const char *pname;
     unsigned int pnamelen;
-    char **pval;
+    char *pval;
 };
 
 static int parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
@@ -93,35 +101,11 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
     { NULL }
 };
 
-/*
- * Using designated struct initializers would be clearer here but
- * we want to avoid relying on C99 features for now.
- */
-static struct sudo_conf_paths {
-    char *askpass;
-    char *sesh;
-    char *nodump;
-    char *noexec;
-    char *plugin_dir;
-} sudo_conf_paths = {
-    _PATH_SUDO_ASKPASS,
-    _PATH_SUDO_SESH,
-#ifdef _PATH_SUDO_NODUMP
-    _PATH_SUDO_NODUMP,
-#else
-    NULL,
-#endif
-#ifdef _PATH_SUDO_NOEXEC
-    _PATH_SUDO_NOEXEC,
-#else
-    NULL,
-#endif
-#ifdef _PATH_SUDO_PLUGIN_DIR
-    _PATH_SUDO_PLUGIN_DIR,
-#else
-    NULL,
-#endif
-};
+/* Indexes into path_table[] below (order is important). */
+#define SUDO_CONF_PATH_ASKPASS		0
+#define SUDO_CONF_PATH_SESH		1
+#define SUDO_CONF_PATH_NOEXEC		2
+#define SUDO_CONF_PATH_PLUGIN_DIR	3
 
 static struct sudo_conf_data {
     bool disable_coredump;
@@ -139,10 +123,10 @@ static struct sudo_conf_data {
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
-	{ "askpass", sizeof("askpass") - 1, &sudo_conf_paths.askpass },
-	{ "sesh", sizeof("sesh") - 1, &sudo_conf_paths.sesh },
-	{ "noexec", sizeof("noexec") - 1, &sudo_conf_paths.noexec },
-	{ "plugin_dir", sizeof("plugin_dir") - 1, &sudo_conf_paths.plugin_dir },
+	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
+	{ "sesh", sizeof("sesh") - 1, _PATH_SUDO_SESH },
+	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
+	{ "plugin_dir", sizeof("plugin_dir") - 1, _PATH_SUDO_PLUGIN_DIR },
 	{ NULL }
     }
 };
@@ -209,7 +193,8 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 		    debug_return_int(-1);
 		}
 	    }
-	    *cur->pval = pval;
+	    /* XXX - potential memory leak */
+	    cur->pval = pval;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%u: Path %s %s",
 		__func__, conf_file, lineno, cur->pname,
 		pval ? pval : "(none)");
@@ -450,28 +435,26 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
 const char *
 sudo_conf_askpass_path_v1(void)
 {
-    return sudo_conf_paths.askpass;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_ASKPASS].pval;
 }
 
 const char *
 sudo_conf_sesh_path_v1(void)
 {
-    return sudo_conf_paths.sesh;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_SESH].pval;
 }
 
 const char *
 sudo_conf_noexec_path_v1(void)
 {
-    return sudo_conf_paths.noexec;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_NOEXEC].pval;
 }
 
-#ifdef _PATH_SUDO_PLUGIN_DIR
 const char *
 sudo_conf_plugin_dir_path_v1(void)
 {
-    return sudo_conf_paths.plugin_dir;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_PLUGIN_DIR].pval;
 }
-#endif
 
 int
 sudo_conf_group_source_v1(void)
