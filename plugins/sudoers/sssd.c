@@ -1715,6 +1715,9 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 	    if (strcmp(cp, "authenticate") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
 		    "NOPASSWD: " : "PASSWD: ");
+	    else if (strcmp(cp, "sudoedit_follow") == 0)
+		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
+		    "NOFOLLOW: " : "FOLLOW: ");
 	    else if (strcmp(cp, "noexec") == 0)
 		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
 		    "EXEC: " : "NOEXEC: ");
