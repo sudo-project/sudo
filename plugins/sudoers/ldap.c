@@ -1885,25 +1885,31 @@ static void
 sudo_ldap_read_secret(const char *path)
 {
     FILE *fp;
-    char buf[LINE_MAX];
+    char *line = NULL;
+    size_t linesize = 0;
+    ssize_t len;
     debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP)
 
-    /* XXX - getline */
     if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
-	if (fgets(buf, sizeof(buf), fp) != NULL) {
-	    buf[strcspn(buf, "\n")] = '\0';
+	len = getline(&line, &linesize, fp);
+	if (len != -1) {
+	    /* trim newline */
+	    while (len > 0 && line[len - 1] == '\n')
+		line[--len] = '\0';
 	    /* copy to bindpw and binddn */
 	    free(ldap_conf.bindpw);
-	    ldap_conf.bindpw = sudo_ldap_decode_secret(buf);
+	    ldap_conf.bindpw = sudo_ldap_decode_secret(line);
 	    if (ldap_conf.bindpw == NULL) {
-		if ((ldap_conf.bindpw = strdup(buf)) == NULL)
-		    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		/* not base64 encoded, use directly */
+		ldap_conf.bindpw = line;
+		line = NULL;
 	    }
 	    free(ldap_conf.binddn);
 	    ldap_conf.binddn = ldap_conf.rootbinddn;
 	    ldap_conf.rootbinddn = NULL;
 	}
 	fclose(fp);
+	free(line);
     }
     debug_return;
 }
