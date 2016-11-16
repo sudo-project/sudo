@@ -714,6 +714,28 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 }
 
 /*
+ * Returns true if the string pointed to by valp begins with an
+ * odd number of '!' characters.  Intervening blanks are ignored.
+ * Stores the address of the string after '!' removal in valp.
+ */
+static bool
+sudo_ldap_is_negated(char **valp)
+{
+    char *val = *valp;
+    bool ret = false;
+    debug_decl(sudo_ldap_is_negated, SUDOERS_DEBUG_LDAP)
+
+    while (*val == '!') {
+	ret = !ret;
+	do {
+	    val++;
+	} while (isblank((unsigned char)*val));
+    }
+    *valp = val;
+    debug_return_bool(ret);
+}
+
+/*
 * Walk through search results and return true if we have a
 * host match, else false.
 */
@@ -722,6 +744,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     char *val;
+    bool negated;
     int matched = UNSPEC;
     debug_decl(sudo_ldap_check_host, SUDOERS_DEBUG_LDAP)
 
@@ -735,14 +758,8 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 
     /* walk through values */
     for (p = bv; *p != NULL && matched != false; p++) {
-	bool foundbang = false;
-
 	val = (*p)->bv_val;
-
-	if (*val == '!') {
-	    val++;
-	    foundbang = true;
-	}
+	negated = sudo_ldap_is_negated(&val);
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
@@ -750,7 +767,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 	    def_netgroup_tuple ? pw->pw_name : NULL) ||
 	    hostname_matches(user_srunhost, user_runhost, val)) {
 
-	    matched = foundbang ? false : true;
+	    matched = negated ? false : true;
 	}
 	DPRINTF2("ldap sudoHost '%s' ... %s",
 	    val, matched == true ? "MATCH!" : "not");
@@ -971,8 +988,8 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
     struct sudo_digest digest, *allowed_digest = NULL;
     struct berval **bv, **p;
     char *allowed_cmnd, *allowed_args, *val;
-    bool foundbang;
     int ret = UNSPEC;
+    bool negated;
     debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
@@ -984,6 +1001,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 
     for (p = bv; *p != NULL && ret != false; p++) {
 	val = (*p)->bv_val;
+
 	/* Match against ALL ? */
 	if (strcmp(val, "ALL") == 0) {
 	    ret = true;
@@ -997,13 +1015,8 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	allowed_digest = sudo_ldap_extract_digest(&val, &digest);
 
 	/* check for !command */
-	if (*val == '!') {
-	    foundbang = true;
-	    allowed_cmnd = val + 1;	/* !command */
-	} else {
-	    foundbang = false;
-	    allowed_cmnd = val;		/* command */
-	}
+	allowed_cmnd = val;
+	negated = sudo_ldap_is_negated(&allowed_cmnd);
 
 	/* split optional args away from command */
 	allowed_args = strchr(allowed_cmnd, ' ');
@@ -1016,7 +1029,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
 	     */
-	    ret = foundbang ? false : true;
+	    ret = negated ? false : true;
 	}
 	if (allowed_args != NULL)
 	    allowed_args[-1] = ' ';	/* restore val */
@@ -1041,7 +1054,8 @@ static int
 sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
 {
     struct berval **bv, **p;
-    char ch, *var;
+    char *var;
+    bool negated;
     int ret = UNSPEC;
     debug_decl(sudo_ldap_check_bool, SUDOERS_DEBUG_LDAP)
 
@@ -1054,13 +1068,12 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
 
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
-	var = (*p)->bv_val;;
+	var = (*p)->bv_val;
 	DPRINTF2("ldap sudoOption: '%s'", var);
 
-	if ((ch = *var) == '!')
-	    var++;
+	negated = sudo_ldap_is_negated(&var);
 	if (strcmp(var, option) == 0)
-	    ret = (ch != '!');
+	    ret = negated ? false : true;
     }
 
     ldap_value_free_len(bv);
@@ -1112,13 +1125,7 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
 	}
     } else {
 	/* Boolean value, either true or false. */
-	op = true;
-	while (*var == '!') {
-	    op = !op;
-	    do {
-		var++;
-	    } while (isblank((unsigned char)*var));
-	}
+	op = sudo_ldap_is_negated(&var) ? false : true;
     }
     *varp = var;
     *valp = val;
@@ -2448,24 +2455,18 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    char *cp = (*p)->bv_val;
-	    if (*cp == '!')
-		cp++;
-	    if (strcmp(cp, "authenticate") == 0)
-		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
-		    "NOPASSWD: " : "PASSWD: ");
-	    else if (strcmp(cp, "sudoedit_follow") == 0)
-		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
-		    "NOFOLLOW: " : "FOLLOW: ");
-	    else if (strcmp(cp, "noexec") == 0)
-		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
-		    "EXEC: " : "NOEXEC: ");
-	    else if (strcmp(cp, "setenv") == 0)
-		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
-		    "NOSETENV: " : "SETENV: ");
-	    else if (strcmp(cp, "mail_all_cmnds") == 0 || strcmp(cp, "mail_always") == 0)
-		sudo_lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
-		    "NOMAIL: " : "MAIL: ");
+	    char *val = (*p)->bv_val;
+	    bool negated = sudo_ldap_is_negated(&val);
+	    if (strcmp(val, "authenticate") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOPASSWD: " : "PASSWD: ");
+	    else if (strcmp(val, "sudoedit_follow") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOFOLLOW: " : "FOLLOW: ");
+	    else if (strcmp(val, "noexec") == 0)
+		sudo_lbuf_append(lbuf, negated ? "EXEC: " : "NOEXEC: ");
+	    else if (strcmp(val, "setenv") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
+	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
 	}
 	ldap_value_free_len(bv);
     }

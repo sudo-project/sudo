@@ -541,6 +541,28 @@ bad:
     debug_return_int(-1);
 }
 
+/*
+ * Returns true if the string pointed to by valp begins with an
+ * odd number of '!' characters.  Intervening blanks are ignored.
+ * Stores the address of the string after '!' removal in valp.
+ */
+static bool
+sudo_sss_is_negated(char **valp)
+{
+    char *val = *valp;
+    bool ret = false;
+    debug_decl(sudo_sss_is_negated, SUDOERS_DEBUG_SSSD)
+
+    while (*val == '!') {
+	ret = !ret;
+	do {
+	    val++;
+	} while (isblank((unsigned char)*val));
+    }
+    *valp = val;
+    debug_return_bool(ret);
+}
+
 static int
 sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 {
@@ -742,6 +764,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     char **val_array, *val;
     int matched = UNSPEC;
+    bool negated;
     int i;
     debug_decl(sudo_sss_check_host, SUDOERS_DEBUG_SSSD);
 
@@ -762,15 +785,10 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 
     /* walk through values */
     for (i = 0; val_array[i] != NULL && matched != false; ++i) {
-	bool foundbang = false;
-
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
-	if (*val == '!') {
-	    val++;
-	    foundbang = true;
-	}
+	negated = sudo_sss_is_negated(&val);
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
@@ -778,7 +796,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
 	    hostname_matches(handle->shost, handle->host, val)) {
 
-	    matched = foundbang ? false : true;
+	    matched = negated ? false : true;
 	}
 
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoHost '%s' ... %s",
@@ -950,8 +968,9 @@ static int
 sudo_sss_check_bool(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
     char *option)
 {
-    char ch, *var, **val_array = NULL;
+    char *var, **val_array = NULL;
     int i, ret = UNSPEC;
+    bool negated;
     debug_decl(sudo_sss_check_bool, SUDOERS_DEBUG_SSSD);
 
     if (rule == NULL)
@@ -973,10 +992,9 @@ sudo_sss_check_bool(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
 	var = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'", var);
 
-	if ((ch = *var) == '!')
-	    var++;
+	negated = sudo_sss_is_negated(&var);
 	if (strcmp(var, option) == 0)
-	    ret = (ch != '!');
+	    ret = negated ? false : true;
     }
 
     handle->fn_free_values(val_array);
@@ -1064,7 +1082,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     char **val_array = NULL, *val;
     char *allowed_cmnd, *allowed_args;
     int ret = UNSPEC;
-    bool foundbang;
+    bool negated;
     unsigned int i;
     struct sudo_digest digest, *allowed_digest = NULL;
     debug_decl(sudo_sss_check_command, SUDOERS_DEBUG_SSSD);
@@ -1102,13 +1120,8 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	allowed_digest = sudo_sss_extract_digest(&val, &digest);
 
 	/* check for !command */
-	if (*val == '!') {
-	    foundbang = true;
-	    allowed_cmnd = val + 1;	/* !command */
-	} else {
-	    foundbang = false;
-	    allowed_cmnd = val;		/* command */
-	}
+	allowed_cmnd = val;
+	negated = sudo_sss_is_negated(&allowed_cmnd);
 
 	/* split optional args away from command */
 	allowed_args = strchr(allowed_cmnd, ' ');
@@ -1121,7 +1134,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
 	     */
-	    ret = foundbang ? false : true;
+	    ret = negated ? false : true;
 	}
 	if (allowed_args != NULL)
 	    allowed_args[-1] = ' ';	/* restore val */
@@ -1181,13 +1194,7 @@ sudo_sss_parse_option(char *optstr, char **varp, char **valp)
 	}
     } else {
 	/* Boolean value, either true or false. */
-	op = true;
-	while (*var == '!') {
-	    op = !op;
-	    do {
-		var++;
-	    } while (isblank((unsigned char)*var));
-	}
+	op = sudo_sss_is_negated(&var) ? false : true;
     }
     *varp = var;
     *valp = val;
@@ -1709,24 +1716,18 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
     case 0:
 	for (i = 0; val_array[i] != NULL; ++i) {
-	    char *cp = val_array[i];
-	    if (*cp == '!')
-		cp++;
-	    if (strcmp(cp, "authenticate") == 0)
-		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-		    "NOPASSWD: " : "PASSWD: ");
-	    else if (strcmp(cp, "sudoedit_follow") == 0)
-		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-		    "NOFOLLOW: " : "FOLLOW: ");
-	    else if (strcmp(cp, "noexec") == 0)
-		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-		    "EXEC: " : "NOEXEC: ");
-	    else if (strcmp(cp, "setenv") == 0)
-		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-		    "NOSETENV: " : "SETENV: ");
-	    else if (strcmp(cp, "mail_all_cmnds") == 0 || strcmp(cp, "mail_always") == 0)
-		sudo_lbuf_append(lbuf, val_array[i][0] == '!' ?
-		    "NOMAIL: " : "MAIL: ");
+	    char *val = val_array[i];
+	    bool negated = sudo_sss_is_negated(&val);
+	    if (strcmp(val, "authenticate") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOPASSWD: " : "PASSWD: ");
+	    else if (strcmp(val, "sudoedit_follow") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOFOLLOW: " : "FOLLOW: ");
+	    else if (strcmp(val, "noexec") == 0)
+		sudo_lbuf_append(lbuf, negated ? "EXEC: " : "NOEXEC: ");
+	    else if (strcmp(val, "setenv") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
+	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
+		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
 	}
 	handle->fn_free_values(val_array);
 	break;
