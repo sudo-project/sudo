@@ -441,7 +441,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 	sudo_settings[ARG_IMPLIED_SHELL].value = "true";
     }
-#ifdef _PATH_SUDO_PLUGIN_DIR
+#ifdef ENABLE_SUDO_PLUGIN_API
     sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
 

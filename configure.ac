@@ -4183,11 +4183,18 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
 	    eval PLUGINDIR="$_PLUGINDIR"
 	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
+	AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
     fi
     exec_prefix="$oexec_prefix"
 fi
+if test X"$with_noexec" = X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, NULL)
+fi
 if test X"$with_selinux" = X"no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
+fi
+if test X"$enable_shared" = X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, NULL)
 fi
 
 dnl

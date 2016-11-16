@@ -256,7 +256,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    remhost = *cur + sizeof("remote_host=") - 1;
 	    continue;
 	}
-#ifdef _PATH_SUDO_PLUGIN_DIR
+#ifdef ENABLE_SUDO_PLUGIN_API
 	if (MATCHES(*cur, "plugin_dir=")) {
 	    path_plugin_dir = *cur + sizeof("plugin_dir=") - 1;
 	    continue;

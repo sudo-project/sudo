@@ -55,14 +55,6 @@
 # define ROOT_UID	0
 #endif
 
-/* Avoid excessive #ifdefs in the code. */
-#ifndef _PATH_SUDO_NOEXEC
-# define _PATH_SUDO_NOEXEC	NULL
-#endif
-#ifndef _PATH_SUDO_PLUGIN_DIR
-# define _PATH_SUDO_PLUGIN_DIR	NULL
-#endif
-
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
@@ -630,4 +622,17 @@ done:
         setlocale(LC_ALL, prev_locale);
     free(prev_locale);
     debug_return_int(ret);
+}
+
+/*
+ * Used by the sudo_conf regress test to clear compile-time path settings.
+ */
+void
+sudo_conf_clear_paths_v1(void)
+{
+    struct sudo_conf_path_table *cur;
+    debug_decl(sudo_conf_clear_paths, SUDO_DEBUG_UTIL)
+
+    for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++)
+	cur->pval = NULL;
 }

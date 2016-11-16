@@ -16,6 +16,9 @@
 /* A colon-separated list of pathnames to be used as the editor for visudo. */
 #undef EDITOR
 
+/* Define to 1 to enable sudo's plugin interface. */
+#undef ENABLE_SUDO_PLUGIN_API
+
 /* Define to 1 to enable environment function debugging. */
 #undef ENV_DEBUG
 

@@ -24396,12 +24396,27 @@ EOF
 #define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR/"
 EOF
 
+
+$as_echo "#define ENABLE_SUDO_PLUGIN_API 1" >>confdefs.h
+
     fi
     exec_prefix="$oexec_prefix"
+fi
+if test X"$with_noexec" = X"no"; then
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_NOEXEC NULL
+EOF
+
 fi
 if test X"$with_selinux" = X"no"; then
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_SESH NULL
+EOF
+
+fi
+if test X"$enable_shared" = X"no"; then
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_PLUGIN_DIR NULL
 EOF
 
 fi

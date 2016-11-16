@@ -37,7 +37,7 @@
 /* We always use the same name for the sudoers plugin, regardless of the OS */
 #define SUDOERS_PLUGIN	"sudoers.so"
 
-#ifdef _PATH_SUDO_PLUGIN_DIR
+#ifdef ENABLE_SUDO_PLUGIN_API
 static int
 sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     size_t pathsize, struct stat *sb)
@@ -144,7 +144,7 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
     (void)strlcpy(fullpath, info->path, pathsize);
     debug_return_bool(true);
 }
-#endif /* _PATH_SUDO_PLUGIN_DIR */
+#endif /* ENABLE_SUDO_PLUGIN_API */
 
 /*
  * Load the plugin specified by "info".

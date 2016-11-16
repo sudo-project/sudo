@@ -36,7 +36,7 @@
 #include "sudo.h"
 #include "sudo_exec.h"
 
-#ifdef _PATH_SUDO_NOEXEC
+#ifdef RTLD_PRELOAD_VAR
 /*
  * Add a DSO file to LD_PRELOAD or the system equivalent.
  */
@@ -144,7 +144,7 @@ preload_dso(char *envp[], const char *dso_file)
 
     debug_return_ptr(envp);
 }
-#endif /* _PATH_SUDO_NOEXEC */
+#endif /* RTLD_PRELOAD_VAR */
 
 /*
  * Disable execution of child processes in the command we are about
@@ -166,10 +166,10 @@ disable_execute(char *envp[], const char *dso)
     sudo_warn(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
-#ifdef _PATH_SUDO_NOEXEC
+#ifdef RTLD_PRELOAD_VAR
     if (dso != NULL)
 	envp = preload_dso(envp, dso);
-#endif /* _PATH_SUDO_NOEXEC */
+#endif /* RTLD_PRELOAD_VAR */
 
     debug_return_ptr(envp);
 }
