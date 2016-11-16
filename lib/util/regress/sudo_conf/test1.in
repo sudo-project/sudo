@@ -42,6 +42,7 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.
 #
+Path noexec /usr/local/libexec/sudo_noexec.so
 Path noexec /usr/libexec/sudo_noexec.so
 
 #

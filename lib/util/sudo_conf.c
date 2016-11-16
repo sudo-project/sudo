@@ -64,6 +64,7 @@ struct sudo_conf_table {
 struct sudo_conf_path_table {
     const char *pname;
     unsigned int pnamelen;
+    bool dynamic;
     char *pval;
 };
 
@@ -115,10 +116,10 @@ static struct sudo_conf_data {
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
-	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
-	{ "sesh", sizeof("sesh") - 1, _PATH_SUDO_SESH },
-	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
-	{ "plugin_dir", sizeof("plugin_dir") - 1, _PATH_SUDO_PLUGIN_DIR },
+	{ "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS },
+	{ "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },
+	{ "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },
+	{ "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR },
 	{ NULL }
     }
 };
@@ -185,8 +186,10 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 		    debug_return_int(-1);
 		}
 	    }
-	    /* XXX - potential memory leak */
+	    if (cur->dynamic)
+		free(cur->pval);
 	    cur->pval = pval;
+	    cur->dynamic = true;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%u: Path %s %s",
 		__func__, conf_file, lineno, cur->pname,
 		pval ? pval : "(none)");
@@ -633,6 +636,10 @@ sudo_conf_clear_paths_v1(void)
     struct sudo_conf_path_table *cur;
     debug_decl(sudo_conf_clear_paths, SUDO_DEBUG_UTIL)
 
-    for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++)
+    for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
+	if (cur->dynamic)
+	    free(cur->pval);
 	cur->pval = NULL;
+	cur->dynamic = false;
+    }
 }
