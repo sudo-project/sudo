@@ -169,15 +169,6 @@ A) configure caches the results of its tests in a file called
    Note that "make realclean" will also remove any object files
    and configure temp files that are laying around as well.
 
-Q) I built sudo on a Solaris >= 2.6 machine but the resulting binary
-   doesn't work on Solaris <= 2.5.1.  Why?
-A) Starting with Solaris 2.6, snprintf(3) is included in the standard
-   C library.  To build a version of sudo on a >= 2.6 machine that
-   will run on a <= 2.5.1 machine, edit config.h and comment out the lines:
-	#define HAVE_SNPRINTF 1
-	#define HAVE_VSNPRINTF 1
-   and run make.
-
 Q) I built sudo on a Solaris 11 (or higher) machine but the resulting
    binary doesn't work older Solaris versions.  Why?
 
