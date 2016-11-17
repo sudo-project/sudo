@@ -487,6 +487,7 @@ get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, path[PATH_MAX];
     unsigned int i = 0;
+    mode_t mask;
     struct passwd *pw;
     int fd;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
@@ -551,6 +552,11 @@ get_user_info(struct user_details *ud)
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
+
+    mask = umask(0);
+    umask(mask);
+    if (asprintf(&user_info[++i], "umask=0%o", (unsigned int)mask) == -1)
+	goto oom;
 
     if (getcwd(path, sizeof(path)) != NULL) {
 	user_info[++i] = sudo_new_key_val("cwd", path);

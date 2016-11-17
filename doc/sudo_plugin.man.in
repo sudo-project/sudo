@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 8, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 17, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -545,6 +545,10 @@ the value will be empty, as in
 uid=uid_t
 The real user ID of the user invoking
 \fBsudo\fR.
+.TP 6n
+umask=octal
+The invoking user's file creation mask.
+Only available starting with API version 1.10.
 .TP 6n
 user=string
 The name of the user invoking
@@ -2764,6 +2768,11 @@ entry was added to the
 list.
 .TP 6n
 Version 1.10 (sudo 1.8.19)
+The
+\fIumask\fR
+entry was added to the
+\fRuser_info\fR
+list.
 The
 \fIiolog_group\fR,
 \fIiolog_mode\fR,

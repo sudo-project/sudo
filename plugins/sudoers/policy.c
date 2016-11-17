@@ -264,6 +264,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #endif
     }
 
+    user_umask = (mode_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
 	    if ((user_name = strdup(*cur + sizeof("user=") - 1)) == NULL)
@@ -346,6 +347,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    continue;
 	}
+	if (MATCHES(*cur, "umask=")) {
+	    p = *cur + sizeof("umask=") - 1;
+	    sudo_user.umask = sudo_strtomode(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
     }
     if ((user_runhost = strdup(remhost ? remhost : user_host)) == NULL)
 	goto oom;
@@ -373,9 +383,11 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    goto bad;
     }
 
-    /* Stash initial umask for later use. */
-    user_umask = umask(SUDO_UMASK);
-    umask(user_umask);
+    /* umask is only set in user_info[] for API 1.10 and above. */
+    if (user_umask == (mode_t)-1) {
+	user_umask = umask(0);
+	umask(user_umask);
+    }
 
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;

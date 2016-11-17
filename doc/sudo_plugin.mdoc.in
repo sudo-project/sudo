@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 8, 2016
+.Dd November 17, 2016
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -484,6 +484,9 @@ the value will be empty, as in
 .It uid=uid_t
 The real user ID of the user invoking
 .Nm sudo .
+.It umask=octal
+The invoking user's file creation mask.
+Only available starting with API version 1.10.
 .It user=string
 The name of the user invoking
 .Nm sudo .
@@ -2420,6 +2423,11 @@ entry was added to the
 .Li command_info
 list.
 .It Version 1.10 (sudo 1.8.19)
+The
+.Em umask
+entry was added to the
+.Li user_info
+list.
 The
 .Em iolog_group ,
 .Em iolog_mode ,
