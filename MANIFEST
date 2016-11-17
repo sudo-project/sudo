@@ -229,7 +229,6 @@ plugins/sample/README
 plugins/sample/sample_plugin.c
 plugins/sample/sample_plugin.exp
 plugins/sudoers/Makefile.in
-plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
 plugins/sudoers/audit.c
 plugins/sudoers/auth/API

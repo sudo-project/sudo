@@ -1703,7 +1703,6 @@ case "$host" in
 
 		# To get all prototypes (so we pass -Wall)
 		AC_DEFINE([_LINUX_SOURCE_COMPAT])
-		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 
 		# For AIX we build in support for both LAM and PAM
 		# and choose which to use based on auth_type in
