@@ -60,7 +60,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     char challenge[256];
     size_t challenge_len;
     static char *orig_prompt = NULL, *new_prompt = NULL;
-    static int op_len, np_size;
+    static size_t op_len, np_size;
     static struct RFC1938 rfc1938;
     debug_decl(sudo_rfc1938_setup, SUDOERS_DEBUG_AUTH)
 
@@ -116,7 +116,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     if (def_long_otp_prompt)
 	(void) snprintf(new_prompt, np_size, "%s\n%s", challenge, orig_prompt);
     else
-	(void) snprintf(new_prompt, np_size, "%.*s [ %s ]:", op_len,
+	(void) snprintf(new_prompt, np_size, "%.*s [ %s ]:", (int)op_len,
 	    orig_prompt, challenge);
 
     *promptp = new_prompt;
