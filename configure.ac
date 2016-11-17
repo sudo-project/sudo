@@ -291,7 +291,7 @@ dnl
 AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 [case $with_devel in
     yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
-		SUDO_APPEND_CPPFLAGS(-DSUDO_DEVEL)
+		AX_APPEND_FLAG([-DSUDO_DEVEL], [CPPFLAGS])
 		DEVEL="true"
 		devdir=.
 		;;
@@ -390,7 +390,7 @@ AC_ARG_WITH(incpath, [AS_HELP_STRING([--with-incpath], [additional places to loo
 		;;
     *)		AC_MSG_NOTICE([Adding ${with_incpath} to CPPFLAGS])
 		for i in ${with_incpath}; do
-		    SUDO_APPEND_CPPFLAGS(-I${i})
+		    AX_APPEND_FLAG([-I${i}], [CPPFLAGS])
 		done
 		;;
 esac])
@@ -1562,7 +1562,7 @@ dnl before the call to LT_INIT
 dnl
 case "$host_os" in
 aix4.[[23]]|aix4.[[23]].*|aix[[5-9]]*)
-    LDFLAGS="${LDFLAGS}${LDFLAGS+ }-Wl,-brtl"
+    AX_APPEND_FLAG([-Wl,-brtl], [LDFLAGS])
     ;;
 esac
 
@@ -1854,8 +1854,7 @@ case "$host" in
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
-		# XXX - sudo LDFLAGS instead?
-		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
+		AX_APPEND_FLAG([-Wl,-no_library_replacement], [SUDO_LDFLAGS])
 
 		: ${CHECKSIA='true'}
 		AC_MSG_CHECKING(whether to disable sia support on Digital UNIX)
@@ -1954,14 +1953,14 @@ case "$host" in
 		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
-		SUDO_APPEND_CPPFLAGS(-I/usr/include)
-		SUDO_APPEND_CPPFLAGS(-I/usr/include/bsd)
-		SUDO_APPEND_CPPFLAGS(-D_MIPS)
+		AX_APPEND_FLAG([-I/usr/include], [CPPFLAGS])
+		AX_APPEND_FLAG([-I/usr/include/bsd], [CPPFLAGS])
+		AX_APPEND_FLAG([-D_MIPS], [CPPFLAGS])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
     *-*-isc*)
-		SUDO_APPEND_CPPFLAGS(-D_ISC)
+		AX_APPEND_FLAG([-D_ISC], [CPPFLAGS])
 		LIB_CRYPT=1
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
 
@@ -2111,7 +2110,7 @@ case "$host" in
 
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
-		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS="${SUDO_LDFLAGS}${SUDO_LDFLAGS+ }-Wl,-force_flat_namespace"])
+		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])
 
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
@@ -2901,7 +2900,7 @@ fi
 # make sure we use the gettext() that matches the include file.
 if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "yes"; then
-	SUDO_APPEND_CPPFLAGS(-I${enable_nls}/include)
+	AX_APPEND_FLAG([-I${enable_nls}/include], [CPPFLAGS])
 	SUDO_APPEND_LIBPATH(LDFLAGS, [$enable_nls/lib])
     fi
     OLIBS="$LIBS"
@@ -2976,7 +2975,7 @@ case "$enable_zlib" in
 	;;
     *)
 	AC_DEFINE(HAVE_ZLIB_H)
-	SUDO_APPEND_CPPFLAGS(-I${enable_zlib}/include)
+	AX_APPEND_FLAG([-I${enable_zlib}/include], [CPPFLAGS])
 	SUDO_APPEND_LIBPATH(ZLIB, [$enable_zlib/lib])
 	ZLIB="${ZLIB} -lz"
 	;;
@@ -2984,6 +2983,7 @@ esac
 case "$enable_zlib" in
     builtin|static|dynamic)
 	AC_DEFINE(HAVE_ZLIB_H)
+	# XXX - can't use AX_APPEND_FLAG due to use of $(top_foo) and quoting
 	CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
 	ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libsudo_z.la'
 	ZLIB_SRC=lib/zlib
@@ -3272,7 +3272,7 @@ dnl
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_fwtk}])
-	SUDO_APPEND_CPPFLAGS(-I${with_fwtk})
+	AX_APPEND_FLAG([-I${with_fwtk}], [CPPFLAGS])
 	with_fwtk=yes
     fi
     SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
@@ -3290,7 +3290,7 @@ if test ${with_SecurID-'no'} != "no"; then
     else
 	with_SecurID=/usr/ace
     fi
-    SUDO_APPEND_CPPFLAGS(-I${with_SecurID})
+    AX_APPEND_FLAG([-I${with_SecurID}], [CPPFLAGS])
     SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
@@ -3322,7 +3322,7 @@ if test ${with_kerb5-'no'} != "no"; then
     if test -n "$KRB5CONFIG"; then
 	AC_DEFINE(HAVE_KERB5)
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
-	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
+	AX_APPEND_FLAG([`krb5-config --cflags`], [CPPFLAGS])
 	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 	dnl
 	dnl Try to determine whether we have Heimdal or MIT Kerberos
@@ -3354,7 +3354,7 @@ if test ${with_kerb5-'no'} != "no"; then
 	else
 	    dnl XXX - try to include krb5.h here too
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_kerb5}/lib])
-	    SUDO_APPEND_CPPFLAGS(-I${with_kerb5}/include)
+	    AX_APPEND_FLAG([-I${with_kerb5}/include], [CPPFLAGS])
 	fi
 
 	dnl
@@ -3442,7 +3442,7 @@ if test ${with_AFS-'no'} = "yes"; then
     # AFS includes may live in /usr/include on some machines...
     for i in /usr/afsws/include; do
 	if test -d ${i}; then
-	    SUDO_APPEND_CPPFLAGS(-I${i})
+	    AX_APPEND_FLAG([-I${i}], [CPPFLAGS])
 	    FOUND_AFSINCDIR=true
 	fi
     done
@@ -3470,7 +3470,7 @@ dnl
 if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
-	SUDO_APPEND_CPPFLAGS(-I${with_skey}/include)
+	AX_APPEND_FLAG([-I${with_skey}/include], [CPPFLAGS])
 	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
@@ -3519,7 +3519,7 @@ dnl
 if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
-	SUDO_APPEND_CPPFLAGS(-I${with_opie}/include)
+	AX_APPEND_FLAG([-I${with_opie}/include], [CPPFLAGS])
 	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
@@ -3619,7 +3619,7 @@ if test ${with_ldap-'no'} != "no"; then
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
-	SUDO_APPEND_CPPFLAGS(-I${with_ldap}/include)
+	AX_APPEND_FLAG([-I${with_ldap}/include], [CPPFLAGS])
 	with_ldap=yes
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
@@ -3713,7 +3713,7 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    AX_APPEND_FLAG([--tag=disable-shared -static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -3725,7 +3725,7 @@ case "$lt_cv_dlopen" in
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    AX_APPEND_FLAG([--tag=disable-shared -static], [SUDOERS_LDFLAGS])
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -3759,8 +3759,8 @@ if test "$enable_shared_libutil" = "no"; then
 	AC_MSG_ERROR(["--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled."])
     else
 	# Do not install sudoers or libsudo_util.
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS}${SUDOERS_LDFLAGS+ }-no-install"
-	LIBUTIL_LDFLAGS="${LIBUTIL_LDFLAGS}${LIBUTIL_LDFLAGS+ }-no-install"
+	AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
+	AX_APPEND_FLAG([-no-install], [LIBUTIL_LDFLAGS])
     fi
 fi
 
@@ -3794,7 +3794,7 @@ dnl it but libc does not, __sprintf_chk should be an undefined symbol.
 dnl
 if test "$enable_hardening" != "no"; then
     O_CPPFLAGS="$CPPFLAGS"
-    SUDO_APPEND_CPPFLAGS(-D_FORTIFY_SOURCE=2)
+    AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
     AC_CACHE_CHECK([whether _FORTIFY_SOURCE may be specified],
 	[sudo_cv_use_fortify_source],
 	[AC_LINK_IFELSE([
@@ -3830,7 +3830,7 @@ dnl GNU ld (which can avoid linking in libgcc when it is not needed).
 dnl This test relies on AC_LANG_WERROR
 dnl
 if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
-    AX_CHECK_COMPILE_FLAG([-static-libgcc], [LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"])
+    AX_CHECK_COMPILE_FLAG([-static-libgcc], [AX_APPEND_FLAG([-Wc,-static-libgcc], [LT_LDFLAGS])])
 fi
 
 dnl
@@ -4014,7 +4014,7 @@ if test "$enable_pie" != "yes"; then
     # Solaris 11.1 and higher supports tagging binaries to use ASLR
     case "$host_os" in
 	solaris2.1[[1-9]]|solaris2.[[2-9]][[0-9]])
-	    AX_CHECK_LINK_FLAG([-Wl,-z,aslr], [PIE_LDFLAGS="${PIE_LDFLAGS}${PIE_LDFLAGS+ }-Wl,-z,aslr"])
+	    AX_CHECK_LINK_FLAG([-Wl,-z,aslr], [AX_APPEND_FLAG([-Wl,-z,aslr], [PIE_LDFLAGS])])
 	    ;;
     esac
 fi
@@ -4072,7 +4072,7 @@ if test "$enable_hardening" != "no"; then
 	SSP_CFLAGS="$sudo_cv_var_stack_protector"
 	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
-    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
 fi
 
 dnl

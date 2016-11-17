@@ -126,6 +126,7 @@ AC_DEFUN([_AC_TYPE_LONG_LONG_SNIPPET],
               | (ullmax / ull) | (ullmax % ull));]])
 ])
 
+m4_include([m4/ax_append_flag.m4])
 m4_include([m4/ax_check_compile_flag.m4])
 m4_include([m4/ax_check_link_flag.m4])
 m4_include([m4/ax_func_getaddrinfo.m4])

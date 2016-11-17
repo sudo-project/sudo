@@ -205,6 +205,7 @@ lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
 ltmain.sh
+m4/ax_append_flag.m4
 m4/ax_check_compile_flag.m4
 m4/ax_check_link_flag.m4
 m4/ax_func_getaddrinfo.m4

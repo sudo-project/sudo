@@ -4255,17 +4255,36 @@ if test "${with_devel+set}" = set; then :
     yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: Setting up for development: -Wall, flex, yacc" >&5
 $as_echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
 
-    case "${CPPFLAGS}" in
-	*"-DSUDO_DEVEL"|*"-DSUDO_DEVEL ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-DSUDO_DEVEL"
-	    else
-		CPPFLAGS="${CPPFLAGS} -DSUDO_DEVEL"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -DSUDO_DEVEL "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -DSUDO_DEVEL"; } >&5
+  (: CPPFLAGS already contains -DSUDO_DEVEL) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -DSUDO_DEVEL"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-DSUDO_DEVEL
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 		DEVEL="true"
 		devdir=.
@@ -4426,17 +4445,36 @@ if test "${with_incpath+set}" = set; then :
 $as_echo "$as_me: Adding ${with_incpath} to CPPFLAGS" >&6;}
 		for i in ${with_incpath}; do
 
-    case "${CPPFLAGS}" in
-	*"-I${i}"|*"-I${i} ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${i}"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${i}"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${i} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${i}"; } >&5
+  (: CPPFLAGS already contains -I${i}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${i}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${i}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 		done
 		;;
@@ -6772,7 +6810,38 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 case "$host_os" in
 aix4.[23]|aix4.[23].*|aix[5-9]*)
-    LDFLAGS="${LDFLAGS}${LDFLAGS+ }-Wl,-brtl"
+
+if ${LDFLAGS+:} false; then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,-brtl "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,-brtl"; } >&5
+  (: LDFLAGS already contains -Wl,-brtl) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,-brtl"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS=-Wl,-brtl
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
     ;;
 esac
 
@@ -15095,8 +15164,38 @@ done
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
-		# XXX - sudo LDFLAGS instead?
-		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
+
+if ${SUDO_LDFLAGS+:} false; then :
+
+  case " $SUDO_LDFLAGS " in #(
+  *" -Wl,-no_library_replacement "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS already contains -Wl,-no_library_replacement"; } >&5
+  (: SUDO_LDFLAGS already contains -Wl,-no_library_replacement) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDO_LDFLAGS " -Wl,-no_library_replacement"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDO_LDFLAGS=-Wl,-no_library_replacement
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 
 		: ${CHECKSIA='true'}
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to disable sia support on Digital UNIX" >&5
@@ -15276,60 +15375,136 @@ _ACEOF
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
 
-    case "${CPPFLAGS}" in
-	*"-I/usr/include"|*"-I/usr/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I/usr/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I/usr/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I/usr/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I/usr/include"; } >&5
+  (: CPPFLAGS already contains -I/usr/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I/usr/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I/usr/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 
-    case "${CPPFLAGS}" in
-	*"-I/usr/include/bsd"|*"-I/usr/include/bsd ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I/usr/include/bsd"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I/usr/include/bsd"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I/usr/include/bsd "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I/usr/include/bsd"; } >&5
+  (: CPPFLAGS already contains -I/usr/include/bsd) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I/usr/include/bsd"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I/usr/include/bsd
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 
-    case "${CPPFLAGS}" in
-	*"-D_MIPS"|*"-D_MIPS ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-D_MIPS"
-	    else
-		CPPFLAGS="${CPPFLAGS} -D_MIPS"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -D_MIPS "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -D_MIPS"; } >&5
+  (: CPPFLAGS already contains -D_MIPS) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -D_MIPS"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-D_MIPS
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
     *-*-isc*)
 
-    case "${CPPFLAGS}" in
-	*"-D_ISC"|*"-D_ISC ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-D_ISC"
-	    else
-		CPPFLAGS="${CPPFLAGS} -D_ISC"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -D_ISC "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -D_ISC"; } >&5
+  (: CPPFLAGS already contains -D_ISC) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -D_ISC"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-D_ISC
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 		LIB_CRYPT=1
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
@@ -15564,7 +15739,38 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__force_flat_namespace" >&5
 $as_echo "$ax_cv_check_ldflags___Wl__force_flat_namespace" >&6; }
 if test x"$ax_cv_check_ldflags___Wl__force_flat_namespace" = xyes; then :
-  SUDO_LDFLAGS="${SUDO_LDFLAGS}${SUDO_LDFLAGS+ }-Wl,-force_flat_namespace"
+
+if ${SUDO_LDFLAGS+:} false; then :
+
+  case " $SUDO_LDFLAGS " in #(
+  *" -Wl,-force_flat_namespace "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS already contains -Wl,-force_flat_namespace"; } >&5
+  (: SUDO_LDFLAGS already contains -Wl,-force_flat_namespace) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDO_LDFLAGS " -Wl,-force_flat_namespace"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDO_LDFLAGS=-Wl,-force_flat_namespace
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 else
   :
 fi
@@ -15631,16 +15837,72 @@ fi
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 
-    case "${LDFLAGS}" in
-	*"-L$i"|*"-L$i ")
-	    ;;
-	*)
-	    LDFLAGS="${LDFLAGS} -L$i"
-	    if test X"$enable_rpath" = X"yes"; then
-		LDFLAGS_R="${LDFLAGS_R} -R$i"
-	    fi
-	    ;;
-    esac
+
+if ${LDFLAGS+:} false; then :
+
+  case " $LDFLAGS " in #(
+  *" -L$i "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -L\$i"; } >&5
+  (: LDFLAGS already contains -L$i) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -L$i"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS=-L$i
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${LDFLAGS_R+:} false; then :
+
+  case " $LDFLAGS_R " in #(
+  *" -R$i "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R already contains -R\$i"; } >&5
+  (: LDFLAGS_R already contains -R$i) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS_R " -R$i"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS_R=-R$i
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
     done
 fi
@@ -20722,29 +20984,104 @@ fi
 if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "yes"; then
 
-    case "${CPPFLAGS}" in
-	*"-I${enable_nls}/include"|*"-I${enable_nls}/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${enable_nls}/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enable_nls}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enable_nls}/include"; } >&5
+  (: CPPFLAGS already contains -I${enable_nls}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enable_nls}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${enable_nls}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 
-    case "${LDFLAGS}" in
-	*"-L$enable_nls/lib"|*"-L$enable_nls/lib ")
-	    ;;
-	*)
-	    LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		LDFLAGS_R="${LDFLAGS_R} -R$enable_nls/lib"
-	    fi
-	    ;;
-    esac
+
+if ${LDFLAGS+:} false; then :
+
+  case " $LDFLAGS " in #(
+  *" -L$enable_nls/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -L\$enable_nls/lib"; } >&5
+  (: LDFLAGS already contains -L$enable_nls/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -L$enable_nls/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS=-L$enable_nls/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${LDFLAGS_R+:} false; then :
+
+  case " $LDFLAGS_R " in #(
+  *" -R$enable_nls/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R already contains -R\$enable_nls/lib"; } >&5
+  (: LDFLAGS_R already contains -R$enable_nls/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS_R " -R$enable_nls/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS_R=-R$enable_nls/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS_R=\"\$LDFLAGS_R\""; } >&5
+  (: LDFLAGS_R="$LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
     fi
     OLIBS="$LIBS"
@@ -20908,29 +21245,104 @@ fi
 	$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
 
-    case "${CPPFLAGS}" in
-	*"-I${enable_zlib}/include"|*"-I${enable_zlib}/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${enable_zlib}/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enable_zlib}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enable_zlib}/include"; } >&5
+  (: CPPFLAGS already contains -I${enable_zlib}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enable_zlib}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${enable_zlib}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 
-    case "${ZLIB}" in
-	*"-L$enable_zlib/lib"|*"-L$enable_zlib/lib ")
-	    ;;
-	*)
-	    ZLIB="${ZLIB} -L$enable_zlib/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		ZLIB_R="${ZLIB_R} -R$enable_zlib/lib"
-	    fi
-	    ;;
-    esac
+
+if ${ZLIB+:} false; then :
+
+  case " $ZLIB " in #(
+  *" -L$enable_zlib/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : ZLIB already contains -L\$enable_zlib/lib"; } >&5
+  (: ZLIB already contains -L$enable_zlib/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ZLIB " -L$enable_zlib/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : ZLIB=\"\$ZLIB\""; } >&5
+  (: ZLIB="$ZLIB") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  ZLIB=-L$enable_zlib/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : ZLIB=\"\$ZLIB\""; } >&5
+  (: ZLIB="$ZLIB") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${ZLIB_R+:} false; then :
+
+  case " $ZLIB_R " in #(
+  *" -R$enable_zlib/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : ZLIB_R already contains -R\$enable_zlib/lib"; } >&5
+  (: ZLIB_R already contains -R$enable_zlib/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append ZLIB_R " -R$enable_zlib/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : ZLIB_R=\"\$ZLIB_R\""; } >&5
+  (: ZLIB_R="$ZLIB_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  ZLIB_R=-R$enable_zlib/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : ZLIB_R=\"\$ZLIB_R\""; } >&5
+  (: ZLIB_R="$ZLIB_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	ZLIB="${ZLIB} -lz"
 	;;
@@ -20939,6 +21351,7 @@ case "$enable_zlib" in
     builtin|static|dynamic)
 	$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
+	# XXX - can't use AX_APPEND_FLAG due to use of $(top_foo) and quoting
 	CPPFLAGS='-I$(top_builddir)/lib/zlib -I$(top_srcdir)/lib/zlib '"${CPPFLAGS}"
 	ZLIB="${ZLIB}"' $(top_builddir)/lib/zlib/libsudo_z.la'
 	ZLIB_SRC=lib/zlib
@@ -21615,29 +22028,104 @@ fi
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${with_fwtk}"|*"-L${with_fwtk} ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_fwtk}"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_fwtk} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_fwtk}"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_fwtk}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_fwtk}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_fwtk}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_fwtk} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_fwtk}"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_fwtk}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_fwtk}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_fwtk}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 
-    case "${CPPFLAGS}" in
-	*"-I${with_fwtk}"|*"-I${with_fwtk} ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${with_fwtk}"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${with_fwtk} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${with_fwtk}"; } >&5
+  (: CPPFLAGS already contains -I${with_fwtk}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${with_fwtk}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${with_fwtk}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 	with_fwtk=yes
     fi
@@ -21654,29 +22142,104 @@ if test ${with_SecurID-'no'} != "no"; then
 	with_SecurID=/usr/ace
     fi
 
-    case "${CPPFLAGS}" in
-	*"-I${with_SecurID}"|*"-I${with_SecurID} ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${with_SecurID}"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${with_SecurID} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${with_SecurID}"; } >&5
+  (: CPPFLAGS already contains -I${with_SecurID}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${with_SecurID}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${with_SecurID}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${with_SecurID}"|*"-L${with_SecurID} ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_SecurID}"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_SecurID} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_SecurID}"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_SecurID}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_SecurID}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_SecurID}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_SecurID} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_SecurID}"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_SecurID}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_SecurID}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_SecurID}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
@@ -21734,7 +22297,38 @@ fi
 	$as_echo "#define HAVE_KERB5 1" >>confdefs.h
 
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
-	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
+
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" `krb5-config --cflags` "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains \`krb5-config --cflags\`"; } >&5
+  (: CPPFLAGS already contains `krb5-config --cflags`) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " `krb5-config --cflags`"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=`krb5-config --cflags`
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
 $as_echo_n "checking whether we are using Heimdal... " >&6; }
@@ -21795,29 +22389,104 @@ $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will h
 	    fi
 	else
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${with_kerb5}/lib"|*"-L${with_kerb5}/lib ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_kerb5}/lib"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_kerb5}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_kerb5}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_kerb5}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_kerb5}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_kerb5}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_kerb5}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_kerb5}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_kerb5}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_kerb5}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_kerb5}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 
-    case "${CPPFLAGS}" in
-	*"-I${with_kerb5}/include"|*"-I${with_kerb5}/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${with_kerb5}/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${with_kerb5}/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${with_kerb5}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${with_kerb5}/include"; } >&5
+  (: CPPFLAGS already contains -I${with_kerb5}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${with_kerb5}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${with_kerb5}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 	fi
 
@@ -22014,16 +22683,72 @@ if test ${with_AFS-'no'} = "yes"; then
     for i in $AFSLIBDIRS; do
 	if test -d ${i}; then
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L$i"|*"-L$i ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R$i"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L$i "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\$i"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L$i) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L$i"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L$i
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R$i "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\$i"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R$i) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R$i"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R$i
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	    FOUND_AFSLIBDIR=true
 	fi
@@ -22052,17 +22777,36 @@ $as_echo "$as_me: WARNING: Unable to locate AFS libraries, you will have to edit
     for i in /usr/afsws/include; do
 	if test -d ${i}; then
 
-    case "${CPPFLAGS}" in
-	*"-I${i}"|*"-I${i} ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${i}"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${i}"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${i} "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${i}"; } >&5
+  (: CPPFLAGS already contains -I${i}) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${i}"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${i}
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 	    FOUND_AFSINCDIR=true
 	fi
@@ -22086,30 +22830,105 @@ if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 
-    case "${CPPFLAGS}" in
-	*"-I${with_skey}/include"|*"-I${with_skey}/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${with_skey}/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${with_skey}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${with_skey}/include"; } >&5
+  (: CPPFLAGS already contains -I${with_skey}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${with_skey}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${with_skey}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${with_skey}/lib"|*"-L${with_skey}/lib ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_skey}/lib"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_skey}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_skey}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_skey}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_skey}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_skey}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_skey}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_skey}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_skey}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_skey}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_skey}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	ac_fn_c_check_header_compile "$LINENO" "skey.h" "ac_cv_header_skey_h" "#include <stdio.h>
 "
@@ -22138,16 +22957,72 @@ fi
 	else
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${dir}/lib"|*"-L${dir}/lib ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${dir}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${dir}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${dir}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${dir}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${dir}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${dir}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${dir}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${dir}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${dir}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${dir}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	fi
 	if test "$found" = "no"; then
@@ -22275,30 +23150,105 @@ if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 
-    case "${CPPFLAGS}" in
-	*"-I${with_opie}/include"|*"-I${with_opie}/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${with_opie}/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${with_opie}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${with_opie}/include"; } >&5
+  (: CPPFLAGS already contains -I${with_opie}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${with_opie}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${with_opie}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${with_opie}/lib"|*"-L${with_opie}/lib ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_opie}/lib"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_opie}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_opie}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_opie}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_opie}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_opie}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_opie}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_opie}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_opie}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_opie}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_opie}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -22343,16 +23293,72 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 	else
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${dir}/lib"|*"-L${dir}/lib ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${dir}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${dir}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${dir}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${dir}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${dir}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${dir}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${dir}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${dir}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${dir}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${dir}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	fi
 	if test "$found" = "no"; then
@@ -22672,30 +23678,105 @@ if test ${with_ldap-'no'} != "no"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 
-    case "${SUDOERS_LDFLAGS}" in
-	*"-L${with_ldap}/lib"|*"-L${with_ldap}/lib ")
-	    ;;
-	*)
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
-	    if test X"$enable_rpath" = X"yes"; then
-		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_ldap}/lib"
-	    fi
-	    ;;
-    esac
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${with_ldap}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${with_ldap}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${with_ldap}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${with_ldap}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${with_ldap}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${with_ldap}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${with_ldap}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${with_ldap}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${with_ldap}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${with_ldap}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
 
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
 
-    case "${CPPFLAGS}" in
-	*"-I${with_ldap}/include"|*"-I${with_ldap}/include ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-I${with_ldap}/include"
-	    else
-		CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${with_ldap}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${with_ldap}/include"; } >&5
+  (: CPPFLAGS already contains -I${with_ldap}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${with_ldap}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${with_ldap}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 	with_ldap=yes
     fi
@@ -23165,7 +24246,38 @@ case "$lt_cv_dlopen" in
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" --tag=disable-shared -static "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared -static"; } >&5
+  (: SUDOERS_LDFLAGS already contains --tag=disable-shared -static) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared -static"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=--tag=disable-shared -static
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -23179,7 +24291,38 @@ case "$lt_cv_dlopen" in
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
-	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" --tag=disable-shared -static "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains --tag=disable-shared -static"; } >&5
+  (: SUDOERS_LDFLAGS already contains --tag=disable-shared -static) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " --tag=disable-shared -static"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=--tag=disable-shared -static
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 	    LT_STATIC=""
 	else
 	    LT_STATIC="--tag=disable-static"
@@ -23214,8 +24357,70 @@ if test "$enable_shared_libutil" = "no"; then
 	as_fn_error $? "\"--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.\"" "$LINENO" 5
     else
 	# Do not install sudoers or libsudo_util.
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS}${SUDOERS_LDFLAGS+ }-no-install"
-	LIBUTIL_LDFLAGS="${LIBUTIL_LDFLAGS}${LIBUTIL_LDFLAGS+ }-no-install"
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -no-install "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -no-install"; } >&5
+  (: SUDOERS_LDFLAGS already contains -no-install) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -no-install"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-no-install
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+if ${LIBUTIL_LDFLAGS+:} false; then :
+
+  case " $LIBUTIL_LDFLAGS " in #(
+  *" -no-install "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBUTIL_LDFLAGS already contains -no-install"; } >&5
+  (: LIBUTIL_LDFLAGS already contains -no-install) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LIBUTIL_LDFLAGS " -no-install"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBUTIL_LDFLAGS=\"\$LIBUTIL_LDFLAGS\""; } >&5
+  (: LIBUTIL_LDFLAGS="$LIBUTIL_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LIBUTIL_LDFLAGS=-no-install
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LIBUTIL_LDFLAGS=\"\$LIBUTIL_LDFLAGS\""; } >&5
+  (: LIBUTIL_LDFLAGS="$LIBUTIL_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
     fi
 fi
 
@@ -23404,17 +24609,36 @@ fi
 if test "$enable_hardening" != "no"; then
     O_CPPFLAGS="$CPPFLAGS"
 
-    case "${CPPFLAGS}" in
-	*"-D_FORTIFY_SOURCE=2"|*"-D_FORTIFY_SOURCE=2 ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="-D_FORTIFY_SOURCE=2"
-	    else
-		CPPFLAGS="${CPPFLAGS} -D_FORTIFY_SOURCE=2"
-	    fi
-	    ;;
-    esac
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -D_FORTIFY_SOURCE=2 "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -D_FORTIFY_SOURCE=2"; } >&5
+  (: CPPFLAGS already contains -D_FORTIFY_SOURCE=2) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -D_FORTIFY_SOURCE=2"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-D_FORTIFY_SOURCE=2
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether _FORTIFY_SOURCE may be specified" >&5
 $as_echo_n "checking whether _FORTIFY_SOURCE may be specified... " >&6; }
@@ -23506,7 +24730,38 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___static_libgcc" >&5
 $as_echo "$ax_cv_check_cflags___static_libgcc" >&6; }
 if test x"$ax_cv_check_cflags___static_libgcc" = xyes; then :
-  LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"
+
+if ${LT_LDFLAGS+:} false; then :
+
+  case " $LT_LDFLAGS " in #(
+  *" -Wc,-static-libgcc "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LT_LDFLAGS already contains -Wc,-static-libgcc"; } >&5
+  (: LT_LDFLAGS already contains -Wc,-static-libgcc) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LT_LDFLAGS " -Wc,-static-libgcc"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LT_LDFLAGS=\"\$LT_LDFLAGS\""; } >&5
+  (: LT_LDFLAGS="$LT_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LT_LDFLAGS=-Wc,-static-libgcc
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LT_LDFLAGS=\"\$LT_LDFLAGS\""; } >&5
+  (: LT_LDFLAGS="$LT_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 else
   :
 fi
@@ -24145,7 +25400,38 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_aslr" >&5
 $as_echo "$ax_cv_check_ldflags___Wl__z_aslr" >&6; }
 if test x"$ax_cv_check_ldflags___Wl__z_aslr" = xyes; then :
-  PIE_LDFLAGS="${PIE_LDFLAGS}${PIE_LDFLAGS+ }-Wl,-z,aslr"
+
+if ${PIE_LDFLAGS+:} false; then :
+
+  case " $PIE_LDFLAGS " in #(
+  *" -Wl,-z,aslr "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS already contains -Wl,-z,aslr"; } >&5
+  (: PIE_LDFLAGS already contains -Wl,-z,aslr) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append PIE_LDFLAGS " -Wl,-z,aslr"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS=\"\$PIE_LDFLAGS\""; } >&5
+  (: PIE_LDFLAGS="$PIE_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  PIE_LDFLAGS=-Wl,-z,aslr
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS=\"\$PIE_LDFLAGS\""; } >&5
+  (: PIE_LDFLAGS="$PIE_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 else
   :
 fi
@@ -24288,7 +25574,38 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_relro" >&5
 $as_echo "$ax_cv_check_ldflags___Wl__z_relro" >&6; }
 if test x"$ax_cv_check_ldflags___Wl__z_relro" = xyes; then :
-  LDFLAGS="${LDFLAGS} -Wl,-z,relro"
+
+if ${LDFLAGS+:} false; then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,-z,relro "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,-z,relro"; } >&5
+  (: LDFLAGS already contains -Wl,-z,relro) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,-z,relro"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  LDFLAGS=-Wl,-z,relro
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
 else
   :
 fi

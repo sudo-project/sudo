@@ -346,33 +346,10 @@ dnl Append a libpath to an LDFLAGS style variable if not already present.
 dnl Also appends to the _R version unless rpath is disabled.
 dnl
 AC_DEFUN([SUDO_APPEND_LIBPATH], [
-    case "${$1}" in
-	*"-L$2"|*"-L$2 ")
-	    ;;
-	*)
-	    $1="${$1} -L$2"
-	    if test X"$enable_rpath" = X"yes"; then
-		$1_R="${$1_R} -R$2"
-	    fi
-	    ;;
-    esac
-])
-
-dnl
-dnl Append a directory to CPPFLAGS if not already present.
-dnl
-AC_DEFUN([SUDO_APPEND_CPPFLAGS], [
-    case "${CPPFLAGS}" in
-	*"$1"|*"$1 ")
-	    ;;
-	*)
-	    if test X"${CPPFLAGS}" = X""; then
-		CPPFLAGS="$1"
-	    else
-		CPPFLAGS="${CPPFLAGS} $1"
-	    fi
-	    ;;
-    esac
+    AX_APPEND_FLAG([-L$2], [$1])
+    if test X"$enable_rpath" = X"yes"; then
+	AX_APPEND_FLAG([-R$2], [$1_R])
+    fi
 ])
 
 dnl
