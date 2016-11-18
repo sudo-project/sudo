@@ -2037,7 +2037,7 @@ case "$host" in
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
 		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
-		CHECKSHADOW="false"
+
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
 		    if test "$OSMAJOR" -ge 3; then
@@ -2045,6 +2045,9 @@ case "$host" in
 		    fi
 		fi
 		: ${with_logincap='maybe'}
+
+		# Newer OpenBSD only fills in pw_password for getpwnam_shadow()
+		shadow_funcs="getpwnam_shadow"
 
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
@@ -4295,6 +4298,7 @@ AH_TEMPLATE(HAVE_FCNTL_CLOSEM, [Define to 1 if your system has the F_CLOSEM fcnt
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
 AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
 AH_TEMPLATE(HAVE_GETPRPWNAM, [Define to 1 if you have the `getprpwnam' function.  (SecureWare-style shadow passwords).])
+AH_TEMPLATE(HAVE_GETPWNAM_SHADOW, [Define to 1 if you have the `getpwnam_shadow' function.])
 AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR4-style shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])

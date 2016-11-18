@@ -289,6 +289,9 @@
    passwords). */
 #undef HAVE_GETPRPWNAM
 
+/* Define to 1 if you have the `getpwnam_shadow' function. */
+#undef HAVE_GETPWNAM_SHADOW
+
 /* Define to 1 if you have the `getresuid' function. */
 #undef HAVE_GETRESUID
 

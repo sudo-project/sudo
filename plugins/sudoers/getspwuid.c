@@ -72,6 +72,14 @@ sudo_getepw(const struct passwd *pw)
 	goto done;
 #endif /* HAVE_ISCOMSEC */
 
+#ifdef HAVE_GETPWNAM_SHADOW
+    {
+	struct passwd *spw;
+
+	if ((spw = getpwnam_shadow(pw->pw_name)) != NULL)
+	    epw = spw->pw_passwd;
+    }
+#endif /* HAVE_GETPWNAM_SHADOW */
 #ifdef HAVE_GETPRPWNAM
     {
 	struct pr_passwd *spw;

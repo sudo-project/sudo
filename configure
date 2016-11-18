@@ -15633,7 +15633,7 @@ done
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
 		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
-		CHECKSHADOW="false"
+
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
 		    if test "$OSMAJOR" -ge 3; then
@@ -15641,6 +15641,9 @@ done
 		    fi
 		fi
 		: ${with_logincap='maybe'}
+
+		# Newer OpenBSD only fills in pw_password for getpwnam_shadow()
+		shadow_funcs="getpwnam_shadow"
 
 		# Examples go in share/examples/sudo
 		if test X"$with_exampledir" = X""; then
@@ -27944,6 +27947,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 
