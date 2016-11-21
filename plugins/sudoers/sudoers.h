@@ -369,7 +369,7 @@ extern sudo_printf_t sudo_printf;
 
 /* sudoers_debug.c */
 bool sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
-void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
+bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
 void sudoers_debug_deregister(void);
 
 /* policy.c */

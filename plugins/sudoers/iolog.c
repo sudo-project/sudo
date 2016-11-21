@@ -784,7 +784,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	    continue;
 	}
     }
-    sudoers_debug_register(plugin_path, &debug_files);
+    if (!sudoers_debug_register(plugin_path, &debug_files)) {
+	ret = -1;
+	goto done;
+    }
 
     /*
      * Pull iolog settings out of command_info.

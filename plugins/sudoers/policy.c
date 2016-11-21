@@ -669,7 +669,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	    continue;
 	}
     }
-    sudoers_debug_register(plugin_path, &debug_files);
+    if (!sudoers_debug_register(plugin_path, &debug_files))
+	debug_return_int(-1);
 
     /* Call the sudoers init function. */
     info.settings = settings;

@@ -179,6 +179,8 @@ main(int argc, char *argv[], char *envp[])
 	exit(EXIT_FAILURE);
     sudo_debug_instance = sudo_debug_register(getprogname(),
 	NULL, NULL, sudo_conf_debug_files(getprogname()));
+    if (sudo_debug_instance == SUDO_DEBUG_INSTANCE_ERROR)
+	exit(EXIT_FAILURE);
 
     /* Make sure we are setuid root. */
     sudo_check_suid(argc > 0 ? argv[0] : "sudo");

@@ -243,8 +243,9 @@ bad:
  * If subsystem names are specified they override the default values.
  * NOTE: subsystems must not be freed by caller unless deregistered.
  * Sets the active instance to the newly registered instance.
- * Returns instance index on success or SUDO_DEBUG_INSTANCE_INITIALIZER
- * on failure.
+ * Returns instance index on success, SUDO_DEBUG_INSTANCE_INITIALIZER
+ * if no debug files are specified and SUDO_DEBUG_INSTANCE_ERROR
+ * on error.
  */
 int
 sudo_debug_register_v1(const char *program, const char *const subsystems[],
@@ -264,7 +265,7 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	subsystems = sudo_debug_default_subsystems;
     } else if (ids == NULL) {
 	/* If subsystems are specified we must have ids[] too. */
-	return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	return SUDO_DEBUG_INSTANCE_ERROR;
     }
 
     /* Search for existing instance. */
@@ -302,17 +303,17 @@ sudo_debug_register_v1(const char *program, const char *const subsystems[],
 	if (idx == SUDO_DEBUG_INSTANCE_MAX) {
 	    /* XXX - realloc? */
 	    sudo_warnx_nodebug("too many debug instances (max %d)", SUDO_DEBUG_INSTANCE_MAX);
-	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	    return SUDO_DEBUG_INSTANCE_ERROR;
 	}
 	if (idx != sudo_debug_last_instance + 1 && idx != free_idx) {
 	    sudo_warnx_nodebug("%s: instance number mismatch: expected %d or %d, got %d", __func__, sudo_debug_last_instance + 1, free_idx, idx);
-	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	    return SUDO_DEBUG_INSTANCE_ERROR;
 	}
 	if ((instance = malloc(sizeof(*instance))) == NULL)
-	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	    return SUDO_DEBUG_INSTANCE_ERROR;
 	if ((instance->program = strdup(program)) == NULL) {
 	    free(instance);
-	    return SUDO_DEBUG_INSTANCE_INITIALIZER;
+	    return SUDO_DEBUG_INSTANCE_ERROR;
 	}
 	instance->subsystems = subsystems;
 	instance->subsystem_ids = ids;

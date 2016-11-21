@@ -168,7 +168,8 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
 
     /* Initialize the debug subsystem. */
-    sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
+    if (!sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname())))
+	exit(EXIT_FAILURE);
 
     /* Parse sudoers plugin options, if any. */
     parse_sudoers_options();

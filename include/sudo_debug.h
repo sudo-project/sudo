@@ -84,6 +84,9 @@ struct sudo_conf_debug_file_list;
 #define SUDO_DEBUG_UTMP		(14<<6)    /* utmp file ops */
 #define SUDO_DEBUG_ALL		0xffff0000 /* all subsystems */
 
+/* Error return for sudo_debug_register().  */
+#define SUDO_DEBUG_INSTANCE_ERROR	-2
+
 /* Initializer for instance index to indicate that debugging is not setup. */
 #define SUDO_DEBUG_INSTANCE_INITIALIZER	-1
 
