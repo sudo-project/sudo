@@ -1,6 +1,6 @@
 # Portable object template file for sudo
 # This file is put in the public domain.
-# Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2015
+# Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2016
 #
 #, fuzzy
 msgid ""
