@@ -194,7 +194,7 @@ main(int argc, char *argv[])
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
 	extern char *malloc_options;
-	malloc_options = "AFGJPR";
+	malloc_options = "S";
     }  
 #endif
 

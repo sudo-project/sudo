@@ -118,7 +118,7 @@ main(int argc, char *argv[])
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
-    malloc_options = "AFGJPR";
+    malloc_options = "S";
 #endif
 #if YYDEBUG
     sudoersdebug = 1;
