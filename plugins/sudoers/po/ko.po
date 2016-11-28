@@ -5,19 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.16b1\n"
+"Project-Id-Version: sudoers 1.8.18b4\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2016-02-19 15:48-0700\n"
-"PO-Revision-Date: 2016-03-18 11:00+0900\n"
+"POT-Creation-Date: 2016-08-31 05:48-0600\n"
+"PO-Revision-Date: 2016-09-21 22:00+0900\n"
 "Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
 "Language: ko\n"
-"X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Poedit 1.8.8\n"
 
 #: confstr.sh:1
 msgid "syntax error"
@@ -52,58 +52,63 @@ msgstr "죄송합니다만, 다시 시도하십시오."
 #: gram.y:805 gram.y:812 gram.y:838 gram.y:845 gram.y:852 gram.y:1136
 #: gram.y:1143 plugins/sudoers/alias.c:123 plugins/sudoers/alias.c:136
 #: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
-#: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:398
+#: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:443
 #: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/auth/sia.c:59
-#: plugins/sudoers/defaults.c:518 plugins/sudoers/defaults.c:722
-#: plugins/sudoers/defaults.c:882 plugins/sudoers/editor.c:64
-#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:92
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
+#: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
+#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
 #: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
-#: plugins/sudoers/group_plugin.c:134 plugins/sudoers/iolog.c:586
-#: plugins/sudoers/iolog.c:618 plugins/sudoers/iolog_path.c:167
-#: plugins/sudoers/ldap.c:446 plugins/sudoers/ldap.c:477
-#: plugins/sudoers/ldap.c:529 plugins/sudoers/ldap.c:562
-#: plugins/sudoers/ldap.c:917 plugins/sudoers/ldap.c:1064
-#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1542
-#: plugins/sudoers/ldap.c:1620 plugins/sudoers/ldap.c:1756
-#: plugins/sudoers/ldap.c:1780 plugins/sudoers/ldap.c:1810
-#: plugins/sudoers/ldap.c:1863 plugins/sudoers/ldap.c:1878
-#: plugins/sudoers/ldap.c:1974 plugins/sudoers/ldap.c:2007
-#: plugins/sudoers/ldap.c:2160 plugins/sudoers/ldap.c:2257
-#: plugins/sudoers/ldap.c:3063 plugins/sudoers/ldap.c:3096
-#: plugins/sudoers/ldap.c:3407 plugins/sudoers/ldap.c:3435
-#: plugins/sudoers/ldap.c:3451 plugins/sudoers/ldap.c:3540
-#: plugins/sudoers/ldap.c:3556 plugins/sudoers/linux_audit.c:76
-#: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:666
-#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:508
-#: plugins/sudoers/match.c:544 plugins/sudoers/match.c:742
-#: plugins/sudoers/match.c:799 plugins/sudoers/parse.c:235
-#: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
-#: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:393
-#: plugins/sudoers/policy.c:602 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/sssd.c:160 plugins/sudoers/sssd.c:192
-#: plugins/sudoers/sssd.c:235 plugins/sudoers/sssd.c:242
-#: plugins/sudoers/sssd.c:278 plugins/sudoers/sssd.c:323
-#: plugins/sudoers/sssd.c:920 plugins/sudoers/sssd.c:1053
-#: plugins/sudoers/sudoers.c:159 plugins/sudoers/sudoers.c:294
-#: plugins/sudoers/sudoers.c:304 plugins/sudoers/sudoers.c:312
-#: plugins/sudoers/sudoers.c:365 plugins/sudoers/sudoers.c:663
-#: plugins/sudoers/sudoers.c:749 plugins/sudoers/sudoers.c:793
-#: plugins/sudoers/sudoers_debug.c:107 plugins/sudoers/sudoreplay.c:472
-#: plugins/sudoers/sudoreplay.c:668 plugins/sudoers/sudoreplay.c:780
-#: plugins/sudoers/sudoreplay.c:820 plugins/sudoers/sudoreplay.c:829
-#: plugins/sudoers/sudoreplay.c:839 plugins/sudoers/sudoreplay.c:847
-#: plugins/sudoers/sudoreplay.c:851 plugins/sudoers/sudoreplay.c:1007
-#: plugins/sudoers/sudoreplay.c:1011 plugins/sudoers/testsudoers.c:130
-#: plugins/sudoers/testsudoers.c:188 plugins/sudoers/testsudoers.c:215
-#: plugins/sudoers/testsudoers.c:232 plugins/sudoers/timestamp.c:390
-#: plugins/sudoers/timestamp.c:426 plugins/sudoers/timestamp.c:838
-#: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
-#: plugins/sudoers/toke_util.c:147 plugins/sudoers/visudo.c:152
-#: plugins/sudoers/visudo.c:213 plugins/sudoers/visudo.c:298
-#: plugins/sudoers/visudo.c:304 plugins/sudoers/visudo.c:434
-#: plugins/sudoers/visudo.c:980 plugins/sudoers/visudo.c:1024
-#: plugins/sudoers/visudo.c:1120 toke.l:785 toke.l:806 toke.l:816 toke.l:924
-#: toke.l:1082
+#: plugins/sudoers/group_plugin.c:134 plugins/sudoers/iolog.c:656
+#: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:446
+#: plugins/sudoers/ldap.c:477 plugins/sudoers/ldap.c:529
+#: plugins/sudoers/ldap.c:562 plugins/sudoers/ldap.c:917
+#: plugins/sudoers/ldap.c:1124 plugins/sudoers/ldap.c:1138
+#: plugins/sudoers/ldap.c:1420 plugins/sudoers/ldap.c:1580
+#: plugins/sudoers/ldap.c:1662 plugins/sudoers/ldap.c:1802
+#: plugins/sudoers/ldap.c:1826 plugins/sudoers/ldap.c:1856
+#: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
+#: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
+#: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3471
+#: plugins/sudoers/ldap.c:3487 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
+#: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:682
+#: plugins/sudoers/logging.c:940 plugins/sudoers/match.c:506
+#: plugins/sudoers/match.c:540 plugins/sudoers/match.c:577
+#: plugins/sudoers/match.c:775 plugins/sudoers/match.c:833
+#: plugins/sudoers/parse.c:236 plugins/sudoers/parse.c:248
+#: plugins/sudoers/parse.c:263 plugins/sudoers/parse.c:275
+#: plugins/sudoers/policy.c:393 plugins/sudoers/policy.c:608
+#: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:139
+#: plugins/sudoers/pwutil.c:210 plugins/sudoers/pwutil.c:286
+#: plugins/sudoers/pwutil.c:457 plugins/sudoers/pwutil.c:522
+#: plugins/sudoers/pwutil.c:591 plugins/sudoers/pwutil.c:749
+#: plugins/sudoers/pwutil.c:806 plugins/sudoers/pwutil.c:851
+#: plugins/sudoers/pwutil.c:908 plugins/sudoers/sssd.c:162
+#: plugins/sudoers/sssd.c:194 plugins/sudoers/sssd.c:237
+#: plugins/sudoers/sssd.c:244 plugins/sudoers/sssd.c:280
+#: plugins/sudoers/sssd.c:390 plugins/sudoers/sssd.c:462
+#: plugins/sudoers/sssd.c:1014 plugins/sudoers/sssd.c:1205
+#: plugins/sudoers/sssd.c:1219 plugins/sudoers/sudoers.c:262
+#: plugins/sudoers/sudoers.c:272 plugins/sudoers/sudoers.c:280
+#: plugins/sudoers/sudoers.c:362 plugins/sudoers/sudoers.c:653
+#: plugins/sudoers/sudoers.c:759 plugins/sudoers/sudoers.c:803
+#: plugins/sudoers/sudoers_debug.c:107 plugins/sudoers/sudoreplay.c:513
+#: plugins/sudoers/sudoreplay.c:712 plugins/sudoers/sudoreplay.c:824
+#: plugins/sudoers/sudoreplay.c:864 plugins/sudoers/sudoreplay.c:873
+#: plugins/sudoers/sudoreplay.c:883 plugins/sudoers/sudoreplay.c:891
+#: plugins/sudoers/sudoreplay.c:895 plugins/sudoers/sudoreplay.c:1051
+#: plugins/sudoers/sudoreplay.c:1055 plugins/sudoers/testsudoers.c:130
+#: plugins/sudoers/testsudoers.c:214 plugins/sudoers/testsudoers.c:231
+#: plugins/sudoers/timestamp.c:402 plugins/sudoers/timestamp.c:438
+#: plugins/sudoers/timestamp.c:854 plugins/sudoers/toke_util.c:56
+#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:146
+#: plugins/sudoers/visudo.c:152 plugins/sudoers/visudo.c:308
+#: plugins/sudoers/visudo.c:314 plugins/sudoers/visudo.c:445
+#: plugins/sudoers/visudo.c:998 plugins/sudoers/visudo.c:1042
+#: plugins/sudoers/visudo.c:1138 toke.l:829 toke.l:929 toke.l:1087
 msgid "unable to allocate memory"
 msgstr "메모리를 할당할 수 없습니다"
 
@@ -111,64 +116,70 @@ msgstr "메모리를 할당할 수 없습니다"
 msgid "a digest requires a path name"
 msgstr "다이제스트에 경로 이름이 필요합니다"
 
-#: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:398
-#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/defaults.c:518
-#: plugins/sudoers/defaults.c:722 plugins/sudoers/defaults.c:882
-#: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
-#: plugins/sudoers/editor.c:92 plugins/sudoers/env.c:234
-#: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:134
-#: plugins/sudoers/iolog.c:586 plugins/sudoers/iolog.c:618
+#: gram.y:1136 gram.y:1143 plugins/sudoers/auth/pam.c:320
+#: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
+#: plugins/sudoers/defaults.c:576 plugins/sudoers/defaults.c:826
+#: plugins/sudoers/defaults.c:974 plugins/sudoers/editor.c:64
+#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
+#: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
+#: plugins/sudoers/group_plugin.c:134 plugins/sudoers/iolog.c:656
 #: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:446
 #: plugins/sudoers/ldap.c:477 plugins/sudoers/ldap.c:529
 #: plugins/sudoers/ldap.c:562 plugins/sudoers/ldap.c:917
-#: plugins/sudoers/ldap.c:1064 plugins/sudoers/ldap.c:1384
-#: plugins/sudoers/ldap.c:1542 plugins/sudoers/ldap.c:1620
-#: plugins/sudoers/ldap.c:1756 plugins/sudoers/ldap.c:1780
-#: plugins/sudoers/ldap.c:1810 plugins/sudoers/ldap.c:1863
-#: plugins/sudoers/ldap.c:1878 plugins/sudoers/ldap.c:1974
-#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2160
-#: plugins/sudoers/ldap.c:2257 plugins/sudoers/ldap.c:3063
-#: plugins/sudoers/ldap.c:3096 plugins/sudoers/ldap.c:3407
-#: plugins/sudoers/ldap.c:3434 plugins/sudoers/ldap.c:3450
-#: plugins/sudoers/ldap.c:3540 plugins/sudoers/ldap.c:3556
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:188
-#: plugins/sudoers/logging.c:924 plugins/sudoers/match.c:508
-#: plugins/sudoers/match.c:544 plugins/sudoers/match.c:742
-#: plugins/sudoers/match.c:799 plugins/sudoers/parse.c:235
-#: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:262
-#: plugins/sudoers/parse.c:274 plugins/sudoers/policy.c:97
+#: plugins/sudoers/ldap.c:1124 plugins/sudoers/ldap.c:1138
+#: plugins/sudoers/ldap.c:1420 plugins/sudoers/ldap.c:1580
+#: plugins/sudoers/ldap.c:1662 plugins/sudoers/ldap.c:1802
+#: plugins/sudoers/ldap.c:1826 plugins/sudoers/ldap.c:1856
+#: plugins/sudoers/ldap.c:1909 plugins/sudoers/ldap.c:1924
+#: plugins/sudoers/ldap.c:2020 plugins/sudoers/ldap.c:2053
+#: plugins/sudoers/ldap.c:2206 plugins/sudoers/ldap.c:2303
+#: plugins/sudoers/ldap.c:3105 plugins/sudoers/ldap.c:3137
+#: plugins/sudoers/ldap.c:3443 plugins/sudoers/ldap.c:3470
+#: plugins/sudoers/ldap.c:3486 plugins/sudoers/ldap.c:3577
+#: plugins/sudoers/ldap.c:3593 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
+#: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:940
+#: plugins/sudoers/match.c:505 plugins/sudoers/match.c:539
+#: plugins/sudoers/match.c:577 plugins/sudoers/match.c:775
+#: plugins/sudoers/match.c:832 plugins/sudoers/parse.c:236
+#: plugins/sudoers/parse.c:248 plugins/sudoers/parse.c:263
+#: plugins/sudoers/parse.c:275 plugins/sudoers/policy.c:97
 #: plugins/sudoers/policy.c:106 plugins/sudoers/policy.c:115
 #: plugins/sudoers/policy.c:139 plugins/sudoers/policy.c:250
 #: plugins/sudoers/policy.c:277 plugins/sudoers/policy.c:286
 #: plugins/sudoers/policy.c:325 plugins/sudoers/policy.c:335
 #: plugins/sudoers/policy.c:344 plugins/sudoers/policy.c:393
-#: plugins/sudoers/policy.c:602 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/policy.c:608 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/pwutil.c:139 plugins/sudoers/pwutil.c:210
+#: plugins/sudoers/pwutil.c:286 plugins/sudoers/pwutil.c:457
+#: plugins/sudoers/pwutil.c:522 plugins/sudoers/pwutil.c:591
+#: plugins/sudoers/pwutil.c:749 plugins/sudoers/pwutil.c:806
+#: plugins/sudoers/pwutil.c:851 plugins/sudoers/pwutil.c:908
 #: plugins/sudoers/set_perms.c:356 plugins/sudoers/set_perms.c:695
 #: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1350
-#: plugins/sudoers/set_perms.c:1514 plugins/sudoers/sssd.c:160
-#: plugins/sudoers/sssd.c:192 plugins/sudoers/sssd.c:235
-#: plugins/sudoers/sssd.c:242 plugins/sudoers/sssd.c:278
-#: plugins/sudoers/sssd.c:323 plugins/sudoers/sssd.c:920
-#: plugins/sudoers/sssd.c:1053 plugins/sudoers/sudoers.c:159
-#: plugins/sudoers/sudoers.c:294 plugins/sudoers/sudoers.c:304
-#: plugins/sudoers/sudoers.c:312 plugins/sudoers/sudoers.c:365
-#: plugins/sudoers/sudoers.c:663 plugins/sudoers/sudoers.c:749
-#: plugins/sudoers/sudoers.c:793 plugins/sudoers/sudoers_debug.c:106
-#: plugins/sudoers/sudoreplay.c:472 plugins/sudoers/sudoreplay.c:668
-#: plugins/sudoers/sudoreplay.c:780 plugins/sudoers/sudoreplay.c:820
-#: plugins/sudoers/sudoreplay.c:829 plugins/sudoers/sudoreplay.c:839
-#: plugins/sudoers/sudoreplay.c:847 plugins/sudoers/sudoreplay.c:851
-#: plugins/sudoers/sudoreplay.c:1007 plugins/sudoers/sudoreplay.c:1011
-#: plugins/sudoers/testsudoers.c:130 plugins/sudoers/testsudoers.c:188
-#: plugins/sudoers/testsudoers.c:215 plugins/sudoers/testsudoers.c:232
-#: plugins/sudoers/timestamp.c:390 plugins/sudoers/timestamp.c:426
-#: plugins/sudoers/timestamp.c:838 plugins/sudoers/toke_util.c:56
-#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:147
-#: plugins/sudoers/visudo.c:152 plugins/sudoers/visudo.c:213
-#: plugins/sudoers/visudo.c:298 plugins/sudoers/visudo.c:304
-#: plugins/sudoers/visudo.c:434 plugins/sudoers/visudo.c:980
-#: plugins/sudoers/visudo.c:1024 plugins/sudoers/visudo.c:1120 toke.l:785
-#: toke.l:806 toke.l:816 toke.l:924 toke.l:1082
+#: plugins/sudoers/set_perms.c:1514 plugins/sudoers/sssd.c:162
+#: plugins/sudoers/sssd.c:194 plugins/sudoers/sssd.c:237
+#: plugins/sudoers/sssd.c:244 plugins/sudoers/sssd.c:280
+#: plugins/sudoers/sssd.c:390 plugins/sudoers/sssd.c:462
+#: plugins/sudoers/sssd.c:1014 plugins/sudoers/sssd.c:1205
+#: plugins/sudoers/sssd.c:1219 plugins/sudoers/sudoers.c:262
+#: plugins/sudoers/sudoers.c:272 plugins/sudoers/sudoers.c:280
+#: plugins/sudoers/sudoers.c:362 plugins/sudoers/sudoers.c:653
+#: plugins/sudoers/sudoers.c:759 plugins/sudoers/sudoers.c:803
+#: plugins/sudoers/sudoers_debug.c:106 plugins/sudoers/sudoreplay.c:513
+#: plugins/sudoers/sudoreplay.c:712 plugins/sudoers/sudoreplay.c:824
+#: plugins/sudoers/sudoreplay.c:864 plugins/sudoers/sudoreplay.c:873
+#: plugins/sudoers/sudoreplay.c:883 plugins/sudoers/sudoreplay.c:891
+#: plugins/sudoers/sudoreplay.c:895 plugins/sudoers/sudoreplay.c:1051
+#: plugins/sudoers/sudoreplay.c:1055 plugins/sudoers/testsudoers.c:130
+#: plugins/sudoers/testsudoers.c:214 plugins/sudoers/testsudoers.c:231
+#: plugins/sudoers/timestamp.c:402 plugins/sudoers/timestamp.c:438
+#: plugins/sudoers/timestamp.c:854 plugins/sudoers/toke_util.c:56
+#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:146
+#: plugins/sudoers/visudo.c:152 plugins/sudoers/visudo.c:308
+#: plugins/sudoers/visudo.c:314 plugins/sudoers/visudo.c:445
+#: plugins/sudoers/visudo.c:998 plugins/sudoers/visudo.c:1042
+#: plugins/sudoers/visudo.c:1138 toke.l:829 toke.l:929 toke.l:1087
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -235,7 +246,7 @@ msgstr "%s: 자격 정보 캐시를 해석할 수 없습니다: %s"
 #: plugins/sudoers/auth/kerb5.c:217
 #, c-format
 msgid "%s: unable to allocate options: %s"
-msgstr "%s: 설정 항목을 할당할 수 없습니다: %s"
+msgstr "%s: 옵션을 할당할 수 없습니다: %s"
 
 #: plugins/sudoers/auth/kerb5.c:232
 #, c-format
@@ -262,37 +273,37 @@ msgstr "%s: 호스트 정보를 가져올 수 없습니다: %s"
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s: TGT를 검증할 수 없습니다! 공격 가능성이 있습니다!: %s"
 
-#: plugins/sudoers/auth/pam.c:92
+#: plugins/sudoers/auth/pam.c:108
 msgid "unable to initialize PAM"
 msgstr "PAM을 초기화할 수 없습니다"
 
-#: plugins/sudoers/auth/pam.c:164
+#: plugins/sudoers/auth/pam.c:194
 msgid "account validation failure, is your account locked?"
 msgstr "계정 검증 실패, 계정이 잠겼습니까?"
 
-#: plugins/sudoers/auth/pam.c:168
+#: plugins/sudoers/auth/pam.c:198
 msgid "Account or password is expired, reset your password and try again"
 msgstr "계정 또는 암호 기한이 지났습니다. 암호를 다시 설정한 후 시도하십시오"
 
-#: plugins/sudoers/auth/pam.c:176
+#: plugins/sudoers/auth/pam.c:206
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "기한이 지난 암호를 바꿀 수 없습니다: %s"
 
-#: plugins/sudoers/auth/pam.c:181
+#: plugins/sudoers/auth/pam.c:211
 msgid "Password expired, contact your system administrator"
 msgstr "암호 기한이 지났습니다. 시스템 관리자에게 문의하십시오"
 
-#: plugins/sudoers/auth/pam.c:185
+#: plugins/sudoers/auth/pam.c:215
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "계정 기한이 지났거나 PAM 설정에 sudo에서 확인할 \"account\" 섹션이 빠졌습니다. 시스템 관리자에게 문의하십시오."
 
-#: plugins/sudoers/auth/pam.c:199
+#: plugins/sudoers/auth/pam.c:229
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr "PAM 인증 오류: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:218
+#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:225
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "%s 데이터베이스에 없습니다"
@@ -321,7 +332,7 @@ msgstr "SecurID용 인증 핸들이 잘못되었습니다"
 msgid "SecurID communication failed"
 msgstr "SecurID 통신에 실패했습니다"
 
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:211
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:213
 msgid "unknown SecurID error"
 msgstr "알 수 없는 SecurID 오류"
 
@@ -353,7 +364,7 @@ msgstr "sudo에 컴파일한 인증 방식이 없습니다!  인증 기능을 �
 msgid "Unable to initialize authentication methods."
 msgstr "인증 방식을 초기화할 수 없습니다."
 
-#: plugins/sudoers/auth/sudo_auth.c:442
+#: plugins/sudoers/auth/sudo_auth.c:441
 msgid "Authentication methods:"
 msgstr "인증 방식:"
 
@@ -386,14 +397,14 @@ msgstr ""
 "\n"
 
 #: plugins/sudoers/check.c:295 plugins/sudoers/check.c:305
-#: plugins/sudoers/sudoers.c:699 plugins/sudoers/sudoers.c:728
+#: plugins/sudoers/sudoers.c:689 plugins/sudoers/sudoers.c:722
 #, c-format
 msgid "unknown uid: %u"
 msgstr "알 수 없는 uid: %u"
 
-#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:774
-#: plugins/sudoers/sudoers.c:1095 plugins/sudoers/testsudoers.c:206
-#: plugins/sudoers/testsudoers.c:361
+#: plugins/sudoers/check.c:300 plugins/sudoers/policy.c:780
+#: plugins/sudoers/sudoers.c:1111 plugins/sudoers/testsudoers.c:205
+#: plugins/sudoers/testsudoers.c:363
 #, c-format
 msgid "unknown user: %s"
 msgstr "알 수 없는 사용자: %s"
@@ -813,48 +824,61 @@ msgstr "알 수 없는 시스템 그룹에 그룹 플러그인 요청"
 msgid "Match netgroups based on the entire tuple: user, host and domain"
 msgstr "user, host, domain 전체 튜플을 기반으로 네트워크 그룹 비교"
 
-#: plugins/sudoers/defaults.c:199 plugins/sudoers/defaults.c:610
-#: plugins/sudoers/visudo_json.c:633 plugins/sudoers/visudo_json.c:668
-#, c-format
-msgid "unknown defaults entry `%s'"
-msgstr "`%s' 항목에 알 수 없는 기본값"
+#: plugins/sudoers/def_data.c:407
+msgid "Allow commands to be run even if sudo cannot write to the audit log"
+msgstr "sudo에서 감시 로그를 기록할 수 없을 경우에도 명령 실행 허용"
 
-#: plugins/sudoers/defaults.c:207 plugins/sudoers/defaults.c:217
-#: plugins/sudoers/defaults.c:241 plugins/sudoers/defaults.c:256
-#: plugins/sudoers/defaults.c:269 plugins/sudoers/defaults.c:282
-#: plugins/sudoers/defaults.c:295 plugins/sudoers/defaults.c:315
-#: plugins/sudoers/defaults.c:325
-#, c-format
-msgid "value `%s' is invalid for option `%s'"
-msgstr "`%s' 값은 `%s' 설정 항목에 맞지 않습니다"
+#: plugins/sudoers/def_data.c:411
+msgid "Allow commands to be run even if sudo cannot write to the I/O log"
+msgstr "sudo에서 입출력 로그를 기록할 수 없을 경우에도 명령 실행 허용"
 
-#: plugins/sudoers/defaults.c:210 plugins/sudoers/defaults.c:220
-#: plugins/sudoers/defaults.c:228 plugins/sudoers/defaults.c:251
-#: plugins/sudoers/defaults.c:264 plugins/sudoers/defaults.c:277
-#: plugins/sudoers/defaults.c:290 plugins/sudoers/defaults.c:310
-#: plugins/sudoers/defaults.c:321
+#: plugins/sudoers/def_data.c:415
+msgid "Allow commands to be run even if sudo cannot write to the log file"
+msgstr "sudo에서 로그 파일에 기록할 수 없을 경우에도 명령 실행 허용"
+
+#: plugins/sudoers/def_data.c:419
+msgid "Resolve groups in sudoers and match on the group ID, not the name"
+msgstr "sudoers의 그룹을 해석하고 그룹 이름이 아닌 ID와 비교"
+
+#: plugins/sudoers/defaults.c:203
 #, c-format
 msgid "no value specified for `%s'"
 msgstr "`%s'에 값을 지정하지 않았습니다"
 
-#: plugins/sudoers/defaults.c:233
+#: plugins/sudoers/defaults.c:218
 #, c-format
 msgid "values for `%s' must start with a '/'"
 msgstr "`%s' 값을 '/'로 시작해야 합니다"
 
-#: plugins/sudoers/defaults.c:301
+#: plugins/sudoers/defaults.c:241
 #, c-format
 msgid "option `%s' does not take a value"
-msgstr "`%s' 설정 항목에 값이 없습니다"
+msgstr "`%s' 옵션에 값이 없습니다"
+
+#: plugins/sudoers/defaults.c:258
+#, c-format
+msgid "invalid Defaults type 0x%x for option `%s'"
+msgstr "`%2$s' 옵션의 잘못된 기본 형식 0x%1$x"
+
+#: plugins/sudoers/defaults.c:271
+#, c-format
+msgid "value `%s' is invalid for option `%s'"
+msgstr "`%s' 값은 `%s' 옵션에 맞지 않습니다"
+
+#: plugins/sudoers/defaults.c:318 plugins/sudoers/defaults.c:716
+#: plugins/sudoers/visudo_json.c:632 plugins/sudoers/visudo_json.c:667
+#, c-format
+msgid "unknown defaults entry `%s'"
+msgstr "`%s' 항목에 알 수 없는 기본값"
 
 #: plugins/sudoers/env.c:296 plugins/sudoers/env.c:303
 #: plugins/sudoers/env.c:408 plugins/sudoers/ldap.c:450
-#: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1166
-#: plugins/sudoers/ldap.c:1388 plugins/sudoers/ldap.c:1704
-#: plugins/sudoers/linux_audit.c:82 plugins/sudoers/logging.c:929
-#: plugins/sudoers/policy.c:511 plugins/sudoers/policy.c:520
-#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:815
-#: plugins/sudoers/testsudoers.c:236 plugins/sudoers/toke_util.c:162
+#: plugins/sudoers/ldap.c:540 plugins/sudoers/ldap.c:1202
+#: plugins/sudoers/ldap.c:1424 plugins/sudoers/ldap.c:1750
+#: plugins/sudoers/linux_audit.c:82 plugins/sudoers/logging.c:945
+#: plugins/sudoers/policy.c:511 plugins/sudoers/policy.c:521
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:825
+#: plugins/sudoers/testsudoers.c:235 plugins/sudoers/toke_util.c:158
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "내부 오류. %s 오버플로우"
@@ -863,11 +887,11 @@ msgstr "내부 오류. %s 오버플로우"
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp가 깨졌습니다. 길이가 일치하지 않습니다"
 
-#: plugins/sudoers/env.c:1083
+#: plugins/sudoers/env.c:1082
 msgid "unable to rebuild the environment"
 msgstr "환경 구성을 다시 갖출 수 없습니다"
 
-#: plugins/sudoers/env.c:1157
+#: plugins/sudoers/env.c:1156
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "죄송하지만 다음 환경 변수를 설정하도록 허가받지 않았습니다: %s"
@@ -882,7 +906,7 @@ msgstr "%s은(는) %d uid가 소유해야 합니다"
 msgid "%s must only be writable by owner"
 msgstr "%s은(는) 소유자만 쓸 수 있습니다"
 
-#: plugins/sudoers/group_plugin.c:98 plugins/sudoers/sssd.c:331
+#: plugins/sudoers/group_plugin.c:98 plugins/sudoers/sssd.c:398
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "%s을(를) 불러올 수 없습니다: %s"
@@ -901,46 +925,51 @@ msgstr "%s: 호환되지 않는 그룹 플러그인 주 버전 %d입니다. %d�
 msgid "Local IP address and netmask pairs:\n"
 msgstr "로컬 IP 주소 및 넷마스크 쌍:\n"
 
-#: plugins/sudoers/iolog.c:92 plugins/sudoers/iolog.c:110
-#: plugins/sudoers/timestamp.c:169
+#: plugins/sudoers/iolog.c:95 plugins/sudoers/iolog.c:122
+#: plugins/sudoers/timestamp.c:181
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "%s이(가) 있지만 디렉터리가 아닙니다(0%o)"
 
-#: plugins/sudoers/iolog.c:103 plugins/sudoers/iolog.c:124
-#: plugins/sudoers/iolog.c:131 plugins/sudoers/timestamp.c:163
-#: plugins/sudoers/timestamp.c:184
+#: plugins/sudoers/iolog.c:110 plugins/sudoers/iolog.c:116
+#: plugins/sudoers/iolog.c:138 plugins/sudoers/iolog.c:147
+#: plugins/sudoers/timestamp.c:170 plugins/sudoers/timestamp.c:196
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "mkdir %s 명령을 실행할 수 없습니다"
 
-#: plugins/sudoers/iolog.c:200 plugins/sudoers/sudoers.c:871
-#: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/sudoreplay.c:769
-#: plugins/sudoers/sudoreplay.c:973 plugins/sudoers/timestamp.c:399
-#: plugins/sudoers/visudo.c:904 plugins/sudoers/visudo_json.c:1012
-#: plugins/sudoers/visudo_json.c:1025
+#: plugins/sudoers/iolog.c:229 plugins/sudoers/sudoers.c:881
+#: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/sudoreplay.c:813
+#: plugins/sudoers/sudoreplay.c:1017 plugins/sudoers/timestamp.c:411
+#: plugins/sudoers/visudo.c:917 plugins/sudoers/visudo_json.c:1011
+#: plugins/sudoers/visudo_json.c:1024
 #, c-format
 msgid "unable to open %s"
 msgstr "%s을(를) 열 수 없습니다"
 
-#: plugins/sudoers/iolog.c:241 plugins/sudoers/sudoers.c:875
-#: plugins/sudoers/sudoreplay.c:1084
+#: plugins/sudoers/iolog.c:270 plugins/sudoers/sudoers.c:885
+#: plugins/sudoers/sudoreplay.c:1128
 #, c-format
 msgid "unable to read %s"
 msgstr "%s을(를) 읽을 수 없습니다"
 
-#: plugins/sudoers/iolog.c:277 plugins/sudoers/sudoreplay.c:550
-#: plugins/sudoers/timestamp.c:298 plugins/sudoers/timestamp.c:301
+#: plugins/sudoers/iolog.c:306 plugins/sudoers/sudoreplay.c:594
+#: plugins/sudoers/timestamp.c:310 plugins/sudoers/timestamp.c:313
 #, c-format
 msgid "unable to write to %s"
 msgstr "%s에 기록할 수 없습니다"
 
-#: plugins/sudoers/iolog.c:342 plugins/sudoers/iolog.c:540
+#: plugins/sudoers/iolog.c:378 plugins/sudoers/iolog.c:582
 #, c-format
 msgid "unable to create %s"
 msgstr "%s을(를) 만들 수 없습니다"
 
-#: plugins/sudoers/iolog.c:723
+#: plugins/sudoers/iolog.c:746 plugins/sudoers/iolog.c:827
+#, c-format
+msgid "unable to write to I/O log file: %s"
+msgstr "입출력 로그에 기록할 수 없습니다: %s"
+
+#: plugins/sudoers/iolog.c:778
 #, c-format
 msgid "%s: internal error, file index %d not open"
 msgstr "%s: 내부 오류. 파일 인덱스 %d을(를) 열지 않았습니다"
@@ -972,20 +1001,20 @@ msgstr "SSL 인증서 및 키 DB를 초기화할 수 없습니다: %s"
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "SSL을 사용하려면 %s에서 TLS_CERT를 설정해야 합니다"
 
-#: plugins/sudoers/ldap.c:1152
+#: plugins/sudoers/ldap.c:1188
 msgid "unable to get GMT time"
 msgstr "GMT 시간을 가져올 수 없습니다"
 
-#: plugins/sudoers/ldap.c:1158
+#: plugins/sudoers/ldap.c:1194
 msgid "unable to format timestamp"
 msgstr "타임스탬프를 형식에 맞출 수 없습니다"
 
-#: plugins/sudoers/ldap.c:1853
+#: plugins/sudoers/ldap.c:1899
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/ldap.c:2394
+#: plugins/sudoers/ldap.c:2440
 #, c-format
 msgid ""
 "\n"
@@ -994,7 +1023,7 @@ msgstr ""
 "\n"
 "LDAP 역할: %s\n"
 
-#: plugins/sudoers/ldap.c:2396
+#: plugins/sudoers/ldap.c:2442
 #, c-format
 msgid ""
 "\n"
@@ -1003,27 +1032,27 @@ msgstr ""
 "\n"
 "LDAP 역할: 알 수 없음\n"
 
-#: plugins/sudoers/ldap.c:2443
+#: plugins/sudoers/ldap.c:2489
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    순서: %s\n"
 
-#: plugins/sudoers/ldap.c:2451 plugins/sudoers/parse.c:555
-#: plugins/sudoers/sssd.c:1429
+#: plugins/sudoers/ldap.c:2497 plugins/sudoers/parse.c:556
+#: plugins/sudoers/sssd.c:1568
 #, c-format
 msgid "    Commands:\n"
 msgstr "    명령:\n"
 
-#: plugins/sudoers/ldap.c:3015
+#: plugins/sudoers/ldap.c:3057
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "LDAP를 초기화할 수 없습니다: %s"
 
-#: plugins/sudoers/ldap.c:3051
+#: plugins/sudoers/ldap.c:3093
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls를 지정했지만 LDAP 라이브러리에서 ldap_start_tls_s() 또는 ldap_start_tls_s_np() 함수를 지원하지 않습니다"
 
-#: plugins/sudoers/ldap.c:3305
+#: plugins/sudoers/ldap.c:3341
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "잘못된 sudoOrder 속성: %s"
@@ -1046,65 +1075,70 @@ msgstr "%8s : %s"
 msgid "%8s : (command continued) %s"
 msgstr "%8s : (명령 계속 실행) %s"
 
-#: plugins/sudoers/logging.c:159
+#: plugins/sudoers/logging.c:163
 #, c-format
-msgid "unable to open log file: %s: %s"
-msgstr "로그 파일을 열 수 없습니다: %s: %s"
+msgid "unable to open log file: %s"
+msgstr "로그 파일을 열 수 없습니다: %s"
 
-#: plugins/sudoers/logging.c:162
+#: plugins/sudoers/logging.c:171
 #, c-format
-msgid "unable to lock log file: %s: %s"
-msgstr "로그 파일을 잠글 수 없습니다: %s: %s"
+msgid "unable to lock log file: %s"
+msgstr "로그 파일을 잠글 수 없습니다: %s"
 
-#: plugins/sudoers/logging.c:211
+#: plugins/sudoers/logging.c:204
+#, c-format
+msgid "unable to write log file: %s"
+msgstr "로그 파일에 기록할 수 없습니다: %s"
+
+#: plugins/sudoers/logging.c:233
 msgid "No user or host"
 msgstr "사용자 또는 호스트 없음"
 
-#: plugins/sudoers/logging.c:213
+#: plugins/sudoers/logging.c:235
 msgid "validation failure"
 msgstr "검증 실패"
 
-#: plugins/sudoers/logging.c:220
+#: plugins/sudoers/logging.c:242
 msgid "user NOT in sudoers"
 msgstr "사용자가 sudoers에 없습니다"
 
-#: plugins/sudoers/logging.c:222
+#: plugins/sudoers/logging.c:244
 msgid "user NOT authorized on host"
 msgstr "사용자가 호스트에서 인증하지 않았습니다"
 
-#: plugins/sudoers/logging.c:224
+#: plugins/sudoers/logging.c:246
 msgid "command not allowed"
 msgstr "명령을 허용하지 않았습니다"
 
-#: plugins/sudoers/logging.c:259
+#: plugins/sudoers/logging.c:281
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
 msgstr "%s은(는) sudoers 설정 파일에 없습니다.  이 시도를 보고합니다.\n"
 
-#: plugins/sudoers/logging.c:262
+#: plugins/sudoers/logging.c:284
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
 msgstr "%s은(는) %s에서 sudo를 실행하도록 허가받지 않았습니다.  이 시도를 보고합니다.\n"
 
-#: plugins/sudoers/logging.c:266
+#: plugins/sudoers/logging.c:288
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
 msgstr "죄송하지만, %s 사용자는 %s에서 sudo를 실행하면 안됩니다.\n"
 
-#: plugins/sudoers/logging.c:269
+#: plugins/sudoers/logging.c:291
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "죄송하지만 %1$s 사용자는 '%2$s%3$s%4$s'을(를) %8$s의 %5$s%6$s%7$s(으)로 실행하도록 허가받지 않았습니다.\n"
 
-#: plugins/sudoers/logging.c:306 plugins/sudoers/sudoers.c:471
-#: plugins/sudoers/sudoers.c:473 plugins/sudoers/sudoers.c:475
-#: plugins/sudoers/sudoers.c:477 plugins/sudoers/sudoers.c:1222
-#: plugins/sudoers/sudoers.c:1224
+#: plugins/sudoers/logging.c:328 plugins/sudoers/sudoers.c:461
+#: plugins/sudoers/sudoers.c:463 plugins/sudoers/sudoers.c:465
+#: plugins/sudoers/sudoers.c:467 plugins/sudoers/sudoers.c:1231
+#: plugins/sudoers/sudoers.c:1233
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: 명령이 없습니다"
 
-#: plugins/sudoers/logging.c:308 plugins/sudoers/sudoers.c:467
+#: plugins/sudoers/logging.c:330 plugins/sudoers/sudoers.c:457
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
@@ -1113,55 +1147,55 @@ msgstr ""
 "'.'에 무시 중인  `%1$s' 요소가 있습니다.\n"
 "실행하려는 명령이 `%3$s'(이)라면, `sudo ./%2$s' 명령을 사용하십시오."
 
-#: plugins/sudoers/logging.c:325
+#: plugins/sudoers/logging.c:347
 msgid "authentication failure"
 msgstr "인증 실패"
 
-#: plugins/sudoers/logging.c:351
+#: plugins/sudoers/logging.c:373
 msgid "a password is required"
 msgstr "암호가 필요합니다"
 
-#: plugins/sudoers/logging.c:422 plugins/sudoers/logging.c:484
+#: plugins/sudoers/logging.c:444 plugins/sudoers/logging.c:510
 #, c-format
 msgid "%u incorrect password attempt"
 msgid_plural "%u incorrect password attempts"
 msgstr[0] "잘못된 암호 입력 시도 %u번"
 
-#: plugins/sudoers/logging.c:572
+#: plugins/sudoers/logging.c:597
 msgid "unable to fork"
 msgstr "포킹할 수 없습니다"
 
-#: plugins/sudoers/logging.c:580 plugins/sudoers/logging.c:640
+#: plugins/sudoers/logging.c:605 plugins/sudoers/logging.c:656
 #, c-format
 msgid "unable to fork: %m"
 msgstr "포킹할 수 없습니다: %m"
 
-#: plugins/sudoers/logging.c:630
+#: plugins/sudoers/logging.c:646
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "파이프를 열 수 없습니다: %m"
 
-#: plugins/sudoers/logging.c:655
+#: plugins/sudoers/logging.c:671
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "표준 입력을 복제할 수 없습니다: %m"
 
-#: plugins/sudoers/logging.c:693
+#: plugins/sudoers/logging.c:709
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "%s을(를) 실행할 수 없습니다: %m"
 
-#: plugins/sudoers/match.c:616
+#: plugins/sudoers/match.c:649
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "%2$s에서 지원하지 않는 다이제스트 형식 %1$d"
 
-#: plugins/sudoers/match.c:657
+#: plugins/sudoers/match.c:690
 #, c-format
 msgid "%s: read error"
 msgstr "%s: 읽기 오류"
 
-#: plugins/sudoers/match.c:692
+#: plugins/sudoers/match.c:725
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "%s 다이제스트(%s)는 %s 형식이 아닙니다"
@@ -1176,7 +1210,7 @@ msgstr "%s %d번째 줄에서 해석 오류"
 msgid "parse error in %s"
 msgstr "%s 해석 오류"
 
-#: plugins/sudoers/parse.c:502
+#: plugins/sudoers/parse.c:503
 #, c-format
 msgid ""
 "\n"
@@ -1185,41 +1219,41 @@ msgstr ""
 "\n"
 "Sudoers 항목:\n"
 
-#: plugins/sudoers/parse.c:503
+#: plugins/sudoers/parse.c:504
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    실행 사용자: "
 
-#: plugins/sudoers/parse.c:517
+#: plugins/sudoers/parse.c:518
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    실행 그룹: "
 
-#: plugins/sudoers/parse.c:526
+#: plugins/sudoers/parse.c:527
 #, c-format
 msgid "    Options: "
 msgstr "    옵션: "
 
-#: plugins/sudoers/policy.c:240 plugins/sudoers/testsudoers.c:253
+#: plugins/sudoers/policy.c:240 plugins/sudoers/testsudoers.c:258
 msgid "unable to parse network address list"
 msgstr "네트워크 주소 목록을 해석할 수 없습니다"
 
-#: plugins/sudoers/policy.c:659 plugins/sudoers/visudo.c:841
+#: plugins/sudoers/policy.c:665 plugins/sudoers/visudo.c:855
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s을(를) 실행할 수 없습니다"
 
-#: plugins/sudoers/policy.c:792
+#: plugins/sudoers/policy.c:798
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Sudoers 정책 플러그인 버전 %s\n"
 
-#: plugins/sudoers/policy.c:794
+#: plugins/sudoers/policy.c:800
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Sudoers 파일 문법 버전 %d\n"
 
-#: plugins/sudoers/policy.c:798
+#: plugins/sudoers/policy.c:804
 #, c-format
 msgid ""
 "\n"
@@ -1228,43 +1262,43 @@ msgstr ""
 "\n"
 "Sudoers 경로: %s\n"
 
-#: plugins/sudoers/policy.c:801
+#: plugins/sudoers/policy.c:807
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "nsswitch 경로: %s\n"
 
-#: plugins/sudoers/policy.c:803
+#: plugins/sudoers/policy.c:809
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "ldap.conf 경로: %s\n"
 
-#: plugins/sudoers/policy.c:804
+#: plugins/sudoers/policy.c:810
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "ldap.secret 경로: %s\n"
 
-#: plugins/sudoers/policy.c:837
+#: plugins/sudoers/policy.c:843
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "%d 형식의 후크를 등록할 수 없습니다(버전 %d.%d)"
 
-#: plugins/sudoers/pwutil.c:158 plugins/sudoers/pwutil.c:176
+#: plugins/sudoers/pwutil.c:162 plugins/sudoers/pwutil.c:180
 #, c-format
 msgid "unable to cache uid %u, out of memory"
 msgstr "%u uid를 캐시에 적재할 수 없습니다. 메모리가 부족합니다."
 
-#: plugins/sudoers/pwutil.c:170
+#: plugins/sudoers/pwutil.c:174
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "%u uid를 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:222 plugins/sudoers/pwutil.c:239
-#: plugins/sudoers/pwutil.c:289 plugins/sudoers/pwutil.c:334
+#: plugins/sudoers/pwutil.c:234 plugins/sudoers/pwutil.c:251
+#: plugins/sudoers/pwutil.c:313 plugins/sudoers/pwutil.c:358
 #, c-format
 msgid "unable to cache user %s, out of memory"
 msgstr "%s 사용자를 캐시에 적재할 수 없습니다. 메모리가 부족합니다."
 
-#: plugins/sudoers/pwutil.c:234
+#: plugins/sudoers/pwutil.c:246
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "%s 사용자를 캐시에 적재할 수 없습니다. 이미 존재합니다."
@@ -1279,31 +1313,38 @@ msgstr "%u gid를 캐시에 적재할 수 없습니다. 메모리가 부족합�
 msgid "unable to cache gid %u, already exists"
 msgstr "%u gid를 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:532 plugins/sudoers/pwutil.c:549
-#: plugins/sudoers/pwutil.c:584 plugins/sudoers/pwutil.c:626
+#: plugins/sudoers/pwutil.c:540 plugins/sudoers/pwutil.c:557
+#: plugins/sudoers/pwutil.c:604 plugins/sudoers/pwutil.c:646
 #, c-format
 msgid "unable to cache group %s, out of memory"
 msgstr "%s 그룹을 캐시에 적재할 수 없습니다. 메모리가 부족합니다."
 
-#: plugins/sudoers/pwutil.c:544
+#: plugins/sudoers/pwutil.c:552
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "%s 그룹을 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:739 plugins/sudoers/pwutil.c:783
+#: plugins/sudoers/pwutil.c:772 plugins/sudoers/pwutil.c:824
+#: plugins/sudoers/pwutil.c:874 plugins/sudoers/pwutil.c:926
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "%s 그룹 목록을 캐시에 적재할 수 없습니다. 이미 존재합니다."
 
-#: plugins/sudoers/pwutil.c:745 plugins/sudoers/pwutil.c:788
+#: plugins/sudoers/pwutil.c:778 plugins/sudoers/pwutil.c:829
+#: plugins/sudoers/pwutil.c:880 plugins/sudoers/pwutil.c:931
 #, c-format
 msgid "unable to cache group list for %s, out of memory"
 msgstr "%s 그룹 목록을 캐시에 적재할 수 없습니다. 메모리가 부족합니다."
 
-#: plugins/sudoers/pwutil.c:777
+#: plugins/sudoers/pwutil.c:818
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "%s 그룹을 해석할 수 없습니다"
+
+#: plugins/sudoers/pwutil.c:920
+#, c-format
+msgid "unable to parse gids for %s"
+msgstr "%s 그룹 ID를 해석할 수 없습니다"
 
 #: plugins/sudoers/set_perms.c:113 plugins/sudoers/set_perms.c:438
 #: plugins/sudoers/set_perms.c:841 plugins/sudoers/set_perms.c:1138
@@ -1368,16 +1409,34 @@ msgstr "argv[0] 감사 경로가 잘렸습니다: %s"
 msgid "audit_failure message too long"
 msgstr "audit_failure 메시지가 너무 깁니다"
 
-#: plugins/sudoers/sssd.c:333
+#: plugins/sudoers/sssd.c:400
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "SSS 소스를 초기화할 수 없습니다. 머신에 SSSD를 설치했습니까?"
 
-#: plugins/sudoers/sssd.c:341 plugins/sudoers/sssd.c:350
-#: plugins/sudoers/sssd.c:359 plugins/sudoers/sssd.c:368
-#: plugins/sudoers/sssd.c:377
+#: plugins/sudoers/sssd.c:408 plugins/sudoers/sssd.c:417
+#: plugins/sudoers/sssd.c:426 plugins/sudoers/sssd.c:435
+#: plugins/sudoers/sssd.c:444
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "%2$s에서 \"%1$s\" 심볼을 찾을 수 없습니다"
+
+#: plugins/sudoers/sssd.c:1492
+#, c-format
+msgid ""
+"\n"
+"SSSD Role: %s\n"
+msgstr ""
+"\n"
+"SSSD 역할: %s\n"
+
+#: plugins/sudoers/sssd.c:1497
+#, c-format
+msgid ""
+"\n"
+"SSSD Role: UNKNOWN\n"
+msgstr ""
+"\n"
+"SSSD 역할: 알 수 없음\n"
 
 #: plugins/sudoers/sudo_nss.c:290
 #, c-format
@@ -1399,95 +1458,95 @@ msgstr "%s 사용자는  %s에서 다음 명령을 실행해야 합니다:\n"
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "%s 사용자는 %s에서 sudo를 실행하도록 허가받지 않았습니다.\n"
 
-#: plugins/sudoers/sudoers.c:172 plugins/sudoers/testsudoers.c:245
-#: plugins/sudoers/visudo.c:223 plugins/sudoers/visudo.c:567
+#: plugins/sudoers/sudoers.c:166 plugins/sudoers/testsudoers.c:244
+#: plugins/sudoers/visudo.c:231 plugins/sudoers/visudo.c:578
+#: plugins/sudoers/visudo.c:921
 msgid "unable to initialize sudoers default values"
 msgstr "sudoers 기본 값을 초기화할 수 없습니다"
 
-#: plugins/sudoers/sudoers.c:197 plugins/sudoers/sudoers.c:239
-#: plugins/sudoers/sudoers.c:833
+#: plugins/sudoers/sudoers.c:196 plugins/sudoers/sudoers.c:843
 msgid "problem with defaults entries"
 msgstr "기본 항목에 문제 발생"
 
-#: plugins/sudoers/sudoers.c:205
+#: plugins/sudoers/sudoers.c:204
 msgid "no valid sudoers sources found, quitting"
 msgstr "올바른 sudoers 설정 원본이 없습니다. 나갑니다."
 
-#: plugins/sudoers/sudoers.c:275
+#: plugins/sudoers/sudoers.c:243
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "sudoers에서 root가 sudo를 실행하지 못하게 지정했습니다"
 
-#: plugins/sudoers/sudoers.c:332
+#: plugins/sudoers/sudoers.c:300
 msgid "you are not permitted to use the -C option"
 msgstr "-C 옵션 사용을 허가받지 않았습니다"
 
-#: plugins/sudoers/sudoers.c:396
+#: plugins/sudoers/sudoers.c:386
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "타임스탬프 소유자(%s): 사용자 없음"
 
-#: plugins/sudoers/sudoers.c:410
+#: plugins/sudoers/sudoers.c:400
 msgid "no tty"
 msgstr "tty 없음"
 
-#: plugins/sudoers/sudoers.c:411
+#: plugins/sudoers/sudoers.c:401
 msgid "sorry, you must have a tty to run sudo"
 msgstr "죄송하지만 sudo를 실행하려면 tty를 확보해야합니다"
 
-#: plugins/sudoers/sudoers.c:466
+#: plugins/sudoers/sudoers.c:456
 msgid "command in current directory"
 msgstr "현재 디렉터리의 명령"
 
-#: plugins/sudoers/sudoers.c:486
+#: plugins/sudoers/sudoers.c:476
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "죄송하지만 이 환경 상태를 유지하도록 허가받지 않았습니다"
 
-#: plugins/sudoers/sudoers.c:778
+#: plugins/sudoers/sudoers.c:788
 msgid "command too long"
 msgstr "명령이 너무 깁니다"
 
-#: plugins/sudoers/sudoers.c:886 plugins/sudoers/visudo.c:427
-#: plugins/sudoers/visudo.c:667
+#: plugins/sudoers/sudoers.c:896 plugins/sudoers/timestamp.c:176
+#: plugins/sudoers/visudo.c:438 plugins/sudoers/visudo.c:681
 #, c-format
 msgid "unable to stat %s"
 msgstr "%s의 상태를 가져올 수 없습니다"
 
-#: plugins/sudoers/sudoers.c:890
+#: plugins/sudoers/sudoers.c:900
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s은(는) 일반 파일이 아닙니다"
 
-#: plugins/sudoers/sudoers.c:894 plugins/sudoers/timestamp.c:225 toke.l:947
+#: plugins/sudoers/sudoers.c:904 plugins/sudoers/timestamp.c:237 toke.l:949
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s은(는) %u uid가 소유했지만, %u uid가 소유해야합니다"
 
-#: plugins/sudoers/sudoers.c:898 toke.l:954
+#: plugins/sudoers/sudoers.c:908 toke.l:954
 #, c-format
 msgid "%s is world writable"
 msgstr "%s에 모두가 기록할 수 있습니다"
 
-#: plugins/sudoers/sudoers.c:902 toke.l:959
+#: plugins/sudoers/sudoers.c:912 toke.l:957
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s은(는) %u gid가 소유했지만, %u gid가 소유해야합니다"
 
-#: plugins/sudoers/sudoers.c:933
+#: plugins/sudoers/sudoers.c:945
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr "루트만 `-c %s' 옵션을 사용할 수 있습니다"
 
-#: plugins/sudoers/sudoers.c:952
+#: plugins/sudoers/sudoers.c:964
 #, c-format
 msgid "unknown login class: %s"
 msgstr "알 수 없는 로그인 클래스: %s"
 
-#: plugins/sudoers/sudoers.c:1031 plugins/sudoers/sudoers.c:1059
+#: plugins/sudoers/sudoers.c:1047 plugins/sudoers/sudoers.c:1075
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "%s 호스트를 해석할 수 없습니다"
 
-#: plugins/sudoers/sudoers.c:1126 plugins/sudoers/testsudoers.c:385
+#: plugins/sudoers/sudoers.c:1142 plugins/sudoers/testsudoers.c:387
 #, c-format
 msgid "unknown group: %s"
 msgstr "잘못된 그룹: %s"
@@ -1507,7 +1566,7 @@ msgstr "잘못된 최대 대기 시간 값: %s"
 msgid "invalid speed factor: %s"
 msgstr "잘못된 속도 인수: %s"
 
-#: plugins/sudoers/sudoreplay.c:254 plugins/sudoers/visudo.c:180
+#: plugins/sudoers/sudoreplay.c:254 plugins/sudoers/visudo.c:184
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s 버전 %s\n"
@@ -1537,102 +1596,102 @@ msgstr "경고: 터미널 화면이 로그를 올바르게 나타내기에 너�
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "로그 화면 크기는 %d x %d 이지만, 터미널 화면 크기는 %d x %d 입니다."
 
-#: plugins/sudoers/sudoreplay.c:368
+#: plugins/sudoers/sudoreplay.c:406
 msgid "unable to set tty to raw mode"
 msgstr "RAW 모드로 tty를 설정할 수 없습니다"
 
-#: plugins/sudoers/sudoreplay.c:401
+#: plugins/sudoers/sudoreplay.c:435
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "잘못된 타이밍 파일 행: %s"
 
-#: plugins/sudoers/sudoreplay.c:611 plugins/sudoers/sudoreplay.c:636
+#: plugins/sudoers/sudoreplay.c:655 plugins/sudoers/sudoreplay.c:680
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "모호한 식 \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:658
+#: plugins/sudoers/sudoreplay.c:702
 msgid "unmatched ')' in expression"
 msgstr "수식에 일치하지 않는 ')'"
 
-#: plugins/sudoers/sudoreplay.c:662
+#: plugins/sudoers/sudoreplay.c:706
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "알 수 없는 검색어 \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:677
+#: plugins/sudoers/sudoreplay.c:721
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s에 인자가 필요합니다"
 
-#: plugins/sudoers/sudoreplay.c:680 plugins/sudoers/sudoreplay.c:1060
+#: plugins/sudoers/sudoreplay.c:724 plugins/sudoers/sudoreplay.c:1104
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "잘못된 정규 표현식: %s"
 
-#: plugins/sudoers/sudoreplay.c:684
+#: plugins/sudoers/sudoreplay.c:728
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "\"%s\" 날짜를 해석할 수 없습니다"
 
-#: plugins/sudoers/sudoreplay.c:693
+#: plugins/sudoers/sudoreplay.c:737
 msgid "unmatched '(' in expression"
 msgstr "수식에 일치하지 않는 '('"
 
-#: plugins/sudoers/sudoreplay.c:695
+#: plugins/sudoers/sudoreplay.c:739
 msgid "illegal trailing \"or\""
 msgstr "잘못된 후위 연산자 \"or\""
 
-#: plugins/sudoers/sudoreplay.c:697
+#: plugins/sudoers/sudoreplay.c:741
 msgid "illegal trailing \"!\""
 msgstr "잘못된 후위 문자 \"!\""
 
-#: plugins/sudoers/sudoreplay.c:746
+#: plugins/sudoers/sudoreplay.c:790
 #, c-format
 msgid "unknown search type %d"
 msgstr "알 수 없는 검색 형식 %d"
 
-#: plugins/sudoers/sudoreplay.c:784
+#: plugins/sudoers/sudoreplay.c:828
 #, c-format
 msgid "%s: invalid log file"
 msgstr "%s: 잘못된 로그 파일"
 
-#: plugins/sudoers/sudoreplay.c:802
+#: plugins/sudoers/sudoreplay.c:846
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr "%s: 타임스탬프 필드가 빠졌습니다"
 
-#: plugins/sudoers/sudoreplay.c:809
+#: plugins/sudoers/sudoreplay.c:853
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr "%s: %s 타임스탬프: %s"
 
-#: plugins/sudoers/sudoreplay.c:816
+#: plugins/sudoers/sudoreplay.c:860
 #, c-format
 msgid "%s: user field is missing"
 msgstr "%s: 사용자 필드가 빠졌습니다"
 
-#: plugins/sudoers/sudoreplay.c:825
+#: plugins/sudoers/sudoreplay.c:869
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr "%s: 실행 사용자 필드가 빠졌습니다"
 
-#: plugins/sudoers/sudoreplay.c:834
+#: plugins/sudoers/sudoreplay.c:878
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr "%s: 실행 그룹 필드가 빠졌습니다"
 
-#: plugins/sudoers/sudoreplay.c:1197
+#: plugins/sudoers/sudoreplay.c:1241
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "사용법: %s [-h] [-d <디렉터리>] [-m <숫자>] [-s <숫자>] <ID>\n"
 
-#: plugins/sudoers/sudoreplay.c:1200
+#: plugins/sudoers/sudoreplay.c:1244
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "사용법: %s [-h] [-d <디렉터리>] -l [<검색식>]\n"
 
-#: plugins/sudoers/sudoreplay.c:1209
+#: plugins/sudoers/sudoreplay.c:1253
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1641,7 +1700,7 @@ msgstr ""
 "%s - sudo 세션 로그를 보여줍니다\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1211
+#: plugins/sudoers/sudoreplay.c:1255
 msgid ""
 "\n"
 "Options:\n"
@@ -1663,11 +1722,11 @@ msgstr ""
 "  -s, --speed=num      출력 속도를 올리거나 내립니다\n"
 "  -V, --version        버전 정보를 나타낸 후 빠져나갑니다"
 
-#: plugins/sudoers/testsudoers.c:324
+#: plugins/sudoers/testsudoers.c:326
 msgid "\thost  unmatched"
 msgstr "\t호스트가  일치하지 않습니다"
 
-#: plugins/sudoers/testsudoers.c:327
+#: plugins/sudoers/testsudoers.c:329
 msgid ""
 "\n"
 "Command allowed"
@@ -1675,7 +1734,7 @@ msgstr ""
 "\n"
 "명령 허용함"
 
-#: plugins/sudoers/testsudoers.c:328
+#: plugins/sudoers/testsudoers.c:330
 msgid ""
 "\n"
 "Command denied"
@@ -1683,7 +1742,7 @@ msgstr ""
 "\n"
 "명령 거부함"
 
-#: plugins/sudoers/testsudoers.c:328
+#: plugins/sudoers/testsudoers.c:330
 msgid ""
 "\n"
 "Command unmatched"
@@ -1691,129 +1750,129 @@ msgstr ""
 "\n"
 "명령이 일치하지 않음"
 
-#: plugins/sudoers/timestamp.c:233
+#: plugins/sudoers/timestamp.c:245
 #, c-format
 msgid "%s is group writable"
 msgstr "%s은(는) 그룹이 기록할 수 있습니다"
 
-#: plugins/sudoers/timestamp.c:309
+#: plugins/sudoers/timestamp.c:321
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "타임스탬프 파일을 %lld 바이트로 자를 수 없습니다"
 
-#: plugins/sudoers/timestamp.c:742 plugins/sudoers/timestamp.c:809
-#: plugins/sudoers/visudo.c:488 plugins/sudoers/visudo.c:494
+#: plugins/sudoers/timestamp.c:758 plugins/sudoers/timestamp.c:825
+#: plugins/sudoers/visudo.c:499 plugins/sudoers/visudo.c:505
 msgid "unable to read the clock"
 msgstr "클록을 읽을 수 없습니다"
 
-#: plugins/sudoers/timestamp.c:756
+#: plugins/sudoers/timestamp.c:772
 msgid "ignoring time stamp from the future"
 msgstr "미래 타임스탬프 값 무시"
 
-#: plugins/sudoers/timestamp.c:768
+#: plugins/sudoers/timestamp.c:784
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "타임스탬프 값이 미래 값으로 너무 밀려있습니다: %20.20s"
 
-#: plugins/sudoers/timestamp.c:863
+#: plugins/sudoers/timestamp.c:879
 #, c-format
 msgid "unable to lock time stamp file %s"
 msgstr "%s 타임스탬프 파일을 잠글 수 없습니다"
 
-#: plugins/sudoers/timestamp.c:906 plugins/sudoers/timestamp.c:926
+#: plugins/sudoers/timestamp.c:923 plugins/sudoers/timestamp.c:943
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "지침 상태 경로가 너무 깁니다: %s/%s"
 
-#: plugins/sudoers/visudo.c:182
+#: plugins/sudoers/visudo.c:186
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr "%s 문법 버전 %d\n"
 
-#: plugins/sudoers/visudo.c:254 plugins/sudoers/visudo.c:619
+#: plugins/sudoers/visudo.c:264 plugins/sudoers/visudo.c:633
 #, c-format
 msgid "press return to edit %s: "
 msgstr "%s을(를) 편집하려면 return 키를 누르십시오:"
 
-#: plugins/sudoers/visudo.c:320
+#: plugins/sudoers/visudo.c:330
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "지정 편집기(%s)가 없습니다"
 
-#: plugins/sudoers/visudo.c:338
+#: plugins/sudoers/visudo.c:348
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "편집기가 없습니다(편집기 경로 = %s)"
 
-#: plugins/sudoers/visudo.c:447 plugins/sudoers/visudo.c:455
+#: plugins/sudoers/visudo.c:458 plugins/sudoers/visudo.c:466
 msgid "write error"
 msgstr "쓰기 오류"
 
-#: plugins/sudoers/visudo.c:501
+#: plugins/sudoers/visudo.c:512
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "임시 파일 상태를 가져올 수 없습니다(%s). %s은(는) 바뀌지 않았습니다"
 
-#: plugins/sudoers/visudo.c:508
+#: plugins/sudoers/visudo.c:519
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "임시 파일 길이가 0입니다(%s). %s은(는) 바뀌지 않았습니다"
 
-#: plugins/sudoers/visudo.c:514
+#: plugins/sudoers/visudo.c:525
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "편집기(%s) 실패. %s은(는) 바뀌지 않았습니다."
 
-#: plugins/sudoers/visudo.c:536
+#: plugins/sudoers/visudo.c:547
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 바꾸지 않음"
 
-#: plugins/sudoers/visudo.c:562
+#: plugins/sudoers/visudo.c:573
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "임시 파일(%s)을 다시 열 수 없습니다. %s은(는) 바뀌지 않았습니다."
 
-#: plugins/sudoers/visudo.c:573
+#: plugins/sudoers/visudo.c:585
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "임시 파일(%s)을 해석할 수 없습니다. 알 수 없는 오류."
 
-#: plugins/sudoers/visudo.c:610
+#: plugins/sudoers/visudo.c:624
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "내부 오류. %s을(를) 목록에서 찾을 수 없습니다!"
 
-#: plugins/sudoers/visudo.c:669 plugins/sudoers/visudo.c:678
+#: plugins/sudoers/visudo.c:683 plugins/sudoers/visudo.c:692
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "%s의 uid/gid를 %u/%u 값으로 설정할 수 없습니다"
 
-#: plugins/sudoers/visudo.c:673 plugins/sudoers/visudo.c:683
+#: plugins/sudoers/visudo.c:687 plugins/sudoers/visudo.c:697
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "%s 모드를 0%o 값으로 바꿀 수 없습니다"
 
-#: plugins/sudoers/visudo.c:700
+#: plugins/sudoers/visudo.c:714
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s 및 %s은(는) 동일한 파일 시스템에 없습니다. mv 명령으로 이름을 바꿉니다"
 
-#: plugins/sudoers/visudo.c:714
+#: plugins/sudoers/visudo.c:728
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "명령 실행 실패: '%s %s %s', %s은(는) 바뀌지 않았습니다"
 
-#: plugins/sudoers/visudo.c:724
+#: plugins/sudoers/visudo.c:738
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "%s 이름 바꾸기 오류. %s은(는) 바뀌지 않았습니다"
 
-#: plugins/sudoers/visudo.c:786
+#: plugins/sudoers/visudo.c:800
 msgid "What now? "
 msgstr "어떻게 하시겠습니까?"
 
-#: plugins/sudoers/visudo.c:800
+#: plugins/sudoers/visudo.c:814
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1825,72 +1884,72 @@ msgstr ""
 "  sudoers 파일을 바꾼 상태에서 저장하지 않고 나갑니다(X)\n"
 "  sudoers 파일을 바꾼 상태에서 저장하고 끝냅니다(Q)\n"
 
-#: plugins/sudoers/visudo.c:848
+#: plugins/sudoers/visudo.c:860
 #, c-format
 msgid "unable to run %s"
 msgstr "%s을(를) 실행할 수 없음"
 
-#: plugins/sudoers/visudo.c:878
+#: plugins/sudoers/visudo.c:890
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: 잘못된 소유자 uid/gid를 %u/%u 값으로 설정해야 합니다\n"
 
-#: plugins/sudoers/visudo.c:885
+#: plugins/sudoers/visudo.c:897
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: 잘못된 권한입니다. 0%o 모드 값을 설정해야 합니다\n"
 
-#: plugins/sudoers/visudo.c:910 plugins/sudoers/visudo_json.c:1032
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo_json.c:1031
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "%s 파일 해석에 실패했습니다. 알 수 없는 오류."
 
-#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo_json.c:1041
+#: plugins/sudoers/visudo.c:944 plugins/sudoers/visudo_json.c:1040
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "%s %d번째 줄 인근 해석 오류\n"
 
-#: plugins/sudoers/visudo.c:929 plugins/sudoers/visudo_json.c:1044
+#: plugins/sudoers/visudo.c:947 plugins/sudoers/visudo_json.c:1043
 #, c-format
 msgid "parse error in %s\n"
 msgstr "%s 해석 오류\n"
 
-#: plugins/sudoers/visudo.c:937 plugins/sudoers/visudo.c:944
+#: plugins/sudoers/visudo.c:955 plugins/sudoers/visudo.c:962
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: 해석 성공\n"
 
-#: plugins/sudoers/visudo.c:991
+#: plugins/sudoers/visudo.c:1009
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s을(를) 사용중입니다. 나중에 다시 시도하십시오"
 
-#: plugins/sudoers/visudo.c:1087
+#: plugins/sudoers/visudo.c:1105
 #, c-format
 msgid "Error: cycle in %s `%s'"
 msgstr "오류: %s의 사이클 `%s'"
 
-#: plugins/sudoers/visudo.c:1088
+#: plugins/sudoers/visudo.c:1106
 #, c-format
 msgid "Warning: cycle in %s `%s'"
 msgstr "경고: %s의 사이클 `%s'"
 
-#: plugins/sudoers/visudo.c:1092
+#: plugins/sudoers/visudo.c:1110
 #, c-format
 msgid "Error: %s `%s' referenced but not defined"
 msgstr "오류: %s `%s'을(를) 참조했지만 정의하지 않았습니다"
 
-#: plugins/sudoers/visudo.c:1093
+#: plugins/sudoers/visudo.c:1111
 #, c-format
 msgid "Warning: %s `%s' referenced but not defined"
 msgstr "경고: %s `%s'을(를) 참조했지만 정의하지 않았습니다"
 
-#: plugins/sudoers/visudo.c:1236
+#: plugins/sudoers/visudo.c:1254
 #, c-format
 msgid "Warning: unused %s `%s'"
 msgstr "경고: 사용하지 않는 %s `%s'"
 
-#: plugins/sudoers/visudo.c:1349
+#: plugins/sudoers/visudo.c:1365
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1899,7 +1958,7 @@ msgstr ""
 "%s - sudoers 파일을 안전하게 편집합니다\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1351
+#: plugins/sudoers/visudo.c:1367
 msgid ""
 "\n"
 "Options:\n"
@@ -1921,11 +1980,11 @@ msgstr ""
 "  -V, --version            버전 정보를 나타낸 후 빠져나갑니다\n"
 "  -x, --export=output_file sudoers 파일을 JSON 형식으로 output_file에 기록"
 
-#: plugins/sudoers/visudo_json.c:1018
+#: plugins/sudoers/visudo_json.c:1017
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr "%s: 입출력 파일은 달라야합니다"
 
-#: toke.l:918
+#: toke.l:923
 msgid "too many levels of includes"
 msgstr "포함 레벨이 너무 많습니다"
