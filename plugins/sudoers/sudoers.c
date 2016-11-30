@@ -227,7 +227,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char *iolog_path = NULL;
     mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
-    bool nopass = false;
+    int nopass = -1;
     int cmnd_status = -1, oldlocale, validated;
     int ret = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
@@ -321,6 +321,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    case all:
 		if (!ISSET(validated, FLAG_NOPASSWD))
 		    nopass = false;
+		else if (nopass == -1)
+		    nopass = true;
 		break;
 	    case any:
 		if (ISSET(validated, FLAG_NOPASSWD))
@@ -350,7 +352,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		break;
 	}
     }
-    if (pwflag && nopass)
+    if (pwflag && nopass == true)
 	def_authenticate = false;
 
     /* Restore user's locale. */
