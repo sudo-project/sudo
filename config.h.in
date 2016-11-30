@@ -1034,6 +1034,12 @@
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
 
+/* The size of `id_t', as computed by sizeof. */
+#undef SIZEOF_ID_T
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
 /* Define to 1 to compile the sudoers plugin statically into the sudo binary.
    */
 #undef STATIC_SUDOERS_PLUGIN

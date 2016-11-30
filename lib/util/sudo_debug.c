@@ -453,6 +453,19 @@ sudo_debug_exit_long_v1(const char *func, const char *file, int line,
 }
 
 void
+sudo_debug_exit_id_t_v1(const char *func, const char *file, int line,
+    int subsys, id_t ret)
+{
+#if SIZEOF_ID_T == 8
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %lld", func, file, line, (long long)ret);
+#else
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
+#endif
+}
+
+void
 sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
     int subsys, size_t ret)
 {

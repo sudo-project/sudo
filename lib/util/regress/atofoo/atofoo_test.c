@@ -82,7 +82,9 @@ static struct strtoid_data {
     { "0,1", 0, ",", "," },
     { "10", 10, NULL, NULL },
     { "-2", -2, NULL, NULL },
+#if (id_t)-2 == 4294967294U
     { "-2", 4294967294U, NULL, NULL },
+#endif
     { "4294967294", 4294967294U, NULL, NULL },
     { NULL, 0, NULL, NULL }
 };

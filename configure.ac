@@ -2337,6 +2337,8 @@ AC_CHECK_TYPE(errno_t, int)
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 SUDO_SOCK_SIN_LEN
+AC_CHECK_SIZEOF([id_t])
+AC_CHECK_SIZEOF([long long])
 dnl
 dnl Check for utmp/utmpx struct members.
 dnl We need to have already defined _GNU_SOURCE on glibc which only has

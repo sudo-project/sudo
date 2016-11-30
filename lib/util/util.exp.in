@@ -17,6 +17,7 @@ sudo_debug_enter_v1
 sudo_debug_execve2_v1
 sudo_debug_exit_v1
 sudo_debug_exit_bool_v1
+sudo_debug_exit_id_t_v1
 sudo_debug_exit_int_v1
 sudo_debug_exit_long_v1
 sudo_debug_exit_ptr_v1
