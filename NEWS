@@ -152,7 +152,7 @@ What's new in Sudo 1.8.17
    Bug #740.
 
  * Sudo now takes all sudoers sources into account when determining
-   whether or not "sudo -l" or "sudo -b" should prompt for a password.
+   whether or not "sudo -l" or "sudo -v" should prompt for a password.
    In other words, if both file and ldap sudoers sources are in
    specified in /etc/nsswitch.conf, "sudo -v" will now require that
    all entries in both sources be have NOPASSWD (file) or !authenticate
