@@ -133,18 +133,18 @@ try_wordexp(void)
     rc = wordexp("$(/bin/echo foo)", &we, 0);
     switch (rc) {
     case -1:
+	/* sudo's wordexp() wrapper returns -1 if RTLD_NEXT is not supported. */
+    case 127:
+	/* Solaris 10 wordexp() returns 127 for execve() failure. */
 #ifdef WRDE_ERRNO
     case WRDE_ERRNO:
-	/*
-	 * Solaris returns WRDE_ERRNO for execve() failure and sudo's
-	 * wordexp() wrapper returns -1 if RTLD_NEXT is not supported.
-	 */
-	printf("%s: MOSTLY OK (wordexp)\n", getprogname());
+	/* Solaris 11 wordexp() returns WRDE_ERRNO for execve() failure. */
+#endif
+	printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
 	ret = 0;
 	break;
-#endif
     case WRDE_CMDSUB:
-	printf("%s: OK (wordexp)\n", getprogname());
+	printf("%s: OK (wordexp) [WRDE_CMDSUB]\n", getprogname());
 	ret = 0;
 	break;
     case 0:
@@ -153,7 +153,8 @@ try_wordexp(void)
 	 * but the execve() wrapper prevents the command substitution.
 	 */
 	if (we.we_wordc == 0) {
-	    printf("%s: MOSTLY OK (wordexp)\n", getprogname());
+	    printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
+	    wordfree(&we);
 	    ret = 0;
 	    break;
 	}
