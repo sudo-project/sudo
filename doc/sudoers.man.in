@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "November 7, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "November 30, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3368,7 +3368,8 @@ This defaults to
 \fR@runas_default@\fR.
 .TP 18n
 syslog_badpri
-Syslog priority to use when user authenticates unsuccessfully.
+Syslog priority to use when the user is not allowed to run a command or
+when authentication is unsuccessful.
 Defaults to
 \fR@badpri@\fR.
 .sp
@@ -3380,17 +3381,27 @@ The following syslog priorities are supported:
 \fBerr\fR,
 \fBinfo\fR,
 \fBnotice\fR,
+\fBwarning\fR,
 and
-\fBwarning\fR.
+\fBnone\fR.
+Negating the option or setting it to a value of
+\fBnone\fR
+will disable logging of unsuccessful commands.
 .TP 18n
 syslog_goodpri
-Syslog priority to use when user authenticates successfully.
+Syslog priority to use when the user is allowed to run a command and
+authentication is successful.
 Defaults to
 \fR@goodpri@\fR.
 .sp
 See
 \fIsyslog_badpri\fR
 for the list of supported syslog priorities.
+Negating the option or setting it to a value of
+\fBnone\fR
+will disable logging of successful commands.
+.TP 18n
+syslog_goodpri
 .TP 18n
 syslog_maxlen
 On many systems,

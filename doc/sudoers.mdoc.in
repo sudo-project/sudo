@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 7, 2016
+.Dd November 30, 2016
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3145,7 +3145,8 @@ option is not specified on the command line.
 This defaults to
 .Li @runas_default@ .
 .It syslog_badpri
-Syslog priority to use when user authenticates unsuccessfully.
+Syslog priority to use when the user is not allowed to run a command or
+when authentication is unsuccessful.
 Defaults to
 .Li @badpri@ .
 .Pp
@@ -3157,16 +3158,25 @@ The following syslog priorities are supported:
 .Sy err ,
 .Sy info ,
 .Sy notice ,
+.Sy warning ,
 and
-.Sy warning .
+.Sy none .
+Negating the option or setting it to a value of
+.Sy none
+will disable logging of unsuccessful commands.
 .It syslog_goodpri
-Syslog priority to use when user authenticates successfully.
+Syslog priority to use when the user is allowed to run a command and
+authentication is successful.
 Defaults to
 .Li @goodpri@ .
 .Pp
 See
 .Em syslog_badpri
 for the list of supported syslog priorities.
+Negating the option or setting it to a value of
+.Sy none
+will disable logging of successful commands.
+.It syslog_goodpri
 .It syslog_maxlen
 On many systems,
 .Xr syslog 3

@@ -74,6 +74,7 @@ static struct strmap priorities[] = {
 	{ "info",	LOG_INFO },
 	{ "notice",	LOG_NOTICE },
 	{ "warning",	LOG_WARNING },
+	{ "none",	-1 },
 	{ NULL,		-1 }
 };
 
@@ -936,9 +937,10 @@ store_syslogpri(const char *str, union sudo_defs_val *sd_un)
     struct strmap *pri;
     debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS)
 
-    if (str == NULL)
-	debug_return_bool(false);
-
+    if (str == NULL) {
+	sd_un->ival = -1;
+	debug_return_bool(true);
+    }
     for (pri = priorities; pri->name != NULL; pri++) {
 	if (strcmp(str, pri->name) != 0) {
 	    sd_un->ival = pri->num;
@@ -954,9 +956,11 @@ logpri2str(int n)
     struct strmap *pri;
     debug_decl(logpri2str, SUDOERS_DEBUG_DEFAULTS)
 
-    for (pri = priorities; pri->name && pri->num != n; pri++)
-	continue;
-    debug_return_const_str(pri->name);
+    for (pri = priorities; pri->name != NULL; pri++) {
+	if (pri->num == n)
+	    debug_return_const_str(pri->name);
+    }
+    debug_return_const_str("unknown");
 }
 
 static bool

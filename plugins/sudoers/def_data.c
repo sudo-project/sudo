@@ -27,11 +27,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Syslog facility if syslog is being used for logging: %s"),
 	NULL,
     }, {
-	"syslog_goodpri", T_LOGPRI,
+	"syslog_goodpri", T_LOGPRI|T_BOOL,
 	N_("Syslog priority to use when user authenticates successfully: %s"),
 	NULL,
     }, {
-	"syslog_badpri", T_LOGPRI,
+	"syslog_badpri", T_LOGPRI|T_BOOL,
 	N_("Syslog priority to use when user authenticates unsuccessfully: %s"),
 	NULL,
     }, {

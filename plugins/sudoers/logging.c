@@ -94,6 +94,10 @@ do_syslog(int pri, char *msg)
     int oldlocale;
     debug_decl(do_syslog, SUDOERS_DEBUG_LOGGING)
 
+    /* A priority of -1 corresponds to "none". */
+    if (pri == -1)
+	debug_return;
+
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     /*

@@ -14,10 +14,10 @@ syslog
 	T_LOGFAC|T_BOOL
 	"Syslog facility if syslog is being used for logging: %s"
 syslog_goodpri
-	T_LOGPRI
+	T_LOGPRI|T_BOOL
 	"Syslog priority to use when user authenticates successfully: %s"
 syslog_badpri
-	T_LOGPRI
+	T_LOGPRI|T_BOOL
 	"Syslog priority to use when user authenticates unsuccessfully: %s"
 long_otp_prompt
 	T_FLAG

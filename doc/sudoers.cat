@@ -1655,17 +1655,25 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        not specified on the command line.  This defaults to
                        root.
 
-     syslog_badpri     Syslog priority to use when user authenticates
-                       unsuccessfully.  Defaults to alert.
+     syslog_badpri     Syslog priority to use when the user is not allowed to
+                       run a command or when authentication is unsuccessful.
+                       Defaults to alert.
 
                        The following syslog priorities are supported: aalleerrtt,
-                       ccrriitt, ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee, and wwaarrnniinngg.
+                       ccrriitt, ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee, wwaarrnniinngg, and
+                       nnoonnee.  Negating the option or setting it to a value of
+                       nnoonnee will disable logging of unsuccessful commands.
 
-     syslog_goodpri    Syslog priority to use when user authenticates
-                       successfully.  Defaults to notice.
+     syslog_goodpri    Syslog priority to use when the user is allowed to run
+                       a command and authentication is successful.  Defaults
+                       to notice.
 
                        See _s_y_s_l_o_g___b_a_d_p_r_i for the list of supported syslog
-                       priorities.
+                       priorities.  Negating the option or setting it to a
+                       value of nnoonnee will disable logging of successful
+                       commands.
+
+     syslog_goodpri
 
      syslog_maxlen     On many systems, syslog(3) has a relatively small log
                        buffer.  IETF RFC 5424 states that syslog servers must
@@ -2632,4 +2640,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.19                    November 7, 2016                    Sudo 1.8.19
+Sudo 1.8.19                    November 30, 2016                   Sudo 1.8.19
