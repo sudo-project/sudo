@@ -44,8 +44,8 @@ DDEESSCCRRIIPPTTIIOONN
                  Select which I/O type(s) to display.  By default, ssuuddoorreeppllaayy
                  will display the command's standard output, standard error
                  and tty output.  The _f_i_l_t_e_r argument is a comma-separated
-                 list, consisting of one or more of following: _s_t_d_o_u_t, _s_t_d_e_r_r,
-                 and _t_t_y_o_u_t.
+                 list, consisting of one or more of following: _s_t_d_i_n, _s_t_d_o_u_t,
+                 _s_t_d_e_r_r, _t_t_y_i_n, and _t_t_y_o_u_t.
 
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
 
@@ -276,4 +276,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.19                       May 4, 2016                      Sudo 1.8.19
+Sudo 1.8.19                    November 30, 2016                   Sudo 1.8.19

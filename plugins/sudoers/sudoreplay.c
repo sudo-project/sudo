@@ -222,10 +222,14 @@ main(int argc, char *argv[])
 	    /* Set the replay filter. */
 	    def_filter = false;
 	    for (cp = strtok_r(optarg, ",", &ep); cp; cp = strtok_r(NULL, ",", &ep)) {
-		if (strcmp(cp, "stdout") == 0)
+		if (strcmp(cp, "stdin") == 0)
+		    io_log_files[IOFD_STDIN].enabled = true;
+		else if (strcmp(cp, "stdout") == 0)
 		    io_log_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)
 		    io_log_files[IOFD_STDERR].enabled = true;
+		else if (strcmp(cp, "ttyin") == 0)
+		    io_log_files[IOFD_TTYIN].enabled = true;
 		else if (strcmp(cp, "ttyout") == 0)
 		    io_log_files[IOFD_TTYOUT].enabled = true;
 		else

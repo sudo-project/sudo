@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd May 4, 2016
+.Dd November 30, 2016
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -104,8 +104,10 @@ will display the command's standard output, standard error and tty output.
 The
 .Ar filter
 argument is a comma-separated list, consisting of one or more of following:
+.Em stdin ,
 .Em stdout ,
 .Em stderr ,
+.Em ttyin ,
 and
 .Em ttyout .
 .It Fl h , -help
