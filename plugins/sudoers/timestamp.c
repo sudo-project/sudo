@@ -389,15 +389,23 @@ timestamp_open(const char *user, pid_t sid)
 
 	/* Remove time stamp file if its mtime predates boot time. */
 	if (tries == 1 && fstat(fd, &sb) == 0) {
-	    struct timespec boottime, mtime;
+	    struct timespec boottime, mtime, now;
 
-	    mtim_get(&sb, mtime);
-	    if (get_boottime(&boottime)) {
-		if (sudo_timespeccmp(&mtime, &boottime, <)) {
-		    /* Time stamp file too old, remove it. */
-		    close(fd);
-		    unlink(fname);
-		    continue;
+	    if (sudo_gettime_real(&now) == 0 && get_boottime(&boottime)) {
+		/* Ignore a boot time that is in the future. */
+		if (sudo_timespeccmp(&now, &boottime, <)) {
+		    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			"ignoring boot time that is in the future");
+		} else {
+		    mtim_get(&sb, mtime);
+		    if (sudo_timespeccmp(&mtime, &boottime, <)) {
+			/* Time stamp file too old, remove it. */
+			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			    "removing time stamp file that predates boot time");
+			close(fd);
+			unlink(fname);
+			continue;
+		    }
 		}
 	    }
 	}
