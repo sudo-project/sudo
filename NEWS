@@ -51,6 +51,16 @@ What's new in Sudo 1.8.19
  * The sudo front-end now passes the user's umask to the plugin.
    Previously the plugin had to determine this itself.
 
+ * Sudoreplay can now display the stdin and ttyin streams when they
+   are explicitly added to the filter list.
+
+ * Fixed a bug introduced in sudo 1.8.17 where the "all" setting
+   for verifypw and listpw was not being honored.  Bug #762.
+
+ * The syslog priority (syslog_goodpri and syslog_badpri) can now
+   be negated or set to "none" to disable logging of successful or
+   unsuccessful sudo attempts via syslog.
+
 What's new in Sudo 1.8.18p1
 
  * When sudo_noexec.so is used, the WRDE_NOCMD flag is now added
