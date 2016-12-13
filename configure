@@ -15892,6 +15892,29 @@ done
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
+		# Undocumented API that dynamically allocates the groups.
+		for ac_func in getgrouplist_2
+do :
+  ac_fn_c_check_func "$LINENO" "getgrouplist_2" "ac_cv_func_getgrouplist_2"
+if test "x$ac_cv_func_getgrouplist_2" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETGROUPLIST_2 1
+_ACEOF
+ ac_fn_c_check_decl "$LINENO" "getgrouplist_2" "ac_cv_have_decl_getgrouplist_2" "$ac_includes_default"
+if test "x$ac_cv_have_decl_getgrouplist_2" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETGROUPLIST_2 $ac_have_decl
+_ACEOF
+
+fi
+done
+
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-force_flat_namespace" >&5
