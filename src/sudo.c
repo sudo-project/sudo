@@ -379,6 +379,7 @@ fix_fds(void)
 /*
  * Allocate space for groups and fill in using getgrouplist()
  * for when we cannot (or don't want to) use getgroups().
+ * Returns 0 on success and -1 on failure.
  */
 static int
 fill_group_list(struct user_details *ud, int system_maxgroups)
@@ -401,6 +402,12 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	ret = 0;
     } else {
+#ifdef HAVE_GETGROUPLIST_2
+	ud->groups = NULL;
+	ud->ngroups = getgrouplist_2(ud->username, ud->gid, &ud->groups);
+	if (ud->ngroups != -1)
+	    ret = 0;
+#else
 	/*
 	 * It is possible to belong to more groups in the group database
 	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
@@ -418,6 +425,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	    }
 	    ret = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
+#endif /* HAVE_GETGROUPLIST_2 */
     }
 done:
     debug_return_int(ret);

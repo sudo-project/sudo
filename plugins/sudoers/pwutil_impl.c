@@ -256,6 +256,14 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1)
 	    }
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
 	} else {
+#ifdef HAVE_GETGROUPLIST_2
+	    ngids = getgrouplist_2(pw->pw_name, pw->pw_gid, &gids);
+	    if (ngids == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		debug_return_ptr(NULL);
+	    }
+#else
 	    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
 	    if (ngids < 0)
 		ngids = NGROUPS_MAX * 2;
@@ -276,6 +284,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1)
 		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
 		    ngids = -1;
 	    }
+#endif /* HAVE_GETGROUPLIST_2 */
 	}
     }
     if (ngids <= 0) {

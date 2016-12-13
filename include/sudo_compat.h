@@ -392,6 +392,9 @@ __dso_public int sudo_getgrouplist(const char *name, gid_t basegid, gid_t *group
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
+#if defined(HAVE_GETGROUPLIST_2) && !defined(HAVE_DECL_GETGROUPLIST_2)
+int getgrouplist_2(const char *name, gid_t basegid, gid_t **groups);
+#endif /* HAVE_GETGROUPLIST_2 && !HAVE_DECL_GETGROUPLIST_2 */
 #ifndef HAVE_GETLINE
 __dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
 # undef getline

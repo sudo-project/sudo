@@ -95,6 +95,10 @@
    don't. */
 #undef HAVE_DECL_GETDOMAINNAME
 
+/* Define to 1 if you have the declaration of `getgrouplist_2', and to 0 if
+   you don't. */
+#undef HAVE_DECL_GETGROUPLIST_2
+
 /* Define to 1 if you have the declaration of `getresuid', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETRESUID
@@ -266,6 +270,9 @@
 
 /* Define to 1 if you have the `getgrouplist' function. */
 #undef HAVE_GETGROUPLIST
+
+/* Define to 1 if you have the `getgrouplist_2' function. */
+#undef HAVE_GETGROUPLIST_2
 
 /* Define to 1 if your system has a working `getgroups' function. */
 #undef HAVE_GETGROUPS

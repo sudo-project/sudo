@@ -2111,6 +2111,9 @@ case "$host" in
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
+		# Undocumented API that dynamically allocates the groups.
+		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])
