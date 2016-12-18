@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "8" "May 4, 2016" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "8" "November 30, 2016" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -110,8 +110,10 @@ will display the command's standard output, standard error and tty output.
 The
 \fIfilter\fR
 argument is a comma-separated list, consisting of one or more of following:
+\fIstdin\fR,
 \fIstdout\fR,
 \fIstderr\fR,
+\fIttyin\fR,
 and
 \fIttyout\fR.
 .TP 12n

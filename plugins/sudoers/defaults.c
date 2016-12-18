@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -73,35 +74,36 @@ static struct strmap priorities[] = {
 	{ "info",	LOG_INFO },
 	{ "notice",	LOG_NOTICE },
 	{ "warning",	LOG_WARNING },
+	{ "none",	-1 },
 	{ NULL,		-1 }
 };
 
 static struct early_default early_defaults[] = {
 #ifdef FQDN
-    { "fqdn", &sudo_defs_table[I_FQDN] },
+    { I_FQDN, true },
 #else
-    { "fqdn" },
+    { I_FQDN },
 #endif
-    { "match_group_by_gid" },
-    { "group_plugin" },
-    { "runas_default" },
-    { "sudoers_locale" },
-    { NULL }
+    { I_MATCH_GROUP_BY_GID },
+    { I_GROUP_PLUGIN },
+    { I_RUNAS_DEFAULT },
+    { I_SUDOERS_LOCALE },
+    { -1 }
 };
 
 /*
  * Local prototypes.
  */
-static bool store_int(const char *, struct sudo_defs_types *);
-static bool store_list(const char *, struct sudo_defs_types *, int op);
-static bool store_mode(const char *, struct sudo_defs_types *);
-static int  store_str(const char *, struct sudo_defs_types *);
-static bool store_syslogfac(const char *, struct sudo_defs_types *);
-static bool store_syslogpri(const char *, struct sudo_defs_types *);
-static bool store_tuple(const char *, struct sudo_defs_types *);
-static bool store_uint(const char *, struct sudo_defs_types *);
-static bool store_float(const char *, struct sudo_defs_types *);
-static bool list_op(const char *, size_t, struct sudo_defs_types *, enum list_ops);
+static bool store_int(const char *str, union sudo_defs_val *sd_un);
+static bool store_list(const char *str, union sudo_defs_val *sd_un, int op);
+static bool store_mode(const char *str, union sudo_defs_val *sd_un);
+static int  store_str(const char *str, union sudo_defs_val *sd_un);
+static bool store_syslogfac(const char *str, union sudo_defs_val *sd_un);
+static bool store_syslogpri(const char *str, union sudo_defs_val *sd_un);
+static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
+static bool store_uint(const char *str, union sudo_defs_val *sd_un);
+static bool store_float(const char *str, union sudo_defs_val *sd_un);
+static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
 static const char *logfac2str(int);
 static const char *logpri2str(int);
 
@@ -190,139 +192,166 @@ dump_defaults(void)
     debug_return;
 }
 
+/*
+ * Find the index of the specified Defaults name in sudo_defs_table[]
+ * On success, returns the matching index or -1 on failure.
+ */
+static int
+find_default(const char *name, const char *file, int lineno, bool quiet)
+{
+    int i;
+    debug_decl(find_default, SUDOERS_DEBUG_DEFAULTS)
+
+    for (i = 0; sudo_defs_table[i].name != NULL; i++) {
+	if (strcmp(name, sudo_defs_table[i].name) == 0)
+	    debug_return_int(i);
+    }
+    if (!quiet) {
+	if (lineno > 0) {
+	    sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
+		file, lineno, name);
+	} else {
+	    sudo_warnx(U_("%s: unknown defaults entry \"%s\""),
+		file, name);
+	}
+    }
+    debug_return_int(-1);
+}
+
+/*
+ * Parse a defaults entry, storing the parsed entry in sd_un.
+ * Returns true on success or false on failure.
+ */
 static bool
-set_default_entry(struct sudo_defs_types *def, const char *val, int op,
-    bool quiet, bool do_callback)
+parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
+    union sudo_defs_val *sd_un, const char *file, int lineno, bool quiet)
 {
     int rc;
-    debug_decl(set_default_entry, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
     if (val == NULL && !ISSET(def->type, T_FLAG)) {
 	/* Check for bogus boolean usage or missing value if non-boolean. */
 	if (!ISSET(def->type, T_BOOL) || op != false) {
-	    if (!quiet)
-		sudo_warnx(U_("no value specified for `%s'"), def->name);
+	    if (!quiet) {
+		if (lineno > 0) {
+		    sudo_warnx(U_("%s:%d no value specified for \"%s\""),
+			file, lineno, def->name);
+		} else {
+		    sudo_warnx(U_("%s: no value specified for \"%s\""),
+			file, def->name);
+		}
+	    }
 	    debug_return_bool(false);
 	}
     }
 
     switch (def->type & T_MASK) {
 	case T_LOGFAC:
-	    rc = store_syslogfac(val, def);
+	    rc = store_syslogfac(val, sd_un);
 	    break;
 	case T_LOGPRI:
-	    rc = store_syslogpri(val, def);
+	    rc = store_syslogpri(val, sd_un);
 	    break;
 	case T_STR:
 	    if (ISSET(def->type, T_PATH) && val != NULL && *val != '/') {
 		if (!quiet) {
-		    sudo_warnx(U_("values for `%s' must start with a '/'"),
-			def->name);
+		    if (lineno > 0) {
+			sudo_warnx(U_("%s:%d values for \"%s\" must start with a '/'"),
+			    file, lineno, def->name);
+		    } else {
+			sudo_warnx(U_("%s: values for \"%s\" must start with a '/'"),
+			    file, def->name);
+		    }
 		}
 		rc = -1;
 		break;
 	    }
-	    rc =  store_str(val, def);
+	    rc =  store_str(val, sd_un);
 	    break;
 	case T_INT:
-	    rc = store_int(val, def);
+	    rc = store_int(val, sd_un);
 	    break;
 	case T_UINT:
-	    rc = store_uint(val, def);
+	    rc = store_uint(val, sd_un);
 	    break;
 	case T_FLOAT:
-	    rc = store_float(val, def);
+	    rc = store_float(val, sd_un);
 	    break;
 	case T_MODE:
-	    rc = store_mode(val, def);
+	    rc = store_mode(val, sd_un);
 	    break;
 	case T_FLAG:
 	    if (val != NULL) {
 		if (!quiet) {
-		    sudo_warnx(U_("option `%s' does not take a value"),
-			def->name);
+		    if (lineno > 0) {
+			sudo_warnx(U_("%s:%d option \"%s\" does not take a value"),
+			    file, lineno, def->name);
+		    } else {
+			sudo_warnx(U_("%s: option \"%s\" does not take a value"),
+			    file, def->name);
+		    }
 		}
 		rc = -1;
 		break;
 	    }
-	    def->sd_un.flag = op;
+	    sd_un->flag = op;
 	    rc = true;
 	    break;
 	case T_LIST:
-	    rc = store_list(val, def, op);
+	    rc = store_list(val, sd_un, op);
 	    break;
 	case T_TUPLE:
-	    rc = store_tuple(val, def);
+	    rc = store_tuple(val, sd_un, def->values);
 	    break;
 	default:
 	    if (!quiet) {
-		sudo_warnx(U_("invalid Defaults type 0x%x for option `%s'"),
-		    def->type, def->name);
+		if (lineno > 0) {
+		    sudo_warnx(U_("%s:%d invalid Defaults type 0x%x for option \"%s\""),
+			file, lineno, def->type, def->name);
+		} else {
+		    sudo_warnx(U_("%s: invalid Defaults type 0x%x for option \"%s\""),
+			file, def->type, def->name);
+		}
 	    }
 	    rc = -1;
 	    break;
     }
-    switch (rc) {
-    case -1:
-	/* Error message already displayed. */
-	rc = false;
-	break;
-    case false:
+    if (rc == false) {
 	if (!quiet) {
-	    sudo_warnx(U_("value `%s' is invalid for option `%s'"),
-		val, def->name);
+	    if (lineno > 0) {
+		sudo_warnx(U_("%s:%d value \"%s\" is invalid for option \"%s\""),
+		    file, lineno, val, def->name);
+	    } else {
+		sudo_warnx(U_("%s: value \"%s\" is invalid for option \"%s\""),
+		    file, val, def->name);
+	    }
 	}
-	break;
-    case true:
-	if (do_callback && def->callback)
-	    rc = def->callback(&def->sd_un);
-	break;
     }
 
-    debug_return_bool(rc);
+    debug_return_bool(rc == true);
 }
 
 struct early_default *
-is_early_default(const char *var)
+is_early_default(const char *name)
 {
     struct early_default *early;
     debug_decl(is_early_default, SUDOERS_DEBUG_DEFAULTS)
 
-    for (early = early_defaults; early->var != NULL; early++) {
-	if (strcmp(var, early->var) == 0)
+    for (early = early_defaults; early->idx != -1; early++) {
+	if (strcmp(name, sudo_defs_table[early->idx].name) == 0)
 	    debug_return_ptr(early);
     }
     debug_return_ptr(NULL);
 }
 
-/*
- * Sets/clears an entry in the defaults structure.
- * If a variable that takes a value is used in a boolean
- * context with op == 0, disable that variable.
- * Eg. you may want to turn off logging to a file for some hosts.
- * This is only meaningful for variables that are *optional*.
- */
-static struct sudo_defs_types *
-set_default_int(const char *var, const char *val, int op, bool quiet,
-    bool do_callback)
+static bool
+run_callback(struct sudo_defs_types *def)
 {
-    struct sudo_defs_types *cur;
-    int num;
-    debug_decl(set_default_int, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(run_callback, SUDOERS_DEBUG_DEFAULTS)
 
-    for (cur = sudo_defs_table, num = 0; cur->name; cur++, num++) {
-	if (strcmp(var, cur->name) == 0)
-	    break;
-    }
-    if (!cur->name) {
-	if (!quiet)
-	    sudo_warnx(U_("unknown defaults entry `%s'"), var);
-	debug_return_ptr(NULL);
-    }
-
-    if (!set_default_entry(cur, val, op, quiet, do_callback))
-	debug_return_ptr(NULL);
-    debug_return_ptr(cur);
+    if (def->callback == NULL)
+	debug_return_bool(true);
+    debug_return_bool(def->callback(&def->sd_un));
 }
 
 /*
@@ -330,13 +359,20 @@ set_default_int(const char *var, const char *val, int op, bool quiet,
  * Runs the callback if present on success.
  */
 bool
-set_default(const char *var, const char *val, int op, bool quiet)
+set_default(const char *var, const char *val, int op, const char *file,
+    int lineno, bool quiet)
 {
-    const struct sudo_defs_types *def;
+    int idx;
     debug_decl(set_default, SUDOERS_DEBUG_DEFAULTS)
 
-    def = set_default_int(var, val, op, quiet, true);
-    debug_return_bool(def != NULL);
+    idx = find_default(var, file, lineno, quiet);
+    if (idx != -1) {
+	/* Set parsed value in sudo_defs_table and run callback (if any). */
+	struct sudo_defs_types *def = &sudo_defs_table[idx];
+	if (parse_default_entry(def, val, op, &def->sd_un, file, lineno, quiet))
+	    debug_return_bool(run_callback(def));
+    }
+    debug_return_bool(false);
 }
 
 /*
@@ -344,17 +380,22 @@ set_default(const char *var, const char *val, int op, bool quiet)
  * and does not run callbacks.
  */
 bool
-set_early_default(const char *var, const char *val, int op, bool quiet,
-    struct early_default *early)
+set_early_default(const char *var, const char *val, int op, const char *file,
+    int lineno, bool quiet, struct early_default *early)
 {
-    const struct sudo_defs_types *def;
+    int idx;
     debug_decl(set_early_default, SUDOERS_DEBUG_DEFAULTS)
 
-    def = set_default_int(var, val, op, quiet, false);
-    if (def == NULL)
-	debug_return_bool(false);
-    early->def = def;
-    debug_return_bool(true);
+    idx = find_default(var, file, lineno, quiet);
+    if (idx != -1) {
+	/* Set parsed value in sudo_defs_table but defer callback (if any). */
+	struct sudo_defs_types *def = &sudo_defs_table[idx];
+	if (parse_default_entry(def, val, op, &def->sd_un, file, lineno, quiet)) {
+	    early->run_callback = true;
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
 }
 
 /*
@@ -364,33 +405,31 @@ bool
 run_early_defaults(void)
 {
     struct early_default *early;
-    bool rc = true;
+    bool ret = true;
     debug_decl(run_early_defaults, SUDOERS_DEBUG_DEFAULTS)
 
-    for (early = early_defaults; early->var != NULL; early++) {
-	if (early->def == NULL)
-	    continue;
-	if (early->def->callback != NULL) {
-	    if (!early->def->callback(&early->def->sd_un))
-		rc = false;
+    for (early = early_defaults; early->idx != -1; early++) {
+	if (early->run_callback) {
+	    if (!run_callback(&sudo_defs_table[early->idx]))
+		ret = false;
+	    early->run_callback = false;
 	}
-	early->def = NULL;
     }
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 static void
-free_default(struct sudo_defs_types *def)
+free_default(int type, union sudo_defs_val *sd_un)
 {
-    switch (def->type & T_MASK) {
+    switch (type & T_MASK) {
 	case T_STR:
-	    free(def->sd_un.str);
+	    free(sd_un->str);
 	    break;
 	case T_LIST:
-	    (void)list_op(NULL, 0, def, freeall);
+	    (void)list_op(NULL, 0, sd_un, freeall);
 	    break;
     }
-    memset(&def->sd_un, 0, sizeof(def->sd_un));
+    memset(sd_un, 0, sizeof(*sd_un));
 }
 
 /*
@@ -407,7 +446,7 @@ init_defaults(void)
     /* Clear any old settings. */
     if (!firsttime) {
 	for (def = sudo_defs_table; def->name != NULL; def++)
-	    free_default(def);
+	    free_default(def->type, &def->sd_un);
     }
 
     /* First initialize the flags. */
@@ -493,23 +532,24 @@ init_defaults(void)
 #endif
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
+    def_iolog_mode = S_IRUSR|S_IWUSR;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
-    (void) store_syslogfac(LOGFAC, &sudo_defs_table[I_SYSLOG]);
-    (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_SYSLOG_GOODPRI]);
-    (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_SYSLOG_BADPRI]);
+    (void) store_syslogfac(LOGFAC, &sudo_defs_table[I_SYSLOG].sd_un);
+    (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_SYSLOG_GOODPRI].sd_un);
+    (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_SYSLOG_BADPRI].sd_un);
 #endif
 
     /* Password flags also have a string and integer component. */
-    (void) store_tuple("any", &sudo_defs_table[I_LISTPW]);
-    (void) store_tuple("all", &sudo_defs_table[I_VERIFYPW]);
+    (void) store_tuple("any", &sudo_defs_table[I_LISTPW].sd_un, sudo_defs_table[I_LISTPW].values);
+    (void) store_tuple("all", &sudo_defs_table[I_VERIFYPW].sd_un, sudo_defs_table[I_VERIFYPW].values);
 
     /* Then initialize the int-like things. */
 #ifdef SUDO_UMASK
     def_umask = SUDO_UMASK;
 #else
-    def_umask = 0777;
+    def_umask = ACCESSPERMS;
 #endif
     def_loglinelen = MAXLOGFILELEN;
     def_timestamp_timeout = TIMEOUT;
@@ -559,6 +599,7 @@ init_defaults(void)
 	goto oom;
     def_set_utmp = true;
     def_pam_setcred = true;
+    def_syslog_maxlen = MAXSYSLOGLEN;
 
     /* Reset the locale. */
     if (!firsttime) {
@@ -583,11 +624,11 @@ oom:
  * Returns true if it matches, else false.
  */
 static bool
-default_type_matches(struct defaults *def, int what)
+default_type_matches(struct defaults *d, int what)
 {
     debug_decl(default_type_matches, SUDOERS_DEBUG_DEFAULTS)
 
-    switch (def->type) {
+    switch (d->type) {
     case DEFAULTS:
 	if (ISSET(what, SETDEF_GENERIC))
 	    debug_return_bool(true);
@@ -617,28 +658,28 @@ default_type_matches(struct defaults *def, int what)
  * Returns true if it matches, else false.
  */
 static bool
-default_binding_matches(struct defaults *def, int what)
+default_binding_matches(struct defaults *d, int what)
 {
     debug_decl(default_binding_matches, SUDOERS_DEBUG_DEFAULTS)
 
-    switch (def->type) {
+    switch (d->type) {
     case DEFAULTS:
 	debug_return_bool(true);
 	break;
     case DEFAULTS_USER:
-	if (userlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	if (userlist_matches(sudo_user.pw, d->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (runaslist_matches(def->binding, NULL, NULL, NULL) == ALLOW)
+	if (runaslist_matches(d->binding, NULL, NULL, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
-	if (hostlist_matches(sudo_user.pw, def->binding) == ALLOW)
+	if (hostlist_matches(sudo_user.pw, d->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_CMND:
-	if (cmndlist_matches(def->binding) == ALLOW)
+	if (cmndlist_matches(d->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     }
@@ -652,8 +693,8 @@ default_binding_matches(struct defaults *def, int what)
 bool
 update_defaults(int what, bool quiet)
 {
-    struct defaults *def;
-    bool rc = true;
+    struct defaults *d;
+    bool ret = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -662,134 +703,139 @@ update_defaults(int what, bool quiet)
     /*
      * First apply Defaults values marked as early.
      */
-    TAILQ_FOREACH(def, &defaults, entries) {
-	struct early_default *early = is_early_default(def->var);
+    TAILQ_FOREACH(d, &defaults, entries) {
+	struct early_default *early = is_early_default(d->var);
 	if (early == NULL)
 	    continue;
 
-	if (!default_type_matches(def, what) ||
-	    !default_binding_matches(def, what))
+	/* Defaults type and binding must match. */
+	if (!default_type_matches(d, what) ||
+	    !default_binding_matches(d, what))
 	    continue;
-	if (!set_early_default(def->var, def->val, def->op, quiet, early))
-	    rc = false;
+
+	/* Copy the value to sudo_defs_table and mark as early. */
+	if (!set_early_default(d->var, d->val, d->op, d->file, d->lineno,
+	    quiet, early))
+	    ret = false;
     }
+    /* Run callbacks for early defaults (if any) */
     if (!run_early_defaults())
-	rc = false;
+	ret = false;
 
     /*
      * Then set the rest of the defaults.
      */
-    TAILQ_FOREACH(def, &defaults, entries) {
+    TAILQ_FOREACH(d, &defaults, entries) {
 	/* Skip Defaults marked as early, we already did them. */
-	if (is_early_default(def->var))
+	if (is_early_default(d->var))
 	    continue;
 
-	if (!default_type_matches(def, what) ||
-	    !default_binding_matches(def, what))
+	/* Defaults type and binding must match. */
+	if (!default_type_matches(d, what) ||
+	    !default_binding_matches(d, what))
 	    continue;
-	if (!set_default(def->var, def->val, def->op, quiet))
-	    rc = false;
+
+	/* Copy the value to sudo_defs_table and run callback (if any) */
+	if (!set_default(d->var, d->val, d->op, d->file, d->lineno, quiet))
+	    ret = false;
     }
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 /*
- * Check the defaults entries without actually setting them.
- * Pass in an OR'd list of which default types to check.
+ * Check all defaults entries without actually setting them.
  */
 bool
-check_defaults(int what, bool quiet)
+check_defaults(bool quiet)
 {
-    struct sudo_defs_types *cur, tmp;
-    struct defaults *def;
-    bool rc = true;
+    struct defaults *d;
+    bool ret = true;
+    int idx;
     debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
 
-    TAILQ_FOREACH(def, &defaults, entries) {
-	if (!default_type_matches(def, what))
-	    continue;
-	for (cur = sudo_defs_table; cur->name != NULL; cur++) {
-	    if (strcmp(def->var, cur->name) == 0)
-		break;
+    TAILQ_FOREACH(d, &defaults, entries) {
+	idx = find_default(d->var, d->file, d->lineno, quiet);
+	if (idx != -1) {
+	    struct sudo_defs_types *def = &sudo_defs_table[idx];
+	    union sudo_defs_val sd_un;
+	    memset(&sd_un, 0, sizeof(sd_un));
+	    if (parse_default_entry(def, d->val, d->op, &sd_un, d->file,
+		d->lineno, quiet)) {
+		free_default(def->type, &sd_un);
+		continue;
+	    }
 	}
-	if (cur->name == NULL) {
-	    if (!quiet)
-		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
-	    rc = false;
-	}
-	/* Don't actually set the defaults value, just checking. */
-	tmp = *cur;
-	memset(&tmp.sd_un, 0, sizeof(tmp.sd_un));
-	if (!set_default_entry(&tmp, def->val, def->op, quiet, false))
-	    rc = false;
-	free_default(&tmp);
+	/* There was an error in the entry, flag it. */
+	d->error = true;
+	ret = false;
     }
-    debug_return_bool(rc);
+    debug_return_bool(ret);
 }
 
 static bool
-store_int(const char *val, struct sudo_defs_types *def)
+store_int(const char *str, union sudo_defs_val *sd_un)
 {
     const char *errstr;
     int i;
     debug_decl(store_int, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL) {
-	def->sd_un.ival = 0;
+    if (str == NULL) {
+	sd_un->ival = 0;
     } else {
-	i = strtonum(val, INT_MIN, INT_MAX, &errstr);
+	i = strtonum(str, INT_MIN, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: %s", val, errstr);
+		"%s: %s", str, errstr);
 	    debug_return_bool(false);
 	}
-	def->sd_un.ival = i;
+	sd_un->ival = i;
     }
     debug_return_bool(true);
 }
 
 static bool
-store_uint(const char *val, struct sudo_defs_types *def)
+store_uint(const char *str, union sudo_defs_val *sd_un)
 {
     const char *errstr;
     unsigned int u;
     debug_decl(store_uint, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL) {
-	def->sd_un.uival = 0;
+    if (str == NULL) {
+	sd_un->uival = 0;
     } else {
-	u = strtonum(val, 0, UINT_MAX, &errstr);
+	u = strtonum(str, 0, UINT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: %s", val, errstr);
+		"%s: %s", str, errstr);
 	    debug_return_bool(false);
 	}
-	def->sd_un.uival = u;
+	sd_un->uival = u;
     }
     debug_return_bool(true);
 }
 
 static bool
-store_float(const char *val, struct sudo_defs_types *def)
+store_float(const char *str, union sudo_defs_val *sd_un)
 {
     char *endp;
     double d;
     debug_decl(store_float, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL) {
-	def->sd_un.fval = 0.0;
+    if (str == NULL) {
+	sd_un->fval = 0.0;
     } else {
-	d = strtod(val, &endp);
+	d = strtod(str, &endp);
 	if (*endp != '\0')
 	    debug_return_bool(false);
 	/* XXX - should check against HUGE_VAL */
-	def->sd_un.fval = d;
+	sd_un->fval = d;
     }
     debug_return_bool(true);
 }
 
 static bool
-store_tuple(const char *val, struct sudo_defs_types *def)
+store_tuple(const char *str, union sudo_defs_val *sd_un,
+    struct def_values *tuple_vals)
 {
     struct def_values *v;
     debug_decl(store_tuple, SUDOERS_DEBUG_DEFAULTS)
@@ -799,12 +845,12 @@ store_tuple(const char *val, struct sudo_defs_types *def)
      * For negation to work the first element of enum def_tuple
      * must be equivalent to boolean false.
      */
-    if (val == NULL) {
-	def->sd_un.ival = 0;
+    if (str == NULL) {
+	sd_un->ival = 0;
     } else {
-	for (v = def->values; v->sval != NULL; v++) {
-	    if (strcmp(v->sval, val) == 0) {
-		def->sd_un.tuple = v->nval;
+	for (v = tuple_vals; v->sval != NULL; v++) {
+	    if (strcmp(v->sval, str) == 0) {
+		sd_un->tuple = v->nval;
 		break;
 	    }
 	}
@@ -815,15 +861,15 @@ store_tuple(const char *val, struct sudo_defs_types *def)
 }
 
 static int
-store_str(const char *val, struct sudo_defs_types *def)
+store_str(const char *str, union sudo_defs_val *sd_un)
 {
     debug_decl(store_str, SUDOERS_DEBUG_DEFAULTS)
 
-    free(def->sd_un.str);
-    if (val == NULL) {
-	def->sd_un.str = NULL;
+    free(sd_un->str);
+    if (str == NULL) {
+	sd_un->str = NULL;
     } else {
-	if ((def->sd_un.str = strdup(val)) == NULL) {
+	if ((sd_un->str = strdup(str)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_int(-1);
 	}
@@ -832,13 +878,13 @@ store_str(const char *val, struct sudo_defs_types *def)
 }
 
 static bool
-store_list(const char *str, struct sudo_defs_types *def, int op)
+store_list(const char *str, union sudo_defs_val *sd_un, int op)
 {
     debug_decl(store_list, SUDOERS_DEBUG_DEFAULTS)
 
     /* Remove all old members. */
     if (op == false || op == true)
-	(void)list_op(NULL, 0, def, freeall);
+	(void)list_op(NULL, 0, sd_un, freeall);
 
     /* Split str into multiple space-separated words and act on each one. */
     if (str != NULL) {
@@ -848,7 +894,7 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 
 	for (cp = sudo_strsplit(str, end, " \t", &ep); cp != NULL;
 	    cp = sudo_strsplit(NULL, end, " \t", &ep)) {
-	    if (!list_op(cp, ep - cp, def, lop))
+	    if (!list_op(cp, ep - cp, sd_un, lop))
 		debug_return_bool(false);
 	}
     }
@@ -856,22 +902,22 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 }
 
 static bool
-store_syslogfac(const char *val, struct sudo_defs_types *def)
+store_syslogfac(const char *str, union sudo_defs_val *sd_un)
 {
     struct strmap *fac;
     debug_decl(store_syslogfac, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL) {
-	def->sd_un.ival = false;
+    if (str == NULL) {
+	sd_un->ival = false;
 	debug_return_bool(true);
     }
-    for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
-	;
-    if (fac->name == NULL)
-	debug_return_bool(false);		/* not found */
-
-    def->sd_un.ival = fac->num;
-    debug_return_bool(true);
+    for (fac = facilities; fac->name != NULL; fac++) {
+	if (strcmp(str, fac->name) != 0) {
+	    sd_un->ival = fac->num;
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);		/* not found */
 }
 
 static const char *
@@ -881,26 +927,27 @@ logfac2str(int n)
     debug_decl(logfac2str, SUDOERS_DEBUG_DEFAULTS)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
-	;
+	continue;
     debug_return_const_str(fac->name);
 }
 
 static bool
-store_syslogpri(const char *val, struct sudo_defs_types *def)
+store_syslogpri(const char *str, union sudo_defs_val *sd_un)
 {
     struct strmap *pri;
     debug_decl(store_syslogpri, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL)
-	debug_return_bool(false);
-
-    for (pri = priorities; pri->name && strcmp(val, pri->name); pri++)
-	;
-    if (pri->name == NULL)
-	debug_return_bool(false); 	/* not found */
-
-    def->sd_un.ival = pri->num;
-    debug_return_bool(true);
+    if (str == NULL) {
+	sd_un->ival = -1;
+	debug_return_bool(true);
+    }
+    for (pri = priorities; pri->name != NULL; pri++) {
+	if (strcmp(str, pri->name) != 0) {
+	    sd_un->ival = pri->num;
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false); 	/* not found */
 }
 
 static const char *
@@ -909,56 +956,59 @@ logpri2str(int n)
     struct strmap *pri;
     debug_decl(logpri2str, SUDOERS_DEBUG_DEFAULTS)
 
-    for (pri = priorities; pri->name && pri->num != n; pri++)
-	;
-    debug_return_const_str(pri->name);
+    for (pri = priorities; pri->name != NULL; pri++) {
+	if (pri->num == n)
+	    debug_return_const_str(pri->name);
+    }
+    debug_return_const_str("unknown");
 }
 
 static bool
-store_mode(const char *val, struct sudo_defs_types *def)
+store_mode(const char *str, union sudo_defs_val *sd_un)
 {
     mode_t mode;
     const char *errstr;
     debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL) {
-	def->sd_un.mode = 0777;
+    if (str == NULL) {
+	sd_un->mode = ACCESSPERMS;
     } else {
-	mode = sudo_strtomode(val, &errstr);
+	mode = sudo_strtomode(str, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s is %s", val, errstr);
+		"%s is %s", str, errstr);
 	    debug_return_bool(false);
 	}
-	def->sd_un.mode = mode;
+	sd_un->mode = mode;
     }
     debug_return_bool(true);
 }
 
 static bool
-list_op(const char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
+list_op(const char *str, size_t len, union sudo_defs_val *sd_un,
+    enum list_ops op)
 {
     struct list_member *cur, *prev = NULL;
     debug_decl(list_op, SUDOERS_DEBUG_DEFAULTS)
 
     if (op == freeall) {
-	while ((cur = SLIST_FIRST(&def->sd_un.list)) != NULL) {
-	    SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
+	while ((cur = SLIST_FIRST(&sd_un->list)) != NULL) {
+	    SLIST_REMOVE_HEAD(&sd_un->list, entries);
 	    free(cur->value);
 	    free(cur);
 	}
 	debug_return_bool(true);
     }
 
-    SLIST_FOREACH(cur, &def->sd_un.list, entries) {
-	if ((strncmp(cur->value, val, len) == 0 && cur->value[len] == '\0')) {
+    SLIST_FOREACH(cur, &sd_un->list, entries) {
+	if ((strncmp(cur->value, str, len) == 0 && cur->value[len] == '\0')) {
 
 	    if (op == add)
 		debug_return_bool(true); /* already exists */
 
 	    /* Delete node */
 	    if (prev == NULL)
-		SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
+		SLIST_REMOVE_HEAD(&sd_un->list, entries);
 	    else
 		SLIST_REMOVE_AFTER(prev, entries);
 	    free(cur->value);
@@ -971,12 +1021,12 @@ list_op(const char *val, size_t len, struct sudo_defs_types *def, enum list_ops 
     /* Add new node to the head of the list. */
     if (op == add) {
 	cur = calloc(1, sizeof(struct list_member));
-	if (cur == NULL || (cur->value = strndup(val, len)) == NULL) {
+	if (cur == NULL || (cur->value = strndup(str, len)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(cur);
 	    debug_return_bool(false);
 	}
-	SLIST_INSERT_HEAD(&def->sd_un.list, cur, entries);
+	SLIST_INSERT_HEAD(&sd_un->list, cur, entries);
     }
     debug_return_bool(true);
 }

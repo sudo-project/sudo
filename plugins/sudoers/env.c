@@ -448,7 +448,7 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
      * just ignores the '=' and anything after it.
      */
     for (cp = var; *cp && *cp != '='; cp++)
-	;
+	continue;
     esize = (size_t)(cp - var) + 2;
     if (val) {
 	esize += strlen(val);	/* glibc treats a NULL val as "" */
@@ -715,7 +715,7 @@ env_should_delete(const char *var)
 
     /* Skip variables with values beginning with () (bash functions) */
     if ((cp = strchr(var, '=')) != NULL) {
-	if (strncmp(cp, "=() ", 3) == 0) {
+	if (strncmp(cp, "=() ", 4) == 0) {
 	    delete_it = true;
 	    goto done;
 	}
@@ -750,7 +750,7 @@ env_should_keep(const char *var)
     /* Skip bash functions unless we matched on the value as well as name. */
     if (keepit && !full_match) {
 	if ((cp = strchr(var, '=')) != NULL) {
-	    if (strncmp(cp, "=() ", 3) == 0)
+	    if (strncmp(cp, "=() ", 4) == 0)
 		keepit = false;
 	}
     }
@@ -817,7 +817,7 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 	case 'U':
 	    if (strncmp(ep, "USER=", 5) == 0)
 		SET(*didvar, DID_USER);
-	    if (strncmp(ep, "USERNAME=", 5) == 0)
+	    if (strncmp(ep, "USERNAME=", 9) == 0)
 		SET(*didvar, DID_USERNAME);
 	    break;
     }
@@ -918,7 +918,7 @@ rebuild_env(void)
 	     * Do SUDO_PS1 -> PS1 conversion.
 	     * This must happen *after* env_should_keep() is called.
 	     */
-	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
+	    if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		ps1 = *ep + 5;
 
 	    if (keepit) {
@@ -1199,7 +1199,7 @@ read_env_file(const char *path, int overwrite)
 
 	/* Must be of the form name=["']value['"] */
 	for (val = var; *val != '\0' && *val != '='; val++)
-	    ;
+	    continue;
 	if (var == val || *val != '=')
 	    continue;
 	var_len = (size_t)(val - var);

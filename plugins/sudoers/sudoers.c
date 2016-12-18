@@ -196,7 +196,6 @@ sudoers_policy_init(void *info, char * const envp[])
 		    N_("problem with defaults entries"));
 	    }
         } else {
-	    /* XXX - used to send mail for sudoers parse errors. */
 	    TAILQ_REMOVE(snl, nss, entries);
         }
     }
@@ -226,9 +225,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 {
     char **edit_argv = NULL;
     char *iolog_path = NULL;
-    mode_t cmnd_umask = 0777;
+    mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
-    bool nopass = false;
+    int nopass = -1;
     int cmnd_status = -1, oldlocale, validated;
     int ret = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
@@ -322,6 +321,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    case all:
 		if (!ISSET(validated, FLAG_NOPASSWD))
 		    nopass = false;
+		else if (nopass == -1)
+		    nopass = true;
 		break;
 	    case any:
 		if (ISSET(validated, FLAG_NOPASSWD))
@@ -351,7 +352,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		break;
 	}
     }
-    if (pwflag && nopass)
+    if (pwflag && nopass == true)
 	def_authenticate = false;
 
     /* Restore user's locale. */
@@ -460,7 +461,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgc, NewArgv, N_("command in current directory"));
-	sudo_warnx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
@@ -539,7 +540,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * If user's umask is more restrictive, OR in those bits too
      * unless umask_override is set.
      */
-    if (def_umask != 0777) {
+    if (def_umask != ACCESSPERMS) {
 	cmnd_umask = def_umask;
 	if (!def_umask_override)
 	    cmnd_umask |= user_umask;
@@ -646,7 +647,7 @@ done:
 }
 
 /*
- * Initialize timezone and fill in ``sudo_user'' struct.
+ * Initialize timezone and fill in sudo_user struct.
  */
 static bool
 init_vars(char * const envp[])
@@ -722,6 +723,15 @@ init_vars(char * const envp[])
 
     /* Set maxseq callback. */
     sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
+
+    /* Set iolog_user callback. */
+    sudo_defs_table[I_IOLOG_USER].callback = cb_iolog_user;
+
+    /* Set iolog_group callback. */
+    sudo_defs_table[I_IOLOG_GROUP].callback = cb_iolog_group;
+
+    /* Set iolog_mode callback. */
+    sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
@@ -948,7 +958,7 @@ set_loginclass(struct passwd *pw)
 
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 && pw->pw_uid != 0) {
-	    sudo_warnx(U_("only root can use `-c %s'"), login_class);
+	    sudo_warnx(U_("only root can use \"-c %s\""), login_class);
 	    ret = false;
 	    goto done;
 	}

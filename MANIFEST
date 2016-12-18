@@ -175,6 +175,7 @@ lib/util/term.c
 lib/util/ttysize.c
 lib/util/util.exp.in
 lib/util/utimens.c
+lib/util/vsyslog.c
 lib/zlib/Makefile.in
 lib/zlib/adler32.c
 lib/zlib/compress.c
@@ -204,6 +205,7 @@ lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
 ltmain.sh
+m4/ax_append_flag.m4
 m4/ax_check_compile_flag.m4
 m4/ax_check_link_flag.m4
 m4/ax_func_getaddrinfo.m4
@@ -228,7 +230,6 @@ plugins/sample/README
 plugins/sample/sample_plugin.c
 plugins/sample/sample_plugin.exp
 plugins/sudoers/Makefile.in
-plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
 plugins/sudoers/audit.c
 plugins/sudoers/auth/API
@@ -290,6 +291,7 @@ plugins/sudoers/logwrap.c
 plugins/sudoers/match.c
 plugins/sudoers/match_addr.c
 plugins/sudoers/mkdefaults
+plugins/sudoers/mkdir_parents.c
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/po/README
@@ -355,6 +357,7 @@ plugins/sudoers/prompt.c
 plugins/sudoers/pwutil.c
 plugins/sudoers/pwutil.h
 plugins/sudoers/pwutil_impl.c
+plugins/sudoers/rcstr.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/check_symbols/check_symbols.c
@@ -464,6 +467,11 @@ plugins/sudoers/regress/visudo/test5.out.ok
 plugins/sudoers/regress/visudo/test5.sh
 plugins/sudoers/regress/visudo/test6.out.ok
 plugins/sudoers/regress/visudo/test6.sh
+plugins/sudoers/regress/visudo/test7.out.ok
+plugins/sudoers/regress/visudo/test7.sh
+plugins/sudoers/regress/visudo/test8.err.ok
+plugins/sudoers/regress/visudo/test8.out.ok
+plugins/sudoers/regress/visudo/test8.sh
 plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
@@ -569,6 +577,7 @@ src/openbsd.c
 src/parse_args.c
 src/preload.c
 src/preserve_fds.c
+src/regress/noexec/check_noexec.c
 src/regress/ttyname/check_ttyname.c
 src/selinux.c
 src/sesh.c

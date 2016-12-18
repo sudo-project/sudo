@@ -266,7 +266,7 @@ int pam_prep_user(struct passwd *);
 /* gram.y */
 int sudoersparse(void);
 extern char *login_style;
-extern const char *errorfile;
+extern char *errorfile;
 extern int errorlineno;
 extern bool parse_error;
 extern bool sudoers_warnings;
@@ -328,6 +328,9 @@ bool get_boottime(struct timespec *);
 /* iolog.c */
 bool io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 bool cb_maxseq(const union sudo_defs_val *sd_un);
+bool cb_iolog_user(const union sudo_defs_val *sd_un);
+bool cb_iolog_group(const union sudo_defs_val *sd_un);
+bool cb_iolog_mode(const union sudo_defs_val *sd_un);
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
@@ -366,7 +369,7 @@ extern sudo_printf_t sudo_printf;
 
 /* sudoers_debug.c */
 bool sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
-void sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
+bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
 void sudoers_debug_deregister(void);
 
 /* policy.c */
@@ -387,6 +390,9 @@ extern const char *path_plugin_dir;
 char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *whitelist);
 
+/* mkdir_parents.c */
+bool sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet);
+
 /* gc.c */
 enum sudoers_gc_types {
     GC_UNKNOWN,
@@ -396,5 +402,11 @@ enum sudoers_gc_types {
 bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
 bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
 void sudoers_gc_init(void);
+
+/* rcstr.c */
+char *rcstr_dup(const char *src);
+char *rcstr_alloc(size_t len);
+char *rcstr_addref(const char *s);
+void rcstr_delref(const char *s);
 
 #endif /* SUDOERS_SUDOERS_H */

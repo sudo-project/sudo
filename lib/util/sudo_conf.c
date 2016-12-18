@@ -64,7 +64,8 @@ struct sudo_conf_table {
 struct sudo_conf_path_table {
     const char *pname;
     unsigned int pnamelen;
-    char **pval;
+    bool dynamic;
+    char *pval;
 };
 
 static int parse_debug(const char *entry, const char *conf_file, unsigned int lineno);
@@ -93,35 +94,11 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
     { NULL }
 };
 
-/*
- * Using designated struct initializers would be clearer here but
- * we want to avoid relying on C99 features for now.
- */
-static struct sudo_conf_paths {
-    char *askpass;
-    char *sesh;
-    char *nodump;
-    char *noexec;
-    char *plugin_dir;
-} sudo_conf_paths = {
-    _PATH_SUDO_ASKPASS,
-    _PATH_SUDO_SESH,
-#ifdef _PATH_SUDO_NODUMP
-    _PATH_SUDO_NODUMP,
-#else
-    NULL,
-#endif
-#ifdef _PATH_SUDO_NOEXEC
-    _PATH_SUDO_NOEXEC,
-#else
-    NULL,
-#endif
-#ifdef _PATH_SUDO_PLUGIN_DIR
-    _PATH_SUDO_PLUGIN_DIR,
-#else
-    NULL,
-#endif
-};
+/* Indexes into path_table[] below (order is important). */
+#define SUDO_CONF_PATH_ASKPASS		0
+#define SUDO_CONF_PATH_SESH		1
+#define SUDO_CONF_PATH_NOEXEC		2
+#define SUDO_CONF_PATH_PLUGIN_DIR	3
 
 static struct sudo_conf_data {
     bool disable_coredump;
@@ -139,10 +116,10 @@ static struct sudo_conf_data {
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.debugging),
     TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
-	{ "askpass", sizeof("askpass") - 1, &sudo_conf_paths.askpass },
-	{ "sesh", sizeof("sesh") - 1, &sudo_conf_paths.sesh },
-	{ "noexec", sizeof("noexec") - 1, &sudo_conf_paths.noexec },
-	{ "plugin_dir", sizeof("plugin_dir") - 1, &sudo_conf_paths.plugin_dir },
+	{ "askpass", sizeof("askpass") - 1, false, _PATH_SUDO_ASKPASS },
+	{ "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },
+	{ "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },
+	{ "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR },
 	{ NULL }
     }
 };
@@ -209,7 +186,10 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 		    debug_return_int(-1);
 		}
 	    }
-	    *cur->pval = pval;
+	    if (cur->dynamic)
+		free(cur->pval);
+	    cur->pval = pval;
+	    cur->dynamic = true;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%u: Path %s %s",
 		__func__, conf_file, lineno, cur->pname,
 		pval ? pval : "(none)");
@@ -220,7 +200,7 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 	__func__, conf_file, lineno, entry);
     debug_return_int(false);
 bad:
-    sudo_warnx(U_("invalid Path value `%s' in %s, line %u"),
+    sudo_warnx(U_("invalid Path value \"%s\" in %s, line %u"),
 	entry, conf_file, lineno);
     debug_return_int(false);
 }
@@ -386,7 +366,7 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
     debug_decl(set_var_disable_coredump, SUDO_DEBUG_UTIL)
 
     if (val == -1) {
-	sudo_warnx(U_("invalid value for %s `%s' in %s, line %u"),
+	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "disable_coredump", strval, conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -407,7 +387,7 @@ set_var_group_source(const char *strval, const char *conf_file,
     } else if (strcasecmp(strval, "dynamic") == 0) {
 	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
     } else {
-	sudo_warnx(U_("unsupported group source `%s' in %s, line %u"), strval,
+	sudo_warnx(U_("unsupported group source \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -423,7 +403,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
 
     max_groups = strtonum(strval, 1, INT_MAX, NULL);
     if (max_groups <= 0) {
-	sudo_warnx(U_("invalid max groups `%s' in %s, line %u"), strval,
+	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -439,7 +419,7 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
     debug_decl(set_var_probe_interfaces, SUDO_DEBUG_UTIL)
 
     if (val == -1) {
-	sudo_warnx(U_("invalid value for %s `%s' in %s, line %u"),
+	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "probe_interfaces", strval, conf_file, lineno);
 	debug_return_bool(false);
     }
@@ -450,30 +430,26 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
 const char *
 sudo_conf_askpass_path_v1(void)
 {
-    return sudo_conf_paths.askpass;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_ASKPASS].pval;
 }
 
 const char *
 sudo_conf_sesh_path_v1(void)
 {
-    return sudo_conf_paths.sesh;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_SESH].pval;
 }
 
-#ifdef _PATH_SUDO_NOEXEC
 const char *
 sudo_conf_noexec_path_v1(void)
 {
-    return sudo_conf_paths.noexec;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_NOEXEC].pval;
 }
-#endif
 
-#ifdef _PATH_SUDO_PLUGIN_DIR
 const char *
 sudo_conf_plugin_dir_path_v1(void)
 {
-    return sudo_conf_paths.plugin_dir;
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_PLUGIN_DIR].pval;
 }
-#endif
 
 int
 sudo_conf_group_source_v1(void)
@@ -649,4 +625,21 @@ done:
         setlocale(LC_ALL, prev_locale);
     free(prev_locale);
     debug_return_int(ret);
+}
+
+/*
+ * Used by the sudo_conf regress test to clear compile-time path settings.
+ */
+void
+sudo_conf_clear_paths_v1(void)
+{
+    struct sudo_conf_path_table *cur;
+    debug_decl(sudo_conf_clear_paths, SUDO_DEBUG_UTIL)
+
+    for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
+	if (cur->dynamic)
+	    free(cur->pval);
+	cur->pval = NULL;
+	cur->dynamic = false;
+    }
 }

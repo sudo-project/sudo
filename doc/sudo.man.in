@@ -1096,7 +1096,7 @@ file as user www:
 .nf
 .sp
 .RS 6n
-$ sudo -u www vi ~www/htdocs/index.html
+$ sudoedit -u www ~www/htdocs/index.html
 .RE
 .fi
 .PP
@@ -1105,7 +1105,7 @@ group:
 .nf
 .sp
 .RS 6n
-$ sudo -g adm view /var/log/syslog
+$ sudo -g adm more /var/log/syslog
 .RE
 .fi
 .PP
@@ -1113,7 +1113,7 @@ To run an editor as jim with a different primary group:
 .nf
 .sp
 .RS 6n
-$ sudo -u jim -g audio vi ~jim/sound.txt
+$ sudoedit -u jim -g audio ~jim/sound.txt
 .RE
 .fi
 .PP

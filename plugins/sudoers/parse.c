@@ -43,7 +43,7 @@
 /*
  * Local prototypes.
  */
-static int display_bound_defaults(int dtype, struct sudo_lbuf *lbuf);
+static int display_bound_defaults(int deftype, struct sudo_lbuf *lbuf);
 static int sudo_file_close(struct sudo_nss *);
 static int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct sudo_lbuf *);
 static int sudo_file_display_cmnd(struct sudo_nss *, struct passwd *);
@@ -672,7 +672,7 @@ sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
  * Display Defaults entries of the given type.
  */
 static int
-display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
+display_bound_defaults(int deftype, struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
     struct member_list *binding = NULL;
@@ -681,7 +681,7 @@ display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
     int atype, nfound = 0;
     debug_decl(display_bound_defaults, SUDOERS_DEBUG_NSS)
 
-    switch (dtype) {
+    switch (deftype) {
 	case DEFAULTS_HOST:
 	    atype = HOSTALIAS;
 	    dsep = "@";
@@ -702,7 +702,7 @@ display_bound_defaults(int dtype, struct sudo_lbuf *lbuf)
 	    debug_return_int(-1);
     }
     TAILQ_FOREACH(d, &defaults, entries) {
-	if (d->type != dtype)
+	if (d->type != deftype)
 	    continue;
 
 	nfound++;

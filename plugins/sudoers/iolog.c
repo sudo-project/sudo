@@ -71,86 +71,111 @@ static bool iolog_compress = false;
 static bool warned = false;
 static struct timeval last_time;
 static unsigned int sessid_max = SESSID_MAX;
+static uid_t iolog_uid = ROOT_UID;
+static gid_t iolog_gid = (gid_t)-1;
+static mode_t iolog_filemode = S_IRUSR|S_IWUSR;
+static mode_t iolog_dirmode = S_IRWXU;
 
 /* sudoers_io is declared at the end of this file. */
 extern __dso_public struct io_plugin sudoers_io;
 
 /*
- * Create path and any parent directories as needed.
- * If is_temp is set, use mkdtemp() for the final directory.
+ * Create directory and any parent directories as needed.
  */
 static bool
-io_mkdirs(char *path, mode_t mode, bool is_temp)
+io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate)
 {
     struct stat sb;
-    gid_t parent_gid = 0;
-    char *slash = path;
+    uid_t parent_uid;
+    gid_t parent_gid;
+    mode_t parent_mode;
     bool ok = true;
     debug_decl(io_mkdirs, SUDOERS_DEBUG_UTIL)
 
-    /* Fast path: not a temporary and already exists. */
-    if (!is_temp && stat(path, &sb) == 0) {
-	if (!S_ISDIR(sb.st_mode)) {
-	    log_warningx(SLOG_SEND_MAIL,
-		N_("%s exists but is not a directory (0%o)"),
+    if (stat(path, &sb) == 0) {
+	if (S_ISDIR(sb.st_mode)) {
+	    parent_gid = sb.st_gid;
+	} else {
+	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
 	    ok = false;
 	}
-	debug_return_bool(ok);
+	goto done;
     }
 
-    while ((slash = strchr(slash + 1, '/')) != NULL) {
-	*slash = '\0';
+    /* Parent directory ownership and mode. */
+    if (!set_intermediate) {
+	parent_mode = S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH;
+	parent_uid = ROOT_UID;
+	parent_gid = (gid_t)-1;
+    } else {
+	parent_mode = mode;
+	parent_uid = uid;
+	parent_gid = *gidp;
+    }
+
+    ok = sudo_mkdir_parents(path, parent_uid, &parent_gid, parent_mode, false);
+    if (ok) {
+	/* Use group ID if specified, else parent gid. */
+	gid_t gid = *gidp != (gid_t)-1 ? *gidp : parent_gid;
+
+	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o", path, (unsigned int) mode);
-	if (mkdir(path, mode) == 0) {
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	if (mkdir(path, mode) != 0 && errno != EEXIST) {
+	    sudo_warnx(U_("unable to mkdir %s"), path);
+	    ok = false;
 	} else {
-	    if (errno != EEXIST) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
-		ok = false;
-		break;
-	    }
-	    /* Already exists, make sure it is a directory. */
-	    if (stat(path, &sb) != 0) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
-		ok = false;
-		break;
-	    }
-	    if (!S_ISDIR(sb.st_mode)) {
-		log_warningx(SLOG_SEND_MAIL,
-		    N_("%s exists but is not a directory (0%o)"),
-		    path, (unsigned int) sb.st_mode);
-		ok = false;
-		break;
-	    }
-	    /* Inherit gid of parent dir for ownership. */
-	    parent_gid = sb.st_gid;
+	    ignore_result(chown(path, uid, gid));
 	}
-	*slash = '/';
     }
+done:
+    if (ok && *gidp == (gid_t)-1)
+	*gidp = parent_gid;
+    debug_return_bool(ok);
+}
+
+/*
+ * Create temporary directory and any parent directories as needed.
+ */
+static bool
+io_mkdtemp(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate)
+{
+    uid_t parent_uid;
+    gid_t parent_gid;
+    mode_t parent_mode;
+    bool ok = true;
+    debug_decl(io_mkdtemp, SUDOERS_DEBUG_UTIL)
+
+    /* Parent directory ownership and mode. */
+    if (!set_intermediate) {
+	parent_mode = S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH;
+	parent_uid = ROOT_UID;
+	parent_gid = (gid_t)-1;
+    } else {
+	parent_mode = mode;
+	parent_uid = uid;
+	parent_gid = *gidp;
+    }
+
+    ok = sudo_mkdir_parents(path, parent_uid, &parent_gid, parent_mode, false);
     if (ok) {
+	/* Use group ID if specified, else parent gid. */
+	gid_t gid = *gidp != (gid_t)-1 ? *gidp : parent_gid;
+
 	/* Create final path component. */
-	if (is_temp) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdtemp %s", path);
-	    if (mkdtemp(path) == NULL) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
-		ok = false;
-	    } else {
-		ignore_result(chown(path, (uid_t)-1, parent_gid));
-	    }
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "mkdtemp %s", path);
+	if (mkdtemp(path) == NULL) {
+	    sudo_warn(U_("unable to mkdir %s"), path);
+	    ok = false;
 	} else {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdir %s, mode 0%o", path, (unsigned int) mode);
-	    if (mkdir(path, mode) != 0 && errno != EEXIST) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to mkdir %s"), path);
-		ok = false;
-	    } else {
-		ignore_result(chown(path, (uid_t)-1, parent_gid));
-	    }
+	    ignore_result(chown(path, uid, gid));
 	}
     }
+
+    if (ok && *gidp == (gid_t)-1)
+	*gidp = parent_gid;
     debug_return_bool(ok);
 }
 
@@ -192,6 +217,106 @@ cb_maxseq(const union sudo_defs_val *sd_un)
 }
 
 /*
+ * Look up I/O log user ID from user name.
+ */
+static bool
+iolog_set_uid(const char *name)
+{
+    struct passwd *pw;
+    debug_decl(iolog_set_uid, SUDOERS_DEBUG_UTIL)
+
+    if (name != NULL) {
+	pw = sudo_getpwnam(name);
+	if (pw != NULL) {
+	    iolog_uid = pw->pw_uid;
+	    sudo_pw_delref(pw);
+	} else {
+	    log_warningx(SLOG_SEND_MAIL,
+		N_("unknown user: %s"), name);
+	}
+    } else {
+	iolog_uid = ROOT_UID;
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Sudoers callback for iolog_user Defaults setting.
+ */
+bool
+cb_iolog_user(const union sudo_defs_val *sd_un)
+{
+    return iolog_set_uid(sd_un->str);
+}
+
+/*
+ * Look up I/O log group ID from group name.
+ */
+static bool
+iolog_set_gid(const char *name)
+{
+    struct group *gr;
+    debug_decl(iolog_set_gid, SUDOERS_DEBUG_UTIL)
+
+    if (name != NULL) {
+	gr = sudo_getgrnam(name);
+	if (gr != NULL) {
+	    iolog_gid = gr->gr_gid;
+	    sudo_gr_delref(gr);
+	} else {
+	    log_warningx(SLOG_SEND_MAIL,
+		N_("unknown group: %s"), name);
+	}
+    } else {
+	iolog_gid = (mode_t)-1;
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Look up I/O log group ID from group name.
+ */
+bool
+cb_iolog_group(const union sudo_defs_val *sd_un)
+{
+    return iolog_set_gid(sd_un->str);
+}
+
+/*
+ * Set iolog_filemode and iolog_dirmode.
+ */
+static bool
+iolog_set_mode(mode_t mode)
+{
+    debug_decl(iolog_set_mode, SUDOERS_DEBUG_UTIL)
+
+    /* Restrict file mode to a subset of 0666. */
+    iolog_filemode = mode & (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+
+    /* For directory mode, add execute bits as needed. */
+    iolog_dirmode = iolog_filemode;
+    if (iolog_dirmode & (S_IRUSR|S_IWUSR))
+	iolog_dirmode |= S_IXUSR;
+    if (iolog_dirmode & (S_IRGRP|S_IWGRP))
+	iolog_dirmode |= S_IXGRP;
+    if (iolog_dirmode & (S_IROTH|S_IWOTH))
+	iolog_dirmode |= S_IXOTH;
+
+    debug_return_bool(true);
+}
+
+/*
+ * Sudoers callback for iolog_mode Defaults setting.
+ */
+bool
+cb_iolog_mode(const union sudo_defs_val *sd_un)
+{
+    return iolog_set_mode(sd_un->mode);
+}
+
+/*
  * Read the on-disk sequence number, set sessid to the next
  * number, and update the on-disk copy.
  * Uses file locking to avoid sequence number collisions.
@@ -203,6 +328,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     char buf[32], *ep;
     int i, len, fd = -1;
     unsigned long id = 0;
+    gid_t gid = iolog_gid;
     ssize_t nread;
     bool ret = false;
     char pathbuf[PATH_MAX];
@@ -211,8 +337,9 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
     /*
      * Create I/O log directory if it doesn't already exist.
+     * Avoid modifying iolog_gid at this point.
      */
-    if (!io_mkdirs(iolog_dir, S_IRWXU, false))
+    if (!io_mkdirs(iolog_dir, iolog_uid, &gid, iolog_dirmode, false))
 	goto done;
 
     /*
@@ -224,12 +351,13 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
 	goto done;
     }
-    fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+    fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
     if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
 	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
+    ignore_result(fchown(fd, iolog_uid, gid));
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
@@ -243,8 +371,9 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
-	    int fd2 = open(fallback, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+	    int fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
+		ignore_result(fchown(fd2, iolog_uid, gid));
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
 		    if (buf[nread - 1] == '\n')
@@ -324,7 +453,7 @@ static size_t
 mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     size_t len;
-    bool is_temp = false;
+    bool ok;
     debug_decl(mkdir_iopath, SUDOERS_DEBUG_UTIL)
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
@@ -337,13 +466,14 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
     /*
      * Create path and intermediate subdirs as needed.
      * If path ends in at least 6 Xs (ala POSIX mktemp), use mkdtemp().
+     * Sets iolog_gid (if it is not already set) as a side effect.
      */
     if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0)
-	is_temp = true;
-    if (!io_mkdirs(pathbuf, S_IRWXU, is_temp))
-	len = (size_t)-1;
+	ok = io_mkdtemp(pathbuf, iolog_uid, &iolog_gid, iolog_dirmode, true);
+    else
+	ok = io_mkdirs(pathbuf, iolog_uid, &iolog_gid, iolog_dirmode, true);
 
-    debug_return_size_t(len);
+    debug_return_size_t(ok ? len : (size_t)-1);
 }
 
 /*
@@ -360,8 +490,9 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
 	if (fd != -1) {
+	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
@@ -491,6 +622,20 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    iolog_compress = true; /* must be global */
 		continue;
 	    }
+	    if (strncmp(*cur, "iolog_mode=", sizeof("iolog_mode=") - 1) == 0) {
+		mode_t mode = sudo_strtomode(*cur + sizeof("iolog_mode=") - 1, &errstr);
+		if (errstr == NULL)
+		    iolog_set_mode(mode);
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_group=", sizeof("iolog_group=") - 1) == 0) {
+		iolog_set_gid(*cur + sizeof("iolog_group=") - 1);
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_user=", sizeof("iolog_user=") - 1) == 0) {
+		iolog_set_uid(*cur + sizeof("iolog_user=") - 1);
+		continue;
+	    }
 	    break;
 	case 'm':
 	    if (strncmp(*cur, "maxseq=", sizeof("maxseq=") - 1) == 0) {
@@ -577,11 +722,12 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
-    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);
     }
+    ignore_result(fchown(fd, iolog_uid, iolog_gid));
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,
@@ -633,12 +779,15 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 		debug_return_int(-1);
 	    continue;
 	}
-	if (strncmp(*cur, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
-	    plugin_path = *cur + sizeof("plugin_path=") - 1;
+	if (strncmp(cp, "plugin_path=", sizeof("plugin_path=") - 1) == 0) {
+	    plugin_path = cp + sizeof("plugin_path=") - 1;
 	    continue;
 	}
     }
-    sudoers_debug_register(plugin_path, &debug_files);
+    if (!sudoers_debug_register(plugin_path, &debug_files)) {
+	ret = -1;
+	goto done;
+    }
 
     /*
      * Pull iolog settings out of command_info.

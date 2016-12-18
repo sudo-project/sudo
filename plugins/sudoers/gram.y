@@ -49,13 +49,16 @@
 #include "parse.h"
 #include "toke.h"
 
+/* If we last saw a newline the entry is on the preceding line. */
+#define this_lineno	(last_token == COMMENT ? sudolineno - 1 : sudolineno)
+
 /*
  * Globals
  */
 bool sudoers_warnings = true;
 bool parse_error = false;
 int errorlineno = -1;
-const char *errorfile = NULL;
+char *errorfile = NULL;
 
 struct defaults_list defaults = TAILQ_HEAD_INITIALIZER(defaults);
 struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
@@ -65,7 +68,7 @@ struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
  */
 static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
-static struct defaults *new_default(char *, char *, int);
+static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
 static struct sudo_digest *new_digest(int, const char *);
 %}
@@ -197,34 +200,24 @@ entry		:	COMMENT {
 			    ;
 			}
 		|	DEFAULTS defaults_list {
-			    if (!add_defaults(DEFAULTS, NULL, $2)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS, NULL, $2))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_USER userlist defaults_list {
-			    if (!add_defaults(DEFAULTS_USER, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_USER, $2, $3))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_RUNAS userlist defaults_list {
-			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_RUNAS, $2, $3))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_HOST hostlist defaults_list {
-			    if (!add_defaults(DEFAULTS_HOST, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_HOST, $2, $3))
 				YYERROR;
-			    }
 			}
 		|	DEFAULTS_CMND cmndlist defaults_list {
-			    if (!add_defaults(DEFAULTS_CMND, $2, $3)) {
-				sudoerserror(N_("unable to allocate memory"));
+			    if (!add_defaults(DEFAULTS_CMND, $2, $3))
 				YYERROR;
-			    }
 			}
 		;
 
@@ -701,7 +694,8 @@ hostaliases	:	hostalias
 
 hostalias	:	ALIAS '=' hostlist {
 			    const char *s;
-			    if ((s = alias_add($1, HOSTALIAS, $3)) != NULL) {
+			    s = alias_add($1, HOSTALIAS, sudoers, this_lineno, $3);
+			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
@@ -721,7 +715,8 @@ cmndaliases	:	cmndalias
 
 cmndalias	:	ALIAS '=' cmndlist {
 			    const char *s;
-			    if ((s = alias_add($1, CMNDALIAS, $3)) != NULL) {
+			    s = alias_add($1, CMNDALIAS, sudoers, this_lineno, $3);
+			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
@@ -741,7 +736,8 @@ runasaliases	:	runasalias
 
 runasalias	:	ALIAS '=' userlist {
 			    const char *s;
-			    if ((s = alias_add($1, RUNASALIAS, $3)) != NULL) {
+			    s = alias_add($1, RUNASALIAS, sudoers, this_lineno, $3);
+			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
@@ -754,7 +750,8 @@ useraliases	:	useralias
 
 useralias	:	ALIAS '=' userlist {
 			    const char *s;
-			    if ((s = alias_add($1, USERALIAS, $3)) != NULL) {
+			    s = alias_add($1, USERALIAS, sudoers, this_lineno, $3);
+			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
 			    }
@@ -861,14 +858,11 @@ sudoerserror(const char *s)
 {
     debug_decl(sudoerserror, SUDOERS_DEBUG_PARSER)
 
-    /* If we last saw a newline the error is on the preceding line. */
-    if (last_token == COMMENT)
-	sudolineno--;
-
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
-	errorlineno = sudolineno;
-	errorfile = sudoers;
+	errorlineno = this_lineno;
+	rcstr_delref(errorfile);
+	errorfile = rcstr_addref(sudoers);
     }
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
@@ -879,7 +873,7 @@ sudoerserror(const char *s)
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), sudolineno);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), this_lineno);
 	    sudoers_setlocale(oldlocale, NULL);
 	}
 #endif
@@ -889,7 +883,7 @@ sudoerserror(const char *s)
 }
 
 static struct defaults *
-new_default(char *var, char *val, int op)
+new_default(char *var, char *val, short op)
 {
     struct defaults *d;
     debug_decl(new_default, SUDOERS_DEBUG_PARSER)
@@ -905,6 +899,8 @@ new_default(char *var, char *val, int op)
     /* d->type = 0; */
     d->op = op;
     /* d->binding = NULL */
+    d->lineno = this_lineno;
+    d->file = rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
@@ -961,8 +957,9 @@ new_digest(int digest_type, const char *digest_str)
 static bool
 add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
-    struct defaults *d;
+    struct defaults *d, *next;
     struct member_list *binding;
+    bool ret = true;
     debug_decl(add_defaults, SUDOERS_DEBUG_PARSER)
 
     if (defs != NULL) {
@@ -972,6 +969,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	if ((binding = malloc(sizeof(*binding))) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
+	    sudoerserror(N_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
 	if (bmem != NULL)
@@ -983,14 +981,14 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	 * Set type and binding (who it applies to) for new entries.
 	 * Then add to the global defaults list.
 	 */
-	HLTQ_FOREACH(d, defs, entries) {
+	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
 	    d->type = type;
 	    d->binding = binding;
+	    TAILQ_INSERT_TAIL(&defaults, d, entries);
 	}
-	TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
     }
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 /*
@@ -1008,11 +1006,33 @@ add_userspec(struct member *members, struct privilege *privs)
 	    "unable to allocate memory");
 	debug_return_bool(false);
     }
+    u->lineno = this_lineno;
+    u->file = rcstr_addref(sudoers);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
 
     debug_return_bool(true);
+}
+
+/*
+ * Free a tailq of members but not the struct member_list container itself.
+ */
+void
+free_members(struct member_list *members)
+{
+    struct member *m, *next;
+    struct sudo_command *c;
+
+    TAILQ_FOREACH_SAFE(m, members, entries, next) {
+	if (m->type == COMMAND) {
+		c = (struct sudo_command *) m->name;
+		free(c->cmnd);
+		free(c->args);
+	}
+	free(m->name);
+	free(m);
+    }
 }
 
 /*
@@ -1028,6 +1048,7 @@ init_parser(const char *path, bool quiet)
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
+    /* XXX - move into a free function */
     TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
 	struct member *m, *m_next;
 	struct privilege *priv, *priv_next;
@@ -1102,6 +1123,7 @@ init_parser(const char *path, bool quiet)
 	    }
 	    free(priv);
 	}
+	rcstr_delref(us->file);
 	free(us);
     }
     TAILQ_INIT(&userspecs);
@@ -1109,21 +1131,11 @@ init_parser(const char *path, bool quiet)
     binding = NULL;
     TAILQ_FOREACH_SAFE(d, &defaults, entries, d_next) {
 	if (d->binding != binding) {
-	    struct member *m, *m_next;
-
 	    binding = d->binding;
-	    TAILQ_FOREACH_SAFE(m, d->binding, entries, m_next) {
-		if (m->type == COMMAND) {
-			struct sudo_command *c =
-			    (struct sudo_command *) m->name;
-			free(c->cmnd);
-			free(c->args);
-		}
-		free(m->name);
-		free(m);
-	    }
+	    free_members(d->binding);
 	    free(d->binding);
 	}
+	rcstr_delref(d->file);
 	free(d->var);
 	free(d->val);
 	free(d);
@@ -1137,9 +1149,9 @@ init_parser(const char *path, bool quiet)
 	ret = false;
     }
 
-    free(sudoers);
+    rcstr_delref(sudoers);
     if (path != NULL) {
-	if ((sudoers = strdup(path)) == NULL) {
+	if ((sudoers = rcstr_dup(path)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    ret = false;
 	}
@@ -1149,7 +1161,8 @@ init_parser(const char *path, bool quiet)
 
     parse_error = false;
     errorlineno = -1;
-    errorfile = sudoers;
+    rcstr_delref(errorfile);
+    errorfile = NULL;
     sudoers_warnings = !quiet;
 
     debug_return_bool(ret);

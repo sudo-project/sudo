@@ -66,6 +66,7 @@ __dso_public bool sudo_conf_disable_coredump_v1(void);
 __dso_public bool sudo_conf_probe_interfaces_v1(void);
 __dso_public int sudo_conf_group_source_v1(void);
 __dso_public int sudo_conf_max_groups_v1(void);
+__dso_public void sudo_conf_clear_paths_v1(void);
 #define sudo_conf_askpass_path() sudo_conf_askpass_path_v1()
 #define sudo_conf_sesh_path() sudo_conf_sesh_path_v1()
 #define sudo_conf_noexec_path() sudo_conf_noexec_path_v1()
@@ -77,5 +78,6 @@ __dso_public int sudo_conf_max_groups_v1(void);
 #define sudo_conf_probe_interfaces() sudo_conf_probe_interfaces_v1()
 #define sudo_conf_group_source() sudo_conf_group_source_v1()
 #define sudo_conf_max_groups() sudo_conf_max_groups_v1()
+#define sudo_conf_clear_paths() sudo_conf_clear_paths_v1()
 
 #endif /* SUDO_CONF_H */

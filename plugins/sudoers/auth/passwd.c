@@ -66,13 +66,6 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
     if (pass[0] == '\0')
 	debug_return_int(pw_epasswd[0] ? AUTH_FAILURE : AUTH_SUCCESS);
 
-#ifdef HAVE_GETAUTHUID
-    /* Ultrix shadow passwords may use crypt16() */
-    epass = (char *) crypt16(pass, pw_epasswd);
-    if (epass != NULL && strcmp(pw_epasswd, epass) == 0)
-	debug_return_int(AUTH_SUCCESS);
-#endif /* HAVE_GETAUTHUID */
-
     /*
      * Truncate to 8 chars if standard DES since not all crypt()'s do this.
      * If this turns out not to be safe we will have to use OS #ifdef's (sigh).

@@ -194,7 +194,7 @@ main(int argc, char *argv[])
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
 	extern char *malloc_options;
-	malloc_options = "AFGJPR";
+	malloc_options = "S";
     }  
 #endif
 
@@ -222,10 +222,14 @@ main(int argc, char *argv[])
 	    /* Set the replay filter. */
 	    def_filter = false;
 	    for (cp = strtok_r(optarg, ",", &ep); cp; cp = strtok_r(NULL, ",", &ep)) {
-		if (strcmp(cp, "stdout") == 0)
+		if (strcmp(cp, "stdin") == 0)
+		    io_log_files[IOFD_STDIN].enabled = true;
+		else if (strcmp(cp, "stdout") == 0)
 		    io_log_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)
 		    io_log_files[IOFD_STDERR].enabled = true;
+		else if (strcmp(cp, "ttyin") == 0)
+		    io_log_files[IOFD_TTYIN].enabled = true;
 		else if (strcmp(cp, "ttyout") == 0)
 		    io_log_files[IOFD_TTYOUT].enabled = true;
 		else
@@ -323,7 +327,7 @@ main(int argc, char *argv[])
     /* Replay session corresponding to io_log_files[]. */
     replay_session(max_wait, decimal);
 
-    sudo_term_restore(STDIN_FILENO, 1);
+    sudo_term_restore(STDIN_FILENO, true);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
@@ -1269,7 +1273,7 @@ help(void)
 static void
 sudoreplay_cleanup(void)
 {
-    sudo_term_restore(STDIN_FILENO, 0);
+    sudo_term_restore(STDIN_FILENO, false);
 }
 
 /*
@@ -1279,6 +1283,6 @@ sudoreplay_cleanup(void)
 static void
 sudoreplay_handler(int signo)
 {
-    sudo_term_restore(STDIN_FILENO, 0);
+    sudo_term_restore(STDIN_FILENO, false);
     kill(getpid(), signo);
 }

@@ -89,11 +89,7 @@ static int sudo_mode;
 
 struct sudo_gc_entry {
     SLIST_ENTRY(sudo_gc_entry) entries;
-    enum sudo_gc_types {
-	GC_UNKNOWN,
-	GC_VECTOR,
-	GC_PTR
-    } type;
+    enum sudo_gc_types type;
     union {
 	char **vec;
 	void *ptr;
@@ -113,7 +109,6 @@ static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
-static bool gc_add(enum sudo_gc_types type, void *ptr);
 static void gc_init(void);
 
 /* Policy plugin convenience functions. */
@@ -184,6 +179,8 @@ main(int argc, char *argv[], char *envp[])
 	exit(EXIT_FAILURE);
     sudo_debug_instance = sudo_debug_register(getprogname(),
 	NULL, NULL, sudo_conf_debug_files(getprogname()));
+    if (sudo_debug_instance == SUDO_DEBUG_INSTANCE_ERROR)
+	exit(EXIT_FAILURE);
 
     /* Make sure we are setuid root. */
     sudo_check_suid(argc > 0 ? argv[0] : "sudo");
@@ -364,7 +361,8 @@ fix_fds(void)
     miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) == -1;
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
-	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
+	devnull = open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	if (devnull == -1)
 	    sudo_fatal(U_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
 	    sudo_fatal("dup2");
@@ -381,6 +379,7 @@ fix_fds(void)
 /*
  * Allocate space for groups and fill in using getgrouplist()
  * for when we cannot (or don't want to) use getgroups().
+ * Returns 0 on success and -1 on failure.
  */
 static int
 fill_group_list(struct user_details *ud, int system_maxgroups)
@@ -403,6 +402,12 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	ret = 0;
     } else {
+#ifdef HAVE_GETGROUPLIST_2
+	ud->groups = NULL;
+	ud->ngroups = getgrouplist_2(ud->username, ud->gid, &ud->groups);
+	if (ud->ngroups != -1)
+	    ret = 0;
+#else
 	/*
 	 * It is possible to belong to more groups in the group database
 	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
@@ -420,6 +425,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	    }
 	    ret = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
+#endif /* HAVE_GETGROUPLIST_2 */
     }
 done:
     debug_return_int(ret);
@@ -491,6 +497,7 @@ get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, path[PATH_MAX];
     unsigned int i = 0;
+    mode_t mask;
     struct passwd *pw;
     int fd;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
@@ -555,6 +562,11 @@ get_user_info(struct user_details *ud)
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;
+
+    mask = umask(0);
+    umask(mask);
+    if (asprintf(&user_info[++i], "umask=0%o", (unsigned int)mask) == -1)
+	goto oom;
 
     if (getcwd(path, sizeof(path)) != NULL) {
 	user_info[++i] = sudo_new_key_val("cwd", path);
@@ -1508,7 +1520,7 @@ iolog_unlink(struct plugin_container *plugin)
     debug_return;
 }
 
-static bool
+bool
 gc_add(enum sudo_gc_types type, void *v)
 {
 #ifdef NO_LEAKS

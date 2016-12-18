@@ -573,13 +573,13 @@ print_defaults_list_json(FILE *fp, struct defaults *def, int indent)
     do {
 	/* Remove leading blanks, must have a non-empty string. */
 	for (start = end; isblank((unsigned char)*start); start++)
-	    ;
+	    continue;
 	if (*start == '\0')
 	    break;
 
 	/* Find the end and print it. */
 	for (end = start; *end && !isblank((unsigned char)*end); end++)
-	    ;
+	    continue;
 	savech = *end;
 	*end = '\0';
 	print_string_json(fp, start);
@@ -629,7 +629,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
-	    sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
+	    sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
 	}
@@ -664,7 +664,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	    def = next;
 	    type = get_defaults_type(def);
 	    if (type == -1) {
-		sudo_warnx(U_("unknown defaults entry `%s'"), def->var);
+		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
 		/* XXX - just pass it through as a string anyway? */
 		break;
 	    }
@@ -1030,7 +1030,9 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	if (!quiet)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;
-	errorfile = sudoers_path;
+	rcstr_delref(errorfile);
+	if ((errorfile = rcstr_dup(sudoers_path)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     ret = !parse_error;
 

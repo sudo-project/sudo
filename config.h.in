@@ -16,6 +16,9 @@
 /* A colon-separated list of pathnames to be used as the editor for visudo. */
 #undef EDITOR
 
+/* Define to 1 to enable sudo's plugin interface. */
+#undef ENABLE_SUDO_PLUGIN_API
+
 /* Define to 1 to enable environment function debugging. */
 #undef ENV_DEBUG
 
@@ -91,6 +94,10 @@
 /* Define to 1 if you have the declaration of `getdomainname', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETDOMAINNAME
+
+/* Define to 1 if you have the declaration of `getgrouplist_2', and to 0 if
+   you don't. */
+#undef HAVE_DECL_GETGROUPLIST_2
 
 /* Define to 1 if you have the declaration of `getresuid', and to 0 if you
    don't. */
@@ -258,15 +265,14 @@
 /* Define to 1 if you have the `getaddrinfo' function. */
 #undef HAVE_GETADDRINFO
 
-/* Define to 1 if you have the `getauthuid' function. (ULTRIX 4.x shadow
-   passwords). */
-#undef HAVE_GETAUTHUID
-
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
 /* Define to 1 if you have the `getgrouplist' function. */
 #undef HAVE_GETGROUPLIST
+
+/* Define to 1 if you have the `getgrouplist_2' function. */
+#undef HAVE_GETGROUPLIST_2
 
 /* Define to 1 if your system has a working `getgroups' function. */
 #undef HAVE_GETGROUPS
@@ -290,9 +296,8 @@
    passwords). */
 #undef HAVE_GETPRPWNAM
 
-/* Define to 1 if you have the `getpwanam' function. (SunOS 4.x shadow
-   passwords). */
-#undef HAVE_GETPWANAM
+/* Define to 1 if you have the `getpwnam_shadow' function. */
+#undef HAVE_GETPWNAM_SHADOW
 
 /* Define to 1 if you have the `getresuid' function. */
 #undef HAVE_GETRESUID
@@ -300,10 +305,6 @@
 /* Define to 1 if you have the `getspnam' function (SVR4-style shadow
    passwords). */
 #undef HAVE_GETSPNAM
-
-/* Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow
-   passwords). */
-#undef HAVE_GETSPWUID
 
 /* Define to 1 if you have the `getttyent' function. */
 #undef HAVE_GETTTYENT
@@ -353,10 +354,6 @@
 /* Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for
    shadow enabled). */
 #undef HAVE_ISCOMSEC
-
-/* Define to 1 if you have the `issecure' function. (SunOS 4.x check for
-   shadow enabled). */
-#undef HAVE_ISSECURE
 
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5
@@ -842,6 +839,9 @@
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
+/* Define to 1 if you have the `vsyslog' function. */
+#undef HAVE_VSYSLOG
+
 /* Define to 1 if you have the `wordexp' function. */
 #undef HAVE_WORDEXP
 
@@ -1040,6 +1040,12 @@
 
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
+
+/* The size of `id_t', as computed by sizeof. */
+#undef SIZEOF_ID_T
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
 
 /* Define to 1 to compile the sudoers plugin statically into the sudo binary.
    */

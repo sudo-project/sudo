@@ -135,34 +135,47 @@ FFIILLEESS
      _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p          Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
+     In addition to reporting _s_u_d_o_e_r_s parse errors, vviissuuddoo may produce the
+     following messages:
+
      sudoers file busy, try again later.
            Someone else is currently editing the _s_u_d_o_e_r_s file.
 
      /etc/sudoers.tmp: Permission denied
            You didn't run vviissuuddoo as root.
 
-     Can't find you in the passwd database
-           Your user ID does not appear in the system passwd file.
+     you do not exist in the passwd database
+           Your user ID does not appear in the system passwd database.
 
-     Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
+     {User,Runas,Host,Cmnd}_Alias referenced but not defined
            Either you are trying to use an undeclared
            {User,Runas,Host,Cmnd}_Alias or you have a user or host name listed
            that consists solely of uppercase letters, digits, and the
            underscore (`_') character.  In the latter case, you can ignore the
-           warnings (ssuuddoo will not complain).  In --ss (strict) mode these are
-           errors, not warnings.
+           warnings (ssuuddoo will not complain).  The message is prefixed with
+           the path name of the _s_u_d_o_e_r_s file and the line number where the
+           undefined alias was used.  In --ss (strict) mode these are errors,
+           not warnings.
 
-     Warning: unused {User,Runas,Host,Cmnd}_Alias
+     unused {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias was defined but never
-           used.  You may wish to comment out or remove the unused alias.
+           used.  The message is prefixed with the path name of the _s_u_d_o_e_r_s
+           file and the line number where the unused alias was defined.  You
+           may wish to comment out or remove the unused alias.
 
-     Warning: cycle in {User,Runas,Host,Cmnd}_Alias
+     cycle in {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
-           itself, either directly or through an alias it includes.  This is
-           only a warning by default as ssuuddoo will ignore cycles when parsing
-           the _s_u_d_o_e_r_s file.
+           itself, either directly or through an alias it includes.  The
+           message is prefixed with the path name of the _s_u_d_o_e_r_s file and the
+           line number where the cycle was detected.  This is only a warning
+           unless vviissuuddoo is run in --ss (strict) mode as ssuuddoo will ignore cycles
+           when parsing the _s_u_d_o_e_r_s file.
 
-     visudo: /etc/sudoers: input and output files must be different
+     unknown defaults entry "name"
+           The _s_u_d_o_e_r_s file contains a Defaults variable not recognized by
+           vviissuuddoo.
+
+     /etc/sudoers: input and output files must be different
            The --xx flag was used and the specified _o_u_t_p_u_t___f_i_l_e has the same
            path name as the _s_u_d_o_e_r_s file to export.
 
@@ -199,4 +212,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.18                    November 20, 2015                   Sudo 1.8.18
+Sudo 1.8.19                    November 12, 2016                   Sudo 1.8.19

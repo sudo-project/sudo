@@ -47,7 +47,8 @@ static struct interface_list interfaces;
 
 /*
  * Parse a space-delimited list of IP address/netmask pairs and
- * store in a list of interface structures.
+ * store in a list of interface structures.  Returns true on
+ * success and false on parse error or memory allocation error.
  */
 bool
 set_interfaces(const char *ai)
@@ -67,28 +68,39 @@ set_interfaces(const char *ai)
 
 	/* Parse addr and store in list. */
 	if ((ifp = calloc(1, sizeof(*ifp))) == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"unable to allocate memory");
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
 #ifdef HAVE_STRUCT_IN6_ADDR
 	    ifp->family = AF_INET6;
-	    if (inet_pton(AF_INET6, addr, &ifp->addr.ip6) != 1 ||
-		inet_pton(AF_INET6, mask, &ifp->netmask.ip6) != 1)
-#endif
-	    {
+	    if (inet_pton(AF_INET6, addr, &ifp->addr.ip6) != 1) {
+		sudo_warnx(U_("unable to parse IP address \"%s\""), addr);
 		free(ifp);
-		continue;
+		goto done;
 	    }
+	    if (inet_pton(AF_INET6, mask, &ifp->netmask.ip6) != 1) {
+		sudo_warnx(U_("unable to parse netmask \"%s\""), mask);
+		free(ifp);
+		goto done;
+	    }
+#else
+	    free(ifp);
+	    continue;
+#endif
 	} else {
 	    /* IPv4 */
 	    ifp->family = AF_INET;
-	    if (inet_pton(AF_INET, addr, &ifp->addr.ip4) != 1 ||
-		inet_pton(AF_INET, mask, &ifp->netmask.ip4) != 1) {
+	    if (inet_pton(AF_INET, addr, &ifp->addr.ip4) != 1) {
+		sudo_warnx(U_("unable to parse IP address \"%s\""), addr);
 		free(ifp);
-		continue;
+		goto done;
+	    }
+	    if (inet_pton(AF_INET, mask, &ifp->netmask.ip4) != 1) {
+		sudo_warnx(U_("unable to parse netmask \"%s\""), mask);
+		free(ifp);
+		goto done;
 	    }
 	}
 	SLIST_INSERT_HEAD(&interfaces, ifp, entries);

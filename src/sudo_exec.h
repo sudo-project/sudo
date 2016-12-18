@@ -73,11 +73,14 @@
  */
 
 /* exec.c */
-struct sudo_event_base;
-int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec);
 extern volatile pid_t cmnd_pid;
 
+/* exec_common.c */
+int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec);
+char **disable_execute(char *envp[], const char *dso);
+
 /* exec_pty.c */
+struct sudo_event_base;
 struct command_details;
 struct command_status;
 int fork_pty(struct command_details *details, int sv[], sigset_t *omask);

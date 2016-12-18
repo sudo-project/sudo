@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "January 20, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "November 17, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -546,6 +546,10 @@ uid=uid_t
 The real user ID of the user invoking
 \fBsudo\fR.
 .TP 6n
+umask=octal
+The invoking user's file creation mask.
+Only available starting with API version 1.10.
+.TP 6n
 user=string
 The name of the user invoking
 \fBsudo\fR.
@@ -895,6 +899,18 @@ must refer to an open file descriptor.
 iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_group=string
+The group that will own newly created I/O log files and directories.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_mode=octal
+The file permision mode to use when creating I/O log files and directories.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_user=string
+The user that will own newly created I/O log files and directories.
 This is a hint to the I/O logging plugin which may choose to ignore it.
 .TP 6n
 iolog_path=string
@@ -2748,6 +2764,21 @@ Version 1.9 (sudo 1.8.16)
 The
 \fIexecfd\fR
 entry was added to the
+\fRcommand_info\fR
+list.
+.TP 6n
+Version 1.10 (sudo 1.8.19)
+The
+\fIumask\fR
+entry was added to the
+\fRuser_info\fR
+list.
+The
+\fIiolog_group\fR,
+\fIiolog_mode\fR,
+and
+\fIiolog_user\fR
+entries were added to the
 \fRcommand_info\fR
 list.
 .SH "SEE ALSO"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2015
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2016
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -159,6 +159,8 @@ struct userspec {
     TAILQ_ENTRY(userspec) entries;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
+    int lineno;
+    char *file;
 };
 
 /*
@@ -209,20 +211,25 @@ struct runascontainer {
 struct alias {
     char *name;				/* alias name */
     unsigned short type;		/* {USER,HOST,RUNAS,CMND}ALIAS */
-    bool used;				/* "used" flag for cycle detection */
+    short used;				/* "used" flag for cycle detection */
+    int lineno;				/* line number of alias entry */
+    char *file;				/* file the alias entry was in */
     struct member_list members;		/* list of alias members */
 };
 
 /*
- * Structure describing a Defaults entry and a list thereof.
+ * Structure describing a Defaults entry in sudoers.
  */
 struct defaults {
     TAILQ_ENTRY(defaults) entries;
     char *var;				/* variable name */
     char *val;				/* variable value */
     struct member_list *binding;	/* user/host/runas binding */
-    int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
-    int op;				/* true, false, '+', '-' */
+    char *file;				/* file Defaults entry was in */
+    short type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
+    char op;				/* true, false, '+', '-' */
+    char error;				/* parse error flag */
+    int lineno;				/* line number of Defaults entry */
 };
 
 /*
@@ -233,7 +240,7 @@ extern struct defaults_list defaults;
 
 /* alias.c */
 bool no_aliases(void);
-const char *alias_add(char *name, int type, struct member *members);
+const char *alias_add(char *name, int type, char *file, int lineno, struct member *members);
 int alias_compare(const void *a1, const void *a2);
 struct alias *alias_get(char *name, int type);
 struct alias *alias_remove(char *name, int type);
@@ -243,7 +250,8 @@ void alias_put(struct alias *a);
 bool init_aliases(void);
 
 /* gram.c */
-bool init_parser(const char *, bool);
+bool init_parser(const char *path, bool quiet);
+void free_members(struct member_list *members);
 
 /* match_addr.c */
 bool addr_matches(char *n);

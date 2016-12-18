@@ -152,53 +152,24 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 static bool
 ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 {
-    struct stat sb;
-    gid_t parent_gid = 0;
-    char *slash = path;
-    bool ret = false;
+    gid_t parent_gid = (gid_t)-1;
+    bool ret;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
 
-    while ((slash = strchr(slash + 1, '/')) != NULL) {
-	*slash = '\0';
+    ret = sudo_mkdir_parents(path, owner, &parent_gid, parent_mode, quiet); 
+    if (ret) {
+	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %s, mode 0%o", path, (unsigned int) parent_mode);
-	if (mkdir(path, parent_mode) == 0) {
-	    ignore_result(chown(path, (uid_t)-1, parent_gid));
+	    "mkdir %s, mode 0%o, uid %d, gid %d", path, mode,
+	    (int)owner, (int)parent_gid);
+	if (mkdir(path, mode) != 0 && errno != EEXIST) {
+	    if (!quiet)
+		sudo_warn(U_("unable to mkdir %s"), path);
+	    ret = false;
 	} else {
-	    if (errno != EEXIST) {
-		if (!quiet)
-		    sudo_warn(U_("unable to mkdir %s"), path);
-		goto done;
-	    }
-	    /* Already exists, make sure it is a directory. */
-	    if (stat(path, &sb) != 0) {
-		if (!quiet)
-		    sudo_warn(U_("unable to stat %s"), path);
-		goto done;
-	    }
-	    if (!S_ISDIR(sb.st_mode)) {
-		if (!quiet) {
-		    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
-			path, (unsigned int) sb.st_mode);
-		}
-		goto done;
-	    }
-	    /* Inherit gid of parent dir for ownership. */
-	    parent_gid = sb.st_gid;
+	    ignore_result(chown(path, owner, parent_gid));
 	}
-	*slash = '/';
     }
-    /* Create final path component. */
-    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"mkdir %s, mode 0%o", path, (unsigned int) mode);
-    if (mkdir(path, mode) != 0 && errno != EEXIST) {
-	if (!quiet)
-	    sudo_warn(U_("unable to mkdir %s"), path);
-	goto done;
-    }
-    ignore_result(chown(path, owner, parent_gid));
-    ret = true;
-done:
     debug_return_bool(ret);
 }
 
@@ -221,7 +192,8 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 	ret = true;
 	break;
     case SUDO_PATH_MISSING:
-	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711, quiet)) {
+	if (make_it && ts_mkdirs(path, timestamp_uid, S_IRWXU,
+	    S_IRWXU|S_IXGRP|S_IXOTH, quiet)) {
 	    ret = true;
 	    break;
 	}
@@ -264,7 +236,7 @@ ts_open(const char *path, int flags)
 
     if (timestamp_uid != 0)
 	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(path, flags, 0600);
+    fd = open(path, flags, S_IRUSR|S_IWUSR);
     if (uid_changed && !restore_perms()) {
 	/* Unable to restore permissions, should not happen. */
 	if (fd != -1) {
@@ -388,7 +360,7 @@ timestamp_open(const char *user, pid_t sid)
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use the time stamp file. */
-    if (def_timestamp_timeout == 0) {
+    if (def_timestamp_timeout == 0.0) {
 	errno = ENOENT;
 	goto bad;
     }
@@ -417,15 +389,23 @@ timestamp_open(const char *user, pid_t sid)
 
 	/* Remove time stamp file if its mtime predates boot time. */
 	if (tries == 1 && fstat(fd, &sb) == 0) {
-	    struct timespec boottime, mtime;
+	    struct timespec boottime, mtime, now;
 
-	    mtim_get(&sb, mtime);
-	    if (get_boottime(&boottime)) {
-		if (sudo_timespeccmp(&mtime, &boottime, <)) {
-		    /* Time stamp file too old, remove it. */
-		    close(fd);
-		    unlink(fname);
-		    continue;
+	    if (sudo_gettime_real(&now) == 0 && get_boottime(&boottime)) {
+		/* Ignore a boot time that is in the future. */
+		if (sudo_timespeccmp(&now, &boottime, <)) {
+		    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			"ignoring boot time that is in the future");
+		} else {
+		    mtim_get(&sb, mtime);
+		    if (sudo_timespeccmp(&mtime, &boottime, <)) {
+			/* Time stamp file too old, remove it. */
+			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			    "removing time stamp file that predates boot time");
+			close(fd);
+			unlink(fname);
+			continue;
+		    }
 		}
 	    }
 	}
@@ -705,7 +685,7 @@ timestamp_status(void *vcookie, struct passwd *pw)
     debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
-    if (def_timestamp_timeout == 0) {
+    if (def_timestamp_timeout == 0.0) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "timestamps disabled");
 	status = TS_OLD;
@@ -808,7 +788,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
     debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
-    if (def_timestamp_timeout == 0) {
+    if (def_timestamp_timeout == 0.0) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "timestamps disabled");
 	goto done;

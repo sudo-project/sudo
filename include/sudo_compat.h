@@ -173,6 +173,19 @@
 #ifndef S_ISLNK
 # define S_ISLNK(m)		(((m) & _S_IFMT) == _S_IFLNK)
 #endif /* S_ISLNK */
+#ifndef S_ISTXT
+# define S_ISTXT		0001000
+#endif /* S_ISTXT */
+
+/*
+ * ACCESSPERMS (00777) and ALLPERMS (07777) are handy BSDisms
+ */
+#ifndef ACCESSPERMS
+# define ACCESSPERMS	(S_IRWXU|S_IRWXG|S_IRWXO)
+#endif /* ACCESSPERMS */
+#ifndef ALLPERMS
+# define ALLPERMS	(S_ISUID|S_ISGID|S_ISTXT|S_IRWXU|S_IRWXG|S_IRWXO)
+#endif /* ALLPERMS */
 
 /* For futimens() and utimensat() emulation. */
 #if !defined(HAVE_FUTIMENS) && !defined(HAVE_UTIMENSAT)
@@ -379,6 +392,9 @@ __dso_public int sudo_getgrouplist(const char *name, gid_t basegid, gid_t *group
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
+#if defined(HAVE_GETGROUPLIST_2) && !HAVE_DECL_GETGROUPLIST_2
+int getgrouplist_2(const char *name, gid_t basegid, gid_t **groups);
+#endif /* HAVE_GETGROUPLIST_2 && !HAVE_DECL_GETGROUPLIST_2 */
 #ifndef HAVE_GETLINE
 __dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
 # undef getline
@@ -487,5 +503,10 @@ __dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # undef reallocarray
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
+#ifndef HAVE_VSYSLOG
+__dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
+# undef vsyslog
+# define vsyslog(_a, _b, _c) sudo_vsyslog((_a), (_b), (_c))
+#endif /* HAVE_VSYSLOG */
 
 #endif /* SUDO_COMPAT_H */

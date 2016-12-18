@@ -48,6 +48,54 @@
  * On success, returns the parsed ID and clears errstr.
  * On error, returns 0 and sets errstr.
  */
+#if SIZEOF_ID_T == SIZEOF_LONG_LONG
+id_t
+sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr)
+{
+    char *ep;
+    id_t ret = 0;
+    long long llval;
+    bool valid = false;
+    debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL)
+
+    /* skip leading space so we can pick up the sign, if any */
+    while (isspace((unsigned char)*p))
+	p++;
+    if (sep == NULL)
+	sep = "";
+    errno = 0;
+    llval = strtoll(p, &ep, 10);
+    if (ep != p) {
+	/* check for valid separator (including '\0') */
+	do {
+	    if (*ep == *sep)
+		valid = true;
+	} while (*sep++ != '\0');
+    }
+    if (!valid) {
+	if (errstr != NULL)
+	    *errstr = N_("invalid value");
+	errno = EINVAL;
+	goto done;
+    }
+    if (errno == ERANGE) {
+	if (errstr != NULL) {
+	    if (llval == LLONG_MAX)) {
+		*errstr = N_("value too large");
+	    else
+		*errstr = N_("value too small");
+	}
+	goto done;
+    }
+    ret = (id_t)llval;
+    if (errstr != NULL)
+	*errstr = NULL;
+    if (endp != NULL)
+	*endp = ep;
+done:
+    debug_return_id_t(ret);
+}
+#else
 id_t
 sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr)
 {
@@ -118,5 +166,6 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
     if (endp != NULL)
 	*endp = ep;
 done:
-    debug_return_int(ret);
+    debug_return_id_t(ret);
 }
+#endif /* SIZEOF_ID_T == 8 */

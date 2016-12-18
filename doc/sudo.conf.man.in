@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO.CONF" "5" "June 15, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "5" "October 15, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -239,8 +239,8 @@ may be overridden by the
 environment variable.
 .TP 10n
 noexec
-The fully-qualified path to a shared library containing dummy
-versions of the
+The fully-qualified path to a shared library containing wrappers
+for the
 \fBexecl\fR(),
 \fBexecle\fR(),
 \fBexeclp\fR(),
@@ -254,9 +254,10 @@ versions of the
 \fBpopen\fR(),
 \fBposix_spawn\fR(),
 \fBposix_spawnp\fR(),
+\fBsystem\fR(),
 and
-\fBsystem\fR()
-library functions that just return an error.
+\fBwordexp\fR()
+library functions that prevent the execution of further commands.
 This is used to implement the
 \fInoexec\fR
 functionality on systems that support

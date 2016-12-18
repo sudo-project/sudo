@@ -27,11 +27,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Syslog facility if syslog is being used for logging: %s"),
 	NULL,
     }, {
-	"syslog_goodpri", T_LOGPRI,
+	"syslog_goodpri", T_LOGPRI|T_BOOL,
 	N_("Syslog priority to use when user authenticates successfully: %s"),
 	NULL,
     }, {
-	"syslog_badpri", T_LOGPRI,
+	"syslog_badpri", T_LOGPRI|T_BOOL,
 	N_("Syslog priority to use when user authenticates unsuccessfully: %s"),
 	NULL,
     }, {
@@ -417,6 +417,22 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"match_group_by_gid", T_FLAG,
 	N_("Resolve groups in sudoers and match on the group ID, not the name"),
+	NULL,
+    }, {
+	"syslog_maxlen", T_UINT,
+	N_("Log entries larger than this value will be split into multiple syslog messages"),
+	NULL,
+    }, {
+	"iolog_user", T_STR|T_BOOL,
+	N_("User that will own the I/O log files: %s"),
+	NULL,
+    }, {
+	"iolog_group", T_STR|T_BOOL,
+	N_("Group that will own the I/O log files: %s"),
+	NULL,
+    }, {
+	"iolog_mode", T_MODE,
+	N_("File mode to use for the I/O log files: 0%o"),
 	NULL,
     }, {
 	NULL, 0, NULL

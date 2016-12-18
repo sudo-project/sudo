@@ -30,7 +30,7 @@ sudo_strnlen(const char *str, size_t maxlen)
 	const char *cp;
 
 	for (cp = str; maxlen != 0 && *cp != '\0'; cp++, maxlen--)
-		;
+		continue;
 
 	return (size_t)(cp - str);
 }

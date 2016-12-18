@@ -34,7 +34,7 @@ os_init(int argc, char *argv[], char *envp[])
 {
 #ifdef SUDO_DEVEL
     extern char *malloc_options;
-    malloc_options = "AFGJPR";
+    malloc_options = "S";
 #endif
     return os_init_common(argc, argv, envp);
 }

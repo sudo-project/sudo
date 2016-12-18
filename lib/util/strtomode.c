@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +50,7 @@ sudo_strtomode_v1(const char *cp, const char **errstr)
 	errno = EINVAL;
 	debug_return_int(0);
     }
-    if (lval < 0 || lval > 0777) {
+    if (lval < 0 || lval > ACCESSPERMS) {
 	if (errstr != NULL)
 	    *errstr = lval < 0 ? N_("value too small") : N_("value too large");
 	errno = ERANGE;

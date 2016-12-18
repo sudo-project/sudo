@@ -256,7 +256,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    remhost = *cur + sizeof("remote_host=") - 1;
 	    continue;
 	}
-#ifdef _PATH_SUDO_PLUGIN_DIR
+#ifdef ENABLE_SUDO_PLUGIN_API
 	if (MATCHES(*cur, "plugin_dir=")) {
 	    path_plugin_dir = *cur + sizeof("plugin_dir=") - 1;
 	    continue;
@@ -264,6 +264,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 #endif
     }
 
+    user_umask = (mode_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
 	    if ((user_name = strdup(*cur + sizeof("user=") - 1)) == NULL)
@@ -346,6 +347,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    continue;
 	}
+	if (MATCHES(*cur, "umask=")) {
+	    p = *cur + sizeof("umask=") - 1;
+	    sudo_user.umask = sudo_strtomode(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
     }
     if ((user_runhost = strdup(remhost ? remhost : user_host)) == NULL)
 	goto oom;
@@ -373,9 +383,11 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    goto bad;
     }
 
-    /* Stash initial umask for later use. */
-    user_umask = umask(SUDO_UMASK);
-    umask(user_umask);
+    /* umask is only set in user_info[] for API 1.10 and above. */
+    if (user_umask == (mode_t)-1) {
+	user_umask = umask(0);
+	umask(user_umask);
+    }
 
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;
@@ -411,7 +423,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     debug_decl(sudoers_policy_exec_setup, SUDOERS_DEBUG_PLUGIN)
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(32, sizeof(char *));
+    command_info = calloc(48, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -556,7 +568,19 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if ((command_info[info_len++] = sudo_new_key_val("utmp_user", runas_pw->pw_name)) == NULL)
 	    goto oom;
     }
-    if (cmnd_umask != 0777) {
+    if (def_iolog_mode != (S_IRUSR|S_IWUSR)) {
+	if (asprintf(&command_info[info_len++], "iolog_mode=0%o", (unsigned int)def_iolog_mode) == -1)
+	    goto oom;
+    }
+    if (def_iolog_user != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("iolog_user", def_iolog_user)) == NULL)
+	    goto oom;
+    }
+    if (def_iolog_group != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("iolog_group", def_iolog_group)) == NULL)
+	    goto oom;
+    }
+    if (cmnd_umask != ACCESSPERMS) {
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
 	    goto oom;
     }
@@ -645,7 +669,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	    continue;
 	}
     }
-    sudoers_debug_register(plugin_path, &debug_files);
+    if (!sudoers_debug_register(plugin_path, &debug_files))
+	debug_return_int(-1);
 
     /* Call the sudoers init function. */
     info.settings = settings;

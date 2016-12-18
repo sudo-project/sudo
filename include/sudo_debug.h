@@ -84,6 +84,9 @@ struct sudo_conf_debug_file_list;
 #define SUDO_DEBUG_UTMP		(14<<6)    /* utmp file ops */
 #define SUDO_DEBUG_ALL		0xffff0000 /* all subsystems */
 
+/* Error return for sudo_debug_register().  */
+#define SUDO_DEBUG_INSTANCE_ERROR	-2
+
 /* Initializer for instance index to indicate that debugging is not setup. */
 #define SUDO_DEBUG_INSTANCE_INITIALIZER	-1
 
@@ -125,6 +128,14 @@ struct sudo_conf_debug_file_list;
     do {								       \
 	int sudo_debug_ret = (ret);					       \
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
+    } while (0)
+
+#define debug_return_id_t(ret)					       \
+    do {								       \
+	id_t sudo_debug_ret = (ret);				       \
+	sudo_debug_exit_id_t(__func__, __FILE__, __LINE__, sudo_debug_subsys,\
 	    sudo_debug_ret);						       \
 	return sudo_debug_ret;						       \
     } while (0)
@@ -231,6 +242,7 @@ __dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, in
 __dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int line, int subsys, int ret);
 __dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, int subsys, long ret);
 __dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, int subsys, const void *ret);
+__dso_public void sudo_debug_exit_id_t_v1(const char *func, const char *file, int line, int subsys, id_t ret);
 __dso_public void sudo_debug_exit_size_t_v1(const char *func, const char *file, int line, int subsys, size_t ret);
 __dso_public void sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line, int subsys, ssize_t ret);
 __dso_public void sudo_debug_exit_str_v1(const char *func, const char *file, int line, int subsys, const char *ret);
@@ -255,6 +267,7 @@ __dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *fil
 #define sudo_debug_exit_int(_a, _b, _c, _d, _e) sudo_debug_exit_int_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_long(_a, _b, _c, _d, _e) sudo_debug_exit_long_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_ptr(_a, _b, _c, _d, _e) sudo_debug_exit_ptr_v1((_a), (_b), (_c), (_d), (_e))
+#define sudo_debug_exit_id_t(_a, _b, _c, _d, _e) sudo_debug_exit_id_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_size_t(_a, _b, _c, _d, _e) sudo_debug_exit_size_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_ssize_t(_a, _b, _c, _d, _e) sudo_debug_exit_ssize_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_str(_a, _b, _c, _d, _e) sudo_debug_exit_str_v1((_a), (_b), (_c), (_d), (_e))

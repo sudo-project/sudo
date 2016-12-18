@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "8" "November 20, 2015" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "8" "November 12, 2016" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -324,6 +324,11 @@ List of who can run what
 \fI@sysconfdir@/sudoers.tmp\fR
 Lock file for visudo
 .SH "DIAGNOSTICS"
+In addition to reporting
+\fIsudoers\fR
+parse errors,
+\fBvisudo\fR
+may produce the following messages:
 .TP 6n
 \fRsudoers file busy, try again later.\fR
 Someone else is currently editing the
@@ -335,10 +340,10 @@ You didn't run
 \fBvisudo\fR
 as root.
 .TP 6n
-\fRCan't find you in the passwd database\fR
-Your user ID does not appear in the system passwd file.
+\fRyou do not exist in the passwd database\fR
+Your user ID does not appear in the system passwd database.
 .TP 6n
-\fRWarning: {User,Runas,Host,Cmnd}_Alias referenced but not defined\fR
+\fR{User,Runas,Host,Cmnd}_Alias referenced but not defined\fR
 Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias
 or you have a user or host name listed that consists solely of
 uppercase letters, digits, and the underscore
@@ -348,26 +353,47 @@ In the latter case, you can ignore the warnings
 (\fBsudo\fR
 will not complain)
 \&.
+The message is prefixed with the path name of the
+\fIsudoers\fR
+file and the line number where the undefined alias was used.
 In
 \fB\-s\fR
 (strict) mode these are errors, not warnings.
 .TP 6n
-\fRWarning: unused {User,Runas,Host,Cmnd}_Alias\fR
+\fRunused {User,Runas,Host,Cmnd}_Alias\fR
 The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
+The message is prefixed with the path name of the
+\fIsudoers\fR
+file and the line number where the unused alias was defined.
 You may wish to comment out or remove the unused alias.
 .TP 6n
-\fRWarning: cycle in {User,Runas,Host,Cmnd}_Alias\fR
+\fRcycle in {User,Runas,Host,Cmnd}_Alias\fR
 The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
 itself, either directly or through an alias it includes.
-This is only a warning by default as
+The message is prefixed with the path name of the
+\fIsudoers\fR
+file and the line number where the cycle was detected.
+This is only a warning unless
+\fBvisudo\fR
+is run in
+\fB\-s\fR
+(strict) mode as
 \fBsudo\fR
 will ignore cycles when parsing
 the
 \fIsudoers\fR
 file.
 .TP 6n
-\fRvisudo: @sysconfdir@/sudoers: input and output files must be different\fR
+\fRunknown defaults entry \&"name\&"\fR
+The
+\fIsudoers\fR
+file contains a
+\fRDefaults\fR
+variable not recognized by
+\fBvisudo\fR.
+.TP 6n
+\fR@sysconfdir@/sudoers: input and output files must be different\fR
 The
 \fB\-x\fR
 flag was used and the specified

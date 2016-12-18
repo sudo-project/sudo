@@ -66,20 +66,16 @@ static char *new_logline(const char *, int);
  * We do an openlog(3)/closelog(3) for each message because some
  * authentication methods (notably PAM) use syslog(3) for their
  * own nefarious purposes and may call openlog(3) and closelog(3).
- * Note that because we don't want to assume that all systems have
- * vsyslog(3) (HP-UX doesn't) "%m" will not be expanded.
  */
 static void
 mysyslog(int pri, const char *fmt, ...)
 {
-    char buf[MAXSYSLOGLEN+1];
     va_list ap;
     debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
 
     va_start(ap, fmt);
     openlog("sudo", 0, def_syslog);
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-    syslog(pri, "%s", buf);
+    vsyslog(pri, fmt, ap);
     va_end(ap);
     closelog();
     debug_return;
@@ -87,7 +83,7 @@ mysyslog(int pri, const char *fmt, ...)
 
 /*
  * Log a message to syslog, pre-pending the username and splitting the
- * message into parts if it is longer than MAXSYSLOGLEN.
+ * message into parts if it is longer than syslog_maxlen.
  */
 static void
 do_syslog(int pri, char *msg)
@@ -98,13 +94,17 @@ do_syslog(int pri, char *msg)
     int oldlocale;
     debug_decl(do_syslog, SUDOERS_DEBUG_LOGGING)
 
+    /* A priority of -1 corresponds to "none". */
+    if (pri == -1)
+	debug_return;
+
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
     fmt = _("%8s : %s");
-    maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
+    maxlen = def_syslog_maxlen - (strlen(fmt) - 5 + strlen(user_name));
     for (p = msg; *p != '\0'; ) {
 	len = strlen(p);
 	if (len > maxlen) {
@@ -126,13 +126,13 @@ do_syslog(int pri, char *msg)
 
 	    /* Advance p and eliminate leading whitespace */
 	    for (p = tmp; *p == ' '; p++)
-		;
+		continue;
 	} else {
 	    mysyslog(pri, fmt, user_name, p);
 	    p += len;
 	}
 	fmt = _("%8s : (command continued) %s");
-	maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
+	maxlen = def_syslog_maxlen - (strlen(fmt) - 5 + strlen(user_name));
     }
 
     sudoers_setlocale(oldlocale, NULL);
@@ -154,7 +154,7 @@ do_logfile(const char *msg)
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    oldmask = umask(077);
+    oldmask = umask(S_IRWXG|S_IRWXO);
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
@@ -327,7 +327,7 @@ log_failure(int status, int flags)
 	if (flags == NOT_FOUND)
 	    sudo_warnx(U_("%s: command not found"), user_cmnd);
 	else if (flags == NOT_FOUND_DOT)
-	    sudo_warnx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	    sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), user_cmnd, user_cmnd, user_cmnd);
     }
 
     debug_return_bool(ret);
@@ -631,7 +631,8 @@ send_mail(const char *fmt, ...)
       sudo_warn("setsid");
     if (chdir("/") == -1)
       sudo_warn("chdir(/)");
-    if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
+    fd = open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if (fd != -1) {
 	(void) dup2(fd, STDIN_FILENO);
 	(void) dup2(fd, STDOUT_FILENO);
 	(void) dup2(fd, STDERR_FILENO);

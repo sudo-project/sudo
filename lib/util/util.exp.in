@@ -1,5 +1,6 @@
 @COMPAT_EXP@initprogname
 sudo_conf_askpass_path_v1
+sudo_conf_clear_paths_v1
 sudo_conf_debug_files_v1
 sudo_conf_debugging_v1
 sudo_conf_disable_coredump_v1
@@ -16,6 +17,7 @@ sudo_debug_enter_v1
 sudo_debug_execve2_v1
 sudo_debug_exit_v1
 sudo_debug_exit_bool_v1
+sudo_debug_exit_id_t_v1
 sudo_debug_exit_int_v1
 sudo_debug_exit_long_v1
 sudo_debug_exit_ptr_v1

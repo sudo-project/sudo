@@ -70,8 +70,8 @@ struct sudo_defs_types {
  * Defaults values to apply before others.
  */
 struct early_default {
-    const char *var;
-    const struct sudo_defs_types *def;
+    short idx;
+    short run_callback;
 };
 
 /*
@@ -107,7 +107,7 @@ struct early_default {
 #define T_PATH		0x200
 
 /*
- * Argument to update_defaults() and check_defaults()
+ * Argument to update_defaults()
  */
 #define SETDEF_GENERIC	0x01
 #define	SETDEF_HOST	0x02
@@ -120,13 +120,13 @@ struct early_default {
  * Prototypes
  */
 void dump_default(void);
-bool check_defaults(int what, bool quiet);
 bool init_defaults(void);
-struct early_default *is_early_default(const char *var);
+struct early_default *is_early_default(const char *name);
 bool run_early_defaults(void);
-bool set_early_default(const char *var, const char *val, int op, bool quiet, struct early_default *early);
-bool set_default(const char *var, const char *val, int op, bool quiet);
+bool set_early_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet, struct early_default *early);
+bool set_default(const char *var, const char *val, int op, const char *file, int lineno, bool quiet);
 bool update_defaults(int what, bool quiet);
+bool check_defaults(bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

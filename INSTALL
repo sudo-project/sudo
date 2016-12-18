@@ -893,11 +893,3 @@ Solaris:
     on Solaris 11 and higher and is distributed on the Solaris
     Companion CD for older Solaris releases.  You can also download
     gcc packages from http://www.opencsw.org/packages/CSWgcc4core/
-
-SunOS 4.x:
-    SunOS does not ship with an ANSI C compiler.  You will need to
-    install an ANSI compiler such as gcc to build sudo.
-
-    The /bin/sh shipped with SunOS blows up while running configure.
-    You can work around this by installing bash or zsh.  If you
-    have bash or zsh in your path, configure will use it automatically.
