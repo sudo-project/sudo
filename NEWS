@@ -29,7 +29,7 @@ What's new in Sudo 1.8.19
    unknown or unparsable Defaults entry to go directly to the file
    with the problem.
 
- * Fix a bug in the sudoers LDAP back-end where a negated sudoHost
+ * Fixed a bug in the sudoers LDAP back-end where a negated sudoHost
    entry would prevent other sudoHost entries following it from matching.
 
  * Warnings from visudo about a cycle in an Alias entry now include the
