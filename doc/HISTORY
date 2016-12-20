@@ -61,13 +61,11 @@ support for including multiple sudoers files.
 
 Quest Sponsorship
 
-In 2010, Quest Software began sponsoring Sudo development by hiring Todd to
-work on Sudo as part of his full-time job.
-
-Dell Sponsorship
-
-In 2012, Dell acquired Quest Software and continues to sponsor Sudo
-development.
+In 2010, Quest Software began sponsoring Sudo development by hiring
+Todd to work on Sudo as part of his full-time job.  This enabled
+the addition of I/O logging, the plugin interface, additional
+regression tests, support for binary packages and more regular
+releases.
 
 Present Day
 

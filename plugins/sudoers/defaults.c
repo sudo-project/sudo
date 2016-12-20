@@ -912,7 +912,7 @@ store_syslogfac(const char *str, union sudo_defs_val *sd_un)
 	debug_return_bool(true);
     }
     for (fac = facilities; fac->name != NULL; fac++) {
-	if (strcmp(str, fac->name) != 0) {
+	if (strcmp(str, fac->name) == 0) {
 	    sd_un->ival = fac->num;
 	    debug_return_bool(true);
 	}
@@ -942,7 +942,7 @@ store_syslogpri(const char *str, union sudo_defs_val *sd_un)
 	debug_return_bool(true);
     }
     for (pri = priorities; pri->name != NULL; pri++) {
-	if (strcmp(str, pri->name) != 0) {
+	if (strcmp(str, pri->name) == 0) {
 	    sd_un->ival = pri->num;
 	    debug_return_bool(true);
 	}
