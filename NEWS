@@ -1,3 +1,8 @@
+What's new in Sudo 1.8.19p1
+
+ * Fixed a bug introduced in sudo 1.8.19 that resulted in the wrong
+   syslog priority and facility being used.
+
 What's new in Sudo 1.8.19
 
  * New "syslog_maxlen" Defaults option to control the maximum size of
