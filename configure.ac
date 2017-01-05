@@ -1730,6 +1730,12 @@ case "$host" in
 		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
 		esac
 
+		# strnlen/strndup may be broken on AIX < 6 depending
+		# on the libc version, use our own.
+		if test $OSMAJOR -lt 6; then
+		    ac_cv_func_strnlen=no
+		fi
+
 		# Remove timedir on boot, AIX does not have /var/run
 		INIT_SCRIPT=aix.sh
 		INIT_DIR=/etc/rc.d/init.d
