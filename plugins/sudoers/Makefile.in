@@ -1124,10 +1124,11 @@ visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-          $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+          $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
+          $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo.c
 visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
