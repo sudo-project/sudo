@@ -1556,8 +1556,9 @@ exec_pty(struct command_details *details,
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
+	struct timespec ts = { 0, 1000 };  /* 1us */
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
-	    continue; /* spin */
+	    nanosleep(&ts, NULL);
     }
 
     /* We have guaranteed that the slave fd is > 2 */

@@ -1,7 +1,7 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
 AC_INIT([sudo], [1.8.19p1], [https://bugzilla.sudo.ws/], [sudo])
@@ -2577,6 +2577,10 @@ AC_CHECK_FUNCS([memrchr], [], [
 AC_CHECK_FUNCS([memset_s], [], [
     AC_LIBOBJ(memset_s)
     SUDO_APPEND_COMPAT_EXP(sudo_memset_s)
+])
+AC_CHECK_FUNCS(nanosleep, [], [
+    # On Solaris, nanosleep is in librt
+    AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
 ])
 AC_CHECK_FUNCS([pw_dup], [], [
     AC_LIBOBJ(pw_dup)

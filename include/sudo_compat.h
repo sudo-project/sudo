@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2016
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -219,6 +219,13 @@
 #define CLR(t, f)	((t) &= ~(f))
 #undef ISSET
 #define ISSET(t, f)     ((t) & (f))
+
+/*
+ * Some systems define this in <sys/param.h> but we don't include that anymore.
+ */
+#ifndef howmany
+# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
+#endif
 
 /*
  * Simple isblank() macro and function for systems without it.
@@ -468,6 +475,11 @@ __dso_public int sudo_mkstemps(char *path, int slen);
 # undef mkstemps
 # define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
 #endif /* !HAVE_MKDTEMP || !HAVE_MKSTEMPS */
+#ifndef HAVE_NANOSLEEP
+__dso_public int sudo_nanosleep(const struct timespec *timeout, struct timespec *remainder);
+#undef nanosleep
+# define nanosleep(_a, _b) sudo_nanosleep((_a), (_b))
+#endif
 #ifndef HAVE_PW_DUP
 __dso_public struct passwd *sudo_pw_dup(const struct passwd *pw);
 # undef pw_dup
