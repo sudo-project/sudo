@@ -493,9 +493,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    const char prefix[] = "iolog_path=";
 	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
 		def_iolog_file, &sudo_user.iolog_file);
-	    if (iolog_path == NULL)
-		goto done;
-	    sudo_user.iolog_file++;
+	    if (iolog_path == NULL) {
+		if (!def_ignore_iolog_errors)
+		    goto done;
+		/* Unable to expand I/O log path, disable I/O logging. */
+		def_log_input = false;
+		def_log_output = false;
+	    } else {
+		sudo_user.iolog_file++;
+	    }
 	}
     }
 
