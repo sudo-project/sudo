@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.19p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.19p2], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
