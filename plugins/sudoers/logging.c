@@ -73,8 +73,8 @@ mysyslog(int pri, const char *fmt, ...)
     va_list ap;
     debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
 
-    va_start(ap, fmt);
     openlog("sudo", 0, def_syslog);
+    va_start(ap, fmt);
     vsyslog(pri, fmt, ap);
     va_end(ap);
     closelog();
