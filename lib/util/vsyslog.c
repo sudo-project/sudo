@@ -62,7 +62,7 @@ sudo_vsyslog(int pri, const char *fmt, va_list ap)
 
     /* Format message and log it, using a static buffer if possible. */
     va_copy(ap2, ap);
-    len = (size_t)snprintf(msgbuf, sizeof(msgbuf), new_fmt, ap2);
+    len = (size_t)vsnprintf(msgbuf, sizeof(msgbuf), new_fmt, ap2);
     va_end(ap2);
     if (len < sizeof(msgbuf)) {
 	syslog(pri, "%s", msgbuf);
