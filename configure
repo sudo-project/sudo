@@ -19741,11 +19741,19 @@ $as_echo "$ac_cv_lib_rt_nanosleep" >&6; }
 if test "x$ac_cv_lib_rt_nanosleep" = xyes; then :
   REPLAY_LIBS="${REPLAY_LIBS} -lrt"
 else
-  case " $LIBOBJS " in
+
+	case " $LIBOBJS " in
   *" nanosleep.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS nanosleep.$ac_objext"
  ;;
 esac
+
+
+    for _sym in nanosleep; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
 
 fi
 
