@@ -2582,7 +2582,7 @@ AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [
 	AC_LIBOBJ(nanosleep)
-	SUDO_APPEND_COMPAT_EXP(nanosleep)
+	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
 ])
 AC_CHECK_FUNCS([pw_dup], [], [

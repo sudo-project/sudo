@@ -19749,7 +19749,7 @@ else
 esac
 
 
-    for _sym in nanosleep; do
+    for _sym in sudo_nanosleep; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
