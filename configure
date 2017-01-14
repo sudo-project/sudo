@@ -19739,7 +19739,11 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_rt_nanosleep" >&5
 $as_echo "$ac_cv_lib_rt_nanosleep" >&6; }
 if test "x$ac_cv_lib_rt_nanosleep" = xyes; then :
-  REPLAY_LIBS="${REPLAY_LIBS} -lrt"
+
+	$as_echo "#define HAVE_NANOSLEEP 1" >>confdefs.h
+
+	LIBRT="-lrt"
+
 else
 
 	case " $LIBOBJS " in

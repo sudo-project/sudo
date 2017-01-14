@@ -2580,7 +2580,10 @@ AC_CHECK_FUNCS([memset_s], [], [
 ])
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
-    AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [
+    AC_CHECK_LIB(rt, nanosleep, [
+	AC_DEFINE(HAVE_NANOSLEEP)
+	LIBRT="-lrt"
+    ], [
 	AC_LIBOBJ(nanosleep)
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
