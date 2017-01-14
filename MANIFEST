@@ -107,6 +107,7 @@ lib/util/mksiglist.h
 lib/util/mksigname.c
 lib/util/mksigname.h
 lib/util/mktemp.c
+lib/util/nanosleep.c
 lib/util/parseln.c
 lib/util/progname.c
 lib/util/pw_dup.c
@@ -472,6 +473,8 @@ plugins/sudoers/regress/visudo/test7.sh
 plugins/sudoers/regress/visudo/test8.err.ok
 plugins/sudoers/regress/visudo/test8.out.ok
 plugins/sudoers/regress/visudo/test8.sh
+plugins/sudoers/regress/visudo/test9.out.ok
+plugins/sudoers/regress/visudo/test9.sh
 plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h

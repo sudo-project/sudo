@@ -1,10 +1,10 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.19p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.19p2], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -1730,6 +1730,12 @@ case "$host" in
 		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
 		esac
 
+		# strnlen/strndup may be broken on AIX < 6 depending
+		# on the libc version, use our own.
+		if test $OSMAJOR -lt 6; then
+		    ac_cv_func_strnlen=no
+		fi
+
 		# Remove timedir on boot, AIX does not have /var/run
 		INIT_SCRIPT=aix.sh
 		INIT_DIR=/etc/rc.d/init.d
@@ -2571,6 +2577,16 @@ AC_CHECK_FUNCS([memrchr], [], [
 AC_CHECK_FUNCS([memset_s], [], [
     AC_LIBOBJ(memset_s)
     SUDO_APPEND_COMPAT_EXP(sudo_memset_s)
+])
+AC_CHECK_FUNCS(nanosleep, [], [
+    # On Solaris, nanosleep is in librt
+    AC_CHECK_LIB(rt, nanosleep, [
+	AC_DEFINE(HAVE_NANOSLEEP)
+	LIBRT="-lrt"
+    ], [
+	AC_LIBOBJ(nanosleep)
+	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
+    ])
 ])
 AC_CHECK_FUNCS([pw_dup], [], [
     AC_LIBOBJ(pw_dup)

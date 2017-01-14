@@ -43,7 +43,7 @@
 # define INADDR_NONE ((unsigned int)-1)
 #endif
 
-static struct interface_list interfaces;
+static struct interface_list interfaces = SLIST_HEAD_INITIALIZER(interfaces);
 
 /*
  * Parse a space-delimited list of IP address/netmask pairs and

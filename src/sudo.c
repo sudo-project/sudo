@@ -842,7 +842,7 @@ sudo_check_suid(const char *sudo)
     bool qualified;
     debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
 
-    if (geteuid() != 0) {
+    if (geteuid() != ROOT_UID) {
 	/* Search for sudo binary in PATH if not fully qualified. */
 	qualified = strchr(sudo, '/') != NULL;
 	if (!qualified) {

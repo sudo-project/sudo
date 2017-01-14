@@ -463,6 +463,10 @@ mktemp_test.lo: $(srcdir)/regress/mktemp/mktemp_test.c \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/mktemp/mktemp_test.c
+nanosleep.lo: $(srcdir)/nanosleep.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/nanosleep.c
 parse_gids_test.lo: $(srcdir)/regress/parse_gids/parse_gids_test.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \

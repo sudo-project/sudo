@@ -61,6 +61,7 @@
 #endif
 
 #include "sudoers.h"
+#include "interfaces.h"
 #include "parse.h"
 #include "redblack.h"
 #include "sudoers_version.h"
@@ -815,9 +816,11 @@ group_plugin_query(const char *user, const char *group, const struct passwd *pw)
 }
 
 /* STUB */
-struct interface *get_interfaces(void)
+struct interface_list *
+get_interfaces(void)
 {
-    return NULL;
+    static struct interface_list dummy = SLIST_HEAD_INITIALIZER(interfaces);
+    return &dummy;
 }
 
 /*
