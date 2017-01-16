@@ -278,7 +278,9 @@ check: $(TEST_PROGS)
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
 	    ./progname_test2 || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; \
-	    ./vsyslog_test || rval=`expr $$rval + $$?`; \
+	    if test -f vsyslog_test; then \
+		./vsyslog_test || rval=`expr $$rval + $$?`; \
+	    fi; \
 	    build_dir=`pwd`; \
 	    cd $(srcdir); \
 	    for dir in sudo_conf sudo_parseln; do \
