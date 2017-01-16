@@ -497,6 +497,7 @@ sudo_unsetenv_nodebug(const char *var)
 	    char **cur = ep;
 	    while ((*cur = *(cur + 1)) != NULL)
 		cur++;
+	    env.env_len--;
 	    /* Keep going, could be multiple instances of the var. */
 	} else {
 	    ep++;
