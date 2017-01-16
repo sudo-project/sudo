@@ -3002,7 +3002,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
 static int
 sudo_ldap_bind_s(LDAP *ld)
 {
-    int ret;
+    int rc, ret;
     debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -3025,27 +3025,27 @@ sudo_ldap_bind_s(LDAP *ld)
 	}
 
 	if (new_ccname != NULL) {
-	    ret = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
-	    if (ret == 0) {
+	    rc = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
+	    if (rc == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "set ccache name %s -> %s",
 		    old_ccname ? old_ccname : "(none)", new_ccname);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "sudo_set_krb5_ccache_name() failed: %d", ret);
+		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	}
 	ret = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
 	if (new_ccname != NULL) {
-	    ret = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
-	    if (ret == 0) {
+	    rc = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
+	    if (rc == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "restore ccache name %s -> %s", new_ccname,
 		    old_ccname ? old_ccname : "(none)");
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "sudo_set_krb5_ccache_name() failed: %d", ret);
+		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	    /* Remove temporary copy of user's credential cache. */
 	    if (tmp_ccname != NULL)
