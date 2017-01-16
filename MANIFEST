@@ -153,6 +153,7 @@ lib/util/regress/sudo_parseln/test5.out.ok
 lib/util/regress/sudo_parseln/test6.in
 lib/util/regress/sudo_parseln/test6.out.ok
 lib/util/regress/tailq/hltq_test.c
+lib/util/regress/vsyslog/vsyslog_test.c
 lib/util/secure_path.c
 lib/util/setgroups.c
 lib/util/sha2.c

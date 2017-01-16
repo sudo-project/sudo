@@ -2690,6 +2690,7 @@ fi
 AC_CHECK_FUNCS([vsyslog], [], [
     AC_LIBOBJ(vsyslog)
     SUDO_APPEND_COMPAT_EXP(sudo_vsyslog)
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }vsyslog_test"
 ])
 dnl
 dnl Function checks for sudo_noexec

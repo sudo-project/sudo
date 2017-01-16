@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -134,6 +134,8 @@ STRSPLIT_TEST_OBJS = strsplit_test.lo
 
 PARSE_GIDS_TEST_OBJS = parse_gids_test.lo
 
+VSYSLOG_TEST_OBJS = vsyslog_test.lo
+
 all: libsudo_util.la
 
 Makefile: $(srcdir)/Makefile.in
@@ -210,6 +212,9 @@ parse_gids_test: $(PARSE_GIDS_TEST_OBJS) libsudo_util.la
 strsplit_test: $(STRSPLIT_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRSPLIT_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+vsyslog_test: $(VSYSLOG_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(VSYSLOG_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 pre-install:
 
 install: install-dirs
@@ -273,6 +278,7 @@ check: $(TEST_PROGS)
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
 	    ./progname_test2 || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; \
+	    ./vsyslog_test || rval=`expr $$rval + $$?`; \
 	    build_dir=`pwd`; \
 	    cd $(srcdir); \
 	    for dir in sudo_conf sudo_parseln; do \
@@ -587,3 +593,8 @@ utimens.lo: $(srcdir)/utimens.c $(incdir)/compat/stdbool.h \
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/utimens.c
 vsyslog.lo: $(srcdir)/vsyslog.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/vsyslog.c
+vsyslog_test.lo: $(srcdir)/regress/vsyslog/vsyslog_test.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                 $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/vsyslog/vsyslog_test.c

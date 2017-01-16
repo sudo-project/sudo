@@ -20551,6 +20551,7 @@ esac
 "
     done
 
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }vsyslog_test"
 
 fi
 done
