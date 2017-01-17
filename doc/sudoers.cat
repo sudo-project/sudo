@@ -1719,8 +1719,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    be of the form ``VARIABLE=value'' or ``export
                    VARIABLE=value''.  The value may optionally be surrounded
                    by single or double quotes.  Variables in this file are
-                   subject to other ssuuddoo environment settings such as _e_n_v___k_e_e_p
-                   and _e_n_v___c_h_e_c_k.
+                   only added if the variable does not already exist in the
+                   environment.  This file is considered to be part of the
+                   security policy, its contents are not subject to other ssuuddoo
+                   environment restrictions such as _e_n_v___k_e_e_p and _e_n_v___c_h_e_c_k.
 
      exempt_group  Users in this group are exempt from password and PATH
                    requirements.  The group name specified should not include
