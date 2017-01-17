@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -258,6 +258,7 @@ static struct ldap_config {
     char *tls_certfile;
     char *tls_keyfile;
     char *tls_keypw;
+    char *sasl_mech;
     char *sasl_auth_id;
     char *rootsasl_auth_id;
     char *sasl_secprops;
@@ -326,6 +327,7 @@ static struct ldap_config_table ldap_conf_global[] = {
     { "netgroup_search_filter", CONF_STR, -1, &ldap_conf.netgroup_search_filter },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, -1, &ldap_conf.use_sasl },
+    { "sasl_mech", CONF_STR, -1, &ldap_conf.sasl_mech },
     { "sasl_auth_id", CONF_STR, -1, &ldap_conf.sasl_auth_id },
     { "rootuse_sasl", CONF_BOOL, -1, &ldap_conf.rootuse_sasl },
     { "rootsasl_auth_id", CONF_STR, -1, &ldap_conf.rootsasl_auth_id },
@@ -2183,7 +2185,17 @@ sudo_ldap_read_config(void)
     }
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     if (ldap_conf.use_sasl != -1) {
+	if (ldap_conf.sasl_mech == NULL) {
+	    /* Default mechanism is GSSAPI. */
+	    ldap_conf.sasl_mech = strdup("GSSAPI");
+	    if (ldap_conf.sasl_mech == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
+	}
 	DPRINTF1("use_sasl         %s", ldap_conf.use_sasl ? "yes" : "no");
+	DPRINTF1("sasl_mech        %s", ldap_conf.sasl_mech);
 	DPRINTF1("sasl_auth_id     %s",
 	    ldap_conf.sasl_auth_id ? ldap_conf.sasl_auth_id : "(NONE)");
 	DPRINTF1("rootuse_sasl     %d",
@@ -3035,8 +3047,9 @@ sudo_ldap_bind_s(LDAP *ld)
 		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	}
-	ret = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
-	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
+	ret = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn,
+	    ldap_conf.sasl_mech, NULL, NULL, LDAP_SASL_QUIET,
+	    sudo_ldap_sasl_interact, auth_id);
 	if (new_ccname != NULL) {
 	    rc = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
 	    if (rc == 0) {
