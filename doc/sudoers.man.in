@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "November 30, 2016" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "January 17, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4565,7 +4565,7 @@ to operator.
 .nf
 .sp
 .RS 0n
-pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd root
+pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd *root*
 
 %opers		ALL = (: ADMINGRP) /usr/sbin/
 .RE
