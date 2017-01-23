@@ -75,6 +75,10 @@
 # include "compat/sha2.h"
 #endif
 
+#if !defined(O_SEARCH) && defined(O_PATH)
+# define O_SEARCH O_PATH
+#endif
+
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 
 static bool command_matches_dir(const char *sudoers_dir, size_t dlen, const struct sudo_digest *digest);
@@ -83,7 +87,7 @@ static bool command_matches_glob(const char *sudoers_cmnd, const char *sudoers_a
 #endif
 static bool command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
 static bool command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
-static bool digest_matches(const char *file, const struct sudo_digest *sd, int *fd);
+static bool digest_matches(int fd, const char *file, const struct sudo_digest *sd);
 
 /*
  * Returns true if string 's' contains meta characters.
@@ -433,10 +437,73 @@ done:
     debug_return_bool(rc);
 }
 
+/*
+ * Stat file by fd is possible, else by path.
+ * Returns true on success, else false.
+ */
+static bool
+do_stat(int fd, const char *path, struct stat *sb)
+{
+    debug_decl(do_stat, SUDOERS_DEBUG_MATCH)
+
+    if (fd != -1)
+	debug_return_bool(fstat(fd, sb) == 0);
+    debug_return_bool(stat(path, sb) == 0);
+}
+
+/*
+ * Open path if fdexec is enabled or if a digest is present.
+ * Returns false on error, else true.
+ */
+static bool
+open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
+{
+    int fd = -1;
+    bool is_script = false;
+    debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH)
+
+    /* Only open the file for fdexec or for digest matching. */
+    if (def_fdexec != always && digest == NULL)
+	debug_return_bool(true);
+
+    fd = open(path, O_RDONLY|O_NONBLOCK);
+# ifdef O_SEARCH
+    if (fd == -1 && errno == EACCES && digest == NULL) {
+	/* Try again with O_SEARCH if no digest is specified. */
+	const int saved_errno = errno;
+	if ((fd = open(path, O_SEARCH)) == -1)
+	    errno = saved_errno;
+    }
+# endif
+    if (fd == -1)
+	debug_return_bool(false);
+
+#ifdef HAVE_FEXECVE
+    do {
+	/* Check for #! cookie and set is_script. */
+	char magic[2];
+	if (read(fd, magic, 2) == 2) {
+	    if (magic[0] == '#' && magic[1] == '!')
+		is_script = true;
+	}
+	(void) lseek(fd, (off_t)0, SEEK_SET);
+    } while (0);
+    /*
+     * Shell scripts go through namei twice and so we can't set the close
+     * on exec flag on the fd for fexecve(2).
+     */
+    if (!is_script)
+	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+#endif /* HAVE_FEXECVE */
+    *fdp = fd;
+    debug_return_bool(true);
+}
+
 static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
     const struct sudo_digest *digest)
 {
+    struct stat sb; /* XXX - unused */
     debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH)
 
     /*
@@ -453,11 +520,22 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	    close(cmnd_fd);
 	    cmnd_fd = -1;
 	}
+	/* Open the file for fdexec or for digest matching. */
+	if (!open_cmnd(user_cmnd, digest, &cmnd_fd))
+	    goto bad;
+	if (!do_stat(cmnd_fd, user_cmnd, &sb))
+	    goto bad;
 	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
-	if (digest != NULL && !digest_matches(user_cmnd, digest, &cmnd_fd))
-	    debug_return_bool(false);
+	if (digest != NULL && !digest_matches(cmnd_fd, user_cmnd, digest))
+	    goto bad;
 	/* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
+bad:
+	if (cmnd_fd != -1) {
+	    close(cmnd_fd);
+	    cmnd_fd = -1;
+	}
+	debug_return_bool(false);
     }
     debug_return_bool(false);
 }
@@ -502,17 +580,22 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
     /* If user_cmnd is fully-qualified, check for an exact match. */
     if (user_cmnd[0] == '/') {
 	for (ap = gl.gl_pathv; (cp = *ap) != NULL; ap++) {
-	    if (strcmp(cp, user_cmnd) != 0 || stat(cp, &sudoers_stat) == -1)
+	    if (fd != -1) {
+		close(fd);
+		fd = -1;
+	    }
+	    if (strcmp(cp, user_cmnd) != 0)
+		continue;
+	    /* Open the file for fdexec or for digest matching. */
+	    if (!open_cmnd(cp, digest, &fd))
+		continue;
+	    if (!do_stat(fd, cp, &sudoers_stat))
 		continue;
 	    if (user_stat == NULL ||
 		(user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino)) {
-		if (fd != -1) {
-		    close(fd);
-		    fd = -1;
-		}
 		/* There could be multiple matches, check digest early. */
-		if (digest != NULL && !digest_matches(cp, digest, &fd)) {
+		if (digest != NULL && !digest_matches(fd, cp, digest)) {
 		    bad_digest = true;
 		    continue;
 		}
@@ -532,6 +615,11 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
     /* No exact match, compare basename, st_dev and st_ino. */
     if (!bad_digest) {
 	for (ap = gl.gl_pathv; (cp = *ap) != NULL; ap++) {
+	    if (fd != -1) {
+		close(fd);
+		fd = -1;
+	    }
+
 	    /* If it ends in '/' it is a directory spec. */
 	    dlen = strlen(cp);
 	    if (cp[dlen - 1] == '/') {
@@ -545,17 +633,18 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		base++;
 	    else
 		base = cp;
-	    if (strcmp(user_base, base) != 0 ||
-		stat(cp, &sudoers_stat) == -1)
+	    if (strcmp(user_base, base) != 0)
+		continue;
+
+	    /* Open the file for fdexec or for digest matching. */
+	    if (!open_cmnd(cp, digest, &fd))
+		continue;
+	    if (!do_stat(fd, cp, &sudoers_stat))
 		continue;
 	    if (user_stat == NULL ||
 		(user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino)) {
-		if (fd != -1) {
-		    close(fd);
-		    fd = -1;
-		}
-		if (digest != NULL && !digest_matches(cp, digest, &fd))
+		if (digest != NULL && !digest_matches(fd, cp, digest))
 		    continue;
 		free(safe_cmnd);
 		if ((safe_cmnd = strdup(cp)) == NULL) {
@@ -655,19 +744,16 @@ static struct digest_function {
 };
 
 static bool
-digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
+digest_matches(int fd, const char *file, const struct sudo_digest *sd)
 {
     unsigned char file_digest[SHA512_DIGEST_LENGTH];
     unsigned char sudoers_digest[SHA512_DIGEST_LENGTH];
     unsigned char buf[32 * 1024];
     struct digest_function *func = NULL;
-#ifdef HAVE_FEXECVE
-    bool first = true;
-    bool is_script = false;
-#endif /* HAVE_FEXECVE */
     size_t nread;
     SHA2_CTX ctx;
     FILE *fp;
+    int fd2;
     unsigned int i;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
@@ -700,22 +786,20 @@ digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
 	}
     }
 
-    if ((fp = fopen(file, "r")) == NULL) {
+    if ((fd2 = dup(fd)) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to dup %s: %s",
+	    file, strerror(errno));
+	debug_return_bool(false);
+    }
+    if ((fp = fdopen(fd2, "r")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to open %s: %s",
 	    file, strerror(errno));
+	close(fd2);
 	debug_return_bool(false);
     }
 
     func->init(&ctx);
     while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
-#ifdef HAVE_FEXECVE
-	/* Check for #! cookie and set is_script. */
-	if (first) {
-	    first = false;
-	    if (nread >= 2 && buf[0] == '#' && buf[1] == '!')
-		is_script = true;
-	}
-#endif /* HAVE_FEXECVE */
 	func->update(&ctx, buf, nread);
     }
     if (ferror(fp)) {
@@ -733,24 +817,6 @@ digest_matches(const char *file, const struct sudo_digest *sd, int *fd)
 	debug_return_bool(false);
     }
 
-#ifdef HAVE_FEXECVE
-    /*
-     * On systems with fexecve(2) we can use that to execute the
-     * matching command even when the directory is writable.
-     */
-    if ((*fd = dup(fileno(fp))) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to dup %s: %s",
-	    file, strerror(errno));
-	fclose(fp);
-	debug_return_bool(false);
-    }
-    /*
-     * Shell scripts go through namei twice and so we can't set the close
-     * on exec flag on the fd for fexecve(2).
-     */
-    if (!is_script)
-	(void)fcntl(*fd, F_SETFD, FD_CLOEXEC);
-#endif /* HAVE_FEXECVE */
     fclose(fp);
     debug_return_bool(true);
 bad_format:
@@ -765,6 +831,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     struct stat sudoers_stat;
     const char *base;
     size_t dlen;
+    int fd = -1;
     debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH)
 
     /* If it ends in '/' it is a directory spec. */
@@ -777,9 +844,14 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	base = sudoers_cmnd;
     else
 	base++;
-    if (strcmp(user_base, base) != 0 ||
-	stat(sudoers_cmnd, &sudoers_stat) == -1)
+    if (strcmp(user_base, base) != 0)
 	debug_return_bool(false);
+
+    /* Open the file for fdexec or for digest matching. */
+    if (!open_cmnd(sudoers_cmnd, digest, &fd))
+	goto bad;
+    if (!do_stat(fd, sudoers_cmnd, &sudoers_stat))
+	goto bad;
 
     /*
      * Return true if inode/device matches AND
@@ -791,23 +863,38 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     if (user_stat != NULL &&
 	(user_stat->st_dev != sudoers_stat.st_dev ||
 	user_stat->st_ino != sudoers_stat.st_ino))
-	debug_return_bool(false);
+	goto bad;
     if (!command_args_match(sudoers_cmnd, sudoers_args))
-	debug_return_bool(false);
-    if (cmnd_fd != -1) {
-	close(cmnd_fd);
-	cmnd_fd = -1;
-    }
-    if (digest != NULL && !digest_matches(sudoers_cmnd, digest, &cmnd_fd)) {
+	goto bad;
+    if (digest != NULL && !digest_matches(fd, sudoers_cmnd, digest)) {
 	/* XXX - log functions not available but we should log very loudly */
-	debug_return_bool(false);
+	goto bad;
     }
     free(safe_cmnd);
     if ((safe_cmnd = strdup(sudoers_cmnd)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_bool(false);
+	goto bad;
+    }
+    if (cmnd_fd != -1) {
+	close(cmnd_fd);
+	cmnd_fd = -1;
+    }
+#ifdef HAVE_FEXECVE
+    /* Stash away fd if we are going to use fexecve(2) */
+    if (def_fdexec == always || (digest != NULL && def_fdexec == digest_only)) {
+	cmnd_fd = fd;
+    } else
+#endif /* HAVE_FEXECVE */
+    {
+	/* Either fdexec is not in use or fexecve(2) is not present. */
+	if (fd != -1)
+	    close(fd);
     }
     debug_return_bool(true);
+bad:
+    if (fd != -1)
+	close(fd);
+    debug_return_bool(false);
 }
 #endif /* SUDOERS_NAME_MATCH */
 
@@ -851,23 +938,30 @@ command_matches_dir(const char *sudoers_dir, size_t dlen,
 	debug_return_bool(false);
     }
     while ((dent = readdir(dirp)) != NULL) {
+	if (fd != -1) {
+	    close(fd);
+	    fd = -1;
+	}
+
 	/* ignore paths > PATH_MAX (XXX - log) */
 	buf[dlen] = '\0';
 	if (strlcat(buf, dent->d_name, sizeof(buf)) >= sizeof(buf))
 	    continue;
 
 	/* only stat if basenames are the same */
-	if (strcmp(user_base, dent->d_name) != 0 ||
-	    stat(buf, &sudoers_stat) == -1)
+	if (strcmp(user_base, dent->d_name) != 0)
 	    continue;
+
+	/* Open the file for fdexec or for digest matching. */
+	if (!open_cmnd(buf, digest, &fd))
+	    continue;
+	if (!do_stat(fd, buf, &sudoers_stat))
+	    continue;
+
 	if (user_stat == NULL ||
 	    (user_stat->st_dev == sudoers_stat.st_dev &&
 	    user_stat->st_ino == sudoers_stat.st_ino)) {
-	    if (fd != -1) {
-		close(fd);
-		fd = -1;
-	    }
-	    if (digest != NULL && !digest_matches(buf, digest, &fd))
+	    if (digest != NULL && !digest_matches(fd, buf, digest))
 		continue;
 	    free(safe_cmnd);
 	    if ((safe_cmnd = strdup(buf)) == NULL) {

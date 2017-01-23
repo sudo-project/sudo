@@ -890,6 +890,11 @@ A similar race condition exists on systems that lack the
 fexecve(2)
 system call when the directory in which the command is located
 is writable by the user.
+See the description of the
+\fIfdexec\fR
+setting for more information on how
+\fBsudo\fR
+executes commands that have an associated digest.
 .PP
 Command digests are only supported by version 1.8.7 or higher.
 .SS "Defaults"
@@ -3484,6 +3489,53 @@ The group name specified should not include a
 \fR%\fR
 prefix.
 This is not set by default.
+.TP 14n
+fdexec
+Determines whether
+\fBsudo\fR
+will execute a command by its path or by an open file descriptor.
+It has the following possible values:
+.PP
+.RS 14n
+.PD 0
+.TP 8n
+always
+Always execute by file descriptor.
+.PD
+.TP 8n
+never
+Never execute by file descriptor.
+.TP 8n
+digest_only
+Only execute by file descriptor if the command has an associated digest
+in the
+\fIsudoers\fR
+file.
+.PP
+The default value is
+\fIdigest_only\fR.
+This avoids a time of check versus time of use race condition when
+the command is located in a directory writable by the invoking user.
+.sp
+Note that
+\fIfdexec\fR
+will change the first element of the argument vector for scripts
+($0 in the shell) due to the way the kernel runs script interpreters.
+Instead of being a normal path, it will refer to a file descriptor.
+For example,
+\fI/dev/fd/4\fR
+on Solaris and
+\fI/proc/self/fd/4\fR
+on Linux.
+A workaround is to use the
+\fRSUDO_COMMAND\fR
+environment variable instead.
+.sp
+This setting is only supported by version 1.8.20 or higher.
+If the operating system does not support the
+fexecve(2)
+system call, this setting has no effect.
+.RE
 .TP 14n
 group_plugin
 A string containing a

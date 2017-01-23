@@ -322,3 +322,7 @@ iolog_group
 iolog_mode
 	T_MODE
 	"File mode to use for the I/O log files: 0%o"
+fdexec
+	T_TUPLE|T_BOOL
+	"Execute commands by file descriptor instead of by path: %s"
+	never digest_only always

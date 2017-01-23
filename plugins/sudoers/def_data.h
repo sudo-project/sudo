@@ -204,11 +204,14 @@
 #define def_iolog_group         (sudo_defs_table[I_IOLOG_GROUP].sd_un.str)
 #define I_IOLOG_MODE            102
 #define def_iolog_mode          (sudo_defs_table[I_IOLOG_MODE].sd_un.mode)
+#define I_FDEXEC                103
+#define def_fdexec              (sudo_defs_table[I_FDEXEC].sd_un.tuple)
 
 enum def_tuple {
 	never,
 	once,
 	always,
 	any,
-	all
+	all,
+	digest_only
 };

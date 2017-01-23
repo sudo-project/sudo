@@ -21,6 +21,13 @@ static struct def_values def_data_verifypw[] = {
     { NULL, 0 },
 };
 
+static struct def_values def_data_fdexec[] = {
+    { "never", never },
+    { "digest_only", digest_only },
+    { "always", always },
+    { NULL, 0 },
+};
+
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
@@ -434,6 +441,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"iolog_mode", T_MODE,
 	N_("File mode to use for the I/O log files: 0%o"),
 	NULL,
+    }, {
+	"fdexec", T_TUPLE|T_BOOL,
+	N_("Execute commands by file descriptor instead of by path: %s"),
+	def_data_fdexec,
     }, {
 	NULL, 0, NULL
     }

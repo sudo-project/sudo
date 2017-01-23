@@ -847,6 +847,11 @@ A similar race condition exists on systems that lack the
 .Xr fexecve 2
 system call when the directory in which the command is located
 is writable by the user.
+See the description of the
+.Em fdexec
+setting for more information on how
+.Nm sudo
+executes commands that have an associated digest.
 .Pp
 Command digests are only supported by version 1.8.7 or higher.
 .Ss Defaults
@@ -3254,6 +3259,46 @@ The group name specified should not include a
 .Li %
 prefix.
 This is not set by default.
+.It fdexec
+Determines whether
+.Nm sudo
+will execute a command by its path or by an open file descriptor.
+It has the following possible values:
+.Bl -tag -width 6n
+.It always
+Always execute by file descriptor.
+.It never
+Never execute by file descriptor.
+.It digest_only
+Only execute by file descriptor if the command has an associated digest
+in the
+.Em sudoers
+file.
+.El
+.Pp
+The default value is
+.Em digest_only .
+This avoids a time of check versus time of use race condition when
+the command is located in a directory writable by the invoking user.
+.Pp
+Note that
+.Em fdexec
+will change the first element of the argument vector for scripts
+($0 in the shell) due to the way the kernel runs script interpreters.
+Instead of being a normal path, it will refer to a file descriptor.
+For example,
+.Pa /dev/fd/4
+on Solaris and
+.Pa /proc/self/fd/4
+on Linux.
+A workaround is to use the
+.Dv SUDO_COMMAND
+environment variable instead.
+.Pp
+This setting is only supported by version 1.8.20 or higher.
+If the operating system does not support the
+.Xr fexecve 2
+system call, this setting has no effect.
 .It group_plugin
 A string containing a
 .Nm sudoers
