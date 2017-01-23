@@ -455,6 +455,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	child = fork_cmnd(details, sv);
     close(sv[1]);
 
+    /* No longer need execfd. */
+    if (details->execfd != -1) {
+	close(details->execfd);
+	details->execfd = -1;
+    }
+
     /* Set command timeout if specified. */
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);

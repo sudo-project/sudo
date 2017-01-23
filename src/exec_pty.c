@@ -1450,6 +1450,12 @@ exec_monitor(struct command_details *details, int backchannel)
     }
     close(errpipe[1]);
 
+    /* No longer need execfd. */
+    if (details->execfd != -1) {
+	close(details->execfd);
+	details->execfd = -1;
+    }
+
     /* Send the command's pid to main sudo process. */
     cstat.type = CMD_PID;
     cstat.val = cmnd_pid;
