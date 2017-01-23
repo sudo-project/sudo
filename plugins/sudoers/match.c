@@ -526,8 +526,14 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	if (!do_stat(cmnd_fd, user_cmnd, &sb))
 	    goto bad;
 	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
-	if (digest != NULL && !digest_matches(cmnd_fd, user_cmnd, digest))
-	    goto bad;
+	if (digest != NULL) {
+	    if (!digest_matches(cmnd_fd, user_cmnd, digest))
+		goto bad;
+	    if (def_fdexec == never) {
+		close(cmnd_fd);
+		cmnd_fd = -1;
+	    }
+	}
 	/* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
 bad:
@@ -665,8 +671,12 @@ done:
 		close(cmnd_fd);
 		cmnd_fd = -1;
 	    }
-	    if (fd != -1)
-		cmnd_fd = fd;
+	    if (fd != -1) {
+		if (def_fdexec == never)
+		    close(fd);
+		else
+		    cmnd_fd = fd;
+	    }
 	    debug_return_bool(true);
 	}
     }
@@ -879,16 +889,11 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 	close(cmnd_fd);
 	cmnd_fd = -1;
     }
-#ifdef HAVE_FEXECVE
-    /* Stash away fd if we are going to use fexecve(2) */
-    if (def_fdexec == always || (digest != NULL && def_fdexec == digest_only)) {
-	cmnd_fd = fd;
-    } else
-#endif /* HAVE_FEXECVE */
-    {
-	/* Either fdexec is not in use or fexecve(2) is not present. */
-	if (fd != -1)
+    if (fd != -1) {
+	if (def_fdexec == never)
 	    close(fd);
+	else
+	    cmnd_fd = fd;
     }
     debug_return_bool(true);
 bad:
@@ -979,8 +984,12 @@ command_matches_dir(const char *sudoers_dir, size_t dlen,
 	    close(cmnd_fd);
 	    cmnd_fd = -1;
 	}
-	if (fd != -1)
-	    cmnd_fd = fd;
+	if (fd != -1) {
+	    if (def_fdexec == never)
+		close(fd);
+	    else
+		cmnd_fd = fd;
+	}
 	debug_return_bool(true);
     }
     if (fd != -1)
