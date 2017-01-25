@@ -1,16 +1,19 @@
 adler32
 adler32_combine
 adler32_combine64
+adler32_z
 compress
 compress2
 compressBound
 crc32
 crc32_combine
 crc32_combine64
+crc32_z
 deflate
 deflateBound
 deflateCopy
 deflateEnd
+deflateGetDictionary
 deflateInit2_
 deflateInit_
 deflateParams
@@ -32,6 +35,8 @@ gzdopen
 gzeof
 gzerror
 gzflush
+gzfread
+gzfwrite
 gzgetc
 gzgetc_
 gzgets
@@ -56,6 +61,7 @@ inflate
 inflateBack
 inflateBackEnd
 inflateBackInit_
+inflateCodesUsed
 inflateCopy
 inflateEnd
 inflateGetDictionary
@@ -71,7 +77,9 @@ inflateSetDictionary
 inflateSync
 inflateSyncPoint
 inflateUndermine
+inflateValidate
 uncompress
+uncompress2
 zError
 zlibCompileFlags
 zlibVersion
