@@ -452,6 +452,34 @@ do_stat(int fd, const char *path, struct stat *sb)
 }
 
 /*
+ * On systems with fexecve(2), set the close-on-exec flag on the file
+ * descriptor only if the file is not a script.  Because scripts need
+ * to be executed by an interpreter the fd must remain open for the
+ * interpreter to use.
+ */
+static void
+set_cloexec(int fd)
+{
+    bool is_script = false;
+#ifdef HAVE_FEXECVE
+    char magic[2];
+
+    /* Check for #! cookie and set is_script. */
+    if (read(fd, magic, 2) == 2) {
+	if (magic[0] == '#' && magic[1] == '!')
+	    is_script = true;
+    }
+    (void) lseek(fd, (off_t)0, SEEK_SET);
+#endif /* HAVE_FEXECVE */
+    /*
+     * Shell scripts go through namei twice and so we can't set the close
+     * on exec flag on the fd for fexecve(2).
+     */
+    if (!is_script)
+	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+}
+
+/*
  * Open path if fdexec is enabled or if a digest is present.
  * Returns false on error, else true.
  */
@@ -459,7 +487,6 @@ static bool
 open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
 {
     int fd = -1;
-    bool is_script = false;
     debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH)
 
     /* Only open the file for fdexec or for digest matching. */
@@ -478,23 +505,7 @@ open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
     if (fd == -1)
 	debug_return_bool(false);
 
-#ifdef HAVE_FEXECVE
-    do {
-	/* Check for #! cookie and set is_script. */
-	char magic[2];
-	if (read(fd, magic, 2) == 2) {
-	    if (magic[0] == '#' && magic[1] == '!')
-		is_script = true;
-	}
-	(void) lseek(fd, (off_t)0, SEEK_SET);
-    } while (0);
-    /*
-     * Shell scripts go through namei twice and so we can't set the close
-     * on exec flag on the fd for fexecve(2).
-     */
-    if (!is_script)
-	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
-#endif /* HAVE_FEXECVE */
+    set_cloexec(fd);
     *fdp = fd;
     debug_return_bool(true);
 }
