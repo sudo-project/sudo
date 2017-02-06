@@ -326,3 +326,6 @@ fdexec
 	T_TUPLE|T_BOOL
 	"Execute commands by file descriptor instead of by path: %s"
 	never digest_only always
+ignore_unknown_defaults
+	T_FLAG
+	"Ignore unknown Defaults entries in sudoers instead of producing a warning"

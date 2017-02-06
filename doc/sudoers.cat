@@ -1073,6 +1073,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        meaningful for the cn=defaults section.  This flag is
                        _o_f_f by default.
 
+     ignore_unknown_defaults
+                       If set, ssuuddoo will not produce a warning if it
+                       encounters an unknown Defaults entry in the _s_u_d_o_e_r_s
+                       file or an unknown sudoOption in LDAP.  This flag is
+                       _o_f_f by default.
+
      insults           If set, ssuuddoo will insult users when they enter an
                        incorrect password.  This flag is _o_f_f by default.
 
@@ -2672,4 +2678,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.19                    January 17, 2017                    Sudo 1.8.19
+Sudo 1.8.20                    February 5, 2017                    Sudo 1.8.20

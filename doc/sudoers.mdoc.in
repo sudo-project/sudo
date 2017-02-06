@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 17, 2017
+.Dd February 5, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2126,6 +2126,16 @@ how to behave when no specific LDAP entries have been matched, this
 sudoOption is only meaningful for the
 .Li cn=defaults
 section.
+This flag is
+.Em off
+by default.
+.It ignore_unknown_defaults
+If set,
+.Nm sudo
+will not produce a warning if it encounters an unknown Defaults entry
+in the
+.Em sudoers
+file or an unknown sudoOption in LDAP.
 This flag is
 .Em off
 by default.

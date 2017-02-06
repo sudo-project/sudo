@@ -79,6 +79,7 @@ static struct strmap priorities[] = {
 };
 
 static struct early_default early_defaults[] = {
+    { I_IGNORE_UNKNOWN_DEFAULTS },
 #ifdef FQDN
     { I_FQDN, true },
 #else
@@ -206,7 +207,7 @@ find_default(const char *name, const char *file, int lineno, bool quiet)
 	if (strcmp(name, sudo_defs_table[i].name) == 0)
 	    debug_return_int(i);
     }
-    if (!quiet) {
+    if (!quiet && !def_ignore_unknown_defaults) {
 	if (lineno > 0) {
 	    sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
 		file, lineno, name);

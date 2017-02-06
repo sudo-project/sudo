@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 17, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 5, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2267,6 +2267,17 @@ how to behave when no specific LDAP entries have been matched, this
 sudoOption is only meaningful for the
 \fRcn=defaults\fR
 section.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
+ignore_unknown_defaults
+If set,
+\fBsudo\fR
+will not produce a warning if it encounters an unknown Defaults entry
+in the
+\fIsudoers\fR
+file or an unknown sudoOption in LDAP.
 This flag is
 \fIoff\fR
 by default.

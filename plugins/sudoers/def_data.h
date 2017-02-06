@@ -206,6 +206,8 @@
 #define def_iolog_mode          (sudo_defs_table[I_IOLOG_MODE].sd_un.mode)
 #define I_FDEXEC                103
 #define def_fdexec              (sudo_defs_table[I_FDEXEC].sd_un.tuple)
+#define I_IGNORE_UNKNOWN_DEFAULTS 104
+#define def_ignore_unknown_defaults (sudo_defs_table[I_IGNORE_UNKNOWN_DEFAULTS].sd_un.flag)
 
 enum def_tuple {
 	never,

@@ -446,6 +446,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Execute commands by file descriptor instead of by path: %s"),
 	def_data_fdexec,
     }, {
+	"ignore_unknown_defaults", T_FLAG,
+	N_("Ignore unknown Defaults entries in sudoers instead of producing a warning"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
