@@ -427,7 +427,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"syslog_maxlen", T_UINT,
-	N_("Log entries larger than this value will be split into multiple syslog messages"),
+	N_("Log entries larger than this value will be split into multiple syslog messages: %u"),
 	NULL,
     }, {
 	"iolog_user", T_STR|T_BOOL,

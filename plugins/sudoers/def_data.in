@@ -312,7 +312,7 @@ match_group_by_gid
 	"Resolve groups in sudoers and match on the group ID, not the name"
 syslog_maxlen
 	T_UINT
-	"Log entries larger than this value will be split into multiple syslog messages"
+	"Log entries larger than this value will be split into multiple syslog messages: %u"
 iolog_user
 	T_STR|T_BOOL
 	"User that will own the I/O log files: %s"
