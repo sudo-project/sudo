@@ -78,7 +78,7 @@ static yy_size_t digest_len;
 
 static bool push_include_int(char *, bool);
 static bool pop_include(void);
-static char *parse_include(char *);
+static char *parse_include_int(const char *, bool);
 
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
@@ -89,6 +89,8 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
 
+#define	parse_include(_p)	(parse_include_int((_p), false))
+#define	parse_includedir(_p)	(parse_include_int((_p), true))
 #define	push_include(_p)	(push_include_int((_p), false))
 #define	push_includedir(_p)	(push_include_int((_p), true))
 %}
@@ -313,7 +315,7 @@ DEFVAR			[a-z_]+
 				LEXRETURN(ERROR);
 			    }
 
-			    if ((path = parse_include(sudoerstext)) == NULL)
+			    if ((path = parse_includedir(sudoerstext)) == NULL)
 				yyterminate();
 
 			    LEXTRACE("INCLUDEDIR\n");
@@ -1053,17 +1055,16 @@ pop_include(void)
 }
 
 static char *
-parse_include(char *base)
+parse_include_int(const char *base, bool isdir)
 {
-    char *cp, *ep, *path, *pp;
+    const char *cp, *ep;
+    char *path, *pp;
     int dirlen = 0, len = 0, subst = 0;
     size_t shost_len = 0;
     debug_decl(parse_include, SUDOERS_DEBUG_PARSER)
 
     /* Pull out path from #include line. */
-    cp = base + sizeof("#include");
-    if (*cp == 'i')
-	cp += 3; /* includedir */
+    cp = base + (isdir ? sizeof("#includedir") : sizeof("#include"));
     while (isblank((unsigned char) *cp))
 	cp++;
     ep = cp;
