@@ -257,6 +257,8 @@ void free_members(struct member_list *members);
 bool addr_matches(char *n);
 
 /* match.c */
+struct group;
+struct passwd;
 bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);

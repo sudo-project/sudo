@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999, 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999, 2009-2011, 2013-2015, 2017
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +23,8 @@
 #include <time.h>
 
 #include "sudo_compat.h"
-
-char *get_timestr(time_t, int);
+#include "sudo_debug.h"
+#include "parse.h"
 
 /*
  * Return a static buffer with the current date + time.
