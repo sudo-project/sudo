@@ -44,6 +44,7 @@ __dso_public int main(int argc, char *argv[]);
  */
 static char *expected_result;
 static int errors;
+static int ntests;
 
 /*
  * Dummy version of syslog to verify the message
@@ -62,6 +63,8 @@ syslog(int priority, const char *fmt, ...)
     if (strcmp(msg, expected_result) != 0) {
 	sudo_warnx_nodebug("Expected \"%s\", got \"%s\"", expected_result, msg);
 	errors++;
+    } else {
+	ntests++;
     }
     va_end(ap);
 }
@@ -79,7 +82,6 @@ test_vsyslog(int priority, const char *fmt, ...)
 int
 main(int argc, char *argv[])
 {
-    int ntests = 0;
     char buf1[1024 * 16], buf2[1024 * 16];
     initprogname(argc > 0 ? argv[0] : "vsyslog_test");
 
@@ -89,7 +91,6 @@ main(int argc, char *argv[])
 	"%s:  %s : TTY=%s ; PWD=%s ; USER=%s ; TSID=%s ; COMMAND=%s",
 	"sudo", "millert", "ttypa", "/etc/mail", "root", "000AB0",
 	"/usr/sbin/newaliases");
-    ntests++;
 
     /* Test small buffer w/ errno. */
     snprintf(buf1, sizeof(buf1),
@@ -97,14 +98,12 @@ main(int argc, char *argv[])
     expected_result = buf1;
     errno = ENOENT;
     test_vsyslog(0, "unable to open %s: %m", "/var/log/sudo-io/seq");
-    ntests++;
 
     /* Test large buffer > 8192 bytes. */
     memset(buf1, 'a', 8192);
     buf1[8192] = '\0';
     expected_result = buf1;
     test_vsyslog(0, "%s", buf1);
-    ntests++;
 
     /* Test large buffer w/ errno > 8192 bytes. */
     memset(buf1, 'b', 8184);
@@ -113,21 +112,20 @@ main(int argc, char *argv[])
     expected_result = buf2;
     errno = EINVAL;
     test_vsyslog(0, "%s: %m", buf1);
-    ntests++;
 
-    /* Test large buffer w/ errno > 8192 bytes. */
+    /* Test large format string > 8192 bytes, expect truncation to 2048. */
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
-    snprintf(buf2, sizeof(buf2), "%s: %s", buf1, strerror(EINVAL));
+    snprintf(buf2, sizeof(buf2), "%.*s", 2047, buf1);
     expected_result = buf2;
-    errno = EINVAL;
-    strlcat(buf1, ": %m", sizeof(buf1));
     test_vsyslog(0, buf1);
-    ntests++;
 
     if (ntests != 0) {
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
+    } else {
+	printf("%s: error, no tests run!\n", getprogname());
+	errors = 1;
     }
     exit(errors);
 }
