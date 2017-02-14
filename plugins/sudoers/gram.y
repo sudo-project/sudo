@@ -73,7 +73,7 @@ static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
-static struct sudo_digest *new_digest(int, const char *);
+static struct sudo_digest *new_digest(int, char *);
 %}
 
 %union {
@@ -584,6 +584,7 @@ options		:	/* empty */ {
 			}
 		|	options timeoutspec {
 			    $$.timeout = parse_timeout($2);
+			    free($2);
 			    if ($$.timeout == -1) {
 				sudoerserror(N_("unable parse timeout value"));
 				YYERROR;
@@ -591,21 +592,25 @@ options		:	/* empty */ {
 			}
 		|	options rolespec {
 #ifdef HAVE_SELINUX
+			    free($$.role);
 			    $$.role = $2;
 #endif
 			}
 		|	options typespec {
 #ifdef HAVE_SELINUX
+			    free($$.type);
 			    $$.type = $2;
 #endif
 			}
 		|	options privsspec {
 #ifdef HAVE_PRIV_SET
+			    free($$.privs);
 			    $$.privs = $2;
 #endif
 			}
 		|	options limitprivsspec {
 #ifdef HAVE_PRIV_SET
+			    free($$.limitprivs);
 			    $$.limitprivs = $2;
 #endif
 			}
@@ -927,7 +932,7 @@ new_member(char *name, int type)
 }
 
 static struct sudo_digest *
-new_digest(int digest_type, const char *digest_str)
+new_digest(int digest_type, char *digest_str)
 {
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER)
@@ -939,7 +944,7 @@ new_digest(int digest_type, const char *digest_str)
     }
 
     dig->digest_type = digest_type;
-    dig->digest_str = strdup(digest_str);
+    dig->digest_str = digest_str;
     if (dig->digest_str == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
@@ -1117,6 +1122,10 @@ init_parser(const char *path, bool quiet)
 			    (struct sudo_command *) cs->cmnd->name;
 			free(c->cmnd);
 			free(c->args);
+			if (c->digest != NULL) {
+			    free(c->digest->digest_str);
+			    free(c->digest);
+			}
 		}
 		free(cs->cmnd->name);
 		free(cs->cmnd);
