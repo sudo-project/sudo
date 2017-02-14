@@ -66,6 +66,7 @@ rcstr_alloc(size_t len)
 
     rcs->refcnt = 1;
     rcs->str[0] = '\0';
+    /* cppcheck-suppress memleak */
     debug_return_ptr(rcs->str);
 }
 
