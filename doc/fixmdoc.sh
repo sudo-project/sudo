@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2012-2014, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -118,7 +118,7 @@ case "$OUTFILE" in
 	# Solaris PrivSpec
 	if [ X"$PSMAN" != X"1" ]; then
 		cat >>"$OUTFILE" <<-'EOF'
-			s/Solaris_Priv_Spec? //
+			s/Solaris_Priv_Spec | //
 			/^Solaris_Priv_Spec ::=/ {
 				N
 				d
@@ -131,7 +131,7 @@ case "$OUTFILE" in
 	# SELinux
 	if [ X"$SEMAN" != X"1" ]; then
 		cat >>"$OUTFILE" <<-'EOF'
-			s/SELinux_Spec? //
+			s/SELinux_Spec | //
 			/^SELinux_Spec ::=/ {
 				N
 				d

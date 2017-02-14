@@ -474,12 +474,11 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Cmnd_Spec_List ::= Cmnd_Spec |
                         Cmnd_Spec ',' Cmnd_Spec_List
 
-     Cmnd_Spec ::= Runas_Spec? Option_Spec* Cmnd
+     Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
      Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec |
-                      Tag_Spec)
+     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec)
 
      SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
@@ -570,10 +569,11 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      setting the group to operator or system.
 
    OOppttiioonn__SSppeecc
-     A command may include zero or more options.  These options include
-     SELinux and Solaris settings as well as tags, described below.  Once an
-     option is set for a Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit
-     that option unless overridden by another option.
+     A Cmnd may have zero or more options associated with it.  Depending on
+     the system, options may consist of SELinux roles and/or types, Solaris
+     privileges sets, and command timeouts.  Once an option is set for a Cmnd,
+     subsequent Cmnds in the Cmnd_Spec_List, inherit that option unless it is
+     overridden by another option.
 
    SSEELLiinnuuxx__SSppeecc
      On systems with SELinux support, _s_u_d_o_e_r_s file entries may optionally have
@@ -612,11 +612,18 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      A command may have a timeout associated with it.  If the timeout expires
      before the command has exited, the command will be terminated.  The
      timeout may be specified in combinations of days, hours, minutes and
-     seconds.  For example, a timeout of 7 days, 8 hours, 30 minutes and 10
-     seconds would be written as 7d8h30m10s where the letter following a
-     number indicates the unit of time.  Any of the days, minutes, hours or
-     seconds may be omitted.  If a number is specified without a unit, seconds
-     is assumed.
+     seconds with a single-letter case-insensitive suffix that indicates the
+     unit of time.  For example, a timeout of 7 days, 8 hours, 30 minutes and
+     10 seconds would be written as 7d8h30m10s.  If a number is specified
+     without a unit, seconds are assumed.  Any of the days, minutes, hours or
+     seconds may be omitted.  The order must be from largest to smallest unit
+     and a unit may not be specified more than once.
+
+     The following are all _v_a_l_i_d timeout values: 7d8h30m10s, 14d, 8h30m, 600s,
+     3600.  The following are _i_n_v_a_l_i_d timeout values: 12m2w1d, 30s10m4h,
+     1d2d3h.
+
+     This option is only supported by version 1.8.20 or higher.
 
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  The following
@@ -1439,7 +1446,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        before it is terminated.  See the Timeout_Spec section
                        for a description of the timeout syntax.
 
-                       This setting is only supported by version 1.8.19 or
+                       This setting is only supported by version 1.8.20 or
                        higher.
 
      maxseq            The maximum sequence number that will be substituted
@@ -2706,4 +2713,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                    February 13, 2017                   Sudo 1.8.20
+Sudo 1.8.20                    February 14, 2017                   Sudo 1.8.20

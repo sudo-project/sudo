@@ -113,7 +113,6 @@ struct cmndtag {
  * Per-command option container struct.
  */
 struct command_options {
-    struct cmndtag tags;		/* tag specificaion */
     int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */

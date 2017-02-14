@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 13, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 14, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -982,12 +982,11 @@ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
 Cmnd_Spec_List ::= Cmnd_Spec |
                    Cmnd_Spec ',' Cmnd_Spec_List
 
-Cmnd_Spec ::= Runas_Spec? Option_Spec* Cmnd
+Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec |
-                 Tag_Spec)
+Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec)
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
@@ -1191,16 +1190,18 @@ user
 may run any command as either user root or bin,
 optionally setting the group to operator or system.
 .SS "Option_Spec"
-A command may include zero or more options.
-These options include SELinux and Solaris settings as well
-as tags, described below.
+A
+\fRCmnd\fR
+may have zero or more options associated with it.
+Depending on the system, options may consist of SELinux roles
+and/or types, Solaris privileges sets, and command timeouts.
 Once an option is set for a
 \fRCmnd\fR,
 subsequent
 \fRCmnd\fRs
 in the
 \fRCmnd_Spec_List\fR,
-inherit that option unless overridden by another option.
+inherit that option unless it is overridden by another option.
 .SS "SELinux_Spec"
 On systems with SELinux support,
 \fIsudoers\fR
@@ -1261,13 +1262,32 @@ A command may have a timeout associated with it.
 If the timeout expires before the command has exited, the
 command will be terminated.
 The timeout may be specified in combinations of days, hours,
-minutes and seconds.
+minutes and seconds with a single-letter case-insensitive suffix
+that indicates the unit of time.
 For example, a timeout of 7 days, 8 hours, 30 minutes and
 10 seconds would be written as
-\fR7d8h30m10s\fR
-where the letter following a number indicates the unit of time.
+\fR7d8h30m10s\fR.
+If a number is specified without a unit, seconds are assumed.
 Any of the days, minutes, hours or seconds may be omitted.
-If a number is specified without a unit, seconds is assumed.
+The order must be from largest to smallest unit and a unit
+may not be specified more than once.
+.PP
+The following are all
+\fIvalid\fR
+timeout values:
+\fR7d8h30m10s\fR,
+\fR14d\fR,
+\fR8h30m\fR,
+\fR600s\fR,
+\fR3600\fR.
+The following are
+\fIinvalid\fR
+timeout values:
+\fR12m2w1d\fR,
+\fR30s10m4h\fR,
+\fR1d2d3h\fR.
+.PP
+This option is only supported by version 1.8.20 or higher.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -3010,7 +3030,7 @@ See the
 \fRTimeout_Spec\fR
 section for a description of the timeout syntax.
 .sp
-This setting is only supported by version 1.8.19 or higher.
+This setting is only supported by version 1.8.20 or higher.
 .TP 18n
 maxseq
 The maximum sequence number that will be substituted for the

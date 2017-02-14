@@ -85,6 +85,7 @@ static struct sudo_digest *new_digest(int, const char *);
     struct sudo_digest *digest;
     struct sudo_command command;
     struct command_options options;
+    struct cmndtag tag;
     char *string;
     int tok;
 }
@@ -158,6 +159,7 @@ static struct sudo_digest *new_digest(int, const char *);
 %type <runas>	  runaslist
 %type <privilege> privilege
 %type <privilege> privileges
+%type <tag>	  cmndtag
 %type <options>	  options
 %type <string>	  rolespec
 %type <string>	  typespec
@@ -383,7 +385,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec options digcmnd {
+cmndspec	:	runasspec options cmndtag digcmnd {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -421,8 +423,8 @@ cmndspec	:	runasspec options digcmnd {
 			    cs->limitprivs = $2.limitprivs;
 #endif
 			    cs->timeout = $2.timeout;
-			    cs->tags = $2.tags;
-			    cs->cmnd = $3;
+			    cs->tags = $3;
+			    cs->cmnd = $4;
 			    HLTQ_INIT(cs, entries);
 			    /* sudo "ALL" implies the SETENV tag */
 			    if (cs->cmnd->type == ALL && !cs->cmnd->negated &&
@@ -587,48 +589,6 @@ options		:	/* empty */ {
 				YYERROR;
 			    }
 			}
-		|	options NOPASSWD {
-			    $$.tags.nopasswd = true;
-			}
-		|	options PASSWD {
-			    $$.tags.nopasswd = false;
-			}
-		|	options NOEXEC {
-			    $$.tags.noexec = true;
-			}
-		|	options EXEC {
-			    $$.tags.noexec = false;
-			}
-		|	options SETENV {
-			    $$.tags.setenv = true;
-			}
-		|	options NOSETENV {
-			    $$.tags.setenv = false;
-			}
-		|	options LOG_INPUT {
-			    $$.tags.log_input = true;
-			}
-		|	options NOLOG_INPUT {
-			    $$.tags.log_input = false;
-			}
-		|	options LOG_OUTPUT {
-			    $$.tags.log_output = true;
-			}
-		|	options NOLOG_OUTPUT {
-			    $$.tags.log_output = false;
-			}
-		|	options FOLLOW {
-			    $$.tags.follow = true;
-			}
-		|	options NOFOLLOW {
-			    $$.tags.follow = false;
-			}
-		|	options MAIL {
-			    $$.tags.send_mail = true;
-			}
-		|	options NOMAIL {
-			    $$.tags.send_mail = false;
-			}
 		|	options rolespec {
 #ifdef HAVE_SELINUX
 			    $$.role = $2;
@@ -648,6 +608,53 @@ options		:	/* empty */ {
 #ifdef HAVE_PRIV_SET
 			    $$.limitprivs = $2;
 #endif
+			}
+		;
+
+cmndtag		:	/* empty */ {
+			    TAGS_INIT($$);
+			}
+		|	cmndtag NOPASSWD {
+			    $$.nopasswd = true;
+			}
+		|	cmndtag PASSWD {
+			    $$.nopasswd = false;
+			}
+		|	cmndtag NOEXEC {
+			    $$.noexec = true;
+			}
+		|	cmndtag EXEC {
+			    $$.noexec = false;
+			}
+		|	cmndtag SETENV {
+			    $$.setenv = true;
+			}
+		|	cmndtag NOSETENV {
+			    $$.setenv = false;
+			}
+		|	cmndtag LOG_INPUT {
+			    $$.log_input = true;
+			}
+		|	cmndtag NOLOG_INPUT {
+			    $$.log_input = false;
+			}
+		|	cmndtag LOG_OUTPUT {
+			    $$.log_output = true;
+			}
+		|	cmndtag NOLOG_OUTPUT {
+			    $$.log_output = false;
+			}
+		|	cmndtag FOLLOW {
+			    $$.follow = true;
+			}
+		|	cmndtag NOFOLLOW {
+			    $$.follow = false;
+			}
+		|	cmndtag MAIL {
+			    $$.send_mail = true;
+			}
+		|	cmndtag NOMAIL {
+			    $$.send_mail = false;
 			}
 		;
 
@@ -1168,7 +1175,6 @@ init_parser(const char *path, bool quiet)
 static void
 init_options(struct command_options *opts)
 {
-    TAGS_INIT(opts->tags);
     opts->timeout = UNSPEC;
 #ifdef HAVE_SELINUX
     opts->role = NULL;

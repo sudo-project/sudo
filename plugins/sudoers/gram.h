@@ -53,6 +53,7 @@ typedef union {
     struct sudo_digest *digest;
     struct sudo_command command;
     struct command_options options;
+    struct cmndtag tag;
     char *string;
     int tok;
 } YYSTYPE;
