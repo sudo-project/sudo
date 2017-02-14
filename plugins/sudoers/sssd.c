@@ -1728,6 +1728,20 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
 		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
 	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
 		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
+	    else if (!negated && strncmp(val, "command_timeout=", 16) == 0)
+		sudo_lbuf_append(lbuf, "TIMEOUT=%s ", val + 16);
+#ifdef HAVE_SELINUX
+	    else if (!negated && strncmp(val, "role=", 5) == 0)
+		sudo_lbuf_append(lbuf, "ROLE=%s ", val + 5);
+	    else if (!negated && strncmp(val, "type=", 5) == 0)
+		sudo_lbuf_append(lbuf, "TYPE=%s ", val + 5);
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    else if (!negated && strncmp(val, "privs=", 6) == 0)
+		sudo_lbuf_append(lbuf, "PRIVS=%s ", val + 6);
+	    else if (!negated && strncmp(val, "limitprivs=", 11) == 0)
+		sudo_lbuf_append(lbuf, "LIMITPRIVS=%s ", val + 11);
+#endif /* HAVE_PRIV_SET */
 	}
 	handle->fn_free_values(val_array);
 	break;
