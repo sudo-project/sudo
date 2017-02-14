@@ -343,17 +343,17 @@ cmndspeclist	:	cmndspec
 			    HLTQ_CONCAT($1, $3, entries);
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
-			    if ($3->role == NULL)
+			    if ($3->role == NULL && $3->type == NULL) {
 				$3->role = prev->role;
-			    if ($3->type == NULL)
 				$3->type = prev->type;
+			    }
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			    /* propagate privs & limitprivs */
-			    if ($3->privs == NULL)
+			    if ($3->privs == NULL && $3->limitprivs == NULL) {
 			        $3->privs = prev->privs;
-			    if ($3->limitprivs == NULL)
 			        $3->limitprivs = prev->limitprivs;
+			    }
 #endif /* HAVE_PRIV_SET */
 			    /* propagate command timeout */
 			    if ($3->timeout == UNSPEC)

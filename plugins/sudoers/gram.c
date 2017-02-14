@@ -1436,17 +1436,17 @@ case 35:
 			    HLTQ_CONCAT(yyvsp[-2].cmndspec, yyvsp[0].cmndspec, entries);
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
-			    if (yyvsp[0].cmndspec->role == NULL)
+			    if (yyvsp[0].cmndspec->role == NULL && yyvsp[0].cmndspec->type == NULL) {
 				yyvsp[0].cmndspec->role = prev->role;
-			    if (yyvsp[0].cmndspec->type == NULL)
 				yyvsp[0].cmndspec->type = prev->type;
+			    }
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			    /* propagate privs & limitprivs */
-			    if (yyvsp[0].cmndspec->privs == NULL)
+			    if (yyvsp[0].cmndspec->privs == NULL && yyvsp[0].cmndspec->limitprivs == NULL) {
 			        yyvsp[0].cmndspec->privs = prev->privs;
-			    if (yyvsp[0].cmndspec->limitprivs == NULL)
 			        yyvsp[0].cmndspec->limitprivs = prev->limitprivs;
+			    }
 #endif /* HAVE_PRIV_SET */
 			    /* propagate command timeout */
 			    if (yyvsp[0].cmndspec->timeout == UNSPEC)
