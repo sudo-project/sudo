@@ -134,7 +134,7 @@ STRSPLIT_TEST_OBJS = strsplit_test.lo
 
 PARSE_GIDS_TEST_OBJS = parse_gids_test.lo
 
-VSYSLOG_TEST_OBJS = vsyslog_test.lo
+VSYSLOG_TEST_OBJS = vsyslog_test.lo vsyslog.lo
 
 all: libsudo_util.la
 
