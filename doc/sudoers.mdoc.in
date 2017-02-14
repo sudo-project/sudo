@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 5, 2017
+.Dd February 13, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -935,9 +935,11 @@ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
 Cmnd_Spec_List ::= Cmnd_Spec |
                    Cmnd_Spec ',' Cmnd_Spec_List
 
-Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Solaris_Priv_Spec? Tag_Spec* Cmnd
+Cmnd_Spec ::= Runas_Spec? Option_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
+
+Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Tag_Spec)
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
@@ -1113,6 +1115,17 @@ user
 .Sy alan
 may run any command as either user root or bin,
 optionally setting the group to operator or system.
+.Ss Option_Spec
+A command may include zero or more options.
+These options include SELinux and Solaris settings as well
+as tags, described below.
+Once an option is set for a
+.Li Cmnd ,
+subsequent
+.Li Cmnd Ns s
+in the
+.Li Cmnd_Spec_List ,
+inherit that option unless overridden by another option.
 .Ss SELinux_Spec
 On systems with SELinux support,
 .Em sudoers

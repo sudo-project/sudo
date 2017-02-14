@@ -51,9 +51,7 @@ typedef union {
     struct privilege *privilege;
     struct sudo_digest *digest;
     struct sudo_command command;
-    struct cmndtag tag;
-    struct selinux_info seinfo;
-    struct solaris_privs_info privinfo;
+    struct command_options options;
     char *string;
     int tok;
 } YYSTYPE;

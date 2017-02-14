@@ -81,9 +81,7 @@ static struct sudo_digest *new_digest(int, const char *);
     struct privilege *privilege;
     struct sudo_digest *digest;
     struct sudo_command command;
-    struct cmndtag tag;
-    struct selinux_info seinfo;
-    struct solaris_privs_info privinfo;
+    struct command_options options;
     char *string;
     int tok;
 }
@@ -156,11 +154,9 @@ static struct sudo_digest *new_digest(int, const char *);
 %type <runas>	  runaslist
 %type <privilege> privilege
 %type <privilege> privileges
-%type <tag>	  cmndtag
-%type <seinfo>	  selinux
+%type <options>	  options
 %type <string>	  rolespec
 %type <string>	  typespec
-%type <privinfo>  solarisprivs
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
 %type <digest>	  digest
@@ -378,7 +374,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
+cmndspec	:	runasspec options digcmnd {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -412,11 +408,11 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			    cs->type = $2.type;
 #endif
 #ifdef HAVE_PRIV_SET
-			    cs->privs = $3.privs;
-			    cs->limitprivs = $3.limitprivs;
+			    cs->privs = $2.privs;
+			    cs->limitprivs = $2.limitprivs;
 #endif
-			    cs->tags = $4;
-			    cs->cmnd = $5;
+			    cs->tags = $2.tags;
+			    cs->cmnd = $3;
 			    HLTQ_INIT(cs, entries);
 			    /* sudo "ALL" implies the SETENV tag */
 			    if (cs->cmnd->type == ALL && !cs->cmnd->negated &&
@@ -490,56 +486,12 @@ typespec	:	TYPE '=' WORD {
 			}
 		;
 
-selinux		:	/* empty */ {
-			    $$.role = NULL;
-			    $$.type = NULL;
-			}
-		|	rolespec {
-			    $$.role = $1;
-			    $$.type = NULL;
-			}
-		|	typespec {
-			    $$.type = $1;
-			    $$.role = NULL;
-			}
-		|	rolespec typespec {
-			    $$.role = $1;
-			    $$.type = $2;
-			}
-		|	typespec rolespec {
-			    $$.type = $1;
-			    $$.role = $2;
-			}
-		;
-
 privsspec	:	PRIVS '=' WORD {
 			    $$ = $3;
 			}
 		;
 limitprivsspec	:	LIMITPRIVS '=' WORD {
 			    $$ = $3;
-			}
-		;
-
-solarisprivs	:	/* empty */ {
-			    $$.privs = NULL;
-			    $$.limitprivs = NULL;
-			}
-		|	privsspec {
-			    $$.privs = $1;
-			    $$.limitprivs = NULL;
-			}
-		|	limitprivsspec {
-			    $$.privs = NULL;
-			    $$.limitprivs = $1;
-			}
-		|	privsspec limitprivsspec {
-			    $$.privs = $1;
-			    $$.limitprivs = $2;
-			}
-		|	limitprivsspec privsspec {
-			    $$.limitprivs = $1;
-			    $$.privs = $2;
 			}
 		;
 
@@ -610,50 +562,76 @@ runaslist	:	/* empty */ {
 			}
 		;
 
-cmndtag		:	/* empty */ {
-			    TAGS_INIT($$);
+options		:	/* empty */ {
+			    TAGS_INIT($$.tags);
+#ifdef HAVE_SELINUX
+			    $$.role = NULL, $$.type = NULL;
+#endif
+#ifdef HAVE_PRIV_SET
+			    $$.privs = NULL, $$.limitprivs = NULL;
+#endif
 			}
-		|	cmndtag NOPASSWD {
-			    $$.nopasswd = true;
+		|	options NOPASSWD {
+			    $$.tags.nopasswd = true;
 			}
-		|	cmndtag PASSWD {
-			    $$.nopasswd = false;
+		|	options PASSWD {
+			    $$.tags.nopasswd = false;
 			}
-		|	cmndtag NOEXEC {
-			    $$.noexec = true;
+		|	options NOEXEC {
+			    $$.tags.noexec = true;
 			}
-		|	cmndtag EXEC {
-			    $$.noexec = false;
+		|	options EXEC {
+			    $$.tags.noexec = false;
 			}
-		|	cmndtag SETENV {
-			    $$.setenv = true;
+		|	options SETENV {
+			    $$.tags.setenv = true;
 			}
-		|	cmndtag NOSETENV {
-			    $$.setenv = false;
+		|	options NOSETENV {
+			    $$.tags.setenv = false;
 			}
-		|	cmndtag LOG_INPUT {
-			    $$.log_input = true;
+		|	options LOG_INPUT {
+			    $$.tags.log_input = true;
 			}
-		|	cmndtag NOLOG_INPUT {
-			    $$.log_input = false;
+		|	options NOLOG_INPUT {
+			    $$.tags.log_input = false;
 			}
-		|	cmndtag LOG_OUTPUT {
-			    $$.log_output = true;
+		|	options LOG_OUTPUT {
+			    $$.tags.log_output = true;
 			}
-		|	cmndtag NOLOG_OUTPUT {
-			    $$.log_output = false;
+		|	options NOLOG_OUTPUT {
+			    $$.tags.log_output = false;
 			}
-		|	cmndtag FOLLOW {
-			    $$.follow = true;
+		|	options FOLLOW {
+			    $$.tags.follow = true;
 			}
-		|	cmndtag NOFOLLOW {
-			    $$.follow = false;
+		|	options NOFOLLOW {
+			    $$.tags.follow = false;
 			}
-		|	cmndtag MAIL {
-			    $$.send_mail = true;
+		|	options MAIL {
+			    $$.tags.send_mail = true;
 			}
-		|	cmndtag NOMAIL {
-			    $$.send_mail = false;
+		|	options NOMAIL {
+			    $$.tags.send_mail = false;
+			}
+		|	options rolespec {
+#ifdef HAVE_SELINUX
+			    $$.role = $2;
+#endif
+			}
+		|	options typespec {
+#ifdef HAVE_SELINUX
+			    $$.type = $2;
+#endif
+			}
+		|	options privsspec {
+#ifdef HAVE_PRIV_SET
+			    $$.privs = $2;
+#endif
+			}
+		|	options limitprivsspec {
+#ifdef HAVE_PRIV_SET
+			    $$.limitprivs = $2;
+#endif
 			}
 		;
 

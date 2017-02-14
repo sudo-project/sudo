@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 5, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 13, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -982,9 +982,11 @@ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
 Cmnd_Spec_List ::= Cmnd_Spec |
                    Cmnd_Spec ',' Cmnd_Spec_List
 
-Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Solaris_Priv_Spec? Tag_Spec* Cmnd
+Cmnd_Spec ::= Runas_Spec? Option_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
+
+Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Tag_Spec)
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
@@ -1185,6 +1187,17 @@ user
 \fBalan\fR
 may run any command as either user root or bin,
 optionally setting the group to operator or system.
+.SS "Option_Spec"
+A command may include zero or more options.
+These options include SELinux and Solaris settings as well
+as tags, described below.
+Once an option is set for a
+\fRCmnd\fR,
+subsequent
+\fRCmnd\fRs
+in the
+\fRCmnd_Spec_List\fR,
+inherit that option unless overridden by another option.
 .SS "SELinux_Spec"
 On systems with SELinux support,
 \fIsudoers\fR

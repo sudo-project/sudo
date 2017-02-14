@@ -110,22 +110,16 @@ struct cmndtag {
 };
 
 /*
- * SELinux-specific container struct.
- * Currently just contains a role and type.
+ * Per-command option container struct.
  */
-struct selinux_info {
-    char *role;
-    char *type;
-};
-
-/*
- * Solaris privileges container struct
- * Currently just contains permitted and limit privileges.
- * It could have PFEXEC and PRIV_AWARE flags added in the future.
- */
-struct solaris_privs_info {
-    char *privs;
-    char *limitprivs;
+struct command_options {
+    struct cmndtag tags;		/* Command tags */
+#ifdef HAVE_SELINUX
+    char *role, *type;			/* SELinux role and type */
+#endif
+#ifdef HAVE_PRIV_SET
+    char *privs, *limitprivs;		/* Solaris privilege sets */
+#endif
 };
 
 /*
