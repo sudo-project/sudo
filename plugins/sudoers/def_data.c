@@ -450,6 +450,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Ignore unknown Defaults entries in sudoers instead of producing a warning"),
 	NULL,
     }, {
+	"command_timeout", T_TIMEOUT|T_BOOL,
+	N_("Time in seconds after which the command will be terminated: %u"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

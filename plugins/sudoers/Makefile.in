@@ -152,8 +152,8 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo hexchar.lo \
 		       gram.lo match.lo match_addr.lo pwutil.lo pwutil_impl.lo \
-		       rcstr.lo redblack.lo sudoers_debug.lo timestr.lo \
-		       toke.lo toke_util.lo
+		       rcstr.lo redblack.lo sudoers_debug.lo timeout.lo \
+		       timestr.lo toke.lo toke_util.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo find_path.lo \
 	       gc.lo goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
@@ -1077,6 +1077,16 @@ testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/testsudoers.c
+timeout.lo: $(srcdir)/timeout.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timeout.c
 timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

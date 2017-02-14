@@ -95,9 +95,9 @@ DDEESSCCRRIIPPTTIIOONN
      was used to authenticate, the terminal session ID, and a time stamp
      (using a monotonic clock if one is available).  The user may then use
      ssuuddoo without a password for a short period of time (5 minutes unless
-     overridden by the _t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a separate
-     record for each tty, which means that a user's login sessions are
-     authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
+     overridden by the _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a
+     separate record for each tty, which means that a user's login sessions
+     are authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
      force the use of a single time stamp for all of a user's sessions.
 
    LLooggggiinngg
@@ -478,11 +478,14 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Tag_Spec)
+     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec |
+                      Tag_Spec)
 
      SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
      Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
+
+     Timeout_Spec ::= 'TIMEOUT=timeout'
 
      Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
                    'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
@@ -604,6 +607,16 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Privileges can be excluded from a set by prefixing the privilege name
      with either an `!' or `-' character.
+
+   TTiimmeeoouutt__SSppeecc
+     A command may have a timeout associated with it.  If the timeout expires
+     before the command has exited, the command will be terminated.  The
+     timeout may be specified in combinations of days, hours, minutes and
+     seconds.  For example, a timeout of 7 days, 8 hours, 30 minutes and 10
+     seconds would be written as 7d8h30m10s where the letter following a
+     number indicates the unit of time.  Any of the days, minutes, hours or
+     seconds may be omitted.  If a number is specified without a unit, seconds
+     is assumed.
 
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  The following
@@ -1421,6 +1434,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        The _c_l_o_s_e_f_r_o_m option can be used to specify a different
                        file descriptor at which to start closing.  The default
                        is 3.
+
+     command_timeout   The maximum amount of time a command is allowed to run
+                       before it is terminated.  See the Timeout_Spec section
+                       for a description of the timeout syntax.
+
+                       This setting is only supported by version 1.8.19 or
+                       higher.
 
      maxseq            The maximum sequence number that will be substituted
                        for the ``%{seq}'' escape in the I/O log file (see the

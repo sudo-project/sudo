@@ -407,6 +407,14 @@ plugins/sudoers/regress/sudoers/test16.in
 plugins/sudoers/regress/sudoers/test16.json.ok
 plugins/sudoers/regress/sudoers/test16.out.ok
 plugins/sudoers/regress/sudoers/test16.toke.ok
+plugins/sudoers/regress/sudoers/test17.in
+plugins/sudoers/regress/sudoers/test17.json.ok
+plugins/sudoers/regress/sudoers/test17.out.ok
+plugins/sudoers/regress/sudoers/test17.toke.ok
+plugins/sudoers/regress/sudoers/test18.in
+plugins/sudoers/regress/sudoers/test18.json.ok
+plugins/sudoers/regress/sudoers/test18.out.ok
+plugins/sudoers/regress/sudoers/test18.toke.ok
 plugins/sudoers/regress/sudoers/test2.in
 plugins/sudoers/regress/sudoers/test2.json.ok
 plugins/sudoers/regress/sudoers/test2.out.ok
@@ -493,6 +501,7 @@ plugins/sudoers/sudoers_debug.h
 plugins/sudoers/sudoers_version.h
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
+plugins/sudoers/timeout.c
 plugins/sudoers/timestamp.c
 plugins/sudoers/timestr.c
 plugins/sudoers/toke.c

@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -43,6 +43,8 @@
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
+#include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 
 #include "sudoers.h" /* XXX */
@@ -66,6 +68,7 @@ struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
 /*
  * Local protoypes
  */
+static void init_options(struct command_options *opts);
 static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
@@ -127,6 +130,7 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
+%token <tok>	 CMND_TIMEOUT		/* command timeout */
 %token <tok>	 MYSELF			/* run as myself, not another user */
 %token <tok>	 SHA224_TOK		/* sha224 token */
 %token <tok>	 SHA256_TOK		/* sha256 token */
@@ -159,7 +163,9 @@ static struct sudo_digest *new_digest(int, const char *);
 %type <string>	  typespec
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
+%type <string>	  timeoutspec
 %type <digest>	  digest
+%type <options>	  options
 
 %%
 
@@ -347,6 +353,9 @@ cmndspeclist	:	cmndspec
 			    if ($3->limitprivs == NULL)
 			        $3->limitprivs = prev->limitprivs;
 #endif /* HAVE_PRIV_SET */
+			    /* propagate command timeout */
+			    if ($3->timeout == UNSPEC)
+				$3->timeout = prev->timeout;
 			    /* propagate tags and runas list */
 			    if ($3->tags.nopasswd == UNSPEC)
 				$3->tags.nopasswd = prev->tags.nopasswd;
@@ -411,6 +420,7 @@ cmndspec	:	runasspec options digcmnd {
 			    cs->privs = $2.privs;
 			    cs->limitprivs = $2.limitprivs;
 #endif
+			    cs->timeout = $2.timeout;
 			    cs->tags = $2.tags;
 			    cs->cmnd = $3;
 			    HLTQ_INIT(cs, entries);
@@ -473,6 +483,11 @@ opcmnd		:	cmnd {
 		|	'!' cmnd {
 			    $$ = $2;
 			    $$->negated = true;
+			}
+		;
+
+timeoutspec	:	CMND_TIMEOUT '=' WORD {
+			    $$ = $3;
 			}
 		;
 
@@ -563,13 +578,14 @@ runaslist	:	/* empty */ {
 		;
 
 options		:	/* empty */ {
-			    TAGS_INIT($$.tags);
-#ifdef HAVE_SELINUX
-			    $$.role = NULL, $$.type = NULL;
-#endif
-#ifdef HAVE_PRIV_SET
-			    $$.privs = NULL, $$.limitprivs = NULL;
-#endif
+			    init_options(&$$);
+			}
+		|	options timeoutspec {
+			    $$.timeout = parse_timeout($2);
+			    if ($$.timeout == -1) {
+				sudoerserror(N_("unable parse timeout value"));
+				YYERROR;
+			    }
 			}
 		|	options NOPASSWD {
 			    $$.tags.nopasswd = true;
@@ -1144,4 +1160,22 @@ init_parser(const char *path, bool quiet)
     sudoers_warnings = !quiet;
 
     debug_return_bool(ret);
+}
+
+/*
+ * Initialize all options in a cmndspec.
+ */
+static void
+init_options(struct command_options *opts)
+{
+    TAGS_INIT(opts->tags);
+    opts->timeout = UNSPEC;
+#ifdef HAVE_SELINUX
+    opts->role = NULL;
+    opts->type = NULL;
+#endif
+#ifdef HAVE_PRIV_SET
+    opts->privs = NULL;
+    opts->limitprivs = NULL;
+#endif
 }

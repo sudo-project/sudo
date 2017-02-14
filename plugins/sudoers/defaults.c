@@ -101,6 +101,7 @@ static bool store_mode(const char *str, union sudo_defs_val *sd_un);
 static int  store_str(const char *str, union sudo_defs_val *sd_un);
 static bool store_syslogfac(const char *str, union sudo_defs_val *sd_un);
 static bool store_syslogpri(const char *str, union sudo_defs_val *sd_un);
+static bool store_timeout(const char *str, union sudo_defs_val *sd_un);
 static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
 static bool store_float(const char *str, union sudo_defs_val *sd_un);
@@ -176,6 +177,13 @@ dump_defaults(void)
 			    sudo_printf(SUDO_CONV_INFO_MSG,
 				"\t%s\n", item->value);
 			}
+		    }
+		    break;
+		case T_TIMEOUT:
+		    if (cur->sd_un.ival) {
+			sudo_printf(SUDO_CONV_INFO_MSG, desc,
+			    cur->sd_un.ival);
+			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
 		case T_TUPLE:
@@ -300,6 +308,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_LIST:
 	    rc = store_list(val, sd_un, op);
+	    break;
+	case T_TIMEOUT:
+	    rc = store_timeout(val, sd_un);
 	    break;
 	case T_TUPLE:
 	    rc = store_tuple(val, sd_un, def->values);
@@ -982,6 +993,25 @@ store_mode(const char *str, union sudo_defs_val *sd_un)
 	    debug_return_bool(false);
 	}
 	sd_un->mode = mode;
+    }
+    debug_return_bool(true);
+}
+
+static bool
+store_timeout(const char *str, union sudo_defs_val *sd_un)
+{
+    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
+
+    if (str == NULL) {
+	sd_un->ival = 0;
+    } else {
+	int seconds = parse_timeout(str);
+	if (seconds == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"%s", str);
+	    debug_return_bool(false);
+	}
+	sd_un->ival = seconds;
     }
     debug_return_bool(true);
 }

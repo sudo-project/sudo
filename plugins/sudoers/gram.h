@@ -36,11 +36,12 @@
 #define ROLE 292
 #define PRIVS 293
 #define LIMITPRIVS 294
-#define MYSELF 295
-#define SHA224_TOK 296
-#define SHA256_TOK 297
-#define SHA384_TOK 298
-#define SHA512_TOK 299
+#define CMND_TIMEOUT 295
+#define MYSELF 296
+#define SHA224_TOK 297
+#define SHA256_TOK 298
+#define SHA384_TOK 299
+#define SHA512_TOK 300
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {

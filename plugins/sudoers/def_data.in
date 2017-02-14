@@ -329,3 +329,6 @@ fdexec
 ignore_unknown_defaults
 	T_FLAG
 	"Ignore unknown Defaults entries in sudoers instead of producing a warning"
+command_timeout
+	T_TIMEOUT|T_BOOL
+	"Time in seconds after which the command will be terminated: %u"

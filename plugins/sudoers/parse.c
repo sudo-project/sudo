@@ -145,7 +145,7 @@ sudo_file_setdefs(struct sudo_nss *nss)
 int
 sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 {
-    int match, host_match, runas_match, cmnd_match;
+    int match, host_match, runas_match, cmnd_match, timeout;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
     struct privilege *priv;
@@ -227,6 +227,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 		    if (cmnd_match != UNSPEC) {
 			match = cmnd_match;
 			tags = &cs->tags;
+			timeout = cs->timeout;
 #ifdef HAVE_SELINUX
 			/* Set role and type if not specified on command line. */
 			if (user_role == NULL) {
@@ -301,6 +302,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     if (match == ALLOW) {
 	SET(validated, VALIDATE_SUCCESS);
 	CLR(validated, VALIDATE_FAILURE);
+	if (timeout > 0)
+	    def_command_timeout = timeout;
 	if (tags != NULL) {
 	    if (tags->nopasswd != UNSPEC)
 		def_authenticate = !tags->nopasswd;
@@ -370,6 +373,11 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     if (cs->type)
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
+    if (cs->timeout > 0) {
+	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+	snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
+	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
+    }
     if (TAG_CHANGED(setenv)) {
 	tags->setenv = cs->tags.setenv;
 	sudo_lbuf_append(lbuf, tags->setenv ? "SETENV: " : "NOSETENV: ");
@@ -481,6 +489,8 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
     if (cs->type && (!prev_cs->type || strcmp(cs->type, prev_cs->type) != 0))
 	return true;
 #endif /* HAVE_SELINUX */
+    if (cs->timeout != prev_cs->timeout)
+	return true;
     return false;
 }
 
@@ -553,6 +563,11 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		if (cs->type)
 		    sudo_lbuf_append(lbuf, "    Type: %s\n", cs->type);
 #endif /* HAVE_SELINUX */
+		if (cs->timeout > 0) {
+		    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+		    snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
+		    sudo_lbuf_append(lbuf, "    Timeout: %s\n", numbuf);
+		}
 		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }
 	    sudo_lbuf_append(lbuf, "\t");

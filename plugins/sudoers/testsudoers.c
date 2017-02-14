@@ -634,6 +634,8 @@ print_privilege(struct privilege *priv)
 	if (cs->limitprivs)
 	    printf("LIMITPRIVS=%s ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
+	if (cs->timeout > 0)
+	    printf("TIMEOUT=%d ", cs->timeout);
 	if (TAG_CHANGED(follow))
 	    printf("%sFOLLOW: ", cs->tags.follow ? "" : "NO");
 	if (TAG_CHANGED(log_input))

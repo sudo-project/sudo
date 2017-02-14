@@ -2479,6 +2479,8 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
 		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
 	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
 		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
+	    else if (!negated && strcmp(val, "command_timeout") == 0)
+		sudo_lbuf_append(lbuf, "TIMEOUT=%s", val);
 	}
 	ldap_value_free_len(bv);
     }

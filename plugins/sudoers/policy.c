@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -578,6 +578,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     }
     if (def_iolog_group != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("iolog_group", def_iolog_group)) == NULL)
+	    goto oom;
+    }
+    if (def_command_timeout != 0) {
+	if (asprintf(&command_info[info_len++], "timeout=%u", def_command_timeout) == -1)
 	    goto oom;
     }
     if (cmnd_umask != ACCESSPERMS) {

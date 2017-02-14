@@ -530,6 +530,11 @@ ALL {
 
 			}
 
+<INITIAL>TIMEOUT {
+			    LEXTRACE("CMND_TIMEOUT ");
+			    LEXRETURN(CMND_TIMEOUT);
+			}
+
 <INITIAL>ROLE {
 #ifdef HAVE_SELINUX
 			    LEXTRACE("ROLE ");

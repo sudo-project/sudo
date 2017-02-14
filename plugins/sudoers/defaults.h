@@ -99,6 +99,8 @@ struct early_default {
 #define T_TUPLE		0x009
 #undef T_FLOAT
 #define T_FLOAT		0x010
+#undef T_TIMEOUT
+#define T_TIMEOUT	0x020
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL

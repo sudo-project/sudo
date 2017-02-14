@@ -113,7 +113,8 @@ struct cmndtag {
  * Per-command option container struct.
  */
 struct command_options {
-    struct cmndtag tags;		/* Command tags */
+    struct cmndtag tags;		/* tag specificaion */
+    int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif
@@ -168,6 +169,7 @@ struct privilege {
 
 /*
  * Structure describing a linked list of Cmnd_Specs.
+ * XXX - include struct command_options instad of its contents inline
  */
 struct cmndspec {
     TAILQ_ENTRY(cmndspec) entries;
@@ -175,6 +177,7 @@ struct cmndspec {
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
+    int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif
@@ -274,5 +277,8 @@ int hexchar(const char *s);
 
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
+
+/* timeout.c */
+int parse_timeout(const char *timestr);
 
 #endif /* SUDOERS_PARSE_H */

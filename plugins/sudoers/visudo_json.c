@@ -781,11 +781,17 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     }
 
     /* Print tags */
-    if (TAGS_SET(cs->tags)) {
+    if (cs->timeout > 0 || TAGS_SET(cs->tags)) {
 	struct cmndtag tag = cs->tags;
 
 	fprintf(fp, "%*s\"Options\": [\n", indent, "");
 	indent += 4;
+	if (cs->timeout > 0) {
+	    value.type = JSON_NUMBER;
+	    value.u.number = cs->timeout;
+	    print_pair_json(fp, "{ ", "command_timeout", &value,
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	}
 	if (tag.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = !tag.nopasswd;

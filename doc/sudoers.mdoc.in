@@ -213,7 +213,7 @@ without a password for a short period of time
 .Po
 .Li @timeout@
 minutes unless overridden by the
-.Em timeout
+.Em timestamp_timeout
 option
 .Pc .
 By default,
@@ -939,11 +939,14 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Tag_Spec)
+Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec |
+                 Tag_Spec)
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
+
+Timeout_Spec ::= 'TIMEOUT=timeout'
 
 Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
               'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
@@ -1176,6 +1179,18 @@ name with either an
 or
 .Ql \-
 character.
+.Ss Timeout_Spec
+A command may have a timeout associated with it.
+If the timeout expires before the command has exited, the
+command will be terminated.
+The timeout may be specified in combinations of days, hours,
+minutes and seconds.
+For example, a timeout of 7 days, 8 hours, 30 minutes and
+10 seconds would be written as
+.Li 7d8h30m10s
+where the letter following a number indicates the unit of time.
+Any of the days, minutes, hours or seconds may be omitted.
+If a number is specified without a unit, seconds is assumed.
 .Ss Tag_Spec
 A command may have zero or more tags associated with it.
 The following tag values are supported:
@@ -2804,6 +2819,14 @@ option can be used to specify a different file descriptor at which
 to start closing.
 The default is
 .Li 3 .
+.It command_timeout
+The maximum amount of time a command is allowed to run before
+it is terminated.
+See the
+.Li Timeout_Spec
+section for a description of the timeout syntax.
+.Pp
+This setting is only supported by version 1.8.20 or higher.
 .It maxseq
 The maximum sequence number that will be substituted for the
 .Dq Li %{seq}

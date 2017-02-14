@@ -38,7 +38,7 @@
 #define YYPREFIX "sudoers"
 #line 2 "gram.y"
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -81,6 +81,8 @@
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
+#include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 
 #include "sudoers.h" /* XXX */
@@ -104,12 +106,13 @@ struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
 /*
  * Local protoypes
  */
+static void init_options(struct command_options *opts);
 static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
 static struct sudo_digest *new_digest(int, const char *);
-#line 76 "gram.y"
+#line 79 "gram.y"
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -125,7 +128,7 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 128 "gram.c"
+#line 131 "gram.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -164,11 +167,12 @@ typedef union {
 #define ROLE 292
 #define PRIVS 293
 #define LIMITPRIVS 294
-#define MYSELF 295
-#define SHA224_TOK 296
-#define SHA256_TOK 297
-#define SHA384_TOK 298
-#define SHA512_TOK 299
+#define CMND_TIMEOUT 295
+#define MYSELF 296
+#define SHA224_TOK 297
+#define SHA256_TOK 298
+#define SHA384_TOK 299
+#define SHA512_TOK 300
 #define YYERRCODE 256
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoerslhs[] =
@@ -176,17 +180,18 @@ const short sudoerslhs[] =
 short sudoerslhs[] =
 #endif
 	{                                        -1,
-    0,    0,   28,   28,   29,   29,   29,   29,   29,   29,
-   29,   29,   29,   29,   29,   29,    4,    4,    3,    3,
+    0,    0,   29,   29,   30,   30,   30,   30,   30,   30,
+   30,   30,   30,   30,   30,   30,    4,    4,    3,    3,
     3,    3,    3,   21,   21,   20,   11,   11,    9,    9,
-    9,    9,    9,    2,    2,    1,   27,   27,   27,   27,
-    7,    7,    6,    6,   23,   24,   25,   26,   18,   18,
-   19,   19,   19,   19,   19,   22,   22,   22,   22,   22,
+    9,    9,    9,    2,    2,    1,   28,   28,   28,   28,
+    7,    7,    6,    6,   27,   23,   24,   25,   26,   18,
+   18,   19,   19,   19,   19,   19,   22,   22,   22,   22,
    22,   22,   22,   22,   22,   22,   22,   22,   22,   22,
-   22,   22,   22,   22,    5,    5,    5,   31,   31,   34,
-   10,   10,   32,   32,   35,    8,    8,   33,   33,   36,
-   30,   30,   37,   14,   14,   12,   12,   13,   13,   13,
-   13,   13,   17,   17,   15,   15,   16,   16,   16,
+   22,   22,   22,   22,   22,   22,    5,    5,    5,   32,
+   32,   35,   10,   10,   33,   33,   36,    8,    8,   34,
+   34,   37,   31,   31,   38,   14,   14,   12,   12,   13,
+   13,   13,   13,   13,   17,   17,   15,   15,   16,   16,
+   16,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoerslen[] =
@@ -198,13 +203,14 @@ short sudoerslen[] =
     2,    2,    3,    3,    3,    3,    1,    3,    1,    2,
     3,    3,    3,    1,    3,    3,    1,    2,    1,    1,
     1,    1,    1,    1,    3,    3,    3,    3,    3,    3,
-    1,    2,    1,    2,    3,    3,    3,    3,    0,    3,
-    0,    1,    3,    2,    1,    0,    2,    2,    2,    2,
+    1,    2,    1,    2,    3,    3,    3,    3,    3,    0,
+    3,    0,    1,    3,    2,    1,    0,    2,    2,    2,
     2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
-    2,    2,    2,    2,    1,    1,    1,    1,    3,    3,
-    1,    3,    1,    3,    3,    1,    3,    1,    3,    3,
-    1,    3,    3,    1,    3,    1,    2,    1,    1,    1,
-    1,    1,    1,    3,    1,    2,    1,    1,    1,
+    2,    2,    2,    2,    2,    2,    1,    1,    1,    1,
+    3,    3,    1,    3,    1,    3,    3,    1,    3,    1,
+    3,    3,    1,    3,    3,    1,    3,    1,    2,    1,
+    1,    1,    1,    1,    1,    3,    1,    2,    1,    1,
+    1,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoersdefred[] =
@@ -212,24 +218,24 @@ const short sudoersdefred[] =
 short sudoersdefred[] =
 #endif
 	{                                      0,
-    0,   98,  100,  101,  102,    0,    0,    0,    0,    0,
-   99,    5,    0,    0,    0,    0,    0,    0,   94,   96,
+    0,  100,  102,  103,  104,    0,    0,    0,    0,    0,
+  101,    5,    0,    0,    0,    0,    0,    0,   96,   98,
     0,    0,    3,    6,    0,    0,   17,    0,   29,   32,
-   31,   33,   30,    0,   27,    0,   81,    0,    0,   77,
-   76,   75,    0,    0,    0,    0,    0,   43,   41,   86,
-    0,    0,    0,    0,   78,    0,    0,   83,    0,    0,
-   91,    0,    0,   88,   97,    0,    0,   24,    0,    4,
+   31,   33,   30,    0,   27,    0,   83,    0,    0,   79,
+   78,   77,    0,    0,    0,    0,    0,   43,   41,   88,
+    0,    0,    0,    0,   80,    0,    0,   85,    0,    0,
+   93,    0,    0,   90,   99,    0,    0,   24,    0,    4,
     0,    0,    0,   20,    0,   28,    0,    0,    0,    0,
    44,    0,    0,    0,    0,    0,    0,   42,    0,    0,
-    0,    0,    0,    0,    0,    0,   95,    0,    0,   21,
-   22,   23,   18,   82,   37,   38,   39,   40,   87,    0,
-   79,    0,   84,    0,   92,    0,   89,    0,   34,    0,
-   56,   25,    0,    0,    0,    0,    0,  107,  109,  108,
-    0,  103,  105,    0,    0,   50,   35,   57,   58,   59,
-   60,   61,   62,   63,   64,   65,   66,   69,   70,   67,
-   68,    0,    0,    0,    0,   36,   71,   72,   73,   74,
-  106,    0,    0,    0,    0,    0,    0,  104,   46,   45,
-   47,   48,
+    0,    0,    0,    0,    0,    0,   97,    0,    0,   21,
+   22,   23,   18,   84,   37,   38,   39,   40,   89,    0,
+   81,    0,   86,    0,   94,    0,   91,    0,   34,    0,
+   57,   25,    0,    0,    0,    0,    0,  109,  111,  110,
+    0,  105,  107,    0,    0,   51,   35,   59,   60,   61,
+   62,   63,   64,   65,   66,   67,   68,   71,   72,   69,
+   70,    0,    0,    0,    0,    0,   36,   73,   74,   75,
+   76,   58,  108,    0,    0,    0,    0,    0,    0,    0,
+  106,   47,   46,   48,   49,   45,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoersdgoto[] =
@@ -239,69 +245,69 @@ short sudoersdgoto[] =
 	{                                      18,
   119,  120,   27,   28,   48,   49,   50,   51,   35,   67,
    37,   19,   20,   21,  132,  133,  134,  121,  125,   68,
-   69,  127,  157,  158,  159,  160,   52,   22,   23,   60,
-   54,   57,   63,   55,   58,   64,   61,
+   69,  127,  158,  159,  160,  161,  162,   52,   22,   23,
+   60,   54,   57,   63,   55,   58,   64,   61,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoerssindex[] =
 #else
 short sudoerssindex[] =
 #endif
-	{                                    478,
- -266,    0,    0,    0,    0,  -23,  289,  -19,  -19,   -5,
+	{                                    499,
+ -266,    0,    0,    0,    0,  -23,  227,  -19,  -19,   -5,
     0,    0, -233, -232, -221, -219, -231,    0,    0,    0,
-  -33,  478,    0,    0,   -3, -216,    0,    3,    0,    0,
+  -33,  499,    0,    0,   -3, -216,    0,    3,    0,    0,
     0,    0,    0, -225,    0,  -28,    0,  -24,  -24,    0,
     0,    0, -240,   -8,   -7,   -2,    2,    0,    0,    0,
   -21,  -12,   -9,    8,    0,   -4,   10,    0,    9,   11,
     0,   13,   14,    0,    0,  -19,  -37,    0,   17,    0,
- -208, -202, -192,    0,  -23,    0,  289,    3,    3,    3,
-    0, -188, -186, -185, -184,   -5,    3,    0,  289, -233,
-   -5, -232,  -19, -221,  -19, -219,    0,   41,  289,    0,
+ -208, -202, -192,    0,  -23,    0,  227,    3,    3,    3,
+    0, -188, -186, -185, -184,   -5,    3,    0,  227, -233,
+   -5, -232,  -19, -221,  -19, -219,    0,   41,  227,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,   39,
     0,   40,    0,   42,    0,   42,    0,  -29,    0,   46,
-    0,    0,  405,  -36,   44,   41,  404,    0,    0,    0,
- -217,    0,    0,   47,  405,    0,    0,    0,    0,    0,
+    0,    0,  289,  -36,   44,   41,  404,    0,    0,    0,
+ -217,    0,    0,   47,  289,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,   31,   32,   33,   34,    0,    0,    0,    0,    0,
-    0,  405,   47, -165, -164, -163, -162,    0,    0,    0,
-    0,    0,};
+    0,   31,   32,   33,   34,   37,    0,    0,    0,    0,
+    0,    0,    0,  289,   47, -164, -163, -162, -161, -160,
+    0,    0,    0,    0,    0,    0,};
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoersrindex[] =
 #else
 short sudoersrindex[] =
 #endif
-	{                                    102,
+	{                                    104,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,  103,    0,    0,    1,    0,    0,  145,    0,    0,
+    0,  105,    0,    0,    1,    0,    0,  145,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,  159,    0,    0,  193,    0,    0,  207,
     0,    0,  241,    0,    0,    0,    0,    0,  275,    0,
     0,    0,    0,    0,    0,    0,    0,  309,  323,  357,
     0,    0,    0,    0,    0,    0,  371,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,  434,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,  450,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,   15,
-    0,   49,    0,   63,    0,   97,    0,   64,    0,  111,
-    0,    0,   65,   67,    0,  434,    0,    0,    0,    0,
-    0,    0,    0,   68,    0,    0,    0,    0,    0,    0,
+    0,   49,    0,   63,    0,   97,    0,   65,    0,  111,
+    0,    0,   67,   68,    0,  450,    0,    0,    0,    0,
+    0,    0,    0,   69,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,   69,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,};
+    0,    0,    0,    0,   72,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,};
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoersgindex[] =
 #else
 short sudoersgindex[] =
 #endif
 	{                                      0,
-  -22,    0,   38,   26,   71,   66,  -73,   24,   82,   -1,
-   43,   51,  105,   -6,  -43,    4,  -11,    0,    0,   27,
-    0,    0,    0,    0,    0,    0,    0,    0,  101,    0,
-    0,    0,    0,   35,   36,   37,   45,
+  -11,    0,   43,   26,   71,   64,  -73,   28,   83,   -1,
+   45,   54,  106,   -6,  -40,    4,  -10,    0,    0,   27,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,  107,
+    0,    0,    0,    0,   38,   35,   36,   48,
 };
-#define YYTABLESIZE 767
+#define YYTABLESIZE 788
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoerstable[] =
 #else
@@ -309,21 +315,21 @@ short sudoerstable[] =
 #endif
 	{                                      34,
    19,   38,   39,   17,   26,   36,   77,   66,   26,   26,
-   66,   26,  109,   17,   80,   77,   40,   41,   24,   66,
+   66,   26,  109,   17,   82,   77,   40,   41,   24,   66,
    43,  135,   86,   98,   53,   56,    2,   43,  123,    3,
     4,    5,   29,   19,   30,   31,   59,   32,   62,   72,
-  128,   73,   74,   42,   19,  129,   75,   80,   85,   82,
-   83,   89,   11,  156,  100,   84,   91,   71,   33,   85,
-  101,   78,   93,   79,   80,   90,  130,   92,   94,   93,
-  102,   96,   80,   95,   99,  105,   87,  106,  107,  108,
-  118,   85,   77,   86,  136,   66,  114,  110,  116,  126,
-  162,  164,  165,  166,  167,   93,   90,  169,  170,  171,
-  172,    1,    2,  137,   51,   55,   85,   52,   54,   53,
-   26,  124,  103,   81,  112,   76,   97,   88,  168,  104,
-   93,   65,   70,  163,  111,  122,    0,  113,    0,   90,
-    0,    0,  117,    0,  161,    0,    0,    0,  115,    0,
-    0,    0,    0,   26,   12,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,   90,    0,    0,    0,    9,    0,
+  128,   73,   74,   42,   19,  129,   75,   82,   87,   82,
+   83,   89,   11,  157,  100,   84,   91,   71,   33,   85,
+  101,   78,   95,   79,   80,   90,  130,   92,   94,   93,
+  102,   96,   82,   95,   99,  105,   87,  106,  107,  108,
+  118,   87,   77,   86,  136,   66,  114,  110,  116,  126,
+  164,  166,  167,  168,  169,   95,   92,  170,  172,  173,
+  174,  175,  176,    1,    2,   52,   87,   56,   53,   55,
+   26,  124,   54,   81,  137,   88,   76,  103,  112,   97,
+   95,  104,   65,  171,  165,  122,  113,  111,   70,   92,
+    0,  117,    0,    0,  163,    0,    0,    0,    0,    0,
+    0,  115,    0,   26,   12,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   92,    0,    0,    0,    9,    0,
     0,    0,    0,    0,    0,    0,    0,    0,   26,    0,
     0,    0,    0,    0,    0,    0,    0,   12,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -333,39 +339,39 @@ short sudoerstable[] =
     0,    0,    0,    0,   29,   10,   30,   31,    2,   32,
    25,    3,    4,    5,   25,   25,    0,   25,    2,    8,
    11,    3,    4,    5,   40,   41,    0,    0,    0,    0,
-   33,   40,   41,    0,   11,    0,   19,    0,   19,    0,
+   33,   40,   41,    0,   11,    0,   19,    0,   19,   34,
     0,   19,   19,   19,   11,   19,   19,   19,   19,   19,
-   80,   42,   80,   11,    7,   80,   80,   80,   42,   80,
-   80,   80,   80,   80,   19,   19,   19,   19,   19,   19,
-   44,   45,   46,   47,    0,    0,    0,    0,   80,   80,
-   80,   80,   80,   80,   85,    0,   85,    7,   15,   85,
-   85,   85,    0,   85,   85,   85,   85,   85,   93,    0,
-   93,   34,   13,   93,   93,   93,    0,   93,   93,   93,
-   93,   93,   85,   85,   85,   85,   85,   85,    0,    0,
-    0,   15,    0,    0,    0,    0,   93,   93,   93,   93,
-   93,   93,   90,    0,   90,   13,   14,   90,   90,   90,
-    0,   90,   90,   90,   90,   90,   26,    0,   26,    0,
+   82,   42,   82,   11,    7,   82,   82,   82,   42,   82,
+   82,   82,   82,   82,   19,   19,   19,   19,   19,   19,
+    0,   44,   45,   46,   47,    0,    0,    0,   82,   82,
+   82,   82,   82,   82,   87,    0,   87,    7,   15,   87,
+   87,   87,    0,   87,   87,   87,   87,   87,   95,    0,
+   95,  131,   13,   95,   95,   95,    0,   95,   95,   95,
+   95,   95,   87,   87,   87,   87,   87,   87,    0,    0,
+    0,   15,    0,    0,    0,    0,   95,   95,   95,   95,
+   95,   95,   92,    0,   92,   13,   14,   92,   92,   92,
+    0,   92,   92,   92,   92,   92,   26,    0,   26,    0,
    16,   26,   26,   26,    0,   26,   26,   26,   26,   26,
-   90,   90,   90,   90,   90,   90,    0,    0,    0,   14,
+   92,   92,   92,   92,   92,   92,    0,    0,    0,   14,
     0,    0,    0,    0,   26,   26,   26,   26,   26,   26,
    12,    0,   12,   16,    0,   12,   12,   12,    0,   12,
    12,   12,   12,   12,    9,    0,    9,    0,    0,    9,
     9,    9,    0,    9,    9,    9,    9,    9,   12,   12,
-   12,   12,   12,   12,    0,    0,   43,  131,    0,    0,
+   12,   12,   12,   12,    0,    0,   43,    0,    0,    0,
     0,    0,    9,    9,    9,    9,    9,    9,   10,    0,
    10,    0,    0,   10,   10,   10,    0,   10,   10,   10,
-   10,   10,    8,    0,    8,    0,   49,    8,    8,    8,
+   10,   10,    8,    0,    8,    0,    0,    8,    8,    8,
     0,    8,    8,    8,    8,    8,   10,   10,   10,   10,
-   10,   10,    0,    0,    0,    0,    0,    0,    0,    0,
+   10,   10,   50,    0,   29,    0,   30,   31,    0,   32,
     8,    8,    8,    8,    8,    8,   11,    0,   11,    0,
     0,   11,   11,   11,    0,   11,   11,   11,   11,   11,
-   17,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+   33,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,   11,   11,   11,   11,   11,   11,
-    7,    0,    7,    0,    0,    7,    7,    7,    0,    7,
-    7,    7,    7,    7,    0,    0,   29,    0,   30,   31,
-    0,   32,    0,    0,    0,    0,    0,    0,    7,    7,
+    7,   17,    7,    0,    0,    7,    7,    7,    0,    7,
+    7,    7,    7,    7,    0,    0,  128,    0,    0,    0,
+    0,  129,    0,    0,    0,    0,    0,    0,    7,    7,
     7,    7,    7,    7,   15,    0,   15,    0,    0,   15,
-   15,   15,   33,   15,   15,   15,   15,   15,   13,    0,
+   15,   15,  130,   15,   15,   15,   15,   15,   13,    0,
    13,    0,    0,   13,   13,   13,    0,   13,   13,   13,
    13,   13,   15,   15,   15,   15,   15,   15,    0,    0,
     0,    0,    0,    0,    0,    0,   13,   13,   13,   13,
@@ -374,17 +380,19 @@ short sudoerstable[] =
     0,   16,   16,   16,    0,   16,   16,   16,   16,   16,
    14,   14,   14,   14,   14,   14,    0,    0,    0,    0,
     0,    0,    0,    0,   16,   16,   16,   16,   16,   16,
-   40,   41,  128,    0,    0,    0,    0,  129,    0,    0,
+   40,   41,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,  138,  139,  140,  141,  142,  143,  144,
-  145,  146,  147,  148,  149,  150,  151,   42,  130,    0,
-   49,   49,    0,    0,  152,  153,  154,  155,    0,   44,
-   45,   46,   47,   49,   49,   49,   49,   49,   49,   49,
-   49,   49,   49,   49,   49,   49,   49,   49,    0,    0,
-    0,    0,    0,    0,   49,   49,   49,   49,    0,   49,
-   49,   49,   49,    1,    0,    2,    0,    0,    3,    4,
-    5,    0,    6,    7,    8,    9,   10,    0,    0,    0,
+  145,  146,  147,  148,  149,  150,  151,   42,    0,    0,
+    0,    0,    0,    0,  152,  153,  154,  155,  156,    0,
+   44,   45,   46,   47,    0,    0,   50,   50,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,   50,
+   50,   50,   50,   50,   50,   50,   50,   50,   50,   50,
+   50,   50,   50,   50,    0,    0,    0,    0,    0,    0,
+   50,   50,   50,   50,   50,    0,   50,   50,   50,   50,
+    0,    0,    0,    0,    1,    0,    2,    0,    0,    3,
+    4,    5,    0,    6,    7,    8,    9,   10,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,   11,   12,   13,   14,   15,   16,
+    0,    0,   11,   12,   13,   14,   15,   16,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short sudoerscheck[] =
@@ -401,12 +409,12 @@ short sudoerscheck[] =
   263,   36,    0,   38,   39,   58,  284,   58,   58,   61,
   263,   58,   58,   61,   58,  264,   51,  264,  264,  264,
    40,   33,   44,   44,   41,   44,   93,   89,   95,   44,
-   44,   61,   61,   61,   61,   33,    0,  263,  263,  263,
-  263,    0,    0,  126,   41,   41,   58,   41,   41,   41,
-    0,  118,   75,   43,   91,   34,   66,   52,  162,   77,
-   58,   17,   22,  135,   90,   99,   -1,   92,   -1,   33,
-   -1,   -1,   96,   -1,  131,   -1,   -1,   -1,   94,   -1,
-   -1,   -1,   -1,   33,    0,   -1,   -1,   -1,   -1,   -1,
+   44,   61,   61,   61,   61,   33,    0,   61,  263,  263,
+  263,  263,  263,    0,    0,   41,   58,   41,   41,   41,
+    0,  118,   41,   43,  126,   52,   34,   75,   91,   66,
+   58,   77,   17,  164,  135,   99,   92,   90,   22,   33,
+   -1,   96,   -1,   -1,  131,   -1,   -1,   -1,   -1,   -1,
+   -1,   94,   -1,   33,    0,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   58,   -1,   -1,   -1,    0,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   58,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   33,   -1,   -1,
@@ -417,11 +425,11 @@ short sudoerscheck[] =
    -1,   -1,   -1,   -1,  258,   33,  260,  261,  258,  263,
   259,  261,  262,  263,  259,  259,   -1,  259,  258,   33,
     0,  261,  262,  263,  257,  258,   -1,   -1,   -1,   -1,
-  284,  257,  258,   -1,  284,   -1,  256,   -1,  258,   -1,
+  284,  257,  258,   -1,  284,   -1,  256,   -1,  258,   33,
    -1,  261,  262,  263,  284,  265,  266,  267,  268,  269,
   256,  284,  258,   33,    0,  261,  262,  263,  284,  265,
   266,  267,  268,  269,  284,  285,  286,  287,  288,  289,
-  296,  297,  298,  299,   -1,   -1,   -1,   -1,  284,  285,
+   -1,  297,  298,  299,  300,   -1,   -1,   -1,  284,  285,
   286,  287,  288,  289,  256,   -1,  258,   33,    0,  261,
   262,  263,   -1,  265,  266,  267,  268,  269,  256,   -1,
   258,   33,    0,  261,  262,  263,   -1,  265,  266,  267,
@@ -435,18 +443,18 @@ short sudoerscheck[] =
   256,   -1,  258,   33,   -1,  261,  262,  263,   -1,  265,
   266,  267,  268,  269,  256,   -1,  258,   -1,   -1,  261,
   262,  263,   -1,  265,  266,  267,  268,  269,  284,  285,
-  286,  287,  288,  289,   -1,   -1,   33,   33,   -1,   -1,
+  286,  287,  288,  289,   -1,   -1,   33,   -1,   -1,   -1,
    -1,   -1,  284,  285,  286,  287,  288,  289,  256,   -1,
   258,   -1,   -1,  261,  262,  263,   -1,  265,  266,  267,
-  268,  269,  256,   -1,  258,   -1,   33,  261,  262,  263,
+  268,  269,  256,   -1,  258,   -1,   -1,  261,  262,  263,
    -1,  265,  266,  267,  268,  269,  284,  285,  286,  287,
-  288,  289,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  288,  289,   33,   -1,  258,   -1,  260,  261,   -1,  263,
   284,  285,  286,  287,  288,  289,  256,   -1,  258,   -1,
    -1,  261,  262,  263,   -1,  265,  266,  267,  268,  269,
-   33,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+  284,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,  284,  285,  286,  287,  288,  289,
-  256,   -1,  258,   -1,   -1,  261,  262,  263,   -1,  265,
-  266,  267,  268,  269,   -1,   -1,  258,   -1,  260,  261,
+  256,   33,  258,   -1,   -1,  261,  262,  263,   -1,  265,
+  266,  267,  268,  269,   -1,   -1,  258,   -1,   -1,   -1,
    -1,  263,   -1,   -1,   -1,   -1,   -1,   -1,  284,  285,
   286,  287,  288,  289,  256,   -1,  258,   -1,   -1,  261,
   262,  263,  284,  265,  266,  267,  268,  269,  256,   -1,
@@ -458,23 +466,25 @@ short sudoerscheck[] =
    -1,  261,  262,  263,   -1,  265,  266,  267,  268,  269,
   284,  285,  286,  287,  288,  289,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,  284,  285,  286,  287,  288,  289,
-  257,  258,  258,   -1,   -1,   -1,   -1,  263,   -1,   -1,
+  257,  258,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,  270,  271,  272,  273,  274,  275,  276,
-  277,  278,  279,  280,  281,  282,  283,  284,  284,   -1,
-  257,  258,   -1,   -1,  291,  292,  293,  294,   -1,  296,
-  297,  298,  299,  270,  271,  272,  273,  274,  275,  276,
   277,  278,  279,  280,  281,  282,  283,  284,   -1,   -1,
-   -1,   -1,   -1,   -1,  291,  292,  293,  294,   -1,  296,
-  297,  298,  299,  256,   -1,  258,   -1,   -1,  261,  262,
-  263,   -1,  265,  266,  267,  268,  269,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,  291,  292,  293,  294,  295,   -1,
+  297,  298,  299,  300,   -1,   -1,  257,  258,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  270,
+  271,  272,  273,  274,  275,  276,  277,  278,  279,  280,
+  281,  282,  283,  284,   -1,   -1,   -1,   -1,   -1,   -1,
+  291,  292,  293,  294,  295,   -1,  297,  298,  299,  300,
+   -1,   -1,   -1,   -1,  256,   -1,  258,   -1,   -1,  261,
+  262,  263,   -1,  265,  266,  267,  268,  269,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,  284,  285,  286,  287,  288,  289,
+   -1,   -1,  284,  285,  286,  287,  288,  289,
 };
 #define YYFINAL 18
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 299
+#define YYMAXTOKEN 300
 #if YYDEBUG
 #if defined(__cplusplus) || defined(__STDC__)
 const char * const sudoersname[] =
@@ -494,8 +504,8 @@ char *sudoersname[] =
 "NOPASSWD","PASSWD","NOEXEC","EXEC","SETENV","NOSETENV","LOG_INPUT",
 "NOLOG_INPUT","LOG_OUTPUT","NOLOG_OUTPUT","MAIL","NOMAIL","FOLLOW","NOFOLLOW",
 "ALL","COMMENT","HOSTALIAS","CMNDALIAS","USERALIAS","RUNASALIAS","ERROR","TYPE",
-"ROLE","PRIVS","LIMITPRIVS","MYSELF","SHA224_TOK","SHA256_TOK","SHA384_TOK",
-"SHA512_TOK",
+"ROLE","PRIVS","LIMITPRIVS","CMND_TIMEOUT","MYSELF","SHA224_TOK","SHA256_TOK",
+"SHA384_TOK","SHA512_TOK",
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const char * const sudoersrule[] =
@@ -547,6 +557,7 @@ char *sudoersrule[] =
 "digcmnd : digest opcmnd",
 "opcmnd : cmnd",
 "opcmnd : '!' cmnd",
+"timeoutspec : CMND_TIMEOUT '=' WORD",
 "rolespec : ROLE '=' WORD",
 "typespec : TYPE '=' WORD",
 "privsspec : PRIVS '=' WORD",
@@ -559,6 +570,7 @@ char *sudoersrule[] =
 "runaslist : ':' grouplist",
 "runaslist : ':'",
 "options :",
+"options : options timeoutspec",
 "options : options NOPASSWD",
 "options : options PASSWD",
 "options : options NOEXEC",
@@ -640,7 +652,7 @@ short *yysslim;
 YYSTYPE *yyvs;
 unsigned int yystacksize;
 int yyparse(void);
-#line 834 "gram.y"
+#line 850 "gram.y"
 void
 sudoerserror(const char *s)
 {
@@ -955,7 +967,25 @@ init_parser(const char *path, bool quiet)
 
     debug_return_bool(ret);
 }
-#line 906 "gram.c"
+
+/*
+ * Initialize all options in a cmndspec.
+ */
+static void
+init_options(struct command_options *opts)
+{
+    TAGS_INIT(opts->tags);
+    opts->timeout = UNSPEC;
+#ifdef HAVE_SELINUX
+    opts->role = NULL;
+    opts->type = NULL;
+#endif
+#ifdef HAVE_PRIV_SET
+    opts->privs = NULL;
+    opts->limitprivs = NULL;
+#endif
+}
+#line 936 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1164,23 +1194,23 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 166 "gram.y"
+#line 172 "gram.y"
 { ; }
 break;
 case 5:
-#line 174 "gram.y"
+#line 180 "gram.y"
 {
 			    ;
 			}
 break;
 case 6:
-#line 177 "gram.y"
+#line 183 "gram.y"
 {
 			    yyerrok;
 			}
 break;
 case 7:
-#line 180 "gram.y"
+#line 186 "gram.y"
 {
 			    if (!add_userspec(yyvsp[-1].member, yyvsp[0].privilege)) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -1189,73 +1219,73 @@ case 7:
 			}
 break;
 case 8:
-#line 186 "gram.y"
-{
-			    ;
-			}
-break;
-case 9:
-#line 189 "gram.y"
-{
-			    ;
-			}
-break;
-case 10:
 #line 192 "gram.y"
 {
 			    ;
 			}
 break;
-case 11:
+case 9:
 #line 195 "gram.y"
 {
 			    ;
 			}
 break;
-case 12:
+case 10:
 #line 198 "gram.y"
+{
+			    ;
+			}
+break;
+case 11:
+#line 201 "gram.y"
+{
+			    ;
+			}
+break;
+case 12:
+#line 204 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS, NULL, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 13:
-#line 202 "gram.y"
+#line 208 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_USER, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 14:
-#line 206 "gram.y"
+#line 212 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_RUNAS, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 15:
-#line 210 "gram.y"
+#line 216 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_HOST, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 16:
-#line 214 "gram.y"
+#line 220 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_CMND, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 18:
-#line 221 "gram.y"
+#line 227 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].defaults, yyvsp[0].defaults, entries);
 			    yyval.defaults = yyvsp[-2].defaults;
 			}
 break;
 case 19:
-#line 227 "gram.y"
+#line 233 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, true);
 			    if (yyval.defaults == NULL) {
@@ -1265,7 +1295,7 @@ case 19:
 			}
 break;
 case 20:
-#line 234 "gram.y"
+#line 240 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, false);
 			    if (yyval.defaults == NULL) {
@@ -1275,7 +1305,7 @@ case 20:
 			}
 break;
 case 21:
-#line 241 "gram.y"
+#line 247 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, true);
 			    if (yyval.defaults == NULL) {
@@ -1285,7 +1315,7 @@ case 21:
 			}
 break;
 case 22:
-#line 248 "gram.y"
+#line 254 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '+');
 			    if (yyval.defaults == NULL) {
@@ -1295,7 +1325,7 @@ case 22:
 			}
 break;
 case 23:
-#line 255 "gram.y"
+#line 261 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '-');
 			    if (yyval.defaults == NULL) {
@@ -1305,14 +1335,14 @@ case 23:
 			}
 break;
 case 25:
-#line 265 "gram.y"
+#line 271 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].privilege, yyvsp[0].privilege, entries);
 			    yyval.privilege = yyvsp[-2].privilege;
 			}
 break;
 case 26:
-#line 271 "gram.y"
+#line 277 "gram.y"
 {
 			    struct privilege *p = calloc(1, sizeof(*p));
 			    if (p == NULL) {
@@ -1326,21 +1356,21 @@ case 26:
 			}
 break;
 case 27:
-#line 284 "gram.y"
+#line 290 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 28:
-#line 288 "gram.y"
+#line 294 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 29:
-#line 294 "gram.y"
+#line 300 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -1350,7 +1380,7 @@ case 29:
 			}
 break;
 case 30:
-#line 301 "gram.y"
+#line 307 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -1360,7 +1390,7 @@ case 30:
 			}
 break;
 case 31:
-#line 308 "gram.y"
+#line 314 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			    if (yyval.member == NULL) {
@@ -1370,7 +1400,7 @@ case 31:
 			}
 break;
 case 32:
-#line 315 "gram.y"
+#line 321 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NTWKADDR);
 			    if (yyval.member == NULL) {
@@ -1380,7 +1410,7 @@ case 32:
 			}
 break;
 case 33:
-#line 322 "gram.y"
+#line 328 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			    if (yyval.member == NULL) {
@@ -1390,7 +1420,7 @@ case 33:
 			}
 break;
 case 35:
-#line 332 "gram.y"
+#line 338 "gram.y"
 {
 			    struct cmndspec *prev;
 			    prev = HLTQ_LAST(yyvsp[-2].cmndspec, cmndspec, entries);
@@ -1409,6 +1439,9 @@ case 35:
 			    if (yyvsp[0].cmndspec->limitprivs == NULL)
 			        yyvsp[0].cmndspec->limitprivs = prev->limitprivs;
 #endif /* HAVE_PRIV_SET */
+			    /* propagate command timeout */
+			    if (yyvsp[0].cmndspec->timeout == UNSPEC)
+				yyvsp[0].cmndspec->timeout = prev->timeout;
 			    /* propagate tags and runas list */
 			    if (yyvsp[0].cmndspec->tags.nopasswd == UNSPEC)
 				yyvsp[0].cmndspec->tags.nopasswd = prev->tags.nopasswd;
@@ -1436,7 +1469,7 @@ case 35:
 			}
 break;
 case 36:
-#line 377 "gram.y"
+#line 386 "gram.y"
 {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
@@ -1474,6 +1507,7 @@ case 36:
 			    cs->privs = yyvsp[-1].options.privs;
 			    cs->limitprivs = yyvsp[-1].options.limitprivs;
 #endif
+			    cs->timeout = yyvsp[-1].options.timeout;
 			    cs->tags = yyvsp[-1].options.tags;
 			    cs->cmnd = yyvsp[0].member;
 			    HLTQ_INIT(cs, entries);
@@ -1485,7 +1519,7 @@ case 36:
 			}
 break;
 case 37:
-#line 425 "gram.y"
+#line 435 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA224, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1495,7 +1529,7 @@ case 37:
 			}
 break;
 case 38:
-#line 432 "gram.y"
+#line 442 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA256, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1505,7 +1539,7 @@ case 38:
 			}
 break;
 case 39:
-#line 439 "gram.y"
+#line 449 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA384, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1515,7 +1549,7 @@ case 39:
 			}
 break;
 case 40:
-#line 446 "gram.y"
+#line 456 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA512, yyvsp[0].string);
 			    if (yyval.digest == NULL) {
@@ -1525,13 +1559,13 @@ case 40:
 			}
 break;
 case 41:
-#line 455 "gram.y"
+#line 465 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			}
 break;
 case 42:
-#line 458 "gram.y"
+#line 468 "gram.y"
 {
 			    if (yyvsp[0].member->type != COMMAND) {
 				sudoerserror(N_("a digest requires a path name"));
@@ -1543,57 +1577,63 @@ case 42:
 			}
 break;
 case 43:
-#line 469 "gram.y"
+#line 479 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 44:
-#line 473 "gram.y"
+#line 483 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 45:
-#line 479 "gram.y"
-{
-			    yyval.string = yyvsp[0].string;
-			}
-break;
-case 46:
-#line 484 "gram.y"
-{
-			    yyval.string = yyvsp[0].string;
-			}
-break;
-case 47:
 #line 489 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
+case 46:
+#line 494 "gram.y"
+{
+			    yyval.string = yyvsp[0].string;
+			}
+break;
+case 47:
+#line 499 "gram.y"
+{
+			    yyval.string = yyvsp[0].string;
+			}
+break;
 case 48:
-#line 493 "gram.y"
+#line 504 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 49:
-#line 498 "gram.y"
+#line 508 "gram.y"
+{
+			    yyval.string = yyvsp[0].string;
+			}
+break;
+case 50:
+#line 513 "gram.y"
 {
 			    yyval.runas = NULL;
 			}
 break;
-case 50:
-#line 501 "gram.y"
+case 51:
+#line 516 "gram.y"
 {
 			    yyval.runas = yyvsp[-1].runas;
 			}
 break;
-case 51:
-#line 506 "gram.y"
+case 52:
+#line 521 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas != NULL) {
@@ -1610,8 +1650,8 @@ case 51:
 			    }
 			}
 break;
-case 52:
-#line 521 "gram.y"
+case 53:
+#line 536 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas == NULL) {
@@ -1622,8 +1662,8 @@ case 52:
 			    /* $$->runasgroups = NULL; */
 			}
 break;
-case 53:
-#line 530 "gram.y"
+case 54:
+#line 545 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas == NULL) {
@@ -1634,8 +1674,8 @@ case 53:
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
-case 54:
-#line 539 "gram.y"
+case 55:
+#line 554 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas == NULL) {
@@ -1646,8 +1686,8 @@ case 54:
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
-case 55:
-#line 548 "gram.y"
+case 56:
+#line 563 "gram.y"
 {
 			    yyval.runas = calloc(1, sizeof(struct runascontainer));
 			    if (yyval.runas != NULL) {
@@ -1664,136 +1704,140 @@ case 55:
 			    }
 			}
 break;
-case 56:
-#line 565 "gram.y"
+case 57:
+#line 580 "gram.y"
 {
-			    TAGS_INIT(yyval.options.tags);
-#ifdef HAVE_SELINUX
-			    yyval.options.role = NULL, yyval.options.type = NULL;
-#endif
-#ifdef HAVE_PRIV_SET
-			    yyval.options.privs = NULL, yyval.options.limitprivs = NULL;
-#endif
+			    init_options(&yyval.options);
 			}
 break;
-case 57:
-#line 574 "gram.y"
+case 58:
+#line 583 "gram.y"
+{
+			    yyval.options.timeout = parse_timeout(yyvsp[0].string);
+			    if (yyval.options.timeout == -1) {
+				sudoerserror(N_("unable parse timeout value"));
+				YYERROR;
+			    }
+			}
+break;
+case 59:
+#line 590 "gram.y"
 {
 			    yyval.options.tags.nopasswd = true;
 			}
 break;
-case 58:
-#line 577 "gram.y"
+case 60:
+#line 593 "gram.y"
 {
 			    yyval.options.tags.nopasswd = false;
 			}
 break;
-case 59:
-#line 580 "gram.y"
+case 61:
+#line 596 "gram.y"
 {
 			    yyval.options.tags.noexec = true;
 			}
 break;
-case 60:
-#line 583 "gram.y"
+case 62:
+#line 599 "gram.y"
 {
 			    yyval.options.tags.noexec = false;
 			}
 break;
-case 61:
-#line 586 "gram.y"
+case 63:
+#line 602 "gram.y"
 {
 			    yyval.options.tags.setenv = true;
 			}
 break;
-case 62:
-#line 589 "gram.y"
+case 64:
+#line 605 "gram.y"
 {
 			    yyval.options.tags.setenv = false;
 			}
 break;
-case 63:
-#line 592 "gram.y"
+case 65:
+#line 608 "gram.y"
 {
 			    yyval.options.tags.log_input = true;
 			}
 break;
-case 64:
-#line 595 "gram.y"
+case 66:
+#line 611 "gram.y"
 {
 			    yyval.options.tags.log_input = false;
 			}
 break;
-case 65:
-#line 598 "gram.y"
+case 67:
+#line 614 "gram.y"
 {
 			    yyval.options.tags.log_output = true;
 			}
 break;
-case 66:
-#line 601 "gram.y"
+case 68:
+#line 617 "gram.y"
 {
 			    yyval.options.tags.log_output = false;
 			}
 break;
-case 67:
-#line 604 "gram.y"
+case 69:
+#line 620 "gram.y"
 {
 			    yyval.options.tags.follow = true;
 			}
 break;
-case 68:
-#line 607 "gram.y"
+case 70:
+#line 623 "gram.y"
 {
 			    yyval.options.tags.follow = false;
 			}
 break;
-case 69:
-#line 610 "gram.y"
+case 71:
+#line 626 "gram.y"
 {
 			    yyval.options.tags.send_mail = true;
 			}
 break;
-case 70:
-#line 613 "gram.y"
+case 72:
+#line 629 "gram.y"
 {
 			    yyval.options.tags.send_mail = false;
 			}
 break;
-case 71:
-#line 616 "gram.y"
+case 73:
+#line 632 "gram.y"
 {
 #ifdef HAVE_SELINUX
 			    yyval.options.role = yyvsp[0].string;
 #endif
 			}
 break;
-case 72:
-#line 621 "gram.y"
+case 74:
+#line 637 "gram.y"
 {
 #ifdef HAVE_SELINUX
 			    yyval.options.type = yyvsp[0].string;
 #endif
 			}
 break;
-case 73:
-#line 626 "gram.y"
+case 75:
+#line 642 "gram.y"
 {
 #ifdef HAVE_PRIV_SET
 			    yyval.options.privs = yyvsp[0].string;
 #endif
 			}
 break;
-case 74:
-#line 631 "gram.y"
+case 76:
+#line 647 "gram.y"
 {
 #ifdef HAVE_PRIV_SET
 			    yyval.options.limitprivs = yyvsp[0].string;
 #endif
 			}
 break;
-case 75:
-#line 638 "gram.y"
+case 77:
+#line 654 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -1802,8 +1846,8 @@ case 75:
 			    }
 			}
 break;
-case 76:
-#line 645 "gram.y"
+case 78:
+#line 661 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -1812,8 +1856,8 @@ case 76:
 			    }
 			}
 break;
-case 77:
-#line 652 "gram.y"
+case 79:
+#line 668 "gram.y"
 {
 			    struct sudo_command *c = calloc(1, sizeof(*c));
 			    if (c == NULL) {
@@ -1830,8 +1874,8 @@ case 77:
 			    }
 			}
 break;
-case 80:
-#line 673 "gram.y"
+case 82:
+#line 689 "gram.y"
 {
 			    const char *s;
 			    s = alias_add(yyvsp[-2].string, HOSTALIAS, sudoers, this_lineno, yyvsp[0].member);
@@ -1841,15 +1885,15 @@ case 80:
 			    }
 			}
 break;
-case 82:
-#line 684 "gram.y"
+case 84:
+#line 700 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 85:
-#line 694 "gram.y"
+case 87:
+#line 710 "gram.y"
 {
 			    const char *s;
 			    s = alias_add(yyvsp[-2].string, CMNDALIAS, sudoers, this_lineno, yyvsp[0].member);
@@ -1859,15 +1903,15 @@ case 85:
 			    }
 			}
 break;
-case 87:
-#line 705 "gram.y"
+case 89:
+#line 721 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 90:
-#line 715 "gram.y"
+case 92:
+#line 731 "gram.y"
 {
 			    const char *s;
 			    s = alias_add(yyvsp[-2].string, RUNASALIAS, sudoers, this_lineno, yyvsp[0].member);
@@ -1877,8 +1921,8 @@ case 90:
 			    }
 			}
 break;
-case 93:
-#line 729 "gram.y"
+case 95:
+#line 745 "gram.y"
 {
 			    const char *s;
 			    s = alias_add(yyvsp[-2].string, USERALIAS, sudoers, this_lineno, yyvsp[0].member);
@@ -1888,29 +1932,29 @@ case 93:
 			    }
 			}
 break;
-case 95:
-#line 740 "gram.y"
+case 97:
+#line 756 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 96:
-#line 746 "gram.y"
+case 98:
+#line 762 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
-case 97:
-#line 750 "gram.y"
+case 99:
+#line 766 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
-case 98:
-#line 756 "gram.y"
+case 100:
+#line 772 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -1919,8 +1963,8 @@ case 98:
 			    }
 			}
 break;
-case 99:
-#line 763 "gram.y"
+case 101:
+#line 779 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -1929,8 +1973,8 @@ case 99:
 			    }
 			}
 break;
-case 100:
-#line 770 "gram.y"
+case 102:
+#line 786 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			    if (yyval.member == NULL) {
@@ -1939,8 +1983,8 @@ case 100:
 			    }
 			}
 break;
-case 101:
-#line 777 "gram.y"
+case 103:
+#line 793 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
 			    if (yyval.member == NULL) {
@@ -1949,8 +1993,8 @@ case 101:
 			    }
 			}
 break;
-case 102:
-#line 784 "gram.y"
+case 104:
+#line 800 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			    if (yyval.member == NULL) {
@@ -1959,29 +2003,29 @@ case 102:
 			    }
 			}
 break;
-case 104:
-#line 794 "gram.y"
+case 106:
+#line 810 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 105:
-#line 800 "gram.y"
+case 107:
+#line 816 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
-case 106:
-#line 804 "gram.y"
+case 108:
+#line 820 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
-case 107:
-#line 810 "gram.y"
+case 109:
+#line 826 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			    if (yyval.member == NULL) {
@@ -1990,8 +2034,8 @@ case 107:
 			    }
 			}
 break;
-case 108:
-#line 817 "gram.y"
+case 110:
+#line 833 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			    if (yyval.member == NULL) {
@@ -2000,8 +2044,8 @@ case 108:
 			    }
 			}
 break;
-case 109:
-#line 824 "gram.y"
+case 111:
+#line 840 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			    if (yyval.member == NULL) {
@@ -2010,7 +2054,7 @@ case 109:
 			    }
 			}
 break;
-#line 1961 "gram.c"
+#line 2005 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
