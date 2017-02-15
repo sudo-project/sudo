@@ -43,9 +43,7 @@
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
-#include <ctype.h>
 #include <errno.h>
-#include <limits.h>
 
 #include "sudoers.h" /* XXX */
 #include "parse.h"
@@ -586,7 +584,10 @@ options		:	/* empty */ {
 			    $$.timeout = parse_timeout($2);
 			    free($2);
 			    if ($$.timeout == -1) {
-				sudoerserror(N_("unable parse timeout value"));
+				if (errno == ERANGE)
+				    sudoerserror(N_("timeout value too large"));
+				else
+				    sudoerserror(N_("invalid timeout value"));
 				YYERROR;
 			    }
 			}
