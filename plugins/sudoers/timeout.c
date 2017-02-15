@@ -108,6 +108,6 @@ parse_timeout(const char *timestr)
 
     debug_return_int(timeout);
 overflow:
-    errno = EOVERFLOW;
+    errno = ERANGE;
     debug_return_int(-1);
 }
