@@ -248,6 +248,12 @@ DDEESSCCRRIIPPTTIIOONN
                        support _s_u_d_o_e_d_i_t.  For more information, see the
                        _c_h_e_c_k___p_o_l_i_c_y section.
 
+                 timeout=string
+                       User-specified command timeout.  Not all plugins
+                       support command timeouts and the ability for the user
+                       to set a timeout may be restricted by policy.  The
+                       format of the timeout string is plugin-specific.
+
                  Additional settings may be added in the future so the plugin
                  should silently ignore settings that it does not recognize.
 
@@ -1554,6 +1560,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            _i_o_l_o_g___m_o_d_e, and _i_o_l_o_g___u_s_e_r entries were added to the command_info
            list.
 
+     Version 1.11 (sudo 1.8.20)
+           The _t_i_m_e_o_u_t entry was added to the settings list.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1583,4 +1592,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                    November 17, 2016                   Sudo 1.8.20
+Sudo 1.8.20                    February 16, 2017                   Sudo 1.8.20
