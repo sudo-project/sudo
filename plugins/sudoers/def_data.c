@@ -454,6 +454,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Time in seconds after which the command will be terminated: %u"),
 	NULL,
     }, {
+	"user_command_timeouts", T_FLAG,
+	N_("Allow the user to specify a timeout on the command line"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

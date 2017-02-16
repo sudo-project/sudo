@@ -476,10 +476,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto bad;
     }
 
+    /* If user specified a timeout make sure sudoers allows it. */
+    if (!def_user_command_timeouts && user_timeout > 0) {
+	/* XXX - audit/log? */
+	sudo_warnx(U_("sorry, you are not allowed set a command timeout"));
+	goto bad;
+    }
+
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    /* XXX - audit? */
+	    /* XXX - audit/log? */
 	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {

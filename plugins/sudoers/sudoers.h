@@ -103,6 +103,7 @@ struct sudo_user {
     int   cols;
     int   flags;
     int   max_groups;
+    int   timeout;
     mode_t umask;
     uid_t uid;
     uid_t gid;
@@ -214,6 +215,7 @@ struct sudo_user {
 #define user_closefrom		(sudo_user.closefrom)
 #define	runas_privs		(sudo_user.privs)
 #define	runas_limitprivs	(sudo_user.limitprivs)
+#define user_timeout		(sudo_user.timeout)
 
 #ifdef __TANDEM
 # define ROOT_UID	65535

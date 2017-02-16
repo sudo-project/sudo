@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 14, 2017
+.Dd February 16, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2795,6 +2795,21 @@ Use of this option will make that impossible.
 This flag is
 .Em off
 by default.
+.It user_command_timeouts
+If set, the user may specify a timeout on the command line.
+If the timeout expires before the command has exited, the
+command will be terminated.
+If a timeout is specified both in the
+.Pa sudoers
+file and on the command line, the smaller of the two timeouts will be used.
+See the
+.Li Timeout_Spec
+section for a description of the timeout syntax.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.20 or higher.
 .It utmp_runas
 If set,
 .Nm sudo

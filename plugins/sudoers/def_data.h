@@ -210,6 +210,8 @@
 #define def_ignore_unknown_defaults (sudo_defs_table[I_IGNORE_UNKNOWN_DEFAULTS].sd_un.flag)
 #define I_COMMAND_TIMEOUT       105
 #define def_command_timeout     (sudo_defs_table[I_COMMAND_TIMEOUT].sd_un.ival)
+#define I_USER_COMMAND_TIMEOUTS 106
+#define def_user_command_timeouts (sudo_defs_table[I_USER_COMMAND_TIMEOUTS].sd_un.flag)
 
 enum def_tuple {
 	never,

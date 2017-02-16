@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2016
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2017
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 19, 2016
+.Dd February 16, 2017
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -57,6 +57,7 @@
 .Op Fl p Ar prompt
 .Op Fl r Ar role
 .Op Fl t Ar type
+.Op Fl T Ar timeout
 .Op Fl u Ar user
 .Op Ar VAR Ns = Ns Ar value
 .Op Fl i | s
@@ -69,6 +70,7 @@
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
+.Op Fl T Ar timeout
 .Op Fl u Ar user
 .Ar
 .Sh DESCRIPTION
@@ -507,6 +509,14 @@ The
 policy only allows root or a user with the
 .Li ALL
 privilege on the current host to use this option.
+.It Fl T Ar timeout , Fl -command-timeout Ns = Ns Ar timeout
+Used to set a timeout for the command.
+If the timeout expires before the command has exited, the
+command will be terminated.
+The security policy may restrict the ability to set command timeouts.
+The
+.Em sudoers
+policy requires that user-specified timeouts be explicitly enabled.
 .It Fl u Ar user , Fl -user Ns = Ns Ar user
 Run the command as a user other than the default target user
 (usually

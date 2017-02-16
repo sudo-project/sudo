@@ -332,3 +332,6 @@ ignore_unknown_defaults
 command_timeout
 	T_TIMEOUT|T_BOOL
 	"Time in seconds after which the command will be terminated: %u"
+user_command_timeouts
+	T_FLAG
+	"Allow the user to specify a timeout on the command line"

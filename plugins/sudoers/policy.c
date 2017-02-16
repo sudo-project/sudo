@@ -35,6 +35,7 @@
 #include "sudoers.h"
 #include "sudoers_version.h"
 #include "interfaces.h"
+#include "parse.h" /* for parse_timeout() */
 
 /*
  * Info passed in from the sudo front-end.
@@ -254,6 +255,18 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "remote_host=")) {
 	    remhost = *cur + sizeof("remote_host=") - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "timeout=")) {
+	    p = *cur + sizeof("timeout=") - 1;
+	    user_timeout = parse_timeout(p);
+	    if (user_timeout == -1) {
+		if (errno == ERANGE)
+		    sudo_warnx(U_("%s: %s"), p, U_("timeout value too large"));
+		else
+		    sudo_warnx(U_("%s: %s"), p, U_("invalid timeout value"));
+		goto bad;
+	    }
 	    continue;
 	}
 #ifdef ENABLE_SUDO_PLUGIN_API
@@ -580,8 +593,11 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if ((command_info[info_len++] = sudo_new_key_val("iolog_group", def_iolog_group)) == NULL)
 	    goto oom;
     }
-    if (def_command_timeout != 0) {
-	if (asprintf(&command_info[info_len++], "timeout=%u", def_command_timeout) == -1)
+    if (def_command_timeout > 0 || user_timeout > 0) {
+	int timeout = def_command_timeout;
+	if (timeout <= 0 || user_timeout < timeout)
+	    timeout = user_timeout;
+	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
     }
     if (cmnd_umask != ACCESSPERMS) {
