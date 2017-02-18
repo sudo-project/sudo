@@ -28,13 +28,10 @@
 
 /*
  * Return a static buffer with the current date + time.
- * Uses strftime() if available, else falls back to ctime().
  */
 char *
 get_timestr(time_t tstamp, int log_year)
 {
-    char *s;
-#ifdef HAVE_STRFTIME
     static char buf[128];
     struct tm *timeptr;
 
@@ -45,17 +42,5 @@ get_timestr(time_t tstamp, int log_year)
 	    timeptr) != 0 && buf[sizeof(buf) - 1] == '\0')
 	    return buf;
     }
-
-#endif /* HAVE_STRFTIME */
-
-    s = ctime(&tstamp);
-    if (s != NULL) {
-	s += 4;				/* skip day of the week */
-	if (log_year)
-	    s[20] = '\0';		/* avoid the newline */
-	else
-	    s[15] = '\0';		/* don't care about year */
-    }
-
-    return s;
+    return NULL;
 }

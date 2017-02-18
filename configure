@@ -2847,7 +2847,6 @@ as_fn_append ac_header_list " sys/sysmacros.h"
 as_fn_append ac_func_list " fexecve"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
-as_fn_append ac_func_list " strftime"
 as_fn_append ac_func_list " pread"
 as_fn_append ac_func_list " pwrite"
 as_fn_append ac_func_list " openat"
@@ -18674,8 +18673,6 @@ _ACEOF
 
 fi
 done
-
-
 
 
 
