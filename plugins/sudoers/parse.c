@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2007-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,8 +29,9 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <ctype.h>
-#include <pwd.h>
 #include <grp.h>
+#include <pwd.h>
+#include <time.h>
 
 #include "sudoers.h"
 #include "parse.h"
@@ -151,6 +152,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     struct privilege *priv;
     struct userspec *us;
     struct member *matching_user;
+    time_t now;
     debug_decl(sudo_file_lookup, SUDOERS_DEBUG_NSS)
 
     if (nss->handle == NULL)
@@ -207,6 +209,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     if (!set_perms(PERM_RUNAS))
 	debug_return_int(validated);
 
+    time(&now);
     match = UNSPEC;
     TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
@@ -219,6 +222,14 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    else
 		continue;
 	    TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
+		if (cs->notbefore != UNSPEC) {
+		    if (now < cs->notbefore)
+			continue;
+		}
+		if (cs->notafter != UNSPEC) {
+		    if (now > cs->notafter)
+			continue;
+		}
 		matching_user = NULL;
 		runas_match = runaslist_matches(cs->runasuserlist,
 		    cs->runasgrouplist, &matching_user, NULL);
@@ -377,6 +388,22 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
 	snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
+    }
+    if (cs->notbefore != UNSPEC) {
+	char buf[sizeof("CCYYMMDDHHMMSSZ")];
+	struct tm *tm = gmtime(&cs->notbefore);
+	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
+	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+	sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
+    }
+    if (cs->notafter != UNSPEC) {
+	char buf[sizeof("CCYYMMDDHHMMSSZ")];
+	struct tm *tm = gmtime(&cs->notafter);
+	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
+	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+	sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
     }
     if (TAG_CHANGED(setenv)) {
 	tags->setenv = cs->tags.setenv;
@@ -567,6 +594,22 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
 		    snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 		    sudo_lbuf_append(lbuf, "    Timeout: %s\n", numbuf);
+		}
+		if (cs->notbefore != UNSPEC) {
+		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
+		    struct tm *tm = gmtime(&cs->notbefore);
+		    snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
+			tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			tm->tm_hour, tm->tm_min, tm->tm_sec);
+		    sudo_lbuf_append(lbuf, "    NotBefore: %s\n", buf);
+		}
+		if (cs->notafter != UNSPEC) {
+		    char buf[sizeof("CCYYMMDDHHMMSSZ")];
+		    struct tm *tm = gmtime(&cs->notafter);
+		    snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
+			tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			tm->tm_hour, tm->tm_min, tm->tm_sec);
+		    sudo_lbuf_append(lbuf, "    NotAfter: %s\n", buf);
 		}
 		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }

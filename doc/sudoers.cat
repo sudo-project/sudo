@@ -478,11 +478,13 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec)
+     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
 
      SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
      Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
+
+     Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
      Timeout_Spec ::= 'TIMEOUT=timeout'
 
@@ -607,6 +609,24 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Privileges can be excluded from a set by prefixing the privilege name
      with either an `!' or `-' character.
+
+   DDaattee__SSppeecc
+     ssuuddooeerrss rules can be specified with a start and end date via the
+     NOTBEFORE and NOTAFTER settings.  The time stamp must be specified in
+     _G_e_n_e_r_a_l_i_z_e_d _T_i_m_e as defined by RFC 4517.  The format is effectively
+     yyyymmddHHMMSSZ where the minutes and seconds are optional.  The `Z'
+     suffix indicates that the time stamp is in Coordinated Universal Time
+     (UTC).  It is also possible to specify a timezone offset from UTC in
+     hours and minutes instead of a `Z'.  For example, `-0500' would
+     correspond to Eastern Standard time in the US.  As an extension, if no
+     `Z' or timezone offset is specified, local time will be used.
+
+     The following are all valid time stamps:
+
+         20170214083000Z
+         2017021408Z
+         20160315220000-0500
+         20151201235900
 
    TTiimmeeoouutt__SSppeecc
      A command may have a timeout associated with it.  If the timeout expires

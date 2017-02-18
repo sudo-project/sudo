@@ -986,11 +986,13 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec)
+Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
+
+Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
 
@@ -1257,6 +1259,42 @@ name with either an
 or
 \(oq\-\(cq
 character.
+.SS "Date_Spec"
+\fBsudoers\fR
+rules can be specified with a start and end date via the
+\fRNOTBEFORE\fR
+and
+\fRNOTAFTER\fR
+settings.
+The time stamp must be specified in
+\fIGeneralized Time\fR
+as defined by RFC 4517.
+The format is effectively
+\fRyyyymmddHHMMSSZ\fR
+where the minutes and seconds are optional.
+The
+\(oqZ\(cq
+suffix indicates that the time stamp is in Coordinated Universal Time (UTC).
+It is also possible to specify a timezone offset from UTC in hours
+and minutes instead of a
+\(oqZ\(cq.
+For example,
+\(oq-0500\(cq
+would correspond to Eastern Standard time in the US.
+As an extension, if no
+\(oqZ\(cq
+or timezone offset is specified, local time will be used.
+.PP
+The following are all valid time stamps:
+.nf
+.sp
+.RS 4n
+20170214083000Z
+2017021408Z
+20160315220000-0500
+20151201235900
+.RE
+.fi
 .SS "Timeout_Spec"
 A command may have a timeout associated with it.
 If the timeout expires before the command has exited, the

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -479,6 +479,19 @@ sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
 {
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
 	"<- %s @ %s:%d := %zd", func, file, line, ret);
+}
+
+void
+sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
+    int subsys, time_t ret)
+{
+#if SIZEOF_TIME_T == 8
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %lld", func, file, line, (long long)ret);
+#else
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
+#endif
 }
 
 void

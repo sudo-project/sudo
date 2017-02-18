@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -533,6 +533,16 @@ ALL {
 <INITIAL>TIMEOUT {
 			    LEXTRACE("CMND_TIMEOUT ");
 			    LEXRETURN(CMND_TIMEOUT);
+			}
+
+<INITIAL>NOTBEFORE {
+			    LEXTRACE("NOTBEFORE ");
+			    LEXRETURN(NOTBEFORE);
+			}
+
+<INITIAL>NOTAFTER {
+			    LEXTRACE("NOTAFTER ");
+			    LEXRETURN(NOTAFTER);
 			}
 
 <INITIAL>ROLE {

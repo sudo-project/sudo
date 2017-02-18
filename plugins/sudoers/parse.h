@@ -113,6 +113,8 @@ struct cmndtag {
  * Per-command option container struct.
  */
 struct command_options {
+    time_t notbefore;			/* time restriction */
+    time_t notafter;			/* time restriction */
     int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
@@ -176,6 +178,8 @@ struct cmndspec {
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
+    time_t notbefore;			/* time restriction */
+    time_t notafter;			/* time restriction */
     int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
@@ -279,5 +283,11 @@ size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
 /* timeout.c */
 int parse_timeout(const char *timestr);
+
+/* gmtoff.c */
+long get_gmtoff(time_t *clock);
+
+/* gentime.c */
+time_t parse_gentime(const char *expstr);
 
 #endif /* SUDOERS_PARSE_H */

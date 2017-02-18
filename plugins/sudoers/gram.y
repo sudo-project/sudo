@@ -130,6 +130,8 @@ static struct sudo_digest *new_digest(int, char *);
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 CMND_TIMEOUT		/* command timeout */
+%token <tok>	 NOTBEFORE		/* time restriction */
+%token <tok>	 NOTAFTER		/* time restriction */
 %token <tok>	 MYSELF			/* run as myself, not another user */
 %token <tok>	 SHA224_TOK		/* sha224 token */
 %token <tok>	 SHA256_TOK		/* sha256 token */
@@ -164,6 +166,8 @@ static struct sudo_digest *new_digest(int, char *);
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
 %type <string>	  timeoutspec
+%type <string>	  notbeforespec
+%type <string>	  notafterspec
 %type <digest>	  digest
 %type <options>	  options
 
@@ -353,6 +357,11 @@ cmndspeclist	:	cmndspec
 			        $3->limitprivs = prev->limitprivs;
 			    }
 #endif /* HAVE_PRIV_SET */
+			    /* propagate command time restrictions */
+			    if ($3->notbefore == UNSPEC)
+				$3->notbefore = prev->notbefore;
+			    if ($3->notafter == UNSPEC)
+				$3->notafter = prev->notafter;
 			    /* propagate command timeout */
 			    if ($3->timeout == UNSPEC)
 				$3->timeout = prev->timeout;
@@ -420,6 +429,8 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    cs->privs = $2.privs;
 			    cs->limitprivs = $2.limitprivs;
 #endif
+			    cs->notbefore = $2.notbefore;
+			    cs->notafter = $2.notafter;
 			    cs->timeout = $2.timeout;
 			    cs->tags = $3;
 			    cs->cmnd = $4;
@@ -487,6 +498,15 @@ opcmnd		:	cmnd {
 		;
 
 timeoutspec	:	CMND_TIMEOUT '=' WORD {
+			    $$ = $3;
+			}
+		;
+
+notbeforespec	:	NOTBEFORE '=' WORD {
+			    $$ = $3;
+			}
+
+notafterspec	:	NOTAFTER '=' WORD {
 			    $$ = $3;
 			}
 		;
@@ -579,6 +599,22 @@ runaslist	:	/* empty */ {
 
 options		:	/* empty */ {
 			    init_options(&$$);
+			}
+		|	options notbeforespec {
+			    $$.notbefore = parse_gentime($2);
+			    free($2);
+			    if ($$.notbefore == -1) {
+				sudoerserror(N_("invalid notbefore value"));
+				YYERROR;
+			    }
+			}
+		|	options notafterspec {
+			    $$.notafter = parse_gentime($2);
+			    free($2);
+			    if ($$.notafter == -1) {
+				sudoerserror(N_("invalid notafter value"));
+				YYERROR;
+			    }
 			}
 		|	options timeoutspec {
 			    $$.timeout = parse_timeout($2);
@@ -1185,6 +1221,8 @@ init_parser(const char *path, bool quiet)
 static void
 init_options(struct command_options *opts)
 {
+    opts->notbefore = UNSPEC;
+    opts->notafter = UNSPEC;
     opts->timeout = UNSPEC;
 #ifdef HAVE_SELINUX
     opts->role = NULL;

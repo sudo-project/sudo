@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -156,6 +156,14 @@ struct sudo_conf_debug_file_list;
 	return sudo_debug_ret;						       \
     } while (0)
 
+#define debug_return_time_t(ret)					       \
+    do {								       \
+	time_t sudo_debug_ret = (ret);				       \
+	sudo_debug_exit_time_t(__func__, __FILE__, __LINE__, sudo_debug_subsys,\
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
+    } while (0)
+
 #define debug_return_long(ret)						       \
     do {								       \
 	long sudo_debug_ret = (ret);					       \
@@ -247,6 +255,7 @@ __dso_public void sudo_debug_exit_size_t_v1(const char *func, const char *file, 
 __dso_public void sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line, int subsys, ssize_t ret);
 __dso_public void sudo_debug_exit_str_v1(const char *func, const char *file, int line, int subsys, const char *ret);
 __dso_public void sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line, int subsys, const char *ret);
+__dso_public void sudo_debug_exit_time_t_v1(const char *func, const char *file, int line, int subsys, time_t ret);
 __dso_public pid_t sudo_debug_fork_v1(void);
 __dso_public int sudo_debug_get_active_instance_v1(void);
 __dso_public int sudo_debug_get_fds_v1(unsigned char **fds);
@@ -272,6 +281,7 @@ __dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *fil
 #define sudo_debug_exit_ssize_t(_a, _b, _c, _d, _e) sudo_debug_exit_ssize_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_str(_a, _b, _c, _d, _e) sudo_debug_exit_str_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_str_masked(_a, _b, _c, _d, _e) sudo_debug_exit_str_masked_v1((_a), (_b), (_c), (_d), (_e))
+#define sudo_debug_exit_time_t(_a, _b, _c, _d, _e) sudo_debug_exit_time_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_fork() sudo_debug_fork_v1()
 #define sudo_debug_get_active_instance() sudo_debug_get_active_instance_v1()
 #define sudo_debug_get_fds(_a) sudo_debug_get_fds_v1((_a))

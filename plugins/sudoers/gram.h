@@ -37,11 +37,13 @@
 #define PRIVS 293
 #define LIMITPRIVS 294
 #define CMND_TIMEOUT 295
-#define MYSELF 296
-#define SHA224_TOK 297
-#define SHA256_TOK 298
-#define SHA384_TOK 299
-#define SHA512_TOK 300
+#define NOTBEFORE 296
+#define NOTAFTER 297
+#define MYSELF 298
+#define SHA224_TOK 299
+#define SHA256_TOK 300
+#define SHA384_TOK 301
+#define SHA512_TOK 302
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {

@@ -939,11 +939,13 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Timeout_Spec)
+Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
+
+Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
 
@@ -1180,6 +1182,39 @@ name with either an
 or
 .Ql \-
 character.
+.Ss Date_Spec
+.Nm sudoers
+rules can be specified with a start and end date via the
+.Li NOTBEFORE
+and
+.Li NOTAFTER
+settings.
+The time stamp must be specified in
+.Em Generalized Time
+as defined by RFC 4517.
+The format is effectively
+.Li yyyymmddHHMMSSZ
+where the minutes and seconds are optional.
+The
+.Ql Z
+suffix indicates that the time stamp is in Coordinated Universal Time (UTC).
+It is also possible to specify a timezone offset from UTC in hours
+and minutes instead of a
+.Ql Z .
+For example,
+.Ql -0500
+would correspond to Eastern Standard time in the US.
+As an extension, if no
+.Ql Z
+or timezone offset is specified, local time will be used.
+.Pp
+The following are all valid time stamps:
+.Bd -literal -offset 4n
+20170214083000Z
+2017021408Z
+20160315220000-0500
+20151201235900
+.Ed
 .Ss Timeout_Spec
 A command may have a timeout associated with it.
 If the timeout expires before the command has exited, the

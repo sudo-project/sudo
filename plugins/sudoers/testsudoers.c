@@ -38,6 +38,7 @@
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
+#include <time.h>
 #include <ctype.h>
 #include <errno.h>
 #include <netinet/in.h>
@@ -636,6 +637,18 @@ print_privilege(struct privilege *priv)
 #endif /* HAVE_PRIV_SET */
 	if (cs->timeout > 0)
 	    printf("TIMEOUT=%d ", cs->timeout);
+	if (cs->notbefore != UNSPEC) {
+	    struct tm *tm = gmtime(&cs->notbefore);
+	    printf("NOTBEFORE=%04d%02d%02d%02d%02d%02dZ ",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min, tm->tm_sec);
+	}
+	if (cs->notafter != UNSPEC) {
+	    struct tm *tm = gmtime(&cs->notafter);
+	    printf("NOTAFTER=%04d%02d%02d%02d%02d%02dZ ",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min, tm->tm_sec);
+	}
 	if (TAG_CHANGED(follow))
 	    printf("%sFOLLOW: ", cs->tags.follow ? "" : "NO");
 	if (TAG_CHANGED(log_input))

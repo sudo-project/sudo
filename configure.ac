@@ -2348,6 +2348,7 @@ SUDO_SOCK_SA_LEN
 SUDO_SOCK_SIN_LEN
 AC_CHECK_SIZEOF([id_t])
 AC_CHECK_SIZEOF([long long])
+AC_CHECK_SIZEOF([time_t])
 dnl
 dnl Check for utmp/utmpx struct members.
 dnl We need to have already defined _GNU_SOURCE on glibc which only has
@@ -2665,6 +2666,10 @@ fi
 AC_CHECK_FUNCS([strtonum])
 AC_LIBOBJ(strtonum)
 SUDO_APPEND_COMPAT_EXP(sudo_strtonum)
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff], [], [], [
+AC_INCLUDES_DEFAULT
+#include <errno.h>
+])
 AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
     [AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
     [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
