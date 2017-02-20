@@ -69,11 +69,6 @@
 #else
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
-#ifdef HAVE_SHA224UPDATE
-# include <sha2.h>
-#else
-# include "compat/sha2.h"
-#endif
 
 #if !defined(O_SEARCH) && defined(O_PATH)
 # define O_SEARCH O_PATH
@@ -723,127 +718,62 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 }
 #else /* !SUDOERS_NAME_MATCH */
 
-static struct digest_function {
-    const char *digest_name;
-    const unsigned int digest_len;
-    void (*init)(SHA2_CTX *);
-#ifdef SHA2_VOID_PTR
-    void (*update)(SHA2_CTX *, const void *, size_t);
-    void (*final)(void *, SHA2_CTX *);
-#else
-    void (*update)(SHA2_CTX *, const unsigned char *, size_t);
-    void (*final)(unsigned char *, SHA2_CTX *);
-#endif
-} digest_functions[] = {
-    {
-	"SHA224",
-	SHA224_DIGEST_LENGTH,
-	SHA224Init,
-	SHA224Update,
-	SHA224Final
-    }, {
-	"SHA256",
-	SHA256_DIGEST_LENGTH,
-	SHA256Init,
-	SHA256Update,
-	SHA256Final
-    }, {
-	"SHA384",
-	SHA384_DIGEST_LENGTH,
-	SHA384Init,
-	SHA384Update,
-	SHA384Final
-    }, {
-	"SHA512",
-	SHA512_DIGEST_LENGTH,
-	SHA512Init,
-	SHA512Update,
-	SHA512Final
-    }, {
-	NULL
-    }
-};
-
 static bool
 digest_matches(int fd, const char *file, const struct sudo_digest *sd)
 {
-    unsigned char file_digest[SHA512_DIGEST_LENGTH];
-    unsigned char sudoers_digest[SHA512_DIGEST_LENGTH];
-    unsigned char buf[32 * 1024];
-    struct digest_function *func = NULL;
-    size_t nread;
-    SHA2_CTX ctx;
-    FILE *fp;
-    int fd2;
-    unsigned int i;
+    unsigned char *file_digest = NULL;
+    unsigned char *sudoers_digest = NULL;
+    bool matched = false;
+    size_t digest_len;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
-    for (i = 0; digest_functions[i].digest_name != NULL; i++) {
-	if (sd->digest_type == i) {
-	    func = &digest_functions[i];
-	    break;
-	}
+    file_digest = sudo_filedigest(fd, file, sd->digest_type, &digest_len);
+    if (file_digest == NULL) {
+	/* Warning (if any) printed by sudo_filedigest() */
+	goto done;
     }
-    if (func == NULL) {
-	sudo_warnx(U_("unsupported digest type %d for %s"), sd->digest_type, file);
-	debug_return_bool(false);
+
+    /* Convert the command digest from ascii to binary. */
+    if ((sudoers_digest = malloc(digest_len)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
     }
-    if (strlen(sd->digest_str) == func->digest_len * 2) {
-	/* Convert the command digest from ascii hex to binary. */
-	for (i = 0; i < func->digest_len; i++) {
+    if (strlen(sd->digest_str) == digest_len * 2) {
+	/* Convert ascii hex to binary. */
+	unsigned int i;
+	for (i = 0; i < digest_len; i++) {
 	    const int h = hexchar(&sd->digest_str[i + i]);
 	    if (h == -1)
 		goto bad_format;
 	    sudoers_digest[i] = (unsigned char)h;
 	}
     } else {
-	size_t len = base64_decode(sd->digest_str, sudoers_digest,
-	    sizeof(sudoers_digest));
-	if (len != func->digest_len) {
+	/* Convert base64 to binary. */
+	size_t len = base64_decode(sd->digest_str, sudoers_digest, digest_len);
+	if (len != digest_len) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"incorrect length for digest, expected %u, got %zu",
-		func->digest_len, len);
+		"incorrect length for digest, expected %zu, got %zu",
+		digest_len, len);
 	    goto bad_format;
 	}
     }
 
-    if ((fd2 = dup(fd)) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to dup %s: %s",
-	    file, strerror(errno));
-	debug_return_bool(false);
-    }
-    if ((fp = fdopen(fd2, "r")) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to open %s: %s",
-	    file, strerror(errno));
-	close(fd2);
-	debug_return_bool(false);
-    }
-
-    func->init(&ctx);
-    while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
-	func->update(&ctx, buf, nread);
-    }
-    if (ferror(fp)) {
-	sudo_warnx(U_("%s: read error"), file);
-	fclose(fp);
-	debug_return_bool(false);
-    }
-    func->final(file_digest, &ctx);
-
-    if (memcmp(file_digest, sudoers_digest, func->digest_len) != 0) {
-	fclose(fp);
+    if (memcmp(file_digest, sudoers_digest, digest_len) == 0) {
+	matched = true;
+    } else {
 	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "%s digest mismatch for %s, expecting %s",
-	    func->digest_name, file, sd->digest_str);
-	debug_return_bool(false);
+	    digest_type_to_name(sd->digest_type), file, sd->digest_str);
     }
+    goto done;
 
-    fclose(fp);
-    debug_return_bool(true);
 bad_format:
     sudo_warnx(U_("digest for %s (%s) is not in %s form"), file,
-	sd->digest_str, func->digest_name);
-    debug_return_bool(false);
+	sd->digest_str, digest_type_to_name(sd->digest_type));
+done:
+    free(sudoers_digest);
+    free(file_digest);
+    debug_return_bool(matched);
 }
 
 static bool

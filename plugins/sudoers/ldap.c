@@ -968,10 +968,8 @@ sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
 			cp++;
 		    *cmnd = cp;
 		    DPRINTF1("%s digest %s for %s",
-			digest_type == SUDO_DIGEST_SHA224 ? "sha224" :
-			digest_type == SUDO_DIGEST_SHA256 ? "sha256" :
-			digest_type == SUDO_DIGEST_SHA384 ? "sha384" :
-			"sha512", digest->digest_str, cp);
+			digest_type_to_name(digest_type),
+			digest->digest_str, cp);
 		    debug_return_ptr(digest);
 		}
 	    }

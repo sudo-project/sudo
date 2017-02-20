@@ -260,8 +260,10 @@ plugins/sudoers/def_data.h
 plugins/sudoers/def_data.in
 plugins/sudoers/defaults.c
 plugins/sudoers/defaults.h
+plugins/sudoers/digestname.c
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
+plugins/sudoers/filedigest.c
 plugins/sudoers/find_path.c
 plugins/sudoers/gc.c
 plugins/sudoers/gentime.c

@@ -150,11 +150,11 @@ TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_digest \
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo gentime.lo \
-		       hexchar.lo gmtoff.lo gram.lo match.lo match_addr.lo \
-		       pwutil.lo pwutil_impl.lo rcstr.lo redblack.lo \
-		       sudoers_debug.lo timeout.lo timestr.lo toke.lo \
-		       toke_util.lo
+LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo digestname.lo \
+		       filedigest.lo gentime.lo gmtoff.lo gram.lo hexchar.lo \
+		       match.lo match_addr.lo pwutil.lo pwutil_impl.lo \
+		       rcstr.lo redblack.lo sudoers_debug.lo timeout.lo \
+		       timestr.lo toke.lo toke_util.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo find_path.lo \
 	       gc.lo goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
@@ -656,6 +656,11 @@ defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/defaults.c
+digestname.lo: $(srcdir)/digestname.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_queue.h $(srcdir)/parse.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/digestname.c
 editor.lo: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -674,6 +679,17 @@ env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/env.c
+filedigest.lo: $(srcdir)/filedigest.c $(devdir)/def_data.h \
+               $(incdir)/compat/sha2.h $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+               $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/filedigest.c
 find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

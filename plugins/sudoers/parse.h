@@ -290,4 +290,10 @@ long get_gmtoff(time_t *clock);
 /* gentime.c */
 time_t parse_gentime(const char *expstr);
 
+/* filedigest.c */
+unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len);
+
+/* digestname.c */
+const char *digest_type_to_name(int digest_type);
+
 #endif /* SUDOERS_PARSE_H */
