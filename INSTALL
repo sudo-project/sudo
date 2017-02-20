@@ -515,6 +515,12 @@ Authentication options:
         gss_krb5_ccache_name() provides a better API to do this it
         is not supported by all Kerberos V and SASL combinations.
 
+  --enable-gcrypt[=DIR]
+        Use GNU crypt's SHA-2 message digest functions instead of the
+        ones bundled with sudo (or in the system's C library).
+        If specified, DIR should contain include and lib directories
+        with gcrypt.h and libgcrypt respectively.
+
   --enable-openssl[=DIR]
         Use OpenSSL's SHA-2 message digest functions instead of the
         ones bundled with sudo (or in the system's C library).

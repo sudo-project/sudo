@@ -1465,6 +1465,20 @@ AC_ARG_ENABLE(openssl,
  esac
 ])
 
+AC_ARG_ENABLE(gcrypt,
+[AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's message digest functions instead of sudo's])],
+[ case $enableval in
+    no)		;;
+    *)		LIBMD="-lgcrypt"
+		FILEDIGEST=filedigest_gcrypt.lo
+		if test "$enableval" != "yes"; then
+		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
+		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
+		fi
+		;;
+ esac
+])
+
 AC_ARG_ENABLE(hardening,
 [AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
 [], [enable_hardening=yes])

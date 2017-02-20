@@ -948,6 +948,7 @@ enable_env_reset
 enable_warnings
 enable_werror
 enable_openssl
+enable_gcrypt
 enable_hardening
 enable_pie
 enable_asan
@@ -1624,6 +1625,8 @@ Optional Features:
   --enable-warnings       Whether to enable compiler warnings
   --enable-werror         Whether to enable the -Werror compiler option
   --enable-openssl        Use OpenSSL's message digest functions instead of
+                          sudo's
+  --enable-gcrypt         Use GNU crypt's message digest functions instead of
                           sudo's
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
@@ -6350,6 +6353,120 @@ if test "${enable_openssl+set}" = set; then :
     no)		;;
     *)		LIBMD="-lcrypto"
 		FILEDIGEST=filedigest_openssl.lo
+		if test "$enableval" != "yes"; then
+
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enableval}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enableval}/include"; } >&5
+  (: CPPFLAGS already contains -I${enableval}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enableval}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${enableval}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${enableval}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${enableval}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${enableval}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${enableval}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${enableval}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+		fi
+		;;
+ esac
+
+fi
+
+
+# Check whether --enable-gcrypt was given.
+if test "${enable_gcrypt+set}" = set; then :
+  enableval=$enable_gcrypt;  case $enableval in
+    no)		;;
+    *)		LIBMD="-lgcrypt"
+		FILEDIGEST=filedigest_gcrypt.lo
 		if test "$enableval" != "yes"; then
 
 if ${CPPFLAGS+:} false; then :

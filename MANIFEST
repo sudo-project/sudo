@@ -264,6 +264,7 @@ plugins/sudoers/digestname.c
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/filedigest.c
+plugins/sudoers/filedigest_gcrypt.c
 plugins/sudoers/filedigest_openssl.c
 plugins/sudoers/find_path.c
 plugins/sudoers/gc.c
