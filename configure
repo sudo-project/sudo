@@ -722,6 +722,7 @@ timeout
 vardir
 rundir
 iolog_dir
+FILEDIGEST
 exampledir
 TMPFILES_D
 COMPAT_EXP
@@ -946,6 +947,7 @@ enable_zlib
 enable_env_reset
 enable_warnings
 enable_werror
+enable_openssl
 enable_hardening
 enable_pie
 enable_asan
@@ -1621,6 +1623,8 @@ Optional Features:
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
   --enable-werror         Whether to enable the -Werror compiler option
+  --enable-openssl        Use OpenSSL's message digest functions instead of
+                          sudo's
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
   --enable-pie            Build sudo as a position independent executable.
@@ -3045,6 +3049,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3089,6 +3094,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
+FILEDIGEST=filedigest.lo
 #
 # End initial values for man page substitution
 #
@@ -6334,6 +6340,120 @@ if test "${enable_werror+set}" = set; then :
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&2;}
 	    ;;
   esac
+
+fi
+
+
+# Check whether --enable-openssl was given.
+if test "${enable_openssl+set}" = set; then :
+  enableval=$enable_openssl;  case $enableval in
+    no)		;;
+    *)		LIBMD="-lcrypto"
+		FILEDIGEST=filedigest_openssl.lo
+		if test "$enableval" != "yes"; then
+
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -I${enableval}/include "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -I\${enableval}/include"; } >&5
+  (: CPPFLAGS already contains -I${enableval}/include) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -I${enableval}/include"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-I${enableval}/include
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
+
+if ${SUDOERS_LDFLAGS+:} false; then :
+
+  case " $SUDOERS_LDFLAGS " in #(
+  *" -L${enableval}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS already contains -L\${enableval}/lib"; } >&5
+  (: SUDOERS_LDFLAGS already contains -L${enableval}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS " -L${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS=-L${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS=\"\$SUDOERS_LDFLAGS\""; } >&5
+  (: SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    if test X"$enable_rpath" = X"yes"; then
+
+if ${SUDOERS_LDFLAGS_R+:} false; then :
+
+  case " $SUDOERS_LDFLAGS_R " in #(
+  *" -R${enableval}/lib "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R already contains -R\${enableval}/lib"; } >&5
+  (: SUDOERS_LDFLAGS_R already contains -R${enableval}/lib) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDOERS_LDFLAGS_R " -R${enableval}/lib"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  SUDOERS_LDFLAGS_R=-R${enableval}/lib
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : SUDOERS_LDFLAGS_R=\"\$SUDOERS_LDFLAGS_R\""; } >&5
+  (: SUDOERS_LDFLAGS_R="$SUDOERS_LDFLAGS_R") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+    fi
+
+		fi
+		;;
+ esac
 
 fi
 
@@ -20419,12 +20539,14 @@ fi
 
 fi
 
-FOUND_SHA2=no
-ac_fn_c_check_header_mongrel "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
+# Look for sha2 functions if not using openssl
+if test "$FILEDIGEST" = "filedigest.lo"; then
+    FOUND_SHA2=no
+    ac_fn_c_check_header_mongrel "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
 if test "x$ac_cv_header_sha2_h" = xyes; then :
 
-    FOUND_SHA2=yes
-    for ac_func in SHA224Update
+	FOUND_SHA2=yes
+	for ac_func in SHA224Update
 do :
   ac_fn_c_check_func "$LINENO" "SHA224Update" "ac_cv_func_SHA224Update"
 if test "x$ac_cv_func_SHA224Update" = xyes; then :
@@ -20467,8 +20589,8 @@ $as_echo "#define SHA2_VOID_PTR 1" >>confdefs.h
 
 else
 
-	# On some systems, SHA224Update is in libmd
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SHA224Update in -lmd" >&5
+	    # On some systems, SHA224Update is in libmd
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SHA224Update in -lmd" >&5
 $as_echo_n "checking for SHA224Update in -lmd... " >&6; }
 if ${ac_cv_lib_md_SHA224Update+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20506,9 +20628,9 @@ fi
 $as_echo "$ac_cv_lib_md_SHA224Update" >&6; }
 if test "x$ac_cv_lib_md_SHA224Update" = xyes; then :
 
-	    $as_echo "#define HAVE_SHA224UPDATE 1" >>confdefs.h
+		$as_echo "#define HAVE_SHA224UPDATE 1" >>confdefs.h
 
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the data argument of SHA224Update() is void *" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the data argument of SHA224Update() is void *" >&5
 $as_echo_n "checking whether the data argument of SHA224Update() is void *... " >&6; }
 if ${sudo_cv_func_sha2_void_ptr+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20542,12 +20664,12 @@ $as_echo "#define SHA2_VOID_PTR 1" >>confdefs.h
 
   fi
 
-	    LIBMD="-lmd"
+		LIBMD="-lmd"
 
 else
 
-	    # Does not have SHA224Update
-	    FOUND_SHA2=no
+		# Does not have SHA224Update
+		FOUND_SHA2=no
 
 fi
 
@@ -20559,8 +20681,8 @@ done
 fi
 
 
-if test X"$FOUND_SHA2" = X"no"; then
-    case " $LIBOBJS " in
+    if test X"$FOUND_SHA2" = X"no"; then
+	case " $LIBOBJS " in
   *" sha2.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS sha2.$ac_objext"
  ;;
@@ -20572,6 +20694,8 @@ esac
 "
     done
 
+	SUDOERS_TEST_PROGS="${SUDOERS_TEST_PROGS}${SUDOERS_TEST_PROGS+ }check_digest"
+    fi
 fi
 for ac_func in vsyslog
 do :

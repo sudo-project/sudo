@@ -145,13 +145,13 @@ SHELL = @SHELL@
 
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
-TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_digest \
-	     check_base64 check_gentime check_hexchar @SUDOERS_TEST_PROGS@
+TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_base64 \
+	     check_gentime check_hexchar @SUDOERS_TEST_PROGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo digestname.lo \
-		       filedigest.lo gentime.lo gmtoff.lo gram.lo hexchar.lo \
+		       @FILEDIGEST@ gentime.lo gmtoff.lo gram.lo hexchar.lo \
 		       match.lo match_addr.lo pwutil.lo pwutil_impl.lo \
 		       rcstr.lo redblack.lo sudoers_debug.lo timeout.lo \
 		       timestr.lo toke.lo toke_util.lo
@@ -377,15 +377,17 @@ check: $(TEST_PROGS) visudo testsudoers
 	    mkdir -p regress/parser; \
 	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
 	    ./check_base64 || rval=`expr $$rval + $$?`; \
-	    ./check_digest > regress/parser/check_digest.out; \
-	    diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
+	    if test -f check_digest; then \
+		./check_digest > regress/parser/check_digest.out; \
+		diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
+	    fi; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \
 	    ./check_gentime || rval=`expr $$rval + $$?`; \
 	    ./check_hexchar || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
-	    case "$(TEST_PROGS)" in \
-		*check_symbols*) ./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`;; \
-	    esac; \
+	    if test -f check_symbols; then \
+		./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
+	    fi; \
 	    mkdir -p regress/logging; \
 	    ./check_wrap $(srcdir)/regress/logging/check_wrap.in > regress/logging/check_wrap.out; \
 	    diff regress/logging/check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok || rval=`expr $$rval + $$?`; \
@@ -690,6 +692,17 @@ filedigest.lo: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/filedigest.c
+filedigest_openssl.lo: $(srcdir)/filedigest_openssl.c $(devdir)/def_data.h \
+                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                       $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                       $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                       $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                       $(srcdir)/logging.h $(srcdir)/parse.h \
+                       $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                       $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/filedigest_openssl.c
 find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -867,12 +880,12 @@ logwrap.lo: $(srcdir)/logwrap.c $(devdir)/def_data.h \
 logwrap.o: logwrap.lo
 match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/fnmatch.h $(incdir)/compat/glob.h \
-          $(incdir)/compat/sha2.h $(incdir)/compat/stdbool.h \
-          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/match.c
 match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h \

@@ -96,6 +96,7 @@ AC_SUBST([RC_LINK])
 AC_SUBST([COMPAT_EXP])
 AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
+AC_SUBST([FILEDIGEST])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -183,6 +184,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
+FILEDIGEST=filedigest.lo
 #
 # End initial values for man page substitution
 #
@@ -1449,6 +1451,20 @@ AC_ARG_ENABLE(werror,
   esac
 ])
 
+AC_ARG_ENABLE(openssl,
+[AS_HELP_STRING([--enable-openssl], [Use OpenSSL's message digest functions instead of sudo's])],
+[ case $enableval in
+    no)		;;
+    *)		LIBMD="-lcrypto"
+		FILEDIGEST=filedigest_openssl.lo
+		if test "$enableval" != "yes"; then
+		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
+		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
+		fi
+		;;
+ esac
+])
+
 AC_ARG_ENABLE(hardening,
 [AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
 [], [enable_hardening=yes])
@@ -2673,24 +2689,28 @@ AC_INCLUDES_DEFAULT
 AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
     [AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
     [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
-FOUND_SHA2=no
-AC_CHECK_HEADER([sha2.h], [
-    FOUND_SHA2=yes
-    AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
-	# On some systems, SHA224Update is in libmd
-	AC_CHECK_LIB(md, SHA224Update, [
-	    AC_DEFINE(HAVE_SHA224UPDATE)
-	    SUDO_FUNC_SHA2_VOID_PTR
-	    LIBMD="-lmd"
-	], [
-	    # Does not have SHA224Update
-	    FOUND_SHA2=no
+# Look for sha2 functions if not using openssl
+if test "$FILEDIGEST" = "filedigest.lo"; then
+    FOUND_SHA2=no
+    AC_CHECK_HEADER([sha2.h], [
+	FOUND_SHA2=yes
+	AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
+	    # On some systems, SHA224Update is in libmd
+	    AC_CHECK_LIB(md, SHA224Update, [
+		AC_DEFINE(HAVE_SHA224UPDATE)
+		SUDO_FUNC_SHA2_VOID_PTR
+		LIBMD="-lmd"
+	    ], [
+		# Does not have SHA224Update
+		FOUND_SHA2=no
+	    ])
 	])
     ])
-])
-if test X"$FOUND_SHA2" = X"no"; then
-    AC_LIBOBJ(sha2)
-    SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
+    if test X"$FOUND_SHA2" = X"no"; then
+	AC_LIBOBJ(sha2)
+	SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
+	SUDOERS_TEST_PROGS="${SUDOERS_TEST_PROGS}${SUDOERS_TEST_PROGS+ }check_digest"
+    fi
 fi
 AC_CHECK_FUNCS([vsyslog], [], [
     AC_LIBOBJ(vsyslog)
