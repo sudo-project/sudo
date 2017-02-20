@@ -42,11 +42,14 @@ get_gmtoff(time_t *clock)
 long
 get_gmtoff(time_t *clock)
 {
-	struct tm gmt, *local;
+	struct tm *gm, gmt, *local;
 	long offset;
 
-	gmt = *gmtime(clock);
-	local = localtime(clock);
+	if ((gm = gmtime(clock)) == NULL)
+	    return 0;
+	gmt = *gm;
+	if ((local = localtime(clock)) == NULL)
+	    return 0;
 
 	offset = (local->tm_sec - gmt.tm_sec) +
 	    ((local->tm_min - gmt.tm_min) * 60) +
