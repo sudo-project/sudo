@@ -63,11 +63,11 @@ DDEESSCCRRIIPPTTIIOONN
 
      --ss, ----ssttrriicctt
                  Enable _s_t_r_i_c_t checking of the _s_u_d_o_e_r_s file.  If an alias is
-                 used before it is defined, vviissuuddoo will consider this a parse
-                 error.  Note that it is not possible to differentiate between
-                 an alias and a host name or user name that consists solely of
-                 uppercase letters, digits, and the underscore (`_')
-                 character.
+                 referenced but not actually defined or if there is a cycle in
+                 an alias, vviissuuddoo will consider this a parse error.  Note that
+                 it is not possible to differentiate between an alias and a
+                 host name or user name that consists solely of uppercase
+                 letters, digits, and the underscore (`_') character.
 
      --VV, ----vveerrssiioonn
                  Print the vviissuuddoo and _s_u_d_o_e_r_s grammar versions and exit.

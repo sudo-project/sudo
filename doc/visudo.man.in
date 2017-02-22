@@ -189,7 +189,8 @@ Enable
 checking of the
 \fIsudoers\fR
 file.
-If an alias is used before it is defined,
+If an alias is referenced but not actually defined
+or if there is a cycle in an alias,
 \fBvisudo\fR
 will consider this a parse error.
 Note that it is not possible to differentiate between an
