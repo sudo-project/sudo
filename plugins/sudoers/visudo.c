@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1137,12 +1137,17 @@ check_alias(char *name, int type, char *file, int lineno, bool strict, bool quie
     } else {
 	if (!quiet) {
 	    if (errno == ELOOP) {
-		sudo_warnx(U_("%s:%d cycle in %s \"%s\""),
+		fprintf(stderr, strict ?
+		    U_("Error: %s:%d cycle in %s \"%s\"") :
+		    U_("Warning: %s:%d cycle in %s \"%s\""),
 		    file, lineno, alias_type_to_string(type), name);
 	    } else {
-		sudo_warnx(U_("%s:%d %s \"%s\" referenced but not defined"),
+		fprintf(stderr, strict ?
+		    U_("Error: %s:%d %s \"%s\" referenced but not defined") :
+		    U_("Warning: %s:%d %s \"%s\" referenced but not defined"),
 		    file, lineno, alias_type_to_string(type), name);
 	    }
+	    fputc('\n', stderr);
 	    if (strict && errorfile == NULL) {
 		errorfile = rcstr_addref(file);
 		errorlineno = lineno;
@@ -1292,8 +1297,9 @@ print_unused(void *v1, void *v2)
 {
     struct alias *a = (struct alias *)v1;
 
-    sudo_warnx_nodebug(U_("%s:%d unused %s \"%s\""),
+    fprintf(stderr, U_("Warning: %s:%d unused %s \"%s\""),
 	a->file, a->lineno, alias_type_to_string(a->type), a->name);
+    fputc('\n', stderr);
     return 0;
 }
 

@@ -147,7 +147,7 @@ DDIIAAGGNNOOSSTTIICCSS
      you do not exist in the passwd database
            Your user ID does not appear in the system passwd database.
 
-     {User,Runas,Host,Cmnd}_Alias referenced but not defined
+     Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
            Either you are trying to use an undeclared
            {User,Runas,Host,Cmnd}_Alias or you have a user or host name listed
            that consists solely of uppercase letters, digits, and the
@@ -157,13 +157,13 @@ DDIIAAGGNNOOSSTTIICCSS
            undefined alias was used.  In --ss (strict) mode these are errors,
            not warnings.
 
-     unused {User,Runas,Host,Cmnd}_Alias
+     Warning: unused {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias was defined but never
            used.  The message is prefixed with the path name of the _s_u_d_o_e_r_s
            file and the line number where the unused alias was defined.  You
            may wish to comment out or remove the unused alias.
 
-     cycle in {User,Runas,Host,Cmnd}_Alias
+     Warning: cycle in {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
            itself, either directly or through an alias it includes.  The
            message is prefixed with the path name of the _s_u_d_o_e_r_s file and the
@@ -172,7 +172,7 @@ DDIIAAGGNNOOSSTTIICCSS
            when parsing the _s_u_d_o_e_r_s file.
 
      unknown defaults entry "name"
-           The _s_u_d_o_e_r_s file contains a Defaults variable not recognized by
+           The _s_u_d_o_e_r_s file contains a Defaults setting not recognized by
            vviissuuddoo.
 
      /etc/sudoers: input and output files must be different
@@ -212,4 +212,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                    November 12, 2016                   Sudo 1.8.20
+Sudo 1.8.20                    February 22, 2017                   Sudo 1.8.20

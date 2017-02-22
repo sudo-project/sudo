@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2015
+.\" Copyright (c) 1996,1998-2005, 2007-2017
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 12, 2016
+.Dd February 22, 2017
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -326,7 +326,7 @@ You didn't run
 as root.
 .It Li you do not exist in the passwd database
 Your user ID does not appear in the system passwd database.
-.It Li {User,Runas,Host,Cmnd}_Alias referenced but not defined
+.It Li Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
 Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias
 or you have a user or host name listed that consists solely of
 uppercase letters, digits, and the underscore
@@ -343,14 +343,14 @@ file and the line number where the undefined alias was used.
 In
 .Fl s
 (strict) mode these are errors, not warnings.
-.It Li unused {User,Runas,Host,Cmnd}_Alias
+.It Li Warning: unused {User,Runas,Host,Cmnd}_Alias
 The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
 The message is prefixed with the path name of the
 .Em sudoers
 file and the line number where the unused alias was defined.
 You may wish to comment out or remove the unused alias.
-.It Li cycle in {User,Runas,Host,Cmnd}_Alias
+.It Li Warning: cycle in {User,Runas,Host,Cmnd}_Alias
 The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
 itself, either directly or through an alias it includes.
 The message is prefixed with the path name of the
@@ -371,7 +371,7 @@ The
 .Em sudoers
 file contains a
 .Li Defaults
-variable not recognized by
+setting not recognized by
 .Nm .
 .It Li @sysconfdir@/sudoers: input and output files must be different
 The
