@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -509,6 +509,10 @@ void
 terminate_command(pid_t pid, bool use_pgrp)
 {
     debug_decl(terminate_command, SUDO_DEBUG_EXEC);
+
+    /* Avoid killing more than a single process or process group. */
+    if (pid <= 0)
+	debug_return;
 
     /*
      * Note that SIGCHLD will interrupt the sleep()
@@ -1069,6 +1073,10 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
     int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
+    /* Avoid killing more than a single process or process group. */
+    if (pid <= 0)
+	debug_return;
+
     if (signo == SIGCONT_FG)
 	strlcpy(signame, "CONT_FG", sizeof(signame));
     else if (signo == SIGCONT_BG)
@@ -1138,13 +1146,11 @@ send_status(int fd, struct command_status *cstat)
  * Wait for command status after receiving SIGCHLD.
  * If the command was stopped, the status is send back to the parent.
  * Otherwise, cstat is filled in but not sent.
- * Returns true if command is still alive, else false.
  */
-static bool
+static void
 handle_sigchld(int backchannel, struct command_status *cstat)
 {
     char signame[SIG2STR_MAX];
-    bool alive = true;
     int status;
     pid_t pid;
     debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
@@ -1161,7 +1167,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
 	    "waitpid returned %d, expected pid %d", pid, cmnd_pid);
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
-	debug_return_bool(false);
+	debug_return;
     }
 
     if (WIFCONTINUED(status)) {
@@ -1177,15 +1183,15 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
 	    __func__, cmnd_pid, signame);
-	alive = false;
+	cmnd_pid = -1;
     } else if (WIFEXITED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
 	    __func__, cmnd_pid, WEXITSTATUS(status));
-	alive = false;
+	cmnd_pid = -1;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_WARN,
 	    "%s: unexpected wait status %d for command (%d)",
-	    __func__, status, cmnd_pid);
+	    __func__, status, (int)cmnd_pid);
     }
 
     /* Don't overwrite execve() failure with child exit status. */
@@ -1206,7 +1212,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	}
     }
 
-    debug_return_bool(alive);
+    debug_return;
 }
 
 struct monitor_closure {
@@ -1216,7 +1222,6 @@ struct monitor_closure {
     struct sudo_event *signal_pipe_event;
     struct command_status *cstat;
     int backchannel;
-    bool alive;
 };
 
 static void
@@ -1242,8 +1247,8 @@ mon_signal_pipe_cb(int fd, int what, void *v)
 	 * directly to the command.
 	 */
 	if (signo == SIGCHLD) {
-	    mc->alive = handle_sigchld(mc->backchannel, mc->cstat);
-	    if (!mc->alive) {
+	    handle_sigchld(mc->backchannel, mc->cstat);
+	    if (cmnd_pid == -1) {
 		/* Remove all but the errpipe event. */
 		sudo_ev_del(mc->evbase, mc->backchannel_event);
 		sudo_ev_del(mc->evbase, mc->signal_pipe_event);
@@ -1492,7 +1497,6 @@ exec_monitor(struct command_details *details, int backchannel)
     mc.cstat = &cstat;
     mc.evbase = evbase;
     mc.backchannel = backchannel;
-    mc.alive = true;
 
     mc.signal_pipe_event = sudo_ev_alloc(signal_pipe[0],
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_signal_pipe_cb, &mc);
@@ -1521,7 +1525,7 @@ exec_monitor(struct command_details *details, int backchannel)
      * the error pipe is closed.
      */
     (void) sudo_ev_loop(evbase, 0);
-    if (mc.alive) {
+    if (cmnd_pid != -1) {
 	/* XXX An error occurred, should send a message back. */
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "Command still running after event loop exit, sending SIGKILL");
