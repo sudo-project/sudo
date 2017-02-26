@@ -57,13 +57,6 @@
 #define TERM_COOKED	0
 #define TERM_RAW	1
 
-/* Compatibility with older tty systems. */
-#if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
-# define TIOCGWINSZ	TIOCGSIZE
-# define TIOCSWINSZ	TIOCSSIZE
-# define winsize	ttysize
-#endif
-
 /*
  * I/O buffer with associated read/write events and a logging action.
  * Used to, e.g. pass data from the pty to the user's terminal
