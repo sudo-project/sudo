@@ -986,7 +986,7 @@ dispatch_signal_pty(struct exec_closure_pty *ec, int signo, char *signame)
 	     */
 	    if (WIFSTOPPED(status)) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "monitor stopped, suspending parent");
+		    "monitor stopped, suspending sudo");
 		n = suspend_sudo(WSTOPSIG(status));
 		kill(pid, SIGCONT);
 		schedule_signal(ec, n);
