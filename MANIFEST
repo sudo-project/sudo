@@ -594,6 +594,8 @@ src/conversation.c
 src/env_hooks.c
 src/exec.c
 src/exec_common.c
+src/exec_monitor.c
+src/exec_nopty.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c

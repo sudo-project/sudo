@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -114,10 +114,10 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_pty.o \
-       get_pty.o hooks.o net_ifs.o load_plugins.o parse_args.o \
-       preserve_fds.o signal.o sudo.o sudo_edit.o tgetpass.o ttyname.o \
-       utmp.o @SUDO_OBJS@
+OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_monitor.o \
+       exec_nopty.o exec_pty.o get_pty.o hooks.o net_ifs.o load_plugins.o \
+       parse_args.o preserve_fds.o signal.o sudo.o sudo_edit.o tgetpass.o \
+       ttyname.o utmp.o @SUDO_OBJS@
 
 SESH_OBJS = sesh.o exec_common.o
 
@@ -299,6 +299,24 @@ exec_common.o: $(srcdir)/exec_common.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_common.c
+exec_monitor.o: $(srcdir)/exec_monitor.c $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+                $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_monitor.c
+exec_nopty.o: $(srcdir)/exec_nopty.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+              $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_nopty.c
 exec_pty.o: $(srcdir)/exec_pty.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \

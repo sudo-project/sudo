@@ -36,6 +36,16 @@
 #endif
 
 /*
+ * Indices into io_fds[] when running a command in a pty.
+ */
+#define SFD_STDIN	0
+#define SFD_STDOUT	1
+#define SFD_STDERR	2
+#define SFD_MASTER	3
+#define SFD_SLAVE	4
+#define SFD_USERTTY	5
+
+/*
  * Special values to indicate whether continuing in foreground or background.
  */
 #define SIGCONT_FG	-2
@@ -69,33 +79,35 @@
 #define SESH_ERR_SOME_FILES 33		/* copy error, some files copied */
 
 /*
- * Symbols shared between exec.c and exec_pty.c
+ * Symbols shared between exec.c, exec_nopty.c, exec_pty.c and exec_monitor.c
  */
+struct command_details;
+struct command_status;
 
 /* exec.c */
-extern volatile pid_t cmnd_pid;
+extern volatile pid_t cmnd_pid, ppgrp;
+void exec_cmnd(struct command_details *details, int errfd);
+void terminate_command(pid_t pid, bool use_pgrp);
+#ifdef SA_SIGINFO
+void exec_handler(int s, siginfo_t *info, void *context);
+#else
+void exec_handler(int s);
+#endif
 
 /* exec_common.c */
 int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec);
 char **disable_execute(char *envp[], const char *dso);
 
+/* exec_nopty.c */
+int exec_nopty(struct command_details *details, struct command_status *cstat);
+
 /* exec_pty.c */
-struct sudo_event_base;
-struct command_details;
-struct command_status;
-int fork_pty(struct command_details *details, int sv[], sigset_t *omask);
-int suspend_parent(int signo);
-void exec_cmnd(struct command_details *details, struct command_status *cstat,
-    int errfd);
-void add_io_events(struct sudo_event_base *evbase);
-#ifdef SA_SIGINFO
-void handler(int s, siginfo_t *info, void *context);
-#else
-void handler(int s);
-#endif
-void pty_close(struct command_status *cstat);
-void pty_setup(uid_t uid, const char *tty, const char *utmp_user);
-void terminate_command(pid_t pid, bool use_pgrp);
+int exec_pty(struct command_details *details, struct command_status *cstat);
+void pty_cleanup(void);
+int pty_make_controlling(void);
+
+/* exec_monitor.c */
+int exec_monitor(struct command_details *details, bool foreground, int backchannel);
 
 /* utmp.c */
 bool utmp_login(const char *from_line, const char *to_line, int ttyfd,
