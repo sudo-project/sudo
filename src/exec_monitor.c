@@ -211,29 +211,27 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	errno = ECHILD;
 	/* FALLTHROUGH */
     case -1:
-	sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "waitpid returned %d, expected pid %d", pid, cmnd_pid);
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
 	debug_return;
     }
 
     if (WIFCONTINUED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
-	    __func__, cmnd_pid);
+	    __func__, (int)cmnd_pid);
     } else if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
-	    __func__, cmnd_pid, signame);
+	    __func__, (int)cmnd_pid, signame);
     } else if (WIFSIGNALED(status)) {
 	if (sig2str(WTERMSIG(status), signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
-	    __func__, cmnd_pid, signame);
+	    __func__, (int)cmnd_pid, signame);
 	cmnd_pid = -1;
     } else if (WIFEXITED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
-	    __func__, cmnd_pid, WEXITSTATUS(status));
+	    __func__, (int)cmnd_pid, WEXITSTATUS(status));
 	cmnd_pid = -1;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_WARN,

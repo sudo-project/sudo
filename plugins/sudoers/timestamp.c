@@ -160,7 +160,7 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
     if (ret) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %s, mode 0%o, uid %d, gid %d", path, mode,
+	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (int)mode,
 	    (int)owner, (int)parent_gid);
 	if (mkdir(path, mode) != 0 && errno != EEXIST) {
 	    if (!quiet)
