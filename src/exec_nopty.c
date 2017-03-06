@@ -391,11 +391,21 @@ dispatch_signal(struct exec_closure_nopty *ec, int signo, char *signame)
 		}
 		if (saved_pgrp != -1) {
 		    /*
-		     * Restore command's process group if different.
-		     * Otherwise, we cannot resume some shells.
+		     * Restore foreground process group, if different.
+		     * Otherwise, we cannot resume some shells (pdksh).
+		     *
+		     * There appears to be a race with shells that do restore
+		     * the controlling group.  Sudo can receive SIGTTOU
+		     * if the shell has already changed the controlling tty.
 		     */
-		    if (saved_pgrp != ppgrp)
+		    if (saved_pgrp != ppgrp) {
+			sigset_t set, oset;
+			sigemptyset(&set);
+			sigaddset(&set, SIGTTOU);
+			sigprocmask(SIG_BLOCK, &set, &oset);
 			(void)tcsetpgrp(fd, saved_pgrp);
+			sigprocmask(SIG_SETMASK, &oset, NULL);
+		    }
 		    close(fd);
 		}
 	    } else {
