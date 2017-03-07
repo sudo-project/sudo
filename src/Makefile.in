@@ -116,8 +116,8 @@ PROGS = @PROGS@
 
 OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_monitor.o \
        exec_nopty.o exec_pty.o get_pty.o hooks.o net_ifs.o load_plugins.o \
-       parse_args.o preserve_fds.o signal.o sudo.o sudo_edit.o tgetpass.o \
-       ttyname.o utmp.o @SUDO_OBJS@
+       parse_args.o preserve_fds.o signal.o sudo.o sudo_edit.o \
+       tcsetpgrp_nobg.o tgetpass.o ttyname.o utmp.o @SUDO_OBJS@
 
 SESH_OBJS = sesh.o exec_common.o
 
@@ -421,6 +421,13 @@ sudo_edit.o: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_edit.c
+tcsetpgrp_nobg.o: $(srcdir)/tcsetpgrp_nobg.c $(incdir)/compat/stdbool.h \
+                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                  $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                  $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(srcdir)/sudo.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tcsetpgrp_nobg.c
 tgetpass.o: $(srcdir)/tgetpass.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \

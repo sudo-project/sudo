@@ -618,6 +618,7 @@ src/sudo_exec.h
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
+src/tcsetpgrp_nobg.c
 src/tgetpass.c
 src/ttyname.c
 src/utmp.c
