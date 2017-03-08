@@ -219,8 +219,8 @@ utmp_logout(const char *line, int status)
 	ut->ut_type = DEAD_PROCESS;
 # endif
 # if defined(HAVE_STRUCT_UTMPX_UT_EXIT) || defined(HAVE_STRUCT_UTMP_UT_EXIT)
-	ut->ut_exit.__e_exit = WEXITSTATUS(status);
-	ut->ut_exit.__e_termination = WIFEXITED(status) ? WEXITSTATUS(status) : 0;
+	ut->ut_exit.__e_termination = WIFSIGNALED(status) ? WTERMSIG(status) : 0;
+	ut->ut_exit.__e_exit = WIFEXITED(status) ? WEXITSTATUS(status) : 0;
 # endif
 	utmp_settime(ut);
 	if (pututxline(ut) != NULL)
