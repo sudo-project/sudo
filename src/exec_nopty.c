@@ -301,127 +301,127 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 }
 
 /*
- * Forward a signal to the command (non-pty version) or handle
- * changes to the command's status (SIGCHLD).
- * XXX - separate SIGCHLD code?
+ * Wait for command status after receiving SIGCHLD.
+ * If the command exits, fill in cstat and stop the event loop.
+ * If the command stops, save the tty pgrp, suspend sudo, then restore
+ * the tty pgrp when sudo resumes.
  */
 static void
-dispatch_signal(struct exec_closure_nopty *ec, int signo, char *signame)
+handle_sigchld_nopty(struct exec_closure_nopty *ec)
 {
-    debug_decl(dispatch_signal, SUDO_DEBUG_EXEC)
+    pid_t pid;
+    int status;
+    char signame[SIG2STR_MAX];
+    debug_decl(handle_sigchld_nopty, SUDO_DEBUG_EXEC)
 
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: evbase %p, child: %d, signo %s(%d), cstat %p",
-	__func__, ec->evbase, (int)ec->child, signame, signo, ec->cstat);
+    /* Read command status. */
+    do {
+	pid = waitpid(ec->child, &status, WUNTRACED|WNOHANG);
+    } while (pid == -1 && errno == EINTR);
+    switch (pid) {
+    case 0:
+	/* waitpid() will return 0 for SIGCONT, which we don't care about */
+	debug_return;
+    case -1:
+	sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	debug_return;
+    }
 
-    if (ec->child == -1)
-	goto done;
-
-    if (signo == SIGCHLD) {
-	pid_t pid;
-	int status;
+    if (WIFSTOPPED(status)) {
 	/*
-	 * The command stopped or exited.
+	 * Save the controlling terminal's process group so we can restore it
+	 * after we resume, if needed.  Most well-behaved shells change the
+	 * pgrp back to its original value before suspending so we must
+	 * not try to restore in that case, lest we race with the child upon
+	 * resume, potentially stopping sudo with SIGTTOU while the command
+	 * continues to run.
 	 */
-	do {
-	    pid = waitpid(ec->child, &status, WUNTRACED|WNOHANG);
-	} while (pid == -1 && errno == EINTR);
-	if (pid == ec->child) {
-	    if (WIFSTOPPED(status)) {
-		/*
-		 * Save the controlling terminal's process group
-		 * so we can restore it after we resume, if needed.
-		 * Most well-behaved shells change the pgrp back to
-		 * its original value before suspending so we must
-		 * not try to restore in that case, lest we race with
-		 * the child upon resume, potentially stopping sudo
-		 * with SIGTTOU while the command continues to run.
-		 */
-		sigaction_t sa, osa;
-		pid_t saved_pgrp = -1;
-		int signo = WSTOPSIG(status);
-		int fd = open(_PATH_TTY, O_RDWR);
-		if (fd != -1) {
-		    saved_pgrp = tcgetpgrp(fd);
-		    if (saved_pgrp == -1) {
-			close(fd);
-			fd = -1;
-		    }
-		}
-		if (saved_pgrp != -1) {
-		    /*
-		     * Child was stopped trying to access controlling
-		     * terminal.  If the child has a different pgrp
-		     * and we own the controlling terminal, give it
-		     * to the child's pgrp and let it continue.
-		     */
-		    if (signo == SIGTTOU || signo == SIGTTIN) {
-			if (saved_pgrp == ppgrp) {
-			    pid_t child_pgrp = getpgid(ec->child);
-			    if (child_pgrp != ppgrp) {
-				if (tcsetpgrp(fd, child_pgrp) == 0) {
-				    if (killpg(child_pgrp, SIGCONT) != 0) {
-					sudo_warn("kill(%d, SIGCONT)",
-					    (int)child_pgrp);
-				    }
-				    close(fd);
-				    goto done;
-				}
+	sigaction_t sa, osa;
+	pid_t saved_pgrp = -1;
+	int fd, signo = WSTOPSIG(status);
+
+	if (sig2str(signo, signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", signo);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
+	    __func__, (int)ec->child, signame);
+
+	fd = open(_PATH_TTY, O_RDWR);
+	if (fd != -1) {
+	    saved_pgrp = tcgetpgrp(fd);
+	    if (saved_pgrp == -1) {
+		close(fd);
+		fd = -1;
+	    }
+	}
+	if (saved_pgrp != -1) {
+	    /*
+	     * Child was stopped trying to access the controlling terminal.
+	     * If the child has a different pgrp and we own the controlling
+	     * terminal, give it to the child's pgrp and let it continue.
+	     */
+	    if (signo == SIGTTOU || signo == SIGTTIN) {
+		if (saved_pgrp == ppgrp) {
+		    pid_t child_pgrp = getpgid(ec->child);
+		    if (child_pgrp != ppgrp) {
+			if (tcsetpgrp_nobg(fd, child_pgrp) == 0) {
+			    if (killpg(child_pgrp, SIGCONT) != 0) {
+				sudo_warn("kill(%d, SIGCONT)",
+				    (int)child_pgrp);
 			    }
+			    close(fd);
+			    goto done;
 			}
 		    }
 		}
-		if (signo == SIGTSTP) {
-		    memset(&sa, 0, sizeof(sa));
-		    sigemptyset(&sa.sa_mask);
-		    sa.sa_flags = SA_RESTART;
-		    sa.sa_handler = SIG_DFL;
-		    if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0) {
-			sudo_warn(U_("unable to set handler for signal %d"),
-			    SIGTSTP);
-		    }
-		}
-		if (kill(getpid(), signo) != 0)
-		    sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
-		if (signo == SIGTSTP) {
-		    if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0) {
-			sudo_warn(U_("unable to restore handler for signal %d"),
-			    SIGTSTP);
-		    }
-		}
-		if (saved_pgrp != -1) {
-		    /*
-		     * Restore foreground process group, if different.
-		     * Otherwise, we cannot resume some shells (pdksh).
-		     *
-		     * It is possible that we are no longer the foreground
-		     * process so use tcsetpgrp_nobg() to avoid sudo
-		     * receiving SIGTTOU.
-		     */
-		    if (saved_pgrp != ppgrp)
-			tcsetpgrp_nobg(fd, saved_pgrp);
-		    close(fd);
-		}
-	    } else {
-		/* Child has exited or been killed, we are done. */
-		ec->child = -1;
-		/* Don't overwrite execve() failure with child exit status. */
-		if (ec->cstat->type != CMD_ERRNO) {
-		    ec->cstat->type = CMD_WSTATUS;
-		    ec->cstat->val = status;
-		}
-		sudo_ev_del(ec->evbase, ec->signal_event);
-		sudo_ev_loopexit(ec->evbase);
-		goto done;
 	    }
 	}
-    } else {
-	/* Send signal to child. */
-	if (signo == SIGALRM) {
-	    terminate_command(ec->child, false);
-	} else if (kill(ec->child, signo) != 0) {
-	    sudo_warn("kill(%d, SIG%s)", (int)ec->child, signame);
+	if (signo == SIGTSTP) {
+	    memset(&sa, 0, sizeof(sa));
+	    sigemptyset(&sa.sa_mask);
+	    sa.sa_flags = SA_RESTART;
+	    sa.sa_handler = SIG_DFL;
+	    if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0) {
+		sudo_warn(U_("unable to set handler for signal %d"),
+		    SIGTSTP);
+	    }
 	}
+	if (kill(getpid(), signo) != 0)
+	    sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
+	if (signo == SIGTSTP) {
+	    if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0) {
+		sudo_warn(U_("unable to restore handler for signal %d"),
+		    SIGTSTP);
+	    }
+	}
+	if (saved_pgrp != -1) {
+	    /*
+	     * On resume, restore foreground process group, if different.
+	     * Otherwise, we cannot resume some shells (pdksh).
+	     *
+	     * It is possible that we are no longer the foreground process so
+	     * use tcsetpgrp_nobg() to prevent sudo from receiving SIGTTOU.
+	     */
+	    if (saved_pgrp != ppgrp)
+		tcsetpgrp_nobg(fd, saved_pgrp);
+	    close(fd);
+	}
+    } else {
+	/* Child has exited or been killed, we are done. */
+	if (WIFSIGNALED(status)) {
+	    if (sig2str(WTERMSIG(status), signame) == -1)
+		snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
+		__func__, (int)ec->child, signame);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
+		__func__, (int)ec->child, WEXITSTATUS(status));
+	}
+	/* Don't overwrite execve() failure with child exit status. */
+	if (ec->cstat->type != CMD_ERRNO) {
+	    ec->cstat->type = CMD_WSTATUS;
+	    ec->cstat->val = status;
+	}
+	ec->child = -1;
     }
 done:
     debug_return;
@@ -459,9 +459,25 @@ signal_pipe_cb(int fd, int what, void *v)
 	}
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
-	sudo_debug_printf(SUDO_DEBUG_DIAG, "received SIG%s", signame);
-	/* XXX - deliver vs. SIGCHLD? */
-	dispatch_signal(ec, signo, signame);
+	sudo_debug_printf(SUDO_DEBUG_DIAG,
+	    "%s: evbase %p, child: %d, signo %s(%d), cstat %p",
+	    __func__, ec->evbase, (int)ec->child, signame, signo, ec->cstat);
+
+	if (signo == SIGCHLD) {
+	    handle_sigchld_nopty(ec);
+	    if (ec->child == -1) {
+		/* Command exited or was killed, exit event loop. */
+		sudo_ev_del(ec->evbase, ec->signal_event);
+		sudo_ev_loopexit(ec->evbase);
+	    }
+	} else if (ec->child != -1) {
+	    /* Send signal to child. */
+	    if (signo == SIGALRM) {
+		terminate_command(ec->child, false);
+	    } else if (kill(ec->child, signo) != 0) {
+		sudo_warn("kill(%d, SIG%s)", (int)ec->child, signame);
+	    }
+	}
     } while (ec->child != -1);
     debug_return;
 }

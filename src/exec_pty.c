@@ -954,63 +954,49 @@ backchannel_cb(int fd, int what, void *v)
 }
 
 /*
- * Forward a signal to the monitor (pty version) or handle
- * changes to the monitors's status (SIGCHLD).
+ * Handle changes to the monitors's status (SIGCHLD).
  */
 static void
-dispatch_signal_pty(struct exec_closure_pty *ec, int signo, char *signame)
+handle_sigchld_pty(struct exec_closure_pty *ec)
 {
-    debug_decl(dispatch_signal_pty, SUDO_DEBUG_EXEC)
+    int n, status;
+    pid_t pid;
+    debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC)
 
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: evbase %p, child: %d, signo %s(%d), cstat %p",
-	__func__, ec->evbase, (int)ec->child, signame, signo, ec->cstat);
-
-    if (ec->child == -1)
-	goto done;
-
-    if (signo == SIGCHLD) {
-	int n, status;
-	pid_t pid;
+    /*
+     * Monitor process was signaled; wait for it as needed.
+     */
+    do {
+	pid = waitpid(ec->child, &status, WUNTRACED|WNOHANG);
+    } while (pid == -1 && errno == EINTR);
+    if (pid == ec->child) {
 	/*
-	 * Monitor process was signaled; wait for it as needed.
+	 * If the monitor dies we get notified via backchannel_cb().
+	 * If it was stopped, we should stop too (the command keeps
+	 * running in its pty) and continue it when we come back.
 	 */
-	do {
-	    pid = waitpid(ec->child, &status, WUNTRACED|WNOHANG);
-	} while (pid == -1 && errno == EINTR);
-	if (pid == ec->child) {
-	    /*
-	     * If the monitor dies we get notified via backchannel_cb().
-	     * If it was stopped, we should stop too (the command keeps
-	     * running in its pty) and continue it when we come back.
-	     */
-	    if (WIFSTOPPED(status)) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "monitor stopped, suspending sudo");
-		n = suspend_sudo(WSTOPSIG(status));
-		kill(pid, SIGCONT);
-		schedule_signal(ec, n);
-		/* Re-enable I/O events and restart event loop. */
-		add_io_events(ec->evbase);
-		sudo_ev_loopcontinue(ec->evbase);
-		goto done;
-	    } else if (WIFSIGNALED(status)) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "monitor killed, signal %d", WTERMSIG(status));
-		ec->child = -1;
-	    } else {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "monitor exited, status %d", WEXITSTATUS(status));
-		ec->child = -1;
-	    }
+	if (WIFSTOPPED(status)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"monitor stopped, suspending sudo");
+	    n = suspend_sudo(WSTOPSIG(status));
+	    kill(pid, SIGCONT);
+	    schedule_signal(ec, n);
+	    /* Re-enable I/O events and restart event loop. */
+	    add_io_events(ec->evbase);
+	    sudo_ev_loopcontinue(ec->evbase);
+	} else if (WIFSIGNALED(status)) {
+	    char signame[SIG2STR_MAX];
+	    if (sig2str(WTERMSIG(status), signame) == -1)
+		snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
+		__func__, (int)ec->child, signame);
+	    ec->child = -1;
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: monitor exited, status %d", __func__, WEXITSTATUS(status));
+	    ec->child = -1;
 	}
-    } else {
-	/* Schedule signo to be forwared to the child. */
-	schedule_signal(ec, signo);
-	/* Restart event loop to service signal immediately. */
-	sudo_ev_loopcontinue(ec->evbase);
     }
-done:
     debug_return;
 }
 
@@ -1024,6 +1010,7 @@ signal_pipe_cb(int fd, int what, void *v)
     ssize_t nread;
     debug_decl(signal_pipe_cb, SUDO_DEBUG_EXEC)
 
+    /* Process received signals until the child dies or the pipe is empty. */
     do {
 	/* read signal pipe */
 	nread = read(fd, &signo, sizeof(signo));
@@ -1045,8 +1032,18 @@ signal_pipe_cb(int fd, int what, void *v)
 	}
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
-	sudo_debug_printf(SUDO_DEBUG_DIAG, "received SIG%s", signame);
-	dispatch_signal_pty(ec, signo, signame);
+	sudo_debug_printf(SUDO_DEBUG_DIAG,
+	    "%s: evbase %p, child: %d, signo %s(%d), cstat %p",
+	    __func__, ec->evbase, (int)ec->child, signame, signo, ec->cstat);
+
+	if (signo == SIGCHLD) {
+	    handle_sigchld_pty(ec);
+	} else if (ec->child != -1) {
+	    /* Schedule signo to be forwared to the child. */
+	    schedule_signal(ec, signo);
+	    /* Restart event loop to service signal immediately. */
+	    sudo_ev_loopcontinue(ec->evbase);
+	}
     } while (ec->child != -1);
     debug_return;
 }

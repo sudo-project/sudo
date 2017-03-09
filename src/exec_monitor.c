@@ -195,12 +195,12 @@ send_status(int fd, struct command_status *cstat)
  * Otherwise, cstat is filled in but not sent.
  */
 static void
-handle_sigchld(int backchannel, struct command_status *cstat)
+mon_handle_sigchld(int backchannel, struct command_status *cstat)
 {
     char signame[SIG2STR_MAX];
     int status;
     pid_t pid;
-    debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
+    debug_decl(mon_handle_sigchld, SUDO_DEBUG_EXEC);
 
     /* Read command status. */
     do {
@@ -283,7 +283,7 @@ mon_signal_pipe_cb(int fd, int what, void *v)
 	 * directly to the command.
 	 */
 	if (signo == SIGCHLD) {
-	    handle_sigchld(mc->backchannel, mc->cstat);
+	    mon_handle_sigchld(mc->backchannel, mc->cstat);
 	    if (cmnd_pid == -1) {
 		/* Remove all but the errpipe event. */
 		sudo_ev_del(mc->evbase, mc->backchannel_event);
