@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.20\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2017-02-16 10:13-0700\n"
+"POT-Creation-Date: 2017-03-09 11:58-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,29 +31,30 @@ msgstr ""
 
 #: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/gidlist.c:74
 #: lib/util/sudo_conf.c:184 lib/util/sudo_conf.c:270 lib/util/sudo_conf.c:347
-#: lib/util/sudo_conf.c:545 src/conversation.c:75 src/exec.c:873
-#: src/exec_common.c:107 src/exec_common.c:123 src/exec_common.c:132
-#: src/exec_pty.c:692 src/exec_pty.c:700 src/exec_pty.c:1163
-#: src/load_plugins.c:52 src/load_plugins.c:65 src/load_plugins.c:215
-#: src/load_plugins.c:238 src/load_plugins.c:303 src/load_plugins.c:318
-#: src/parse_args.c:183 src/parse_args.c:205 src/parse_args.c:376
-#: src/parse_args.c:472 src/parse_args.c:494 src/preserve_fds.c:47
-#: src/preserve_fds.c:130 src/selinux.c:83 src/selinux.c:292 src/selinux.c:415
-#: src/selinux.c:424 src/sesh.c:115 src/sudo.c:398 src/sudo.c:423
-#: src/sudo.c:488 src/sudo.c:610 src/sudo.c:670 src/sudo.c:680 src/sudo.c:700
-#: src/sudo.c:719 src/sudo.c:728 src/sudo.c:737 src/sudo.c:754 src/sudo.c:795
-#: src/sudo.c:805 src/sudo.c:825 src/sudo.c:1246 src/sudo.c:1267
-#: src/sudo.c:1441 src/sudo.c:1535 src/sudo_edit.c:151 src/sudo_edit.c:775
-#: src/sudo_edit.c:872 src/sudo_edit.c:985 src/sudo_edit.c:1005
+#: lib/util/sudo_conf.c:545 src/conversation.c:75 src/exec_common.c:107
+#: src/exec_common.c:123 src/exec_common.c:132 src/exec_monitor.c:214
+#: src/exec_nopty.c:326 src/exec_pty.c:623 src/exec_pty.c:631
+#: src/exec_pty.c:868 src/load_plugins.c:52 src/load_plugins.c:65
+#: src/load_plugins.c:215 src/load_plugins.c:238 src/load_plugins.c:303
+#: src/load_plugins.c:318 src/parse_args.c:183 src/parse_args.c:205
+#: src/parse_args.c:376 src/parse_args.c:472 src/parse_args.c:494
+#: src/preserve_fds.c:47 src/preserve_fds.c:130 src/selinux.c:83
+#: src/selinux.c:292 src/selinux.c:415 src/selinux.c:424 src/sesh.c:115
+#: src/sudo.c:398 src/sudo.c:423 src/sudo.c:488 src/sudo.c:610 src/sudo.c:670
+#: src/sudo.c:680 src/sudo.c:700 src/sudo.c:719 src/sudo.c:728 src/sudo.c:737
+#: src/sudo.c:754 src/sudo.c:795 src/sudo.c:805 src/sudo.c:825 src/sudo.c:1246
+#: src/sudo.c:1267 src/sudo.c:1441 src/sudo.c:1535 src/sudo_edit.c:151
+#: src/sudo_edit.c:775 src/sudo_edit.c:872 src/sudo_edit.c:985
+#: src/sudo_edit.c:1005
 #, c-format
 msgid "%s: %s"
 msgstr ""
 
 #: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/sudo_conf.c:185
 #: lib/util/sudo_conf.c:270 lib/util/sudo_conf.c:347 lib/util/sudo_conf.c:545
-#: src/conversation.c:76 src/exec.c:873 src/exec_common.c:107
-#: src/exec_common.c:124 src/exec_common.c:133 src/exec_pty.c:692
-#: src/exec_pty.c:700 src/load_plugins.c:215 src/load_plugins.c:238
+#: src/conversation.c:76 src/exec_common.c:107 src/exec_common.c:124
+#: src/exec_common.c:133 src/exec_pty.c:623 src/exec_pty.c:631
+#: src/exec_pty.c:868 src/load_plugins.c:215 src/load_plugins.c:238
 #: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:183
 #: src/parse_args.c:205 src/parse_args.c:376 src/parse_args.c:472
 #: src/parse_args.c:494 src/preserve_fds.c:47 src/preserve_fds.c:130
@@ -134,84 +135,88 @@ msgstr ""
 msgid "unable to open %s"
 msgstr ""
 
-#: src/exec.c:115 src/exec.c:117 src/exec.c:122 src/exec.c:408 src/exec.c:410
-#: src/exec.c:412 src/exec.c:414 src/exec.c:416 src/exec.c:418 src/exec.c:421
-#: src/exec.c:437 src/exec.c:439 src/exec.c:606 src/exec.c:800
-#: src/exec_pty.c:464 src/exec_pty.c:730 src/exec_pty.c:800 src/exec_pty.c:802
-#: src/exec_pty.c:814 src/exec_pty.c:816 src/exec_pty.c:1347
-#: src/exec_pty.c:1349 src/exec_pty.c:1354 src/exec_pty.c:1356
-#: src/exec_pty.c:1370 src/exec_pty.c:1381 src/exec_pty.c:1383
-#: src/exec_pty.c:1385 src/exec_pty.c:1387 src/exec_pty.c:1389
-#: src/exec_pty.c:1391 src/exec_pty.c:1393 src/signal.c:148 src/signal.c:162
+#: src/exec.c:189 src/exec_monitor.c:504 src/exec_monitor.c:506
+#: src/exec_monitor.c:511 src/exec_monitor.c:513 src/exec_monitor.c:527
+#: src/exec_monitor.c:538 src/exec_monitor.c:540 src/exec_monitor.c:542
+#: src/exec_monitor.c:544 src/exec_monitor.c:546 src/exec_monitor.c:548
+#: src/exec_monitor.c:550 src/exec_nopty.c:191 src/exec_nopty.c:193
+#: src/exec_nopty.c:195 src/exec_nopty.c:197 src/exec_nopty.c:199
+#: src/exec_nopty.c:201 src/exec_nopty.c:203 src/exec_nopty.c:205
+#: src/exec_nopty.c:208 src/exec_nopty.c:222 src/exec_nopty.c:224
+#: src/exec_nopty.c:226 src/exec_nopty.c:384 src/exec_pty.c:427
+#: src/exec_pty.c:661 src/exec_pty.c:1196 src/exec_pty.c:1198
+#: src/exec_pty.c:1200 src/exec_pty.c:1202 src/exec_pty.c:1204
+#: src/exec_pty.c:1206 src/exec_pty.c:1208 src/exec_pty.c:1211
+#: src/exec_pty.c:1219 src/exec_pty.c:1221 src/exec_pty.c:1223
+#: src/exec_pty.c:1231 src/exec_pty.c:1233 src/signal.c:148 src/signal.c:162
 #, c-format
 msgid "unable to set handler for signal %d"
-msgstr ""
-
-#: src/exec.c:127 src/exec_pty.c:846 src/exec_pty.c:1431 src/tgetpass.c:250
-msgid "unable to fork"
-msgstr ""
-
-#: src/exec.c:303 src/exec.c:311 src/exec.c:878 src/exec_pty.c:585
-#: src/exec_pty.c:590 src/exec_pty.c:660 src/exec_pty.c:667 src/exec_pty.c:954
-#: src/exec_pty.c:964 src/exec_pty.c:1009 src/exec_pty.c:1016
-#: src/exec_pty.c:1041 src/exec_pty.c:1502 src/exec_pty.c:1509
-#: src/exec_pty.c:1516
-msgid "unable to add event to queue"
-msgstr ""
-
-#: src/exec.c:391
-msgid "unable to create sockets"
-msgstr ""
-
-#: src/exec.c:446
-msgid "policy plugin failed session initialization"
-msgstr ""
-
-#: src/exec.c:497
-msgid "error in event loop"
-msgstr ""
-
-#: src/exec.c:515
-msgid "unable to restore tty label"
-msgstr ""
-
-#: src/exec.c:614 src/exec_pty.c:496 src/signal.c:87
-#, c-format
-msgid "unable to restore handler for signal %d"
-msgstr ""
-
-#: src/exec.c:732 src/exec_pty.c:1236
-msgid "error reading from signal pipe"
 msgstr ""
 
 #: src/exec_common.c:166
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/exec_pty.c:188
-msgid "unable to allocate pty"
+#: src/exec_monitor.c:277 src/exec_nopty.c:455 src/exec_pty.c:1028
+msgid "error reading from signal pipe"
 msgstr ""
 
-#: src/exec_pty.c:774 src/exec_pty.c:783 src/exec_pty.c:791 src/exec_pty.c:1339
-#: src/exec_pty.c:1428 src/signal.c:129 src/tgetpass.c:246
-msgid "unable to create pipe"
-msgstr ""
-
-#: src/exec_pty.c:1269
-msgid "error reading from pipe"
-msgstr ""
-
-#: src/exec_pty.c:1296
+#: src/exec_monitor.c:363
 msgid "error reading from socketpair"
 msgstr ""
 
-#: src/exec_pty.c:1305
+#: src/exec_monitor.c:372
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
 
-#: src/exec_pty.c:1407
+#: src/exec_monitor.c:450 src/exec_monitor.c:458 src/exec_monitor.c:466
+#: src/exec_nopty.c:130 src/exec_nopty.c:138 src/exec_pty.c:516
+#: src/exec_pty.c:521 src/exec_pty.c:591 src/exec_pty.c:598 src/exec_pty.c:873
+#: src/exec_pty.c:1129 src/exec_pty.c:1137 src/exec_pty.c:1322
+#: src/exec_pty.c:1332 src/exec_pty.c:1377 src/exec_pty.c:1384
+#: src/exec_pty.c:1409
+msgid "unable to add event to queue"
+msgstr ""
+
+#: src/exec_monitor.c:496 src/exec_monitor.c:570 src/exec_nopty.c:161
+#: src/exec_pty.c:705 src/exec_pty.c:714 src/exec_pty.c:722 src/signal.c:129
+#: src/tgetpass.c:246
+msgid "unable to create pipe"
+msgstr ""
+
+#: src/exec_monitor.c:562
 msgid "unable to set controlling tty"
+msgstr ""
+
+#: src/exec_monitor.c:573 src/exec_nopty.c:240 src/exec_pty.c:756
+#: src/tgetpass.c:250
+msgid "unable to fork"
+msgstr ""
+
+#: src/exec_monitor.c:654 src/exec_nopty.c:292
+msgid "unable to restore tty label"
+msgstr ""
+
+#: src/exec_nopty.c:233 src/exec_pty.c:1240
+msgid "policy plugin failed session initialization"
+msgstr ""
+
+#: src/exec_nopty.c:281 src/exec_pty.c:1278
+msgid "error in event loop"
+msgstr ""
+
+#: src/exec_nopty.c:392 src/exec_pty.c:459 src/signal.c:87
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr ""
+
+#: src/exec_pty.c:133
+msgid "unable to allocate pty"
+msgstr ""
+
+#: src/exec_pty.c:1179
+msgid "unable to create sockets"
 msgstr ""
 
 #: src/load_plugins.c:50 src/load_plugins.c:63 src/load_plugins.c:85
