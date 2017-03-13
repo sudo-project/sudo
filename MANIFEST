@@ -109,6 +109,7 @@ lib/util/mksigname.h
 lib/util/mktemp.c
 lib/util/nanosleep.c
 lib/util/parseln.c
+lib/util/pipe2.c
 lib/util/progname.c
 lib/util/pw_dup.c
 lib/util/reallocarray.c

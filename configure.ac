@@ -2619,6 +2619,10 @@ AC_CHECK_FUNCS(nanosleep, [], [
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
 ])
+AC_CHECK_FUNCS([pipe2], [], [
+    AC_LIBOBJ(pipe2)
+    SUDO_APPEND_COMPAT_EXP(sudo_pipe2)
+])
 AC_CHECK_FUNCS([pw_dup], [], [
     AC_LIBOBJ(pw_dup)
     SUDO_APPEND_COMPAT_EXP(sudo_pw_dup)

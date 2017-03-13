@@ -202,6 +202,11 @@
 # endif
 #endif
 
+/* For pipe2() emulation. */
+#if !defined(HAVE_PIPE2) && defined(O_NONBLOCK) && !defined(O_CLOEXEC)
+# define O_CLOEXEC	0x80000000
+#endif
+
 /*
  * BSD defines these in <sys/param.h> but we don't include that anymore.
  */
@@ -520,5 +525,10 @@ __dso_public void sudo_vsyslog(int pri, const char *fmt, va_list ap);
 # undef vsyslog
 # define vsyslog(_a, _b, _c) sudo_vsyslog((_a), (_b), (_c))
 #endif /* HAVE_VSYSLOG */
+#ifndef HAVE_PIPE2
+__dso_public int sudo_pipe2(int fildes[2], int flags);
+# undef pipe2
+# define pipe2(_a, _b) sudo_pipe2((_a), (_b))
+#endif /* HAVE_PIPE2 */
 
 #endif /* SUDO_COMPAT_H */
