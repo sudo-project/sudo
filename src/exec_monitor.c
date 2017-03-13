@@ -492,7 +492,7 @@ exec_monitor(struct command_details *details, bool foreground, int backchannel)
      * We use a pipe to atomically handle signal notification within
      * the event loop.
      */
-    if (pipe_nonblock(signal_pipe) != 0)
+    if (pipe2(signal_pipe, O_NONBLOCK) != 0)
 	sudo_fatal(U_("unable to create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */

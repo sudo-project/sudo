@@ -195,7 +195,6 @@ char *tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback);
 
 /* exec.c */
-int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
 
 /* parse_args.c */

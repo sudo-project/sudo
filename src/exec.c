@@ -257,35 +257,6 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 }
 
 /*
- * Open a pipe and make both ends non-blocking.
- * Returns 0 on success and -1 on error.
- */
-int
-pipe_nonblock(int fds[2])
-{
-    int flags, ret;
-    debug_decl(pipe_nonblock, SUDO_DEBUG_EXEC)
-
-    ret = pipe(fds);
-    if (ret != -1) {
-	flags = fcntl(fds[0], F_GETFL, 0);
-	if (flags != -1 && !ISSET(flags, O_NONBLOCK))
-	    ret = fcntl(fds[0], F_SETFL, flags | O_NONBLOCK);
-	if (ret != -1) {
-	    flags = fcntl(fds[1], F_GETFL, 0);
-	    if (flags != -1 && !ISSET(flags, O_NONBLOCK))
-		ret = fcntl(fds[1], F_SETFL, flags | O_NONBLOCK);
-	}
-	if (ret == -1) {
-	    close(fds[0]);
-	    close(fds[1]);
-	}
-    }
-
-    debug_return_int(ret);
-}
-
-/*
  * Kill command with increasing urgency.
  */
 void
