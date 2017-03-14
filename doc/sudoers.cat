@@ -2240,8 +2240,10 @@ II//OO LLOOGG FFIILLEESS
      _s_t_d_e_r_r    standard error to a pipe or redirected to a file
 
      All files other than _l_o_g are compressed in gzip format unless the
-     _c_o_m_p_r_e_s_s___i_o option has been disabled.  Due to buffering, the I/O log data
-     will not be complete until the ssuuddoo command has completed.  The output
+     _c_o_m_p_r_e_s_s___i_o option has been disabled.  Due to buffering, it is not
+     possible to display the I/O logs in real-time as the program is
+     executing.  The I/O log data will not be complete until the program run
+     by ssuuddoo has exited or has been terminated by a signal.  The output
      portion of an I/O log file can be viewed with the sudoreplay(1m) utility,
      which can also be used to list or search the available logs.
 
@@ -2745,4 +2747,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                    February 16, 2017                   Sudo 1.8.20
+Sudo 1.8.20                     March 14, 2017                     Sudo 1.8.20
