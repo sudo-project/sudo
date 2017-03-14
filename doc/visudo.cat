@@ -26,8 +26,8 @@ DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not save the
      changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
      print a message stating the line number(s) where the error occurred and
-     the user will receive the ``What now?'' prompt.  At this point the user
-     may enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
+     the user will receive the "What now?" prompt.  At this point the user may
+     enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
      changes, or `Q' to quit and save changes.  The `Q' option should be used
      with extreme care because if vviissuuddoo believes there to be a parse error,
      so will ssuuddoo and no one will be able to run ssuuddoo again until the error is
@@ -50,7 +50,7 @@ DDEESSCCRRIIPPTTIIOONN
                  Specify an alternate _s_u_d_o_e_r_s file location.  With this
                  option, vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
                  choice, instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file
-                 used is the specified _s_u_d_o_e_r_s file with ``.tmp'' appended to
+                 used is the specified _s_u_d_o_e_r_s file with ".tmp" appended to
                  it.  In _c_h_e_c_k_-_o_n_l_y mode only, the argument to --ff may be `-',
                  indicating that _s_u_d_o_e_r_s will be read from the standard input.
 
@@ -206,7 +206,7 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     vviissuuddoo is provided ``AS IS'' and any express or implied warranties,
+     vviissuuddoo is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for

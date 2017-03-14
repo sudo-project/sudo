@@ -68,7 +68,7 @@ DDEESSCCRRIIPPTTIIOONN
                  Use the specified BSD authentication _t_y_p_e when validating the
                  user, if allowed by _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The system
                  administrator may specify a list of sudo-specific
-                 authentication methods by adding an ``auth-sudo'' entry in
+                 authentication methods by adding an "auth-sudo" entry in
                  _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  This option is only available on systems
                  that support BSD authentication.
 
@@ -377,18 +377,18 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      completed, then passes the command's exit status to the security policy's
      close function and exits.  If an I/O logging plugin is configured or if
      the security policy explicitly requests it, a new  pseudo-terminal
-     (``pty'') is created and a second ssuuddoo process is used to relay job
-     control signals between the user's existing pty and the new pty the
-     command is being run in.  This extra process makes it possible to, for
-     example, suspend and resume the command.  Without it, the command would
-     be in what POSIX terms an ``orphaned process group'' and it would not
-     receive any job control signals.  As a special case, if the policy plugin
-     does not define a close function and no pty is required, ssuuddoo will
-     execute the command directly instead of calling fork(2) first.  The
-     _s_u_d_o_e_r_s policy plugin will only define a close function when I/O logging
-     is enabled, a pty is required, or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options
-     are enabled.  Note that _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by
-     default on systems using PAM.
+     ("pty") is created and a second ssuuddoo process is used to relay job control
+     signals between the user's existing pty and the new pty the command is
+     being run in.  This extra process makes it possible to, for example,
+     suspend and resume the command.  Without it, the command would be in what
+     POSIX terms an "orphaned process group" and it would not receive any job
+     control signals.  As a special case, if the policy plugin does not define
+     a close function and no pty is required, ssuuddoo will execute the command
+     directly instead of calling fork(2) first.  The _s_u_d_o_e_r_s policy plugin
+     will only define a close function when I/O logging is enabled, a pty is
+     required, or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options are enabled.  Note
+     that _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by default on systems using
+     PAM.
 
    SSiiggnnaall hhaannddlliinngg
      When the command is run as a child of the ssuuddoo process, ssuuddoo will relay
@@ -442,7 +442,7 @@ EEXXIITT VVAALLUUEE
      error is printed to the standard error.  (If the directory does not exist
      or if it is not really a directory, the entry is ignored and no error is
      printed.)  This should not happen under normal circumstances.  The most
-     common reason for stat(2) to return ``permission denied'' is if you are
+     common reason for stat(2) to return "permission denied" is if you are
      running an automounter and one of the directories in your PATH is on a
      machine that is currently unreachable.
 
@@ -477,7 +477,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      for the command that is run).  This historical practice dates from a time
      when most operating systems allowed setuid processes to dump core by
      default.  To aid in debugging ssuuddoo crashes, you may wish to re-enable
-     core dumps by setting ``disable_coredump'' to false in the sudo.conf(4)
+     core dumps by setting "disable_coredump" to false in the sudo.conf(4)
      file as follows:
 
            Set disable_coredump false
@@ -622,7 +622,7 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     ssuuddoo is provided ``AS IS'' and any express or implied warranties,
+     ssuuddoo is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for

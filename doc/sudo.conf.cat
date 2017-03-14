@@ -30,7 +30,7 @@ DDEESSCCRRIIPPTTIIOONN
      Non-comment lines that don't begin with Plugin, Path, Debug, or Set are
      silently ignored.
 
-     The ssuuddoo..ccoonnff file is always parsed in the ``C'' locale.
+     The ssuuddoo..ccoonnff file is always parsed in the "C" locale.
 
    PPlluuggiinn ccoonnffiigguurraattiioonn
      ssuuddoo supports a plugin architecture for security policies and
@@ -131,7 +131,7 @@ DDEESSCCRRIIPPTTIIOONN
                Core dumps of ssuuddoo itself are disabled by default to prevent
                the disclosure of potentially sensitive information.  To aid in
                debugging ssuuddoo crashes, you may wish to re-enable core dumps by
-               setting ``disable_coredump'' to false in ssuuddoo..ccoonnff as follows:
+               setting "disable_coredump" to false in ssuuddoo..ccoonnff as follows:
 
                      Set disable_coredump false
 
@@ -171,20 +171,20 @@ DDEESSCCRRIIPPTTIIOONN
                static    Use the static group list that the kernel returns.
                          Retrieving the group list this way is very fast but
                          it is subject to an upper limit as described above.
-                         It is ``static'' in that it does not reflect changes
-                         to the group database made after the user logs in.
-                         This was the default behavior prior to ssuuddoo 1.8.7.
+                         It is "static" in that it does not reflect changes to
+                         the group database made after the user logs in.  This
+                         was the default behavior prior to ssuuddoo 1.8.7.
 
                dynamic   Always query the group database directly.  It is
-                         ``dynamic'' in that changes made to the group
-                         database after the user logs in will be reflected in
-                         the group list.  On some systems, querying the group
-                         database for all of a user's groups can be time
-                         consuming when querying a network-based group
-                         database.  Most operating systems provide an
-                         efficient method of performing such queries.
-                         Currently, ssuuddoo supports efficient group queries on
-                         AIX, BSD, HP-UX, Linux and Solaris.
+                         "dynamic" in that changes made to the group database
+                         after the user logs in will be reflected in the group
+                         list.  On some systems, querying the group database
+                         for all of a user's groups can be time consuming when
+                         querying a network-based group database.  Most
+                         operating systems provide an efficient method of
+                         performing such queries.  Currently, ssuuddoo supports
+                         efficient group queries on AIX, BSD, HP-UX, Linux and
+                         Solaris.
 
                adaptive  Only query the group database if the static group
                          list returned by the kernel has the maximum number of
@@ -412,7 +412,7 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     ssuuddoo is provided ``AS IS'' and any express or implied warranties,
+     ssuuddoo is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for

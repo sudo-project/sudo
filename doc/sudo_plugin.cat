@@ -94,7 +94,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            settings
                  A vector of user-supplied ssuuddoo settings in the form of
-                 ``name=value'' strings.  The vector is terminated by a NULL
+                 "name=value" strings.  The vector is terminated by a NULL
                  pointer.  These settings correspond to flags the user
                  specified when running ssuuddoo.  As such, they will only be
                  present when the corresponding flag has been specified on the
@@ -164,8 +164,8 @@ DDEESSCCRRIIPPTTIIOONN
 
                  network_addrs=list
                        A space-separated list of IP network addresses and
-                       netmasks in the form ``addr/netmask'', e.g.
-                       ``192.168.1.2/255.255.255.0''.  The address and netmask
+                       netmasks in the form "addr/netmask", e.g.
+                       "192.168.1.2/255.255.255.0".  The address and netmask
                        pairs may be either IPv4 or IPv6, depending on what the
                        operating system supports.  If the address contains a
                        colon (`:'), it is an IPv6 address, else it is IPv4.
@@ -199,8 +199,8 @@ DDEESSCCRRIIPPTTIIOONN
                        vector instead of setting it based on the runas user.
 
                  progname=string
-                       The command name that sudo was run as, typically
-                       ``sudo'' or ``sudoedit''.
+                       The command name that sudo was run as, typically "sudo"
+                       or "sudoedit".
 
                  prompt=string
                        The prompt to use when requesting a password, if
@@ -259,7 +259,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            user_info
                  A vector of information about the user running the command in
-                 the form of ``name=value'' strings.  The vector is terminated
+                 the form of "name=value" strings.  The vector is terminated
                  by a NULL pointer.
 
                  When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
@@ -337,7 +337,7 @@ DDEESSCCRRIIPPTTIIOONN
                  tty=string
                        The path to the user's terminal device.  If the user
                        has no terminal device associated with the session, the
-                       value will be empty, as in ``tty=''.
+                       value will be empty, as in "tty=".
 
                  uid=uid_t
                        The real user ID of the user invoking ssuuddoo.
@@ -351,7 +351,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            user_env
                  The user's environment in the form of a NULL-terminated
-                 vector of ``name=value'' strings.
+                 vector of "name=value" strings.
 
                  When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                  equal sign (`=') since the _n_a_m_e field will never include one
@@ -411,7 +411,7 @@ DDEESSCCRRIIPPTTIIOONN
            EDITOR, and include it in _a_r_g_v___o_u_t (note that environment variables
            may include command line flags).  The files to be edited should be
            copied from _a_r_g_v into _a_r_g_v___o_u_t, separated from the editor and its
-           arguments by a ``--'' element.  The ``--'' will be removed by ssuuddoo
+           arguments by a "--" element.  The "--" will be removed by ssuuddoo
            before the editor is executed.  The plugin should also set
            _s_u_d_o_e_d_i_t_=_t_r_u_e in the _c_o_m_m_a_n_d___i_n_f_o list.
 
@@ -436,7 +436,7 @@ DDEESSCCRRIIPPTTIIOONN
            env_add
                  Additional environment variables specified by the user on the
                  command line in the form of a NULL-terminated vector of
-                 ``name=value'' strings.  The plugin may reject the command if
+                 "name=value" strings.  The plugin may reject the command if
                  one or more variables are not allowed to be set, or it may
                  silently ignore such variables.
 
@@ -446,7 +446,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            command_info
                  Information about the command being run in the form of
-                 ``name=value'' strings.  These values are used by ssuuddoo to set
+                 "name=value" strings.  These values are used by ssuuddoo to set
                  the execution environment when running a command.  The plugin
                  is responsible for creating and populating the vector, which
                  must be terminated with a NULL pointer.  The following values
@@ -764,7 +764,7 @@ DDEESSCCRRIIPPTTIIOONN
            password database, otherwise it will be NULL.
 
            The _u_s_e_r___e_n_v argument points to the environment the command will
-           run in, in the form of a NULL-terminated vector of ``name=value''
+           run in, in the form of a NULL-terminated vector of "name=value"
            strings.  This is the same string passed back to the front end via
            the Policy Plugin's _u_s_e_r___e_n_v___o_u_t parameter.  If the iinniitt__sseessssiioonn()
            function needs to modify the user environment, it should update the
@@ -951,7 +951,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            settings
                  A vector of user-supplied ssuuddoo settings in the form of
-                 ``name=value'' strings.  The vector is terminated by a NULL
+                 "name=value" strings.  The vector is terminated by a NULL
                  pointer.  These settings correspond to flags the user
                  specified when running ssuuddoo.  As such, they will only be
                  present when the corresponding flag has been specified on the
@@ -966,7 +966,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            user_info
                  A vector of information about the user running the command in
-                 the form of ``name=value'' strings.  The vector is terminated
+                 the form of "name=value" strings.  The vector is terminated
                  by a NULL pointer.
 
                  When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
@@ -985,7 +985,7 @@ DDEESSCCRRIIPPTTIIOONN
 
            user_env
                  The user's environment in the form of a NULL-terminated
-                 vector of ``name=value'' strings.
+                 vector of "name=value" strings.
 
                  When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                  equal sign (`=') since the _n_a_m_e field will never include one
@@ -1286,9 +1286,9 @@ DDEESSCCRRIIPPTTIIOONN
      The ssuuddoo front end does not have native support for running remote
      commands.  However, starting with ssuuddoo 1.8.8, the --hh option may be used
      to specify a remote host that is passed to the policy plugin.  A plugin
-     may also accept a _r_u_n_a_s___u_s_e_r in the form of ``user@hostname'' which will
+     may also accept a _r_u_n_a_s___u_s_e_r in the form of "user@hostname" which will
      work with older versions of ssuuddoo.  It is anticipated that remote commands
-     will be supported by executing a ``helper'' program.  The policy plugin
+     will be supported by executing a "helper" program.  The policy plugin
      should setup the execution environment such that the ssuuddoo front end will
      run the helper which, in turn, will connect to the remote host and run
      the command.
@@ -1586,7 +1586,7 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     ssuuddoo is provided ``AS IS'' and any express or implied warranties,
+     ssuuddoo is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for

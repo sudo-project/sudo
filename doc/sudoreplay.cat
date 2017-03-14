@@ -50,7 +50,7 @@ DDEESSCCRRIIPPTTIIOONN
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
 
      --ll, ----lliisstt [_s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n]
-                 Enable ``list mode''.  In this mode, ssuuddoorreeppllaayy will list
+                 Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
                  available sessions in a format similar to the ssuuddoo log file
                  format, sorted by file name (or sequence number).  If a
                  _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is specified, it will be used to restrict
@@ -162,12 +162,12 @@ DDEESSCCRRIIPPTTIIOONN
 
      next Friday
              The first second of the Friday in the next (upcoming) week.  Not
-             to be confused with ``this friday'' which would match the friday
-             of the current week.
+             to be confused with "this friday" which would match the friday of
+             the current week.
 
      last week
-             The current time but 7 days ago.  This is equivalent to ``a week
-             ago''.
+             The current time but 7 days ago.  This is equivalent to "a week
+             ago".
 
      a fortnight ago
              The current time but 14 days ago.
@@ -187,12 +187,12 @@ DDEESSCCRRIIPPTTIIOONN
              10:01 am, September 17, 2009.
 
      Note that relative time specifications do not always work as expected.
-     For example, the ``next'' qualifier is intended to be used in conjunction
-     with a day such as ``next Monday''.  When used with units of weeks,
-     months, years, etc the result will be one more than expected.  For
-     example, ``next week'' will result in a time exactly two weeks from now,
-     which is probably not what was intended.  This will be addressed in a
-     future version of ssuuddoorreeppllaayy.
+     For example, the "next" qualifier is intended to be used in conjunction
+     with a day such as "next Monday".  When used with units of weeks, months,
+     years, etc the result will be one more than expected.  For example, "next
+     week" will result in a time exactly two weeks from now, which is probably
+     not what was intended.  This will be addressed in a future version of
+     ssuuddoorreeppllaayy.
 
    DDeebbuuggggiinngg ssuuddoorreeppllaayy
      ssuuddoorreeppllaayy versions 1.8.4 and higher support a flexible debugging
@@ -270,7 +270,7 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     ssuuddoorreeppllaayy is provided ``AS IS'' and any express or implied warranties,
+     ssuuddoorreeppllaayy is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
