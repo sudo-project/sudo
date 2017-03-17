@@ -292,13 +292,14 @@ iolog_set_mode(mode_t mode)
 {
     debug_decl(iolog_set_mode, SUDOERS_DEBUG_UTIL)
 
-    /* Restrict file mode to a subset of 0666. */
-    iolog_filemode = mode & (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+    /* I/O log files must be readable and writable by owner. */
+    iolog_filemode = S_IRUSR|S_IWUSR;
+
+    /* Add in group and other read/write if specified. */
+    iolog_filemode |= mode & (S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
 
     /* For directory mode, add execute bits as needed. */
-    iolog_dirmode = iolog_filemode;
-    if (iolog_dirmode & (S_IRUSR|S_IWUSR))
-	iolog_dirmode |= S_IXUSR;
+    iolog_dirmode = iolog_filemode | S_IXUSR;
     if (iolog_dirmode & (S_IRGRP|S_IWGRP))
 	iolog_dirmode |= S_IXGRP;
     if (iolog_dirmode & (S_IROTH|S_IWOTH))

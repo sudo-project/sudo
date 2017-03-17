@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 14, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 17, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3324,12 +3324,15 @@ the parent directory.
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
 iolog_mode
-The file permision mode to use when creating I/O log files,
-mode bits other than 0666 are ignored.
+The file mode to use when creating I/O log files.
+Mode bits for read and write permissions for owner, group or other
+are honored, everything else is ignored.
+The file permissions will always include the owner read and
+write bits, even if they are not present in the specified mode.
 When creating I/O log directories, search (execute) bits are added
 to to match the read and write bits specified by
 \fIiolog_mode\fR.
-Defaults to 0600.
+Defaults to 0600 (read and write by user only).
 .sp
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
