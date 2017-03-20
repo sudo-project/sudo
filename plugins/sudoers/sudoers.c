@@ -86,6 +86,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 int long_list;
 uid_t timestamp_uid;
+gid_t timestamp_gid;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
@@ -381,11 +382,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    pw = sudo_getpwnam(def_timestampowner);
 	if (pw != NULL) {
 	    timestamp_uid = pw->pw_uid;
+	    timestamp_gid = pw->pw_gid;
 	    sudo_pw_delref(pw);
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("timestamp owner (%s): No such user"), def_timestampowner);
 	    timestamp_uid = ROOT_UID;
+	    timestamp_gid = ROOT_GID;
 	}
     }
 

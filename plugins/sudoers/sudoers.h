@@ -366,6 +366,7 @@ extern struct passwd *list_pw;
 extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
+extern gid_t timestamp_gid;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 

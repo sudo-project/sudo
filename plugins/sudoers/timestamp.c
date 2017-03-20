@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -150,24 +150,24 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
  * Returns false on failure and displays a warning to stderr.
  */
 static bool
-ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
+ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
+    mode_t parent_mode, bool quiet)
 {
-    gid_t parent_gid = (gid_t)-1;
     bool ret;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
 
-    ret = sudo_mkdir_parents(path, owner, &parent_gid, parent_mode, quiet); 
+    ret = sudo_mkdir_parents(path, owner, &group, parent_mode, quiet); 
     if (ret) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (int)mode,
-	    (int)owner, (int)parent_gid);
+	    (int)owner, (int)group);
 	if (mkdir(path, mode) != 0 && errno != EEXIST) {
 	    if (!quiet)
 		sudo_warn(U_("unable to mkdir %s"), path);
 	    ret = false;
 	} else {
-	    ignore_result(chown(path, owner, parent_gid));
+	    ignore_result(chown(path, owner, group));
 	}
     }
     debug_return_bool(ret);
@@ -192,7 +192,7 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
 	ret = true;
 	break;
     case SUDO_PATH_MISSING:
-	if (make_it && ts_mkdirs(path, timestamp_uid, S_IRWXU,
+	if (make_it && ts_mkdirs(path, timestamp_uid, timestamp_gid, S_IRWXU,
 	    S_IRWXU|S_IXGRP|S_IXOTH, quiet)) {
 	    ret = true;
 	    break;
