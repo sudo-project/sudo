@@ -335,3 +335,6 @@ command_timeout
 user_command_timeouts
 	T_FLAG
 	"Allow the user to specify a timeout on the command line"
+iolog_flush
+	T_FLAG
+	"Flush I/O log data to disk immediately instead of buffering it"

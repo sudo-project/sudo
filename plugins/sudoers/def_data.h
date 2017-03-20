@@ -212,6 +212,8 @@
 #define def_command_timeout     (sudo_defs_table[I_COMMAND_TIMEOUT].sd_un.ival)
 #define I_USER_COMMAND_TIMEOUTS 106
 #define def_user_command_timeouts (sudo_defs_table[I_USER_COMMAND_TIMEOUTS].sd_un.flag)
+#define I_IOLOG_FLUSH           107
+#define def_iolog_flush         (sudo_defs_table[I_IOLOG_FLUSH].sd_un.flag)
 
 enum def_tuple {
 	never,

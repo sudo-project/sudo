@@ -710,6 +710,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 
 /*
  * Write the "/log" file that contains the user and command info.
+ * This file is not compressed.
  */
 static bool
 write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
@@ -746,6 +747,57 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     ret = !ferror(fp);
     fclose(fp);
     debug_return_bool(ret);
+}
+
+#ifdef HAVE_ZLIB_H
+static const char *
+gzstrerror(gzFile file)
+{
+    int errnum;
+
+    return gzerror(file, &errnum);
+}
+#endif /* HAVE_ZLIB_H */
+
+/*
+ * Write to an I/O log, compressing if iolog_compress is enabled.
+ * If def_iolog_flush is true, flush the buffer immediately.
+ */
+static const char *
+iolog_write(const void *buf, unsigned int len, int idx)
+{
+    const char *errstr = NULL;
+    debug_decl(iolog_write, SUDOERS_DEBUG_PLUGIN)
+
+#ifdef HAVE_ZLIB_H
+    if (iolog_compress) {
+	if (gzwrite(io_log_files[idx].fd.g, buf, len) != (int)len) {
+	    errstr = gzstrerror(io_log_files[idx].fd.g);
+	    goto done;
+	}
+	if (def_iolog_flush) {
+	    if (gzflush(io_log_files[idx].fd.g, Z_SYNC_FLUSH) != Z_OK) {
+		errstr = gzstrerror(io_log_files[idx].fd.g);
+		goto done;
+	    }
+	}
+    } else
+#endif
+    {
+	if (fwrite(buf, 1, len, io_log_files[idx].fd.f) != len) {
+	    errstr = strerror(errno);
+	    goto done;
+	}
+	if (def_iolog_flush) {
+	    if (fflush(io_log_files[idx].fd.f) != 0) {
+		errstr = strerror(errno);
+		goto done;
+	    }
+	}
+    }
+
+done:
+    debug_return_const_str(errstr);
 }
 
 static int
@@ -915,13 +967,15 @@ sudoers_io_version(int verbose)
 
 /*
  * Generic I/O logging function.  Called by the I/O logging entry points.
+ * Returns 1 on success and -1 on error.
  */
 static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
+    char tbuf[1024];
     const char *errstr = NULL;
-    int ret = true;
+    int ret = -1;
     debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
 
     if (io_log_files[idx].fd.v == NULL) {
@@ -932,41 +986,28 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
     gettimeofday(&now, NULL);
 
-#ifdef HAVE_ZLIB_H
-    if (iolog_compress) {
-	if (gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len) != (int)len) {
-	    int errnum;
+    /* Write I/O log file entry. */
+    errstr = iolog_write(buf, len, idx);
+    if (errstr != NULL)
+	goto done;
 
-	    errstr = gzerror(io_log_files[idx].fd.g, &errnum);
-	    ret = -1;
-	}
-    } else
-#endif
-    {
-	if (fwrite(buf, 1, len, io_log_files[idx].fd.f) != len) {
-	    errstr = strerror(errno);
-	    ret = -1;
-	}
-    }
+    /* Write timing file entry. */
     sudo_timevalsub(&now, &last_time, &delay);
-#ifdef HAVE_ZLIB_H
-    if (iolog_compress) {
-	if (gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %u\n", idx,
-	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) == 0) {
-	    int errnum;
-
-	    errstr = gzerror(io_log_files[IOFD_TIMING].fd.g, &errnum);
-	    ret = -1;
-	}
-    } else
-#endif
-    {
-	if (fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %u\n", idx,
-	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len) < 0) {
-	    errstr = strerror(errno);
-	    ret = -1;
-	}
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u\n", idx,
+	delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
+    if (len >= sizeof(tbuf)) {
+	/* Not actually possible due to the size of tbuf[]. */
+	errstr = strerror(EOVERFLOW);
+	goto done;
     }
+    errstr = iolog_write(tbuf, len, IOFD_TIMING);
+    if (errstr != NULL)
+	goto done;
+
+    /* Success. */
+    ret = 1;
+
+done:
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
@@ -980,7 +1021,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 	/* Ignore errors if they occur if the policy says so. */
 	if (iolog_details.ignore_iolog_errors)
-	    ret = true;
+	    ret = 1;
     }
 
     debug_return_int(ret);

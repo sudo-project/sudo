@@ -458,6 +458,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Allow the user to specify a timeout on the command line"),
 	NULL,
     }, {
+	"iolog_flush", T_FLAG,
+	N_("Flush I/O log data to disk immediately instead of buffering it"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 17, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 20, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3315,6 +3315,19 @@ ends in six or
 more
 \fRX\fRs.
 .TP 18n
+iolog_flush
+If set,
+\fBsudo\fR
+will flush I/O log data to disk after each write instead of buffering it.
+This makes it possible to view the logs in real-time as the program
+is executing but may significantly reduce the effectiveness of I/O
+log compression.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.20 or higher.
+.TP 18n
 iolog_group
 The group name to look up when setting the group ID on new I/O log
 files and directories.
@@ -4467,12 +4480,16 @@ All files other than
 \fIlog\fR
 are compressed in gzip format unless the
 \fIcompress_io\fR
-option has been disabled.
-Due to buffering, it is not possible to display the I/O logs in
-real-time as the program is executing.
+flag has been disabled.
+Due to buffering, it is not normally possible to display the I/O logs in
+real-time as the program is executing
 The I/O log data will not be complete until the program run by
 \fBsudo\fR
 has exited or has been terminated by a signal.
+The
+\fIiolog_flush\fR
+flag can be used to disable buffering, in which case I/O log data
+is written to disk as soon as it is available.
 The output portion of an I/O log file can be viewed with the
 sudoreplay(@mansectsu@)
 utility, which can also be used to list or search the available logs.
