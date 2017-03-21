@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 20, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3331,8 +3331,17 @@ This setting is only supported by version 1.8.20 or higher.
 iolog_group
 The group name to look up when setting the group ID on new I/O log
 files and directories.
-By default, I/O log files and directories inherit the group ID of
-the parent directory.
+If
+\fIiolog_group\fR
+is not set,
+the primary group ID of the user specified by
+\fIiolog_user\fR
+is used.
+If neither
+\fIiolog_group\fR
+nor
+\fIiolog_user\fR
+are set, I/O log files and directories are created with group ID 0.
 .sp
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
@@ -3350,10 +3359,13 @@ Defaults to 0600 (read and write by user only).
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
 iolog_user
-The user name to look up when setting the user ID on new I/O log
-files and directories.
-By default, I/O log files and directories are owned by the superuser
-(user ID 0).
+The user name to look up when setting the user and group IDs on new
+I/O log files and directories.
+If
+\fIiolog_group\fR
+is set, it will be used instead of the user's primary group ID.
+By default, I/O log files and directories are created with user and
+group ID 0.
 .sp
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n

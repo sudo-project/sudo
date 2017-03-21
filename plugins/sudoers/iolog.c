@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -71,10 +71,13 @@ static bool iolog_compress = false;
 static bool warned = false;
 static struct timeval last_time;
 static unsigned int sessid_max = SESSID_MAX;
-static uid_t iolog_uid = ROOT_UID;
-static gid_t iolog_gid = (gid_t)-1;
 static mode_t iolog_filemode = S_IRUSR|S_IWUSR;
 static mode_t iolog_dirmode = S_IRWXU;
+static bool iolog_gid_set;
+
+/* shared with set_perms.c */
+uid_t iolog_uid = ROOT_UID;
+gid_t iolog_gid = ROOT_GID;
 
 /* sudoers_io is declared at the end of this file. */
 extern __dso_public struct io_plugin sudoers_io;
@@ -83,18 +86,27 @@ extern __dso_public struct io_plugin sudoers_io;
  * Create directory and any parent directories as needed.
  */
 static bool
-io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate)
+io_mkdirs(char *path)
 {
     struct stat sb;
-    uid_t parent_uid;
-    gid_t parent_gid;
-    mode_t parent_mode;
-    bool ok = true;
+    bool ok, uid_changed = false;
     debug_decl(io_mkdirs, SUDOERS_DEBUG_UTIL)
 
-    if (stat(path, &sb) == 0) {
+    ok = stat(path, &sb) == 0;
+    if (!ok) {
+	/* Try again as the I/O log owner (for NFS). */
+	if (set_perms(PERM_IOLOG)) {
+	    ok = stat(path, &sb) == 0;
+	    if (!restore_perms())
+		ok = false;
+	}
+    }
+    if (ok) {
 	if (S_ISDIR(sb.st_mode)) {
-	    parent_gid = sb.st_gid;
+	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode)
+		ignore_result(chmod(path, iolog_dirmode));
+	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid)
+		ignore_result(chown(path, iolog_uid, iolog_gid));
 	} else {
 	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
@@ -103,35 +115,28 @@ io_mkdirs(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate
 	goto done;
     }
 
-    /* Parent directory ownership and mode. */
-    if (!set_intermediate) {
-	parent_mode = S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH;
-	parent_uid = ROOT_UID;
-	parent_gid = (gid_t)-1;
-    } else {
-	parent_mode = mode;
-	parent_uid = uid;
-	parent_gid = *gidp;
+    ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
+    if (!ok) {
+	/* Try again as the I/O log owner (for NFS). */
+	uid_changed = set_perms(PERM_IOLOG);
+	ok = sudo_mkdir_parents(path, -1, -1, iolog_dirmode, false);
     }
-
-    ok = sudo_mkdir_parents(path, parent_uid, &parent_gid, parent_mode, false);
     if (ok) {
-	/* Use group ID if specified, else parent gid. */
-	gid_t gid = *gidp != (gid_t)-1 ? *gidp : parent_gid;
-
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %s, mode 0%o", path, (unsigned int) mode);
-	if (mkdir(path, mode) != 0 && errno != EEXIST) {
-	    sudo_warnx(U_("unable to mkdir %s"), path);
+	    "mkdir %s, mode 0%o", path, (unsigned int) iolog_dirmode);
+	if (mkdir(path, iolog_dirmode) != 0 && errno != EEXIST) {
+	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
-	    ignore_result(chown(path, uid, gid));
+	    ignore_result(chown(path, iolog_uid, iolog_gid));
 	}
     }
+    if (uid_changed) {
+	if (!restore_perms())
+	    ok = false;
+    }
 done:
-    if (ok && *gidp == (gid_t)-1)
-	*gidp = parent_gid;
     debug_return_bool(ok);
 }
 
@@ -139,30 +144,19 @@ done:
  * Create temporary directory and any parent directories as needed.
  */
 static bool
-io_mkdtemp(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediate)
+io_mkdtemp(char *path)
 {
-    uid_t parent_uid;
-    gid_t parent_gid;
-    mode_t parent_mode;
     bool ok = true;
+    bool uid_changed = false;
     debug_decl(io_mkdtemp, SUDOERS_DEBUG_UTIL)
 
-    /* Parent directory ownership and mode. */
-    if (!set_intermediate) {
-	parent_mode = S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH;
-	parent_uid = ROOT_UID;
-	parent_gid = (gid_t)-1;
-    } else {
-	parent_mode = mode;
-	parent_uid = uid;
-	parent_gid = *gidp;
+    ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
+    if (!ok) {
+	/* Try again as the I/O log owner (for NFS). */
+	uid_changed = set_perms(PERM_IOLOG);
+	ok = sudo_mkdir_parents(path, -1, -1, iolog_dirmode, false);
     }
-
-    ok = sudo_mkdir_parents(path, parent_uid, &parent_gid, parent_mode, false);
     if (ok) {
-	/* Use group ID if specified, else parent gid. */
-	gid_t gid = *gidp != (gid_t)-1 ? *gidp : parent_gid;
-
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdtemp %s", path);
@@ -170,12 +164,18 @@ io_mkdtemp(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool set_intermediat
 	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
-	    ignore_result(chown(path, uid, gid));
+	    ignore_result(chown(path, iolog_uid, iolog_gid));
+	    if (chmod(path, iolog_dirmode) != 0) {
+		sudo_warn(U_("unable to change mode of %s to 0%o"),
+		    path, iolog_dirmode);
+	    }
 	}
     }
 
-    if (ok && *gidp == (gid_t)-1)
-	*gidp = parent_gid;
+    if (uid_changed) {
+	if (!restore_perms())
+	    ok = false;
+    }
     debug_return_bool(ok);
 }
 
@@ -217,25 +217,31 @@ cb_maxseq(const union sudo_defs_val *sd_un)
 }
 
 /*
- * Look up I/O log user ID from user name.
+ * Look up I/O log user ID from user name.  Sets iolog_uid.
+ * Also sets iolog_gid if iolog_group not specified.
  */
 static bool
-iolog_set_uid(const char *name)
+iolog_set_user(const char *name)
 {
     struct passwd *pw;
-    debug_decl(iolog_set_uid, SUDOERS_DEBUG_UTIL)
+    debug_decl(iolog_set_user, SUDOERS_DEBUG_UTIL)
 
     if (name != NULL) {
 	pw = sudo_getpwnam(name);
 	if (pw != NULL) {
 	    iolog_uid = pw->pw_uid;
+	    if (!iolog_gid_set)
+		iolog_gid = pw->pw_gid;
 	    sudo_pw_delref(pw);
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("unknown user: %s"), name);
 	}
     } else {
+	/* Reset to default. */
 	iolog_uid = ROOT_UID;
+	if (!iolog_gid_set)
+	    iolog_gid = ROOT_GID;
     }
 
     debug_return_bool(true);
@@ -247,29 +253,33 @@ iolog_set_uid(const char *name)
 bool
 cb_iolog_user(const union sudo_defs_val *sd_un)
 {
-    return iolog_set_uid(sd_un->str);
+    return iolog_set_user(sd_un->str);
 }
 
 /*
  * Look up I/O log group ID from group name.
+ * Sets iolog_gid.
  */
 static bool
-iolog_set_gid(const char *name)
+iolog_set_group(const char *name)
 {
     struct group *gr;
-    debug_decl(iolog_set_gid, SUDOERS_DEBUG_UTIL)
+    debug_decl(iolog_set_group, SUDOERS_DEBUG_UTIL)
 
     if (name != NULL) {
 	gr = sudo_getgrnam(name);
 	if (gr != NULL) {
 	    iolog_gid = gr->gr_gid;
+	    iolog_gid_set = true;
 	    sudo_gr_delref(gr);
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("unknown group: %s"), name);
 	}
     } else {
-	iolog_gid = (mode_t)-1;
+	/* Reset to default. */
+	iolog_gid = ROOT_GID;
+	iolog_gid_set = false;
     }
 
     debug_return_bool(true);
@@ -281,7 +291,7 @@ iolog_set_gid(const char *name)
 bool
 cb_iolog_group(const union sudo_defs_val *sd_un)
 {
-    return iolog_set_gid(sd_un->str);
+    return iolog_set_group(sd_un->str);
 }
 
 /*
@@ -338,9 +348,8 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
     /*
      * Create I/O log directory if it doesn't already exist.
-     * Avoid modifying iolog_gid at this point.
      */
-    if (!io_mkdirs(iolog_dir, iolog_uid, &gid, iolog_dirmode, false))
+    if (!io_mkdirs(iolog_dir))
 	goto done;
 
     /*
@@ -354,11 +363,17 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
     if (fd == -1) {
+	/* Try again as the I/O log owner (for NFS). */
+	set_perms(PERM_IOLOG);
+	fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
+	restore_perms();
+    }
+    if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
 	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
-    ignore_result(fchown(fd, iolog_uid, gid));
+    ignore_result(fchown(fd, iolog_uid, iolog_gid));
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
@@ -372,7 +387,14 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
-	    int fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
+	    int fd2;
+	    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
+	    if (fd == -1) {
+		/* Try again as the I/O log owner (for NFS). */
+		set_perms(PERM_IOLOG);
+		fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
+		restore_perms();
+	    }
 	    if (fd2 != -1) {
 		ignore_result(fchown(fd2, iolog_uid, gid));
 		nread = read(fd2, buf, sizeof(buf) - 1);
@@ -470,9 +492,9 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
      * Sets iolog_gid (if it is not already set) as a side effect.
      */
     if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0)
-	ok = io_mkdtemp(pathbuf, iolog_uid, &iolog_gid, iolog_dirmode, true);
+	ok = io_mkdtemp(pathbuf);
     else
-	ok = io_mkdirs(pathbuf, iolog_uid, &iolog_gid, iolog_dirmode, true);
+	ok = io_mkdirs(pathbuf);
 
     debug_return_size_t(ok ? len : (size_t)-1);
 }
@@ -492,6 +514,12 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
 	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
+	if (fd == -1) {
+	    /* Try again as the I/O log owner (for NFS). */
+	    set_perms(PERM_IOLOG);
+	    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
+	    restore_perms();
+	}
 	if (fd != -1) {
 	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -630,11 +658,11 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_group=", sizeof("iolog_group=") - 1) == 0) {
-		iolog_set_gid(*cur + sizeof("iolog_group=") - 1);
+		iolog_set_group(*cur + sizeof("iolog_group=") - 1);
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_user=", sizeof("iolog_user=") - 1) == 0) {
-		iolog_set_uid(*cur + sizeof("iolog_user=") - 1);
+		iolog_set_user(*cur + sizeof("iolog_user=") - 1);
 		continue;
 	    }
 	    break;
@@ -725,6 +753,12 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
     fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
+    if (fd == -1) {
+	/* Try again as the I/O log owner (for NFS). */
+	set_perms(PERM_IOLOG);
+	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
+	restore_perms();
+    }
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);

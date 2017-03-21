@@ -156,7 +156,7 @@ ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
     bool ret;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
 
-    ret = sudo_mkdir_parents(path, owner, &group, parent_mode, quiet); 
+    ret = sudo_mkdir_parents(path, owner, group, parent_mode, quiet); 
     if (ret) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,

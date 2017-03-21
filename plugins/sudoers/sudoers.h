@@ -170,13 +170,14 @@ struct sudo_user {
 /*
  * Used with set_perms()
  */
-#define PERM_INITIAL             0x00
-#define PERM_ROOT                0x01
-#define PERM_USER                0x02
-#define PERM_FULL_USER           0x03
-#define PERM_SUDOERS             0x04
-#define PERM_RUNAS               0x05
-#define PERM_TIMESTAMP           0x06
+#define PERM_INITIAL		0x00
+#define PERM_ROOT		0x01
+#define PERM_USER		0x02
+#define PERM_FULL_USER		0x03
+#define PERM_SUDOERS		0x04
+#define PERM_RUNAS		0x05
+#define PERM_TIMESTAMP		0x06
+#define PERM_IOLOG		0x07
 
 /*
  * Shortcuts for sudo_user contents.
@@ -333,6 +334,8 @@ bool cb_maxseq(const union sudo_defs_val *sd_un);
 bool cb_iolog_user(const union sudo_defs_val *sd_un);
 bool cb_iolog_group(const union sudo_defs_val *sd_un);
 bool cb_iolog_mode(const union sudo_defs_val *sd_un);
+extern uid_t iolog_uid;
+extern gid_t iolog_gid;
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
@@ -394,7 +397,7 @@ char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *whitelist);
 
 /* mkdir_parents.c */
-bool sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet);
+bool sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
 
 /* gc.c */
 enum sudoers_gc_types {

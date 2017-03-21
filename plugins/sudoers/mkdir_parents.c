@@ -38,27 +38,21 @@
  * Note that path is modified but is restored before it returns.
  */
 bool
-sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet)
+sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 {
     struct stat sb;
-    gid_t parent_gid = 0;
     char *slash = path;
     debug_decl(sudo_mkdir_parents, SUDOERS_DEBUG_UTIL)
-
-    /* If no gid specified, inherit from parent dir. */
-    if (*gidp != (gid_t)-1)
-	parent_gid = *gidp;
-    else if (stat("/", &sb) == 0)
-	parent_gid = sb.st_gid;
 
     /* Create parent directories as needed. */
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (unsigned int)mode,
-	    (int)uid, (int)parent_gid);
+	    (int)uid, (int)gid);
 	if (mkdir(path, mode) == 0) {
-	    ignore_result(chown(path, uid, parent_gid));
+	    if (uid != (uid_t)-1 && gid != (gid_t)-1)
+		ignore_result(chown(path, uid, gid));
 	} else {
 	    if (errno != EEXIST) {
 		if (!quiet)
@@ -77,16 +71,10 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet)
 			path, (unsigned int) sb.st_mode);
 		goto bad;
 	    }
-	    /* Inherit gid of parent dir for ownership. */
-	    if (*gidp == (gid_t)-1)
-		parent_gid = sb.st_gid;
 	}
 	*slash = '/';
     }
 
-    /* Return parent gid if none was specified by caller. */
-    if (*gidp == (gid_t)-1)
-	*gidp = parent_gid;
     debug_return_bool(true);
 bad:
     /* We must restore the path before we return. */
