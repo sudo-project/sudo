@@ -481,6 +481,7 @@ sudo_sss_close(struct sudo_nss *nss)
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
 	free(nss->handle);
+	nss->handle = NULL;
     }
     debug_return_int(0);
 }
