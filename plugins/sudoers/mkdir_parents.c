@@ -53,7 +53,6 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 	if (mkdir(path, mode) == 0) {
 	    if (uid != (uid_t)-1 && gid != (gid_t)-1)
 		ignore_result(chown(path, uid, gid));
-	    ignore_result(chmod(path, mode));
 	} else {
 	    if (errno != EEXIST) {
 		if (!quiet)

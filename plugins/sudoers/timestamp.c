@@ -154,8 +154,11 @@ ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
     mode_t parent_mode, bool quiet)
 {
     bool ret;
+    mode_t omask;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH)
 
+    /* umask must not be more restrictive than the file modes. */
+    omask = umask(ACCESSPERMS & ~(mode|parent_mode));
     ret = sudo_mkdir_parents(path, owner, group, parent_mode, quiet); 
     if (ret) {
 	/* Create final path component. */
@@ -170,6 +173,7 @@ ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
 	    ignore_result(chown(path, owner, group));
 	}
     }
+    umask(omask);
     debug_return_bool(ret);
 }
 

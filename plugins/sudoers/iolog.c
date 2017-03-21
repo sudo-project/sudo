@@ -130,7 +130,6 @@ io_mkdirs(char *path)
 	    ok = false;
 	} else {
 	    ignore_result(chown(path, iolog_uid, iolog_gid));
-	    ignore_result(chmod(path, iolog_dirmode));
 	}
     }
     if (uid_changed) {
@@ -340,11 +339,15 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     char buf[32], *ep;
     int i, len, fd = -1;
     unsigned long id = 0;
+    mode_t omask;
     ssize_t nread;
     bool ret = false;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     debug_decl(io_nextid, SUDOERS_DEBUG_UTIL)
+
+    /* umask must not be more restrictive than the file modes. */
+    omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
 
     /*
      * Create I/O log directory if it doesn't already exist.
@@ -374,7 +377,6 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     }
     sudo_lock_file(fd, SUDO_LOCK);
     ignore_result(fchown(fd, iolog_uid, iolog_gid));
-    ignore_result(fchmod(fd, iolog_filemode));
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
@@ -398,7 +400,6 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	    }
 	    if (fd2 != -1) {
 		ignore_result(fchown(fd2, iolog_uid, iolog_gid));
-		ignore_result(fchmod(fd2, iolog_filemode));
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
 		    if (buf[nread - 1] == '\n')
@@ -464,6 +465,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     ret = true;
 
 done:
+    umask(omask);
     if (fd != -1)
 	close(fd);
     debug_return_bool(ret);
@@ -524,7 +526,6 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 	}
 	if (fd != -1) {
 	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
-	    ignore_result(fchmod(fd, iolog_filemode));
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
@@ -767,7 +768,6 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	debug_return_bool(false);
     }
     ignore_result(fchown(fd, iolog_uid, iolog_gid));
-    ignore_result(fchmod(fd, iolog_filemode));
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,
@@ -850,6 +850,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const *cur;
     const char *cp, *plugin_path = NULL;
     size_t len;
+    mode_t omask;
     int i, ret = -1;
     debug_decl(sudoers_io_open, SUDOERS_DEBUG_PLUGIN)
 
@@ -875,6 +876,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	    continue;
 	}
     }
+
+    /* umask must not be more restrictive than the file modes. */
+    omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
+
     if (!sudoers_debug_register(plugin_path, &debug_files)) {
 	ret = -1;
 	goto done;
@@ -943,6 +948,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     ret = true;
 
 done:
+    umask(omask);
     free(tofree);
     if (iolog_details.runas_pw)
 	sudo_pw_delref(iolog_details.runas_pw);
