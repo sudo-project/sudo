@@ -66,14 +66,7 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 		    sudo_warn(U_("unable to stat %s"), path);
 		goto bad;
 	    }
-	    if (S_ISDIR(sb.st_mode)) {
-		if (uid != (uid_t)-1 && gid != (gid_t)-1) {
-		    if (sb.st_uid != uid || sb.st_gid != uid)
-			ignore_result(chown(path, uid, uid));
-		}
-		if ((sb.st_mode & ALLPERMS) != mode)
-		    ignore_result(chmod(path, mode));
-	    } else {
+	    if (!S_ISDIR(sb.st_mode)) {
 		if (!quiet)
 		    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 			path, (unsigned int) sb.st_mode);
