@@ -103,10 +103,10 @@ io_mkdirs(char *path)
     }
     if (ok) {
 	if (S_ISDIR(sb.st_mode)) {
-	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode)
-		ignore_result(chmod(path, iolog_dirmode));
 	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid)
 		ignore_result(chown(path, iolog_uid, iolog_gid));
+	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode)
+		ignore_result(chmod(path, iolog_dirmode));
 	} else {
 	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
@@ -130,6 +130,7 @@ io_mkdirs(char *path)
 	    ok = false;
 	} else {
 	    ignore_result(chown(path, iolog_uid, iolog_gid));
+	    ignore_result(chmod(path, iolog_dirmode));
 	}
     }
     if (uid_changed) {
@@ -374,6 +375,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     }
     sudo_lock_file(fd, SUDO_LOCK);
     ignore_result(fchown(fd, iolog_uid, iolog_gid));
+    ignore_result(fchmod(fd, iolog_filemode));
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
@@ -397,6 +399,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	    }
 	    if (fd2 != -1) {
 		ignore_result(fchown(fd2, iolog_uid, gid));
+		ignore_result(fchmod(fd2, iolog_filemode));
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
 		    if (buf[nread - 1] == '\n')
@@ -522,6 +525,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 	}
 	if (fd != -1) {
 	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+	    ignore_result(fchmod(fd, iolog_filemode));
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
@@ -764,6 +768,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	debug_return_bool(false);
     }
     ignore_result(fchown(fd, iolog_uid, iolog_gid));
+    ignore_result(fchmod(fd, iolog_filemode));
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,
