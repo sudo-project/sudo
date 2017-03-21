@@ -340,7 +340,6 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     char buf[32], *ep;
     int i, len, fd = -1;
     unsigned long id = 0;
-    gid_t gid = iolog_gid;
     ssize_t nread;
     bool ret = false;
     char pathbuf[PATH_MAX];
@@ -398,7 +397,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 		restore_perms();
 	    }
 	    if (fd2 != -1) {
-		ignore_result(fchown(fd2, iolog_uid, gid));
+		ignore_result(fchown(fd2, iolog_uid, iolog_gid));
 		ignore_result(fchmod(fd2, iolog_filemode));
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
