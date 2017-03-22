@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 21, 2017
+.Dd March 22, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -452,11 +452,21 @@ variables in
 are also applied.
 All other environment variables are removed.
 .Pp
-Finally, if the
+Finally, the
+.Em restricted_env_file
+and
 .Em env_file
-option is defined, any variables present
-in that file will be set to their specified values as long as they
-would not conflict with an existing environment variable.
+files are applied, if present.
+The variables in
+.Em restricted_env_file
+are applied first and are subject to the same restrictions as the
+invoking user's environment, as detailed above.
+The variables in
+.Em env_file
+are applied last and are not subject to these restrictions.
+In both cases, variables present in the files will only be set to
+their specified values if they would not conflict with an existing
+environment variable.
 .Sh SUDOERS FILE FORMAT
 The
 .Em sudoers
@@ -2010,8 +2020,10 @@ will run the command in a minimal environment containing the
 and
 .Ev SUDO_*
 variables.
-Any
-variables in the caller's environment that match the
+Any variables in the caller's environment or in the file specified
+by the
+.Em restricted_env_file
+option that match the
 .Li env_keep
 and
 .Li env_check
@@ -3565,6 +3577,40 @@ interpreting the
 sign.
 Defaults to
 .Li @mailto@ .
+.It restricted_env_file
+The
+.Em restricted_env_file
+option specifies the fully qualified path to a file containing variables
+to be set in the environment of the program being run.
+Entries in this file should either be of the form
+.Dq Li VARIABLE=value
+or
+.Dq Li export VARIABLE=value .
+The value may optionally be surrounded by single or double quotes.
+Variables in this file are only added if the variable does not already
+exist in the environment.
+Unlike
+.Em env_file ,
+the file's contents are not trusted and are processed in a manner
+similar to that of the invoking user's environment.
+If
+.Em env_reset
+is enabled, variables in the file will only be added if they are
+matched by either the
+.Em env_check
+or
+.Em env_keep
+list.
+If 
+.Em env_reset
+is disabled, variables in the file are added as long as they
+are not matched by the
+.Em env_delete
+list.
+In either case, the contents of
+.Em restricted_env_file
+are processed before the contents of
+.Em env_file .
 .It secure_path
 Path used for every command run from
 .Nm sudo .

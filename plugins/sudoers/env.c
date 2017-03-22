@@ -900,7 +900,7 @@ rebuild_env(void)
 #endif /* HAVE_LOGIN_CAP_H */
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	    /* Insert system-wide environment variables. */
-	    read_env_file(_PATH_ENVIRONMENT, true);
+	    read_env_file(_PATH_ENVIRONMENT, true, false);
 #endif
 	    for (ep = env.envp; *ep; ep++)
 		env_update_didvar(*ep, &didvar);
@@ -1171,7 +1171,7 @@ validate_env_vars(char * const env_vars[])
  * character are skipped.
  */
 bool
-read_env_file(const char *path, int overwrite)
+read_env_file(const char *path, bool overwrite, bool restricted)
 {
     FILE *fp;
     bool ret = true;
@@ -1205,6 +1205,15 @@ read_env_file(const char *path, int overwrite)
 	    continue;
 	var_len = (size_t)(val - var);
 	val_len = strlen(++val);
+
+	/*
+	 * If the env file is restricted, apply env_check and env_keep
+	 * when env_reset is set or env_delete when it is not.
+	 */
+	if (restricted) {
+	    if (def_env_reset ? !env_should_keep(var) : env_should_delete(var))
+		continue;
+	}
 
 	/* Strip leading and trailing single/double quotes */
 	if ((val[0] == '\'' || val[0] == '\"') && val[0] == val[val_len - 1]) {

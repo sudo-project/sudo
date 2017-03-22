@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 22, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -466,11 +466,21 @@ variables in
 are also applied.
 All other environment variables are removed.
 .PP
-Finally, if the
+Finally, the
+\fIrestricted_env_file\fR
+and
 \fIenv_file\fR
-option is defined, any variables present
-in that file will be set to their specified values as long as they
-would not conflict with an existing environment variable.
+files are applied, if present.
+The variables in
+\fIrestricted_env_file\fR
+are applied first and are subject to the same restrictions as the
+invoking user's environment, as detailed above.
+The variables in
+\fIenv_file\fR
+are applied last and are not subject to these restrictions.
+In both cases, variables present in the files will only be set to
+their specified values if they would not conflict with an existing
+environment variable.
 .SH "SUDOERS FILE FORMAT"
 The
 \fIsudoers\fR
@@ -2145,8 +2155,10 @@ will run the command in a minimal environment containing the
 and
 \fRSUDO_*\fR
 variables.
-Any
-variables in the caller's environment that match the
+Any variables in the caller's environment or in the file specified
+by the
+\fIrestricted_env_file\fR
+option that match the
 \fRenv_keep\fR
 and
 \fRenv_check\fR
@@ -3831,6 +3843,41 @@ interpreting the
 sign.
 Defaults to
 \fR@mailto@\fR.
+.TP 14n
+restricted_env_file
+The
+\fIrestricted_env_file\fR
+option specifies the fully qualified path to a file containing variables
+to be set in the environment of the program being run.
+Entries in this file should either be of the form
+\(Lq\fRVARIABLE=value\fR\(Rq
+or
+\(Lq\fRexport VARIABLE=value\fR\(Rq.
+The value may optionally be surrounded by single or double quotes.
+Variables in this file are only added if the variable does not already
+exist in the environment.
+Unlike
+\fIenv_file\fR,
+the file's contents are not trusted and are processed in a manner
+similar to that of the invoking user's environment.
+If
+\fIenv_reset\fR
+is enabled, variables in the file will only be added if they are
+matched by either the
+\fIenv_check\fR
+or
+\fIenv_keep\fR
+list.
+If
+\fIenv_reset\fR
+is disabled, variables in the file are added as long as they
+are not matched by the
+\fIenv_delete\fR
+list.
+In either case, the contents of
+\fIrestricted_env_file\fR
+are processed before the contents of
+\fIenv_file\fR.
 .TP 14n
 secure_path
 Path used for every command run from

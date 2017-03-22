@@ -217,6 +217,9 @@ type
 env_file
 	T_STR|T_PATH|T_BOOL
 	"Path to the sudo-specific environment file: %s"
+restricted_env_file
+	T_STR|T_PATH|T_BOOL
+	"Path to the restricted sudo-specific environment file: %s"
 sudoers_locale
 	T_STR
 	"Locale to use while parsing sudoers: %s"

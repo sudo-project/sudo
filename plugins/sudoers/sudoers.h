@@ -348,7 +348,7 @@ bool env_swap_old(void);
 bool env_init(char * const envp[]);
 bool init_envtables(void);
 bool insert_env_vars(char * const envp[]);
-bool read_env_file(const char *, int);
+bool read_env_file(const char *path, bool overwrite, bool restricted);
 bool rebuild_env(void);
 bool validate_env_vars(char * const envp[]);
 int sudo_setenv(const char *var, const char *val, int overwrite);

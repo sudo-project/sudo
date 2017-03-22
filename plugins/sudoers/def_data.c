@@ -302,6 +302,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the sudo-specific environment file: %s"),
 	NULL,
     }, {
+	"restricted_env_file", T_STR|T_PATH|T_BOOL,
+	N_("Path to the restricted sudo-specific environment file: %s"),
+	NULL,
+    }, {
 	"sudoers_locale", T_STR,
 	N_("Locale to use while parsing sudoers: %s"),
 	NULL,

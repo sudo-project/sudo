@@ -588,7 +588,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	/* Insert system-wide environment variables. */
-	if (!read_env_file(_PATH_ENVIRONMENT, true))
+	if (!read_env_file(_PATH_ENVIRONMENT, true, false))
 	    sudo_warn("%s", _PATH_ENVIRONMENT);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
@@ -604,8 +604,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Insert system-wide environment variables. */
+    if (def_restricted_env_file) {
+	if (!read_env_file(def_env_file, false, true))
+	    sudo_warn("%s", def_restricted_env_file);
+    }
     if (def_env_file) {
-	if (!read_env_file(def_env_file, false))
+	if (!read_env_file(def_env_file, false, false))
 	    sudo_warn("%s", def_env_file);
     }
 
