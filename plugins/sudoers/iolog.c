@@ -125,9 +125,15 @@ io_mkdirs(char *path)
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o", path, (unsigned int) iolog_dirmode);
-	if (mkdir(path, iolog_dirmode) != 0 && errno != EEXIST) {
-	    sudo_warn(U_("unable to mkdir %s"), path);
-	    ok = false;
+	ok = mkdir(path, iolog_dirmode) == 0 || errno == EEXIST;
+	if (!ok) {
+	    if (!uid_changed) {
+		/* Try again as the I/O log owner (for NFS). */
+		uid_changed = set_perms(PERM_IOLOG);
+		ok = mkdir(path, iolog_dirmode) == 0 || errno == EEXIST;
+	    }
+	    if (!ok)
+		sudo_warn(U_("unable to mkdir %s"), path);
 	} else {
 	    ignore_result(chown(path, iolog_uid, iolog_gid));
 	}
