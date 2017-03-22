@@ -809,7 +809,7 @@ iolog_write(const void *buf, unsigned int len, int idx)
 
 #ifdef HAVE_ZLIB_H
     if (iolog_compress) {
-	if (gzwrite(io_log_files[idx].fd.g, buf, len) != (int)len) {
+	if (gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len) != (int)len) {
 	    errstr = gzstrerror(io_log_files[idx].fd.g);
 	    goto done;
 	}
