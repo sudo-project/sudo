@@ -167,7 +167,7 @@ io_mkdtemp(char *path)
 	    ignore_result(chown(path, iolog_uid, iolog_gid));
 	    if (chmod(path, iolog_dirmode) != 0) {
 		sudo_warn(U_("unable to change mode of %s to 0%o"),
-		    path, iolog_dirmode);
+		    path, (unsigned int)iolog_dirmode);
 	    }
 	}
     }
