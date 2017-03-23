@@ -93,7 +93,7 @@ io_mkdirs(char *path)
     debug_decl(io_mkdirs, SUDOERS_DEBUG_UTIL)
 
     ok = stat(path, &sb) == 0;
-    if (!ok) {
+    if (!ok && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (set_perms(PERM_IOLOG)) {
 	    ok = stat(path, &sb) == 0;
@@ -116,7 +116,7 @@ io_mkdirs(char *path)
     }
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
-    if (!ok) {
+    if (!ok && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	uid_changed = set_perms(PERM_IOLOG);
 	ok = sudo_mkdir_parents(path, -1, -1, iolog_dirmode, false);
@@ -127,7 +127,7 @@ io_mkdirs(char *path)
 	    "mkdir %s, mode 0%o", path, (unsigned int) iolog_dirmode);
 	ok = mkdir(path, iolog_dirmode) == 0 || errno == EEXIST;
 	if (!ok) {
-	    if (!uid_changed) {
+	    if (errno == EACCES && !uid_changed) {
 		/* Try again as the I/O log owner (for NFS). */
 		uid_changed = set_perms(PERM_IOLOG);
 		ok = mkdir(path, iolog_dirmode) == 0 || errno == EEXIST;
@@ -157,7 +157,7 @@ io_mkdtemp(char *path)
     debug_decl(io_mkdtemp, SUDOERS_DEBUG_UTIL)
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
-    if (!ok) {
+    if (!ok && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	uid_changed = set_perms(PERM_IOLOG);
 	ok = sudo_mkdir_parents(path, -1, -1, iolog_dirmode, false);
@@ -166,11 +166,13 @@ io_mkdtemp(char *path)
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdtemp %s", path);
+	/* We cannot retry mkdtemp() so always use PERM_IOLOG */
+	if (!uid_changed)
+	    uid_changed = set_perms(PERM_IOLOG);
 	if (mkdtemp(path) == NULL) {
 	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
-	    ignore_result(chown(path, iolog_uid, iolog_gid));
 	    if (chmod(path, iolog_dirmode) != 0) {
 		sudo_warn(U_("unable to change mode of %s to 0%o"),
 		    path, (unsigned int)iolog_dirmode);
@@ -371,7 +373,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	goto done;
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
-    if (fd == -1) {
+    if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	set_perms(PERM_IOLOG);
 	fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
@@ -398,7 +400,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2;
 	    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
-	    if (fd == -1) {
+	    if (fd == -1 && errno == EACCES) {
 		/* Try again as the I/O log owner (for NFS). */
 		set_perms(PERM_IOLOG);
 		fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
@@ -524,7 +526,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
 	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-	if (fd == -1) {
+	if (fd == -1 && errno == EACCES) {
 	    /* Try again as the I/O log owner (for NFS). */
 	    set_perms(PERM_IOLOG);
 	    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
@@ -763,7 +765,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
     fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-    if (fd == -1) {
+    if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	set_perms(PERM_IOLOG);
 	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
