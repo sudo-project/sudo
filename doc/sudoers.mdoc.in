@@ -3170,6 +3170,13 @@ is set, it will be used instead of the user's primary group ID.
 By default, I/O log files and directories are created with user and
 group ID 0.
 .Pp
+This setting can be useful when the I/O logs are stored on a Network
+File System (NFS) share.
+Having a dedicated user own the I/O log files means that
+.Nm
+does not write to the log files as user ID 0, which is usually
+not permitted by NFS.
+.Pp
 This setting is only supported by version 1.8.19 or higher.
 .It lecture_status_dir
 The directory in which
