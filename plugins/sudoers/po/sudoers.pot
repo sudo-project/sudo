@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.20\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2017-03-21 16:33-0600\n"
+"POT-Creation-Date: 2017-03-24 15:36-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,7 @@ msgstr ""
 #: plugins/sudoers/filedigest.c:120 plugins/sudoers/filedigest_gcrypt.c:90
 #: plugins/sudoers/filedigest_openssl.c:111 plugins/sudoers/gc.c:52
 #: plugins/sudoers/group_plugin.c:134 plugins/sudoers/interfaces.c:71
-#: plugins/sudoers/iolog.c:901 plugins/sudoers/iolog_path.c:167
+#: plugins/sudoers/iolog.c:909 plugins/sudoers/iolog_path.c:167
 #: plugins/sudoers/ldap.c:449 plugins/sudoers/ldap.c:480
 #: plugins/sudoers/ldap.c:532 plugins/sudoers/ldap.c:565
 #: plugins/sudoers/ldap.c:963 plugins/sudoers/ldap.c:1157
@@ -93,8 +93,8 @@ msgstr ""
 #: plugins/sudoers/sssd.c:1233 plugins/sudoers/sssd.c:1247
 #: plugins/sudoers/sssd.c:1263 plugins/sudoers/sudoers.c:262
 #: plugins/sudoers/sudoers.c:272 plugins/sudoers/sudoers.c:280
-#: plugins/sudoers/sudoers.c:364 plugins/sudoers/sudoers.c:676
-#: plugins/sudoers/sudoers.c:791 plugins/sudoers/sudoers.c:835
+#: plugins/sudoers/sudoers.c:364 plugins/sudoers/sudoers.c:680
+#: plugins/sudoers/sudoers.c:795 plugins/sudoers/sudoers.c:839
 #: plugins/sudoers/sudoers_debug.c:107 plugins/sudoers/sudoreplay.c:517
 #: plugins/sudoers/sudoreplay.c:716 plugins/sudoers/sudoreplay.c:828
 #: plugins/sudoers/sudoreplay.c:868 plugins/sudoers/sudoreplay.c:877
@@ -144,7 +144,7 @@ msgstr ""
 #: plugins/sudoers/filedigest_gcrypt.c:90
 #: plugins/sudoers/filedigest_openssl.c:111 plugins/sudoers/gc.c:52
 #: plugins/sudoers/group_plugin.c:134 plugins/sudoers/interfaces.c:71
-#: plugins/sudoers/iolog.c:901 plugins/sudoers/iolog_path.c:167
+#: plugins/sudoers/iolog.c:909 plugins/sudoers/iolog_path.c:167
 #: plugins/sudoers/ldap.c:449 plugins/sudoers/ldap.c:480
 #: plugins/sudoers/ldap.c:532 plugins/sudoers/ldap.c:565
 #: plugins/sudoers/ldap.c:963 plugins/sudoers/ldap.c:1157
@@ -189,8 +189,8 @@ msgstr ""
 #: plugins/sudoers/sssd.c:1247 plugins/sudoers/sssd.c:1263
 #: plugins/sudoers/sudoers.c:262 plugins/sudoers/sudoers.c:272
 #: plugins/sudoers/sudoers.c:280 plugins/sudoers/sudoers.c:364
-#: plugins/sudoers/sudoers.c:676 plugins/sudoers/sudoers.c:791
-#: plugins/sudoers/sudoers.c:835 plugins/sudoers/sudoers_debug.c:106
+#: plugins/sudoers/sudoers.c:680 plugins/sudoers/sudoers.c:795
+#: plugins/sudoers/sudoers.c:839 plugins/sudoers/sudoers_debug.c:106
 #: plugins/sudoers/sudoreplay.c:517 plugins/sudoers/sudoreplay.c:716
 #: plugins/sudoers/sudoreplay.c:828 plugins/sudoers/sudoreplay.c:868
 #: plugins/sudoers/sudoreplay.c:877 plugins/sudoers/sudoreplay.c:887
@@ -419,13 +419,13 @@ msgid ""
 msgstr ""
 
 #: plugins/sudoers/check.c:295 plugins/sudoers/check.c:305
-#: plugins/sudoers/sudoers.c:712 plugins/sudoers/sudoers.c:754
+#: plugins/sudoers/sudoers.c:716 plugins/sudoers/sudoers.c:758
 #, c-format
 msgid "unknown uid: %u"
 msgstr ""
 
-#: plugins/sudoers/check.c:300 plugins/sudoers/iolog.c:238
-#: plugins/sudoers/policy.c:825 plugins/sudoers/sudoers.c:1143
+#: plugins/sudoers/check.c:300 plugins/sudoers/iolog.c:246
+#: plugins/sudoers/policy.c:825 plugins/sudoers/sudoers.c:1147
 #: plugins/sudoers/testsudoers.c:208 plugins/sudoers/testsudoers.c:366
 #, c-format
 msgid "unknown user: %s"
@@ -735,179 +735,184 @@ msgstr ""
 
 #: plugins/sudoers/def_data.c:306
 #, c-format
-msgid "Locale to use while parsing sudoers: %s"
+msgid "Path to the restricted sudo-specific environment file: %s"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:310
-msgid "Allow sudo to prompt for a password even if it would be visible"
+#, c-format
+msgid "Locale to use while parsing sudoers: %s"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:314
-msgid "Provide visual feedback at the password prompt when there is user input"
+msgid "Allow sudo to prompt for a password even if it would be visible"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:318
+msgid "Provide visual feedback at the password prompt when there is user input"
+msgstr ""
+
+#: plugins/sudoers/def_data.c:322
 msgid ""
 "Use faster globbing that is less accurate but does not access the filesystem"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:322
+#: plugins/sudoers/def_data.c:326
 msgid ""
 "The umask specified in sudoers will override the user's, even if it is more "
 "permissive"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:326
+#: plugins/sudoers/def_data.c:330
 msgid "Log user's input for the command being run"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:330
+#: plugins/sudoers/def_data.c:334
 msgid "Log the output of the command being run"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:334
+#: plugins/sudoers/def_data.c:338
 msgid "Compress I/O logs using zlib"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:338
-msgid "Always run commands in a pseudo-tty"
-msgstr ""
-
 #: plugins/sudoers/def_data.c:342
-#, c-format
-msgid "Plugin for non-Unix group support: %s"
+msgid "Always run commands in a pseudo-tty"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:346
 #, c-format
-msgid "Directory in which to store input/output logs: %s"
+msgid "Plugin for non-Unix group support: %s"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:350
 #, c-format
-msgid "File in which to store the input/output log: %s"
+msgid "Directory in which to store input/output logs: %s"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:354
-msgid "Add an entry to the utmp/utmpx file when allocating a pty"
+#, c-format
+msgid "File in which to store the input/output log: %s"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:358
-msgid "Set the user in utmp to the runas user, not the invoking user"
+msgid "Add an entry to the utmp/utmpx file when allocating a pty"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:362
-msgid "Set of permitted privileges"
+msgid "Set the user in utmp to the runas user, not the invoking user"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:366
-msgid "Set of limit privileges"
+msgid "Set of permitted privileges"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:370
-msgid "Run commands on a pty in the background"
+msgid "Set of limit privileges"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:374
-msgid "PAM service name to use"
+msgid "Run commands on a pty in the background"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:378
-msgid "PAM service name to use for login shells"
+msgid "PAM service name to use"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:382
-msgid "Attempt to establish PAM credentials for the target user"
+msgid "PAM service name to use for login shells"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:386
-msgid "Create a new PAM session for the command to run in"
+msgid "Attempt to establish PAM credentials for the target user"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:390
+msgid "Create a new PAM session for the command to run in"
+msgstr ""
+
+#: plugins/sudoers/def_data.c:394
 #, c-format
 msgid "Maximum I/O log sequence number: %u"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:394
+#: plugins/sudoers/def_data.c:398
 msgid "Enable sudoers netgroup support"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:398
+#: plugins/sudoers/def_data.c:402
 msgid ""
 "Check parent directories for writability when editing files with sudoedit"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:402
+#: plugins/sudoers/def_data.c:406
 msgid "Follow symbolic links when editing files with sudoedit"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:406
+#: plugins/sudoers/def_data.c:410
 msgid "Query the group plugin for unknown system groups"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:410
+#: plugins/sudoers/def_data.c:414
 msgid "Match netgroups based on the entire tuple: user, host and domain"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:414
+#: plugins/sudoers/def_data.c:418
 msgid "Allow commands to be run even if sudo cannot write to the audit log"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:418
+#: plugins/sudoers/def_data.c:422
 msgid "Allow commands to be run even if sudo cannot write to the I/O log"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:422
+#: plugins/sudoers/def_data.c:426
 msgid "Allow commands to be run even if sudo cannot write to the log file"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:426
+#: plugins/sudoers/def_data.c:430
 msgid "Resolve groups in sudoers and match on the group ID, not the name"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:430
+#: plugins/sudoers/def_data.c:434
 #, c-format
 msgid ""
 "Log entries larger than this value will be split into multiple syslog "
 "messages: %u"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:434
+#: plugins/sudoers/def_data.c:438
 #, c-format
 msgid "User that will own the I/O log files: %s"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:438
+#: plugins/sudoers/def_data.c:442
 #, c-format
 msgid "Group that will own the I/O log files: %s"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:442
+#: plugins/sudoers/def_data.c:446
 #, c-format
 msgid "File mode to use for the I/O log files: 0%o"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:446
+#: plugins/sudoers/def_data.c:450
 #, c-format
 msgid "Execute commands by file descriptor instead of by path: %s"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:450
+#: plugins/sudoers/def_data.c:454
 msgid ""
 "Ignore unknown Defaults entries in sudoers instead of producing a warning"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:454
+#: plugins/sudoers/def_data.c:458
 #, c-format
 msgid "Time in seconds after which the command will be terminated: %u"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:458
+#: plugins/sudoers/def_data.c:462
 msgid "Allow the user to specify a timeout on the command line"
 msgstr ""
 
-#: plugins/sudoers/def_data.c:462
+#: plugins/sudoers/def_data.c:466
 msgid "Flush I/O log data to disk immediately instead of buffering it"
 msgstr ""
 
@@ -977,7 +982,7 @@ msgstr ""
 #: plugins/sudoers/ldap.c:1475 plugins/sudoers/ldap.c:1801
 #: plugins/sudoers/linux_audit.c:82 plugins/sudoers/logging.c:946
 #: plugins/sudoers/policy.c:536 plugins/sudoers/policy.c:546
-#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:857
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:861
 #: plugins/sudoers/testsudoers.c:238 plugins/sudoers/toke_util.c:158
 #, c-format
 msgid "internal error, %s overflow"
@@ -1053,25 +1058,25 @@ msgstr ""
 msgid "%s exists but is not a directory (0%o)"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:129 plugins/sudoers/iolog.c:164
+#: plugins/sudoers/iolog.c:136 plugins/sudoers/iolog.c:173
 #: plugins/sudoers/mkdir_parents.c:59 plugins/sudoers/timestamp.c:170
 #, c-format
 msgid "unable to mkdir %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:169 plugins/sudoers/visudo.c:722
+#: plugins/sudoers/iolog.c:177 plugins/sudoers/visudo.c:722
 #: plugins/sudoers/visudo.c:732
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:277 plugins/sudoers/sudoers.c:1174
+#: plugins/sudoers/iolog.c:285 plugins/sudoers/sudoers.c:1178
 #: plugins/sudoers/testsudoers.c:390
 #, c-format
 msgid "unknown group: %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:375 plugins/sudoers/sudoers.c:913
+#: plugins/sudoers/iolog.c:383 plugins/sudoers/sudoers.c:917
 #: plugins/sudoers/sudoreplay.c:304 plugins/sudoers/sudoreplay.c:817
 #: plugins/sudoers/sudoreplay.c:1021 plugins/sudoers/timestamp.c:387
 #: plugins/sudoers/visudo.c:954 plugins/sudoers/visudo_json.c:1001
@@ -1080,29 +1085,29 @@ msgstr ""
 msgid "unable to open %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:425 plugins/sudoers/sudoers.c:917
+#: plugins/sudoers/iolog.c:433 plugins/sudoers/sudoers.c:921
 #: plugins/sudoers/sudoreplay.c:1132
 #, c-format
 msgid "unable to read %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:461 plugins/sudoers/sudoreplay.c:598
+#: plugins/sudoers/iolog.c:469 plugins/sudoers/sudoreplay.c:598
 #: plugins/sudoers/timestamp.c:286 plugins/sudoers/timestamp.c:289
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:542 plugins/sudoers/iolog.c:767
+#: plugins/sudoers/iolog.c:550 plugins/sudoers/iolog.c:775
 #, c-format
 msgid "unable to create %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:992 plugins/sudoers/iolog.c:1062
+#: plugins/sudoers/iolog.c:1000 plugins/sudoers/iolog.c:1070
 #, c-format
 msgid "unable to write to I/O log file: %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:1026
+#: plugins/sudoers/iolog.c:1034
 #, c-format
 msgid "%s: internal error, file index %d not open"
 msgstr ""
@@ -1263,8 +1268,8 @@ msgstr ""
 
 #: plugins/sudoers/logging.c:328 plugins/sudoers/sudoers.c:471
 #: plugins/sudoers/sudoers.c:473 plugins/sudoers/sudoers.c:475
-#: plugins/sudoers/sudoers.c:477 plugins/sudoers/sudoers.c:1263
-#: plugins/sudoers/sudoers.c:1265
+#: plugins/sudoers/sudoers.c:477 plugins/sudoers/sudoers.c:1267
+#: plugins/sudoers/sudoers.c:1269
 #, c-format
 msgid "%s: command not found"
 msgstr ""
@@ -1320,7 +1325,7 @@ msgstr ""
 msgid "digest for %s (%s) is not in %s form"
 msgstr ""
 
-#: plugins/sudoers/mkdir_parents.c:65 plugins/sudoers/sudoers.c:928
+#: plugins/sudoers/mkdir_parents.c:65 plugins/sudoers/sudoers.c:932
 #: plugins/sudoers/visudo.c:440 plugins/sudoers/visudo.c:716
 #, c-format
 msgid "unable to stat %s"
@@ -1582,7 +1587,7 @@ msgstr ""
 msgid "unable to initialize sudoers default values"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:197 plugins/sudoers/sudoers.c:875
+#: plugins/sudoers/sudoers.c:197 plugins/sudoers/sudoers.c:879
 msgid "problem with defaults entries"
 msgstr ""
 
@@ -1623,41 +1628,41 @@ msgstr ""
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:820
+#: plugins/sudoers/sudoers.c:824
 msgid "command too long"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:932
+#: plugins/sudoers/sudoers.c:936
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:936 plugins/sudoers/timestamp.c:213 toke.l:969
+#: plugins/sudoers/sudoers.c:940 plugins/sudoers/timestamp.c:213 toke.l:969
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:940 toke.l:974
+#: plugins/sudoers/sudoers.c:944 toke.l:974
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:944 toke.l:977
+#: plugins/sudoers/sudoers.c:948 toke.l:977
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:977
+#: plugins/sudoers/sudoers.c:981
 #, c-format
 msgid "only root can use \"-c %s\""
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:996
+#: plugins/sudoers/sudoers.c:1000
 #, c-format
 msgid "unknown login class: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1079 plugins/sudoers/sudoers.c:1107
+#: plugins/sudoers/sudoers.c:1083 plugins/sudoers/sudoers.c:1111
 #, c-format
 msgid "unable to resolve host %s"
 msgstr ""
