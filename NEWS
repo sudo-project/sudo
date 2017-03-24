@@ -11,6 +11,48 @@ What's new in Sudo 1.8.20
 
  * The embedded copy of zlib has been upgraded to version 1.2.11.
 
+ * Fixed a bug that prevented sudoers include files with a relative
+   path starting with the letter 'i' from being opened.  Bug #776.
+
+ * Added support for command timeouts in sudoers.  The command will
+   be terminated if the timeout expires.
+
+ * The SELinux role and type are now displayed in the "sudo -l"
+   output for the LDAP and SSSD backends, just as they are in the
+   sudoers backend.
+
+ * A new command line option, -T, can be used to specify a command
+   timeout as long as the user-specified timeout is not longer than
+   the timeout specified in sudoers.  This option may only be
+   used when the "user_command_timeouts" flag is enabled in sudoers.
+
+ * Added NOTBEFORE and NOTAFTER command options to the sudoers
+   backend similar to what is already available in the LDAP backend.
+
+ * Sudo can now optionally use the SHA2 functions in OpenSSL or GNU
+   crypt instead of the SHA2 implementation bundled with sudo.
+
+ * Fixed a compilation error on systems without the stdbool.h header
+   file.  Bug #778.
+
+ * Fixed a compilation error in the standalone Kerberos V authentication
+   module.  Bug #777.
+
+ * Added the iolog_flush flag to sudoers which causes I/O log data
+   to be written immediately to disk instead of being buffered.
+
+ * I/O log files are now created with group ID 0 by default unless
+   the "iolog_user" or "iolog_group" options are set in sudoers.
+
+ * It is now possible to store I/O log files on an NFS-mounted
+   file system where uid 0 is remapped to an unprivileged user.
+   The "iolog_user" option must be set to a non-root user and the
+   top-level I/O log directory must exist and be owned by that user.
+
+ * Added the restricted_env_file setting to sudoers which is similar
+   to env_file but its contents are subject to the same restrictions
+   as variables in the invoking user's environment.
+
 What's new in Sudo 1.8.19p2
 
  * Fixed a crash in visudo introduced in sudo 1.8.9 when an IP address
@@ -35,8 +77,8 @@ What's new in Sudo 1.8.19
  * Sudo has been run against PVS-Studio and any issues that were
    not false positives have been addressed.
 
- * I/O log files are now created same group ID as the parent directory
-   and not the invoking user's group ID.
+ * I/O log files are now created with the same group ID as the
+   parent directory and not the invoking user's group ID.
 
  * I/O log permissions and ownership are now configurable via the
    "iolog_mode", "iolog_user" and "iolog_group" sudoers Defaults
