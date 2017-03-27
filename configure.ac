@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.20], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.20b1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -2727,7 +2727,6 @@ if test "$FILEDIGEST" = "filedigest.lo"; then
     if test X"$FOUND_SHA2" = X"no"; then
 	AC_LIBOBJ(sha2)
 	SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
-	SUDOERS_TEST_PROGS="${SUDOERS_TEST_PROGS}${SUDOERS_TEST_PROGS+ }check_digest"
     fi
 fi
 AC_CHECK_FUNCS([vsyslog], [], [

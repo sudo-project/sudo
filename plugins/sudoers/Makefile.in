@@ -146,7 +146,7 @@ SHELL = @SHELL@
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
 TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_base64 \
-	     check_gentime check_hexchar @SUDOERS_TEST_PROGS@
+	     check_gentime check_hexchar check_digest @SUDOERS_TEST_PROGS@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -175,7 +175,7 @@ CHECK_ADDR_OBJS = check_addr.o interfaces.o match_addr.o sudoers_debug.o \
 
 CHECK_BASE64_OBJS = check_base64.o base64.o sudoers_debug.o
 
-CHECK_DIGEST_OBJS = check_digest.o
+CHECK_DIGEST_OBJS = check_digest.o filedigest.o digestname.o sudoers_debug.o
 
 CHECK_FILL_OBJS = check_fill.o hexchar.o toke_util.o sudoers_debug.o
 
@@ -658,6 +658,7 @@ defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/defaults.c
+digestname.o: digestname.lo
 digestname.lo: $(srcdir)/digestname.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_queue.h $(srcdir)/parse.h \
@@ -681,6 +682,7 @@ env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/env.c
+filedigest.o: filedigest.lo
 filedigest.lo: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(incdir)/compat/sha2.h $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \

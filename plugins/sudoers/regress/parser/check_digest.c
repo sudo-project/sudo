@@ -30,57 +30,20 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
+#include <limits.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
-
-#ifdef HAVE_SHA224UPDATE
-# include <sha2.h>
-#else
-# include "compat/sha2.h"
-#endif
+#include "sudo_fatal.h"
+#include "sudo_queue.h"
+#include "parse.h"
 
 __dso_public int main(int argc, char *argv[]);
-
-static struct digest_function {
-    const char *digest_name;
-    const int digest_len;
-    void (*init)(SHA2_CTX *);
-#ifdef SHA2_VOID_PTR
-    void (*update)(SHA2_CTX *, const void *, size_t);
-    void (*final)(void *, SHA2_CTX *);
-#else
-    void (*update)(SHA2_CTX *, const unsigned char *, size_t);
-    void (*final)(unsigned char *, SHA2_CTX *);
-#endif
-} digest_functions[] = {
-    {
-	"SHA224",
-	SHA224_DIGEST_LENGTH,
-	SHA224Init,
-	SHA224Update,
-	SHA224Final
-    }, {
-	"SHA256",
-	SHA256_DIGEST_LENGTH,
-	SHA256Init,
-	SHA256Update,
-	SHA256Final
-    }, {
-	"SHA384",
-	SHA384_DIGEST_LENGTH,
-	SHA384Init,
-	SHA384Update,
-	SHA384Final
-    }, {
-	"SHA512",
-	SHA512_DIGEST_LENGTH,
-	SHA512Init,
-	SHA512Update,
-	SHA512Final
-    }, {
-	NULL
-    }
-};
 
 #define NUM_TESTS	8
 static const char *test_strings[NUM_TESTS] = {
@@ -95,43 +58,77 @@ static const char *test_strings[NUM_TESTS] = {
 	"012345678901234567890",
 };
 
+static unsigned char *
+check_digest(int digest_type, const char *buf, size_t buflen, size_t *digest_len)
+{
+    char tfile[] = "digest.XXXXXX";
+    unsigned char *digest = NULL;
+    int tfd;
+
+    /* Write test data to temporary file. */
+    tfd = mkstemp(tfile);
+    if (tfd == -1) {
+	sudo_warn_nodebug("mkstemp");
+	goto done;
+    }
+    if ((size_t)write(tfd, buf, buflen) != buflen) {
+	sudo_warn_nodebug("write");
+	goto done;
+    }
+    lseek(tfd, 0, SEEK_SET);
+
+    /* Get file digest. */
+    digest = sudo_filedigest(tfd, tfile, digest_type, digest_len);
+    if (digest == NULL) {
+	/* Warning (if any) printed by sudo_filedigest() */
+	goto done;
+    }
+done:
+    if (tfd != -1) {
+	close(tfd);
+	unlink(tfile);
+    }
+    return digest;
+}
+
 int
 main(int argc, char *argv[])
 {
-    SHA2_CTX ctx;
-    int i, j;
-    struct digest_function *func;
-    unsigned char digest[SHA512_DIGEST_LENGTH];
     static const char hex[] = "0123456789abcdef";
-    unsigned char buf[1000];
+    char buf[1000 * 1000];
+    unsigned char *digest;
+    unsigned int i, j;
+    size_t digest_len;
+    int digest_type;
 
-    for (func = digest_functions; func->digest_name != NULL; func++) {
+    for (digest_type = 0; digest_type < SUDO_DIGEST_INVALID; digest_type++) {
 	for (i = 0; i < NUM_TESTS; i++) {
-	    func->init(&ctx);
-	    func->update(&ctx, (unsigned char *)test_strings[i],
-		strlen(test_strings[i]));
-	    func->final(digest, &ctx);
-	    printf("%s (\"%s\") = ", func->digest_name, test_strings[i]);
-	    for (j = 0; j < func->digest_len; j++) {
+	    digest = check_digest(digest_type, test_strings[i],
+		strlen(test_strings[i]), &digest_len);
+	    if (digest != NULL) {
+		printf("%s (\"%s\") = ", digest_type_to_name(digest_type),
+		    test_strings[i]);
+		for (j = 0; j < digest_len; j++) {
+		    putchar(hex[digest[j] >> 4]);
+		    putchar(hex[digest[j] & 0x0f]);
+		}
+		putchar('\n');
+	    }
+	}
+
+	/* Simulate a string of a million 'a' characters. */
+	memset(buf, 'a', sizeof(buf));
+	digest = check_digest(digest_type, buf, sizeof(buf), &digest_len);
+	if (digest != NULL) {
+	    printf("%s (one million 'a' characters) = ",
+		digest_type_to_name(digest_type));
+	    for (j = 0; j < digest_len; j++) {
 		putchar(hex[digest[j] >> 4]);
 		putchar(hex[digest[j] & 0x0f]);
 	    }
 	    putchar('\n');
 	}
-
-	/* Simulate a string of a million 'a' characters. */
-	memset(buf, 'a', sizeof(buf));
-	func->init(&ctx);
-	for (i = 0; i < 1000; i++) {
-	    func->update(&ctx, buf, sizeof(buf));
-	}
-	func->final(digest, &ctx);
-	printf("%s (one million 'a' characters) = ", func->digest_name);
-	for (j = 0; j < func->digest_len; j++) {
-	    putchar(hex[digest[j] >> 4]);
-	    putchar(hex[digest[j] & 0x0f]);
-	}
-	putchar('\n');
     }
-    exit(0);
+
+    return 0;
 }
