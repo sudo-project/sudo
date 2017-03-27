@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 22, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 27, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3699,6 +3699,13 @@ on Linux.
 A workaround is to use the
 \fRSUDO_COMMAND\fR
 environment variable instead.
+.sp
+The
+\fIfdexec\fR
+setting is only used when the command is matched by path name.
+It has no effect if the command is matched by the built-in
+\fBALL\fR
+alias.
 .sp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the

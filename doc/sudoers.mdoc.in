@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 22, 2017
+.Dd March 27, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3456,6 +3456,13 @@ on Linux.
 A workaround is to use the
 .Dv SUDO_COMMAND
 environment variable instead.
+.Pp
+The
+.Em fdexec
+setting is only used when the command is matched by path name.
+It has no effect if the command is matched by the built-in
+.Sy ALL
+alias.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the

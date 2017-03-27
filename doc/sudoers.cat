@@ -1852,6 +1852,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    A workaround is to use the SUDO_COMMAND environment
                    variable instead.
 
+                   The _f_d_e_x_e_c setting is only used when the command is matched
+                   by path name.  It has no effect if the command is matched
+                   by the built-in AALLLL alias.
+
                    This setting is only supported by version 1.8.20 or higher.
                    If the operating system does not support the fexecve(2)
                    system call, this setting has no effect.
@@ -2792,4 +2796,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                     March 22, 2017                     Sudo 1.8.20
+Sudo 1.8.20                     March 27, 2017                     Sudo 1.8.20
