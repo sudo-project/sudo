@@ -205,7 +205,10 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 {
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
 
-    dispatch_pending_signals(cstat);
+    if (dispatch_pending_signals(cstat) != 0) {
+	/* Killed by SIGINT or SIGQUIT */
+	debug_return_int(0);
+    }
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {
