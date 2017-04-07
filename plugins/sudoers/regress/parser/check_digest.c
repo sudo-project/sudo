@@ -113,6 +113,7 @@ main(int argc, char *argv[])
 		    putchar(hex[digest[j] & 0x0f]);
 		}
 		putchar('\n');
+		free(digest);
 	    }
 	}
 
@@ -127,6 +128,7 @@ main(int argc, char *argv[])
 		putchar(hex[digest[j] & 0x0f]);
 	    }
 	    putchar('\n');
+	    free(digest);
 	}
     }
 
