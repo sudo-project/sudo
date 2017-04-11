@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 27, 2017
+.Dd April 11, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2368,10 +2368,12 @@ This flag is
 .Em @mail_no_user@
 by default.
 .It match_group_by_gid
-By default, when matching groups,
+By default,
 .Nm
-will first resolve all the user's group IDs to group names and then
-compare those group names to any group names listed in the
+will look up each group the user is a member of by group ID to
+determine the group name (this is only done once).
+The resulting list of the user's group names is used when matching
+groups listed in the
 .Em sudoers
 file.
 This works well on systems where the number of groups listed in the
@@ -2387,10 +2389,29 @@ running commands via
 may take longer than normal.
 On such systems it may be faster to use the
 .Em match_group_by_gid
-flag to avoid resolving the user's group IDs to group names and
-instead resolve all group names listed in the
+flag to avoid resolving the user's group IDs to group names.
+In this case,
+.Nm
+must look up any group name listed in the
 .Em sudoers
-file, matching by group ID instead of by group name.
+file and use the group ID instead of the group name when determining
+whether the user is a member of the group.
+.Pp
+Note that if
+.Em match_group_by_gid
+is enabled, group database lookups performed by
+.Nm
+will be keyed by group name as opposed to group ID.
+On systems where there are multiple sources for the group database,
+it is possible to have conflicting group names or group IDs in the local
+.Pa /etc/group
+file and the remote group database.
+On such systems, enabling or disabling
+.Em match_group_by_gid
+can be used to choose whether group database queries are performed
+by name (enabled) or ID (disabled), which may aid in working around
+group entry conflicts.
+.Pp
 The
 .Em match_group_by_gid
 flag has no effect when
