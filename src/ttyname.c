@@ -180,7 +180,11 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin, char *name, size_t 
     DIR *d = NULL;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
 
-    if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
+    if (dir[0] == '\0') {
+	errno = ENOENT;
+	goto done;
+    }
+    if ((d = opendir(dir)) == NULL)
 	goto done;
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
