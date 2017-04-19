@@ -825,7 +825,7 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     int i, ret = false;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
 
-    if (!handle || !rule)
+    if (rule == NULL)
 	debug_return_bool(false);
 
     switch (handle->fn_get_values(rule, "sudoUser", &val_array)) {
