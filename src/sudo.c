@@ -384,7 +384,7 @@ fix_fds(void)
 static int
 fill_group_list(struct user_details *ud, int system_maxgroups)
 {
-    int tries, ret = -1;
+    int ret = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
     /*
@@ -408,6 +408,8 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	if (ud->ngroups != -1)
 	    ret = 0;
 #else
+	int tries;
+
 	/*
 	 * It is possible to belong to more groups in the group database
 	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
