@@ -82,8 +82,8 @@ typedef void (*sss_sudo_free_values_t)(char**);
 
 struct sudo_sss_handle {
     char *domainname;
-    char *host;
-    char *shost;
+    char *ipa_host;
+    char *ipa_shost;
     struct passwd *pw;
     void *ssslib;
     sss_sudo_send_recv_t fn_send_recv;
@@ -385,7 +385,7 @@ sudo_sss_open(struct sudo_nss *nss)
     debug_decl(sudo_sss_open, SUDOERS_DEBUG_SSSD);
 
     /* Create a handle container. */
-    handle = malloc(sizeof(struct sudo_sss_handle));
+    handle = calloc(1, sizeof(struct sudo_sss_handle));
     if (handle == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(ENOMEM);
@@ -447,9 +447,6 @@ sudo_sss_open(struct sudo_nss *nss)
 	debug_return_int(EFAULT);
     }
 
-    handle->domainname = NULL;
-    handle->host = user_runhost;
-    handle->shost = user_srunhost;
     handle->pw = sudo_user.pw;
     nss->handle = handle;
 
@@ -458,7 +455,7 @@ sudo_sss_open(struct sudo_nss *nss)
      * in sssd.conf and use it in preference to user_runhost.
      */
     if (strcmp(user_runhost, user_host) == 0) {
-	if (get_ipa_hostname(&handle->shost, &handle->host) == -1) {
+	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(handle);
 	    debug_return_int(ENOMEM);
@@ -480,7 +477,9 @@ sudo_sss_close(struct sudo_nss *nss)
     if (nss && nss->handle) {
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
-	free(nss->handle);
+	free(handle->ipa_host);
+	free(handle->ipa_shost);
+	free(handle);
 	nss->handle = NULL;
     }
     debug_return_int(0);
@@ -586,8 +585,9 @@ sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 static int
 sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule, int group_matched)
 {
-    char **val_array = NULL;
-    char *val;
+    const char *host = handle->ipa_host ? handle->ipa_host : user_runhost;
+    const char *shost = handle->ipa_shost ? handle->ipa_shost : user_srunhost;
+    char *val, **val_array = NULL;
     int ret = false, i;
     debug_decl(sudo_sss_check_runas_user, SUDOERS_DEBUG_SSSD);
 
@@ -657,8 +657,8 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	switch (val[0]) {
 	case '+':
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "netgr_");
-	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
-		def_netgroup_tuple ? handle->shost : NULL, runas_pw->pw_name)) {
+	    if (netgr_matches(val, def_netgroup_tuple ? host : NULL,
+		def_netgroup_tuple ? shost : NULL, runas_pw->pw_name)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "=> match");
 		ret = true;
 	    }
@@ -763,7 +763,9 @@ sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 static bool
 sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    char **val_array, *val;
+    const char *host = handle->ipa_host ? handle->ipa_host : user_runhost;
+    const char *shost = handle->ipa_shost ? handle->ipa_shost : user_srunhost;
+    char *val, **val_array;
     int matched = UNSPEC;
     bool negated;
     int i;
@@ -793,9 +795,9 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
-	    netgr_matches(val, handle->host, handle->shost,
+	    netgr_matches(val, host, shost,
 	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
-	    hostname_matches(handle->shost, handle->host, val)) {
+	    hostname_matches(shost, host, val)) {
 
 	    matched = negated ? false : true;
 	}
@@ -817,9 +819,10 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 static bool
 sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int ret = false;
+    const char *host = handle->ipa_host ? handle->ipa_host : user_runhost;
+    const char *shost = handle->ipa_shost ? handle->ipa_shost : user_srunhost;
     char **val_array;
-    int i;
+    int i, ret = false;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
 
     if (!handle || !rule)
@@ -845,8 +848,8 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
-	    if (netgr_matches(val, def_netgroup_tuple ? handle->host : NULL,
-		def_netgroup_tuple ? handle->shost : NULL, handle->pw->pw_name)) {
+	    if (netgr_matches(val, def_netgroup_tuple ? host : NULL,
+		def_netgroup_tuple ? shost : NULL, handle->pw->pw_name)) {
 		ret = true;
 	    }
 	    break;
