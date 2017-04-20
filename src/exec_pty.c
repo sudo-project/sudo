@@ -1061,8 +1061,7 @@ sigfwd_cb(int sock, int what, void *v)
     ssize_t nsent;
     debug_decl(sigfwd_cb, SUDO_DEBUG_EXEC)
 
-    while (!TAILQ_EMPTY(&ec->sigfwd_list)) {
-	sigfwd = TAILQ_FIRST(&ec->sigfwd_list);
+    while ((sigfwd = TAILQ_FIRST(&ec->sigfwd_list)) != NULL) {
 	if (sigfwd->signo == SIGCONT_FG)
 	    strlcpy(signame, "CONT_FG", sizeof(signame));
 	else if (sigfwd->signo == SIGCONT_BG)
@@ -1080,14 +1079,13 @@ sigfwd_cb(int sock, int what, void *v)
 	free(sigfwd);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
-		struct sigforward *sigfwd_next;
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "broken pipe writing to child over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
-		TAILQ_FOREACH_SAFE(sigfwd, &ec->sigfwd_list, entries, sigfwd_next) {
+		while ((sigfwd = TAILQ_FIRST(&ec->sigfwd_list)) != NULL) {
+		    TAILQ_REMOVE(&ec->sigfwd_list, sigfwd, entries);
 		    free(sigfwd);
 		}
-		TAILQ_INIT(&ec->sigfwd_list);
 		/* XXX - child (monitor) is dead, we should exit too? */
 	    }
 	    break;
