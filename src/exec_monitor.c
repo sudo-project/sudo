@@ -301,46 +301,44 @@ static void
 mon_errpipe_cb(int fd, int what, void *v)
 {
     struct monitor_closure *mc = v;
-    ssize_t n;
+    ssize_t nread;
     int errval;
     debug_decl(mon_errpipe_cb, SUDO_DEBUG_EXEC);
 
-    /* read errno from child or EOF when command is executed. */
-    n = read(fd, &errval, sizeof(errval));
-    switch (n) {
+    /*
+     * Read errno from child or EOF when command is executed.
+     * Note that the error pipe is *blocking*.
+     */
+    do {
+	nread = read(fd, &errval, sizeof(errval));
+    } while (nread == -1 && errno == EINTR);
+
+    switch (nread) {
     case -1:
-	switch (errno) {
-	case EINTR:
-	    /* got a signal, restart loop to service it. */
-	    sudo_ev_loopcontinue(mc->evbase);
-	    break;
-	case EAGAIN:
-	    /* not ready after all... */
-	    break;
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"failed to read error pipe: %s", strerror(errno));
-	    mc->cstat->type = CMD_ERRNO;
-	    mc->cstat->val = errno;
+	if (errno != EAGAIN) {
+	    if (mc->cstat->val == CMD_INVALID) {
+		/* XXX - need a way to distinguish non-exec error. */
+		mc->cstat->type = CMD_ERRNO;
+		mc->cstat->val = errno;
+	    }
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: failed to read error pipe", __func__);
 	    sudo_ev_loopbreak(mc->evbase);
-	    break;
 	}
 	break;
-    case 0:
-	/*
-	 * We get EOF when the command is executed and the other
-	 * end of the error pipe is closed.  Just remove the event.
-	 */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "EOF on error pipe, removing event");
-	sudo_ev_del(mc->evbase, mc->errpipe_event);
-	break;
     default:
-	/* Errno value when child is unable to execute command. */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
-	    strerror(errval));
-	mc->cstat->type = CMD_ERRNO;
-	mc->cstat->val = errval;
+	if (nread == 0) {
+	    /* The error pipe closes when the command is executed. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "EOF on error pipe");
+	} else {
+	    /* Errno value when child is unable to execute command. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
+		strerror(errval));
+	    mc->cstat->type = CMD_ERRNO;
+	    mc->cstat->val = errval;
+	}
 	sudo_ev_del(mc->evbase, mc->errpipe_event);
+	close(fd);
 	break;
     }
     debug_return;
