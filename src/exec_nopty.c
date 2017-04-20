@@ -157,7 +157,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     /*
      * We use a pipe to get errno if execve(2) fails in the child.
      */
-    if (pipe(errpipe) == -1)
+    if (pipe2(errpipe, O_CLOEXEC) == -1)
 	sudo_fatal(U_("unable to create pipe"));
 
     /*
@@ -244,7 +244,6 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	close(errpipe[0]);
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
-	(void)fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
 	exec_cmnd(details, errpipe[1]);
 	while (write(errpipe[1], &errno, sizeof(int)) == -1) {
 	    if (errno != EINTR)

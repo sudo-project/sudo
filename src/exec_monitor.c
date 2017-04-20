@@ -566,7 +566,7 @@ exec_monitor(struct command_details *details, bool foreground, int backchannel)
     mon_pgrp = getpgrp();	/* save a copy of our process group */
 
     /* Start command and wait for it to stop or exit */
-    if (pipe(errpipe) == -1)
+    if (pipe2(errpipe, O_CLOEXEC) == -1)
 	sudo_fatal(U_("unable to create pipe"));
     cmnd_pid = sudo_debug_fork();
     if (cmnd_pid == -1) {
@@ -579,7 +579,6 @@ exec_monitor(struct command_details *details, bool foreground, int backchannel)
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	close(errpipe[0]);
-	(void)fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
 	restore_signals();
 
 	/* setup tty and exec command */
