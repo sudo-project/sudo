@@ -643,7 +643,7 @@ static int
 fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 {
     struct command_status cstat;
-    int io_pipe[3][2];
+    int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     sigaction_t sa;
     sigset_t mask;
     pid_t child;
@@ -697,7 +697,6 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
      * If either stdin, stdout or stderr is not a tty we use a pipe
      * to interpose ourselves instead of duping the pty fd.
      */
-    memset(io_pipe, 0, sizeof(io_pipe));
     if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
 	pipeline = true;
@@ -763,11 +762,11 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	sigprocmask(SIG_SETMASK, omask, NULL);
 	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
-	if (io_pipe[STDIN_FILENO][1])
+	if (io_pipe[STDIN_FILENO][1] != -1)
 	    close(io_pipe[STDIN_FILENO][1]);
-	if (io_pipe[STDOUT_FILENO][0])
+	if (io_pipe[STDOUT_FILENO][0] != -1)
 	    close(io_pipe[STDOUT_FILENO][0]);
-	if (io_pipe[STDERR_FILENO][0])
+	if (io_pipe[STDERR_FILENO][0] != -1)
 	    close(io_pipe[STDERR_FILENO][0]);
 	/*                      
 	 * If stdin/stdout is not a tty, start command in the background
@@ -786,11 +785,11 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     }
 
     /* Close the other end of the stdin/stdout/stderr pipes. */
-    if (io_pipe[STDIN_FILENO][0])
+    if (io_pipe[STDIN_FILENO][0] != -1)
 	close(io_pipe[STDIN_FILENO][0]);
-    if (io_pipe[STDOUT_FILENO][1])
+    if (io_pipe[STDOUT_FILENO][1] != -1)
 	close(io_pipe[STDOUT_FILENO][1]);
-    if (io_pipe[STDERR_FILENO][1])
+    if (io_pipe[STDERR_FILENO][1] != -1)
 	close(io_pipe[STDERR_FILENO][1]);
 
     debug_return_int(child);
