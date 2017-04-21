@@ -278,7 +278,7 @@ typedef struct sigaction sigaction_t;
 #endif
 
 #if !defined(HAVE_KILLPG) && !defined(killpg)
-# define killpg(p, s)	kill((p), -(s))
+# define killpg(p, s)	kill(-(p), (s))
 #endif
 
 /*
