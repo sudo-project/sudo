@@ -85,10 +85,11 @@ still allow people to get their work done."
 	if test -n "$linux_audit"; then
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
+	# The package manager will handle an existing sudoers file
+	rm -f ${pp_destdir}$sudoersdir/sudoers.dist
 %else
-	# For all but RPM and Debian we need to install sudoers with a different
-	# name and make a copy of it if there is no existing file.
-	mv ${pp_destdir}$sudoersdir/sudoers ${pp_destdir}$sudoersdir/sudoers.dist
+	# For all but RPM and Debian we copy sudoers in a post-install script.
+	rm -f ${pp_destdir}$sudoersdir/sudoers
 %endif
 
 %if [deb]

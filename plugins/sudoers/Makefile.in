@@ -349,8 +349,9 @@ install-plugin: sudoers.la install-dirs
 
 install-sudoers: install-dirs
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0750 $(DESTDIR)$(sudoersdir)/sudoers.d
+	$(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist
 	test -r $(DESTDIR)$(sudoersdir)/sudoers || \
-	    $(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sudoersdir)/sudoers
+	    cp -p $(DESTDIR)$(sudoersdir)/sudoers.dist $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
@@ -360,8 +361,9 @@ uninstall:
 		$(DESTDIR)$(replaydir)/sudoreplay$(INSTALL_BACKUP) \
 		$(DESTDIR)$(visudodir)/visudo$(INSTALL_BACKUP) \
 		$(DESTDIR)$(plugindir)/sudoers.so$(INSTALL_BACKUP)
-	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
+	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
+	-rm -f $(DESTDIR)$(sudoersdir)/sudoers.dist
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
