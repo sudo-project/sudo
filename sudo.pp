@@ -457,8 +457,8 @@ still allow people to get their work done."
 %post [rpm]
 	case "%{pp_rpm_distro}" in
 	aix*)
-		# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
-		if [ -d /etc/rc.d ]; then
+		# Create /etc/rc.d/rc2.d/S90sudo link if possible
+		if [ -d /etc/rc.d/rc2.d ]; then
 			rm -f /etc/rc.d/rc2.d/S90sudo
 			ln -s /etc/rc.d/init.d/sudo /etc/rc.d/rc2.d/S90sudo
 		fi
