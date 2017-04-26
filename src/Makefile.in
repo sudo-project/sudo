@@ -172,20 +172,27 @@ pre-install:
 install: install-binaries install-rc @INSTALL_NOEXEC@
 
 install-dirs:
+	# We only create the rc.d dir when installing to the actual system dir
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
 	if test -n "$(INIT_SCRIPT)"; then \
-	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR) \
-		`echo $(DESTDIR)$(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
+	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR); \
+	    if test -z "$(DESTDIR)"; then \
+		$(SHELL) $(top_srcdir)/mkinstalldirs \
+		    `echo $(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
+	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
 	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(tmpfiles_d); \
 	fi
 
 install-rc: install-dirs
+	# We only create the rc.d link when installing to the actual system dir
 	if [ -n "$(INIT_SCRIPT)" ]; then \
 	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
-	    rm -f $(DESTDIR)$(RC_LINK); \
-	    ln -s $(INIT_DIR)/sudo $(DESTDIR)$(RC_LINK); \
+	    if test -z "$(DESTDIR)"; then \
+		rm -f $(RC_LINK); \
+		ln -s $(INIT_DIR)/sudo $(RC_LINK); \
+	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
 	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
 	fi
