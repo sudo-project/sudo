@@ -322,7 +322,7 @@ main(int argc, char *argv[], char *envp[])
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = SIG_DFL;
-	sigaction(SIGINT, &sa, NULL);
+	sigaction(WTERMSIG(status), &sa, NULL);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	    WTERMSIG(status) | 128);                
 	kill(getpid(), WTERMSIG(status));
