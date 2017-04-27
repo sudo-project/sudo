@@ -316,8 +316,16 @@ main(int argc, char *argv[], char *envp[])
 	    sudo_fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
     }
 
+    /*
+     * If the command was terminated by a signal, sudo needs to terminated
+     * the same way.  Otherwise, the shell may ignore a keyboard-generated
+     * signal.  However, we want to avoid having sudo dump core itself.
+     */
     if (WIFSIGNALED(status)) {
 	sigaction_t sa;
+
+	if (WCOREDUMP(status))
+	    disable_coredumps();
 
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
