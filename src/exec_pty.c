@@ -826,20 +826,7 @@ pty_close(struct command_status *cstat)
     if (io_fds[SFD_USERTTY] != -1)
 	sudo_term_restore(io_fds[SFD_USERTTY], false);
 
-    /* If child was signalled, write the reason to stdout like the shell. */
-    if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
-	int signo = WTERMSIG(cstat->val);
-	if (signo && signo != SIGINT && signo != SIGPIPE) {
-	    const char *reason = strsignal(signo);
-	    n = io_fds[SFD_USERTTY] != -1 ?
-		io_fds[SFD_USERTTY] : STDOUT_FILENO;
-	    if (write(n, reason, strlen(reason)) != -1) {
-		if (WCOREDUMP(cstat->val))
-		    ignore_result(write(n, " (core dumped)", 14));
-		ignore_result(write(n, "\n", 1));
-	    }
-	}
-    }
+    /* Update utmp */
     if (utmp_user != NULL)
 	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
     debug_return;
