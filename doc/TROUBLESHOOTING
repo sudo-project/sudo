@@ -113,32 +113,14 @@ A) You can specify the editor to use in visudo in the sudoers file.
    --with-editor and --with-env-editor configure options.
 
 Q) Sudo appears to be removing some variables from my environment, why?
-A) Sudo removes the following "dangerous" environment variables
-   to guard against shared library spoofing, shell voodoo, and
-   kerberos server spoofing.
-     IFS
-     LOCALDOMAIN
-     RES_OPTIONS
-     HOSTALIASES
-     NLSPATH
-     PATH_LOCALE
-     TERMINFO
-     TERMINFO_DIRS
-     TERMPATH
-     TERMCAP
-     ENV
-     BASH_ENV
-     LC_ (if it contains a '/' or '%')
-     LANG (if it contains a '/' or '%')
-     LANGUAGE (if it contains a '/' or '%')
-     LD_*
-     _RLD_*
-     SHLIB_PATH (HP-UX only)
-     LIBPATH (AIX only)
-     KRB5_CONFIG (kerb5 only)
-     VAR_ACE (SecurID only)
-     USR_ACE (SecurID only)
-     DLC_ACE (SecurID only)
+A) By default, sudo runs commands with  new, minimal environment.
+   It is possible to control what environment variables are copied
+   from the invoking user's environment using the "env_keep" setting
+   in sudoers.  Another, less secure, option is to disable the
+   "env_reset" setting to copy all variables from the invoking
+   user's environment that are not considered "dangerous".  See the
+   "Command Environment" section of the sudoers manual for more
+   information.
 
 Q) How can I keep sudo from asking for a password?
 A) To specify this on a per-user (and per-command) basis, use the
@@ -171,7 +153,6 @@ A) configure caches the results of its tests in a file called
 
 Q) I built sudo on a Solaris 11 (or higher) machine but the resulting
    binary doesn't work older Solaris versions.  Why?
-
 A) Starting with Solaris 11, asprintf(3) is included in the standard
    C library.  To build a version of sudo on a Solaris 11 machine that
    will run on an older Solaris release, edit config.h and comment out
