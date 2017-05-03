@@ -173,6 +173,11 @@ Compilation options:
         https://github.com/google/sanitizers/wiki/AddressSanitizer
 	The following compiler flag is used: -fsanitize=address,undefined
 
+        This option should only be used for testing and not in a
+        production environment.  Due to AddressSanitizer's unchecked
+        use of environment variables, it is trivial to exploit a
+        setuid root executable such as sudo.
+
   --enable-pie
         Build sudo and related programs as as a position independent
         executables (PIE).  This improves the effectiveness of address
