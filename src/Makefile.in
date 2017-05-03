@@ -104,7 +104,7 @@ INIT_DIR=@INIT_DIR@
 INIT_SCRIPT=@INIT_SCRIPT@
 RC_LINK=@RC_LINK@
 
-TEST_PROGS = check_ttyname
+TEST_PROGS = check_ttyname @CHECK_NOEXEC@
 TEST_LIBS = @LIBS@ $(LT_LIBS)
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -233,7 +233,7 @@ splint:
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
 
-check: $(TEST_PROGS) @CHECK_NOEXEC@
+check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    ./check_ttyname; \
 	fi
