@@ -3152,6 +3152,28 @@ The number of tries a user gets to enter his/her password before
 logs the failure and exits.
 The default is
 \fR@passwd_tries@\fR.
+.TP 18n
+syslog_maxlen
+On many systems,
+syslog(3)
+has a relatively small log buffer.
+IETF RFC 5424 states that syslog servers must support messages of
+at least 480 bytes and should support messages up to 2048 bytes.
+By default,
+\fBsudoers\fR
+creates log messages up to 980 bytes which corresponds to the
+historic BSD syslog implementation which used a 1024 byte buffer
+to store the message, date, hostname and program name.
+To prevent syslog messages from being truncated,
+\fBsudoers\fR
+will split up log messages that are larger than
+\fIsyslog_maxlen\fR
+bytes.
+When a message is split, additional parts will include the string
+\(Lq(command continued)\(Rq
+after the user name and before the continued command line arguments.
+.sp
+This setting is only supported by version 1.8.19 or higher.
 .PP
 \fBIntegers that can be used in a boolean context\fR:
 .TP 18n
@@ -3562,62 +3584,6 @@ option is not specified on the command line.
 This defaults to
 \fR@runas_default@\fR.
 .TP 18n
-syslog_badpri
-Syslog priority to use when the user is not allowed to run a command or
-when authentication is unsuccessful.
-Defaults to
-\fR@badpri@\fR.
-.sp
-The following syslog priorities are supported:
-\fBalert\fR,
-\fBcrit\fR,
-\fBdebug\fR,
-\fBemerg\fR,
-\fBerr\fR,
-\fBinfo\fR,
-\fBnotice\fR,
-\fBwarning\fR,
-and
-\fBnone\fR.
-Negating the option or setting it to a value of
-\fBnone\fR
-will disable logging of unsuccessful commands.
-.TP 18n
-syslog_goodpri
-Syslog priority to use when the user is allowed to run a command and
-authentication is successful.
-Defaults to
-\fR@goodpri@\fR.
-.sp
-See
-\fIsyslog_badpri\fR
-for the list of supported syslog priorities.
-Negating the option or setting it to a value of
-\fBnone\fR
-will disable logging of successful commands.
-.TP 18n
-syslog_maxlen
-On many systems,
-syslog(3)
-has a relatively small log buffer.
-IETF RFC 5424 states that syslog servers must support messages of
-at least 480 bytes and should support messages up to 2048 bytes.
-By default,
-\fBsudoers\fR
-creates log messages up to 980 bytes which corresponds to the
-historic BSD syslog implementation which used a 1024 byte buffer
-to store the message, date, hostname and program name.
-To prevent syslog messages from being truncated,
-\fBsudoers\fR
-will split up log messages that are larger than
-\fIsyslog_maxlen\fR
-bytes.
-When a message is split, additional parts will include the string
-\(Lq(command continued)\(Rq
-after the user name and before the continued command line arguments.
-.sp
-This setting is only supported by version 1.8.19 or higher.
-.TP 18n
 sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
@@ -3953,6 +3919,41 @@ OS supports it),
 \fBlocal6\fR,
 and
 \fBlocal7\fR.
+.TP 14n
+syslog_badpri
+.br
+Syslog priority to use when the user is not allowed to run a command or
+when authentication is unsuccessful.
+Defaults to
+\fR@badpri@\fR.
+.sp
+The following syslog priorities are supported:
+\fBalert\fR,
+\fBcrit\fR,
+\fBdebug\fR,
+\fBemerg\fR,
+\fBerr\fR,
+\fBinfo\fR,
+\fBnotice\fR,
+\fBwarning\fR,
+and
+\fBnone\fR.
+Negating the option or setting it to a value of
+\fBnone\fR
+will disable logging of unsuccessful commands.
+.TP 14n
+syslog_goodpri
+Syslog priority to use when the user is allowed to run a command and
+authentication is successful.
+Defaults to
+\fR@goodpri@\fR.
+.sp
+See
+\fIsyslog_badpri\fR
+for the list of supported syslog priorities.
+Negating the option or setting it to a value of
+\fBnone\fR
+will disable logging of successful commands.
 .TP 14n
 verifypw
 This option controls when a password will be required when a user runs
