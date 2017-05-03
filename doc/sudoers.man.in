@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "April 11, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "May 3, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3595,8 +3595,6 @@ for the list of supported syslog priorities.
 Negating the option or setting it to a value of
 \fBnone\fR
 will disable logging of successful commands.
-.TP 18n
-syslog_goodpri
 .TP 18n
 syslog_maxlen
 On many systems,
