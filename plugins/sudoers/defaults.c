@@ -238,19 +238,31 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     int rc;
     debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL && !ISSET(def->type, T_FLAG)) {
-	/* Check for bogus boolean usage or missing value if non-boolean. */
-	if (!ISSET(def->type, T_BOOL) || op != false) {
-	    if (!quiet) {
-		if (lineno > 0) {
-		    sudo_warnx(U_("%s:%d no value specified for \"%s\""),
-			file, lineno, def->name);
-		} else {
-		    sudo_warnx(U_("%s: no value specified for \"%s\""),
-			file, def->name);
+    /*
+     * If no value specified, the boolean flag must be set for non-flags.
+     * Only flags and tuples support boolean "true".
+     */
+    if (val == NULL) {
+	switch (def->type & T_MASK) {
+	case T_FLAG:
+	    break;
+	case T_TUPLE:
+	    if (ISSET(def->type, T_BOOL))
+		break;
+	    /* FALLTHROUGH */
+	default:
+	    if (!ISSET(def->type, T_BOOL) || op != false) {
+		if (!quiet) {
+		    if (lineno > 0) {
+			sudo_warnx(U_("%s:%d no value specified for \"%s\""),
+			    file, lineno, def->name);
+		    } else {
+			sudo_warnx(U_("%s: no value specified for \"%s\""),
+			    file, def->name);
+		    }
 		}
+		debug_return_bool(false);
 	    }
-	    debug_return_bool(false);
 	}
     }
 
