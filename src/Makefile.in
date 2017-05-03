@@ -161,7 +161,7 @@ sudo_noexec.la: libsudo_noexec.la
 sesh: $(SESH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
-check_noexec: $(CHECK_NOEXEC_OBJS) $(top_builddir)/lib/util/libsudo_util.la
+check_noexec: $(CHECK_NOEXEC_OBJS) $(top_builddir)/lib/util/libsudo_util.la sudo_noexec.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_NOEXEC_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
@@ -236,11 +236,9 @@ cppcheck:
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    ./check_ttyname; \
-	fi
-
-check_sudo_noexec: sudo_noexec.la check_noexec
-	@if test X"$(cross_compiling)" != X"yes"; then \
-	    ./check_noexec .libs/$(noexecfile); \
+	    if test X"@CHECK_NOEXEC@" != X""; then \
+		./check_noexec .libs/$(noexecfile); \
+	    fi; \
 	fi
 
 clean:
