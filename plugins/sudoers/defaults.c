@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2016
+ * Copyright (c) 1999-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -250,6 +250,12 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    if (ISSET(def->type, T_BOOL))
 		break;
 	    /* FALLTHROUGH */
+	case T_LOGFAC:
+	    if (op == true) {
+		/* Use default syslog facility if none specified. */
+		val = LOGFAC;
+	    }
+	    break;
 	default:
 	    if (!ISSET(def->type, T_BOOL) || op != false) {
 		if (!quiet) {
