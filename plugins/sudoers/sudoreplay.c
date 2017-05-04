@@ -1136,7 +1136,7 @@ check_input(int fd, int what, void *v)
 	case 0:
 	    /* Ignore EOF. */
 	    break;
-	case 1:
+	default:
 	    if (paused) {
 		/* Any key will unpause, event is finished. */
 		/* XXX - pause time could be less than timeout */
