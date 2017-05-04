@@ -336,6 +336,33 @@ cb_iolog_mode(const union sudo_defs_val *sd_un)
 }
 
 /*
+ * Wrapper for open(2) that retries with PERM_IOLOG if open(2)
+ * returns EACCES.
+ */
+static int
+io_open(const char *path, int flags, mode_t perm)
+{
+    int fd;
+    debug_decl(io_open, SUDOERS_DEBUG_UTIL)
+
+    fd = open(path, flags, perm);
+    if (fd == -1 && errno == EACCES) {
+	/* Try again as the I/O log owner (for NFS). */
+	if (set_perms(PERM_IOLOG)) {
+	    fd = open(path, flags, perm);
+	    if (!restore_perms()) {
+		/* restore_perms() warns on error. */
+		if (fd != -1) {
+		    close(fd);
+		    fd = -1;
+		}
+	    }
+	}
+    }
+    debug_return_int(fd);
+}
+
+/*
  * Read the on-disk sequence number, set sessid to the next
  * number, and update the on-disk copy.
  * Uses file locking to avoid sequence number collisions.
@@ -372,14 +399,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
 	goto done;
     }
-    fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
-    if (fd == -1 && errno == EACCES) {
-	/* Try again as the I/O log owner (for NFS). */
-	if (set_perms(PERM_IOLOG)) {
-	    fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
-	    restore_perms();
-	}
-    }
+    fd = io_open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
     if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
 	goto done;
@@ -399,15 +419,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
-	    int fd2;
-	    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
-	    if (fd2 == -1 && errno == EACCES) {
-		/* Try again as the I/O log owner (for NFS). */
-		if (set_perms(PERM_IOLOG)) {
-		    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
-		    restore_perms();
-		}
-	    }
+	    int fd2 = io_open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
 		ignore_result(fchown(fd2, iolog_uid, iolog_gid));
 		nread = read(fd2, buf, sizeof(buf) - 1);
@@ -527,14 +539,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-	if (fd == -1 && errno == EACCES) {
-	    /* Try again as the I/O log owner (for NFS). */
-	    if (set_perms(PERM_IOLOG)) {
-		fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-		restore_perms();
-	    }
-	}
+	int fd = io_open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
 	if (fd != -1) {
 	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -767,14 +772,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
-    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-    if (fd == -1 && errno == EACCES) {
-	/* Try again as the I/O log owner (for NFS). */
-	if (set_perms(PERM_IOLOG)) {
-	    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-	    restore_perms();
-	}
-    }
+    fd = io_open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);
