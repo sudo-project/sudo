@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -448,7 +448,8 @@ replay_session(const double max_wait, const char *decimal)
 	timeout.tv_usec = (to_wait - timeout.tv_sec) * 1000000.0;
 
 	/* Run event event loop to delay and get keyboard input. */
-	sudo_ev_add(evbase, input_ev, &timeout, false);
+	if (sudo_ev_add(evbase, input_ev, &timeout, false) == -1)
+	    sudo_fatal(U_("unable to add event to queue"));
 	sudo_ev_loop(evbase, 0);
 
 	/* Even if we are not replaying, we still have to delay. */
@@ -553,7 +554,8 @@ replay_session(const double max_wait, const char *decimal)
 
 	    /* Run event event loop to write output. */
 	    /* XXX - should use a single event loop with a circular buffer. */
-	    sudo_ev_add(evbase, output_ev, NULL, false);
+	    if (sudo_ev_add(evbase, output_ev, NULL, false) == -1)
+		sudo_fatal(U_("unable to add event to queue"));
 	    sudo_ev_loop(evbase, 0);
 	}
     }
@@ -623,7 +625,8 @@ write_output(int fd, int what, void *v)
     }
 
     /* Reschedule event to write remainder. */
-    sudo_ev_add(sudo_ev_get_base(wc->wevent), wc->wevent, NULL, false);
+    if (sudo_ev_add(NULL, wc->wevent, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
     debug_return;
 }
 
@@ -1119,7 +1122,6 @@ static void
 check_input(int fd, int what, void *v)
 {
     struct sudo_event *ev = v;
-    struct sudo_event_base *evbase = sudo_ev_get_base(ev);
     struct timeval tv, *timeout = NULL;
     static bool paused = 0;
     char ch;
@@ -1167,7 +1169,8 @@ check_input(int fd, int what, void *v)
 	    timeout = &tv;
 	}
 	/* Re-enable event. */
-	sudo_ev_add(evbase, ev, timeout, false);
+	if (sudo_ev_add(NULL, ev, timeout, false) == -1)
+	    sudo_fatal(U_("unable to add event to queue"));
     }
     debug_return;
 }
