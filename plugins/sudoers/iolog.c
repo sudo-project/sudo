@@ -400,7 +400,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2;
 	    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
-	    if (fd == -1 && errno == EACCES) {
+	    if (fd2 == -1 && errno == EACCES) {
 		/* Try again as the I/O log owner (for NFS). */
 		set_perms(PERM_IOLOG);
 		fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
