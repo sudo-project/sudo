@@ -375,9 +375,10 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
     if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
-	set_perms(PERM_IOLOG);
-	fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
-	restore_perms();
+	if (set_perms(PERM_IOLOG)) {
+	    fd = open(pathbuf, O_RDWR|O_CREAT, iolog_filemode);
+	    restore_perms();
+	}
     }
     if (fd == -1) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), pathbuf);
@@ -402,9 +403,10 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 == -1 && errno == EACCES) {
 		/* Try again as the I/O log owner (for NFS). */
-		set_perms(PERM_IOLOG);
-		fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
-		restore_perms();
+		if (set_perms(PERM_IOLOG)) {
+		    fd2 = open(fallback, O_RDWR|O_CREAT, iolog_filemode);
+		    restore_perms();
+		}
 	    }
 	    if (fd2 != -1) {
 		ignore_result(fchown(fd2, iolog_uid, iolog_gid));
@@ -528,9 +530,10 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 	int fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
 	if (fd == -1 && errno == EACCES) {
 	    /* Try again as the I/O log owner (for NFS). */
-	    set_perms(PERM_IOLOG);
-	    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-	    restore_perms();
+	    if (set_perms(PERM_IOLOG)) {
+		fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
+		restore_perms();
+	    }
 	}
 	if (fd != -1) {
 	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
@@ -767,9 +770,10 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
     if (fd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
-	set_perms(PERM_IOLOG);
-	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
-	restore_perms();
+	if (set_perms(PERM_IOLOG)) {
+	    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
+	    restore_perms();
+	}
     }
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
