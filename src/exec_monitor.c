@@ -390,10 +390,26 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     setpgid(0, self);
 
     /* Wire up standard fds, note that stdout/stderr may be pipes. */
-    if (dup2(io_fds[SFD_STDIN], STDIN_FILENO) == -1 ||
-	dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1 ||
-	dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
-	sudo_fatal("dup2");
+    if (io_fds[SFD_STDIN] != STDIN_FILENO) {
+	if (dup2(io_fds[SFD_STDIN], STDIN_FILENO) == -1)
+	    sudo_fatal("dup2");
+	if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
+	    close(io_fds[SFD_STDIN]);
+    }
+    if (io_fds[SFD_STDOUT] != STDOUT_FILENO) {
+	if (dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1)
+	    sudo_fatal("dup2");
+	if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
+	    close(io_fds[SFD_STDOUT]);
+    }
+    if (io_fds[SFD_STDERR] != STDERR_FILENO) {
+	if (dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
+	    sudo_fatal("dup2");
+	if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
+	    close(io_fds[SFD_STDERR]);
+    }
+    if (io_fds[SFD_SLAVE] != -1)
+	close(io_fds[SFD_SLAVE]);
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
@@ -401,16 +417,6 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
 	    nanosleep(&ts, NULL);
     }
-
-    /* We have guaranteed that the slave fd is > 2 */
-    if (io_fds[SFD_SLAVE] != -1)
-	close(io_fds[SFD_SLAVE]);
-    if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
-	close(io_fds[SFD_STDIN]);
-    if (io_fds[SFD_STDOUT] != io_fds[SFD_SLAVE])
-	close(io_fds[SFD_STDOUT]);
-    if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
-	close(io_fds[SFD_STDERR]);
 
     /* Execute command; only returns on error. */
     exec_cmnd(details, errfd);

@@ -642,8 +642,10 @@ io_buf_new(int rfd, int wfd,
 static int
 fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 {
+    struct plugin_container *plugin;
     struct command_status cstat;
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
+    bool interpose[3] = { false, false, false };
     sigaction_t sa;
     sigset_t mask;
     pid_t child;
@@ -668,6 +670,16 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     sigaddset(&ttyblock, SIGTSTP);
     sigaddset(&ttyblock, SIGTTIN);
     sigaddset(&ttyblock, SIGTTOU);
+
+    /* Determine whether any of std{in,out,err} should be logged. */
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->log_stdin)
+	    interpose[STDIN_FILENO] = true;
+	if (plugin->u.io->log_stdout)
+	    interpose[STDOUT_FILENO] = true;
+	if (plugin->u.io->log_stderr)
+	    interpose[STDERR_FILENO] = true;
+    }
 
     /*
      * Setup stdin/stdout/stderr for child, to be duped after forking.
@@ -694,34 +706,64 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     }
 
     /*
-     * If either stdin, stdout or stderr is not a tty we use a pipe
-     * to interpose ourselves instead of duping the pty fd.
+     * If stdin, stdout or stderr is not a tty and logging is enabled,
+     * use a pipe to interpose ourselves instead of using the pty fd.
      */
     if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
-	pipeline = true;
-	if (pipe(io_pipe[STDIN_FILENO]) != 0)
-	    sudo_fatal(U_("unable to create pipe"));
-	io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-	    log_stdin, &iobufs);
-	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	if (!interpose[STDIN_FILENO]) {
+	    /* Not logging stdin, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdin not a tty, not logging");
+	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
+	    if (io_fds[SFD_STDIN] == -1)
+		sudo_fatal("dup");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdin not a tty, creating a pipe");
+	    pipeline = true;
+	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
+		sudo_fatal(U_("unable to create pipe"));
+	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
+		log_stdin, &iobufs);
+	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	}
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "stdout not a tty, creating a pipe");
-	pipeline = true;
-	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
-	    sudo_fatal(U_("unable to create pipe"));
-	io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-	    log_stdout, &iobufs);
-	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
+	if (!interpose[STDOUT_FILENO]) {
+	    /* Not logging stdout, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdout not a tty, not logging");
+	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
+	    if (io_fds[SFD_STDOUT] == -1)
+		sudo_fatal("dup");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdout not a tty, creating a pipe");
+	    pipeline = true;
+	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
+		sudo_fatal(U_("unable to create pipe"));
+	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
+		log_stdout, &iobufs);
+	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
+	}
     }
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
-	if (pipe(io_pipe[STDERR_FILENO]) != 0)
-	    sudo_fatal(U_("unable to create pipe"));
-	io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-	    log_stderr, &iobufs);
-	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
+	if (!interpose[STDERR_FILENO]) {
+	    /* Not logging stderr, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stderr not a tty, not logging");
+	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
+	    if (io_fds[SFD_STDERR] == -1)
+		sudo_fatal("dup");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stderr not a tty, creating a pipe");
+	    if (pipe(io_pipe[STDERR_FILENO]) != 0)
+		sudo_fatal(U_("unable to create pipe"));
+	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
+		log_stderr, &iobufs);
+	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
+	}
     }
 
     if (foreground) {
