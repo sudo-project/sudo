@@ -408,8 +408,6 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	    close(io_fds[SFD_STDERR]);
     }
-    if (io_fds[SFD_SLAVE] != -1)
-	close(io_fds[SFD_SLAVE]);
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
@@ -417,6 +415,10 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
 	    nanosleep(&ts, NULL);
     }
+
+    /* Done with the pty slave, don't leak it. */
+    if (io_fds[SFD_SLAVE] != -1)
+	close(io_fds[SFD_SLAVE]);
 
     /* Execute command; only returns on error. */
     exec_cmnd(details, errfd);
