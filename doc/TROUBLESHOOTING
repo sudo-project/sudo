@@ -239,7 +239,7 @@ A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
 
     /usr/local/bin/sudo:
 	    accessauths = ALLOW_ALL
-	    innateprivs = PV_DAC_GID,PV_DAC_O,PV_DAC_R,PV_DAC_UID,PV_DAC_W,PV_DAC_X,PV_FS_CHOWN,PV_PROC_ENV,PV_PROC_PRIO,PV_PROC_RAC
+	    innateprivs = PV_DAC_GID,PV_DAC_R,PV_DAC_UID,PV_DAC_X,PV_FS_CHOWN,PV_PROC_PRIO,PV_NET_PORT,PV_NET_CNTL,PV_SU_UID
 	    secflags = FSF_EPS
 
 Q) Sudo configures and builds without error but when I run it I get
