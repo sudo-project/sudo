@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd May 3, 2017
+.Dd May 8, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1695,7 +1695,7 @@ For example, given:
 .Ed
 .Pp
 .Nm sudo
-will read each file in
+will suspend processing of the current file and read each file in
 .Pa /etc/sudoers.d ,
 skipping file names that end in
 .Ql ~
@@ -1715,6 +1715,10 @@ would be loaded
 .Pa /etc/sudoers.d/10_second .
 Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
+After parsing the files in the directory, control returns to the
+file that contained the
+.Li #includedir
+directive.
 .Pp
 Note that unlike files included via
 .Li #include ,

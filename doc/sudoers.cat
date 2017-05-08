@@ -852,14 +852,17 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
          #includedir /etc/sudoers.d
 
-     ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that end
-     in `~' or contain a `.' character to avoid causing problems with package
-     manager or editor temporary/backup files.  Files are parsed in sorted
-     lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
+     ssuuddoo will suspend processing of the current file and read each file in
+     _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that end in `~' or contain a `.'
+     character to avoid causing problems with package manager or editor
+     temporary/backup files.  Files are parsed in sorted lexical order.  That
+     is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is lexical,
      not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded _a_f_t_e_r
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes in
-     the file names can be used to avoid such problems.
+     the file names can be used to avoid such problems.  After parsing the
+     files in the directory, control returns to the file that contained the
+     #includedir directive.
 
      Note that unlike files included via #include, vviissuuddoo will not edit the
      files in a #includedir directory unless one of them contains a syntax
@@ -2810,4 +2813,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                       May 3, 2017                      Sudo 1.8.20
+Sudo 1.8.20                       May 8, 2017                      Sudo 1.8.20

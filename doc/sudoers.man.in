@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "May 3, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "May 8, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1819,7 +1819,7 @@ For example, given:
 .fi
 .PP
 \fBsudo\fR
-will read each file in
+will suspend processing of the current file and read each file in
 \fI/etc/sudoers.d\fR,
 skipping file names that end in
 \(oq~\(cq
@@ -1839,6 +1839,10 @@ would be loaded
 \fI/etc/sudoers.d/10_second\fR.
 Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
+After parsing the files in the directory, control returns to the
+file that contained the
+\fR#includedir\fR
+directive.
 .PP
 Note that unlike files included via
 \fR#include\fR,
