@@ -173,6 +173,11 @@ Compilation options:
         https://github.com/google/sanitizers/wiki/AddressSanitizer
 	The following compiler flag is used: -fsanitize=address,undefined
 
+        This option should only be used for testing and not in a
+        production environment.  Due to AddressSanitizer's unchecked
+        use of environment variables, it is trivial to exploit a
+        setuid root executable such as sudo.
+
   --enable-pie
         Build sudo and related programs as as a position independent
         executables (PIE).  This improves the effectiveness of address
@@ -327,7 +332,7 @@ Optional features:
 	another program (think shell escapes).  Please see the
 	"PREVENTING SHELL ESCAPES" section in the sudoers man page
 	for details.  If specified, PATH should be a fully qualified
-	path name, e.g. /usr/local/libexec/sudo_noexec.so.  If PATH
+	path name, e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH
 	is "no", noexec support will not be compiled in.  The default
 	is to compile noexec support if libtool supports building
 	shared objects on your OS.
@@ -514,6 +519,18 @@ Authentication options:
         the KRB5CCNAME environment variable to set this.  While
         gss_krb5_ccache_name() provides a better API to do this it
         is not supported by all Kerberos V and SASL combinations.
+
+  --enable-gcrypt[=DIR]
+        Use GNU crypt's SHA-2 message digest functions instead of the
+        ones bundled with sudo (or in the system's C library).
+        If specified, DIR should contain include and lib directories
+        with gcrypt.h and libgcrypt respectively.
+
+  --enable-openssl[=DIR]
+        Use OpenSSL's SHA-2 message digest functions instead of the
+        ones bundled with sudo (or in the system's C library).
+        If specified, DIR should contain include and lib directories
+        with openssl/sha.h and libcrypto respectively.
 
 Development options:
   --enable-env-debug

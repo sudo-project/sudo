@@ -151,22 +151,18 @@ siglist.c signame.c:
 	(cd lib/util && exec $(MAKE) $@)
 
 depend: siglist.c signame.c
-	@if test "$(srcdir)" != "."; then \
-	    echo "make depend only supported in the source directory"; \
-	    exit 1; \
-	fi; \
-	$(srcdir)/mkdep.pl $(srcdir)/lib/util/Makefile.in \
-	    $(srcdir)/plugins/sample/Makefile.in \
-	    $(srcdir)/plugins/group_file/Makefile.in \
-	    $(srcdir)/plugins/sudoers/Makefile.in \
-	    $(srcdir)/plugins/system_group/Makefile.in \
-	    $(srcdir)/src/Makefile.in $(srcdir)/lib/zlib/Makefile.in; \
-	./config.status --file $(srcdir)/lib/util/Makefile \
-	    --file $(srcdir)/plugins/sample/Makefile \
-	    --file $(srcdir)/plugins/group_file/Makefile \
-	    --file $(srcdir)/plugins/sudoers/Makefile \
-	    --file $(srcdir)/plugins/system_group/Makefile \
-	    --file $(srcdir)/src/Makefile --file $(srcdir)/lib/zlib/Makefile
+	$(top_srcdir)/mkdep.pl --builddir=`pwd` --srcdir=$(top_srcdir) \
+	    lib/util/Makefile.in lib/zlib/Makefile.in \
+	    plugins/group_file/Makefile.in plugins/sample/Makefile.in \
+	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
+	    src/Makefile.in && \
+	$(top_builddir)/config.status --file $(top_builddir)/lib/util/Makefile \
+	    --file $(top_builddir)/plugins/sample/Makefile \
+	    --file $(top_builddir)/plugins/group_file/Makefile \
+	    --file $(top_builddir)/plugins/sudoers/Makefile \
+	    --file $(top_builddir)/plugins/system_group/Makefile \
+	    --file $(top_builddir)/src/Makefile \
+	    --file $(top_builddir)/lib/zlib/Makefile
 
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
@@ -284,7 +280,7 @@ install-nls:
 	fi
 
 check-dist: update-pot compile-po
-	@if [ -d .hg ]; then \
+	@if test -d $(srcdir)/.hg && cd $(srcdir); then \
 	    if test `hg stat -am | wc -l` -ne 0; then \
 		echo "Uncommitted changes" 1>&2; \
 		hg stat -am 1>&2; \
@@ -295,10 +291,11 @@ check-dist: update-pot compile-po
 dist: check-dist force-dist
 
 force-dist: ChangeLog $(srcdir)/MANIFEST
+	cd $(top_srcdir) && \
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
 	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
-	    `$(SED) 's/[ 	].*//' $(srcdir)/MANIFEST`
-	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar
+	    `$(SED) 's/[ 	].*//' $(srcdir)/MANIFEST` && \
+	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar && \
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
 package: $(srcdir)/sudo.pp

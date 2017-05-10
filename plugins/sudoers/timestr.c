@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999, 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999, 2009-2011, 2013-2015, 2017
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,18 +23,15 @@
 #include <time.h>
 
 #include "sudo_compat.h"
-
-char *get_timestr(time_t, int);
+#include "sudo_debug.h"
+#include "parse.h"
 
 /*
  * Return a static buffer with the current date + time.
- * Uses strftime() if available, else falls back to ctime().
  */
 char *
 get_timestr(time_t tstamp, int log_year)
 {
-    char *s;
-#ifdef HAVE_STRFTIME
     static char buf[128];
     struct tm *timeptr;
 
@@ -44,17 +42,5 @@ get_timestr(time_t tstamp, int log_year)
 	    timeptr) != 0 && buf[sizeof(buf) - 1] == '\0')
 	    return buf;
     }
-
-#endif /* HAVE_STRFTIME */
-
-    s = ctime(&tstamp);
-    if (s != NULL) {
-	s += 4;				/* skip day of the week */
-	if (log_year)
-	    s[20] = '\0';		/* avoid the newline */
-	else
-	    s[15] = '\0';		/* don't care about year */
-    }
-
-    return s;
+    return NULL;
 }

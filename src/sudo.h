@@ -195,7 +195,6 @@ char *tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback);
 
 /* exec.c */
-int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
 
 /* parse_args.c */
@@ -270,5 +269,8 @@ void preload_static_symbols(void);
 int add_preserved_fd(struct preserved_fd_list *pfds, int fd);
 void closefrom_except(int startfd, struct preserved_fd_list *pfds);
 void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
+
+/* setpgrp_nobg.c */
+int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
 
 #endif /* SUDO_SUDO_H */

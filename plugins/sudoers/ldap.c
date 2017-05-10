@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -258,6 +258,7 @@ static struct ldap_config {
     char *tls_certfile;
     char *tls_keyfile;
     char *tls_keypw;
+    char *sasl_mech;
     char *sasl_auth_id;
     char *rootsasl_auth_id;
     char *sasl_secprops;
@@ -326,6 +327,7 @@ static struct ldap_config_table ldap_conf_global[] = {
     { "netgroup_search_filter", CONF_STR, -1, &ldap_conf.netgroup_search_filter },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, -1, &ldap_conf.use_sasl },
+    { "sasl_mech", CONF_STR, -1, &ldap_conf.sasl_mech },
     { "sasl_auth_id", CONF_STR, -1, &ldap_conf.sasl_auth_id },
     { "rootuse_sasl", CONF_BOOL, -1, &ldap_conf.rootuse_sasl },
     { "rootsasl_auth_id", CONF_STR, -1, &ldap_conf.rootsasl_auth_id },
@@ -966,10 +968,8 @@ sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
 			cp++;
 		    *cmnd = cp;
 		    DPRINTF1("%s digest %s for %s",
-			digest_type == SUDO_DIGEST_SHA224 ? "sha224" :
-			digest_type == SUDO_DIGEST_SHA256 ? "sha256" :
-			digest_type == SUDO_DIGEST_SHA384 ? "sha384" :
-			"sha512", digest->digest_str, cp);
+			digest_type_to_name(digest_type),
+			digest->digest_str, cp);
 		    debug_return_ptr(digest);
 		}
 	    }
@@ -2183,7 +2183,17 @@ sudo_ldap_read_config(void)
     }
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     if (ldap_conf.use_sasl != -1) {
+	if (ldap_conf.sasl_mech == NULL) {
+	    /* Default mechanism is GSSAPI. */
+	    ldap_conf.sasl_mech = strdup("GSSAPI");
+	    if (ldap_conf.sasl_mech == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
+	}
 	DPRINTF1("use_sasl         %s", ldap_conf.use_sasl ? "yes" : "no");
+	DPRINTF1("sasl_mech        %s", ldap_conf.sasl_mech);
 	DPRINTF1("sasl_auth_id     %s",
 	    ldap_conf.sasl_auth_id ? ldap_conf.sasl_auth_id : "(NONE)");
 	DPRINTF1("rootuse_sasl     %d",
@@ -2467,6 +2477,20 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
 		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
 	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
 		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
+	    else if (!negated && strncmp(val, "command_timeout=", 16) == 0)
+		sudo_lbuf_append(lbuf, "TIMEOUT=%s ", val + 16);
+#ifdef HAVE_SELINUX
+	    else if (!negated && strncmp(val, "role=", 5) == 0)
+		sudo_lbuf_append(lbuf, "ROLE=%s ", val + 5);
+	    else if (!negated && strncmp(val, "type=", 5) == 0)
+		sudo_lbuf_append(lbuf, "TYPE=%s ", val + 5);
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    else if (!negated && strncmp(val, "privs=", 6) == 0)
+		sudo_lbuf_append(lbuf, "PRIVS=%s ", val + 6);
+	    else if (!negated && strncmp(val, "limitprivs=", 11) == 0)
+		sudo_lbuf_append(lbuf, "LIMITPRIVS=%s ", val + 11);
+#endif /* HAVE_PRIV_SET */
 	}
 	ldap_value_free_len(bv);
     }
@@ -3002,7 +3026,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
 static int
 sudo_ldap_bind_s(LDAP *ld)
 {
-    int ret;
+    int rc, ret;
     debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -3025,27 +3049,28 @@ sudo_ldap_bind_s(LDAP *ld)
 	}
 
 	if (new_ccname != NULL) {
-	    ret = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
-	    if (ret == 0) {
+	    rc = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
+	    if (rc == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "set ccache name %s -> %s",
 		    old_ccname ? old_ccname : "(none)", new_ccname);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "sudo_set_krb5_ccache_name() failed: %d", ret);
+		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	}
-	ret = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
-	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
+	ret = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn,
+	    ldap_conf.sasl_mech, NULL, NULL, LDAP_SASL_QUIET,
+	    sudo_ldap_sasl_interact, auth_id);
 	if (new_ccname != NULL) {
-	    ret = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
-	    if (ret == 0) {
+	    rc = sudo_set_krb5_ccache_name(old_ccname ? old_ccname : "", NULL);
+	    if (rc == 0) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "restore ccache name %s -> %s", new_ccname,
 		    old_ccname ? old_ccname : "(none)");
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "sudo_set_krb5_ccache_name() failed: %d", ret);
+		    "sudo_set_krb5_ccache_name() failed: %d", rc);
 	    }
 	    /* Remove temporary copy of user's credential cache. */
 	    if (tmp_ccname != NULL)

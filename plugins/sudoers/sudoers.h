@@ -103,6 +103,7 @@ struct sudo_user {
     int   cols;
     int   flags;
     int   max_groups;
+    int   timeout;
     mode_t umask;
     uid_t uid;
     uid_t gid;
@@ -169,13 +170,14 @@ struct sudo_user {
 /*
  * Used with set_perms()
  */
-#define PERM_INITIAL             0x00
-#define PERM_ROOT                0x01
-#define PERM_USER                0x02
-#define PERM_FULL_USER           0x03
-#define PERM_SUDOERS             0x04
-#define PERM_RUNAS               0x05
-#define PERM_TIMESTAMP           0x06
+#define PERM_INITIAL		0x00
+#define PERM_ROOT		0x01
+#define PERM_USER		0x02
+#define PERM_FULL_USER		0x03
+#define PERM_SUDOERS		0x04
+#define PERM_RUNAS		0x05
+#define PERM_TIMESTAMP		0x06
+#define PERM_IOLOG		0x07
 
 /*
  * Shortcuts for sudo_user contents.
@@ -214,6 +216,7 @@ struct sudo_user {
 #define user_closefrom		(sudo_user.closefrom)
 #define	runas_privs		(sudo_user.privs)
 #define	runas_limitprivs	(sudo_user.limitprivs)
+#define user_timeout		(sudo_user.timeout)
 
 #ifdef __TANDEM
 # define ROOT_UID	65535
@@ -331,6 +334,8 @@ bool cb_maxseq(const union sudo_defs_val *sd_un);
 bool cb_iolog_user(const union sudo_defs_val *sd_un);
 bool cb_iolog_group(const union sudo_defs_val *sd_un);
 bool cb_iolog_mode(const union sudo_defs_val *sd_un);
+extern uid_t iolog_uid;
+extern gid_t iolog_gid;
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
@@ -343,7 +348,7 @@ bool env_swap_old(void);
 bool env_init(char * const envp[]);
 bool init_envtables(void);
 bool insert_env_vars(char * const envp[]);
-bool read_env_file(const char *, int);
+bool read_env_file(const char *path, bool overwrite, bool restricted);
 bool rebuild_env(void);
 bool validate_env_vars(char * const envp[]);
 int sudo_setenv(const char *var, const char *val, int overwrite);
@@ -364,6 +369,7 @@ extern struct passwd *list_pw;
 extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
+extern gid_t timestamp_gid;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 
@@ -391,7 +397,7 @@ char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *whitelist);
 
 /* mkdir_parents.c */
-bool sudo_mkdir_parents(char *path, uid_t uid, gid_t *gidp, mode_t mode, bool quiet);
+bool sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
 
 /* gc.c */
 enum sudoers_gc_types {

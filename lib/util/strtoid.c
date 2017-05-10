@@ -80,7 +80,7 @@ sudo_strtoid_v1(const char *p, const char *sep, char **endp, const char **errstr
     }
     if (errno == ERANGE) {
 	if (errstr != NULL) {
-	    if (llval == LLONG_MAX)) {
+	    if (llval == LLONG_MAX)
 		*errstr = N_("value too large");
 	    else
 		*errstr = N_("value too small");

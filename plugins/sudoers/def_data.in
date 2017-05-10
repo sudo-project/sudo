@@ -217,6 +217,9 @@ type
 env_file
 	T_STR|T_PATH|T_BOOL
 	"Path to the sudo-specific environment file: %s"
+restricted_env_file
+	T_STR|T_PATH|T_BOOL
+	"Path to the restricted sudo-specific environment file: %s"
 sudoers_locale
 	T_STR
 	"Locale to use while parsing sudoers: %s"
@@ -312,7 +315,7 @@ match_group_by_gid
 	"Resolve groups in sudoers and match on the group ID, not the name"
 syslog_maxlen
 	T_UINT
-	"Log entries larger than this value will be split into multiple syslog messages"
+	"Log entries larger than this value will be split into multiple syslog messages: %u"
 iolog_user
 	T_STR|T_BOOL
 	"User that will own the I/O log files: %s"
@@ -322,3 +325,19 @@ iolog_group
 iolog_mode
 	T_MODE
 	"File mode to use for the I/O log files: 0%o"
+fdexec
+	T_TUPLE|T_BOOL
+	"Execute commands by file descriptor instead of by path: %s"
+	never digest_only always
+ignore_unknown_defaults
+	T_FLAG
+	"Ignore unknown Defaults entries in sudoers instead of producing a warning"
+command_timeout
+	T_TIMEOUT|T_BOOL
+	"Time in seconds after which the command will be terminated: %u"
+user_command_timeouts
+	T_FLAG
+	"Allow the user to specify a timeout on the command line"
+iolog_flush
+	T_FLAG
+	"Flush I/O log data to disk immediately instead of buffering it"

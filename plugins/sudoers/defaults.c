@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2016
+ * Copyright (c) 1999-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -79,6 +79,7 @@ static struct strmap priorities[] = {
 };
 
 static struct early_default early_defaults[] = {
+    { I_IGNORE_UNKNOWN_DEFAULTS },
 #ifdef FQDN
     { I_FQDN, true },
 #else
@@ -100,6 +101,7 @@ static bool store_mode(const char *str, union sudo_defs_val *sd_un);
 static int  store_str(const char *str, union sudo_defs_val *sd_un);
 static bool store_syslogfac(const char *str, union sudo_defs_val *sd_un);
 static bool store_syslogpri(const char *str, union sudo_defs_val *sd_un);
+static bool store_timeout(const char *str, union sudo_defs_val *sd_un);
 static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
 static bool store_float(const char *str, union sudo_defs_val *sd_un);
@@ -177,6 +179,13 @@ dump_defaults(void)
 			}
 		    }
 		    break;
+		case T_TIMEOUT:
+		    if (cur->sd_un.ival) {
+			sudo_printf(SUDO_CONV_INFO_MSG, desc,
+			    cur->sd_un.ival);
+			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
+		    }
+		    break;
 		case T_TUPLE:
 		    for (def = cur->values; def->sval; def++) {
 			if (cur->sd_un.tuple == def->nval) {
@@ -206,7 +215,7 @@ find_default(const char *name, const char *file, int lineno, bool quiet)
 	if (strcmp(name, sudo_defs_table[i].name) == 0)
 	    debug_return_int(i);
     }
-    if (!quiet) {
+    if (!quiet && !def_ignore_unknown_defaults) {
 	if (lineno > 0) {
 	    sudo_warnx(U_("%s:%d unknown defaults entry \"%s\""),
 		file, lineno, name);
@@ -229,19 +238,37 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     int rc;
     debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
-    if (val == NULL && !ISSET(def->type, T_FLAG)) {
-	/* Check for bogus boolean usage or missing value if non-boolean. */
-	if (!ISSET(def->type, T_BOOL) || op != false) {
-	    if (!quiet) {
-		if (lineno > 0) {
-		    sudo_warnx(U_("%s:%d no value specified for \"%s\""),
-			file, lineno, def->name);
-		} else {
-		    sudo_warnx(U_("%s: no value specified for \"%s\""),
-			file, def->name);
-		}
+    /*
+     * If no value specified, the boolean flag must be set for non-flags.
+     * Only flags and tuples support boolean "true".
+     */
+    if (val == NULL) {
+	switch (def->type & T_MASK) {
+	case T_FLAG:
+	    break;
+	case T_TUPLE:
+	    if (ISSET(def->type, T_BOOL))
+		break;
+	    /* FALLTHROUGH */
+	case T_LOGFAC:
+	    if (op == true) {
+		/* Use default syslog facility if none specified. */
+		val = LOGFAC;
 	    }
-	    debug_return_bool(false);
+	    break;
+	default:
+	    if (!ISSET(def->type, T_BOOL) || op != false) {
+		if (!quiet) {
+		    if (lineno > 0) {
+			sudo_warnx(U_("%s:%d no value specified for \"%s\""),
+			    file, lineno, def->name);
+		    } else {
+			sudo_warnx(U_("%s: no value specified for \"%s\""),
+			    file, def->name);
+		    }
+		}
+		debug_return_bool(false);
+	    }
 	}
     }
 
@@ -299,6 +326,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_LIST:
 	    rc = store_list(val, sd_un, op);
+	    break;
+	case T_TIMEOUT:
+	    rc = store_timeout(val, sd_un);
 	    break;
 	case T_TUPLE:
 	    rc = store_tuple(val, sd_un, def->values);
@@ -533,6 +563,7 @@ init_defaults(void)
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
+    def_fdexec = digest_only;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -980,6 +1011,25 @@ store_mode(const char *str, union sudo_defs_val *sd_un)
 	    debug_return_bool(false);
 	}
 	sd_un->mode = mode;
+    }
+    debug_return_bool(true);
+}
+
+static bool
+store_timeout(const char *str, union sudo_defs_val *sd_un)
+{
+    debug_decl(store_mode, SUDOERS_DEBUG_DEFAULTS)
+
+    if (str == NULL) {
+	sd_un->ival = 0;
+    } else {
+	int seconds = parse_timeout(str);
+	if (seconds == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"%s", str);
+	    debug_return_bool(false);
+	}
+	sd_un->ival = seconds;
     }
     debug_return_bool(true);
 }

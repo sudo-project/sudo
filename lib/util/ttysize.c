@@ -30,14 +30,6 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
-/* Compatibility with older tty systems. */
-#if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
-# define TIOCGWINSZ	TIOCGSIZE
-# define winsize	ttysize
-# define ws_col		ts_cols
-# define ws_row		ts_lines
-#endif
-
 #ifdef TIOCGWINSZ
 static int
 get_ttysize_ioctl(int *rowp, int *colp)

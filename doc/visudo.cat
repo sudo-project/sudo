@@ -26,8 +26,8 @@ DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not save the
      changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
      print a message stating the line number(s) where the error occurred and
-     the user will receive the ``What now?'' prompt.  At this point the user
-     may enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
+     the user will receive the "What now?" prompt.  At this point the user may
+     enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
      changes, or `Q' to quit and save changes.  The `Q' option should be used
      with extreme care because if vviissuuddoo believes there to be a parse error,
      so will ssuuddoo and no one will be able to run ssuuddoo again until the error is
@@ -50,7 +50,7 @@ DDEESSCCRRIIPPTTIIOONN
                  Specify an alternate _s_u_d_o_e_r_s file location.  With this
                  option, vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
                  choice, instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file
-                 used is the specified _s_u_d_o_e_r_s file with ``.tmp'' appended to
+                 used is the specified _s_u_d_o_e_r_s file with ".tmp" appended to
                  it.  In _c_h_e_c_k_-_o_n_l_y mode only, the argument to --ff may be `-',
                  indicating that _s_u_d_o_e_r_s will be read from the standard input.
 
@@ -63,11 +63,11 @@ DDEESSCCRRIIPPTTIIOONN
 
      --ss, ----ssttrriicctt
                  Enable _s_t_r_i_c_t checking of the _s_u_d_o_e_r_s file.  If an alias is
-                 used before it is defined, vviissuuddoo will consider this a parse
-                 error.  Note that it is not possible to differentiate between
-                 an alias and a host name or user name that consists solely of
-                 uppercase letters, digits, and the underscore (`_')
-                 character.
+                 referenced but not actually defined or if there is a cycle in
+                 an alias, vviissuuddoo will consider this a parse error.  Note that
+                 it is not possible to differentiate between an alias and a
+                 host name or user name that consists solely of uppercase
+                 letters, digits, and the underscore (`_') character.
 
      --VV, ----vveerrssiioonn
                  Print the vviissuuddoo and _s_u_d_o_e_r_s grammar versions and exit.
@@ -147,7 +147,7 @@ DDIIAAGGNNOOSSTTIICCSS
      you do not exist in the passwd database
            Your user ID does not appear in the system passwd database.
 
-     {User,Runas,Host,Cmnd}_Alias referenced but not defined
+     Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
            Either you are trying to use an undeclared
            {User,Runas,Host,Cmnd}_Alias or you have a user or host name listed
            that consists solely of uppercase letters, digits, and the
@@ -157,13 +157,13 @@ DDIIAAGGNNOOSSTTIICCSS
            undefined alias was used.  In --ss (strict) mode these are errors,
            not warnings.
 
-     unused {User,Runas,Host,Cmnd}_Alias
+     Warning: unused {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias was defined but never
            used.  The message is prefixed with the path name of the _s_u_d_o_e_r_s
            file and the line number where the unused alias was defined.  You
            may wish to comment out or remove the unused alias.
 
-     cycle in {User,Runas,Host,Cmnd}_Alias
+     Warning: cycle in {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
            itself, either directly or through an alias it includes.  The
            message is prefixed with the path name of the _s_u_d_o_e_r_s file and the
@@ -172,7 +172,7 @@ DDIIAAGGNNOOSSTTIICCSS
            when parsing the _s_u_d_o_e_r_s file.
 
      unknown defaults entry "name"
-           The _s_u_d_o_e_r_s file contains a Defaults variable not recognized by
+           The _s_u_d_o_e_r_s file contains a Defaults setting not recognized by
            vviissuuddoo.
 
      /etc/sudoers: input and output files must be different
@@ -206,10 +206,10 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     vviissuuddoo is provided ``AS IS'' and any express or implied warranties,
+     vviissuuddoo is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.19                    November 12, 2016                   Sudo 1.8.19
+Sudo 1.8.20                    February 22, 2017                   Sudo 1.8.20

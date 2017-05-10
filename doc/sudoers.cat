@@ -95,9 +95,9 @@ DDEESSCCRRIIPPTTIIOONN
      was used to authenticate, the terminal session ID, and a time stamp
      (using a monotonic clock if one is available).  The user may then use
      ssuuddoo without a password for a short period of time (5 minutes unless
-     overridden by the _t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a separate
-     record for each tty, which means that a user's login sessions are
-     authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
+     overridden by the _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a
+     separate record for each tty, which means that a user's login sessions
+     are authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
      force the use of a single time stamp for all of a user's sessions.
 
    LLooggggiinngg
@@ -150,12 +150,12 @@ DDEESSCCRRIIPPTTIIOONN
 
          env_keep += "my_func=()*"
 
-     Without the ``=()*'' suffix, this would not match, as old-style bbaasshh
-     shell functions are not preserved by default.
+     Without the "=()*" suffix, this would not match, as old-style bbaasshh shell
+     functions are not preserved by default.
 
      The complete list of environment variables that ssuuddoo allows or denies is
-     contained in the output of ``sudo -V'' when run as root.  Please note
-     that this list varies based on the operating system ssuuddoo is running on.
+     contained in the output of "sudo -V" when run as root.  Please note that
+     this list varies based on the operating system ssuuddoo is running on.
 
      On systems that support PAM where the ppaamm__eennvv module is enabled for ssuuddoo,
      variables in the PAM environment may be merged in to the environment.  If
@@ -184,8 +184,12 @@ DDEESSCCRRIIPPTTIIOONN
      the _p_a_t_h and _s_e_t_e_n_v variables in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f are also applied.  All
      other environment variables are removed.
 
-     Finally, if the _e_n_v___f_i_l_e option is defined, any variables present in that
-     file will be set to their specified values as long as they would not
+     Finally, the _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e and _e_n_v___f_i_l_e files are applied, if
+     present.  The variables in _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e are applied first and are
+     subject to the same restrictions as the invoking user's environment, as
+     detailed above.  The variables in _e_n_v___f_i_l_e are applied last and are not
+     subject to these restrictions.  In both cases, variables present in the
+     files will only be set to their specified values if they would not
      conflict with an existing environment variable.
 
 SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
@@ -209,7 +213,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Each _p_r_o_d_u_c_t_i_o_n _r_u_l_e references others and thus makes up a grammar for
      the language.  EBNF also contains the following operators, which many
      readers will recognize from regular expressions.  Do not, however,
-     confuse them with ``wildcard'' characters, which have different meanings.
+     confuse them with "wildcard" characters, which have different meanings.
 
      ?     Means that the preceding symbol (or group of symbols) is optional.
            That is, it may appear once or not at all.
@@ -348,9 +352,9 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      command on your machine returns the fully qualified host name, you'll
      need to use the _f_q_d_n option for wildcards to be useful.  Note that ssuuddoo
      only inspects actual network interfaces; this means that IP address
-     127.0.0.1 (localhost) will never match.  Also, the host name
-     ``localhost'' will only match if that is the actual host name, which is
-     usually only the case for non-networked systems.
+     127.0.0.1 (localhost) will never match.  Also, the host name "localhost"
+     will only match if that is the actual host name, which is usually only
+     the case for non-networked systems.
 
      digest ::= [A-Fa-f0-9]+ |
                 [[A-Za-z0-9+/=]+
@@ -387,10 +391,10 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      the Cmnd must match exactly those given by the user on the command line
      (or match the wildcards if there are any).  Note that the following
      characters must be escaped with a `\' if they are used in command
-     arguments: `,', `:', `=', `\'.  The built-in command ``sudoedit'' is used
+     arguments: `,', `:', `=', `\'.  The built-in command "sudoedit" is used
      to permit a user to run ssuuddoo with the --ee option (or as ssuuddooeeddiitt).  It may
      take command line arguments just as a normal command does.  Note that
-     ``sudoedit'' is a command built into ssuuddoo itself and must be specified in
+     "sudoedit" is a command built into ssuuddoo itself and must be specified in
      the _s_u_d_o_e_r_s file without a leading path.
 
      If a command name is prefixed with a Digest_Spec, the command will only
@@ -416,7 +420,9 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      command after the digest check has been performed but before the command
      is executed.  A similar race condition exists on systems that lack the
      fexecve(2) system call when the directory in which the command is located
-     is writable by the user.
+     is writable by the user.  See the description of the _f_d_e_x_e_c setting for
+     more information on how ssuuddoo executes commands that have an associated
+     digest.
 
      Command digests are only supported by version 1.8.7 or higher.
 
@@ -472,13 +478,19 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Cmnd_Spec_List ::= Cmnd_Spec |
                         Cmnd_Spec ',' Cmnd_Spec_List
 
-     Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Solaris_Priv_Spec? Tag_Spec* Cmnd
+     Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
      Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
+
+     Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
 
      SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
      Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
+
+     Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
+
+     Timeout_Spec ::= 'TIMEOUT=timeout'
 
      Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
                    'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
@@ -489,8 +501,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      what user) on specified hosts.  By default, commands are run as rroooott, but
      this can be changed on a per-command basis.
 
-     The basic structure of a user specification is ``who where = (as_whom)
-     what''.  Let's break that down into its constituent parts:
+     The basic structure of a user specification is "who where = (as_whom)
+     what".  Let's break that down into its constituent parts:
 
    RRuunnaass__SSppeecc
      A Runas_Spec determines the user and/or the group that a command may be
@@ -562,6 +574,13 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      user aallaann may run any command as either user root or bin, optionally
      setting the group to operator or system.
 
+   OOppttiioonn__SSppeecc
+     A Cmnd may have zero or more options associated with it.  Depending on
+     the system, options may consist of SELinux roles and/or types, Solaris
+     privileges sets, and command timeouts.  Once an option is set for a Cmnd,
+     subsequent Cmnds in the Cmnd_Spec_List, inherit that option unless it is
+     overridden by another option.
+
    SSEELLiinnuuxx__SSppeecc
      On systems with SELinux support, _s_u_d_o_e_r_s file entries may optionally have
      an SELinux role and/or type associated with a command.  If a role or type
@@ -581,7 +600,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      $ ppriv -l
 
-     In addition, there are several ``special'' privilege strings:
+     In addition, there are several "special" privilege strings:
 
      none      the empty set
 
@@ -594,6 +613,41 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      Privileges can be excluded from a set by prefixing the privilege name
      with either an `!' or `-' character.
+
+   DDaattee__SSppeecc
+     ssuuddooeerrss rules can be specified with a start and end date via the
+     NOTBEFORE and NOTAFTER settings.  The time stamp must be specified in
+     _G_e_n_e_r_a_l_i_z_e_d _T_i_m_e as defined by RFC 4517.  The format is effectively
+     yyyymmddHHMMSSZ where the minutes and seconds are optional.  The `Z'
+     suffix indicates that the time stamp is in Coordinated Universal Time
+     (UTC).  It is also possible to specify a timezone offset from UTC in
+     hours and minutes instead of a `Z'.  For example, `-0500' would
+     correspond to Eastern Standard time in the US.  As an extension, if no
+     `Z' or timezone offset is specified, local time will be used.
+
+     The following are all valid time stamps:
+
+         20170214083000Z
+         2017021408Z
+         20160315220000-0500
+         20151201235900
+
+   TTiimmeeoouutt__SSppeecc
+     A command may have a timeout associated with it.  If the timeout expires
+     before the command has exited, the command will be terminated.  The
+     timeout may be specified in combinations of days, hours, minutes and
+     seconds with a single-letter case-insensitive suffix that indicates the
+     unit of time.  For example, a timeout of 7 days, 8 hours, 30 minutes and
+     10 seconds would be written as 7d8h30m10s.  If a number is specified
+     without a unit, seconds are assumed.  Any of the days, minutes, hours or
+     seconds may be omitted.  The order must be from largest to smallest unit
+     and a unit may not be specified more than once.
+
+     The following are all _v_a_l_i_d timeout values: 7d8h30m10s, 14d, 8h30m, 600s,
+     3600.  The following are _i_n_v_a_l_i_d timeout values: 12m2w1d, 30s10m4h,
+     1d2d3h.
+
+     This option is only supported by version 1.8.20 or higher.
 
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  The following
@@ -668,8 +722,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        the group specified by the _e_x_e_m_p_t___g_r_o_u_p option.
 
        By default, if the NOPASSWD tag is applied to any of the entries for a
-       user on the current host, he or she will be able to run ``sudo -l''
-       without a password.  Additionally, a user may only run ``sudo -v''
+       user on the current host, he or she will be able to run "sudo -l"
+       without a password.  Additionally, a user may only run "sudo -v"
        without a password if the NOPASSWD tag is present for all a user's
        entries that pertain to the current host.  This behavior may be
        overridden via the _v_e_r_i_f_y_p_w and _l_i_s_t_p_w options.
@@ -690,7 +744,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be
      used in host names, path names and command line arguments in the _s_u_d_o_e_r_s
      file.  Wildcard matching is done via the glob(3) and fnmatch(3) functions
-     as specified by IEEE Std 1003.1 (``POSIX.1'').
+     as specified by IEEE Std 1003.1 ("POSIX.1").
 
      *         Matches any set of zero or more characters (including white
                space).
@@ -786,7 +840,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      The file name may also include the %h escape, signifying the short form
      of the host name.  In other words, if the machine's host name is
-     ``xerxes'', then
+     "xerxes", then
 
          #include /etc/sudoers.%h
 
@@ -798,14 +852,17 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
          #includedir /etc/sudoers.d
 
-     ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that end
-     in `~' or contain a `.' character to avoid causing problems with package
-     manager or editor temporary/backup files.  Files are parsed in sorted
-     lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
+     ssuuddoo will suspend processing of the current file and read each file in
+     _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that end in `~' or contain a `.'
+     character to avoid causing problems with package manager or editor
+     temporary/backup files.  Files are parsed in sorted lexical order.  That
+     is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is lexical,
      not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded _a_f_t_e_r
      _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes in
-     the file names can be used to avoid such problems.
+     the file names can be used to avoid such problems.  After parsing the
+     files in the directory, control returns to the file that contained the
+     #includedir directive.
 
      Note that unlike files included via #include, vviissuuddoo will not edit the
      files in a #includedir directory unless one of them contains a syntax
@@ -841,10 +898,10 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
          !root
 
      it would explicitly deny root but not match any other users.  This is
-     different from a true ``negation'' operator.
+     different from a true "negation" operator.
 
      Note, however, that using a `!' in conjunction with the built-in AALLLL
-     alias to allow a user to run ``all but a few'' commands rarely works as
+     alias to allow a user to run "all but a few" commands rarely works as
      intended (see _S_E_C_U_R_I_T_Y _N_O_T_E_S below).
 
      Long lines can be continued with a backslash (`\') as the last character
@@ -955,8 +1012,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      env_reset         If set, ssuuddoo will run the command in a minimal
                        environment containing the TERM, PATH, HOME, MAIL,
                        SHELL, LOGNAME, USER, USERNAME and SUDO_* variables.
-                       Any variables in the caller's environment that match
-                       the env_keep and env_check lists are then added,
+                       Any variables in the caller's environment or in the
+                       file specified by the _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e option that
+                       match the env_keep and env_check lists are then added,
                        followed by any variables present in the file specified
                        by the _e_n_v___f_i_l_e option (if any).  The contents of the
                        env_keep and env_check lists, as modified by global
@@ -989,25 +1047,24 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        domain name.  In other words, instead of myhost you
                        would use myhost.mydomain.edu.  You may still use the
                        short form if you wish (and even mix the two).  This
-                       option is only effective when the ``canonical'' host
+                       option is only effective when the "canonical" host
                        name, as returned by the ggeettaaddddrriinnffoo() or
                        ggeetthhoossttbbyynnaammee() function, is a fully-qualified domain
                        name.  This is usually the case when the system is
                        configured to use DNS for host name resolution.
 
                        If the system is configured to use the _/_e_t_c_/_h_o_s_t_s file
-                       in preference to DNS, the ``canonical'' host name may
-                       not be fully-qualified.  The order that sources are
-                       queried for host name resolution is usually specified
-                       in the _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f, _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f,
-                       _/_e_t_c_/_h_o_s_t_._c_o_n_f, or, in some cases, _/_e_t_c_/_r_e_s_o_l_v_._c_o_n_f
-                       file.  In the _/_e_t_c_/_h_o_s_t_s file, the first host name of
-                       the entry is considered to be the ``canonical'' name;
-                       subsequent names are aliases that are not used by
-                       ssuuddooeerrss.  For example, the following hosts file line
-                       for the machine ``xyzzy'' has the fully-qualified
-                       domain name as the ``canonical'' host name, and the
-                       short version as an alias.
+                       in preference to DNS, the "canonical" host name may not
+                       be fully-qualified.  The order that sources are queried
+                       for host name resolution is usually specified in the
+                       _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f, _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f, _/_e_t_c_/_h_o_s_t_._c_o_n_f,
+                       or, in some cases, _/_e_t_c_/_r_e_s_o_l_v_._c_o_n_f file.  In the
+                       _/_e_t_c_/_h_o_s_t_s file, the first host name of the entry is
+                       considered to be the "canonical" name; subsequent names
+                       are aliases that are not used by ssuuddooeerrss.  For example,
+                       the following hosts file line for the machine "xyzzy"
+                       has the fully-qualified domain name as the "canonical"
+                       host name, and the short version as an alias.
 
                              192.168.1.1    xyzzy.sudo.ws xyzzy
 
@@ -1020,7 +1077,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        which renders ssuuddoo unusable if DNS stops working (for
                        example if the machine is disconnected from the
                        network).  Also note that just like with the hosts
-                       file, you must use the ``canonical'' name as DNS knows
+                       file, you must use the "canonical" name as DNS knows
                        it.  That is, you may not use a host alias (CNAME
                        entry) due to performance issues and the fact that
                        there is no way to get all aliases from DNS.
@@ -1069,6 +1126,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        option tells ssuuddoo how to behave when no specific LDAP
                        entries have been matched, this sudoOption is only
                        meaningful for the cn=defaults section.  This flag is
+                       _o_f_f by default.
+
+     ignore_unknown_defaults
+                       If set, ssuuddoo will not produce a warning if it
+                       encounters an unknown Defaults entry in the _s_u_d_o_e_r_s
+                       file or an unknown sudoOption in LDAP.  This flag is
                        _o_f_f by default.
 
      insults           If set, ssuuddoo will insult users when they enter an
@@ -1134,24 +1197,39 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        _o_n by default.
 
      match_group_by_gid
-                       By default, when matching groups, ssuuddooeerrss will first
-                       resolve all the user's group IDs to group names and
-                       then compare those group names to any group names
-                       listed in the _s_u_d_o_e_r_s file.  This works well on systems
-                       where the number of groups listed in the _s_u_d_o_e_r_s file
-                       is larger than the number of groups a typical user
-                       belongs to.  On systems where group lookups are slow,
-                       where users may belong to a large number of groups, and
-                       where the number of groups listed in the _s_u_d_o_e_r_s file
-                       is relatively small, it may be prohibitively expensive
-                       and running commands via ssuuddoo may take longer than
-                       normal.  On such systems it may be faster to use the
+                       By default, ssuuddooeerrss will look up each group the user is
+                       a member of by group ID to determine the group name
+                       (this is only done once).  The resulting list of the
+                       user's group names is used when matching groups listed
+                       in the _s_u_d_o_e_r_s file.  This works well on systems where
+                       the number of groups listed in the _s_u_d_o_e_r_s file is
+                       larger than the number of groups a typical user belongs
+                       to.  On systems where group lookups are slow, where
+                       users may belong to a large number of groups, and where
+                       the number of groups listed in the _s_u_d_o_e_r_s file is
+                       relatively small, it may be prohibitively expensive and
+                       running commands via ssuuddoo may take longer than normal.
+                       On such systems it may be faster to use the
                        _m_a_t_c_h___g_r_o_u_p___b_y___g_i_d flag to avoid resolving the user's
-                       group IDs to group names and instead resolve all group
-                       names listed in the _s_u_d_o_e_r_s file, matching by group ID
-                       instead of by group name.  The _m_a_t_c_h___g_r_o_u_p___b_y___g_i_d flag
-                       has no effect when _s_u_d_o_e_r_s data is stored in LDAP.
-                       This flag is _o_f_f by default.
+                       group IDs to group names.  In this case, ssuuddooeerrss must
+                       look up any group name listed in the _s_u_d_o_e_r_s file and
+                       use the group ID instead of the group name when
+                       determining whether the user is a member of the group.
+
+                       Note that if _m_a_t_c_h___g_r_o_u_p___b_y___g_i_d is enabled, group
+                       database lookups performed by ssuuddooeerrss will be keyed by
+                       group name as opposed to group ID.  On systems where
+                       there are multiple sources for the group database, it
+                       is possible to have conflicting group names or group
+                       IDs in the local _/_e_t_c_/_g_r_o_u_p file and the remote group
+                       database.  On such systems, enabling or disabling
+                       _m_a_t_c_h___g_r_o_u_p___b_y___g_i_d can be used to choose whether group
+                       database queries are performed by name (enabled) or ID
+                       (disabled), which may aid in working around group entry
+                       conflicts.
+
+                       The _m_a_t_c_h___g_r_o_u_p___b_y___g_i_d flag has no effect when _s_u_d_o_e_r_s
+                       data is stored in LDAP.  This flag is _o_f_f by default.
 
                        This setting is only supported by version 1.8.18 or
                        higher.
@@ -1199,10 +1277,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      passprompt_override
                        The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
                        normally only be used if the password prompt provided
-                       by systems such as PAM matches the string
-                       ``Password:''.  If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set,
-                       _p_a_s_s_p_r_o_m_p_t will always be used.  This flag is _o_f_f by
-                       default.
+                       by systems such as PAM matches the string "Password:".
+                       If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set, _p_a_s_s_p_r_o_m_p_t will always
+                       be used.  This flag is _o_f_f by default.
 
      path_info         Normally, ssuuddoo will tell the user when a command could
                        not be found in their PATH environment variable.  Some
@@ -1238,9 +1315,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        default.
 
      root_sudo         If set, root is allowed to run ssuuddoo too.  Disabling
-                       this prevents users from ``chaining'' ssuuddoo commands to
-                       get a root shell by doing something like ``sudo sudo
-                       /bin/sh''.  Note, however, that turning off _r_o_o_t___s_u_d_o
+                       this prevents users from "chaining" ssuuddoo commands to
+                       get a root shell by doing something like "sudo sudo
+                       /bin/sh".  Note, however, that turning off _r_o_o_t___s_u_d_o
                        will also prevent root from running ssuuddooeeddiitt.
                        Disabling _r_o_o_t___s_u_d_o provides no real additional
                        security; it exists purely for historical reasons.
@@ -1383,6 +1460,18 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        this option will make that impossible.  This flag is
                        _o_f_f by default.
 
+     user_command_timeouts
+                       If set, the user may specify a timeout on the command
+                       line.  If the timeout expires before the command has
+                       exited, the command will be terminated.  If a timeout
+                       is specified both in the _s_u_d_o_e_r_s file and on the
+                       command line, the smaller of the two timeouts will be
+                       used.  See the Timeout_Spec section for a description
+                       of the timeout syntax.  This flag is _o_f_f by default.
+
+                       This setting is only supported by version 1.8.20 or
+                       higher.
+
      utmp_runas        If set, ssuuddoo will store the name of the runas user when
                        updating the utmp (or utmpx) file.  By default, ssuuddoo
                        stores the name of the invoking user.  This flag is _o_f_f
@@ -1393,7 +1482,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        on the terminal.  If the _v_i_s_i_b_l_e_p_w flag is set, ssuuddoo
                        will prompt for a password even when it would be
                        visible on the screen.  This makes it possible to run
-                       things like ``ssh somehost sudo ls'' since by default,
+                       things like "ssh somehost sudo ls" since by default,
                        ssh(1) does not allocate a tty when running a command.
                        This flag is _o_f_f by default.
 
@@ -1406,18 +1495,24 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        file descriptor at which to start closing.  The default
                        is 3.
 
+     command_timeout   The maximum amount of time a command is allowed to run
+                       before it is terminated.  See the Timeout_Spec section
+                       for a description of the timeout syntax.
+
+                       This setting is only supported by version 1.8.20 or
+                       higher.
+
      maxseq            The maximum sequence number that will be substituted
-                       for the ``%{seq}'' escape in the I/O log file (see the
+                       for the "%{seq}" escape in the I/O log file (see the
                        _i_o_l_o_g___d_i_r description above for more information).
-                       While the value substituted for ``%{seq}'' is in base
-                       36, _m_a_x_s_e_q itself should be expressed in decimal.
-                       Values larger than 2176782336 (which corresponds to the
-                       base 36 sequence number ``ZZZZZZ'') will be silently
-                       truncated to 2176782336.  The default value is
-                       2176782336.
+                       While the value substituted for "%{seq}" is in base 36,
+                       _m_a_x_s_e_q itself should be expressed in decimal.  Values
+                       larger than 2176782336 (which corresponds to the base
+                       36 sequence number "ZZZZZZ") will be silently truncated
+                       to 2176782336.  The default value is 2176782336.
 
                        Once the local sequence number reaches the value of
-                       _m_a_x_s_e_q, it will ``roll over'' to zero, after which
+                       _m_a_x_s_e_q, it will "roll over" to zero, after which
                        ssuuddooeerrss will truncate and re-use any existing I/O log
                        path names.
 
@@ -1427,6 +1522,23 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      passwd_tries      The number of tries a user gets to enter his/her
                        password before ssuuddoo logs the failure and exits.  The
                        default is 3.
+
+     syslog_maxlen     On many systems, syslog(3) has a relatively small log
+                       buffer.  IETF RFC 5424 states that syslog servers must
+                       support messages of at least 480 bytes and should
+                       support messages up to 2048 bytes.  By default, ssuuddooeerrss
+                       creates log messages up to 980 bytes which corresponds
+                       to the historic BSD syslog implementation which used a
+                       1024 byte buffer to store the message, date, hostname
+                       and program name.  To prevent syslog messages from
+                       being truncated, ssuuddooeerrss will split up log messages
+                       that are larger than _s_y_s_l_o_g___m_a_x_l_e_n bytes.  When a
+                       message is split, additional parts will include the
+                       string "(command continued)" after the user name and
+                       before the continued command line arguments.
+
+                       This setting is only supported by version 1.8.19 or
+                       higher.
 
      IInntteeggeerrss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
@@ -1450,7 +1562,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        value less than 0 the user's time stamp will not expire
                        until the system is rebooted.  This can be used to
                        allow users to create or delete their own time stamps
-                       via ``sudo -v'' and ``sudo -k'' respectively.
+                       via "sudo -v" and "sudo -k" respectively.
 
      umask             Umask to use when running the command.  Negate this
                        option or set it to 0777 to preserve the user's umask.
@@ -1528,7 +1640,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        options are enabled or when the LOG_INPUT or LOG_OUTPUT
                        tags are present for a command.  Note that _i_o_l_o_g___f_i_l_e
                        may contain directory components.  The default is
-                       ``%{seq}''.
+                       "%{seq}".
 
                        See the _i_o_l_o_g___d_i_r option above for a list of supported
                        percent (`%') escape sequences.
@@ -1543,27 +1655,50 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        will be truncated and overwritten unless _i_o_l_o_g___f_i_l_e
                        ends in six or more Xs.
 
+     iolog_flush       If set, ssuuddoo will flush I/O log data to disk after each
+                       write instead of buffering it.  This makes it possible
+                       to view the logs in real-time as the program is
+                       executing but may significantly reduce the
+                       effectiveness of I/O log compression.  This flag is _o_f_f
+                       by default.
+
+                       This setting is only supported by version 1.8.20 or
+                       higher.
+
      iolog_group       The group name to look up when setting the group ID on
-                       new I/O log files and directories.  By default, I/O log
-                       files and directories inherit the group ID of the
-                       parent directory.
+                       new I/O log files and directories.  If _i_o_l_o_g___g_r_o_u_p is
+                       not set, the primary group ID of the user specified by
+                       _i_o_l_o_g___u_s_e_r is used.  If neither _i_o_l_o_g___g_r_o_u_p nor
+                       _i_o_l_o_g___u_s_e_r are set, I/O log files and directories are
+                       created with group ID 0.
 
                        This setting is only supported by version 1.8.19 or
                        higher.
 
-     iolog_mode        The file permision mode to use when creating I/O log
-                       files, mode bits other than 0666 are ignored.  When
-                       creating I/O log directories, search (execute) bits are
-                       added to to match the read and write bits specified by
-                       _i_o_l_o_g___m_o_d_e.  Defaults to 0600.
+     iolog_mode        The file mode to use when creating I/O log files.  Mode
+                       bits for read and write permissions for owner, group or
+                       other are honored, everything else is ignored.  The
+                       file permissions will always include the owner read and
+                       write bits, even if they are not present in the
+                       specified mode.  When creating I/O log directories,
+                       search (execute) bits are added to to match the read
+                       and write bits specified by _i_o_l_o_g___m_o_d_e.  Defaults to
+                       0600 (read and write by user only).
 
                        This setting is only supported by version 1.8.19 or
                        higher.
 
-     iolog_user        The user name to look up when setting the user ID on
-                       new I/O log files and directories.  By default, I/O log
-                       files and directories are owned by the superuser (user
-                       ID 0).
+     iolog_user        The user name to look up when setting the user and
+                       group IDs on new I/O log files and directories.  If
+                       _i_o_l_o_g___g_r_o_u_p is set, it will be used instead of the
+                       user's primary group ID.  By default, I/O log files and
+                       directories are created with user and group ID 0.
+
+                       This setting can be useful when the I/O logs are stored
+                       on a Network File System (NFS) share.  Having a
+                       dedicated user own the I/O log files means that ssuuddooeerrss
+                       does not write to the log files as user ID 0, which is
+                       usually not permitted by NFS.
 
                        This setting is only supported by version 1.8.19 or
                        higher.
@@ -1585,7 +1720,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      mailsub           Subject of the mail sent to the _m_a_i_l_t_o user.  The
                        escape %h will expand to the host name of the machine.
-                       Default is ``*** SECURITY information for %h ***''.
+                       Default is "*** SECURITY information for %h ***".
 
      noexec_file       As of ssuuddoo version 1.8.1 this option is no longer
                        supported.  The path to the noexec file should now be
@@ -1594,7 +1729,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      pam_login_service
                        On systems that use PAM for authentication, this is the
                        service name used when the --ii option is specified.  The
-                       default value is ``sudo''.  See the description of
+                       default value is "sudo".  See the description of
                        _p_a_m___s_e_r_v_i_c_e for more information.
 
                        This setting is only supported by version 1.8.8 or
@@ -1604,7 +1739,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        name specifies the PAM policy to apply.  This usually
                        corresponds to an entry in the _p_a_m_._c_o_n_f file or a file
                        in the _/_e_t_c_/_p_a_m_._d directory.  The default value is
-                       ``sudo''.
+                       "sudo".
 
                        This setting is only supported by version 1.8.8 or
                        higher.
@@ -1633,7 +1768,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        %%    two consecutive % characters are collapsed into a
                              single % character
 
-                       The default value is ``Password:''.
+                       The default value is "Password:".
 
      privs             The default Solaris privileges to use when constructing
                        a new privilege set for a command.  This is passed to
@@ -1655,47 +1790,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        not specified on the command line.  This defaults to
                        root.
 
-     syslog_badpri     Syslog priority to use when the user is not allowed to
-                       run a command or when authentication is unsuccessful.
-                       Defaults to alert.
-
-                       The following syslog priorities are supported: aalleerrtt,
-                       ccrriitt, ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee, wwaarrnniinngg, and
-                       nnoonnee.  Negating the option or setting it to a value of
-                       nnoonnee will disable logging of unsuccessful commands.
-
-     syslog_goodpri    Syslog priority to use when the user is allowed to run
-                       a command and authentication is successful.  Defaults
-                       to notice.
-
-                       See _s_y_s_l_o_g___b_a_d_p_r_i for the list of supported syslog
-                       priorities.  Negating the option or setting it to a
-                       value of nnoonnee will disable logging of successful
-                       commands.
-
-     syslog_goodpri
-
-     syslog_maxlen     On many systems, syslog(3) has a relatively small log
-                       buffer.  IETF RFC 5424 states that syslog servers must
-                       support messages of at least 480 bytes and should
-                       support messages up to 2048 bytes.  By default, ssuuddooeerrss
-                       creates log messages up to 980 bytes which corresponds
-                       to the historic BSD syslog implementation which used a
-                       1024 byte buffer to store the message, date, hostname
-                       and program name.  To prevent syslog messages from
-                       being truncated, ssuuddooeerrss will split up log messages
-                       that are larger than _s_y_s_l_o_g___m_a_x_l_e_n bytes.  When a
-                       message is split, additional parts will include the
-                       string ``(command continued)'' after the user name and
-                       before the continued command line arguments.
-
-                       This setting is only supported by version 1.8.19 or
-                       higher.
-
      sudoers_locale    Locale to use when parsing the sudoers file, logging
                        commands, and sending email.  Note that changing the
                        locale may affect how sudoers is interpreted.  Defaults
-                       to ``C''.
+                       to "C".
 
      timestampdir      The directory in which ssuuddoo stores its time stamp
                        files.  This directory should be cleared when the
@@ -1716,15 +1814,49 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      env_file      The _e_n_v___f_i_l_e option specifies the fully qualified path to a
                    file containing variables to be set in the environment of
                    the program being run.  Entries in this file should either
-                   be of the form ``VARIABLE=value'' or ``export
-                   VARIABLE=value''.  The value may optionally be surrounded
-                   by single or double quotes.  Variables in this file are
-                   subject to other ssuuddoo environment settings such as _e_n_v___k_e_e_p
-                   and _e_n_v___c_h_e_c_k.
+                   be of the form "VARIABLE=value" or "export VARIABLE=value".
+                   The value may optionally be surrounded by single or double
+                   quotes.  Variables in this file are only added if the
+                   variable does not already exist in the environment.  This
+                   file is considered to be part of the security policy, its
+                   contents are not subject to other ssuuddoo environment
+                   restrictions such as _e_n_v___k_e_e_p and _e_n_v___c_h_e_c_k.
 
      exempt_group  Users in this group are exempt from password and PATH
                    requirements.  The group name specified should not include
                    a % prefix.  This is not set by default.
+
+     fdexec        Determines whether ssuuddoo will execute a command by its path
+                   or by an open file descriptor.  It has the following
+                   possible values:
+
+                   always  Always execute by file descriptor.
+
+                   never   Never execute by file descriptor.
+
+                   digest_only
+                           Only execute by file descriptor if the command has
+                           an associated digest in the _s_u_d_o_e_r_s file.
+
+                   The default value is _d_i_g_e_s_t___o_n_l_y.  This avoids a time of
+                   check versus time of use race condition when the command is
+                   located in a directory writable by the invoking user.
+
+                   Note that _f_d_e_x_e_c will change the first element of the
+                   argument vector for scripts ($0 in the shell) due to the
+                   way the kernel runs script interpreters.  Instead of being
+                   a normal path, it will refer to a file descriptor.  For
+                   example, _/_d_e_v_/_f_d_/_4 on Solaris and _/_p_r_o_c_/_s_e_l_f_/_f_d_/_4 on Linux.
+                   A workaround is to use the SUDO_COMMAND environment
+                   variable instead.
+
+                   The _f_d_e_x_e_c setting is only used when the command is matched
+                   by path name.  It has no effect if the command is matched
+                   by the built-in AALLLL alias.
+
+                   This setting is only supported by version 1.8.20 or higher.
+                   If the operating system does not support the fexecve(2)
+                   system call, this setting has no effect.
 
      group_plugin  A string containing a ssuuddooeerrss group plugin with optional
                    arguments.  The string should consist of the plugin path,
@@ -1786,20 +1918,38 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      mailerpath    Path to mail program used to send warning mail.  Defaults
                    to the path to sendmail found at configure time.
 
-     mailfrom      Address to use for the ``from'' address when sending
-                   warning and error mail.  The address should be enclosed in
-                   double quotes ("") to protect against ssuuddoo interpreting the
-                   @ sign.  Defaults to the name of the user running ssuuddoo.
+     mailfrom      Address to use for the "from" address when sending warning
+                   and error mail.  The address should be enclosed in double
+                   quotes ("") to protect against ssuuddoo interpreting the @
+                   sign.  Defaults to the name of the user running ssuuddoo.
 
      mailto        Address to send warning and error mail to.  The address
                    should be enclosed in double quotes ("") to protect against
                    ssuuddoo interpreting the @ sign.  Defaults to root.
 
+     restricted_env_file
+                   The _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e option specifies the fully
+                   qualified path to a file containing variables to be set in
+                   the environment of the program being run.  Entries in this
+                   file should either be of the form "VARIABLE=value" or
+                   "export VARIABLE=value".  The value may optionally be
+                   surrounded by single or double quotes.  Variables in this
+                   file are only added if the variable does not already exist
+                   in the environment.  Unlike _e_n_v___f_i_l_e, the file's contents
+                   are not trusted and are processed in a manner similar to
+                   that of the invoking user's environment.  If _e_n_v___r_e_s_e_t is
+                   enabled, variables in the file will only be added if they
+                   are matched by either the _e_n_v___c_h_e_c_k or _e_n_v___k_e_e_p list.  If
+                   _e_n_v___r_e_s_e_t is disabled, variables in the file are added as
+                   long as they are not matched by the _e_n_v___d_e_l_e_t_e list.  In
+                   either case, the contents of _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e are
+                   processed before the contents of _e_n_v___f_i_l_e.
+
      secure_path   Path used for every command run from ssuuddoo.  If you don't
                    trust the people running ssuuddoo to have a sane PATH
                    environment variable you may want to use this.  Another use
-                   is if you want to have the ``root path'' be separate from
-                   the ``user path''.  Users in the group specified by the
+                   is if you want to have the "root path" be separate from the
+                   "user path".  Users in the group specified by the
                    _e_x_e_m_p_t___g_r_o_u_p option are not affected by _s_e_c_u_r_e___p_a_t_h.  This
                    option is not set by default.
 
@@ -1809,6 +1959,25 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    The following syslog facilities are supported: aauutthhpprriivv (if
                    your OS supports it), aauutthh, ddaaeemmoonn, uusseerr, llooccaall00, llooccaall11,
                    llooccaall22, llooccaall33, llooccaall44, llooccaall55, llooccaall66, and llooccaall77.
+
+     syslog_badpri
+                   Syslog priority to use when the user is not allowed to run
+                   a command or when authentication is unsuccessful.  Defaults
+                   to alert.
+
+                   The following syslog priorities are supported: aalleerrtt, ccrriitt,
+                   ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee, wwaarrnniinngg, and nnoonnee.
+                   Negating the option or setting it to a value of nnoonnee will
+                   disable logging of unsuccessful commands.
+
+     syslog_goodpri
+                   Syslog priority to use when the user is allowed to run a
+                   command and authentication is successful.  Defaults to
+                   notice.
+
+                   See _s_y_s_l_o_g___b_a_d_p_r_i for the list of supported syslog
+                   priorities.  Negating the option or setting it to a value
+                   of nnoonnee will disable logging of successful commands.
 
      verifypw      This option controls when a password will be required when
                    a user runs ssuuddoo with the --vv option.  It has the following
@@ -1835,13 +2004,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      LLiissttss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
      env_check         Environment variables to be removed from the user's
-                       environment unless they are considered ``safe''.  For
-                       all variables except TZ, ``safe'' means that the
-                       variable's value does not contain any `%' or `/'
-                       characters.  This can be used to guard against printf-
-                       style format vulnerabilities in poorly-written
-                       programs.  The TZ variable is considered unsafe if any
-                       of the following are true:
+                       environment unless they are considered "safe".  For all
+                       variables except TZ, "safe" means that the variable's
+                       value does not contain any `%' or `/' characters.  This
+                       can be used to guard against printf-style format
+                       vulnerabilities in poorly-written programs.  The TZ
+                       variable is considered unsafe if any of the following
+                       are true:
 
                        ++oo   It consists of a fully-qualified path name,
                            optionally prefixed with a colon (`:'), that does
@@ -1938,10 +2107,10 @@ LLOOGG FFOORRMMAATT
      Where the fields are as follows:
 
      date          The date the command was run.  Typically, this is in the
-                   format ``MMM, DD, HH:MM:SS''.  If logging via syslog(3),
-                   the actual date format is controlled by the syslog daemon.
-                   If logging to a file and the _l_o_g___y_e_a_r option is enabled,
-                   the date will also include the year.
+                   format "MMM, DD, HH:MM:SS".  If logging via syslog(3), the
+                   actual date format is controlled by the syslog daemon.  If
+                   logging to a file and the _l_o_g___y_e_a_r option is enabled, the
+                   date will also include the year.
 
      hostname      The name of the host ssuuddoo was run on.  This field is only
                    present when logging via syslog(3).
@@ -1951,9 +2120,9 @@ LLOOGG FFOORRMMAATT
 
      username      The login name of the user who ran ssuuddoo.
 
-     ttyname       The short name of the terminal (e.g. ``console'',
-                   ``tty01'', or ``pts/0'') ssuuddoo was run on, or ``unknown'' if
-                   there was no terminal present.
+     ttyname       The short name of the terminal (e.g. "console", "tty01", or
+                   "pts/0") ssuuddoo was run on, or "unknown" if there was no
+                   terminal present.
 
      cwd           The current working directory that ssuuddoo was run in.
 
@@ -1972,7 +2141,7 @@ LLOOGG FFOORRMMAATT
      command       The actual command that was executed.
 
      Messages are logged using the locale specified by _s_u_d_o_e_r_s___l_o_c_a_l_e, which
-     defaults to the ``C'' locale.
+     defaults to the "C" locale.
 
    DDeenniieedd ccoommmmaanndd lloogg eennttrriieess
      If the user is not allowed to run the command, the reason for the denial
@@ -2025,7 +2194,7 @@ LLOOGG FFOORRMMAATT
         user ID 0 to a different value.  Normally, ssuuddooeerrss tries to open the
         _s_u_d_o_e_r_s file using group permissions to avoid this problem.  Consider
         either changing the ownership of _/_e_t_c_/_s_u_d_o_e_r_s or adding an argument
-        like ``sudoers_uid=N'' (where `N' is the user ID that owns the _s_u_d_o_e_r_s
+        like "sudoers_uid=N" (where `N' is the user ID that owns the _s_u_d_o_e_r_s
         file) to the end of the ssuuddooeerrss Plugin line in the sudo.conf(4) file.
 
      unable to stat /etc/sudoers
@@ -2037,20 +2206,20 @@ LLOOGG FFOORRMMAATT
 
      /etc/sudoers is owned by uid N, should be 0
         The _s_u_d_o_e_r_s file has the wrong owner.  If you wish to change the
-        _s_u_d_o_e_r_s file owner, please add ``sudoers_uid=N'' (where `N' is the
-        user ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss Plugin line in the
+        _s_u_d_o_e_r_s file owner, please add "sudoers_uid=N" (where `N' is the user
+        ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss Plugin line in the
         sudo.conf(4) file.
 
      /etc/sudoers is world writable
         The permissions on the _s_u_d_o_e_r_s file allow all users to write to it.
         The _s_u_d_o_e_r_s file must not be world-writable, the default file mode is
         0440 (readable by owner and group, writable by none).  The default
-        mode may be changed via the ``sudoers_mode'' option to the ssuuddooeerrss
+        mode may be changed via the "sudoers_mode" option to the ssuuddooeerrss
         Plugin line in the sudo.conf(4) file.
 
      /etc/sudoers is owned by gid N, should be 1
         The _s_u_d_o_e_r_s file has the wrong group ownership.  If you wish to change
-        the _s_u_d_o_e_r_s file group ownership, please add ``sudoers_gid=N'' (where
+        the _s_u_d_o_e_r_s file group ownership, please add "sudoers_gid=N" (where
         `N' is the group ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss Plugin
         line in the sudo.conf(4) file.
 
@@ -2107,8 +2276,8 @@ II//OO LLOOGG FFIILLEESS
      and log all user input and/or output.  I/O is logged to the directory
      specified by the _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
      unique session ID that is included in the ssuuddoo log line, prefixed with
-     ``TSID=''.  The _i_o_l_o_g___f_i_l_e option may be used to control the format of
-     the session ID.
+     "TSID=".  The _i_o_l_o_g___f_i_l_e option may be used to control the format of the
+     session ID.
 
      Each I/O log is stored in a separate directory that contains the
      following files:
@@ -2135,10 +2304,14 @@ II//OO LLOOGG FFIILLEESS
      _s_t_d_e_r_r    standard error to a pipe or redirected to a file
 
      All files other than _l_o_g are compressed in gzip format unless the
-     _c_o_m_p_r_e_s_s___i_o option has been disabled.  Due to buffering, the I/O log data
-     will not be complete until the ssuuddoo command has completed.  The output
-     portion of an I/O log file can be viewed with the sudoreplay(1m) utility,
-     which can also be used to list or search the available logs.
+     _c_o_m_p_r_e_s_s___i_o flag has been disabled.  Due to buffering, it is not normally
+     possible to display the I/O logs in real-time as the program is executing
+     The I/O log data will not be complete until the program run by ssuuddoo has
+     exited or has been terminated by a signal.  The _i_o_l_o_g___f_l_u_s_h flag can be
+     used to disable buffering, in which case I/O log data is written to disk
+     as soon as it is available.  The output portion of an I/O log file can be
+     viewed with the sudoreplay(1m) utility, which can also be used to list or
+     search the available logs.
 
      Note that user input may contain sensitive information such as passwords
      (even if they are not echoed to the screen), which will be stored in the
@@ -2287,7 +2460,7 @@ EEXXAAMMPPLLEESS
 
      The user jjooee may only su(1) to operator.
 
-     pete            HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd root
+     pete            HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd *root*
 
      %opers          ALL = (: ADMINGRP) /usr/sbin/
 
@@ -2314,7 +2487,7 @@ EEXXAAMMPPLLEESS
      jim             +biglab = ALL
 
      The user jjiimm may run any command on machines in the _b_i_g_l_a_b netgroup.
-     ssuuddoo knows that ``biglab'' is a netgroup due to the `+' prefix.
+     ssuuddoo knows that "biglab" is a netgroup due to the `+' prefix.
 
      +secretaries    ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
 
@@ -2371,7 +2544,7 @@ EEXXAAMMPPLLEESS
 
 SSEECCUURRIITTYY NNOOTTEESS
    LLiimmiittaattiioonnss ooff tthhee ``!!'' ooppeerraattoorr
-     It is generally not effective to ``subtract'' commands from AALLLL using the
+     It is generally not effective to "subtract" commands from AALLLL using the
      `!' operator.  A user can trivially circumvent this by copying the
      desired command to a different name and then executing that.  For
      example:
@@ -2475,7 +2648,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      invoking user and with the environment unmodified.  More information may
      be found in the description of the --ee option in sudo(1m).
 
-     For example, to allow user operator to edit the ``message of the day''
+     For example, to allow user operator to edit the "message of the day"
      file:
 
            operator        sudoedit /etc/motd
@@ -2634,10 +2807,10 @@ SSUUPPPPOORRTT
      the archives.
 
 DDIISSCCLLAAIIMMEERR
-     ssuuddoo is provided ``AS IS'' and any express or implied warranties,
+     ssuuddoo is provided "AS IS" and any express or implied warranties,
      including, but not limited to, the implied warranties of merchantability
      and fitness for a particular purpose are disclaimed.  See the LICENSE
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.19                    November 30, 2016                   Sudo 1.8.19
+Sudo 1.8.20                       May 8, 2017                      Sudo 1.8.20

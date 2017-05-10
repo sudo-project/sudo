@@ -70,6 +70,9 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
+#ifdef __linux__
+# include <sys/prctl.h>
+#endif
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -104,7 +107,7 @@ static struct sudo_gc_list sudo_gc_list = SLIST_HEAD_INITIALIZER(sudo_gc_list);
  * Local functions
  */
 static void fix_fds(void);
-static void disable_coredumps(void);
+static void disable_coredump(bool restore);
 static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
@@ -136,9 +139,6 @@ static void iolog_close(struct plugin_container *plugin, int exit_status,
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
 static void iolog_unlink(struct plugin_container *plugin);
 
-#ifdef RLIMIT_CORE
-static struct rlimit corelimit;
-#endif
 #ifdef __linux__
 static struct rlimit nproclimit;
 #endif
@@ -201,7 +201,8 @@ main(int argc, char *argv[], char *envp[])
 	exit(EXIT_FAILURE); /* get_user_info printed error message */
 
     /* Disable core dumps if not enabled in sudo.conf. */
-    disable_coredumps();
+    if (sudo_conf_disable_coredump())
+	disable_coredump(false);
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
@@ -300,11 +301,6 @@ main(int argc, char *argv[], char *envp[])
 	    /* Become full root (not just setuid) so user cannot kill us. */
 	    if (setuid(ROOT_UID) == -1)
 		sudo_warn("setuid(%d)", ROOT_UID);
-	    /* Restore coredumpsize resource limit before running. */
-#ifdef RLIMIT_CORE
-	    if (sudo_conf_disable_coredump())
-		(void) setrlimit(RLIMIT_CORE, &corelimit);
-#endif /* RLIMIT_CORE */
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
 		status = sudo_edit(&command_details);
 	    } else {
@@ -316,13 +312,21 @@ main(int argc, char *argv[], char *envp[])
 	    sudo_fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
     }
 
+    /*
+     * If the command was terminated by a signal, sudo needs to terminated
+     * the same way.  Otherwise, the shell may ignore a keyboard-generated
+     * signal.  However, we want to avoid having sudo dump core itself.
+     */
     if (WIFSIGNALED(status)) {
 	sigaction_t sa;
+
+	if (WCOREDUMP(status))
+	    disable_coredump(false);
 
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = SIG_DFL;
-	sigaction(SIGINT, &sa, NULL);
+	sigaction(WTERMSIG(status), &sa, NULL);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	    WTERMSIG(status) | 128);                
 	kill(getpid(), WTERMSIG(status));
@@ -384,7 +388,7 @@ fix_fds(void)
 static int
 fill_group_list(struct user_details *ud, int system_maxgroups)
 {
-    int tries, ret = -1;
+    int ret = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
     /*
@@ -408,6 +412,8 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	if (ud->ngroups != -1)
 	    ret = 0;
 #else
+	int tries;
+
 	/*
 	 * It is possible to belong to more groups in the group database
 	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
@@ -889,27 +895,39 @@ sudo_check_suid(const char *sudo)
 
 /*
  * Disable core dumps to avoid dropping a core with user password in it.
- * We will reset this limit before executing the command.
+ * Called with restore set to true before executing the command.
  * Not all operating systems disable core dumps for setuid processes.
  */
 static void
-disable_coredumps(void)
+disable_coredump(bool restore)
 {
-#if defined(RLIMIT_CORE)
     struct rlimit rl;
-    debug_decl(disable_coredumps, SUDO_DEBUG_UTIL)
+    static struct rlimit corelimit;
+#ifdef __linux__
+    static int dumpflag;
+#endif
+    debug_decl(disable_coredump, SUDO_DEBUG_UTIL)
 
-    /*
-     * Turn off core dumps?
-     */
-    if (sudo_conf_disable_coredump()) {
-	(void) getrlimit(RLIMIT_CORE, &corelimit);
-	memcpy(&rl, &corelimit, sizeof(struct rlimit));
-	rl.rlim_cur = 0;
-	(void) setrlimit(RLIMIT_CORE, &rl);
+    if (restore) {
+	(void) setrlimit(RLIMIT_CORE, &corelimit);
+#ifdef __linux__
+	(void) prctl(PR_SET_DUMPABLE, dumpflag, 0, 0, 0);
+#endif /* __linux__ */
+	debug_return;
     }
+
+    (void) getrlimit(RLIMIT_CORE, &corelimit);
+    rl.rlim_cur = 0;
+    rl.rlim_max = 0;
+    (void) setrlimit(RLIMIT_CORE, &rl);
+#ifdef __linux__
+    /* On Linux, also set PR_SET_DUMPABLE to zero (reset by execve). */
+    if ((dumpflag = prctl(PR_GET_DUMPABLE, 0, 0, 0, 0)) == -1)
+	dumpflag = 0;
+    (void) prctl(PR_SET_DUMPABLE, 0, 0, 0, 0);
+#endif /* __linux__ */
+
     debug_return;
-#endif /* RLIMIT_CORE */
 }
 
 /*
@@ -1003,6 +1021,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    goto done;
     }
 #endif
+
+    /* Restore coredumpsize resource limit before running. */
+    if (sudo_conf_disable_coredump())
+	disable_coredump(true);
 
     if (details->pw != NULL) {
 #ifdef HAVE_PROJECT_H

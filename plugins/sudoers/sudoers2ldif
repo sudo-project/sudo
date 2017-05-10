@@ -39,6 +39,8 @@ my %HA;
 my %CA;
 my $base=$ENV{SUDOERS_BASE} or die "$0: Container SUDOERS_BASE undefined\n";
 my @options=();
+my $notBefore;
+my $notAfter;
 
 my $did_defaults=0;
 my $order = 0;
@@ -102,6 +104,8 @@ while (<>){
       my @hosts=split /\s*,\s*/,$p2;
       my @cmds= split /\s*,\s*/,$p3;
       @options=();
+      undef $notBefore;
+      undef $notAfter;
       print "dn: cn=$username,$base\n";
       print "objectClass: top\n";
       print "objectClass: sudoRole\n";
@@ -121,6 +125,8 @@ while (<>){
         }
       }
       print "sudoCommand: $_\n" foreach expand(\%CA,@cmds);
+      print "sudoNotBefore: $notBefore\n" if defined($notBefore);
+      print "sudoNotAfter: $notAfter\n" if defined($notAfter);
       print "sudoOption: $_\n" foreach @options;
       printf "sudoOrder: %d\n", ++$order;
       print "\n";
@@ -138,7 +144,16 @@ sub expand{
 
   # preen the line a little
   foreach (@_){
-    # if NOPASSWD: directive found, mark entire entry as not requiring
+    # Convert upper case command options
+    s/TIMEOUT=(\S+)\s*// && push @options,"timeout=$1";
+    s/ROLE=(\S+)\s*// && push @options,"role=$1";
+    s/TYPE=(\S+)\s*// && push @options,"type=$1";
+    s/PRIVS=(\S+)\s*// && push @options,"privs=$1";
+    s/LIMITPRIVS=(\S+)\s*// && push @options,"limitprivs=$1";
+    s/NOTBEFORE=(\S+)\s*// &&  do { $notBefore=$1 };
+    s/NOTAFTER=(\S+)\s*// && do { $notAfter=$1 };
+
+    # Convert command tags to options
     s/NOPASSWD:\s*// && push @options,"!authenticate";
     s/PASSWD:\s*// && push @options,"authenticate";
     s/NOEXEC:\s*// && push @options,"noexec";

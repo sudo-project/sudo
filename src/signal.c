@@ -27,6 +27,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 
 #include "sudo.h"
@@ -125,7 +126,7 @@ init_signals(void)
      * We use a pipe to atomically handle signal notification within
      * the select() loop without races (we may not have pselect()).
      */
-    if (pipe_nonblock(signal_pipe) != 0)
+    if (pipe2(signal_pipe, O_NONBLOCK) != 0)
 	sudo_fatal(U_("unable to create pipe"));
 
     memset(&sa, 0, sizeof(sa));

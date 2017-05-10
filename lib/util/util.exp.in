@@ -25,6 +25,7 @@ sudo_debug_exit_size_t_v1
 sudo_debug_exit_ssize_t_v1
 sudo_debug_exit_str_v1
 sudo_debug_exit_str_masked_v1
+sudo_debug_exit_time_t_v1
 sudo_debug_fork_v1
 sudo_debug_get_active_instance_v1
 sudo_debug_get_fds_v1

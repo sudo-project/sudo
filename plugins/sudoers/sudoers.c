@@ -86,6 +86,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 int long_list;
 uid_t timestamp_uid;
+gid_t timestamp_gid;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
@@ -381,11 +382,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    pw = sudo_getpwnam(def_timestampowner);
 	if (pw != NULL) {
 	    timestamp_uid = pw->pw_uid;
+	    timestamp_gid = pw->pw_gid;
 	    sudo_pw_delref(pw);
 	} else {
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("timestamp owner (%s): No such user"), def_timestampowner);
 	    timestamp_uid = ROOT_UID;
+	    timestamp_gid = ROOT_GID;
 	}
     }
 
@@ -476,10 +479,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	goto bad;
     }
 
+    /* If user specified a timeout make sure sudoers allows it. */
+    if (!def_user_command_timeouts && user_timeout > 0) {
+	/* XXX - audit/log? */
+	sudo_warnx(U_("sorry, you are not allowed set a command timeout"));
+	goto bad;
+    }
+
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    /* XXX - audit? */
+	    /* XXX - audit/log? */
 	    sudo_warnx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
@@ -578,7 +588,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	/* Insert system-wide environment variables. */
-	if (!read_env_file(_PATH_ENVIRONMENT, true))
+	if (!read_env_file(_PATH_ENVIRONMENT, true, false))
 	    sudo_warn("%s", _PATH_ENVIRONMENT);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
@@ -594,8 +604,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Insert system-wide environment variables. */
+    if (def_restricted_env_file) {
+	if (!read_env_file(def_env_file, false, true))
+	    sudo_warn("%s", def_restricted_env_file);
+    }
     if (def_env_file) {
-	if (!read_env_file(def_env_file, false))
+	if (!read_env_file(def_env_file, false, false))
 	    sudo_warn("%s", def_env_file);
     }
 

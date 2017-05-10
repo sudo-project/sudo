@@ -19,21 +19,33 @@ use File::Temp qw/ :mktemp  /;
 use Fcntl;
 use warnings;
 
-die "usage: $0 Makefile ...\n" unless $#ARGV >= 0;
+die "usage: $0 [--builddir=dir] [--srcdir=dir] Makefile.in ...\n" unless $#ARGV >= 0;
 
 my @incpaths;
 my %dir_vars;
 my %implicit;
 my %generated;
+my $top_builddir = ".";
+my $top_srcdir;
 
-# Read in MANIFEST fail if present
-my %manifest;
-if (open(MANIFEST, "<MANIFEST")) {
-    while (<MANIFEST>) {
-	chomp;
-	next unless /([^\/]+\.[cly])$/;
-	$manifest{$1} = $_;
+# Check for srcdir and/or builddir, if present
+while ($ARGV[0] =~ /^--(src|build)dir=(.*)/) {
+    if ($1 eq 'src') {
+	$top_srcdir = $2;
+    } else {
+	$top_builddir = $2;
     }
+    shift @ARGV;
+}
+chdir($top_srcdir) if defined($top_srcdir);
+
+# Read in MANIFEST or fail if not present
+my %manifest;
+die "unable to open MANIFEST: $!\n" unless open(MANIFEST, "<MANIFEST");
+while (<MANIFEST>) {
+    chomp;
+    next unless /([^\/]+\.[cly])$/;
+    $manifest{$1} = $_;
 }
 
 foreach (@ARGV) {
@@ -70,7 +82,8 @@ sub mkdep {
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo solaris_audit.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getgrouplist.lo getline.lo getopt_long.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo strtonum.lo utimens.lo vsyslog.lo:;
+    $makefile =~ s:\@FILEDIGEST\@:filedigest.lo filedigest_openssl.lo filedigest_gcrypt.lo:;
+    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getgrouplist.lo getline.lo getopt_long.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo strtonum.lo utimens.lo vsyslog.lo pipe2.lo:;
 
     # Parse OBJS lines
     my %objs;
@@ -100,6 +113,7 @@ sub mkdep {
     $dir_vars{'srcdir'} = $1 || '.';
     $dir_vars{'devdir'} = $dir_vars{'srcdir'};
     $dir_vars{'authdir'} = $dir_vars{'srcdir'} . "/auth";
+    $dir_vars{'builddir'} = $top_builddir . "/" . $dir_vars{'srcdir'};
     $dir_vars{'top_srcdir'} = '.';
     #$dir_vars{'top_builddir'} = '.';
     $dir_vars{'incdir'} = 'include';
@@ -183,8 +197,8 @@ sub find_depends {
     my ($deps, $code, %headers);
 
     if ($src !~ /\//) {
-	# XXX - want build dir not src dir
-	$src = "$dir_vars{'srcdir'}/$src";
+	# generated file, local to build dir
+	$src = "$dir_vars{'builddir'}/$src";
     }
 
     # resolve $(srcdir) etc.

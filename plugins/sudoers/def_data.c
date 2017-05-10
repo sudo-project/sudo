@@ -21,6 +21,13 @@ static struct def_values def_data_verifypw[] = {
     { NULL, 0 },
 };
 
+static struct def_values def_data_fdexec[] = {
+    { "never", never },
+    { "digest_only", digest_only },
+    { "always", always },
+    { NULL, 0 },
+};
+
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
@@ -295,6 +302,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Path to the sudo-specific environment file: %s"),
 	NULL,
     }, {
+	"restricted_env_file", T_STR|T_PATH|T_BOOL,
+	N_("Path to the restricted sudo-specific environment file: %s"),
+	NULL,
+    }, {
 	"sudoers_locale", T_STR,
 	N_("Locale to use while parsing sudoers: %s"),
 	NULL,
@@ -420,7 +431,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"syslog_maxlen", T_UINT,
-	N_("Log entries larger than this value will be split into multiple syslog messages"),
+	N_("Log entries larger than this value will be split into multiple syslog messages: %u"),
 	NULL,
     }, {
 	"iolog_user", T_STR|T_BOOL,
@@ -433,6 +444,26 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"iolog_mode", T_MODE,
 	N_("File mode to use for the I/O log files: 0%o"),
+	NULL,
+    }, {
+	"fdexec", T_TUPLE|T_BOOL,
+	N_("Execute commands by file descriptor instead of by path: %s"),
+	def_data_fdexec,
+    }, {
+	"ignore_unknown_defaults", T_FLAG,
+	N_("Ignore unknown Defaults entries in sudoers instead of producing a warning"),
+	NULL,
+    }, {
+	"command_timeout", T_TIMEOUT|T_BOOL,
+	N_("Time in seconds after which the command will be terminated: %u"),
+	NULL,
+    }, {
+	"user_command_timeouts", T_FLAG,
+	N_("Allow the user to specify a timeout on the command line"),
+	NULL,
+    }, {
+	"iolog_flush", T_FLAG,
+	N_("Flush I/O log data to disk immediately instead of buffering it"),
 	NULL,
     }, {
 	NULL, 0, NULL

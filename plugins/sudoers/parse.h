@@ -110,22 +110,18 @@ struct cmndtag {
 };
 
 /*
- * SELinux-specific container struct.
- * Currently just contains a role and type.
+ * Per-command option container struct.
  */
-struct selinux_info {
-    char *role;
-    char *type;
-};
-
-/*
- * Solaris privileges container struct
- * Currently just contains permitted and limit privileges.
- * It could have PFEXEC and PRIV_AWARE flags added in the future.
- */
-struct solaris_privs_info {
-    char *privs;
-    char *limitprivs;
+struct command_options {
+    time_t notbefore;			/* time restriction */
+    time_t notafter;			/* time restriction */
+    int timeout;			/* command timeout */
+#ifdef HAVE_SELINUX
+    char *role, *type;			/* SELinux role and type */
+#endif
+#ifdef HAVE_PRIV_SET
+    char *privs, *limitprivs;		/* Solaris privilege sets */
+#endif
 };
 
 /*
@@ -174,6 +170,7 @@ struct privilege {
 
 /*
  * Structure describing a linked list of Cmnd_Specs.
+ * XXX - include struct command_options instad of its contents inline
  */
 struct cmndspec {
     TAILQ_ENTRY(cmndspec) entries;
@@ -181,6 +178,9 @@ struct cmndspec {
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
+    time_t notbefore;			/* time restriction */
+    time_t notafter;			/* time restriction */
+    int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif
@@ -257,6 +257,8 @@ void free_members(struct member_list *members);
 bool addr_matches(char *n);
 
 /* match.c */
+struct group;
+struct passwd;
 bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
@@ -278,5 +280,20 @@ int hexchar(const char *s);
 
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
+
+/* timeout.c */
+int parse_timeout(const char *timestr);
+
+/* gmtoff.c */
+long get_gmtoff(time_t *clock);
+
+/* gentime.c */
+time_t parse_gentime(const char *expstr);
+
+/* filedigest.c */
+unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len);
+
+/* digestname.c */
+const char *digest_type_to_name(int digest_type);
 
 #endif /* SUDOERS_PARSE_H */

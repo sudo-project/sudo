@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -101,7 +101,9 @@ static struct sudo_settings sudo_settings[] = {
     { "plugin_dir" },
 #define ARG_REMOTE_HOST 21
     { "remote_host" },
-#define NUM_SETTINGS 22
+#define ARG_TIMEOUT 22
+    { "timeout" },
+#define NUM_SETTINGS 23
     { NULL }
 };
 
@@ -118,7 +120,7 @@ static struct sudo_settings sudo_settings[] = {
  * Note that we must disable arg permutation to support setting environment
  * variables and to better support the optional arg of the -h flag.
  */
-static const char short_opts[] =  "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:Sst:U:u:Vv";
+static const char short_opts[] =  "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:SsT:t:U:u:Vv";
 static struct option long_opts[] = {
     { "askpass",	no_argument,		NULL,	'A' },
     { "auth-type",	required_argument,	NULL,	'a' },
@@ -142,6 +144,7 @@ static struct option long_opts[] = {
     { "stdin",		no_argument,		NULL,	'S' },
     { "shell",		no_argument,		NULL,	's' },
     { "type",		required_argument,	NULL,	't' },
+    { "command-timeout",required_argument,	NULL,	'T' },
     { "other-user",	required_argument,	NULL,	'U' },
     { "user",		required_argument,	NULL,	'u' },
     { "version",	no_argument,		NULL,	'V' },
@@ -332,6 +335,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
 		    break;
 #endif
+		case 'T':
+		    sudo_settings[ARG_TIMEOUT].value = optarg;
+		    break;
 		case 'S':
 		    SET(tgetpass_flags, TGP_STDIN);
 		    break;
@@ -588,7 +594,7 @@ static void
 help(void)
 {
     struct sudo_lbuf lbuf;
-    const int indent = 30;
+    const int indent = 32;
     const char *pname = getprogname();
     debug_decl(help, SUDO_DEBUG_ARGS)
 
@@ -602,67 +608,69 @@ help(void)
     usage(0);
 
     sudo_lbuf_append(&lbuf, _("\nOptions:\n"));
-    sudo_lbuf_append(&lbuf, "  -A, --askpass               %s\n",
+    sudo_lbuf_append(&lbuf, "  -A, --askpass                 %s\n",
 	_("use a helper program for password prompting"));
 #ifdef HAVE_BSD_AUTH_H
-    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type        %s\n",
+    sudo_lbuf_append(&lbuf, "  -a, --auth-type=type          %s\n",
 	_("use specified BSD authentication type"));
 #endif
-    sudo_lbuf_append(&lbuf, "  -b, --background            %s\n",
+    sudo_lbuf_append(&lbuf, "  -b, --background              %s\n",
 	_("run command in the background"));
-    sudo_lbuf_append(&lbuf, "  -C, --close-from=num        %s\n",
+    sudo_lbuf_append(&lbuf, "  -C, --close-from=num          %s\n",
 	_("close all file descriptors >= num"));
 #ifdef HAVE_LOGIN_CAP_H
-    sudo_lbuf_append(&lbuf, "  -c, --login-class=class     %s\n",
+    sudo_lbuf_append(&lbuf, "  -c, --login-class=class       %s\n",
 	_("run command with the specified BSD login class"));
 #endif
-    sudo_lbuf_append(&lbuf, "  -E, --preserve-env          %s\n",
+    sudo_lbuf_append(&lbuf, "  -E, --preserve-env            %s\n",
 	_("preserve user environment when running command"));
-    sudo_lbuf_append(&lbuf, "  -e, --edit                  %s\n",
+    sudo_lbuf_append(&lbuf, "  -e, --edit                    %s\n",
 	_("edit files instead of running a command"));
-    sudo_lbuf_append(&lbuf, "  -g, --group=group           %s\n",
+    sudo_lbuf_append(&lbuf, "  -g, --group=group             %s\n",
 	_("run command as the specified group name or ID"));
-    sudo_lbuf_append(&lbuf, "  -H, --set-home              %s\n",
+    sudo_lbuf_append(&lbuf, "  -H, --set-home                %s\n",
 	_("set HOME variable to target user's home dir"));
-    sudo_lbuf_append(&lbuf, "  -h, --help                  %s\n",
+    sudo_lbuf_append(&lbuf, "  -h, --help                    %s\n",
 	_("display help message and exit"));
-    sudo_lbuf_append(&lbuf, "  -h, --host=host             %s\n",
+    sudo_lbuf_append(&lbuf, "  -h, --host=host               %s\n",
 	_("run command on host (if supported by plugin)"));
-    sudo_lbuf_append(&lbuf, "  -i, --login                 %s\n",
+    sudo_lbuf_append(&lbuf, "  -i, --login                   %s\n",
 	_("run login shell as the target user; a command may also be specified"));
-    sudo_lbuf_append(&lbuf, "  -K, --remove-timestamp      %s\n",
+    sudo_lbuf_append(&lbuf, "  -K, --remove-timestamp        %s\n",
 	_("remove timestamp file completely"));
-    sudo_lbuf_append(&lbuf, "  -k, --reset-timestamp       %s\n",
+    sudo_lbuf_append(&lbuf, "  -k, --reset-timestamp         %s\n",
 	_("invalidate timestamp file"));
-    sudo_lbuf_append(&lbuf, "  -l, --list                  %s\n",
+    sudo_lbuf_append(&lbuf, "  -l, --list                    %s\n",
 	_("list user's privileges or check a specific command; use twice for longer format"));
-    sudo_lbuf_append(&lbuf, "  -n, --non-interactive       %s\n",
+    sudo_lbuf_append(&lbuf, "  -n, --non-interactive         %s\n",
 	_("non-interactive mode, no prompts are used"));
-    sudo_lbuf_append(&lbuf, "  -P, --preserve-groups       %s\n",
+    sudo_lbuf_append(&lbuf, "  -P, --preserve-groups         %s\n",
 	_("preserve group vector instead of setting to target's"));
-    sudo_lbuf_append(&lbuf, "  -p, --prompt=prompt         %s\n",
+    sudo_lbuf_append(&lbuf, "  -p, --prompt=prompt           %s\n",
 	_("use the specified password prompt"));
 #ifdef HAVE_SELINUX
-    sudo_lbuf_append(&lbuf, "  -r, --role=role             %s\n",
+    sudo_lbuf_append(&lbuf, "  -r, --role=role               %s\n",
 	_("create SELinux security context with specified role"));
 #endif
-    sudo_lbuf_append(&lbuf, "  -S, --stdin                 %s\n",
+    sudo_lbuf_append(&lbuf, "  -S, --stdin                   %s\n",
 	_("read password from standard input"));
-    sudo_lbuf_append(&lbuf, "  -s, --shell                 %s\n",
+    sudo_lbuf_append(&lbuf, "  -s, --shell                   %s\n",
 	_("run shell as the target user; a command may also be specified"));
 #ifdef HAVE_SELINUX
-    sudo_lbuf_append(&lbuf, "  -t, --type=type             %s\n",
+    sudo_lbuf_append(&lbuf, "  -t, --type=type               %s\n",
 	_("create SELinux security context with specified type"));
 #endif
-    sudo_lbuf_append(&lbuf, "  -U, --other-user=user       %s\n",
+    sudo_lbuf_append(&lbuf, "  -T, --command-timeout=timeout %s\n",
+	_("terminate command after the specified time limit"));
+    sudo_lbuf_append(&lbuf, "  -U, --other-user=user         %s\n",
 	_("in list mode, display privileges for user"));
-    sudo_lbuf_append(&lbuf, "  -u, --user=user             %s\n",
+    sudo_lbuf_append(&lbuf, "  -u, --user=user               %s\n",
 	_("run command (or edit file) as specified user name or ID"));
-    sudo_lbuf_append(&lbuf, "  -V, --version               %s\n",
+    sudo_lbuf_append(&lbuf, "  -V, --version                 %s\n",
 	_("display version information and exit"));
-    sudo_lbuf_append(&lbuf, "  -v, --validate              %s\n",
+    sudo_lbuf_append(&lbuf, "  -v, --validate                %s\n",
 	_("update user's timestamp without running a command"));
-    sudo_lbuf_append(&lbuf, "  --                          %s\n",
+    sudo_lbuf_append(&lbuf, "  --                            %s\n",
 	_("stop processing command line arguments"));
     sudo_lbuf_print(&lbuf);
     sudo_lbuf_destroy(&lbuf);

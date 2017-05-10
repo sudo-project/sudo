@@ -1,1 +1,1 @@
-visudo: stdin:1 cycle in User_Alias "FOO"
+Error: stdin:1 cycle in User_Alias "FOO"

@@ -20,7 +20,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -66,6 +70,7 @@ rcstr_alloc(size_t len)
 
     rcs->refcnt = 1;
     rcs->str[0] = '\0';
+    /* cppcheck-suppress memleak */
     debug_return_ptr(rcs->str);
 }
 

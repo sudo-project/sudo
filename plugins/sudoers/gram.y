@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -43,7 +43,7 @@
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
-#include <limits.h>
+#include <errno.h>
 
 #include "sudoers.h" /* XXX */
 #include "parse.h"
@@ -66,11 +66,12 @@ struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
 /*
  * Local protoypes
  */
+static void init_options(struct command_options *opts);
 static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
-static struct sudo_digest *new_digest(int, const char *);
+static struct sudo_digest *new_digest(int, char *);
 %}
 
 %union {
@@ -81,9 +82,8 @@ static struct sudo_digest *new_digest(int, const char *);
     struct privilege *privilege;
     struct sudo_digest *digest;
     struct sudo_command command;
+    struct command_options options;
     struct cmndtag tag;
-    struct selinux_info seinfo;
-    struct solaris_privs_info privinfo;
     char *string;
     int tok;
 }
@@ -129,6 +129,9 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
+%token <tok>	 CMND_TIMEOUT		/* command timeout */
+%token <tok>	 NOTBEFORE		/* time restriction */
+%token <tok>	 NOTAFTER		/* time restriction */
 %token <tok>	 MYSELF			/* run as myself, not another user */
 %token <tok>	 SHA224_TOK		/* sha224 token */
 %token <tok>	 SHA256_TOK		/* sha256 token */
@@ -157,13 +160,16 @@ static struct sudo_digest *new_digest(int, const char *);
 %type <privilege> privilege
 %type <privilege> privileges
 %type <tag>	  cmndtag
-%type <seinfo>	  selinux
+%type <options>	  options
 %type <string>	  rolespec
 %type <string>	  typespec
-%type <privinfo>  solarisprivs
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
+%type <string>	  timeoutspec
+%type <string>	  notbeforespec
+%type <string>	  notafterspec
 %type <digest>	  digest
+%type <options>	  options
 
 %%
 
@@ -339,18 +345,26 @@ cmndspeclist	:	cmndspec
 			    HLTQ_CONCAT($1, $3, entries);
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
-			    if ($3->role == NULL)
+			    if ($3->role == NULL && $3->type == NULL) {
 				$3->role = prev->role;
-			    if ($3->type == NULL)
 				$3->type = prev->type;
+			    }
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			    /* propagate privs & limitprivs */
-			    if ($3->privs == NULL)
+			    if ($3->privs == NULL && $3->limitprivs == NULL) {
 			        $3->privs = prev->privs;
-			    if ($3->limitprivs == NULL)
 			        $3->limitprivs = prev->limitprivs;
+			    }
 #endif /* HAVE_PRIV_SET */
+			    /* propagate command time restrictions */
+			    if ($3->notbefore == UNSPEC)
+				$3->notbefore = prev->notbefore;
+			    if ($3->notafter == UNSPEC)
+				$3->notafter = prev->notafter;
+			    /* propagate command timeout */
+			    if ($3->timeout == UNSPEC)
+				$3->timeout = prev->timeout;
 			    /* propagate tags and runas list */
 			    if ($3->tags.nopasswd == UNSPEC)
 				$3->tags.nopasswd = prev->tags.nopasswd;
@@ -378,7 +392,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
+cmndspec	:	runasspec options cmndtag digcmnd {
 			    struct cmndspec *cs = calloc(1, sizeof(*cs));
 			    if (cs == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -412,11 +426,14 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			    cs->type = $2.type;
 #endif
 #ifdef HAVE_PRIV_SET
-			    cs->privs = $3.privs;
-			    cs->limitprivs = $3.limitprivs;
+			    cs->privs = $2.privs;
+			    cs->limitprivs = $2.limitprivs;
 #endif
-			    cs->tags = $4;
-			    cs->cmnd = $5;
+			    cs->notbefore = $2.notbefore;
+			    cs->notafter = $2.notafter;
+			    cs->timeout = $2.timeout;
+			    cs->tags = $3;
+			    cs->cmnd = $4;
 			    HLTQ_INIT(cs, entries);
 			    /* sudo "ALL" implies the SETENV tag */
 			    if (cs->cmnd->type == ALL && !cs->cmnd->negated &&
@@ -480,6 +497,20 @@ opcmnd		:	cmnd {
 			}
 		;
 
+timeoutspec	:	CMND_TIMEOUT '=' WORD {
+			    $$ = $3;
+			}
+		;
+
+notbeforespec	:	NOTBEFORE '=' WORD {
+			    $$ = $3;
+			}
+
+notafterspec	:	NOTAFTER '=' WORD {
+			    $$ = $3;
+			}
+		;
+
 rolespec	:	ROLE '=' WORD {
 			    $$ = $3;
 			}
@@ -490,56 +521,12 @@ typespec	:	TYPE '=' WORD {
 			}
 		;
 
-selinux		:	/* empty */ {
-			    $$.role = NULL;
-			    $$.type = NULL;
-			}
-		|	rolespec {
-			    $$.role = $1;
-			    $$.type = NULL;
-			}
-		|	typespec {
-			    $$.type = $1;
-			    $$.role = NULL;
-			}
-		|	rolespec typespec {
-			    $$.role = $1;
-			    $$.type = $2;
-			}
-		|	typespec rolespec {
-			    $$.type = $1;
-			    $$.role = $2;
-			}
-		;
-
 privsspec	:	PRIVS '=' WORD {
 			    $$ = $3;
 			}
 		;
 limitprivsspec	:	LIMITPRIVS '=' WORD {
 			    $$ = $3;
-			}
-		;
-
-solarisprivs	:	/* empty */ {
-			    $$.privs = NULL;
-			    $$.limitprivs = NULL;
-			}
-		|	privsspec {
-			    $$.privs = $1;
-			    $$.limitprivs = NULL;
-			}
-		|	limitprivsspec {
-			    $$.privs = NULL;
-			    $$.limitprivs = $1;
-			}
-		|	privsspec limitprivsspec {
-			    $$.privs = $1;
-			    $$.limitprivs = $2;
-			}
-		|	limitprivsspec privsspec {
-			    $$.limitprivs = $1;
-			    $$.privs = $2;
 			}
 		;
 
@@ -607,6 +594,62 @@ runaslist	:	/* empty */ {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
+			}
+		;
+
+options		:	/* empty */ {
+			    init_options(&$$);
+			}
+		|	options notbeforespec {
+			    $$.notbefore = parse_gentime($2);
+			    free($2);
+			    if ($$.notbefore == -1) {
+				sudoerserror(N_("invalid notbefore value"));
+				YYERROR;
+			    }
+			}
+		|	options notafterspec {
+			    $$.notafter = parse_gentime($2);
+			    free($2);
+			    if ($$.notafter == -1) {
+				sudoerserror(N_("invalid notafter value"));
+				YYERROR;
+			    }
+			}
+		|	options timeoutspec {
+			    $$.timeout = parse_timeout($2);
+			    free($2);
+			    if ($$.timeout == -1) {
+				if (errno == ERANGE)
+				    sudoerserror(N_("timeout value too large"));
+				else
+				    sudoerserror(N_("invalid timeout value"));
+				YYERROR;
+			    }
+			}
+		|	options rolespec {
+#ifdef HAVE_SELINUX
+			    free($$.role);
+			    $$.role = $2;
+#endif
+			}
+		|	options typespec {
+#ifdef HAVE_SELINUX
+			    free($$.type);
+			    $$.type = $2;
+#endif
+			}
+		|	options privsspec {
+#ifdef HAVE_PRIV_SET
+			    free($$.privs);
+			    $$.privs = $2;
+#endif
+			}
+		|	options limitprivsspec {
+#ifdef HAVE_PRIV_SET
+			    free($$.limitprivs);
+			    $$.limitprivs = $2;
+#endif
 			}
 		;
 
@@ -926,7 +969,7 @@ new_member(char *name, int type)
 }
 
 static struct sudo_digest *
-new_digest(int digest_type, const char *digest_str)
+new_digest(int digest_type, char *digest_str)
 {
     struct sudo_digest *dig;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER)
@@ -938,7 +981,7 @@ new_digest(int digest_type, const char *digest_str)
     }
 
     dig->digest_type = digest_type;
-    dig->digest_str = strdup(digest_str);
+    dig->digest_str = digest_str;
     if (dig->digest_str == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
@@ -1116,6 +1159,10 @@ init_parser(const char *path, bool quiet)
 			    (struct sudo_command *) cs->cmnd->name;
 			free(c->cmnd);
 			free(c->args);
+			if (c->digest != NULL) {
+			    free(c->digest->digest_str);
+			    free(c->digest);
+			}
 		}
 		free(cs->cmnd->name);
 		free(cs->cmnd);
@@ -1166,4 +1213,23 @@ init_parser(const char *path, bool quiet)
     sudoers_warnings = !quiet;
 
     debug_return_bool(ret);
+}
+
+/*
+ * Initialize all options in a cmndspec.
+ */
+static void
+init_options(struct command_options *opts)
+{
+    opts->notbefore = UNSPEC;
+    opts->notafter = UNSPEC;
+    opts->timeout = UNSPEC;
+#ifdef HAVE_SELINUX
+    opts->role = NULL;
+    opts->type = NULL;
+#endif
+#ifdef HAVE_PRIV_SET
+    opts->privs = NULL;
+    opts->limitprivs = NULL;
+#endif
 }

@@ -254,23 +254,7 @@ print_command_json(FILE *fp, struct member *m, int indent, bool last_one)
     /* Optional digest. */
     if (c->digest != NULL) {
 	fputs(",\n", fp);
-	switch (c->digest->digest_type) {
-	case SUDO_DIGEST_SHA224:
-	    digest_name = "sha224";
-	    break;
-	case SUDO_DIGEST_SHA256:
-	    digest_name = "sha256";
-	    break;
-	case SUDO_DIGEST_SHA384:
-	    digest_name = "sha384";
-	    break;
-	case SUDO_DIGEST_SHA512:
-	    digest_name = "sha512";
-	    break;
-	default:
-	    digest_name = "invalid digest";
-	    break;
-	}
+	digest_name = digest_type_to_name(c->digest->digest_type);
 	value.type = JSON_STRING;
 	value.u.string = c->digest->digest_str;
 	print_pair_json(fp, NULL, digest_name, &value, NULL, indent);
@@ -781,11 +765,17 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     }
 
     /* Print tags */
-    if (TAGS_SET(cs->tags)) {
+    if (cs->timeout > 0 || TAGS_SET(cs->tags)) {
 	struct cmndtag tag = cs->tags;
 
 	fprintf(fp, "%*s\"Options\": [\n", indent, "");
 	indent += 4;
+	if (cs->timeout > 0) {
+	    value.type = JSON_NUMBER;
+	    value.u.number = cs->timeout;
+	    print_pair_json(fp, "{ ", "command_timeout", &value,
+		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	}
 	if (tag.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = !tag.nopasswd;

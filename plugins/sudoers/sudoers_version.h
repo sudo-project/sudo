@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013, 2015, 2017
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +18,6 @@
 /*
  * Major sudoers grammar changes are documented here.
  * Note that minor changes such as added Defaults options are not listed here.
- * This file placed in the public domain by Todd C. Miller on Apr 5, 2011.
  *
  * 1	sudo 1.1
  * 2	sudo 1.3, adds support specifying a directory instead of a command.
@@ -64,11 +64,12 @@
  * 43	sudo 1.8.7, Support for specifying a digest along with the command.
  * 44	sudo 1.8.13, added MAIL/NOMAIL tags.
  * 45	sudo 1.8.15, added FOLLOW/NOFOLLOW tags as well as sudoedit_follow and sudoedit_checkdir Defaults.
-*/
+ * 46	sudo 1.8.20, added TIMEOUT, NOTBEFORE and NOTAFTER options.
+ */
 
 #ifndef SUDOERS_VERSION_H
 #define	SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	45
+#define SUDOERS_GRAMMAR_VERSION	46
 
 #endif /* SUDOERS_VERSION_H */

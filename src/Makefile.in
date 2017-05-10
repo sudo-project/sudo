@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -104,7 +104,7 @@ INIT_DIR=@INIT_DIR@
 INIT_SCRIPT=@INIT_SCRIPT@
 RC_LINK=@RC_LINK@
 
-TEST_PROGS = check_ttyname
+TEST_PROGS = check_ttyname @CHECK_NOEXEC@
 TEST_LIBS = @LIBS@ $(LT_LIBS)
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -114,10 +114,10 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_pty.o \
-       get_pty.o hooks.o net_ifs.o load_plugins.o parse_args.o \
-       preserve_fds.o signal.o sudo.o sudo_edit.o tgetpass.o ttyname.o \
-       utmp.o @SUDO_OBJS@
+OBJS = conversation.o env_hooks.o exec.o exec_common.o exec_monitor.o \
+       exec_nopty.o exec_pty.o get_pty.o hooks.o net_ifs.o load_plugins.o \
+       parse_args.o preserve_fds.o signal.o sudo.o sudo_edit.o \
+       tcsetpgrp_nobg.o tgetpass.o ttyname.o utmp.o @SUDO_OBJS@
 
 SESH_OBJS = sesh.o exec_common.o
 
@@ -161,7 +161,7 @@ sudo_noexec.la: libsudo_noexec.la
 sesh: $(SESH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
-check_noexec: $(CHECK_NOEXEC_OBJS) $(top_builddir)/lib/util/libsudo_util.la
+check_noexec: $(CHECK_NOEXEC_OBJS) $(top_builddir)/lib/util/libsudo_util.la sudo_noexec.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_NOEXEC_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
@@ -172,20 +172,27 @@ pre-install:
 install: install-binaries install-rc @INSTALL_NOEXEC@
 
 install-dirs:
+	# We only create the rc.d dir when installing to the actual system dir
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
 	if test -n "$(INIT_SCRIPT)"; then \
-	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR) \
-		`echo $(DESTDIR)$(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
+	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR); \
+	    if test -z "$(DESTDIR)"; then \
+		$(SHELL) $(top_srcdir)/mkinstalldirs \
+		    `echo $(RC_LINK) | $(SED) 's,/[^/]*$$,,'`; \
+	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
 	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(tmpfiles_d); \
 	fi
 
 install-rc: install-dirs
+	# We only create the rc.d link when installing to the actual system dir
 	if [ -n "$(INIT_SCRIPT)" ]; then \
 	    $(INSTALL) $(INSTALL_OWNER) -m 0755 $(top_builddir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
-	    rm -f $(DESTDIR)$(RC_LINK); \
-	    ln -s $(INIT_DIR)/sudo $(DESTDIR)$(RC_LINK); \
+	    if test -z "$(DESTDIR)"; then \
+		rm -f $(RC_LINK); \
+		ln -s $(INIT_DIR)/sudo $(RC_LINK); \
+	    fi; \
 	elif test -n "$(tmpfiles_d)"; then \
 	    $(INSTALL) $(INSTALL_OWNER) -m 0644 $(top_builddir)/init.d/sudo.conf $(DESTDIR)$(tmpfiles_d)/sudo.conf; \
 	fi
@@ -226,14 +233,12 @@ splint:
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
 
-check: $(TEST_PROGS) @CHECK_NOEXEC@
+check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    ./check_ttyname; \
-	fi
-
-check_sudo_noexec: sudo_noexec.la check_noexec
-	@if test X"$(cross_compiling)" != X"yes"; then \
-	    ./check_noexec .libs/$(noexecfile); \
+	    if test X"@CHECK_NOEXEC@" != X""; then \
+		./check_noexec .libs/$(noexecfile); \
+	    fi; \
 	fi
 
 clean:
@@ -299,6 +304,24 @@ exec_common.o: $(srcdir)/exec_common.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_common.c
+exec_monitor.o: $(srcdir)/exec_monitor.c $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+                $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_monitor.c
+exec_nopty.o: $(srcdir)/exec_nopty.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+              $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/exec_nopty.c
 exec_pty.o: $(srcdir)/exec_pty.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
@@ -403,6 +426,13 @@ sudo_edit.o: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_edit.c
+tcsetpgrp_nobg.o: $(srcdir)/tcsetpgrp_nobg.c $(incdir)/compat/stdbool.h \
+                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                  $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                  $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(srcdir)/sudo.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tcsetpgrp_nobg.c
 tgetpass.o: $(srcdir)/tgetpass.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \

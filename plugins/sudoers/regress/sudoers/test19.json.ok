@@ -1,0 +1,156 @@
+{
+    "User_Specs": [
+        {
+            "User_List": [
+                { "username": "user0" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" },
+                        { "command": "/bin/ls" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user1" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" },
+                        { "command": "/bin/ls" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user2" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user3" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user4" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user5" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user6" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user7" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user8" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user9" }
+            ],
+            "Host_List": [
+                { "hostalias": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

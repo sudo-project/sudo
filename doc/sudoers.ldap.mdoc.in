@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2003-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd September 1, 2016
+.Dd January 17, 2017
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -716,6 +716,13 @@ By default,
 .Nm sudo
 will use an anonymous connection.
 This option is only relevant when using SASL authentication.
+.It Sy SASL_MECH Ar mechanisms
+A white space-delimited list of SASL authentication mechanisms to use.
+By default,
+.Nm sudo
+will use
+.Dv GSSAPI
+authentication.
 .It Sy SASL_SECPROPS Ar none/properties
 SASL security properties or
 .Em none
