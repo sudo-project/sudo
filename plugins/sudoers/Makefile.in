@@ -175,7 +175,7 @@ CHECK_ADDR_OBJS = check_addr.o interfaces.o match_addr.o sudoers_debug.o \
 
 CHECK_BASE64_OBJS = check_base64.o base64.o sudoers_debug.o
 
-CHECK_DIGEST_OBJS = check_digest.o filedigest.o digestname.o sudoers_debug.o
+CHECK_DIGEST_OBJS = check_digest.o @FILEDIGEST@ digestname.o sudoers_debug.o
 
 CHECK_FILL_OBJS = check_fill.o hexchar.o toke_util.o sudoers_debug.o
 
