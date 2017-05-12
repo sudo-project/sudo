@@ -117,6 +117,20 @@ splint: config.status
 	done; \
 	exit $$rval
 
+cov-build:
+	make clean
+	cov-build --dir cov-int make ${MFLAGS} all
+
+cov-upload:
+	tar zcf cov-int.tgz cov-int
+	curl --form token=$$COVERITY_SUDO_TOKEN \
+	    --form email=todd.miller@courtesan.com \
+	    --form file=@cov-int.tgz \
+	    --form version="$(VERSION)" \
+	    https://scan.coverity.com/builds?project=sudo
+
+cov-analyze: cov-upload
+
 install-dirs install-binaries install-includes install-plugin: config.status pre-install
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) "INSTALL_OWNER=$(INSTALL_OWNER)" $@) && continue; \
@@ -327,6 +341,7 @@ clean: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
+	-rm -rf cov-int cov-int.tgz
 
 mostlyclean: clean
 
