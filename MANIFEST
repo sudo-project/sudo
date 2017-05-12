@@ -264,6 +264,7 @@ plugins/sudoers/defaults.h
 plugins/sudoers/digestname.c
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
+plugins/sudoers/env_pattern.c
 plugins/sudoers/filedigest.c
 plugins/sudoers/filedigest_gcrypt.c
 plugins/sudoers/filedigest_openssl.c
@@ -370,6 +371,8 @@ plugins/sudoers/rcstr.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/check_symbols/check_symbols.c
+plugins/sudoers/regress/env_match/check_env_pattern.c
+plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/iolog_path/check_iolog_path.c
 plugins/sudoers/regress/iolog_path/data
 plugins/sudoers/regress/logging/check_wrap.c

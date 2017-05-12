@@ -570,30 +570,13 @@ static bool
 matches_env_list(const char *var, struct list_members *list, bool *full_match)
 {
     struct list_member *cur;
-    bool match = false;
     debug_decl(matches_env_list, SUDOERS_DEBUG_ENV)
 
     SLIST_FOREACH(cur, list, entries) {
-	size_t sep_pos, len = strlen(cur->value);
-	bool iswild = false;
-
-	/* Locate position of the '=' separator in var=value. */
-	sep_pos = strcspn(var, "=");
-
-	/* Deal with '*' wildcard at the end of the pattern. */
-	if (cur->value[len - 1] == '*') {
-	    len--;
-	    iswild = true;
-	}
-	if (strncmp(cur->value, var, len) == 0 &&
-	    (iswild || len == sep_pos || var[len] == '\0')) {
-	    /* If we matched past the '=', count as a full match. */
-	    *full_match = len > sep_pos + 1;
-	    match = true;
-	    break;
-	}
+	if (matches_env_pattern(cur->value, var, full_match))
+	    debug_return_bool(true);
     }
-    debug_return_bool(match);
+    debug_return_bool(false);
 }
 
 /*
