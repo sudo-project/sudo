@@ -36,61 +36,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-volatile pid_t cmnd_pid = -1;
-volatile pid_t ppgrp = -1;
-
-/*
- * Generic handler for signals received by the sudo front end while the
- * command is running.  The other end is checked in the main event loop.
- */
-#ifdef SA_SIGINFO
-void
-exec_handler(int s, siginfo_t *info, void *context)
-{
-    unsigned char signo = (unsigned char)s;
-
-    /*
-     * Do not forward signals sent by a process in the command's process
-     * group, do not forward it as we don't want the child to indirectly
-     * kill itself.  For example, this can happen with some versions of
-     * reboot that call kill(-1, SIGTERM) to kill all other processes.
-     */
-    if (s != SIGCHLD && USER_SIGNALED(info) && info->si_pid != 0) {
-	pid_t si_pgrp = getpgid(info->si_pid);
-	if (si_pgrp != -1) {
-	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
-		return;
-	} else if (info->si_pid == cmnd_pid) {
-		return;
-	}
-    }
-
-    /*
-     * The pipe is non-blocking, if we overflow the kernel's pipe
-     * buffer we drop the signal.  This is not a problem in practice.
-     */
-    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
-	if (errno != EINTR)
-	    break;
-    }
-}
-#else
-void
-exec_handler(int s)
-{
-    unsigned char signo = (unsigned char)s;
-
-    /*
-     * The pipe is non-blocking, if we overflow the kernel's pipe
-     * buffer we drop the signal.  This is not a problem in practice.
-     */
-    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
-	if (errno != EINTR)
-	    break;
-    }
-}
-#endif
-
 /*
  * Setup the execution environment and execute the command.
  * If SELinux is enabled, run the command via sesh, otherwise
@@ -138,60 +83,53 @@ exec_cmnd(struct command_details *details, int errfd)
 }
 
 /*
- * Drain pending signals from signal_pipe written by sudo_handler().
- * Handles the case where the signal was sent to us before
- * we have executed the command.
- * Returns 1 if we should terminate, else 0.
+ * Check for caught signals sent to sudo before command execution.
+ * Also suspends the process if SIGTSTP was caught.
+ * Returns true if we should terminate, else false.
  */
-static int
-dispatch_pending_signals(struct command_status *cstat)
+bool
+sudo_terminated(struct command_status *cstat)
 {
-    ssize_t nread;
-    struct sigaction sa;
-    unsigned char signo = 0;
-    int ret = 0;
-    debug_decl(dispatch_pending_signals, SUDO_DEBUG_EXEC)
+    int signo;
+    bool sigtstp = false;
+    debug_decl(sudo_terminated, SUDO_DEBUG_EXEC)
 
-    for (;;) {
-	nread = read(signal_pipe[0], &signo, sizeof(signo));
-	if (nread <= 0) {
-	    /* It should not be possible to get EOF but just in case. */
-	    if (nread == 0)
-		errno = ECONNRESET;
-	    /* Restart if interrupted by signal so the pipe doesn't fill. */
-	    if (errno == EINTR)
-		continue;
-	    /* If pipe is empty, we are done. */
-	    if (errno == EAGAIN)
+    for (signo = 0; signo < NSIG; signo++) {
+	if (signal_pending(signo)) {
+	    switch (signo) {
+	    case SIGTSTP:
+		/* Suspend below if not terminated. */
+		sigtstp = true;
 		break;
-	    sudo_debug_printf(SUDO_DEBUG_ERROR, "error reading signal pipe %s",
-		strerror(errno));
-	    cstat->type = CMD_ERRNO;
-	    cstat->val = errno;
-	    ret = 1;
-	    break;
-	}
-	/* Take the first terminal signal. */
-	if (signo == SIGINT || signo == SIGQUIT) {
-	    cstat->type = CMD_WSTATUS;
-	    cstat->val = signo + 128;
-	    ret = 1;
-	    break;
+	    default:
+		/* Terminal signal, do not exec command. */
+		cstat->type = CMD_WSTATUS;
+		cstat->val = signo + 128;
+		debug_return_bool(true);
+		break;
+	    }
 	}
     }
-    /* Only stop if we haven't already been terminated. */
-    if (signo == SIGTSTP) {
+    if (sigtstp) {
+	struct sigaction sa;
+	sigset_t set, oset;
+
+	/* Send SIGTSTP to ourselves, unblocking it if needed. */
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_DFL;
 	if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
 	    sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
+	sigemptyset(&set);
+	sigaddset(&set, SIGTSTP);
+	sigprocmask(SIG_UNBLOCK, &set, &oset);
 	if (kill(getpid(), SIGTSTP) != 0)
 	    sudo_warn("kill(%d, SIGTSTP)", (int)getpid());
-	/* No need to reinstall SIGTSTP handler. */
+	sigprocmask(SIG_SETMASK, &oset, NULL);
+	/* No need to restore old SIGTSTP handler. */
     }
-    debug_return_int(ret);
+    debug_return_bool(false);
 }
 
 /*
@@ -204,11 +142,6 @@ int
 sudo_execute(struct command_details *details, struct command_status *cstat)
 {
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
-
-    if (dispatch_pending_signals(cstat) != 0) {
-	/* Killed by SIGINT or SIGQUIT */
-	debug_return_int(0);
-    }
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {
@@ -246,9 +179,11 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	 * as sudoedit, there is no command timeout and there is no close
 	 * function, just exec directly.  Only returns on error.
 	 */
-	exec_cmnd(details, -1);
-	cstat->type = CMD_ERRNO;
-	cstat->val = errno;
+	if (!sudo_terminated(cstat)) {
+	    exec_cmnd(details, -1);
+	    cstat->type = CMD_ERRNO;
+	    cstat->val = errno;
+	}
     } else {
 	/*
 	 * No pty but we need to wait for the command to finish to

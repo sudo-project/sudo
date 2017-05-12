@@ -38,18 +38,27 @@
 #include "sudo_plugin_int.h"
 
 struct exec_closure_nopty {
-    pid_t child;
+    pid_t cmnd_pid;
+    pid_t ppgrp;
     struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
-    struct sudo_event *signal_event;
     struct sudo_event *errpipe_event;
+    struct sudo_event *sigint_event;
+    struct sudo_event *sigquit_event;
+    struct sudo_event *sigtstp_event;
+    struct sudo_event *sigterm_event;
+    struct sudo_event *sighup_event;
+    struct sudo_event *sigalrm_event;
+    struct sudo_event *sigpipe_event;
+    struct sudo_event *sigusr1_event;
+    struct sudo_event *sigusr2_event;
+    struct sudo_event *sigchld_event;
+    struct sudo_event *sigcont_event;
+    struct sudo_event *siginfo_event;
 };
 
-static void signal_pipe_cb(int fd, int what, void *v);
-#ifdef SA_SIGINFO
-static void exec_handler_user_only(int s, siginfo_t *info, void *context);
-#endif
+static void handle_sigchld_nopty(struct exec_closure_nopty *ec);
 
 /* Note: this is basically the same as mon_errpipe_cb() in exec_monitor.c */
 static void
@@ -99,6 +108,84 @@ errpipe_cb(int fd, int what, void *v)
     debug_return;
 }
 
+/* Signal callback */
+static void
+signal_cb_nopty(int signo, int what, void *v)
+{
+    struct sudo_ev_siginfo_container *sc = v;
+    struct exec_closure_nopty *ec = sc->closure;
+    char signame[SIG2STR_MAX];
+    debug_decl(signal_cb_nopty, SUDO_DEBUG_EXEC)
+
+    if (ec->cmnd_pid == -1)
+	debug_return;
+
+    if (sig2str(signo, signame) == -1)
+	snprintf(signame, sizeof(signame), "%d", signo);
+    sudo_debug_printf(SUDO_DEBUG_DIAG,
+	"%s: evbase %p, command: %d, signo %s(%d), cstat %p",
+	__func__, ec->evbase, (int)ec->cmnd_pid, signame, signo, ec->cstat);
+
+    switch (signo) {
+    case SIGCHLD:
+	handle_sigchld_nopty(ec);
+	if (ec->cmnd_pid == -1) {
+	    /* Command exited or was killed, exit event loop. */
+	    sudo_ev_loopexit(ec->evbase);
+	}
+	debug_return;
+    case SIGINT:
+    case SIGQUIT:
+    case SIGTSTP:
+	/*
+	 * Only forward user-generated signals not sent by a process in
+	 * the command's own process group.  Signals sent by the kernel
+	 * may include SIGTSTP when the user presses ^Z.  Curses programs
+	 * often trap ^Z and send SIGTSTP to their own pgrp, so we don't
+	 * want to send an extra SIGTSTP.
+	 */
+	if (!USER_SIGNALED(sc->siginfo))
+	    debug_return;
+	if (sc->siginfo->si_pid != 0) {
+	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
+		    debug_return;
+	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+		debug_return;
+	    }
+	}
+	break;
+    default:
+	/*
+	 * Do not forward signals sent by a process in the command's process
+	 * group, as we don't want the command to indirectly kill itself.
+	 * For example, this can happen with some versions of reboot that
+	 * call kill(-1, SIGTERM) to kill all other processes.
+	 */
+	if (USER_SIGNALED(sc->siginfo) && sc->siginfo->si_pid != 0) {
+	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
+		    debug_return;
+	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+		debug_return;
+	    }
+	}
+	break;
+    }
+
+    /* Send signal to command. */
+    if (signo == SIGALRM) {
+	terminate_command(ec->cmnd_pid, false);
+    } else if (kill(ec->cmnd_pid, signo) != 0) {
+	sudo_warn("kill(%d, SIG%s)", (int)ec->cmnd_pid, signame);
+    }
+
+    debug_return;
+}
+
+
 /*
  * Fill in the exec closure and setup initial exec events.
  * Allocates events for the signal pipe and error pipe.
@@ -110,7 +197,7 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     debug_decl(fill_exec_closure_nopty, SUDO_DEBUG_EXEC)
 
     /* Fill in the non-event part of the closure. */
-    ec->child = cmnd_pid;
+    ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
 
@@ -119,14 +206,6 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     if (ec->evbase == NULL)
 	sudo_fatal(NULL);
 
-    /* Event for local signals via signal_pipe. */
-    ec->signal_event = sudo_ev_alloc(signal_pipe[0],
-	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, ec);
-    if (ec->signal_event == NULL)
-	sudo_fatal(NULL);
-    if (sudo_ev_add(ec->evbase, ec->signal_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
-
     /* Event for command status via errfd. */
     ec->errpipe_event = sudo_ev_alloc(errfd,
 	SUDO_EV_READ|SUDO_EV_PERSIST, errpipe_cb, ec);
@@ -134,9 +213,120 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
 	sudo_fatal(NULL);
     if (sudo_ev_add(ec->evbase, ec->errpipe_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
-
-    sudo_debug_printf(SUDO_DEBUG_INFO, "signal pipe fd %d\n", signal_pipe[0]);
     sudo_debug_printf(SUDO_DEBUG_INFO, "error pipe fd %d\n", errfd);
+
+    /* Events for local signals. */
+    ec->sigint_event = sudo_ev_alloc(SIGINT,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigint_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigint_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigquit_event = sudo_ev_alloc(SIGQUIT,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigquit_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigquit_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigtstp_event = sudo_ev_alloc(SIGTSTP,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigtstp_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigtstp_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigterm_event = sudo_ev_alloc(SIGTERM,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigterm_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigterm_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sighup_event = sudo_ev_alloc(SIGHUP,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sighup_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sighup_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigalrm_event = sudo_ev_alloc(SIGALRM,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigalrm_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigalrm_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigpipe_event = sudo_ev_alloc(SIGPIPE,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigpipe_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigpipe_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigusr1_event = sudo_ev_alloc(SIGUSR1,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigusr1_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigusr1_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigusr2_event = sudo_ev_alloc(SIGUSR2,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigusr2_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigusr2_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigchld_event = sudo_ev_alloc(SIGCHLD,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigchld_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigchld_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigcont_event = sudo_ev_alloc(SIGCONT,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->sigcont_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigcont_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+#ifdef SIGINFO
+    ec->siginfo_event = sudo_ev_alloc(SIGINFO,
+	SUDO_EV_SIGINFO, signal_cb_nopty, ec);
+    if (ec->siginfo_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->siginfo_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+#endif
+
+    debug_return;
+}
+
+/*
+ * Free the dynamically-allocated contents of the exec closure.
+ */
+static void
+free_exec_closure_nopty(struct exec_closure_nopty *ec)
+{
+    debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC)
+
+    sudo_ev_base_free(ec->evbase);
+    sudo_ev_free(ec->errpipe_event);
+    sudo_ev_free(ec->sigint_event);
+    sudo_ev_free(ec->sigquit_event);
+    sudo_ev_free(ec->sigtstp_event);
+    sudo_ev_free(ec->sigterm_event);
+    sudo_ev_free(ec->sighup_event);
+    sudo_ev_free(ec->sigalrm_event);
+    sudo_ev_free(ec->sigpipe_event);
+    sudo_ev_free(ec->sigusr1_event);
+    sudo_ev_free(ec->sigusr2_event);
+    sudo_ev_free(ec->sigchld_event);
+    sudo_ev_free(ec->sigcont_event);
+    sudo_ev_free(ec->siginfo_event);
 
     debug_return;
 }
@@ -147,81 +337,10 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
 int
 exec_nopty(struct command_details *details, struct command_status *cstat)
 {
-    struct exec_closure_nopty ec;
-    sigaction_t sa;
+    struct exec_closure_nopty ec = { 0 };
+    sigset_t set, oset;
     int errpipe[2];
     debug_decl(exec_nopty, SUDO_DEBUG_EXEC)
-
-    /*
-     * We use a pipe to get errno if execve(2) fails in the child.
-     */
-    if (pipe2(errpipe, O_CLOEXEC) == -1)
-	sudo_fatal(U_("unable to create pipe"));
-
-    /*
-     * Signals to pass to the child process (excluding SIGALRM).
-     * We block all other signals while running the signal handler.
-     * Note: HP-UX select() will not be interrupted if SA_RESTART set.
-     *
-     * We also need to handle suspend/restore of sudo and the command.
-     * In most cases, the command will be in the same process group as
-     * sudo and job control will "just work".  However, if the command
-     * changes its process group ID and does not change it back (or is
-     * kill by SIGSTOP which is not catchable), we need to resume the
-     * command manually.  Also, if SIGTSTP is sent directly to sudo,
-     * we need to suspend the command, and then suspend ourself, restoring
-     * the default SIGTSTP handler temporarily.
-     *
-     * XXX - currently we send SIGCONT upon resume in some cases where
-     * we don't need to (e.g. command pgrp == parent pgrp).
-     */
-
-    memset(&sa, 0, sizeof(sa));
-    sigfillset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
-#ifdef SA_SIGINFO
-    sa.sa_flags |= SA_SIGINFO;
-    sa.sa_sigaction = exec_handler;
-#else
-    sa.sa_handler = exec_handler;
-#endif
-    if (sudo_sigaction(SIGTERM, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGTERM);
-    if (sudo_sigaction(SIGHUP, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGHUP);
-    if (sudo_sigaction(SIGALRM, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGALRM);
-    if (sudo_sigaction(SIGPIPE, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
-    if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGUSR1);
-    if (sudo_sigaction(SIGUSR2, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGUSR2);
-    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
-    if (sudo_sigaction(SIGCONT, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGCONT);
-#ifdef SIGINFO
-    if (sudo_sigaction(SIGINFO, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGINFO);
-#endif
-
-    /*
-     * When not running the command in a pty, we do not want to
-     * forward signals generated by the kernel that the child will
-     * already have received by virtue of being in the controlling
-     * terminals's process group (SIGINT, SIGQUIT, SIGTSTP).
-     */
-#ifdef SA_SIGINFO
-    sa.sa_flags |= SA_SIGINFO;
-    sa.sa_sigaction = exec_handler_user_only;
-#endif
-    if (sudo_sigaction(SIGINT, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGINT);
-    if (sudo_sigaction(SIGQUIT, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGQUIT);
-    if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
 
     /*
      * The policy plugin's session init must be run before we fork
@@ -230,18 +349,34 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     if (policy_init_session(details) != true)
 	sudo_fatalx(U_("policy plugin failed session initialization"));
 
-    ppgrp = getpgrp();	/* parent's process group */
+    /*
+     * We use a pipe to get errno if execve(2) fails in the child.
+     */
+    if (pipe2(errpipe, O_CLOEXEC) != 0)
+	sudo_fatal(U_("unable to create pipe"));
 
-    cmnd_pid = sudo_debug_fork();
-    switch (cmnd_pid) {
+    /*
+     * Block signals until we have our handlers setup in the parent so
+     * we don't miss SIGCHLD if the command exits immediately.
+     */
+    sigfillset(&set);
+    sigprocmask(SIG_BLOCK, &set, &oset);
+
+    /* Check for early termination or suspend signals before we fork. */
+    if (sudo_terminated(cstat)) {
+	sigprocmask(SIG_SETMASK, &oset, NULL);
+	debug_return_int(0);
+    }
+
+    ec.cmnd_pid = sudo_debug_fork();
+    switch (ec.cmnd_pid) {
     case -1:
 	sudo_fatal(U_("unable to fork"));
 	break;
     case 0:
 	/* child */
+	sigprocmask(SIG_SETMASK, &oset, NULL);
 	close(errpipe[0]);
-	close(signal_pipe[0]);
-	close(signal_pipe[1]);
 	exec_cmnd(details, errpipe[1]);
 	while (write(errpipe[1], &errno, sizeof(int)) == -1) {
 	    if (errno != EINTR)
@@ -251,7 +386,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	_exit(1);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
-	(int)cmnd_pid);
+	(int)ec.cmnd_pid);
     close(errpipe[1]);
 
     /* No longer need execfd. */
@@ -265,10 +400,13 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	alarm(details->timeout);
 
     /*
-     * Fill in exec closure, allocate event base and two persistent events:
-     *	the signal pipe and the error pipe.
+     * Fill in exec closure, allocate event base, signal events and
+     * the error pipe event.
      */
     fill_exec_closure_nopty(&ec, cstat, details, errpipe[0]);
+
+    /* Restore signal mask now that signal handlers are setup. */
+    sigprocmask(SIG_SETMASK, &oset, NULL);
 
     /*
      * Non-pty event loop.
@@ -280,7 +418,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	/* error from callback */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	/* kill command */
-	terminate_command(ec.child, true);
+	terminate_command(ec.cmnd_pid, true);
     }
 
 #ifdef HAVE_SELINUX
@@ -291,9 +429,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 #endif
 
     /* Free things up. */
-    sudo_ev_base_free(ec.evbase);
-    sudo_ev_free(ec.signal_event);
-    sudo_ev_free(ec.errpipe_event);
+    free_exec_closure_nopty(&ec);
     debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
 }
 
@@ -313,7 +449,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 
     /* Read command status. */
     do {
-	pid = waitpid(ec->child, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(ec->cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
     case 0:
@@ -329,7 +465,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	 * Save the controlling terminal's process group so we can restore it
 	 * after we resume, if needed.  Most well-behaved shells change the
 	 * pgrp back to its original value before suspending so we must
-	 * not try to restore in that case, lest we race with the child upon
+	 * not try to restore in that case, lest we race with the command upon
 	 * resume, potentially stopping sudo with SIGTTOU while the command
 	 * continues to run.
 	 */
@@ -340,7 +476,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
-	    __func__, (int)ec->child, signame);
+	    __func__, (int)ec->cmnd_pid, signame);
 
 	fd = open(_PATH_TTY, O_RDWR);
 	if (fd != -1) {
@@ -352,18 +488,18 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	}
 	if (saved_pgrp != -1) {
 	    /*
-	     * Child was stopped trying to access the controlling terminal.
-	     * If the child has a different pgrp and we own the controlling
-	     * terminal, give it to the child's pgrp and let it continue.
+	     * Command was stopped trying to access the controlling terminal.
+	     * If the command has a different pgrp and we own the controlling
+	     * terminal, give it to the command's pgrp and let it continue.
 	     */
 	    if (signo == SIGTTOU || signo == SIGTTIN) {
-		if (saved_pgrp == ppgrp) {
-		    pid_t child_pgrp = getpgid(ec->child);
-		    if (child_pgrp != ppgrp) {
-			if (tcsetpgrp_nobg(fd, child_pgrp) == 0) {
-			    if (killpg(child_pgrp, SIGCONT) != 0) {
+		if (saved_pgrp == ec->ppgrp) {
+		    pid_t cmnd_pgrp = getpgid(ec->cmnd_pid);
+		    if (cmnd_pgrp != ec->ppgrp) {
+			if (tcsetpgrp_nobg(fd, cmnd_pgrp) == 0) {
+			    if (killpg(cmnd_pgrp, SIGCONT) != 0) {
 				sudo_warn("kill(%d, SIGCONT)",
-				    (int)child_pgrp);
+				    (int)cmnd_pgrp);
 			    }
 			    close(fd);
 			    goto done;
@@ -398,125 +534,28 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	     * It is possible that we are no longer the foreground process so
 	     * use tcsetpgrp_nobg() to prevent sudo from receiving SIGTTOU.
 	     */
-	    if (saved_pgrp != ppgrp)
+	    if (saved_pgrp != ec->ppgrp)
 		tcsetpgrp_nobg(fd, saved_pgrp);
 	    close(fd);
 	}
     } else {
-	/* Child has exited or been killed, we are done. */
+	/* Command has exited or been killed, we are done. */
 	if (WIFSIGNALED(status)) {
 	    if (sig2str(WTERMSIG(status), signame) == -1)
 		snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) killed, SIG%s",
-		__func__, (int)ec->child, signame);
+		__func__, (int)ec->cmnd_pid, signame);
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) exited: %d",
-		__func__, (int)ec->child, WEXITSTATUS(status));
+		__func__, (int)ec->cmnd_pid, WEXITSTATUS(status));
 	}
-	/* Don't overwrite execve() failure with child exit status. */
+	/* Don't overwrite execve() failure with command exit status. */
 	if (ec->cstat->type != CMD_ERRNO) {
 	    ec->cstat->type = CMD_WSTATUS;
 	    ec->cstat->val = status;
 	}
-	ec->child = -1;
+	ec->cmnd_pid = -1;
     }
 done:
     debug_return;
 }
-
-/* Signal pipe callback */
-static void
-signal_pipe_cb(int fd, int what, void *v)
-{
-    struct exec_closure_nopty *ec = v;
-    char signame[SIG2STR_MAX];
-    unsigned char signo;
-    ssize_t nread;
-    debug_decl(signal_pipe_cb, SUDO_DEBUG_EXEC)
-
-    /* Process received signals until the child dies or the pipe is empty. */
-    do {
-	/* read signal pipe */
-	nread = read(fd, &signo, sizeof(signo));
-	if (nread <= 0) {
-	    /* It should not be possible to get EOF but just in case... */
-	    if (nread == 0)
-		errno = ECONNRESET;
-	    /* Restart if interrupted by signal so the pipe doesn't fill. */
-	    if (errno == EINTR)
-		continue;
-	    /* On error, store errno and break out of the event loop. */
-	    if (errno != EAGAIN) {
-		ec->cstat->type = CMD_ERRNO;
-		ec->cstat->val = errno;
-		sudo_warn(U_("error reading from signal pipe"));
-		sudo_ev_loopbreak(ec->evbase);
-	    }
-	    break;
-	}
-	if (sig2str(signo, signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", signo);
-	sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "%s: evbase %p, child: %d, signo %s(%d), cstat %p",
-	    __func__, ec->evbase, (int)ec->child, signame, signo, ec->cstat);
-
-	if (signo == SIGCHLD) {
-	    handle_sigchld_nopty(ec);
-	    if (ec->child == -1) {
-		/* Command exited or was killed, exit event loop. */
-		sudo_ev_del(ec->evbase, ec->signal_event);
-		sudo_ev_loopexit(ec->evbase);
-	    }
-	} else if (ec->child != -1) {
-	    /* Send signal to child. */
-	    if (signo == SIGALRM) {
-		terminate_command(ec->child, false);
-	    } else if (kill(ec->child, signo) != 0) {
-		sudo_warn("kill(%d, SIG%s)", (int)ec->child, signame);
-	    }
-	}
-    } while (ec->child != -1);
-    debug_return;
-}
-
-#ifdef SA_SIGINFO
-/*
- * Generic handler for signals passed from parent -> child.
- * The other end of signal_pipe is checked in the main event loop.
- * This version is for the non-pty case and does not forward
- * signals that are generated by the kernel.
- */
-static void
-exec_handler_user_only(int s, siginfo_t *info, void *context)
-{
-    unsigned char signo = (unsigned char)s;
-
-    /*
-     * Only forward user-generated signals not sent by a process in
-     * the command's own process group.  Signals sent by the kernel
-     * may include SIGTSTP when the user presses ^Z.  Curses programs
-     * often trap ^Z and send SIGTSTP to their own pgrp, so we don't
-     * want to send an extra SIGTSTP.
-     */
-    if (!USER_SIGNALED(info))
-	return;
-    if (info->si_pid != 0) {
-	pid_t si_pgrp = getpgid(info->si_pid);
-	if (si_pgrp != -1) {
-	    if (si_pgrp == ppgrp || si_pgrp == cmnd_pid)
-		return;
-	} else if (info->si_pid == cmnd_pid) {
-	    return;
-	}
-    }
-
-    /*
-     * The pipe is non-blocking, if we overflow the kernel's pipe
-     * buffer we drop the signal.  This is not a problem in practice.
-     */
-    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
-	if (errno != EINTR)
-	    break;
-    }
-}
-#endif /* SA_SIGINFO */

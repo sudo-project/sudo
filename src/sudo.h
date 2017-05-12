@@ -256,11 +256,11 @@ char *get_process_ttyname(char *name, size_t namelen);
 
 /* signal.c */
 struct sigaction;
-extern int signal_pipe[2];
 int sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa);
 void init_signals(void);
 void restore_signals(void);
 void save_signals(void);
+bool signal_pending(int signo);
 
 /* preload.c */
 void preload_static_symbols(void);

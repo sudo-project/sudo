@@ -33,8 +33,6 @@
 #include "sudo.h"
 #include "sudo_exec.h"
 
-int signal_pipe[2];
-
 static struct signal_state {
     int signo;
     int restore;
@@ -55,6 +53,21 @@ static struct signal_state {
     { SIGUSR2 },	/* SAVED_SIGUSR2 */
     { -1 }
 };
+
+static sig_atomic_t pending_signals[NSIG];
+
+static void
+sudo_handler(int signo)
+{
+    /* Mark signal as pending. */
+    pending_signals[signo] = 1;
+}
+
+bool
+signal_pending(int signo)
+{
+    return pending_signals[signo] == 1;
+}
 
 /*
  * Save signal handler state so it can be restored before exec.
@@ -94,21 +107,6 @@ restore_signals(void)
     debug_return;
 }
 
-static void
-sudo_handler(int s)
-{
-    unsigned char signo = (unsigned char)s;
-
-    /*
-     * The pipe is non-blocking, if we overflow the kernel's pipe
-     * buffer we drop the signal.  This is not a problem in practice.
-     */
-    while (write(signal_pipe[1], &signo, sizeof(signo)) == -1) {
-	if (errno != EINTR)
-	    break;
-    }
-}
-
 /*
  * Trap tty-generated (and other) signals so we can't be killed before
  * calling the policy close function.  The signal pipe will be drained
@@ -121,13 +119,6 @@ init_signals(void)
     struct sigaction sa;
     struct signal_state *ss;
     debug_decl(init_signals, SUDO_DEBUG_MAIN)
-
-    /*
-     * We use a pipe to atomically handle signal notification within
-     * the select() loop without races (we may not have pselect()).
-     */
-    if (pipe2(signal_pipe, O_NONBLOCK) != 0)
-	sudo_fatal(U_("unable to create pipe"));
 
     memset(&sa, 0, sizeof(sa));
     sigfillset(&sa.sa_mask);

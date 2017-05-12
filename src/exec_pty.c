@@ -45,7 +45,7 @@
 #define TERM_COOKED	0
 #define TERM_RAW	1
 
-/* We keep a tailq of signals to forward to child. */
+/* We keep a tailq of signals to forward to the monitor. */
 struct sigforward {
     TAILQ_ENTRY(sigforward) entries;
     int signo;
@@ -53,14 +53,24 @@ struct sigforward {
 TAILQ_HEAD(sigfwd_list, sigforward);
 
 struct exec_closure_pty {
-    pid_t child;
-    sigset_t *omask;
+    pid_t monitor_pid;
+    pid_t cmnd_pid;
+    pid_t ppgrp;
     struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
-    struct sudo_event *signal_event;
-    struct sudo_event *sigfwd_event;
     struct sudo_event *backchannel_event;
+    struct sudo_event *sigint_event;
+    struct sudo_event *sigquit_event;
+    struct sudo_event *sigtstp_event;
+    struct sudo_event *sigterm_event;
+    struct sudo_event *sighup_event;
+    struct sudo_event *sigalrm_event;
+    struct sudo_event *sigusr1_event;
+    struct sudo_event *sigusr2_event;
+    struct sudo_event *sigchld_event;
+    struct sudo_event *sigwinch_event;
+    struct sudo_event *sigfwd_event;
     struct sigfwd_list sigfwd_list;
 };
 
@@ -73,6 +83,7 @@ struct io_buffer;
 typedef bool (*sudo_io_action_t)(const char *, unsigned int, struct io_buffer *);
 struct io_buffer {
     SLIST_ENTRY(io_buffer) entries;
+    struct exec_closure_pty *ec;
     struct sudo_event *revent;
     struct sudo_event *wevent;
     sudo_io_action_t action;
@@ -83,7 +94,7 @@ struct io_buffer {
 SLIST_HEAD(io_buffer_list, io_buffer);
 
 static char slavename[PATH_MAX];
-int io_fds[6] = { -1, -1, -1, -1, -1, -1}; /* XXX - sudo_exec.h? */
+int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static bool foreground, pipeline;
 static bool tty_initialized;
 static int ttymode = TERM_COOKED;
@@ -91,13 +102,11 @@ static sigset_t ttyblock;
 static struct io_buffer_list iobufs;
 static const char *utmp_user;
 
-static int fork_pty(struct command_details *details, int sv[], sigset_t *omask);
 static void del_io_events(bool nonblocking);
-static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static int safe_close(int fd);
 static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
-static void check_foreground(void);
+static void check_foreground(pid_t ppgrp);
 static void add_io_events(struct sudo_event_base *evbase);
 
 /*
@@ -357,7 +366,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
  * the pty slave as needed.
  */
 static void
-check_foreground(void)
+check_foreground(pid_t ppgrp)
 {
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
@@ -380,7 +389,7 @@ check_foreground(void)
  * foreground or SIGCONT_BG if it is a background process.
  */
 static int
-suspend_sudo(int signo)
+suspend_sudo(int signo, pid_t ppgrp)
 {
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
@@ -395,7 +404,7 @@ suspend_sudo(int signo)
 	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
 	if (!foreground)
-	    check_foreground();
+	    check_foreground(ppgrp);
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
@@ -431,7 +440,7 @@ suspend_sudo(int signo)
 	    sudo_warn("killpg(%d, SIG%s)", (int)ppgrp, signame);
 
 	/* Check foreground/background status on resume. */
-	check_foreground();
+	check_foreground(ppgrp);
 
 	/*
 	 * We always resume the command in the foreground if sudo itself
@@ -506,8 +515,10 @@ read_callback(int fd, int what, void *v)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"read %d bytes from fd %d", n, fd);
-	    if (!iob->action(iob->buf + iob->len, n, iob))
-		terminate_command(cmnd_pid, true);
+	    if (!iob->action(iob->buf + iob->len, n, iob)) {
+		terminate_command(iob->ec->cmnd_pid, true);
+		iob->ec->cmnd_pid = -1;
+	    }
 	    iob->len += n;
 	    /* Enable writer if not /dev/tty or we are foreground pgrp. */
 	    if (iob->wevent != NULL &&
@@ -561,12 +572,9 @@ write_callback(int fd, int what, void *v)
 	    /* not an error */
 	    break;
 	default:
-#if 0 /* XXX -- how to set cstat? stash in iobufs instead? */
-	    if (cstat != NULL) {
-		cstat->type = CMD_ERRNO;
-		cstat->val = errno;
-	    }
-#endif /* XXX */
+	    /* XXX - need a way to distinguish non-exec error. */
+	    iob->ec->cstat->type = CMD_ERRNO;
+	    iob->ec->cstat->val = errno;
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"error writing fd %d: %s", fd, strerror(errno));
 	    sudo_ev_loopbreak(evbase);
@@ -604,7 +612,7 @@ write_callback(int fd, int what, void *v)
 static void
 io_buf_new(int rfd, int wfd,
     bool (*action)(const char *, unsigned int, struct io_buffer *),
-    struct io_buffer_list *head)
+    struct exec_closure_pty *ec, struct io_buffer_list *head)
 {
     int n;
     struct io_buffer *iob;
@@ -621,6 +629,7 @@ io_buf_new(int rfd, int wfd,
     /* Allocate and add to head of list. */
     if ((iob = malloc(sizeof(*iob))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    iob->ec = ec;
     iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, read_callback, iob);
     iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, write_callback, iob);
     iob->len = 0;
@@ -632,209 +641,6 @@ io_buf_new(int rfd, int wfd,
     SLIST_INSERT_HEAD(head, iob, entries);
 
     debug_return;
-}
-
-/*
- * Fork a monitor process which runs the actual command as its own child
- * process with std{in,out,err} hooked up to the pty or pipes as appropriate.
- * Returns the child pid.
- */
-static int
-fork_pty(struct command_details *details, int sv[], sigset_t *omask)
-{
-    struct plugin_container *plugin;
-    struct command_status cstat;
-    int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
-    bool interpose[3] = { false, false, false };
-    sigaction_t sa;
-    sigset_t mask;
-    pid_t child;
-    debug_decl(fork_pty, SUDO_DEBUG_EXEC);
-
-    ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
-
-    memset(&sa, 0, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-
-    if (io_fds[SFD_USERTTY] != -1) {
-	sa.sa_flags = SA_RESTART;
-	sa.sa_handler = sigwinch;
-	if (sudo_sigaction(SIGWINCH, &sa, NULL) != 0)
-	    sudo_warn(U_("unable to set handler for signal %d"), SIGWINCH);
-    }
-
-    /* So we can block tty-generated signals */
-    sigemptyset(&ttyblock);
-    sigaddset(&ttyblock, SIGINT);
-    sigaddset(&ttyblock, SIGQUIT);
-    sigaddset(&ttyblock, SIGTSTP);
-    sigaddset(&ttyblock, SIGTTIN);
-    sigaddset(&ttyblock, SIGTTOU);
-
-    /* Determine whether any of std{in,out,err} should be logged. */
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->log_stdin)
-	    interpose[STDIN_FILENO] = true;
-	if (plugin->u.io->log_stdout)
-	    interpose[STDOUT_FILENO] = true;
-	if (plugin->u.io->log_stderr)
-	    interpose[STDERR_FILENO] = true;
-    }
-
-    /*
-     * Setup stdin/stdout/stderr for child, to be duped after forking.
-     * In background mode there is no stdin.
-     */
-    if (!ISSET(details->flags, CD_BACKGROUND))
-	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
-    io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
-
-    if (io_fds[SFD_USERTTY] != -1) {
-	/* Read from /dev/tty, write to pty master */
-	if (!ISSET(details->flags, CD_BACKGROUND)) {
-	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-		log_ttyin, &iobufs);
-	}
-
-	/* Read from pty master, write to /dev/tty */
-	io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
-	    log_ttyout, &iobufs);
-
-	/* Are we the foreground process? */
-	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
-    }
-
-    /*
-     * If stdin, stdout or stderr is not a tty and logging is enabled,
-     * use a pipe to interpose ourselves instead of using the pty fd.
-     */
-    if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
-	if (!interpose[STDIN_FILENO]) {
-	    /* Not logging stdin, do not interpose. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not a tty, not logging");
-	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
-	    if (io_fds[SFD_STDIN] == -1)
-		sudo_fatal("dup");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not a tty, creating a pipe");
-	    pipeline = true;
-	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
-		sudo_fatal(U_("unable to create pipe"));
-	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-		log_stdin, &iobufs);
-	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
-	}
-    }
-    if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
-	if (!interpose[STDOUT_FILENO]) {
-	    /* Not logging stdout, do not interpose. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not a tty, not logging");
-	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
-	    if (io_fds[SFD_STDOUT] == -1)
-		sudo_fatal("dup");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not a tty, creating a pipe");
-	    pipeline = true;
-	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
-		sudo_fatal(U_("unable to create pipe"));
-	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-		log_stdout, &iobufs);
-	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
-	}
-    }
-    if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
-	if (!interpose[STDERR_FILENO]) {
-	    /* Not logging stderr, do not interpose. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not a tty, not logging");
-	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
-	    if (io_fds[SFD_STDERR] == -1)
-		sudo_fatal("dup");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not a tty, creating a pipe");
-	    if (pipe(io_pipe[STDERR_FILENO]) != 0)
-		sudo_fatal(U_("unable to create pipe"));
-	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-		log_stderr, &iobufs);
-	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
-	}
-    }
-
-    if (foreground) {
-	/* Copy terminal attrs from user tty -> pty slave. */
-	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-	    tty_initialized = true;
-	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
-	}
-
-	/* Start out in raw mode unless part of a pipeline or backgrounded. */
-	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
-	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		ttymode = TERM_RAW;
-	}
-    }
-
-    /*
-     * Block some signals until cmnd_pid is set in the parent to avoid a
-     * race between exec of the command and receipt of a fatal signal from it.
-     */
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGTERM);
-    sigaddset(&mask, SIGHUP);
-    sigaddset(&mask, SIGINT);
-    sigaddset(&mask, SIGQUIT);
-    sigprocmask(SIG_BLOCK, &mask, omask);
-
-    child = sudo_debug_fork();
-    switch (child) {
-    case -1:
-	sudo_fatal(U_("unable to fork"));
-	break;
-    case 0:
-	/* child */
-	close(sv[0]);
-	close(signal_pipe[0]);
-	close(signal_pipe[1]);
-	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-	sigprocmask(SIG_SETMASK, omask, NULL);
-	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
-	if (io_pipe[STDIN_FILENO][1] != -1)
-	    close(io_pipe[STDIN_FILENO][1]);
-	if (io_pipe[STDOUT_FILENO][0] != -1)
-	    close(io_pipe[STDOUT_FILENO][0]);
-	if (io_pipe[STDERR_FILENO][0] != -1)
-	    close(io_pipe[STDERR_FILENO][0]);
-	/*                      
-	 * If stdin/stdout is not a tty, start command in the background
-	 * since it might be part of a pipeline that reads from /dev/tty.
-	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
-	 * when it needs access to the controlling tty.
-	 */                                                              
-	exec_monitor(details, foreground && !pipeline, sv[1]);
-	cstat.type = CMD_ERRNO;
-	cstat.val = errno;
-	while (send(sv[1], &cstat, sizeof(cstat), 0) == -1) {
-	    if (errno != EINTR)
-		break;
-	}
-	_exit(1);
-    }
-
-    /* Close the other end of the stdin/stdout/stderr pipes. */
-    if (io_pipe[STDIN_FILENO][0] != -1)
-	close(io_pipe[STDIN_FILENO][0]);
-    if (io_pipe[STDOUT_FILENO][1] != -1)
-	close(io_pipe[STDOUT_FILENO][1]);
-    if (io_pipe[STDERR_FILENO][1] != -1)
-	close(io_pipe[STDERR_FILENO][1]);
-
-    debug_return_int(child);
 }
 
 static void
@@ -890,7 +696,7 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
 	strlcpy(signame, "CONT_BG", sizeof(signame));
     else if (sig2str(signo, signame) == -1)
 	snprintf(signame, sizeof(signame), "%d", signo);
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for child", signame);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for command", signame);
 
     if ((sigfwd = calloc(1, sizeof(*sigfwd))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -907,78 +713,98 @@ static void
 backchannel_cb(int fd, int what, void *v)
 {
     struct exec_closure_pty *ec = v;
-    ssize_t n;
+    struct command_status cstat;
+    ssize_t nread;
     debug_decl(backchannel_cb, SUDO_DEBUG_EXEC)
 
-    /* read child status */
-    n = recv(fd, ec->cstat, sizeof(struct command_status), MSG_WAITALL);
-    if (n != sizeof(struct command_status)) {
-	if (n == -1) {
+    /*
+     * Read command status from the monitor.
+     * Note that the backchannel is a *blocking* socket.
+     */
+    for (;;) {
+	nread = recv(fd, &cstat, sizeof(cstat), MSG_WAITALL);
+	switch (nread) {
+	case -1:
 	    switch (errno) {
 	    case EINTR:
-		/* got a signal, restart loop to service it. */
-		sudo_ev_loopcontinue(ec->evbase);
-		break;
+		/* Should not happen now that we use SA_RESTART. */
+		continue;
 	    case EAGAIN:
-		/* not ready after all... */
+		/* Nothing ready. */
 		break;
 	    default:
-		ec->cstat->type = CMD_ERRNO;
-		ec->cstat->val = errno;
-		sudo_debug_printf(SUDO_DEBUG_ERROR,
-		    "failed to read child status: %s", strerror(errno));
-		sudo_ev_loopbreak(ec->evbase);
+		if (ec->cstat->val != CMD_WSTATUS) {
+		    ec->cstat->type = CMD_ERRNO;
+		    ec->cstat->val = errno;
+		    sudo_debug_printf(SUDO_DEBUG_ERROR,
+			"%s: failed to read command status: %s",
+			__func__, strerror(errno));
+		    sudo_ev_loopbreak(ec->evbase);
+		}
 		break;
 	    }
-	} else {
-	    /* Short read or EOF. */
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"failed to read child status: %s", n ? "short read" : "EOF");
-	    /* XXX - need new CMD_ type for monitor errors. */
-	    errno = n ? EIO : ECONNRESET;
-	    ec->cstat->type = CMD_ERRNO;
-	    ec->cstat->val = errno;
-	    sudo_ev_loopbreak(ec->evbase);
+	    break;
+	case 0:
+	    /* EOF, monitor exited or was killed. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"EOF on backchannel, monitor dead?");
+	    if (ec->cstat->type == CMD_INVALID) {
+		/* XXX - need new CMD_ type for monitor errors. */
+		ec->cstat->type = CMD_ERRNO;
+		ec->cstat->val = ECONNRESET;
+	    }
+	    sudo_ev_loopexit(ec->evbase);
+	    break;
+	case sizeof(cstat):
+	    /* Check command status. */
+	    switch (cstat.type) {
+	    case CMD_PID:
+		ec->cmnd_pid = ec->cstat->val;
+		sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
+		    ec->details->command, (int)ec->cmnd_pid);
+		break;
+	    case CMD_WSTATUS:
+		if (WIFSTOPPED(cstat.val)) {
+		    int signo;
+
+		    /* Suspend parent and tell monitor how to resume on return. */
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"command stopped, suspending parent");
+		    signo = suspend_sudo(WSTOPSIG(cstat.val), ec->ppgrp);
+		    schedule_signal(ec, signo);
+		    /* Re-enable I/O events and restart event loop to service signal. */
+		    add_io_events(ec->evbase);
+		    sudo_ev_loopcontinue(ec->evbase);
+		} else {
+		    /* Command exited or was killed, either way we are done. */
+		    sudo_debug_printf(SUDO_DEBUG_INFO, "command exited or was killed");
+		    sudo_ev_loopexit(ec->evbase);
+		}
+		*ec->cstat = cstat;
+		break;
+	    case CMD_ERRNO:
+		/* Monitor was unable to execute command or broken pipe. */
+		sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
+		    strerror(cstat.val));
+		sudo_ev_loopbreak(ec->evbase);
+		*ec->cstat = cstat;
+		break;
+	    }
+	    /* Keep reading command status messages until EAGAIN or EOF. */
+	    break;
+	default:
+	    /* Short read, should not happen. */
+	    if (ec->cstat->val != CMD_WSTATUS) {
+		ec->cstat->type = CMD_ERRNO;
+		ec->cstat->val = EIO;
+		sudo_debug_printf(SUDO_DEBUG_ERROR,
+		    "%s: failed to read command status: short read", __func__);
+		sudo_ev_loopbreak(ec->evbase);
+	    }
+	    break;
 	}
 	debug_return;
     }
-    switch (ec->cstat->type) {
-    case CMD_PID:
-	/*
-	 * Once we know the command's pid we can unblock
-	 * signals which ere blocked in fork_pty().  This
-	 * avoids a race between exec of the command and
-	 * receipt of a fatal signal from it.
-	 */
-	cmnd_pid = ec->cstat->val;
-	sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
-	    ec->details->command, (int)cmnd_pid);
-	sigprocmask(SIG_SETMASK, ec->omask, NULL);
-	break;
-    case CMD_WSTATUS:
-	if (WIFSTOPPED(ec->cstat->val)) {
-	    /* Suspend parent and tell child how to resume on return. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"child stopped, suspending parent");
-	    n = suspend_sudo(WSTOPSIG(ec->cstat->val));
-	    schedule_signal(ec, n);
-	    /* Re-enable I/O events and restart event loop to service signal. */
-	    add_io_events(ec->evbase);
-	    sudo_ev_loopcontinue(ec->evbase);
-	} else {
-	    /* Child exited or was killed, either way we are done. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "child exited or was killed");
-	    sudo_ev_loopexit(ec->evbase);
-	}
-	break;
-    case CMD_ERRNO:
-	/* Child was unable to execute command or broken pipe. */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
-	    strerror(ec->cstat->val));
-	sudo_ev_loopbreak(ec->evbase);
-	break;
-    }
-    debug_return;
 }
 
 /*
@@ -995,84 +821,94 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
      * Monitor process was signaled; wait for it as needed.
      */
     do {
-	pid = waitpid(ec->child, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
-    if (pid == ec->child) {
-	/*
-	 * If the monitor dies we get notified via backchannel_cb().
-	 * If it was stopped, we should stop too (the command keeps
-	 * running in its pty) and continue it when we come back.
-	 */
-	if (WIFSTOPPED(status)) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"monitor stopped, suspending sudo");
-	    n = suspend_sudo(WSTOPSIG(status));
-	    kill(pid, SIGCONT);
-	    schedule_signal(ec, n);
-	    /* Re-enable I/O events and restart event loop. */
-	    add_io_events(ec->evbase);
-	    sudo_ev_loopcontinue(ec->evbase);
-	} else if (WIFSIGNALED(status)) {
-	    char signame[SIG2STR_MAX];
-	    if (sig2str(WTERMSIG(status), signame) == -1)
-		snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
-		__func__, (int)ec->child, signame);
-	    ec->child = -1;
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: monitor exited, status %d", __func__, WEXITSTATUS(status));
-	    ec->child = -1;
-	}
+    switch (pid) {
+    case 0:
+	errno = ECHILD;
+	/* FALLTHROUGH */
+    case -1:
+	sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	debug_return;
+    }
+
+    /*
+     * If the monitor dies we get notified via backchannel_cb().
+     * If it was stopped, we should stop too (the command keeps
+     * running in its pty) and continue it when we come back.
+     */
+    if (WIFSTOPPED(status)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "monitor stopped, suspending sudo");
+	n = suspend_sudo(WSTOPSIG(status), ec->ppgrp);
+	kill(pid, SIGCONT);
+	schedule_signal(ec, n);
+	/* Re-enable I/O events and restart event loop. */
+	add_io_events(ec->evbase);
+	sudo_ev_loopcontinue(ec->evbase);
+    } else if (WIFSIGNALED(status)) {
+	char signame[SIG2STR_MAX];
+	if (sig2str(WTERMSIG(status), signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
+	    __func__, (int)ec->monitor_pid, signame);
+	ec->monitor_pid = -1;
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: monitor exited, status %d", __func__, WEXITSTATUS(status));
+	ec->monitor_pid = -1;
     }
     debug_return;
 }
 
-/* Signal pipe callback */
+/* Signal callback */
 static void
-signal_pipe_cb(int fd, int what, void *v)
+signal_cb_pty(int signo, int what, void *v)
 {
-    struct exec_closure_pty *ec = v;
+    struct sudo_ev_siginfo_container *sc = v;
+    struct exec_closure_pty *ec = sc->closure;
     char signame[SIG2STR_MAX];
-    unsigned char signo;
-    ssize_t nread;
-    debug_decl(signal_pipe_cb, SUDO_DEBUG_EXEC)
+    debug_decl(signal_cb_pty, SUDO_DEBUG_EXEC)
 
-    /* Process received signals until the child dies or the pipe is empty. */
-    do {
-	/* read signal pipe */
-	nread = read(fd, &signo, sizeof(signo));
-	if (nread <= 0) {
-	    /* It should not be possible to get EOF but just in case... */
-	    if (nread == 0)
-		errno = ECONNRESET;
-	    /* Restart if interrupted by signal so the pipe doesn't fill. */
-	    if (errno == EINTR)
-		continue;
-	    /* On error, store errno and break out of the event loop. */
-	    if (errno != EAGAIN) {
-		ec->cstat->type = CMD_ERRNO;
-		ec->cstat->val = errno;
-		sudo_warn(U_("error reading from signal pipe"));
-		sudo_ev_loopbreak(ec->evbase);
+    if (ec->monitor_pid == -1)
+	debug_return;
+
+    if (sig2str(signo, signame) == -1)
+	snprintf(signame, sizeof(signame), "%d", signo);
+    sudo_debug_printf(SUDO_DEBUG_DIAG,
+	"%s: evbase %p, monitor: %d, signo %s(%d), cstat %p", __func__,
+	ec->evbase, (int)ec->monitor_pid, signame, signo, ec->cstat);
+
+    switch (signo) {
+    case SIGCHLD:
+	handle_sigchld_pty(ec);
+	break;
+    case SIGWINCH:
+	sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+	break;
+    default:
+	/*
+	 * Do not forward signals sent by a process in the command's process
+	 * group, as we don't want the command to indirectly kill itself.
+	 * For example, this can happen with some versions of reboot that
+	 * call kill(-1, SIGTERM) to kill all other processes.
+	 */
+	if (USER_SIGNALED(sc->siginfo) && sc->siginfo->si_pid != 0) {
+	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
+		    debug_return;
+	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+		debug_return;
 	    }
-	    break;
 	}
-	if (sig2str(signo, signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", signo);
-	sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "%s: evbase %p, child: %d, signo %s(%d), cstat %p",
-	    __func__, ec->evbase, (int)ec->child, signame, signo, ec->cstat);
+	/* Schedule signo to be forwared to the command. */
+	schedule_signal(ec, signo);
+	/* Restart event loop to service signal immediately. */
+	sudo_ev_loopcontinue(ec->evbase);
+	break;
+    }
 
-	if (signo == SIGCHLD) {
-	    handle_sigchld_pty(ec);
-	} else if (ec->child != -1) {
-	    /* Schedule signo to be forwared to the child. */
-	    schedule_signal(ec, signo);
-	    /* Restart event loop to service signal immediately. */
-	    sudo_ev_loopcontinue(ec->evbase);
-	}
-    } while (ec->child != -1);
     debug_return;
 }
 
@@ -1098,7 +934,7 @@ sigfwd_cb(int sock, int what, void *v)
 	else if (sig2str(sigfwd->signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", sigfwd->signo);
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "sending SIG%s to child over backchannel", signame);
+	    "sending SIG%s to monitor over backchannel", signame);
 	cstat.type = CMD_SIGNO;
 	cstat.val = sigfwd->signo;
 	do {
@@ -1109,13 +945,16 @@ sigfwd_cb(int sock, int what, void *v)
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
-		    "broken pipe writing to child over backchannel");
+		    "broken pipe writing to monitor over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
 		while ((sigfwd = TAILQ_FIRST(&ec->sigfwd_list)) != NULL) {
 		    TAILQ_REMOVE(&ec->sigfwd_list, sigfwd, entries);
 		    free(sigfwd);
 		}
-		/* XXX - child (monitor) is dead, we should exit too? */
+		/* XXX - need new CMD_ type for monitor errors. */
+		ec->cstat->type = CMD_ERRNO;
+		ec->cstat->val = errno;
+		sudo_ev_loopbreak(ec->evbase);
 	    }
 	    break;
 	}
@@ -1129,14 +968,13 @@ sigfwd_cb(int sock, int what, void *v)
  */
 static void
 fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
-    struct command_details *details, pid_t child, sigset_t *omask,
-    int backchannel)
+    struct command_details *details, pid_t ppgrp, int backchannel)
 {
     debug_decl(fill_exec_closure_pty, SUDO_DEBUG_EXEC)
 
     /* Fill in the non-event part of the closure. */
-    ec->child = child;
-    ec->omask = omask;
+    ec->cmnd_pid = -1;
+    ec->ppgrp = ppgrp;
     ec->cstat = cstat;
     ec->details = details;
     TAILQ_INIT(&ec->sigfwd_list);
@@ -1146,14 +984,6 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     if (ec->evbase == NULL)
 	sudo_fatal(NULL);
 
-    /* Event for local signals via signal_pipe. */
-    ec->signal_event = sudo_ev_alloc(signal_pipe[0],
-	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, ec);
-    if (ec->signal_event == NULL)
-	sudo_fatal(NULL);
-    if (sudo_ev_add(ec->evbase, ec->signal_event, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
-
     /* Event for command status via backchannel. */
     ec->backchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, backchannel_cb, ec);
@@ -1161,15 +991,109 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
 	sudo_fatal(NULL);
     if (sudo_ev_add(ec->evbase, ec->backchannel_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
+    sudo_debug_printf(SUDO_DEBUG_INFO, "backchannel fd %d\n", backchannel);
+
+    /* Events for local signals. */
+    ec->sigint_event = sudo_ev_alloc(SIGINT,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigint_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigint_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigquit_event = sudo_ev_alloc(SIGQUIT,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigquit_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigquit_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigtstp_event = sudo_ev_alloc(SIGTSTP,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigtstp_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigtstp_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigterm_event = sudo_ev_alloc(SIGTERM,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigterm_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigterm_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sighup_event = sudo_ev_alloc(SIGHUP,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sighup_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sighup_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigalrm_event = sudo_ev_alloc(SIGALRM,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigalrm_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigalrm_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigusr1_event = sudo_ev_alloc(SIGUSR1,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigusr1_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigusr1_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigusr2_event = sudo_ev_alloc(SIGUSR2,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigusr2_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigusr2_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigchld_event = sudo_ev_alloc(SIGCHLD,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigchld_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigchld_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    ec->sigwinch_event = sudo_ev_alloc(SIGWINCH,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigwinch_event == NULL)
+	sudo_fatal(NULL);
+    if (sudo_ev_add(ec->evbase, ec->sigwinch_event, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
     ec->sigfwd_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_WRITE, sigfwd_cb, ec);
     if (ec->sigfwd_event == NULL)
 	sudo_fatal(NULL);
+}
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "signal pipe fd %d\n", signal_pipe[0]);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "backchannel fd %d\n", backchannel);
+/*
+ * Free the dynamically-allocated contents of the exec closure.
+ */
+static void
+free_exec_closure_pty(struct exec_closure_pty *ec)
+{
+    debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC)
+
+    sudo_ev_base_free(ec->evbase);
+    sudo_ev_free(ec->backchannel_event);
+    sudo_ev_free(ec->sigint_event);
+    sudo_ev_free(ec->sigquit_event);
+    sudo_ev_free(ec->sigtstp_event);
+    sudo_ev_free(ec->sigterm_event);
+    sudo_ev_free(ec->sighup_event);
+    sudo_ev_free(ec->sigalrm_event);
+    sudo_ev_free(ec->sigusr1_event);
+    sudo_ev_free(ec->sigusr2_event);
+    sudo_ev_free(ec->sigchld_event);
+    sudo_ev_free(ec->sigwinch_event);
+    sudo_ev_free(ec->sigfwd_event);
+
+    debug_return;
 }
 
 /*
@@ -1181,11 +1105,14 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
 int
 exec_pty(struct command_details *details, struct command_status *cstat)
 {
+    int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
+    bool interpose[3] = { false, false, false };
     struct sigforward *sigfwd, *sigfwd_next;
-    struct exec_closure_pty ec;
+    struct exec_closure_pty ec = { 0 };
+    struct plugin_container *plugin;
+    sigset_t set, oset;
     sigaction_t sa;
-    sigset_t omask;
-    pid_t child;
+    pid_t ppgrp;
     int sv[2];
     debug_decl(exec_pty, SUDO_DEBUG_EXEC)
 
@@ -1198,59 +1125,18 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     pty_setup(details->euid, user_details.tty);
 
     /*
-     * We communicate with the child over a bi-directional pair of sockets.
-     * Parent sends signal info to child and child sends back wait status.
+     * We communicate with the monitor over a bi-directional pair of sockets.
+     * Parent sends signal info to monitor and monitor sends back wait status.
      */
     if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
 	sudo_fatal(U_("unable to create sockets"));
 
     /*
-     * Signals to forward to the child process (excluding SIGALRM).
-     * We block all other signals while running the signal handler.
-     * Note: HP-UX select() will not be interrupted if SA_RESTART set.
+     * We don't want to receive SIGTTIN/SIGTTOU.
+     * XXX - this affects tcsetattr() and tcsetpgrp() too.
      */
     memset(&sa, 0, sizeof(sa));
-    sigfillset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
-#ifdef SA_SIGINFO
-    sa.sa_flags |= SA_SIGINFO;
-    sa.sa_sigaction = exec_handler;
-#else
-    sa.sa_handler = exec_handler;
-#endif
-    if (sudo_sigaction(SIGTERM, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGTERM);
-    if (sudo_sigaction(SIGHUP, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGHUP);
-    if (sudo_sigaction(SIGALRM, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGALRM);
-    if (sudo_sigaction(SIGPIPE, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGPIPE);
-    if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGUSR1);
-    if (sudo_sigaction(SIGUSR2, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGUSR2);
-    if (sudo_sigaction(SIGCHLD, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGCHLD);
-#ifdef SIGINFO
-    if (sudo_sigaction(SIGINFO, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGINFO);
-#endif
-
-    /*
-     * Unlike the non-pty case, we can use our normal signal handler
-     * for tty-generated signals triggered by the user.
-     */
-    if (sudo_sigaction(SIGINT, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGINT);
-    if (sudo_sigaction(SIGQUIT, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGQUIT);
-    if (sudo_sigaction(SIGTSTP, &sa, NULL) != 0)
-	sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
-
-    /*
-     * We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable.
-     */
+    sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_IGN;
     if (sudo_sigaction(SIGTTIN, &sa, NULL) != 0)
@@ -1268,9 +1154,179 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * Child will run the command in the pty, parent will pass data
      * to and from pty.
-     * XXX - inline fork_pty or refactor differently?
      */
-    child = fork_pty(details, sv, &omask);
+
+    /* So we can block tty-generated signals */
+    sigemptyset(&ttyblock);
+    sigaddset(&ttyblock, SIGINT);
+    sigaddset(&ttyblock, SIGQUIT);
+    sigaddset(&ttyblock, SIGTSTP);
+    sigaddset(&ttyblock, SIGTTIN);
+    sigaddset(&ttyblock, SIGTTOU);
+
+    ppgrp = getpgrp();	/* parent's pgrp, so child can signal us */
+
+    /* Determine whether any of std{in,out,err} should be logged. */
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->log_stdin)
+	    interpose[STDIN_FILENO] = true;
+	if (plugin->u.io->log_stdout)
+	    interpose[STDOUT_FILENO] = true;
+	if (plugin->u.io->log_stderr)
+	    interpose[STDERR_FILENO] = true;
+    }
+
+    /*
+     * Setup stdin/stdout/stderr for command, to be duped after forking.
+     * In background mode there is no stdin.
+     */
+    if (!ISSET(details->flags, CD_BACKGROUND))
+	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
+    io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
+    io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
+
+    if (io_fds[SFD_USERTTY] != -1) {
+	/* Read from /dev/tty, write to pty master */
+	if (!ISSET(details->flags, CD_BACKGROUND)) {
+	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+		log_ttyin, &ec, &iobufs);
+	}
+
+	/* Read from pty master, write to /dev/tty */
+	io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
+	    log_ttyout, &ec, &iobufs);
+
+	/* Are we the foreground process? */
+	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
+    }
+
+    /*
+     * If stdin, stdout or stderr is not a tty and logging is enabled,
+     * use a pipe to interpose ourselves instead of using the pty fd.
+     */
+    if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
+	if (!interpose[STDIN_FILENO]) {
+	    /* Not logging stdin, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdin not a tty, not logging");
+	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
+	    if (io_fds[SFD_STDIN] == -1)
+		sudo_fatal("dup");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdin not a tty, creating a pipe");
+	    pipeline = true;
+	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
+		sudo_fatal(U_("unable to create pipe"));
+	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
+		log_stdin, &ec, &iobufs);
+	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	}
+    }
+    if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
+	if (!interpose[STDOUT_FILENO]) {
+	    /* Not logging stdout, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdout not a tty, not logging");
+	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
+	    if (io_fds[SFD_STDOUT] == -1)
+		sudo_fatal("dup");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdout not a tty, creating a pipe");
+	    pipeline = true;
+	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
+		sudo_fatal(U_("unable to create pipe"));
+	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
+		log_stdout, &ec, &iobufs);
+	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
+	}
+    }
+    if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
+	if (!interpose[STDERR_FILENO]) {
+	    /* Not logging stderr, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stderr not a tty, not logging");
+	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
+	    if (io_fds[SFD_STDERR] == -1)
+		sudo_fatal("dup");
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stderr not a tty, creating a pipe");
+	    if (pipe(io_pipe[STDERR_FILENO]) != 0)
+		sudo_fatal(U_("unable to create pipe"));
+	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
+		log_stderr, &ec, &iobufs);
+	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
+	}
+    }
+
+    if (foreground) {
+	/* Copy terminal attrs from user tty -> pty slave. */
+	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+	    tty_initialized = true;
+	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+	}
+
+	/* Start out in raw mode unless part of a pipeline or backgrounded. */
+	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
+	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		ttymode = TERM_RAW;
+	}
+    }
+
+    /*
+     * Block signals until we have our handlers setup in the parent so
+     * we don't miss SIGCHLD if the command exits immediately.
+     */
+    sigfillset(&set);
+    sigprocmask(SIG_BLOCK, &set, &oset);
+
+    /* Check for early termination or suspend signals before we fork. */
+    if (sudo_terminated(cstat)) {
+	sigprocmask(SIG_SETMASK, &oset, NULL);
+	debug_return_int(0);
+    }
+
+    ec.monitor_pid = sudo_debug_fork();
+    switch (ec.monitor_pid) {
+    case -1:
+	sudo_fatal(U_("unable to fork"));
+	break;
+    case 0:
+	/* child */
+	close(sv[0]);
+	(void)fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
+	if (io_pipe[STDIN_FILENO][1] != -1)
+	    close(io_pipe[STDIN_FILENO][1]);
+	if (io_pipe[STDOUT_FILENO][0] != -1)
+	    close(io_pipe[STDOUT_FILENO][0]);
+	if (io_pipe[STDERR_FILENO][0] != -1)
+	    close(io_pipe[STDERR_FILENO][0]);
+	/*                      
+	 * If stdin/stdout is not a tty, start command in the background
+	 * since it might be part of a pipeline that reads from /dev/tty.
+	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
+	 * when it needs access to the controlling tty.
+	 */                                                              
+	exec_monitor(details, &oset, foreground && !pipeline, sv[1]);
+	cstat->type = CMD_ERRNO;
+	cstat->val = errno;
+	while (send(sv[1], cstat, sizeof(*cstat), 0) == -1) {
+	    if (errno != EINTR)
+		break;
+	}
+	_exit(1);
+    }
+
+    /* Close the other end of the stdin/stdout/stderr pipes and socketpair. */
+    if (io_pipe[STDIN_FILENO][0] != -1)
+	close(io_pipe[STDIN_FILENO][0]);
+    if (io_pipe[STDOUT_FILENO][1] != -1)
+	close(io_pipe[STDOUT_FILENO][1]);
+    if (io_pipe[STDERR_FILENO][1] != -1)
+	close(io_pipe[STDERR_FILENO][1]);
     close(sv[1]);
 
     /* No longer need execfd. */
@@ -1284,16 +1340,19 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	alarm(details->timeout);
 
     /*
+     * Fill in exec closure, allocate event base, signal events and
+     * the backchannel event.
+     */
+    fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0]);
+
+    /* Restore signal mask now that signal handlers are setup. */
+    sigprocmask(SIG_SETMASK, &oset, NULL);
+
+    /*
      * I/O logging must be in the C locale for floating point numbers
      * to be logged consistently.
      */
     setlocale(LC_ALL, "C");
-
-    /*
-     * Allocate event base and two persistent events:
-     *	the signal pipe and the child process's backchannel.
-     */
-    fill_exec_closure_pty(&ec, cstat, details, child, &omask, sv[0]);
 
     /*
      * In the event loop we pass input from user tty to master
@@ -1303,18 +1362,16 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (sudo_ev_loop(ec.evbase, 0) == -1)
 	sudo_warn(U_("error in event loop"));
     if (sudo_ev_got_break(ec.evbase)) {
-	/* error from callback */
+	/* error from callback or monitor died */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
+	/* XXX - may need to terminate command if cmnd_pid != -1 */
     }
 
-    /* Flush any remaining output and free pty-related memory. */
+    /* Flush any remaining output, free I/O bufs and events, do logout. */
     pty_close(cstat);
 
     /* Free things up. */
-    sudo_ev_base_free(ec.evbase);
-    sudo_ev_free(ec.sigfwd_event);
-    sudo_ev_free(ec.signal_event);
-    sudo_ev_free(ec.backchannel_event);
+    free_exec_closure_pty(&ec);
     TAILQ_FOREACH_SAFE(sigfwd, &ec.sigfwd_list, entries, sigfwd_next) {
 	free(sigfwd);
     }
@@ -1462,7 +1519,6 @@ del_io_events(bool nonblocking)
 static void
 sync_ttysize(int src, int dst)
 {
-#ifdef TIOCGWINSZ
     struct winsize wsize;
     pid_t pgrp;
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
@@ -1474,19 +1530,6 @@ sync_ttysize(int src, int dst)
     }
 
     debug_return;
-#endif
-}
-
-/*
- * Handler for SIGWINCH in parent.
- */
-static void
-sigwinch(int s)
-{
-    int serrno = errno;
-
-    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
-    errno = serrno;
 }
 
 /*

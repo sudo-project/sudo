@@ -27,12 +27,10 @@
 /*
  * Some older systems support siginfo but predate SI_USER.
  */
-#ifdef SA_SIGINFO
-# ifdef SI_USER
-#  define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code == SI_USER)
-# else
-#  define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code <= 0)
-# endif
+#ifdef SI_USER
+# define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code == SI_USER)
+#else
+# define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code <= 0)
 #endif
 
 /*
@@ -85,14 +83,9 @@ struct command_details;
 struct command_status;
 
 /* exec.c */
-extern volatile pid_t cmnd_pid, ppgrp;
 void exec_cmnd(struct command_details *details, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
-#ifdef SA_SIGINFO
-void exec_handler(int s, siginfo_t *info, void *context);
-#else
-void exec_handler(int s);
-#endif
+bool sudo_terminated(struct command_status *cstat);
 
 /* exec_common.c */
 int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool noexec);
@@ -105,9 +98,10 @@ int exec_nopty(struct command_details *details, struct command_status *cstat);
 int exec_pty(struct command_details *details, struct command_status *cstat);
 void pty_cleanup(void);
 int pty_make_controlling(void);
+extern int io_fds[6];
 
 /* exec_monitor.c */
-int exec_monitor(struct command_details *details, bool foreground, int backchannel);
+int exec_monitor(struct command_details *details, sigset_t *omask, bool foreground, int backchannel);
 
 /* utmp.c */
 bool utmp_login(const char *from_line, const char *to_line, int ttyfd,
