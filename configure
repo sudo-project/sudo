@@ -18122,18 +18122,6 @@ else
 
 fi
 
-ac_fn_c_check_type "$LINENO" "sigaction_t" "ac_cv_type_sigaction_t" "#include <sys/types.h>
-#include <signal.h>
-"
-if test "x$ac_cv_type_sigaction_t" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_SIGACTION_T 1
-_ACEOF
-
-
-fi
-
 ac_fn_c_check_type "$LINENO" "struct in6_addr" "ac_cv_type_struct_in6_addr" "#include <sys/types.h>
 #include <netinet/in.h>
 "

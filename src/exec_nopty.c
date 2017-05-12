@@ -469,7 +469,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	 * resume, potentially stopping sudo with SIGTTOU while the command
 	 * continues to run.
 	 */
-	sigaction_t sa, osa;
+	struct sigaction sa, osa;
 	pid_t saved_pgrp = -1;
 	int fd, signo = WSTOPSIG(status);
 

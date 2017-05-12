@@ -50,7 +50,7 @@ sigttou(int signo)
 int
 tcsetpgrp_nobg(int fd, pid_t pgrp_id)
 {
-    sigaction_t sa, osa;
+    struct sigaction sa, osa;
     int rc;
 
     /*

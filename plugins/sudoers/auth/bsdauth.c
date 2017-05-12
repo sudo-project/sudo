@@ -104,7 +104,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
     char *s;
     size_t len;
     int authok = 0;
-    sigaction_t sa, osa;
+    struct sigaction sa, osa;
     auth_session_t *as = ((struct bsdauth_state *) auth->data)->as;
     debug_decl(bsdauth_verify, SUDOERS_DEBUG_AUTH)
 

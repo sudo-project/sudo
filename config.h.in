@@ -627,9 +627,6 @@
 /* Define to 1 if you have the `sig2str' function. */
 #undef HAVE_SIG2STR
 
-/* Define to 1 if the system has the type `sigaction_t'. */
-#undef HAVE_SIGACTION_T
-
 /* Define to 1 if you use S/Key. */
 #undef HAVE_SKEY
 

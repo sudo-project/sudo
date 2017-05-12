@@ -392,7 +392,7 @@ static int
 suspend_sudo(int signo, pid_t ppgrp)
 {
     char signame[SIG2STR_MAX];
-    sigaction_t sa, osa;
+    struct sigaction sa, osa;
     int ret = 0;
     debug_decl(suspend_sudo, SUDO_DEBUG_EXEC);
 
@@ -1111,7 +1111,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
     sigset_t set, oset;
-    sigaction_t sa;
+    struct sigaction sa;
     pid_t ppgrp;
     int sv[2];
     debug_decl(exec_pty, SUDO_DEBUG_EXEC)

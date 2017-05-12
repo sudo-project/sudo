@@ -862,7 +862,7 @@ whatnow(void)
 static void
 setup_signals(void)
 {
-    sigaction_t sa;
+    struct sigaction sa;
     debug_decl(setup_signals, SUDOERS_DEBUG_UTIL)
 
     /*

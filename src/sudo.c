@@ -318,7 +318,7 @@ main(int argc, char *argv[], char *envp[])
      * signal.  However, we want to avoid having sudo dump core itself.
      */
     if (WIFSIGNALED(status)) {
-	sigaction_t sa;
+	struct sigaction sa;
 
 	if (WCOREDUMP(status))
 	    disable_coredump(false);

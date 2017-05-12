@@ -249,13 +249,6 @@ __dso_public int isblank(int);
 #endif /* HAVE__INNETGR */
 
 /*
- * Add IRIX-like sigaction_t for those without it.
- */
-#ifndef HAVE_SIGACTION_T
-typedef struct sigaction sigaction_t;
-#endif
-
-/*
  * The nitems macro may be defined in sys/param.h
  */
 #ifndef nitems

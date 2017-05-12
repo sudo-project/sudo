@@ -81,7 +81,7 @@ sigttou(int signo)
 static int
 tcsetattr_nobg(int fd, int flags, struct termios *tp)
 {
-    sigaction_t sa, osa;
+    struct sigaction sa, osa;
     int rc;
 
     /*

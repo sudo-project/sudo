@@ -381,7 +381,7 @@ replay_session(const double max_wait, const char *decimal)
     bool interactive;
     struct write_closure wc;
     char buf[LINE_MAX];
-    sigaction_t sa;
+    struct sigaction sa;
     int idx;
     debug_decl(replay_session, SUDO_DEBUG_UTIL)
 

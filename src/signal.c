@@ -36,7 +36,7 @@
 static struct signal_state {
     int signo;
     int restore;
-    sigaction_t sa;
+    struct sigaction sa;
 } saved_signals[] = {
     { SIGALRM },	/* SAVED_SIGALRM */
     { SIGCHLD },	/* SAVED_SIGCHLD */

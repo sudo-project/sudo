@@ -495,7 +495,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 {
     struct monitor_closure mc = { 0 };
     struct command_status cstat;
-    sigaction_t sa;
+    struct sigaction sa;
     int errpipe[2];
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
