@@ -449,7 +449,7 @@ replay_session(const double max_wait, const char *decimal)
 
 	/* Run event event loop to delay and get keyboard input. */
 	if (sudo_ev_add(evbase, input_ev, &timeout, false) == -1)
-	    sudo_fatal(NULL);
+	    sudo_fatal(U_("unable to add event to queue"));
 	sudo_ev_loop(evbase, 0);
 
 	/* Even if we are not replaying, we still have to delay. */
@@ -555,7 +555,7 @@ replay_session(const double max_wait, const char *decimal)
 	    /* Run event event loop to write output. */
 	    /* XXX - should use a single event loop with a circular buffer. */
 	    if (sudo_ev_add(evbase, output_ev, NULL, false) == -1)
-		sudo_fatal(NULL);
+		sudo_fatal(U_("unable to add event to queue"));
 	    sudo_ev_loop(evbase, 0);
 	}
     }
@@ -626,7 +626,7 @@ write_output(int fd, int what, void *v)
 
     /* Reschedule event to write remainder. */
     if (sudo_ev_add(NULL, wc->wevent, NULL, false) == -1)
-	sudo_fatal(NULL);
+	sudo_fatal(U_("unable to add event to queue"));
     debug_return;
 }
 
@@ -1170,7 +1170,7 @@ check_input(int fd, int what, void *v)
 	}
 	/* Re-enable event. */
 	if (sudo_ev_add(NULL, ev, timeout, false) == -1)
-	    sudo_fatal(NULL);
+	    sudo_fatal(U_("unable to add event to queue"));
     }
     debug_return;
 }
