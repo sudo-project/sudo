@@ -86,19 +86,14 @@ sudo_ev_deactivate_all(struct sudo_event_base *base)
 /*
  * Activate all signal events for which the corresponding signal_pending[]
  * flag is set.
- * Returns true if at least one sigevent has been activated.
  */
-static bool
+static void
 sudo_ev_activate_sigevents(struct sudo_event_base *base)
 {
     struct sudo_event *ev;
     sigset_t set, oset;
-    bool ret = false;
     int i;
     debug_decl(sudo_ev_activate_sigevents, SUDO_DEBUG_EVENT)
-
-    if (base->signal_caught == 0)
-	debug_return_bool(false);
 
     /*
      * We treat this as a critical section since the signal handler
@@ -126,12 +121,11 @@ sudo_ev_activate_sigevents(struct sudo_event_base *base)
 	    ev->revents = ev->events & (SUDO_EV_SIGNAL|SUDO_EV_SIGINFO);
 	    TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
 	    SET(ev->flags, SUDO_EVQ_ACTIVE);
-	    ret = true;
 	}
     }
     sigprocmask(SIG_SETMASK, &oset, NULL);
 
-    debug_return_bool(ret);
+    debug_return;
 }
 
 /*
@@ -140,15 +134,29 @@ sudo_ev_activate_sigevents(struct sudo_event_base *base)
 static void
 signal_pipe_cb(int fd, int what, void *v)
 {
+    struct sudo_event_base *base = v;
     unsigned char ch;
+    ssize_t nread;
+    debug_decl(signal_pipe_cb, SUDO_DEBUG_EVENT)
 
     /*
      * Drain signal_pipe, the signal handler updated base->signals_pending.
      * Actual processing of signal events is done when poll/select is
      * interrupted by a signal.
      */
-    while (read(fd, &ch, 1) > 0)
-	continue;
+    while ((nread = read(fd, &ch, 1)) > 0) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: received signal %d", __func__, (int)ch);
+    }
+    if (nread == -1 && errno != EAGAIN) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "%s: error reading from signal pipe", __func__);
+    }
+
+    /* Activate signal events. */
+    sudo_ev_activate_sigevents(base);
+
+    debug_return;
 }
 
 struct sudo_event_base *
@@ -179,7 +187,7 @@ sudo_ev_base_alloc_v1(void)
 	goto bad;
     }
     sudo_ev_init(&base->signal_event, base->signal_pipe[1],
-	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, NULL);
+	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, base);
 
     debug_return_ptr(base);
 bad:
@@ -306,10 +314,7 @@ sudo_ev_handler(int signo, siginfo_t *info, void *context)
 	signal_base->signal_caught = 1;
 
 	/* Wake up the other end of the pipe. */
-	while (write(signal_base->signal_pipe[0], &ch, 1) == -1) {
-	    if (errno != EINTR)
-		break;
-	}
+	ignore_result(write(signal_base->signal_pipe[0], &ch, 1));
     }
 }
 
@@ -586,8 +591,10 @@ rescan:
 		continue;
 	    if (errno == EINTR) {
 		/* Interrupted by signal, check for sigevents. */
-		if (sudo_ev_activate_sigevents(base))
+		if (base->signal_caught) {
+		    signal_pipe_cb(base->signal_pipe[1], SUDO_EV_READ, base);
 		    break;
+		}
 		continue;
 	    }
 	    rc = -1;
@@ -616,9 +623,6 @@ rescan:
 	    /* I/O events active, sudo_ev_scan_impl() already added them. */
 	    break;
 	}
-
-	/* Activate signal events, if any. */
-	sudo_ev_activate_sigevents(base);
 
 	/*
 	 * Service each event in the active queue.
