@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,8 +31,9 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
@@ -40,8 +41,15 @@
 #include "sudo_event.h"
 #include "sudo_util.h"
 
+static void sudo_ev_init(struct sudo_event *ev, int fd, short events,
+    sudo_ev_callback_t callback, void *closure);
+
+/* We need the event base to be available from the signal handler. */
+static struct sudo_event_base *signal_base;
+
 /*
  * Add an event to the base's active queue and mark it active.
+ * This is extern so sudo_ev_scan_impl() can call it.
  */
 void
 sudo_ev_activate(struct sudo_event_base *base, struct sudo_event *ev)
@@ -67,47 +75,160 @@ static void
 sudo_ev_deactivate_all(struct sudo_event_base *base)
 {
     struct sudo_event *ev;
+    debug_decl(sudo_ev_deactivate_all, SUDO_DEBUG_EVENT)
 
     while ((ev = TAILQ_FIRST(&base->active)) != NULL)
 	sudo_ev_deactivate(base, ev);
+
+    debug_return;
+}
+
+/*
+ * Activate all signal events for which the corresponding signal_pending[]
+ * flag is set.
+ * Returns true if at least one sigevent has been activated.
+ */
+static bool
+sudo_ev_activate_sigevents(struct sudo_event_base *base)
+{
+    struct sudo_event *ev;
+    sigset_t set, oset;
+    bool ret = false;
+    int i;
+    debug_decl(sudo_ev_activate_sigevents, SUDO_DEBUG_EVENT)
+
+    if (base->signal_caught == 0)
+	debug_return_bool(false);
+
+    /*
+     * We treat this as a critical section since the signal handler
+     * could modify the siginfo[] entry.
+     */
+    sigfillset(&set);
+    sigprocmask(SIG_BLOCK, &set, &oset);
+    base->signal_caught = 0;
+    for (i = 0; i < NSIG; i++) {
+	if (!base->signal_pending[i])
+	    continue;
+	base->signal_pending[i] = 0;
+	TAILQ_FOREACH(ev, &base->signals[i], entries) {
+	    if (ISSET(ev->events, SUDO_EV_SIGINFO)) {
+		struct sudo_ev_siginfo_container *sc = ev->closure;
+		memcpy(&sc->siginfo, base->siginfo[i], sizeof(sc->siginfo));
+	    }
+	    /* Make event active. */
+	    ev->revents = ev->events & (SUDO_EV_SIGNAL|SUDO_EV_SIGINFO);
+	    TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+	    SET(ev->flags, SUDO_EVQ_ACTIVE);
+	    ret = true;
+	}
+    }
+    sigprocmask(SIG_SETMASK, &oset, NULL);
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Internal callback for SUDO_EV_SIGNAL and SUDO_EV_SIGINFO.
+ */
+static void
+signal_pipe_cb(int fd, int what, void *v)
+{
+    unsigned char ch;
+
+    /*
+     * Drain signal_pipe, the signal handler updated base->signals_pending.
+     * Actual processing of signal events is done when poll/select is
+     * interrupted by a signal.
+     */
+    while (read(fd, &ch, 1) > 0)
+	continue;
 }
 
 struct sudo_event_base *
 sudo_ev_base_alloc_v1(void)
 {
     struct sudo_event_base *base;
+    int i;
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
     base = calloc(1, sizeof(*base));
     if (base == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate base", __func__);
-	debug_return_ptr(NULL);
+	goto bad;
     }
     TAILQ_INIT(&base->events);
     TAILQ_INIT(&base->timeouts);
+    for (i = 0; i < NSIG; i++)
+	TAILQ_INIT(&base->signals[i]);
     if (sudo_ev_base_alloc_impl(base) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: unable to allocate impl base", __func__);
-	free(base);
-	base = NULL;
+	goto bad;
     }
+    if (pipe2(base->signal_pipe, O_NONBLOCK|O_CLOEXEC) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: unable to create signal pipe", __func__);
+	goto bad;
+    }
+    sudo_ev_init(&base->signal_event, base->signal_pipe[1],
+	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, NULL);
 
     debug_return_ptr(base);
+bad:
+    if (base != NULL) {
+	sudo_ev_base_free_impl(base);
+	free(base);
+    }
+    debug_return_ptr(NULL);
 }
 
 void
 sudo_ev_base_free_v1(struct sudo_event_base *base)
 {
     struct sudo_event *ev, *next;
+    int i;
     debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT)
+
+    if (base == NULL)
+	debug_return;
 
     /* Remove any existing events before freeing the base. */
     TAILQ_FOREACH_SAFE(ev, &base->events, entries, next) {
 	sudo_ev_del(base, ev);
     }
+    for (i = 0; i < NSIG; i++) {
+	TAILQ_FOREACH_SAFE(ev, &base->signals[i], entries, next) {
+	    sudo_ev_del(base, ev);
+	}
+	free(base->siginfo[i]);
+	free(base->orig_handlers[i]);
+    }
     sudo_ev_base_free_impl(base);
+    close(base->signal_pipe[0]);
+    close(base->signal_pipe[1]);
     free(base);
+
+    debug_return;
+}
+
+/*
+ * Clear and fill in a struct sudo_event.
+ */
+static void
+sudo_ev_init(struct sudo_event *ev, int fd, short events,
+    sudo_ev_callback_t callback, void *closure)
+{
+    debug_decl(sudo_ev_init, SUDO_DEBUG_EVENT)
+
+    /* XXX - sanity check events value */
+    memset(ev, 0, sizeof(*ev));
+    ev->fd = fd;
+    ev->events = events;
+    ev->pfd_idx = -1;
+    ev->callback = callback;
+    ev->closure = closure;
 
     debug_return;
 }
@@ -118,19 +239,26 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
     struct sudo_event *ev;
     debug_decl(sudo_ev_alloc, SUDO_DEBUG_EVENT)
 
-    /* XXX - sanity check events value */
-
-    ev = calloc(1, sizeof(*ev));
+    ev = malloc(sizeof(*ev));
     if (ev == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate event", __func__);
 	debug_return_ptr(NULL);
     }
-    ev->fd = fd;
-    ev->events = events;
-    ev->pfd_idx = -1;
-    ev->callback = callback;
-    ev->closure = closure;
+    /* For SUDO_EV_SIGINFO we use a container to store closure + siginfo_t */
+    if (ISSET(events, SUDO_EV_SIGINFO)) {
+	struct sudo_ev_siginfo_container *container =
+	    malloc(sizeof(*container));
+	if (container == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: unable to allocate siginfo container", __func__);
+	    free(ev);
+	    debug_return_ptr(NULL);
+	}
+	container->closure = closure;
+	closure = container;
+    }
+    sudo_ev_init(ev, fd, events, callback, closure);
 
     debug_return_ptr(ev);
 }
@@ -140,11 +268,121 @@ sudo_ev_free_v1(struct sudo_event *ev)
 {
     debug_decl(sudo_ev_free, SUDO_DEBUG_EVENT)
 
+    if (ev == NULL)
+	debug_return;
+
     /* Make sure ev is not in use before freeing it. */
     if (ISSET(ev->flags, SUDO_EVQ_INSERTED))
 	(void)sudo_ev_del(NULL, ev);
+    if (ISSET(ev->events, SUDO_EV_SIGINFO))
+	free(ev->closure);
     free(ev);
+
     debug_return;
+}
+
+static void
+sudo_ev_handler(int signo, siginfo_t *info, void *context)
+{
+    unsigned char ch = (unsigned char)signo;
+
+    if (signal_base != NULL) {
+	/*
+	 * Update signals_pending[] and siginfo[].
+	 * All signals must be blocked any time siginfo[] is accessed.
+	 */
+	memcpy(signal_base->siginfo[signo], info, sizeof(*info));
+	signal_base->signal_pending[signo] = 1;
+	signal_base->signal_caught = 1;
+
+	/* Wake up the other end of the pipe. */
+	while (write(signal_base->signal_pipe[0], &ch, 1) == -1) {
+	    if (errno != EINTR)
+		break;
+	}
+    }
+}
+
+int
+sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
+    bool tohead)
+{
+    const int signo = ev->fd;
+    debug_decl(sudo_ev_add_signal, SUDO_DEBUG_EVENT)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: adding event %p to base %p, signal %d, events %d",
+	__func__, ev, base, signo, ev->events);
+    if (signo >= NSIG) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: signo %d larger than max %d", __func__, signo, NSIG - 1);
+	debug_return_int(-1);
+    }
+    if ((ev->events & ~(SUDO_EV_SIGNAL|SUDO_EV_SIGINFO|SUDO_EV_PERSIST)) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: invalid event set 0x%x", __func__, ev->events);
+	debug_return_int(-1);
+    }
+
+    /*
+     * Allocate base->siginfo[signo] and base->orig_handlers[signo] as needed.
+     */
+    if (base->siginfo[signo] == NULL) {
+	base->siginfo[signo] = malloc(sizeof(*base->siginfo[signo]));
+	if (base->siginfo[signo] == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: unable to allocate siginfo for signo %d",
+		__func__, signo);
+	    debug_return_int(-1);
+	}
+    }
+    if (base->orig_handlers[signo] == NULL) {
+	base->orig_handlers[signo] =
+	    malloc(sizeof(*base->orig_handlers[signo]));
+	if (base->orig_handlers[signo] == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: unable to allocate orig_handlers for signo %d",
+		__func__, signo);
+	    debug_return_int(-1);
+	}
+    }
+
+    /* Install signal handler as needed, saving the original value. */
+    if (TAILQ_EMPTY(&base->signals[signo])) {
+	struct sigaction sa;
+        memset(&sa, 0, sizeof(sa));
+        sigfillset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART|SA_SIGINFO;
+        sa.sa_sigaction = sudo_ev_handler;
+        if (sigaction(signo, &sa, base->orig_handlers[signo]) != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: unable to install handler for signo %d", __func__, signo);
+	    debug_return_int(-1);
+	}
+	base->num_handlers++;
+    }
+
+    /*
+     * Insert signal event into the proper tail queue.
+     * Signal events are always persistent.
+     */
+    ev->base = base;
+    if (tohead) {
+	TAILQ_INSERT_HEAD(&base->signals[signo], ev, entries);
+    } else {
+	TAILQ_INSERT_TAIL(&base->signals[signo], ev, entries);
+    }
+    SET(ev->events, SUDO_EV_PERSIST);
+    SET(ev->flags, SUDO_EVQ_INSERTED);
+
+    /* Add the internal signal_pipe event on demand. */
+    if (!ISSET(base->signal_event.flags, SUDO_EVQ_INSERTED))
+	sudo_ev_add(base, &base->signal_event, NULL, true);
+
+    /* Update global signal base so handler to update signals_pending[] */
+    signal_base = base;
+
+    debug_return_int(0);
 }
 
 int
@@ -173,6 +411,10 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 	}
     } else {
+	/* Special handling for signal events. */
+	if (ev->events & (SUDO_EV_SIGNAL|SUDO_EV_SIGINFO))
+	    debug_return_int(sudo_ev_add_signal(base, ev, tohead));
+
 	/* Add event to the base. */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: adding event %p to base %p, fd %d, events %d",
@@ -214,6 +456,10 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
     debug_return_int(0);
 }
 
+/*
+ * Remove an event from the base, if specified, or the base embedded
+ * in the event if not.  Note that there are multiple tail queues.
+ */
 int
 sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
 {
@@ -240,22 +486,46 @@ sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
 	debug_return_int(-1);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: removing event %p from base %p, fd %d, events %d",
-	__func__, ev, base, ev->fd, ev->events);
+    if (ev->events & (SUDO_EV_SIGNAL|SUDO_EV_SIGINFO)) {
+	const int signo = ev->fd;
 
-    /* Call backend. */
-    if (ev->events & (SUDO_EV_READ|SUDO_EV_WRITE)) {
-	if (sudo_ev_del_impl(base, ev) != 0)
-	    debug_return_int(-1);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: removing event %p from base %p, signo %d, events %d",
+	    __func__, ev, base, signo, ev->events);
+
+	/* Unlink from signal event list. */
+	TAILQ_REMOVE(&base->signals[signo], ev, entries);
+	if (TAILQ_EMPTY(&base->signals[signo])) {
+	    if (sigaction(signo, base->orig_handlers[signo], NULL) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "%s: unable to restore handler for signo %d",
+		    __func__, signo);
+		debug_return_int(-1);
+	    }
+	    base->num_handlers--;
+	}
+	if (base->num_handlers == 0) {
+	    /* No registered signal events, remove internal event. */
+	    sudo_ev_del(base, &base->signal_event);
+	}
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: removing event %p from base %p, fd %d, events %d",
+	    __func__, ev, base, ev->fd, ev->events);
+
+	/* Call backend. */
+	if (ev->events & (SUDO_EV_READ|SUDO_EV_WRITE)) {
+	    if (sudo_ev_del_impl(base, ev) != 0)
+		debug_return_int(-1);
+	}
+
+	/* Unlink from event list. */
+	TAILQ_REMOVE(&base->events, ev, entries);
+
+	/* Unlink from timeouts list. */
+	if (ISSET(ev->flags, SUDO_EVQ_TIMEOUTS))
+	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
     }
-
-    /* Unlink from event list. */
-    TAILQ_REMOVE(&base->events, ev, entries);
-
-    /* Unlink from timeouts list. */
-    if (ISSET(ev->flags, SUDO_EVQ_TIMEOUTS))
-	TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 
     /* Unlink from active list. */
     if (ISSET(ev->flags, SUDO_EVQ_ACTIVE))
@@ -302,8 +572,14 @@ rescan:
 	nready = sudo_ev_scan_impl(base, flags);
 	switch (nready) {
 	case -1:
-	    if (errno == EINTR || errno == ENOMEM)
+	    if (errno == ENOMEM)
 		continue;
+	    if (errno == EINTR) {
+		/* Interrupted by signal, check for sigevents. */
+		if (sudo_ev_activate_sigevents(base))
+		    break;
+		continue;
+	    }
 	    rc = -1;
 	    goto done;
 	case 0:
@@ -330,6 +606,9 @@ rescan:
 	    /* I/O events active, sudo_ev_scan_impl() already added them. */
 	    break;
 	}
+
+	/* Activate signal events, if any. */
+	sudo_ev_activate_sigevents(base);
 
 	/*
 	 * Service each event in the active queue.

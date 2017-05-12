@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 #ifndef SUDO_EVENT_H
 #define SUDO_EVENT_H
 
+#include <signal.h>	/* for sigatomic_t and NSIG */
 #include "sudo_queue.h"
 
 /* Event types */
@@ -24,6 +25,8 @@
 #define SUDO_EV_READ		0x02	/* fire when readable */
 #define SUDO_EV_WRITE		0x04	/* fire when writable */
 #define SUDO_EV_PERSIST		0x08	/* persist until deleted */
+#define SUDO_EV_SIGNAL		0x10	/* fire on signal receipt */
+#define SUDO_EV_SIGINFO		0x20	/* fire on signal receipt (siginfo) */
 
 /* Event flags (internal) */
 #define SUDO_EVQ_INSERTED	0x01	/* event is on the event queue */
@@ -45,13 +48,22 @@
 
 typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
 
+/*
+ * Container for SUDO_EV_SIGINFO events that gets passed as the closure
+ * pointer.  This allows us to pass a siginfo_t without changing everything.
+ */
+struct sudo_ev_siginfo_container {
+    void *closure;
+    siginfo_t siginfo;
+};
+
 /* Member of struct sudo_event_base. */
 struct sudo_event {
     TAILQ_ENTRY(sudo_event) entries;
     TAILQ_ENTRY(sudo_event) active_entries;
     TAILQ_ENTRY(sudo_event) timeouts_entries;
     struct sudo_event_base *base; /* base this event belongs to */
-    int fd;			/* fd we are interested in */
+    int fd;			/* fd/signal we are interested in */
     short events;		/* SUDO_EV_* flags (in) */
     short revents;		/* SUDO_EV_* flags (out) */
     short flags;		/* internal event flags */
@@ -60,13 +72,20 @@ struct sudo_event {
     struct timeval timeout;	/* for SUDO_EV_TIMEOUT */
     void *closure;		/* user-provided data pointer */
 };
-
 TAILQ_HEAD(sudo_event_list, sudo_event);
 
 struct sudo_event_base {
     struct sudo_event_list events; /* tail queue of all events */
     struct sudo_event_list active; /* tail queue of active events */
     struct sudo_event_list timeouts; /* tail queue of timeout events */
+    struct sudo_event signal_event; /* storage for signal pipe event */
+    struct sudo_event_list signals[NSIG]; /* array of signal event tail queues */
+    struct sigaction *orig_handlers[NSIG]; /* original signal handlers */
+    siginfo_t *siginfo[NSIG];	/* detailed signal info */
+    sig_atomic_t signal_pending[NSIG]; /* pending signals */
+    sig_atomic_t signal_caught;	/* at least one signal caught */
+    int num_handlers;		/* number of installed handlers */
+    int signal_pipe[2];		/* so we can wake up on singal */
 #ifdef HAVE_POLL
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */
