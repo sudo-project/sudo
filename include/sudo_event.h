@@ -54,7 +54,8 @@ typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
  */
 struct sudo_ev_siginfo_container {
     void *closure;
-    siginfo_t siginfo;
+    siginfo_t *siginfo;
+    char si_buf[1];
 };
 
 /* Member of struct sudo_event_base. */

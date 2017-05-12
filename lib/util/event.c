@@ -114,7 +114,13 @@ sudo_ev_activate_sigevents(struct sudo_event_base *base)
 	TAILQ_FOREACH(ev, &base->signals[i], entries) {
 	    if (ISSET(ev->events, SUDO_EV_SIGINFO)) {
 		struct sudo_ev_siginfo_container *sc = ev->closure;
-		memcpy(&sc->siginfo, base->siginfo[i], sizeof(sc->siginfo));
+		if (base->siginfo[i]->si_signo == 0) {
+		    /* No siginfo available. */
+		    sc->siginfo = NULL;
+		} else {
+		    sc->siginfo = (siginfo_t *)sc->si_buf;
+		    memcpy(sc->siginfo, base->siginfo[i], sizeof(siginfo_t));
+		}
 	    }
 	    /* Make event active. */
 	    ev->revents = ev->events & (SUDO_EV_SIGNAL|SUDO_EV_SIGINFO);
@@ -248,7 +254,7 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
     /* For SUDO_EV_SIGINFO we use a container to store closure + siginfo_t */
     if (ISSET(events, SUDO_EV_SIGINFO)) {
 	struct sudo_ev_siginfo_container *container =
-	    malloc(sizeof(*container));
+	    malloc(sizeof(*container) + sizeof(siginfo_t) - 1);
 	if (container == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to allocate siginfo container", __func__);
@@ -290,8 +296,12 @@ sudo_ev_handler(int signo, siginfo_t *info, void *context)
 	/*
 	 * Update signals_pending[] and siginfo[].
 	 * All signals must be blocked any time siginfo[] is accessed.
+	 * If no siginfo available, zero out the struct in base.
 	 */
-	memcpy(signal_base->siginfo[signo], info, sizeof(*info));
+	if (info == NULL)
+	    memset(signal_base->siginfo[signo], 0, sizeof(*info));
+	else
+	    memcpy(signal_base->siginfo[signo], info, sizeof(*info));
 	signal_base->signal_pending[signo] = 1;
 	signal_base->signal_caught = 1;
 
