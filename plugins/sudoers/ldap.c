@@ -1453,6 +1453,11 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
 			    ldap_value_free_len(bv);
 			    goto oom;
 			}
+#ifdef __clang_analyzer__
+			/* clang analyzer false positive */
+			if (__builtin_expect(netgroups->stqh_last == NULL, 0))
+			    __builtin_trap();
+#endif
 			STAILQ_INSERT_TAIL(netgroups, ng, entries);
 			DPRINTF1("Found new netgroup %s for %s", ng->name, base);
 		    }
