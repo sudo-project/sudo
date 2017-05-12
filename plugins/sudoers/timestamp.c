@@ -465,7 +465,7 @@ timestamp_lock_record(int fd, off_t pos, off_t len)
     got_signal = 0;
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT; /* don't restart system calls */
+    sa.sa_flags = 0; /* don't restart system calls */
     sa.sa_handler = timestamp_handler;
     (void) sigaction(SIGINT, &sa, &saveint);
     (void) sigaction(SIGQUIT, &sa, &savequit);

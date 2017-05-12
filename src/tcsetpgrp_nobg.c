@@ -60,7 +60,7 @@ tcsetpgrp_nobg(int fd, pid_t pgrp_id)
      */
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+    sa.sa_flags = 0; /* do not restart syscalls */
     sa.sa_handler = sigttou;
     got_sigttou = 0;
     (void)sigaction(SIGTTOU, &sa, &osa);

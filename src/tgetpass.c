@@ -157,7 +157,7 @@ restart:
      */
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT;	/* don't restart system calls */
+    sa.sa_flags = 0;	/* don't restart system calls */
     sa.sa_handler = tgetpass_handler;
     (void) sigaction(SIGALRM, &sa, &savealrm);
     (void) sigaction(SIGINT, &sa, &saveint);

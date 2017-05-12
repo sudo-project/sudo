@@ -250,16 +250,9 @@ __dso_public int isblank(int);
 
 /*
  * Add IRIX-like sigaction_t for those without it.
- * SA_RESTART is not required by POSIX; SunOS has SA_INTERRUPT instead.
  */
 #ifndef HAVE_SIGACTION_T
 typedef struct sigaction sigaction_t;
-#endif
-#ifndef SA_INTERRUPT
-# define SA_INTERRUPT	0
-#endif
-#ifndef SA_RESTART
-# define SA_RESTART	0
 #endif
 
 /*
