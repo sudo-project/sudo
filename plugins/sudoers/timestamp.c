@@ -170,7 +170,11 @@ ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
 		sudo_warn(U_("unable to mkdir %s"), path);
 	    ret = false;
 	} else {
-	    ignore_result(chown(path, owner, group));
+	    if (chown(path, owner, group) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to chown %d:%d %s", __func__,
+		    (int)owner, (int)group, path);
+	    }
 	}
     }
     umask(omask);

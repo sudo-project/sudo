@@ -103,10 +103,20 @@ io_mkdirs(char *path)
     }
     if (ok) {
 	if (S_ISDIR(sb.st_mode)) {
-	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid)
-		ignore_result(chown(path, iolog_uid, iolog_gid));
-	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode)
-		ignore_result(chmod(path, iolog_dirmode));
+	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid) {
+		if (chown(path, iolog_uid, iolog_gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chown %d:%d %s", __func__,
+			(int)iolog_uid, (int)iolog_gid, path);
+		}
+	    }
+	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode) {
+		if (chmod(path, iolog_dirmode) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chmod 0%o %s", __func__,
+			(int)iolog_dirmode, path);
+		}
+	    }
 	} else {
 	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
@@ -135,7 +145,11 @@ io_mkdirs(char *path)
 	    if (!ok)
 		sudo_warn(U_("unable to mkdir %s"), path);
 	} else {
-	    ignore_result(chown(path, iolog_uid, iolog_gid));
+	    if (chown(path, iolog_uid, iolog_gid) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to chown %d:%d %s", __func__,
+		    (int)iolog_uid, (int)iolog_gid, path);
+	    }
 	}
     }
     if (uid_changed) {
@@ -405,7 +419,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
-    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+    if (fchown(fd, iolog_uid, iolog_gid) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to fchown %d:%d %s", __func__,
+	    (int)iolog_uid, (int)iolog_gid, pathbuf);
+    }
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
@@ -421,7 +439,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2 = io_open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
-		ignore_result(fchown(fd2, iolog_uid, iolog_gid));
+		if (fchown(fd2, iolog_uid, iolog_gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to fchown %d:%d %s", __func__,
+			(int)iolog_uid, (int)iolog_gid, fallback);
+		}
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
 		    if (buf[nread - 1] == '\n')
@@ -541,7 +563,11 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     if (iol->enabled) {
 	int fd = io_open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
 	if (fd != -1) {
-	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+	    if (fchown(fd, iolog_uid, iolog_gid) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to fchown %d:%d %s", __func__,
+		    (int)iolog_uid, (int)iolog_gid, pathbuf);
+	    }
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
@@ -777,7 +803,11 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);
     }
-    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+    if (fchown(fd, iolog_uid, iolog_gid) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to fchown %d:%d %s", __func__,
+	    (int)iolog_uid, (int)iolog_gid, pathbuf);
+    }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,

@@ -697,10 +697,20 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	 */
 	(void) unlink(sp->tpath);
 	if (!oldperms && fstat(sp->fd, &sb) != -1) {
-	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid)
-		ignore_result(chown(sp->path, sudoers_uid, sudoers_gid));
-	    if ((sb.st_mode & ACCESSPERMS) != sudoers_mode)
-		ignore_result(chmod(sp->path, sudoers_mode));
+	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
+		if (chown(sp->path, sudoers_uid, sudoers_gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chown %d:%d %s", __func__,
+			(int)sudoers_uid, (int)sudoers_gid, sp->path);
+		}
+	    }
+	    if ((sb.st_mode & ACCESSPERMS) != sudoers_mode) {
+		if (chmod(sp->path, sudoers_mode) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chmod 0%o %s", __func__,
+			(int)sudoers_mode, sp->path);
+		}
+	    }
 	}
 	ret = true;
 	goto done;

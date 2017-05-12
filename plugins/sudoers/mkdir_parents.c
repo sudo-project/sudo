@@ -51,8 +51,13 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
 	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (unsigned int)mode,
 	    (int)uid, (int)gid);
 	if (mkdir(path, mode) == 0) {
-	    if (uid != (uid_t)-1 && gid != (gid_t)-1)
-		ignore_result(chown(path, uid, gid));
+	    if (uid != (uid_t)-1 && gid != (gid_t)-1) {
+		if (chown(path, uid, gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chown %d:%d %s", __func__,
+			(int)uid, (int)gid, path);
+		}
+	    }
 	} else {
 	    if (errno != EEXIST) {
 		if (!quiet)
