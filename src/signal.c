@@ -127,7 +127,6 @@ init_signals(void)
 
     for (ss = saved_signals; ss->signo > 0; ss++) {
 	switch (ss->signo) {
-	    case SIGCHLD:
 	    case SIGCONT:
 	    case SIGPIPE:
 	    case SIGTTIN:
