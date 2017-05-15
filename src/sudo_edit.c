@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008, 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,9 +39,6 @@
 #include <fcntl.h>
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
-#endif
-#ifdef HAVE_SELINUX
-# include <selinux/selinux.h>
 #endif
 
 #include "sudo.h"
