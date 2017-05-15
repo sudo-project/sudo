@@ -30,7 +30,6 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
-#ifdef TIOCGWINSZ
 static int
 get_ttysize_ioctl(int *rowp, int *colp)
 {
@@ -45,13 +44,6 @@ get_ttysize_ioctl(int *rowp, int *colp)
     }
     debug_return_int(-1);
 }
-#else
-static int
-get_ttysize_ioctl(int *rowp, int *colp)
-{
-    return -1;
-}
-#endif /* TIOCGWINSZ */
 
 void
 sudo_get_ttysize_v1(int *rowp, int *colp)
