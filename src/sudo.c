@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,18 +45,8 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_LOGIN_CAP_H
-# include <login_cap.h>
-# ifndef LOGIN_SETENV
-#  define LOGIN_SETENV	0
-# endif
-#endif
-#ifdef HAVE_PROJECT_H
-# include <project.h>
-# include <sys/task.h>
-#endif
 #ifdef HAVE_SELINUX
-# include <selinux/selinux.h>
+# include <selinux/selinux.h>		/* for is_selinux_enabled() */
 #endif
 #ifdef HAVE_SETAUTHDB
 # include <usersec.h>
@@ -107,7 +97,6 @@ static struct sudo_gc_list sudo_gc_list = SLIST_HEAD_INITIALIZER(sudo_gc_list);
  * Local functions
  */
 static void fix_fds(void);
-static void disable_coredump(bool restore);
 static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
@@ -138,10 +127,6 @@ static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
 static void iolog_unlink(struct plugin_container *plugin);
-
-#ifdef __linux__
-static struct rlimit nproclimit;
-#endif
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -296,6 +281,8 @@ main(int argc, char *argv[], char *envp[])
 	    command_info_to_details(command_info, &command_details);
 	    command_details.argv = argv_out;
 	    command_details.envp = user_env_out;
+	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
+		SET(command_details.flags, CD_LOGIN_SHELL);
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
 	    /* Become full root (not just setuid) so user cannot kill us. */
@@ -898,7 +885,7 @@ sudo_check_suid(const char *sudo)
  * Called with restore set to true before executing the command.
  * Not all operating systems disable core dumps for setuid processes.
  */
-static void
+void
 disable_coredump(bool restore)
 {
     struct rlimit rl;
@@ -930,47 +917,7 @@ disable_coredump(bool restore)
     debug_return;
 }
 
-/*
- * Unlimit the number of processes since Linux's setuid() will
- * apply resource limits when changing uid and return EAGAIN if
- * nproc would be exceeded by the uid switch.
- */
-static void
-unlimit_nproc(void)
-{
-#ifdef __linux__
-    struct rlimit rl;
-    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
-
-    if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
-	sudo_warn("getrlimit");
-    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
-    if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
-	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
-	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
-	    sudo_warn("setrlimit");
-    }
-    debug_return;
-#endif /* __linux__ */
-}
-
-/*
- * Restore saved value of RLIMIT_NPROC.
- */
-static void
-restore_nproc(void)
-{
-#ifdef __linux__
-    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
-
-    if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
-	sudo_warn("setrlimit");
-
-    debug_return;
-#endif /* __linux__ */
-}
-
-static bool
+bool
 set_user_groups(struct command_details *details)
 {
     bool ret = false;
@@ -1000,163 +947,6 @@ set_user_groups(struct command_details *details)
 
 done:
     CLR(details->flags, CD_SET_GROUPS);
-    debug_return_bool(ret);
-}
-
-/*
- * Setup the execution environment immediately prior to the call to execve().
- * Group setup is performed by policy_init_session(), called earlier.
- * Returns true on success and false on failure.
- */
-bool
-exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
-{
-    bool ret = false;
-    debug_decl(exec_setup, SUDO_DEBUG_EXEC)
-
-#ifdef HAVE_SELINUX
-    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-	if (selinux_setup(details->selinux_role, details->selinux_type,
-	    ptyname ? ptyname : user_details.tty, ptyfd) == -1)
-	    goto done;
-    }
-#endif
-
-    /* Restore coredumpsize resource limit before running. */
-    if (sudo_conf_disable_coredump())
-	disable_coredump(true);
-
-    if (details->pw != NULL) {
-#ifdef HAVE_PROJECT_H
-	set_project(details->pw);
-#endif
-#ifdef HAVE_PRIV_SET
-	if (details->privs != NULL) {
-	    if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
-		sudo_warn("unable to set privileges");
-		goto done;
-	    }
-	}
-	if (details->limitprivs != NULL) {
-	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
-		sudo_warn("unable to set limit privileges");
-		goto done;
-	    }
-	} else if (details->privs != NULL) {
-	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
-		sudo_warn("unable to set limit privileges");
-		goto done;
-	    }
-	}
-#endif /* HAVE_PRIV_SET */
-
-#ifdef HAVE_GETUSERATTR
-	if (aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty) != 0) {
-	    /* error message displayed by aix_prep_user */
-	    goto done;
-	}
-#endif
-#ifdef HAVE_LOGIN_CAP_H
-	if (details->login_class) {
-	    int flags;
-	    login_cap_t *lc;
-
-	    /*
-	     * We only use setusercontext() to set the nice value and rlimits
-	     * unless this is a login shell (sudo -i).
-	     */
-	    lc = login_getclass((char *)details->login_class);
-	    if (!lc) {
-		sudo_warnx(U_("unknown login class %s"), details->login_class);
-		errno = ENOENT;
-		goto done;
-	    }
-	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-		/* Set everything except user, group and login name. */
-		flags = LOGIN_SETALL;
-		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER|LOGIN_SETENV|LOGIN_SETPATH);
-		CLR(details->flags, CD_SET_UMASK); /* LOGIN_UMASK instead */
-	    } else {
-		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
-	    }
-	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
-		sudo_warn(U_("unable to set user context"));
-		if (details->pw->pw_uid != ROOT_UID)
-		    goto done;
-	    }
-	}
-#endif /* HAVE_LOGIN_CAP_H */
-    }
-
-    if (ISSET(details->flags, CD_SET_GROUPS)) {
-	/* set_user_groups() prints error message on failure. */
-	if (!set_user_groups(details))
-	    goto done;
-    }
-
-    if (ISSET(details->flags, CD_SET_PRIORITY)) {
-	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
-	    sudo_warn(U_("unable to set process priority"));
-	    goto done;
-	}
-    }
-    if (ISSET(details->flags, CD_SET_UMASK))
-	(void) umask(details->umask);
-    if (details->chroot) {
-	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
-	    sudo_warn(U_("unable to change root to %s"), details->chroot);
-	    goto done;
-	}
-    }
-
-    /* 
-     * Unlimit the number of processes since Linux's setuid() will
-     * return EAGAIN if RLIMIT_NPROC would be exceeded by the uid switch.
-     */
-    unlimit_nproc();
-
-#if defined(HAVE_SETRESUID)
-    if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->uid, (unsigned int)details->euid);
-	goto done;
-    }
-#elif defined(HAVE_SETREUID)
-    if (setreuid(details->uid, details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->uid, (unsigned int)details->euid);
-	goto done;
-    }
-#else
-    /* Cannot support real user ID that is different from effective user ID. */
-    if (setuid(details->euid) != 0) {
-	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
-	    (unsigned int)details->euid, (unsigned int)details->euid);
-	goto done;
-    }
-#endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
-
-    /* Restore previous value of RLIMIT_NPROC. */
-    restore_nproc();
-
-    /*
-     * Only change cwd if we have chroot()ed or the policy modules
-     * specifies a different cwd.  Must be done after uid change.
-     */
-    if (details->cwd != NULL) {
-	if (details->chroot || user_details.cwd == NULL ||
-	    strcmp(details->cwd, user_details.cwd) != 0) {
-	    /* Note: cwd is relative to the new root, if any. */
-	    if (chdir(details->cwd) != 0) {
-		sudo_warn(U_("unable to change directory to %s"), details->cwd);
-		goto done;
-	    }
-	}
-    }
-
-    ret = true;
-
-done:
     debug_return_bool(ret);
 }
 

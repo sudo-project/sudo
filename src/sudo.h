@@ -130,6 +130,7 @@ struct user_details {
 #define CD_SUDOEDIT_FOLLOW	0x10000
 #define CD_SUDOEDIT_CHECKDIR	0x20000
 #define CD_SET_GROUPS		0x40000
+#define CD_LOGIN_SHELL		0x80000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -206,11 +207,12 @@ extern int tgetpass_flags;
 bool get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
 
 /* sudo.c */
-bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
+void disable_coredump(bool restore);
+bool set_user_groups(struct command_details *details);
 extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;

@@ -17,6 +17,8 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -28,13 +30,225 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pwd.h>
 #include <signal.h>
+#ifdef HAVE_LOGIN_CAP_H
+# include <login_cap.h>
+# ifndef LOGIN_SETENV
+#  define LOGIN_SETENV  0
+# endif
+#endif
+#ifdef HAVE_PROJECT_H
+# include <project.h>
+# include <sys/task.h>
+#endif
 
 #include "sudo.h"
 #include "sudo_exec.h"
 #include "sudo_event.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+
+#ifdef __linux__
+static struct rlimit nproclimit;
+#endif
+
+/*
+ * Unlimit the number of processes since Linux's setuid() will
+ * apply resource limits when changing uid and return EAGAIN if
+ * nproc would be exceeded by the uid switch.
+ */
+static void
+unlimit_nproc(void)
+{
+#ifdef __linux__
+    struct rlimit rl;
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+
+    if (getrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("getrlimit");
+    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
+    if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
+	rl.rlim_cur = rl.rlim_max = nproclimit.rlim_max;
+	if (setrlimit(RLIMIT_NPROC, &rl) != 0)
+	    sudo_warn("setrlimit");
+    }
+    debug_return;
+#endif /* __linux__ */
+}
+
+/*
+ * Restore saved value of RLIMIT_NPROC.
+ */
+static void
+restore_nproc(void)
+{
+#ifdef __linux__
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+
+    if (setrlimit(RLIMIT_NPROC, &nproclimit) != 0)
+	sudo_warn("setrlimit");
+
+    debug_return;
+#endif /* __linux__ */
+}
+
+/*
+ * Setup the execution environment immediately prior to the call to execve().
+ * Group setup is performed by policy_init_session(), called earlier.
+ * Returns true on success and false on failure.
+ */
+static bool
+exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
+{
+    bool ret = false;
+    debug_decl(exec_setup, SUDO_DEBUG_EXEC)
+
+#ifdef HAVE_SELINUX
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+	if (selinux_setup(details->selinux_role, details->selinux_type,
+	    ptyname ? ptyname : user_details.tty, ptyfd) == -1)
+	    goto done;
+    }
+#endif
+
+    /* Restore coredumpsize resource limit before running. */
+    if (sudo_conf_disable_coredump())
+	disable_coredump(true);
+
+    if (details->pw != NULL) {
+#ifdef HAVE_PROJECT_H
+	set_project(details->pw);
+#endif
+#ifdef HAVE_PRIV_SET
+	if (details->privs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
+		sudo_warn("unable to set privileges");
+		goto done;
+	    }
+	}
+	if (details->limitprivs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
+		sudo_warn("unable to set limit privileges");
+		goto done;
+	    }
+	} else if (details->privs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
+		sudo_warn("unable to set limit privileges");
+		goto done;
+	    }
+	}
+#endif /* HAVE_PRIV_SET */
+
+#ifdef HAVE_GETUSERATTR
+	if (aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty) != 0) {
+	    /* error message displayed by aix_prep_user */
+	    goto done;
+	}
+#endif
+#ifdef HAVE_LOGIN_CAP_H
+	if (details->login_class) {
+	    int flags;
+	    login_cap_t *lc;
+
+	    /*
+	     * We only use setusercontext() to set the nice value and rlimits
+	     * unless this is a login shell (sudo -i).
+	     */
+	    lc = login_getclass((char *)details->login_class);
+	    if (!lc) {
+		sudo_warnx(U_("unknown login class %s"), details->login_class);
+		errno = ENOENT;
+		goto done;
+	    }
+	    if (ISSET(details->flags, CD_LOGIN_SHELL)) {
+		/* Set everything except user, group and login name. */
+		flags = LOGIN_SETALL;
+		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER|LOGIN_SETENV|LOGIN_SETPATH);
+		CLR(details->flags, CD_SET_UMASK); /* LOGIN_UMASK instead */
+	    } else {
+		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
+	    }
+	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
+		sudo_warn(U_("unable to set user context"));
+		if (details->pw->pw_uid != ROOT_UID)
+		    goto done;
+	    }
+	}
+#endif /* HAVE_LOGIN_CAP_H */
+    }
+
+    if (ISSET(details->flags, CD_SET_GROUPS)) {
+	/* set_user_groups() prints error message on failure. */
+	if (!set_user_groups(details))
+	    goto done;
+    }
+
+    if (ISSET(details->flags, CD_SET_PRIORITY)) {
+	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
+	    sudo_warn(U_("unable to set process priority"));
+	    goto done;
+	}
+    }
+    if (ISSET(details->flags, CD_SET_UMASK))
+	(void) umask(details->umask);
+    if (details->chroot) {
+	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
+	    sudo_warn(U_("unable to change root to %s"), details->chroot);
+	    goto done;
+	}
+    }
+
+    /* 
+     * Unlimit the number of processes since Linux's setuid() will
+     * return EAGAIN if RLIMIT_NPROC would be exceeded by the uid switch.
+     */
+    unlimit_nproc();
+
+#if defined(HAVE_SETRESUID)
+    if (setresuid(details->uid, details->euid, details->euid) != 0) {
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->uid, (unsigned int)details->euid);
+	goto done;
+    }
+#elif defined(HAVE_SETREUID)
+    if (setreuid(details->uid, details->euid) != 0) {
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->uid, (unsigned int)details->euid);
+	goto done;
+    }
+#else
+    /* Cannot support real user ID that is different from effective user ID. */
+    if (setuid(details->euid) != 0) {
+	sudo_warn(U_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->euid, (unsigned int)details->euid);
+	goto done;
+    }
+#endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
+
+    /* Restore previous value of RLIMIT_NPROC. */
+    restore_nproc();
+
+    /*
+     * Only change cwd if we have chroot()ed or the policy modules
+     * specifies a different cwd.  Must be done after uid change.
+     */
+    if (details->cwd != NULL) {
+	if (details->chroot || user_details.cwd == NULL ||
+	    strcmp(details->cwd, user_details.cwd) != 0) {
+	    /* Note: cwd is relative to the new root, if any. */
+	    if (chdir(details->cwd) != 0) {
+		sudo_warn(U_("unable to change directory to %s"), details->cwd);
+		goto done;
+	    }
+	}
+    }
+
+    ret = true;
+
+done:
+    debug_return_bool(ret);
+}
 
 /*
  * Setup the execution environment and execute the command.
