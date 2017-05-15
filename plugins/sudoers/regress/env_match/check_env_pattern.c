@@ -24,8 +24,9 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <time.h>		/* for sudo_compat.h */
+#include <grp.h>		/* for sudo_compat.h */
 
-#include "sudo_compat.h"
 #include "sudoers.h"
 
 __dso_public int main(int argc, char *argv[]);
