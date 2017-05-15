@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <termios.h>
+#include <termios.h>		/* for struct winsize on HP-UX */
 #include <limits.h>
 
 #include "sudo_compat.h"

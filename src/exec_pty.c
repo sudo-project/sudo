@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <termios.h>		/* for struct winsize on HP-UX */
 
 #include "sudo.h"
 #include "sudo_event.h"
