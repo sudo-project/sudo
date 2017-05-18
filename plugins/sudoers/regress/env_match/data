@@ -17,3 +17,6 @@ fo*o*() foooo 0
 MYPATH=*:/mydir:* MYPATH=/dir1/subdir1:/mydir:/dir2:/dir3/subdir2 2
 MYPATH=*:/mydir:** MYPATH=/dir1/subdir1:/mydir:/dir2:/dir3/subdir2 2
 MYPATH=*:/mdir:* MYPATH=/dir1/subdir1:/mydir:/dir2:/dir3/subdir2 0
+a*a*a*a*a*a* aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=b 1
+a*a*a*a*a*a*=b* aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=b 2
+a*a*a*a*a*a*=* aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=c 1
