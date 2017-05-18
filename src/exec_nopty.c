@@ -550,7 +550,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		__func__, (int)ec->cmnd_pid, WEXITSTATUS(status));
 	}
 	/* Don't overwrite execve() failure with command exit status. */
-	if (ec->cstat->type != CMD_ERRNO) {
+	if (ec->cstat->type == CMD_INVALID) {
 	    ec->cstat->type = CMD_WSTATUS;
 	    ec->cstat->val = status;
 	}

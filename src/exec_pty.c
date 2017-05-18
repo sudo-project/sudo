@@ -734,7 +734,7 @@ backchannel_cb(int fd, int what, void *v)
 		/* Nothing ready. */
 		break;
 	    default:
-		if (ec->cstat->val != CMD_WSTATUS) {
+		if (ec->cstat->val == CMD_INVALID) {
 		    ec->cstat->type = CMD_ERRNO;
 		    ec->cstat->val = errno;
 		    sudo_debug_printf(SUDO_DEBUG_ERROR,
@@ -795,7 +795,7 @@ backchannel_cb(int fd, int what, void *v)
 	    break;
 	default:
 	    /* Short read, should not happen. */
-	    if (ec->cstat->val != CMD_WSTATUS) {
+	    if (ec->cstat->val == CMD_INVALID) {
 		ec->cstat->type = CMD_ERRNO;
 		ec->cstat->val = EIO;
 		sudo_debug_printf(SUDO_DEBUG_ERROR,

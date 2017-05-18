@@ -193,7 +193,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
     }
 
     /* Don't overwrite execve() failure with child exit status. */
-    if (mc->cstat->type != CMD_ERRNO) {
+    if (mc->cstat->type == CMD_INVALID) {
 	/*
 	 * Store wait status in cstat and forward to parent if stopped.
 	 */
