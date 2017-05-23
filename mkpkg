@@ -122,6 +122,12 @@ fi
 # Choose compiler options by osversion if not cross-compiling.
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
+	macos*)
+	    # Use clang on macOS if present
+	    if [ -z "$CC" -a -x /usr/bin/clang ]; then
+		CC=/usr/bin/clang; export CC
+	    fi
+	    ;;
 	sol[0-9]*)
 	    # Use the Sun Studio C compiler on Solaris if possible
 	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
