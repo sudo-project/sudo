@@ -103,6 +103,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	    free(rfds_in);
 	    free(wfds_in);
 	    free(rfds_out);
+	    free(wfds_out);
 	    debug_return_int(-1);
 	}
 
