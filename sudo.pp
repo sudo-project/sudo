@@ -272,9 +272,9 @@ still allow people to get their work done."
 %if [macos]
 	pp_macos_pkg_type=flat
 	pp_macos_bundle_id=ws.sudo.pkg.sudo
-	pp_macos_pkg_license=doc/LICENSE
+	pp_macos_pkg_license=$docdir/LICENSE
 	pp_macos_pkg_readme=${pp_wrkdir}/ReadMe.txt
-	perl -pe 'last if (/^What/i && $seen++)' NEWS > ${pp_wrkdir}/ReadMe.txt
+	perl -pe 'last if (/^What/i && $seen++)' $docdir/NEWS > ${pp_wrkdir}/ReadMe.txt
 %endif
 
 %if X"$aix_freeware" = X"true"
