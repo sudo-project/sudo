@@ -1,3 +1,16 @@
+What's new in Sudo 1.8.20p1
+
+ * Fixed "make check" when using OpenSSL or GNU crypt.
+   Bug #787.
+
+ * Fixed CVE-2017-1000367, a bug parsing /proc/pid/stat on Linux
+   when the process name contains spaces.  Since the user has control
+   over the command name, this could potentially be used by a user
+   with sudo access to overwrite an arbitrary file on systems with
+   SELinux enabled.  Also stop performing a breadth-first traversal
+   of /dev when looking for the device; only a hard-coded list of
+   directories are checked,
+
 What's new in Sudo 1.8.20
 
  * Added support for SASL_MECH in ldap.conf. Bug #764
