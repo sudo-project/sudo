@@ -62,12 +62,6 @@
 
 #include "sudo.h"
 
-#if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
-# define NAMLEN(dirent)	(dirent)->d_namlen
-#else
-# define NAMLEN(dirent)	strlen((dirent)->d_name)
-#endif
-
 /*
  * How to access the tty device number in struct kinfo_proc.
  */
@@ -145,22 +139,9 @@ sudo_ttyname_dev(dev_t tdev, char *name, size_t namelen)
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
 /*
- * Device nodes and directories to search before searching all of /dev
+ * Device nodes to ignore.
  */
-static char *search_devs[] = {
-    "/dev/console",
-    "/dev/pts/",	/* POSIX pty */
-    "/dev/vt/",		/* Solaris virtual console */
-    "/dev/term/",	/* Solaris serial ports */
-    "/dev/zcons/",	/* Solaris zone console */
-    "/dev/pty/",	/* HP-UX old-style pty */
-    NULL
-};
-
-/*
- * Device nodes to ignore when searching all of /dev
- */
-static char *ignore_devs[] = {
+static const char *ignore_devs[] = {
     "/dev/stdin",
     "/dev/stdout",
     "/dev/stderr",
@@ -207,7 +188,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
 	"scanning for dev %u in %s", (unsigned int)rdev, dir);
 
     sdlen = strlen(dir);
-    if (dir[sdlen - 1] == '/')
+    while (sdlen > 0 && dir[sdlen - 1] == '/')
 	sdlen--;
     if (sdlen + 1 >= sizeof(pathbuf)) {
 	errno = ERANGE;
@@ -215,32 +196,33 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
     }
     memcpy(pathbuf, dir, sdlen);
     pathbuf[sdlen++] = '/';
-    pathbuf[sdlen] = '\0';
 
     while ((dp = readdir(d)) != NULL) {
 	struct stat sb;
-	size_t d_len, len;
 
 	/* Skip anything starting with "." */
 	if (dp->d_name[0] == '.')
 	    continue;
 
-	d_len = NAMLEN(dp);
-	if (sdlen + d_len >= sizeof(pathbuf))
+	pathbuf[sdlen] = '\0';
+	if (strlcat(pathbuf, dp->d_name, sizeof(pathbuf)) >= sizeof(pathbuf)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s%s is too big to fit in pathbuf", pathbuf, dp->d_name);
 	    continue;
-	memcpy(&pathbuf[sdlen], dp->d_name, d_len + 1); /* copy NUL too */
-	d_len += sdlen;
+	}
 
+	/* Ignore device nodes listed in ignore_devs[]. */
 	for (i = 0; ignore_devs[i] != NULL; i++) {
-	    len = strlen(ignore_devs[i]);
-	    if (ignore_devs[i][len - 1] == '/')
-		len--;
-	    if (d_len == len && strncmp(pathbuf, ignore_devs[i], len) == 0)
+	    if (strcmp(pathbuf, ignore_devs[i]) == 0)
 		break;
 	}
-	if (ignore_devs[i] != NULL)
+	if (ignore_devs[i] != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"ignoring %s", pathbuf);
 	    continue;
-# if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DTTOIF)
+	}
+
+# if defined(HAVE_STRUCT_DIRENT_D_TYPE)
 	/*
 	 * Avoid excessive stat() calls by checking dp->d_type.
 	 */
@@ -248,18 +230,19 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
 	    case DT_CHR:
 	    case DT_LNK:
 	    case DT_UNKNOWN:
-		/* Could be a character device, stat() it. */
-		if (stat(pathbuf, &sb) == -1)
-		    continue;
 		break;
 	    default:
 		/* Not a character device or link, skip it. */
+		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		    "skipping non-device %s", pathbuf);
 		continue;
 	}
-# else
-	if (stat(pathbuf, &sb) == -1)
-	    continue;
 # endif
+	if (stat(pathbuf, &sb) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to stat %s", pathbuf);
+	    continue;
+	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"resolved dev %u as %s", (unsigned int)rdev, pathbuf);
@@ -281,67 +264,88 @@ done:
     debug_return_str(ret);
 }
 
+static char *
+sudo_dev_check(dev_t rdev, const char *devname, char *buf, size_t buflen)
+{
+    struct stat sb;
+    debug_decl(sudo_dev_check, SUDO_DEBUG_UTIL)
+
+    if (stat(devname, &sb) == 0) {
+	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"comparing dev %u to %s: match!",
+		(unsigned int)rdev, devname);
+	    if (strlcpy(buf, devname, buflen) < buflen)
+		debug_return_str(buf);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"unable to store %s, have %zu, need %zu",
+		devname, buflen, strlen(devname) + 1);
+	    errno = ERANGE;
+	}
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"comparing dev %u to %s: no", (unsigned int)rdev, devname);
+    debug_return_str(NULL);
+}
+
 /*
  * Like ttyname() but uses a dev_t instead of an open fd.
  * Returns name on success and NULL on failure, setting errno.
  * Generic version.
  */
 static char *
-sudo_ttyname_dev(dev_t rdev, char *name, size_t namelen)
+sudo_ttyname_dev(dev_t rdev, char *buf, size_t buflen)
 {
-    char buf[PATH_MAX], **sd, *devname;
-    char *ret = NULL;
-    struct stat sb;
+    const char *devsearch, *devsearch_end;
+    char path[PATH_MAX], *ret;
+    const char *cp, *ep;
     size_t len;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
 
     /*
-     * First check search_devs[] for common tty devices.
+     * First, check /dev/console.
      */
-    for (sd = search_devs; (devname = *sd) != NULL; sd++) {
-	len = strlen(devname);
-	if (devname[len - 1] == '/') {
-	    if (strcmp(devname, "/dev/pts/") == 0) {
-		/* Special case /dev/pts */
-		(void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
-		    (unsigned int)minor(rdev));
-		if (stat(buf, &sb) == 0) {
-		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
-			sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-			    "comparing dev %u to %s: match!",
-			    (unsigned int)rdev, buf);
-			if (strlcpy(name, buf, namelen) < namelen)
-			    ret = name;
-			else
-			    errno = ERANGE;
-			goto done;
-		    }
-		}
-		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "comparing dev %u to %s: no", (unsigned int)rdev, buf);
-	    } else {
-		/* Traverse directory */
-		ret = sudo_ttyname_scan(devname, rdev, name, namelen);
-		if (ret != NULL || errno == ENOMEM)
-		    goto done;
-	    }
-	} else {
-	    if (stat(devname, &sb) == 0) {
-		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
-		    if (strlcpy(name, devname, namelen) < namelen)
-			ret = name;
-		    else
-			errno = ERANGE;
-		    goto done;
-		}
-	    }
-	}
-    }
+    ret = sudo_dev_check(rdev, "/dev/console", buf, buflen);
+    if (ret != NULL)
+	goto done;
 
     /*
-     * Not found?  Check all device nodes in /dev.
+     * Then check the device search path.
      */
-    ret = sudo_ttyname_scan(_PATH_DEV, rdev, name, namelen);
+    devsearch = sudo_conf_devsearch_path();
+    devsearch_end = devsearch + strlen(devsearch);
+    for (cp = sudo_strsplit(devsearch, devsearch_end, ":", &ep);
+	cp != NULL; cp = sudo_strsplit(NULL, devsearch_end, ":", &ep)) {
+
+	len = (size_t)(ep - cp);
+	if (len >= sizeof(path)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"devsearch entry %.*s too long", (int)len, cp);
+	    continue;
+	}
+	memcpy(path, cp, len);
+	path[len] = '\0';
+
+	if (strcmp(path, "/dev/pts") == 0) {
+	    /* Special case /dev/pts */
+	    len = (size_t)snprintf(path, sizeof(path), "/dev/pts/%u",
+		(unsigned int)minor(rdev));
+	    if (len >= sizeof(path)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "devsearch entry /dev/pts/%u too long",
+		    (unsigned int)minor(rdev));
+		continue;
+	    }
+	    ret = sudo_dev_check(rdev, path, buf, buflen);
+	    if (ret != NULL)
+		goto done;
+	} else {
+	    /* Scan path, looking for rdev. */
+	    ret = sudo_ttyname_scan(path, rdev, buf, buflen);
+	    if (ret != NULL || errno == ENOMEM)
+		goto done;
+	}
+    }
 
 done:
     debug_return_str(ret);

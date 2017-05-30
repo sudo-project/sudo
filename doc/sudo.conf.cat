@@ -106,6 +106,15 @@ DDEESSCCRRIIPPTTIIOONN
                _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
                variable.
 
+     devsearch
+               An ordered, colon-separated search path of directories to look
+               in for device nodes.  This is used when mapping the process's
+               tty device number to a device name.  Sudo will _n_o_t recurse into
+               subdirectories.  If terminal devices may be located in a
+               subdirectory of _/_d_e_v, that path must be explicitly listed in
+               _d_e_v_s_e_a_r_c_h.  The default value is:
+               /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+
      noexec    The fully-qualified path to a shared library containing
                wrappers for the eexxeeccll(), eexxeeccllee(), eexxeeccllpp(), eexxeecctt(), eexxeeccvv(),
                eexxeeccvvee(), eexxeeccvvPP(), eexxeeccvvpp(), eexxeeccvvppee(), ffeexxeeccvvee(), ppooppeenn(),
@@ -418,4 +427,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                    October 15, 2016                    Sudo 1.8.20
+Sudo 1.8.21                      May 30, 2017                      Sudo 1.8.21

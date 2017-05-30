@@ -97,6 +97,7 @@ AC_SUBST([COMPAT_EXP])
 AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
 AC_SUBST([FILEDIGEST])
+AC_SUBST([devsearch])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -185,6 +186,7 @@ pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
 FILEDIGEST=filedigest.lo
+devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
 #
@@ -1530,6 +1532,17 @@ AC_ARG_ENABLE(tmpfiles.d,
 esac], [
     test -f /usr/lib/tmpfiles.d/systemd.conf && TMPFILES_D=/usr/lib/tmpfiles.d
 ])
+
+AC_ARG_ENABLE(devsearch,
+[AS_HELP_STRING([--enable-devsearch=PATH], [The colon-delimited path to search for device nodes when determing the tty name.])],
+[case $enableval in
+    yes)	# use default value
+		;;
+    no)		AC_MSG_WARN([Ignoring attempt to disable the device search path])
+		;;
+    *)		devsearch="$enableval"
+esac])
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_DEVSEARCH, "$devsearch")
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in

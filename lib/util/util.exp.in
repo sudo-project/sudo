@@ -7,6 +7,7 @@ sudo_conf_disable_coredump_v1
 sudo_conf_group_source_v1
 sudo_conf_max_groups_v1
 sudo_conf_noexec_path_v1
+sudo_conf_devsearch_path_v1
 sudo_conf_plugin_dir_path_v1
 sudo_conf_plugins_v1
 sudo_conf_probe_interfaces_v1

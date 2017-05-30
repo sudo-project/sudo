@@ -123,6 +123,10 @@
 # undef _PATH_SUDO_PLUGIN_DIR
 #endif /* _PATH_SUDO_PLUGIN_DIR */
 
+#ifndef _PATH_SUDO_DEVSEARCH
+# undef _PATH_SUDO_DEVSEARCH
+#endif /* _PATH_SUDO_DEVSEARCH */
+
 #ifndef _PATH_VI
 # undef _PATH_VI
 #endif /* _PATH_VI */

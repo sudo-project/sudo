@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd October 15, 2016
+.Dd May 30, 2017
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -215,6 +215,19 @@ The value of
 may be overridden by the
 .Ev SUDO_ASKPASS
 environment variable.
+.It devsearch
+An ordered, colon-separated search path of directories to look in for
+device nodes.
+This is used when mapping the process's tty device number to a device name.
+Sudo will
+.Em not
+recurse into subdirectories.
+If terminal devices may be located in a subdirectory of
+.Pa /dev ,
+that path must be explicitly listed in
+.Em devsearch .
+The default value is:
+.Li /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the

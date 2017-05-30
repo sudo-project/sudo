@@ -722,6 +722,7 @@ timeout
 vardir
 rundir
 iolog_dir
+devsearch
 FILEDIGEST
 exampledir
 TMPFILES_D
@@ -959,6 +960,7 @@ enable_rpath
 enable_static_sudoers
 enable_shared_libutil
 enable_tmpfiles_d
+enable_devsearch
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1641,6 +1643,8 @@ Optional Features:
   --disable-shared-libutil
                           Disable use of the libsudo_util shared library.
   --enable-tmpfiles.d=DIR Set the path to the systemd tmpfiles.d directory.
+  --enable-devsearch=PATH The colon-delimited path to search for device nodes
+                          when determing the tty name.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -3053,6 +3057,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3098,6 +3103,7 @@ pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
 FILEDIGEST=filedigest.lo
+devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
 #
@@ -6662,6 +6668,23 @@ else
     test -f /usr/lib/tmpfiles.d/systemd.conf && TMPFILES_D=/usr/lib/tmpfiles.d
 
 fi
+
+
+# Check whether --enable-devsearch was given.
+if test "${enable_devsearch+set}" = set; then :
+  enableval=$enable_devsearch; case $enableval in
+    yes)	# use default value
+		;;
+    no)		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring attempt to disable the device search path" >&5
+$as_echo "$as_me: WARNING: Ignoring attempt to disable the device search path" >&2;}
+		;;
+    *)		devsearch="$enableval"
+esac
+fi
+
+cat >>confdefs.h <<EOF
+#define _PATH_SUDO_DEVSEARCH "$devsearch"
+EOF
 
 
 

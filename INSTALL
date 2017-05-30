@@ -368,6 +368,12 @@ Operating system-specific options:
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.
 
+  --enable-devsearch=PATH
+        Set a system-specific search path of directories to look in
+        for device nodes.  Sudo uses this when mapping the process's
+	tty device number to a device name.  The default value is:
+            /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+
   --with-bsm-audit
         Enable support for sudo BSM audit logs on systems that support it.
 	This includes recent versions of FreeBSD, Mac OS X and Solaris.
