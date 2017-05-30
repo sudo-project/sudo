@@ -455,7 +455,8 @@ done:
 char *
 get_process_ttyname(char *name, size_t namelen)
 {
-    char path[PATH_MAX], *line = NULL;
+    const char path[] = "/proc/self/stat";
+    char *line = NULL;
     char *ret = NULL;
     size_t linesize = 0;
     int serrno = errno;
@@ -463,8 +464,7 @@ get_process_ttyname(char *name, size_t namelen)
     FILE *fp;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
-    /* Try to determine the tty from tty_nr in /proc/pid/stat. */
-    snprintf(path, sizeof(path), "/proc/%u/stat", (unsigned int)getpid());
+    /* Try to determine the tty from tty_nr in /proc/self/stat. */
     if ((fp = fopen(path, "r")) != NULL) {
 	len = getline(&line, &linesize, fp);
 	fclose(fp);
