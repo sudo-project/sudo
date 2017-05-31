@@ -456,25 +456,37 @@ char *
 get_process_ttyname(char *name, size_t namelen)
 {
     const char path[] = "/proc/self/stat";
-    char *line = NULL;
+    char *cp, buf[1024];
     char *ret = NULL;
-    size_t linesize = 0;
     int serrno = errno;
-    ssize_t len;
-    FILE *fp;
+    ssize_t nread;
+    int fd;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
-    /* Try to determine the tty from tty_nr in /proc/self/stat. */
-    if ((fp = fopen(path, "r")) != NULL) {
-	len = getline(&line, &linesize, fp);
-	fclose(fp);
-	if (len != -1) {
+    /*
+     * Try to determine the tty from tty_nr in /proc/self/stat.
+     * Ignore /proc/self/stat if it contains embedded NUL bytes.
+     */
+    if ((fd = open(path, O_RDONLY | O_NOFOLLOW)) != -1) {
+	cp = buf;
+	while ((nread = read(fd, cp, buf + sizeof(buf) - cp)) != 0) {
+	    if (nread == -1) {
+		if (errno == EAGAIN || errno == EINTR)
+		    continue;
+		break;
+	    }
+	    cp += nread;
+	    if (cp >= buf + sizeof(buf))
+		break;
+	}
+	if (nread == 0 && memchr(buf, '\0', cp - buf) == NULL) {
 	    /*
 	     * Field 7 is the tty dev (0 if no tty).
-	     * Since the process name at field 2 "(comm)" may include spaces,
-	     * start at the last ')' found.
+	     * Since the process name at field 2 "(comm)" may include
+	     * whitespace (including newlines), start at the last ')' found.
 	     */
-	    char *cp = strrchr(line, ')');
+	    *cp = '\0';
+	    cp = strrchr(buf, ')');
 	    if (cp != NULL) {
 		char *ep = cp;
 		const char *errstr;
@@ -505,7 +517,8 @@ get_process_ttyname(char *name, size_t namelen)
     errno = ENOENT;
 
 done:
-    free(line);
+    if (fd != -1)
+	close(fd);
     if (ret == NULL)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
