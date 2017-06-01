@@ -159,19 +159,12 @@ signal_pipe_cb(int fd, int what, void *v)
     debug_return;
 }
 
-struct sudo_event_base *
-sudo_ev_base_alloc_v1(void)
+static int
+sudo_ev_base_init(struct sudo_event_base *base)
 {
-    struct sudo_event_base *base;
     int i;
-    debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_base_init, SUDO_DEBUG_EVENT)
 
-    base = calloc(1, sizeof(*base));
-    if (base == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s: unable to allocate base", __func__);
-	goto bad;
-    }
     TAILQ_INIT(&base->events);
     TAILQ_INIT(&base->timeouts);
     for (i = 0; i < NSIG; i++)
@@ -189,13 +182,30 @@ sudo_ev_base_alloc_v1(void)
     sudo_ev_init(&base->signal_event, base->signal_pipe[1],
 	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, base);
 
-    debug_return_ptr(base);
+    debug_return_int(0);
 bad:
-    if (base != NULL) {
-	sudo_ev_base_free_impl(base);
-	free(base);
+    /* Note: signal_pipe[] not filled in. */
+    sudo_ev_base_free_impl(base);
+    debug_return_int(-1);
+}
+
+struct sudo_event_base *
+sudo_ev_base_alloc_v1(void)
+{
+    struct sudo_event_base *base;
+    debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
+
+    base = calloc(1, sizeof(*base));
+    if (base == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: unable to allocate base", __func__);
+	debug_return_ptr(NULL);
     }
-    debug_return_ptr(NULL);
+    if (sudo_ev_base_init(base) != 0) {
+	free(base);
+	debug_return_ptr(NULL);
+    }
+    debug_return_ptr(base);
 }
 
 void
