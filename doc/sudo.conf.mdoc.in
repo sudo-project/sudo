@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd May 30, 2017
+.Dd June 2, 2017
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -218,7 +218,8 @@ environment variable.
 .It devsearch
 An ordered, colon-separated search path of directories to look in for
 device nodes.
-This is used when mapping the process's tty device number to a device name.
+This is used when mapping the process's tty device number to a device name
+on systems that do not provide such a mechanism.
 Sudo will
 .Em not
 recurse into subdirectories.
@@ -228,6 +229,12 @@ that path must be explicitly listed in
 .Em devsearch .
 The default value is:
 .Li /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+.Pp
+This option is ignored on systems that support either the
+.Fn devname
+or
+.Fn _ttyname_dev
+functions, for example BSD, macOS and Solaris.
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the
