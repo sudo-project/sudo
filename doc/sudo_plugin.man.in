@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 16, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "June 2, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -866,11 +866,11 @@ For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
 Unfortunately, not all operating systems do this by default,
 and even those that do may have bugs.
-For example, Mac OS X fails to restart the
+For example, macOS fails to restart the
 \fBtcgetattr\fR()
 and
 \fBtcsetattr\fR()
-system calls (this is a bug in Mac OS X).
+system calls (this is a bug in macOS).
 Furthermore, because this behavior depends on the command stopping with the
 \fRSIGTTIN\fR
 or

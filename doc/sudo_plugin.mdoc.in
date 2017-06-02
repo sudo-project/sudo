@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 16, 2017
+.Dd June 2, 2017
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -768,11 +768,11 @@ For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
 Unfortunately, not all operating systems do this by default,
 and even those that do may have bugs.
-For example, Mac OS X fails to restart the
+For example, macOS fails to restart the
 .Fn tcgetattr
 and
 .Fn tcsetattr
-system calls (this is a bug in Mac OS X).
+system calls (this is a bug in macOS).
 Furthermore, because this behavior depends on the command stopping with the
 .Dv SIGTTIN
 or

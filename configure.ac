@@ -3239,7 +3239,7 @@ if test ${with_pam-"no"} != "no"; then
     found_pam_lib=no
     AC_CHECK_LIB(pam, pam_start, [found_pam_lib=yes], [], [$lt_cv_dlopen_libs])
     #
-    # Some PAM implementations (MacOS X for example) put the PAM headers
+    # Some PAM implementations (macOS for example) put the PAM headers
     # in /usr/include/pam instead of /usr/include/security...
     #
     found_pam_hdrs=no

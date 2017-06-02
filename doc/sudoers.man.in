@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "May 10, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "June 2, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2090,11 +2090,11 @@ For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
 Unfortunately, not all operating systems do this by default,
 and even those that do may have bugs.
-For example, Mac OS X fails to restart the
+For example, macOS fails to restart the
 \fBtcgetattr\fR()
 and
 \fBtcsetattr\fR()
-system calls (this is a bug in Mac OS X).
+system calls (this is a bug in macOS).
 Furthermore, because this behavior depends on the command stopping with the
 \fRSIGTTIN\fR
 or
@@ -2319,7 +2319,7 @@ If disabled, a command may only be run after the audit event is successfully
 written.
 This flag is only effective on systems for which
 \fBsudoers\fR
-supports audit logging, including FreeBSD, Linux, Mac OS X and Solaris.
+supports audit logging, including FreeBSD, Linux, macOS and Solaris.
 This flag is
 \fIon\fR
 by default.
@@ -5202,7 +5202,7 @@ running under binary emulation are not affected.
 The
 \fInoexec\fR
 feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, MacOS X, HP-UX 11.x and AIX 5.3 and above.
+Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 \fRLD_PRELOAD\fR
 environment variable.

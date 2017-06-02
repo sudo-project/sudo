@@ -40,7 +40,7 @@ still allow people to get their work done."
 %endif
 
 %if [macos]
-	# System Integrity Protection on Mac OS X won't allow us to write
+	# System Integrity Protection on macOS won't allow us to write
 	# directly to /etc or /var.  We must install in /private instead.
 	case "$sudoersdir" in
 	/etc|/etc/*)

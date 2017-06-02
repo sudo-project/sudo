@@ -97,7 +97,7 @@ if make --version 2>&1 | grep GNU >/dev/null; then
     NJOBS=0
     case "`uname`" in
 	Darwin)
-	    # Mac OS X
+	    # macOS
 	    NJOBS=`sysctl -n hw.ncpu`
 	    ;;
 	Linux)
