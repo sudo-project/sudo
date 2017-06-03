@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "June 2, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "June 3, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -326,7 +326,7 @@ are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
 or
 \fIenv_check\fR,
-as they will be interpreted as functions by older versions of the
+as they may be interpreted as functions by the
 \fBbash\fR
 shell.
 Prior to version 1.8.11, such variables were always removed.
@@ -345,9 +345,14 @@ In this case,
 and
 \fIenv_delete\fR
 behave like a blacklist.
-Environment variables with a value beginning with
+Prior to version 1.8.21, environment variables with a value beginning with
 \fR()\fR
-are always removed, even if they do not match one of the blacklists.
+were always removed.
+Beginning with version 1.8.21, a pattern in
+\fIenv_delete\fR
+is used to match
+\fBbash\fR
+shell functions instead.
 Since it is not possible
 to blacklist all potentially dangerous environment variables, use
 of the default
@@ -368,19 +373,19 @@ By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 (\(oq=\&\(cq),
 both the variables name and value must match.
-For example, an old-style (pre-shellshock)
+For example, a
 \fBbash\fR
 shell function could be matched as follows:
 .nf
 .sp
 .RS 4n
-env_keep += "my_func=()*"
+env_keep += "BASH_FUNC_my_func%%=()*"
 .RE
 .fi
 .PP
 Without the
 \(Lq\fR=()*\fR\(Rq
-suffix, this would not match, as old-style
+suffix, this would not match, as
 \fBbash\fR
 shell functions are not preserved by default.
 .PP

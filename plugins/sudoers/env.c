@@ -164,8 +164,7 @@ static const char *initial_badenv_table[] = {
     "PYTHONUSERBASE",		/* python, per user site-packages directory */
     "RUBYLIB",			/* ruby, library load path */
     "RUBYOPT",			/* ruby, extra command line options */
-    "BASH_FUNC_*",		/* new-style bash functions */
-    "__BASH_FUNC<*",		/* new-style bash functions (Apple) */
+    "*=()*",			/* bash functions */
     NULL
 };
 
@@ -692,24 +691,14 @@ matches_env_keep(const char *var, bool *full_match)
 static bool
 env_should_delete(const char *var)
 {
-    const char *cp;
     int delete_it;
     bool full_match = false;
     debug_decl(env_should_delete, SUDOERS_DEBUG_ENV);
-
-    /* Skip variables with values beginning with () (bash functions) */
-    if ((cp = strchr(var, '=')) != NULL) {
-	if (strncmp(cp, "=() ", 4) == 0) {
-	    delete_it = true;
-	    goto done;
-	}
-    }
 
     delete_it = matches_env_delete(var);
     if (!delete_it)
 	delete_it = matches_env_check(var, &full_match) == false;
 
-done:
     sudo_debug_printf(SUDO_DEBUG_INFO, "delete %s: %s",
 	var, delete_it ? "YES" : "NO");
     debug_return_bool(delete_it);

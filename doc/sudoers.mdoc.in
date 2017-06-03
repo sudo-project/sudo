@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd June 2, 2017
+.Dd June 3, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -315,7 +315,7 @@ are removed unless both the name and value parts are matched by
 .Em env_keep
 or
 .Em env_check ,
-as they will be interpreted as functions by older versions of the
+as they may be interpreted as functions by the
 .Sy bash
 shell.
 Prior to version 1.8.11, such variables were always removed.
@@ -334,9 +334,14 @@ In this case,
 and
 .Em env_delete
 behave like a blacklist.
-Environment variables with a value beginning with
+Prior to version 1.8.21, environment variables with a value beginning with
 .Li ()
-are always removed, even if they do not match one of the blacklists.
+were always removed.
+Beginning with version 1.8.21, a pattern in
+.Em env_delete
+is used to match
+.Sy bash
+shell functions instead.
 Since it is not possible
 to blacklist all potentially dangerous environment variables, use
 of the default
@@ -357,16 +362,16 @@ By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 .Pq Ql =\& ,
 both the variables name and value must match.
-For example, an old-style (pre-shellshock)
+For example, a
 .Sy bash
 shell function could be matched as follows:
 .Bd -literal -offset 4n
-env_keep += "my_func=()*"
+env_keep += "BASH_FUNC_my_func%%=()*"
 .Ed
 .Pp
 Without the
 .Dq Li =()*
-suffix, this would not match, as old-style
+suffix, this would not match, as
 .Sy bash
 shell functions are not preserved by default.
 .Pp
