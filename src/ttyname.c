@@ -496,12 +496,19 @@ get_process_ttyname(char *name, size_t namelen)
 		    if (*ep == ' ') {
 			*ep = '\0';
 			if (++field == 7) {
-			    dev_t tdev = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+			    int tty_nr = strtonum(cp, INT_MIN, INT_MAX, &errstr);
 			    if (errstr) {
 				sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				    "%s: tty device %s: %s", path, cp, errstr);
 			    }
-			    if (tdev > 0) {
+			    if (tty_nr != 0) {
+				/*
+				 * Avoid sign extension when assigning tdev.
+				 * tty_nr in /proc/self/stat is printed as a
+				 * signed int but the actual device number is an
+				 * unsigned int and dev_t is unsigned long long.
+				 */
+				dev_t tdev = (unsigned int)tty_nr;
 				errno = serrno;
 				ret = sudo_ttyname_dev(tdev, name, namelen);
 				goto done;
