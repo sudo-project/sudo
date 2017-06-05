@@ -932,7 +932,8 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
- * Returns 0 on success and 1 on failure.
+ * Returns the wait status of the command on success and a wait status
+ * of 1 on failure.
  */
 int
 sudo_edit(struct command_details *command_details)
@@ -1046,12 +1047,14 @@ sudo_edit(struct command_details *command_details)
     else
 #endif
 	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
+    if (errors)
+	goto cleanup;
 
     for (i = 0; i < nfiles; i++)
 	free(tf[i].tfile);
     free(tf);
     free(nargv);
-    debug_return_int(errors ? 1 : rc);
+    debug_return_int(rc);
 
 cleanup:
     /* Clean up temp files and return. */
@@ -1063,7 +1066,7 @@ cleanup:
     }
     free(tf);
     free(nargv);
-    debug_return_int(1);
+    debug_return_int(W_EXITCODE(1, 0));
 }
 
 #else /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
@@ -1075,7 +1078,7 @@ int
 sudo_edit(struct command_details *command_details)
 {
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
-    debug_return_int(1);
+    debug_return_int(W_EXITCODE(1, 0));
 }
 
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
