@@ -700,7 +700,6 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 		sudo_warnx(U_("%s unchanged"), tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);
-		errors++;
 		continue;
 	    }
 	}
