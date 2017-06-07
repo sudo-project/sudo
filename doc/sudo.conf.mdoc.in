@@ -174,7 +174,7 @@ Plugin sudoers_io sudoers.so
 For more information on the
 .Nm sudo
 plugin architecture, see the
-.Xr sudo_plugin @mansectsu@
+.Xr sudo_plugin @mansectform@
 manual.
 .Ss Path settings
 A
@@ -640,7 +640,7 @@ Plugin sudoers_io sudoers.so
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@ ,
-.Xr sudo_plugin @mansectsu@
+.Xr sudo_plugin @mansectform@
 .Sh HISTORY
 See the HISTORY file in the
 .Nm sudo

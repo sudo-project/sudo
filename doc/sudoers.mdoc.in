@@ -3901,7 +3901,7 @@ Defaults group_plugin=system_group.so
 .El
 .Pp
 The group provider plugin API is described in detail in
-.Xr sudo_plugin @mansectsu@ .
+.Xr sudo_plugin @mansectform@ .
 .Sh LOG FORMAT
 .Nm
 can log events using either
@@ -5120,7 +5120,7 @@ manual.
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudo @mansectsu@ ,
-.Xr sudo_plugin @mansectsu@ ,
+.Xr sudo_plugin @mansectform@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on

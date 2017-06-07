@@ -81,7 +81,7 @@ DDEESSCCRRIIPPTTIIOONN
            Plugin sudoers_io sudoers.so
 
      For more information on the ssuuddoo plugin architecture, see the
-     sudo_plugin(1m) manual.
+     sudo_plugin(4) manual.
 
    PPaatthh sseettttiinnggss
      A Path line consists of the Path keyword, followed by the name of the
@@ -400,7 +400,7 @@ EEXXAAMMPPLLEESS
      #Set group_source static
 
 SSEEEE AALLSSOO
-     sudoers(4), sudo(1m), sudo_plugin(1m)
+     sudoers(4), sudo(1m), sudo_plugin(4)
 
 HHIISSTTOORRYY
      See the HISTORY file in the ssuuddoo distribution

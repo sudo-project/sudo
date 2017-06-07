@@ -193,7 +193,7 @@ Plugin sudoers_io sudoers.so
 For more information on the
 \fBsudo\fR
 plugin architecture, see the
-sudo_plugin(@mansectsu@)
+sudo_plugin(@mansectform@)
 manual.
 .SS "Path settings"
 A
@@ -705,7 +705,7 @@ Plugin sudoers_io sudoers.so
 .SH "SEE ALSO"
 sudoers(@mansectform@),
 sudo(@mansectsu@),
-sudo_plugin(@mansectsu@)
+sudo_plugin(@mansectform@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR

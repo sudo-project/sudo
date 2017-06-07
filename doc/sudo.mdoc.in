@@ -771,7 +771,7 @@ See the
 manual for details of the
 .Pa @sysconfdir@/sudo.conf
 file and the
-.Xr sudo_plugin @mansectsu@
+.Xr sudo_plugin @mansectform@
 manual for more information about the
 .Nm
 plugin architecture.
@@ -1046,7 +1046,7 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Xr passwd @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
-.Xr sudo_plugin @mansectsu@ ,
+.Xr sudo_plugin @mansectform@ ,
 .Xr sudoreplay @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh HISTORY

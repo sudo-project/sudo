@@ -32,6 +32,7 @@
 .HP 5n
 \fBsudo\fR
 \fB\-h\fR\ |\ \fB\-K\fR\ |\ \fB\-k\fR\ |\ \fB\-V\fR
+.br
 .PD 0
 .HP 5n
 \fBsudo\fR
@@ -840,7 +841,7 @@ sudo.conf(@mansectform@)
 manual for details of the
 \fI@sysconfdir@/sudo.conf\fR
 file and the
-sudo_plugin(@mansectsu@)
+sudo_plugin(@mansectform@)
 manual for more information about the
 \fBsudo\fR
 plugin architecture.
@@ -1153,7 +1154,7 @@ login_cap(3),
 passwd(@mansectform@),
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),
-sudo_plugin(@mansectsu@),
+sudo_plugin(@mansectform@),
 sudoreplay(@mansectsu@),
 visudo(@mansectsu@)
 .SH "HISTORY"

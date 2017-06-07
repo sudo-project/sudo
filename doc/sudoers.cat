@@ -2094,7 +2094,7 @@ GGRROOUUPP PPRROOVVIIDDEERR PPLLUUGGIINNSS
 
                Defaults group_plugin=system_group.so
 
-     The group provider plugin API is described in detail in sudo_plugin(1m).
+     The group provider plugin API is described in detail in sudo_plugin(4).
 
 LLOOGG FFOORRMMAATT
      ssuuddooeerrss can log events using either syslog(3) or a simple log file.  The
@@ -2778,7 +2778,7 @@ DDEEBBUUGGGGIINNGG
 
 SSEEEE AALLSSOO
      ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3), sudo.conf(4),
-     sudoers.ldap(4), sudo(1m), sudo_plugin(1m), visudo(1m)
+     sudoers.ldap(4), sudo(1m), sudo_plugin(4), visudo(1m)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
