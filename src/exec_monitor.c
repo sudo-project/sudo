@@ -196,17 +196,20 @@ mon_handle_sigchld(struct monitor_closure *mc)
     if (mc->cstat->type == CMD_INVALID) {
 	/*
 	 * Store wait status in cstat and forward to parent if stopped.
+	 * Parent does not expect SIGCONT so don't bother sending it.
 	 */
-	mc->cstat->type = CMD_WSTATUS;
-	mc->cstat->val = status;
-	if (WIFSTOPPED(status)) {
-	    /* Save the foreground pgid so we can restore it later. */
-	    do {
-		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
-	    } while (pid == -1 && errno == EINTR);
-	    if (pid != mc->mon_pgrp)
-		mc->cmnd_pgrp = pid;
-	    send_status(mc->backchannel, mc->cstat);
+	if (!WIFCONTINUED(status)) {
+	    mc->cstat->type = CMD_WSTATUS;
+	    mc->cstat->val = status;
+	    if (WIFSTOPPED(status)) {
+		/* Save the foreground pgid so we can restore it later. */
+		do {
+		    pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+		} while (pid == -1 && errno == EINTR);
+		if (pid != mc->mon_pgrp)
+		    mc->cmnd_pgrp = pid;
+		send_status(mc->backchannel, mc->cstat);
+	    }
 	}
     }
 
