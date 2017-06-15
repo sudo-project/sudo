@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2015, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,17 +34,54 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
+/* TCSASOFT is a BSD extension that ignores control flags and speed. */
 #ifndef TCSASOFT
 # define TCSASOFT	0
 #endif
-#ifndef ECHONL
-# define ECHONL		0
+
+/* Non-standard termios input flags */
+#ifndef IUCLC
+# define IUCLC		0
+#endif
+#ifndef IMAXBEL
+# define IMAXBEL	0
+#endif
+#ifndef IUTF8
+# define IUTF8	0
+#endif
+
+/* Non-standard termios output flags */
+#ifndef OLCUC
+# define OLCUC	0
+#endif
+#ifndef ONLCR
+# define ONLCR	0
+#endif
+#ifndef OCRNL
+# define OCRNL	0
+#endif
+#ifndef ONOCR
+# define ONOCR	0
+#endif
+#ifndef ONLRET
+# define ONLRET	0
+#endif
+
+/* Non-standard termios local flags */
+#ifndef XCASE
+# define XCASE		0
 #endif
 #ifndef IEXTEN
 # define IEXTEN		0
 #endif
-#ifndef IUCLC
-# define IUCLC		0
+#ifndef ECHOCTL
+# define ECHOCTL	0
+#endif
+#ifndef ECHOKE
+# define ECHOKE		0
+#endif
+#ifndef PENDIN
+# define PENDIN		0
 #endif
 
 #ifndef _POSIX_VDISABLE
@@ -202,19 +239,47 @@ sudo_term_cbreak_v1(int fd)
     debug_return_bool(false);
 }
 
+/* Termios flags to copy between terminals. */
+#define INPUT_FLAGS (IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR|ICRNL|IUCLC|IXON|IXANY|IXOFF|IMAXBEL|IUTF8)
+#define OUTPUT_FLAGS (OPOST|OLCUC|ONLCR|OCRNL|ONOCR|ONLRET)
+#define CONTROL_FLAGS (CS7|CS8|PARENB|PARODD)
+#define LOCAL_FLAGS (ISIG|ICANON|XCASE|ECHO|ECHOE|ECHOK|ECHONL|NOFLSH|TOSTOP|IEXTEN|ECHOCTL|ECHOKE|PENDIN)
+
 /*
  * Copy terminal settings from one descriptor to another.
+ * We cannot simply copy the struct termios as src and dst may be
+ * different terminal types (pseudo-tty vs. console or glass tty).
  * Returns true on success or false on failure.
  */
 bool
 sudo_term_copy_v1(int src, int dst)
 {
-    struct termios tt;
+    struct termios tt_src, tt_dst;
+    speed_t speed;
+    int i;
     debug_decl(sudo_term_copy, SUDO_DEBUG_UTIL)
 
-    if (tcgetattr(src, &tt) != 0)
+    if (tcgetattr(src, &tt_src) != 0 || tcgetattr(dst, &tt_dst) != 0)
 	debug_return_bool(false);
-    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt) == 0)
+
+    /* Copy select input, output, control and local flags. */
+    tt_dst.c_iflag |= (tt_src.c_iflag & INPUT_FLAGS);
+    tt_dst.c_oflag |= (tt_src.c_oflag & OUTPUT_FLAGS);
+    tt_dst.c_cflag |= (tt_src.c_cflag & CONTROL_FLAGS);
+    tt_dst.c_lflag |= (tt_src.c_lflag & LOCAL_FLAGS);
+
+    /* Copy special chars from src verbatim. */
+    for (i = 0; i < NCCS; i++)
+	tt_dst.c_cc[i] = tt_src.c_cc[i];
+
+    /* Copy speed from src (zero output speed closes the connection). */
+    if ((speed = cfgetospeed(&tt_src)) == B0)
+	speed = B38400;
+    cfsetospeed(&tt_dst, speed);
+    speed = cfgetispeed(&tt_src);
+    cfsetispeed(&tt_dst, speed);
+
+    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt_dst) == 0)
 	debug_return_bool(true);
     debug_return_bool(false);
 }
