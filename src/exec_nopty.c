@@ -553,6 +553,10 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	if (ec->cstat->type == CMD_INVALID) {
 	    ec->cstat->type = CMD_WSTATUS;
 	    ec->cstat->val = status;
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"%s: not overwriting command status %d,%d with %d,%d",
+		__func__, ec->cstat->type, ec->cstat->val, CMD_WSTATUS, status);
 	}
 	ec->cmnd_pid = -1;
     }

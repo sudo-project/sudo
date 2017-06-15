@@ -211,6 +211,10 @@ mon_handle_sigchld(struct monitor_closure *mc)
 		send_status(mc->backchannel, mc->cstat);
 	    }
 	}
+    } else {                       
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "%s: not overwriting command status %d,%d with %d,%d",
+	    __func__, mc->cstat->type, mc->cstat->val, CMD_WSTATUS, status);
     }
 
     debug_return;
