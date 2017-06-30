@@ -81,6 +81,10 @@ seed_random(void)
 	SEED_T seed;
 	int fd;
 
+# ifdef HAVE_GETENTROPY
+	/* Not really an fd, just has to be -1 on error. */
+	fd = getentropy(&seed, sizeof(seed));
+# else
 	/*
 	 * Seed from /dev/urandom if possible.
 	 */
@@ -95,7 +99,7 @@ seed_random(void)
 	    if (nread != (ssize_t)sizeof(seed))
 		fd = -1;
 	}
-
+# endif /* HAVE_GETENTROPY */
 	/*
 	 * If no /dev/urandom, seed from time of day and process id
 	 * multiplied by small primes.

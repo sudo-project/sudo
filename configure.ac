@@ -2689,6 +2689,9 @@ AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
 AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
 if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_CHECK_FUNCS([arc4random random lrand48], [break])
+    if test X"$ac_cv_func_arc4random" != X"yes"; then
+	AC_CHECK_FUNCS([getentropy])
+    fi
     AC_LIBOBJ(mktemp)
     # If either mkdtemp() or mkstemps() is missing, replace both.
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
