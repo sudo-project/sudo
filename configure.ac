@@ -1541,8 +1541,10 @@ AC_ARG_ENABLE(devsearch,
     no)		AC_MSG_WARN([Ignoring attempt to disable the device search path])
 		;;
     *)		devsearch="$enableval"
+		;;
 esac])
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_DEVSEARCH, "$devsearch")
+ds="`echo \"$devsearch\"|sed 's@/dev/*\([[^:]]*:*\)@_PATH_DEV \"\1\" @g'`"
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_DEVSEARCH, $ds)
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in

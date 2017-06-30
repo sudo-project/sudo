@@ -36,11 +36,11 @@
 #endif /* _PATH_DEV */
 
 #ifndef _PATH_TTY
-# define _PATH_TTY		"/dev/tty"
+# define _PATH_TTY		_PATH_DEV "tty"
 #endif /* _PATH_TTY */
 
 #ifndef _PATH_DEVNULL
-# define _PATH_DEVNULL		"/dev/null"
+# define _PATH_DEVNULL		_PATH_DEV "null"
 #endif /* _PATH_DEVNULL */
 
 #ifndef _PATH_DEFPATH

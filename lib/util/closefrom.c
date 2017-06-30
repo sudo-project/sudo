@@ -103,7 +103,7 @@ sudo_closefrom(int lowfd)
 
     /* Use /proc/self/fd (or /dev/fd on FreeBSD) if it exists. */
 # if defined(__FreeBSD__) || defined(__APPLE__)
-    path = "/dev/fd";
+    path = _PATH_DEV "fd";
 # else
     path = "/proc/self/fd";
 # endif

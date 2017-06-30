@@ -142,9 +142,9 @@ sudo_ttyname_dev(dev_t tdev, char *name, size_t namelen)
  * Device nodes to ignore.
  */
 static const char *ignore_devs[] = {
-    "/dev/stdin",
-    "/dev/stdout",
-    "/dev/stderr",
+    _PATH_DEV "stdin",
+    _PATH_DEV "stdout",
+    _PATH_DEV "stderr",
     NULL
 };
 
@@ -305,7 +305,7 @@ sudo_ttyname_dev(dev_t rdev, char *buf, size_t buflen)
     /*
      * First, check /dev/console.
      */
-    ret = sudo_dev_check(rdev, "/dev/console", buf, buflen);
+    ret = sudo_dev_check(rdev, _PATH_DEV "console", buf, buflen);
     if (ret != NULL)
 	goto done;
 
@@ -326,14 +326,14 @@ sudo_ttyname_dev(dev_t rdev, char *buf, size_t buflen)
 	memcpy(path, cp, len);
 	path[len] = '\0';
 
-	if (strcmp(path, "/dev/pts") == 0) {
+	if (strcmp(path, _PATH_DEV "pts") == 0) {
 	    /* Special case /dev/pts */
-	    len = (size_t)snprintf(path, sizeof(path), "/dev/pts/%u",
-		(unsigned int)minor(rdev));
+	    len = (size_t)snprintf(path, sizeof(path), "%spts/%u",
+		_PATH_DEV, (unsigned int)minor(rdev));
 	    if (len >= sizeof(path)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "devsearch entry /dev/pts/%u too long",
-		    (unsigned int)minor(rdev));
+		    "devsearch entry %spts/%u too long",
+		    _PATH_DEV, (unsigned int)minor(rdev));
 		continue;
 	    }
 	    ret = sudo_dev_check(rdev, path, buf, buflen);

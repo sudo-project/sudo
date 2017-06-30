@@ -99,9 +99,9 @@ posix_openpt(int oflag)
     int fd;
 
 #  ifdef _AIX
-    fd = open("/dev/ptc", oflag);
+    fd = open(_PATH_DEV "ptc", oflag);
 #  else
-    fd = open("/dev/ptmx", oflag);
+    fd = open(_PATH_DEV "ptmx", oflag);
 #  endif
     return fd;
 }
@@ -145,7 +145,7 @@ done:
 
 #else /* Old-style BSD ptys */
 
-static char line[] = "/dev/ptyXX";
+static char line[] = _PATH_DEV "ptyXX";
 
 bool
 get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
@@ -160,16 +160,16 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 	ttygid = gr->gr_gid;
 
     for (bank = "pqrs"; *bank != '\0'; bank++) {
-	line[sizeof("/dev/ptyX") - 2] = *bank;
+	line[sizeof(_PATH_DEV "ptyX") - 2] = *bank;
 	for (cp = "0123456789abcdef"; *cp != '\0'; cp++) {
-	    line[sizeof("/dev/ptyXX") - 2] = *cp;
+	    line[sizeof(_PATH_DEV "ptyXX") - 2] = *cp;
 	    *master = open(line, O_RDWR|O_NOCTTY, 0);
 	    if (*master == -1) {
 		if (errno == ENOENT)
 		    goto done; /* out of ptys */
 		continue; /* already in use */
 	    }
-	    line[sizeof("/dev/p") - 2] = 't';
+	    line[sizeof(_PATH_DEV "p") - 2] = 't';
 	    (void) chown(line, ttyuid, ttygid);
 	    (void) chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
 # ifdef HAVE_REVOKE

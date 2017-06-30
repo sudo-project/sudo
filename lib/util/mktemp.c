@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015, 2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -43,6 +43,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "pathnames.h"
 
 #define MKTEMP_FILE	1
 #define MKTEMP_DIR	2
@@ -83,7 +84,7 @@ seed_random(void)
 	/*
 	 * Seed from /dev/urandom if possible.
 	 */
-	fd = open("/dev/urandom", O_RDONLY);
+	fd = open(_PATH_DEV "urandom", O_RDONLY);
 	if (fd != -1) {
 	    ssize_t nread;
 

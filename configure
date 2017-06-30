@@ -6679,11 +6679,13 @@ if test "${enable_devsearch+set}" = set; then :
 $as_echo "$as_me: WARNING: Ignoring attempt to disable the device search path" >&2;}
 		;;
     *)		devsearch="$enableval"
+		;;
 esac
 fi
 
+ds="`echo \"$devsearch\"|sed 's@/dev/*\([^:]*:*\)@_PATH_DEV \"\1\" @g'`"
 cat >>confdefs.h <<EOF
-#define _PATH_SUDO_DEVSEARCH "$devsearch"
+#define _PATH_SUDO_DEVSEARCH $ds
 EOF
 
 

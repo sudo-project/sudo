@@ -145,8 +145,9 @@ pty_setup(uid_t uid, const char *tty)
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: /dev/tty fd %d, pty master fd %d, pty slave fd %d", __func__,
-	    io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]);
+	    "%s: %s fd %d, pty master fd %d, pty slave fd %d",
+	    __func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+	    io_fds[SFD_SLAVE]);
     }
 
     debug_return;
@@ -1581,7 +1582,7 @@ safe_close(int fd)
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: not closing fd %d (/dev/tty)", __func__, fd);
+	    "%s: not closing fd %d (%s)", __func__, fd, _PATH_TTY);
 	errno = EINVAL;
 	debug_return_int(-1);
     }
