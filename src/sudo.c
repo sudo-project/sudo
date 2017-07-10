@@ -1274,7 +1274,11 @@ iolog_open(struct plugin_container *plugin, struct sudo_settings *settings,
 	    sudo_conversation_printf, plugin_settings, user_info, command_info,
 	    argc, argv, user_env, plugin->options);
     }
+
+    /* Stash plugin debug instance ID if set in open() function. */
+    plugin->debug_instance = sudo_debug_get_active_instance();
     sudo_debug_set_active_instance(sudo_debug_instance);
+
     debug_return_int(ret);
 }
 
