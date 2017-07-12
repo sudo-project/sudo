@@ -220,7 +220,7 @@ $(shlib_opt): $(shlib_exp)
 	@true
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile)
+	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
 libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
@@ -316,7 +316,7 @@ $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 	fi
 
 sudoers: $(srcdir)/sudoers.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@
 
 pre-install:
 	@if test X"$(cross_compiling)" != X"yes" -a -r $(DESTDIR)$(sudoersdir)/sudoers; then \

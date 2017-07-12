@@ -132,10 +132,10 @@ VERSION = @PACKAGE_VERSION@
 all: $(PROGS)
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file src/Makefile)
+	cd $(top_builddir) && ./config.status --file src/Makefile
 
 ./sudo_usage.h: $(srcdir)/sudo_usage.h.in
-	(cd $(top_builddir) && ./config.status --file src/sudo_usage.h)
+	cd $(top_builddir) && ./config.status --file src/sudo_usage.h
 
 .SUFFIXES: .c .h .lo .o
 

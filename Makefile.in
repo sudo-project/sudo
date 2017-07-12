@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -162,7 +162,7 @@ uninstall-nls:
 	done
 
 siglist.c signame.c:
-	(cd lib/util && exec $(MAKE) $@)
+	cd lib/util && exec $(MAKE) $@
 
 depend: siglist.c signame.c
 	$(top_srcdir)/mkdep.pl --builddir=`pwd` --srcdir=$(top_srcdir) \

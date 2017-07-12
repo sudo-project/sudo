@@ -139,7 +139,7 @@ VSYSLOG_TEST_OBJS = vsyslog_test.lo vsyslog.lo
 all: libsudo_util.la
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file lib/util/Makefile)
+	cd $(top_builddir) && ./config.status --file lib/util/Makefile
 
 .SUFFIXES: .c .h .lo
 
