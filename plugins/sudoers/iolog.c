@@ -961,8 +961,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
 
     /* Write log file with user and command details. */
-    if (gettimeofday(&last_time, NULL) == -1)
+    if (gettimeofday(&last_time, NULL) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
 	goto done;
+    }
     write_info_log(pathbuf, len, &iolog_details, argv, &last_time);
 
     /* Create the timing and I/O log files. */
@@ -1060,7 +1063,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
-    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_log, SUDOERS_DEBUG_PLUGIN)
 
     if (io_log_files[idx].fd.v == NULL) {
 	sudo_warnx(U_("%s: internal error, file index %d not open"),
@@ -1068,7 +1071,12 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	debug_return_int(-1);
     }
 
-    gettimeofday(&now, NULL);
+    if (gettimeofday(&now, NULL) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	errstr = strerror(errno);
+	goto done;
+    }
 
     /* Write I/O log file entry. */
     errstr = iolog_write(buf, len, idx);
@@ -1141,6 +1149,57 @@ sudoers_io_log_stderr(const char *buf, unsigned int len)
     return sudoers_io_log(buf, len, IOFD_STDERR);
 }
 
+static int
+sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
+{
+    struct timeval now, delay;
+    unsigned int len;
+    char tbuf[1024];
+    const char *errstr = NULL;
+    int ret = -1;
+    debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN)
+
+    if (gettimeofday(&now, NULL) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	errstr = strerror(errno);
+	goto done;
+    }
+
+    /* Write window change event to the timing file. */
+    sudo_timevalsub(&now, &last_time, &delay);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u %u\n",
+	IOFD_TIMING, delay.tv_sec + ((double)delay.tv_usec / 1000000),
+	lines, cols);
+    if (len >= sizeof(tbuf)) {
+	/* Not actually possible due to the size of tbuf[]. */
+	errstr = strerror(EOVERFLOW);
+	goto done;
+    }
+    errstr = iolog_write(tbuf, len, IOFD_TIMING);
+    if (errstr != NULL)
+	goto done;
+
+done:
+    last_time.tv_sec = now.tv_sec;
+    last_time.tv_usec = now.tv_usec;
+
+    if (ret == -1) {
+	if (errstr != NULL && !warned) {
+	    /* Only warn about I/O log file errors once. */
+	    log_warning(SLOG_SEND_MAIL,
+		N_("unable to write to I/O log file: %s"), errstr);
+	    warned = true;
+	}
+
+	/* Ignore errors if they occur if the policy says so. */
+	if (iolog_details.ignore_iolog_errors)
+	    ret = 1;
+    }
+
+    debug_return_int(ret);
+}
+
 __dso_public struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
@@ -1151,5 +1210,8 @@ __dso_public struct io_plugin sudoers_io = {
     sudoers_io_log_ttyout,
     sudoers_io_log_stdin,
     sudoers_io_log_stdout,
-    sudoers_io_log_stderr
+    sudoers_io_log_stderr,
+    NULL, /* register_hooks */
+    NULL, /* deregister_hooks */
+    sudoers_io_change_winsize
 };
