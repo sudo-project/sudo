@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "June 2, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "July 11, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1470,6 +1470,7 @@ struct io_plugin {
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
+    int (*change_winsize)(unsigned int lines, unsigned int cols);
 };
 .RE
 .fi
@@ -1976,6 +1977,24 @@ See the
 \fIPolicy plugin API\fR
 section for a description of
 \fRderegister_hooks.\fR
+.TP 6n
+change_winsize
+.nf
+.RS 6n
+int (*change_winsize)(unsigned int lines, unsigned int cols);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBchange_winsize\fR()
+function is called whenever the window size of the terminal changes from
+the initial values specified in the
+\fRuser_info\fR
+list.
+It returns 1 on success, 0 on failure, \-1 if an error occurred (which
+will terminate the running command).
+.RE
 .PP
 \fII/O Plugin Version Macros\fR
 .PP
@@ -2794,6 +2813,11 @@ The
 entry was added to the
 \fRsettings\fR
 list.
+.TP 6n
+Version 1.12 (sudo 1.8.21)
+The
+\fRchange_winsize\fR
+field was added to the io_plugin struct.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),

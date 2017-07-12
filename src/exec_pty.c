@@ -362,6 +362,38 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     debug_return_bool(ret);
 }
 
+/* Call I/O plugin stderr log method. */
+static void
+log_winchange(unsigned int rows, unsigned int cols)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+    debug_decl(log_winchange, SUDO_DEBUG_EXEC);
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->version < SUDO_API_MKVERSION(1, 12))
+	    continue;
+	if (plugin->u.io->change_winsize) {
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->change_winsize(rows, cols);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->change_winsize = NULL;
+		}
+		break;
+	    }
+	}
+    }
+    sudo_debug_set_active_instance(sudo_debug_instance);
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+
+    debug_return;
+}
+
 /*
  * Check whether we are running in the foregroup.
  * Updates the foreground global and does lazy init of the
@@ -376,8 +408,8 @@ check_foreground(pid_t ppgrp)
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
 	if (foreground && !tty_initialized) {
 	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-		tty_initialized = true;
 		sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+		tty_initialized = true;
 	    }
 	}
     }
@@ -1266,8 +1298,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
 	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-	    tty_initialized = true;
 	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+	    tty_initialized = true;
 	}
 
 	/* Start out in raw mode unless part of a pipeline or backgrounded. */
@@ -1516,7 +1548,8 @@ del_io_events(bool nonblocking)
 }
 
 /*
- * Propagates tty size change signals to pty being used by the command.
+ * Propagates tty size change signals to pty being used by the command
+ * and passes new window size to the I/O plugin.
  */
 static void
 sync_ttysize(int src, int dst)
@@ -1526,9 +1559,12 @@ sync_ttysize(int src, int dst)
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
 
     if (ioctl(src, TIOCGWINSZ, &wsize) == 0) {
-	    ioctl(dst, TIOCSWINSZ, &wsize);
+	    (void)ioctl(dst, TIOCSWINSZ, &wsize);
 	    if ((pgrp = tcgetpgrp(dst)) != -1)
 		killpg(pgrp, SIGWINCH);
+
+	    if (tty_initialized)
+		log_winchange(wsize.ws_row, wsize.ws_col);
     }
 
     debug_return;

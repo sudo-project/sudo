@@ -867,6 +867,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*register_hook)(struct sudo_hook *hook));
          void (*deregister_hooks)(int version,
             int (*deregister_hook)(struct sudo_hook *hook));
+         int (*change_winsize)(unsigned int lines, unsigned int cols);
      };
 
      When an I/O plugin is loaded, ssuuddoo runs the command in a pseudo-tty.
@@ -1123,6 +1124,14 @@ DDEESSCCRRIIPPTTIIOONN
      deregister_hooks
            See the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I section for a description of
            deregister_hooks.
+
+     change_winsize
+           int (*change_winsize)(unsigned int lines, unsigned int cols);
+
+           The cchhaannggee__wwiinnssiizzee() function is called whenever the window size of
+           the terminal changes from the initial values specified in the
+           user_info list.  It returns 1 on success, 0 on failure, -1 if an
+           error occurred (which will terminate the running command).
 
      _I_/_O _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
 
@@ -1563,6 +1572,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
      Version 1.11 (sudo 1.8.20)
            The _t_i_m_e_o_u_t entry was added to the settings list.
 
+     Version 1.12 (sudo 1.8.21)
+           The change_winsize field was added to the io_plugin struct.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1592,4 +1604,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                      June 2, 2017                      Sudo 1.8.21
+Sudo 1.8.21                      July 11, 2017                     Sudo 1.8.21

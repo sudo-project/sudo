@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 2, 2017
+.Dd July 11, 2017
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1298,6 +1298,7 @@ struct io_plugin {
        int (*register_hook)(struct sudo_hook *hook));
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
+    int (*change_winsize)(unsigned int lines, unsigned int cols);
 };
 .Ed
 .Pp
@@ -1730,6 +1731,19 @@ See the
 .Sx Policy plugin API
 section for a description of
 .Li deregister_hooks.
+.It change_winsize
+.Bd -literal -compact
+int (*change_winsize)(unsigned int lines, unsigned int cols);
+.Ed
+.Pp
+The
+.Fn change_winsize
+function is called whenever the window size of the terminal changes from
+the initial values specified in the
+.Li user_info
+list.
+It returns 1 on success, 0 on failure, \-1 if an error occurred (which
+will terminate the running command).
 .El
 .Pp
 .Em I/O Plugin Version Macros
@@ -2447,6 +2461,10 @@ The
 entry was added to the
 .Li settings
 list.
+.It Version 1.12 (sudo 1.8.21)
+The
+.Li change_winsize
+field was added to the io_plugin struct.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
