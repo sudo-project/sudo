@@ -262,11 +262,17 @@ sudo_term_copy_v1(int src, int dst)
     if (tcgetattr(src, &tt_src) != 0 || tcgetattr(dst, &tt_dst) != 0)
 	debug_return_bool(false);
 
+    /* Clear select input, output, control and local flags. */
+    CLR(tt_dst.c_iflag, INPUT_FLAGS);
+    CLR(tt_dst.c_oflag, OUTPUT_FLAGS);
+    CLR(tt_dst.c_cflag, CONTROL_FLAGS);
+    CLR(tt_dst.c_lflag, LOCAL_FLAGS);
+
     /* Copy select input, output, control and local flags. */
-    tt_dst.c_iflag |= (tt_src.c_iflag & INPUT_FLAGS);
-    tt_dst.c_oflag |= (tt_src.c_oflag & OUTPUT_FLAGS);
-    tt_dst.c_cflag |= (tt_src.c_cflag & CONTROL_FLAGS);
-    tt_dst.c_lflag |= (tt_src.c_lflag & LOCAL_FLAGS);
+    SET(tt_dst.c_iflag, (tt_src.c_iflag & INPUT_FLAGS));
+    SET(tt_dst.c_oflag, (tt_src.c_oflag & OUTPUT_FLAGS));
+    SET(tt_dst.c_cflag, (tt_src.c_cflag & CONTROL_FLAGS));
+    SET(tt_dst.c_lflag, (tt_src.c_lflag & LOCAL_FLAGS));
 
     /* Copy special chars from src verbatim. */
     for (i = 0; i < NCCS; i++)
