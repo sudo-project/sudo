@@ -1103,6 +1103,11 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
 	SUDO_EV_WRITE, sigfwd_cb, ec);
     if (ec->sigfwd_event == NULL)
 	sudo_fatal(NULL);
+
+    /* Set the default event base. */
+    sudo_ev_base_setdef(ec->evbase);
+
+    debug_return;
 }
 
 /*
@@ -1113,6 +1118,7 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
 {
     debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC)
 
+    sudo_ev_base_setdef(NULL);
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->backchannel_event);
     sudo_ev_free(ec->sigint_event);

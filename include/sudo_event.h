@@ -111,6 +111,10 @@ __dso_public struct sudo_event_base *sudo_ev_base_alloc_v1(void);
 __dso_public void sudo_ev_base_free_v1(struct sudo_event_base *base);
 #define sudo_ev_base_free(_a) sudo_ev_base_free_v1((_a))
 
+/* Set the default event base. */
+__dso_public void sudo_ev_base_setdef_v1(struct sudo_event_base *base);
+#define sudo_ev_base_setdef(_a) sudo_ev_base_setdef_v1((_a))
+
 /* Allocate a new event. */
 __dso_public struct sudo_event *sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure);
 #define sudo_ev_alloc(_a, _b, _c, _d) sudo_ev_alloc_v1((_a), (_b), (_c), (_d))

@@ -46,6 +46,7 @@ sudo_ev_add_v1
 sudo_ev_alloc_v1
 sudo_ev_base_alloc_v1
 sudo_ev_base_free_v1
+sudo_ev_base_setdef_v1
 sudo_ev_del_v1
 sudo_ev_free_v1
 sudo_ev_get_timeleft_v1

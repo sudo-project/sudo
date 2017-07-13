@@ -302,6 +302,9 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
 	sudo_fatal(U_("unable to add event to queue"));
 #endif
 
+    /* Set the default event base. */
+    sudo_ev_base_setdef(ec->evbase);
+
     debug_return;
 }
 
@@ -313,6 +316,7 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
 {
     debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC)
 
+    sudo_ev_base_setdef(NULL);
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->errpipe_event);
     sudo_ev_free(ec->sigint_event);

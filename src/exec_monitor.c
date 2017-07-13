@@ -486,6 +486,11 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
 	sudo_fatal(NULL);
     if (sudo_ev_add(mc->evbase, mc->sigchld_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
+
+    /* Clear the default event base. */
+    sudo_ev_base_setdef(NULL);
+
+    debug_return;
 }
 
 /*

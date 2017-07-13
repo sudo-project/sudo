@@ -44,6 +44,9 @@
 static void sudo_ev_init(struct sudo_event *ev, int fd, short events,
     sudo_ev_callback_t callback, void *closure);
 
+/* Default event base when none is specified. */
+static struct sudo_event_base *default_base;
+
 /* We need the event base to be available from the signal handler. */
 static struct sudo_event_base *signal_base;
 
@@ -237,6 +240,16 @@ sudo_ev_base_free_v1(struct sudo_event_base *base)
     debug_return;
 }
 
+void
+sudo_ev_base_setdef_v1(struct sudo_event_base *base)
+{
+    debug_decl(sudo_ev_base_setdef, SUDO_DEBUG_EVENT)
+
+    default_base = base;
+
+    debug_return;
+}
+
 /*
  * Clear and fill in a struct sudo_event.
  */
@@ -328,7 +341,7 @@ sudo_ev_handler(int signo, siginfo_t *info, void *context)
     }
 }
 
-int
+static int
 sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
     bool tohead)
 {
@@ -416,14 +429,17 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
 
-    /* If no base specified, use existing one. */
+    /* If no base specified, use existing or default base. */
     if (base == NULL) {
-	if (ev->base == NULL) {
+	if (ev->base != NULL) {
+	    base = ev->base;
+	} else if (default_base != NULL) {
+	    base = default_base;
+	} else {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: no base specified",
 		__func__);
 	    debug_return_int(-1);
 	}
-	base = ev->base;
     }
 
     /* Only add new events to the events list. */
