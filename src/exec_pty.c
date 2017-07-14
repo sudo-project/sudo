@@ -1118,7 +1118,6 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
 {
     debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC)
 
-    sudo_ev_base_setdef(NULL);
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->backchannel_event);
     sudo_ev_free(ec->sigint_event);

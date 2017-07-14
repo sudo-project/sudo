@@ -221,6 +221,10 @@ sudo_ev_base_free_v1(struct sudo_event_base *base)
     if (base == NULL)
 	debug_return;
 
+    /* Reset the default base if necessary. */
+    if (default_base == base)
+	default_base = NULL;
+
     /* Remove any existing events before freeing the base. */
     TAILQ_FOREACH_SAFE(ev, &base->events, entries, next) {
 	sudo_ev_del(base, ev);

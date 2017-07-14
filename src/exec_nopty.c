@@ -316,7 +316,6 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
 {
     debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC)
 
-    sudo_ev_base_setdef(NULL);
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->errpipe_event);
     sudo_ev_free(ec->sigint_event);
