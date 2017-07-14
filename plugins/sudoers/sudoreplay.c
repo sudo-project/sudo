@@ -429,20 +429,123 @@ struct term_names {
     { NULL, 0 }
 };
 
+struct getsize_closure {
+    int nums[2];
+    int nums_depth;
+    int nums_maxdepth;
+    int state;
+    const char *cp;
+    struct sudo_event *ev;
+    struct timeval timeout;
+};
+
+/* getsize states */
+#define INITIAL		0x00
+#define NEW_NUMBER	0x01
+#define NUMBER		0x02
+#define GOTSIZE		0x04
+#define READCHAR	0x10
+
+/*
+ * Callback for reading the terminal size response.
+ * We use an event for this to support timeouts.
+ */
+static void
+getsize_cb(int fd, int what, void *v)
+{
+    struct getsize_closure *gc = v;
+    unsigned char ch;
+    debug_decl(getsize_cb, SUDO_DEBUG_UTIL)
+
+    for (;;) {
+	if (gc->cp[0] == '\0') {
+	    gc->state = GOTSIZE;
+	    goto done;
+	}
+	if (ISSET(gc->state, READCHAR)) {
+	    switch (read(ttyfd, &ch, 1)) {
+	    case -1:
+		if (errno == EAGAIN)
+		    goto another;
+		/* FALLTHROUGH */
+	    case 0:
+		goto done;
+	    case 1:
+		CLR(gc->state, READCHAR);
+		break;
+	    }
+	}
+	switch (gc->state) {
+	case INITIAL:
+	    if (ch == 0233 && gc->cp[0] == '\033') {
+		/* meta escape, equivalent to ESC[ */
+		ch = '[';
+		gc->cp++;
+	    }
+	    if (gc->cp[0] == '%' && gc->cp[1] == 'd') {
+		gc->state = NEW_NUMBER;
+		continue;
+	    }
+	    if (gc->cp[0] != ch) {
+		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		    "got %d, expected %d", ch, gc->cp[0]);
+		goto done;
+	    }
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"got %d", ch);
+	    SET(gc->state, READCHAR);
+	    gc->cp++;
+	    break;
+	case NEW_NUMBER:
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"parsing number");
+	    if (!isdigit(ch))
+		goto done;
+	    gc->cp += 2;
+	    if (gc->nums_depth > gc->nums_maxdepth)
+		goto done;
+	    gc->nums[gc->nums_depth] = 0;
+	    gc->state = NUMBER;
+	    /* FALLTHROUGH */
+	case NUMBER:
+	    if (!isdigit(ch)) {
+		/* done with number, reparse ch */
+		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		    "number %d (ch %d)", gc->nums[gc->nums_depth], ch);
+		gc->nums_depth++;
+		gc->state = INITIAL;
+		continue;
+	    }
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"got %d", ch);
+	    if (gc->nums[gc->nums_depth] > INT_MAX / 10)
+		goto done;
+	    gc->nums[gc->nums_depth] *= 10;
+	    gc->nums[gc->nums_depth] += (ch - '0');
+	    SET(gc->state, READCHAR);
+	    break;
+	}
+    }
+
+another:
+    if (sudo_ev_add(NULL, gc->ev, &gc->timeout, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+done:
+    debug_return;
+}
+
+
 /*
  * Get the terminal size using vt100 terminal escapes.
  */
 static bool
 xterm_get_size(int *new_rows, int *new_cols)
 {
+    struct sudo_event_base *evbase;
+    struct getsize_closure gc;
     const char getsize_request[] = "\0337\033[r\033[999;999H\033[6n";
     const char getsize_response[] = "\033[%d;%dR";
-    const char *cp;
-    int nums_depth = 0;
-    int nums_maxdepth = 1;
-    unsigned char ch;
     bool ret = false;
-    int nums[2];
     debug_decl(xterm_get_size, SUDO_DEBUG_UTIL)
 
     /* request the terminal's size */
@@ -452,40 +555,40 @@ xterm_get_size(int *new_rows, int *new_cols)
 	goto done;
     }
 
-    /* read back terminal size response */
-    /* XXX - add timeout */
-    for (cp = getsize_response; *cp != '\0'; cp++) {
-	if (read(ttyfd, &ch, 1) != 1)
-	    goto done;
-	if (ch == 0233 && cp[0] == '\033' && cp[1] == '[') {
-	    /* meta escape, equivalent to ESC[ */
-	    cp++;
-	    continue;
-	}
-	if (cp[0] == '%' && cp[1] == 'd') {
-	    /* parse number */
-	    cp += 2;
-	    if (nums_depth > nums_maxdepth)
-		goto done;
-	    nums[nums_depth] = 0;
-	    while (isdigit(ch)) {
-		if (!isdigit(ch))
-		    break;
-		if (nums[nums_depth] > INT_MAX / 10)
-		    goto done;
-		nums[nums_depth] = (nums[nums_depth] * 10) + (ch - '0');
-		if (read(ttyfd, &ch, 1) != 1)
-		    goto done;
-	    }
-	    nums_depth++;
-	}
-	if (*cp != ch)
-	    goto done;
+    /*
+     * Callback info for reading back the size with a 10 second timeout.
+     * We expect two numbers (rows and cols).
+     */
+    gc.state = INITIAL|READCHAR;
+    gc.nums_depth = 0;
+    gc.nums_maxdepth = 1;
+    gc.cp = getsize_response;
+    gc.timeout.tv_sec = 10;
+    gc.timeout.tv_usec = 0;
+
+    /* Setup an event for reading the terminal size */
+    evbase = sudo_ev_base_alloc();
+    if (evbase == NULL)
+	sudo_fatal(NULL);
+    gc.ev = sudo_ev_alloc(ttyfd, SUDO_EV_READ, getsize_cb, &gc);
+    if (gc.ev == NULL)
+        sudo_fatal(NULL);
+
+    /* Read back terminal size response */
+    if (sudo_ev_add(evbase, gc.ev, &gc.timeout, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+    sudo_ev_loop(evbase, 0);
+
+    if (gc.state == GOTSIZE) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "terminal size %d x %x", gc.nums[0], gc.nums[1]);
+	*new_rows = gc.nums[0];
+	*new_cols = gc.nums[1];
+	ret = true;
     }
 
-    *new_rows = nums[0];
-    *new_cols = nums[1];
-    ret = true;
+    sudo_ev_base_free(evbase);
+    sudo_ev_free(gc.ev);
 
 done:
     debug_return_bool(ret);
@@ -583,6 +686,8 @@ setup_terminal(struct log_info *li, bool interactive, bool resize)
 	/* session terminal size is different, try to resize ours */
 	if (xterm_set_size(li->rows, li->cols)) {
 	    /* success */
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"resized terminal to %d x %x", li->rows, li->cols);
 	    terminal_was_resized = true;
 	    debug_return;
 	}
@@ -605,6 +710,8 @@ resize_terminal(int rows, int cols)
     if (terminal_can_resize) {
 	if (xterm_set_size(rows, cols))
 	    terminal_was_resized = true;
+	else
+	    terminal_can_resize = false;
     }
 
     debug_return;
