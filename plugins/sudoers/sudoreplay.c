@@ -603,7 +603,6 @@ static bool
 xterm_set_size(int rows, int cols)
 {
     const char setsize_fmt[] = "\033[8;%d;%dt";
-    const char restore_cursor[] = "\0338";
     int len, new_rows, new_cols;
     bool ret = false;
     char buf[1024];
@@ -626,8 +625,6 @@ xterm_set_size(int rows, int cols)
     if (rows == new_rows && cols == new_cols)
 	ret = true;
 
-    /* Restore cursor */
-    ignore_result(write(ttyfd, restore_cursor, strlen(restore_cursor)));
 done:
     debug_return_bool(ret);
 }
