@@ -470,7 +470,7 @@ getsize_cb(int fd, int what, void *v)
 		/* FALLTHROUGH */
 	    case 0:
 		goto done;
-	    case 1:
+	    default:
 		CLR(gc->state, READCHAR);
 		break;
 	    }
