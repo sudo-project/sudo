@@ -717,14 +717,13 @@ resize_terminal(int rows, int cols)
 static void
 restore_terminal_size(void)
 {
-    int ch;
     debug_decl(restore_terminal, SUDO_DEBUG_UTIL)
 
     if (terminal_was_resized) {
 	/* We are still in raw mode, hence the carriage return. */
 	printf(U_("Replay finished, press any key to restore the terminal."));
 	fflush(stdout);
-	ch = getchar();
+	(void)getchar();
 	xterm_set_size(terminal_rows, terminal_cols);
 	putchar('\r');
 	putchar('\n');
