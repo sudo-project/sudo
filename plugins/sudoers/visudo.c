@@ -78,9 +78,9 @@ struct sudoersfile {
     TAILQ_ENTRY(sudoersfile) entries;
     char *path;
     char *tpath;
+    bool modified;
+    bool doedit;
     int fd;
-    int modified;
-    int doedit;
 };
 TAILQ_HEAD(sudoersfile_list, sudoersfile);
 
@@ -662,11 +662,20 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 
 	/* If any new #include directives were added, edit them too. */
-	for (sp = TAILQ_NEXT(last, entries); sp != NULL; sp = TAILQ_NEXT(sp, entries)) {
-	    printf(_("press return to edit %s: "), sp->path);
-	    while ((ch = getchar()) != EOF && ch != '\n')
-		    continue;
-	    edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
+	if ((sp = TAILQ_NEXT(last, entries)) != NULL) {
+	    bool modified = false;
+	    do {
+		printf(_("press return to edit %s: "), sp->path);
+		while ((ch = getchar()) != EOF && ch != '\n')
+			continue;
+		edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
+		if (sp->modified)
+		    modified = true;
+	    } while ((sp = TAILQ_NEXT(sp, entries)) != NULL);
+
+	    /* Reparse sudoers if newly added includes were modified. */
+	    if (modified)
+		continue;
 	}
 
 	/* If all sudoers files parsed OK we are done. */
@@ -1041,10 +1050,10 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	entry = calloc(1, sizeof(*entry));
 	if (entry == NULL || (entry->path = strdup(path)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	/* entry->modified = 0; */
-	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	/* entry->tpath = NULL; */
+	/* entry->modified = false; */
 	entry->doedit = doedit;
+	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	if (entry->fd == -1) {
 	    sudo_warn("%s", entry->path);
 	    free(entry);
