@@ -454,7 +454,7 @@ static void
 getsize_cb(int fd, int what, void *v)
 {
     struct getsize_closure *gc = v;
-    unsigned char ch;
+    unsigned char ch = '\0';
     debug_decl(getsize_cb, SUDO_DEBUG_UTIL)
 
     for (;;) {
