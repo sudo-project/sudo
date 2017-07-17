@@ -276,8 +276,7 @@ main(int argc, char *argv[])
      */
     if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    if (sp->doedit)
-		(void) install_sudoers(sp, oldperms);
+	    (void) install_sudoers(sp, oldperms);
 	}
     }
     free(editor);
