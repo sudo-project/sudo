@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "February 16, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "July 20, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1048,7 +1048,10 @@ Default editor to use in
 Set to the group ID of the user who invoked sudo.
 .TP 17n
 \fRSUDO_PROMPT\fR
-Used as the default password prompt.
+Used as the default password prompt unless
+the
+\fB\-p\fR
+option was specified.
 .TP 17n
 \fRSUDO_PS1\fR
 If set,

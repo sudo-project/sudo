@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 16, 2017
+.Dd July 20, 2017
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -965,7 +965,10 @@ Default editor to use in
 .It Ev SUDO_GID
 Set to the group ID of the user who invoked sudo.
 .It Ev SUDO_PROMPT
-Used as the default password prompt.
+Used as the default password prompt unless
+the
+.Fl p
+option was specified.
 .It Ev SUDO_PS1
 If set,
 .Ev PS1
