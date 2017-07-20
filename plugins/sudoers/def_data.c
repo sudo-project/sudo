@@ -466,6 +466,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Flush I/O log data to disk immediately instead of buffering it"),
 	NULL,
     }, {
+	"syslog_pid", T_FLAG,
+	N_("Include the process ID when logging via syslog"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

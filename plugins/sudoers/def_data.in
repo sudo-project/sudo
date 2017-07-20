@@ -341,3 +341,6 @@ user_command_timeouts
 iolog_flush
 	T_FLAG
 	"Flush I/O log data to disk immediately instead of buffering it"
+syslog_pid
+	T_FLAG
+	"Include the process ID when logging via syslog"

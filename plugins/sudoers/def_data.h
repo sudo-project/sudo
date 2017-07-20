@@ -216,6 +216,8 @@
 #define def_user_command_timeouts (sudo_defs_table[I_USER_COMMAND_TIMEOUTS].sd_un.flag)
 #define I_IOLOG_FLUSH           108
 #define def_iolog_flush         (sudo_defs_table[I_IOLOG_FLUSH].sd_un.flag)
+#define I_SYSLOG_PID            109
+#define def_syslog_pid          (sudo_defs_table[I_SYSLOG_PID].sd_un.flag)
 
 enum def_tuple {
 	never,

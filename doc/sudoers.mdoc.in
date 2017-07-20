@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd June 3, 2017
+.Dd July 20, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2797,6 +2797,15 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.15 or higher.
+.It syslog_pid
+When logging via
+.Xr syslog 3 ,
+include the process ID in the log entry.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.21 or higher.
 .It targetpw
 If set,
 .Nm sudo

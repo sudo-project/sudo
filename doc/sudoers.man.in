@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "June 3, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "July 20, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2976,6 +2976,16 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.15 or higher.
+.TP 18n
+syslog_pid
+When logging via
+syslog(3),
+include the process ID in the log entry.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.21 or higher.
 .TP 18n
 targetpw
 If set,

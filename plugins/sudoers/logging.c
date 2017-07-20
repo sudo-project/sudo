@@ -70,10 +70,11 @@ static char *new_logline(const char *, int);
 static void
 mysyslog(int pri, const char *fmt, ...)
 {
+    const int flags = def_syslog_pid ? LOG_PID : 0;
     va_list ap;
     debug_decl(mysyslog, SUDOERS_DEBUG_LOGGING)
 
-    openlog("sudo", 0, def_syslog);
+    openlog("sudo", flags, def_syslog);
     va_start(ap, fmt);
     vsyslog(pri, fmt, ap);
     va_end(ap);
