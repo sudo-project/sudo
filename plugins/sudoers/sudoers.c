@@ -693,10 +693,12 @@ init_vars(char * const envp[])
 		    user_path = *ep + 5;
 		break;
 	    case 'S':
-		if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
+		if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0) {
 		    user_prompt = *ep + 12;
-		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
+		    def_passprompt_override = true;
+		} else if (strncmp("SUDO_USER=", *ep, 10) == 0) {
 		    prev_user = *ep + 10;
+		}
 		break;
 	    }
     }
