@@ -417,6 +417,49 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 #endif /* PAM_TEXT_DOMAIN */
 
 /*
+ * We use the PAM prompt in preference to sudo's as long
+ * as passprompt_override is not set and:
+ *  a) the (translated) sudo prompt matches /^Password: ?/
+ * or:
+ *  b) the PAM prompt itself *doesn't* match /^Password: ?/
+ *     or /^username's Password: ?/
+ *
+ * The intent is to use the PAM prompt for things like
+ * challenge-response, otherwise use sudo's prompt.
+ * There may also be cases where a localized translation
+ * of "Password: " exists for PAM but not for sudo.
+ */
+static bool
+use_pam_prompt(const char *pam_prompt)
+{
+    size_t user_len;
+    debug_decl(use_pam_prompt, SUDOERS_DEBUG_AUTH)
+
+    if (!def_passprompt_override) {
+	/* If sudo prompt matches "^Password: ?$", use PAM prompt. */
+	if (PROMPT_IS_PASSWORD(def_prompt))
+	    debug_return_bool(true);
+
+	/* If PAM prompt matches "^Password: ?$", use sudo prompt. */
+	if (PAM_PROMPT_IS_PASSWORD(pam_prompt))
+	    debug_return_bool(false);
+
+	/*
+	 * Some PAM modules use "^username's Password: ?$" instead of
+	 * "^Password: ?" so check for that too.
+	 */
+	user_len = strlen(user_name);
+	if (strncmp(pam_prompt, user_name, user_len) == 0) {
+	    const char *cp = pam_prompt + user_len;
+	    if (strncmp(cp, "'s Password:", 12) == 0 &&
+		(cp[12] == '\0' || (cp[12] == ' ' && cp[13] == '\0')))
+		debug_return_bool(false);
+	}
+    }
+    debug_return_bool(false);
+}
+
+/*
  * ``Conversation function'' for PAM <-> human interaction.
  */
 static int
@@ -461,25 +504,9 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		if (getpass_error)
 		    goto done;
 
-		/*
-		 * We use the PAM prompt in preference to sudo's as long
-		 * as passprompt_override is not set and:
-		 *  a) the (translated) sudo prompt matches /^Password: ?/
-		 * or:
-		 *  b) the PAM prompt itself *doesn't* match /^Password: ?/
-		 *
-		 * The intent is to use the PAM prompt for things like
-		 * challenge-response, otherwise use sudo's prompt.
-		 * There may also be cases where a localized translation
-		 * of "Password: " exists for PAM but not for sudo.
-		 */
-		prompt = def_prompt;
-		if (!def_passprompt_override) {
-		    if (PROMPT_IS_PASSWORD(def_prompt))
-			prompt = pm->msg;
-		    else if (!PAM_PROMPT_IS_PASSWORD(pm->msg))
-			prompt = pm->msg;
-		}
+		/* Choose either the sudo prompt or the PAM one. */
+		prompt = use_pam_prompt(pm->msg) ? pm->msg : def_prompt;
+
 		/* Read the password unless interrupted. */
 		pass = auth_getpass(prompt, def_passwd_timeout * 60, type, callback);
 		if (pass == NULL) {
