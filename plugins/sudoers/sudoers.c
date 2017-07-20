@@ -681,27 +681,30 @@ init_vars(char * const envp[])
 	debug_return_bool(false);
     }
 
+#define MATCHES(s, v)	\
+    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
+
     for (ep = envp; *ep; ep++) {
-	/* XXX - don't fill in if empty string */
 	switch (**ep) {
 	    case 'K':
-		if (strncmp("KRB5CCNAME=", *ep, 11) == 0)
-		    user_ccname = *ep + 11;
+		if (MATCHES(*ep, "KRB5CCNAME="))
+		    user_ccname = *ep + sizeof("KRB5CCNAME=") - 1;
 		break;
 	    case 'P':
-		if (strncmp("PATH=", *ep, 5) == 0)
-		    user_path = *ep + 5;
+		if (MATCHES(*ep, "PATH="))
+		    user_path = *ep + sizeof("PATH=") - 1;
 		break;
 	    case 'S':
-		if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0) {
-		    user_prompt = *ep + 12;
+		if (!user_prompt && MATCHES(*ep, "SUDO_PROMPT=")) {
+		    user_prompt = *ep + sizeof("SUDO_PROMPT=") - 1;
 		    def_passprompt_override = true;
-		} else if (strncmp("SUDO_USER=", *ep, 10) == 0) {
-		    prev_user = *ep + 10;
+		} else if (MATCHES(*ep, "SUDO_USER=")) {
+		    prev_user = *ep + sizeof("SUDO_USER=") - 1;
 		}
 		break;
 	    }
     }
+#undef MATCHES
 
     /*
      * Get a local copy of the user's passwd struct and group list if we

@@ -1338,7 +1338,9 @@ parse_sudoers_options(void)
 	if (info != NULL && info->options != NULL) {
 	    char * const *cur;
 
-#define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
+#define MATCHES(s, v)	\
+    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
+
 	    for (cur = info->options; *cur != NULL; cur++) {
 		const char *errstr, *p;
 		id_t id;
@@ -1369,6 +1371,7 @@ parse_sudoers_options(void)
 		    continue;
 		}
 	    }
+#undef MATCHES
 	}
     }
     debug_return;
