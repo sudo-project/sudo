@@ -264,19 +264,19 @@ utmp_runas
 	"Set the user in utmp to the runas user, not the invoking user"
 privs
 	T_STR
-	"Set of permitted privileges"
+	"Set of permitted privileges: %s"
 limitprivs
 	T_STR
-	"Set of limit privileges"
+	"Set of limit privileges: %s"
 exec_background
 	T_FLAG
 	"Run commands on a pty in the background"
 pam_service
 	T_STR
-	"PAM service name to use"
+	"PAM service name to use: %s"
 pam_login_service
 	T_STR
-	"PAM service name to use for login shells"
+	"PAM service name to use for login shells: %s"
 pam_setcred
 	T_FLAG
 	"Attempt to establish PAM credentials for the target user"

@@ -363,11 +363,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"privs", T_STR,
-	N_("Set of permitted privileges"),
+	N_("Set of permitted privileges: %s"),
 	NULL,
     }, {
 	"limitprivs", T_STR,
-	N_("Set of limit privileges"),
+	N_("Set of limit privileges: %s"),
 	NULL,
     }, {
 	"exec_background", T_FLAG,
@@ -375,11 +375,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"pam_service", T_STR,
-	N_("PAM service name to use"),
+	N_("PAM service name to use: %s"),
 	NULL,
     }, {
 	"pam_login_service", T_STR,
-	N_("PAM service name to use for login shells"),
+	N_("PAM service name to use for login shells: %s"),
 	NULL,
     }, {
 	"pam_setcred", T_FLAG,
