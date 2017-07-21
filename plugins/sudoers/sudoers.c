@@ -695,12 +695,14 @@ init_vars(char * const envp[])
 		    user_path = *ep + sizeof("PATH=") - 1;
 		break;
 	    case 'S':
-		if (!user_prompt && MATCHES(*ep, "SUDO_PROMPT=")) {
-		    user_prompt = *ep + sizeof("SUDO_PROMPT=") - 1;
-		    def_passprompt_override = true;
-		} else if (MATCHES(*ep, "SUDO_USER=")) {
-		    prev_user = *ep + sizeof("SUDO_USER=") - 1;
+		if (MATCHES(*ep, "SUDO_PROMPT=")) {
+		    /* Don't override "sudo -p prompt" */
+		    if (user_prompt == NULL)
+			user_prompt = *ep + sizeof("SUDO_PROMPT=") - 1;
+		    break;
 		}
+		if (MATCHES(*ep, "SUDO_USER="))
+		    prev_user = *ep + sizeof("SUDO_USER=") - 1;
 		break;
 	    }
     }
