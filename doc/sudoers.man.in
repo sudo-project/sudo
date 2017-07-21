@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "July 20, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "July 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2677,16 +2677,12 @@ by default.
 This setting is only supported by version 1.8.8 or higher.
 .TP 18n
 passprompt_override
-The password prompt specified by
+If set, the prompt specified by
 \fIpassprompt\fR
-will normally only be used if the password prompt provided by systems
-such as PAM matches the string
-\(LqPassword:\(Rq.
-If
-\fIpassprompt_override\fR
-is set,
-\fIpassprompt\fR
-will always be used.
+or the
+\fRSUDO_PROMPT\fR
+environment variable will always be used and will replace the
+prompt provided by a PAM module or other authentication method.
 This flag is
 \fIoff\fR
 by default.
@@ -3575,6 +3571,19 @@ characters are collapsed into a single
 \fR%\fR
 character
 .PP
+On systems that use PAM for authentication,
+\fIpassprompt\fR
+will only be used if the prompt provided by the PAM module matches the string
+\(LqPassword: \(Rq
+or
+\(Lqusername's Password: \(Rq.
+This ensures that the
+\fIpassprompt\fR
+setting does not interfere with challenge-response style authentication.
+The
+\fIpassprompt_override\fR
+flag can be used to change this behavior.
+.sp
 The default value is
 \(Lq\fR@passprompt@\fR\(Rq.
 .RE

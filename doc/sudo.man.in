@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "July 20, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "July 21, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -518,8 +518,12 @@ characters are collapsed into a single
 \(oq%\(cq
 character
 .PP
-The custom prompt will override the system password prompt on systems that
-support PAM unless the
+The custom prompt will override the default prompt specified by either
+the security policy or the
+\fRSUDO_PROMPT\fR
+environment variable.
+On systems that use PAM, the custom prompt will also override the prompt
+specified by a PAM module unless the
 \fIpassprompt_override\fR
 flag is disabled in
 \fIsudoers\fR.

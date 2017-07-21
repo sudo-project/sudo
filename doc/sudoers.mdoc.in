@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 20, 2017
+.Dd July 21, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2514,16 +2514,12 @@ by default.
 .Pp
 This setting is only supported by version 1.8.8 or higher.
 .It passprompt_override
-The password prompt specified by
+If set, the prompt specified by
 .Em passprompt
-will normally only be used if the password prompt provided by systems
-such as PAM matches the string
-.Dq Password: .
-If
-.Em passprompt_override
-is set,
-.Em passprompt
-will always be used.
+or the
+.Ev SUDO_PROMPT
+environment variable will always be used and will replace the
+prompt provided by a PAM module or other authentication method.
 This flag is
 .Em off
 by default.
@@ -3348,8 +3344,21 @@ characters are collapsed into a single
 character
 .El
 .Pp
+On systems that use PAM for authentication,
+.Em passprompt
+will only be used if the prompt provided by the PAM module matches the string
+.Dq "Password: "
+or
+.Dq "username's Password: " .
+This ensures that the
+.Em passprompt
+setting does not interfere with challenge-response style authentication.
+The
+.Em passprompt_override
+flag can be used to change this behavior.
+.Pp
 The default value is
-.Dq Li @passprompt@ .
+.Dq Li "@passprompt@" .
 .It privs
 The default Solaris privileges to use when constructing a new
 privilege set for a command.
