@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 2, 2017
+.Dd July 21, 2017
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -410,10 +410,11 @@ version 1.8.7 and higher.
 By default,
 .Nm sudo
 will probe the system's network interfaces and pass the IP address
-of each enabled interface to the policy plugin.  This makes it
-possible for the plugin to match rules based on the IP address
-without having to query DNS.  On Linux systems with a large number
-of virtual interfaces, this may take a non-negligible amount of time.
+of each enabled interface to the policy plugin.
+This makes it possible for the plugin to match rules based on the IP address
+without having to query DNS.
+On Linux systems with a large number of virtual interfaces, this may
+take a non-negligible amount of time.
 If IP-based matching is not required, network interface probing
 can be disabled as follows:
 .Bd -literal -offset indent
@@ -437,8 +438,8 @@ line consists of the
 .Li Debug
 keyword, followed by the name of the program (or plugin) to debug
 .Pq Nm sudo , Nm visudo , Nm sudoreplay , Nm sudoers ,
-the debug file name and a comma-separated list of debug flags.  The
-debug flag syntax used by
+the debug file name and a comma-separated list of debug flags.
+The debug flag syntax used by
 .Nm sudo
 and the
 .Nm sudoers
@@ -490,7 +491,8 @@ The following priorities are supported, in order of decreasing severity:
 and
 .Em debug .
 Each priority, when specified, also includes all priorities higher
-than it.  For example, a priority of
+than it.
+For example, a priority of
 .Em notice
 would include debug messages logged at
 .Em notice

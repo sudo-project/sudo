@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO.CONF" "5" "June 2, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "5" "July 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -452,10 +452,11 @@ probe_interfaces
 By default,
 \fBsudo\fR
 will probe the system's network interfaces and pass the IP address
-of each enabled interface to the policy plugin.  This makes it
-possible for the plugin to match rules based on the IP address
-without having to query DNS.  On Linux systems with a large number
-of virtual interfaces, this may take a non-negligible amount of time.
+of each enabled interface to the policy plugin.
+This makes it possible for the plugin to match rules based on the IP address
+without having to query DNS.
+On Linux systems with a large number of virtual interfaces, this may
+take a non-negligible amount of time.
 If IP-based matching is not required, network interface probing
 can be disabled as follows:
 .nf
@@ -483,8 +484,8 @@ line consists of the
 \fRDebug\fR
 keyword, followed by the name of the program (or plugin) to debug
 (\fBsudo\fR, \fBvisudo\fR, \fBsudoreplay\fR, \fBsudoers\fR),
-the debug file name and a comma-separated list of debug flags.  The
-debug flag syntax used by
+the debug file name and a comma-separated list of debug flags.
+The debug flag syntax used by
 \fBsudo\fR
 and the
 \fBsudoers\fR
@@ -539,7 +540,8 @@ The following priorities are supported, in order of decreasing severity:
 and
 \fIdebug\fR.
 Each priority, when specified, also includes all priorities higher
-than it.  For example, a priority of
+than it.
+For example, a priority of
 \fInotice\fR
 would include debug messages logged at
 \fInotice\fR
