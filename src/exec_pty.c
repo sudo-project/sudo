@@ -192,6 +192,7 @@ log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyin = NULL;
 		}
+		ret = false;
 		break;
 	    }
 	}
@@ -223,6 +224,7 @@ log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdin = NULL;
 		}
+		ret = false;
 		break;
 	    }
 	}
@@ -254,6 +256,7 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_ttyout = NULL;
 		}
+		ret = false;
 		break;
 	    }
 	}
@@ -297,6 +300,7 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stdout = NULL;
 		}
+		ret = false;
 		break;
 	    }
 	}
@@ -340,6 +344,7 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 		    /* Error: disable plugin's I/O function. */
 		    plugin->u.io->log_stderr = NULL;
 		}
+		ret = false;
 		break;
 	    }
 	}
