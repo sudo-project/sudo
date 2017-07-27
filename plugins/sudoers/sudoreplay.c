@@ -91,27 +91,35 @@ struct log_info {
     int cols;
 };
 
-/*
- * I/O log timing entry.
- */
-struct iolog_timing {
-    double seconds;
-    int idx;
-    union {
-	struct {
-	    int rows;
-	    int cols;
-	} winsize;
-	size_t nbytes;
-    } u;
-};
-
-/* Closure for write_output */
-struct write_closure {
-    struct sudo_event *wevent;
-    struct iovec *iov;
-    unsigned int iovcnt;
-    size_t nbytes;
+struct replay_closure {
+    struct sudo_event_base *evbase;
+    struct sudo_event *delay_ev;
+    struct sudo_event *keyboard_ev;
+    struct sudo_event *output_ev;
+    struct sudo_event *sighup_ev;
+    struct sudo_event *sigint_ev;
+    struct sudo_event *sigquit_ev;
+    struct sudo_event *sigterm_ev;
+    struct sudo_event *sigtstp_ev;
+    struct timing_closure {
+	const char *decimal;
+	double max_delay;
+	int idx;
+	union {
+	    struct {
+		int rows;
+		int cols;
+	    } winsize;
+	    size_t nbytes; // XXX
+	} u;
+    } timing;
+    bool interactive;
+    struct io_buffer {
+	unsigned int len; /* buffer length (how much produced) */
+	unsigned int off; /* write position (how much already consumed) */
+	unsigned int toread; /* how much remains to be read */
+	char buf[64 * 1024];
+    } iobuf;
 };
 
 /*
@@ -181,14 +189,13 @@ extern time_t get_date(char *);
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_expr(struct search_node_list *, char **, bool);
-static int parse_timing(const char *buf, const char *decimal, struct iolog_timing *timing);
+static bool parse_timing(const char *buf, double *seconds, struct timing_closure *timing);
 static struct log_info *parse_logfile(char *logfile);
-static void check_input(int fd, int what, void *v);
+static void read_keyboard(int fd, int what, void *v);
 static void free_log_info(struct log_info *li);
 static void help(void) __attribute__((__noreturn__));
-static void replay_session(const double max_wait, const char *decimal, bool interactive);
+static int replay_session(double max_wait, const char *decimal, bool interactive);
 static void sudoreplay_cleanup(void);
-static void sudoreplay_handler(int);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
 static void restore_terminal_size(void);
@@ -219,14 +226,14 @@ main(int argc, char *argv[])
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
-    double max_wait = 0;
+    double max_delay = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     {
 	extern char *malloc_options;
 	malloc_options = "S";
-    }  
+    }
 #endif
 
     initprogname(argc > 0 ? argv[0] : "sudoreplay");
@@ -275,7 +282,7 @@ main(int argc, char *argv[])
 	    break;
 	case 'm':
 	    errno = 0;
-	    max_wait = strtod(optarg, &ep);
+	    max_delay = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
 		sudo_fatalx(U_("invalid max wait: %s"), optarg);
 	    break;
@@ -337,7 +344,7 @@ main(int argc, char *argv[])
 
     /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
-	if (open_io_fd(path, plen, &io_log_files[idx]) == -1) 
+	if (open_io_fd(path, plen, &io_log_files[idx]) == -1)
 	    sudo_fatal(U_("unable to open %s"), path);
     }
 
@@ -360,7 +367,7 @@ main(int argc, char *argv[])
     li = NULL;
 
     /* Replay session corresponding to io_log_files[]. */
-    replay_session(max_wait, decimal, interactive);
+    exitcode = replay_session(max_delay, decimal, interactive);
 
     restore_terminal_size();
     sudo_term_restore(ttyfd, true);
@@ -391,6 +398,20 @@ io_log_read(int idx, char *buf, size_t nbytes)
 	nread = -1;
 #endif
     debug_return_ssize_t(nread);
+}
+
+static int
+io_log_eof(int idx)
+{
+    int ret;
+    debug_decl(io_log_eof, SUDO_DEBUG_UTIL)
+
+#ifdef HAVE_ZLIB_H
+    ret = gzeof(io_log_files[idx].fd.g);
+#else
+    ret = feof(io_log_files[idx].fd.f);
+#endif
+    debug_return_int(ret);
 }
 
 static char *
@@ -608,6 +629,7 @@ xterm_set_size(int rows, int cols)
     char buf[1024];
     debug_decl(xterm_set_size, SUDO_DEBUG_UTIL)
 
+    /* XXX - save cursor and position restore after resizing */
     len = snprintf(buf, sizeof(buf), setsize_fmt, rows, cols);
     if (len < 0 || len >= (int)sizeof(buf)) {
 	/* not possible due to size of buf */
@@ -620,6 +642,7 @@ xterm_set_size(int rows, int cols)
 	    "%s: error writing xterm resize request", __func__);
 	goto done;
     }
+    /* XXX - keyboard input will interfere with this */
     if (!xterm_get_size(&new_rows, &new_cols))
 	goto done;
     if (rows == new_rows && cols == new_cols)
@@ -732,197 +755,277 @@ restore_terminal_size(void)
     debug_return;
 }
 
-static void
-replay_session(const double max_wait, const char *decimal, bool interactive)
+/*
+ * Read the next record from the timing file and schedule a delay
+ * event with the specified timeout.
+ * Return 0 on success, 1 on EOF and -1 on error.
+ */
+static int
+read_timing_record(struct replay_closure *closure)
 {
-    struct sudo_event *input_ev, *output_ev;
-    unsigned int i, iovcnt = 0, iovmax = 0;
-    struct sudo_event_base *evbase;
-    struct iovec iovb, *iov = &iovb;
-    struct write_closure wc;
+    struct timeval timeout;
     char buf[LINE_MAX];
-    struct sigaction sa;
+    double delay;
+    debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
+
+    /* Read next record from timing file. */
+    if (io_log_gets(IOFD_TIMING, buf, sizeof(buf)) == NULL) {
+	/* EOF or error reading timing file, we are done. */
+	debug_return_int(io_log_eof(IOFD_TIMING) ? 1 : -1);
+    }
+
+    /* Parse timing file record. */
+    buf[strcspn(buf, "\n")] = '\0';
+    if (!parse_timing(buf, &delay, &closure->timing))
+	sudo_fatalx(U_("invalid timing file line: %s"), buf);
+
+    /* Record number bytes to read. */
+    /* XXX - remove timing->nbytes? */
+    if (closure->timing.idx != IOFD_TIMING) {
+    	closure->iobuf.len = 0;
+    	closure->iobuf.off = 0;
+    	closure->iobuf.toread = closure->timing.u.nbytes;
+    }
+
+    /* Adjust delay using speed factor and clamp to max_delay */
+    delay /= speed_factor;
+    if (closure->timing.max_delay && delay > closure->timing.max_delay)
+	delay = closure->timing.max_delay;
+
+    /* Convert delay to a timeval. */
+    timeout.tv_sec = delay;
+    timeout.tv_usec = (delay - timeout.tv_sec) * 1000000.0;
+
+    /* Schedule the delay event. */
+    if (sudo_ev_add(closure->evbase, closure->delay_ev, &timeout, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    debug_return_int(0);
+}
+
+static bool
+fill_iobuf(struct replay_closure *closure)
+{
+    const size_t space = sizeof(closure->iobuf.buf) - closure->iobuf.len;
+    const struct timing_closure *timing = &closure->timing;
+    ssize_t nread;
+    size_t len;
+    debug_decl(fill_iobuf, SUDO_DEBUG_UTIL)
+
+    if (closure->iobuf.toread != 0 && space != 0) {
+	len = closure->iobuf.toread < space ? closure->iobuf.toread : space;
+	nread = io_log_read(timing->idx,
+	    closure->iobuf.buf + closure->iobuf.off, len);
+	if (nread <= 0) {
+	    if (nread == 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "%s: premature EOF, expected %u bytes",
+		    io_log_files[timing->idx].suffix, closure->iobuf.toread);
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "%s: read error", io_log_files[timing->idx].suffix);
+	    }
+	    sudo_warnx(U_("unable to read %s"),
+		io_log_files[timing->idx].suffix);
+	    debug_return_bool(false);
+	}
+	closure->iobuf.toread -= nread;
+	closure->iobuf.len += nread;
+    }
+
+    debug_return_bool(true);
+}
+
+/*
+ * Called when the inter-record delay has expired.
+ * Depending on the record type, either reads the next
+ * record or changes window size.
+ */
+static void
+delay_cb(int fd, int what, void *v)
+{
+    struct replay_closure *closure = v;
+    const struct timing_closure *timing = &closure->timing;
+    debug_decl(delay_cb, SUDO_DEBUG_UTIL)
+
+    /* Delay done, read I/O log record or change window size. */
+    if (timing->idx == IOFD_TIMING) {
+	resize_terminal(timing->u.winsize.rows, timing->u.winsize.cols);
+	switch (read_timing_record(closure)) {
+	case 0:
+	    /* success */
+	    break;
+	case 1:
+	    /* EOF */
+	    sudo_ev_loopexit(closure->evbase);
+	    break;
+	default:
+	    /* error */
+	    sudo_ev_loopbreak(closure->evbase);
+	    break;
+	}
+	debug_return;
+    }
+
+    /* Even if we are not replaying, we still have to delay. */
+    if (timing->idx >= IOFD_MAX || io_log_files[timing->idx].fd.v == NULL)
+	debug_return;
+
+    /* Enable write event. */
+    if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    debug_return;
+}
+
+static void
+replay_closure_free(struct replay_closure *closure)
+{
+    /*
+     * Free events and event base, then the closure itself.
+     */
+    sudo_ev_free(closure->delay_ev);
+    sudo_ev_free(closure->keyboard_ev);
+    sudo_ev_free(closure->output_ev);
+    sudo_ev_free(closure->sighup_ev);
+    sudo_ev_free(closure->sigint_ev);
+    sudo_ev_free(closure->sigquit_ev);
+    sudo_ev_free(closure->sigterm_ev);
+    sudo_ev_free(closure->sigtstp_ev);
+    sudo_ev_base_free(closure->evbase);
+    free(closure);
+}
+
+static void
+signal_cb(int signo, int what, void *v)
+{
+    struct replay_closure *closure = v;
+    debug_decl(signal_cb, SUDO_DEBUG_UTIL)
+
+    switch (signo) {
+    case SIGHUP:
+    case SIGINT:
+    case SIGQUIT:
+    case SIGTERM:
+	/* Free the event base and restore signal handlers. */
+	replay_closure_free(closure);
+
+	/* Restore the terminal and die. */
+	sudoreplay_cleanup();
+	kill(getpid(), signo);
+	break;
+    case SIGTSTP:
+	/* Ignore ^Z since we have no way to restore the screen. */
+	break;
+    }
+
+    debug_return;
+}
+
+static struct replay_closure *
+replay_closure_alloc(double max_delay, const char *decimal, bool interactive)
+{
+    struct replay_closure *closure;
+    debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
+
+    if ((closure = calloc(1, sizeof(*closure))) == NULL)
+	debug_return_ptr(NULL);
+
+    closure->interactive = interactive;
+    closure->timing.max_delay = max_delay;
+    closure->timing.decimal = decimal;
+
+    /*
+     * Setup event base and delay, input and output events.
+     * If interactive, take input from and write to /dev/tty.
+     * If not interactive there is no input event.
+     */
+    closure->evbase = sudo_ev_base_alloc();
+    if (closure->evbase == NULL)
+	goto bad;
+    closure->delay_ev = sudo_ev_alloc(-1, SUDO_EV_TIMEOUT, delay_cb, closure);
+    if (closure->delay_ev == NULL)
+        goto bad;
+    if (interactive) {
+	closure->keyboard_ev = sudo_ev_alloc(ttyfd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	    read_keyboard, closure);
+	if (closure->keyboard_ev == NULL)
+	    goto bad;
+	if (sudo_ev_add(closure->evbase, closure->keyboard_ev, NULL, false) == -1)
+	    sudo_fatal(U_("unable to add event to queue"));
+    }
+    closure->output_ev = sudo_ev_alloc(interactive ? ttyfd : STDOUT_FILENO,
+	SUDO_EV_WRITE, write_output, closure);
+    if (closure->output_ev == NULL)
+        goto bad;
+
+    /*
+     * Setup signal events, we need to restore the terminal if killed.
+     */
+    closure->sighup_ev = sudo_ev_alloc(SIGHUP, SUDO_EV_SIGNAL, signal_cb,
+	closure);
+    if (closure->sighup_ev == NULL)
+	goto bad;
+    if (sudo_ev_add(closure->evbase, closure->sighup_ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    closure->sigint_ev = sudo_ev_alloc(SIGINT, SUDO_EV_SIGNAL, signal_cb,
+	closure);
+    if (closure->sigint_ev == NULL)
+	goto bad;
+    if (sudo_ev_add(closure->evbase, closure->sigint_ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    closure->sigquit_ev = sudo_ev_alloc(SIGQUIT, SUDO_EV_SIGNAL, signal_cb,
+	closure);
+    if (closure->sigquit_ev == NULL)
+	goto bad;
+    if (sudo_ev_add(closure->evbase, closure->sigquit_ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    closure->sigterm_ev = sudo_ev_alloc(SIGTERM, SUDO_EV_SIGNAL, signal_cb,
+	closure);
+    if (closure->sigterm_ev == NULL)
+	goto bad;
+    if (sudo_ev_add(closure->evbase, closure->sigterm_ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    closure->sigtstp_ev = sudo_ev_alloc(SIGTSTP, SUDO_EV_SIGNAL, signal_cb,
+	closure);
+    if (closure->sigtstp_ev == NULL)
+	goto bad;
+    if (sudo_ev_add(closure->evbase, closure->sigtstp_ev, NULL, false) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    debug_return_ptr(closure);
+bad:
+    replay_closure_free(closure);
+    debug_return_ptr(NULL);
+}
+
+static int
+replay_session(double max_delay, const char *decimal, bool interactive)
+{
+    struct replay_closure *closure;
+    int ret = 0;
     debug_decl(replay_session, SUDO_DEBUG_UTIL)
 
-    /* Restore terminal if interrupted. */
-    memset(&sa, 0, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESETHAND;
-    sa.sa_handler = sudoreplay_handler;
-    (void) sigaction(SIGINT, &sa, NULL);
-    (void) sigaction(SIGTERM, &sa, NULL);
-    (void) sigaction(SIGHUP, &sa, NULL);
-    (void) sigaction(SIGQUIT, &sa, NULL);
-
-    /* Don't suspend as we cannot restore the screen on resume. */
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGTSTP, &sa, NULL);
-
-    /*
-     * Setup event base and input/output events.
-     * If interactive, take input from and write to /dev/tty.
-     * If not interactive, delay instead of reading input and write to stdout.
-     */
-    evbase = sudo_ev_base_alloc();
-    if (evbase == NULL)
-	sudo_fatal(NULL);
-    input_ev = sudo_ev_alloc(ttyfd, interactive ? SUDO_EV_READ :
-	SUDO_EV_TIMEOUT, check_input, sudo_ev_self_cbarg());
-    if (input_ev == NULL)
-        sudo_fatal(NULL);
-    output_ev = sudo_ev_alloc(interactive ? ttyfd : STDOUT_FILENO,
-	SUDO_EV_WRITE, write_output, &wc);
-    if (output_ev == NULL)
-        sudo_fatal(NULL);
-
-    /*
-     * Read each line of the timing file, displaying the output streams.
-     */
-    while (io_log_gets(IOFD_TIMING, buf, sizeof(buf)) != NULL) {
-	size_t len, nread;
-	double to_wait;
-	struct timeval timeout;
-	struct iolog_timing timing;
-	bool need_nlcr = false;
-	char last_char = '\0';
-
-	buf[strcspn(buf, "\n")] = '\0';
-	if (!parse_timing(buf, decimal, &timing))
-	    sudo_fatalx(U_("invalid timing file line: %s"), buf);
-
-	/* Adjust delay using speed factor and clamp to max_wait */
-	to_wait = timing.seconds / speed_factor;
-	if (max_wait && to_wait > max_wait)
-	    to_wait = max_wait;
-
-	/* Convert delay to a timeval. */
-	timeout.tv_sec = to_wait;
-	timeout.tv_usec = (to_wait - timeout.tv_sec) * 1000000.0;
-
-	/* Run event event loop to delay and get keyboard input. */
-	if (sudo_ev_add(evbase, input_ev, &timeout, false) == -1)
-	    sudo_fatal(U_("unable to add event to queue"));
-	sudo_ev_loop(evbase, 0);
-
-	if (timing.idx == IOFD_TIMING) {
-	    resize_terminal(timing.u.winsize.rows, timing.u.winsize.cols);
-	    continue;
-	}
-
-	/* Even if we are not replaying, we still have to delay. */
-	if (timing.idx >= IOFD_MAX || io_log_files[timing.idx].fd.v == NULL)
-	    continue;
-
-	/* Check whether we need to convert newline to CR LF pairs. */
-	if (interactive) 
-	    need_nlcr = (timing.idx == IOFD_STDOUT || timing.idx == IOFD_STDERR);
-
-	/* All output is sent to stdout. */
-	/* XXX - assumes no wall clock time spent writing output. */
-	while (timing.u.nbytes != 0) {
-	    if (timing.u.nbytes > sizeof(buf))
-		len = sizeof(buf);
-	    else
-		len = timing.u.nbytes;
-	    nread = io_log_read(timing.idx, buf, len);
-	    if (nread <= 0) {
-		if (nread == 0) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"%s: premature EOF, expected %zu bytes",
-			io_log_files[timing.idx].suffix, timing.u.nbytes);
-		} else {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-			"%s: read error", io_log_files[timing.idx].suffix);
-		}
-		break;
-	    }
-	    timing.u.nbytes -= nread;
-
-	    /* Convert newline to carriage return + linefeed if needed. */
-	    if (need_nlcr) {
-		size_t remainder = nread;
-		size_t linelen;
-		char *line = buf;
-		char *nl, *cp = buf;
-
-		/*
-		 * Handle a "\r\n" pair that spans a buffer.
-		 * The newline will be written as part of the next line.
-		 */
-		if (last_char == '\r' && *cp == '\n') {
-		    cp++;
-		    remainder--;
-		}
-
-		iovcnt = 0;
-		while ((nl = memchr(cp, '\n', remainder)) != NULL) {
-		    /*
-		     * If there is already a carriage return, keep going.
-		     * We'll include it as part of the next line written.
-		     */
-		    if (cp != nl && nl[-1] == '\r') {
-			remainder = (size_t)(&buf[nread - 1] - nl);
-			cp = nl + 1;
-		    	continue;
-		    }
-
-		    /* Store the line in iov followed by \r\n pair. */
-		    if (iovcnt + 3 > iovmax) {
-			iov = iovmax ?
-			    reallocarray(iov, iovmax <<= 1, sizeof(*iov)) :
-			    reallocarray(NULL, iovmax = 32, sizeof(*iov));
-			if (iov == NULL)
-			    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		    }
-		    linelen = (size_t)(nl - line) + 1;
-		    iov[iovcnt].iov_base = line;
-		    iov[iovcnt].iov_len = linelen - 1; /* not including \n */
-		    iovcnt++;
-		    iov[iovcnt].iov_base = "\r\n";
-		    iov[iovcnt].iov_len = 2;
-		    iovcnt++;
-		    line = cp = nl + 1;
-		    remainder -= linelen;
-		}
-		if ((size_t)(line - buf) != nread) {
-		    /*
-		     * Partial line without a linefeed or multiple lines
-		     * that already had \r\n pairs.
-		     */
-		    iov[iovcnt].iov_base = line;
-		    iov[iovcnt].iov_len = nread - (line - buf);
-		    iovcnt++;
-		}
-		last_char = buf[nread - 1]; /* stash last char of old buffer */
-	    } else {
-		/* No conversion needed. */
-		iov[0].iov_base = buf;
-		iov[0].iov_len = nread;
-		iovcnt = 1;
-	    }
-
-	    /* Setup closure for write_output. */
-	    wc.wevent = output_ev;
-	    wc.iov = iov;
-	    wc.iovcnt = iovcnt;
-	    wc.nbytes = 0;
-	    for (i = 0; i < iovcnt; i++)
-		wc.nbytes += iov[i].iov_len;
-
-	    /* Run event event loop to write output. */
-	    /* XXX - should use a single event loop with a circular buffer. */
-	    if (sudo_ev_add(evbase, output_ev, NULL, false) == -1)
-		sudo_fatal(U_("unable to add event to queue"));
-	    sudo_ev_loop(evbase, 0);
-	}
+    /* Allocate the delay closure and read the first timing record. */
+    closure = replay_closure_alloc(max_delay, decimal, interactive);
+    if (read_timing_record(closure) != 0) {
+	ret = 1;
+	goto done;
     }
-    if (iov != &iovb)
-	free(iov);
-    sudo_ev_base_free(evbase);
-    sudo_ev_free(input_ev);
-    sudo_ev_free(output_ev);
-    debug_return;
+
+    /* Run event loop. */
+    sudo_ev_loop(closure->evbase, 0);
+    if (sudo_ev_got_break(closure->evbase))
+	ret = 1;
+
+done:
+    /* Clean up and return. */
+    replay_closure_free(closure);
+    debug_return_int(ret);
 }
 
 static int
@@ -943,48 +1046,82 @@ open_io_fd(char *path, int len, struct io_log_file *iol)
     debug_return_int(iol->fd.v ? 0 : -1);
 }
 
+/*
+ * Write the I/O buffer.
+ */
 static void
 write_output(int fd, int what, void *v)
 {
-    struct write_closure *wc = v;
-    size_t nwritten;
-    unsigned int i;
+    struct replay_closure *closure = v;
+    struct io_buffer *iobuf = &closure->iobuf;
+    unsigned iovcnt = 1;
+    struct iovec iov[2];
+    bool need_nlcr = false;
+    size_t nbytes, nwritten;
     debug_decl(write_output, SUDO_DEBUG_UTIL)
 
-    nwritten = writev(fd, wc->iov, wc->iovcnt);
+    /* Refill iobuf if there is more to read and buf is empty. */
+    if (!fill_iobuf(closure)) {
+	sudo_ev_loopbreak(closure->evbase);
+	debug_return;
+    }
+
+    if (closure->interactive)
+	need_nlcr = (fd == IOFD_STDOUT || fd == IOFD_STDERR);
+
+    nbytes = iobuf->len - iobuf->off;
+    iov[0].iov_base = iobuf->buf + iobuf->off;
+    iov[0].iov_len = nbytes;
+
+    if (need_nlcr) {
+	char *nl;
+
+	/* We may need to add a carriage return after the newline. */
+	nl = memchr(iov[0].iov_base, '\n', iov[0].iov_len);
+	if (nl != NULL) {
+	    iov[0].iov_len--;	/* skip the existing newline */
+	    iov[1].iov_base = "\r\n";
+	    iov[1].iov_len = 2;
+	    iovcnt = 2;
+	    nbytes++;		/* account for the added carriage return */
+	}
+    }
+
+    nwritten = writev(fd, iov, iovcnt);
     switch ((ssize_t)nwritten) {
     case -1:
 	if (errno != EINTR && errno != EAGAIN)
 	    sudo_fatal(U_("unable to write to %s"), "stdout");
 	break;
-    case 0:
-	break;
     default:
-	if (wc->nbytes == nwritten) {
-	    /* writev completed */
-	    debug_return;
+	if (iovcnt == 2 && nwritten == nbytes) {
+		/* subtract one for the carriage return we added above. */
+		nwritten--;
 	}
-
-	/* short writev, adjust iov so we can write the remainder. */
-	wc->nbytes -= nwritten;
-	i = wc->iovcnt;
-	while (i--) {
-	    if (wc->iov[0].iov_len > nwritten) {
-		/* Partial write, adjust base and len and reschedule. */
-		wc->iov[0].iov_base = (char *)wc->iov[0].iov_base + nwritten;
-		wc->iov[0].iov_len -= nwritten;
-		break;
-	    }
-	    nwritten -= wc->iov[0].iov_len;
-	    wc->iov++;
-	    wc->iovcnt--;
-	}
+	iobuf->off += nwritten;
 	break;
     }
 
-    /* Reschedule event to write remainder. */
-    if (sudo_ev_add(NULL, wc->wevent, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
+    if (iobuf->off == iobuf->len) {
+	/* Write complete, go to next timing entry if possible. */
+	switch (read_timing_record(closure)) {
+	case 0:
+	    /* success */
+	    break;
+	case 1:
+	    /* EOF */
+	    sudo_ev_loopexit(closure->evbase);
+	    break;
+	default:
+	    /* error */
+	    sudo_ev_loopbreak(closure->evbase);
+	    break;
+	}
+    } else {
+	/* Reschedule event to write remainder. */
+	if (sudo_ev_add(NULL, closure->output_ev, NULL, false) == -1)
+	    sudo_fatal(U_("unable to add event to queue"));
+    }
     debug_return;
 }
 
@@ -1473,62 +1610,82 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
 }
 
 /*
- * Check input for ' ', '<', '>', return
+ * Check keyboard for ' ', '<', '>', return
  * pause, slow, fast, next
  */
 static void
-check_input(int fd, int what, void *v)
+read_keyboard(int fd, int what, void *v)
 {
-    struct sudo_event *ev = v;
-    struct timeval tv, *timeout = NULL;
-    static bool paused = 0;
+    struct replay_closure *closure = v;
+    static bool paused = false;
+    struct timeval tv;
     char ch;
-    debug_decl(check_input, SUDO_DEBUG_UTIL)
+    debug_decl(read_keyboard, SUDO_DEBUG_UTIL)
 
-    if (ISSET(what, SUDO_EV_READ)) {
-	switch (read(fd, &ch, 1)) {
-	case -1:
-	    if (errno != EINTR && errno != EAGAIN)
-		sudo_fatal(U_("unable to read %s"), "stdin");
+    switch (read(fd, &ch, 1)) {
+    case -1:
+	if (errno != EINTR && errno != EAGAIN)
+	    sudo_fatal(U_("unable to read %s"), "stdin");
+	break;
+    case 0:
+	/* Ignore EOF. */
+	break;
+    default:
+	if (paused) {
+	    /* Any key will unpause, run the delay callback directly. */
+	    paused = false;
+	    delay_cb(-1, SUDO_EV_TIMEOUT, closure);
+	    debug_return;
+	}
+	switch (ch) {
+	case ' ':
+	    paused = true;
+	    /* Disable the delay event until we unpause. */
+	    sudo_ev_del(closure->evbase, closure->delay_ev);
 	    break;
-	case 0:
-	    /* Ignore EOF. */
+	case '<':
+	    speed_factor /= 2;
+            sudo_ev_get_timeleft(closure->delay_ev, &tv);
+            if (sudo_timevalisset(&tv)) {
+		/* Double remaining timeout. */
+		tv.tv_sec *= 2;
+		tv.tv_usec *= 2;
+		if (tv.tv_usec >= 1000000) {
+		    tv.tv_sec++;
+		    tv.tv_usec -= 1000000;
+		}
+		if (sudo_ev_add(NULL, closure->delay_ev, &tv, false) == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"failed to double remaining delay timeout");
+		}
+            }
+	    break;
+	case '>':
+	    speed_factor *= 2;
+            sudo_ev_get_timeleft(closure->delay_ev, &tv);
+            if (sudo_timevalisset(&tv)) {
+		/* Halve remaining timeout. */
+		if (tv.tv_sec & 1)
+		    tv.tv_usec += 500000;
+		tv.tv_sec /= 2;
+		tv.tv_usec /= 2;
+		if (sudo_ev_add(NULL, closure->delay_ev, &tv, false) == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"failed to halve remaining delay timeout");
+		}
+            }
+	    break;
+	case '\r':
+	case '\n':
+	    /* Cancel existing delay, run callback directly. */
+	    sudo_ev_del(closure->evbase, closure->delay_ev);
+	    delay_cb(-1, SUDO_EV_TIMEOUT, closure);
 	    break;
 	default:
-	    if (paused) {
-		/* Any key will unpause, event is finished. */
-		/* XXX - pause time could be less than timeout */
-		paused = false;
-		debug_return; /* XXX */
-	    }
-	    switch (ch) {
-	    case ' ':
-		paused = true;
-		break;
-	    case '<':
-		speed_factor /= 2;
-		break;
-	    case '>':
-		speed_factor *= 2;
-		break;
-	    case '\r':
-	    case '\n':
-		debug_return; /* XXX */
-	    }
+	    /* Unknown key, nothing to do. */
 	    break;
 	}
-	if (!paused) {
-	    /* Determine remaining timeout, if any. */
-	    sudo_ev_get_timeleft(ev, &tv);
-	    if (!sudo_timevalisset(&tv)) {
-		/* No time left, event is done. */
-		debug_return;
-	    }
-	    timeout = &tv;
-	}
-	/* Re-enable event. */
-	if (sudo_ev_add(NULL, ev, timeout, false) == -1)
-	    sudo_fatal(U_("unable to add event to queue"));
+	break;
     }
     debug_return;
 }
@@ -1538,10 +1695,10 @@ check_input(int fd, int what, void *v)
  *	index sleep_time num_bytes
  * Where index is IOFD_*, sleep_time is the number of seconds to sleep
  * before writing the data and num_bytes is the number of bytes to output.
- * Returns 1 on success and 0 on failure.
+ * Returns true on success and false on failure.
  */
-static int
-parse_timing(const char *buf, const char *decimal, struct iolog_timing *timing)
+static bool
+parse_timing(const char *buf, double *seconds, struct timing_closure *timing)
 {
     unsigned long ul;
     long l;
@@ -1571,19 +1728,19 @@ parse_timing(const char *buf, const char *decimal, struct iolog_timing *timing)
      */
     errno = 0;
     l = strtol(cp, &ep, 10);
-    if (ep == cp || (*ep != '.' && strncmp(ep, decimal, strlen(decimal)) != 0))
+    if (ep == cp || (*ep != '.' && strncmp(ep, timing->decimal, strlen(timing->decimal)) != 0))
 	goto bad;
     if (l < 0 || l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
 	goto bad;
-    timing->seconds = (double)l;
-    cp = ep + (*ep == '.' ? 1 : strlen(decimal));
+    *seconds = (double)l;
+    cp = ep + (*ep == '.' ? 1 : strlen(timing->decimal));
     d = 10.0;
     while (isdigit((unsigned char) *cp)) {
 	fract += (*cp - '0') / d;
 	d *= 10;
 	cp++;
     }
-    timing->seconds += fract;
+    *seconds += fract;
     while (isspace((unsigned char) *cp))
 	cp++;
 
@@ -1615,9 +1772,9 @@ parse_timing(const char *buf, const char *decimal, struct iolog_timing *timing)
 	timing->u.nbytes = (size_t)ul;
     }
 
-    debug_return_int(1);
+    debug_return_bool(true);
 bad:
-    debug_return_int(0);
+    debug_return_bool(false);
 }
 
 static void
@@ -1657,15 +1814,4 @@ sudoreplay_cleanup(void)
 {
     restore_terminal_size();
     sudo_term_restore(ttyfd, false);
-}
-
-/*
- * Signal handler for SIGINT, SIGTERM, SIGHUP, SIGQUIT
- * Must be installed with SA_RESETHAND enabled.
- */
-static void
-sudoreplay_handler(int signo)
-{
-    sudoreplay_cleanup();
-    kill(getpid(), signo);
 }
