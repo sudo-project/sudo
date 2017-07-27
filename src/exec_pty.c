@@ -269,7 +269,6 @@ log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
 	 */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: deleting and freeing devtty wevent %p", __func__, iob->wevent);
-	sudo_ev_del(NULL, iob->wevent);
 	sudo_ev_free(iob->wevent);
 	iob->wevent = NULL;
 	iob->off = iob->len = 0;
@@ -313,7 +312,6 @@ log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
 	 */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: deleting and freeing stdout wevent %p", __func__, iob->wevent);
-	sudo_ev_del(NULL, iob->wevent);
 	sudo_ev_free(iob->wevent);
 	iob->wevent = NULL;
 	iob->off = iob->len = 0;
@@ -357,7 +355,6 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 	 */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: deleting and freeing stderr wevent %p", __func__, iob->wevent);
-	sudo_ev_del(NULL, iob->wevent);
 	sudo_ev_free(iob->wevent);
 	iob->wevent = NULL;
 	iob->off = iob->len = 0;
@@ -1597,7 +1594,6 @@ ev_free_by_fd(struct sudo_event_base *evbase, int fd)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "%s: deleting and freeing revent %p with fd %d",
 		    __func__, iob->revent, fd);
-		sudo_ev_del(evbase, iob->revent);
 		sudo_ev_free(iob->revent);
 		iob->revent = NULL;
 	    }
@@ -1607,7 +1603,6 @@ ev_free_by_fd(struct sudo_event_base *evbase, int fd)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "%s: deleting and freeing wevent %p with fd %d",
 		    __func__, iob->wevent, fd);
-		sudo_ev_del(evbase, iob->wevent);
 		sudo_ev_free(iob->wevent);
 		iob->wevent = NULL;
 	    }
