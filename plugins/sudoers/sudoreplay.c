@@ -484,7 +484,8 @@ getsize_cb(int fd, int what, void *v)
 	    goto done;
 	}
 	if (ISSET(gc->state, READCHAR)) {
-	    switch (read(ttyfd, &ch, 1)) {
+	    ssize_t nread = read(ttyfd, &ch, 1);
+	    switch (nread) {
 	    case -1:
 		if (errno == EAGAIN)
 		    goto another;
@@ -1619,10 +1620,12 @@ read_keyboard(int fd, int what, void *v)
     struct replay_closure *closure = v;
     static bool paused = false;
     struct timeval tv;
+    ssize_t nread;
     char ch;
     debug_decl(read_keyboard, SUDO_DEBUG_UTIL)
 
-    switch (read(fd, &ch, 1)) {
+    nread = read(fd, &ch, 1);
+    switch (nread) {
     case -1:
 	if (errno != EINTR && errno != EAGAIN)
 	    sudo_fatal(U_("unable to read %s"), "stdin");
