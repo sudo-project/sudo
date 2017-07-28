@@ -32,6 +32,7 @@
 #endif
 
 #include "sudo_compat.h"
+#include "pathnames.h"
 
 #ifndef _POSIX_OPEN_MAX
 # define _POSIX_OPEN_MAX	20
