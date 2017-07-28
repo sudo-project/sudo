@@ -5,7 +5,7 @@ What's new in Sudo 1.8.21
 
  * It is now possible to preserve bash shell functions in the
    environment when the "env_reset" sudoers setting is disabled by
-   removing the "*=()* " pattern from the env_delete list.
+   removing the "*=()*" pattern from the env_delete list.
 
  * A change made in sudo 1.8.15 inadvertantly caused sudoedit to
    send itself SIGHUP instead of exiting when the editor returns
@@ -15,9 +15,9 @@ What's new in Sudo 1.8.21
    actually modified.  Previously, sudoedit treated a lack of
    modifications as an error.
 
- * When running a command in a pseudo terminal (pty), sudo now
-   copies a subset of the terminal flags to the new pty.  Previously,
-   all flags were copied, even those not appropriate for a pty.
+ * When running a command in a pseudo-tty (pty), sudo now copies a
+   subset of the terminal flags to the new pty.  Previously, all
+   flags were copied, even those not appropriate for a pty.
 
  * Fixed a problem with debug logging in the sudoers I/O logging
    plugin.
