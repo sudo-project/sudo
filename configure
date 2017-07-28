@@ -962,6 +962,7 @@ enable_shared_libutil
 enable_tmpfiles_d
 enable_devsearch
 with_selinux
+enable_sasl
 enable_gss_krb5_ccache_name
 enable_shared
 enable_static
@@ -1645,6 +1646,7 @@ Optional Features:
   --enable-tmpfiles.d=DIR Set the path to the systemd tmpfiles.d directory.
   --enable-devsearch=PATH The colon-delimited path to search for device nodes
                           when determing the tty name.
+  --enable-sasl           Enable/disable LDAP SASL support
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -6748,6 +6750,18 @@ fi
 esac
 else
   with_selinux=no
+fi
+
+
+# Check whether --enable-sasl was given.
+if test "${enable_sasl+set}" = set; then :
+  enableval=$enable_sasl;  case "$enableval" in
+    yes|no) ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-sasl: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-sasl: $enableval" >&2;}
+	    ;;
+  esac
+
 fi
 
 
@@ -22552,7 +22566,7 @@ if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
 fi
 
     #
-    # Some PAM implementations (MacOS X for example) put the PAM headers
+    # Some PAM implementations (macOS for example) put the PAM headers
     # in /usr/include/pam instead of /usr/include/security...
     #
     found_pam_hdrs=no
@@ -24695,7 +24709,9 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-    for ac_header in sasl/sasl.h sasl.h
+    if test ${enable_sasl-'yes'} = "yes"; then
+	found_sasl_h=no
+	for ac_header in sasl/sasl.h sasl.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -24704,7 +24720,8 @@ if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
-	for ac_func in ldap_sasl_interactive_bind_s
+	    found_sasl_h=yes
+	    for ac_func in ldap_sasl_interactive_bind_s
 do :
   ac_fn_c_check_func "$LINENO" "ldap_sasl_interactive_bind_s" "ac_cv_func_ldap_sasl_interactive_bind_s"
 if test "x$ac_cv_func_ldap_sasl_interactive_bind_s" = xyes; then :
@@ -24715,12 +24732,21 @@ _ACEOF
 fi
 done
 
-	break
+	    break
 
 fi
 
 done
 
+	if test X${enable_sasl} = X"yes"; then
+	    if test X"$found_sasl_h" != X"yes"; then
+		as_fn_error $? "\"--enable-sasl specified but unable to locate SASL development headers.\"" "$LINENO" 5
+	    fi
+	    if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
+		as_fn_error $? "\"--enable-sasl specified but SASL support is missing in your LDAP library\"" "$LINENO" 5
+	    fi
+	fi
+    fi
     for ac_header in ldap_ssl.h mps/ldap_ssl.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`

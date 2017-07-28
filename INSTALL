@@ -312,6 +312,12 @@ Optional features:
 	this file instead of /etc/ldap.secret to read the secret password
 	when rootbinddn is specified in the ldap config file.
 
+  --disable-sasl
+        Disable SASL authentication for LDAP.  By default, sudo
+        will compile in support for SASL authentication if the
+        ldap_sasl_interactive_bind_s() function is present in the
+        LDAP libraries.
+
   --with-logincap
 	This adds support for login classes specified in /etc/login.conf.
 	It is enabled by default on BSD/OS, Darwin, FreeBSD, OpenBSD and

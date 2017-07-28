@@ -1562,6 +1562,15 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
 		;;
 esac], [with_selinux=no])
 
+AC_ARG_ENABLE(sasl,
+[AS_HELP_STRING([--enable-sasl], [Enable/disable LDAP SASL support])],
+[ case "$enableval" in
+    yes|no) ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-sasl: $enableval])
+	    ;;
+  esac
+])
+
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
 dnl
@@ -3745,10 +3754,22 @@ if test ${with_ldap-'no'} != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
-	AC_CHECK_FUNCS([ldap_sasl_interactive_bind_s])
-	break
-    ])
+    if test ${enable_sasl-'yes'} = "yes"; then
+	found_sasl_h=no
+	AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
+	    found_sasl_h=yes
+	    AC_CHECK_FUNCS([ldap_sasl_interactive_bind_s])
+	    break
+	])
+	if test X${enable_sasl} = X"yes"; then
+	    if test X"$found_sasl_h" != X"yes"; then
+		AC_MSG_ERROR(["--enable-sasl specified but unable to locate SASL development headers."])
+	    fi
+	    if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
+		AC_MSG_ERROR(["--enable-sasl specified but SASL support is missing in your LDAP library"])
+	    fi
+	fi
+    fi
     AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
     AC_CHECK_FUNCS([ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_init ldap_ssl_client_init ldap_start_tls_s_np])
     AC_CHECK_FUNCS([ldap_search_ext_s ldap_search_st], [break])
