@@ -3031,7 +3031,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
 static int
 sudo_ldap_bind_s(LDAP *ld)
 {
-    int rc, ret;
+    int ret;
     debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -3042,6 +3042,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	const char *tmp_ccname = NULL;
 	void *auth_id = ldap_conf.rootsasl_auth_id ?
 	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
+	int rc;
 
 	/* Make temp copy of the user's credential cache as needed. */
 	if (ldap_conf.krb5_ccname == NULL && user_ccname != NULL) {
