@@ -118,6 +118,7 @@ struct replay_closure {
 	unsigned int len; /* buffer length (how much produced) */
 	unsigned int off; /* write position (how much already consumed) */
 	unsigned int toread; /* how much remains to be read */
+	int lastc;	  /* last char written */
 	char buf[64 * 1024];
     } iobuf;
 };
@@ -785,6 +786,7 @@ read_timing_record(struct replay_closure *closure)
     if (closure->timing.idx != IOFD_TIMING) {
     	closure->iobuf.len = 0;
     	closure->iobuf.off = 0;
+    	closure->iobuf.lastc = '\0';
     	closure->iobuf.toread = closure->timing.u.nbytes;
     }
 
@@ -1054,10 +1056,11 @@ static void
 write_output(int fd, int what, void *v)
 {
     struct replay_closure *closure = v;
+    const struct timing_closure *timing = &closure->timing;
     struct io_buffer *iobuf = &closure->iobuf;
     unsigned iovcnt = 1;
     struct iovec iov[2];
-    bool need_nlcr = false;
+    bool added_cr = false;
     size_t nbytes, nwritten;
     debug_decl(write_output, SUDO_DEBUG_UTIL)
 
@@ -1067,24 +1070,30 @@ write_output(int fd, int what, void *v)
 	debug_return;
     }
 
-    if (closure->interactive)
-	need_nlcr = (fd == IOFD_STDOUT || fd == IOFD_STDERR);
-
     nbytes = iobuf->len - iobuf->off;
     iov[0].iov_base = iobuf->buf + iobuf->off;
     iov[0].iov_len = nbytes;
 
-    if (need_nlcr) {
+    if (closure->interactive &&
+	(timing->idx == IOFD_STDOUT || timing->idx == IOFD_STDERR)) {
 	char *nl;
 
-	/* We may need to add a carriage return after the newline. */
+	/*
+	 * We may need to insert a carriage return before the newline.
+	 * Note that the carriage return may have already been written.
+	 */
 	nl = memchr(iov[0].iov_base, '\n', iov[0].iov_len);
 	if (nl != NULL) {
-	    iov[0].iov_len--;	/* skip the existing newline */
-	    iov[1].iov_base = "\r\n";
-	    iov[1].iov_len = 2;
-	    iovcnt = 2;
-	    nbytes++;		/* account for the added carriage return */
+	    size_t len = (size_t)(nl - (char *)iov[0].iov_base);
+	    if ((nl == iov[0].iov_base && iobuf->lastc != '\r') ||
+		(nl != iov[0].iov_base && nl[-1] != '\r')) {
+		iov[0].iov_len = len;
+		iov[1].iov_base = "\r\n";
+		iov[1].iov_len = 2;
+		iovcnt = 2;
+		nbytes = iov[0].iov_len + iov[1].iov_len;
+		added_cr = true;
+	    }
 	}
     }
 
@@ -1094,10 +1103,20 @@ write_output(int fd, int what, void *v)
 	if (errno != EINTR && errno != EAGAIN)
 	    sudo_fatal(U_("unable to write to %s"), "stdout");
 	break;
+    case 0:
+	/* Should not happen. */
+	break;
     default:
-	if (iovcnt == 2 && nwritten == nbytes) {
-		/* subtract one for the carriage return we added above. */
-		nwritten--;
+	if (added_cr && nwritten >= nbytes - 1) {
+	    /* The last char written was either '\r' or '\n'. */
+	    iobuf->lastc = nwritten == nbytes ? '\n' : '\r';
+	} else {
+	    /* Stash the last char written. */
+	    iobuf->lastc = *((char *)iov[0].iov_base + nwritten);
+	}
+	if (added_cr) {
+	    /* Subtract one for the carriage return we added above. */
+	    nwritten--;
 	}
 	iobuf->off += nwritten;
 	break;
