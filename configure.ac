@@ -127,7 +127,7 @@ AC_SUBST([runas_default])
 AC_SUBST([env_editor])
 AC_SUBST([env_reset])
 AC_SUBST([passwd_tries])
-AC_SUBST([tty_tickets])
+AC_SUBST([timestamp_type])
 AC_SUBST([insults])
 AC_SUBST([root_sudo])
 AC_SUBST([path_info])
@@ -171,7 +171,7 @@ env_editor=off
 env_reset=on
 editor=vi
 passwd_tries=3
-tty_tickets=on
+timestamp_type=tty
 insults=off
 root_sudo=on
 path_info=on
@@ -1036,22 +1036,15 @@ esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
 AC_MSG_RESULT($password_timeout)
 
-AC_MSG_CHECKING(whether to use per-tty ticket files)
 AC_ARG_WITH(tty-tickets, [AS_HELP_STRING([--with-tty-tickets], [use a different ticket file for each tty])],
 [case $with_tty_tickets in
-    yes)	tty_tickets=on
+    yes)	timestamp_type=tty
 		;;
-    no)		tty_tickets=off
+    no)		timestamp_type=global
 		;;
     *)		AC_MSG_ERROR(["--with-tty-tickets does not take an argument."])
 		;;
 esac])
-if test "$tty_tickets" = "off"; then
-    AC_DEFINE(NO_TTY_TICKETS)
-    AC_MSG_RESULT(no)
-else
-    AC_MSG_RESULT(yes)
-fi
 
 AC_MSG_CHECKING(whether to include insults)
 AC_ARG_WITH(insults, [AS_HELP_STRING([--with-insults], [insult the user for entering an incorrect password])],
@@ -1570,6 +1563,18 @@ AC_ARG_ENABLE(sasl,
 	    ;;
   esac
 ])
+
+AC_ARG_ENABLE(timestamp-type,
+[AS_HELP_STRING([--timestamp-type=TYPE], [Set the default time stamp record type to global, ppid or tty.])],
+[ case "$enableval" in
+    global|ppid|tty)
+	    timestamp_type=$enableval
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-timestamp-type: $enableval])
+	    ;;
+  esac
+])
+AC_DEFINE_UNQUOTED(TIMESTAMP_TYPE, $timestamp_type)
 
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
@@ -4443,7 +4448,7 @@ AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture 
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support.])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
-AH_TEMPLATE(NO_TTY_TICKETS, [Define to 1 if you want a single ticket file instead of per-tty files.])
+AH_TEMPLATE(TIMESTAMP_TYPE, [Define to global, ppid or tty to set the default timestamp record type.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
 AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Define to 1 to enable replacement getcwd if system getcwd is broken.])
 AH_TEMPLATE(SECURE_PATH, [A colon-separated list of directories to override the user's PATH with.])

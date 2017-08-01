@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "July 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 1, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -216,7 +216,7 @@ file lookup is still done for root, not the user specified by
 \fBsudoers\fR
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the uid that was used to authenticate, the
+containing the user ID that was used to authenticate, the
 terminal session ID, and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
@@ -229,12 +229,13 @@ option)
 \&.
 By default,
 \fBsudoers\fR
-uses a separate record for each tty, which means that
+uses a separate record for each terminal, which means that
 a user's login sessions are authenticated separately.
 The
-\fItty_tickets\fR
-option can be disabled to force the use of a
-single time stamp for all of a user's sessions.
+\fItimestamp_type\fR
+option can be used to select the type of time stamp record
+\fBsudoers\fR
+will use.
 .SS "Logging"
 \fBsudoers\fR
 can log both successful and unsuccessful attempts (as well
@@ -3005,11 +3006,12 @@ tty_tickets
 If set, users must authenticate on a per-tty basis.
 With this flag enabled,
 \fBsudo\fR
-will use a separate record in the time stamp file for each tty.
+will use a separate record in the time stamp file for each terminal.
 If disabled, a single record is used for all login sessions.
-This flag is
-\fI@tty_tickets@\fR
-by default.
+.sp
+This option has been superceded by the
+\fItimestamp_type\fR
+option.
 .TP 18n
 umask_override
 If set,
@@ -3628,6 +3630,58 @@ sending email.
 Note that changing the locale may affect how sudoers is interpreted.
 Defaults to
 \(Lq\fRC\fR\(Rq.
+.TP 18n
+timestamp_type
+\fBsudoers\fR
+uses per-user time stamp files for credential caching.
+The
+\fItimestamp_type\fR
+option can be used to specify the type of time stamp record used.
+It has the following possible values:
+.PP
+.RS 18n
+.PD 0
+.TP 8n
+global
+A single time stamp record is used for all of a user's login sessions,
+regardless of the terminal or parent process ID.
+An additional record is used to serialize password prompts when
+\fBsudo\fR
+is used multiple times in a pipeline, but this does not affect authentication.
+.PD
+.TP 8n
+ppid
+A single time stamp record is used for all processes with the same parent
+process ID (usually the shell).
+Commands run from the same shell (or other common parent process)
+will not require a password for
+\fItimestamp_timeout\fR
+minutes
+(\fR@timeout@\fR
+by default)
+\&.
+Commands run via
+\fBsudo\fR
+with a different parent process ID, for example from a shell script,
+will be authenticated separately.
+.TP 8n
+tty
+One time stamp record is used for each terminal,
+which means that a user's login sessions are authenticated separately.
+If no terminal is present, the behavior is the same as
+\fIppid\fR.
+Commands run from the same terminal will not require a password for
+\fItimestamp_timeout\fR
+minutes
+(\fR@timeout@\fR
+by default)
+\&.
+.PP
+The default value is
+\fI@timestamp_type@\fR.
+.sp
+This setting is only supported by version 1.8.21 or higher.
+.RE
 .TP 18n
 timestampdir
 The directory in which

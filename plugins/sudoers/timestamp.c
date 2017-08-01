@@ -312,15 +312,15 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
  * based on auth user pw.  Does not set the time stamp.
  */
 static void
-ts_fill4(struct timestamp_entry *entry, struct passwd *pw, int flags, bool tty_tickets)
+ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
+    enum def_tuple ticket_type)
 {
     struct stat sb;
-    debug_decl(ts_fill4, SUDOERS_DEBUG_AUTH)
+    debug_decl(ts_init_key, SUDOERS_DEBUG_AUTH)
 
     memset(entry, 0, sizeof(*entry));
     entry->version = TS_VERSION;
     entry->size = sizeof(*entry);
-    entry->type = TS_GLOBAL;	/* may be overriden below */
     entry->flags = flags;
     if (pw != NULL) {
 	entry->auth_uid = pw->pw_uid;
@@ -328,31 +328,38 @@ ts_fill4(struct timestamp_entry *entry, struct passwd *pw, int flags, bool tty_t
 	entry->flags |= TS_ANYUID;
     }
     entry->sid = user_sid;
-    if (tty_tickets) {
+    switch (ticket_type) {
+    case tty:
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
 	    entry->u.ttydev = sb.st_rdev;
-	} else {
-	    /* ppid-based time stamp */
-	    entry->type = TS_PPID;
-	    entry->u.ppid = getppid();
+	    break;
 	}
+	/* FALLTHROUGH */
+    case ppid:
+	/* ppid-based time stamp */
+	entry->type = TS_PPID;
+	entry->u.ppid = getppid();
+	break;
+    default:
+	/* global time stamp */
+	entry->type = TS_GLOBAL;
+	break;
     }
 
     debug_return;
 }
 
 static void
-ts_fill(struct timestamp_entry *entry, struct passwd *pw, int flags)
+ts_init_key_nonglobal(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
-    ts_fill4(entry, pw, flags, def_tty_tickets);
-}
-
-static void
-ts_fill_tty(struct timestamp_entry *entry, struct passwd *pw, int flags)
-{
-    ts_fill4(entry, pw, flags, true);
+    /*
+     * Even if the timestamp type is global we still want to do per-tty
+     * or per-ppid locking so sudo works predictably in a pipeline.
+     */
+    ts_init_key(entry, pw, flags,
+	def_timestamp_type != global ? def_timestamp_type : tty);
 }
 
 /*
@@ -602,13 +609,15 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	    debug_return_bool(false);
     }
 
-    /* Search for a tty-based record or append a new one. */
+    /* Search for a tty/ppid-based record or append a new one. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"searching for tty time stamp record");
-    ts_fill_tty(&cookie->key, pw, TS_DISABLED);
+	"searching for %s time stamp record",
+	def_timestamp_type == ppid ? "ppid" : "tty");
+    ts_init_key_nonglobal(&cookie->key, pw, TS_DISABLED);
     if (ts_find_record(cookie->fd, &cookie->key, &entry)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "found existing tty time stamp record");
+	    "found existing %s time stamp record",
+	    def_timestamp_type == ppid ? "ppid" : "tty");
 	lock_pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
@@ -618,19 +627,16 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	    debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"tty time stamp position is %lld", (long long)lock_pos);
+	"%s time stamp position is %lld",
+	def_timestamp_type == ppid ? "ppid" : "tty", (long long)lock_pos);
 
-    if (def_tty_tickets) {
-	/* For tty tickets the tty lock is the same as the record lock. */
-	cookie->pos = lock_pos;
-	cookie->locked = true;
-    } else {
+    if (def_timestamp_type == global) {
 	/*
-	 * For non-tty tickets we use a separate record lock that we
+	 * For global tickets we use a separate record lock that we
 	 * cannot hold long-term since it is shared between all ttys.
 	 */
 	cookie->locked = false;
-	cookie->key.type = TS_GLOBAL;	/* find a non-tty record */
+	cookie->key.type = TS_GLOBAL;	/* find a global record */
 
 	if (lseek(cookie->fd, 0, SEEK_SET) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
@@ -648,6 +654,10 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	    if (ts_write(cookie->fd, cookie->fname, &cookie->key, -1) == -1)
 		debug_return_bool(false);
 	}
+    } else {
+	/* For tty/ppid tickets the tty lock is the same as the record lock. */
+	cookie->pos = lock_pos;
+	cookie->locked = true;
     }
 
     /* Unlock the TS_LOCKEXCL record. */
@@ -872,7 +882,7 @@ timestamp_remove(bool unlink_it)
     /*
      * Find matching entries and invalidate them.
      */
-    ts_fill(&key, NULL, 0);
+    ts_init_key(&key, NULL, 0, def_timestamp_type);
     while (ts_find_record(fd, &key, &entry)) {
 	/* Back up and disable the entry. */
 	if (!ISSET(entry.flags, TS_DISABLED)) {

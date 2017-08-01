@@ -695,7 +695,7 @@ ldap_conf
 path_info
 root_sudo
 insults
-tty_tickets
+timestamp_type
 passwd_tries
 env_reset
 env_editor
@@ -963,6 +963,7 @@ enable_tmpfiles_d
 enable_devsearch
 with_selinux
 enable_sasl
+enable_timestamp_type
 enable_gss_krb5_ccache_name
 enable_shared
 enable_static
@@ -1647,6 +1648,8 @@ Optional Features:
   --enable-devsearch=PATH The colon-delimited path to search for device nodes
                           when determing the tty name.
   --enable-sasl           Enable/disable LDAP SASL support
+  --timestamp-type=TYPE   Set the default time stamp record type to global,
+                          ppid or tty.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -3090,7 +3093,7 @@ env_editor=off
 env_reset=on
 editor=vi
 passwd_tries=3
-tty_tickets=on
+timestamp_type=tty
 insults=off
 root_sudo=on
 path_info=on
@@ -5690,30 +5693,19 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $password_timeout" >&5
 $as_echo "$password_timeout" >&6; }
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use per-tty ticket files" >&5
-$as_echo_n "checking whether to use per-tty ticket files... " >&6; }
 
 # Check whether --with-tty-tickets was given.
 if test "${with_tty_tickets+set}" = set; then :
   withval=$with_tty_tickets; case $with_tty_tickets in
-    yes)	tty_tickets=on
+    yes)	timestamp_type=tty
 		;;
-    no)		tty_tickets=off
+    no)		timestamp_type=global
 		;;
     *)		as_fn_error $? "\"--with-tty-tickets does not take an argument.\"" "$LINENO" 5
 		;;
 esac
 fi
 
-if test "$tty_tickets" = "off"; then
-    $as_echo "#define NO_TTY_TICKETS 1" >>confdefs.h
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to include insults" >&5
 $as_echo_n "checking whether to include insults... " >&6; }
@@ -6763,6 +6755,24 @@ $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-sasl: $enableva
   esac
 
 fi
+
+
+# Check whether --enable-timestamp-type was given.
+if test "${enable_timestamp_type+set}" = set; then :
+  enableval=$enable_timestamp_type;  case "$enableval" in
+    global|ppid|tty)
+	    timestamp_type=$enableval
+	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-timestamp-type: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-timestamp-type: $enableval" >&2;}
+	    ;;
+  esac
+
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define TIMESTAMP_TYPE $timestamp_type
+_ACEOF
 
 
 # Check whether --enable-gss_krb5_ccache_name was given.

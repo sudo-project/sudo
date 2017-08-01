@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 21, 2017
+.Dd August 1, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -204,7 +204,7 @@ file lookup is still done for root, not the user specified by
 .Nm sudoers
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the uid that was used to authenticate, the
+containing the user ID that was used to authenticate, the
 terminal session ID, and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
@@ -218,12 +218,13 @@ option
 .Pc .
 By default,
 .Nm sudoers
-uses a separate record for each tty, which means that
+uses a separate record for each terminal, which means that
 a user's login sessions are authenticated separately.
 The
-.Em tty_tickets
-option can be disabled to force the use of a
-single time stamp for all of a user's sessions.
+.Em timestamp_type
+option can be used to select the type of time stamp record
+.Nm sudoers
+will use.
 .Ss Logging
 .Nm sudoers
 can log both successful and unsuccessful attempts (as well
@@ -2823,11 +2824,12 @@ by default.
 If set, users must authenticate on a per-tty basis.
 With this flag enabled,
 .Nm sudo
-will use a separate record in the time stamp file for each tty.
+will use a separate record in the time stamp file for each terminal.
 If disabled, a single record is used for all login sessions.
-This flag is
-.Em @tty_tickets@
-by default.
+.Pp
+This option has been superceded by the
+.Em timestamp_type
+option.
 .It umask_override
 If set,
 .Nm sudo
@@ -3396,6 +3398,53 @@ sending email.
 Note that changing the locale may affect how sudoers is interpreted.
 Defaults to
 .Dq Li C .
+.It timestamp_type
+.Nm sudoers
+uses per-user time stamp files for credential caching.
+The
+.Em timestamp_type
+option can be used to specify the type of time stamp record used.
+It has the following possible values:
+.Bl -tag -width 6n
+.It global
+A single time stamp record is used for all of a user's login sessions,
+regardless of the terminal or parent process ID.
+An additional record is used to serialize password prompts when
+.Nm sudo
+is used multiple times in a pipeline, but this does not affect authentication.
+.It ppid
+A single time stamp record is used for all processes with the same parent
+process ID (usually the shell).
+Commands run from the same shell (or other common parent process)
+will not require a password for
+.Em timestamp_timeout
+minutes
+.Po
+.Li @timeout@
+by default
+.Pc .
+Commands run via
+.Nm sudo
+with a different parent process ID, for example from a shell script,
+will be authenticated separately.
+.It tty
+One time stamp record is used for each terminal,
+which means that a user's login sessions are authenticated separately.
+If no terminal is present, the behavior is the same as
+.Em ppid .
+Commands run from the same terminal will not require a password for
+.Em timestamp_timeout
+minutes
+.Po
+.Li @timeout@
+by default
+.Pc .
+.El
+.Pp
+The default value is
+.Em @timestamp_type@ .
+.Pp
+This setting is only supported by version 1.8.21 or higher.
 .It timestampdir
 The directory in which
 .Nm sudo

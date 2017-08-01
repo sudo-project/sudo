@@ -28,6 +28,13 @@ static struct def_values def_data_fdexec[] = {
     { NULL, 0 },
 };
 
+static struct def_values def_data_timestamp_type[] = {
+    { "global", global },
+    { "ppid", ppid },
+    { "tty", tty },
+    { NULL, 0 },
+};
+
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
@@ -469,6 +476,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"syslog_pid", T_FLAG,
 	N_("Include the process ID when logging via syslog"),
 	NULL,
+    }, {
+	"timestamp_type", T_TUPLE,
+	N_("Type of authentication timestamp record: %s"),
+	def_data_timestamp_type,
     }, {
 	NULL, 0, NULL
     }

@@ -344,3 +344,7 @@ iolog_flush
 syslog_pid
 	T_FLAG
 	"Include the process ID when logging via syslog"
+timestamp_type
+	T_TUPLE
+	"Type of authentication timestamp record: %s"
+	global ppid tty

@@ -498,9 +498,6 @@ init_defaults(void)
 #ifdef SEND_MAIL_WHEN_NOT_OK
     def_mail_no_perms = true;
 #endif
-#ifndef NO_TTY_TICKETS
-    def_tty_tickets = true;
-#endif
 #ifndef NO_LECTURE
     def_lecture = once;
 #endif
@@ -534,6 +531,7 @@ init_defaults(void)
 #ifdef UMASK_OVERRIDE
     def_umask_override = true;
 #endif
+    def_timestamp_type = TIMESTAMP_TYPE;
     if ((def_iolog_file = strdup("%{seq}")) == NULL)
 	goto oom;
     if ((def_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR)) == NULL)

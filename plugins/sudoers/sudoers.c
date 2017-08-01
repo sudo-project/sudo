@@ -71,6 +71,7 @@
 static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
 static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
+static bool cb_tty_tickets(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -760,6 +761,9 @@ init_vars(char * const envp[])
     /* Set iolog_mode callback. */
     sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
 
+    /* Set tty_tickets callback. */
+    sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
+
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
 	log_warningx(SLOG_SEND_MAIL, N_("unknown uid: %u"),
@@ -1206,6 +1210,22 @@ cb_runas_default(const union sudo_defs_val *sd_un)
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
 	debug_return_bool(set_runaspw(sd_un->str, true));
+    debug_return_bool(true);
+}
+
+/*
+ * Callback for runas_default sudoers setting.
+ */
+static bool
+cb_tty_tickets(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_tty_tickets, SUDOERS_DEBUG_PLUGIN)
+
+    /* Convert tty_tickets -> timestamp_type */
+    if (sd_un->flag)
+	def_timestamp_type = tty;
+    else
+	def_timestamp_type = global;
     debug_return_bool(true);
 }
 

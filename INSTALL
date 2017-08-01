@@ -615,6 +615,13 @@ Options that set runtime-changeable default values:
 	"-s" flag imply "-H".
 	Sudoers option: set_home
 
+  --enable-timestamp-type=TYPE
+        Set the default time stamp record type.  The TYPE may be "global"
+	(a single record per user), "ppid" (a single record for process
+	with the same parent process), or "tty" (a separate record for
+	each login session).  The default is "tty".
+	Sudoers option: timestamp_type
+
   --with-all-insults
 	Include all the insult sets listed below.  You must either specify
 	--with-insults or enable insults in the sudoers file for this to
@@ -858,12 +865,6 @@ Options that set runtime-changeable default values:
 	Number of minutes that can elapse before sudo will ask for a passwd
 	again.  The default is 5, set this to 0 to always prompt for a password.
 	Sudoers option: timestamp_timeout
-
-  --with-tty-tickets=no, --without-tty-tickets
-	By default, sudo uses a different ticket file for each user/tty combo.
-	With this option disabled, a single ticket will be used for all
-	of a user's login sessions.
-	Sudoers option: tty_tickets
 
   --with-umask=MASK
 	Umask to use when running the root command.  The default is 0022.

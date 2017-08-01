@@ -50,6 +50,12 @@ What's new in Sudo 1.8.21
    not be terminated when the I/O logging plugin returned an error
    to the sudo front-end.
 
+ * A new "timestamp_type" sudoers setting has been added that replaces
+   the "tty_tickets" option.  In addition to tty and global time stamp
+   records, it is now possible to use the parent process ID to restrict
+   the time stamp to commands run by the same process, usually the shell.
+   Bug #793
+
 What's new in Sudo 1.8.20p2
 
  * Fixed a bug parsing /proc/pid/stat on Linux when the process
