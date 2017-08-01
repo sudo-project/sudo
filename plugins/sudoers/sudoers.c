@@ -1100,8 +1100,9 @@ cb_fqdn(const union sudo_defs_val *sd_un)
     /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
     lhost = shost = NULL;
     if (remote) {
-	/* Failure checked below. */
-	(void)resolve_host(user_runhost, &lhost, &shost);
+	if (!resolve_host(user_runhost, &lhost, &shost)) {
+	    sudo_warnx(U_("unable to resolve host %s"), user_runhost);
+	}
     } else {
 	/* Not remote, just use user_host. */
 	if ((lhost = strdup(user_host)) != NULL) {
@@ -1110,19 +1111,21 @@ cb_fqdn(const union sudo_defs_val *sd_un)
 	    else
 		shost = lhost;
 	}
+	if (lhost == NULL || shost == NULL) {
+	    free(lhost);
+	    if (lhost != shost)
+		free(shost);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_bool(false);
+	}
     }
-    if (lhost == NULL || shost == NULL) {
-	free(lhost);
-	free(shost);
-	log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG,
-	    N_("unable to resolve host %s"), user_runhost);
-	debug_return_bool(false);
+    if (lhost != NULL && shost != NULL) {
+	if (user_srunhost != user_runhost)
+	    free(user_srunhost);
+	free(user_runhost);
+	user_runhost = lhost;
+	user_srunhost = shost;
     }
-    if (user_srunhost != user_runhost)
-	free(user_srunhost);
-    free(user_runhost);
-    user_runhost = lhost;
-    user_srunhost = shost;
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"host %s, shost %s, runhost %s, srunhost %s",
