@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 21, 2017
+.Dd Auguest 2, 2017
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -234,6 +234,12 @@ This option is only available on systems with BSD login classes.
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
+The security policy may return an error if the user does not have
+permission to preserve the environment.
+.It Fl -preserve-env=list
+Indicates to the security policy that the user wishes to add the
+comma-separated list of environment variables to those preserved
+from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
 .It Fl e , -edit

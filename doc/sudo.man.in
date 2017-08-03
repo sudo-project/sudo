@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "July 21, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "Auguest 2, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -257,6 +257,13 @@ This option is only available on systems with BSD login classes.
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
+The security policy may return an error if the user does not have
+permission to preserve the environment.
+.TP 12n
+\fB\--preserve-env=list\fR
+Indicates to the security policy that the user wishes to add the
+comma-separated list of environment variables to those preserved
+from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
 .TP 12n
