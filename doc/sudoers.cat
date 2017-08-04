@@ -529,8 +529,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      dgb     boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
 
-     The user ddggbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m--but only as
-     ooppeerraattoorr.  E.g.,
+     The user ddggbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m on the host
+     boulder--but only as ooppeerraattoorr.  E.g.,
 
      $ sudo -u operator /bin/ls
 
@@ -2868,4 +2868,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                     August 1, 2017                     Sudo 1.8.21
+Sudo 1.8.21                     August 4, 2017                     Sudo 1.8.21

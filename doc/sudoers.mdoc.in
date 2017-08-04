@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 1, 2017
+.Dd August 4, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1056,7 +1056,9 @@ may run
 .Pa /bin/ls ,
 .Pa /bin/kill ,
 and
-.Pa /usr/bin/lprm Ns \(em Ns but
+.Pa /usr/bin/lprm
+on the host
+.No boulder Ns \(em Ns but
 only as
 .Sy operator .
 E.g.,
