@@ -59,6 +59,8 @@ What's new in Sudo 1.8.21
  * The --preserve-env command line option has been extended to accept
    a comma-separated list of environment variables to preserve.
 
+ * Friulian translation for sudo from translationproject.org.
+
 What's new in Sudo 1.8.20p2
 
  * Fixed a bug parsing /proc/pid/stat on Linux when the process
