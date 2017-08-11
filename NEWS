@@ -54,10 +54,11 @@ What's new in Sudo 1.8.21
    the "tty_tickets" option.  In addition to tty and global time stamp
    records, it is now possible to use the parent process ID to restrict
    the time stamp to commands run by the same process, usually the shell.
-   Bug #793
+   Bug #793.
 
  * The --preserve-env command line option has been extended to accept
    a comma-separated list of environment variables to preserve.
+   Bug #279.
 
  * Friulian translation for sudo from translationproject.org.
 
