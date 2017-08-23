@@ -1,3 +1,67 @@
+What's new in Sudo 1.8.21
+
+ * The path that sudo uses to search for terminal devices can now
+   be configured via the new "devsearch" Path setting in sudo.conf.
+
+ * It is now possible to preserve bash shell functions in the
+   environment when the "env_reset" sudoers setting is disabled by
+   removing the "*=()*" pattern from the env_delete list.
+
+ * A change made in sudo 1.8.15 inadvertantly caused sudoedit to
+   send itself SIGHUP instead of exiting when the editor returns
+   an error or the file was not modified.
+
+ * Sudoedit now uses an exit code of zero if the file was not
+   actually modified.  Previously, sudoedit treated a lack of
+   modifications as an error.
+
+ * When running a command in a pseudo-tty (pty), sudo now copies a
+   subset of the terminal flags to the new pty.  Previously, all
+   flags were copied, even those not appropriate for a pty.
+
+ * Fixed a problem with debug logging in the sudoers I/O logging
+   plugin.
+
+ * Window size change events are now logged to the policy plugin.
+   On xterm and compatible terminals, sudoreplay is now capable of
+   resizing the terminal to match the size of the terminal the
+   command was run on.  The new -R option can be used to disable
+   terminal resizing.
+
+ * Fixed a bug in visudo where a newly added file was not checked
+   for syntax errors.  Bug #791.
+
+ * Fixed a bug in visudo where if a syntax error in an include
+   directory (like /etc/sudoers.d) was detected, the edited version
+   was left as a temporary file instead of being installed.
+
+ * On PAM systems, sudo will now treat "username's Password:" as
+   a standard password prompt.  As a result, the SUDO_PROMPT
+   environment variable will now override "username's Password:"
+   as well as the more common "Password:".  Previously, the
+   "passprompt_override" Defaults setting would need to be set for
+   SUDO_PROMPT to override a prompt of "username's Password:".
+
+ * A new "syslog_pid" sudoers setting has been added to include
+   sudo's process ID along with the process name when logging via
+   syslog.  Bug #792.
+
+ * Fixed a bug introduced in sudo 1.8.18 where a command would
+   not be terminated when the I/O logging plugin returned an error
+   to the sudo front-end.
+
+ * A new "timestamp_type" sudoers setting has been added that replaces
+   the "tty_tickets" option.  In addition to tty and global time stamp
+   records, it is now possible to use the parent process ID to restrict
+   the time stamp to commands run by the same process, usually the shell.
+   Bug #793.
+
+ * The --preserve-env command line option has been extended to accept
+   a comma-separated list of environment variables to preserve.
+   Bug #279.
+
+ * Friulian translation for sudo from translationproject.org.
+
 What's new in Sudo 1.8.20p2
 
  * Fixed a bug parsing /proc/pid/stat on Linux when the process

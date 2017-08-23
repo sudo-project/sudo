@@ -1181,8 +1181,13 @@ restore_perms(void)
      */
     if (OID(euid) == ROOT_UID) {
 	/* setuid() may not set the saved ID unless the euid is ROOT_UID */
-	if (ID(euid) != ROOT_UID)
-	    ignore_result(setreuid(-1, ROOT_UID));
+	if (ID(euid) != ROOT_UID) {
+	    if (setreuid(-1, ROOT_UID) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "setreuid() [%d, %d] -> [-1, %d)", (int)state->ruid,
+		    (int)state->euid, ROOT_UID);
+	    }
+	}
 	if (setuid(ROOT_UID)) {
 	    sudo_warn("setuid() [%d, %d] -> %d)", (int)state->ruid,
 		(int)state->euid, ROOT_UID);

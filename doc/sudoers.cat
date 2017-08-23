@@ -91,14 +91,14 @@ DDEESSCCRRIIPPTTIIOONN
      SUDO_USER.
 
      ssuuddooeerrss uses per-user time stamp files for credential caching.  Once a
-     user has been authenticated, a record is written containing the uid that
-     was used to authenticate, the terminal session ID, and a time stamp
+     user has been authenticated, a record is written containing the user ID
+     that was used to authenticate, the terminal session ID, and a time stamp
      (using a monotonic clock if one is available).  The user may then use
      ssuuddoo without a password for a short period of time (5 minutes unless
      overridden by the _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a
-     separate record for each tty, which means that a user's login sessions
-     are authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
-     force the use of a single time stamp for all of a user's sessions.
+     separate record for each terminal, which means that a user's login
+     sessions are authenticated separately.  The _t_i_m_e_s_t_a_m_p___t_y_p_e option can be
+     used to select the type of time stamp record ssuuddooeerrss will use.
 
    LLooggggiinngg
      ssuuddooeerrss can log both successful and unsuccessful attempts (as well as
@@ -130,28 +130,32 @@ DDEESSCCRRIIPPTTIIOONN
      _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.  This is effectively a whitelist for
      environment variables.  Environment variables with a value beginning with
      () are removed unless both the name and value parts are matched by
-     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they will be interpreted as functions by older
-     versions of the bbaasshh shell.  Prior to version 1.8.11, such variables were
-     always removed.
+     _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they may be interpreted as functions by the
+     bbaasshh shell.  Prior to version 1.8.11, such variables were always removed.
 
      If, however, the _e_n_v___r_e_s_e_t option is disabled, any variables not
      explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are inherited
      from the invoking process.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave
-     like a blacklist.  Environment variables with a value beginning with ()
-     are always removed, even if they do not match one of the blacklists.
-     Since it is not possible to blacklist all potentially dangerous
+     like a blacklist.  Prior to version 1.8.21, environment variables with a
+     value beginning with () were always removed.  Beginning with version
+     1.8.21, a pattern in _e_n_v___d_e_l_e_t_e is used to match bbaasshh shell functions
+     instead.  Since it is not possible to blacklist all potentially dangerous
      environment variables, use of the default _e_n_v___r_e_s_e_t behavior is
      encouraged.
 
+     Environment variables specified by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or _e_n_v___k_e_e_p may
+     include one or more `*' characters which will match zero or more
+     characters.  No other wildcard characters are supported.
+
      By default, environment variables are matched by name.  However, if the
      pattern includes an equal sign (`='), both the variables name and value
-     must match.  For example, an old-style (pre-shellshock) bbaasshh shell
-     function could be matched as follows:
+     must match.  For example, a bbaasshh shell function could be matched as
+     follows:
 
-         env_keep += "my_func=()*"
+         env_keep += "BASH_FUNC_my_func%%=()*"
 
-     Without the "=()*" suffix, this would not match, as old-style bbaasshh shell
-     functions are not preserved by default.
+     Without the "=()*" suffix, this would not match, as bbaasshh shell functions
+     are not preserved by default.
 
      The complete list of environment variables that ssuuddoo allows or denies is
      contained in the output of "sudo -V" when run as root.  Please note that
@@ -525,8 +529,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      dgb     boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
 
-     The user ddggbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m--but only as
-     ooppeerraattoorr.  E.g.,
+     The user ddggbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m on the host
+     boulder--but only as ooppeerraattoorr.  E.g.,
 
      $ sudo -u operator /bin/ls
 
@@ -981,8 +985,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        support the automatic restarting of system calls.
                        Unfortunately, not all operating systems do this by
                        default, and even those that do may have bugs.  For
-                       example, Mac OS X fails to restart the ttccggeettaattttrr() and
-                       ttccsseettaattttrr() system calls (this is a bug in Mac OS X).
+                       example, macOS fails to restart the ttccggeettaattttrr() and
+                       ttccsseettaattttrr() system calls (this is a bug in macOS).
                        Furthermore, because this behavior depends on the
                        command stopping with the SIGTTIN or SIGTTOU signals,
                        programs that catch these signals and suspend
@@ -1091,8 +1095,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        a command may only be run after the audit event is
                        successfully written.  This flag is only effective on
                        systems for which ssuuddooeerrss supports audit logging,
-                       including FreeBSD, Linux, Mac OS X and Solaris.  This
-                       flag is _o_n by default.
+                       including FreeBSD, Linux, macOS and Solaris.  This flag
+                       is _o_n by default.
 
      ignore_dot        If set, ssuuddoo will ignore "." or "" (both denoting
                        current directory) in the PATH environment variable;
@@ -1275,11 +1279,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        higher.
 
      passprompt_override
-                       The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
-                       normally only be used if the password prompt provided
-                       by systems such as PAM matches the string "Password:".
-                       If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set, _p_a_s_s_p_r_o_m_p_t will always
-                       be used.  This flag is _o_f_f by default.
+                       If set, the prompt specified by _p_a_s_s_p_r_o_m_p_t or the
+                       SUDO_PROMPT environment variable will always be used
+                       and will replace the prompt provided by a PAM module or
+                       other authentication method.  This flag is _o_f_f by
+                       default.
 
      path_info         Normally, ssuuddoo will tell the user when a command could
                        not be found in their PATH environment variable.  Some
@@ -1416,6 +1420,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        This setting is only supported by version 1.8.15 or
                        higher.
 
+     syslog_pid        When logging via syslog(3), include the process ID in
+                       the log entry.  This flag is _o_f_f by default.
+
+                       This setting is only supported by version 1.8.21 or
+                       higher.
+
      targetpw          If set, ssuuddoo will prompt for the password of the user
                        specified by the --uu option (defaults to root) instead
                        of the password of the invoking user when running a
@@ -1426,9 +1436,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      tty_tickets       If set, users must authenticate on a per-tty basis.
                        With this flag enabled, ssuuddoo will use a separate record
-                       in the time stamp file for each tty.  If disabled, a
-                       single record is used for all login sessions.  This
-                       flag is _o_n by default.
+                       in the time stamp file for each terminal.  If disabled,
+                       a single record is used for all login sessions.
+
+                       This option has been superceded by the _t_i_m_e_s_t_a_m_p___t_y_p_e
+                       option.
 
      umask_override    If set, ssuuddoo will set the umask as specified in the
                        _s_u_d_o_e_r_s file without modification.  This makes it
@@ -1768,7 +1780,15 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        %%    two consecutive % characters are collapsed into a
                              single % character
 
-                       The default value is "Password:".
+                       On systems that use PAM for authentication, _p_a_s_s_p_r_o_m_p_t
+                       will only be used if the prompt provided by the PAM
+                       module matches the string "Password: " or "username's
+                       Password: ".  This ensures that the _p_a_s_s_p_r_o_m_p_t setting
+                       does not interfere with challenge-response style
+                       authentication.  The _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag can be
+                       used to change this behavior.
+
+                       The default value is "Password: ".
 
      privs             The default Solaris privileges to use when constructing
                        a new privilege set for a command.  This is passed to
@@ -1794,6 +1814,41 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        commands, and sending email.  Note that changing the
                        locale may affect how sudoers is interpreted.  Defaults
                        to "C".
+
+     timestamp_type    ssuuddooeerrss uses per-user time stamp files for credential
+                       caching.  The _t_i_m_e_s_t_a_m_p___t_y_p_e option can be used to
+                       specify the type of time stamp record used.  It has the
+                       following possible values:
+
+                       global  A single time stamp record is used for all of a
+                               user's login sessions, regardless of the
+                               terminal or parent process ID.  An additional
+                               record is used to serialize password prompts
+                               when ssuuddoo is used multiple times in a pipeline,
+                               but this does not affect authentication.
+
+                       ppid    A single time stamp record is used for all
+                               processes with the same parent process ID
+                               (usually the shell).  Commands run from the
+                               same shell (or other common parent process)
+                               will not require a password for
+                               _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t minutes (5 by default).
+                               Commands run via ssuuddoo with a different parent
+                               process ID, for example from a shell script,
+                               will be authenticated separately.
+
+                       tty     One time stamp record is used for each
+                               terminal, which means that a user's login
+                               sessions are authenticated separately.  If no
+                               terminal is present, the behavior is the same
+                               as _p_p_i_d.  Commands run from the same terminal
+                               will not require a password for
+                               _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t minutes (5 by default).
+
+                       The default value is _t_t_y.
+
+                       This setting is only supported by version 1.8.21 or
+                       higher.
 
      timestampdir      The directory in which ssuuddoo stores its time stamp
                        files.  This directory should be cleared when the
@@ -2090,7 +2145,7 @@ GGRROOUUPP PPRROOVVIIDDEERR PPLLUUGGIINNSS
 
                Defaults group_plugin=system_group.so
 
-     The group provider plugin API is described in detail in sudo_plugin(1m).
+     The group provider plugin API is described in detail in sudo_plugin(4).
 
 LLOOGG FFOORRMMAATT
      ssuuddooeerrss can log events using either syslog(3) or a simple log file.  The
@@ -2606,7 +2661,7 @@ SSEECCUURRIITTYY NNOOTTEESS
                affected.
 
                The _n_o_e_x_e_c feature is known to work on SunOS, Solaris, *BSD,
-               Linux, IRIX, Tru64 UNIX, MacOS X, HP-UX 11.x and AIX 5.3 and
+               Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and
                above.  It should be supported on most operating systems that
                support the LD_PRELOAD environment variable.  Check your
                operating system's manual pages for the dynamic linker (usually
@@ -2774,7 +2829,7 @@ DDEEBBUUGGGGIINNGG
 
 SSEEEE AALLSSOO
      ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3), sudo.conf(4),
-     sudoers.ldap(4), sudo(1m), sudo_plugin(1m), visudo(1m)
+     sudoers.ldap(4), sudo(1m), sudo_plugin(4), visudo(1m)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
@@ -2813,4 +2868,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                       May 8, 2017                      Sudo 1.8.20
+Sudo 1.8.21                     August 4, 2017                     Sudo 1.8.21

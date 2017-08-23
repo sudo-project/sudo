@@ -45,26 +45,35 @@
 # define AUDIT_NOT_CONFIGURED	ENOSYS
 #endif
 
+#ifdef __FreeBSD__
+# define BSM_AUDIT_COMPAT
+#endif
+
 static au_event_t sudo_audit_event = AUE_sudo;
 
 static int
 audit_sudo_selected(int sorf)
 {
 	auditinfo_addr_t ainfo_addr;
+#ifdef BSM_AUDIT_COMPAT
+	auditinfo_t ainfo;
+#endif
 	struct au_mask *mask;
 	int rc;
 	debug_decl(audit_sudo_selected, SUDOERS_DEBUG_AUDIT)
 
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
+#ifdef BSM_AUDIT_COMPAT
 		if (errno == ENOSYS) {
-			auditinfo_t ainfo;
 			/* Fall back to older BSM API. */
 			if (getaudit(&ainfo) < 0) {
 				sudo_warn("getaudit");
 				debug_return_int(-1);
 			}
 			mask = &ainfo.ai_mask;
-		} else {
+		} else
+#endif /* BSM_AUDIT_COMPAT */
+		{
 			sudo_warn("getaudit_addr");
 			debug_return_int(-1);
 		}
@@ -132,6 +141,7 @@ bsm_audit_success(char *exec_args[])
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) {
 		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
+#ifdef BSM_AUDIT_COMPAT
 	} else if (errno == ENOSYS) {
 		/*
 		 * NB: We should probably watch out for ERANGE here.
@@ -142,6 +152,7 @@ bsm_audit_success(char *exec_args[])
 		}
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
+#endif /* BSM_AUDIT_COMPAT */
 	} else {
 		sudo_warn("getaudit_addr");
 		debug_return_int(-1);
@@ -216,6 +227,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) { 
 		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
+#ifdef BSM_AUDIT_COMPAT
 	} else if (errno == ENOSYS) {
 		if (getaudit(&ainfo) < 0) {
 			sudo_warn("getaudit");
@@ -223,6 +235,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 		}
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
+#endif /* BSM_AUDIT_COMPAT */
 	} else {
 		sudo_warn("getaudit_addr");
 		debug_return_int(-1);

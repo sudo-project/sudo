@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd October 15, 2016
+.Dd July 21, 2017
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -174,7 +174,7 @@ Plugin sudoers_io sudoers.so
 For more information on the
 .Nm sudo
 plugin architecture, see the
-.Xr sudo_plugin @mansectsu@
+.Xr sudo_plugin @mansectform@
 manual.
 .Ss Path settings
 A
@@ -215,6 +215,26 @@ The value of
 may be overridden by the
 .Ev SUDO_ASKPASS
 environment variable.
+.It devsearch
+An ordered, colon-separated search path of directories to look in for
+device nodes.
+This is used when mapping the process's tty device number to a device name
+on systems that do not provide such a mechanism.
+Sudo will
+.Em not
+recurse into subdirectories.
+If terminal devices may be located in a subdirectory of
+.Pa /dev ,
+that path must be explicitly listed in
+.Em devsearch .
+The default value is:
+.Li /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+.Pp
+This option is ignored on systems that support either the
+.Fn devname
+or
+.Fn _ttyname_dev
+functions, for example BSD, macOS and Solaris.
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the
@@ -390,10 +410,11 @@ version 1.8.7 and higher.
 By default,
 .Nm sudo
 will probe the system's network interfaces and pass the IP address
-of each enabled interface to the policy plugin.  This makes it
-possible for the plugin to match rules based on the IP address
-without having to query DNS.  On Linux systems with a large number
-of virtual interfaces, this may take a non-negligible amount of time.
+of each enabled interface to the policy plugin.
+This makes it possible for the plugin to match rules based on the IP address
+without having to query DNS.
+On Linux systems with a large number of virtual interfaces, this may
+take a non-negligible amount of time.
 If IP-based matching is not required, network interface probing
 can be disabled as follows:
 .Bd -literal -offset indent
@@ -417,8 +438,8 @@ line consists of the
 .Li Debug
 keyword, followed by the name of the program (or plugin) to debug
 .Pq Nm sudo , Nm visudo , Nm sudoreplay , Nm sudoers ,
-the debug file name and a comma-separated list of debug flags.  The
-debug flag syntax used by
+the debug file name and a comma-separated list of debug flags.
+The debug flag syntax used by
 .Nm sudo
 and the
 .Nm sudoers
@@ -470,7 +491,8 @@ The following priorities are supported, in order of decreasing severity:
 and
 .Em debug .
 Each priority, when specified, also includes all priorities higher
-than it.  For example, a priority of
+than it.
+For example, a priority of
 .Em notice
 would include debug messages logged at
 .Em notice
@@ -620,7 +642,7 @@ Plugin sudoers_io sudoers.so
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@ ,
-.Xr sudo_plugin @mansectsu@
+.Xr sudo_plugin @mansectform@
 .Sh HISTORY
 See the HISTORY file in the
 .Nm sudo

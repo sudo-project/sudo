@@ -161,6 +161,19 @@ struct qm_trace {
 #endif	/* QUEUE_MACRO_DEBUG */
 
 /*
+ * XXX - Work around a bug in the llvm static analyzer.
+ * https://bugs.llvm.org//show_bug.cgi?id=18222
+ */
+#ifdef __clang_analyzer__
+# define ANALYZER_ASSERT(x) do {					\
+	if (!__builtin_expect(!(x), 0))					\
+		__builtin_trap();					\
+} while (0)
+#else
+# define ANALYZER_ASSERT(x) do {} while (0)
+#endif /* __clang_analyzer__ */
+
+ /*
  * Singly-linked List declarations.
  */
 #undef SLIST_HEAD
@@ -505,6 +518,7 @@ struct {								\
 
 #undef LIST_REMOVE
 #define	LIST_REMOVE(elm, field) do {					\
+	ANALYZER_ASSERT(elm != NULL);					\
 	QMD_SAVELINK(oldnext, (elm)->field.le_next);			\
 	QMD_SAVELINK(oldprev, (elm)->field.le_prev);			\
 	if (LIST_NEXT((elm), field) != NULL)				\
@@ -686,6 +700,7 @@ struct {								\
 
 #undef TAILQ_REMOVE
 #define	TAILQ_REMOVE(head, elm, field) do {				\
+	ANALYZER_ASSERT(elm != NULL);					\
 	QMD_SAVELINK(oldnext, (elm)->field.tqe_next);			\
 	QMD_SAVELINK(oldprev, (elm)->field.tqe_prev);			\
 	if ((TAILQ_NEXT((elm), field)) != NULL)				\

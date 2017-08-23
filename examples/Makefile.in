@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2014, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -56,7 +56,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 all: $(EXAMPLES)
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file examples/Makefile)
+	cd $(top_builddir) && ./config.status --file examples/Makefile
 
 pre-install:
 

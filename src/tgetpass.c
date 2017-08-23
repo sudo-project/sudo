@@ -84,8 +84,8 @@ char *
 tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback)
 {
-    sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
-    sigaction_t savetstp, savettin, savettou;
+    struct sigaction sa, savealrm, saveint, savehup, savequit, saveterm;
+    struct sigaction savetstp, savettin, savettou;
     char *pass;
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
@@ -157,7 +157,7 @@ restart:
      */
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_INTERRUPT;	/* don't restart system calls */
+    sa.sa_flags = 0;	/* don't restart system calls */
     sa.sa_handler = tgetpass_handler;
     (void) sigaction(SIGALRM, &sa, &savealrm);
     (void) sigaction(SIGINT, &sa, &saveint);

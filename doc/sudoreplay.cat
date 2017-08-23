@@ -4,7 +4,7 @@ NNAAMMEE
      ssuuddoorreeppllaayy - replay sudo session logs
 
 SSYYNNOOPPSSIISS
-     ssuuddoorreeppllaayy [--hh] [--dd _d_i_r] [--ff _f_i_l_t_e_r] [--mm _n_u_m] [--ss _n_u_m] ID
+     ssuuddoorreeppllaayy [--hhnnRR] [--dd _d_i_r] [--ff _f_i_l_t_e_r] [--mm _n_u_m] [--ss _n_u_m] ID
 
      ssuuddoorreeppllaayy [--hh] [--dd _d_i_r] --ll [search expression]
 
@@ -23,8 +23,12 @@ DDEESSCCRRIIPPTTIIOONN
      In list mode, ssuuddoorreeppllaayy can be used to find the ID of a session based on
      a number of criteria such as the user, tty or command run.
 
-     In replay mode, if the standard output has not been redirected,
-     ssuuddoorreeppllaayy will act on the following keys:
+     In replay mode, if the standard input and output are connected to a
+     terminal and the --nn option is not specified, ssuuddoorreeppllaayy will operate
+     interactively.  In interactive mode, ssuuddoorreeppllaayy will attempt to adjust
+     the terminal size to match that of the session and write directly to the
+     terminal (not all terminals support this).  Additionally, it will poll
+     the keyboard and act on the following keys:
 
      `\n' or `\r'  Skip to the next replay event; useful for long pauses.
 
@@ -33,6 +37,10 @@ DDEESSCCRRIIPPTTIIOONN
      `<'           Reduce the playback speed by one half.
 
      `>'           Double the playback speed.
+
+     The session can be interrupted via control-C.  When the session has
+     finished, the terminal is restored to its original size if it was changed
+     during playback.
 
      The options are as follows:
 
@@ -114,6 +122,15 @@ DDEESSCCRRIIPPTTIIOONN
                  _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
                  point number, e.g. _2_._5.
 
+     --nn, ----nnoonn--iinntteerraaccttiivvee
+                 Do not prompt for user input or attempt to resize the
+                 terminal.  The session is written to the standard output, not
+                 directly to the user's terminal.
+
+     --RR, ----nnoo--rreessiizzee
+                 Do not attempt to resize the terminal to match the terminal
+                 size of the session.
+
      --ss, ----ssppeeeedd _s_p_e_e_d___f_a_c_t_o_r
                  This option causes ssuuddoorreeppllaayy to adjust the number of seconds
                  it will wait between key presses or program output.  This can
@@ -162,7 +179,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      next Friday
              The first second of the Friday in the next (upcoming) week.  Not
-             to be confused with "this friday" which would match the friday of
+             to be confused with "this Friday" which would match the Friday of
              the current week.
 
      last week
@@ -276,4 +293,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.20                    November 30, 2016                   Sudo 1.8.20
+Sudo 1.8.21                      July 13, 2017                     Sudo 1.8.21

@@ -71,6 +71,7 @@
 static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
 static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
+static bool cb_tty_tickets(const union sudo_defs_val *);
 static int set_cmnd(void);
 static int create_admin_success_flag(void);
 static bool init_vars(char * const *);
@@ -681,25 +682,32 @@ init_vars(char * const envp[])
 	debug_return_bool(false);
     }
 
+#define MATCHES(s, v)	\
+    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
+
     for (ep = envp; *ep; ep++) {
-	/* XXX - don't fill in if empty string */
 	switch (**ep) {
 	    case 'K':
-		if (strncmp("KRB5CCNAME=", *ep, 11) == 0)
-		    user_ccname = *ep + 11;
+		if (MATCHES(*ep, "KRB5CCNAME="))
+		    user_ccname = *ep + sizeof("KRB5CCNAME=") - 1;
 		break;
 	    case 'P':
-		if (strncmp("PATH=", *ep, 5) == 0)
-		    user_path = *ep + 5;
+		if (MATCHES(*ep, "PATH="))
+		    user_path = *ep + sizeof("PATH=") - 1;
 		break;
 	    case 'S':
-		if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
-		    user_prompt = *ep + 12;
-		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
-		    prev_user = *ep + 10;
+		if (MATCHES(*ep, "SUDO_PROMPT=")) {
+		    /* Don't override "sudo -p prompt" */
+		    if (user_prompt == NULL)
+			user_prompt = *ep + sizeof("SUDO_PROMPT=") - 1;
+		    break;
+		}
+		if (MATCHES(*ep, "SUDO_USER="))
+		    prev_user = *ep + sizeof("SUDO_USER=") - 1;
 		break;
 	    }
     }
+#undef MATCHES
 
     /*
      * Get a local copy of the user's passwd struct and group list if we
@@ -752,6 +760,9 @@ init_vars(char * const envp[])
 
     /* Set iolog_mode callback. */
     sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
+
+    /* Set tty_tickets callback. */
+    sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
@@ -1093,8 +1104,9 @@ cb_fqdn(const union sudo_defs_val *sd_un)
     /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
     lhost = shost = NULL;
     if (remote) {
-	/* Failure checked below. */
-	(void)resolve_host(user_runhost, &lhost, &shost);
+	if (!resolve_host(user_runhost, &lhost, &shost)) {
+	    sudo_warnx(U_("unable to resolve host %s"), user_runhost);
+	}
     } else {
 	/* Not remote, just use user_host. */
 	if ((lhost = strdup(user_host)) != NULL) {
@@ -1103,19 +1115,21 @@ cb_fqdn(const union sudo_defs_val *sd_un)
 	    else
 		shost = lhost;
 	}
+	if (lhost == NULL || shost == NULL) {
+	    free(lhost);
+	    if (lhost != shost)
+		free(shost);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return_bool(false);
+	}
     }
-    if (lhost == NULL || shost == NULL) {
-	free(lhost);
-	free(shost);
-	log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG,
-	    N_("unable to resolve host %s"), user_runhost);
-	debug_return_bool(false);
+    if (lhost != NULL && shost != NULL) {
+	if (user_srunhost != user_runhost)
+	    free(user_srunhost);
+	free(user_runhost);
+	user_runhost = lhost;
+	user_srunhost = shost;
     }
-    if (user_srunhost != user_runhost)
-	free(user_srunhost);
-    free(user_runhost);
-    user_runhost = lhost;
-    user_srunhost = shost;
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"host %s, shost %s, runhost %s, srunhost %s",
@@ -1196,6 +1210,22 @@ cb_runas_default(const union sudo_defs_val *sd_un)
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
 	debug_return_bool(set_runaspw(sd_un->str, true));
+    debug_return_bool(true);
+}
+
+/*
+ * Callback for runas_default sudoers setting.
+ */
+static bool
+cb_tty_tickets(const union sudo_defs_val *sd_un)
+{
+    debug_decl(cb_tty_tickets, SUDOERS_DEBUG_PLUGIN)
+
+    /* Convert tty_tickets -> timestamp_type */
+    if (sd_un->flag)
+	def_timestamp_type = tty;
+    else
+	def_timestamp_type = global;
     debug_return_bool(true);
 }
 

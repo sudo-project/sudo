@@ -29,6 +29,7 @@
 #ifdef HAVE_SELINUX
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -149,6 +150,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 {
     security_context_t tty_con = NULL;
     security_context_t new_tty_con = NULL;
+    struct stat sb;
     int fd;
     debug_decl(relabel_tty, SUDO_DEBUG_SELINUX)
 
@@ -161,8 +163,13 @@ relabel_tty(const char *ttyn, int ptyfd)
     /* If sudo is not allocating a pty for the command, open current tty. */
     if (ptyfd == -1) {
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY|O_NONBLOCK);
-	if (se_state.ttyfd == -1) {
+	if (se_state.ttyfd == -1 || fstat(se_state.ttyfd, &sb) == -1) {
 	    sudo_warn(U_("unable to open %s, not relabeling tty"), ttyn);
+	    goto bad;
+	}
+	if (!S_ISCHR(sb.st_mode)) {
+	    sudo_warn(U_("%s is not a character device, not relabeling tty"),
+		ttyn);
 	    goto bad;
 	}
 	(void)fcntl(se_state.ttyfd, F_SETFL,
@@ -197,8 +204,13 @@ relabel_tty(const char *ttyn, int ptyfd)
     if (ptyfd != -1) {
 	/* Reopen pty that was relabeled, std{in,out,err} are reset later. */
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY, 0);
-	if (se_state.ttyfd == -1) {
+	if (se_state.ttyfd == -1 || fstat(se_state.ttyfd, &sb) == -1) {
 	    sudo_warn(U_("unable to open %s"), ttyn);
+	    goto bad;
+	}
+	if (!S_ISCHR(sb.st_mode)) {
+	    sudo_warn(U_("%s is not a character device, not relabeling tty"),
+		ttyn);
 	    goto bad;
 	}
 	if (dup2(se_state.ttyfd, ptyfd) == -1) {
@@ -209,8 +221,13 @@ relabel_tty(const char *ttyn, int ptyfd)
 	/* Re-open tty to get new label and reset std{in,out,err} */
 	close(se_state.ttyfd);
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY|O_NONBLOCK);
-	if (se_state.ttyfd == -1) {
+	if (se_state.ttyfd == -1 || fstat(se_state.ttyfd, &sb) == -1) {
 	    sudo_warn(U_("unable to open %s"), ttyn);
+	    goto bad;
+	}
+	if (!S_ISCHR(sb.st_mode)) {
+	    sudo_warn(U_("%s is not a character device, not relabeling tty"),
+		ttyn);
 	    goto bad;
 	}
 	(void)fcntl(se_state.ttyfd, F_SETFL,

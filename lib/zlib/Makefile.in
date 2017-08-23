@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -95,7 +95,7 @@ LTOBJS = adler32.lo compress.lo crc32.lo deflate.lo gzclose.lo gzlib.lo \
 all: libsudo_z.la
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file lib/zlib/Makefile)
+	cd $(top_builddir) && ./config.status --file lib/zlib/Makefile
 
 .SUFFIXES: .c .h .lo
 

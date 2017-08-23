@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 16, 2017
+.Dd Auguest 2, 2017
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -234,6 +234,12 @@ This option is only available on systems with BSD login classes.
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
+The security policy may return an error if the user does not have
+permission to preserve the environment.
+.It Fl -preserve-env=list
+Indicates to the security policy that the user wishes to add the
+comma-separated list of environment variables to those preserved
+from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
 .It Fl e , -edit
@@ -467,8 +473,12 @@ characters are collapsed into a single
 character
 .El
 .Pp
-The custom prompt will override the system password prompt on systems that
-support PAM unless the
+The custom prompt will override the default prompt specified by either
+the security policy or the
+.Ev SUDO_PROMPT
+environment variable.
+On systems that use PAM, the custom prompt will also override the prompt
+specified by a PAM module unless the
 .Em passprompt_override
 flag is disabled in
 .Em sudoers .
@@ -771,7 +781,7 @@ See the
 manual for details of the
 .Pa @sysconfdir@/sudo.conf
 file and the
-.Xr sudo_plugin @mansectsu@
+.Xr sudo_plugin @mansectform@
 manual for more information about the
 .Nm
 plugin architecture.
@@ -965,7 +975,10 @@ Default editor to use in
 .It Ev SUDO_GID
 Set to the group ID of the user who invoked sudo.
 .It Ev SUDO_PROMPT
-Used as the default password prompt.
+Used as the default password prompt unless
+the
+.Fl p
+option was specified.
 .It Ev SUDO_PS1
 If set,
 .Ev PS1
@@ -1046,7 +1059,7 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Xr passwd @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
-.Xr sudo_plugin @mansectsu@ ,
+.Xr sudo_plugin @mansectform@ ,
 .Xr sudoreplay @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh HISTORY

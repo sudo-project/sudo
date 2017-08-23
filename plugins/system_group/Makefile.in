@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -107,7 +107,7 @@ VERSION = @PACKAGE_VERSION@
 all: system_group.la
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file plugins/system_group/Makefile)
+	cd $(top_builddir) && ./config.status --file plugins/system_group/Makefile
 
 .SUFFIXES: .o .c .h .lo
 

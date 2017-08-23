@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -99,6 +99,7 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
 #define SUDO_CONF_PATH_SESH		1
 #define SUDO_CONF_PATH_NOEXEC		2
 #define SUDO_CONF_PATH_PLUGIN_DIR	3
+#define SUDO_CONF_PATH_DEVSEARCH	4
 
 static struct sudo_conf_data {
     bool disable_coredump;
@@ -107,7 +108,7 @@ static struct sudo_conf_data {
     int max_groups;
     struct sudo_conf_debug_list debugging;
     struct plugin_info_list plugins;
-    struct sudo_conf_path_table path_table[5];
+    struct sudo_conf_path_table path_table[6];
 } sudo_conf_data = {
     true,
     true,
@@ -120,6 +121,7 @@ static struct sudo_conf_data {
 	{ "sesh", sizeof("sesh") - 1, false, _PATH_SUDO_SESH },
 	{ "noexec", sizeof("noexec") - 1, false, _PATH_SUDO_NOEXEC },
 	{ "plugin_dir", sizeof("plugin_dir") - 1, false, _PATH_SUDO_PLUGIN_DIR },
+	{ "devsearch", sizeof("devsearch") - 1, false, _PATH_SUDO_DEVSEARCH },
 	{ NULL }
     }
 };
@@ -449,6 +451,12 @@ const char *
 sudo_conf_plugin_dir_path_v1(void)
 {
     return sudo_conf_data.path_table[SUDO_CONF_PATH_PLUGIN_DIR].pval;
+}
+
+const char *
+sudo_conf_devsearch_path_v1(void)
+{
+    return sudo_conf_data.path_table[SUDO_CONF_PATH_DEVSEARCH].pval;
 }
 
 int

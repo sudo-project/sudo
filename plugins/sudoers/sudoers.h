@@ -359,6 +359,9 @@ int sudoers_hook_putenv(char *string, void *closure);
 int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
 int sudoers_hook_unsetenv(const char *name, void *closure);
 
+/* env_pattern.c */
+bool matches_env_pattern(const char *pattern, const char *var, bool *full_match);
+
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);

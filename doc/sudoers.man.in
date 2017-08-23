@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "May 8, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "August 4, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -216,7 +216,7 @@ file lookup is still done for root, not the user specified by
 \fBsudoers\fR
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the uid that was used to authenticate, the
+containing the user ID that was used to authenticate, the
 terminal session ID, and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
@@ -229,12 +229,13 @@ option)
 \&.
 By default,
 \fBsudoers\fR
-uses a separate record for each tty, which means that
+uses a separate record for each terminal, which means that
 a user's login sessions are authenticated separately.
 The
-\fItty_tickets\fR
-option can be disabled to force the use of a
-single time stamp for all of a user's sessions.
+\fItimestamp_type\fR
+option can be used to select the type of time stamp record
+\fBsudoers\fR
+will use.
 .SS "Logging"
 \fBsudoers\fR
 can log both successful and unsuccessful attempts (as well
@@ -326,7 +327,7 @@ are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
 or
 \fIenv_check\fR,
-as they will be interpreted as functions by older versions of the
+as they may be interpreted as functions by the
 \fBbash\fR
 shell.
 Prior to version 1.8.11, such variables were always removed.
@@ -345,32 +346,47 @@ In this case,
 and
 \fIenv_delete\fR
 behave like a blacklist.
-Environment variables with a value beginning with
+Prior to version 1.8.21, environment variables with a value beginning with
 \fR()\fR
-are always removed, even if they do not match one of the blacklists.
+were always removed.
+Beginning with version 1.8.21, a pattern in
+\fIenv_delete\fR
+is used to match
+\fBbash\fR
+shell functions instead.
 Since it is not possible
 to blacklist all potentially dangerous environment variables, use
 of the default
 \fIenv_reset\fR
 behavior is encouraged.
 .PP
+Environment variables specified by
+\fIenv_check\fR,
+\fIenv_delete\fR,
+or
+\fIenv_keep\fR
+may include one or more
+\(oq*\(cq
+characters which will match zero or more characters.
+No other wildcard characters are supported.
+.PP
 By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 (\(oq=\&\(cq),
 both the variables name and value must match.
-For example, an old-style (pre-shellshock)
+For example, a
 \fBbash\fR
 shell function could be matched as follows:
 .nf
 .sp
 .RS 4n
-env_keep += "my_func=()*"
+env_keep += "BASH_FUNC_my_func%%=()*"
 .RE
 .fi
 .PP
 Without the
 \(Lq\fR=()*\fR\(Rq
-suffix, this would not match, as old-style
+suffix, this would not match, as
 \fBbash\fR
 shell functions are not preserved by default.
 .PP
@@ -1091,7 +1107,9 @@ may run
 \fI/bin/ls\fR,
 \fI/bin/kill\fR,
 and
-\fI/usr/bin/lprm\fR\(embut
+\fI/usr/bin/lprm\fR
+on the host
+boulder\(embut
 only as
 \fBoperator\fR.
 E.g.,
@@ -2080,11 +2098,11 @@ For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
 Unfortunately, not all operating systems do this by default,
 and even those that do may have bugs.
-For example, Mac OS X fails to restart the
+For example, macOS fails to restart the
 \fBtcgetattr\fR()
 and
 \fBtcsetattr\fR()
-system calls (this is a bug in Mac OS X).
+system calls (this is a bug in macOS).
 Furthermore, because this behavior depends on the command stopping with the
 \fRSIGTTIN\fR
 or
@@ -2309,7 +2327,7 @@ If disabled, a command may only be run after the audit event is successfully
 written.
 This flag is only effective on systems for which
 \fBsudoers\fR
-supports audit logging, including FreeBSD, Linux, Mac OS X and Solaris.
+supports audit logging, including FreeBSD, Linux, macOS and Solaris.
 This flag is
 \fIon\fR
 by default.
@@ -2662,16 +2680,12 @@ by default.
 This setting is only supported by version 1.8.8 or higher.
 .TP 18n
 passprompt_override
-The password prompt specified by
+If set, the prompt specified by
 \fIpassprompt\fR
-will normally only be used if the password prompt provided by systems
-such as PAM matches the string
-\(LqPassword:\(Rq.
-If
-\fIpassprompt_override\fR
-is set,
-\fIpassprompt\fR
-will always be used.
+or the
+\fRSUDO_PROMPT\fR
+environment variable will always be used and will replace the
+prompt provided by a PAM module or other authentication method.
 This flag is
 \fIoff\fR
 by default.
@@ -2962,6 +2976,16 @@ by default.
 .sp
 This setting is only supported by version 1.8.15 or higher.
 .TP 18n
+syslog_pid
+When logging via
+syslog(3),
+include the process ID in the log entry.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.21 or higher.
+.TP 18n
 targetpw
 If set,
 \fBsudo\fR
@@ -2984,11 +3008,12 @@ tty_tickets
 If set, users must authenticate on a per-tty basis.
 With this flag enabled,
 \fBsudo\fR
-will use a separate record in the time stamp file for each tty.
+will use a separate record in the time stamp file for each terminal.
 If disabled, a single record is used for all login sessions.
-This flag is
-\fI@tty_tickets@\fR
-by default.
+.sp
+This option has been superceded by the
+\fItimestamp_type\fR
+option.
 .TP 18n
 umask_override
 If set,
@@ -3550,6 +3575,19 @@ characters are collapsed into a single
 \fR%\fR
 character
 .PP
+On systems that use PAM for authentication,
+\fIpassprompt\fR
+will only be used if the prompt provided by the PAM module matches the string
+\(LqPassword: \(Rq
+or
+\(Lqusername's Password: \(Rq.
+This ensures that the
+\fIpassprompt\fR
+setting does not interfere with challenge-response style authentication.
+The
+\fIpassprompt_override\fR
+flag can be used to change this behavior.
+.sp
 The default value is
 \(Lq\fR@passprompt@\fR\(Rq.
 .RE
@@ -3594,6 +3632,58 @@ sending email.
 Note that changing the locale may affect how sudoers is interpreted.
 Defaults to
 \(Lq\fRC\fR\(Rq.
+.TP 18n
+timestamp_type
+\fBsudoers\fR
+uses per-user time stamp files for credential caching.
+The
+\fItimestamp_type\fR
+option can be used to specify the type of time stamp record used.
+It has the following possible values:
+.PP
+.RS 18n
+.PD 0
+.TP 8n
+global
+A single time stamp record is used for all of a user's login sessions,
+regardless of the terminal or parent process ID.
+An additional record is used to serialize password prompts when
+\fBsudo\fR
+is used multiple times in a pipeline, but this does not affect authentication.
+.PD
+.TP 8n
+ppid
+A single time stamp record is used for all processes with the same parent
+process ID (usually the shell).
+Commands run from the same shell (or other common parent process)
+will not require a password for
+\fItimestamp_timeout\fR
+minutes
+(\fR@timeout@\fR
+by default)
+\&.
+Commands run via
+\fBsudo\fR
+with a different parent process ID, for example from a shell script,
+will be authenticated separately.
+.TP 8n
+tty
+One time stamp record is used for each terminal,
+which means that a user's login sessions are authenticated separately.
+If no terminal is present, the behavior is the same as
+\fIppid\fR.
+Commands run from the same terminal will not require a password for
+\fItimestamp_timeout\fR
+minutes
+(\fR@timeout@\fR
+by default)
+\&.
+.PP
+The default value is
+\fI@timestamp_type@\fR.
+.sp
+This setting is only supported by version 1.8.21 or higher.
+.RE
 .TP 18n
 timestampdir
 The directory in which
@@ -4176,7 +4266,7 @@ Defaults group_plugin=system_group.so
 .fi
 .PP
 The group provider plugin API is described in detail in
-sudo_plugin(@mansectsu@).
+sudo_plugin(@mansectform@).
 .SH "LOG FORMAT"
 \fBsudoers\fR
 can log events using either
@@ -5192,7 +5282,7 @@ running under binary emulation are not affected.
 The
 \fInoexec\fR
 feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, MacOS X, HP-UX 11.x and AIX 5.3 and above.
+Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 \fRLD_PRELOAD\fR
 environment variable.
@@ -5528,7 +5618,7 @@ strftime(3),
 sudo.conf(@mansectform@),
 sudoers.ldap(@mansectform@),
 sudo(@mansectsu@),
-sudo_plugin(@mansectsu@),
+sudo_plugin(@mansectform@),
 visudo(@mansectsu@)
 .SH "AUTHORS"
 Many people have worked on

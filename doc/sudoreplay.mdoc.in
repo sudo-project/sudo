@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 30, 2016
+.Dd July 13, 2017
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -22,7 +22,7 @@
 .Nd replay sudo session logs
 .Sh SYNOPSIS
 .Nm sudoreplay
-.Op Fl h
+.Op Fl hnR
 .Op Fl d Ar dir
 .Op Fl f Ar filter
 .Op Fl m Ar num
@@ -75,9 +75,17 @@ In list mode,
 can be used to find the ID of a session based on a number of criteria
 such as the user, tty or command run.
 .Pp
-In replay mode, if the standard output has not been redirected,
+In replay mode, if the standard input and output are connected to a terminal
+and the
+.Fl n
+option is not specified,
 .Nm
-will act on the following keys:
+will operate interactively.
+In interactive mode,
+.Nm
+will attempt to adjust the terminal size to match that of the session and
+write directly to the terminal (not all terminals support this).
+Additionally, it will poll the keyboard and act on the following keys:
 .Bl -tag -width 12n
 .It So Li \en Sc No or So Li \er Sc
 Skip to the next replay event; useful for long pauses.
@@ -88,6 +96,10 @@ Reduce the playback speed by one half.
 .It Ql >
 Double the playback speed.
 .El
+.Pp
+The session can be interrupted via control-C.
+When the session has finished, the terminal is restored to its
+original size if it was changed during playback.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
@@ -208,6 +220,13 @@ will limit these pauses to at most
 seconds.
 The value may be specified as a floating point number, e.g.\&
 .Em 2.5 .
+.It Fl n , -non-interactive
+Do not prompt for user input or attempt to resize the terminal.
+The session is written to the standard output, not directly to
+the user's terminal.
+.It Fl R , -no-resize
+Do not attempt to resize the terminal to match the terminal size
+of the session.
 .It Fl s , -speed Ar speed_factor
 This option causes
 .Nm
@@ -262,8 +281,8 @@ Exactly one day from now.
 .It next Friday
 The first second of the Friday in the next (upcoming) week.
 Not to be confused with
-.Dq this friday
-which would match the friday of the current week.
+.Dq this Friday
+which would match the Friday of the current week.
 .It last week
 The current time but 7 days ago.
 This is equivalent to

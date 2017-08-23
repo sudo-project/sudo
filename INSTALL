@@ -312,6 +312,12 @@ Optional features:
 	this file instead of /etc/ldap.secret to read the secret password
 	when rootbinddn is specified in the ldap config file.
 
+  --disable-sasl
+        Disable SASL authentication for LDAP.  By default, sudo
+        will compile in support for SASL authentication if the
+        ldap_sasl_interactive_bind_s() function is present in the
+        LDAP libraries.
+
   --with-logincap
 	This adds support for login classes specified in /etc/login.conf.
 	It is enabled by default on BSD/OS, Darwin, FreeBSD, OpenBSD and
@@ -367,6 +373,12 @@ Operating system-specific options:
   --enable-admin-flag
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.
+
+  --enable-devsearch=PATH
+        Set a system-specific search path of directories to look in
+        for device nodes.  Sudo uses this when mapping the process's
+	tty device number to a device name.  The default value is:
+            /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 
   --with-bsm-audit
         Enable support for sudo BSM audit logs on systems that support it.
@@ -602,6 +614,13 @@ Options that set runtime-changeable default values:
 	unless the "-u" option is used).  This option effectively makes the
 	"-s" flag imply "-H".
 	Sudoers option: set_home
+
+  --enable-timestamp-type=TYPE
+        Set the default time stamp record type.  The TYPE may be "global"
+	(a single record per user), "ppid" (a single record for process
+	with the same parent process), or "tty" (a separate record for
+	each login session).  The default is "tty".
+	Sudoers option: timestamp_type
 
   --with-all-insults
 	Include all the insult sets listed below.  You must either specify
@@ -846,12 +865,6 @@ Options that set runtime-changeable default values:
 	Number of minutes that can elapse before sudo will ask for a passwd
 	again.  The default is 5, set this to 0 to always prompt for a password.
 	Sudoers option: timestamp_timeout
-
-  --with-tty-tickets=no, --without-tty-tickets
-	By default, sudo uses a different ticket file for each user/tty combo.
-	With this option disabled, a single ticket will be used for all
-	of a user's login sessions.
-	Sudoers option: tty_tickets
 
   --with-umask=MASK
 	Umask to use when running the root command.  The default is 0022.

@@ -103,10 +103,20 @@ io_mkdirs(char *path)
     }
     if (ok) {
 	if (S_ISDIR(sb.st_mode)) {
-	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid)
-		ignore_result(chown(path, iolog_uid, iolog_gid));
-	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode)
-		ignore_result(chmod(path, iolog_dirmode));
+	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid) {
+		if (chown(path, iolog_uid, iolog_gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chown %d:%d %s", __func__,
+			(int)iolog_uid, (int)iolog_gid, path);
+		}
+	    }
+	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode) {
+		if (chmod(path, iolog_dirmode) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chmod 0%o %s", __func__,
+			(int)iolog_dirmode, path);
+		}
+	    }
 	} else {
 	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
@@ -135,7 +145,11 @@ io_mkdirs(char *path)
 	    if (!ok)
 		sudo_warn(U_("unable to mkdir %s"), path);
 	} else {
-	    ignore_result(chown(path, iolog_uid, iolog_gid));
+	    if (chown(path, iolog_uid, iolog_gid) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to chown %d:%d %s", __func__,
+		    (int)iolog_uid, (int)iolog_gid, path);
+	    }
 	}
     }
     if (uid_changed) {
@@ -405,7 +419,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	goto done;
     }
     sudo_lock_file(fd, SUDO_LOCK);
-    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+    if (fchown(fd, iolog_uid, iolog_gid) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to fchown %d:%d %s", __func__,
+	    (int)iolog_uid, (int)iolog_gid, pathbuf);
+    }
 
     /*
      * If there is no seq file in iolog_dir and a fallback dir was
@@ -421,7 +439,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2 = io_open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
-		ignore_result(fchown(fd2, iolog_uid, iolog_gid));
+		if (fchown(fd2, iolog_uid, iolog_gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to fchown %d:%d %s", __func__,
+			(int)iolog_uid, (int)iolog_gid, fallback);
+		}
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
 		    if (buf[nread - 1] == '\n')
@@ -541,7 +563,11 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     if (iol->enabled) {
 	int fd = io_open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, iolog_filemode);
 	if (fd != -1) {
-	    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+	    if (fchown(fd, iolog_uid, iolog_gid) != 0) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to fchown %d:%d %s", __func__,
+		    (int)iolog_uid, (int)iolog_gid, pathbuf);
+	    }
 	    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
 	    if (docompress)
@@ -777,7 +803,11 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	log_warning(SLOG_SEND_MAIL, N_("unable to create %s"), pathbuf);
 	debug_return_bool(false);
     }
-    ignore_result(fchown(fd, iolog_uid, iolog_gid));
+    if (fchown(fd, iolog_uid, iolog_gid) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to fchown %d:%d %s", __func__,
+	    (int)iolog_uid, (int)iolog_gid, pathbuf);
+    }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,
@@ -931,8 +961,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
 
     /* Write log file with user and command details. */
-    if (gettimeofday(&last_time, NULL) == -1)
+    if (gettimeofday(&last_time, NULL) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
 	goto done;
+    }
     write_info_log(pathbuf, len, &iolog_details, argv, &last_time);
 
     /* Create the timing and I/O log files. */
@@ -1030,7 +1063,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
-    debug_decl(sudoers_io_version, SUDOERS_DEBUG_PLUGIN)
+    debug_decl(sudoers_io_log, SUDOERS_DEBUG_PLUGIN)
 
     if (io_log_files[idx].fd.v == NULL) {
 	sudo_warnx(U_("%s: internal error, file index %d not open"),
@@ -1038,7 +1071,12 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	debug_return_int(-1);
     }
 
-    gettimeofday(&now, NULL);
+    if (gettimeofday(&now, NULL) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	errstr = strerror(errno);
+	goto done;
+    }
 
     /* Write I/O log file entry. */
     errstr = iolog_write(buf, len, idx);
@@ -1111,6 +1149,57 @@ sudoers_io_log_stderr(const char *buf, unsigned int len)
     return sudoers_io_log(buf, len, IOFD_STDERR);
 }
 
+static int
+sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
+{
+    struct timeval now, delay;
+    unsigned int len;
+    char tbuf[1024];
+    const char *errstr = NULL;
+    int ret = -1;
+    debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN)
+
+    if (gettimeofday(&now, NULL) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	errstr = strerror(errno);
+	goto done;
+    }
+
+    /* Write window change event to the timing file. */
+    sudo_timevalsub(&now, &last_time, &delay);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u %u\n",
+	IOFD_TIMING, delay.tv_sec + ((double)delay.tv_usec / 1000000),
+	lines, cols);
+    if (len >= sizeof(tbuf)) {
+	/* Not actually possible due to the size of tbuf[]. */
+	errstr = strerror(EOVERFLOW);
+	goto done;
+    }
+    errstr = iolog_write(tbuf, len, IOFD_TIMING);
+    if (errstr != NULL)
+	goto done;
+
+done:
+    last_time.tv_sec = now.tv_sec;
+    last_time.tv_usec = now.tv_usec;
+
+    if (ret == -1) {
+	if (errstr != NULL && !warned) {
+	    /* Only warn about I/O log file errors once. */
+	    log_warning(SLOG_SEND_MAIL,
+		N_("unable to write to I/O log file: %s"), errstr);
+	    warned = true;
+	}
+
+	/* Ignore errors if they occur if the policy says so. */
+	if (iolog_details.ignore_iolog_errors)
+	    ret = 1;
+    }
+
+    debug_return_int(ret);
+}
+
 __dso_public struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
@@ -1121,5 +1210,8 @@ __dso_public struct io_plugin sudoers_io = {
     sudoers_io_log_ttyout,
     sudoers_io_log_stdin,
     sudoers_io_log_stdout,
-    sudoers_io_log_stderr
+    sudoers_io_log_stderr,
+    NULL, /* register_hooks */
+    NULL, /* deregister_hooks */
+    sudoers_io_change_winsize
 };

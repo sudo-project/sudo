@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -104,7 +104,7 @@ lint: all
 	fi
 
 Makefile: $(srcdir)/Makefile.in
-	(cd $(top_builddir) && ./config.status --file doc/Makefile)
+	cd $(top_builddir) && ./config.status --file doc/Makefile
 
 .SUFFIXES: .man
 
@@ -155,10 +155,10 @@ $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	fi
 
 $(mansrcdir)/visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(mansrcdir)/visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -178,10 +178,10 @@ $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	fi
 
 $(mansrcdir)/sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.man.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(mansrcdir)/sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.mdoc.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -230,10 +230,10 @@ $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	fi
 
 $(mansrcdir)/sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.man.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(mansrcdir)/sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.mdoc.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -253,10 +253,10 @@ $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	fi
 
 $(mansrcdir)/sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.man.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(mansrcdir)/sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay.mdoc.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -276,10 +276,10 @@ $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	fi
 
 $(mansrcdir)/sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin.man.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(mansrcdir)/sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin.mdoc.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \

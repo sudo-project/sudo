@@ -97,7 +97,7 @@ if make --version 2>&1 | grep GNU >/dev/null; then
     NJOBS=0
     case "`uname`" in
 	Darwin)
-	    # Mac OS X
+	    # macOS
 	    NJOBS=`sysctl -n hw.ncpu`
 	    ;;
 	Linux)
@@ -122,6 +122,12 @@ fi
 # Choose compiler options by osversion if not cross-compiling.
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
+	macos*)
+	    # Use clang on macOS if present
+	    if [ -z "$CC" -a -x /usr/bin/clang ]; then
+		CC=/usr/bin/clang; export CC
+	    fi
+	    ;;
 	sol[0-9]*)
 	    # Use the Sun Studio C compiler on Solaris if possible
 	    if [ -z "$CC" -a -x /usr/bin/cc ]; then

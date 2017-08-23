@@ -178,9 +178,9 @@ struct cmndspec {
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
+    int timeout;			/* command timeout */
     time_t notbefore;			/* time restriction */
     time_t notafter;			/* time restriction */
-    int timeout;			/* command timeout */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif

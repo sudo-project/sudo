@@ -28,6 +28,13 @@ static struct def_values def_data_fdexec[] = {
     { NULL, 0 },
 };
 
+static struct def_values def_data_timestamp_type[] = {
+    { "global", global },
+    { "ppid", ppid },
+    { "tty", tty },
+    { NULL, 0 },
+};
+
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
@@ -363,11 +370,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"privs", T_STR,
-	N_("Set of permitted privileges"),
+	N_("Set of permitted privileges: %s"),
 	NULL,
     }, {
 	"limitprivs", T_STR,
-	N_("Set of limit privileges"),
+	N_("Set of limit privileges: %s"),
 	NULL,
     }, {
 	"exec_background", T_FLAG,
@@ -375,11 +382,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"pam_service", T_STR,
-	N_("PAM service name to use"),
+	N_("PAM service name to use: %s"),
 	NULL,
     }, {
 	"pam_login_service", T_STR,
-	N_("PAM service name to use for login shells"),
+	N_("PAM service name to use for login shells: %s"),
 	NULL,
     }, {
 	"pam_setcred", T_FLAG,
@@ -465,6 +472,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"iolog_flush", T_FLAG,
 	N_("Flush I/O log data to disk immediately instead of buffering it"),
 	NULL,
+    }, {
+	"syslog_pid", T_FLAG,
+	N_("Include the process ID when logging via syslog"),
+	NULL,
+    }, {
+	"timestamp_type", T_TUPLE,
+	N_("Type of authentication timestamp record: %s"),
+	def_data_timestamp_type,
     }, {
 	NULL, 0, NULL
     }

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "February 16, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "Auguest 2, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -32,6 +32,7 @@
 .HP 5n
 \fBsudo\fR
 \fB\-h\fR\ |\ \fB\-K\fR\ |\ \fB\-k\fR\ |\ \fB\-V\fR
+.br
 .PD 0
 .HP 5n
 \fBsudo\fR
@@ -256,6 +257,13 @@ This option is only available on systems with BSD login classes.
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
+The security policy may return an error if the user does not have
+permission to preserve the environment.
+.TP 12n
+\fB\--preserve-env=list\fR
+Indicates to the security policy that the user wishes to add the
+comma-separated list of environment variables to those preserved
+from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
 .TP 12n
@@ -517,8 +525,12 @@ characters are collapsed into a single
 \(oq%\(cq
 character
 .PP
-The custom prompt will override the system password prompt on systems that
-support PAM unless the
+The custom prompt will override the default prompt specified by either
+the security policy or the
+\fRSUDO_PROMPT\fR
+environment variable.
+On systems that use PAM, the custom prompt will also override the prompt
+specified by a PAM module unless the
 \fIpassprompt_override\fR
 flag is disabled in
 \fIsudoers\fR.
@@ -840,7 +852,7 @@ sudo.conf(@mansectform@)
 manual for details of the
 \fI@sysconfdir@/sudo.conf\fR
 file and the
-sudo_plugin(@mansectsu@)
+sudo_plugin(@mansectform@)
 manual for more information about the
 \fBsudo\fR
 plugin architecture.
@@ -1047,7 +1059,10 @@ Default editor to use in
 Set to the group ID of the user who invoked sudo.
 .TP 17n
 \fRSUDO_PROMPT\fR
-Used as the default password prompt.
+Used as the default password prompt unless
+the
+\fB\-p\fR
+option was specified.
 .TP 17n
 \fRSUDO_PS1\fR
 If set,
@@ -1153,7 +1168,7 @@ login_cap(3),
 passwd(@mansectform@),
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),
-sudo_plugin(@mansectsu@),
+sudo_plugin(@mansectform@),
 sudoreplay(@mansectsu@),
 visudo(@mansectsu@)
 .SH "HISTORY"

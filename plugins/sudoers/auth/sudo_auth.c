@@ -216,7 +216,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
     int ret, status, success = AUTH_FAILURE;
     sudo_auth *auth;
     sigset_t mask, omask;
-    sigaction_t sa, saved_sigtstp;
+    struct sigaction sa, saved_sigtstp;
     debug_decl(verify_user, SUDOERS_DEBUG_AUTH)
 
     /* Make sure we have at least one auth method. */
@@ -295,7 +295,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	    if (success != AUTH_FAILURE)
 		break;
 	}
-	if (!standalone) {
+	if (pass != NULL) {
 	    memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 	    free(pass);
 	}

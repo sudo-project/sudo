@@ -216,6 +216,10 @@
 #define def_user_command_timeouts (sudo_defs_table[I_USER_COMMAND_TIMEOUTS].sd_un.flag)
 #define I_IOLOG_FLUSH           108
 #define def_iolog_flush         (sudo_defs_table[I_IOLOG_FLUSH].sd_un.flag)
+#define I_SYSLOG_PID            109
+#define def_syslog_pid          (sudo_defs_table[I_SYSLOG_PID].sd_un.flag)
+#define I_TIMESTAMP_TYPE        110
+#define def_timestamp_type      (sudo_defs_table[I_TIMESTAMP_TYPE].sd_un.tuple)
 
 enum def_tuple {
 	never,
@@ -223,5 +227,8 @@ enum def_tuple {
 	always,
 	any,
 	all,
-	digest_only
+	digest_only,
+	global,
+	ppid,
+	tty
 };

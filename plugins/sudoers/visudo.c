@@ -78,9 +78,9 @@ struct sudoersfile {
     TAILQ_ENTRY(sudoersfile) entries;
     char *path;
     char *tpath;
+    bool modified;
+    bool doedit;
     int fd;
-    int modified;
-    int doedit;
 };
 TAILQ_HEAD(sudoersfile_list, sudoersfile);
 
@@ -276,8 +276,7 @@ main(int argc, char *argv[])
      */
     if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    if (sp->doedit)
-		(void) install_sudoers(sp, oldperms);
+	    (void) install_sudoers(sp, oldperms);
 	}
     }
     free(editor);
@@ -662,11 +661,20 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 
 	/* If any new #include directives were added, edit them too. */
-	for (sp = TAILQ_NEXT(last, entries); sp != NULL; sp = TAILQ_NEXT(sp, entries)) {
-	    printf(_("press return to edit %s: "), sp->path);
-	    while ((ch = getchar()) != EOF && ch != '\n')
-		    continue;
-	    edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
+	if ((sp = TAILQ_NEXT(last, entries)) != NULL) {
+	    bool modified = false;
+	    do {
+		printf(_("press return to edit %s: "), sp->path);
+		while ((ch = getchar()) != EOF && ch != '\n')
+			continue;
+		edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
+		if (sp->modified)
+		    modified = true;
+	    } while ((sp = TAILQ_NEXT(sp, entries)) != NULL);
+
+	    /* Reparse sudoers if newly added includes were modified. */
+	    if (modified)
+		continue;
 	}
 
 	/* If all sudoers files parsed OK we are done. */
@@ -697,10 +705,20 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	 */
 	(void) unlink(sp->tpath);
 	if (!oldperms && fstat(sp->fd, &sb) != -1) {
-	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid)
-		ignore_result(chown(sp->path, sudoers_uid, sudoers_gid));
-	    if ((sb.st_mode & ACCESSPERMS) != sudoers_mode)
-		ignore_result(chmod(sp->path, sudoers_mode));
+	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
+		if (chown(sp->path, sudoers_uid, sudoers_gid) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chown %d:%d %s", __func__,
+			(int)sudoers_uid, (int)sudoers_gid, sp->path);
+		}
+	    }
+	    if ((sb.st_mode & ACCESSPERMS) != sudoers_mode) {
+		if (chmod(sp->path, sudoers_mode) != 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to chmod 0%o %s", __func__,
+			(int)sudoers_mode, sp->path);
+		}
+	    }
 	}
 	ret = true;
 	goto done;
@@ -862,7 +880,7 @@ whatnow(void)
 static void
 setup_signals(void)
 {
-    sigaction_t sa;
+    struct sigaction sa;
     debug_decl(setup_signals, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -1031,10 +1049,10 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	entry = calloc(1, sizeof(*entry));
 	if (entry == NULL || (entry->path = strdup(path)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	/* entry->modified = 0; */
-	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	/* entry->tpath = NULL; */
+	/* entry->modified = false; */
 	entry->doedit = doedit;
+	entry->fd = open(entry->path, open_flags, sudoers_mode);
 	if (entry->fd == -1) {
 	    sudo_warn("%s", entry->path);
 	    free(entry);
@@ -1320,7 +1338,9 @@ parse_sudoers_options(void)
 	if (info != NULL && info->options != NULL) {
 	    char * const *cur;
 
-#define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
+#define MATCHES(s, v)	\
+    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
+
 	    for (cur = info->options; *cur != NULL; cur++) {
 		const char *errstr, *p;
 		id_t id;
@@ -1351,6 +1371,7 @@ parse_sudoers_options(void)
 		    continue;
 		}
 	    }
+#undef MATCHES
 	}
     }
     debug_return;

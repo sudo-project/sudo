@@ -107,6 +107,12 @@ static struct sudo_settings sudo_settings[] = {
     { NULL }
 };
 
+struct environment {
+    char **envp;		/* pointer to the new environment */
+    size_t env_size;		/* size of new_environ in char **'s */
+    size_t env_len;		/* number of slots used, not counting NULL */
+};
+
 /*
  * Default flags allowed when running a command.
  */
@@ -127,7 +133,7 @@ static struct option long_opts[] = {
     { "background",	no_argument,		NULL,	'b' },
     { "close-from",	required_argument,	NULL,	'C' },
     { "login-class",	required_argument,	NULL,	'c' },
-    { "preserve-env",	no_argument,		NULL,	'E' },
+    { "preserve-env",	optional_argument,	NULL,	'E' },
     { "edit",		no_argument,		NULL,	'e' },
     { "group",		required_argument,	NULL,	'g' },
     { "set-home",	no_argument,		NULL,	'H' },
@@ -153,6 +159,73 @@ static struct option long_opts[] = {
 };
 
 /*
+ * Insert a key=value pair into the specified environment.
+ */
+static void
+env_insert(struct environment *e, char *pair)
+{
+    debug_decl(env_insert, SUDO_DEBUG_ARGS)
+
+    /* Make sure we have at least two slots free (one for NULL). */
+    if (e->env_len + 1 >= e->env_size) {
+	char **tmp;
+
+	if (e->env_size == 0)
+	    e->env_size = 16;
+	tmp = reallocarray(e->envp, e->env_size, 2 * sizeof(char *));
+	if (tmp == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	e->envp = tmp;
+	e->env_size *= 2;
+    }
+    e->envp[e->env_len++] = pair;
+    e->envp[e->env_len] = NULL;
+
+    debug_return;
+}
+
+/*
+ * Format as var=val and insert into the specified environment.
+ */
+static void
+env_set(struct environment *e, char *var, char *val)
+{
+    char *pair;
+    debug_decl(env_set, SUDO_DEBUG_ARGS)
+
+    pair = sudo_new_key_val(var, val);
+    if (pair == NULL) {
+	sudo_fatalx(U_("%s: %s"),
+	    __func__, U_("unable to allocate memory"));
+    }
+    env_insert(e, pair);
+
+    debug_return;
+}
+
+/*
+ * Parse a comma-separated list of env vars and add to the
+ * specified environment.
+ */
+static void
+parse_env_list(struct environment *e, char *list)
+{
+    char *cp, *last, *val;
+    debug_decl(parse_env_list, SUDO_DEBUG_ARGS)
+
+    for ((cp = strtok_r(list, ",", &last)); cp != NULL;
+	(cp = strtok_r(NULL, ",", &last))) {
+	if (strchr(cp, '=') != NULL) {
+	    sudo_warnx(U_("invalid environment variable name: %s"), cp);
+	    usage(1);
+	}
+	if ((val = getenv(cp)) != NULL)
+	    env_set(e, cp, val);
+    }
+    debug_return;
+}
+
+/*
  * Command line argument parsing.
  * Sets nargc and nargv which corresponds to the argc/argv we'll use
  * for the command to be run (if we are running one).
@@ -161,26 +234,21 @@ int
 parse_args(int argc, char **argv, int *nargc, char ***nargv,
     struct sudo_settings **settingsp, char ***env_addp)
 {
+    struct environment extra_env;
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
     int ch, i;
-    char *cp, **env_add;
+    char *cp;
     const char *runas_user = NULL;
     const char *runas_group = NULL;
     const char *progname;
     int proglen;
-    int nenv = 0;
-    int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
 
     /* Is someone trying something funny? */
     if (argc <= 0)
 	usage(1);
-
-    env_add = reallocarray(NULL, env_size, sizeof(char *));
-    if (env_add == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Pass progname to plugin so it can call initprogname() */
     progname = getprogname();
@@ -218,6 +286,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 #define is_envar (optind < argc && argv[optind][0] != '/' && \
 	    strchr(argv[optind], '=') != NULL)
 
+    /* Space for environment variables is lazy allocated. */
+    memset(&extra_env, 0, sizeof(extra_env));
+
     /* XXX - should fill in settings at the end to avoid dupes */
     for (;;) {
 	/*
@@ -253,7 +324,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    /* Ignored for backwards compatibility. */
 		    break;
 		case 'E':
-		    sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
+		    /*
+		     * Optional argument is a comma-separated list of
+		     * environment variables to preserve.  If not present,
+		     * preserve everything.
+		     */
+		    if (optarg == NULL)
+			sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
+		    else
+			parse_env_list(&extra_env, optarg);
 		    break;
 		case 'e':
 		    if (mode && mode != MODE_EDIT)
@@ -368,25 +447,14 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    usage(1);
 	    }
 	} else if (!got_end_of_args && is_envar) {
-	    if (nenv == env_size - 2) {
-		char **tmp;
-
-		tmp = reallocarray(env_add, env_size, 2 * sizeof(char *));
-		if (tmp == NULL)
-		    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		env_add = tmp;
-		env_size *= 2;
-	    }
-	    env_add[nenv++] = argv[optind];
-
-	    /* Crank optind and resume getopt. */
+	    /* Insert key=value pair, crank optind and resume getopt. */
+	    env_insert(&extra_env, argv[optind]);
 	    optind++;
 	} else {
 	    /* Not an option or an environment variable -- we're done. */
 	    break;
 	}
     }
-    env_add[nenv] = NULL;
 
     argc -= optind;
     argv += optind;
@@ -421,10 +489,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     if ((flags & valid_flags) != flags)
 	usage(1);
     if (mode == MODE_EDIT &&
-       (ISSET(flags, MODE_PRESERVE_ENV) || env_add[0] != NULL)) {
+       (ISSET(flags, MODE_PRESERVE_ENV) || extra_env.env_len != 0)) {
 	if (ISSET(mode, MODE_PRESERVE_ENV))
 	    sudo_warnx(U_("the `-E' option is not valid in edit mode"));
-	if (env_add[0] != NULL)
+	if (extra_env.env_len != 0)
 	    sudo_warnx(U_("you may not specify environment variables in edit mode"));
 	usage(1);
     }
@@ -518,7 +586,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
     }
 
     *settingsp = sudo_settings;
-    *env_addp = env_add;
+    *env_addp = extra_env.envp;
     *nargc = argc;
     *nargv = argv;
     debug_return_int(mode | flags);
@@ -624,6 +692,8 @@ help(void)
 #endif
     sudo_lbuf_append(&lbuf, "  -E, --preserve-env            %s\n",
 	_("preserve user environment when running command"));
+    sudo_lbuf_append(&lbuf, "      --preserve-env=list       %s\n",
+	_("preserve specific environment variables"));
     sudo_lbuf_append(&lbuf, "  -e, --edit                    %s\n",
 	_("edit files instead of running a command"));
     sudo_lbuf_append(&lbuf, "  -g, --group=group             %s\n",

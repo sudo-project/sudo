@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd May 8, 2017
+.Dd August 4, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -204,7 +204,7 @@ file lookup is still done for root, not the user specified by
 .Nm sudoers
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
-containing the uid that was used to authenticate, the
+containing the user ID that was used to authenticate, the
 terminal session ID, and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
@@ -218,12 +218,13 @@ option
 .Pc .
 By default,
 .Nm sudoers
-uses a separate record for each tty, which means that
+uses a separate record for each terminal, which means that
 a user's login sessions are authenticated separately.
 The
-.Em tty_tickets
-option can be disabled to force the use of a
-single time stamp for all of a user's sessions.
+.Em timestamp_type
+option can be used to select the type of time stamp record
+.Nm sudoers
+will use.
 .Ss Logging
 .Nm sudoers
 can log both successful and unsuccessful attempts (as well
@@ -315,7 +316,7 @@ are removed unless both the name and value parts are matched by
 .Em env_keep
 or
 .Em env_check ,
-as they will be interpreted as functions by older versions of the
+as they may be interpreted as functions by the
 .Sy bash
 shell.
 Prior to version 1.8.11, such variables were always removed.
@@ -334,29 +335,44 @@ In this case,
 and
 .Em env_delete
 behave like a blacklist.
-Environment variables with a value beginning with
+Prior to version 1.8.21, environment variables with a value beginning with
 .Li ()
-are always removed, even if they do not match one of the blacklists.
+were always removed.
+Beginning with version 1.8.21, a pattern in
+.Em env_delete
+is used to match
+.Sy bash
+shell functions instead.
 Since it is not possible
 to blacklist all potentially dangerous environment variables, use
 of the default
 .Em env_reset
 behavior is encouraged.
 .Pp
+Environment variables specified by
+.Em env_check ,
+.Em env_delete ,
+or
+.Em env_keep
+may include one or more
+.Ql *
+characters which will match zero or more characters.
+No other wildcard characters are supported.
+.Pp
 By default, environment variables are matched by name.
 However, if the pattern includes an equal sign
 .Pq Ql =\& ,
 both the variables name and value must match.
-For example, an old-style (pre-shellshock)
+For example, a
 .Sy bash
 shell function could be matched as follows:
 .Bd -literal -offset 4n
-env_keep += "my_func=()*"
+env_keep += "BASH_FUNC_my_func%%=()*"
 .Ed
 .Pp
 Without the
 .Dq Li =()*
-suffix, this would not match, as old-style
+suffix, this would not match, as
 .Sy bash
 shell functions are not preserved by default.
 .Pp
@@ -1040,7 +1056,9 @@ may run
 .Pa /bin/ls ,
 .Pa /bin/kill ,
 and
-.Pa /usr/bin/lprm Ns \(em Ns but
+.Pa /usr/bin/lprm
+on the host
+.No boulder Ns \(em Ns but
 only as
 .Sy operator .
 E.g.,
@@ -1947,11 +1965,11 @@ For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
 Unfortunately, not all operating systems do this by default,
 and even those that do may have bugs.
-For example, Mac OS X fails to restart the
+For example, macOS fails to restart the
 .Fn tcgetattr
 and
 .Fn tcsetattr
-system calls (this is a bug in Mac OS X).
+system calls (this is a bug in macOS).
 Furthermore, because this behavior depends on the command stopping with the
 .Dv SIGTTIN
 or
@@ -2169,7 +2187,7 @@ If disabled, a command may only be run after the audit event is successfully
 written.
 This flag is only effective on systems for which
 .Nm
-supports audit logging, including FreeBSD, Linux, Mac OS X and Solaris.
+supports audit logging, including FreeBSD, Linux, macOS and Solaris.
 This flag is
 .Em on
 by default.
@@ -2499,16 +2517,12 @@ by default.
 .Pp
 This setting is only supported by version 1.8.8 or higher.
 .It passprompt_override
-The password prompt specified by
+If set, the prompt specified by
 .Em passprompt
-will normally only be used if the password prompt provided by systems
-such as PAM matches the string
-.Dq Password: .
-If
-.Em passprompt_override
-is set,
-.Em passprompt
-will always be used.
+or the
+.Ev SUDO_PROMPT
+environment variable will always be used and will replace the
+prompt provided by a PAM module or other authentication method.
 This flag is
 .Em off
 by default.
@@ -2782,6 +2796,15 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.15 or higher.
+.It syslog_pid
+When logging via
+.Xr syslog 3 ,
+include the process ID in the log entry.
+This flag is
+.Em off
+by default.
+.Pp
+This setting is only supported by version 1.8.21 or higher.
 .It targetpw
 If set,
 .Nm sudo
@@ -2803,11 +2826,12 @@ by default.
 If set, users must authenticate on a per-tty basis.
 With this flag enabled,
 .Nm sudo
-will use a separate record in the time stamp file for each tty.
+will use a separate record in the time stamp file for each terminal.
 If disabled, a single record is used for all login sessions.
-This flag is
-.Em @tty_tickets@
-by default.
+.Pp
+This option has been superceded by the
+.Em timestamp_type
+option.
 .It umask_override
 If set,
 .Nm sudo
@@ -3324,8 +3348,21 @@ characters are collapsed into a single
 character
 .El
 .Pp
+On systems that use PAM for authentication,
+.Em passprompt
+will only be used if the prompt provided by the PAM module matches the string
+.Dq "Password: "
+or
+.Dq "username's Password: " .
+This ensures that the
+.Em passprompt
+setting does not interfere with challenge-response style authentication.
+The
+.Em passprompt_override
+flag can be used to change this behavior.
+.Pp
 The default value is
-.Dq Li @passprompt@ .
+.Dq Li "@passprompt@" .
 .It privs
 The default Solaris privileges to use when constructing a new
 privilege set for a command.
@@ -3363,6 +3400,53 @@ sending email.
 Note that changing the locale may affect how sudoers is interpreted.
 Defaults to
 .Dq Li C .
+.It timestamp_type
+.Nm sudoers
+uses per-user time stamp files for credential caching.
+The
+.Em timestamp_type
+option can be used to specify the type of time stamp record used.
+It has the following possible values:
+.Bl -tag -width 6n
+.It global
+A single time stamp record is used for all of a user's login sessions,
+regardless of the terminal or parent process ID.
+An additional record is used to serialize password prompts when
+.Nm sudo
+is used multiple times in a pipeline, but this does not affect authentication.
+.It ppid
+A single time stamp record is used for all processes with the same parent
+process ID (usually the shell).
+Commands run from the same shell (or other common parent process)
+will not require a password for
+.Em timestamp_timeout
+minutes
+.Po
+.Li @timeout@
+by default
+.Pc .
+Commands run via
+.Nm sudo
+with a different parent process ID, for example from a shell script,
+will be authenticated separately.
+.It tty
+One time stamp record is used for each terminal,
+which means that a user's login sessions are authenticated separately.
+If no terminal is present, the behavior is the same as
+.Em ppid .
+Commands run from the same terminal will not require a password for
+.Em timestamp_timeout
+minutes
+.Po
+.Li @timeout@
+by default
+.Pc .
+.El
+.Pp
+The default value is
+.Em @timestamp_type@ .
+.Pp
+This setting is only supported by version 1.8.21 or higher.
 .It timestampdir
 The directory in which
 .Nm sudo
@@ -3886,7 +3970,7 @@ Defaults group_plugin=system_group.so
 .El
 .Pp
 The group provider plugin API is described in detail in
-.Xr sudo_plugin @mansectsu@ .
+.Xr sudo_plugin @mansectform@ .
 .Sh LOG FORMAT
 .Nm
 can log events using either
@@ -4799,7 +4883,7 @@ running under binary emulation are not affected.
 The
 .Em noexec
 feature is known to work on SunOS, Solaris, *BSD,
-Linux, IRIX, Tru64 UNIX, MacOS X, HP-UX 11.x and AIX 5.3 and above.
+Linux, IRIX, Tru64 UNIX, macOS, HP-UX 11.x and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 .Ev LD_PRELOAD
 environment variable.
@@ -5105,7 +5189,7 @@ manual.
 .Xr sudo.conf @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudo @mansectsu@ ,
-.Xr sudo_plugin @mansectsu@ ,
+.Xr sudo_plugin @mansectform@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on

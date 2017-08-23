@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.20p2], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.21], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -97,6 +97,7 @@ AC_SUBST([COMPAT_EXP])
 AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
 AC_SUBST([FILEDIGEST])
+AC_SUBST([devsearch])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -126,7 +127,7 @@ AC_SUBST([runas_default])
 AC_SUBST([env_editor])
 AC_SUBST([env_reset])
 AC_SUBST([passwd_tries])
-AC_SUBST([tty_tickets])
+AC_SUBST([timestamp_type])
 AC_SUBST([insults])
 AC_SUBST([root_sudo])
 AC_SUBST([path_info])
@@ -170,7 +171,7 @@ env_editor=off
 env_reset=on
 editor=vi
 passwd_tries=3
-tty_tickets=on
+timestamp_type=tty
 insults=off
 root_sudo=on
 path_info=on
@@ -185,6 +186,7 @@ pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
 FILEDIGEST=filedigest.lo
+devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
 #
@@ -1034,22 +1036,15 @@ esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
 AC_MSG_RESULT($password_timeout)
 
-AC_MSG_CHECKING(whether to use per-tty ticket files)
 AC_ARG_WITH(tty-tickets, [AS_HELP_STRING([--with-tty-tickets], [use a different ticket file for each tty])],
 [case $with_tty_tickets in
-    yes)	tty_tickets=on
+    yes)	timestamp_type=tty
 		;;
-    no)		tty_tickets=off
+    no)		timestamp_type=global
 		;;
     *)		AC_MSG_ERROR(["--with-tty-tickets does not take an argument."])
 		;;
 esac])
-if test "$tty_tickets" = "off"; then
-    AC_DEFINE(NO_TTY_TICKETS)
-    AC_MSG_RESULT(no)
-else
-    AC_MSG_RESULT(yes)
-fi
 
 AC_MSG_CHECKING(whether to include insults)
 AC_ARG_WITH(insults, [AS_HELP_STRING([--with-insults], [insult the user for entering an incorrect password])],
@@ -1531,6 +1526,19 @@ esac], [
     test -f /usr/lib/tmpfiles.d/systemd.conf && TMPFILES_D=/usr/lib/tmpfiles.d
 ])
 
+AC_ARG_ENABLE(devsearch,
+[AS_HELP_STRING([--enable-devsearch=PATH], [The colon-delimited path to search for device nodes when determing the tty name.])],
+[case $enableval in
+    yes)	# use default value
+		;;
+    no)		AC_MSG_WARN([Ignoring attempt to disable the device search path])
+		;;
+    *)		devsearch="$enableval"
+		;;
+esac])
+ds="`echo \"$devsearch\"|sed 's@/dev/*\([[^:]]*:*\)@_PATH_DEV \"\1\" @g'`"
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_DEVSEARCH, $ds)
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -1546,6 +1554,27 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
     *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
 		;;
 esac], [with_selinux=no])
+
+AC_ARG_ENABLE(sasl,
+[AS_HELP_STRING([--enable-sasl], [Enable/disable LDAP SASL support])],
+[ case "$enableval" in
+    yes|no) ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-sasl: $enableval])
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(timestamp-type,
+[AS_HELP_STRING([--timestamp-type=TYPE], [Set the default time stamp record type to global, ppid or tty.])],
+[ case "$enableval" in
+    global|ppid|tty)
+	    timestamp_type=$enableval
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-timestamp-type: $enableval])
+	    ;;
+  esac
+])
+AC_DEFINE_UNQUOTED(TIMESTAMP_TYPE, $timestamp_type)
 
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
@@ -2355,8 +2384,6 @@ AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types
 #include <time.h>])
 AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
-AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
-#include <signal.h>])
 AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
@@ -2676,6 +2703,9 @@ AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
 AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
 if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
     AC_CHECK_FUNCS([arc4random random lrand48], [break])
+    if test X"$ac_cv_func_arc4random" != X"yes"; then
+	AC_CHECK_FUNCS([getentropy])
+    fi
     AC_LIBOBJ(mktemp)
     # If either mkdtemp() or mkstemps() is missing, replace both.
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
@@ -3228,7 +3258,7 @@ if test ${with_pam-"no"} != "no"; then
     found_pam_lib=no
     AC_CHECK_LIB(pam, pam_start, [found_pam_lib=yes], [], [$lt_cv_dlopen_libs])
     #
-    # Some PAM implementations (MacOS X for example) put the PAM headers
+    # Some PAM implementations (macOS for example) put the PAM headers
     # in /usr/include/pam instead of /usr/include/security...
     #
     found_pam_hdrs=no
@@ -3729,10 +3759,22 @@ if test ${with_ldap-'no'} != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
-	AC_CHECK_FUNCS([ldap_sasl_interactive_bind_s])
-	break
-    ])
+    if test ${enable_sasl-'yes'} = "yes"; then
+	found_sasl_h=no
+	AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
+	    found_sasl_h=yes
+	    AC_CHECK_FUNCS([ldap_sasl_interactive_bind_s])
+	    break
+	])
+	if test X${enable_sasl} = X"yes"; then
+	    if test X"$found_sasl_h" != X"yes"; then
+		AC_MSG_ERROR(["--enable-sasl specified but unable to locate SASL development headers."])
+	    fi
+	    if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
+		AC_MSG_ERROR(["--enable-sasl specified but SASL support is missing in your LDAP library"])
+	    fi
+	fi
+    fi
     AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
     AC_CHECK_FUNCS([ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_init ldap_ssl_client_init ldap_start_tls_s_np])
     AC_CHECK_FUNCS([ldap_search_ext_s ldap_search_st], [break])
@@ -4406,7 +4448,7 @@ AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture 
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support.])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
-AH_TEMPLATE(NO_TTY_TICKETS, [Define to 1 if you want a single ticket file instead of per-tty files.])
+AH_TEMPLATE(TIMESTAMP_TYPE, [Define to global, ppid or tty to set the default timestamp record type.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
 AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Define to 1 to enable replacement getcwd if system getcwd is broken.])
 AH_TEMPLATE(SECURE_PATH, [A colon-separated list of directories to override the user's PATH with.])

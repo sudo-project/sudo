@@ -82,7 +82,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN)
 
-#define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
+#define MATCHES(s, v)	\
+    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
 
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
@@ -389,7 +390,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	/* user_ttypath remains NULL */
     }
 
-    if (groups != NULL && groups[0] != '\0') {
+    if (groups != NULL) {
 	/* sudo_parse_gids() will print a warning on error. */
 	user_ngids = sudo_parse_gids(groups, &user_gid, &user_gids);
 	if (user_ngids == -1)
