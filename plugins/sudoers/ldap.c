@@ -1847,12 +1847,10 @@ sudo_ldap_build_pass2(void)
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
-	len = asprintf(&filt, "%s%s(sudoUser=*)(sudoUser=%s*)%s%s",
-	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
+	len = asprintf(&filt, "(&%s(sudoUser=*)(sudoUser=%s*)%s)",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    query_netgroups ? "+" : "%:",
-	    ldap_conf.timed ? timebuffer : "",
-	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
+	    ldap_conf.timed ? timebuffer : "");
     }
     if (len == -1)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
