@@ -169,7 +169,6 @@ case "$osversion" in
 		with_linux_audit=true
 		with_pam_login=true
 		with_sssd=true
-		with_sudo_ldap_conf=true
 		;;
 	esac
 
