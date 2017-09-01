@@ -583,7 +583,7 @@ sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 }
 
 static int
-sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule, int group_matched)
+sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *sss_rule, int *group_matched)
 {
     const char *host = handle->ipa_host ? handle->ipa_host : user_runhost;
     const char *shost = handle->ipa_shost ? handle->ipa_shost : user_srunhost;
@@ -603,9 +603,17 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sudoRunAsUser: no result.");
+        if (*group_matched == UNSPEC) {
+            /* We haven't check for sudoRunAsGroup yet, check now. */
+	    i = handle->fn_get_values(sss_rule, "sudoRunAsGroup", &val_array);
+            if (i == 0) {
+                *group_matched = false;
+		handle->fn_free_values(val_array);
+            }
+        }
 	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED))
 	    debug_return_int(UNSPEC);
-	switch (group_matched) {
+	switch (*group_matched) {
 	case UNSPEC:
 	    /*
 	     * No runas user or group entries.  Match runas_default
@@ -755,7 +763,7 @@ sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 
     if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
 	group_matched = sudo_sss_check_runas_group(handle, rule);
-    user_matched = sudo_sss_check_runas_user(handle, rule, group_matched);
+    user_matched = sudo_sss_check_runas_user(handle, rule, &group_matched);
 
     debug_return_bool(group_matched != false && user_matched != false);
 }

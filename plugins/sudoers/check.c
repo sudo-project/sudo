@@ -127,6 +127,8 @@ check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 	    ret = true;
 	    break;
 	}
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: check user flag overrides time stamp", __func__);
 	/* FALLTHROUGH */
 
     default:
@@ -192,6 +194,9 @@ check_user(int validated, int mode)
      * If the user is not changing uid/gid, no need for a password.
      */
     if (!def_authenticate || user_is_exempt()) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s", __func__,
+	    !def_authenticate ? "authentication disabled" :
+	    "user exempt from authentication");
 	ret = true;
 	goto done;
     }
@@ -204,6 +209,8 @@ check_user(int validated, int mode)
 	if (runas_privs == NULL && runas_limitprivs == NULL)
 #endif
 	{
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: user running command as self", __func__);
 	    ret = true;
 	    goto done;
 	}

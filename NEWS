@@ -1,3 +1,30 @@
+What's new in Sudo 1.8.21p1
+
+ * On systems that support both PAM and SIGINFO, the main sudo
+   process will no longer forward SIGINFO to the command if the
+   signal was generated from the keyboard.  The command will have
+   already received SIGINFO since it is part of the same process
+   group so there's no need for sudo to forward it.  This is
+   consistent with the handling of SIGINT, SIGQUIT and SIGTSTP.
+   Bug #796
+
+ * If SUDOERS_SEARCH_FILTER in ldap.conf does not specify a value,
+   the LDAP search expression used when looking up netgroups and
+   non-Unix groups had a syntax error if a group plugin was not
+   specified.
+
+ * "sudo -U otheruser -l" will now have an exit value of 0 even
+   if "otheruser" has no sudo privileges.  The exit value when a
+   user attempts to lists their own privileges or when a command
+   is specified is unchanged.
+
+ * Fixed a regression introduced in sudo 1.8.21 where sudoreplay
+   playback would hang for I/O logs that contain terminal input.
+
+ * Sudo 1.8.18 contained an incomplete fix for the matching of
+   entries in the LDAP and SSSD backends when a sudoRunAsGroup is
+   specified but no sudoRunAsUser is present in the sudoRole.
+
 What's new in Sudo 1.8.21
 
  * The path that sudo uses to search for terminal devices can now

@@ -134,6 +134,9 @@ signal_cb_nopty(int signo, int what, void *v)
 	    sudo_ev_loopexit(ec->evbase);
 	}
 	debug_return;
+#ifdef SIGINFO
+    case SIGINFO:
+#endif
     case SIGINT:
     case SIGQUIT:
     case SIGTSTP:

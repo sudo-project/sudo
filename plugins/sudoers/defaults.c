@@ -238,6 +238,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
     int rc;
     debug_decl(parse_default_entry, SUDOERS_DEBUG_DEFAULTS)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%d %s=%s op=%d",
+	__func__, file, lineno, def->name, val ? val : "", op);
+
     /*
      * If no value specified, the boolean flag must be set for non-flags.
      * Only flags and tuples support boolean "true".
