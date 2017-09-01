@@ -806,6 +806,31 @@ read_timing_record(struct replay_closure *closure)
     debug_return_int(0);
 }
 
+/*
+ * Read next timing record.
+ * Exits the event loop on EOF, breaks out on error.
+ */
+static void
+next_timing_record(struct replay_closure *closure)
+{
+    debug_decl(next_timing_record, SUDO_DEBUG_UTIL)
+
+    switch (read_timing_record(closure)) {
+    case 0:
+	/* success */
+	break;
+    case 1:
+	/* EOF */
+	sudo_ev_loopexit(closure->evbase);
+	break;
+    default:
+	/* error */
+	sudo_ev_loopbreak(closure->evbase);
+	break;
+    }
+    debug_return;
+}
+
 static bool
 fill_iobuf(struct replay_closure *closure)
 {
@@ -851,30 +876,20 @@ delay_cb(int fd, int what, void *v)
     const struct timing_closure *timing = &closure->timing;
     debug_decl(delay_cb, SUDO_DEBUG_UTIL)
 
-    /* Delay done, read I/O log record or change window size. */
+    /* Check for window change event and resize as needed. */
     if (timing->idx == IOFD_TIMING) {
 	resize_terminal(timing->u.winsize.rows, timing->u.winsize.cols);
-	switch (read_timing_record(closure)) {
-	case 0:
-	    /* success */
-	    break;
-	case 1:
-	    /* EOF */
-	    sudo_ev_loopexit(closure->evbase);
-	    break;
-	default:
-	    /* error */
-	    sudo_ev_loopbreak(closure->evbase);
-	    break;
-	}
+	next_timing_record(closure);
 	debug_return;
     }
 
-    /* Even if we are not replaying, we still have to delay. */
-    if (timing->idx >= IOFD_MAX || io_log_files[timing->idx].fd.v == NULL)
+    /* If we are not replaying this stream, just read the next record. */
+    if (timing->idx >= IOFD_MAX || !io_log_files[timing->idx].enabled) {
+	next_timing_record(closure);
 	debug_return;
+    }
 
-    /* Enable write event. */
+    /* We are replaying this strean, enable write event. */
     if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
@@ -1046,7 +1061,11 @@ open_io_fd(char *path, int len, struct io_log_file *iol)
 #else
     iol->fd.f = fopen(path, "r");
 #endif
-    debug_return_int(iol->fd.v ? 0 : -1);
+    if (iol->fd.v == NULL) {
+	iol->enabled = false;
+	debug_return_int(-1);
+    }
+    debug_return_int(0);
 }
 
 /*
