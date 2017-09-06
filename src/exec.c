@@ -311,6 +311,9 @@ sudo_terminated(struct command_status *cstat)
     for (signo = 0; signo < NSIG; signo++) {
 	if (signal_pending(signo)) {
 	    switch (signo) {
+	    case SIGCHLD:
+		/* Ignore. */
+		break;
 	    case SIGTSTP:
 		/* Suspend below if not terminated. */
 		sigtstp = true;
