@@ -1149,13 +1149,19 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        connected to the user's tty, due to I/O redirection or
                        because the command is part of a pipeline, that input
                        is also captured and stored in a separate log file.
-                       For more information, see the _I_/_O _L_O_G _F_I_L_E_S section.
-                       This flag is _o_f_f by default.
+                       Anything sent to the standard input will be consumed,
+                       regardless of whether or not the command run via ssuuddoo
+                       is actually reading the standard input.  This may have
+                       unexpected results when using ssuuddoo in a shell script
+                       that expects to process the standard input.  For more
+                       information about I/O logging, see the _I_/_O _L_O_G _F_I_L_E_S
+                       section.  This flag is _o_f_f by default.
 
      log_output        If set, ssuuddoo will run the command in a pseudo-tty and
                        log all output that is sent to the screen, similar to
-                       the script(1) command.  For more information, see the
-                       _I_/_O _L_O_G _F_I_L_E_S section.  This flag is _o_f_f by default.
+                       the script(1) command.  For more information about I/O
+                       logging, see the _I_/_O _L_O_G _F_I_L_E_S section.  This flag is
+                       _o_f_f by default.
 
      log_year          If set, the four-digit year will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
@@ -1464,13 +1470,18 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        not needed, this option can be disabled to reduce the
                        load on the LDAP server.  This flag is _o_n by default.
 
-     use_pty           If set, ssuuddoo will run the command in a pseudo-pty even
-                       if no I/O logging is being gone.  A malicious program
-                       run under ssuuddoo could conceivably fork a background
-                       process that retains to the user's terminal device
-                       after the main program has finished executing.  Use of
-                       this option will make that impossible.  This flag is
-                       _o_f_f by default.
+     use_pty           If set, and ssuuddoo is running in a terminal, the command
+                       will be run in a pseudo-pty (even if no I/O logging is
+                       being done).  If the ssuuddoo process is not attached to a
+                       terminal, _u_s_e___p_t_y has no effect.
+
+                       A malicious program run under ssuuddoo may be capable of
+                       injecting injecting commands into the user's terminal
+                       or running a background process that retains access to
+                       the user's terminal device even after the main program
+                       has finished executing.  By running the command in a
+                       separate pseudo-pty, this attack is no longer possible.
+                       This flag is _o_f_f by default.
 
      user_command_timeouts
                        If set, the user may specify a timeout on the command
@@ -2328,11 +2339,11 @@ LLOOGG FFOORRMMAATT
 
 II//OO LLOOGG FFIILLEESS
      When I/O logging is enabled, ssuuddoo will run the command in a pseudo-tty
-     and log all user input and/or output.  I/O is logged to the directory
-     specified by the _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
-     unique session ID that is included in the ssuuddoo log line, prefixed with
-     "TSID=".  The _i_o_l_o_g___f_i_l_e option may be used to control the format of the
-     session ID.
+     and log all user input and/or output, depending on which options are
+     enabled.  I/O is logged to the directory specified by the _i_o_l_o_g___d_i_r
+     option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a unique session ID that is
+     included in the ssuuddoo log line, prefixed with "TSID=".  The _i_o_l_o_g___f_i_l_e
+     option may be used to control the format of the session ID.
 
      Each I/O log is stored in a separate directory that contains the
      following files:
@@ -2868,4 +2879,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                     August 4, 2017                     Sudo 1.8.21
+Sudo 1.8.21                    September 7, 2017                   Sudo 1.8.21

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "August 4, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "September 7, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2425,7 +2425,14 @@ will run the command in a pseudo-tty and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
-For more information, see the
+Anything sent to the standard input will be consumed, regardless of
+whether or not the command run via
+\fBsudo\fR
+is actually reading the standard input.
+This may have unexpected results when using
+\fBsudo\fR
+in a shell script that expects to process the standard input.
+For more information about I/O logging, see the
 \fII/O LOG FILES\fR
 section.
 This flag is
@@ -2439,7 +2446,7 @@ will run the command in a pseudo-tty and log all output that is sent
 to the screen, similar to the
 script(1)
 command.
-For more information, see the
+For more information about I/O logging, see the
 \fII/O LOG FILES\fR
 section.
 This flag is
@@ -3066,14 +3073,24 @@ This flag is
 by default.
 .TP 18n
 use_pty
-If set,
+If set, and
 \fBsudo\fR
-will run the command in a pseudo-pty even if no I/O logging is being gone.
+is running in a terminal, the command will be run in a pseudo-pty
+(even if no I/O logging is being done).
+If the
+\fBsudo\fR
+process is not attached to a terminal,
+\fIuse_pty\fR
+has no effect.
+.sp
 A malicious program run under
 \fBsudo\fR
-could conceivably fork a background process that retains to the user's
-terminal device after the main program has finished executing.
-Use of this option will make that impossible.
+may be capable of injecting injecting commands into the user's
+terminal or running a background process that retains access to the
+user's terminal device even after the main program has finished
+executing.
+By running the command in a separate pseudo-pty, this attack is
+no longer possible.
 This flag is
 \fIoff\fR
 by default.
@@ -4616,7 +4633,8 @@ word wrap will be disabled.
 .SH "I/O LOG FILES"
 When I/O logging is enabled,
 \fBsudo\fR
-will run the command in a pseudo-tty and log all user input and/or output.
+will run the command in a pseudo-tty and log all user input and/or output,
+depending on which options are enabled.
 I/O is logged to the directory specified by the
 \fIiolog_dir\fR
 option
