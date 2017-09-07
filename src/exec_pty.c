@@ -801,7 +801,7 @@ backchannel_cb(int fd, int what, void *v)
 	    /* Check command status. */
 	    switch (cstat.type) {
 	    case CMD_PID:
-		ec->cmnd_pid = ec->cstat->val;
+		ec->cmnd_pid = cstat.val;
 		sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
 		    ec->details->command, (int)ec->cmnd_pid);
 		break;
