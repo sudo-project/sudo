@@ -1149,7 +1149,7 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.
  */
-int
+bool
 exec_pty(struct command_details *details, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
@@ -1169,6 +1169,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (pty_setup(details->euid, user_details.tty)) {
 	if (ISSET(details->flags, CD_SET_UTMP))
 	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
+    } else if (TAILQ_EMPTY(&io_plugins)) {
+	/* Not logging I/O and didn't allocate a pty. */
+	debug_return_bool(false);
     }
 
     /*
@@ -1332,7 +1335,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /* Check for early termination or suspend signals before we fork. */
     if (sudo_terminated(cstat)) {
 	sigprocmask(SIG_SETMASK, &oset, NULL);
-	debug_return_int(0);
+	debug_return_int(true);
     }
 
     ec.monitor_pid = sudo_debug_fork();
@@ -1422,7 +1425,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     TAILQ_FOREACH_SAFE(sigfwd, &ec.sigfwd_list, entries, sigfwd_next) {
 	free(sigfwd);
     }
-    debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
+    debug_return_bool(true);
 }
 
 /*

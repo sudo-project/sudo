@@ -92,10 +92,10 @@ int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool
 char **disable_execute(char *envp[], const char *dso);
 
 /* exec_nopty.c */
-int exec_nopty(struct command_details *details, struct command_status *cstat);
+void exec_nopty(struct command_details *details, struct command_status *cstat);
 
 /* exec_pty.c */
-int exec_pty(struct command_details *details, struct command_status *cstat);
+bool exec_pty(struct command_details *details, struct command_status *cstat);
 void pty_cleanup(void);
 int pty_make_controlling(void);
 extern int io_fds[6];

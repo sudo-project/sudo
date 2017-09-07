@@ -380,34 +380,37 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     }
 
     /*
-     * If we have an I/O plugin or the policy plugin has requested one, we
-     * need to allocate a pty.
+     * Run the command in a new pty if there is an I/O plugin or the policy
+     * has requested a pty.  If /dev/tty is unavailable and no I/O plugin
+     * is configured, this returns false and we run the command without a pty.
      */
     if (!TAILQ_EMPTY(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
-	/*
-	 * Run the command in a new pty, wait for it to finish and
-	 * send the plugin the exit status.
-	 */
-	exec_pty(details, cstat);
-    } else if (!ISSET(details->flags, CD_SET_TIMEOUT|CD_SUDOEDIT) &&
+	if (exec_pty(details, cstat))
+	    goto done;
+    }
+
+    /*
+     * If we are not running the command in a pty, we were not invoked
+     * as sudoedit, there is no command timeout and there is no close
+     * function, just exec directly.  Only returns on error.
+     */
+    if (!ISSET(details->flags, CD_SET_TIMEOUT|CD_SUDOEDIT) &&
 	policy_plugin.u.policy->close == NULL) {
-	/*
-	 * If we are not running the command in a pty, we were not invoked
-	 * as sudoedit, there is no command timeout and there is no close
-	 * function, just exec directly.  Only returns on error.
-	 */
 	if (!sudo_terminated(cstat)) {
 	    exec_cmnd(details, -1);
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	}
-    } else {
-	/*
-	 * No pty but we need to wait for the command to finish to
-	 * send the plugin the exit status.
-	 */
-	exec_nopty(details, cstat);
+	goto done;
     }
+
+    /*
+     * Run the command in the existing tty (if any) and wait for it to finish.
+     */
+    exec_nopty(details, cstat);
+
+done:
+    /* The caller will run any plugin close functions. */
     debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
 }
 

@@ -340,7 +340,7 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
 /*
  * Execute a command and wait for it to finish.
  */
-int
+void
 exec_nopty(struct command_details *details, struct command_status *cstat)
 {
     struct exec_closure_nopty ec = { 0 };
@@ -371,7 +371,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     /* Check for early termination or suspend signals before we fork. */
     if (sudo_terminated(cstat)) {
 	sigprocmask(SIG_SETMASK, &oset, NULL);
-	debug_return_int(0);
+	debug_return;
     }
 
     ec.cmnd_pid = sudo_debug_fork();
@@ -436,7 +436,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 
     /* Free things up. */
     free_exec_closure_nopty(&ec);
-    debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
+    debug_return;
 }
 
 /*
