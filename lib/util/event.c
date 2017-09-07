@@ -153,7 +153,7 @@ signal_pipe_cb(int fd, int what, void *v)
     }
     if (nread == -1 && errno != EAGAIN) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "%s: error reading from signal pipe", __func__);
+	    "%s: error reading from signal pipe fd %d", __func__, fd);
     }
 
     /* Activate signal events. */
@@ -182,7 +182,7 @@ sudo_ev_base_init(struct sudo_event_base *base)
 	    "%s: unable to create signal pipe", __func__);
 	goto bad;
     }
-    sudo_ev_init(&base->signal_event, base->signal_pipe[1],
+    sudo_ev_init(&base->signal_event, base->signal_pipe[0],
 	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, base);
 
     debug_return_int(0);
@@ -341,7 +341,7 @@ sudo_ev_handler(int signo, siginfo_t *info, void *context)
 	signal_base->signal_caught = 1;
 
 	/* Wake up the other end of the pipe. */
-	ignore_result(write(signal_base->signal_pipe[0], &ch, 1));
+	ignore_result(write(signal_base->signal_pipe[1], &ch, 1));
     }
 }
 
@@ -622,7 +622,7 @@ rescan:
 	    if (errno == EINTR) {
 		/* Interrupted by signal, check for sigevents. */
 		if (base->signal_caught) {
-		    signal_pipe_cb(base->signal_pipe[1], SUDO_EV_READ, base);
+		    signal_pipe_cb(base->signal_pipe[0], SUDO_EV_READ, base);
 		    break;
 		}
 		continue;

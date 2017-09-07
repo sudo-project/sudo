@@ -238,9 +238,17 @@ static char *
 sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
+    struct sigaction sa, savechld;
     int pfd[2], status;
     pid_t child;
     debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
+
+    /* Set SIGCHLD handler to default since we call waitpid() below. */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGCHLD, &sa, &savechld);
 
     if (pipe(pfd) == -1)
 	sudo_fatal(U_("unable to create pipe"));
@@ -287,6 +295,9 @@ sudo_askpass(const char *askpass, const char *prompt)
 
     if (pass == NULL)
 	errno = EINTR;	/* make cancel button simulate ^C */
+
+    /* Restore saved SIGCHLD handler. */
+    (void) sigaction(SIGCHLD, &savechld, NULL);
 
     debug_return_str_masked(pass);
 }

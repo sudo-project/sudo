@@ -435,28 +435,32 @@ use_pam_prompt(const char *pam_prompt)
     size_t user_len;
     debug_decl(use_pam_prompt, SUDOERS_DEBUG_AUTH)
 
-    if (!def_passprompt_override) {
-	/* If sudo prompt matches "^Password: ?$", use PAM prompt. */
-	if (PROMPT_IS_PASSWORD(def_prompt))
-	    debug_return_bool(true);
+    /* Always use sudo prompt if passprompt_override is set. */
+    if (def_passprompt_override)
+	debug_return_bool(false);
 
-	/* If PAM prompt matches "^Password: ?$", use sudo prompt. */
-	if (PAM_PROMPT_IS_PASSWORD(pam_prompt))
+    /* If sudo prompt matches "^Password: ?$", use PAM prompt. */
+    if (PROMPT_IS_PASSWORD(def_prompt))
+	debug_return_bool(true);
+
+    /* If PAM prompt matches "^Password: ?$", use sudo prompt. */
+    if (PAM_PROMPT_IS_PASSWORD(pam_prompt))
+	debug_return_bool(false);
+
+    /*
+     * Some PAM modules use "^username's Password: ?$" instead of
+     * "^Password: ?" so check for that too.
+     */
+    user_len = strlen(user_name);
+    if (strncmp(pam_prompt, user_name, user_len) == 0) {
+	const char *cp = pam_prompt + user_len;
+	if (strncmp(cp, "'s Password:", 12) == 0 &&
+	    (cp[12] == '\0' || (cp[12] == ' ' && cp[13] == '\0')))
 	    debug_return_bool(false);
-
-	/*
-	 * Some PAM modules use "^username's Password: ?$" instead of
-	 * "^Password: ?" so check for that too.
-	 */
-	user_len = strlen(user_name);
-	if (strncmp(pam_prompt, user_name, user_len) == 0) {
-	    const char *cp = pam_prompt + user_len;
-	    if (strncmp(cp, "'s Password:", 12) == 0 &&
-		(cp[12] == '\0' || (cp[12] == ' ' && cp[13] == '\0')))
-		debug_return_bool(false);
-	}
     }
-    debug_return_bool(false);
+
+    /* Otherwise, use the PAM prompt. */
+    debug_return_bool(true);
 }
 
 /*
