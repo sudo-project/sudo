@@ -131,26 +131,32 @@ pty_cleanup(void)
  * Fills in io_fds[SFD_USERTTY], io_fds[SFD_MASTER], io_fds[SFD_SLAVE]
  * and slavename globals.
  */
-static void
+static bool
 pty_setup(uid_t uid, const char *tty)
 {
     debug_decl(pty_setup, SUDO_DEBUG_EXEC);
 
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR);
-    if (io_fds[SFD_USERTTY] != -1) {
-	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
-	    slavename, sizeof(slavename), uid))
-	    sudo_fatal(U_("unable to allocate pty"));
-	/* Add entry to utmp/utmpx? */
-	if (utmp_user != NULL)
-	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: %s fd %d, pty master fd %d, pty slave fd %d",
-	    __func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-	    io_fds[SFD_SLAVE]);
+    if (io_fds[SFD_USERTTY] == -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no %s, not allocating a pty",
+	    __func__, _PATH_TTY);
+	debug_return_bool(false);
     }
 
-    debug_return;
+    if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
+	slavename, sizeof(slavename), uid))
+	sudo_fatal(U_("unable to allocate pty"));
+
+    /* Add entry to utmp/utmpx? */
+    if (utmp_user != NULL)
+	utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: %s fd %d, pty master fd %d, pty slave fd %d",
+	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+	io_fds[SFD_SLAVE]);
+
+    debug_return_bool(true);
 }
 
 int
@@ -1160,10 +1166,10 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * Allocate a pty.
      */
-    if (ISSET(details->flags, CD_SET_UTMP))
-	utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
-    sudo_debug_printf(SUDO_DEBUG_INFO, "allocate pty for I/O logging");
-    pty_setup(details->euid, user_details.tty);
+    if (pty_setup(details->euid, user_details.tty)) {
+	if (ISSET(details->flags, CD_SET_UTMP))
+	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
+    }
 
     /*
      * We communicate with the monitor over a bi-directional pair of sockets.
