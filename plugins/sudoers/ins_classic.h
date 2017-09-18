@@ -22,7 +22,7 @@
      */
 
     "Wrong!  You cheating scum!",
-#ifdef PC_INSULTS
+#ifndef OFFENSIVE_INSULTS
     "And you call yourself a Rocket Scientist!",
 #else
     "No soap, honkie-lips.",

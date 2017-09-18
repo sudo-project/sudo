@@ -288,6 +288,16 @@ AC_ARG_WITH(alertmail, [AS_HELP_STRING([--with-alertmail], [deprecated])],
 		;;
 esac])
 
+AC_ARG_WITH(pc-insults, [AS_HELP_STRING([--with-pc-insults], [deprecated])],
+[case $with_pc_insults in
+    yes)	enable_offensive_insults=no
+		AC_MSG_NOTICE([--with-pc-insults option deprecated, it is now the default])
+		;;
+    no)		enable_offensive_insults=yes
+		AC_MSG_NOTICE([--without-pc-insults option deprecated, use --enable-offensive-insults])
+		;;
+esac])
+
 dnl
 dnl Options for --with
 dnl
@@ -1142,15 +1152,6 @@ AC_ARG_WITH(ldap-secret-file, [AS_HELP_STRING([--with-ldap-secret-file], [path t
 test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
 SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret file])
 
-AC_ARG_WITH(pc-insults, [AS_HELP_STRING([--with-pc-insults], [replace politically incorrect insults with less offensive ones])],
-[case $with_pc_insults in
-    yes)	AC_DEFINE(PC_INSULTS)
-		;;
-    no)		;;
-    *)		AC_MSG_ERROR(["--with-pc-insults does not take an argument."])
-		;;
-esac])
-
 dnl include all insult sets on one line
 if test "$insults" = "on"; then
     AC_MSG_CHECKING(which insult sets to include)
@@ -1575,6 +1576,13 @@ AC_ARG_ENABLE(timestamp-type,
   esac
 ])
 AC_DEFINE_UNQUOTED(TIMESTAMP_TYPE, $timestamp_type)
+
+AC_ARG_ENABLE(offensive_insults,
+[AS_HELP_STRING([--enable-offensive-insults], [Enable potentially offensive sudo insults.])],
+[], [enable_offensive_insults=no])
+if test "$enable_offensive_insults" = "yes"; then
+    AC_DEFINE(OFFENSIVE_INSULTS)
+fi
 
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
@@ -4449,7 +4457,7 @@ AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM ses
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(TIMESTAMP_TYPE, [Define to global, ppid or tty to set the default timestamp record type.])
-AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
+AH_TEMPLATE(OFFENSIVE_INSULTS, [Define to 1 to include offensive insults from the classic version of sudo.])
 AH_TEMPLATE(PREFER_PORTABLE_GETCWD, [Define to 1 to enable replacement getcwd if system getcwd is broken.])
 AH_TEMPLATE(SECURE_PATH, [A colon-separated list of directories to override the user's PATH with.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])

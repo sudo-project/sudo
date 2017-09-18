@@ -360,6 +360,10 @@ Optional features:
         Specify the path to the SSSD shared library, which is loaded
         at run-time.
 
+  --enable-offensive-insults
+        Enable potentially offensive sudo insults from the classic
+        version of sudo.
+
 Operating system-specific options:
   --disable-setreuid
         Disable use of the setreuid() function for operating systems
@@ -815,9 +819,6 @@ Options that set runtime-changeable default values:
 	Number of tries a user gets to enter his/her password before sudo logs
 	the failure and exits.  The default is 3.
 	Sudoers option: passwd_tries
-
-  --with-pc-insults
-	Replace politically incorrect insults with less objectionable ones.
 
   --with-runas-default=USER
 	The default user to run commands as if the -u flag is not specified

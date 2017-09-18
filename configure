@@ -851,6 +851,7 @@ ac_user_opts='
 enable_option_checking
 with_otp_only
 with_alertmail
+with_pc_insults
 with_devel
 with_CC
 with_rpath
@@ -925,7 +926,6 @@ with_nsswitch
 with_ldap
 with_ldap_conf_file
 with_ldap_secret_file
-with_pc_insults
 with_secure_path
 with_interfaces
 with_askpass
@@ -964,6 +964,7 @@ enable_devsearch
 with_selinux
 enable_sasl
 enable_timestamp_type
+enable_offensive_insults
 enable_gss_krb5_ccache_name
 enable_shared
 enable_static
@@ -1650,6 +1651,8 @@ Optional Features:
   --enable-sasl           Enable/disable LDAP SASL support
   --timestamp-type=TYPE   Set the default time stamp record type to global,
                           ppid or tty.
+  --enable-offensive-insults
+                          Enable potentially offensive sudo insults.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -1668,6 +1671,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-otp-only         deprecated
   --with-alertmail        deprecated
+  --with-pc-insults       deprecated
   --with-devel            add development options
   --with-CC               C compiler to use
   --with-rpath            deprecated, use --disable-rpath
@@ -1749,8 +1753,6 @@ Optional Packages:
   --with-ldap[=DIR]       enable LDAP support
   --with-ldap-conf-file   path to LDAP configuration file
   --with-ldap-secret-file path to LDAP secret password file
-  --with-pc-insults       replace politically incorrect insults with less
-                          offensive ones
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-askpass=PATH     Fully qualified pathname of askpass helper
@@ -4450,6 +4452,22 @@ fi
 
 
 
+# Check whether --with-pc-insults was given.
+if test "${with_pc_insults+set}" = set; then :
+  withval=$with_pc_insults; case $with_pc_insults in
+    yes)	enable_offensive_insults=no
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: --with-pc-insults option deprecated, it is now the default" >&5
+$as_echo "$as_me: --with-pc-insults option deprecated, it is now the default" >&6;}
+		;;
+    no)		enable_offensive_insults=yes
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: --without-pc-insults option deprecated, use --enable-offensive-insults" >&5
+$as_echo "$as_me: --without-pc-insults option deprecated, use --enable-offensive-insults" >&6;}
+		;;
+esac
+fi
+
+
+
 
 # Check whether --with-devel was given.
 if test "${with_devel+set}" = set; then :
@@ -5862,20 +5880,6 @@ cat >>confdefs.h <<EOF
 EOF
 
 
-
-# Check whether --with-pc-insults was given.
-if test "${with_pc_insults+set}" = set; then :
-  withval=$with_pc_insults; case $with_pc_insults in
-    yes)	$as_echo "#define PC_INSULTS 1" >>confdefs.h
-
-		;;
-    no)		;;
-    *)		as_fn_error $? "\"--with-pc-insults does not take an argument.\"" "$LINENO" 5
-		;;
-esac
-fi
-
-
 if test "$insults" = "on"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking which insult sets to include" >&5
 $as_echo_n "checking which insult sets to include... " >&6; }
@@ -6774,6 +6778,18 @@ cat >>confdefs.h <<_ACEOF
 #define TIMESTAMP_TYPE $timestamp_type
 _ACEOF
 
+
+# Check whether --enable-offensive_insults was given.
+if test "${enable_offensive_insults+set}" = set; then :
+  enableval=$enable_offensive_insults;
+else
+  enable_offensive_insults=no
+fi
+
+if test "$enable_offensive_insults" = "yes"; then
+    $as_echo "#define OFFENSIVE_INSULTS 1" >>confdefs.h
+
+fi
 
 # Check whether --enable-gss_krb5_ccache_name was given.
 if test "${enable_gss_krb5_ccache_name+set}" = set; then :
