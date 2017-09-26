@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 7, 2017
+.Dd September 26, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -466,7 +466,11 @@ and
 variables in
 .Pa /etc/login.conf
 are also applied.
-All other environment variables are removed.
+All other environment variables are removed unless permitted by
+.Em env_keep
+or
+.Em env_check ,
+described above.
 .Pp
 Finally, the
 .Em restricted_env_file

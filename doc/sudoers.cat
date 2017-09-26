@@ -186,7 +186,8 @@ DDEESSCCRRIIPPTTIIOONN
      (and Linux systems without PAM), the contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t are
      also included.  On BSD systems, if the _u_s_e___l_o_g_i_n_c_l_a_s_s flag is enabled,
      the _p_a_t_h and _s_e_t_e_n_v variables in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f are also applied.  All
-     other environment variables are removed.
+     other environment variables are removed unless permitted by _e_n_v___k_e_e_p or
+     _e_n_v___c_h_e_c_k, described above.
 
      Finally, the _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e and _e_n_v___f_i_l_e files are applied, if
      present.  The variables in _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e are applied first and are
@@ -2879,4 +2880,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                    September 7, 2017                   Sudo 1.8.21
+Sudo 1.8.21                   September 26, 2017                   Sudo 1.8.21

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "September 7, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "September 26, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -480,7 +480,11 @@ and
 variables in
 \fI/etc/login.conf\fR
 are also applied.
-All other environment variables are removed.
+All other environment variables are removed unless permitted by
+\fIenv_keep\fR
+or
+\fIenv_check\fR,
+described above.
 .PP
 Finally, the
 \fIrestricted_env_file\fR
