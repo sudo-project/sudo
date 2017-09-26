@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
@@ -1159,6 +1160,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     struct plugin_container *plugin;
     sigset_t set, oset;
     struct sigaction sa;
+    struct stat sb;
     pid_t ppgrp;
     int sv[2];
     debug_decl(exec_pty, SUDO_DEBUG_EXEC)
@@ -1259,6 +1261,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, not logging");
+	    if (fstat(STDIN_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+		pipeline = true;
 	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
 	    if (io_fds[SFD_STDIN] == -1)
 		sudo_fatal("dup");
@@ -1278,6 +1282,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, not logging");
+	    if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+		pipeline = true;
 	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
 	    if (io_fds[SFD_STDOUT] == -1)
 		sudo_fatal("dup");
@@ -1297,6 +1303,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, not logging");
+	    if (fstat(STDERR_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+		pipeline = true;
 	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
 	    if (io_fds[SFD_STDERR] == -1)
 		sudo_fatal("dup");
