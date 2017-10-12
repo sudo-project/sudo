@@ -187,16 +187,19 @@ DDEESSCCRRIIPPTTIIOONN
      --ii, ----llooggiinn
                  Run the shell specified by the target user's password
                  database entry as a login shell.  This means that login-
-                 specific resource files such as _._p_r_o_f_i_l_e or _._l_o_g_i_n will be
-                 read by the shell.  If a command is specified, it is passed
-                 to the shell for execution via the shell's --cc option.  If no
-                 command is specified, an interactive shell is executed.  ssuuddoo
-                 attempts to change to that user's home directory before
-                 running the shell.  The command is run with an environment
-                 similar to the one a user would receive at log in.  The
-                 _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t section in the sudoers(4) manual
-                 documents how the --ii option affects the environment in which
-                 a command is run when the _s_u_d_o_e_r_s policy is in use.
+                 specific resource files such as _._p_r_o_f_i_l_e, _._b_a_s_h___p_r_o_f_i_l_e or
+                 _._l_o_g_i_n will be read by the shell.  If a command is specified,
+                 it is passed to the shell for execution via the shell's --cc
+                 option.  If no command is specified, an interactive shell is
+                 executed.  ssuuddoo attempts to change to that user's home
+                 directory before running the shell.  The command is run with
+                 an environment similar to the one a user would receive at log
+                 in.  Note that most shells behave differently when a command
+                 is specified as compared to an interactive session; consult
+                 the shell's manual for details.  The _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t
+                 section in the sudoers(4) manual documents how the --ii option
+                 affects the environment in which a command is run when the
+                 _s_u_d_o_e_r_s policy is in use.
 
      --KK, ----rreemmoovvee--ttiimmeessttaammpp
                  Similar to the --kk option, except that it removes the user's
@@ -289,6 +292,9 @@ DDEESSCCRRIIPPTTIIOONN
                  password database entry.  If a command is specified, it is
                  passed to the shell for execution via the shell's --cc option.
                  If no command is specified, an interactive shell is executed.
+                 Note that most shells behave differently when a command is
+                 specified as compared to an interactive session; consult the
+                 shell's manual for details.
 
      --tt _t_y_p_e, ----ttyyppee=_t_y_p_e
                  Run the command with an SELinux security context that
@@ -638,4 +644,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                     August 2, 2017                     Sudo 1.8.21
+Sudo 1.8.21                    October 12, 2017                    Sudo 1.8.21

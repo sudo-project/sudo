@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "August 2, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "October 12, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -385,7 +385,8 @@ option to list a user's privileges for the remote host.
 Run the shell specified by the target user's password database entry
 as a login shell.
 This means that login-specific resource files such as
-\fI.profile\fR
+\fI.profile\fR,
+\fI.bash_profile\fR
 or
 \fI.login\fR
 will be read by the shell.
@@ -399,6 +400,9 @@ attempts to change to that user's home directory before running the
 shell.
 The command is run with an environment similar to the one
 a user would receive at log in.
+Note that most shells behave differently when a command is specified
+as compared to an interactive session; consult the shell's manual
+for details.
 The
 \fICommand environment\fR
 section in the
@@ -556,6 +560,9 @@ via the shell's
 \fB\-c\fR
 option.
 If no command is specified, an interactive shell is executed.
+Note that most shells behave differently when a command is specified
+as compared to an interactive session; consult the shell's manual
+for details.
 .TP 12n
 \fB\-t\fR \fItype\fR, \fB\--type\fR=\fItype\fR
 Run the command with an SELinux security context that includes
