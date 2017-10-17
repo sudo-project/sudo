@@ -38,137 +38,212 @@ my %UA;
 my %HA;
 my %CA;
 my $base=$ENV{SUDOERS_BASE} or die "$0: Container SUDOERS_BASE undefined\n";
-my @options=();
+my @options = ();
 my $notBefore;
 my $notAfter;
 
-my $did_defaults=0;
+my $did_defaults = 0;
 my $order = 0;
 my %seen_users;
+my @sudoersdirs;
 
-# parse sudoers one line at a time
-while (<>){
+# Parsing is now through callbacks reading @ARGV or STDIN
+sub parse_sudoers_line {
+    my $line = shift;
 
-  # remove comment
-  s/#.*//;
+    # remove comment
+    $line =~ s/#.*//;
 
-  # line continuation
-  $_.=<> while s/\\\s*$//s;
+    # cleanup newline
+    chomp $line;
 
-  # cleanup newline
-  chomp;
+    # ignore blank lines
+    return if $line =~ /^\s*$/;
 
-  # ignore blank lines
-  next if /^\s*$/;
+    if ($line =~ s/^Defaults\s+//) {
+	$line =~ s/\s+$//; # remove trailing whitespace
+	# remove spaces between '!', '=', '+=' and '-='
+	$line =~ s/^(\S+)\s*([\+-]?=)\s*(\S.*)$/$1$2$3/ unless $line =~ s/^!\s*(\S.*)$/!$1/;
+	push @options, $line;
+    } elsif ($line =~ /^(\S+)\s+([^=]+)=\s*(.*)/) {
+	# Aliases or Definitions
+	my ($p1, $p2, $p3) = ($1, $2, $3);
+	$p2 =~ s/\s+$//; # remove trailing whitespace
+	$p3 =~ s/\s+$//; # remove trailing whitespace
 
-  if (s/^Defaults\s+//) {
-    s/\s+$//; # remove trailing whitespace
-    # remove spaces between '!', '=', '+=' and '-='
-    s/^(\S+)\s*([\+-]?=)\s*(\S.*)$/$1$2$3/ unless s/^!\s*(\S.*)$/!$1/;
-    push @options, $_;
-  } elsif (/^(\S+)\s+([^=]+)=\s*(.*)/) {
-    # Aliases or Definitions
-    my ($p1,$p2,$p3)=($1,$2,$3);
-    $p2=~s/\s+$//; # remove trailing whitespace
-    $p3=~s/\s+$//; # remove trailing whitespace
-
-    if ($p1 eq "User_Alias") {
-      $UA{$p2}=$p3;
-    } elsif ($p1 eq "Runas_Alias") {
-      $RA{$p2}=$p3;
-    } elsif ($p1 eq "Host_Alias") {
-      $HA{$p2}=$p3;
-    } elsif ($p1 eq "Cmnd_Alias") {
-      $CA{$p2}=$p3;
+	if ($p1 eq "User_Alias") {
+	    $UA{$p2}=$p3;
+	} elsif ($p1 eq "Runas_Alias") {
+	    $RA{$p2}=$p3;
+	} elsif ($p1 eq "Host_Alias") {
+	    $HA{$p2}=$p3;
+	} elsif ($p1 eq "Cmnd_Alias") {
+	    $CA{$p2}=$p3;
+	} else {
+	    if (!$did_defaults++){
+		# do this once
+		print "dn: cn=defaults,$base\n";
+		print "objectClass: top\n";
+		print "objectClass: sudoRole\n";
+		print "cn: defaults\n";
+		print "description: Default sudoOption's go here\n";
+		print "sudoOption: $_\n" foreach @options;
+		printf "sudoOrder: %d\n", ++$order;
+		print "\n";
+	    }
+	    # Definition
+	    my @users = split(/\s*,\s*/, $p1);
+	    my $username = $users[0];
+	    if ($seen_users{$username}) {
+		$seen_users{$username} += 1;
+		$username = sprintf("%s_%s", $username, $seen_users{$username});
+	    } else {
+		$seen_users{$username} = 1;
+	    }
+	    my @hosts = split(/\s*,\s*/, $p2);
+	    my @cmds = split(/\s*,\s*/, $p3);
+	    @options=();
+	    undef $notBefore;
+	    undef $notAfter;
+	    print "dn: cn=$username,$base\n";
+	    print "objectClass: top\n";
+	    print "objectClass: sudoRole\n";
+	    print "cn: $username\n";
+	    # will clobber options
+	    print "sudoUser: $_\n"   foreach expand(\%UA,@users);
+	    print "sudoHost: $_\n"   foreach expand(\%HA,@hosts);
+	    foreach (@cmds) {
+		if (s/^\(([^\)]+)\)\s*//) {
+		    my @runas = split(/:\s*/, $1);
+		    if (defined($runas[0])) {
+			print "sudoRunAsUser: $_\n" foreach expand(\%RA, split(/,\s*/, $runas[0]));
+		    }
+		    if (defined($runas[1])) {
+			print "sudoRunAsGroup: $_\n" foreach expand(\%RA, split(/,\s*/, $runas[1]));
+		    }
+		}
+	    }
+	    print "sudoCommand: $_\n" foreach expand(\%CA,@cmds);
+	    print "sudoNotBefore: $notBefore\n" if defined($notBefore);
+	    print "sudoNotAfter: $notAfter\n" if defined($notAfter);
+	    print "sudoOption: $_\n" foreach @options;
+	    printf "sudoOrder: %d\n", ++$order;
+	    print "\n";
+	}
     } else {
-      if (!$did_defaults++){
-        # do this once
-        print "dn: cn=defaults,$base\n";
-        print "objectClass: top\n";
-        print "objectClass: sudoRole\n";
-        print "cn: defaults\n";
-        print "description: Default sudoOption's go here\n";
-        print "sudoOption: $_\n" foreach @options;
-        printf "sudoOrder: %d\n", ++$order;
-        print "\n";
-      }
-      # Definition
-      my @users=split /\s*,\s*/,$p1;
-      my $username = $users[0];
-      if ($seen_users{$username}) {
-          $seen_users{$username} += 1;
-          $username = sprintf("%s_%s", $username, $seen_users{$username});
-      } else {
-          $seen_users{$username} = 1;
-      }
-      my @hosts=split /\s*,\s*/,$p2;
-      my @cmds= split /\s*,\s*/,$p3;
-      @options=();
-      undef $notBefore;
-      undef $notAfter;
-      print "dn: cn=$username,$base\n";
-      print "objectClass: top\n";
-      print "objectClass: sudoRole\n";
-      print "cn: $username\n";
-      # will clobber options
-      print "sudoUser: $_\n"   foreach expand(\%UA,@users);
-      print "sudoHost: $_\n"   foreach expand(\%HA,@hosts);
-      foreach (@cmds) {
-        if (s/^\(([^\)]+)\)\s*//) {
-          my @runas = split(/:\s*/, $1);
-          if (defined($runas[0])) {
-            print "sudoRunAsUser: $_\n" foreach expand(\%RA, split(/,\s*/, $runas[0]));
-          }
-          if (defined($runas[1])) {
-            print "sudoRunAsGroup: $_\n" foreach expand(\%RA, split(/,\s*/, $runas[1]));
-          }
-        }
-      }
-      print "sudoCommand: $_\n" foreach expand(\%CA,@cmds);
-      print "sudoNotBefore: $notBefore\n" if defined($notBefore);
-      print "sudoNotAfter: $notAfter\n" if defined($notAfter);
-      print "sudoOption: $_\n" foreach @options;
-      printf "sudoOrder: %d\n", ++$order;
-      print "\n";
+	warn "parse error: $line\n";
     }
-  } else {
-    print "parse error: $_\n";
-  }
 }
 
-#
-# recursively expand hash elements
-sub expand{
-  my $ref=shift;
-  my @a=();
+# Recursively expand hash elements
+sub expand {
+    my $ref=shift;
+    my @a=();
 
-  # preen the line a little
-  foreach (@_){
-    # Convert upper case command options
-    s/TIMEOUT=(\S+)\s*// && push @options,"timeout=$1";
-    s/ROLE=(\S+)\s*// && push @options,"role=$1";
-    s/TYPE=(\S+)\s*// && push @options,"type=$1";
-    s/PRIVS=(\S+)\s*// && push @options,"privs=$1";
-    s/LIMITPRIVS=(\S+)\s*// && push @options,"limitprivs=$1";
-    s/NOTBEFORE=(\S+)\s*// &&  do { $notBefore=$1 };
-    s/NOTAFTER=(\S+)\s*// && do { $notAfter=$1 };
+    # preen the line a little
+    foreach (@_) {
+	# Convert upper case command options
+	s/TIMEOUT=(\S+)\s*// && push @options,"timeout=$1";
+	s/ROLE=(\S+)\s*// && push @options,"role=$1";
+	s/TYPE=(\S+)\s*// && push @options,"type=$1";
+	s/PRIVS=(\S+)\s*// && push @options,"privs=$1";
+	s/LIMITPRIVS=(\S+)\s*// && push @options,"limitprivs=$1";
+	s/NOTBEFORE=(\S+)\s*// &&  do { $notBefore=$1 };
+	s/NOTAFTER=(\S+)\s*// && do { $notAfter=$1 };
 
-    # Convert command tags to options
-    s/NOPASSWD:\s*// && push @options,"!authenticate";
-    s/PASSWD:\s*// && push @options,"authenticate";
-    s/NOEXEC:\s*// && push @options,"noexec";
-    s/EXEC:\s*// && push @options,"!noexec";
-    s/SETENV:\s*// && push @options,"setenv";
-    s/NOSETENV:\s*// && push @options,"!setenv";
-    s/LOG_INPUT:\s*// && push @options,"log_input";
-    s/NOLOG_INPUT:\s*// && push @options,"!log_input";
-    s/LOG_OUTPUT:\s*// && push @options,"log_output";
-    s/NOLOG_OUTPUT:\s*// && push @options,"!log_output";
-    s/[[:upper:]]+://; # silently remove other tags
-    s/\s+$//; # right trim
-  }
+	# Convert command tags to options
+	s/NOPASSWD:\s*// && push @options,"!authenticate";
+	s/PASSWD:\s*// && push @options,"authenticate";
+	s/NOEXEC:\s*// && push @options,"noexec";
+	s/EXEC:\s*// && push @options,"!noexec";
+	s/SETENV:\s*// && push @options,"setenv";
+	s/NOSETENV:\s*// && push @options,"!setenv";
+	s/LOG_INPUT:\s*// && push @options,"log_input";
+	s/NOLOG_INPUT:\s*// && push @options,"!log_input";
+	s/LOG_OUTPUT:\s*// && push @options,"log_output";
+	s/NOLOG_OUTPUT:\s*// && push @options,"!log_output";
+	s/[[:upper:]]+://; # silently remove other tags
+	s/\s+$//; # right trim
+    }
 
-  # do the expanding
-  push @a,$ref->{$_} ? expand($ref,split /\s*,\s*/,$ref->{$_}):$_ foreach @_;
-  @a;
+    # do the expanding
+    push @a,$ref->{$_} ? expand($ref,split /\s*,\s*/,$ref->{$_}):$_ foreach @_;
+    @a;
+}
+
+# Parse sudoers, expanding #include and #includedir directives
+sub scan_sudoers_fh {
+    my ($filehandle, $callback) = @_;
+
+    while (<$filehandle>) {
+        if (/^#include\s+(.+?)\s*$/){
+            scan_sudoers_filename($1, 0, $callback);
+        } elsif (/^#includedir\s+(.+?)\s*$/){
+            scan_sudoers_dirname($1, $callback);
+        } else {
+            $callback->($_);
+        }
+    }
+}
+
+# Read from #include file
+sub scan_sudoers_filename {
+    my ($filename, $quiet, $callback) = @_;
+
+    # Keep track of the parent dir of sudoers for relative includes
+    if ($filename =~ m:^(/.*/):) {
+	push(@sudoersdirs, $1);
+    } elsif ($#sudoersdirs != -1) {
+	$filename = $sudoersdirs[$#sudoersdirs] . "/$filename";
+	push(@sudoersdirs, $sudoersdirs[$#sudoersdirs]);
+    }
+    if (open(my $fh, '<', $filename)) {
+	scan_sudoers_fh($fh, $callback);
+    } else {
+	warn "unable to open $filename: $!\n" unless $quiet;
+    }
+    pop(@sudoersdirs) unless $#sudoersdirs == -1;
+}
+
+# Read from #includedir directory
+sub scan_sudoers_dirname {
+    my ($dirname, $callback) = @_;
+
+    # Ignore a missing include dir
+    if (opendir(my $dh, $dirname)) {
+	while (readdir $dh) {
+	    # Ignore files that end in '~' or have a '.' in them
+	    next if /\./ || /~$/;
+	    scan_sudoers_filename("$dirname/$_", 1, $callback);
+	}
+	closedir($dh);
+    }
+}
+
+# Returns a sub that reads lines until continuations,
+# then it invokes the callback to do the parsing
+sub make_continuation_handler {
+    my ($callback) = @_;
+
+    my $buffer = '';
+    return sub {
+        my ($line) = @_;
+
+        if ($line =~ s/\\\s*$//) {
+            # line continuation
+            $buffer .= $line;
+        } else {
+            # parse buffer
+            $callback->($buffer . $line);
+            # empty buffer
+            $buffer='';
+        }
+    };
+}
+
+my $parser_cb = make_continuation_handler(\&parse_sudoers_line);
+if (@ARGV) {
+    scan_sudoers_filename($_, 0, $parser_cb) for @ARGV;
+} else {
+    scan_sudoers_fh(\*STDIN, $parser_cb);
 }
