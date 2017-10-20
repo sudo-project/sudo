@@ -79,6 +79,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *remhost = NULL;
+    bool uid_set = false, gid_set = false;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN)
 
@@ -292,6 +293,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
+	    uid_set = true;
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
@@ -301,6 +303,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
+	    gid_set = true;
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
@@ -354,7 +357,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
-	    sudo_user.sid = (pid_t) sudo_strtoid(p, NULL, NULL, &errstr);
+	    user_sid = (pid_t) sudo_strtoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -371,6 +374,25 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
     }
+
+    /* User name, user ID, group ID and host name must be specified. */
+    if (user_name == NULL) {
+	sudo_warnx(U_("user name not set by sudo front-end"));
+	goto bad;
+    }
+    if (!uid_set) {
+	sudo_warnx(U_("user ID not set by sudo front-end"));
+	goto bad;
+    }
+    if (!gid_set) {
+	sudo_warnx(U_("group ID not set by sudo front-end"));
+	goto bad;
+    }
+    if (user_host == NULL) {
+	sudo_warnx(U_("host name not set by sudo front-end"));
+	goto bad;
+    }
+
     if ((user_runhost = strdup(remhost ? remhost : user_host)) == NULL)
 	goto oom;
     if ((p = strchr(user_runhost, '.')) != NULL) {
