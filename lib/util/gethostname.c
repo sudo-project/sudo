@@ -42,7 +42,7 @@ sudo_gethostname_v1(void)
 
     hname = malloc(host_name_max + 1);
     if (hname != NULL) {
-	if (gethostname(hname, host_name_max + 1) == 0) {
+	if (gethostname(hname, host_name_max + 1) == 0 && *hname != '\0') {
 	    /* Old gethostname() may not NUL-terminate if there is no room. */
 	    hname[host_name_max] = '\0';
 	} else {
