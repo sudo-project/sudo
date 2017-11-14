@@ -427,7 +427,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     case false:
 	/* Note: log_denial() calls audit for us. */
 	if (!ISSET(validated, VALIDATE_SUCCESS)) {
-	    if (!log_denial(validated, false))
+	    /* Only display a denial message if no password was read. */
+	    if (!log_denial(validated, def_passwd_tries <= 0))
 		goto done;
 	}
 	goto bad;
