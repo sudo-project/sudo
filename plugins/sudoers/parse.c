@@ -182,14 +182,16 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 		if (hostlist_matches(sudo_user.pw, &priv->hostlist) != ALLOW)
 		    continue;
 		TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+		    if ((pwcheck == any && cs->tags.nopasswd == true) ||
+			(pwcheck == all && cs->tags.nopasswd != true))
+			nopass = cs->tags.nopasswd;
+		    if (match == ALLOW)
+			continue;
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
 			cmnd_matches(cs->cmnd) == ALLOW)
 			    match = ALLOW;
-		    if ((pwcheck == any && cs->tags.nopasswd == true) ||
-			(pwcheck == all && cs->tags.nopasswd != true))
-			nopass = cs->tags.nopasswd;
 		}
 	    }
 	}
