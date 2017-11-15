@@ -3320,12 +3320,13 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		(pwcheck == all && doauth != true)) {
 		doauth = !!sudo_ldap_check_bool(ld, entry, "authenticate");
 	    }
+	    if (matched == true)
+		continue;
 	    /* Only check the command when listing another user. */
 	    if (user_uid == 0 || list_pw == NULL ||
 		user_uid == list_pw->pw_uid ||
 		sudo_ldap_check_command(ld, entry, NULL) == true) {
 		matched = true;
-		break;
 	    }
 	}
 	if (matched == true || user_uid == 0) {

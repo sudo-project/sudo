@@ -1321,12 +1321,13 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		    (pwcheck == all && doauth != true)) {
 		    doauth = !!sudo_sss_check_bool(handle, rule, "authenticate");
 		}
+		if (matched == true)
+		    continue;
 		/* Only check the command when listing another user. */
 		if (user_uid == 0 || list_pw == NULL ||
 		    user_uid == list_pw->pw_uid ||
 		    sudo_sss_check_command(handle, rule, NULL) == true) {
 		    matched = true;
-		    break;
 		}
 	    }
 	}
