@@ -202,6 +202,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    SET(validated, FLAG_CHECK_USER);
 	else if (nopass == true)
 	    SET(validated, FLAG_NOPASSWD);
+	else
+	    CLR(validated, FLAG_NOPASSWD);
 	debug_return_int(validated);
     }
 

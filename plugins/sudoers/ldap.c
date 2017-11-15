@@ -3340,6 +3340,8 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		case any:
 		    if (doauth == false)
 			SET(ret, FLAG_NOPASSWD);
+		    else
+			CLR(ret, FLAG_NOPASSWD);
 		    break;
 		default:
 		    break;
