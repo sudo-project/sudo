@@ -541,6 +541,7 @@ done:
 
 overflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    free(buf);
     debug_return_int(-1);
 }
 #else
@@ -1663,7 +1664,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 {
     char *buf, timebuffer[TIMEFILTER_LENGTH + 1], gidbuf[MAX_UID_T_LEN + 1];
     struct ldap_netgroup_list netgroups;
-    struct ldap_netgroup *ng, *nextng;
+    struct ldap_netgroup *ng = NULL;
     struct gid_list *gidlist;
     struct group_list *grlist;
     struct group *grp;
@@ -1713,11 +1714,11 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	    }
 	} else {
 	    /* sudo_netgroup_lookup() failed, clean up. */
-	    STAILQ_FOREACH_SAFE(ng, &netgroups, entries, nextng) {
+	    while ((ng = STAILQ_FIRST(&netgroups)) != NULL) {
+		STAILQ_REMOVE_HEAD(&netgroups, entries);
 		free(ng->name);
 		free(ng);
 	    }
-	    STAILQ_INIT(&netgroups);
 	}
     }
 
@@ -1726,7 +1727,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	sz += TIMEFILTER_LENGTH;
     if ((buf = malloc(sz)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_str(NULL);
+	goto bad;
     }
     *buf = '\0';
 
@@ -1787,7 +1788,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	sudo_gr_delref(grp);
 
     /* Add netgroups (if any), freeing the list as we go. */
-    STAILQ_FOREACH_SAFE(ng, &netgroups, entries, nextng) {
+    while ((ng = STAILQ_FIRST(&netgroups)) != NULL) {
+	STAILQ_REMOVE_HEAD(&netgroups, entries);
 	CHECK_STRLCAT(buf, "(sudoUser=+", sz);
 	CHECK_LDAP_VCAT(buf, ng->name, sz);
 	CHECK_STRLCAT(buf, ")", sz);
@@ -1801,10 +1803,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     /* Add the time restriction, or simply end the global OR. */
     if (ldap_conf.timed) {
 	CHECK_STRLCAT(buf, ")", sz); /* closes the global OR */
-	if (!sudo_ldap_timefilter(timebuffer, sizeof(timebuffer))) {
-	    free(buf);
-	    debug_return_str(NULL);
-	}
+	if (!sudo_ldap_timefilter(timebuffer, sizeof(timebuffer)))
+	    goto bad;
 	CHECK_STRLCAT(buf, timebuffer, sz);
     } else if (ldap_conf.search_filter) {
 	CHECK_STRLCAT(buf, ")", sz); /* closes the global OR */
@@ -1814,6 +1814,17 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     debug_return_str(buf);
 overflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+    if (ng != NULL) {
+	/* Overflow while traversing netgroups. */
+	free(ng->name);
+	free(ng);
+    }
+bad:
+    while ((ng = STAILQ_FIRST(&netgroups)) != NULL) {
+	STAILQ_REMOVE_HEAD(&netgroups, entries);
+	free(ng->name);
+	free(ng);
+    }
     free(buf);
     debug_return_str(NULL);
 }
