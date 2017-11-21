@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 12, 2017
+.Dd November 29, 2017
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -651,29 +651,74 @@ BSD login class
 scheduling priority (aka nice value)
 .El
 .Ss Process model
-When
+There are two distinct ways
 .Nm
-runs a command, it calls
-.Xr fork 2 ,
-sets up the execution environment as described above, and calls the
-.Xr execve
-system call in the child process.
-The main
-.Nm
-process waits until the command has completed, then passes the
-command's exit status to the security policy's close function and exits.
+can run a command.
+.Pp
 If an I/O logging plugin is configured or if the security policy
-explicitly requests it, a new  pseudo-terminal
+explicitly requests it, a new pseudo-terminal
 .Pq Dq pty
-is created and a second
+is allocated and
+.Xr fork 2
+is used to create a second
 .Nm
-process is used to relay job control signals between the user's
-existing pty and the new pty the command is being run in.
-This extra process makes it possible to, for example, suspend
-and resume the command.
-Without it, the command would be in what POSIX terms an
+process, referred to as the
+.Em monitor .
+The
+.Em monitor
+creates a new terminal session with itself as the leader and the pty as its
+controlling terminal, calls
+.Xr fork 2 ,
+sets up the execution environment as described above, and then uses the
+.Xr execve 2
+system call to run the command in the child process.
+The
+.Em monitor
+exists to relay job control signals between the user's
+existing terminal and the pty the command is being run in.
+This makes it possible to suspend and resume the command.
+Without the monitor, the command would be in what POSIX terms an
 .Dq orphaned process group
-and it would not receive any job control signals.
+and it would not receive any job control signals from the kernel.
+When the command exits or is terminated by a signal, the
+.Em monitor
+passes the command's exit status to the main
+.Nm
+process and exits.
+On most systems, processes created by the command that are still
+running in the background when the command exits and that have
+not changed their session will receive the
+.Dv SIGHUP
+signal when the monitor exits, since it is the terminal session leader.
+To prevent this from happening, background processes started by the command
+can be invoked via the
+.Xr nohup 1
+command to ignore
+.Dv SIGHUP .
+Alternately, some systems provide a
+.Xr setsid 1
+command which can be used to run the command in a new session.
+In both cases, there is a potential race condition where the
+command being run via
+.Nm
+could exit before
+.Xr nohup 1
+or
+.Xr setsid 1
+have time to complete their setup.
+.Pp
+If no pty is used,
+.Nm
+calls
+.Xr fork 2 ,
+sets up the execution environment as described above, and uses the
+.Xr execve 2
+system call to run the command in the child process.
+.Pp
+In both cases, the main
+.Nm
+process waits until the command (or monitor) has completed, then passes the
+command's exit status to the security policy's close function and exits.
 As a special case, if the policy plugin does not define a close
 function and no pty is required,
 .Nm

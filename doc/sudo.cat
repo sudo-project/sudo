@@ -386,24 +386,45 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      ++oo   scheduling priority (aka nice value)
 
    PPrroocceessss mmooddeell
-     When ssuuddoo runs a command, it calls fork(2), sets up the execution
-     environment as described above, and calls the execve system call in the
-     child process.  The main ssuuddoo process waits until the command has
-     completed, then passes the command's exit status to the security policy's
-     close function and exits.  If an I/O logging plugin is configured or if
-     the security policy explicitly requests it, a new  pseudo-terminal
-     ("pty") is created and a second ssuuddoo process is used to relay job control
-     signals between the user's existing pty and the new pty the command is
-     being run in.  This extra process makes it possible to, for example,
-     suspend and resume the command.  Without it, the command would be in what
+     There are two distinct ways ssuuddoo can run a command.
+
+     If an I/O logging plugin is configured or if the security policy
+     explicitly requests it, a new pseudo-terminal ("pty") is allocated and
+     fork(2) is used to create a second ssuuddoo process, referred to as the
+     _m_o_n_i_t_o_r.  The _m_o_n_i_t_o_r creates a new terminal session with itself as the
+     leader and the pty as its controlling terminal, calls fork(2), sets up
+     the execution environment as described above, and then uses the execve(2)
+     system call to run the command in the child process.  The _m_o_n_i_t_o_r exists
+     to relay job control signals between the user's existing terminal and the
+     pty the command is being run in.  This makes it possible to suspend and
+     resume the command.  Without the monitor, the command would be in what
      POSIX terms an "orphaned process group" and it would not receive any job
-     control signals.  As a special case, if the policy plugin does not define
-     a close function and no pty is required, ssuuddoo will execute the command
-     directly instead of calling fork(2) first.  The _s_u_d_o_e_r_s policy plugin
-     will only define a close function when I/O logging is enabled, a pty is
-     required, or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options are enabled.  Note
-     that _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by default on systems using
-     PAM.
+     control signals from the kernel.  When the command exits or is terminated
+     by a signal, the _m_o_n_i_t_o_r passes the command's exit status to the main
+     ssuuddoo process and exits.  On most systems, processes created by the
+     command that are still running in the background when the command exits
+     and that have not changed their session will receive the SIGHUP signal
+     when the monitor exits, since it is the terminal session leader.  To
+     prevent this from happening, background processes started by the command
+     can be invoked via the nohup(1) command to ignore SIGHUP.  Alternately,
+     some systems provide a setsid(1) command which can be used to run the
+     command in a new session.  In both cases, there is a potential race
+     condition where the command being run via ssuuddoo could exit before nohup(1)
+     or setsid(1) have time to complete their setup.
+
+     If no pty is used, ssuuddoo calls fork(2), sets up the execution environment
+     as described above, and uses the execve(2) system call to run the command
+     in the child process.
+
+     In both cases, the main ssuuddoo process waits until the command (or monitor)
+     has completed, then passes the command's exit status to the security
+     policy's close function and exits.  As a special case, if the policy
+     plugin does not define a close function and no pty is required, ssuuddoo will
+     execute the command directly instead of calling fork(2) first.  The
+     _s_u_d_o_e_r_s policy plugin will only define a close function when I/O logging
+     is enabled, a pty is required, or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options
+     are enabled.  Note that _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by
+     default on systems using PAM.
 
    SSiiggnnaall hhaannddlliinngg
      When the command is run as a child of the ssuuddoo process, ssuuddoo will relay
@@ -644,4 +665,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                    October 12, 2017                    Sudo 1.8.21
+Sudo 1.8.21                    November 29, 2017                   Sudo 1.8.21
