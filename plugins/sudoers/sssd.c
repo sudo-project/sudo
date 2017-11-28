@@ -349,6 +349,8 @@ get_ipa_hostname(char **shostp, char **lhostp)
 		    *lhostp = lhost;
 		    ret = true;
 		} else {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
 		    free(shost);
 		    free(lhost);
 		    ret = -1;
@@ -456,7 +458,6 @@ sudo_sss_open(struct sudo_nss *nss)
      */
     if (strcmp(user_runhost, user_host) == 0) {
 	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(handle);
 	    debug_return_int(ENOMEM);
 	}
@@ -478,7 +479,8 @@ sudo_sss_close(struct sudo_nss *nss)
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
 	free(handle->ipa_host);
-	free(handle->ipa_shost);
+	if (handle->ipa_host != handle->ipa_shost)
+	    free(handle->ipa_shost);
 	free(handle);
 	nss->handle = NULL;
     }
