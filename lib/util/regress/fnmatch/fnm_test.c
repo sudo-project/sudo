@@ -17,6 +17,7 @@
 #endif /* HAVE_STRINGS_H */
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
@@ -32,6 +33,8 @@ main(int argc, char *argv[])
 	FILE *fp = stdin;
 	char pattern[1024], string[1024], flagstr[1024];
 	int errors = 0, tests = 0, flags, got, want;
+
+	initprogname(argc > 0 ? argv[0] : "fnm_test");
 
 	if (argc > 1) {
 		if ((fp = fopen(argv[1], "r")) == NULL) {

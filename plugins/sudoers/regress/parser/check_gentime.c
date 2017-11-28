@@ -30,6 +30,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 #include "sudoers_debug.h"
 #include "parse.h"
 
@@ -64,6 +65,8 @@ main(int argc, char *argv[])
 {
     int ntests, errors = 0;
     time_t result;
+
+    initprogname(argc > 0 ? argv[0] : "check_gentime");
 
     /* Do local time tests in Eastern Standard Time. */
     putenv("TZ=EST5EST5");

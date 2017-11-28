@@ -38,6 +38,8 @@ main(int argc, char *argv[])
     char pattern[1024], string[1024];
     int errors = 0, tests = 0, got, want;
 
+    initprogname(argc > 0 ? argv[0] : "check_env_pattern");
+
     if (argc > 1) {
 	if ((fp = fopen(argv[1], "r")) == NULL) {
 	    perror(argv[1]);
