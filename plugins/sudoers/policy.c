@@ -540,7 +540,10 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	gid_t egid;
 	size_t glsize;
 	char *cp, *gid_list;
-	struct gid_list *gidlist = sudo_get_gidlist(runas_pw);
+	struct gid_list *gidlist;
+
+	/* Only use results from a group db query, not the front end. */
+	gidlist = sudo_get_gidlist(runas_pw, ENTRY_TYPE_QUERIED);
 
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +

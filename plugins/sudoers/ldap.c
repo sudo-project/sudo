@@ -1697,7 +1697,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
 	    sz += 12 + sudo_ldap_value_len(grlist->groups[i]);
 	}
     }
-    if ((gidlist = sudo_get_gidlist(pw)) != NULL) {
+    if ((gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY)) != NULL) {
 	for (i = 0; i < gidlist->ngids; i++) {
 	    if (pw->pw_gid == gidlist->gids[i])
 		continue;

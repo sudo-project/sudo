@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996, 1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1699,8 +1699,9 @@ runas_setgroups(void)
 	debug_return_ptr(user_gid_list);
     }
 
+    /* Only use results from a group db query, not the front end. */
     pw = runas_pw ? runas_pw : sudo_user.pw;
-    gidlist = sudo_get_gidlist(pw);
+    gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_QUERIED);
     if (gidlist != NULL) {
 	if (sudo_setgroups(gidlist->ngids, gidlist->gids) < 0) {
 	    sudo_gidlist_delref(gidlist);

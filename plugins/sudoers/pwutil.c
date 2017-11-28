@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -69,7 +69,8 @@ static int  cmp_grgid(const void *, const void *);
 #endif
 
 /*
- * Compare by uid.
+ * Compare by user ID.
+ * v1 is the key to find or data to insert, v2 is in-tree data.
  */
 static int
 cmp_pwuid(const void *v1, const void *v2)
@@ -78,11 +79,14 @@ cmp_pwuid(const void *v1, const void *v2)
     const struct cache_item *ci2 = (const struct cache_item *) v2;
     if (ci1->k.uid == ci2->k.uid)
 	return strcmp(ci1->registry, ci2->registry);
-    return ci1->k.uid - ci2->k.uid;
+    if (ci1->k.uid < ci2->k.uid)
+	return -1;
+    return 1;
 }
 
 /*
- * Compare by user name.
+ * Compare by user/group name.
+ * v1 is the key to find or data to insert, v2 is in-tree data.
  */
 static int
 cmp_pwnam(const void *v1, const void *v2)
@@ -92,6 +96,28 @@ cmp_pwnam(const void *v1, const void *v2)
     int ret = strcmp(ci1->k.name, ci2->k.name);
     if (ret == 0)
 	ret = strcmp(ci1->registry, ci2->registry);
+    return ret;
+}
+
+/*
+ * Compare by user name, taking into account the source type.
+ * Need to differentiate between group IDs received from the front-end
+ * (via getgroups()) and groups IDs queried from the group database.
+ * v1 is the key to find or data to insert, v2 is in-tree data.
+ */
+static int
+cmp_gidlist(const void *v1, const void *v2)
+{
+    const struct cache_item *ci1 = (const struct cache_item *) v1;
+    const struct cache_item *ci2 = (const struct cache_item *) v2;
+    int ret = strcmp(ci1->k.name, ci2->k.name);
+    if (ret == 0) {
+	if (ci1->type == ENTRY_TYPE_ANY || ci1->type == ci2->type)
+	    return strcmp(ci1->registry, ci2->registry);
+	if (ci1->type < ci2->type)
+	    return -1;
+	return 1;
+    }
     return ret;
 }
 
@@ -401,7 +427,8 @@ sudo_freepwcache(void)
 }
 
 /*
- * Compare by gid.
+ * Compare by group ID.
+ * v1 is the key to find or data to insert, v2 is in-tree data.
  */
 static int
 cmp_grgid(const void *v1, const void *v2)
@@ -410,7 +437,9 @@ cmp_grgid(const void *v1, const void *v2)
     const struct cache_item *ci2 = (const struct cache_item *) v2;
     if (ci1->k.gid == ci2->k.gid)
 	return strcmp(ci1->registry, ci2->registry);
-    return ci1->k.gid - ci2->k.gid;
+    if (ci1->k.gid < ci2->k.gid)
+	return -1;
+    return 1;
 }
 
 void
@@ -836,7 +865,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
 }
 
 struct gid_list *
-sudo_get_gidlist(const struct passwd *pw)
+sudo_get_gidlist(const struct passwd *pw, unsigned int type)
 {
     struct cache_item key, *item;
     struct rbnode *node;
@@ -846,7 +875,7 @@ sudo_get_gidlist(const struct passwd *pw)
 	__func__, pw->pw_name);
 
     if (gidlist_cache == NULL) {
-	gidlist_cache = rbcreate(cmp_pwnam);
+	gidlist_cache = rbcreate(cmp_gidlist);
 	if (gidlist_cache == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_ptr(NULL);
@@ -854,6 +883,7 @@ sudo_get_gidlist(const struct passwd *pw)
     }
 
     key.k.name = pw->pw_name;
+    key.type = type;
     getauthregistry(pw->pw_name, key.registry);
     if ((node = rbfind(gidlist_cache, &key)) != NULL) {
 	item = node->data;
@@ -862,7 +892,7 @@ sudo_get_gidlist(const struct passwd *pw)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = sudo_make_gidlist_item(pw, NULL);
+    item = sudo_make_gidlist_item(pw, NULL, type);
     if (item == NULL) {
 	/* Out of memory? */
 	debug_return_ptr(NULL);
@@ -896,14 +926,14 @@ done:
 }
 
 int
-sudo_set_gidlist(struct passwd *pw, char * const *gids)
+sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
 {
     struct cache_item key, *item;
     struct rbnode *node;
     debug_decl(sudo_set_gidlist, SUDOERS_DEBUG_NSS)
 
     if (gidlist_cache == NULL) {
-	gidlist_cache = rbcreate(cmp_pwnam);
+	gidlist_cache = rbcreate(cmp_gidlist);
 	if (gidlist_cache == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_int(-1);
@@ -914,9 +944,10 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids)
      * Cache group db entry if it doesn't already exist
      */
     key.k.name = pw->pw_name;
+    key.type = type;
     getauthregistry(NULL, key.registry);
     if ((node = rbfind(gidlist_cache, &key)) == NULL) {
-	if ((item = sudo_make_gidlist_item(pw, gids)) == NULL) {
+	if ((item = sudo_make_gidlist_item(pw, gids, type)) == NULL) {
 	    sudo_warnx(U_("unable to parse gids for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}
@@ -961,7 +992,7 @@ user_in_group(const struct passwd *pw, const char *group)
 		matched = true;
 		goto done;
 	    }
-	    if ((gidlist = sudo_get_gidlist(pw)) != NULL) {
+	    if ((gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY)) != NULL) {
 		for (i = 0; i < gidlist->ngids; i++) {
 		    if (gid == gidlist->gids[i]) {
 			matched = true;
@@ -992,11 +1023,13 @@ user_in_group(const struct passwd *pw, const char *group)
 	}
 
 	/* Check the supplementary group vector. */
-	if (gidlist == NULL && (gidlist = sudo_get_gidlist(pw)) != NULL) {
-	    for (i = 0; i < gidlist->ngids; i++) {
-		if (gid == gidlist->gids[i]) {
-		    matched = true;
-		    goto done;
+	if (gidlist == NULL) {
+	    if ((gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY)) != NULL) {
+		for (i = 0; i < gidlist->ngids; i++) {
+		    if (gid == gidlist->gids[i]) {
+			matched = true;
+			goto done;
+		    }
 		}
 	    }
 	}

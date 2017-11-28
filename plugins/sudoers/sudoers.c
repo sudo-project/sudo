@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -732,7 +732,7 @@ init_vars(char * const envp[])
 	}
     }
     if (user_gid_list == NULL)
-	user_gid_list = sudo_get_gidlist(sudo_user.pw);
+	user_gid_list = sudo_get_gidlist(sudo_user.pw, ENTRY_TYPE_ANY);
 
     /* Store initialize permissions so we can restore them later. */
     if (!set_perms(PERM_INITIAL))

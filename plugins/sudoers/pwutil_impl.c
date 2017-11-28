@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2015
+ * Copyright (c) 1996, 1998-2005, 2007-2017
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -230,7 +230,8 @@ sudo_make_gritem(gid_t gid, const char *name)
  * elements.  Fills in datum from user_gids or from getgrouplist(3).
  */
 struct cache_item *
-sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1)
+sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
+    unsigned int type)
 {
     char *cp;
     size_t nsize, total;
@@ -240,12 +241,15 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1)
     int i, ngids;
     debug_decl(sudo_make_gidlist_item, SUDOERS_DEBUG_NSS)
 
-    if (pw == sudo_user.pw && sudo_user.gids != NULL) {
+    /* Don't use user_gids if the entry type says we must query the db. */
+    if (type != ENTRY_TYPE_QUERIED && pw == sudo_user.pw && sudo_user.gids != NULL) {
 	gids = user_gids;
 	ngids = user_ngids;
 	user_gids = NULL;
 	user_ngids = 0;
+	type = ENTRY_TYPE_FRONTEND;
     } else {
+	type = ENTRY_TYPE_QUERIED;
 	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
 	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
@@ -320,6 +324,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1)
     glitem->cache.k.name = cp;
     glitem->cache.d.gidlist = gidlist;
     glitem->cache.refcnt = 1;
+    glitem->cache.type = type;
 
     /*
      * Store group IDs.
@@ -348,7 +353,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     int i, groupname_len;
     debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS)
 
-    gidlist = sudo_get_gidlist(pw);
+    gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY);
     if (gidlist == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "no gid list for use %s", pw->pw_name);
