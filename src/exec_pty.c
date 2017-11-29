@@ -563,9 +563,8 @@ read_callback(int fd, int what, void *v)
 		iob->ec->cmnd_pid = -1;
 	    }
 	    iob->len += n;
-	    /* Enable writer if not /dev/tty or we are foreground pgrp. */
-	    if (iob->wevent != NULL &&
-		(foreground || !USERTTY_EVENT(iob->wevent))) {
+	    /* Enable writer now that there is data in the buffer. */
+	    if (iob->wevent != NULL) {
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
 		    sudo_fatal(U_("unable to add event to queue"));
 	    }
@@ -1452,7 +1451,7 @@ add_io_events(struct sudo_event_base *evbase)
      * Normally, write buffers are added on demand when data is read.
      */
     SLIST_FOREACH(iob, &iobufs, entries) {
-	/* Don't read/write from /dev/tty if we are not in the foreground. */
+	/* Don't read from /dev/tty if we are not in the foreground. */
 	if (iob->revent != NULL &&
 	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
 	    if (iob->len != sizeof(iob->buf)) {
@@ -1463,8 +1462,8 @@ add_io_events(struct sudo_event_base *evbase)
 		    sudo_fatal(U_("unable to add event to queue"));
 	    }
 	}
-	if (iob->wevent != NULL &&
-	    (foreground || !USERTTY_EVENT(iob->wevent))) {
+	if (iob->wevent != NULL) {
+	    /* Enable writer if buffer is not empty. */
 	    if (iob->len > iob->off) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O wevent %p, fd %d, events %d",
