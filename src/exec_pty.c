@@ -110,6 +110,7 @@ static int safe_close(int fd);
 static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
 static void check_foreground(pid_t ppgrp);
 static void add_io_events(struct sudo_event_base *evbase);
+static void schedule_signal(struct exec_closure_pty *ec, int signo);
 
 /*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
@@ -518,23 +519,53 @@ suspend_sudo(int signo, pid_t ppgrp)
 }
 
 /*
+ * SIGTTIN signal handler for read_callback that just sets a flag.
+ */
+static volatile sig_atomic_t got_sigttin;
+
+static void
+sigttin(int signo)
+{
+    got_sigttin = 1;
+}
+
+/*
  * Read an iobuf that is ready.
  */
 static void
 read_callback(int fd, int what, void *v)
 {
     struct io_buffer *iob = v;
-    struct sudo_event_base *evbase;
-    int n;
+    struct sudo_event_base *evbase = sudo_ev_get_base(iob->revent);
+    struct sigaction sa, osa;
+    int saved_errno;
+    ssize_t n;
     debug_decl(read_callback, SUDO_DEBUG_EXEC);
 
-    evbase = sudo_ev_get_base(iob->revent);
-    do {
-	n = read(fd, iob->buf + iob->len, sizeof(iob->buf) - iob->len);
-    } while (n == -1 && errno == EINTR);
+    /*
+     * We ignore SIGTTIN by default but we need to handle it when reading
+     * from the terminal.  A signal event won't work here because the
+     * read() would be restarted, preventing the callback from running.
+     */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = sigttin;
+    got_sigttin = 0;
+    sigaction(SIGTTIN, &sa, &osa);
+    n = read(fd, iob->buf + iob->len, sizeof(iob->buf) - iob->len);
+    saved_errno = errno;
+    sigaction(SIGTTIN, &osa, NULL);
+    errno = saved_errno;
+
     switch (n) {
 	case -1:
-	    if (errno == EAGAIN)
+	    if (got_sigttin) {
+		/* Schedule SIGTTIN to be forwared to the command. */
+		schedule_signal(iob->ec, SIGTTIN);
+		/* Restart event loop to service signal immediately. */
+		sudo_ev_loopcontinue(evbase);
+	    }
+	    if (errno == EAGAIN || errno == EINTR)
 		break;
 	    /* treat read error as fatal and close the fd */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
@@ -557,7 +588,7 @@ read_callback(int fd, int what, void *v)
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"read %d bytes from fd %d", n, fd);
+		"read %zd bytes from fd %d", n, fd);
 	    if (!iob->action(iob->buf + iob->len, n, iob)) {
 		terminate_command(iob->ec->cmnd_pid, true);
 		iob->ec->cmnd_pid = -1;
@@ -578,20 +609,44 @@ read_callback(int fd, int what, void *v)
 }
 
 /*
+ * SIGTTOU signal handler for write_callback that just sets a flag.
+ */
+static volatile sig_atomic_t got_sigttou;
+
+static void
+sigttou(int signo)
+{
+    got_sigttou = 1;
+}
+
+/*
  * Write an iobuf that is ready.
  */
 static void
 write_callback(int fd, int what, void *v)
 {
     struct io_buffer *iob = v;
-    struct sudo_event_base *evbase;
-    int n;
+    struct sudo_event_base *evbase = sudo_ev_get_base(iob->wevent);
+    struct sigaction sa, osa;
+    int saved_errno;
+    ssize_t n;
     debug_decl(write_callback, SUDO_DEBUG_EXEC);
 
-    evbase = sudo_ev_get_base(iob->wevent);
-    do {
-	n = write(fd, iob->buf + iob->off, iob->len - iob->off);
-    } while (n == -1 && errno == EINTR);
+    /*
+     * We ignore SIGTTOU by default but we need to handle it when writing
+     * to the terminal.  A signal event won't work here because the
+     * write() would be restarted, preventing the callback from running.
+     */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = sigttou;
+    got_sigttou = 0;
+    sigaction(SIGTTOU, &sa, &osa);
+    n = write(fd, iob->buf + iob->off, iob->len - iob->off);
+    saved_errno = errno;
+    sigaction(SIGTTOU, &osa, NULL);
+    errno = saved_errno;
+
     if (n == -1) {
 	switch (errno) {
 	case EPIPE:
@@ -610,6 +665,14 @@ write_callback(int fd, int what, void *v)
 	    safe_close(fd);
 	    ev_free_by_fd(evbase, fd);
 	    break;
+	case EINTR:
+	    if (got_sigttou) {
+		/* Schedule SIGTTOU to be forwared to the command. */
+		schedule_signal(iob->ec, SIGTTOU);
+		/* Restart event loop to service signal immediately. */
+		sudo_ev_loopcontinue(evbase);
+	    }
+	    /* FALLTHROUGH */
 	case EAGAIN:
 	    /* not an error */
 	    break;
@@ -624,7 +687,7 @@ write_callback(int fd, int what, void *v)
 	}
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "wrote %d bytes to fd %d", n, fd);
+	    "wrote %zd bytes to fd %d", n, fd);
 	iob->off += n;
 	/* Reset buffer if fully consumed. */
 	if (iob->off == iob->len) {
