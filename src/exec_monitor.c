@@ -380,8 +380,12 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	struct timespec ts = { 0, 1000 };  /* 1us */
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: waiting for controlling tty",
+	    __func__);
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
 	    nanosleep(&ts, NULL);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: got controlling tty",
+	    __func__);
     }
 
     /* Done with the pty slave, don't leak it. */
@@ -389,6 +393,8 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	close(io_fds[SFD_SLAVE]);
 
     /* Execute command; only returns on error. */
+    sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
+	details->command, foreground ? "foreground" : "background");
     exec_cmnd(details, errfd);
 
     debug_return;
