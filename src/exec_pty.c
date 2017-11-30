@@ -562,8 +562,6 @@ read_callback(int fd, int what, void *v)
 	    if (got_sigttin) {
 		/* Schedule SIGTTIN to be forwared to the command. */
 		schedule_signal(iob->ec, SIGTTIN);
-		/* Restart event loop to service signal immediately. */
-		sudo_ev_loopcontinue(evbase);
 	    }
 	    if (errno == EAGAIN || errno == EINTR)
 		break;
@@ -669,8 +667,6 @@ write_callback(int fd, int what, void *v)
 	    if (got_sigttou) {
 		/* Schedule SIGTTOU to be forwared to the command. */
 		schedule_signal(iob->ec, SIGTTOU);
-		/* Restart event loop to service signal immediately. */
-		sudo_ev_loopcontinue(evbase);
 	    }
 	    /* FALLTHROUGH */
 	case EAGAIN:
@@ -811,6 +807,9 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
     if (sudo_ev_add(ec->evbase, ec->sigfwd_event, NULL, true) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
+    /* Restart event loop to service signal immediately. */
+    sudo_ev_loopcontinue(ec->evbase);
+
     debug_return;
 }
 
@@ -875,9 +874,8 @@ backchannel_cb(int fd, int what, void *v)
 			"command stopped, suspending parent");
 		    signo = suspend_sudo(WSTOPSIG(cstat.val), ec->ppgrp);
 		    schedule_signal(ec, signo);
-		    /* Re-enable I/O events and restart event loop to service signal. */
+		    /* Re-enable I/O events */
 		    add_io_events(ec->evbase);
-		    sudo_ev_loopcontinue(ec->evbase);
 		} else {
 		    /* Command exited or was killed, either way we are done. */
 		    sudo_debug_printf(SUDO_DEBUG_INFO, "command exited or was killed");
@@ -946,9 +944,8 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 	n = suspend_sudo(WSTOPSIG(status), ec->ppgrp);
 	kill(pid, SIGCONT);
 	schedule_signal(ec, n);
-	/* Re-enable I/O events and restart event loop. */
+	/* Re-enable I/O events */
 	add_io_events(ec->evbase);
-	sudo_ev_loopcontinue(ec->evbase);
     } else if (WIFSIGNALED(status)) {
 	char signame[SIG2STR_MAX];
 	if (sig2str(WTERMSIG(status), signame) == -1)
@@ -1005,10 +1002,8 @@ signal_cb_pty(int signo, int what, void *v)
 		debug_return;
 	    }
 	}
-	/* Schedule signo to be forwared to the command. */
+	/* Schedule signal to be forwared to the command. */
 	schedule_signal(ec, signo);
-	/* Restart event loop to service signal immediately. */
-	sudo_ev_loopcontinue(ec->evbase);
 	break;
     }
 
