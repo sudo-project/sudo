@@ -832,8 +832,6 @@ backchannel_cb(int fd, int what, void *v)
 	case -1:
 	    switch (errno) {
 	    case EINTR:
-		/* Should not happen now that we use SA_RESTART. */
-		continue;
 	    case EAGAIN:
 		/* Nothing ready. */
 		break;
@@ -1042,11 +1040,9 @@ sigfwd_cb(int sock, int what, void *v)
 	    "sending SIG%s to monitor over backchannel", signame);
 	cstat.type = CMD_SIGNO;
 	cstat.val = sigfwd->signo;
-	do {
-	    nsent = send(sock, &cstat, sizeof(cstat), 0);
-	} while (nsent == -1 && errno == EINTR);
 	TAILQ_REMOVE(&ec->sigfwd_list, sigfwd, entries);
 	free(sigfwd);
+	nsent = send(sock, &cstat, sizeof(cstat), 0);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
@@ -1433,9 +1429,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	exec_monitor(details, &oset, foreground && !pipeline, sv[1]);
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
-	while (send(sv[1], cstat, sizeof(*cstat), 0) == -1) {
-	    if (errno != EINTR)
-		break;
+	if (send(sv[1], cstat, sizeof(*cstat), 0) == -1) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+                "%s: unable to send status to parent", __func__);
 	}
 	_exit(1);
     }

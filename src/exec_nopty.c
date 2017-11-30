@@ -73,13 +73,10 @@ errpipe_cb(int fd, int what, void *v)
      * Read errno from child or EOF when command is executed.
      * Note that the error pipe is *blocking*.
      */
-    do {
-	nread = read(fd, &errval, sizeof(errval));
-    } while (nread == -1 && errno == EINTR);
-
+    nread = read(fd, &errval, sizeof(errval));
     switch (nread) {
     case -1:
-	if (errno != EAGAIN) {
+	if (errno != EAGAIN && errno != EINTR) {
 	    if (ec->cstat->val == CMD_INVALID) {
 		/* XXX - need a way to distinguish non-exec error. */
 		ec->cstat->type = CMD_ERRNO;
