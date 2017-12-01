@@ -630,6 +630,17 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	} while (pid == -1 && errno == EINTR);
 	/* XXX - update cstat with wait status? */
     }
+
+    /*
+     * Take the controlling tty.  This prevents processes spawned by the
+     * command from receiving SIGHUP when the session leader (us) exits.
+     */
+    if (tcsetpgrp(io_fds[SFD_SLAVE], mc.mon_pgrp) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to set foreground pgrp to %d (monitor)",
+	    __func__, (int)mc.mon_pgrp);
+    }
+
     /* Send parent status. */
     send_status(backchannel, &cstat);
 
