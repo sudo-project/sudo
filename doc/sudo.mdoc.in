@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 29, 2017
+.Dd December 1, 2017
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -685,27 +685,10 @@ When the command exits or is terminated by a signal, the
 passes the command's exit status to the main
 .Nm
 process and exits.
-On most systems, processes created by the command that are still
-running in the background when the command exits and that have
-not changed their session will receive the
-.Dv SIGHUP
-signal when the monitor exits, since it is the terminal session leader.
-To prevent this from happening, background processes started by the command
-can be invoked via the
-.Xr nohup 1
-command to ignore
-.Dv SIGHUP .
-Alternately, some systems provide a
-.Xr setsid 1
-command which can be used to run the command in a new session.
-In both cases, there is a potential race condition where the
-command being run via
+After receiving the command's exit status, the main
 .Nm
-could exit before
-.Xr nohup 1
-or
-.Xr setsid 1
-have time to complete their setup.
+passes the command's exit status to the security policy's close function
+and exits.
 .Pp
 If no pty is used,
 .Nm
@@ -714,13 +697,12 @@ calls
 sets up the execution environment as described above, and uses the
 .Xr execve 2
 system call to run the command in the child process.
-.Pp
-In both cases, the main
+The main
 .Nm
-process waits until the command (or monitor) has completed, then passes the
+process waits until the command has completed, then passes the
 command's exit status to the security policy's close function and exits.
 As a special case, if the policy plugin does not define a close
-function and no pty is required,
+function,
 .Nm
 will execute the command directly instead of calling
 .Xr fork 2
