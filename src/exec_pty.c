@@ -415,11 +415,14 @@ check_foreground(pid_t ppgrp)
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
     if (io_fds[SFD_USERTTY] != -1) {
+	/* Always check for window size changes. */
+	sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
-	if (foreground && !tty_initialized) {
-	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-		sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
-		tty_initialized = true;
+	if (foreground) {
+	    if (!tty_initialized) {
+		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]))
+		    tty_initialized = true;
 	    }
 	}
     }
@@ -1372,12 +1375,13 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	}
     }
 
+    /* Set pty window size. */
+    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
-	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]))
 	    tty_initialized = true;
-	}
 
 	/* Start out in raw mode unless part of a pipeline or backgrounded. */
 	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
@@ -1631,17 +1635,25 @@ del_io_events(bool nonblocking)
 static void
 sync_ttysize(int src, int dst)
 {
-    struct winsize wsize;
+    struct winsize wsize, owsize;
     pid_t pgrp;
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
 
-    if (ioctl(src, TIOCGWINSZ, &wsize) == 0) {
-	    (void)ioctl(dst, TIOCSWINSZ, &wsize);
-	    if ((pgrp = tcgetpgrp(dst)) != -1)
-		killpg(pgrp, SIGWINCH);
+    if (ioctl(src, TIOCGWINSZ, &wsize) == 0 &&
+	ioctl(dst, TIOCGWINSZ, &owsize) == 0 &&
+	(wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col)) {
 
-	    if (tty_initialized)
-		log_winchange(wsize.ws_row, wsize.ws_col);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "window size change %dx%d -> %dx%d",
+	    owsize.ws_col, owsize.ws_row, wsize.ws_col, wsize.ws_row);
+
+	(void)ioctl(dst, TIOCSWINSZ, &wsize);
+	if ((pgrp = tcgetpgrp(dst)) != -1)
+	    killpg(pgrp, SIGWINCH);
+
+	/* Only log window size changes, not the initial setting. */
+	if (tty_initialized)
+	    log_winchange(wsize.ws_row, wsize.ws_col);
     }
 
     debug_return;
