@@ -746,6 +746,7 @@ restore_terminal_size(void)
 
     if (terminal_was_resized) {
 	/* We are still in raw mode, hence the carriage return. */
+	putchar('\r');
 	printf(U_("Replay finished, press any key to restore the terminal."));
 	fflush(stdout);
 	(void)getchar();
