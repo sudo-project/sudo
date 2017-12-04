@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1999-2005, 2007, 2010-2012, 2014-2016
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2002 Michael Stroucken <michael@stroucken.org>
  *
  * Permission to use, copy, modify, and distribute this software for any

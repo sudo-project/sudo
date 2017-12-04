@@ -3,7 +3,7 @@
 /*	$FreeBSD: head/lib/libc/stdlib/getopt_long.c 236936 2012-06-11 22:25:20Z delphij $	*/
 
 /*
- * Copyright (c) 2002 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2002 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

@@ -1,7 +1,7 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 AC_PREREQ([2.59])
 AC_INIT([sudo], [1.8.22], [https://bugzilla.sudo.ws/], [sudo])

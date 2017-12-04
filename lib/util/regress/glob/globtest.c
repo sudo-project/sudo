@@ -1,7 +1,7 @@
 /*	$OpenBSD: globtest.c,v 1.1 2008/10/01 23:04:36 millert Exp $	*/
 
 /*
- * Public domain, 2008, Todd C. Miller <Todd.Miller@courtesan.com>
+ * Public domain, 2008, Todd C. Miller <Todd.Miller@sudo.ws>
  */
 
 #include <config.h>
