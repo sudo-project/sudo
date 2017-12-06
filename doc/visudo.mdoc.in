@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 22, 2017
+.Dd December 6, 2017
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -127,8 +127,15 @@ Enable
 mode.
 The existing
 .Em sudoers
-file will be
-checked for syntax errors, owner and mode.
+file (and any other files it includes) will be
+checked for syntax errors.
+If the
+.Fl f
+option has not been specified,
+.Nm
+will also check the
+.Em sudoers
+file owner and mode.
 A message will be printed to the standard output describing the status of
 .Em sudoers
 unless the
@@ -165,6 +172,10 @@ may be
 indicating that
 .Em sudoers
 will be read from the standard input.
+Because the policy is evaluated in its entirety, it is not sufficient
+to check an individual
+.Em sudoers
+include file for syntax errors.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
 .It Fl q , -quiet

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "8" "February 22, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "8" "December 6, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -130,8 +130,15 @@ Enable
 mode.
 The existing
 \fIsudoers\fR
-file will be
-checked for syntax errors, owner and mode.
+file (and any other files it includes) will be
+checked for syntax errors.
+If the
+\fB\-f\fR
+option has not been specified,
+\fBvisudo\fR
+will also check the
+\fIsudoers\fR
+file owner and mode.
 A message will be printed to the standard output describing the status of
 \fIsudoers\fR
 unless the
@@ -169,6 +176,10 @@ may be
 indicating that
 \fIsudoers\fR
 will be read from the standard input.
+Because the policy is evaluated in its entirety, it is not sufficient
+to check an individual
+\fIsudoers\fR
+include file for syntax errors.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.

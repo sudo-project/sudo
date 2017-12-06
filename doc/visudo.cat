@@ -38,8 +38,10 @@ DDEESSCCRRIIPPTTIIOONN
      The options are as follows:
 
      --cc, ----cchheecckk
-                 Enable _c_h_e_c_k_-_o_n_l_y mode.  The existing _s_u_d_o_e_r_s file will be
-                 checked for syntax errors, owner and mode.  A message will be
+                 Enable _c_h_e_c_k_-_o_n_l_y mode.  The existing _s_u_d_o_e_r_s file (and any
+                 other files it includes) will be checked for syntax errors.
+                 If the --ff option has not been specified, vviissuuddoo will also
+                 check the _s_u_d_o_e_r_s file owner and mode.  A message will be
                  printed to the standard output describing the status of
                  _s_u_d_o_e_r_s unless the --qq option was specified.  If the check
                  completes successfully, vviissuuddoo will exit with a value of 0.
@@ -53,6 +55,9 @@ DDEESSCCRRIIPPTTIIOONN
                  used is the specified _s_u_d_o_e_r_s file with ".tmp" appended to
                  it.  In _c_h_e_c_k_-_o_n_l_y mode only, the argument to --ff may be `-',
                  indicating that _s_u_d_o_e_r_s will be read from the standard input.
+                 Because the policy is evaluated in its entirety, it is not
+                 sufficient to check an individual _s_u_d_o_e_r_s include file for
+                 syntax errors.
 
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
 
@@ -212,4 +217,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    February 22, 2017                   Sudo 1.8.22
+Sudo 1.8.22                    December 6, 2017                    Sudo 1.8.22
