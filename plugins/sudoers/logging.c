@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,6 +47,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <syslog.h>
 
 #include "sudoers.h"
 

@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <ctype.h>
+#include <syslog.h>
 
 #include "sudoers.h"
 #include "parse.h"
