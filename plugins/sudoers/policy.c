@@ -68,6 +68,25 @@ extern __dso_public struct policy_plugin sudoers_policy;
 extern char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 
+static int
+parse_bool(const char *line, int varlen, int *flags, int fval)
+{
+    debug_decl(parse_bool, SUDOERS_DEBUG_PLUGIN)
+
+    switch (sudo_strtobool(line + varlen + 1)) {
+    case true:
+	SET(*flags, fval);
+	debug_return_int(true);
+    case false:
+	CLR(*flags, fval);
+	debug_return_int(false);
+    default:
+	sudo_warn(U_("invalid %.*s set by sudo front-end"),
+	    varlen, line);
+	debug_return_int(-1);
+    }
+}
+
 /*
  * Deserialize args, settings and user_info arrays.
  * Fills in struct sudo_user and other common sudoers state.
@@ -84,12 +103,21 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN)
 
 #define MATCHES(s, v)	\
-    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
+    (strncmp((s), (v), sizeof(v) - 1) == 0)
+
+#define CHECK(s, v) do {	\
+    if ((s)[sizeof(v) - 1] == '\0') { \
+	sudo_warn(U_("invalid %.*s set by sudo front-end"), \
+	    (int)(sizeof(v) - 2), v); \
+	goto bad; \
+    } \
+} while (0)
 
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
 	    if (MATCHES(*cur, "sudoers_file=")) {
+		CHECK(*cur, "sudoers_file=");
 		sudoers_file = *cur + sizeof("sudoers_file=") - 1;
 		continue;
 	    }
@@ -121,10 +149,12 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		continue;
 	    }
 	    if (MATCHES(*cur, "ldap_conf=")) {
+		CHECK(*cur, "ldap_conf=");
 		path_ldap_conf = *cur + sizeof("ldap_conf=") - 1;
 		continue;
 	    }
 	    if (MATCHES(*cur, "ldap_secret=")) {
+		CHECK(*cur, "ldap_secret=");
 		path_ldap_secret = *cur + sizeof("ldap_secret=") - 1;
 		continue;
 	    }
@@ -145,94 +175,110 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_user=")) {
+	    CHECK(*cur, "runas_user=");
 	    *runas_user = *cur + sizeof("runas_user=") - 1;
 	    sudo_user.flags |= RUNAS_USER_SPECIFIED;
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_group=")) {
+	    CHECK(*cur, "runas_group=");
 	    *runas_group = *cur + sizeof("runas_group=") - 1;
 	    sudo_user.flags |= RUNAS_GROUP_SPECIFIED;
 	    continue;
 	}
 	if (MATCHES(*cur, "prompt=")) {
+	    /* Allow epmpty prompt. */
 	    user_prompt = *cur + sizeof("prompt=") - 1;
 	    def_passprompt_override = true;
 	    continue;
 	}
 	if (MATCHES(*cur, "set_home=")) {
-	    if (sudo_strtobool(*cur + sizeof("set_home=") - 1) == true)
-		SET(flags, MODE_RESET_HOME);
+	    if (parse_bool(*cur, sizeof("set_home") - 1, &flags,
+		MODE_RESET_HOME) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_environment=")) {
-	    if (sudo_strtobool(*cur + sizeof("preserve_environment=") - 1) == true)
-		SET(flags, MODE_PRESERVE_ENV);
+	    if (parse_bool(*cur, sizeof("preserve_environment") - 1, &flags,
+		MODE_PRESERVE_ENV) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "run_shell=")) {
-	    if (sudo_strtobool(*cur + sizeof("run_shell=") - 1) == true)
-		SET(flags, MODE_SHELL);
+	    if (parse_bool(*cur, sizeof("run_shell") -1, &flags,
+		MODE_SHELL) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "login_shell=")) {
-	    if (sudo_strtobool(*cur + sizeof("login_shell=") - 1) == true) {
-		SET(flags, MODE_LOGIN_SHELL);
-		def_env_reset = true;
-	    }
+	    if (parse_bool(*cur, sizeof("login_shell") - 1, &flags,
+		MODE_LOGIN_SHELL) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "implied_shell=")) {
-	    if (sudo_strtobool(*cur + sizeof("implied_shell=") - 1) == true)
-		SET(flags, MODE_IMPLIED_SHELL);
+	    if (parse_bool(*cur, sizeof("implied_shell") - 1, &flags,
+		MODE_IMPLIED_SHELL) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_groups=")) {
-	    if (sudo_strtobool(*cur + sizeof("preserve_groups=") - 1) == true)
-		SET(flags, MODE_PRESERVE_GROUPS);
+	    if (parse_bool(*cur, sizeof("preserve_groups") - 1, &flags,
+		MODE_PRESERVE_GROUPS) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "ignore_ticket=")) {
-	    if (sudo_strtobool(*cur + sizeof("ignore_ticket=") - 1) == true)
-		SET(flags, MODE_IGNORE_TICKET);
+	    if (parse_bool(*cur, sizeof("ignore_ticket") -1, &flags,
+		MODE_IGNORE_TICKET) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "noninteractive=")) {
-	    if (sudo_strtobool(*cur + sizeof("noninteractive=") - 1) == true)
-		SET(flags, MODE_NONINTERACTIVE);
+	    if (parse_bool(*cur, sizeof("noninteractive") - 1, &flags,
+		MODE_NONINTERACTIVE) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "sudoedit=")) {
-	    if (sudo_strtobool(*cur + sizeof("sudoedit=") - 1) == true)
-		SET(flags, MODE_EDIT);
+	    if (parse_bool(*cur, sizeof("sudoedit") - 1, &flags,
+		MODE_EDIT) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "login_class=")) {
+	    CHECK(*cur, "login_class=");
 	    login_class = *cur + sizeof("login_class=") - 1;
 	    def_use_loginclass = true;
 	    continue;
 	}
 #ifdef HAVE_PRIV_SET
 	if (MATCHES(*cur, "runas_privs=")) {
+	    CHECK(*cur, "runas_privs=");
 	    def_privs = *cur + sizeof("runas_privs=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_limitprivs=")) {
+	    CHECK(*cur, "runas_limitprivs=");
 	    def_limitprivs = *cur + sizeof("runas_limitprivs=") - 1;
 	    continue;
 	}
 #endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
+	    CHECK(*cur, "selinux_role=");
 	    user_role = *cur + sizeof("selinux_role=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "selinux_type=")) {
+	    CHECK(*cur, "selinux_type=");
 	    user_type = *cur + sizeof("selinux_type=") - 1;
 	    continue;
 	}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
+	    CHECK(*cur, "login_style=");
 	    login_style = *cur + sizeof("bsdauth_type=") - 1;
 	    continue;
 	}
@@ -256,10 +302,12 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "remote_host=")) {
+	    CHECK(*cur, "remote_host=");
 	    remhost = *cur + sizeof("remote_host=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "timeout=")) {
+	    CHECK(*cur, "timeout=");
 	    p = *cur + sizeof("timeout=") - 1;
 	    user_timeout = parse_timeout(p);
 	    if (user_timeout == -1) {
@@ -273,6 +321,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 #ifdef ENABLE_SUDO_PLUGIN_API
 	if (MATCHES(*cur, "plugin_dir=")) {
+	    CHECK(*cur, "plugin_dir=");
 	    path_plugin_dir = *cur + sizeof("plugin_dir=") - 1;
 	    continue;
 	}
@@ -282,6 +331,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     user_umask = (mode_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
+	    CHECK(*cur, "user=");
 	    if ((user_name = strdup(*cur + sizeof("user=") - 1)) == NULL)
 		goto oom;
 	    continue;
@@ -307,15 +357,18 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
+	    CHECK(*cur, "groups=");
 	    groups = *cur + sizeof("groups=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "cwd=")) {
+	    CHECK(*cur, "cwd=");
 	    if ((user_cwd = strdup(*cur + sizeof("cwd=") - 1)) == NULL)
 		goto oom;
 	    continue;
 	}
 	if (MATCHES(*cur, "tty=")) {
+	    CHECK(*cur, "tty=");
 	    if ((user_ttypath = strdup(*cur + sizeof("tty=") - 1)) == NULL)
 		goto oom;
 	    user_tty = user_ttypath;
@@ -324,6 +377,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "host=")) {
+	    CHECK(*cur, "host=");
 	    if ((user_host = strdup(*cur + sizeof("host=") - 1)) == NULL)
 		goto oom;
 	    if ((p = strchr(user_host, '.')) != NULL) {
@@ -424,6 +478,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	user_umask = umask(0);
 	umask(user_umask);
     }
+
+    /* Always reset the environment for a login shell. */
+    if (ISSET(flags, MODE_LOGIN_SHELL))
+	def_env_reset = true;
 
     /* Some systems support fexecve() which we use for digest matches. */
     cmnd_fd = -1;
