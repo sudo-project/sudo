@@ -19,7 +19,7 @@
 
 use warnings;
 
-my $format="%ad  %aN  <%aE>%n%h%n%B%nFILES:";
+my $format="%ad  %aN  <%aE>%n%h%n%B%n";
 my @cmd = ("git", "log", "--log-size", "--name-only", "--date=short", "--format=$format", @ARGV);
 open(LOG, '-|', @cmd) || die "$0: unable to run git log: $!";
 
@@ -28,53 +28,50 @@ my $body;
 my @files;
 my $key_date = "";
 my $log_size = 0;
-my $state = 0;
+my @lines;
 
 while (<LOG>) {
     chomp;
     if (/^log size (\d+)$/) {
-	# XXX - should use log_size to make sure we get the entire entry
 	$log_size = $1;
 
 	# Print previous entry if there is one
 	print_entry($hash, $body, @files) if defined($hash);
 
 	# Init new entry
-	$state = 1;
 	undef $hash;
 	undef $body;
 	undef @files;
+	undef @lines;
 
-	# Check for continued entry
-	$_ = <LOG>;
-	last unless defined($_);
-	chomp;
+	# Read entry and split on newlines
+	read(LOG, my $buf, $log_size) ||
+	    die "$0: unable to read $log_size bytes: $!\n";
+	@lines = split(/\r?\n/, $buf);
+
+	# Check for continued entry (duplicate Date + Author)
+	$_ = shift(@lines);
 	if ($_ ne $key_date) {
 	    # New entry
 	    print "$_\n\n";
 	    $key_date = $_;
 	}
-    } elsif (/^FILES:$/) {
-	$state = 3;
-    } else {
-	if ($state == 1) {
-	    # hash
-	    $hash = $_;
-	    $state++;
-	} elsif ($state == 2) {
-	    # multi-line message body
+
+	# Hash comes first
+	$hash = shift(@lines);
+
+	# Commit message body (multi-line)
+	foreach (@lines) {
 	    if (defined($body)) {
 		$_ = "\r" if $_ eq "";
 		$body .= " $_";
 	    } else {
 		$body = $_;
 	    }
-	} elsif ($state == 3) {
-	    # file list
-	    push(@files, $_) unless $_ eq "";
-	} else {
-	    warn "unexpected state $state for $_\n";
 	}
+    } else {
+	# Not a log entry, must be the file list
+	push(@files, $_) unless $_ eq "";
     }
 }
 
