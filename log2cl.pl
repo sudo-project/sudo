@@ -19,7 +19,7 @@
 
 use warnings;
 
-my $format="%ad  %aN  <%aE>%n%h%n%s%n%b%nFILES:";
+my $format="%ad  %aN  <%aE>%n%h%n%B%nFILES:";
 my @cmd = ("git", "log", "--log-size", "--name-only", "--date=short", "--format=$format", @ARGV);
 open(LOG, '-|', @cmd) || die "$0: unable to run git log: $!";
 
@@ -62,8 +62,9 @@ while (<LOG>) {
 	    $hash = $_;
 	    $state++;
 	} elsif ($state == 2) {
-	    # message body
+	    # multi-line message body
 	    if (defined($body)) {
+		$_ = "\r" if $_ eq "";
 		$body .= " $_";
 	    } else {
 		$body = $_;
@@ -95,7 +96,7 @@ sub print_entry
 	$files
 	^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ~~
 	$body
-	^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	@*
 	$hash
 
 .
