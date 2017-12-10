@@ -185,6 +185,10 @@ ChangeLog:
 	    else \
 		rm -f $@.tmp; \
 	    fi; \
+	elif test -d $(srcdir)/.git && cd $(srcdir); then \
+	    $(top_srcdir)/log2cl.pl -b master > $@; \
+	else \
+	    echo "ChangeLog data not available" > $@; \
 	fi
 
 config.status:
