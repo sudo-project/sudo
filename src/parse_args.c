@@ -428,8 +428,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 #endif
 		case 'T':
-		    if (*optarg == '\0')
-			usage(1);
+		    /* Plugin determines whether empty timeout is allowed. */
 		    sudo_settings[ARG_TIMEOUT].value = optarg;
 		    break;
 		case 'S':

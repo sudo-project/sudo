@@ -307,7 +307,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "timeout=")) {
-	    CHECK(*cur, "timeout=");
 	    p = *cur + sizeof("timeout=") - 1;
 	    user_timeout = parse_timeout(p);
 	    if (user_timeout == -1) {
