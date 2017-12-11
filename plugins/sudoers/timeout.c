@@ -45,66 +45,64 @@ int
 parse_timeout(const char *timestr)
 {
     debug_decl(parse_timeout, SUDOERS_DEBUG_PARSER)
-    const char digits[] = "0123456789";
     const char suffixes[] = "dhms";
-    const char *cp;
+    const char *cp = timestr;
     int timeout = 0;
-    size_t len = 0;
     int idx = 0;
 
-    for (cp = timestr; *cp != '\0'; cp += len) {
+    do {
+	char *ep;
 	char ch;
 	long l;
 
-	if ((len = strspn(cp, digits)) == 0) {
-	    /* parse error */
+	/* Parse number, must be present and positive. */
+	errno = 0;
+	l = strtol(cp, &ep, 10);
+	if (ep == cp) {
+	    /* missing timeout */
 	    errno = EINVAL;
 	    debug_return_int(-1);
 	}
-	if (cp[len] == '\0') {
-	    /* no suffix, assume seconds. */
-	    ch = 's';
-	} else {
-	    ch = tolower(cp[len]);
-	    len++;
-	}
+	if (errno == ERANGE || l < 0 || l > INT_MAX)
+	    goto overflow;
 
 	/* Find a matching suffix or return an error. */
-	while (suffixes[idx] != ch) {
-	    if (suffixes[idx] == '\0') {
-		/* parse error */
-		errno = EINVAL;
-		debug_return_int(-1);
+	if (*ep != '\0') {
+	    ch = tolower((unsigned char)*ep++);
+	    while (suffixes[idx] != ch) {
+		if (suffixes[idx] == '\0') {
+		    /* parse error */
+		    errno = EINVAL;
+		    debug_return_int(-1);
+		}
+		idx++;
 	    }
-	    idx++;
-	}
 
-	errno = 0;
-	l = strtol(cp, NULL, 10);
-	if (errno == ERANGE || l > INT_MAX)
-	    goto overflow;
-	switch (ch) {
-	case 'd':
-	    if (l > INT_MAX / (24 * 60 * 60))
+	    /* Apply suffix. */
+	    switch (ch) {
+	    case 'd':
+		if (l > INT_MAX / (24 * 60 * 60))
+		    goto overflow;
+		l *= 24 * 60 * 60;
+		break;
+	    case 'h':
+		if (l > INT_MAX / (60 * 60))
+		    goto overflow;
+		l *= 60 * 60;
+		break;
+	    case 'm':
+		if (l > INT_MAX / 60)
+		    goto overflow;
+		l *= 60;
+		break;
+	    }
+	    if (l > INT_MAX - timeout)
 		goto overflow;
-	    l *= 24 * 60 * 60;
-	    break;
-	case 'h':
-	    if (l > INT_MAX / (60 * 60))
-		goto overflow;
-	    l *= 60 * 60;
-	    break;
-	case 'm':
-	    if (l > INT_MAX / 60)
-		goto overflow;
-	    l *= 60;
-	    break;
 	}
-	if (l > INT_MAX - timeout)
-	    goto overflow;
+	cp = ep;
 
 	timeout += l;
-    }
+    } while (*cp != '\0');
 
     debug_return_int(timeout);
 overflow:
