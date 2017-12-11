@@ -3288,6 +3288,14 @@ its own umask which will override the value set in
 .PP
 \fBStrings\fR:
 .TP 18n
+authfail_message
+Message that is displayed after a user fails to authenticate.
+The message may include the
+\(oq%d\(cq
+escape which will expand to the number of failed password attempts.
+If set, it overrides the default message,
+\fR%d incorrect password attempts\fR.
+.TP 18n
 badpass_message
 Message that is displayed if a user enters an incorrect password.
 The default is

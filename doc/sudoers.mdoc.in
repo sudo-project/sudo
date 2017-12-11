@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 26, 2017
+.Dd December 11, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3094,6 +3094,13 @@ its own umask which will override the value set in
 .Pp
 .Sy Strings :
 .Bl -tag -width 16n
+.It authfail_message
+Message that is displayed after a user fails to authenticate.
+The message may include the
+.Ql %d
+escape which will expand to the number of failed password attempts.
+If set, it overrides the default message,
+.Li %d incorrect password attempt(s) .
 .It badpass_message
 Message that is displayed if a user enters an incorrect password.
 The default is

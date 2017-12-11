@@ -422,6 +422,57 @@ log_allowed(int status)
 }
 
 /*
+ * Format an authentication failure message, using either
+ * authfail_message from sudoers or a locale-specific message.
+ */
+static int
+fmt_authfail_message(char **str, va_list ap)
+{
+    unsigned int tries = va_arg(ap, unsigned int);
+    char *src, *dst0, *dst, *dst_end;
+    size_t size;
+    int len;
+    debug_decl(fmt_authfail_message, SUDOERS_DEBUG_LOGGING)
+
+    if (def_authfail_message == NULL) {
+	debug_return_int(asprintf(str, ngettext("%u incorrect password attempt",
+	    "%u incorrect password attempts", tries), tries));
+    }
+
+    src = def_authfail_message;
+    size = strlen(src) + 33;
+    if ((dst0 = dst = malloc(size)) == NULL)
+	debug_return_int(-1);
+    dst_end = dst + size;
+
+    /* Always leave space for the terminating NUL. */
+    while (*src != '\0' && dst + 1 < dst_end) {
+	if (src[0] == '%') {
+	    switch (src[1]) {
+	    case '%':
+		src++;
+		break;
+	    case 'd':
+		len = snprintf(dst, dst_end - dst, "%u", tries);
+		if (len == -1 || len >= (int)(dst_end - dst))
+		    goto done;
+		dst += len;
+		src += 2;
+		continue;
+	    default:
+		break;
+	    }
+	}
+	*dst++ = *src++;
+    }
+done:
+    *dst = '\0';
+
+    *str = dst0;
+    debug_return_int(dst - dst0);
+}
+
+/*
  * Perform logging for log_warning()/log_warningx().
  */
 static bool
@@ -442,9 +493,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 
     /* Expand printf-style format + args (with a special case). */
     if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	unsigned int tries = va_arg(ap, unsigned int);
-	len = asprintf(&message, ngettext("%u incorrect password attempt",
-	    "%u incorrect password attempts", tries), tries);
+	len = fmt_authfail_message(&message, ap);
     } else {
 	len = vasprintf(&message, _(fmt), ap);
     }
@@ -508,9 +557,15 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     if (!ISSET(flags, SLOG_NO_STDERR)) {
 	sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	    unsigned int tries = va_arg(ap2, unsigned int);
-	    sudo_warnx_nodebug(ngettext("%u incorrect password attempt",
-		"%u incorrect password attempts", tries), tries);
+	    len = fmt_authfail_message(&message, ap2);
+	    if (len == -1) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		ret = false;
+		goto done;
+	    }
+	    sudo_warnx_nodebug("%s", message);
+	    free(message);
 	} else {
 	    errno = serrno;
 	    if (ISSET(flags, SLOG_USE_ERRNO))

@@ -348,3 +348,6 @@ timestamp_type
 	T_TUPLE
 	"Type of authentication timestamp record: %s"
 	global ppid tty
+authfail_message
+	T_STR
+	"Authentication failure message: %s"

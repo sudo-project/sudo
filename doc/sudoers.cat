@@ -1600,6 +1600,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      SSttrriinnggss:
 
+     authfail_message  Message that is displayed after a user fails to
+                       authenticate.  The message may include the `%d' escape
+                       which will expand to the number of failed password
+                       attempts.  If set, it overrides the default message, %d
+                       incorrect password attempts.
+
      badpass_message   Message that is displayed if a user enters an incorrect
                        password.  The default is Sorry, try again. unless
                        insults are enabled.

@@ -481,6 +481,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Type of authentication timestamp record: %s"),
 	def_data_timestamp_type,
     }, {
+	"authfail_message", T_STR,
+	N_("Authentication failure message: %s"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
