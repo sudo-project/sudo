@@ -312,7 +312,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 		case 'C':
 		    if (strtonum(optarg, 3, INT_MAX, NULL) == 0) {
-			sudo_warnx(_("the argument to -C must be a number greater than or equal to 3"));
+			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
 			usage(1);
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
