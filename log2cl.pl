@@ -62,6 +62,7 @@ while (<LOG>) {
 
 	# Commit message body (multi-line)
 	foreach (@lines) {
+	    last if $_ eq "--HG--";
 	    if (defined($body)) {
 		$_ = "\r" if $_ eq "";
 		$body .= " $_";
