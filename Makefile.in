@@ -124,7 +124,7 @@ cov-build:
 cov-upload:
 	tar zcf cov-int.tgz cov-int
 	curl --form token=$$COVERITY_SUDO_TOKEN \
-	    --form email=todd.miller@courtesan.com \
+	    --form email=todd.miller@sudo.ws \
 	    --form file=@cov-int.tgz \
 	    --form version="$(VERSION)" \
 	    https://scan.coverity.com/builds?project=sudo
