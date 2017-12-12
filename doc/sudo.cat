@@ -231,9 +231,9 @@ DDEESSCCRRIIPPTTIIOONN
 
                  If a _c_o_m_m_a_n_d is specified and is permitted by the security
                  policy, the fully-qualified path to the command is displayed
-                 along with any command line arguments.  If _c_o_m_m_a_n_d is
-                 specified but not allowed, ssuuddoo will exit with a status value
-                 of 1.
+                 along with any command line arguments.  If a _c_o_m_m_a_n_d is
+                 specified but not allowed by the policy, ssuuddoo will exit with
+                 a status value of 1.
 
      --nn, ----nnoonn--iinntteerraaccttiivvee
                  Avoid prompting the user for input of any kind.  If a
@@ -458,15 +458,21 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
 EEXXIITT VVAALLUUEE
      Upon successful execution of a command, the exit status from ssuuddoo will be
      the exit status of the program that was executed.  If the command
-     terminated due to receipt of a signal, ssuuddoo will send itself the signal
-     that terminated the command.
+     terminated due to receipt of a signal, ssuuddoo will send itself the same
+     signal that terminated the command.
 
-     Otherwise, ssuuddoo exits with a value of 1 if there is a
-     configuration/permission problem or if ssuuddoo cannot execute the given
-     command.  In the latter case, the error string is printed to the standard
-     error.  If ssuuddoo cannot stat(2) one or more entries in the user's PATH, an
-     error is printed to the standard error.  (If the directory does not exist
-     or if it is not really a directory, the entry is ignored and no error is
+     If the --ll option was specified without a command, ssuuddoo will exit with a
+     value of 0 if the user is allowed to run ssuuddoo and they authenticated
+     successfully (as required by the security policy).  If a command is
+     specified with the --ll option, the exit value will only be 0 if the
+     command is permitted by the security policy, otherwise it will be 1.
+
+     If there is an authentication failure, a configuration/permission problem
+     or if the given command cannot be executed, ssuuddoo exits with a value of 1.
+     In the latter case, the error string is printed to the standard error.
+     If ssuuddoo cannot stat(2) one or more entries in the user's PATH, an error
+     is printed to the standard error.  (If the directory does not exist or if
+     it is not really a directory, the entry is ignored and no error is
      printed.)  This should not happen under normal circumstances.  The most
      common reason for stat(2) to return "permission denied" is if you are
      running an automounter and one of the directories in your PATH is on a

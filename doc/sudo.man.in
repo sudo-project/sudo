@@ -460,9 +460,9 @@ If a
 is specified and is permitted by the security policy, the fully-qualified
 path to the command is displayed along with any command line
 arguments.
-If
+If a
 \fIcommand\fR
-is specified but not allowed,
+is specified but not allowed by the policy,
 \fBsudo\fR
 will exit with a status value of 1.
 .TP 12n
@@ -896,14 +896,24 @@ Upon successful execution of a command, the exit status from
 will be the exit status of the program that was executed.
 If the command terminated due to receipt of a signal,
 \fBsudo\fR
-will send itself the signal that terminated the command.
+will send itself the same signal that terminated the command.
 .PP
-Otherwise,
+If the
+\fB\-l\fR
+option was specified without a command,
 \fBsudo\fR
-exits with a value of 1 if there is a configuration/permission
-problem or if
+will exit with a value of 0 if the user is allowed to run
 \fBsudo\fR
-cannot execute the given command.
+and they authenticated successfully (as required by the security policy).
+If a command is specified with the
+\fB\-l\fR
+option, the exit value will only be 0 if the command is permitted by the
+security policy, otherwise it will be 1.
+.PP
+If there is an authentication failure, a configuration/permission
+problem or if the given command cannot be executed,
+\fBsudo\fR
+exits with a value of 1.
 In the latter case, the error string is printed to the standard error.
 If
 \fBsudo\fR
