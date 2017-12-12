@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "5" "January 17, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "December 12, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -245,6 +245,18 @@ that contains a list of users that commands may be run as.
 The special value
 \fRALL\fR
 will match any user.
+If
+\fRsudoRunAsUser\fR
+is specified but empty, it will match the invoking user.
+If neither
+\fRsudoRunAsUser\fR
+nor
+\fRsudoRunAsGroup\fR
+are present, the value of the
+runas_default
+\fRsudoOption\fR
+is used (defaults to
+\fR@runas_default@ ).\fR
 .sp
 The
 \fRsudoRunAsUser\fR

@@ -122,7 +122,10 @@ DDEESSCCRRIIPPTTIIOONN
            A user name or uid (prefixed with `#') that commands may be run as
            or a Unix group (prefixed with a `%') or user netgroup (prefixed
            with a `+') that contains a list of users that commands may be run
-           as.  The special value ALL will match any user.
+           as.  The special value ALL will match any user.  If sudoRunAsUser
+           is specified but empty, it will match the invoking user.  If
+           neither sudoRunAsUser nor sudoRunAsGroup are present, the value of
+           the runas_default sudoOption is used (defaults to root ).
 
            The sudoRunAsUser attribute is only available in ssuuddoo versions
            1.7.0 and higher.  Older versions of ssuuddoo use the sudoRunAs
@@ -910,4 +913,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    January 17, 2017                    Sudo 1.8.22
+Sudo 1.8.22                    December 12, 2017                   Sudo 1.8.22

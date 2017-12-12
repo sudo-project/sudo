@@ -680,6 +680,12 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 		ret = true;
 	    }
 	    break;
+	case '\0':
+	    /* Empty RunAsUser means run as the invoking user. */
+	    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
+		strcmp(user_name, runas_pw->pw_name) == 0)
+		ret = true;
+	    break;
 	case 'A':
 	    if (strcmp(val, "ALL") == 0) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "ALL => match");
@@ -1773,7 +1779,8 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     switch (handle->fn_get_values(rule, "sudoCommand", &val_array)) {
     case 0:
 	for (i = 0; val_array[i] != NULL; ++i) {
-	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "",
+		val_array[i][0] ? val_array[i] : user_name);
 	    count++;
 	}
 	handle->fn_free_values(val_array);

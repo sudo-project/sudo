@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 17, 2017
+.Dd December 12, 2017
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -229,6 +229,18 @@ that contains a list of users that commands may be run as.
 The special value
 .Li ALL
 will match any user.
+If
+.Li sudoRunAsUser
+is specified but empty, it will match the invoking user.
+If neither
+.Li sudoRunAsUser
+nor
+.Li sudoRunAsGroup
+are present, the value of the
+.En runas_default
+.Li sudoOption
+is used (defaults to
+.Li @runas_default@ ).
 .Pp
 The
 .Li sudoRunAsUser
