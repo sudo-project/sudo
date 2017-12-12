@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "September 26, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "December 11, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3294,7 +3294,7 @@ The message may include the
 \(oq%d\(cq
 escape which will expand to the number of failed password attempts.
 If set, it overrides the default message,
-\fR%d incorrect password attempts\fR.
+\fR%d incorrect password attempt(s)\fR.
 .TP 18n
 badpass_message
 Message that is displayed if a user enters an incorrect password.
