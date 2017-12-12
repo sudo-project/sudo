@@ -14,12 +14,12 @@ What's new in Sudo 1.8.22
  * Fixed a crash when the system's host name is not set.
    Bug #807
 
- * The sudoers2ldif script now handle #include and #includedir 
+ * The sudoers2ldif script now handles #include and #includedir 
    directives.
 
  * Fixed a bug where sudo would silently exit when the command was
    not allowed by sudoers and the "passwd_tries" sudoers option
-   was set to a value less than 1.
+   was set to a value less than one.
 
  * Fixed a bug with the "listpw" and "verifypw" sudoers options and
    multiple sudoers sources.  If the option is set to "all", a
@@ -49,6 +49,13 @@ What's new in Sudo 1.8.22
    I/O logging was enabled.  If the TOSTOP terminal flag is set,
    sudo will suspend the command (and then itself) with the SIGTTOU
    signal.
+
+ * A new "authfail_message" sudoers option that overrides the
+   default "N incorrect password attempt(s)".
+
+ * An empty sudoRunAsUser attribute in the LDAP and SSSD backends
+   will now match the invoking user.  This is more consistent with
+   how an empty runas user in the sudoers file is treated.
 
 What's new in Sudo 1.8.21p2
 
