@@ -828,87 +828,85 @@ backchannel_cb(int fd, int what, void *v)
      * Read command status from the monitor.
      * Note that the backchannel is a *blocking* socket.
      */
-    for (;;) {
-	nread = recv(fd, &cstat, sizeof(cstat), MSG_WAITALL);
-	switch (nread) {
-	case -1:
-	    switch (errno) {
-	    case EINTR:
-	    case EAGAIN:
-		/* Nothing ready. */
-		break;
-	    default:
-		if (ec->cstat->val == CMD_INVALID) {
-		    ec->cstat->type = CMD_ERRNO;
-		    ec->cstat->val = errno;
-		    sudo_debug_printf(SUDO_DEBUG_ERROR,
-			"%s: failed to read command status: %s",
-			__func__, strerror(errno));
-		    sudo_ev_loopbreak(ec->evbase);
-		}
-		break;
-	    }
-	    break;
-	case 0:
-	    /* EOF, monitor exited or was killed. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"EOF on backchannel, monitor dead?");
-	    if (ec->cstat->type == CMD_INVALID) {
-		/* XXX - need new CMD_ type for monitor errors. */
-		ec->cstat->type = CMD_ERRNO;
-		ec->cstat->val = ECONNRESET;
-	    }
-	    sudo_ev_loopexit(ec->evbase);
-	    break;
-	case sizeof(cstat):
-	    /* Check command status. */
-	    switch (cstat.type) {
-	    case CMD_PID:
-		ec->cmnd_pid = cstat.val;
-		sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
-		    ec->details->command, (int)ec->cmnd_pid);
-		break;
-	    case CMD_WSTATUS:
-		if (WIFSTOPPED(cstat.val)) {
-		    int signo;
-
-		    /* Suspend parent and tell monitor how to resume on return. */
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"command stopped, suspending parent");
-		    signo = suspend_sudo(WSTOPSIG(cstat.val), ec->ppgrp);
-		    schedule_signal(ec, signo);
-		    /* Re-enable I/O events */
-		    add_io_events(ec->evbase);
-		} else {
-		    /* Command exited or was killed, either way we are done. */
-		    sudo_debug_printf(SUDO_DEBUG_INFO, "command exited or was killed");
-		    sudo_ev_loopexit(ec->evbase);
-		}
-		*ec->cstat = cstat;
-		break;
-	    case CMD_ERRNO:
-		/* Monitor was unable to execute command or broken pipe. */
-		sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
-		    strerror(cstat.val));
-		sudo_ev_loopbreak(ec->evbase);
-		*ec->cstat = cstat;
-		break;
-	    }
-	    /* Keep reading command status messages until EAGAIN or EOF. */
+    nread = recv(fd, &cstat, sizeof(cstat), MSG_WAITALL);
+    switch (nread) {
+    case -1:
+	switch (errno) {
+	case EINTR:
+	case EAGAIN:
+	    /* Nothing ready. */
 	    break;
 	default:
-	    /* Short read, should not happen. */
 	    if (ec->cstat->val == CMD_INVALID) {
 		ec->cstat->type = CMD_ERRNO;
-		ec->cstat->val = EIO;
+		ec->cstat->val = errno;
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
-		    "%s: failed to read command status: short read", __func__);
+		    "%s: failed to read command status: %s",
+		    __func__, strerror(errno));
 		sudo_ev_loopbreak(ec->evbase);
 	    }
 	    break;
 	}
-	debug_return;
+	break;
+    case 0:
+	/* EOF, monitor exited or was killed. */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "EOF on backchannel, monitor dead?");
+	if (ec->cstat->type == CMD_INVALID) {
+	    /* XXX - need new CMD_ type for monitor errors. */
+	    ec->cstat->type = CMD_ERRNO;
+	    ec->cstat->val = ECONNRESET;
+	}
+	sudo_ev_loopexit(ec->evbase);
+	break;
+    case sizeof(cstat):
+	/* Check command status. */
+	switch (cstat.type) {
+	case CMD_PID:
+	    ec->cmnd_pid = cstat.val;
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
+		ec->details->command, (int)ec->cmnd_pid);
+	    break;
+	case CMD_WSTATUS:
+	    if (WIFSTOPPED(cstat.val)) {
+		int signo;
+
+		/* Suspend parent and tell monitor how to resume on return. */
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "command stopped, suspending parent");
+		signo = suspend_sudo(WSTOPSIG(cstat.val), ec->ppgrp);
+		schedule_signal(ec, signo);
+		/* Re-enable I/O events */
+		add_io_events(ec->evbase);
+	    } else {
+		/* Command exited or was killed, either way we are done. */
+		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited or was killed");
+		sudo_ev_loopexit(ec->evbase);
+	    }
+	    *ec->cstat = cstat;
+	    break;
+	case CMD_ERRNO:
+	    /* Monitor was unable to execute command or broken pipe. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
+		strerror(cstat.val));
+	    sudo_ev_loopbreak(ec->evbase);
+	    *ec->cstat = cstat;
+	    break;
+	}
+	/* Keep reading command status messages until EAGAIN or EOF. */
+	break;
+    default:
+	/* Short read, should not happen. */
+	if (ec->cstat->val == CMD_INVALID) {
+	    ec->cstat->type = CMD_ERRNO;
+	    ec->cstat->val = EIO;
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%s: failed to read command status: short read", __func__);
+	    sudo_ev_loopbreak(ec->evbase);
+	}
+	break;
     }
+    debug_return;
 }
 
 /*
