@@ -608,6 +608,14 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
 	    debug_return_bool(false);
     }
+    if (entry.size != sizeof(entry)) {
+	/* Reset position if the lock record has an unexpected size. */
+	if (lseek(cookie->fd, entry.size, SEEK_SET) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to seek to %lld", (long long)entry.size);
+	    debug_return_bool(false);
+	}
+    }
 
     /* Search for a tty/ppid-based record or append a new one. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
