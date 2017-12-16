@@ -2772,19 +2772,21 @@ SSEECCUURRIITTYY NNOOTTEESS
      with a date greater than current_time + 2 * TIMEOUT will be ignored and
      ssuuddooeerrss will log and complain.
 
-     Since time stamp files live in the file system, they can outlive a user's
-     login session.  As a result, a user may be able to login, run a command
-     with ssuuddoo after authenticating, logout, login again, and run ssuuddoo without
-     authenticating so long as the record's time stamp is within 5 minutes (or
-     whatever value the timeout is set to in the _s_u_d_o_e_r_s file).  When the
-     _t_t_y___t_i_c_k_e_t_s option is enabled, the time stamp record includes the device
-     number of the terminal the user authenticated with.  This provides per-
-     tty granularity but time stamp records still may outlive the user's
-     session.  The time stamp record also includes the session ID of the
-     process that last authenticated.  This prevents processes in different
-     terminal sessions from using the same time stamp record.  It also helps
-     reduce the chance that a user will be able to run ssuuddoo without entering a
-     password when logging out and back in again on the same terminal.
+     If the _t_i_m_e_s_t_a_m_p___t_y_p_e option is set to "tty", the time stamp record
+     includes the device number of the terminal the user authenticated with.
+     This provides per-terminal granularity but time stamp records may still
+     outlive the user's session.
+
+     Unless the _t_i_m_e_s_t_a_m_p___t_y_p_e option is set to "global", the time stamp
+     record also includes the session ID of the process that last
+     authenticated.  This prevents processes in different terminal sessions
+     from using the same time stamp record.  On systems where a process's
+     start time can be queried, the start time of the session leader is
+     recorded in the time stamp record.  If no terminal is present or the
+     _t_i_m_e_s_t_a_m_p___t_y_p_e option is set to "ppid", the start time of the parent
+     process is used instead.  In most cases this will prevent a time stamp
+     record from being re-used without the user entering a password when
+     logging out and back in again.
 
 DDEEBBUUGGGGIINNGG
      Versions 1.8.4 and higher of the ssuuddooeerrss plugin support a flexible
@@ -2886,4 +2888,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    December 11, 2017                   Sudo 1.8.22
+Sudo 1.8.22                    December 15, 2017                   Sudo 1.8.22

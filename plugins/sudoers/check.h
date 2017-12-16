@@ -34,7 +34,7 @@
  * records.  Each record starts with a 16-bit version number and a 16-bit
  * record size.  Multiple record types can coexist in the same file.
  */
-#define	TS_VERSION		1
+#define	TS_VERSION		2
 
 /* Time stamp entry types */
 #define TS_GLOBAL		0x01
@@ -46,7 +46,6 @@
 #define TS_DISABLED		0x01	/* entry disabled */
 #define TS_ANYUID		0x02	/* ignore uid, only valid in the key */
 
-/* XXX - may also want to store uid/gid of tty device */
 struct timestamp_entry {
     unsigned short version;	/* version number */
     unsigned short size;	/* entry size */
@@ -54,6 +53,7 @@ struct timestamp_entry {
     unsigned short flags;	/* TS_DISABLED, TS_ANYUID */
     uid_t auth_uid;		/* uid to authenticate as */
     pid_t sid;			/* session ID associated with tty/ppid */
+    struct timespec start_time;	/* session/ppid start time */
     struct timespec ts;		/* timestamp (CLOCK_MONOTONIC) */
     union {
 	dev_t ttydev;		/* tty device number */
@@ -66,6 +66,7 @@ void  timestamp_close(void *vcookie);
 bool  timestamp_lock(void *vcookie, struct passwd *pw);
 bool  timestamp_update(void *vcookie, struct passwd *pw);
 int   timestamp_status(void *vcookie, struct passwd *pw);
+int   get_starttime(pid_t pid, struct timespec *starttime);
 bool  already_lectured(int status);
 int   set_lectured(void);
 

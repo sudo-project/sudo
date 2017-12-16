@@ -515,6 +515,7 @@ plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
 plugins/sudoers/sssd.c
+plugins/sudoers/starttime.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
 plugins/sudoers/sudo_printf.c

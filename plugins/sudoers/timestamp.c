@@ -90,9 +90,14 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 	/* verify parent pid */
 	if (entry->u.ppid != key->u.ppid)
 	    debug_return_bool(false);
+	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
+	    debug_return_bool(false);
+        break;
 	break;
     case TS_TTY:
 	if (entry->u.ttydev != key->u.ttydev)
+	    debug_return_bool(false);
+	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
 	    debug_return_bool(false);
 	break;
     default:
@@ -334,6 +339,8 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
 	    entry->u.ttydev = sb.st_rdev;
+	    if (entry->sid != -1)
+		get_starttime(entry->sid, &entry->start_time);
 	    break;
 	}
 	/* FALLTHROUGH */
@@ -341,6 +348,7 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 	/* ppid-based time stamp */
 	entry->type = TS_PPID;
 	entry->u.ppid = getppid();
+	get_starttime(entry->u.ppid, &entry->start_time);
 	break;
     default:
 	/* global time stamp */

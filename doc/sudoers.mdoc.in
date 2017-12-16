@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 11, 2017
+.Dd December 15, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5089,31 +5089,33 @@ will be ignored and
 .Nm sudoers
 will log and complain.
 .Pp
-Since time stamp files live in the file system, they can outlive a
-user's login session.
-As a result, a user may be able to login, run a command with
-.Nm sudo
-after authenticating, logout, login again, and run
-.Nm sudo
-without authenticating so long as the record's time stamp is within
-.Li @timeout@
-minutes (or whatever value the timeout is set to in the
-.Em sudoers
-file).
-When the
-.Em tty_tickets
-option is enabled, the time stamp record includes the device
-number of the terminal the user authenticated with.
-This provides per-tty granularity but time stamp records still
-may outlive the user's session.
-The time stamp record also includes the session ID of the process
+If the
+.Em timestamp_type
+option is set to
+.Dq tty ,
+the time stamp record includes the device number of the terminal
+the user authenticated with.
+This provides per-terminal granularity but time stamp records may still
+outlive the user's session.
+.Pp
+Unless the
+.Em timestamp_type
+option is set to
+.Dq global ,
+the time stamp record also includes the session ID of the process
 that last authenticated.
 This prevents processes in different terminal sessions from using
 the same time stamp record.
-It also helps reduce the chance that a user will be able to run
-.Nm sudo
-without entering a password when logging out and back in again
-on the same terminal.
+On systems where a process's start time can be queried,
+the start time of the session leader
+is recorded in the time stamp record.
+If no terminal is present or the
+.Em timestamp_type
+option is set to
+.Dq ppid ,
+the start time of the parent process is used instead.
+In most cases this will prevent a time stamp record from being re-used
+without the user entering a password when logging out and back in again.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
 .Nm
