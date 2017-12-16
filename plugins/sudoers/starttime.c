@@ -84,7 +84,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int mib[6], rc;
-    debug_decl(get_starttime, SUDO_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
 
     /*
      * Lookup start time for pid via sysctl.
@@ -116,6 +116,9 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	starttime->tv_sec = ki_proc->p_ustart_sec;
 	starttime->tv_nsec = ki_proc->p_ustart_usec / 1000;
 #endif
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: start time for %d: { %lld, %ld }", __func__,
+	    (int)pid, (long long)starttime->tv_sec, (long)starttime->tv_nsec);
     } else {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to get start time for %d via KERN_PROC", (int)pid);
@@ -132,7 +135,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     char path[PATH_MAX];
     ssize_t nread;
     int fd, ret = -1;
-    debug_decl(get_starttime, SUDO_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
 
     /* Determine the start time from pr_start in /proc/pid/psinfo. */
     snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)pid);
@@ -143,6 +146,10 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	    starttime->tv_sec = psinfo.pr_start.tv_sec;
 	    starttime->tv_nsec = psinfo.pr_start.tv_nsec;
 	    ret = 0;
+
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: start time for %d: { %lld, %ld }", __func__, (int)pid,
+		(long long)starttime->tv_sec, (long)starttime->tv_nsec);
 	}
     }
 
@@ -161,7 +168,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     int ret = -1;
     int fd = -1;
     long tps;
-    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
 
     /*
      * Start time is in ticks per second on Linux.
@@ -202,7 +209,6 @@ get_starttime(pid_t pid, struct timespec *starttime)
 
 		while (*++ep != '\0') {
 		    if (*ep == ' ') {
-			*ep = '\0';
 			if (++field == 22) {
 			    unsigned long long ullval;
 
@@ -226,8 +232,14 @@ get_starttime(pid_t pid, struct timespec *starttime)
 			    starttime->tv_sec = ullval / tps;
 			    starttime->tv_nsec =
 				(ullval % tps) * (1000000000 / tps);
-
 			    ret = 0;
+
+			    sudo_debug_printf(SUDO_DEBUG_INFO,
+				"%s: start time for %d: { %lld, %ld }",
+				__func__, (int)pid,
+				(long long)starttime->tv_sec,
+				(long)starttime->tv_nsec);
+
 			    goto done;
 			}
 			cp = ep + 1;
@@ -244,6 +256,7 @@ done:
     if (ret == -1)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to get start time for %d via %s", (int)pid, path);
+
     debug_return_int(ret);
 }
 #elif defined(HAVE_PSTAT_GETPROC)
@@ -252,7 +265,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
 {
     struct pst_status pstat;
     int rc;
-    debug_decl(get_starttime, SUDO_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
 
     /*
      * Determine the start time from pst_start in struct pst_status.
@@ -262,6 +275,11 @@ get_starttime(pid_t pid, struct timespec *starttime)
     if (rc != -1 || errno == EOVERFLOW) {
 	starttime->tv_sec = pstat.pst_start;
 	starttime->tv_nsec = 0;
+
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: start time for %d: { %lld, %ld }", __func__,
+	    (int)pid, (long long)starttime->tv_sec, (long)starttime->tv_nsec);
+
 	debug_return_int(0);
     }
 
@@ -273,7 +291,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
 int
 get_starttime(pid_t pid, struct timespec *starttime)
 {
-    debug_decl(get_starttime, SUDO_DEBUG_UTIL)
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
 
     sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 	"process start time not supported by sudo on this system");
