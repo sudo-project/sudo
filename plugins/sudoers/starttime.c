@@ -67,7 +67,7 @@
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_namelen	6
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_namelen	4
@@ -111,6 +111,10 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	/* FreeBSD and Dragonfly */
 	starttime->tv_sec = ki_proc->ki_start.tv_sec;
 	starttime->tv_nsec = ki_proc->ki_start.tv_usec / 1000;
+#elif defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+	/* 4.4BSD and macOS */
+	starttime->tv_sec = ki_proc->kp_proc.p_starttime.tv_sec;
+	starttime->tv_nsec = ki_proc->kp_proc.p_starttime.tv_usec / 1000;
 #else
 	/* NetBSD and OpenBSD */
 	starttime->tv_sec = ki_proc->p_ustart_sec;
