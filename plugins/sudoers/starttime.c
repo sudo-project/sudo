@@ -108,9 +108,9 @@ get_starttime(pid_t pid, struct timespec *starttime)
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
 #if defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
-	/* FreeBSD and macOS */
-	starttime->tv_sec = ki_proc->ki_start->tv_sec;
-	starttime->tv_nsec = ki_proc->ki_start->tv_usec / 1000;
+	/* FreeBSD and Dragonfly */
+	starttime->tv_sec = ki_proc->ki_start.tv_sec;
+	starttime->tv_nsec = ki_proc->ki_start.tv_usec / 1000;
 #else
 	/* NetBSD and OpenBSD */
 	starttime->tv_sec = ki_proc->p_ustart_sec;
