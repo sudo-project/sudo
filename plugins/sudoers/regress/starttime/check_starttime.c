@@ -24,33 +24,76 @@
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
+#include "sudo_fatal.h"
 #include "check.h"
 
 __dso_public int main(int argc, char *argv[]);
+
+#ifdef __linux__
+static int
+get_now(struct timespec *now)
+{
+    int ret = -1;
+    char buf[1024];
+    FILE *fp;
+
+    /* Linux process start time is relative to boot time. */
+    fp = fopen("/proc/uptime", "r");
+    if (fp != NULL) {
+	if (fgets(buf, sizeof(buf), fp) != NULL) {
+	    char *ep;
+	    double uptime = strtod(buf, &ep);
+	    if (*ep == ' ') {
+		now->tv_sec = (time_t)uptime;
+		now->tv_nsec = (uptime - (time_t)uptime) * 1000000000;
+		ret = 0;
+	    }
+	}
+	fclose(fp);
+    }
+    return ret;
+}
+#else
+static int
+get_now(struct timespec *now)
+{
+    /* Process start time is relative to wall clock time. */
+    return sudo_gettime_real(now);
+}
+#endif
 
 int
 main(int argc, char *argv[])
 {
     int ntests = 0, errors = 0;
-    struct timespec ts;
+    struct timespec now, then, delta;
     pid_t pids[2];
     int i;
 
     initprogname(argc > 0 ? argv[0] : "check_starttime");
 
+    if (get_now(&now) == -1)
+	sudo_fatal_nodebug("unable to get current time");
+
     pids[0] = getpid();
     pids[1] = getppid();
 
-    /*
-     * We don't try to check the resulting timespec as it differs
-     * by platform.  On some it is wallclock time, on others it
-     * is relative to boot time.
-     */
     for (i = 0; i < 2; i++) {
 	ntests++;
-	if (get_starttime(pids[i], &ts)  == -1) {
+	if (get_starttime(pids[i], &then)  == -1) {
 	    printf("%s: test %d: unable to get start time for pid %d\n",
 		getprogname(), ntests, (int)pids[i]);
+	    errors++;
+	}
+	if (i != 0)
+	    continue;
+
+	/* Verify our own process start time, allowing for some drift. */
+	ntests++;
+	sudo_timespecsub(&then, &now, &delta);
+	if (delta.tv_sec > 30 || delta.tv_sec < -30) {
+	    printf("%s: test %d: unexpected start time for pid %d: %s",
+		getprogname(), ntests, (int)pids[i], ctime(&then.tv_sec));
 	    errors++;
 	}
     }
