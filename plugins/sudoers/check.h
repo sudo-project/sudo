@@ -37,10 +37,10 @@
 #define	TS_VERSION		2
 
 /* Time stamp entry types */
-#define TS_GLOBAL		0x01
-#define TS_TTY			0x02
-#define TS_PPID			0x03
-#define TS_LOCKEXCL		0x04
+#define TS_GLOBAL		0x01	/* not restricted by tty or ppid */
+#define TS_TTY			0x02	/* restricted by tty */
+#define TS_PPID			0x03	/* restricted by ppid */
+#define TS_LOCKEXCL		0x04	/* special lock record */
 
 /* Time stamp flags */
 #define TS_DISABLED		0x01	/* entry disabled */

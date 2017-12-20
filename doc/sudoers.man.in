@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "December 15, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "December 20, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -217,7 +217,8 @@ file lookup is still done for root, not the user specified by
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the user ID that was used to authenticate, the
-terminal session ID, and a time stamp
+terminal session ID, the start time of the session leader
+(or parent proccess) and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
 \fBsudo\fR
@@ -5651,6 +5652,7 @@ sudo.conf(@mansectform@),
 sudoers.ldap(@mansectform@),
 sudo(@mansectsu@),
 sudo_plugin(@mansectform@),
+sudoers_timestamp(@mansectform@),
 visudo(@mansectsu@)
 .SH "AUTHORS"
 Many people have worked on

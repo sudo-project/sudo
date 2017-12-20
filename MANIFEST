@@ -40,6 +40,9 @@ doc/sudoers.ldap.man.in
 doc/sudoers.ldap.mdoc.in
 doc/sudoers.man.in
 doc/sudoers.mdoc.in
+doc/sudoers_timestamp.cat
+doc/sudoers_timestamp.man.in
+doc/sudoers_timestamp.mdoc.in
 doc/sudoreplay.cat
 doc/sudoreplay.man.in
 doc/sudoreplay.mdoc.in

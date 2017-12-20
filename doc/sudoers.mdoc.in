@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 15, 2017
+.Dd December 20, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -205,7 +205,8 @@ file lookup is still done for root, not the user specified by
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the user ID that was used to authenticate, the
-terminal session ID, and a time stamp
+terminal session ID, the start time of the session leader
+(or parent proccess) and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
 .Nm sudo
@@ -5221,6 +5222,7 @@ manual.
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudo @mansectsu@ ,
 .Xr sudo_plugin @mansectform@ ,
+.Xr sudoers_timestamp @mansectform@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on
