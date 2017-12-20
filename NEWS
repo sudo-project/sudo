@@ -72,6 +72,11 @@ What's new in Sudo 1.8.22
    the likelihood of a time stamp record being re-used when a user
    logs out and back in again.  Bug #818.
 
+ * The "timestamp_type" option now takes a "kernel" value on OpenBSD
+   systems.  This causes the tty-based time stamp to be stored in
+   the kernel instead of on the file system.  If no tty is present,
+   the time stamp is considered to be invalid.
+
 What's new in Sudo 1.8.21p2
 
  * Fixed a bug introduced in version 1.8.21 which prevented sudo

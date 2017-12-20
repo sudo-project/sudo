@@ -32,6 +32,7 @@ static struct def_values def_data_timestamp_type[] = {
     { "global", global },
     { "ppid", ppid },
     { "tty", tty },
+    { "kernel", kernel },
     { NULL, 0 },
 };
 

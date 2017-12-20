@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)
@@ -388,6 +389,13 @@ timestamp_open(const char *user, pid_t sid)
 	goto bad;
     }
 
+    if (def_timestamp_type == kernel) {
+	fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    goto bad;
+	goto done;
+    }
+
     /* Sanity check timestamp dir and create if missing. */
     if (!ts_secure_dir(def_timestampdir, true, false))
 	goto bad;
@@ -435,6 +443,7 @@ timestamp_open(const char *user, pid_t sid)
 	break;
     }
 
+done:
     /* Allocate and fill in cookie to store state. */
     cookie = malloc(sizeof(*cookie));
     if (cookie == NULL) {
@@ -590,6 +599,11 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	debug_return_bool(false);
     }
 
+    if (def_timestamp_type == kernel) {
+	cookie->pos = 0;
+	debug_return_bool(true);
+    }
+
     /*
      * Take a lock on the "write" record (the first record in the file).
      * This will let us seek for the record or extend as needed
@@ -732,6 +746,20 @@ timestamp_status(void *vcookie, struct passwd *pw)
 	goto done;
     }
 
+    if (def_timestamp_type == kernel) {
+#ifdef TIOCCHKVERAUTH
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    goto done;
+	if (ioctl(fd, TIOCCHKVERAUTH) == 0)
+	    status = TS_CURRENT;
+	else
+	    status = TS_OLD;
+	close(fd);
+#endif
+	goto done;
+    }
+
     /* Read the record at the correct position. */
     if ((nread = ts_read(cookie, &entry)) != sizeof(entry))
 	goto done;
@@ -833,6 +861,18 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	goto done;
     }
 
+    if (def_timestamp_type == kernel) {
+#ifdef TIOCSETVERAUTH
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd != -1) {
+	    int secs = 60 * def_timestamp_timeout;
+	    ioctl(fd, TIOCSETVERAUTH, &secs);
+	    close(fd);
+	}
+#endif
+	goto done;
+    }
+
     /* Update timestamp in key and enable it. */
     CLR(cookie->key.flags, TS_DISABLED);
     if (sudo_gettime_mono(&cookie->key.ts) == -1) {
@@ -863,6 +903,17 @@ timestamp_remove(bool unlink_it)
     int fd = -1, ret = true;
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH)
+
+    if (def_timestamp_type == kernel) {
+#ifdef TIOCCLRVERAUTH
+	fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    ret = -1;
+	else
+	    ioctl(fd, TIOCCLRVERAUTH);
+#endif
+	goto done;
+    }
 
     if (asprintf(&fname, "%s/%s", def_timestampdir, user_name) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

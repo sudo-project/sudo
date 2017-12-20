@@ -232,5 +232,6 @@ enum def_tuple {
 	digest_only,
 	global,
 	ppid,
-	tty
+	tty,
+	kernel
 };

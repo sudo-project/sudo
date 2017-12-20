@@ -3470,6 +3470,11 @@ minutes
 .Li @timeout@
 by default
 .Pc .
+.It kernel
+The time stamp is stored in the kernel as an attribute of the terminal
+device.
+If no terminal is present, the time stamp is considered to be invalid.
+This is currently only supported on OpenBSD.
 .El
 .Pp
 The default value is

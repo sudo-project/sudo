@@ -1864,6 +1864,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                                will not require a password for
                                _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t minutes (5 by default).
 
+                       kernel  The time stamp is stored in the kernel as an
+                               attribute of the terminal device.  If no
+                               terminal is present, the time stamp is
+                               considered to be invalid.  This is currently
+                               only supported on OpenBSD.
+
                        The default value is _t_t_y.
 
                        This setting is only supported by version 1.8.21 or

@@ -3708,6 +3708,12 @@ minutes
 (\fR@timeout@\fR
 by default)
 \&.
+.TP 8n
+kernel
+The time stamp is stored in the kernel as an attribute of the terminal
+device.
+If no terminal is present, the time stamp is considered to be invalid.
+This is currently only supported on OpenBSD.
 .PP
 The default value is
 \fI@timestamp_type@\fR.
