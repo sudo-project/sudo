@@ -1290,7 +1290,9 @@ find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
 	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
 	    editor_path = resolve_editor(cp, (size_t)(ep - cp), nfiles,
 		files, argc_out, argv_out, NULL);
-	    if (editor_path == NULL && errno != ENOENT)
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
 		debug_return_str(NULL);
 	}
     }
