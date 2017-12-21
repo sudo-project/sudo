@@ -54,7 +54,7 @@ struct timestamp_entry {
     uid_t auth_uid;		/* uid to authenticate as */
     pid_t sid;			/* session ID associated with tty/ppid */
     struct timespec start_time;	/* session/ppid start time */
-    struct timespec ts;		/* timestamp (CLOCK_MONOTONIC) */
+    struct timespec ts;		/* time stamp (CLOCK_MONOTONIC) */
     union {
 	dev_t ttydev;		/* tty device number */
 	pid_t ppid;		/* parent pid */
