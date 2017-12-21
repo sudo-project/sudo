@@ -7,16 +7,16 @@ DDEESSCCRRIIPPTTIIOONN
      The ssuuddooeerrss plugin uses per-user time stamp files for credential caching.
      Once a user has been authenticated, they may use ssuuddoo without a password
      for a short period of time (5 minutes unless overridden by the
-     _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  ssuuddooeerrss uses a separate record for each
-     terminal, which means that a user's login sessions are authenticated
-     separately.  The _t_i_m_e_s_t_a_m_p___t_y_p_e option can be used to select the type of
-     time stamp record ssuuddooeerrss will use.
+     _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a separate record
+     for each terminal, which means that a user's login sessions are
+     authenticated separately.  The _t_i_m_e_s_t_a_m_p___t_y_p_e option can be used to
+     select the type of time stamp record ssuuddooeerrss will use.
 
      A multi-record time stamp file format was introduced in ssuuddoo 1.8.10 that
      uses a single file per user.  Previously, a separate file was used for
      each user and terminal combination unless tty-based time stamps were
      disabled.  The new format is extensible and records of multiple types and
-     versions may co-exist within the same file.
+     versions may coexist within the same file.
 
      All records, regardless of type or version, begin with a 16-bit version
      number and a 16-bit record size.
@@ -41,7 +41,7 @@ DDEESSCCRRIIPPTTIIOONN
          uid_t auth_uid;             /* uid to authenticate as */
          pid_t sid;                  /* session ID associated with tty/ppid */
          struct timespec start_time; /* session/ppid start time */
-         struct timespec ts;         /* timestamp (CLOCK_MONOTONIC) */
+         struct timespec ts;         /* time stamp (CLOCK_MONOTONIC) */
          union {
              dev_t ttydev;           /* tty device number */
              pid_t ppid;             /* parent pid */
@@ -145,9 +145,11 @@ HHIISSTTOORRYY
            prevent re-use of the time stamp file after logout.
 
      1.8.6p7
-           The terminal session ID was added to tty-based time stamp files.
-           This helped prevent re-use of the time stamp file on systems where
-           the terminal device's inode change time was updated by writing.
+           The terminal session ID was added to tty-based time stamp files to
+           prevent re-use of the time stamp by the same user in a different
+           terminal session.  It also helped prevent re-use of the time stamp
+           file on systems where the terminal device's inode change time was
+           updated by writing.
 
      1.8.10
            A new, multi-record time stamp file format was introduced that uses
@@ -157,12 +159,15 @@ HHIISSTTOORRYY
 
      1.8.15
            Individual records are locked in the time stamp file instead of the
-           entire file.
+           entire file and the lock is held until authentication is complete.
 
      1.8.22
            The start time of the terminal session leader or parent process is
            now stored in non-global time stamp records.  This prevents re-use
            of the time stamp file after logout in most cases.
+
+           Support was added for the kernel-based tty time stamps available in
+           OpenBSD which do not use an on-disk time stamp file.
 
 SSEEEE AALLSSOO
      sudoers(4), sudo(1m)
@@ -193,4 +198,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    December 19, 2017                   Sudo 1.8.22
+Sudo 1.8.22                    December 21, 2017                   Sudo 1.8.22

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS_TIMESTAMP" "5" "December 19, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS_TIMESTAMP" "5" "December 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -34,6 +34,7 @@ minutes unless overridden by the
 \fItimestamp_timeout\fR
 option)
 \&.
+By default,
 \fBsudoers\fR
 uses a separate record for each terminal, which means that
 a user's login sessions are authenticated separately.
@@ -49,7 +50,7 @@ A multi-record time stamp file format was introduced in
 Previously, a separate file was used for each user and terminal
 combination unless tty-based time stamps were disabled.  The new
 format is extensible and records of multiple types and versions may
-co-exist within the same file.
+coexist within the same file.
 .PP
 All records, regardless of type or version, begin with a 16-bit version
 number and a 16-bit record size.
@@ -76,7 +77,7 @@ struct timestamp_entry {
     uid_t auth_uid;             /* uid to authenticate as */
     pid_t sid;                  /* session ID associated with tty/ppid */
     struct timespec start_time; /* session/ppid start time */
-    struct timespec ts;         /* timestamp (CLOCK_MONOTONIC) */
+    struct timespec ts;         /* time stamp (CLOCK_MONOTONIC) */
     union {
         dev_t ttydev;           /* tty device number */
         pid_t ppid;             /* parent pid */
@@ -249,8 +250,10 @@ where it was not updated when the device was written to, the inode change time.
 This helped prevent re-use of the time stamp file after logout.
 .TP 6n
 1.8.6p7
-The terminal session ID was added to tty-based time stamp files.
-This helped prevent re-use of the time stamp file on systems where
+The terminal session ID was added to tty-based time stamp files to
+prevent re-use of the time stamp by the same user in a different
+terminal session.
+It also helped prevent re-use of the time stamp file on systems where
 the terminal device's inode change time was updated by writing.
 .TP 6n
 1.8.10
@@ -262,12 +265,15 @@ as required by POSIX.
 .TP 6n
 1.8.15
 Individual records are locked in the time stamp file instead of the
-entire file.
+entire file and the lock is held until authentication is complete.
 .TP 6n
 1.8.22
 The start time of the terminal session leader or parent process is
 now stored in non-global time stamp records.
 This prevents re-use of the time stamp file after logout in most cases.
+.sp
+Support was added for the kernel-based tty time stamps available in
+OpenBSD which do not use an on-disk time stamp file.
 .SH "SEE ALSO"
 sudoers(@mansectform@),
 sudo(@mansectsu@)
