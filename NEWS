@@ -77,6 +77,9 @@ What's new in Sudo 1.8.22
    the kernel instead of on the file system.  If no tty is present,
    the time stamp is considered to be invalid.
 
+ * Visudo will now use the SUDO_EDITOR environment variable (if
+   present) in addition to VISUAL and EDITOR.
+
 What's new in Sudo 1.8.21p2
 
  * Fixed a bug introduced in version 1.8.21 which prevented sudo
