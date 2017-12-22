@@ -469,6 +469,11 @@ done:
     *dst = '\0';
 
     *str = dst0;
+#ifdef __clang_analyzer__
+    /* clang analyzer false positive */
+    if (__builtin_expect(dst < dst0, 0))
+	__builtin_trap();
+#endif
     debug_return_int(dst - dst0);
 }
 
