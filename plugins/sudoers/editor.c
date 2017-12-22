@@ -36,11 +36,12 @@
  * the result against whitelist if non-NULL.  An argument vector
  * suitable for execve() is allocated and stored in argv_out.
  * If nfiles is non-zero, files[] is added to the end of argv_out.
+ *
  * Returns the path to be executed on success, else NULL.
  * The caller is responsible for freeing the returned editor path
  * as well as the argument vector.
  */
-char *
+static char *
 resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
     int *argc_out, char ***argv_out, char * const *whitelist)
 {
@@ -107,5 +108,67 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
 
     *argc_out = nargc;
     *argv_out = nargv;
+    debug_return_str(editor_path);
+}
+
+/*
+ * Determine which editor to use based on the SUDO_EDITOR, VISUAL and
+ * EDITOR environment variables as well as the editor path in sudoers.
+ * If env_error is true, an editor environment variable that cannot be
+ * resolved is an error.
+ *
+ * Returns the path to be executed on success, else NULL.
+ * The caller is responsible for freeing the returned editor path
+ * as well as the argument vector.
+ */
+char *
+find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
+     char * const *whitelist, const char **env_editor, bool env_error)
+{
+    char *ev[3], *editor_path = NULL;
+    unsigned int i;
+    debug_decl(find_editor, SUDOERS_DEBUG_UTIL)
+
+    /*
+     * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.
+     */
+    *env_editor = NULL;
+    ev[0] = "SUDO_EDITOR";
+    ev[1] = "VISUAL";
+    ev[2] = "EDITOR";
+    for (i = 0; i < nitems(ev); i++) {
+	char *editor = getenv(ev[i]);
+
+	if (editor != NULL && *editor != '\0') {
+	    *env_editor = editor;
+	    editor_path = resolve_editor(editor, strlen(editor),
+		nfiles, files, argc_out, argv_out, whitelist);
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
+		debug_return_str(NULL);
+	}
+    }
+    if (editor_path == NULL) {
+	const char *def_editor_end = def_editor + strlen(def_editor);
+	const char *cp, *ep;
+
+	if (env_error && *env_editor != NULL) {
+	    /* User-specified editor could not be found. */
+	    debug_return_str(NULL);
+	}
+
+	/* def_editor could be a path, split it up, avoiding strtok() */
+	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
+	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
+	    editor_path = resolve_editor(cp, (size_t)(ep - cp), nfiles,
+		files, argc_out, argv_out, whitelist);
+	    if (editor_path != NULL)
+		break;
+	    if (errno != ENOENT)
+		debug_return_str(NULL);
+	}
+    }
+
     debug_return_str(editor_path);
 }

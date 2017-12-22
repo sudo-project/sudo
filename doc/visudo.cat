@@ -13,27 +13,45 @@ DDEESSCCRRIIPPTTIIOONN
      _s_u_d_o_e_r_s file is currently being edited you will receive a message to try
      again later.
 
-     There is a hard-coded list of one or more editors that vviissuuddoo will use
-     set at compile-time that may be overridden via the _e_d_i_t_o_r _s_u_d_o_e_r_s Default
-     variable.  This list defaults to vi.  Normally, vviissuuddoo does not honor the
-     VISUAL or EDITOR environment variables unless they contain an editor in
-     the aforementioned editors list.  However, if vviissuuddoo is configured with
-     the --with-env-editor option or the _e_n_v___e_d_i_t_o_r Default variable is set in
-     _s_u_d_o_e_r_s, vviissuuddoo will use any the editor defines by VISUAL or EDITOR.
-     Note that this can be a security hole since it allows the user to execute
-     any program they wish simply by setting VISUAL or EDITOR.
-
-     vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not save the
+     vviissuuddoo parses the _s_u_d_o_e_r_s file after editing and will not save the
      changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
      print a message stating the line number(s) where the error occurred and
      the user will receive the "What now?" prompt.  At this point the user may
      enter `e' to re-edit the _s_u_d_o_e_r_s file, `x' to exit without saving the
      changes, or `Q' to quit and save changes.  The `Q' option should be used
-     with extreme care because if vviissuuddoo believes there to be a parse error,
-     so will ssuuddoo and no one will be able to run ssuuddoo again until the error is
-     fixed.  If `e' is typed to edit the _s_u_d_o_e_r_s file after a parse error has
-     been detected, the cursor will be placed on the line where the error
-     occurred (if the editor supports this feature).
+     with extreme caution because if vviissuuddoo believes there to be a parse
+     error, so will ssuuddoo and no one will be able to run ssuuddoo again until the
+     error is fixed.  If `e' is typed to edit the _s_u_d_o_e_r_s file after a parse
+     error has been detected, the cursor will be placed on the line where the
+     error occurred (if the editor supports this feature).
+
+     There are two _s_u_d_o_e_r_s settings that determine which editor vviissuuddoo will
+     run.
+
+     editor    A colon (`:') separated list of editors allowed to be used with
+               vviissuuddoo.  vviissuuddoo will choose the editor that matches the user's
+               SUDO_EDITOR, VISUAL or EDITOR environment variable if possible,
+               or the first editor in the list that exists and is executable.
+               Note that the SUDO_EDITOR, VISUAL and EDITOR environment
+               variables are not preserved by default when the _e_n_v___r_e_s_e_t
+               _s_u_d_o_e_r_s option is enabled.  The default editor path is _v_i which
+               can be set at compile time via the --with-editor configure
+               option.
+
+     env_editor
+               If set, vviissuuddoo will use the value of the SUDO_EDITOR, VISUAL or
+               EDITOR environment variables before falling back on the default
+               editor list.  Note that this may create a security hole as it
+               allows the user to run any arbitrary command as root without
+               logging.  A safer alternative is to place a colon-separated
+               list of editors in the _e_d_i_t_o_r variable.  vviissuuddoo will then only
+               use SUDO_EDITOR, VISUAL or EDITOR if they match a value
+               specified in _e_d_i_t_o_r.  If the _e_n_v___r_e_s_e_t flag is enabled, the
+               SUDO_EDITOR, VISUAL and/or EDITOR environment variables must be
+               present in the _e_n_v___k_e_e_p list for the _e_n_v___e_d_i_t_o_r flag to
+               function when vviissuuddoo is invoked via ssuuddoo.  The default value is
+               _o_f_f, which can be set at compile time via the --with-env-editor
+               configure option.
 
      The options are as follows:
 
@@ -128,9 +146,11 @@ EENNVVIIRROONNMMEENNTT
      The following environment variables may be consulted depending on the
      value of the _e_d_i_t_o_r and _e_n_v___e_d_i_t_o_r _s_u_d_o_e_r_s settings:
 
-     VISUAL           Invoked by vviissuuddoo as the editor to use
+     SUDO_EDITOR      Invoked by vviissuuddoo as the editor to use
 
-     EDITOR           Used by vviissuuddoo if VISUAL is not set
+     VISUAL           Used by vviissuuddoo if SUDO_EDITOR is not set
+
+     EDITOR           Used by vviissuuddoo if neither SUDO_EDITOR nor VISUAL is set
 
 FFIILLEESS
      _/_e_t_c_/_s_u_d_o_._c_o_n_f            Sudo front end configuration
@@ -217,4 +237,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    December 6, 2017                    Sudo 1.8.22
+Sudo 1.8.22                    December 21, 2017                   Sudo 1.8.22

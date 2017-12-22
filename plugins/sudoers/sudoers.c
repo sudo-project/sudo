@@ -68,7 +68,6 @@
 /*
  * Prototypes
  */
-static char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out);
 static bool cb_fqdn(const union sudo_defs_val *);
 static bool cb_runas_default(const union sudo_defs_val *);
 static bool cb_tty_tickets(const union sudo_defs_val *);
@@ -622,13 +621,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	int edit_argc;
+	const char *env_editor;
 
 	free(safe_cmnd);
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
-	    &edit_argv);
+	    &edit_argv, NULL, &env_editor, false);
 	if (safe_cmnd == NULL) {
 	    if (errno != ENOENT)
 		goto done;
+	    audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
+		env_editor ? env_editor : def_editor);
+	    sudo_warnx(U_("%s: command not found"),
+		env_editor ? env_editor : def_editor);
 	    goto bad;
 	}
 	if (audit_success(edit_argc, edit_argv) != 0 && !def_ignore_audit_errors)
@@ -1250,58 +1254,6 @@ sudoers_cleanup(void)
     sudo_freegrcache();
 
     debug_return;
-}
-
-/*
- * Determine which editor to use.  We don't need to worry about restricting
- * this to a "safe" editor since it runs with the uid of the invoking user,
- * not the runas (privileged) user.
- * Returns a fully-qualified path to the editor on success and fills
- * in argc_out and argv_out accordingly.  Returns NULL on failure.
- */
-static char *
-find_editor(int nfiles, char **files, int *argc_out, char ***argv_out)
-{
-    const char *cp, *ep, *editor = NULL;
-    char *editor_path = NULL, **ev, *ev0[4];
-    debug_decl(find_editor, SUDOERS_DEBUG_PLUGIN)
-
-    /*
-     * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.
-     */
-    ev0[0] = "SUDO_EDITOR";
-    ev0[1] = "VISUAL";
-    ev0[2] = "EDITOR";
-    ev0[3] = NULL;
-    for (ev = ev0; editor_path == NULL && *ev != NULL; ev++) {
-	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
-	    editor_path = resolve_editor(editor, strlen(editor),
-		nfiles, files, argc_out, argv_out, NULL);
-	    if (editor_path != NULL)
-		break;
-	    if (errno != ENOENT)
-		debug_return_str(NULL);
-	}
-    }
-    if (editor_path == NULL) {
-	/* def_editor could be a path, split it up, avoiding strtok() */
-	const char *def_editor_end = def_editor + strlen(def_editor);
-	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
-	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
-	    editor_path = resolve_editor(cp, (size_t)(ep - cp), nfiles,
-		files, argc_out, argv_out, NULL);
-	    if (editor_path != NULL)
-		break;
-	    if (errno != ENOENT)
-		debug_return_str(NULL);
-	}
-    }
-    if (!editor_path) {
-	audit_failure(NewArgc, NewArgv, N_("%s: command not found"),
-	    editor ? editor : def_editor);
-	sudo_warnx(U_("%s: command not found"), editor ? editor : def_editor);
-    }
-    debug_return_str(editor_path);
 }
 
 #ifdef USE_ADMIN_FLAG

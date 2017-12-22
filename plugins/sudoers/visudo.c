@@ -289,7 +289,8 @@ done:
 static char *
 get_editor(int *editor_argc, char ***editor_argv)
 {
-    char *editor, *editor_path = NULL, **whitelist = NULL;
+    char *editor_path = NULL, **whitelist = NULL;
+    const char *env_editor;
     static char *files[] = { "+1", "sudoers" };
     unsigned int whitelist_len = 0;
     debug_decl(get_editor, SUDOERS_DEBUG_UTIL)
@@ -318,37 +319,16 @@ get_editor(int *editor_argc, char ***editor_argv)
 	whitelist[whitelist_len] = NULL;
     }
 
-    /* First try to use user's VISUAL or EDITOR environment vars. */
-    if ((editor = getenv("VISUAL")) == NULL || *editor == '\0')
-	editor = getenv("EDITOR");
-    if (editor && *editor == '\0')
-	editor = NULL;
-    if (editor != NULL) {
-	editor_path = resolve_editor(editor, strlen(editor), 2, files,
-	    editor_argc, editor_argv, whitelist);
-	if (def_env_editor && editor_path == NULL) {
-	    /* If we are honoring $EDITOR this is a fatal error. */
-	    sudo_fatalx(U_("specified editor (%s) doesn't exist"), editor);
-	}
-    }
+    editor_path = find_editor(2, files, editor_argc, editor_argv, whitelist,
+	&env_editor, true);
     if (editor_path == NULL) {
-	/* def_editor could be a path, split it up, avoiding strtok() */
-	const char *def_editor_end = def_editor + strlen(def_editor);
-	const char *cp, *ep;
-	for (cp = sudo_strsplit(def_editor, def_editor_end, ":", &ep);
-	    cp != NULL; cp = sudo_strsplit(NULL, def_editor_end, ":", &ep)) {
-	    editor_path = resolve_editor(cp, (size_t)(ep - cp), 2, files,
-		editor_argc, editor_argv, whitelist);
-	    if (editor_path != NULL)
-		break;
-	    if (errno != ENOENT)
-		goto done;
+	if (def_env_editor && env_editor != NULL) {
+	    /* We are honoring $EDITOR so this is a fatal error. */
+	    sudo_fatalx(U_("specified editor (%s) doesn't exist"), env_editor);
 	}
-    }
-    if (editor_path == NULL)
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
+    }
 
-done:
     if (whitelist != NULL) {
 	while (whitelist_len--)
 	    free(whitelist[whitelist_len]);

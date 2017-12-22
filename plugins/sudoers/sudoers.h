@@ -403,8 +403,8 @@ bool cb_group_plugin(const union sudo_defs_val *sd_un);
 extern const char *path_plugin_dir;
 
 /* editor.c */
-char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
-    int *argc_out, char ***argv_out, char * const *whitelist);
+char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
+     char * const *whitelist, const char **env_editor, bool env_error);
 
 /* mkdir_parents.c */
 bool sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);

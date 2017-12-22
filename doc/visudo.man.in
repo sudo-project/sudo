@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "8" "December 6, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "8" "December 21, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -48,48 +48,10 @@ If the
 \fIsudoers\fR
 file is currently being edited you will receive a message to try again later.
 .PP
-There is a hard-coded list of one or more editors that
-\fBvisudo\fR
-will use set at compile-time that may be overridden via the
-\fIeditor\fR
-\fIsudoers\fR
-\fRDefault\fR
-variable.
-This list defaults to
-\fR@editor@\fR.
-Normally,
-\fBvisudo\fR
-does not honor the
-\fRVISUAL\fR
-or
-\fREDITOR\fR
-environment variables unless they contain an editor in the aforementioned
-editors list.
-However, if
-\fBvisudo\fR
-is configured with the
-\fR--with-env-editor\fR
-option or the
-\fIenv_editor\fR
-\fRDefault\fR
-variable is set in
-\fIsudoers\fR,
-\fBvisudo\fR
-will use any the editor defines by
-\fRVISUAL\fR
-or
-\fREDITOR\fR.
-Note that this can be a security hole since it allows the user to
-execute any program they wish simply by setting
-\fRVISUAL\fR
-or
-\fREDITOR\fR.
-.PP
 \fBvisudo\fR
 parses the
 \fIsudoers\fR
-file after the edit and will
-not save the changes if there is a syntax error.
+file after editing and will not save the changes if there is a syntax error.
 Upon finding an error,
 \fBvisudo\fR
 will print a message stating the line number(s)
@@ -107,7 +69,7 @@ to exit without saving the changes, or
 to quit and save changes.
 The
 \(oqQ\(cq
-option should be used with extreme care because if
+option should be used with extreme caution because if
 \fBvisudo\fR
 believes there to be a parse error, so will
 \fBsudo\fR
@@ -121,6 +83,84 @@ is typed to edit the
 \fIsudoers\fR
 file after a parse error has been detected, the cursor will be placed on
 the line where the error occurred (if the editor supports this feature).
+.PP
+There are two
+\fIsudoers\fR
+settings that determine which editor
+\fBvisudo\fR
+will run.
+.TP 10n
+editor
+A colon
+(\(oq:\&\(cq)
+separated list of editors allowed to be used with
+\fBvisudo\fR.
+\fBvisudo\fR
+will choose the editor that matches the user's
+\fRSUDO_EDITOR\fR,
+\fRVISUAL\fR
+or
+\fREDITOR\fR
+environment variable if possible, or the first editor in the
+list that exists and is executable.
+Note that the
+\fRSUDO_EDITOR\fR,
+\fRVISUAL\fR
+and
+\fREDITOR\fR
+environment variables are not preserved by default when the
+\fIenv_reset\fR
+\fIsudoers\fR
+option is enabled.
+The default editor path is
+\fI@editor@\fR
+which can be set at compile time via the
+\fR--with-editor\fR
+configure option.
+.TP 10n
+env_editor
+If set,
+\fBvisudo\fR
+will use the value of the
+\fRSUDO_EDITOR\fR,
+\fRVISUAL\fR
+or
+\fREDITOR\fR
+environment variables before falling back on the default editor list.
+Note that this may create a security hole as it allows the user to
+run any arbitrary command as root without logging.
+A safer alternative is to place a colon-separated list of editors
+in the
+\fIeditor\fR
+variable.
+\fBvisudo\fR
+will then only use
+\fRSUDO_EDITOR\fR,
+\fRVISUAL\fR
+or
+\fREDITOR\fR
+if they match a value specified in
+\fIeditor\fR.
+If the
+\fIenv_reset\fR
+flag is enabled, the
+\fRSUDO_EDITOR\fR,
+\fRVISUAL\fR
+and/or
+\fREDITOR\fR
+environment variables must be present in the
+\fIenv_keep\fR
+list for the
+\fIenv_editor\fR
+flag to function when
+\fBvisudo\fR
+is invoked via
+\fBsudo\fR.
+The default value is
+\fI@env_editor@\fR,
+which can be set at compile time via the
+\fR--with-env-editor\fR
+configure option.
 .PP
 The options are as follows:
 .TP 12n
@@ -314,17 +354,26 @@ and
 \fIsudoers\fR
 settings:
 .TP 17n
-\fRVISUAL\fR
+\fRSUDO_EDITOR\fR
 Invoked by
 \fBvisudo\fR
 as the editor to use
 .TP 17n
-\fREDITOR\fR
+\fRVISUAL\fR
 Used by
 \fBvisudo\fR
 if
-\fRVISUAL\fR
+\fRSUDO_EDITOR\fR
 is not set
+.TP 17n
+\fREDITOR\fR
+Used by
+\fBvisudo\fR
+if neither
+\fRSUDO_EDITOR\fR
+nor
+\fRVISUAL\fR
+is set
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR

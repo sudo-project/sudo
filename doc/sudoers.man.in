@@ -2132,29 +2132,32 @@ env_editor
 If set,
 \fBvisudo\fR
 will use the value of the
-\fREDITOR\fR
-or
+\fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
+or
+\fREDITOR\fR
 environment variables before falling back on the default editor list.
 Note that this may create a security hole as it allows the user to
 run any arbitrary command as root without logging.
 A safer alternative is to place a colon-separated list of editors
 in the
-\fReditor\fR
+\fIeditor\fR
 variable.
 \fBvisudo\fR
-will then only use the
-\fREDITOR\fR
-or
+will then only use
+\fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
+or
+\fREDITOR\fR
 if they match a value specified in
-\fReditor\fR.
+\fIeditor\fR.
 If the
 \fIenv_reset\fR
 flag is enabled, the
-\fREDITOR\fR
-and/or
+\fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
+and/or
+\fREDITOR\fR
 environment variables must be present in the
 \fIenv_keep\fR
 list for the
@@ -3310,15 +3313,17 @@ separated list of editors allowed to be used with
 \fBvisudo\fR.
 \fBvisudo\fR
 will choose the editor that matches the user's
-\fREDITOR\fR
-or
+\fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
+or
+\fREDITOR\fR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
 Note that the
-\fREDITOR\fR
-and
+\fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
+and
+\fREDITOR\fR
 environment variables are not preserved by default when the
 \fIenv_reset\fR
 option is enabled.
