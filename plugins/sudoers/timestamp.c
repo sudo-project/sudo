@@ -393,7 +393,8 @@ timestamp_open(const char *user, pid_t sid)
 	fd = open(_PATH_TTY, O_RDWR);
 	if (fd == -1)
 	    goto bad;
-	goto done;
+	close(fd);
+	fd = -1;
     }
 
     /* Sanity check timestamp dir and create if missing. */
@@ -443,7 +444,6 @@ timestamp_open(const char *user, pid_t sid)
 	break;
     }
 
-done:
     /* Allocate and fill in cookie to store state. */
     cookie = malloc(sizeof(*cookie));
     if (cookie == NULL) {
@@ -599,11 +599,6 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	debug_return_bool(false);
     }
 
-    if (def_timestamp_type == kernel) {
-	cookie->pos = 0;
-	debug_return_bool(true);
-    }
-
     /*
      * Take a lock on the "write" record (the first record in the file).
      * This will let us seek for the record or extend as needed
@@ -651,7 +646,8 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	lock_pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "appending new tty time stamp record");
+	    "appending new %s time stamp record",
+	    def_timestamp_type == ppid ? "ppid" : "tty");
 	lock_pos = lseek(cookie->fd, 0, SEEK_CUR);
 	if (ts_write(cookie->fd, cookie->fname, &cookie->key, -1) == -1)
 	    debug_return_bool(false);
