@@ -111,8 +111,8 @@ SHELL = @SHELL@
 LTOBJS = event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
 	 gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo secure_path.lo \
 	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
-	 sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo ttysize.lo \
-	 @COMMON_OBJS@ @LTLIBOBJS@
+	 sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
+	 ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 ATOFOO_TEST_OBJS = atofoo_test.lo
 
@@ -589,6 +589,12 @@ term.lo: $(srcdir)/term.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/term.c
+ttyname_dev.lo: $(srcdir)/ttyname_dev.c $(incdir)/compat/stdbool.h \
+                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/ttyname_dev.c
 ttysize.lo: $(srcdir)/ttysize.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

@@ -46,6 +46,20 @@
 #define TS_DISABLED		0x01	/* entry disabled */
 #define TS_ANYUID		0x02	/* ignore uid, only valid in the key */
 
+struct timestamp_entry_v1 {
+    unsigned short version;	/* version number */
+    unsigned short size;	/* entry size */
+    unsigned short type;	/* TS_GLOBAL, TS_TTY, TS_PPID */
+    unsigned short flags;	/* TS_DISABLED, TS_ANYUID */
+    uid_t auth_uid;		/* uid to authenticate as */
+    pid_t sid;			/* session ID associated with tty/ppid */
+    struct timespec ts;		/* time stamp (CLOCK_MONOTONIC) */
+    union {
+	dev_t ttydev;		/* tty device number */
+	pid_t ppid;		/* parent pid */
+    } u;
+};
+
 struct timestamp_entry {
     unsigned short version;	/* version number */
     unsigned short size;	/* entry size */

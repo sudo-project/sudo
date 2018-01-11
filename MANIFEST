@@ -178,6 +178,7 @@ lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
 lib/util/term.c
+lib/util/ttyname_dev.c
 lib/util/ttysize.c
 lib/util/util.exp.in
 lib/util/utimens.c
@@ -540,6 +541,7 @@ plugins/sudoers/toke.c
 plugins/sudoers/toke.h
 plugins/sudoers/toke.l
 plugins/sudoers/toke_util.c
+plugins/sudoers/tsdump.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/visudo.c

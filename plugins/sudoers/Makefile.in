@@ -172,6 +172,8 @@ REPLAY_OBJS = getdate.o sudoreplay.o
 TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o \
 	    sudo_printf.o testsudoers.o tsgetgrpw.o
 
+TSDUMP_OBJS = tsdump.o sudoers_debug.o locale.o
+
 CHECK_ADDR_OBJS = check_addr.o interfaces.o match_addr.o sudoers_debug.o \
 		  sudo_printf.o
 
@@ -244,6 +246,9 @@ sudoreplay: timestr.lo $(REPLAY_OBJS) $(LT_LIBS)
 
 testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(TESTSUDOERS_LIBS)
+
+tsdump: $(TSDUMP_OBJS) $(LT_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(TSDUMP_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_addr: $(CHECK_ADDR_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS)
@@ -661,15 +666,9 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_path/check_iolog_path.c
 check_starttime.o: $(srcdir)/regress/starttime/check_starttime.c \
-                   $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
-                   $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                   $(srcdir)/check.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                   $(top_builddir)/pathnames.h
+                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                   $(srcdir)/check.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/starttime/check_starttime.c
 check_symbols.o: $(srcdir)/regress/check_symbols/check_symbols.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1250,6 +1249,14 @@ toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/toke_util.c
 toke_util.o: toke_util.lo
+tsdump.o: $(srcdir)/tsdump.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/check.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tsdump.c
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

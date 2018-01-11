@@ -19252,7 +19252,18 @@ if test "x$ac_cv_func_sysctl" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SYSCTL 1
 _ACEOF
- ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" "
+ for ac_func in devname
+do :
+  ac_fn_c_check_func "$LINENO" "devname" "ac_cv_func_devname"
+if test "x$ac_cv_func_devname" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DEVNAME 1
+_ACEOF
+
+fi
+done
+
+    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" "
 #	include <sys/param.h>
 #	include <sys/sysctl.h>
 #	include <sys/user.h>

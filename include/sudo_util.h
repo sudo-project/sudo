@@ -248,6 +248,10 @@ __dso_public bool sudo_term_raw_v1(int fd, int isig);
 __dso_public bool sudo_term_restore_v1(int fd, bool flush);
 #define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
 
+/* ttyname_dev.c */
+__dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen);
+#define sudo_ttyname_dev(_a, _b, _c) sudo_ttyname_dev_v1((_a), (_b), (_c))
+
 /* ttysize.c */
 __dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
