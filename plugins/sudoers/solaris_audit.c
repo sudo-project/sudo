@@ -32,7 +32,7 @@
 
 static adt_session_data_t *ah;		/* audit session handle */
 static adt_event_data_t	*event;		/* event to be generated */
-static char		cwd[MAXPATHLEN];
+static char		cwd[PATH_MAX];
 static char		cmdpath[PATH_MAX];
 
 static int
