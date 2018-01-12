@@ -53,8 +53,9 @@ union timestamp_entry_storage {
 __dso_public int main(int argc, char *argv[]);
 
 static void usage(void) __attribute__((__noreturn__));
-static void dump_entry(union timestamp_entry_storage *u, off_t pos);
+static void dump_entry(struct timestamp_entry *entry, off_t pos);
 static bool valid_entry(union timestamp_entry_storage *u, off_t pos);
+static bool convert_entry(union timestamp_entry_storage *record, struct timespec *off);
 
 /*
  * tsdump: a simple utility to dump the contents of a time stamp file.
@@ -68,6 +69,7 @@ main(int argc, char *argv[])
     const char *user = NULL;
     char *fname = NULL;
     union timestamp_entry_storage cur;
+    struct timespec now, timediff;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -104,6 +106,13 @@ main(int argc, char *argv[])
 	usage();
     }
 
+    /* Calculate the difference between real time and mono time. */
+    if (sudo_gettime_real(&now) == -1)
+	sudo_fatal("unable to get current time");
+    if (sudo_gettime_mono(&timediff) == -1)
+	sudo_fatal("unable to read the clock");
+    sudo_timespecsub(&now, &timediff, &timediff);
+
     if (fname == NULL) {
 	struct passwd *pw;
 
@@ -136,8 +145,12 @@ main(int argc, char *argv[])
 	    if (lseek(fd, offset, SEEK_CUR) == -1)
 		sudo_fatal("unable to seek %d bytes", (int)offset);
 	}
-	if (valid)
-	    dump_entry(&cur, pos);
+	if (valid) {
+	    /* Convert entry to latest version as needed. */
+	    if (!convert_entry(&cur, &timediff))
+		continue;
+	    dump_entry(&cur.v2, pos);
+	}
     }
 
     return 0;
@@ -220,45 +233,51 @@ print_flags(int flags)
 
 /*
  * Convert an older entry to current.
+ * Also adjusts time stamps on Linux to be wallclock time.
  */
 static bool
-convert_entry(union timestamp_entry_storage *record)
+convert_entry(union timestamp_entry_storage *record, struct timespec *off)
 {
     union timestamp_entry_storage orig;
     debug_decl(convert_entry, SUDOERS_DEBUG_UTIL)
 
-    if (record->common.version != 1) {
-	sudo_warnx("unexpected record version %hu", record->common.version);
-	debug_return_bool(false);
+    if (record->common.version != TS_VERSION) {
+	if (record->common.version != 1) {
+	    sudo_warnx("unexpected record version %hu", record->common.version);
+	    debug_return_bool(false);
+	}
+
+	/* The first four fields are the same regardless of version. */
+	memcpy(&orig, record, sizeof(union timestamp_entry_storage));
+	record->v2.auth_uid = orig.v1.auth_uid;
+	record->v2.sid = orig.v1.sid;
+	sudo_timespecclear(&record->v2.start_time);
+	record->v2.ts = orig.v1.ts;
+	if (record->common.type == TS_TTY)
+	    record->v2.u.ttydev = orig.v1.u.ttydev;
+	else if (record->common.type == TS_PPID)
+	    record->v2.u.ppid = orig.v1.u.ppid;
+	else
+	    memset(&record->v2.u, 0, sizeof(record->v2.u));
     }
 
-    /* The first four fields are the same regardless of version. */
-    memcpy(&orig, record, sizeof(union timestamp_entry_storage));
-    record->v2.auth_uid = orig.v1.auth_uid;
-    record->v2.sid = orig.v1.sid;
-    sudo_timespecclear(&record->v2.start_time);
-    record->v2.ts = orig.v1.ts;
-    if (record->common.type == TS_TTY)
-	record->v2.u.ttydev = orig.v1.u.ttydev;
-    else if (record->common.type == TS_PPID)
-	record->v2.u.ppid = orig.v1.u.ppid;
-    else
-	memset(&record->v2.u, 0, sizeof(record->v2.u));
+    /* On Linux, start time is relative to boot time, adjust to real time. */
+#ifdef __linux__
+    if (sudo_timespecisset(&record->v2.start_time))
+	sudo_timespecadd(&record->v2.start_time, off, &record->v2.start_time);
+#endif
+
+    /* Adjust time stamp from mono time to real time. */
+    if (sudo_timespecisset(&record->v2.ts))
+	sudo_timespecadd(&record->v2.ts, off, &record->v2.ts);
 
     debug_return_bool(true);
 }
 
 static void
-dump_entry(union timestamp_entry_storage *u, off_t pos)
+dump_entry(struct timestamp_entry *entry, off_t pos)
 {
-    struct timestamp_entry *entry = (struct timestamp_entry *)u;
     debug_decl(dump_entry, SUDOERS_DEBUG_UTIL)
-
-    /* Convert to latest version as needed. */
-    if (u->common.version != TS_VERSION) {
-	if (!convert_entry(u))
-	    debug_return;
-    }
 
     printf("position: %lld\n", (long long)pos);
     printf("version: %hu\n", entry->version);
