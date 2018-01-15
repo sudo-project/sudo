@@ -72,6 +72,9 @@ What's new in Sudo 1.8.22
    the likelihood of a time stamp record being re-used when a user
    logs out and back in again.  Bug #818.
 
+ * The sudoers time stamp file format is now documented in the new
+   sudoers_timestamp manual.
+
  * The "timestamp_type" option now takes a "kernel" value on OpenBSD
    systems.  This causes the tty-based time stamp to be stored in
    the kernel instead of on the file system.  If no tty is present,
