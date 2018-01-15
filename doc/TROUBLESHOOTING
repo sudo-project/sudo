@@ -231,6 +231,15 @@ A) If your /etc/pam.conf file has the libpam_hpsec.so.1 session module
    enabled, you may need to a add line like the following to pam.conf:
    sudo session required libpam_hpsec.so.1 bypass_umask
 
+Q) When I run "sudo -i shell_alias" I get "command not found" even
+   though the alias is defined in my shell startup files.
+A) Commands run via "sudo -i" are executed by the shell in
+   non-interactive mode.  The bash shell will ony parse aliases in
+   interactive mode unless the "expand_aliases" shell option is
+   set.  If you add "shopt -s expand_aliases" to your .bash_profile
+   (or .profile if using that instead) the aliases should now be
+   available to "sudo -i".
+
 Q) When I run sudo on AIX I get the following error:
     setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID): Operation not permitted.
 A) AIX's Enhanced RBAC is preventing sudo from running.  To fix

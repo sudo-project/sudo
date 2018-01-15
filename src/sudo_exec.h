@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -92,10 +92,10 @@ int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], bool
 char **disable_execute(char *envp[], const char *dso);
 
 /* exec_nopty.c */
-int exec_nopty(struct command_details *details, struct command_status *cstat);
+void exec_nopty(struct command_details *details, struct command_status *cstat);
 
 /* exec_pty.c */
-int exec_pty(struct command_details *details, struct command_status *cstat);
+bool exec_pty(struct command_details *details, struct command_status *cstat);
 void pty_cleanup(void);
 int pty_make_controlling(void);
 extern int io_fds[6];

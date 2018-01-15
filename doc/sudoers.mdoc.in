@@ -1,6 +1,6 @@
 .\"
 .\" Copyright (c) 1994-1996, 1998-2005, 2007-2017
-.\"	Todd C. Miller <Todd.Miller@courtesan.com>
+.\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 4, 2017
+.Dd December 20, 2017
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -205,7 +205,8 @@ file lookup is still done for root, not the user specified by
 uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the user ID that was used to authenticate, the
-terminal session ID, and a time stamp
+terminal session ID, the start time of the session leader
+(or parent proccess) and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
 .Nm sudo
@@ -466,7 +467,11 @@ and
 variables in
 .Pa /etc/login.conf
 are also applied.
-All other environment variables are removed.
+All other environment variables are removed unless permitted by
+.Em env_keep
+or
+.Em env_check ,
+described above.
 .Pp
 Finally, the
 .Em restricted_env_file
@@ -1993,29 +1998,32 @@ flag is enabled.
 If set,
 .Nm visudo
 will use the value of the
-.Ev EDITOR
-or
+.Ev SUDO_EDITOR ,
 .Ev VISUAL
+or
+.Ev EDITOR
 environment variables before falling back on the default editor list.
 Note that this may create a security hole as it allows the user to
 run any arbitrary command as root without logging.
 A safer alternative is to place a colon-separated list of editors
 in the
-.Li editor
+.Em editor
 variable.
 .Nm visudo
-will then only use the
-.Ev EDITOR
-or
+will then only use
+.Ev SUDO_EDITOR ,
 .Ev VISUAL
+or
+.Ev EDITOR
 if they match a value specified in
-.Li editor .
+.Em editor .
 If the
 .Em env_reset
 flag is enabled, the 
-.Ev EDITOR
-and/or
+.Ev SUDO_EDITOR ,
 .Ev VISUAL
+and/or
+.Ev EDITOR
 environment variables must be present in the
 .Em env_keep
 list for the
@@ -2277,7 +2285,14 @@ will run the command in a pseudo-tty and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
-For more information, see the
+Anything sent to the standard input will be consumed, regardless of
+whether or not the command run via
+.Nm sudo
+is actually reading the standard input.
+This may have unexpected results when using
+.Nm sudo
+in a shell script that expects to process the standard input.
+For more information about I/O logging, see the
 .Sx "I/O LOG FILES"
 section.
 This flag is
@@ -2290,7 +2305,7 @@ will run the command in a pseudo-tty and log all output that is sent
 to the screen, similar to the
 .Xr script 1
 command.
-For more information, see the
+For more information about I/O logging, see the
 .Sx "I/O LOG FILES"
 section.
 This flag is
@@ -2880,14 +2895,24 @@ This flag is
 .Em on
 by default.
 .It use_pty
-If set,
+If set, and
 .Nm sudo
-will run the command in a pseudo-pty even if no I/O logging is being gone.
+is running in a terminal, the command will be run in a pseudo-pty
+(even if no I/O logging is being done).
+If the
+.Nm sudo
+process is not attached to a terminal,
+.Em use_pty
+has no effect.
+.Pp
 A malicious program run under
 .Nm sudo
-could conceivably fork a background process that retains to the user's
-terminal device after the main program has finished executing.
-Use of this option will make that impossible.
+may be capable of injecting injecting commands into the user's
+terminal or running a background process that retains access to the
+user's terminal device even after the main program has finished
+executing.
+By running the command in a separate pseudo-pty, this attack is
+no longer possible.
 This flag is
 .Em off
 by default.
@@ -3073,6 +3098,13 @@ its own umask which will override the value set in
 .Pp
 .Sy Strings :
 .Bl -tag -width 16n
+.It authfail_message
+Message that is displayed after a user fails to authenticate.
+The message may include the
+.Ql %d
+escape which will expand to the number of failed password attempts.
+If set, it overrides the default message,
+.Li %d incorrect password attempt(s) .
 .It badpass_message
 Message that is displayed if a user enters an incorrect password.
 The default is
@@ -3085,15 +3117,17 @@ separated list of editors allowed to be used with
 .Nm visudo .
 .Nm visudo
 will choose the editor that matches the user's
-.Ev EDITOR
-or
+.Ev SUDO_EDITOR ,
 .Ev VISUAL
+or
+.Ev EDITOR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
 Note that the
-.Ev EDITOR
-and
+.Ev SUDO_EDITOR ,
 .Ev VISUAL
+and
+.Ev EDITOR
 environment variables are not preserved by default when the
 .Em env_reset
 option is enabled.
@@ -3441,6 +3475,11 @@ minutes
 .Li @timeout@
 by default
 .Pc .
+.It kernel
+The time stamp is stored in the kernel as an attribute of the terminal
+device.
+If no terminal is present, the time stamp is considered to be invalid.
+This is currently only supported on OpenBSD.
 .El
 .Pp
 The default value is
@@ -4292,7 +4331,8 @@ word wrap will be disabled.
 .Sh I/O LOG FILES
 When I/O logging is enabled,
 .Nm sudo
-will run the command in a pseudo-tty and log all user input and/or output.
+will run the command in a pseudo-tty and log all user input and/or output,
+depending on which options are enabled.
 I/O is logged to the directory specified by the
 .Em iolog_dir
 option
@@ -5060,31 +5100,33 @@ will be ignored and
 .Nm sudoers
 will log and complain.
 .Pp
-Since time stamp files live in the file system, they can outlive a
-user's login session.
-As a result, a user may be able to login, run a command with
-.Nm sudo
-after authenticating, logout, login again, and run
-.Nm sudo
-without authenticating so long as the record's time stamp is within
-.Li @timeout@
-minutes (or whatever value the timeout is set to in the
-.Em sudoers
-file).
-When the
-.Em tty_tickets
-option is enabled, the time stamp record includes the device
-number of the terminal the user authenticated with.
-This provides per-tty granularity but time stamp records still
-may outlive the user's session.
-The time stamp record also includes the session ID of the process
+If the
+.Em timestamp_type
+option is set to
+.Dq tty ,
+the time stamp record includes the device number of the terminal
+the user authenticated with.
+This provides per-terminal granularity but time stamp records may still
+outlive the user's session.
+.Pp
+Unless the
+.Em timestamp_type
+option is set to
+.Dq global ,
+the time stamp record also includes the session ID of the process
 that last authenticated.
 This prevents processes in different terminal sessions from using
 the same time stamp record.
-It also helps reduce the chance that a user will be able to run
-.Nm sudo
-without entering a password when logging out and back in again
-on the same terminal.
+On systems where a process's start time can be queried,
+the start time of the session leader
+is recorded in the time stamp record.
+If no terminal is present or the
+.Em timestamp_type
+option is set to
+.Dq ppid ,
+the start time of the parent process is used instead.
+In most cases this will prevent a time stamp record from being re-used
+without the user entering a password when logging out and back in again.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
 .Nm
@@ -5190,6 +5232,7 @@ manual.
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudo @mansectsu@ ,
 .Xr sudo_plugin @mansectform@ ,
+.Xr sudoers_timestamp @mansectform@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on

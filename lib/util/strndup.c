@@ -1,7 +1,7 @@
 /*	$OpenBSD: strndup.c,v 1.1 2010/05/18 22:24:55 tedu Exp $	*/
 
 /*
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

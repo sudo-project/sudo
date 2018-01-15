@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,7 +70,6 @@ static void
 deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 {
     char signame[SIG2STR_MAX];
-    int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
     /* Avoid killing more than a single process or process group. */
@@ -93,16 +92,20 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	break;
     case SIGCONT_FG:
 	/* Continue in foreground, grant it controlling tty. */
-	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], mc->cmnd_pgrp);
-	} while (status == -1 && errno == EINTR);
+	if (tcsetpgrp(io_fds[SFD_SLAVE], mc->cmnd_pgrp) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to set foreground pgrp to %d (command)",
+		__func__, (int)mc->cmnd_pgrp);
+	}
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGCONT_BG:
 	/* Continue in background, I take controlling tty. */
-	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], mc->mon_pgrp);
-	} while (status == -1 && errno == EINTR);
+	if (tcsetpgrp(io_fds[SFD_SLAVE], mc->mon_pgrp) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to set foreground pgrp to %d (monitor)",
+		__func__, (int)mc->mon_pgrp);
+	}
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGKILL:
@@ -130,12 +133,10 @@ send_status(int fd, struct command_status *cstat)
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "sending status message to parent: [%d, %d]",
 	    cstat->type, cstat->val);
-	do {
-	    n = send(fd, cstat, sizeof(*cstat), 0);
-	} while (n == -1 && errno == EINTR);
+	n = send(fd, cstat, sizeof(*cstat), 0);
 	if (n != sizeof(*cstat)) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"unable to send status to parent: %s", strerror(errno));
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to send status to parent", __func__);
 	}
 	cstat->type = CMD_INVALID; /* prevent re-sending */
     }
@@ -203,9 +204,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	    mc->cstat->val = status;
 	    if (WIFSTOPPED(status)) {
 		/* Save the foreground pgid so we can restore it later. */
-		do {
-		    pid = tcgetpgrp(io_fds[SFD_SLAVE]);
-		} while (pid == -1 && errno == EINTR);
+		pid = tcgetpgrp(io_fds[SFD_SLAVE]);
 		if (pid != mc->mon_pgrp)
 		    mc->cmnd_pgrp = pid;
 		send_status(mc->backchannel, mc->cstat);
@@ -271,13 +270,10 @@ mon_errpipe_cb(int fd, int what, void *v)
      * Read errno from child or EOF when command is executed.
      * Note that the error pipe is *blocking*.
      */
-    do {
-	nread = read(fd, &errval, sizeof(errval));
-    } while (nread == -1 && errno == EINTR);
-
+    nread = read(fd, &errval, sizeof(errval));
     switch (nread) {
     case -1:
-	if (errno != EAGAIN) {
+	if (errno != EAGAIN && errno != EINTR) {
 	    if (mc->cstat->val == CMD_INVALID) {
 		/* XXX - need a way to distinguish non-exec error. */
 		mc->cstat->type = CMD_ERRNO;
@@ -380,8 +376,12 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	struct timespec ts = { 0, 1000 };  /* 1us */
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: waiting for controlling tty",
+	    __func__);
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
 	    nanosleep(&ts, NULL);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: got controlling tty",
+	    __func__);
     }
 
     /* Done with the pty slave, don't leak it. */
@@ -389,6 +389,8 @@ exec_cmnd_pty(struct command_details *details, bool foreground, int errfd)
 	close(io_fds[SFD_SLAVE]);
 
     /* Execute command; only returns on error. */
+    sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
+	details->command, foreground ? "foreground" : "background");
     exec_cmnd(details, errfd);
 
     debug_return;
@@ -561,10 +563,8 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 
 	/* setup tty and exec command */
 	exec_cmnd_pty(details, foreground, errpipe[1]);
-	while (write(errpipe[1], &errno, sizeof(int)) == -1) {
-	    if (errno != EINTR)
-		break;
-	}
+	if (write(errpipe[1], &errno, sizeof(int)) == -1)
+	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(1);
     }
     close(errpipe[1]);
@@ -603,11 +603,11 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 
     /* Make the command the foreground process for the pty slave. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
-	int n;
-
-	do {
-	    n = tcsetpgrp(io_fds[SFD_SLAVE], mc.cmnd_pgrp);
-	} while (n == -1 && errno == EINTR);
+	if (tcsetpgrp(io_fds[SFD_SLAVE], mc.cmnd_pgrp) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to set foreground pgrp to %d (command)",
+		__func__, (int)mc.cmnd_pgrp);
+	}
     }
 
     /*
@@ -630,6 +630,17 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	} while (pid == -1 && errno == EINTR);
 	/* XXX - update cstat with wait status? */
     }
+
+    /*
+     * Take the controlling tty.  This prevents processes spawned by the
+     * command from receiving SIGHUP when the session leader (us) exits.
+     */
+    if (tcsetpgrp(io_fds[SFD_SLAVE], mc.mon_pgrp) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to set foreground pgrp to %d (monitor)",
+	    __func__, (int)mc.mon_pgrp);
+    }
+
     /* Send parent status. */
     send_status(backchannel, &cstat);
 

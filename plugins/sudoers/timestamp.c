@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)
@@ -90,9 +91,14 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 	/* verify parent pid */
 	if (entry->u.ppid != key->u.ppid)
 	    debug_return_bool(false);
+	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
+	    debug_return_bool(false);
+        break;
 	break;
     case TS_TTY:
 	if (entry->u.ttydev != key->u.ttydev)
+	    debug_return_bool(false);
+	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
 	    debug_return_bool(false);
 	break;
     default:
@@ -334,6 +340,8 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
 	    entry->u.ttydev = sb.st_rdev;
+	    if (entry->sid != -1)
+		get_starttime(entry->sid, &entry->start_time);
 	    break;
 	}
 	/* FALLTHROUGH */
@@ -341,6 +349,7 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 	/* ppid-based time stamp */
 	entry->type = TS_PPID;
 	entry->u.ppid = getppid();
+	get_starttime(entry->u.ppid, &entry->start_time);
 	break;
     default:
 	/* global time stamp */
@@ -378,6 +387,14 @@ timestamp_open(const char *user, pid_t sid)
     if (def_timestamp_timeout == 0.0) {
 	errno = ENOENT;
 	goto bad;
+    }
+
+    if (def_timestamp_type == kernel) {
+	fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    goto bad;
+	close(fd);
+	fd = -1;
     }
 
     /* Sanity check timestamp dir and create if missing. */
@@ -608,6 +625,14 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
 	    debug_return_bool(false);
     }
+    if (entry.size != sizeof(entry)) {
+	/* Reset position if the lock record has an unexpected size. */
+	if (lseek(cookie->fd, entry.size, SEEK_SET) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to seek to %lld", (long long)entry.size);
+	    debug_return_bool(false);
+	}
+    }
 
     /* Search for a tty/ppid-based record or append a new one. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
@@ -621,7 +646,8 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	lock_pos = lseek(cookie->fd, 0, SEEK_CUR) - (off_t)entry.size;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "appending new tty time stamp record");
+	    "appending new %s time stamp record",
+	    def_timestamp_type == ppid ? "ppid" : "tty");
 	lock_pos = lseek(cookie->fd, 0, SEEK_CUR);
 	if (ts_write(cookie->fd, cookie->fname, &cookie->key, -1) == -1)
 	    debug_return_bool(false);
@@ -713,6 +739,20 @@ timestamp_status(void *vcookie, struct passwd *pw)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "NULL cookie or invalid position");
 	status = TS_OLD;
+	goto done;
+    }
+
+    if (def_timestamp_type == kernel) {
+#ifdef TIOCCHKVERAUTH
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    goto done;
+	if (ioctl(fd, TIOCCHKVERAUTH) == 0)
+	    status = TS_CURRENT;
+	else
+	    status = TS_OLD;
+	close(fd);
+#endif
 	goto done;
     }
 
@@ -817,6 +857,18 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	goto done;
     }
 
+    if (def_timestamp_type == kernel) {
+#ifdef TIOCSETVERAUTH
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd != -1) {
+	    int secs = 60 * def_timestamp_timeout;
+	    ioctl(fd, TIOCSETVERAUTH, &secs);
+	    close(fd);
+	}
+#endif
+	goto done;
+    }
+
     /* Update timestamp in key and enable it. */
     CLR(cookie->key.flags, TS_DISABLED);
     if (sudo_gettime_mono(&cookie->key.ts) == -1) {
@@ -847,6 +899,17 @@ timestamp_remove(bool unlink_it)
     int fd = -1, ret = true;
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH)
+
+    if (def_timestamp_type == kernel) {
+#ifdef TIOCCLRVERAUTH
+	fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    ret = -1;
+	else
+	    ioctl(fd, TIOCCLRVERAUTH);
+#endif
+	goto done;
+    }
 
     if (asprintf(&fname, "%s/%s", def_timestampdir, user_name) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

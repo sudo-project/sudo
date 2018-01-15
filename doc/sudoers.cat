@@ -92,13 +92,14 @@ DDEESSCCRRIIPPTTIIOONN
 
      ssuuddooeerrss uses per-user time stamp files for credential caching.  Once a
      user has been authenticated, a record is written containing the user ID
-     that was used to authenticate, the terminal session ID, and a time stamp
-     (using a monotonic clock if one is available).  The user may then use
-     ssuuddoo without a password for a short period of time (5 minutes unless
-     overridden by the _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a
-     separate record for each terminal, which means that a user's login
-     sessions are authenticated separately.  The _t_i_m_e_s_t_a_m_p___t_y_p_e option can be
-     used to select the type of time stamp record ssuuddooeerrss will use.
+     that was used to authenticate, the terminal session ID, the start time of
+     the session leader (or parent proccess) and a time stamp (using a
+     monotonic clock if one is available).  The user may then use ssuuddoo without
+     a password for a short period of time (5 minutes unless overridden by the
+     _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t option).  By default, ssuuddooeerrss uses a separate record
+     for each terminal, which means that a user's login sessions are
+     authenticated separately.  The _t_i_m_e_s_t_a_m_p___t_y_p_e option can be used to
+     select the type of time stamp record ssuuddooeerrss will use.
 
    LLooggggiinngg
      ssuuddooeerrss can log both successful and unsuccessful attempts (as well as
@@ -186,7 +187,8 @@ DDEESSCCRRIIPPTTIIOONN
      (and Linux systems without PAM), the contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t are
      also included.  On BSD systems, if the _u_s_e___l_o_g_i_n_c_l_a_s_s flag is enabled,
      the _p_a_t_h and _s_e_t_e_n_v variables in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f are also applied.  All
-     other environment variables are removed.
+     other environment variables are removed unless permitted by _e_n_v___k_e_e_p or
+     _e_n_v___c_h_e_c_k, described above.
 
      Finally, the _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e and _e_n_v___f_i_l_e files are applied, if
      present.  The variables in _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e are applied first and are
@@ -999,19 +1001,19 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        higher.  It has no effect unless I/O logging is enabled
                        or the _u_s_e___p_t_y flag is enabled.
 
-     env_editor        If set, vviissuuddoo will use the value of the EDITOR or
-                       VISUAL environment variables before falling back on the
-                       default editor list.  Note that this may create a
-                       security hole as it allows the user to run any
+     env_editor        If set, vviissuuddoo will use the value of the SUDO_EDITOR,
+                       VISUAL or EDITOR environment variables before falling
+                       back on the default editor list.  Note that this may
+                       create a security hole as it allows the user to run any
                        arbitrary command as root without logging.  A safer
                        alternative is to place a colon-separated list of
-                       editors in the editor variable.  vviissuuddoo will then only
-                       use the EDITOR or VISUAL if they match a value
-                       specified in editor.  If the _e_n_v___r_e_s_e_t flag is enabled,
-                       the EDITOR and/or VISUAL environment variables must be
-                       present in the _e_n_v___k_e_e_p list for the _e_n_v___e_d_i_t_o_r flag to
-                       function when vviissuuddoo is invoked via ssuuddoo.  This flag is
-                       _o_f_f by default.
+                       editors in the _e_d_i_t_o_r variable.  vviissuuddoo will then only
+                       use SUDO_EDITOR, VISUAL or EDITOR if they match a value
+                       specified in _e_d_i_t_o_r.  If the _e_n_v___r_e_s_e_t flag is enabled,
+                       the SUDO_EDITOR, VISUAL and/or EDITOR environment
+                       variables must be present in the _e_n_v___k_e_e_p list for the
+                       _e_n_v___e_d_i_t_o_r flag to function when vviissuuddoo is invoked via
+                       ssuuddoo.  This flag is _o_f_f by default.
 
      env_reset         If set, ssuuddoo will run the command in a minimal
                        environment containing the TERM, PATH, HOME, MAIL,
@@ -1149,13 +1151,19 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        connected to the user's tty, due to I/O redirection or
                        because the command is part of a pipeline, that input
                        is also captured and stored in a separate log file.
-                       For more information, see the _I_/_O _L_O_G _F_I_L_E_S section.
-                       This flag is _o_f_f by default.
+                       Anything sent to the standard input will be consumed,
+                       regardless of whether or not the command run via ssuuddoo
+                       is actually reading the standard input.  This may have
+                       unexpected results when using ssuuddoo in a shell script
+                       that expects to process the standard input.  For more
+                       information about I/O logging, see the _I_/_O _L_O_G _F_I_L_E_S
+                       section.  This flag is _o_f_f by default.
 
      log_output        If set, ssuuddoo will run the command in a pseudo-tty and
                        log all output that is sent to the screen, similar to
-                       the script(1) command.  For more information, see the
-                       _I_/_O _L_O_G _F_I_L_E_S section.  This flag is _o_f_f by default.
+                       the script(1) command.  For more information about I/O
+                       logging, see the _I_/_O _L_O_G _F_I_L_E_S section.  This flag is
+                       _o_f_f by default.
 
      log_year          If set, the four-digit year will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
@@ -1464,13 +1472,18 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        not needed, this option can be disabled to reduce the
                        load on the LDAP server.  This flag is _o_n by default.
 
-     use_pty           If set, ssuuddoo will run the command in a pseudo-pty even
-                       if no I/O logging is being gone.  A malicious program
-                       run under ssuuddoo could conceivably fork a background
-                       process that retains to the user's terminal device
-                       after the main program has finished executing.  Use of
-                       this option will make that impossible.  This flag is
-                       _o_f_f by default.
+     use_pty           If set, and ssuuddoo is running in a terminal, the command
+                       will be run in a pseudo-pty (even if no I/O logging is
+                       being done).  If the ssuuddoo process is not attached to a
+                       terminal, _u_s_e___p_t_y has no effect.
+
+                       A malicious program run under ssuuddoo may be capable of
+                       injecting injecting commands into the user's terminal
+                       or running a background process that retains access to
+                       the user's terminal device even after the main program
+                       has finished executing.  By running the command in a
+                       separate pseudo-pty, this attack is no longer possible.
+                       This flag is _o_f_f by default.
 
      user_command_timeouts
                        If set, the user may specify a timeout on the command
@@ -1588,18 +1601,24 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      SSttrriinnggss:
 
+     authfail_message  Message that is displayed after a user fails to
+                       authenticate.  The message may include the `%d' escape
+                       which will expand to the number of failed password
+                       attempts.  If set, it overrides the default message, %d
+                       incorrect password attempt(s).
+
      badpass_message   Message that is displayed if a user enters an incorrect
                        password.  The default is Sorry, try again. unless
                        insults are enabled.
 
      editor            A colon (`:') separated list of editors allowed to be
                        used with vviissuuddoo.  vviissuuddoo will choose the editor that
-                       matches the user's EDITOR or VISUAL environment
-                       variable if possible, or the first editor in the list
-                       that exists and is executable.  Note that the EDITOR
-                       and VISUAL environment variables are not preserved by
-                       default when the _e_n_v___r_e_s_e_t option is enabled.  The
-                       default is _v_i.
+                       matches the user's SUDO_EDITOR, VISUAL or EDITOR
+                       environment variable if possible, or the first editor
+                       in the list that exists and is executable.  Note that
+                       the SUDO_EDITOR, VISUAL and EDITOR environment
+                       variables are not preserved by default when the
+                       _e_n_v___r_e_s_e_t option is enabled.  The default is _v_i.
 
      iolog_dir         The top-level directory to use when constructing the
                        path name for the input/output log directory.  Only
@@ -1844,6 +1863,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                                as _p_p_i_d.  Commands run from the same terminal
                                will not require a password for
                                _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t minutes (5 by default).
+
+                       kernel  The time stamp is stored in the kernel as an
+                               attribute of the terminal device.  If no
+                               terminal is present, the time stamp is
+                               considered to be invalid.  This is currently
+                               only supported on OpenBSD.
 
                        The default value is _t_t_y.
 
@@ -2328,11 +2353,11 @@ LLOOGG FFOORRMMAATT
 
 II//OO LLOOGG FFIILLEESS
      When I/O logging is enabled, ssuuddoo will run the command in a pseudo-tty
-     and log all user input and/or output.  I/O is logged to the directory
-     specified by the _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
-     unique session ID that is included in the ssuuddoo log line, prefixed with
-     "TSID=".  The _i_o_l_o_g___f_i_l_e option may be used to control the format of the
-     session ID.
+     and log all user input and/or output, depending on which options are
+     enabled.  I/O is logged to the directory specified by the _i_o_l_o_g___d_i_r
+     option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a unique session ID that is
+     included in the ssuuddoo log line, prefixed with "TSID=".  The _i_o_l_o_g___f_i_l_e
+     option may be used to control the format of the session ID.
 
      Each I/O log is stored in a separate directory that contains the
      following files:
@@ -2754,19 +2779,21 @@ SSEECCUURRIITTYY NNOOTTEESS
      with a date greater than current_time + 2 * TIMEOUT will be ignored and
      ssuuddooeerrss will log and complain.
 
-     Since time stamp files live in the file system, they can outlive a user's
-     login session.  As a result, a user may be able to login, run a command
-     with ssuuddoo after authenticating, logout, login again, and run ssuuddoo without
-     authenticating so long as the record's time stamp is within 5 minutes (or
-     whatever value the timeout is set to in the _s_u_d_o_e_r_s file).  When the
-     _t_t_y___t_i_c_k_e_t_s option is enabled, the time stamp record includes the device
-     number of the terminal the user authenticated with.  This provides per-
-     tty granularity but time stamp records still may outlive the user's
-     session.  The time stamp record also includes the session ID of the
-     process that last authenticated.  This prevents processes in different
-     terminal sessions from using the same time stamp record.  It also helps
-     reduce the chance that a user will be able to run ssuuddoo without entering a
-     password when logging out and back in again on the same terminal.
+     If the _t_i_m_e_s_t_a_m_p___t_y_p_e option is set to "tty", the time stamp record
+     includes the device number of the terminal the user authenticated with.
+     This provides per-terminal granularity but time stamp records may still
+     outlive the user's session.
+
+     Unless the _t_i_m_e_s_t_a_m_p___t_y_p_e option is set to "global", the time stamp
+     record also includes the session ID of the process that last
+     authenticated.  This prevents processes in different terminal sessions
+     from using the same time stamp record.  On systems where a process's
+     start time can be queried, the start time of the session leader is
+     recorded in the time stamp record.  If no terminal is present or the
+     _t_i_m_e_s_t_a_m_p___t_y_p_e option is set to "ppid", the start time of the parent
+     process is used instead.  In most cases this will prevent a time stamp
+     record from being re-used without the user entering a password when
+     logging out and back in again.
 
 DDEEBBUUGGGGIINNGG
      Versions 1.8.4 and higher of the ssuuddooeerrss plugin support a flexible
@@ -2829,7 +2856,7 @@ DDEEBBUUGGGGIINNGG
 
 SSEEEE AALLSSOO
      ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3), sudo.conf(4),
-     sudoers.ldap(4), sudo(1m), sudo_plugin(4), visudo(1m)
+     sudoers.ldap(4), sudo(1m), sudo_plugin(4), sudoers_timestamp(4), visudo(1m)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
@@ -2868,4 +2895,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                     August 4, 2017                     Sudo 1.8.21
+Sudo 1.8.22                    December 20, 2017                   Sudo 1.8.22

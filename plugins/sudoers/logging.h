@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2009-2014
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2009-2017
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,6 @@
 #ifndef SUDOERS_LOGGING_H
 #define SUDOERS_LOGGING_H
 
-#include <syslog.h>
 #ifdef __STDC__
 # include <stdarg.h>
 #else

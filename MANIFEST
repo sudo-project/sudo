@@ -40,6 +40,9 @@ doc/sudoers.ldap.man.in
 doc/sudoers.ldap.mdoc.in
 doc/sudoers.man.in
 doc/sudoers.mdoc.in
+doc/sudoers_timestamp.cat
+doc/sudoers_timestamp.man.in
+doc/sudoers_timestamp.mdoc.in
 doc/sudoreplay.cat
 doc/sudoreplay.man.in
 doc/sudoreplay.mdoc.in
@@ -175,6 +178,7 @@ lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
 lib/util/term.c
+lib/util/ttyname_dev.c
 lib/util/ttysize.c
 lib/util/util.exp.in
 lib/util/utimens.c
@@ -207,6 +211,7 @@ lib/zlib/zlib.exp
 lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
+log2cl.pl
 ltmain.sh
 m4/ax_append_flag.m4
 m4/ax_check_compile_flag.m4
@@ -323,6 +328,8 @@ plugins/sudoers/po/fi.mo
 plugins/sudoers/po/fi.po
 plugins/sudoers/po/fr.mo
 plugins/sudoers/po/fr.po
+plugins/sudoers/po/fur.mo
+plugins/sudoers/po/fur.po
 plugins/sudoers/po/hr.mo
 plugins/sudoers/po/hr.po
 plugins/sudoers/po/hu.mo
@@ -386,6 +393,7 @@ plugins/sudoers/regress/parser/check_digest.out.ok
 plugins/sudoers/regress/parser/check_fill.c
 plugins/sudoers/regress/parser/check_gentime.c
 plugins/sudoers/regress/parser/check_hexchar.c
+plugins/sudoers/regress/starttime/check_starttime.c
 plugins/sudoers/regress/sudoers/test1.in
 plugins/sudoers/regress/sudoers/test1.json.ok
 plugins/sudoers/regress/sudoers/test1.out.ok
@@ -513,6 +521,7 @@ plugins/sudoers/set_perms.c
 plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
 plugins/sudoers/sssd.c
+plugins/sudoers/starttime.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
 plugins/sudoers/sudo_printf.c
@@ -533,6 +542,7 @@ plugins/sudoers/toke.c
 plugins/sudoers/toke.h
 plugins/sudoers/toke.l
 plugins/sudoers/toke_util.c
+plugins/sudoers/tsdump.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/visudo.c

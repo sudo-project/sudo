@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -746,6 +746,7 @@ restore_terminal_size(void)
 
     if (terminal_was_resized) {
 	/* We are still in raw mode, hence the carriage return. */
+	putchar('\r');
 	printf(U_("Replay finished, press any key to restore the terminal."));
 	fflush(stdout);
 	(void)getchar();

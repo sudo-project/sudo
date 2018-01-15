@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -349,6 +349,8 @@ get_ipa_hostname(char **shostp, char **lhostp)
 		    *lhostp = lhost;
 		    ret = true;
 		} else {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
 		    free(shost);
 		    free(lhost);
 		    ret = -1;
@@ -456,7 +458,6 @@ sudo_sss_open(struct sudo_nss *nss)
      */
     if (strcmp(user_runhost, user_host) == 0) {
 	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(handle);
 	    debug_return_int(ENOMEM);
 	}
@@ -478,7 +479,8 @@ sudo_sss_close(struct sudo_nss *nss)
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
 	free(handle->ipa_host);
-	free(handle->ipa_shost);
+	if (handle->ipa_host != handle->ipa_shost)
+	    free(handle->ipa_shost);
 	free(handle);
 	nss->handle = NULL;
     }
@@ -677,6 +679,12 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "=> match");
 		ret = true;
 	    }
+	    break;
+	case '\0':
+	    /* Empty RunAsUser means run as the invoking user. */
+	    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
+		strcmp(user_name, runas_pw->pw_name) == 0)
+		ret = true;
 	    break;
 	case 'A':
 	    if (strcmp(val, "ALL") == 0) {
@@ -1321,12 +1329,13 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		    (pwcheck == all && doauth != true)) {
 		    doauth = !!sudo_sss_check_bool(handle, rule, "authenticate");
 		}
+		if (matched == true)
+		    continue;
 		/* Only check the command when listing another user. */
 		if (user_uid == 0 || list_pw == NULL ||
 		    user_uid == list_pw->pw_uid ||
 		    sudo_sss_check_command(handle, rule, NULL) == true) {
 		    matched = true;
-		    break;
 		}
 	    }
 	}
@@ -1341,6 +1350,8 @@ sudo_sss_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		case any:
 		    if (doauth == false)
 			SET(ret, FLAG_NOPASSWD);
+		    else
+			CLR(ret, FLAG_NOPASSWD);
 		    break;
 		default:
 		    break;
@@ -1768,7 +1779,8 @@ sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
     switch (handle->fn_get_values(rule, "sudoCommand", &val_array)) {
     case 0:
 	for (i = 0; val_array[i] != NULL; ++i) {
-	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
+	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "",
+		val_array[i][0] ? val_array[i] : user_name);
 	    count++;
 	}
 	handle->fn_free_values(val_array);

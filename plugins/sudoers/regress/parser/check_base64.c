@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 extern size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
@@ -78,6 +79,8 @@ main(int argc, char *argv[])
     int i, errors = 0;
     unsigned char buf[32];
     size_t len;
+
+    initprogname(argc > 0 ? argv[0] : "check_base64");
 
     for (i = 0; i < ntests; i++) {
 	len = base64_decode(test_strings[i].encoded, buf, sizeof(buf));

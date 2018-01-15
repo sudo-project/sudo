@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 1996, 1998-2005, 2008, 2009-2017
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -164,6 +164,9 @@
 #ifndef _S_IFLNK
 # define _S_IFLNK		S_IFLNK
 #endif /* _S_IFLNK */
+#ifndef _S_IFIFO
+# define _S_IFIFO		S_IFIFO
+#endif /* _S_IFIFO */
 #ifndef S_ISREG
 # define S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
 #endif /* S_ISREG */
@@ -172,6 +175,9 @@
 #endif /* S_ISDIR */
 #ifndef S_ISLNK
 # define S_ISLNK(m)		(((m) & _S_IFMT) == _S_IFLNK)
+#endif /* S_ISLNK */
+#ifndef S_ISFIFO
+# define S_ISFIFO(m)		(((m) & _S_IFMT) == _S_IFIFO)
 #endif /* S_ISLNK */
 #ifndef S_ISTXT
 # define S_ISTXT		0001000

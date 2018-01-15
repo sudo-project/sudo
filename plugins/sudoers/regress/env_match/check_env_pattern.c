@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,7 @@
 
 #include <config.h>
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -37,6 +38,8 @@ main(int argc, char *argv[])
     FILE *fp = stdin;
     char pattern[1024], string[1024];
     int errors = 0, tests = 0, got, want;
+
+    initprogname(argc > 0 ? argv[0] : "check_env_pattern");
 
     if (argc > 1) {
 	if ((fp = fopen(argv[1], "r")) == NULL) {

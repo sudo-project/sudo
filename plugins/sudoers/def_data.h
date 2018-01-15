@@ -220,6 +220,8 @@
 #define def_syslog_pid          (sudo_defs_table[I_SYSLOG_PID].sd_un.flag)
 #define I_TIMESTAMP_TYPE        110
 #define def_timestamp_type      (sudo_defs_table[I_TIMESTAMP_TYPE].sd_un.tuple)
+#define I_AUTHFAIL_MESSAGE      111
+#define def_authfail_message    (sudo_defs_table[I_AUTHFAIL_MESSAGE].sd_un.str)
 
 enum def_tuple {
 	never,
@@ -230,5 +232,6 @@ enum def_tuple {
 	digest_only,
 	global,
 	ppid,
-	tty
+	tty,
+	kernel
 };

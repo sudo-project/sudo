@@ -195,6 +195,9 @@
    don't. */
 #undef HAVE_DECL__SYS_SIGNAME
 
+/* Define to 1 if you have the `devname' function. */
+#undef HAVE_DEVNAME
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -958,6 +961,10 @@
 /* Define if your C preprocessor does not support variadic macros. */
 #undef NO_VARIADIC_MACROS
 
+/* Define to 1 to include offensive insults from the classic version of sudo.
+   */
+#undef OFFENSIVE_INSULTS
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -985,10 +992,6 @@
 
 /* The passwd prompt timeout (in minutes). */
 #undef PASSWORD_TIMEOUT
-
-/* Define to 1 to replace politically incorrect insults with less offensive
-   ones. */
-#undef PC_INSULTS
 
 /* Define to 1 to enable replacement getcwd if system getcwd is broken. */
 #undef PREFER_PORTABLE_GETCWD

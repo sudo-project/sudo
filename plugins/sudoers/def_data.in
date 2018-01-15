@@ -347,4 +347,7 @@ syslog_pid
 timestamp_type
 	T_TUPLE
 	"Type of authentication timestamp record: %s"
-	global ppid tty
+	global ppid tty kernel
+authfail_message
+	T_STR
+	"Authentication failure message: %s"

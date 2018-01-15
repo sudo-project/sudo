@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -97,6 +97,10 @@ restore_signals(void)
 
     for (ss = saved_signals; ss->signo != -1; ss++) {
 	if (ss->restore) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"restoring handler for signal %d: %s", ss->signo,
+		ss->sa.sa_handler == SIG_IGN ? "SIG_IGN" :
+		ss->sa.sa_handler == SIG_DFL ? "SIG_DFL" : "???");
 	    if (sigaction(ss->signo, &ss->sa, NULL) != 0) {
 		sudo_warn(U_("unable to restore handler for signal %d"),
 		    ss->signo);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -421,6 +421,15 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 #endif /* HAVE_GETGROUPLIST_2 */
     }
 done:
+    if (ret == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: %s: unable to get groups via getgrouplist()",
+	    __func__, ud->username);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: %s: got %d groups via getgrouplist()",
+	    __func__, ud->username, ud->ngroups);
+    }
     debug_return_int(ret);
 }
 
@@ -446,8 +455,15 @@ get_user_groups(struct user_details *ud)
 		if (ud->groups == NULL)
 		    goto oom;
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: %s: unable to get %d groups via getgroups()",
+			__func__, ud->username, ud->ngroups);
 		    free(ud->groups);
 		    ud->groups = NULL;
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"%s: %s: got %d groups via getgroups()",
+			__func__, ud->username, ud->ngroups);
 		}
 	    }
 	}

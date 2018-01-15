@@ -60,6 +60,7 @@ sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1
 sudo_fatalx_nodebug_v1
+sudo_ttyname_dev_v1
 sudo_get_ttysize_v1
 sudo_gethostname_v1
 sudo_gettime_mono_v1

@@ -1,7 +1,7 @@
 /*	$OpenBSD: globtest.c,v 1.1 2008/10/01 23:04:36 millert Exp $	*/
 
 /*
- * Public domain, 2008, Todd C. Miller <Todd.Miller@courtesan.com>
+ * Public domain, 2008, Todd C. Miller <Todd.Miller@sudo.ws>
  */
 
 #include <config.h>
@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 #define MAX_RESULTS	256
 
@@ -44,6 +45,8 @@ main(int argc, char **argv)
 	int errors = 0, tests = 0, lineno;
 	struct gl_entry entry;
 	size_t len;
+
+	initprogname(argc > 0 ? argv[0] : "globtest");
 
 	if (argc > 1) {
 		if ((fp = fopen(argv[1], "r")) == NULL) {

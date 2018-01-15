@@ -1,6 +1,28 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.20:
+
+    Prior to version 1.8.20, when log_input, log_output or use_pty
+    were enabled, if any of the standard input, output or error
+    were not connected to a terminal, sudo would use a pipe.  The
+    pipe allows sudo to interpose itself between the old standard
+    input, output or error and log the contents.  Beginning with
+    version 1.8.20, a pipe is only used when I/O logging is enabled.
+    If use_pty is set without log_input or log_output, no pipe will
+    be used.  Additionally, if log_input is set without log_output,
+    a pipe is only used for the standard input.  Likewise, if
+    log_output is set without log_input, a pipe is only used for
+    the standard output and standard error.  This results in a
+    noticable change in behavior if the use_pty flag is set and no
+    terminal is present when running commands such as scripts that
+    execute other commands asynchronously (in the background).
+    Previously, sudo would exit immediately, causing background
+    commands to terminate with a broken pipe if they attempt to
+    write to the standard output or standard error.  As of version
+    1.8.20, a pipe will not be used in this case so the command
+    will no longer be terminated.
+
 o Upgrading from a version prior to 1.8.16:
 
     When editing files with sudoedit, files in a directory that is

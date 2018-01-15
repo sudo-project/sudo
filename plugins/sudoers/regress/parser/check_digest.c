@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,6 +41,7 @@
 #include "sudo_compat.h"
 #include "sudo_fatal.h"
 #include "sudo_queue.h"
+#include "sudo_util.h"
 #include "parse.h"
 
 __dso_public int main(int argc, char *argv[]);
@@ -100,6 +101,8 @@ main(int argc, char *argv[])
     unsigned int i, j;
     size_t digest_len;
     int digest_type;
+
+    initprogname(argc > 0 ? argv[0] : "check_digest");
 
     for (digest_type = 0; digest_type < SUDO_DIGEST_INVALID; digest_type++) {
 	for (i = 0; i < NUM_TESTS; i++) {

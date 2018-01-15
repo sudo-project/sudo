@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -302,6 +302,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
+		    if (*optarg == '\0')
+			usage(1);
 		    sudo_settings[ARG_BSDAUTH_TYPE].value = optarg;
 		    break;
 #endif
@@ -310,13 +312,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    break;
 		case 'C':
 		    if (strtonum(optarg, 3, INT_MAX, NULL) == 0) {
-			sudo_warnx(_("the argument to -C must be a number greater than or equal to 3"));
+			sudo_warnx(U_("the argument to -C must be a number greater than or equal to 3"));
 			usage(1);
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
 		    break;
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':
+		    if (*optarg == '\0')
+			usage(1);
 		    sudo_settings[ARG_LOGIN_CLASS].value = optarg;
 		    break;
 #endif
@@ -342,6 +346,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'g':
+		    if (*optarg == '\0')
+			usage(1);
 		    runas_group = optarg;
 		    sudo_settings[ARG_RUNAS_GROUP].value = optarg;
 		    break;
@@ -370,6 +376,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    }
 		    /* FALLTHROUGH */
 		case OPT_HOSTNAME:
+		    if (*optarg == '\0')
+			usage(1);
 		    sudo_settings[ARG_REMOTE_HOST].value = optarg;
 		    break;
 		case 'i':
@@ -404,17 +412,23 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    sudo_settings[ARG_PRESERVE_GROUPS].value = "true";
 		    break;
 		case 'p':
+		    /* An empty prompt is allowed. */
 		    sudo_settings[ARG_PROMPT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
+		    if (*optarg == '\0')
+			usage(1);
 		    sudo_settings[ARG_SELINUX_ROLE].value = optarg;
 		    break;
 		case 't':
+		    if (*optarg == '\0')
+			usage(1);
 		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
 		    break;
 #endif
 		case 'T':
+		    /* Plugin determines whether empty timeout is allowed. */
 		    sudo_settings[ARG_TIMEOUT].value = optarg;
 		    break;
 		case 'S':
@@ -425,9 +439,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		    SET(flags, MODE_SHELL);
 		    break;
 		case 'U':
+		    if (*optarg == '\0')
+			usage(1);
 		    list_user = optarg;
 		    break;
 		case 'u':
+		    if (*optarg == '\0')
+			usage(1);
 		    runas_user = optarg;
 		    sudo_settings[ARG_RUNAS_USER].value = optarg;
 		    break;

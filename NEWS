@@ -1,3 +1,88 @@
+What's new in Sudo 1.8.22
+
+ * Commands run in the background from a script run via sudo will
+   no longer receive SIGHUP when the parent exits and I/O logging
+   is enabled.  Bug #502
+
+ * A particularly offensive insult is now disabled by default.
+   Bug #804
+
+ * The description of "sudo -i" now correctly documents that
+   the "env_keep" and "env_check" sudoers options are applied to
+   the environment.  Bug #806
+
+ * Fixed a crash when the system's host name is not set.
+   Bug #807
+
+ * The sudoers2ldif script now handles #include and #includedir 
+   directives.
+
+ * Fixed a bug where sudo would silently exit when the command was
+   not allowed by sudoers and the "passwd_tries" sudoers option
+   was set to a value less than one.
+
+ * Fixed a bug with the "listpw" and "verifypw" sudoers options and
+   multiple sudoers sources.  If the option is set to "all", a
+   password should be required unless none of a user's sudoers
+   entries from any source require authentication.
+
+ * Fixed a bug with the "listpw" and "verifypw" sudoers options in
+   the LDAP and SSSD back-ends.  If the option is set to "any", and
+   the entry contained multiple rules, only the first matching rule
+   was checked.  If an entry contained more than one matching rule
+   and the first rule required authentication but a subsequent rule
+   did not, sudo would prompt for a password when it should not have.
+
+ * When running a command as the invoking user (not root), sudo
+   would execute the command with the same group vector it was
+   started with.  Sudo now executes the command with a new group
+   vector based on the group database which is consistent with
+   how su(1) operates.
+
+ * Fixed a double free in the SSSD back-end that could occur when
+   ipa_hostname is present in sssd.conf and is set to an unqualified
+   host name.
+
+ * When I/O logging is enabled, sudo will now write to the terminal
+   even when it is a background process.  Previously, sudo would
+   only write to the tty when it was the foreground process when
+   I/O logging was enabled.  If the TOSTOP terminal flag is set,
+   sudo will suspend the command (and then itself) with the SIGTTOU
+   signal.
+
+ * A new "authfail_message" sudoers option that overrides the
+   default "N incorrect password attempt(s)".
+
+ * An empty sudoRunAsUser attribute in the LDAP and SSSD backends
+   will now match the invoking user.  This is more consistent with
+   how an empty runas user in the sudoers file is treated.
+
+ * Documented that in check mode, visudo does not check the owner/mode
+   on files specified with the -f flag.  Bug #809.
+
+ * It is now an error to specify the runas user as an empty string
+   on the command line.  Previously, an empty runas user was treated
+   the same as an unspecified runas user.  Bug #817.
+
+ * When "timestamp_type" option is set to "tty" and a terminal is
+   present, the time stamp record will now include the start time
+   of the session leader.  When the "timestamp_type" option is set
+   to "ppid" or when no terminal is available, the start time of
+   the parent process is used instead.  This significantly reduces
+   the likelihood of a time stamp record being re-used when a user
+   logs out and back in again.  Bug #818.
+
+ * The sudoers time stamp file format is now documented in the new
+   sudoers_timestamp manual.
+
+ * The "timestamp_type" option now takes a "kernel" value on OpenBSD
+   systems.  This causes the tty-based time stamp to be stored in
+   the kernel instead of on the file system.  If no tty is present,
+   the time stamp is considered to be invalid.
+
+ * Visudo will now use the SUDO_EDITOR environment variable (if
+   present) in addition to VISUAL and EDITOR.
+
 What's new in Sudo 1.8.21p2
 
  * Fixed a bug introduced in version 1.8.21 which prevented sudo
@@ -34,7 +119,7 @@ What's new in Sudo 1.8.21p1
    playback would hang for I/O logs that contain terminal input.
 
  * Sudo 1.8.18 contained an incomplete fix for the matching of
-   entries in the LDAP and SSSD backends when a sudoRunAsGroup is
+   entries in the LDAP and SSSD back-ends when a sudoRunAsGroup is
    specified but no sudoRunAsUser is present in the sudoRole.
 
 What's new in Sudo 1.8.21
@@ -140,8 +225,8 @@ What's new in Sudo 1.8.20
    be terminated if the timeout expires.
 
  * The SELinux role and type are now displayed in the "sudo -l"
-   output for the LDAP and SSSD backends, just as they are in the
-   sudoers backend.
+   output for the LDAP and SSSD back-ends, just as they are in the
+   sudoers back-end.
 
  * A new command line option, -T, can be used to specify a command
    timeout as long as the user-specified timeout is not longer than
@@ -149,7 +234,7 @@ What's new in Sudo 1.8.20
    used when the "user_command_timeouts" flag is enabled in sudoers.
 
  * Added NOTBEFORE and NOTAFTER command options to the sudoers
-   backend similar to what is already available in the LDAP backend.
+   back-end similar to what is already available in the LDAP back-end.
 
  * Sudo can now optionally use the SHA2 functions in OpenSSL or GNU
    crypt instead of the SHA2 implementation bundled with sudo.
@@ -175,7 +260,7 @@ What's new in Sudo 1.8.20
    to env_file but its contents are subject to the same restrictions
    as variables in the invoking user's environment.
 
- * Fixed a use after free bug in the SSSD backend when the fqdn
+ * Fixed a use after free bug in the SSSD back-end when the fqdn
    sudoOption is enabled and no hostname value is present in
    /etc/sssd/sssd.conf.
 
@@ -338,7 +423,7 @@ What's new in Sudo 1.8.18
 
  * Fixed a bug where "sudo -l command" would indicate that a command
    was runnable even when denied by sudoers when using the LDAP or
-   SSSD backends.
+   SSSD back-ends.
 
  * The match_group_by_gid Defaults option has been added to allow
    sites where group name resolution is slow and where sudoers only
@@ -362,12 +447,12 @@ What's new in Sudo 1.8.18
    flag is enabled in sudoers.  Bug #757
 
  * Negated sudoHost attributes are now supported by the LDAP and
-   SSSD backends.
+   SSSD back-ends.
 
- * Fixed matching entries in the LDAP and SSSD backends when a
+ * Fixed matching entries in the LDAP and SSSD back-ends when a
    RunAsGroup is specified but no RunAsUser is present.
 
- * Fixed "sudo -l" output in the LDAP and SSSD backends when a
+ * Fixed "sudo -l" output in the LDAP and SSSD back-ends when a
    RunAsGroup is specified but no RunAsUser is present.
 
 What's new in Sudo 1.8.17p1
@@ -424,9 +509,9 @@ What's new in Sudo 1.8.17
  * Fixed a bug on AIX where the stack size hard resource limit was
    being set to 2GB instead of 4GB on 64-bit systems.
 
- * The SSSD backend now properly supports "sudo -U otheruser -l".
+ * The SSSD back-end now properly supports "sudo -U otheruser -l".
 
- * The SSSD backend now uses the value of "ipa_hostname"
+ * The SSSD back-end now uses the value of "ipa_hostname"
    from sssd.conf, if specified, when matching the host name.
 
  * Fixed a hang on some systems when the command is being run in
@@ -448,12 +533,12 @@ What's new in Sudo 1.8.16
 
  * Fixed a bug that could cause warning mail to be sent in list
    mode (sudo -l) for users without sudo privileges when the
-   LDAP and sssd backends are used.
+   LDAP and sssd back-ends are used.
 
  * Fixed a bug that prevented the "mail_no_user" option from working
-   properly with the LDAP backend.
+   properly with the LDAP back-end.
 
- * In the LDAP and sssd backends, white space is now ignored between
+ * In the LDAP and sssd back-ends, white space is now ignored between
    an operator (!, +, +=, -=) when parsing a sudoOption.
 
  * It is now possible to disable Path settings in sudo.conf
@@ -481,7 +566,7 @@ What's new in Sudo 1.8.16
    problem when a user or group of the same name exists in multiple
    auth registries.  For example, local and LDAP.
 
- * Fixed a crash in the SSSD backend when the invoking user is not
+ * Fixed a crash in the SSSD back-end when the invoking user is not
    found.  Bug #732.
 
  * Added the --enable-asan configure flag to enable address sanitizer
@@ -500,7 +585,7 @@ What's new in Sudo 1.8.16
  * Fixed support for negating character classes in sudo's version
    of the fnmatch() function.
 
- * Fixed a bug in the LDAP and SSSD backends that could allow an
+ * Fixed a bug in the LDAP and SSSD back-ends that could allow an
    unauthorized user to list another user's privileges.  Bug #738.
 
  * The PAM conversation function now works around an ambiguity in the
@@ -613,7 +698,7 @@ What's new in Sudo 1.8.14p2
 What's new in Sudo 1.8.14p1
 
  * Fixed a bug introduced in sudo 1.8.14 that prevented the sssd
-   backend from working.  Bug #703.
+   back-end from working.  Bug #703.
 
 What's new in Sudo 1.8.14
 
@@ -1522,7 +1607,7 @@ What's new in Sudo 1.8.5?
    ldap_start_tls_s() function.
 
  * The TLS_CHECKPEER parameter in ldap.conf now works when the
-   Mozilla NSS crypto backend is used with OpenLDAP.
+   Mozilla NSS crypto back-end is used with OpenLDAP.
 
  * A new group provider plugin, system_group, is included which
    performs group look ups by name using the system groups database.

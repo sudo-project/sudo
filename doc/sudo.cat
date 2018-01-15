@@ -187,16 +187,19 @@ DDEESSCCRRIIPPTTIIOONN
      --ii, ----llooggiinn
                  Run the shell specified by the target user's password
                  database entry as a login shell.  This means that login-
-                 specific resource files such as _._p_r_o_f_i_l_e or _._l_o_g_i_n will be
-                 read by the shell.  If a command is specified, it is passed
-                 to the shell for execution via the shell's --cc option.  If no
-                 command is specified, an interactive shell is executed.  ssuuddoo
-                 attempts to change to that user's home directory before
-                 running the shell.  The command is run with an environment
-                 similar to the one a user would receive at log in.  The
-                 _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t section in the sudoers(4) manual
-                 documents how the --ii option affects the environment in which
-                 a command is run when the _s_u_d_o_e_r_s policy is in use.
+                 specific resource files such as _._p_r_o_f_i_l_e, _._b_a_s_h___p_r_o_f_i_l_e or
+                 _._l_o_g_i_n will be read by the shell.  If a command is specified,
+                 it is passed to the shell for execution via the shell's --cc
+                 option.  If no command is specified, an interactive shell is
+                 executed.  ssuuddoo attempts to change to that user's home
+                 directory before running the shell.  The command is run with
+                 an environment similar to the one a user would receive at log
+                 in.  Note that most shells behave differently when a command
+                 is specified as compared to an interactive session; consult
+                 the shell's manual for details.  The _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t
+                 section in the sudoers(4) manual documents how the --ii option
+                 affects the environment in which a command is run when the
+                 _s_u_d_o_e_r_s policy is in use.
 
      --KK, ----rreemmoovvee--ttiimmeessttaammpp
                  Similar to the --kk option, except that it removes the user's
@@ -228,9 +231,9 @@ DDEESSCCRRIIPPTTIIOONN
 
                  If a _c_o_m_m_a_n_d is specified and is permitted by the security
                  policy, the fully-qualified path to the command is displayed
-                 along with any command line arguments.  If _c_o_m_m_a_n_d is
-                 specified but not allowed, ssuuddoo will exit with a status value
-                 of 1.
+                 along with any command line arguments.  If a _c_o_m_m_a_n_d is
+                 specified but not allowed by the policy, ssuuddoo will exit with
+                 a status value of 1.
 
      --nn, ----nnoonn--iinntteerraaccttiivvee
                  Avoid prompting the user for input of any kind.  If a
@@ -289,6 +292,9 @@ DDEESSCCRRIIPPTTIIOONN
                  password database entry.  If a command is specified, it is
                  passed to the shell for execution via the shell's --cc option.
                  If no command is specified, an interactive shell is executed.
+                 Note that most shells behave differently when a command is
+                 specified as compared to an interactive session; consult the
+                 shell's manual for details.
 
      --tt _t_y_p_e, ----ttyyppee=_t_y_p_e
                  Run the command with an SELinux security context that
@@ -380,24 +386,35 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      ++oo   scheduling priority (aka nice value)
 
    PPrroocceessss mmooddeell
-     When ssuuddoo runs a command, it calls fork(2), sets up the execution
-     environment as described above, and calls the execve system call in the
-     child process.  The main ssuuddoo process waits until the command has
-     completed, then passes the command's exit status to the security policy's
-     close function and exits.  If an I/O logging plugin is configured or if
-     the security policy explicitly requests it, a new  pseudo-terminal
-     ("pty") is created and a second ssuuddoo process is used to relay job control
-     signals between the user's existing pty and the new pty the command is
-     being run in.  This extra process makes it possible to, for example,
-     suspend and resume the command.  Without it, the command would be in what
+     There are two distinct ways ssuuddoo can run a command.
+
+     If an I/O logging plugin is configured or if the security policy
+     explicitly requests it, a new pseudo-terminal ("pty") is allocated and
+     fork(2) is used to create a second ssuuddoo process, referred to as the
+     _m_o_n_i_t_o_r.  The _m_o_n_i_t_o_r creates a new terminal session with itself as the
+     leader and the pty as its controlling terminal, calls fork(2), sets up
+     the execution environment as described above, and then uses the execve(2)
+     system call to run the command in the child process.  The _m_o_n_i_t_o_r exists
+     to relay job control signals between the user's existing terminal and the
+     pty the command is being run in.  This makes it possible to suspend and
+     resume the command.  Without the monitor, the command would be in what
      POSIX terms an "orphaned process group" and it would not receive any job
-     control signals.  As a special case, if the policy plugin does not define
-     a close function and no pty is required, ssuuddoo will execute the command
-     directly instead of calling fork(2) first.  The _s_u_d_o_e_r_s policy plugin
-     will only define a close function when I/O logging is enabled, a pty is
-     required, or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options are enabled.  Note
-     that _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by default on systems using
-     PAM.
+     control signals from the kernel.  When the command exits or is terminated
+     by a signal, the _m_o_n_i_t_o_r passes the command's exit status to the main
+     ssuuddoo process and exits.  After receiving the command's exit status, the
+     main ssuuddoo passes the command's exit status to the security policy's close
+     function and exits.
+
+     If no pty is used, ssuuddoo calls fork(2), sets up the execution environment
+     as described above, and uses the execve(2) system call to run the command
+     in the child process.  The main ssuuddoo process waits until the command has
+     completed, then passes the command's exit status to the security policy's
+     close function and exits.  As a special case, if the policy plugin does
+     not define a close function, ssuuddoo will execute the command directly
+     instead of calling fork(2) first.  The _s_u_d_o_e_r_s policy plugin will only
+     define a close function when I/O logging is enabled, a pty is required,
+     or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options are enabled.  Note that
+     _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by default on systems using PAM.
 
    SSiiggnnaall hhaannddlliinngg
      When the command is run as a child of the ssuuddoo process, ssuuddoo will relay
@@ -441,15 +458,21 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
 EEXXIITT VVAALLUUEE
      Upon successful execution of a command, the exit status from ssuuddoo will be
      the exit status of the program that was executed.  If the command
-     terminated due to receipt of a signal, ssuuddoo will send itself the signal
-     that terminated the command.
+     terminated due to receipt of a signal, ssuuddoo will send itself the same
+     signal that terminated the command.
 
-     Otherwise, ssuuddoo exits with a value of 1 if there is a
-     configuration/permission problem or if ssuuddoo cannot execute the given
-     command.  In the latter case, the error string is printed to the standard
-     error.  If ssuuddoo cannot stat(2) one or more entries in the user's PATH, an
-     error is printed to the standard error.  (If the directory does not exist
-     or if it is not really a directory, the entry is ignored and no error is
+     If the --ll option was specified without a command, ssuuddoo will exit with a
+     value of 0 if the user is allowed to run ssuuddoo and they authenticated
+     successfully (as required by the security policy).  If a command is
+     specified with the --ll option, the exit value will only be 0 if the
+     command is permitted by the security policy, otherwise it will be 1.
+
+     If there is an authentication failure, a configuration/permission problem
+     or if the given command cannot be executed, ssuuddoo exits with a value of 1.
+     In the latter case, the error string is printed to the standard error.
+     If ssuuddoo cannot stat(2) one or more entries in the user's PATH, an error
+     is printed to the standard error.  (If the directory does not exist or if
+     it is not really a directory, the entry is ignored and no error is
      printed.)  This should not happen under normal circumstances.  The most
      common reason for stat(2) to return "permission denied" is if you are
      running an automounter and one of the directories in your PATH is on a
@@ -638,4 +661,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.21                     August 2, 2017                     Sudo 1.8.21
+Sudo 1.8.22                    December 1, 2017                    Sudo 1.8.22

@@ -32,6 +32,7 @@ static struct def_values def_data_timestamp_type[] = {
     { "global", global },
     { "ppid", ppid },
     { "tty", tty },
+    { "kernel", kernel },
     { NULL, 0 },
 };
 
@@ -480,6 +481,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"timestamp_type", T_TUPLE,
 	N_("Type of authentication timestamp record: %s"),
 	def_data_timestamp_type,
+    }, {
+	"authfail_message", T_STR,
+	N_("Authentication failure message: %s"),
+	NULL,
     }, {
 	NULL, 0, NULL
     }

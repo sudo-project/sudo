@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2015 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,7 @@ sudo_gethostname_v1(void)
 
     hname = malloc(host_name_max + 1);
     if (hname != NULL) {
-	if (gethostname(hname, host_name_max + 1) == 0) {
+	if (gethostname(hname, host_name_max + 1) == 0 && *hname != '\0') {
 	    /* Old gethostname() may not NUL-terminate if there is no room. */
 	    hname[host_name_max] = '\0';
 	} else {

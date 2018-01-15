@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2004, 2007, 2010, 2013
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

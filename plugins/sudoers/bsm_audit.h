@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010, 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2010, 2013-2014 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2009 Christian S.J. Peron
  *
  * Permission to use, copy, modify, and distribute this software for any

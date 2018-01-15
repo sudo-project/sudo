@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -73,13 +73,10 @@ errpipe_cb(int fd, int what, void *v)
      * Read errno from child or EOF when command is executed.
      * Note that the error pipe is *blocking*.
      */
-    do {
-	nread = read(fd, &errval, sizeof(errval));
-    } while (nread == -1 && errno == EINTR);
-
+    nread = read(fd, &errval, sizeof(errval));
     switch (nread) {
     case -1:
-	if (errno != EAGAIN) {
+	if (errno != EAGAIN && errno != EINTR) {
 	    if (ec->cstat->val == CMD_INVALID) {
 		/* XXX - need a way to distinguish non-exec error. */
 		ec->cstat->type = CMD_ERRNO;
@@ -340,7 +337,7 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
 /*
  * Execute a command and wait for it to finish.
  */
-int
+void
 exec_nopty(struct command_details *details, struct command_status *cstat)
 {
     struct exec_closure_nopty ec = { 0 };
@@ -371,7 +368,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     /* Check for early termination or suspend signals before we fork. */
     if (sudo_terminated(cstat)) {
 	sigprocmask(SIG_SETMASK, &oset, NULL);
-	debug_return_int(0);
+	debug_return;
     }
 
     ec.cmnd_pid = sudo_debug_fork();
@@ -436,7 +433,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 
     /* Free things up. */
     free_exec_closure_nopty(&ec);
-    debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
+    debug_return;
 }
 
 /*

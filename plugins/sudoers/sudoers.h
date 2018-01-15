@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2016
- *	Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2017
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -109,6 +109,13 @@ struct sudo_user {
     uid_t gid;
     pid_t sid;
 };
+
+/*
+ * sudo_get_gidlist() type values
+ */
+#define ENTRY_TYPE_ANY		0x00
+#define ENTRY_TYPE_QUERIED	0x01
+#define ENTRY_TYPE_FRONTEND	0x02
 
 /*
  * sudo_user flag values
@@ -303,7 +310,7 @@ __dso_public void sudo_gr_addref(struct group *);
 __dso_public void sudo_gr_delref(struct group *);
 bool user_in_group(const struct passwd *, const char *);
 struct group *sudo_fakegrnam(const char *);
-struct gid_list *sudo_get_gidlist(const struct passwd *pw);
+struct gid_list *sudo_get_gidlist(const struct passwd *pw, unsigned int type);
 struct group_list *sudo_get_grlist(const struct passwd *pw);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
 struct passwd *sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home, const char *shell);
@@ -318,7 +325,7 @@ void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
-int  sudo_set_gidlist(struct passwd *pw, char * const *gids);
+int  sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type);
 int  sudo_set_grlist(struct passwd *pw, char * const *groups);
 void sudo_setspent(void);
 
@@ -396,8 +403,8 @@ bool cb_group_plugin(const union sudo_defs_val *sd_un);
 extern const char *path_plugin_dir;
 
 /* editor.c */
-char *resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
-    int *argc_out, char ***argv_out, char * const *whitelist);
+char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
+     char * const *whitelist, const char **env_editor, bool env_error);
 
 /* mkdir_parents.c */
 bool sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);

@@ -1,7 +1,7 @@
 /*	$OpenBSD: vfprintf.c,v 1.67 2014/12/21 00:23:30 daniel Exp $	*/
 /*-
  * Copyright (c) 1999-2005, 2008, 2010-2016
- *      Todd C. Miller <Todd.Miller@courtesan.com>
+ *      Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
  *

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015, 2017 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2015, 2017 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -124,7 +124,7 @@ cov-build:
 cov-upload:
 	tar zcf cov-int.tgz cov-int
 	curl --form token=$$COVERITY_SUDO_TOKEN \
-	    --form email=todd.miller@courtesan.com \
+	    --form email=todd.miller@sudo.ws \
 	    --form file=@cov-int.tgz \
 	    --form version="$(VERSION)" \
 	    https://scan.coverity.com/builds?project=sudo
@@ -185,6 +185,10 @@ ChangeLog:
 	    else \
 		rm -f $@.tmp; \
 	    fi; \
+	elif test -d $(srcdir)/.git && cd $(srcdir); then \
+	    $(top_srcdir)/log2cl.pl -b master > $@; \
+	else \
+	    echo "ChangeLog data not available" > $@; \
 	fi
 
 config.status:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 int hexchar(const char *s);
 
@@ -49,6 +50,8 @@ main(int argc, char *argv[])
 {
     struct hexchar_test *test_data;
     int i, ntests, result, errors = 0;
+
+    initprogname(argc > 0 ? argv[0] : "check_hexchar");
 
     /* Build up test data. */
     ntests = 256 + 256 + 3;
