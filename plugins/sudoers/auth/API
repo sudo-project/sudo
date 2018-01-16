@@ -14,10 +14,11 @@ typedef struct sudo_auth {
 
     int (*init)(struct passwd *pw, sudo_auth *auth);
     int (*setup)(struct passwd *pw, char **prompt, sudo_auth *auth);
-    int (*verify)(struct passwd *pw, char *p, sudo_auth *auth);
+    int (*verify)(struct passwd *pw, char *p, sudo_auth *auth, struct sudo_conv_callback *callback);
+    int (*approval)(struct passwd *pw, sudo_auth *auth);
     int (*cleanup)(struct passwd *pw, sudo_auth *auth);
-    int (*begin_session)(struct passwd *pw, sudo_auth *auth);
-    int (*end_session)(sudo_auth *auth);
+    int (*begin_session)(struct passwd *pw, char **user_env[], struct sudo_auth *auth);
+    int (*end_session)(struct passwd *pw, struct sudo_auth *auth);
 } sudo_auth;
 
 The variables in the struct are as follows:
@@ -71,12 +72,21 @@ The functions in the struct are as follows:
         pointer to the prompt string may be used to add method-specific
         info to the prompt.
 
-    int verify(struct passwd *pw, char *p, sudo_auth *auth)
+    int verify(struct passwd *pw, char *p, sudo_auth *auth, struct sudo_conv_callback *callback)
         Function to do user verification for this auth method.  For
         standalone auth methods ``p'' is the prompt string.  For
         normal auth methods, ``p'' is the password the user entered.
+	The callback should be passed to auth_getpass() to allow sudoers
+	to unlock the ticket file when sudo is suspended.
         Note that standalone auth methods are responsible for
         rerading the password themselves.
+
+    int approval(struct passwd *pw, struct sudo_auth *auth)
+	Function to perform account management and approval *after*
+	the user has authenticated successfully.  This function may
+	check for expired accounts, perform time of day restrictions, etc.
+	For PAM, this calls pam_acct_mgmt().  For BSD auth, it calls
+	auth_approval().
 
     int cleanup(struct passwd *pw, sudo_auth *auth)
         Function to do per-auth method cleanup.  This is only run
@@ -84,6 +94,14 @@ The functions in the struct are as follows:
         has completely failed or succeeded to authenticate.
 	The ``auth->status'' variable contains the result of the
 	last authentication attempt which may be interesting.
+
+    int begin_session(struct passwd *pw, char **user_env[], struct sudo_auth *auth)
+	Function to begin a user session.  This is used for session handling
+	in PAM and SIA.
+
+    int end_session(struct passwd *pw, struct sudo_auth *auth)
+	Function to end a user session.  This is used for session handling
+	in PAM and SIA.
 
 A note about standalone methods.  Some authentication methods can't
 coexist with any others.  This may be because they encapsulate other

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -186,47 +186,68 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     }
     switch (*pam_status) {
 	case PAM_SUCCESS:
-	    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
-	    switch (*pam_status) {
-		case PAM_SUCCESS:
-		    debug_return_int(AUTH_SUCCESS);
-		case PAM_AUTH_ERR:
-		    log_warningx(0, N_("account validation failure, "
-			"is your account locked?"));
-		    debug_return_int(AUTH_FATAL);
-		case PAM_NEW_AUTHTOK_REQD:
-		    log_warningx(0, N_("Account or password is "
-			"expired, reset your password and try again"));
-		    *pam_status = pam_chauthtok(pamh,
-			PAM_CHANGE_EXPIRED_AUTHTOK);
-		    if (*pam_status == PAM_SUCCESS)
-			debug_return_int(AUTH_SUCCESS);
-		    if ((s = pam_strerror(pamh, *pam_status)) != NULL) {
-			log_warningx(0,
-			    N_("unable to change expired password: %s"), s);
-		    }
-		    debug_return_int(AUTH_FAILURE);
-		case PAM_AUTHTOK_EXPIRED:
-		    log_warningx(0,
-			N_("Password expired, contact your system administrator"));
-		    debug_return_int(AUTH_FATAL);
-		case PAM_ACCT_EXPIRED:
-		    log_warningx(0,
-			N_("Account expired or PAM config lacks an \"account\" "
-			"section for sudo, contact your system administrator"));
-		    debug_return_int(AUTH_FATAL);
-	    }
-	    /* FALLTHROUGH */
+	    debug_return_int(AUTH_SUCCESS);
 	case PAM_AUTH_ERR:
 	case PAM_AUTHINFO_UNAVAIL:
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"pam_acct_mgmt: %d", *pam_status);
+		"pam_authenticate: %d", *pam_status);
 	    debug_return_int(AUTH_FAILURE);
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)) != NULL)
 		log_warningx(0, N_("PAM authentication error: %s"), s);
+	    debug_return_int(AUTH_FATAL);
+    }
+}
+
+int
+sudo_pam_approval(struct passwd *pw, sudo_auth *auth)
+{
+    const char *s;
+    int *pam_status = (int *) auth->data;
+    debug_decl(sudo_pam_approval, SUDOERS_DEBUG_AUTH)
+
+    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
+    switch (*pam_status) {
+	case PAM_SUCCESS:
+	    debug_return_int(AUTH_SUCCESS);
+	case PAM_AUTH_ERR:
+	    log_warningx(0, N_("account validation failure, "
+		"is your account locked?"));
+	    debug_return_int(AUTH_FATAL);
+	case PAM_NEW_AUTHTOK_REQD:
+	    log_warningx(0, N_("Account or password is "
+		"expired, reset your password and try again"));
+	    *pam_status = pam_chauthtok(pamh,
+		PAM_CHANGE_EXPIRED_AUTHTOK);
+	    if (*pam_status == PAM_SUCCESS)
+		debug_return_int(AUTH_SUCCESS);
+	    if ((s = pam_strerror(pamh, *pam_status)) == NULL)
+		s = "unknown error";
+	    log_warningx(0,
+		N_("unable to change expired password: %s"), s);
+	    debug_return_int(AUTH_FAILURE);
+	case PAM_AUTHTOK_EXPIRED:
+	    log_warningx(0,
+		N_("Password expired, contact your system administrator"));
+	    debug_return_int(AUTH_FATAL);
+	case PAM_ACCT_EXPIRED:
+	    log_warningx(0,
+		N_("Account expired or PAM config lacks an \"account\" "
+		"section for sudo, contact your system administrator"));
+	    debug_return_int(AUTH_FATAL);
+	case PAM_AUTHINFO_UNAVAIL:
+	case PAM_MAXTRIES:
+	case PAM_PERM_DENIED:
+	    s = pam_strerror(pamh, *pam_status);
+	    log_warningx(0, N_("PAM account management error: %s"),
+		s ? s : "unknown error");
+	    debug_return_int(AUTH_FAILURE);
+	default:
+	    s = pam_strerror(pamh, *pam_status);
+	    log_warningx(0, N_("PAM account management error: %s"),
+		s ? s : "unknown error");
 	    debug_return_int(AUTH_FATAL);
     }
 }

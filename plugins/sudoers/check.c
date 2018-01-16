@@ -219,6 +219,10 @@ check_user(int validated, int mode)
     ret = check_user_interactive(validated, mode, auth_pw);
 
 done:
+    if (ret == true) {
+	/* The approval function may disallow a user post-authentication. */
+	ret = sudo_auth_approval(auth_pw, validated);
+    }
     sudo_auth_cleanup(auth_pw);
     sudo_pw_delref(auth_pw);
 

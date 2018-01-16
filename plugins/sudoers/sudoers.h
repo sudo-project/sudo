@@ -136,8 +136,7 @@ struct sudo_user {
 #define FLAG_NO_CHECK		0x080
 #define FLAG_NON_INTERACTIVE	0x100
 #define FLAG_BAD_PASSWORD	0x200
-#define FLAG_AUTH_ERROR		0x400
-#define FLAG_NOPASSWD		0x800
+#define FLAG_NOPASSWD		0x400
 
 /*
  * find_path()/set_cmnd() return values
@@ -265,6 +264,7 @@ int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
+int sudo_auth_approval(struct passwd *pw, int validated);
 int sudo_auth_cleanup(struct passwd *pw);
 
 /* set_perms.c */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2008-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,47 +41,47 @@
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */
 #ifdef HAVE_AIXAUTH
-    AUTH_ENTRY("aixauth", FLAG_STANDALONE, sudo_aix_init, NULL, sudo_aix_verify, sudo_aix_cleanup, NULL, NULL)
+    AUTH_ENTRY("aixauth", FLAG_STANDALONE, sudo_aix_init, NULL, sudo_aix_verify, NULL, sudo_aix_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_PAM
-    AUTH_ENTRY("pam", FLAG_STANDALONE, sudo_pam_init, NULL, sudo_pam_verify, sudo_pam_cleanup, sudo_pam_begin_session, sudo_pam_end_session)
+    AUTH_ENTRY("pam", FLAG_STANDALONE, sudo_pam_init, NULL, sudo_pam_verify, sudo_pam_approval, sudo_pam_cleanup, sudo_pam_begin_session, sudo_pam_end_session)
 #endif
 #ifdef HAVE_SECURID
-    AUTH_ENTRY("SecurId", FLAG_STANDALONE, sudo_securid_init, sudo_securid_setup, sudo_securid_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("SecurId", FLAG_STANDALONE, sudo_securid_init, sudo_securid_setup, sudo_securid_verify, NULL, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_SIA_SES_INIT
-    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, sudo_sia_begin_session, NULL)
+    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, NULL, sudo_sia_cleanup, sudo_sia_begin_session, NULL)
 #endif
 #ifdef HAVE_FWTK
-    AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, sudo_fwtk_cleanup, NULL, NULL)
+    AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, NULL, sudo_fwtk_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_BSD_AUTH_H
-    AUTH_ENTRY("bsdauth", FLAG_STANDALONE, bsdauth_init, NULL, bsdauth_verify, bsdauth_cleanup, NULL, NULL)
+    AUTH_ENTRY("bsdauth", FLAG_STANDALONE, bsdauth_init, NULL, bsdauth_verify, bsdauth_approval, bsdauth_cleanup, NULL, NULL)
 #endif
 
 /* Non-standalone entries */
 #ifndef WITHOUT_PASSWD
-    AUTH_ENTRY("passwd", 0, sudo_passwd_init, NULL, sudo_passwd_verify, sudo_passwd_cleanup, NULL, NULL)
+    AUTH_ENTRY("passwd", 0, sudo_passwd_init, NULL, sudo_passwd_verify, NULL, sudo_passwd_cleanup, NULL, NULL)
 #endif
 #if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY("secureware", 0, sudo_secureware_init, NULL, sudo_secureware_verify, sudo_secureware_cleanup, NULL, NULL)
+    AUTH_ENTRY("secureware", 0, sudo_secureware_init, NULL, sudo_secureware_verify, NULL, sudo_secureware_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_AFS
-    AUTH_ENTRY("afs", 0, NULL, NULL, sudo_afs_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("afs", 0, NULL, NULL, sudo_afs_verify, NULL, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_DCE
-    AUTH_ENTRY("dce", 0, NULL, NULL, sudo_dce_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("dce", 0, NULL, NULL, sudo_dce_verify, NULL, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_KERB5
-    AUTH_ENTRY("kerb5", 0, sudo_krb5_init, sudo_krb5_setup, sudo_krb5_verify, sudo_krb5_cleanup, NULL, NULL)
+    AUTH_ENTRY("kerb5", 0, sudo_krb5_init, sudo_krb5_setup, sudo_krb5_verify, NULL, sudo_krb5_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_SKEY
-    AUTH_ENTRY("S/Key", 0, NULL, sudo_rfc1938_setup, sudo_rfc1938_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("S/Key", 0, NULL, sudo_rfc1938_setup, sudo_rfc1938_verify, NULL, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_OPIE
-    AUTH_ENTRY("OPIE", 0, NULL, sudo_rfc1938_setup, sudo_rfc1938_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("OPIE", 0, NULL, sudo_rfc1938_setup, sudo_rfc1938_verify, NULL, NULL, NULL, NULL)
 #endif
-    AUTH_ENTRY(NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL)
+    AUTH_ENTRY(NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 };
 
 static bool standalone;
@@ -159,6 +159,30 @@ sudo_auth_init(struct passwd *pw)
 }
 
 /*
+ * Cleanup all authentication approval methods.
+ * Returns true on success, false on failure and -1 on error.
+ */
+int
+sudo_auth_approval(struct passwd *pw, int validated)
+{
+    sudo_auth *auth;
+    debug_decl(sudo_auth_approval, SUDOERS_DEBUG_AUTH)
+
+    /* Call approval routines. */
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->approval && !IS_DISABLED(auth)) {
+	    int status = (auth->approval)(pw, auth);
+	    if (status != AUTH_SUCCESS) {
+		/* Assume error msg already printed. */
+		log_auth_failure(validated, 0);
+		debug_return_int(status == AUTH_FAILURE ? false : -1);
+	    }
+	}
+    }
+    debug_return_int(true);
+}
+
+/*
  * Cleanup all authentication methods.
  * Returns 0 on success and -1 on error.
  */
@@ -166,18 +190,19 @@ int
 sudo_auth_cleanup(struct passwd *pw)
 {
     sudo_auth *auth;
-    int status = AUTH_SUCCESS;
     debug_decl(sudo_auth_cleanup, SUDOERS_DEBUG_AUTH)
 
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
-	    status = (auth->cleanup)(pw, auth);
-	    if (status == AUTH_FATAL)
-		break;		/* assume error msg already printed */
+	    int status = (auth->cleanup)(pw, auth);
+	    if (status == AUTH_FATAL) {
+		/* Assume error msg already printed. */
+		debug_return_int(-1);
+	    }
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : 0);
+    debug_return_int(0);
 }
 
 static void
@@ -322,7 +347,7 @@ done:
 	    break;
 	case AUTH_FATAL:
 	default:
-	    log_auth_failure(validated | FLAG_AUTH_ERROR, 0);
+	    log_auth_failure(validated, 0);
 	    ret = -1;
 	    break;
     }
@@ -338,17 +363,18 @@ int
 sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 {
     sudo_auth *auth;
-    int status = AUTH_SUCCESS;
     debug_decl(sudo_auth_begin_session, SUDOERS_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
-	    status = (auth->begin_session)(pw, user_env, auth);
-	    if (status != AUTH_SUCCESS)
-		break;		/* assume error msg already printed */
+	    int status = (auth->begin_session)(pw, user_env, auth);
+	    if (status != AUTH_SUCCESS) {
+		/* Assume error msg already printed. */
+		debug_return_int(-1);
+	    }
 	}
     }
-    debug_return_int(status == AUTH_SUCCESS ? 1 : -1);
+    debug_return_int(1);
 }
 
 bool
@@ -375,17 +401,19 @@ int
 sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
-    int status = AUTH_SUCCESS;
+    int status;
     debug_decl(sudo_auth_end_session, SUDOERS_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(pw, auth);
-	    if (status == AUTH_FATAL)
-		break;			/* assume error msg already printed */
+	    if (status == AUTH_FATAL) {
+		/* Assume error msg already printed. */
+		debug_return_int(-1);
+	    }
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : 1);
+    debug_return_int(1);
 }
 
 /*

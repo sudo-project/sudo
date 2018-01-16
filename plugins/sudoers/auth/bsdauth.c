@@ -169,6 +169,22 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 }
 
 int
+bsdauth_approval(struct passwd *pw, sudo_auth *auth)
+{
+    struct bsdauth_state *state = auth->data;
+    debug_decl(bsdauth_approval, SUDOERS_DEBUG_AUTH)
+
+    if (auth_approval(state->as, state->lc, pw->pw_name, "auth-sudo") == 0) {
+	if (auth_getstate(state->as) & AUTH_EXPIRED)
+	    log_warningx(0, "%s", N_("your account has expired"));
+	else
+	    log_warningx(0, "%s", N_("approval failed"));
+	debug_return_int(AUTH_FAILURE);
+    }
+    debug_return_int(AUTH_SUCCESS);
+}
+
+int
 bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     struct bsdauth_state *state = auth->data;
