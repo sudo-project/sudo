@@ -169,7 +169,6 @@ static struct sudo_digest *new_digest(int, char *);
 %type <string>	  notbeforespec
 %type <string>	  notafterspec
 %type <digest>	  digest
-%type <options>	  options
 
 %%
 
