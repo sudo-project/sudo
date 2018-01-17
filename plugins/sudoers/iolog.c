@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,9 +28,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>

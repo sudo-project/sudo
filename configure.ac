@@ -2316,7 +2316,6 @@ dnl
 dnl Header file checks
 dnl
 AC_HEADER_DIRENT
-AC_HEADER_TIME
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
 AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])

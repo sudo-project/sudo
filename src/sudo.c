@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,7 +24,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,9 +41,7 @@
 #include <signal.h>
 #include <grp.h>
 #include <pwd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>		/* for is_selinux_enabled() */
 #endif

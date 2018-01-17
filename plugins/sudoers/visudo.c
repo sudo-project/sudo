@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2017
+ * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -32,7 +32,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/uio.h>
 #ifndef __TANDEM
 # include <sys/file.h>
@@ -54,11 +53,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
 
 #include "sudoers.h"
 #include "interfaces.h"

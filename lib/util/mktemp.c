@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015, 2017
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015, 2017, 2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -38,9 +38,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 #include <unistd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 
 #include "sudo_compat.h"
 #include "pathnames.h"

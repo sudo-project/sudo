@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -22,7 +22,6 @@
 #ifdef HAVE_SSSD
 
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,9 +32,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>

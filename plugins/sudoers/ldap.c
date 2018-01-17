@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -31,9 +31,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
