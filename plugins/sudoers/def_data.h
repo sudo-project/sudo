@@ -67,9 +67,9 @@
 #define I_LOGLINELEN            33
 #define def_loglinelen          (sudo_defs_table[I_LOGLINELEN].sd_un.uival)
 #define I_TIMESTAMP_TIMEOUT     34
-#define def_timestamp_timeout   (sudo_defs_table[I_TIMESTAMP_TIMEOUT].sd_un.fval)
+#define def_timestamp_timeout   (sudo_defs_table[I_TIMESTAMP_TIMEOUT].sd_un.tspec)
 #define I_PASSWD_TIMEOUT        35
-#define def_passwd_timeout      (sudo_defs_table[I_PASSWD_TIMEOUT].sd_un.fval)
+#define def_passwd_timeout      (sudo_defs_table[I_PASSWD_TIMEOUT].sd_un.tspec)
 #define I_PASSWD_TRIES          36
 #define def_passwd_tries        (sudo_defs_table[I_PASSWD_TRIES].sd_un.uival)
 #define I_UMASK                 37

@@ -121,9 +121,9 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
      * S/Key.
      */
     if ((s = auth_challenge(as)) == NULL) {
-	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else {
-	pass = auth_getpass(s, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(s, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
@@ -142,8 +142,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 		debug_return_int(AUTH_FATAL);
 	    }
 	    free(pass);
-	    pass = auth_getpass(s, def_passwd_timeout * 60,
-		SUDO_CONV_PROMPT_ECHO_ON, callback);
+	    pass = auth_getpass(s, SUDO_CONV_PROMPT_ECHO_ON, callback);
 	    free(s);
 	}
     }

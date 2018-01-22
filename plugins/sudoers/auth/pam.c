@@ -533,7 +533,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		prompt = use_pam_prompt(pm->msg) ? pm->msg : def_prompt;
 
 		/* Read the password unless interrupted. */
-		pass = auth_getpass(prompt, def_passwd_timeout * 60, type, callback);
+		pass = auth_getpass(prompt, type, callback);
 		if (pass == NULL) {
 		    /* Error (or ^C) reading password, don't try again. */
 		    getpass_error = true;

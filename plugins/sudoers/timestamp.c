@@ -381,7 +381,7 @@ timestamp_open(const char *user, pid_t sid)
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use the time stamp file. */
-    if (def_timestamp_timeout == 0.0) {
+    if (!sudo_timespecisset(&def_timestamp_timeout)) {
 	errno = ENOENT;
 	goto bad;
     }
@@ -720,13 +720,13 @@ timestamp_status(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
     struct timestamp_entry entry;
-    struct timespec diff, now, timeout;
+    struct timespec diff, now;
     int status = TS_ERROR;		/* assume the worst */
     ssize_t nread;
     debug_decl(timestamp_status, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
-    if (def_timestamp_timeout == 0.0) {
+    if (!sudo_timespecisset(&def_timestamp_timeout)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "timestamps disabled");
 	status = TS_OLD;
@@ -781,7 +781,8 @@ timestamp_status(void *vcookie, struct passwd *pw)
     }
 
     /* Negative timeouts only expire manually (sudo -k).  */
-    if (def_timestamp_timeout < 0) {
+    sudo_timespecclear(&diff);
+    if (sudo_timespeccmp(&def_timestamp_timeout, &diff, <)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "time stamp record does not expire");
 	status = TS_CURRENT;
@@ -795,12 +796,9 @@ timestamp_status(void *vcookie, struct passwd *pw)
 	goto done;
     }
     sudo_timespecsub(&now, &entry.ts, &diff);
-    timeout.tv_sec = 60 * def_timestamp_timeout;
-    timeout.tv_nsec = ((60.0 * def_timestamp_timeout) - (double)timeout.tv_sec)
-	* 1000000000.0;
-    if (sudo_timespeccmp(&diff, &timeout, <)) {
+    if (sudo_timespeccmp(&diff, &def_timestamp_timeout, <)) {
 	status = TS_CURRENT;
-#ifdef CLOCK_MONOTONIC
+#if defined(CLOCK_MONOTONIC) || defined(__MACH__)
 	/* A monotonic clock should never run backwards. */
 	if (diff.tv_sec < 0) {
 	    log_warningx(SLOG_SEND_MAIL,
@@ -810,10 +808,21 @@ timestamp_status(void *vcookie, struct passwd *pw)
 	    (void)ts_write(cookie->fd, cookie->fname, &entry, cookie->pos);
 	}
 #else
-	/* Check for bogus (future) time in the stampfile. */
+	/*
+	 * Check for bogus (future) time in the stampfile.
+	 * If diff / 2 > timeout, someone has been fooling with the clock.
+	 */
 	sudo_timespecsub(&entry.ts, &now, &diff);
-	timeout.tv_sec *= 2;
-	if (sudo_timespeccmp(&diff, &timeout, >)) {
+	diff.tv_nsec /= 2;
+	if (diff.tv_sec & 1)
+	    diff.tv_nsec += 500000000;
+	diff.tv_sec /= 2;
+	while (diff.tv_nsec >= 1000000000) {
+	    diff.tv_sec++;
+	    diff.tv_nsec -= 1000000000;
+	}
+
+	if (sudo_timespeccmp(&diff, &def_timestamp_timeout, >)) {
 	    time_t tv_sec = (time_t)entry.ts.tv_sec;
 	    log_warningx(SLOG_SEND_MAIL,
 		N_("time stamp too far in the future: %20.20s"),
@@ -843,7 +852,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
     debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH)
 
     /* Zero timeout means don't use time stamp files. */
-    if (def_timestamp_timeout == 0.0) {
+    if (!sudo_timespecisset(&def_timestamp_timeout)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "timestamps disabled");
 	goto done;
@@ -858,7 +867,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
 #ifdef TIOCSETVERAUTH
 	int fd = open(_PATH_TTY, O_RDWR);
 	if (fd != -1) {
-	    int secs = 60 * def_timestamp_timeout;
+	    int secs = def_timestamp_timeout.tv_sec;
 	    ioctl(fd, TIOCSETVERAUTH, &secs);
 	    close(fd);
 	}

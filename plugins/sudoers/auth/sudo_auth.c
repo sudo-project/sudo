@@ -304,8 +304,7 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 
 	/* Get the password unless the auth function will do it for us */
 	if (!standalone) {
-	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
-		SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	    pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	    if (pass == NULL)
 		break;
 	}
@@ -422,8 +421,7 @@ sudo_auth_end_session(struct passwd *pw)
  * The user is responsible for freeing the returned value.
  */
 char *
-auth_getpass(const char *prompt, int timeout, int type,
-    struct sudo_conv_callback *callback)
+auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
@@ -448,7 +446,7 @@ auth_getpass(const char *prompt, int timeout, int type,
     /* Call conversation function. */
     memset(&msg, 0, sizeof(msg));
     msg.msg_type = type;
-    msg.timeout = def_passwd_timeout * 60;
+    msg.timeout = def_passwd_timeout.tv_sec;
     msg.msg = prompt;
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl, callback);

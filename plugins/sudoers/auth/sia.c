@@ -84,8 +84,7 @@ sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth,
     debug_decl(sudo_sia_verify, SUDOERS_DEBUG_AUTH)
 
     /* Get password, return AUTH_INTR if we got ^C */
-    pass = auth_getpass(prompt, def_passwd_timeout * 60,
-        SUDO_CONV_PROMPT_ECHO_OFF, callback);
+    pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     if (pass == NULL)
 	debug_return_int(AUTH_INTR);
 

@@ -48,8 +48,7 @@ typedef struct sudo_auth {
 #define IS_ONEANDONLY(x)	((x)->flags & FLAG_ONEANDONLY)
 
 /* Like tgetpass() but uses conversation function */
-char *auth_getpass(const char *prompt, int timeout, int type,
-    struct sudo_conv_callback *callback);
+char *auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback);
 
 /* Pointer to conversation function to use with auth_getpass(). */
 extern sudo_conv_t sudo_conv;

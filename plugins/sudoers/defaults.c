@@ -105,7 +105,7 @@ static bool store_syslogpri(const char *str, union sudo_defs_val *sd_un);
 static bool store_timeout(const char *str, union sudo_defs_val *sd_un);
 static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
-static bool store_float(const char *str, union sudo_defs_val *sd_un);
+static bool store_timespec(const char *str, union sudo_defs_val *sd_un);
 static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
 static const char *logfac2str(int);
 static const char *logpri2str(int);
@@ -163,10 +163,14 @@ dump_defaults(void)
 		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.uival);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
-		case T_FLOAT:
-		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.fval);
+		case T_TIMESPEC: {
+		    /* display time spec in minutes as a double */
+		    double d = cur->sd_un.tspec.tv_sec / 60.0;
+		    d += cur->sd_un.tspec.tv_nsec / 1000000000.0;
+		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
+		}
 		case T_MODE:
 		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.mode);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
@@ -305,9 +309,6 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	case T_UINT:
 	    rc = store_uint(val, sd_un);
 	    break;
-	case T_FLOAT:
-	    rc = store_float(val, sd_un);
-	    break;
 	case T_MODE:
 	    rc = store_mode(val, sd_un);
 	    break;
@@ -336,6 +337,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_TUPLE:
 	    rc = store_tuple(val, sd_un, def->values);
+	    break;
+	case T_TIMESPEC:
+	    rc = store_timespec(val, sd_un);
 	    break;
 	default:
 	    if (!quiet) {
@@ -585,8 +589,8 @@ init_defaults(void)
     def_umask = ACCESSPERMS;
 #endif
     def_loglinelen = MAXLOGFILELEN;
-    def_timestamp_timeout = TIMEOUT;
-    def_passwd_timeout = PASSWORD_TIMEOUT;
+    def_timestamp_timeout.tv_sec = TIMEOUT * 60;
+    def_passwd_timeout.tv_sec = PASSWORD_TIMEOUT * 60;
     def_passwd_tries = TRIES_FOR_PASSWORD;
 #ifdef HAVE_ZLIB_H
     def_compress_io = true;
@@ -848,20 +852,25 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
 }
 
 static bool
-store_float(const char *str, union sudo_defs_val *sd_un)
+store_timespec(const char *str, union sudo_defs_val *sd_un)
 {
     char *endp;
     double d;
-    debug_decl(store_float, SUDOERS_DEBUG_DEFAULTS)
+    debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS)
 
     if (str == NULL) {
-	sd_un->fval = 0.0;
+	sd_un->tspec.tv_sec = 0;
+	sd_un->tspec.tv_nsec = 0;
     } else {
 	d = strtod(str, &endp);
 	if (*endp != '\0')
 	    debug_return_bool(false);
 	/* XXX - should check against HUGE_VAL */
-	sd_un->fval = d;
+
+	/* Convert from minutes to seconds and nanoseconds. */
+	d *= 60.0;
+	sd_un->tspec.tv_sec = (time_t)d;
+	sd_un->tspec.tv_nsec = (long)(d - sd_un->tspec.tv_sec) * 1000000000L;
     }
     debug_return_bool(true);
 }
