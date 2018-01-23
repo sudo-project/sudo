@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2017
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 20, 2017
+.Dd January 23, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3478,7 +3478,13 @@ by default
 .It kernel
 The time stamp is stored in the kernel as an attribute of the terminal
 device.
-If no terminal is present, the time stamp is considered to be invalid.
+If no terminal is present, the behavior is the same as
+.Em ppid .
+The maximum value of
+.Em timestamp_timeout
+is limited to 3600 when using
+.Em kernel
+time stamps.
 This is currently only supported on OpenBSD.
 .El
 .Pp

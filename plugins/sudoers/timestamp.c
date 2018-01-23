@@ -100,6 +100,8 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 	break;
     default:
 	/* unknown record type, ignore it */
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "unknown time stamp record type %d", entry->type);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -332,6 +334,10 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
     }
     entry->sid = user_sid;
     switch (ticket_type) {
+    default:
+	/* Unknown time stamp ticket type, treat as tty (should not happen). */
+	sudo_warnx("unknown time stamp ticket type %d", ticket_type);
+	/* FALLTHROUGH */
     case tty:
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
@@ -342,13 +348,14 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 	    break;
 	}
 	/* FALLTHROUGH */
+    case kernel:
     case ppid:
 	/* ppid-based time stamp */
 	entry->type = TS_PPID;
 	entry->u.ppid = getppid();
 	get_starttime(entry->u.ppid, &entry->start_time);
 	break;
-    default:
+    case global:
 	/* global time stamp */
 	entry->type = TS_GLOBAL;
 	break;
@@ -361,11 +368,11 @@ static void
 ts_init_key_nonglobal(struct timestamp_entry *entry, struct passwd *pw, int flags)
 {
     /*
-     * Even if the timestamp type is global we still want to do per-tty
-     * or per-ppid locking so sudo works predictably in a pipeline.
+     * Even if the timestamp type is global or kernel we still want to do
+     * per-tty or per-ppid locking so sudo works predictably in a pipeline.
      */
     ts_init_key(entry, pw, flags,
-	def_timestamp_type != global ? def_timestamp_type : tty);
+	def_timestamp_type == ppid ? ppid : tty);
 }
 
 /*
@@ -384,14 +391,6 @@ timestamp_open(const char *user, pid_t sid)
     if (!sudo_timespecisset(&def_timestamp_timeout)) {
 	errno = ENOENT;
 	goto bad;
-    }
-
-    if (def_timestamp_type == kernel) {
-	fd = open(_PATH_TTY, O_RDWR);
-	if (fd == -1)
-	    goto bad;
-	close(fd);
-	fd = -1;
     }
 
     /* Sanity check timestamp dir and create if missing. */
@@ -739,19 +738,19 @@ timestamp_status(void *vcookie, struct passwd *pw)
 	goto done;
     }
 
-    if (def_timestamp_type == kernel) {
 #ifdef TIOCCHKVERAUTH
+    if (def_timestamp_type == kernel) {
 	int fd = open(_PATH_TTY, O_RDWR);
-	if (fd == -1)
+	if (fd != -1) {
+	    if (ioctl(fd, TIOCCHKVERAUTH) == 0)
+		status = TS_CURRENT;
+	    else
+		status = TS_OLD;
+	    close(fd);
 	    goto done;
-	if (ioctl(fd, TIOCCHKVERAUTH) == 0)
-	    status = TS_CURRENT;
-	else
-	    status = TS_OLD;
-	close(fd);
-#endif
-	goto done;
+	}
     }
+#endif
 
     /* Read the record at the correct position. */
     if ((nread = ts_read(cookie, &entry)) != sizeof(entry))
@@ -863,22 +862,22 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	goto done;
     }
 
-    if (def_timestamp_type == kernel) {
 #ifdef TIOCSETVERAUTH
+    if (def_timestamp_type == kernel) {
 	int fd = open(_PATH_TTY, O_RDWR);
 	if (fd != -1) {
 	    int secs = def_timestamp_timeout.tv_sec;
 	    if (secs > 0) {
 		if (secs > 3600)
-		    secs = 3600;        /* OpenBSD limitation */
+		    secs = 3600;	/* OpenBSD limitation */
 		if (ioctl(fd, TIOCSETVERAUTH, &secs) != 0)
 		    sudo_warn("TIOCSETVERAUTH");
 	    }
 	    close(fd);
+	    goto done;
 	}
-#endif
-	goto done;
     }
+#endif
 
     /* Update timestamp in key and enable it. */
     CLR(cookie->key.flags, TS_DISABLED);
@@ -911,16 +910,15 @@ timestamp_remove(bool unlink_it)
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH)
 
-    if (def_timestamp_type == kernel) {
 #ifdef TIOCCLRVERAUTH
+    if (def_timestamp_type == kernel) {
 	fd = open(_PATH_TTY, O_RDWR);
-	if (fd == -1)
-	    ret = -1;
-	else
+	if (fd != -1) {
 	    ioctl(fd, TIOCCLRVERAUTH);
-#endif
-	goto done;
+	    goto done;
+	}
     }
+#endif
 
     if (asprintf(&fname, "%s/%s", def_timestampdir, user_name) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
