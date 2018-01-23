@@ -868,7 +868,12 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	int fd = open(_PATH_TTY, O_RDWR);
 	if (fd != -1) {
 	    int secs = def_timestamp_timeout.tv_sec;
-	    ioctl(fd, TIOCSETVERAUTH, &secs);
+	    if (secs > 0) {
+		if (secs > 3600)
+		    secs = 3600;        /* OpenBSD limitation */
+		if (ioctl(fd, TIOCSETVERAUTH, &secs) != 0)
+		    sudo_warn("TIOCSETVERAUTH");
+	    }
 	    close(fd);
 	}
 #endif
