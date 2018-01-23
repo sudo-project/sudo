@@ -870,7 +870,7 @@ store_timespec(const char *str, union sudo_defs_val *sd_un)
 	/* Convert from minutes to seconds and nanoseconds. */
 	d *= 60.0;
 	sd_un->tspec.tv_sec = (time_t)d;
-	sd_un->tspec.tv_nsec = (long)(d - sd_un->tspec.tv_sec) * 1000000000L;
+	sd_un->tspec.tv_nsec = (long)((d - sd_un->tspec.tv_sec) * 1000000000.0);
     }
     debug_return_bool(true);
 }
