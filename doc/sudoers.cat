@@ -1867,9 +1867,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        kernel  The time stamp is stored in the kernel as an
                                attribute of the terminal device.  If no
                                terminal is present, the behavior is the same
-                               as _p_p_i_d.  The maximum value of
-                               _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t is limited to 3600 when using
-                               _k_e_r_n_e_l time stamps.  This is currently only
+                               as _p_p_i_d.  Negative _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t values are
+                               not supported and positive values are limited
+                               to a maximum of 3600.  This is currently only
                                supported on OpenBSD.
 
                        The default value is _t_t_y.
@@ -2897,4 +2897,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    January 23, 2018                    Sudo 1.8.22
+Sudo 1.8.22                    January 24, 2018                    Sudo 1.8.22

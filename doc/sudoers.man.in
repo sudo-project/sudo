@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 23, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "January 24, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3719,11 +3719,9 @@ The time stamp is stored in the kernel as an attribute of the terminal
 device.
 If no terminal is present, the behavior is the same as
 \fIppid\fR.
-The maximum value of
+Negative
 \fItimestamp_timeout\fR
-is limited to 3600 when using
-\fIkernel\fR
-time stamps.
+values are not supported and positive values are limited to a maximum of 3600.
 This is currently only supported on OpenBSD.
 .PP
 The default value is
