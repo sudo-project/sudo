@@ -984,33 +984,28 @@ print_userspecs_json(FILE *fp, int indent, bool need_comma)
  * Export the parsed sudoers file in JSON format.
  */
 bool
-export_sudoers(const char *sudoers_path, const char *export_path)
+convert_sudoers_json(const char *input_file, const char *output_file)
 {
     bool ret = false, need_comma = false;
     const int indent = 4;
-    FILE *export_fp = stdout;
-    debug_decl(export_sudoers, SUDOERS_DEBUG_UTIL)
+    FILE *output_fp = stdout;
+    debug_decl(convert_sudoers_json, SUDOERS_DEBUG_UTIL)
 
-    if (strcmp(sudoers_path, "-") == 0) {
+    if (strcmp(input_file, "-") == 0) {
 	sudoersin = stdin;
-	sudoers_path = "stdin";
-    } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL)
-	sudo_fatal(U_("unable to open %s"), sudoers_path);
-    if (strcmp(export_path, "-") != 0) {
-	/* XXX - move check to front-end */
-	if (strcmp(sudoers_path, export_path) == 0) {
-	    sudo_fatalx(U_("%s: input and output files must be different"),
-		sudoers_path);
-	}
-	if ((export_fp = fopen(export_path, "w")) == NULL)
-	    sudo_fatal(U_("unable to open %s"), export_path);
+	input_file = "stdin";
+    } else if ((sudoersin = fopen(input_file, "r")) == NULL)
+	sudo_fatal(U_("unable to open %s"), input_file);
+    if (strcmp(output_file, "-") != 0) {
+	if ((output_fp = fopen(output_file, "w")) == NULL)
+	    sudo_fatal(U_("unable to open %s"), output_file);
     }
-    init_parser(sudoers_path, false);
+    init_parser(input_file, false);
     if (sudoersparse() && !parse_error) {
-	sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);
+	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
 	parse_error = true;
 	rcstr_delref(errorfile);
-	if ((errorfile = rcstr_dup(sudoers_path)) == NULL)
+	if ((errorfile = rcstr_dup(input_file)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     ret = !parse_error;
@@ -1025,27 +1020,27 @@ export_sudoers(const char *sudoers_path, const char *export_path)
     }
 
     /* Open JSON output. */
-    putc('{', export_fp);
+    putc('{', output_fp);
 
     /* Dump Defaults in JSON format. */
-    need_comma = print_defaults_json(export_fp, indent, need_comma);
+    need_comma = print_defaults_json(output_fp, indent, need_comma);
 
     /* Dump Aliases in JSON format. */
-    need_comma = print_aliases_json(export_fp, indent, need_comma);
+    need_comma = print_aliases_json(output_fp, indent, need_comma);
 
     /* Dump User_Specs in JSON format. */
-    print_userspecs_json(export_fp, indent, need_comma);
+    print_userspecs_json(output_fp, indent, need_comma);
 
     /* Close JSON output. */
-    fputs("\n}\n", export_fp);
+    fputs("\n}\n", output_fp);
 
 done:
-    if (export_fp != NULL) {
-	(void)fflush(export_fp);
-	if (ferror(export_fp))
+    if (output_fp != NULL) {
+	(void)fflush(output_fp);
+	if (ferror(output_fp))
 	    ret = false;
-	if (export_fp != stdout)
-	    fclose(export_fp);
+	if (output_fp != stdout)
+	    fclose(output_fp);
     }
     debug_return_bool(ret);
 }

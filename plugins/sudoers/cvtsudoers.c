@@ -49,7 +49,7 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-extern bool export_sudoers(const char *, const char *);
+extern bool convert_sudoers_json(const char *, const char *);
 
 /*
  * Globals
@@ -148,6 +148,13 @@ main(int argc, char *argv[])
 	input_file  = argv[0];
     }
 
+    if (strcmp(input_file, "-") != 0) {
+	if (strcmp(input_file, output_file) == 0) {
+	    sudo_fatalx(U_("%s: input and output files must be different"),
+		input_file);
+	}
+    }
+
     /* Mock up a fake sudo_user struct. */
     /* XXX - common with visudo */
     user_cmnd = user_base = "";
@@ -166,7 +173,8 @@ main(int argc, char *argv[])
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
-    exitcode = export_sudoers(input_file, output_file) ? EXIT_SUCCESS : EXIT_FAILURE;
+    exitcode = convert_sudoers_json(input_file, output_file) ?
+	EXIT_SUCCESS : EXIT_FAILURE;
 
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
