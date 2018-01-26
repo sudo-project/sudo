@@ -50,6 +50,7 @@
 #endif /* HAVE_GETOPT_LONG */
 
 extern bool convert_sudoers_json(const char *, const char *);
+extern void get_hostname(void);
 
 /*
  * Globals
@@ -69,7 +70,6 @@ static struct option long_opts[] = {
 };
 
 __dso_public int main(int argc, char *argv[]);
-static void get_hostname(void);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 
@@ -185,77 +185,6 @@ FILE *
 open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     return fopen(sudoers, "r");
-}
-
-/* XXX - Common stubs belong in their own file */
-
-/* STUB */
-bool
-init_envtables(void)
-{
-    return true;
-}
-
-/* STUB */
-bool
-user_is_exempt(void)
-{
-    return false;
-}
-
-/* STUB */
-void
-sudo_setspent(void)
-{
-    return;
-}
-
-/* STUB */
-void
-sudo_endspent(void)
-{
-    return;
-}
-
-/* STUB */
-int
-group_plugin_query(const char *user, const char *group, const struct passwd *pw)
-{
-    return false;
-}
-
-/* STUB */
-struct interface_list *
-get_interfaces(void)
-{
-    static struct interface_list dummy = SLIST_HEAD_INITIALIZER(interfaces);
-    return &dummy;
-}
-
-/*
- * Look up the hostname and set user_host and user_shost.
- */
-static void
-get_hostname(void)
-{
-    char *p;
-    debug_decl(get_hostname, SUDOERS_DEBUG_UTIL)
-
-    if ((user_host = sudo_gethostname()) != NULL) {
-	if ((p = strchr(user_host, '.'))) {
-	    *p = '\0';
-	    if ((user_shost = strdup(user_host)) == NULL)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    *p = '.';
-	} else {
-	    user_shost = user_host;
-	}
-    } else {
-	user_host = user_shost = "localhost";
-    }
-    user_runhost = user_host;
-    user_srunhost = user_shost;
-    debug_return;
 }
 
 static void

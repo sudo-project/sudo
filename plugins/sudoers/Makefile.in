@@ -159,9 +159,9 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
 	       set_perms.lo starttime.lo sudo_nss.lo sudoers.lo \
 	       timestamp.lo @SUDOERS_OBJS@
 
-VISUDO_OBJS = editor.o find_path.o goodpath.o locale.o sudo_printf.o visudo.o
+VISUDO_OBJS = editor.o find_path.o goodpath.o locale.o stubs.o sudo_printf.o visudo.o
 
-CVTSUDOERS_OBJS = cvtsudoers.o cvtsudoers_json.o locale.o sudo_printf.o
+CVTSUDOERS_OBJS = cvtsudoers.o cvtsudoers_json.o locale.o stubs.o sudo_printf.o
 
 REPLAY_OBJS = getdate.o sudoreplay.o
 
@@ -1166,6 +1166,14 @@ starttime.lo: $(srcdir)/starttime.c $(devdir)/def_data.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/starttime.c
 starttime.o: starttime.lo
+stubs.o: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/stubs.c
 sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

@@ -85,7 +85,6 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
  * Function prototypes
  */
 static void quit(int);
-static void get_hostname(void);
 static int whatnow(void);
 static int check_aliases(bool strict, bool quiet);
 static char *get_editor(int *editor_argc, char ***editor_argv);
@@ -101,6 +100,7 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static void visudo_cleanup(void);
 
+extern void get_hostname(void);
 extern void sudoersrestart(FILE *);
 
 /*
@@ -767,49 +767,6 @@ done:
     debug_return_bool(ret);
 }
 
-/* STUB */
-bool
-init_envtables(void)
-{
-    return true;
-}
-
-/* STUB */
-bool
-user_is_exempt(void)
-{
-    return false;
-}
-
-/* STUB */
-void
-sudo_setspent(void)
-{
-    return;
-}
-
-/* STUB */
-void
-sudo_endspent(void)
-{
-    return;
-}
-
-/* STUB */
-int
-group_plugin_query(const char *user, const char *group, const struct passwd *pw)
-{
-    return false;
-}
-
-/* STUB */
-struct interface_list *
-get_interfaces(void)
-{
-    static struct interface_list dummy = SLIST_HEAD_INITIALIZER(interfaces);
-    return &dummy;
-}
-
 /*
  * Assuming a parse error occurred, prompt the user for what they want
  * to do now.  Returns the first letter of their choice.
@@ -1046,32 +1003,6 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     if (keepopen != NULL)
 	*keepopen = true;
     debug_return_ptr(fp);
-}
-
-/*
- * Look up the hostname and set user_host and user_shost.
- */
-static void
-get_hostname(void)
-{
-    char *p;
-    debug_decl(get_hostname, SUDOERS_DEBUG_UTIL)
-
-    if ((user_host = sudo_gethostname()) != NULL) {
-	if ((p = strchr(user_host, '.'))) {
-	    *p = '\0';
-	    if ((user_shost = strdup(user_host)) == NULL)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    *p = '.';
-	} else {
-	    user_shost = user_host;
-	}
-    } else {
-	user_host = user_shost = "localhost";
-    }
-    user_runhost = user_host;
-    user_srunhost = user_shost;
-    debug_return;
 }
 
 static bool
