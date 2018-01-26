@@ -108,3 +108,63 @@ get_hostname(void)
 
     debug_return;
 }
+
+/*
+ * Parse sudoers plugin options.
+ * May set sudoers_file, sudoers_uid, sudoers_gid or sudoers_mode globals.
+ */
+void
+parse_sudoers_options(void)
+{
+    struct plugin_info_list *plugins;
+    debug_decl(parse_sudoers_options, SUDOERS_DEBUG_UTIL)
+
+    plugins = sudo_conf_plugins();
+    if (plugins) {
+	struct plugin_info *info;
+
+	TAILQ_FOREACH(info, plugins, entries) {
+	    if (strcmp(info->symbol_name, "sudoers_policy") == 0)
+		break;
+	}
+	if (info != NULL && info->options != NULL) {
+	    char * const *cur;
+
+#define MATCHES(s, v)	\
+    (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
+
+	    for (cur = info->options; *cur != NULL; cur++) {
+		const char *errstr, *p;
+		id_t id;
+
+		if (MATCHES(*cur, "sudoers_file=")) {
+		    sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+		    continue;
+		}
+		if (MATCHES(*cur, "sudoers_uid=")) {
+		    p = *cur + sizeof("sudoers_uid=") - 1;
+		    id = sudo_strtoid(p, NULL, NULL, &errstr);
+		    if (errstr == NULL)
+			sudoers_uid = (uid_t) id;
+		    continue;
+		}
+		if (MATCHES(*cur, "sudoers_gid=")) {
+		    p = *cur + sizeof("sudoers_gid=") - 1;
+		    id = sudo_strtoid(p, NULL, NULL, &errstr);
+		    if (errstr == NULL)
+			sudoers_gid = (gid_t) id;
+		    continue;
+		}
+		if (MATCHES(*cur, "sudoers_mode=")) {
+		    p = *cur + sizeof("sudoers_mode=") - 1;
+		    id = (id_t) sudo_strtomode(p, &errstr);
+		    if (errstr == NULL)
+			sudoers_mode = (mode_t) id;
+		    continue;
+		}
+	    }
+#undef MATCHES
+	}
+    }
+    debug_return;
+}

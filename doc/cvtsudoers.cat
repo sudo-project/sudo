@@ -10,9 +10,9 @@ DDEESSCCRRIIPPTTIIOONN
      ccvvttssuuddooeerrss can be used to convert a policy file in _s_u_d_o_e_r_s format to
      other formats.  The default output format is JSON.
 
-     If no _s_u_d_o_e_r_s___f_i_l_e is specified, or if it is `-', the policy is read from
-     the standard input.  By default, the result is written to the standard
-     output.
+     If _s_u_d_o_e_r_s___f_i_l_e is `-', the policy is read from the standard input.  If
+     no _s_u_d_o_e_r_s___f_i_l_e is specified, _/_e_t_c_/_s_u_d_o_e_r_s will be used.  By default, the
+     result is written to the standard output.
 
      The options are as follows:
 

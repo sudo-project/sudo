@@ -33,11 +33,16 @@ can be used to convert a policy file in
 format to other formats.
 The default output format is JSON.
 .Pp
-If no
+If
 .Ar sudoers_file
-is specified, or if it is
+is
 .Ql - ,
 the policy is read from the standard input.
+If no
+.Ar sudoers_file
+is specified,
+.Pa @sysconfdir@/sudoers
+will be used.
 By default, the result is written to the standard output.
 .Pp
 The options are as follows:
