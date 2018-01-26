@@ -20,6 +20,9 @@ doc/LICENSE
 doc/Makefile.in
 doc/TROUBLESHOOTING
 doc/UPGRADE
+doc/cvtsudoers.cat
+doc/cvtsudoers.man.in
+doc/cvtsudoers.mdoc.in
 doc/fixman.sh
 doc/fixmdoc.sh
 doc/schema.ActiveDirectory
@@ -261,6 +264,8 @@ plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h
 plugins/sudoers/check.c
 plugins/sudoers/check.h
+plugins/sudoers/cvtsudoers.c
+plugins/sudoers/cvtsudoers_json.c
 plugins/sudoers/def_data.c
 plugins/sudoers/def_data.h
 plugins/sudoers/def_data.in
@@ -546,7 +551,6 @@ plugins/sudoers/tsdump.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/visudo.c
-plugins/sudoers/visudo_json.c
 plugins/system_group/Makefile.in
 plugins/system_group/system_group.c
 plugins/system_group/system_group.exp

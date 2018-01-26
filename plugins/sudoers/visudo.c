@@ -101,9 +101,6 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static void visudo_cleanup(void);
 
-extern bool export_sudoers(const char *, const char *, bool, bool);
-
-extern void sudoerserror(const char *);
 extern void sudoersrestart(FILE *);
 
 /*
@@ -135,7 +132,6 @@ main(int argc, char *argv[])
     char *editor, **editor_argv;
     int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
-    const char *export_path;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -176,7 +172,6 @@ main(int argc, char *argv[])
      * Arg handling.
      */
     checkonly = oldperms = quiet = strict = false;
-    export_path = NULL;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
@@ -202,8 +197,9 @@ main(int argc, char *argv[])
 		quiet = true;		/* quiet mode */
 		break;
 	    case 'x':
-		export_path = optarg;	/* export mode */
-		break;
+		/* XXX - make more concise */
+		sudo_warnx(U_("conversion of sudoers to JSON format has moved to the cvtsudoers utility"));
+		usage(1);
 	    default:
 		usage(1);
 	}
@@ -231,10 +227,6 @@ main(int argc, char *argv[])
 
     if (checkonly) {
 	exitcode = check_syntax(sudoers_file, quiet, strict, oldperms) ? 0 : 1;
-	goto done;
-    }
-    if (export_path != NULL) {
-	exitcode = export_sudoers(sudoers_file, export_path, quiet, strict) ? 0 : 1;
 	goto done;
     }
 
@@ -1399,7 +1391,7 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-chqsV] [-f sudoers] [-x output_file]\n", getprogname());
+	"usage: %s [-chqsV] [-f sudoers]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -1415,7 +1407,6 @@ help(void)
 	"  -h, --help               display help message and exit\n"
 	"  -q, --quiet              less verbose (quiet) syntax error messages\n"
 	"  -s, --strict             strict syntax checking\n"
-	"  -V, --version            display version information and exit\n"
-	"  -x, --export=output_file write sudoers in JSON format to output_file"));
+	"  -V, --version            display version information and exit\n"));
     exit(0);
 }

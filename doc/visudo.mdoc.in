@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2017
+.\" Copyright (c) 1996,1998-2005, 2007-2018
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 21, 2017
+.Dd January 26, 2018
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -29,7 +29,6 @@
 .Nm visudo
 .Op Fl chqsV
 .Op Fl f Ar sudoers
-.Op Fl x Ar output_file
 .Sh DESCRIPTION
 .Nm
 edits the
@@ -248,34 +247,6 @@ Print the
 and
 .Em sudoers
 grammar versions and exit.
-.It Fl x Ar output_file , Fl -export Ns = Ns Ar output_file
-Export a
-.Em sudoers
-in JSON format and write it to
-.Ar output_file .
-If
-.Ar output_file
-is
-.Ql - ,
-the exported
-.Em sudoers
-policy will be written to the standard output.
-By default,
-.Pa @sysconfdir@/sudoers
-(and any files it includes) will be exported.
-The
-.Fl f
-option can be used to specify a different
-.Em sudoers
-file to export.
-The exported format is intended to be easier for third-party
-applications to parse than the traditional
-.Em sudoers
-format.
-The various values have explicit types which removes much of the
-ambiguity of the
-.Em sudoers
-format.
 .El
 .Ss Debugging and sudoers plugin arguments
 .Nm
@@ -433,14 +404,6 @@ file contains a
 .Li Defaults
 setting not recognized by
 .Nm .
-.It Li @sysconfdir@/sudoers: input and output files must be different
-The
-.Fl x
-flag was used and the specified
-.Ar output_file
-has the same path name as the
-.Em sudoers
-file to export.
 .El
 .Sh SEE ALSO
 .Xr vi 1 ,

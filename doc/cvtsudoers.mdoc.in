@@ -1,0 +1,109 @@
+.\"
+.\" Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd January 25, 2018
+.Dt CVTSUDOERS @mansectsu@
+.Os Sudo @PACKAGE_VERSION@
+.Sh NAME
+.Nm cvtsudoers
+.Nd convert between sudoers file formats
+.Sh SYNOPSIS
+.Nm cvtsudoers
+.Op Fl hV
+.Op Fl f Ar format
+.Op Fl o Ar output_file
+.Op Ar sudoers_file
+.Sh DESCRIPTION
+.Nm
+can be used to convert a policy file in
+.Em sudoers
+format to other formats.
+The default output format is JSON.
+.Pp
+If no
+.Ar sudoers_file
+is specified, or if it is
+.Ql - ,
+the policy is read from the standard input.
+By default, the result is written to the standard output.
+.Pp
+The options are as follows:
+.Bl -tag -width Fl
+.It Fl f , -format
+Specify the output format.
+Currently, JSON is the only supported output format.
+The JSON format is intended to be easier for third-party
+applications to parse than the traditional
+.Em sudoers
+format.
+The various values have explicit types which removes much of the
+ambiguity of the
+.Em sudoers
+format.
+.It Fl h , -help
+Display a short help message to the standard output and exit.
+.It Fl o Ar output_file , Fl -output Ns = Ns Ar output_file
+Write the converted output to
+.Ar output_file .
+If no
+.Ar output_file
+is specified, or if it is
+.Ql - ,
+the converted
+.Em sudoers
+policy will be written to the standard output.
+.It Fl V , -version
+Print the
+.Nm
+and
+.Em sudoers
+grammar versions and exit.
+.El
+.El
+.Sh SEE ALSO
+.Xr sudoers @mansectform@ ,
+.Xr sudo @mansectsu@
+.Sh AUTHORS
+Many people have worked on
+.Nm sudo
+over the years; this version consists of code written primarily by:
+.Bd -ragged -offset indent
+.An Todd C. Miller
+.Ed
+.Pp
+See the CONTRIBUTORS file in the
+.Nm sudo
+distribution (https://www.sudo.ws/contributors.html) for an
+exhaustive list of people who have contributed to
+.Nm sudo .
+.Sh BUGS
+If you feel you have found a bug in
+.Nm ,
+please submit a bug report at https://bugzilla.sudo.ws/
+.Sh SUPPORT
+Limited free support is available via the sudo-users mailing list,
+see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+.Sh DISCLAIMER
+.Nm
+is provided
+.Dq AS IS
+and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.
+See the LICENSE file distributed with
+.Nm sudo
+or https://www.sudo.ws/license.html for complete details.

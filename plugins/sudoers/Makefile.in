@@ -57,6 +57,7 @@ NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@ @LIBMD@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
 VISUDO_LIBS = $(NET_LIBS) @LIBMD@
+CVTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@
 TESTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@
 
 # C preprocessor defines
@@ -121,12 +122,6 @@ plugindir = @PLUGINDIR@
 # Directory in which to install the sudoers file
 sudoersdir = $(sysconfdir)
 
-# Directory in which to install sudoreplay.
-replaydir = $(bindir)
-
-# Directory in which to install visudo
-visudodir = $(sbindir)
-
 # User and group ids the installed files should be "owned" by
 install_uid = 0
 install_gid = 0
@@ -143,7 +138,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-PROGS = sudoers.la visudo sudoreplay testsudoers
+PROGS = sudoers.la visudo sudoreplay cvtsudoers testsudoers
 
 TEST_PROGS = check_addr check_base64 check_digest check_env_pattern \
 	     check_fill check_gentime check_hexchar check_iolog_path \
@@ -164,8 +159,9 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
 	       set_perms.lo starttime.lo sudo_nss.lo sudoers.lo \
 	       timestamp.lo @SUDOERS_OBJS@
 
-VISUDO_OBJS = editor.o find_path.o goodpath.o locale.o sudo_printf.o visudo.o \
-	      visudo_json.o
+VISUDO_OBJS = editor.o find_path.o goodpath.o locale.o sudo_printf.o visudo.o
+
+CVTSUDOERS_OBJS = cvtsudoers.o cvtsudoers_json.o locale.o sudo_printf.o
 
 REPLAY_OBJS = getdate.o sudoreplay.o
 
@@ -240,6 +236,9 @@ sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(VISUDO_LIBS)
+
+cvtsudoers: libparsesudoers.la $(CVTSUDOERS_OBJS) $(LT_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CVTSUDOERS_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) libparsesudoers.la $(LIBS) $(CVTSUDOERS_LIBS)
 
 sudoreplay: timestr.lo $(REPLAY_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) timestr.lo $(LIBS) $(REPLAY_LIBS)
@@ -339,7 +338,7 @@ install: install-plugin install-binaries install-sudoers install-doc
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
-	    $(DESTDIR)$(visudodir) $(DESTDIR)$(replaydir) \
+	    $(DESTDIR)$(sbindir) $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
 	    `echo $(DESTDIR)$(rundir)|$(SED) 's,/[^/]*$$,,'` \
 	    `echo $(DESTDIR)$(vardir)|$(SED) 's,/[^/]*$$,,'`
@@ -347,9 +346,10 @@ install-dirs:
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(vardir)
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0700 $(DESTDIR)$(vardir)/lectured
 
-install-binaries: visudo sudoreplay install-dirs
-	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
-	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 visudo $(DESTDIR)$(visudodir)/visudo
+install-binaries: cvtsudoers sudoreplay visudo install-dirs
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 cvtsudoers $(DESTDIR)$(bindir)/cvtsudoers
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 sudoreplay $(DESTDIR)$(bindir)/sudoreplay
+	INSTALL_BACKUP='$(INSTALL_BACKUP)' $(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL) $(INSTALL_OWNER) -m 0755 visudo $(DESTDIR)$(sbindir)/visudo
 
 install-includes:
 
@@ -372,11 +372,13 @@ install-sudoers: install-dirs
 
 uninstall:
 	-$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
-	-rm -f	$(DESTDIR)$(replaydir)/sudoreplay \
-		$(DESTDIR)$(visudodir)/visudo
+	-rm -f	$(DESTDIR)$(bindir)/cvtsudoers \
+		$(DESTDIR)$(bindir)/sudoreplay
+		$(DESTDIR)$(sbindir)/visudo
 	-test -z "$(INSTALL_BACKUP)" || \
-		$(DESTDIR)$(replaydir)/sudoreplay$(INSTALL_BACKUP) \
-		$(DESTDIR)$(visudodir)/visudo$(INSTALL_BACKUP) \
+		$(DESTDIR)$(bindir)/cvtsudoers$(INSTALL_BACKUP) \
+		$(DESTDIR)$(bindir)/sudoreplay$(INSTALL_BACKUP) \
+		$(DESTDIR)$(sbindir)/visudo$(INSTALL_BACKUP) \
 		$(DESTDIR)$(plugindir)/sudoers.so$(INSTALL_BACKUP)
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
@@ -445,7 +447,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    diff $$toke $(srcdir)/$$toke.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
-		./visudo -f $$t -x - >$$json 2>/dev/null || true; \
+		./cvtsudoers -o $$json $$t 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if cmp $$json $(srcdir)/$$json.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
@@ -680,6 +682,29 @@ check_wrap.o: $(srcdir)/regress/logging/check_wrap.c \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/logging/check_wrap.c
+cvtsudoers.o: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
+              $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+              $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers.c
+cvtsudoers_json.o: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
+                   $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_json.c
 dce.lo: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1278,13 +1303,3 @@ visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
           $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo.c
-visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
-               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-               $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-               $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo_json.c

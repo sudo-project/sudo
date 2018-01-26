@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -982,11 +982,9 @@ print_userspecs_json(FILE *fp, int indent, bool need_comma)
 
 /*
  * Export the parsed sudoers file in JSON format.
- * XXX - ignores strict flag and doesn't pass through quiet flag
  */
 bool
-export_sudoers(const char *sudoers_path, const char *export_path,
-    bool quiet, bool strict)
+export_sudoers(const char *sudoers_path, const char *export_path)
 {
     bool ret = false, need_comma = false;
     const int indent = 4;
@@ -996,29 +994,20 @@ export_sudoers(const char *sudoers_path, const char *export_path,
     if (strcmp(sudoers_path, "-") == 0) {
 	sudoersin = stdin;
 	sudoers_path = "stdin";
-    } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL) {
-	if (!quiet)
-	    sudo_warn(U_("unable to open %s"), sudoers_path);
-	goto done;
-    }
+    } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL)
+	sudo_fatal(U_("unable to open %s"), sudoers_path);
     if (strcmp(export_path, "-") != 0) {
+	/* XXX - move check to front-end */
 	if (strcmp(sudoers_path, export_path) == 0) {
-	    if (!quiet) {
-		sudo_warnx(U_("%s: input and output files must be different"),
-		    sudoers_path);
-	    }
-	    goto done;
+	    sudo_fatalx(U_("%s: input and output files must be different"),
+		sudoers_path);
 	}
-	if ((export_fp = fopen(export_path, "w")) == NULL) {
-	    if (!quiet)
-		sudo_warn(U_("unable to open %s"), export_path);
-	    goto done;
-	}
+	if ((export_fp = fopen(export_path, "w")) == NULL)
+	    sudo_fatal(U_("unable to open %s"), export_path);
     }
-    init_parser(sudoers_path, quiet);
+    init_parser(sudoers_path, false);
     if (sudoersparse() && !parse_error) {
-	if (!quiet)
-	    sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);
+	sudo_warnx(U_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;
 	rcstr_delref(errorfile);
 	if ((errorfile = rcstr_dup(sudoers_path)) == NULL)
@@ -1027,13 +1016,11 @@ export_sudoers(const char *sudoers_path, const char *export_path,
     ret = !parse_error;
 
     if (parse_error) {
-	if (!quiet) {
-	    if (errorlineno != -1)
-		sudo_warnx(U_("parse error in %s near line %d\n"),
-		    errorfile, errorlineno);
-	    else if (errorfile != NULL)
-		sudo_warnx(U_("parse error in %s\n"), errorfile);
-	}
+	if (errorlineno != -1)
+	    sudo_warnx(U_("parse error in %s near line %d\n"),
+		errorfile, errorlineno);
+	else if (errorfile != NULL)
+	    sudo_warnx(U_("parse error in %s\n"), errorfile);
 	goto done;
     }
 
