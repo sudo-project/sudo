@@ -164,10 +164,10 @@ dump_defaults(void)
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_TIMESPEC: {
-		    /* display time spec in minutes as a double */
-		    double d = cur->sd_un.tspec.tv_sec / 60.0;
-		    d += cur->sd_un.tspec.tv_nsec / 1000000000.0;
-		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d);
+		    /* display timespec in minutes as a double */
+		    double d = cur->sd_un.tspec.tv_sec +
+			(cur->sd_un.tspec.tv_nsec / 1000000000.0);
+		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d * 60.0);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		}
@@ -851,26 +851,61 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
     debug_return_bool(true);
 }
 
+#ifndef TIME_T_MAX
+# if SIZEOF_TIME_T == 8
+#  define TIME_T_MAX	LLONG_MAX
+# else
+#  define TIME_T_MAX	INT_MAX
+# endif
+#endif
+
 static bool
 store_timespec(const char *str, union sudo_defs_val *sd_un)
 {
-    char *endp;
-    double d;
+    struct timespec ts;
+    char sign = '+';
+    int i;
     debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS)
 
-    if (str == NULL) {
-	sd_un->tspec.tv_sec = 0;
-	sd_un->tspec.tv_nsec = 0;
+    sudo_timespecclear(&ts);
+    if (str != NULL) {
+	/* Convert from minutes to timespec. */
+	if (*str == '+' || *str == '-')
+	    sign = *str++;
+	while (*str != '\0' && *str != '.') {
+		if (!isdigit((unsigned char)*str))
+		    debug_return_bool(false);	/* invalid number */
+		if (ts.tv_sec > TIME_T_MAX / 10)
+		    debug_return_bool(false);	/* overflow */
+		ts.tv_sec *= 10;
+		ts.tv_sec += *str++ - '0';
+	}
+	if (*str++ == '.') {
+	    /* Convert optional fractional component to nanosecs. */
+	    for (i = 100000000; i > 0; i /= 10) {
+		if (*str == '\0')
+		    break;
+		if (!isdigit((unsigned char)*str))
+		    debug_return_bool(false);	/* invalid number */
+		ts.tv_nsec += i * (*str++ - '0');
+	    }
+	}
+	/* Convert from minutes to seconds. */
+	if (ts.tv_sec > TIME_T_MAX / 60)
+	    debug_return_bool(false);	/* overflow */
+	ts.tv_sec *= 60;
+	ts.tv_nsec *= 60;
+	while (ts.tv_nsec >= 1000000000) {
+	    ts.tv_sec++;
+	    ts.tv_nsec -= 1000000000;
+	}
+    }
+    if (sign == '-') {
+	sd_un->tspec.tv_sec = -ts.tv_sec;
+	sd_un->tspec.tv_nsec = -ts.tv_nsec;
     } else {
-	d = strtod(str, &endp);
-	if (*endp != '\0')
-	    debug_return_bool(false);
-	/* XXX - should check against HUGE_VAL */
-
-	/* Convert from minutes to seconds and nanoseconds. */
-	d *= 60.0;
-	sd_un->tspec.tv_sec = (time_t)d;
-	sd_un->tspec.tv_nsec = (long)((d - sd_un->tspec.tv_sec) * 1000000000.0);
+	sd_un->tspec.tv_sec = ts.tv_sec;
+	sd_un->tspec.tv_nsec = ts.tv_nsec;
     }
     debug_return_bool(true);
 }
