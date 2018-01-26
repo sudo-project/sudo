@@ -352,6 +352,7 @@ install-includes:
 install-doc: install-dirs
 	for f in $(OTHER_DOCS); do $(INSTALL) $(INSTALL_OWNER) -m 0644 $$f $(DESTDIR)$(docdir); done
 	@LDAP@for f in $(OTHER_DOCS_LDAP); do $(INSTALL) $(INSTALL_OWNER) -m 0644 $$f $(DESTDIR)$(docdir); done
+	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/cvtsudoers.$(mantype) $(DESTDIR)$(mandirsu)/cvtsudoers.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudo_plugin.$(mantype) $(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
@@ -361,7 +362,7 @@ install-doc: install-dirs
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoers_timestamp.$(mantype) $(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform)
 	@LDAP@$(INSTALL) $(INSTALL_OWNER) -m 0644 $(mansrcdir)/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 	@if test -n "$(MANCOMPRESS)"; then \
-	    for f in $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers_timestamp.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
+	    for f in $(mandirsu)/cvtsudoers.$(mansectsu) $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers_timestamp.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
 		if test -f $(DESTDIR)$$f; then \
 		    echo $(MANCOMPRESS) -f $(DESTDIR)$$f; \
 		    $(MANCOMPRESS) -f $(DESTDIR)$$f; \
@@ -380,7 +381,8 @@ install-plugin:
 
 uninstall:
 	-rm -rf	$(DESTDIR)$(docdir)
-	-rm -f	$(DESTDIR)$(mandirsu)/sudo.$(mansectsu) \
+	-rm -f	$(DESTDIR)$(mandirsu)/cvtsudoers.$(mansectsu) \
+		$(DESTDIR)$(mandirsu)/sudo.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu) \
