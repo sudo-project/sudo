@@ -984,39 +984,16 @@ print_userspecs_json(FILE *fp, int indent, bool need_comma)
  * Export the parsed sudoers file in JSON format.
  */
 bool
-convert_sudoers_json(const char *input_file, const char *output_file)
+convert_sudoers_json(const char *output_file)
 {
-    bool ret = false, need_comma = false;
+    bool ret = true, need_comma = false;
     const int indent = 4;
     FILE *output_fp = stdout;
     debug_decl(convert_sudoers_json, SUDOERS_DEBUG_UTIL)
 
-    if (strcmp(input_file, "-") == 0) {
-	sudoersin = stdin;
-	input_file = "stdin";
-    } else if ((sudoersin = fopen(input_file, "r")) == NULL)
-	sudo_fatal(U_("unable to open %s"), input_file);
-    if (strcmp(output_file, "-") != 0) {
+    if (strcmp(output_file, "-") != 0) {                     
 	if ((output_fp = fopen(output_file, "w")) == NULL)
 	    sudo_fatal(U_("unable to open %s"), output_file);
-    }
-    init_parser(input_file, false);
-    if (sudoersparse() && !parse_error) {
-	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
-	parse_error = true;
-	rcstr_delref(errorfile);
-	if ((errorfile = rcstr_dup(input_file)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    }
-    ret = !parse_error;
-
-    if (parse_error) {
-	if (errorlineno != -1)
-	    sudo_warnx(U_("parse error in %s near line %d\n"),
-		errorfile, errorlineno);
-	else if (errorfile != NULL)
-	    sudo_warnx(U_("parse error in %s\n"), errorfile);
-	goto done;
     }
 
     /* Open JSON output. */
@@ -1033,14 +1010,11 @@ convert_sudoers_json(const char *input_file, const char *output_file)
 
     /* Close JSON output. */
     fputs("\n}\n", output_fp);
+    (void)fflush(output_fp);
+    if (ferror(output_fp))
+	ret = false;
+    if (output_fp != stdout)
+	fclose(output_fp);
 
-done:
-    if (output_fp != NULL) {
-	(void)fflush(output_fp);
-	if (ferror(output_fp))
-	    ret = false;
-	if (output_fp != stdout)
-	    fclose(output_fp);
-    }
     debug_return_bool(ret);
 }

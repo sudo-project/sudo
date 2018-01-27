@@ -49,7 +49,7 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-extern bool convert_sudoers_json(const char *, const char *);
+extern bool convert_sudoers_json(const char *output_file);
 extern void parse_sudoers_options(void);
 extern void get_hostname(void);
 
@@ -180,8 +180,30 @@ main(int argc, char *argv[])
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
-    exitcode = convert_sudoers_json(input_file, output_file) ?
-	EXIT_SUCCESS : EXIT_FAILURE;
+    /* Open sudoers file and parse it. */
+    if (strcmp(input_file, "-") == 0) {
+	sudoersin = stdin;
+	input_file = "stdin";
+    } else if ((sudoersin = fopen(input_file, "r")) == NULL)
+	sudo_fatal(U_("unable to open %s"), input_file);
+    init_parser(input_file, false);
+    if (sudoersparse() && !parse_error) {
+	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
+	parse_error = true;
+	rcstr_delref(errorfile);
+	if ((errorfile = rcstr_dup(input_file)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    }
+    if (parse_error) {
+	if (errorlineno != -1)
+	    sudo_warnx(U_("parse error in %s near line %d\n"),
+		errorfile, errorlineno);
+	else if (errorfile != NULL)
+	    sudo_warnx(U_("parse error in %s\n"), errorfile);
+	goto done;
+    }
+
+    exitcode = convert_sudoers_json(output_file) ?  EXIT_SUCCESS : EXIT_FAILURE;
 
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
