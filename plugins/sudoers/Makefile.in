@@ -447,7 +447,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    diff $$toke $(srcdir)/$$toke.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
-		./cvtsudoers -o $$json $$t 2>/dev/null || true; \
+		./cvtsudoers $$t >$$json 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if cmp $$json $(srcdir)/$$json.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
