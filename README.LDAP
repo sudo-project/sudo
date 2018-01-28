@@ -106,13 +106,12 @@ For instance, if using OpenLDAP:
   objectClass: organizationalUnit
   ou: SUDOers
 
-(An example location is shown below).  Then use the provided script to convert
-your sudoers file into LDIF format.  The script will also convert any default
-options.
+(An example location is shown below).  Then use the cvtsudoers utility to
+convert your sudoers file into LDIF format.
 
   # SUDOERS_BASE=ou=SUDOers,dc=example,dc=com
   # export SUDOERS_BASE
-  # ./sudoers2ldif /etc/sudoers > /tmp/sudoers.ldif
+  # cvtsudoers -f ldif -o /tmp/sudoers.ldif /etc/sudoers
 
 Step 2:
 Import into your directory server.  The following example is for
