@@ -1,0 +1,11 @@
+dn: cn=millert,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: millert
+sudoUser: millert
+sudoHost: ALL
+sudoCommand: sha224:/bin/ls
+sudoCommand: sha256:/bin/sh
+sudoCommand: sha512:/bin/kill
+sudoOrder: 1
+

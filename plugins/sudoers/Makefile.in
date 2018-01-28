@@ -423,6 +423,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		out="regress/sudoers/$${base}.out"; \
 		toke="regress/sudoers/$${base}.toke"; \
 		json="regress/sudoers/$${base}.json"; \
+		ldif="regress/sudoers/$${base}.ldif"; \
 		if test -s $$json.ok; then \
 		    ASAN_OPTIONS=; \
 		else \
@@ -432,10 +433,10 @@ check: $(TEST_PROGS) visudo testsudoers
 		    ./testsudoers -dt <$$t >$$out 2>$$toke || true; \
 		if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
-		    echo "$$dir/$$base (parse): OK"; \
+		    echo "$$dir/$$base (JSON): OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
-		    echo "$$dir/$$base: FAIL"; \
+		    echo "$$dir/$$base (JSON): FAIL"; \
 		    diff $$out $(srcdir)/$$out.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
@@ -448,7 +449,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    diff $$toke $(srcdir)/$$toke.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
-		./cvtsudoers $$t >$$json 2>/dev/null || true; \
+		./cvtsudoers -f json $$t >$$json 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if cmp $$json $(srcdir)/$$json.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
@@ -457,6 +458,17 @@ check: $(TEST_PROGS) visudo testsudoers
 		    failed=`expr $$failed + 1`; \
 		    echo "$$dir/$$base: FAIL"; \
 		    diff $$json $(srcdir)/$$json.ok || true; \
+		fi; \
+		SUDOERS_BASE="ou=SUDOers,dc=sudo,dc=ws" \
+		    ./cvtsudoers -f ldif $$t >$$ldif 2>/dev/null || true; \
+		total=`expr $$total + 1`; \
+		if cmp $$ldif $(srcdir)/$$ldif.ok >/dev/null; then \
+		    passed=`expr $$passed + 1`; \
+		    echo "$$dir/$$base (parse): OK"; \
+		else \
+		    failed=`expr $$failed + 1`; \
+		    echo "$$dir/$$base: FAIL"; \
+		    diff $$ldif $(srcdir)/$$ldif.ok || true; \
 		fi; \
 	    done; \
 	    echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
@@ -508,7 +520,7 @@ check: $(TEST_PROGS) visudo testsudoers
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
 	    *.lo *.o *.la *.a stamp-* core *.core core.* regress/*/*.out \
-	    regress/*/*.toke regress/*/*.err regress/*/*.json
+	    regress/*/*.toke regress/*/*.err regress/*/*.json regress/*/*.ldif
 
 mostlyclean: clean
 

@@ -1,0 +1,64 @@
+dn: cn=defaults,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: defaults
+description: Default sudoOption's go here
+
+dn: cn=#0,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: #0
+sudoUser: #0
+sudoHost: ALL
+sudoCommand: ALL
+sudoOrder: 1
+
+dn: cn=#0_1,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: #0_1
+sudoUser: #0
+sudoHost: ALL
+sudoRunAsUser: #0
+sudoRunAsGroup: #0
+sudoCommand: ALL
+sudoOrder: 2
+
+dn: cn=#0_2,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: #0_2
+sudoUser: #0
+sudoHost: ALL
+sudoCommand: ALL
+sudoOrder: 3
+
+dn: cn=#0_3,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: #0_3
+sudoUser: #0
+sudoHost: ALL
+sudoRunAsUser: #0
+sudoRunAsGroup: #0
+sudoCommand: ALL
+sudoOrder: 4
+
+dn: cn=%#0,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: %#0
+sudoUser: %#0
+sudoHost: ALL
+sudoCommand: ALL
+sudoOrder: 5
+
+dn: cn=%#0_1,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: %#0_1
+sudoUser: %#0
+sudoHost: ALL
+sudoCommand: ALL
+sudoOrder: 6
+
