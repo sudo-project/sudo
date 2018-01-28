@@ -36,16 +36,11 @@ can be used to convert a policy file in
 format to other formats.
 The default output format is JSON.
 .PP
-If
-\fIsudoers_file\fR
-is
-\(oq-\(cq,
-the policy is read from the standard input.
 If no
 \fIsudoers_file\fR
-is specified,
-\fI@sysconfdir@/sudoers\fR
-will be used.
+is specified, or if it is
+\(oq-\(cq,
+the policy is read from the standard input.
 By default, the result is written to the standard output.
 .PP
 The options are as follows:

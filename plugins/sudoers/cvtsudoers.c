@@ -51,7 +51,6 @@
 
 extern bool convert_sudoers_json(const char *output_file);
 extern bool convert_sudoers_ldif(const char *output_file, const char *base);
-extern void parse_sudoers_options(void);
 extern void get_hostname(void);
 
 /*
@@ -86,7 +85,7 @@ main(int argc, char *argv[])
 {
     int ch, exitcode = EXIT_FAILURE;
     enum output_formats output_format = output_json;
-    const char *input_file = NULL;
+    const char *input_file = "-";
     const char *output_file = "-";
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
@@ -116,9 +115,6 @@ main(int argc, char *argv[])
     /* Initialize the debug subsystem. */
     if (!sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname())))
 	goto done;
-
-    /* Parse sudoers plugin options, if any. */
-    parse_sudoers_options();
 
     /*
      * Arg handling.
@@ -155,14 +151,12 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* Input file (defaults to /etc/sudoers). */
+    /* Input file (defaults to stdin). */
     if (argc > 0) {
 	/* XXX - allow multiple input files? */
 	if (argc > 1)
 	    usage(1);
 	input_file  = argv[0];
-    } else {
-	input_file = sudoers_file;
     }
 
     if (strcmp(input_file, "-") != 0) {
