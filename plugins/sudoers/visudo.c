@@ -130,6 +130,7 @@ main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
     char *editor, **editor_argv;
+    const char *export_path = NULL;
     int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
@@ -197,9 +198,8 @@ main(int argc, char *argv[])
 		quiet = true;		/* quiet mode */
 		break;
 	    case 'x':
-		/* XXX - make more concise */
-		sudo_warnx(U_("conversion of sudoers to JSON format has moved to the cvtsudoers utility"));
-		usage(1);
+		export_path = optarg;
+		break;
 	    default:
 		usage(1);
 	}
@@ -207,6 +207,15 @@ main(int argc, char *argv[])
     /* There should be no other command line arguments. */
     if (argc - optind != 0)
 	usage(1);
+
+    if (export_path != NULL) {
+	/* Backwards compatibility for the time being. */
+	sudo_warnx(U_("the -x option will be removed in a future release"));
+	sudo_warnx(U_("please consider using the cvtsudoers utility instead"));
+	execlp("cvtsudoers", "cvtsudoers", "-f", "json", "-o", export_path,
+	    sudoers_file, (char *)0);
+	sudo_fatal(U_("unable to execute %s"), "cvtsudoers");
+    }
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
