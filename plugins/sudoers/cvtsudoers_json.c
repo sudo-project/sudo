@@ -27,6 +27,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
 #include <stdarg.h>
+#include <time.h>
 #include <ctype.h>
 
 #include "sudoers.h"
@@ -733,7 +734,9 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     struct cmndspec *next = *nextp;
     struct json_value value;
     struct member *m;
+    struct tm *tp;
     bool last_one;
+    char timebuf[sizeof("20120727121554Z")];
     debug_decl(print_cmndspec_json, SUDOERS_DEBUG_UTIL)
 
     /* Open Cmnd_Spec object. */
@@ -765,7 +768,8 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     }
 
     /* Print tags */
-    if (cs->timeout > 0 || TAGS_SET(cs->tags)) {
+    if (cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
+	TAGS_SET(cs->tags)) {
 	struct cmndtag tag = cs->tags;
 
 	fprintf(fp, "%*s\"Options\": [\n", indent, "");
@@ -775,6 +779,35 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 	    value.u.number = cs->timeout;
 	    print_pair_json(fp, "{ ", "command_timeout", &value,
 		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	}
+	if (cs->notbefore != UNSPEC) {
+	    if ((tp = gmtime(&cs->notbefore)) == NULL) {
+		sudo_warn(U_("unable to get GMT time"));
+	    } else {
+		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		    sudo_warnx(U_("unable to format timestamp"));
+		} else {
+		    value.type = JSON_STRING;
+		    value.u.string = timebuf;
+		    print_pair_json(fp, "{ ", "notbefore", &value,
+			(TAGS_SET(tag) || cs->notafter != UNSPEC) ?
+			" },\n" : " }\n", indent);
+		}
+	    }
+	}
+	if (cs->notafter != UNSPEC) {
+	    if ((tp = gmtime(&cs->notafter)) == NULL) {
+		sudo_warn(U_("unable to get GMT time"));
+	    } else {
+		if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		    sudo_warnx(U_("unable to format timestamp"));
+		} else {
+		    value.type = JSON_STRING;
+		    value.u.string = timebuf;
+		    print_pair_json(fp, "{ ", "notafter", &value,
+			TAGS_SET(tag) ?  " },\n" : " }\n", indent);
+		}
+	    }
 	}
 	if (tag.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;

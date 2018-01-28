@@ -165,7 +165,9 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp)
 {
     struct cmndspec *next = *nextp;
     struct member *m;
+    struct tm *tp;
     bool last_one;
+    char timebuf[sizeof("20120727121554Z")];
     debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL)
 
     /* Print runasuserlist as sudoRunAsUser attributes */
@@ -181,6 +183,30 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp)
 	TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 	    print_member_ldif(fp, m->name, m->type, m->negated,
 		RUNASALIAS, "sudoRunAsGroup");
+	}
+    }
+
+    /* Print sudoNotBefore and sudoNotAfter attributes */
+    if (cs->notbefore != UNSPEC) {
+	if ((tp = gmtime(&cs->notbefore)) == NULL) {
+	    sudo_warn(U_("unable to get GMT time"));
+	} else {
+	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		sudo_warnx(U_("unable to format timestamp"));
+	    } else {
+		fprintf(fp, "sudoNotBefore: %s\n", timebuf);
+	    }
+	}
+    }
+    if (cs->notafter != UNSPEC) {
+	if ((tp = gmtime(&cs->notafter)) == NULL) {
+	    sudo_warn(U_("unable to get GMT time"));
+	} else {
+	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
+		sudo_warnx(U_("unable to format timestamp"));
+	    } else {
+		fprintf(fp, "sudoNotAfter: %s\n", timebuf);
+	    }
 	}
     }
 
@@ -378,7 +404,7 @@ convert_sudoers_ldif(const char *output_file, const char *base)
 	    sudo_fatalx(U_("The SUDOERS_BASE environment variable is not set"));
     }
 
-    if (strcmp(output_file, "-") != 0) {                     
+    if (strcmp(output_file, "-") != 0) {
 	if ((output_fp = fopen(output_file, "w")) == NULL)
 	    sudo_fatal(U_("unable to open %s"), output_file);
     }
