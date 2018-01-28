@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "January 25, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "January 27, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -52,15 +52,30 @@ The options are as follows:
 .TP 12n
 \fB\-f\fR, \fB\--format\fR
 Specify the output format.
-Currently, JSON is the only supported output format.
-The JSON format is intended to be easier for third-party
-applications to parse than the traditional
+The following formats are supported:
+.PP
+.RS 12n
+.PD 0
+.TP 10n
+JSON
+JSON (JavaScript Object Notation) files are usually easier for
+third-party applications to consume than the traditional
 \fIsudoers\fR
 format.
 The various values have explicit types which removes much of the
 ambiguity of the
 \fIsudoers\fR
 format.
+.PD
+.TP 10n
+LDIF
+LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
+server for use with
+sudoers.ldap(@mansectform@).
+.PD 0
+.PP
+.RE
+.PD
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
@@ -84,6 +99,7 @@ and
 grammar versions and exit.
 .SH "SEE ALSO"
 sudoers(@mansectform@),
+sudoers.ldap(@mansectform@),
 sudo(@mansectsu@)
 .SH "AUTHORS"
 Many people have worked on

@@ -266,6 +266,7 @@ plugins/sudoers/check.c
 plugins/sudoers/check.h
 plugins/sudoers/cvtsudoers.c
 plugins/sudoers/cvtsudoers_json.c
+plugins/sudoers/cvtsudoers_ldif.c
 plugins/sudoers/def_data.c
 plugins/sudoers/def_data.h
 plugins/sudoers/def_data.in

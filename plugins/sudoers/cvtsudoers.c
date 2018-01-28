@@ -50,6 +50,7 @@
 #endif /* HAVE_GETOPT_LONG */
 
 extern bool convert_sudoers_json(const char *output_file);
+extern bool convert_sudoers_ldif(const char *output_file, const char *base);
 extern void parse_sudoers_options(void);
 extern void get_hostname(void);
 
@@ -74,13 +75,19 @@ __dso_public int main(int argc, char *argv[]);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 
+enum output_formats {
+    output_invalid,
+    output_json,
+    output_ldif
+};
+
 int
 main(int argc, char *argv[])
 {
     int ch, exitcode = EXIT_FAILURE;
+    enum output_formats output_format = output_json;
     const char *input_file = NULL;
     const char *output_file = "-";
-    const char *output_format = "JSON";
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -119,11 +126,14 @@ main(int argc, char *argv[])
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'f':
-		if (strcasecmp(optarg, "json") != 0) {
+		if (strcasecmp(optarg, "json") == 0) {
+		    output_format = output_json;
+		} else if (strcasecmp(optarg, "ldif") == 0) {
+		    output_format = output_ldif;
+		} else {
 		    sudo_warnx("unsupported output format %s", optarg);
 		    usage(1);
 		}
-		output_format = optarg;
 		break;
 	    case 'h':
 		help();
@@ -203,7 +213,16 @@ main(int argc, char *argv[])
 	goto done;
     }
 
-    exitcode = convert_sudoers_json(output_file) ?  EXIT_SUCCESS : EXIT_FAILURE;
+    switch (output_format) {
+    case output_json:
+	exitcode = !convert_sudoers_json(output_file);
+	break;
+    case output_ldif:
+	exitcode = !convert_sudoers_ldif(output_file, NULL);
+	break;
+    default:
+	sudo_fatalx("error: unhandled output format %d", output_format);
+    }
 
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);

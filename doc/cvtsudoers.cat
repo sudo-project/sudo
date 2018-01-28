@@ -17,12 +17,18 @@ DDEESSCCRRIIPPTTIIOONN
      The options are as follows:
 
      --ff, ----ffoorrmmaatt
-                 Specify the output format.  Currently, JSON is the only
-                 supported output format.  The JSON format is intended to be
-                 easier for third-party applications to parse than the
-                 traditional _s_u_d_o_e_r_s format.  The various values have explicit
-                 types which removes much of the ambiguity of the _s_u_d_o_e_r_s
-                 format.
+                 Specify the output format.  The following formats are
+                 supported:
+
+                 JSON      JSON (JavaScript Object Notation) files are usually
+                           easier for third-party applications to consume than
+                           the traditional _s_u_d_o_e_r_s format.  The various values
+                           have explicit types which removes much of the
+                           ambiguity of the _s_u_d_o_e_r_s format.
+
+                 LDIF      LDIF (LDAP Data Interchange Format) files can be
+                           imported into an LDAP server for use with
+                           sudoers.ldap(4).
 
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
 
@@ -35,7 +41,7 @@ DDEESSCCRRIIPPTTIIOONN
                  Print the ccvvttssuuddooeerrss and _s_u_d_o_e_r_s grammar versions and exit.
 
 SSEEEE AALLSSOO
-     sudoers(4), sudo(1m)
+     sudoers(4), sudoers.ldap(4), sudo(1m)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
@@ -63,4 +69,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                    January 25, 2018                    Sudo 1.8.22
+Sudo 1.8.22                    January 27, 2018                    Sudo 1.8.22

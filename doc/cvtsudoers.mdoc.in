@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 25, 2018
+.Dd January 27, 2018
 .Dt CVTSUDOERS @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -49,15 +49,22 @@ The options are as follows:
 .Bl -tag -width Fl
 .It Fl f , -format
 Specify the output format.
-Currently, JSON is the only supported output format.
-The JSON format is intended to be easier for third-party
-applications to parse than the traditional
+The following formats are supported:
+.Bl -tag -width 8n
+.It JSON
+JSON (JavaScript Object Notation) files are usually easier for
+third-party applications to consume than the traditional
 .Em sudoers
 format.
 The various values have explicit types which removes much of the
 ambiguity of the
 .Em sudoers
 format.
+.It LDIF
+LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
+server for use with
+.Xr sudoers.ldap @mansectform@ .
+.El
 .It Fl h , -help
 Display a short help message to the standard output and exit.
 .It Fl o Ar output_file , Fl -output Ns = Ns Ar output_file
@@ -80,6 +87,7 @@ grammar versions and exit.
 .El
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,
+.Xr sudoers.ldap @mansectform@ ,
 .Xr sudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on
