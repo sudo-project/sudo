@@ -371,7 +371,7 @@ user_to_cn(const char *user)
 
     debug_return_str(cn);
 bad:
-    if (su != NULL && su->count == 1)
+    if (su != NULL && su->count == 0)
 	seen_user_free(su);
     free(cn);
     debug_return_str(NULL);
