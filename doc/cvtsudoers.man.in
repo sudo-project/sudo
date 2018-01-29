@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "January 27, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "January 28, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -34,7 +34,7 @@
 can be used to convert a policy file in
 \fIsudoers\fR
 format to other formats.
-The default output format is JSON.
+The default output format is LDIF.
 .PP
 If no
 \fIsudoers_file\fR

@@ -15,8 +15,7 @@
  */
 
 /*
- * Convert from sudoers format to other formats.
- * Currently outputs to JSON
+ * Convert from the sudoers file format to LDIF or JSON format.
  */
 
 #include <config.h>
@@ -84,7 +83,7 @@ int
 main(int argc, char *argv[])
 {
     int ch, exitcode = EXIT_FAILURE;
-    enum output_formats output_format = output_json;
+    enum output_formats output_format = output_ldif;
     const char *input_file = "-";
     const char *output_file = "-";
     debug_decl(main, SUDOERS_DEBUG_MAIN)
@@ -245,9 +244,9 @@ help(void)
     (void) printf(_("%s - convert between sudoers file formats\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -f, --format=JSON        specify output format\n"
+	"  -f, --format=JSON|LDIF   specify output format (JSON or LDIF)\n"
 	"  -h, --help               display help message and exit\n"
-	"  -o, --output=output_file write sudoers in JSON format to output_file\n"
+	"  -o, --output=output_file write converted sudoers to output_file\n"
 	"  -V, --version            display version information and exit"));
     exit(0);
 }
