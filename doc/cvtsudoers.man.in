@@ -26,6 +26,7 @@
 .HP 11n
 \fBcvtsudoers\fR
 [\fB\-hV\fR]
+[\fB\-b\fR\ \fIdn\fR]
 [\fB\-f\fR\ \fIformat\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
 [\fIsudoers_file\fR]
@@ -48,7 +49,19 @@ By default, the result is written to the standard output.
 .PP
 The options are as follows:
 .TP 12n
-\fB\-f\fR, \fB\--format\fR
+\fB\-b\fR \fIdn\fR, \fB\--base\fR=\fIdn\fR
+The base DN (distinguished name) that will be used when performing
+LDAP queries.
+Typically this is of the form
+\fRou=SUDOers,dc=example,dc=com\fR
+for the domain
+\fRexample.com\fR.
+If this option is not specified, the value of the
+\fRSUDOERS_BASE\fR
+environment variable will be used instead.
+Only necessary when converting to LDIF format.
+.TP 12n
+\fB\-f\fR \fIoutput_format\fR, \fB\--format\fR=\fIoutput_format\fR
 Specify the output format.
 The following formats are supported:
 .PP

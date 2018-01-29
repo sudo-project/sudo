@@ -401,7 +401,7 @@ convert_sudoers_ldif(const char *output_file, const char *base)
     if (base == NULL) {
 	base = getenv("SUDOERS_BASE");
 	if (base == NULL)
-	    sudo_fatalx(U_("The SUDOERS_BASE environment variable is not set"));
+	    sudo_fatalx(U_("the SUDOERS_BASE environment variable is not set and the -b option was not specified."));
     }
 
     if (strcmp(output_file, "-") != 0) {

@@ -4,7 +4,7 @@ NNAAMMEE
      ccvvttssuuddooeerrss - convert between sudoers file formats
 
 SSYYNNOOPPSSIISS
-     ccvvttssuuddooeerrss [--hhVV] [--ff _f_o_r_m_a_t] [--oo _o_u_t_p_u_t___f_i_l_e] [_s_u_d_o_e_r_s___f_i_l_e]
+     ccvvttssuuddooeerrss [--hhVV] [--bb _d_n] [--ff _f_o_r_m_a_t] [--oo _o_u_t_p_u_t___f_i_l_e] [_s_u_d_o_e_r_s___f_i_l_e]
 
 DDEESSCCRRIIPPTTIIOONN
      ccvvttssuuddooeerrss can be used to convert a policy file in _s_u_d_o_e_r_s format to
@@ -17,7 +17,15 @@ DDEESSCCRRIIPPTTIIOONN
 
      The options are as follows:
 
-     --ff, ----ffoorrmmaatt
+     --bb _d_n, ----bbaassee=_d_n
+                 The base DN (distinguished name) that will be used when
+                 performing LDAP queries.  Typically this is of the form
+                 ou=SUDOers,dc=example,dc=com for the domain example.com.  If
+                 this option is not specified, the value of the SUDOERS_BASE
+                 environment variable will be used instead.  Only necessary
+                 when converting to LDIF format.
+
+     --ff _o_u_t_p_u_t___f_o_r_m_a_t, ----ffoorrmmaatt=_o_u_t_p_u_t___f_o_r_m_a_t
                  Specify the output format.  The following formats are
                  supported:
 

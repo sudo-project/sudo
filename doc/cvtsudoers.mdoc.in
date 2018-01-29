@@ -23,6 +23,7 @@
 .Sh SYNOPSIS
 .Nm cvtsudoers
 .Op Fl hV
+.Op Fl b Ar dn
 .Op Fl f Ar format
 .Op Fl o Ar output_file
 .Op Ar sudoers_file
@@ -45,7 +46,18 @@ By default, the result is written to the standard output.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
-.It Fl f , -format
+.It Fl b Ar dn , Fl -base Ns = Ns Ar dn
+The base DN (distinguished name) that will be used when performing
+LDAP queries.
+Typically this is of the form
+.Li ou=SUDOers,dc=example,dc=com
+for the domain
+.Li example.com .
+If this option is not specified, the value of the
+.Ev SUDOERS_BASE
+environment variable will be used instead.
+Only necessary when converting to LDIF format.
+.It Fl f Ar output_format , Fl -format Ns = Ns Ar output_format
 Specify the output format.
 The following formats are supported:
 .Bl -tag -width 8n
@@ -73,7 +85,7 @@ Command, host, runas and user aliases are not supported by the
 sudoers LDAP schema so they are expanded during the conversion.
 .El
 .El
-.It Fl h , -help
+.It Fl h , Fl -help
 Display a short help message to the standard output and exit.
 .It Fl o Ar output_file , Fl -output Ns = Ns Ar output_file
 Write the converted output to

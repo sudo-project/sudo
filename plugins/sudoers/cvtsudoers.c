@@ -57,8 +57,9 @@ extern void get_hostname(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "f:ho:V";
+static const char short_opts[] =  "b:f:ho:V";
 static struct option long_opts[] = {
+    { "base",		required_argument,	NULL,	'b' },
     { "format",		required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
 #ifdef notyet
@@ -86,6 +87,7 @@ main(int argc, char *argv[])
     enum output_formats output_format = output_ldif;
     const char *input_file = "-";
     const char *output_file = "-";
+    const char *sudoers_base = NULL;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -120,31 +122,34 @@ main(int argc, char *argv[])
      */
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
-	    case 'f':
-		if (strcasecmp(optarg, "json") == 0) {
-		    output_format = output_json;
-		} else if (strcasecmp(optarg, "ldif") == 0) {
-		    output_format = output_ldif;
-		} else {
-		    sudo_warnx("unsupported output format %s", optarg);
-		    usage(1);
-		}
-		break;
-	    case 'h':
-		help();
-		break;
-	    case 'o':
-		output_file = optarg;
-		break;
-	    case 'V':
-		(void) printf(_("%s version %s\n"), getprogname(),
-		    PACKAGE_VERSION);
-		(void) printf(_("%s grammar version %d\n"), getprogname(),
-		    SUDOERS_GRAMMAR_VERSION);
-		exitcode = EXIT_SUCCESS;
-		goto done;
-	    default:
+	case 'b':
+	    sudoers_base = optarg;
+	    break;
+	case 'f':
+	    if (strcasecmp(optarg, "json") == 0) {
+		output_format = output_json;
+	    } else if (strcasecmp(optarg, "ldif") == 0) {
+		output_format = output_ldif;
+	    } else {
+		sudo_warnx("unsupported output format %s", optarg);
 		usage(1);
+	    }
+	    break;
+	case 'h':
+	    help();
+	    break;
+	case 'o':
+	    output_file = optarg;
+	    break;
+	case 'V':
+	    (void) printf(_("%s version %s\n"), getprogname(),
+		PACKAGE_VERSION);
+	    (void) printf(_("%s grammar version %d\n"), getprogname(),
+		SUDOERS_GRAMMAR_VERSION);
+	    exitcode = EXIT_SUCCESS;
+	    goto done;
+	default:
+	    usage(1);
 	}
     }
     argc -= optind;
@@ -211,7 +216,7 @@ main(int argc, char *argv[])
 	exitcode = !convert_sudoers_json(output_file);
 	break;
     case output_ldif:
-	exitcode = !convert_sudoers_ldif(output_file, NULL);
+	exitcode = !convert_sudoers_ldif(output_file, sudoers_base);
 	break;
     default:
 	sudo_fatalx("error: unhandled output format %d", output_format);
@@ -232,7 +237,7 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-hV] [-f format] [-o output_file] [sudoers_file]\n",
+	"usage: %s [-hV] [-b dn] [-f format] [-o output_file] [sudoers_file]\n",
 	    getprogname());
     if (fatal)
 	exit(1);
@@ -244,6 +249,7 @@ help(void)
     (void) printf(_("%s - convert between sudoers file formats\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
+	"  -b, --base=dn            the base DN for sudo LDAP queries\n"
 	"  -f, --format=JSON|LDIF   specify output format (JSON or LDIF)\n"
 	"  -h, --help               display help message and exit\n"
 	"  -o, --output=output_file write converted sudoers to output_file\n"
