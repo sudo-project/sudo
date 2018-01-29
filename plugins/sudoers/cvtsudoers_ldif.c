@@ -36,7 +36,7 @@
 
 struct seen_user {
     const char *name;
-    long count;
+    unsigned long count;
 };
 
 static int sudo_order;
@@ -49,6 +49,15 @@ seen_user_compare(const void *aa, const void *bb)
     const struct seen_user *b = bb;
 
     return strcasecmp(a->name, b->name);
+}
+
+static void
+seen_user_free(void *v)
+{
+    struct seen_user *su = v;
+
+    free((void *)su->name);
+    free(su);
 }
 
 /*
@@ -296,6 +305,79 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp)
 }
 
 /*
+ * Convert user name to cn, avoiding duplicates and quoting as needed.
+ */
+static char *
+user_to_cn(const char *user)
+{
+    struct seen_user key, *su = NULL;
+    struct rbnode *node;
+    const char *src;
+    char *cn, *dst;
+    size_t size;
+    debug_decl(user_to_cn, SUDOERS_DEBUG_UTIL)
+
+    /* Allocate as much as we could possibly need. */
+    size = (2 * strlen(user)) + 64 + 1;
+    if ((cn = malloc(size)) == NULL)
+	goto bad;
+
+    /*
+     * Increment the number of times we have seen this user.
+     */
+    key.name = user;
+    node = rbfind(seen_users, &key);
+    if (node != NULL) {
+	su = node->data;
+    } else {
+	if ((su = malloc(sizeof(*su))) == NULL)
+	    goto bad;
+	su->count = 0;
+	if ((su->name = strdup(user)) == NULL)
+	    goto bad;
+	if (rbinsert(seen_users, su, NULL) != 0)
+	    goto bad;
+    }
+
+    /* Build cn, quoting special chars as needed (we allocated 2 x len). */
+    for (src = user, dst = cn; *src != '\0'; src++) {
+	switch (*src) {
+	case ',':
+	case '\\':
+	case '#':
+	case '+':
+	case '<':
+	case '>':
+	case ';':
+	    *dst++ = '\\';
+	    *dst++ = *src;
+	    break;
+	default:
+	    *dst++ = *src;
+	    break;
+	}
+    }
+    *dst = '\0';
+
+    /* Append count if there are duplicate users (cn must be unique). */
+    if (su->count != 0) {
+	size -= (size_t)(dst - cn);
+	if ((size_t)snprintf(dst, size, "_%lu", su->count) >= size) {
+	    sudo_warnx(U_("internal error, %s overflow"), __func__);
+	    goto bad;
+	}
+    }
+    su->count++;
+
+    debug_return_str(cn);
+bad:
+    if (su != NULL && su->count == 1)
+	seen_user_free(su);
+    free(cn);
+    debug_return_str(NULL);
+}
+
+/*
  * Print a single User_Spec.
  */
 static bool
@@ -304,7 +386,6 @@ print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
     struct privilege *priv;
     struct member *m;
     struct cmndspec *cs, *next;
-    struct rbnode *node;
     debug_decl(print_userspec_ldif, SUDOERS_DEBUG_UTIL)
 
     /*
@@ -315,33 +396,13 @@ print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, next) {
 	    char *cn;
-	    struct seen_user *su, key;
 
 	    /*
 	     * Increment the number of times we have seen this user.
 	     * If more than one user is listed, just use the first one.
 	     */
 	    m = TAILQ_FIRST(&us->users);
-	    key.name = m->name ? m->name : "ALL";
-	    node = rbfind(seen_users, &key);
-	    if (node != NULL) {
-		su = node->data;
-		if (asprintf(&cn, "%s_%ld", key.name, su->count) == -1)
-		    cn = NULL;
-		su->count++;
-	    } else {
-		if ((su = malloc(sizeof(*su))) == NULL) {
-		    sudo_fatalx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		}
-		su->name = key.name;
-		su->count = 1;
-		if (rbinsert(seen_users, su, NULL) != 0) {
-		    sudo_fatalx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		}
-		cn = strdup(key.name);
-	    }
+	    cn = user_to_cn(m->name ? m->name : "ALL");
 	    if (cn == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
@@ -422,7 +483,7 @@ convert_sudoers_ldif(const char *output_file, const char *base)
     warn_bound_defaults_ldif(output_fp);
 
     /* Clean up. */
-    rbdestroy(seen_users, free);
+    rbdestroy(seen_users, seen_user_free);
 
     (void)fflush(output_fp);
     if (ferror(output_fp))
