@@ -1,6 +1,28 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.23:
+
+    In sudo 1.8.23 the "sudoers2ldif" script and the "visudo -c"
+    functionality has been superseded by the "cvtsudoers" utility.
+    The cvtsudoers utility is intended to be a drop-in replacement
+    for "sudoers2ldif".  Because it uses the same parser as sudo
+    and visudo, cvtsudoers can perform a more accurate conversion
+    than sudoers2ldif could.
+
+    To convert a sudoers file to JSON, the format option must be
+    specified.  For example, instead of:
+
+    visudo -f sudoers_file -x output_file
+
+    one would use:
+
+    cvtsudoers -f json -o output_file sudoers_file
+
+    Note that unlike "visudo -x", "cvtsudoers" reads from the
+    standard input by default.  Also, the base DN may be specified
+    on the command line, if desired, using the -b option.
+
 o Upgrading from a version prior to 1.8.20:
 
     Prior to version 1.8.20, when log_input, log_output or use_pty
@@ -14,7 +36,7 @@ o Upgrading from a version prior to 1.8.20:
     a pipe is only used for the standard input.  Likewise, if
     log_output is set without log_input, a pipe is only used for
     the standard output and standard error.  This results in a
-    noticable change in behavior if the use_pty flag is set and no
+    noticeable change in behavior if the use_pty flag is set and no
     terminal is present when running commands such as scripts that
     execute other commands asynchronously (in the background).
     Previously, sudo would exit immediately, causing background
