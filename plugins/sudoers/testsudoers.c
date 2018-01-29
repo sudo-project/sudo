@@ -115,7 +115,7 @@ main(int argc, char *argv[])
     char *p, *grfile, *pwfile;
     const char *errstr;
     int match, host_match, runas_match, cmnd_match;
-    int ch, dflag, exitcode = 0;
+    int ch, dflag, exitcode = EXIT_FAILURE;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -135,8 +135,9 @@ main(int argc, char *argv[])
 
     /* Initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-	exit(EXIT_FAILURE);
-    sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
+	goto done;
+    if (!sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname())))
+	goto done;
 
     dflag = 0;
     grfile = pwfile = NULL;
