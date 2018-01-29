@@ -402,7 +402,7 @@ print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
 	     * If more than one user is listed, just use the first one.
 	     */
 	    m = TAILQ_FIRST(&us->users);
-	    cn = user_to_cn(m->name ? m->name : "ALL");
+	    cn = user_to_cn(m->type == ALL ? "ALL" : m->name);
 	    if (cn == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
