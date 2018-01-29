@@ -35,6 +35,9 @@ can be used to convert a policy file in
 \fIsudoers\fR
 format to other formats.
 The default output format is LDIF.
+It is only possible to convert a
+\fIsudoers\fR
+file that is syntactically correct.
 .PP
 If no
 \fIsudoers_file\fR
@@ -67,7 +70,23 @@ LDIF
 LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
 server for use with
 sudoers.ldap(@mansectform@).
+.sp
+Conversion to LDIF has the following limitations:
+.PP
+.RS 10n
 .PD 0
+.TP 6n
+\fB\(bu\fR
+Command, host, runas and user-specific Defaults lines cannot be
+translated as they don't have an equivalent in the sudoers LDAP schema.
+.PD
+.TP 6n
+\fB\(bu\fR
+Command, host, runas and user aliases are not supported by the
+sudoers LDAP schema so they are expanded during the conversion.
+.PD 0
+.PP
+.RE
 .PP
 .RE
 .PD

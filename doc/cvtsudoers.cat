@@ -8,7 +8,8 @@ SSYYNNOOPPSSIISS
 
 DDEESSCCRRIIPPTTIIOONN
      ccvvttssuuddooeerrss can be used to convert a policy file in _s_u_d_o_e_r_s format to
-     other formats.  The default output format is LDIF.
+     other formats.  The default output format is LDIF.  It is only possible
+     to convert a _s_u_d_o_e_r_s file that is syntactically correct.
 
      If no _s_u_d_o_e_r_s___f_i_l_e is specified, or if it is `-', the policy is read from
      the standard input.  By default, the result is written to the standard
@@ -29,6 +30,17 @@ DDEESSCCRRIIPPTTIIOONN
                  LDIF      LDIF (LDAP Data Interchange Format) files can be
                            imported into an LDAP server for use with
                            sudoers.ldap(4).
+
+                           Conversion to LDIF has the following limitations:
+
+                           ++oo     Command, host, runas and user-specific
+                                 Defaults lines cannot be translated as they
+                                 don't have an equivalent in the sudoers LDAP
+                                 schema.
+
+                           ++oo     Command, host, runas and user aliases are not
+                                 supported by the sudoers LDAP schema so they
+                                 are expanded during the conversion.
 
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
 

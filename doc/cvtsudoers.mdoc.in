@@ -32,6 +32,9 @@ can be used to convert a policy file in
 .Em sudoers
 format to other formats.
 The default output format is LDIF.
+It is only possible to convert a
+.Em sudoers
+file that is syntactically correct.
 .Pp
 If no
 .Ar sudoers_file
@@ -59,6 +62,16 @@ format.
 LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
 server for use with
 .Xr sudoers.ldap @mansectform@ .
+.Pp
+Conversion to LDIF has the following limitations:
+.Bl -bullet -width 4n
+.It
+Command, host, runas and user-specific Defaults lines cannot be
+translated as they don't have an equivalent in the sudoers LDAP schema.
+.It
+Command, host, runas and user aliases are not supported by the
+sudoers LDAP schema so they are expanded during the conversion.
+.El
 .El
 .It Fl h , -help
 Display a short help message to the standard output and exit.
