@@ -341,7 +341,6 @@ still allow people to get their work done."
 	$vardir/		0711 root: ignore-others
 	$vardir/lectured/	0700 root:
 	$docdir/		0755
-	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others

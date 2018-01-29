@@ -354,8 +354,7 @@ install-binaries: cvtsudoers sudoreplay visudo install-dirs
 
 install-includes:
 
-install-doc: install-dirs
-	@LDAP@$(INSTALL) $(INSTALL_OWNER) -m 0755 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
+install-doc:
 
 install-plugin: sudoers.la install-dirs
 	case "$(LT_LDFLAGS)" in \
