@@ -90,7 +90,6 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 	    debug_return_bool(false);
 	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
 	    debug_return_bool(false);
-        break;
 	break;
     case TS_TTY:
 	if (entry->u.ttydev != key->u.ttydev)
@@ -164,7 +163,7 @@ ts_mkdirs(char *path, uid_t owner, gid_t group, mode_t mode,
 
     /* umask must not be more restrictive than the file modes. */
     omask = umask(ACCESSPERMS & ~(mode|parent_mode));
-    ret = sudo_mkdir_parents(path, owner, group, parent_mode, quiet); 
+    ret = sudo_mkdir_parents(path, owner, group, parent_mode, quiet);
     if (ret) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
@@ -790,8 +789,8 @@ timestamp_status(void *vcookie, struct passwd *pw)
 
     /* Compare stored time stamp with current time. */
     if (sudo_gettime_mono(&now) == -1) {
-        log_warning(0, N_("unable to read the clock"));
-        status = TS_ERROR;
+	log_warning(0, N_("unable to read the clock"));
+	status = TS_ERROR;
 	goto done;
     }
     sudo_timespecsub(&now, &entry.ts, &diff);
@@ -882,7 +881,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
     /* Update timestamp in key and enable it. */
     CLR(cookie->key.flags, TS_DISABLED);
     if (sudo_gettime_mono(&cookie->key.ts) == -1) {
-        log_warning(0, N_("unable to read the clock"));
+	log_warning(0, N_("unable to read the clock"));
 	goto done;
     }
 
