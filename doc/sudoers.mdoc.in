@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 24, 2018
+.Dd January 30, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3482,7 +3482,8 @@ If no terminal is present, the behavior is the same as
 .Em ppid .
 Negative
 .Em timestamp_timeout
-values are not supported and positive values are limited to a maximum of 3600.
+values are not supported and positive values are limited to a maximum
+of 60 minutes.
 This is currently only supported on OpenBSD.
 .El
 .Pp
