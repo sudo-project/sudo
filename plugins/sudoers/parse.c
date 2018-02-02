@@ -38,9 +38,6 @@
 #include "sudo_lbuf.h"
 #include <gram.h>
 
-/* Characters that must be quoted in sudoers */
-#define	SUDOERS_QUOTED	":\\,=#\""
-
 /*
  * Local prototypes.
  */
@@ -844,7 +841,7 @@ done:
 }
 
 /*
- * Print the contents of a struct member to stdout
+ * Write the contents of a struct member to the lbuf
  */
 static void
 print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
