@@ -244,6 +244,7 @@ extern struct defaults_list defaults;
 /* alias.c */
 bool no_aliases(void);
 const char *alias_add(char *name, int type, char *file, int lineno, struct member *members);
+const char *alias_type_to_string(int alias_type);
 int alias_compare(const void *a1, const void *a2);
 struct alias *alias_get(char *name, int type);
 struct alias *alias_remove(char *name, int type);

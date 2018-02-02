@@ -1035,16 +1035,6 @@ alias_remove_recursive(char *name, int type)
     debug_return_bool(ret);
 }
 
-static const char *
-alias_type_to_string(int alias_type)
-{
-    return alias_type == HOSTALIAS ? "Host_Alias" :
-	alias_type == CMNDALIAS ? "Cmnd_Alias" :
-	alias_type == USERALIAS ? "User_Alias" :
-	alias_type == RUNASALIAS ? "Runas_Alias" :
-	"Invalid_Alias";
-}
-
 static int
 check_alias(char *name, int type, char *file, int lineno, bool strict, bool quiet)
 {

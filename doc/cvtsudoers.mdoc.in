@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd January 28, 2018
+.Dd February 2, 2018
 .Dt CVTSUDOERS @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -84,6 +84,11 @@ translated as they don't have an equivalent in the sudoers LDAP schema.
 Command, host, runas and user aliases are not supported by the
 sudoers LDAP schema so they are expanded during the conversion.
 .El
+.It sudoers
+Traditional sudoers format.
+A new sudoers file will be reconstructed from the parsed input file.
+Comments are not preserved and data from any include files will be
+output inline.
 .El
 .It Fl h , Fl -help
 Display a short help message to the standard output and exit.

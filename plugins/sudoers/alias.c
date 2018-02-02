@@ -213,3 +213,13 @@ init_aliases(void)
 
     debug_return_bool(aliases != NULL);
 }
+
+const char *
+alias_type_to_string(int alias_type)
+{
+    return alias_type == HOSTALIAS ? "Host_Alias" :
+	alias_type == CMNDALIAS ? "Cmnd_Alias" :
+	alias_type == USERALIAS ? "User_Alias" :
+	alias_type == RUNASALIAS ? "Runas_Alias" :
+	"Invalid_Alias";
+}

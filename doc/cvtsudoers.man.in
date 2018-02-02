@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "January 28, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "February 2, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -100,6 +100,14 @@ sudoers LDAP schema so they are expanded during the conversion.
 .PD 0
 .PP
 .RE
+.PD
+.TP 10n
+sudoers
+Traditional sudoers format.
+A new sudoers file will be reconstructed from the parsed input file.
+Comments are not preserved and data from any include files will be
+output inline.
+.PD 0
 .PP
 .RE
 .PD
