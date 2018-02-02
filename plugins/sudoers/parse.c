@@ -883,7 +883,14 @@ print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 	    }
 	    /* FALLTHROUGH */
 	default:
-	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", name);
+	    /* Do not quote UID/GID, all others get quoted. */
+	    if (name[0] == '#' &&
+		name[strspn(name + 1, "0123456789") + 1] == '\0') {
+		sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", name);
+	    } else {
+		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s%s",
+		    negated ? "!" : "", name);
+	    }
 	    break;
     }
     debug_return;
