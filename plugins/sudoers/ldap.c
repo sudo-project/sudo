@@ -2490,6 +2490,22 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
     }
     sudo_lbuf_append(lbuf, ") ");
 
+    /* Get the sudoNotBefore and sudoNotAfter Values from the entry */
+    bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
+    if (bv != NULL) {
+	for (p = bv; *p != NULL; p++) {
+	    sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", (*p)->bv_val);
+	}
+	ldap_value_free_len(bv);
+    }
+    bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
+    if (bv != NULL) {
+	for (p = bv; *p != NULL; p++) {
+	    sudo_lbuf_append(lbuf, "NOTAFTER=%s ", (*p)->bv_val);
+	}
+	ldap_value_free_len(bv);
+    }
+
     /* get the Option Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv != NULL) {
@@ -2591,6 +2607,26 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
 	    /* finish printing sudoRunAs */
 	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
 	}
+	sudo_lbuf_append(lbuf, "\n");
+    }
+
+    /* Get the sudoNotBefore and sudoNotAfter Values from the entry */
+    bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
+    if (bv != NULL) {
+	sudo_lbuf_append(lbuf, "    NotBefore: ");
+	for (p = bv; *p != NULL; p++) {
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	}
+	ldap_value_free_len(bv);
+	sudo_lbuf_append(lbuf, "\n");
+    }
+    bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
+    if (bv != NULL) {
+	sudo_lbuf_append(lbuf, "    NotAfter: ");
+	for (p = bv; *p != NULL; p++) {
+	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	}
+	ldap_value_free_len(bv);
 	sudo_lbuf_append(lbuf, "\n");
     }
 
