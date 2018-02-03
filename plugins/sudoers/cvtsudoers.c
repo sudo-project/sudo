@@ -252,7 +252,7 @@ print_member_sudoers(struct sudo_lbuf *lbuf, struct member *m)
 	    c = (struct sudo_command *)m->name;
 	    if (m->negated)
 		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->cmnd);
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s", c->cmnd);
 	    if (c->args) {
 		sudo_lbuf_append(lbuf, " ");
 		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
@@ -264,8 +264,14 @@ print_member_sudoers(struct sudo_lbuf *lbuf, struct member *m)
 		m->name[strspn(m->name + 1, "0123456789") + 1] == '\0') {
 		sudo_lbuf_append(lbuf, "%s%s", m->negated ? "!" : "", m->name);
 	    } else {
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s%s",
-		    m->negated ? "!" : "", m->name);
+		if (strpbrk(m->name, " \t") != NULL) {
+		    sudo_lbuf_append(lbuf, "\"");
+		    sudo_lbuf_append_quoted(lbuf, "\"", "%s", m->name);
+		    sudo_lbuf_append(lbuf, "\"");
+		} else {
+		    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s%s",
+			m->negated ? "!" : "", m->name);
+		}
 	    }
 	    break;
     }
