@@ -423,6 +423,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		toke="regress/sudoers/$${base}.toke"; \
 		json="regress/sudoers/$${base}.json"; \
 		ldif="regress/sudoers/$${base}.ldif"; \
+		sudo="regress/sudoers/$${base}.sudo"; \
 		if test -s $$json.ok; then \
 		    ASAN_OPTIONS=; \
 		else \
@@ -432,19 +433,19 @@ check: $(TEST_PROGS) visudo testsudoers
 		    ./testsudoers -dt <$$t >$$out 2>$$toke || true; \
 		if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
-		    echo "$$dir/$$base (JSON): OK"; \
+		    echo "$$dir/$$base (parse): OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
-		    echo "$$dir/$$base (JSON): FAIL"; \
+		    echo "$$dir/$$base (parse): FAIL"; \
 		    diff $$out $(srcdir)/$$out.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
 		if cmp $$toke $(srcdir)/$$toke.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
-		    echo "$$dir/$$base (toke):  OK"; \
+		    echo "$$dir/$$base (toke): OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
-		    echo "$$dir/$$base (toke):  FAIL"; \
+		    echo "$$dir/$$base (toke): FAIL"; \
 		    diff $$toke $(srcdir)/$$toke.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
@@ -452,10 +453,10 @@ check: $(TEST_PROGS) visudo testsudoers
 		total=`expr $$total + 1`; \
 		if cmp $$json $(srcdir)/$$json.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
-		    echo "$$dir/$$base (parse): OK"; \
+		    echo "$$dir/$$base (json): OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
-		    echo "$$dir/$$base: FAIL"; \
+		    echo "$$dir/$$base (json): FAIL"; \
 		    diff $$json $(srcdir)/$$json.ok || true; \
 		fi; \
 		SUDOERS_BASE="ou=SUDOers,dc=sudo,dc=ws" \
@@ -463,11 +464,21 @@ check: $(TEST_PROGS) visudo testsudoers
 		total=`expr $$total + 1`; \
 		if cmp $$ldif $(srcdir)/$$ldif.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
-		    echo "$$dir/$$base (parse): OK"; \
+		    echo "$$dir/$$base (ldif): OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
-		    echo "$$dir/$$base: FAIL"; \
+		    echo "$$dir/$$base: (ldif) FAIL"; \
 		    diff $$ldif $(srcdir)/$$ldif.ok || true; \
+		fi; \
+		./cvtsudoers -f sudoers $$t >$$sudo 2>/dev/null || true; \
+		total=`expr $$total + 1`; \
+		if ./visudo -qcf $$sudo; then \
+		    passed=`expr $$passed + 1`; \
+		    echo "$$dir/$$base (reparse): OK"; \
+		else \
+		    failed=`expr $$failed + 1`; \
+		    echo "$$dir/$$base: (reparse) FAIL"; \
+		    ./visudo -cf $$sudo || true; \
 		fi; \
 	    done; \
 	    echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
@@ -519,7 +530,8 @@ check: $(TEST_PROGS) visudo testsudoers
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
 	    *.lo *.o *.la *.a stamp-* core *.core core.* regress/*/*.out \
-	    regress/*/*.toke regress/*/*.err regress/*/*.json regress/*/*.ldif
+	    regress/*/*.toke regress/*/*.err regress/*/*.json regress/*/*.ldif \
+	    regress/*/*.sudoers
 
 mostlyclean: clean
 
