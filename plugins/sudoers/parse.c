@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -863,7 +863,7 @@ print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 	    c = (struct sudo_command *) name;
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->cmnd);
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s", c->cmnd);
 	    if (c->args) {
 		sudo_lbuf_append(lbuf, " ");
 		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
@@ -888,8 +888,14 @@ print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
 		name[strspn(name + 1, "0123456789") + 1] == '\0') {
 		sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", name);
 	    } else {
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s%s",
-		    negated ? "!" : "", name);
+		if (strpbrk(name, " \t") != NULL) {
+		    sudo_lbuf_append(lbuf, "%s\"", negated ? "!" : "");
+		    sudo_lbuf_append_quoted(lbuf, "\"", "%s", name);
+		    sudo_lbuf_append(lbuf, "\"");
+		} else {
+		    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s%s",
+			negated ? "!" : "", name);
+		}
 	    }
 	    break;
     }
