@@ -265,7 +265,7 @@ print_member_sudoers(struct sudo_lbuf *lbuf, struct member *m)
 		sudo_lbuf_append(lbuf, "%s%s", m->negated ? "!" : "", m->name);
 	    } else {
 		if (strpbrk(m->name, " \t") != NULL) {
-		    sudo_lbuf_append(lbuf, "\"");
+		    sudo_lbuf_append(lbuf, "%s\"", m->negated ? "!" : "");
 		    sudo_lbuf_append_quoted(lbuf, "\"", "%s", m->name);
 		    sudo_lbuf_append(lbuf, "\"");
 		} else {
