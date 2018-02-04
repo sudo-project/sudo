@@ -929,7 +929,7 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 	group_matched = sudo_ldap_check_runas_group(ld, entry);
     user_matched = sudo_ldap_check_runas_user(ld, entry, &group_matched);
 
-    debug_return_bool(group_matched != false && user_matched != false); 
+    debug_return_bool(group_matched != false && user_matched != false);
 }
 
 static struct sudo_digest *
@@ -1156,7 +1156,7 @@ static bool
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
-    char *cn, *copy, *var, *val, *source = NULL;
+    char *cn, *var, *val, *source = NULL;
     bool ret = false;
     int op;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
@@ -1178,7 +1178,9 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
     /* walk through options, early ones first */
     for (p = bv; *p != NULL; p++) {
 	struct early_default *early;
+	char *copy;
 
+	/* Avoid modifying bv as we need to use it again below. */
 	if ((copy = strdup((*p)->bv_val)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
@@ -1195,16 +1197,11 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 
     /* walk through options again, skipping early ones */
     for (p = bv; *p != NULL; p++) {
-	if ((copy = strdup((*p)->bv_val)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-	op = sudo_ldap_parse_option(copy, &var, &val);
+	op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
 	if (is_early_default(var) == NULL) {
 	    set_default(var, val, op,
 		source ? source : "sudoRole UNKNOWN", 0, false);
 	}
-	free(copy);
     }
     ret = true;
 
@@ -1537,7 +1534,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	escaped_host = sudo_ldap_value_dup(user_runhost);
 	if (user_runhost == user_srunhost)
 	    escaped_shost = escaped_host;
-	else 
+	else
 	    escaped_shost = sudo_ldap_value_dup(user_srunhost);
 	if (escaped_host == NULL || escaped_shost == NULL)
 	    goto oom;
@@ -2372,6 +2369,46 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
 #endif
 }
 
+static void
+sudo_ldap_print_quoted3(struct sudo_lbuf *lbuf, const char *prefix, const char *str, const char *suffix)
+{
+    const char *name = str;
+
+    /* Prefix is not quoted. */
+    if (prefix != NULL)
+	sudo_lbuf_append(lbuf, "%s", prefix);
+
+    /* Do not quote UID/GID, all others get quoted. */
+    while (*name == '!')
+	name++;
+    if (name[0] == '#' &&
+	name[strspn(name + 1, "0123456789") + 1] == '\0') {
+	sudo_lbuf_append(lbuf, "%s", str);
+    } else if (strpbrk(str, " \t") != NULL) {
+	sudo_lbuf_append(lbuf, "\"");
+	sudo_lbuf_append_quoted(lbuf, "\"", "%s", str);
+	sudo_lbuf_append(lbuf, "\"");
+    } else {
+	sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", str);
+    }
+
+    /* Suffix is not quoted. */
+    if (suffix != NULL)
+	sudo_lbuf_append(lbuf, "%s", suffix);
+}
+
+static void
+sudo_ldap_print_quoted2(struct sudo_lbuf *lbuf, const char *prefix, const char *str)
+{
+    return sudo_ldap_print_quoted3(lbuf, prefix, str, NULL);
+}
+
+static void
+sudo_ldap_print_quoted(struct sudo_lbuf *lbuf, const char *str)
+{
+    return sudo_ldap_print_quoted3(lbuf, NULL, str, NULL);
+}
+
 /*
  * Fetch and display the global Options.
  */
@@ -2385,8 +2422,8 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
     LDAPMessage *entry, *result;
-    char *prefix, *filt;
-    int rc, count = 0;
+    char *prefix, *filt, *var, *val;
+    int op, rc, count = 0;
     debug_decl(sudo_ldap_display_defaults, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -2416,7 +2453,10 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		else
 		    prefix = ", ";
 		for (p = bv; *p != NULL; p++) {
-		    sudo_lbuf_append(lbuf, "%s%s", prefix, (*p)->bv_val);
+		    op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
+		    sudo_lbuf_append(lbuf, "%s%s%s", prefix, var,
+			op == '+' ? "+=" : op == '-' ? "-=" : "=");
+		    sudo_ldap_print_quoted(lbuf, val);
 		    prefix = ", ";
 		    count++;
 		}
@@ -2463,7 +2503,7 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "",
+	    sudo_ldap_print_quoted2(lbuf, p != bv ? ", " : "",
 		(*p)->bv_val[0] ? (*p)->bv_val : user_name);
 	}
 	ldap_value_free_len(bv);
@@ -2475,17 +2515,17 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
     if (bv != NULL) {
 	if (no_runas_user) {
 	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
+	    sudo_ldap_print_quoted(lbuf, pw->pw_name);
 	}
 	sudo_lbuf_append(lbuf, " : ");
 	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    sudo_ldap_print_quoted2(lbuf, p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     } else {
 	if (no_runas_user) {
 	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
+	    sudo_ldap_print_quoted(lbuf, def_runas_default);
 	}
     }
     sudo_lbuf_append(lbuf, ") ");
@@ -2494,14 +2534,14 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
     bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", (*p)->bv_val);
+	    sudo_ldap_print_quoted3(lbuf, "NOTBEFORE=", (*p)->bv_val, " ");
 	}
 	ldap_value_free_len(bv);
     }
     bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "NOTAFTER=%s ", (*p)->bv_val);
+	    sudo_ldap_print_quoted3(lbuf, "NOTAFTER=", (*p)->bv_val, " ");
 	}
 	ldap_value_free_len(bv);
     }
@@ -2523,18 +2563,18 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
 	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
 		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
 	    else if (!negated && strncmp(val, "command_timeout=", 16) == 0)
-		sudo_lbuf_append(lbuf, "TIMEOUT=%s ", val + 16);
+		sudo_ldap_print_quoted3(lbuf, "TIMEOUT=", val + 16, " ");
 #ifdef HAVE_SELINUX
 	    else if (!negated && strncmp(val, "role=", 5) == 0)
-		sudo_lbuf_append(lbuf, "ROLE=%s ", val + 5);
+		sudo_ldap_print_quoted3(lbuf, "ROLE=", val + 5, " ");
 	    else if (!negated && strncmp(val, "type=", 5) == 0)
-		sudo_lbuf_append(lbuf, "TYPE=%s ", val + 5);
+		sudo_ldap_print_quoted3(lbuf, "TYPE=", val + 5, " ");
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 	    else if (!negated && strncmp(val, "privs=", 6) == 0)
-		sudo_lbuf_append(lbuf, "PRIVS=%s ", val + 6);
+		sudo_ldap_print_quoted3(lbuf, "PRIVS=", val + 6, " ");
 	    else if (!negated && strncmp(val, "limitprivs=", 11) == 0)
-		sudo_lbuf_append(lbuf, "LIMITPRIVS=%s ", val + 11);
+		sudo_ldap_print_quoted3(lbuf, "LIMITPRIVS=", val + 11, " ");
 #endif /* HAVE_PRIV_SET */
 	}
 	ldap_value_free_len(bv);
@@ -2544,7 +2584,17 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+	    char *args = strpbrk((*p)->bv_val, " \t");
+	    if (args != NULL)
+		*args++ = '\0';
+	    if (p != bv)
+		sudo_lbuf_append(lbuf, ", ");
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s",
+		(*p)->bv_val);
+	    if (args != NULL) {
+		sudo_lbuf_append(lbuf, " ");
+		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", args);
+	    }
 	    count++;
 	}
 	ldap_value_free_len(bv);
