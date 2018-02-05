@@ -538,7 +538,7 @@ print_userspecs_sudoers(struct sudo_lbuf *lbuf)
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 
-static FILE *output_fp = stdout;	/* global for convert_sudoers_output */
+static FILE *output_fp;		/* global for convert_sudoers_output */
 
 static int
 convert_sudoers_output(const char *buf)
@@ -556,7 +556,9 @@ convert_sudoers_sudoers(const char *output_file)
     struct sudo_lbuf lbuf;
     debug_decl(convert_sudoers_sudoers, SUDOERS_DEBUG_UTIL)
 
-    if (strcmp(output_file, "-") != 0) {
+    if (strcmp(output_file, "-") == 0) {
+	output_fp = stdout;
+    } else {
 	if ((output_fp = fopen(output_file, "w")) == NULL)
 	    sudo_fatal(U_("unable to open %s"), output_file);
     }
