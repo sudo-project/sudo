@@ -831,23 +831,96 @@ add_userspec(struct member *members, struct privilege *privs)
 }
 
 /*
+ * Free a member struct and its contents.
+ */
+void
+free_member(struct member *m)
+{
+    if (m->type == COMMAND) {
+	    struct sudo_command *c = (struct sudo_command *)m->name;
+	    free(c->cmnd);
+	    free(c->args);
+	    if (c->digest != NULL) {
+		free(c->digest->digest_str);
+		free(c->digest);
+	    }
+    }
+    free(m->name);
+    free(m);
+}
+
+/*
  * Free a tailq of members but not the struct member_list container itself.
  */
 void
 free_members(struct member_list *members)
 {
-    struct member *m, *next;
-    struct sudo_command *c;
+    struct member *m;
 
-    TAILQ_FOREACH_SAFE(m, members, entries, next) {
-	if (m->type == COMMAND) {
-		c = (struct sudo_command *) m->name;
-		free(c->cmnd);
-		free(c->args);
-	}
-	free(m->name);
-	free(m);
+    while ((m = TAILQ_FIRST(members)) != NULL) {
+	TAILQ_REMOVE(members, m, entries);
+	free_member(m);
     }
+}
+
+void
+free_userspec(struct userspec *us)
+{
+    struct privilege *priv, *next;
+
+    free_members(&us->users);
+    TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next) {
+	struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
+	struct cmndspec *cs, *cs_next;
+#ifdef HAVE_SELINUX
+	char *role = NULL, *type = NULL;
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	char *privs = NULL, *limitprivs = NULL;
+#endif /* HAVE_PRIV_SET */
+
+	free_members(&priv->hostlist);
+	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
+#ifdef HAVE_SELINUX
+	    /* Only free the first instance of a role/type. */
+	    if (cs->role != role) {
+		role = cs->role;
+		free(cs->role);
+	    }
+	    if (cs->type != type) {
+		type = cs->type;
+		free(cs->type);
+	    }
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    /* Only free the first instance of privs/limitprivs. */
+	    if (cs->privs != privs) {
+		privs = cs->privs;
+		free(cs->privs);
+	    }
+	    if (cs->limitprivs != limitprivs) {
+		limitprivs = cs->limitprivs;
+		free(cs->limitprivs);
+	    }
+#endif /* HAVE_PRIV_SET */
+	    /* Only free the first instance of runas user/group lists. */
+	    if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
+		runasuserlist = cs->runasuserlist;
+		free_members(runasuserlist);
+		free(runasuserlist);
+	    }
+	    if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
+		runasgrouplist = cs->runasgrouplist;
+		free_members(runasgrouplist);
+		free(runasgrouplist);
+	    }
+	    free_member(cs->cmnd);
+	    free(cs);
+	}
+	free(priv);
+    }
+    rcstr_delref(us->file);
+    free(us);
 }
 
 /*
@@ -858,97 +931,19 @@ bool
 init_parser(const char *path, bool quiet)
 {
     struct member_list *binding;
-    struct defaults *d, *d_next;
-    struct userspec *us, *us_next;
+    struct defaults *d;
+    struct userspec *us;
     bool ret = true;
+    void *next;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
-    /* XXX - move into a free function */
-    TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
-	struct member *m, *m_next;
-	struct privilege *priv, *priv_next;
-
-	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
-	    free(m->name);
-	    free(m);
-	}
-	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
-	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
-	    struct cmndspec *cs, *cs_next;
-#ifdef HAVE_SELINUX
-	    char *role = NULL, *type = NULL;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	    char *privs = NULL, *limitprivs = NULL;
-#endif /* HAVE_PRIV_SET */
-
-	    TAILQ_FOREACH_SAFE(m, &priv->hostlist, entries, m_next) {
-		free(m->name);
-		free(m);
-	    }
-	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
-#ifdef HAVE_SELINUX
-		/* Only free the first instance of a role/type. */
-		if (cs->role != role) {
-		    role = cs->role;
-		    free(cs->role);
-		}
-		if (cs->type != type) {
-		    type = cs->type;
-		    free(cs->type);
-		}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-		/* Only free the first instance of privs/limitprivs. */
-		if (cs->privs != privs) {
-		    privs = cs->privs;
-		    free(cs->privs);
-		}
-		if (cs->limitprivs != limitprivs) {
-		    limitprivs = cs->limitprivs;
-		    free(cs->limitprivs);
-		}
-#endif /* HAVE_PRIV_SET */
-		/* Only free the first instance of runas user/group lists. */
-		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
-		    runasuserlist = cs->runasuserlist;
-		    TAILQ_FOREACH_SAFE(m, runasuserlist, entries, m_next) {
-			free(m->name);
-			free(m);
-		    }
-		    free(runasuserlist);
-		}
-		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
-		    runasgrouplist = cs->runasgrouplist;
-		    TAILQ_FOREACH_SAFE(m, runasgrouplist, entries, m_next) {
-			free(m->name);
-			free(m);
-		    }
-		    free(runasgrouplist);
-		}
-		if (cs->cmnd->type == COMMAND) {
-			struct sudo_command *c =
-			    (struct sudo_command *) cs->cmnd->name;
-			free(c->cmnd);
-			free(c->args);
-			if (c->digest != NULL) {
-			    free(c->digest->digest_str);
-			    free(c->digest);
-			}
-		}
-		free(cs->cmnd->name);
-		free(cs->cmnd);
-		free(cs);
-	    }
-	    free(priv);
-	}
-	rcstr_delref(us->file);
-	free(us);
+    TAILQ_FOREACH_SAFE(us, &userspecs, entries, next) {
+	free_userspec(us);
     }
     TAILQ_INIT(&userspecs);
 
     binding = NULL;
-    TAILQ_FOREACH_SAFE(d, &defaults, entries, d_next) {
+    TAILQ_FOREACH_SAFE(d, &defaults, entries, next) {
 	if (d->binding != binding) {
 	    binding = d->binding;
 	    free_members(d->binding);
@@ -1005,7 +1000,7 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 956 "gram.c"
+#line 951 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2129,7 +2124,7 @@ case 116:
 			    }
 			}
 break;
-#line 2080 "gram.c"
+#line 2075 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
