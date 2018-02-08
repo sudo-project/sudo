@@ -355,7 +355,7 @@ still allow people to get their work done."
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 %else
-	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid
 %endif
 %if X"$aix_freeware" = X"true"
 	# Links for binaries from /opt/freeware to /usr
