@@ -364,35 +364,34 @@ done:
     debug_return_int(validated);
 }
 
-#define	TAG_CHANGED(t) \
-	(TAG_SET(cs->tags.t) && cs->tags.t != tags->t)
+#define	TAG_CHANGED(ocs, ncs, tt) \
+	(TAG_SET((ncs)->tags.tt) && \
+	    ((ocs) == NULL || (ncs)->tags.tt != (ocs)->tags.tt))
 
 static bool
-sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
+sudo_file_append_cmnd(struct cmndspec *cs, struct cmndspec *prev_cs,
     struct sudo_lbuf *lbuf)
 {
     debug_decl(sudo_file_append_cmnd, SUDOERS_DEBUG_NSS)
 
-    /* XXX - should not print privs/limitprivs, role/type, timeout
-             or notbefore/after if unchanged from prior cs */
 #ifdef HAVE_PRIV_SET
-    if (cs->privs)
+    if (cs->privs != NULL && cs->privs != prev_cs->privs)
 	sudo_lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
-    if (cs->limitprivs)
+    if (cs->limitprivs != NULL && cs->limitprivs != prev_cs->limitprivs)
 	sudo_lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
-    if (cs->role)
+    if (cs->role != NULL && cs->role != prev_cs->role)
 	sudo_lbuf_append(lbuf, "ROLE=%s ", cs->role);
-    if (cs->type)
+    if (cs->type != NULL && cs->type != prev_cs->type)
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
-    if (cs->timeout > 0) {
+    if (cs->timeout > 0 && cs->timeout != prev_cs->timeout) {
 	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
 	snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
     }
-    if (cs->notbefore != UNSPEC) {
+    if (cs->notbefore != UNSPEC && cs->notbefore != prev_cs->notbefore) {
 	char buf[sizeof("CCYYMMDDHHMMSSZ")];
 	struct tm *tm = gmtime(&cs->notbefore);
 	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
@@ -400,7 +399,7 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 	sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
     }
-    if (cs->notafter != UNSPEC) {
+    if (cs->notafter != UNSPEC && cs->notafter != prev_cs->notafter) {
 	char buf[sizeof("CCYYMMDDHHMMSSZ")];
 	struct tm *tm = gmtime(&cs->notafter);
 	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
@@ -408,34 +407,20 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 	sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
     }
-    if (TAG_CHANGED(setenv)) {
-	tags->setenv = cs->tags.setenv;
-	sudo_lbuf_append(lbuf, tags->setenv ? "SETENV: " : "NOSETENV: ");
-    }
-    if (TAG_CHANGED(noexec)) {
-	tags->noexec = cs->tags.noexec;
-	sudo_lbuf_append(lbuf, tags->noexec ? "NOEXEC: " : "EXEC: ");
-    }
-    if (TAG_CHANGED(nopasswd)) {
-	tags->nopasswd = cs->tags.nopasswd;
-	sudo_lbuf_append(lbuf, tags->nopasswd ? "NOPASSWD: " : "PASSWD: ");
-    }
-    if (TAG_CHANGED(log_input)) {
-	tags->log_input = cs->tags.log_input;
-	sudo_lbuf_append(lbuf, tags->log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
-    }
-    if (TAG_CHANGED(log_output)) {
-	tags->log_output = cs->tags.log_output;
-	sudo_lbuf_append(lbuf, tags->log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
-    }
-    if (TAG_CHANGED(send_mail)) {
-	tags->send_mail = cs->tags.send_mail;
-	sudo_lbuf_append(lbuf, tags->send_mail ? "MAIL: " : "NOMAIL: ");
-    }
-    if (TAG_CHANGED(follow)) {
-	tags->follow = cs->tags.follow;
-	sudo_lbuf_append(lbuf, tags->follow ? "FOLLOW: " : "NOFOLLOW: ");
-    }
+    if (TAG_CHANGED(prev_cs, cs, setenv))
+	sudo_lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
+    if (TAG_CHANGED(prev_cs, cs, noexec))
+	sudo_lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
+    if (TAG_CHANGED(prev_cs, cs, nopasswd))
+	sudo_lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
+    if (TAG_CHANGED(prev_cs, cs, log_input))
+	sudo_lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
+    if (TAG_CHANGED(prev_cs, cs, log_output))
+	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
+    if (TAG_CHANGED(prev_cs, cs, send_mail))
+	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
+    if (TAG_CHANGED(prev_cs, cs, follow))
+	sudo_lbuf_append(lbuf, cs->tags.follow ? "FOLLOW: " : "NOFOLLOW: ");
     print_member(lbuf, cs->cmnd, CMNDALIAS);
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -470,20 +455,15 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     struct cmndspec *cs, *prev_cs;
     struct member *m;
     struct privilege *priv;
-    struct cmndtag tags;
     int nfound = 0;
     debug_decl(sudo_file_display_priv_short, SUDOERS_DEBUG_NSS)
 
-    /* gcc -Wuninitialized false positive */
-    TAGS_INIT(tags);
-    /* XXX - should init tags for each privilege */
-    /* XXX - does runas change inheriting? */
-    /* XXX - what about time and timeout inheriting? */
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(pw, &priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+	    /* Start a new line if RunAs changes. */
 	    if (prev_cs == NULL || RUNAS_CHANGED(cs, prev_cs)) {
 		if (cs != TAILQ_FIRST(&priv->cmndlist))
 		    sudo_lbuf_append(lbuf, "\n");
@@ -508,11 +488,10 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-		TAGS_INIT(tags);
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		sudo_lbuf_append(lbuf, ", ");
 	    }
-	    sudo_file_append_cmnd(cs, &tags, lbuf);
+	    sudo_file_append_cmnd(cs, prev_cs, lbuf);
 	    prev_cs = cs;
 	    nfound++;
 	}
@@ -531,7 +510,7 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
 {
     if (prev_cs == NULL)
 	return true;
-    if (RUNAS_CHANGED(cs, prev_cs) || TAGS_CHANGED(cs->tags, prev_cs->tags))
+    if (RUNAS_CHANGED(cs, prev_cs) || TAGS_CHANGED(prev_cs->tags, cs->tags))
 	return true;
 #ifdef HAVE_PRIV_SET
     if (cs->privs && (!prev_cs->privs || strcmp(cs->privs, prev_cs->privs) != 0))
