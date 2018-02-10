@@ -1408,6 +1408,17 @@ sudo_sss_display_bound_defaults(struct sudo_nss *nss,
     debug_return_int(0);
 }
 
+static char *
+val_array_iter(void *base, void **save)
+{
+    char **val_array;
+
+    val_array = *save ? *save : base;
+    *save = val_array + 1;
+
+    return *val_array;
+}
+
 static struct userspec_list *
 sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_result)
 {
@@ -1466,10 +1477,9 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	/* Parse sudoOptions. */
 	handle->fn_get_values(rule, "sudoOption", &opts);
 
-	priv = sudo_ldap_role_to_priv(cn, runasusers ? &runasusers : NULL,
-	    runasgroups ? &runasgroups: NULL, &cmnds, opts ? &opts : NULL,
+	priv = sudo_ldap_role_to_priv(cn, runasusers, runasgroups, cmnds, opts,
 	    notbefore ? notbefore[0] : NULL, notafter ? notafter[0] : NULL,
-	    sizeof(char **), 0);
+	    val_array_iter);
 
 	/* Cleanup */
 	if (cn_array != NULL)

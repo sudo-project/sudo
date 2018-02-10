@@ -17,9 +17,11 @@
 #ifndef SUDOERS_LDAP_H
 #define SUDOERS_LDAP_H
 
+typedef char * (*sudo_ldap_iter_t)(void *, void **);
+
 bool sudo_ldap_is_negated(char **valp);
 int sudo_ldap_parse_option(char *optstr, char **varp, char **valp);
-struct privilege *sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups, void *cmnds, void *opts, const char *notbefore, const char *notafter, size_t ele_size, size_t str_off);
+struct privilege *sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups, void *cmnds, void *opts, const char *notbefore, const char *notafter, sudo_ldap_iter_t iter);
 struct sudo_digest *sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest);
 
 #endif /* SUDOERS_LDAP_H */

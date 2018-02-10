@@ -117,19 +117,19 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
  * The caller is responsible for freeing the returned struct member_list.
  */
 static struct member_list *
-array_to_member_list(void *a, size_t ele_size, size_t str_off)
+array_to_member_list(void *a, sudo_ldap_iter_t iter)
 {
     struct member_list *members;
     struct member *m;
+    void *save = NULL;
+    char *val;
     debug_decl(bv_to_member_list, SUDOERS_DEBUG_LDAP)
 
     if ((members = calloc(1, sizeof(*members))) == NULL)
 	return NULL;
     TAILQ_INIT(members);                      
 
-    for (;*((char **)a) != NULL; a = (char *)a + ele_size) {
-	char *val = *(char **)(*((char **)a) + str_off);
-
+    while ((val = iter(a, &save)) != NULL) {
 	if ((m = calloc(1, sizeof(*m))) == NULL)
 	    goto bad;
 
@@ -173,13 +173,15 @@ bad:
 struct privilege *
 sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
     void *cmnds, void *opts, const char *notbefore,
-    const char *notafter, size_t ele_size, size_t str_off)
+    const char *notafter, sudo_ldap_iter_t iter)
 {
     struct cmndspec *cmndspec = NULL;
     struct cmndspec *prev_cmndspec = NULL;
     struct sudo_command *c;
     struct privilege *priv;
     struct member *m;
+    void *cmnds_save = NULL;
+    char *cmnd;
     debug_decl(sudo_ldap_role_to_priv, SUDOERS_DEBUG_LDAP)
 
     if ((priv = calloc(1, sizeof(*priv))) == NULL)
@@ -200,12 +202,8 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 
     /*
      * Parse sudoCommands and add to cmndlist.
-     * The convoluted pointer arithmetic is to support passing in
-     * either a struct berval ** or a char ***.
-     * An interator would probably be better.
      */
-    for (;*((char **)cmnds) != NULL; cmnds = (char *)cmnds + ele_size) {
-	char *cmnd = *(char **)(*((char **)cmnds) + str_off);
+    while ((cmnd = iter(cmnds, &cmnds_save)) != NULL) {
 	char *args;
 
 	/* Allocate storage upfront. */
@@ -256,7 +254,7 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 	    /* Parse sudoRunAsUser / sudoRunAs */
 	    if (runasusers != NULL) {
 		cmndspec->runasuserlist =
-		    array_to_member_list(runasusers, ele_size, str_off);
+		    array_to_member_list(runasusers, iter);
 		if (cmndspec->runasuserlist == NULL)
 		    goto oom;
 	    }
@@ -264,7 +262,7 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 	    /* Parse sudoRunAsGroup */
 	    if (runasgroups != NULL) {
 		cmndspec->runasgrouplist =
-		    array_to_member_list(runasgroups, ele_size, str_off);
+		    array_to_member_list(runasgroups, iter);
 		if (cmndspec->runasgrouplist == NULL)
 		    goto oom;
 	    }
@@ -277,8 +275,10 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 
 	    /* Parse sudoOptions. */
 	    if (opts != NULL) {
-		for (; *((char **)opts) != NULL; opts = (char *)opts + ele_size) {
-		    char *opt = *(char **)(*((char **)opts) + str_off);
+		void *opts_save = NULL;
+		char *opt;
+
+		while ((opt = iter(opts, &opts_save)) != NULL) {
 		    char *var, *val;
 		    int op;
 

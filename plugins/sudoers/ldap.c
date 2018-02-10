@@ -2311,6 +2311,16 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     debug_return_int(0);
 }
 
+static char *
+berval_iter(void *base, void **save)
+{
+    struct berval **bv;
+
+    bv = *save ? *save : base;
+    *save = bv + 1;
+    return *bv ? (*bv)->bv_val : NULL;
+}
+
 static struct userspec_list *
 ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
 {
@@ -2368,8 +2378,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
 
 	priv = sudo_ldap_role_to_priv(cn, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
-	    notafter ? notafter[0]->bv_val : NULL,
-	    sizeof(struct berval *), offsetof(struct berval, bv_val));
+	    notafter ? notafter[0]->bv_val : NULL, berval_iter);
 
 	/* Cleanup */
 	if (cn != NULL)
