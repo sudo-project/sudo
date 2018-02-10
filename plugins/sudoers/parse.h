@@ -308,5 +308,6 @@ const char *digest_type_to_name(int digest_type);
 /* parse.c */
 struct sudo_lbuf;
 int sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw, struct sudo_lbuf *lbuf);
+void sudo_lbuf_append_default(struct sudo_lbuf *lbuf, struct defaults *d);
 
 #endif /* SUDOERS_PARSE_H */

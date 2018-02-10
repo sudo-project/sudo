@@ -2236,29 +2236,6 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
 #endif
 }
 
-static void
-sudo_ldap_print_quoted(struct sudo_lbuf *lbuf, const char *str)
-{
-    const char *name = str;
-    debug_decl(sudo_ldap_print_quoted, SUDOERS_DEBUG_LDAP)
-
-    /* Do not quote UID/GID, all others get quoted. */
-    while (*name == '!')
-	name++;
-    if (name[0] == '#' &&
-	name[strspn(name + 1, "0123456789") + 1] == '\0') {
-	sudo_lbuf_append(lbuf, "%s", str);
-    } else if (strpbrk(str, " \t") != NULL) {
-	sudo_lbuf_append(lbuf, "\"");
-	sudo_lbuf_append_quoted(lbuf, "\"", "%s", str);
-	sudo_lbuf_append(lbuf, "\"");
-    } else {
-	sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", str);
-    }
-
-    debug_return;
-}
-
 /*
  * Fetch and display the global Options.
  */
@@ -2272,8 +2249,8 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
     LDAPMessage *entry, *result;
-    char *prefix, *filt, *var, *val;
-    int op, rc, count = 0;
+    char *prefix, *filt;
+    int rc, count = 0;
     debug_decl(sudo_ldap_display_defaults, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -2303,10 +2280,11 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		else
 		    prefix = ", ";
 		for (p = bv; *p != NULL; p++) {
-		    op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
-		    sudo_lbuf_append(lbuf, "%s%s%s", prefix, var,
-			op == '+' ? "+=" : op == '-' ? "-=" : "=");
-		    sudo_ldap_print_quoted(lbuf, val);
+		    struct defaults d;
+
+		    sudo_lbuf_append(lbuf, "%s", prefix);
+		    d.op = sudo_ldap_parse_option((*p)->bv_val, &d.var, &d.val);
+		    sudo_lbuf_append_default(lbuf, &d);
 		    prefix = ", ";
 		    count++;
 		}

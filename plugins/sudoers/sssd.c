@@ -1334,7 +1334,7 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct sss_sudo_rule *rule;
     struct sss_sudo_result *sss_result = NULL;
     uint32_t sss_error = 0;
-    char *prefix, *val, **val_array = NULL;
+    char *prefix, **val_array = NULL;
     unsigned int i, j;
     int count = 0;
     debug_decl(sudo_sss_display_defaults, SUDOERS_DEBUG_SSSD);
@@ -1379,8 +1379,11 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	    prefix = ", ";
 
 	for (j = 0; val_array[j] != NULL; ++j) {
-	    val = val_array[j];
-	    sudo_lbuf_append(lbuf, "%s%s", prefix, val);
+	    struct defaults d;
+
+	    sudo_lbuf_append(lbuf, "%s", prefix);
+	    d.op = sudo_ldap_parse_option(val_array[j], &d.var, &d.val);
+	    sudo_lbuf_append_default(lbuf, &d);
 	    prefix = ", ";
 	    count++;
 	}

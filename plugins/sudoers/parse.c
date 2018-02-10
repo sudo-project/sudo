@@ -443,10 +443,10 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 /*
  * Format and append a defaults entry to the specified lbuf.
  */
-static void
-sudo_file_append_default(struct sudo_lbuf *lbuf, struct defaults *d)
+void
+sudo_lbuf_append_default(struct sudo_lbuf *lbuf, struct defaults *d)
 {
-    debug_decl(sudo_file_append_default, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_lbuf_append_default, SUDOERS_DEBUG_NSS)
 
     if (d->val != NULL) {
 	sudo_lbuf_append(lbuf, "%s%s", d->var,
@@ -602,7 +602,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		olen = lbuf->len;
 		sudo_lbuf_append(lbuf, _("    Options: "));
 		TAILQ_FOREACH(def, &priv->defaults, entries) {
-		    sudo_file_append_default(lbuf, def);
+		    sudo_lbuf_append_default(lbuf, def);
 		    sudo_lbuf_append(lbuf, ", ");
 		}
 		if (TAG_SET(cs->tags.setenv))
@@ -739,7 +739,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		continue;
 	}
 	sudo_lbuf_append(lbuf, "%s", prefix);
-	sudo_file_append_default(lbuf, d);
+	sudo_lbuf_append_default(lbuf, d);
 	prefix = ", ";
 	nfound++;
     }
@@ -819,7 +819,7 @@ display_bound_defaults(int deftype, struct sudo_lbuf *lbuf)
 	    }
 	} else
 	    sudo_lbuf_append(lbuf, ", ");
-	sudo_file_append_default(lbuf, d);
+	sudo_lbuf_append_default(lbuf, d);
     }
 
     if (sudo_lbuf_error(lbuf))
