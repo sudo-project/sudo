@@ -373,6 +373,8 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 {
     debug_decl(sudo_file_append_cmnd, SUDOERS_DEBUG_NSS)
 
+    /* XXX - should not print privs/limitprivs, role/type, timeout
+             or notbefore/after if unchanged from prior cs */
 #ifdef HAVE_PRIV_SET
     if (cs->privs)
 	sudo_lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
@@ -438,6 +440,29 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 
+/*
+ * Format and append a defaults entry to the specified lbuf.
+ */
+static void
+sudo_file_append_default(struct sudo_lbuf *lbuf, struct defaults *d)
+{
+    debug_decl(sudo_file_append_default, SUDOERS_DEBUG_NSS)
+
+    if (d->val != NULL) {
+	sudo_lbuf_append(lbuf, "%s%s", d->var,
+	    d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=");
+	if (strpbrk(d->val, " \t") != NULL) {
+	    sudo_lbuf_append(lbuf, "\"");
+	    sudo_lbuf_append_quoted(lbuf, "\"", "%s", d->val);
+	    sudo_lbuf_append(lbuf, "\"");
+	} else
+	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
+    } else {
+	sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
+    }
+    debug_return;
+}
+
 static int
 sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     struct sudo_lbuf *lbuf)
@@ -451,6 +476,9 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 
     /* gcc -Wuninitialized false positive */
     TAGS_INIT(tags);
+    /* XXX - should init tags for each privilege */
+    /* XXX - does runas change inheriting? */
+    /* XXX - what about time and timeout inheriting? */
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(pw, &priv->hostlist) != ALLOW)
 	    continue;
@@ -519,6 +547,10 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
 #endif /* HAVE_SELINUX */
     if (cs->timeout != prev_cs->timeout)
 	return true;
+    if (cs->notbefore != prev_cs->notbefore)
+	return true;
+    if (cs->notafter != prev_cs->notafter)
+	return true;
     return false;
 }
 
@@ -527,8 +559,9 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     struct sudo_lbuf *lbuf)
 {
     struct cmndspec *cs, *prev_cs;
-    struct member *m;
     struct privilege *priv;
+    struct defaults *def;
+    struct member *m;
     int nfound = 0, olen;
     debug_decl(sudo_file_display_priv_long, SUDOERS_DEBUG_NSS)
 
@@ -538,7 +571,12 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	    if (new_long_entry(cs, prev_cs)) {
-		sudo_lbuf_append(lbuf, _("\nSudoers entry:\n"));
+		if (priv->ldap_role != NULL) {
+		    sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"),
+			priv->ldap_role);
+		} else {
+		    sudo_lbuf_append(lbuf, _("\nSudoers entry:\n"));
+		}
 		sudo_lbuf_append(lbuf, _("    RunAsUsers: "));
 		if (cs->runasuserlist != NULL) {
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
@@ -563,6 +601,10 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		}
 		olen = lbuf->len;
 		sudo_lbuf_append(lbuf, _("    Options: "));
+		TAILQ_FOREACH(def, &priv->defaults, entries) {
+		    sudo_file_append_default(lbuf, def);
+		    sudo_lbuf_append(lbuf, ", ");
+		}
 		if (TAG_SET(cs->tags.setenv))
 		    sudo_lbuf_append(lbuf, "%ssetenv, ", cs->tags.setenv ? "" : "!");
 		if (TAG_SET(cs->tags.noexec))
@@ -624,21 +666,16 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     debug_return_int(nfound);
 }
 
-/*
- * Returns the number of matching privileges or -1 on error.
- */
+/* XXX - better naming */
 int
-sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
+sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     struct userspec *us;
     int nfound = 0;
-    debug_decl(sudo_file_display_priv, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_display_userspecs, SUDOERS_DEBUG_NSS)
 
-    if (nss->handle == NULL)
-	goto done;
-
-    TAILQ_FOREACH(us, &userspecs, entries) {
+    TAILQ_FOREACH(us, usl, entries) {
 	if (userlist_matches(pw, &us->users) != ALLOW)
 	    continue;
 
@@ -649,8 +686,22 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
     }
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
-done:
     debug_return_int(nfound);
+}
+
+/*
+ * Returns the number of matching privileges or -1 on error.
+ */
+static int
+sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
+    struct sudo_lbuf *lbuf)
+{
+    debug_decl(sudo_file_display_priv, SUDOERS_DEBUG_NSS)
+
+    if (nss->handle == NULL)
+	debug_return_int(0);
+
+    debug_return_int(sudo_display_userspecs(&userspecs, pw, lbuf));
 }
 
 /*
@@ -687,18 +738,8 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	    case DEFAULTS_CMND:
 		continue;
 	}
-	if (d->val != NULL) {
-	    sudo_lbuf_append(lbuf, "%s%s%s", prefix, d->var,
-		d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=");
-	    if (strpbrk(d->val, " \t") != NULL) {
-		sudo_lbuf_append(lbuf, "\"");
-		sudo_lbuf_append_quoted(lbuf, "\"", "%s", d->val);
-		sudo_lbuf_append(lbuf, "\"");
-	    } else
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
-	} else
-	    sudo_lbuf_append(lbuf, "%s%s%s", prefix,
-		d->op == false ? "!" : "", d->var);
+	sudo_lbuf_append(lbuf, "%s", prefix);
+	sudo_file_append_default(lbuf, d);
 	prefix = ", ";
 	nfound++;
     }
@@ -778,11 +819,7 @@ display_bound_defaults(int deftype, struct sudo_lbuf *lbuf)
 	    }
 	} else
 	    sudo_lbuf_append(lbuf, ", ");
-	if (d->val != NULL) {
-	    sudo_lbuf_append(lbuf, "%s%s%s", d->var, d->op == '+' ? "+=" :
-		d->op == '-' ? "-=" : "=", d->val);
-	} else
-	    sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
+	sudo_file_append_default(lbuf, d);
     }
 
     if (sudo_lbuf_error(lbuf))

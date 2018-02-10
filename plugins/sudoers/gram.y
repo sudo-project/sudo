@@ -283,6 +283,7 @@ privilege	:	hostlist '=' cmndspeclist {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
+			    TAILQ_INIT(&p->defaults);
 			    HLTQ_TO_TAILQ(&p->hostlist, $1, entries);
 			    HLTQ_TO_TAILQ(&p->cmndlist, $3, entries);
 			    HLTQ_INIT(p, entries);
@@ -1093,12 +1094,13 @@ free_members(struct member_list *members)
 void
 free_userspec(struct userspec *us)
 {
-    struct privilege *priv, *next;
+    struct privilege *priv;
 
     free_members(&us->users);
-    TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next) {
+    while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
 	struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
-	struct cmndspec *cs, *cs_next;
+	struct cmndspec *cs;
+	struct defaults *def;
 #ifdef HAVE_SELINUX
 	char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
@@ -1106,8 +1108,11 @@ free_userspec(struct userspec *us)
 	char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
 
+	TAILQ_REMOVE(&us->privileges, priv, entries);
+	free(priv->ldap_role);
 	free_members(&priv->hostlist);
-	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
+	while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
+	    TAILQ_REMOVE(&priv->cmndlist, cs, entries);
 #ifdef HAVE_SELINUX
 	    /* Only free the first instance of a role/type. */
 	    if (cs->role != role) {
@@ -1143,6 +1148,12 @@ free_userspec(struct userspec *us)
 	    }
 	    free_member(cs->cmnd);
 	    free(cs);
+	}
+	while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
+	    TAILQ_REMOVE(&priv->defaults, def, entries);
+	    free(def->var);
+	    free(def->val);
+	    free(def);
 	}
 	free(priv);
     }

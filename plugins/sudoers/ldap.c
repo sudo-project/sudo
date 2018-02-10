@@ -59,6 +59,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_dso.h"
 
@@ -2370,13 +2371,10 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
 }
 
 static void
-sudo_ldap_print_quoted3(struct sudo_lbuf *lbuf, const char *prefix, const char *str, const char *suffix)
+sudo_ldap_print_quoted(struct sudo_lbuf *lbuf, const char *str)
 {
     const char *name = str;
-
-    /* Prefix is not quoted. */
-    if (prefix != NULL)
-	sudo_lbuf_append(lbuf, "%s", prefix);
+    debug_decl(sudo_ldap_print_quoted, SUDOERS_DEBUG_LDAP)
 
     /* Do not quote UID/GID, all others get quoted. */
     while (*name == '!')
@@ -2392,21 +2390,7 @@ sudo_ldap_print_quoted3(struct sudo_lbuf *lbuf, const char *prefix, const char *
 	sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", str);
     }
 
-    /* Suffix is not quoted. */
-    if (suffix != NULL)
-	sudo_lbuf_append(lbuf, "%s", suffix);
-}
-
-static void
-sudo_ldap_print_quoted2(struct sudo_lbuf *lbuf, const char *prefix, const char *str)
-{
-    return sudo_ldap_print_quoted3(lbuf, prefix, str, NULL);
-}
-
-static void
-sudo_ldap_print_quoted(struct sudo_lbuf *lbuf, const char *str)
-{
-    return sudo_ldap_print_quoted3(lbuf, NULL, str, NULL);
+    debug_return;
 }
 
 /*
@@ -2484,237 +2468,311 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
 }
 
 /*
- * Print a record in the short form, ala file sudoers.
+ * Convert an array of struct berval to a member list.
  */
-static int
-sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
+static struct member_list *
+bv_to_member_list(struct berval **bv)
 {
-    struct berval **bv, **p;
-    bool no_runas_user = true;
-    int count = 0;
-    debug_decl(sudo_ldap_display_entry_short, SUDOERS_DEBUG_LDAP)
+    struct member_list *members;
+    struct berval **p;
+    struct member *m;
+    debug_decl(bv_to_member_list, SUDOERS_DEBUG_LDAP)
 
-    sudo_lbuf_append(lbuf, "    (");
+    if ((members = calloc(1, sizeof(*members))) == NULL)
+	return NULL;
+    TAILQ_INIT(members);                      
 
-    /* get the RunAsUser Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
-    if (bv == NULL)
-	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
-    if (bv != NULL) {
-	for (p = bv; *p != NULL; p++) {
-	    sudo_ldap_print_quoted2(lbuf, p != bv ? ", " : "",
-		(*p)->bv_val[0] ? (*p)->bv_val : user_name);
-	}
-	ldap_value_free_len(bv);
-	no_runas_user = false;
-    }
+    for (p = bv; *p != NULL; p++) {
+	if ((m = calloc(1, sizeof(*m))) == NULL)
+	    goto bad;
 
-    /* get the RunAsGroup Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
-    if (bv != NULL) {
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_ldap_print_quoted(lbuf, pw->pw_name);
-	}
-	sudo_lbuf_append(lbuf, " : ");
-	for (p = bv; *p != NULL; p++) {
-	    sudo_ldap_print_quoted2(lbuf, p != bv ? ", " : "", (*p)->bv_val);
-	}
-	ldap_value_free_len(bv);
-    } else {
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_ldap_print_quoted(lbuf, def_runas_default);
-	}
-    }
-    sudo_lbuf_append(lbuf, ") ");
-
-    /* Get the sudoNotBefore and sudoNotAfter Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
-    if (bv != NULL) {
-	for (p = bv; *p != NULL; p++) {
-	    sudo_ldap_print_quoted3(lbuf, "NOTBEFORE=", (*p)->bv_val, " ");
-	}
-	ldap_value_free_len(bv);
-    }
-    bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
-    if (bv != NULL) {
-	for (p = bv; *p != NULL; p++) {
-	    sudo_ldap_print_quoted3(lbuf, "NOTAFTER=", (*p)->bv_val, " ");
-	}
-	ldap_value_free_len(bv);
-    }
-
-    /* get the Option Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoOption");
-    if (bv != NULL) {
-	for (p = bv; *p != NULL; p++) {
-	    char *val = (*p)->bv_val;
-	    bool negated = sudo_ldap_is_negated(&val);
-	    if (strcmp(val, "authenticate") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOPASSWD: " : "PASSWD: ");
-	    else if (strcmp(val, "sudoedit_follow") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOFOLLOW: " : "FOLLOW: ");
-	    else if (strcmp(val, "noexec") == 0)
-		sudo_lbuf_append(lbuf, negated ? "EXEC: " : "NOEXEC: ");
-	    else if (strcmp(val, "setenv") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
-	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
-	    else if (!negated && strncmp(val, "command_timeout=", 16) == 0)
-		sudo_ldap_print_quoted3(lbuf, "TIMEOUT=", val + 16, " ");
-#ifdef HAVE_SELINUX
-	    else if (!negated && strncmp(val, "role=", 5) == 0)
-		sudo_ldap_print_quoted3(lbuf, "ROLE=", val + 5, " ");
-	    else if (!negated && strncmp(val, "type=", 5) == 0)
-		sudo_ldap_print_quoted3(lbuf, "TYPE=", val + 5, " ");
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	    else if (!negated && strncmp(val, "privs=", 6) == 0)
-		sudo_ldap_print_quoted3(lbuf, "PRIVS=", val + 6, " ");
-	    else if (!negated && strncmp(val, "limitprivs=", 11) == 0)
-		sudo_ldap_print_quoted3(lbuf, "LIMITPRIVS=", val + 11, " ");
-#endif /* HAVE_PRIV_SET */
-	}
-	ldap_value_free_len(bv);
-    }
-
-    /* get the Command Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoCommand");
-    if (bv != NULL) {
-	for (p = bv; *p != NULL; p++) {
-	    char *args = strpbrk((*p)->bv_val, " \t");
-	    if (args != NULL)
-		*args++ = '\0';
-	    if (p != bv)
-		sudo_lbuf_append(lbuf, ", ");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s",
-		(*p)->bv_val);
-	    if (args != NULL) {
-		sudo_lbuf_append(lbuf, " ");
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", args);
+	char *val = (*p)->bv_val;
+	switch (val[0]) {
+	case '\0':
+	    /* Empty RunAsUser means run as the invoking user. */
+	    m->type = MYSELF;
+	    break;
+	case 'A':
+	    if (strcmp(val, "ALL") == 0) {
+		m->type = ALL;
+		break;
 	    }
-	    count++;
+	    /* FALLTHROUGH */
+	default:
+	    m->type = WORD;
+	    m->name = strdup(val);
+	    if (m->name == NULL) {
+		free(m);
+		goto bad;
+	    }
+	    break;
 	}
-	ldap_value_free_len(bv);
+	TAILQ_INSERT_TAIL(members, m, entries);
     }
-    sudo_lbuf_append(lbuf, "\n");
-
-    debug_return_int(count);
+    debug_return_ptr(members);
+bad:
+    while ((m = TAILQ_FIRST(members)) != NULL) {
+	TAILQ_REMOVE(members, m, entries);
+	free(m->name);
+	free(m);
+    }
+    free(members);
+    debug_return_ptr(NULL);
 }
 
-/*
- * Print a record in the long form.
- */
-static int
-sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
+static struct userspec_list *
+ldap2sudoers(LDAP *ld, struct ldap_result *lres)
 {
+    struct userspec_list *ldap_userspecs;
+    struct cmndspec *cmndspec = NULL;
+    struct sudo_command *c;
+    struct privilege *priv;
+    struct userspec *us;
+    struct member *m;
     struct berval **bv, **p;
-    bool no_runas_user = true;
-    char *rdn;
-    int count = 0;
-    debug_decl(sudo_ldap_display_entry_long, SUDOERS_DEBUG_LDAP)
+    struct berval **cmnd_bv, **cmnd; /* XXX - naming */
+    char *cn;
+    unsigned int i;
+    debug_decl(ldap2sudoers, SUDOERS_DEBUG_LDAP)
 
-    /* extract the dn, only show the first rdn */
-    rdn = sudo_ldap_get_first_rdn(ld, entry);
-    if (rdn != NULL)
-	sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"), rdn);
-    else
-	sudo_lbuf_append(lbuf, _("\nLDAP Role: UNKNOWN\n"));
-    if (rdn)
-	ldap_memfree(rdn);
+    if ((ldap_userspecs = calloc(1, sizeof(*ldap_userspecs))) == NULL)
+	goto oom;
+    TAILQ_INIT(ldap_userspecs);
 
-    /* get the RunAsUser Values from the entry */
-    sudo_lbuf_append(lbuf, "    RunAsUsers: ");
-    bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
-    if (bv == NULL)
-	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
-    if (bv != NULL) {
-	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+    /* We only have a single userspec */
+    if ((us = calloc(1, sizeof(*us))) == NULL)
+	goto oom;
+    TAILQ_INIT(&us->users);
+    TAILQ_INIT(&us->privileges);
+    TAILQ_INSERT_TAIL(ldap_userspecs, us, entries);
+
+    /* The user has already matched, use ALL as wildcard. */
+    if ((m = calloc(1, sizeof(*m))) == NULL)
+	goto oom;
+    m->type = ALL;
+    TAILQ_INSERT_TAIL(&us->users, m, entries);
+
+    /* Treat each sudoRole as a separate privilege. */
+    for (i = 0; i < lres->nentries; i++) {
+	struct cmndspec *prev_cmndspec = NULL;
+	LDAPMessage *entry = lres->entries[i].entry;
+
+	/* Ignore sudoRole without sudoCommand. */
+	cmnd_bv = ldap_get_values_len(ld, entry, "sudoCommand");
+	if (cmnd_bv == NULL)
+	    continue;
+
+	if ((priv = calloc(1, sizeof(*priv))) == NULL)
+	    goto oom;
+	TAILQ_INIT(&priv->hostlist);
+	TAILQ_INIT(&priv->cmndlist);
+	TAILQ_INIT(&priv->defaults);
+	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
+
+	/* Get the entry's dn for long format printing. */
+	cn = sudo_ldap_get_first_rdn(ld, entry);
+	priv->ldap_role = strdup(cn ? cn : "UNKNOWN");
+	if (cn != NULL)
+	    ldap_memfree(cn);
+	if (priv->ldap_role == NULL)
+	    goto oom;
+
+	/* The host has already matched, use ALL as wildcard. */
+	if ((m = calloc(1, sizeof(*m))) == NULL)
+	    goto oom;
+	m->type = ALL;
+	TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
+
+	/* Parse sudoCommands and add to cmndlist. */
+	for (cmnd = cmnd_bv; *cmnd != NULL; cmnd++) {
+	    char *args;
+
+	    /* Allocate storage upfront. */
+	    cmndspec = calloc(1, sizeof(*cmndspec));
+	    c = calloc(1, sizeof(*c));
+	    m = calloc(1, sizeof(*m));
+	    if (cmndspec == NULL || c == NULL || m == NULL) {
+		free(c);
+		free(m);
+		goto oom;
+	    }
+	    TAILQ_INSERT_TAIL(&priv->cmndlist, cmndspec, entries);
+
+	    /* Initialize cmndspec */
+	    TAGS_INIT(cmndspec->tags);
+	    cmndspec->notbefore = UNSPEC;
+	    cmndspec->notafter = UNSPEC;
+	    cmndspec->timeout = UNSPEC;
+
+	    /* Fill in command. */
+	    if ((args = strpbrk((*cmnd)->bv_val, " \t")) != NULL) {
+		*args++ = '\0';
+		if ((c->args = strdup(args)) == NULL) {
+		    free(c);
+		    free(m);
+		    goto oom;
+		}
+	    }
+	    if ((c->cmnd = strdup((*cmnd)->bv_val)) == NULL) {
+		free(c->args);
+		free(c);
+		free(m);
+		goto oom;
+	    }
+	    m->type = COMMAND;
+	    m->name = (char *)c;
+	    cmndspec->cmnd = m;
+
+	    if (prev_cmndspec != NULL) {
+		/* Inherit values from prior cmndspec */
+		cmndspec->runasuserlist = prev_cmndspec->runasuserlist;
+		cmndspec->runasgrouplist = prev_cmndspec->runasgrouplist;
+		cmndspec->notbefore = prev_cmndspec->notbefore;
+		cmndspec->notafter = prev_cmndspec->notafter;
+		cmndspec->tags = prev_cmndspec->tags;
+	    } else {
+		/* Parse sudoRunAsUser / sudoRunAs */
+		bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
+		if (bv == NULL)
+		    bv = ldap_get_values_len(ld, entry, "sudoRunAs"); /* old style */
+		if (bv != NULL) {
+		    cmndspec->runasuserlist = bv_to_member_list(bv);
+		    if (cmndspec->runasuserlist == NULL)
+			goto oom;
+		    ldap_value_free_len(bv);
+		    bv = NULL;
+		}
+
+		/* Parse sudoRunAsGroup */
+		bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
+		if (bv != NULL) {
+		    cmndspec->runasgrouplist = bv_to_member_list(bv);
+		    if (cmndspec->runasgrouplist == NULL)
+			goto oom;
+		    ldap_value_free_len(bv);
+		    bv = NULL;
+		}
+
+		/* Parse sudoNotBefore */
+		bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
+		if (bv != NULL) {
+		    /* Only takes the last entry. */
+		    for (p = bv; *p != NULL; p++) {
+			cmndspec->notbefore = parse_gentime((*p)->bv_val);
+		    }
+		    ldap_value_free_len(bv);
+		    bv = NULL;
+		}
+
+		/* Parse sudoNotAfter */
+		bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
+		if (bv != NULL) {
+		    /* Only takes the last entry. */
+		    for (p = bv; *p != NULL; p++) {
+			cmndspec->notafter = parse_gentime((*p)->bv_val);
+		    }
+		    ldap_value_free_len(bv);
+		    bv = NULL;
+		}
+
+		/* Parse sudoOptions. */
+		bv = ldap_get_values_len(ld, entry, "sudoOption");
+		if (bv != NULL) {
+		    for (p = bv; *p != NULL; p++) {
+			char *var, *val;
+			int op;
+
+			op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
+			if (strcmp(var, "command_timeout") == 0) {
+			    if (op == '=')
+				cmndspec->timeout = parse_timeout(val);
+#ifdef HAVE_SELINUX
+			} else if (strcmp(var, "role") == 0) {
+			    if (op == '=') {
+				if ((cmndspec->role = strdup(val)) == NULL)
+				    goto oom;
+			    }
+			} else if (strcmp(var, "type") == 0) {
+			    if (op == '=') {
+				if ((cmndspec->type = strdup(val)) == NULL)
+				    goto oom;
+			    }
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+			} else if (strcmp(var, "privs") == 0) {
+			    if (op == '=') {
+				if ((cmndspec->privs = strdup(val)) == NULL)
+				    goto oom;
+			    }
+			} else if (strcmp(val, "limitprivs") == 0) {
+			    if (op == '=') {
+				if ((cmndspec->limitprivs = strdup(val)) == NULL)
+				    goto oom;
+			    }
+#endif /* HAVE_PRIV_SET */
+			} else if (long_list) {
+			    struct defaults *def = calloc(1, sizeof(*def));
+			    if (def == NULL)
+				goto oom;
+			    def->op = op;
+			    if ((def->var = strdup(var)) == NULL) {
+				free(def);
+				goto oom;
+			    }
+			    if (val != NULL) {
+				if ((def->val = strdup(val)) == NULL) {
+				    free(def->var);
+				    free(def);
+				    goto oom;
+				}
+			    }
+			    TAILQ_INSERT_TAIL(&priv->defaults, def, entries);
+			} else {
+			    /* Convert to tags. */
+			    if (op != true && op != false)
+				continue;
+			    if (strcmp(var, "authenticate") == 0) {
+				cmndspec->tags.nopasswd = op == false;
+			    } else if (strcmp(var, "sudoedit_follow") == 0) {
+				cmndspec->tags.follow = op == true;
+			    } else if (strcmp(var, "noexec") == 0) {
+				cmndspec->tags.noexec = op == true;
+			    } else if (strcmp(var, "setenv") == 0) {
+				cmndspec->tags.setenv = op == true;
+			    } else if (strcmp(var, "mail_all_cmnds") == 0 ||
+				strcmp(var, "mail_always") == 0) {
+				cmndspec->tags.send_mail = op == true;
+			    }
+			}
+		    }
+		    ldap_value_free_len(bv);
+		    bv = NULL;
+		}
+
+		/* So we can inherit previous values. */
+		prev_cmndspec = cmndspec;
+	    }
 	}
-	ldap_value_free_len(bv);
-	no_runas_user = false;
+	ldap_value_free_len(cmnd_bv);
+	cmnd_bv = NULL;
     }
 
-    /* get the RunAsGroup Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
-    if (bv != NULL) {
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
-	}
-	sudo_lbuf_append(lbuf, "\n    RunAsGroups: ");
-	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
-	}
-	ldap_value_free_len(bv);
-	sudo_lbuf_append(lbuf, "\n");
-    } else {
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
-	}
-	sudo_lbuf_append(lbuf, "\n");
-    }
+    debug_return_ptr(ldap_userspecs);
 
-    /* Get the sudoNotBefore and sudoNotAfter Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
-    if (bv != NULL) {
-	sudo_lbuf_append(lbuf, "    NotBefore: ");
-	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
-	}
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (cmnd_bv != NULL)
+	ldap_value_free_len(cmnd_bv);
+    if (bv != NULL)
 	ldap_value_free_len(bv);
-	sudo_lbuf_append(lbuf, "\n");
-    }
-    bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
-    if (bv != NULL) {
-	sudo_lbuf_append(lbuf, "    NotAfter: ");
-	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
+    if (ldap_userspecs != NULL) {
+	while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
+	    TAILQ_REMOVE(ldap_userspecs, us, entries);
+	    free_userspec(us);
 	}
-	ldap_value_free_len(bv);
-	sudo_lbuf_append(lbuf, "\n");
+	free(ldap_userspecs);
     }
-
-    /* get the Option Values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoOption");
-    if (bv != NULL) {
-	sudo_lbuf_append(lbuf, "    Options: ");
-	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
-	}
-	ldap_value_free_len(bv);
-	sudo_lbuf_append(lbuf, "\n");
-    }
-
-    /*
-     * Display order attribute if present.  This attribute is single valued,
-     * so there is no need for a loop.
-     */
-    bv = ldap_get_values_len(ld, entry, "sudoOrder");
-    if (bv != NULL) {
-	if (*bv != NULL) {
-	    sudo_lbuf_append(lbuf, _("    Order: %s\n"), (*bv)->bv_val);
-	}
-	ldap_value_free_len(bv);
-    }
-
-    /* Get the command values from the entry. */
-    bv = ldap_get_values_len(ld, entry, "sudoCommand");
-    if (bv != NULL) {
-	sudo_lbuf_append(lbuf, _("    Commands:\n"));
-	for (p = bv; *p != NULL; p++) {
-	    sudo_lbuf_append(lbuf, "\t%s\n", (*p)->bv_val);
-	    count++;
-	}
-	ldap_value_free_len(bv);
-    }
-
-    debug_return_int(count);
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -2725,10 +2783,10 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld;
+    struct userspec_list *ldap_userspecs = NULL;
     struct ldap_result *lres;
-    LDAPMessage *entry;
-    unsigned int i, count = 0;
+    LDAP *ld;
+    int ret = 0;
     debug_decl(sudo_ldap_display_privs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -2740,19 +2798,27 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     if (lres == NULL)
 	goto done;
 
-    /* Display all matching entries. */
-    for (i = 0; i < lres->nentries; i++) {
-	entry = lres->entries[i].entry;
-	if (long_list)
-	    count += sudo_ldap_display_entry_long(ld, entry, pw, lbuf);
-	else
-	    count += sudo_ldap_display_entry_short(ld, entry, pw, lbuf);
+    /* Convert to sudoers parse tree. */
+    if ((ldap_userspecs = ldap2sudoers(ld, lres)) == NULL) {
+	ret = -1;
+	goto done;
     }
 
+    /* Call common display code. */
+    ret = sudo_display_userspecs(ldap_userspecs, pw, lbuf);
+
 done:
+    if (ldap_userspecs != NULL) {
+	struct userspec *us;
+	while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
+	    TAILQ_REMOVE(ldap_userspecs, us, entries);
+	    free_userspec(us);
+	}
+	free(ldap_userspecs);
+    }
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
-    debug_return_int(count);
+    debug_return_int(ret);
 }
 
 static int

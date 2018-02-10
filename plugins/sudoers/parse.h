@@ -167,8 +167,10 @@ struct userspec {
  */
 struct privilege {
     TAILQ_ENTRY(privilege) entries;
+    char *ldap_role;			/* LDAP sudoRole */
     struct member_list hostlist;	/* list of hosts */
     struct cmndspec_list cmndlist;	/* list of Cmnd_Specs */
+    struct defaults_list defaults;	/* list of sudoOptions */
 };
 
 /*
@@ -301,5 +303,9 @@ unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t
 
 /* digestname.c */
 const char *digest_type_to_name(int digest_type);
+
+/* parse.c */
+struct sudo_lbuf;
+int sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw, struct sudo_lbuf *lbuf);
 
 #endif /* SUDOERS_PARSE_H */
