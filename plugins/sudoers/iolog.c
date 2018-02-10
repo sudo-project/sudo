@@ -164,8 +164,7 @@ done:
 static bool
 io_mkdtemp(char *path)
 {
-    bool ok = true;
-    bool uid_changed = false;
+    bool ok, uid_changed = false;
     debug_decl(io_mkdtemp, SUDOERS_DEBUG_UTIL)
 
     ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
