@@ -44,7 +44,7 @@ sudo_mkdir_parents(char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
     char *slash = path;
     debug_decl(sudo_mkdir_parents, SUDOERS_DEBUG_UTIL)
 
-    /* Create parent directories as needed. */
+    /* cppcheck-suppress nullPointerRedundantCheck */
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
