@@ -379,6 +379,10 @@ dnl
 AC_ARG_WITH(sssd, [AS_HELP_STRING([--with-sssd], [enable SSSD support])],
 [case $with_sssd in
     yes)	SUDOERS_OBJS="${SUDOERS_OBJS} sssd.lo"
+		case "$SUDOERS_OBJS" in
+		    *ldap_common.lo*) ;;
+		    *) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_common.lo";;
+		esac
 		AC_DEFINE(HAVE_SSSD)
 		;;
     no)		;;
@@ -3727,6 +3731,10 @@ if test ${with_ldap-'no'} != "no"; then
 	with_ldap=yes
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
+    case "$SUDOERS_OBJS" in
+	*ldap_common.lo*) ;;
+	*) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_common.lo";;
+    esac
     LDAP=""
 
     _LIBS="$LIBS"

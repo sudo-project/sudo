@@ -864,70 +864,76 @@ free_members(struct member_list *members)
 }
 
 void
+free_privilege(struct privilege *priv)
+{
+    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
+    struct cmndspec *cs;
+    struct defaults *def;
+#ifdef HAVE_SELINUX
+    char *role = NULL, *type = NULL;
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+    char *privs = NULL, *limitprivs = NULL;
+#endif /* HAVE_PRIV_SET */
+
+    free(priv->ldap_role);
+    free_members(&priv->hostlist);
+    while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
+	TAILQ_REMOVE(&priv->cmndlist, cs, entries);
+#ifdef HAVE_SELINUX
+	/* Only free the first instance of a role/type. */
+	if (cs->role != role) {
+	    role = cs->role;
+	    free(cs->role);
+	}
+	if (cs->type != type) {
+	    type = cs->type;
+	    free(cs->type);
+	}
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	/* Only free the first instance of privs/limitprivs. */
+	if (cs->privs != privs) {
+	    privs = cs->privs;
+	    free(cs->privs);
+	}
+	if (cs->limitprivs != limitprivs) {
+	    limitprivs = cs->limitprivs;
+	    free(cs->limitprivs);
+	}
+#endif /* HAVE_PRIV_SET */
+	/* Only free the first instance of runas user/group lists. */
+	if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
+	    runasuserlist = cs->runasuserlist;
+	    free_members(runasuserlist);
+	    free(runasuserlist);
+	}
+	if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
+	    runasgrouplist = cs->runasgrouplist;
+	    free_members(runasgrouplist);
+	    free(runasgrouplist);
+	}
+	free_member(cs->cmnd);
+	free(cs);
+    }
+    while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
+	TAILQ_REMOVE(&priv->defaults, def, entries);
+	free(def->var);
+	free(def->val);
+	free(def);
+    }
+    free(priv);
+}
+
+void
 free_userspec(struct userspec *us)
 {
     struct privilege *priv;
 
     free_members(&us->users);
     while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
-	struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
-	struct cmndspec *cs;
-	struct defaults *def;
-#ifdef HAVE_SELINUX
-	char *role = NULL, *type = NULL;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	char *privs = NULL, *limitprivs = NULL;
-#endif /* HAVE_PRIV_SET */
-
 	TAILQ_REMOVE(&us->privileges, priv, entries);
-	free(priv->ldap_role);
-	free_members(&priv->hostlist);
-	while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
-	    TAILQ_REMOVE(&priv->cmndlist, cs, entries);
-#ifdef HAVE_SELINUX
-	    /* Only free the first instance of a role/type. */
-	    if (cs->role != role) {
-		role = cs->role;
-		free(cs->role);
-	    }
-	    if (cs->type != type) {
-		type = cs->type;
-		free(cs->type);
-	    }
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	    /* Only free the first instance of privs/limitprivs. */
-	    if (cs->privs != privs) {
-		privs = cs->privs;
-		free(cs->privs);
-	    }
-	    if (cs->limitprivs != limitprivs) {
-		limitprivs = cs->limitprivs;
-		free(cs->limitprivs);
-	    }
-#endif /* HAVE_PRIV_SET */
-	    /* Only free the first instance of runas user/group lists. */
-	    if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
-		runasuserlist = cs->runasuserlist;
-		free_members(runasuserlist);
-		free(runasuserlist);
-	    }
-	    if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
-		runasgrouplist = cs->runasgrouplist;
-		free_members(runasgrouplist);
-		free(runasgrouplist);
-	    }
-	    free_member(cs->cmnd);
-	    free(cs);
-	}
-	while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
-	    TAILQ_REMOVE(&priv->defaults, def, entries);
-	    free(def->var);
-	    free(def->val);
-	    free(def);
-	}
-	free(priv);
+	free_privilege(priv);
     }
     rcstr_delref(us->file);
     free(us);
@@ -1010,7 +1016,7 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 961 "gram.c"
+#line 967 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2135,7 +2141,7 @@ case 116:
 			    }
 			}
 break;
-#line 2086 "gram.c"
+#line 2092 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

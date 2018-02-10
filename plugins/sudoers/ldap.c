@@ -61,6 +61,7 @@
 #include "parse.h"
 #include "gram.h"
 #include "sudo_lbuf.h"
+#include "sudo_ldap.h"
 #include "sudo_dso.h"
 
 /* Older Netscape LDAP SDKs don't prototype ldapssl_set_strength() */
@@ -716,28 +717,6 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 }
 
 /*
- * Returns true if the string pointed to by valp begins with an
- * odd number of '!' characters.  Intervening blanks are ignored.
- * Stores the address of the string after '!' removal in valp.
- */
-static bool
-sudo_ldap_is_negated(char **valp)
-{
-    char *val = *valp;
-    bool ret = false;
-    debug_decl(sudo_ldap_is_negated, SUDOERS_DEBUG_LDAP)
-
-    while (*val == '!') {
-	ret = !ret;
-	do {
-	    val++;
-	} while (isblank((unsigned char)*val));
-    }
-    *valp = val;
-    debug_return_bool(ret);
-}
-
-/*
 * Walk through search results and return true if we have a
 * host match, else false.
 */
@@ -933,67 +912,6 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
     debug_return_bool(group_matched != false && user_matched != false);
 }
 
-static struct sudo_digest *
-sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
-{
-    char *ep, *cp = *cmnd;
-    int digest_type = SUDO_DIGEST_INVALID;
-    debug_decl(sudo_ldap_extract_digest, SUDOERS_DEBUG_LDAP)
-
-    /*
-     * Check for and extract a digest prefix, e.g.
-     * sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1 /bin/ls
-     */
-    if (cp[0] == 's' && cp[1] == 'h' && cp[2] == 'a') {
-	switch (cp[3]) {
-	case '2':
-	    if (cp[4] == '2' && cp[5] == '4')
-		digest_type = SUDO_DIGEST_SHA224;
-	    else if (cp[4] == '5' && cp[5] == '6')
-		digest_type = SUDO_DIGEST_SHA256;
-	    break;
-	case '3':
-	    if (cp[4] == '8' && cp[5] == '4')
-		digest_type = SUDO_DIGEST_SHA384;
-	    break;
-	case '5':
-	    if (cp[4] == '1' && cp[5] == '2')
-		digest_type = SUDO_DIGEST_SHA512;
-	    break;
-	}
-	if (digest_type != SUDO_DIGEST_INVALID) {
-	    cp += 6;
-	    while (isblank((unsigned char)*cp))
-		cp++;
-	    if (*cp == ':') {
-		cp++;
-		while (isblank((unsigned char)*cp))
-		    cp++;
-		ep = cp;
-		while (*ep != '\0' && !isblank((unsigned char)*ep))
-		    ep++;
-		if (*ep != '\0') {
-		    digest->digest_type = digest_type;
-		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
-		    if (digest->digest_str == NULL) {
-			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-			debug_return_ptr(NULL);
-		    }
-		    cp = ep + 1;
-		    while (isblank((unsigned char)*cp))
-			cp++;
-		    *cmnd = cp;
-		    DPRINTF1("%s digest %s for %s",
-			digest_type_to_name(digest_type),
-			digest->digest_str, cp);
-		    debug_return_ptr(digest);
-		}
-	    }
-	}
-    }
-    debug_return_ptr(NULL);
-}
-
 /*
  * Walk through search results and return true if we have a command match,
  * false if disallowed and UNSPEC if not matched.
@@ -1095,58 +1013,6 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
     ldap_value_free_len(bv);
 
     debug_return_int(ret);
-}
-
-/*
- * Parse an option string into a defaults structure.
- * The members of def are pointers into optstr (which is modified).
- */
-static int
-sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
-{
-    char *cp, *val = NULL;
-    char *var = optstr;
-    int op;
-    debug_decl(sudo_ldap_parse_option, SUDOERS_DEBUG_LDAP)
-
-    DPRINTF2("ldap sudoOption: '%s'", optstr);
-
-    /* check for equals sign past first char */
-    cp = strchr(var, '=');
-    if (cp > var) {
-	val = cp + 1;
-	op = cp[-1];	/* peek for += or -= cases */
-	if (op == '+' || op == '-') {
-	    /* case var+=val or var-=val */
-	    cp--;
-	} else {
-	    /* case var=val */
-	    op = true;
-	}
-	/* Trim whitespace between var and operator. */
-	while (cp > var && isblank((unsigned char)cp[-1]))
-	    cp--;
-	/* Truncate variable name. */
-	*cp = '\0';
-	/* Trim leading whitespace from val. */
-	while (isblank((unsigned char)*val))
-	    val++;
-	/* Strip double quotes if present. */
-	if (*val == '"') {
-	    char *ep = val + strlen(val);
-	    if (ep != val && ep[-1] == '"') {
-		val++;
-		ep[-1] = '\0';
-	    }
-	}
-    } else {
-	/* Boolean value, either true or false. */
-	op = sudo_ldap_is_negated(&var) ? false : true;
-    }
-    *varp = var;
-    *valp = val;
-
-    debug_return_int(op);
 }
 
 /*
@@ -2467,73 +2333,14 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     debug_return_int(0);
 }
 
-/*
- * Convert an array of struct berval to a member list.
- */
-static struct member_list *
-bv_to_member_list(struct berval **bv)
-{
-    struct member_list *members;
-    struct berval **p;
-    struct member *m;
-    debug_decl(bv_to_member_list, SUDOERS_DEBUG_LDAP)
-
-    if ((members = calloc(1, sizeof(*members))) == NULL)
-	return NULL;
-    TAILQ_INIT(members);                      
-
-    for (p = bv; *p != NULL; p++) {
-	if ((m = calloc(1, sizeof(*m))) == NULL)
-	    goto bad;
-
-	char *val = (*p)->bv_val;
-	switch (val[0]) {
-	case '\0':
-	    /* Empty RunAsUser means run as the invoking user. */
-	    m->type = MYSELF;
-	    break;
-	case 'A':
-	    if (strcmp(val, "ALL") == 0) {
-		m->type = ALL;
-		break;
-	    }
-	    /* FALLTHROUGH */
-	default:
-	    m->type = WORD;
-	    m->name = strdup(val);
-	    if (m->name == NULL) {
-		free(m);
-		goto bad;
-	    }
-	    break;
-	}
-	TAILQ_INSERT_TAIL(members, m, entries);
-    }
-    debug_return_ptr(members);
-bad:
-    while ((m = TAILQ_FIRST(members)) != NULL) {
-	TAILQ_REMOVE(members, m, entries);
-	free(m->name);
-	free(m);
-    }
-    free(members);
-    debug_return_ptr(NULL);
-}
-
 static struct userspec_list *
-ldap2sudoers(LDAP *ld, struct ldap_result *lres)
+ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
 {
     struct userspec_list *ldap_userspecs;
-    struct cmndspec *cmndspec = NULL;
-    struct sudo_command *c;
-    struct privilege *priv;
     struct userspec *us;
     struct member *m;
-    struct berval **bv, **p;
-    struct berval **cmnd_bv, **cmnd; /* XXX - naming */
-    char *cn;
     unsigned int i;
-    debug_decl(ldap2sudoers, SUDOERS_DEBUG_LDAP)
+    debug_decl(ldap_to_sudoers, SUDOERS_DEBUG_LDAP)
 
     if ((ldap_userspecs = calloc(1, sizeof(*ldap_userspecs))) == NULL)
 	goto oom;
@@ -2554,217 +2361,63 @@ ldap2sudoers(LDAP *ld, struct ldap_result *lres)
 
     /* Treat each sudoRole as a separate privilege. */
     for (i = 0; i < lres->nentries; i++) {
-	struct cmndspec *prev_cmndspec = NULL;
 	LDAPMessage *entry = lres->entries[i].entry;
+	struct berval **cmnds, **runasusers, **runasgroups;
+	struct berval **opts, **notbefore, **notafter;
+	struct privilege *priv;
+	char *cn;
 
 	/* Ignore sudoRole without sudoCommand. */
-	cmnd_bv = ldap_get_values_len(ld, entry, "sudoCommand");
-	if (cmnd_bv == NULL)
+	cmnds = ldap_get_values_len(ld, entry, "sudoCommand");
+	if (cmnds == NULL)
 	    continue;
-
-	if ((priv = calloc(1, sizeof(*priv))) == NULL)
-	    goto oom;
-	TAILQ_INIT(&priv->hostlist);
-	TAILQ_INIT(&priv->cmndlist);
-	TAILQ_INIT(&priv->defaults);
-	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
 
 	/* Get the entry's dn for long format printing. */
 	cn = sudo_ldap_get_first_rdn(ld, entry);
-	priv->ldap_role = strdup(cn ? cn : "UNKNOWN");
+
+	/* Get sudoRunAsUser / sudoRunAsGroup */
+	runasusers = ldap_get_values_len(ld, entry, "sudoRunAsUser");
+	if (runasusers == NULL)
+	    runasusers = ldap_get_values_len(ld, entry, "sudoRunAs");
+	runasgroups = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
+
+	/* Get sudoNotBefore / sudoNotAfter */
+	notbefore = ldap_get_values_len(ld, entry, "sudoNotBefore");
+	notafter = ldap_get_values_len(ld, entry, "sudoNotAfter");
+
+	/* Parse sudoOptions. */
+	opts = ldap_get_values_len(ld, entry, "sudoOption");
+
+	priv = sudo_ldap_role_to_priv(cn, runasusers, runasgroups,
+	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
+	    notafter ? notafter[0]->bv_val : NULL,
+	    sizeof(struct berval *), offsetof(struct berval, bv_val));
+
+	/* Cleanup */
 	if (cn != NULL)
 	    ldap_memfree(cn);
-	if (priv->ldap_role == NULL)
+	if (cmnds != NULL)
+	    ldap_value_free_len(cmnds);
+	if (runasusers != NULL)
+	    ldap_value_free_len(runasusers);
+	if (runasgroups != NULL)
+	    ldap_value_free_len(runasgroups);
+	if (opts != NULL)
+	    ldap_value_free_len(opts);
+	if (notbefore != NULL)
+	    ldap_value_free_len(notbefore);
+	if (notafter != NULL)
+	    ldap_value_free_len(notafter);
+
+	if (priv == NULL)
 	    goto oom;
-
-	/* The host has already matched, use ALL as wildcard. */
-	if ((m = calloc(1, sizeof(*m))) == NULL)
-	    goto oom;
-	m->type = ALL;
-	TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
-
-	/* Parse sudoCommands and add to cmndlist. */
-	for (cmnd = cmnd_bv; *cmnd != NULL; cmnd++) {
-	    char *args;
-
-	    /* Allocate storage upfront. */
-	    cmndspec = calloc(1, sizeof(*cmndspec));
-	    c = calloc(1, sizeof(*c));
-	    m = calloc(1, sizeof(*m));
-	    if (cmndspec == NULL || c == NULL || m == NULL) {
-		free(c);
-		free(m);
-		goto oom;
-	    }
-	    TAILQ_INSERT_TAIL(&priv->cmndlist, cmndspec, entries);
-
-	    /* Initialize cmndspec */
-	    TAGS_INIT(cmndspec->tags);
-	    cmndspec->notbefore = UNSPEC;
-	    cmndspec->notafter = UNSPEC;
-	    cmndspec->timeout = UNSPEC;
-
-	    /* Fill in command. */
-	    if ((args = strpbrk((*cmnd)->bv_val, " \t")) != NULL) {
-		*args++ = '\0';
-		if ((c->args = strdup(args)) == NULL) {
-		    free(c);
-		    free(m);
-		    goto oom;
-		}
-	    }
-	    if ((c->cmnd = strdup((*cmnd)->bv_val)) == NULL) {
-		free(c->args);
-		free(c);
-		free(m);
-		goto oom;
-	    }
-	    m->type = COMMAND;
-	    m->name = (char *)c;
-	    cmndspec->cmnd = m;
-
-	    if (prev_cmndspec != NULL) {
-		/* Inherit values from prior cmndspec */
-		cmndspec->runasuserlist = prev_cmndspec->runasuserlist;
-		cmndspec->runasgrouplist = prev_cmndspec->runasgrouplist;
-		cmndspec->notbefore = prev_cmndspec->notbefore;
-		cmndspec->notafter = prev_cmndspec->notafter;
-		cmndspec->tags = prev_cmndspec->tags;
-	    } else {
-		/* Parse sudoRunAsUser / sudoRunAs */
-		bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
-		if (bv == NULL)
-		    bv = ldap_get_values_len(ld, entry, "sudoRunAs"); /* old style */
-		if (bv != NULL) {
-		    cmndspec->runasuserlist = bv_to_member_list(bv);
-		    if (cmndspec->runasuserlist == NULL)
-			goto oom;
-		    ldap_value_free_len(bv);
-		    bv = NULL;
-		}
-
-		/* Parse sudoRunAsGroup */
-		bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
-		if (bv != NULL) {
-		    cmndspec->runasgrouplist = bv_to_member_list(bv);
-		    if (cmndspec->runasgrouplist == NULL)
-			goto oom;
-		    ldap_value_free_len(bv);
-		    bv = NULL;
-		}
-
-		/* Parse sudoNotBefore */
-		bv = ldap_get_values_len(ld, entry, "sudoNotBefore");
-		if (bv != NULL) {
-		    /* Only takes the last entry. */
-		    for (p = bv; *p != NULL; p++) {
-			cmndspec->notbefore = parse_gentime((*p)->bv_val);
-		    }
-		    ldap_value_free_len(bv);
-		    bv = NULL;
-		}
-
-		/* Parse sudoNotAfter */
-		bv = ldap_get_values_len(ld, entry, "sudoNotAfter");
-		if (bv != NULL) {
-		    /* Only takes the last entry. */
-		    for (p = bv; *p != NULL; p++) {
-			cmndspec->notafter = parse_gentime((*p)->bv_val);
-		    }
-		    ldap_value_free_len(bv);
-		    bv = NULL;
-		}
-
-		/* Parse sudoOptions. */
-		bv = ldap_get_values_len(ld, entry, "sudoOption");
-		if (bv != NULL) {
-		    for (p = bv; *p != NULL; p++) {
-			char *var, *val;
-			int op;
-
-			op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
-			if (strcmp(var, "command_timeout") == 0) {
-			    if (op == '=')
-				cmndspec->timeout = parse_timeout(val);
-#ifdef HAVE_SELINUX
-			} else if (strcmp(var, "role") == 0) {
-			    if (op == '=') {
-				if ((cmndspec->role = strdup(val)) == NULL)
-				    goto oom;
-			    }
-			} else if (strcmp(var, "type") == 0) {
-			    if (op == '=') {
-				if ((cmndspec->type = strdup(val)) == NULL)
-				    goto oom;
-			    }
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-			} else if (strcmp(var, "privs") == 0) {
-			    if (op == '=') {
-				if ((cmndspec->privs = strdup(val)) == NULL)
-				    goto oom;
-			    }
-			} else if (strcmp(val, "limitprivs") == 0) {
-			    if (op == '=') {
-				if ((cmndspec->limitprivs = strdup(val)) == NULL)
-				    goto oom;
-			    }
-#endif /* HAVE_PRIV_SET */
-			} else if (long_list) {
-			    struct defaults *def = calloc(1, sizeof(*def));
-			    if (def == NULL)
-				goto oom;
-			    def->op = op;
-			    if ((def->var = strdup(var)) == NULL) {
-				free(def);
-				goto oom;
-			    }
-			    if (val != NULL) {
-				if ((def->val = strdup(val)) == NULL) {
-				    free(def->var);
-				    free(def);
-				    goto oom;
-				}
-			    }
-			    TAILQ_INSERT_TAIL(&priv->defaults, def, entries);
-			} else {
-			    /* Convert to tags. */
-			    if (op != true && op != false)
-				continue;
-			    if (strcmp(var, "authenticate") == 0) {
-				cmndspec->tags.nopasswd = op == false;
-			    } else if (strcmp(var, "sudoedit_follow") == 0) {
-				cmndspec->tags.follow = op == true;
-			    } else if (strcmp(var, "noexec") == 0) {
-				cmndspec->tags.noexec = op == true;
-			    } else if (strcmp(var, "setenv") == 0) {
-				cmndspec->tags.setenv = op == true;
-			    } else if (strcmp(var, "mail_all_cmnds") == 0 ||
-				strcmp(var, "mail_always") == 0) {
-				cmndspec->tags.send_mail = op == true;
-			    }
-			}
-		    }
-		    ldap_value_free_len(bv);
-		    bv = NULL;
-		}
-
-		/* So we can inherit previous values. */
-		prev_cmndspec = cmndspec;
-	    }
-	}
-	ldap_value_free_len(cmnd_bv);
-	cmnd_bv = NULL;
+	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
     }
 
     debug_return_ptr(ldap_userspecs);
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (cmnd_bv != NULL)
-	ldap_value_free_len(cmnd_bv);
-    if (bv != NULL)
-	ldap_value_free_len(bv);
     if (ldap_userspecs != NULL) {
 	while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
 	    TAILQ_REMOVE(ldap_userspecs, us, entries);
@@ -2799,7 +2452,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	goto done;
 
     /* Convert to sudoers parse tree. */
-    if ((ldap_userspecs = ldap2sudoers(ld, lres)) == NULL) {
+    if ((ldap_userspecs = ldap_to_sudoers(ld, lres)) == NULL) {
 	ret = -1;
 	goto done;
     }

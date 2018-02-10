@@ -42,7 +42,9 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "gram.h"
 #include "sudo_lbuf.h"
+#include "sudo_ldap.h"
 #include "sudo_dso.h"
 
 /* SSSD <--> SUDO interface - do not change */
@@ -540,28 +542,6 @@ bad:
     debug_return_int(-1);
 }
 
-/*
- * Returns true if the string pointed to by valp begins with an
- * odd number of '!' characters.  Intervening blanks are ignored.
- * Stores the address of the string after '!' removal in valp.
- */
-static bool
-sudo_sss_is_negated(char **valp)
-{
-    char *val = *valp;
-    bool ret = false;
-    debug_decl(sudo_sss_is_negated, SUDOERS_DEBUG_SSSD)
-
-    while (*val == '!') {
-	ret = !ret;
-	do {
-	    val++;
-	} while (isblank((unsigned char)*val));
-    }
-    *valp = val;
-    debug_return_bool(ret);
-}
-
 static int
 sudo_sss_checkpw(struct sudo_nss *nss, struct passwd *pw)
 {
@@ -804,7 +784,7 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	val = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
 
-	negated = sudo_sss_is_negated(&val);
+	negated = sudo_ldap_is_negated(&val);
 
 	/* match any or address or netgroup or hostname */
 	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
@@ -1009,7 +989,7 @@ sudo_sss_check_bool(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
 	var = val_array[i];
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'", var);
 
-	negated = sudo_sss_is_negated(&var);
+	negated = sudo_ldap_is_negated(&var);
 	if (strcmp(var, option) == 0)
 	    ret = negated ? false : true;
     }
@@ -1017,73 +997,6 @@ sudo_sss_check_bool(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
     handle->fn_free_values(val_array);
 
     debug_return_int(ret);
-}
-
-/*
- * If a digest prefix is present, fills in struct sudo_digest
- * and returns a pointer to it, updating cmnd to point to the
- * command after the digest.
- */
-static struct sudo_digest *
-sudo_sss_extract_digest(char **cmnd, struct sudo_digest *digest)
-{
-    char *ep, *cp = *cmnd;
-    int digest_type = SUDO_DIGEST_INVALID;
-    debug_decl(sudo_sss_check_command, SUDOERS_DEBUG_LDAP)
-
-    /*
-     * Check for and extract a digest prefix, e.g.
-     * sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1 /bin/ls
-     */
-    if (cp[0] == 's' && cp[1] == 'h' && cp[2] == 'a') {
-	switch (cp[3]) {
-	case '2':
-	    if (cp[4] == '2' && cp[5] == '4')
-		digest_type = SUDO_DIGEST_SHA224;
-	    else if (cp[4] == '5' && cp[5] == '6')
-		digest_type = SUDO_DIGEST_SHA256;
-	    break;
-	case '3':
-	    if (cp[4] == '8' && cp[5] == '4')
-		digest_type = SUDO_DIGEST_SHA384;
-	    break;
-	case '5':
-	    if (cp[4] == '1' && cp[5] == '2')
-		digest_type = SUDO_DIGEST_SHA512;
-	    break;
-	}
-	if (digest_type != SUDO_DIGEST_INVALID) {
-	    cp += 6;
-	    while (isblank((unsigned char)*cp))
-		cp++;
-	    if (*cp == ':') {
-		cp++;
-		while (isblank((unsigned char)*cp))
-		    cp++;
-		ep = cp;
-		while (*ep != '\0' && !isblank((unsigned char)*ep))
-		    ep++;
-		if (*ep != '\0') {
-		    digest->digest_type = digest_type;
-		    digest->digest_str = strndup(cp, (size_t)(ep - cp));
-		    if (digest->digest_str == NULL) {
-			sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-			debug_return_ptr(NULL);
-		    }
-		    cp = ep + 1;
-		    while (isblank((unsigned char)*cp))
-			cp++;
-		    *cmnd = cp;
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"%s digest %s for %s",
-			digest_type_to_name(digest_type),
-			digest->digest_str, cp);
-		    debug_return_ptr(digest);
-		}
-	    }
-	}
-    }
-    debug_return_ptr(NULL);
 }
 
 /*
@@ -1132,11 +1045,11 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	}
 
         /* check for sha-2 digest */
-	allowed_digest = sudo_sss_extract_digest(&val, &digest);
+	allowed_digest = sudo_ldap_extract_digest(&val, &digest);
 
 	/* check for !command */
 	allowed_cmnd = val;
-	negated = sudo_sss_is_negated(&allowed_cmnd);
+	negated = sudo_ldap_is_negated(&allowed_cmnd);
 
 	/* split optional args away from command */
 	allowed_args = strchr(allowed_cmnd, ' ');
@@ -1163,58 +1076,6 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     handle->fn_free_values(val_array); /* more cleanup */
 
     debug_return_int(ret);
-}
-
-/*
- * Parse an option string into a defaults structure.
- * The members of def are pointers into optstr (which is modified).
- */
-static int
-sudo_sss_parse_option(char *optstr, char **varp, char **valp)
-{
-    char *cp, *val = NULL;
-    char *var = optstr;
-    int op;
-    debug_decl(sudo_sss_parse_option, SUDOERS_DEBUG_SSSD)
-
-    sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoOption: '%s'", optstr);
-
-    /* check for equals sign past first char */
-    cp = strchr(var, '=');
-    if (cp > var) {
-	val = cp + 1;
-	op = cp[-1];	/* peek for += or -= cases */
-	if (op == '+' || op == '-') {
-	    /* case var+=val or var-=val */
-	    cp--;
-	} else {
-	    /* case var=val */
-	    op = true;
-	}
-	/* Trim whitespace between var and operator. */
-	while (cp > var && isblank((unsigned char)cp[-1]))
-	    cp--;
-	/* Truncate variable name. */
-	*cp = '\0';
-	/* Trim leading whitespace from val. */
-	while (isblank((unsigned char)*val))
-	    val++;
-	/* Strip double quotes if present. */
-	if (*val == '"') {
-	    char *ep = val + strlen(val);
-	    if (ep != val && ep[-1] == '"') {
-		val++;
-		ep[-1] = '\0';
-	    }
-	}
-    } else {
-	/* Boolean value, either true or false. */
-	op = sudo_sss_is_negated(&var) ? false : true;
-    }
-    *varp = var;
-    *valp = val;
-
-    debug_return_int(op);
 }
 
 static bool
@@ -1263,7 +1124,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	op = sudo_sss_parse_option(copy, &var, &val);
+	op = sudo_ldap_parse_option(copy, &var, &val);
 	early = is_early_default(var);
 	if (early != NULL) {
 	    set_early_default(var, val, op,
@@ -1279,7 +1140,7 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	op = sudo_sss_parse_option(copy, &var, &val);
+	op = sudo_ldap_parse_option(copy, &var, &val);
 	if (is_early_default(var) == NULL) {
 	    set_default(var, val, op,
 		source ? source : "sudoRole UNKNOWN", 0, false);
@@ -1544,255 +1405,102 @@ sudo_sss_display_bound_defaults(struct sudo_nss *nss,
     debug_return_int(0);
 }
 
-static int
-sudo_sss_display_entry_long(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct passwd *pw, struct sudo_lbuf *lbuf)
+static struct userspec_list *
+sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_result)
 {
-    char **val_array = NULL;
-    bool no_runas_user = true;
-    int count = 0, i;
-    debug_decl(sudo_sss_display_entry_long, SUDOERS_DEBUG_SSSD);
+    struct userspec_list *sss_userspecs;
+    struct userspec *us;
+    struct member *m;
+    unsigned int i;
+    debug_decl(sss_to_sudoers, SUDOERS_DEBUG_SSSD)
 
-    switch (handle->fn_get_values(rule, "cn", &val_array)) {
-    case 0:
-	if (val_array[0] != NULL)
-	    sudo_lbuf_append(lbuf, _("\nSSSD Role: %s\n"), val_array[0]);
-	handle->fn_free_values(val_array);
-	val_array = NULL;
-	break;
-    default:
-	sudo_lbuf_append(lbuf, _("\nSSSD Role: UNKNOWN\n"));
+    if ((sss_userspecs = calloc(1, sizeof(*sss_userspecs))) == NULL)
+	goto oom;
+    TAILQ_INIT(sss_userspecs);
+
+    /* We only have a single userspec */
+    if ((us = calloc(1, sizeof(*us))) == NULL)
+	goto oom;
+    TAILQ_INIT(&us->users);
+    TAILQ_INIT(&us->privileges);
+    TAILQ_INSERT_TAIL(sss_userspecs, us, entries);
+
+    /* The user has already matched, use ALL as wildcard. */
+    if ((m = calloc(1, sizeof(*m))) == NULL)
+	goto oom;
+    m->type = ALL;
+    TAILQ_INSERT_TAIL(&us->users, m, entries);
+
+    /* Treat each sudoRole as a separate privilege. */
+    for (i = 0; i < sss_result->num_rules; i++) {
+	struct sss_sudo_rule *rule = sss_result->rules + i;
+	char **cmnds, **runasusers = NULL, **runasgroups = NULL;
+	char **opts = NULL, **notbefore = NULL, **notafter = NULL;
+	char **cn_array = NULL;
+	char *cn = NULL;
+	struct privilege *priv;
+
+	/* XXX - check for error vs. ENOENT */
+
+	/* Ignore sudoRole without sudoCommand. */
+	if (handle->fn_get_values(rule, "sudoCommand", &cmnds) != 0)
+	    continue;
+
+	/* Get the entry's dn for long format printing. */
+	if (handle->fn_get_values(rule, "cn", &cn_array) == 0)
+	    cn = cn_array[0];
+
+	/* Get sudoRunAsUser / sudoRunAsGroup */
+	if (handle->fn_get_values(rule, "sudoRunAsUser", &runasusers) != 0) {
+	    handle->fn_get_values(rule, "sudoRunAs", &runasusers);
+	}
+	handle->fn_get_values(rule, "sudoRunAsGroup", &runasgroups);
+
+	/* Get sudoNotBefore / sudoNotAfter */
+	handle->fn_get_values(rule, "sudoNotBefore", &notbefore);
+	handle->fn_get_values(rule, "sudoNotAfter", &notafter);
+
+	/* Parse sudoOptions. */
+	handle->fn_get_values(rule, "sudoOption", &opts);
+
+	priv = sudo_ldap_role_to_priv(cn, runasusers ? &runasusers : NULL,
+	    runasgroups ? &runasgroups: NULL, &cmnds, opts ? &opts : NULL,
+	    notbefore ? notbefore[0] : NULL, notafter ? notafter[0] : NULL,
+	    sizeof(char **), 0);
+
+	/* Cleanup */
+	if (cn_array != NULL)
+	    handle->fn_free_values(cn_array);
+	if (cmnds != NULL)
+	    handle->fn_free_values(cmnds);
+	if (runasusers != NULL)
+	    handle->fn_free_values(runasusers);
+	if (runasgroups != NULL)
+	    handle->fn_free_values(runasgroups);
+	if (opts != NULL)
+	    handle->fn_free_values(opts);
+	if (notbefore != NULL)
+	    handle->fn_free_values(notbefore);
+	if (notafter != NULL)
+	    handle->fn_free_values(notafter);
+
+	if (priv == NULL)
+	    goto oom;
+	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
     }
 
-    /* get the RunAsUser Values from the entry */
-    sudo_lbuf_append(lbuf, "    RunAsUsers: ");
-    switch (handle->fn_get_values(rule, "sudoRunAsUser", &val_array)) {
-    case 0:
-	for (i = 0; val_array[i] != NULL; ++i)
-	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	handle->fn_free_values(val_array);
-	no_runas_user = false;
-	break;
-    case ENOENT:
-	switch (handle->fn_get_values(rule, "sudoRunAs", &val_array)) {
-	case 0:
-	    for (i = 0; val_array[i] != NULL; ++i)
-		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	    handle->fn_free_values(val_array);
-	    no_runas_user = false;
-	    break;
-	case ENOENT:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    break;
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAs): != 0");
-	    debug_return_int(count);
+    debug_return_ptr(sss_userspecs);
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (sss_userspecs != NULL) {
+	while ((us = TAILQ_FIRST(sss_userspecs)) != NULL) {
+	    TAILQ_REMOVE(sss_userspecs, us, entries);
+	    free_userspec(us);
 	}
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsUser): != 0");
-	debug_return_int(count);
+	free(sss_userspecs);
     }
-
-    /* get the RunAsGroup Values from the entry */
-    switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
-    case 0:
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
-	}
-	sudo_lbuf_append(lbuf, "\n    RunAsGroups: ");
-	for (i = 0; val_array[i] != NULL; ++i)
-	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	handle->fn_free_values(val_array);
-	sudo_lbuf_append(lbuf, "\n");
-	break;
-    case ENOENT:
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
-	}
-	sudo_lbuf_append(lbuf, "\n");
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoRunAsGroup): != 0");
-	debug_return_int(count);
-    }
-
-    /* get the Option Values from the entry */
-    switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
-    case 0:
-	sudo_lbuf_append(lbuf, "    Options: ");
-	for (i = 0; val_array[i] != NULL; ++i)
-	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	handle->fn_free_values(val_array);
-	sudo_lbuf_append(lbuf, "\n");
-	break;
-    case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoOption): != 0");
-	debug_return_int(count);
-    }
-
-    /* Get the command values from the entry. */
-    switch (handle->fn_get_values(rule, "sudoCommand", &val_array)) {
-    case 0:
-	sudo_lbuf_append(lbuf, _("    Commands:\n"));
-	for (i = 0; val_array[i] != NULL; ++i) {
-	     sudo_lbuf_append(lbuf, "\t%s\n", val_array[i]);
-	     count++;
-	}
-	handle->fn_free_values(val_array);
-	break;
-    case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoCommand): != 0");
-	debug_return_int(count);
-    }
-
-    debug_return_int(count);
-}
-
-static int
-sudo_sss_display_entry_short(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, struct passwd *pw, struct sudo_lbuf *lbuf)
-{
-    char **val_array = NULL;
-    bool no_runas_user = true;
-    int count = 0, i;
-    debug_decl(sudo_sss_display_entry_short, SUDOERS_DEBUG_SSSD);
-
-    sudo_lbuf_append(lbuf, "    (");
-
-    /* get the RunAsUser Values from the entry */
-    switch (handle->fn_get_values(rule, "sudoRunAsUser", &val_array)) {
-    case 0:
-	for (i = 0; val_array[i] != NULL; ++i)
-	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	handle->fn_free_values(val_array);
-	no_runas_user = false;
-	break;
-    case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result. Trying old style (sudoRunAs).");
-	/* try old style */
-	switch (handle->fn_get_values(rule, "sudoRunAs", &val_array)) {
-	case 0:
-	    for (i = 0; val_array[i] != NULL; ++i)
-		 sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	    handle->fn_free_values(val_array);
-	    no_runas_user = false;
-	    break;
-	case ENOENT:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	    break;
-	default:
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"handle->fn_get_values(sudoRunAs): != 0");
-	    debug_return_int(count);
-	}
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoRunAsUser): != 0");
-	debug_return_int(count);
-    }
-
-    /* get the RunAsGroup Values from the entry */
-    switch (handle->fn_get_values(rule, "sudoRunAsGroup", &val_array)) {
-    case 0:
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", pw->pw_name);
-	}
-	sudo_lbuf_append(lbuf, " : ");
-	for (i = 0; val_array[i] != NULL; ++i)
-	     sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "", val_array[i]);
-	handle->fn_free_values(val_array);
-	break;
-    case ENOENT:
-	if (no_runas_user) {
-	    /* finish printing sudoRunAs */
-	    sudo_lbuf_append(lbuf, "%s", def_runas_default);
-	}
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoRunAsGroup): != 0");
-	debug_return_int(count);
-    }
-
-    sudo_lbuf_append(lbuf, ") ");
-
-    /* get the Option Values from the entry */
-    switch (handle->fn_get_values(rule, "sudoOption", &val_array)) {
-    case 0:
-	for (i = 0; val_array[i] != NULL; ++i) {
-	    char *val = val_array[i];
-	    bool negated = sudo_sss_is_negated(&val);
-	    if (strcmp(val, "authenticate") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOPASSWD: " : "PASSWD: ");
-	    else if (strcmp(val, "sudoedit_follow") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOFOLLOW: " : "FOLLOW: ");
-	    else if (strcmp(val, "noexec") == 0)
-		sudo_lbuf_append(lbuf, negated ? "EXEC: " : "NOEXEC: ");
-	    else if (strcmp(val, "setenv") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOSETENV: " : "SETENV: ");
-	    else if (strcmp(val, "mail_all_cmnds") == 0 || strcmp(val, "mail_always") == 0)
-		sudo_lbuf_append(lbuf, negated ? "NOMAIL: " : "MAIL: ");
-	    else if (!negated && strncmp(val, "command_timeout=", 16) == 0)
-		sudo_lbuf_append(lbuf, "TIMEOUT=%s ", val + 16);
-#ifdef HAVE_SELINUX
-	    else if (!negated && strncmp(val, "role=", 5) == 0)
-		sudo_lbuf_append(lbuf, "ROLE=%s ", val + 5);
-	    else if (!negated && strncmp(val, "type=", 5) == 0)
-		sudo_lbuf_append(lbuf, "TYPE=%s ", val + 5);
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	    else if (!negated && strncmp(val, "privs=", 6) == 0)
-		sudo_lbuf_append(lbuf, "PRIVS=%s ", val + 6);
-	    else if (!negated && strncmp(val, "limitprivs=", 11) == 0)
-		sudo_lbuf_append(lbuf, "LIMITPRIVS=%s ", val + 11);
-#endif /* HAVE_PRIV_SET */
-	}
-	handle->fn_free_values(val_array);
-	break;
-    case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoOption): != 0");
-	debug_return_int(count);
-    }
-
-    /* get the Command Values from the entry */
-    switch (handle->fn_get_values(rule, "sudoCommand", &val_array)) {
-    case 0:
-	for (i = 0; val_array[i] != NULL; ++i) {
-	    sudo_lbuf_append(lbuf, "%s%s", i != 0 ? ", " : "",
-		val_array[i][0] ? val_array[i] : user_name);
-	    count++;
-	}
-	handle->fn_free_values(val_array);
-	break;
-    case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_get_values(sudoCommand): != 0");
-	debug_return_int(count);
-    }
-    sudo_lbuf_append(lbuf, "\n");
-
-    debug_return_int(count);
+    debug_return_ptr(NULL);
 }
 
 static int
@@ -1800,9 +1508,9 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     struct sudo_sss_handle *handle = nss->handle;
+    struct userspec_list *sss_userspecs = NULL;
     struct sss_sudo_result *sss_result = NULL;
-    struct sss_sudo_rule *rule;
-    unsigned int i, count = 0;
+    int ret = 0;
     debug_decl(sudo_sss_display_privs, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
@@ -1815,22 +1523,30 @@ sudo_sss_display_privs(struct sudo_nss *nss, struct passwd *pw,
     sss_result = sudo_sss_result_get(nss, pw, NULL);
 
     if (sss_result == NULL)
-	debug_return_int(count);
+	debug_return_int(ret);
 
-    /* Display all matching entries. */
-    for (i = 0; i < sss_result->num_rules; ++i) {
-	rule = sss_result->rules + i;
-	if (long_list)
-	    count += sudo_sss_display_entry_long(handle, rule, pw, lbuf);
-	else
-	    count += sudo_sss_display_entry_short(handle, rule, pw, lbuf);
+    /* Convert to sudoers parse tree. */
+    if ((sss_userspecs = sss_to_sudoers(handle, sss_result)) == NULL) {
+	ret = -1;
+	goto done;
     }
 
-    handle->fn_free_result(sss_result);
+    /* Call common display code. */
+    ret = sudo_display_userspecs(sss_userspecs, pw, lbuf);
 
+done:
+    /* Cleanup */
+    handle->fn_free_result(sss_result);
+    if (sss_userspecs != NULL) {
+	struct userspec *us;
+	while ((us = TAILQ_FIRST(sss_userspecs)) != NULL) {
+	    TAILQ_REMOVE(sss_userspecs, us, entries);
+	    free_userspec(us);
+	}
+	free(sss_userspecs);
+    }
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
-    debug_return_int(count);
+    debug_return_int(ret);
 }
-
 #endif /* HAVE_SSSD */
