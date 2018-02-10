@@ -280,6 +280,7 @@ plugins/sudoers/filedigest.c
 plugins/sudoers/filedigest_gcrypt.c
 plugins/sudoers/filedigest_openssl.c
 plugins/sudoers/find_path.c
+plugins/sudoers/fmtsudoers.c
 plugins/sudoers/gc.c
 plugins/sudoers/gentime.c
 plugins/sudoers/getdate.c

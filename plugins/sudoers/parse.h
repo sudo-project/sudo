@@ -308,6 +308,13 @@ const char *digest_type_to_name(int digest_type);
 /* parse.c */
 struct sudo_lbuf;
 int sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw, struct sudo_lbuf *lbuf);
-void sudo_lbuf_append_default(struct sudo_lbuf *lbuf, struct defaults *d);
+
+/* fmtsudoers.c */
+bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs, struct cmndspec *prev_cs, bool expand_aliases);
+bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
+bool sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
+bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv, bool expand_aliases);
+bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us, bool expand_aliases);
+bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl, bool expand_aliases);
 
 #endif /* SUDOERS_PARSE_H */

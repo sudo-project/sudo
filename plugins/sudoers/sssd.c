@@ -1383,7 +1383,7 @@ sudo_sss_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 
 	    sudo_lbuf_append(lbuf, "%s", prefix);
 	    d.op = sudo_ldap_parse_option(val_array[j], &d.var, &d.val);
-	    sudo_lbuf_append_default(lbuf, &d);
+	    sudoers_format_default(lbuf, &d);
 	    prefix = ", ";
 	    count++;
 	}

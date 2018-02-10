@@ -51,8 +51,6 @@ static int sudo_file_lookup(struct sudo_nss *, int, int);
 static int sudo_file_open(struct sudo_nss *);
 static int sudo_file_parse(struct sudo_nss *);
 static int sudo_file_setdefs(struct sudo_nss *);
-static void print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type);
-static void print_member_sep(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
 
 /* sudo_nss implementation */
 struct sudo_nss sudo_nss_file = {
@@ -364,90 +362,6 @@ done:
     debug_return_int(validated);
 }
 
-#define	TAG_CHANGED(ocs, ncs, tt) \
-	(TAG_SET((ncs)->tags.tt) && \
-	    ((ocs) == NULL || (ncs)->tags.tt != (ocs)->tags.tt))
-
-static bool
-sudo_file_append_cmnd(struct cmndspec *cs, struct cmndspec *prev_cs,
-    struct sudo_lbuf *lbuf)
-{
-    debug_decl(sudo_file_append_cmnd, SUDOERS_DEBUG_NSS)
-
-#ifdef HAVE_PRIV_SET
-    if (cs->privs != NULL && cs->privs != prev_cs->privs)
-	sudo_lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
-    if (cs->limitprivs != NULL && cs->limitprivs != prev_cs->limitprivs)
-	sudo_lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
-    if (cs->role != NULL && cs->role != prev_cs->role)
-	sudo_lbuf_append(lbuf, "ROLE=%s ", cs->role);
-    if (cs->type != NULL && cs->type != prev_cs->type)
-	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
-#endif /* HAVE_SELINUX */
-    if (cs->timeout > 0 && cs->timeout != prev_cs->timeout) {
-	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
-	snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
-	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
-    }
-    if (cs->notbefore != UNSPEC && cs->notbefore != prev_cs->notbefore) {
-	char buf[sizeof("CCYYMMDDHHMMSSZ")];
-	struct tm *tm = gmtime(&cs->notbefore);
-	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
-	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-	sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
-    }
-    if (cs->notafter != UNSPEC && cs->notafter != prev_cs->notafter) {
-	char buf[sizeof("CCYYMMDDHHMMSSZ")];
-	struct tm *tm = gmtime(&cs->notafter);
-	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
-	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-	sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
-    }
-    if (TAG_CHANGED(prev_cs, cs, setenv))
-	sudo_lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
-    if (TAG_CHANGED(prev_cs, cs, noexec))
-	sudo_lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
-    if (TAG_CHANGED(prev_cs, cs, nopasswd))
-	sudo_lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
-    if (TAG_CHANGED(prev_cs, cs, log_input))
-	sudo_lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
-    if (TAG_CHANGED(prev_cs, cs, log_output))
-	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
-    if (TAG_CHANGED(prev_cs, cs, send_mail))
-	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
-    if (TAG_CHANGED(prev_cs, cs, follow))
-	sudo_lbuf_append(lbuf, cs->tags.follow ? "FOLLOW: " : "NOFOLLOW: ");
-    print_member(lbuf, cs->cmnd, CMNDALIAS);
-    debug_return_bool(!sudo_lbuf_error(lbuf));
-}
-
-/*
- * Format and append a defaults entry to the specified lbuf.
- */
-void
-sudo_lbuf_append_default(struct sudo_lbuf *lbuf, struct defaults *d)
-{
-    debug_decl(sudo_lbuf_append_default, SUDOERS_DEBUG_NSS)
-
-    if (d->val != NULL) {
-	sudo_lbuf_append(lbuf, "%s%s", d->var,
-	    d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=");
-	if (strpbrk(d->val, " \t") != NULL) {
-	    sudo_lbuf_append(lbuf, "\"");
-	    sudo_lbuf_append_quoted(lbuf, "\"", "%s", d->val);
-	    sudo_lbuf_append(lbuf, "\"");
-	} else
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
-    } else {
-	sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
-    }
-    debug_return;
-}
-
 static int
 sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     struct sudo_lbuf *lbuf)
@@ -472,7 +386,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m != TAILQ_FIRST(cs->runasuserlist))
 			    sudo_lbuf_append(lbuf, ", ");
-			print_member(lbuf, m, RUNASALIAS);
+			sudoers_format_member(lbuf, m, ", ", RUNASALIAS);
 		    }
 		} else if (cs->runasgrouplist == NULL) {
 		    sudo_lbuf_append(lbuf, "%s", def_runas_default);
@@ -484,14 +398,14 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m != TAILQ_FIRST(cs->runasgrouplist))
 			    sudo_lbuf_append(lbuf, ", ");
-			print_member(lbuf, m, RUNASALIAS);
+			sudoers_format_member(lbuf, m, ", ", RUNASALIAS);
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		sudo_lbuf_append(lbuf, ", ");
 	    }
-	    sudo_file_append_cmnd(cs, prev_cs, lbuf);
+	    sudoers_format_cmndspec(lbuf, cs, prev_cs, true);
 	    prev_cs = cs;
 	    nfound++;
 	}
@@ -539,8 +453,6 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 {
     struct cmndspec *cs, *prev_cs;
     struct privilege *priv;
-    struct defaults *def;
-    struct member *m;
     int nfound = 0, olen;
     debug_decl(sudo_file_display_priv_long, SUDOERS_DEBUG_NSS)
 
@@ -549,6 +461,9 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	    continue;
 	prev_cs = NULL;
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+	    struct defaults *d;
+	    struct member *m;
+
 	    if (new_long_entry(cs, prev_cs)) {
 		if (priv->ldap_role != NULL) {
 		    sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"),
@@ -561,7 +476,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 			if (m != TAILQ_FIRST(cs->runasuserlist))
 			    sudo_lbuf_append(lbuf, ", ");
-			print_member(lbuf, m, RUNASALIAS);
+			sudoers_format_member(lbuf, m, ", ", RUNASALIAS);
 		    }
 		} else if (cs->runasgrouplist == NULL) {
 		    sudo_lbuf_append(lbuf, "%s", def_runas_default);
@@ -574,14 +489,14 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 			if (m != TAILQ_FIRST(cs->runasgrouplist))
 			    sudo_lbuf_append(lbuf, ", ");
-			print_member(lbuf, m, RUNASALIAS);
+			sudoers_format_member(lbuf, m, ", ", RUNASALIAS);
 		    }
 		    sudo_lbuf_append(lbuf, "\n");
 		}
 		olen = lbuf->len;
 		sudo_lbuf_append(lbuf, _("    Options: "));
-		TAILQ_FOREACH(def, &priv->defaults, entries) {
-		    sudo_lbuf_append_default(lbuf, def);
+		TAILQ_FOREACH(d, &priv->defaults, entries) {
+		    sudoers_format_default(lbuf, d);
 		    sudo_lbuf_append(lbuf, ", ");
 		}
 		if (TAG_SET(cs->tags.setenv))
@@ -636,7 +551,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		sudo_lbuf_append(lbuf, _("    Commands:\n"));
 	    }
 	    sudo_lbuf_append(lbuf, "\t");
-	    print_member_sep(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
+	    sudoers_format_member(lbuf, cs->cmnd, "\n\t", CMNDALIAS);
 	    sudo_lbuf_append(lbuf, "\n");
 	    prev_cs = cs;
 	    nfound++;
@@ -718,7 +633,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		continue;
 	}
 	sudo_lbuf_append(lbuf, "%s", prefix);
-	sudo_lbuf_append_default(lbuf, d);
+	sudoers_format_default(lbuf, d);
 	prefix = ", ";
 	nfound++;
     }
@@ -793,12 +708,12 @@ display_bound_defaults(int deftype, struct sudo_lbuf *lbuf)
 	    TAILQ_FOREACH(m, binding, entries) {
 		if (m != TAILQ_FIRST(binding))
 		    sudo_lbuf_append(lbuf, ",");
-		print_member(lbuf, m, atype);
+		sudoers_format_member(lbuf, m, ", ", atype);
 		sudo_lbuf_append(lbuf, " ");
 	    }
 	} else
 	    sudo_lbuf_append(lbuf, ", ");
-	sudo_lbuf_append_default(lbuf, d);
+	sudoers_format_default(lbuf, d);
     }
 
     if (sudo_lbuf_error(lbuf))
@@ -854,79 +769,4 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     }
 done:
     debug_return_int(ret);
-}
-
-/*
- * Write the contents of a struct member to the lbuf
- */
-static void
-print_member_int(struct sudo_lbuf *lbuf, char *name, int type, int negated,
-    const char *separator, int alias_type)
-{
-    struct alias *a;
-    struct member *m;
-    struct sudo_command *c;
-    debug_decl(print_member_int, SUDOERS_DEBUG_NSS)
-
-    switch (type) {
-	case ALL:
-	    sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
-	    break;
-	case MYSELF:
-	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", user_name);
-	    break;
-	case COMMAND:
-	    c = (struct sudo_command *) name;
-	    if (negated)
-		sudo_lbuf_append(lbuf, "!");
-	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s", c->cmnd);
-	    if (c->args) {
-		sudo_lbuf_append(lbuf, " ");
-		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
-	    }
-	    break;
-	case ALIAS:
-	    if ((a = alias_get(name, alias_type)) != NULL) {
-		TAILQ_FOREACH(m, &a->members, entries) {
-		    if (m != TAILQ_FIRST(&a->members))
-			sudo_lbuf_append(lbuf, "%s", separator);
-		    print_member_int(lbuf, m->name, m->type,
-			negated ? !m->negated : m->negated, separator,
-			alias_type);
-		}
-		alias_put(a);
-		break;
-	    }
-	    /* FALLTHROUGH */
-	default:
-	    /* Do not quote UID/GID, all others get quoted. */
-	    if (name[0] == '#' &&
-		name[strspn(name + 1, "0123456789") + 1] == '\0') {
-		sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", name);
-	    } else {
-		if (strpbrk(name, " \t") != NULL) {
-		    sudo_lbuf_append(lbuf, "%s\"", negated ? "!" : "");
-		    sudo_lbuf_append_quoted(lbuf, "\"", "%s", name);
-		    sudo_lbuf_append(lbuf, "\"");
-		} else {
-		    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s%s",
-			negated ? "!" : "", name);
-		}
-	    }
-	    break;
-    }
-    debug_return;
-}
-
-static void
-print_member(struct sudo_lbuf *lbuf, struct member *m, int alias_type)
-{
-    print_member_int(lbuf, m->name, m->type, m->negated, ", ", alias_type);
-}
-
-static void
-print_member_sep(struct sudo_lbuf *lbuf, struct member *m,
-    const char *separator, int alias_type)
-{
-    print_member_int(lbuf, m->name, m->type, m->negated, separator, alias_type);
 }
