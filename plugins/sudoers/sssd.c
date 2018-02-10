@@ -1409,12 +1409,11 @@ sudo_sss_display_bound_defaults(struct sudo_nss *nss,
 }
 
 static char *
-val_array_iter(void *base, void **save)
+val_array_iter(void **vp)
 {
-    char **val_array;
+    char **val_array = *vp;
 
-    val_array = *save ? *save : base;
-    *save = val_array + 1;
+    *vp = val_array + 1;
 
     return *val_array;
 }

@@ -2312,12 +2312,11 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
 }
 
 static char *
-berval_iter(void *base, void **save)
+berval_iter(void **vp)
 {
-    struct berval **bv;
+    struct berval **bv = *vp;
 
-    bv = *save ? *save : base;
-    *save = bv + 1;
+    *vp = bv + 1;
     return *bv ? (*bv)->bv_val : NULL;
 }
 

@@ -121,7 +121,6 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 {
     struct member_list *members;
     struct member *m;
-    void *save = NULL;
     char *val;
     debug_decl(bv_to_member_list, SUDOERS_DEBUG_LDAP)
 
@@ -129,7 +128,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 	return NULL;
     TAILQ_INIT(members);                      
 
-    while ((val = iter(a, &save)) != NULL) {
+    while ((val = iter(&a)) != NULL) {
 	if ((m = calloc(1, sizeof(*m))) == NULL)
 	    goto bad;
 
@@ -180,7 +179,6 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
     struct sudo_command *c;
     struct privilege *priv;
     struct member *m;
-    void *cmnds_save = NULL;
     char *cmnd;
     debug_decl(sudo_ldap_role_to_priv, SUDOERS_DEBUG_LDAP)
 
@@ -203,7 +201,7 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
     /*
      * Parse sudoCommands and add to cmndlist.
      */
-    while ((cmnd = iter(cmnds, &cmnds_save)) != NULL) {
+    while ((cmnd = iter(&cmnds)) != NULL) {
 	char *args;
 
 	/* Allocate storage upfront. */
@@ -275,10 +273,9 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 
 	    /* Parse sudoOptions. */
 	    if (opts != NULL) {
-		void *opts_save = NULL;
 		char *opt;
 
-		while ((opt = iter(opts, &opts_save)) != NULL) {
+		while ((opt = iter(&opts)) != NULL) {
 		    char *var, *val;
 		    int op;
 

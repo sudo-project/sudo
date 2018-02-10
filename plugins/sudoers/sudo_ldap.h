@@ -17,7 +17,7 @@
 #ifndef SUDOERS_LDAP_H
 #define SUDOERS_LDAP_H
 
-typedef char * (*sudo_ldap_iter_t)(void *, void **);
+typedef char * (*sudo_ldap_iter_t)(void **);
 
 bool sudo_ldap_is_negated(char **valp);
 int sudo_ldap_parse_option(char *optstr, char **varp, char **valp);
