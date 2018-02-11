@@ -24492,7 +24492,7 @@ fi
 
 	with_ldap=yes
     fi
-    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
+    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo"
     case "$SUDOERS_OBJS" in
 	*ldap_common.lo*) ;;
 	*) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_common.lo";;

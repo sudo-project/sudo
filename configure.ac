@@ -3730,7 +3730,7 @@ if test ${with_ldap-'no'} != "no"; then
 	AX_APPEND_FLAG([-I${with_ldap}/include], [CPPFLAGS])
 	with_ldap=yes
     fi
-    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
+    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo"
     case "$SUDOERS_OBJS" in
 	*ldap_common.lo*) ;;
 	*) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_common.lo";;

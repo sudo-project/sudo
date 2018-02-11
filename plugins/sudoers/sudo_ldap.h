@@ -17,8 +17,10 @@
 #ifndef SUDOERS_LDAP_H
 #define SUDOERS_LDAP_H
 
+/* Iterators used by sudo_ldap_role_to_priv() to handle bervar ** or char ** */
 typedef char * (*sudo_ldap_iter_t)(void **);
 
+/* ldap_common.c */
 bool sudo_ldap_is_negated(char **valp);
 int sudo_ldap_parse_option(char *optstr, char **varp, char **valp);
 struct privilege *sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups, void *cmnds, void *opts, const char *notbefore, const char *notafter, sudo_ldap_iter_t iter);
