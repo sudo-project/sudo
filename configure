@@ -25259,7 +25259,7 @@ fi
 $as_echo_n "checking for sudo run dir location... " >&6; }
 rundir="$with_rundir"
 if test -z "$rundir"; then
-    for d in /var/run /var/db /var/lib /var/adm /usr/adm; do
+    for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
 	    rundir="$d/sudo"
 	    break
@@ -28659,7 +28659,7 @@ $as_echo "$as_me: You will need to customize examples/pam.conf and install it as
     esac
 fi
 case "$rundir" in
-    /var/run*)
+    /run/*|/var/run/*)
 	clear_rundir=0
 	;;
     *)

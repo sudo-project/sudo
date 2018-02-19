@@ -4382,7 +4382,7 @@ dnl
 dnl Warn user if they may need to clear rundir manually.
 dnl
 case "$rundir" in
-    /var/run*)
+    /run/*|/var/run/*)
 	clear_rundir=0
 	;;
     *)

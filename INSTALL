@@ -134,11 +134,11 @@ Directory and file names:
         do not survive a system reboot.  This is typically where
         the time stamp directory is located.  By default, configure
         will use the first existing directory in the following list:
-	    /var/run, /var/db, /var/lib, /var/adm, /usr/adm
+	    /run /var/run, /var/db, /var/lib, /var/adm, /usr/adm
 	This directory should be cleared when the system reboots.
-	On systems that lack /var/run, the default rundir and vardir
-	may be the same.  In this case, only the ts directory inside
-	the rundir needs to be cleared at boot time.
+	On systems that lack /run or /var/run, the default rundir and
+	vardir may be the same.  In this case, only the ts directory
+	inside the rundir needs to be cleared at boot time.
 
   --with-vardir=DIR
         Set the directory to be used for sudo-specific files that

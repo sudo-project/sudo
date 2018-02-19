@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "January 30, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "February 19, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -5484,6 +5484,8 @@ unprivileged users to change the ownership of files they create.
 While the time stamp directory
 \fIshould\fR
 be cleared at reboot time, not all systems contain a
+\fI/run\fR
+or
 \fI/var/run\fR
 directory.
 To avoid potential problems,
