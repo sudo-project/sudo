@@ -46,8 +46,8 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-static bool convert_sudoers_sudoers(const char *output_file);
-extern bool convert_sudoers_json(const char *output_file);
+static bool convert_sudoers_sudoers(const char *output_file, bool expand_aliases);
+extern bool convert_sudoers_json(const char *output_file, bool expand_aliases);
 extern bool convert_sudoers_ldif(const char *output_file, const char *base);
 extern void get_hostname(void);
 
@@ -56,9 +56,10 @@ extern void get_hostname(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:f:ho:V";
+static const char short_opts[] =  "b:ef:ho:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
+    { "expand-aliases",	no_argument,		NULL,	'e' },
     { "format",		required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
 #ifdef notyet
@@ -87,6 +88,7 @@ main(int argc, char *argv[])
     const char *input_file = "-";
     const char *output_file = "-";
     const char *sudoers_base = NULL;
+    bool expand_aliases = false;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -118,6 +120,9 @@ main(int argc, char *argv[])
 	switch (ch) {
 	case 'b':
 	    sudoers_base = optarg;
+	    break;
+	case 'e':
+	    expand_aliases = true;
 	    break;
 	case 'f':
 	    if (strcasecmp(optarg, "json") == 0) {
@@ -209,13 +214,13 @@ main(int argc, char *argv[])
 
     switch (output_format) {
     case output_json:
-	exitcode = !convert_sudoers_json(output_file);
+	exitcode = !convert_sudoers_json(output_file, expand_aliases);
 	break;
     case output_ldif:
 	exitcode = !convert_sudoers_ldif(output_file, sudoers_base);
 	break;
     case output_sudoers:
-	exitcode = !convert_sudoers_sudoers(output_file);
+	exitcode = !convert_sudoers_sudoers(output_file, expand_aliases);
 	break;
     default:
 	sudo_fatalx("error: unhandled output format %d", output_format);
@@ -236,35 +241,42 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
  * Display Defaults entries
  */
 static bool
-print_defaults_sudoers(struct sudo_lbuf *lbuf)
+print_defaults_sudoers(struct sudo_lbuf *lbuf, bool expand_aliases)
 {
     struct defaults *def, *next;
-    struct member *m;
     debug_decl(print_defaults_sudoers, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+	struct member *m;
+	int alias_type;
+
 	/* Print Defaults type and binding (if present) */
 	switch (def->type) {
-	    case DEFAULTS:
-		sudo_lbuf_append(lbuf, "Defaults");
-		break;
 	    case DEFAULTS_HOST:
 		sudo_lbuf_append(lbuf, "Defaults@");
+		alias_type = HOSTALIAS;
 		break;
 	    case DEFAULTS_USER:
 		sudo_lbuf_append(lbuf, "Defaults:");
+		alias_type = expand_aliases ? USERALIAS : UNSPEC;
 		break;
 	    case DEFAULTS_RUNAS:
 		sudo_lbuf_append(lbuf, "Defaults>");
+		alias_type = expand_aliases ? RUNASALIAS : UNSPEC;
 		break;
 	    case DEFAULTS_CMND:
 		sudo_lbuf_append(lbuf, "Defaults!");
+		alias_type = expand_aliases ? CMNDALIAS : UNSPEC;
+		break;
+	    default:
+		sudo_lbuf_append(lbuf, "Defaults");
+		alias_type = UNSPEC;
 		break;
 	}
 	TAILQ_FOREACH(m, def->binding, entries) {
 	    if (m != TAILQ_FIRST(def->binding))
 		sudo_lbuf_append(lbuf, ", ");
-	    sudoers_format_member(lbuf, m, NULL, UNSPEC);
+	    sudoers_format_member(lbuf, m, ", ", alias_type);
 	}
 
 	/* Print Defaults with the same binding, there may be multiple. */
@@ -327,7 +339,7 @@ convert_sudoers_output(const char *buf)
  * Convert back to sudoers.
  */
 static bool
-convert_sudoers_sudoers(const char *output_file)
+convert_sudoers_sudoers(const char *output_file, bool expand_aliases)
 {
     bool ret = true;
     struct sudo_lbuf lbuf;
@@ -344,7 +356,7 @@ convert_sudoers_sudoers(const char *output_file)
     sudo_lbuf_init(&lbuf, convert_sudoers_output, 4, "\\", 80);
 
     /* Print Defaults */
-    if (!print_defaults_sudoers(&lbuf))
+    if (!print_defaults_sudoers(&lbuf, expand_aliases))
 	goto done;
     if (lbuf.len > 0) {
 	sudo_lbuf_print(&lbuf);
@@ -352,15 +364,17 @@ convert_sudoers_sudoers(const char *output_file)
     }
 
     /* Print Aliases */
-    if (!print_aliases_sudoers(&lbuf))
-	goto done;
-    if (lbuf.len > 1) {
-	sudo_lbuf_print(&lbuf);
-	sudo_lbuf_append(&lbuf, "\n");
+    if (!expand_aliases) {
+	if (!print_aliases_sudoers(&lbuf))
+	    goto done;
+	if (lbuf.len > 1) {
+	    sudo_lbuf_print(&lbuf);
+	    sudo_lbuf_append(&lbuf, "\n");
+	}
     }
 
     /* Print User_Specs */
-    if (!sudoers_format_userspecs(&lbuf, &userspecs, false))
+    if (!sudoers_format_userspecs(&lbuf, &userspecs, expand_aliases))
 	goto done;
     if (lbuf.len > 1) {
 	sudo_lbuf_print(&lbuf);
@@ -388,9 +402,8 @@ done:
 static void
 usage(int fatal)
 {
-    (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-hV] [-b dn] [-f format] [-o output_file] [sudoers_file]\n",
-	    getprogname());
+    (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehV] [-b dn] "
+	"[-f format] [-o output_file] [sudoers_file]\n", getprogname());
     if (fatal)
 	exit(1);
 }

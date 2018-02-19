@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "February 2, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "February 18, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -25,7 +25,7 @@
 .SH "SYNOPSIS"
 .HP 11n
 \fBcvtsudoers\fR
-[\fB\-hV\fR]
+[\fB\-ehV\fR]
 [\fB\-b\fR\ \fIdn\fR]
 [\fB\-f\fR\ \fIformat\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
@@ -60,6 +60,13 @@ If this option is not specified, the value of the
 \fRSUDOERS_BASE\fR
 environment variable will be used instead.
 Only necessary when converting to LDIF format.
+.TP 12n
+\fB\-e\fR, \fB\--expand-aliases\fR
+Expand aliases in
+\fIsudoers_file\fR.
+Aliases are preserved by default when the output
+\fIformat\fR
+is JSON or sudoers.
 .TP 12n
 \fB\-f\fR \fIoutput_format\fR, \fB\--format\fR=\fIoutput_format\fR
 Specify the output format.

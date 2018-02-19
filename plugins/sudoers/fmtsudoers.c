@@ -39,7 +39,7 @@
  */
 static bool
 sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
-    int negated, const char *separator, int alias_type)
+    bool negated, const char *separator, int alias_type)
 {
     struct alias *a;
     struct member *m;
@@ -245,7 +245,8 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
     TAILQ_FOREACH(m, &us->users, entries) {
 	if (m != TAILQ_FIRST(&us->users))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, m, NULL, UNSPEC);
+	sudoers_format_member(lbuf, m, ", ",
+	    expand_aliases ? USERALIAS : UNSPEC);
     }
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {

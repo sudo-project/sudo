@@ -120,7 +120,7 @@ warn_bound_defaults_ldif(FILE *fp)
  * See print_member_int() in parse.c.
  */
 static void
-print_member_ldif(FILE *fp, char *name, int type, int negated,
+print_member_ldif(FILE *fp, char *name, int type, bool negated,
     int alias_type, const char *prefix)
 {
     struct alias *a;
