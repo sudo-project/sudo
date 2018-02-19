@@ -120,7 +120,7 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1)
+    if (io_fds[SFD_USERTTY] != -1)
 	sudo_term_restore(io_fds[SFD_USERTTY], false);
     if (utmp_user != NULL)
 	utmp_logout(slavename, 0);
