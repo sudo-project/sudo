@@ -415,7 +415,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * Non-pty event loop.
      * Wait for command to exit, handles signals and the error pipe.
      */
-    if (sudo_ev_loop(ec.evbase, 0) == -1)
+    if (sudo_ev_dispatch(ec.evbase) == -1)
 	sudo_warn(U_("error in event loop"));
     if (sudo_ev_got_break(ec.evbase)) {
 	/* error from callback */

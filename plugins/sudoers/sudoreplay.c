@@ -598,7 +598,7 @@ xterm_get_size(int *new_rows, int *new_cols)
     /* Read back terminal size response */
     if (sudo_ev_add(evbase, gc.ev, &gc.timeout, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
-    sudo_ev_loop(evbase, 0);
+    sudo_ev_dispatch(evbase);
 
     if (gc.state == GOTSIZE) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -1035,7 +1035,7 @@ replay_session(double max_delay, const char *decimal, bool interactive)
     }
 
     /* Run event loop. */
-    sudo_ev_loop(closure->evbase, 0);
+    sudo_ev_dispatch(closure->evbase);
     if (sudo_ev_got_break(closure->evbase))
 	ret = 1;
 

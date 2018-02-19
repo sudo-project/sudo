@@ -3,11 +3,11 @@ sudo_conf_askpass_path_v1
 sudo_conf_clear_paths_v1
 sudo_conf_debug_files_v1
 sudo_conf_debugging_v1
+sudo_conf_devsearch_path_v1
 sudo_conf_disable_coredump_v1
 sudo_conf_group_source_v1
 sudo_conf_max_groups_v1
 sudo_conf_noexec_path_v1
-sudo_conf_devsearch_path_v1
 sudo_conf_plugin_dir_path_v1
 sudo_conf_plugins_v1
 sudo_conf_probe_interfaces_v1
@@ -16,7 +16,6 @@ sudo_conf_sesh_path_v1
 sudo_debug_deregister_v1
 sudo_debug_enter_v1
 sudo_debug_execve2_v1
-sudo_debug_exit_v1
 sudo_debug_exit_bool_v1
 sudo_debug_exit_id_t_v1
 sudo_debug_exit_int_v1
@@ -24,9 +23,10 @@ sudo_debug_exit_long_v1
 sudo_debug_exit_ptr_v1
 sudo_debug_exit_size_t_v1
 sudo_debug_exit_ssize_t_v1
-sudo_debug_exit_str_v1
 sudo_debug_exit_str_masked_v1
+sudo_debug_exit_str_v1
 sudo_debug_exit_time_t_v1
+sudo_debug_exit_v1
 sudo_debug_fork_v1
 sudo_debug_get_active_instance_v1
 sudo_debug_get_fds_v1
@@ -48,6 +48,7 @@ sudo_ev_base_alloc_v1
 sudo_ev_base_free_v1
 sudo_ev_base_setdef_v1
 sudo_ev_del_v1
+sudo_ev_dispatch_v1
 sudo_ev_free_v1
 sudo_ev_get_timeleft_v1
 sudo_ev_got_break_v1
@@ -60,7 +61,6 @@ sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1
 sudo_fatalx_nodebug_v1
-sudo_ttyname_dev_v1
 sudo_get_ttysize_v1
 sudo_gethostname_v1
 sudo_gettime_mono_v1
@@ -92,6 +92,7 @@ sudo_term_kill
 sudo_term_noecho_v1
 sudo_term_raw_v1
 sudo_term_restore_v1
+sudo_ttyname_dev_v1
 sudo_vfatal_nodebug_v1
 sudo_vfatalx_nodebug_v1
 sudo_vwarn_nodebug_v1

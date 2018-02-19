@@ -131,6 +131,10 @@ __dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event 
 __dso_public int sudo_ev_del_v1(struct sudo_event_base *head, struct sudo_event *ev);
 #define sudo_ev_del(_a, _b) sudo_ev_del_v1((_a), (_b))
 
+/* Dispatch events, returns SUDO_CB_SUCCESS, SUDO_CB_BREAK or SUDO_CB_ERROR */
+__dso_public int sudo_ev_dispatch_v1(struct sudo_event_base *head);
+#define sudo_ev_dispatch(_a) sudo_ev_dispatch_v1((_a))
+
 /* Main event loop, returns SUDO_CB_SUCCESS, SUDO_CB_BREAK or SUDO_CB_ERROR */
 __dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, int flags);
 #define sudo_ev_loop(_a, _b) sudo_ev_loop_v1((_a), (_b))

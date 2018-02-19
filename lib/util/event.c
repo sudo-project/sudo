@@ -583,6 +583,12 @@ sudo_ev_del_v1(struct sudo_event_base *base, struct sudo_event *ev)
     debug_return_int(0);
 }
 
+int
+sudo_ev_dispatch_v1(struct sudo_event_base *base)
+{
+    return sudo_ev_loop_v1(base, 0);
+}
+
 /*
  * Run main event loop.
  * Returns 0 on success, 1 if no events registered  and -1 on error 
