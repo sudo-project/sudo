@@ -385,8 +385,14 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
     case COMMAND:
 	print_command_json(fp, m, indent, last_one);
 	debug_return;
+    case ALL:
+	value.u.string = "ALL";
+	/* FALLTHROUGH */
     case WORD:
 	switch (word_type) {
+	case TYPE_COMMAND:
+	    typestr = "command";
+	    break;
 	case TYPE_HOSTNAME:
 	    typestr = "hostname";
 	    break;
@@ -412,9 +418,6 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
 	    sudo_fatalx("unexpected word type %d", word_type);
 	}
 	break;
-    case ALL:
-	value.u.string = "ALL";
-	/* FALLTHROUGH */
     case ALIAS:
 	switch (word_type) {
 	case TYPE_COMMAND:

@@ -39,7 +39,7 @@
                 { "userid": 0 }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -47,7 +47,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -57,7 +57,7 @@
                 { "userid": 0 }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -71,7 +71,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -81,7 +81,7 @@
                 { "userid": 0 }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -89,7 +89,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -99,7 +99,7 @@
                 { "userid": 0 }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -113,7 +113,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -123,7 +123,7 @@
                 { "usergid": 0 }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -131,7 +131,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -141,7 +141,7 @@
                 { "usergid": 0 }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -149,7 +149,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
