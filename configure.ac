@@ -845,7 +845,7 @@ AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir=DIR], [deprecated])],
 		;;
 esac])
 
-AC_ARG_WITH(rundir, [AS_HELP_STRING([--with-rundir=DIR], [path to the sudo time stamp parent dir])],
+AC_ARG_WITH(rundir, [AS_HELP_STRING([--with-rundir=DIR], [directory for sudo-specific files that do not survive a system reboot, e.g. `/var/run/sudo'])],
 [case $with_rundir in
     yes)	AC_MSG_ERROR(["must give --with-rundir an argument."])
 		;;
@@ -853,7 +853,7 @@ AC_ARG_WITH(rundir, [AS_HELP_STRING([--with-rundir=DIR], [path to the sudo time 
 		;;
 esac])
 
-AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [path to the sudo var dir])],
+AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [directory for sudo-specific files that survive a system reboot, e.g. `/var/db/sudo' or `/var/lib/sudo'])],
 [case $with_vardir in
     yes)	AC_MSG_ERROR(["must give --with-vardir an argument."])
 		;;

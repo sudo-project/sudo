@@ -1719,8 +1719,11 @@ Optional Packages:
   --with-badpass-message  message the user sees when the password is wrong
   --with-fqdn             expect fully qualified hosts in sudoers
   --with-timedir=DIR      deprecated
-  --with-rundir=DIR       path to the sudo time stamp parent dir
-  --with-vardir=DIR       path to the sudo var dir
+  --with-rundir=DIR       directory for sudo-specific files that do not
+                          survive a system reboot, e.g. `/var/run/sudo'
+  --with-vardir=DIR       directory for sudo-specific files that survive a
+                          system reboot, e.g. `/var/db/sudo' or
+                          `/var/lib/sudo'
   --with-iologdir=DIR     directory to store sudo I/O log files in
   --with-tzdir=DIR        path to the time zone data directory
   --with-sendmail         set path to sendmail

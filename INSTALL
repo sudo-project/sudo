@@ -126,34 +126,35 @@ Directory and file names:
 	Install sudo example files in DIR [DATAROOTDIR/doc/sudo/examples]
 
   --with-plugindir=DIR
-	Set the directory that sudo looks in to find the policy and I/O
+	The directory that sudo looks in to find the policy and I/O
 	logging plugins.  Defaults to the LIBEXEC/sudo.
 
   --with-rundir=DIR
-        Set the directory to be used for sudo-specific files that
-        do not survive a system reboot.  This is typically where
-        the time stamp directory is located.  By default, configure
-        will use the first existing directory in the following list:
-	    /run /var/run, /var/db, /var/lib, /var/adm, /usr/adm
+        The directory to be used for sudo-specific files that do
+        not survive a system reboot.  This is typically where the
+        time stamp directory is located.  By default, configure
+        will choose from the following list:
+	    /run/sudo /var/run/sudo, /var/db/sudo, /var/lib/sudo,
+	    /var/adm/sudo, /usr/adm/sudo
 	This directory should be cleared when the system reboots.
 	On systems that lack /run or /var/run, the default rundir and
 	vardir may be the same.  In this case, only the ts directory
 	inside the rundir needs to be cleared at boot time.
 
   --with-vardir=DIR
-        Set the directory to be used for sudo-specific files that
-        survive a system reboot.  This is typically where the lecture
-        status directory is stored.  By default, configure will use
-        the first existing directory in the following list:
-	    /var/db, /var/lib, /var/adm, /usr/adm
-	This directory should not be cleared when the system boots.
+        The directory to be used for sudo-specific files that survive
+        a system reboot.  This is typically where the lecture status
+        directory is stored.  By default, configure will choose
+        from the following list:
+	    /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo
+	This directory should *not* be cleared when the system boots.
 
   --with-tzdir=DIR
-        Set the directory to the system's time zone data files.  This 
-	is only used when sanitizing the TZ environment variable to
-	allow for fully-qualified paths in TZ.
-        By default, configure will look for an existing "zoneinfo"
-	directory in the following locations:
+        The directory to the system's time zone data files.  This
+        is only used when sanitizing the TZ environment variable
+        to allow for fully-qualified paths in TZ.  By default,
+        configure will look for an existing "zoneinfo" directory
+        in the following locations:
 	    /usr/share /usr/share/lib /usr/lib /etc
 	If no zoneinfo directory is found, the TZ variable may not
 	contain a fully-qualified path.
