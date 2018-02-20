@@ -2776,6 +2776,10 @@ AC_CHECK_FUNCS([vsyslog], [], [
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }vsyslog_test"
 ])
 dnl
+dnl 4.4BSD-based systems can force the password or group file to be held open
+dnl
+AC_CHECK_FUNCS([setpassent setgroupent])
+dnl
 dnl Function checks for sudo_noexec
 dnl
 if test X"$with_noexec" != X"no"; then

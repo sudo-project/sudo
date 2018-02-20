@@ -603,8 +603,14 @@
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 
+/* Define to 1 if you have the `setgroupent' function. */
+#undef HAVE_SETGROUPENT
+
 /* Define to 1 if you have the `setkeycreatecon' function. */
 #undef HAVE_SETKEYCREATECON
+
+/* Define to 1 if you have the `setpassent' function. */
+#undef HAVE_SETPASSENT
 
 /* Define to 1 if you have the `setprogname' function. */
 #undef HAVE_SETPROGNAME

@@ -508,6 +508,19 @@ get_user_info(struct user_details *ud)
     int fd;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
+    /*
+     * On BSD systems you can set a hint to keep the password and
+     * group databases open instead of having to open and close
+     * them all the time.  Since sudo does a lot of password and
+     * group lookups, keeping the file open can speed things up.
+     */
+#ifdef HAVE_SETPASSENT
+    setpassent(1);
+#endif /* HAVE_SETPASSENT */
+#ifdef HAVE_SETGROUPENT
+    setgroupent(1);
+#endif /* HAVE_SETGROUPENT */
+
     memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
