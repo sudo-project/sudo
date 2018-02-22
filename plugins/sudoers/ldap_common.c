@@ -136,6 +136,22 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 	    /* Empty RunAsUser means run as the invoking user. */
 	    m->type = MYSELF;
 	    break;
+	case '+':
+	    m->type = NETGROUP;
+	    m->name = strdup(val);
+	    if (m->name == NULL) {
+		free(m);
+		goto bad;
+	    }
+	    break;
+	case '%':
+	    m->type = USERGROUP;
+	    m->name = strdup(val);
+	    if (m->name == NULL) {
+		free(m);
+		goto bad;
+	    }
+	    break;
 	case 'A':
 	    if (strcmp(val, "ALL") == 0) {
 		m->type = ALL;
