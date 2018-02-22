@@ -3,7 +3,7 @@ Notes on upgrading from an older release
 
 o Upgrading from a version prior to 1.8.23:
 
-    In sudo 1.8.23 the "sudoers2ldif" script and the "visudo -c"
+    In sudo 1.8.23 the "sudoers2ldif" script and the "visudo -x"
     functionality has been superseded by the "cvtsudoers" utility.
     The cvtsudoers utility is intended to be a drop-in replacement
     for "sudoers2ldif".  Because it uses the same parser as sudo
