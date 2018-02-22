@@ -334,7 +334,7 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
     enum word_type word_type, bool last_one, int indent, bool expand_aliases)
 {
     struct json_value value;
-    const char *typestr;
+    const char *typestr = NULL;
     const char *errstr;
     int alias_type = UNSPEC;
     bool need_newline = true;
