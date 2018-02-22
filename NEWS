@@ -3,8 +3,9 @@ What's new in Sudo 1.8.23
  * PAM account management modules and BSD auto approval modules are
    now run even when no password is required.
 
- * The new cvtsudoers utility replaces both the "sudoers2ldif"
-   script and the "visudo -x" functionality.
+ * The new cvtsudoers utility replaces both the "sudoers2ldif" script
+   and the "visudo -x" functionality.  It can read a file in either
+   sudoers or LDIF format and produce JSON, LDIF or sudoers output.
 
  * The file, ldap and sss sudoers backends now share a common set
    of formatting functions for "sudo -l" output, which is also used
