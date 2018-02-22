@@ -139,8 +139,10 @@ print_member_ldif(FILE *fp, char *name, int type, bool negated,
     case COMMAND:
 	c = (struct sudo_command *)name;
 	fprintf(fp, "%s: ", prefix);
-	if (c->digest != NULL)
-	    fprintf(fp, "%s:", digest_type_to_name(c->digest->digest_type));
+	if (c->digest != NULL) {
+	    fprintf(fp, "%s:%s ", digest_type_to_name(c->digest->digest_type),
+		c->digest->digest_str);
+	}
 	fprintf(fp, "%s%s", negated ? "!" : "", c->cmnd);
 	if (c->args != NULL)
 	    fprintf(fp, " %s", c->args);
