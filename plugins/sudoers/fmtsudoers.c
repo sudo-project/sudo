@@ -55,6 +55,11 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
+	    if (c->digest != NULL) {
+		sudo_lbuf_append(lbuf, "%s:%s ",
+		    digest_type_to_name(c->digest->digest_type),
+		    c->digest->digest_str);
+	    }
 	    if (negated)
 		sudo_lbuf_append(lbuf, "!");
 	    sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED" \t", "%s", c->cmnd);
@@ -63,6 +68,17 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
 		sudo_lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", c->args);
 	    }
 	    break;
+	case USERGROUP:
+	    /* Special case for %#gid, %:non-unix-group, %:#non-unix-gid */
+	    if (strpbrk(name, " \t") == NULL) {
+		if (*++name == ':') {
+		    name++;
+		    sudo_lbuf_append(lbuf, "%s", "%:");
+		} else {
+		    sudo_lbuf_append(lbuf, "%s", "%");
+		}
+	    }
+	    goto print_word;
 	case ALIAS:
 	    if (alias_type != UNSPEC) {
 		if ((a = alias_get(name, alias_type)) != NULL) {
@@ -79,6 +95,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
 	    }
 	    /* FALLTHROUGH */
 	default:
+	print_word:
 	    /* Do not quote UID/GID, all others get quoted. */
 	    if (name[0] == '#' &&
 		name[strspn(name + 1, "0123456789") + 1] == '\0') {
