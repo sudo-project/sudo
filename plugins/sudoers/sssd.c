@@ -1476,9 +1476,9 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	/* Parse sudoOptions. */
 	handle->fn_get_values(rule, "sudoOption", &opts);
 
-	priv = sudo_ldap_role_to_priv(cn, runasusers, runasgroups, cmnds, opts,
-	    notbefore ? notbefore[0] : NULL, notafter ? notafter[0] : NULL,
-	    val_array_iter);
+	priv = sudo_ldap_role_to_priv(cn, NULL, runasusers, runasgroups,
+	    cmnds, opts, notbefore ? notbefore[0] : NULL,
+	    notafter ? notafter[0] : NULL, false, long_list, val_array_iter);
 
 	/* Cleanup */
 	if (cn_array != NULL)

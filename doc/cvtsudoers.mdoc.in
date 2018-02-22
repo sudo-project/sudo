@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 18, 2018
+.Dd February 22, 2018
 .Dt CVTSUDOERS @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -24,21 +24,23 @@
 .Nm cvtsudoers
 .Op Fl ehV
 .Op Fl b Ar dn
-.Op Fl f Ar format
+.Op Fl i Ar input_format
+.Op Fl f Ar output_format
 .Op Fl o Ar output_file
-.Op Ar sudoers_file
+.Op Ar input_file
 .Sh DESCRIPTION
 .Nm
-can be used to convert a policy file in
+can be used to convert between
 .Em sudoers
-format to other formats.
+security policy file formats.
+The default input format is sudoers.
 The default output format is LDIF.
 It is only possible to convert a
 .Em sudoers
 file that is syntactically correct.
 .Pp
 If no
-.Ar sudoers_file
+.Ar input_file
 is specified, or if it is
 .Ql - ,
 the policy is read from the standard input.
@@ -59,7 +61,7 @@ environment variable will be used instead.
 Only necessary when converting to LDIF format.
 .It Fl e , Fl -expand-aliases
 Expand aliases in
-.Ar sudoers_file .
+.Ar input_file .
 Aliases are preserved by default when the output
 .Ar format
 is JSON or sudoers.
@@ -108,6 +110,22 @@ is specified, or if it is
 the converted
 .Em sudoers
 policy will be written to the standard output.
+.It Fl i Ar input_format , Fl -input-format Ns = Ns Ar input_format
+Specify the input format.
+The following formats are supported:
+.Bl -tag -width 8n
+.It LDIF
+LDIF (LDAP Data Interchange Format) files can be exported from an LDAP
+server to convert security policies used by
+.Xr sudoers.ldap @mansectform@ .
+If a base DN (distinguished name) is specified, only sudoRole objects
+that match the base DN will be processed.
+Not all sudoOptions specified in a sudoRole can be translated from
+LDIF to sudoers format.
+.It sudoers
+Traditional sudoers format.
+This is the default input format.
+.El
 .It Fl V , -version
 Print the
 .Nm

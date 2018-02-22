@@ -19,6 +19,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -28,12 +29,11 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
-#ifdef HAVE_LBER_H
-# include <lber.h>
-#endif
-#include <ldap.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "sudoers.h"
+#include "interfaces.h"
 #include "parse.h"
 #include "gram.h"
 #include "sudo_lbuf.h"
@@ -112,7 +112,7 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
 }
 
 /*
- * Convert an array to a member list.
+ * Convert an array of user/group names to a member list.
  * The caller is responsible for freeing the returned struct member_list.
  */
 static struct member_list *
@@ -180,14 +180,77 @@ bad:
     debug_return_ptr(NULL);
 }
 
+static bool
+is_address(char *host)
+{
+    union sudo_in_addr_un addr;
+    bool ret = false;
+    char *slash;
+    debug_decl(is_address, SUDOERS_DEBUG_LDAP)
+
+    /* Check for mask, not currently parsed. */
+    if ((slash = strchr(host, '/')) != NULL)
+	*slash = '\0';
+
+    if (inet_pton(AF_INET, host, &addr.ip4) == 1)
+	ret = true;
+#ifdef HAVE_STRUCT_IN6_ADDR
+    else if (inet_pton(AF_INET6, host, &addr.ip6) == 1)
+	ret = true;
+#endif
+
+    if (slash != NULL)
+	*slash = '/';
+
+    debug_return_bool(ret);
+}
+
+static struct member *
+host_to_member(char *host)
+{
+    struct member *m;
+    debug_decl(host_to_member, SUDOERS_DEBUG_LDAP)
+
+    if ((m = calloc(1, sizeof(*m))) == NULL)
+	goto oom;
+    m->negated = sudo_ldap_is_negated(&host);
+    m->name = strdup(host);
+    if (m->name == NULL)
+	goto oom;
+    switch (*host) {
+    case '+':
+	m->type = NETGROUP;
+	break;
+    case 'A':
+	if (strcmp(host, "ALL") == 0) {
+	    m->type = ALL;
+	    break;
+	}
+	/* FALLTHROUGH */
+    default:
+	if (is_address(host)) {
+	    m->type = NTWKADDR;
+	} else {
+	    m->type = WORD;
+	}
+	break;
+    }
+
+    debug_return_ptr(m);
+oom:
+    free(m);
+    debug_return_ptr(NULL);
+}
+
 /*
  * Convert an LDAP sudoRole to a sudoers privilege.
  * Pass in struct berval ** for LDAP or char *** for SSSD.
  */
 struct privilege *
-sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
-    void *cmnds, void *opts, const char *notbefore,
-    const char *notafter, sudo_ldap_iter_t iter)
+sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
+    void *runasgroups, void *cmnds, void *opts, const char *notbefore,
+    const char *notafter, bool warnings, bool store_options,
+    sudo_ldap_iter_t iter)
 {
     struct cmndspec *cmndspec = NULL;
     struct cmndspec *prev_cmndspec = NULL;
@@ -207,17 +270,27 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
     if (priv->ldap_role == NULL)
 	goto oom;
 
-    /* The host has already matched, use ALL as wildcard. */
-    if ((m = calloc(1, sizeof(*m))) == NULL)
-	goto oom;
-    m->type = ALL;
-    TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
+    if (hosts == NULL) {
+	/* The host has already matched, use ALL as wildcard. */
+	if ((m = calloc(1, sizeof(*m))) == NULL)
+	    goto oom;
+	m->type = ALL;
+	TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
+    } else {
+	char *host;
+	while ((host = iter(&hosts)) != NULL) {
+	    if ((m = host_to_member(host)) == NULL)
+		goto oom;
+	    TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
+	}
+    }
 
     /*
      * Parse sudoCommands and add to cmndlist.
      */
     while ((cmnd = iter(&cmnds)) != NULL) {
 	char *args;
+	struct sudo_digest digest;
 
 	/* Allocate storage upfront. */
 	cmndspec = calloc(1, sizeof(*cmndspec));
@@ -237,23 +310,30 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 	cmndspec->notafter = UNSPEC;
 	cmndspec->timeout = UNSPEC;
 
-	/* Fill in command. */
+	/* Fill in member. */
+	m->type = COMMAND;
+	m->negated = sudo_ldap_is_negated(&cmnd);
+	m->name = (char *)c;
+
+	/* Fill in command with optional digest. */
+	if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
+	    if ((c->digest = malloc(sizeof(*c->digest))) == NULL) {
+		free_member(m);
+		goto oom;
+	    }
+	    *c->digest = digest;
+	}
 	if ((args = strpbrk(cmnd, " \t")) != NULL) {
 	    *args++ = '\0';
 	    if ((c->args = strdup(args)) == NULL) {
-		free(c);
-		free(m);
+		free_member(m);
 		goto oom;
 	    }
 	}
 	if ((c->cmnd = strdup(cmnd)) == NULL) {
-	    free(c->args);
-	    free(c);
-	    free(m);
+	    free_member(m);
 	    goto oom;
 	}
-	m->type = COMMAND;
-	m->name = (char *)c;
 	cmndspec->cmnd = m;
 
 	if (prev_cmndspec != NULL) {
@@ -322,10 +402,11 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 				goto oom;
 			}
 #endif /* HAVE_PRIV_SET */
-		    } else if (long_list) {
+		    } else if (store_options) {
 			struct defaults *def = calloc(1, sizeof(*def));
 			if (def == NULL)
 			    goto oom;
+			def->type = DEFAULTS;
 			def->op = op;
 			if ((def->var = strdup(var)) == NULL) {
 			    free(def);
@@ -341,19 +422,33 @@ sudo_ldap_role_to_priv(const char *cn, void *runasusers, void *runasgroups,
 			TAILQ_INSERT_TAIL(&priv->defaults, def, entries);
 		    } else {
 			/* Convert to tags. */
-			if (op != true && op != false)
+			bool handled = true;
+
+			if (op == true || op == false) {
+			    if (strcmp(var, "authenticate") == 0) {
+				cmndspec->tags.nopasswd = op == false;
+			    } else if (strcmp(var, "sudoedit_follow") == 0) {
+				cmndspec->tags.follow = op == true;
+			    } else if (strcmp(var, "noexec") == 0) {
+				cmndspec->tags.noexec = op == true;
+			    } else if (strcmp(var, "setenv") == 0) {
+				cmndspec->tags.setenv = op == true;
+			    } else if (strcmp(var, "mail_all_cmnds") == 0 ||
+				strcmp(var, "mail_always") == 0) {
+				cmndspec->tags.send_mail = op == true;
+			    } else {
+				handled = false;
+			    }
+			} else {
+			    handled = false;
+			}
+			if (!handled && warnings) {
+			    if (val != NULL) {
+				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), var, op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			    } else {
+				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), op == false ? "!" : "", var, "");
+			    }
 			    continue;
-			if (strcmp(var, "authenticate") == 0) {
-			    cmndspec->tags.nopasswd = op == false;
-			} else if (strcmp(var, "sudoedit_follow") == 0) {
-			    cmndspec->tags.follow = op == true;
-			} else if (strcmp(var, "noexec") == 0) {
-			    cmndspec->tags.noexec = op == true;
-			} else if (strcmp(var, "setenv") == 0) {
-			    cmndspec->tags.setenv = op == true;
-			} else if (strcmp(var, "mail_all_cmnds") == 0 ||
-			    strcmp(var, "mail_always") == 0) {
-			    cmndspec->tags.send_mail = op == true;
 			}
 		    }
 		}

@@ -47,8 +47,10 @@
 #endif /* HAVE_GETOPT_LONG */
 
 static bool convert_sudoers_sudoers(const char *output_file, bool expand_aliases);
+static bool parse_sudoers(const char *input_file);
 extern bool convert_sudoers_json(const char *output_file, bool expand_aliases);
 extern bool convert_sudoers_ldif(const char *output_file, const char *base);
+extern bool parse_ldif(const char *input_file, bool store_options, const char *base);
 extern void get_hostname(void);
 
 /*
@@ -56,15 +58,13 @@ extern void get_hostname(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:ef:ho:V";
+static const char short_opts[] =  "b:ef:hi:o:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "expand-aliases",	no_argument,		NULL,	'e' },
     { "format",		required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
-#ifdef notyet
     { "input-format",	required_argument,	NULL,	'i' },
-#endif
     { "output",		required_argument,	NULL,	'o' },
     { "version",	no_argument,		NULL,	'V' },
     { NULL,		no_argument,		NULL,	'\0' },
@@ -74,17 +74,19 @@ __dso_public int main(int argc, char *argv[]);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 
-enum output_formats {
-    output_json,
-    output_ldif,
-    output_sudoers
+enum sudoers_formats {
+    format_json,
+    format_ldif,
+    format_sudoers
 };
 
 int
 main(int argc, char *argv[])
 {
     int ch, exitcode = EXIT_FAILURE;
-    enum output_formats output_format = output_ldif;
+    enum sudoers_formats output_format = format_ldif;
+    enum sudoers_formats input_format = format_sudoers;
+    bool store_options = true;
     const char *input_file = "-";
     const char *output_file = "-";
     const char *sudoers_base = NULL;
@@ -126,11 +128,14 @@ main(int argc, char *argv[])
 	    break;
 	case 'f':
 	    if (strcasecmp(optarg, "json") == 0) {
-		output_format = output_json;
+		output_format = format_json;
+		store_options = true;
 	    } else if (strcasecmp(optarg, "ldif") == 0) {
-		output_format = output_ldif;
+		output_format = format_ldif;
+		store_options = true;
 	    } else if (strcasecmp(optarg, "sudoers") == 0) {
-		output_format = output_sudoers;
+		output_format = format_sudoers;
+		store_options = false;
 	    } else {
 		sudo_warnx("unsupported output format %s", optarg);
 		usage(1);
@@ -138,6 +143,16 @@ main(int argc, char *argv[])
 	    break;
 	case 'h':
 	    help();
+	    break;
+	case 'i':
+	    if (strcasecmp(optarg, "ldif") == 0) {
+		input_format = format_ldif;
+	    } else if (strcasecmp(optarg, "sudoers") == 0) {
+		input_format = format_sudoers;
+	    } else {
+		sudo_warnx("unsupported input format %s", optarg);
+		usage(1);
+	    }
 	    break;
 	case 'o':
 	    output_file = optarg;
@@ -156,9 +171,12 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
+    /* If no base DN specified, check SUDOERS_BASE. */
+    if (sudoers_base == NULL)
+	sudoers_base = getenv("SUDOERS_BASE");
+
     /* Input file (defaults to stdin). */
     if (argc > 0) {
-	/* XXX - allow multiple input files? */
 	if (argc > 1)
 	    usage(1);
 	input_file  = argv[0];
@@ -189,6 +207,43 @@ main(int argc, char *argv[])
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
+    switch (input_format) {
+    case format_ldif:
+	if (!parse_ldif(input_file, store_options, sudoers_base))
+	    goto done;
+	break;
+    case format_sudoers:
+	if (!parse_sudoers(input_file))
+	    goto done;
+	break;
+    default:
+	sudo_fatalx("error: unhandled input %d", input_format);
+    }
+
+    switch (output_format) {
+    case format_json:
+	exitcode = !convert_sudoers_json(output_file, expand_aliases);
+	break;
+    case format_ldif:
+	exitcode = !convert_sudoers_ldif(output_file, sudoers_base);
+	break;
+    case format_sudoers:
+	exitcode = !convert_sudoers_sudoers(output_file, expand_aliases);
+	break;
+    default:
+	sudo_fatalx("error: unhandled output format %d", output_format);
+    }
+
+done:
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
+    return exitcode;
+}
+
+static bool
+parse_sudoers(const char *input_file)
+{
+    debug_decl(parse_sudoers, SUDOERS_DEBUG_UTIL)
+
     /* Open sudoers file and parse it. */
     if (strcmp(input_file, "-") == 0) {
 	sudoersin = stdin;
@@ -209,26 +264,9 @@ main(int argc, char *argv[])
 		errorfile, errorlineno);
 	else if (errorfile != NULL)
 	    sudo_warnx(U_("parse error in %s\n"), errorfile);
-	goto done;
+	debug_return_bool(false);
     }
-
-    switch (output_format) {
-    case output_json:
-	exitcode = !convert_sudoers_json(output_file, expand_aliases);
-	break;
-    case output_ldif:
-	exitcode = !convert_sudoers_ldif(output_file, sudoers_base);
-	break;
-    case output_sudoers:
-	exitcode = !convert_sudoers_sudoers(output_file, expand_aliases);
-	break;
-    default:
-	sudo_fatalx("error: unhandled output format %d", output_format);
-    }
-
-done:
-    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
-    return exitcode;
+    debug_return_bool(true);
 }
 
 FILE *
@@ -403,7 +441,8 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehV] [-b dn] "
-	"[-f format] [-o output_file] [sudoers_file]\n", getprogname());
+	"[-f output_format] [-i input_format] [-o output_file] [input_file]\n",
+	getprogname());
     if (fatal)
 	exit(1);
 }

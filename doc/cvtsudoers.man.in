@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "February 18, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "February 22, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -27,21 +27,23 @@
 \fBcvtsudoers\fR
 [\fB\-ehV\fR]
 [\fB\-b\fR\ \fIdn\fR]
-[\fB\-f\fR\ \fIformat\fR]
+[\fB\-i\fR\ \fIinput_format\fR]
+[\fB\-f\fR\ \fIoutput_format\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
-[\fIsudoers_file\fR]
+[\fIinput_file\fR]
 .SH "DESCRIPTION"
 \fBcvtsudoers\fR
-can be used to convert a policy file in
+can be used to convert between
 \fIsudoers\fR
-format to other formats.
+security policy file formats.
+The default input format is sudoers.
 The default output format is LDIF.
 It is only possible to convert a
 \fIsudoers\fR
 file that is syntactically correct.
 .PP
 If no
-\fIsudoers_file\fR
+\fIinput_file\fR
 is specified, or if it is
 \(oq-\(cq,
 the policy is read from the standard input.
@@ -63,7 +65,7 @@ Only necessary when converting to LDIF format.
 .TP 12n
 \fB\-e\fR, \fB\--expand-aliases\fR
 Expand aliases in
-\fIsudoers_file\fR.
+\fIinput_file\fR.
 Aliases are preserved by default when the output
 \fIformat\fR
 is JSON or sudoers.
@@ -132,6 +134,31 @@ is specified, or if it is
 the converted
 \fIsudoers\fR
 policy will be written to the standard output.
+.TP 12n
+\fB\-i\fR \fIinput_format\fR, \fB\--input-format\fR=\fIinput_format\fR
+Specify the input format.
+The following formats are supported:
+.PP
+.RS 12n
+.PD 0
+.TP 10n
+LDIF
+LDIF (LDAP Data Interchange Format) files can be exported from an LDAP
+server to convert security policies used by
+sudoers.ldap(@mansectform@).
+If a base DN (distinguished name) is specified, only sudoRole objects
+that match the base DN will be processed.
+Not all sudoOptions specified in a sudoRole can be translated from
+LDIF to sudoers format.
+.PD
+.TP 10n
+sudoers
+Traditional sudoers format.
+This is the default input format.
+.PD 0
+.PP
+.RE
+.PD
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
 Print the

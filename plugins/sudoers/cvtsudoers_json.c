@@ -773,10 +773,11 @@ print_aliases_json(FILE *fp, int indent, bool need_comma)
  */
 static void
 print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
-    bool expand_aliases, int indent)
+    struct defaults_list *options, bool expand_aliases, int indent)
 {
     struct cmndspec *next = *nextp;
     struct json_value value;
+    struct defaults *def;
     struct member *m;
     struct tm *tp;
     bool last_one;
@@ -811,18 +812,20 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 	fprintf(fp, "%*s],\n", indent, "");
     }
 
-    /* Print tags */
+    /* Print options and tags */
     if (cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
-	TAGS_SET(cs->tags)) {
+	TAGS_SET(cs->tags) || !TAILQ_EMPTY(options)) {
 	struct cmndtag tag = cs->tags;
+	const char *prefix = "\n";
 
-	fprintf(fp, "%*s\"Options\": [\n", indent, "");
+	fprintf(fp, "%*s\"Options\": [", indent, "");
 	indent += 4;
 	if (cs->timeout > 0) {
 	    value.type = JSON_NUMBER;
 	    value.u.number = cs->timeout;
-	    print_pair_json(fp, "{ ", "command_timeout", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "command_timeout", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (cs->notbefore != UNSPEC) {
 	    if ((tp = gmtime(&cs->notbefore)) == NULL) {
@@ -833,9 +836,9 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 		} else {
 		    value.type = JSON_STRING;
 		    value.u.string = timebuf;
-		    print_pair_json(fp, "{ ", "notbefore", &value,
-			(TAGS_SET(tag) || cs->notafter != UNSPEC) ?
-			" },\n" : " }\n", indent);
+		    fputs(prefix, fp);
+		    print_pair_json(fp, "{ ", "notbefore", &value, " }", indent);
+		    prefix = ",\n";
 		}
 	    }
 	}
@@ -848,60 +851,83 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 		} else {
 		    value.type = JSON_STRING;
 		    value.u.string = timebuf;
-		    print_pair_json(fp, "{ ", "notafter", &value,
-			TAGS_SET(tag) ?  " },\n" : " }\n", indent);
+		    fputs(prefix, fp);
+		    print_pair_json(fp, "{ ", "notafter", &value, " }", indent);
+		    prefix = ",\n";
 		}
 	    }
 	}
 	if (tag.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = !tag.nopasswd;
-	    tag.nopasswd = UNSPEC;
-	    print_pair_json(fp, "{ ", "authenticate", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "authenticate", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (tag.noexec != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.noexec;
-	    tag.noexec = UNSPEC;
-	    print_pair_json(fp, "{ ", "noexec", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "noexec", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (tag.send_mail != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.send_mail;
-	    tag.send_mail = UNSPEC;
-	    print_pair_json(fp, "{ ", "send_mail", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "send_mail", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (tag.setenv != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.setenv;
-	    tag.setenv = UNSPEC;
-	    print_pair_json(fp, "{ ", "setenv", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "setenv", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (tag.follow != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.follow;
-	    tag.follow = UNSPEC;
-	    print_pair_json(fp, "{ ", "sudoedit_follow", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "sudoedit_follow", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (tag.log_input != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.log_input;
-	    tag.log_input = UNSPEC;
-	    print_pair_json(fp, "{ ", "log_input", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "log_input", &value, " }", indent);
+	    prefix = ",\n";
 	}
 	if (tag.log_output != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = tag.log_output;
-	    tag.log_output = UNSPEC;
-	    print_pair_json(fp, "{ ", "log_output", &value,
-		TAGS_SET(tag) ? " },\n" : " }\n", indent);
+	    fputs(prefix, fp);
+	    print_pair_json(fp, "{ ", "log_output", &value, " }", indent);
+	    prefix = ",\n";
 	}
+	TAILQ_FOREACH(def, options, entries) {
+	    int type = get_defaults_type(def);
+	    if (type == -1) {
+		sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
+		/* XXX - just pass it through as a string anyway? */
+		continue;
+	    }
+	    fputs(prefix, fp);
+	    if ((type & T_MASK) == T_FLAG || def->val == NULL) {
+		value.type = JSON_BOOL;
+		value.u.boolean = def->op;
+		print_pair_json(fp, "{ ", def->var, &value, " }", indent);
+	    } else if ((type & T_MASK) == T_LIST) {
+		print_defaults_list_json(fp, def, indent);
+	    } else {
+		value.type = JSON_STRING;
+		value.u.string = def->val;
+		print_pair_json(fp, "{ ", def->var, &value, " }", indent);
+	    }
+	    prefix = ",\n";
+	}
+	putc('\n', fp);
 	indent -= 4;
 	fprintf(fp, "%*s],\n", indent, "");
     }
@@ -1024,7 +1050,8 @@ print_userspec_json(FILE *fp, struct userspec *us, int indent, bool expand_alias
 	fprintf(fp, "%*s\"Cmnd_Specs\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, next) {
-	    print_cmndspec_json(fp, cs, &next, expand_aliases, indent);
+	    print_cmndspec_json(fp, cs, &next, &priv->defaults,
+		expand_aliases, indent);
 	}
 	indent -= 4;
 	fprintf(fp, "%*s]\n", indent, "");

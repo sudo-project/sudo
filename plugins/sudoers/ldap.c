@@ -1556,9 +1556,10 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
 	/* Parse sudoOptions. */
 	opts = ldap_get_values_len(ld, entry, "sudoOption");
 
-	priv = sudo_ldap_role_to_priv(cn, runasusers, runasgroups,
+	priv = sudo_ldap_role_to_priv(cn, NULL, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
-	    notafter ? notafter[0]->bv_val : NULL, berval_iter);
+	    notafter ? notafter[0]->bv_val : NULL, false, long_list,
+	    berval_iter);
 
 	/* Cleanup */
 	if (cn != NULL)
