@@ -51,7 +51,8 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
 	    sudo_lbuf_append(lbuf, "%sALL", negated ? "!" : "");
 	    break;
 	case MYSELF:
-	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "", user_name);
+	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
+		user_name ? user_name : "");
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
