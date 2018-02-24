@@ -178,7 +178,7 @@ main(int argc, char *argv[])
 	    output_file = optarg;
 	    break;
 	case 'O':
-	    conf->sudo_order = sudo_strtonum(optarg, 1, UINT_MAX, &errstr);
+	    conf->sudo_order = sudo_strtonum(optarg, 0, UINT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("starting order: %s: %s"), optarg, U_(errstr));
 		usage(1);

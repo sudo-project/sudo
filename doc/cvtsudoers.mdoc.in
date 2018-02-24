@@ -137,6 +137,8 @@ see the
 .Fl I
 option for details.
 Defaults to a starting point of 1.
+A starting point of 0 will disable the generation of sudoOrder
+attributes in the resulting LDIF file.
 .It Fl o Ar output_file , Fl -output Ns = Ns Ar output_file
 Write the converted output to
 .Ar output_file .

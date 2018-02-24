@@ -172,6 +172,8 @@ see the
 \fB\-I\fR
 option for details.
 Defaults to a starting point of 1.
+A starting point of 0 will disable the generation of sudoOrder
+attributes in the resulting LDIF file.
 .TP 12n
 \fB\-o\fR \fIoutput_file\fR, \fB\--output\fR=\fIoutput_file\fR
 Write the converted output to

@@ -445,8 +445,10 @@ print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *con
 
 	    print_cmndspec_ldif(fp, cs, &next, &priv->defaults);
 
-	    fprintf(fp, "sudoOrder: %d\n\n", conf->sudo_order);
-	    conf->sudo_order += conf->order_increment;
+	    if (conf->sudo_order != 0) {
+		fprintf(fp, "sudoOrder: %d\n\n", conf->sudo_order);
+		conf->sudo_order += conf->order_increment;
+	    }
 	}
     }
 
