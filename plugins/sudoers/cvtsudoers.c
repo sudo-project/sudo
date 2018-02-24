@@ -100,7 +100,7 @@ main(int argc, char *argv[])
     if (!sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
-    bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
+    bindtextdomain("sudoers", LOCALEDIR);
     textdomain("sudoers");
 
     /* Read debug and plugin sections of sudo.conf. */
@@ -248,20 +248,6 @@ main(int argc, char *argv[])
 		input_file);
 	}
     }
-
-    /* Mock up a fake sudo_user struct. */
-    /* XXX - should not be required */
-    user_cmnd = user_base = "";
-    if (geteuid() == 0) {
-	const char *user = getenv("SUDO_USER");
-	if (user != NULL && *user != '\0')
-	    sudo_user.pw = sudo_getpwnam(user);
-    }
-    if (sudo_user.pw == NULL) {
-	if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
-	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
-    }
-    get_hostname();
 
     /* Setup defaults data structures. */
     if (!init_defaults())
