@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1996, 1998-2005, 2007-2017
+# Copyright (c) 1996, 1998-2005, 2007-2018
 #       Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -63,6 +63,7 @@ TESTSUDOERS_LIBS = $(NET_LIBS) @LIBMD@
 # C preprocessor defines
 CPPDEFS = -DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
 	  -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" \
+	  -D_PATH_CVTSUDOERS_CONF=\"$(sysconfdir)/cvtsudoers.conf\" \
 	  -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
 	  -DSUDOERS_MODE=$(sudoers_mode)
 
@@ -449,7 +450,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    diff $$toke $(srcdir)/$$toke.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
-		./cvtsudoers -f json $$t >$$json 2>/dev/null || true; \
+		./cvtsudoers -c "" -f json $$t >$$json 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if cmp $$json $(srcdir)/$$json.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
@@ -460,7 +461,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    diff $$json $(srcdir)/$$json.ok || true; \
 		fi; \
 		SUDOERS_BASE="ou=SUDOers,dc=sudo,dc=ws" \
-		    ./cvtsudoers -f ldif $$t >$$ldif 2>/dev/null || true; \
+		    ./cvtsudoers -c "" -f ldif $$t >$$ldif 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if cmp $$ldif $(srcdir)/$$ldif.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
@@ -470,7 +471,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    echo "$$dir/$$base: (ldif) FAIL"; \
 		    diff $$ldif $(srcdir)/$$ldif.ok || true; \
 		fi; \
-		./cvtsudoers -f sudoers $$t >$$sudo 2>/dev/null || true; \
+		./cvtsudoers -c "" -f sudoers $$t >$$sudo 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if ./visudo -qcf $$sudo; then \
 		    passed=`expr $$passed + 1`; \
@@ -712,8 +713,9 @@ cvtsudoers.o: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
+              $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers.c
@@ -723,10 +725,10 @@ cvtsudoers_json.o: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
                    $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
                    $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                   $(top_builddir)/pathnames.h
+                   $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
+                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_json.c
 cvtsudoers_ldif.o: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(devdir)/gram.h $(incdir)/compat/stdbool.h \
@@ -734,11 +736,11 @@ cvtsudoers_ldif.o: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
                    $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/redblack.h $(srcdir)/sudo_ldap.h \
-                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                   $(top_builddir)/pathnames.h
+                   $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
+                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+                   $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
+                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_ldif.c
 dce.lo: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

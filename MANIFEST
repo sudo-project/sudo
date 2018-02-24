@@ -265,6 +265,7 @@ plugins/sudoers/bsm_audit.h
 plugins/sudoers/check.c
 plugins/sudoers/check.h
 plugins/sudoers/cvtsudoers.c
+plugins/sudoers/cvtsudoers.h
 plugins/sudoers/cvtsudoers_json.c
 plugins/sudoers/cvtsudoers_ldif.c
 plugins/sudoers/def_data.c

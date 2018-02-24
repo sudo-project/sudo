@@ -32,6 +32,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
+#include "cvtsudoers.h"
 #include <gram.h>
 
 /*
@@ -1089,14 +1090,14 @@ print_userspecs_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
  * Export the parsed sudoers file in JSON format.
  */
 bool
-convert_sudoers_json(const char *output_file, bool expand_aliases)
+convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf)
 {
     bool ret = true, need_comma = false;
     const int indent = 4;
     FILE *output_fp = stdout;
     debug_decl(convert_sudoers_json, SUDOERS_DEBUG_UTIL)
 
-    if (strcmp(output_file, "-") != 0) {                     
+    if (strcmp(output_file, "-") != 0) {
 	if ((output_fp = fopen(output_file, "w")) == NULL)
 	    sudo_fatal(U_("unable to open %s"), output_file);
     }
@@ -1105,14 +1106,14 @@ convert_sudoers_json(const char *output_file, bool expand_aliases)
     putc('{', output_fp);
 
     /* Dump Defaults in JSON format. */
-    need_comma = print_defaults_json(output_fp, indent, expand_aliases, need_comma);
+    need_comma = print_defaults_json(output_fp, indent, conf->expand_aliases, need_comma);
 
     /* Dump Aliases in JSON format. */
-    if (!expand_aliases)
+    if (!conf->expand_aliases)
 	need_comma = print_aliases_json(output_fp, indent, need_comma);
 
     /* Dump User_Specs in JSON format. */
-    print_userspecs_json(output_fp, indent, expand_aliases, need_comma);
+    print_userspecs_json(output_fp, indent, conf->expand_aliases, need_comma);
 
     /* Close JSON output. */
     fputs("\n}\n", output_fp);

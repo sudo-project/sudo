@@ -33,6 +33,7 @@
 #include "sudo_ldap.h"
 #include "parse.h"
 #include "redblack.h"
+#include "cvtsudoers.h"
 #include <gram.h>
 
 struct seen_user {
@@ -40,7 +41,6 @@ struct seen_user {
     unsigned long count;
 };
 
-static int sudo_order;
 static struct rbtree *seen_users;
 
 static int
@@ -400,7 +400,7 @@ bad:
  * Print a single User_Spec.
  */
 static bool
-print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
+print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *conf)
 {
     struct privilege *priv;
     struct member *m;
@@ -427,7 +427,7 @@ print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
 		    U_("unable to allocate memory"));
 	    }
 
-	    fprintf(fp, "dn: cn=%s,%s\n", cn, base);
+	    fprintf(fp, "dn: cn=%s,%s\n", cn, conf->sudoers_base);
 	    fprintf(fp, "objectClass: top\n");
 	    fprintf(fp, "objectClass: sudoRole\n");
 	    fprintf(fp, "cn: %s\n", cn);
@@ -445,7 +445,8 @@ print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
 
 	    print_cmndspec_ldif(fp, cs, &next, &priv->defaults);
 
-	    fprintf(fp, "sudoOrder: %d\n\n", ++sudo_order);
+	    fprintf(fp, "sudoOrder: %d\n\n", conf->sudo_order);
+	    conf->sudo_order += conf->order_increment;
 	}
     }
 
@@ -456,13 +457,13 @@ print_userspec_ldif(FILE *fp, struct userspec *us, const char *base)
  * Print User_Specs.
  */
 static bool
-print_userspecs_ldif(FILE *fp, const char *base)
+print_userspecs_ldif(FILE *fp, struct cvtsudoers_config *conf)
 {
     struct userspec *us;
     debug_decl(print_userspecs_ldif, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH(us, &userspecs, entries) {
-	if (!print_userspec_ldif(fp, us, base))
+	if (!print_userspec_ldif(fp, us, conf))
 	    debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -472,17 +473,17 @@ print_userspecs_ldif(FILE *fp, const char *base)
  * Export the parsed sudoers file in LDIF format.
  */
 bool
-convert_sudoers_ldif(const char *output_file, const char *base)
+convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf)
 {
     bool ret = true;
     FILE *output_fp = stdout;
     debug_decl(convert_sudoers_ldif, SUDOERS_DEBUG_UTIL)
 
-    if (base == NULL) {
+    if (conf->sudoers_base == NULL) {
 	sudo_fatalx(U_("the SUDOERS_BASE environment variable is not set and the -b option was not specified."));
     }
 
-    if (strcmp(output_file, "-") != 0) {
+    if (output_file != NULL && strcmp(output_file, "-") != 0) {
 	if ((output_fp = fopen(output_file, "w")) == NULL)
 	    sudo_fatal(U_("unable to open %s"), output_file);
     }
@@ -491,10 +492,10 @@ convert_sudoers_ldif(const char *output_file, const char *base)
     seen_users = rbcreate(seen_user_compare);
 
     /* Dump global Defaults in LDIF format. */
-    print_global_defaults_ldif(output_fp, base);
+    print_global_defaults_ldif(output_fp, conf->sudoers_base);
 
     /* Dump User_Specs in LDIF format, expanding Aliases. */
-    print_userspecs_ldif(output_fp, base);
+    print_userspecs_ldif(output_fp, conf);
 
     /* Warn about non-translatable Defaults entries. */
     warn_bound_defaults_ldif(output_fp);
@@ -697,7 +698,7 @@ ldif_store_options(struct ldif_str_list *options)
  *	 create aliases on the fly for multiple users/hosts?
  */
 bool
-parse_ldif(const char *input_file, bool store_options, const char *base)
+parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 {
     struct sudo_role_list roles = STAILQ_HEAD_INITIALIZER(roles);
     struct sudo_role **role_array, *role = NULL;
@@ -798,7 +799,7 @@ parse_ldif(const char *input_file, bool store_options, const char *base)
 	/* Parse dn and objectClass. */
 	if (strncasecmp(line, "dn:", 3) == 0) {
 	    /* Compare dn to base, if specified. */
-	    if (base != NULL) {
+	    if (conf->sudoers_base != NULL) {
 		cp = line + 3;
 		while (isblank((unsigned char)*cp))
 		    cp++;
@@ -810,7 +811,7 @@ parse_ldif(const char *input_file, bool store_options, const char *base)
 		    if (*cp == ',')
 			cp++;
 		}
-		if (strcasecmp(cp, base) != 0) {
+		if (strcasecmp(cp, conf->sudoers_base) != 0) {
 		    /* Doesn't match base, skip the rest of it. */
 		    mismatch = true;
 		    continue;
@@ -936,7 +937,7 @@ parse_ldif(const char *input_file, bool store_options, const char *base)
 	priv = sudo_ldap_role_to_priv(role->cn, STAILQ_FIRST(&role->hosts),
 	    STAILQ_FIRST(&role->runasusers), STAILQ_FIRST(&role->runasgroups),
 	    STAILQ_FIRST(&role->cmnds), STAILQ_FIRST(&role->options),
-	    role->notbefore, role->notafter, true, store_options,
+	    role->notbefore, role->notafter, true, conf->store_options,
 	    ldif_string_iter);
 	if (priv == NULL) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
