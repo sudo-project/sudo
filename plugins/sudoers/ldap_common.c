@@ -281,7 +281,11 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	while ((host = iter(&hosts)) != NULL) {
 	    if ((m = host_to_member(host)) == NULL)
 		goto oom;
-	    TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
+	    /* Negated hosts have precedence so insert them at the end. */
+	    if (m->negated)
+		TAILQ_INSERT_TAIL(&priv->hostlist, m, entries);
+	    else
+		TAILQ_INSERT_HEAD(&priv->hostlist, m, entries);
 	}
     }
 
@@ -291,6 +295,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
     while ((cmnd = iter(&cmnds)) != NULL) {
 	char *args;
 	struct sudo_digest digest;
+	bool negated = sudo_ldap_is_negated(&cmnd);
 
 	/* Allocate storage upfront. */
 	cmndspec = calloc(1, sizeof(*cmndspec));
@@ -302,7 +307,12 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    free(m);
 	    goto oom;
 	}
-	TAILQ_INSERT_TAIL(&priv->cmndlist, cmndspec, entries);
+
+	/* Negated commands have precedence so insert them at the end. */
+	if (negated)
+	    TAILQ_INSERT_TAIL(&priv->cmndlist, cmndspec, entries);
+	else
+	    TAILQ_INSERT_HEAD(&priv->cmndlist, cmndspec, entries);
 
 	/* Initialize cmndspec */
 	TAGS_INIT(cmndspec->tags);
@@ -312,7 +322,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	/* Fill in member. */
 	m->type = COMMAND;
-	m->negated = sudo_ldap_is_negated(&cmnd);
+	m->negated = negated;
 	m->name = (char *)c;
 
 	/* Fill in command with optional digest. */
