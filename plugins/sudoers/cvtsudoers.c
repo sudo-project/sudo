@@ -249,6 +249,9 @@ main(int argc, char *argv[])
 	}
     }
 
+    /* We may need the hostname to resolve %h escapes in include files. */
+    get_hostname();
+
     /* Setup defaults data structures. */
     if (!init_defaults())
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
