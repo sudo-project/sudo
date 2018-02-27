@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 19, 2018
+.Dd February 26, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1677,7 +1677,7 @@ file loops.
 .Pp
 If the path to the include file is not fully-qualified (does not
 begin with a
-.Ql / ,
+.Ql / ) ,
 it must be located in the same directory as the sudoers file it was
 included from.
 For example, if
