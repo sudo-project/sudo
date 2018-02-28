@@ -518,7 +518,11 @@ struct ldif_string {
     STAILQ_ENTRY(ldif_string) entries;
     char *str;
 };
-STAILQ_HEAD(ldif_str_list, ldif_string);
+struct ldif_str_list {
+    struct ldif_string *stqh_first;
+    struct ldif_string **stqh_last;
+    unsigned int refcnt;
+};
 
 struct sudo_role {
     STAILQ_ENTRY(sudo_role) entries;
@@ -526,33 +530,14 @@ struct sudo_role {
     char *notbefore;
     char *notafter;
     double order;
-    struct ldif_str_list cmnds;
-    struct ldif_str_list hosts;
-    struct ldif_str_list users;
-    struct ldif_str_list runasusers;
-    struct ldif_str_list runasgroups;
-    struct ldif_str_list options;
+    struct ldif_str_list *cmnds;
+    struct ldif_str_list *hosts;
+    struct ldif_str_list *users;
+    struct ldif_str_list *runasusers;
+    struct ldif_str_list *runasgroups;
+    struct ldif_str_list *options;
 };
 STAILQ_HEAD(sudo_role_list, sudo_role);
-
-static struct sudo_role *
-sudo_role_alloc(void)
-{
-    struct sudo_role *role;
-    debug_decl(sudo_role_alloc, SUDOERS_DEBUG_UTIL)
-
-    role = calloc(1, sizeof(*role));
-    if (role != NULL) {
-	STAILQ_INIT(&role->cmnds);
-	STAILQ_INIT(&role->hosts);
-	STAILQ_INIT(&role->users);
-	STAILQ_INIT(&role->runasusers);
-	STAILQ_INIT(&role->runasgroups);
-	STAILQ_INIT(&role->options);
-    }
-
-    debug_return_ptr(role);
-}
 
 static struct ldif_string *
 ldif_string_alloc(const char *s)
@@ -577,17 +562,65 @@ ldif_string_free(struct ldif_string *ls)
     free(ls);
 }
 
-static void
-str_list_free(struct ldif_str_list *strlist)
+static struct ldif_str_list *
+str_list_alloc(void)
 {
+    struct ldif_str_list *strlist;
+    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
+
+    strlist = malloc(sizeof(*strlist));
+    STAILQ_INIT(strlist);
+    strlist->refcnt = 1;
+
+    debug_return_ptr(strlist);
+}
+
+static void
+str_list_free(void *v)
+{
+    struct ldif_str_list *strlist = v;
     struct ldif_string *first;
     debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
 
-    while ((first = STAILQ_FIRST(strlist)) != NULL) {
-	STAILQ_REMOVE_HEAD(strlist, entries);
-	ldif_string_free(first);
+    if (--strlist->refcnt == 0) {
+	while ((first = STAILQ_FIRST(strlist)) != NULL) {
+	    STAILQ_REMOVE_HEAD(strlist, entries);
+	    ldif_string_free(first);
+	}
+	free(strlist);
     }
     debug_return;
+}
+
+static struct sudo_role *
+sudo_role_alloc(void)
+{
+    struct sudo_role *role;
+    debug_decl(sudo_role_alloc, SUDOERS_DEBUG_UTIL)
+
+    role = calloc(1, sizeof(*role));
+    if (role != NULL) {
+	role->cmnds = str_list_alloc();
+	role->hosts = str_list_alloc();
+	role->users = str_list_alloc();
+	role->runasusers = str_list_alloc();
+	role->runasgroups = str_list_alloc();
+	role->options = str_list_alloc();
+	if (role->cmnds == NULL || role->hosts == NULL ||
+	    role->users == NULL || role->runasusers == NULL ||
+	    role->runasgroups == NULL || role->options == NULL) {
+	    str_list_free(role->cmnds);
+	    str_list_free(role->hosts);
+	    str_list_free(role->users);
+	    str_list_free(role->runasusers);
+	    str_list_free(role->runasgroups);
+	    str_list_free(role->options);
+	    free(role);
+	    role = NULL;
+	}
+    }
+
+    debug_return_ptr(role);
 }
 
 static void
@@ -599,12 +632,12 @@ sudo_role_free(struct sudo_role *role)
 	free(role->cn);
 	free(role->notbefore);
 	free(role->notafter);
-	str_list_free(&role->cmnds);
-	str_list_free(&role->hosts);
-	str_list_free(&role->users);
-	str_list_free(&role->runasusers);
-	str_list_free(&role->runasgroups);
-	str_list_free(&role->options);
+	str_list_free(role->cmnds);
+	str_list_free(role->hosts);
+	str_list_free(role->users);
+	str_list_free(role->runasusers);
+	str_list_free(role->runasgroups);
+	str_list_free(role->options);
 	free(role);
     }
 
@@ -616,7 +649,7 @@ sudo_role_free(struct sudo_role *role)
  * insert into the specified strlist.
  */
 static void
-ldif_store_string(const char *str, struct ldif_str_list *strlist)
+ldif_store_string(const char *str, struct ldif_str_list *strlist, bool sorted)
 {
     struct ldif_string *ls;
     debug_decl(ldif_store_string, SUDOERS_DEBUG_UTIL)
@@ -627,7 +660,24 @@ ldif_store_string(const char *str, struct ldif_str_list *strlist)
 	sudo_fatalx(U_("%s: %s"), __func__,
 	    U_("unable to allocate memory"));
     }
-    STAILQ_INSERT_TAIL(strlist, ls, entries);
+    if (!sorted) {
+	STAILQ_INSERT_TAIL(strlist, ls, entries);
+    } else {
+	struct ldif_string *prev, *next;
+
+	/* Insertion sort, list is small. */
+	prev = STAILQ_FIRST(strlist);
+	if (prev == NULL || strcasecmp(str, prev->str) <= 0) {
+	    STAILQ_INSERT_HEAD(strlist, ls, entries);
+	} else {
+	    while ((next = STAILQ_NEXT(prev, entries)) != NULL) {
+		if (strcasecmp(str, next->str) <= 0)
+		    break;
+		prev = next;
+	    }
+	    STAILQ_INSERT_AFTER(strlist, prev, ls, entries);
+	}
+    }
 
     debug_return;
 }
@@ -692,6 +742,49 @@ ldif_store_options(struct ldif_str_list *options)
     debug_return;
 }
 
+static int
+str_list_cmp(const void *aa, const void *bb)
+{
+    const struct ldif_str_list *a = aa;
+    const struct ldif_str_list *b = bb;
+    const struct ldif_string *lsa = STAILQ_FIRST(a);
+    const struct ldif_string *lsb = STAILQ_FIRST(b);
+    int ret;
+
+    while (lsa != NULL && lsb != NULL) {
+	if ((ret = strcmp(lsa->str, lsb->str)) != 0)
+	    return ret;
+	lsa = STAILQ_NEXT(lsa, entries);
+	lsb = STAILQ_NEXT(lsb, entries);
+    }
+    return lsa == lsb ? 0 : (lsa == NULL ? -1 : 1);
+}
+
+static int
+str_list_cache(struct rbtree *cache, struct ldif_str_list **strlistp)
+{
+    struct ldif_str_list *strlist = *strlistp;
+    struct rbnode *node;
+    int ret;
+    debug_decl(str_list_cache, SUDOERS_DEBUG_UTIL)
+
+    ret = rbinsert(cache, strlist, &node);
+    switch (ret) {
+    case 0:
+	/* new entry, take a ref for the cache */
+	strlist->refcnt++;
+	break;
+    case 1:
+	/* already exists, use existing and take a ref. */
+	str_list_free(strlist);
+	strlist = node->data;
+	strlist->refcnt++;
+	*strlistp = strlist;
+	break;
+    }
+    debug_return_int(ret);
+}
+
 /*
  * Parse a sudoers file in LDIF format
  * https://tools.ietf.org/html/rfc2849
@@ -705,6 +798,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 {
     struct sudo_role_list roles = STAILQ_HEAD_INITIALIZER(roles);
     struct sudo_role **role_array, *role = NULL;
+    struct rbtree *usercache, *groupcache, *hostcache;
     unsigned int n, numroles = 0;
     bool in_role = false;
     size_t linesize = 0;
@@ -725,6 +819,12 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
         sudo_fatal(U_("unable to open %s"), input_file);
     init_parser(input_file, false);
 
+    usercache = rbcreate(str_list_cmp);
+    groupcache = rbcreate(str_list_cmp);
+    hostcache = rbcreate(str_list_cmp);
+    if (usercache == NULL || groupcache == NULL || hostcache == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+
     /* Read through input, parsing into sudo_roles and global defaults. */
     for (;;) {
 	len = getline(&line, &linesize, fp);
@@ -737,15 +837,33 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	if (len <= 0) {
 	    if (in_role) {
 		if (role->cn != NULL && strcmp(role->cn, "defaults") == 0) {
-		    ldif_store_options(&role->options);
+		    ldif_store_options(role->options);
 		    sudo_role_free(role);
-		} else if (STAILQ_EMPTY(&role->users) ||
-		    STAILQ_EMPTY(&role->hosts) || STAILQ_EMPTY(&role->cmnds)) {
+		} else if (STAILQ_EMPTY(role->users) ||
+		    STAILQ_EMPTY(role->hosts) || STAILQ_EMPTY(role->cmnds)) {
 		    /* Incomplete role. */
 		    sudo_warnx(U_("ignoring incomplete sudoRole: cn: %s"),
 			role->cn ? role->cn : "UNKNOWN");
 		    sudo_role_free(role);
 		} else {
+		    /* Cache users, hosts, runasusers and runasgroups. */
+		    if (str_list_cache(usercache, &role->users) == -1) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+		    }
+		    if (str_list_cache(hostcache, &role->hosts) == -1) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+		    }
+		    if (str_list_cache(usercache, &role->runasusers) == -1) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+		    }
+		    if (str_list_cache(groupcache, &role->runasgroups) == -1) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+		    }
+
 		    /* Store finished role. */
 		    STAILQ_INSERT_TAIL(&roles, role, entries);
 		    numroles++;
@@ -845,19 +963,19 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		    U_("unable to allocate memory"));
 	    }
 	} else if (strncmp(line, "sudoUser:", 9) == 0) {
-	    ldif_store_string(line + 9, &role->users);
+	    ldif_store_string(line + 9, role->users, true);
 	} else if (strncmp(line, "sudoHost:", 9) == 0) {
-	    ldif_store_string(line + 9, &role->hosts);
+	    ldif_store_string(line + 9, role->hosts, true);
 	} else if (strncmp(line, "sudoRunAs:", 10) == 0) {
-	    ldif_store_string(line + 10, &role->runasusers);
+	    ldif_store_string(line + 10, role->runasusers, true);
 	} else if (strncmp(line, "sudoRunAsUser:", 14) == 0) {
-	    ldif_store_string(line + 14, &role->runasusers);
+	    ldif_store_string(line + 14, role->runasusers, true);
 	} else if (strncmp(line, "sudoRunAsGroup:", 15) == 0) {
-	    ldif_store_string(line + 15, &role->runasgroups);
+	    ldif_store_string(line + 15, role->runasgroups, true);
 	} else if (strncmp(line, "sudoCommand:", 12) == 0) {
-	    ldif_store_string(line + 12, &role->cmnds);
+	    ldif_store_string(line + 12, role->cmnds, false);
 	} else if (strncmp(line, "sudoOption:", 11) == 0) {
-	    ldif_store_string(line + 11, &role->options);
+	    ldif_store_string(line + 11, role->options, false);
 	} else if (strncmp(line, "sudoNotBefore:", 14) == 0) {
 	    cp = line + 14;
 	    while (isblank((unsigned char)*cp))
@@ -902,58 +1020,87 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	struct ldif_string *ls;
 	struct userspec *us;
 	struct member *m;
-
-	/* Allocate a new userspec and fill in the user list. */
-	if ((us = calloc(1, sizeof(*us))) == NULL) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	TAILQ_INIT(&us->privileges);
-	TAILQ_INIT(&us->users);
+	bool reuse_userspec = false;
+	bool reuse_hostspec = false;
 
 	role = role_array[n];
-	STAILQ_FOREACH(ls, &role->users, entries) {
-	    char *user = ls->str;
 
-            if ((m = calloc(1, sizeof(*m))) == NULL) {
+	/* Check whether we can reuse the user and host spec */
+	if (n > 0 && role->users == role_array[n - 1]->users) {
+	    reuse_userspec = true;
+	    if (role->hosts == role_array[n - 1]->hosts)
+		reuse_hostspec = true;
+
+	    /* TODO: reuse runasusers and runasgroups */
+	}
+
+	if (reuse_userspec) {
+	    /* Re-use the previous userspec */
+	    us = TAILQ_LAST(&userspecs, userspec_list);
+	} else {
+	    /* Allocate a new userspec and fill in the user list. */
+	    if ((us = calloc(1, sizeof(*us))) == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
-            m->negated = sudo_ldap_is_negated(&user);
-            m->name = strdup(user);
-            if (m->name == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-            }
-	    if (strcmp(user, "ALL") == 0) {
-		m->type = ALL;
-	    } else if (*user == '+') {
-		m->type = NETGROUP;
-	    } else if (*user == '%') {
-		m->type = USERGROUP;
-	    } else {
-		m->type = WORD;
+	    TAILQ_INIT(&us->privileges);
+	    TAILQ_INIT(&us->users);
+
+	    STAILQ_FOREACH(ls, role->users, entries) {
+		char *user = ls->str;
+
+		if ((m = calloc(1, sizeof(*m))) == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
+		m->negated = sudo_ldap_is_negated(&user);
+		m->name = strdup(user);
+		if (m->name == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
+		if (strcmp(user, "ALL") == 0) {
+		    m->type = ALL;
+		} else if (*user == '+') {
+		    m->type = NETGROUP;
+		} else if (*user == '%') {
+		    m->type = USERGROUP;
+		} else {
+		    m->type = WORD;
+		}
+		TAILQ_INSERT_TAIL(&us->users, m, entries);
 	    }
-	    TAILQ_INSERT_TAIL(&us->users, m, entries);
 	}
 
 	/* Convert role to sudoers privilege. */
-	priv = sudo_ldap_role_to_priv(role->cn, STAILQ_FIRST(&role->hosts),
-	    STAILQ_FIRST(&role->runasusers), STAILQ_FIRST(&role->runasgroups),
-	    STAILQ_FIRST(&role->cmnds), STAILQ_FIRST(&role->options),
+	priv = sudo_ldap_role_to_priv(role->cn, STAILQ_FIRST(role->hosts),
+	    STAILQ_FIRST(role->runasusers), STAILQ_FIRST(role->runasgroups),
+	    STAILQ_FIRST(role->cmnds), STAILQ_FIRST(role->options),
 	    role->notbefore, role->notafter, true, conf->store_options,
 	    ldif_string_iter);
 	if (priv == NULL) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
-	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
 
-	/* Add finished userspec to the list. */
-	TAILQ_INSERT_TAIL(&userspecs, us, entries);
+	if (reuse_hostspec) {
+	    /* Hostspec unchanged, append cmndlist to previous privilege. */
+	    struct privilege *prev_priv = TAILQ_LAST(&us->privileges, privilege_list);
+	    TAILQ_CONCAT(&prev_priv->cmndlist, &priv->cmndlist, entries);
+	    free_privilege(priv);
+	} else {
+	    TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
+	}
+
+	/* Add finished userspec to the list if new. */
+	if (!reuse_userspec)
+	    TAILQ_INSERT_TAIL(&userspecs, us, entries);
     }
 
     /* Clean up. */
+    rbdestroy(usercache, str_list_free);
+    rbdestroy(groupcache, str_list_free);
+    rbdestroy(hostcache, str_list_free);
     for (n = 0; n < numroles; n++)
 	sudo_role_free(role_array[n]);
     free(role_array);
