@@ -871,8 +871,10 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		role = NULL;
 		in_role = false;
 	    }
-	    if (len == -1)
+	    if (len == -1) {
+		free(role);
 		break;
+	    }
 	    mismatch = false;
 	    continue;
 	}
@@ -1002,7 +1004,9 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 
     /* Convert from list of roles to array and sort by order. */
     role_array = reallocarray(NULL, numroles + 1, sizeof(*role_array));
-    for (n = 0; (role = STAILQ_FIRST(&roles)) != NULL; n++) {
+    for (n = 0; n < numroles; n++) {
+	if ((role = STAILQ_FIRST(&roles)) == NULL)
+	    break;	/* cannot happen */
 	STAILQ_REMOVE_HEAD(&roles, entries);
 	role_array[n] = role;
     }
