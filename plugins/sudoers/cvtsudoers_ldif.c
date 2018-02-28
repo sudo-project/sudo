@@ -605,6 +605,7 @@ sudo_role_free(struct sudo_role *role)
 	str_list_free(&role->runasusers);
 	str_list_free(&role->runasgroups);
 	str_list_free(&role->options);
+	free(role);
     }
 
     debug_return;
@@ -879,6 +880,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	    }
 	}
     }
+    free(line);
 
     /* Convert from list of roles to array and sort by order. */
     role_array = reallocarray(NULL, numroles + 1, sizeof(*role_array));
