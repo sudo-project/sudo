@@ -305,8 +305,8 @@ plugins/sudoers/iolog.c
 plugins/sudoers/iolog.h
 plugins/sudoers/iolog_path.c
 plugins/sudoers/ldap.c
-plugins/sudoers/ldap_common.c
 plugins/sudoers/ldap_conf.c
+plugins/sudoers/ldap_util.c
 plugins/sudoers/linux_audit.c
 plugins/sudoers/linux_audit.h
 plugins/sudoers/locale.c

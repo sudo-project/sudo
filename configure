@@ -4621,8 +4621,8 @@ if test "${with_sssd+set}" = set; then :
   withval=$with_sssd; case $with_sssd in
     yes)	SUDOERS_OBJS="${SUDOERS_OBJS} sssd.lo"
 		case "$SUDOERS_OBJS" in
-		    *ldap_common.lo*) ;;
-		    *) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_common.lo";;
+		    *ldap_util.lo*) ;;
+		    *) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_util.lo";;
 		esac
 		$as_echo "#define HAVE_SSSD 1" >>confdefs.h
 
@@ -24509,8 +24509,8 @@ fi
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo"
     case "$SUDOERS_OBJS" in
-	*ldap_common.lo*) ;;
-	*) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_common.lo";;
+	*ldap_util.lo*) ;;
+	*) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_util.lo";;
     esac
     LDAP=""
 
