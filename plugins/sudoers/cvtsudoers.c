@@ -82,7 +82,7 @@ main(int argc, char *argv[])
     int ch, exitcode = EXIT_FAILURE;
     enum sudoers_formats output_format = format_ldif;
     enum sudoers_formats input_format = format_sudoers;
-    struct cvtsudoers_config *conf;
+    struct cvtsudoers_config *conf = NULL;
     const char *input_file = "-";
     const char *output_file = "-";
     const char *conf_file = _PATH_CVTSUDOERS_CONF;
@@ -398,12 +398,14 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
 {
     debug_decl(cvtsudoers_conf_free, SUDOERS_DEBUG_UTIL)
 
-    free(conf->sudoers_base);
-    free(conf->input_format);
-    free(conf->output_format);
-    conf->sudoers_base = NULL;
-    conf->input_format = NULL;
-    conf->output_format = NULL;
+    if (conf != NULL) {
+	free(conf->sudoers_base);
+	free(conf->input_format);
+	free(conf->output_format);
+	conf->sudoers_base = NULL;
+	conf->input_format = NULL;
+	conf->output_format = NULL;
+    }
 
     debug_return;
 }
