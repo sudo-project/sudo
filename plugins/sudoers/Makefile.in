@@ -425,6 +425,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		json="regress/sudoers/$${base}.json"; \
 		ldif="regress/sudoers/$${base}.ldif"; \
 		sudo="regress/sudoers/$${base}.sudo"; \
+		ldif2sudo="regress/sudoers/$${base}.ldif2sudo"; \
 		if test -s $$json.ok; then \
 		    ASAN_OPTIONS=; \
 		else \
@@ -480,6 +481,18 @@ check: $(TEST_PROGS) visudo testsudoers
 		    failed=`expr $$failed + 1`; \
 		    echo "$$dir/$$base: (reparse) FAIL"; \
 		    ./visudo -cf $$sudo || true; \
+		fi; \
+		if test -s $(srcdir)/$$ldif.ok; then \
+		    ./cvtsudoers -c "" -i ldif -f sudoers $(srcdir)/$$ldif.ok >$$ldif2sudo || true; \
+		    total=`expr $$total + 1`; \
+		    if cmp $$ldif2sudo $(srcdir)/$$ldif2sudo.ok >/dev/null; then \
+			passed=`expr $$passed + 1`; \
+			echo "$$dir/$$base (ldif2sudo): OK"; \
+		    else \
+			failed=`expr $$failed + 1`; \
+			echo "$$dir/$$base: (ldif2sudo) FAIL"; \
+			diff $$ldif $(srcdir)/$$ldif.ok || true; \
+		    fi; \
 		fi; \
 	    done; \
 	    echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
