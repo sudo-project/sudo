@@ -714,8 +714,8 @@ role_order_cmp(const void *va, const void *vb)
     const struct sudo_role *b = *(const struct sudo_role **)vb;
     debug_decl(role_order_cmp, SUDOERS_DEBUG_LDAP)
 
-    debug_return_int(b->order < a->order ? -1 :
-        (b->order > a->order ? 1 : 0));
+    debug_return_int(a->order < b->order ? -1 :
+        (a->order > b->order ? 1 : 0));
 }
 
 /*
@@ -1151,6 +1151,11 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	    ldif_store_string(line + 12, role->cmnds, false);
 	} else if (strncmp(line, "sudoOption:", 11) == 0) {
 	    ldif_store_string(line + 11, role->options, false);
+	} else if (strncmp(line, "sudoOrder:", 10) == 0) {
+	    char *ep, *cp = line + 10;
+	    role->order = strtod(cp, &ep);
+	    if (ep == cp || *ep != '\0')
+		sudo_warnx(U_("invalid sudoOrder attribute: %s"), cp);
 	} else if (strncmp(line, "sudoNotBefore:", 14) == 0) {
 	    char *cp = line + 14;
 	    while (isblank((unsigned char)*cp))
