@@ -731,11 +731,15 @@ ldif_store_options(struct ldif_str_list *options)
 	TAILQ_INIT(d->binding);
 	d->type = DEFAULTS;
 	d->op = sudo_ldap_parse_option(ls->str, &var, &val);
-	d->var = strdup(var);
-	d->val = strdup(val);
-	if (d->var == NULL || d->val == NULL) {
+	if ((d->var = strdup(var)) == NULL) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
+	}
+	if (val != NULL) {
+	    if ((d->val = strdup(val)) == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
 	}
 	TAILQ_INSERT_TAIL(&defaults, d, entries);
     }
