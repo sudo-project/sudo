@@ -1,9 +1,3 @@
-dn: cn=defaults,ou=SUDOers,dc=sudo,dc=ws
-objectClass: top
-objectClass: sudoRole
-cn: defaults
-description: Default sudoOption's go here
-
 dn: cn=\#0,ou=SUDOers,dc=sudo,dc=ws
 objectClass: top
 objectClass: sudoRole

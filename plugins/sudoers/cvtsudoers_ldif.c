@@ -94,9 +94,16 @@ print_options_ldif(FILE *fp, struct defaults_list *options)
 static bool
 print_global_defaults_ldif(FILE *fp, const char *base)
 {
+    unsigned int count = 0;
+    struct defaults *opt;
     debug_decl(print_global_defaults_ldif, SUDOERS_DEBUG_UTIL)
 
-    if (TAILQ_EMPTY(&defaults))
+    TAILQ_FOREACH(opt, &defaults, entries) {
+	/* Skip bound Defaults (unsupported). */
+	if (opt->type == DEFAULTS)
+	    count++;
+    }
+    if (count == 0)
 	debug_return_bool(true);
 
     fprintf(fp, "dn: cn=defaults,%s\n", base);
