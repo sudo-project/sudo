@@ -811,8 +811,8 @@ ldif_to_sudoers(struct sudo_role_list *roles, unsigned int numroles,
     /*
      * Iterate over roles in sorted order, using sudo_ldap_role_to_priv()
      * to convert to privilege and store in userspecs.
-     * TODO: merge multiple users with the same sudoOrder?
      * TODO: use cn to create a UserAlias if multiple users in it?
+     * TODO: add comment info based on cn?
      */
     for (n = 0; n < numroles; n++) {
 	struct privilege *priv;
@@ -820,18 +820,30 @@ ldif_to_sudoers(struct sudo_role_list *roles, unsigned int numroles,
 	struct userspec *us;
 	struct member *m;
 	bool reuse_userspec = false;
-	bool reuse_hostspec = false;
+	bool reuse_privilege = false;
+	bool reuse_runas = false;
 
 	role = role_array[n];
 
 	/* Check whether we can reuse the user and host spec */
-	/* XXX - probably can't do this if store_options is set */
 	if (n > 0 && role->users == role_array[n - 1]->users) {
 	    reuse_userspec = true;
-	    if (role->hosts == role_array[n - 1]->hosts)
-		reuse_hostspec = true;
 
-	    /* TODO: reuse runasusers and runasgroups */
+	    /*
+	     * Since options are stored per-privilege we can't
+	     * append to the previous privilege's cmndlist if
+	     * we are storing options.
+	     */
+	    if (!store_options) {
+		if (role->hosts == role_array[n - 1]->hosts) {
+		    reuse_privilege = true;
+
+		    /* Reuse runasusers and runasgroups if possible. */
+		    if (role->runasusers == role_array[n - 1]->runasusers &&
+			role->runasgroups == role_array[n - 1]->runasgroups)
+			reuse_runas = true;
+		}
+	    }
 	}
 
 	if (reuse_userspec) {
@@ -883,9 +895,29 @@ ldif_to_sudoers(struct sudo_role_list *roles, unsigned int numroles,
 		U_("unable to allocate memory"));
 	}
 
-	if (reuse_hostspec) {
+	if (reuse_privilege) {
 	    /* Hostspec unchanged, append cmndlist to previous privilege. */
 	    struct privilege *prev_priv = TAILQ_LAST(&us->privileges, privilege_list);
+	    if (reuse_runas) {
+		/* Runas users and groups same if as in previous privilege. */
+		struct member_list *runasuserlist =
+		    TAILQ_FIRST(&prev_priv->cmndlist)->runasuserlist;
+		struct member_list *runasgrouplist =
+		    TAILQ_FIRST(&prev_priv->cmndlist)->runasgrouplist;
+		struct cmndspec *cmndspec = TAILQ_FIRST(&priv->cmndlist);
+
+		/* Free duplicate runas lists. */
+		if (cmndspec->runasuserlist != NULL)
+		    free_members(cmndspec->runasuserlist);
+		if (cmndspec->runasgrouplist != NULL)
+		    free_members(cmndspec->runasgrouplist);
+
+		/* Update cmndspec with previous runas lists. */
+		TAILQ_FOREACH(cmndspec, &priv->cmndlist, entries) {
+		    cmndspec->runasuserlist = runasuserlist;
+		    cmndspec->runasgrouplist = runasgrouplist;
+		}
+	    }
 	    TAILQ_CONCAT(&prev_priv->cmndlist, &priv->cmndlist, entries);
 	    free_privilege(priv);
 	} else {
