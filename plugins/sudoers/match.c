@@ -211,7 +211,7 @@ runaslist_matches(const struct member_list *user_list,
      */
     if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) {
 	if (user_matched == UNSPEC) {
-	    if (strcmp(runas_pw->pw_name, user_name) == 0)
+	    if (strcmp(user_name, runas_pw->pw_name) == 0)
 		user_matched = ALLOW;	/* only changing group */
 	}
 	if (group_list != NULL) {
@@ -980,7 +980,7 @@ userpw_matches(const char *sudoers_user, const char *user, const struct passwd *
 	    goto done;
 	}
     }
-    rc = strcmp(sudoers_user, user) == 0;
+    rc = strcasecmp(sudoers_user, user) == 0;
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"user %s matches sudoers user %s: %s",
@@ -1007,7 +1007,7 @@ group_matches(const char *sudoers_group, const struct group *gr)
 	    goto done;
 	}
     }
-    rc = strcmp(gr->gr_name, sudoers_group) == 0;
+    rc = strcasecmp(sudoers_group, gr->gr_name) == 0;
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"group %s matches sudoers group %s: %s",
