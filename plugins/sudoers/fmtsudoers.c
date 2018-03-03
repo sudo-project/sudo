@@ -285,7 +285,7 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
  */
 bool
 sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl,
-    bool expand_aliases)
+    bool expand_aliases, bool flush)
 {
     struct userspec *us;
     debug_decl(sudoers_format_userspecs, SUDOERS_DEBUG_UTIL)
@@ -293,6 +293,7 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl,
     TAILQ_FOREACH(us, usl, entries) {
 	if (!sudoers_format_userspec(lbuf, us, expand_aliases))
 	    break;
+	sudo_lbuf_print(lbuf);
     }
 
     debug_return_bool(!sudo_lbuf_error(lbuf));

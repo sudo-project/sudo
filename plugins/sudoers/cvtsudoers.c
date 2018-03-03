@@ -583,7 +583,7 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
     }
 
     /* Print User_Specs */
-    if (!sudoers_format_userspecs(&lbuf, &userspecs, conf->expand_aliases))
+    if (!sudoers_format_userspecs(&lbuf, &userspecs, conf->expand_aliases, true))
 	goto done;
     if (lbuf.len > 1) {
 	sudo_lbuf_print(&lbuf);

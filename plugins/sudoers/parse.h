@@ -315,6 +315,6 @@ bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
 bool sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
 bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv, bool expand_aliases);
 bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us, bool expand_aliases);
-bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl, bool expand_aliases);
+bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl, bool expand_aliases, bool flush);
 
 #endif /* SUDOERS_PARSE_H */
