@@ -1099,13 +1099,18 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		char *cp = line + 3;
 		while (isblank((unsigned char)*cp))
 		    cp++;
+		/* Skip over cn if present. */
 		if (strncasecmp(cp, "cn=", 3) == 0) {
 		    cp += 3;
-		    /* XXX - handle escaped ','? */
-		    while (*cp != ',' && *cp != '\0')
-			cp++;
-		    if (*cp == ',')
-			cp++;
+		    while (*cp != '\0') {
+			/* Handle escaped ',' chars. */
+			if (*cp == '\\')
+			    cp++;
+			if (*cp == ',') {
+			    cp++;
+			    break;
+			}
+		    }
 		}
 		if (strcasecmp(cp, conf->sudoers_base) != 0) {
 		    /* Doesn't match base, skip the rest of it. */
