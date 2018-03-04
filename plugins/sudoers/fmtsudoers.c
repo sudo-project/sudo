@@ -378,7 +378,7 @@ sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d,
 
     if (next != NULL) {
 	/* Merge Defaults with the same binding, there may be multiple. */
-	struct defaults *n = *next;
+	struct defaults *n;
 	while ((n = TAILQ_NEXT(d, entries)) && d->binding == n->binding) {
 	    sudo_lbuf_append(lbuf, ", ");
 	    sudoers_format_default(lbuf, n);
