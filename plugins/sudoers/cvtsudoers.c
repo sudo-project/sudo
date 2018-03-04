@@ -455,51 +455,9 @@ print_defaults_sudoers(struct sudo_lbuf *lbuf, bool expand_aliases)
     struct defaults *def, *next;
     debug_decl(print_defaults_sudoers, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
-	struct member *m;
-	int alias_type;
+    TAILQ_FOREACH_SAFE(def, &defaults, entries, next)
+	sudoers_format_default_line(lbuf, def, &next, expand_aliases);
 
-	/* Print Defaults type and binding (if present) */
-	switch (def->type) {
-	    case DEFAULTS_HOST:
-		sudo_lbuf_append(lbuf, "Defaults@");
-		alias_type = HOSTALIAS;
-		break;
-	    case DEFAULTS_USER:
-		sudo_lbuf_append(lbuf, "Defaults:");
-		alias_type = expand_aliases ? USERALIAS : UNSPEC;
-		break;
-	    case DEFAULTS_RUNAS:
-		sudo_lbuf_append(lbuf, "Defaults>");
-		alias_type = expand_aliases ? RUNASALIAS : UNSPEC;
-		break;
-	    case DEFAULTS_CMND:
-		sudo_lbuf_append(lbuf, "Defaults!");
-		alias_type = expand_aliases ? CMNDALIAS : UNSPEC;
-		break;
-	    default:
-		sudo_lbuf_append(lbuf, "Defaults");
-		alias_type = UNSPEC;
-		break;
-	}
-	TAILQ_FOREACH(m, def->binding, entries) {
-	    if (m != TAILQ_FIRST(def->binding))
-		sudo_lbuf_append(lbuf, ", ");
-	    sudoers_format_member(lbuf, m, ", ", alias_type);
-	}
-
-	/* Print Defaults with the same binding, there may be multiple. */
-	for (;;) {
-	    sudo_lbuf_append(lbuf, " ");
-	    sudoers_format_default(lbuf, def);
-	    next = TAILQ_NEXT(def, entries);
-	    if (next == NULL || def->binding != next->binding)
-		break;
-	    def = next;
-	    sudo_lbuf_append(lbuf, ",");
-	}
-	sudo_lbuf_append(lbuf, "\n");
-    }
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 

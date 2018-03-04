@@ -1053,6 +1053,7 @@ add_userspec(struct member *members, struct privilege *privs)
     u->file = rcstr_addref(sudoers);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
+    STAILQ_INIT(&u->comments);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
 
     debug_return_bool(true);
@@ -1157,11 +1158,17 @@ void
 free_userspec(struct userspec *us)
 {
     struct privilege *priv;
+    struct comment *comment;
 
     free_members(&us->users);
     while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
 	TAILQ_REMOVE(&us->privileges, priv, entries);
 	free_privilege(priv);
+    }
+    while ((comment = STAILQ_FIRST(&us->comments)) != NULL) {
+	STAILQ_REMOVE_HEAD(&us->comments, entries);
+	free(comment->str);
+	free(comment);
     }
     rcstr_delref(us->file);
     free(us);

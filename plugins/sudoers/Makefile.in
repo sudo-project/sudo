@@ -461,7 +461,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    diff $$json $(srcdir)/$$json.ok || true; \
 		fi; \
 		SUDOERS_BASE="ou=SUDOers,dc=sudo,dc=ws" \
-		    ./cvtsudoers -c "" -f ldif $$t >$$ldif 2>/dev/null || true; \
+		    ./cvtsudoers -c "" -f ldif < $$t >$$ldif 2>/dev/null || true; \
 		total=`expr $$total + 1`; \
 		if cmp $$ldif $(srcdir)/$$ldif.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \

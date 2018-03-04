@@ -34,6 +34,7 @@
 #include "parse.h"
 #include "redblack.h"
 #include "cvtsudoers.h"
+#include "sudo_lbuf.h"
 #include <gram.h>
 
 struct seen_user {
@@ -95,14 +96,26 @@ static bool
 print_global_defaults_ldif(FILE *fp, const char *base)
 {
     unsigned int count = 0;
+    struct sudo_lbuf lbuf;
     struct defaults *opt;
     debug_decl(print_global_defaults_ldif, SUDOERS_DEBUG_UTIL)
 
+    sudo_lbuf_init(&lbuf, NULL, 0, NULL, 80);
+
     TAILQ_FOREACH(opt, &defaults, entries) {
 	/* Skip bound Defaults (unsupported). */
-	if (opt->type == DEFAULTS)
+	if (opt->type == DEFAULTS) {
 	    count++;
+	} else {
+	    lbuf.len = 0;
+	    sudo_lbuf_append(&lbuf, "# ");
+	    sudoers_format_default_line(&lbuf, opt, false, true);
+	    fprintf(fp, "# Unable to translate %s:%d\n%s\n",
+		opt->file, opt->lineno, lbuf.buf);
+	}
     }
+    sudo_lbuf_destroy(&lbuf);
+
     if (count == 0)
 	debug_return_bool(true);
 
@@ -116,24 +129,6 @@ print_global_defaults_ldif(FILE *fp, const char *base)
     putc('\n', fp);
 
     debug_return_bool(!ferror(fp));
-}
-
-static void
-warn_bound_defaults_ldif(FILE *fp)
-{
-    struct defaults *def;
-    debug_decl(warn_bound_defaults_ldif, SUDOERS_DEBUG_UTIL)
-
-    TAILQ_FOREACH(def, &defaults, entries) {
-	if (def->type == DEFAULTS)
-	    continue;		/* only want bound defaults */
-
-	/* XXX - print Defaults line */
-	sudo_warnx(U_("%s:%d unable to translate Defaults line"),
-	    def->file, def->lineno);
-    }
-
-    debug_return;
 }
 
 /*
@@ -506,9 +501,6 @@ convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf)
     /* Dump User_Specs in LDIF format, expanding Aliases. */
     print_userspecs_ldif(output_fp, conf);
 
-    /* Warn about non-translatable Defaults entries. */
-    warn_bound_defaults_ldif(output_fp);
-
     /* Clean up. */
     rbdestroy(seen_users, seen_user_free);
 
@@ -812,7 +804,6 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 
     /*
      * TODO: use cn to create a UserAlias if multiple users in it?
-     * TODO: add comment info based on cn?
      */
 
     if (reuse_userspec) {
@@ -826,6 +817,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 	}
 	TAILQ_INIT(&us->privileges);
 	TAILQ_INIT(&us->users);
+	STAILQ_INIT(&us->comments);
 
 	STAILQ_FOREACH(ls, role->users, entries) {
 	    char *user = ls->str;
@@ -850,6 +842,38 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 		m->type = WORD;
 	    }
 	    TAILQ_INSERT_TAIL(&us->users, m, entries);
+	}
+    }
+
+    /* Add source role as a comment. */
+    if (role->cn != NULL) {
+	struct comment *comment = NULL;
+	if (reuse_userspec) {
+	    /* Try to re-use comment too. */
+	    STAILQ_FOREACH(comment, &us->comments, entries) {
+		if (strncmp(comment->str, "sudoRole ", 9) == 0) {
+		    char *tmpstr;
+		    if (asprintf(&tmpstr, "%s, %s", comment->str, role->cn) == -1) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+		    }
+		    free(comment->str);
+		    comment->str = tmpstr;
+		    break;
+		}
+	    }
+	}
+	if (comment == NULL) {
+	    /* Create a new comment. */
+	    if ((comment = malloc(sizeof(*comment))) == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    if (asprintf(&comment->str, "sudoRole %s", role->cn) == -1) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    STAILQ_INSERT_TAIL(&us->comments, comment, entries);
 	}
     }
 
@@ -964,6 +988,32 @@ ldif_to_sudoers(struct sudo_role_list *roles, unsigned int numroles,
     free(role_array);
 
     debug_return;
+}
+
+/*
+ * Given a cn with possible quoted characters, return a copy of
+ * the cn with quote characters ('\\') removed.
+ * The caller is responsible for freeing the returned string.
+ */
+static
+char *unquote_cn(const char *src)
+{
+    char *dst, *new_cn;
+    size_t len;
+    debug_decl(unquote_cn, SUDOERS_DEBUG_UTIL)
+
+    len = strlen(src);
+    if ((new_cn = malloc(len + 1)) == NULL)
+	debug_return_str(NULL);
+
+    for (dst = new_cn; *src != '\0';) {
+	if (src[0] == '\\' && src[1] != '\0')
+	    src++;
+	*dst++ = *src++;
+    }
+    *dst = '\0';
+
+    debug_return_str(new_cn);
 }
 
 /*
@@ -1136,8 +1186,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	    while (isblank((unsigned char)*cp))
 		cp++;
 	    free(role->cn);
-	    /* XXX - unescape chars? */
-	    role->cn = strdup(cp);
+	    role->cn = unquote_cn(cp);
 	    if (role->cn == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));

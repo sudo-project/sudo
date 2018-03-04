@@ -1519,6 +1519,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
 	goto oom;
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
+    STAILQ_INIT(&us->comments);
     TAILQ_INSERT_TAIL(ldap_userspecs, us, entries);
 
     /* The user has already matched, use ALL as wildcard. */

@@ -461,6 +461,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			    handled = false;
 			}
 			if (!handled && warnings) {
+			    /* XXX - callback to process unsupported options. */
 			    if (val != NULL) {
 				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), var, op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
 			    } else {

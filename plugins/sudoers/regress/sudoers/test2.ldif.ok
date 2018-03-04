@@ -1,3 +1,30 @@
+# Unable to translate stdin:26
+# Defaults@somehost set_home
+
+# Unable to translate stdin:27
+# Defaults@quoted\" set_home
+
+# Unable to translate stdin:30
+# Defaults:you set_home
+
+# Unable to translate stdin:31
+# Defaults:us\" set_home
+
+# Unable to translate stdin:32
+# Defaults:%them set_home
+
+# Unable to translate stdin:33
+# Defaults:"%: non UNIX 0 c" set_home
+
+# Unable to translate stdin:34
+# Defaults:+net set_home
+
+# Unable to translate stdin:37
+# Defaults>someone set_home
+
+# Unable to translate stdin:38
+# Defaults>"some one" set_home
+
 dn: cn=foo,ou=SUDOers,dc=sudo,dc=ws
 objectClass: top
 objectClass: sudoRole

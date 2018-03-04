@@ -256,8 +256,14 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
     bool expand_aliases)
 {
     struct privilege *priv;
+    struct comment *comment;
     struct member *m;
     debug_decl(sudoers_format_userspec, SUDOERS_DEBUG_UTIL)
+
+    /* Print comments (if any). */
+    STAILQ_FOREACH(comment, &us->comments, entries) {
+	sudo_lbuf_append(lbuf, "# %s\n", comment->str);
+    }
 
     /* Print users list. */
     TAILQ_FOREACH(m, &us->users, entries) {
@@ -291,9 +297,10 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl,
     debug_decl(sudoers_format_userspecs, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH(us, usl, entries) {
+	if (us != TAILQ_FIRST(usl))
+	    sudo_lbuf_append(lbuf, sep);
 	if (!sudoers_format_userspec(lbuf, us, expand_aliases))
 	    break;
-	sudo_lbuf_append(lbuf, sep);
 	sudo_lbuf_print(lbuf);
     }
 
@@ -320,5 +327,66 @@ sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d)
     } else {
 	sudo_lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
     }
+    debug_return_bool(!sudo_lbuf_error(lbuf));
+}
+
+/*
+ * Format and append a defaults line to the specified lbuf.
+ * If next, is specified, it must point to the next defaults
+ * entry in the list; this is used to print multiple defaults
+ * entries with the same binding on a single line.
+ */
+bool
+sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d,
+    struct defaults **next, bool expand_aliases)
+{
+    struct member *m;
+    int alias_type;
+    debug_decl(sudoers_format_default_line, SUDOERS_DEBUG_UTIL)
+
+    /* Print Defaults type and binding (if present) */
+    switch (d->type) {
+	case DEFAULTS_HOST:
+	    sudo_lbuf_append(lbuf, "Defaults@");
+	    alias_type = HOSTALIAS;
+	    break;
+	case DEFAULTS_USER:
+	    sudo_lbuf_append(lbuf, "Defaults:");
+	    alias_type = expand_aliases ? USERALIAS : UNSPEC;
+	    break;
+	case DEFAULTS_RUNAS:
+	    sudo_lbuf_append(lbuf, "Defaults>");
+	    alias_type = expand_aliases ? RUNASALIAS : UNSPEC;
+	    break;
+	case DEFAULTS_CMND:
+	    sudo_lbuf_append(lbuf, "Defaults!");
+	    alias_type = expand_aliases ? CMNDALIAS : UNSPEC;
+	    break;
+	default:
+	    sudo_lbuf_append(lbuf, "Defaults");
+	    alias_type = UNSPEC;
+	    break;
+    }
+    TAILQ_FOREACH(m, d->binding, entries) {
+	if (m != TAILQ_FIRST(d->binding))
+	    sudo_lbuf_append(lbuf, ", ");
+	sudoers_format_member(lbuf, m, ", ", alias_type);
+    }
+
+    sudo_lbuf_append(lbuf, " ");
+    sudoers_format_default(lbuf, d);
+
+    if (next != NULL) {
+	/* Merge Defaults with the same binding, there may be multiple. */
+	struct defaults *n = *next;
+	while ((n = TAILQ_NEXT(d, entries)) && d->binding == n->binding) {
+	    sudo_lbuf_append(lbuf, ", ");
+	    sudoers_format_default(lbuf, n);
+	    d = n;
+	}
+	*next = n;
+    }
+    sudo_lbuf_append(lbuf, "\n");
+
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }

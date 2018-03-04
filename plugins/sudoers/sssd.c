@@ -1436,6 +1436,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	goto oom;
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
+    STAILQ_INIT(&us->comments);
     TAILQ_INSERT_TAIL(sss_userspecs, us, entries);
 
     /* The user has already matched, use ALL as wildcard. */

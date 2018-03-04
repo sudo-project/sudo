@@ -150,6 +150,7 @@ TAILQ_HEAD(userspec_list, userspec);
 TAILQ_HEAD(member_list, member);
 TAILQ_HEAD(privilege_list, privilege);
 TAILQ_HEAD(cmndspec_list, cmndspec);
+STAILQ_HEAD(comment_list, comment);
 
 /*
  * Structure describing a user specification and list thereof.
@@ -158,6 +159,7 @@ struct userspec {
     TAILQ_ENTRY(userspec) entries;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
+    struct comment_list comments;	/* optional comments */
     int lineno;
     char *file;
 };
@@ -207,6 +209,11 @@ struct member {
 struct runascontainer {
     struct member *runasusers;
     struct member *runasgroups;
+};
+
+struct comment {
+    STAILQ_ENTRY(comment) entries;
+    char *str;
 };
 
 /*
@@ -312,6 +319,7 @@ int sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw, struct 
 /* fmtsudoers.c */
 bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs, struct cmndspec *prev_cs, bool expand_aliases);
 bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
+bool sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d, struct defaults **next, bool expand_aliases);
 bool sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
 bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv, bool expand_aliases);
 bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us, bool expand_aliases);
