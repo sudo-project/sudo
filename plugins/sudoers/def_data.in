@@ -351,3 +351,9 @@ timestamp_type
 authfail_message
 	T_STR
 	"Authentication failure message: %s"
+case_insensitive_user
+	T_FLAG
+	"Ignore case when matching user names"
+case_insensitive_group
+	T_FLAG
+	"Ignore case when matching group names"

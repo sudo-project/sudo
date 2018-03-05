@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "February 26, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 5, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2038,6 +2038,24 @@ This default may be overridden via the
 and
 \fRNOPASSWD\fR
 tags.
+This flag is
+\fIon\fR
+by default.
+.TP 18n
+case_insensitive_group
+If enabled, group names in
+\fIsudoers\fR
+will be matched in a case insentive manner.
+This may be necessary when users are stored in LDAP or AD.
+This flag is
+\fIon\fR
+by default.
+.TP 18n
+case_insensitive_user
+If enabled, user names in
+\fIsudoers\fR
+will be matched in a case insentive manner.
+This may be necessary when groups are stored in LDAP or AD.
 This flag is
 \fIon\fR
 by default.

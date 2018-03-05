@@ -486,6 +486,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Authentication failure message: %s"),
 	NULL,
     }, {
+	"case_insensitive_user", T_FLAG,
+	N_("Ignore case when matching user names"),
+	NULL,
+    }, {
+	"case_insensitive_group", T_FLAG,
+	N_("Ignore case when matching group names"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -1034,9 +1034,15 @@ user_in_group(const struct passwd *pw, const char *group)
 	    }
 	}
     } else if ((grlist = sudo_get_grlist(pw)) != NULL) {
+	int (*compare)(const char *, const char *);
+	if (def_case_insensitive_group)
+	    compare = strcasecmp;
+	else
+	    compare = strcmp;
+
 	/* Check the supplementary group vector. */
 	for (i = 0; i < grlist->ngroups; i++) {
-	    if (strcasecmp(group, grlist->groups[i]) == 0) {
+	    if (compare(group, grlist->groups[i]) == 0) {
 		matched = true;
 		goto done;
 	    }
@@ -1044,7 +1050,7 @@ user_in_group(const struct passwd *pw, const char *group)
 
 	/* Check against user's primary (passwd file) group. */
 	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	    if (strcasecmp(group, grp->gr_name) == 0) {
+	    if (compare(group, grp->gr_name) == 0) {
 		matched = true;
 		goto done;
 	    }

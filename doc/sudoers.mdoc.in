@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 26, 2018
+.Dd March 5, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1908,6 +1908,22 @@ This default may be overridden via the
 and
 .Li NOPASSWD
 tags.
+This flag is
+.Em on
+by default.
+.It case_insensitive_group
+If enabled, group names in
+.Em sudoers
+will be matched in a case insentive manner.
+This may be necessary when users are stored in LDAP or AD.
+This flag is
+.Em on
+by default.
+.It case_insensitive_user
+If enabled, user names in
+.Em sudoers
+will be matched in a case insentive manner.
+This may be necessary when groups are stored in LDAP or AD.
 This flag is
 .Em on
 by default.

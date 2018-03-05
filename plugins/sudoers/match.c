@@ -980,7 +980,10 @@ userpw_matches(const char *sudoers_user, const char *user, const struct passwd *
 	    goto done;
 	}
     }
-    rc = strcasecmp(sudoers_user, user) == 0;
+    if (def_case_insensitive_user)
+	rc = strcasecmp(sudoers_user, user) == 0;
+    else
+	rc = strcmp(sudoers_user, user) == 0;
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"user %s matches sudoers user %s: %s",
@@ -1007,7 +1010,10 @@ group_matches(const char *sudoers_group, const struct group *gr)
 	    goto done;
 	}
     }
-    rc = strcasecmp(sudoers_group, gr->gr_name) == 0;
+    if (def_case_insensitive_group)
+	rc = strcasecmp(sudoers_group, gr->gr_name) == 0;
+    else
+	rc = strcmp(sudoers_group, gr->gr_name) == 0;
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"group %s matches sudoers group %s: %s",

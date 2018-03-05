@@ -435,7 +435,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry, int *group_matched)
 	     * No runas user entries but have a matching runas group entry.
 	     * If trying to run as the invoking user, allow it.
 	     */
-	    if (strcmp(user_name, runas_pw->pw_name) == 0)
+	    if (userpw_matches(user_name, runas_pw->pw_name, runas_pw))
 		ret = true;
 	    break;
 	}
@@ -475,7 +475,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry, int *group_matched)
 	case '\0':
 	    /* Empty RunAsUser means run as the invoking user. */
 	    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
-		strcmp(user_name, runas_pw->pw_name) == 0)
+		userpw_matches(user_name, runas_pw->pw_name, runas_pw))
 		ret = true;
 	    break;
 	case 'A':

@@ -455,7 +455,7 @@ sudo_sss_open(struct sudo_nss *nss)
      * If runhost is the same as the local host, check for ipa_hostname
      * in sssd.conf and use it in preference to user_runhost.
      */
-    if (strcmp(user_runhost, user_host) == 0) {
+    if (strcasecmp(user_runhost, user_host) == 0) {
 	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
 	    free(handle);
 	    debug_return_int(ENOMEM);
@@ -607,7 +607,7 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	     * If trying to run as the invoking user, allow it.
 	     */
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "Matching against user_name");
-	    if (strcmp(user_name, runas_pw->pw_name) == 0)
+	    if (userpw_matches(user_name, runas_pw->pw_name, runas_pw))
 		ret = true;
 	    break;
 	}
@@ -660,7 +660,7 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	case '\0':
 	    /* Empty RunAsUser means run as the invoking user. */
 	    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
-		strcmp(user_name, runas_pw->pw_name) == 0)
+		userpw_matches(user_name, runas_pw->pw_name, runas_pw))
 		ret = true;
 	    break;
 	case 'A':

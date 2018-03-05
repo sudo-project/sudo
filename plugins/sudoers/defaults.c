@@ -637,6 +637,8 @@ init_defaults(void)
     def_set_utmp = true;
     def_pam_setcred = true;
     def_syslog_maxlen = MAXSYSLOGLEN;
+    def_case_insensitive_user = true;
+    def_case_insensitive_group = true;
 
     /* Reset the locale. */
     if (!firsttime) {

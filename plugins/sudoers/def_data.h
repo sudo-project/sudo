@@ -222,6 +222,10 @@
 #define def_timestamp_type      (sudo_defs_table[I_TIMESTAMP_TYPE].sd_un.tuple)
 #define I_AUTHFAIL_MESSAGE      111
 #define def_authfail_message    (sudo_defs_table[I_AUTHFAIL_MESSAGE].sd_un.str)
+#define I_CASE_INSENSITIVE_USER 112
+#define def_case_insensitive_user (sudo_defs_table[I_CASE_INSENSITIVE_USER].sd_un.flag)
+#define I_CASE_INSENSITIVE_GROUP 113
+#define def_case_insensitive_group (sudo_defs_table[I_CASE_INSENSITIVE_GROUP].sd_un.flag)
 
 enum def_tuple {
 	never,
