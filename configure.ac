@@ -2532,10 +2532,10 @@ if test "$utmp_style" = "LEGACY"; then
 fi
 
 AC_CHECK_FUNCS([sysctl], [AC_CHECK_FUNCS([devname])
-    AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [], [
-	AC_CHECK_MEMBERS([struct kinfo_proc2.p_tdev], [], [
-	    AC_CHECK_MEMBERS([struct kinfo_proc.p_tdev], [], [
-		AC_CHECK_MEMBERS([struct kinfo_proc.kp_eproc.e_tdev], [], [], [
+    AC_CHECK_MEMBER([struct kinfo_proc.ki_structsize], [AC_DEFINE(HAVE_KINFO_PROC_FREEBSD)], [
+	AC_CHECK_MEMBER([struct kinfo_proc2.p_paddr], [AC_DEFINE(HAVE_KINFO_PROC2_NETBSD)], [
+	    AC_CHECK_MEMBER([struct kinfo_proc.p_paddr], [AC_DEFINE(HAVE_KINFO_PROC_OPENBSD)], [
+		AC_CHECK_MEMBER([struct kinfo_proc.kp_proc], [AC_DEFINE(HAVE_KINFO_PROC_44BSD)], [], [
 #		    include <sys/param.h>
 #		    include <sys/sysctl.h>
 		])
@@ -4505,7 +4505,10 @@ AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_
 AH_TEMPLATE(NEED_RESOLV_H, [Define to 1 if resolv.h must be included to get the `inet_ntop' or `inet_pton' function prototypes.])
 AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the `strnlen' function.])
 AH_TEMPLATE(PAM_SUN_CODEBASE, [Define to 1 if your system uses a Solaris-derived PAM and not Linux-PAM or OpenPAM.])
-
+AH_TEMPLATE(HAVE_KINFO_PROC_44BSD, [Define to 1 if your system has a 4.4BSD-style kinfo_proc struct.])
+AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-style kinfo_proc struct.])
+AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
+AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl

@@ -367,7 +367,7 @@ tgetpass_handler(int s)
 static bool
 tty_present(void)
 {
-#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
+#if defined(HAVE_KINFO_PROC2_NETBSD) || defined(HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_44BSD) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
     debug_decl(tty_present, SUDO_DEBUG_UTIL)
     debug_return_bool(user_details.tty != NULL);
 #else

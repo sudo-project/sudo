@@ -24,9 +24,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+#if defined(HAVE_44BSD_KINFO_PROC) || defined (HAVE_OPENBSD_KINFO_PROC) || defined(HAVE_NETBSD_KINFO_PROC2)
 # include <sys/sysctl.h>
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+#elif defined(HAVE_FREEBSD_KINFO_PROC)
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
@@ -59,15 +59,15 @@
 /*
  * Arguments for sysctl(2) when reading the process start time.
  */
-#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+#if defined(HAVE_NETBSD_KINFO_PROC)
 # define SUDO_KERN_PROC		KERN_PROC2
 # define sudo_kinfo_proc	kinfo_proc2
 # define sudo_kp_namelen	6
-#elif defined(HAVE_STRUCT_KINFO_PROC_P_TDEV)
+#elif defined(HAVE_OPENBSD_KINFO_PROC)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_namelen	6
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+#elif defined(HAVE_FREEBSD_KINFO_PROC) || defined(HAVE_44BSD_KINFO_PROC)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_namelen	4
@@ -107,11 +107,11 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
-#if defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+#if defined(HAVE_FREEBSD_KINFO_PROC)
 	/* FreeBSD and Dragonfly */
 	starttime->tv_sec = ki_proc->ki_start.tv_sec;
 	starttime->tv_nsec = ki_proc->ki_start.tv_usec / 1000;
-#elif defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+#elif defined(HAVE_44BSD_KINFO_PROC)
 	/* 4.4BSD and macOS */
 	starttime->tv_sec = ki_proc->kp_proc.p_starttime.tv_sec;
 	starttime->tv_nsec = ki_proc->kp_proc.p_starttime.tv_usec / 1000;

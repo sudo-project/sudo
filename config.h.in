@@ -367,6 +367,18 @@
 /* Define to 1 if you have the `killpg' function. */
 #undef HAVE_KILLPG
 
+/* Define to 1 if your system has a NetBSD-style kinfo_proc2 struct. */
+#undef HAVE_KINFO_PROC2_NETBSD
+
+/* Define to 1 if your system has a 4.4BSD-style kinfo_proc struct. */
+#undef HAVE_KINFO_PROC_44BSD
+
+/* Define to 1 if your system has a FreeBSD-style kinfo_proc struct. */
+#undef HAVE_KINFO_PROC_FREEBSD
+
+/* Define to 1 if your system has an OpenBSD-style kinfo_proc struct. */
+#undef HAVE_KINFO_PROC_OPENBSD
+
 /* Define to 1 if you have the `krb5_get_init_creds_opt_alloc' function. */
 #undef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
 
@@ -698,18 +710,6 @@
 
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
-
-/* Define to 1 if `p_tdev' is a member of `struct kinfo_proc2'. */
-#undef HAVE_STRUCT_KINFO_PROC2_P_TDEV
-
-/* Define to 1 if `ki_tdev' is a member of `struct kinfo_proc'. */
-#undef HAVE_STRUCT_KINFO_PROC_KI_TDEV
-
-/* Define to 1 if `kp_eproc.e_tdev' is a member of `struct kinfo_proc'. */
-#undef HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV
-
-/* Define to 1 if `p_tdev' is a member of `struct kinfo_proc'. */
-#undef HAVE_STRUCT_KINFO_PROC_P_TDEV
 
 /* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
 #undef HAVE_STRUCT_PSINFO_PR_TTYDEV

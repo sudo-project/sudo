@@ -19235,60 +19235,44 @@ _ACEOF
 fi
 done
 
-    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" "
+    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_structsize" "ac_cv_member_struct_kinfo_proc_ki_structsize" "
 #	include <sys/param.h>
 #	include <sys/sysctl.h>
 #	include <sys/user.h>
 
 "
-if test "x$ac_cv_member_struct_kinfo_proc_ki_tdev" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_KINFO_PROC_KI_TDEV 1
-_ACEOF
-
+if test "x$ac_cv_member_struct_kinfo_proc_ki_structsize" = xyes; then :
+  $as_echo "#define HAVE_KINFO_PROC_FREEBSD 1" >>confdefs.h
 
 else
 
-	ac_fn_c_check_member "$LINENO" "struct kinfo_proc2" "p_tdev" "ac_cv_member_struct_kinfo_proc2_p_tdev" "
+	ac_fn_c_check_member "$LINENO" "struct kinfo_proc2" "p_paddr" "ac_cv_member_struct_kinfo_proc2_p_paddr" "
 #	    include <sys/param.h>
 #	    include <sys/sysctl.h>
 
 "
-if test "x$ac_cv_member_struct_kinfo_proc2_p_tdev" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_KINFO_PROC2_P_TDEV 1
-_ACEOF
-
+if test "x$ac_cv_member_struct_kinfo_proc2_p_paddr" = xyes; then :
+  $as_echo "#define HAVE_KINFO_PROC2_NETBSD 1" >>confdefs.h
 
 else
 
-	    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_tdev" "ac_cv_member_struct_kinfo_proc_p_tdev" "
+	    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_paddr" "ac_cv_member_struct_kinfo_proc_p_paddr" "
 #		include <sys/param.h>
 #		include <sys/sysctl.h>
 
 "
-if test "x$ac_cv_member_struct_kinfo_proc_p_tdev" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_KINFO_PROC_P_TDEV 1
-_ACEOF
-
+if test "x$ac_cv_member_struct_kinfo_proc_p_paddr" = xyes; then :
+  $as_echo "#define HAVE_KINFO_PROC_OPENBSD 1" >>confdefs.h
 
 else
 
-		ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_eproc.e_tdev" "ac_cv_member_struct_kinfo_proc_kp_eproc_e_tdev" "
+		ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_proc" "ac_cv_member_struct_kinfo_proc_kp_proc" "
 #		    include <sys/param.h>
 #		    include <sys/sysctl.h>
 
 "
-if test "x$ac_cv_member_struct_kinfo_proc_kp_eproc_e_tdev" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV 1
-_ACEOF
-
+if test "x$ac_cv_member_struct_kinfo_proc_kp_proc" = xyes; then :
+  $as_echo "#define HAVE_KINFO_PROC_44BSD 1" >>confdefs.h
 
 fi
 
@@ -28687,6 +28671,9 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
+
+
 
 
 
