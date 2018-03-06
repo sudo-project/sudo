@@ -344,7 +344,20 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 
     /* Most of the time we print a string. */
     value.type = JSON_STRING;
-    value.u.string = name;
+    if (name != NULL) {
+	value.u.string = name;
+    } else {
+	switch (type) {
+	case ALL:
+	    value.u.string = "ALL";
+	    break;
+	case MYSELF:
+	    value.u.string = "";
+	    break;
+	default:
+	    sudo_fatalx("missing member name for type %d", type);
+	}
+    }
 
     switch (type) {
     case USERGROUP:
@@ -389,8 +402,7 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	print_command_json(fp, name, type, negated, indent, last_one);
 	debug_return;
     case ALL:
-	value.u.string = "ALL";
-	/* FALLTHROUGH */
+    case MYSELF:
     case WORD:
 	switch (word_type) {
 	case TYPE_COMMAND:
