@@ -487,10 +487,10 @@ print_member(struct member *m)
 
     if (m->negated)
 	putchar('!');
-    if (m->name == NULL)
+    if (m->type == ALL)
 	fputs("ALL", stdout);
     else if (m->type != COMMAND)
-	fputs(m->name, stdout);
+	fputs(m->name ? m->name : "", stdout);
     else {
 	c = (struct sudo_command *) m->name;
 	printf("%s%s%s", c->cmnd, c->args ? " " : "",
