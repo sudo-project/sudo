@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -52,12 +52,6 @@
 #include "sudo_lbuf.h"
 #include <gram.h>
 
-#ifdef HAVE_FNMATCH
-# include <fnmatch.h>
-#else
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
-
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -73,6 +67,7 @@ static bool cb_runas_default(const union sudo_defs_val *);
 static int testsudoers_error(const char *msg);
 static int testsudoers_output(const char *buf);
 
+/* tsgetgrpw.c */
 extern void setgrfile(const char *);
 extern void setgrent(void);
 extern void endgrent(void);
@@ -86,6 +81,7 @@ extern struct passwd *getpwent(void);
 extern struct passwd *getpwnam(const char *);
 extern struct passwd *getpwuid(uid_t);
 
+/* gram.y */
 extern int (*trace_print)(const char *msg);
 
 /*
@@ -132,6 +128,7 @@ main(int argc, char *argv[])
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
+    /* No word wrap on output. */
     sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
 
     /* Initialize the debug subsystem. */
