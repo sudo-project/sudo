@@ -1,5 +1,3 @@
 Parses OK.
 
-
-
-user	ALL = sudoedit /etc/motd
+user ALL = sudoedit /etc/motd

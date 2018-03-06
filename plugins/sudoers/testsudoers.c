@@ -49,6 +49,7 @@
 #include "interfaces.h"
 #include "parse.h"
 #include "sudo_conf.h"
+#include "sudo_lbuf.h"
 #include <gram.h>
 
 #ifdef HAVE_FNMATCH
@@ -64,16 +65,13 @@
 /*
  * Function Prototypes
  */
-int  print_alias(void *, void *);
-void dump_sudoers(void);
-void print_defaults(void);
-void print_privilege(struct privilege *);
-void print_userspecs(void);
-void usage(void) __attribute__((__noreturn__));
+static void dump_sudoers(struct sudo_lbuf *lbuf);
+static void usage(void) __attribute__((__noreturn__));
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static bool cb_runas_default(const union sudo_defs_val *);
-static int testsudoers_print(const char *msg);
+static int testsudoers_error(const char *msg);
+static int testsudoers_output(const char *buf);
 
 extern void setgrfile(const char *);
 extern void setgrent(void);
@@ -116,6 +114,7 @@ main(int argc, char *argv[])
     const char *errstr;
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = EXIT_FAILURE;
+    struct sudo_lbuf lbuf;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -132,6 +131,8 @@ main(int argc, char *argv[])
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
+
+    sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
 
     /* Initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
@@ -165,7 +166,7 @@ main(int argc, char *argv[])
 		grfile = optarg;
 		break;
 	    case 't':
-		trace_print = testsudoers_print;
+		trace_print = testsudoers_error;
 		break;
 	    case 'U':
 		sudoers_uid = (uid_t)sudo_strtoid(optarg, NULL, NULL, &errstr);
@@ -294,7 +295,7 @@ main(int argc, char *argv[])
 
     if (dflag) {
 	(void) putchar('\n');
-	dump_sudoers();
+	dump_sudoers(&lbuf);
 	if (argc < 2) {
 	    exitcode = parse_error ? 1 : 0;
 	    goto done;
@@ -308,9 +309,9 @@ main(int argc, char *argv[])
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
-	    putchar('\n');
-	    print_privilege(priv);
-	    putchar('\n');
+	    sudo_lbuf_append(&lbuf, "\n");
+	    sudoers_format_privilege(&lbuf, priv, false);
+	    sudo_lbuf_print(&lbuf);
 	    host_match = hostlist_matches(sudo_user.pw, &priv->hostlist);
 	    if (host_match == ALLOW) {
 		puts("\thost  matched");
@@ -342,6 +343,7 @@ main(int argc, char *argv[])
      */
     exitcode = parse_error ? 1 : (match == ALLOW ? 0 : match + 3);
 done:
+    sudo_lbuf_destroy(&lbuf);
     sudo_freepwcache();
     sudo_freegrcache();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
@@ -479,244 +481,98 @@ restore_perms(void)
     return true;
 }
 
-void
-print_member(struct member *m)
+static bool
+print_defaults(struct sudo_lbuf *lbuf)
 {
-    struct sudo_command *c;
-    debug_decl(print_member, SUDOERS_DEBUG_UTIL)
-
-    if (m->negated)
-	putchar('!');
-    if (m->type == ALL)
-	fputs("ALL", stdout);
-    else if (m->type != COMMAND)
-	fputs(m->name ? m->name : "", stdout);
-    else {
-	c = (struct sudo_command *) m->name;
-	printf("%s%s%s", c->cmnd, c->args ? " " : "",
-	    c->args ? c->args : "");
-    }
-
-    debug_return;
-}
-
-void
-print_defaults(void)
-{
-    struct defaults *d;
-    struct member *m;
+    struct defaults *def, *next;
     debug_decl(print_defaults, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH(d, &defaults, entries) {
-	(void) fputs("Defaults", stdout);
-	switch (d->type) {
-	    case DEFAULTS_HOST:
-		putchar('@');
-		break;
-	    case DEFAULTS_USER:
-		putchar(':');
-		break;
-	    case DEFAULTS_RUNAS:
-		putchar('>');
-		break;
-	    case DEFAULTS_CMND:
-		putchar('!');
-		break;
-	}
-	TAILQ_FOREACH(m, d->binding, entries) {
-	    if (m != TAILQ_FIRST(d->binding))
-		putchar(',');
-	    print_member(m);
-	}
-	printf("\t%s%s", d->op == false ? "!" : "", d->var);
-	if (d->val != NULL) {
-	    printf("%c%s", d->op == true ? '=' : d->op, d->val);
-	}
-	putchar('\n');
-    }
+    TAILQ_FOREACH_SAFE(def, &defaults, entries, next)
+	sudoers_format_default_line(lbuf, def, &next, false);
 
-    debug_return;
+    debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 
-int
+static int
 print_alias(void *v1, void *v2)
 {
-    struct alias *a = (struct alias *)v1;
+    struct alias *a = v1;
+    struct sudo_lbuf *lbuf = v2;
     struct member *m;
-    struct sudo_command *c;
     debug_decl(print_alias, SUDOERS_DEBUG_UTIL)
 
-    switch (a->type) {
-	case HOSTALIAS:
-	    (void) printf("Host_Alias\t%s = ", a->name);
-	    break;
-	case CMNDALIAS:
-	    (void) printf("Cmnd_Alias\t%s = ", a->name);
-	    break;
-	case USERALIAS:
-	    (void) printf("User_Alias\t%s = ", a->name);
-	    break;
-	case RUNASALIAS:
-	    (void) printf("Runas_Alias\t%s = ", a->name);
-	    break;
-    }
+    sudo_lbuf_append(lbuf, "%s %s = ", alias_type_to_string(a->type),
+	a->name);
     TAILQ_FOREACH(m, &a->members, entries) {
 	if (m != TAILQ_FIRST(&a->members))
-	    fputs(", ", stdout);
-	if (m->type == COMMAND) {
-	    c = (struct sudo_command *) m->name;
-	    printf("%s%s%s", c->cmnd, c->args ? " " : "",
-		c->args ? c->args : "");
-	} else if (m->type == ALL) {
-	    fputs("ALL", stdout);
-	} else {
-	    fputs(m->name, stdout);
-	}
+	    sudo_lbuf_append(lbuf, ", ");
+	sudoers_format_member(lbuf, m, NULL, UNSPEC);
     }
-    putchar('\n');
-    debug_return_int(0);
+    sudo_lbuf_append(lbuf, "\n");
+
+    debug_return_int(sudo_lbuf_error(lbuf) ? -1 : 0);
 }
 
-#define TAG_SET(tt) \
-    ((tt) != UNSPEC && (tt) != IMPLIED)
-
-#define TAG_CHANGED(t) \
-    (TAG_SET(cs->tags.t) && cs->tags.t != tags.t)
-
-void
-print_privilege(struct privilege *priv)
+static bool
+print_aliases(struct sudo_lbuf *lbuf)
 {
-    struct cmndspec *cs;
-    struct member *m;
-    struct cmndtag tags;
-    debug_decl(print_privilege, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_aliases, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-	if (m != TAILQ_FIRST(&priv->hostlist))
-	    fputs(", ", stdout);
-	print_member(m);
-    }
-    fputs(" = ", stdout);
-    TAGS_INIT(tags);
-    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-	if (cs != TAILQ_FIRST(&priv->cmndlist))
-	    fputs(", ", stdout);
-	if (cs->runasuserlist != NULL || cs->runasgrouplist != NULL) {
-	    fputs("(", stdout);
-	    if (cs->runasuserlist != NULL) {
-		TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-		    if (m != TAILQ_FIRST(cs->runasuserlist))
-			fputs(", ", stdout);
-		    print_member(m);
-		}  
-	    } else if (cs->runasgrouplist == NULL) {
-		fputs(def_runas_default, stdout);
-	    } else {
-		fputs(sudo_user.pw->pw_name, stdout);
-	    }
-	    if (cs->runasgrouplist != NULL) {
-		fputs(" : ", stdout);
-		TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-		    if (m != TAILQ_FIRST(cs->runasgrouplist))
-			fputs(", ", stdout);
-		    print_member(m);
-		}
-	    }
-	    fputs(") ", stdout);
-	}
-#ifdef HAVE_SELINUX
-	if (cs->role)
-	    printf("ROLE=%s ", cs->role);
-	if (cs->type)
-	    printf("TYPE=%s ", cs->type);
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	if (cs->privs)
-	    printf("PRIVS=%s ", cs->privs);
-	if (cs->limitprivs)
-	    printf("LIMITPRIVS=%s ", cs->limitprivs);
-#endif /* HAVE_PRIV_SET */
-	if (cs->timeout > 0)
-	    printf("TIMEOUT=%d ", cs->timeout);
-	if (cs->notbefore != UNSPEC) {
-	    struct tm *tm = gmtime(&cs->notbefore);
-	    printf("NOTBEFORE=%04d%02d%02d%02d%02d%02dZ ",
-		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		tm->tm_hour, tm->tm_min, tm->tm_sec);
-	}
-	if (cs->notafter != UNSPEC) {
-	    struct tm *tm = gmtime(&cs->notafter);
-	    printf("NOTAFTER=%04d%02d%02d%02d%02d%02dZ ",
-		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		tm->tm_hour, tm->tm_min, tm->tm_sec);
-	}
-	if (TAG_CHANGED(follow))
-	    printf("%sFOLLOW: ", cs->tags.follow ? "" : "NO");
-	if (TAG_CHANGED(log_input))
-	    printf("%sLOG_INPUT: ", cs->tags.log_input ? "" : "NO");
-	if (TAG_CHANGED(log_output))
-	    printf("%sLOG_OUTPUT: ", cs->tags.log_output ? "" : "NO");
-	if (TAG_CHANGED(noexec))
-	    printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
-	if (TAG_CHANGED(nopasswd))
-	    printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
-	if (TAG_CHANGED(send_mail))
-	    printf("%sMAIL: ", cs->tags.send_mail ? "" : "NO");
-	if (TAG_CHANGED(setenv))
-	    printf("%sSETENV: ", cs->tags.setenv ? "" : "NO");
-	print_member(cs->cmnd);
-	memcpy(&tags, &cs->tags, sizeof(tags));
-    }
-    debug_return;
+    alias_apply(print_alias, lbuf);
+
+    debug_return_bool(!sudo_lbuf_error(lbuf));
 }
 
-void
-print_userspecs(void)
-{
-    struct member *m;
-    struct userspec *us;
-    struct privilege *priv;
-    debug_decl(print_userspecs, SUDOERS_DEBUG_UTIL)
-
-    TAILQ_FOREACH(us, &userspecs, entries) {
-	TAILQ_FOREACH(m, &us->users, entries) {
-	    if (m != TAILQ_FIRST(&us->users))
-		fputs(", ", stdout);
-	    print_member(m);
-	}
-	putchar('\t');
-	TAILQ_FOREACH(priv, &us->privileges, entries) {
-	    if (priv != TAILQ_FIRST(&us->privileges))
-		fputs(" : ", stdout);
-	    print_privilege(priv);
-	}
-	putchar('\n');
-    }
-    debug_return;
-}
-
-void
-dump_sudoers(void)
+static void
+dump_sudoers(struct sudo_lbuf *lbuf)
 {
     debug_decl(dump_sudoers, SUDOERS_DEBUG_UTIL)
 
-    print_defaults();
+    /* Print Defaults */
+    if (!print_defaults(lbuf))
+	goto done;
+    if (lbuf->len > 0) {
+	sudo_lbuf_print(lbuf);
+	sudo_lbuf_append(lbuf, "\n");
+    }
 
-    putchar('\n');
-    alias_apply(print_alias, NULL);
+    /* Print Aliases */
+    if (!print_aliases(lbuf))
+	goto done;
+    if (lbuf->len > 1) {
+	sudo_lbuf_print(lbuf);
+	sudo_lbuf_append(lbuf, "\n");
+    }
 
-    putchar('\n');
-    print_userspecs();
+    /* Print User_Specs */
+    if (!sudoers_format_userspecs(lbuf, &userspecs, NULL, false, true))
+	goto done;
+    if (lbuf->len > 1) {
+	sudo_lbuf_print(lbuf);
+    }
+
+done:
+    if (sudo_lbuf_error(lbuf)) {
+	if (errno == ENOMEM)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    }
 
     debug_return;
 }
 
-static int testsudoers_print(const char *msg)
+static int
+testsudoers_output(const char *buf)
 {
-    return fputs(msg, stderr);
+    return fputs(buf, stdout);
 }
 
-void
+static int
+testsudoers_error(const char *buf)
+{
+    return fputs(buf, stderr);
+}
+
+static void
 usage(void)
 {
     (void) fprintf(stderr, "usage: %s [-dt] [-G sudoers_gid] [-g group] [-h host] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
