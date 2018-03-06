@@ -323,6 +323,6 @@ bool sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d, str
 bool sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
 bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv, bool expand_aliases);
 bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us, bool expand_aliases);
-bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl, const char *sep, bool expand_aliases, bool flush);
+bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl, const char *separator, bool expand_aliases, bool flush);
 
 #endif /* SUDOERS_PARSE_H */
