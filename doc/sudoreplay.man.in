@@ -240,7 +240,9 @@ will limit these pauses to at most
 seconds.
 The value may be specified as a floating point number, e.g.\&
 \fI2.5\fR.
-A negative value will eliminate the pauses entirely.
+A
+\fImax_wait\fR
+of zero or less will eliminate the pauses entirely.
 .TP 12n
 \fB\-n\fR, \fB\--non-interactive\fR
 Do not prompt for user input or attempt to resize the terminal.

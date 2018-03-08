@@ -101,7 +101,7 @@ struct replay_closure {
     struct sudo_event *sigtstp_ev;
     struct timing_closure {
 	const char *decimal;
-	double max_delay;
+	struct timeval *max_delay;
 	int idx;
 	union {
 	    struct {
@@ -193,7 +193,7 @@ static struct log_info *parse_logfile(char *logfile);
 static void read_keyboard(int fd, int what, void *v);
 static void free_log_info(struct log_info *li);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(double max_wait, const char *decimal, bool interactive);
+static int replay_session(struct timeval *max_wait, const char *decimal, bool interactive);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -225,7 +225,8 @@ main(int argc, char *argv[])
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
-    double max_delay = 0;
+    struct timeval max_delay_storage, *max_delay = NULL;
+    double dval;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -281,9 +282,17 @@ main(int argc, char *argv[])
 	    break;
 	case 'm':
 	    errno = 0;
-	    max_delay = strtod(optarg, &ep);
+	    dval = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
 		sudo_fatalx(U_("invalid max wait: %s"), optarg);
+	    if (dval <= 0.0) {
+		sudo_timevalclear(&max_delay_storage);
+	    } else {
+		max_delay_storage.tv_sec = dval;
+		max_delay_storage.tv_usec =
+		    (dval - max_delay_storage.tv_sec) * 1000000.0;
+	    }
+	    max_delay = &max_delay_storage;
 	    break;
 	case 'n':
 	    interactive = false;
@@ -789,14 +798,18 @@ read_timing_record(struct replay_closure *closure)
     	closure->iobuf.toread = closure->timing.u.nbytes;
     }
 
-    /* Adjust delay using speed factor and clamp to max_delay */
+    /* Adjust delay using speed factor. */
     delay /= speed_factor;
-    if (closure->timing.max_delay && delay > closure->timing.max_delay)
-	delay = closure->timing.max_delay;
 
     /* Convert delay to a timeval. */
     timeout.tv_sec = delay;
     timeout.tv_usec = (delay - timeout.tv_sec) * 1000000.0;
+
+    /* Clamp timeout to max delay. */
+    if (closure->timing.max_delay != NULL) {
+	if (sudo_timevalcmp(&timeout, closure->timing.max_delay, >))
+	    timeout = *closure->timing.max_delay;
+    }
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timeout, false) == -1)
@@ -940,7 +953,7 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(double max_delay, const char *decimal, bool interactive)
+replay_closure_alloc(struct timeval *max_delay, const char *decimal, bool interactive)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -1021,7 +1034,7 @@ bad:
 }
 
 static int
-replay_session(double max_delay, const char *decimal, bool interactive)
+replay_session(struct timeval *max_delay, const char *decimal, bool interactive)
 {
     struct replay_closure *closure;
     int ret = 0;

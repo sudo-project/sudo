@@ -120,8 +120,8 @@ DDEESSCCRRIIPPTTIIOONN
                  session includes long pauses.  When the --mm option is
                  specified, ssuuddoorreeppllaayy will limit these pauses to at most
                  _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
-                 point number, e.g. _2_._5.  A negative value will eliminate the
-                 pauses entirely.
+                 point number, e.g. _2_._5.  A _m_a_x___w_a_i_t of zero or less will
+                 eliminate the pauses entirely.
 
      --nn, ----nnoonn--iinntteerraaccttiivvee
                  Do not prompt for user input or attempt to resize the
