@@ -120,7 +120,8 @@ DDEESSCCRRIIPPTTIIOONN
                  session includes long pauses.  When the --mm option is
                  specified, ssuuddoorreeppllaayy will limit these pauses to at most
                  _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
-                 point number, e.g. _2_._5.
+                 point number, e.g. _2_._5.  A negative value will eliminate the
+                 pauses entirely.
 
      --nn, ----nnoonn--iinntteerraaccttiivvee
                  Do not prompt for user input or attempt to resize the
@@ -293,4 +294,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.22                      July 13, 2017                     Sudo 1.8.22
+Sudo 1.8.23                      March 8, 2018                     Sudo 1.8.23
