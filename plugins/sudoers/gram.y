@@ -1158,7 +1158,7 @@ void
 free_userspec(struct userspec *us)
 {
     struct privilege *priv;
-    struct comment *comment;
+    struct sudoers_comment *comment;
 
     free_members(&us->users);
     while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {

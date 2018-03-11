@@ -150,7 +150,7 @@ TAILQ_HEAD(userspec_list, userspec);
 TAILQ_HEAD(member_list, member);
 TAILQ_HEAD(privilege_list, privilege);
 TAILQ_HEAD(cmndspec_list, cmndspec);
-STAILQ_HEAD(comment_list, comment);
+STAILQ_HEAD(comment_list, sudoers_comment);
 
 /*
  * Structure describing a user specification and list thereof.
@@ -211,8 +211,8 @@ struct runascontainer {
     struct member *runasgroups;
 };
 
-struct comment {
-    STAILQ_ENTRY(comment) entries;
+struct sudoers_comment {
+    STAILQ_ENTRY(sudoers_comment) entries;
     char *str;
 };
 

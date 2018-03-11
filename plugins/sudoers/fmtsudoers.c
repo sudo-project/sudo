@@ -256,7 +256,7 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
     bool expand_aliases)
 {
     struct privilege *priv;
-    struct comment *comment;
+    struct sudoers_comment *comment;
     struct member *m;
     debug_decl(sudoers_format_userspec, SUDOERS_DEBUG_UTIL)
 

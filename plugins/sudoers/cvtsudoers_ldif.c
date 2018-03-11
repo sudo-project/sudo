@@ -847,7 +847,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 
     /* Add source role as a comment. */
     if (role->cn != NULL) {
-	struct comment *comment = NULL;
+	struct sudoers_comment *comment = NULL;
 	if (reuse_userspec) {
 	    /* Try to re-use comment too. */
 	    STAILQ_FOREACH(comment, &us->comments, entries) {
