@@ -544,6 +544,9 @@ get_user_info(struct user_details *ud)
     ud->gid = getgid();
     ud->egid = getegid();
 
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(IDtouser(ud->uid), NULL);
+#endif
     pw = getpwuid(ud->uid);
     if (pw == NULL)
 	sudo_fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
