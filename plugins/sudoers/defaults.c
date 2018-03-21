@@ -457,7 +457,7 @@ run_early_defaults(void)
 }
 
 static void
-free_default(int type, union sudo_defs_val *sd_un)
+free_defs_val(int type, union sudo_defs_val *sd_un)
 {
     switch (type & T_MASK) {
 	case T_STR:
@@ -484,7 +484,7 @@ init_defaults(void)
     /* Clear any old settings. */
     if (!firsttime) {
 	for (def = sudo_defs_table; def->name != NULL; def++)
-	    free_default(def->type, &def->sd_un);
+	    free_defs_val(def->type, &def->sd_un);
     }
 
     /* First initialize the flags. */
@@ -800,7 +800,7 @@ check_defaults(bool quiet)
 	    memset(&sd_un, 0, sizeof(sd_un));
 	    if (parse_default_entry(def, d->val, d->op, &sd_un, d->file,
 		d->lineno, quiet)) {
-		free_default(def->type, &sd_un);
+		free_defs_val(def->type, &sd_un);
 		continue;
 	    }
 	}

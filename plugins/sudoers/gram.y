@@ -1065,6 +1065,8 @@ add_userspec(struct member *members, struct privilege *privs)
 void
 free_member(struct member *m)
 {
+    debug_decl(free_member, SUDOERS_DEBUG_PARSER)
+
     if (m->type == COMMAND) {
 	    struct sudo_command *c = (struct sudo_command *)m->name;
 	    free(c->cmnd);
@@ -1076,6 +1078,8 @@ free_member(struct member *m)
     }
     free(m->name);
     free(m);
+
+    debug_return;
 }
 
 /*
@@ -1085,17 +1089,39 @@ void
 free_members(struct member_list *members)
 {
     struct member *m;
+    debug_decl(free_members, SUDOERS_DEBUG_PARSER)
 
     while ((m = TAILQ_FIRST(members)) != NULL) {
 	TAILQ_REMOVE(members, m, entries);
 	free_member(m);
     }
+
+    debug_return;
+}
+
+struct member_list *
+free_default(struct defaults *def, struct member_list *binding)
+{
+    debug_decl(free_default, SUDOERS_DEBUG_PARSER)
+
+    if (def->binding != binding) {
+	binding = def->binding;
+	free_members(def->binding);
+	free(def->binding);
+    }
+    rcstr_delref(def->file);
+    free(def->var);
+    free(def->val);
+    free(def);
+
+    debug_return_ptr(binding);
 }
 
 void
 free_privilege(struct privilege *priv)
 {
     struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
+    struct member_list *binding = NULL;
     struct cmndspec *cs;
     struct defaults *def;
 #ifdef HAVE_SELINUX
@@ -1104,6 +1130,7 @@ free_privilege(struct privilege *priv)
 #ifdef HAVE_PRIV_SET
     char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
+    debug_decl(free_privilege, SUDOERS_DEBUG_PARSER)
 
     free(priv->ldap_role);
     free_members(&priv->hostlist);
@@ -1147,11 +1174,11 @@ free_privilege(struct privilege *priv)
     }
     while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
 	TAILQ_REMOVE(&priv->defaults, def, entries);
-	free(def->var);
-	free(def->val);
-	free(def);
+	binding = free_default(def, binding);
     }
     free(priv);
+
+    debug_return;
 }
 
 void
@@ -1159,6 +1186,7 @@ free_userspec(struct userspec *us)
 {
     struct privilege *priv;
     struct sudoers_comment *comment;
+    debug_decl(free_userspec, SUDOERS_DEBUG_PARSER)
 
     free_members(&us->users);
     while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
@@ -1172,6 +1200,8 @@ free_userspec(struct userspec *us)
     }
     rcstr_delref(us->file);
     free(us);
+
+    debug_return;
 }
 
 /*
@@ -1181,8 +1211,8 @@ free_userspec(struct userspec *us)
 bool
 init_parser(const char *path, bool quiet)
 {
-    struct member_list *binding;
-    struct defaults *d;
+    struct member_list *binding = NULL;
+    struct defaults *def;
     struct userspec *us;
     bool ret = true;
     void *next;
@@ -1193,17 +1223,8 @@ init_parser(const char *path, bool quiet)
     }
     TAILQ_INIT(&userspecs);
 
-    binding = NULL;
-    TAILQ_FOREACH_SAFE(d, &defaults, entries, next) {
-	if (d->binding != binding) {
-	    binding = d->binding;
-	    free_members(d->binding);
-	    free(d->binding);
-	}
-	rcstr_delref(d->file);
-	free(d->var);
-	free(d->val);
-	free(d);
+    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+	binding = free_default(def, binding);
     }
     TAILQ_INIT(&defaults);
 
