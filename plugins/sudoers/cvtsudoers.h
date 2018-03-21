@@ -26,7 +26,6 @@ enum sudoers_formats {
 
 /*
  * Simple string list with optional reference count.
- * XXX - move this so fmtsudoers can use it
  */
 struct cvtsudoers_string {
     STAILQ_ENTRY(cvtsudoers_string) entries;

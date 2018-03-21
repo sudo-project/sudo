@@ -528,60 +528,6 @@ struct sudo_role {
 };
 STAILQ_HEAD(sudo_role_list, sudo_role);
 
-/* XXX - move to cvtsudoers.c */
-struct cvtsudoers_string *
-cvtsudoers_string_alloc(const char *s)
-{
-    struct cvtsudoers_string *ls;
-    debug_decl(cvtsudoers_string_alloc, SUDOERS_DEBUG_UTIL)
-
-    if ((ls = malloc(sizeof(*ls))) != NULL) {
-	if ((ls->str = strdup(s)) == NULL) {
-	    free(ls);
-	    ls = NULL;
-	}
-    }
-
-    debug_return_ptr(ls);
-}
-
-void
-cvtsudoers_string_free(struct cvtsudoers_string *ls)
-{
-    free(ls->str);
-    free(ls);
-}
-
-struct cvtsudoers_str_list *
-str_list_alloc(void)
-{
-    struct cvtsudoers_str_list *strlist;
-    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
-
-    strlist = malloc(sizeof(*strlist));
-    STAILQ_INIT(strlist);
-    strlist->refcnt = 1;
-
-    debug_return_ptr(strlist);
-}
-
-void
-str_list_free(void *v)
-{
-    struct cvtsudoers_str_list *strlist = v;
-    struct cvtsudoers_string *first;
-    debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
-
-    if (--strlist->refcnt == 0) {
-	while ((first = STAILQ_FIRST(strlist)) != NULL) {
-	    STAILQ_REMOVE_HEAD(strlist, entries);
-	    cvtsudoers_string_free(first);
-	}
-	free(strlist);
-    }
-    debug_return;
-}
-
 static struct sudo_role *
 sudo_role_alloc(void)
 {
@@ -677,7 +623,7 @@ ldif_store_string(const char *str, struct cvtsudoers_str_list *strlist, bool sor
  * Takes a pointer to a struct cvtsudoers_string *.
  * Returns the string or NULL if we've reached the end.
  */
-char *
+static char *
 cvtsudoers_string_iter(void **vp)
 {
     struct cvtsudoers_string *ls = *vp;

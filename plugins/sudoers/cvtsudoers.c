@@ -77,7 +77,7 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static bool convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
-static bool parse_filter(char *expression);
+static bool cvtsudoers_parse_filter(char *expression);
 static bool alias_remove_unused(void);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
@@ -236,7 +236,7 @@ main(int argc, char *argv[])
     }
     if (conf->filter != NULL) {
 	/* We always expand aliases when filtering (may change in future). */
-	if (!parse_filter(conf->filter))
+	if (!cvtsudoers_parse_filter(conf->filter))
 	    usage(1);
     }
 
@@ -437,10 +437,10 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
 }
 
 static bool
-parse_filter(char *expression)
+cvtsudoers_parse_filter(char *expression)
 {
     char *last = NULL, *cp = expression;
-    debug_decl(parse_filter, SUDOERS_DEBUG_UTIL)
+    debug_decl(cvtsudoers_parse_filter, SUDOERS_DEBUG_UTIL)
 
     if (filters == NULL) {
 	if ((filters = malloc(sizeof(*filters))) == NULL) {
@@ -488,6 +488,59 @@ parse_filter(char *expression)
     }
 
     debug_return_bool(true);
+}
+
+struct cvtsudoers_string *
+cvtsudoers_string_alloc(const char *s)
+{
+    struct cvtsudoers_string *ls;
+    debug_decl(cvtsudoers_string_alloc, SUDOERS_DEBUG_UTIL)
+
+    if ((ls = malloc(sizeof(*ls))) != NULL) {
+	if ((ls->str = strdup(s)) == NULL) {
+	    free(ls);
+	    ls = NULL;
+	}
+    }
+
+    debug_return_ptr(ls);
+}
+
+void
+cvtsudoers_string_free(struct cvtsudoers_string *ls)
+{
+    free(ls->str);
+    free(ls);
+}
+
+struct cvtsudoers_str_list *
+str_list_alloc(void)
+{
+    struct cvtsudoers_str_list *strlist;
+    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
+
+    strlist = malloc(sizeof(*strlist));
+    STAILQ_INIT(strlist);
+    strlist->refcnt = 1;
+
+    debug_return_ptr(strlist);
+}
+
+void
+str_list_free(void *v)
+{
+    struct cvtsudoers_str_list *strlist = v;
+    struct cvtsudoers_string *first;
+    debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
+
+    if (--strlist->refcnt == 0) {
+	while ((first = STAILQ_FIRST(strlist)) != NULL) {
+	    STAILQ_REMOVE_HEAD(strlist, entries);
+	    cvtsudoers_string_free(first);
+	}
+	free(strlist);
+    }
+    debug_return;
 }
 
 static bool
