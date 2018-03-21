@@ -269,7 +269,7 @@ void free_member(struct member *m);
 void free_members(struct member_list *members);
 void free_privilege(struct privilege *priv);
 void free_userspec(struct userspec *us);
-struct member_list *free_default(struct defaults *def, struct member_list *binding);
+void free_default(struct defaults *def, struct member_list **binding);
 
 /* match_addr.c */
 bool addr_matches(char *n);

@@ -762,7 +762,7 @@ static void
 filter_defaults(void)
 {
     struct defaults *def, *next;
-    struct member_list *binding = NULL;
+    struct member_list *prev_binding = NULL;
     debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
@@ -770,17 +770,17 @@ filter_defaults(void)
 	case DEFAULTS_USER:
 	    if (!userlist_matches_filter(def->binding)) {
 		TAILQ_REMOVE(&defaults, def, entries);
-		binding = free_default(def, binding);
+		free_default(def, &prev_binding);
 	    } else {
-		binding = def->binding;
+		prev_binding = def->binding;
 	    }
 	    break;
 	case DEFAULTS_HOST:
 	    if (!hostlist_matches_filter(def->binding)) {
 		TAILQ_REMOVE(&defaults, def, entries);
-		binding = free_default(def, binding);
+		free_default(def, &prev_binding);
 	    } else {
-		binding = def->binding;
+		prev_binding = def->binding;
 	    }
 	    break;
 	default:

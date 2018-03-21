@@ -871,13 +871,13 @@ free_members(struct member_list *members)
     debug_return;
 }
 
-struct member_list *
-free_default(struct defaults *def, struct member_list *binding)
+void
+free_default(struct defaults *def, struct member_list **binding)
 {
     debug_decl(free_default, SUDOERS_DEBUG_PARSER)
 
-    if (def->binding != binding) {
-	binding = def->binding;
+    if (def->binding != *binding) {
+	*binding = def->binding;
 	free_members(def->binding);
 	free(def->binding);
     }
@@ -886,14 +886,14 @@ free_default(struct defaults *def, struct member_list *binding)
     free(def->val);
     free(def);
 
-    debug_return_ptr(binding);
+    debug_return;
 }
 
 void
 free_privilege(struct privilege *priv)
 {
     struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
-    struct member_list *binding = NULL;
+    struct member_list *prev_binding = NULL;
     struct cmndspec *cs;
     struct defaults *def;
 #ifdef HAVE_SELINUX
@@ -946,7 +946,7 @@ free_privilege(struct privilege *priv)
     }
     while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
 	TAILQ_REMOVE(&priv->defaults, def, entries);
-	binding = free_default(def, binding);
+	free_default(def, &prev_binding);
     }
     free(priv);
 
@@ -983,7 +983,7 @@ free_userspec(struct userspec *us)
 bool
 init_parser(const char *path, bool quiet)
 {
-    struct member_list *binding = NULL;
+    struct member_list *prev_binding = NULL;
     struct defaults *def;
     struct userspec *us;
     bool ret = true;
@@ -996,7 +996,7 @@ init_parser(const char *path, bool quiet)
     TAILQ_INIT(&userspecs);
 
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
-	binding = free_default(def, binding);
+	free_default(def, &prev_binding);
     }
     TAILQ_INIT(&defaults);
 
