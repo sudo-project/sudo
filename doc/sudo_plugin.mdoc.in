@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 11, 2017
+.Dd March 21, 2018
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1758,7 +1758,7 @@ while the plugin functions are run.
 The following signals are trapped by default before the command is
 executed:
 .Pp
-.Bl -bullet -compact
+.Bl -bullet -compact -width 1n
 .It
 .Dv SIGALRM
 .It

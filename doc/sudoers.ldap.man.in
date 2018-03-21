@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "5" "December 12, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -36,7 +36,7 @@ in a large, distributed environment.
 Using LDAP for
 \fIsudoers\fR
 has several benefits:
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fBsudo\fR
 no longer needs to read
@@ -44,7 +44,7 @@ no longer needs to read
 in its entirety.
 When LDAP is used, there are only two or three LDAP queries per invocation.
 This makes it especially fast and particularly usable in LDAP environments.
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fBsudo\fR
 no longer exits if there is a typo in
@@ -55,7 +55,7 @@ It is still possible to have typos in a user or host name, but
 this will not prevent
 \fBsudo\fR
 from running.
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 It is possible to specify per-entry options that override the global
 default options.
@@ -64,7 +64,7 @@ only supports default options and limited options associated with
 user/host/commands/aliases.
 The syntax is complicated and can be difficult for users to understand.
 Placing the options directly in the entry is more natural.
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 The
 \fBvisudo\fR

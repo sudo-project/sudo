@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 5, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -698,13 +698,13 @@ and
 syntax depends on
 the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
-.TP 6n
+.TP 3n
 \fB\(bu\fR
 Group in the same domain: "%:Group Name"
-.TP 6n
+.TP 3n
 \fB\(bu\fR
 Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
-.TP 6n
+.TP 3n
 \fB\(bu\fR
 Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 .PP
@@ -4181,7 +4181,7 @@ variable is considered unsafe if any of the following are true:
 .PP
 .RS 18n
 .PD 0
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 It consists of a fully-qualified path name,
 optionally prefixed with a colon
@@ -4190,15 +4190,15 @@ that does not match the location of the
 \fIzoneinfo\fR
 directory.
 .PD
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 It contains a
 \fI..\fR
 path element.
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 It contains white space or non-printable characters.
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 It is longer than the value of
 \fRPATH_MAX\fR.

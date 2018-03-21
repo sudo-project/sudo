@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "December 1, 2017" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -309,15 +309,15 @@ their original location and the temporary versions are removed.
 To help prevent the editing of unauthorized files, the following
 restrictions are enforced unless explicitly allowed by the security policy:
 .RS 16n
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 Symbolic links may not be edited (version 1.8.15 and higher).
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 Symbolic links along the path to be edited are not followed when the
 parent directory is writable by the invoking user unless that user
 is root (version 1.8.16 and higher).
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 Files located in a directory that is writable by the invoking user may
 not be edited unless that user is root (version 1.8.16 and higher).
@@ -688,37 +688,37 @@ and the group vector is initialized based on the group database
 option was specified).
 .PP
 The following parameters may be specified by security policy:
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 real and effective user ID
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 real and effective group ID
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 supplementary group IDs
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 the environment list
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 current working directory
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 file creation mode mask (umask)
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 SELinux role and type
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 Solaris project
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 Solaris privileges
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 BSD login class
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 scheduling priority (aka nice value)
 .SS "Process model"

@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 1, 2017
+.Dd March 21, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -279,7 +279,7 @@ their original location and the temporary versions are removed.
 .Pp
 To help prevent the editing of unauthorized files, the following
 restrictions are enforced unless explicitly allowed by the security policy:
-.Bl -bullet -offset 4
+.Bl -bullet -offset 4 -width 1n
 .It
 Symbolic links may not be edited (version 1.8.15 and higher).
 .It
@@ -626,7 +626,7 @@ and the group vector is initialized based on the group database
 option was specified).
 .Pp
 The following parameters may be specified by security policy:
-.Bl -bullet
+.Bl -bullet -width 1n
 .It
 real and effective user ID
 .It

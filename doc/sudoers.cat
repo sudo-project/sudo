@@ -302,11 +302,11 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      group provider plugin.  For instance, the QAS AD plugin supports the
      following formats:
 
-     ++oo     Group in the same domain: "%:Group Name"
+     ++oo  Group in the same domain: "%:Group Name"
 
-     ++oo     Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
+     ++oo  Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 
-     ++oo     Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
+     ++oo  Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 
      See _G_R_O_U_P _P_R_O_V_I_D_E_R _P_L_U_G_I_N_S for more information.
 
@@ -2106,16 +2106,15 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        variable is considered unsafe if any of the following
                        are true:
 
-                       ++oo   It consists of a fully-qualified path name,
-                           optionally prefixed with a colon (`:'), that does
-                           not match the location of the _z_o_n_e_i_n_f_o directory.
+                       ++oo  It consists of a fully-qualified path name,
+                          optionally prefixed with a colon (`:'), that does
+                          not match the location of the _z_o_n_e_i_n_f_o directory.
 
-                       ++oo   It contains a _._. path element.
+                       ++oo  It contains a _._. path element.
 
-                       ++oo   It contains white space or non-printable
-                           characters.
+                       ++oo  It contains white space or non-printable characters.
 
-                       ++oo   It is longer than the value of PATH_MAX.
+                       ++oo  It is longer than the value of PATH_MAX.
 
                        The argument may be a double-quoted, space-separated
                        list or a single value without double-quotes.  The list
@@ -2909,4 +2908,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.23                      March 5, 2018                     Sudo 1.8.23
+Sudo 1.8.23                     March 21, 2018                     Sudo 1.8.23

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "July 11, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2007,32 +2007,32 @@ front end installs default signal handlers to trap common signals
 while the plugin functions are run.
 The following signals are trapped by default before the command is
 executed:
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGALRM\fR
 .PD 0
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGHUP\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGINT\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGPIPE\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGQUIT\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGTERM\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGTSTP\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGUSR1\fR
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 \fRSIGUSR2\fR
 .PD
