@@ -32,6 +32,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pwd.h>
 #include <unistd.h>
 
 #include "sudoers.h"
@@ -39,6 +40,7 @@
 #include "sudoers_version.h"
 #include "sudo_conf.h"
 #include "sudo_lbuf.h"
+#include "redblack.h"
 #include "cvtsudoers.h"
 #include <gram.h>
 
@@ -51,9 +53,10 @@
 /*
  * Globals
  */
+struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:ef:hi:I:o:O:V";
+static const char short_opts[] =  "b:c:ef:hi:I:m:o:O:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
@@ -62,6 +65,7 @@ static struct option long_opts[] = {
     { "help",		no_argument,		NULL,	'h' },
     { "input-format",	required_argument,	NULL,	'i' },
     { "increment",	required_argument,	NULL,	'I' },
+    { "match",		required_argument,	NULL,	'm' },
     { "order-start",	required_argument,	NULL,	'O' },
     { "output",		required_argument,	NULL,	'o' },
     { "version",	no_argument,		NULL,	'V' },
@@ -73,8 +77,12 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static bool convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
+static bool parse_filter(char *expression);
+static bool alias_remove_unused(void);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
+static void filter_userspecs(void);
+static void filter_defaults(void);
 
 int
 main(int argc, char *argv[])
@@ -174,6 +182,9 @@ main(int argc, char *argv[])
 		usage(1);
 	    }
 	    break;
+	case 'm':
+	    conf->filter = optarg;
+	    break;
 	case 'o':
 	    output_file = optarg;
 	    break;
@@ -223,6 +234,11 @@ main(int argc, char *argv[])
 	    usage(1);
 	}
     }
+    if (conf->filter != NULL) {
+	/* We always expand aliases when filtering (may change in future). */
+	if (!parse_filter(conf->filter))
+	    usage(1);
+    }
 
     /* If no base DN specified, check SUDOERS_BASE. */
     if (conf->sudoers_base == NULL) {
@@ -269,6 +285,15 @@ main(int argc, char *argv[])
 	sudo_fatalx("error: unhandled input %d", input_format);
     }
 
+    /* Apply filters. */
+    if (conf->filter != NULL) {
+	    filter_userspecs();
+
+	    filter_defaults();
+
+	    alias_remove_unused();
+    }
+
     switch (output_format) {
     case format_json:
 	exitcode = !convert_sudoers_json(output_file, conf);
@@ -299,6 +324,7 @@ static struct cvtsudoers_conf_table cvtsudoers_conf_vars[] = {
     { "sudoers_base", CONF_STR, &cvtsudoers_config.sudoers_base },
     { "input_format", CONF_STR, &cvtsudoers_config.input_format },
     { "output_format", CONF_STR, &cvtsudoers_config.output_format },
+    { "match", CONF_STR, &cvtsudoers_config.filter },
     { "expand_aliases", CONF_BOOL, &cvtsudoers_config.expand_aliases }
 };
 
@@ -411,6 +437,60 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
 }
 
 static bool
+parse_filter(char *expression)
+{
+    char *last = NULL, *cp = expression;
+    debug_decl(parse_filter, SUDOERS_DEBUG_UTIL)
+
+    if (filters == NULL) {
+	if ((filters = malloc(sizeof(*filters))) == NULL) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	STAILQ_INIT(&filters->users);
+	STAILQ_INIT(&filters->groups);
+	STAILQ_INIT(&filters->hosts);
+    }
+
+    for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
+	/*
+	 * Filter expression:
+	 *	user=foo,group=bar,host=baz
+	 */
+	char *keyword;
+	struct cvtsudoers_string *s;
+
+	if ((s = malloc(sizeof(*s))) == NULL) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+
+	/* Parse keyword = value */
+	keyword = cp;
+	if ((cp = strchr(cp, '=')) == NULL) {
+	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    debug_return_bool(false);
+	}
+	*cp++ = '\0';
+	s->str = cp;
+
+	if (strcmp(keyword, "user") == 0 ){
+	    STAILQ_INSERT_TAIL(&filters->users, s, entries);
+	} else if (strcmp(keyword, "group") == 0 ){
+	    STAILQ_INSERT_TAIL(&filters->groups, s, entries);
+	} else if (strcmp(keyword, "host") == 0 ){
+	    STAILQ_INSERT_TAIL(&filters->hosts, s, entries);
+	} else {
+	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    free(s);
+	    debug_return_bool(false);
+	}
+    }
+
+    debug_return_bool(true);
+}
+
+static bool
 parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 {
     debug_decl(parse_sudoers, SUDOERS_DEBUG_UTIL)
@@ -444,6 +524,89 @@ FILE *
 open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     return fopen(sudoers, "r");
+}
+
+bool
+userlist_matches_filter(struct member_list *userlist)
+{
+    struct cvtsudoers_string *s;
+    bool matches = false;
+    debug_decl(userlist_matches_filter, SUDOERS_DEBUG_UTIL)
+
+    if (filters == NULL ||
+	(STAILQ_EMPTY(&filters->users) && STAILQ_EMPTY(&filters->groups)))
+	debug_return_bool(true);
+
+    if (STAILQ_EMPTY(&filters->users)) {
+	struct passwd pw;
+
+	/*
+	 * Only groups in filter, make a dummy user so userlist_matches()
+	 * can do its thing.
+	 */
+	memset(&pw, 0, sizeof(pw));
+	pw.pw_name = "_nobody";
+	pw.pw_uid = (uid_t)-1;
+	pw.pw_gid = (gid_t)-1;
+	if (userlist_matches(&pw, userlist) == true)
+	    matches = true;
+    }
+
+    STAILQ_FOREACH(s, &filters->users, entries) {
+	struct passwd *pw = NULL;
+        if (s->str[0] == '#') {
+	    const char *errstr;
+            uid_t uid = sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
+            if (errstr == NULL)
+                pw = sudo_getpwuid(uid);
+	}
+	if (pw == NULL)
+	    pw = sudo_getpwnam(s->str);
+	if (pw == NULL)
+	    continue;
+	if (userlist_matches(pw, userlist) == true)
+	    matches = true;
+	sudo_pw_delref(pw);
+	if (matches)
+	    break;
+    }
+
+    debug_return_bool(matches);
+}
+
+bool
+hostlist_matches_filter(struct member_list *hostlist)
+{
+    struct cvtsudoers_string *s;
+    bool matches = false;
+    debug_decl(hostlist_matches_filter, SUDOERS_DEBUG_UTIL)
+
+    if (filters == NULL || STAILQ_EMPTY(&filters->hosts))
+	debug_return_bool(true);
+
+    STAILQ_FOREACH(s, &filters->hosts, entries) {
+	user_runhost = s->str;
+	if ((user_srunhost = strchr(user_runhost, '.')) != NULL) {
+	    user_srunhost = strndup(user_runhost,
+		(size_t)(user_srunhost - user_runhost));
+	    if (user_srunhost == NULL) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	} else {
+	    user_srunhost = user_runhost;
+	}
+	/* XXX - can't use netgroup_tuple with NULL pw */
+	if (hostlist_matches(NULL, hostlist) == true)
+	    matches = true;
+	if (user_srunhost != user_runhost)
+	    free(user_srunhost);
+	user_runhost = user_host;
+	user_srunhost = user_shost;
+	if (matches)
+	    break;
+    }
+    debug_return_bool(matches);
 }
 
 /*
@@ -500,6 +663,195 @@ static int
 convert_sudoers_output(const char *buf)
 {
     return fputs(buf, output_fp);
+}
+
+/*
+ * Apply filters to userspecs, removing non-matching entries.
+ */
+static void
+filter_userspecs(void)
+{
+    struct userspec *us, *next_us;
+    struct privilege *priv, *next_priv;
+    debug_decl(filter_userspecs, SUDOERS_DEBUG_UTIL)
+
+    /*
+     * Does not currently prune out non-matching entries in the user or
+     * host lists.  It acts more like a grep than a true filter.
+     * In the future, we may want to add a prune option.
+     */
+    TAILQ_FOREACH_SAFE(us, &userspecs, entries, next_us) {
+	if (!userlist_matches_filter(&us->users)) {
+	    TAILQ_REMOVE(&userspecs, us, entries);
+	    free_userspec(us);
+	    continue;
+	}
+	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next_priv) {
+	    if (!hostlist_matches_filter(&priv->hostlist)) {
+		TAILQ_REMOVE(&us->privileges, priv, entries);
+		free_privilege(priv);
+	    }
+	}
+	if (TAILQ_EMPTY(&us->privileges)) {
+	    TAILQ_REMOVE(&userspecs, us, entries);
+	    free_userspec(us);
+	    continue;
+	}
+    }
+    debug_return;
+}
+
+/*
+ * Apply filters to host/user-based Defaults, removing non-matching entries.
+ */
+static void
+filter_defaults(void)
+{
+    struct defaults *def, *next;
+    struct member_list *binding = NULL;
+    debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
+
+    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+	switch (def->type) {
+	case DEFAULTS_USER:
+	    if (!userlist_matches_filter(def->binding)) {
+		TAILQ_REMOVE(&defaults, def, entries);
+		binding = free_default(def, binding);
+	    } else {
+		binding = def->binding;
+	    }
+	    break;
+	case DEFAULTS_HOST:
+	    if (!hostlist_matches_filter(def->binding)) {
+		TAILQ_REMOVE(&defaults, def, entries);
+		binding = free_default(def, binding);
+	    } else {
+		binding = def->binding;
+	    }
+	    break;
+	default:
+	    break;
+	}
+    }
+    debug_return;
+}
+
+/*
+ * Remove the alias of the specified type as well as any other aliases
+ * referenced by that alias.
+ * XXX - share with visudo
+ */
+static bool
+alias_remove_recursive(char *name, int type, struct rbtree *freelist)
+{
+    struct member *m;
+    struct alias *a;
+    bool ret = true;
+    debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
+
+    if ((a = alias_remove(name, type)) != NULL) {
+	TAILQ_FOREACH(m, &a->members, entries) {
+	    if (m->type == ALIAS) {
+		if (!alias_remove_recursive(m->name, type, freelist))
+		    ret = false;
+	    }
+	}
+	if (rbinsert(freelist, a, NULL) != 0)
+	    ret = false;
+    }
+    debug_return_bool(ret);
+}
+
+/*
+ * Remove unreferenced aliases.
+ * XXX - share with visudo
+ */
+static bool
+alias_remove_unused(void)
+{
+    struct cmndspec *cs;
+    struct member *m;
+    struct privilege *priv;
+    struct userspec *us;
+    struct defaults *d;
+    int atype, errors = 0;
+    struct rbtree *used_aliases;
+    struct rbtree *unused_aliases;
+    debug_decl(alias_remove_unused, SUDOERS_DEBUG_ALIAS)
+
+    used_aliases = rbcreate(alias_compare);
+    if (used_aliases == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
+    }
+
+    /* Move referenced aliases to used_aliases. */
+    TAILQ_FOREACH(us, &userspecs, entries) {
+	TAILQ_FOREACH(m, &us->users, entries) {
+	    if (m->type == ALIAS) {
+		if (!alias_remove_recursive(m->name, USERALIAS, used_aliases))
+		    errors++;
+	    }
+	}
+	TAILQ_FOREACH(priv, &us->privileges, entries) {
+	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
+		if (m->type == ALIAS) {
+		    if (!alias_remove_recursive(m->name, HOSTALIAS, used_aliases))
+			errors++;
+		}
+	    }
+	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+		if (cs->runasuserlist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+			if (m->type == ALIAS) {
+			    if (!alias_remove_recursive(m->name, RUNASALIAS, used_aliases))
+				errors++;
+			}
+		    }
+		}
+		if (cs->runasgrouplist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+			if (m->type == ALIAS) {
+			    if (!alias_remove_recursive(m->name, RUNASALIAS, used_aliases))
+				errors++;
+			}
+		    }
+		}
+		if ((m = cs->cmnd)->type == ALIAS) {
+		    if (!alias_remove_recursive(m->name, CMNDALIAS, used_aliases))
+			errors++;
+		}
+	    }
+	}
+    }
+    TAILQ_FOREACH(d, &defaults, entries) {
+	switch (d->type) {
+	    case DEFAULTS_HOST:
+		atype = HOSTALIAS;
+		break;
+	    case DEFAULTS_USER:
+		atype = USERALIAS;
+		break;
+	    case DEFAULTS_RUNAS:
+		atype = RUNASALIAS;
+		break;
+	    case DEFAULTS_CMND:
+		atype = CMNDALIAS;
+		break;
+	    default:
+		continue; /* not an alias */
+	}
+	TAILQ_FOREACH(m, d->binding, entries) {
+	    if (m->type == ALIAS) {
+		if (!alias_remove_recursive(m->name, atype, used_aliases))
+		    errors++;
+	    }
+	}
+    }
+    unused_aliases = replace_aliases(used_aliases);
+    rbdestroy(unused_aliases, alias_free);
+
+    debug_return_int(errors ? false : true);
 }
 
 /*
@@ -571,7 +923,7 @@ usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehV] [-b dn] "
 	"[-c conf_file ] [-f output_format] [-i input_format] [-I increment] "
-	"[-o output_file] [-O start_point] [input_file]\n",
+	"[-m filter] [-o output_file] [-O start_point] [input_file]\n",
 	getprogname());
     if (fatal)
 	exit(1);
@@ -586,11 +938,12 @@ help(void)
 	"  -b, --base=dn              the base DN for sudo LDAP queries\n"
 	"  -e, --expand-aliases       expand aliases when converting\n"
 	"  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"
-	"  -I, --increment=num        amount to increase each sudoOrder by\n"
 	"  -i, --input-format=format  set input format: LDIF or sudoers\n"
+	"  -I, --increment=num        amount to increase each sudoOrder by\n"
 	"  -h, --help                 display help message and exit\n"
-	"  -O, --order-start=num      starting point for first sudoOrder\n"
+	"  -m, --match=filter         only convert entries that match the filter expression\n"
 	"  -o, --output=output_file   write converted sudoers to output_file\n"
+	"  -O, --order-start=num      starting point for first sudoOrder\n"
 	"  -V, --version              display version information and exit"));
     exit(0);
 }

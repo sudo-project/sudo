@@ -252,6 +252,7 @@ extern struct defaults_list defaults;
 
 /* alias.c */
 bool no_aliases(void);
+struct rbtree *replace_aliases(struct rbtree *new_aliases);
 const char *alias_add(char *name, int type, char *file, int lineno, struct member *members);
 const char *alias_type_to_string(int alias_type);
 int alias_compare(const void *a1, const void *a2);

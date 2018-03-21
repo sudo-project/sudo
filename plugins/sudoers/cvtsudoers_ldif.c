@@ -465,7 +465,7 @@ print_userspecs_ldif(FILE *fp, struct cvtsudoers_config *conf)
 {
     struct userspec *us;
     debug_decl(print_userspecs_ldif, SUDOERS_DEBUG_UTIL)
-
+ 
     TAILQ_FOREACH(us, &userspecs, entries) {
 	if (!print_userspec_ldif(fp, us, conf))
 	    debug_return_bool(false);
@@ -513,36 +513,27 @@ convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf)
     debug_return_bool(ret);
 }
 
-struct ldif_string {
-    STAILQ_ENTRY(ldif_string) entries;
-    char *str;
-};
-struct ldif_str_list {
-    struct ldif_string *stqh_first;
-    struct ldif_string **stqh_last;
-    unsigned int refcnt;
-};
-
 struct sudo_role {
     STAILQ_ENTRY(sudo_role) entries;
     char *cn;
     char *notbefore;
     char *notafter;
     double order;
-    struct ldif_str_list *cmnds;
-    struct ldif_str_list *hosts;
-    struct ldif_str_list *users;
-    struct ldif_str_list *runasusers;
-    struct ldif_str_list *runasgroups;
-    struct ldif_str_list *options;
+    struct cvtsudoers_str_list *cmnds;
+    struct cvtsudoers_str_list *hosts;
+    struct cvtsudoers_str_list *users;
+    struct cvtsudoers_str_list *runasusers;
+    struct cvtsudoers_str_list *runasgroups;
+    struct cvtsudoers_str_list *options;
 };
 STAILQ_HEAD(sudo_role_list, sudo_role);
 
-static struct ldif_string *
-ldif_string_alloc(const char *s)
+/* XXX - move to cvtsudoers.c */
+struct cvtsudoers_string *
+cvtsudoers_string_alloc(const char *s)
 {
-    struct ldif_string *ls;
-    debug_decl(ldif_string_alloc, SUDOERS_DEBUG_UTIL)
+    struct cvtsudoers_string *ls;
+    debug_decl(cvtsudoers_string_alloc, SUDOERS_DEBUG_UTIL)
 
     if ((ls = malloc(sizeof(*ls))) != NULL) {
 	if ((ls->str = strdup(s)) == NULL) {
@@ -554,17 +545,17 @@ ldif_string_alloc(const char *s)
     debug_return_ptr(ls);
 }
 
-static void
-ldif_string_free(struct ldif_string *ls)
+void
+cvtsudoers_string_free(struct cvtsudoers_string *ls)
 {
     free(ls->str);
     free(ls);
 }
 
-static struct ldif_str_list *
+struct cvtsudoers_str_list *
 str_list_alloc(void)
 {
-    struct ldif_str_list *strlist;
+    struct cvtsudoers_str_list *strlist;
     debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
 
     strlist = malloc(sizeof(*strlist));
@@ -574,17 +565,17 @@ str_list_alloc(void)
     debug_return_ptr(strlist);
 }
 
-static void
+void
 str_list_free(void *v)
 {
-    struct ldif_str_list *strlist = v;
-    struct ldif_string *first;
+    struct cvtsudoers_str_list *strlist = v;
+    struct cvtsudoers_string *first;
     debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
 
     if (--strlist->refcnt == 0) {
 	while ((first = STAILQ_FIRST(strlist)) != NULL) {
 	    STAILQ_REMOVE_HEAD(strlist, entries);
-	    ldif_string_free(first);
+	    cvtsudoers_string_free(first);
 	}
 	free(strlist);
     }
@@ -644,25 +635,25 @@ sudo_role_free(struct sudo_role *role)
 }
 
 /*
- * Allocate a struct ldif_string, store str in it and
+ * Allocate a struct cvtsudoers_string, store str in it and
  * insert into the specified strlist.
  */
 static void
-ldif_store_string(const char *str, struct ldif_str_list *strlist, bool sorted)
+ldif_store_string(const char *str, struct cvtsudoers_str_list *strlist, bool sorted)
 {
-    struct ldif_string *ls;
+    struct cvtsudoers_string *ls;
     debug_decl(ldif_store_string, SUDOERS_DEBUG_UTIL)
 
     while (isblank((unsigned char)*str))
 	str++;
-    if ((ls = ldif_string_alloc(str)) == NULL) {
+    if ((ls = cvtsudoers_string_alloc(str)) == NULL) {
 	sudo_fatalx(U_("%s: %s"), __func__,
 	    U_("unable to allocate memory"));
     }
     if (!sorted) {
 	STAILQ_INSERT_TAIL(strlist, ls, entries);
     } else {
-	struct ldif_string *prev, *next;
+	struct cvtsudoers_string *prev, *next;
 
 	/* Insertion sort, list is small. */
 	prev = STAILQ_FIRST(strlist);
@@ -683,13 +674,13 @@ ldif_store_string(const char *str, struct ldif_str_list *strlist, bool sorted)
 
 /*
  * Iterator for sudo_ldap_role_to_priv().
- * Takes a pointer to a struct ldif_string *.
+ * Takes a pointer to a struct cvtsudoers_string *.
  * Returns the string or NULL if we've reached the end.
  */
-static char *
-ldif_string_iter(void **vp)
+char *
+cvtsudoers_string_iter(void **vp)
 {
-    struct ldif_string *ls = *vp;
+    struct cvtsudoers_string *ls = *vp;
 
     if (ls == NULL)
 	return NULL;
@@ -714,10 +705,10 @@ role_order_cmp(const void *va, const void *vb)
  * Parse list of sudoOption and store in global defaults list.
  */
 static void
-ldif_store_options(struct ldif_str_list *options)
+ldif_store_options(struct cvtsudoers_str_list *options)
 {
     struct defaults *d;
-    struct ldif_string *ls;
+    struct cvtsudoers_string *ls;
     char *var, *val;
     debug_decl(ldif_store_options, SUDOERS_DEBUG_UTIL)
 
@@ -748,10 +739,10 @@ ldif_store_options(struct ldif_str_list *options)
 static int
 str_list_cmp(const void *aa, const void *bb)
 {
-    const struct ldif_str_list *a = aa;
-    const struct ldif_str_list *b = bb;
-    const struct ldif_string *lsa = STAILQ_FIRST(a);
-    const struct ldif_string *lsb = STAILQ_FIRST(b);
+    const struct cvtsudoers_str_list *a = aa;
+    const struct cvtsudoers_str_list *b = bb;
+    const struct cvtsudoers_string *lsa = STAILQ_FIRST(a);
+    const struct cvtsudoers_string *lsb = STAILQ_FIRST(b);
     int ret;
 
     while (lsa != NULL && lsb != NULL) {
@@ -764,9 +755,9 @@ str_list_cmp(const void *aa, const void *bb)
 }
 
 static int
-str_list_cache(struct rbtree *cache, struct ldif_str_list **strlistp)
+str_list_cache(struct rbtree *cache, struct cvtsudoers_str_list **strlistp)
 {
-    struct ldif_str_list *strlist = *strlistp;
+    struct cvtsudoers_str_list *strlist = *strlistp;
     struct rbnode *node;
     int ret;
     debug_decl(str_list_cache, SUDOERS_DEBUG_UTIL)
@@ -797,7 +788,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
     bool reuse_userspec, bool reuse_privilege, bool reuse_runas)
 {
     struct privilege *priv;
-    struct ldif_string *ls;
+    struct cvtsudoers_string *ls;
     struct userspec *us;
     struct member *m;
     debug_decl(role_to_sudoers, SUDOERS_DEBUG_UTIL)
@@ -882,7 +873,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 	STAILQ_FIRST(role->runasusers), STAILQ_FIRST(role->runasgroups),
 	STAILQ_FIRST(role->cmnds), STAILQ_FIRST(role->options),
 	role->notbefore, role->notafter, true, store_options,
-	ldif_string_iter);
+	cvtsudoers_string_iter);
     if (priv == NULL) {
 	sudo_fatalx(U_("%s: %s"), __func__,
 	    U_("unable to allocate memory"));

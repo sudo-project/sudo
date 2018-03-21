@@ -24,11 +24,26 @@ enum sudoers_formats {
     format_sudoers
 };
 
+/*
+ * Simple string list with optional reference count.
+ * XXX - move this so fmtsudoers can use it
+ */
+struct cvtsudoers_string {
+    STAILQ_ENTRY(cvtsudoers_string) entries;
+    char *str;
+};
+struct cvtsudoers_str_list {
+    struct cvtsudoers_string *stqh_first;
+    struct cvtsudoers_string **stqh_last;
+    unsigned int refcnt;
+};
+
 /* cvtsudoers.conf settings */
 struct cvtsudoers_config {
     char *sudoers_base;
     char *input_format;
     char *output_format;
+    char *filter;
     unsigned int sudo_order;
     unsigned int order_increment;
     bool expand_aliases;
@@ -36,7 +51,7 @@ struct cvtsudoers_config {
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { NULL, NULL, NULL, 1, 1, false, true }
+#define INITIAL_CONFIG { NULL, NULL, NULL, NULL, 1, 1, false, true }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1
@@ -48,9 +63,27 @@ struct cvtsudoers_conf_table {
     void *valp;			/* pointer into cvtsudoers_config */
 };
 
+struct cvtsudoers_filter {
+    struct cvtsudoers_str_list users;
+    struct cvtsudoers_str_list groups;
+    struct cvtsudoers_str_list hosts;
+};
+
 bool convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf);
 bool convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf);
 bool parse_ldif(const char *input_file, struct cvtsudoers_config *conf);
 void get_hostname(void);
+
+struct member_list;
+struct userspec_list;
+bool userlist_matches_filter(struct member_list *userlist);
+bool hostlist_matches_filter(struct member_list *hostlist);
+
+struct cvtsudoers_str_list *str_list_alloc(void);
+void str_list_free(void *v);
+struct cvtsudoers_string *cvtsudoers_string_alloc(const char *s);
+void cvtsudoers_string_free(struct cvtsudoers_string *ls);
+
+extern struct cvtsudoers_filter *filters;
 
 #endif /* SUDOERS_CVTSUDOERS_H */

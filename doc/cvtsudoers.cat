@@ -4,9 +4,9 @@ NNAAMMEE
      ccvvttssuuddooeerrss - convert between sudoers file formats
 
 SSYYNNOOPPSSIISS
-     ccvvttssuuddooeerrss [--eehhVV] [--bb _d_n] [--cc _c_o_n_f___f_i_l_e] [--II _i_n_c_r_e_m_e_n_t] [--ii _i_n_p_u_t___f_o_r_m_a_t]
-                [--ff _o_u_t_p_u_t___f_o_r_m_a_t] [--OO _s_t_a_r_t___p_o_i_n_t] [--oo _o_u_t_p_u_t___f_i_l_e]
-                [_i_n_p_u_t___f_i_l_e]
+     ccvvttssuuddooeerrss [--eehhVV] [--bb _d_n] [--cc _c_o_n_f___f_i_l_e] [--ff _o_u_t_p_u_t___f_o_r_m_a_t]
+                [--ii _i_n_p_u_t___f_o_r_m_a_t] [--II _i_n_c_r_e_m_e_n_t] [--mm _f_i_l_t_e_r] [--oo _o_u_t_p_u_t___f_i_l_e]
+                [--OO _s_t_a_r_t___p_o_i_n_t] [_i_n_p_u_t___f_i_l_e]
 
 DDEESSCCRRIIPPTTIIOONN
      ccvvttssuuddooeerrss can be used to convert between _s_u_d_o_e_r_s security policy file
@@ -52,14 +52,13 @@ DDEESSCCRRIIPPTTIIOONN
 
                            Conversion to LDIF has the following limitations:
 
-                           ++oo     Command, host, runas and user-specific
-                                 Defaults lines cannot be translated as they
-                                 don't have an equivalent in the sudoers LDAP
-                                 schema.
+                           ++oo  Command, host, runas and user-specific Defaults
+                              lines cannot be translated as they don't have an
+                              equivalent in the sudoers LDAP schema.
 
-                           ++oo     Command, host, runas and user aliases are not
-                                 supported by the sudoers LDAP schema so they
-                                 are expanded during the conversion.
+                           ++oo  Command, host, runas and user aliases are not
+                              supported by the sudoers LDAP schema so they are
+                              expanded during the conversion.
 
                  sudoers   Traditional sudoers format.  A new sudoers file
                            will be reconstructed from the parsed input file.
@@ -67,11 +66,6 @@ DDEESSCCRRIIPPTTIIOONN
                            include files will be output inline.
 
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
-
-     --II _i_n_c_r_e_m_e_n_t, ----iinnccrreemmeenntt=_i_n_c_r_e_m_e_n_t
-                 When generating LDIF output, increment each sudoOrder
-                 attribute by the specified number.  Defaults to an increment
-                 of 1.
 
      --ii _i_n_p_u_t___f_o_r_m_a_t, ----iinnppuutt--ffoorrmmaatt=_i_n_p_u_t___f_o_r_m_a_t
                  Specify the input format.  The following formats are
@@ -88,6 +82,28 @@ DDEESSCCRRIIPPTTIIOONN
                  sudoers   Traditional sudoers format.  This is the default
                            input format.
 
+     --II _i_n_c_r_e_m_e_n_t, ----iinnccrreemmeenntt=_i_n_c_r_e_m_e_n_t
+                 When generating LDIF output, increment each sudoOrder
+                 attribute by the specified number.  Defaults to an increment
+                 of 1.
+
+     --mm _f_i_l_t_e_r, ----mmaattcchh=_f_i_l_t_e_r
+                 Only output rules that match the specified _f_i_l_t_e_r.  A _f_i_l_t_e_r
+                 expression is made up of one or more kkeeyy == _v_a_l_u_e pairs,
+                 separated by a comma (`,').  The kkeeyy may be "user", "group"
+                 or "host".  For example, uusseerr = _o_p_e_r_a_t_o_r or hhoosstt = _w_w_w.
+
+                 The password and group databases are not consulted when
+                 matching against the filter so the users and groups do not
+                 need to be present on the local system.  Only aliases that
+                 are referenced by the filtered policy rules will be
+                 displayed.
+
+     --oo _o_u_t_p_u_t___f_i_l_e, ----oouuttppuutt=_o_u_t_p_u_t___f_i_l_e
+                 Write the converted output to _o_u_t_p_u_t___f_i_l_e.  If no _o_u_t_p_u_t___f_i_l_e
+                 is specified, or if it is `-', the converted _s_u_d_o_e_r_s policy
+                 will be written to the standard output.
+
      --OO _s_t_a_r_t___p_o_i_n_t, ----oorrddeerr--ssttaarrtt=_s_t_a_r_t___p_o_i_n_t
                  When generating LDIF output, use the number specified by
                  _s_t_a_r_t___p_o_i_n_t in the sudoOrder attribute of the first sudoRole
@@ -96,11 +112,6 @@ DDEESSCCRRIIPPTTIIOONN
                  details.  Defaults to a starting point of 1.  A starting
                  point of 0 will disable the generation of sudoOrder
                  attributes in the resulting LDIF file.
-
-     --oo _o_u_t_p_u_t___f_i_l_e, ----oouuttppuutt=_o_u_t_p_u_t___f_i_l_e
-                 Write the converted output to _o_u_t_p_u_t___f_i_l_e.  If no _o_u_t_p_u_t___f_i_l_e
-                 is specified, or if it is `-', the converted _s_u_d_o_e_r_s policy
-                 will be written to the standard output.
 
      --VV, ----vveerrssiioonn
                  Print the ccvvttssuuddooeerrss and _s_u_d_o_e_r_s grammar versions and exit.
@@ -114,6 +125,9 @@ DDEESSCCRRIIPPTTIIOONN
 
      iinnppuutt__ffoorrmmaatt == _l_d_i_f | _s_u_d_o_e_r_s
            See the description of the --ii command line option.
+
+     mmaattcchh == _f_i_l_t_e_r
+           See the description of the --mm command line option.
 
      oorrddeerr__iinnccrreemmeenntt == _i_n_c_r_e_m_e_n_t
            See the description of the --II command line option.
@@ -162,4 +176,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.23                    February 23, 2018                   Sudo 1.8.23
+Sudo 1.8.23                     March 21, 2018                     Sudo 1.8.23

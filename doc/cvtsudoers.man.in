@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "February 23, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -28,11 +28,12 @@
 [\fB\-ehV\fR]
 [\fB\-b\fR\ \fIdn\fR]
 [\fB\-c\fR\ \fIconf_file\fR]
-[\fB\-I\fR\ \fIincrement\fR]
-[\fB\-i\fR\ \fIinput_format\fR]
 [\fB\-f\fR\ \fIoutput_format\fR]
-[\fB\-O\fR\ \fIstart_point\fR]
+[\fB\-i\fR\ \fIinput_format\fR]
+[\fB\-I\fR\ \fIincrement\fR]
+[\fB\-m\fR\ \fIfilter\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
+[\fB\-O\fR\ \fIstart_point\fR]
 [\fIinput_file\fR]
 .SH "DESCRIPTION"
 \fBcvtsudoers\fR
@@ -105,12 +106,12 @@ Conversion to LDIF has the following limitations:
 .PP
 .RS 10n
 .PD 0
-.TP 6n
+.TP 3n
 \fB\(bu\fR
 Command, host, runas and user-specific Defaults lines cannot be
 translated as they don't have an equivalent in the sudoers LDAP schema.
 .PD
-.TP 6n
+.TP 3n
 \fB\(bu\fR
 Command, host, runas and user aliases are not supported by the
 sudoers LDAP schema so they are expanded during the conversion.
@@ -131,11 +132,6 @@ output inline.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
-.TP 12n
-\fB\-I\fR \fIincrement\fR, \fB\--increment\fR=\fIincrement\fR
-When generating LDIF output, increment each sudoOrder attribute by
-the specified number.
-Defaults to an increment of 1.
 .TP 12n
 \fB\-i\fR \fIinput_format\fR, \fB\--input-format\fR=\fIinput_format\fR
 Specify the input format.
@@ -162,6 +158,49 @@ This is the default input format.
 .RE
 .PD
 .TP 12n
+\fB\-I\fR \fIincrement\fR, \fB\--increment\fR=\fIincrement\fR
+When generating LDIF output, increment each sudoOrder attribute by
+the specified number.
+Defaults to an increment of 1.
+.TP 12n
+\fB\-m\fR \fIfilter\fR, \fB\--match\fR=\fIfilter\fR
+Only output rules that match the specified
+\fIfilter\fR.
+A
+\fIfilter\fR
+expression is made up of one or more
+\fBkey =\fR \fIvalue\fR
+pairs, separated by a comma
+(\(oq\&,\(cq).
+The
+\fBkey\fR
+may be
+\(Lquser\(Rq,
+\(Lqgroup\(Rq
+or
+\(Lqhost\(Rq.
+For example,
+\fBuser\fR = \fIoperator\fR
+or
+\fBhost\fR = \fIwww\fR.
+.sp
+The password and group databases are not consulted when matching
+against the filter so the users and groups do not need to be present
+on the local system.
+Only aliases that are referenced by the filtered policy rules will
+be displayed.
+.TP 12n
+\fB\-o\fR \fIoutput_file\fR, \fB\--output\fR=\fIoutput_file\fR
+Write the converted output to
+\fIoutput_file\fR.
+If no
+\fIoutput_file\fR
+is specified, or if it is
+\(oq-\(cq,
+the converted
+\fIsudoers\fR
+policy will be written to the standard output.
+.TP 12n
 \fB\-O\fR \fIstart_point\fR, \fB\--order-start\fR=\fIstart_point\fR
 When generating LDIF output, use the number specified by
 \fIstart_point\fR
@@ -174,17 +213,6 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
-.TP 12n
-\fB\-o\fR \fIoutput_file\fR, \fB\--output\fR=\fIoutput_file\fR
-Write the converted output to
-\fIoutput_file\fR.
-If no
-\fIoutput_file\fR
-is specified, or if it is
-\(oq-\(cq,
-the converted
-\fIsudoers\fR
-policy will be written to the standard output.
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
 Print the
@@ -208,6 +236,11 @@ command line option.
 \fBinput_format =\fR \fIldif\fR | \fIsudoers\fR
 See the description of the
 \fB\-i\fR
+command line option.
+.TP 6n
+\fBmatch =\fR \fIfilter\fR
+See the description of the
+\fB\-m\fR
 command line option.
 .TP 6n
 \fBorder_increment =\fR \fIincrement\fR

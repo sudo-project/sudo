@@ -39,7 +39,7 @@
 /*
  * Globals
  */
-struct rbtree *aliases;
+static struct rbtree *aliases;
 
 /*
  * Comparison function for the red-black tree.
@@ -164,6 +164,20 @@ no_aliases(void)
 {
     debug_decl(no_aliases, SUDOERS_DEBUG_ALIAS)
     debug_return_bool(rbisempty(aliases));
+}
+
+/*
+ * Replace the aliases tree with a new one, returns the old.
+ */
+struct rbtree *
+replace_aliases(struct rbtree *new_aliases)
+{
+    struct rbtree *old_aliases = aliases;
+    debug_decl(replace_aliases, SUDOERS_DEBUG_ALIAS)
+
+    aliases = new_aliases;
+
+    debug_return_ptr(old_aliases);
 }
 
 /*
