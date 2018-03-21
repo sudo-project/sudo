@@ -469,6 +469,7 @@ cvtsudoers_parse_filter(char *expression)
 	keyword = cp;
 	if ((cp = strchr(cp, '=')) == NULL) {
 	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    free(s);
 	    debug_return_bool(false);
 	}
 	*cp++ = '\0';
