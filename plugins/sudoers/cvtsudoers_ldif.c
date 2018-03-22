@@ -496,10 +496,12 @@ convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf)
     seen_users = rbcreate(seen_user_compare);
 
     /* Dump global Defaults in LDIF format. */
-    print_global_defaults_ldif(output_fp, conf->sudoers_base);
+    if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS))
+	print_global_defaults_ldif(output_fp, conf->sudoers_base);
 
     /* Dump User_Specs in LDIF format, expanding Aliases. */
-    print_userspecs_ldif(output_fp, conf);
+    if (!ISSET(conf->suppress, SUPPRESS_PRIVS))
+	print_userspecs_ldif(output_fp, conf);
 
     /* Clean up. */
     rbdestroy(seen_users, seen_user_free);

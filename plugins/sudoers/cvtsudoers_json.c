@@ -1118,14 +1118,20 @@ convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf)
     putc('{', output_fp);
 
     /* Dump Defaults in JSON format. */
-    need_comma = print_defaults_json(output_fp, indent, conf->expand_aliases, need_comma);
+    if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS)) {
+	need_comma = print_defaults_json(output_fp, indent,
+	    conf->expand_aliases, need_comma);
+    }
 
     /* Dump Aliases in JSON format. */
-    if (!conf->expand_aliases)
+    if (!conf->expand_aliases && !ISSET(conf->suppress, SUPPRESS_ALIASES))
 	need_comma = print_aliases_json(output_fp, indent, need_comma);
 
     /* Dump User_Specs in JSON format. */
-    print_userspecs_json(output_fp, indent, conf->expand_aliases, need_comma);
+    if (!ISSET(conf->suppress, SUPPRESS_PRIVS)) {
+	print_userspecs_json(output_fp, indent, conf->expand_aliases,
+	    need_comma);
+    }
 
     /* Close JSON output. */
     fputs("\n}\n", output_fp);

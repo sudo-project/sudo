@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 21, 2018
+.Dd March 22, 2018
 .Dt CVTSUDOERS @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -31,6 +31,7 @@
 .Op Fl m Ar filter
 .Op Fl o Ar output_file
 .Op Fl O Ar start_point
+.Op Fl s Ar sections
 .Op Ar input_file
 .Sh DESCRIPTION
 .Nm
@@ -176,6 +177,19 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
+.It Fl s Ar sections , Fl -suppress Ns = Ns Ar sections
+Suppress the output of specific
+.Ar sections
+of the security policy.
+One or more section names may be specified, separated by a comma
+.Pq Ql \&, .
+The supported section name are:
+.Sy defaults ,
+.Sy aliases
+and
+.Sy privileges
+(which may be shortened to
+.Sy privs ) .
 .It Fl V , -version
 Print the
 .Nm

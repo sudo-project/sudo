@@ -56,7 +56,7 @@
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:ef:hi:I:m:o:O:V";
+static const char short_opts[] =  "b:c:ef:hi:I:m:o:O:s:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
@@ -68,6 +68,7 @@ static struct option long_opts[] = {
     { "match",		required_argument,	NULL,	'm' },
     { "order-start",	required_argument,	NULL,	'O' },
     { "output",		required_argument,	NULL,	'o' },
+    { "suppress",	required_argument,	NULL,	's' },
     { "version",	no_argument,		NULL,	'V' },
     { NULL,		no_argument,		NULL,	'\0' },
 };
@@ -81,6 +82,7 @@ static bool cvtsudoers_parse_filter(char *expression);
 static bool alias_remove_unused(void);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
+static int cvtsudoers_parse_suppression(char *expression);
 static void filter_userspecs(void);
 static void filter_defaults(void);
 
@@ -194,6 +196,11 @@ main(int argc, char *argv[])
 		sudo_warnx(U_("starting order: %s: %s"), optarg, U_(errstr));
 		usage(1);
 	    }
+	    break;
+	case 's':
+	    conf->suppress = cvtsudoers_parse_suppression(optarg);
+	    if (conf->suppress == -1)
+		usage(1);
 	    break;
 	case 'V':
 	    (void) printf(_("%s version %s\n"), getprogname(),
@@ -434,6 +441,29 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
     }
 
     debug_return;
+}
+
+static int
+cvtsudoers_parse_suppression(char *expression)
+{
+    char *last = NULL, *cp = expression;
+    int flags = 0;
+    debug_decl(cvtsudoers_parse_suppression, SUDOERS_DEBUG_UTIL)
+
+    for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
+	if (strcasecmp(cp, "defaults") == 0) {
+	    SET(flags, SUPPRESS_DEFAULTS);
+	} else if (strcasecmp(cp, "aliases") == 0) {
+	    SET(flags, SUPPRESS_ALIASES);
+	} else if (strcasecmp(cp, "privileges") == 0 || strcasecmp(cp, "privs") == 0) {
+	    SET(flags, SUPPRESS_PRIVS);
+	} else {
+	    sudo_warnx(U_("invalid suppression type: %s"), cp);
+	    debug_return_int(-1);
+	}
+    }
+
+    debug_return_int(flags);
 }
 
 static bool
@@ -929,15 +959,17 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
     sudo_lbuf_init(&lbuf, convert_sudoers_output, 4, "\\", 80);
 
     /* Print Defaults */
-    if (!print_defaults_sudoers(&lbuf, conf->expand_aliases))
-	goto done;
-    if (lbuf.len > 0) {
-	sudo_lbuf_print(&lbuf);
-	sudo_lbuf_append(&lbuf, "\n");
+    if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS)) {
+	if (!print_defaults_sudoers(&lbuf, conf->expand_aliases))
+	    goto done;
+	if (lbuf.len > 0) {
+	    sudo_lbuf_print(&lbuf);
+	    sudo_lbuf_append(&lbuf, "\n");
+	}
     }
 
     /* Print Aliases */
-    if (!conf->expand_aliases) {
+    if (!conf->expand_aliases && !ISSET(conf->suppress, SUPPRESS_ALIASES)) {
 	if (!print_aliases_sudoers(&lbuf))
 	    goto done;
 	if (lbuf.len > 1) {
@@ -947,10 +979,14 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
     }
 
     /* Print User_Specs, separated by blank lines. */
-    if (!sudoers_format_userspecs(&lbuf, &userspecs, "\n", conf->expand_aliases, true))
-	goto done;
-    if (lbuf.len > 1) {
-	sudo_lbuf_print(&lbuf);
+    if (!ISSET(conf->suppress, SUPPRESS_PRIVS)) {
+	if (!sudoers_format_userspecs(&lbuf, &userspecs, "\n",
+	    conf->expand_aliases, true)) {
+	    goto done;
+	}
+	if (lbuf.len > 1) {
+	    sudo_lbuf_print(&lbuf);
+	}
     }
 
 done:
@@ -977,8 +1013,8 @@ usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehV] [-b dn] "
 	"[-c conf_file ] [-f output_format] [-i input_format] [-I increment] "
-	"[-m filter] [-o output_file] [-O start_point] [input_file]\n",
-	getprogname());
+	"[-m filter] [-o output_file] [-O start_point] [-s sections] "
+	"[input_file]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -998,6 +1034,7 @@ help(void)
 	"  -m, --match=filter         only convert entries that match the filter expression\n"
 	"  -o, --output=output_file   write converted sudoers to output_file\n"
 	"  -O, --order-start=num      starting point for first sudoOrder\n"
+	"  -s, --suppress=sections    suppress output of certain sections\n"
 	"  -V, --version              display version information and exit"));
     exit(0);
 }

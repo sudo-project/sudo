@@ -37,6 +37,11 @@ struct cvtsudoers_str_list {
     unsigned int refcnt;
 };
 
+/* Flags for cvtsudoers_config.suppress */
+#define SUPPRESS_DEFAULTS	0x01
+#define SUPPRESS_ALIASES	0x02
+#define SUPPRESS_PRIVS		0x04
+
 /* cvtsudoers.conf settings */
 struct cvtsudoers_config {
     char *sudoers_base;
@@ -45,12 +50,13 @@ struct cvtsudoers_config {
     char *filter;
     unsigned int sudo_order;
     unsigned int order_increment;
+    int suppress;
     bool expand_aliases;
     bool store_options;
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { NULL, NULL, NULL, NULL, 1, 1, false, true }
+#define INITIAL_CONFIG { NULL, NULL, NULL, NULL, 1, 1, 0, false, true }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1

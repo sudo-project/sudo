@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "8" "March 22, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -34,6 +34,7 @@
 [\fB\-m\fR\ \fIfilter\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
 [\fB\-O\fR\ \fIstart_point\fR]
+[\fB\-s\fR\ \fIsections\fR]
 [\fIinput_file\fR]
 .SH "DESCRIPTION"
 \fBcvtsudoers\fR
@@ -213,6 +214,20 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
+.TP 12n
+\fB\-s\fR \fIsections\fR, \fB\--suppress\fR=\fIsections\fR
+Suppress the output of specific
+\fIsections\fR
+of the security policy.
+One or more section names may be specified, separated by a comma
+(\(oq\&,\(cq).
+The supported section name are:
+\fBdefaults\fR,
+\fBaliases\fR
+and
+\fBprivileges\fR
+(which may be shortened to
+\fBprivs\fR).
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
 Print the
