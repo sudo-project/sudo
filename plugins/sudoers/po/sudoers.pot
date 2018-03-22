@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.23\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2018-03-21 13:33-0600\n"
+"POT-Creation-Date: 2018-03-22 13:29-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,25 +50,25 @@ msgstr ""
 #: plugins/sudoers/alias.c:139 plugins/sudoers/auth/bsdauth.c:141
 #: plugins/sudoers/auth/kerb5.c:119 plugins/sudoers/auth/kerb5.c:145
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:109
-#: plugins/sudoers/cvtsudoers.c:150 plugins/sudoers/cvtsudoers.c:164
-#: plugins/sudoers/cvtsudoers.c:175 plugins/sudoers/cvtsudoers.c:249
-#: plugins/sudoers/cvtsudoers.c:367 plugins/sudoers/cvtsudoers.c:448
-#: plugins/sudoers/cvtsudoers.c:465 plugins/sudoers/cvtsudoers.c:563
-#: plugins/sudoers/cvtsudoers.c:647 plugins/sudoers/cvtsudoers.c:837
-#: plugins/sudoers/cvtsudoers.c:958 plugins/sudoers/cvtsudoers_ldif.c:429
-#: plugins/sudoers/cvtsudoers_ldif.c:597 plugins/sudoers/cvtsudoers_ldif.c:665
-#: plugins/sudoers/cvtsudoers_ldif.c:672 plugins/sudoers/cvtsudoers_ldif.c:677
-#: plugins/sudoers/cvtsudoers_ldif.c:753 plugins/sudoers/cvtsudoers_ldif.c:764
-#: plugins/sudoers/cvtsudoers_ldif.c:770 plugins/sudoers/cvtsudoers_ldif.c:795
-#: plugins/sudoers/cvtsudoers_ldif.c:807 plugins/sudoers/cvtsudoers_ldif.c:811
-#: plugins/sudoers/cvtsudoers_ldif.c:825 plugins/sudoers/cvtsudoers_ldif.c:994
-#: plugins/sudoers/cvtsudoers_ldif.c:1024
-#: plugins/sudoers/cvtsudoers_ldif.c:1049
-#: plugins/sudoers/cvtsudoers_ldif.c:1078
-#: plugins/sudoers/cvtsudoers_ldif.c:1129
-#: plugins/sudoers/cvtsudoers_ldif.c:1158
-#: plugins/sudoers/cvtsudoers_ldif.c:1168 plugins/sudoers/defaults.c:657
+#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:113
+#: plugins/sudoers/cvtsudoers.c:154 plugins/sudoers/cvtsudoers.c:168
+#: plugins/sudoers/cvtsudoers.c:179 plugins/sudoers/cvtsudoers.c:261
+#: plugins/sudoers/cvtsudoers.c:385 plugins/sudoers/cvtsudoers.c:489
+#: plugins/sudoers/cvtsudoers.c:506 plugins/sudoers/cvtsudoers.c:605
+#: plugins/sudoers/cvtsudoers.c:689 plugins/sudoers/cvtsudoers.c:879
+#: plugins/sudoers/cvtsudoers.c:1006 plugins/sudoers/cvtsudoers_ldif.c:429
+#: plugins/sudoers/cvtsudoers_ldif.c:599 plugins/sudoers/cvtsudoers_ldif.c:667
+#: plugins/sudoers/cvtsudoers_ldif.c:674 plugins/sudoers/cvtsudoers_ldif.c:679
+#: plugins/sudoers/cvtsudoers_ldif.c:755 plugins/sudoers/cvtsudoers_ldif.c:766
+#: plugins/sudoers/cvtsudoers_ldif.c:772 plugins/sudoers/cvtsudoers_ldif.c:797
+#: plugins/sudoers/cvtsudoers_ldif.c:809 plugins/sudoers/cvtsudoers_ldif.c:813
+#: plugins/sudoers/cvtsudoers_ldif.c:827 plugins/sudoers/cvtsudoers_ldif.c:996
+#: plugins/sudoers/cvtsudoers_ldif.c:1026
+#: plugins/sudoers/cvtsudoers_ldif.c:1051
+#: plugins/sudoers/cvtsudoers_ldif.c:1080
+#: plugins/sudoers/cvtsudoers_ldif.c:1131
+#: plugins/sudoers/cvtsudoers_ldif.c:1160
+#: plugins/sudoers/cvtsudoers_ldif.c:1170 plugins/sudoers/defaults.c:657
 #: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
 #: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
 #: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
@@ -100,11 +100,11 @@ msgstr ""
 #: plugins/sudoers/parse.c:259 plugins/sudoers/parse.c:274
 #: plugins/sudoers/parse.c:286 plugins/sudoers/policy.c:498
 #: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:165 plugins/sudoers/pwutil.c:236
-#: plugins/sudoers/pwutil.c:312 plugins/sudoers/pwutil.c:486
-#: plugins/sudoers/pwutil.c:551 plugins/sudoers/pwutil.c:620
-#: plugins/sudoers/pwutil.c:778 plugins/sudoers/pwutil.c:835
-#: plugins/sudoers/pwutil.c:880 plugins/sudoers/pwutil.c:938
+#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
+#: plugins/sudoers/pwutil.c:338 plugins/sudoers/pwutil.c:512
+#: plugins/sudoers/pwutil.c:577 plugins/sudoers/pwutil.c:646
+#: plugins/sudoers/pwutil.c:804 plugins/sudoers/pwutil.c:861
+#: plugins/sudoers/pwutil.c:906 plugins/sudoers/pwutil.c:964
 #: plugins/sudoers/sssd.c:161 plugins/sudoers/sssd.c:193
 #: plugins/sudoers/sssd.c:236 plugins/sudoers/sssd.c:243
 #: plugins/sudoers/sssd.c:279 plugins/sudoers/sssd.c:352
@@ -156,24 +156,24 @@ msgstr ""
 
 #: gram.y:1234 gram.y:1241 plugins/sudoers/auth/pam.c:341
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/cvtsudoers.c:109 plugins/sudoers/cvtsudoers.c:149
-#: plugins/sudoers/cvtsudoers.c:163 plugins/sudoers/cvtsudoers.c:174
-#: plugins/sudoers/cvtsudoers.c:248 plugins/sudoers/cvtsudoers.c:366
-#: plugins/sudoers/cvtsudoers.c:447 plugins/sudoers/cvtsudoers.c:464
-#: plugins/sudoers/cvtsudoers.c:563 plugins/sudoers/cvtsudoers.c:646
-#: plugins/sudoers/cvtsudoers.c:837 plugins/sudoers/cvtsudoers.c:958
-#: plugins/sudoers/cvtsudoers_ldif.c:428 plugins/sudoers/cvtsudoers_ldif.c:596
-#: plugins/sudoers/cvtsudoers_ldif.c:664 plugins/sudoers/cvtsudoers_ldif.c:671
-#: plugins/sudoers/cvtsudoers_ldif.c:676 plugins/sudoers/cvtsudoers_ldif.c:752
-#: plugins/sudoers/cvtsudoers_ldif.c:763 plugins/sudoers/cvtsudoers_ldif.c:769
-#: plugins/sudoers/cvtsudoers_ldif.c:794 plugins/sudoers/cvtsudoers_ldif.c:806
-#: plugins/sudoers/cvtsudoers_ldif.c:810 plugins/sudoers/cvtsudoers_ldif.c:824
-#: plugins/sudoers/cvtsudoers_ldif.c:994 plugins/sudoers/cvtsudoers_ldif.c:1023
-#: plugins/sudoers/cvtsudoers_ldif.c:1048
-#: plugins/sudoers/cvtsudoers_ldif.c:1077
-#: plugins/sudoers/cvtsudoers_ldif.c:1128
-#: plugins/sudoers/cvtsudoers_ldif.c:1157
-#: plugins/sudoers/cvtsudoers_ldif.c:1167 plugins/sudoers/defaults.c:657
+#: plugins/sudoers/cvtsudoers.c:113 plugins/sudoers/cvtsudoers.c:153
+#: plugins/sudoers/cvtsudoers.c:167 plugins/sudoers/cvtsudoers.c:178
+#: plugins/sudoers/cvtsudoers.c:260 plugins/sudoers/cvtsudoers.c:384
+#: plugins/sudoers/cvtsudoers.c:488 plugins/sudoers/cvtsudoers.c:505
+#: plugins/sudoers/cvtsudoers.c:605 plugins/sudoers/cvtsudoers.c:688
+#: plugins/sudoers/cvtsudoers.c:879 plugins/sudoers/cvtsudoers.c:1006
+#: plugins/sudoers/cvtsudoers_ldif.c:428 plugins/sudoers/cvtsudoers_ldif.c:598
+#: plugins/sudoers/cvtsudoers_ldif.c:666 plugins/sudoers/cvtsudoers_ldif.c:673
+#: plugins/sudoers/cvtsudoers_ldif.c:678 plugins/sudoers/cvtsudoers_ldif.c:754
+#: plugins/sudoers/cvtsudoers_ldif.c:765 plugins/sudoers/cvtsudoers_ldif.c:771
+#: plugins/sudoers/cvtsudoers_ldif.c:796 plugins/sudoers/cvtsudoers_ldif.c:808
+#: plugins/sudoers/cvtsudoers_ldif.c:812 plugins/sudoers/cvtsudoers_ldif.c:826
+#: plugins/sudoers/cvtsudoers_ldif.c:996 plugins/sudoers/cvtsudoers_ldif.c:1025
+#: plugins/sudoers/cvtsudoers_ldif.c:1050
+#: plugins/sudoers/cvtsudoers_ldif.c:1079
+#: plugins/sudoers/cvtsudoers_ldif.c:1130
+#: plugins/sudoers/cvtsudoers_ldif.c:1159
+#: plugins/sudoers/cvtsudoers_ldif.c:1169 plugins/sudoers/defaults.c:657
 #: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
 #: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
 #: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
@@ -212,11 +212,11 @@ msgstr ""
 #: plugins/sudoers/policy.c:406 plugins/sudoers/policy.c:415
 #: plugins/sudoers/policy.c:424 plugins/sudoers/policy.c:498
 #: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:165 plugins/sudoers/pwutil.c:236
-#: plugins/sudoers/pwutil.c:312 plugins/sudoers/pwutil.c:486
-#: plugins/sudoers/pwutil.c:551 plugins/sudoers/pwutil.c:620
-#: plugins/sudoers/pwutil.c:778 plugins/sudoers/pwutil.c:835
-#: plugins/sudoers/pwutil.c:880 plugins/sudoers/pwutil.c:938
+#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
+#: plugins/sudoers/pwutil.c:338 plugins/sudoers/pwutil.c:512
+#: plugins/sudoers/pwutil.c:577 plugins/sudoers/pwutil.c:646
+#: plugins/sudoers/pwutil.c:804 plugins/sudoers/pwutil.c:861
+#: plugins/sudoers/pwutil.c:906 plugins/sudoers/pwutil.c:964
 #: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
 #: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
 #: plugins/sudoers/set_perms.c:1641 plugins/sudoers/sssd.c:161
@@ -484,66 +484,71 @@ msgstr ""
 msgid "unknown user: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:181
+#: plugins/sudoers/cvtsudoers.c:185
 #, c-format
 msgid "order increment: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:194
+#: plugins/sudoers/cvtsudoers.c:201
 #, c-format
 msgid "starting order: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:199 plugins/sudoers/sudoreplay.c:310
+#: plugins/sudoers/cvtsudoers.c:211 plugins/sudoers/sudoreplay.c:310
 #: plugins/sudoers/visudo.c:179
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:201 plugins/sudoers/visudo.c:181
+#: plugins/sudoers/cvtsudoers.c:213 plugins/sudoers/visudo.c:181
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:218
+#: plugins/sudoers/cvtsudoers.c:230
 #, c-format
 msgid "unsupported input format %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:233
+#: plugins/sudoers/cvtsudoers.c:245
 #, c-format
 msgid "unsupported output format %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:263
+#: plugins/sudoers/cvtsudoers.c:275
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:273 plugins/sudoers/sudoers.c:167
+#: plugins/sudoers/cvtsudoers.c:291 plugins/sudoers/sudoers.c:167
 #: plugins/sudoers/testsudoers.c:246 plugins/sudoers/visudo.c:235
 #: plugins/sudoers/visudo.c:590 plugins/sudoers/visudo.c:911
 msgid "unable to initialize sudoers default values"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:355 plugins/sudoers/ldap_conf.c:413
+#: plugins/sudoers/cvtsudoers.c:373 plugins/sudoers/ldap_conf.c:413
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:414
+#: plugins/sudoers/cvtsudoers.c:432
 #, c-format
 msgid "%s: unknown key word: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:471 plugins/sudoers/cvtsudoers.c:484
+#: plugins/sudoers/cvtsudoers.c:472
+#, c-format
+msgid "invalid suppression type: %s"
+msgstr ""
+
+#: plugins/sudoers/cvtsudoers.c:512 plugins/sudoers/cvtsudoers.c:526
 #, c-format
 msgid "invalid filter: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:556 plugins/sudoers/cvtsudoers.c:924
+#: plugins/sudoers/cvtsudoers.c:598 plugins/sudoers/cvtsudoers.c:966
 #: plugins/sudoers/cvtsudoers_json.c:1114 plugins/sudoers/cvtsudoers_ldif.c:492
-#: plugins/sudoers/cvtsudoers_ldif.c:981 plugins/sudoers/iolog.c:415
+#: plugins/sudoers/cvtsudoers_ldif.c:983 plugins/sudoers/iolog.c:415
 #: plugins/sudoers/sudoers.c:933 plugins/sudoers/sudoreplay.c:356
 #: plugins/sudoers/sudoreplay.c:1366 plugins/sudoers/sudoreplay.c:1570
 #: plugins/sudoers/timestamp.c:410 plugins/sudoers/tsdump.c:130
@@ -552,36 +557,36 @@ msgstr ""
 msgid "unable to open %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:559 plugins/sudoers/visudo.c:916
+#: plugins/sudoers/cvtsudoers.c:601 plugins/sudoers/visudo.c:916
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:567 plugins/sudoers/visudo.c:932
+#: plugins/sudoers/cvtsudoers.c:609 plugins/sudoers/visudo.c:932
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:570 plugins/sudoers/visudo.c:935
+#: plugins/sudoers/cvtsudoers.c:612 plugins/sudoers/visudo.c:935
 #, c-format
 msgid "parse error in %s\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:965 plugins/sudoers/iolog.c:502
+#: plugins/sudoers/cvtsudoers.c:1013 plugins/sudoers/iolog.c:502
 #: plugins/sudoers/sudoreplay.c:1135 plugins/sudoers/timestamp.c:294
 #: plugins/sudoers/timestamp.c:297
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:988
+#: plugins/sudoers/cvtsudoers.c:1036
 #, c-format
 msgid ""
 "%s - convert between sudoers file formats\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:990
+#: plugins/sudoers/cvtsudoers.c:1038
 msgid ""
 "\n"
 "Options:\n"
@@ -591,10 +596,11 @@ msgid ""
 "  -i, --input-format=format  set input format: LDIF or sudoers\n"
 "  -I, --increment=num        amount to increase each sudoOrder by\n"
 "  -h, --help                 display help message and exit\n"
-"  -m, --match=filter         only convert entries that match the filter "
-"expression\n"
+"  -m, --match=filter         only convert entries that match the filter\n"
+"  -M, --match-local          match filter uses passwd and group databases\n"
 "  -o, --output=output_file   write converted sudoers to output_file\n"
 "  -O, --order-start=num      starting point for first sudoOrder\n"
+"  -s, --suppress=sections    suppress output of certain sections\n"
 "  -V, --version              display version information and exit"
 msgstr ""
 
@@ -635,12 +641,12 @@ msgid ""
 "specified."
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers_ldif.c:1014
+#: plugins/sudoers/cvtsudoers_ldif.c:1016
 #, c-format
 msgid "ignoring incomplete sudoRole: cn: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers_ldif.c:1149 plugins/sudoers/ldap.c:2316
+#: plugins/sudoers/cvtsudoers_ldif.c:1151 plugins/sudoers/ldap.c:2316
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
@@ -1620,66 +1626,66 @@ msgstr ""
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:188 plugins/sudoers/pwutil.c:206
+#: plugins/sudoers/pwutil.c:214 plugins/sudoers/pwutil.c:232
 #, c-format
 msgid "unable to cache uid %u, out of memory"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:200
+#: plugins/sudoers/pwutil.c:226
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:260 plugins/sudoers/pwutil.c:277
-#: plugins/sudoers/pwutil.c:339 plugins/sudoers/pwutil.c:384
+#: plugins/sudoers/pwutil.c:286 plugins/sudoers/pwutil.c:303
+#: plugins/sudoers/pwutil.c:365 plugins/sudoers/pwutil.c:410
 #, c-format
 msgid "unable to cache user %s, out of memory"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:272
+#: plugins/sudoers/pwutil.c:298
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:503 plugins/sudoers/pwutil.c:521
+#: plugins/sudoers/pwutil.c:529 plugins/sudoers/pwutil.c:547
 #, c-format
 msgid "unable to cache gid %u, out of memory"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:515
+#: plugins/sudoers/pwutil.c:541
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:569 plugins/sudoers/pwutil.c:586
-#: plugins/sudoers/pwutil.c:633 plugins/sudoers/pwutil.c:675
+#: plugins/sudoers/pwutil.c:595 plugins/sudoers/pwutil.c:612
+#: plugins/sudoers/pwutil.c:659 plugins/sudoers/pwutil.c:701
 #, c-format
 msgid "unable to cache group %s, out of memory"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:581
+#: plugins/sudoers/pwutil.c:607
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:801 plugins/sudoers/pwutil.c:853
-#: plugins/sudoers/pwutil.c:904 plugins/sudoers/pwutil.c:957
+#: plugins/sudoers/pwutil.c:827 plugins/sudoers/pwutil.c:879
+#: plugins/sudoers/pwutil.c:930 plugins/sudoers/pwutil.c:983
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:807 plugins/sudoers/pwutil.c:858
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:962
+#: plugins/sudoers/pwutil.c:833 plugins/sudoers/pwutil.c:884
+#: plugins/sudoers/pwutil.c:936 plugins/sudoers/pwutil.c:988
 #, c-format
 msgid "unable to cache group list for %s, out of memory"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:847
+#: plugins/sudoers/pwutil.c:873
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:951
+#: plugins/sudoers/pwutil.c:977
 #, c-format
 msgid "unable to parse gids for %s"
 msgstr ""
