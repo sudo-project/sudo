@@ -54,6 +54,14 @@ static int  cmp_pwuid(const void *, const void *);
 static int  cmp_pwnam(const void *, const void *);
 static int  cmp_grgid(const void *, const void *);
 
+/*
+ * Default functions for building cache items.
+ */
+static sudo_make_pwitem_t make_pwitem = sudo_make_pwitem;
+static sudo_make_gritem_t make_gritem = sudo_make_gritem;
+static sudo_make_gidlist_item_t make_gidlist_item = sudo_make_gidlist_item;
+static sudo_make_grlist_item_t make_grlist_item = sudo_make_grlist_item;
+
 #define cmp_grnam	cmp_pwnam
 
 /*
@@ -67,6 +75,24 @@ static int  cmp_grgid(const void *, const void *);
 #else
 # define getauthregistry(u, r)	((r)[0] = '\0')
 #endif
+
+/*
+ * Change the default pwutil backend functions.
+ * The default functions query the password and group databases.
+ */
+void
+sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
+    sudo_make_gidlist_item_t gidlist_item, sudo_make_grlist_item_t grlist_item)
+{
+    debug_decl(sudo_pwutil_set_backend, SUDOERS_DEBUG_NSS)
+
+    make_pwitem = pwitem;
+    make_gritem = gritem;
+    make_gidlist_item = gidlist_item;
+    make_grlist_item = grlist_item;
+
+    debug_return;
+}
 
 /*
  * Compare by user ID.
@@ -179,7 +205,7 @@ sudo_getpwuid(uid_t uid)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(uid), key.registry);
 #endif
-    item = sudo_make_pwitem(uid, NULL);
+    item = make_pwitem(uid, NULL);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -250,7 +276,7 @@ sudo_getpwnam(const char *name)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb((char *) name, key.registry);
 #endif
-    item = sudo_make_pwitem((uid_t)-1, name);
+    item = make_pwitem((uid_t)-1, name);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -497,7 +523,7 @@ sudo_getgrgid(gid_t gid)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = sudo_make_gritem(gid, NULL);
+    item = make_gritem(gid, NULL);
     if (item == NULL) {
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item))) == NULL) {
 	    sudo_warnx(U_("unable to cache gid %u, out of memory"),
@@ -562,7 +588,7 @@ sudo_getgrnam(const char *name)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = sudo_make_gritem((gid_t)-1, name);
+    item = make_gritem((gid_t)-1, name);
     if (item == NULL) {
 	const size_t len = strlen(name) + 1;
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item) + len)) == NULL) {
@@ -789,7 +815,7 @@ sudo_get_grlist(const struct passwd *pw)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = sudo_make_grlist_item(pw, NULL);
+    item = make_grlist_item(pw, NULL);
     if (item == NULL) {
 	/* Out of memory? */
 	debug_return_ptr(NULL);
@@ -843,7 +869,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
     key.k.name = pw->pw_name;
     getauthregistry(NULL, key.registry);
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
-	if ((item = sudo_make_grlist_item(pw, groups)) == NULL) {
+	if ((item = make_grlist_item(pw, groups)) == NULL) {
 	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}
@@ -892,7 +918,7 @@ sudo_get_gidlist(const struct passwd *pw, unsigned int type)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = sudo_make_gidlist_item(pw, NULL, type);
+    item = make_gidlist_item(pw, NULL, type);
     if (item == NULL) {
 	/* Out of memory? */
 	debug_return_ptr(NULL);
@@ -947,7 +973,7 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
     key.type = type;
     getauthregistry(NULL, key.registry);
     if ((node = rbfind(gidlist_cache, &key)) == NULL) {
-	if ((item = sudo_make_gidlist_item(pw, gids, type)) == NULL) {
+	if ((item = make_gidlist_item(pw, gids, type)) == NULL) {
 	    sudo_warnx(U_("unable to parse gids for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}

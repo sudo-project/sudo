@@ -4,7 +4,7 @@ NNAAMMEE
      ccvvttssuuddooeerrss - convert between sudoers file formats
 
 SSYYNNOOPPSSIISS
-     ccvvttssuuddooeerrss [--eehhVV] [--bb _d_n] [--cc _c_o_n_f___f_i_l_e] [--ff _o_u_t_p_u_t___f_o_r_m_a_t]
+     ccvvttssuuddooeerrss [--eehhMMVV] [--bb _d_n] [--cc _c_o_n_f___f_i_l_e] [--ff _o_u_t_p_u_t___f_o_r_m_a_t]
                 [--ii _i_n_p_u_t___f_o_r_m_a_t] [--II _i_n_c_r_e_m_e_n_t] [--mm _f_i_l_t_e_r] [--oo _o_u_t_p_u_t___f_i_l_e]
                 [--OO _s_t_a_r_t___p_o_i_n_t] [--ss _s_e_c_t_i_o_n_s] [_i_n_p_u_t___f_i_l_e]
 
@@ -98,6 +98,16 @@ DDEESSCCRRIIPPTTIIOONN
                  need to be present on the local system.  Only aliases that
                  are referenced by the filtered policy rules will be
                  displayed.
+
+     --MM, ----mmaattcchh--llooccaall
+                 When the --mm option is also specified, use password and group
+                 database information when matching users and groups in the
+                 filter.  Only users and groups in the filter that exist on
+                 the local system will match, and a user's groups will
+                 automatically be added to the filter.  If the --MM is _n_o_t
+                 specified, users and groups in the filter do not need to
+                 exist on the local system, but all groups used for matching
+                 must be explicitly listed in the filter.
 
      --oo _o_u_t_p_u_t___f_i_l_e, ----oouuttppuutt=_o_u_t_p_u_t___f_i_l_e
                  Write the converted output to _o_u_t_p_u_t___f_i_l_e.  If no _o_u_t_p_u_t___f_i_l_e

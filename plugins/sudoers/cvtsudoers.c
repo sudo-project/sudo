@@ -56,7 +56,7 @@
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:ef:hi:I:m:o:O:s:V";
+static const char short_opts[] =  "b:c:ef:hi:I:m:Mo:O:s:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
@@ -66,6 +66,7 @@ static struct option long_opts[] = {
     { "input-format",	required_argument,	NULL,	'i' },
     { "increment",	required_argument,	NULL,	'I' },
     { "match",		required_argument,	NULL,	'm' },
+    { "match-local",	no_argument,		NULL,	'M' },
     { "order-start",	required_argument,	NULL,	'O' },
     { "output",		required_argument,	NULL,	'o' },
     { "suppress",	required_argument,	NULL,	's' },
@@ -93,6 +94,7 @@ main(int argc, char *argv[])
     enum sudoers_formats output_format = format_ldif;
     enum sudoers_formats input_format = format_sudoers;
     struct cvtsudoers_config *conf = NULL;
+    bool match_local = false;
     const char *input_file = "-";
     const char *output_file = "-";
     const char *conf_file = _PATH_CVTSUDOERS_CONF;
@@ -187,6 +189,9 @@ main(int argc, char *argv[])
 	case 'm':
 	    conf->filter = optarg;
 	    break;
+	case 'M':
+	    match_local = true;
+	    break;
 	case 'o':
 	    output_file = optarg;
 	    break;
@@ -270,6 +275,12 @@ main(int argc, char *argv[])
 	    sudo_fatalx(U_("%s: input and output files must be different"),
 		input_file);
 	}
+    }
+
+    /* Set pwutil backend to use the filter data. */
+    if (conf->filter != NULL && !match_local) {
+	sudo_pwutil_set_backend(cvtsudoers_make_pwitem, cvtsudoers_make_gritem,
+	    cvtsudoers_make_gidlist_item, cvtsudoers_make_grlist_item);
     }
 
     /* We may need the hostname to resolve %h escapes in include files. */
@@ -610,7 +621,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
     return fopen(sudoers, "r");
 }
 
-bool
+static bool
 userlist_matches_filter(struct member_list *userlist)
 {
     struct cvtsudoers_string *s;
@@ -658,7 +669,7 @@ userlist_matches_filter(struct member_list *userlist)
     debug_return_bool(matches);
 }
 
-bool
+static bool
 hostlist_matches_filter(struct member_list *hostlist)
 {
     struct cvtsudoers_string *s;
@@ -1011,7 +1022,7 @@ done:
 static void
 usage(int fatal)
 {
-    (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehV] [-b dn] "
+    (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehMV] [-b dn] "
 	"[-c conf_file ] [-f output_format] [-i input_format] [-I increment] "
 	"[-m filter] [-o output_file] [-O start_point] [-s sections] "
 	"[input_file]\n", getprogname());
@@ -1031,7 +1042,8 @@ help(void)
 	"  -i, --input-format=format  set input format: LDIF or sudoers\n"
 	"  -I, --increment=num        amount to increase each sudoOrder by\n"
 	"  -h, --help                 display help message and exit\n"
-	"  -m, --match=filter         only convert entries that match the filter expression\n"
+	"  -m, --match=filter         only convert entries that match the filter\n"
+	"  -M, --match-local          match filter uses passwd and group databases\n"
 	"  -o, --output=output_file   write converted sudoers to output_file\n"
 	"  -O, --order-start=num      starting point for first sudoOrder\n"
 	"  -s, --suppress=sections    suppress output of certain sections\n"

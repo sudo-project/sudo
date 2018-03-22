@@ -73,7 +73,7 @@ do {							\
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
-sudo_make_pwitem(uid_t uid, const char *name)
+cvtsudoers_make_pwitem(uid_t uid, const char *name)
 {
     char *cp, uidstr[MAX_UID_T_LEN + 2];
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
@@ -179,7 +179,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
-sudo_make_gritem(gid_t gid, const char *name)
+cvtsudoers_make_gritem(gid_t gid, const char *name)
 {
     char *cp, gidstr[MAX_UID_T_LEN + 2];
     size_t nsize, psize, nmem, total, len;
@@ -292,7 +292,7 @@ static struct cache_item_gidlist *gidlist_item;
  * elements.  Fills in datum from user_gids or from getgrouplist(3).
  */
 struct cache_item *
-sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
+cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
     unsigned int type)
 {
     char *cp;
@@ -391,7 +391,7 @@ static struct cache_item_gidlist *grlist_item;
  * elements.  Fills in group names from a call to sudo_get_gidlist().
  */
 struct cache_item *
-sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
+cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
 {
     char *cp;
     size_t nsize, ngroups, total, len;

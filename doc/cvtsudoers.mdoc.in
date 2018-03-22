@@ -22,7 +22,7 @@
 .Nd convert between sudoers file formats
 .Sh SYNOPSIS
 .Nm cvtsudoers
-.Op Fl ehV
+.Op Fl ehMV
 .Op Fl b Ar dn
 .Op Fl c Ar conf_file
 .Op Fl f Ar output_format
@@ -155,6 +155,20 @@ against the filter so the users and groups do not need to be present
 on the local system.
 Only aliases that are referenced by the filtered policy rules will
 be displayed.
+.It Fl M , Fl -match-local
+When the
+.Fl m
+option is also specified, use password and group database information
+when matching users and groups in the filter.
+Only users and groups in the filter that exist on the local system will match,
+and a user's groups will automatically be added to the filter.
+If the
+.Fl M
+is
+.Em not
+specified, users and groups in the filter do not need to exist on the
+local system, but all groups used for matching must be explicitly listed
+in the filter.
 .It Fl o Ar output_file , Fl -output Ns = Ns Ar output_file
 Write the converted output to
 .Ar output_file .

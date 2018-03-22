@@ -74,21 +74,25 @@ struct cvtsudoers_filter {
     struct cvtsudoers_str_list hosts;
 };
 
-bool convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf);
-bool convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf);
-bool parse_ldif(const char *input_file, struct cvtsudoers_config *conf);
-void get_hostname(void);
-
-struct member_list;
-struct userspec_list;
-bool userlist_matches_filter(struct member_list *userlist);
-bool hostlist_matches_filter(struct member_list *hostlist);
-
+/* cvtsudoers.c */
+extern struct cvtsudoers_filter *filters;
 struct cvtsudoers_str_list *str_list_alloc(void);
 void str_list_free(void *v);
 struct cvtsudoers_string *cvtsudoers_string_alloc(const char *s);
 void cvtsudoers_string_free(struct cvtsudoers_string *ls);
 
-extern struct cvtsudoers_filter *filters;
+/* cvtsudoers_json.c */
+bool convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf);
+
+/* cvtsudoers_ldif.c */
+bool convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf);
+bool parse_ldif(const char *input_file, struct cvtsudoers_config *conf);
+void get_hostname(void);
+
+/* cvtsudoers_pwutil.c */
+struct cache_item *cvtsudoers_make_pwitem(uid_t uid, const char *name);
+struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
+struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1, unsigned int type);
+struct cache_item *cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1);
 
 #endif /* SUDOERS_CVTSUDOERS_H */

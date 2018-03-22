@@ -25,7 +25,7 @@
 .SH "SYNOPSIS"
 .HP 11n
 \fBcvtsudoers\fR
-[\fB\-ehV\fR]
+[\fB\-ehMV\fR]
 [\fB\-b\fR\ \fIdn\fR]
 [\fB\-c\fR\ \fIconf_file\fR]
 [\fB\-f\fR\ \fIoutput_format\fR]
@@ -190,6 +190,21 @@ against the filter so the users and groups do not need to be present
 on the local system.
 Only aliases that are referenced by the filtered policy rules will
 be displayed.
+.TP 12n
+\fB\-M\fR, \fB\--match-local\fR
+When the
+\fB\-m\fR
+option is also specified, use password and group database information
+when matching users and groups in the filter.
+Only users and groups in the filter that exist on the local system will match,
+and a user's groups will automatically be added to the filter.
+If the
+\fB\-M\fR
+is
+\fInot\fR
+specified, users and groups in the filter do not need to exist on the
+local system, but all groups used for matching must be explicitly listed
+in the filter.
 .TP 12n
 \fB\-o\fR \fIoutput_file\fR, \fB\--output\fR=\fIoutput_file\fR
 Write the converted output to
