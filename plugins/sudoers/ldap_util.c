@@ -409,7 +409,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			    if ((cmndspec->privs = strdup(val)) == NULL)
 				goto oom;
 			}
-		    } else if (strcmp(val, "limitprivs") == 0) {
+		    } else if (strcmp(var, "limitprivs") == 0) {
 			if (op == '=') {
 			    if ((cmndspec->limitprivs = strdup(val)) == NULL)
 				goto oom;
