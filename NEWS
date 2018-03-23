@@ -3,13 +3,34 @@ What's new in Sudo 1.8.23
  * PAM account management modules and BSD auto approval modules are
    now run even when no password is required.
 
+ * For kernel-based time stamps, if no terminal is present, fall
+   back to parent-pid style time stamps.
+
  * The new cvtsudoers utility replaces both the "sudoers2ldif" script
    and the "visudo -x" functionality.  It can read a file in either
    sudoers or LDIF format and produce JSON, LDIF or sudoers output.
+   It is also possible to filter the generated output file by user,
+   group or host name.
 
  * The file, ldap and sss sudoers backends now share a common set
    of formatting functions for "sudo -l" output, which is also used
    by the cvtsudoers utility.
+
+ * The /run directory is now used in preference to /var/run if it
+   exists. Bug #822.
+
+ * More accurate descriptions of the --with-rundir and --with-vardir
+   configure options.  Bug #823.
+
+ * The setpassent() and setgroupent() functions are now used on systems
+   that support them to keep the passwd and group database open.
+   Sudo performs a lot of passwd and group lookups so it can be
+   beneficial to avoid opening and closing the files each time.
+
+ * The new case_insensitive_user and case_insensitive_group sudoers
+   options can be used to control whether sudo does case-sensitive
+   matching of users and groups in sudoers.  Case insensitive
+   matching is now the default.
 
 What's new in Sudo 1.8.22
 
