@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "8" "March 22, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "CVTSUDOERS" "1" "March 22, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
