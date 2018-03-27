@@ -755,7 +755,8 @@ pty_close(struct command_status *cstat)
     debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
     /* Close the pty slave first so reads from the master don't block. */
-    close(io_fds[SFD_SLAVE]);
+    if (io_fds[SFD_SLAVE] != -1)
+	close(io_fds[SFD_SLAVE]);
 
     /* Flush any remaining output (the plugin already got it). */
     if (io_fds[SFD_USERTTY] != -1) {
@@ -786,7 +787,8 @@ pty_close(struct command_status *cstat)
 	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
 
     /* Close pty master. */
-    close(io_fds[SFD_MASTER]);
+    if (io_fds[SFD_MASTER] != -1)
+	close(io_fds[SFD_MASTER]);
 
     debug_return;
 }
