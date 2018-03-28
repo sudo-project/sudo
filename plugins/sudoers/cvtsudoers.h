@@ -37,6 +37,14 @@ struct cvtsudoers_str_list {
     unsigned int refcnt;
 };
 
+/* Flags for cvtsudoers_config.defaults */
+#define CVT_DEFAULTS_GLOBAL	0x01
+#define CVT_DEFAULTS_USER	0x02
+#define CVT_DEFAULTS_RUNAS	0x04
+#define CVT_DEFAULTS_HOST	0x08
+#define CVT_DEFAULTS_CMND	0x10
+#define CVT_DEFAULTS_ALL	0xff
+
 /* Flags for cvtsudoers_config.suppress */
 #define SUPPRESS_DEFAULTS	0x01
 #define SUPPRESS_ALIASES	0x02
@@ -50,13 +58,14 @@ struct cvtsudoers_config {
     char *filter;
     unsigned int sudo_order;
     unsigned int order_increment;
-    int suppress;
+    short defaults;
+    short suppress;
     bool expand_aliases;
     bool store_options;
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { NULL, NULL, NULL, NULL, 1, 1, 0, false, true }
+#define INITIAL_CONFIG { NULL, NULL, NULL, NULL, 1, 1, CVT_DEFAULTS_ALL, 0, false, true }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1

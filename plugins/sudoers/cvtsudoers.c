@@ -56,10 +56,11 @@
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:ef:hi:I:m:Mo:O:s:V";
+static const char short_opts[] =  "b:c:d:ef:hi:I:m:Mo:O:s:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
+    { "defaults",	required_argument,	NULL,	'd' },
     { "expand-aliases",	no_argument,		NULL,	'e' },
     { "output-format",	required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
@@ -83,9 +84,10 @@ static bool cvtsudoers_parse_filter(char *expression);
 static bool alias_remove_unused(void);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
+static int cvtsudoers_parse_defaults(char *expression);
 static int cvtsudoers_parse_suppression(char *expression);
 static void filter_userspecs(void);
-static void filter_defaults(void);
+static void filter_defaults(struct cvtsudoers_config *conf);
 
 int
 main(int argc, char *argv[])
@@ -156,6 +158,11 @@ main(int argc, char *argv[])
 	    break;
 	case 'c':
 	    /* handled above */
+	    break;
+	case 'd':
+	    conf->defaults = cvtsudoers_parse_defaults(optarg);
+	    if (conf->defaults == -1)
+		usage(1);
 	    break;
 	case 'e':
 	    conf->expand_aliases = true;
@@ -304,13 +311,10 @@ main(int argc, char *argv[])
     }
 
     /* Apply filters. */
-    if (conf->filter != NULL) {
-	    filter_userspecs();
-
-	    filter_defaults();
-
-	    alias_remove_unused();
-    }
+    filter_userspecs();
+    filter_defaults(conf);
+    if (filters != NULL || conf->defaults != CVT_DEFAULTS_ALL)
+	alias_remove_unused();
 
     switch (output_format) {
     case format_json:
@@ -452,6 +456,33 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
     }
 
     debug_return;
+}
+
+static int
+cvtsudoers_parse_defaults(char *expression)
+{
+    char *last = NULL, *cp = expression;
+    int flags = 0;
+    debug_decl(cvtsudoers_parse_defaults, SUDOERS_DEBUG_UTIL)
+
+    for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
+	if (strcasecmp(cp, "global") == 0) {
+	    SET(flags, CVT_DEFAULTS_GLOBAL);
+	} else if (strcasecmp(cp, "user") == 0) {
+	    SET(flags, CVT_DEFAULTS_USER);
+	} else if (strcasecmp(cp, "runas") == 0) {
+	    SET(flags, CVT_DEFAULTS_RUNAS);
+	} else if (strcasecmp(cp, "host") == 0) {
+	    SET(flags, CVT_DEFAULTS_HOST);
+	} else if (strcasecmp(cp, "command") == 0) {
+	    SET(flags, CVT_DEFAULTS_CMND);
+	} else {
+	    sudo_warnx(U_("invalid defaults type: %s"), cp);
+	    debug_return_int(-1);
+	}
+    }
+
+    debug_return_int(flags);
 }
 
 static int
@@ -770,6 +801,9 @@ filter_userspecs(void)
     struct privilege *priv, *next_priv;
     debug_decl(filter_userspecs, SUDOERS_DEBUG_UTIL)
 
+    if (filters == NULL)
+	debug_return;
+
     /*
      * Does not currently prune out non-matching entries in the user or
      * host lists.  It acts more like a grep than a true filter.
@@ -800,32 +834,51 @@ filter_userspecs(void)
  * Apply filters to host/user-based Defaults, removing non-matching entries.
  */
 static void
-filter_defaults(void)
+filter_defaults(struct cvtsudoers_config *conf)
 {
     struct defaults *def, *next;
     struct member_list *prev_binding = NULL;
     debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
 
+    if (filters == NULL && conf->defaults == CVT_DEFAULTS_ALL)
+	debug_return;
+
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+	bool keep = true;
+
 	switch (def->type) {
+	case DEFAULTS:
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_GLOBAL))
+		keep = false;
+	    break;
 	case DEFAULTS_USER:
-	    if (!userlist_matches_filter(def->binding)) {
-		TAILQ_REMOVE(&defaults, def, entries);
-		free_default(def, &prev_binding);
-	    } else {
-		prev_binding = def->binding;
-	    }
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_USER) ||
+		!userlist_matches_filter(def->binding))
+		keep = false;
+	    break;
+	case DEFAULTS_RUNAS:
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_RUNAS))
+		keep = false;
 	    break;
 	case DEFAULTS_HOST:
-	    if (!hostlist_matches_filter(def->binding)) {
-		TAILQ_REMOVE(&defaults, def, entries);
-		free_default(def, &prev_binding);
-	    } else {
-		prev_binding = def->binding;
-	    }
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_HOST) ||
+		!hostlist_matches_filter(def->binding))
+		keep = false;
+	    break;
+	case DEFAULTS_CMND:
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_RUNAS))
+		keep = false;
 	    break;
 	default:
+	    sudo_fatalx_nodebug("unexpected defaults type %d", def->type);
 	    break;
+	}
+
+	if (!keep) {
+	    TAILQ_REMOVE(&defaults, def, entries);
+	    free_default(def, &prev_binding);
+	} else {
+	    prev_binding = def->binding;
 	}
     }
     debug_return;
@@ -1023,9 +1076,9 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehMV] [-b dn] "
-	"[-c conf_file ] [-f output_format] [-i input_format] [-I increment] "
-	"[-m filter] [-o output_file] [-O start_point] [-s sections] "
-	"[input_file]\n", getprogname());
+	"[-c conf_file ] [-d deftypes] [-f output_format] [-i input_format] "
+	"[-I increment] [-m filter] [-o output_file] [-O start_point] "
+	"[-s sections] [input_file]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -1037,6 +1090,7 @@ help(void)
     usage(0);
     (void) puts(_("\nOptions:\n"
 	"  -b, --base=dn              the base DN for sudo LDAP queries\n"
+	"  -d, --defaults=deftypes    only convert Defaults of the specified types\n"
 	"  -e, --expand-aliases       expand aliases when converting\n"
 	"  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"
 	"  -i, --input-format=format  set input format: LDIF or sudoers\n"

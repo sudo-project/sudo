@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 22, 2018
+.Dd March 28, 2018
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -25,6 +25,7 @@
 .Op Fl ehMV
 .Op Fl b Ar dn
 .Op Fl c Ar conf_file
+.Op Fl d Ar deftypes
 .Op Fl f Ar output_format
 .Op Fl i Ar input_format
 .Op Fl I Ar increment
@@ -68,6 +69,39 @@ Only necessary when converting to LDIF format.
 Specify the path to a configuration file.
 Defaults to
 .Pa @sysconfdir@/cvtsudoers.conf .
+.It Fl d Ar deftypes , Fl -defaults Ns = Ns Ar deftypes
+Only convert
+.Li Defaults
+entries of the specified types.
+One or more
+.Li Defaults
+types may be specified, separated by a comma
+.Pq Ql \&, .
+The supported types are:
+.Bl -tag -width 8n
+.It global
+Defaults entries that always match.
+.It user
+Per-user Defaults entries.
+.It runas
+Per-runas user Defaults entries.
+.It host
+Per-host Defaults entries.
+.It commands
+Per-command Defaults entries.
+.El
+.Pp
+See the
+.Sy Defaults
+section in
+.Xr sudoers @mansectform@
+for more information.
+.Pp
+If the
+.Fl d
+option is not specified, all
+.Li Defaults
+entries will be converted.
 .It Fl e , Fl -expand-aliases
 Expand aliases in
 .Ar input_file .

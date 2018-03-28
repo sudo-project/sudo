@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "1" "March 22, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "March 28, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -28,6 +28,7 @@
 [\fB\-ehMV\fR]
 [\fB\-b\fR\ \fIdn\fR]
 [\fB\-c\fR\ \fIconf_file\fR]
+[\fB\-d\fR\ \fIdeftypes\fR]
 [\fB\-f\fR\ \fIoutput_format\fR]
 [\fB\-i\fR\ \fIinput_format\fR]
 [\fB\-I\fR\ \fIincrement\fR]
@@ -72,6 +73,48 @@ Only necessary when converting to LDIF format.
 Specify the path to a configuration file.
 Defaults to
 \fI@sysconfdir@/cvtsudoers.conf\fR.
+.TP 12n
+\fB\-d\fR \fIdeftypes\fR, \fB\--defaults\fR=\fIdeftypes\fR
+Only convert
+\fRDefaults\fR
+entries of the specified types.
+One or more
+\fRDefaults\fR
+types may be specified, separated by a comma
+(\(oq\&,\(cq).
+The supported types are:
+.PP
+.RS 12n
+.PD 0
+.TP 10n
+global
+Defaults entries that always match.
+.PD
+.TP 10n
+user
+Per-user Defaults entries.
+.TP 10n
+runas
+Per-runas user Defaults entries.
+.TP 10n
+host
+Per-host Defaults entries.
+.TP 10n
+commands
+Per-command Defaults entries.
+.PP
+See the
+\fBDefaults\fR
+section in
+sudoers(@mansectform@)
+for more information.
+.sp
+If the
+\fB\-d\fR
+option is not specified, all
+\fRDefaults\fR
+entries will be converted.
+.RE
 .TP 12n
 \fB\-e\fR, \fB\--expand-aliases\fR
 Expand aliases in
