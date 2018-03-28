@@ -79,15 +79,18 @@ types may be specified, separated by a comma
 .Pq Ql \&, .
 The supported types are:
 .Bl -tag -width 8n
+.It all
+All Defaults entries.
 .It global
-Defaults entries that always match.
+Gobal Defaults entries that are applied regardless of
+user, runas, host or command.
 .It user
 Per-user Defaults entries.
 .It runas
 Per-runas user Defaults entries.
 .It host
 Per-host Defaults entries.
-.It commands
+.It command
 Per-command Defaults entries.
 .El
 .Pp

@@ -87,9 +87,13 @@ The supported types are:
 .RS 12n
 .PD 0
 .TP 10n
-global
-Defaults entries that always match.
+all
+All Defaults entries.
 .PD
+.TP 10n
+global
+Gobal Defaults entries that are applied regardless of
+user, runas, host or command.
 .TP 10n
 user
 Per-user Defaults entries.
@@ -100,7 +104,7 @@ Per-runas user Defaults entries.
 host
 Per-host Defaults entries.
 .TP 10n
-commands
+command
 Per-command Defaults entries.
 .PP
 See the

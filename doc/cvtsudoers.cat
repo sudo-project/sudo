@@ -38,7 +38,10 @@ DDEESSCCRRIIPPTTIIOONN
                  more Defaults types may be specified, separated by a comma
                  (`,').  The supported types are:
 
-                 global    Defaults entries that always match.
+                 all       All Defaults entries.
+
+                 global    Gobal Defaults entries that are applied regardless
+                           of user, runas, host or command.
 
                  user      Per-user Defaults entries.
 
@@ -46,7 +49,7 @@ DDEESSCCRRIIPPTTIIOONN
 
                  host      Per-host Defaults entries.
 
-                 commands  Per-command Defaults entries.
+                 command   Per-command Defaults entries.
 
                  See the DDeeffaauullttss section in sudoers(4) for more information.
 

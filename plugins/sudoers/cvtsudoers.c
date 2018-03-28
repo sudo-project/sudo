@@ -466,7 +466,9 @@ cvtsudoers_parse_defaults(char *expression)
     debug_decl(cvtsudoers_parse_defaults, SUDOERS_DEBUG_UTIL)
 
     for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
-	if (strcasecmp(cp, "global") == 0) {
+	if (strcasecmp(cp, "all") == 0) {
+	    SET(flags, CVT_DEFAULTS_ALL);
+	} else if (strcasecmp(cp, "global") == 0) {
 	    SET(flags, CVT_DEFAULTS_GLOBAL);
 	} else if (strcasecmp(cp, "user") == 0) {
 	    SET(flags, CVT_DEFAULTS_USER);
