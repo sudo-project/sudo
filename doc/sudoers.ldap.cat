@@ -32,20 +32,6 @@ DDEESSCCRRIIPPTTIIOONN
         when the data is inserted into LDAP, there is no need for a
         specialized tool to check syntax.
 
-     Another major difference between LDAP and file-based _s_u_d_o_e_r_s is that in
-     LDAP, ssuuddoo-specific Aliases are not supported.
-
-     For the most part, there is really no need for ssuuddoo-specific Aliases.
-     Unix groups, non-Unix groups (via the _g_r_o_u_p___p_l_u_g_i_n) or user netgroups can
-     be used in place of User_Aliases and Runas_Aliases.  Host netgroups can
-     be used in place of Host_Aliases.  Since groups and netgroups can also be
-     stored in LDAP there is no real need for ssuuddoo-specific aliases.
-
-     Cmnd_Aliases are not really required either since it is possible to have
-     multiple users listed in a sudoRole.  Instead of defining a Cmnd_Alias
-     that is referenced by multiple users, one can create a sudoRole that
-     contains the commands and assign multiple users to it.
-
    SSUUDDOOeerrss LLDDAAPP ccoonnttaaiinneerr
      The _s_u_d_o_e_r_s configuration is contained in the ou=SUDOers LDAP container.
 
@@ -55,7 +41,7 @@ DDEESSCCRRIIPPTTIIOONN
      SSH_AUTH_SOCK variable will be preserved in the environment for all
      users.
 
-         dn: cn=defaults,ou=SUDOers,dc=example,dc=com
+         dn: cn=defaults,ou=SUDOers,dc=my-domain,dc=com
          objectClass: top
          objectClass: sudoRole
          cn: defaults
@@ -184,7 +170,7 @@ DDEESSCCRRIIPPTTIIOONN
      The following example allows users in group wheel to run any command on
      any host via ssuuddoo:
 
-         dn: cn=%wheel,ou=SUDOers,dc=example,dc=com
+         dn: cn=%wheel,ou=SUDOers,dc=my-domain,dc=com
          objectClass: top
          objectClass: sudoRole
          cn: %wheel
@@ -231,10 +217,19 @@ DDEESSCCRRIIPPTTIIOONN
      significantly speed up ssuuddoo's execution time.
 
    DDiiffffeerreenncceess bbeettwweeeenn LLDDAAPP aanndd nnoonn--LLDDAAPP ssuuddooeerrss
-     There are some subtle differences in the way sudoers is handled once in
-     LDAP.  Probably the biggest is that according to the RFC, LDAP ordering
-     is arbitrary and you cannot expect that Attributes and Entries are
-     returned in any specific order.
+     One of the major differences between LDAP and file-based _s_u_d_o_e_r_s is that
+     in LDAP, ssuuddoo-specific Aliases are not supported.
+
+     For the most part, there is little need for ssuuddoo-specific Aliases.  Unix
+     groups, non-Unix groups (via the _g_r_o_u_p___p_l_u_g_i_n) or user netgroups can be
+     used in place of User_Aliases and Runas_Aliases.  Host netgroups can be
+     used in place of Host_Aliases.  Since groups and netgroups can also be
+     stored in LDAP there is no real need for ssuuddoo-specific aliases.
+
+     There are also some subtle differences in the way sudoers is handled once
+     in LDAP.  Probably the biggest is that according to the RFC, LDAP
+     ordering is arbitrary and you cannot expect that Attributes and Entries
+     are returned in any specific order.
 
      The order in which different entries are applied can be controlled using
      the sudoOrder attribute, but there is no way to guarantee the order of
@@ -273,9 +268,9 @@ DDEESSCCRRIIPPTTIIOONN
          sudoCommand: !/bin/sh
          sudoCommand: ALL
 
-     Another difference is that negations on the Host, User or Runas are
-     currently ignored.  For example, the following attributes do not behave
-     the way one might expect.
+     Another difference is that it is not possible to use negation in a
+     sudoUser, sudoRunAsUser or sudoRunAsGroup attribute.  For example, the
+     following attributes do not behave the way one might expect.
 
          # does not match all but joe
          # rather, does not match anyone
@@ -286,10 +281,88 @@ DDEESSCCRRIIPPTTIIOONN
          sudoUser: ALL
          sudoUser: !joe
 
-         # does not match all but web01
-         # rather, matches all hosts including web01
+   CCoonnvveerrttiinngg bbeettwweeeenn ffiillee--bbaasseedd aanndd LLDDAAPP ssuuddooeerrss
+     The cvtsudoers(1) utility can be used to convert between file-based and
+     LDAP _s_u_d_o_e_r_s.  However, there are features in the file-based sudoers that
+     have no equivalent in LDAP-based sudoers (and vice versa).  These cannot
+     be converted automatically.
+
+     For example, a Cmnd_Alias in a _s_u_d_o_e_r_s file may be converted to a
+     sudoRole that contains multiple commands.  Multiple users and/or groups
+     may be assigned to the sudoRole.
+
+     Also, host, user, runas and command-based Defaults entries are not
+     supported.  However, a sudoRole may contain one or more sudoOption
+     attributes which can often serve the same purpose.
+
+     Consider the following _s_u_d_o_e_r_s lines:
+
+         Cmnd_Alias PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
+         Defaults!PAGERS noexec
+         alice, bob ALL = ALL
+
+     In this example, alice and bob are allowed to run all commands, but the
+     commands listed in PAGERS will have the noexec flag set, preventing shell
+     escapes.
+
+     When converting this to LDAP, two sudoRole objects can be used:
+
+         dn: cn=PAGERS,ou=SUDOers,dc=my-domain,dc=com
+         objectClass: top
+         objectClass: sudoRole
+         cn: PAGERS
+         sudoUser: alice
+         sudoUser: bob
          sudoHost: ALL
-         sudoHost: !web01
+         sudoCommand: /usr/bin/more
+         sudoCommand: /usr/bin/pg
+         sudoCommand: /usr/bin/less
+         sudoOption: noexec
+         sudoOrder: 900
+
+         dn: cn=ADMINS,ou=SUDOers,dc=my-domain,dc=com
+         objectClass: top
+         objectClass: sudoRole
+         cn: ADMINS
+         sudoUser: alice
+         sudoUser: bob
+         sudoHost: ALL
+         sudoCommand: ALL
+         sudoOrder: 100
+
+     In the LDAP version, the sudoOrder attribute is used to guarantee that
+     the PAGERS sudoRole with _n_o_e_x_e_c has precedence.  Unlike the _s_u_d_o_e_r_s
+     version, the LDAP version requires that all users for whom the
+     restriction should apply be assigned to the PAGERS sudoRole.  Using a
+     Unix group or netgroup in PAGERS rather than listing each user would make
+     this easier to maintain.
+
+     Per-user Defaults entries can be emulated by using one or more sudoOption
+     attributes in a sudoRole.  Consider the following _s_u_d_o_e_r_s lines:
+
+         User_Alias ADMINS = john, sally
+         Defaults:ADMINS !authenticate
+         ADMINS ALL = (ALL:ALL) ALL
+
+     In this example, john and sally are allowed to run any command as any
+     user or group.
+
+     When converting this to LDAP, we can use a Unix group instead of the
+     User_Alias.
+
+         dn: cn=admins,ou=SUDOers,dc=my-domain,dc=com
+         objectClass: top
+         objectClass: sudoRole
+         cn: admins
+         sudoUser: %admin
+         sudoHost: ALL
+         sudoRunAsUser: ALL
+         sudoRunAsGroup: ALL
+         sudoCommand: ALL
+         sudoOption: !authenticate
+
+     This assumes that users john and sally are members of the "admins" Unix
+     group.
 
    SSuuddooeerrss sscchheemmaa
      In order to use ssuuddoo's LDAP support, the ssuuddoo schema must be installed on
@@ -370,9 +443,9 @@ DDEESSCCRRIIPPTTIIOONN
 
      NNEETTGGRROOUUPP__BBAASSEE _b_a_s_e
            The base DN to use when performing LDAP netgroup queries.
-           Typically this is of the form ou=netgroup,dc=example,dc=com for the
-           domain example.com.  Multiple NNEETTGGRROOUUPP__BBAASSEE lines may be specified,
-           in which case they are queried in the order specified.
+           Typically this is of the form ou=netgroup,dc=my-domain,dc=com for
+           the domain my-domain.com.  Multiple NNEETTGGRROOUUPP__BBAASSEE lines may be
+           specified, in which case they are queried in the order specified.
 
            This option can be used to query a user's netgroups directly via
            LDAP which is usually faster than fetching every sudoRole object
@@ -452,8 +525,8 @@ DDEESSCCRRIIPPTTIIOONN
 
      SSUUDDOOEERRSS__BBAASSEE _b_a_s_e
            The base DN to use when performing ssuuddoo LDAP queries.  Typically
-           this is of the form ou=SUDOers,dc=example,dc=com for the domain
-           example.com.  Multiple SSUUDDOOEERRSS__BBAASSEE lines may be specified, in
+           this is of the form ou=SUDOers,dc=my-domain,dc=com for the domain
+           my-domain.com.  Multiple SSUUDDOOEERRSS__BBAASSEE lines may be specified, in
            which case they are queried in the order specified.
 
      SSUUDDOOEERRSS__DDEEBBUUGG _d_e_b_u_g___l_e_v_e_l
@@ -714,7 +787,7 @@ EEXXAAMMPPLLEESS
        timelimit 30
        #
        # Must be set or sudo will ignore LDAP; may be specified multiple times.
-       sudoers_base   ou=SUDOers,dc=example,dc=com
+       sudoers_base   ou=SUDOers,dc=my-domain,dc=com
        #
        # verbose sudoers matching from ldap
        #sudoers_debug 2
@@ -879,7 +952,7 @@ EEXXAAMMPPLLEESS
           )
 
 SSEEEE AALLSSOO
-     ldap.conf(4), sssd-sudo(4), sudo.conf(4), sudoers(4)
+     cvtsudoers(1), ldap.conf(4), sssd-sudo(4), sudo.conf(4), sudoers(4)
 
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
@@ -912,4 +985,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.23                     March 21, 2018                     Sudo 1.8.23
+Sudo 1.8.23                     March 29, 2018                     Sudo 1.8.23

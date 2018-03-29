@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 21, 2018
+.Dd March 29, 2018
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -72,31 +72,6 @@ Since LDAP updates are atomic, locking is no longer necessary.
 Because syntax is checked when the data is inserted into LDAP, there
 is no need for a specialized tool to check syntax.
 .El
-.Pp
-Another major difference between LDAP and file-based
-.Em sudoers
-is that in LDAP,
-.Nm sudo Ns -specific
-Aliases are not supported.
-.Pp
-For the most part, there is really no need for
-.Nm sudo Ns -specific
-Aliases.
-Unix groups, non-Unix groups (via the
-.Em group_plugin )
-or user netgroups can be used in place of User_Aliases and Runas_Aliases.
-Host netgroups can be used in place of Host_Aliases.
-Since groups and netgroups can also be stored in LDAP there is no real need for
-.Nm sudo Ns -specific
-aliases.
-.Pp
-Cmnd_Aliases are not really required either since it is possible
-to have multiple users listed in a
-.Li sudoRole .
-Instead of defining a Cmnd_Alias that is referenced by multiple users,
-one can create a
-.Li sudoRole
-that contains the commands and assign multiple users to it.
 .Ss SUDOers LDAP container
 The
 .Em sudoers
@@ -117,7 +92,7 @@ In the following example, the
 .Ev SSH_AUTH_SOCK
 variable will be preserved in the environment for all users.
 .Bd -literal -offset 4n
-dn: cn=defaults,ou=SUDOers,dc=example,dc=com
+dn: cn=defaults,ou=SUDOers,dc=my-domain,dc=com
 objectClass: top
 objectClass: sudoRole
 cn: defaults
@@ -166,7 +141,7 @@ entry is preceded by an exclamation point,
 and the entry matches, the
 .Li sudoRole
 in which it resides will be ignored.
-Negated 
+Negated
 .Li sudoHost
 entries are only supported by version 1.8.18 or higher.
 .It Sy sudoCommand
@@ -353,7 +328,7 @@ The following example allows users in group wheel to run any command
 on any host via
 .Nm sudo :
 .Bd -literal -offset 4n
-dn: cn=%wheel,ou=SUDOers,dc=example,dc=com
+dn: cn=%wheel,ou=SUDOers,dc=my-domain,dc=com
 objectClass: top
 objectClass: sudoRole
 cn: %wheel
@@ -424,7 +399,24 @@ can significantly speed up
 .Nm sudo Ns 's
 execution time.
 .Ss Differences between LDAP and non-LDAP sudoers
-There are some subtle differences in the way sudoers is handled
+One of the major differences between LDAP and file-based
+.Em sudoers
+is that in LDAP,
+.Nm sudo Ns -specific
+Aliases are not supported.
+.Pp
+For the most part, there is little need for
+.Nm sudo Ns -specific
+Aliases.
+Unix groups, non-Unix groups (via the
+.Em group_plugin )
+or user netgroups can be used in place of User_Aliases and Runas_Aliases.
+Host netgroups can be used in place of Host_Aliases.
+Since groups and netgroups can also be stored in LDAP there is no real need for
+.Nm sudo Ns -specific
+aliases.
+.Pp
+There are also some subtle differences in the way sudoers is handled
 once in LDAP.
 Probably the biggest is that according to the RFC, LDAP ordering
 is arbitrary and you cannot expect that Attributes and Entries are
@@ -472,8 +464,8 @@ sudoCommand: !/bin/sh
 sudoCommand: ALL
 .Ed
 .Pp
-Another difference is that negations on the Host, User or Runas are
-currently ignored.
+Another difference is that it is not possible to use negation in a
+sudoUser, sudoRunAsUser or sudoRunAsGroup attribute.
 For example, the following attributes do not behave the way one might expect.
 .Bd -literal -offset 4n
 # does not match all but joe
@@ -484,12 +476,117 @@ sudoUser: !joe
 # rather, matches everyone including Joe
 sudoUser: ALL
 sudoUser: !joe
-
-# does not match all but web01
-# rather, matches all hosts including web01
-sudoHost: ALL
-sudoHost: !web01
 .Ed
+.Ss Converting between file-based and LDAP sudoers
+The
+.Xr cvtsudoers 1
+utility can be used to convert between file-based and LDAP
+.Em sudoers .
+However, there are features in the file-based sudoers that have
+no equivalent in LDAP-based sudoers (and vice versa).
+These cannot be converted automatically.
+.Pp
+For example, a Cmnd_Alias in a
+.Em sudoers
+file may be converted to a
+.Li sudoRole
+that contains multiple commands.
+Multiple users and/or groups may be assigned to the
+.Li sudoRole .
+.Pp
+Also, host, user, runas and command-based
+.Li Defaults
+entries are not supported.
+However, a
+.Li sudoRole
+may contain one or more
+.Li sudoOption
+attributes which can often serve the same purpose.
+.Pp
+Consider the following
+.Em sudoers
+lines:
+.Bd -literal -offset 4n
+Cmnd_Alias PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
+Defaults!PAGERS noexec
+alice, bob ALL = ALL
+.Ed
+.Pp
+In this example, alice and bob are allowed to run all commands, but
+the commands listed in PAGERS will have the noexec flag set,
+preventing shell escapes.
+.Pp
+When converting this to LDAP, two sudoRole objects can be used:
+.Bd -literal -offset 4n
+dn: cn=PAGERS,ou=SUDOers,dc=my-domain,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: PAGERS
+sudoUser: alice
+sudoUser: bob
+sudoHost: ALL
+sudoCommand: /usr/bin/more
+sudoCommand: /usr/bin/pg
+sudoCommand: /usr/bin/less
+sudoOption: noexec
+sudoOrder: 900
+
+dn: cn=ADMINS,ou=SUDOers,dc=my-domain,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: ADMINS
+sudoUser: alice
+sudoUser: bob
+sudoHost: ALL
+sudoCommand: ALL
+sudoOrder: 100
+.Ed
+.Pp
+In the LDAP version, the sudoOrder attribute is used to guarantee
+that the PAGERS sudoRole with
+.Em noexec
+has precedence.
+Unlike the
+.Em sudoers
+version, the LDAP version requires that all users for whom the restriction
+should apply be assigned to the PAGERS sudoRole.
+Using a Unix group or netgroup in PAGERS rather than listing each
+user would make this easier to maintain.
+.Pp
+Per-user
+.Li Defaults
+entries can be emulated by using one or more sudoOption attributes
+in a sudoRole.
+Consider the following
+.Em sudoers
+lines:
+.Bd -literal -offset 4n
+User_Alias ADMINS = john, sally
+Defaults:ADMINS !authenticate
+ADMINS ALL = (ALL:ALL) ALL
+.Ed
+.Pp
+In this example, john and sally are allowed to run any command
+as any user or group.
+.Pp
+When converting this to LDAP, we can use a Unix group instead
+of the User_Alias.
+.Bd -literal -offset 4n
+dn: cn=admins,ou=SUDOers,dc=my-domain,dc=com
+objectClass: top
+objectClass: sudoRole
+cn: admins
+sudoUser: %admin
+sudoHost: ALL
+sudoRunAsUser: ALL
+sudoRunAsGroup: ALL
+sudoCommand: ALL
+sudoOption: !authenticate
+.Ed
+.Pp
+This assumes that users john and sally are members of the
+.Dq admins
+Unix group.
 .Ss Sudoers schema
 In order to use
 .Nm sudo Ns 's
@@ -629,9 +726,9 @@ The default value is protocol version 3.
 .It Sy NETGROUP_BASE Ar base
 The base DN to use when performing LDAP netgroup queries.
 Typically this is of the form
-.Li ou=netgroup,dc=example,dc=com
+.Li ou=netgroup,dc=my-domain,dc=com
 for the domain
-.Li example.com .
+.Li my-domain.com .
 Multiple
 .Sy NETGROUP_BASE
 lines may be specified, in which case they are queried in the order specified.
@@ -768,9 +865,9 @@ The base DN to use when performing
 .Nm sudo
 LDAP queries.
 Typically this is of the form
-.Li ou=SUDOers,dc=example,dc=com
+.Li ou=SUDOers,dc=my-domain,dc=com
 for the domain
-.Li example.com .
+.Li my-domain.com .
 Multiple
 .Sy SUDOERS_BASE
 lines may be specified, in which case they are queried in the order specified.
@@ -1188,7 +1285,7 @@ bind_timelimit 30
 timelimit 30
 #
 # Must be set or sudo will ignore LDAP; may be specified multiple times.
-sudoers_base   ou=SUDOers,dc=example,dc=com
+sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #
 # verbose sudoers matching from ldap
 #sudoers_debug 2
@@ -1362,6 +1459,7 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
    )
 .Ed
 .Sh SEE ALSO
+.Xr cvtsudoers 1 ,
 .Xr ldap.conf @mansectform@ ,
 .Xr sssd-sudo @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
