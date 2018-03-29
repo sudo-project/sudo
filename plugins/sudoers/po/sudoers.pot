@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.23\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2018-03-22 13:29-0600\n"
+"POT-Creation-Date: 2018-03-29 10:19-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,13 +50,13 @@ msgstr ""
 #: plugins/sudoers/alias.c:139 plugins/sudoers/auth/bsdauth.c:141
 #: plugins/sudoers/auth/kerb5.c:119 plugins/sudoers/auth/kerb5.c:145
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:113
-#: plugins/sudoers/cvtsudoers.c:154 plugins/sudoers/cvtsudoers.c:168
-#: plugins/sudoers/cvtsudoers.c:179 plugins/sudoers/cvtsudoers.c:261
-#: plugins/sudoers/cvtsudoers.c:385 plugins/sudoers/cvtsudoers.c:489
-#: plugins/sudoers/cvtsudoers.c:506 plugins/sudoers/cvtsudoers.c:605
-#: plugins/sudoers/cvtsudoers.c:689 plugins/sudoers/cvtsudoers.c:879
-#: plugins/sudoers/cvtsudoers.c:1006 plugins/sudoers/cvtsudoers_ldif.c:429
+#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:115
+#: plugins/sudoers/cvtsudoers.c:156 plugins/sudoers/cvtsudoers.c:175
+#: plugins/sudoers/cvtsudoers.c:186 plugins/sudoers/cvtsudoers.c:268
+#: plugins/sudoers/cvtsudoers.c:389 plugins/sudoers/cvtsudoers.c:522
+#: plugins/sudoers/cvtsudoers.c:539 plugins/sudoers/cvtsudoers.c:638
+#: plugins/sudoers/cvtsudoers.c:722 plugins/sudoers/cvtsudoers.c:934
+#: plugins/sudoers/cvtsudoers.c:1061 plugins/sudoers/cvtsudoers_ldif.c:429
 #: plugins/sudoers/cvtsudoers_ldif.c:599 plugins/sudoers/cvtsudoers_ldif.c:667
 #: plugins/sudoers/cvtsudoers_ldif.c:674 plugins/sudoers/cvtsudoers_ldif.c:679
 #: plugins/sudoers/cvtsudoers_ldif.c:755 plugins/sudoers/cvtsudoers_ldif.c:766
@@ -156,12 +156,12 @@ msgstr ""
 
 #: gram.y:1234 gram.y:1241 plugins/sudoers/auth/pam.c:341
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/cvtsudoers.c:113 plugins/sudoers/cvtsudoers.c:153
-#: plugins/sudoers/cvtsudoers.c:167 plugins/sudoers/cvtsudoers.c:178
-#: plugins/sudoers/cvtsudoers.c:260 plugins/sudoers/cvtsudoers.c:384
-#: plugins/sudoers/cvtsudoers.c:488 plugins/sudoers/cvtsudoers.c:505
-#: plugins/sudoers/cvtsudoers.c:605 plugins/sudoers/cvtsudoers.c:688
-#: plugins/sudoers/cvtsudoers.c:879 plugins/sudoers/cvtsudoers.c:1006
+#: plugins/sudoers/cvtsudoers.c:115 plugins/sudoers/cvtsudoers.c:155
+#: plugins/sudoers/cvtsudoers.c:174 plugins/sudoers/cvtsudoers.c:185
+#: plugins/sudoers/cvtsudoers.c:267 plugins/sudoers/cvtsudoers.c:388
+#: plugins/sudoers/cvtsudoers.c:521 plugins/sudoers/cvtsudoers.c:538
+#: plugins/sudoers/cvtsudoers.c:638 plugins/sudoers/cvtsudoers.c:721
+#: plugins/sudoers/cvtsudoers.c:934 plugins/sudoers/cvtsudoers.c:1061
 #: plugins/sudoers/cvtsudoers_ldif.c:428 plugins/sudoers/cvtsudoers_ldif.c:598
 #: plugins/sudoers/cvtsudoers_ldif.c:666 plugins/sudoers/cvtsudoers_ldif.c:673
 #: plugins/sudoers/cvtsudoers_ldif.c:678 plugins/sudoers/cvtsudoers_ldif.c:754
@@ -484,69 +484,74 @@ msgstr ""
 msgid "unknown user: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:185
+#: plugins/sudoers/cvtsudoers.c:192
 #, c-format
 msgid "order increment: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:201
+#: plugins/sudoers/cvtsudoers.c:208
 #, c-format
 msgid "starting order: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:211 plugins/sudoers/sudoreplay.c:310
+#: plugins/sudoers/cvtsudoers.c:218 plugins/sudoers/sudoreplay.c:310
 #: plugins/sudoers/visudo.c:179
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:213 plugins/sudoers/visudo.c:181
+#: plugins/sudoers/cvtsudoers.c:220 plugins/sudoers/visudo.c:181
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:230
+#: plugins/sudoers/cvtsudoers.c:237
 #, c-format
 msgid "unsupported input format %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:245
+#: plugins/sudoers/cvtsudoers.c:252
 #, c-format
 msgid "unsupported output format %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:275
+#: plugins/sudoers/cvtsudoers.c:282
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:291 plugins/sudoers/sudoers.c:167
+#: plugins/sudoers/cvtsudoers.c:298 plugins/sudoers/sudoers.c:167
 #: plugins/sudoers/testsudoers.c:246 plugins/sudoers/visudo.c:235
 #: plugins/sudoers/visudo.c:590 plugins/sudoers/visudo.c:911
 msgid "unable to initialize sudoers default values"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:373 plugins/sudoers/ldap_conf.c:413
+#: plugins/sudoers/cvtsudoers.c:377 plugins/sudoers/ldap_conf.c:413
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:432
+#: plugins/sudoers/cvtsudoers.c:436
 #, c-format
 msgid "%s: unknown key word: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:472
+#: plugins/sudoers/cvtsudoers.c:482
+#, c-format
+msgid "invalid defaults type: %s"
+msgstr ""
+
+#: plugins/sudoers/cvtsudoers.c:505
 #, c-format
 msgid "invalid suppression type: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:512 plugins/sudoers/cvtsudoers.c:526
+#: plugins/sudoers/cvtsudoers.c:545 plugins/sudoers/cvtsudoers.c:559
 #, c-format
 msgid "invalid filter: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:598 plugins/sudoers/cvtsudoers.c:966
+#: plugins/sudoers/cvtsudoers.c:631 plugins/sudoers/cvtsudoers.c:1021
 #: plugins/sudoers/cvtsudoers_json.c:1114 plugins/sudoers/cvtsudoers_ldif.c:492
 #: plugins/sudoers/cvtsudoers_ldif.c:983 plugins/sudoers/iolog.c:415
 #: plugins/sudoers/sudoers.c:933 plugins/sudoers/sudoreplay.c:356
@@ -557,40 +562,41 @@ msgstr ""
 msgid "unable to open %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:601 plugins/sudoers/visudo.c:916
+#: plugins/sudoers/cvtsudoers.c:634 plugins/sudoers/visudo.c:916
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:609 plugins/sudoers/visudo.c:932
+#: plugins/sudoers/cvtsudoers.c:642 plugins/sudoers/visudo.c:932
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:612 plugins/sudoers/visudo.c:935
+#: plugins/sudoers/cvtsudoers.c:645 plugins/sudoers/visudo.c:935
 #, c-format
 msgid "parse error in %s\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:1013 plugins/sudoers/iolog.c:502
+#: plugins/sudoers/cvtsudoers.c:1068 plugins/sudoers/iolog.c:502
 #: plugins/sudoers/sudoreplay.c:1135 plugins/sudoers/timestamp.c:294
 #: plugins/sudoers/timestamp.c:297
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:1036
+#: plugins/sudoers/cvtsudoers.c:1091
 #, c-format
 msgid ""
 "%s - convert between sudoers file formats\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:1038
+#: plugins/sudoers/cvtsudoers.c:1093
 msgid ""
 "\n"
 "Options:\n"
 "  -b, --base=dn              the base DN for sudo LDAP queries\n"
+"  -d, --defaults=deftypes    only convert Defaults of the specified types\n"
 "  -e, --expand-aliases       expand aliases when converting\n"
 "  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"
 "  -i, --input-format=format  set input format: LDIF or sudoers\n"
