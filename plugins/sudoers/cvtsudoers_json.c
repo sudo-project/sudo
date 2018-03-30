@@ -366,10 +366,10 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	    value.u.string++;
 	    typestr = "nonunixgroup";
 	    if (*value.u.string == '#') {
-		id = sudo_strtoid(name + 3, NULL, NULL, &errstr);
+		id = sudo_strtoid(value.u.string + 1, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx("internal error: non-Unix group ID %s: \"%s\"",
-			errstr, name);
+			errstr, value.u.string + 1);
 		} else {
 		    value.type = JSON_ID;
 		    value.u.id = id;
@@ -379,10 +379,10 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	} else {
 	    typestr = "usergroup";
 	    if (*value.u.string == '#') {
-		id = sudo_strtoid(name + 2, NULL, NULL, &errstr);
+		id = sudo_strtoid(value.u.string + 1, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx("internal error: group ID %s: \"%s\"",
-			errstr, name);
+			errstr, value.u.string + 1);
 		} else {
 		    value.type = JSON_ID;
 		    value.u.id = id;
@@ -418,7 +418,7 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	case TYPE_USERNAME:
 	    typestr = "username";
 	    if (*value.u.string == '#') {
-		id = sudo_strtoid(name + 1, NULL, NULL, &errstr);
+		id = sudo_strtoid(value.u.string + 1, NULL, NULL, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx("internal error: user ID %s: \"%s\"",
 			errstr, name);
@@ -476,7 +476,7 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	struct alias *a;
 	struct member *m;
 
-	if ((a = alias_get(name, alias_type)) != NULL) {
+	if ((a = alias_get(value.u.string, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
 		print_member_json_int(fp, m->name, m->type,
 		    negated ? !m->negated : m->negated,
