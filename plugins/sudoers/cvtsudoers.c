@@ -584,8 +584,10 @@ cvtsudoers_string_alloc(const char *s)
 void
 cvtsudoers_string_free(struct cvtsudoers_string *ls)
 {
-    free(ls->str);
-    free(ls);
+    if (ls != NULL) {
+	free(ls->str);
+	free(ls);
+    }
 }
 
 struct cvtsudoers_str_list *
@@ -595,8 +597,10 @@ str_list_alloc(void)
     debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
 
     strlist = malloc(sizeof(*strlist));
-    STAILQ_INIT(strlist);
-    strlist->refcnt = 1;
+    if (strlist != NULL) {
+	STAILQ_INIT(strlist);
+	strlist->refcnt = 1;
+    }
 
     debug_return_ptr(strlist);
 }
@@ -608,12 +612,14 @@ str_list_free(void *v)
     struct cvtsudoers_string *first;
     debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
 
-    if (--strlist->refcnt == 0) {
-	while ((first = STAILQ_FIRST(strlist)) != NULL) {
-	    STAILQ_REMOVE_HEAD(strlist, entries);
-	    cvtsudoers_string_free(first);
+    if (strlist != NULL) {
+	if (--strlist->refcnt == 0) {
+	    while ((first = STAILQ_FIRST(strlist)) != NULL) {
+		STAILQ_REMOVE_HEAD(strlist, entries);
+		cvtsudoers_string_free(first);
+	    }
+	    free(strlist);
 	}
-	free(strlist);
     }
     debug_return;
 }
