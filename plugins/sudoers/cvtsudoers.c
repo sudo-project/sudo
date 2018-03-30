@@ -461,7 +461,7 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
 static int
 cvtsudoers_parse_defaults(char *expression)
 {
-    char *last = NULL, *cp = expression;
+    char *last, *cp = expression;
     int flags = 0;
     debug_decl(cvtsudoers_parse_defaults, SUDOERS_DEBUG_UTIL)
 
@@ -490,7 +490,7 @@ cvtsudoers_parse_defaults(char *expression)
 static int
 cvtsudoers_parse_suppression(char *expression)
 {
-    char *last = NULL, *cp = expression;
+    char *last, *cp = expression;
     int flags = 0;
     debug_decl(cvtsudoers_parse_suppression, SUDOERS_DEBUG_UTIL)
 
@@ -513,7 +513,7 @@ cvtsudoers_parse_suppression(char *expression)
 static bool
 cvtsudoers_parse_filter(char *expression)
 {
-    char *last = NULL, *cp = expression;
+    char *last, *cp = expression;
     debug_decl(cvtsudoers_parse_filter, SUDOERS_DEBUG_UTIL)
 
     if (filters == NULL) {
