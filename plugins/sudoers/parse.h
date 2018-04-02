@@ -258,6 +258,7 @@ const char *alias_type_to_string(int alias_type);
 int alias_compare(const void *a1, const void *a2);
 struct alias *alias_get(char *name, int type);
 struct alias *alias_remove(char *name, int type);
+bool alias_find_used(struct rbtree *used_aliases);
 void alias_apply(int (*func)(void *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);

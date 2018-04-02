@@ -81,13 +81,13 @@ static void usage(int);
 static bool convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
 static bool cvtsudoers_parse_filter(char *expression);
-static bool alias_remove_unused(void);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
 static int cvtsudoers_parse_defaults(char *expression);
 static int cvtsudoers_parse_suppression(char *expression);
 static void filter_userspecs(void);
 static void filter_defaults(struct cvtsudoers_config *conf);
+static void alias_remove_unused(void);
 
 int
 main(int argc, char *argv[])
@@ -893,121 +893,28 @@ filter_defaults(struct cvtsudoers_config *conf)
 }
 
 /*
- * Remove the alias of the specified type as well as any other aliases
- * referenced by that alias.
- * XXX - share with visudo
- */
-static bool
-alias_remove_recursive(char *name, int type, struct rbtree *freelist)
-{
-    struct member *m;
-    struct alias *a;
-    bool ret = true;
-    debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
-
-    if ((a = alias_remove(name, type)) != NULL) {
-	TAILQ_FOREACH(m, &a->members, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, type, freelist))
-		    ret = false;
-	    }
-	}
-	if (rbinsert(freelist, a, NULL) != 0)
-	    ret = false;
-    }
-    debug_return_bool(ret);
-}
-
-/*
  * Remove unreferenced aliases.
- * XXX - share with visudo
  */
-static bool
+static void
 alias_remove_unused(void)
 {
-    struct cmndspec *cs;
-    struct member *m;
-    struct privilege *priv;
-    struct userspec *us;
-    struct defaults *d;
-    int atype, errors = 0;
     struct rbtree *used_aliases;
     struct rbtree *unused_aliases;
     debug_decl(alias_remove_unused, SUDOERS_DEBUG_ALIAS)
 
     used_aliases = rbcreate(alias_compare);
-    if (used_aliases == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
+    if (used_aliases == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
-    /* Move referenced aliases to used_aliases. */
-    TAILQ_FOREACH(us, &userspecs, entries) {
-	TAILQ_FOREACH(m, &us->users, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, USERALIAS, used_aliases))
-		    errors++;
-	    }
-	}
-	TAILQ_FOREACH(priv, &us->privileges, entries) {
-	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-		if (m->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, HOSTALIAS, used_aliases))
-			errors++;
-		}
-	    }
-	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-		if (cs->runasuserlist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-			if (m->type == ALIAS) {
-			    if (!alias_remove_recursive(m->name, RUNASALIAS, used_aliases))
-				errors++;
-			}
-		    }
-		}
-		if (cs->runasgrouplist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-			if (m->type == ALIAS) {
-			    if (!alias_remove_recursive(m->name, RUNASALIAS, used_aliases))
-				errors++;
-			}
-		    }
-		}
-		if ((m = cs->cmnd)->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, CMNDALIAS, used_aliases))
-			errors++;
-		}
-	    }
-	}
-    }
-    TAILQ_FOREACH(d, &defaults, entries) {
-	switch (d->type) {
-	    case DEFAULTS_HOST:
-		atype = HOSTALIAS;
-		break;
-	    case DEFAULTS_USER:
-		atype = USERALIAS;
-		break;
-	    case DEFAULTS_RUNAS:
-		atype = RUNASALIAS;
-		break;
-	    case DEFAULTS_CMND:
-		atype = CMNDALIAS;
-		break;
-	    default:
-		continue; /* not an alias */
-	}
-	TAILQ_FOREACH(m, d->binding, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, atype, used_aliases))
-		    errors++;
-	    }
-	}
-    }
+    /* Move all referenced aliases to used_aliases. */
+    if (!alias_find_used(used_aliases))
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+
+    /* Only unreferenced aliases are left, swap and free the unused ones. */
     unused_aliases = replace_aliases(used_aliases);
     rbdestroy(unused_aliases, alias_free);
 
-    debug_return_int(errors ? false : true);
+    debug_return;
 }
 
 /*
