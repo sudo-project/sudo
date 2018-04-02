@@ -52,20 +52,22 @@ struct cvtsudoers_str_list {
 
 /* cvtsudoers.conf settings */
 struct cvtsudoers_config {
-    char *sudoers_base;
-    char *input_format;
-    char *output_format;
-    char *filter;
     unsigned int sudo_order;
     unsigned int order_increment;
     short defaults;
     short suppress;
     bool expand_aliases;
     bool store_options;
+    char *sudoers_base;
+    char *input_format;
+    char *output_format;
+    char *filter;
+    char *defstr;
+    char *supstr;
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { NULL, NULL, NULL, NULL, 1, 1, CVT_DEFAULTS_ALL, 0, false, true }
+#define INITIAL_CONFIG { 1, 1, CVT_DEFAULTS_ALL, 0, false, true }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1

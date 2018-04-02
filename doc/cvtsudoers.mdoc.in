@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 28, 2018
+.Dd March 30, 2018
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -256,6 +256,10 @@ may also be specified in a configuration file,
 by default.
 The following keywords are recognized:
 .Bl -tag -width 4n
+.It Sy defaults = Ar deftypes
+See the description of the
+.Fl d
+command line option.
 .It Sy expand_aliases = Ar yes | no
 See the description of the
 .Fl e
@@ -283,6 +287,10 @@ command line option.
 .It Sy sudoers_base = Ar dn
 See the description of the
 .Fl b
+command line option.
+.It Sy suppress = Ar sections
+See the description of the
+.Fl s
 command line option.
 .El
 .Pp

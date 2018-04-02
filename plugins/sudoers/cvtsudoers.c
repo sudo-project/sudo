@@ -160,9 +160,7 @@ main(int argc, char *argv[])
 	    /* handled above */
 	    break;
 	case 'd':
-	    conf->defaults = cvtsudoers_parse_defaults(optarg);
-	    if (conf->defaults == -1)
-		usage(1);
+	    conf->defstr = optarg;
 	    break;
 	case 'e':
 	    conf->expand_aliases = true;
@@ -210,9 +208,7 @@ main(int argc, char *argv[])
 	    }
 	    break;
 	case 's':
-	    conf->suppress = cvtsudoers_parse_suppression(optarg);
-	    if (conf->suppress == -1)
-		usage(1);
+	    conf->supstr = optarg;
 	    break;
 	case 'V':
 	    (void) printf(_("%s version %s\n"), getprogname(),
@@ -256,6 +252,16 @@ main(int argc, char *argv[])
     if (conf->filter != NULL) {
 	/* We always expand aliases when filtering (may change in future). */
 	if (!cvtsudoers_parse_filter(conf->filter))
+	    usage(1);
+    }
+    if (conf->defstr != NULL) {
+	conf->defaults = cvtsudoers_parse_defaults(conf->defstr);
+	if (conf->defaults == -1)
+	    usage(1);
+    }
+    if (conf->supstr != NULL) {
+	conf->suppress = cvtsudoers_parse_suppression(conf->supstr);
+	if (conf->suppress == -1)
 	    usage(1);
     }
 
@@ -347,6 +353,8 @@ static struct cvtsudoers_conf_table cvtsudoers_conf_vars[] = {
     { "input_format", CONF_STR, &cvtsudoers_config.input_format },
     { "output_format", CONF_STR, &cvtsudoers_config.output_format },
     { "match", CONF_STR, &cvtsudoers_config.filter },
+    { "defaults", CONF_STR, &cvtsudoers_config.defstr },
+    { "suppress", CONF_STR, &cvtsudoers_config.supstr },
     { "expand_aliases", CONF_BOOL, &cvtsudoers_config.expand_aliases }
 };
 
