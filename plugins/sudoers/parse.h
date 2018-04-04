@@ -286,8 +286,10 @@ bool usergr_matches(const char *group, const char *user, const struct passwd *pw
 bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
 int cmnd_matches(const struct member *m);
 int cmndlist_matches(const struct member_list *list);
+int host_matches(const struct passwd *pw, const char *host, const char *shost, const struct member *m);
 int hostlist_matches(const struct passwd *pw, const struct member_list *list);
 int runaslist_matches(const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
+int user_matches(const struct passwd *pw, const struct member *m);
 int userlist_matches(const struct passwd *pw, const struct member_list *list);
 const char *sudo_getdomainname(void);
 

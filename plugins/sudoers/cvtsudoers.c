@@ -56,7 +56,7 @@
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:d:ef:hi:I:m:Mo:O:s:V";
+static const char short_opts[] =  "b:c:d:ef:hi:I:m:Mo:O:ps:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
@@ -68,6 +68,7 @@ static struct option long_opts[] = {
     { "increment",	required_argument,	NULL,	'I' },
     { "match",		required_argument,	NULL,	'm' },
     { "match-local",	no_argument,		NULL,	'M' },
+    { "prune-matches",	no_argument,		NULL,	'p' },
     { "order-start",	required_argument,	NULL,	'O' },
     { "output",		required_argument,	NULL,	'o' },
     { "suppress",	required_argument,	NULL,	's' },
@@ -85,7 +86,7 @@ static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
 static int cvtsudoers_parse_defaults(char *expression);
 static int cvtsudoers_parse_suppression(char *expression);
-static void filter_userspecs(void);
+static void filter_userspecs(struct cvtsudoers_config *conf);
 static void filter_defaults(struct cvtsudoers_config *conf);
 static void alias_remove_unused(void);
 
@@ -207,6 +208,9 @@ main(int argc, char *argv[])
 		usage(1);
 	    }
 	    break;
+	case 'p':
+	    conf->prune_matches = true;
+	    break;
 	case 's':
 	    conf->supstr = optarg;
 	    break;
@@ -317,7 +321,7 @@ main(int argc, char *argv[])
     }
 
     /* Apply filters. */
-    filter_userspecs();
+    filter_userspecs(conf);
     filter_defaults(conf);
     if (filters != NULL || conf->defaults != CVT_DEFAULTS_ALL)
 	alias_remove_unused();
@@ -355,7 +359,8 @@ static struct cvtsudoers_conf_table cvtsudoers_conf_vars[] = {
     { "match", CONF_STR, &cvtsudoers_config.filter },
     { "defaults", CONF_STR, &cvtsudoers_config.defstr },
     { "suppress", CONF_STR, &cvtsudoers_config.supstr },
-    { "expand_aliases", CONF_BOOL, &cvtsudoers_config.expand_aliases }
+    { "expand_aliases", CONF_BOOL, &cvtsudoers_config.expand_aliases },
+    { "prune_matches", CONF_BOOL, &cvtsudoers_config.prune_matches }
 };
 
 /*
@@ -669,86 +674,144 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 }
 
 static bool
-userlist_matches_filter(struct member_list *userlist)
+userlist_matches_filter(struct member_list *users, bool remove_nonmatching)
 {
     struct cvtsudoers_string *s;
-    bool matches = false;
+    struct member *m, *next;
+    bool ret = false;
     debug_decl(userlist_matches_filter, SUDOERS_DEBUG_UTIL)
 
     if (filters == NULL ||
 	(STAILQ_EMPTY(&filters->users) && STAILQ_EMPTY(&filters->groups)))
 	debug_return_bool(true);
 
-    if (STAILQ_EMPTY(&filters->users)) {
-	struct passwd pw;
+    TAILQ_FOREACH_REVERSE_SAFE(m, users, member_list, entries, next) {
+	bool matched = false;
 
-	/*
-	 * Only groups in filter, make a dummy user so userlist_matches()
-	 * can do its thing.
-	 */
-	memset(&pw, 0, sizeof(pw));
-	pw.pw_name = "_nobody";
-	pw.pw_uid = (uid_t)-1;
-	pw.pw_gid = (gid_t)-1;
-	if (userlist_matches(&pw, userlist) == true)
-	    matches = true;
-    }
+	if (STAILQ_EMPTY(&filters->users)) {
+	    struct passwd pw;
 
-    STAILQ_FOREACH(s, &filters->users, entries) {
-	struct passwd *pw = NULL;
-        if (s->str[0] == '#') {
-	    const char *errstr;
-            uid_t uid = sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
-            if (errstr == NULL)
-                pw = sudo_getpwuid(uid);
+	    /*
+	     * Only groups in filter, make a dummy user so userlist_matches()
+	     * can do its thing.
+	     */
+	    memset(&pw, 0, sizeof(pw));
+	    pw.pw_name = "_nobody";
+	    pw.pw_uid = (uid_t)-1;
+	    pw.pw_gid = (gid_t)-1;
+
+	    if (user_matches(&pw, m) == true) {
+		matched = true;
+		ret = true;
+	    }
+	} else {
+	    STAILQ_FOREACH(s, &filters->users, entries) {
+		struct passwd *pw = NULL;
+
+		if (s->str[0] == '#') {
+		    const char *errstr;
+		    uid_t uid = sudo_strtoid(s->str + 1, NULL, NULL, &errstr);
+		    if (errstr == NULL)
+			pw = sudo_getpwuid(uid);
+		}
+		if (pw == NULL)
+		    pw = sudo_getpwnam(s->str);
+		if (pw == NULL)
+		    continue;
+
+		if (user_matches(pw, m) == true)
+		    matched = true;
+		sudo_pw_delref(pw);
+
+		/* Only need one user in the filter to match. */
+		if (matched) {
+		    ret = true;
+		    break;
+		}
+	    }
 	}
-	if (pw == NULL)
-	    pw = sudo_getpwnam(s->str);
-	if (pw == NULL)
-	    continue;
-	if (userlist_matches(pw, userlist) == true)
-	    matches = true;
-	sudo_pw_delref(pw);
-	if (matches)
-	    break;
+
+	if (!matched && remove_nonmatching) {
+	    TAILQ_REMOVE(users, m, entries);
+	    free_member(m);
+	}
     }
 
-    debug_return_bool(matches);
+    debug_return_bool(ret);
 }
 
 static bool
-hostlist_matches_filter(struct member_list *hostlist)
+hostlist_matches_filter(struct member_list *hostlist, bool remove_nonmatching)
 {
     struct cvtsudoers_string *s;
-    bool matches = false;
+    struct member *m, *next;
+    char *lhost, *shost;
+    bool ret = false;
+    char **shosts;
+    int n = 0;
     debug_decl(hostlist_matches_filter, SUDOERS_DEBUG_UTIL)
 
     if (filters == NULL || STAILQ_EMPTY(&filters->hosts))
 	debug_return_bool(true);
 
+    /* Create an array of short host names. */
     STAILQ_FOREACH(s, &filters->hosts, entries) {
-	user_runhost = s->str;
-	if ((user_srunhost = strchr(user_runhost, '.')) != NULL) {
-	    user_srunhost = strndup(user_runhost,
-		(size_t)(user_srunhost - user_runhost));
-	    if (user_srunhost == NULL) {
+	n++;
+    }
+    shosts = reallocarray(NULL, n, sizeof(char *));
+    if (shosts == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    n = 0;
+    STAILQ_FOREACH(s, &filters->hosts, entries) {
+	lhost = s->str;
+	if ((shost = strchr(lhost, '.')) != NULL) {
+	    shost = strndup(lhost, (size_t)(shost - lhost));
+	    if (shost == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
 	} else {
-	    user_srunhost = user_runhost;
+	    shost = lhost;
 	}
-	/* XXX - can't use netgroup_tuple with NULL pw */
-	if (hostlist_matches(NULL, hostlist) == true)
-	    matches = true;
-	if (user_srunhost != user_runhost)
-	    free(user_srunhost);
-	user_runhost = user_host;
-	user_srunhost = user_shost;
-	if (matches)
-	    break;
+	shosts[n++] = shost;
     }
-    debug_return_bool(matches);
+
+    TAILQ_FOREACH_REVERSE_SAFE(m, hostlist, member_list, entries, next) {
+	bool matched = false;
+	n = 0;
+	STAILQ_FOREACH(s, &filters->hosts, entries) {
+	    lhost = s->str;
+	    shost = shosts[n++];
+
+	    /* XXX - can't use netgroup_tuple with NULL pw */
+	    if (host_matches(NULL, lhost, shost, m) == true)
+		matched = true;
+
+	    /* Only need one host in the filter to match. */
+	    if (matched) {
+		ret = true;
+		break;
+	    }
+	}
+
+	/* Short-circuit unless removing non-matches. */
+	if (!matched && remove_nonmatching) {
+	    TAILQ_REMOVE(hostlist, m, entries);
+	    free_member(m);
+	}
+    }
+
+    /* Free shosts array and its contents. */
+    n = 0;
+    STAILQ_FOREACH(s, &filters->hosts, entries) {
+	lhost = s->str;
+	shost = shosts[n++];
+	if (shost != lhost)
+	    free(shost);
+    }
+    free(shosts);
+
+    debug_return_bool(ret == true);
 }
 
 /*
@@ -811,7 +874,7 @@ convert_sudoers_output(const char *buf)
  * Apply filters to userspecs, removing non-matching entries.
  */
 static void
-filter_userspecs(void)
+filter_userspecs(struct cvtsudoers_config *conf)
 {
     struct userspec *us, *next_us;
     struct privilege *priv, *next_priv;
@@ -826,13 +889,13 @@ filter_userspecs(void)
      * In the future, we may want to add a prune option.
      */
     TAILQ_FOREACH_SAFE(us, &userspecs, entries, next_us) {
-	if (!userlist_matches_filter(&us->users)) {
+	if (!userlist_matches_filter(&us->users, conf->prune_matches)) {
 	    TAILQ_REMOVE(&userspecs, us, entries);
 	    free_userspec(us);
 	    continue;
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next_priv) {
-	    if (!hostlist_matches_filter(&priv->hostlist)) {
+	    if (!hostlist_matches_filter(&priv->hostlist, conf->prune_matches)) {
 		TAILQ_REMOVE(&us->privileges, priv, entries);
 		free_privilege(priv);
 	    }
@@ -869,7 +932,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    break;
 	case DEFAULTS_USER:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_USER) ||
-		!userlist_matches_filter(def->binding))
+		!userlist_matches_filter(def->binding, conf->prune_matches))
 		keep = false;
 	    break;
 	case DEFAULTS_RUNAS:
@@ -878,7 +941,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    break;
 	case DEFAULTS_HOST:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_HOST) ||
-		!hostlist_matches_filter(def->binding))
+		!hostlist_matches_filter(def->binding, conf->prune_matches))
 		keep = false;
 	    break;
 	case DEFAULTS_CMND:
@@ -998,7 +1061,7 @@ done:
 static void
 usage(int fatal)
 {
-    (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehMV] [-b dn] "
+    (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehMpV] [-b dn] "
 	"[-c conf_file ] [-d deftypes] [-f output_format] [-i input_format] "
 	"[-I increment] [-m filter] [-o output_file] [-O start_point] "
 	"[-s sections] [input_file]\n", getprogname());
@@ -1023,6 +1086,7 @@ help(void)
 	"  -M, --match-local          match filter uses passwd and group databases\n"
 	"  -o, --output=output_file   write converted sudoers to output_file\n"
 	"  -O, --order-start=num      starting point for first sudoOrder\n"
+	"  -p, --prune-matches        prune non-matching users, groups and hosts\n"
 	"  -s, --suppress=sections    suppress output of certain sections\n"
 	"  -V, --version              display version information and exit"));
     exit(0);

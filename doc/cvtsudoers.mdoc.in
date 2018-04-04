@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 30, 2018
+.Dd April 4, 2018
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -22,7 +22,7 @@
 .Nd convert between sudoers file formats
 .Sh SYNOPSIS
 .Nm cvtsudoers
-.Op Fl ehMV
+.Op Fl ehMpV
 .Op Fl b Ar dn
 .Op Fl c Ar conf_file
 .Op Fl d Ar deftypes
@@ -228,6 +228,13 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
+.It Fl p , Fl -prune-matches
+When the
+.Fl m
+option is also specified,
+.Nm
+will prune out non-matching users, groups and hosts from
+matching entries.
 .It Fl s Ar sections , Fl -suppress Ns = Ns Ar sections
 Suppress the output of specific
 .Ar sections
@@ -283,6 +290,10 @@ command line option.
 .It Sy output_format = Ar json | ldif | sudoers
 See the description of the
 .Fl f
+command line option.
+.It Sy prune_matches = Ar yes | no
+See the description of the
+.Fl p
 command line option.
 .It Sy sudoers_base = Ar dn
 See the description of the

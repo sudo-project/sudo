@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "1" "March 30, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "April 4, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -25,7 +25,7 @@
 .SH "SYNOPSIS"
 .HP 11n
 \fBcvtsudoers\fR
-[\fB\-ehMV\fR]
+[\fB\-ehMpV\fR]
 [\fB\-b\fR\ \fIdn\fR]
 [\fB\-c\fR\ \fIconf_file\fR]
 [\fB\-d\fR\ \fIdeftypes\fR]
@@ -277,6 +277,14 @@ Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
 .TP 12n
+\fB\-p\fR, \fB\--prune-matches\fR
+When the
+\fB\-m\fR
+option is also specified,
+\fBcvtsudoers\fR
+will prune out non-matching users, groups and hosts from
+matching entries.
+.TP 12n
 \fB\-s\fR \fIsections\fR, \fB\--suppress\fR=\fIsections\fR
 Suppress the output of specific
 \fIsections\fR
@@ -338,6 +346,11 @@ command line option.
 \fBoutput_format =\fR \fIjson\fR | \fIldif\fR | \fIsudoers\fR
 See the description of the
 \fB\-f\fR
+command line option.
+.TP 6n
+\fBprune_matches =\fR \fIyes\fR | \fIno\fR
+See the description of the
+\fB\-p\fR
 command line option.
 .TP 6n
 \fBsudoers_base =\fR \fIdn\fR

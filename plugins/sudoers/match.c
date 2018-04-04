@@ -90,6 +90,48 @@ static bool digest_matches(int fd, const char *file, const struct sudo_digest *s
 #define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
 /*
+ * Check whether user described by pw matches member.
+ * Returns ALLOW, DENY or UNSPEC.
+ */
+int
+user_matches(const struct passwd *pw, const struct member *m)
+{
+    struct alias *a;
+    int matched = UNSPEC;
+    debug_decl(user_matches, SUDOERS_DEBUG_MATCH)
+
+    switch (m->type) {
+	case ALL:
+	    matched = !m->negated;
+	    break;
+	case NETGROUP:
+	    if (netgr_matches(m->name,
+		def_netgroup_tuple ? user_runhost : NULL,
+		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
+		matched = !m->negated;
+	    break;
+	case USERGROUP:
+	    if (usergr_matches(m->name, pw->pw_name, pw))
+		matched = !m->negated;
+	    break;
+	case ALIAS:
+	    if ((a = alias_get(m->name, USERALIAS)) != NULL) {
+		int rc = userlist_matches(pw, &a->members);
+		if (rc != UNSPEC)
+		    matched = m->negated ? !rc : rc;
+		alias_put(a);
+		break;
+	    }
+	    /* FALLTHROUGH */
+	case WORD:
+	    if (userpw_matches(m->name, pw->pw_name, pw))
+		matched = !m->negated;
+	    break;
+    }
+    debug_return_int(matched);
+}
+
+/*
  * Check for user described by pw in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
@@ -97,40 +139,11 @@ int
 userlist_matches(const struct passwd *pw, const struct member_list *list)
 {
     struct member *m;
-    struct alias *a;
-    int rc, matched = UNSPEC;
+    int matched = UNSPEC;
     debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	switch (m->type) {
-	    case ALL:
-		matched = !m->negated;
-		break;
-	    case NETGROUP:
-		if (netgr_matches(m->name,
-		    def_netgroup_tuple ? user_runhost : NULL,
-		    def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
-		    matched = !m->negated;
-		break;
-	    case USERGROUP:
-		if (usergr_matches(m->name, pw->pw_name, pw))
-		    matched = !m->negated;
-		break;
-	    case ALIAS:
-		if ((a = alias_get(m->name, USERALIAS)) != NULL) {
-		    rc = userlist_matches(pw, &a->members);
-		    if (rc != UNSPEC)
-			matched = m->negated ? !rc : rc;
-		    alias_put(a);
-		    break;
-		}
-		/* FALLTHROUGH */
-	    case WORD:
-		if (userpw_matches(m->name, pw->pw_name, pw))
-		    matched = !m->negated;
-		break;
-	}
-	if (matched != UNSPEC)
+	if ((matched = user_matches(pw, m)) != UNSPEC)
 	    break;
     }
     debug_return_int(matched);
@@ -256,46 +269,72 @@ runaslist_matches(const struct member_list *user_list,
 }
 
 /*
- * Check for host and shost in a list of members.
+ * Check for lhost and shost in a list of members.
+ * Returns ALLOW, DENY or UNSPEC.
+ */
+static int
+hostlist_matches_int(const struct passwd *pw, const char *lhost,
+    const char *shost, const struct member_list *list)
+{
+    struct member *m;
+    int matched = UNSPEC;
+    debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
+
+    TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
+	matched = host_matches(pw, lhost, shost, m);
+	if (matched != UNSPEC)
+	    break;
+    }
+    debug_return_int(matched);
+}
+
+/*
+ * Check for user_runhost and user_srunhost in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
 hostlist_matches(const struct passwd *pw, const struct member_list *list)
 {
-    struct member *m;
-    struct alias *a;
-    int rc, matched = UNSPEC;
-    debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
+    return hostlist_matches_int(pw, user_runhost, user_srunhost, list);
+}
 
-    TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	switch (m->type) {
-	    case ALL:
+/*
+ * Check whether host or shost matches member.
+ * Returns ALLOW, DENY or UNSPEC.
+ */
+int
+host_matches(const struct passwd *pw, const char *lhost, const char *shost,
+    const struct member *m)
+{
+    struct alias *a;
+    int matched = UNSPEC;
+    debug_decl(host_matches, SUDOERS_DEBUG_MATCH)
+
+    switch (m->type) {
+	case ALL:
+	    matched = !m->negated;
+	    break;
+	case NETGROUP:
+	    if (netgr_matches(m->name, lhost, shost,
+		def_netgroup_tuple ? pw->pw_name : NULL))
 		matched = !m->negated;
+	    break;
+	case NTWKADDR:
+	    if (addr_matches(m->name))
+		matched = !m->negated;
+	    break;
+	case ALIAS:
+	    if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
+		int rc = hostlist_matches_int(pw, lhost, shost, &a->members);
+		if (rc != UNSPEC)
+		    matched = m->negated ? !rc : rc;
+		alias_put(a);
 		break;
-	    case NETGROUP:
-		if (netgr_matches(m->name, user_runhost, user_srunhost,
-		    def_netgroup_tuple ? pw->pw_name : NULL))
-		    matched = !m->negated;
-		break;
-	    case NTWKADDR:
-		if (addr_matches(m->name))
-		    matched = !m->negated;
-		break;
-	    case ALIAS:
-		if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
-		    rc = hostlist_matches(pw, &a->members);
-		    if (rc != UNSPEC)
-			matched = m->negated ? !rc : rc;
-		    alias_put(a);
-		    break;
-		}
-		/* FALLTHROUGH */
-	    case WORD:
-		if (hostname_matches(user_srunhost, user_runhost, m->name))
-		    matched = !m->negated;
-		break;
-	}
-	if (matched != UNSPEC)
+	    }
+	    /* FALLTHROUGH */
+	case WORD:
+	    if (hostname_matches(shost, lhost, m->name))
+		matched = !m->negated;
 	    break;
     }
     debug_return_int(matched);

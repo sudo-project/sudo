@@ -58,6 +58,7 @@ struct cvtsudoers_config {
     short suppress;
     bool expand_aliases;
     bool store_options;
+    bool prune_matches;
     char *sudoers_base;
     char *input_format;
     char *output_format;
@@ -67,7 +68,7 @@ struct cvtsudoers_config {
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { 1, 1, CVT_DEFAULTS_ALL, 0, false, true }
+#define INITIAL_CONFIG { 1, 1, CVT_DEFAULTS_ALL, 0, false, true, false }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1
