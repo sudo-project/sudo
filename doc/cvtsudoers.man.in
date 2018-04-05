@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "1" "April 4, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "April 5, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -232,9 +232,20 @@ For example,
 or
 \fBhost\fR = \fIwww\fR.
 .sp
-The password and group databases are not consulted when matching
+A matching
+\fIsudoers\fR
+rule may also include users, groups and hosts that are not part of the
+\fIfilter\fR.
+This can happen when a rule includes multiple users, groups or hosts.
+To prune out any non-matching user, group or host from the rules, the
+\fB\-p\fR
+option may be used.
+.sp
+By default, the password and group databases are not consulted when matching
 against the filter so the users and groups do not need to be present
-on the local system.
+on the local system (see the
+\fB\-M\fR
+option).
 Only aliases that are referenced by the filtered policy rules will
 be displayed.
 .TP 12n
