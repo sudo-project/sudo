@@ -32,6 +32,13 @@ What's new in Sudo 1.8.23
    matching of users and groups in sudoers.  Case insensitive
    matching is now the default.
 
+ * Fixed the build-time process start time test on Linux when the
+   test is run from within a container.  Bug #829.
+
+ * When determining which temporary directory to use, sudoedit now
+   checks the directory for writability before using it.  Previously,
+   sudoedit only performed an existence check.  Bug #827.
+
 What's new in Sudo 1.8.22
 
  * Commands run in the background from a script run via sudo will
