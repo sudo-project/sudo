@@ -55,40 +55,6 @@ struct tempfile {
 
 static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
 
-/*
- * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
- * Returns true on success, else false;
- */
-static bool
-set_tmpdir(void)
-{
-    const char *tdir;
-    struct stat sb;
-    size_t len;
-    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT)
-
-    if (stat(_PATH_VARTMP, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-	tdir = _PATH_VARTMP;
-    }
-#ifdef _PATH_USRTMP
-    else if (stat(_PATH_USRTMP, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-	tdir = _PATH_USRTMP;
-    }
-#endif
-    else {
-	tdir = _PATH_TMP;
-    }
-    len = strlcpy(edit_tmpdir, tdir, sizeof(edit_tmpdir));
-    if (len >= sizeof(edit_tmpdir)) {
-	errno = ENAMETOOLONG;
-	sudo_warn("%s", tdir);
-	debug_return_bool(false);
-    }
-    while (len > 0 && edit_tmpdir[--len] == '/')
-	edit_tmpdir[len] = '\0';
-    debug_return_bool(true);
-}
-
 static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
@@ -116,6 +82,145 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     errno = serrno;
 
     debug_return;
+}
+
+#ifdef HAVE_FACCESSAT
+/*
+ * Returns true if the open directory fd is writable by the user.
+ */
+static int
+dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
+{
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+    int rc;
+
+    /* Change uid/gid/groups to invoking user, usually needs root perms. */
+    if (cd->euid != ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0)
+	    sudo_fatal("seteuid(ROOT_UID)");
+    }
+    switch_user(ud->uid, ud->gid, ud->ngroups, ud->groups);
+
+    /* Access checks are done using the euid/egid and group vector. */
+    rc = faccessat(dfd, ".", W_OK, AT_EACCESS);
+
+    /* Change uid/gid/groups back to target user, may need root perms. */
+    if (ud->uid != ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0)
+	    sudo_fatal("seteuid(ROOT_UID)");
+    }
+    switch_user(cd->euid, cd->egid, cd->ngroups, cd->groups);
+
+    if (rc == 0)
+	debug_return_int(true);
+    if (errno == EACCES)
+	debug_return_int(false);
+    debug_return_int(-1);
+}
+#else
+static bool
+group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
+{
+    int i;
+    debug_decl(group_matches, SUDO_DEBUG_EDIT)
+
+    if (target == gid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user gid %u matches directory gid %u", (unsigned int)gid,
+	    (unsigned int)target);
+	debug_return_bool(true);
+    }
+    for (i = 0; i < ngroups; i++) {
+	if (target == groups[i]) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"user gid %u matches directory gid %u", (unsigned int)gid,
+		(unsigned int)target);
+	    debug_return_bool(true);
+	}
+    }
+    debug_return_bool(false);
+}
+
+/*
+ * Returns true if the open directory fd is writable by the user.
+ */
+static int
+dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
+{
+    struct stat sb;
+    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
+
+    if (fstat(dfd, &sb) == -1)
+	debug_return_int(-1);
+
+    /* If the user owns the dir we always consider it writable. */
+    if (sb.st_uid == ud->uid) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "user uid %u matches directory uid %u", (unsigned int)ud->uid,
+	    (unsigned int)sb.st_uid);
+	debug_return_int(true);
+    }
+
+    /* Other writable? */
+    if (ISSET(sb.st_mode, S_IWOTH)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "directory is writable by other");
+	debug_return_int(true);
+    }
+
+    /* Group writable? */
+    if (ISSET(sb.st_mode, S_IWGRP)) {
+	if (group_matches(sb.st_gid, ud->gid, ud->ngroups, ud->groups)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"directory is writable by one of the user's groups");
+	    debug_return_int(true);
+	}
+    }
+
+    errno = EACCES;
+    debug_return_int(false);
+}
+#endif /* HAVE_FACCESSAT */
+
+/*
+ * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
+ * Returns true on success, else false;
+ */
+static bool
+set_tmpdir(struct command_details *command_details)
+{
+    const char *tdir = NULL;
+    const char *tmpdirs[] = {
+	_PATH_VARTMP,
+#ifdef _PATH_USRTMP
+	_PATH_USRTMP,
+#endif
+	_PATH_TMP
+    };
+    unsigned int i;
+    size_t len;
+    int dfd;
+    debug_decl(set_tmpdir, SUDO_DEBUG_EDIT)
+
+    for (i = 0; tdir == NULL && i < nitems(tmpdirs); i++) {
+	if ((dfd = open(tmpdirs[i], O_RDONLY)) != -1) {
+	    if (dir_is_writable(dfd, &user_details, command_details) == true)
+		tdir = tmpdirs[i];
+	    close(dfd);
+	}
+    }
+    if (tdir == NULL)
+	sudo_fatalx(U_("no writable temporary directory found"));
+   
+    len = strlcpy(edit_tmpdir, tdir, sizeof(edit_tmpdir));
+    if (len >= sizeof(edit_tmpdir)) {
+	errno = ENAMETOOLONG;
+	sudo_warn("%s", tdir);
+	debug_return_bool(false);
+    }
+    while (len > 0 && edit_tmpdir[--len] == '/')
+	edit_tmpdir[len] = '\0';
+    debug_return_bool(true);
 }
 
 /*
@@ -268,104 +373,6 @@ done:
     debug_return_int(fd);
 }
 #endif /* O_NOFOLLOW */
-
-#ifdef HAVE_FACCESSAT
-/*
- * Returns true if the open directory fd is writable by the user.
- */
-static int
-dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
-{
-    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
-    int rc;
-
-    /* Change uid/gid/groups to invoking user, usually needs root perms. */
-    if (cd->euid != ROOT_UID) {
-	if (seteuid(ROOT_UID) != 0)
-	    sudo_fatal("seteuid(ROOT_UID)");
-    }
-    switch_user(ud->uid, ud->gid, ud->ngroups, ud->groups);
-
-    /* Access checks are done using the euid/egid and group vector. */
-    rc = faccessat(dfd, ".", W_OK, AT_EACCESS);
-
-    /* Change uid/gid/groups back to target user, may need root perms. */
-    if (ud->uid != ROOT_UID) {
-	if (seteuid(ROOT_UID) != 0)
-	    sudo_fatal("seteuid(ROOT_UID)");
-    }
-    switch_user(cd->euid, cd->egid, cd->ngroups, cd->groups);
-
-    if (rc == 0)
-	debug_return_int(true);
-    if (errno == EACCES)
-	debug_return_int(false);
-    debug_return_int(-1);
-}
-#else
-static bool
-group_matches(gid_t target, gid_t gid, int ngroups, GETGROUPS_T *groups)
-{
-    int i;
-    debug_decl(group_matches, SUDO_DEBUG_EDIT)
-
-    if (target == gid) {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user gid %u matches directory gid %u", (unsigned int)gid,
-	    (unsigned int)target);
-	debug_return_bool(true);
-    }
-    for (i = 0; i < ngroups; i++) {
-	if (target == groups[i]) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"user gid %u matches directory gid %u", (unsigned int)gid,
-		(unsigned int)target);
-	    debug_return_bool(true);
-	}
-    }
-    debug_return_bool(false);
-}
-
-/*
- * Returns true if the open directory fd is writable by the user.
- */
-static int
-dir_is_writable(int dfd, struct user_details *ud, struct command_details *cd)
-{
-    struct stat sb;
-    debug_decl(dir_is_writable, SUDO_DEBUG_EDIT)
-
-    if (fstat(dfd, &sb) == -1)
-	debug_return_int(-1);
-
-    /* If the user owns the dir we always consider it writable. */
-    if (sb.st_uid == ud->uid) {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user uid %u matches directory uid %u", (unsigned int)ud->uid,
-	    (unsigned int)sb.st_uid);
-	debug_return_int(true);
-    }
-
-    /* Other writable? */
-    if (ISSET(sb.st_mode, S_IWOTH)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "directory is writable by other");
-	debug_return_int(true);
-    }
-
-    /* Group writable? */
-    if (ISSET(sb.st_mode, S_IWGRP)) {
-	if (group_matches(sb.st_gid, ud->gid, ud->ngroups, ud->groups)) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"directory is writable by one of the user's groups");
-	    debug_return_int(true);
-	}
-    }
-
-    errno = EACCES;
-    debug_return_int(false);
-}
-#endif /* HAVE_FACCESSAT */
 
 /*
  * Directory open flags for use with openat(2).
@@ -942,7 +949,7 @@ sudo_edit(struct command_details *command_details)
     struct tempfile *tf = NULL;
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
 
-    if (!set_tmpdir())
+    if (!set_tmpdir(command_details))
 	goto cleanup;
 
     /*
