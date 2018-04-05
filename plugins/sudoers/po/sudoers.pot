@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.23\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2018-03-29 10:19-0600\n"
+"POT-Creation-Date: 2018-04-05 06:36-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,13 +50,14 @@ msgstr ""
 #: plugins/sudoers/alias.c:139 plugins/sudoers/auth/bsdauth.c:141
 #: plugins/sudoers/auth/kerb5.c:119 plugins/sudoers/auth/kerb5.c:145
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:115
-#: plugins/sudoers/cvtsudoers.c:156 plugins/sudoers/cvtsudoers.c:175
-#: plugins/sudoers/cvtsudoers.c:186 plugins/sudoers/cvtsudoers.c:268
-#: plugins/sudoers/cvtsudoers.c:389 plugins/sudoers/cvtsudoers.c:522
-#: plugins/sudoers/cvtsudoers.c:539 plugins/sudoers/cvtsudoers.c:638
-#: plugins/sudoers/cvtsudoers.c:722 plugins/sudoers/cvtsudoers.c:934
-#: plugins/sudoers/cvtsudoers.c:1061 plugins/sudoers/cvtsudoers_ldif.c:429
+#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:116
+#: plugins/sudoers/cvtsudoers.c:157 plugins/sudoers/cvtsudoers.c:174
+#: plugins/sudoers/cvtsudoers.c:185 plugins/sudoers/cvtsudoers.c:278
+#: plugins/sudoers/cvtsudoers.c:402 plugins/sudoers/cvtsudoers.c:535
+#: plugins/sudoers/cvtsudoers.c:552 plugins/sudoers/cvtsudoers.c:657
+#: plugins/sudoers/cvtsudoers.c:763 plugins/sudoers/cvtsudoers.c:771
+#: plugins/sudoers/cvtsudoers.c:978 plugins/sudoers/cvtsudoers.c:982
+#: plugins/sudoers/cvtsudoers.c:1045 plugins/sudoers/cvtsudoers_ldif.c:429
 #: plugins/sudoers/cvtsudoers_ldif.c:599 plugins/sudoers/cvtsudoers_ldif.c:667
 #: plugins/sudoers/cvtsudoers_ldif.c:674 plugins/sudoers/cvtsudoers_ldif.c:679
 #: plugins/sudoers/cvtsudoers_ldif.c:755 plugins/sudoers/cvtsudoers_ldif.c:766
@@ -93,10 +94,10 @@ msgstr ""
 #: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
 #: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
 #: plugins/sudoers/logging.c:568 plugins/sudoers/logging.c:745
-#: plugins/sudoers/logging.c:1003 plugins/sudoers/match.c:617
-#: plugins/sudoers/match.c:664 plugins/sudoers/match.c:714
-#: plugins/sudoers/match.c:738 plugins/sudoers/match.c:826
-#: plugins/sudoers/match.c:915 plugins/sudoers/parse.c:247
+#: plugins/sudoers/logging.c:1003 plugins/sudoers/match.c:656
+#: plugins/sudoers/match.c:703 plugins/sudoers/match.c:753
+#: plugins/sudoers/match.c:777 plugins/sudoers/match.c:865
+#: plugins/sudoers/match.c:954 plugins/sudoers/parse.c:247
 #: plugins/sudoers/parse.c:259 plugins/sudoers/parse.c:274
 #: plugins/sudoers/parse.c:286 plugins/sudoers/policy.c:498
 #: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
@@ -126,10 +127,10 @@ msgstr ""
 #: plugins/sudoers/timestamp.c:445 plugins/sudoers/timestamp.c:923
 #: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
 #: plugins/sudoers/toke_util.c:146 plugins/sudoers/tsdump.c:125
-#: plugins/sudoers/visudo.c:147 plugins/sudoers/visudo.c:308
-#: plugins/sudoers/visudo.c:314 plugins/sudoers/visudo.c:424
-#: plugins/sudoers/visudo.c:602 plugins/sudoers/visudo.c:920
-#: plugins/sudoers/visudo.c:986 plugins/sudoers/visudo.c:1096 toke.l:849
+#: plugins/sudoers/visudo.c:146 plugins/sudoers/visudo.c:307
+#: plugins/sudoers/visudo.c:313 plugins/sudoers/visudo.c:423
+#: plugins/sudoers/visudo.c:601 plugins/sudoers/visudo.c:919
+#: plugins/sudoers/visudo.c:985 plugins/sudoers/visudo.c:1074 toke.l:849
 #: toke.l:949 toke.l:1106
 msgid "unable to allocate memory"
 msgstr ""
@@ -156,12 +157,13 @@ msgstr ""
 
 #: gram.y:1234 gram.y:1241 plugins/sudoers/auth/pam.c:341
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/cvtsudoers.c:115 plugins/sudoers/cvtsudoers.c:155
-#: plugins/sudoers/cvtsudoers.c:174 plugins/sudoers/cvtsudoers.c:185
-#: plugins/sudoers/cvtsudoers.c:267 plugins/sudoers/cvtsudoers.c:388
-#: plugins/sudoers/cvtsudoers.c:521 plugins/sudoers/cvtsudoers.c:538
-#: plugins/sudoers/cvtsudoers.c:638 plugins/sudoers/cvtsudoers.c:721
-#: plugins/sudoers/cvtsudoers.c:934 plugins/sudoers/cvtsudoers.c:1061
+#: plugins/sudoers/cvtsudoers.c:116 plugins/sudoers/cvtsudoers.c:156
+#: plugins/sudoers/cvtsudoers.c:173 plugins/sudoers/cvtsudoers.c:184
+#: plugins/sudoers/cvtsudoers.c:277 plugins/sudoers/cvtsudoers.c:401
+#: plugins/sudoers/cvtsudoers.c:534 plugins/sudoers/cvtsudoers.c:551
+#: plugins/sudoers/cvtsudoers.c:657 plugins/sudoers/cvtsudoers.c:763
+#: plugins/sudoers/cvtsudoers.c:770 plugins/sudoers/cvtsudoers.c:978
+#: plugins/sudoers/cvtsudoers.c:982 plugins/sudoers/cvtsudoers.c:1045
 #: plugins/sudoers/cvtsudoers_ldif.c:428 plugins/sudoers/cvtsudoers_ldif.c:598
 #: plugins/sudoers/cvtsudoers_ldif.c:666 plugins/sudoers/cvtsudoers_ldif.c:673
 #: plugins/sudoers/cvtsudoers_ldif.c:678 plugins/sudoers/cvtsudoers_ldif.c:754
@@ -199,9 +201,9 @@ msgstr ""
 #: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
 #: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
 #: plugins/sudoers/logging.c:567 plugins/sudoers/logging.c:1003
-#: plugins/sudoers/match.c:616 plugins/sudoers/match.c:663
-#: plugins/sudoers/match.c:714 plugins/sudoers/match.c:738
-#: plugins/sudoers/match.c:826 plugins/sudoers/match.c:914
+#: plugins/sudoers/match.c:655 plugins/sudoers/match.c:702
+#: plugins/sudoers/match.c:753 plugins/sudoers/match.c:777
+#: plugins/sudoers/match.c:865 plugins/sudoers/match.c:953
 #: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:259
 #: plugins/sudoers/parse.c:274 plugins/sudoers/parse.c:286
 #: plugins/sudoers/policy.c:128 plugins/sudoers/policy.c:137
@@ -240,11 +242,11 @@ msgstr ""
 #: plugins/sudoers/timestamp.c:401 plugins/sudoers/timestamp.c:445
 #: plugins/sudoers/timestamp.c:923 plugins/sudoers/toke_util.c:56
 #: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:146
-#: plugins/sudoers/tsdump.c:125 plugins/sudoers/visudo.c:147
-#: plugins/sudoers/visudo.c:308 plugins/sudoers/visudo.c:314
-#: plugins/sudoers/visudo.c:424 plugins/sudoers/visudo.c:602
-#: plugins/sudoers/visudo.c:920 plugins/sudoers/visudo.c:986
-#: plugins/sudoers/visudo.c:1096 toke.l:849 toke.l:949 toke.l:1106
+#: plugins/sudoers/tsdump.c:125 plugins/sudoers/visudo.c:146
+#: plugins/sudoers/visudo.c:307 plugins/sudoers/visudo.c:313
+#: plugins/sudoers/visudo.c:423 plugins/sudoers/visudo.c:601
+#: plugins/sudoers/visudo.c:919 plugins/sudoers/visudo.c:985
+#: plugins/sudoers/visudo.c:1074 toke.l:849 toke.l:949 toke.l:1106
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -381,7 +383,7 @@ msgstr ""
 msgid "PAM account management error: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:229
+#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:228
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr ""
@@ -484,23 +486,23 @@ msgstr ""
 msgid "unknown user: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:192
+#: plugins/sudoers/cvtsudoers.c:191
 #, c-format
 msgid "order increment: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:208
+#: plugins/sudoers/cvtsudoers.c:207
 #, c-format
 msgid "starting order: %s: %s"
 msgstr ""
 
 #: plugins/sudoers/cvtsudoers.c:218 plugins/sudoers/sudoreplay.c:310
-#: plugins/sudoers/visudo.c:179
+#: plugins/sudoers/visudo.c:178
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:220 plugins/sudoers/visudo.c:181
+#: plugins/sudoers/cvtsudoers.c:220 plugins/sudoers/visudo.c:180
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr ""
@@ -515,83 +517,83 @@ msgstr ""
 msgid "unsupported output format %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:282
+#: plugins/sudoers/cvtsudoers.c:292
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:298 plugins/sudoers/sudoers.c:167
-#: plugins/sudoers/testsudoers.c:246 plugins/sudoers/visudo.c:235
-#: plugins/sudoers/visudo.c:590 plugins/sudoers/visudo.c:911
+#: plugins/sudoers/cvtsudoers.c:308 plugins/sudoers/sudoers.c:167
+#: plugins/sudoers/testsudoers.c:246 plugins/sudoers/visudo.c:234
+#: plugins/sudoers/visudo.c:589 plugins/sudoers/visudo.c:910
 msgid "unable to initialize sudoers default values"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:377 plugins/sudoers/ldap_conf.c:413
+#: plugins/sudoers/cvtsudoers.c:390 plugins/sudoers/ldap_conf.c:413
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:436
+#: plugins/sudoers/cvtsudoers.c:449
 #, c-format
 msgid "%s: unknown key word: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:482
+#: plugins/sudoers/cvtsudoers.c:495
 #, c-format
 msgid "invalid defaults type: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:505
+#: plugins/sudoers/cvtsudoers.c:518
 #, c-format
 msgid "invalid suppression type: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:545 plugins/sudoers/cvtsudoers.c:559
+#: plugins/sudoers/cvtsudoers.c:558 plugins/sudoers/cvtsudoers.c:572
 #, c-format
 msgid "invalid filter: %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:631 plugins/sudoers/cvtsudoers.c:1021
+#: plugins/sudoers/cvtsudoers.c:650 plugins/sudoers/cvtsudoers.c:1005
 #: plugins/sudoers/cvtsudoers_json.c:1114 plugins/sudoers/cvtsudoers_ldif.c:492
 #: plugins/sudoers/cvtsudoers_ldif.c:983 plugins/sudoers/iolog.c:415
 #: plugins/sudoers/sudoers.c:933 plugins/sudoers/sudoreplay.c:356
 #: plugins/sudoers/sudoreplay.c:1366 plugins/sudoers/sudoreplay.c:1570
 #: plugins/sudoers/timestamp.c:410 plugins/sudoers/tsdump.c:130
-#: plugins/sudoers/visudo.c:907
+#: plugins/sudoers/visudo.c:906
 #, c-format
 msgid "unable to open %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:634 plugins/sudoers/visudo.c:916
+#: plugins/sudoers/cvtsudoers.c:653 plugins/sudoers/visudo.c:915
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:642 plugins/sudoers/visudo.c:932
+#: plugins/sudoers/cvtsudoers.c:661 plugins/sudoers/visudo.c:931
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:645 plugins/sudoers/visudo.c:935
+#: plugins/sudoers/cvtsudoers.c:664 plugins/sudoers/visudo.c:934
 #, c-format
 msgid "parse error in %s\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:1068 plugins/sudoers/iolog.c:502
+#: plugins/sudoers/cvtsudoers.c:1052 plugins/sudoers/iolog.c:502
 #: plugins/sudoers/sudoreplay.c:1135 plugins/sudoers/timestamp.c:294
 #: plugins/sudoers/timestamp.c:297
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:1091
+#: plugins/sudoers/cvtsudoers.c:1075
 #, c-format
 msgid ""
 "%s - convert between sudoers file formats\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/cvtsudoers.c:1093
+#: plugins/sudoers/cvtsudoers.c:1077
 msgid ""
 "\n"
 "Options:\n"
@@ -606,6 +608,7 @@ msgid ""
 "  -M, --match-local          match filter uses passwd and group databases\n"
 "  -o, --output=output_file   write converted sudoers to output_file\n"
 "  -O, --order-start=num      starting point for first sudoOrder\n"
+"  -p, --prune-matches        prune non-matching users, groups and hosts\n"
 "  -s, --suppress=sections    suppress output of certain sections\n"
 "  -V, --version              display version information and exit"
 msgstr ""
@@ -1304,8 +1307,8 @@ msgstr ""
 msgid "unable to mkdir %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:188 plugins/sudoers/visudo.c:718
-#: plugins/sudoers/visudo.c:728
+#: plugins/sudoers/iolog.c:188 plugins/sudoers/visudo.c:717
+#: plugins/sudoers/visudo.c:727
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr ""
@@ -1509,13 +1512,13 @@ msgstr ""
 msgid "unable to execute %s: %m"
 msgstr ""
 
-#: plugins/sudoers/match.c:771
+#: plugins/sudoers/match.c:810
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr ""
 
 #: plugins/sudoers/mkdir_parents.c:70 plugins/sudoers/sudoers.c:948
-#: plugins/sudoers/visudo.c:417 plugins/sudoers/visudo.c:712
+#: plugins/sudoers/visudo.c:416 plugins/sudoers/visudo.c:711
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
@@ -1589,8 +1592,8 @@ msgstr ""
 msgid "host name not set by sudo front-end"
 msgstr ""
 
-#: plugins/sudoers/policy.c:793 plugins/sudoers/visudo.c:217
-#: plugins/sudoers/visudo.c:845
+#: plugins/sudoers/policy.c:793 plugins/sudoers/visudo.c:216
+#: plugins/sudoers/visudo.c:844
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -2071,7 +2074,7 @@ msgid "unable to truncate time stamp file to %lld bytes"
 msgstr ""
 
 #: plugins/sudoers/timestamp.c:792 plugins/sudoers/timestamp.c:884
-#: plugins/sudoers/visudo.c:478 plugins/sudoers/visudo.c:484
+#: plugins/sudoers/visudo.c:477 plugins/sudoers/visudo.c:483
 msgid "unable to read the clock"
 msgstr ""
 
@@ -2094,93 +2097,93 @@ msgstr ""
 msgid "lecture status path too long: %s/%s"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:213
+#: plugins/sudoers/visudo.c:212
 msgid "the -x option will be removed in a future release"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:214
+#: plugins/sudoers/visudo.c:213
 msgid "please consider using the cvtsudoers utility instead"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:264 plugins/sudoers/visudo.c:645
+#: plugins/sudoers/visudo.c:263 plugins/sudoers/visudo.c:644
 #, c-format
 msgid "press return to edit %s: "
 msgstr ""
 
-#: plugins/sudoers/visudo.c:325
+#: plugins/sudoers/visudo.c:324
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:327
+#: plugins/sudoers/visudo.c:326
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:437 plugins/sudoers/visudo.c:445
+#: plugins/sudoers/visudo.c:436 plugins/sudoers/visudo.c:444
 msgid "write error"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:491
+#: plugins/sudoers/visudo.c:490
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:498
+#: plugins/sudoers/visudo.c:497
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:504
+#: plugins/sudoers/visudo.c:503
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:526
+#: plugins/sudoers/visudo.c:525
 #, c-format
 msgid "%s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:585
+#: plugins/sudoers/visudo.c:584
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr ""
 
-#: plugins/sudoers/visudo.c:597
+#: plugins/sudoers/visudo.c:596
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:634
+#: plugins/sudoers/visudo.c:633
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:714 plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:713 plugins/sudoers/visudo.c:722
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:745
+#: plugins/sudoers/visudo.c:744
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:759
+#: plugins/sudoers/visudo.c:758
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:769
+#: plugins/sudoers/visudo.c:768
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:790
+#: plugins/sudoers/visudo.c:789
 msgid "What now? "
 msgstr ""
 
-#: plugins/sudoers/visudo.c:804
+#: plugins/sudoers/visudo.c:803
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -2188,64 +2191,64 @@ msgid ""
 "  (Q)uit and save changes to sudoers file (DANGER!)\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:850
+#: plugins/sudoers/visudo.c:849
 #, c-format
 msgid "unable to run %s"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:880
+#: plugins/sudoers/visudo.c:879
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:887
+#: plugins/sudoers/visudo.c:886
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:943 plugins/sudoers/visudo.c:950
+#: plugins/sudoers/visudo.c:942 plugins/sudoers/visudo.c:949
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:997
+#: plugins/sudoers/visudo.c:996
 #, c-format
 msgid "%s busy, try again later"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1058
+#: plugins/sudoers/visudo.c:1036
 #, c-format
 msgid "Error: %s:%d cycle in %s \"%s\""
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1059
+#: plugins/sudoers/visudo.c:1037
 #, c-format
 msgid "Warning: %s:%d cycle in %s \"%s\""
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1063
+#: plugins/sudoers/visudo.c:1041
 #, c-format
 msgid "Error: %s:%d %s \"%s\" referenced but not defined"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1064
+#: plugins/sudoers/visudo.c:1042
 #, c-format
 msgid "Warning: %s:%d %s \"%s\" referenced but not defined"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1217
+#: plugins/sudoers/visudo.c:1135
 #, c-format
 msgid "Warning: %s:%d unused %s \"%s\""
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1332
+#: plugins/sudoers/visudo.c:1250
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1334
+#: plugins/sudoers/visudo.c:1252
 msgid ""
 "\n"
 "Options:\n"
