@@ -69,14 +69,14 @@ alias_compare(const void *v1, const void *v2)
  * alias to mark it as unused.
  */
 struct alias *
-alias_get(char *name, int type)
+alias_get(const char *name, int type)
 {
     struct alias key;
     struct rbnode *node;
     struct alias *a = NULL;
     debug_decl(alias_get, SUDOERS_DEBUG_ALIAS)
 
-    key.name = name;
+    key.name = (char *)name;
     key.type = type;
     if ((node = rbfind(aliases, &key)) != NULL) {
 	/*
@@ -189,10 +189,12 @@ alias_free(void *v)
     struct alias *a = (struct alias *)v;
     debug_decl(alias_free, SUDOERS_DEBUG_ALIAS)
 
-    free(a->name);
-    rcstr_delref(a->file);
-    free_members(&a->members);
-    free(a);
+    if (a != NULL) {
+	free(a->name);
+	rcstr_delref(a->file);
+	free_members(&a->members);
+	free(a);
+    }
 
     debug_return;
 }

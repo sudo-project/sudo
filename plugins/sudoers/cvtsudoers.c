@@ -323,7 +323,7 @@ main(int argc, char *argv[])
     /* Apply filters. */
     filter_userspecs(conf);
     filter_defaults(conf);
-    if (filters != NULL || conf->defaults != CVT_DEFAULTS_ALL)
+    if (filters != NULL)
 	alias_remove_unused();
 
     switch (output_format) {
@@ -910,13 +910,136 @@ filter_userspecs(struct cvtsudoers_config *conf)
 }
 
 /*
+ * Check whether the alias described by "alias_name" is the same
+ * as "name" or includes an alias called "name".
+ * Returns true if matched, else false.
+ */
+static bool
+alias_matches(const char *name, const char *alias_name, int alias_type)
+{
+    struct alias *a;
+    struct member *m;
+    bool ret = false;
+    debug_decl(alias_matches, SUDOERS_DEBUG_ALIAS)
+
+    if (strcmp(name, alias_name) == 0)
+	debug_return_bool(true);
+
+    if ((a = alias_get(alias_name, alias_type)) != NULL) {
+	TAILQ_FOREACH(m, &a->members, entries) {
+	    if (m->type != ALIAS)
+		continue;
+	    if (alias_matches(name, m->name, alias_type)) {
+		ret = true;
+		break;
+	    }
+	}
+	alias_put(a);
+    }
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Check whether userspecs uses the aliases in the specified member lists.
+ * If used, they are removed (and freed) from the list.
+ * This does *not* check Defaults for used aliases, only userspecs.
+ */
+static void
+alias_used_by_userspecs(struct member_list *user_aliases,
+    struct member_list *runas_aliases, struct member_list *host_aliases,
+    struct member_list *cmnd_aliases)
+{
+    struct privilege *priv, *priv_next;
+    struct userspec *us, *us_next;
+    struct cmndspec *cs, *cs_next;
+    struct member *m, *m_next;
+    struct member *am, *am_next;
+    debug_decl(alias_used_by_userspecs, SUDOERS_DEBUG_ALIAS)
+
+    /* Iterate over the policy, checking for aliases. */
+    TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
+	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
+	    if (m->type == ALIAS) {
+		/* If alias is used, remove from user_aliases and free. */
+		TAILQ_FOREACH_SAFE(am, user_aliases, entries, am_next) {
+		    if (alias_matches(am->name, m->name, USERALIAS)) {
+			TAILQ_REMOVE(user_aliases, am, entries);
+			free_member(am);
+		    }
+		}
+	    }
+	}
+	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
+	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
+		if (m->type == ALIAS) {
+		    /* If alias is used, remove from host_aliases and free. */
+		    TAILQ_FOREACH_SAFE(am, host_aliases, entries, am_next) {
+			if (alias_matches(am->name, m->name, HOSTALIAS)) {
+			    TAILQ_REMOVE(host_aliases, am, entries);
+			    free_member(am);
+			}
+		    }
+		}
+	    }
+	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
+		if (cs->runasuserlist != NULL) {
+		    TAILQ_FOREACH_SAFE(m, cs->runasuserlist, entries, m_next) {
+			if (m->type == ALIAS) {
+			    /* If alias is used, remove from runas_aliases and free. */
+			    TAILQ_FOREACH_SAFE(am, runas_aliases, entries, am_next) {
+				if (alias_matches(am->name, m->name, RUNASALIAS)) {
+				    TAILQ_REMOVE(runas_aliases, am, entries);
+				    free_member(am);
+				}
+			    }
+			}
+		    }
+		}
+		if (cs->runasgrouplist != NULL) {
+		    TAILQ_FOREACH_SAFE(m, cs->runasgrouplist, entries, m_next) {
+			if (m->type == ALIAS) {
+			    /* If alias is used, remove from runas_aliases and free. */
+			    TAILQ_FOREACH_SAFE(am, runas_aliases, entries, am_next) {
+				if (alias_matches(am->name, m->name, RUNASALIAS)) {
+				    TAILQ_REMOVE(runas_aliases, am, entries);
+				    free_member(am);
+				}
+			    }
+			}
+		    }
+		}
+		if ((m = cs->cmnd)->type == ALIAS) {
+		    /* If alias is used, remove from cmnd_aliases and free. */
+		    TAILQ_FOREACH_SAFE(am, cmnd_aliases, entries, am_next) {
+			if (alias_matches(am->name, m->name, CMNDALIAS)) {
+			    TAILQ_REMOVE(cmnd_aliases, am, entries);
+			    free_member(am);
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    debug_return;
+}
+
+/*
  * Apply filters to host/user-based Defaults, removing non-matching entries.
  */
 static void
 filter_defaults(struct cvtsudoers_config *conf)
 {
-    struct defaults *def, *next;
+    struct member_list user_aliases = TAILQ_HEAD_INITIALIZER(user_aliases);
+    struct member_list runas_aliases = TAILQ_HEAD_INITIALIZER(runas_aliases);
+    struct member_list host_aliases = TAILQ_HEAD_INITIALIZER(host_aliases);
+    struct member_list cmnd_aliases = TAILQ_HEAD_INITIALIZER(cmnd_aliases);
     struct member_list *prev_binding = NULL;
+    struct defaults *def;
+    struct member *m;
+    void *next;
+    int alias_type;
     debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     if (filters == NULL && conf->defaults == CVT_DEFAULTS_ALL)
@@ -929,24 +1052,29 @@ filter_defaults(struct cvtsudoers_config *conf)
 	case DEFAULTS:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_GLOBAL))
 		keep = false;
+	    alias_type = UNSPEC;
 	    break;
 	case DEFAULTS_USER:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_USER) ||
 		!userlist_matches_filter(def->binding, conf->prune_matches))
 		keep = false;
+	    alias_type = USERALIAS;
 	    break;
 	case DEFAULTS_RUNAS:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_RUNAS))
 		keep = false;
+	    alias_type = RUNASALIAS;
 	    break;
 	case DEFAULTS_HOST:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_HOST) ||
 		!hostlist_matches_filter(def->binding, conf->prune_matches))
 		keep = false;
+	    alias_type = HOSTALIAS;
 	    break;
 	case DEFAULTS_CMND:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_RUNAS))
 		keep = false;
+	    alias_type = CMNDALIAS;
 	    break;
 	default:
 	    sudo_fatalx_nodebug("unexpected defaults type %d", def->type);
@@ -954,12 +1082,59 @@ filter_defaults(struct cvtsudoers_config *conf)
 	}
 
 	if (!keep) {
+	    /* Look for aliases used by the binding. */
+	    /* XXX - move to function */
+	    if (alias_type != UNSPEC && def->binding != prev_binding) {
+		TAILQ_FOREACH_SAFE(m, def->binding, entries, next) {
+		    if (m->type == ALIAS) {
+			TAILQ_REMOVE(def->binding, m, entries);
+			switch (alias_type) {
+			case USERALIAS:
+			    TAILQ_INSERT_TAIL(&user_aliases, m, entries);
+			    break;
+			case RUNASALIAS:
+			    TAILQ_INSERT_TAIL(&runas_aliases, m, entries);
+			    break;
+			case HOSTALIAS:
+			    TAILQ_INSERT_TAIL(&host_aliases, m, entries);
+			    break;
+			case CMNDALIAS:
+			    TAILQ_INSERT_TAIL(&cmnd_aliases, m, entries);
+			    break;
+			default:
+			    sudo_fatalx_nodebug("unexpected alias type %d", alias_type);
+			    break;
+			}
+		    }
+		}
+	    }
 	    TAILQ_REMOVE(&defaults, def, entries);
 	    free_default(def, &prev_binding);
 	} else {
 	    prev_binding = def->binding;
 	}
     }
+
+    /* Remove now-unreferenced aliases. */
+    alias_used_by_userspecs(&user_aliases, &runas_aliases, &host_aliases,
+	&cmnd_aliases);
+    TAILQ_FOREACH_SAFE(m, &user_aliases, entries, next) {
+	struct alias *a = alias_remove(m->name, USERALIAS);
+	alias_free(a);
+    }
+    TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, next) {
+	struct alias *a = alias_remove(m->name, RUNASALIAS);
+	alias_free(a);
+    }
+    TAILQ_FOREACH_SAFE(m, &host_aliases, entries, next) {
+	struct alias *a = alias_remove(m->name, HOSTALIAS);
+	alias_free(a);
+    }
+    TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, next) {
+	struct alias *a = alias_remove(m->name, CMNDALIAS);
+	alias_free(a);
+    }
+
     debug_return;
 }
 
