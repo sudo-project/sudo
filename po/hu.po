@@ -1,15 +1,15 @@
 # Hungarian translation for sudo.
-# Copyright (C) 2016, 2017 Free Software Foundation, Inc.
+# Copyright (C) 2016, 2017, 2018 Free Software Foundation, Inc.
 # This file is distributed under the same license as the sudo package.
 #
 # Gabor Kelemen <kelemeng@gnome.hu>, 2016.
-# Balázs Úr <urbalazs@gmail.com>, 2017.
+# Balázs Úr <urbalazs@gmail.com>, 2017, 2018.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.20b1\n"
+"Project-Id-Version: sudo 1.8.21b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2017-03-09 11:58-0700\n"
-"PO-Revision-Date: 2017-05-03 23:56+0200\n"
+"POT-Creation-Date: 2017-08-03 10:04-0600\n"
+"PO-Revision-Date: 2018-01-20 13:53+0100\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
 "Language: hu\n"
@@ -35,39 +35,39 @@ msgid "unable to restore registry"
 msgstr "a rendszerleíró visszaállítása sikertelen"
 
 #: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/gidlist.c:74
-#: lib/util/sudo_conf.c:184 lib/util/sudo_conf.c:270 lib/util/sudo_conf.c:347
-#: lib/util/sudo_conf.c:545 src/conversation.c:75 src/exec_common.c:107
-#: src/exec_common.c:123 src/exec_common.c:132 src/exec_monitor.c:214
-#: src/exec_nopty.c:326 src/exec_pty.c:623 src/exec_pty.c:631
-#: src/exec_pty.c:868 src/load_plugins.c:52 src/load_plugins.c:65
-#: src/load_plugins.c:215 src/load_plugins.c:238 src/load_plugins.c:303
-#: src/load_plugins.c:318 src/parse_args.c:183 src/parse_args.c:205
-#: src/parse_args.c:376 src/parse_args.c:472 src/parse_args.c:494
-#: src/preserve_fds.c:47 src/preserve_fds.c:130 src/selinux.c:83
-#: src/selinux.c:292 src/selinux.c:415 src/selinux.c:424 src/sesh.c:115
-#: src/sudo.c:398 src/sudo.c:423 src/sudo.c:488 src/sudo.c:610 src/sudo.c:670
-#: src/sudo.c:680 src/sudo.c:700 src/sudo.c:719 src/sudo.c:728 src/sudo.c:737
-#: src/sudo.c:754 src/sudo.c:795 src/sudo.c:805 src/sudo.c:825 src/sudo.c:1246
-#: src/sudo.c:1267 src/sudo.c:1441 src/sudo.c:1535 src/sudo_edit.c:151
-#: src/sudo_edit.c:775 src/sudo_edit.c:872 src/sudo_edit.c:985
-#: src/sudo_edit.c:1005
+#: lib/util/sudo_conf.c:186 lib/util/sudo_conf.c:272 lib/util/sudo_conf.c:349
+#: lib/util/sudo_conf.c:553 src/conversation.c:75 src/exec_common.c:107
+#: src/exec_common.c:123 src/exec_common.c:132 src/exec_monitor.c:167
+#: src/exec_nopty.c:462 src/exec_pty.c:667 src/exec_pty.c:676
+#: src/exec_pty.c:738 src/exec_pty.c:867 src/load_plugins.c:52
+#: src/load_plugins.c:65 src/load_plugins.c:215 src/load_plugins.c:238
+#: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:177
+#: src/parse_args.c:198 src/parse_args.c:273 src/parse_args.c:540
+#: src/parse_args.c:562 src/preserve_fds.c:47 src/preserve_fds.c:130
+#: src/selinux.c:84 src/selinux.c:309 src/selinux.c:432 src/selinux.c:441
+#: src/sesh.c:115 src/sudo.c:389 src/sudo.c:416 src/sudo.c:481 src/sudo.c:603
+#: src/sudo.c:663 src/sudo.c:673 src/sudo.c:693 src/sudo.c:712 src/sudo.c:721
+#: src/sudo.c:730 src/sudo.c:747 src/sudo.c:788 src/sudo.c:798 src/sudo.c:818
+#: src/sudo.c:1058 src/sudo.c:1079 src/sudo.c:1253 src/sudo.c:1351
+#: src/sudo_edit.c:148 src/sudo_edit.c:771 src/sudo_edit.c:868
+#: src/sudo_edit.c:982 src/sudo_edit.c:1002
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/sudo_conf.c:185
-#: lib/util/sudo_conf.c:270 lib/util/sudo_conf.c:347 lib/util/sudo_conf.c:545
+#: lib/util/aix.c:275 lib/util/gidlist.c:64 lib/util/sudo_conf.c:187
+#: lib/util/sudo_conf.c:272 lib/util/sudo_conf.c:349 lib/util/sudo_conf.c:553
 #: src/conversation.c:76 src/exec_common.c:107 src/exec_common.c:124
-#: src/exec_common.c:133 src/exec_pty.c:623 src/exec_pty.c:631
-#: src/exec_pty.c:868 src/load_plugins.c:215 src/load_plugins.c:238
-#: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:183
-#: src/parse_args.c:205 src/parse_args.c:376 src/parse_args.c:472
-#: src/parse_args.c:494 src/preserve_fds.c:47 src/preserve_fds.c:130
-#: src/selinux.c:83 src/selinux.c:292 src/selinux.c:415 src/selinux.c:424
-#: src/sesh.c:115 src/sudo.c:398 src/sudo.c:423 src/sudo.c:488 src/sudo.c:610
-#: src/sudo.c:825 src/sudo.c:1246 src/sudo.c:1267 src/sudo.c:1441
-#: src/sudo.c:1535 src/sudo_edit.c:151 src/sudo_edit.c:775 src/sudo_edit.c:872
-#: src/sudo_edit.c:985 src/sudo_edit.c:1005
+#: src/exec_common.c:133 src/exec_pty.c:667 src/exec_pty.c:676
+#: src/exec_pty.c:738 src/load_plugins.c:215 src/load_plugins.c:238
+#: src/load_plugins.c:303 src/load_plugins.c:318 src/parse_args.c:177
+#: src/parse_args.c:199 src/parse_args.c:273 src/parse_args.c:540
+#: src/parse_args.c:562 src/preserve_fds.c:47 src/preserve_fds.c:130
+#: src/selinux.c:84 src/selinux.c:309 src/selinux.c:432 src/selinux.c:441
+#: src/sesh.c:115 src/sudo.c:389 src/sudo.c:416 src/sudo.c:481 src/sudo.c:603
+#: src/sudo.c:818 src/sudo.c:1058 src/sudo.c:1079 src/sudo.c:1253
+#: src/sudo.c:1351 src/sudo_edit.c:148 src/sudo_edit.c:771 src/sudo_edit.c:868
+#: src/sudo_edit.c:982 src/sudo_edit.c:1002
 msgid "unable to allocate memory"
 msgstr "a memóriafoglalás sikertelen"
 
@@ -90,70 +90,87 @@ msgstr "túl magas érték"
 msgid "value too small"
 msgstr "túl alacsony érték"
 
-#: lib/util/sudo_conf.c:203
+#: lib/util/sudo_conf.c:205
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
 msgstr "érvénytelen „%s” útvonal érték a(z) %s, %u. sorában"
 
-#: lib/util/sudo_conf.c:369 lib/util/sudo_conf.c:422
+#: lib/util/sudo_conf.c:371 lib/util/sudo_conf.c:424
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
 msgstr "a(z) %s értéke („%s”) érvénytelen a(z) %s, %u. sorában"
 
-#: lib/util/sudo_conf.c:390
+#: lib/util/sudo_conf.c:392
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
 msgstr "nem támogatott „%s” csoportforrás a(z) %s, %u. sorában"
 
-#: lib/util/sudo_conf.c:406
+#: lib/util/sudo_conf.c:408
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr "érvénytelen legnagyobb csoportok („%s”) a(z) %s, %u. sorában"
 
-#: lib/util/sudo_conf.c:561
+#: lib/util/sudo_conf.c:569
 #, c-format
 msgid "unable to stat %s"
 msgstr "%s nem érhető el"
 
-#: lib/util/sudo_conf.c:564
+#: lib/util/sudo_conf.c:572
 #, c-format
 msgid "%s is not a regular file"
 msgstr "a(z) %s nem szabályos fájl"
 
-#: lib/util/sudo_conf.c:567
+#: lib/util/sudo_conf.c:575
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s a(z) %u uid tulajdona, ennek kellene lennie: %u"
 
-#: lib/util/sudo_conf.c:571
+#: lib/util/sudo_conf.c:579
 #, c-format
 msgid "%s is world writable"
 msgstr "%s bárki számára írható"
 
-#: lib/util/sudo_conf.c:574
+#: lib/util/sudo_conf.c:582
 #, c-format
 msgid "%s is group writable"
 msgstr "%s a csoport számára írható"
 
-#: lib/util/sudo_conf.c:584 src/selinux.c:201 src/selinux.c:213 src/sudo.c:366
+#: lib/util/sudo_conf.c:592 src/selinux.c:208 src/selinux.c:225 src/sudo.c:357
 #, c-format
 msgid "unable to open %s"
 msgstr "%s nem nyitható meg"
 
-#: src/exec.c:189 src/exec_monitor.c:504 src/exec_monitor.c:506
-#: src/exec_monitor.c:511 src/exec_monitor.c:513 src/exec_monitor.c:527
-#: src/exec_monitor.c:538 src/exec_monitor.c:540 src/exec_monitor.c:542
-#: src/exec_monitor.c:544 src/exec_monitor.c:546 src/exec_monitor.c:548
-#: src/exec_monitor.c:550 src/exec_nopty.c:191 src/exec_nopty.c:193
-#: src/exec_nopty.c:195 src/exec_nopty.c:197 src/exec_nopty.c:199
-#: src/exec_nopty.c:201 src/exec_nopty.c:203 src/exec_nopty.c:205
-#: src/exec_nopty.c:208 src/exec_nopty.c:222 src/exec_nopty.c:224
-#: src/exec_nopty.c:226 src/exec_nopty.c:384 src/exec_pty.c:427
-#: src/exec_pty.c:661 src/exec_pty.c:1196 src/exec_pty.c:1198
-#: src/exec_pty.c:1200 src/exec_pty.c:1202 src/exec_pty.c:1204
-#: src/exec_pty.c:1206 src/exec_pty.c:1208 src/exec_pty.c:1211
-#: src/exec_pty.c:1219 src/exec_pty.c:1221 src/exec_pty.c:1223
-#: src/exec_pty.c:1231 src/exec_pty.c:1233 src/signal.c:148 src/signal.c:162
+#: src/exec.c:160
+#, c-format
+msgid "unknown login class %s"
+msgstr "ismeretlen %s logikai osztály"
+
+#: src/exec.c:173
+msgid "unable to set user context"
+msgstr "a felhasználói környezet beállítása sikertelen"
+
+#: src/exec.c:189
+msgid "unable to set process priority"
+msgstr "a folyamat prioritásának beállítása sikertelen"
+
+#: src/exec.c:197
+#, c-format
+msgid "unable to change root to %s"
+msgstr "a gyökér megváltoztatása sikertelen erre: %s"
+
+#: src/exec.c:210 src/exec.c:216 src/exec.c:223
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "a runas uid értékre (%u, %u) váltás sikertelen"
+
+#: src/exec.c:241
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "a könyvtárváltás sikertelen erre: %s"
+
+#: src/exec.c:337 src/exec_monitor.c:526 src/exec_monitor.c:528
+#: src/exec_nopty.c:520 src/exec_pty.c:472 src/exec_pty.c:1184
+#: src/exec_pty.c:1186 src/signal.c:139 src/signal.c:153
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "%d szignál kezelőjének beállítása sikertelen"
@@ -162,65 +179,69 @@ msgstr "%d szignál kezelőjének beállítása sikertelen"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "a PRIV_PROC_EXEC eltávolítása sikertelen a PRIV_LIMIT-ből"
 
-#: src/exec_monitor.c:277 src/exec_nopty.c:455 src/exec_pty.c:1028
-msgid "error reading from signal pipe"
-msgstr "hiba a szignálcsatornából való olvasáskor"
-
-#: src/exec_monitor.c:363
+#: src/exec_monitor.c:326
 msgid "error reading from socketpair"
 msgstr "hiba a foglalatpárból való olvasáskor"
 
-#: src/exec_monitor.c:372
+#: src/exec_monitor.c:338
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "váratlan választípus a visszcsatornán: %d"
 
-#: src/exec_monitor.c:450 src/exec_monitor.c:458 src/exec_monitor.c:466
-#: src/exec_nopty.c:130 src/exec_nopty.c:138 src/exec_pty.c:516
-#: src/exec_pty.c:521 src/exec_pty.c:591 src/exec_pty.c:598 src/exec_pty.c:873
-#: src/exec_pty.c:1129 src/exec_pty.c:1137 src/exec_pty.c:1322
-#: src/exec_pty.c:1332 src/exec_pty.c:1377 src/exec_pty.c:1384
-#: src/exec_pty.c:1409
+#: src/exec_monitor.c:423 src/exec_monitor.c:431 src/exec_monitor.c:439
+#: src/exec_monitor.c:446 src/exec_monitor.c:453 src/exec_monitor.c:460
+#: src/exec_monitor.c:467 src/exec_monitor.c:474 src/exec_monitor.c:481
+#: src/exec_monitor.c:488 src/exec_nopty.c:215 src/exec_nopty.c:224
+#: src/exec_nopty.c:231 src/exec_nopty.c:238 src/exec_nopty.c:245
+#: src/exec_nopty.c:252 src/exec_nopty.c:259 src/exec_nopty.c:266
+#: src/exec_nopty.c:273 src/exec_nopty.c:280 src/exec_nopty.c:287
+#: src/exec_nopty.c:294 src/exec_nopty.c:302 src/exec_pty.c:563
+#: src/exec_pty.c:568 src/exec_pty.c:635 src/exec_pty.c:642 src/exec_pty.c:743
+#: src/exec_pty.c:1029 src/exec_pty.c:1038 src/exec_pty.c:1045
+#: src/exec_pty.c:1052 src/exec_pty.c:1059 src/exec_pty.c:1066
+#: src/exec_pty.c:1073 src/exec_pty.c:1080 src/exec_pty.c:1087
+#: src/exec_pty.c:1094 src/exec_pty.c:1101 src/exec_pty.c:1446
+#: src/exec_pty.c:1456 src/exec_pty.c:1501 src/exec_pty.c:1508
+#: src/exec_pty.c:1533
 msgid "unable to add event to queue"
 msgstr "az esemény hozzáadása a sorhoz sikertelen"
 
-#: src/exec_monitor.c:496 src/exec_monitor.c:570 src/exec_nopty.c:161
-#: src/exec_pty.c:705 src/exec_pty.c:714 src/exec_pty.c:722 src/signal.c:129
-#: src/tgetpass.c:246
-msgid "unable to create pipe"
-msgstr "adatcsatorna létrehozása sikertelen"
-
-#: src/exec_monitor.c:562
+#: src/exec_monitor.c:540
 msgid "unable to set controlling tty"
 msgstr "a vezérlő tty beállítása sikertelen"
 
-#: src/exec_monitor.c:573 src/exec_nopty.c:240 src/exec_pty.c:756
+#: src/exec_monitor.c:548 src/exec_nopty.c:359 src/exec_pty.c:1261
+#: src/exec_pty.c:1280 src/exec_pty.c:1298 src/tgetpass.c:246
+msgid "unable to create pipe"
+msgstr "adatcsatorna létrehozása sikertelen"
+
+#: src/exec_monitor.c:553 src/exec_nopty.c:377 src/exec_pty.c:1335
 #: src/tgetpass.c:250
 msgid "unable to fork"
 msgstr "az elágaztatás sikertelen"
 
-#: src/exec_monitor.c:654 src/exec_nopty.c:292
+#: src/exec_monitor.c:639 src/exec_nopty.c:430
 msgid "unable to restore tty label"
 msgstr "a tty címke visszaállítása sikertelen"
 
-#: src/exec_nopty.c:233 src/exec_pty.c:1240
+#: src/exec_nopty.c:353 src/exec_pty.c:1193
 msgid "policy plugin failed session initialization"
 msgstr "a házirendbővítménynek nem sikerült a munkamenet előkészítése"
 
-#: src/exec_nopty.c:281 src/exec_pty.c:1278
+#: src/exec_nopty.c:419 src/exec_pty.c:1404
 msgid "error in event loop"
 msgstr "hiba az eseményhurokban"
 
-#: src/exec_nopty.c:392 src/exec_pty.c:459 src/signal.c:87
+#: src/exec_nopty.c:528 src/exec_pty.c:504 src/signal.c:101
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr "%d szignál kezelőjének visszaállítása sikertelen"
 
-#: src/exec_pty.c:133
+#: src/exec_pty.c:143
 msgid "unable to allocate pty"
 msgstr "a pty lefoglalása sikertelen"
 
-#: src/exec_pty.c:1179
+#: src/exec_pty.c:1173
 msgid "unable to create sockets"
 msgstr "a foglalatok létrehozása sikertelen"
 
@@ -291,48 +312,53 @@ msgstr "kettőzött „%s” I/O bővítmény mellőzése a(z) %s, %d. sorában"
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "a(z) %s házirendbővítmény nem tartalmazza a „check_policy” metódust"
 
-#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:483
+#: src/net_ifs.c:173 src/net_ifs.c:190 src/net_ifs.c:335 src/sudo.c:476
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "belső hiba, %s túlcsordul"
 
-#: src/parse_args.c:242
+#: src/parse_args.c:219
+#, c-format
+msgid "invalid environment variable name: %s"
+msgstr "érvénytelen környezeti változó név: %s"
+
+#: src/parse_args.c:313
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "a -C kapcsoló argumentuma legyen 3, vagy ennél nagyobb szám"
 
-#: src/parse_args.c:412
+#: src/parse_args.c:480
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "az „-i” és „-s” kapcsoló egyszerre nem használható"
 
-#: src/parse_args.c:416
+#: src/parse_args.c:484
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "az „-i” és „-E” kapcsoló egyszerre nem használható"
 
-#: src/parse_args.c:426
+#: src/parse_args.c:494
 msgid "the `-E' option is not valid in edit mode"
 msgstr "az „-E” kapcsoló nem használható szerkesztő módban"
 
-#: src/parse_args.c:428
+#: src/parse_args.c:496
 msgid "you may not specify environment variables in edit mode"
 msgstr "nem használhat környezeti változókat szerkesztő módban"
 
-#: src/parse_args.c:436
+#: src/parse_args.c:504
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "az „-U” kapcsoló csak a „-l” kapcsolóval együtt használható"
 
-#: src/parse_args.c:440
+#: src/parse_args.c:508
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "az „-A” és „-S” kapcsoló együtt nem használható"
 
-#: src/parse_args.c:516
+#: src/parse_args.c:584
 msgid "sudoedit is not supported on this platform"
 msgstr "a „sudoedit” nem támogatott ezen a rendszeren"
 
-#: src/parse_args.c:589
+#: src/parse_args.c:657
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Kizárólag az -e, -h, -i, -K, -l, -s, -v vagy -V kapcsolók egyike használható"
 
-#: src/parse_args.c:603
+#: src/parse_args.c:671
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -341,7 +367,7 @@ msgstr ""
 "%s - fájlok szerkesztése más felhasználóként\n"
 "\n"
 
-#: src/parse_args.c:605
+#: src/parse_args.c:673
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -350,7 +376,7 @@ msgstr ""
 "%s - parancs végrehajtása más felhasználóként\n"
 "\n"
 
-#: src/parse_args.c:610
+#: src/parse_args.c:678
 #, c-format
 msgid ""
 "\n"
@@ -359,206 +385,215 @@ msgstr ""
 "\n"
 "Kapcsolók:\n"
 
-#: src/parse_args.c:612
+#: src/parse_args.c:680
 msgid "use a helper program for password prompting"
 msgstr "segédprogram használata a jelszóbekérésre"
 
-#: src/parse_args.c:615
+#: src/parse_args.c:683
 msgid "use specified BSD authentication type"
 msgstr "megadott BSD hitelesítési típus használata"
 
-#: src/parse_args.c:618
+#: src/parse_args.c:686
 msgid "run command in the background"
 msgstr "parancs futtatása a háttérben"
 
-#: src/parse_args.c:620
+#: src/parse_args.c:688
 msgid "close all file descriptors >= num"
 msgstr "minden fájlleíró lezárása, ami >= num"
 
-#: src/parse_args.c:623
+#: src/parse_args.c:691
 msgid "run command with the specified BSD login class"
 msgstr "parancs futtatása a megadott BSD bejelentkezési osztállyal"
 
-#: src/parse_args.c:626
+#: src/parse_args.c:694
 msgid "preserve user environment when running command"
 msgstr "felhasználói környezet megőrzése parancsfuttatáskor"
 
-#: src/parse_args.c:628
+#: src/parse_args.c:696
+msgid "preserve specific environment variables"
+msgstr "bizonyos környezeti változók megőrzése"
+
+#: src/parse_args.c:698
 msgid "edit files instead of running a command"
 msgstr "fájlok szerkesztése parancs futtatása helyett"
 
-#: src/parse_args.c:630
+#: src/parse_args.c:700
 msgid "run command as the specified group name or ID"
 msgstr "parancs futtatása megadott csoportnévként vagy -azonosítóként"
 
-#: src/parse_args.c:632
+#: src/parse_args.c:702
 msgid "set HOME variable to target user's home dir"
 msgstr "a HOME változó beállítása a célfelhasználó saját könyvtárára"
 
-#: src/parse_args.c:634
+#: src/parse_args.c:704
 msgid "display help message and exit"
 msgstr "súgóüzenet megjelenítése és kilépés"
 
-#: src/parse_args.c:636
+#: src/parse_args.c:706
 msgid "run command on host (if supported by plugin)"
 msgstr "parancs futtatása a gépen (ha a bővítmény támogatja)"
 
-#: src/parse_args.c:638
+#: src/parse_args.c:708
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "bejelentkezési parancsértelmező futtatása a célfelhasználóként; egy parancs is megadható"
 
-#: src/parse_args.c:640
+#: src/parse_args.c:710
 msgid "remove timestamp file completely"
 msgstr "időbélyeg fájl teljes eltávolítása"
 
-#: src/parse_args.c:642
+#: src/parse_args.c:712
 msgid "invalidate timestamp file"
 msgstr "időbélyeg fájl érvénytelenítése"
 
-#: src/parse_args.c:644
+#: src/parse_args.c:714
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "felhasználó jogosultságainak felsorolása, vagy adott parancs ellenőrzése, kétszer megadva hosszabb formátumban"
 
-#: src/parse_args.c:646
+#: src/parse_args.c:716
 msgid "non-interactive mode, no prompts are used"
 msgstr "nem interaktív mód, kérdések nélkül"
 
-#: src/parse_args.c:648
+#: src/parse_args.c:718
 msgid "preserve group vector instead of setting to target's"
 msgstr "csoportvektor megőrzése a céléra beállítás helyett"
 
-#: src/parse_args.c:650
+#: src/parse_args.c:720
 msgid "use the specified password prompt"
 msgstr "a megadott jelszóbekérés használata"
 
-#: src/parse_args.c:653
+#: src/parse_args.c:723
 msgid "create SELinux security context with specified role"
 msgstr "SELinux biztonsági környezet létrehozása a megadott szereppel"
 
-#: src/parse_args.c:656
+#: src/parse_args.c:726
 msgid "read password from standard input"
 msgstr "jelszó olvasása a szabványos bemenetről"
 
-#: src/parse_args.c:658
+#: src/parse_args.c:728
 msgid "run shell as the target user; a command may also be specified"
 msgstr "parancsértelmező futtatása a célfelhasználóként; egy parancs is megadható"
 
-#: src/parse_args.c:661
+#: src/parse_args.c:731
 msgid "create SELinux security context with specified type"
 msgstr "SELinux biztonsági környezet létrehozása a megadott típussal"
 
-#: src/parse_args.c:664
+#: src/parse_args.c:734
 msgid "terminate command after the specified time limit"
 msgstr "parancs megszakítása a megadott időkorlát után"
 
-#: src/parse_args.c:666
+#: src/parse_args.c:736
 msgid "in list mode, display privileges for user"
 msgstr "lista módban a felhasználó jogosultságainak megjelenítése"
 
-#: src/parse_args.c:668
+#: src/parse_args.c:738
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "parancs futtatása (vagy fájl szerkesztése) a megadott nevű vagy azonosítójú felhasználóként"
 
-#: src/parse_args.c:670
+#: src/parse_args.c:740
 msgid "display version information and exit"
 msgstr "verzióinformáció kiírása és kilépés"
 
-#: src/parse_args.c:672
+#: src/parse_args.c:742
 msgid "update user's timestamp without running a command"
 msgstr "felhasználó időbélyegének frissítése parancs futtatása nélkül"
 
-#: src/parse_args.c:674
+#: src/parse_args.c:744
 msgid "stop processing command line arguments"
 msgstr "parancssori argumentumok feldolgozásának befejezése"
 
-#: src/selinux.c:77
+#: src/selinux.c:78
 msgid "unable to open audit system"
 msgstr "a felülvizsgálati rendszer megnyitása sikertelen"
 
-#: src/selinux.c:87
+#: src/selinux.c:88
 msgid "unable to send audit message"
 msgstr "a felülvizsgálati üzenet küldése sikertelen"
 
-#: src/selinux.c:115
+#: src/selinux.c:116
 #, c-format
 msgid "unable to fgetfilecon %s"
 msgstr "az fgetfilecon %s futtatása sikertelen"
 
-#: src/selinux.c:120
+#: src/selinux.c:121
 #, c-format
 msgid "%s changed labels"
 msgstr "%s megváltoztatta a címkéket"
 
-#: src/selinux.c:125
+#: src/selinux.c:126
 #, c-format
 msgid "unable to restore context for %s"
 msgstr "%s környezetének visszaállítása sikertelen"
 
-#: src/selinux.c:165
+#: src/selinux.c:167
 #, c-format
 msgid "unable to open %s, not relabeling tty"
 msgstr "%s nem nyitható meg, a tty nem címkézhető újra"
 
-#: src/selinux.c:173
+#: src/selinux.c:171 src/selinux.c:212 src/selinux.c:229
+#, c-format
+msgid "%s is not a character device, not relabeling tty"
+msgstr "a(z) %s nem karakteres eszköz, a tty nem címkézhető újra"
+
+#: src/selinux.c:180
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "a jelenlegi tty környezet lekérése sikertelen, a tty nem címkézhető újra"
 
-#: src/selinux.c:180
+#: src/selinux.c:187
 msgid "unknown security class \"chr_file\", not relabeling tty"
 msgstr "ismeretlen „chr_file” biztonsági osztály, a tty nem címkézhető újra"
 
-#: src/selinux.c:185
+#: src/selinux.c:192
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "az új tty környezet lekérése sikertelen, a tty nem címkézhető újra"
 
-#: src/selinux.c:192
+#: src/selinux.c:199
 msgid "unable to set new tty context"
 msgstr "az új tty környezet beállítása sikertelen"
 
-#: src/selinux.c:256
+#: src/selinux.c:273
 #, c-format
 msgid "you must specify a role for type %s"
 msgstr "meg kell adnia egy szerepet a(z) %s típushoz"
 
-#: src/selinux.c:262
+#: src/selinux.c:279
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "az alapértelmezett típus lekérése sikertelen a(z) %s szerepnél"
 
-#: src/selinux.c:280
+#: src/selinux.c:297
 #, c-format
 msgid "failed to set new role %s"
 msgstr "%s új szerep beállítása nem sikerült"
 
-#: src/selinux.c:284
+#: src/selinux.c:301
 #, c-format
 msgid "failed to set new type %s"
 msgstr "%s új típus beállítása nem sikerült"
 
-#: src/selinux.c:296
+#: src/selinux.c:313
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s nem érvényes környezet"
 
-#: src/selinux.c:331
+#: src/selinux.c:348
 msgid "failed to get old_context"
 msgstr "az old_context lekérése nem sikerült"
 
-#: src/selinux.c:337
+#: src/selinux.c:354
 msgid "unable to determine enforcing mode."
 msgstr "a kényszerítő mód meghatározása sikertelen."
 
-#: src/selinux.c:354
+#: src/selinux.c:371
 #, c-format
 msgid "unable to set tty context to %s"
 msgstr "a tty környezet beállítása sikertelen erre: %s"
 
-#: src/selinux.c:393
+#: src/selinux.c:410
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "a végrehajtási környezet beállítása sikertelen erre: %s"
 
-#: src/selinux.c:400
+#: src/selinux.c:417
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "a kulcslétrehozási környezet beállítása sikertelen erre: %s"
@@ -577,12 +612,12 @@ msgstr "érvénytelen fájlleíró szám: %s"
 msgid "unable to run %s as a login shell"
 msgstr "%s futtatása bejelentkezési parancsértelmezőként sikertelen"
 
-#: src/sesh.c:125 src/sudo.c:1305
+#: src/sesh.c:125 src/sudo.c:1117
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s nem hajtható végre"
 
-#: src/signal.c:69
+#: src/signal.c:83
 #, c-format
 msgid "unable to save handler for signal %d"
 msgstr "%d szignál kezelőjének mentése sikertelen"
@@ -630,213 +665,185 @@ msgstr "a projekt beállítása nem sikerült a(z) „%s” projektnél"
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "figyelmeztetés: az erőforrás-vezérlés hozzárendelése nem sikerült a(z) „%s” projektnél"
 
-#: src/sudo.c:212
+#: src/sudo.c:198
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo %s verzió\n"
 
-#: src/sudo.c:214
+#: src/sudo.c:200
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Configure kapcsolói: %s\n"
 
-#: src/sudo.c:222
+#: src/sudo.c:208
 msgid "fatal error, unable to load plugins"
 msgstr "végzetes hiba: a bővítmények betöltése sikertelen"
 
-#: src/sudo.c:230
+#: src/sudo.c:216
 msgid "unable to initialize policy plugin"
 msgstr "a házirendbővítmény előkészítése sikertelen"
 
-#: src/sudo.c:274
+#: src/sudo.c:260
 msgid "plugin did not return a command to execute"
 msgstr "a bővítmény nem tért vissza végrehajtandó paranccsal"
 
-#: src/sudo.c:290
+#: src/sudo.c:276
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "hiba a(z) %s I/O bővítmény előkészítésekor"
 
-#: src/sudo.c:316
+#: src/sudo.c:299
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "váratatlan 0x%x sudo mód"
 
-#: src/sudo.c:468
+#: src/sudo.c:461
 msgid "unable to get group vector"
 msgstr "a csoportvektor lekérése sikertelen"
 
-#: src/sudo.c:530
+#: src/sudo.c:523
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "ismeretlen %u uid: kicsoda Ön?"
 
-#: src/sudo.c:586
+#: src/sudo.c:579
 msgid "unable to determine tty"
 msgstr "a tty meghatározása sikertelen"
 
-#: src/sudo.c:874
+#: src/sudo.c:867
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s a(z) %d uid tulajdona kell legyen, és a setuid bitnek beállítva kell lennie"
 
-#: src/sudo.c:877
+#: src/sudo.c:870
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "a tényleges uid nem %d, a(z) %s a „nosuid” kapcsolóval beállított fájlrendszeren vagy rendszergazda jogosultságok nélküli NFS fájlrendszeren van?"
 
-#: src/sudo.c:883
+#: src/sudo.c:876
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "a tényleges uid nem %d, a sudo telepítette a setuid gyökeret?"
 
-#: src/sudo.c:964
+#: src/sudo.c:929
 msgid "unable to set supplementary group IDs"
 msgstr "a kiegészítő csoportazonosítók beállítása sikertelen"
 
-#: src/sudo.c:971
+#: src/sudo.c:936
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
-msgstr "a tényleges gid beállítása a rúnák gid %u értékre sikertelen"
+msgstr "a tényleges gid beállítása a runas gid %u értékre sikertelen"
 
-#: src/sudo.c:977
+#: src/sudo.c:942
 #, c-format
 msgid "unable to set gid to runas gid %u"
-msgstr "a gid beállítása a rúnák gid %u értékre sikertelen"
+msgstr "a gid beállítása a runas gid %u értékre sikertelen"
 
-#: src/sudo.c:1048
-#, c-format
-msgid "unknown login class %s"
-msgstr "ismeretlen %s logikai osztály"
-
-#: src/sudo.c:1061
-msgid "unable to set user context"
-msgstr "a felhasználói környezet beállítása sikertelen"
-
-#: src/sudo.c:1077
-msgid "unable to set process priority"
-msgstr "a folyamat prioritásának beállítása sikertelen"
-
-#: src/sudo.c:1085
-#, c-format
-msgid "unable to change root to %s"
-msgstr "a gyökér megváltoztatása sikertelen erre: %s"
-
-#: src/sudo.c:1098 src/sudo.c:1104 src/sudo.c:1111
-#, c-format
-msgid "unable to change to runas uid (%u, %u)"
-msgstr "a rúnák uid értékre (%u, %u) váltás sikertelen"
-
-#: src/sudo.c:1129
-#, c-format
-msgid "unable to change directory to %s"
-msgstr "a könyvtárváltás sikertelen erre: %s"
-
-#: src/sudo.c:1187
+#: src/sudo.c:999
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "váratlan gyermekmegszakítási feltétel: %d"
 
-#: src/sudo.c:1333
+#: src/sudo.c:1145
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "a(z) %s házirendbővítményből hiányzik a „check_policy” metódus"
 
-#: src/sudo.c:1351
+#: src/sudo.c:1163
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "a(z) %s házirendbővítmény nem támogatja a jogosultságok felsorolását"
 
-#: src/sudo.c:1368
+#: src/sudo.c:1180
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "a(z) %s házirendbővítmény nem támogatja a -v kapcsolót"
 
-#: src/sudo.c:1383
+#: src/sudo.c:1195
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "a(z) %s házirendbővítmény nem támogatja a -k/-K kapcsolókat"
 
-#: src/sudo_edit.c:181 src/sudo_edit.c:270
+#: src/sudo_edit.c:178 src/sudo_edit.c:267
 msgid "unable to restore current working directory"
 msgstr "az aktuális munkakönyvtár visszaállítása sikertelen"
 
-#: src/sudo_edit.c:577 src/sudo_edit.c:689
+#: src/sudo_edit.c:574 src/sudo_edit.c:686
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: nem szabályos fájl"
 
-#: src/sudo_edit.c:584
+#: src/sudo_edit.c:581
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr "%s: szimbolikus linkek szerkesztése nem engedélyezett"
 
-#: src/sudo_edit.c:587
+#: src/sudo_edit.c:584
 #, c-format
 msgid "%s: editing files in a writable directory is not permitted"
 msgstr "%s: fájlok szerkesztése egy írható könyvtárban nem engedélyezett"
 
-#: src/sudo_edit.c:620 src/sudo_edit.c:728
+#: src/sudo_edit.c:617 src/sudo_edit.c:724
 #, c-format
 msgid "%s: short write"
 msgstr "%s: rövid írás"
 
-#: src/sudo_edit.c:690
+#: src/sudo_edit.c:687
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s módosítatlanul hagyva"
 
-#: src/sudo_edit.c:703 src/sudo_edit.c:889
+#: src/sudo_edit.c:700 src/sudo_edit.c:885
 #, c-format
 msgid "%s unchanged"
 msgstr "%s változatlan"
 
-#: src/sudo_edit.c:717 src/sudo_edit.c:739
+#: src/sudo_edit.c:713 src/sudo_edit.c:735
 #, c-format
 msgid "unable to write to %s"
 msgstr "az írás sikertelen ebbe: %s"
 
-#: src/sudo_edit.c:718 src/sudo_edit.c:737 src/sudo_edit.c:740
-#: src/sudo_edit.c:914 src/sudo_edit.c:918
+#: src/sudo_edit.c:714 src/sudo_edit.c:733 src/sudo_edit.c:736
+#: src/sudo_edit.c:910 src/sudo_edit.c:914
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "a szerkesztési munkamenet tartalma ebben maradt: %s"
 
-#: src/sudo_edit.c:736
+#: src/sudo_edit.c:732
 msgid "unable to read temporary file"
 msgstr "az átmeneti fájl olvasása sikertelen"
 
-#: src/sudo_edit.c:819
+#: src/sudo_edit.c:815
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: belső hiba: útvonalak páratlan száma"
 
-#: src/sudo_edit.c:821
+#: src/sudo_edit.c:817
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: átmeneti fájlok létrehozása sikertelen"
 
-#: src/sudo_edit.c:823 src/sudo_edit.c:921
+#: src/sudo_edit.c:819 src/sudo_edit.c:917
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: ismeretlen hiba: %d"
 
-#: src/sudo_edit.c:913
+#: src/sudo_edit.c:909
 msgid "unable to copy temporary files back to their original location"
 msgstr "az átmeneti fájlok visszamásolása az eredeti helyükre sikertelen"
 
-#: src/sudo_edit.c:917
+#: src/sudo_edit.c:913
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "néhány átmeneti fájl visszamásolása az eredeti helyükre sikertelen"
 
-#: src/sudo_edit.c:961
+#: src/sudo_edit.c:958
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "az uid megváltoztatása rendszergazdára (%u) sikertelen"
 
-#: src/sudo_edit.c:978
+#: src/sudo_edit.c:975
 msgid "plugin error: missing file list for sudoedit"
 msgstr "bővítményhiba: hiányzó fájllista a sudoedit programnál"
 
-#: src/sudo_edit.c:1019 src/sudo_edit.c:1032
+#: src/sudo_edit.c:1016 src/sudo_edit.c:1029
 msgid "unable to read the clock"
 msgstr "az óra olvasása sikertelen"
 
