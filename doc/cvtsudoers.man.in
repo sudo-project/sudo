@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "1" "April 5, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "April 12, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -223,14 +223,18 @@ pairs, separated by a comma
 The
 \fBkey\fR
 may be
-\(Lquser\(Rq,
-\(Lqgroup\(Rq
+\(lquser\(rq,
+\(lqgroup\(rq
 or
-\(Lqhost\(Rq.
+\(lqhost\(rq.
 For example,
 \fBuser\fR = \fIoperator\fR
 or
 \fBhost\fR = \fIwww\fR.
+An upper-case User_Alias or Host_Alias may be specified as the
+\(lquser\(rq
+or
+\(lqhost\(rq.
 .sp
 A matching
 \fIsudoers\fR
@@ -318,7 +322,7 @@ and
 grammar versions and exit.
 .PP
 Options in the form
-\(Lqkeyword = value\(Rq
+\(lqkeyword = value\(rq
 may also be specified in a configuration file,
 \fI@sysconfdir@/cvtsudoers.conf\fR
 by default.
@@ -409,7 +413,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBcvtsudoers\fR
 is provided
-\(LqAS IS\(Rq
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

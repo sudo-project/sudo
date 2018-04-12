@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd April 5, 2018
+.Dd April 12, 2018
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -186,6 +186,10 @@ For example,
 .Sy user No = Ar operator
 or
 .Sy host No = Ar www .
+An upper-case User_Alias or Host_Alias may be specified as the
+.Dq user
+or
+.Dq host .
 .Pp
 A matching
 .Em sudoers
