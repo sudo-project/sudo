@@ -674,7 +674,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 }
 
 static bool
-userlist_matches_filter(struct member_list *users, bool remove_nonmatching)
+userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *conf)
 {
     struct cvtsudoers_string *s;
     struct member *m, *next;
@@ -700,13 +700,19 @@ userlist_matches_filter(struct member_list *users, bool remove_nonmatching)
 	    pw.pw_uid = (uid_t)-1;
 	    pw.pw_gid = (gid_t)-1;
 
-	    if (user_matches(&pw, m) == true) {
+	    if (user_matches(&pw, m) == true)
 		matched = true;
-		ret = true;
-	    }
 	} else {
 	    STAILQ_FOREACH(s, &filters->users, entries) {
 		struct passwd *pw = NULL;
+
+		/* An upper case filter entry may be a User_Alias */
+		if (m->type == ALIAS && !conf->expand_aliases) {
+		    if (strcmp(m->name, s->str) == 0) {
+			matched = true;
+			break;
+		    }
+		}
 
 		if (s->str[0] == '#') {
 		    const char *errstr;
@@ -724,14 +730,14 @@ userlist_matches_filter(struct member_list *users, bool remove_nonmatching)
 		sudo_pw_delref(pw);
 
 		/* Only need one user in the filter to match. */
-		if (matched) {
-		    ret = true;
+		if (matched)
 		    break;
-		}
 	    }
 	}
 
-	if (!matched && remove_nonmatching) {
+	if (matched) {
+	    ret = true;
+	} else if (conf->prune_matches) {
 	    TAILQ_REMOVE(users, m, entries);
 	    free_member(m);
 	}
@@ -741,7 +747,7 @@ userlist_matches_filter(struct member_list *users, bool remove_nonmatching)
 }
 
 static bool
-hostlist_matches_filter(struct member_list *hostlist, bool remove_nonmatching)
+hostlist_matches_filter(struct member_list *hostlist, struct cvtsudoers_config *conf)
 {
     struct cvtsudoers_string *s;
     struct member *m, *next;
@@ -783,19 +789,25 @@ hostlist_matches_filter(struct member_list *hostlist, bool remove_nonmatching)
 	    lhost = s->str;
 	    shost = shosts[n++];
 
-	    /* XXX - can't use netgroup_tuple with NULL pw */
-	    if (host_matches(NULL, lhost, shost, m) == true)
-		matched = true;
+	    /* An upper case filter entry may be a Host_Alias */
+	    if (m->type == ALIAS && !conf->expand_aliases) {
+		if (strcmp(m->name, s->str) == 0) {
+		    matched = true;
+		    break;
+		}
+	    }
 
 	    /* Only need one host in the filter to match. */
-	    if (matched) {
-		ret = true;
+	    /* XXX - can't use netgroup_tuple with NULL pw */
+	    if (host_matches(NULL, lhost, shost, m) == true) {
+		matched = true;
 		break;
 	    }
 	}
 
-	/* Short-circuit unless removing non-matches. */
-	if (!matched && remove_nonmatching) {
+	if (matched) {
+	    ret = true;
+	} else if (conf->prune_matches) {
 	    TAILQ_REMOVE(hostlist, m, entries);
 	    free_member(m);
 	}
@@ -889,13 +901,13 @@ filter_userspecs(struct cvtsudoers_config *conf)
      * In the future, we may want to add a prune option.
      */
     TAILQ_FOREACH_SAFE(us, &userspecs, entries, next_us) {
-	if (!userlist_matches_filter(&us->users, conf->prune_matches)) {
+	if (!userlist_matches_filter(&us->users, conf)) {
 	    TAILQ_REMOVE(&userspecs, us, entries);
 	    free_userspec(us);
 	    continue;
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next_priv) {
-	    if (!hostlist_matches_filter(&priv->hostlist, conf->prune_matches)) {
+	    if (!hostlist_matches_filter(&priv->hostlist, conf)) {
 		TAILQ_REMOVE(&us->privileges, priv, entries);
 		free_privilege(priv);
 	    }
@@ -1056,7 +1068,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    break;
 	case DEFAULTS_USER:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_USER) ||
-		!userlist_matches_filter(def->binding, conf->prune_matches))
+		!userlist_matches_filter(def->binding, conf))
 		keep = false;
 	    alias_type = USERALIAS;
 	    break;
@@ -1067,7 +1079,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    break;
 	case DEFAULTS_HOST:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_HOST) ||
-		!hostlist_matches_filter(def->binding, conf->prune_matches))
+		!hostlist_matches_filter(def->binding, conf))
 		keep = false;
 	    alias_type = HOSTALIAS;
 	    break;
