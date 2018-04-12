@@ -348,7 +348,7 @@ sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d,
     switch (d->type) {
 	case DEFAULTS_HOST:
 	    sudo_lbuf_append(lbuf, "Defaults@");
-	    alias_type = HOSTALIAS;
+	    alias_type = expand_aliases ? HOSTALIAS : UNSPEC;
 	    break;
 	case DEFAULTS_USER:
 	    sudo_lbuf_append(lbuf, "Defaults:");
