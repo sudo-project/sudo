@@ -878,8 +878,10 @@ free_default(struct defaults *def, struct member_list **binding)
 
     if (def->binding != *binding) {
 	*binding = def->binding;
-	free_members(def->binding);
-	free(def->binding);
+	if (def->binding != NULL) {
+	    free_members(def->binding);
+	    free(def->binding);
+	}
     }
     rcstr_delref(def->file);
     free(def->var);
@@ -1044,7 +1046,7 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 995 "gram.c"
+#line 997 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2169,7 +2171,7 @@ case 116:
 			    }
 			}
 break;
-#line 2120 "gram.c"
+#line 2122 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

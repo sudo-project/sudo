@@ -1048,16 +1048,15 @@ filter_defaults(struct cvtsudoers_config *conf)
     struct member_list host_aliases = TAILQ_HEAD_INITIALIZER(host_aliases);
     struct member_list cmnd_aliases = TAILQ_HEAD_INITIALIZER(cmnd_aliases);
     struct member_list *prev_binding = NULL;
-    struct defaults *def;
-    struct member *m;
-    void *next;
+    struct defaults *def, *def_next;
+    struct member *m, *m_next;
     int alias_type;
     debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     if (filters == NULL && conf->defaults == CVT_DEFAULTS_ALL)
 	debug_return;
 
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+    TAILQ_FOREACH_SAFE(def, &defaults, entries, def_next) {
 	bool keep = true;
 
 	switch (def->type) {
@@ -1097,7 +1096,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    /* Look for aliases used by the binding. */
 	    /* XXX - move to function */
 	    if (alias_type != UNSPEC && def->binding != prev_binding) {
-		TAILQ_FOREACH_SAFE(m, def->binding, entries, next) {
+		TAILQ_FOREACH_SAFE(m, def->binding, entries, m_next) {
 		    if (m->type == ALIAS) {
 			TAILQ_REMOVE(def->binding, m, entries);
 			switch (alias_type) {
@@ -1122,6 +1121,15 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    }
 	    TAILQ_REMOVE(&defaults, def, entries);
 	    free_default(def, &prev_binding);
+	    if (prev_binding != NULL) {
+		/* Remove and free Defaults that share the same binding. */
+		while (def_next != NULL && def_next->binding == prev_binding) {
+		    def = def_next;
+		    def_next = TAILQ_NEXT(def, entries);
+		    TAILQ_REMOVE(&defaults, def, entries);
+		    free_default(def, &prev_binding);
+		}
+	    }
 	} else {
 	    prev_binding = def->binding;
 	}
@@ -1130,21 +1138,25 @@ filter_defaults(struct cvtsudoers_config *conf)
     /* Remove now-unreferenced aliases. */
     alias_used_by_userspecs(&user_aliases, &runas_aliases, &host_aliases,
 	&cmnd_aliases);
-    TAILQ_FOREACH_SAFE(m, &user_aliases, entries, next) {
+    TAILQ_FOREACH_SAFE(m, &user_aliases, entries, m_next) {
 	struct alias *a = alias_remove(m->name, USERALIAS);
 	alias_free(a);
+	free_member(m);
     }
-    TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, next) {
+    TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, m_next) {
 	struct alias *a = alias_remove(m->name, RUNASALIAS);
 	alias_free(a);
+	free_member(m);
     }
-    TAILQ_FOREACH_SAFE(m, &host_aliases, entries, next) {
+    TAILQ_FOREACH_SAFE(m, &host_aliases, entries, m_next) {
 	struct alias *a = alias_remove(m->name, HOSTALIAS);
 	alias_free(a);
+	free_member(m);
     }
-    TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, next) {
+    TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, m_next) {
 	struct alias *a = alias_remove(m->name, CMNDALIAS);
 	alias_free(a);
+	free_member(m);
     }
 
     debug_return;

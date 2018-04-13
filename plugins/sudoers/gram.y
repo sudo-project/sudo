@@ -1106,8 +1106,10 @@ free_default(struct defaults *def, struct member_list **binding)
 
     if (def->binding != *binding) {
 	*binding = def->binding;
-	free_members(def->binding);
-	free(def->binding);
+	if (def->binding != NULL) {
+	    free_members(def->binding);
+	    free(def->binding);
+	}
     }
     rcstr_delref(def->file);
     free(def->var);
