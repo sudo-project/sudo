@@ -1083,7 +1083,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    alias_type = HOSTALIAS;
 	    break;
 	case DEFAULTS_CMND:
-	    if (!ISSET(conf->defaults, CVT_DEFAULTS_RUNAS))
+	    if (!ISSET(conf->defaults, CVT_DEFAULTS_CMND))
 		keep = false;
 	    alias_type = CMNDALIAS;
 	    break;
