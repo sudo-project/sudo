@@ -392,7 +392,7 @@ splint:
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
 
-check: $(TEST_PROGS) visudo testsudoers
+check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    LC_ALL=C; export LC_ALL; \
 	    unset LANG || LANG=; \
@@ -500,7 +500,7 @@ check: $(TEST_PROGS) visudo testsudoers
 	    if test $$failed -ne 0; then \
 		rval=`expr $$rval + $$failed`; \
 	    fi; \
-	    for dir in testsudoers visudo; do \
+	    for dir in testsudoers visudo cvtsudoers; do \
 		mkdir -p regress/$$dir; \
 		passed=0; failed=0; total=0; \
 		for t in $(srcdir)/regress/$$dir/*.sh; do \

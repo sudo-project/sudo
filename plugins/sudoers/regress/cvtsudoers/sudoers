@@ -94,13 +94,6 @@ pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd *root*
 # listed in the Runas_Alias "OP" (ie: root and operator)
 bob		SPARC = (OP) ALL : SGI = (OP) ALL
 
-# jim may run anything on machines in the biglab netgroup
-jim		+biglab = ALL
-
-# users in the secretaries netgroup need to help manage the printers
-# as well as add and remove users
-+secretaries	ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
-
 # fred can run commands as oracle or sybase without a password
 fred		ALL = (DB) NOPASSWD: ALL
 
