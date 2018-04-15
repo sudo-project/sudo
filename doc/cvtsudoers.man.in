@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "1" "April 12, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "April 14, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -353,7 +353,7 @@ See the description of the
 \fB\-I\fR
 command line option.
 .TP 6n
-\fBorder_start =\fR \fIstart_port\fR
+\fBorder_start =\fR \fIstart_point\fR
 See the description of the
 \fB\-O\fR
 command line option.
