@@ -89,6 +89,7 @@ static int cvtsudoers_parse_suppression(char *expression);
 static void filter_userspecs(struct cvtsudoers_config *conf);
 static void filter_defaults(struct cvtsudoers_config *conf);
 static void alias_remove_unused(void);
+static void alias_prune(struct cvtsudoers_config *conf);
 
 int
 main(int argc, char *argv[])
@@ -323,8 +324,11 @@ main(int argc, char *argv[])
     /* Apply filters. */
     filter_userspecs(conf);
     filter_defaults(conf);
-    if (filters != NULL)
+    if (filters != NULL) {
 	alias_remove_unused();
+	if (conf->prune_matches && conf->expand_aliases)
+	    alias_prune(conf);
+    }
 
     switch (output_format) {
     case format_json:
@@ -707,6 +711,7 @@ userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *con
 		struct passwd *pw = NULL;
 
 		/* An upper case filter entry may be a User_Alias */
+		/* XXX - doesn't handle nested aliases */
 		if (m->type == ALIAS && !conf->expand_aliases) {
 		    if (strcmp(m->name, s->str) == 0) {
 			matched = true;
@@ -790,6 +795,7 @@ hostlist_matches_filter(struct member_list *hostlist, struct cvtsudoers_config *
 	    shost = shosts[n++];
 
 	    /* An upper case filter entry may be a Host_Alias */
+	    /* XXX - doesn't handle nested aliases */
 	    if (m->type == ALIAS && !conf->expand_aliases) {
 		if (strcmp(m->name, s->str) == 0) {
 		    matched = true;
@@ -1183,6 +1189,43 @@ alias_remove_unused(void)
     /* Only unreferenced aliases are left, swap and free the unused ones. */
     unused_aliases = replace_aliases(used_aliases);
     rbdestroy(unused_aliases, alias_free);
+
+    debug_return;
+}
+
+/*
+ * Prune out non-matching entries from user and host aliases.
+ */
+int
+alias_prune_helper(void *v, void *cookie)
+{
+    struct alias *a = v;
+    struct cvtsudoers_config *conf = cookie;
+
+    /* XXX - misue of these functions */
+    switch (a->type) {
+    case USERALIAS:
+	userlist_matches_filter(&a->members, conf);
+	break;
+    case HOSTALIAS:
+	hostlist_matches_filter(&a->members, conf);
+	break;
+    default:
+	break;
+    }
+
+    return 0;
+}
+
+/*
+ * Prune out non-matching entries from within aliases.
+ */
+static void
+alias_prune(struct cvtsudoers_config *conf)
+{
+    debug_decl(alias_prune, SUDOERS_DEBUG_ALIAS)
+
+    alias_apply(alias_prune_helper, conf);
 
     debug_return;
 }

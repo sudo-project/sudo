@@ -116,6 +116,7 @@ user_matches(const struct passwd *pw, const struct member *m)
 	    break;
 	case ALIAS:
 	    if ((a = alias_get(m->name, USERALIAS)) != NULL) {
+		/* XXX */
 		int rc = userlist_matches(pw, &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
@@ -325,6 +326,7 @@ host_matches(const struct passwd *pw, const char *lhost, const char *shost,
 	    break;
 	case ALIAS:
 	    if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
+		/* XXX */
 		int rc = hostlist_matches_int(pw, lhost, shost, &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
