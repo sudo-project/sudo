@@ -79,7 +79,7 @@ are silently ignored.
 The
 \fBsudo.conf\fR
 file is always parsed in the
-\(Lq\fRC\fR\(Rq
+\(lq\fRC\fR\(rq
 locale.
 .SS "Plugin configuration"
 \fBsudo\fR
@@ -316,7 +316,7 @@ sensitive information.
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
-\(Lqdisable_coredump\(Rq
+\(lqdisable_coredump\(rq
 to false in
 \fBsudo.conf\fR
 as follows:
@@ -386,7 +386,7 @@ Use the static group list that the kernel returns.
 Retrieving the group list this way is very fast but it is subject
 to an upper limit as described above.
 It is
-\(Lqstatic\(Rq
+\(lqstatic\(rq
 in that it does not reflect changes to the group database made
 after the user logs in.
 This was the default behavior prior to
@@ -396,7 +396,7 @@ This was the default behavior prior to
 dynamic
 Always query the group database directly.
 It is
-\(Lqdynamic\(Rq
+\(lqdynamic\(rq
 in that changes made to the group database after the user logs in
 will be reflected in the group list.
 On some systems, querying the group database for all of a user's
@@ -738,7 +738,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-\(LqAS IS\(Rq
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

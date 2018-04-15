@@ -161,7 +161,7 @@ If a command name is preceded by an exclamation point,
 the user will be prohibited from running that command.
 .sp
 The built-in command
-\(Lq\fRsudoedit\fR\(Rq
+\(lq\fRsudoedit\fR\(rq
 is used to permit a user to run
 \fBsudo\fR
 with the
@@ -170,7 +170,7 @@ option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
 Note that
-\(Lq\fRsudoedit\fR\(Rq
+\(lq\fRsudoedit\fR\(rq
 is a command built into
 \fBsudo\fR
 itself and must be specified in without a leading path.
@@ -321,7 +321,7 @@ If multiple entries match, the entry with the highest
 \fRsudoOrder\fR
 attribute is chosen.
 This corresponds to the
-\(Lqlast match\(Rq
+\(lqlast match\(rq
 behavior of the sudoers file.
 If the
 \fRsudoOrder\fR
@@ -625,7 +625,7 @@ sudoOption: !authenticate
 .fi
 .PP
 This assumes that users john and sally are members of the
-\(Lqadmins\(Rq
+\(lqadmins\(rq
 Unix group.
 .SS "Sudoers schema"
 In order to use
@@ -725,7 +725,7 @@ parameter.
 The
 \fIsecret\fR
 may be a plain text password or a base64-encoded string with a
-\(Lqbase64:\(Rq
+\(lqbase64:\(rq
 prefix.
 For example:
 .nf
@@ -954,7 +954,7 @@ parameter is deprecated and will be removed in a future release.
 The same information is now logged via the
 \fBsudo\fR
 debugging framework using the
-\(Lqldap\(Rq
+\(lqldap\(rq
 subsystem at priorities
 \fIdiag\fR
 and
@@ -1116,7 +1116,7 @@ using the Tivoli Directory Server LDAP library.
 The
 \fIsecret\fR
 may be a plain text password or a base64-encoded string with a
-\(Lqbase64:\(Rq
+\(lqbase64:\(rq
 prefix.
 For example:
 .nf
@@ -1633,7 +1633,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-\(LqAS IS\(Rq
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

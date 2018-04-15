@@ -386,7 +386,7 @@ env_keep += "BASH_FUNC_my_func%%=()*"
 .fi
 .PP
 Without the
-\(Lq\fR=()*\fR\(Rq
+\(lq\fR=()*\fR\(rq
 suffix, this would not match, as
 \fBbash\fR
 shell functions are not preserved by default.
@@ -394,7 +394,7 @@ shell functions are not preserved by default.
 The complete list of environment variables that
 \fBsudo\fR
 allows or denies is contained in the output of
-\(Lq\fRsudo -V\fR\(Rq
+\(lq\fRsudo -V\fR\(rq
 when run as root.
 Please note that this list varies based on the operating system
 \fBsudo\fR
@@ -535,7 +535,7 @@ EBNF also contains the following
 operators, which many readers will recognize from regular
 expressions.
 Do not, however, confuse them with
-\(Lqwildcard\(Rq
+\(lqwildcard\(rq
 characters, which have different meanings.
 .TP 6n
 \fR\&?\fR
@@ -799,7 +799,7 @@ Note that
 only inspects actual network interfaces; this means that IP address
 127.0.0.1 (localhost) will never match.
 Also, the host name
-\(Lqlocalhost\(Rq
+\(lqlocalhost\(rq
 will only match if that is the actual host name, which is usually
 only the case for non-networked systems.
 .nf
@@ -867,7 +867,7 @@ if they are used in command arguments:
 \(oq=\&\(cq,
 \(oq\e\(cq.
 The built-in command
-\(Lq\fRsudoedit\fR\(Rq
+\(lq\fRsudoedit\fR\(rq
 is used to permit a user to run
 \fBsudo\fR
 with the
@@ -876,7 +876,7 @@ option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
 Note that
-\(Lq\fRsudoedit\fR\(Rq
+\(lq\fRsudoedit\fR\(rq
 is a command built into
 \fBsudo\fR
 itself and must be specified in the
@@ -1044,7 +1044,7 @@ run as
 but this can be changed on a per-command basis.
 .PP
 The basic structure of a user specification is
-\(Lqwho where = (as_whom) what\(Rq.
+\(lqwho where = (as_whom) what\(rq.
 Let's break that down into its constituent parts:
 .SS "Runas_Spec"
 A
@@ -1271,7 +1271,7 @@ $ ppriv -l
 .fi
 .PP
 In addition, there are several
-\(Lqspecial\(Rq
+\(lqspecial\(rq
 privilege strings:
 .TP 10n
 none
@@ -1556,10 +1556,10 @@ By default, if the
 \fRNOPASSWD\fR
 tag is applied to any of the entries for a user on the current host,
 he or she will be able to run
-\(Lq\fRsudo -l\fR\(Rq
+\(lq\fRsudo -l\fR\(rq
 without a password.
 Additionally, a user may only run
-\(Lq\fRsudo -v\fR\(Rq
+\(lq\fRsudo -v\fR\(rq
 without a password if the
 \fRNOPASSWD\fR
 tag is present for all a user's entries that pertain to the current host.
@@ -1609,7 +1609,7 @@ glob(3)
 and
 fnmatch(3)
 functions as specified by
-IEEE Std 1003.1 (\(LqPOSIX.1\(Rq).
+IEEE Std 1003.1 (\(lqPOSIX.1\(rq).
 .TP 10n
 \fR*\fR
 Matches any set of zero or more characters (including white space).
@@ -1812,7 +1812,7 @@ The file name may also include the
 \fR%h\fR
 escape, signifying the short form of the host name.
 In other words, if the machine's host name is
-\(Lqxerxes\(Rq,
+\(lqxerxes\(rq,
 then
 .nf
 .sp
@@ -1945,7 +1945,7 @@ is omitted, as in:
 .PP
 it would explicitly deny root but not match any other users.
 This is different from a true
-\(Lqnegation\(Rq
+\(lqnegation\(rq
 operator.
 .PP
 Note, however, that using a
@@ -1953,7 +1953,7 @@ Note, however, that using a
 in conjunction with the built-in
 \fBALL\fR
 alias to allow a user to run
-\(Lqall but a few\(Rq
+\(lqall but a few\(rq
 commands rarely works as intended (see
 \fISECURITY NOTES\fR
 below).
@@ -2279,7 +2279,7 @@ command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
 This option is only effective when the
-\(Lqcanonical\(Rq
+\(lqcanonical\(rq
 host name, as returned by the
 \fBgetaddrinfo\fR()
 or
@@ -2291,7 +2291,7 @@ for host name resolution.
 If the system is configured to use the
 \fI/etc/hosts\fR
 file in preference to DNS, the
-\(Lqcanonical\(Rq
+\(lqcanonical\(rq
 host name may not be fully-qualified.
 The order that sources are queried for host name resolution
 is usually specified in the
@@ -2304,13 +2304,13 @@ file.
 In the
 \fI/etc/hosts\fR
 file, the first host name of the entry is considered to be the
-\(Lqcanonical\(Rq
+\(lqcanonical\(rq
 name; subsequent names are aliases that are not used by
 \fBsudoers\fR.
 For example, the following hosts file line for the machine
-\(Lqxyzzy\(Rq
+\(lqxyzzy\(rq
 has the fully-qualified domain name as the
-\(Lqcanonical\(Rq
+\(lqcanonical\(rq
 host name, and the short version as an alias.
 .sp
 .RS 24n
@@ -2331,7 +2331,7 @@ to make DNS lookups which renders
 unusable if DNS stops working (for example if the machine is disconnected
 from the network).
 Also note that just like with the hosts file, you must use the
-\(Lqcanonical\(Rq
+\(lqcanonical\(rq
 name as DNS knows it.
 That is, you may not use a host alias
 (\fRCNAME\fR
@@ -2791,10 +2791,10 @@ If set, root is allowed to run
 \fBsudo\fR
 too.
 Disabling this prevents users from
-\(Lqchaining\(Rq
+\(lqchaining\(rq
 \fBsudo\fR
 commands to get a root shell by doing something like
-\(Lq\fRsudo sudo /bin/sh\fR\(Rq.
+\(lq\fRsudo sudo /bin/sh\fR\(rq.
 Note, however, that turning off
 \fIroot_sudo\fR
 will also prevent root from running
@@ -3159,7 +3159,7 @@ flag is set,
 \fBsudo\fR
 will prompt for a password even when it would be visible on the screen.
 This makes it possible to run things like
-\(Lq\fRssh somehost sudo ls\fR\(Rq
+\(lq\fRssh somehost sudo ls\fR\(rq
 since by default,
 ssh(1)
 does
@@ -3193,25 +3193,25 @@ This setting is only supported by version 1.8.20 or higher.
 .TP 18n
 maxseq
 The maximum sequence number that will be substituted for the
-\(Lq\fR%{seq}\fR\(Rq
+\(lq\fR%{seq}\fR\(rq
 escape in the I/O log file (see the
 \fIiolog_dir\fR
 description above for more information).
 While the value substituted for
-\(Lq\fR%{seq}\fR\(Rq
+\(lq\fR%{seq}\fR\(rq
 is in base 36,
 \fImaxseq\fR
 itself should be expressed in decimal.
 Values larger than 2176782336 (which corresponds to the
 base 36 sequence number
-\(LqZZZZZZ\(Rq)
+\(lqZZZZZZ\(rq)
 will be silently truncated to 2176782336.
 The default value is 2176782336.
 .sp
 Once the local sequence number reaches the value of
 \fImaxseq\fR,
 it will
-\(Lqroll over\(Rq
+\(lqroll over\(rq
 to zero, after which
 \fBsudoers\fR
 will truncate and re-use any existing I/O log path names.
@@ -3242,7 +3242,7 @@ will split up log messages that are larger than
 \fIsyslog_maxlen\fR
 bytes.
 When a message is split, additional parts will include the string
-\(Lq(command continued)\(Rq
+\(lq(command continued)\(rq
 after the user name and before the continued command line arguments.
 .sp
 This setting is only supported by version 1.8.19 or higher.
@@ -3287,9 +3287,9 @@ If set to a value less than
 \fR0\fR
 the user's time stamp will not expire until the system is rebooted.
 This can be used to allow users to create or delete their own time stamps via
-\(Lq\fRsudo -v\fR\(Rq
+\(lq\fRsudo -v\fR\(rq
 and
-\(Lq\fRsudo -k\fR\(Rq
+\(lq\fRsudo -k\fR\(rq
 respectively.
 .TP 18n
 umask
@@ -3424,7 +3424,7 @@ Note that
 \fIiolog_file\fR
 may contain directory components.
 The default is
-\(Lq\fR%{seq}\fR\(Rq.
+\(lq\fR%{seq}\fR\(rq.
 .sp
 See the
 \fIiolog_dir\fR
@@ -3545,7 +3545,7 @@ The escape
 \fR%h\fR
 will expand to the host name of the machine.
 Default is
-\(Lq\fR@mailsub@\fR\(Rq.
+\(lq\fR@mailsub@\fR\(rq.
 .TP 18n
 noexec_file
 As of
@@ -3562,7 +3562,7 @@ name used when the
 \fB\-i\fR
 option is specified.
 The default value is
-\(Lq\fR@pam_login_service@\fR\(Rq.
+\(lq\fR@pam_login_service@\fR\(rq.
 See the description of
 \fIpam_service\fR
 for more information.
@@ -3578,7 +3578,7 @@ file or a file in the
 \fI/etc/pam.d\fR
 directory.
 The default value is
-\(Lq\fRsudo\fR\(Rq.
+\(lq\fRsudo\fR\(rq.
 .sp
 This setting is only supported by version 1.8.8 or higher.
 .TP 18n
@@ -3631,9 +3631,9 @@ character
 On systems that use PAM for authentication,
 \fIpassprompt\fR
 will only be used if the prompt provided by the PAM module matches the string
-\(LqPassword: \(Rq
+\(lqPassword: \(rq
 or
-\(Lqusername's Password: \(Rq.
+\(lqusername's Password: \(rq.
 This ensures that the
 \fIpassprompt\fR
 setting does not interfere with challenge-response style authentication.
@@ -3642,7 +3642,7 @@ The
 flag can be used to change this behavior.
 .sp
 The default value is
-\(Lq\fR@passprompt@\fR\(Rq.
+\(lq\fR@passprompt@\fR\(rq.
 .RE
 .TP 18n
 privs
@@ -3684,7 +3684,7 @@ Locale to use when parsing the sudoers file, logging commands, and
 sending email.
 Note that changing the locale may affect how sudoers is interpreted.
 Defaults to
-\(Lq\fRC\fR\(Rq.
+\(lq\fRC\fR\(rq.
 .TP 18n
 timestamp_type
 \fBsudoers\fR
@@ -3781,9 +3781,9 @@ The
 option specifies the fully qualified path to a file containing variables
 to be set in the environment of the program being run.
 Entries in this file should either be of the form
-\(Lq\fRVARIABLE=value\fR\(Rq
+\(lq\fRVARIABLE=value\fR\(rq
 or
-\(Lq\fRexport VARIABLE=value\fR\(Rq.
+\(lq\fRexport VARIABLE=value\fR\(rq.
 The value may optionally be surrounded by single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
@@ -3977,7 +3977,7 @@ Defaults to the path to sendmail found at configure time.
 .TP 14n
 mailfrom
 Address to use for the
-\(Lqfrom\(Rq
+\(lqfrom\(rq
 address when sending warning and error mail.
 The address should be enclosed in double quotes
 (\&"")
@@ -4007,9 +4007,9 @@ The
 option specifies the fully qualified path to a file containing variables
 to be set in the environment of the program being run.
 Entries in this file should either be of the form
-\(Lq\fRVARIABLE=value\fR\(Rq
+\(lq\fRVARIABLE=value\fR\(rq
 or
-\(Lq\fRexport VARIABLE=value\fR\(Rq.
+\(lq\fRexport VARIABLE=value\fR\(rq.
 The value may optionally be surrounded by single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
@@ -4046,9 +4046,9 @@ to have a sane
 \fRPATH\fR
 environment variable you may want to use this.
 Another use is if you want to have the
-\(Lqroot path\(Rq
+\(lqroot path\(rq
 be separate from the
-\(Lquser path\(Rq.
+\(lquser path\(rq.
 Users in the group specified by the
 \fIexempt_group\fR
 option are not affected by
@@ -4164,10 +4164,10 @@ The default value is
 env_check
 Environment variables to be removed from the user's environment
 unless they are considered
-\(Lqsafe\(Rq.
+\(lqsafe\(rq.
 For all variables except
 \fRTZ\fR,
-\(Lqsafe\(Rq
+\(lqsafe\(rq
 means that the variable's value does not contain any
 \(oq%\(cq
 or
@@ -4354,7 +4354,7 @@ Where the fields are as follows:
 date
 The date the command was run.
 Typically, this is in the format
-\(LqMMM, DD, HH:MM:SS\(Rq.
+\(lqMMM, DD, HH:MM:SS\(rq.
 If logging via
 syslog(3),
 the actual date format is controlled by the syslog daemon.
@@ -4384,13 +4384,13 @@ The login name of the user who ran
 .TP 14n
 ttyname
 The short name of the terminal (e.g.\&
-\(Lqconsole\(Rq,
-\(Lqtty01\(Rq,
+\(lqconsole\(rq,
+\(lqtty01\(rq,
 or
-\(Lqpts/0\(Rq)
+\(lqpts/0\(rq)
 \fBsudo\fR
 was run on, or
-\(Lqunknown\(Rq
+\(lqunknown\(rq
 if there was no terminal present.
 .TP 14n
 cwd
@@ -4422,7 +4422,7 @@ The actual command that was executed.
 Messages are logged using the locale specified by
 \fIsudoers_locale\fR,
 which defaults to the
-\(Lq\fRC\fR\(Rq
+\(lq\fRC\fR\(rq
 locale.
 .SS "Denied command log entries"
 If the user is not allowed to run the command, the reason for the denial
@@ -4505,7 +4505,7 @@ file using group permissions to avoid this problem.
 Consider either changing the ownership of
 \fI@sysconfdir@/sudoers\fR
 or adding an argument like
-\(Lqsudoers_uid=N\(Rq
+\(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
 is the user ID that owns the
@@ -4534,7 +4534,7 @@ file has the wrong owner.
 If you wish to change the
 \fIsudoers\fR
 file owner, please add
-\(Lqsudoers_uid=N\(Rq
+\(lqsudoers_uid=N\(rq
 (where
 \(oqN\(cq
 is the user ID that owns the
@@ -4555,7 +4555,7 @@ The
 file must not be world-writable, the default file mode
 is 0440 (readable by owner and group, writable by none).
 The default mode may be changed via the
-\(Lqsudoers_mode\(Rq
+\(lqsudoers_mode\(rq
 option to the
 \fBsudoers\fR
 \fRPlugin\fR
@@ -4570,7 +4570,7 @@ file has the wrong group ownership.
 If you wish to change the
 \fIsudoers\fR
 file group ownership, please add
-\(Lqsudoers_gid=N\(Rq
+\(lqsudoers_gid=N\(rq
 (where
 \(oqN\(cq
 is the group ID that owns the
@@ -4690,7 +4690,7 @@ by default)
 using a unique session ID that is included in the
 \fBsudo\fR
 log line, prefixed with
-\(Lq\fRTSID=\fR\(Rq.
+\(lq\fRTSID=\fR\(rq.
 The
 \fIiolog_file\fR
 option may be used to control the format of the session ID.
@@ -5096,7 +5096,7 @@ may run any command on machines in the
 netgroup.
 \fBsudo\fR
 knows that
-\(Lqbiglab\(Rq
+\(lqbiglab\(rq
 is a netgroup due to the
 \(oq+\(cq
 prefix.
@@ -5234,7 +5234,7 @@ for encapsulating in a shell script.
 .SH "SECURITY NOTES"
 .SS "Limitations of the \(oq!\&\(cq operator"
 It is generally not effective to
-\(Lqsubtract\(Rq
+\(lqsubtract\(rq
 commands from
 \fBALL\fR
 using the
@@ -5432,7 +5432,7 @@ option in
 sudo(@mansectsu@).
 .PP
 For example, to allow user operator to edit the
-\(Lqmessage of the day\(Rq
+\(lqmessage of the day\(rq
 file:
 .nf
 .sp
@@ -5537,7 +5537,7 @@ will log and complain.
 If the
 \fItimestamp_type\fR
 option is set to
-\(Lqtty\(Rq,
+\(lqtty\(rq,
 the time stamp record includes the device number of the terminal
 the user authenticated with.
 This provides per-terminal granularity but time stamp records may still
@@ -5546,7 +5546,7 @@ outlive the user's session.
 Unless the
 \fItimestamp_type\fR
 option is set to
-\(Lqglobal\(Rq,
+\(lqglobal\(rq,
 the time stamp record also includes the session ID of the process
 that last authenticated.
 This prevents processes in different terminal sessions from using
@@ -5557,7 +5557,7 @@ is recorded in the time stamp record.
 If no terminal is present or the
 \fItimestamp_type\fR
 option is set to
-\(Lqppid\(Rq,
+\(lqppid\(rq,
 the start time of the parent process is used instead.
 In most cases this will prevent a time stamp record from being re-used
 without the user entering a password when logging out and back in again.
@@ -5741,7 +5741,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-\(LqAS IS\(Rq
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

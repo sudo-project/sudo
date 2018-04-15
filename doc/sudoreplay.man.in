@@ -134,7 +134,7 @@ Display a short help message to the standard output and exit.
 .TP 12n
 \fB\-l\fR, \fB\--list\fR [\fIsearch expression\fR]
 Enable
-\(Lqlist mode\(Rq.
+\(lqlist mode\(rq.
 In this mode,
 \fBsudoreplay\fR
 will list available sessions in a format similar to the
@@ -313,13 +313,13 @@ yesterday
 next Friday
 The first second of the Friday in the next (upcoming) week.
 Not to be confused with
-\(Lqthis Friday\(Rq
+\(lqthis Friday\(rq
 which would match the Friday of the current week.
 .TP 8n
 last week
 The current time but 7 days ago.
 This is equivalent to
-\(Lqa week ago\(Rq.
+\(lqa week ago\(rq.
 .TP 8n
 a fortnight ago
 The current time but 14 days ago.
@@ -341,13 +341,13 @@ The current time but 14 days ago.
 .PP
 Note that relative time specifications do not always work as expected.
 For example, the
-\(Lqnext\(Rq
+\(lqnext\(rq
 qualifier is intended to be used in conjunction with a day such as
-\(Lqnext Monday\(Rq.
+\(lqnext Monday\(rq.
 When used with units of weeks, months, years, etc
 the result will be one more than expected.
 For example,
-\(Lqnext week\(Rq
+\(lqnext week\(rq
 will result in a time exactly two weeks from now, which is probably
 not what was intended.
 This will be addressed in a future version of
@@ -467,7 +467,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudoreplay\fR
 is provided
-\(LqAS IS\(Rq
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

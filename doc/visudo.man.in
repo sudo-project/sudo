@@ -55,7 +55,7 @@ Upon finding an error,
 \fBvisudo\fR
 will print a message stating the line number(s)
 where the error occurred and the user will receive the
-\(LqWhat now?\(Rq
+\(lqWhat now?\(rq
 prompt.
 At this point the user may enter
 \(oqe\(cq
@@ -204,7 +204,7 @@ instead of the default,
 The lock file used is the specified
 \fIsudoers\fR
 file with
-\(Lq\.tmp\(Rq
+\(lq\.tmp\(rq
 appended to it.
 In
 \fIcheck-only\fR
@@ -459,7 +459,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBvisudo\fR
 is provided
-\(LqAS IS\(Rq
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
