@@ -24,10 +24,10 @@ DDEESSCCRRIIPPTTIIOONN
      --bb _d_n, ----bbaassee=_d_n
                  The base DN (distinguished name) that will be used when
                  performing LDAP queries.  Typically this is of the form
-                 ou=SUDOers,dc=example,dc=com for the domain example.com.  If
-                 this option is not specified, the value of the SUDOERS_BASE
-                 environment variable will be used instead.  Only necessary
-                 when converting to LDIF format.
+                 ou=SUDOers,dc=-mydomain,dc=com for the domain my-domain.com.
+                 If this option is not specified, the value of the
+                 SUDOERS_BASE environment variable will be used instead.  Only
+                 necessary when converting to LDIF format.
 
      --cc, ----ccoonnffiigg
                  Specify the path to a configuration file.  Defaults to
@@ -61,8 +61,8 @@ DDEESSCCRRIIPPTTIIOONN
                  default when the output _f_o_r_m_a_t is JSON or sudoers.
 
      --ff _o_u_t_p_u_t___f_o_r_m_a_t, ----ffoorrmmaatt=_o_u_t_p_u_t___f_o_r_m_a_t
-                 Specify the output format.  The following formats are
-                 supported:
+                 Specify the output format (case-insensitive).  The following
+                 formats are supported:
 
                  JSON      JSON (JavaScript Object Notation) files are usually
                            easier for third-party applications to consume than
@@ -209,6 +209,32 @@ DDEESSCCRRIIPPTTIIOONN
 
 FFIILLEESS
      _/_e_t_c_/_c_v_t_s_u_d_o_e_r_s_._c_o_n_f      default configuration for cvtsudoers
+
+EEXXAAMMPPLLEESS
+     Convert _/_e_t_c_/_s_u_d_o_e_r_s to LDIF (LDAP Data Interchange Format) where the
+     _l_d_a_p_._c_o_n_f file uses a _s_u_d_o_e_r_s___b_a_s_e of my-domain,dc=com, storing the
+     result in _s_u_d_o_e_r_s_._l_d_i_f:
+
+           $ cvtsudoers -b ou=SUDOers,dc=my-domain,dc=com -o sudoers.ldif \
+                        /etc/sudoers
+
+     Convert _/_e_t_c_/_s_u_d_o_e_r_s to JSON format, storing the result in _s_u_d_o_e_r_s_._j_s_o_n:
+
+           $ cvtsudoers -f json -o sudoers.json /etc/sudoers
+
+     Parse _/_e_t_c_/_s_u_d_o_e_r_s and display only rules that match user _a_m_b_r_o_s_e on host
+     _h_a_s_t_u_r:
+
+           $ cvtsudoers -f sudoers -m user=ambrose,host=hastur /etc/sudoers
+
+     Same as above, but expand aliases and prune out any non-matching users
+     and hosts from the expanded entries.
+
+           $ cvtsudoers -ep -f sudoers -m user=ambrose,host=hastur /etc/sudoers
+
+     Convert _s_u_d_o_e_r_s_._l_d_i_f from LDIF to traditional _s_u_d_o_e_r_s format:
+
+           $ cvtsudoers -i ldif -f sudoers -o sudoers.new sudoers.ldif
 
 SSEEEE AALLSSOO
      sudoers(4), sudoers.ldap(4), sudo(1m)

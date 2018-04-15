@@ -61,9 +61,9 @@ The options are as follows:
 The base DN (distinguished name) that will be used when performing
 LDAP queries.
 Typically this is of the form
-\fRou=SUDOers,dc=example,dc=com\fR
+\fRou=SUDOers,dc=-mydomain,dc=com\fR
 for the domain
-\fRexample.com\fR.
+\fRmy-domain.com\fR.
 If this option is not specified, the value of the
 \fRSUDOERS_BASE\fR
 environment variable will be used instead.
@@ -128,7 +128,7 @@ Aliases are preserved by default when the output
 is JSON or sudoers.
 .TP 12n
 \fB\-f\fR \fIoutput_format\fR, \fB\--format\fR=\fIoutput_format\fR
-Specify the output format.
+Specify the output format (case-insensitive).
 The following formats are supported:
 .PP
 .RS 12n
@@ -384,6 +384,67 @@ configuration file.
 .TP 26n
 \fI@sysconfdir@/cvtsudoers.conf\fR
 default configuration for cvtsudoers
+.SH "EXAMPLES"
+Convert
+\fI/etc/sudoers\fR
+to LDIF (LDAP Data Interchange Format) where the
+\fIldap.conf\fR
+file uses a
+\fIsudoers_base\fR
+of my-domain,dc=com, storing the result in
+\fIsudoers.ldif\fR:
+.nf
+.sp
+.RS 6n
+$ cvtsudoers -b ou=SUDOers,dc=my-domain,dc=com -o sudoers.ldif \e
+             /etc/sudoers
+.RE
+.fi
+.PP
+Convert
+\fI/etc/sudoers\fR
+to JSON format, storing the result in
+\fIsudoers.json\fR:
+.nf
+.sp
+.RS 6n
+$ cvtsudoers -f json -o sudoers.json /etc/sudoers
+.RE
+.fi
+.PP
+Parse
+\fI/etc/sudoers\fR
+and display only rules that match user
+\fIambrose\fR
+on host
+\fIhastur\fR:
+.nf
+.sp
+.RS 6n
+$ cvtsudoers -f sudoers -m user=ambrose,host=hastur /etc/sudoers
+.RE
+.fi
+.PP
+Same as above, but expand aliases and prune out any non-matching
+users and hosts from the expanded entries.
+.nf
+.sp
+.RS 6n
+$ cvtsudoers -ep -f sudoers -m user=ambrose,host=hastur /etc/sudoers
+.RE
+.fi
+.PP
+Convert
+\fIsudoers.ldif\fR
+from LDIF to traditional
+\fIsudoers\fR
+format:
+.nf
+.sp
+.RS 6n
+$ cvtsudoers -i ldif -f sudoers -o sudoers.new sudoers.ldif
+.RE
+.fi
 .SH "SEE ALSO"
 sudoers(@mansectform@),
 sudoers.ldap(@mansectform@),

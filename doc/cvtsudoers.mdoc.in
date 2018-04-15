@@ -58,9 +58,9 @@ The options are as follows:
 The base DN (distinguished name) that will be used when performing
 LDAP queries.
 Typically this is of the form
-.Li ou=SUDOers,dc=example,dc=com
+.Li ou=SUDOers,dc=-mydomain,dc=com
 for the domain
-.Li example.com .
+.Li my-domain.com .
 If this option is not specified, the value of the
 .Ev SUDOERS_BASE
 environment variable will be used instead.
@@ -112,7 +112,7 @@ Aliases are preserved by default when the output
 .Ar format
 is JSON or sudoers.
 .It Fl f Ar output_format , Fl -format Ns = Ns Ar output_format
-Specify the output format.
+Specify the output format (case-insensitive).
 The following formats are supported:
 .Bl -tag -width 8n
 .It JSON
@@ -327,6 +327,52 @@ configuration file.
 .It Pa @sysconfdir@/cvtsudoers.conf
 default configuration for cvtsudoers
 .El
+.Sh EXAMPLES
+Convert
+.Pa /etc/sudoers
+to LDIF (LDAP Data Interchange Format) where the
+.Pa ldap.conf
+file uses a
+.Em sudoers_base
+of my-domain,dc=com, storing the result in
+.Pa sudoers.ldif :
+.Bd -literal -offset indent
+$ cvtsudoers -b ou=SUDOers,dc=my-domain,dc=com -o sudoers.ldif \e
+             /etc/sudoers
+.Ed
+.Pp
+Convert
+.Pa /etc/sudoers
+to JSON format, storing the result in
+.Pa sudoers.json :
+.Bd -literal -offset indent
+$ cvtsudoers -f json -o sudoers.json /etc/sudoers
+.Ed
+.Pp
+Parse
+.Pa /etc/sudoers
+and display only rules that match user
+.Em ambrose
+on host
+.Em hastur :
+.Bd -literal -offset indent
+$ cvtsudoers -f sudoers -m user=ambrose,host=hastur /etc/sudoers
+.Ed
+.Pp
+Same as above, but expand aliases and prune out any non-matching
+users and hosts from the expanded entries.
+.Bd -literal -offset indent
+$ cvtsudoers -ep -f sudoers -m user=ambrose,host=hastur /etc/sudoers
+.Ed
+.Pp
+Convert
+.Pa sudoers.ldif
+from LDIF to traditional
+.Em sudoers
+format:
+.Bd -literal -offset indent
+$ cvtsudoers -i ldif -f sudoers -o sudoers.new sudoers.ldif
+.Ed
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
