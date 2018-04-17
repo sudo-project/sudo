@@ -124,6 +124,7 @@ static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
 static void iolog_unlink(struct plugin_container *plugin);
+static void free_plugin_container(struct plugin_container *plugin, bool ioplugin);
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -1359,8 +1360,26 @@ iolog_unlink(struct plugin_container *plugin)
     }
     /* Remove from io_plugins list and free. */
     TAILQ_REMOVE(&io_plugins, plugin, entries);
+    free_plugin_container(plugin, true);
+
+    debug_return;
+}
+
+static void
+free_plugin_container(struct plugin_container *plugin, bool ioplugin)
+{
+    debug_decl(free_plugin_container, SUDO_DEBUG_PLUGIN)
+
     free(plugin->path);
-    free(plugin);
+    free(plugin->name);
+    if (plugin->options != NULL) {
+	int i = 0;
+	while (plugin->options[i] != NULL)
+	    free(plugin->options[i++]);
+	free(plugin->options);
+    }
+    if (ioplugin)
+	free(plugin);
 
     debug_return;
 }
@@ -1429,11 +1448,10 @@ gc_run(void)
     }
 
     /* Free plugin structs. */
-    free(policy_plugin.path);
+    free_plugin_container(&policy_plugin, false);
     while ((plugin = TAILQ_FIRST(&io_plugins))) {
 	TAILQ_REMOVE(&io_plugins, plugin, entries);
-	free(plugin->path);
-	free(plugin);
+	free_plugin_container(plugin, true);
     }
 
     debug_return;

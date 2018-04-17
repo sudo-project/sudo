@@ -264,8 +264,13 @@ static void
 free_plugin_info(struct plugin_info *info)
 {
     free(info->path);
-    free(info->options);
     free(info->symbol_name);
+    if (info->options != NULL) {
+	int i = 0;
+	while (info->options[i] != NULL)
+	    free(info->options[i++]);
+	free(info->options);
+    }
     free(info);
 }
 
@@ -294,7 +299,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 
     /*
      * If no policy plugin, fall back to the default (sudoers).
-     * If there is also no I/O log plugin, sudoers for that too.
+     * If there is also no I/O log plugin, use sudoers for that too.
      */
     if (policy_plugin->handle == NULL) {
 	/* Default policy plugin */
@@ -303,11 +308,15 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	info->symbol_name = "sudoers_policy";
-	info->path = SUDOERS_PLUGIN;
+	info->symbol_name = strdup("sudoers_policy");
+	info->path = strdup(SUDOERS_PLUGIN);
+	if (info->symbol_name == NULL || info->path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 	/* info->options = NULL; */
 	ret = sudo_load_plugin(policy_plugin, io_plugins, info);
-	free(info);
+	free_plugin_info(info);
 	if (!ret)
 	    goto done;
 
@@ -318,11 +327,15 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 		goto done;
 	    }
-	    info->symbol_name = "sudoers_io";
-	    info->path = SUDOERS_PLUGIN;
+	    info->symbol_name = strdup("sudoers_io");
+	    info->path = strdup(SUDOERS_PLUGIN);
+	    if (info->symbol_name == NULL || info->path == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		goto done;
+	    }
 	    /* info->options = NULL; */
 	    ret = sudo_load_plugin(policy_plugin, io_plugins, info);
-	    free(info);
+	    free_plugin_info(info);
 	    if (!ret)
 		goto done;
 	}
