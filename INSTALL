@@ -705,6 +705,11 @@ Options that set runtime-changeable default values:
 	and warning.
 	Sudoers option: syslog_goodpri
 
+  --with-python-insults
+	Insults the user with lines from "Monty Python's Flying Circus" when an
+	incorrect password is entered. You must either specify --with-insults or
+	enable insults in the sudoers file for this to have any effect.
+
   --with-goons-insults
 	Insults the user with lines from the "Goon Show" when an incorrect
 	password is entered.  You must either specify --with-insults or

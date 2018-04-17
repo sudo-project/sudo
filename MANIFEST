@@ -299,6 +299,7 @@ plugins/sudoers/ins_2001.h
 plugins/sudoers/ins_classic.h
 plugins/sudoers/ins_csops.h
 plugins/sudoers/ins_goons.h
+plugins/sudoers/ins_python.h
 plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h

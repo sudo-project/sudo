@@ -1089,6 +1089,7 @@ AC_ARG_WITH(all-insults, [AS_HELP_STRING([--with-all-insults], [include all the 
 		with_csops_insults=yes
 		with_hal_insults=yes
 		with_goons_insults=yes
+		with_python_insults=yes
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-all-insults does not take an argument."])
@@ -1131,6 +1132,15 @@ AC_ARG_WITH(goons-insults, [AS_HELP_STRING([--with-goons-insults], [include the 
 		;;
 esac])
 
+AC_ARG_WITH(python-insults, [AS_HELP_STRING([--with-python-insults], [include the insults from "Monty Python's Flying Circus"])],
+[case $with_python_insults in
+    yes)	AC_DEFINE(PYTHON_INSULTS)
+        ;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-python-insults does not take an argument."])
+        ;;
+esac])
+
 AC_ARG_WITH(nsswitch, [AS_HELP_STRING([--with-nsswitch[[=PATH]]], [path to nsswitch.conf])],
 [case $with_nsswitch in
     no)		;;
@@ -1160,6 +1170,7 @@ dnl include all insult sets on one line
 if test "$insults" = "on"; then
     AC_MSG_CHECKING(which insult sets to include)
     i=""
+    test "$with_python_insults" = "yes" && i="python ${i}"
     test "$with_goons_insults" = "yes" && i="goons ${i}"
     test "$with_hal_insults" = "yes" && i="hal ${i}"
     test "$with_csops_insults" = "yes" && i="csops ${i}"
@@ -4408,6 +4419,7 @@ AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
 AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in sudoers.])
 AH_TEMPLATE(ENV_RESET, [Define to 1 to enable environment resetting by default.])
+AH_TEMPLATE(PYTHON_INSULTS, [Define to 1 if you want insults from "Monty Python's Flying Circus".])
 AH_TEMPLATE(GOONS_INSULTS, [Define to 1 if you want insults from the "Goon Show".])
 AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
 AH_TEMPLATE(HAVE_AFS, [Define to 1 if you use AFS.])

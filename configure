@@ -922,6 +922,7 @@ with_classic_insults
 with_csops_insults
 with_hal_insults
 with_goons_insults
+with_python_insults
 with_nsswitch
 with_ldap
 with_ldap_conf_file
@@ -1752,6 +1753,8 @@ Optional Packages:
   --with-csops-insults    include CSOps insults
   --with-hal-insults      include 2001-like insults
   --with-goons-insults    include the insults from the "Goon Show"
+  --with-python-insults   include the insults from "Monty Python's Flying
+                          Circus"
   --with-nsswitch[=PATH]  path to nsswitch.conf
   --with-ldap[=DIR]       enable LDAP support
   --with-ldap-conf-file   path to LDAP configuration file
@@ -5771,6 +5774,7 @@ if test "${with_all_insults+set}" = set; then :
 		with_csops_insults=yes
 		with_hal_insults=yes
 		with_goons_insults=yes
+		with_python_insults=yes
 		;;
     no)		;;
     *)		as_fn_error $? "\"--with-all-insults does not take an argument.\"" "$LINENO" 5
@@ -5836,6 +5840,20 @@ fi
 
 
 
+# Check whether --with-python-insults was given.
+if test "${with_python_insults+set}" = set; then :
+  withval=$with_python_insults; case $with_python_insults in
+    yes)	$as_echo "#define PYTHON_INSULTS 1" >>confdefs.h
+
+        ;;
+    no)		;;
+    *)		as_fn_error $? "\"--with-python-insults does not take an argument.\"" "$LINENO" 5
+        ;;
+esac
+fi
+
+
+
 # Check whether --with-nsswitch was given.
 if test "${with_nsswitch+set}" = set; then :
   withval=$with_nsswitch; case $with_nsswitch in
@@ -5891,6 +5909,7 @@ if test "$insults" = "on"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking which insult sets to include" >&5
 $as_echo_n "checking which insult sets to include... " >&6; }
     i=""
+    test "$with_python_insults" = "yes" && i="python ${i}"
     test "$with_goons_insults" = "yes" && i="goons ${i}"
     test "$with_hal_insults" = "yes" && i="hal ${i}"
     test "$with_csops_insults" = "yes" && i="csops ${i}"
@@ -28671,6 +28690,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

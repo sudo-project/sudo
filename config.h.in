@@ -1014,6 +1014,9 @@
 /* Define to const if the `putenv' takes a const argument. */
 #undef PUTENV_CONST
 
+/* Define to 1 if you want insults from "Monty Python's Flying Circus". */
+#undef PYTHON_INSULTS
+
 /* The default value of preloaded objects (if any). */
 #undef RTLD_PRELOAD_DEFAULT
 

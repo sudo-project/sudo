@@ -39,6 +39,8 @@ What's new in Sudo 1.8.23
    checks the directory for writability before using it.  Previously,
    sudoedit only performed an existence check.  Bug #827.
 
+ * Sudo now includes an optional set of Monty Python-inspired insults.
+
 What's new in Sudo 1.8.22
 
  * Commands run in the background from a script run via sudo will

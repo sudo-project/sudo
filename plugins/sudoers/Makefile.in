@@ -1283,6 +1283,7 @@ sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/ins_2001.h \
               $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
               $(srcdir)/ins_goons.h $(srcdir)/insults.h $(srcdir)/logging.h \
+              $(srcdir)/ins_python.h $(srcdir)/insults.h $(srcdir)/logging.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h

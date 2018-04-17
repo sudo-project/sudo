@@ -18,7 +18,7 @@
 #ifndef SUDOERS_INSULTS_H
 #define SUDOERS_INSULTS_H
 
-#if defined(HAL_INSULTS) || defined(GOONS_INSULTS) || defined(CLASSIC_INSULTS) || defined(CSOPS_INSULTS)
+#if defined(HAL_INSULTS) || defined(GOONS_INSULTS) || defined(CLASSIC_INSULTS) || defined(CSOPS_INSULTS) || defined(PYTHON_INSULTS)
 
 /*
  * Use one or more set of insults as determined by configure
@@ -42,6 +42,10 @@ char *insults[] = {
 #  include "ins_csops.h"
 # endif
 
+# ifdef PYTHON_INSULTS
+#  include "ins_python.h"
+# endif
+
     NULL
 
 };
@@ -56,6 +60,6 @@ char *insults[] = {
  */
 #define INSULT		(insults[time(NULL) % NOFINSULTS])
 
-#endif /* HAL_INSULTS || GOONS_INSULTS || CLASSIC_INSULTS || CSOPS_INSULTS */
+#endif /* HAL_INSULTS || GOONS_INSULTS || CLASSIC_INSULTS || CSOPS_INSULTS || PYTHON_INSULTS */
 
 #endif /* SUDOERS_INSULTS_H */
