@@ -82,7 +82,7 @@ The supported types are:
 .It all
 All Defaults entries.
 .It global
-Gobal Defaults entries that are applied regardless of
+Global Defaults entries that are applied regardless of
 user, runas, host or command.
 .It user
 Per-user Defaults entries.

@@ -124,12 +124,12 @@ DDEESSCCRRIIPPTTIIOONN
                  eliminate the pauses entirely.
 
      --nn, ----nnoonn--iinntteerraaccttiivvee
-                 Do not prompt for user input or attempt to resize the
+                 Do not prompt for user input or attempt to re-size the
                  terminal.  The session is written to the standard output, not
                  directly to the user's terminal.
 
      --RR, ----nnoo--rreessiizzee
-                 Do not attempt to resize the terminal to match the terminal
+                 Do not attempt to re-size the terminal to match the terminal
                  size of the session.
 
      --ss, ----ssppeeeedd _s_p_e_e_d___f_a_c_t_o_r

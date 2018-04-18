@@ -525,7 +525,7 @@ DDEESSCCRRIIPPTTIIOONN
                        which may choose to ignore it.
 
                  iolog_mode=octal
-                       The file permision mode to use when creating I/O log
+                       The file permission mode to use when creating I/O log
                        files and directories.  This is a hint to the I/O
                        logging plugin which may choose to ignore it.
 

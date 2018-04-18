@@ -741,7 +741,7 @@ object containing a
 that begins with a
 .Ql +
 prefix.
-The NIS schema used by some LDAP servers need a modificaton to
+The NIS schema used by some LDAP servers need a modification to
 support querying the
 .Li nisNetgroup
 object by its

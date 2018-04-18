@@ -450,7 +450,7 @@ DDEESSCCRRIIPPTTIIOONN
            This option can be used to query a user's netgroups directly via
            LDAP which is usually faster than fetching every sudoRole object
            containing a sudoUser that begins with a `+' prefix.  The NIS
-           schema used by some LDAP servers need a modificaton to support
+           schema used by some LDAP servers need a modification to support
            querying the nisNetgroup object by its nisNetgroupTriple member.
            OpenLDAP's ssllaappdd requires the following change to the
            nisNetgroupTriple attribute:

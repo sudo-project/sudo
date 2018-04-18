@@ -224,11 +224,11 @@ A
 .Em max_wait
 of zero or less will eliminate the pauses entirely.
 .It Fl n , -non-interactive
-Do not prompt for user input or attempt to resize the terminal.
+Do not prompt for user input or attempt to re-size the terminal.
 The session is written to the standard output, not directly to
 the user's terminal.
 .It Fl R , -no-resize
-Do not attempt to resize the terminal to match the terminal size
+Do not attempt to re-size the terminal to match the terminal size
 of the session.
 .It Fl s , -speed Ar speed_factor
 This option causes
