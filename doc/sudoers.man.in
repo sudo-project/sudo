@@ -43,7 +43,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "April 17, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "April 18, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -240,7 +240,7 @@ uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the user ID that was used to authenticate, the
 terminal session ID, the start time of the session leader
-(or parent proccess) and a time stamp
+(or parent process) and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
 \fBsudo\fR
@@ -344,7 +344,19 @@ and
 options.
 This is effectively a whitelist
 for environment variables.
-Environment variables with a value beginning with
+The environment variables
+\fRLOGNAME\fR,
+\fRUSER\fR
+and
+\fRUSERNAME\fR
+are treated specially.
+If one or more variables are preserved from the invoking process,
+any of the three remaining variables (that were not explicitly
+preserved) will be set to the same value as the first one in the
+list that was preserved.
+This avoids an inconsistent environment where some of the variables
+describing the user name are set to the invoking user and some are
+set to the target user.
 \fR()\fR
 are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
@@ -2067,7 +2079,7 @@ by default.
 case_insensitive_group
 If enabled, group names in
 \fIsudoers\fR
-will be matched in a case insentive manner.
+will be matched in a case insensitive manner.
 This may be necessary when users are stored in LDAP or AD.
 This flag is
 \fIon\fR
@@ -2076,7 +2088,7 @@ by default.
 case_insensitive_user
 If enabled, user names in
 \fIsudoers\fR
-will be matched in a case insentive manner.
+will be matched in a case insensitive manner.
 This may be necessary when groups are stored in LDAP or AD.
 This flag is
 \fIon\fR
@@ -3066,7 +3078,7 @@ With this flag enabled,
 will use a separate record in the time stamp file for each terminal.
 If disabled, a single record is used for all login sessions.
 .sp
-This option has been superceded by the
+This option has been superseded by the
 \fItimestamp_type\fR
 option.
 .TP 18n
@@ -3109,7 +3121,7 @@ If set, netgroups (prefixed with
 \(oq+\(cq),
 may be used in place of a user or host.
 For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server unless the
+sub-string match on the server unless the
 \fBNETGROUP_BASE\fR
 directive is present in the
 \fI@ldap_conf@\fR
