@@ -21,7 +21,29 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.\" Automatically generated from an mdoc input file.  Do not edit.
+.\"
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
+.\"	Todd C. Miller <Todd.Miller@sudo.ws>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.\" Sponsored in part by the Defense Advanced Research Projects
+.\" Agency (DARPA) and Air Force Research Laboratory, Air Force
+.\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
+.\"
+.TH "SUDOERS" "5" "April 17, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3327,8 +3349,21 @@ unless insults are enabled.
 editor
 A colon
 (\(oq:\&\(cq)
-separated list of editors allowed to be used with
+separated list of editors path names used by
+\fBsudoedit\fR
+and
 \fBvisudo\fR.
+For
+\fBsudoedit\fR,
+this list is used to find an editor when none of the
+\fRSUDO_EDITOR\fR,
+\fRVISUAL\fR
+or
+\fREDITOR\fR
+environment variables are set to an editor that exists and is executable.
+For
+\fBvisudo\fR,
+it is used as a white list of allowed editors;
 \fBvisudo\fR
 will choose the editor that matches the user's
 \fRSUDO_EDITOR\fR,
@@ -3336,13 +3371,16 @@ will choose the editor that matches the user's
 or
 \fREDITOR\fR
 environment variable if possible, or the first editor in the
-list that exists and is executable.
-Note that the
+list that exists and is executable if not.
+Unless invoked as
+\fBsudoedit\fR,
+\fBsudo\fR
+does not preserve the
 \fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
 and
 \fREDITOR\fR
-environment variables are not preserved by default when the
+environment variables by default, even when the
 \fIenv_reset\fR
 option is enabled.
 The default is

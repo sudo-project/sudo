@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 21, 2018
+.Dd April 17, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3129,8 +3129,21 @@ unless insults are enabled.
 .It editor
 A colon
 .Pq Ql :\&
-separated list of editors allowed to be used with
+separated list of editors path names used by
+.Nm sudoedit
+and
 .Nm visudo .
+For
+.Nm sudoedit ,
+this list is used to find an editor when none of the
+.Ev SUDO_EDITOR ,
+.Ev VISUAL
+or
+.Ev EDITOR
+environment variables are set to an editor that exists and is executable.
+For
+.Nm visudo ,
+it is used as a white list of allowed editors;
 .Nm visudo
 will choose the editor that matches the user's
 .Ev SUDO_EDITOR ,
@@ -3138,13 +3151,16 @@ will choose the editor that matches the user's
 or
 .Ev EDITOR
 environment variable if possible, or the first editor in the
-list that exists and is executable.
-Note that the
+list that exists and is executable if not.
+Unless invoked as
+.Nm sudoedit ,
+.Nm sudo
+does not preserve the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
 and
 .Ev EDITOR
-environment variables are not preserved by default when the
+environment variables by default, even when the
 .Em env_reset
 option is enabled.
 The default is
