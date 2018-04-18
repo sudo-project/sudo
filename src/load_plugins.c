@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -312,6 +312,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	info->path = strdup(SUDOERS_PLUGIN);
 	if (info->symbol_name == NULL || info->path == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free_plugin_info(info);
 	    goto done;
 	}
 	/* info->options = NULL; */
@@ -331,6 +332,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    info->path = strdup(SUDOERS_PLUGIN);
 	    if (info->symbol_name == NULL || info->path == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+		free_plugin_info(info);
 		goto done;
 	    }
 	    /* info->options = NULL; */
