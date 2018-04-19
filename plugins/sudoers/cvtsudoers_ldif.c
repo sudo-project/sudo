@@ -1090,8 +1090,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		    cp++;
 		/* Skip over cn if present. */
 		if (strncasecmp(cp, "cn=", 3) == 0) {
-		    cp += 3;
-		    while (*cp != '\0') {
+		    for (cp += 3; *cp != '\0'; cp++) {
 			/* Handle escaped ',' chars. */
 			if (*cp == '\\')
 			    cp++;
