@@ -5,304 +5,67 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers-1.8.10b3\n"
-"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2018-04-05 06:36-0600\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2014-02-07 15:13-0700\n"
 "PO-Revision-Date: 2014-06-04 08:01+0300\n"
 "Last-Translator: Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>\n"
 "Language-Team: Greek <team@lists.gnome.gr>\n"
 "Language: el\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.0\n"
 
-#: confstr.sh:1
-#, fuzzy
-msgid "syntax error"
-msgstr "%s: σφάλμα ανάγνωσης"
-
 #: confstr.sh:2
-#, fuzzy
-msgid "%p's password: "
+msgid "Password:"
 msgstr "Κωδικός πρόσβασης:"
 
 #: confstr.sh:3
-msgid "[sudo] password for %p: "
-msgstr ""
-
-#: confstr.sh:4
-#, fuzzy
-msgid "Password: "
-msgstr "Κωδικός πρόσβασης:"
-
-#: confstr.sh:5
 msgid "*** SECURITY information for %h ***"
 msgstr "*** Πληροφορίες ΑΣΦΑΛΕΙΑΣ για το %h ***"
 
-#: confstr.sh:6
+#: confstr.sh:4
 msgid "Sorry, try again."
 msgstr "Συγνώμη, δοκιμάστε ξανά."
 
-#: gram.y:191 gram.y:239 gram.y:246 gram.y:253 gram.y:260 gram.y:267 gram.y:283
-#: gram.y:307 gram.y:314 gram.y:321 gram.y:328 gram.y:335 gram.y:398 gram.y:406
-#: gram.y:416 gram.y:449 gram.y:456 gram.y:463 gram.y:470 gram.y:552 gram.y:559
-#: gram.y:568 gram.y:577 gram.y:594 gram.y:706 gram.y:713 gram.y:720 gram.y:728
-#: gram.y:824 gram.y:831 gram.y:838 gram.y:845 gram.y:852 gram.y:878 gram.y:885
-#: gram.y:892 gram.y:1015 gram.y:1234 gram.y:1241 plugins/sudoers/alias.c:124
-#: plugins/sudoers/alias.c:139 plugins/sudoers/auth/bsdauth.c:141
-#: plugins/sudoers/auth/kerb5.c:119 plugins/sudoers/auth/kerb5.c:145
-#: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:116
-#: plugins/sudoers/cvtsudoers.c:157 plugins/sudoers/cvtsudoers.c:174
-#: plugins/sudoers/cvtsudoers.c:185 plugins/sudoers/cvtsudoers.c:278
-#: plugins/sudoers/cvtsudoers.c:402 plugins/sudoers/cvtsudoers.c:535
-#: plugins/sudoers/cvtsudoers.c:552 plugins/sudoers/cvtsudoers.c:657
-#: plugins/sudoers/cvtsudoers.c:763 plugins/sudoers/cvtsudoers.c:771
-#: plugins/sudoers/cvtsudoers.c:978 plugins/sudoers/cvtsudoers.c:982
-#: plugins/sudoers/cvtsudoers.c:1045 plugins/sudoers/cvtsudoers_ldif.c:429
-#: plugins/sudoers/cvtsudoers_ldif.c:599 plugins/sudoers/cvtsudoers_ldif.c:667
-#: plugins/sudoers/cvtsudoers_ldif.c:674 plugins/sudoers/cvtsudoers_ldif.c:679
-#: plugins/sudoers/cvtsudoers_ldif.c:755 plugins/sudoers/cvtsudoers_ldif.c:766
-#: plugins/sudoers/cvtsudoers_ldif.c:772 plugins/sudoers/cvtsudoers_ldif.c:797
-#: plugins/sudoers/cvtsudoers_ldif.c:809 plugins/sudoers/cvtsudoers_ldif.c:813
-#: plugins/sudoers/cvtsudoers_ldif.c:827 plugins/sudoers/cvtsudoers_ldif.c:996
-#: plugins/sudoers/cvtsudoers_ldif.c:1026
-#: plugins/sudoers/cvtsudoers_ldif.c:1051
-#: plugins/sudoers/cvtsudoers_ldif.c:1080
-#: plugins/sudoers/cvtsudoers_ldif.c:1131
-#: plugins/sudoers/cvtsudoers_ldif.c:1160
-#: plugins/sudoers/cvtsudoers_ldif.c:1170 plugins/sudoers/defaults.c:657
-#: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
-#: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
-#: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
-#: plugins/sudoers/filedigest.c:120 plugins/sudoers/filedigest_gcrypt.c:90
-#: plugins/sudoers/filedigest_openssl.c:111 plugins/sudoers/gc.c:52
-#: plugins/sudoers/group_plugin.c:131 plugins/sudoers/interfaces.c:71
-#: plugins/sudoers/iolog.c:938 plugins/sudoers/iolog_path.c:167
-#: plugins/sudoers/ldap.c:205 plugins/sudoers/ldap.c:678
-#: plugins/sudoers/ldap.c:691 plugins/sudoers/ldap.c:994
-#: plugins/sudoers/ldap.c:1154 plugins/sudoers/ldap.c:1236
-#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1443
-#: plugins/sudoers/ldap.c:1589 plugins/sudoers/ldap.c:2076
-#: plugins/sudoers/ldap.c:2108 plugins/sudoers/ldap.c:2420
-#: plugins/sudoers/ldap.c:2448 plugins/sudoers/ldap.c:2464
-#: plugins/sudoers/ldap.c:2554 plugins/sudoers/ldap.c:2570
-#: plugins/sudoers/ldap_conf.c:215 plugins/sudoers/ldap_conf.c:246
-#: plugins/sudoers/ldap_conf.c:298 plugins/sudoers/ldap_conf.c:334
-#: plugins/sudoers/ldap_conf.c:423 plugins/sudoers/ldap_conf.c:438
-#: plugins/sudoers/ldap_conf.c:534 plugins/sudoers/ldap_conf.c:567
-#: plugins/sudoers/ldap_conf.c:648 plugins/sudoers/ldap_conf.c:730
-#: plugins/sudoers/ldap_util.c:486 plugins/sudoers/ldap_util.c:540
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
-#: plugins/sudoers/logging.c:568 plugins/sudoers/logging.c:745
-#: plugins/sudoers/logging.c:1003 plugins/sudoers/match.c:656
-#: plugins/sudoers/match.c:703 plugins/sudoers/match.c:753
-#: plugins/sudoers/match.c:777 plugins/sudoers/match.c:865
-#: plugins/sudoers/match.c:954 plugins/sudoers/parse.c:247
-#: plugins/sudoers/parse.c:259 plugins/sudoers/parse.c:274
-#: plugins/sudoers/parse.c:286 plugins/sudoers/policy.c:498
-#: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
-#: plugins/sudoers/pwutil.c:338 plugins/sudoers/pwutil.c:512
-#: plugins/sudoers/pwutil.c:577 plugins/sudoers/pwutil.c:646
-#: plugins/sudoers/pwutil.c:804 plugins/sudoers/pwutil.c:861
-#: plugins/sudoers/pwutil.c:906 plugins/sudoers/pwutil.c:964
-#: plugins/sudoers/sssd.c:161 plugins/sudoers/sssd.c:193
-#: plugins/sudoers/sssd.c:236 plugins/sudoers/sssd.c:243
-#: plugins/sudoers/sssd.c:279 plugins/sudoers/sssd.c:352
-#: plugins/sudoers/sssd.c:391 plugins/sudoers/sssd.c:1110
-#: plugins/sudoers/sssd.c:1124 plugins/sudoers/sssd.c:1140
-#: plugins/sudoers/sssd.c:1508 plugins/sudoers/stubs.c:96
-#: plugins/sudoers/stubs.c:104 plugins/sudoers/sudoers.c:262
-#: plugins/sudoers/sudoers.c:272 plugins/sudoers/sudoers.c:280
-#: plugins/sudoers/sudoers.c:364 plugins/sudoers/sudoers.c:686
-#: plugins/sudoers/sudoers.c:811 plugins/sudoers/sudoers.c:855
-#: plugins/sudoers/sudoers.c:1127 plugins/sudoers/sudoers_debug.c:107
-#: plugins/sudoers/sudoreplay.c:1265 plugins/sudoers/sudoreplay.c:1377
-#: plugins/sudoers/sudoreplay.c:1417 plugins/sudoers/sudoreplay.c:1426
-#: plugins/sudoers/sudoreplay.c:1436 plugins/sudoers/sudoreplay.c:1444
-#: plugins/sudoers/sudoreplay.c:1448 plugins/sudoers/sudoreplay.c:1604
-#: plugins/sudoers/sudoreplay.c:1608 plugins/sudoers/testsudoers.c:126
-#: plugins/sudoers/testsudoers.c:216 plugins/sudoers/testsudoers.c:233
-#: plugins/sudoers/testsudoers.c:554 plugins/sudoers/timestamp.c:401
-#: plugins/sudoers/timestamp.c:445 plugins/sudoers/timestamp.c:923
-#: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
-#: plugins/sudoers/toke_util.c:146 plugins/sudoers/tsdump.c:125
-#: plugins/sudoers/visudo.c:146 plugins/sudoers/visudo.c:307
-#: plugins/sudoers/visudo.c:313 plugins/sudoers/visudo.c:423
-#: plugins/sudoers/visudo.c:601 plugins/sudoers/visudo.c:919
-#: plugins/sudoers/visudo.c:985 plugins/sudoers/visudo.c:1074 toke.l:849
-#: toke.l:949 toke.l:1106
-#, fuzzy
-msgid "unable to allocate memory"
-msgstr "αδύνατη η δημιουργία του %s"
-
-#: gram.y:481
-#, fuzzy
-msgid "a digest requires a path name"
-msgstr "το %s απαιτεί ένα όρισμα"
-
-#: gram.y:607
-msgid "invalid notbefore value"
-msgstr ""
-
-#: gram.y:615
-#, fuzzy
-msgid "invalid notafter value"
-msgstr "αποτυχία επικύρωσης"
-
-#: gram.y:624 plugins/sudoers/policy.c:314
-msgid "timeout value too large"
-msgstr ""
-
-#: gram.y:626 plugins/sudoers/policy.c:316
-#, fuzzy
-msgid "invalid timeout value"
-msgstr "αποτυχία επικύρωσης"
-
-#: gram.y:1234 gram.y:1241 plugins/sudoers/auth/pam.c:341
-#: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/cvtsudoers.c:116 plugins/sudoers/cvtsudoers.c:156
-#: plugins/sudoers/cvtsudoers.c:173 plugins/sudoers/cvtsudoers.c:184
-#: plugins/sudoers/cvtsudoers.c:277 plugins/sudoers/cvtsudoers.c:401
-#: plugins/sudoers/cvtsudoers.c:534 plugins/sudoers/cvtsudoers.c:551
-#: plugins/sudoers/cvtsudoers.c:657 plugins/sudoers/cvtsudoers.c:763
-#: plugins/sudoers/cvtsudoers.c:770 plugins/sudoers/cvtsudoers.c:978
-#: plugins/sudoers/cvtsudoers.c:982 plugins/sudoers/cvtsudoers.c:1045
-#: plugins/sudoers/cvtsudoers_ldif.c:428 plugins/sudoers/cvtsudoers_ldif.c:598
-#: plugins/sudoers/cvtsudoers_ldif.c:666 plugins/sudoers/cvtsudoers_ldif.c:673
-#: plugins/sudoers/cvtsudoers_ldif.c:678 plugins/sudoers/cvtsudoers_ldif.c:754
-#: plugins/sudoers/cvtsudoers_ldif.c:765 plugins/sudoers/cvtsudoers_ldif.c:771
-#: plugins/sudoers/cvtsudoers_ldif.c:796 plugins/sudoers/cvtsudoers_ldif.c:808
-#: plugins/sudoers/cvtsudoers_ldif.c:812 plugins/sudoers/cvtsudoers_ldif.c:826
-#: plugins/sudoers/cvtsudoers_ldif.c:996 plugins/sudoers/cvtsudoers_ldif.c:1025
-#: plugins/sudoers/cvtsudoers_ldif.c:1050
-#: plugins/sudoers/cvtsudoers_ldif.c:1079
-#: plugins/sudoers/cvtsudoers_ldif.c:1130
-#: plugins/sudoers/cvtsudoers_ldif.c:1159
-#: plugins/sudoers/cvtsudoers_ldif.c:1169 plugins/sudoers/defaults.c:657
-#: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
-#: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
-#: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
-#: plugins/sudoers/filedigest.c:120 plugins/sudoers/filedigest_gcrypt.c:72
-#: plugins/sudoers/filedigest_gcrypt.c:90
-#: plugins/sudoers/filedigest_openssl.c:111 plugins/sudoers/gc.c:52
-#: plugins/sudoers/group_plugin.c:131 plugins/sudoers/interfaces.c:71
-#: plugins/sudoers/iolog.c:938 plugins/sudoers/iolog_path.c:167
-#: plugins/sudoers/ldap.c:205 plugins/sudoers/ldap.c:678
-#: plugins/sudoers/ldap.c:691 plugins/sudoers/ldap.c:994
-#: plugins/sudoers/ldap.c:1154 plugins/sudoers/ldap.c:1236
-#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1443
-#: plugins/sudoers/ldap.c:1589 plugins/sudoers/ldap.c:2076
-#: plugins/sudoers/ldap.c:2108 plugins/sudoers/ldap.c:2420
-#: plugins/sudoers/ldap.c:2447 plugins/sudoers/ldap.c:2463
-#: plugins/sudoers/ldap.c:2554 plugins/sudoers/ldap.c:2570
-#: plugins/sudoers/ldap_conf.c:215 plugins/sudoers/ldap_conf.c:246
-#: plugins/sudoers/ldap_conf.c:298 plugins/sudoers/ldap_conf.c:334
-#: plugins/sudoers/ldap_conf.c:423 plugins/sudoers/ldap_conf.c:438
-#: plugins/sudoers/ldap_conf.c:534 plugins/sudoers/ldap_conf.c:567
-#: plugins/sudoers/ldap_conf.c:647 plugins/sudoers/ldap_conf.c:730
-#: plugins/sudoers/ldap_util.c:486 plugins/sudoers/ldap_util.c:540
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
-#: plugins/sudoers/logging.c:567 plugins/sudoers/logging.c:1003
-#: plugins/sudoers/match.c:655 plugins/sudoers/match.c:702
-#: plugins/sudoers/match.c:753 plugins/sudoers/match.c:777
-#: plugins/sudoers/match.c:865 plugins/sudoers/match.c:953
-#: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:259
-#: plugins/sudoers/parse.c:274 plugins/sudoers/parse.c:286
-#: plugins/sudoers/policy.c:128 plugins/sudoers/policy.c:137
-#: plugins/sudoers/policy.c:146 plugins/sudoers/policy.c:172
-#: plugins/sudoers/policy.c:299 plugins/sudoers/policy.c:314
-#: plugins/sudoers/policy.c:316 plugins/sudoers/policy.c:342
-#: plugins/sudoers/policy.c:352 plugins/sudoers/policy.c:396
-#: plugins/sudoers/policy.c:406 plugins/sudoers/policy.c:415
-#: plugins/sudoers/policy.c:424 plugins/sudoers/policy.c:498
-#: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
-#: plugins/sudoers/pwutil.c:338 plugins/sudoers/pwutil.c:512
-#: plugins/sudoers/pwutil.c:577 plugins/sudoers/pwutil.c:646
-#: plugins/sudoers/pwutil.c:804 plugins/sudoers/pwutil.c:861
-#: plugins/sudoers/pwutil.c:906 plugins/sudoers/pwutil.c:964
-#: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
-#: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
-#: plugins/sudoers/set_perms.c:1641 plugins/sudoers/sssd.c:161
-#: plugins/sudoers/sssd.c:193 plugins/sudoers/sssd.c:236
-#: plugins/sudoers/sssd.c:243 plugins/sudoers/sssd.c:279
-#: plugins/sudoers/sssd.c:351 plugins/sudoers/sssd.c:391
-#: plugins/sudoers/sssd.c:1109 plugins/sudoers/sssd.c:1124
-#: plugins/sudoers/sssd.c:1140 plugins/sudoers/sssd.c:1508
-#: plugins/sudoers/stubs.c:96 plugins/sudoers/stubs.c:104
-#: plugins/sudoers/sudoers.c:262 plugins/sudoers/sudoers.c:272
-#: plugins/sudoers/sudoers.c:280 plugins/sudoers/sudoers.c:364
-#: plugins/sudoers/sudoers.c:686 plugins/sudoers/sudoers.c:811
-#: plugins/sudoers/sudoers.c:855 plugins/sudoers/sudoers.c:1127
-#: plugins/sudoers/sudoers_debug.c:106 plugins/sudoers/sudoreplay.c:1265
-#: plugins/sudoers/sudoreplay.c:1377 plugins/sudoers/sudoreplay.c:1417
-#: plugins/sudoers/sudoreplay.c:1426 plugins/sudoers/sudoreplay.c:1436
-#: plugins/sudoers/sudoreplay.c:1444 plugins/sudoers/sudoreplay.c:1448
-#: plugins/sudoers/sudoreplay.c:1604 plugins/sudoers/sudoreplay.c:1608
-#: plugins/sudoers/testsudoers.c:126 plugins/sudoers/testsudoers.c:216
-#: plugins/sudoers/testsudoers.c:233 plugins/sudoers/testsudoers.c:554
-#: plugins/sudoers/timestamp.c:401 plugins/sudoers/timestamp.c:445
-#: plugins/sudoers/timestamp.c:923 plugins/sudoers/toke_util.c:56
-#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:146
-#: plugins/sudoers/tsdump.c:125 plugins/sudoers/visudo.c:146
-#: plugins/sudoers/visudo.c:307 plugins/sudoers/visudo.c:313
-#: plugins/sudoers/visudo.c:423 plugins/sudoers/visudo.c:601
-#: plugins/sudoers/visudo.c:919 plugins/sudoers/visudo.c:985
-#: plugins/sudoers/visudo.c:1074 toke.l:849 toke.l:949 toke.l:1106
+#: plugins/sudoers/alias.c:136
 #, c-format
-msgid "%s: %s"
-msgstr "%s: %s"
-
-#: plugins/sudoers/alias.c:135
-#, fuzzy, c-format
-msgid "Alias \"%s\" already defined"
+msgid "Alias `%s' already defined"
 msgstr "Έχει ήδη οριστεί το ψευδώνυμο `%s'"
 
-#: plugins/sudoers/auth/bsdauth.c:68
+#: plugins/sudoers/auth/bsdauth.c:75
 #, c-format
 msgid "unable to get login class for user %s"
 msgstr "αδύνατη η λήψη κλάσης σύνδεσης για τον χρήστη %s"
 
-#: plugins/sudoers/auth/bsdauth.c:73
+#: plugins/sudoers/auth/bsdauth.c:81
 msgid "unable to begin bsd authentication"
 msgstr "αδύνατη η έναρξη της πιστοποίησης bsd"
 
-#: plugins/sudoers/auth/bsdauth.c:81
+#: plugins/sudoers/auth/bsdauth.c:89
 msgid "invalid authentication type"
 msgstr "άκυρος τύπος πιστοποίησης"
 
-#: plugins/sudoers/auth/bsdauth.c:90
+#: plugins/sudoers/auth/bsdauth.c:98
 msgid "unable to initialize BSD authentication"
 msgstr "αδύνατη η αρχικοποίηση της πιστοποίησης BSD"
 
-#: plugins/sudoers/auth/bsdauth.c:178
-msgid "your account has expired"
-msgstr ""
-
-#: plugins/sudoers/auth/bsdauth.c:180
-msgid "approval failed"
-msgstr ""
-
-#: plugins/sudoers/auth/fwtk.c:52
+#: plugins/sudoers/auth/fwtk.c:59
 msgid "unable to read fwtk config"
 msgstr "αδύνατη η ανάγνωση του fwtk config"
 
-#: plugins/sudoers/auth/fwtk.c:57
+#: plugins/sudoers/auth/fwtk.c:64
 msgid "unable to connect to authentication server"
 msgstr "αδύνατη η σύνδεση με τον εξυπηρετητή πιστοποίησης"
 
-#: plugins/sudoers/auth/fwtk.c:63 plugins/sudoers/auth/fwtk.c:87
-#: plugins/sudoers/auth/fwtk.c:119
+#: plugins/sudoers/auth/fwtk.c:70 plugins/sudoers/auth/fwtk.c:94
+#: plugins/sudoers/auth/fwtk.c:127
 msgid "lost connection to authentication server"
 msgstr "απώλεια σύνδεσης με τον εξυπηρετητή πιστοποίησης"
 
-#: plugins/sudoers/auth/fwtk.c:67
+#: plugins/sudoers/auth/fwtk.c:74
 #, c-format
 msgid ""
 "authentication server error:\n"
@@ -311,17 +74,17 @@ msgstr ""
 "σφάλμα εξυπηρετητή πιστοποίησης:\n"
 "%s"
 
-#: plugins/sudoers/auth/kerb5.c:111
+#: plugins/sudoers/auth/kerb5.c:116
 #, c-format
 msgid "%s: unable to convert principal to string ('%s'): %s"
 msgstr "%s: αδύνατη η μετατροπή της αρχής ασφάλειας σε συμβολοσειρά ('%s'): %s"
 
-#: plugins/sudoers/auth/kerb5.c:161
+#: plugins/sudoers/auth/kerb5.c:159
 #, c-format
 msgid "%s: unable to parse '%s': %s"
 msgstr "%s: αδύνατη η ανάλυση του '%s': %s"
 
-#: plugins/sudoers/auth/kerb5.c:170
+#: plugins/sudoers/auth/kerb5.c:169
 #, c-format
 msgid "%s: unable to resolve credential cache: %s"
 msgstr "%s: αδύνατη η επίλυση κρυφής μνήμης διαπιστευτήριων: %s"
@@ -331,158 +94,131 @@ msgstr "%s: αδύνατη η επίλυση κρυφής μνήμης διαπ�
 msgid "%s: unable to allocate options: %s"
 msgstr "%s: αδύνατη η κατανομή επιλογών: %s"
 
-#: plugins/sudoers/auth/kerb5.c:232
+#: plugins/sudoers/auth/kerb5.c:233
 #, c-format
 msgid "%s: unable to get credentials: %s"
 msgstr "%s: αδύνατη η λήψη διαπιστευτηρίων: %s"
 
-#: plugins/sudoers/auth/kerb5.c:245
+#: plugins/sudoers/auth/kerb5.c:246
 #, c-format
 msgid "%s: unable to initialize credential cache: %s"
 msgstr "%s: αδύνατη η αρχικοποίηση κρυφής μνήμης διαπιστευτηρίων: %s"
 
-#: plugins/sudoers/auth/kerb5.c:248
+#: plugins/sudoers/auth/kerb5.c:250
 #, c-format
 msgid "%s: unable to store credential in cache: %s"
 msgstr "%s: αδύνατη η αποθήκευση διαπιστευτηρίων στην κρυφή μνήμη: %s"
 
-#: plugins/sudoers/auth/kerb5.c:312
+#: plugins/sudoers/auth/kerb5.c:315
 #, c-format
 msgid "%s: unable to get host principal: %s"
 msgstr "%s: αδύνατη η λήψη αρχής ασφάλειας του οικοδεσπότη: %s"
 
-#: plugins/sudoers/auth/kerb5.c:326
+#: plugins/sudoers/auth/kerb5.c:330
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s: Αδύνατη η επιβεβαίωση TGT! Πιθανή επίθεση!: %s"
 
-#: plugins/sudoers/auth/pam.c:108
+#: plugins/sudoers/auth/pam.c:98
 msgid "unable to initialize PAM"
 msgstr "αδύνατη η αρχικοποίηση του PAM"
 
-#: plugins/sudoers/auth/pam.c:199
-#, c-format
-msgid "PAM authentication error: %s"
-msgstr "Σφάλμα πιστοποίησης PAM: %s"
-
-#: plugins/sudoers/auth/pam.c:216
+#: plugins/sudoers/auth/pam.c:149
 msgid "account validation failure, is your account locked?"
 msgstr "αποτυχία επικύρωσης λογαριασμού, είναι κλειδωμένος ο λογαριασμός σας;"
 
-#: plugins/sudoers/auth/pam.c:220
+#: plugins/sudoers/auth/pam.c:153
 msgid "Account or password is expired, reset your password and try again"
-msgstr ""
-"Ο λογαριασμός ή ο κωδικός πρόσβασης έχει λήξει, επαναφέρτε τον κωδικό "
-"πρόσβασής σας και ξαναδοκιμάστε"
+msgstr "Ο λογαριασμός ή ο κωδικός πρόσβασης έχει λήξει, επαναφέρτε τον κωδικό πρόσβασής σας και ξαναδοκιμάστε"
 
-#: plugins/sudoers/auth/pam.c:229
+#: plugins/sudoers/auth/pam.c:161
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "αδύνατη η αλλαγή του ληγμένου κωδικού πρόσβασης: %s"
 
-#: plugins/sudoers/auth/pam.c:233
+#: plugins/sudoers/auth/pam.c:166
 msgid "Password expired, contact your system administrator"
-msgstr ""
-"Ο κωδικός πρόσβασης έχει λήξει, επικοινωνήστε με τον διαχειριστή του "
-"συστήματος"
+msgstr "Ο κωδικός πρόσβασης έχει λήξει, επικοινωνήστε με τον διαχειριστή του συστήματος"
 
-#: plugins/sudoers/auth/pam.c:237
-msgid ""
-"Account expired or PAM config lacks an \"account\" section for sudo, contact "
-"your system administrator"
-msgstr ""
-"Ο λογαριασμός έχει λήξει ή το PAM config στερείται μιας ενότητας "
-"\"λογαριασμού\" για sudo, επικοινωνήστε με τον διαχειριστή του συστήματός σας"
+#: plugins/sudoers/auth/pam.c:170
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "Ο λογαριασμός έχει λήξει ή το PAM config στερείται μιας ενότητας \"λογαριασμού\" για sudo, επικοινωνήστε με τον διαχειριστή του συστήματός σας"
 
-#: plugins/sudoers/auth/pam.c:244 plugins/sudoers/auth/pam.c:249
-#, fuzzy, c-format
-msgid "PAM account management error: %s"
+#: plugins/sudoers/auth/pam.c:187
+#, c-format
+msgid "PAM authentication error: %s"
 msgstr "Σφάλμα πιστοποίησης PAM: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:228
+#: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:222
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "δεν υπάρχετε στη βάση δεδομένων %s"
 
-#: plugins/sudoers/auth/securid5.c:73
+#: plugins/sudoers/auth/securid5.c:80
 msgid "failed to initialise the ACE API library"
 msgstr "αποτυχία αρχικοποίησης της βιβλιοθήκης ACE API"
 
-#: plugins/sudoers/auth/securid5.c:99
+#: plugins/sudoers/auth/securid5.c:106
 msgid "unable to contact the SecurID server"
 msgstr "αδύνατη η επικοινωνία με τον εξυπηρετητή SecurID"
 
-#: plugins/sudoers/auth/securid5.c:108
+#: plugins/sudoers/auth/securid5.c:115
 msgid "User ID locked for SecurID Authentication"
 msgstr "Το αναγνωριστικό του χρήστη για πιστοποίηση SecurID είναι κλειδωμένο"
 
-#: plugins/sudoers/auth/securid5.c:112 plugins/sudoers/auth/securid5.c:163
+#: plugins/sudoers/auth/securid5.c:119 plugins/sudoers/auth/securid5.c:170
 msgid "invalid username length for SecurID"
 msgstr "άκυρο μήκος ονόματος χρήστη για SecurID"
 
-#: plugins/sudoers/auth/securid5.c:116 plugins/sudoers/auth/securid5.c:168
+#: plugins/sudoers/auth/securid5.c:123 plugins/sudoers/auth/securid5.c:175
 msgid "invalid Authentication Handle for SecurID"
 msgstr "άκυρη διαχείριση πιστοποίησης για SecurID"
 
-#: plugins/sudoers/auth/securid5.c:120
+#: plugins/sudoers/auth/securid5.c:127
 msgid "SecurID communication failed"
 msgstr "αποτυχία επικοινωνίας SecurID"
 
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:213
+#: plugins/sudoers/auth/securid5.c:131 plugins/sudoers/auth/securid5.c:214
 msgid "unknown SecurID error"
 msgstr "άγνωστο σφάλμα SecurID"
 
-#: plugins/sudoers/auth/securid5.c:158
+#: plugins/sudoers/auth/securid5.c:165
 msgid "invalid passcode length for SecurID"
 msgstr "άκυρο μήκος κωδικού περάσματος για το SecurID"
 
-#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
+#: plugins/sudoers/auth/sia.c:108
 msgid "unable to initialize SIA session"
 msgstr "αδύνατη η αρχικοποίηση της συνεδρίας SIA"
 
-#: plugins/sudoers/auth/sudo_auth.c:126
+#: plugins/sudoers/auth/sudo_auth.c:119
 msgid "invalid authentication methods"
 msgstr "άκυρες μέθοδοι πιστοποίησης"
 
-#: plugins/sudoers/auth/sudo_auth.c:128
-msgid ""
-"Invalid authentication methods compiled into sudo!  You may not mix "
-"standalone and non-standalone authentication."
-msgstr ""
-"Άκυρες μεταγλωττισμένες μέθοδοι πιστοποίησης στο sudo! Δεν μπορείτε να "
-"αναμίξετε αυτόνομη και μη αυτόνομη πιστοποίηση."
+#: plugins/sudoers/auth/sudo_auth.c:120
+msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
+msgstr "Άκυρες μεταγλωττισμένες μέθοδοι πιστοποίησης στο sudo! Δεν μπορείτε να αναμίξετε αυτόνομη και μη αυτόνομη πιστοποίηση."
 
-#: plugins/sudoers/auth/sudo_auth.c:249 plugins/sudoers/auth/sudo_auth.c:299
+#: plugins/sudoers/auth/sudo_auth.c:203
 msgid "no authentication methods"
 msgstr "δεν υπάρχουν μέθοδοι πιστοποίησης"
 
-#: plugins/sudoers/auth/sudo_auth.c:251
-msgid ""
-"There are no authentication methods compiled into sudo!  If you want to turn "
-"off authentication, use the --disable-authentication configure option."
-msgstr ""
-"Δεν υπάρχουν μεταγλωττισμένες μέθοδοι πιστοποίησης στο sudo! Αν θέλετε να "
-"απενεργοποιήσετε την πιστοποίηση, χρησιμοποιήστε την επιλογή ρύθμισης --"
-"disable-authentication."
+#: plugins/sudoers/auth/sudo_auth.c:205
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "Δεν υπάρχουν μεταγλωττισμένες μέθοδοι πιστοποίησης στο sudo! Αν θέλετε να απενεργοποιήσετε την πιστοποίηση, χρησιμοποιήστε την επιλογή ρύθμισης --disable-authentication."
 
-#: plugins/sudoers/auth/sudo_auth.c:301
-#, fuzzy
-msgid "Unable to initialize authentication methods."
-msgstr "αδύνατη η αρχικοποίηση της πιστοποίησης BSD"
-
-#: plugins/sudoers/auth/sudo_auth.c:467
+#: plugins/sudoers/auth/sudo_auth.c:389
 msgid "Authentication methods:"
 msgstr "Μέθοδοι πιστοποίησης:"
 
-#: plugins/sudoers/bsm_audit.c:120 plugins/sudoers/bsm_audit.c:211
+#: plugins/sudoers/bsm_audit.c:91 plugins/sudoers/bsm_audit.c:158
 msgid "Could not determine audit condition"
 msgstr "Αδυναμία εντοπισμού συνθήκης ελέγχου"
 
-#: plugins/sudoers/bsm_audit.c:183 plugins/sudoers/bsm_audit.c:273
+#: plugins/sudoers/bsm_audit.c:134 plugins/sudoers/bsm_audit.c:199
 msgid "unable to commit audit record"
 msgstr "αδύνατη η υποβολή εγγραφής ελέγχου"
 
-#: plugins/sudoers/check.c:260
+#: plugins/sudoers/check.c:189
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -502,1135 +238,591 @@ msgstr ""
 "    #3) Η μεγάλη ισχύς συνυπάρχει με τη μεγάλη ευθύνη.\n"
 "\n"
 
-#: plugins/sudoers/check.c:303 plugins/sudoers/check.c:313
-#: plugins/sudoers/sudoers.c:729 plugins/sudoers/sudoers.c:774
-#: plugins/sudoers/tsdump.c:121
+#: plugins/sudoers/check.c:232 plugins/sudoers/check.c:238
+#: plugins/sudoers/sudoers.c:562 plugins/sudoers/sudoers.c:588
 #, c-format
 msgid "unknown uid: %u"
 msgstr "άγνωστο uid: %u"
 
-#: plugins/sudoers/check.c:308 plugins/sudoers/iolog.c:257
-#: plugins/sudoers/policy.c:908 plugins/sudoers/sudoers.c:1166
-#: plugins/sudoers/testsudoers.c:207 plugins/sudoers/testsudoers.c:366
+#: plugins/sudoers/check.c:235 plugins/sudoers/policy.c:657
+#: plugins/sudoers/sudoers.c:850 plugins/sudoers/testsudoers.c:211
+#: plugins/sudoers/testsudoers.c:363
 #, c-format
 msgid "unknown user: %s"
 msgstr "άγνωστος χρήστης: %s"
 
-#: plugins/sudoers/cvtsudoers.c:191
-#, c-format
-msgid "order increment: %s: %s"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers.c:207
-#, c-format
-msgid "starting order: %s: %s"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers.c:218 plugins/sudoers/sudoreplay.c:310
-#: plugins/sudoers/visudo.c:178
-#, c-format
-msgid "%s version %s\n"
-msgstr "%s έκδοση %s\n"
-
-#: plugins/sudoers/cvtsudoers.c:220 plugins/sudoers/visudo.c:180
-#, c-format
-msgid "%s grammar version %d\n"
-msgstr "γραμματική %s έκδοση %d\n"
-
-#: plugins/sudoers/cvtsudoers.c:237
-#, fuzzy, c-format
-msgid "unsupported input format %s"
-msgstr "ανυποστήρικτος τύπος αφομοίωσης %d για %s"
-
-#: plugins/sudoers/cvtsudoers.c:252
-#, fuzzy, c-format
-msgid "unsupported output format %s"
-msgstr "ανυποστήρικτος τύπος αφομοίωσης %d για %s"
-
-#: plugins/sudoers/cvtsudoers.c:292
-#, c-format
-msgid "%s: input and output files must be different"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers.c:308 plugins/sudoers/sudoers.c:167
-#: plugins/sudoers/testsudoers.c:246 plugins/sudoers/visudo.c:234
-#: plugins/sudoers/visudo.c:589 plugins/sudoers/visudo.c:910
-#, fuzzy
-msgid "unable to initialize sudoers default values"
-msgstr "%s: αδύνατη η αρχικοποίηση κρυφής μνήμης διαπιστευτηρίων: %s"
-
-#: plugins/sudoers/cvtsudoers.c:390 plugins/sudoers/ldap_conf.c:413
-#, c-format
-msgid "%s: %s: %s: %s"
-msgstr "%s: %s: %s: %s"
-
-#: plugins/sudoers/cvtsudoers.c:449
-#, fuzzy, c-format
-msgid "%s: unknown key word: %s"
-msgstr "άγνωστος χρήστης: %s"
-
-#: plugins/sudoers/cvtsudoers.c:495
-#, fuzzy, c-format
-msgid "invalid defaults type: %s"
-msgstr "άκυρη επιλογή φίλτρου: %s"
-
-#: plugins/sudoers/cvtsudoers.c:518
-#, fuzzy, c-format
-msgid "invalid suppression type: %s"
-msgstr "άκυρη κανονική έκφραση: %s"
-
-#: plugins/sudoers/cvtsudoers.c:558 plugins/sudoers/cvtsudoers.c:572
-#, fuzzy, c-format
-msgid "invalid filter: %s"
-msgstr "άκυρη επιλογή φίλτρου: %s"
-
-#: plugins/sudoers/cvtsudoers.c:650 plugins/sudoers/cvtsudoers.c:1005
-#: plugins/sudoers/cvtsudoers_json.c:1114 plugins/sudoers/cvtsudoers_ldif.c:492
-#: plugins/sudoers/cvtsudoers_ldif.c:983 plugins/sudoers/iolog.c:415
-#: plugins/sudoers/sudoers.c:933 plugins/sudoers/sudoreplay.c:356
-#: plugins/sudoers/sudoreplay.c:1366 plugins/sudoers/sudoreplay.c:1570
-#: plugins/sudoers/timestamp.c:410 plugins/sudoers/tsdump.c:130
-#: plugins/sudoers/visudo.c:906
-#, c-format
-msgid "unable to open %s"
-msgstr "αδύνατο το άνοιγμα του %s"
-
-#: plugins/sudoers/cvtsudoers.c:653 plugins/sudoers/visudo.c:915
-#, c-format
-msgid "failed to parse %s file, unknown error"
-msgstr "αποτυχία ανάλυσης αρχείου %s, άγνωστο σφάλμα"
-
-#: plugins/sudoers/cvtsudoers.c:661 plugins/sudoers/visudo.c:931
-#, c-format
-msgid "parse error in %s near line %d\n"
-msgstr "ανάλυση σφάλματος στο %s κοντά στη γραμμή %d\n"
-
-#: plugins/sudoers/cvtsudoers.c:664 plugins/sudoers/visudo.c:934
-#, c-format
-msgid "parse error in %s\n"
-msgstr "ανάλυση σφάλματος %s\n"
-
-#: plugins/sudoers/cvtsudoers.c:1052 plugins/sudoers/iolog.c:502
-#: plugins/sudoers/sudoreplay.c:1135 plugins/sudoers/timestamp.c:294
-#: plugins/sudoers/timestamp.c:297
-#, c-format
-msgid "unable to write to %s"
-msgstr "αδύνατη η εγγραφή σε %s"
-
-#: plugins/sudoers/cvtsudoers.c:1075
-#, fuzzy, c-format
-msgid ""
-"%s - convert between sudoers file formats\n"
-"\n"
-msgstr ""
-"%s - ασφαλής επεξεργασία του αρχείου χρηστών sudo\n"
-"\n"
-
-#: plugins/sudoers/cvtsudoers.c:1077
-msgid ""
-"\n"
-"Options:\n"
-"  -b, --base=dn              the base DN for sudo LDAP queries\n"
-"  -d, --defaults=deftypes    only convert Defaults of the specified types\n"
-"  -e, --expand-aliases       expand aliases when converting\n"
-"  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"
-"  -i, --input-format=format  set input format: LDIF or sudoers\n"
-"  -I, --increment=num        amount to increase each sudoOrder by\n"
-"  -h, --help                 display help message and exit\n"
-"  -m, --match=filter         only convert entries that match the filter\n"
-"  -M, --match-local          match filter uses passwd and group databases\n"
-"  -o, --output=output_file   write converted sudoers to output_file\n"
-"  -O, --order-start=num      starting point for first sudoOrder\n"
-"  -p, --prune-matches        prune non-matching users, groups and hosts\n"
-"  -s, --suppress=sections    suppress output of certain sections\n"
-"  -V, --version              display version information and exit"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_json.c:674 plugins/sudoers/cvtsudoers_json.c:709
-#: plugins/sudoers/cvtsudoers_json.c:925
-#, fuzzy, c-format
-msgid "unknown defaults entry \"%s\""
-msgstr "άγνωστες προεπιλογές καταχώρισης `%s'"
-
-#: plugins/sudoers/cvtsudoers_json.c:845 plugins/sudoers/cvtsudoers_json.c:860
-#: plugins/sudoers/cvtsudoers_ldif.c:219 plugins/sudoers/cvtsudoers_ldif.c:230
-#: plugins/sudoers/ldap.c:757
-msgid "unable to get GMT time"
-msgstr "αδύνατη η λήψη χρόνου GMT"
-
-#: plugins/sudoers/cvtsudoers_json.c:848 plugins/sudoers/cvtsudoers_json.c:863
-#: plugins/sudoers/cvtsudoers_ldif.c:222 plugins/sudoers/cvtsudoers_ldif.c:233
-#: plugins/sudoers/ldap.c:763
-msgid "unable to format timestamp"
-msgstr "αδύνατη η μορφοποίηση της χρονικής σήμανσης"
-
-#: plugins/sudoers/cvtsudoers_ldif.c:387 plugins/sudoers/env.c:295
-#: plugins/sudoers/env.c:302 plugins/sudoers/env.c:407
-#: plugins/sudoers/ldap.c:771 plugins/sudoers/ldap.c:998
-#: plugins/sudoers/ldap.c:1323 plugins/sudoers/ldap_conf.c:219
-#: plugins/sudoers/ldap_conf.c:309 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/logging.c:1008 plugins/sudoers/policy.c:619
-#: plugins/sudoers/policy.c:629 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:877 plugins/sudoers/testsudoers.c:237
-#: plugins/sudoers/toke_util.c:158
-#, c-format
-msgid "internal error, %s overflow"
-msgstr "εσωτερικό σφάλμα, υπερχείλιση του %s"
-
-#: plugins/sudoers/cvtsudoers_ldif.c:487
-msgid ""
-"the SUDOERS_BASE environment variable is not set and the -b option was not "
-"specified."
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_ldif.c:1016
-#, c-format
-msgid "ignoring incomplete sudoRole: cn: %s"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_ldif.c:1151 plugins/sudoers/ldap.c:2316
-#, c-format
-msgid "invalid sudoOrder attribute: %s"
-msgstr "άκυρο γνώρισμα sudoOrder: %s"
-
-#: plugins/sudoers/def_data.c:42
+#: plugins/sudoers/def_data.c:27
 #, c-format
 msgid "Syslog facility if syslog is being used for logging: %s"
 msgstr "Ευκολία Syslog αν το syslog χρησιμοποιείται για καταγραφή: %s"
 
-#: plugins/sudoers/def_data.c:46
+#: plugins/sudoers/def_data.c:31
 #, c-format
 msgid "Syslog priority to use when user authenticates successfully: %s"
 msgstr "Προτεραιότητα χρήσης Syslog, όταν ο χρήστης πιστοποιείται επιτυχώς: %s"
 
-#: plugins/sudoers/def_data.c:50
+#: plugins/sudoers/def_data.c:35
 #, c-format
 msgid "Syslog priority to use when user authenticates unsuccessfully: %s"
-msgstr ""
-"Προτεραιότητα χρήσης Syslog, όταν ο χρήστης πιστοποιείται ανεπιτυχώς: %s"
+msgstr "Προτεραιότητα χρήσης Syslog, όταν ο χρήστης πιστοποιείται ανεπιτυχώς: %s"
 
-#: plugins/sudoers/def_data.c:54
+#: plugins/sudoers/def_data.c:39
 msgid "Put OTP prompt on its own line"
 msgstr "Τοποθέτηση της προτροπής OTP στη δική της γραμμή"
 
-#: plugins/sudoers/def_data.c:58
+#: plugins/sudoers/def_data.c:43
 msgid "Ignore '.' in $PATH"
 msgstr "Παράβλεψη '.' στο $PATH"
 
-#: plugins/sudoers/def_data.c:62
+#: plugins/sudoers/def_data.c:47
 msgid "Always send mail when sudo is run"
 msgstr "Να στέλνετε πάντα μήνυμα όταν εκτελείται το sudo"
 
-#: plugins/sudoers/def_data.c:66
+#: plugins/sudoers/def_data.c:51
 msgid "Send mail if user authentication fails"
 msgstr "Να στέλνετε μήνυμα αν η πιστοποίηση χρήστη αποτύχει"
 
-#: plugins/sudoers/def_data.c:70
+#: plugins/sudoers/def_data.c:55
 msgid "Send mail if the user is not in sudoers"
 msgstr "Να στέλνετε μήνυμα αν ο χρήστης δεν είναι στους χρήστες sudo"
 
-#: plugins/sudoers/def_data.c:74
+#: plugins/sudoers/def_data.c:59
 msgid "Send mail if the user is not in sudoers for this host"
-msgstr ""
-"Να στέλνετε μήνυμα αν ο χρήστης δεν είναι στους χρήστες sudo για αυτόν τον "
-"οικοδεσπότη"
+msgstr "Να στέλνετε μήνυμα αν ο χρήστης δεν είναι στους χρήστες sudo για αυτόν τον οικοδεσπότη"
 
-#: plugins/sudoers/def_data.c:78
+#: plugins/sudoers/def_data.c:63
 msgid "Send mail if the user is not allowed to run a command"
-msgstr ""
-"Να στέλνετε μήνυμα αν ο χρήστης δεν επιτρέπεται να εκτελέσει μια εντολή"
+msgstr "Να στέλνετε μήνυμα αν ο χρήστης δεν επιτρέπεται να εκτελέσει μια εντολή"
 
-#: plugins/sudoers/def_data.c:82
-#, fuzzy
-msgid "Send mail if the user tries to run a command"
-msgstr ""
-"Να στέλνετε μήνυμα αν ο χρήστης δεν επιτρέπεται να εκτελέσει μια εντολή"
-
-#: plugins/sudoers/def_data.c:86
+#: plugins/sudoers/def_data.c:67
 msgid "Use a separate timestamp for each user/tty combo"
-msgstr ""
-"Να χρησιμοποιείται ξεχωριστή χρονική σήμανση για κάθε χρήστη/σύνθετο tty"
+msgstr "Να χρησιμοποιείται ξεχωριστή χρονική σήμανση για κάθε χρήστη/σύνθετο tty"
 
-#: plugins/sudoers/def_data.c:90
+#: plugins/sudoers/def_data.c:71
 msgid "Lecture user the first time they run sudo"
 msgstr "Να δίνονται οδηγίες στον χρήστη την πρώτη φορά που εκτελεί sudo"
 
-#: plugins/sudoers/def_data.c:94
+#: plugins/sudoers/def_data.c:75
 #, c-format
 msgid "File containing the sudo lecture: %s"
 msgstr "Το αρχείο που περιέχει τις οδηγίες sudo: %s"
 
-#: plugins/sudoers/def_data.c:98
+#: plugins/sudoers/def_data.c:79
 msgid "Require users to authenticate by default"
 msgstr "Να απαιτείται από τους χρήστες να πιστοποιούνται από προεπιλογή"
 
-#: plugins/sudoers/def_data.c:102
+#: plugins/sudoers/def_data.c:83
 msgid "Root may run sudo"
 msgstr "Ο υπερχρήστης μπορεί να εκτελεί sudo"
 
-#: plugins/sudoers/def_data.c:106
+#: plugins/sudoers/def_data.c:87
 msgid "Log the hostname in the (non-syslog) log file"
 msgstr "Καταγραφή του ονόματος οικοδεσπότη στο αρχείο καταγραφής (non-syslog)"
 
-#: plugins/sudoers/def_data.c:110
+#: plugins/sudoers/def_data.c:91
 msgid "Log the year in the (non-syslog) log file"
 msgstr "Καταγραφή του έτους στο αρχείο καταγραφής (non-syslog)"
 
-#: plugins/sudoers/def_data.c:114
+#: plugins/sudoers/def_data.c:95
 msgid "If sudo is invoked with no arguments, start a shell"
 msgstr "Αν το sudo κλήθηκε χωρίς ορίσματα, να αρχίσει ένα κέλυφος"
 
-#: plugins/sudoers/def_data.c:118
+#: plugins/sudoers/def_data.c:99
 msgid "Set $HOME to the target user when starting a shell with -s"
-msgstr ""
-"Ορίστε το $HOME του προοριζόμενου χρήστη όταν ξεκινάτε ένα κέλυφος με -s"
+msgstr "Ορίστε το $HOME του προοριζόμενου χρήστη όταν ξεκινάτε ένα κέλυφος με -s"
 
-#: plugins/sudoers/def_data.c:122
+#: plugins/sudoers/def_data.c:103
 msgid "Always set $HOME to the target user's home directory"
-msgstr ""
-"Να ορίζεται πάντα το $HOME στον προσωπικό κατάλογο του προοριζόμενου χρήστη"
+msgstr "Να ορίζεται πάντα το $HOME στον προσωπικό κατάλογο του προοριζόμενου χρήστη"
 
-#: plugins/sudoers/def_data.c:126
+#: plugins/sudoers/def_data.c:107
 msgid "Allow some information gathering to give useful error messages"
-msgstr ""
-"Να επιτρέπεται η συγκέντρωση κάποιων πληροφοριών για να δίνονται χρήσιμα "
-"μηνύματα σφαλμάτων"
+msgstr "Να επιτρέπεται η συγκέντρωση κάποιων πληροφοριών για να δίνονται χρήσιμα μηνύματα σφαλμάτων"
 
-#: plugins/sudoers/def_data.c:130
+#: plugins/sudoers/def_data.c:111
 msgid "Require fully-qualified hostnames in the sudoers file"
-msgstr ""
-"Να απαιτούνται πλήρως χαρακτηρισμένα ονόματα οικοδεσπότη στο αρχείο χρηστών "
-"sudo"
+msgstr "Να απαιτούνται πλήρως χαρακτηρισμένα ονόματα οικοδεσπότη στο αρχείο χρηστών sudo"
 
-#: plugins/sudoers/def_data.c:134
+#: plugins/sudoers/def_data.c:115
 msgid "Insult the user when they enter an incorrect password"
 msgstr "Να ειδοποιείται ο χρήστης όταν εισάγει έναν εσφαλμένο κωδικό πρόσβασης"
 
-#: plugins/sudoers/def_data.c:138
+#: plugins/sudoers/def_data.c:119
 msgid "Only allow the user to run sudo if they have a tty"
 msgstr "Να επιτρέπεται στον χρήστη να εκτελεί sudo μόνο αν έχει ένα tty"
 
-#: plugins/sudoers/def_data.c:142
+#: plugins/sudoers/def_data.c:123
 msgid "Visudo will honor the EDITOR environment variable"
 msgstr "Το Visudo θα σεβαστεί τη μεταβλητή περιβάλλοντος του EDITOR"
 
-#: plugins/sudoers/def_data.c:146
+#: plugins/sudoers/def_data.c:127
 msgid "Prompt for root's password, not the users's"
 msgstr "Να ζητιέται ο κωδικός πρόσβασης του υπερχρήστη, όχι του χρήστη"
 
-#: plugins/sudoers/def_data.c:150
+#: plugins/sudoers/def_data.c:131
 msgid "Prompt for the runas_default user's password, not the users's"
-msgstr ""
-"Να ζητιέται ο κωδικός πρόσβασης των χρηστών runas_default, όχι των χρηστών"
+msgstr "Να ζητιέται ο κωδικός πρόσβασης των χρηστών runas_default, όχι των χρηστών"
 
-#: plugins/sudoers/def_data.c:154
+#: plugins/sudoers/def_data.c:135
 msgid "Prompt for the target user's password, not the users's"
-msgstr ""
-"Να ζητιέται ο κωδικός πρόσβασης του προοριζόμενου χρήστη, όχι των χρηστών"
+msgstr "Να ζητιέται ο κωδικός πρόσβασης του προοριζόμενου χρήστη, όχι των χρηστών"
 
-#: plugins/sudoers/def_data.c:158
+#: plugins/sudoers/def_data.c:139
 msgid "Apply defaults in the target user's login class if there is one"
-msgstr ""
-"Να εφαρμόζονται οι προεπιλογές στην κλάση σύνδεσης του προοριζόμενου χρήστη "
-"αν υπάρχει κάποιες"
+msgstr "Να εφαρμόζονται οι προεπιλογές στην κλάση σύνδεσης του προοριζόμενου χρήστη αν υπάρχει κάποιες"
 
-#: plugins/sudoers/def_data.c:162
+#: plugins/sudoers/def_data.c:143
 msgid "Set the LOGNAME and USER environment variables"
 msgstr "Να ορίζονται οι μεταβλητές περιβάλλοντος LOGNAME και USER"
 
-#: plugins/sudoers/def_data.c:166
+#: plugins/sudoers/def_data.c:147
 msgid "Only set the effective uid to the target user, not the real uid"
-msgstr ""
-"Να ορίζεται μόνο το ενεργό uid του προοριζόμενου χρήστη, όχι το πραγματικό "
-"uid"
+msgstr "Να ορίζεται μόνο το ενεργό uid του προοριζόμενου χρήστη, όχι το πραγματικό uid"
 
-#: plugins/sudoers/def_data.c:170
+#: plugins/sudoers/def_data.c:151
 msgid "Don't initialize the group vector to that of the target user"
-msgstr ""
-"Να μην αρχικοποιείται το διάνυσμα ομάδας σε αυτό του προοριζόμενου χρήστη"
+msgstr "Να μην αρχικοποιείται το διάνυσμα ομάδας σε αυτό του προοριζόμενου χρήστη"
 
-#: plugins/sudoers/def_data.c:174
+#: plugins/sudoers/def_data.c:155
 #, c-format
 msgid "Length at which to wrap log file lines (0 for no wrap): %u"
-msgstr ""
-"Το μήκος στο οποίο θα αναδιπλώνονται οι γραμμές του αρχείου καταγραφής (0 "
-"για χωρίς αναδίπλωση): %u"
+msgstr "Το μήκος στο οποίο θα αναδιπλώνονται οι γραμμές του αρχείου καταγραφής (0 για χωρίς αναδίπλωση): %u"
 
-#: plugins/sudoers/def_data.c:178
+#: plugins/sudoers/def_data.c:159
 #, c-format
 msgid "Authentication timestamp timeout: %.1f minutes"
 msgstr "Όριο χρόνου χρονικής σήμανσης πιστοποίησης: %.1f λεπτά"
 
-#: plugins/sudoers/def_data.c:182
+#: plugins/sudoers/def_data.c:163
 #, c-format
 msgid "Password prompt timeout: %.1f minutes"
 msgstr "Όριο χρόνου προτροπής κωδικού πρόσβασης: %.1f λεπτά"
 
-#: plugins/sudoers/def_data.c:186
+#: plugins/sudoers/def_data.c:167
 #, c-format
 msgid "Number of tries to enter a password: %u"
 msgstr "Αριθμός προσπαθειών για να εισάγετε έναν κωδικό πρόσβασης: %u"
 
-#: plugins/sudoers/def_data.c:190
+#: plugins/sudoers/def_data.c:171
 #, c-format
 msgid "Umask to use or 0777 to use user's: 0%o"
 msgstr "Χρησιμοποιήστε umask ή 0777 για να χρησιμοποιήσετε του χρήστη: 0%o"
 
-#: plugins/sudoers/def_data.c:194
+#: plugins/sudoers/def_data.c:175
 #, c-format
 msgid "Path to log file: %s"
 msgstr "Διαδρομή για το αρχείο καταγραφής: %s"
 
-#: plugins/sudoers/def_data.c:198
+#: plugins/sudoers/def_data.c:179
 #, c-format
 msgid "Path to mail program: %s"
 msgstr "Διαδρομή για το πρόγραμμα αλληλογραφίας: %s"
 
-#: plugins/sudoers/def_data.c:202
+#: plugins/sudoers/def_data.c:183
 #, c-format
 msgid "Flags for mail program: %s"
 msgstr "Σημαίες για το πρόγραμμα αλληλογραφίας: %s"
 
-#: plugins/sudoers/def_data.c:206
+#: plugins/sudoers/def_data.c:187
 #, c-format
 msgid "Address to send mail to: %s"
 msgstr "Διεύθυνση αποστολής αλληλογραφίας προς: %s"
 
-#: plugins/sudoers/def_data.c:210
+#: plugins/sudoers/def_data.c:191
 #, c-format
 msgid "Address to send mail from: %s"
 msgstr "Διεύθυνση λήψης αλληλογραφίας από: %s"
 
-#: plugins/sudoers/def_data.c:214
+#: plugins/sudoers/def_data.c:195
 #, c-format
 msgid "Subject line for mail messages: %s"
 msgstr "Γραμμή θέματος για μηνύματα αλληλογραφίας: %s"
 
-#: plugins/sudoers/def_data.c:218
+#: plugins/sudoers/def_data.c:199
 #, c-format
 msgid "Incorrect password message: %s"
 msgstr "Εσφαλμένο μήνυμα κωδικού πρόσβασης: %s"
 
-#: plugins/sudoers/def_data.c:222
+#: plugins/sudoers/def_data.c:203
 #, c-format
 msgid "Path to lecture status dir: %s"
 msgstr "Διαδρομή για τον κατάλογο κατάστασης οδηγιών: %s"
 
-#: plugins/sudoers/def_data.c:226
+#: plugins/sudoers/def_data.c:207
 #, c-format
 msgid "Path to authentication timestamp dir: %s"
 msgstr "Διαδρομή για τον κατάλογο χρονικής σήμανσης πιστοποίησης: %s"
 
-#: plugins/sudoers/def_data.c:230
+#: plugins/sudoers/def_data.c:211
 #, c-format
 msgid "Owner of the authentication timestamp dir: %s"
 msgstr "Κάτοχος καταλόγου χρονικής σήμανσης πιστοποίησης: %s"
 
-#: plugins/sudoers/def_data.c:234
+#: plugins/sudoers/def_data.c:215
 #, c-format
 msgid "Users in this group are exempt from password and PATH requirements: %s"
-msgstr ""
-"Οι χρήστες αυτής της ομάδας εξαιρούνται από τον κωδικό πρόσβασης και της "
-"απαιτήσεις PATH: %s"
+msgstr "Οι χρήστες αυτής της ομάδας εξαιρούνται από τον κωδικό πρόσβασης και της απαιτήσεις PATH: %s"
 
-#: plugins/sudoers/def_data.c:238
+#: plugins/sudoers/def_data.c:219
 #, c-format
 msgid "Default password prompt: %s"
 msgstr "Προτροπή προεπιλεγμένου κωδικού πρόσβασης: %s"
 
-#: plugins/sudoers/def_data.c:242
+#: plugins/sudoers/def_data.c:223
 msgid "If set, passprompt will override system prompt in all cases."
-msgstr ""
-"Αν οριστεί, η προτροπή περάσματος θα αντικαταστήσει την προτροπή συστήματος "
-"σε όλες τις περιπτώσεις."
+msgstr "Αν οριστεί, η προτροπή περάσματος θα αντικαταστήσει την προτροπή συστήματος σε όλες τις περιπτώσεις."
 
-#: plugins/sudoers/def_data.c:246
+#: plugins/sudoers/def_data.c:227
 #, c-format
 msgid "Default user to run commands as: %s"
 msgstr "Προεπιλεγμένος χρήστης για να εκτελεί εντολές ως: %s"
 
-#: plugins/sudoers/def_data.c:250
+#: plugins/sudoers/def_data.c:231
 #, c-format
 msgid "Value to override user's $PATH with: %s"
 msgstr "Τιμή που θα αντικαθιστά τη $PATH χρήστη με: %s"
 
-#: plugins/sudoers/def_data.c:254
+#: plugins/sudoers/def_data.c:235
 #, c-format
 msgid "Path to the editor for use by visudo: %s"
 msgstr "Διαδρομή για τον επεξεργαστή για χρήση από το visudo: %s"
 
-#: plugins/sudoers/def_data.c:258
+#: plugins/sudoers/def_data.c:239
 #, c-format
 msgid "When to require a password for 'list' pseudocommand: %s"
-msgstr ""
-"Πότε θα απαιτείται κωδικός πρόσβασης για τον 'κατάλογο' ψευδοεντολών: %s"
+msgstr "Πότε θα απαιτείται κωδικός πρόσβασης για τον 'κατάλογο' ψευδοεντολών: %s"
 
-#: plugins/sudoers/def_data.c:262
+#: plugins/sudoers/def_data.c:243
 #, c-format
 msgid "When to require a password for 'verify' pseudocommand: %s"
-msgstr ""
-"Πότε θα απαιτείται κωδικός πρόσβασης για 'επιβεβαίωση' ψευδοεντολής: %s"
+msgstr "Πότε θα απαιτείται κωδικός πρόσβασης για 'επιβεβαίωση' ψευδοεντολής: %s"
 
-#: plugins/sudoers/def_data.c:266
+#: plugins/sudoers/def_data.c:247
 msgid "Preload the dummy exec functions contained in the sudo_noexec library"
-msgstr ""
-"Να προφορτώνονται οι εικονικές συναρτήσεις εκτέλεσης στη βιβλιοθήκη "
-"sudo_noexec"
+msgstr "Να προφορτώνονται οι εικονικές συναρτήσεις εκτέλεσης στη βιβλιοθήκη sudo_noexec"
 
-#: plugins/sudoers/def_data.c:270
+#: plugins/sudoers/def_data.c:251
 msgid "If LDAP directory is up, do we ignore local sudoers file"
-msgstr ""
-"Αν ο κατάλογος LDAP είναι ανεβασμένος, παραβλέπουμε το τοπικό αρχείο χρηστών "
-"sudo."
+msgstr "Αν ο κατάλογος LDAP είναι ανεβασμένος, παραβλέπουμε το τοπικό αρχείο χρηστών sudo."
 
-#: plugins/sudoers/def_data.c:274
+#: plugins/sudoers/def_data.c:255
 #, fuzzy, c-format
 msgid "File descriptors >= %d will be closed before executing a command"
-msgstr ""
-"Οι περιγραφείς αρχείων &gt;= %d να είναι κλειστοί πριν την εκτέλεση μιας "
-"εντολής"
+msgstr "Οι περιγραφείς αρχείων &gt;= %d να είναι κλειστοί πριν την εκτέλεση μιας εντολής"
 
-#: plugins/sudoers/def_data.c:278
+#: plugins/sudoers/def_data.c:259
 msgid "If set, users may override the value of `closefrom' with the -C option"
-msgstr ""
-"Αν οριστεί, οι χρήστες μπορούν να αντικαθιστούν την τιμή του `closefrom' με "
-"την επιλογή -C"
+msgstr "Αν οριστεί, οι χρήστες μπορούν να αντικαθιστούν την τιμή του `closefrom' με την επιλογή -C"
 
-#: plugins/sudoers/def_data.c:282
+#: plugins/sudoers/def_data.c:263
 msgid "Allow users to set arbitrary environment variables"
-msgstr ""
-"Να επιτρέπεται στους χρήστες να ορίζουν ελεύθερες μεταβλητές περιβάλλοντος"
+msgstr "Να επιτρέπεται στους χρήστες να ορίζουν ελεύθερες μεταβλητές περιβάλλοντος"
 
-#: plugins/sudoers/def_data.c:286
+#: plugins/sudoers/def_data.c:267
 msgid "Reset the environment to a default set of variables"
-msgstr ""
-"Να επαναρρυθμίζεται το περιβάλλον σε ένα προεπιλεγμένο σύνολο μεταβλητών"
+msgstr "Να επαναρρυθμίζεται το περιβάλλον σε ένα προεπιλεγμένο σύνολο μεταβλητών"
 
-#: plugins/sudoers/def_data.c:290
+#: plugins/sudoers/def_data.c:271
 msgid "Environment variables to check for sanity:"
 msgstr "Οι μεταβλητές περιβάλλοντος που θα ελέγχονται για ακεραιότητα:"
 
-#: plugins/sudoers/def_data.c:294
+#: plugins/sudoers/def_data.c:275
 msgid "Environment variables to remove:"
 msgstr "Οι μεταβλητές περιβάλλοντος προς αφαίρεση:"
 
-#: plugins/sudoers/def_data.c:298
+#: plugins/sudoers/def_data.c:279
 msgid "Environment variables to preserve:"
 msgstr "Οι μεταβλητές περιβάλλοντος για διατήρηση:"
 
-#: plugins/sudoers/def_data.c:302
+#: plugins/sudoers/def_data.c:283
 #, c-format
 msgid "SELinux role to use in the new security context: %s"
-msgstr ""
-"Ο ρόλος του SELinux που θα χρησιμοποιηθεί στο νέο περιεχόμενο ασφάλειας: %s"
+msgstr "Ο ρόλος του SELinux που θα χρησιμοποιηθεί στο νέο περιεχόμενο ασφάλειας: %s"
 
-#: plugins/sudoers/def_data.c:306
+#: plugins/sudoers/def_data.c:287
 #, c-format
 msgid "SELinux type to use in the new security context: %s"
-msgstr ""
-"Ο τύπος SELinux που θα χρησιμοποιηθεί στο νέο περιεχόμενο ασφάλειας: %s"
+msgstr "Ο τύπος SELinux που θα χρησιμοποιηθεί στο νέο περιεχόμενο ασφάλειας: %s"
 
-#: plugins/sudoers/def_data.c:310
+#: plugins/sudoers/def_data.c:291
 #, c-format
 msgid "Path to the sudo-specific environment file: %s"
 msgstr "Η διαδρομή προς το αρχείο περιβάλλοντος που είναι ειδικό για sudo: %s"
 
-#: plugins/sudoers/def_data.c:314
-#, fuzzy, c-format
-msgid "Path to the restricted sudo-specific environment file: %s"
-msgstr "Η διαδρομή προς το αρχείο περιβάλλοντος που είναι ειδικό για sudo: %s"
-
-#: plugins/sudoers/def_data.c:318
+#: plugins/sudoers/def_data.c:295
 #, c-format
 msgid "Locale to use while parsing sudoers: %s"
-msgstr ""
-"Οι τοπικές ρυθμίσεις που θα χρησιμοποιηθούν κατά την ανάλυση των χρηστών "
-"sudo: %s"
+msgstr "Οι τοπικές ρυθμίσεις που θα χρησιμοποιηθούν κατά την ανάλυση των χρηστών sudo: %s"
 
-#: plugins/sudoers/def_data.c:322
+#: plugins/sudoers/def_data.c:299
 msgid "Allow sudo to prompt for a password even if it would be visible"
-msgstr ""
-"Να επιτρέπεται στο sudo να ζητά κωδικό πρόσβασης ακόμα κι αν θα είναι ορατό"
+msgstr "Να επιτρέπεται στο sudo να ζητά κωδικό πρόσβασης ακόμα κι αν θα είναι ορατό"
 
-#: plugins/sudoers/def_data.c:326
+#: plugins/sudoers/def_data.c:303
 msgid "Provide visual feedback at the password prompt when there is user input"
-msgstr ""
-"Να παρέχεται οπτική ανάδραση στην προτροπή κωδικού πρόσβασης όταν υπάρχει "
-"είσοδος χρήστη"
+msgstr "Να παρέχεται οπτική ανάδραση στην προτροπή κωδικού πρόσβασης όταν υπάρχει είσοδος χρήστη"
 
-#: plugins/sudoers/def_data.c:330
-msgid ""
-"Use faster globbing that is less accurate but does not access the filesystem"
-msgstr ""
-"Να χρησιμοποιείται γρηγορότερη επέκταση (globbing) που είναι λιγότερο "
-"ακριβές, αλλά δεν έχει πρόσβαση στο σύστημα αρχείων"
+#: plugins/sudoers/def_data.c:307
+msgid "Use faster globbing that is less accurate but does not access the filesystem"
+msgstr "Να χρησιμοποιείται γρηγορότερη επέκταση (globbing) που είναι λιγότερο ακριβές, αλλά δεν έχει πρόσβαση στο σύστημα αρχείων"
 
-#: plugins/sudoers/def_data.c:334
-msgid ""
-"The umask specified in sudoers will override the user's, even if it is more "
-"permissive"
-msgstr ""
-"Η umask που ορίστηκε στους χρήστες sudo θα αντικαταστήσει αυτή του χρήστη, "
-"ακόμα κι αν δίνει περισσότερα δικαιώματα."
+#: plugins/sudoers/def_data.c:311
+msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
+msgstr "Η umask που ορίστηκε στους χρήστες sudo θα αντικαταστήσει αυτή του χρήστη, ακόμα κι αν δίνει περισσότερα δικαιώματα."
 
-#: plugins/sudoers/def_data.c:338
+#: plugins/sudoers/def_data.c:315
 msgid "Log user's input for the command being run"
 msgstr "Να καταγράφεται η είσοδος χρήστη για την εκτελούμενη εντολή"
 
-#: plugins/sudoers/def_data.c:342
+#: plugins/sudoers/def_data.c:319
 msgid "Log the output of the command being run"
 msgstr "Να καταγράφεται η έξοδος της εκτελούμενης εντολής"
 
-#: plugins/sudoers/def_data.c:346
+#: plugins/sudoers/def_data.c:323
 msgid "Compress I/O logs using zlib"
 msgstr "Συμπίεση καταγραφών εισόδου/εξόδου χρησιμοποιώντας το zlib"
 
-#: plugins/sudoers/def_data.c:350
+#: plugins/sudoers/def_data.c:327
 msgid "Always run commands in a pseudo-tty"
 msgstr "Να εκτελούνται πάντα εντολές σε ψευδο-tty"
 
-#: plugins/sudoers/def_data.c:354
+#: plugins/sudoers/def_data.c:331
 #, c-format
 msgid "Plugin for non-Unix group support: %s"
 msgstr "Πρόσθετο για υποστήριξη ομάδας μη Γιούνιξ: %s"
 
-#: plugins/sudoers/def_data.c:358
+#: plugins/sudoers/def_data.c:335
 #, c-format
 msgid "Directory in which to store input/output logs: %s"
 msgstr "Κατάλογος στον οποίο αποθηκεύονται οι καταγραφές εισόδου/εξόδου: %s"
 
-#: plugins/sudoers/def_data.c:362
+#: plugins/sudoers/def_data.c:339
 #, c-format
 msgid "File in which to store the input/output log: %s"
 msgstr "Αρχείο στο οποίο θα αποθηκεύεται η καταγραφή εισόδου/εξόδου: %s"
 
-#: plugins/sudoers/def_data.c:366
+#: plugins/sudoers/def_data.c:343
 msgid "Add an entry to the utmp/utmpx file when allocating a pty"
-msgstr ""
-"Να προστίθεται μια καταχώριση στο αρχείο utmp/utmpx κατά την εκχώρηση ενός "
-"pty"
+msgstr "Να προστίθεται μια καταχώριση στο αρχείο utmp/utmpx κατά την εκχώρηση ενός pty"
 
-#: plugins/sudoers/def_data.c:370
+#: plugins/sudoers/def_data.c:347
 msgid "Set the user in utmp to the runas user, not the invoking user"
-msgstr ""
-"Να ορίζεται ο χρήστης στο utmp στον χρήστη runas, να μην καλείται ο χρήστης"
+msgstr "Να ορίζεται ο χρήστης στο utmp στον χρήστη runas, να μην καλείται ο χρήστης"
 
-#: plugins/sudoers/def_data.c:374
-#, fuzzy, c-format
-msgid "Set of permitted privileges: %s"
+#: plugins/sudoers/def_data.c:351
+msgid "Set of permitted privileges"
 msgstr "Να ορίζονται τα επιτρεπόμενα δικαιώματα"
 
-#: plugins/sudoers/def_data.c:378
-#, fuzzy, c-format
-msgid "Set of limit privileges: %s"
+#: plugins/sudoers/def_data.c:355
+msgid "Set of limit privileges"
 msgstr "Να ορίζονται τα δικαιώματα ορίου"
 
-#: plugins/sudoers/def_data.c:382
+#: plugins/sudoers/def_data.c:359
 msgid "Run commands on a pty in the background"
 msgstr "Να εκτελούνται εντολές σε ένα pty στο παρασκήνιο"
 
-#: plugins/sudoers/def_data.c:386
-#, fuzzy, c-format
-msgid "PAM service name to use: %s"
+#: plugins/sudoers/def_data.c:363
+msgid "PAM service name to use"
 msgstr "Το όνομα υπηρεσίας PAM που θα χρησιμοποιηθεί"
 
-#: plugins/sudoers/def_data.c:390
-#, fuzzy, c-format
-msgid "PAM service name to use for login shells: %s"
+#: plugins/sudoers/def_data.c:367
+msgid "PAM service name to use for login shells"
 msgstr "Το όνομα υπηρεσίας PAM που θα χρησιμοποιηθεί για κελύφη σύνδεσης"
 
-#: plugins/sudoers/def_data.c:394
+#: plugins/sudoers/def_data.c:371
 msgid "Attempt to establish PAM credentials for the target user"
-msgstr ""
-"Να γίνεται προσπάθεια δημιουργίας διαπιστευτηρίων για τον προοριζόμενο χρήστη"
+msgstr "Να γίνεται προσπάθεια δημιουργίας διαπιστευτηρίων για τον προοριζόμενο χρήστη"
 
-#: plugins/sudoers/def_data.c:398
+#: plugins/sudoers/def_data.c:375
 msgid "Create a new PAM session for the command to run in"
 msgstr "Να δημιουργείται μια νέα συνεδρία PAM για την εκτελούμενη εντολή"
 
-#: plugins/sudoers/def_data.c:402
+#: plugins/sudoers/def_data.c:379
 #, c-format
 msgid "Maximum I/O log sequence number: %u"
 msgstr "Μέγιστος αριθμός αλληλουχίας καταγραφών εισόδου/εξόδου: %u"
 
-#: plugins/sudoers/def_data.c:406
+#: plugins/sudoers/def_data.c:383
 msgid "Enable sudoers netgroup support"
 msgstr "Να ενεργοποιείται η υποστήριξη ομάδας δικτύου στους χρήστες sudo"
 
-#: plugins/sudoers/def_data.c:410
-msgid ""
-"Check parent directories for writability when editing files with sudoedit"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:414
-msgid "Follow symbolic links when editing files with sudoedit"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:418
-msgid "Query the group plugin for unknown system groups"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:422
-msgid "Match netgroups based on the entire tuple: user, host and domain"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:426
-msgid "Allow commands to be run even if sudo cannot write to the audit log"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:430
-msgid "Allow commands to be run even if sudo cannot write to the I/O log"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:434
-msgid "Allow commands to be run even if sudo cannot write to the log file"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:438
-msgid "Resolve groups in sudoers and match on the group ID, not the name"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:442
+#: plugins/sudoers/defaults.c:210 plugins/sudoers/defaults.c:600
+#: plugins/sudoers/visudo_json.c:611 plugins/sudoers/visudo_json.c:647
 #, c-format
-msgid ""
-"Log entries larger than this value will be split into multiple syslog "
-"messages: %u"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:446
-#, c-format
-msgid "User that will own the I/O log files: %s"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:450
-#, c-format
-msgid "Group that will own the I/O log files: %s"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:454
-#, c-format
-msgid "File mode to use for the I/O log files: 0%o"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:458
-#, c-format
-msgid "Execute commands by file descriptor instead of by path: %s"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:462
-msgid ""
-"Ignore unknown Defaults entries in sudoers instead of producing a warning"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:466
-#, c-format
-msgid "Time in seconds after which the command will be terminated: %u"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:470
-msgid "Allow the user to specify a timeout on the command line"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:474
-msgid "Flush I/O log data to disk immediately instead of buffering it"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:478
-msgid "Include the process ID when logging via syslog"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:482
-#, fuzzy, c-format
-msgid "Type of authentication timestamp record: %s"
-msgstr "Κάτοχος καταλόγου χρονικής σήμανσης πιστοποίησης: %s"
-
-#: plugins/sudoers/def_data.c:486
-#, fuzzy, c-format
-msgid "Authentication failure message: %s"
-msgstr "αποτυχία πιστοποίησης"
-
-#: plugins/sudoers/def_data.c:490
-msgid "Ignore case when matching user names"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:494
-msgid "Ignore case when matching group names"
-msgstr ""
-
-#: plugins/sudoers/defaults.c:225
-#, fuzzy, c-format
-msgid "%s:%d unknown defaults entry \"%s\""
+msgid "unknown defaults entry `%s'"
 msgstr "άγνωστες προεπιλογές καταχώρισης `%s'"
 
-#: plugins/sudoers/defaults.c:228
-#, fuzzy, c-format
-msgid "%s: unknown defaults entry \"%s\""
-msgstr "άγνωστες προεπιλογές καταχώρισης `%s'"
-
-#: plugins/sudoers/defaults.c:271
-#, fuzzy, c-format
-msgid "%s:%d no value specified for \"%s\""
-msgstr "δεν ορίστηκε τιμή για το `%s'"
-
-#: plugins/sudoers/defaults.c:274
-#, fuzzy, c-format
-msgid "%s: no value specified for \"%s\""
-msgstr "δεν ορίστηκε τιμή για το `%s'"
-
-#: plugins/sudoers/defaults.c:294
-#, fuzzy, c-format
-msgid "%s:%d values for \"%s\" must start with a '/'"
-msgstr "οι τιμές για το `%s' πρέπει να αρχίζουν με ένα '/'"
-
-#: plugins/sudoers/defaults.c:297
-#, fuzzy, c-format
-msgid "%s: values for \"%s\" must start with a '/'"
-msgstr "οι τιμές για το `%s' πρέπει να αρχίζουν με ένα '/'"
-
-#: plugins/sudoers/defaults.c:319
-#, fuzzy, c-format
-msgid "%s:%d option \"%s\" does not take a value"
-msgstr "η επιλογή `%s' δεν παίρνει τιμή"
-
-#: plugins/sudoers/defaults.c:322
-#, fuzzy, c-format
-msgid "%s: option \"%s\" does not take a value"
-msgstr "η επιλογή `%s' δεν παίρνει τιμή"
-
-#: plugins/sudoers/defaults.c:347
-#, fuzzy, c-format
-msgid "%s:%d invalid Defaults type 0x%x for option \"%s\""
-msgstr "άκυρη επιλογή φίλτρου: %s"
-
-#: plugins/sudoers/defaults.c:350
-#, fuzzy, c-format
-msgid "%s: invalid Defaults type 0x%x for option \"%s\""
-msgstr "άκυρη επιλογή φίλτρου: %s"
-
-#: plugins/sudoers/defaults.c:360
-#, fuzzy, c-format
-msgid "%s:%d value \"%s\" is invalid for option \"%s\""
+#: plugins/sudoers/defaults.c:218 plugins/sudoers/defaults.c:228
+#: plugins/sudoers/defaults.c:248 plugins/sudoers/defaults.c:261
+#: plugins/sudoers/defaults.c:274 plugins/sudoers/defaults.c:287
+#: plugins/sudoers/defaults.c:300 plugins/sudoers/defaults.c:320
+#: plugins/sudoers/defaults.c:330
+#, c-format
+msgid "value `%s' is invalid for option `%s'"
 msgstr "η τιμή `%s' είναι άκυρη για την επιλογή `%s'"
 
-#: plugins/sudoers/defaults.c:363
-#, fuzzy, c-format
-msgid "%s: value \"%s\" is invalid for option \"%s\""
-msgstr "η τιμή `%s' είναι άκυρη για την επιλογή `%s'"
+#: plugins/sudoers/defaults.c:221 plugins/sudoers/defaults.c:231
+#: plugins/sudoers/defaults.c:239 plugins/sudoers/defaults.c:256
+#: plugins/sudoers/defaults.c:269 plugins/sudoers/defaults.c:282
+#: plugins/sudoers/defaults.c:295 plugins/sudoers/defaults.c:315
+#: plugins/sudoers/defaults.c:326
+#, c-format
+msgid "no value specified for `%s'"
+msgstr "δεν ορίστηκε τιμή για το `%s'"
 
-#: plugins/sudoers/env.c:376
+#: plugins/sudoers/defaults.c:244
+#, c-format
+msgid "values for `%s' must start with a '/'"
+msgstr "οι τιμές για το `%s' πρέπει να αρχίζουν με ένα '/'"
+
+#: plugins/sudoers/defaults.c:306
+#, c-format
+msgid "option `%s' does not take a value"
+msgstr "η επιλογή `%s' δεν παίρνει τιμή"
+
+#: plugins/sudoers/env.c:288 plugins/sudoers/env.c:293
+#: plugins/sudoers/env.c:395 plugins/sudoers/linux_audit.c:82
+#: plugins/sudoers/policy.c:442 plugins/sudoers/policy.c:449
+#: plugins/sudoers/prompt.c:171 plugins/sudoers/sudoers.c:656
+#: plugins/sudoers/testsudoers.c:241
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "εσωτερικό σφάλμα, υπερχείλιση του %s"
+
+#: plugins/sudoers/env.c:367
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: αλλοιωμένο envp, ασυμφωνία μήκους"
 
-#: plugins/sudoers/env.c:1055
-#, fuzzy
-msgid "unable to rebuild the environment"
-msgstr "αδύνατη η δόμηση φίλτρου χρόνου"
-
-#: plugins/sudoers/env.c:1129
+#: plugins/sudoers/env.c:1014
 #, c-format
-msgid ""
-"sorry, you are not allowed to set the following environment variables: %s"
-msgstr ""
-"συγνώμη, δεν σας επιτρέπετε να ορίσετε τις παρακάτω μεταβλητές "
-"περιβάλλοντος: %s"
+msgid "sorry, you are not allowed to set the following environment variables: %s"
+msgstr "συγνώμη, δεν σας επιτρέπετε να ορίσετε τις παρακάτω μεταβλητές περιβάλλοντος: %s"
 
-#: plugins/sudoers/filedigest.c:104 plugins/sudoers/filedigest_gcrypt.c:66
-#: plugins/sudoers/filedigest_openssl.c:95
-#, c-format
-msgid "unsupported digest type %d for %s"
-msgstr "ανυποστήρικτος τύπος αφομοίωσης %d για %s"
-
-#: plugins/sudoers/filedigest.c:129 plugins/sudoers/filedigest_gcrypt.c:98
-#: plugins/sudoers/filedigest_openssl.c:120
-#, c-format
-msgid "%s: read error"
-msgstr "%s: σφάλμα ανάγνωσης"
-
-#: plugins/sudoers/group_plugin.c:83
+#: plugins/sudoers/group_plugin.c:94
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "το %s πρέπει να κατέχεται από το uid %d"
 
-#: plugins/sudoers/group_plugin.c:87
+#: plugins/sudoers/group_plugin.c:98
 #, c-format
 msgid "%s must only be writable by owner"
 msgstr "το %s πρέπει να είναι εγγράψιμο μόνο από τον κάτοχο"
 
-#: plugins/sudoers/group_plugin.c:95 plugins/sudoers/sssd.c:399
+#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "αδύνατη η φόρτωση του %s: %s"
 
-#: plugins/sudoers/group_plugin.c:101
+#: plugins/sudoers/group_plugin.c:110
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
 msgstr "αδύνατη η εύρεση συμβόλου \"group_plugin\" στο %s"
 
-#: plugins/sudoers/group_plugin.c:106
+#: plugins/sudoers/group_plugin.c:115
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
 msgstr "%s: ασύμβατη μεγάλη έκδοση %d του προσθέτου ομάδας, αναμενόταν %d"
 
-#: plugins/sudoers/interfaces.c:79 plugins/sudoers/interfaces.c:96
-#, fuzzy, c-format
-msgid "unable to parse IP address \"%s\""
-msgstr "αδύνατη η ανάγνωση του %s"
-
-#: plugins/sudoers/interfaces.c:84 plugins/sudoers/interfaces.c:101
-#, fuzzy, c-format
-msgid "unable to parse netmask \"%s\""
-msgstr "%s: αδύνατη η ανάλυση του '%s': %s"
-
-#: plugins/sudoers/interfaces.c:129
+#: plugins/sudoers/interfaces.c:116
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Ζεύγη τοπικής διεύθυνσης IP και μάσκας δικτύου:\n"
 
-#: plugins/sudoers/iolog.c:119 plugins/sudoers/mkdir_parents.c:75
+#: plugins/sudoers/iolog.c:99 plugins/sudoers/iolog.c:112
+#: plugins/sudoers/timestamp.c:227
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "το %s υπάρχει, αλλά δεν είναι κατάλογος (0%o)"
 
-#: plugins/sudoers/iolog.c:144 plugins/sudoers/iolog.c:184
-#: plugins/sudoers/mkdir_parents.c:64 plugins/sudoers/timestamp.c:174
+#: plugins/sudoers/iolog.c:109 plugins/sudoers/iolog.c:123
+#: plugins/sudoers/iolog.c:127 plugins/sudoers/timestamp.c:221
+#: plugins/sudoers/timestamp.c:242
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "αδύνατο το mkdir %s"
 
-#: plugins/sudoers/iolog.c:188 plugins/sudoers/visudo.c:717
-#: plugins/sudoers/visudo.c:727
+#: plugins/sudoers/iolog.c:190 plugins/sudoers/sudoers.c:710
+#: plugins/sudoers/sudoreplay.c:342 plugins/sudoers/sudoreplay.c:813
+#: plugins/sudoers/sudoreplay.c:1010 plugins/sudoers/timestamp.c:345
+#: plugins/sudoers/visudo.c:823 plugins/sudoers/visudo_json.c:995
+#: plugins/sudoers/visudo_json.c:1001
 #, c-format
-msgid "unable to change mode of %s to 0%o"
-msgstr "αδύνατη η αλλαγή κατάστασης του %s στο 0%o"
+msgid "unable to open %s"
+msgstr "αδύνατο το άνοιγμα του %s"
 
-#: plugins/sudoers/iolog.c:296 plugins/sudoers/sudoers.c:1197
-#: plugins/sudoers/testsudoers.c:390
-#, c-format
-msgid "unknown group: %s"
-msgstr "άγνωστη ομάδα: %s"
-
-#: plugins/sudoers/iolog.c:466 plugins/sudoers/sudoers.c:937
-#: plugins/sudoers/sudoreplay.c:868 plugins/sudoers/sudoreplay.c:1681
-#: plugins/sudoers/tsdump.c:140
+#: plugins/sudoers/iolog.c:229 plugins/sudoers/sudoers.c:713
+#: plugins/sudoers/sudoreplay.c:1117
 #, c-format
 msgid "unable to read %s"
 msgstr "αδύνατη η ανάγνωση του %s"
 
-#: plugins/sudoers/iolog.c:581 plugins/sudoers/iolog.c:800
+#: plugins/sudoers/iolog.c:259 plugins/sudoers/sudoreplay.c:582
+#: plugins/sudoers/timestamp.c:184
+#, c-format
+msgid "unable to write to %s"
+msgstr "αδύνατη η εγγραφή σε %s"
+
+#: plugins/sudoers/iolog.c:319 plugins/sudoers/iolog.c:512
 #, c-format
 msgid "unable to create %s"
 msgstr "αδύνατη η δημιουργία του %s"
 
-#: plugins/sudoers/iolog.c:1032 plugins/sudoers/iolog.c:1107
-#: plugins/sudoers/iolog.c:1188
-#, fuzzy, c-format
-msgid "unable to write to I/O log file: %s"
-msgstr "αδύνατη η εγγραφή σε %s"
-
-#: plugins/sudoers/iolog.c:1066
-#, fuzzy, c-format
-msgid "%s: internal error, file index %d not open"
-msgstr "εσωτερικό σφάλμα, αδύνατη η εύρεση του %s στον κατάλογο!"
-
-#: plugins/sudoers/ldap.c:198 plugins/sudoers/ldap_conf.c:288
-msgid "starttls not supported when using ldaps"
-msgstr "το starttls δεν υποστηρίζεται όταν χρησιμοποιείται το ldaps"
-
-#: plugins/sudoers/ldap.c:269
-#, c-format
-msgid "unable to initialize SSL cert and key db: %s"
-msgstr "αδύνατη η αρχικοποίηση των cert SSL και db κλειδιών: %s"
-
-#: plugins/sudoers/ldap.c:272
-#, c-format
-msgid "you must set TLS_CERT in %s to use SSL"
-msgstr "πρέπει να ορίσετε το TLS_CERT σε %s για να χρησιμοποιήσετε το SSL"
-
-#: plugins/sudoers/ldap.c:2028
-#, c-format
-msgid "unable to initialize LDAP: %s"
-msgstr "αδύνατη η αρχικοποίηση του LDAP: %s"
-
-#: plugins/sudoers/ldap.c:2064
-msgid ""
-"start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
-"ldap_start_tls_s_np()"
-msgstr ""
-"ορίστηκε το start_tls, αλλά οι βιβλιοθήκες LDAP υποστηρίζουν "
-"ldap_start_tls_s() ή ldap_start_tls_s_np()"
-
-#: plugins/sudoers/ldap_conf.c:197
+#: plugins/sudoers/ldap.c:406
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: υπερβολικά μεγάλη θύρα"
 
-#: plugins/sudoers/ldap_conf.c:257
+#: plugins/sudoers/ldap.c:429
+msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
+msgstr "sudo_ldap_conf_add_ports: εκτός χώρου επέκτασης hostbuf"
+
+#: plugins/sudoers/ldap.c:461
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "ανυποστήρικτος τύπος LDAP uri: %s"
 
-#: plugins/sudoers/ldap_conf.c:284
+#: plugins/sudoers/ldap.c:492
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "αδύνατη η ανάμιξη URIs ldap και ldaps"
 
-#: plugins/sudoers/ldap_util.c:466 plugins/sudoers/ldap_util.c:468
-#, fuzzy, c-format
-msgid "unable to convert sudoOption: %s%s%s"
-msgstr "%s: αδύνατη η κατανομή επιλογών: %s"
+#: plugins/sudoers/ldap.c:496 plugins/sudoers/ldap.c:528
+msgid "starttls not supported when using ldaps"
+msgstr "το starttls δεν υποστηρίζεται όταν χρησιμοποιείται το ldaps"
 
-#: plugins/sudoers/linux_audit.c:52
-msgid "unable to open audit system"
-msgstr "αδύνατο το άνοιγμα συστήματος ελέγχου"
+#: plugins/sudoers/ldap.c:514
+msgid "sudo_ldap_parse_uri: out of space building hostbuf"
+msgstr "sudo_ldap_parse_uri: εκτός χώρου δόμησης του hostbuf"
 
-#: plugins/sudoers/linux_audit.c:93
-msgid "unable to send audit message"
-msgstr "αδύνατη η αποστολή μηνύματος ελέγχου"
-
-#: plugins/sudoers/logging.c:108
+#: plugins/sudoers/ldap.c:595
 #, c-format
-msgid "%8s : %s"
-msgstr "%8s : %s"
+msgid "unable to initialize SSL cert and key db: %s"
+msgstr "αδύνατη η αρχικοποίηση των cert SSL και db κλειδιών: %s"
 
-#: plugins/sudoers/logging.c:136
+#: plugins/sudoers/ldap.c:598
 #, c-format
-msgid "%8s : (command continued) %s"
-msgstr "%8s : (συνεχιζόμενη εντολή) %s"
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "πρέπει να ορίσετε το TLS_CERT σε %s για να χρησιμοποιήσετε το SSL"
 
-#: plugins/sudoers/logging.c:165
-#, fuzzy, c-format
-msgid "unable to open log file: %s"
-msgstr "αδύνατο το άνοιγμα αρχείου καταγραφής: %s: %s"
+#: plugins/sudoers/ldap.c:1089
+msgid "unable to get GMT time"
+msgstr "αδύνατη η λήψη χρόνου GMT"
 
-#: plugins/sudoers/logging.c:173
-#, fuzzy, c-format
-msgid "unable to lock log file: %s"
-msgstr "αδύνατο το κλείδωμα αρχείου καταγραφής: %s: %s"
+#: plugins/sudoers/ldap.c:1095
+msgid "unable to format timestamp"
+msgstr "αδύνατη η μορφοποίηση της χρονικής σήμανσης"
 
-#: plugins/sudoers/logging.c:206
-#, fuzzy, c-format
-msgid "unable to write log file: %s"
-msgstr "αδύνατη η εγγραφή σε %s"
+#: plugins/sudoers/ldap.c:1103
+msgid "unable to build time filter"
+msgstr "αδύνατη η δόμηση φίλτρου χρόνου"
 
-#: plugins/sudoers/logging.c:235
-msgid "No user or host"
-msgstr "Χωρίς χρήστη ή οικοδεσπότη"
+#: plugins/sudoers/ldap.c:1322
+msgid "sudo_ldap_build_pass1 allocation mismatch"
+msgstr "ασυμφωνία κατανομής sudo_ldap_build_pass1"
 
-#: plugins/sudoers/logging.c:237
-msgid "validation failure"
-msgstr "αποτυχία επικύρωσης"
-
-#: plugins/sudoers/logging.c:244
-msgid "user NOT in sudoers"
-msgstr "ο χρήστης ΔΕΝ είναι στους sudo"
-
-#: plugins/sudoers/logging.c:246
-msgid "user NOT authorized on host"
-msgstr "ο χρήστης ΔΕΝ εξουσιοδοτήθηκε στον οικοδεσπότη"
-
-#: plugins/sudoers/logging.c:248
-msgid "command not allowed"
-msgstr "μη επιτρεπόμενη εντολή"
-
-#: plugins/sudoers/logging.c:283
+#: plugins/sudoers/ldap.c:1433
 #, c-format
-msgid "%s is not in the sudoers file.  This incident will be reported.\n"
-msgstr ""
-"το %s δεν είναι στο αρχείο χρηστών sudo. Αυτό το συμβάν θα αναφερθεί.\n"
+msgid "%s: %s: %s: %s"
+msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/logging.c:286
-#, c-format
-msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
-msgstr ""
-"ο %s δεν επιτρέπεται να εκτελέσει sudo στο %s. Αυτό το συμβάν θα αναφερθεί.\n"
-
-#: plugins/sudoers/logging.c:290
-#, c-format
-msgid "Sorry, user %s may not run sudo on %s.\n"
-msgstr "Συγνώμη, ο χρήστης %s δεν μπορεί να εκτελέσει sudo στο %s.\n"
-
-#: plugins/sudoers/logging.c:293
-#, c-format
-msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
-msgstr ""
-"Συγνώμη, ο χρήστης %s δεν επιτρέπεται να εκτελέσει '%s%s%s' ως %s%s%s στο "
-"%s.\n"
-
-#: plugins/sudoers/logging.c:330 plugins/sudoers/sudoers.c:472
-#: plugins/sudoers/sudoers.c:474 plugins/sudoers/sudoers.c:476
-#: plugins/sudoers/sudoers.c:478 plugins/sudoers/sudoers.c:632
-#: plugins/sudoers/sudoers.c:634
-#, c-format
-msgid "%s: command not found"
-msgstr "%s: δεν βρέθηκε η εντολή"
-
-#: plugins/sudoers/logging.c:332 plugins/sudoers/sudoers.c:468
-#, fuzzy, c-format
-msgid ""
-"ignoring \"%s\" found in '.'\n"
-"Use \"sudo ./%s\" if this is the \"%s\" you wish to run."
-msgstr ""
-"παραβλέπεται το `%s' που βρέθηκε στο '.'\n"
-"Χρησιμοποιήστε `sudo ./%s' αν αυτό είναι το `%s' που θέλετε να εκτελέσετε."
-
-#: plugins/sudoers/logging.c:349
-msgid "authentication failure"
-msgstr "αποτυχία πιστοποίησης"
-
-#: plugins/sudoers/logging.c:375
-msgid "a password is required"
-msgstr "απαιτείται κωδικός πρόσβασης"
-
-#: plugins/sudoers/logging.c:438
-#, c-format
-msgid "%u incorrect password attempt"
-msgid_plural "%u incorrect password attempts"
-msgstr[0] "%u ανεπιτυχής προσπάθεια κωδικού πρόσβασης"
-msgstr[1] "%u ανεπιτυχείς προσπάθειες κωδικού πρόσβασης"
-
-#: plugins/sudoers/logging.c:659
-msgid "unable to fork"
-msgstr "αδύνατη η διακλάδωση"
-
-#: plugins/sudoers/logging.c:667 plugins/sudoers/logging.c:719
-#, c-format
-msgid "unable to fork: %m"
-msgstr "αδύνατη η διακλάδωση: %m"
-
-#: plugins/sudoers/logging.c:709
-#, c-format
-msgid "unable to open pipe: %m"
-msgstr "αδύνατο το άνοιγμα της διοχέτευσης: %m"
-
-#: plugins/sudoers/logging.c:734
-#, c-format
-msgid "unable to dup stdin: %m"
-msgstr "αδύνατο να dup στην τυπική είσοδο: %m"
-
-#: plugins/sudoers/logging.c:772
-#, c-format
-msgid "unable to execute %s: %m"
-msgstr "αδύνατη η εκτέλεση %s: %m"
-
-#: plugins/sudoers/match.c:810
-#, c-format
-msgid "digest for %s (%s) is not in %s form"
-msgstr "η αφομοίωση για το %s (%s) δεν είναι στη μορφή %s"
-
-#: plugins/sudoers/mkdir_parents.c:70 plugins/sudoers/sudoers.c:948
-#: plugins/sudoers/visudo.c:416 plugins/sudoers/visudo.c:711
-#, c-format
-msgid "unable to stat %s"
-msgstr "αδύνατο να εκτελεστεί stat %s"
-
-#: plugins/sudoers/parse.c:110
-#, c-format
-msgid "parse error in %s near line %d"
-msgstr "σφάλμα ανάλυσης στο %s κοντά στη γραμμή %d"
-
-#: plugins/sudoers/parse.c:113
-#, c-format
-msgid "parse error in %s"
-msgstr "ανάλυση σφάλματος για %s"
-
-#: plugins/sudoers/parse.c:469
+#: plugins/sudoers/ldap.c:1909
 #, c-format
 msgid ""
 "\n"
@@ -1639,7 +831,194 @@ msgstr ""
 "\n"
 "Ρόλος LDAP: %s\n"
 
-#: plugins/sudoers/parse.c:472
+#: plugins/sudoers/ldap.c:1911
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: UNKNOWN\n"
+msgstr ""
+"\n"
+"Ρόλος LDAP: ΑΓΝΩΣΤΟΣ\n"
+
+#: plugins/sudoers/ldap.c:1958
+#, c-format
+msgid "    Order: %s\n"
+msgstr "    Σειρά: %s\n"
+
+#: plugins/sudoers/ldap.c:1966 plugins/sudoers/parse.c:504
+#: plugins/sudoers/sssd.c:1295
+#, c-format
+msgid "    Commands:\n"
+msgstr "    Εντολές:\n"
+
+#: plugins/sudoers/ldap.c:2509
+#, c-format
+msgid "unable to initialize LDAP: %s"
+msgstr "αδύνατη η αρχικοποίηση του LDAP: %s"
+
+#: plugins/sudoers/ldap.c:2551
+msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
+msgstr "ορίστηκε το start_tls, αλλά οι βιβλιοθήκες LDAP υποστηρίζουν ldap_start_tls_s() ή ldap_start_tls_s_np()"
+
+#: plugins/sudoers/ldap.c:2784
+#, c-format
+msgid "invalid sudoOrder attribute: %s"
+msgstr "άκυρο γνώρισμα sudoOrder: %s"
+
+#: plugins/sudoers/linux_audit.c:57
+msgid "unable to open audit system"
+msgstr "αδύνατο το άνοιγμα συστήματος ελέγχου"
+
+#: plugins/sudoers/linux_audit.c:93
+msgid "unable to send audit message"
+msgstr "αδύνατη η αποστολή μηνύματος ελέγχου"
+
+#: plugins/sudoers/logging.c:136
+#, c-format
+msgid "%8s : %s"
+msgstr "%8s : %s"
+
+#: plugins/sudoers/logging.c:164
+#, c-format
+msgid "%8s : (command continued) %s"
+msgstr "%8s : (συνεχιζόμενη εντολή) %s"
+
+#: plugins/sudoers/logging.c:189
+#, c-format
+msgid "unable to open log file: %s: %s"
+msgstr "αδύνατο το άνοιγμα αρχείου καταγραφής: %s: %s"
+
+#: plugins/sudoers/logging.c:192
+#, c-format
+msgid "unable to lock log file: %s: %s"
+msgstr "αδύνατο το κλείδωμα αρχείου καταγραφής: %s: %s"
+
+#: plugins/sudoers/logging.c:243
+msgid "No user or host"
+msgstr "Χωρίς χρήστη ή οικοδεσπότη"
+
+#: plugins/sudoers/logging.c:245
+msgid "validation failure"
+msgstr "αποτυχία επικύρωσης"
+
+#: plugins/sudoers/logging.c:252
+msgid "user NOT in sudoers"
+msgstr "ο χρήστης ΔΕΝ είναι στους sudo"
+
+#: plugins/sudoers/logging.c:254
+msgid "user NOT authorized on host"
+msgstr "ο χρήστης ΔΕΝ εξουσιοδοτήθηκε στον οικοδεσπότη"
+
+#: plugins/sudoers/logging.c:256
+msgid "command not allowed"
+msgstr "μη επιτρεπόμενη εντολή"
+
+#: plugins/sudoers/logging.c:286
+#, c-format
+msgid "%s is not in the sudoers file.  This incident will be reported.\n"
+msgstr "το %s δεν είναι στο αρχείο χρηστών sudo. Αυτό το συμβάν θα αναφερθεί.\n"
+
+#: plugins/sudoers/logging.c:289
+#, c-format
+msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
+msgstr "ο %s δεν επιτρέπεται να εκτελέσει sudo στο %s. Αυτό το συμβάν θα αναφερθεί.\n"
+
+#: plugins/sudoers/logging.c:293
+#, c-format
+msgid "Sorry, user %s may not run sudo on %s.\n"
+msgstr "Συγνώμη, ο χρήστης %s δεν μπορεί να εκτελέσει sudo στο %s.\n"
+
+#: plugins/sudoers/logging.c:296
+#, c-format
+msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
+msgstr "Συγνώμη, ο χρήστης %s δεν επιτρέπεται να εκτελέσει '%s%s%s' ως %s%s%s στο %s.\n"
+
+#: plugins/sudoers/logging.c:333 plugins/sudoers/sudoers.c:382
+#: plugins/sudoers/sudoers.c:383 plugins/sudoers/sudoers.c:385
+#: plugins/sudoers/sudoers.c:386 plugins/sudoers/sudoers.c:1017
+#: plugins/sudoers/sudoers.c:1018
+#, c-format
+msgid "%s: command not found"
+msgstr "%s: δεν βρέθηκε η εντολή"
+
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:378
+#, c-format
+msgid ""
+"ignoring `%s' found in '.'\n"
+"Use `sudo ./%s' if this is the `%s' you wish to run."
+msgstr ""
+"παραβλέπεται το `%s' που βρέθηκε στο '.'\n"
+"Χρησιμοποιήστε `sudo ./%s' αν αυτό είναι το `%s' που θέλετε να εκτελέσετε."
+
+#: plugins/sudoers/logging.c:351
+msgid "authentication failure"
+msgstr "αποτυχία πιστοποίησης"
+
+#: plugins/sudoers/logging.c:377
+msgid "a password is required"
+msgstr "απαιτείται κωδικός πρόσβασης"
+
+#: plugins/sudoers/logging.c:441 plugins/sudoers/logging.c:495
+#, c-format
+msgid "%u incorrect password attempt"
+msgid_plural "%u incorrect password attempts"
+msgstr[0] "%u ανεπιτυχής προσπάθεια κωδικού πρόσβασης"
+msgstr[1] "%u ανεπιτυχείς προσπάθειες κωδικού πρόσβασης"
+
+#: plugins/sudoers/logging.c:581
+msgid "unable to fork"
+msgstr "αδύνατη η διακλάδωση"
+
+#: plugins/sudoers/logging.c:588 plugins/sudoers/logging.c:644
+#, c-format
+msgid "unable to fork: %m"
+msgstr "αδύνατη η διακλάδωση: %m"
+
+#: plugins/sudoers/logging.c:634
+#, c-format
+msgid "unable to open pipe: %m"
+msgstr "αδύνατο το άνοιγμα της διοχέτευσης: %m"
+
+#: plugins/sudoers/logging.c:659
+#, c-format
+msgid "unable to dup stdin: %m"
+msgstr "αδύνατο να dup στην τυπική είσοδο: %m"
+
+#: plugins/sudoers/logging.c:694
+#, c-format
+msgid "unable to execute %s: %m"
+msgstr "αδύνατη η εκτέλεση %s: %m"
+
+#: plugins/sudoers/logging.c:914
+msgid "internal error: insufficient space for log line"
+msgstr "εσωτερικό σφάλμα: ανεπαρκής χώρος για γραμμή καταγραφής"
+
+#: plugins/sudoers/match.c:617
+#, c-format
+msgid "unsupported digest type %d for %s"
+msgstr "ανυποστήρικτος τύπος αφομοίωσης %d για %s"
+
+#: plugins/sudoers/match.c:647
+#, c-format
+msgid "%s: read error"
+msgstr "%s: σφάλμα ανάγνωσης"
+
+#: plugins/sudoers/match.c:661
+#, c-format
+msgid "digest for %s (%s) is not in %s form"
+msgstr "η αφομοίωση για το %s (%s) δεν είναι στη μορφή %s"
+
+#: plugins/sudoers/parse.c:115
+#, c-format
+msgid "parse error in %s near line %d"
+msgstr "σφάλμα ανάλυσης στο %s κοντά στη γραμμή %d"
+
+#: plugins/sudoers/parse.c:118
+#, c-format
+msgid "parse error in %s"
+msgstr "ανάλυση σφάλματος για %s"
+
+#: plugins/sudoers/parse.c:451
 #, c-format
 msgid ""
 "\n"
@@ -1648,69 +1027,49 @@ msgstr ""
 "\n"
 "Καταχώριση χρηστών sudo:\n"
 
-#: plugins/sudoers/parse.c:474
+#: plugins/sudoers/parse.c:452
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    RunAsUsers: "
 
-#: plugins/sudoers/parse.c:488
+#: plugins/sudoers/parse.c:466
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    RunAsGroups: "
 
-#: plugins/sudoers/parse.c:497
+#: plugins/sudoers/parse.c:475
 #, c-format
 msgid "    Options: "
 msgstr "  Επιλογές: "
 
-#: plugins/sudoers/parse.c:551
+#: plugins/sudoers/policy.c:109 plugins/sudoers/policy.c:116
+#: plugins/sudoers/policy.c:123 plugins/sudoers/policy.c:145
+#: plugins/sudoers/policy.c:259 plugins/sudoers/policy.c:277
+#: plugins/sudoers/policy.c:284 plugins/sudoers/policy.c:312
+#: plugins/sudoers/policy.c:320 plugins/sudoers/policy.c:327
+#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
+#: plugins/sudoers/set_perms.c:1525
 #, c-format
-msgid "    Commands:\n"
-msgstr "    Εντολές:\n"
+msgid "%s: %s"
+msgstr "%s: %s"
 
-#: plugins/sudoers/policy.c:84 plugins/sudoers/policy.c:110
-#, c-format
-msgid "invalid %.*s set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:289 plugins/sudoers/testsudoers.c:260
-#, fuzzy
-msgid "unable to parse network address list"
-msgstr "αδύνατη η ανάλυση ομάδων για %s"
-
-#: plugins/sudoers/policy.c:433
-msgid "user name not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:437
-msgid "user ID not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:441
-msgid "group ID not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:445
-msgid "host name not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:793 plugins/sudoers/visudo.c:216
-#: plugins/sudoers/visudo.c:844
+#: plugins/sudoers/policy.c:539 plugins/sudoers/visudo.c:764
 #, c-format
 msgid "unable to execute %s"
 msgstr "Αδύνατη η εκτέλεση του %s."
 
-#: plugins/sudoers/policy.c:926
+#: plugins/sudoers/policy.c:681
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Η έκδοση προσθέτου πολιτικής χρηστών sudo %s\n"
 
-#: plugins/sudoers/policy.c:928
+#: plugins/sudoers/policy.c:683
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Η έκδοση γραμματικής αρχείου χρηστών sudo %d\n"
 
-#: plugins/sudoers/policy.c:932
+#: plugins/sudoers/policy.c:687
 #, c-format
 msgid ""
 "\n"
@@ -1719,270 +1078,207 @@ msgstr ""
 "\n"
 "διαδρομή χρηστών sudo: %s\n"
 
-#: plugins/sudoers/policy.c:935
+#: plugins/sudoers/policy.c:690
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "διαδρομή nsswitch: %s\n"
 
-#: plugins/sudoers/policy.c:937
+#: plugins/sudoers/policy.c:692
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "διαδρομή ldap.conf: %s\n"
 
-#: plugins/sudoers/policy.c:938
+#: plugins/sudoers/policy.c:693
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "διαδρομή ldap.secret: %s\n"
 
-#: plugins/sudoers/policy.c:971
-#, c-format
-msgid "unable to register hook of type %d (version %d.%d)"
-msgstr ""
-
-#: plugins/sudoers/pwutil.c:214 plugins/sudoers/pwutil.c:232
-#, fuzzy, c-format
-msgid "unable to cache uid %u, out of memory"
-msgstr "αδύνατη η αποθήκευση του uid %u, υπάρχει ήδη"
-
-#: plugins/sudoers/pwutil.c:226
+#: plugins/sudoers/pwutil.c:148
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "αδύνατη η αποθήκευση του uid %u, υπάρχει ήδη"
 
-#: plugins/sudoers/pwutil.c:286 plugins/sudoers/pwutil.c:303
-#: plugins/sudoers/pwutil.c:365 plugins/sudoers/pwutil.c:410
-#, fuzzy, c-format
-msgid "unable to cache user %s, out of memory"
-msgstr "αδύνατη η αποθήκευση του %s χρήστη, υπάρχει ήδη"
-
-#: plugins/sudoers/pwutil.c:298
+#: plugins/sudoers/pwutil.c:190
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "αδύνατη η αποθήκευση του %s χρήστη, υπάρχει ήδη"
 
-#: plugins/sudoers/pwutil.c:529 plugins/sudoers/pwutil.c:547
-#, fuzzy, c-format
-msgid "unable to cache gid %u, out of memory"
-msgstr "αδύνατη η αποθήκευση του gid %u, υπάρχει ήδη"
-
-#: plugins/sudoers/pwutil.c:541
+#: plugins/sudoers/pwutil.c:393
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "αδύνατη η αποθήκευση του gid %u, υπάρχει ήδη"
 
-#: plugins/sudoers/pwutil.c:595 plugins/sudoers/pwutil.c:612
-#: plugins/sudoers/pwutil.c:659 plugins/sudoers/pwutil.c:701
-#, fuzzy, c-format
-msgid "unable to cache group %s, out of memory"
-msgstr "αδύνατη η αποθήκευση ομάδας %s, υπάρχει ήδη"
-
-#: plugins/sudoers/pwutil.c:607
+#: plugins/sudoers/pwutil.c:429
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "αδύνατη η αποθήκευση ομάδας %s, υπάρχει ήδη"
 
-#: plugins/sudoers/pwutil.c:827 plugins/sudoers/pwutil.c:879
-#: plugins/sudoers/pwutil.c:930 plugins/sudoers/pwutil.c:983
+#: plugins/sudoers/pwutil.c:592 plugins/sudoers/pwutil.c:614
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "αδύνατη η αποθήκευση καταλόγου ομάδας %s, υπάρχει ήδη"
 
-#: plugins/sudoers/pwutil.c:833 plugins/sudoers/pwutil.c:884
-#: plugins/sudoers/pwutil.c:936 plugins/sudoers/pwutil.c:988
-#, fuzzy, c-format
-msgid "unable to cache group list for %s, out of memory"
-msgstr "αδύνατη η αποθήκευση καταλόγου ομάδας %s, υπάρχει ήδη"
-
-#: plugins/sudoers/pwutil.c:873
+#: plugins/sudoers/pwutil.c:612
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "αδύνατη η ανάλυση ομάδων για %s"
 
-#: plugins/sudoers/pwutil.c:977
-#, fuzzy, c-format
-msgid "unable to parse gids for %s"
-msgstr "αδύνατη η ανάλυση ομάδων για %s"
-
-#: plugins/sudoers/set_perms.c:113 plugins/sudoers/set_perms.c:469
-#: plugins/sudoers/set_perms.c:912 plugins/sudoers/set_perms.c:1239
-#: plugins/sudoers/set_perms.c:1556
+#: plugins/sudoers/set_perms.c:124 plugins/sudoers/set_perms.c:449
+#: plugins/sudoers/set_perms.c:852 plugins/sudoers/set_perms.c:1149
+#: plugins/sudoers/set_perms.c:1441
 msgid "perm stack overflow"
 msgstr "υπερχείλιση στοίβας perm"
 
-#: plugins/sudoers/set_perms.c:121 plugins/sudoers/set_perms.c:400
-#: plugins/sudoers/set_perms.c:477 plugins/sudoers/set_perms.c:779
-#: plugins/sudoers/set_perms.c:920 plugins/sudoers/set_perms.c:1163
-#: plugins/sudoers/set_perms.c:1247 plugins/sudoers/set_perms.c:1489
-#: plugins/sudoers/set_perms.c:1564 plugins/sudoers/set_perms.c:1654
+#: plugins/sudoers/set_perms.c:132 plugins/sudoers/set_perms.c:457
+#: plugins/sudoers/set_perms.c:860 plugins/sudoers/set_perms.c:1157
+#: plugins/sudoers/set_perms.c:1449
 msgid "perm stack underflow"
 msgstr "υποχείλιση στοίβας perm"
 
-#: plugins/sudoers/set_perms.c:180 plugins/sudoers/set_perms.c:523
-#: plugins/sudoers/set_perms.c:1298 plugins/sudoers/set_perms.c:1596
+#: plugins/sudoers/set_perms.c:191 plugins/sudoers/set_perms.c:504
+#: plugins/sudoers/set_perms.c:1208 plugins/sudoers/set_perms.c:1481
 msgid "unable to change to root gid"
 msgstr "αδύνατη η αλλαγή σε gid υπερχρήστη"
 
-#: plugins/sudoers/set_perms.c:269 plugins/sudoers/set_perms.c:620
-#: plugins/sudoers/set_perms.c:1049 plugins/sudoers/set_perms.c:1375
+#: plugins/sudoers/set_perms.c:280 plugins/sudoers/set_perms.c:601
+#: plugins/sudoers/set_perms.c:989 plugins/sudoers/set_perms.c:1285
 msgid "unable to change to runas gid"
 msgstr "αδύνατη η αλλαγή σε gid runas"
 
-#: plugins/sudoers/set_perms.c:274 plugins/sudoers/set_perms.c:625
-#: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1380
-msgid "unable to set runas group vector"
-msgstr "αδύνατος ο ορισμός διανύσματος ομάδας runas"
-
-#: plugins/sudoers/set_perms.c:285 plugins/sudoers/set_perms.c:636
-#: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1389
+#: plugins/sudoers/set_perms.c:292 plugins/sudoers/set_perms.c:613
+#: plugins/sudoers/set_perms.c:999 plugins/sudoers/set_perms.c:1295
 msgid "unable to change to runas uid"
 msgstr "αδύνατη η αλλαγή σε uid runas"
 
-#: plugins/sudoers/set_perms.c:303 plugins/sudoers/set_perms.c:654
-#: plugins/sudoers/set_perms.c:1079 plugins/sudoers/set_perms.c:1405
+#: plugins/sudoers/set_perms.c:310 plugins/sudoers/set_perms.c:631
+#: plugins/sudoers/set_perms.c:1015 plugins/sudoers/set_perms.c:1311
 msgid "unable to change to sudoers gid"
 msgstr "αδύνατη η αλλαγή σε gid χρηστών sudo"
 
-#: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
-#: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
-#: plugins/sudoers/set_perms.c:1641
+#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
+#: plugins/sudoers/set_perms.c:1525
 msgid "too many processes"
 msgstr "υπερβολικά πολλές διεργασίες"
 
-#: plugins/sudoers/solaris_audit.c:51
-#, fuzzy
-msgid "unable to get current working directory"
+#: plugins/sudoers/set_perms.c:1595
+msgid "unable to set runas group vector"
 msgstr "αδύνατος ο ορισμός διανύσματος ομάδας runas"
 
-#: plugins/sudoers/solaris_audit.c:59
-#, c-format
-msgid "truncated audit path user_cmnd: %s"
-msgstr ""
-
-#: plugins/sudoers/solaris_audit.c:66
-#, c-format
-msgid "truncated audit path argv[0]: %s"
-msgstr ""
-
-#: plugins/sudoers/solaris_audit.c:115
-msgid "audit_failure message too long"
-msgstr ""
-
-#: plugins/sudoers/sssd.c:401
+#: plugins/sudoers/sssd.c:252
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
-msgstr ""
-"αδύνατη η αρχικοποίηση πηγής SSS. Είναι το SSSD εγκατεστημένο στο μηχάνημά "
-"σας;"
+msgstr "αδύνατη η αρχικοποίηση πηγής SSS. Είναι το SSSD εγκατεστημένο στο μηχάνημά σας;"
 
-#: plugins/sudoers/sssd.c:409 plugins/sudoers/sssd.c:418
-#: plugins/sudoers/sssd.c:427 plugins/sudoers/sssd.c:436
-#: plugins/sudoers/sssd.c:445
+#: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
+#: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
+#: plugins/sudoers/sssd.c:291
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "αδύνατη η εύρεση συμβόλου \"%s\" στο %s"
 
-#: plugins/sudoers/sudo_nss.c:289
+#: plugins/sudoers/sudo_nss.c:283
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr "Συμφωνία προεπιλεγμένων καταχωρίσεων για %s στο %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:307
+#: plugins/sudoers/sudo_nss.c:296
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr "Runas και προεπιλεγμένες ειδικές εντολές για το %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:325
+#: plugins/sudoers/sudo_nss.c:309
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr "Ο χρήστης %s μπορεί να εκτελέσει τις παρακάτω εντολές στο %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:338
+#: plugins/sudoers/sudo_nss.c:318
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Ο χρήστης %s δεν επιτρέπεται να εκτελέσει sudo στο %s.\n"
 
-#: plugins/sudoers/sudoers.c:197 plugins/sudoers/sudoers.c:895
+#: plugins/sudoers/sudoers.c:154 plugins/sudoers/sudoers.c:188
+#: plugins/sudoers/sudoers.c:675
 msgid "problem with defaults entries"
 msgstr "πρόβλημα με τις προεπιλεγμένες καταχωρίσεις"
 
-#: plugins/sudoers/sudoers.c:204
+#: plugins/sudoers/sudoers.c:160
 msgid "no valid sudoers sources found, quitting"
 msgstr "δεν βρέθηκαν έγκυρες πηγές χρηστών sudo, έξοδος"
 
-#: plugins/sudoers/sudoers.c:243
+#: plugins/sudoers/sudoers.c:222
 msgid "sudoers specifies that root is not allowed to sudo"
-msgstr ""
-"οι χρήστες sudo καθορίζουν ότι ο υπερχρήστης δεν επιτρέπεται να εκτελέσει "
-"sudo"
+msgstr "οι χρήστες sudo καθορίζουν ότι ο υπερχρήστης δεν επιτρέπεται να εκτελέσει sudo"
 
-#: plugins/sudoers/sudoers.c:300
+#: plugins/sudoers/sudoers.c:261
 msgid "you are not permitted to use the -C option"
 msgstr "δεν επιτρέπετε να χρησιμοποιήσετε την επιλογή -C"
 
-#: plugins/sudoers/sudoers.c:389
+#: plugins/sudoers/sudoers.c:314
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "κάτοχος χρονικής σήμανσης (%s): Δεν υπάρχει τέτοιος χρήστης"
 
-#: plugins/sudoers/sudoers.c:404
+#: plugins/sudoers/sudoers.c:328
 msgid "no tty"
 msgstr "χωρίς tty"
 
-#: plugins/sudoers/sudoers.c:405
+#: plugins/sudoers/sudoers.c:329
 msgid "sorry, you must have a tty to run sudo"
 msgstr "συγνώμη, πρέπει να έχετε ένα tty για να εκτελέσετε sudo"
 
-#: plugins/sudoers/sudoers.c:467
+#: plugins/sudoers/sudoers.c:377
 msgid "command in current directory"
 msgstr "εντολή στο τρέχοντα κατάλογο"
 
-#: plugins/sudoers/sudoers.c:486
-#, fuzzy
-msgid "sorry, you are not allowed set a command timeout"
-msgstr "συγνώμη, δεν σας επιτρέπεται να διατηρήσετε το περιβάλλον"
-
-#: plugins/sudoers/sudoers.c:494
+#: plugins/sudoers/sudoers.c:394
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "συγνώμη, δεν σας επιτρέπεται να διατηρήσετε το περιβάλλον"
 
-#: plugins/sudoers/sudoers.c:840
-#, fuzzy
-msgid "command too long"
-msgstr "μη επιτρεπόμενη εντολή"
+#: plugins/sudoers/sudoers.c:725 plugins/sudoers/visudo.c:326
+#: plugins/sudoers/visudo.c:590
+#, c-format
+msgid "unable to stat %s"
+msgstr "αδύνατο να εκτελεστεί stat %s"
 
-#: plugins/sudoers/sudoers.c:952
+#: plugins/sudoers/sudoers.c:728
 #, c-format
 msgid "%s is not a regular file"
 msgstr "το %s δεν είναι ένα κανονικό αρχείο"
 
-#: plugins/sudoers/sudoers.c:956 plugins/sudoers/timestamp.c:221 toke.l:969
+#: plugins/sudoers/sudoers.c:731 plugins/sudoers/timestamp.c:283 toke.l:923
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "το %s κατέχεται από uid %u, θα έπρεπε να είναι %u"
 
-#: plugins/sudoers/sudoers.c:960 toke.l:974
+#: plugins/sudoers/sudoers.c:735 toke.l:930
 #, c-format
 msgid "%s is world writable"
 msgstr "Το %s είναι εγγράψιμο από όλους"
 
-#: plugins/sudoers/sudoers.c:964 toke.l:977
+#: plugins/sudoers/sudoers.c:738 toke.l:935
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "το %s κατέχεται από gid %u, θα έπρεπε να είναι %u"
 
-#: plugins/sudoers/sudoers.c:997
-#, fuzzy, c-format
-msgid "only root can use \"-c %s\""
+#: plugins/sudoers/sudoers.c:764
+#, c-format
+msgid "only root can use `-c %s'"
 msgstr "μόνο ο υπερχρήστης μπορεί να χρησιμοποιήσει `-c %s'"
 
-#: plugins/sudoers/sudoers.c:1016
+#: plugins/sudoers/sudoers.c:781 plugins/sudoers/sudoers.c:783
 #, c-format
 msgid "unknown login class: %s"
 msgstr "άγνωστη κλάση σύνδεσης: %s"
 
-#: plugins/sudoers/sudoers.c:1099 plugins/sudoers/sudoers.c:1113
+#: plugins/sudoers/sudoers.c:815
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "αδύνατη η επίλυση οικοδεσπότη %s"
+
+#: plugins/sudoers/sudoers.c:878 plugins/sudoers/testsudoers.c:387
+#, c-format
+msgid "unknown group: %s"
+msgstr "άγνωστη ομάδα: %s"
 
 #: plugins/sudoers/sudoreplay.c:274
 #, c-format
@@ -1994,150 +1290,137 @@ msgstr "άκυρη επιλογή φίλτρου: %s"
 msgid "invalid max wait: %s"
 msgstr "άκυρη μέγιστη αναμονή: %s"
 
-#: plugins/sudoers/sudoreplay.c:307
+#: plugins/sudoers/sudoreplay.c:293
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "άκυρος συντελεστής ταχύτητας: %s"
 
-#: plugins/sudoers/sudoreplay.c:342
+#: plugins/sudoers/sudoreplay.c:296 plugins/sudoers/visudo.c:184
+#, c-format
+msgid "%s version %s\n"
+msgstr "%s έκδοση %s\n"
+
+#: plugins/sudoers/sudoreplay.c:328
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/χρονισμός: %s"
 
-#: plugins/sudoers/sudoreplay.c:348
+#: plugins/sudoers/sudoreplay.c:334
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/χρονισμός: %s"
 
-#: plugins/sudoers/sudoreplay.c:364
-#, fuzzy, c-format
-msgid "Replaying sudo session: %s"
+#: plugins/sudoers/sudoreplay.c:350
+#, c-format
+msgid "Replaying sudo session: %s\n"
 msgstr "Αναπαράγεται η συνεδρία sudo: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:562 plugins/sudoers/sudoreplay.c:609
-#: plugins/sudoers/sudoreplay.c:816 plugins/sudoers/sudoreplay.c:906
-#: plugins/sudoers/sudoreplay.c:985 plugins/sudoers/sudoreplay.c:1000
-#: plugins/sudoers/sudoreplay.c:1007 plugins/sudoers/sudoreplay.c:1014
-#: plugins/sudoers/sudoreplay.c:1021 plugins/sudoers/sudoreplay.c:1028
-#: plugins/sudoers/sudoreplay.c:1174
-#, fuzzy
-msgid "unable to add event to queue"
-msgstr "αδύνατη η αλλαγή σε uid runas"
+#: plugins/sudoers/sudoreplay.c:356
+#, c-format
+msgid "Warning: your terminal is too small to properly replay the log.\n"
+msgstr "Προειδοποίηση: το τερματικό σας είναι υπερβολικά μικρό για σωστή επανάληψη του ημερολογίου.\n"
 
-#: plugins/sudoers/sudoreplay.c:677
+#: plugins/sudoers/sudoreplay.c:357
+#, c-format
+msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
+msgstr "Η γεωμετρία του ημερολογίου είναι %d x %d, η γεωμετρία του τερματικού σας είναι %d x %d."
+
+#: plugins/sudoers/sudoreplay.c:412
 msgid "unable to set tty to raw mode"
 msgstr "αδύνατος ο ορισμός σε ακατέργαστη κατάσταση"
 
-#: plugins/sudoers/sudoreplay.c:728
-#, c-format
-msgid "Warning: your terminal is too small to properly replay the log.\n"
-msgstr ""
-"Προειδοποίηση: το τερματικό σας είναι υπερβολικά μικρό για σωστή επανάληψη "
-"του ημερολογίου.\n"
-
-#: plugins/sudoers/sudoreplay.c:729
-#, c-format
-msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
-msgstr ""
-"Η γεωμετρία του ημερολογίου είναι %d x %d, η γεωμετρία του τερματικού σας "
-"είναι %d x %d."
-
-#: plugins/sudoers/sudoreplay.c:757
-msgid "Replay finished, press any key to restore the terminal."
-msgstr ""
-
-#: plugins/sudoers/sudoreplay.c:790
+#: plugins/sudoers/sudoreplay.c:443
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "άκυρη γραμμή αρχείου χρονισμού: %s"
 
-#: plugins/sudoers/sudoreplay.c:1208 plugins/sudoers/sudoreplay.c:1233
+#: plugins/sudoers/sudoreplay.c:649 plugins/sudoers/sudoreplay.c:674
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "ασαφής παράσταση \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:1255
+#: plugins/sudoers/sudoreplay.c:696
 msgid "unmatched ')' in expression"
 msgstr "ασύμφωνο ')' σε παράσταση"
 
-#: plugins/sudoers/sudoreplay.c:1259
+#: plugins/sudoers/sudoreplay.c:700
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "άγνωστος όρος αναζήτησης \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:1274
+#: plugins/sudoers/sudoreplay.c:714
 #, c-format
 msgid "%s requires an argument"
 msgstr "το %s απαιτεί ένα όρισμα"
 
-#: plugins/sudoers/sudoreplay.c:1277 plugins/sudoers/sudoreplay.c:1657
+#: plugins/sudoers/sudoreplay.c:718 plugins/sudoers/sudoreplay.c:1090
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "άκυρη κανονική έκφραση: %s"
 
-#: plugins/sudoers/sudoreplay.c:1281
+#: plugins/sudoers/sudoreplay.c:724
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "αδύνατη η ανάλυση ημερομηνίας \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:1290
+#: plugins/sudoers/sudoreplay.c:733
 msgid "unmatched '(' in expression"
 msgstr "ασύμφωνο '(' σε παράσταση"
 
-#: plugins/sudoers/sudoreplay.c:1292
+#: plugins/sudoers/sudoreplay.c:735
 msgid "illegal trailing \"or\""
 msgstr "απαράδεκτο τελικό \"or\""
 
-#: plugins/sudoers/sudoreplay.c:1294
+#: plugins/sudoers/sudoreplay.c:737
 msgid "illegal trailing \"!\""
 msgstr "απαράδεκτο τελικό \"!\""
 
-#: plugins/sudoers/sudoreplay.c:1343
+#: plugins/sudoers/sudoreplay.c:790
 #, c-format
 msgid "unknown search type %d"
 msgstr "άγνωστος τύπος αναζήτησης %d"
 
-#: plugins/sudoers/sudoreplay.c:1381
+#: plugins/sudoers/sudoreplay.c:827
 #, c-format
 msgid "%s: invalid log file"
 msgstr "%s: άκυρο αρχείο ημερολογίου"
 
-#: plugins/sudoers/sudoreplay.c:1399
+#: plugins/sudoers/sudoreplay.c:845
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr "%s: το πεδίο σήμανσης χρόνου λείπει"
 
-#: plugins/sudoers/sudoreplay.c:1406
+#: plugins/sudoers/sudoreplay.c:852
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr "%s: η σήμανση χρόνου %s: %s"
 
-#: plugins/sudoers/sudoreplay.c:1413
+#: plugins/sudoers/sudoreplay.c:859
 #, c-format
 msgid "%s: user field is missing"
 msgstr "%s: το πεδίο χρήστη λείπει"
 
-#: plugins/sudoers/sudoreplay.c:1422
+#: plugins/sudoers/sudoreplay.c:867
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr "%s: το πεδίο χρήστη runas λείπει"
 
-#: plugins/sudoers/sudoreplay.c:1431
+#: plugins/sudoers/sudoreplay.c:875
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr "%s: το πεδίο ομάδας runas λείπει"
 
-#: plugins/sudoers/sudoreplay.c:1837
-#, fuzzy, c-format
-msgid "usage: %s [-hnR] [-d dir] [-m num] [-s num] ID\n"
+#: plugins/sudoers/sudoreplay.c:1230
+#, c-format
+msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "χρήση: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 
-#: plugins/sudoers/sudoreplay.c:1840
+#: plugins/sudoers/sudoreplay.c:1233
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "χρήση: %s [-h] [-d dir] -l [παράσταση αναζήτησης]\n"
 
-#: plugins/sudoers/sudoreplay.c:1849
+#: plugins/sudoers/sudoreplay.c:1242
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -2146,7 +1429,7 @@ msgstr ""
 "%s - επανάληψη ημερολογίων συνεδρίας sudo\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1851
+#: plugins/sudoers/sudoreplay.c:1244
 msgid ""
 "\n"
 "Options:\n"
@@ -2163,18 +1446,16 @@ msgstr ""
 "  -d, --directory=κατάλογος  καθορισμός καταλόγου για ημερολόγια συνεδρίας\n"
 "  -f, --filter=φίλτρο  ορισμός ποιοι τύποι εισόδου/εξόδου να εμφανίζονται\n"
 "  -h, --help           εμφάνιση μηνύματος βοήθειας και έξοδος\n"
-"  -l, --list           κατάλογος διαθέσιμων αναγνωριστικών συνεδρίας, με "
-"προαιρετική παράσταση\n"
-"  -m, --max-wait=αριθ  μέγιστος αριθμός δευτερολέπτων αναμονής μεταξύ "
-"συμβάντων\n"
+"  -l, --list           κατάλογος διαθέσιμων αναγνωριστικών συνεδρίας, με προαιρετική παράσταση\n"
+"  -m, --max-wait=αριθ  μέγιστος αριθμός δευτερολέπτων αναμονής μεταξύ συμβάντων\n"
 "  -s, --speed=αριθ     επιτάχυνση ή επιβράδυνση εξόδου\n"
 "  -V, --version        εμφάνιση πληροφοριών έκδοσης και έξοδος"
 
-#: plugins/sudoers/testsudoers.c:328
+#: plugins/sudoers/testsudoers.c:326
 msgid "\thost  unmatched"
 msgstr "        ασύμφωνος οικοδεσπότης"
 
-#: plugins/sudoers/testsudoers.c:331
+#: plugins/sudoers/testsudoers.c:329
 msgid ""
 "\n"
 "Command allowed"
@@ -2182,7 +1463,7 @@ msgstr ""
 "\n"
 "Επιτρεπόμενη εντολή"
 
-#: plugins/sudoers/testsudoers.c:332
+#: plugins/sudoers/testsudoers.c:330
 msgid ""
 "\n"
 "Command denied"
@@ -2190,7 +1471,7 @@ msgstr ""
 "\n"
 "Απαγορευμένη εντολή"
 
-#: plugins/sudoers/testsudoers.c:332
+#: plugins/sudoers/testsudoers.c:330
 msgid ""
 "\n"
 "Command unmatched"
@@ -2198,130 +1479,118 @@ msgstr ""
 "\n"
 "ασύμφωνη εντολή"
 
-#: plugins/sudoers/timestamp.c:229
-#, c-format
-msgid "%s is group writable"
-msgstr "το %s είναι εγγράψιμη ομάδα"
-
-#: plugins/sudoers/timestamp.c:305
+#: plugins/sudoers/timestamp.c:191
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "αδύνατη η περικοπή αρχείου σήμανσης χρόνου σε %lld ψηφιολέξεις"
 
-#: plugins/sudoers/timestamp.c:792 plugins/sudoers/timestamp.c:884
-#: plugins/sudoers/visudo.c:477 plugins/sudoers/visudo.c:483
-#, fuzzy
-msgid "unable to read the clock"
-msgstr "αδύνατη η ανάγνωση του fwtk config"
+#: plugins/sudoers/timestamp.c:291
+#, c-format
+msgid "%s is group writable"
+msgstr "το %s είναι εγγράψιμη ομάδα"
 
-#: plugins/sudoers/timestamp.c:803
+#: plugins/sudoers/timestamp.c:311
+#, c-format
+msgid "timestamp path too long: %s/%s"
+msgstr "η διαδρομή χρονικής σήμανσης είναι υπερβολικά μεγάλη: %s/%s"
+
+#: plugins/sudoers/timestamp.c:484
 msgid "ignoring time stamp from the future"
 msgstr "να αγνοείται η χρονική σήμανση στο μέλλον"
 
-#: plugins/sudoers/timestamp.c:826
+#: plugins/sudoers/timestamp.c:496
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "η χρονική σήμανση υπερβολικά μακρινή στο μέλλον: %20.20s"
 
-#: plugins/sudoers/timestamp.c:948
-#, fuzzy, c-format
-msgid "unable to lock time stamp file %s"
-msgstr "αδύνατη η περικοπή αρχείου σήμανσης χρόνου σε %lld ψηφιολέξεις"
-
-#: plugins/sudoers/timestamp.c:992 plugins/sudoers/timestamp.c:1012
+#: plugins/sudoers/timestamp.c:596 plugins/sudoers/timestamp.c:618
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "η διαδρομή κατάστασης οδηγίας υπερβολικά μεγάλη: %s/%s"
 
-#: plugins/sudoers/visudo.c:212
-msgid "the -x option will be removed in a future release"
-msgstr ""
+#: plugins/sudoers/toke_util.c:176
+msgid "fill_args: buffer overflow"
+msgstr "fill_args: υπερχείλιση ενδιάμεσης μνήμης"
 
-#: plugins/sudoers/visudo.c:213
-msgid "please consider using the cvtsudoers utility instead"
-msgstr ""
+#: plugins/sudoers/visudo.c:186
+#, c-format
+msgid "%s grammar version %d\n"
+msgstr "γραμματική %s έκδοση %d\n"
 
-#: plugins/sudoers/visudo.c:263 plugins/sudoers/visudo.c:644
+#: plugins/sudoers/visudo.c:257 plugins/sudoers/visudo.c:543
 #, c-format
 msgid "press return to edit %s: "
 msgstr "πατήστε return για να επεξεργαστείτε το %s: "
 
-#: plugins/sudoers/visudo.c:324
-#, c-format
-msgid "specified editor (%s) doesn't exist"
-msgstr "ο συγκεκριμένος επεξεργαστής (%s) δεν υπάρχει"
-
-#: plugins/sudoers/visudo.c:326
-#, c-format
-msgid "no editor found (editor path = %s)"
-msgstr "δεν βρέθηκε κανένας επεξεργαστής (διαδρομή επεξεργαστή = %s)"
-
-#: plugins/sudoers/visudo.c:436 plugins/sudoers/visudo.c:444
+#: plugins/sudoers/visudo.c:342 plugins/sudoers/visudo.c:348
 msgid "write error"
 msgstr "σφάλμα εγγραφής"
 
-#: plugins/sudoers/visudo.c:490
+#: plugins/sudoers/visudo.c:430
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "αδύνατη η εκτέλεση stat προσωρινού αρχείου (%s), το %s δεν άλλαξε"
 
-#: plugins/sudoers/visudo.c:497
+#: plugins/sudoers/visudo.c:435
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "προσωρινό αρχείο μηδενικού μήκους (%s), το %s αμετάβλητο"
 
-#: plugins/sudoers/visudo.c:503
+#: plugins/sudoers/visudo.c:441
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "αποτυχία επεξεργασίας του (%s), το %s αμετάβλητο"
 
-#: plugins/sudoers/visudo.c:525
+#: plugins/sudoers/visudo.c:463
 #, c-format
 msgid "%s unchanged"
 msgstr "αμετάβλητο %s"
 
-#: plugins/sudoers/visudo.c:584
+#: plugins/sudoers/visudo.c:488
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "αδύνατο το ξαναάνοιγμα του προσωρινού αρχείου (%s), το %s αμετάβλητο"
 
-#: plugins/sudoers/visudo.c:596
+#: plugins/sudoers/visudo.c:498
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "αδύνατη η ανάλυση του προσωρινού αρχείου (%s), άγνωστο σφάλμα"
 
-#: plugins/sudoers/visudo.c:633
+#: plugins/sudoers/visudo.c:534
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "εσωτερικό σφάλμα, αδύνατη η εύρεση του %s στον κατάλογο!"
 
-#: plugins/sudoers/visudo.c:713 plugins/sudoers/visudo.c:722
+#: plugins/sudoers/visudo.c:592 plugins/sudoers/visudo.c:601
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "αδύνατος ο ορισμός (uid, gid) του %s στο (%u, %u)"
 
-#: plugins/sudoers/visudo.c:744
+#: plugins/sudoers/visudo.c:596 plugins/sudoers/visudo.c:606
+#, c-format
+msgid "unable to change mode of %s to 0%o"
+msgstr "αδύνατη η αλλαγή κατάστασης του %s στο 0%o"
+
+#: plugins/sudoers/visudo.c:623
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
-msgstr ""
-"τα %s και %s δεν έχουν το ίδιο σύστημα αρχείων, χρησιμοποιήστε το mv για "
-"μετονομασία"
+msgstr "τα %s και %s δεν έχουν το ίδιο σύστημα αρχείων, χρησιμοποιήστε το mv για μετονομασία"
 
-#: plugins/sudoers/visudo.c:758
+#: plugins/sudoers/visudo.c:637
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "αποτυχία εντολής: '%s %s %s', το %s αμετάβλητο"
 
-#: plugins/sudoers/visudo.c:768
+#: plugins/sudoers/visudo.c:647
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "σφάλμα μετονομασίας του %s, το %s αμετάβλητο"
 
-#: plugins/sudoers/visudo.c:789
+#: plugins/sudoers/visudo.c:709
 msgid "What now? "
 msgstr "Τι να γίνει τώρα; "
 
-#: plugins/sudoers/visudo.c:803
+#: plugins/sudoers/visudo.c:723
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -2333,57 +1602,87 @@ msgstr ""
 "  e(x)it έξοδος χωρίς αποθήκευση αλλαγών στο αρχείο χρηστών sudo\n"
 "  (Q)uit έξοδος και αποθήκευση αλλαγών στο αρχείο χρηστών sudo (ΚΙΝΔΥΝΟΣ!)\n"
 
-#: plugins/sudoers/visudo.c:849
+#: plugins/sudoers/visudo.c:771
 #, c-format
 msgid "unable to run %s"
 msgstr "αδύνατη η εκτέλεση του %s"
 
-#: plugins/sudoers/visudo.c:879
+#: plugins/sudoers/visudo.c:797
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: εσφαλμένος κάτοχος (uid, gid) πρέπει να είναι (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:886
+#: plugins/sudoers/visudo.c:804
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: εσφαλμένα δικαιώματα, πρέπει να είναι κατάσταση 0%o\n"
 
-#: plugins/sudoers/visudo.c:942 plugins/sudoers/visudo.c:949
+#: plugins/sudoers/visudo.c:829 plugins/sudoers/visudo_json.c:1008
+#, c-format
+msgid "failed to parse %s file, unknown error"
+msgstr "αποτυχία ανάλυσης αρχείου %s, άγνωστο σφάλμα"
+
+#: plugins/sudoers/visudo.c:845 plugins/sudoers/visudo_json.c:1017
+#, c-format
+msgid "parse error in %s near line %d\n"
+msgstr "ανάλυση σφάλματος στο %s κοντά στη γραμμή %d\n"
+
+#: plugins/sudoers/visudo.c:848 plugins/sudoers/visudo_json.c:1020
+#, c-format
+msgid "parse error in %s\n"
+msgstr "ανάλυση σφάλματος %s\n"
+
+#: plugins/sudoers/visudo.c:856 plugins/sudoers/visudo.c:863
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: επιτυχής ανάλυση\n"
 
-#: plugins/sudoers/visudo.c:996
+#: plugins/sudoers/visudo.c:909
 #, c-format
 msgid "%s busy, try again later"
 msgstr "το %s είναι απασχολημένο, ξαναδοκιμάστε αργότερα"
 
-#: plugins/sudoers/visudo.c:1036
-#, fuzzy, c-format
-msgid "Error: %s:%d cycle in %s \"%s\""
+#: plugins/sudoers/visudo.c:953
+#, c-format
+msgid "specified editor (%s) doesn't exist"
+msgstr "ο συγκεκριμένος επεξεργαστής (%s) δεν υπάρχει"
+
+#: plugins/sudoers/visudo.c:976
+#, c-format
+msgid "unable to stat editor (%s)"
+msgstr "αδύνατο να εκτελέσουμε stat στον επεξεργαστή (%s)"
+
+#: plugins/sudoers/visudo.c:1024
+#, c-format
+msgid "no editor found (editor path = %s)"
+msgstr "δεν βρέθηκε κανένας επεξεργαστής (διαδρομή επεξεργαστή = %s)"
+
+#: plugins/sudoers/visudo.c:1117
+#, c-format
+msgid "Error: cycle in %s_Alias `%s'"
 msgstr "Σφάλμα: κύκλος στο %s_Alias `%s'"
 
-#: plugins/sudoers/visudo.c:1037
-#, fuzzy, c-format
-msgid "Warning: %s:%d cycle in %s \"%s\""
+#: plugins/sudoers/visudo.c:1118
+#, c-format
+msgid "Warning: cycle in %s_Alias `%s'"
 msgstr "Προειδοποίηση: κύκλος στο %s_Alias `%s'"
 
-#: plugins/sudoers/visudo.c:1041
-#, fuzzy, c-format
-msgid "Error: %s:%d %s \"%s\" referenced but not defined"
+#: plugins/sudoers/visudo.c:1124
+#, c-format
+msgid "Error: %s_Alias `%s' referenced but not defined"
 msgstr "Σφάλμα: αναφέρθηκε το %s_Alias `%s', αλλά δεν ορίστηκε"
 
-#: plugins/sudoers/visudo.c:1042
-#, fuzzy, c-format
-msgid "Warning: %s:%d %s \"%s\" referenced but not defined"
+#: plugins/sudoers/visudo.c:1125
+#, c-format
+msgid "Warning: %s_Alias `%s' referenced but not defined"
 msgstr "Προειδοποίηση: αναφέρθηκε το %s_Alias `%s', αλλά δεν ορίστηκε"
 
-#: plugins/sudoers/visudo.c:1135
-#, fuzzy, c-format
-msgid "Warning: %s:%d unused %s \"%s\""
+#: plugins/sudoers/visudo.c:1267
+#, c-format
+msgid "%s: unused %s_Alias %s"
 msgstr "%s: αχρησιμοποίητο %s_Alias %s"
 
-#: plugins/sudoers/visudo.c:1250
+#: plugins/sudoers/visudo.c:1329
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -2392,60 +1691,28 @@ msgstr ""
 "%s - ασφαλής επεξεργασία του αρχείου χρηστών sudo\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1252
-#, fuzzy
+#: plugins/sudoers/visudo.c:1331
 msgid ""
 "\n"
 "Options:\n"
-"  -c, --check              check-only mode\n"
-"  -f, --file=sudoers       specify sudoers file location\n"
-"  -h, --help               display help message and exit\n"
-"  -q, --quiet              less verbose (quiet) syntax error messages\n"
-"  -s, --strict             strict syntax checking\n"
-"  -V, --version            display version information and exit\n"
+"  -c, --check       check-only mode\n"
+"  -f, --file=file   specify sudoers file location\n"
+"  -h, --help        display help message and exit\n"
+"  -q, --quiet       less verbose (quiet) syntax error messages\n"
+"  -s, --strict      strict syntax checking\n"
+"  -V, --version     display version information and exit\n"
+"  -x, --export=file export sudoers in JSON format"
 msgstr ""
 "\n"
 "Επιλογές:\n"
 "  -c, --check       κατάσταση μόνο ελέγχου\n"
 "  -f, --file=αρχείο καθορισμός θέσης αρχείου χρηστών sudo\n"
 "  -h, --help        εμφάνιση μηνύματος βοήθειας και έξοδος\n"
-"  -q, --quiet       λιγότερο αναλυτική (αθόρυβη) σύνταξη μηνυμάτων "
-"σφαλμάτων\n"
+"  -q, --quiet       λιγότερο αναλυτική (αθόρυβη) σύνταξη μηνυμάτων σφαλμάτων\n"
 "  -s, --strict      αυστηρός έλεγχος σύνταξης\n"
 "  -V, --version     εμφάνιση πληροφοριών έκδοσης και έξοδος\n"
 "  -x, --export=αρχείο εξαγωγή χρηστών sudo σε μορφή JSON"
 
-#: toke.l:943
+#: toke.l:894
 msgid "too many levels of includes"
 msgstr "περιλαμβάνει υπερβολικά πολλά επίπεδα"
-
-#~ msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
-#~ msgstr "sudo_ldap_conf_add_ports: εκτός χώρου επέκτασης hostbuf"
-
-#~ msgid "sudo_ldap_parse_uri: out of space building hostbuf"
-#~ msgstr "sudo_ldap_parse_uri: εκτός χώρου δόμησης του hostbuf"
-
-#~ msgid "sudo_ldap_build_pass1 allocation mismatch"
-#~ msgstr "ασυμφωνία κατανομής sudo_ldap_build_pass1"
-
-#~ msgid ""
-#~ "\n"
-#~ "LDAP Role: UNKNOWN\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Ρόλος LDAP: ΑΓΝΩΣΤΟΣ\n"
-
-#~ msgid "    Order: %s\n"
-#~ msgstr "    Σειρά: %s\n"
-
-#~ msgid "internal error: insufficient space for log line"
-#~ msgstr "εσωτερικό σφάλμα: ανεπαρκής χώρος για γραμμή καταγραφής"
-
-#~ msgid "timestamp path too long: %s/%s"
-#~ msgstr "η διαδρομή χρονικής σήμανσης είναι υπερβολικά μεγάλη: %s/%s"
-
-#~ msgid "fill_args: buffer overflow"
-#~ msgstr "fill_args: υπερχείλιση ενδιάμεσης μνήμης"
-
-#~ msgid "unable to stat editor (%s)"
-#~ msgstr "αδύνατο να εκτελέσουμε stat στον επεξεργαστή (%s)"

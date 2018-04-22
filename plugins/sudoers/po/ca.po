@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.8.19b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2018-04-05 06:36-0600\n"
+"POT-Creation-Date: 2016-12-03 19:24-0700\n"
 "PO-Revision-Date: 2016-12-29 17:28+0100\n"
 "Last-Translator: Walter Garcia-Fontes <walter.garcia@upf.edu>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
@@ -45,214 +45,148 @@ msgstr "*** Informació de SEGURETAT per a %h ***"
 msgid "Sorry, try again."
 msgstr "Ho sentim, proveu un altre cop."
 
-#: gram.y:191 gram.y:239 gram.y:246 gram.y:253 gram.y:260 gram.y:267 gram.y:283
-#: gram.y:307 gram.y:314 gram.y:321 gram.y:328 gram.y:335 gram.y:398 gram.y:406
-#: gram.y:416 gram.y:449 gram.y:456 gram.y:463 gram.y:470 gram.y:552 gram.y:559
-#: gram.y:568 gram.y:577 gram.y:594 gram.y:706 gram.y:713 gram.y:720 gram.y:728
-#: gram.y:824 gram.y:831 gram.y:838 gram.y:845 gram.y:852 gram.y:878 gram.y:885
-#: gram.y:892 gram.y:1015 gram.y:1234 gram.y:1241 plugins/sudoers/alias.c:124
+#: gram.y:186 gram.y:234 gram.y:241 gram.y:248 gram.y:255 gram.y:262
+#: gram.y:278 gram.y:301 gram.y:308 gram.y:315 gram.y:322 gram.y:329
+#: gram.y:384 gram.y:392 gram.y:402 gram.y:432 gram.y:439 gram.y:446
+#: gram.y:453 gram.y:565 gram.y:572 gram.y:581 gram.y:590 gram.y:607
+#: gram.y:663 gram.y:670 gram.y:677 gram.y:685 gram.y:781 gram.y:788
+#: gram.y:795 gram.y:802 gram.y:809 gram.y:835 gram.y:842 gram.y:849
+#: gram.y:972 gram.y:1148 gram.y:1155 plugins/sudoers/alias.c:124
 #: plugins/sudoers/alias.c:139 plugins/sudoers/auth/bsdauth.c:141
 #: plugins/sudoers/auth/kerb5.c:119 plugins/sudoers/auth/kerb5.c:145
-#: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/cvtsudoers.c:116
-#: plugins/sudoers/cvtsudoers.c:157 plugins/sudoers/cvtsudoers.c:174
-#: plugins/sudoers/cvtsudoers.c:185 plugins/sudoers/cvtsudoers.c:278
-#: plugins/sudoers/cvtsudoers.c:402 plugins/sudoers/cvtsudoers.c:535
-#: plugins/sudoers/cvtsudoers.c:552 plugins/sudoers/cvtsudoers.c:657
-#: plugins/sudoers/cvtsudoers.c:763 plugins/sudoers/cvtsudoers.c:771
-#: plugins/sudoers/cvtsudoers.c:978 plugins/sudoers/cvtsudoers.c:982
-#: plugins/sudoers/cvtsudoers.c:1045 plugins/sudoers/cvtsudoers_ldif.c:429
-#: plugins/sudoers/cvtsudoers_ldif.c:599 plugins/sudoers/cvtsudoers_ldif.c:667
-#: plugins/sudoers/cvtsudoers_ldif.c:674 plugins/sudoers/cvtsudoers_ldif.c:679
-#: plugins/sudoers/cvtsudoers_ldif.c:755 plugins/sudoers/cvtsudoers_ldif.c:766
-#: plugins/sudoers/cvtsudoers_ldif.c:772 plugins/sudoers/cvtsudoers_ldif.c:797
-#: plugins/sudoers/cvtsudoers_ldif.c:809 plugins/sudoers/cvtsudoers_ldif.c:813
-#: plugins/sudoers/cvtsudoers_ldif.c:827 plugins/sudoers/cvtsudoers_ldif.c:996
-#: plugins/sudoers/cvtsudoers_ldif.c:1026
-#: plugins/sudoers/cvtsudoers_ldif.c:1051
-#: plugins/sudoers/cvtsudoers_ldif.c:1080
-#: plugins/sudoers/cvtsudoers_ldif.c:1131
-#: plugins/sudoers/cvtsudoers_ldif.c:1160
-#: plugins/sudoers/cvtsudoers_ldif.c:1170 plugins/sudoers/defaults.c:657
-#: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
-#: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
-#: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
-#: plugins/sudoers/filedigest.c:120 plugins/sudoers/filedigest_gcrypt.c:90
-#: plugins/sudoers/filedigest_openssl.c:111 plugins/sudoers/gc.c:52
-#: plugins/sudoers/group_plugin.c:131 plugins/sudoers/interfaces.c:71
-#: plugins/sudoers/iolog.c:938 plugins/sudoers/iolog_path.c:167
-#: plugins/sudoers/ldap.c:205 plugins/sudoers/ldap.c:678
-#: plugins/sudoers/ldap.c:691 plugins/sudoers/ldap.c:994
-#: plugins/sudoers/ldap.c:1154 plugins/sudoers/ldap.c:1236
-#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1443
-#: plugins/sudoers/ldap.c:1589 plugins/sudoers/ldap.c:2076
-#: plugins/sudoers/ldap.c:2108 plugins/sudoers/ldap.c:2420
-#: plugins/sudoers/ldap.c:2448 plugins/sudoers/ldap.c:2464
-#: plugins/sudoers/ldap.c:2554 plugins/sudoers/ldap.c:2570
-#: plugins/sudoers/ldap_conf.c:215 plugins/sudoers/ldap_conf.c:246
-#: plugins/sudoers/ldap_conf.c:298 plugins/sudoers/ldap_conf.c:334
-#: plugins/sudoers/ldap_conf.c:423 plugins/sudoers/ldap_conf.c:438
-#: plugins/sudoers/ldap_conf.c:534 plugins/sudoers/ldap_conf.c:567
-#: plugins/sudoers/ldap_conf.c:648 plugins/sudoers/ldap_conf.c:730
-#: plugins/sudoers/ldap_util.c:486 plugins/sudoers/ldap_util.c:540
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
-#: plugins/sudoers/logging.c:568 plugins/sudoers/logging.c:745
-#: plugins/sudoers/logging.c:1003 plugins/sudoers/match.c:656
-#: plugins/sudoers/match.c:703 plugins/sudoers/match.c:753
-#: plugins/sudoers/match.c:777 plugins/sudoers/match.c:865
-#: plugins/sudoers/match.c:954 plugins/sudoers/parse.c:247
-#: plugins/sudoers/parse.c:259 plugins/sudoers/parse.c:274
-#: plugins/sudoers/parse.c:286 plugins/sudoers/policy.c:498
-#: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
-#: plugins/sudoers/pwutil.c:338 plugins/sudoers/pwutil.c:512
-#: plugins/sudoers/pwutil.c:577 plugins/sudoers/pwutil.c:646
-#: plugins/sudoers/pwutil.c:804 plugins/sudoers/pwutil.c:861
-#: plugins/sudoers/pwutil.c:906 plugins/sudoers/pwutil.c:964
-#: plugins/sudoers/sssd.c:161 plugins/sudoers/sssd.c:193
-#: plugins/sudoers/sssd.c:236 plugins/sudoers/sssd.c:243
-#: plugins/sudoers/sssd.c:279 plugins/sudoers/sssd.c:352
-#: plugins/sudoers/sssd.c:391 plugins/sudoers/sssd.c:1110
-#: plugins/sudoers/sssd.c:1124 plugins/sudoers/sssd.c:1140
-#: plugins/sudoers/sssd.c:1508 plugins/sudoers/stubs.c:96
-#: plugins/sudoers/stubs.c:104 plugins/sudoers/sudoers.c:262
-#: plugins/sudoers/sudoers.c:272 plugins/sudoers/sudoers.c:280
-#: plugins/sudoers/sudoers.c:364 plugins/sudoers/sudoers.c:686
-#: plugins/sudoers/sudoers.c:811 plugins/sudoers/sudoers.c:855
-#: plugins/sudoers/sudoers.c:1127 plugins/sudoers/sudoers_debug.c:107
-#: plugins/sudoers/sudoreplay.c:1265 plugins/sudoers/sudoreplay.c:1377
-#: plugins/sudoers/sudoreplay.c:1417 plugins/sudoers/sudoreplay.c:1426
-#: plugins/sudoers/sudoreplay.c:1436 plugins/sudoers/sudoreplay.c:1444
-#: plugins/sudoers/sudoreplay.c:1448 plugins/sudoers/sudoreplay.c:1604
-#: plugins/sudoers/sudoreplay.c:1608 plugins/sudoers/testsudoers.c:126
-#: plugins/sudoers/testsudoers.c:216 plugins/sudoers/testsudoers.c:233
-#: plugins/sudoers/testsudoers.c:554 plugins/sudoers/timestamp.c:401
-#: plugins/sudoers/timestamp.c:445 plugins/sudoers/timestamp.c:923
+#: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
+#: plugins/sudoers/auth/sia.c:59 plugins/sudoers/defaults.c:618
+#: plugins/sudoers/defaults.c:873 plugins/sudoers/defaults.c:1025
+#: plugins/sudoers/editor.c:64 plugins/sudoers/editor.c:82
+#: plugins/sudoers/editor.c:93 plugins/sudoers/env.c:234
+#: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:134
+#: plugins/sudoers/interfaces.c:71 plugins/sudoers/iolog.c:805
+#: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:447
+#: plugins/sudoers/ldap.c:478 plugins/sudoers/ldap.c:530
+#: plugins/sudoers/ldap.c:563 plugins/sudoers/ldap.c:961
+#: plugins/sudoers/ldap.c:1157 plugins/sudoers/ldap.c:1168
+#: plugins/sudoers/ldap.c:1184 plugins/sudoers/ldap.c:1471
+#: plugins/sudoers/ldap.c:1631 plugins/sudoers/ldap.c:1713
+#: plugins/sudoers/ldap.c:1853 plugins/sudoers/ldap.c:1877
+#: plugins/sudoers/ldap.c:1966 plugins/sudoers/ldap.c:1981
+#: plugins/sudoers/ldap.c:2077 plugins/sudoers/ldap.c:2110
+#: plugins/sudoers/ldap.c:2263 plugins/sudoers/ldap.c:2360
+#: plugins/sudoers/ldap.c:3178 plugins/sudoers/ldap.c:3210
+#: plugins/sudoers/ldap.c:3519 plugins/sudoers/ldap.c:3547
+#: plugins/sudoers/ldap.c:3563 plugins/sudoers/ldap.c:3653
+#: plugins/sudoers/ldap.c:3669 plugins/sudoers/linux_audit.c:76
+#: plugins/sudoers/logging.c:188 plugins/sudoers/logging.c:450
+#: plugins/sudoers/logging.c:471 plugins/sudoers/logging.c:683
+#: plugins/sudoers/logging.c:941 plugins/sudoers/match.c:501
+#: plugins/sudoers/match.c:535 plugins/sudoers/match.c:572
+#: plugins/sudoers/match.c:770 plugins/sudoers/match.c:828
+#: plugins/sudoers/parse.c:236 plugins/sudoers/parse.c:248
+#: plugins/sudoers/parse.c:263 plugins/sudoers/parse.c:275
+#: plugins/sudoers/policy.c:405 plugins/sudoers/policy.c:632
+#: plugins/sudoers/prompt.c:93 plugins/sudoers/pwutil.c:139
+#: plugins/sudoers/pwutil.c:210 plugins/sudoers/pwutil.c:286
+#: plugins/sudoers/pwutil.c:457 plugins/sudoers/pwutil.c:522
+#: plugins/sudoers/pwutil.c:591 plugins/sudoers/pwutil.c:749
+#: plugins/sudoers/pwutil.c:806 plugins/sudoers/pwutil.c:851
+#: plugins/sudoers/pwutil.c:908 plugins/sudoers/sssd.c:162
+#: plugins/sudoers/sssd.c:194 plugins/sudoers/sssd.c:237
+#: plugins/sudoers/sssd.c:244 plugins/sudoers/sssd.c:280
+#: plugins/sudoers/sssd.c:390 plugins/sudoers/sssd.c:462
+#: plugins/sudoers/sssd.c:1053 plugins/sudoers/sssd.c:1234
+#: plugins/sudoers/sssd.c:1248 plugins/sudoers/sssd.c:1264
+#: plugins/sudoers/sudoers.c:261 plugins/sudoers/sudoers.c:271
+#: plugins/sudoers/sudoers.c:279 plugins/sudoers/sudoers.c:363
+#: plugins/sudoers/sudoers.c:660 plugins/sudoers/sudoers.c:775
+#: plugins/sudoers/sudoers.c:819 plugins/sudoers/sudoers_debug.c:107
+#: plugins/sudoers/sudoreplay.c:517 plugins/sudoers/sudoreplay.c:716
+#: plugins/sudoers/sudoreplay.c:828 plugins/sudoers/sudoreplay.c:868
+#: plugins/sudoers/sudoreplay.c:877 plugins/sudoers/sudoreplay.c:887
+#: plugins/sudoers/sudoreplay.c:895 plugins/sudoers/sudoreplay.c:899
+#: plugins/sudoers/sudoreplay.c:1055 plugins/sudoers/sudoreplay.c:1059
+#: plugins/sudoers/testsudoers.c:130 plugins/sudoers/testsudoers.c:216
+#: plugins/sudoers/testsudoers.c:233 plugins/sudoers/timestamp.c:374
+#: plugins/sudoers/timestamp.c:418 plugins/sudoers/timestamp.c:834
 #: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
-#: plugins/sudoers/toke_util.c:146 plugins/sudoers/tsdump.c:125
-#: plugins/sudoers/visudo.c:146 plugins/sudoers/visudo.c:307
-#: plugins/sudoers/visudo.c:313 plugins/sudoers/visudo.c:423
-#: plugins/sudoers/visudo.c:601 plugins/sudoers/visudo.c:919
-#: plugins/sudoers/visudo.c:985 plugins/sudoers/visudo.c:1074 toke.l:849
-#: toke.l:949 toke.l:1106
+#: plugins/sudoers/toke_util.c:146 plugins/sudoers/visudo.c:152
+#: plugins/sudoers/visudo.c:309 plugins/sudoers/visudo.c:315
+#: plugins/sudoers/visudo.c:446 plugins/sudoers/visudo.c:624
+#: plugins/sudoers/visudo.c:964 plugins/sudoers/visudo.c:1030
+#: plugins/sudoers/visudo.c:1074 plugins/sudoers/visudo.c:1171
+#: plugins/sudoers/visudo_json.c:1035 toke.l:832 toke.l:932 toke.l:1090
 msgid "unable to allocate memory"
 msgstr "no es pot assignar memòria"
 
-#: gram.y:481
+#: gram.y:464
 msgid "a digest requires a path name"
 msgstr "au un resum li cal un nom de camí"
 
-#: gram.y:607
-msgid "invalid notbefore value"
-msgstr ""
-
-#: gram.y:615
-#, fuzzy
-msgid "invalid notafter value"
-msgstr "ha fallat la validació"
-
-#: gram.y:624 plugins/sudoers/policy.c:314
-msgid "timeout value too large"
-msgstr ""
-
-#: gram.y:626 plugins/sudoers/policy.c:316
-#, fuzzy
-msgid "invalid timeout value"
-msgstr "ha fallat la validació"
-
-#: gram.y:1234 gram.y:1241 plugins/sudoers/auth/pam.c:341
-#: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
-#: plugins/sudoers/cvtsudoers.c:116 plugins/sudoers/cvtsudoers.c:156
-#: plugins/sudoers/cvtsudoers.c:173 plugins/sudoers/cvtsudoers.c:184
-#: plugins/sudoers/cvtsudoers.c:277 plugins/sudoers/cvtsudoers.c:401
-#: plugins/sudoers/cvtsudoers.c:534 plugins/sudoers/cvtsudoers.c:551
-#: plugins/sudoers/cvtsudoers.c:657 plugins/sudoers/cvtsudoers.c:763
-#: plugins/sudoers/cvtsudoers.c:770 plugins/sudoers/cvtsudoers.c:978
-#: plugins/sudoers/cvtsudoers.c:982 plugins/sudoers/cvtsudoers.c:1045
-#: plugins/sudoers/cvtsudoers_ldif.c:428 plugins/sudoers/cvtsudoers_ldif.c:598
-#: plugins/sudoers/cvtsudoers_ldif.c:666 plugins/sudoers/cvtsudoers_ldif.c:673
-#: plugins/sudoers/cvtsudoers_ldif.c:678 plugins/sudoers/cvtsudoers_ldif.c:754
-#: plugins/sudoers/cvtsudoers_ldif.c:765 plugins/sudoers/cvtsudoers_ldif.c:771
-#: plugins/sudoers/cvtsudoers_ldif.c:796 plugins/sudoers/cvtsudoers_ldif.c:808
-#: plugins/sudoers/cvtsudoers_ldif.c:812 plugins/sudoers/cvtsudoers_ldif.c:826
-#: plugins/sudoers/cvtsudoers_ldif.c:996 plugins/sudoers/cvtsudoers_ldif.c:1025
-#: plugins/sudoers/cvtsudoers_ldif.c:1050
-#: plugins/sudoers/cvtsudoers_ldif.c:1079
-#: plugins/sudoers/cvtsudoers_ldif.c:1130
-#: plugins/sudoers/cvtsudoers_ldif.c:1159
-#: plugins/sudoers/cvtsudoers_ldif.c:1169 plugins/sudoers/defaults.c:657
-#: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
-#: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
-#: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
-#: plugins/sudoers/filedigest.c:120 plugins/sudoers/filedigest_gcrypt.c:72
-#: plugins/sudoers/filedigest_gcrypt.c:90
-#: plugins/sudoers/filedigest_openssl.c:111 plugins/sudoers/gc.c:52
-#: plugins/sudoers/group_plugin.c:131 plugins/sudoers/interfaces.c:71
-#: plugins/sudoers/iolog.c:938 plugins/sudoers/iolog_path.c:167
-#: plugins/sudoers/ldap.c:205 plugins/sudoers/ldap.c:678
-#: plugins/sudoers/ldap.c:691 plugins/sudoers/ldap.c:994
-#: plugins/sudoers/ldap.c:1154 plugins/sudoers/ldap.c:1236
-#: plugins/sudoers/ldap.c:1384 plugins/sudoers/ldap.c:1443
-#: plugins/sudoers/ldap.c:1589 plugins/sudoers/ldap.c:2076
-#: plugins/sudoers/ldap.c:2108 plugins/sudoers/ldap.c:2420
-#: plugins/sudoers/ldap.c:2447 plugins/sudoers/ldap.c:2463
-#: plugins/sudoers/ldap.c:2554 plugins/sudoers/ldap.c:2570
-#: plugins/sudoers/ldap_conf.c:215 plugins/sudoers/ldap_conf.c:246
-#: plugins/sudoers/ldap_conf.c:298 plugins/sudoers/ldap_conf.c:334
-#: plugins/sudoers/ldap_conf.c:423 plugins/sudoers/ldap_conf.c:438
-#: plugins/sudoers/ldap_conf.c:534 plugins/sudoers/ldap_conf.c:567
-#: plugins/sudoers/ldap_conf.c:647 plugins/sudoers/ldap_conf.c:730
-#: plugins/sudoers/ldap_util.c:486 plugins/sudoers/ldap_util.c:540
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
-#: plugins/sudoers/logging.c:567 plugins/sudoers/logging.c:1003
-#: plugins/sudoers/match.c:655 plugins/sudoers/match.c:702
-#: plugins/sudoers/match.c:753 plugins/sudoers/match.c:777
-#: plugins/sudoers/match.c:865 plugins/sudoers/match.c:953
-#: plugins/sudoers/parse.c:247 plugins/sudoers/parse.c:259
-#: plugins/sudoers/parse.c:274 plugins/sudoers/parse.c:286
-#: plugins/sudoers/policy.c:128 plugins/sudoers/policy.c:137
-#: plugins/sudoers/policy.c:146 plugins/sudoers/policy.c:172
-#: plugins/sudoers/policy.c:299 plugins/sudoers/policy.c:314
-#: plugins/sudoers/policy.c:316 plugins/sudoers/policy.c:342
-#: plugins/sudoers/policy.c:352 plugins/sudoers/policy.c:396
-#: plugins/sudoers/policy.c:406 plugins/sudoers/policy.c:415
-#: plugins/sudoers/policy.c:424 plugins/sudoers/policy.c:498
-#: plugins/sudoers/policy.c:735 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:262
-#: plugins/sudoers/pwutil.c:338 plugins/sudoers/pwutil.c:512
-#: plugins/sudoers/pwutil.c:577 plugins/sudoers/pwutil.c:646
-#: plugins/sudoers/pwutil.c:804 plugins/sudoers/pwutil.c:861
-#: plugins/sudoers/pwutil.c:906 plugins/sudoers/pwutil.c:964
-#: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
-#: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
-#: plugins/sudoers/set_perms.c:1641 plugins/sudoers/sssd.c:161
-#: plugins/sudoers/sssd.c:193 plugins/sudoers/sssd.c:236
-#: plugins/sudoers/sssd.c:243 plugins/sudoers/sssd.c:279
-#: plugins/sudoers/sssd.c:351 plugins/sudoers/sssd.c:391
-#: plugins/sudoers/sssd.c:1109 plugins/sudoers/sssd.c:1124
-#: plugins/sudoers/sssd.c:1140 plugins/sudoers/sssd.c:1508
-#: plugins/sudoers/stubs.c:96 plugins/sudoers/stubs.c:104
-#: plugins/sudoers/sudoers.c:262 plugins/sudoers/sudoers.c:272
-#: plugins/sudoers/sudoers.c:280 plugins/sudoers/sudoers.c:364
-#: plugins/sudoers/sudoers.c:686 plugins/sudoers/sudoers.c:811
-#: plugins/sudoers/sudoers.c:855 plugins/sudoers/sudoers.c:1127
-#: plugins/sudoers/sudoers_debug.c:106 plugins/sudoers/sudoreplay.c:1265
-#: plugins/sudoers/sudoreplay.c:1377 plugins/sudoers/sudoreplay.c:1417
-#: plugins/sudoers/sudoreplay.c:1426 plugins/sudoers/sudoreplay.c:1436
-#: plugins/sudoers/sudoreplay.c:1444 plugins/sudoers/sudoreplay.c:1448
-#: plugins/sudoers/sudoreplay.c:1604 plugins/sudoers/sudoreplay.c:1608
-#: plugins/sudoers/testsudoers.c:126 plugins/sudoers/testsudoers.c:216
-#: plugins/sudoers/testsudoers.c:233 plugins/sudoers/testsudoers.c:554
-#: plugins/sudoers/timestamp.c:401 plugins/sudoers/timestamp.c:445
-#: plugins/sudoers/timestamp.c:923 plugins/sudoers/toke_util.c:56
-#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:146
-#: plugins/sudoers/tsdump.c:125 plugins/sudoers/visudo.c:146
-#: plugins/sudoers/visudo.c:307 plugins/sudoers/visudo.c:313
-#: plugins/sudoers/visudo.c:423 plugins/sudoers/visudo.c:601
-#: plugins/sudoers/visudo.c:919 plugins/sudoers/visudo.c:985
-#: plugins/sudoers/visudo.c:1074 toke.l:849 toke.l:949 toke.l:1106
+#: gram.y:1148 gram.y:1155 plugins/sudoers/auth/pam.c:320
+#: plugins/sudoers/auth/pam.c:443 plugins/sudoers/auth/rfc1938.c:109
+#: plugins/sudoers/defaults.c:618 plugins/sudoers/defaults.c:873
+#: plugins/sudoers/defaults.c:1025 plugins/sudoers/editor.c:64
+#: plugins/sudoers/editor.c:82 plugins/sudoers/editor.c:93
+#: plugins/sudoers/env.c:234 plugins/sudoers/gc.c:52
+#: plugins/sudoers/group_plugin.c:134 plugins/sudoers/interfaces.c:71
+#: plugins/sudoers/iolog.c:805 plugins/sudoers/iolog_path.c:167
+#: plugins/sudoers/ldap.c:447 plugins/sudoers/ldap.c:478
+#: plugins/sudoers/ldap.c:530 plugins/sudoers/ldap.c:563
+#: plugins/sudoers/ldap.c:961 plugins/sudoers/ldap.c:1157
+#: plugins/sudoers/ldap.c:1168 plugins/sudoers/ldap.c:1184
+#: plugins/sudoers/ldap.c:1471 plugins/sudoers/ldap.c:1631
+#: plugins/sudoers/ldap.c:1713 plugins/sudoers/ldap.c:1853
+#: plugins/sudoers/ldap.c:1877 plugins/sudoers/ldap.c:1966
+#: plugins/sudoers/ldap.c:1981 plugins/sudoers/ldap.c:2077
+#: plugins/sudoers/ldap.c:2110 plugins/sudoers/ldap.c:2263
+#: plugins/sudoers/ldap.c:2360 plugins/sudoers/ldap.c:3178
+#: plugins/sudoers/ldap.c:3210 plugins/sudoers/ldap.c:3519
+#: plugins/sudoers/ldap.c:3546 plugins/sudoers/ldap.c:3562
+#: plugins/sudoers/ldap.c:3653 plugins/sudoers/ldap.c:3669
+#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:188
+#: plugins/sudoers/logging.c:450 plugins/sudoers/logging.c:471
+#: plugins/sudoers/logging.c:941 plugins/sudoers/match.c:500
+#: plugins/sudoers/match.c:534 plugins/sudoers/match.c:572
+#: plugins/sudoers/match.c:770 plugins/sudoers/match.c:827
+#: plugins/sudoers/parse.c:236 plugins/sudoers/parse.c:248
+#: plugins/sudoers/parse.c:263 plugins/sudoers/parse.c:275
+#: plugins/sudoers/policy.c:97 plugins/sudoers/policy.c:106
+#: plugins/sudoers/policy.c:115 plugins/sudoers/policy.c:139
+#: plugins/sudoers/policy.c:250 plugins/sudoers/policy.c:278
+#: plugins/sudoers/policy.c:287 plugins/sudoers/policy.c:326
+#: plugins/sudoers/policy.c:336 plugins/sudoers/policy.c:345
+#: plugins/sudoers/policy.c:354 plugins/sudoers/policy.c:405
+#: plugins/sudoers/policy.c:632 plugins/sudoers/prompt.c:93
+#: plugins/sudoers/pwutil.c:139 plugins/sudoers/pwutil.c:210
+#: plugins/sudoers/pwutil.c:286 plugins/sudoers/pwutil.c:457
+#: plugins/sudoers/pwutil.c:522 plugins/sudoers/pwutil.c:591
+#: plugins/sudoers/pwutil.c:749 plugins/sudoers/pwutil.c:806
+#: plugins/sudoers/pwutil.c:851 plugins/sudoers/pwutil.c:908
+#: plugins/sudoers/set_perms.c:356 plugins/sudoers/set_perms.c:695
+#: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1350
+#: plugins/sudoers/set_perms.c:1514 plugins/sudoers/sssd.c:162
+#: plugins/sudoers/sssd.c:194 plugins/sudoers/sssd.c:237
+#: plugins/sudoers/sssd.c:244 plugins/sudoers/sssd.c:280
+#: plugins/sudoers/sssd.c:390 plugins/sudoers/sssd.c:462
+#: plugins/sudoers/sssd.c:1053 plugins/sudoers/sssd.c:1233
+#: plugins/sudoers/sssd.c:1248 plugins/sudoers/sssd.c:1264
+#: plugins/sudoers/sudoers.c:261 plugins/sudoers/sudoers.c:271
+#: plugins/sudoers/sudoers.c:279 plugins/sudoers/sudoers.c:363
+#: plugins/sudoers/sudoers.c:660 plugins/sudoers/sudoers.c:775
+#: plugins/sudoers/sudoers.c:819 plugins/sudoers/sudoers_debug.c:106
+#: plugins/sudoers/sudoreplay.c:517 plugins/sudoers/sudoreplay.c:716
+#: plugins/sudoers/sudoreplay.c:828 plugins/sudoers/sudoreplay.c:868
+#: plugins/sudoers/sudoreplay.c:877 plugins/sudoers/sudoreplay.c:887
+#: plugins/sudoers/sudoreplay.c:895 plugins/sudoers/sudoreplay.c:899
+#: plugins/sudoers/sudoreplay.c:1055 plugins/sudoers/sudoreplay.c:1059
+#: plugins/sudoers/testsudoers.c:130 plugins/sudoers/testsudoers.c:216
+#: plugins/sudoers/testsudoers.c:233 plugins/sudoers/timestamp.c:374
+#: plugins/sudoers/timestamp.c:418 plugins/sudoers/timestamp.c:834
+#: plugins/sudoers/toke_util.c:56 plugins/sudoers/toke_util.c:109
+#: plugins/sudoers/toke_util.c:146 plugins/sudoers/visudo.c:152
+#: plugins/sudoers/visudo.c:309 plugins/sudoers/visudo.c:315
+#: plugins/sudoers/visudo.c:446 plugins/sudoers/visudo.c:624
+#: plugins/sudoers/visudo.c:964 plugins/sudoers/visudo.c:1030
+#: plugins/sudoers/visudo.c:1074 plugins/sudoers/visudo.c:1171
+#: plugins/sudoers/visudo_json.c:1035 toke.l:832 toke.l:932 toke.l:1090
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -279,14 +213,6 @@ msgstr "tipus no vàlida d'autenticació"
 msgid "unable to initialize BSD authentication"
 msgstr "no s'ha pogut inicialitzar l'autenticació BSD"
 
-#: plugins/sudoers/auth/bsdauth.c:178
-msgid "your account has expired"
-msgstr ""
-
-#: plugins/sudoers/auth/bsdauth.c:180
-msgid "approval failed"
-msgstr ""
-
 #: plugins/sudoers/auth/fwtk.c:52
 msgid "unable to read fwtk config"
 msgstr "no s'ha pogut llegir la configuració fwtk"
@@ -296,7 +222,7 @@ msgid "unable to connect to authentication server"
 msgstr "no s'ha pogut connectar al servidor d'autenticació"
 
 #: plugins/sudoers/auth/fwtk.c:63 plugins/sudoers/auth/fwtk.c:87
-#: plugins/sudoers/auth/fwtk.c:119
+#: plugins/sudoers/auth/fwtk.c:121
 msgid "lost connection to authentication server"
 msgstr "s'ha perdut la connexió al servidor d'autenticació"
 
@@ -312,8 +238,7 @@ msgstr ""
 #: plugins/sudoers/auth/kerb5.c:111
 #, c-format
 msgid "%s: unable to convert principal to string ('%s'): %s"
-msgstr ""
-"%s: no s'ha pogut convertir el principal a la cadena de caràcters ('%s'): %s"
+msgstr "%s: no s'ha pogut convertir el principal a la cadena de caràcters ('%s'): %s"
 
 #: plugins/sudoers/auth/kerb5.c:161
 #, c-format
@@ -359,45 +284,33 @@ msgstr "%s: No s'ha pogut verificar TGT! Possible atac!: %s"
 msgid "unable to initialize PAM"
 msgstr "No s'ha pogut inicialitzar PAM"
 
-#: plugins/sudoers/auth/pam.c:199
-#, c-format
-msgid "PAM authentication error: %s"
-msgstr "Error d'autenticació PAM: %s"
-
-#: plugins/sudoers/auth/pam.c:216
+#: plugins/sudoers/auth/pam.c:194
 msgid "account validation failure, is your account locked?"
 msgstr "fallada de validació de compte, està bloquejat el vostre compte?"
 
-#: plugins/sudoers/auth/pam.c:220
+#: plugins/sudoers/auth/pam.c:198
 msgid "Account or password is expired, reset your password and try again"
-msgstr ""
-"Ha expirat el compte o la contrasenya, restabliu la vostra contrasenya i "
-"proveu un altre cop"
+msgstr "Ha expirat el compte o la contrasenya, restabliu la vostra contrasenya i proveu un altre cop"
 
-#: plugins/sudoers/auth/pam.c:229
+#: plugins/sudoers/auth/pam.c:206
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "no s'ha pogut canviar la contrasenya expirada: %s"
 
-#: plugins/sudoers/auth/pam.c:233
+#: plugins/sudoers/auth/pam.c:211
 msgid "Password expired, contact your system administrator"
-msgstr ""
-"Ha expirat la contrasenya, contacteu el vostre administrador de sistema"
+msgstr "Ha expirat la contrasenya, contacteu el vostre administrador de sistema"
 
-#: plugins/sudoers/auth/pam.c:237
-msgid ""
-"Account expired or PAM config lacks an \"account\" section for sudo, contact "
-"your system administrator"
-msgstr ""
-"Ha expirat el compte o la configuració PAM no té una secció \"compte\" per a "
-"sudo, contacteu el vostre administrador de sistema"
+#: plugins/sudoers/auth/pam.c:215
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "Ha expirat el compte o la configuració PAM no té una secció \"compte\" per a sudo, contacteu el vostre administrador de sistema"
 
-#: plugins/sudoers/auth/pam.c:244 plugins/sudoers/auth/pam.c:249
-#, fuzzy, c-format
-msgid "PAM account management error: %s"
+#: plugins/sudoers/auth/pam.c:229
+#, c-format
+msgid "PAM authentication error: %s"
 msgstr "Error d'autenticació PAM: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:228
+#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:226
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "no existiu a la base de dades %s"
@@ -434,7 +347,7 @@ msgstr "error desconegut de SecurID"
 msgid "invalid passcode length for SecurID"
 msgstr "longitud no vàlida de contrasenya per a SecurID"
 
-#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
+#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:125
 msgid "unable to initialize SIA session"
 msgstr "no s'ha pogut inicialitzar la sessió SIA"
 
@@ -443,43 +356,34 @@ msgid "invalid authentication methods"
 msgstr "mètodes no vàlids d'autenticació"
 
 #: plugins/sudoers/auth/sudo_auth.c:128
-msgid ""
-"Invalid authentication methods compiled into sudo!  You may not mix "
-"standalone and non-standalone authentication."
-msgstr ""
-"Mètodes no vàlids d'autenticació compilats dins del sudo! No podeu barrejar "
-"l'autenticació independent i no independent."
+msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
+msgstr "Mètodes no vàlids d'autenticació compilats dins del sudo! No podeu barrejar l'autenticació independent i no independent."
 
-#: plugins/sudoers/auth/sudo_auth.c:249 plugins/sudoers/auth/sudo_auth.c:299
+#: plugins/sudoers/auth/sudo_auth.c:224 plugins/sudoers/auth/sudo_auth.c:274
 msgid "no authentication methods"
 msgstr "no hi ha mètodes d'autenticació"
 
-#: plugins/sudoers/auth/sudo_auth.c:251
-msgid ""
-"There are no authentication methods compiled into sudo!  If you want to turn "
-"off authentication, use the --disable-authentication configure option."
-msgstr ""
-"No hi ha mètodes d'autenticació compilats dins del sudo! Si voleu "
-"deshabilitar l'autenticació, useu l'opció de configuració --disable-"
-"authentication"
+#: plugins/sudoers/auth/sudo_auth.c:226
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "No hi ha mètodes d'autenticació compilats dins del sudo! Si voleu deshabilitar l'autenticació, useu l'opció de configuració --disable-authentication"
 
-#: plugins/sudoers/auth/sudo_auth.c:301
+#: plugins/sudoers/auth/sudo_auth.c:276
 msgid "Unable to initialize authentication methods."
 msgstr "No s'han pogut inicialitzar els mètodes d'autenticació."
 
-#: plugins/sudoers/auth/sudo_auth.c:467
+#: plugins/sudoers/auth/sudo_auth.c:441
 msgid "Authentication methods:"
 msgstr "Mètodes d'autenticació:"
 
-#: plugins/sudoers/bsm_audit.c:120 plugins/sudoers/bsm_audit.c:211
+#: plugins/sudoers/bsm_audit.c:111 plugins/sudoers/bsm_audit.c:200
 msgid "Could not determine audit condition"
 msgstr "No s'ha pogut determinar la condició d'auditoria"
 
-#: plugins/sudoers/bsm_audit.c:183 plugins/sudoers/bsm_audit.c:273
+#: plugins/sudoers/bsm_audit.c:172 plugins/sudoers/bsm_audit.c:260
 msgid "unable to commit audit record"
 msgstr "no s'ha pogut validar el registre d'auditoria"
 
-#: plugins/sudoers/check.c:260
+#: plugins/sudoers/check.c:252
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -499,863 +403,575 @@ msgstr ""
 "    #3) Tenir molt de poder està associat amb tenir molta responsabilitat.\n"
 "\n"
 
-#: plugins/sudoers/check.c:303 plugins/sudoers/check.c:313
-#: plugins/sudoers/sudoers.c:729 plugins/sudoers/sudoers.c:774
-#: plugins/sudoers/tsdump.c:121
+#: plugins/sudoers/check.c:295 plugins/sudoers/check.c:305
+#: plugins/sudoers/sudoers.c:696 plugins/sudoers/sudoers.c:738
 #, c-format
 msgid "unknown uid: %u"
 msgstr "uid desconegut: %u"
 
-#: plugins/sudoers/check.c:308 plugins/sudoers/iolog.c:257
-#: plugins/sudoers/policy.c:908 plugins/sudoers/sudoers.c:1166
-#: plugins/sudoers/testsudoers.c:207 plugins/sudoers/testsudoers.c:366
+#: plugins/sudoers/check.c:300 plugins/sudoers/iolog.c:235
+#: plugins/sudoers/policy.c:805 plugins/sudoers/sudoers.c:1127
+#: plugins/sudoers/testsudoers.c:207 plugins/sudoers/testsudoers.c:365
 #, c-format
 msgid "unknown user: %s"
 msgstr "usuari desconegut: %s"
 
-#: plugins/sudoers/cvtsudoers.c:191
-#, c-format
-msgid "order increment: %s: %s"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers.c:207
-#, c-format
-msgid "starting order: %s: %s"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers.c:218 plugins/sudoers/sudoreplay.c:310
-#: plugins/sudoers/visudo.c:178
-#, c-format
-msgid "%s version %s\n"
-msgstr "%s versió %s\n"
-
-#: plugins/sudoers/cvtsudoers.c:220 plugins/sudoers/visudo.c:180
-#, c-format
-msgid "%s grammar version %d\n"
-msgstr "%s versió de la gramàtica %d\n"
-
-#: plugins/sudoers/cvtsudoers.c:237
-#, fuzzy, c-format
-msgid "unsupported input format %s"
-msgstr "tipus de resum no suportat %d per a %s"
-
-#: plugins/sudoers/cvtsudoers.c:252
-#, fuzzy, c-format
-msgid "unsupported output format %s"
-msgstr "tipus de resum no suportat %d per a %s"
-
-#: plugins/sudoers/cvtsudoers.c:292
-#, c-format
-msgid "%s: input and output files must be different"
-msgstr "%s: els fitxers d'entrada i de sortida han de ser diferents"
-
-#: plugins/sudoers/cvtsudoers.c:308 plugins/sudoers/sudoers.c:167
-#: plugins/sudoers/testsudoers.c:246 plugins/sudoers/visudo.c:234
-#: plugins/sudoers/visudo.c:589 plugins/sudoers/visudo.c:910
-msgid "unable to initialize sudoers default values"
-msgstr "no s'han pogut inicialitzar el valors predeterminats dels sudoers"
-
-#: plugins/sudoers/cvtsudoers.c:390 plugins/sudoers/ldap_conf.c:413
-#, c-format
-msgid "%s: %s: %s: %s"
-msgstr "%s: %s: %s: %s"
-
-#: plugins/sudoers/cvtsudoers.c:449
-#, fuzzy, c-format
-msgid "%s: unknown key word: %s"
-msgstr "usuari desconegut: %s"
-
-#: plugins/sudoers/cvtsudoers.c:495
-#, fuzzy, c-format
-msgid "invalid defaults type: %s"
-msgstr "opció no vàlida de filtre: %s"
-
-#: plugins/sudoers/cvtsudoers.c:518
-#, fuzzy, c-format
-msgid "invalid suppression type: %s"
-msgstr "expressió regular no vàlida: %s"
-
-#: plugins/sudoers/cvtsudoers.c:558 plugins/sudoers/cvtsudoers.c:572
-#, fuzzy, c-format
-msgid "invalid filter: %s"
-msgstr "opció no vàlida de filtre: %s"
-
-#: plugins/sudoers/cvtsudoers.c:650 plugins/sudoers/cvtsudoers.c:1005
-#: plugins/sudoers/cvtsudoers_json.c:1114 plugins/sudoers/cvtsudoers_ldif.c:492
-#: plugins/sudoers/cvtsudoers_ldif.c:983 plugins/sudoers/iolog.c:415
-#: plugins/sudoers/sudoers.c:933 plugins/sudoers/sudoreplay.c:356
-#: plugins/sudoers/sudoreplay.c:1366 plugins/sudoers/sudoreplay.c:1570
-#: plugins/sudoers/timestamp.c:410 plugins/sudoers/tsdump.c:130
-#: plugins/sudoers/visudo.c:906
-#, c-format
-msgid "unable to open %s"
-msgstr "no s'ha pogut obrir %s"
-
-#: plugins/sudoers/cvtsudoers.c:653 plugins/sudoers/visudo.c:915
-#, c-format
-msgid "failed to parse %s file, unknown error"
-msgstr "no s'ha pogut analitzar el fitxer %s, error desconegut"
-
-#: plugins/sudoers/cvtsudoers.c:661 plugins/sudoers/visudo.c:931
-#, c-format
-msgid "parse error in %s near line %d\n"
-msgstr "error d'anàlisi a %s a prop de la línia %d\n"
-
-#: plugins/sudoers/cvtsudoers.c:664 plugins/sudoers/visudo.c:934
-#, c-format
-msgid "parse error in %s\n"
-msgstr "error d'anàlisi a %s\n"
-
-#: plugins/sudoers/cvtsudoers.c:1052 plugins/sudoers/iolog.c:502
-#: plugins/sudoers/sudoreplay.c:1135 plugins/sudoers/timestamp.c:294
-#: plugins/sudoers/timestamp.c:297
-#, c-format
-msgid "unable to write to %s"
-msgstr "no s'ha pogut escriure a %s"
-
-#: plugins/sudoers/cvtsudoers.c:1075
-#, fuzzy, c-format
-msgid ""
-"%s - convert between sudoers file formats\n"
-"\n"
-msgstr ""
-"%s - edita amb seguretat el fitxer sudoers\n"
-"\n"
-
-#: plugins/sudoers/cvtsudoers.c:1077
-msgid ""
-"\n"
-"Options:\n"
-"  -b, --base=dn              the base DN for sudo LDAP queries\n"
-"  -d, --defaults=deftypes    only convert Defaults of the specified types\n"
-"  -e, --expand-aliases       expand aliases when converting\n"
-"  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"
-"  -i, --input-format=format  set input format: LDIF or sudoers\n"
-"  -I, --increment=num        amount to increase each sudoOrder by\n"
-"  -h, --help                 display help message and exit\n"
-"  -m, --match=filter         only convert entries that match the filter\n"
-"  -M, --match-local          match filter uses passwd and group databases\n"
-"  -o, --output=output_file   write converted sudoers to output_file\n"
-"  -O, --order-start=num      starting point for first sudoOrder\n"
-"  -p, --prune-matches        prune non-matching users, groups and hosts\n"
-"  -s, --suppress=sections    suppress output of certain sections\n"
-"  -V, --version              display version information and exit"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_json.c:674 plugins/sudoers/cvtsudoers_json.c:709
-#: plugins/sudoers/cvtsudoers_json.c:925
-#, c-format
-msgid "unknown defaults entry \"%s\""
-msgstr "entrada «%s» desconeguda de paràmetres predeterminats"
-
-#: plugins/sudoers/cvtsudoers_json.c:845 plugins/sudoers/cvtsudoers_json.c:860
-#: plugins/sudoers/cvtsudoers_ldif.c:219 plugins/sudoers/cvtsudoers_ldif.c:230
-#: plugins/sudoers/ldap.c:757
-msgid "unable to get GMT time"
-msgstr "no s'ha pogut obtenir l'hora GMT"
-
-#: plugins/sudoers/cvtsudoers_json.c:848 plugins/sudoers/cvtsudoers_json.c:863
-#: plugins/sudoers/cvtsudoers_ldif.c:222 plugins/sudoers/cvtsudoers_ldif.c:233
-#: plugins/sudoers/ldap.c:763
-msgid "unable to format timestamp"
-msgstr "no s'ha pogut donar format a la marca horària"
-
-#: plugins/sudoers/cvtsudoers_ldif.c:387 plugins/sudoers/env.c:295
-#: plugins/sudoers/env.c:302 plugins/sudoers/env.c:407
-#: plugins/sudoers/ldap.c:771 plugins/sudoers/ldap.c:998
-#: plugins/sudoers/ldap.c:1323 plugins/sudoers/ldap_conf.c:219
-#: plugins/sudoers/ldap_conf.c:309 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/logging.c:1008 plugins/sudoers/policy.c:619
-#: plugins/sudoers/policy.c:629 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:877 plugins/sudoers/testsudoers.c:237
-#: plugins/sudoers/toke_util.c:158
-#, c-format
-msgid "internal error, %s overflow"
-msgstr "error intern, desbordament de %s"
-
-#: plugins/sudoers/cvtsudoers_ldif.c:487
-msgid ""
-"the SUDOERS_BASE environment variable is not set and the -b option was not "
-"specified."
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_ldif.c:1016
-#, c-format
-msgid "ignoring incomplete sudoRole: cn: %s"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_ldif.c:1151 plugins/sudoers/ldap.c:2316
-#, c-format
-msgid "invalid sudoOrder attribute: %s"
-msgstr "atribut sudoOrder no vàlid: %s"
-
-#: plugins/sudoers/def_data.c:42
+#: plugins/sudoers/def_data.c:27
 #, c-format
 msgid "Syslog facility if syslog is being used for logging: %s"
 msgstr "Eina syslog si s'està usant syslog per als registres: %s"
 
-#: plugins/sudoers/def_data.c:46
+#: plugins/sudoers/def_data.c:31
 #, c-format
 msgid "Syslog priority to use when user authenticates successfully: %s"
 msgstr "Prioritat de syslog a usar quan l'usuari s'autentica amb èxit: %s"
 
-#: plugins/sudoers/def_data.c:50
+#: plugins/sudoers/def_data.c:35
 #, c-format
 msgid "Syslog priority to use when user authenticates unsuccessfully: %s"
 msgstr "Prioritat de syslog a usar quan l'usuari no té èxit a autenticar- %s"
 
-#: plugins/sudoers/def_data.c:54
+#: plugins/sudoers/def_data.c:39
 msgid "Put OTP prompt on its own line"
 msgstr "Poseu la pregunta OTP a la seva pròpia línia"
 
-#: plugins/sudoers/def_data.c:58
+#: plugins/sudoers/def_data.c:43
 msgid "Ignore '.' in $PATH"
 msgstr "Ignoreu '.' al $PATH"
 
-#: plugins/sudoers/def_data.c:62
+#: plugins/sudoers/def_data.c:47
 msgid "Always send mail when sudo is run"
 msgstr "Envia sempre correu electrònic quan s'executi sudo"
 
-#: plugins/sudoers/def_data.c:66
+#: plugins/sudoers/def_data.c:51
 msgid "Send mail if user authentication fails"
 msgstr "Envia correu electrònic si falla l'autenticació de l'usuari"
 
-#: plugins/sudoers/def_data.c:70
+#: plugins/sudoers/def_data.c:55
 msgid "Send mail if the user is not in sudoers"
 msgstr "Envia correu electrònic si l'usuari no està als sudoers"
 
-#: plugins/sudoers/def_data.c:74
+#: plugins/sudoers/def_data.c:59
 msgid "Send mail if the user is not in sudoers for this host"
-msgstr ""
-"Envia el correu electrònic si l'usuari no està als sudoers per a aquesta "
-"amfitrió"
+msgstr "Envia el correu electrònic si l'usuari no està als sudoers per a aquesta amfitrió"
 
-#: plugins/sudoers/def_data.c:78
+#: plugins/sudoers/def_data.c:63
 msgid "Send mail if the user is not allowed to run a command"
-msgstr ""
-"Envia correu electrònic si l'usuari no té permís per executar aquesta ordre"
+msgstr "Envia correu electrònic si l'usuari no té permís per executar aquesta ordre"
 
-#: plugins/sudoers/def_data.c:82
+#: plugins/sudoers/def_data.c:67
 msgid "Send mail if the user tries to run a command"
 msgstr "Envia correu electrònic si l'usuari intenta executar una ordre"
 
-#: plugins/sudoers/def_data.c:86
+#: plugins/sudoers/def_data.c:71
 msgid "Use a separate timestamp for each user/tty combo"
 msgstr "Usa una marca horària separada per a cada combinació usuari/terminal"
 
-#: plugins/sudoers/def_data.c:90
+#: plugins/sudoers/def_data.c:75
 msgid "Lecture user the first time they run sudo"
 msgstr "Dóna una llissó a l'usuari cada cop que executi sudo"
 
-#: plugins/sudoers/def_data.c:94
+#: plugins/sudoers/def_data.c:79
 #, c-format
 msgid "File containing the sudo lecture: %s"
 msgstr "Fitxer que conté la llissó de sudo: %s"
 
-#: plugins/sudoers/def_data.c:98
+#: plugins/sudoers/def_data.c:83
 msgid "Require users to authenticate by default"
 msgstr "Requereix de forma predeterminada que els usuaris s'autentiquin"
 
-#: plugins/sudoers/def_data.c:102
+#: plugins/sudoers/def_data.c:87
 msgid "Root may run sudo"
 msgstr "L'usuari primari pot executar sudo"
 
-#: plugins/sudoers/def_data.c:106
+#: plugins/sudoers/def_data.c:91
 msgid "Log the hostname in the (non-syslog) log file"
-msgstr ""
-"Registra el nom del sistema amfitrió al fitxer de registre (que no és syslog)"
+msgstr "Registra el nom del sistema amfitrió al fitxer de registre (que no és syslog)"
 
-#: plugins/sudoers/def_data.c:110
+#: plugins/sudoers/def_data.c:95
 msgid "Log the year in the (non-syslog) log file"
 msgstr "Registra l'any al fitxer de registre (que no és syslog)"
 
-#: plugins/sudoers/def_data.c:114
+#: plugins/sudoers/def_data.c:99
 msgid "If sudo is invoked with no arguments, start a shell"
 msgstr "Si sudo s'invoca sense arguments, inicia un intèrpret d'ordres"
 
-#: plugins/sudoers/def_data.c:118
+#: plugins/sudoers/def_data.c:103
 msgid "Set $HOME to the target user when starting a shell with -s"
 msgstr "Estableix $HOME per a l'usuari destí quan s'inicia un d'ordres amb -s"
 
-#: plugins/sudoers/def_data.c:122
+#: plugins/sudoers/def_data.c:107
 msgid "Always set $HOME to the target user's home directory"
 msgstr "Estableix sempre $HOME al directori de l'usuari destí"
 
-#: plugins/sudoers/def_data.c:126
+#: plugins/sudoers/def_data.c:111
 msgid "Allow some information gathering to give useful error messages"
 msgstr "Permet recollir alguna informació per donar missatges d'error útils"
 
-#: plugins/sudoers/def_data.c:130
+#: plugins/sudoers/def_data.c:115
 msgid "Require fully-qualified hostnames in the sudoers file"
 msgstr "Requereix noms de sistema amfitrió qualificats completament al sudoers"
 
-#: plugins/sudoers/def_data.c:134
+#: plugins/sudoers/def_data.c:119
 msgid "Insult the user when they enter an incorrect password"
 msgstr "Insulta a l'usuari quen entri una contrasenya incorrecta"
 
-#: plugins/sudoers/def_data.c:138
+#: plugins/sudoers/def_data.c:123
 msgid "Only allow the user to run sudo if they have a tty"
 msgstr "Permet a l'usuari executar sudo únicament si té un terminal"
 
-#: plugins/sudoers/def_data.c:142
+#: plugins/sudoers/def_data.c:127
 msgid "Visudo will honor the EDITOR environment variable"
 msgstr "Visudo tindrà en compte la variable d'entorn EDITOR"
 
-#: plugins/sudoers/def_data.c:146
+#: plugins/sudoers/def_data.c:131
 msgid "Prompt for root's password, not the users's"
-msgstr ""
-"Pregunta per la contrasenya de l'usuari primari, no la de l'usuari normal"
+msgstr "Pregunta per la contrasenya de l'usuari primari, no la de l'usuari normal"
 
-#: plugins/sudoers/def_data.c:150
+#: plugins/sudoers/def_data.c:135
 msgid "Prompt for the runas_default user's password, not the users's"
-msgstr ""
-"Pregunta per la contrasenya de l'usuari runas_default, no la de l'usuari "
-"normal"
+msgstr "Pregunta per la contrasenya de l'usuari runas_default, no la de l'usuari normal"
 
-#: plugins/sudoers/def_data.c:154
+#: plugins/sudoers/def_data.c:139
 msgid "Prompt for the target user's password, not the users's"
-msgstr ""
-"Pregunta per la contrasenya de l'usuari destí, no la de l'usuari normal"
+msgstr "Pregunta per la contrasenya de l'usuari destí, no la de l'usuari normal"
 
-#: plugins/sudoers/def_data.c:158
+#: plugins/sudoers/def_data.c:143
 msgid "Apply defaults in the target user's login class if there is one"
-msgstr ""
-"Aplica els paràmetres predeterminats a la classe d'inici de sessió de "
-"l'usuari destí si hi ha una"
+msgstr "Aplica els paràmetres predeterminats a la classe d'inici de sessió de l'usuari destí si hi ha una"
 
-#: plugins/sudoers/def_data.c:162
+#: plugins/sudoers/def_data.c:147
 msgid "Set the LOGNAME and USER environment variables"
 msgstr "Estableix les variables d'entorn LOGNAME i USER"
 
-#: plugins/sudoers/def_data.c:166
+#: plugins/sudoers/def_data.c:151
 msgid "Only set the effective uid to the target user, not the real uid"
 msgstr "Estableix únicament l'uid efectiu de l'usuari destí, no l'uid real"
 
-#: plugins/sudoers/def_data.c:170
+#: plugins/sudoers/def_data.c:155
 msgid "Don't initialize the group vector to that of the target user"
-msgstr ""
-"No inicialitzis el vector de grup perquè coincideixi amb el de l'usuari destí"
+msgstr "No inicialitzis el vector de grup perquè coincideixi amb el de l'usuari destí"
 
-#: plugins/sudoers/def_data.c:174
+#: plugins/sudoers/def_data.c:159
 #, c-format
 msgid "Length at which to wrap log file lines (0 for no wrap): %u"
-msgstr ""
-"longitud a la qual ajustar les línies del fitxer de registres (0 per a no "
-"ajustar): %u"
+msgstr "longitud a la qual ajustar les línies del fitxer de registres (0 per a no ajustar): %u"
 
-#: plugins/sudoers/def_data.c:178
+#: plugins/sudoers/def_data.c:163
 #, c-format
 msgid "Authentication timestamp timeout: %.1f minutes"
-msgstr ""
-"Temps màxim d'espera per a la marca horària de l'autenticació: %.1f minuts"
+msgstr "Temps màxim d'espera per a la marca horària de l'autenticació: %.1f minuts"
 
-#: plugins/sudoers/def_data.c:182
+#: plugins/sudoers/def_data.c:167
 #, c-format
 msgid "Password prompt timeout: %.1f minutes"
 msgstr "Temps màxim d'espera per a la pregunta de la contrasenya: %.1f minuts"
 
-#: plugins/sudoers/def_data.c:186
+#: plugins/sudoers/def_data.c:171
 #, c-format
 msgid "Number of tries to enter a password: %u"
 msgstr "Nombre de intents per entrar una contrasenya: %u"
 
-#: plugins/sudoers/def_data.c:190
+#: plugins/sudoers/def_data.c:175
 #, c-format
 msgid "Umask to use or 0777 to use user's: 0%o"
 msgstr "Umask a usar o 0777 per usar la de l'usuari: 0%o"
 
-#: plugins/sudoers/def_data.c:194
+#: plugins/sudoers/def_data.c:179
 #, c-format
 msgid "Path to log file: %s"
 msgstr "Camí al fitxer de registre: %s"
 
-#: plugins/sudoers/def_data.c:198
+#: plugins/sudoers/def_data.c:183
 #, c-format
 msgid "Path to mail program: %s"
 msgstr "Camí al programa de correu electrònic: %s"
 
-#: plugins/sudoers/def_data.c:202
+#: plugins/sudoers/def_data.c:187
 #, c-format
 msgid "Flags for mail program: %s"
 msgstr "Indicadors per al programa de correu electrònic: %s"
 
-#: plugins/sudoers/def_data.c:206
+#: plugins/sudoers/def_data.c:191
 #, c-format
 msgid "Address to send mail to: %s"
 msgstr "Adreça per enviar correu electrònic: %s"
 
-#: plugins/sudoers/def_data.c:210
+#: plugins/sudoers/def_data.c:195
 #, c-format
 msgid "Address to send mail from: %s"
 msgstr "Adreça per enviar correu electrònic des de: %s"
 
-#: plugins/sudoers/def_data.c:214
+#: plugins/sudoers/def_data.c:199
 #, c-format
 msgid "Subject line for mail messages: %s"
 msgstr "Línia d'assumpte per als missatges de correu electrònic: %s"
 
-#: plugins/sudoers/def_data.c:218
+#: plugins/sudoers/def_data.c:203
 #, c-format
 msgid "Incorrect password message: %s"
 msgstr "Missatge de contrasenya incorrecta: %s"
 
-#: plugins/sudoers/def_data.c:222
+#: plugins/sudoers/def_data.c:207
 #, c-format
 msgid "Path to lecture status dir: %s"
 msgstr "Camí al directori d'estat de la llissó: %s"
 
-#: plugins/sudoers/def_data.c:226
+#: plugins/sudoers/def_data.c:211
 #, c-format
 msgid "Path to authentication timestamp dir: %s"
 msgstr "Camí del directori de marques horàries d'autenticació: %s"
 
-#: plugins/sudoers/def_data.c:230
+#: plugins/sudoers/def_data.c:215
 #, c-format
 msgid "Owner of the authentication timestamp dir: %s"
 msgstr "Propietari del directori de marques horàries d'autenticació: %s"
 
-#: plugins/sudoers/def_data.c:234
+#: plugins/sudoers/def_data.c:219
 #, c-format
 msgid "Users in this group are exempt from password and PATH requirements: %s"
-msgstr ""
-"Els usuaris d'aquest grup estan exempts dels requeriments  contrasenya i "
-"PATH: %s"
+msgstr "Els usuaris d'aquest grup estan exempts dels requeriments  contrasenya i PATH: %s"
 
-#: plugins/sudoers/def_data.c:238
+#: plugins/sudoers/def_data.c:223
 #, c-format
 msgid "Default password prompt: %s"
 msgstr "Pregunta predeterminada de contrasenya: %s"
 
-#: plugins/sudoers/def_data.c:242
+#: plugins/sudoers/def_data.c:227
 msgid "If set, passprompt will override system prompt in all cases."
-msgstr ""
-"Si està establert, la pregunta de contrasenya primarà sobre la pregunta del "
-"sistema en tots els casos."
+msgstr "Si està establert, la pregunta de contrasenya primarà sobre la pregunta del sistema en tots els casos."
 
-#: plugins/sudoers/def_data.c:246
+#: plugins/sudoers/def_data.c:231
 #, c-format
 msgid "Default user to run commands as: %s"
 msgstr "Usuari predeterminat per executar ordres com a: %s"
 
-#: plugins/sudoers/def_data.c:250
+#: plugins/sudoers/def_data.c:235
 #, c-format
 msgid "Value to override user's $PATH with: %s"
 msgstr "Valor per anul·lar el $PATH de l'usuari amb: %s"
 
-#: plugins/sudoers/def_data.c:254
+#: plugins/sudoers/def_data.c:239
 #, c-format
 msgid "Path to the editor for use by visudo: %s"
 msgstr "Camí a l'editor a usar per visudo: %s"
 
-#: plugins/sudoers/def_data.c:258
+#: plugins/sudoers/def_data.c:243
 #, c-format
 msgid "When to require a password for 'list' pseudocommand: %s"
 msgstr "Quan requerir una contrasenya per a la pseudo-ordre 'list': %s"
 
-#: plugins/sudoers/def_data.c:262
+#: plugins/sudoers/def_data.c:247
 #, c-format
 msgid "When to require a password for 'verify' pseudocommand: %s"
 msgstr "Quan requerir una contrasenya per a la pseudo-ordre 'verify': %s"
 
-#: plugins/sudoers/def_data.c:266
+#: plugins/sudoers/def_data.c:251
 msgid "Preload the dummy exec functions contained in the sudo_noexec library"
-msgstr ""
-"Pre-carrega les funcions dummy exex contingudes a la biblioteca sudo_noexec"
+msgstr "Pre-carrega les funcions dummy exex contingudes a la biblioteca sudo_noexec"
 
-#: plugins/sudoers/def_data.c:270
+#: plugins/sudoers/def_data.c:255
 msgid "If LDAP directory is up, do we ignore local sudoers file"
 msgstr "Si el directori LDAP està actiu, ignorem el fitxer local sudoers?"
 
-#: plugins/sudoers/def_data.c:274
+#: plugins/sudoers/def_data.c:259
 #, c-format
 msgid "File descriptors >= %d will be closed before executing a command"
 msgstr "Els descriptors de fitxer >= %d es tancaran abans d'executar una ordre"
 
-#: plugins/sudoers/def_data.c:278
+#: plugins/sudoers/def_data.c:263
 msgid "If set, users may override the value of `closefrom' with the -C option"
-msgstr ""
-"Si està establert, els usuaris podran anul·lar el valor de `closeform' amb "
-"l'opció -C"
+msgstr "Si està establert, els usuaris podran anul·lar el valor de `closeform' amb l'opció -C"
 
-#: plugins/sudoers/def_data.c:282
+#: plugins/sudoers/def_data.c:267
 msgid "Allow users to set arbitrary environment variables"
 msgstr "Permet als usuaris fixar variables arbitràries d'entorn"
 
-#: plugins/sudoers/def_data.c:286
+#: plugins/sudoers/def_data.c:271
 msgid "Reset the environment to a default set of variables"
 msgstr "Restableix l'entorn a un conjunt predeterminat de variables"
 
-#: plugins/sudoers/def_data.c:290
+#: plugins/sudoers/def_data.c:275
 msgid "Environment variables to check for sanity:"
 msgstr "Les variables d'entorn per comprovar la validesa:"
 
-#: plugins/sudoers/def_data.c:294
+#: plugins/sudoers/def_data.c:279
 msgid "Environment variables to remove:"
 msgstr "Variables d'entorn a suprimir:"
 
-#: plugins/sudoers/def_data.c:298
+#: plugins/sudoers/def_data.c:283
 msgid "Environment variables to preserve:"
 msgstr "Variables d'entorn a preservar:"
 
-#: plugins/sudoers/def_data.c:302
+#: plugins/sudoers/def_data.c:287
 #, c-format
 msgid "SELinux role to use in the new security context: %s"
 msgstr "Rol SELinux a usar al nou context de seguretat: %s"
 
-#: plugins/sudoers/def_data.c:306
+#: plugins/sudoers/def_data.c:291
 #, c-format
 msgid "SELinux type to use in the new security context: %s"
 msgstr "Tipus SELinux a usar al nou context de seguretat: %s"
 
-#: plugins/sudoers/def_data.c:310
+#: plugins/sudoers/def_data.c:295
 #, c-format
 msgid "Path to the sudo-specific environment file: %s"
 msgstr "Camí al fitxer d'entorn sudo-específic: %s"
 
-#: plugins/sudoers/def_data.c:314
-#, fuzzy, c-format
-msgid "Path to the restricted sudo-specific environment file: %s"
-msgstr "Camí al fitxer d'entorn sudo-específic: %s"
-
-#: plugins/sudoers/def_data.c:318
+#: plugins/sudoers/def_data.c:299
 #, c-format
 msgid "Locale to use while parsing sudoers: %s"
 msgstr "Configuració local a usar quan s'estan analitzant els sudoers: %s"
 
-#: plugins/sudoers/def_data.c:322
+#: plugins/sudoers/def_data.c:303
 msgid "Allow sudo to prompt for a password even if it would be visible"
-msgstr ""
-"Permet a sudo preguntar per una contrasenya tot i que pugui ser visible"
+msgstr "Permet a sudo preguntar per una contrasenya tot i que pugui ser visible"
 
-#: plugins/sudoers/def_data.c:326
+#: plugins/sudoers/def_data.c:307
 msgid "Provide visual feedback at the password prompt when there is user input"
-msgstr ""
-"Proveeix retroalimentació a la pregunta de contrasenya quan hi ha una "
-"entrada per l'usuari"
+msgstr "Proveeix retroalimentació a la pregunta de contrasenya quan hi ha una entrada per l'usuari"
 
-#: plugins/sudoers/def_data.c:330
-msgid ""
-"Use faster globbing that is less accurate but does not access the filesystem"
-msgstr ""
-"Usa una expansió que és menys precisa però no accedeix el sistema de fitxers"
+#: plugins/sudoers/def_data.c:311
+msgid "Use faster globbing that is less accurate but does not access the filesystem"
+msgstr "Usa una expansió que és menys precisa però no accedeix el sistema de fitxers"
 
-#: plugins/sudoers/def_data.c:334
-msgid ""
-"The umask specified in sudoers will override the user's, even if it is more "
-"permissive"
-msgstr ""
-"Els permisos umask als sudoers anul·larà els permisos de l'usuari, tot i que "
-"siguin més permissius"
+#: plugins/sudoers/def_data.c:315
+msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
+msgstr "Els permisos umask als sudoers anul·larà els permisos de l'usuari, tot i que siguin més permissius"
 
-#: plugins/sudoers/def_data.c:338
+#: plugins/sudoers/def_data.c:319
 msgid "Log user's input for the command being run"
-msgstr ""
-"Registra l'entrada feta per l'usuari per a l'ordre que s'està executant"
+msgstr "Registra l'entrada feta per l'usuari per a l'ordre que s'està executant"
 
-#: plugins/sudoers/def_data.c:342
+#: plugins/sudoers/def_data.c:323
 msgid "Log the output of the command being run"
 msgstr "Registra la sortida de l'ordre que s'està executant"
 
-#: plugins/sudoers/def_data.c:346
+#: plugins/sudoers/def_data.c:327
 msgid "Compress I/O logs using zlib"
 msgstr "Comprimeix els registres d'entrada/sortida usant zlib"
 
-#: plugins/sudoers/def_data.c:350
+#: plugins/sudoers/def_data.c:331
 msgid "Always run commands in a pseudo-tty"
 msgstr "Executa sempre les ordres en un pseudo-terminal"
 
-#: plugins/sudoers/def_data.c:354
+#: plugins/sudoers/def_data.c:335
 #, c-format
 msgid "Plugin for non-Unix group support: %s"
 msgstr "Connector per a suport de grup no Unix: %s"
 
-#: plugins/sudoers/def_data.c:358
+#: plugins/sudoers/def_data.c:339
 #, c-format
 msgid "Directory in which to store input/output logs: %s"
 msgstr "Directori on arxivar els registres entrada/sortida: %s"
 
-#: plugins/sudoers/def_data.c:362
+#: plugins/sudoers/def_data.c:343
 #, c-format
 msgid "File in which to store the input/output log: %s"
 msgstr "Fitxer on arxivar el registre entrada/sortida: %s"
 
-#: plugins/sudoers/def_data.c:366
+#: plugins/sudoers/def_data.c:347
 msgid "Add an entry to the utmp/utmpx file when allocating a pty"
-msgstr ""
-"Afegeix una entrada al fitxer utmp/utmpx quan s'estigui assignant un pty"
+msgstr "Afegeix una entrada al fitxer utmp/utmpx quan s'estigui assignant un pty"
 
-#: plugins/sudoers/def_data.c:370
+#: plugins/sudoers/def_data.c:351
 msgid "Set the user in utmp to the runas user, not the invoking user"
-msgstr ""
-"Estableix l'usuari a utmp perquè sigui l'usuari runas, no l'usuari invocant"
+msgstr "Estableix l'usuari a utmp perquè sigui l'usuari runas, no l'usuari invocant"
 
-#: plugins/sudoers/def_data.c:374
-#, fuzzy, c-format
-msgid "Set of permitted privileges: %s"
+#: plugins/sudoers/def_data.c:355
+msgid "Set of permitted privileges"
 msgstr "Conjunt de privilegis permesos"
 
-#: plugins/sudoers/def_data.c:378
-#, fuzzy, c-format
-msgid "Set of limit privileges: %s"
+#: plugins/sudoers/def_data.c:359
+msgid "Set of limit privileges"
 msgstr "Conjunt de privilegis límit"
 
-#: plugins/sudoers/def_data.c:382
+#: plugins/sudoers/def_data.c:363
 msgid "Run commands on a pty in the background"
 msgstr "Executa les ordres a un pseudo-terminal (pty) al fons"
 
-#: plugins/sudoers/def_data.c:386
-#, fuzzy, c-format
-msgid "PAM service name to use: %s"
+#: plugins/sudoers/def_data.c:367
+msgid "PAM service name to use"
 msgstr "Nom del servei PAM a usar"
 
-#: plugins/sudoers/def_data.c:390
-#, fuzzy, c-format
-msgid "PAM service name to use for login shells: %s"
+#: plugins/sudoers/def_data.c:371
+msgid "PAM service name to use for login shells"
 msgstr "Nom del servei PAM a usar per a intèrprets d'ordres d'inici de sessió"
 
-#: plugins/sudoers/def_data.c:394
+#: plugins/sudoers/def_data.c:375
 msgid "Attempt to establish PAM credentials for the target user"
 msgstr "Intent d'establir credencials PAM per a l'usuari destí"
 
-#: plugins/sudoers/def_data.c:398
+#: plugins/sudoers/def_data.c:379
 msgid "Create a new PAM session for the command to run in"
 msgstr "Crea una nova sessió PAM on s'executi l'ordre"
 
-#: plugins/sudoers/def_data.c:402
+#: plugins/sudoers/def_data.c:383
 #, c-format
 msgid "Maximum I/O log sequence number: %u"
 msgstr "Número màxim de seqüència de registre d'entrada/sortida: %u"
 
-#: plugins/sudoers/def_data.c:406
+#: plugins/sudoers/def_data.c:387
 msgid "Enable sudoers netgroup support"
 msgstr "Habilita el suport de netgroup dels sudoers"
 
-#: plugins/sudoers/def_data.c:410
-msgid ""
-"Check parent directories for writability when editing files with sudoedit"
-msgstr ""
-"Comprova que el directori pare tingui permisos d'escriptura quan s'estiguin "
-"editant fitxers amb sudoedit"
+#: plugins/sudoers/def_data.c:391
+msgid "Check parent directories for writability when editing files with sudoedit"
+msgstr "Comprova que el directori pare tingui permisos d'escriptura quan s'estiguin editant fitxers amb sudoedit"
 
-#: plugins/sudoers/def_data.c:414
+#: plugins/sudoers/def_data.c:395
 msgid "Follow symbolic links when editing files with sudoedit"
-msgstr ""
-"Segueix els enllaços simbòlics quan s'estiguin editant fitxers amb sudoedit"
+msgstr "Segueix els enllaços simbòlics quan s'estiguin editant fitxers amb sudoedit"
 
-#: plugins/sudoers/def_data.c:418
+#: plugins/sudoers/def_data.c:399
 msgid "Query the group plugin for unknown system groups"
 msgstr "Consulta al connector de grups per grups desconeguts de sistema"
 
-#: plugins/sudoers/def_data.c:422
+#: plugins/sudoers/def_data.c:403
 msgid "Match netgroups based on the entire tuple: user, host and domain"
-msgstr ""
-"Fes concordar els grups de xarxa en base al conjunt sencer: usuari, amfitrió "
-"i domini"
+msgstr "Fes concordar els grups de xarxa en base al conjunt sencer: usuari, amfitrió i domini"
 
-#: plugins/sudoers/def_data.c:426
+#: plugins/sudoers/def_data.c:407
 msgid "Allow commands to be run even if sudo cannot write to the audit log"
-msgstr ""
-"Permet que s'executin les ordres tot i que sudo no pot escriure al registre "
-"d'auditoria"
+msgstr "Permet que s'executin les ordres tot i que sudo no pot escriure al registre d'auditoria"
 
-#: plugins/sudoers/def_data.c:430
+#: plugins/sudoers/def_data.c:411
 msgid "Allow commands to be run even if sudo cannot write to the I/O log"
-msgstr ""
-"Permet que s'executin les ordres tot i que sudo no pot escriure al registre "
-"d'entrada/sortida"
+msgstr "Permet que s'executin les ordres tot i que sudo no pot escriure al registre d'entrada/sortida"
 
-#: plugins/sudoers/def_data.c:434
+#: plugins/sudoers/def_data.c:415
 msgid "Allow commands to be run even if sudo cannot write to the log file"
-msgstr ""
-"Permet que s'executin les ordres tot i que sudo no pot escriure al fitxer de "
-"registre"
+msgstr "Permet que s'executin les ordres tot i que sudo no pot escriure al fitxer de registre"
 
-#: plugins/sudoers/def_data.c:438
+#: plugins/sudoers/def_data.c:419
 msgid "Resolve groups in sudoers and match on the group ID, not the name"
-msgstr ""
-"Resol els grups a sudoers i fes concordar amb l'identificador de grup, no el "
-"nom"
+msgstr "Resol els grups a sudoers i fes concordar amb l'identificador de grup, no el nom"
 
-#: plugins/sudoers/def_data.c:442
-#, fuzzy, c-format
-msgid ""
-"Log entries larger than this value will be split into multiple syslog "
-"messages: %u"
-msgstr ""
-"Les entrades de registre més grans que aquest valor es dividiran en "
-"múltiples missatges de syslog"
+#: plugins/sudoers/def_data.c:423
+msgid "Log entries larger than this value will be split into multiple syslog messages"
+msgstr "Les entrades de registre més grans que aquest valor es dividiran en múltiples missatges de syslog"
 
-#: plugins/sudoers/def_data.c:446
+#: plugins/sudoers/def_data.c:427
 #, c-format
 msgid "User that will own the I/O log files: %s"
 msgstr "L'usuari que serà el propietari dels fitxers d'entrada/sortida: %s"
 
-#: plugins/sudoers/def_data.c:450
+#: plugins/sudoers/def_data.c:431
 #, c-format
 msgid "Group that will own the I/O log files: %s"
-msgstr ""
-"El grup que serà el propietari dels fitxers de registre d'entrada/sortida: %s"
+msgstr "El grup que serà el propietari dels fitxers de registre d'entrada/sortida: %s"
 
-#: plugins/sudoers/def_data.c:454
+#: plugins/sudoers/def_data.c:435
 #, c-format
 msgid "File mode to use for the I/O log files: 0%o"
-msgstr ""
-"Mode de fitxer a usar per als fitxers de registre d'entrada/sortida: 0%o"
+msgstr "Mode de fitxer a usar per als fitxers de registre d'entrada/sortida: 0%o"
 
-#: plugins/sudoers/def_data.c:458
-#, c-format
-msgid "Execute commands by file descriptor instead of by path: %s"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:462
-msgid ""
-"Ignore unknown Defaults entries in sudoers instead of producing a warning"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:466
-#, c-format
-msgid "Time in seconds after which the command will be terminated: %u"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:470
-msgid "Allow the user to specify a timeout on the command line"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:474
-msgid "Flush I/O log data to disk immediately instead of buffering it"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:478
-msgid "Include the process ID when logging via syslog"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:482
-#, fuzzy, c-format
-msgid "Type of authentication timestamp record: %s"
-msgstr "Propietari del directori de marques horàries d'autenticació: %s"
-
-#: plugins/sudoers/def_data.c:486
-#, fuzzy, c-format
-msgid "Authentication failure message: %s"
-msgstr "ha fallat l'autenticació"
-
-#: plugins/sudoers/def_data.c:490
-msgid "Ignore case when matching user names"
-msgstr ""
-
-#: plugins/sudoers/def_data.c:494
-msgid "Ignore case when matching group names"
-msgstr ""
-
-#: plugins/sudoers/defaults.c:225
+#: plugins/sudoers/defaults.c:211
 #, c-format
 msgid "%s:%d unknown defaults entry \"%s\""
 msgstr "%s:%d entrada «%s» desconeguda de paràmetres predeterminats"
 
-#: plugins/sudoers/defaults.c:228
+#: plugins/sudoers/defaults.c:214
 #, c-format
 msgid "%s: unknown defaults entry \"%s\""
 msgstr "%s: entrada «%s» desconeguda de paràmetres predeterminats"
 
-#: plugins/sudoers/defaults.c:271
+#: plugins/sudoers/defaults.c:237
 #, c-format
 msgid "%s:%d no value specified for \"%s\""
 msgstr "%s:%d no s'ha especificat un valor per a «%s»"
 
-#: plugins/sudoers/defaults.c:274
+#: plugins/sudoers/defaults.c:240
 #, c-format
 msgid "%s: no value specified for \"%s\""
 msgstr "%s: no s'ha especificat un valor per a «%s»"
 
-#: plugins/sudoers/defaults.c:294
+#: plugins/sudoers/defaults.c:259
 #, c-format
 msgid "%s:%d values for \"%s\" must start with a '/'"
 msgstr "%s:%d els valors per a «%s» han de començar amb un «/»"
 
-#: plugins/sudoers/defaults.c:297
+#: plugins/sudoers/defaults.c:262
 #, c-format
 msgid "%s: values for \"%s\" must start with a '/'"
 msgstr "%s: els valors per a «%s» han de començar amb un «/»"
 
-#: plugins/sudoers/defaults.c:319
+#: plugins/sudoers/defaults.c:287
 #, c-format
 msgid "%s:%d option \"%s\" does not take a value"
 msgstr "%s:%d l'opció «%s» no pren un valor"
 
-#: plugins/sudoers/defaults.c:322
+#: plugins/sudoers/defaults.c:290
 #, c-format
 msgid "%s: option \"%s\" does not take a value"
 msgstr "%s: l'opció «%s» no pren un valor"
 
-#: plugins/sudoers/defaults.c:347
+#: plugins/sudoers/defaults.c:309
 #, c-format
 msgid "%s:%d invalid Defaults type 0x%x for option \"%s\""
 msgstr "%s:%d tipus de paràmetres predeterminats 0x%x per a l'opció «%s»"
 
-#: plugins/sudoers/defaults.c:350
+#: plugins/sudoers/defaults.c:312
 #, c-format
 msgid "%s: invalid Defaults type 0x%x for option \"%s\""
-msgstr ""
-"%s: tipus 0x%x no vàlid de paràmetres predeterminats per a l'opció «%s»"
+msgstr "%s: tipus 0x%x no vàlid de paràmetres predeterminats per a l'opció «%s»"
 
-#: plugins/sudoers/defaults.c:360
+#: plugins/sudoers/defaults.c:322
 #, c-format
 msgid "%s:%d value \"%s\" is invalid for option \"%s\""
 msgstr "%s:%d el valor «%s» no és vàlid per a l'opció «%s»"
 
-#: plugins/sudoers/defaults.c:363
+#: plugins/sudoers/defaults.c:325
 #, c-format
 msgid "%s: value \"%s\" is invalid for option \"%s\""
 msgstr "%s: el valor «%s» no és vàlid per a l'opció «%s»"
 
-#: plugins/sudoers/env.c:376
+#: plugins/sudoers/env.c:296 plugins/sudoers/env.c:303
+#: plugins/sudoers/env.c:408 plugins/sudoers/ldap.c:451
+#: plugins/sudoers/ldap.c:541 plugins/sudoers/ldap.c:1253
+#: plugins/sudoers/ldap.c:1475 plugins/sudoers/ldap.c:1801
+#: plugins/sudoers/linux_audit.c:82 plugins/sudoers/logging.c:946
+#: plugins/sudoers/policy.c:523 plugins/sudoers/policy.c:533
+#: plugins/sudoers/prompt.c:161 plugins/sudoers/sudoers.c:841
+#: plugins/sudoers/testsudoers.c:237 plugins/sudoers/toke_util.c:158
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "error intern, desbordament de %s"
+
+#: plugins/sudoers/env.c:377
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp corrupte, discordança de longitud"
 
-#: plugins/sudoers/env.c:1055
+#: plugins/sudoers/env.c:1082
 msgid "unable to rebuild the environment"
 msgstr "no s'ha pogut reconstruir l'entorn"
 
-#: plugins/sudoers/env.c:1129
+#: plugins/sudoers/env.c:1156
 #, c-format
-msgid ""
-"sorry, you are not allowed to set the following environment variables: %s"
-msgstr ""
-"ho sentim, no teniu permís d'establir les següents variables d'entorn: %s"
+msgid "sorry, you are not allowed to set the following environment variables: %s"
+msgstr "ho sentim, no teniu permís d'establir les següents variables d'entorn: %s"
 
-#: plugins/sudoers/filedigest.c:104 plugins/sudoers/filedigest_gcrypt.c:66
-#: plugins/sudoers/filedigest_openssl.c:95
-#, c-format
-msgid "unsupported digest type %d for %s"
-msgstr "tipus de resum no suportat %d per a %s"
-
-#: plugins/sudoers/filedigest.c:129 plugins/sudoers/filedigest_gcrypt.c:98
-#: plugins/sudoers/filedigest_openssl.c:120
-#, c-format
-msgid "%s: read error"
-msgstr "%s: error de lectura"
-
-#: plugins/sudoers/group_plugin.c:83
+#: plugins/sudoers/group_plugin.c:86
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s ha de ser propietat de l'uid %d"
 
-#: plugins/sudoers/group_plugin.c:87
+#: plugins/sudoers/group_plugin.c:90
 #, c-format
 msgid "%s must only be writable by owner"
 msgstr "%s ha de ser modificable sols pel seu propietari"
 
-#: plugins/sudoers/group_plugin.c:95 plugins/sudoers/sssd.c:399
+#: plugins/sudoers/group_plugin.c:98 plugins/sudoers/sssd.c:398
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "no s'ha pogut carregar %s: %s"
 
-#: plugins/sudoers/group_plugin.c:101
+#: plugins/sudoers/group_plugin.c:104
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
 msgstr "no s'ha pogut trobar el símbol \"group_plugin\" a %s"
 
-#: plugins/sudoers/group_plugin.c:106
+#: plugins/sudoers/group_plugin.c:109
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
 msgstr "%s: connector incompatible de group versió principal %d, s'esperava %d"
@@ -1374,96 +990,141 @@ msgstr "no s'ha pogut analitzar la màscara de xarxa «%s»"
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Adreça local IP i parelles netmask:\n"
 
-#: plugins/sudoers/iolog.c:119 plugins/sudoers/mkdir_parents.c:75
+#: plugins/sudoers/iolog.c:99 plugins/sudoers/mkdir_parents.c:78
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "%s existeix però no és un directori (0%o)"
 
-#: plugins/sudoers/iolog.c:144 plugins/sudoers/iolog.c:184
-#: plugins/sudoers/mkdir_parents.c:64 plugins/sudoers/timestamp.c:174
+#: plugins/sudoers/iolog.c:126 plugins/sudoers/iolog.c:170
+#: plugins/sudoers/mkdir_parents.c:65 plugins/sudoers/timestamp.c:167
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "no s'ha pogut mkdir %s"
 
-#: plugins/sudoers/iolog.c:188 plugins/sudoers/visudo.c:717
-#: plugins/sudoers/visudo.c:727
-#, c-format
-msgid "unable to change mode of %s to 0%o"
-msgstr "no s'ha pogut canviar el mode de %s a 0%o"
-
-#: plugins/sudoers/iolog.c:296 plugins/sudoers/sudoers.c:1197
-#: plugins/sudoers/testsudoers.c:390
+#: plugins/sudoers/iolog.c:269 plugins/sudoers/sudoers.c:1158
+#: plugins/sudoers/testsudoers.c:389
 #, c-format
 msgid "unknown group: %s"
 msgstr "grup desconegut: %s"
 
-#: plugins/sudoers/iolog.c:466 plugins/sudoers/sudoers.c:937
-#: plugins/sudoers/sudoreplay.c:868 plugins/sudoers/sudoreplay.c:1681
-#: plugins/sudoers/tsdump.c:140
+#: plugins/sudoers/iolog.c:356 plugins/sudoers/sudoers.c:897
+#: plugins/sudoers/sudoreplay.c:304 plugins/sudoers/sudoreplay.c:817
+#: plugins/sudoers/sudoreplay.c:1021 plugins/sudoers/timestamp.c:383
+#: plugins/sudoers/visudo.c:951 plugins/sudoers/visudo_json.c:1011
+#: plugins/sudoers/visudo_json.c:1024
+#, c-format
+msgid "unable to open %s"
+msgstr "no s'ha pogut obrir %s"
+
+#: plugins/sudoers/iolog.c:399 plugins/sudoers/sudoers.c:901
+#: plugins/sudoers/sudoreplay.c:1132
 #, c-format
 msgid "unable to read %s"
 msgstr "no s'ha pogut llegir %s"
 
-#: plugins/sudoers/iolog.c:581 plugins/sudoers/iolog.c:800
+#: plugins/sudoers/iolog.c:435 plugins/sudoers/sudoreplay.c:598
+#: plugins/sudoers/timestamp.c:282 plugins/sudoers/timestamp.c:285
+#, c-format
+msgid "unable to write to %s"
+msgstr "no s'ha pogut escriure a %s"
+
+#: plugins/sudoers/iolog.c:509 plugins/sudoers/iolog.c:727
 #, c-format
 msgid "unable to create %s"
 msgstr "no s'ha pogut crear %s"
 
-#: plugins/sudoers/iolog.c:1032 plugins/sudoers/iolog.c:1107
-#: plugins/sudoers/iolog.c:1188
+#: plugins/sudoers/iolog.c:895 plugins/sudoers/iolog.c:976
 #, c-format
 msgid "unable to write to I/O log file: %s"
 msgstr "no s'ha pogut escriure al fitxer de registre d'entrada/sortida: %s"
 
-#: plugins/sudoers/iolog.c:1066
+#: plugins/sudoers/iolog.c:927
 #, c-format
 msgid "%s: internal error, file index %d not open"
 msgstr "%s: error intern, l'índex %d de fitxers no està obert"
 
-#: plugins/sudoers/ldap.c:198 plugins/sudoers/ldap_conf.c:288
-msgid "starttls not supported when using ldaps"
-msgstr "starttls no suportat quan s'està usant ldaps"
-
-#: plugins/sudoers/ldap.c:269
-#, c-format
-msgid "unable to initialize SSL cert and key db: %s"
-msgstr "no s'ha pogut inicialitzar el certificat SSL i la clau db: %s"
-
-#: plugins/sudoers/ldap.c:272
-#, c-format
-msgid "you must set TLS_CERT in %s to use SSL"
-msgstr "heu d'establir TLS_CERT a %s per usar SSL"
-
-#: plugins/sudoers/ldap.c:2028
-#, c-format
-msgid "unable to initialize LDAP: %s"
-msgstr "no s'ha pogut inicialitzar LDAP: %s"
-
-#: plugins/sudoers/ldap.c:2064
-msgid ""
-"start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
-"ldap_start_tls_s_np()"
-msgstr ""
-"s'ha especificat start_tls  però les biblioteques LDAP no donen suport a "
-"ldap_start_tls_s() o ldap_start_tls_s_np()"
-
-#: plugins/sudoers/ldap_conf.c:197
+#: plugins/sudoers/ldap.c:429
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: el port és massa gran"
 
-#: plugins/sudoers/ldap_conf.c:257
+#: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "tipus d'uri LDAP no suportat: %s"
 
-#: plugins/sudoers/ldap_conf.c:284
+#: plugins/sudoers/ldap.c:516
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "no s'han pogut barrejar el ldap i els ldaps URIs "
 
-#: plugins/sudoers/ldap_util.c:466 plugins/sudoers/ldap_util.c:468
-#, fuzzy, c-format
-msgid "unable to convert sudoOption: %s%s%s"
-msgstr "%s: no s'han pogut assignar les opcions: %s"
+#: plugins/sudoers/ldap.c:520 plugins/sudoers/ldap.c:556
+msgid "starttls not supported when using ldaps"
+msgstr "starttls no suportat quan s'està usant ldaps"
+
+#: plugins/sudoers/ldap.c:627
+#, c-format
+msgid "unable to initialize SSL cert and key db: %s"
+msgstr "no s'ha pogut inicialitzar el certificat SSL i la clau db: %s"
+
+#: plugins/sudoers/ldap.c:630
+#, c-format
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "heu d'establir TLS_CERT a %s per usar SSL"
+
+#: plugins/sudoers/ldap.c:1239
+msgid "unable to get GMT time"
+msgstr "no s'ha pogut obtenir l'hora GMT"
+
+#: plugins/sudoers/ldap.c:1245
+msgid "unable to format timestamp"
+msgstr "no s'ha pogut donar format a la marca horària"
+
+#: plugins/sudoers/ldap.c:1956
+#, c-format
+msgid "%s: %s: %s: %s"
+msgstr "%s: %s: %s: %s"
+
+#: plugins/sudoers/ldap.c:2504
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: %s\n"
+msgstr ""
+"\n"
+"Rol LDAP: %s\n"
+
+#: plugins/sudoers/ldap.c:2506
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: UNKNOWN\n"
+msgstr ""
+"\n"
+"Rol LDAP: DESCONEGUT\n"
+
+#: plugins/sudoers/ldap.c:2562
+#, c-format
+msgid "    Order: %s\n"
+msgstr "    Ordre: %s\n"
+
+#: plugins/sudoers/ldap.c:2570 plugins/sudoers/parse.c:556
+#: plugins/sudoers/sssd.c:1626
+#, c-format
+msgid "    Commands:\n"
+msgstr "    Ordres:\n"
+
+#: plugins/sudoers/ldap.c:3130
+#, c-format
+msgid "unable to initialize LDAP: %s"
+msgstr "no s'ha pogut inicialitzar LDAP: %s"
+
+#: plugins/sudoers/ldap.c:3166
+msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
+msgstr "s'ha especificat start_tls  però les biblioteques LDAP no donen suport a ldap_start_tls_s() o ldap_start_tls_s_np()"
+
+#: plugins/sudoers/ldap.c:3415
+#, c-format
+msgid "invalid sudoOrder attribute: %s"
+msgstr "atribut sudoOrder no vàlid: %s"
 
 #: plugins/sudoers/linux_audit.c:52
 msgid "unable to open audit system"
@@ -1473,81 +1134,80 @@ msgstr "no s'ha pogut obrir el sistema d'auditoria"
 msgid "unable to send audit message"
 msgstr "no s'ha pogut enviar el missatge d'auditoria"
 
-#: plugins/sudoers/logging.c:108
+#: plugins/sudoers/logging.c:106
 #, c-format
 msgid "%8s : %s"
 msgstr "%8s : %s"
 
-#: plugins/sudoers/logging.c:136
+#: plugins/sudoers/logging.c:134
 #, c-format
 msgid "%8s : (command continued) %s"
 msgstr "%8s : (ordre continuada) %s"
 
-#: plugins/sudoers/logging.c:165
+#: plugins/sudoers/logging.c:163
 #, c-format
 msgid "unable to open log file: %s"
 msgstr "no s'ha pogut obrir el fitxer de registre: %s"
 
-#: plugins/sudoers/logging.c:173
+#: plugins/sudoers/logging.c:171
 #, c-format
 msgid "unable to lock log file: %s"
 msgstr "no s'ha pogut bloquejar el fitxer de registre: %s"
 
-#: plugins/sudoers/logging.c:206
+#: plugins/sudoers/logging.c:204
 #, c-format
 msgid "unable to write log file: %s"
 msgstr "no s'ha pogut escriure el fitxer de registre: %s"
 
-#: plugins/sudoers/logging.c:235
+#: plugins/sudoers/logging.c:233
 msgid "No user or host"
 msgstr "No hi ha usuari o amfitrió"
 
-#: plugins/sudoers/logging.c:237
+#: plugins/sudoers/logging.c:235
 msgid "validation failure"
 msgstr "ha fallat la validació"
 
-#: plugins/sudoers/logging.c:244
+#: plugins/sudoers/logging.c:242
 msgid "user NOT in sudoers"
 msgstr "l'usuari NO ESTÀ als sudoers"
 
-#: plugins/sudoers/logging.c:246
+#: plugins/sudoers/logging.c:244
 msgid "user NOT authorized on host"
 msgstr "l'usuari NO està autoritzat a l'amfitrió"
 
-#: plugins/sudoers/logging.c:248
+#: plugins/sudoers/logging.c:246
 msgid "command not allowed"
 msgstr "ordre no permesa"
 
-#: plugins/sudoers/logging.c:283
+#: plugins/sudoers/logging.c:281
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
 msgstr "%s no està al fitxer sudoers.  S'informarà d'aquest incident.\n"
 
-#: plugins/sudoers/logging.c:286
+#: plugins/sudoers/logging.c:284
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
-msgstr ""
-"%s no té permís per executar sudo a %s.  S'informarà d'aquest incident.\n"
+msgstr "%s no té permís per executar sudo a %s.  S'informarà d'aquest incident.\n"
 
-#: plugins/sudoers/logging.c:290
+#: plugins/sudoers/logging.c:288
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
 msgstr "Ho sentim, l'usuari %s no pot executar sudo a %s.\n"
 
-#: plugins/sudoers/logging.c:293
+#: plugins/sudoers/logging.c:291
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "Ho sentim, l'usuari %s no pot executar '%s%s%s' com a %s%s%s a %s.\n"
 
-#: plugins/sudoers/logging.c:330 plugins/sudoers/sudoers.c:472
-#: plugins/sudoers/sudoers.c:474 plugins/sudoers/sudoers.c:476
-#: plugins/sudoers/sudoers.c:478 plugins/sudoers/sudoers.c:632
-#: plugins/sudoers/sudoers.c:634
+#: plugins/sudoers/logging.c:328 plugins/sudoers/sudoers.c:468
+#: plugins/sudoers/sudoers.c:470 plugins/sudoers/sudoers.c:472
+#: plugins/sudoers/sudoers.c:474 plugins/sudoers/sudoers.c:1247
+#: plugins/sudoers/sudoers.c:1249
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: no s'ha trobar l'ordre"
 
-#: plugins/sudoers/logging.c:332 plugins/sudoers/sudoers.c:468
+#: plugins/sudoers/logging.c:330 plugins/sudoers/sudoers.c:464
 #, c-format
 msgid ""
 "ignoring \"%s\" found in '.'\n"
@@ -1556,76 +1216,77 @@ msgstr ""
 "s'ignorarà «%s» trobat a «.»\n"
 "Useu «sudo ./%s» si aquest és el «%s» que voleu executar."
 
-#: plugins/sudoers/logging.c:349
+#: plugins/sudoers/logging.c:347
 msgid "authentication failure"
 msgstr "ha fallat l'autenticació"
 
-#: plugins/sudoers/logging.c:375
+#: plugins/sudoers/logging.c:373
 msgid "a password is required"
 msgstr "es requereix una contrasenya"
 
-#: plugins/sudoers/logging.c:438
+#: plugins/sudoers/logging.c:444 plugins/sudoers/logging.c:510
 #, c-format
 msgid "%u incorrect password attempt"
 msgid_plural "%u incorrect password attempts"
 msgstr[0] "%u intent incorrecte de contrasenya"
 msgstr[1] "%u intents incorrectes de contrasenya"
 
-#: plugins/sudoers/logging.c:659
+#: plugins/sudoers/logging.c:597
 msgid "unable to fork"
 msgstr "no es pot bifurcar"
 
-#: plugins/sudoers/logging.c:667 plugins/sudoers/logging.c:719
+#: plugins/sudoers/logging.c:605 plugins/sudoers/logging.c:657
 #, c-format
 msgid "unable to fork: %m"
 msgstr "no est pot bifurcar: %m"
 
-#: plugins/sudoers/logging.c:709
+#: plugins/sudoers/logging.c:647
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "no es pot obrir la canonada: %m"
 
-#: plugins/sudoers/logging.c:734
+#: plugins/sudoers/logging.c:672
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "no es pot duplicar l'entrada estàndard: %m"
 
-#: plugins/sudoers/logging.c:772
+#: plugins/sudoers/logging.c:710
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "no es pot executar %s: %m"
 
-#: plugins/sudoers/match.c:810
+#: plugins/sudoers/match.c:644
+#, c-format
+msgid "unsupported digest type %d for %s"
+msgstr "tipus de resum no suportat %d per a %s"
+
+#: plugins/sudoers/match.c:685
+#, c-format
+msgid "%s: read error"
+msgstr "%s: error de lectura"
+
+#: plugins/sudoers/match.c:720
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "digest per a  %s (%s) no està en forma %s"
 
-#: plugins/sudoers/mkdir_parents.c:70 plugins/sudoers/sudoers.c:948
-#: plugins/sudoers/visudo.c:416 plugins/sudoers/visudo.c:711
+#: plugins/sudoers/mkdir_parents.c:72 plugins/sudoers/sudoers.c:912
+#: plugins/sudoers/visudo.c:439 plugins/sudoers/visudo.c:715
 #, c-format
 msgid "unable to stat %s"
 msgstr "no s'ha pogut accedir %s"
 
-#: plugins/sudoers/parse.c:110
+#: plugins/sudoers/parse.c:114
 #, c-format
 msgid "parse error in %s near line %d"
 msgstr "error d'anàlisi a %s a prop de la línia %d"
 
-#: plugins/sudoers/parse.c:113
+#: plugins/sudoers/parse.c:117
 #, c-format
 msgid "parse error in %s"
 msgstr "error d'anàlisi a la línia %s"
 
-#: plugins/sudoers/parse.c:469
-#, c-format
-msgid ""
-"\n"
-"LDAP Role: %s\n"
-msgstr ""
-"\n"
-"Rol LDAP: %s\n"
-
-#: plugins/sudoers/parse.c:472
+#: plugins/sudoers/parse.c:503
 #, c-format
 msgid ""
 "\n"
@@ -1634,68 +1295,41 @@ msgstr ""
 "\n"
 "Entrada de sudoers:\n"
 
-#: plugins/sudoers/parse.c:474
+#: plugins/sudoers/parse.c:504
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    RunAsUsers: "
 
-#: plugins/sudoers/parse.c:488
+#: plugins/sudoers/parse.c:518
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    RunAsGroups: "
 
-#: plugins/sudoers/parse.c:497
+#: plugins/sudoers/parse.c:527
 #, c-format
 msgid "    Options: "
 msgstr "    Opcions: "
 
-#: plugins/sudoers/parse.c:551
-#, c-format
-msgid "    Commands:\n"
-msgstr "    Ordres:\n"
-
-#: plugins/sudoers/policy.c:84 plugins/sudoers/policy.c:110
-#, c-format
-msgid "invalid %.*s set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:289 plugins/sudoers/testsudoers.c:260
+#: plugins/sudoers/policy.c:240 plugins/sudoers/testsudoers.c:260
 msgid "unable to parse network address list"
 msgstr "no s'ha pogut analitzar la llista d'adreces de xarxa"
 
-#: plugins/sudoers/policy.c:433
-msgid "user name not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:437
-msgid "user ID not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:441
-msgid "group ID not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:445
-msgid "host name not set by sudo front-end"
-msgstr ""
-
-#: plugins/sudoers/policy.c:793 plugins/sudoers/visudo.c:216
-#: plugins/sudoers/visudo.c:844
+#: plugins/sudoers/policy.c:690 plugins/sudoers/visudo.c:889
 #, c-format
 msgid "unable to execute %s"
 msgstr "no s'ha pogut executar %s"
 
-#: plugins/sudoers/policy.c:926
+#: plugins/sudoers/policy.c:823
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Versió del connector de política de sudoers %s\n"
 
-#: plugins/sudoers/policy.c:928
+#: plugins/sudoers/policy.c:825
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Versió de gramàtica del fitxer sudoers %d\n"
 
-#: plugins/sudoers/policy.c:932
+#: plugins/sudoers/policy.c:829
 #, c-format
 msgid ""
 "\n"
@@ -1704,133 +1338,132 @@ msgstr ""
 "\n"
 "Camí del sudoers: %s\n"
 
-#: plugins/sudoers/policy.c:935
+#: plugins/sudoers/policy.c:832
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "camí del nsswitch: %s\n"
 
-#: plugins/sudoers/policy.c:937
+#: plugins/sudoers/policy.c:834
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "camí de ldap.conf: %s\n"
 
-#: plugins/sudoers/policy.c:938
+#: plugins/sudoers/policy.c:835
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "camí del ldap.secret: %s\n"
 
-#: plugins/sudoers/policy.c:971
+#: plugins/sudoers/policy.c:868
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "no s'ha pogut registrar el lligam de tipus %d (versió %d.%d)"
 
-#: plugins/sudoers/pwutil.c:214 plugins/sudoers/pwutil.c:232
+#: plugins/sudoers/pwutil.c:162 plugins/sudoers/pwutil.c:180
 #, c-format
 msgid "unable to cache uid %u, out of memory"
 msgstr "no s'ha pogut posar al cau l'uid %u, s'ha exhaurit la memòria"
 
-#: plugins/sudoers/pwutil.c:226
+#: plugins/sudoers/pwutil.c:174
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "no s'ha pogut posar l'uid %u al cau, ja existeix"
 
-#: plugins/sudoers/pwutil.c:286 plugins/sudoers/pwutil.c:303
-#: plugins/sudoers/pwutil.c:365 plugins/sudoers/pwutil.c:410
+#: plugins/sudoers/pwutil.c:234 plugins/sudoers/pwutil.c:251
+#: plugins/sudoers/pwutil.c:313 plugins/sudoers/pwutil.c:358
 #, c-format
 msgid "unable to cache user %s, out of memory"
 msgstr "no s'ha pogut posar l'usuari %s, s'ha exhaurit la memòria"
 
-#: plugins/sudoers/pwutil.c:298
+#: plugins/sudoers/pwutil.c:246
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "no s'ha pogut posar l'usuari %s al cau, ja existeix"
 
-#: plugins/sudoers/pwutil.c:529 plugins/sudoers/pwutil.c:547
+#: plugins/sudoers/pwutil.c:474 plugins/sudoers/pwutil.c:492
 #, c-format
 msgid "unable to cache gid %u, out of memory"
 msgstr "no s'ha pogut posar el gid %u al cau, s'ha exhaurit la memòria"
 
-#: plugins/sudoers/pwutil.c:541
+#: plugins/sudoers/pwutil.c:486
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "no s'ha pogut posar el gid %u al cau, ja existeix"
 
-#: plugins/sudoers/pwutil.c:595 plugins/sudoers/pwutil.c:612
-#: plugins/sudoers/pwutil.c:659 plugins/sudoers/pwutil.c:701
+#: plugins/sudoers/pwutil.c:540 plugins/sudoers/pwutil.c:557
+#: plugins/sudoers/pwutil.c:604 plugins/sudoers/pwutil.c:646
 #, c-format
 msgid "unable to cache group %s, out of memory"
 msgstr "no s'ha pogut posar el grup %s al cau, s'ha exhaurit"
 
-#: plugins/sudoers/pwutil.c:607
+#: plugins/sudoers/pwutil.c:552
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "no s'ha pogut posar el grup %s al cau, ja existeix"
 
-#: plugins/sudoers/pwutil.c:827 plugins/sudoers/pwutil.c:879
-#: plugins/sudoers/pwutil.c:930 plugins/sudoers/pwutil.c:983
+#: plugins/sudoers/pwutil.c:772 plugins/sudoers/pwutil.c:824
+#: plugins/sudoers/pwutil.c:874 plugins/sudoers/pwutil.c:926
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "no s'ha pogut la llista de grups al cau per a %s, ja existeix"
 
-#: plugins/sudoers/pwutil.c:833 plugins/sudoers/pwutil.c:884
-#: plugins/sudoers/pwutil.c:936 plugins/sudoers/pwutil.c:988
+#: plugins/sudoers/pwutil.c:778 plugins/sudoers/pwutil.c:829
+#: plugins/sudoers/pwutil.c:880 plugins/sudoers/pwutil.c:931
 #, c-format
 msgid "unable to cache group list for %s, out of memory"
-msgstr ""
-"no s'ha pogut la llista de grups al cau per a %s,  s'ha exhaurit la memòria"
+msgstr "no s'ha pogut la llista de grups al cau per a %s,  s'ha exhaurit la memòria"
 
-#: plugins/sudoers/pwutil.c:873
+#: plugins/sudoers/pwutil.c:818
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "no s'han pogut analitzar els grups per a %s"
 
-#: plugins/sudoers/pwutil.c:977
+#: plugins/sudoers/pwutil.c:920
 #, c-format
 msgid "unable to parse gids for %s"
 msgstr "no s'han pogut analitzar els identificadors de grups per a %s"
 
-#: plugins/sudoers/set_perms.c:113 plugins/sudoers/set_perms.c:469
-#: plugins/sudoers/set_perms.c:912 plugins/sudoers/set_perms.c:1239
-#: plugins/sudoers/set_perms.c:1556
+#: plugins/sudoers/set_perms.c:113 plugins/sudoers/set_perms.c:438
+#: plugins/sudoers/set_perms.c:841 plugins/sudoers/set_perms.c:1138
+#: plugins/sudoers/set_perms.c:1430
 msgid "perm stack overflow"
 msgstr "desbordament de la pila de permisos"
 
-#: plugins/sudoers/set_perms.c:121 plugins/sudoers/set_perms.c:400
-#: plugins/sudoers/set_perms.c:477 plugins/sudoers/set_perms.c:779
-#: plugins/sudoers/set_perms.c:920 plugins/sudoers/set_perms.c:1163
-#: plugins/sudoers/set_perms.c:1247 plugins/sudoers/set_perms.c:1489
-#: plugins/sudoers/set_perms.c:1564 plugins/sudoers/set_perms.c:1654
+#: plugins/sudoers/set_perms.c:121 plugins/sudoers/set_perms.c:369
+#: plugins/sudoers/set_perms.c:446 plugins/sudoers/set_perms.c:708
+#: plugins/sudoers/set_perms.c:849 plugins/sudoers/set_perms.c:1067
+#: plugins/sudoers/set_perms.c:1146 plugins/sudoers/set_perms.c:1363
+#: plugins/sudoers/set_perms.c:1438 plugins/sudoers/set_perms.c:1527
 msgid "perm stack underflow"
 msgstr "subdesbordament de la pila de permisos"
 
-#: plugins/sudoers/set_perms.c:180 plugins/sudoers/set_perms.c:523
-#: plugins/sudoers/set_perms.c:1298 plugins/sudoers/set_perms.c:1596
+#: plugins/sudoers/set_perms.c:180 plugins/sudoers/set_perms.c:492
+#: plugins/sudoers/set_perms.c:1197 plugins/sudoers/set_perms.c:1470
 msgid "unable to change to root gid"
 msgstr "no s'ha pogut canvir el gid de l'usuari primari"
 
-#: plugins/sudoers/set_perms.c:269 plugins/sudoers/set_perms.c:620
-#: plugins/sudoers/set_perms.c:1049 plugins/sudoers/set_perms.c:1375
+#: plugins/sudoers/set_perms.c:269 plugins/sudoers/set_perms.c:589
+#: plugins/sudoers/set_perms.c:978 plugins/sudoers/set_perms.c:1274
 msgid "unable to change to runas gid"
 msgstr "no s'ha pogut canviar el gid runas"
 
-#: plugins/sudoers/set_perms.c:274 plugins/sudoers/set_perms.c:625
-#: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1380
+#: plugins/sudoers/set_perms.c:274 plugins/sudoers/set_perms.c:594
+#: plugins/sudoers/set_perms.c:983 plugins/sudoers/set_perms.c:1279
 msgid "unable to set runas group vector"
 msgstr "no s'ha pogut configurar el vector de grup runas"
 
-#: plugins/sudoers/set_perms.c:285 plugins/sudoers/set_perms.c:636
-#: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1389
+#: plugins/sudoers/set_perms.c:285 plugins/sudoers/set_perms.c:605
+#: plugins/sudoers/set_perms.c:992 plugins/sudoers/set_perms.c:1288
 msgid "unable to change to runas uid"
 msgstr "no s'ha pogut canviar l'uid runas"
 
-#: plugins/sudoers/set_perms.c:303 plugins/sudoers/set_perms.c:654
-#: plugins/sudoers/set_perms.c:1079 plugins/sudoers/set_perms.c:1405
+#: plugins/sudoers/set_perms.c:303 plugins/sudoers/set_perms.c:623
+#: plugins/sudoers/set_perms.c:1008 plugins/sudoers/set_perms.c:1304
 msgid "unable to change to sudoers gid"
 msgstr "no s'ha pogut canvir el gid del sudoers"
 
-#: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
-#: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
-#: plugins/sudoers/set_perms.c:1641
+#: plugins/sudoers/set_perms.c:356 plugins/sudoers/set_perms.c:695
+#: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1350
+#: plugins/sudoers/set_perms.c:1514
 msgid "too many processes"
 msgstr "massa processos"
 
@@ -1852,274 +1485,278 @@ msgstr "camí truncat d'auditoria argv[0]: %s"
 msgid "audit_failure message too long"
 msgstr "missatge audit_failure massa llarg"
 
-#: plugins/sudoers/sssd.c:401
+#: plugins/sudoers/sssd.c:400
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
-msgstr ""
-"no s'ha pogut inicialitzar la font del SSS. Està el SSSD instal·lat al "
-"vostre sistema?"
+msgstr "no s'ha pogut inicialitzar la font del SSS. Està el SSSD instal·lat al vostre sistema?"
 
-#: plugins/sudoers/sssd.c:409 plugins/sudoers/sssd.c:418
-#: plugins/sudoers/sssd.c:427 plugins/sudoers/sssd.c:436
-#: plugins/sudoers/sssd.c:445
+#: plugins/sudoers/sssd.c:408 plugins/sudoers/sssd.c:417
+#: plugins/sudoers/sssd.c:426 plugins/sudoers/sssd.c:435
+#: plugins/sudoers/sssd.c:444
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "no s'ha pogut trobar el símbol \"%s\" a %s"
 
-#: plugins/sudoers/sudo_nss.c:289
+#: plugins/sudoers/sssd.c:1541
+#, c-format
+msgid ""
+"\n"
+"SSSD Role: %s\n"
+msgstr ""
+"\n"
+"Rol SSDD: %s\n"
+
+#: plugins/sudoers/sssd.c:1546
+#, c-format
+msgid ""
+"\n"
+"SSSD Role: UNKNOWN\n"
+msgstr ""
+"\n"
+"Rol SSSD: DESCONEGUT\n"
+
+#: plugins/sudoers/sudo_nss.c:290
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr "Entrades predeterminades concordants per a %s a %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:307
+#: plugins/sudoers/sudo_nss.c:308
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr "Runas i valors predeterminats específics d'ordres per a %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:325
+#: plugins/sudoers/sudo_nss.c:326
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr "L'usuari %s pot executar les ordres següents a %s:\n"
 
-#: plugins/sudoers/sudo_nss.c:338
+#: plugins/sudoers/sudo_nss.c:339
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "L'usuari %s no té permisos per executar sudo a %s.\n"
 
-#: plugins/sudoers/sudoers.c:197 plugins/sudoers/sudoers.c:895
+#: plugins/sudoers/sudoers.c:166 plugins/sudoers/testsudoers.c:246
+#: plugins/sudoers/visudo.c:232 plugins/sudoers/visudo.c:612
+#: plugins/sudoers/visudo.c:955
+msgid "unable to initialize sudoers default values"
+msgstr "no s'han pogut inicialitzar el valors predeterminats dels sudoers"
+
+#: plugins/sudoers/sudoers.c:196 plugins/sudoers/sudoers.c:859
 msgid "problem with defaults entries"
 msgstr "hi ha un problema amb les entrades predeterminades"
 
-#: plugins/sudoers/sudoers.c:204
+#: plugins/sudoers/sudoers.c:203
 msgid "no valid sudoers sources found, quitting"
 msgstr "no s'han trobat fonts vàlides de sudoers, se sortirà"
 
-#: plugins/sudoers/sudoers.c:243
+#: plugins/sudoers/sudoers.c:242
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "el fitxer sudoers especifica que l'usuari primar no pot executar sudo"
 
-#: plugins/sudoers/sudoers.c:300
+#: plugins/sudoers/sudoers.c:299
 msgid "you are not permitted to use the -C option"
 msgstr "no teniu permisos per usar l'opció -C"
 
-#: plugins/sudoers/sudoers.c:389
+#: plugins/sudoers/sudoers.c:387
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "propietari de la marca horària (%s): No existeix aquest usuari"
 
-#: plugins/sudoers/sudoers.c:404
+#: plugins/sudoers/sudoers.c:401
 msgid "no tty"
 msgstr "no hi ha una terminal"
 
-#: plugins/sudoers/sudoers.c:405
+#: plugins/sudoers/sudoers.c:402
 msgid "sorry, you must have a tty to run sudo"
 msgstr "ho sentim, heu de tenir una terminal per executar sudo"
 
-#: plugins/sudoers/sudoers.c:467
+#: plugins/sudoers/sudoers.c:463
 msgid "command in current directory"
 msgstr "ordre al directori actual"
 
-#: plugins/sudoers/sudoers.c:486
-#, fuzzy
-msgid "sorry, you are not allowed set a command timeout"
-msgstr "ho sentim, no teniu permisos per preserver l'entorn"
-
-#: plugins/sudoers/sudoers.c:494
+#: plugins/sudoers/sudoers.c:483
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "ho sentim, no teniu permisos per preserver l'entorn"
 
-#: plugins/sudoers/sudoers.c:840
+#: plugins/sudoers/sudoers.c:804
 msgid "command too long"
 msgstr "ordre massa llarga"
 
-#: plugins/sudoers/sudoers.c:952
+#: plugins/sudoers/sudoers.c:916
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s no és un fitxer regular"
 
-#: plugins/sudoers/sudoers.c:956 plugins/sudoers/timestamp.c:221 toke.l:969
+#: plugins/sudoers/sudoers.c:920 plugins/sudoers/timestamp.c:209 toke.l:952
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s és propietat de l'uid %u, hauria de ser %u"
 
-#: plugins/sudoers/sudoers.c:960 toke.l:974
+#: plugins/sudoers/sudoers.c:924 toke.l:957
 #, c-format
 msgid "%s is world writable"
 msgstr "%s te permís universal d'escriptura"
 
-#: plugins/sudoers/sudoers.c:964 toke.l:977
+#: plugins/sudoers/sudoers.c:928 toke.l:960
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s és propietat del gid %u, hauria de ser %u"
 
-#: plugins/sudoers/sudoers.c:997
+#: plugins/sudoers/sudoers.c:961
 #, c-format
 msgid "only root can use \"-c %s\""
 msgstr "sols l'usuari primari pot usar «-c %s»"
 
-#: plugins/sudoers/sudoers.c:1016
+#: plugins/sudoers/sudoers.c:980
 #, c-format
 msgid "unknown login class: %s"
 msgstr "classe desconeguda d'inici de sessió: %s"
 
-#: plugins/sudoers/sudoers.c:1099 plugins/sudoers/sudoers.c:1113
+#: plugins/sudoers/sudoers.c:1063 plugins/sudoers/sudoers.c:1091
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "no s'ha pogut resoldre l'amfitrió %s"
 
-#: plugins/sudoers/sudoreplay.c:274
+#: plugins/sudoers/sudoreplay.c:236
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "opció no vàlida de filtre: %s"
 
-#: plugins/sudoers/sudoreplay.c:287
+#: plugins/sudoers/sudoreplay.c:249
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "espera màxima no vàlida: %s"
 
-#: plugins/sudoers/sudoreplay.c:307
+#: plugins/sudoers/sudoreplay.c:255
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "factor no vàlid de velocitat: %s"
 
-#: plugins/sudoers/sudoreplay.c:342
+#: plugins/sudoers/sudoreplay.c:258 plugins/sudoers/visudo.c:185
+#, c-format
+msgid "%s version %s\n"
+msgstr "%s versió %s\n"
+
+#: plugins/sudoers/sudoreplay.c:290
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/sincronització: %s"
 
-#: plugins/sudoers/sudoreplay.c:348
+#: plugins/sudoers/sudoreplay.c:296
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/sincronització: %s"
 
-#: plugins/sudoers/sudoreplay.c:364
-#, fuzzy, c-format
-msgid "Replaying sudo session: %s"
+#: plugins/sudoers/sudoreplay.c:312
+#, c-format
+msgid "Replaying sudo session: %s\n"
 msgstr "S'està tornant a reproduir la sessió sudo: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:562 plugins/sudoers/sudoreplay.c:609
-#: plugins/sudoers/sudoreplay.c:816 plugins/sudoers/sudoreplay.c:906
-#: plugins/sudoers/sudoreplay.c:985 plugins/sudoers/sudoreplay.c:1000
-#: plugins/sudoers/sudoreplay.c:1007 plugins/sudoers/sudoreplay.c:1014
-#: plugins/sudoers/sudoreplay.c:1021 plugins/sudoers/sudoreplay.c:1028
-#: plugins/sudoers/sudoreplay.c:1174
-#, fuzzy
-msgid "unable to add event to queue"
-msgstr "no s'ha pogut canviar l'uid runas"
+#: plugins/sudoers/sudoreplay.c:318
+#, c-format
+msgid "Warning: your terminal is too small to properly replay the log.\n"
+msgstr "Advertiment: el vostre terminal és massa petit per reproduir apropiadament el registre.\n"
 
-#: plugins/sudoers/sudoreplay.c:677
+#: plugins/sudoers/sudoreplay.c:319
+#, c-format
+msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
+msgstr "La geometria del registre és %d x %d, la geometria del vostre terminal és %d x %d."
+
+#: plugins/sudoers/sudoreplay.c:410
 msgid "unable to set tty to raw mode"
 msgstr "no s'ha pogut configurar el terminal a mode de dades en brut"
 
-#: plugins/sudoers/sudoreplay.c:728
-#, c-format
-msgid "Warning: your terminal is too small to properly replay the log.\n"
-msgstr ""
-"Advertiment: el vostre terminal és massa petit per reproduir apropiadament "
-"el registre.\n"
-
-#: plugins/sudoers/sudoreplay.c:729
-#, c-format
-msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
-msgstr ""
-"La geometria del registre és %d x %d, la geometria del vostre terminal és %d "
-"x %d."
-
-#: plugins/sudoers/sudoreplay.c:757
-msgid "Replay finished, press any key to restore the terminal."
-msgstr ""
-
-#: plugins/sudoers/sudoreplay.c:790
+#: plugins/sudoers/sudoreplay.c:439
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "línia no vàlida de fitxer de sincronització: %s"
 
-#: plugins/sudoers/sudoreplay.c:1208 plugins/sudoers/sudoreplay.c:1233
+#: plugins/sudoers/sudoreplay.c:659 plugins/sudoers/sudoreplay.c:684
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "expressió ambigua \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:1255
+#: plugins/sudoers/sudoreplay.c:706
 msgid "unmatched ')' in expression"
 msgstr "')' sense concordança a l'expressió"
 
-#: plugins/sudoers/sudoreplay.c:1259
+#: plugins/sudoers/sudoreplay.c:710
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "terme desconegut de cerca \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:1274
+#: plugins/sudoers/sudoreplay.c:725
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s requereix un argument"
 
-#: plugins/sudoers/sudoreplay.c:1277 plugins/sudoers/sudoreplay.c:1657
+#: plugins/sudoers/sudoreplay.c:728 plugins/sudoers/sudoreplay.c:1108
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "expressió regular no vàlida: %s"
 
-#: plugins/sudoers/sudoreplay.c:1281
+#: plugins/sudoers/sudoreplay.c:732
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "no s'ha pogut analitzar la data \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:1290
+#: plugins/sudoers/sudoreplay.c:741
 msgid "unmatched '(' in expression"
 msgstr "'(' sense concordança a l'expressió"
 
-#: plugins/sudoers/sudoreplay.c:1292
+#: plugins/sudoers/sudoreplay.c:743
 msgid "illegal trailing \"or\""
 msgstr "\"or\" final il·legal"
 
-#: plugins/sudoers/sudoreplay.c:1294
+#: plugins/sudoers/sudoreplay.c:745
 msgid "illegal trailing \"!\""
 msgstr "\"!\" final il·legal"
 
-#: plugins/sudoers/sudoreplay.c:1343
+#: plugins/sudoers/sudoreplay.c:794
 #, c-format
 msgid "unknown search type %d"
 msgstr "tipus desconegut de cerca %d"
 
-#: plugins/sudoers/sudoreplay.c:1381
+#: plugins/sudoers/sudoreplay.c:832
 #, c-format
 msgid "%s: invalid log file"
 msgstr "%s: fitxer no vàlid de registre"
 
-#: plugins/sudoers/sudoreplay.c:1399
+#: plugins/sudoers/sudoreplay.c:850
 #, c-format
 msgid "%s: time stamp field is missing"
 msgstr "%s: no hi ha el camp de marca horària "
 
-#: plugins/sudoers/sudoreplay.c:1406
+#: plugins/sudoers/sudoreplay.c:857
 #, c-format
 msgid "%s: time stamp %s: %s"
 msgstr "%s: marca horària %s: %s"
 
-#: plugins/sudoers/sudoreplay.c:1413
+#: plugins/sudoers/sudoreplay.c:864
 #, c-format
 msgid "%s: user field is missing"
 msgstr "%s: no hi ha el camp d'usuari runas"
 
-#: plugins/sudoers/sudoreplay.c:1422
+#: plugins/sudoers/sudoreplay.c:873
 #, c-format
 msgid "%s: runas user field is missing"
 msgstr "%s: no hi ha el camp del grup runas"
 
-#: plugins/sudoers/sudoreplay.c:1431
+#: plugins/sudoers/sudoreplay.c:882
 #, c-format
 msgid "%s: runas group field is missing"
 msgstr "%s: no es troba el camp del grup runas"
 
-#: plugins/sudoers/sudoreplay.c:1837
-#, fuzzy, c-format
-msgid "usage: %s [-hnR] [-d dir] [-m num] [-s num] ID\n"
+#: plugins/sudoers/sudoreplay.c:1245
+#, c-format
+msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "ús: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 
-#: plugins/sudoers/sudoreplay.c:1840
+#: plugins/sudoers/sudoreplay.c:1248
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "usage: %s [-h] [-d dir] -l [cerca l'expressió]\n"
 
-#: plugins/sudoers/sudoreplay.c:1849
+#: plugins/sudoers/sudoreplay.c:1257
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -2128,7 +1765,7 @@ msgstr ""
 "%s - reprodueix els registres de la sessió sudo\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1851
+#: plugins/sudoers/sudoreplay.c:1259
 msgid ""
 "\n"
 "Options:\n"
@@ -2142,8 +1779,7 @@ msgid ""
 msgstr ""
 "\n"
 "Opcions:\n"
-"  -d, --directori=dir  especifiqueu el directori per als registres de la "
-"sessió\n"
+"  -d, --directori=dir  especifiqueu el directori per als registres de la sessió\n"
 "  -f, --filter=filtre  especifiqueu quin(s) tipus d'entrada/sortida mostrar\n"
 "  -h, --help           mostra el missatge d'ajuda i surt\n"
 "  -l, --list           mostra una llista dels IDs de les sessions\n"
@@ -2180,128 +1816,129 @@ msgstr ""
 "\n"
 "Ordre sense concordança"
 
-#: plugins/sudoers/timestamp.c:229
+#: plugins/sudoers/timestamp.c:217
 #, c-format
 msgid "%s is group writable"
 msgstr "%s és modificable pel grup"
 
-#: plugins/sudoers/timestamp.c:305
+#: plugins/sudoers/timestamp.c:293
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "no s'ha pogut truncar el fitxer de marca horària a %lld bytes"
 
-#: plugins/sudoers/timestamp.c:792 plugins/sudoers/timestamp.c:884
-#: plugins/sudoers/visudo.c:477 plugins/sudoers/visudo.c:483
+#: plugins/sudoers/timestamp.c:738 plugins/sudoers/timestamp.c:805
+#: plugins/sudoers/visudo.c:500 plugins/sudoers/visudo.c:506
 msgid "unable to read the clock"
 msgstr "no s'ha pogut llegir el rellotge"
 
-#: plugins/sudoers/timestamp.c:803
+#: plugins/sudoers/timestamp.c:752
 msgid "ignoring time stamp from the future"
 msgstr "s'ignorarà la marca horària del futur"
 
-#: plugins/sudoers/timestamp.c:826
+#: plugins/sudoers/timestamp.c:764
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "la marca horària està massa lluny en el futur: %20.20s"
 
-#: plugins/sudoers/timestamp.c:948
+#: plugins/sudoers/timestamp.c:859
 #, c-format
 msgid "unable to lock time stamp file %s"
 msgstr "no s'ha pogut bloquejar el fitxer de marca horària %s"
 
-#: plugins/sudoers/timestamp.c:992 plugins/sudoers/timestamp.c:1012
+#: plugins/sudoers/timestamp.c:903 plugins/sudoers/timestamp.c:923
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "el camí de l'estat de la llissó és massa llarg: %s/%s"
 
-#: plugins/sudoers/visudo.c:212
-msgid "the -x option will be removed in a future release"
-msgstr ""
+#: plugins/sudoers/visudo.c:187
+#, c-format
+msgid "%s grammar version %d\n"
+msgstr "%s versió de la gramàtica %d\n"
 
-#: plugins/sudoers/visudo.c:213
-msgid "please consider using the cvtsudoers utility instead"
-msgstr ""
-
-#: plugins/sudoers/visudo.c:263 plugins/sudoers/visudo.c:644
+#: plugins/sudoers/visudo.c:265 plugins/sudoers/visudo.c:665
 #, c-format
 msgid "press return to edit %s: "
 msgstr "prem la tecla d'introducció per editar %s: "
 
-#: plugins/sudoers/visudo.c:324
+#: plugins/sudoers/visudo.c:331
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "l'editor especificat (%s) no existeix"
 
-#: plugins/sudoers/visudo.c:326
+#: plugins/sudoers/visudo.c:349
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "no s'ha trobat un editor (el camí de l'editor = %s)"
 
-#: plugins/sudoers/visudo.c:436 plugins/sudoers/visudo.c:444
+#: plugins/sudoers/visudo.c:459 plugins/sudoers/visudo.c:467
 msgid "write error"
 msgstr "error d'escriptura"
 
-#: plugins/sudoers/visudo.c:490
+#: plugins/sudoers/visudo.c:513
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "no s'ha pogut accedir al fitxer temporal (%s), no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:497
+#: plugins/sudoers/visudo.c:520
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "fitxer temporal amb longitud nul·la (%s), no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:503
+#: plugins/sudoers/visudo.c:526
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "l'editor (%s) ha fallat, no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:525
+#: plugins/sudoers/visudo.c:548
 #, c-format
 msgid "%s unchanged"
 msgstr "no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:584
+#: plugins/sudoers/visudo.c:607
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "no s'ha pogut reobrir el fitxer temporal (%s), no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:596
+#: plugins/sudoers/visudo.c:619
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "no s'ha pogut analitzar el fitxer temporal (%s), error desconegut"
 
-#: plugins/sudoers/visudo.c:633
+#: plugins/sudoers/visudo.c:656
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "error intern, no s'ha pogut trobar %s a la llista!"
 
-#: plugins/sudoers/visudo.c:713 plugins/sudoers/visudo.c:722
+#: plugins/sudoers/visudo.c:717 plugins/sudoers/visudo.c:726
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "no s'ha pogut establir (uid, gid) de %s a (%u, %u)"
 
-#: plugins/sudoers/visudo.c:744
+#: plugins/sudoers/visudo.c:721 plugins/sudoers/visudo.c:731
+#, c-format
+msgid "unable to change mode of %s to 0%o"
+msgstr "no s'ha pogut canviar el mode de %s a 0%o"
+
+#: plugins/sudoers/visudo.c:748
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
-msgstr ""
-"%s i %s no estan al mateix sistema de fitxers, s'usarà mv per reanomenar"
+msgstr "%s i %s no estan al mateix sistema de fitxers, s'usarà mv per reanomenar"
 
-#: plugins/sudoers/visudo.c:758
+#: plugins/sudoers/visudo.c:762
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "l'ordre ha fallat: '%s %s %s', no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:768
+#: plugins/sudoers/visudo.c:772
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "error quan s'estava reanomenant %s, no s'ha modificat %s"
 
-#: plugins/sudoers/visudo.c:789
+#: plugins/sudoers/visudo.c:834
 msgid "What now? "
 msgstr "Què fem ara? "
 
-#: plugins/sudoers/visudo.c:803
+#: plugins/sudoers/visudo.c:848
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -2313,57 +1950,62 @@ msgstr ""
 "  (x) surt sense desar els canvis al fitxer sudoers\n"
 "  (Q) surt i desa el canvis el fitxer sudoers (PERILL!)\n"
 
-#: plugins/sudoers/visudo.c:849
+#: plugins/sudoers/visudo.c:894
 #, c-format
 msgid "unable to run %s"
 msgstr "no s'ha pogut executar %s"
 
-#: plugins/sudoers/visudo.c:879
+#: plugins/sudoers/visudo.c:924
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: propietari incorrecte (uid, gid) hauria de ser (%uk, %u)\n"
 
-#: plugins/sudoers/visudo.c:886
+#: plugins/sudoers/visudo.c:931
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: permisos dolents, hauria de ser mode 0%o\n"
 
-#: plugins/sudoers/visudo.c:942 plugins/sudoers/visudo.c:949
+#: plugins/sudoers/visudo.c:960 plugins/sudoers/visudo_json.c:1031
+#, c-format
+msgid "failed to parse %s file, unknown error"
+msgstr "no s'ha pogut analitzar el fitxer %s, error desconegut"
+
+#: plugins/sudoers/visudo.c:976 plugins/sudoers/visudo_json.c:1042
+#, c-format
+msgid "parse error in %s near line %d\n"
+msgstr "error d'anàlisi a %s a prop de la línia %d\n"
+
+#: plugins/sudoers/visudo.c:979 plugins/sudoers/visudo_json.c:1045
+#, c-format
+msgid "parse error in %s\n"
+msgstr "error d'anàlisi a %s\n"
+
+#: plugins/sudoers/visudo.c:987 plugins/sudoers/visudo.c:994
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: s'analitzat correctament\n"
 
-#: plugins/sudoers/visudo.c:996
+#: plugins/sudoers/visudo.c:1041
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s està ocupat, proveu un altre cop més tard"
 
-#: plugins/sudoers/visudo.c:1036
-#, fuzzy, c-format
-msgid "Error: %s:%d cycle in %s \"%s\""
+#: plugins/sudoers/visudo.c:1137
+#, c-format
+msgid "%s:%d cycle in %s \"%s\""
 msgstr "%s:%d cicle a %s «%s»"
 
-#: plugins/sudoers/visudo.c:1037
-#, fuzzy, c-format
-msgid "Warning: %s:%d cycle in %s \"%s\""
-msgstr "%s:%d cicle a %s «%s»"
-
-#: plugins/sudoers/visudo.c:1041
-#, fuzzy, c-format
-msgid "Error: %s:%d %s \"%s\" referenced but not defined"
+#: plugins/sudoers/visudo.c:1140
+#, c-format
+msgid "%s:%d %s \"%s\" referenced but not defined"
 msgstr "%s:%d %s «%s» s'ha referenciat però no s'ha definit "
 
-#: plugins/sudoers/visudo.c:1042
-#, fuzzy, c-format
-msgid "Warning: %s:%d %s \"%s\" referenced but not defined"
-msgstr "%s:%d %s «%s» s'ha referenciat però no s'ha definit "
-
-#: plugins/sudoers/visudo.c:1135
-#, fuzzy, c-format
-msgid "Warning: %s:%d unused %s \"%s\""
+#: plugins/sudoers/visudo.c:1292
+#, c-format
+msgid "%s:%d unused %s \"%s\""
 msgstr "%s:%d sense usar %s «%s»"
 
-#: plugins/sudoers/visudo.c:1250
+#: plugins/sudoers/visudo.c:1403
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -2372,8 +2014,7 @@ msgstr ""
 "%s - edita amb seguretat el fitxer sudoers\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1252
-#, fuzzy
+#: plugins/sudoers/visudo.c:1405
 msgid ""
 "\n"
 "Options:\n"
@@ -2383,46 +2024,31 @@ msgid ""
 "  -q, --quiet              less verbose (quiet) syntax error messages\n"
 "  -s, --strict             strict syntax checking\n"
 "  -V, --version            display version information and exit\n"
+"  -x, --export=output_file write sudoers in JSON format to output_file"
 msgstr ""
 "\n"
 "Opcions:\n"
 "  -c, --check              mode de sols verificació\n"
 "  -f, --file=sudoers       especifiqueu la ubicació del fitxer sudoers\n"
 "  -h, --help               mostra el missatge d'ajuda i surt\n"
-"  -q, --quiet              missatges d'error de sintaxi menys informatius "
-"(silenciós)\n"
+"  -q, --quiet              missatges d'error de sintaxi menys informatius (silenciós)\n"
 "  -s, --strict             verificació estricta de la sintaxi\n"
 "  -V, --version            mostra la informació de la versió i surt\n"
-"  -x, --export=output_file escriu el fitxer sudoers en format JSON a "
-"output_file"
+"  -x, --export=output_file escriu el fitxer sudoers en format JSON a output_file"
 
-#: toke.l:943
+#: plugins/sudoers/visudo_json.c:632 plugins/sudoers/visudo_json.c:667
+#, c-format
+msgid "unknown defaults entry \"%s\""
+msgstr "entrada «%s» desconeguda de paràmetres predeterminats"
+
+#: plugins/sudoers/visudo_json.c:1017
+#, c-format
+msgid "%s: input and output files must be different"
+msgstr "%s: els fitxers d'entrada i de sortida han de ser diferents"
+
+#: toke.l:926
 msgid "too many levels of includes"
 msgstr "massa nivells d'inclusions"
-
-#~ msgid ""
-#~ "\n"
-#~ "LDAP Role: UNKNOWN\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Rol LDAP: DESCONEGUT\n"
-
-#~ msgid "    Order: %s\n"
-#~ msgstr "    Ordre: %s\n"
-
-#~ msgid ""
-#~ "\n"
-#~ "SSSD Role: %s\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Rol SSDD: %s\n"
-
-#~ msgid ""
-#~ "\n"
-#~ "SSSD Role: UNKNOWN\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Rol SSSD: DESCONEGUT\n"
 
 #~ msgid "Warning: cycle in %s `%s'"
 #~ msgstr "Advertiment: cicle a %s `%s'"
@@ -2434,9 +2060,7 @@ msgstr "massa nivells d'inclusions"
 #~ msgstr "Advertiment: %s `%s' sense usar"
 
 #~ msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
-#~ msgstr ""
-#~ "sudo_ldap_conf_add_ports: s'ha exhaurit l'espai quan s'estava expandint "
-#~ "hostbuf"
+#~ msgstr "sudo_ldap_conf_add_ports: s'ha exhaurit l'espai quan s'estava expandint hostbuf"
 
 #~ msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 #~ msgstr "sudo_ldap_parse_uri: s'ha exhaurit l'espai construint hostbuf"
