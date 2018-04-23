@@ -487,32 +487,22 @@ do_stat(int fd, const char *path, struct stat *sb)
     debug_return_bool(stat(path, sb) == 0);
 }
 
-/*
- * On systems with fexecve(2), set the close-on-exec flag on the file
- * descriptor only if the file is not a script.  Because scripts need
- * to be executed by an interpreter the fd must remain open for the
- * interpreter to use.
- */
-static void
-set_cloexec(int fd)
-{
-    bool is_script = false;
 #ifdef HAVE_FEXECVE
+/*
+ * Check whether the fd refers to a shell script with a "#!" shebang.
+ */
+static bool
+is_script(int fd)
+{
+    bool ret = false;
     char magic[2];
 
-    /* Check for #! cookie and set is_script. */
     if (read(fd, magic, 2) == 2) {
 	if (magic[0] == '#' && magic[1] == '!')
-	    is_script = true;
+	    ret = true;
     }
     (void) lseek(fd, (off_t)0, SEEK_SET);
-#endif /* HAVE_FEXECVE */
-    /*
-     * Shell scripts go through namei twice and so we can't set the close
-     * on exec flag on the fd for fexecve(2).
-     */
-    if (!is_script)
-	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+    return ret;
 }
 
 /*
@@ -541,10 +531,36 @@ open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
     if (fd == -1)
 	debug_return_bool(false);
 
-    set_cloexec(fd);
+    if (is_script(fd)) {
+	char fdpath[PATH_MAX];
+	struct stat sb;
+
+	/* We can only use fexecve() on a script if /dev/fd/N exists. */
+	snprintf(fdpath, sizeof(fdpath), "/dev/fd/%d", fd);
+	if (stat(fdpath, &sb) != 0) {
+	    close(fd);
+	    debug_return_bool(false);
+	}
+
+	/*
+	 * Shell scripts go through namei twice so we can't set the
+	 * close on exec flag on the fd for fexecve(2).
+	 */
+    } else {
+	/* Not a script, close on exec is safe. */
+	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
+    }
+
     *fdp = fd;
     debug_return_bool(true);
 }
+#else /* HAVE_FEXECVE */
+static bool
+open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
+{
+    return true;
+}
+#endif /* HAVE_FEXECVE */
 
 static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
