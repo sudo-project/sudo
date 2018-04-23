@@ -539,7 +539,7 @@ open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
 	snprintf(fdpath, sizeof(fdpath), "/dev/fd/%d", fd);
 	if (stat(fdpath, &sb) != 0) {
 	    close(fd);
-	    debug_return_bool(false);
+	    debug_return_bool(true);
 	}
 
 	/*
