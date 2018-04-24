@@ -716,6 +716,8 @@ po/vi.mo
 po/vi.po
 po/zh_CN.mo
 po/zh_CN.po
+po/zh_TW.mo
+po/zh_TW.po
 pp
 src/Makefile.in
 src/conversation.c
