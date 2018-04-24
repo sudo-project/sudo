@@ -512,7 +512,7 @@ static void
 print_member_json(FILE *fp, struct member *m, enum word_type word_type,
     bool last_one, int indent, bool expand_aliases)
 {
-    return print_member_json_int(fp, m->name, m->type, m->negated, word_type,
+    print_member_json_int(fp, m->name, m->type, m->negated, word_type,
 	last_one, indent, expand_aliases);
 }
 
