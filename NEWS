@@ -41,8 +41,10 @@ What's new in Sudo 1.8.23
 
  * Sudo now includes an optional set of Monty Python-inspired insults.
 
- * Added a workaround for systems that support fexecve(2) but do
-   not have the /dev/fd directory available by default.  Bug #831.
+ * Fixed the execution of scripts with an associated digest (checksum)
+   in sudoers on FreeBSD systems.  FreeBSD does not have a proper
+   /dev/fd directory mounted by default and its fexecve(2) is not
+   fully POSIX compliant when executing scripts.  Bug #831.
 
 What's new in Sudo 1.8.22
 
