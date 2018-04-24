@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2017
+ * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -785,6 +785,7 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
     file_digest = sudo_filedigest(fd, file, sd->digest_type, &digest_len);
+    lseek(fd, SEEK_SET, (off_t)0);
     if (file_digest == NULL) {
 	/* Warning (if any) printed by sudo_filedigest() */
 	goto done;
