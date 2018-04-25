@@ -219,6 +219,14 @@ A) On systems that use a Mozilla-derived LDAP SDK there must be a
     Enter new password: <return>
     Re-enter password: <return>
 
+Q) On Solaris, when I run command via sudo it displays information
+   about the last login for every command.  How can I fix this?
+A) This output comes from /usr/lib/security/pam_unix_session.so.1.
+   To suppress it, first create /etc/pam.d/sudo if it doesn't exist:
+    cp /etc/pam.d/other /etc/pam.d/sudo
+   Then add "nowarn" to the end of the pam_unix_session.so.1 line:
+    session required pam_unix_session.so.1 nowarm
+
 Q) On HP-UX, when I run command via sudo it displays information
    about the last successful login and last authentication failure
    for every command.  How can I fix this?
