@@ -70,8 +70,8 @@
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 
-#if !defined(O_SEARCH) && defined(O_PATH)
-# define O_SEARCH O_PATH
+#if !defined(O_EXEC) && defined(O_PATH)
+# define O_EXEC O_PATH
 #endif
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
@@ -519,11 +519,11 @@ open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
 	debug_return_bool(true);
 
     fd = open(path, O_RDONLY|O_NONBLOCK);
-# ifdef O_SEARCH
+# ifdef O_EXEC
     if (fd == -1 && errno == EACCES && digest == NULL) {
-	/* Try again with O_SEARCH if no digest is specified. */
+	/* Try again with O_EXEC if no digest is specified. */
 	const int saved_errno = errno;
-	if ((fd = open(path, O_SEARCH)) == -1)
+	if ((fd = open(path, O_EXEC)) == -1)
 	    errno = saved_errno;
     }
 # endif
