@@ -42,9 +42,9 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <dirent.h>
-#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+#if defined(HAVE_KINFO_PROC2_NETBSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_44BSD)
 # include <sys/sysctl.h>
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+#elif defined(HAVE_KINFO_PROC_FREEBSD)
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
@@ -62,22 +62,22 @@
 /*
  * How to access the tty device number in struct kinfo_proc.
  */
-#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+#if defined(HAVE_KINFO_PROC2_NETBSD)
 # define SUDO_KERN_PROC		KERN_PROC2
 # define sudo_kinfo_proc	kinfo_proc2
 # define sudo_kp_tdev		p_tdev
 # define sudo_kp_namelen	6
-#elif defined(HAVE_STRUCT_KINFO_PROC_P_TDEV)
+#elif defined(HAVE_KINFO_PROC_OPENBSD)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_tdev		p_tdev
 # define sudo_kp_namelen	6
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+#elif defined(HAVE_KINFO_PROC_FREEBSD)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_tdev		ki_tdev
 # define sudo_kp_namelen	4
-#elif defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+#elif defined(HAVE_KINFO_PROC_44BSD)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_tdev		kp_eproc.e_tdev

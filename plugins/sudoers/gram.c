@@ -825,9 +825,33 @@ add_userspec(struct member *members, struct privilege *privs)
     u->file = rcstr_addref(sudoers);
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
+    STAILQ_INIT(&u->comments);
     TAILQ_INSERT_TAIL(&userspecs, u, entries);
 
     debug_return_bool(true);
+}
+
+/*
+ * Free a member struct and its contents.
+ */
+void
+free_member(struct member *m)
+{
+    debug_decl(free_member, SUDOERS_DEBUG_PARSER)
+
+    if (m->type == COMMAND) {
+	    struct sudo_command *c = (struct sudo_command *)m->name;
+	    free(c->cmnd);
+	    free(c->args);
+	    if (c->digest != NULL) {
+		free(c->digest->digest_str);
+		free(c->digest);
+	    }
+    }
+    free(m->name);
+    free(m);
+
+    debug_return;
 }
 
 /*
@@ -836,18 +860,122 @@ add_userspec(struct member *members, struct privilege *privs)
 void
 free_members(struct member_list *members)
 {
-    struct member *m, *next;
-    struct sudo_command *c;
+    struct member *m;
+    debug_decl(free_members, SUDOERS_DEBUG_PARSER)
 
-    TAILQ_FOREACH_SAFE(m, members, entries, next) {
-	if (m->type == COMMAND) {
-		c = (struct sudo_command *) m->name;
-		free(c->cmnd);
-		free(c->args);
-	}
-	free(m->name);
-	free(m);
+    while ((m = TAILQ_FIRST(members)) != NULL) {
+	TAILQ_REMOVE(members, m, entries);
+	free_member(m);
     }
+
+    debug_return;
+}
+
+void
+free_default(struct defaults *def, struct member_list **binding)
+{
+    debug_decl(free_default, SUDOERS_DEBUG_PARSER)
+
+    if (def->binding != *binding) {
+	*binding = def->binding;
+	if (def->binding != NULL) {
+	    free_members(def->binding);
+	    free(def->binding);
+	}
+    }
+    rcstr_delref(def->file);
+    free(def->var);
+    free(def->val);
+    free(def);
+
+    debug_return;
+}
+
+void
+free_privilege(struct privilege *priv)
+{
+    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
+    struct member_list *prev_binding = NULL;
+    struct cmndspec *cs;
+    struct defaults *def;
+#ifdef HAVE_SELINUX
+    char *role = NULL, *type = NULL;
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+    char *privs = NULL, *limitprivs = NULL;
+#endif /* HAVE_PRIV_SET */
+    debug_decl(free_privilege, SUDOERS_DEBUG_PARSER)
+
+    free(priv->ldap_role);
+    free_members(&priv->hostlist);
+    while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
+	TAILQ_REMOVE(&priv->cmndlist, cs, entries);
+#ifdef HAVE_SELINUX
+	/* Only free the first instance of a role/type. */
+	if (cs->role != role) {
+	    role = cs->role;
+	    free(cs->role);
+	}
+	if (cs->type != type) {
+	    type = cs->type;
+	    free(cs->type);
+	}
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	/* Only free the first instance of privs/limitprivs. */
+	if (cs->privs != privs) {
+	    privs = cs->privs;
+	    free(cs->privs);
+	}
+	if (cs->limitprivs != limitprivs) {
+	    limitprivs = cs->limitprivs;
+	    free(cs->limitprivs);
+	}
+#endif /* HAVE_PRIV_SET */
+	/* Only free the first instance of runas user/group lists. */
+	if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
+	    runasuserlist = cs->runasuserlist;
+	    free_members(runasuserlist);
+	    free(runasuserlist);
+	}
+	if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
+	    runasgrouplist = cs->runasgrouplist;
+	    free_members(runasgrouplist);
+	    free(runasgrouplist);
+	}
+	free_member(cs->cmnd);
+	free(cs);
+    }
+    while ((def = TAILQ_FIRST(&priv->defaults)) != NULL) {
+	TAILQ_REMOVE(&priv->defaults, def, entries);
+	free_default(def, &prev_binding);
+    }
+    free(priv);
+
+    debug_return;
+}
+
+void
+free_userspec(struct userspec *us)
+{
+    struct privilege *priv;
+    struct sudoers_comment *comment;
+    debug_decl(free_userspec, SUDOERS_DEBUG_PARSER)
+
+    free_members(&us->users);
+    while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
+	TAILQ_REMOVE(&us->privileges, priv, entries);
+	free_privilege(priv);
+    }
+    while ((comment = STAILQ_FIRST(&us->comments)) != NULL) {
+	STAILQ_REMOVE_HEAD(&us->comments, entries);
+	free(comment->str);
+	free(comment);
+    }
+    rcstr_delref(us->file);
+    free(us);
+
+    debug_return;
 }
 
 /*
@@ -857,107 +985,20 @@ free_members(struct member_list *members)
 bool
 init_parser(const char *path, bool quiet)
 {
-    struct member_list *binding;
-    struct defaults *d, *d_next;
-    struct userspec *us, *us_next;
+    struct member_list *prev_binding = NULL;
+    struct defaults *def;
+    struct userspec *us;
     bool ret = true;
+    void *next;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
-    /* XXX - move into a free function */
-    TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
-	struct member *m, *m_next;
-	struct privilege *priv, *priv_next;
-
-	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
-	    free(m->name);
-	    free(m);
-	}
-	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
-	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
-	    struct cmndspec *cs, *cs_next;
-#ifdef HAVE_SELINUX
-	    char *role = NULL, *type = NULL;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-	    char *privs = NULL, *limitprivs = NULL;
-#endif /* HAVE_PRIV_SET */
-
-	    TAILQ_FOREACH_SAFE(m, &priv->hostlist, entries, m_next) {
-		free(m->name);
-		free(m);
-	    }
-	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
-#ifdef HAVE_SELINUX
-		/* Only free the first instance of a role/type. */
-		if (cs->role != role) {
-		    role = cs->role;
-		    free(cs->role);
-		}
-		if (cs->type != type) {
-		    type = cs->type;
-		    free(cs->type);
-		}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-		/* Only free the first instance of privs/limitprivs. */
-		if (cs->privs != privs) {
-		    privs = cs->privs;
-		    free(cs->privs);
-		}
-		if (cs->limitprivs != limitprivs) {
-		    limitprivs = cs->limitprivs;
-		    free(cs->limitprivs);
-		}
-#endif /* HAVE_PRIV_SET */
-		/* Only free the first instance of runas user/group lists. */
-		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
-		    runasuserlist = cs->runasuserlist;
-		    TAILQ_FOREACH_SAFE(m, runasuserlist, entries, m_next) {
-			free(m->name);
-			free(m);
-		    }
-		    free(runasuserlist);
-		}
-		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
-		    runasgrouplist = cs->runasgrouplist;
-		    TAILQ_FOREACH_SAFE(m, runasgrouplist, entries, m_next) {
-			free(m->name);
-			free(m);
-		    }
-		    free(runasgrouplist);
-		}
-		if (cs->cmnd->type == COMMAND) {
-			struct sudo_command *c =
-			    (struct sudo_command *) cs->cmnd->name;
-			free(c->cmnd);
-			free(c->args);
-			if (c->digest != NULL) {
-			    free(c->digest->digest_str);
-			    free(c->digest);
-			}
-		}
-		free(cs->cmnd->name);
-		free(cs->cmnd);
-		free(cs);
-	    }
-	    free(priv);
-	}
-	rcstr_delref(us->file);
-	free(us);
+    TAILQ_FOREACH_SAFE(us, &userspecs, entries, next) {
+	free_userspec(us);
     }
     TAILQ_INIT(&userspecs);
 
-    binding = NULL;
-    TAILQ_FOREACH_SAFE(d, &defaults, entries, d_next) {
-	if (d->binding != binding) {
-	    binding = d->binding;
-	    free_members(d->binding);
-	    free(d->binding);
-	}
-	rcstr_delref(d->file);
-	free(d->var);
-	free(d->val);
-	free(d);
+    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+	free_default(def, &prev_binding);
     }
     TAILQ_INIT(&defaults);
 
@@ -1005,7 +1046,7 @@ init_options(struct command_options *opts)
     opts->limitprivs = NULL;
 #endif
 }
-#line 956 "gram.c"
+#line 997 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1214,23 +1255,23 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 176 "gram.y"
+#line 175 "gram.y"
 { ; }
 break;
 case 5:
-#line 184 "gram.y"
+#line 183 "gram.y"
 {
 			    ;
 			}
 break;
 case 6:
-#line 187 "gram.y"
+#line 186 "gram.y"
 {
 			    yyerrok;
 			}
 break;
 case 7:
-#line 190 "gram.y"
+#line 189 "gram.y"
 {
 			    if (!add_userspec(yyvsp[-1].member, yyvsp[0].privilege)) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -1239,73 +1280,73 @@ case 7:
 			}
 break;
 case 8:
-#line 196 "gram.y"
+#line 195 "gram.y"
 {
 			    ;
 			}
 break;
 case 9:
-#line 199 "gram.y"
+#line 198 "gram.y"
 {
 			    ;
 			}
 break;
 case 10:
-#line 202 "gram.y"
+#line 201 "gram.y"
 {
 			    ;
 			}
 break;
 case 11:
-#line 205 "gram.y"
+#line 204 "gram.y"
 {
 			    ;
 			}
 break;
 case 12:
-#line 208 "gram.y"
+#line 207 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS, NULL, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 13:
-#line 212 "gram.y"
+#line 211 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_USER, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 14:
-#line 216 "gram.y"
+#line 215 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_RUNAS, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 15:
-#line 220 "gram.y"
+#line 219 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_HOST, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 16:
-#line 224 "gram.y"
+#line 223 "gram.y"
 {
 			    if (!add_defaults(DEFAULTS_CMND, yyvsp[-1].member, yyvsp[0].defaults))
 				YYERROR;
 			}
 break;
 case 18:
-#line 231 "gram.y"
+#line 230 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].defaults, yyvsp[0].defaults, entries);
 			    yyval.defaults = yyvsp[-2].defaults;
 			}
 break;
 case 19:
-#line 237 "gram.y"
+#line 236 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, true);
 			    if (yyval.defaults == NULL) {
@@ -1315,7 +1356,7 @@ case 19:
 			}
 break;
 case 20:
-#line 244 "gram.y"
+#line 243 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, false);
 			    if (yyval.defaults == NULL) {
@@ -1325,7 +1366,7 @@ case 20:
 			}
 break;
 case 21:
-#line 251 "gram.y"
+#line 250 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, true);
 			    if (yyval.defaults == NULL) {
@@ -1335,7 +1376,7 @@ case 21:
 			}
 break;
 case 22:
-#line 258 "gram.y"
+#line 257 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '+');
 			    if (yyval.defaults == NULL) {
@@ -1345,7 +1386,7 @@ case 22:
 			}
 break;
 case 23:
-#line 265 "gram.y"
+#line 264 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '-');
 			    if (yyval.defaults == NULL) {
@@ -1355,20 +1396,21 @@ case 23:
 			}
 break;
 case 25:
-#line 275 "gram.y"
+#line 274 "gram.y"
 {
 			    HLTQ_CONCAT(yyvsp[-2].privilege, yyvsp[0].privilege, entries);
 			    yyval.privilege = yyvsp[-2].privilege;
 			}
 break;
 case 26:
-#line 281 "gram.y"
+#line 280 "gram.y"
 {
 			    struct privilege *p = calloc(1, sizeof(*p));
 			    if (p == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
+			    TAILQ_INIT(&p->defaults);
 			    HLTQ_TO_TAILQ(&p->hostlist, yyvsp[-2].member, entries);
 			    HLTQ_TO_TAILQ(&p->cmndlist, yyvsp[0].cmndspec, entries);
 			    HLTQ_INIT(p, entries);
@@ -2129,7 +2171,7 @@ case 116:
 			    }
 			}
 break;
-#line 2080 "gram.c"
+#line 2122 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

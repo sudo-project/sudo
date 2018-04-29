@@ -120,7 +120,7 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1)
+    if (io_fds[SFD_USERTTY] != -1)
 	sudo_term_restore(io_fds[SFD_USERTTY], false);
     if (utmp_user != NULL)
 	utmp_logout(slavename, 0);
@@ -754,6 +754,10 @@ pty_close(struct command_status *cstat)
     int n;
     debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
+    /* Close the pty slave first so reads from the master don't block. */
+    if (io_fds[SFD_SLAVE] != -1)
+	close(io_fds[SFD_SLAVE]);
+
     /* Flush any remaining output (the plugin already got it). */
     if (io_fds[SFD_USERTTY] != -1) {
 	n = fcntl(io_fds[SFD_USERTTY], F_GETFL, 0);
@@ -781,6 +785,11 @@ pty_close(struct command_status *cstat)
     /* Update utmp */
     if (utmp_user != NULL)
 	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
+
+    /* Close pty master. */
+    if (io_fds[SFD_MASTER] != -1)
+	close(io_fds[SFD_MASTER]);
+
     debug_return;
 }
 
@@ -1472,7 +1481,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * and pass output from master to stdout and IO plugin.
      */
     add_io_events(ec.evbase);
-    if (sudo_ev_loop(ec.evbase, 0) == -1)
+    if (sudo_ev_dispatch(ec.evbase) == -1)
 	sudo_warn(U_("error in event loop"));
     if (sudo_ev_got_break(ec.evbase)) {
 	/* error from callback or monitor died */
@@ -1581,6 +1590,8 @@ del_io_events(bool nonblocking)
 	    }
 	}
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: flushing remaining I/O buffers (nonblocking)", __func__);
     (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
 
     /*
@@ -1606,7 +1617,9 @@ del_io_events(bool nonblocking)
 		}
 	    }
 	}
-	(void) sudo_ev_loop(evbase, 0);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: flushing remaining write buffers (blocking)", __func__);
+	(void) sudo_ev_dispatch(evbase);
      
 	/* We should now have flushed all write buffers. */
 	SLIST_FOREACH(iob, &iobufs, entries) {

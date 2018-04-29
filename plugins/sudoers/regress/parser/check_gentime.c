@@ -36,7 +36,7 @@
 
 __dso_public int main(int argc, char *argv[]);
 
-struct gentime_test {
+const struct gentime_test {
     char *gentime;
     time_t unixtime;
 } tests[] = {
@@ -57,13 +57,13 @@ struct gentime_test {
     { "2017021408.5Z", 1487061000 },
     { "2017021408,5Z", 1487061000 },
     { "20170214Z", -1 },
-    { NULL, -1 }
 };
 
 int
 main(int argc, char *argv[])
 {
-    int ntests, errors = 0;
+    const int ntests = nitems(tests);
+    int i, errors = 0;
     time_t result;
 
     initprogname(argc > 0 ? argv[0] : "check_gentime");
@@ -72,12 +72,12 @@ main(int argc, char *argv[])
     putenv("TZ=EST5EST5");
     tzset();
 
-    for (ntests = 0; tests[ntests].gentime != NULL; ntests++) {
-	result = parse_gentime(tests[ntests].gentime);
-	if (result != tests[ntests].unixtime) {
+    for (i = 0; i < ntests; i++) {
+	result = parse_gentime(tests[i].gentime);
+	if (result != tests[i].unixtime) {
 	    fprintf(stderr, "check_gentime[%d]: %s: expected %lld, got %lld\n",
-		ntests, tests[ntests].gentime,
-		(long long)tests[ntests].unixtime, (long long)result);
+		i, tests[i].gentime,
+		(long long)tests[i].unixtime, (long long)result);
 	    errors++;
 	}
     }

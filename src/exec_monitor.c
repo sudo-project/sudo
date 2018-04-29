@@ -617,7 +617,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      */
     cstat.type = CMD_INVALID;
     cstat.val = 0;
-    (void) sudo_ev_loop(mc.evbase, 0);
+    (void) sudo_ev_dispatch(mc.evbase);
     if (mc.cmnd_pid != -1) {
 	pid_t pid;
 

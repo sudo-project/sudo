@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2017
+ * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -32,7 +32,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/uio.h>
 #ifndef __TANDEM
 # include <sys/file.h>
@@ -54,11 +53,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
 
 #include "sudoers.h"
 #include "interfaces.h"
@@ -88,7 +85,6 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
  * Function prototypes
  */
 static void quit(int);
-static void get_hostname(void);
 static int whatnow(void);
 static int check_aliases(bool strict, bool quiet);
 static char *get_editor(int *editor_argc, char ***editor_argv);
@@ -104,9 +100,7 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static void visudo_cleanup(void);
 
-extern bool export_sudoers(const char *, const char *, bool, bool);
-
-extern void sudoerserror(const char *);
+extern void get_hostname(void);
 extern void sudoersrestart(FILE *);
 
 /*
@@ -115,7 +109,6 @@ extern void sudoersrestart(FILE *);
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
-static struct rbtree *alias_freelist;
 static bool checkonly;
 static const char short_opts[] =  "cf:hqsVx:";
 static struct option long_opts[] = {
@@ -136,9 +129,9 @@ main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
     char *editor, **editor_argv;
+    const char *export_path = NULL;
     int ch, oldlocale, editor_argc, exitcode = 0;
     bool quiet, strict, oldperms;
-    const char *export_path;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -179,7 +172,6 @@ main(int argc, char *argv[])
      * Arg handling.
      */
     checkonly = oldperms = quiet = strict = false;
-    export_path = NULL;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
@@ -205,7 +197,7 @@ main(int argc, char *argv[])
 		quiet = true;		/* quiet mode */
 		break;
 	    case 'x':
-		export_path = optarg;	/* export mode */
+		export_path = optarg;
 		break;
 	    default:
 		usage(1);
@@ -214,6 +206,15 @@ main(int argc, char *argv[])
     /* There should be no other command line arguments. */
     if (argc - optind != 0)
 	usage(1);
+
+    if (export_path != NULL) {
+	/* Backwards compatibility for the time being. */
+	sudo_warnx(U_("the -x option will be removed in a future release"));
+	sudo_warnx(U_("please consider using the cvtsudoers utility instead"));
+	execlp("cvtsudoers", "cvtsudoers", "-f", "json", "-o", export_path,
+	    sudoers_file, (char *)0);
+	sudo_fatal(U_("unable to execute %s"), "cvtsudoers");
+    }
 
     /* Mock up a fake sudo_user struct. */
     user_cmnd = user_base = "";
@@ -234,10 +235,6 @@ main(int argc, char *argv[])
 
     if (checkonly) {
 	exitcode = check_syntax(sudoers_file, quiet, strict, oldperms) ? 0 : 1;
-	goto done;
-    }
-    if (export_path != NULL) {
-	exitcode = export_sudoers(sudoers_file, export_path, quiet, strict) ? 0 : 1;
 	goto done;
     }
 
@@ -778,49 +775,6 @@ done:
     debug_return_bool(ret);
 }
 
-/* STUB */
-bool
-init_envtables(void)
-{
-    return true;
-}
-
-/* STUB */
-bool
-user_is_exempt(void)
-{
-    return false;
-}
-
-/* STUB */
-void
-sudo_setspent(void)
-{
-    return;
-}
-
-/* STUB */
-void
-sudo_endspent(void)
-{
-    return;
-}
-
-/* STUB */
-int
-group_plugin_query(const char *user, const char *group, const struct passwd *pw)
-{
-    return false;
-}
-
-/* STUB */
-struct interface_list *
-get_interfaces(void)
-{
-    static struct interface_list dummy = SLIST_HEAD_INITIALIZER(interfaces);
-    return &dummy;
-}
-
 /*
  * Assuming a parse error occurred, prompt the user for what they want
  * to do now.  Returns the first letter of their choice.
@@ -1059,63 +1013,6 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
     debug_return_ptr(fp);
 }
 
-/*
- * Look up the hostname and set user_host and user_shost.
- */
-static void
-get_hostname(void)
-{
-    char *p;
-    debug_decl(get_hostname, SUDOERS_DEBUG_UTIL)
-
-    if ((user_host = sudo_gethostname()) != NULL) {
-	if ((p = strchr(user_host, '.'))) {
-	    *p = '\0';
-	    if ((user_shost = strdup(user_host)) == NULL)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    *p = '.';
-	} else {
-	    user_shost = user_host;
-	}
-    } else {
-	user_host = user_shost = "localhost";
-    }
-    user_runhost = user_host;
-    user_srunhost = user_shost;
-    debug_return;
-}
-
-static bool
-alias_remove_recursive(char *name, int type)
-{
-    struct member *m;
-    struct alias *a;
-    bool ret = true;
-    debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
-
-    if ((a = alias_remove(name, type)) != NULL) {
-	TAILQ_FOREACH(m, &a->members, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, type))
-		    ret = false;
-	    }
-	}
-	if (rbinsert(alias_freelist, a, NULL) != 0)
-	    ret = false;
-    }
-    debug_return_bool(ret);
-}
-
-static const char *
-alias_type_to_string(int alias_type)
-{
-    return alias_type == HOSTALIAS ? "Host_Alias" :
-	alias_type == CMNDALIAS ? "Cmnd_Alias" :
-	alias_type == USERALIAS ? "User_Alias" :
-	alias_type == RUNASALIAS ? "Runas_Alias" :
-	"Invalid_Alias";
-}
-
 static int
 check_alias(char *name, int type, char *file, int lineno, bool strict, bool quiet)
 {
@@ -1164,16 +1061,16 @@ check_alias(char *name, int type, char *file, int lineno, bool strict, bool quie
 static int
 check_aliases(bool strict, bool quiet)
 {
+    struct rbtree *used_aliases;
     struct cmndspec *cs;
     struct member *m;
     struct privilege *priv;
     struct userspec *us;
-    struct defaults *d;
-    int atype, errors = 0;
+    int errors = 0;
     debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS)
 
-    alias_freelist = rbcreate(alias_compare);
-    if (alias_freelist == NULL) {
+    used_aliases = rbcreate(alias_compare);
+    if (used_aliases == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
@@ -1219,69 +1116,9 @@ check_aliases(bool strict, bool quiet)
     }
 
     /* Reverse check (destructive) */
-    TAILQ_FOREACH(us, &userspecs, entries) {
-	TAILQ_FOREACH(m, &us->users, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, USERALIAS))
-		    errors++;
-	    }
-	}
-	TAILQ_FOREACH(priv, &us->privileges, entries) {
-	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-		if (m->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, HOSTALIAS))
-			errors++;
-		}
-	    }
-	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-		if (cs->runasuserlist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-			if (m->type == ALIAS) {
-			    if (!alias_remove_recursive(m->name, RUNASALIAS))
-				errors++;
-			}
-		    }
-		}
-		if (cs->runasgrouplist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-			if (m->type == ALIAS) {
-			    if (!alias_remove_recursive(m->name, RUNASALIAS))
-				errors++;
-			}
-		    }
-		}
-		if ((m = cs->cmnd)->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, CMNDALIAS))
-			errors++;
-		}
-	    }
-	}
-    }
-    TAILQ_FOREACH(d, &defaults, entries) {
-	switch (d->type) {
-	    case DEFAULTS_HOST:
-		atype = HOSTALIAS;
-		break;
-	    case DEFAULTS_USER:
-		atype = USERALIAS;
-		break;
-	    case DEFAULTS_RUNAS:
-		atype = RUNASALIAS;
-		break;
-	    case DEFAULTS_CMND:
-		atype = CMNDALIAS;
-		break;
-	    default:
-		continue; /* not an alias */
-	}
-	TAILQ_FOREACH(m, d->binding, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, atype))
-		    errors++;
-	    }
-	}
-    }
-    rbdestroy(alias_freelist, alias_free);
+    if (!alias_find_used(used_aliases))
+	errors++;
+    rbdestroy(used_aliases, alias_free);
 
     /* If all aliases were referenced we will have an empty tree. */
     if (!no_aliases() && !quiet)
@@ -1402,7 +1239,7 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-chqsV] [-f sudoers] [-x output_file]\n", getprogname());
+	"usage: %s [-chqsV] [-f sudoers]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -1418,7 +1255,6 @@ help(void)
 	"  -h, --help               display help message and exit\n"
 	"  -q, --quiet              less verbose (quiet) syntax error messages\n"
 	"  -s, --strict             strict syntax checking\n"
-	"  -V, --version            display version information and exit\n"
-	"  -x, --export=output_file write sudoers in JSON format to output_file"));
+	"  -V, --version            display version information and exit\n"));
     exit(0);
 }

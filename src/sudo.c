@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,7 +24,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,9 +41,7 @@
 #include <signal.h>
 #include <grp.h>
 #include <pwd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>		/* for is_selinux_enabled() */
 #endif
@@ -127,6 +124,7 @@ static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
 static void iolog_unlink(struct plugin_container *plugin);
+static void free_plugin_container(struct plugin_container *plugin, bool ioplugin);
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
@@ -511,6 +509,19 @@ get_user_info(struct user_details *ud)
     int fd;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
+    /*
+     * On BSD systems you can set a hint to keep the password and
+     * group databases open instead of having to open and close
+     * them all the time.  Since sudo does a lot of password and
+     * group lookups, keeping the file open can speed things up.
+     */
+#ifdef HAVE_SETPASSENT
+    setpassent(1);
+#endif /* HAVE_SETPASSENT */
+#ifdef HAVE_SETGROUPENT
+    setgroupent(1);
+#endif /* HAVE_SETGROUPENT */
+
     memset(ud, 0, sizeof(*ud));
 
     /* XXX - bound check number of entries */
@@ -534,6 +545,9 @@ get_user_info(struct user_details *ud)
     ud->gid = getgid();
     ud->egid = getegid();
 
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(IDtouser(ud->uid), NULL);
+#endif
     pw = getpwuid(ud->uid);
     if (pw == NULL)
 	sudo_fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
@@ -1346,8 +1360,26 @@ iolog_unlink(struct plugin_container *plugin)
     }
     /* Remove from io_plugins list and free. */
     TAILQ_REMOVE(&io_plugins, plugin, entries);
+    free_plugin_container(plugin, true);
+
+    debug_return;
+}
+
+static void
+free_plugin_container(struct plugin_container *plugin, bool ioplugin)
+{
+    debug_decl(free_plugin_container, SUDO_DEBUG_PLUGIN)
+
     free(plugin->path);
-    free(plugin);
+    free(plugin->name);
+    if (plugin->options != NULL) {
+	int i = 0;
+	while (plugin->options[i] != NULL)
+	    free(plugin->options[i++]);
+	free(plugin->options);
+    }
+    if (ioplugin)
+	free(plugin);
 
     debug_return;
 }
@@ -1416,11 +1448,10 @@ gc_run(void)
     }
 
     /* Free plugin structs. */
-    free(policy_plugin.path);
+    free_plugin_container(&policy_plugin, false);
     while ((plugin = TAILQ_FIRST(&io_plugins))) {
 	TAILQ_REMOVE(&io_plugins, plugin, entries);
-	free(plugin->path);
-	free(plugin);
+	free_plugin_container(plugin, true);
     }
 
     debug_return;

@@ -1,7 +1,7 @@
 #!/bin/sh
-# Copyright 2014 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="20140924"
- # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
+# Copyright 2018 One Identity, LLC. ALL RIGHTS RESERVED
+pp_revision="20180220"
+ # Copyright 2018 One Identity, LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
@@ -12,7 +12,7 @@ pp_revision="20140924"
  # 2. Redistributions in binary form must reproduce the above copyright
  #    notice, this list of conditions and the following disclaimer in the
  #    documentation and/or other materials provided with the distribution.
- # 3. Neither the name of Quest Software, Inc. nor the names of its
+ # 3. Neither the name of One Identity, LLC. nor the names of its
  #    contributors may be used to endorse or promote products derived from
  #    this software without specific prior written permission.
  #
@@ -31,7 +31,7 @@ pp_revision="20140924"
  # Please see <http://rc.quest.com/topics/polypkg/> for more information
 
 pp_version="1.0.0.$pp_revision"
-pp_copyright="Copyright 2012, Quest Software, Inc. ALL RIGHTS RESERVED."
+pp_copyright="Copyright 2018, One Identity, LLC. ALL RIGHTS RESERVED."
 
 pp_opt_debug=false
 pp_opt_destdir="$DESTDIR"
@@ -802,7 +802,7 @@ pp_frontend_init () {
     version=
     summary="no summary"
     description="No description"
-    copyright="Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED."
+    copyright="Copyright 2018 One Identity, LLC. ALL RIGHTS RESERVED."
 
     #-- if the user supplied extra arguments on the command line
     #   then load them now.
@@ -961,7 +961,7 @@ pp_frontend () {
              fi
 	     test $# -eq 0 || pp_warn "ignoring extra arguments: $line"
 	     continue;;
-	  %pre|%post|%preun|%postup|%postun|%files|%depend|%check|%conflict)
+	  %pre|%post|%preun|%postup|%preup|%postun|%files|%depend|%check|%conflict)
              pp_debug "processing new component section $*"
              s="$1"; shift
              if test $# -eq 0 || pp_is_qualifier "$1"; then
@@ -1056,7 +1056,7 @@ pp_frontend () {
 		. $pp_wrkdir/tmp
 		: > $pp_wrkdir/tmp
 		;;
-	%pre.*|%preun.*|%post.*|%postup.*|%postun.*|%depend.*|%check.*|%conflict.*|%service.*|%fixup)
+	%pre.*|%preun.*|%post.*|%postup.*|%preup.*|%postun.*|%depend.*|%check.*|%conflict.*|%service.*|%fixup)
                 pp_debug "leaving $section: substituting $pp_wrkdir/tmp"
                 # cat $pp_wrkdir/tmp >&2    # debugging
                 $pp_opt_debug && pp_substitute < $pp_wrkdir/tmp >&2
@@ -1080,7 +1080,7 @@ pp_frontend () {
 	%_initial)
 		case "$line" in "") continue;; esac # ignore non-section blanks
 		pp_die "Ignoring text before % section introducer";;
-	%set|%pre.*|%preun.*|%post.*|%postup.*|%postun.*|%check.*|%service.*|%fixup)
+	%set|%pre.*|%preun.*|%post.*|%postup.*|%preup.*|%postun.*|%check.*|%service.*|%fixup)
                 pp_debug "appending line to \$pp_wrkdir/tmp"
 		echo "$line" >> $pp_wrkdir/tmp
 		;;
@@ -3592,7 +3592,7 @@ pp_solaris_make_service_group () {
 }
 
 pp_solaris_make_service () {
-    typeset file out _cmd svc
+    typeset file out svc
 
     svc="${pp_solaris_smf_service_name:-$1}"
     file=${pp_solaris_service_script:-"/etc/init.d/${pp_solaris_service_script_name:-$svc}"}
@@ -3644,37 +3644,57 @@ fi
 _EOF
     fi
 
-    #-- construct a start command that builds a pid file as needed
-    #   and forks the daemon
-    _cmd="$cmd";
+    #-- Construct a start command that builds a pid file as needed
+    #   and forks the daemon.  Services started by smf may not fork.
     if test -z "$pidfile"; then
 	# The service does not define a pidfile, so we have to make
 	# our own up. On Solaris systems where there is no /var/run
 	# we must use /tmp to guarantee the pid files are removed after
 	# a system crash.
-	cat <<. >>$out
+	if test -z "$pp_piddir"; then
 	    pp_piddir="/var/run"
-	    test -d "\$pp_piddir/." || pp_piddir="/tmp"
+	fi
+	cat <<. >>$out
+	    pp_isdaemon=0
+	    pp_piddirs="${pp_piddir}${pp_piddir+ }/var/run /tmp"
+	    for pp_piddir in \$pp_piddirs; do
+		test -d "\$pp_piddir/." && break
+	    done
 	    pidfile="\$pp_piddir/$svc.pid"
 .
-        _cmd="$cmd & echo \$! > \$pidfile"
     else
 	# The service is able to write its own PID file
 	cat <<. >>$out
+	    pp_isdaemon=1
 	    pidfile="$pidfile"
 .
     fi
 
+    pp_su=
     if test "${user:-root}" != "root"; then
-        _cmd="su $user -c exec $_cmd";
+	pp_su="su $user -c exec "
     fi
 
     cat <<. >>$out
 	stop_signal="${stop_signal:-TERM}"
 	svc="${svc}"
 
-        # generated command to run $svc as a daemon process
-        pp_exec () { $_cmd; }
+        # generated command to run $svc as a service
+	pp_exec () {
+	    if [ \$pp_isdaemon -ne 1 ]; then
+		if [ "t\$PP_SMF_SERVICE" = "t" ]; then
+		    ${pp_su}$cmd &
+		    echo \$! > \$pidfile
+		else
+		    echo "via exec."
+		    echo \$$ > \$pidfile
+		    exec ${pp_su}$cmd
+		    return 1
+		fi
+	    else
+		${pp_su}$cmd
+	    fi
+	}
 .
 
     #-- write the invariant section of the init script
@@ -3686,7 +3706,7 @@ _EOF
                 read pid < "$pidfile" 2>/dev/null
                 if test ${pid:-0} -gt 1 && kill -0 "$pid" 2>/dev/null; then
                     # make sure command name matches up to the first 8 chars
-                    c="`echo $_cmd | sed -e 's: .*::' -e 's:^.*/::' -e 's/^\(........\).*$/\1/'`"
+                    c="`echo $cmd | sed -e 's: .*::' -e 's:^.*/::' -e 's/^\(........\).*$/\1/'`"
                     pid="`ps -p $pid 2>/dev/null | sed -n \"s/^ *\($pid\) .*$c *$/\1/p\"`"
                     if test -n "$pid"; then
                         return 0
@@ -3864,7 +3884,7 @@ pp_backend_deb_init () {
     pp_deb_release=
     pp_deb_arch=
     pp_deb_arch_std=
-    pp_deb_maintainer="Quest Software, Inc <support@quest.com>"
+    pp_deb_maintainer="One Identity, LLC <support@oneidentity.com>"
     pp_deb_copyright=
     pp_deb_distro=
     pp_deb_control_description=
@@ -5359,6 +5379,10 @@ pp_backend_rpm_init () {
     pp_rpm_packager=
     pp_rpm_provides=
     pp_rpm_requires=
+    pp_rpm_requires_pre=
+    pp_rpm_requires_post=
+    pp_rpm_requires_preun=
+    pp_rpm_requires_postun=
     pp_rpm_release=
     pp_rpm_epoch=
     pp_rpm_dev_group="Development/Libraries"
@@ -5368,11 +5392,27 @@ pp_backend_rpm_init () {
     pp_rpm_dbg_description=
     pp_rpm_doc_description=
     pp_rpm_dev_requires=
+    pp_rpm_dev_requires_pre=
+    pp_rpm_dev_requires_post=
+    pp_rpm_dev_requires_preun=
+    pp_rpm_dev_requires_postun=
     pp_rpm_dbg_requires=
+    pp_rpm_dbg_requires_pre=
+    pp_rpm_dbg_requires_post=
+    pp_rpm_dbg_requires_preun=
+    pp_rpm_dbg_requires_postun=
     pp_rpm_doc_requires=
+    pp_rpm_doc_requires_pre=
+    pp_rpm_doc_requires_post=
+    pp_rpm_doc_requires_preun=
+    pp_rpm_doc_requires_postun=
     pp_rpm_dev_provides=
     pp_rpm_dbg_provides=
     pp_rpm_doc_provides=
+
+    pp_rpm_autoprov=
+    pp_rpm_autoreq=
+    pp_rpm_autoreqprov=
 
     pp_rpm_dbg_pkgname=debug
     pp_rpm_dev_pkgname=devel
@@ -5636,7 +5676,7 @@ EOF
 }
 
 pp_backend_rpm () {
-    local cmp specfile _summary _group _desc _pkg _subname svc
+    local cmp specfile _summary _group _desc _pkg _subname svc _script
 
 	specfile=$pp_wrkdir/$name.spec
         : > $specfile
@@ -5659,12 +5699,17 @@ pp_backend_rpm () {
 		Group:   ${pp_rpm_group}
 		License: ${pp_rpm_license}
 .
-	if test -n "$pp_rpm_url"; then
-	    pp_rpm_label "URL"  "$pp_rpm_url"               >>$specfile
-	fi
-	pp_rpm_label "Vendor"   "${pp_rpm_vendor:-$vendor}" >>$specfile
-	pp_rpm_label "Packager" "$pp_rpm_packager"          >>$specfile
-	pp_rpm_label "Provides" "$pp_rpm_provides"          >>$specfile
+	pp_rpm_label "URL"              "$pp_rpm_url"             >>$specfile
+	pp_rpm_label "Vendor"           "${pp_rpm_vendor:-$vendor}" >>$specfile
+	pp_rpm_label "Packager"         "$pp_rpm_packager"        >>$specfile
+	pp_rpm_label "Provides"         "$pp_rpm_provides"        >>$specfile
+	pp_rpm_label "Requires(pre)"    "$pp_rpm_requires_pre"    >>$specfile
+	pp_rpm_label "Requires(post)"   "$pp_rpm_requires_post"   >>$specfile
+	pp_rpm_label "Requires(preun)"  "$pp_rpm_requires_preun"  >>$specfile
+	pp_rpm_label "Requires(postun)" "$pp_rpm_requires_postun" >>$specfile
+	pp_rpm_label "AutoProv"         "$pp_rpm_autoprov"        >>$specfile
+	pp_rpm_label "AutoReq"          "$pp_rpm_autoreq"         >>$specfile
+	pp_rpm_label "AutoReqProv"      "$pp_rpm_autoreqprov"     >>$specfile
 
 	test -n "$pp_rpm_serial" && pp_warn "pp_rpm_serial deprecated"
 	if test -n "$pp_rpm_epoch"; then
@@ -5718,6 +5763,12 @@ pp_backend_rpm () {
 			Summary: $name $_summary
 			Group: $_group
 .
+                for _script in pre post preun postun; do
+                    eval '_pkg="$pp_rpm_'$cmp'_requires_'$_script'"'
+                    if test -n "$_pkg"; then
+                        eval pp_rpm_label "Requires($_script)" $_pkg
+                    fi
+                done
                 eval '_pkg="$pp_rpm_'$cmp'_requires"'
                 if test -n "$_pkg"; then
                     eval pp_rpm_label Requires ${pp_rpm_name:-$name} $_pkg
@@ -6548,7 +6599,7 @@ pp_backend_rpm_function () {
 
     <http://developer.apple.com/documentation/DeveloperTools/Conceptual/SoftwareDistribution4/Concepts/sd_pkg_flags.html>
     Info.plist = {
-     CFBundleGetInfoString: "1.2.3, Quest Software, Inc.",
+     CFBundleGetInfoString: "1.2.3, One Identity, LLC.",
      CFBundleIdentifier: "com.quest.rc.openssh",
      CFBundleShortVersionString: "1.2.3",
      IFMajorVersion: 1,
@@ -7752,6 +7803,572 @@ pp_backend_null_probe () {
 
 pp_backend_null_vas_platforms () {
 :
+}
+
+pp_platforms="$pp_platforms bsd"
+
+pp_bsd_munge_text () {
+    # Insert a leading space on each line, replace blank lines with a
+    #space followed by a full-stop.
+    test -z "$1" && pp_die "pp_bsd_munge_text requires a parameter"
+    echo ${1} | sed "s,^\(.*\)$, \1, " | sed "s,^[ \t]*$, .,g"
+}
+
+pp_backend_bsd_detect () {
+	test x"$1" = x"FreeBSD"
+}
+
+pp_backend_bsd_init () {
+
+    # Get the OS revision
+    pp_bsd_detect_os
+
+    # Get the arch (i386/amd64)
+    pp_bsd_detect_arch
+
+    pp_bsd_name=
+    pp_bsd_version=
+    pp_bsd_origin=
+    pp_bsd_comment=
+    pp_bsd_arch=
+    pp_bsd_www=
+    pp_bsd_maintainer=
+    pp_bsd_prefix="/usr/local"
+    pp_bsd_desc=
+    pp_bsd_message=
+
+    # pp_bsd_category must be in array format comma seperated
+    # pp_bsd_category=[security,network]
+    pp_bsd_category=
+
+    # pp_bsd_licenselogic can be one of the following: single, and, or unset
+    pp_bsd_licenselogic=
+
+    # pp_bsd_licenses must be in array format comma seperated
+    # pp_bsd_licenses=[GPLv2,MIT]
+    pp_bsd_licenses=
+
+    # pp_bsd_annotations. These can be any key: value pair
+    # key must be seperated by a :
+    # keyvalue pairs must be comma seperated
+    # pp_bsd_annotations="repo_type: binary, somekey: somevalue"
+    # since all packages created by PolyPackage will be of type binary
+    # let's just set it now.
+    pp_bsd_annotations="repo_type: binary"
+
+    pp_bsd_dbg_pkgname="debug"
+    pp_bsd_dev_pkgname="devel"
+    pp_bsd_doc_pkgname="doc"
+
+    # Make sure any programs we require are installed
+    pp_bsd_check_required_programs
+
+}
+
+pp_bsd_cmp_full_name () {
+    typeset prefix
+    prefix="${pp_bsd_name:-$name}"
+    case "$1" in
+        run) echo "${prefix}" ;;
+        dbg) echo "${prefix}-${pp_bsd_dbg_pkgname}";;
+        dev) echo "${prefix}-${pp_bsd_dev_pkgname}";;
+        doc) echo "${prefix}-${pp_bsd_doc_pkgname}";;
+        *)   pp_error "unknown component '$1'";
+    esac
+}
+
+pp_bsd_check_required_programs () {
+    local p needed notfound ok
+    needed= notfound=
+
+    # list of programs FreeBSD needs in order to create a binary package
+    for prog in ${pp_bsd_required_programs:-"pkg"}
+    do
+        if which $prog 2>&1 > /dev/null; then
+            pp_debug "$prog: found"
+        else
+            pp_debug "$prog: not found"
+            case "$prog" in
+                pkg) p=pkg;;
+                *)   pp_die "Unexpected pkg tool $prog";;
+            esac
+            notfound="$notfound $prod"
+            pp_contains "$needed" "$p" || needed="$needed $p"
+        fi
+    done
+    if [ -n "$notfound" ]; then
+        pp_error "cannot find these programs: $notfound"
+        pp_error "please install these packages: $needed"
+    fi
+}
+
+pp_bsd_detect_os () {
+    typeset revision
+
+    pp_bsd_os=`uname -s`
+    revision=`uname -r`
+    pp_bsd_os_rev=`echo $revision | awk -F '-' '{print $1}'`
+}
+
+pp_bsd_detect_arch() {
+    pp_bsd_platform="`uname -m`" 
+    case $pp_bsd_platform in
+        amd64) pp_bsd_platform_std=x86_64;;
+        i386)  pp_bsd_platform_std=i386;;
+        *)     pp_bsd_platform_std=unknown;;
+    esac
+}
+
+pp_bsd_label () {
+    local label arg
+    label="$1"; shift
+    for arg
+    do
+        test -z "$arg" || echo "$label: $arg"
+    done
+}
+
+pp_bsd_make_annotations () {
+
+    test -z $1 && pp_die "pp_bsd_make_annotations requires a parameter"
+    manifest=$1
+
+    # Add annotations. These can be any key: value pair
+    # key must be seperated by a :
+    # key:value pairs must be comma seperated.
+    if test -n "$pp_bsd_annotations"; then
+        pp_debug "Processing annotations:"
+        pp_bsd_label "annotations" "{" >> $manifest
+
+        SAVEIFS=$IFS
+        IFS=,
+        for annotate in $pp_bsd_annotations; do
+            # Remove any spaces at the start of the line
+            annotate=`echo $annotate | sed 's/^ *//'`
+            pp_debug "  $annotate"
+            echo "  $annotate" >> $manifest
+        done
+        IFS=$SAVEIFS
+        echo "}" >> $manifest
+    fi
+}
+
+pp_bsd_make_depends() {
+    typeset package origin version
+    cmp=$1
+    manifest=$2
+
+    if test -s $pp_wrkdir/%depend.${cmp}; then
+        echo "deps: {" >> $manifest
+        cat $pp_wrkdir/%depend.${cmp} | while read package origin version; do
+            if test x != x$package; then
+                pp_debug "Processing dependency: $package"
+                if test x != x$origin -a x != x$version; then
+                    pp_debug "  $package: {origin: \"$origin\", version: \"$version\"}"
+                    echo "  $package: {origin: \"$origin\", version: \"$version\"}" >> $manifest
+                else
+                    pp_warn "Dependency $package is missing origin or version or both"
+                fi
+            fi
+        done
+        echo "}" >> $manifest
+    fi
+}
+
+pp_bsd_make_messages () {
+    test -z $1 && pp_die "pp_bsd_make_messages requires a parameter"
+    manifest=$1
+   
+    pp_debug "Processing messsages"
+
+    # Empty messages: [ ] is OK in the manifest
+    pp_bsd_label "messages" "[" >> $manifest
+    # Look for a single message in the variable pp_bsd_message
+    if test -n "$pp_bsd_message"; then
+        echo "  { message: \"`pp_bsd_munge_text "$pp_bsd_message"`\" }," >> $manifest
+    fi
+    local a=1
+    # Look for messages in the variables pp_bsd_message_[1..n]
+    var="pp_bsd_messages_1"
+    while [ -n "${!var}" ]; do
+        echo "  { message: \"`pp_bsd_munge_text "${!var}"`\" }," >> $manifest
+        a=`expr $a + 1`
+        var="pp_bsd_messages_$a"
+    done
+    echo "]" >> $manifest
+}
+
+pp_bsd_make_manifest() { 
+    local cmp manifest
+
+    cmp="$1"
+    manifest="$2"
+
+    package_name=`pp_bsd_cmp_full_name $cmp`
+
+    # Required for pkg +MANIFEST
+    cat <<-. >> $manifest
+  name: "${package_name}"
+  version: "${pp_bsd_version:-$version}"
+  origin: "${pp_bsd_origin}"
+  www: "${pp_bsd_www}"
+  desc: "`pp_bsd_munge_text "${pp_bsd_desc:-$description}"`"
+  comment: "${pp_bsd_comment:-$summary}"
+  maintainer: "${pp_bsd_maintainer}"
+  prefix: "${pp_bsd_prefix}"
+.
+
+    # Optional, so if they are not included in the pkg-product.pp file then do not create the label
+    pp_bsd_label "categories" "${pp_bsd_categories}" >> $manifest
+    pp_bsd_label "arch" "${pp_bsd_arch}" >> $manifest
+    pp_bsd_label "licenselogic" "${pp_bsd_licenselogic}" >> $manifest
+    pp_bsd_label "licenses" "${pp_bsd_licenses}" >> $manifest
+
+    pp_bsd_make_annotations $manifest
+    pp_bsd_make_depends $cmp $manifest
+
+    pp_bsd_make_messages $manifest
+}
+
+pp_bsd_fakeroot () {
+    if test -s $pp_wrkdir/fakeroot.save; then
+    fakeroot -i $pp_wrkdir/fakeroot.save -s $pp_wrkdir/fakeroot.save "$@"
+    else
+    fakeroot -s $pp_wrkdir/fakeroot.save "$@"
+    fi
+}
+
+pp_bsd_make_data() {
+    # t = file type
+    # m = file mode
+    # o = file owner
+    # g = file group
+    # f = ?
+    # p = file path
+    # st = file link
+    #
+    # EXAMPLE: f 755 root httpd v /usr/bin/hello goodbye
+    # -> /usr/bin/hello: {uname: root, gname: httpd, perm: 755 } goodbye
+    typeset _l t m o g f p st datadir
+    cmp=$1
+    datadir=$pp_wrkdir/`pp_bsd_cmp_full_name $cmp`
+    local path
+
+    outfilelist="$pp_wrkdir/files.list.$cmp"
+    outdirslist="$pp_wrkdir/dirs.list.$cmp"
+
+    pp_debug "Processing $pp_wrkdir/%file.${cmp}"
+
+    echo "files: {" > $outfilelist
+    echo "directories: {" > $outdirslist
+
+    cat $pp_wrkdir/%files.${cmp} | while read t m o g f p st; do
+        test x"$o" = x"-" && o="${pp_bsd_defattr_uid:-root}"
+        test x"$g" = x"-" && g="${pp_bsd_defattr_gid:-wheel}"
+        path=$pp_bsd_prefix$p
+        case "$t" in
+            f) # Files
+                # For now just skip the file if it is volatile, we will need to remove it in the pre uninstall script
+                if [ x"$f" != x"v" ]; then
+                    # If the directory doesn't exist where we are going to copy this file, then create it first
+                    if [ ! -d `dirname "$datadir$path"` ]; then
+                        pp_debug "creating directory `dirname "$datadir$path"`"
+                        mkdir -p `dirname "$datadir$path"`
+                    fi
+
+                    pp_debug "install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path";
+                    pp_bsd_fakeroot install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path;
+                    echo "  \"$path\": \"-\", \"$path\": {uname: $o, gname: $g, perm: ${m}}" >> $outfilelist;
+                else
+                    pp_warn "file $f was marked as volatile, skipping"
+                fi;
+                ;; 
+            d) # Directories
+                pp_debug "install -D $datadir -o $o -g $g -m ${m} -d -v $datadir$path";
+                pp_bsd_fakeroot install -D $datadir -o $o -g $g -m ${m} -d -v $datadir$path;
+                echo "  \"$path\": \"-\", \"$path\": {uname: $o, gname: $g, perm: ${m}}" >> $outdirslist;
+                 ;;
+            s) # Symlinks
+                pp_debug "Found symlink: $datadir$path";
+                # Remove leading /
+                rel_p=`echo $p | sed s,^/,,`
+                (cd $datadir$pp_bsd_prefix; ln -sf $st $rel_p);                 
+                # Do we care if the file doesn't exist? Just symnlink it regardless and throw a warning? This will be important in the case 
+                # where we depend on other packages to be installed and will be using the libs from that package.
+                if [ ! -e "$datadir$path" ]; then
+                    pp_warn "$datadir$path does not exist"
+                fi
+                echo "  \"$path\": \"$st\"" >> $outfilelist;
+                ;;
+            *)  pp_error "Unsupported data file type: %t";;
+        esac    
+    done     
+
+    echo "}" >> $outfilelist
+    echo "}" >> $outdirslist
+    cat $outfilelist >> $manifest
+    cat $outdirslist >> $manifest
+
+    pp_debug "Finished processing $pp_wrkdir/%file.${cmp}"
+}
+
+pp_bsd_makebsd() {
+    typeset cmp
+    typeset package_build_dir
+    local manifest postinstall preinstall preuninstall postuninstall preupgrade postupgrade
+
+    cmp="$1"
+
+    if test -z "$pp_bsd_platform"; then
+        pp_error "Unknown BSD architecture"
+        return 1
+    fi
+
+    _subname=`pp_bsd_cmp_full_name $cmp`
+    package_build_dir=$pp_wrkdir/$_subname
+
+    manifest="$package_build_dir/+MANIFEST"
+    postinstall="$package_build_dir/+POST_INSTALL"
+    preinstall="$package_build_dir/+PRE_INSTALL"
+    preuninstall="$package_build_dir/+PRE_DEINSTALL"
+    postuninstall="$package_build_dir/+POST_DEINSTALL"
+    preupgrade="$package_build_dir/+PRE_UPGRADE"
+    postupgrade="$package_build_dir/+POST_UPGRADE"
+
+    # Create package dir
+    mkdir -p $package_build_dir
+
+    pp_bsd_make_manifest $cmp $manifest
+    pp_bsd_make_data $cmp
+
+    pp_debug "Processing pre/post install scripts"
+
+    if test -s $pp_wrkdir/%pre.$cmp; then
+         pp_debug "Found %pre.$cmp"
+         {
+             cat "$pp_wrkdir/%pre.$cmp"
+         } > $preinstall
+         pp_debug "Created $preinstall"
+    fi
+
+    if test -s $pp_wrkdir/%post.$cmp; then
+         pp_debug "Found %post.$cmp"
+         {
+             echo "# Post install script for "
+             cat "$pp_wrkdir/%post.$cmp"
+         } > $postinstall
+         pp_debug "Created $postinstall"
+    fi
+
+    pp_debug "Processing pre/post uninstall scripts"
+
+    if test -s $pp_wrkdir/%preun.$cmp; then
+        pp_debug "Found %preun.$cmp"
+        {   
+            echo "# Pre uninstall script for ${pp_bsd_name:-$name}"
+            cat "$pp_wrkdir/%preun.$cmp"
+        } > $preuninstall
+        pp_debug "Created pkg $preuninstall"
+    fi
+
+    if test -s $pp_wrkdir/%postun.$cmp; then
+        pp_debug "Found %postun.$cmp"
+        {   
+            echo "# Post uninstall script for ${pp_bsd_name:-$name}"
+            cat "$pp_wrkdir/%postun.$cmp"
+        } > $postuninstall
+        pp_debug "Created $postuninstall"
+    fi
+
+    if test -s $pp_wrkdir/%preup.$cmp; then
+        pp_debug "Found %preup.$cmp"
+        {
+            echo "# Pre upgrade script for ${pp_bsd_name:-$name}"
+            cat "$pp_wrkdir/%preup.$cmp"
+        } > $preupgrade
+        pp_debug "Created pkg $preupgrade"
+    fi
+
+    if test -s $pp_wrkdir/%postup.$cmp; then
+        pp_debug "Found %postup.$cmp"
+        {
+            echo "# Post upgrade script for ${pp_bsd_name:-$name}"
+            cat "$pp_wrkdir/%postup.$cmp"
+        } > $postupgrade
+        pp_debug "Created $postupgrade"
+    fi
+}
+
+pp_backend_bsd() {
+    #get-files-dir-entries
+    #create-manifest
+    #create-preuninstall
+    #create-postinstall
+    #create-package
+    #
+
+    for cmp in $pp_components
+    do
+        _subname=`pp_bsd_cmp_full_name $cmp`
+        pp_debug "Generating packaging specific files for $_subname"
+        pp_bsd_makebsd $cmp
+    done    
+
+    # call this to fixup any files before creating the actual packages
+    . $pp_wrkdir/%fixup
+
+    for cmp in $pp_components
+    do
+        _subname=`pp_bsd_cmp_full_name $cmp`
+        package_build_dir=$pp_wrkdir/$_subname
+    	# Build the actual packages now
+        pp_debug "Building FreeBSD $_subname"
+        pp_debug "Running package create command: pkg create -m $package_build_dir -r $pp_wrkdir/`pp_bsd_cmp_full_name $cmp` -o $pp_wrkdir"
+        pp_bsd_fakeroot pkg create -m $package_build_dir -r $pp_wrkdir/`pp_bsd_cmp_full_name $cmp` -o $pp_wrkdir -v
+    done
+
+}
+
+pp_bsd_name () {
+    typeset cmp="${1:-run}"
+    echo `pp_bsd_cmp_full_name $cmp`"-${pp_bsd_version:-$version}.txz"
+}
+
+pp_backend_bsd_names () {
+    for cmp in $pp_components; do
+    	echo `pp_bsd_cmp_full_name $cmp`"-${pp_bsd_version:-$version}.txz"
+    done
+}
+
+pp_backend_bsd_cleanup () {
+    :
+}
+
+pp_backend_bsd_probe () {
+        echo "${pp_bsd_os}-${pp_bsd_platform_std}"
+        echo "${pp_bsd_os}${pp_bsd_os_rev}-${pp_bsd_platform_std}"
+}
+
+
+pp_backend_bsd_vas_platforms() {
+    case "${pp_bsd_platform_std}" in
+        x86_64) echo "FreeBSD-x86_64.txz FreeBSD-i386.txz";;
+        i386)   echo "FreeBSD-i386.txz";;
+        *) pp_die "unknown architecture $pp_bsd_platform_std";;
+    esac
+}
+
+
+pp_backend_bsd_install_script () {
+    typeset cmp _cmp_full_name
+
+	echo "#!/bin/sh"
+    pp_install_script_common
+
+    cat <<.
+
+        cmp_to_pkgname () {
+            test x"\$*" = x"all" && set -- $pp_components
+            for cmp
+            do
+                case \$cmp in
+.
+    for cmp in $pp_components; do
+         echo "                    $cmp) echo '`pp_bsd_cmp_full_name $cmp`';;"
+    done
+
+    cat <<.
+                    *) usage;;
+                esac
+            done
+        }
+
+        cmp_to_pathname () {
+            test x"\$*" = x"all" &&
+                set -- $pp_components
+            for cmp
+            do
+                case \$cmp in
+.
+    for cmp in $pp_components; do
+        echo "                    $cmp) echo \${PP_PKGDESTDIR:-.}/'`pp_bsd_name $cmp`';;"
+    done
+
+    cat <<.
+                    *) usage;;
+                esac
+            done
+        }
+
+        test \$# -eq 0 && usage
+        op="\$1"; shift
+        case "\$op" in
+            list-components)
+                test \$# -eq 0 || usage \$op
+                echo $pp_components
+                ;;
+            list-services)
+                test \$# -eq 0 || usage \$op
+                echo $pp_services
+                ;;
+            list-files)
+                test \$# -ge 1 || usage \$op
+                cmp_to_pathname "\$@"
+                ;;
+            install)
+                test \$# -ge 1 || usage \$op
+                pkg add \`cmp_to_pathname "\$@"\`
+                ;;
+            uninstall)
+                test \$# -ge 1 || usage \$op
+                pkg remove \`cmp_to_pkgname "\$@"\`; :
+                ;;
+            start|stop)
+                test \$# -ge 1 || usage \$op
+                ec=0
+                for svc
+                do
+                    /etc/rc.d/\$svc \$op || ec=1
+                done
+                exit \$ec
+                ;;
+            print-platform)
+                test \$# -eq 0 || usage \$op
+                echo "${pp_bsd_os}-${pp_bsd_platform}"
+                echo '`pp_backend_bsd_probe`'
+                ;;
+            *)
+                usage
+                ;;
+        esac
+.
+}
+pp_backend_bsd_function() {
+    case "$1" in
+        pp_mkgroup) cat<<'.';;
+            /usr/sbin/pw group show "$1" 2>/dev/null && return 0
+            /usr/sbin/pw group add "$1"
+.
+        pp_mkuser:depends) echo pp_mkgroup;;
+        pp_mkuser) cat<<'.';;
+            #Check if user exists
+            /usr/sbin/pw user show "$1" 2>/dev/null && return 0
+            pp_mkgroup "${2:-$1}" || return 1
+            echo "Creating user $1"
+            /usr/sbin/pw user add \
+                -n "$1" \
+                -d "${3:-/nonexistent}" \
+                -g "${2:-$1}" \
+                -s "${4:-/bin/false}"
+.
+        pp_havelib) cat<<'.';;
+            for pp_tmp_dir in `echo "/usr/local/lib:/usr/lib:/lib${3:+:$3}" | tr : ' '`; do
+                test -r "$pp_tmp_dir/lib$1.so{$2:+.$2}" && return 0
+            done
+            return 1
+.
+        *) false;;
+    esac
 }
 
 

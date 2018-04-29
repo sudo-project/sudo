@@ -67,11 +67,6 @@
         },
         {
             "Options": [
-                { "syslog_goodpri": true }
-            ]
-        },
-        {
-            "Options": [
                 { "syslog_goodpri": false }
             ]
         },
@@ -118,11 +113,6 @@
         {
             "Options": [
                 { "syslog_goodpri": "none" }
-            ]
-        },
-        {
-            "Options": [
-                { "syslog_badpri": true }
             ]
         },
         {

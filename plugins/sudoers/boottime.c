@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2015, 2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,9 +34,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <errno.h>
 #include <limits.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #ifndef __linux__
 # if defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
 #  include <sys/sysctl.h>

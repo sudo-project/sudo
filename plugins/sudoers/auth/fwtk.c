@@ -91,18 +91,16 @@ restart:
     /* Get the password/response from the user. */
     if (strncmp(resp, "challenge ", 10) == 0) {
 	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
-	pass = auth_getpass(buf, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(buf, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass && *pass == '\0') {
 	    free(pass);
 	    pass = auth_getpass("Response [echo on]: ",
-		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_ON, callback);
+		SUDO_CONV_PROMPT_ECHO_ON, callback);
 	}
     } else if (strncmp(resp, "chalnecho ", 10) == 0) {
-	pass = auth_getpass(&resp[10], def_passwd_timeout * 60,
-	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(&resp[10], SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else if (strncmp(resp, "password", 8) == 0) {
-	pass = auth_getpass(prompt, def_passwd_timeout * 60,
-	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else if (strncmp(resp, "display ", 8) == 0) {
 	sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", &resp[8]);
 	strlcpy(buf, "response dummy", sizeof(buf));

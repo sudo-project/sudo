@@ -280,6 +280,7 @@ still allow people to get their work done."
 %if X"$aix_freeware" = X"true"
 	# Create links from /opt/freeware/{bin,sbin} -> /usr/{bin.sbin}
 	mkdir -p ${pp_destdir}/usr/bin ${pp_destdir}/usr/sbin
+	ln -s -f ${bindir}/cvtsudoers ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudo ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudoedit ${pp_destdir}/usr/bin
 	ln -s -f ${bindir}/sudoreplay ${pp_destdir}/usr/bin
@@ -326,10 +327,11 @@ still allow people to get their work done."
 %if X"$parentdirs" != X""
 	$parentdirs		-
 %endif
+	$bindir/cvtsudoers  	0755 root:
 	$bindir/sudo        	4755 root:
 	$bindir/sudoedit    	0755 root: symlink sudo
-	$sbindir/visudo     	0755
 	$bindir/sudoreplay  	0755
+	$sbindir/visudo     	0755
 	$includedir/sudo_plugin.h 0644
 	$libexecdir/sudo/	0755
 	$libexecdir/sudo/sesh	0755 optional,ignore-others
@@ -339,7 +341,6 @@ still allow people to get their work done."
 	$vardir/		0711 root: ignore-others
 	$vardir/lectured/	0700 root:
 	$docdir/		0755
-	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
@@ -354,10 +355,11 @@ still allow people to get their work done."
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 %else
-	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid
 %endif
 %if X"$aix_freeware" = X"true"
 	# Links for binaries from /opt/freeware to /usr
+	/usr/bin/cvtsudoers    	0755 root: symlink $bindir/cvtsudoers
 	/usr/bin/sudo    	0755 root: symlink $bindir/sudo
 	/usr/bin/sudoedit    	0755 root: symlink $bindir/sudoedit
 	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay

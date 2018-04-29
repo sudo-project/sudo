@@ -12,7 +12,7 @@
                 { "username": "user0" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -32,7 +32,7 @@
                 { "username": "user1" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -50,7 +50,7 @@
                 { "username": "user2" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -68,7 +68,7 @@
                 { "username": "user3" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -86,7 +86,7 @@
                 { "username": "user4" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -104,7 +104,7 @@
                 { "username": "user5" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -122,7 +122,7 @@
                 { "username": "user6" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -140,7 +140,7 @@
                 { "username": "user7" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
@@ -158,7 +158,7 @@
                 { "username": "user8" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {

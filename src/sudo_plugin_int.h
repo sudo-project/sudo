@@ -86,9 +86,9 @@ struct io_plugin_1_1 {
 struct plugin_container {
     TAILQ_ENTRY(plugin_container) entries;
     struct sudo_conf_debug_file_list *debug_files;
-    const char *name;
+    char *name;
     char *path;
-    char * const *options;
+    char **options;
     void *handle;
     int debug_instance;
     union {

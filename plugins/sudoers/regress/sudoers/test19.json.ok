@@ -5,10 +5,14 @@
                 { "username": "user0" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" },
+                        { "notafter": "20170301083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" },
                         { "command": "/bin/ls" }
@@ -21,10 +25,13 @@
                 { "username": "user1" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" },
                         { "command": "/bin/ls" }
@@ -37,10 +44,13 @@
                 { "username": "user2" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083018Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -52,10 +62,13 @@
                 { "username": "user3" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214080000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -67,10 +80,13 @@
                 { "username": "user4" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214082400Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -82,10 +98,13 @@
                 { "username": "user5" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -97,10 +116,13 @@
                 { "username": "user6" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -112,10 +134,13 @@
                 { "username": "user7" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -127,10 +152,13 @@
                 { "username": "user8" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]
@@ -142,10 +170,13 @@
                 { "username": "user9" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {
+                    "Options": [
+                        { "notbefore": "20170214083000Z" }
+                    ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
                     ]

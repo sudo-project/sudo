@@ -222,8 +222,8 @@ This is used when mapping the process's tty device number to a device name
 on systems that do not provide such a mechanism.
 Sudo will
 .Em not
-recurse into subdirectories.
-If terminal devices may be located in a subdirectory of
+recurse into sub-directories.
+If terminal devices may be located in a sub-directory of
 .Pa /dev ,
 that path must be explicitly listed in
 .Em devsearch .

@@ -179,7 +179,7 @@ valid_entry(union timestamp_entry_storage *u, off_t pos)
 	break;
     default:
 	printf("unknown time stamp entry version %d @ %lld\n",
-	    entry->version, (long long)pos);
+	    (int)entry->version, (long long)pos);
 	debug_return_bool(false);
 	break;
     }

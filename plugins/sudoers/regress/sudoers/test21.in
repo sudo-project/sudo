@@ -13,7 +13,6 @@ Defaults	syslog=local5
 Defaults	syslog=local6
 Defaults	syslog=local7
 
-Defaults	syslog_goodpri
 Defaults	!syslog_goodpri
 Defaults	syslog_goodpri=alert
 Defaults	syslog_goodpri=crit
@@ -25,7 +24,6 @@ Defaults	syslog_goodpri=notice
 Defaults	syslog_goodpri=warning
 Defaults	syslog_goodpri=none
 
-Defaults	syslog_badpri
 Defaults	!syslog_badpri
 Defaults	syslog_badpri=alert
 Defaults	syslog_badpri=crit

@@ -52,10 +52,10 @@ main(int argc, char *argv[])
     if (get_process_ttyname(pathbuf, sizeof(pathbuf)) != NULL)
 	tty_sudo = pathbuf;
 
-#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || \
-    defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || \
-    defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || \
-    defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || \
+#if defined(HAVE_KINFO_PROC2_NETBSD) || \
+    defined(HAVE_KINFO_PROC_OPENBSD) || \
+    defined(HAVE_KINFO_PROC_FREEBSD) || \
+    defined(HAVE_KINFO_PROC_44BSD) || \
     defined(HAVE__TTYNAME_DEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || \
     defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
 

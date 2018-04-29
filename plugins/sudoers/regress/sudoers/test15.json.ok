@@ -5,7 +5,7 @@
                 { "username": "user" }
             ],
             "Host_List": [
-                { "hostalias": "ALL" }
+                { "hostname": "ALL" }
             ],
             "Cmnd_Specs": [
                 {

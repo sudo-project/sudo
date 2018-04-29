@@ -105,7 +105,7 @@ static bool store_syslogpri(const char *str, union sudo_defs_val *sd_un);
 static bool store_timeout(const char *str, union sudo_defs_val *sd_un);
 static bool store_tuple(const char *str, union sudo_defs_val *sd_un, struct def_values *tuple_vals);
 static bool store_uint(const char *str, union sudo_defs_val *sd_un);
-static bool store_float(const char *str, union sudo_defs_val *sd_un);
+static bool store_timespec(const char *str, union sudo_defs_val *sd_un);
 static bool list_op(const char *str, size_t, union sudo_defs_val *sd_un, enum list_ops op);
 static const char *logfac2str(int);
 static const char *logpri2str(int);
@@ -163,10 +163,14 @@ dump_defaults(void)
 		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.uival);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
-		case T_FLOAT:
-		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.fval);
+		case T_TIMESPEC: {
+		    /* display timespec in minutes as a double */
+		    double d = cur->sd_un.tspec.tv_sec +
+			(cur->sd_un.tspec.tv_nsec / 1000000000.0);
+		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d * 60.0);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
+		}
 		case T_MODE:
 		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.mode);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
@@ -305,9 +309,6 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	case T_UINT:
 	    rc = store_uint(val, sd_un);
 	    break;
-	case T_FLOAT:
-	    rc = store_float(val, sd_un);
-	    break;
 	case T_MODE:
 	    rc = store_mode(val, sd_un);
 	    break;
@@ -336,6 +337,9 @@ parse_default_entry(struct sudo_defs_types *def, const char *val, int op,
 	    break;
 	case T_TUPLE:
 	    rc = store_tuple(val, sd_un, def->values);
+	    break;
+	case T_TIMESPEC:
+	    rc = store_timespec(val, sd_un);
 	    break;
 	default:
 	    if (!quiet) {
@@ -453,7 +457,7 @@ run_early_defaults(void)
 }
 
 static void
-free_default(int type, union sudo_defs_val *sd_un)
+free_defs_val(int type, union sudo_defs_val *sd_un)
 {
     switch (type & T_MASK) {
 	case T_STR:
@@ -480,7 +484,7 @@ init_defaults(void)
     /* Clear any old settings. */
     if (!firsttime) {
 	for (def = sudo_defs_table; def->name != NULL; def++)
-	    free_default(def->type, &def->sd_un);
+	    free_defs_val(def->type, &def->sd_un);
     }
 
     /* First initialize the flags. */
@@ -585,8 +589,8 @@ init_defaults(void)
     def_umask = ACCESSPERMS;
 #endif
     def_loglinelen = MAXLOGFILELEN;
-    def_timestamp_timeout = TIMEOUT;
-    def_passwd_timeout = PASSWORD_TIMEOUT;
+    def_timestamp_timeout.tv_sec = TIMEOUT * 60;
+    def_passwd_timeout.tv_sec = PASSWORD_TIMEOUT * 60;
     def_passwd_tries = TRIES_FOR_PASSWORD;
 #ifdef HAVE_ZLIB_H
     def_compress_io = true;
@@ -633,6 +637,8 @@ init_defaults(void)
     def_set_utmp = true;
     def_pam_setcred = true;
     def_syslog_maxlen = MAXSYSLOGLEN;
+    def_case_insensitive_user = true;
+    def_case_insensitive_group = true;
 
     /* Reset the locale. */
     if (!firsttime) {
@@ -794,7 +800,7 @@ check_defaults(bool quiet)
 	    memset(&sd_un, 0, sizeof(sd_un));
 	    if (parse_default_entry(def, d->val, d->op, &sd_un, d->file,
 		d->lineno, quiet)) {
-		free_default(def->type, &sd_un);
+		free_defs_val(def->type, &sd_un);
 		continue;
 	    }
 	}
@@ -847,21 +853,61 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
     debug_return_bool(true);
 }
 
-static bool
-store_float(const char *str, union sudo_defs_val *sd_un)
-{
-    char *endp;
-    double d;
-    debug_decl(store_float, SUDOERS_DEBUG_DEFAULTS)
+#ifndef TIME_T_MAX
+# if SIZEOF_TIME_T == 8
+#  define TIME_T_MAX	LLONG_MAX
+# else
+#  define TIME_T_MAX	INT_MAX
+# endif
+#endif
 
-    if (str == NULL) {
-	sd_un->fval = 0.0;
+static bool
+store_timespec(const char *str, union sudo_defs_val *sd_un)
+{
+    struct timespec ts;
+    char sign = '+';
+    int i;
+    debug_decl(store_timespec, SUDOERS_DEBUG_DEFAULTS)
+
+    sudo_timespecclear(&ts);
+    if (str != NULL) {
+	/* Convert from minutes to timespec. */
+	if (*str == '+' || *str == '-')
+	    sign = *str++;
+	while (*str != '\0' && *str != '.') {
+		if (!isdigit((unsigned char)*str))
+		    debug_return_bool(false);	/* invalid number */
+		if (ts.tv_sec > TIME_T_MAX / 10)
+		    debug_return_bool(false);	/* overflow */
+		ts.tv_sec *= 10;
+		ts.tv_sec += *str++ - '0';
+	}
+	if (*str++ == '.') {
+	    /* Convert optional fractional component to nanosecs. */
+	    for (i = 100000000; i > 0; i /= 10) {
+		if (*str == '\0')
+		    break;
+		if (!isdigit((unsigned char)*str))
+		    debug_return_bool(false);	/* invalid number */
+		ts.tv_nsec += i * (*str++ - '0');
+	    }
+	}
+	/* Convert from minutes to seconds. */
+	if (ts.tv_sec > TIME_T_MAX / 60)
+	    debug_return_bool(false);	/* overflow */
+	ts.tv_sec *= 60;
+	ts.tv_nsec *= 60;
+	while (ts.tv_nsec >= 1000000000) {
+	    ts.tv_sec++;
+	    ts.tv_nsec -= 1000000000;
+	}
+    }
+    if (sign == '-') {
+	sd_un->tspec.tv_sec = -ts.tv_sec;
+	sd_un->tspec.tv_nsec = -ts.tv_nsec;
     } else {
-	d = strtod(str, &endp);
-	if (*endp != '\0')
-	    debug_return_bool(false);
-	/* XXX - should check against HUGE_VAL */
-	sd_un->fval = d;
+	sd_un->tspec.tv_sec = ts.tv_sec;
+	sd_un->tspec.tv_nsec = ts.tv_nsec;
     }
     debug_return_bool(true);
 }

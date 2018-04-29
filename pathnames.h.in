@@ -70,6 +70,13 @@
 #endif /* _PATH_SUDOERS */
 
 /*
+ * NOTE: _PATH_CVTSUDOERS_CONF is usually overridden by the Makefile.
+ */
+#ifndef _PATH_CVTSUDOERS_CONF
+# define _PATH_CVTSUDOERS_CONF		"/etc/cvtsudoers.conf"
+#endif /* _PATH_CVTSUDOERS_CONF */
+
+/*
  * The following paths are controlled via the configure script.
  */
 

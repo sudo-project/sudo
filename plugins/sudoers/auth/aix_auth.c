@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -144,8 +144,7 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
     debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH)
 
     do {
-	pass = auth_getpass(prompt, def_passwd_timeout * 60,
-	    SUDO_CONV_PROMPT_ECHO_OFF, callback);
+	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
 	if (pass == NULL)
 	    break;
 	free(message);

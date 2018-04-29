@@ -136,8 +136,7 @@ struct sudo_user {
 #define FLAG_NO_CHECK		0x080
 #define FLAG_NON_INTERACTIVE	0x100
 #define FLAG_BAD_PASSWORD	0x200
-#define FLAG_AUTH_ERROR		0x400
-#define FLAG_NOPASSWD		0x800
+#define FLAG_NOPASSWD		0x400
 
 /*
  * find_path()/set_cmnd() return values
@@ -265,6 +264,7 @@ int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
+int sudo_auth_approval(struct passwd *pw, int validated);
 int sudo_auth_cleanup(struct passwd *pw);
 
 /* set_perms.c */
@@ -304,6 +304,10 @@ int display_privs(struct sudo_nss_list *, struct passwd *);
 int display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
+typedef struct cache_item * (*sudo_make_pwitem_t)(uid_t uid, const char *user);
+typedef struct cache_item * (*sudo_make_gritem_t)(gid_t gid, const char *group);
+typedef struct cache_item * (*sudo_make_gidlist_item_t)(const struct passwd *pw, char * const *gids, unsigned int type);
+typedef struct cache_item * (*sudo_make_grlist_item_t)(const struct passwd *pw, char * const *groups);
 __dso_public struct group *sudo_getgrgid(gid_t);
 __dso_public struct group *sudo_getgrnam(const char *);
 __dso_public void sudo_gr_addref(struct group *);
@@ -327,6 +331,7 @@ void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
 int  sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type);
 int  sudo_set_grlist(struct passwd *pw, char * const *groups);
+void sudo_pwutil_set_backend(sudo_make_pwitem_t, sudo_make_gritem_t, sudo_make_gidlist_item_t, sudo_make_grlist_item_t);
 void sudo_setspent(void);
 
 /* timestr.c */

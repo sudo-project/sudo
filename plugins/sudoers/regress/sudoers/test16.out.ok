@@ -1,6 +1,5 @@
 Parses OK.
 
+Cmnd_Alias EDIT = sudoedit /etc/motd
 
-Cmnd_Alias	EDIT = sudoedit /etc/motd
-
-user	ALL = EDIT
+user ALL = EDIT

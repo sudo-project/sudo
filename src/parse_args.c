@@ -337,6 +337,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 			sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
 		    else
 			parse_env_list(&extra_env, optarg);
+		    SET(flags, MODE_PRESERVE_ENV);
 		    break;
 		case 'e':
 		    if (mode && mode != MODE_EDIT)

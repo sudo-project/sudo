@@ -18,6 +18,9 @@
 #ifndef SUDOERS_PARSE_H
 #define SUDOERS_PARSE_H
 
+/* Characters that must be quoted in sudoers */
+#define SUDOERS_QUOTED  ":\\,=#\""
+
 #undef UNSPEC
 #define UNSPEC	-1
 #undef DENY
@@ -147,6 +150,7 @@ TAILQ_HEAD(userspec_list, userspec);
 TAILQ_HEAD(member_list, member);
 TAILQ_HEAD(privilege_list, privilege);
 TAILQ_HEAD(cmndspec_list, cmndspec);
+STAILQ_HEAD(comment_list, sudoers_comment);
 
 /*
  * Structure describing a user specification and list thereof.
@@ -155,6 +159,7 @@ struct userspec {
     TAILQ_ENTRY(userspec) entries;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
+    struct comment_list comments;	/* optional comments */
     int lineno;
     char *file;
 };
@@ -164,8 +169,10 @@ struct userspec {
  */
 struct privilege {
     TAILQ_ENTRY(privilege) entries;
+    char *ldap_role;			/* LDAP sudoRole */
     struct member_list hostlist;	/* list of hosts */
     struct cmndspec_list cmndlist;	/* list of Cmnd_Specs */
+    struct defaults_list defaults;	/* list of sudoOptions */
 };
 
 /*
@@ -204,6 +211,11 @@ struct runascontainer {
     struct member *runasgroups;
 };
 
+struct sudoers_comment {
+    STAILQ_ENTRY(sudoers_comment) entries;
+    char *str;
+};
+
 /*
  * Generic structure to hold {User,Host,Runas,Cmnd}_Alias
  * Aliases are stored in a red-black tree, sorted by name and type.
@@ -240,10 +252,13 @@ extern struct defaults_list defaults;
 
 /* alias.c */
 bool no_aliases(void);
+struct rbtree *replace_aliases(struct rbtree *new_aliases);
 const char *alias_add(char *name, int type, char *file, int lineno, struct member *members);
+const char *alias_type_to_string(int alias_type);
 int alias_compare(const void *a1, const void *a2);
-struct alias *alias_get(char *name, int type);
+struct alias *alias_get(const char *name, int type);
 struct alias *alias_remove(char *name, int type);
+bool alias_find_used(struct rbtree *used_aliases);
 void alias_apply(int (*func)(void *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);
@@ -251,7 +266,11 @@ bool init_aliases(void);
 
 /* gram.c */
 bool init_parser(const char *path, bool quiet);
+void free_member(struct member *m);
 void free_members(struct member_list *members);
+void free_privilege(struct privilege *priv);
+void free_userspec(struct userspec *us);
+void free_default(struct defaults *def, struct member_list **binding);
 
 /* match_addr.c */
 bool addr_matches(char *n);
@@ -267,8 +286,10 @@ bool usergr_matches(const char *group, const char *user, const struct passwd *pw
 bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
 int cmnd_matches(const struct member *m);
 int cmndlist_matches(const struct member_list *list);
+int host_matches(const struct passwd *pw, const char *host, const char *shost, const struct member *m);
 int hostlist_matches(const struct passwd *pw, const struct member_list *list);
 int runaslist_matches(const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
+int user_matches(const struct passwd *pw, const struct member *m);
 int userlist_matches(const struct passwd *pw, const struct member_list *list);
 const char *sudo_getdomainname(void);
 
@@ -295,5 +316,18 @@ unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t
 
 /* digestname.c */
 const char *digest_type_to_name(int digest_type);
+
+/* parse.c */
+struct sudo_lbuf;
+int sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw, struct sudo_lbuf *lbuf);
+
+/* fmtsudoers.c */
+bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs, struct cmndspec *prev_cs, bool expand_aliases);
+bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
+bool sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d, struct defaults **next, bool expand_aliases);
+bool sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m, const char *separator, int alias_type);
+bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv, bool expand_aliases);
+bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us, bool expand_aliases);
+bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl, const char *separator, bool expand_aliases, bool flush);
 
 #endif /* SUDOERS_PARSE_H */

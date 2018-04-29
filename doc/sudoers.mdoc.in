@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2017
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 20, 2017
+.Dd April 18, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -206,7 +206,7 @@ uses per-user time stamp files for credential caching.
 Once a user has been authenticated, a record is written
 containing the user ID that was used to authenticate, the
 terminal session ID, the start time of the session leader
-(or parent proccess) and a time stamp
+(or parent process) and a time stamp
 (using a monotonic clock if one is available).
 The user may then use
 .Nm sudo
@@ -311,7 +311,19 @@ and
 options.
 This is effectively a whitelist
 for environment variables.
-Environment variables with a value beginning with
+The environment variables
+.Ev LOGNAME ,
+.Ev USER
+and
+.Ev USERNAME
+are treated specially.
+If one or more variables are preserved from the invoking process,
+any of the three remaining variables (that were not explicitly
+preserved) will be set to the same value as the first one in the
+list that was preserved.
+This avoids an inconsistent environment where some of the variables
+describing the user name are set to the invoking user and some are
+set to the target user.
 .Li ()
 are removed unless both the name and value parts are matched by
 .Em env_keep
@@ -671,7 +683,7 @@ and
 syntax depends on
 the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
-.Bl -bullet -width 4n
+.Bl -bullet -width 4n -width 1n
 .It
 Group in the same domain: "%:Group Name"
 .It
@@ -1677,7 +1689,7 @@ file loops.
 .Pp
 If the path to the include file is not fully-qualified (does not
 begin with a
-.Ql / ,
+.Ql / ) ,
 it must be located in the same directory as the sudoers file it was
 included from.
 For example, if
@@ -1908,6 +1920,22 @@ This default may be overridden via the
 and
 .Li NOPASSWD
 tags.
+This flag is
+.Em on
+by default.
+.It case_insensitive_group
+If enabled, group names in
+.Em sudoers
+will be matched in a case insensitive manner.
+This may be necessary when users are stored in LDAP or AD.
+This flag is
+.Em on
+by default.
+.It case_insensitive_user
+If enabled, user names in
+.Em sudoers
+will be matched in a case insensitive manner.
+This may be necessary when groups are stored in LDAP or AD.
 This flag is
 .Em on
 by default.
@@ -2844,7 +2872,7 @@ With this flag enabled,
 will use a separate record in the time stamp file for each terminal.
 If disabled, a single record is used for all login sessions.
 .Pp
-This option has been superceded by the
+This option has been superseded by the
 .Em timestamp_type
 option.
 .It umask_override
@@ -2884,7 +2912,7 @@ If set, netgroups (prefixed with
 .Ql + ) ,
 may be used in place of a user or host.
 For LDAP-based sudoers, netgroup support requires an expensive
-substring match on the server unless the
+sub-string match on the server unless the
 .Sy NETGROUP_BASE
 directive is present in the
 .Pa @ldap_conf@
@@ -3113,8 +3141,21 @@ unless insults are enabled.
 .It editor
 A colon
 .Pq Ql :\&
-separated list of editors allowed to be used with
+separated list of editors path names used by
+.Nm sudoedit
+and
 .Nm visudo .
+For
+.Nm sudoedit ,
+this list is used to find an editor when none of the
+.Ev SUDO_EDITOR ,
+.Ev VISUAL
+or
+.Ev EDITOR
+environment variables are set to an editor that exists and is executable.
+For
+.Nm visudo ,
+it is used as a white list of allowed editors;
 .Nm visudo
 will choose the editor that matches the user's
 .Ev SUDO_EDITOR ,
@@ -3122,13 +3163,16 @@ will choose the editor that matches the user's
 or
 .Ev EDITOR
 environment variable if possible, or the first editor in the
-list that exists and is executable.
-Note that the
+list that exists and is executable if not.
+Unless invoked as
+.Nm sudoedit ,
+.Nm sudo
+does not preserve the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
 and
 .Ev EDITOR
-environment variables are not preserved by default when the
+environment variables by default, even when the
 .Em env_reset
 option is enabled.
 The default is
@@ -3478,7 +3522,12 @@ by default
 .It kernel
 The time stamp is stored in the kernel as an attribute of the terminal
 device.
-If no terminal is present, the time stamp is considered to be invalid.
+If no terminal is present, the behavior is the same as
+.Em ppid .
+Negative
+.Em timestamp_timeout
+values are not supported and positive values are limited to a maximum
+of 60 minutes.
 This is currently only supported on OpenBSD.
 .El
 .Pp
@@ -3871,7 +3920,7 @@ in poorly-written programs.
 The
 .Li TZ
 variable is considered unsafe if any of the following are true:
-.Bl -bullet
+.Bl -bullet -width 1n
 .It
 It consists of a fully-qualified path name,
 optionally prefixed with a colon
@@ -5070,6 +5119,8 @@ unprivileged users to change the ownership of files they create.
 While the time stamp directory
 .Em should
 be cleared at reboot time, not all systems contain a
+.Pa /run
+or
 .Pa /var/run
 directory.
 To avoid potential problems,

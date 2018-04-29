@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2016
+ * Copyright (c) 1993-1996,1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +22,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -32,9 +31,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <pwd.h>
@@ -219,6 +216,10 @@ check_user(int validated, int mode)
     ret = check_user_interactive(validated, mode, auth_pw);
 
 done:
+    if (ret == true) {
+	/* The approval function may disallow a user post-authentication. */
+	ret = sudo_auth_approval(auth_pw, validated);
+    }
     sudo_auth_cleanup(auth_pw);
     sudo_pw_delref(auth_pw);
 

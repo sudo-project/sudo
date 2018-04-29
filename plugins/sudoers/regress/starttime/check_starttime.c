@@ -17,8 +17,10 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -27,27 +29,45 @@
 #include "sudo_fatal.h"
 #include "check.h"
 
+#ifndef TIME_T_MAX
+# if SIZEOF_TIME_T == 8
+#  define TIME_T_MAX    LLONG_MAX
+# else
+#  define TIME_T_MAX    INT_MAX
+# endif
+#endif
+
 __dso_public int main(int argc, char *argv[]);
 
 #ifdef __linux__
 static int
 get_now(struct timespec *now)
 {
-    int ret = -1;
+    const char *errstr;
     char buf[1024];
+    time_t seconds;
+    int ret = -1;
     FILE *fp;
 
     /* Linux process start time is relative to boot time. */
-    fp = fopen("/proc/uptime", "r");
+    fp = fopen("/proc/stat", "r");
     if (fp != NULL) {
-	if (fgets(buf, sizeof(buf), fp) != NULL) {
-	    char *ep;
-	    double uptime = strtod(buf, &ep);
-	    if (*ep == ' ') {
-		now->tv_sec = (time_t)uptime;
-		now->tv_nsec = (uptime - (time_t)uptime) * 1000000000;
-		ret = 0;
-	    }
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
+	    if (strncmp(buf, "btime ", 6) != 0)
+		continue;
+	    buf[strcspn(buf, "\n")] = '\0';
+
+	    /* Boot time is in seconds since the epoch. */
+	    seconds = strtonum(buf + 6, 0, TIME_T_MAX, &errstr);
+	    if (errstr != NULL)
+		return -1;
+
+	    /* Instead of the real time, "now" is relative to boot time. */
+	    if (sudo_gettime_real(now) == -1)
+		return -1;
+	    now->tv_sec -= seconds;
+	    ret = 0;
+	    break;
 	}
 	fclose(fp);
     }

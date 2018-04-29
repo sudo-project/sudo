@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,9 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #include <errno.h>
 
 #if defined(__MACH__) && !defined(HAVE_CLOCK_GETTIME)

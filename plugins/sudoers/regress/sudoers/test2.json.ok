@@ -142,7 +142,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -163,7 +163,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -184,7 +184,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -205,7 +205,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -226,7 +226,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -247,7 +247,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -268,7 +268,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -289,7 +289,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -310,7 +310,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -331,7 +331,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -352,7 +352,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -373,7 +373,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
@@ -394,7 +394,7 @@
                         { "setenv": true }
                     ],
                     "Commands": [
-                        { "cmndalias": "ALL" }
+                        { "command": "ALL" }
                     ]
                 }
             ]
