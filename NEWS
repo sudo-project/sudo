@@ -1,6 +1,6 @@
 What's new in Sudo 1.8.23
 
- * PAM account management modules and BSD auto approval modules are
+ * PAM account management modules and BSD auth approval modules are
    now run even when no password is required.
 
  * For kernel-based time stamps, if no terminal is present, fall
