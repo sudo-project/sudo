@@ -1030,8 +1030,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		in_role = false;
 	    }
 	    if (len == -1) {
-		sudo_role_free(role);
-		role = NULL;
+		/* EOF */
 		break;
 	    }
 	    mismatch = false;
