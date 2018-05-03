@@ -530,37 +530,6 @@ struct sudo_role {
 };
 STAILQ_HEAD(sudo_role_list, sudo_role);
 
-static struct sudo_role *
-sudo_role_alloc(void)
-{
-    struct sudo_role *role;
-    debug_decl(sudo_role_alloc, SUDOERS_DEBUG_UTIL)
-
-    role = calloc(1, sizeof(*role));
-    if (role != NULL) {
-	role->cmnds = str_list_alloc();
-	role->hosts = str_list_alloc();
-	role->users = str_list_alloc();
-	role->runasusers = str_list_alloc();
-	role->runasgroups = str_list_alloc();
-	role->options = str_list_alloc();
-	if (role->cmnds == NULL || role->hosts == NULL ||
-	    role->users == NULL || role->runasusers == NULL ||
-	    role->runasgroups == NULL || role->options == NULL) {
-	    str_list_free(role->cmnds);
-	    str_list_free(role->hosts);
-	    str_list_free(role->users);
-	    str_list_free(role->runasusers);
-	    str_list_free(role->runasgroups);
-	    str_list_free(role->options);
-	    free(role);
-	    role = NULL;
-	}
-    }
-
-    debug_return_ptr(role);
-}
-
 static void
 sudo_role_free(struct sudo_role *role)
 {
@@ -580,6 +549,31 @@ sudo_role_free(struct sudo_role *role)
     }
 
     debug_return;
+}
+
+static struct sudo_role *
+sudo_role_alloc(void)
+{
+    struct sudo_role *role;
+    debug_decl(sudo_role_alloc, SUDOERS_DEBUG_UTIL)
+
+    role = calloc(1, sizeof(*role));
+    if (role != NULL) {
+	role->cmnds = str_list_alloc();
+	role->hosts = str_list_alloc();
+	role->users = str_list_alloc();
+	role->runasusers = str_list_alloc();
+	role->runasgroups = str_list_alloc();
+	role->options = str_list_alloc();
+	if (role->cmnds == NULL || role->hosts == NULL ||
+	    role->users == NULL || role->runasusers == NULL ||
+	    role->runasgroups == NULL || role->options == NULL) {
+	    sudo_role_free(role);
+	    role = NULL;
+	}
+    }
+
+    debug_return_ptr(role);
 }
 
 /*
@@ -1010,12 +1004,14 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		if (role->cn != NULL && strcmp(role->cn, "defaults") == 0) {
 		    ldif_store_options(role->options);
 		    sudo_role_free(role);
+		    role = NULL;
 		} else if (STAILQ_EMPTY(role->users) ||
 		    STAILQ_EMPTY(role->hosts) || STAILQ_EMPTY(role->cmnds)) {
 		    /* Incomplete role. */
 		    sudo_warnx(U_("ignoring incomplete sudoRole: cn: %s"),
 			role->cn ? role->cn : "UNKNOWN");
 		    sudo_role_free(role);
+		    role = NULL;
 		} else {
 		    /* Cache users, hosts, runasusers and runasgroups. */
 		    if (str_list_cache(usercache, &role->users) == -1 ||
@@ -1034,7 +1030,8 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 		in_role = false;
 	    }
 	    if (len == -1) {
-		free(role);
+		sudo_role_free(role);
+		role = NULL;
 		break;
 	    }
 	    mismatch = false;
@@ -1170,6 +1167,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	    }
 	}
     }
+    sudo_role_free(role);
     free(line);
 
     /* Convert from roles to sudoers data structures. */
