@@ -724,7 +724,12 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
     }
 #endif /* HAVE_SELINUX */
 
-    /* Fill in exec environment info */
+    /* Free on exit; they are not available in the close function. */
+    sudoers_gc_add(GC_VECTOR, argv);
+    sudoers_gc_add(GC_VECTOR, envp);
+    sudoers_gc_add(GC_VECTOR, command_info);
+
+    /* Fill in exec environment info. */
     *(exec_args->argv) = argv;
     *(exec_args->envp) = envp;
     *(exec_args->info) = command_info;
