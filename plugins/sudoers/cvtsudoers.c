@@ -585,25 +585,25 @@ cvtsudoers_parse_filter(char *expression)
 struct cvtsudoers_string *
 cvtsudoers_string_alloc(const char *s)
 {
-    struct cvtsudoers_string *ls;
+    struct cvtsudoers_string *cs;
     debug_decl(cvtsudoers_string_alloc, SUDOERS_DEBUG_UTIL)
 
-    if ((ls = malloc(sizeof(*ls))) != NULL) {
-	if ((ls->str = strdup(s)) == NULL) {
-	    free(ls);
-	    ls = NULL;
+    if ((cs = malloc(sizeof(*cs))) != NULL) {
+	if ((cs->str = strdup(s)) == NULL) {
+	    free(cs);
+	    cs = NULL;
 	}
     }
 
-    debug_return_ptr(ls);
+    debug_return_ptr(cs);
 }
 
 void
-cvtsudoers_string_free(struct cvtsudoers_string *ls)
+cvtsudoers_string_free(struct cvtsudoers_string *cs)
 {
-    if (ls != NULL) {
-	free(ls->str);
-	free(ls);
+    if (cs != NULL) {
+	free(cs->str);
+	free(cs);
     }
 }
 
