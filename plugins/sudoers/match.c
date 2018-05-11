@@ -782,7 +782,7 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
     file_digest = sudo_filedigest(fd, file, sd->digest_type, &digest_len);
-    lseek(fd, SEEK_SET, (off_t)0);
+    (void) lseek(fd, (off_t)0, SEEK_SET);
     if (file_digest == NULL) {
 	/* Warning (if any) printed by sudo_filedigest() */
 	goto done;
