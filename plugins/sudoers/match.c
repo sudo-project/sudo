@@ -495,13 +495,17 @@ is_script(int fd)
 {
     bool ret = false;
     char magic[2];
+    debug_decl(is_script, SUDOERS_DEBUG_MATCH)
 
     if (read(fd, magic, 2) == 2) {
 	if (magic[0] == '#' && magic[1] == '!')
 	    ret = true;
     }
-    (void) lseek(fd, (off_t)0, SEEK_SET);
-    return ret;
+    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to rewind script fd");
+    }
+    debug_return_int(ret);
 }
 
 /*
@@ -782,7 +786,10 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
     file_digest = sudo_filedigest(fd, file, sd->digest_type, &digest_len);
-    (void) lseek(fd, (off_t)0, SEEK_SET);
+    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to rewind digest fd");
+    }
     if (file_digest == NULL) {
 	/* Warning (if any) printed by sudo_filedigest() */
 	goto done;
