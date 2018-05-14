@@ -45,7 +45,6 @@
 #include <errno.h>
 #include <ctype.h>
 #include "sudoers.h"
-#include "parse.h"
 #include "toke.h"
 #include <gram.h>
 #include "sudo_lbuf.h"

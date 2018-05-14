@@ -38,7 +38,6 @@
 #include <errno.h>
 
 #include "sudoers.h"
-#include "parse.h"
 
 #ifdef HAVE_SHA224UPDATE
 # include <sha2.h>

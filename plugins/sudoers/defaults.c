@@ -37,7 +37,6 @@
 #include <syslog.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include <gram.h>
 
 /*

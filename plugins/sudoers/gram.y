@@ -45,8 +45,7 @@
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #include <errno.h>
 
-#include "sudoers.h" /* XXX */
-#include "parse.h"
+#include "sudoers.h"
 #include "toke.h"
 
 /* If we last saw a newline the entry is on the preceding line. */

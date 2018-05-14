@@ -35,7 +35,6 @@
 #include "sudoers.h"
 #include "sudoers_version.h"
 #include "interfaces.h"
-#include "parse.h" /* for parse_timeout() */
 
 /*
  * Info passed in from the sudo front-end.

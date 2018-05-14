@@ -34,7 +34,6 @@
 #include <time.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include "sudo_lbuf.h"
 #include <gram.h>
 

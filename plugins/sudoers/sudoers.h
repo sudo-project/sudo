@@ -38,6 +38,7 @@
 #include "sudo_queue.h"
 #include "defaults.h"
 #include "logging.h"
+#include "parse.h"
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"

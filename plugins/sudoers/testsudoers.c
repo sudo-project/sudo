@@ -47,7 +47,6 @@
 #include "tsgetgrpw.h"
 #include "sudoers.h"
 #include "interfaces.h"
-#include "parse.h"
 #include "sudo_conf.h"
 #include "sudo_lbuf.h"
 #include <gram.h>

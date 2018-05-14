@@ -35,7 +35,6 @@
 #include <openssl/sha.h>
 
 #include "sudoers.h"
-#include "parse.h"
 
 union ANY_CTX {
     SHA256_CTX sha256;

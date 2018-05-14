@@ -35,7 +35,6 @@
 #include <gcrypt.h>
 
 #include "sudoers.h"
-#include "parse.h"
 
 unsigned char *
 sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_lenp)

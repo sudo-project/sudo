@@ -54,7 +54,6 @@
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
 #include "sudoers.h"
-#include "parse.h"
 #include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"

@@ -61,7 +61,6 @@
 #include <errno.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include <gram.h>
 
 #ifdef HAVE_FNMATCH

@@ -32,7 +32,6 @@
 #include <errno.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include "redblack.h"
 #include <gram.h>
 

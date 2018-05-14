@@ -31,7 +31,6 @@
 #include <ctype.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include "cvtsudoers.h"
 #include <gram.h>
 

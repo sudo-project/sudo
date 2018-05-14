@@ -59,7 +59,6 @@
 
 #include "sudoers.h"
 #include "interfaces.h"
-#include "parse.h"
 #include "redblack.h"
 #include "sudoers_version.h"
 #include "sudo_conf.h"

@@ -37,7 +37,6 @@
 #include <errno.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include "toke.h"
 #include <gram.h>
 

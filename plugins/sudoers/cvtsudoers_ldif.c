@@ -31,7 +31,6 @@
 
 #include "sudoers.h"
 #include "sudo_ldap.h"
-#include "parse.h"
 #include "redblack.h"
 #include "cvtsudoers.h"
 #include "sudo_lbuf.h"

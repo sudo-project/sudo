@@ -36,7 +36,6 @@
 #include <unistd.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include "sudoers_version.h"
 #include "sudo_conf.h"
 #include "sudo_lbuf.h"

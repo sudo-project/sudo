@@ -34,7 +34,6 @@
 
 #include "sudoers.h"
 #include "interfaces.h"
-#include "parse.h"
 #include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
