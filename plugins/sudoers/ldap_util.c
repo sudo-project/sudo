@@ -286,9 +286,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 {
     struct cmndspec_list negated_cmnds = TAILQ_HEAD_INITIALIZER(negated_cmnds);
     struct member_list negated_hosts = TAILQ_HEAD_INITIALIZER(negated_hosts);
-    struct cmndspec *cmndspec = NULL;
     struct cmndspec *prev_cmndspec = NULL;
-    struct sudo_command *c;
     struct privilege *priv;
     struct member *m;
     char *cmnd;
@@ -328,19 +326,23 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
      * Parse sudoCommands and add to cmndlist.
      */
     while ((cmnd = iter(&cmnds)) != NULL) {
-	char *args;
-	struct sudo_digest digest;
 	bool negated = sudo_ldap_is_negated(&cmnd);
+	struct sudo_command *c = NULL;
+	struct cmndspec *cmndspec;
 
 	/* Allocate storage upfront. */
-	cmndspec = calloc(1, sizeof(*cmndspec));
-	c = calloc(1, sizeof(*c));
-	m = calloc(1, sizeof(*m));
-	if (cmndspec == NULL || c == NULL || m == NULL) {
-	    free(cmndspec);
-	    free(c);
-	    free(m);
+	if ((cmndspec = calloc(1, sizeof(*cmndspec))) == NULL)
 	    goto oom;
+	if ((m = calloc(1, sizeof(*m))) == NULL) {
+	    free(cmndspec);
+	    goto oom;
+	}
+	if (strcmp(cmnd, "ALL") != 0) {
+	    if ((c = calloc(1, sizeof(*c))) == NULL) {
+		free(cmndspec);
+		free(m);
+		goto oom;
+	    }
 	}
 
 	/* Negated commands have precedence so insert them at the end. */
@@ -357,9 +359,13 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	/* Fill in member. */
 	m->negated = negated;
-	if (strcmp(cmnd, "ALL") == 0) {
+	if (c == NULL) {
+	    /* No command name for "ALL" */
 	    m->type = ALL;
 	} else {
+	    struct sudo_digest digest;
+	    char *args;
+
 	    m->type = COMMAND;
 	    m->name = (char *)c;
 
