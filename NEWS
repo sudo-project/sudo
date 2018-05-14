@@ -1,3 +1,11 @@
+What's new in Sudo 1.8.24
+
+ * The LDAP and SSS back-ends now use the same rule evaluation code
+   as the sudoers file backend.  This builds on the work in sudo
+   1.8.23 where the formatting functions for "sudo -l" output were
+   shared.  The handling of negated commands in SSS and LDAP is
+   unchanged.
+
 What's new in Sudo 1.8.23
 
  * PAM account management modules and BSD auth approval modules are
