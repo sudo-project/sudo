@@ -285,7 +285,7 @@ main(int argc, char *argv[])
 	(void) fputs("Parses OK", stdout);
     }
 
-    if (!update_defaults(SETDEF_ALL, false))
+    if (!update_defaults(&defaults, SETDEF_ALL, false))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
 

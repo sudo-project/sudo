@@ -137,7 +137,6 @@ struct sudo_user {
 #define FLAG_NO_CHECK		0x080
 #define FLAG_NON_INTERACTIVE	0x100
 #define FLAG_BAD_PASSWORD	0x200
-#define FLAG_NOPASSWD		0x400
 
 /*
  * find_path()/set_cmnd() return values
@@ -299,10 +298,6 @@ void dump_auth_methods(void);
 
 /* getspwuid.c */
 char *sudo_getepw(const struct passwd *);
-
-/* sudo_nss.c */
-int display_privs(struct sudo_nss_list *, struct passwd *);
-int display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
 typedef struct cache_item * (*sudo_make_pwitem_t)(uid_t uid, const char *user);

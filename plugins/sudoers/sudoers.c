@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -59,6 +59,7 @@
 #include <ctype.h>
 
 #include "sudoers.h"
+#include "parse.h"
 #include "auth/sudo_auth.h"
 
 #ifndef HAVE_GETADDRINFO
@@ -189,11 +190,13 @@ sudoers_policy_init(void *info, char * const envp[])
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
+    init_parser(sudoers_file, false);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
             sources++;
-            if (nss->setdefs(nss) != 0) {
-                log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+	    if (nss->getdefs(nss) != 0 || !update_defaults(&nss->defaults,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+		log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		    N_("problem with defaults entries"));
 	    }
         } else {
@@ -228,7 +231,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char *iolog_path = NULL;
     mode_t cmnd_umask = ACCESSPERMS;
     struct sudo_nss *nss;
-    int nopass = -1;
     int cmnd_status = -1, oldlocale, validated;
     int ret = -1;
     debug_decl(sudoers_policy_main, SUDOERS_DEBUG_PLUGIN)
@@ -307,54 +309,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Check sudoers sources, using the locale specified in sudoers.
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-    validated = FLAG_NO_USER | FLAG_NO_HOST;
-    TAILQ_FOREACH(nss, snl, entries) {
-	validated = nss->lookup(nss, validated, pwflag);
-
-	/*
-	 * The NOPASSWD tag needs special handling among all sources
-	 * in -l or -v mode.
-	 */
-	if (pwflag) {
-	    enum def_tuple pwcheck =
-		(pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
-	    switch (pwcheck) {
-	    case all:
-		if (!ISSET(validated, FLAG_NOPASSWD))
-		    nopass = false;
-		else if (nopass == -1)
-		    nopass = true;
-		break;
-	    case any:
-		if (ISSET(validated, FLAG_NOPASSWD))
-		    nopass = true;
-		break;
-	    case never:
-		nopass = true;
-		break;
-	    case always:
-		nopass = false;
-		break;
-	    default:
-		break;
-	    }
-	}
-
-	if (ISSET(validated, VALIDATE_ERROR)) {
-	    /* The lookup function should have printed an error. */
-	    goto done;
-	} else if (ISSET(validated, VALIDATE_SUCCESS)) {
-	    /* Handle [SUCCESS=return] */
-	    if (nss->ret_if_found)
-		break;
-	} else {
-	    /* Handle [NOTFOUND=return] */
-	    if (nss->ret_if_notfound)
-		break;
-	}
+    validated = sudoers_lookup(snl, sudo_user.pw, FLAG_NO_USER | FLAG_NO_HOST,
+	pwflag);
+    if (ISSET(validated, VALIDATE_ERROR)) {
+	/* The lookup function should have printed an error. */
+	goto done;
     }
-    if (pwflag && nopass == true)
-	def_authenticate = false;
 
     /* Restore user's locale. */
     sudoers_setlocale(oldlocale, NULL);
@@ -546,6 +506,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
     if (def_group_plugin)
 	group_plugin_unload();
+    init_parser(NULL, false);
 
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
 	/* ret already set appropriately */
@@ -801,8 +762,9 @@ init_vars(char * const envp[])
 static int
 set_cmnd(void)
 {
-    int ret = FOUND;
+    struct sudo_nss *nss;
     char *path = user_path;
+    int ret = FOUND;
     debug_decl(set_cmnd, SUDOERS_DEBUG_PLUGIN)
 
     /* Allocate user_stat for find_path() and match functions. */
@@ -890,9 +852,11 @@ set_cmnd(void)
     else
 	user_base = user_cmnd;
 
-    if (!update_defaults(SETDEF_CMND, false)) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-	    N_("problem with defaults entries"));
+    TAILQ_FOREACH(nss, snl, entries) {
+	if (!update_defaults(&nss->defaults, SETDEF_CMND, false)) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("problem with defaults entries"));
+	}
     }
 
     debug_return_int(ret);

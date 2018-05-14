@@ -318,10 +318,13 @@ unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t
 const char *digest_type_to_name(int digest_type);
 
 /* parse.c */
-struct sudo_lbuf;
-int sudo_display_userspecs(struct userspec_list *usl, struct passwd *pw, struct sudo_lbuf *lbuf);
+struct sudo_nss_list;
+int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated, int pwflag);
+int display_privs(struct sudo_nss_list *snl, struct passwd *pw);
+int display_cmnd(struct sudo_nss_list *snl, struct passwd *pw);
 
 /* fmtsudoers.c */
+struct sudo_lbuf;
 bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs, struct cmndspec *prev_cs, bool expand_aliases);
 bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
 bool sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d, struct defaults **next, bool expand_aliases);

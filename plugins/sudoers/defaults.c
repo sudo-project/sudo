@@ -725,11 +725,11 @@ default_binding_matches(struct defaults *d, int what)
 }
 
 /*
- * Update the defaults based on what was set by sudoers.
+ * Update the global defaults based on the given defaults list.
  * Pass in an OR'd list of which default types to update.
  */
 bool
-update_defaults(int what, bool quiet)
+update_defaults(struct defaults_list *defs, int what, bool quiet)
 {
     struct defaults *d;
     bool ret = true;
@@ -741,7 +741,7 @@ update_defaults(int what, bool quiet)
     /*
      * First apply Defaults values marked as early.
      */
-    TAILQ_FOREACH(d, &defaults, entries) {
+    TAILQ_FOREACH(d, defs, entries) {
 	struct early_default *early = is_early_default(d->var);
 	if (early == NULL)
 	    continue;
@@ -763,7 +763,7 @@ update_defaults(int what, bool quiet)
     /*
      * Then set the rest of the defaults.
      */
-    TAILQ_FOREACH(d, &defaults, entries) {
+    TAILQ_FOREACH(d, defs, entries) {
 	/* Skip Defaults marked as early, we already did them. */
 	if (is_early_default(d->var))
 	    continue;

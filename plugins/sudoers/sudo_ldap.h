@@ -20,8 +20,9 @@
 /* Iterators used by sudo_ldap_role_to_priv() to handle bervar ** or char ** */
 typedef char * (*sudo_ldap_iter_t)(void **);
 
-/* ldap_common.c */
+/* ldap_util.c */
 bool sudo_ldap_is_negated(char **valp);
+bool sudo_ldap_add_default(const char *var, const char *val, int op, char *source, struct defaults_list *defs);
 int sudo_ldap_parse_option(char *optstr, char **varp, char **valp);
 struct privilege *sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers, void *runasgroups, void *cmnds, void *opts, const char *notbefore, const char *notafter, bool warnings, bool store_options, sudo_ldap_iter_t iter);
 struct sudo_digest *sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest);

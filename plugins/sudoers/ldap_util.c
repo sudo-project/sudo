@@ -241,6 +241,39 @@ oom:
     debug_return_ptr(NULL);
 }
 
+bool
+sudo_ldap_add_default(const char *var, const char *val, int op,
+    char *source, struct defaults_list *defs)
+{
+    struct defaults *def;
+    debug_decl(sudo_ldap_add_default, SUDOERS_DEBUG_LDAP)
+
+    if ((def = calloc(1, sizeof(*def))) == NULL)
+	goto oom;
+
+    def->type = DEFAULTS;
+    def->op = op;
+    if ((def->var = strdup(var)) == NULL) {
+	goto oom;
+    }
+    if (val != NULL) {
+	if ((def->val = strdup(val)) == NULL)
+	    goto oom;
+    }
+    def->file = source;
+    rcstr_addref(source);
+    TAILQ_INSERT_TAIL(defs, def, entries);
+    debug_return_bool(true);
+
+oom:
+    if (def != NULL) {
+	free(def->var);
+	free(def->val);
+	free(def);
+    }
+    debug_return_bool(false);
+}
+
 /*
  * Convert an LDAP sudoRole to a sudoers privilege.
  * Pass in struct berval ** for LDAP or char *** for SSSD.
@@ -384,7 +417,15 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	    /* Parse sudoOptions. */
 	    if (opts != NULL) {
-		char *opt;
+		char *opt, *source = NULL;
+
+		if (store_options) {
+		    /* Use sudoRole in place of file name in defaults. */
+		    size_t slen = sizeof("sudoRole") + strlen(priv->ldap_role);
+		    if ((source = rcstr_alloc(slen)) == NULL)
+			goto oom;
+		    snprintf(source, slen, "sudoRole %s", priv->ldap_role);
+		}
 
 		while ((opt = iter(&opts)) != NULL) {
 		    char *var, *val;
@@ -419,23 +460,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 #endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
-			struct defaults *def = calloc(1, sizeof(*def));
-			if (def == NULL)
-			    goto oom;
-			def->type = DEFAULTS;
-			def->op = op;
-			if ((def->var = strdup(var)) == NULL) {
-			    free(def);
+			if (!sudo_ldap_add_default(var, val, op, source,
+			    &priv->defaults)) {
 			    goto oom;
 			}
-			if (val != NULL) {
-			    if ((def->val = strdup(val)) == NULL) {
-				free(def->var);
-				free(def);
-				goto oom;
-			    }
-			}
-			TAILQ_INSERT_TAIL(&priv->defaults, def, entries);
 		    } else {
 			/* Convert to tags. */
 			bool handled = true;
@@ -474,6 +502,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 		    }
 		}
+		rcstr_delref(source);
 	    }
 
 	    /* So we can inherit previous values. */

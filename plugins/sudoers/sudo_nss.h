@@ -25,19 +25,18 @@ struct sudo_nss {
     int (*open)(struct sudo_nss *nss);
     int (*close)(struct sudo_nss *nss);
     int (*parse)(struct sudo_nss *nss);
-    int (*setdefs)(struct sudo_nss *nss);
-    int (*lookup)(struct sudo_nss *nss, int, int);
-    int (*display_cmnd)(struct sudo_nss *nss, struct passwd *);
-    int (*display_defaults)(struct sudo_nss *nss, struct passwd *, struct sudo_lbuf *);
-    int (*display_bound_defaults)(struct sudo_nss *nss, struct passwd *, struct sudo_lbuf *);
-    int (*display_privs)(struct sudo_nss *nss, struct passwd *, struct sudo_lbuf *);
+    int (*query)(struct sudo_nss *nss, struct passwd *pw);
+    int (*getdefs)(struct sudo_nss *nss);
     void *handle;
-    short ret_if_found;
-    short ret_if_notfound;
+    bool ret_if_found;
+    bool ret_if_notfound;
+    struct defaults_list defaults;
+    struct userspec_list userspecs;
 };
 
 TAILQ_HEAD(sudo_nss_list, sudo_nss);
 
 struct sudo_nss_list *sudo_read_nss(void);
+bool sudo_nss_can_continue(struct sudo_nss *nss, int match);
 
 #endif /* SUDOERS_NSS_H */

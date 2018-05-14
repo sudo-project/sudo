@@ -142,31 +142,20 @@ STAILQ_HEAD(ldap_netgroup_list, ldap_netgroup);
 static int sudo_ldap_open(struct sudo_nss *nss);
 static int sudo_ldap_close(struct sudo_nss *nss);
 static int sudo_ldap_parse(struct sudo_nss *nss);
-static int sudo_ldap_setdefs(struct sudo_nss *nss);
-static int sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag);
-static int sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw);
-static int sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct sudo_lbuf *lbuf);
-static int sudo_ldap_display_bound_defaults(struct sudo_nss *nss,
-    struct passwd *pw, struct sudo_lbuf *lbuf);
-static int sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
-    struct sudo_lbuf *lbuf);
+static int sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw);
+static int sudo_ldap_getdefs(struct sudo_nss *nss);
 static struct ldap_result *sudo_ldap_result_get(struct sudo_nss *nss,
     struct passwd *pw);
 static char *sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry);
 
 /*
  * LDAP sudo_nss handle.
- * We store the connection to the LDAP server, the cached ldap_result object
- * (if any), and the name of the user the query was performed for.
- * If a new query is launched with sudo_ldap_result_get() that specifies a
- * different user, the old cached result is freed before the new query is run.
+ * We store the connection to the LDAP server and the passwd struct of the
+ * user the last query was performed for.
  */
 struct sudo_ldap_handle {
     LDAP *ld;
-    struct ldap_result *result;
-    const char *username;
-    struct gid_list *gidlist;
+    struct passwd *pw;
 };
 
 struct sudo_nss sudo_nss_ldap = {
@@ -174,12 +163,8 @@ struct sudo_nss sudo_nss_ldap = {
     sudo_ldap_open,
     sudo_ldap_close,
     sudo_ldap_parse,
-    sudo_ldap_setdefs,
-    sudo_ldap_lookup,
-    sudo_ldap_display_cmnd,
-    sudo_ldap_display_defaults,
-    sudo_ldap_display_bound_defaults,
-    sudo_ldap_display_privs
+    sudo_ldap_query,
+    sudo_ldap_getdefs
 };
 
 #ifdef HAVE_LDAP_INITIALIZE
@@ -397,321 +382,60 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     debug_return_bool(matched == true);
 }
 
-static int
-sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry, int *group_matched)
-{
-    struct berval **bv, **p;
-    char *val;
-    bool ret = false;
-    debug_decl(sudo_ldap_check_runas_user, SUDOERS_DEBUG_LDAP)
-
-    /* get the runas user from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
-    if (bv == NULL)
-	bv = ldap_get_values_len(ld, entry, "sudoRunAs"); /* old style */
-    if (bv == NULL) {
-	DPRINTF2("sudoRunAsUser: no result.");
-	if (*group_matched == UNSPEC) {
-	    /* We haven't check for sudoRunAsGroup yet, check now. */
-	    bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
-	    if (bv != NULL) {
-		*group_matched = false;
-		ldap_value_free_len(bv);
-	    }
-	}
-	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED))
-	    debug_return_int(UNSPEC);
-	switch (*group_matched) {
-	case UNSPEC:
-	    /*
-	     * No runas user or group entries.  Match runas_default
-	     * against what the user specified on the command line.
-	     */
-	    ret = userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw);
-	    break;
-	case true:
-	    /*
-	     * No runas user entries but have a matching runas group entry.
-	     * If trying to run as the invoking user, allow it.
-	     */
-	    if (userpw_matches(user_name, runas_pw->pw_name, runas_pw))
-		ret = true;
-	    break;
-	}
-	debug_return_int(ret);
-    }
-
-    /*
-     * BUG:
-     *
-     * if runas is not specified on the command line, the only information
-     * as to which user to run as is in the runas_default option.  We should
-     * check to see if we have the local option present.  Unfortunately we
-     * don't parse these options until after this routine says yes or no.
-     * The query has already returned, so we could peek at the attribute
-     * values here though.
-     *
-     * For now just require users to always use -u option unless its set
-     * in the global defaults. This behaviour is no different than the global
-     * /etc/sudoers.
-     *
-     * Sigh - maybe add this feature later
-     */
-
-    /* walk through values returned, looking for a match */
-    for (p = bv; *p != NULL && !ret; p++) {
-	val = (*p)->bv_val;
-	switch (val[0]) {
-	case '+':
-	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
-		def_netgroup_tuple ? user_srunhost : NULL, runas_pw->pw_name))
-		ret = true;
-	    break;
-	case '%':
-	    if (usergr_matches(val, runas_pw->pw_name, runas_pw))
-		ret = true;
-	    break;
-	case '\0':
-	    /* Empty RunAsUser means run as the invoking user. */
-	    if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
-		userpw_matches(user_name, runas_pw->pw_name, runas_pw))
-		ret = true;
-	    break;
-	case 'A':
-	    if (strcmp(val, "ALL") == 0) {
-		ret = true;
-		break;
-	    }
-	    /* FALLTHROUGH */
-	default:
-	    if (userpw_matches(val, runas_pw->pw_name, runas_pw))
-		ret = true;
-	    break;
-	}
-	DPRINTF2("ldap sudoRunAsUser '%s' ... %s", val, ret ? "MATCH!" : "not");
-    }
-
-    ldap_value_free_len(bv);	/* cleanup */
-
-    debug_return_int(ret);
-}
-
-static int
-sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
-{
-    struct berval **bv, **p;
-    char *val;
-    bool ret = false;
-    debug_decl(sudo_ldap_check_runas_group, SUDOERS_DEBUG_LDAP)
-
-    /* get the values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
-    if (bv == NULL) {
-	DPRINTF2("sudoRunAsGroup: no result.");
-	if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED)) {
-	    if (runas_pw->pw_gid == runas_gr->gr_gid)
-		ret = true;	/* runas group matches passwd db */
-	}
-	debug_return_int(ret);
-    }
-
-    /* walk through values returned, looking for a match */
-    for (p = bv; *p != NULL && !ret; p++) {
-	val = (*p)->bv_val;
-	if (strcmp(val, "ALL") == 0 || group_matches(val, runas_gr))
-	    ret = true;
-	DPRINTF2("ldap sudoRunAsGroup '%s' ... %s",
-	    val, ret ? "MATCH!" : "not");
-    }
-
-    ldap_value_free_len(bv);	/* cleanup */
-
-    debug_return_int(ret);
-}
-
 /*
- * Walk through search results and return true if we have a runas match,
- * else false.  RunAs info is optional.
+ * Read sudoOption and fill in the defaults list.
+ * This is used to parse the cn=defaults entry.
  */
 static bool
-sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
-{
-    int user_matched = UNSPEC;
-    int group_matched = UNSPEC;
-    debug_decl(sudo_ldap_check_runas, SUDOERS_DEBUG_LDAP)
-
-    if (!entry)
-	debug_return_bool(false);
-
-    if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED))
-	group_matched = sudo_ldap_check_runas_group(ld, entry);
-    user_matched = sudo_ldap_check_runas_user(ld, entry, &group_matched);
-
-    debug_return_bool(group_matched != false && user_matched != false);
-}
-
-/*
- * Walk through search results and return true if we have a command match,
- * false if disallowed and UNSPEC if not matched.
- */
-static int
-sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
-{
-    struct sudo_digest digest, *allowed_digest = NULL;
-    struct berval **bv, **p;
-    char *allowed_cmnd, *allowed_args, *val;
-    int ret = UNSPEC;
-    bool negated;
-    debug_decl(sudo_ldap_check_command, SUDOERS_DEBUG_LDAP)
-
-    if (!entry)
-	debug_return_int(ret);
-
-    bv = ldap_get_values_len(ld, entry, "sudoCommand");
-    if (bv == NULL)
-	debug_return_int(ret);
-
-    for (p = bv; *p != NULL && ret != false; p++) {
-	val = (*p)->bv_val;
-
-	/* Match against ALL ? */
-	if (strcmp(val, "ALL") == 0) {
-	    ret = true;
-	    if (setenv_implied != NULL)
-		*setenv_implied = true;
-	    DPRINTF2("ldap sudoCommand '%s' ... MATCH!", val);
-	    continue;
-	}
-
-	/* check for sha-2 digest */
-	allowed_digest = sudo_ldap_extract_digest(&val, &digest);
-
-	/* check for !command */
-	allowed_cmnd = val;
-	negated = sudo_ldap_is_negated(&allowed_cmnd);
-
-	/* split optional args away from command */
-	allowed_args = strchr(allowed_cmnd, ' ');
-	if (allowed_args)
-	    *allowed_args++ = '\0';
-
-	/* check the command like normal */
-	if (command_matches(allowed_cmnd, allowed_args, allowed_digest)) {
-	    /*
-	     * If allowed (no bang) set ret but keep on checking.
-	     * If disallowed (bang), exit loop.
-	     */
-	    ret = negated ? false : true;
-	}
-	if (allowed_args != NULL)
-	    allowed_args[-1] = ' ';	/* restore val */
-
-	DPRINTF2("ldap sudoCommand '%s' ... %s",
-	    val, ret == true ? "MATCH!" : "not");
-
-	if (allowed_digest != NULL)
-	    free(allowed_digest->digest_str);
-    }
-
-    ldap_value_free_len(bv);	/* more cleanup */
-
-    debug_return_int(ret);
-}
-
-/*
- * Search for boolean "option" in sudoOption.
- * Returns true if found and allowed, false if negated, else UNSPEC.
- */
-static int
-sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
+sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs)
 {
     struct berval **bv, **p;
-    char *var;
-    bool negated;
-    int ret = UNSPEC;
-    debug_decl(sudo_ldap_check_bool, SUDOERS_DEBUG_LDAP)
-
-    if (entry == NULL)
-	debug_return_int(ret);
-
-    bv = ldap_get_values_len(ld, entry, "sudoOption");
-    if (bv == NULL)
-	debug_return_int(ret);
-
-    /* walk through options */
-    for (p = bv; *p != NULL; p++) {
-	var = (*p)->bv_val;
-	DPRINTF2("ldap sudoOption: '%s'", var);
-
-	negated = sudo_ldap_is_negated(&var);
-	if (strcmp(var, option) == 0)
-	    ret = negated ? false : true;
-    }
-
-    ldap_value_free_len(bv);
-
-    debug_return_int(ret);
-}
-
-/*
- * Read sudoOption and modify the defaults as we go.  This is used once
- * from the cn=defaults entry and also once when a final sudoRole is matched.
- */
-static bool
-sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
-{
-    struct berval **bv, **p;
-    char *cn, *var, *val, *source = NULL;
+    char *cn, *cp, *source = NULL;
     bool ret = false;
-    int op;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
 
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv == NULL)
 	debug_return_bool(true);
 
-    /* get the entry's dn for option error reporting */
+    /* Use sudoRole in place of file name in defaults. */
     cn = sudo_ldap_get_first_rdn(ld, entry);
-    if (cn != NULL) {
-	if (asprintf(&source, "sudoRole %s", cn) == -1) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    source = NULL;
-	    goto done;
-	}
+    if (asprintf(&cp, "sudoRole %s", cn ? cn : "UNKNOWN") == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    if ((source = rcstr_dup(cp)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	free(cp);
+	goto done;
     }
 
-    /* walk through options, early ones first */
+    /* Walk through options, appending to defs. */
     for (p = bv; *p != NULL; p++) {
-	struct early_default *early;
-	char *copy;
+	char *copy, *var, *val;
+	int op;
 
-	/* Avoid modifying bv as we need to use it again below. */
-	if ((copy = strdup((*p)->bv_val)) == NULL) {
+	copy = strdup((*p)->bv_val);	/* XXX - should not need to copy */
+	if (copy == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(copy);
 	    goto done;
 	}
+
 	op = sudo_ldap_parse_option(copy, &var, &val);
-	early = is_early_default(var);
-	if (early != NULL) {
-	    set_early_default(var, val, op,
-		source ? source : "sudoRole UNKNOWN", 0, false, early);
+	if (!sudo_ldap_add_default(var, val, op, source, defs)) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    free(copy);
+	    goto done;
 	}
+
 	free(copy);
     }
-    run_early_defaults();
 
-    /* walk through options again, skipping early ones */
-    for (p = bv; *p != NULL; p++) {
-	op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
-	if (is_early_default(var) == NULL) {
-	    set_default(var, val, op,
-		source ? source : "sudoRole UNKNOWN", 0, false);
-	}
-    }
     ret = true;
 
 done:
-    free(source);
+    rcstr_delref(source);
     if (cn)
 	ldap_memfree(cn);
     ldap_value_free_len(bv);
@@ -1416,81 +1140,6 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
 #endif
 }
 
-/*
- * Fetch and display the global Options.
- */
-static int
-sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
-{
-    struct berval **bv, **p;
-    struct timeval tv, *tvp = NULL;
-    struct ldap_config_str *base;
-    struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld;
-    LDAPMessage *entry, *result;
-    char *prefix, *filt;
-    int rc, count = 0;
-    debug_decl(sudo_ldap_display_defaults, SUDOERS_DEBUG_LDAP)
-
-    if (handle == NULL || handle->ld == NULL)
-	goto done;
-    ld = handle->ld;
-
-    filt = sudo_ldap_build_default_filter();
-    if (filt == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	count = -1;
-	goto done;
-    }
-    STAILQ_FOREACH(base, &ldap_conf.base, entries) {
-	if (ldap_conf.timeout > 0) {
-	    tv.tv_sec = ldap_conf.timeout;
-	    tv.tv_usec = 0;
-	    tvp = &tv;
-	}
-	result = NULL;
-	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
-	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
-	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
-	    bv = ldap_get_values_len(ld, entry, "sudoOption");
-	    if (bv != NULL) {
-		if (lbuf->len == 0 || isspace((unsigned char)lbuf->buf[lbuf->len - 1]))
-		    prefix = "    ";
-		else
-		    prefix = ", ";
-		for (p = bv; *p != NULL; p++) {
-		    struct defaults d;
-
-		    sudo_lbuf_append(lbuf, "%s", prefix);
-		    d.op = sudo_ldap_parse_option((*p)->bv_val, &d.var, &d.val);
-		    sudoers_format_default(lbuf, &d);
-		    prefix = ", ";
-		    count++;
-		}
-		ldap_value_free_len(bv);
-	    }
-	}
-	ldap_msgfree(result);
-    }
-    free(filt);
-done:
-    if (sudo_lbuf_error(lbuf))
-	debug_return_int(-1);
-    debug_return_int(count);
-}
-
-/*
- * STUB
- */
-static int
-sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
-{
-    debug_decl(sudo_ldap_display_bound_defaults, SUDOERS_DEBUG_LDAP)
-    debug_return_int(0);
-}
-
 static char *
 berval_iter(void **vp)
 {
@@ -1500,18 +1149,14 @@ berval_iter(void **vp)
     return *bv ? (*bv)->bv_val : NULL;
 }
 
-static struct userspec_list *
-ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
+static bool
+ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
+    struct userspec_list *ldap_userspecs)
 {
-    struct userspec_list *ldap_userspecs;
     struct userspec *us;
     struct member *m;
     unsigned int i;
     debug_decl(ldap_to_sudoers, SUDOERS_DEBUG_LDAP)
-
-    if ((ldap_userspecs = calloc(1, sizeof(*ldap_userspecs))) == NULL)
-	goto oom;
-    TAILQ_INIT(ldap_userspecs);
 
     /* We only have a single userspec */
     if ((us = calloc(1, sizeof(*us))) == NULL)
@@ -1586,101 +1231,11 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres)
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (ldap_userspecs != NULL) {
-	while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
-	    TAILQ_REMOVE(ldap_userspecs, us, entries);
-	    free_userspec(us);
-	}
-	free(ldap_userspecs);
+    while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
+	TAILQ_REMOVE(ldap_userspecs, us, entries);
+	free_userspec(us);
     }
     debug_return_ptr(NULL);
-}
-
-/*
- * Like sudo_ldap_lookup(), except we just print entries.
- */
-static int
-sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
-{
-    struct sudo_ldap_handle *handle = nss->handle;
-    struct userspec_list *ldap_userspecs = NULL;
-    struct ldap_result *lres;
-    LDAP *ld;
-    int ret = 0;
-    debug_decl(sudo_ldap_display_privs, SUDOERS_DEBUG_LDAP)
-
-    if (handle == NULL || handle->ld == NULL)
-	goto done;
-    ld = handle->ld;
-
-    DPRINTF1("ldap search for command list");
-    lres = sudo_ldap_result_get(nss, pw);
-    if (lres == NULL)
-	goto done;
-
-    /* Convert to sudoers parse tree. */
-    if ((ldap_userspecs = ldap_to_sudoers(ld, lres)) == NULL) {
-	ret = -1;
-	goto done;
-    }
-
-    /* Call common display code. */
-    ret = sudo_display_userspecs(ldap_userspecs, pw, lbuf);
-
-done:
-    if (ldap_userspecs != NULL) {
-	struct userspec *us;
-	while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
-	    TAILQ_REMOVE(ldap_userspecs, us, entries);
-	    free_userspec(us);
-	}
-	free(ldap_userspecs);
-    }
-    if (sudo_lbuf_error(lbuf))
-	debug_return_int(-1);
-    debug_return_int(ret);
-}
-
-static int
-sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
-{
-    struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld;
-    struct ldap_result *lres;
-    LDAPMessage *entry;
-    bool found = false;
-    unsigned int i;
-    debug_decl(sudo_ldap_display_cmnd, SUDOERS_DEBUG_LDAP)
-
-    if (handle == NULL || handle->ld == NULL)
-	goto done;
-    ld = handle->ld;
-
-    /*
-     * The sudo_ldap_result_get() function returns all nodes that match
-     * the user and the host.
-     */
-    DPRINTF1("ldap search for command list");
-    lres = sudo_ldap_result_get(nss, pw);
-    if (lres == NULL)
-	goto done;
-    for (i = 0; i < lres->nentries; i++) {
-	entry = lres->entries[i].entry;
-	if (!sudo_ldap_check_runas(ld, entry))
-	    continue;
-	if (sudo_ldap_check_command(ld, entry, NULL) == true) {
-	    found = true;
-	    goto done;
-	}
-    }
-
-done:
-    if (found)
-	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
-	    safe_cmnd ? safe_cmnd : user_cmnd,
-	    user_args ? " " : "", user_args ? user_args : "");
-   debug_return_int(!found);
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -2087,20 +1642,28 @@ done:
 }
 
 static int
-sudo_ldap_setdefs(struct sudo_nss *nss)
+sudo_ldap_getdefs(struct sudo_nss *nss)
 {
     struct ldap_config_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
+    struct member_list *prev_binding = NULL;
     struct timeval tv, *tvp = NULL;
+    struct defaults *def;
     LDAP *ld;
     LDAPMessage *entry, *result = NULL;
     char *filt;
-    int ret;
-    debug_decl(sudo_ldap_setdefs, SUDOERS_DEBUG_LDAP)
+    int rc, ret = -1;
+    debug_decl(sudo_ldap_getdefs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
 	debug_return_int(-1);
     ld = handle->ld;
+
+    /* Free old defaults, if any. */
+    while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
+	TAILQ_REMOVE(&nss->defaults, def, entries);
+	free_default(def, &prev_binding);
+    }
 
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
@@ -2117,14 +1680,12 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 	}
 	ldap_msgfree(result);
 	result = NULL;
-	ret = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
+	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
-	if (ret == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
+	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    DPRINTF1("found:%s", ldap_get_dn(ld, entry));
-	    if (!sudo_ldap_parse_options(ld, entry)) {
-		ret = -1;
+	    if (!sudo_ldap_parse_options(ld, entry, &nss->defaults))
 		goto done;
-	    }
 	} else {
 	    DPRINTF1("no default options found in %s", base->val);
 	}
@@ -2134,132 +1695,6 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 done:
     ldap_msgfree(result);
     free(filt);
-
-    debug_return_int(ret);
-}
-
-/*
- * like sudoers_lookup() - only LDAP style
- */
-static int
-sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
-{
-    struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld;
-    LDAPMessage *entry;
-    int rc, setenv_implied;
-    unsigned int i;
-    struct ldap_result *lres = NULL;
-    debug_decl(sudo_ldap_lookup, SUDOERS_DEBUG_LDAP)
-
-    if (handle == NULL || handle->ld == NULL)
-	debug_return_int(ret);
-    ld = handle->ld;
-
-    /* Fetch list of sudoRole entries that match user and host. */
-    lres = sudo_ldap_result_get(nss, sudo_user.pw);
-    if (lres == NULL)
-	debug_return_int(ret);
-
-    /*
-     * The following queries only determine whether or not a password
-     * is required, so the order of the entries doesn't matter.
-     */
-    if (pwflag) {
-	int doauth = UNSPEC;
-	int matched = UNSPEC;
-	enum def_tuple pwcheck =
-	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
-
-	DPRINTF1("perform search for pwflag %d", pwflag);
-	for (i = 0; i < lres->nentries; i++) {
-	    entry = lres->entries[i].entry;
-	    if ((pwcheck == any && doauth != false) ||
-		(pwcheck == all && doauth != true)) {
-		doauth = !!sudo_ldap_check_bool(ld, entry, "authenticate");
-	    }
-	    if (matched == true)
-		continue;
-	    /* Only check the command when listing another user. */
-	    if (user_uid == 0 || list_pw == NULL ||
-		user_uid == list_pw->pw_uid ||
-		sudo_ldap_check_command(ld, entry, NULL) == true) {
-		matched = true;
-	    }
-	}
-	if (matched == true || user_uid == 0) {
-	    SET(ret, VALIDATE_SUCCESS);
-	    CLR(ret, VALIDATE_FAILURE);
-	    switch (pwcheck) {
-		case always:
-		    SET(ret, FLAG_CHECK_USER);
-		    break;
-		case all:
-		case any:
-		    if (doauth == false)
-			SET(ret, FLAG_NOPASSWD);
-		    else
-			CLR(ret, FLAG_NOPASSWD);
-		    break;
-		default:
-		    break;
-	    }
-	}
-	goto done;
-    }
-
-    DPRINTF1("searching LDAP for sudoers entries");
-
-    setenv_implied = false;
-    for (i = 0; i < lres->nentries; i++) {
-	entry = lres->entries[i].entry;
-	if (!sudo_ldap_check_runas(ld, entry))
-	    continue;
-	rc = sudo_ldap_check_command(ld, entry, &setenv_implied);
-	if (rc != UNSPEC) {
-	    /* We have a match. */
-	    DPRINTF1("Command %sallowed", rc == true ? "" : "NOT ");
-	    if (rc == true) {
-		DPRINTF1("LDAP entry: %p", entry);
-		/* Apply entry-specific options. */
-		if (setenv_implied)
-		    def_setenv = true;
-		if (sudo_ldap_parse_options(ld, entry)) {
-#ifdef HAVE_SELINUX
-		    /* Set role and type if not specified on command line. */
-		    if (user_role == NULL)
-			user_role = def_role;
-		    if (user_type == NULL)
-			user_type = def_type;
-#endif /* HAVE_SELINUX */
-		    SET(ret, VALIDATE_SUCCESS);
-		    CLR(ret, VALIDATE_FAILURE);
-		} else {
-		    SET(ret, VALIDATE_ERROR);
-		}
-	    } else {
-		SET(ret, VALIDATE_FAILURE);
-		CLR(ret, VALIDATE_SUCCESS);
-	    }
-	    break;
-	}
-    }
-
-done:
-    DPRINTF1("done with LDAP searches");
-    DPRINTF1("user_matches=%s", lres->user_matches ? "true" : "false");
-    DPRINTF1("host_matches=%s", lres->host_matches ? "true" : "false");
-
-    if (!ISSET(ret, VALIDATE_SUCCESS)) {
-	/* No matching entries. */
-	if (pwflag && list_pw == NULL)
-	    SET(ret, FLAG_NO_CHECK);
-    }
-    if (pwflag || lres->user_matches)
-	CLR(ret, FLAG_NO_USER);
-    if (pwflag || lres->host_matches)
-	CLR(ret, FLAG_NO_HOST);
-    DPRINTF1("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret);
 
     debug_return_int(ret);
 }
@@ -2344,27 +1779,36 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
 }
 
 /*
- * Free the ldap result structure in the sudo_nss handle.
+ * Free the cached results in the sudo_nss handle, if present.
  */
 static void
 sudo_ldap_result_free_nss(struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
+    struct member_list *prev_binding = NULL;
+    struct defaults *def;
+    struct userspec *us;
     debug_decl(sudo_ldap_result_free_nss, SUDOERS_DEBUG_LDAP)
 
-    if (handle->result != NULL) {
-	DPRINTF1("removing reusable search result");
-	sudo_ldap_result_free(handle->result);
-	handle->username = NULL;
-	handle->gidlist = NULL;
-	handle->result = NULL;
+    if (handle->pw != NULL)
+	sudo_pw_delref(handle->pw);
+
+    /* XXX - do in main module? */
+    while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
+	TAILQ_REMOVE(&nss->userspecs, us, entries);
+	free_userspec(us);
     }
+    while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
+	TAILQ_REMOVE(&nss->defaults, def, entries);
+	free_default(def, &prev_binding);
+    }
+
     debug_return;
 }
 
 /*
- * Perform the LDAP query for the user or return a cached query if
- * there is one for this user.
+ * Perform the LDAP query for the user.  The caller is responsible for
+ * freeing the result with sudo_ldap_result_free().
  */
 static struct ldap_result *
 sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
@@ -2378,23 +1822,6 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     int pass, rc;
     char *filt;
     debug_decl(sudo_ldap_result_get, SUDOERS_DEBUG_LDAP)
-
-    /*
-     * If we already have a cached result, return it so we don't have to
-     * have to contact the LDAP server again.
-     */
-    if (handle->result) {
-	if (handle->gidlist == user_gid_list &&
-	    strcmp(pw->pw_name, handle->username) == 0) {
-	    DPRINTF1("reusing previous result (user %s) with %d entries",
-		handle->username, handle->result->nentries);
-	    debug_return_ptr(handle->result);
-	}
-	/* User mismatch, cached result cannot be used. */
-	DPRINTF1("removing result (user %s), new search (user %s)",
-	    handle->username, pw->pw_name);
-	sudo_ldap_result_free_nss(nss);
-    }
 
     /*
      * Okay - time to search for anything that matches this user
@@ -2483,13 +1910,6 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 	    ldap_entry_compare);
     }
 
-    /* Store everything in the sudo_nss handle. */
-    /* XXX - store pw and take a reference to it. */
-    /* XXX - take refs for gidlist and grlist */
-    handle->result = lres;
-    handle->username = pw->pw_name;
-    handle->gidlist = user_gid_list;
-
     debug_return_ptr(lres);
 }
 
@@ -2503,7 +1923,7 @@ sudo_ldap_close(struct sudo_nss *nss)
     debug_decl(sudo_ldap_close, SUDOERS_DEBUG_LDAP)
 
     if (handle != NULL) {
-	/* Free the result before unbinding; it may use the LDAP connection. */
+	/* Free the cached result. */
 	sudo_ldap_result_free_nss(nss);
 
 	/* Unbind and close the LDAP connection. */
@@ -2517,6 +1937,65 @@ sudo_ldap_close(struct sudo_nss *nss)
 	nss->handle = NULL;
     }
     debug_return_int(0);
+}
+
+/*
+ * Perform LDAP query for user and host and convert to sudoers
+ * parse tree.
+ */
+static int
+sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
+{
+    struct sudo_ldap_handle *handle = nss->handle;
+    struct ldap_result *lres = NULL;
+    struct userspec *us;
+    int ret = 0;
+    LDAP *ld;
+    debug_decl(sudo_ldap_query, SUDOERS_DEBUG_LDAP)
+
+    if (handle == NULL || handle->ld == NULL)
+	goto done;
+    ld = handle->ld;
+
+    /* Use cached result if it matches pw. */
+    if (handle->pw != NULL) {
+	if (pw == handle->pw)
+	    goto done;
+	sudo_pw_delref(handle->pw);
+	handle->pw = NULL;
+    }
+
+    /* Free old userspecs, if any. */
+    while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
+	TAILQ_REMOVE(&nss->userspecs, us, entries);
+	free_userspec(us);
+    }
+
+    DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
+	user_runhost);
+    if ((lres = sudo_ldap_result_get(nss, pw)) == NULL)
+	goto done;
+
+    /* Convert to sudoers parse tree. */
+    if (!ldap_to_sudoers(ld, lres, &nss->userspecs)) {
+	ret = -1;
+	goto done;
+    }
+
+    /* Stash a ref to the passwd struct in the handle. */
+    sudo_pw_addref(pw);
+    handle->pw = pw;
+
+done:
+    /* Cleanup. */
+    sudo_ldap_result_free(lres);
+    if (ret == -1) {
+	while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
+	    TAILQ_REMOVE(&nss->userspecs, us, entries);
+	    free_userspec(us);
+	}
+    }
+    debug_return_int(ret);
 }
 
 /*

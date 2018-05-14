@@ -246,7 +246,8 @@ main(int argc, char *argv[])
     init_parser(sudoers_file, quiet);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
+    (void) update_defaults(&defaults, SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER,
+	quiet);
     sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
@@ -601,7 +602,8 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
-	    (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
+	    (void) update_defaults(&defaults,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	    check_defaults_and_aliases(strict, quiet);
 	}
 	sudoers_setlocale(oldlocale, NULL);
@@ -918,7 +920,8 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (!parse_error) {
-	(void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
+	(void) update_defaults(&defaults,
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	check_defaults_and_aliases(strict, quiet);
     }
     sudoers_setlocale(oldlocale, NULL);
