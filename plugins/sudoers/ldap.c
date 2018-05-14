@@ -123,8 +123,6 @@ struct ldap_result {
     struct ldap_entry_wrapper *entries;
     unsigned int allocated_entries;
     unsigned int nentries;
-    bool user_matches;
-    bool host_matches;
 };
 #define	ALLOCATION_INCREMENT	100
 
@@ -337,49 +335,6 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     ldap_value_free_len(bv);	/* cleanup */
 
     debug_return_bool(ret);
-}
-
-/*
-* Walk through search results and return true if we have a
-* host match, else false.
-*/
-static bool
-sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
-{
-    struct berval **bv, **p;
-    char *val;
-    bool negated;
-    int matched = UNSPEC;
-    debug_decl(sudo_ldap_check_host, SUDOERS_DEBUG_LDAP)
-
-    if (!entry)
-	debug_return_bool(false);
-
-    /* get the values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoHost");
-    if (bv == NULL)
-	debug_return_bool(false);
-
-    /* walk through values */
-    for (p = bv; *p != NULL && matched != false; p++) {
-	val = (*p)->bv_val;
-	negated = sudo_ldap_is_negated(&val);
-
-	/* match any or address or netgroup or hostname */
-	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
-	    netgr_matches(val, user_runhost, user_srunhost,
-	    def_netgroup_tuple ? pw->pw_name : NULL) ||
-	    hostname_matches(user_srunhost, user_runhost, val)) {
-
-	    matched = negated ? false : true;
-	}
-	DPRINTF2("ldap sudoHost '%s' ... %s",
-	    val, matched == true ? "MATCH!" : "not");
-    }
-
-    ldap_value_free_len(bv);	/* cleanup */
-
-    debug_return_bool(matched == true);
 }
 
 /*
@@ -1175,10 +1130,12 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     /* Treat each sudoRole as a separate privilege. */
     for (i = 0; i < lres->nentries; i++) {
 	LDAPMessage *entry = lres->entries[i].entry;
-	struct berval **cmnds, **runasusers, **runasgroups;
+	struct berval **cmnds, **runasusers, **runasgroups, **hosts;
 	struct berval **opts, **notbefore, **notafter;
 	struct privilege *priv;
 	char *cn;
+
+	/* XXX - check for errors, e.g. ld->ld_errno == LDAP_NO_MEMORY */
 
 	/* Ignore sudoRole without sudoCommand. */
 	cmnds = ldap_get_values_len(ld, entry, "sudoCommand");
@@ -1187,6 +1144,9 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 
 	/* Get the entry's dn for long format printing. */
 	cn = sudo_ldap_get_first_rdn(ld, entry);
+
+	/* Get sudoHost */
+	hosts = ldap_get_values_len(ld, entry, "sudoHost");
 
 	/* Get sudoRunAsUser / sudoRunAsGroup */
 	runasusers = ldap_get_values_len(ld, entry, "sudoRunAsUser");
@@ -1201,7 +1161,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 	/* Parse sudoOptions. */
 	opts = ldap_get_values_len(ld, entry, "sudoOption");
 
-	priv = sudo_ldap_role_to_priv(cn, NULL, runasusers, runasgroups,
+	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
 	    notafter ? notafter[0]->bv_val : NULL, false, long_list,
 	    berval_iter);
@@ -1211,6 +1171,8 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 	    ldap_memfree(cn);
 	if (cmnds != NULL)
 	    ldap_value_free_len(cmnds);
+	if (hosts != NULL)
+	    ldap_value_free_len(hosts);
 	if (runasusers != NULL)
 	    ldap_value_free_len(runasusers);
 	if (runasgroups != NULL)
@@ -1877,14 +1839,9 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		    debug_return_ptr(NULL);
 		}
 		LDAP_FOREACH(entry, ld, result) {
-		    /* Check user or non-unix group. */
+		    /* Check non-unix group in 2nd pass. */
 		    if (pass && !sudo_ldap_check_non_unix_group(ld, entry, pw))
 			continue;
-		    lres->user_matches = true;
-		    /* Check host. */
-		    if (!sudo_ldap_check_host(ld, entry, pw))
-			continue;
-		    lres->host_matches = true;
 		    if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));

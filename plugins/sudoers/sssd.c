@@ -94,12 +94,13 @@ struct sudo_sss_handle {
 static int sudo_sss_open(struct sudo_nss *nss);
 static int sudo_sss_close(struct sudo_nss *nss);
 static int sudo_sss_parse(struct sudo_nss *nss);
+static int sudo_sss_getdefs(struct sudo_nss *nss);
 static int sudo_sss_query(struct sudo_nss *nss, struct passwd *pw);
+
 static bool sudo_sss_parse_options(struct sudo_sss_handle *handle,
 				   struct sss_sudo_rule *rule,
 				   struct defaults_list *defs);
 
-static int sudo_sss_getdefs(struct sudo_nss *nss);
 
 static struct sss_sudo_result *sudo_sss_result_get(struct sudo_nss *nss,
 						   struct passwd *pw);
@@ -107,186 +108,6 @@ static struct sss_sudo_result *sudo_sss_result_get(struct sudo_nss *nss,
 static bool sss_to_sudoers(struct sudo_sss_handle *handle,
 			   struct sss_sudo_result *sss_result,
 			   struct userspec_list *sss_userspecs);
-
-static void
-sudo_sss_attrfree(struct sss_sudo_attr *attr)
-{
-    unsigned int i;
-    debug_decl(sudo_sss_attrfree, SUDOERS_DEBUG_SSSD)
-
-    free(attr->name);
-    attr->name = NULL;
-    if (attr->values != NULL) {
-	for (i = 0; i < attr->num_values; ++i)
-	    free(attr->values[i]);
-	free(attr->values);
-	attr->values = NULL;
-    }
-    attr->num_values = 0;
-
-    debug_return;
-}
-
-static bool
-sudo_sss_attrcpy(struct sss_sudo_attr *dst, const struct sss_sudo_attr *src)
-{
-    unsigned int i = 0;
-    debug_decl(sudo_sss_attrcpy, SUDOERS_DEBUG_SSSD)
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "malloc: cnt=%d", src->num_values);
-
-    dst->name = strdup(src->name);
-    dst->values = reallocarray(NULL, src->num_values, sizeof(char *));
-    if (dst->name == NULL || dst->values == NULL)
-	goto oom;
-    dst->num_values = src->num_values;
-
-    for (i = 0; i < dst->num_values; ++i) {
-	dst->values[i] = strdup(src->values[i]);
-	if (dst->values[i] == NULL) {
-	    dst->num_values = i;
-	    goto oom;
-	}
-    }
-
-    debug_return_bool(true);
-oom:
-    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    sudo_sss_attrfree(dst);
-    debug_return_bool(false);
-}
-
-static void
-sudo_sss_rulefree(struct sss_sudo_rule *rule)
-{
-    unsigned int i;
-    debug_decl(sudo_sss_rulefree, SUDOERS_DEBUG_SSSD)
-
-    for (i = 0; i < rule->num_attrs; ++i)
-	sudo_sss_attrfree(rule->attrs + i);
-    free(rule->attrs);
-    rule->attrs = NULL;
-    rule->num_attrs = 0;
-
-    debug_return;
-}
-
-static bool
-sudo_sss_rulecpy(struct sss_sudo_rule *dst, const struct sss_sudo_rule *src)
-{
-    unsigned int i;
-    debug_decl(sudo_sss_rulecpy, SUDOERS_DEBUG_SSSD)
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "dst=%p, src=%p", dst, src);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "malloc: cnt=%d", src->num_attrs);
-
-    dst->num_attrs = 0;
-    dst->attrs = reallocarray(NULL, src->num_attrs, sizeof(struct sss_sudo_attr));
-    if (dst->attrs == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_bool(false);
-    }
-
-    for (i = 0; i < src->num_attrs; ++i) {
-	if (!sudo_sss_attrcpy(dst->attrs + i, src->attrs + i)) {
-	    dst->num_attrs = i;
-	    sudo_sss_rulefree(dst);
-	    debug_return_bool(false);
-	}
-    }
-    dst->num_attrs = i;
-
-    debug_return_bool(true);
-}
-
-#define SUDO_SSS_FILTER_INCLUDE 0
-#define SUDO_SSS_FILTER_EXCLUDE 1
-
-/* XXX - insted of filtering result, include user and host in sudoers parse tree */
-static struct sss_sudo_result *
-sudo_sss_filter_result(struct sudo_sss_handle *handle,
-    struct sss_sudo_result *in_res,
-    int (*filterp)(struct sudo_sss_handle *, struct sss_sudo_rule *, void *),
-    int act, void *filterp_arg)
-{
-    struct sss_sudo_result *out_res;
-    unsigned int i, l;
-    int r;
-    debug_decl(sudo_sss_filter_result, SUDOERS_DEBUG_SSSD)
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "in_res=%p, count=%u, act=%s",
-	in_res, in_res ? in_res->num_rules : 0,
-	act == SUDO_SSS_FILTER_EXCLUDE ? "EXCLUDE" : "INCLUDE");
-
-    if (in_res == NULL)
-	debug_return_ptr(NULL);
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "malloc: cnt=%d", in_res->num_rules);
-
-    if ((out_res = calloc(1, sizeof(struct sss_sudo_result))) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_ptr(NULL);
-    }
-    if (in_res->num_rules > 0) {
-	out_res->rules =
-	    reallocarray(NULL, in_res->num_rules, sizeof(struct sss_sudo_rule));
-	if (out_res->rules == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    free(out_res);
-	    debug_return_ptr(NULL);
-	}
-    }
-
-    for (i = l = 0; i < in_res->num_rules; ++i) {
-	 r = filterp(handle, in_res->rules + i, filterp_arg);
-
-	 if (( r && act == SUDO_SSS_FILTER_INCLUDE) ||
-	     (!r && act == SUDO_SSS_FILTER_EXCLUDE)) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		"COPY (%s): %p[%u] => %p[%u] (= %p)",
-		act == SUDO_SSS_FILTER_EXCLUDE ? "not excluded" : "included",
-		in_res->rules, i, out_res->rules, l, in_res->rules + i);
-
-	    if (!sudo_sss_rulecpy(out_res->rules + l, in_res->rules + i)) {
-		while (l--) {
-		    sudo_sss_rulefree(out_res->rules + l);
-		}
-		free(out_res->rules);
-		free(out_res);
-		debug_return_ptr(NULL);
-	    }
-	    ++l;
-	}
-    }
-
-    if (l < in_res->num_rules) {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "reallocating result: %p (count: %u -> %u)", out_res->rules,
-	    in_res->num_rules, l);
-	if (l > 0) {
-	    struct sss_sudo_rule *rules =
-		reallocarray(out_res->rules, l, sizeof(struct sss_sudo_rule));
-	    if (out_res->rules == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		while (l--) {
-		    sudo_sss_rulefree(out_res->rules + l);
-		}
-		free(out_res->rules);
-		free(out_res);
-		debug_return_ptr(NULL);
-	    }
-	    out_res->rules = rules;
-	} else {
-	    free(out_res->rules);
-	    out_res->rules = NULL;
-	}
-    }
-
-    out_res->num_rules = l;
-
-    debug_return_ptr(out_res);
-}
 
 static int
 get_ipa_hostname(char **shostp, char **lhostp)
@@ -614,57 +435,6 @@ bad:
     debug_return_int(-1);
 }
 
-static bool
-sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
-{
-    const char *host = handle->ipa_host ? handle->ipa_host : user_runhost;
-    const char *shost = handle->ipa_shost ? handle->ipa_shost : user_srunhost;
-    char *val, **val_array;
-    int matched = UNSPEC;
-    bool negated;
-    int i;
-    debug_decl(sudo_sss_check_host, SUDOERS_DEBUG_SSSD);
-
-    if (rule == NULL)
-	debug_return_bool(false);
-
-    /* get the values from the rule */
-    switch (handle->fn_get_values(rule, "sudoHost", &val_array)) {
-    case 0:
-	break;
-    case ENOENT:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	debug_return_bool(false);
-    default:
-	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoHost): != 0");
-	debug_return_bool(false);
-    }
-
-    /* walk through values */
-    for (i = 0; val_array[i] != NULL && matched != false; ++i) {
-	val = val_array[i];
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
-
-	negated = sudo_ldap_is_negated(&val);
-
-	/* match any or address or netgroup or hostname */
-	if (strcmp(val, "ALL") == 0 || addr_matches(val) ||
-	    netgr_matches(val, host, shost,
-	    def_netgroup_tuple ? handle->pw->pw_name : NULL) ||
-	    hostname_matches(shost, host, val)) {
-
-	    matched = negated ? false : true;
-	}
-
-	sudo_debug_printf(SUDO_DEBUG_INFO, "sssd/ldap sudoHost '%s' ... %s",
-	    val, matched == true ? "MATCH!" : "not");
-    }
-
-    handle->fn_free_values(val_array);
-
-    debug_return_bool(matched == true);
-}
-
 /*
  * SSSD doesn't handle netgroups, we have to ensure they are correctly filtered
  * in sudo. The rules may contain mixed sudoUser specification so we have to
@@ -729,26 +499,11 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
     debug_return_bool(ret);
 }
 
-/* XXX - insted of filtering result, include user and host in sudoers parse tree */
-static int
-sudo_sss_result_filterp(struct sudo_sss_handle *handle,
-    struct sss_sudo_rule *rule, void *unused)
-{
-    (void)unused;
-    debug_decl(sudo_sss_result_filterp, SUDOERS_DEBUG_SSSD);
-
-    if (sudo_sss_check_host(handle, rule) &&
-        sudo_sss_check_user(handle, rule))
-	debug_return_int(1);
-    else
-	debug_return_int(0);
-}
-
 static struct sss_sudo_result *
 sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
-    struct sss_sudo_result *u_sss_result, *f_sss_result;
+    struct sss_sudo_result *sss_result = NULL;
     uint32_t sss_error = 0, ret;
     debug_decl(sudo_sss_result_get, SUDOERS_DEBUG_SSSD);
 
@@ -756,21 +511,19 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "domainname=%s",
 	handle->domainname ? handle->domainname : "NULL");
 
-    u_sss_result = f_sss_result = NULL;
-
     ret = handle->fn_send_recv(pw->pw_uid, pw->pw_name,
-	handle->domainname, &sss_error, &u_sss_result);
+	handle->domainname, &sss_error, &sss_result);
 
     switch (ret) {
     case 0:
 	switch (sss_error) {
 	case 0:
-	    if (u_sss_result != NULL) {
+	    if (sss_result != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_INFO, "Received %u rule(s)",
-		    u_sss_result->num_rules);
+		    sss_result->num_rules);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "Internal error: u_sss_result == NULL && sss_error == 0");
+		    "Internal error: sss_result == NULL && sss_error == 0");
 		debug_return_ptr(NULL);
 	    }
 	    break;
@@ -788,23 +541,7 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
 	debug_return_ptr(NULL);
     }
 
-    /* XXX - insted of filtering result, include user and host in sudoers parse tree */
-    f_sss_result = sudo_sss_filter_result(handle, u_sss_result,
-	sudo_sss_result_filterp, SUDO_SSS_FILTER_INCLUDE, NULL);
-
-    if (f_sss_result != NULL) {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "u_sss_result=(%p, %u) => f_sss_result=(%p, %u)", u_sss_result,
-	    u_sss_result->num_rules, f_sss_result, f_sss_result->num_rules);
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "u_sss_result=(%p, %u) => f_sss_result=NULL", u_sss_result,
-	    u_sss_result->num_rules);
-    }
-
-    handle->fn_free_result(u_sss_result);
-
-    debug_return_ptr(f_sss_result);
+    debug_return_ptr(sss_result);
 }
 
 static bool
@@ -903,8 +640,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
     STAILQ_INIT(&us->comments);
     TAILQ_INSERT_TAIL(sss_userspecs, us, entries);
 
-    /* The user has already matched, use ALL as wildcard. */
-    /* XXX - remove filtering and include sudoUser and host in userspec */
+    /* We only include rules where the user matches. */
     if ((m = calloc(1, sizeof(*m))) == NULL)
 	goto oom;
     m->type = ALL;
@@ -915,11 +651,15 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	struct sss_sudo_rule *rule = sss_result->rules + i;
 	char **cmnds, **runasusers = NULL, **runasgroups = NULL;
 	char **opts = NULL, **notbefore = NULL, **notafter = NULL;
-	char **cn_array = NULL;
+	char **hosts = NULL, **cn_array = NULL;
 	char *cn = NULL;
 	struct privilege *priv;
 
 	/* XXX - check for error vs. ENOENT */
+
+	/* Only include matching user roles (XXX). */
+	if (!sudo_sss_check_user(handle, rule))
+	    continue;
 
 	/* Ignore sudoRole without sudoCommand. */
 	if (handle->fn_get_values(rule, "sudoCommand", &cmnds) != 0)
@@ -928,6 +668,9 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	/* Get the entry's dn for long format printing. */
 	if (handle->fn_get_values(rule, "cn", &cn_array) == 0)
 	    cn = cn_array[0];
+
+	/* Get sudoHost */
+	handle->fn_get_values(rule, "sudoHost", &hosts);
 
 	/* Get sudoRunAsUser / sudoRunAsGroup */
 	if (handle->fn_get_values(rule, "sudoRunAsUser", &runasusers) != 0) {
@@ -942,7 +685,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	/* Parse sudoOptions. */
 	handle->fn_get_values(rule, "sudoOption", &opts);
 
-	priv = sudo_ldap_role_to_priv(cn, NULL, runasusers, runasgroups,
+	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0] : NULL,
 	    notafter ? notafter[0] : NULL, false, long_list, val_array_iter);
 
@@ -951,6 +694,8 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	    handle->fn_free_values(cn_array);
 	if (cmnds != NULL)
 	    handle->fn_free_values(cmnds);
+	if (hosts != NULL)
+	    handle->fn_free_values(hosts);
 	if (runasusers != NULL)
 	    handle->fn_free_values(runasusers);
 	if (runasgroups != NULL)
