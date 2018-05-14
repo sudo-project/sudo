@@ -446,6 +446,7 @@ bad:
  * SSSD doesn't handle netgroups, we have to ensure they are correctly filtered
  * in sudo. The rules may contain mixed sudoUser specification so we have to
  * check not only for netgroup membership but also for user and group matches.
+ * Otherwise, a netgroup non-match could override a user/group match.
  */
 static bool
 sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
@@ -665,7 +666,10 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	char **hosts = NULL, **cn_array = NULL, *cn = NULL;
 	struct privilege *priv = NULL;
 
-	/* Only include matching user roles (XXX). */
+	/*
+	 * We don't know whether a rule was included due to a user/group
+	 * match or because it contained a netgroup.
+	 */
 	if (!sudo_sss_check_user(handle, rule))
 	    continue;
 
