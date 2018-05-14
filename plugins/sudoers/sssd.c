@@ -388,6 +388,7 @@ sudo_sss_getdefs(struct sudo_nss *nss)
     struct defaults *def;
     uint32_t sss_error;
     unsigned int i;
+    int rc;
     debug_decl(sudo_sss_getdefs, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL)
@@ -402,11 +403,17 @@ sudo_sss_getdefs(struct sudo_nss *nss)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
     /* NOTE: these are global defaults, user ID and name are not used. */
-    if (handle->fn_send_recv_defaults(sudo_user.pw->pw_uid,
-				      sudo_user.pw->pw_name, &sss_error,
-				      &handle->domainname, &sss_result) != 0) {
+    rc = handle->fn_send_recv_defaults(sudo_user.pw->pw_uid,
+	sudo_user.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
+    switch (rc) {
+    case 0:
+	break;
+    case ENOMEM:
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	/* FALLTHROUGH */
+    default:
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_send_recv_defaults: != 0, sss_error=%u", sss_error);
+	    "handle->fn_send_recv_defaults: rc=%d, sss_error=%u", rc, sss_error);
 	debug_return_int(-1);
     }
     if (sss_error != 0) {
@@ -504,17 +511,16 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
-    uint32_t sss_error = 0, ret;
+    uint32_t sss_error = 0, rc;
     debug_decl(sudo_sss_result_get, SUDOERS_DEBUG_SSSD);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "  username=%s", pw->pw_name);
     sudo_debug_printf(SUDO_DEBUG_DIAG, "domainname=%s",
 	handle->domainname ? handle->domainname : "NULL");
 
-    ret = handle->fn_send_recv(pw->pw_uid, pw->pw_name,
+    rc = handle->fn_send_recv(pw->pw_uid, pw->pw_name,
 	handle->domainname, &sss_error, &sss_result);
-
-    switch (ret) {
+    switch (rc) {
     case 0:
 	switch (sss_error) {
 	case 0:
@@ -535,9 +541,12 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
 	    debug_return_ptr(NULL);
 	}
 	break;
+    case ENOMEM:
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	/* FALLTHROUGH */
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "handle->fn_send_recv: != 0: ret=%d", ret);
+	    "handle->fn_send_recv: rc=%d", rc);
 	debug_return_ptr(NULL);
     }
 
@@ -563,6 +572,8 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
 	debug_return_bool(true);
+    case ENOMEM:
+	goto oom;
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoOption): != 0");
 	debug_return_bool(false);
@@ -651,45 +662,101 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 	struct sss_sudo_rule *rule = sss_result->rules + i;
 	char **cmnds, **runasusers = NULL, **runasgroups = NULL;
 	char **opts = NULL, **notbefore = NULL, **notafter = NULL;
-	char **hosts = NULL, **cn_array = NULL;
-	char *cn = NULL;
-	struct privilege *priv;
-
-	/* XXX - check for error vs. ENOENT */
+	char **hosts = NULL, **cn_array = NULL, *cn = NULL;
+	struct privilege *priv = NULL;
 
 	/* Only include matching user roles (XXX). */
 	if (!sudo_sss_check_user(handle, rule))
 	    continue;
 
-	/* Ignore sudoRole without sudoCommand. */
-	if (handle->fn_get_values(rule, "sudoCommand", &cmnds) != 0)
+	switch (handle->fn_get_values(rule, "sudoCommand", &cmnds)) {
+	case 0:
+	    break;
+	case ENOENT:
+	    /* Ignore sudoRole without sudoCommand. */
 	    continue;
+	default:
+	    goto cleanup;
+	}
 
 	/* Get the entry's dn for long format printing. */
-	if (handle->fn_get_values(rule, "cn", &cn_array) == 0)
+	switch (handle->fn_get_values(rule, "cn", &cn_array)) {
+	case 0:
 	    cn = cn_array[0];
+	    break;
+	case ENOENT:
+	    break;
+	default:
+	    goto cleanup;
+	}
 
 	/* Get sudoHost */
-	handle->fn_get_values(rule, "sudoHost", &hosts);
-
-	/* Get sudoRunAsUser / sudoRunAsGroup */
-	if (handle->fn_get_values(rule, "sudoRunAsUser", &runasusers) != 0) {
-	    handle->fn_get_values(rule, "sudoRunAs", &runasusers);
+	switch (handle->fn_get_values(rule, "sudoHost", &hosts)) {
+	case 0:
+	case ENOENT:
+	    break;
+	default:
+	    goto cleanup;
 	}
-	handle->fn_get_values(rule, "sudoRunAsGroup", &runasgroups);
 
-	/* Get sudoNotBefore / sudoNotAfter */
-	handle->fn_get_values(rule, "sudoNotBefore", &notbefore);
-	handle->fn_get_values(rule, "sudoNotAfter", &notafter);
+	/* Get sudoRunAsUser / sudoRunAs */
+	switch (handle->fn_get_values(rule, "sudoRunAsUser", &runasusers)) {
+	case 0:
+	    break;
+	case ENOENT:
+	    switch (handle->fn_get_values(rule, "sudoRunAs", &runasusers)) {
+		case 0:
+		case ENOENT:
+		    break;
+		default:
+		    goto cleanup;
+	    }
+	    break;
+	default:
+	    goto cleanup;
+	}
+
+	/* Get sudoRunAsGroup */
+	switch (handle->fn_get_values(rule, "sudoRunAsGroup", &runasgroups)) {
+	case 0:
+	case ENOENT:
+	    break;
+	default:
+	    goto cleanup;
+	}
+
+	/* Get sudoNotBefore */
+	switch (handle->fn_get_values(rule, "sudoNotBefore", &notbefore)) {
+	case 0:
+	case ENOENT:
+	    break;
+	default:
+	    goto cleanup;
+	}
+
+	/* Get sudoNotAfter */
+	switch (handle->fn_get_values(rule, "sudoNotAfter", &notafter)) {
+	case 0:
+	case ENOENT:
+	    break;
+	default:
+	    goto cleanup;
+	}
 
 	/* Parse sudoOptions. */
-	handle->fn_get_values(rule, "sudoOption", &opts);
+	switch (handle->fn_get_values(rule, "sudoOption", &opts)) {
+	case 0:
+	case ENOENT:
+	    break;
+	default:
+	    goto cleanup;
+	}
 
 	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0] : NULL,
 	    notafter ? notafter[0] : NULL, false, long_list, val_array_iter);
 
-	/* Cleanup */
+    cleanup:
 	if (cn_array != NULL)
 	    handle->fn_free_values(cn_array);
 	if (cmnds != NULL)

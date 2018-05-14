@@ -60,6 +60,14 @@
 #include "sudo_ldap_conf.h"
 #include "sudo_dso.h"
 
+#ifndef LDAP_OPT_RESULT_CODE
+# define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
+#endif
+
+#ifndef LDAP_OPT_SUCCESS
+# define LDAP_OPT_SUCCESS LDAP_SUCCESS
+#endif
+
 #if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(LDAP_SASL_QUIET)
 # define LDAP_SASL_QUIET	0
 #endif
@@ -296,24 +304,48 @@ done:
 }
 
 /*
+ * Wrapper for ldap_get_values_len() that fills in the response code
+ * on error.
+ */
+static struct berval **
+sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, char *attr, int *rc)
+{
+    struct berval **bval;
+
+    bval = ldap_get_values_len(ld, entry, attr);
+    if (bval == NULL) {
+	int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
+	if (optrc != LDAP_OPT_SUCCESS)
+	    *rc = optrc;
+    } else {
+	*rc = LDAP_SUCCESS;
+    }
+    return bval;
+}
+
+/*
  * Walk through search results and return true if we have a matching
  * non-Unix group (including netgroups), else false.
  */
-static bool
+static int
 sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
-    char *val;
     bool ret = false;
+    char *val;
+    int rc;
     debug_decl(sudo_ldap_check_non_unix_group, SUDOERS_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(ret);
 
     /* get the values from the entry */
-    bv = ldap_get_values_len(ld, entry, "sudoUser");
-    if (bv == NULL)
-	debug_return_bool(ret);
+    bv = sudo_ldap_get_values_len(ld, entry, "sudoUser", &rc);
+    if (bv == NULL) {
+	if (rc == LDAP_NO_MEMORY)
+	    debug_return_int(-1);
+	debug_return_bool(false);
+    }
 
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -347,11 +379,15 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
     struct berval **bv, **p;
     char *cn, *cp, *source = NULL;
     bool ret = false;
+    int rc;
     debug_decl(sudo_ldap_parse_options, SUDOERS_DEBUG_LDAP)
 
-    bv = ldap_get_values_len(ld, entry, "sudoOption");
-    if (bv == NULL)
+    bv = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
+    if (bv == NULL) {
+	if (rc == LDAP_NO_MEMORY)
+	    debug_return_bool(false);
 	debug_return_bool(true);
+    }
 
     /* Use sudoRole in place of file name in defaults. */
     cn = sudo_ldap_get_first_rdn(ld, entry);
@@ -447,6 +483,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
 	timebuffer, timebuffer);
     if (len <= 0 || (size_t)len >= buffersize) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	errno = EOVERFLOW;
 	len = -1;
     }
 
@@ -633,8 +670,11 @@ sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
 	    LDAP_FOREACH(entry, ld, result) {
 		struct berval **bv;
 
-		bv = ldap_get_values_len(ld, entry, "cn");
-		if (bv != NULL) {
+		bv = sudo_ldap_get_values_len(ld, entry, "cn", &rc);
+		if (bv == NULL) {
+		    if (rc == LDAP_NO_MEMORY)
+			goto oom;
+		} else {
 		    /* Don't add a netgroup twice. */
 		    STAILQ_FOREACH(ng, netgroups, entries) {
 			/* Assumes only one cn per entry. */
@@ -792,8 +832,11 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	LDAP_FOREACH(entry, ld, result) {
 	    struct berval **bv;
 
-	    bv = ldap_get_values_len(ld, entry, "cn");
-	    if (bv != NULL) {
+	    bv = sudo_ldap_get_values_len(ld, entry, "cn", &rc);
+	    if (bv == NULL) {
+		if (rc == LDAP_NO_MEMORY)
+		    goto oom;
+	    } else {
 		/* Don't add a netgroup twice. */
 		STAILQ_FOREACH(ng, netgroups, entries) {
 		    /* Assumes only one cn per entry. */
@@ -910,10 +953,8 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     /* If timed, add space for time limits. */
     if (ldap_conf.timed)
 	sz += TIMEFILTER_LENGTH;
-    if ((buf = malloc(sz)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((buf = malloc(sz)) == NULL)
 	goto bad;
-    }
     *buf = '\0';
 
     /*
@@ -1004,6 +1045,7 @@ overflow:
 	free(ng->name);
 	free(ng);
     }
+    errno = EOVERFLOW;
 bad:
     while ((ng = STAILQ_FIRST(&netgroups)) != NULL) {
 	STAILQ_REMOVE_HEAD(&netgroups, entries);
@@ -1059,7 +1101,7 @@ sudo_ldap_build_pass2(void)
 	    ldap_conf.timed ? timebuffer : "");
     }
     if (len == -1)
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	filt = NULL;
 
     debug_return_str(filt);
 }
@@ -1088,7 +1130,7 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
     debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
 
     if ((dn = ldap_get_dn(ld, entry)) == NULL)
-	return NULL;
+	debug_return_str(NULL);
     edn = ldap_explode_dn(dn, 1);
     ldap_memfree(dn);
     debug_return_str(edn ? edn[0] : NULL);
@@ -1111,6 +1153,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     struct userspec *us;
     struct member *m;
     unsigned int i;
+    int rc;
     debug_decl(ldap_to_sudoers, SUDOERS_DEBUG_LDAP)
 
     /* We only have a single userspec */
@@ -1130,43 +1173,60 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
     /* Treat each sudoRole as a separate privilege. */
     for (i = 0; i < lres->nentries; i++) {
 	LDAPMessage *entry = lres->entries[i].entry;
-	struct berval **cmnds, **runasusers, **runasgroups, **hosts;
-	struct berval **opts, **notbefore, **notafter;
-	struct privilege *priv;
+	struct berval **cmnds = NULL, **hosts = NULL;
+	struct berval **runasusers = NULL, **runasgroups = NULL;
+	struct berval **opts = NULL, **notbefore = NULL, **notafter = NULL;
+	struct privilege *priv = NULL;
 	char *cn;
 
-	/* XXX - check for errors, e.g. ld->ld_errno == LDAP_NO_MEMORY */
-
 	/* Ignore sudoRole without sudoCommand. */
-	cmnds = ldap_get_values_len(ld, entry, "sudoCommand");
-	if (cmnds == NULL)
+	cmnds = sudo_ldap_get_values_len(ld, entry, "sudoCommand", &rc);
+	if (cmnds == NULL) {
+	    if (rc == LDAP_NO_MEMORY)
+		goto oom;
 	    continue;
+	}
 
 	/* Get the entry's dn for long format printing. */
-	cn = sudo_ldap_get_first_rdn(ld, entry);
+	if ((cn = sudo_ldap_get_first_rdn(ld, entry)) == NULL)
+	    goto cleanup;
 
 	/* Get sudoHost */
-	hosts = ldap_get_values_len(ld, entry, "sudoHost");
+	hosts = sudo_ldap_get_values_len(ld, entry, "sudoHost", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
 
 	/* Get sudoRunAsUser / sudoRunAsGroup */
-	runasusers = ldap_get_values_len(ld, entry, "sudoRunAsUser");
-	if (runasusers == NULL)
-	    runasusers = ldap_get_values_len(ld, entry, "sudoRunAs");
-	runasgroups = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
+	runasusers = sudo_ldap_get_values_len(ld, entry, "sudoRunAsUser", &rc);
+	if (runasusers == NULL) {
+	    if (rc != LDAP_NO_MEMORY)
+		runasusers = sudo_ldap_get_values_len(ld, entry, "sudoRunAs", &rc);
+	    if (rc == LDAP_NO_MEMORY)
+		goto cleanup;
+	}
+	runasgroups = sudo_ldap_get_values_len(ld, entry, "sudoRunAsGroup", &rc);
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
 
 	/* Get sudoNotBefore / sudoNotAfter */
 	notbefore = ldap_get_values_len(ld, entry, "sudoNotBefore");
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
 	notafter = ldap_get_values_len(ld, entry, "sudoNotAfter");
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
 
 	/* Parse sudoOptions. */
 	opts = ldap_get_values_len(ld, entry, "sudoOption");
+	if (rc == LDAP_NO_MEMORY)
+	    goto cleanup;
 
 	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
 	    notafter ? notafter[0]->bv_val : NULL, false, long_list,
 	    berval_iter);
 
-	/* Cleanup */
+    cleanup:
 	if (cn != NULL)
 	    ldap_memfree(cn);
 	if (cmnds != NULL)
@@ -1697,13 +1757,17 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
     struct berval **bv;
     double order = 0.0;
     char *ep;
+    int rc;
     debug_decl(sudo_ldap_result_add_entry, SUDOERS_DEBUG_LDAP)
 
     /* Determine whether the entry has the sudoOrder attribute. */
     last = sudo_ldap_result_last_search(lres);
     if (last != NULL) {
-	bv = ldap_get_values_len(last->ldap, entry, "sudoOrder");
-	if (bv != NULL) {
+	bv = sudo_ldap_get_values_len(last->ldap, entry, "sudoOrder", &rc);
+	if (rc == LDAP_NO_MEMORY) {
+	    /* XXX - return error */
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	} else {
 	    if (ldap_count_values_len(bv) > 0) {
 		/* Get the value of this attribute, 0 if not present. */
 		DPRINTF2("order attribute raw: %s", (*bv)->bv_val);
@@ -1781,8 +1845,8 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result;
     LDAP *ld = handle->ld;
+    char *filt = NULL;
     int pass, rc;
-    char *filt;
     debug_decl(sudo_ldap_result_get, SUDOERS_DEBUG_LDAP)
 
     /*
@@ -1804,10 +1868,8 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      * an ldap_result object.  The results are then sorted by sudoOrder.
      */
     lres = sudo_ldap_result_alloc();
-    if (lres == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_ptr(NULL);
-    }
+    if (lres == NULL)
+	goto oom;
     for (pass = 0; pass < 2; pass++) {
 	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(ld, pw);
 	if (filt != NULL) {
@@ -1831,32 +1893,30 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 
 		/* Add the search result to list of search results. */
 		DPRINTF1("adding search result");
-		if (sudo_ldap_result_add_search(lres, ld, result) == NULL) {
-		    sudo_warnx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		    free(filt);
-		    sudo_ldap_result_free(lres);
-		    debug_return_ptr(NULL);
-		}
+		if (sudo_ldap_result_add_search(lres, ld, result) == NULL)
+		    goto oom;
 		LDAP_FOREACH(entry, ld, result) {
-		    /* Check non-unix group in 2nd pass. */
-		    if (pass && !sudo_ldap_check_non_unix_group(ld, entry, pw))
-			continue;
-		    if (sudo_ldap_result_add_entry(lres, entry) == NULL) {
-			sudo_warnx(U_("%s: %s"), __func__,
-			    U_("unable to allocate memory"));
-			free(filt);
-			sudo_ldap_result_free(lres);
-			debug_return_ptr(NULL);
+		    if (pass != 0) {
+			/* Check non-unix group in 2nd pass. */
+			switch (sudo_ldap_check_non_unix_group(ld, entry, pw)) {
+			case -1:
+			    goto oom;
+			case false:
+			    continue;
+			default:
+			    break;
+			}
 		    }
+		    if (sudo_ldap_result_add_entry(lres, entry) == NULL)
+			goto oom;
 		}
 		DPRINTF1("result now has %d entries", lres->nentries);
 	    }
 	    free(filt);
+	    filt = NULL;
 	} else if (errno != ENOENT) {
 	    /* Out of memory? */
-	    sudo_ldap_result_free(lres);
-	    debug_return_ptr(NULL);
+	    goto oom;
 	}
     }
 
@@ -1868,6 +1928,11 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     }
 
     debug_return_ptr(lres);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    free(filt);
+    sudo_ldap_result_free(lres);
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -1930,8 +1995,10 @@ sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
 
     DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
 	user_runhost);
-    if ((lres = sudo_ldap_result_get(nss, pw)) == NULL)
+    if ((lres = sudo_ldap_result_get(nss, pw)) == NULL) {
+	ret = -1;
 	goto done;
+    }
 
     /* Convert to sudoers parse tree. */
     if (!ldap_to_sudoers(ld, lres, &nss->userspecs)) {
