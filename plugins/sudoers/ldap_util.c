@@ -324,28 +324,32 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	cmndspec->timeout = UNSPEC;
 
 	/* Fill in member. */
-	m->type = COMMAND;
 	m->negated = negated;
-	m->name = (char *)c;
+	if (strcmp(cmnd, "ALL") == 0) {
+	    m->type = ALL;
+	} else {
+	    m->type = COMMAND;
+	    m->name = (char *)c;
 
-	/* Fill in command with optional digest. */
-	if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
-	    if ((c->digest = malloc(sizeof(*c->digest))) == NULL) {
+	    /* Fill in command with optional digest. */
+	    if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
+		if ((c->digest = malloc(sizeof(*c->digest))) == NULL) {
+		    free_member(m);
+		    goto oom;
+		}
+		*c->digest = digest;
+	    }
+	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
+		*args++ = '\0';
+		if ((c->args = strdup(args)) == NULL) {
+		    free_member(m);
+		    goto oom;
+		}
+	    }
+	    if ((c->cmnd = strdup(cmnd)) == NULL) {
 		free_member(m);
 		goto oom;
 	    }
-	    *c->digest = digest;
-	}
-	if ((args = strpbrk(cmnd, " \t")) != NULL) {
-	    *args++ = '\0';
-	    if ((c->args = strdup(args)) == NULL) {
-		free_member(m);
-		goto oom;
-	    }
-	}
-	if ((c->cmnd = strdup(cmnd)) == NULL) {
-	    free_member(m);
-	    goto oom;
 	}
 	cmndspec->cmnd = m;
 
