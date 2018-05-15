@@ -15452,6 +15452,18 @@ fi
 		    ac_cv_func_strnlen=no
 		fi
 
+		# getline() may or may ont be present on AIX <= 6.1.
+		# bos610 is missing getline/getdelim but bos61J has it.
+		if test $OSMAJOR -le 6; then
+		    ac_cv_func_getline=no
+		fi
+
+		# memset_s() may or may ont be present on AIX <= 7.1.
+		# bos710 is missing memset_s but bos71L has it.
+		if test $OSMAJOR -le 7; then
+		    ac_cv_func_memset_s=no
+		fi
+
 		# Remove timedir on boot, AIX does not have /var/run
 		INIT_SCRIPT=aix.sh
 		INIT_DIR=/etc/rc.d/init.d
