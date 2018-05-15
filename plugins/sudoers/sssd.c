@@ -279,9 +279,6 @@ sudo_sss_open(struct sudo_nss *nss)
 static int
 sudo_sss_close(struct sudo_nss *nss)
 {
-    struct member_list *prev_binding = NULL;
-    struct defaults *def;
-    struct userspec *us;
     struct sudo_sss_handle *handle;
     debug_decl(sudo_sss_close, SUDOERS_DEBUG_SSSD);
 
@@ -297,14 +294,8 @@ sudo_sss_close(struct sudo_nss *nss)
 	nss->handle = NULL;
 
 	/* XXX - do in main module? */
-	while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	    TAILQ_REMOVE(&nss->userspecs, us, entries);
-	    free_userspec(us);
-	}
-	while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
-	    TAILQ_REMOVE(&nss->defaults, def, entries);
-	    free_default(def, &prev_binding);
-	}
+	free_userspecs(&nss->userspecs);
+	free_defaults(&nss->defaults);
     }
     debug_return_int(0);
 }
@@ -317,7 +308,6 @@ sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
-    struct userspec *us;
     int ret = 0;
     debug_decl(sudo_sss_query, SUDOERS_DEBUG_SSSD);
 
@@ -330,10 +320,7 @@ sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
     }
 
     /* Free old userspecs, if any. */
-    while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	TAILQ_REMOVE(&nss->userspecs, us, entries);
-	free_userspec(us);
-    }
+    free_userspecs(&nss->userspecs);
 
     /* Fetch list of sudoRole entries that match user and host. */
     sss_result = sudo_sss_result_get(nss, pw);
@@ -358,12 +345,8 @@ sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
 done:
     /* Cleanup */
     handle->fn_free_result(sss_result);
-    if (ret == -1) {
-	while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	    TAILQ_REMOVE(&nss->userspecs, us, entries);
-	    free_userspec(us);
-	}
-    }
+    if (ret == -1)
+	free_userspecs(&nss->userspecs);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
@@ -384,8 +367,6 @@ sudo_sss_getdefs(struct sudo_nss *nss)
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
     struct sss_sudo_rule   *sss_rule;
-    struct member_list *prev_binding = NULL;
-    struct defaults *def;
     uint32_t sss_error;
     unsigned int i;
     int rc;
@@ -395,10 +376,7 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	debug_return_int(-1);
 
     /* Free old defaults, if any. */
-    while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
-	TAILQ_REMOVE(&nss->defaults, def, entries);
-	free_default(def, &prev_binding);
-    }
+    free_defaults(&nss->defaults);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
@@ -787,10 +765,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle, struct sss_sudo_result *sss_resul
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    while ((us = TAILQ_FIRST(sss_userspecs)) != NULL) {
-	TAILQ_REMOVE(sss_userspecs, us, entries);
-	free_userspec(us);
-    }
+    free_userspecs(sss_userspecs);
     debug_return_bool(false);
 }
 #endif /* HAVE_SSSD */

@@ -1253,10 +1253,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    while ((us = TAILQ_FIRST(ldap_userspecs)) != NULL) {
-	TAILQ_REMOVE(ldap_userspecs, us, entries);
-	free_userspec(us);
-    }
+    free_userspecs(ldap_userspecs);
     debug_return_ptr(NULL);
 }
 
@@ -1668,9 +1665,7 @@ sudo_ldap_getdefs(struct sudo_nss *nss)
 {
     struct ldap_config_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
-    struct member_list *prev_binding = NULL;
     struct timeval tv, *tvp = NULL;
-    struct defaults *def;
     LDAP *ld;
     LDAPMessage *entry, *result = NULL;
     char *filt;
@@ -1682,10 +1677,7 @@ sudo_ldap_getdefs(struct sudo_nss *nss)
     ld = handle->ld;
 
     /* Free old defaults, if any. */
-    while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
-	TAILQ_REMOVE(&nss->defaults, def, entries);
-	free_default(def, &prev_binding);
-    }
+    free_defaults(&nss->defaults);
 
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
@@ -1811,23 +1803,14 @@ static void
 sudo_ldap_result_free_nss(struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    struct member_list *prev_binding = NULL;
-    struct defaults *def;
-    struct userspec *us;
     debug_decl(sudo_ldap_result_free_nss, SUDOERS_DEBUG_LDAP)
 
     if (handle->pw != NULL)
 	sudo_pw_delref(handle->pw);
 
     /* XXX - do in main module? */
-    while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	TAILQ_REMOVE(&nss->userspecs, us, entries);
-	free_userspec(us);
-    }
-    while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
-	TAILQ_REMOVE(&nss->defaults, def, entries);
-	free_default(def, &prev_binding);
-    }
+    free_userspecs(&nss->userspecs);
+    free_defaults(&nss->defaults);
 
     debug_return;
 }
@@ -1970,7 +1953,6 @@ sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_result *lres = NULL;
-    struct userspec *us;
     int ret = 0;
     LDAP *ld;
     debug_decl(sudo_ldap_query, SUDOERS_DEBUG_LDAP)
@@ -1988,10 +1970,7 @@ sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
     }
 
     /* Free old userspecs, if any. */
-    while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	TAILQ_REMOVE(&nss->userspecs, us, entries);
-	free_userspec(us);
-    }
+    free_userspecs(&nss->userspecs);
 
     DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
 	user_runhost);
@@ -2013,12 +1992,8 @@ sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
 done:
     /* Cleanup. */
     sudo_ldap_result_free(lres);
-    if (ret == -1) {
-	while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	    TAILQ_REMOVE(&nss->userspecs, us, entries);
-	    free_userspec(us);
-	}
-    }
+    if (ret == -1)
+	free_userspecs(&nss->userspecs);
     debug_return_int(ret);
 }
 

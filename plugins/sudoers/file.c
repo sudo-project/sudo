@@ -71,9 +71,6 @@ sudo_file_open(struct sudo_nss *nss)
 static int
 sudo_file_close(struct sudo_nss *nss)
 {
-    struct member_list *prev_binding = NULL;
-    struct defaults *def;
-    struct userspec *us;
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
 
     if (nss->handle != NULL) {
@@ -82,14 +79,8 @@ sudo_file_close(struct sudo_nss *nss)
 	sudoersin = NULL;
 
 	/* XXX - do in main module? */
-	while ((us = TAILQ_FIRST(&nss->userspecs)) != NULL) {
-	    TAILQ_REMOVE(&nss->userspecs, us, entries);
-	    free_userspec(us);
-	}
-	while ((def = TAILQ_FIRST(&nss->defaults)) != NULL) {
-	    TAILQ_REMOVE(&nss->defaults, def, entries);
-	    free_default(def, &prev_binding);
-	}
+	free_userspecs(&nss->userspecs);
+	free_defaults(&nss->defaults);
     }
 
     debug_return_int(0);

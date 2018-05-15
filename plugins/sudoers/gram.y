@@ -1099,6 +1099,21 @@ free_members(struct member_list *members)
 }
 
 void
+free_defaults(struct defaults_list *defs)
+{
+    struct member_list *prev_binding = NULL;
+    struct defaults *def;
+    debug_decl(free_defaults, SUDOERS_DEBUG_PARSER)
+
+    while ((def = TAILQ_FIRST(defs)) != NULL) {
+	TAILQ_REMOVE(defs, def, entries);
+	free_default(def, &prev_binding);
+    }
+
+    debug_return;
+}
+
+void
 free_default(struct defaults *def, struct member_list **binding)
 {
     debug_decl(free_default, SUDOERS_DEBUG_PARSER)
@@ -1183,6 +1198,20 @@ free_privilege(struct privilege *priv)
 }
 
 void
+free_userspecs(struct userspec_list *usl)
+{
+    struct userspec *us;
+    debug_decl(free_userspecs, SUDOERS_DEBUG_PARSER)
+
+    while ((us = TAILQ_FIRST(usl)) != NULL) {
+	TAILQ_REMOVE(usl, us, entries);
+	free_userspec(us);
+    }
+
+    debug_return;
+}
+
+void
 free_userspec(struct userspec *us)
 {
     struct privilege *priv;
@@ -1212,23 +1241,11 @@ free_userspec(struct userspec *us)
 bool
 init_parser(const char *path, bool quiet)
 {
-    struct member_list *prev_binding = NULL;
-    struct defaults *def;
-    struct userspec *us;
     bool ret = true;
-    void *next;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
-    TAILQ_FOREACH_SAFE(us, &userspecs, entries, next) {
-	free_userspec(us);
-    }
-    TAILQ_INIT(&userspecs);
-
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
-	free_default(def, &prev_binding);
-    }
-    TAILQ_INIT(&defaults);
-
+    free_userspecs(&userspecs);
+    free_defaults(&defaults);
     init_lexer();
 
     if (!init_aliases()) {
