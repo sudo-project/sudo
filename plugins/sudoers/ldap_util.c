@@ -170,11 +170,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
     }
     debug_return_ptr(members);
 bad:
-    while ((m = TAILQ_FIRST(members)) != NULL) {
-	TAILQ_REMOVE(members, m, entries);
-	free(m->name);
-	free(m);
-    }
+    free_members(members);
     free(members);
     debug_return_ptr(NULL);
 }
@@ -356,43 +352,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	cmndspec->notbefore = UNSPEC;
 	cmndspec->notafter = UNSPEC;
 	cmndspec->timeout = UNSPEC;
-
-	/* Fill in member. */
-	m->negated = negated;
-	if (c == NULL) {
-	    /* No command name for "ALL" */
-	    m->type = ALL;
-	} else {
-	    struct sudo_digest digest;
-	    char *args;
-
-	    m->type = COMMAND;
-	    m->name = (char *)c;
-
-	    /* Fill in command with optional digest. */
-	    if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
-		if ((c->digest = malloc(sizeof(*c->digest))) == NULL) {
-		    free_member(m);
-		    goto oom;
-		}
-		*c->digest = digest;
-	    }
-	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
-		*args++ = '\0';
-		if ((c->args = strdup(args)) == NULL) {
-		    free_member(m);
-		    goto oom;
-		}
-	    }
-	    if ((c->cmnd = strdup(cmnd)) == NULL) {
-		free_member(m);
-		goto oom;
-	    }
-	}
 	cmndspec->cmnd = m;
 
 	if (prev_cmndspec != NULL) {
-	    /* Inherit values from prior cmndspec */
+	    /* Inherit values from prior cmndspec (common to the sudoRole). */
 	    cmndspec->runasuserlist = prev_cmndspec->runasuserlist;
 	    cmndspec->runasgrouplist = prev_cmndspec->runasgrouplist;
 	    cmndspec->notbefore = prev_cmndspec->notbefore;
@@ -516,9 +479,35 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    /* So we can inherit previous values. */
 	    prev_cmndspec = cmndspec;
 	}
-	/* Sudo "ALL" implies the SETENV tag. */
-	if (c == NULL && cmndspec->tags.setenv == UNSPEC)
-	    cmndspec->tags.setenv = IMPLIED;
+
+	/* Fill in command member now that options have been processed. */
+	m->negated = negated;
+	if (c == NULL) {
+	    /* No command name for "ALL" */
+	    m->type = ALL;
+	    if (cmndspec->tags.setenv == UNSPEC)
+		cmndspec->tags.setenv = IMPLIED;
+	} else {
+	    struct sudo_digest digest;
+	    char *args;
+
+	    m->type = COMMAND;
+	    m->name = (char *)c;
+
+	    /* Fill in command with optional digest. */
+	    if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
+		if ((c->digest = malloc(sizeof(*c->digest))) == NULL)
+		    goto oom;
+		*c->digest = digest;
+	    }
+	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
+		*args++ = '\0';
+		if ((c->args = strdup(args)) == NULL)
+		    goto oom;
+	    }
+	    if ((c->cmnd = strdup(cmnd)) == NULL)
+		goto oom;
+	}
     }
     /* Negated commands take precedence so we insert them at the end. */
     TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
@@ -527,8 +516,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (priv != NULL)
+    if (priv != NULL) {
+	TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
 	free_privilege(priv);
+    }
     debug_return_ptr(NULL);
 }
 
