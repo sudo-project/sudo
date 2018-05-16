@@ -213,6 +213,7 @@ sudo_getpwuid(uid_t uid)
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item))) == NULL) {
 	    sudo_warnx(U_("unable to cache uid %u, out of memory"),
 		(unsigned int) uid);
+	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
 	item->refcnt = 1;
@@ -284,6 +285,7 @@ sudo_getpwnam(const char *name)
 	const size_t len = strlen(name) + 1;
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item) + len)) == NULL) {
 	    sudo_warnx(U_("unable to cache user %s, out of memory"), name);
+	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
 	item->refcnt = 1;
@@ -528,6 +530,7 @@ sudo_getgrgid(gid_t gid)
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item))) == NULL) {
 	    sudo_warnx(U_("unable to cache gid %u, out of memory"),
 		(unsigned int) gid);
+	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
 	item->refcnt = 1;
@@ -593,6 +596,7 @@ sudo_getgrnam(const char *name)
 	const size_t len = strlen(name) + 1;
 	if (errno != ENOENT || (item = calloc(1, sizeof(*item) + len)) == NULL) {
 	    sudo_warnx(U_("unable to cache group %s, out of memory"), name);
+	    /* cppcheck-suppress memleak */
 	    debug_return_ptr(NULL);
 	}
 	item->refcnt = 1;
