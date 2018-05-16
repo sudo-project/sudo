@@ -398,6 +398,8 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    cmndspec->notbefore = prev_cmndspec->notbefore;
 	    cmndspec->notafter = prev_cmndspec->notafter;
 	    cmndspec->tags = prev_cmndspec->tags;
+	    if (cmndspec->tags.setenv == IMPLIED)
+		cmndspec->tags.setenv = UNSPEC;
 	} else {
 	    /* Parse sudoRunAsUser / sudoRunAs */
 	    if (runasusers != NULL) {
@@ -514,6 +516,9 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    /* So we can inherit previous values. */
 	    prev_cmndspec = cmndspec;
 	}
+	/* Sudo "ALL" implies the SETENV tag. */
+	if (c == NULL && cmndspec->tags.setenv == UNSPEC)
+	    cmndspec->tags.setenv = IMPLIED;
     }
     /* Negated commands take precedence so we insert them at the end. */
     TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
