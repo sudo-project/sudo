@@ -80,7 +80,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		    continue;
 		TAILQ_FOREACH(def, &priv->defaults, entries) {
 		    if (strcmp(def->var, "authenticate") == 0)
-			priv_nopass = def->op;
+			priv_nopass = !def->op;
 		}
 		TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 		    if (pwcheck == any) {
