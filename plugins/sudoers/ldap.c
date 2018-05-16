@@ -1209,15 +1209,15 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 	    goto cleanup;
 
 	/* Get sudoNotBefore / sudoNotAfter */
-	notbefore = ldap_get_values_len(ld, entry, "sudoNotBefore");
+	notbefore = sudo_ldap_get_values_len(ld, entry, "sudoNotBefore", &rc);
 	if (rc == LDAP_NO_MEMORY)
 	    goto cleanup;
-	notafter = ldap_get_values_len(ld, entry, "sudoNotAfter");
+	notafter = sudo_ldap_get_values_len(ld, entry, "sudoNotAfter", &rc);
 	if (rc == LDAP_NO_MEMORY)
 	    goto cleanup;
 
 	/* Parse sudoOptions. */
-	opts = ldap_get_values_len(ld, entry, "sudoOption");
+	opts = sudo_ldap_get_values_len(ld, entry, "sudoOption", &rc);
 	if (rc == LDAP_NO_MEMORY)
 	    goto cleanup;
 
