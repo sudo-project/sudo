@@ -330,14 +330,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 		case 'E':
 		    /*
 		     * Optional argument is a comma-separated list of
-		     * environment variables to preserve.  If not present,
-		     * preserve everything.
+		     * environment variables to preserve.
+		     * If not present, preserve everything.
 		     */
-		    if (optarg == NULL)
+		    if (optarg == NULL) {
 			sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
-		    else
+			SET(flags, MODE_PRESERVE_ENV);
+		    } else {
 			parse_env_list(&extra_env, optarg);
-		    SET(flags, MODE_PRESERVE_ENV);
+		    }
 		    break;
 		case 'e':
 		    if (mode && mode != MODE_EDIT)
