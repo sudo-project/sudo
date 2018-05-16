@@ -339,6 +339,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		free(m);
 		goto oom;
 	    }
+	    m->name = (char *)c;
 	}
 
 	/* Negated commands have precedence so insert them at the end. */
@@ -492,7 +493,6 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    char *args;
 
 	    m->type = COMMAND;
-	    m->name = (char *)c;
 
 	    /* Fill in command with optional digest. */
 	    if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
