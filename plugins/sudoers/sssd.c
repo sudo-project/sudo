@@ -332,21 +332,24 @@ sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
     if (sss_result == NULL)
 	goto done;
 
+    /* Stash a ref to the passwd struct in the handle. */
+    sudo_pw_addref(pw);
+    handle->pw = pw;
+
     /* Convert to sudoers parse tree. */
     if (!sss_to_sudoers(handle, sss_result, &nss->userspecs)) {
 	ret = -1;
 	goto done;
     }
 
-    /* Stash a ref to the passwd struct in the handle. */
-    sudo_pw_addref(pw);
-    handle->pw = pw;
-
 done:
     /* Cleanup */
     handle->fn_free_result(sss_result);
-    if (ret == -1)
+    if (ret == -1) {
 	free_userspecs(&nss->userspecs);
+	sudo_pw_delref(handle->pw);
+	handle->pw = NULL;
+    }
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
