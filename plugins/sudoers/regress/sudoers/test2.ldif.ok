@@ -45,10 +45,10 @@ sudoRunAsUser: root
 sudoCommand: ALL
 sudoOrder: 2
 
-dn: cn=foo",ou=SUDOers,dc=sudo,dc=ws
+dn: cn=foo\",ou=SUDOers,dc=sudo,dc=ws
 objectClass: top
 objectClass: sudoRole
-cn: foo"
+cn: foo\"
 sudoUser: foo"
 sudoHost: hostc
 sudoRunAsUser: root
@@ -65,10 +65,10 @@ sudoRunAsUser: root
 sudoCommand: ALL
 sudoOrder: 4
 
-dn: cn=foo:bar",ou=SUDOers,dc=sudo,dc=ws
+dn: cn=foo:bar\",ou=SUDOers,dc=sudo,dc=ws
 objectClass: top
 objectClass: sudoRole
-cn: foo:bar"
+cn: foo:bar\"
 sudoUser: foo:bar"
 sudoHost: hoste
 sudoRunAsUser: root
@@ -115,10 +115,10 @@ sudoRunAsUser: root
 sudoCommand: ALL
 sudoOrder: 9
 
-dn: cn=%:C/non"UNIX"0 c,ou=SUDOers,dc=sudo,dc=ws
+dn: cn=%:C/non\"UNIX\"0 c,ou=SUDOers,dc=sudo,dc=ws
 objectClass: top
 objectClass: sudoRole
-cn: %:C/non"UNIX"0 c
+cn: %:C/non\"UNIX\"0 c
 sudoUser: %:C/non"UNIX"0 c
 sudoHost: hoste
 sudoRunAsUser: root

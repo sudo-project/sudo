@@ -326,6 +326,7 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
 
 /*
  * Convert user name to cn, avoiding duplicates and quoting as needed.
+ * See http://www.faqs.org/rfcs/rfc2253.html
  */
 static char *
 user_to_cn(const char *user)
@@ -363,19 +364,23 @@ user_to_cn(const char *user)
     for (src = user, dst = cn; *src != '\0'; src++) {
 	switch (*src) {
 	case ',':
-	case '\\':
-	case '#':
 	case '+':
+	case '"':
+	case '\\':
 	case '<':
 	case '>':
+	case '#':
 	case ';':
-	    *dst++ = '\\';
-	    *dst++ = *src;
+	    *dst++ = '\\';	/* always escape */
+	    break;
+	case ' ':
+	    if (src == user || src[1] == '\0')
+		*dst++ = '\\';	/* only escape at beginning or end of string */
 	    break;
 	default:
-	    *dst++ = *src;
 	    break;
 	}
+	*dst++ = *src;
     }
     *dst = '\0';
 
