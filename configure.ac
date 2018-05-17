@@ -1420,6 +1420,7 @@ AC_ARG_ENABLE(env_debug,
 AC_ARG_ENABLE(zlib,
 [AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
 [], [enable_zlib=yes])
+AX_APPEND_FLAG([-DZLIB_CONST], [CPPFLAGS])
 
 AC_MSG_CHECKING(whether to enable environment resetting by default)
 AC_ARG_ENABLE(env_reset,

@@ -6323,6 +6323,38 @@ else
 fi
 
 
+if ${CPPFLAGS+:} false; then :
+
+  case " $CPPFLAGS " in #(
+  *" -DZLIB_CONST "*) :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -DZLIB_CONST"; } >&5
+  (: CPPFLAGS already contains -DZLIB_CONST) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -DZLIB_CONST"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else
+
+  CPPFLAGS=-DZLIB_CONST
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable environment resetting by default" >&5
 $as_echo_n "checking whether to enable environment resetting by default... " >&6; }
 # Check whether --enable-env_reset was given.
