@@ -371,6 +371,7 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
 	char *attr_val;
+	int len;
 
 	len = asprintf(&attr_val, "role=%s", cs->role);
 	if (len == -1) {
@@ -394,6 +395,7 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
 	char *attr_val;
+	int len;
 
 	if (cs->privs != NULL) {
 	    len = asprintf(&attr_val, "privs=%s", cs->privs);
