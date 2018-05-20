@@ -60,6 +60,61 @@ seen_user_free(void *v)
     free(su);
 }
 
+static bool
+safe_string(const char *str)
+{
+    unsigned int ch = *str++;
+    debug_decl(safe_string, SUDOERS_DEBUG_UTIL)
+
+    /* Initial char must be <= 127 and not LF, CR, SPACE, ':', '<' */
+    switch (ch) {
+    case '\n':
+    case '\r':
+    case ' ':
+    case ':':
+    case '<':
+	debug_return_bool(false);
+    default:
+	if (ch > 127)
+	    debug_return_bool(false);
+    }
+
+    /* Any value <= 127 decimal except NUL, LF, and CR is safe */
+    while ((ch = *str++) != '\0') {
+	if (ch > 127 || ch == '\n' || ch == '\r')
+	    debug_return_bool(false);
+    }
+
+    debug_return_bool(true);
+}
+
+static bool
+print_attribute_ldif(FILE *fp, const char *name, const char *value)
+{
+    char *encoded = NULL;
+    size_t esize;
+    debug_decl(print_attribute_ldif, SUDOERS_DEBUG_UTIL)
+
+    if (!safe_string(value)) {
+	const size_t vlen = strlen(value);
+	esize = ((vlen + 2) / 3 * 4) + 1;
+	if ((encoded = malloc(esize)) == NULL)
+	    debug_return_bool(false);
+	if (base64_encode(value, vlen, encoded, esize) == (size_t)-1) {
+	    free(encoded);
+	    debug_return_bool(false);
+	}
+	fprintf(fp, "%s:: %s\n", name, encoded);
+	free(encoded);
+    } else if (*value != '\0') {
+	fprintf(fp, "%s: %s\n", name, value);
+    } else {
+	fprintf(fp, "%s:\n", name);
+    }
+
+    debug_return_bool(true);
+}
+
 /*
  * Print sudoOptions from a defaults_list.
  */
@@ -67,6 +122,8 @@ static bool
 print_options_ldif(FILE *fp, struct defaults_list *options)
 {
     struct defaults *opt;
+    char *attr_val;
+    int len;
     debug_decl(print_options_ldif, SUDOERS_DEBUG_UTIL)
 
     TAILQ_FOREACH(opt, options, entries) {
@@ -75,13 +132,19 @@ print_options_ldif(FILE *fp, struct defaults_list *options)
 
 	if (opt->val != NULL) {
 	    /* There is no need to double quote values here. */
-	    fprintf(fp, "sudoOption: %s%s%s\n", opt->var,
+	    len = asprintf(&attr_val, "%s%s%s", opt->var,
 		opt->op == '+' ? "+=" : opt->op == '-' ? "-=" : "=", opt->val);
 	} else {
 	    /* Boolean flag. */
-	    fprintf(fp, "sudoOption: %s%s\n", opt->op == false ? "!" : "",
-		opt->var);
+	    len = asprintf(&attr_val, "%s%s",
+		opt->op == false ? "!" : "", opt->var);
 	}
+	if (len == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, "sudoOption", attr_val);
+	free(attr_val);
     }
 
     debug_return_bool(!ferror(fp));
@@ -96,6 +159,7 @@ print_global_defaults_ldif(FILE *fp, const char *base)
     unsigned int count = 0;
     struct sudo_lbuf lbuf;
     struct defaults *opt;
+    char *dn;
     debug_decl(print_global_defaults_ldif, SUDOERS_DEBUG_UTIL)
 
     sudo_lbuf_init(&lbuf, NULL, 0, NULL, 80);
@@ -117,11 +181,16 @@ print_global_defaults_ldif(FILE *fp, const char *base)
     if (count == 0)
 	debug_return_bool(true);
 
-    fprintf(fp, "dn: cn=defaults,%s\n", base);
-    fputs("objectClass: top\n", fp);
-    fputs("objectClass: sudoRole\n", fp);
-    fputs("cn: defaults\n", fp);
-    fputs("description: Default sudoOption's go here\n", fp);
+    if (asprintf(&dn, "cn=defaults,%s", base) == -1) {
+	sudo_fatalx(U_("%s: %s"), __func__,
+	    U_("unable to allocate memory"));
+    }
+    print_attribute_ldif(fp, "dn", dn);
+    free(dn);
+    print_attribute_ldif(fp, "objectClass", "top");
+    print_attribute_ldif(fp, "objectClass", "sudoRole");
+    print_attribute_ldif(fp, "cn", "defaults");
+    print_attribute_ldif(fp, "description", "Default sudoOption's go here");
 
     print_options_ldif(fp, &defaults);
     putc('\n', fp);
@@ -130,50 +199,60 @@ print_global_defaults_ldif(FILE *fp, const char *base)
 }
 
 /*
- * Print struct member in LDIF format, with specified prefix.
+ * Print struct member in LDIF format as the specified attribute.
  * See print_member_int() in parse.c.
  */
 static void
 print_member_ldif(FILE *fp, char *name, int type, bool negated,
-    int alias_type, const char *prefix)
+    int alias_type, const char *attr_name)
 {
     struct alias *a;
     struct member *m;
     struct sudo_command *c;
+    char *attr_val;
+    int len;
     debug_decl(print_member_ldif, SUDOERS_DEBUG_UTIL)
 
     switch (type) {
     case ALL:
-	fprintf(fp, "%s: %sALL\n", prefix, negated ? "!" : "");
+	print_attribute_ldif(fp, attr_name, negated ? "!ALL" : "ALL");
 	break;
     case MYSELF:
 	/* Only valid for sudoRunasUser */
-	fprintf(fp, "%s:\n", prefix);
+	print_attribute_ldif(fp, attr_name, "");
 	break;
     case COMMAND:
 	c = (struct sudo_command *)name;
-	fprintf(fp, "%s: ", prefix);
-	if (c->digest != NULL) {
-	    fprintf(fp, "%s:%s ", digest_type_to_name(c->digest->digest_type),
-		c->digest->digest_str);
+	len = asprintf(&attr_val, "%s%s%s%s%s%s%s%s",
+	    c->digest ? digest_type_to_name(c->digest->digest_type) : "",
+	    c->digest ? ":" : "", c->digest ? c->digest->digest_str : "",
+	    c->digest ? " " : "", negated ? "!" : "", c->cmnd,
+	    c->args ? " " : "", c->args ? c->args : "");
+	if (len == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
 	}
-	fprintf(fp, "%s%s", negated ? "!" : "", c->cmnd);
-	if (c->args != NULL)
-	    fprintf(fp, " %s", c->args);
-	putc('\n', fp);
+	print_attribute_ldif(fp, attr_name, attr_val);
+	free(attr_val);
 	break;
     case ALIAS:
 	if ((a = alias_get(name, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
 		print_member_ldif(fp, m->name, m->type,
-		    negated ? !m->negated : m->negated, alias_type, prefix);
+		    negated ? !m->negated : m->negated, alias_type, attr_name);
 	    }
 	    alias_put(a);
 	    break;
 	}
 	/* FALLTHROUGH */
     default:
-	fprintf(fp, "%s: %s%s\n", prefix, negated ? "!" : "", name);
+	len = asprintf(&attr_val, "%s%s", negated ? "!" : "", name);
+	if (len == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, attr_name, attr_val);
+	free(attr_val);
 	break;
     }
 
@@ -219,7 +298,7 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
 	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
 		sudo_warnx(U_("unable to format timestamp"));
 	    } else {
-		fprintf(fp, "sudoNotBefore: %s\n", timebuf);
+		print_attribute_ldif(fp, "sudoNotBefore", timebuf);
 	    }
 	}
     }
@@ -230,14 +309,20 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
 	    if (strftime(timebuf, sizeof(timebuf), "%Y%m%d%H%M%SZ", tp) == 0) {
 		sudo_warnx(U_("unable to format timestamp"));
 	    } else {
-		fprintf(fp, "sudoNotAfter: %s\n", timebuf);
+		print_attribute_ldif(fp, "sudoNotAfter", timebuf);
 	    }
 	}
     }
 
     /* Print timeout as a sudoOption. */
     if (cs->timeout > 0) {
-	fprintf(fp, "sudoOption: command_timeout=%d\n", cs->timeout);
+	char *attr_val;
+	if (asprintf(&attr_val, "command_timeout=%d", cs->timeout) == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, "sudoOption", attr_val);
+	free(attr_val);
     }
 
     /* Print tags as sudoOption attributes */
@@ -245,31 +330,37 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
 	struct cmndtag tag = cs->tags;
 
 	if (tag.nopasswd != UNSPEC) {
-	    fprintf(fp, "sudoOption: %sauthenticate\n", tag.nopasswd ? "!" : "");
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.nopasswd ? "!authenticate" : "authenticate");
 	}
 	if (tag.noexec != UNSPEC) {
-	    fprintf(fp, "sudoOption: %snoexec\n", tag.noexec ? "" : "!");
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.noexec ? "noexec" : "!noexec");
 	}
 	if (tag.send_mail != UNSPEC) {
 	    if (tag.send_mail) {
-		fprintf(fp, "sudoOption: mail_all_cmnds\n");
+		print_attribute_ldif(fp, "sudoOption", "mail_all_cmnds");
 	    } else {
-		fprintf(fp, "sudoOption: !mail_all_cmnds\n");
-		fprintf(fp, "sudoOption: !mail_always\n");
-		fprintf(fp, "sudoOption: !mail_no_perms\n");
+		print_attribute_ldif(fp, "sudoOption", "!mail_all_cmnds");
+		print_attribute_ldif(fp, "sudoOption", "!mail_always");
+		print_attribute_ldif(fp, "sudoOption", "!mail_no_perms");
 	    }
 	}
 	if (tag.setenv != UNSPEC && tag.setenv != IMPLIED) {
-	    fprintf(fp, "sudoOption: %ssetenv\n", tag.setenv ? "" : "!");
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.setenv ? "setenv" : "!setenv");
 	}
 	if (tag.follow != UNSPEC) {
-	    fprintf(fp, "sudoOption: %ssudoedit_follow\n", tag.follow ? "" : "!");
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.follow ? "sudoedit_follow" : "!sudoedit_follow");
 	}
 	if (tag.log_input != UNSPEC) {
-	    fprintf(fp, "sudoOption: %slog_input\n", tag.log_input ? "" : "!");
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.log_input ? "log_input" : "!log_input");
 	}
 	if (tag.log_output != UNSPEC) {
-	    fprintf(fp, "sudoOption: %slog_output\n", tag.log_output ? "" : "!");
+	    print_attribute_ldif(fp, "sudoOption",
+		tag.log_output ? "log_output" : "!log_output");
 	}
     }
     print_options_ldif(fp, options);
@@ -277,18 +368,49 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
 #ifdef HAVE_SELINUX
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
-	fprintf(fp, "sudoOption: role=%s\n", cs->role);
-	fprintf(fp, "sudoOption: type=%s\n", cs->type);
+	char *attr_val;
+
+	len = asprintf(&attr_val, "role=%s", cs->role);
+	if (len == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, "sudoOption", attr_val);
+	free(attr_val);
+
+	len = asprintf(&attr_val, "type=%s", cs->type);
+	if (len == -1) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
+	print_attribute_ldif(fp, "sudoOption", attr_val);
+	free(attr_val);
     }
 #endif /* HAVE_SELINUX */
 
 #ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
-	if (cs->privs != NULL)
-	    fprintf(fp, "sudoOption: privs=%s\n", cs->privs);
-	if (cs->limitprivs != NULL)
-	    fprintf(fp, "sudoOption: limitprivs=%s\n", cs->limitprivs);
+	char *attr_val;
+
+	if (cs->privs != NULL) {
+	    len = asprintf(&attr_val, "privs=%s", cs->privs);
+	    if (len == -1) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    print_attribute_ldif(fp, "sudoOption", attr_val);
+	    free(attr_val);
+	}
+	if (cs->limitprivs != NULL) {
+	    len = asprintf(&attr_val, "limitprivs=%s", cs->limitprivs);
+	    if (len == -1) {
+		sudo_fatalx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+	    }
+	    print_attribute_ldif(fp, "sudoOption", attr_val);
+	    free(attr_val);
+	}
     }
 #endif /* HAVE_PRIV_SET */
 
@@ -419,7 +541,8 @@ print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *con
      */
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, next) {
-	    char *cn;
+	    const char *base = conf->sudoers_base;
+	    char *cn, *dn;
 
 	    /*
 	     * Increment the number of times we have seen this user.
@@ -427,16 +550,17 @@ print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *con
 	     */
 	    m = TAILQ_FIRST(&us->users);
 	    cn = user_to_cn(m->type == ALL ? "ALL" : m->name);
-	    if (cn == NULL) {
+	    if (cn == NULL || asprintf(&dn, "cn=%s,%s", cn, base) == -1) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
 
-	    fprintf(fp, "dn: cn=%s,%s\n", cn, conf->sudoers_base);
-	    fprintf(fp, "objectClass: top\n");
-	    fprintf(fp, "objectClass: sudoRole\n");
-	    fprintf(fp, "cn: %s\n", cn);
+	    print_attribute_ldif(fp, "dn", dn);
+	    print_attribute_ldif(fp, "objectClass", "top");
+	    print_attribute_ldif(fp, "objectClass", "sudoRole");
+	    print_attribute_ldif(fp, "cn", cn);
 	    free(cn);
+	    free(dn);
 
 	    TAILQ_FOREACH(m, &us->users, entries) {
 		print_member_ldif(fp, m->name, m->type, m->negated,
@@ -451,7 +575,10 @@ print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *con
 	    print_cmndspec_ldif(fp, cs, &next, &priv->defaults);
 
 	    if (conf->sudo_order != 0) {
-		fprintf(fp, "sudoOrder: %u\n\n", conf->sudo_order);
+		char numbuf[(((sizeof(conf->sudo_order) * 8) + 2) / 3) + 2];
+		(void)snprintf(numbuf, sizeof(numbuf), "%u", conf->sudo_order);
+		print_attribute_ldif(fp, "sudoOrder", numbuf);
+		putc('\n', fp);
 		conf->sudo_order += conf->order_increment;
 	    }
 	}
