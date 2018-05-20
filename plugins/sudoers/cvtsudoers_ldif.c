@@ -93,6 +93,7 @@ safe_string(const char *str)
 static bool
 print_attribute_ldif(FILE *fp, const char *name, const char *value)
 {
+    const unsigned char *uvalue = (unsigned char *)value;
     char *encoded = NULL;
     size_t esize;
     debug_decl(print_attribute_ldif, SUDOERS_DEBUG_UTIL)
@@ -102,7 +103,7 @@ print_attribute_ldif(FILE *fp, const char *name, const char *value)
 	esize = ((vlen + 2) / 3 * 4) + 1;
 	if ((encoded = malloc(esize)) == NULL)
 	    debug_return_bool(false);
-	if (base64_encode(value, vlen, encoded, esize) == (size_t)-1) {
+	if (base64_encode(uvalue, vlen, encoded, esize) == (size_t)-1) {
 	    free(encoded);
 	    debug_return_bool(false);
 	}
@@ -743,7 +744,7 @@ ldif_parse_attribute(char *str)
     attr = str;
     if (encoded) {
 	/* decode base64 inline and NUL-terminate */
-	len = base64_decode(str, attr, strlen(str));
+	len = base64_decode(str, (unsigned char *)attr, strlen(str));
 	attr[len] = '\0';
     }
 

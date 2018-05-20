@@ -101,7 +101,8 @@ main(int argc, char *argv[])
 	}
 
 	/* Test encode. */
-	len = base64_encode(test_strings[i].ascii, strlen(test_strings[i].ascii), buf, sizeof(buf));
+	len = base64_encode((unsigned char *)test_strings[i].ascii,
+	    strlen(test_strings[i].ascii), (char *)buf, sizeof(buf));
 	if (len == (size_t)-1) {
 	    fprintf(stderr, "check_base64: failed to encode %s\n",
 		test_strings[i].ascii);
