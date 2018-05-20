@@ -68,6 +68,8 @@ safe_string(const char *str)
 
     /* Initial char must be <= 127 and not LF, CR, SPACE, ':', '<' */
     switch (ch) {
+    case '\0':
+	debug_return_bool(true);
     case '\n':
     case '\r':
     case ' ':
