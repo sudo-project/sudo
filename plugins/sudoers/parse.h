@@ -303,6 +303,7 @@ int hexchar(const char *s);
 
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
+size_t base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len);
 
 /* timeout.c */
 int parse_timeout(const char *timestr);

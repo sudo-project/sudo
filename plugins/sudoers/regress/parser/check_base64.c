@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,9 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
+/* From parse.h */
 extern size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
+extern size_t base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len);
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -75,22 +77,45 @@ struct base64_test {
 int
 main(int argc, char *argv[])
 {
-    const int ntests = nitems(test_strings);
+    int ntests = nitems(test_strings);
     int i, errors = 0;
-    unsigned char buf[32];
+    unsigned char buf[64];
     size_t len;
 
     initprogname(argc > 0 ? argv[0] : "check_base64");
 
     for (i = 0; i < ntests; i++) {
+	/* Test decode. */
 	len = base64_decode(test_strings[i].encoded, buf, sizeof(buf));
-	buf[len] = '\0';
-	if (strcmp(test_strings[i].ascii, (char *)buf) != 0) {
-	    fprintf(stderr, "check_base64: expected %s, got %s",
-		test_strings[i].ascii, buf);
+	if (len == (size_t)-1) {
+	    fprintf(stderr, "check_base64: failed to decode %s\n",
+		test_strings[i].encoded);
 	    errors++;
+	} else {
+	    buf[len] = '\0';
+	    if (strcmp(test_strings[i].ascii, (char *)buf) != 0) {
+		fprintf(stderr, "check_base64: expected %s, got %s\n",
+		    test_strings[i].ascii, buf);
+		errors++;
+	    }
+	}
+
+	/* Test encode. */
+	len = base64_encode(test_strings[i].ascii, strlen(test_strings[i].ascii), buf, sizeof(buf));
+	if (len == (size_t)-1) {
+	    fprintf(stderr, "check_base64: failed to encode %s\n",
+		test_strings[i].ascii);
+	    errors++;
+	} else {
+	    if (strcmp(test_strings[i].encoded, (char *)buf) != 0) {
+		fprintf(stderr, "check_base64: expected %s, got %s\n",
+		    test_strings[i].encoded, buf);
+		errors++;
+	    }
 	}
     }
+    ntests *= 2;	/* we test in both directions */
+
     printf("check_base64: %d tests run, %d errors, %d%% success rate\n",
 	ntests, errors, (ntests - errors) * 100 / ntests);
     exit(errors);
