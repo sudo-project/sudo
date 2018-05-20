@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Test LDAP base filtering.
+# Test LDIF base64 attribute parsing
 #
 
 exec 2>&1
