@@ -20,6 +20,7 @@
 #include <stdio.h>
 
 #include "sudo_compat.h"
+#include "sudo_digest.h"
 #include "sudoers_debug.h"
 #include "parse.h"
 

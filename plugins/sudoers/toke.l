@@ -47,13 +47,8 @@
 #include "sudoers.h"
 #include "toke.h"
 #include <gram.h>
+#include "sudo_digest.h"
 #include "sudo_lbuf.h"
-
-#ifdef HAVE_SHA224UPDATE
-# include <sha2.h>
-#else
-# include "compat/sha2.h"
-#endif
 
 #if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
 # define NAMLEN(dirent)	(dirent)->d_namlen
@@ -73,7 +68,7 @@ gid_t sudoers_gid = SUDOERS_GID;
 
 static bool continued, sawspace;
 static int prev_state;
-static yy_size_t digest_len;
+static int digest_type = -1;
 
 static bool push_include_int(char *, bool);
 static bool pop_include(void);
@@ -256,6 +251,8 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[[:xdigit:]]+ {
 			    /* Only return DIGEST if the length is correct. */
+			    yy_size_t digest_len =
+				sudo_digest_getlen(digest_type);
 			    if ((yy_size_t)sudoersleng == digest_len * 2) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
@@ -269,7 +266,8 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[A-Za-z0-9\+/=]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    yy_size_t len;
+			    yy_size_t len, digest_len =
+				sudo_digest_getlen(digest_type);
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
 				len = 4 * ((digest_len + 2) / 3);
@@ -597,28 +595,28 @@ ALL {
 			}
 
 sha224			{
-			    digest_len = SHA224_DIGEST_LENGTH;
+			    digest_type = SUDO_DIGEST_SHA224;
 			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA224_TOK ");
 			    LEXRETURN(SHA224_TOK);
 			}
 
 sha256			{
-			    digest_len = SHA256_DIGEST_LENGTH;
+			    digest_type = SUDO_DIGEST_SHA256;
 			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA256_TOK ");
 			    LEXRETURN(SHA256_TOK);
 			}
 
 sha384			{
-			    digest_len = SHA384_DIGEST_LENGTH;
+			    digest_type = SUDO_DIGEST_SHA384;
 			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA384_TOK ");
 			    LEXRETURN(SHA384_TOK);
 			}
 
 sha512			{
-			    digest_len = SHA512_DIGEST_LENGTH;
+			    digest_type = SUDO_DIGEST_SHA512;
 			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA512_TOK ");
 			    LEXRETURN(SHA512_TOK);
@@ -916,6 +914,7 @@ init_lexer(void)
     keepopen = false;
     sawspace = false;
     continued = false;
+    digest_type = -1;
     prev_state = INITIAL;
 
     debug_return;

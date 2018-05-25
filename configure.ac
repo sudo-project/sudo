@@ -96,7 +96,7 @@ AC_SUBST([RC_LINK])
 AC_SUBST([COMPAT_EXP])
 AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
-AC_SUBST([FILEDIGEST])
+AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -185,7 +185,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
-FILEDIGEST=filedigest.lo
+DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
@@ -1468,7 +1468,7 @@ AC_ARG_ENABLE(openssl,
 [ case $enableval in
     no)		;;
     *)		LIBMD="-lcrypto"
-		FILEDIGEST=filedigest_openssl.lo
+		DIGEST=digest_openssl.lo
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
 		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
@@ -1482,7 +1482,7 @@ AC_ARG_ENABLE(gcrypt,
 [ case $enableval in
     no)		;;
     *)		LIBMD="-lgcrypt"
-		FILEDIGEST=filedigest_gcrypt.lo
+		DIGEST=digest_gcrypt.lo
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
 		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
@@ -2773,7 +2773,7 @@ AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
     [AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
     [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
 # Look for sha2 functions if not using openssl
-if test "$FILEDIGEST" = "filedigest.lo"; then
+if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
     AC_CHECK_HEADER([sha2.h], [
 	FOUND_SHA2=yes

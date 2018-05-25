@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -108,7 +108,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LTOBJS = event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
+LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
 	 gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo secure_path.lo \
 	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
 	 sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
@@ -155,9 +155,9 @@ $(shlib_opt): $(shlib_exp)
 libsudo_util.la: $(LTOBJS) @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
-	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LIBINTL@ @LIBDL@ @LIBRT@;; \
+	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LIBINTL@ @LIBMD@ @LIBDL@ @LIBRT@;; \
 	*) \
-	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBDL@ @LIBRT@;; \
+	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBDL@ @LIBRT@;; \
 	esac
 
 siglist.c: mksiglist
@@ -366,6 +366,21 @@ conf_test.lo: $(srcdir)/regress/sudo_conf/conf_test.c \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/sudo_conf/conf_test.c
+digest.lo: $(srcdir)/digest.c $(incdir)/compat/sha2.h \
+           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_digest.h \
+           $(incdir)/sudo_queue.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/digest.c
+digest_gcrypt.lo: $(srcdir)/digest_gcrypt.c $(incdir)/compat/stdbool.h \
+                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_digest.h $(incdir)/sudo_queue.h \
+                  $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/digest_gcrypt.c
+digest_openssl.lo: $(srcdir)/digest_openssl.c $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+                   $(incdir)/sudo_digest.h $(incdir)/sudo_queue.h \
+                   $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/digest_openssl.c
 event.lo: $(srcdir)/event.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h

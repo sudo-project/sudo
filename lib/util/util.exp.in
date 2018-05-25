@@ -37,6 +37,12 @@ sudo_debug_set_active_instance_v1
 sudo_debug_update_fd_v1
 sudo_debug_vprintf2_v1
 sudo_debug_write2_v1
+sudo_digest_alloc_v1
+sudo_digest_final_v1
+sudo_digest_free_v1
+sudo_digest_getlen_v1
+sudo_digest_reset_v1
+sudo_digest_update_v1
 sudo_dso_findsym_v1
 sudo_dso_load_v1
 sudo_dso_preload_table_v1

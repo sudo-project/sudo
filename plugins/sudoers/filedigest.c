@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,69 +38,27 @@
 #include <errno.h>
 
 #include "sudoers.h"
-
-#ifdef HAVE_SHA224UPDATE
-# include <sha2.h>
-#else
-# include "compat/sha2.h"
-#endif
-
-static struct digest_function {
-    const unsigned int digest_len;
-    void (*init)(SHA2_CTX *);
-#ifdef SHA2_VOID_PTR
-    void (*update)(SHA2_CTX *, const void *, size_t);
-    void (*final)(void *, SHA2_CTX *);
-#else
-    void (*update)(SHA2_CTX *, const unsigned char *, size_t);
-    void (*final)(unsigned char *, SHA2_CTX *);
-#endif
-} digest_functions[] = {
-    {
-	SHA224_DIGEST_LENGTH,
-	SHA224Init,
-	SHA224Update,
-	SHA224Final
-    }, {
-	SHA256_DIGEST_LENGTH,
-	SHA256Init,
-	SHA256Update,
-	SHA256Final
-    }, {
-	SHA384_DIGEST_LENGTH,
-	SHA384Init,
-	SHA384Update,
-	SHA384Final
-    }, {
-	SHA512_DIGEST_LENGTH,
-	SHA512Init,
-	SHA512Update,
-	SHA512Final
-    }, {
-	0
-    }
-};
+#include "sudo_digest.h"
 
 unsigned char *
 sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
 {
-    struct digest_function *func = NULL;
     unsigned char *file_digest = NULL;
     unsigned char buf[32 * 1024];
-    size_t nread;
-    SHA2_CTX ctx;
-    int i, fd2;
+    struct sudo_digest *dig = NULL;
     FILE *fp = NULL;
+    size_t nread;
+    int fd2;
     debug_decl(sudo_filedigest, SUDOERS_DEBUG_UTIL)
 
-    for (i = 0; digest_functions[i].digest_len != 0; i++) {
-	if (digest_type == i) {
-	    func = &digest_functions[i];
-	    break;
-	}
-    }
-    if (func == NULL) {
+    *digest_len = sudo_digest_getlen(digest_type);
+    if (*digest_len == (size_t)-1) {
 	sudo_warnx(U_("unsupported digest type %d for %s"), digest_type, file);
+	goto bad;
+    }
+
+    if ((dig = sudo_digest_alloc(digest_type)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
 
@@ -115,25 +73,25 @@ sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
 	close(fd2);
 	goto bad;
     }
-    if ((file_digest = malloc(func->digest_len)) == NULL) {
+    if ((file_digest = malloc(*digest_len)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
 
-    func->init(&ctx);
     while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
-	func->update(&ctx, buf, nread);
+	sudo_digest_update(dig, buf, nread);
     }
     if (ferror(fp)) {
 	sudo_warnx(U_("%s: read error"), file);
 	goto bad;
     }
-    func->final(file_digest, &ctx);
+    sudo_digest_final(dig, file_digest);
+    sudo_digest_free(dig);
     fclose(fp);
 
-    *digest_len = func->digest_len;
     debug_return_ptr(file_digest);
 bad:
+    sudo_digest_free(dig);
     free(file_digest);
     if (fp != NULL)
 	fclose(fp);

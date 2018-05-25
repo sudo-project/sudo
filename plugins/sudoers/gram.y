@@ -46,6 +46,7 @@
 #include <errno.h>
 
 #include "sudoers.h"
+#include "sudo_digest.h"
 #include "toke.h"
 
 /* If we last saw a newline the entry is on the preceding line. */
@@ -70,7 +71,7 @@ static bool add_defaults(int, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
-static struct sudo_digest *new_digest(int, char *);
+static struct command_digest *new_digest(int, char *);
 %}
 
 %union {
@@ -79,7 +80,7 @@ static struct sudo_digest *new_digest(int, char *);
     struct member *member;
     struct runascontainer *runas;
     struct privilege *privilege;
-    struct sudo_digest *digest;
+    struct command_digest *digest;
     struct sudo_command command;
     struct command_options options;
     struct cmndtag tag;
@@ -967,28 +968,28 @@ new_member(char *name, int type)
     debug_return_ptr(m);
 }
 
-static struct sudo_digest *
+static struct command_digest *
 new_digest(int digest_type, char *digest_str)
 {
-    struct sudo_digest *dig;
+    struct command_digest *digest;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER)
 
-    if ((dig = malloc(sizeof(*dig))) == NULL) {
+    if ((digest = malloc(sizeof(*digest))) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
 	debug_return_ptr(NULL);
     }
 
-    dig->digest_type = digest_type;
-    dig->digest_str = digest_str;
-    if (dig->digest_str == NULL) {
+    digest->digest_type = digest_type;
+    digest->digest_str = digest_str;
+    if (digest->digest_str == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
-	free(dig);
-	dig = NULL;
+	free(digest);
+	digest = NULL;
     }
 
-    debug_return_ptr(dig);
+    debug_return_ptr(digest);
 }
 
 /*

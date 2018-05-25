@@ -75,13 +75,13 @@
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 
-static bool command_matches_dir(const char *sudoers_dir, size_t dlen, const struct sudo_digest *digest);
+static bool command_matches_dir(const char *sudoers_dir, size_t dlen, const struct command_digest *digest);
 #ifndef SUDOERS_NAME_MATCH
-static bool command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
+static bool command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
 #endif
-static bool command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
-static bool command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
-static bool digest_matches(int fd, const char *file, const struct sudo_digest *sd);
+static bool command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+static bool command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+static bool digest_matches(int fd, const char *file, const struct command_digest *digest);
 
 /*
  * Returns true if string 's' contains meta characters.
@@ -425,7 +425,7 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
  * otherwise, return true if user_cmnd names one of the inodes in path.
  */
 bool
-command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
+command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     bool rc = false;
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH)
@@ -512,7 +512,7 @@ is_script(int fd)
  * Returns false on error, else true.
  */
 static bool
-open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
+open_cmnd(const char *path, const struct command_digest *digest, int *fdp)
 {
     int fd = -1;
     debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH)
@@ -580,7 +580,7 @@ set_cmnd_fd(int fd)
 
 static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     struct stat sb; /* XXX - unused */
     int fd = -1;
@@ -621,7 +621,7 @@ bad:
 #ifndef SUDOERS_NAME_MATCH
 static bool
 command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     struct stat sudoers_stat;
     bool bad_digest = false;
@@ -751,7 +751,7 @@ done:
 
 #ifdef SUDOERS_NAME_MATCH
 static bool
-command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
+command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     size_t dlen;
     debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH)
@@ -776,7 +776,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 #else /* !SUDOERS_NAME_MATCH */
 
 static bool
-digest_matches(int fd, const char *file, const struct sudo_digest *sd)
+digest_matches(int fd, const char *file, const struct command_digest *digest)
 {
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
@@ -784,7 +784,7 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     size_t digest_len;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
-    file_digest = sudo_filedigest(fd, file, sd->digest_type, &digest_len);
+    file_digest = sudo_filedigest(fd, file, digest->digest_type, &digest_len);
     if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "unable to rewind digest fd");
@@ -799,18 +799,18 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    if (strlen(sd->digest_str) == digest_len * 2) {
+    if (strlen(digest->digest_str) == digest_len * 2) {
 	/* Convert ascii hex to binary. */
 	unsigned int i;
 	for (i = 0; i < digest_len; i++) {
-	    const int h = hexchar(&sd->digest_str[i + i]);
+	    const int h = hexchar(&digest->digest_str[i + i]);
 	    if (h == -1)
 		goto bad_format;
 	    sudoers_digest[i] = (unsigned char)h;
 	}
     } else {
 	/* Convert base64 to binary. */
-	size_t len = base64_decode(sd->digest_str, sudoers_digest, digest_len);
+	size_t len = base64_decode(digest->digest_str, sudoers_digest, digest_len);
 	if (len != digest_len) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"incorrect length for digest, expected %zu, got %zu",
@@ -824,13 +824,13 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     } else {
 	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "%s digest mismatch for %s, expecting %s",
-	    digest_type_to_name(sd->digest_type), file, sd->digest_str);
+	    digest_type_to_name(digest->digest_type), file, digest->digest_str);
     }
     goto done;
 
 bad_format:
     sudo_warnx(U_("digest for %s (%s) is not in %s form"), file,
-	sd->digest_str, digest_type_to_name(sd->digest_type));
+	digest->digest_str, digest_type_to_name(digest->digest_type));
 done:
     free(sudoers_digest);
     free(file_digest);
@@ -838,7 +838,7 @@ done:
 }
 
 static bool
-command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
+command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     struct stat sudoers_stat;
     const char *base;
@@ -903,7 +903,7 @@ bad:
  */
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH)
     /* XXX - check digest */
@@ -915,7 +915,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen,
  */
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     struct stat sudoers_stat;
     struct dirent *dent;

@@ -723,7 +723,7 @@ vardir
 rundir
 iolog_dir
 devsearch
-FILEDIGEST
+DIGEST
 exampledir
 TMPFILES_D
 COMPAT_EXP
@@ -3116,7 +3116,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
-FILEDIGEST=filedigest.lo
+DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
@@ -6415,7 +6415,7 @@ if test "${enable_openssl+set}" = set; then :
   enableval=$enable_openssl;  case $enableval in
     no)		;;
     *)		LIBMD="-lcrypto"
-		FILEDIGEST=filedigest_openssl.lo
+		DIGEST=digest_openssl.lo
 		if test "$enableval" != "yes"; then
 
 if ${CPPFLAGS+:} false; then :
@@ -6529,7 +6529,7 @@ if test "${enable_gcrypt+set}" = set; then :
   enableval=$enable_gcrypt;  case $enableval in
     no)		;;
     *)		LIBMD="-lgcrypt"
-		FILEDIGEST=filedigest_gcrypt.lo
+		DIGEST=digest_gcrypt.lo
 		if test "$enableval" != "yes"; then
 
 if ${CPPFLAGS+:} false; then :
@@ -20752,7 +20752,7 @@ fi
 fi
 
 # Look for sha2 functions if not using openssl
-if test "$FILEDIGEST" = "filedigest.lo"; then
+if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
     ac_fn_c_check_header_mongrel "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
 if test "x$ac_cv_header_sha2_h" = xyes; then :

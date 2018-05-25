@@ -77,13 +77,7 @@
      ((cs1)->runasuserlist != (cs2)->runasuserlist || \
      (cs1)->runasgrouplist != (cs2)->runasgrouplist)
 
-#define SUDO_DIGEST_SHA224	0
-#define SUDO_DIGEST_SHA256	1
-#define SUDO_DIGEST_SHA384	2
-#define SUDO_DIGEST_SHA512	3
-#define SUDO_DIGEST_INVALID	4
-
-struct sudo_digest {
+struct command_digest {
     unsigned int digest_type;
     char *digest_str;
 };
@@ -95,7 +89,7 @@ struct sudo_digest {
 struct sudo_command {
     char *cmnd;
     char *args;
-    struct sudo_digest *digest;
+    struct command_digest *digest;
 };
 
 /*
@@ -280,7 +274,7 @@ bool addr_matches(char *n);
 /* match.c */
 struct group;
 struct passwd;
-bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
 bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);

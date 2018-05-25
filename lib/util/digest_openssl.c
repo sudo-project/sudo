@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,7 +34,9 @@
 
 #include <openssl/sha.h>
 
-#include "sudoers.h"
+#include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_digest.h"
 
 union ANY_CTX {
     SHA256_CTX sha256;
@@ -72,17 +74,18 @@ static struct digest_function {
     }
 };
 
-unsigned char *
-sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
-{
-    struct digest_function *func = NULL;
-    unsigned char *file_digest = NULL;
-    unsigned char buf[32 * 1024];
-    size_t nread;
+struct sudo_digest {
+    struct digest_function *func;
     union ANY_CTX ctx;
-    int i, fd2;
-    FILE *fp = NULL;
-    debug_decl(sudo_filedigest, SUDOERS_DEBUG_UTIL)
+};
+
+struct sudo_digest *
+sudo_digest_alloc_v1(int digest_type)
+{
+    debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL)
+    struct digest_function *func = NULL;
+    struct sudo_digest *dig;
+    int i;
 
     for (i = 0; digest_functions[i].digest_len != 0; i++) {
 	if (digest_type == i) {
@@ -91,42 +94,67 @@ sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
 	}
     }
     if (func == NULL) {
-	sudo_warnx(U_("unsupported digest type %d for %s"), digest_type, file);
-	goto bad;
+	errno = EINVAL;
+	debug_return_ptr(NULL);
     }
 
-    if ((fd2 = dup(fd)) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to dup %s: %s",
-	    file, strerror(errno));
-	goto bad;
-    }
-    if ((fp = fdopen(fd2, "r")) == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to fdopen %s: %s",
-	    file, strerror(errno));
-	close(fd2);
-	goto bad;
-    }
-    if ((file_digest = malloc(func->digest_len)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto bad;
+    if ((dig = malloc(sizeof(*dig))) == NULL)
+	debug_return_ptr(NULL);
+    func->init(&dig->ctx);
+    dig->func = func;
+
+    debug_return_ptr(dig);
+}
+
+void
+sudo_digest_free_v1(struct sudo_digest *dig)
+{
+    debug_decl(sudo_digest_free, SUDO_DEBUG_UTIL)
+
+    free(dig);
+
+    debug_return;
+}
+
+void
+sudo_digest_reset_v1(struct sudo_digest *dig)
+{
+    debug_decl(sudo_digest_reset, SUDO_DEBUG_UTIL)
+
+    dig->func->init(&dig->ctx);
+
+    debug_return;
+}
+int
+sudo_digest_getlen_v1(int digest_type)
+{
+    debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL)
+    int i;
+
+    for (i = 0; digest_functions[i].digest_len != 0; i++) {
+	if (digest_type == i)
+	    debug_return_int(digest_functions[i].digest_len);
     }
 
-    func->init(&ctx);
-    while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
-	func->update(&ctx, buf, nread);
-    }
-    if (ferror(fp)) {
-	sudo_warnx(U_("%s: read error"), file);
-	goto bad;
-    }
-    func->final(file_digest, &ctx);
-    fclose(fp);
+    debug_return_int(-1);
+}
 
-    *digest_len = func->digest_len;
-    debug_return_ptr(file_digest);
-bad:
-    free(file_digest);
-    if (fp != NULL)
-	fclose(fp);
-    debug_return_ptr(NULL);
+void
+sudo_digest_update_v1(struct sudo_digest *dig, const void *data, size_t len)
+{
+    debug_decl(sudo_digest_update, SUDO_DEBUG_UTIL)
+
+    dig->func->update(&dig->ctx, data, len);
+
+    debug_return;
+}
+
+void
+sudo_digest_final_v1(struct sudo_digest *dig, unsigned char *md)
+{
+    debug_decl(sudo_digest_final, SUDO_DEBUG_UTIL)
+
+    dig->func->final(md, &dig->ctx);
+
+    debug_return;
 }

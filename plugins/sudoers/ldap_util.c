@@ -37,6 +37,7 @@
 #include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
+#include "sudo_digest.h"
 
 /*
  * Returns true if the string pointed to by valp begins with an
@@ -489,7 +490,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    if (cmndspec->tags.setenv == UNSPEC)
 		cmndspec->tags.setenv = IMPLIED;
 	} else {
-	    struct sudo_digest digest;
+	    struct command_digest digest;
 	    char *args;
 
 	    m->type = COMMAND;
@@ -524,12 +525,12 @@ oom:
 }
 
 /*
- * If a digest prefix is present, fills in struct sudo_digest
+ * If a digest prefix is present, fills in struct command_digest
  * and returns a pointer to it, updating cmnd to point to the
  * command after the digest.
  */
-struct sudo_digest *
-sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
+struct command_digest *
+sudo_ldap_extract_digest(char **cmnd, struct command_digest *digest)
 {
     char *ep, *cp = *cmnd;
     int digest_type = SUDO_DIGEST_INVALID;
