@@ -1,7 +1,7 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996,1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 AC_PREREQ([2.59])
 AC_INIT([sudo], [1.8.24], [https://bugzilla.sudo.ws/], [sudo])
@@ -79,6 +79,7 @@ AC_SUBST([LIBDL])
 AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
 AC_SUBST([LIBMD])
+AC_SUBST([LIBPTHREAD])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
@@ -1469,6 +1470,7 @@ AC_ARG_ENABLE(openssl,
     no)		;;
     *)		LIBMD="-lcrypto"
 		DIGEST=digest_openssl.lo
+		AC_DEFINE(HAVE_OPENSSL)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
 		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
@@ -1483,6 +1485,7 @@ AC_ARG_ENABLE(gcrypt,
     no)		;;
     *)		LIBMD="-lgcrypt"
 		DIGEST=digest_gcrypt.lo
+		AC_DEFINE(HAVE_GCRYPT)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
 		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
@@ -2346,7 +2349,7 @@ dnl
 AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
+AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/syscall.h sys/statvfs.h])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2486,7 +2489,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite openat faccessat wordexp])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite openat faccessat wordexp getauxval])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2546,6 +2549,24 @@ AC_CHECK_FUNCS([getline], [], [
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
+])
+AC_CHECK_FUNCS([arc4random_uniform], [], [
+    AC_LIBOBJ(arc4random_uniform)
+    SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
+    AC_CHECK_FUNCS([arc4random], [], [
+	AC_LIBOBJ(arc4random)
+	SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
+	# arc4random.c needs getentropy()
+	AC_CHECK_FUNCS([getentropy], [], [
+	    AC_LIBOBJ(getentropy)
+	    SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
+	])
+	# arc4random.c wants pthread_atfork
+	AC_CHECK_HEADERS([pthread.h], [
+	    AC_CHECK_LIB(pthread, main, [LIBPTHREAD="-lpthread"])
+	    AC_CHECK_FUNCS([pthread_atfork])
+	])
+    ])
 ])
 
 utmp_style=LEGACY
@@ -3254,6 +3275,14 @@ AC_INCLUDES_DEFAULT
 	fi
     fi
 ])
+
+dnl
+dnl Check for dl_iterate_phdr, may require -ldl
+dnl
+OLIBS="$LIBS"
+LIBS="$LIBS $lt_cv_dlopen_libs"
+AC_CHECK_FUNCS([dl_iterate_phdr])
+LIBS="$OLIBS"
 
 dnl
 dnl nsswitch.conf and its equivalents
@@ -4534,6 +4563,8 @@ AH_TEMPLATE(HAVE_KINFO_PROC_44BSD, [Define to 1 if your system has a 4.4BSD-styl
 AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
+AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's sha2 functions.])
+AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl

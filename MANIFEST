@@ -78,6 +78,7 @@ include/sudo_gettext.h
 include/sudo_lbuf.h
 include/sudo_plugin.h
 include/sudo_queue.h
+include/sudo_rand.h
 include/sudo_util.h
 indent.pro
 init.d/aix.sh.in
@@ -86,6 +87,10 @@ init.d/sudo.conf.in
 install-sh
 lib/util/Makefile.in
 lib/util/aix.c
+lib/util/arc4random.c
+lib/util/arc4random.h
+lib/util/arc4random_uniform.c
+lib/util/chacha_private.h
 lib/util/closefrom.c
 lib/util/digest.c
 lib/util/digest_gcrypt.c
@@ -97,6 +102,7 @@ lib/util/fatal.c
 lib/util/fnmatch.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
+lib/util/getentropy.c
 lib/util/getgrouplist.c
 lib/util/gethostname.c
 lib/util/getline.c

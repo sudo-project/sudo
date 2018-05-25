@@ -741,6 +741,7 @@ SUDOERS_TEST_PROGS
 COMPAT_TEST_PROGS
 LOCALEDIR_SUFFIX
 SUDO_NLS
+LIBPTHREAD
 LIBMD
 LIBINTL
 LIBRT
@@ -2869,6 +2870,8 @@ as_fn_append ac_header_list " sys/bsdtypes.h"
 as_fn_append ac_header_list " sys/select.h"
 as_fn_append ac_header_list " sys/stropts.h"
 as_fn_append ac_header_list " sys/sysmacros.h"
+as_fn_append ac_header_list " sys/syscall.h"
+as_fn_append ac_header_list " sys/statvfs.h"
 as_fn_append ac_func_list " fexecve"
 as_fn_append ac_func_list " killpg"
 as_fn_append ac_func_list " nl_langinfo"
@@ -2877,6 +2880,7 @@ as_fn_append ac_func_list " pwrite"
 as_fn_append ac_func_list " openat"
 as_fn_append ac_func_list " faccessat"
 as_fn_append ac_func_list " wordexp"
+as_fn_append ac_func_list " getauxval"
 as_fn_append ac_func_list " seteuid"
 # Check that the precious variables saved in the cache have kept the same
 # value.
@@ -2951,6 +2955,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -6416,6 +6421,8 @@ if test "${enable_openssl+set}" = set; then :
     no)		;;
     *)		LIBMD="-lcrypto"
 		DIGEST=digest_openssl.lo
+		$as_echo "#define HAVE_OPENSSL 1" >>confdefs.h
+
 		if test "$enableval" != "yes"; then
 
 if ${CPPFLAGS+:} false; then :
@@ -6530,6 +6537,8 @@ if test "${enable_gcrypt+set}" = set; then :
     no)		;;
     *)		LIBMD="-lgcrypt"
 		DIGEST=digest_gcrypt.lo
+		$as_echo "#define HAVE_GCRYPT 1" >>confdefs.h
+
 		if test "$enableval" != "yes"; then
 
 if ${CPPFLAGS+:} false; then :
@@ -17645,6 +17654,10 @@ fi
 
 
 
+
+
+
+
 for ac_header in endian.h sys/endian.h machine/endian.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -18989,6 +19002,8 @@ done
 
 
 
+
+
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -19208,6 +19223,144 @@ esac
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
+
+
+fi
+done
+
+for ac_func in arc4random_uniform
+do :
+  ac_fn_c_check_func "$LINENO" "arc4random_uniform" "ac_cv_func_arc4random_uniform"
+if test "x$ac_cv_func_arc4random_uniform" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ARC4RANDOM_UNIFORM 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" arc4random_uniform.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS arc4random_uniform.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_arc4random_uniform; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+    for ac_func in arc4random
+do :
+  ac_fn_c_check_func "$LINENO" "arc4random" "ac_cv_func_arc4random"
+if test "x$ac_cv_func_arc4random" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ARC4RANDOM 1
+_ACEOF
+
+else
+
+	case " $LIBOBJS " in
+  *" arc4random.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS arc4random.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_arc4random; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+	# arc4random.c needs getentropy()
+	for ac_func in getentropy
+do :
+  ac_fn_c_check_func "$LINENO" "getentropy" "ac_cv_func_getentropy"
+if test "x$ac_cv_func_getentropy" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETENTROPY 1
+_ACEOF
+
+else
+
+	    case " $LIBOBJS " in
+  *" getentropy.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getentropy.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_getentropy; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+done
+
+	# arc4random.c wants pthread_atfork
+	for ac_header in pthread.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
+if test "x$ac_cv_header_pthread_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PTHREAD_H 1
+_ACEOF
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lpthread" >&5
+$as_echo_n "checking for main in -lpthread... " >&6; }
+if ${ac_cv_lib_pthread_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpthread  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pthread_main=yes
+else
+  ac_cv_lib_pthread_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_main" >&5
+$as_echo "$ac_cv_lib_pthread_main" >&6; }
+if test "x$ac_cv_lib_pthread_main" = xyes; then :
+  LIBPTHREAD="-lpthread"
+fi
+
+	    for ac_func in pthread_atfork
+do :
+  ac_fn_c_check_func "$LINENO" "pthread_atfork" "ac_cv_func_pthread_atfork"
+if test "x$ac_cv_func_pthread_atfork" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PTHREAD_ATFORK 1
+_ACEOF
+
+fi
+done
+
+
+fi
+
+done
+
+
+fi
+done
 
 
 fi
@@ -22532,6 +22685,21 @@ esac
 fi
 done
 
+
+OLIBS="$LIBS"
+LIBS="$LIBS $lt_cv_dlopen_libs"
+for ac_func in dl_iterate_phdr
+do :
+  ac_fn_c_check_func "$LINENO" "dl_iterate_phdr" "ac_cv_func_dl_iterate_phdr"
+if test "x$ac_cv_func_dl_iterate_phdr" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DL_ITERATE_PHDR 1
+_ACEOF
+
+fi
+done
+
+LIBS="$OLIBS"
 
 if test ${with_netsvc-"no"} != "no"; then
     cat >>confdefs.h <<EOF
@@ -28707,6 +28875,8 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
+
 
 
 

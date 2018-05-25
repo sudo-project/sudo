@@ -1,4 +1,5 @@
 @COMPAT_EXP@initprogname
+sudo_arc4random_uniform
 sudo_conf_askpass_path_v1
 sudo_conf_clear_paths_v1
 sudo_conf_debug_files_v1
