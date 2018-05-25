@@ -30,6 +30,11 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif /* HAVE_STDLIB_H */
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -41,6 +46,7 @@
 #include <time.h>
 
 #include "sudo_compat.h"
+#include "sudo_rand.h"
 #include "pathnames.h"
 
 #define MKTEMP_FILE	1
@@ -49,80 +55,6 @@
 #define TEMPCHARS	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 #define NUM_CHARS	(sizeof(TEMPCHARS) - 1)
 #define MIN_X		6
-
-#ifndef INT_MAX
-#define INT_MAX	0x7fffffff
-#endif
-
-#if defined(HAVE_ARC4RANDOM)
-# define RAND()		arc4random()
-# define SEED_T		unsigned int
-#elif defined(HAVE_RANDOM)
-# define RAND()		random()
-# define SRAND(_x)	srandom((_x))
-# define SEED_T		unsigned int
-#elif defined(HAVE_LRAND48)
-# define RAND()		lrand48()
-# define SRAND(_x)	srand48((_x))
-# define SEED_T		long
-#else
-# define RAND()		rand()
-# define SRAND(_x)	srand((_x))
-# define SEED_T		unsigned int
-#endif
-
-static void
-seed_random(void)
-{
-#ifdef SRAND
-	struct timeval tv;
-	SEED_T seed;
-	int fd;
-
-# ifdef HAVE_GETENTROPY
-	/* Not really an fd, just has to be -1 on error. */
-	fd = getentropy(&seed, sizeof(seed));
-# else
-	/*
-	 * Seed from /dev/urandom if possible.
-	 */
-	fd = open(_PATH_DEV "urandom", O_RDONLY);
-	if (fd != -1) {
-	    ssize_t nread;
-
-	    do {
-		nread = read(fd, &seed, sizeof(seed));
-	    } while (nread == -1 && errno == EINTR);
-	    close(fd);
-	    if (nread != (ssize_t)sizeof(seed))
-		fd = -1;
-	}
-# endif /* HAVE_GETENTROPY */
-	/*
-	 * If no /dev/urandom, seed from time of day and process id
-	 * multiplied by small primes.
-	 */
-	if (fd == -1) {
-	    (void) gettimeofday(&tv, NULL);
-	    seed = (tv.tv_sec % 10000) * 523 + tv.tv_usec * 13 +
-		(getpid() % 1000) * 983;
-	}
-	SRAND(seed);
-#endif
-}
-
-static unsigned int
-get_random(void)
-{
-	static int initialized;
-
-	if (!initialized) {
-		seed_random();
-		initialized = 1;
-	}
-
-	return RAND() & 0xffffffff;
-}
 
 static int
 mktemp_internal(char *path, int slen, int mode)
@@ -153,7 +85,7 @@ mktemp_internal(char *path, int slen, int mode)
 
 	do {
 		for (cp = start; cp != ep; cp++) {
-			r = get_random() % NUM_CHARS;
+			r = arc4random_uniform(NUM_CHARS);
 			*cp = tempchars[r];
 		}
 

@@ -1284,12 +1284,13 @@ sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/ins_2001.h \
-              $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
-              $(srcdir)/ins_goons.h $(srcdir)/ins_python.h $(srcdir)/insults.h \
-              $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+              $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h \
+              $(srcdir)/ins_csops.h $(srcdir)/ins_goons.h \
+              $(srcdir)/ins_python.h $(srcdir)/insults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/sudo_auth.c
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
