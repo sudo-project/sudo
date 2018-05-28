@@ -4531,7 +4531,7 @@ pop_include(void)
     FILE *fp;
     debug_decl(pop_include, SUDOERS_DEBUG_PARSER)
 
-    if (idepth == 0)
+    if (idepth == 0 || YY_CURRENT_BUFFER == NULL)
 	debug_return_bool(false);
 
     if (!keepopen)
