@@ -38,25 +38,6 @@
 #include "sudo_lbuf.h"
 #include <gram.h>
 
-/*
- * Local prototypes.
- */
-static int sudo_file_close(struct sudo_nss *);
-static int sudo_file_open(struct sudo_nss *);
-static int sudo_file_parse(struct sudo_nss *);
-static int sudo_file_query(struct sudo_nss *, struct passwd *pw);
-static int sudo_file_getdefs(struct sudo_nss *);
-
-/* sudo_nss implementation */
-struct sudo_nss sudo_nss_file = {
-    { NULL, NULL },
-    sudo_file_open,
-    sudo_file_close,
-    sudo_file_parse,
-    sudo_file_query,
-    sudo_file_getdefs
-};
-
 static int
 sudo_file_open(struct sudo_nss *nss)
 {
@@ -134,3 +115,13 @@ sudo_file_getdefs(struct sudo_nss *nss)
     debug_decl(sudo_file_getdefs, SUDOERS_DEBUG_NSS)
     debug_return_int(0);
 }
+
+/* sudo_nss implementation */
+struct sudo_nss sudo_nss_file = {
+    { NULL, NULL },
+    sudo_file_open,
+    sudo_file_close,
+    sudo_file_parse,
+    sudo_file_query,
+    sudo_file_getdefs
+};

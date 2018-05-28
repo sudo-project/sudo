@@ -144,16 +144,6 @@ struct ldap_netgroup {
 };
 STAILQ_HEAD(ldap_netgroup_list, ldap_netgroup);
 
-/* sudo_nss implementation */
-static int sudo_ldap_open(struct sudo_nss *nss);
-static int sudo_ldap_close(struct sudo_nss *nss);
-static int sudo_ldap_parse(struct sudo_nss *nss);
-static int sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw);
-static int sudo_ldap_getdefs(struct sudo_nss *nss);
-static struct ldap_result *sudo_ldap_result_get(struct sudo_nss *nss,
-    struct passwd *pw);
-static char *sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry);
-
 /*
  * LDAP sudo_nss handle.
  * We store the connection to the LDAP server and the passwd struct of the
@@ -162,15 +152,6 @@ static char *sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry);
 struct sudo_ldap_handle {
     LDAP *ld;
     struct passwd *pw;
-};
-
-struct sudo_nss sudo_nss_ldap = {
-    { NULL, NULL },
-    sudo_ldap_open,
-    sudo_ldap_close,
-    sudo_ldap_parse,
-    sudo_ldap_query,
-    sudo_ldap_getdefs
 };
 
 #ifdef HAVE_LDAP_INITIALIZE
@@ -367,6 +348,37 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     ldap_value_free_len(bv);	/* cleanup */
 
     debug_return_bool(ret);
+}
+
+/*
+ * Extract the dn from an entry and return the first rdn from it.
+ */
+static char *
+sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
+{
+#ifdef HAVE_LDAP_STR2DN
+    char *dn, *rdn = NULL;
+    LDAPDN tmpDN;
+    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
+
+    if ((dn = ldap_get_dn(ld, entry)) == NULL)
+	debug_return_str(NULL);
+    if (ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP) == LDAP_SUCCESS) {
+	ldap_rdn2str(tmpDN[0], &rdn, LDAP_DN_FORMAT_UFN);
+	ldap_dnfree(tmpDN);
+    }
+    ldap_memfree(dn);
+    debug_return_str(rdn);
+#else
+    char *dn, **edn;
+    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
+
+    if ((dn = ldap_get_dn(ld, entry)) == NULL)
+	debug_return_str(NULL);
+    edn = ldap_explode_dn(dn, 1);
+    ldap_memfree(dn);
+    debug_return_str(edn ? edn[0] : NULL);
+#endif
 }
 
 /*
@@ -1104,37 +1116,6 @@ sudo_ldap_build_pass2(void)
 	filt = NULL;
 
     debug_return_str(filt);
-}
-
-/*
- * Extract the dn from an entry and return the first rdn from it.
- */
-static char *
-sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
-{
-#ifdef HAVE_LDAP_STR2DN
-    char *dn, *rdn = NULL;
-    LDAPDN tmpDN;
-    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
-
-    if ((dn = ldap_get_dn(ld, entry)) == NULL)
-	debug_return_str(NULL);
-    if (ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP) == LDAP_SUCCESS) {
-	ldap_rdn2str(tmpDN[0], &rdn, LDAP_DN_FORMAT_UFN);
-	ldap_dnfree(tmpDN);
-    }
-    ldap_memfree(dn);
-    debug_return_str(rdn);
-#else
-    char *dn, **edn;
-    debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP)
-
-    if ((dn = ldap_get_dn(ld, entry)) == NULL)
-	debug_return_str(NULL);
-    edn = ldap_explode_dn(dn, 1);
-    ldap_memfree(dn);
-    debug_return_str(edn ? edn[0] : NULL);
-#endif
 }
 
 static char *
@@ -2055,3 +2036,13 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
     return result;
 }
 #endif
+
+/* sudo_nss implementation */
+struct sudo_nss sudo_nss_ldap = {
+    { NULL, NULL },
+    sudo_ldap_open,
+    sudo_ldap_close,
+    sudo_ldap_parse,
+    sudo_ldap_query,
+    sudo_ldap_getdefs
+};
