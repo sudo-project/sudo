@@ -85,6 +85,7 @@ struct sudo_sss_handle {
     void *ssslib;
     struct userspec_list userspecs;
     struct defaults_list defaults;
+    bool cached_defaults;
     sss_sudo_send_recv_t fn_send_recv;
     sss_sudo_send_recv_defaults_t fn_send_recv_defaults;
     sss_sudo_free_result_t fn_free_result;
@@ -695,7 +696,6 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
-    struct sss_sudo_rule   *sss_rule;
     uint32_t sss_error;
     unsigned int i;
     int rc;
@@ -707,8 +707,9 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	debug_return_ptr(NULL);
     }
 
-    /* Free old defaults, if any. */
-    free_defaults(&handle->defaults);
+    /* Use cached result if present. */
+    if (handle->cached_defaults)
+	debug_return_ptr(&handle->defaults);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
@@ -726,27 +727,30 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	    "handle->fn_send_recv_defaults: rc=%d, sss_error=%u", rc, sss_error);
 	debug_return_ptr(NULL);
     }
-    if (sss_error != 0) {
-	if (sss_error == ENOENT) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"No global defaults entry found in SSSD.");
-	    goto done;
+
+    switch (sss_error) {
+    case 0:
+	/* Success */
+	for (i = 0; i < sss_result->num_rules; ++i) {
+	    struct sss_sudo_rule *sss_rule = sss_result->rules + i;
+	    sudo_debug_printf(SUDO_DEBUG_DIAG,
+		"Parsing cn=defaults, %d/%d", i, sss_result->num_rules);
+	    if (!sudo_sss_parse_options(handle, sss_rule, &handle->defaults))
+		goto bad;
 	}
+	break;
+    case ENOENT:
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "No global defaults entry found in SSSD.");
+	break;
+    default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "sss_error=%u\n", sss_error);
 	goto bad;
     }
-
-    for (i = 0; i < sss_result->num_rules; ++i) {
-	 sudo_debug_printf(SUDO_DEBUG_DIAG,
-	    "Parsing cn=defaults, %d/%d", i, sss_result->num_rules);
-	 sss_rule = sss_result->rules + i;
-	 if (!sudo_sss_parse_options(handle, sss_rule, &handle->defaults))
-	    goto bad;
-    }
-
-done:
+    handle->cached_defaults = true;
     handle->fn_free_result(sss_result);
     debug_return_ptr(&handle->defaults);
+
 bad:
     handle->fn_free_result(sss_result);
     debug_return_ptr(NULL);

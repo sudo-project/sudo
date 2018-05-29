@@ -154,6 +154,7 @@ struct sudo_ldap_handle {
     struct passwd *pw;
     struct userspec_list userspecs;
     struct defaults_list defaults;
+    bool cached_defaults;
 };
 
 #ifdef HAVE_LDAP_INITIALIZE
@@ -1669,12 +1670,12 @@ done:
 static struct defaults_list *
 sudo_ldap_getdefs(struct sudo_nss *nss)
 {
-    struct ldap_config_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
+    struct defaults_list *ret = &handle->defaults;
     struct timeval tv, *tvp = NULL;
-    struct defaults_list *ret = NULL;
+    struct ldap_config_str *base;
     LDAPMessage *entry, *result = NULL;
-    char *filt;
+    char *filt = NULL;
     int rc;
     debug_decl(sudo_ldap_getdefs, SUDOERS_DEBUG_LDAP)
 
@@ -1684,8 +1685,9 @@ sudo_ldap_getdefs(struct sudo_nss *nss)
 	debug_return_ptr(NULL);
     }
 
-    /* Free old defaults, if any. */
-    free_defaults(&handle->defaults);
+    /* Use cached result if present. */
+    if (handle->cached_defaults)
+	goto done;
 
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
@@ -1708,13 +1710,15 @@ sudo_ldap_getdefs(struct sudo_nss *nss)
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    DPRINTF1("found:%s", ldap_get_dn(ld, entry));
-	    if (!sudo_ldap_parse_options(ld, entry, &handle->defaults))
+	    if (!sudo_ldap_parse_options(ld, entry, &handle->defaults)) {
+		ret = NULL;
 		goto done;
+	    }
 	} else {
 	    DPRINTF1("no default options found in %s", base->val);
 	}
     }
-    ret = &handle->defaults;
+    handle->cached_defaults = true;
 
 done:
     ldap_msgfree(result);
