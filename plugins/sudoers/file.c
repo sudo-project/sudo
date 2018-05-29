@@ -57,6 +57,7 @@ sudo_file_close(struct sudo_nss *nss)
 	free_userspecs(&handle->userspecs);
 	free_defaults(&handle->defaults);
 
+	free(handle);
 	nss->handle = NULL;
     }
 
