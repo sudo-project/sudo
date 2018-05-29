@@ -417,24 +417,14 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry, struct defaults_list *defs
 
     /* Walk through options, appending to defs. */
     for (p = bv; *p != NULL; p++) {
-	char *copy, *var, *val;
+	char *var, *val;
 	int op;
 
-	copy = strdup((*p)->bv_val);	/* XXX - should not need to copy */
-	if (copy == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    free(copy);
-	    goto done;
-	}
-
-	op = sudo_ldap_parse_option(copy, &var, &val);
+	op = sudo_ldap_parse_option((*p)->bv_val, &var, &val);
 	if (!sudo_ldap_add_default(var, val, op, source, defs)) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    free(copy);
 	    goto done;
 	}
-
-	free(copy);
     }
 
     ret = true;

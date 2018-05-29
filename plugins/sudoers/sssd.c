@@ -437,18 +437,12 @@ sudo_sss_parse_options(struct sudo_sss_handle *handle, struct sss_sudo_rule *rul
 
     /* Walk through options, appending to defs. */
     for (i = 0; val_array[i] != NULL; i++) {
-	char *copy, *var, *val;
+	char *var, *val;
 	int op;
 
-	/* XXX - should not need to copy */
-	if ((copy = strdup(val_array[i])) == NULL)
+	op = sudo_ldap_parse_option(val_array[i], &var, &val);
+	if (!sudo_ldap_add_default(var, val, op, source, defs))
 	    goto oom;
-	op = sudo_ldap_parse_option(copy, &var, &val);
-	if (!sudo_ldap_add_default(var, val, op, source, defs)) {
-	    free(copy);
-	    goto oom;
-	}
-	free(copy);
     }
     ret = true;
     goto done;
