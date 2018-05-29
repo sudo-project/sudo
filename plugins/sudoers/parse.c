@@ -65,12 +65,13 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     CLR(validated, FLAG_NO_HOST);
     match = DENY;
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->query(nss, pw) == -1) {
+	struct userspec_list *usl = nss->query(nss, pw);
+	if (usl == NULL) {
 	    /* The query function should have printed an error message. */
 	    SET(validated, VALIDATE_ERROR);
 	    break;
 	}
-	TAILQ_FOREACH(us, &nss->userspecs, entries) {
+	TAILQ_FOREACH(us, usl, entries) {
 	    if (userlist_matches(pw, &us->users) != ALLOW)
 		continue;
 	    TAILQ_FOREACH(priv, &us->privileges, entries) {
@@ -114,8 +115,9 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 }
 
 static int
-sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw, int *validated,
-    struct cmndspec **matching_cs, struct defaults_list **defs, time_t now)
+sudoers_lookup_check(struct userspec_list *usl, struct passwd *pw,
+    int *validated, struct cmndspec **matching_cs,
+    struct defaults_list **defs, time_t now)
 {
     int host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
@@ -124,7 +126,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw, int *validated,
     struct member *matching_user;
     debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER)
 
-    TAILQ_FOREACH_REVERSE(us, &nss->userspecs, userspec_list, entries) {
+    TAILQ_FOREACH_REVERSE(us, usl, userspec_list, entries) {
 	if (userlist_matches(pw, &us->users) != ALLOW)
 	    continue;
 	CLR(*validated, FLAG_NO_USER);
@@ -290,13 +292,14 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated,
     /* Query each sudoers source and check the user. */
     time(&now);
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->query(nss, pw) == -1) {
+	struct userspec_list *usl = nss->query(nss, pw);
+	if (usl == NULL) {
 	    /* The query function should have printed an error message. */
 	    SET(validated, VALIDATE_ERROR);
 	    break;
 	}
 
-	m = sudoers_lookup_check(nss, pw, &validated, &cs, &defs, now);
+	m = sudoers_lookup_check(usl, pw, &validated, &cs, &defs, now);
 	if (m != UNSPEC)
 	    match = m;
 
@@ -690,14 +693,6 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     int cols, count, olen, n;
     debug_decl(display_privs, SUDOERS_DEBUG_PARSER)
 
-    /* Query all sudoers sources first. */
-    TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->query(nss, pw) == -1) {
-	    /* The query function should have printed an error message. */
-	    debug_return_int(-1);
-	}
-    }
-
     cols = sudo_user.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
 	cols = 0;
@@ -708,10 +703,13 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	n = display_defaults(&nss->defaults, pw, &def_buf);
-	if (n == -1)
-	    goto bad;
-	count += n;
+	struct defaults_list *defs = nss->getdefs(nss);
+	if (defs != NULL) {
+	    n = display_defaults(defs, pw, &def_buf);
+	    if (n == -1)
+		goto bad;
+	    count += n;
+	}
     }
     if (count != 0) {
 	sudo_lbuf_append(&def_buf, "\n\n");
@@ -726,10 +724,13 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	n = display_bound_defaults(&nss->defaults, pw, &def_buf);
-	if (n == -1)
-	    goto bad;
-	count += n;
+	struct defaults_list *defs = nss->getdefs(nss);
+	if (defs != NULL) {
+	    n = display_bound_defaults(defs, pw, &def_buf);
+	    if (n == -1)
+		goto bad;
+	    count += n;
+	}
     }
     if (count != 0) {
 	sudo_lbuf_append(&def_buf, "\n\n");
@@ -744,10 +745,13 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	pw->pw_name, user_srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	n = sudo_display_userspecs(&nss->userspecs, pw, &priv_buf);
-	if (n == -1)
-	    goto bad;
-	count += n;
+	struct userspec_list *usl = nss->query(nss, pw);
+	if (usl != NULL) {
+	    n = sudo_display_userspecs(usl, pw, &priv_buf);
+	    if (n == -1)
+		goto bad;
+	    count += n;
+	}
     }
     if (count == 0) {
 	def_buf.len = 0;
@@ -774,7 +778,7 @@ bad:
 }
 
 static int
-display_cmnd_check(struct sudo_nss *nss, struct passwd *pw, time_t now)
+display_cmnd_check(struct userspec_list *usl, struct passwd *pw, time_t now)
 {
     int host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
@@ -782,7 +786,7 @@ display_cmnd_check(struct sudo_nss *nss, struct passwd *pw, time_t now)
     struct userspec *us;
     debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER)
 
-    TAILQ_FOREACH_REVERSE(us, &nss->userspecs, userspec_list, entries) {
+    TAILQ_FOREACH_REVERSE(us, usl, userspec_list, entries) {
 	if (userlist_matches(pw, &us->users) != ALLOW)
 	    continue;
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
@@ -828,12 +832,13 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
     /* Iterate over each source, checking for the command. */
     time(&now);
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->query(nss, pw) == -1) {
+	struct userspec_list *usl = nss->query(nss, pw);
+	if (usl == NULL) {
 	    /* The query function should have printed an error message. */
 	    debug_return_int(-1);
 	}
 
-	m = display_cmnd_check(nss, pw, now);
+	m = display_cmnd_check(usl, pw, now);
 	if (m != UNSPEC)
 	    match = m;
 

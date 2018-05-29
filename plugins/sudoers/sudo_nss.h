@@ -17,21 +17,20 @@
 #ifndef SUDOERS_NSS_H
 #define SUDOERS_NSS_H
 
-struct sudo_lbuf;
 struct passwd;
+struct userspec_list;
+struct defaults_list;
 
 struct sudo_nss {
     TAILQ_ENTRY(sudo_nss) entries;
     int (*open)(struct sudo_nss *nss);
     int (*close)(struct sudo_nss *nss);
     int (*parse)(struct sudo_nss *nss);
-    int (*query)(struct sudo_nss *nss, struct passwd *pw);
-    int (*getdefs)(struct sudo_nss *nss);
+    struct userspec_list *(*query)(struct sudo_nss *nss, struct passwd *pw);
+    struct defaults_list *(*getdefs)(struct sudo_nss *nss);
     void *handle;
     bool ret_if_found;
     bool ret_if_notfound;
-    struct defaults_list defaults;
-    struct userspec_list userspecs;
 };
 
 TAILQ_HEAD(sudo_nss_list, sudo_nss);

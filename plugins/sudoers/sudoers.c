@@ -193,8 +193,9 @@ sudoers_policy_init(void *info, char * const envp[])
     init_parser(sudoers_file, false);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
+	    struct defaults_list *defs = nss->getdefs(nss);
             sources++;
-	    if (nss->getdefs(nss) != 0 || !update_defaults(&nss->defaults,
+	    if (defs == NULL || !update_defaults(defs,
 		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
 		log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		    N_("problem with defaults entries"));
@@ -853,7 +854,8 @@ set_cmnd(void)
 	user_base = user_cmnd;
 
     TAILQ_FOREACH(nss, snl, entries) {
-	if (!update_defaults(&nss->defaults, SETDEF_CMND, false)) {
+	struct defaults_list *defs = nss->getdefs(nss);
+	if (!update_defaults(defs, SETDEF_CMND, false)) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("problem with defaults entries"));
 	}

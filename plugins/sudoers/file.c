@@ -38,33 +38,59 @@
 #include "sudo_lbuf.h"
 #include <gram.h>
 
-static int
-sudo_file_open(struct sudo_nss *nss)
-{
-    debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS)
-
-    if (def_ignore_local_sudoers)
-	debug_return_int(-1);
-    nss->handle = open_sudoers(sudoers_file, false, NULL);
-    debug_return_int(nss->handle ? 0 : -1);
-}
+struct sudo_file_handle {
+    FILE *fp;
+    struct defaults_list defaults;
+    struct userspec_list userspecs;
+};
 
 static int
 sudo_file_close(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
+    struct sudo_file_handle *handle = nss->handle;
 
-    if (nss->handle != NULL) {
-	fclose(nss->handle);
-	nss->handle = NULL;
+    if (handle != NULL) {
+	fclose(handle->fp);
 	sudoersin = NULL;
 
-	/* XXX - do in main module? */
-	free_userspecs(&nss->userspecs);
-	free_defaults(&nss->defaults);
+	free_userspecs(&handle->userspecs);
+	free_defaults(&handle->defaults);
+
+	nss->handle = NULL;
     }
 
     debug_return_int(0);
+}
+
+static int
+sudo_file_open(struct sudo_nss *nss)
+{
+    debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS)
+    struct sudo_file_handle *handle;
+
+    if (def_ignore_local_sudoers)
+	debug_return_int(-1);
+
+    if (nss->handle != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: called with non-NULL handle %p", __func__, nss->handle);
+	sudo_file_close(nss);
+    }
+
+    handle = malloc(sizeof(*handle));
+    if (handle != NULL) {
+	handle->fp = open_sudoers(sudoers_file, false, NULL);
+	if (handle->fp != NULL) {
+	    TAILQ_INIT(&handle->userspecs);
+	    TAILQ_INIT(&handle->defaults);
+	} else {
+	    free(handle);
+	    handle = NULL;
+	}
+    }
+    nss->handle = handle;
+    debug_return_int(nss->handle ? 0 : -1);
 }
 
 /*
@@ -74,11 +100,15 @@ static int
 sudo_file_parse(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
+    struct sudo_file_handle *handle = nss->handle;
 
-    if (nss->handle == NULL)
+    if (handle == NULL || handle->fp == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: called with NULL %s",
+	    __func__, handle ? "file pointer" : "handle");
 	debug_return_int(-1);
+    }
 
-    sudoersin = nss->handle;
+    sudoersin = handle->fp;
     if (sudoersparse() != 0 || parse_error) {
 	if (errorlineno != -1) {
 	    log_warningx(SLOG_SEND_MAIL, N_("parse error in %s near line %d"),
@@ -90,30 +120,45 @@ sudo_file_parse(struct sudo_nss *nss)
     }
 
     /* Move parsed userspecs and defaults to nss structure. */
-    TAILQ_CONCAT(&nss->userspecs, &userspecs, entries);
-    TAILQ_CONCAT(&nss->defaults, &defaults, entries);
+    TAILQ_CONCAT(&handle->userspecs, &userspecs, entries);
+    TAILQ_CONCAT(&handle->defaults, &defaults, entries);
 
     debug_return_int(0);
 }
 
 /*
- * No need for explicit queries for sudoers file, we have it all in memory.
+ * We return all cached userspecs, the parse functions will
+ * perform matching against pw for us.
  */
-static int
+static struct userspec_list *
 sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
 {
+    struct sudo_file_handle *handle = nss->handle;
     debug_decl(sudo_file_query, SUDOERS_DEBUG_NSS)
-    debug_return_int(0);
+
+    if (handle == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: called with NULL handle", __func__);
+	debug_return_ptr(NULL);
+    }
+    debug_return_ptr(&handle->userspecs);
 }
 
 /*
- * No need to get defaults for sudoers file, the parse function handled it.
+ * Return cached defaults entries.
  */
-static int
+static struct defaults_list *
 sudo_file_getdefs(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_getdefs, SUDOERS_DEBUG_NSS)
-    debug_return_int(0);
+    struct sudo_file_handle *handle = nss->handle;
+
+    if (handle == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: called with NULL handle", __func__);
+	debug_return_ptr(NULL);
+    }
+    debug_return_ptr(&handle->defaults);
 }
 
 /* sudo_nss implementation */

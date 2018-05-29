@@ -43,18 +43,6 @@ extern struct sudo_nss sudo_nss_ldap;
 extern struct sudo_nss sudo_nss_sss;
 #endif
 
-static void
-sudo_nss_insert(struct sudo_nss_list *snl, struct sudo_nss *nss)
-{
-    debug_decl(sudo_nss_insert, SUDOERS_DEBUG_NSS)
-
-    TAILQ_INIT(&nss->userspecs);
-    TAILQ_INIT(&nss->defaults);
-    TAILQ_INSERT_TAIL(snl, nss, entries);
-
-    debug_return;
-}
-
 /* Make sure we have not already inserted the nss entry. */
 #define SUDO_NSS_CHECK_UNUSED(nss, tag)					       \
     if (nss.entries.tqe_next != NULL || nss.entries.tqe_prev != NULL) {      \
@@ -103,18 +91,18 @@ sudo_read_nss(void)
 	for ((cp = strtok_r(line + 8, " \t", &last)); cp != NULL; (cp = strtok_r(NULL, " \t", &last))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		SUDO_NSS_CHECK_UNUSED(sudo_nss_file, "files");
-		sudo_nss_insert(&snl, &sudo_nss_file);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 		got_match = saw_files = true;
 #ifdef HAVE_LDAP
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
 		SUDO_NSS_CHECK_UNUSED(sudo_nss_ldap, "ldap");
-		sudo_nss_insert(&snl, &sudo_nss_ldap);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 		got_match = saw_ldap = true;
 #endif
 #ifdef HAVE_SSSD
 	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
 		SUDO_NSS_CHECK_UNUSED(sudo_nss_sss, "sss");
-		sudo_nss_insert(&snl, &sudo_nss_sss);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 		got_match = saw_sss = true;
 #endif
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
@@ -137,7 +125,7 @@ sudo_read_nss(void)
 nomatch:
     /* Default to files only if no matches */
     if (TAILQ_EMPTY(&snl))
-	sudo_nss_insert(&snl, &sudo_nss_file);
+	TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 
     debug_return_ptr(&snl);
 }
@@ -190,20 +178,20 @@ sudo_read_nss(void)
 
 	    if (!saw_files && strncasecmp(cp, "files", 5) == 0 &&
 		(isspace((unsigned char)cp[5]) || cp[5] == '\0')) {
-		sudo_nss_insert(&snl, &sudo_nss_file);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 		got_match = saw_files = true;
 		ep = &cp[5];
 #ifdef HAVE_LDAP
 	    } else if (!saw_ldap && strncasecmp(cp, "ldap", 4) == 0 &&
 		(isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
-		sudo_nss_insert(&snl, &sudo_nss_ldap);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 		got_match = saw_ldap = true;
 		ep = &cp[4];
 #endif
 #ifdef HAVE_SSSD
 	    } else if (!saw_sss && strncasecmp(cp, "sss", 3) == 0 &&
 		(isspace((unsigned char)cp[3]) || cp[3] == '\0')) {
-		sudo_nss_insert(&snl, &sudo_nss_sss);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 		got_match = saw_sss = true;
 		ep = &cp[3];
 #endif
@@ -230,7 +218,7 @@ sudo_read_nss(void)
 nomatch:
     /* Default to files only if no matches */
     if (TAILQ_EMPTY(&snl))
-	sudo_nss_insert(&snl, &sudo_nss_file);
+	TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 
     debug_return_ptr(&snl);
 }
@@ -247,12 +235,12 @@ sudo_read_nss(void)
     debug_decl(sudo_read_nss, SUDOERS_DEBUG_NSS)
 
 #  ifdef HAVE_SSSD
-    sudo_nss_insert(&snl, &sudo_nss_sss);
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 #  endif
 #  ifdef HAVE_LDAP
-    sudo_nss_insert(&snl, &sudo_nss_ldap);
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 #  endif
-    sudo_nss_insert(&snl, &sudo_nss_file);
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 
     debug_return_ptr(&snl);
 }
