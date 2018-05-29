@@ -855,7 +855,7 @@ set_cmnd(void)
 
     TAILQ_FOREACH(nss, snl, entries) {
 	struct defaults_list *defs = nss->getdefs(nss);
-	if (!update_defaults(defs, SETDEF_CMND, false)) {
+	if (defs == NULL || !update_defaults(defs, SETDEF_CMND, false)) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("problem with defaults entries"));
 	}
