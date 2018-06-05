@@ -143,6 +143,11 @@ try_wordexp(void)
 	printf("%s: OK (wordexp) [%d]\n", getprogname(), rc);
 	ret = 0;
 	break;
+    case WRDE_SYNTAX:
+	/* FreeBSD returns WRDE_SYNTAX if it can't write to the shell process */
+	printf("%s: OK (wordexp) [WRDE_SYNTAX]\n", getprogname());
+	ret = 0;
+	break;
     case WRDE_CMDSUB:
 	printf("%s: OK (wordexp) [WRDE_CMDSUB]\n", getprogname());
 	ret = 0;
