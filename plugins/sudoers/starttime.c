@@ -109,16 +109,14 @@ get_starttime(pid_t pid, struct timespec *starttime)
     if (rc != -1) {
 #if defined(HAVE_KINFO_PROC_FREEBSD)
 	/* FreeBSD and Dragonfly */
-	starttime->tv_sec = ki_proc->ki_start.tv_sec;
-	starttime->tv_nsec = ki_proc->ki_start.tv_usec / 1000;
+	TIMEVAL_TO_TIMESPEC(&ki_proc->ki_start, starttime);
 #elif defined(HAVE_KINFO_PROC_44BSD)
 	/* 4.4BSD and macOS */
-	starttime->tv_sec = ki_proc->kp_proc.p_starttime.tv_sec;
-	starttime->tv_nsec = ki_proc->kp_proc.p_starttime.tv_usec / 1000;
+	TIMEVAL_TO_TIMESPEC(&ki_proc->kp_proc.p_starttime, starttime);
 #else
 	/* NetBSD and OpenBSD */
 	starttime->tv_sec = ki_proc->p_ustart_sec;
-	starttime->tv_nsec = ki_proc->p_ustart_usec / 1000;
+	starttime->tv_nsec = ki_proc->p_ustart_usec * 1000;
 #endif
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: start time for %d: { %lld, %ld }", __func__,
