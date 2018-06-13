@@ -41,6 +41,7 @@ struct sudo_conv_message {
 #define SUDO_CONV_INFO_MSG	    0x0004  /* informational message */
 #define SUDO_CONV_PROMPT_MASK	    0x0005  /* mask user input */
 #define SUDO_CONV_PROMPT_ECHO_OK    0x1000  /* flag: allow echo if no tty */
+#define SUDO_CONV_PREFER_TTY	    0x2000  /* flag: use tty if possible */
     int msg_type;
     int timeout;
     const char *msg;

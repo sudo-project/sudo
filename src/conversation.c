@@ -29,8 +29,9 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -46,7 +47,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
     char *pass;
-    int n;
+    int fd, n;
     const int conv_debug_instance = sudo_debug_get_active_instance();
 
     sudo_debug_set_active_instance(sudo_debug_instance);
@@ -54,6 +55,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     for (n = 0; n < num_msgs; n++) {
 	const struct sudo_conv_message *msg = &msgs[n];
 	int flags = tgetpass_flags;
+	FILE *fp = stdout;
 
 	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
@@ -77,13 +79,22 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		}
 		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
-	    case SUDO_CONV_INFO_MSG:
-		if (msg->msg != NULL && fputs(msg->msg, stdout) == EOF)
-		    goto err;
-		break;
 	    case SUDO_CONV_ERROR_MSG:
-		if (msg->msg != NULL && fputs(msg->msg, stderr) == EOF)
-		    goto err;
+		fp = stderr;
+		/* FALLTHROUGH */
+	    case SUDO_CONV_INFO_MSG:
+		if (msg->msg != NULL) {
+		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY)) {
+			/* Try writing to /dev/tty first. */
+			if ((fd = open(_PATH_TTY, O_WRONLY)) != -1) {
+			    if (write(fd, msg->msg, strlen(msg->msg)) != -1)
+				break;
+			    close(fd);
+			}
+		    }
+		    if (fputs(msg->msg, fp) == EOF)
+			goto err;
+		}
 		break;
 	    default:
 		goto err;

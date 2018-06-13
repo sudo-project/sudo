@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "June 1, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2354,6 +2354,7 @@ struct sudo_conv_message {
 #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
 #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
 #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
+#define SUDO_CONV_PREFER_TTY       0x2000 /* flag: use tty if possible */
     int msg_type;
     int timeout;
     const char *msg;
@@ -2435,6 +2436,71 @@ The intended use is to allow the plugin to release resources, such as locks,
 that should not be held indefinitely while suspended and then reacquire them
 when the process is resumed.
 Note that the functions are not actually invoked from within a signal handler.
+.PP
+The
+\fImsg_type\fR
+must be set to one of the following values:
+.TP 6n
+SUDO_CONV_PROMPT_ECHO_OFF
+Prompt the user for input with echo disabled;
+this is generally used for passwords.
+The reply will be stored in the
+\fIreplies\fR
+array.
+.TP 6n
+SUDO_CONV_PROMPT_ECHO_ON
+Prompt the user for input with echo enabled.
+The reply will be stored in the
+\fIreplies\fR
+array.
+.TP 6n
+SUDO_CONV_ERROR_MSG
+Display an error message.
+The message is written to the standard error unless the
+\fRSUDO_CONV_PREFER_TTY\fR
+flag is set, in which case it is written to the user's terminal if possible.
+.TP 6n
+SUDO_CONV_INFO_MSG
+Display a message.
+The message is written to the standard output unless the
+\fRSUDO_CONV_PREFER_TTY\fR
+flag is set, in which case it is written to the user's terminal if possible.
+.TP 6n
+SUDO_CONV_PROMPT_MASK
+Prompt the user for input but echo an asterisk character for each
+character read.
+The reply will be stored in the
+\fIreplies\fR
+This can be used to provide visual feedback to the user while reading
+sensitive information that should not be displayed.
+.PP
+In addition to the above values, the following flag bits may also be set:
+.TP 6n
+SUDO_CONV_PROMPT_ECHO_OK
+Allow input to be read when echo cannot be disabled
+when the message type is
+\fRSUDO_CONV_PROMPT_ECHO_OFF\fR
+or
+\fRSUDO_CONV_PROMPT_MASK\fR.
+By default,
+\fBsudo\fR
+will refuse to read input if the echo cannot be disabled for those
+message types.
+.TP 6n
+SUDO_CONV_PREFER_TTY
+When displaying a message via
+\fRSUDO_CONV_ERROR_MSG\fR
+or
+\fRSUDO_CONV_INFO_MSG\fR,
+try to write the message to the user's terminal.
+If the terminal is unavailable, the standard error or standard output
+will be used, depending upon whether
+The user's terminal is always used when possible for input,
+this flag is only used for output.
+\fRSUDO_CONV_ERROR_MSG\fR
+or
+\fRSUDO_CONV_INFO_MSG\fR
+was used.
 .PP
 The plugin is responsible for freeing the reply buffer located in each
 \fRstruct sudo_conv_reply\fR,
