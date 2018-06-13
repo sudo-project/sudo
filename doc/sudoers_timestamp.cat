@@ -118,6 +118,9 @@ LLOOCCKKIINNGG
      same terminal (or parent process ID) from from prompting for a password
      as the same time.
 
+SSEEEE AALLSSOO
+     sudoers(4), sudo(1m)
+
 HHIISSTTOORRYY
      Originally, ssuuddoo used a single zero-length file per user and the file's
      modification time was used as the time stamp.  Later versions of ssuuddoo
@@ -169,9 +172,6 @@ HHIISSTTOORRYY
            Support was added for the kernel-based tty time stamps available in
            OpenBSD which do not use an on-disk time stamp file.
 
-SSEEEE AALLSSOO
-     sudoers(4), sudo(1m)
-
 AAUUTTHHOORRSS
      Many people have worked on ssuuddoo over the years; this version consists of
      code written primarily by:
@@ -198,4 +198,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.23                    December 21, 2017                   Sudo 1.8.23
+Sudo 1.8.24                    December 21, 2017                   Sudo 1.8.24

@@ -154,8 +154,8 @@ DDEESSCCRRIIPPTTIIOONN
                without compromising security.  To actually get a ssuuddoo core
                file you will likely need to enable core dumps for setuid
                processes.  On BSD and Linux systems this is accomplished in
-               the sysctl command.  On Solaris, the coreadm command is used to
-               configure core dump behavior.
+               the sysctl(1m) command.  On Solaris, the coreadm(1m) command is
+               used to configure core dump behavior.
 
                This setting is only available in ssuuddoo version 1.8.4 and
                higher.
@@ -278,7 +278,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      The priorities _t_r_a_c_e and _d_e_b_u_g also include function call tracing which
      logs when a function is entered and when it returns.  For example, the
-     following trace is for the get_user_groups() function located in
+     following trace is for the ggeett__uusseerr__ggrroouuppss() function located in
      src/sudo.c:
 
            sudo[123] -> get_user_groups @ src/sudo.c:385
@@ -400,7 +400,7 @@ EEXXAAMMPPLLEESS
      #Set group_source static
 
 SSEEEE AALLSSOO
-     sudoers(4), sudo(1m), sudo_plugin(4)
+     sudo_plugin(4), sudoers(4), sudo(1m)
 
 HHIISSTTOORRYY
      See the HISTORY file in the ssuuddoo distribution
@@ -432,4 +432,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.23                      July 21, 2017                     Sudo 1.8.23
+Sudo 1.8.24                      July 21, 2017                     Sudo 1.8.24

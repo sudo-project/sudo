@@ -227,10 +227,10 @@ If neither
 nor
 \fRsudoRunAsGroup\fR
 are present, the value of the
-runas_default
+\fIrunas_default\fR
 \fRsudoOption\fR
 is used (defaults to
-\fR@runas_default@ ).\fR
+\fR@runas_default@\fR).
 .sp
 The
 \fRsudoRunAsUser\fR

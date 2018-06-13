@@ -47,9 +47,9 @@ A multi-record time stamp file format was introduced in
 .Nm sudo
 1.8.10 that uses a single file per user.
 Previously, a separate file was used for each user and terminal
-combination unless tty-based time stamps were disabled.  The new
-format is extensible and records of multiple types and versions may
-coexist within the same file.
+combination unless tty-based time stamps were disabled.
+The new format is extensible and records of multiple types and versions
+may coexist within the same file.
 .Pp
 All records, regardless of type or version, begin with a 16-bit version
 number and a 16-bit record size.
@@ -200,6 +200,9 @@ Instead, a separate lock record is used to prevent multiple
 .Nm sudo
 processes using the same terminal (or parent process ID) from
 from prompting for a password as the same time.
+.Sh SEE ALSO
+.Xr sudoers @mansectform@ ,
+.Xr sudo @mansectsu@
 .Sh HISTORY
 Originally,
 .Nm sudo
@@ -252,9 +255,6 @@ This prevents re-use of the time stamp file after logout in most cases.
 Support was added for the kernel-based tty time stamps available in
 OpenBSD which do not use an on-disk time stamp file.
 .El
-.Sh SEE ALSO
-.Xr sudoers @mansectform@ ,
-.Xr sudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on
 .Nm sudo

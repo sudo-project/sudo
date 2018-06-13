@@ -80,8 +80,8 @@ allows a permitted user to execute a
 as the superuser or another user, as specified by the security
 policy.
 The invoking user's real
-.No ( Em not
-effective) user ID is used to determine the user name with which
+.Pq Em not No effective
+user ID is used to determine the user name with which
 to query the security policy.
 .Pp
 .Nm
@@ -1102,8 +1102,8 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Xr login_cap 3 ,
 .Xr passwd @mansectform@ ,
 .Xr sudo.conf @mansectform@ ,
-.Xr sudoers @mansectform@ ,
 .Xr sudo_plugin @mansectform@ ,
+.Xr sudoers @mansectform@ ,
 .Xr sudoreplay @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh HISTORY

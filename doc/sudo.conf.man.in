@@ -335,10 +335,10 @@ To actually get a
 \fBsudo\fR
 core file you will likely need to enable core dumps for setuid processes.
 On BSD and Linux systems this is accomplished in the
-sysctl
+sysctl(@mansectsu@)
 command.
 On Solaris, the
-coreadm
+coreadm(1m)
 command is used to configure core dump behavior.
 .sp
 This setting is only available in
@@ -552,7 +552,8 @@ and
 \fIdebug\fR
 also include function call tracing which logs when a function is
 entered and when it returns.
-For example, the following trace is for the get_user_groups()
+For example, the following trace is for the
+\fBget_user_groups\fR()
 function located in src/sudo.c:
 .nf
 .sp
@@ -704,9 +705,9 @@ Plugin sudoers_io sudoers.so
 .RE
 .fi
 .SH "SEE ALSO"
+sudo_plugin(@mansectform@),
 sudoers(@mansectform@),
-sudo(@mansectsu@),
-sudo_plugin(@mansectform@)
+sudo(@mansectsu@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR

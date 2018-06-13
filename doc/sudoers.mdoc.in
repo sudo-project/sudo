@@ -683,7 +683,7 @@ and
 syntax depends on
 the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
-.Bl -bullet -width 4n -width 1n
+.Bl -bullet -width 1n
 .It
 Group in the same domain: "%:Group Name"
 .It
@@ -2047,7 +2047,7 @@ if they match a value specified in
 .Em editor .
 If the
 .Em env_reset
-flag is enabled, the 
+flag is enabled, the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
 and/or
@@ -3286,7 +3286,7 @@ The group name to look up when setting the group ID on new I/O log
 files and directories.
 If
 .Em iolog_group
-is not set, 
+is not set,
 the primary group ID of the user specified by
 .Em iolog_user
 is used.
@@ -3645,7 +3645,7 @@ If arguments are present, the string must be enclosed in double quotes
 .Pq \&"" .
 .Pp
 For more information see
-.Xr "GROUP PROVIDER PLUGINS" .
+.Sx "GROUP PROVIDER PLUGINS" .
 .It lecture
 This option controls when a short lecture will be printed along with
 the password prompt.
@@ -3726,7 +3726,8 @@ By default,
 .Nm sudo
 logs via syslog.
 .It mailerflags
-Flags to use when invoking mailer. Defaults to
+Flags to use when invoking mailer.
+Defaults to
 .Fl t .
 .It mailerpath
 Path to mail program used to send warning mail.
@@ -3779,7 +3780,7 @@ matched by either the
 or
 .Em env_keep
 list.
-If 
+If
 .Em env_reset
 is disabled, variables in the file are added as long as they
 are not matched by the
@@ -5280,10 +5281,10 @@ manual.
 .Xr mktemp 3 ,
 .Xr strftime 3 ,
 .Xr sudo.conf @mansectform@ ,
-.Xr sudoers.ldap @mansectform@ ,
-.Xr sudo @mansectsu@ ,
 .Xr sudo_plugin @mansectform@ ,
+.Xr sudoers.ldap @mansectform@ ,
 .Xr sudoers_timestamp @mansectform@ ,
+.Xr sudo @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on

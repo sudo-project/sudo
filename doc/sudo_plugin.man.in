@@ -1975,7 +1975,7 @@ deregister_hooks
 See the
 \fIPolicy plugin API\fR
 section for a description of
-\fRderegister_hooks.\fR
+\fRderegister_hooks\fR.
 .TP 6n
 change_winsize
 .nf

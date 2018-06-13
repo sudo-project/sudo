@@ -306,10 +306,10 @@ To actually get a
 .Nm sudo
 core file you will likely need to enable core dumps for setuid processes.
 On BSD and Linux systems this is accomplished in the
-.Xr sysctl
+.Xr sysctl 8
 command.
 On Solaris, the
-.Xr coreadm
+.Xr coreadm 1m
 command is used to configure core dump behavior.
 .Pp
 This setting is only available in
@@ -504,7 +504,8 @@ and
 .Em debug
 also include function call tracing which logs when a function is
 entered and when it returns.
-For example, the following trace is for the get_user_groups()
+For example, the following trace is for the
+.Fn get_user_groups
 function located in src/sudo.c:
 .Bd -literal -offset indent
 sudo[123] -> get_user_groups @ src/sudo.c:385
@@ -640,9 +641,9 @@ Plugin sudoers_io sudoers.so
 #Set group_source static
 .Ed
 .Sh SEE ALSO
+.Xr sudo_plugin @mansectform@ ,
 .Xr sudoers @mansectform@ ,
-.Xr sudo @mansectsu@ ,
-.Xr sudo_plugin @mansectform@
+.Xr sudo @mansectsu@
 .Sh HISTORY
 See the HISTORY file in the
 .Nm sudo

@@ -1730,7 +1730,7 @@ section for a description of
 See the
 .Sx Policy plugin API
 section for a description of
-.Li deregister_hooks.
+.Li deregister_hooks .
 .It change_winsize
 .Bd -literal -compact
 int (*change_winsize)(unsigned int lines, unsigned int cols);

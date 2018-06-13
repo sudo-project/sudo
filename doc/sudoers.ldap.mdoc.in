@@ -212,10 +212,10 @@ If neither
 nor
 .Li sudoRunAsGroup
 are present, the value of the
-.En runas_default
+.Em runas_default
 .Li sudoOption
 is used (defaults to
-.Li @runas_default@ ).
+.Li @runas_default@ ) .
 .Pp
 The
 .Li sudoRunAsUser
