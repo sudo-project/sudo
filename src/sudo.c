@@ -366,7 +366,7 @@ fix_fds(void)
 }
 
 /*
- * Allocate space for groups and fill in using getgrouplist()
+ * Allocate space for groups and fill in using sudo_getgrouplist2()
  * for when we cannot (or don't want to) use getgroups().
  * Returns 0 on success and -1 on failure.
  */
@@ -377,55 +377,31 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
     /*
-     * If user specified a max number of groups, use it, otherwise keep
-     * trying getgrouplist() until we have enough room in the array.
+     * If user specified a max number of groups, use it, otherwise let
+     * sudo_getgrouplist2() allocate the group vector.
      */
     ud->ngroups = sudo_conf_max_groups();
     if (ud->ngroups > 0) {
 	ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
-	if (ud->groups == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-	/* No error on insufficient space if user specified max_groups. */
-	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
-	ret = 0;
-    } else {
-#ifdef HAVE_GETGROUPLIST_2
-	ud->groups = NULL;
-	ud->ngroups = getgrouplist_2(ud->username, ud->gid, &ud->groups);
-	if (ud->ngroups != -1)
+	if (ud->groups != NULL) {
+	    /* No error on insufficient space if user specified max_groups. */
+	    (void)sudo_getgrouplist2(ud->username, ud->gid, &ud->groups,
+		&ud->ngroups);
 	    ret = 0;
-#else
-	int tries;
-
-	/*
-	 * It is possible to belong to more groups in the group database
-	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
-	 * and double this as needed.
-	 */
-	ud->groups = NULL;
-	ud->ngroups = system_maxgroups << 1;
-	for (tries = 0; tries < 10 && ret == -1; tries++) {
-	    ud->ngroups <<= 1;
-	    free(ud->groups);
-	    ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
-	    if (ud->groups == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		goto done;
-	    }
-	    ret = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
 	}
-#endif /* HAVE_GETGROUPLIST_2 */
+    } else {
+	ud->groups = NULL;
+	ret = sudo_getgrouplist2(ud->username, ud->gid, &ud->groups,
+	    &ud->ngroups);
     }
-done:
     if (ret == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: %s: unable to get groups via getgrouplist()",
+	    "%s: %s: unable to get groups via sudo_getgrouplist2()",
 	    __func__, ud->username);
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: %s: got %d groups via getgrouplist()",
+	    "%s: %s: got %d groups via sudo_getgrouplist2()",
 	    __func__, ud->username, ud->ngroups);
     }
     debug_return_int(ret);

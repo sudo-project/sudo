@@ -227,7 +227,7 @@ sudo_make_gritem(gid_t gid, const char *name)
 
 /*
  * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from user_gids or from getgrouplist(3).
+ * elements.  Fills in datum from user_gids or from sudo_getgrouplist2(3).
  */
 struct cache_item *
 sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
@@ -258,37 +258,14 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *unused1,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
 	    }
-	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
+	    (void)sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids);
 	} else {
-#ifdef HAVE_GETGROUPLIST_2
-	    ngids = getgrouplist_2(pw->pw_name, pw->pw_gid, &gids);
-	    if (ngids == -1) {
+	    gids = NULL;
+	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
 	    }
-#else
-	    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
-	    if (ngids < 0)
-		ngids = NGROUPS_MAX * 2;
-	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
-	    if (gids == NULL) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable to allocate memory");
-		debug_return_ptr(NULL);
-	    }
-	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-		free(gids);
-		gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
-		if (gids == NULL) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"unable to allocate memory");
-		    debug_return_ptr(NULL);
-		}
-		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
-		    ngids = -1;
-	    }
-#endif /* HAVE_GETGROUPLIST_2 */
 	}
     }
     if (ngids <= 0) {

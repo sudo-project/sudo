@@ -289,7 +289,7 @@ static struct cache_item_gidlist *gidlist_item;
 
 /*
  * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from user_gids or from getgrouplist(3).
+ * elements.  Fills in datum from user_gids or from sudo_getgrouplist2(3).
  */
 struct cache_item *
 cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
