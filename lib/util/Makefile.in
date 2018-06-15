@@ -109,10 +109,10 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LTOBJS = @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo gettime.lo \
-	 gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo secure_path.lo \
-	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
-	 sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
-	 ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
+	 getgrouplist.lo gidlist.lo lbuf.lo locking.lo parseln.lo progname.lo \
+	 secure_path.lo setgroups.lo strsplit.lo strtobool.lo strtoid.lo \
+	 strtomode.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo \
+	 ttyname_dev.lo ttysize.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 ATOFOO_TEST_OBJS = atofoo_test.lo
 

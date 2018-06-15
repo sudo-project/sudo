@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011, 2013-2016
+ * Copyright (c) 2010, 2011, 2013-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -17,8 +17,6 @@
 
 #include <config.h>
 
-#ifndef HAVE_GETGROUPLIST
-
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +27,8 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <grp.h>
+#include <limits.h>
+#include <unistd.h>
 #ifdef HAVE_NSS_SEARCH
 # include <errno.h>
 # include <limits.h>
@@ -43,22 +43,103 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
-#if defined(HAVE_GETGRSET)
+#ifndef HAVE_GETGROUPLIST
+int
+sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGROUPS_T *groups,
+    int *ngroupsp)
+{
+    return sudo_getgrouplist2(name, basegid, &groups, ngroupsp);
+}
+#endif /* HAVE_GETGROUPLIST */
+
+#if defined(HAVE_GETGROUPLIST)
+
+#if defined(HAVE_GETGROUPLIST_2) && !HAVE_DECL_GETGROUPLIST_2
+int getgrouplist_2(const char *name, GETGROUPS_T basegid, GETGROUPS_T **groups);
+#endif /* HAVE_GETGROUPLIST_2 && !HAVE_DECL_GETGROUPLIST_2 */
+
 /*
- * BSD-compatible getgrouplist(3) using AIX getgrset(3)
+ * Extended getgrouplist(3) using getgrouplist(3) and getgrouplist_2(3)
  */
 int
-sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+    GETGROUPS_T **groupsp, int *ngroupsp)
 {
+    GETGROUPS_T *groups = *groupsp;
+    int ngroups;
+#ifndef HAVE_GETGROUPLIST_2
+    int grpsize, tries;
+#endif
+
+    /* For static group vector, just use getgrouplist(3). */
+    if (groups != NULL)
+	return getgrouplist(name, basegid, groups, ngroupsp);
+
+#ifdef HAVE_GETGROUPLIST_2
+    if ((ngroups = getgrouplist_2(name, basegid, groupsp)) == -1)
+	return -1;
+    *ngroupsp = ngroups;
+    return 0;
+#else
+    grpsize = (int)sysconf(_SC_NGROUPS_MAX);
+    if (grpsize < 0)
+	grpsize = NGROUPS_MAX;
+    /*
+     * It is possible to belong to more groups in the group database
+     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
+     * and double this as needed.
+     */
+    grpsize <<= 1;
+    for (tries = 0; tries < 10; tries++) {
+	free(groups);
+	groups = reallocarray(NULL, grpsize, 2 * sizeof(*groups));
+	if (groups == NULL)
+	    return -1;
+	grpsize <<= 1;
+	ngroups = grpsize;
+	if (getgrouplist(name, basegid, groups, &ngroups) == 0) {
+	    *groupsp = groups;
+	    *ngroupsp = ngroups;
+	    return 0;
+	}
+    }
+    free(groups);
+    return -1;
+#endif /* HAVE_GETGROUPLIST_2 */
+}
+
+#elif defined(HAVE_GETGRSET)
+
+/*
+ * Extended getgrouplist(3) using AIX getgrset(3)
+ */
+int
+sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+    GETGROUPS_T **groupsp, int *ngroupsp)
+{
+    GETGROUPS_T *groups = *groupsp;
     char *cp, *grset = NULL;
     int ngroups = 1;
     int grpsize = *ngroupsp;
     int ret = -1;
     gid_t gid;
 
+    if (groups == NULL) {
+	/* Dynamically-sized group vector. */
+	grpsize = (int)sysconf(_SC_NGROUPS_MAX);
+	if (grpsize < 0)
+	    grpsize = NGROUPS_MAX;
+	groups = reallocarray(NULL, grpsize, 4 * sizeof(*groups));
+	if (groups == NULL)
+	    return -1;
+	grpsize <<= 2;
+    } else {
+	/* Static group vector. */
+	if (grpsize <= 0)
+	    return -1;
+    }
+
     /* We support BSD semantics where the first element is the base gid */
-    if (grpsize <= 0)
-	return -1;
     groups[0] = basegid;
 
 #ifdef HAVE_SETAUTHDB
@@ -71,8 +152,23 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 	for (cp = strtok_r(grset, ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
 	    gid = sudo_strtoid(cp, NULL, NULL, &errstr);
 	    if (errstr == NULL && gid != basegid) {
-		if (ngroups == grpsize)
-		    goto done;
+		if (ngroups == grpsize) {
+		    GETGROUPS_T *tmp;
+
+		    if (*groupsp != NULL) {
+			/* Static group vector. */
+			goto done;
+		    }
+		    tmp = reallocarray(groups, grpsize, 2 * sizeof(*groups));
+		    if (tmp == NULL) {
+			free(groups);
+			groups = NULL;
+			ngroups = 0;
+			goto done;
+		    }
+		    groups = tmp;
+		    grpsize <<= 1;
+		}
 		groups[ngroups++] = gid;
 	    }
 	}
@@ -84,6 +180,7 @@ done:
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
+    *groupsp = groups;
     *ngroupsp = ngroups;
 
     return ret;
@@ -193,7 +290,8 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
 }
 
 static nss_status_t
-process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm)
+process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm,
+    int dynamic)
 {
     const char *user = gbm->username;
     nss_status_t ret = NSS_NOTFOUND;
@@ -201,6 +299,10 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm)
     struct group *grp;
     char **gr_mem;
     int	error, i;
+
+    /* Hack to let us check whether the query was handled by nscd or us. */
+    if (gbm->force_slow_way != 0)
+	gbm->force_slow_way = 2;
 
     buf = _nss_XbyY_buf_alloc(sizeof(struct group), NSS_BUFLEN_GROUP);
     if (buf == NULL)
@@ -219,6 +321,17 @@ process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm)
 		if (gbm->gid_array[i] == grp->gr_gid)
 		    goto done;			/* already present */
 	    }
+	    if (i == gbm->maxgids && dynamic) {
+		GETGROUPS_T *tmp = reallocarray(gbm->gid_array, gbm->maxgids,
+		    2 * sizeof(GETGROUPS_T));
+		if (tmp == NULL) {
+		    /* Out of memory, just return what we have. */
+		    dynamic = 0;
+		} else {
+		    gbm->gid_array = tmp;
+		    gbm->maxgids <<= 1;
+		}
+	    }
 	    /* Store gid if there is space. */
 	    if (i < gbm->maxgids)
 		gbm->gid_array[i] = grp->gr_gid;
@@ -232,35 +345,91 @@ done:
     return ret;
 }
 
+static nss_status_t
+process_cstr_static(const char *instr, int inlen, struct nss_groupsbymem *gbm)
+{
+    return process_cstr(instr, inlen, gbm, 0);
+}
+
+static nss_status_t
+process_cstr_dynamic(const char *instr, int inlen, struct nss_groupsbymem *gbm)
+{
+    return process_cstr(instr, inlen, gbm, 1);
+}
+
 /*
- * BSD-compatible getgrouplist(3) using nss_search(3)
+ * Extended getgrouplist(3) using nss_search(3)
  */
 int
-sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+    GETGROUPS_T **groupsp, int *ngroupsp)
 {
     struct nss_groupsbymem gbm;
     static DEFINE_NSS_DB_ROOT(db_root);
 
-    /* We support BSD semantics where the first element is the base gid */
-    if (*ngroupsp <= 0)
-	return -1;
-    groups[0] = basegid;
-
     memset(&gbm, 0, sizeof(gbm));
     gbm.username = name;
-    gbm.gid_array = groups;
+    gbm.gid_array = *groupsp;
     gbm.maxgids = *ngroupsp;
     gbm.numgids = 1; /* for basegid */
     gbm.force_slow_way = 1;
     gbm.str2ent = str2grp;
-    gbm.process_cstr = process_cstr;
+
+    if (gbm.gid_array == NULL) {
+	/* Dynamically-sized group vector. */
+	gbm.maxgids = (int)sysconf(_SC_NGROUPS_MAX);
+	if (gbm.maxgids < 0)
+	    gbm.maxgids = NGROUPS_MAX;
+	gbm.gid_array = reallocarray(NULL, gbm.maxgids, 4 * sizeof(GETGROUPS_T));
+	if (gbm.gid_array == NULL)
+	    return -1;
+	gbm.maxgids <<= 2;
+	gbm.process_cstr = process_cstr_dynamic;
+    } else {
+	/* Static group vector. */
+	if (gbm.maxgids <= 0)
+	    return -1;
+	gbm.process_cstr = process_cstr_static;
+    }
+
+    /* We support BSD semantics where the first element is the base gid */
+    gbm.gid_array[0] = basegid;
 
     /*
      * Can't use nss_search return value since it may return NSS_UNAVAIL
      * when no nsswitch.conf entry (e.g. compat mode).
      */
-    (void)nss_search(&db_root, _nss_initf_group, NSS_DBOP_GROUP_BYMEMBER, &gbm);
+    for (;;) {
+	GETGROUPS_T *tmp;
 
+	(void)nss_search(&db_root, _nss_initf_group, NSS_DBOP_GROUP_BYMEMBER,
+	    &gbm);
+
+	/*
+	 * If this was a statically-sized group vector or nscd was not used
+	 * we are done.
+	 */
+	if (gbm.process_cstr != process_cstr_dynamic || gbm.force_slow_way == 2)
+	    break;
+
+	/*
+	 * If gid_array is full and the query was handled by nscd, there
+	 * may be more data, so double gid_array and try again.
+	 */
+	if (gbm.numgids != gbm.maxgids)
+	    break;
+
+	tmp = reallocarray(gbm.gid_array, gbm.maxgids, 2 * sizeof(GETGROUPS_T));
+	if (tmp == NULL) {
+	    free(gbm.gid_array);
+	    return -1;
+	}
+	gbm.gid_array = tmp;
+	gbm.maxgids <<= 1;
+    }
+
+    /* Note: we can only detect a too-small group list if nscd is not used. */
+    *groupsp = gbm.gid_array;
     if (gbm.numgids <= gbm.maxgids) {
         *ngroupsp = gbm.numgids;
         return 0;
@@ -269,22 +438,37 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     return -1;
 }
 
-#else /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
+#else /* !HAVE_GETGROUPLIST && !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
 
 /*
- * BSD-compatible getgrouplist(3) using getgrent(3)
+ * Extended getgrouplist(3) using getgrent(3)
  */
 int
-sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+    GETGROUPS_T **groupsp, int *ngroupsp)
 {
-    int i, ngroups = 1;
+    GETGROUPS_T *groups = *groupsp;
     int grpsize = *ngroupsp;
+    int i, ngroups = 1;
     int ret = -1;
     struct group *grp;
 
+    if (groups == NULL) {
+	/* Dynamically-sized group vector. */
+	grpsize = (int)sysconf(_SC_NGROUPS_MAX);
+	if (grpsize < 0)
+	    grpsize = NGROUPS_MAX;
+	groups = reallocarray(NULL, grpsize, 4 * sizeof(*groups));
+	if (groups == NULL)
+	    return -1;
+	grpsize <<= 2;
+    } else {
+	/* Static group vector. */
+	if (grpsize <= 0)
+	    return -1;
+    }
+
     /* We support BSD semantics where the first element is the base gid */
-    if (grpsize <= 0)
-	return -1;
     groups[0] = basegid;
 
     setgrent();
@@ -305,8 +489,23 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 		break;
 	}
 	if (i == ngroups) {
-	    if (ngroups == grpsize)
-		goto done;
+	    if (ngroups == grpsize) {
+		GETGROUPS_T *tmp;
+
+		if (*groupsp != NULL) {
+		    /* Static group vector. */
+		    goto done;
+		}
+		tmp = reallocarray(groups, grpsize, 2 * sizeof(*groups));
+		if (tmp == NULL) {
+		    free(groups);
+		    groups = NULL;
+		    ngroups = 0;
+		    goto done;
+		}
+		groups = tmp;
+		grpsize <<= 1;
+	    }
 	    groups[ngroups++] = grp->gr_gid;
 	}
     }
@@ -314,9 +513,9 @@ sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 
 done:
     endgrent();
+    *groupsp = groups;
     *ngroupsp = ngroups;
 
     return ret;
 }
-#endif /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
-#endif /* HAVE_GETGROUPLIST */
+#endif /* !HAVE_GETGROUPLIST && !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */

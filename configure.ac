@@ -2538,7 +2538,6 @@ AC_CHECK_FUNCS([getgrouplist], [], [
 	])
 	;;
     esac
-    AC_LIBOBJ(getgrouplist)
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
 AC_CHECK_FUNCS([getline], [], [

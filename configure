@@ -19149,12 +19149,6 @@ fi
 
 	;;
     esac
-    case " $LIBOBJS " in
-  *" getgrouplist.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
- ;;
-esac
-
 
     for _sym in sudo_getgrouplist; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
