@@ -87,9 +87,11 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY)) {
 			/* Try writing to /dev/tty first. */
 			if ((fd = open(_PATH_TTY, O_WRONLY)) != -1) {
-			    if (write(fd, msg->msg, strlen(msg->msg)) != -1)
-				break;
+			    ssize_t nwritten =
+				write(fd, msg->msg, strlen(msg->msg));
 			    close(fd);
+			    if (nwritten != -1)
+				break;
 			}
 		    }
 		    if (fputs(msg->msg, fp) == EOF)
