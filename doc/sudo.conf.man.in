@@ -1,6 +1,6 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
-.\" Copyright (c) 2010-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO.CONF" "5" "July 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "5" "June 16, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -440,12 +440,13 @@ By default,
 \fBsudo\fR
 will allocate four times the system's maximum number of groups (see above)
 and retry with double that number if the group database query fails.
-However, some systems just return as many entries as will fit and
-do not indicate an error when there is a lack of space.
 .sp
 This setting is only available in
 \fBsudo\fR
 version 1.8.7 and higher.
+It should not be required in
+\fBsudo\fR
+versions 1.8.24 and higher and may be removed in a later release.
 .TP 10n
 probe_interfaces
 By default,
