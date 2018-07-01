@@ -6,6 +6,25 @@ What's new in Sudo 1.8.24
    shared.  The handling of negated commands in SSS and LDAP is
    unchanged.
 
+ * Fixed a regression introduced in 1.8.23 where "sudo -i" could
+   not be used in conjunction with --preserve-env=VARIABLE.  Bug #835
+
+ * cvtsudoers can now parse base64-encoded attributes in LDIF files.
+
+ * Random insults are now more random.
+
+ * Fixed the noexec wordexp(3) test on FreeBSD.
+
+ * Added SUDO_CONV_PREFER_TTY flag for conversation function to
+   tell sudo to try writing to /dev/tty first. Can be used in
+   conjunction with SUDO_CONV_INFO_MSG and SUDO_CONV_ERROR_MSG.
+
+ * Sudo now supports an arbitrary number of groups per user on
+   Solaris.  Previously, only the first 64 groups were found.
+   This should remove the need to set "max_groups" in sudo.conf.
+
+ * Fixed typos in the OpenLDAP sudo schema.  Bugs #839 and #840.
+
 What's new in Sudo 1.8.23
 
  * PAM account management modules and BSD auth approval modules are
