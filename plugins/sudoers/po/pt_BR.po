@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sudoers 1.8.23b3\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2018-04-05 06:36-0600\n"
-"PO-Revision-Date: 2018-04-12 08:04-0200\n"
+"PO-Revision-Date: 2018-06-13 08:22-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
@@ -156,7 +156,7 @@ msgstr "valor de timeout grande demais"
 
 #: gram.y:626 plugins/sudoers/policy.c:316
 msgid "invalid timeout value"
-msgstr "valore de timeout inválido"
+msgstr "valor de timeout inválido"
 
 #: gram.y:1234 gram.y:1241 plugins/sudoers/auth/pam.c:341
 #: plugins/sudoers/auth/pam.c:511 plugins/sudoers/auth/rfc1938.c:109
