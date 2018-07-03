@@ -63,17 +63,21 @@ _rs_forkhandler(void)
 }
 #endif /* HAVE_PTHREAD_ATFORK */
 
+static int wipeonfork;
+
 static inline void
 _rs_forkdetect(void)
 {
-	static pid_t _rs_pid = 0;
-	pid_t pid = getpid();
+	if (!wipeonfork) {
+		static pid_t _rs_pid = 0;
+		pid_t pid = getpid();
 
-	if (_rs_pid == 0 || _rs_pid != pid || _rs_forked) {
-		_rs_pid = pid;
-		_rs_forked = 0;
-		if (rs)
-			memset(rs, 0, sizeof(*rs));
+		if (_rs_pid == 0 || _rs_pid != pid || _rs_forked) {
+			_rs_pid = pid;
+			_rs_forked = 0;
+			if (rs)
+				memset(rs, 0, sizeof(*rs));
+		}
 	}
 }
 
@@ -90,6 +94,13 @@ _rs_allocate(struct _rs **rsp, struct _rsx **rsxp)
 		*rsp = NULL;
 		return (-1);
 	}
+
+#ifdef MADV_WIPEONFORK
+	if (madvise (*rsp, sizeof(**rsp), MADV_WIPEONFORK) == 0 &&
+	    madvise (*rsxp, sizeof(**rsxp), MADV_WIPEONFORK) == 0) {
+		wipeonfork = 1;
+	}
+#endif
 
 	_ARC4_ATFORK(_rs_forkhandler);
 	return (0);
