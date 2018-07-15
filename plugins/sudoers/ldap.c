@@ -830,6 +830,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	if (rc != LDAP_SUCCESS) {
 	    DPRINTF1("ldap netgroup search failed: %s", ldap_err2string(rc));
 	    ldap_msgfree(result);
+	    result = NULL;
 	    continue;
 	}
 
