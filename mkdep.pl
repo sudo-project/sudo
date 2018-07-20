@@ -134,8 +134,8 @@ sub mkdep {
     foreach my $obj (sort keys %objs) {
 	next unless $obj =~ /(\S+)\.(l?o)$/;
 	if ($2 eq "o" && exists($objs{"$1.lo"})) {
-	    # If we have both .lo and .o files, make the .o depend on the .lo
-	    $new_makefile .= sprintf("%s: %s.lo\n", $obj, $1);
+	    # We have both .lo and .o files, only the .lo should be used
+	    warn "$file: $obj should be $1.lo\n";
 	} else {
 	    # Use old depenencies when mapping objects to their source.
 	    # If no old depenency, use the MANIFEST file to find the source.
