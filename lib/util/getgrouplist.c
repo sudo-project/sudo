@@ -97,7 +97,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	    return -1;
 	grpsize <<= 1;
 	ngroups = grpsize;
-	if (getgrouplist(name, basegid, groups, &ngroups) == 0) {
+	if (getgrouplist(name, basegid, groups, &ngroups) != -1) {
 	    *groupsp = groups;
 	    *ngroupsp = ngroups;
 	    return 0;
