@@ -754,9 +754,16 @@ pty_close(struct command_status *cstat)
     int n;
     debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
-    /* Close the pty slave first so reads from the master don't block. */
-    if (io_fds[SFD_SLAVE] != -1)
+#ifndef _AIX
+    /*
+     * Close the pty slave first so reads from the master don't block.
+     * On AIX as it will cause us to lose *our* controlling tty too!
+     */
+    if (io_fds[SFD_SLAVE] != -1) {
 	close(io_fds[SFD_SLAVE]);
+	io_fds[SFD_SLAVE] = -1;
+    }
+#endif
 
     /* Flush any remaining output (the plugin already got it). */
     if (io_fds[SFD_USERTTY] != -1) {
@@ -786,9 +793,13 @@ pty_close(struct command_status *cstat)
     if (utmp_user != NULL)
 	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
 
+#ifndef _AIX
     /* Close pty master. */
-    if (io_fds[SFD_MASTER] != -1)
+    if (io_fds[SFD_MASTER] != -1) {
 	close(io_fds[SFD_MASTER]);
+	io_fds[SFD_MASTER] = -1;
+    }
+#endif
 
     debug_return;
 }
