@@ -525,6 +525,9 @@ get_user_info(struct user_details *ud)
     aix_setauthdb(IDtouser(ud->uid), NULL);
 #endif
     pw = getpwuid(ud->uid);
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
     if (pw == NULL)
 	sudo_fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
@@ -820,11 +823,11 @@ command_info_to_details(char * const info[], struct command_details *details)
     aix_setauthdb(IDtouser(details->euid), NULL);
 #endif
     details->pw = getpwuid(details->euid);
-    if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
+    if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 #ifdef HAVE_SELINUX
     if (details->selinux_role != NULL && is_selinux_enabled() > 0)
