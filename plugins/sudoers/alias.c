@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2016
+ * Copyright (c) 2004-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -36,15 +36,10 @@
 #include <gram.h>
 
 /*
- * Globals
- */
-static struct rbtree *aliases;
-
-/*
  * Comparison function for the red-black tree.
  * Aliases are sorted by name with the type used as a tie-breaker.
  */
-int
+static int
 alias_compare(const void *v1, const void *v2)
 {
     const struct alias *a1 = (const struct alias *)v1;
@@ -68,16 +63,19 @@ alias_compare(const void *v1, const void *v2)
  * alias to mark it as unused.
  */
 struct alias *
-alias_get(const char *name, int type)
+alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type)
 {
     struct alias key;
     struct rbnode *node;
     struct alias *a = NULL;
     debug_decl(alias_get, SUDOERS_DEBUG_ALIAS)
 
+    if (parse_tree->aliases == NULL)
+	debug_return_ptr(NULL);
+
     key.name = (char *)name;
     key.type = type;
-    if ((node = rbfind(aliases, &key)) != NULL) {
+    if ((node = rbfind(parse_tree->aliases, &key)) != NULL) {
 	/*
 	 * Check whether this alias is already in use.
 	 * If so, we've detected a loop.  If not, set the flag,
@@ -112,11 +110,19 @@ alias_put(struct alias *a)
  * Returns NULL on success and an error string on failure.
  */
 const char *
-alias_add(char *name, int type, char *file, int lineno, struct member *members)
+alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
+    char *file, int lineno, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
     debug_decl(alias_add, SUDOERS_DEBUG_ALIAS)
+
+    if (parse_tree->aliases == NULL) {
+	if ((parse_tree->aliases = alloc_aliases()) == NULL) {
+	    strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
+	    debug_return_str(errbuf);
+	}
+    }
 
     a = calloc(1, sizeof(*a));
     if (a == NULL) {
@@ -129,9 +135,10 @@ alias_add(char *name, int type, char *file, int lineno, struct member *members)
     a->file = rcstr_addref(file);
     a->lineno = lineno;
     HLTQ_TO_TAILQ(&a->members, members, entries);
-    switch (rbinsert(aliases, a, NULL)) {
+    switch (rbinsert(parse_tree->aliases, a, NULL)) {
     case 1:
-	snprintf(errbuf, sizeof(errbuf), N_("Alias \"%s\" already defined"), name);
+	snprintf(errbuf, sizeof(errbuf), N_("Alias \"%s\" already defined"),
+	    name);
 	alias_free(a);
 	debug_return_str(errbuf);
     case -1:
@@ -146,37 +153,26 @@ alias_add(char *name, int type, char *file, int lineno, struct member *members)
  * Apply a function to each alias entry and pass in a cookie.
  */
 void
-alias_apply(int (*func)(void *, void *), void *cookie)
+alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(void *, void *),
+    void *cookie)
 {
     debug_decl(alias_apply, SUDOERS_DEBUG_ALIAS)
 
-    rbapply(aliases, func, cookie, inorder);
+    if (parse_tree->aliases != NULL)
+	rbapply(parse_tree->aliases, func, cookie, inorder);
 
     debug_return;
 }
 
 /*
- * Returns true if there are no aliases, else false.
+ * Returns true if there are no aliases in the parse_tree, else false.
  */
 bool
-no_aliases(void)
+no_aliases(struct sudoers_parse_tree *parse_tree)
 {
     debug_decl(no_aliases, SUDOERS_DEBUG_ALIAS)
-    debug_return_bool(rbisempty(aliases));
-}
-
-/*
- * Replace the aliases tree with a new one, returns the old.
- */
-struct rbtree *
-replace_aliases(struct rbtree *new_aliases)
-{
-    struct rbtree *old_aliases = aliases;
-    debug_decl(replace_aliases, SUDOERS_DEBUG_ALIAS)
-
-    aliases = new_aliases;
-
-    debug_return_ptr(old_aliases);
+    debug_return_bool(parse_tree->aliases == NULL ||
+	rbisempty(parse_tree->aliases));
 }
 
 /*
@@ -202,31 +198,37 @@ alias_free(void *v)
  * Find the named alias, remove it from the tree and return it.
  */
 struct alias *
-alias_remove(char *name, int type)
+alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type)
 {
     struct rbnode *node;
     struct alias key;
     debug_decl(alias_remove, SUDOERS_DEBUG_ALIAS)
 
-    key.name = name;
-    key.type = type;
-    if ((node = rbfind(aliases, &key)) == NULL) {
-	errno = ENOENT;
-	return NULL;
+    if (parse_tree->aliases != NULL) {
+	key.name = name;
+	key.type = type;
+	if ((node = rbfind(parse_tree->aliases, &key)) != NULL)
+	    debug_return_ptr(rbdelete(parse_tree->aliases, node));
     }
-    debug_return_ptr(rbdelete(aliases, node));
+    errno = ENOENT;
+    debug_return_ptr(NULL);
 }
 
-bool
-init_aliases(void)
+struct rbtree *
+alloc_aliases(void)
 {
-    debug_decl(init_aliases, SUDOERS_DEBUG_ALIAS)
+    debug_decl(alloc_aliases, SUDOERS_DEBUG_ALIAS)
+
+    debug_return_ptr(rbcreate(alias_compare));
+}
+
+void
+free_aliases(struct rbtree *aliases)
+{
+    debug_decl(free_aliases, SUDOERS_DEBUG_ALIAS)
 
     if (aliases != NULL)
 	rbdestroy(aliases, alias_free);
-    aliases = rbcreate(alias_compare);
-
-    debug_return_bool(aliases != NULL);
 }
 
 const char *
@@ -244,17 +246,18 @@ alias_type_to_string(int alias_type)
  * referenced by that alias.  Stores removed aliases in a freelist.
  */
 static bool
-alias_remove_recursive(char *name, int type, struct rbtree *freelist)
+alias_remove_recursive(struct sudoers_parse_tree *parse_tree, char *name,
+    int type, struct rbtree *freelist)
 {
     struct member *m;
     struct alias *a;
     bool ret = true;
     debug_decl(alias_remove_recursive, SUDOERS_DEBUG_ALIAS)
 
-    if ((a = alias_remove(name, type)) != NULL) {
+    if ((a = alias_remove(parse_tree, name, type)) != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, type, freelist))
+		if (!alias_remove_recursive(parse_tree, m->name, type, freelist))
 		    ret = false;
 	    }
 	}
@@ -264,81 +267,80 @@ alias_remove_recursive(char *name, int type, struct rbtree *freelist)
     debug_return_bool(ret);
 }
 
+static int
+alias_find_used_members(struct sudoers_parse_tree *parse_tree,
+    struct member_list *members, int atype, struct rbtree *used_aliases)
+{
+    struct member *m;
+    int errors = 0;
+    debug_decl(alias_find_used_members, SUDOERS_DEBUG_ALIAS)
+
+    if (members != NULL) {
+	TAILQ_FOREACH(m, members, entries) {
+	    if (m->type != ALIAS)
+		continue;
+	    if (!alias_remove_recursive(parse_tree, m->name, atype, used_aliases))
+		errors++;
+	}
+    }
+
+    debug_return_int(errors);
+}
+
 /*
  * Move all aliases referenced by userspecs to used_aliases.
  */
 bool
-alias_find_used(struct rbtree *used_aliases)
+alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases)
 {
     struct privilege *priv;
     struct userspec *us;
     struct cmndspec *cs;
     struct defaults *d;
     struct member *m;
-    int atype, errors = 0;
+    int errors = 0;
     debug_decl(alias_find_used, SUDOERS_DEBUG_ALIAS)
 
     /* Move referenced aliases to used_aliases. */
-    TAILQ_FOREACH(us, &userspecs, entries) {
-	TAILQ_FOREACH(m, &us->users, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, USERALIAS, used_aliases))
-		    errors++;
-	    }
-	}
+    TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
+	errors += alias_find_used_members(parse_tree, &us->users,
+	    USERALIAS, used_aliases);
 	TAILQ_FOREACH(priv, &us->privileges, entries) {
-	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-		if (m->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, HOSTALIAS, used_aliases))
-			errors++;
-		}
-	    }
+	    errors += alias_find_used_members(parse_tree, &priv->hostlist,
+		HOSTALIAS, used_aliases);
 	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-		if (cs->runasuserlist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-			if (m->type == ALIAS) {
-			    if (!alias_remove_recursive(m->name, RUNASALIAS, used_aliases))
-				errors++;
-			}
-		    }
-		}
-		if (cs->runasgrouplist != NULL) {
-		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-			if (m->type == ALIAS) {
-			    if (!alias_remove_recursive(m->name, RUNASALIAS, used_aliases))
-				errors++;
-			}
-		    }
-		}
+		errors += alias_find_used_members(parse_tree, cs->runasuserlist,
+		    RUNASALIAS, used_aliases);
+		errors += alias_find_used_members(parse_tree, cs->runasgrouplist,
+		    RUNASALIAS, used_aliases);
 		if ((m = cs->cmnd)->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, CMNDALIAS, used_aliases))
+		    if (!alias_remove_recursive(parse_tree, m->name, CMNDALIAS,
+			used_aliases))
 			errors++;
 		}
 	    }
 	}
     }
-    TAILQ_FOREACH(d, &defaults, entries) {
+    TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		atype = HOSTALIAS;
+		errors += alias_find_used_members(parse_tree, d->binding,
+		    HOSTALIAS, used_aliases);
 		break;
 	    case DEFAULTS_USER:
-		atype = USERALIAS;
+		errors += alias_find_used_members(parse_tree, d->binding,
+		    USERALIAS, used_aliases);
 		break;
 	    case DEFAULTS_RUNAS:
-		atype = RUNASALIAS;
+		errors += alias_find_used_members(parse_tree, d->binding,
+		    RUNASALIAS, used_aliases);
 		break;
 	    case DEFAULTS_CMND:
-		atype = CMNDALIAS;
+		errors += alias_find_used_members(parse_tree, d->binding,
+		    CMNDALIAS, used_aliases);
 		break;
 	    default:
-		continue; /* not an alias */
-	}
-	TAILQ_FOREACH(m, d->binding, entries) {
-	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, atype, used_aliases))
-		    errors++;
-	    }
+		break;
 	}
     }
 

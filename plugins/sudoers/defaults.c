@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2017
+ * Copyright (c) 1999-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -696,7 +696,8 @@ default_type_matches(struct defaults *d, int what)
  * Returns true if it matches, else false.
  */
 static bool
-default_binding_matches(struct defaults *d, int what)
+default_binding_matches(struct sudoers_parse_tree *parse_tree,
+    struct defaults *d, int what)
 {
     debug_decl(default_binding_matches, SUDOERS_DEBUG_DEFAULTS)
 
@@ -705,19 +706,19 @@ default_binding_matches(struct defaults *d, int what)
 	debug_return_bool(true);
 	break;
     case DEFAULTS_USER:
-	if (userlist_matches(sudo_user.pw, d->binding) == ALLOW)
+	if (userlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (runaslist_matches(d->binding, NULL, NULL, NULL) == ALLOW)
+	if (runaslist_matches(parse_tree, d->binding, NULL, NULL, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
-	if (hostlist_matches(sudo_user.pw, d->binding) == ALLOW)
+	if (hostlist_matches(parse_tree, sudo_user.pw, d->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_CMND:
-	if (cmndlist_matches(d->binding) == ALLOW)
+	if (cmndlist_matches(parse_tree, d->binding) == ALLOW)
 	    debug_return_bool(true);
 	break;
     }
@@ -729,7 +730,7 @@ default_binding_matches(struct defaults *d, int what)
  * Pass in an OR'd list of which default types to update.
  */
 bool
-update_defaults(struct defaults_list *defs, int what, bool quiet)
+update_defaults(struct sudoers_parse_tree *parse_tree, int what, bool quiet)
 {
     struct defaults *d;
     bool ret = true;
@@ -741,14 +742,14 @@ update_defaults(struct defaults_list *defs, int what, bool quiet)
     /*
      * First apply Defaults values marked as early.
      */
-    TAILQ_FOREACH(d, defs, entries) {
+    TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	struct early_default *early = is_early_default(d->var);
 	if (early == NULL)
 	    continue;
 
 	/* Defaults type and binding must match. */
 	if (!default_type_matches(d, what) ||
-	    !default_binding_matches(d, what))
+	    !default_binding_matches(parse_tree, d, what))
 	    continue;
 
 	/* Copy the value to sudo_defs_table and mark as early. */
@@ -763,14 +764,14 @@ update_defaults(struct defaults_list *defs, int what, bool quiet)
     /*
      * Then set the rest of the defaults.
      */
-    TAILQ_FOREACH(d, defs, entries) {
+    TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	/* Skip Defaults marked as early, we already did them. */
 	if (is_early_default(d->var))
 	    continue;
 
 	/* Defaults type and binding must match. */
 	if (!default_type_matches(d, what) ||
-	    !default_binding_matches(d, what))
+	    !default_binding_matches(parse_tree, d, what))
 	    continue;
 
 	/* Copy the value to sudo_defs_table and run callback (if any) */
@@ -784,14 +785,14 @@ update_defaults(struct defaults_list *defs, int what, bool quiet)
  * Check all defaults entries without actually setting them.
  */
 bool
-check_defaults(bool quiet)
+check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet)
 {
     struct defaults *d;
     bool ret = true;
     int idx;
     debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS)
 
-    TAILQ_FOREACH(d, &defaults, entries) {
+    TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
 	idx = find_default(d->var, d->file, d->lineno, quiet);
 	if (idx != -1) {
 	    struct sudo_defs_types *def = &sudo_defs_table[idx];

@@ -83,9 +83,7 @@ struct sudo_sss_handle {
     char *ipa_shost;
     struct passwd *pw;
     void *ssslib;
-    struct userspec_list userspecs;
-    struct defaults_list defaults;
-    bool cached_defaults;
+    struct sudoers_parse_tree parse_tree;
     sss_sudo_send_recv_t fn_send_recv;
     sss_sudo_send_recv_defaults_t fn_send_recv_defaults;
     sss_sudo_free_result_t fn_free_result;
@@ -237,7 +235,7 @@ val_array_iter(void **vp)
 
 static bool
 sss_to_sudoers(struct sudo_sss_handle *handle,
-    struct sss_sudo_result *sss_result, struct userspec_list *sss_userspecs)
+    struct sss_sudo_result *sss_result)
 {
     struct userspec *us;
     struct member *m;
@@ -250,7 +248,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     TAILQ_INIT(&us->users);
     TAILQ_INIT(&us->privileges);
     STAILQ_INIT(&us->comments);
-    TAILQ_INSERT_TAIL(sss_userspecs, us, entries);
+    TAILQ_INSERT_TAIL(&handle->parse_tree.userspecs, us, entries);
 
     /* We only include rules where the user matches. */
     if ((m = calloc(1, sizeof(*m))) == NULL)
@@ -387,7 +385,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    free_userspecs(sss_userspecs);
+    free_userspecs(&handle->parse_tree.userspecs);
     debug_return_bool(false);
 }
 
@@ -517,8 +515,7 @@ sudo_sss_close(struct sudo_nss *nss)
 	free(handle->ipa_host);
 	if (handle->ipa_host != handle->ipa_shost)
 	    free(handle->ipa_shost);
-	free_userspecs(&handle->userspecs);
-	free_defaults(&handle->defaults);
+	free_parse_tree(&handle->parse_tree);
 	free(handle);
 	nss->handle = NULL;
     }
@@ -544,9 +541,7 @@ sudo_sss_open(struct sudo_nss *nss)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(ENOMEM);
     }
-
-    TAILQ_INIT(&handle->userspecs);
-    TAILQ_INIT(&handle->defaults);
+    init_parse_tree(&handle->parse_tree);
 
     /* Load symbols */
     handle->ssslib = sudo_dso_load(path, SUDO_DSO_LAZY);
@@ -625,18 +620,18 @@ sudo_sss_open(struct sudo_nss *nss)
 /*
  * Perform query for user and host and convert to sudoers parse tree.
  */
-static struct userspec_list *
+static int
 sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
-    struct userspec_list *ret = &handle->userspecs;
+    int ret = 0;
     debug_decl(sudo_sss_query, SUDOERS_DEBUG_SSSD);
 
     if (handle == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: called with NULL handle", __func__);
-	debug_return_ptr(NULL);
+	debug_return_int(-1);
     }
 
     /* Use cached result if it matches pw. */
@@ -648,7 +643,7 @@ sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
     }
 
     /* Free old userspecs, if any. */
-    free_userspecs(&handle->userspecs);
+    free_userspecs(&handle->parse_tree.userspecs);
 
     /* Fetch list of sudoRole entries that match user and host. */
     sss_result = sudo_sss_result_get(nss, pw);
@@ -657,45 +652,59 @@ sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
 	"searching SSSD/LDAP for sudoers entries for user %s, host %s",
 	 pw->pw_name, user_runhost);
 
-    if (sss_result == NULL)
-	goto done;
-
     /* Stash a ref to the passwd struct in the handle. */
     sudo_pw_addref(pw);
     handle->pw = pw;
 
-    /* Convert to sudoers parse tree. */
-    if (!sss_to_sudoers(handle, sss_result, &handle->userspecs)) {
-	ret = NULL;
-	goto done;
+    /* Convert to sudoers parse tree if the user was found. */
+    if (sss_result != NULL) {
+	if (!sss_to_sudoers(handle, sss_result)) {
+	    ret = -1;
+	    goto done;
+	}
     }
 
 done:
     /* Cleanup */
     handle->fn_free_result(sss_result);
-    if (ret == NULL) {
-	free_userspecs(&handle->userspecs);
-	sudo_pw_delref(handle->pw);
-	handle->pw = NULL;
+    if (ret == -1) {
+	free_userspecs(&handle->parse_tree.userspecs);
+	if (handle->pw != NULL) {
+	    sudo_pw_delref(handle->pw);
+	    handle->pw = NULL;
+	}
     }
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Done with LDAP searches");
 
-    debug_return_ptr(ret);
+    debug_return_int(ret);
+}
+
+/*
+ * Return the initialized (but empty) sudoers parse tree.
+ * The contents will be populated by the getdefs() and query() functions.
+ */
+static struct sudoers_parse_tree *
+sudo_sss_parse(struct sudo_nss *nss)
+{
+    struct sudo_sss_handle *handle = nss->handle;
+    debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
+
+    if (handle == NULL) {
+    	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: called with NULL handle", __func__);
+	debug_return_ptr(NULL);
+    }
+
+    debug_return_ptr(&handle->parse_tree);
 }
 
 static int
-sudo_sss_parse(struct sudo_nss *nss)
-{
-    debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
-    debug_return_int(0);
-}
-
-static struct defaults_list *
 sudo_sss_getdefs(struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
+    static bool cached;
     uint32_t sss_error;
     unsigned int i;
     int rc;
@@ -704,12 +713,12 @@ sudo_sss_getdefs(struct sudo_nss *nss)
     if (handle == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: called with NULL handle", __func__);
-	debug_return_ptr(NULL);
+	debug_return_int(-1);
     }
 
     /* Use cached result if present. */
-    if (handle->cached_defaults)
-	debug_return_ptr(&handle->defaults);
+    if (cached)
+	debug_return_int(0);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
@@ -725,7 +734,7 @@ sudo_sss_getdefs(struct sudo_nss *nss)
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "handle->fn_send_recv_defaults: rc=%d, sss_error=%u", rc, sss_error);
-	debug_return_ptr(NULL);
+	debug_return_int(-1);
     }
 
     switch (sss_error) {
@@ -735,7 +744,8 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	    struct sss_sudo_rule *sss_rule = sss_result->rules + i;
 	    sudo_debug_printf(SUDO_DEBUG_DIAG,
 		"Parsing cn=defaults, %d/%d", i, sss_result->num_rules);
-	    if (!sudo_sss_parse_options(handle, sss_rule, &handle->defaults))
+	    if (!sudo_sss_parse_options(handle, sss_rule,
+		&handle->parse_tree.defaults))
 		goto bad;
 	}
 	break;
@@ -747,13 +757,13 @@ sudo_sss_getdefs(struct sudo_nss *nss)
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "sss_error=%u\n", sss_error);
 	goto bad;
     }
-    handle->cached_defaults = true;
     handle->fn_free_result(sss_result);
-    debug_return_ptr(&handle->defaults);
+    cached = true;
+    debug_return_int(0);
 
 bad:
     handle->fn_free_result(sss_result);
-    debug_return_ptr(NULL);
+    debug_return_int(-1);
 }
 
 /* sudo_nss implementation */

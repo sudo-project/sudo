@@ -152,9 +152,7 @@ STAILQ_HEAD(ldap_netgroup_list, ldap_netgroup);
 struct sudo_ldap_handle {
     LDAP *ld;
     struct passwd *pw;
-    struct userspec_list userspecs;
-    struct defaults_list defaults;
-    bool cached_defaults;
+    struct sudoers_parse_tree parse_tree;
 };
 
 #ifdef HAVE_LDAP_INITIALIZE
@@ -1553,8 +1551,7 @@ sudo_ldap_close(struct sudo_nss *nss)
 	/* Free the handle container. */
 	if (handle->pw != NULL)
 	    sudo_pw_delref(handle->pw);
-	free_userspecs(&handle->userspecs);
-	free_defaults(&handle->defaults);
+	free_parse_tree(&handle->parse_tree);
 	free(handle);
 	nss->handle = NULL;
     }
@@ -1660,40 +1657,39 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
     handle->ld = ld;
     /* handle->pw = NULL; */
-    TAILQ_INIT(&handle->userspecs);
-    TAILQ_INIT(&handle->defaults);
+    init_parse_tree(&handle->parse_tree);
     nss->handle = handle;
 
 done:
     debug_return_int(rc == LDAP_SUCCESS ? 0 : -1);
 }
 
-static struct defaults_list *
+static int
 sudo_ldap_getdefs(struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    struct defaults_list *ret = &handle->defaults;
     struct timeval tv, *tvp = NULL;
     struct ldap_config_str *base;
     LDAPMessage *entry, *result = NULL;
     char *filt = NULL;
-    int rc;
+    int rc, ret = -1;
+    static bool cached;
     debug_decl(sudo_ldap_getdefs, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: called with NULL handle", __func__);
-	debug_return_ptr(NULL);
+	debug_return_int(-1);
     }
 
     /* Use cached result if present. */
-    if (handle->cached_defaults)
-	goto done;
+    if (cached)
+	debug_return_int(0);
 
     filt = sudo_ldap_build_default_filter();
     if (filt == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_ptr(NULL);
+	debug_return_int(-1);
     }
     DPRINTF1("Looking for cn=defaults: %s", filt);
 
@@ -1711,21 +1707,20 @@ sudo_ldap_getdefs(struct sudo_nss *nss)
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    DPRINTF1("found:%s", ldap_get_dn(ld, entry));
-	    if (!sudo_ldap_parse_options(ld, entry, &handle->defaults)) {
-		ret = NULL;
+	    if (!sudo_ldap_parse_options(ld, entry, &handle->parse_tree.defaults))
 		goto done;
-	    }
 	} else {
 	    DPRINTF1("no default options found in %s", base->val);
 	}
     }
-    handle->cached_defaults = true;
+    cached = true;
+    ret = 0;
 
 done:
     ldap_msgfree(result);
     free(filt);
 
-    debug_return_ptr(ret);
+    debug_return_int(ret);
 }
 
 /*
@@ -1918,13 +1913,65 @@ oom:
  * Perform LDAP query for user and host and convert to sudoers
  * parse tree.
  */
-static struct userspec_list *
+static int
 sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_result *lres = NULL;
-    struct userspec_list *ret = &handle->userspecs;
+    int ret = -1;
     debug_decl(sudo_ldap_query, SUDOERS_DEBUG_LDAP)
+
+    if (handle == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: called with NULL handle", __func__);
+	debug_return_int(-1);
+    }
+
+    /* Use cached result if it matches pw. */
+    if (handle->pw != NULL) {
+	if (pw == handle->pw) {
+	    ret = 0;
+	    goto done;
+	}
+	sudo_pw_delref(handle->pw);
+	handle->pw = NULL;
+    }
+
+    /* Free old userspecs, if any. */
+    free_userspecs(&handle->parse_tree.userspecs);
+
+    DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
+	user_runhost);
+    if ((lres = sudo_ldap_result_get(nss, pw)) == NULL)
+	goto done;
+
+    /* Convert to sudoers parse tree. */
+    if (!ldap_to_sudoers(handle->ld, lres, &handle->parse_tree.userspecs))
+	goto done;
+
+    /* Stash a ref to the passwd struct in the handle. */
+    sudo_pw_addref(pw);
+    handle->pw = pw;
+
+    ret = 0;
+
+done:
+    /* Cleanup. */
+    sudo_ldap_result_free(lres);
+    if (ret == -1)
+	free_userspecs(&handle->parse_tree.userspecs);
+    debug_return_int(ret);
+}
+
+/*
+ * Return the initialized (but empty) sudoers parse tree.
+ * The contents will be populated by the getdefs() and query() functions.
+ */
+static struct sudoers_parse_tree *
+sudo_ldap_parse(struct sudo_nss *nss)
+{
+    struct sudo_ldap_handle *handle = nss->handle;
+    debug_decl(sudo_ldap_parse, SUDOERS_DEBUG_LDAP)
 
     if (handle == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
@@ -1932,53 +1979,7 @@ sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
 	debug_return_ptr(NULL);
     }
 
-    /* Use cached result if it matches pw. */
-    if (handle->pw != NULL) {
-	if (pw == handle->pw)
-	    goto done;
-	sudo_pw_delref(handle->pw);
-	handle->pw = NULL;
-    }
-
-    /* Free old userspecs, if any. */
-    free_userspecs(&handle->userspecs);
-
-    DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
-	user_runhost);
-    if ((lres = sudo_ldap_result_get(nss, pw)) == NULL) {
-	ret = NULL;
-	goto done;
-    }
-
-    /* Convert to sudoers parse tree. */
-    if (!ldap_to_sudoers(handle->ld, lres, &handle->userspecs)) {
-	ret = NULL;
-	goto done;
-    }
-
-    /* Stash a ref to the passwd struct in the handle. */
-    sudo_pw_addref(pw);
-    handle->pw = pw;
-
-    ret = &handle->userspecs;
-
-done:
-    /* Cleanup. */
-    sudo_ldap_result_free(lres);
-    if (ret == NULL) {
-	free_userspecs(&handle->userspecs);
-	debug_return_ptr(NULL);
-    }
-    debug_return_ptr(ret);
-}
-
-/*
- * STUB
- */
-static int
-sudo_ldap_parse(struct sudo_nss *nss)
-{
-    return 0;
+    debug_return_ptr(&handle->parse_tree);
 }
 
 #if 0

@@ -40,8 +40,7 @@
 
 struct sudo_file_handle {
     FILE *fp;
-    struct defaults_list defaults;
-    struct userspec_list userspecs;
+    struct sudoers_parse_tree parse_tree;
 };
 
 static int
@@ -54,9 +53,7 @@ sudo_file_close(struct sudo_nss *nss)
 	fclose(handle->fp);
 	sudoersin = NULL;
 
-	free_userspecs(&handle->userspecs);
-	free_defaults(&handle->defaults);
-
+	free_parse_tree(&handle->parse_tree);
 	free(handle);
 	nss->handle = NULL;
     }
@@ -83,8 +80,7 @@ sudo_file_open(struct sudo_nss *nss)
     if (handle != NULL) {
 	handle->fp = open_sudoers(sudoers_file, false, NULL);
 	if (handle->fp != NULL) {
-	    TAILQ_INIT(&handle->userspecs);
-	    TAILQ_INIT(&handle->defaults);
+	    init_parse_tree(&handle->parse_tree);
 	} else {
 	    free(handle);
 	    handle = NULL;
@@ -95,9 +91,9 @@ sudo_file_open(struct sudo_nss *nss)
 }
 
 /*
- * Parse the specified sudoers file.
+ * Parse and return the specified sudoers file.
  */
-static int
+static struct sudoers_parse_tree *
 sudo_file_parse(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS)
@@ -106,7 +102,7 @@ sudo_file_parse(struct sudo_nss *nss)
     if (handle == NULL || handle->fp == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: called with NULL %s",
 	    __func__, handle ? "file pointer" : "handle");
-	debug_return_int(-1);
+	debug_return_ptr(NULL);
     }
 
     sudoersin = handle->fp;
@@ -117,49 +113,33 @@ sudo_file_parse(struct sudo_nss *nss)
 	} else {
 	    log_warningx(SLOG_SEND_MAIL, N_("parse error in %s"), errorfile);
 	}
-	debug_return_int(-1);
+	debug_return_ptr(NULL);
     }
 
-    /* Move parsed userspecs and defaults to nss structure. */
-    TAILQ_CONCAT(&handle->userspecs, &userspecs, entries);
-    TAILQ_CONCAT(&handle->defaults, &defaults, entries);
+    /* Move parsed sudoers policy to nss handle. */
+    reparent_parse_tree(&handle->parse_tree);
 
+    debug_return_ptr(&handle->parse_tree);
+}
+
+/*
+ * No need for explicit sudoers queries, the parse function handled it.
+ */
+static int
+sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
+{
+    debug_decl(sudo_file_query, SUDOERS_DEBUG_NSS)
     debug_return_int(0);
 }
 
 /*
- * We return all cached userspecs, the parse functions will
- * perform matching against pw for us.
+ * No need to get defaults for sudoers file, the parse function handled it.
  */
-static struct userspec_list *
-sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
-{
-    struct sudo_file_handle *handle = nss->handle;
-    debug_decl(sudo_file_query, SUDOERS_DEBUG_NSS)
-
-    if (handle == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR,
-	    "%s: called with NULL handle", __func__);
-	debug_return_ptr(NULL);
-    }
-    debug_return_ptr(&handle->userspecs);
-}
-
-/*
- * Return cached defaults entries.
- */
-static struct defaults_list *
+static int
 sudo_file_getdefs(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_getdefs, SUDOERS_DEBUG_NSS)
-    struct sudo_file_handle *handle = nss->handle;
-
-    if (handle == NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR,
-	    "%s: called with NULL handle", __func__);
-	debug_return_ptr(NULL);
-    }
-    debug_return_ptr(&handle->defaults);
+    debug_return_int(0);
 }
 
 /* sudo_nss implementation */

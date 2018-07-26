@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2017
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -60,8 +60,11 @@ bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
 
-struct defaults_list defaults = TAILQ_HEAD_INITIALIZER(defaults);
-struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
+struct sudoers_parse_tree parsed_policy = {
+    TAILQ_HEAD_INITIALIZER(parsed_policy.userspecs),
+    TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
+    NULL /* aliases */
+};
 
 /*
  * Local protoypes
@@ -737,7 +740,8 @@ hostaliases	:	hostalias
 
 hostalias	:	ALIAS '=' hostlist {
 			    const char *s;
-			    s = alias_add($1, HOSTALIAS, sudoers, this_lineno, $3);
+			    s = alias_add(&parsed_policy, $1, HOSTALIAS,
+				sudoers, this_lineno, $3);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -758,7 +762,8 @@ cmndaliases	:	cmndalias
 
 cmndalias	:	ALIAS '=' cmndlist {
 			    const char *s;
-			    s = alias_add($1, CMNDALIAS, sudoers, this_lineno, $3);
+			    s = alias_add(&parsed_policy, $1, CMNDALIAS,
+				sudoers, this_lineno, $3);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -779,7 +784,8 @@ runasaliases	:	runasalias
 
 runasalias	:	ALIAS '=' userlist {
 			    const char *s;
-			    s = alias_add($1, RUNASALIAS, sudoers, this_lineno, $3);
+			    s = alias_add(&parsed_policy, $1, RUNASALIAS,
+				sudoers, this_lineno, $3);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -793,7 +799,8 @@ useraliases	:	useralias
 
 useralias	:	ALIAS '=' userlist {
 			    const char *s;
-			    s = alias_add($1, USERALIAS, sudoers, this_lineno, $3);
+			    s = alias_add(&parsed_policy, $1, USERALIAS,
+				sudoers, this_lineno, $3);
 			    if (s != NULL) {
 				sudoerserror(s);
 				YYERROR;
@@ -1027,7 +1034,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	HLTQ_FOREACH_SAFE(d, defs, entries, next) {
 	    d->type = type;
 	    d->binding = binding;
-	    TAILQ_INSERT_TAIL(&defaults, d, entries);
+	    TAILQ_INSERT_TAIL(&parsed_policy.defaults, d, entries);
 	}
     }
 
@@ -1054,7 +1061,7 @@ add_userspec(struct member *members, struct privilege *privs)
     HLTQ_TO_TAILQ(&u->users, members, entries);
     HLTQ_TO_TAILQ(&u->privileges, privs, entries);
     STAILQ_INIT(&u->comments);
-    TAILQ_INSERT_TAIL(&userspecs, u, entries);
+    TAILQ_INSERT_TAIL(&parsed_policy.userspecs, u, entries);
 
     debug_return_bool(true);
 }
@@ -1236,6 +1243,41 @@ free_userspec(struct userspec *us)
 }
 
 /*
+ * Initialized a sudoers parse tree.
+ */
+void
+init_parse_tree(struct sudoers_parse_tree *parse_tree)
+{
+    TAILQ_INIT(&parse_tree->userspecs);
+    TAILQ_INIT(&parse_tree->defaults);
+    parse_tree->aliases = NULL;
+}
+
+/*
+ * Move the contents of parsed_policy to new_tree.
+ */
+void
+reparent_parse_tree(struct sudoers_parse_tree *new_tree)
+{
+    TAILQ_CONCAT(&new_tree->userspecs, &parsed_policy.userspecs, entries);
+    TAILQ_CONCAT(&new_tree->defaults, &parsed_policy.defaults, entries);
+    new_tree->aliases = parsed_policy.aliases;
+    parsed_policy.aliases = NULL;
+}
+
+/*
+ * Free the contents of a sudoers parse tree and initialize it.
+ */
+void
+free_parse_tree(struct sudoers_parse_tree *parse_tree)
+{
+    free_userspecs(&parse_tree->userspecs);
+    free_defaults(&parse_tree->defaults);
+    free_aliases(parse_tree->aliases);
+    parse_tree->aliases = NULL;
+}
+
+/*
  * Free up space used by data structures from a previous parser run and sets
  * the current sudoers file to path.
  */
@@ -1245,14 +1287,8 @@ init_parser(const char *path, bool quiet)
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER)
 
-    free_userspecs(&userspecs);
-    free_defaults(&defaults);
+    free_parse_tree(&parsed_policy);
     init_lexer();
-
-    if (!init_aliases()) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	ret = false;
-    }
 
     rcstr_delref(sudoers);
     if (path != NULL) {

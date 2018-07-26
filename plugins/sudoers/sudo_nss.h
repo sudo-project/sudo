@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2007-2011, 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2007-2011, 2013-2015, 2017-2018
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,14 +22,16 @@ struct passwd;
 struct userspec_list;
 struct defaults_list;
 
+/* XXX - parse_tree, ret_if_found and ret_if_notfound should be private */
 struct sudo_nss {
     TAILQ_ENTRY(sudo_nss) entries;
     int (*open)(struct sudo_nss *nss);
     int (*close)(struct sudo_nss *nss);
-    int (*parse)(struct sudo_nss *nss);
-    struct userspec_list *(*query)(struct sudo_nss *nss, struct passwd *pw);
-    struct defaults_list *(*getdefs)(struct sudo_nss *nss);
+    struct sudoers_parse_tree *(*parse)(struct sudo_nss *nss);
+    int (*query)(struct sudo_nss *nss, struct passwd *pw);
+    int (*getdefs)(struct sudo_nss *nss);
     void *handle;
+    struct sudoers_parse_tree *parse_tree;
     bool ret_if_found;
     bool ret_if_notfound;
 };

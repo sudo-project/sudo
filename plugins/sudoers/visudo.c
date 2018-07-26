@@ -246,8 +246,8 @@ main(int argc, char *argv[])
     init_parser(sudoers_file, quiet);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(&defaults, SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER,
-	quiet);
+    (void) update_defaults(&parsed_policy,
+	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
     sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
@@ -538,13 +538,13 @@ check_defaults_and_aliases(bool strict, bool quiet)
 {
     debug_decl(check_defaults_and_aliases, SUDOERS_DEBUG_UTIL)
 
-    if (!check_defaults(quiet)) {
+    if (!check_defaults(&parsed_policy, quiet)) {
 	struct defaults *d;
 	rcstr_delref(errorfile);
 	errorfile = NULL;
 	errorlineno = -1;
 	/* XXX - should edit all files with errors */
-	TAILQ_FOREACH(d, &defaults, entries) {
+	TAILQ_FOREACH(d, &parsed_policy.defaults, entries) {
 	    if (d->error) {
 		/* Defaults parse error, set errorfile/errorlineno. */
 		errorfile = rcstr_addref(d->file);
@@ -602,7 +602,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
-	    (void) update_defaults(&defaults,
+	    (void) update_defaults(&parsed_policy,
 		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	    check_defaults_and_aliases(strict, quiet);
 	}
@@ -920,7 +920,7 @@ check_syntax(const char *sudoers_file, bool quiet, bool strict, bool oldperms)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     if (!parse_error) {
-	(void) update_defaults(&defaults,
+	(void) update_defaults(&parsed_policy,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	check_defaults_and_aliases(strict, quiet);
     }
@@ -1023,7 +1023,7 @@ check_alias(char *name, int type, char *file, int lineno, bool strict, bool quie
     int errors = 0;
     debug_decl(check_alias, SUDOERS_DEBUG_ALIAS)
 
-    if ((a = alias_get(name, type)) != NULL) {
+    if ((a = alias_get(&parsed_policy, name, type)) != NULL) {
 	/* check alias contents */
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type != ALIAS)
@@ -1071,14 +1071,14 @@ check_aliases(bool strict, bool quiet)
     int errors = 0;
     debug_decl(check_aliases, SUDOERS_DEBUG_ALIAS)
 
-    used_aliases = rbcreate(alias_compare);
+    used_aliases = alloc_aliases();
     if (used_aliases == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
 
     /* Forward check. */
-    TAILQ_FOREACH(us, &userspecs, entries) {
+    TAILQ_FOREACH(us, &parsed_policy.userspecs, entries) {
 	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
 		errors += check_alias(m->name, USERALIAS,
@@ -1118,13 +1118,13 @@ check_aliases(bool strict, bool quiet)
     }
 
     /* Reverse check (destructive) */
-    if (!alias_find_used(used_aliases))
+    if (!alias_find_used(&parsed_policy, used_aliases))
 	errors++;
-    rbdestroy(used_aliases, alias_free);
+    free_aliases(used_aliases);
 
     /* If all aliases were referenced we will have an empty tree. */
-    if (!no_aliases() && !quiet)
-	alias_apply(print_unused, NULL);
+    if (!no_aliases(&parsed_policy) && !quiet)
+	alias_apply(&parsed_policy, print_unused, NULL);
 
     debug_return_int(strict ? errors : 0);
 }

@@ -703,7 +703,7 @@ userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *con
 	    pw.pw_uid = (uid_t)-1;
 	    pw.pw_gid = (gid_t)-1;
 
-	    if (user_matches(&pw, m) == true)
+	    if (user_matches(&parsed_policy, &pw, m) == true)
 		matched = true;
 	} else {
 	    STAILQ_FOREACH(s, &filters->users, entries) {
@@ -729,7 +729,7 @@ userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *con
 		if (pw == NULL)
 		    continue;
 
-		if (user_matches(pw, m) == true)
+		if (user_matches(&parsed_policy, pw, m) == true)
 		    matched = true;
 		sudo_pw_delref(pw);
 
@@ -804,7 +804,7 @@ hostlist_matches_filter(struct member_list *hostlist, struct cvtsudoers_config *
 
 	    /* Only need one host in the filter to match. */
 	    /* XXX - can't use netgroup_tuple with NULL pw */
-	    if (host_matches(NULL, lhost, shost, m) == true) {
+	    if (host_matches(&parsed_policy, NULL, lhost, shost, m) == true) {
 		matched = true;
 		break;
 	    }
@@ -840,8 +840,10 @@ print_defaults_sudoers(struct sudo_lbuf *lbuf, bool expand_aliases)
     struct defaults *def, *next;
     debug_decl(print_defaults_sudoers, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, next)
-	sudoers_format_default_line(lbuf, def, &next, expand_aliases);
+    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, next) {
+	sudoers_format_default_line(lbuf, &parsed_policy, def, &next,
+	    expand_aliases);
+    }
 
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -859,7 +861,7 @@ print_alias_sudoers(void *v1, void *v2)
     TAILQ_FOREACH(m, &a->members, entries) {
 	if (m != TAILQ_FIRST(&a->members))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, m, NULL, UNSPEC);
+	sudoers_format_member(lbuf, &parsed_policy, m, NULL, UNSPEC);
     }
     sudo_lbuf_append(lbuf, "\n");
 
@@ -874,7 +876,7 @@ print_aliases_sudoers(struct sudo_lbuf *lbuf)
 {
     debug_decl(print_aliases_sudoers, SUDOERS_DEBUG_UTIL)
 
-    alias_apply(print_alias_sudoers, lbuf);
+    alias_apply(&parsed_policy, print_alias_sudoers, lbuf);
 
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -905,9 +907,9 @@ filter_userspecs(struct cvtsudoers_config *conf)
      * host lists.  It acts more like a grep than a true filter.
      * In the future, we may want to add a prune option.
      */
-    TAILQ_FOREACH_SAFE(us, &userspecs, entries, next_us) {
+    TAILQ_FOREACH_SAFE(us, &parsed_policy.userspecs, entries, next_us) {
 	if (!userlist_matches_filter(&us->users, conf)) {
-	    TAILQ_REMOVE(&userspecs, us, entries);
+	    TAILQ_REMOVE(&parsed_policy.userspecs, us, entries);
 	    free_userspec(us);
 	    continue;
 	}
@@ -918,7 +920,7 @@ filter_userspecs(struct cvtsudoers_config *conf)
 	    }
 	}
 	if (TAILQ_EMPTY(&us->privileges)) {
-	    TAILQ_REMOVE(&userspecs, us, entries);
+	    TAILQ_REMOVE(&parsed_policy.userspecs, us, entries);
 	    free_userspec(us);
 	    continue;
 	}
@@ -942,7 +944,8 @@ alias_matches(const char *name, const char *alias_name, int alias_type)
     if (strcmp(name, alias_name) == 0)
 	debug_return_bool(true);
 
-    if ((a = alias_get(alias_name, alias_type)) != NULL) {
+    a = alias_get(&parsed_policy, alias_name, alias_type);
+    if (a != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type != ALIAS)
 		continue;
@@ -975,7 +978,7 @@ alias_used_by_userspecs(struct member_list *user_aliases,
     debug_decl(alias_used_by_userspecs, SUDOERS_DEBUG_ALIAS)
 
     /* Iterate over the policy, checking for aliases. */
-    TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
+    TAILQ_FOREACH_SAFE(us, &parsed_policy.userspecs, entries, us_next) {
 	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
 	    if (m->type == ALIAS) {
 		/* If alias is used, remove from user_aliases and free. */
@@ -1055,13 +1058,14 @@ filter_defaults(struct cvtsudoers_config *conf)
     struct member_list *prev_binding = NULL;
     struct defaults *def, *def_next;
     struct member *m, *m_next;
+    struct alias *a;
     int alias_type;
     debug_decl(filter_defaults, SUDOERS_DEBUG_DEFAULTS)
 
     if (filters == NULL && conf->defaults == CVT_DEFAULTS_ALL)
 	debug_return;
 
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, def_next) {
+    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, def_next) {
 	bool keep = true;
 
 	switch (def->type) {
@@ -1118,20 +1122,21 @@ filter_defaults(struct cvtsudoers_config *conf)
 			    TAILQ_INSERT_TAIL(&cmnd_aliases, m, entries);
 			    break;
 			default:
-			    sudo_fatalx_nodebug("unexpected alias type %d", alias_type);
+			    sudo_fatalx_nodebug("unexpected alias type %d",
+				alias_type);
 			    break;
 			}
 		    }
 		}
 	    }
-	    TAILQ_REMOVE(&defaults, def, entries);
+	    TAILQ_REMOVE(&parsed_policy.defaults, def, entries);
 	    free_default(def, &prev_binding);
 	    if (prev_binding != NULL) {
 		/* Remove and free Defaults that share the same binding. */
 		while (def_next != NULL && def_next->binding == prev_binding) {
 		    def = def_next;
 		    def_next = TAILQ_NEXT(def, entries);
-		    TAILQ_REMOVE(&defaults, def, entries);
+		    TAILQ_REMOVE(&parsed_policy.defaults, def, entries);
 		    free_default(def, &prev_binding);
 		}
 	    }
@@ -1144,22 +1149,22 @@ filter_defaults(struct cvtsudoers_config *conf)
     alias_used_by_userspecs(&user_aliases, &runas_aliases, &host_aliases,
 	&cmnd_aliases);
     TAILQ_FOREACH_SAFE(m, &user_aliases, entries, m_next) {
-	struct alias *a = alias_remove(m->name, USERALIAS);
+	a = alias_remove(&parsed_policy, m->name, USERALIAS);
 	alias_free(a);
 	free_member(m);
     }
     TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, m_next) {
-	struct alias *a = alias_remove(m->name, RUNASALIAS);
+	a = alias_remove(&parsed_policy, m->name, RUNASALIAS);
 	alias_free(a);
 	free_member(m);
     }
     TAILQ_FOREACH_SAFE(m, &host_aliases, entries, m_next) {
-	struct alias *a = alias_remove(m->name, HOSTALIAS);
+	a = alias_remove(&parsed_policy, m->name, HOSTALIAS);
 	alias_free(a);
 	free_member(m);
     }
     TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, m_next) {
-	struct alias *a = alias_remove(m->name, CMNDALIAS);
+	a = alias_remove(&parsed_policy, m->name, CMNDALIAS);
 	alias_free(a);
 	free_member(m);
     }
@@ -1174,20 +1179,19 @@ static void
 alias_remove_unused(void)
 {
     struct rbtree *used_aliases;
-    struct rbtree *unused_aliases;
     debug_decl(alias_remove_unused, SUDOERS_DEBUG_ALIAS)
 
-    used_aliases = rbcreate(alias_compare);
+    used_aliases = alloc_aliases();
     if (used_aliases == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Move all referenced aliases to used_aliases. */
-    if (!alias_find_used(used_aliases))
+    if (!alias_find_used(&parsed_policy, used_aliases))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Only unreferenced aliases are left, swap and free the unused ones. */
-    unused_aliases = replace_aliases(used_aliases);
-    rbdestroy(unused_aliases, alias_free);
+    free_aliases(parsed_policy.aliases);
+    parsed_policy.aliases = used_aliases;
 
     debug_return;
 }
@@ -1224,7 +1228,7 @@ alias_prune(struct cvtsudoers_config *conf)
 {
     debug_decl(alias_prune, SUDOERS_DEBUG_ALIAS)
 
-    alias_apply(alias_prune_helper, conf);
+    alias_apply(&parsed_policy, alias_prune_helper, conf);
 
     debug_return;
 }
@@ -1271,7 +1275,7 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
 
     /* Print User_Specs, separated by blank lines. */
     if (!ISSET(conf->suppress, SUPPRESS_PRIVS)) {
-	if (!sudoers_format_userspecs(&lbuf, &userspecs, "\n",
+	if (!sudoers_format_userspecs(&lbuf, &parsed_policy, "\n",
 	    conf->expand_aliases, true)) {
 	    goto done;
 	}

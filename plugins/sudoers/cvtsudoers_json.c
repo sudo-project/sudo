@@ -475,7 +475,7 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	struct alias *a;
 	struct member *m;
 
-	if ((a = alias_get(value.u.string, alias_type)) != NULL) {
+	if ((a = alias_get(&parsed_policy, value.u.string, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
 		print_member_json_int(fp, m->name, m->type,
 		    negated ? !m->negated : m->negated,
@@ -661,13 +661,13 @@ print_defaults_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
     int type;
     debug_decl(print_defaults_json, SUDOERS_DEBUG_UTIL)
 
-    if (TAILQ_EMPTY(&defaults))
+    if (TAILQ_EMPTY(&parsed_policy.defaults))
 	debug_return_bool(need_comma);
 
     fprintf(fp, "%s\n%*s\"Defaults\": [\n", need_comma ? "," : "", indent, "");
     indent += 4;
 
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
+    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
 	    sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
@@ -745,7 +745,7 @@ print_aliases_by_type_json(FILE *fp, int alias_type, const char *title,
     closure.alias_type = alias_type;
     closure.title = title;
     closure.need_comma = need_comma;
-    alias_apply(print_alias_json, &closure);
+    alias_apply(&parsed_policy, print_alias_json, &closure);
     if (closure.count != 0) {
 	print_indent(fp, closure.indent);
 	fputs("]\n", fp);
@@ -1083,12 +1083,12 @@ print_userspecs_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
     struct userspec *us;
     debug_decl(print_userspecs_json, SUDOERS_DEBUG_UTIL)
 
-    if (TAILQ_EMPTY(&userspecs))
+    if (TAILQ_EMPTY(&parsed_policy.userspecs))
 	debug_return_bool(need_comma);
 
     fprintf(fp, "%s\n%*s\"User_Specs\": [\n", need_comma ? "," : "", indent, "");
     indent += 4;
-    TAILQ_FOREACH(us, &userspecs, entries) {
+    TAILQ_FOREACH(us, &parsed_policy.userspecs, entries) {
 	print_userspec_json(fp, us, indent, expand_aliases);
     }
     indent -= 4;

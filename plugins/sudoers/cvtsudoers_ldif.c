@@ -167,14 +167,14 @@ print_global_defaults_ldif(FILE *fp, const char *base)
 
     sudo_lbuf_init(&lbuf, NULL, 0, NULL, 80);
 
-    TAILQ_FOREACH(opt, &defaults, entries) {
+    TAILQ_FOREACH(opt, &parsed_policy.defaults, entries) {
 	/* Skip bound Defaults (unsupported). */
 	if (opt->type == DEFAULTS) {
 	    count++;
 	} else {
 	    lbuf.len = 0;
 	    sudo_lbuf_append(&lbuf, "# ");
-	    sudoers_format_default_line(&lbuf, opt, false, true);
+	    sudoers_format_default_line(&lbuf, &parsed_policy, opt, false, true);
 	    fprintf(fp, "# Unable to translate %s:%d\n%s\n",
 		opt->file, opt->lineno, lbuf.buf);
 	}
@@ -195,7 +195,7 @@ print_global_defaults_ldif(FILE *fp, const char *base)
     print_attribute_ldif(fp, "cn", "defaults");
     print_attribute_ldif(fp, "description", "Default sudoOption's go here");
 
-    print_options_ldif(fp, &defaults);
+    print_options_ldif(fp, &parsed_policy.defaults);
     putc('\n', fp);
 
     debug_return_bool(!ferror(fp));
@@ -239,7 +239,7 @@ print_member_ldif(FILE *fp, char *name, int type, bool negated,
 	free(attr_val);
 	break;
     case ALIAS:
-	if ((a = alias_get(name, alias_type)) != NULL) {
+	if ((a = alias_get(&parsed_policy, name, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
 		print_member_ldif(fp, m->name, m->type,
 		    negated ? !m->negated : m->negated, alias_type, attr_name);
@@ -601,7 +601,7 @@ print_userspecs_ldif(FILE *fp, struct cvtsudoers_config *conf)
     struct userspec *us;
     debug_decl(print_userspecs_ldif, SUDOERS_DEBUG_UTIL)
  
-    TAILQ_FOREACH(us, &userspecs, entries) {
+    TAILQ_FOREACH(us, &parsed_policy.userspecs, entries) {
 	if (!print_userspec_ldif(fp, us, conf))
 	    debug_return_bool(false);
     }
@@ -860,7 +860,7 @@ ldif_store_options(struct cvtsudoers_str_list *options)
 		    U_("unable to allocate memory"));
 	    }
 	}
-	TAILQ_INSERT_TAIL(&defaults, d, entries);
+	TAILQ_INSERT_TAIL(&parsed_policy.defaults, d, entries);
     }
     debug_return;
 }
@@ -928,7 +928,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 
     if (reuse_userspec) {
 	/* Re-use the previous userspec */
-	us = TAILQ_LAST(&userspecs, userspec_list);
+	us = TAILQ_LAST(&parsed_policy.userspecs, userspec_list);
     } else {
 	/* Allocate a new userspec and fill in the user list. */
 	if ((us = calloc(1, sizeof(*us))) == NULL) {
@@ -1039,7 +1039,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 
     /* Add finished userspec to the list if new. */
     if (!reuse_userspec)
-	TAILQ_INSERT_TAIL(&userspecs, us, entries);
+	TAILQ_INSERT_TAIL(&parsed_policy.userspecs, us, entries);
 
     debug_return;
 }

@@ -93,7 +93,8 @@ static bool digest_matches(int fd, const char *file, const struct command_digest
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-user_matches(const struct passwd *pw, const struct member *m)
+user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const struct member *m)
 {
     struct alias *a;
     int matched = UNSPEC;
@@ -114,9 +115,9 @@ user_matches(const struct passwd *pw, const struct member *m)
 		matched = !m->negated;
 	    break;
 	case ALIAS:
-	    if ((a = alias_get(m->name, USERALIAS)) != NULL) {
+	    if ((a = alias_get(parse_tree, m->name, USERALIAS)) != NULL) {
 		/* XXX */
-		int rc = userlist_matches(pw, &a->members);
+		int rc = userlist_matches(parse_tree, pw, &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);
@@ -136,14 +137,15 @@ user_matches(const struct passwd *pw, const struct member *m)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-userlist_matches(const struct passwd *pw, const struct member_list *list)
+userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	if ((matched = user_matches(pw, m)) != UNSPEC)
+	if ((matched = user_matches(parse_tree, pw, m)) != UNSPEC)
 	    break;
     }
     debug_return_int(matched);
@@ -155,9 +157,9 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-runaslist_matches(const struct member_list *user_list,
-    const struct member_list *group_list, struct member **matching_user,
-    struct member **matching_group)
+runaslist_matches(struct sudoers_parse_tree *parse_tree,
+    const struct member_list *user_list, const struct member_list *group_list,
+    struct member **matching_user, struct member **matching_group)
 {
     struct member *m;
     struct alias *a;
@@ -191,9 +193,10 @@ runaslist_matches(const struct member_list *user_list,
 			    user_matched = !m->negated;
 			break;
 		    case ALIAS:
-			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			    rc = runaslist_matches(&a->members, &empty,
-				matching_user, NULL);
+			a = alias_get(parse_tree, m->name, RUNASALIAS);
+			if (a != NULL) {
+			    rc = runaslist_matches(parse_tree, &a->members,
+				&empty, matching_user, NULL);
 			    if (rc != UNSPEC)
 				user_matched = m->negated ? !rc : rc;
 			    alias_put(a);
@@ -234,9 +237,10 @@ runaslist_matches(const struct member_list *user_list,
 			group_matched = !m->negated;
 			break;
 		    case ALIAS:
-			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			    rc = runaslist_matches(&empty, &a->members,
-				NULL, matching_group);
+			a = alias_get(parse_tree, m->name, RUNASALIAS);
+			if (a != NULL) {
+			    rc = runaslist_matches(parse_tree, &empty,
+				&a->members, NULL, matching_group);
 			    if (rc != UNSPEC)
 				group_matched = m->negated ? !rc : rc;
 			    alias_put(a);
@@ -273,15 +277,16 @@ runaslist_matches(const struct member_list *user_list,
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-hostlist_matches_int(const struct passwd *pw, const char *lhost,
-    const char *shost, const struct member_list *list)
+hostlist_matches_int(struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const char *lhost, const char *shost,
+    const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	matched = host_matches(pw, lhost, shost, m);
+	matched = host_matches(parse_tree, pw, lhost, shost, m);
 	if (matched != UNSPEC)
 	    break;
     }
@@ -293,9 +298,10 @@ hostlist_matches_int(const struct passwd *pw, const char *lhost,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-hostlist_matches(const struct passwd *pw, const struct member_list *list)
+hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const struct member_list *list)
 {
-    return hostlist_matches_int(pw, user_runhost, user_srunhost, list);
+    return hostlist_matches_int(parse_tree, pw, user_runhost, user_srunhost, list);
 }
 
 /*
@@ -303,8 +309,8 @@ hostlist_matches(const struct passwd *pw, const struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-host_matches(const struct passwd *pw, const char *lhost, const char *shost,
-    const struct member *m)
+host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const char *lhost, const char *shost, const struct member *m)
 {
     struct alias *a;
     int matched = UNSPEC;
@@ -324,9 +330,11 @@ host_matches(const struct passwd *pw, const char *lhost, const char *shost,
 		matched = !m->negated;
 	    break;
 	case ALIAS:
-	    if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
+	    a = alias_get(parse_tree, m->name, HOSTALIAS);
+	    if (a != NULL) {
 		/* XXX */
-		int rc = hostlist_matches_int(pw, lhost, shost, &a->members);
+		int rc = hostlist_matches_int(parse_tree, pw, lhost, shost,
+		    &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);
@@ -346,14 +354,15 @@ host_matches(const struct passwd *pw, const char *lhost, const char *shost,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmndlist_matches(const struct member_list *list)
+cmndlist_matches(struct sudoers_parse_tree *parse_tree,
+    const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	matched = cmnd_matches(m);
+	matched = cmnd_matches(parse_tree, m);
 	if (matched != UNSPEC)
 	    break;
     }
@@ -365,7 +374,7 @@ cmndlist_matches(const struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(const struct member *m)
+cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 {
     struct alias *a;
     struct sudo_command *c;
@@ -377,8 +386,9 @@ cmnd_matches(const struct member *m)
 	    matched = !m->negated;
 	    break;
 	case ALIAS:
-	    if ((a = alias_get(m->name, CMNDALIAS)) != NULL) {
-		rc = cmndlist_matches(&a->members);
+	    a = alias_get(parse_tree, m->name, CMNDALIAS);
+	    if (a != NULL) {
+		rc = cmndlist_matches(parse_tree, &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);

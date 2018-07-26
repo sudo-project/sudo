@@ -37,8 +37,9 @@
  * the specified separator (which must not be NULL in the UNSPEC case).
  */
 static bool
-sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
-    bool negated, const char *separator, int alias_type)
+sudoers_format_member_int(struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree, char *name, int type, bool negated,
+    const char *separator, int alias_type)
 {
     struct alias *a;
     struct member *m;
@@ -81,13 +82,13 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
 	    goto print_word;
 	case ALIAS:
 	    if (alias_type != UNSPEC) {
-		if ((a = alias_get(name, alias_type)) != NULL) {
+		if ((a = alias_get(parse_tree, name, alias_type)) != NULL) {
 		    TAILQ_FOREACH(m, &a->members, entries) {
 			if (m != TAILQ_FIRST(&a->members))
 			    sudo_lbuf_append(lbuf, "%s", separator);
-			sudoers_format_member_int(lbuf, m->name, m->type,
-			    negated ? !m->negated : m->negated, separator,
-			    alias_type);
+			sudoers_format_member_int(lbuf, parse_tree, m->name,
+			    m->type, negated ? !m->negated : m->negated,
+			    separator, alias_type);
 		    }
 		    alias_put(a);
 		    break;
@@ -116,11 +117,12 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf, char *name, int type,
 }
 
 bool
-sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m,
+sudoers_format_member(struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree, struct member *m,
     const char *separator, int alias_type)
 {
-    return sudoers_format_member_int(lbuf, m->name, m->type, m->negated,
-	separator, alias_type);
+    return sudoers_format_member_int(lbuf, parse_tree, m->name, m->type,
+	m->negated, separator, alias_type);
 }
 
 #define	FIELD_CHANGED(ocs, ncs, fld) \
@@ -133,7 +135,8 @@ sudoers_format_member(struct sudo_lbuf *lbuf, struct member *m,
  * Write a cmndspec to lbuf in sudoers format.
  */
 bool
-sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs,
+sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
     struct cmndspec *prev_cs, bool expand_aliases)
 {
     debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL)
@@ -185,7 +188,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs,
 	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
     if (TAG_CHANGED(prev_cs, cs, follow))
 	sudo_lbuf_append(lbuf, cs->tags.follow ? "FOLLOW: " : "NOFOLLOW: ");
-    sudoers_format_member(lbuf, cs->cmnd, ", ",
+    sudoers_format_member(lbuf, parse_tree, cs->cmnd, ", ",
 	expand_aliases ? CMNDALIAS : UNSPEC);
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -194,7 +197,8 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct cmndspec *cs,
  * Write a privilege to lbuf in sudoers format.
  */
 bool
-sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv,
+sudoers_format_privilege(struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree, struct privilege *priv,
     bool expand_aliases)
 {
     struct cmndspec *cs, *prev_cs;
@@ -205,7 +209,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv,
     TAILQ_FOREACH(m, &priv->hostlist, entries) {
 	if (m != TAILQ_FIRST(&priv->hostlist))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, m, ", ",
+	sudoers_format_member(lbuf, parse_tree, m, ", ",
 	    expand_aliases ? HOSTALIAS : UNSPEC);
     }
 
@@ -222,7 +226,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv,
 		TAILQ_FOREACH(m, cs->runasuserlist, entries) {
 		    if (m != TAILQ_FIRST(cs->runasuserlist))
 			sudo_lbuf_append(lbuf, ", ");
-		    sudoers_format_member(lbuf, m, ", ",
+		    sudoers_format_member(lbuf, parse_tree, m, ", ",
 			expand_aliases ? RUNASALIAS : UNSPEC);
 		}
 	    }
@@ -231,7 +235,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv,
 		TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 		    if (m != TAILQ_FIRST(cs->runasgrouplist))
 			sudo_lbuf_append(lbuf, ", ");
-		    sudoers_format_member(lbuf, m, ", ",
+		    sudoers_format_member(lbuf, parse_tree, m, ", ",
 			expand_aliases ? RUNASALIAS : UNSPEC);
 		}
 	    }
@@ -240,7 +244,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv,
 	} else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 	    sudo_lbuf_append(lbuf, ", ");
 	}
-	sudoers_format_cmndspec(lbuf, cs, prev_cs, expand_aliases);
+	sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, expand_aliases);
 	prev_cs = cs;
     }
 
@@ -251,8 +255,9 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf, struct privilege *priv,
  * Write a userspec to lbuf in sudoers format.
  */
 bool
-sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
-    bool expand_aliases)
+sudoers_format_userspec(struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree,
+    struct userspec *us, bool expand_aliases)
 {
     struct privilege *priv;
     struct sudoers_comment *comment;
@@ -268,7 +273,7 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
     TAILQ_FOREACH(m, &us->users, entries) {
 	if (m != TAILQ_FIRST(&us->users))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, m, ", ",
+	sudoers_format_member(lbuf, parse_tree, m, ", ",
 	    expand_aliases ? USERALIAS : UNSPEC);
     }
 
@@ -277,7 +282,7 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
 	    sudo_lbuf_append(lbuf, " : ");
 	else
 	    sudo_lbuf_append(lbuf, " ");
-	if (!sudoers_format_privilege(lbuf, priv, expand_aliases))
+	if (!sudoers_format_privilege(lbuf, parse_tree, priv, expand_aliases))
 	    break;
     }
     sudo_lbuf_append(lbuf, "\n");
@@ -289,16 +294,17 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf, struct userspec *us,
  * Write a userspec_list to lbuf in sudoers format.
  */
 bool
-sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct userspec_list *usl,
-    const char *separator, bool expand_aliases, bool flush)
+sudoers_format_userspecs(struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree, const char *separator,
+    bool expand_aliases, bool flush)
 {
     struct userspec *us;
     debug_decl(sudoers_format_userspecs, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH(us, usl, entries) {
-	if (separator != NULL && us != TAILQ_FIRST(usl))
+    TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
+	if (separator != NULL && us != TAILQ_FIRST(&parse_tree->userspecs))
 	    sudo_lbuf_append(lbuf, "%s", separator);
-	if (!sudoers_format_userspec(lbuf, us, expand_aliases))
+	if (!sudoers_format_userspec(lbuf, parse_tree, us, expand_aliases))
 	    break;
 	sudo_lbuf_print(lbuf);
     }
@@ -336,7 +342,8 @@ sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d)
  * entries with the same binding on a single line.
  */
 bool
-sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d,
+sudoers_format_default_line( struct sudo_lbuf *lbuf,
+    struct sudoers_parse_tree *parse_tree, struct defaults *d,
     struct defaults **next, bool expand_aliases)
 {
     struct member *m;
@@ -369,7 +376,7 @@ sudoers_format_default_line(struct sudo_lbuf *lbuf, struct defaults *d,
     TAILQ_FOREACH(m, d->binding, entries) {
 	if (m != TAILQ_FIRST(d->binding))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, m, ", ", alias_type);
+	sudoers_format_member(lbuf, parse_tree, m, ", ", alias_type);
     }
 
     sudo_lbuf_append(lbuf, " ");

@@ -192,17 +192,17 @@ sudoers_policy_init(void *info, char * const envp[])
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
     init_parser(sudoers_file, false);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
-        if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
-	    struct defaults_list *defs = nss->getdefs(nss);
-            sources++;
-	    if (defs == NULL || !update_defaults(defs,
-		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-		log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		    N_("problem with defaults entries"));
-	    }
-        } else {
+	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
-        }
+	    continue;
+	}
+
+	sources++;
+	if (nss->getdefs(nss) == -1 || !update_defaults(nss->parse_tree,
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+		N_("problem with defaults entries"));
+	}
     }
     if (sources == 0) {
 	sudo_warnx(U_("no valid sudoers sources found, quitting"));
@@ -243,12 +243,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
 	/* Not an audit event. */
-        sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
-        goto bad;
+	sudo_warnx(U_("sudoers specifies that root is not allowed to sudo"));
+	goto bad;
     }    
 
     if (!set_perms(PERM_INITIAL))
-        goto bad;
+	goto bad;
 
     /* Environment variables specified on the command line. */
     if (env_add != NULL && env_add[0] != NULL)
@@ -854,8 +854,7 @@ set_cmnd(void)
 	user_base = user_cmnd;
 
     TAILQ_FOREACH(nss, snl, entries) {
-	struct defaults_list *defs = nss->getdefs(nss);
-	if (defs == NULL || !update_defaults(defs, SETDEF_CMND, false)) {
+	if (!update_defaults(nss->parse_tree, SETDEF_CMND, false)) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
 		N_("problem with defaults entries"));
 	}

@@ -285,7 +285,7 @@ main(int argc, char *argv[])
 	(void) fputs("Parses OK", stdout);
     }
 
-    if (!update_defaults(&defaults, SETDEF_ALL, false))
+    if (!update_defaults(&parsed_policy, SETDEF_ALL, false))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
 
@@ -301,22 +301,23 @@ main(int argc, char *argv[])
     /* This loop must match the one in sudo_file_lookup() */
     printf("\nEntries for user %s:\n", user_name);
     match = UNSPEC;
-    TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
-	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
+    TAILQ_FOREACH_REVERSE(us, &parsed_policy.userspecs, userspec_list, entries) {
+	if (userlist_matches(&parsed_policy, sudo_user.pw, &us->users) != ALLOW)
 	    continue;
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    sudo_lbuf_append(&lbuf, "\n");
-	    sudoers_format_privilege(&lbuf, priv, false);
+	    sudoers_format_privilege(&lbuf, &parsed_policy, priv, false);
 	    sudo_lbuf_print(&lbuf);
-	    host_match = hostlist_matches(sudo_user.pw, &priv->hostlist);
+	    host_match = hostlist_matches(&parsed_policy, sudo_user.pw,
+		&priv->hostlist);
 	    if (host_match == ALLOW) {
 		puts("\thost  matched");
 		TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
-		    runas_match = runaslist_matches(cs->runasuserlist,
-			cs->runasgrouplist, NULL, NULL);
+		    runas_match = runaslist_matches(&parsed_policy,
+			cs->runasuserlist, cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
-			cmnd_match = cmnd_matches(cs->cmnd);
+			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd);
 			if (cmnd_match != UNSPEC)
 			    match = cmnd_match;
 			printf("\tcmnd  %s\n", match == ALLOW ? "allowed" :
@@ -483,8 +484,8 @@ print_defaults(struct sudo_lbuf *lbuf)
     struct defaults *def, *next;
     debug_decl(print_defaults, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH_SAFE(def, &defaults, entries, next)
-	sudoers_format_default_line(lbuf, def, &next, false);
+    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, next)
+	sudoers_format_default_line(lbuf, &parsed_policy, def, &next, false);
 
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -502,7 +503,7 @@ print_alias(void *v1, void *v2)
     TAILQ_FOREACH(m, &a->members, entries) {
 	if (m != TAILQ_FIRST(&a->members))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, m, NULL, UNSPEC);
+	sudoers_format_member(lbuf, &parsed_policy, m, NULL, UNSPEC);
     }
     sudo_lbuf_append(lbuf, "\n");
 
@@ -514,7 +515,7 @@ print_aliases(struct sudo_lbuf *lbuf)
 {
     debug_decl(print_aliases, SUDOERS_DEBUG_UTIL)
 
-    alias_apply(print_alias, lbuf);
+    alias_apply(&parsed_policy, print_alias, lbuf);
 
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -541,7 +542,7 @@ dump_sudoers(struct sudo_lbuf *lbuf)
     }
 
     /* Print User_Specs */
-    if (!sudoers_format_userspecs(lbuf, &userspecs, NULL, false, true))
+    if (!sudoers_format_userspecs(lbuf, &parsed_policy, NULL, false, true))
 	goto done;
     if (lbuf->len > 1) {
 	sudo_lbuf_print(lbuf);
