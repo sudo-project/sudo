@@ -264,7 +264,7 @@ int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
-int sudo_auth_approval(struct passwd *pw, int validated);
+int sudo_auth_approval(struct passwd *pw, int validated, bool exempt);
 int sudo_auth_cleanup(struct passwd *pw);
 
 /* set_perms.c */

@@ -175,6 +175,7 @@ check_user(int validated, int mode)
 {
     struct passwd *auth_pw;
     int ret = -1;
+    bool exempt = false;
     debug_decl(check_user, SUDOERS_DEBUG_AUTH)
 
     /*
@@ -194,6 +195,7 @@ check_user(int validated, int mode)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s", __func__,
 	    !def_authenticate ? "authentication disabled" :
 	    "user exempt from authentication");
+	exempt = true;
 	ret = true;
 	goto done;
     }
@@ -218,7 +220,7 @@ check_user(int validated, int mode)
 done:
     if (ret == true) {
 	/* The approval function may disallow a user post-authentication. */
-	ret = sudo_auth_approval(auth_pw, validated);
+	ret = sudo_auth_approval(auth_pw, validated, exempt);
     }
     sudo_auth_cleanup(auth_pw);
     sudo_pw_delref(auth_pw);

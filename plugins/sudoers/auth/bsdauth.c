@@ -168,7 +168,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 }
 
 int
-bsdauth_approval(struct passwd *pw, sudo_auth *auth)
+bsdauth_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 {
     struct bsdauth_state *state = auth->data;
     debug_decl(bsdauth_approval, SUDOERS_DEBUG_AUTH)

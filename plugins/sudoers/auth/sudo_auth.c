@@ -168,7 +168,7 @@ sudo_auth_init(struct passwd *pw)
  * Returns true on success, false on failure and -1 on error.
  */
 int
-sudo_auth_approval(struct passwd *pw, int validated)
+sudo_auth_approval(struct passwd *pw, int validated, bool exempt)
 {
     sudo_auth *auth;
     debug_decl(sudo_auth_approval, SUDOERS_DEBUG_AUTH)
@@ -176,7 +176,7 @@ sudo_auth_approval(struct passwd *pw, int validated)
     /* Call approval routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->approval && !IS_DISABLED(auth)) {
-	    int status = (auth->approval)(pw, auth);
+	    int status = (auth->approval)(pw, auth, exempt);
 	    if (status != AUTH_SUCCESS) {
 		/* Assume error msg already printed. */
 		log_auth_failure(validated, 0);

@@ -31,7 +31,7 @@ typedef struct sudo_auth {
     int (*init)(struct passwd *pw, struct sudo_auth *auth);
     int (*setup)(struct passwd *pw, char **prompt, struct sudo_auth *auth);
     int (*verify)(struct passwd *pw, char *p, struct sudo_auth *auth, struct sudo_conv_callback *callback);
-    int (*approval)(struct passwd *pw, struct sudo_auth *auth);
+    int (*approval)(struct passwd *pw, struct sudo_auth *auth, bool exempt);
     int (*cleanup)(struct passwd *pw, struct sudo_auth *auth);
     int (*begin_session)(struct passwd *pw, char **user_env[], struct sudo_auth *auth);
     int (*end_session)(struct passwd *pw, struct sudo_auth *auth);
@@ -56,7 +56,7 @@ extern sudo_conv_t sudo_conv;
 /* Prototypes for standalone methods */
 int bsdauth_init(struct passwd *pw, sudo_auth *auth);
 int bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
-int bsdauth_approval(struct passwd *pw, sudo_auth *auth);
+int bsdauth_approval(struct passwd *pw, sudo_auth *auth, bool exempt);
 int bsdauth_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_aix_init(struct passwd *pw, sudo_auth *auth);
 int sudo_aix_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
@@ -67,7 +67,7 @@ int sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_init(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
-int sudo_pam_approval(struct passwd *pw, sudo_auth *auth);
+int sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt);
 int sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_begin_session(struct passwd *pw, char **user_env[], sudo_auth *auth);
 int sudo_pam_end_session(struct passwd *pw, sudo_auth *auth);
