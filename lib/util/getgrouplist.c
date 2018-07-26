@@ -86,22 +86,25 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	grpsize = NGROUPS_MAX;
     /*
      * It is possible to belong to more groups in the group database
-     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
-     * and double this as needed.
+     * than NGROUPS_MAX.
      */
-    grpsize <<= 1;
     for (tries = 0; tries < 10; tries++) {
 	free(groups);
-	groups = reallocarray(NULL, grpsize, 2 * sizeof(*groups));
+	groups = reallocarray(NULL, grpsize, sizeof(*groups));
 	if (groups == NULL)
 	    return -1;
-	grpsize <<= 1;
 	ngroups = grpsize;
 	if (getgrouplist(name, basegid, groups, &ngroups) != -1) {
 	    *groupsp = groups;
 	    *ngroupsp = ngroups;
 	    return 0;
 	}
+	if (ngroups == grpsize) {
+	    /* Failed for some reason other than ngroups too small. */
+	    break;
+	}
+	/* getgrouplist(3) set ngroups to the required length, use it. */
+	grpsize = ngroups;
     }
     free(groups);
     return -1;
@@ -118,59 +121,47 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp)
 {
     GETGROUPS_T *groups = *groupsp;
-    char *cp, *grset = NULL;
+    char *cp, *last, *grset = NULL;
+    const char *errstr;
     int ngroups = 1;
     int grpsize = *ngroupsp;
     int ret = -1;
     gid_t gid;
 
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb((char *) name, NULL);
+#endif
+    if ((grset = getgrset(name)) == NULL)
+	goto done;
+
     if (groups == NULL) {
-	/* Dynamically-sized group vector. */
-	grpsize = (int)sysconf(_SC_NGROUPS_MAX);
-	if (grpsize < 0)
-	    grpsize = NGROUPS_MAX;
-	groups = reallocarray(NULL, grpsize, 4 * sizeof(*groups));
+	/* Dynamically-sized group vector, count groups and alloc. */
+	grpsize = 1;	/* reserve one for basegid */
+	if (*grset != '\0') {
+	    grset++;
+	    for (cp = grset; *cp != '\0'; cp++) {
+		if (*cp == ',')
+		    grpsize++;
+	    }
+	}
+	groups = reallocarray(NULL, grpsize, sizeof(*groups));
 	if (groups == NULL)
 	    return -1;
-	grpsize <<= 2;
     } else {
 	/* Static group vector. */
-	if (grpsize <= 0)
+	if (grpsize < 1)
 	    return -1;
     }
 
     /* We support BSD semantics where the first element is the base gid */
     groups[0] = basegid;
 
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb((char *) name, NULL);
-#endif
-    if ((grset = getgrset(name)) != NULL) {
-	char *last;
-	const char *errstr;
-
-	for (cp = strtok_r(grset, ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
-	    gid = sudo_strtoid(cp, NULL, NULL, &errstr);
-	    if (errstr == NULL && gid != basegid) {
-		if (ngroups == grpsize) {
-		    GETGROUPS_T *tmp;
-
-		    if (*groupsp != NULL) {
-			/* Static group vector. */
-			goto done;
-		    }
-		    tmp = reallocarray(groups, grpsize, 2 * sizeof(*groups));
-		    if (tmp == NULL) {
-			free(groups);
-			groups = NULL;
-			ngroups = 0;
-			goto done;
-		    }
-		    groups = tmp;
-		    grpsize <<= 1;
-		}
-		groups[ngroups++] = gid;
-	    }
+    for (cp = strtok_r(grset, ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
+	gid = sudo_strtoid(cp, NULL, NULL, &errstr);
+	if (errstr == NULL && gid != basegid) {
+	    if (ngroups == grpsize)
+		goto done;
+	    groups[ngroups++] = gid;
 	}
     }
     ret = 0;
@@ -464,7 +455,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	grpsize <<= 2;
     } else {
 	/* Static group vector. */
-	if (grpsize <= 0)
+	if (grpsize < 1)
 	    return -1;
     }
 
