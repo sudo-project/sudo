@@ -25,6 +25,25 @@ What's new in Sudo 1.8.24
 
  * Fixed typos in the OpenLDAP sudo schema.  Bugs #839 and #840.
 
+ * Fixed a race condition when building with parallel make.
+   Bug #842
+
+ * Fixed a duplicate free when netgroup_base in ldap.conf is set
+   to an invalid value.
+
+ * Fixed a bug introduced in sudo 1.8.23 on AIX that could prevent
+   local users and groups from being resolved properly on systems
+   that have users stored in NIS, LDAP or AD.
+
+ * Added a workaround for an AIX bug exposed by a change in sudo
+   1.8.23 that prevents the terminal mode from being restored when
+   I/O logging is enabled.
+
+ * On systems using PAM, sudo now ignores the PAM_NEW_AUTHTOK_REQD
+   and PAM_AUTHTOK_EXPIRED errors from PAM account management if
+   authentication is disabled for the user.  This fixes a regression
+   introduced in sudo 1.8.23.  Bug #843
+
 What's new in Sudo 1.8.23
 
  * PAM account management modules and BSD auth approval modules are
