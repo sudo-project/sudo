@@ -1196,7 +1196,7 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 
 	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0]->bv_val : NULL,
-	    notafter ? notafter[0]->bv_val : NULL, false, long_list,
+	    notafter ? notafter[0]->bv_val : NULL, false, !short_list,
 	    berval_iter);
 
     cleanup:

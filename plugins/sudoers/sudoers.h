@@ -377,7 +377,7 @@ int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add
 void sudoers_cleanup(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
-extern int long_list;
+extern bool short_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern gid_t timestamp_gid;

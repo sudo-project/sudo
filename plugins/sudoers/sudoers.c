@@ -85,7 +85,7 @@ static bool tty_present(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-int long_list;
+bool short_list;
 uid_t timestamp_uid;
 gid_t timestamp_gid;
 #ifdef HAVE_BSD_AUTH_H

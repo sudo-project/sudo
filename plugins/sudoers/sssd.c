@@ -356,7 +356,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
 
 	priv = sudo_ldap_role_to_priv(cn, hosts, runasusers, runasgroups,
 	    cmnds, opts, notbefore ? notbefore[0] : NULL,
-	    notafter ? notafter[0] : NULL, false, long_list, val_array_iter);
+	    notafter ? notafter[0] : NULL, false, !short_list, val_array_iter);
 
     cleanup:
 	if (cn_array != NULL)

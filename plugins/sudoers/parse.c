@@ -540,10 +540,10 @@ sudo_display_userspecs(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
 	    continue;
 
-	if (long_list)
-	    nfound += display_priv_long(parse_tree, pw, us, lbuf);
-	else
+	if (short_list)
 	    nfound += display_priv_short(parse_tree, pw, us, lbuf);
+	else
+	    nfound += display_priv_long(parse_tree, pw, us, lbuf);
     }
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
