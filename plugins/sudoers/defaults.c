@@ -730,7 +730,8 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
  * Pass in an OR'd list of which default types to update.
  */
 bool
-update_defaults(struct sudoers_parse_tree *parse_tree, int what, bool quiet)
+update_defaults(struct sudoers_parse_tree *parse_tree,
+    struct defaults_list *defs, int what, bool quiet)
 {
     struct defaults *d;
     bool ret = true;
@@ -739,10 +740,14 @@ update_defaults(struct sudoers_parse_tree *parse_tree, int what, bool quiet)
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"what: 0x%02x", what);
 
+    /* If no defaults list specified, use the global one in the parse tree. */
+    if (defs == NULL)
+	defs = &parse_tree->defaults;
+
     /*
      * First apply Defaults values marked as early.
      */
-    TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
+    TAILQ_FOREACH(d, defs, entries) {
 	struct early_default *early = is_early_default(d->var);
 	if (early == NULL)
 	    continue;
@@ -764,7 +769,7 @@ update_defaults(struct sudoers_parse_tree *parse_tree, int what, bool quiet)
     /*
      * Then set the rest of the defaults.
      */
-    TAILQ_FOREACH(d, &parse_tree->defaults, entries) {
+    TAILQ_FOREACH(d, defs, entries) {
 	/* Skip Defaults marked as early, we already did them. */
 	if (is_early_default(d->var))
 	    continue;

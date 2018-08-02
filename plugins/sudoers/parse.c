@@ -310,7 +310,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated,
     }
     if (match != UNSPEC) {
 	if (defs != NULL)
-	    update_defaults(parse_tree, SETDEF_GENERIC, false);
+	    update_defaults(parse_tree, defs, SETDEF_GENERIC, false);
 	if (!apply_cmndspec(cs))
 	    SET(validated, VALIDATE_ERROR);
 	else if (match == ALLOW)
