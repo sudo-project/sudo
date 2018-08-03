@@ -83,7 +83,7 @@ rcstr_addref(const char *s)
     if (s == NULL)
 	debug_return_ptr(NULL);
 
-    rcs = __containerof(s, struct rcstr, str);
+    rcs = __containerof((const void *)s, struct rcstr, str);
     rcs->refcnt++;
     debug_return_ptr(rcs->str);
 }
@@ -95,7 +95,7 @@ rcstr_delref(const char *s)
     debug_decl(rcstr_dup, SUDOERS_DEBUG_UTIL)
 
     if (s != NULL) {
-	rcs = __containerof(s, struct rcstr, str);
+	rcs = __containerof((const void *)s, struct rcstr, str);
 	if (--rcs->refcnt == 0) {
 	    rcs->str[0] = '\0';
 	    free(rcs);
