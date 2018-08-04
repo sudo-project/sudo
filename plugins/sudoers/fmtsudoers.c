@@ -203,7 +203,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf,
 {
     struct cmndspec *cs, *prev_cs;
     struct member *m;
-    debug_decl(sudoers_format_userspec, SUDOERS_DEBUG_UTIL)
+    debug_decl(sudoers_format_privilege, SUDOERS_DEBUG_UTIL)
 
     /* Print hosts list. */
     TAILQ_FOREACH(m, &priv->hostlist, entries) {
