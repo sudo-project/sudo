@@ -439,37 +439,16 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 		    } else {
 			/* Convert to tags. */
-			bool handled = true;
-
-			if (op == true || op == false) {
-			    if (strcmp(var, "authenticate") == 0) {
-				cmndspec->tags.nopasswd = op == false;
-			    } else if (strcmp(var, "sudoedit_follow") == 0) {
-				cmndspec->tags.follow = op == true;
-			    } else if (strcmp(var, "log_input") == 0) {
-				cmndspec->tags.log_input = op == true;
-			    } else if (strcmp(var, "log_output") == 0) {
-				cmndspec->tags.log_output = op == true;
-			    } else if (strcmp(var, "noexec") == 0) {
-				cmndspec->tags.noexec = op == true;
-			    } else if (strcmp(var, "setenv") == 0) {
-				cmndspec->tags.setenv = op == true;
-			    } else if (strcmp(var, "mail_all_cmnds") == 0 ||
-				strcmp(var, "mail_always") == 0 ||
-				strcmp(var, "mail_no_perms") == 0) {
-				cmndspec->tags.send_mail = op == true;
-			    } else {
-				handled = false;
-			    }
-			} else {
-			    handled = false;
-			}
-			if (!handled && warnings) {
-			    /* XXX - callback to process unsupported options. */
-			    if (val != NULL) {
-				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), var, op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
-			    } else {
-				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), op == false ? "!" : "", var, "");
+			bool converted = sudoers_defaults_to_tags(var, val, op,
+			    &cmndspec->tags);
+			if (!converted) {
+			    if (warnings) {
+				/* XXX - callback to process unsupported options. */
+				if (val != NULL) {
+				    sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), var, op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+				} else {
+				    sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), op == false ? "!" : "", var, "");
+				}
 			    }
 			    continue;
 			}

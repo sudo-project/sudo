@@ -373,11 +373,10 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
-int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
+int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
-extern bool short_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern gid_t timestamp_gid;

@@ -327,19 +327,23 @@ static int
 display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     struct userspec *us, struct sudo_lbuf *lbuf)
 {
-    struct cmndspec *cs, *prev_cs;
-    struct member *m;
     struct privilege *priv;
     int nfound = 0;
     debug_decl(display_priv_short, SUDOERS_DEBUG_PARSER)
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
+	struct cmndspec *cs, *prev_cs = NULL;
+	struct cmndtag tags;
+
 	if (hostlist_matches(parse_tree, pw, &priv->hostlist) != ALLOW)
 	    continue;
-	prev_cs = NULL;
+
+	sudoers_defaults_list_to_tags(&priv->defaults, &tags);
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	    /* Start a new line if RunAs changes. */
 	    if (prev_cs == NULL || RUNAS_CHANGED(cs, prev_cs)) {
+		struct member *m;
+
 		if (cs != TAILQ_FIRST(&priv->cmndlist))
 		    sudo_lbuf_append(lbuf, "\n");
 		sudo_lbuf_append(lbuf, "    (");
@@ -368,7 +372,7 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		sudo_lbuf_append(lbuf, ", ");
 	    }
-	    sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, true);
+	    sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags, true);
 	    prev_cs = cs;
 	    nfound++;
 	}
@@ -416,12 +420,13 @@ static int
 display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     struct userspec *us, struct sudo_lbuf *lbuf)
 {
-    struct cmndspec *cs, *prev_cs;
     struct privilege *priv;
-    int nfound = 0, olen;
+    int nfound = 0;
     debug_decl(display_priv_long, SUDOERS_DEBUG_PARSER)
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
+	struct cmndspec *cs, *prev_cs;
+
 	if (hostlist_matches(parse_tree, pw, &priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
@@ -430,6 +435,8 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 	    struct member *m;
 
 	    if (new_long_entry(cs, prev_cs)) {
+		int olen;
+
 		if (priv->ldap_role != NULL) {
 		    sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"),
 			priv->ldap_role);
@@ -530,7 +537,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 
 static int
 sudo_display_userspecs(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
+    struct sudo_lbuf *lbuf, bool verbose)
 {
     struct userspec *us;
     int nfound = 0;
@@ -540,10 +547,10 @@ sudo_display_userspecs(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
 	    continue;
 
-	if (short_list)
-	    nfound += display_priv_short(parse_tree, pw, us, lbuf);
-	else
+	if (verbose)
 	    nfound += display_priv_long(parse_tree, pw, us, lbuf);
+	else
+	    nfound += display_priv_short(parse_tree, pw, us, lbuf);
     }
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
@@ -692,7 +699,7 @@ output(const char *buf)
  * Returns true on success or -1 on error.
  */
 int
-display_privs(struct sudo_nss_list *snl, struct passwd *pw)
+display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
     struct sudo_nss *nss;
     struct sudo_lbuf def_buf, priv_buf;
@@ -747,7 +754,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) != -1) {
-	    n = sudo_display_userspecs(nss->parse_tree, pw, &priv_buf);
+	    n = sudo_display_userspecs(nss->parse_tree, pw, &priv_buf, verbose);
 	    if (n == -1)
 		goto bad;
 	    count += n;

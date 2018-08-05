@@ -125,11 +125,77 @@ sudoers_format_member(struct sudo_lbuf *lbuf,
 	m->negated, separator, alias_type);
 }
 
+/*
+ * Store a defaults entry as a command tag.
+ */
+bool
+sudoers_defaults_to_tags(const char *var, const char *val, int op,
+    struct cmndtag *tags)
+{
+    bool ret = true;
+    debug_decl(sudoers_defaults_to_tags, SUDOERS_DEBUG_UTIL)
+
+    if (op == true || op == false) {
+	if (strcmp(var, "authenticate") == 0) {
+	    tags->nopasswd = op == false;
+	} else if (strcmp(var, "sudoedit_follow") == 0) {
+	    tags->follow = op == true;
+	} else if (strcmp(var, "log_input") == 0) {
+	    tags->log_input = op == true;
+	} else if (strcmp(var, "log_output") == 0) {
+	    tags->log_output = op == true;
+	} else if (strcmp(var, "noexec") == 0) {
+	    tags->noexec = op == true;
+	} else if (strcmp(var, "setenv") == 0) {
+	    tags->setenv = op == true;
+	} else if (strcmp(var, "mail_all_cmnds") == 0 ||
+	    strcmp(var, "mail_always") == 0 ||
+	    strcmp(var, "mail_no_perms") == 0) {
+	    tags->send_mail = op == true;
+	} else {
+	    ret = false;
+	}
+    } else {
+	ret = false;
+    }
+    debug_return_bool(ret);
+}
+
+/*
+ * Convert a defaults list to command tags.
+ */
+bool
+sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
+{
+    bool ret = true;
+    struct defaults *d;
+    debug_decl(sudoers_defaults_list_to_tags, SUDOERS_DEBUG_UTIL)
+
+    TAGS_INIT(*tags);
+    if (defs != NULL) {
+	TAILQ_FOREACH(d, defs, entries) {
+	    if (!sudoers_defaults_to_tags(d->var, d->val, d->op, tags)) {
+		if (d->val != NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_WARN,
+			"unable to convert defaults to tag: %s%s%s", d->var,
+			d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=", d->val);
+		} else {
+		    sudo_debug_printf(SUDO_DEBUG_WARN,
+			"unable to convert defaults to tag: %s%s%s",
+			d->op == false ? "!" : "", d->var, "");
+		}
+		ret = false;
+	    }
+	}
+    }
+    debug_return_bool(ret);
+}
+
 #define	FIELD_CHANGED(ocs, ncs, fld) \
 	((ocs) == NULL || (ncs)->fld != (ocs)->fld)
 
-#define	TAG_CHANGED(ocs, ncs, tt) \
-	(TAG_SET((ncs)->tags.tt) && FIELD_CHANGED(ocs, ncs, tags.tt))
+#define	TAG_CHANGED(ocs, ncs, t, tt) \
+	(TAG_SET((t).tt) && FIELD_CHANGED(ocs, ncs, tags.tt))
 
 /*
  * Write a cmndspec to lbuf in sudoers format.
@@ -137,9 +203,12 @@ sudoers_format_member(struct sudo_lbuf *lbuf,
 bool
 sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
-    struct cmndspec *prev_cs, bool expand_aliases)
+    struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
 {
     debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL)
+
+    /* Merge privilege-level tags with cmndspec tags. */
+    TAGS_MERGE(tags, cs->tags);
 
 #ifdef HAVE_PRIV_SET
     if (cs->privs != NULL && FIELD_CHANGED(prev_cs, cs, privs))
@@ -174,20 +243,20 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 	sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
     }
-    if (TAG_CHANGED(prev_cs, cs, setenv))
-	sudo_lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
-    if (TAG_CHANGED(prev_cs, cs, noexec))
-	sudo_lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
-    if (TAG_CHANGED(prev_cs, cs, nopasswd))
-	sudo_lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
-    if (TAG_CHANGED(prev_cs, cs, log_input))
-	sudo_lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
-    if (TAG_CHANGED(prev_cs, cs, log_output))
-	sudo_lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
-    if (TAG_CHANGED(prev_cs, cs, send_mail))
-	sudo_lbuf_append(lbuf, cs->tags.send_mail ? "MAIL: " : "NOMAIL: ");
-    if (TAG_CHANGED(prev_cs, cs, follow))
-	sudo_lbuf_append(lbuf, cs->tags.follow ? "FOLLOW: " : "NOFOLLOW: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, setenv))
+	sudo_lbuf_append(lbuf, tags.setenv ? "SETENV: " : "NOSETENV: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, noexec))
+	sudo_lbuf_append(lbuf, tags.noexec ? "NOEXEC: " : "EXEC: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, nopasswd))
+	sudo_lbuf_append(lbuf, tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, log_input))
+	sudo_lbuf_append(lbuf, tags.log_input ? "LOG_INPUT: " : "NOLOG_INPUT: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, log_output))
+	sudo_lbuf_append(lbuf, tags.log_output ? "LOG_OUTPUT: " : "NOLOG_OUTPUT: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, send_mail))
+	sudo_lbuf_append(lbuf, tags.send_mail ? "MAIL: " : "NOMAIL: ");
+    if (TAG_CHANGED(prev_cs, cs, tags, follow))
+	sudo_lbuf_append(lbuf, tags.follow ? "FOLLOW: " : "NOFOLLOW: ");
     sudoers_format_member(lbuf, parse_tree, cs->cmnd, ", ",
 	expand_aliases ? CMNDALIAS : UNSPEC);
     debug_return_bool(!sudo_lbuf_error(lbuf));
@@ -202,8 +271,12 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf,
     bool expand_aliases)
 {
     struct cmndspec *cs, *prev_cs;
+    struct cmndtag tags;
     struct member *m;
     debug_decl(sudoers_format_privilege, SUDOERS_DEBUG_UTIL)
+
+    /* Convert per-privilege defaults to tags. */
+    sudoers_defaults_list_to_tags(&priv->defaults, &tags);
 
     /* Print hosts list. */
     TAILQ_FOREACH(m, &priv->hostlist, entries) {
@@ -244,7 +317,8 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf,
 	} else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 	    sudo_lbuf_append(lbuf, ", ");
 	}
-	sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, expand_aliases);
+	sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags,
+	    expand_aliases);
 	prev_cs = cs;
     }
 

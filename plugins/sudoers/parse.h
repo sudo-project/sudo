@@ -44,6 +44,26 @@
 } while (0)
 
 /*
+ * Copy any tags set in t2 into t, overriding the value in t.
+ */
+#define TAGS_MERGE(t, t2) do {						       \
+    if ((t2).follow != UNSPEC)						       \
+	(t).follow = (t2).follow;					       \
+    if ((t2).log_input != UNSPEC)					       \
+	(t).log_input = (t2).log_input;					       \
+    if ((t2).log_output != UNSPEC)					       \
+	(t).log_output = (t2).log_output;				       \
+    if ((t2).noexec != UNSPEC)						       \
+	(t).noexec = (t2).noexec;					       \
+    if ((t2).nopasswd != UNSPEC)					       \
+	(t).nopasswd = (t2).nopasswd;					       \
+    if ((t2).send_mail != UNSPEC)					       \
+	(t).send_mail = (t2).send_mail;					       \
+    if ((t2).setenv != UNSPEC)						       \
+	(t).setenv = (t2).setenv;					       \
+} while (0)
+
+/*
  * Returns true if any tag are not UNSPEC, else false.
  */
 #define TAGS_SET(t)							       \
@@ -323,17 +343,19 @@ const char *digest_type_to_name(int digest_type);
 /* parse.c */
 struct sudo_nss_list;
 int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated, int pwflag);
-int display_privs(struct sudo_nss_list *snl, struct passwd *pw);
+int display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
 int display_cmnd(struct sudo_nss_list *snl, struct passwd *pw);
 
 /* fmtsudoers.c */
 struct sudo_lbuf;
-bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct cmndspec *cs, struct cmndspec *prev_cs, bool expand_aliases);
+bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct cmndspec *cs, struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases);
 bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
 bool sudoers_format_default_line(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct defaults *d, struct defaults **next, bool expand_aliases);
 bool sudoers_format_member(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct member *m, const char *separator, int alias_type);
 bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct privilege *priv, bool expand_aliases);
 bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct userspec *us, bool expand_aliases);
 bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, const char *separator, bool expand_aliases, bool flush);
+bool sudoers_defaults_to_tags(const char *var, const char *val, int op, struct cmndtag *tags);
+bool sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags);
 
 #endif /* SUDOERS_PARSE_H */

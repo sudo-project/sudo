@@ -85,7 +85,6 @@ static bool tty_present(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-bool short_list;
 uid_t timestamp_uid;
 gid_t timestamp_gid;
 #ifdef HAVE_BSD_AUTH_H
@@ -226,7 +225,7 @@ cleanup:
 
 int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
-    void *closure)
+    bool verbose, void *closure)
 {
     char **edit_argv = NULL;
     char *iolog_path = NULL;
@@ -485,7 +484,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
 	    break;
 	case MODE_LIST:
-	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw);
+	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
 	    break;
 	case MODE_VALIDATE:
 	    /* Nothing to do. */

@@ -858,7 +858,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
-    ret = sudoers_policy_main(argc, argv, 0, env_add, &exec_args);
+    ret = sudoers_policy_main(argc, argv, 0, env_add, false, &exec_args);
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
 	if (!def_log_input && !def_log_output && !def_use_pty &&
@@ -876,7 +876,7 @@ sudoers_policy_validate(void)
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
 
-    debug_return_int(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL));
+    debug_return_int(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, false, NULL));
 }
 
 static void
@@ -904,8 +904,6 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	SET(sudo_mode, MODE_CHECK);
     else
 	SET(sudo_mode, MODE_LIST);
-    if (!verbose)
-	short_list = true;
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
@@ -913,7 +911,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	    debug_return_int(-1);
 	}
     }
-    ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL);
+    ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, verbose, NULL);
     if (list_user) {
 	sudo_pw_delref(list_pw);
 	list_pw = NULL;
