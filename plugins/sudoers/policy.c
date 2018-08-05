@@ -905,7 +905,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     else
 	SET(sudo_mode, MODE_LIST);
     if (!verbose)
-	short_list = 1;
+	short_list = true;
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
