@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd April 18, 2018
+.Dd August 7, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -560,18 +560,26 @@ There are four kinds of aliases:
 and
 .Li Cmnd_Alias .
 .Bd -literal
-Alias ::= 'User_Alias'  User_Alias (':' User_Alias)* |
-          'Runas_Alias' Runas_Alias (':' Runas_Alias)* |
-          'Host_Alias'  Host_Alias (':' Host_Alias)* |
-          'Cmnd_Alias'  Cmnd_Alias (':' Cmnd_Alias)*
+Alias ::= 'User_Alias'  User_Alias_Spec (':' User_Alias_Spec)* |
+          'Runas_Alias' Runas_Alias_Spec (':' Runas_Alias_Spec)* |
+          'Host_Alias'  Host_Alias_Spec (':' Host_Alias_Spec)* |
+          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
 
-User_Alias ::= NAME '=' User_List
+User_Alias ::= NAME
 
-Runas_Alias ::= NAME '=' Runas_List
+User_Alias_Spec ::= User_Alias '=' User_List
 
-Host_Alias ::= NAME '=' Host_List
+Runas_Alias ::= NAME
 
-Cmnd_Alias ::= NAME '=' Cmnd_List
+Runas_Alias_Spec ::= Runas_Alias '=' Runas_List
+
+Host_Alias ::= NAME
+
+Host_Alias_Spec ::= Host_Alias '=' Host_List
+
+Cmnd_Alias ::= NAME
+
+Cmnd_Alias_Spec ::= Cmnd_Alias '=' Cmnd_List
 
 NAME ::= [A-Z]([A-Z][0-9]_)*
 .Ed
