@@ -48,7 +48,7 @@ What's new in Sudo 1.8.24
    definition of User, Runas, Host, and Cmnd Aliases.  Bug #834
 
  * Fixed a bug that resulted in only the first window size change
-   event to be logged.
+   event being logged.
 
 What's new in Sudo 1.8.23
 
