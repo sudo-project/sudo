@@ -70,37 +70,65 @@ struct ts_cookie {
  * We don't match on the sid or actual time stamp.
  */
 static bool
-ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
+ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
+    unsigned int recno)
 {
     debug_decl(ts_match_record, SUDOERS_DEBUG_AUTH)
 
-    if (entry->version != key->version)
+    if (entry->version != key->version) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s:%u record version mismatch (want %u, got %u)", __func__, recno,
+	    key->version, entry->version);
 	debug_return_bool(false);
-    if (!ISSET(key->flags, TS_ANYUID) && entry->auth_uid != key->auth_uid)
+    }
+    if (!ISSET(key->flags, TS_ANYUID) && entry->auth_uid != key->auth_uid) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s:%u record uid mismatch (want %u, got %u)", __func__, recno,
+	    key->auth_uid, entry->auth_uid);
 	debug_return_bool(false);
-    if (entry->type != key->type)
+    }
+    if (entry->type != key->type) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s:%u record type mismatch (want %u, got %u)", __func__, recno,
+	    key->type, entry->type);
 	debug_return_bool(false);
+    }
     switch (entry->type) {
     case TS_GLOBAL:
 	/* no ppid or tty to match */
 	break;
     case TS_PPID:
 	/* verify parent pid */
-	if (entry->u.ppid != key->u.ppid)
+	if (entry->u.ppid != key->u.ppid) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"%s:%u record ppid mismatch (want %d, got %d)", __func__, recno,
+		key->u.ppid, entry->u.ppid);
 	    debug_return_bool(false);
-	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
+	}
+	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=)) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"%s:%u ppid start time mismatch", __func__, recno);
 	    debug_return_bool(false);
+	}
 	break;
     case TS_TTY:
-	if (entry->u.ttydev != key->u.ttydev)
+	if (entry->u.ttydev != key->u.ttydev) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"%s:%u record tty mismatch (want 0x%x, got 0x%x)", __func__,
+		recno, (unsigned int)key->u.ttydev, (unsigned int)entry->u.ttydev);
 	    debug_return_bool(false);
-	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=))
+	}
+	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=)) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"%s:%u session leader start time mismatch", __func__, recno);
 	    debug_return_bool(false);
+	}
 	break;
     default:
 	/* unknown record type, ignore it */
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-	    "unknown time stamp record type %d", entry->type);
+	    "%s:%u unknown time stamp record type %d", __func__, recno,
+	    entry->type);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -118,12 +146,14 @@ static bool
 ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entry)
 {
     struct timestamp_entry cur;
+    unsigned int recno = 0;
     debug_decl(ts_find_record, SUDOERS_DEBUG_AUTH)
 
     /*
      * Find a matching record (does not match sid or time stamp value).
      */
     while (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
+	recno++;
 	if (cur.size != sizeof(cur)) {
 	    /* wrong size, seek to start of next record */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -139,7 +169,7 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 		break;			/* size must be non-zero */
 	    continue;
 	}
-	if (ts_match_record(key, &cur)) {
+	if (ts_match_record(key, &cur, recno)) {
 	    memcpy(entry, &cur, sizeof(struct timestamp_entry));
 	    debug_return_bool(true);
 	}
