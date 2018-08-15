@@ -102,10 +102,12 @@ lint: all
 	    echo "make lint only supported for mdoc manuals" 1>&2; \
 	    exit 1; \
 	else \
+	    rval=0; \
 	    for m in $(DOCS); do \
 		echo $(MANDOC) -Tlint $$m; \
-		$(MANDOC) -Tlint $$m; \
+		$(MANDOC) -Tlint $$m || rval=`expr $$rval + $$?`; \
 	    done; \
+	    exit $$rval; \
 	fi
 
 Makefile: $(srcdir)/Makefile.in
