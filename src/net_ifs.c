@@ -28,6 +28,9 @@ struct mbuf;
 struct rtentry;
 #endif
 
+/* Avoid a compilation problem with gcc and machine/sys/getppdp.h */
+#define _MACHINE_SYS_GETPPDP_INCLUDED
+
 #include <config.h>
 
 #include <sys/types.h>
