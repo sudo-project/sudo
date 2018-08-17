@@ -91,9 +91,10 @@ top_srcdir=`dirname $0`
 : ${osversion="`$top_srcdir/pp --probe`"}
 test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
+: ${MAKE=make}
 
 # If using GNU make, set number of jobs
-if make --version 2>&1 | grep GNU >/dev/null; then
+if ${MAKE} --version 2>&1 | grep GNU >/dev/null; then
     NJOBS=0
     case "`uname`" in
 	Darwin)
@@ -112,6 +113,9 @@ if make --version 2>&1 | grep GNU >/dev/null; then
 	    if [ -x /usr/sbin/psrinfo ]; then
 		NJOBS=`/usr/sbin/psrinfo | wc -l`
 	    fi
+	    ;;
+	HP-UX)
+	    NJOBS=`sar -Mu 1 1 | awk 'END {print NR-5}'`
 	    ;;
     esac
     if [ $NJOBS -gt 1 ]; then
@@ -389,8 +393,8 @@ IFS="	$nl"
 set -- $configure_opts $extra_opts
 IFS="$OIFS"
 if [ -r Makefile ]; then
-    make $make_opts distclean
+    ${MAKE} $make_opts distclean
 fi
 $top_srcdir/configure "$@" || exit 1
-make $make_opts && make $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+${MAKE} $make_opts && ${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
 test $debug -eq 0 && rm -rf destdir
