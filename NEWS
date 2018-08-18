@@ -7,7 +7,7 @@ What's new in Sudo 1.8.24
    unchanged.
 
  * Fixed a regression introduced in 1.8.23 where "sudo -i" could
-   not be used in conjunction with --preserve-env=VARIABLE.  Bug #835
+   not be used in conjunction with --preserve-env=VARIABLE.  Bug #835.
 
  * cvtsudoers can now parse base64-encoded attributes in LDIF files.
 
@@ -26,7 +26,7 @@ What's new in Sudo 1.8.24
  * Fixed typos in the OpenLDAP sudo schema.  Bugs #839 and #840.
 
  * Fixed a race condition when building with parallel make.
-   Bug #842
+   Bug #842.
 
  * Fixed a duplicate free when netgroup_base in ldap.conf is set
    to an invalid value.
@@ -42,10 +42,10 @@ What's new in Sudo 1.8.24
  * On systems using PAM, sudo now ignores the PAM_NEW_AUTHTOK_REQD
    and PAM_AUTHTOK_EXPIRED errors from PAM account management if
    authentication is disabled for the user.  This fixes a regression
-   introduced in sudo 1.8.23.  Bug #843
+   introduced in sudo 1.8.23.  Bug #843.
 
  * Fixed an ambiguity in the sudoers manual in the description and
-   definition of User, Runas, Host, and Cmnd Aliases.  Bug #834
+   definition of User, Runas, Host, and Cmnd Aliases.  Bug #834.
 
  * Fixed a bug that resulted in only the first window size change
    event being logged.
@@ -53,6 +53,9 @@ What's new in Sudo 1.8.24
  * Fixed a bug on HP-UX systems introduced in sudo 1.8.22 that
    caused sudo to prompt for a password every time when tty-based
    time stamp files were in use.
+
+ * Fixed a compilation problem on systems that define O_PATH or
+   O_SEARCH in fnctl.h but do not define O_DIRECTORY.  Bug #844.
 
 What's new in Sudo 1.8.23
 
