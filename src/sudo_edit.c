@@ -379,13 +379,21 @@ done:
  * Use O_SEARCH/O_PATH and/or O_DIRECTORY where possible.
  */
 #if defined(O_SEARCH)
-# define DIR_OPEN_FLAGS	(O_SEARCH|O_DIRECTORY)
+# if defined(O_DIRECTORY)
+#  define DIR_OPEN_FLAGS	(O_SEARCH|O_DIRECTORY)
+# else
+#  define DIR_OPEN_FLAGS	(O_SEARCH)
+# endif
 #elif defined(O_PATH)
-# define DIR_OPEN_FLAGS	(O_PATH|O_DIRECTORY)
+# if defined(O_DIRECTORY)
+#  define DIR_OPEN_FLAGS	(O_PATH|O_DIRECTORY)
+# else
+#  define DIR_OPEN_FLAGS	(O_PATH)
+# endif
 #elif defined(O_DIRECTORY)
-# define DIR_OPEN_FLAGS	(O_RDONLY|O_DIRECTORY)
+# define DIR_OPEN_FLAGS		(O_RDONLY|O_DIRECTORY)
 #else
-# define DIR_OPEN_FLAGS	(O_RDONLY|O_NONBLOCK)
+# define DIR_OPEN_FLAGS		(O_RDONLY|O_NONBLOCK)
 #endif
 
 static int

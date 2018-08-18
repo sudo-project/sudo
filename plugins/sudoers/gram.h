@@ -52,7 +52,7 @@ typedef union {
     struct member *member;
     struct runascontainer *runas;
     struct privilege *privilege;
-    struct sudo_digest *digest;
+    struct command_digest *digest;
     struct sudo_command command;
     struct command_options options;
     struct cmndtag tag;

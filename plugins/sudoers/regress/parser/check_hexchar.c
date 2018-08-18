@@ -50,6 +50,8 @@ main(int argc, char *argv[])
 {
     struct hexchar_test *test_data;
     int i, ntests, result, errors = 0;
+    static const char xdigs_lower[] = "0123456789abcdef";
+    static const char xdigs_upper[] = "0123456789ABCDEF";
 
     initprogname(argc > 0 ? argv[0] : "check_hexchar");
 
@@ -58,11 +60,13 @@ main(int argc, char *argv[])
     test_data = calloc(sizeof(*test_data), ntests);
     for (i = 0; i < 256; i++) {
 	/* lower case */
-	snprintf(test_data[i].hex, sizeof(test_data[i].hex), "%02x", i);
 	test_data[i].value = i;
+	test_data[i].hex[1] = xdigs_lower[ (i & 0x0f)];
+	test_data[i].hex[0] = xdigs_lower[((i & 0xf0) >> 4)];
 	/* upper case */
-	snprintf(test_data[i + 256].hex, sizeof(test_data[i + 256].hex), "%02X", i);
 	test_data[i + 256].value = i;
+	test_data[i + 256].hex[1] = xdigs_upper[ (i & 0x0f)];
+	test_data[i + 256].hex[0] = xdigs_upper[((i & 0xf0) >> 4)];
     }
     /* Also test invalid data */
     test_data[ntests - 3].hex[0] = '\0';
@@ -75,7 +79,7 @@ main(int argc, char *argv[])
     for (i = 0; i < ntests; i++) {
 	result = hexchar(test_data[i].hex);
 	if (result != test_data[i].value) {
-	    fprintf(stderr, "check_hexchar: expected %d, got %d",
+	    fprintf(stderr, "check_hexchar: expected %d, got %d\n",
 		test_data[i].value, result);
 	    errors++;
 	}

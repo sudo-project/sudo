@@ -34,10 +34,10 @@
 
 #include "sudoers.h"
 #include "interfaces.h"
-#include "parse.h"
 #include "gram.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
+#include "sudo_digest.h"
 
 /*
  * Returns true if the string pointed to by valp begins with an
@@ -171,11 +171,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
     }
     debug_return_ptr(members);
 bad:
-    while ((m = TAILQ_FIRST(members)) != NULL) {
-	TAILQ_REMOVE(members, m, entries);
-	free(m->name);
-	free(m);
-    }
+    free_members(members);
     free(members);
     debug_return_ptr(NULL);
 }
@@ -242,6 +238,39 @@ oom:
     debug_return_ptr(NULL);
 }
 
+bool
+sudo_ldap_add_default(const char *var, const char *val, int op,
+    char *source, struct defaults_list *defs)
+{
+    struct defaults *def;
+    debug_decl(sudo_ldap_add_default, SUDOERS_DEBUG_LDAP)
+
+    if ((def = calloc(1, sizeof(*def))) == NULL)
+	goto oom;
+
+    def->type = DEFAULTS;
+    def->op = op;
+    if ((def->var = strdup(var)) == NULL) {
+	goto oom;
+    }
+    if (val != NULL) {
+	if ((def->val = strdup(val)) == NULL)
+	    goto oom;
+    }
+    def->file = source;
+    rcstr_addref(source);
+    TAILQ_INSERT_TAIL(defs, def, entries);
+    debug_return_bool(true);
+
+oom:
+    if (def != NULL) {
+	free(def->var);
+	free(def->val);
+	free(def);
+    }
+    debug_return_bool(false);
+}
+
 /*
  * Convert an LDAP sudoRole to a sudoers privilege.
  * Pass in struct berval ** for LDAP or char *** for SSSD.
@@ -254,9 +283,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 {
     struct cmndspec_list negated_cmnds = TAILQ_HEAD_INITIALIZER(negated_cmnds);
     struct member_list negated_hosts = TAILQ_HEAD_INITIALIZER(negated_hosts);
-    struct cmndspec *cmndspec = NULL;
     struct cmndspec *prev_cmndspec = NULL;
-    struct sudo_command *c;
     struct privilege *priv;
     struct member *m;
     char *cmnd;
@@ -296,19 +323,24 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
      * Parse sudoCommands and add to cmndlist.
      */
     while ((cmnd = iter(&cmnds)) != NULL) {
-	char *args;
-	struct sudo_digest digest;
 	bool negated = sudo_ldap_is_negated(&cmnd);
+	struct sudo_command *c = NULL;
+	struct cmndspec *cmndspec;
 
 	/* Allocate storage upfront. */
-	cmndspec = calloc(1, sizeof(*cmndspec));
-	c = calloc(1, sizeof(*c));
-	m = calloc(1, sizeof(*m));
-	if (cmndspec == NULL || c == NULL || m == NULL) {
-	    free(cmndspec);
-	    free(c);
-	    free(m);
+	if ((cmndspec = calloc(1, sizeof(*cmndspec))) == NULL)
 	    goto oom;
+	if ((m = calloc(1, sizeof(*m))) == NULL) {
+	    free(cmndspec);
+	    goto oom;
+	}
+	if (strcmp(cmnd, "ALL") != 0) {
+	    if ((c = calloc(1, sizeof(*c))) == NULL) {
+		free(cmndspec);
+		free(m);
+		goto oom;
+	    }
+	    m->name = (char *)c;
 	}
 
 	/* Negated commands have precedence so insert them at the end. */
@@ -322,40 +354,17 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	cmndspec->notbefore = UNSPEC;
 	cmndspec->notafter = UNSPEC;
 	cmndspec->timeout = UNSPEC;
-
-	/* Fill in member. */
-	m->type = COMMAND;
-	m->negated = negated;
-	m->name = (char *)c;
-
-	/* Fill in command with optional digest. */
-	if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
-	    if ((c->digest = malloc(sizeof(*c->digest))) == NULL) {
-		free_member(m);
-		goto oom;
-	    }
-	    *c->digest = digest;
-	}
-	if ((args = strpbrk(cmnd, " \t")) != NULL) {
-	    *args++ = '\0';
-	    if ((c->args = strdup(args)) == NULL) {
-		free_member(m);
-		goto oom;
-	    }
-	}
-	if ((c->cmnd = strdup(cmnd)) == NULL) {
-	    free_member(m);
-	    goto oom;
-	}
 	cmndspec->cmnd = m;
 
 	if (prev_cmndspec != NULL) {
-	    /* Inherit values from prior cmndspec */
+	    /* Inherit values from prior cmndspec (common to the sudoRole). */
 	    cmndspec->runasuserlist = prev_cmndspec->runasuserlist;
 	    cmndspec->runasgrouplist = prev_cmndspec->runasgrouplist;
 	    cmndspec->notbefore = prev_cmndspec->notbefore;
 	    cmndspec->notafter = prev_cmndspec->notafter;
 	    cmndspec->tags = prev_cmndspec->tags;
+	    if (cmndspec->tags.setenv == IMPLIED)
+		cmndspec->tags.setenv = UNSPEC;
 	} else {
 	    /* Parse sudoRunAsUser / sudoRunAs */
 	    if (runasusers != NULL) {
@@ -381,7 +390,15 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 	    /* Parse sudoOptions. */
 	    if (opts != NULL) {
-		char *opt;
+		char *opt, *source = NULL;
+
+		if (store_options) {
+		    /* Use sudoRole in place of file name in defaults. */
+		    size_t slen = sizeof("sudoRole") + strlen(priv->ldap_role);
+		    if ((source = rcstr_alloc(slen)) == NULL)
+			goto oom;
+		    snprintf(source, slen, "sudoRole %s", priv->ldap_role);
+		}
 
 		while ((opt = iter(&opts)) != NULL) {
 		    char *var, *val;
@@ -416,65 +433,60 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 #endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
-			struct defaults *def = calloc(1, sizeof(*def));
-			if (def == NULL)
-			    goto oom;
-			def->type = DEFAULTS;
-			def->op = op;
-			if ((def->var = strdup(var)) == NULL) {
-			    free(def);
+			if (!sudo_ldap_add_default(var, val, op, source,
+			    &priv->defaults)) {
 			    goto oom;
 			}
-			if (val != NULL) {
-			    if ((def->val = strdup(val)) == NULL) {
-				free(def->var);
-				free(def);
-				goto oom;
-			    }
-			}
-			TAILQ_INSERT_TAIL(&priv->defaults, def, entries);
 		    } else {
 			/* Convert to tags. */
-			bool handled = true;
-
-			if (op == true || op == false) {
-			    if (strcmp(var, "authenticate") == 0) {
-				cmndspec->tags.nopasswd = op == false;
-			    } else if (strcmp(var, "sudoedit_follow") == 0) {
-				cmndspec->tags.follow = op == true;
-			    } else if (strcmp(var, "log_input") == 0) {
-				cmndspec->tags.log_input = op == true;
-			    } else if (strcmp(var, "log_output") == 0) {
-				cmndspec->tags.log_output = op == true;
-			    } else if (strcmp(var, "noexec") == 0) {
-				cmndspec->tags.noexec = op == true;
-			    } else if (strcmp(var, "setenv") == 0) {
-				cmndspec->tags.setenv = op == true;
-			    } else if (strcmp(var, "mail_all_cmnds") == 0 ||
-				strcmp(var, "mail_always") == 0 ||
-				strcmp(var, "mail_no_perms") == 0) {
-				cmndspec->tags.send_mail = op == true;
-			    } else {
-				handled = false;
-			    }
-			} else {
-			    handled = false;
-			}
-			if (!handled && warnings) {
-			    /* XXX - callback to process unsupported options. */
-			    if (val != NULL) {
-				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), var, op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
-			    } else {
-				sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), op == false ? "!" : "", var, "");
+			bool converted = sudoers_defaults_to_tags(var, val, op,
+			    &cmndspec->tags);
+			if (!converted) {
+			    if (warnings) {
+				/* XXX - callback to process unsupported options. */
+				if (val != NULL) {
+				    sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), var, op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+				} else {
+				    sudo_warnx(U_("unable to convert sudoOption: %s%s%s"), op == false ? "!" : "", var, "");
+				}
 			    }
 			    continue;
 			}
 		    }
 		}
+		rcstr_delref(source);
 	    }
 
 	    /* So we can inherit previous values. */
 	    prev_cmndspec = cmndspec;
+	}
+
+	/* Fill in command member now that options have been processed. */
+	m->negated = negated;
+	if (c == NULL) {
+	    /* No command name for "ALL" */
+	    m->type = ALL;
+	    if (cmndspec->tags.setenv == UNSPEC)
+		cmndspec->tags.setenv = IMPLIED;
+	} else {
+	    struct command_digest digest;
+	    char *args;
+
+	    m->type = COMMAND;
+
+	    /* Fill in command with optional digest. */
+	    if (sudo_ldap_extract_digest(&cmnd, &digest) != NULL) {
+		if ((c->digest = malloc(sizeof(*c->digest))) == NULL)
+		    goto oom;
+		*c->digest = digest;
+	    }
+	    if ((args = strpbrk(cmnd, " \t")) != NULL) {
+		*args++ = '\0';
+		if ((c->args = strdup(args)) == NULL)
+		    goto oom;
+	    }
+	    if ((c->cmnd = strdup(cmnd)) == NULL)
+		goto oom;
 	}
     }
     /* Negated commands take precedence so we insert them at the end. */
@@ -484,18 +496,20 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (priv != NULL)
+    if (priv != NULL) {
+	TAILQ_CONCAT(&priv->cmndlist, &negated_cmnds, entries);
 	free_privilege(priv);
+    }
     debug_return_ptr(NULL);
 }
 
 /*
- * If a digest prefix is present, fills in struct sudo_digest
+ * If a digest prefix is present, fills in struct command_digest
  * and returns a pointer to it, updating cmnd to point to the
  * command after the digest.
  */
-struct sudo_digest *
-sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
+struct command_digest *
+sudo_ldap_extract_digest(char **cmnd, struct command_digest *digest)
 {
     char *ep, *cp = *cmnd;
     int digest_type = SUDO_DIGEST_INVALID;

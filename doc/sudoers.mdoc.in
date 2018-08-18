@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd April 18, 2018
+.Dd August 7, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -560,18 +560,26 @@ There are four kinds of aliases:
 and
 .Li Cmnd_Alias .
 .Bd -literal
-Alias ::= 'User_Alias'  User_Alias (':' User_Alias)* |
-          'Runas_Alias' Runas_Alias (':' Runas_Alias)* |
-          'Host_Alias'  Host_Alias (':' Host_Alias)* |
-          'Cmnd_Alias'  Cmnd_Alias (':' Cmnd_Alias)*
+Alias ::= 'User_Alias'  User_Alias_Spec (':' User_Alias_Spec)* |
+          'Runas_Alias' Runas_Alias_Spec (':' Runas_Alias_Spec)* |
+          'Host_Alias'  Host_Alias_Spec (':' Host_Alias_Spec)* |
+          'Cmnd_Alias'  Cmnd_Alias_Spec (':' Cmnd_Alias_Spec)*
 
-User_Alias ::= NAME '=' User_List
+User_Alias ::= NAME
 
-Runas_Alias ::= NAME '=' Runas_List
+User_Alias_Spec ::= User_Alias '=' User_List
 
-Host_Alias ::= NAME '=' Host_List
+Runas_Alias ::= NAME
 
-Cmnd_Alias ::= NAME '=' Cmnd_List
+Runas_Alias_Spec ::= Runas_Alias '=' Runas_List
+
+Host_Alias ::= NAME
+
+Host_Alias_Spec ::= Host_Alias '=' Host_List
+
+Cmnd_Alias ::= NAME
+
+Cmnd_Alias_Spec ::= Cmnd_Alias '=' Cmnd_List
 
 NAME ::= [A-Z]([A-Z][0-9]_)*
 .Ed
@@ -683,7 +691,7 @@ and
 syntax depends on
 the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
-.Bl -bullet -width 4n -width 1n
+.Bl -bullet -width 1n
 .It
 Group in the same domain: "%:Group Name"
 .It
@@ -2047,7 +2055,7 @@ if they match a value specified in
 .Em editor .
 If the
 .Em env_reset
-flag is enabled, the 
+flag is enabled, the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
 and/or
@@ -3286,7 +3294,7 @@ The group name to look up when setting the group ID on new I/O log
 files and directories.
 If
 .Em iolog_group
-is not set, 
+is not set,
 the primary group ID of the user specified by
 .Em iolog_user
 is used.
@@ -3645,7 +3653,7 @@ If arguments are present, the string must be enclosed in double quotes
 .Pq \&"" .
 .Pp
 For more information see
-.Xr "GROUP PROVIDER PLUGINS" .
+.Sx "GROUP PROVIDER PLUGINS" .
 .It lecture
 This option controls when a short lecture will be printed along with
 the password prompt.
@@ -3726,7 +3734,8 @@ By default,
 .Nm sudo
 logs via syslog.
 .It mailerflags
-Flags to use when invoking mailer. Defaults to
+Flags to use when invoking mailer.
+Defaults to
 .Fl t .
 .It mailerpath
 Path to mail program used to send warning mail.
@@ -3779,7 +3788,7 @@ matched by either the
 or
 .Em env_keep
 list.
-If 
+If
 .Em env_reset
 is disabled, variables in the file are added as long as they
 are not matched by the
@@ -5280,10 +5289,10 @@ manual.
 .Xr mktemp 3 ,
 .Xr strftime 3 ,
 .Xr sudo.conf @mansectform@ ,
-.Xr sudoers.ldap @mansectform@ ,
-.Xr sudo @mansectsu@ ,
 .Xr sudo_plugin @mansectform@ ,
+.Xr sudoers.ldap @mansectform@ ,
 .Xr sudoers_timestamp @mansectform@ ,
+.Xr sudo @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on

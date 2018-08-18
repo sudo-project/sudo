@@ -110,7 +110,7 @@ environment variables are not preserved by default when the
 option is enabled.
 The default editor path is
 .Pa @editor@
-which can be set at compile time via the 
+which can be set at compile time via the
 .Li --with-editor
 configure option.
 .It env_editor
@@ -138,7 +138,7 @@ if they match a value specified in
 .Em editor .
 If the
 .Em env_reset
-flag is enabled, the 
+flag is enabled, the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
 and/or
@@ -153,7 +153,7 @@ is invoked via
 .Nm sudo .
 The default value is
 .Em @env_editor@ ,
-which can be set at compile time via the 
+which can be set at compile time via the
 .Li --with-env-editor
 configure option.
 .El

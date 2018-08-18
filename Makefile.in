@@ -238,6 +238,8 @@ update-pot:
 		    rm -f $$pot.tmp; \
 		fi; \
 	    done; \
+	else \
+	    echo "Unable to update .pot files: $(XGETTEXT) not found" 1>&2; \
 	fi
 
 update-po: update-pot
@@ -251,6 +253,8 @@ update-po: update-pot
 		    $(MSGFMT) --output /dev/null --check-format $$po || exit 1; \
 		done; \
 	    done; \
+	else \
+	    echo "Unable to update .po files: $(MSGFMT) not found" 1>&2; \
 	fi
 
 compile-po:
@@ -273,6 +277,8 @@ compile-po:
 	    done; \
 	    $(MAKE) -f Makefile.$$$$; \
 	    rm -f Makefile.$$$$; \
+	else \
+	    echo "Unable to compile message catalogs: $(MSGFMT) not found" 1>&2; \
 	fi
 
 install-nls:

@@ -38,6 +38,7 @@
 #include "sudo_queue.h"
 #include "defaults.h"
 #include "logging.h"
+#include "parse.h"
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
@@ -136,7 +137,6 @@ struct sudo_user {
 #define FLAG_NO_CHECK		0x080
 #define FLAG_NON_INTERACTIVE	0x100
 #define FLAG_BAD_PASSWORD	0x200
-#define FLAG_NOPASSWD		0x400
 
 /*
  * find_path()/set_cmnd() return values
@@ -264,7 +264,7 @@ int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
-int sudo_auth_approval(struct passwd *pw, int validated);
+int sudo_auth_approval(struct passwd *pw, int validated, bool exempt);
 int sudo_auth_cleanup(struct passwd *pw);
 
 /* set_perms.c */
@@ -298,10 +298,6 @@ void dump_auth_methods(void);
 
 /* getspwuid.c */
 char *sudo_getepw(const struct passwd *);
-
-/* sudo_nss.c */
-int display_privs(struct sudo_nss_list *, struct passwd *);
-int display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
 typedef struct cache_item * (*sudo_make_pwitem_t)(uid_t uid, const char *user);
@@ -377,11 +373,10 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
-int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
+int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
-extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern gid_t timestamp_gid;

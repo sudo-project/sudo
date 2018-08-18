@@ -41,6 +41,7 @@ struct sudo_conv_message {
 #define SUDO_CONV_INFO_MSG	    0x0004  /* informational message */
 #define SUDO_CONV_PROMPT_MASK	    0x0005  /* mask user input */
 #define SUDO_CONV_PROMPT_ECHO_OK    0x1000  /* flag: allow echo if no tty */
+#define SUDO_CONV_PREFER_TTY	    0x2000  /* flag: use tty if possible */
     int msg_type;
     int timeout;
     const char *msg;
@@ -134,7 +135,7 @@ struct policy_plugin {
     int (*open)(unsigned int version, sudo_conv_t conversation,
 	sudo_printf_t sudo_printf, char * const settings[],
 	char * const user_info[], char * const user_env[],
-	char * const plugin_plugins[]);
+	char * const plugin_options[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*check_policy)(int argc, char * const argv[],
@@ -158,7 +159,7 @@ struct io_plugin {
 	sudo_printf_t sudo_printf, char * const settings[],
 	char * const user_info[], char * const command_info[],
 	int argc, char * const argv[], char * const user_env[],
-	char * const plugin_plugins[]);
+	char * const plugin_options[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*log_ttyin)(const char *buf, unsigned int len);

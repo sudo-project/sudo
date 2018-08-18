@@ -202,7 +202,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 }
 
 int
-sudo_pam_approval(struct passwd *pw, sudo_auth *auth)
+sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 {
     const char *s;
     int *pam_status = (int *) auth->data;
@@ -217,6 +217,10 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth)
 		"is your account locked?"));
 	    debug_return_int(AUTH_FATAL);
 	case PAM_NEW_AUTHTOK_REQD:
+	    /* Ignore if user is exempt from password restrictions. */
+	    if (exempt)
+		debug_return_int(AUTH_SUCCESS);
+	    /* New password required, try to change it. */
 	    log_warningx(0, N_("Account or password is "
 		"expired, reset your password and try again"));
 	    *pam_status = pam_chauthtok(pamh,
@@ -229,6 +233,10 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth)
 		N_("unable to change expired password: %s"), s);
 	    debug_return_int(AUTH_FAILURE);
 	case PAM_AUTHTOK_EXPIRED:
+	    /* Ignore if user is exempt from password restrictions. */
+	    if (exempt)
+		debug_return_int(AUTH_SUCCESS);
+	    /* Password expired, cannot be updated by user. */
 	    log_warningx(0,
 		N_("Password expired, contact your system administrator"));
 	    debug_return_int(AUTH_FATAL);

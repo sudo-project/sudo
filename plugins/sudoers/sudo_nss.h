@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2007-2011, 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2007-2011, 2013-2015, 2017-2018
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,27 +18,27 @@
 #ifndef SUDOERS_NSS_H
 #define SUDOERS_NSS_H
 
-struct sudo_lbuf;
 struct passwd;
+struct userspec_list;
+struct defaults_list;
 
+/* XXX - parse_tree, ret_if_found and ret_if_notfound should be private */
 struct sudo_nss {
     TAILQ_ENTRY(sudo_nss) entries;
     int (*open)(struct sudo_nss *nss);
     int (*close)(struct sudo_nss *nss);
-    int (*parse)(struct sudo_nss *nss);
-    int (*setdefs)(struct sudo_nss *nss);
-    int (*lookup)(struct sudo_nss *nss, int, int);
-    int (*display_cmnd)(struct sudo_nss *nss, struct passwd *);
-    int (*display_defaults)(struct sudo_nss *nss, struct passwd *, struct sudo_lbuf *);
-    int (*display_bound_defaults)(struct sudo_nss *nss, struct passwd *, struct sudo_lbuf *);
-    int (*display_privs)(struct sudo_nss *nss, struct passwd *, struct sudo_lbuf *);
+    struct sudoers_parse_tree *(*parse)(struct sudo_nss *nss);
+    int (*query)(struct sudo_nss *nss, struct passwd *pw);
+    int (*getdefs)(struct sudo_nss *nss);
     void *handle;
-    short ret_if_found;
-    short ret_if_notfound;
+    struct sudoers_parse_tree *parse_tree;
+    bool ret_if_found;
+    bool ret_if_notfound;
 };
 
 TAILQ_HEAD(sudo_nss_list, sudo_nss);
 
 struct sudo_nss_list *sudo_read_nss(void);
+bool sudo_nss_can_continue(struct sudo_nss *nss, int match);
 
 #endif /* SUDOERS_NSS_H */

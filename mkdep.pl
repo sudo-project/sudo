@@ -82,8 +82,8 @@ sub mkdep {
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo ldap_util.lo ldap_conf.lo solaris_audit.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
-    $makefile =~ s:\@FILEDIGEST\@:filedigest.lo filedigest_openssl.lo filedigest_gcrypt.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getgrouplist.lo getline.lo getopt_long.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo strtonum.lo utimens.lo vsyslog.lo pipe2.lo:;
+    $makefile =~ s:\@DIGEST\@:digest.lo digest_openssl.lo digest_gcrypt.lo:;
+    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_uniform.lo closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getentropy.lo getgrouplist.lo getline.lo getopt_long.lo glob.lo inet_ntop_lo inet_pton.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo strtonum.lo utimens.lo vsyslog.lo pipe2.lo:;
 
     # Parse OBJS lines
     my %objs;
@@ -134,8 +134,8 @@ sub mkdep {
     foreach my $obj (sort keys %objs) {
 	next unless $obj =~ /(\S+)\.(l?o)$/;
 	if ($2 eq "o" && exists($objs{"$1.lo"})) {
-	    # If we have both .lo and .o files, make the .o depend on the .lo
-	    $new_makefile .= sprintf("%s: %s.lo\n", $obj, $1);
+	    # We have both .lo and .o files, only the .lo should be used
+	    warn "$file: $obj should be $1.lo\n";
 	} else {
 	    # Use old depenencies when mapping objects to their source.
 	    # If no old depenency, use the MANIFEST file to find the source.

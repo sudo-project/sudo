@@ -1,6 +1,65 @@
+What's new in Sudo 1.8.24
+
+ * The LDAP and SSS back-ends now use the same rule evaluation code
+   as the sudoers file backend.  This builds on the work in sudo
+   1.8.23 where the formatting functions for "sudo -l" output were
+   shared.  The handling of negated commands in SSS and LDAP is
+   unchanged.
+
+ * Fixed a regression introduced in 1.8.23 where "sudo -i" could
+   not be used in conjunction with --preserve-env=VARIABLE.  Bug #835.
+
+ * cvtsudoers can now parse base64-encoded attributes in LDIF files.
+
+ * Random insults are now more random.
+
+ * Fixed the noexec wordexp(3) test on FreeBSD.
+
+ * Added SUDO_CONV_PREFER_TTY flag for conversation function to
+   tell sudo to try writing to /dev/tty first. Can be used in
+   conjunction with SUDO_CONV_INFO_MSG and SUDO_CONV_ERROR_MSG.
+
+ * Sudo now supports an arbitrary number of groups per user on
+   Solaris.  Previously, only the first 64 groups were found.
+   This should remove the need to set "max_groups" in sudo.conf.
+
+ * Fixed typos in the OpenLDAP sudo schema.  Bugs #839 and #840.
+
+ * Fixed a race condition when building with parallel make.
+   Bug #842.
+
+ * Fixed a duplicate free when netgroup_base in ldap.conf is set
+   to an invalid value.
+
+ * Fixed a bug introduced in sudo 1.8.23 on AIX that could prevent
+   local users and groups from being resolved properly on systems
+   that have users stored in NIS, LDAP or AD.
+
+ * Added a workaround for an AIX bug exposed by a change in sudo
+   1.8.23 that prevents the terminal mode from being restored when
+   I/O logging is enabled.
+
+ * On systems using PAM, sudo now ignores the PAM_NEW_AUTHTOK_REQD
+   and PAM_AUTHTOK_EXPIRED errors from PAM account management if
+   authentication is disabled for the user.  This fixes a regression
+   introduced in sudo 1.8.23.  Bug #843.
+
+ * Fixed an ambiguity in the sudoers manual in the description and
+   definition of User, Runas, Host, and Cmnd Aliases.  Bug #834.
+
+ * Fixed a bug that resulted in only the first window size change
+   event being logged.
+
+ * Fixed a bug on HP-UX systems introduced in sudo 1.8.22 that
+   caused sudo to prompt for a password every time when tty-based
+   time stamp files were in use.
+
+ * Fixed a compilation problem on systems that define O_PATH or
+   O_SEARCH in fnctl.h but do not define O_DIRECTORY.  Bug #844.
+
 What's new in Sudo 1.8.23
 
- * PAM account management modules and BSD auto approval modules are
+ * PAM account management modules and BSD auth approval modules are
    now run even when no password is required.
 
  * For kernel-based time stamps, if no terminal is present, fall

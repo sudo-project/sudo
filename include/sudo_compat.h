@@ -392,13 +392,10 @@ __dso_public char *sudo_getcwd(char *, size_t size);
 # define getcwd(_a, _b) sudo_getcwd((_a), (_b))
 #endif /* PREFER_PORTABLE_GETCWD */
 #ifndef HAVE_GETGROUPLIST
-__dso_public int sudo_getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp);
+__dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGROUPS_T *groups, int *ngroupsp);
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
-#if defined(HAVE_GETGROUPLIST_2) && !HAVE_DECL_GETGROUPLIST_2
-int getgrouplist_2(const char *name, gid_t basegid, gid_t **groups);
-#endif /* HAVE_GETGROUPLIST_2 && !HAVE_DECL_GETGROUPLIST_2 */
 #ifndef HAVE_GETLINE
 __dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
 # undef getline

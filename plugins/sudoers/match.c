@@ -61,7 +61,6 @@
 #include <errno.h>
 
 #include "sudoers.h"
-#include "parse.h"
 #include <gram.h>
 
 #ifdef HAVE_FNMATCH
@@ -76,13 +75,13 @@
 
 static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 
-static bool command_matches_dir(const char *sudoers_dir, size_t dlen, const struct sudo_digest *digest);
+static bool command_matches_dir(const char *sudoers_dir, size_t dlen, const struct command_digest *digest);
 #ifndef SUDOERS_NAME_MATCH
-static bool command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
+static bool command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
 #endif
-static bool command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
-static bool command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
-static bool digest_matches(int fd, const char *file, const struct sudo_digest *sd);
+static bool command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+static bool command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+static bool digest_matches(int fd, const char *file, const struct command_digest *digest);
 
 /*
  * Returns true if string 's' contains meta characters.
@@ -94,7 +93,8 @@ static bool digest_matches(int fd, const char *file, const struct sudo_digest *s
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-user_matches(const struct passwd *pw, const struct member *m)
+user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const struct member *m)
 {
     struct alias *a;
     int matched = UNSPEC;
@@ -115,9 +115,9 @@ user_matches(const struct passwd *pw, const struct member *m)
 		matched = !m->negated;
 	    break;
 	case ALIAS:
-	    if ((a = alias_get(m->name, USERALIAS)) != NULL) {
+	    if ((a = alias_get(parse_tree, m->name, USERALIAS)) != NULL) {
 		/* XXX */
-		int rc = userlist_matches(pw, &a->members);
+		int rc = userlist_matches(parse_tree, pw, &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);
@@ -137,14 +137,15 @@ user_matches(const struct passwd *pw, const struct member *m)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-userlist_matches(const struct passwd *pw, const struct member_list *list)
+userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	if ((matched = user_matches(pw, m)) != UNSPEC)
+	if ((matched = user_matches(parse_tree, pw, m)) != UNSPEC)
 	    break;
     }
     debug_return_int(matched);
@@ -156,9 +157,9 @@ userlist_matches(const struct passwd *pw, const struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-runaslist_matches(const struct member_list *user_list,
-    const struct member_list *group_list, struct member **matching_user,
-    struct member **matching_group)
+runaslist_matches(struct sudoers_parse_tree *parse_tree,
+    const struct member_list *user_list, const struct member_list *group_list,
+    struct member **matching_user, struct member **matching_group)
 {
     struct member *m;
     struct alias *a;
@@ -192,9 +193,10 @@ runaslist_matches(const struct member_list *user_list,
 			    user_matched = !m->negated;
 			break;
 		    case ALIAS:
-			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			    rc = runaslist_matches(&a->members, &empty,
-				matching_user, NULL);
+			a = alias_get(parse_tree, m->name, RUNASALIAS);
+			if (a != NULL) {
+			    rc = runaslist_matches(parse_tree, &a->members,
+				&empty, matching_user, NULL);
 			    if (rc != UNSPEC)
 				user_matched = m->negated ? !rc : rc;
 			    alias_put(a);
@@ -235,9 +237,10 @@ runaslist_matches(const struct member_list *user_list,
 			group_matched = !m->negated;
 			break;
 		    case ALIAS:
-			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			    rc = runaslist_matches(&empty, &a->members,
-				NULL, matching_group);
+			a = alias_get(parse_tree, m->name, RUNASALIAS);
+			if (a != NULL) {
+			    rc = runaslist_matches(parse_tree, &empty,
+				&a->members, NULL, matching_group);
 			    if (rc != UNSPEC)
 				group_matched = m->negated ? !rc : rc;
 			    alias_put(a);
@@ -274,15 +277,16 @@ runaslist_matches(const struct member_list *user_list,
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-hostlist_matches_int(const struct passwd *pw, const char *lhost,
-    const char *shost, const struct member_list *list)
+hostlist_matches_int(struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const char *lhost, const char *shost,
+    const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(hostlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	matched = host_matches(pw, lhost, shost, m);
+	matched = host_matches(parse_tree, pw, lhost, shost, m);
 	if (matched != UNSPEC)
 	    break;
     }
@@ -294,9 +298,10 @@ hostlist_matches_int(const struct passwd *pw, const char *lhost,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-hostlist_matches(const struct passwd *pw, const struct member_list *list)
+hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const struct member_list *list)
 {
-    return hostlist_matches_int(pw, user_runhost, user_srunhost, list);
+    return hostlist_matches_int(parse_tree, pw, user_runhost, user_srunhost, list);
 }
 
 /*
@@ -304,8 +309,8 @@ hostlist_matches(const struct passwd *pw, const struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-host_matches(const struct passwd *pw, const char *lhost, const char *shost,
-    const struct member *m)
+host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    const char *lhost, const char *shost, const struct member *m)
 {
     struct alias *a;
     int matched = UNSPEC;
@@ -325,9 +330,11 @@ host_matches(const struct passwd *pw, const char *lhost, const char *shost,
 		matched = !m->negated;
 	    break;
 	case ALIAS:
-	    if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
+	    a = alias_get(parse_tree, m->name, HOSTALIAS);
+	    if (a != NULL) {
 		/* XXX */
-		int rc = hostlist_matches_int(pw, lhost, shost, &a->members);
+		int rc = hostlist_matches_int(parse_tree, pw, lhost, shost,
+		    &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);
@@ -347,14 +354,15 @@ host_matches(const struct passwd *pw, const char *lhost, const char *shost,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmndlist_matches(const struct member_list *list)
+cmndlist_matches(struct sudoers_parse_tree *parse_tree,
+    const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
     debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH)
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	matched = cmnd_matches(m);
+	matched = cmnd_matches(parse_tree, m);
 	if (matched != UNSPEC)
 	    break;
     }
@@ -366,7 +374,7 @@ cmndlist_matches(const struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(const struct member *m)
+cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m)
 {
     struct alias *a;
     struct sudo_command *c;
@@ -378,8 +386,9 @@ cmnd_matches(const struct member *m)
 	    matched = !m->negated;
 	    break;
 	case ALIAS:
-	    if ((a = alias_get(m->name, CMNDALIAS)) != NULL) {
-		rc = cmndlist_matches(&a->members);
+	    a = alias_get(parse_tree, m->name, CMNDALIAS);
+	    if (a != NULL) {
+		rc = cmndlist_matches(parse_tree, &a->members);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
 		alias_put(a);
@@ -426,7 +435,7 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
  * otherwise, return true if user_cmnd names one of the inodes in path.
  */
 bool
-command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
+command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     bool rc = false;
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH)
@@ -495,13 +504,17 @@ is_script(int fd)
 {
     bool ret = false;
     char magic[2];
+    debug_decl(is_script, SUDOERS_DEBUG_MATCH)
 
     if (read(fd, magic, 2) == 2) {
 	if (magic[0] == '#' && magic[1] == '!')
 	    ret = true;
     }
-    (void) lseek(fd, (off_t)0, SEEK_SET);
-    return ret;
+    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to rewind script fd");
+    }
+    debug_return_int(ret);
 }
 
 /*
@@ -509,7 +522,7 @@ is_script(int fd)
  * Returns false on error, else true.
  */
 static bool
-open_cmnd(const char *path, const struct sudo_digest *digest, int *fdp)
+open_cmnd(const char *path, const struct command_digest *digest, int *fdp)
 {
     int fd = -1;
     debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH)
@@ -577,7 +590,7 @@ set_cmnd_fd(int fd)
 
 static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     struct stat sb; /* XXX - unused */
     int fd = -1;
@@ -618,7 +631,7 @@ bad:
 #ifndef SUDOERS_NAME_MATCH
 static bool
 command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     struct stat sudoers_stat;
     bool bad_digest = false;
@@ -748,7 +761,7 @@ done:
 
 #ifdef SUDOERS_NAME_MATCH
 static bool
-command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
+command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     size_t dlen;
     debug_decl(command_matches_normal, SUDOERS_DEBUG_MATCH)
@@ -773,7 +786,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
 #else /* !SUDOERS_NAME_MATCH */
 
 static bool
-digest_matches(int fd, const char *file, const struct sudo_digest *sd)
+digest_matches(int fd, const char *file, const struct command_digest *digest)
 {
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
@@ -781,8 +794,11 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     size_t digest_len;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
-    file_digest = sudo_filedigest(fd, file, sd->digest_type, &digest_len);
-    lseek(fd, SEEK_SET, (off_t)0);
+    file_digest = sudo_filedigest(fd, file, digest->digest_type, &digest_len);
+    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "unable to rewind digest fd");
+    }
     if (file_digest == NULL) {
 	/* Warning (if any) printed by sudo_filedigest() */
 	goto done;
@@ -793,18 +809,18 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    if (strlen(sd->digest_str) == digest_len * 2) {
+    if (strlen(digest->digest_str) == digest_len * 2) {
 	/* Convert ascii hex to binary. */
 	unsigned int i;
 	for (i = 0; i < digest_len; i++) {
-	    const int h = hexchar(&sd->digest_str[i + i]);
+	    const int h = hexchar(&digest->digest_str[i + i]);
 	    if (h == -1)
 		goto bad_format;
 	    sudoers_digest[i] = (unsigned char)h;
 	}
     } else {
 	/* Convert base64 to binary. */
-	size_t len = base64_decode(sd->digest_str, sudoers_digest, digest_len);
+	size_t len = base64_decode(digest->digest_str, sudoers_digest, digest_len);
 	if (len != digest_len) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"incorrect length for digest, expected %zu, got %zu",
@@ -818,13 +834,13 @@ digest_matches(int fd, const char *file, const struct sudo_digest *sd)
     } else {
 	sudo_debug_printf(SUDO_DEBUG_DIAG|SUDO_DEBUG_LINENO,
 	    "%s digest mismatch for %s, expecting %s",
-	    digest_type_to_name(sd->digest_type), file, sd->digest_str);
+	    digest_type_to_name(digest->digest_type), file, digest->digest_str);
     }
     goto done;
 
 bad_format:
     sudo_warnx(U_("digest for %s (%s) is not in %s form"), file,
-	sd->digest_str, digest_type_to_name(sd->digest_type));
+	digest->digest_str, digest_type_to_name(digest->digest_type));
 done:
     free(sudoers_digest);
     free(file_digest);
@@ -832,7 +848,7 @@ done:
 }
 
 static bool
-command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest)
+command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest)
 {
     struct stat sudoers_stat;
     const char *base;
@@ -897,7 +913,7 @@ bad:
  */
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH)
     /* XXX - check digest */
@@ -909,7 +925,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen,
  */
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen,
-    const struct sudo_digest *digest)
+    const struct command_digest *digest)
 {
     struct stat sudoers_stat;
     struct dirent *dent;

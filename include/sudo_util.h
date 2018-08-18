@@ -179,6 +179,10 @@ __dso_public int sudo_gettime_real_v1(struct timespec *ts);
 __dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 #define sudo_parse_gids(_a, _b, _c) sudo_parse_gids_v1((_a), (_b), (_c))
 
+/* getgrouplist.c */
+__dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGROUPS_T **groupsp, int *ngroupsp);
+#define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
+
 /* key_val.c */
 __dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
 #define sudo_new_key_val(_a, _b) sudo_new_key_val_v1((_a), (_b))

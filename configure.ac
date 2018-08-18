@@ -1,10 +1,10 @@
 dnl
 dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
-dnl Copyright (c) 1994-1996,1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996,1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.23], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.24], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -79,6 +79,7 @@ AC_SUBST([LIBDL])
 AC_SUBST([LIBRT])
 AC_SUBST([LIBINTL])
 AC_SUBST([LIBMD])
+AC_SUBST([LIBPTHREAD])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
@@ -96,7 +97,7 @@ AC_SUBST([RC_LINK])
 AC_SUBST([COMPAT_EXP])
 AC_SUBST([TMPFILES_D])
 AC_SUBST([exampledir])
-AC_SUBST([FILEDIGEST])
+AC_SUBST([DIGEST])
 AC_SUBST([devsearch])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -185,7 +186,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
-FILEDIGEST=filedigest.lo
+DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
@@ -1420,6 +1421,7 @@ AC_ARG_ENABLE(env_debug,
 AC_ARG_ENABLE(zlib,
 [AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
 [], [enable_zlib=yes])
+AX_APPEND_FLAG([-DZLIB_CONST], [CPPFLAGS])
 
 AC_MSG_CHECKING(whether to enable environment resetting by default)
 AC_ARG_ENABLE(env_reset,
@@ -1467,7 +1469,8 @@ AC_ARG_ENABLE(openssl,
 [ case $enableval in
     no)		;;
     *)		LIBMD="-lcrypto"
-		FILEDIGEST=filedigest_openssl.lo
+		DIGEST=digest_openssl.lo
+		AC_DEFINE(HAVE_OPENSSL)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
 		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
@@ -1481,7 +1484,8 @@ AC_ARG_ENABLE(gcrypt,
 [ case $enableval in
     no)		;;
     *)		LIBMD="-lgcrypt"
-		FILEDIGEST=filedigest_gcrypt.lo
+		DIGEST=digest_gcrypt.lo
+		AC_DEFINE(HAVE_GCRYPT)
 		if test "$enableval" != "yes"; then
 		    AX_APPEND_FLAG([-I${enableval}/include], [CPPFLAGS])
 		    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${enableval}/lib])
@@ -1816,6 +1820,18 @@ case "$host" in
 		# on the libc version, use our own.
 		if test $OSMAJOR -lt 6; then
 		    ac_cv_func_strnlen=no
+		fi
+
+		# getline() may or may ont be present on AIX <= 6.1.
+		# bos610 is missing getline/getdelim but bos61J has it.
+		if test $OSMAJOR -le 6; then
+		    ac_cv_func_getline=no
+		fi
+
+		# memset_s() may or may ont be present on AIX <= 7.1.
+		# bos710 is missing memset_s but bos71L has it.
+		if test $OSMAJOR -le 7; then
+		    ac_cv_func_memset_s=no
 		fi
 
 		# Remove timedir on boot, AIX does not have /var/run
@@ -2333,7 +2349,7 @@ dnl
 AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h])
+AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/syscall.h sys/statvfs.h])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2473,7 +2489,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite openat faccessat wordexp])
+AC_CHECK_FUNCS_ONCE([fexecve killpg nl_langinfo pread pwrite openat faccessat wordexp getauxval])
 case "$host_os" in
     hpux*)
 	if test X"$ac_cv_func_pread" = X"yes"; then
@@ -2522,7 +2538,6 @@ AC_CHECK_FUNCS([getgrouplist], [], [
 	])
 	;;
     esac
-    AC_LIBOBJ(getgrouplist)
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
 AC_CHECK_FUNCS([getline], [], [
@@ -2533,6 +2548,24 @@ AC_CHECK_FUNCS([getline], [], [
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
+])
+AC_CHECK_FUNCS([arc4random_uniform], [], [
+    AC_LIBOBJ(arc4random_uniform)
+    SUDO_APPEND_COMPAT_EXP(sudo_arc4random_uniform)
+    AC_CHECK_FUNCS([arc4random], [], [
+	AC_LIBOBJ(arc4random)
+	SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
+	# arc4random.c needs getentropy()
+	AC_CHECK_FUNCS([getentropy], [], [
+	    AC_LIBOBJ(getentropy)
+	    SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
+	])
+	# arc4random.c wants pthread_atfork
+	AC_CHECK_HEADERS([pthread.h], [
+	    AC_CHECK_LIB(pthread, main, [LIBPTHREAD="-lpthread"])
+	    AC_CHECK_FUNCS([pthread_atfork])
+	])
+    ])
 ])
 
 utmp_style=LEGACY
@@ -2760,7 +2793,7 @@ AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
     [AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
     [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
 # Look for sha2 functions if not using openssl
-if test "$FILEDIGEST" = "filedigest.lo"; then
+if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
     AC_CHECK_HEADER([sha2.h], [
 	FOUND_SHA2=yes
@@ -3241,6 +3274,14 @@ AC_INCLUDES_DEFAULT
 	fi
     fi
 ])
+
+dnl
+dnl Check for dl_iterate_phdr, may require -ldl
+dnl
+OLIBS="$LIBS"
+LIBS="$LIBS $lt_cv_dlopen_libs"
+AC_CHECK_FUNCS([dl_iterate_phdr])
+LIBS="$OLIBS"
 
 dnl
 dnl nsswitch.conf and its equivalents
@@ -4521,6 +4562,8 @@ AH_TEMPLATE(HAVE_KINFO_PROC_44BSD, [Define to 1 if your system has a 4.4BSD-styl
 AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
+AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's sha2 functions.])
+AH_TEMPLATE(HAVE_GCRYPT, [Define to 1 if you are using gcrypt's sha2 functions.])
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl

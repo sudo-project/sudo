@@ -20,6 +20,8 @@
 
 #if defined(HAL_INSULTS) || defined(GOONS_INSULTS) || defined(CLASSIC_INSULTS) || defined(CSOPS_INSULTS) || defined(PYTHON_INSULTS)
 
+#include "sudo_rand.h"
+
 /*
  * Use one or more set of insults as determined by configure
  */
@@ -58,7 +60,7 @@ char *insults[] = {
 /*
  * return a pseudo-random insult.
  */
-#define INSULT		(insults[time(NULL) % NOFINSULTS])
+#define INSULT		(insults[arc4random_uniform(NOFINSULTS)])
 
 #endif /* HAL_INSULTS || GOONS_INSULTS || CLASSIC_INSULTS || CSOPS_INSULTS || PYTHON_INSULTS */
 

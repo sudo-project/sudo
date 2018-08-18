@@ -249,132 +249,18 @@ sudo_read_nss(void)
 
 #endif /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
 
-static int
-output(const char *buf)
+bool
+sudo_nss_can_continue(struct sudo_nss *nss, int match)
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-    debug_decl(output, SUDOERS_DEBUG_NSS)
+    debug_decl(sudo_nss_should_continue, SUDOERS_DEBUG_NSS)
 
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_INFO_MSG;
-    msg.msg = buf;
-    memset(&repl, 0, sizeof(repl));
-    if (sudo_conv(1, &msg, &repl, NULL) == -1)
-	debug_return_int(0);
-    debug_return_int(strlen(buf));
-}
+    /* Handle [NOTFOUND=return] */
+    if (nss->ret_if_notfound && match == UNSPEC)
+	debug_return_bool(false);
 
-/*
- * Print out privileges for the specified user.
- * Returns true on success or -1 on error.
- */
-int
-display_privs(struct sudo_nss_list *snl, struct passwd *pw)
-{
-    struct sudo_nss *nss;
-    struct sudo_lbuf defs, privs;
-    struct stat sb;
-    int cols, count, olen;
-    debug_decl(display_privs, SUDOERS_DEBUG_NSS)
+    /* Handle [SUCCESS=return] */
+    if (nss->ret_if_found && match != UNSPEC)
+	debug_return_bool(false);
 
-    cols = sudo_user.cols;
-    if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
-	cols = 0;
-    sudo_lbuf_init(&defs, output, 4, NULL, cols);
-    sudo_lbuf_init(&privs, output, 8, NULL, cols);
-
-    /* Display defaults from all sources. */
-    sudo_lbuf_append(&defs, _("Matching Defaults entries for %s on %s:\n"),
-	pw->pw_name, user_srunhost);
-    count = 0;
-    TAILQ_FOREACH(nss, snl, entries) {
-	const int n = nss->display_defaults(nss, pw, &defs);
-	if (n == -1)
-	    goto bad;
-	count += n;
-    }
-    if (count) {
-	sudo_lbuf_append(&defs, "\n\n");
-    } else {
-	/* Undo Defaults header. */
-	defs.len = 0;
-    }
-
-    /* Display Runas and Cmnd-specific defaults from all sources. */
-    olen = defs.len;
-    sudo_lbuf_append(&defs, _("Runas and Command-specific defaults for %s:\n"),
-	pw->pw_name);
-    count = 0;
-    TAILQ_FOREACH(nss, snl, entries) {
-	const int n = nss->display_bound_defaults(nss, pw, &defs);
-	if (n == -1)
-	    goto bad;
-	count += n;
-    }
-    if (count) {
-	sudo_lbuf_append(&defs, "\n\n");
-    } else {
-	/* Undo Defaults header. */
-	defs.len = olen;
-    }
-
-    /* Display privileges from all sources. */
-    sudo_lbuf_append(&privs,
-	_("User %s may run the following commands on %s:\n"),
-	pw->pw_name, user_srunhost);
-    count = 0;
-    TAILQ_FOREACH(nss, snl, entries) {
-	const int n = nss->display_privs(nss, pw, &privs);
-	if (n == -1)
-	    goto bad;
-	count += n;
-    }
-    if (count == 0) {
-	defs.len = 0;
-	privs.len = 0;
-	sudo_lbuf_append(&privs,
-	    _("User %s is not allowed to run sudo on %s.\n"),
-	    pw->pw_name, user_shost);
-    }
-    if (sudo_lbuf_error(&defs) || sudo_lbuf_error(&privs))
-	goto bad;
-
-    sudo_lbuf_print(&defs);
-    sudo_lbuf_print(&privs);
-
-    sudo_lbuf_destroy(&defs);
-    sudo_lbuf_destroy(&privs);
-
-    debug_return_int(true);
-bad:
-    sudo_lbuf_destroy(&defs);
-    sudo_lbuf_destroy(&privs);
-
-    debug_return_int(-1);
-}
-
-/*
- * Check user_cmnd against sudoers and print the matching entry if the
- * command is allowed.
- * Returns true if the command is allowed, false if not or -1 on error.
- */
-int
-display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
-{
-    struct sudo_nss *nss;
-    debug_decl(display_cmnd, SUDOERS_DEBUG_NSS)
-
-    /* XXX - display_cmnd return value is backwards */
-    /* XXX - doesn't handle commands allowed by one backend denied by another. */
-    TAILQ_FOREACH(nss, snl, entries) {
-	switch (nss->display_cmnd(nss, pw)) {
-	    case 0:
-		debug_return_int(true);
-	    case -1:
-		debug_return_int(-1);
-	}
-    }
-    debug_return_int(false);
+    debug_return_bool(true);
 }

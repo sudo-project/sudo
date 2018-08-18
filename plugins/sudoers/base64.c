@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -85,4 +85,42 @@ base64_decode(const char *in, unsigned char *out, size_t out_size)
 	    *out++ = (v >> rem) & 0xff;
     }
     debug_return_size_t((size_t)(out - out0));
+}
+
+static const unsigned char base64enc_tab[64] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+size_t
+base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len)
+{
+    size_t ii, io;
+    unsigned int rem, v;
+    debug_decl(base64_encode, SUDOERS_DEBUG_MATCH)
+
+    for (io = 0, ii = 0, v = 0, rem = 0; ii < in_len; ii++) {
+	unsigned char ch = in[ii];
+	v = (v << 8) | ch;
+	rem += 8;
+	while (rem >= 6) {
+	    rem -= 6;
+	    if (io >= out_len)
+		debug_return_size_t((size_t)-1); /* truncation is failure */
+	    out[io++] = base64enc_tab[(v >> rem) & 63];
+	}
+    }
+    if (rem != 0) {
+	v <<= (6 - rem);
+	if (io >= out_len)
+	    debug_return_size_t((size_t)-1); /* truncation is failure */
+	out[io++] = base64enc_tab[v&63];
+    }
+    while (io & 3) {
+	if (io >= out_len)
+	    debug_return_size_t((size_t)-1); /* truncation is failure */
+	out[io++] = '=';
+    }
+    if (io >= out_len)
+	debug_return_size_t((size_t)-1); /* no room for NUL terminator */
+    out[io] = '\0';
+    debug_return_size_t(io);
 }

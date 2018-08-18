@@ -44,7 +44,6 @@
 #endif
 
 #include "sudoers.h"
-#include "parse.h"
 #include "sudo_lbuf.h"
 #include "sudo_ldap.h"
 #include "sudo_ldap_conf.h"

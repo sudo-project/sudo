@@ -1177,6 +1177,9 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
     if (errstr != NULL)
 	goto done;
 
+    /* Success. */
+    ret = 1;
+
 done:
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
