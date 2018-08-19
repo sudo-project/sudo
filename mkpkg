@@ -117,6 +117,9 @@ if ${MAKE} --version 2>&1 | grep GNU >/dev/null; then
 	HP-UX)
 	    NJOBS=`sar -Mu 1 1 | awk 'END {print NR-5}'`
 	    ;;
+	AIX)
+	    NJOBS=`bindprocessor -q | awk '{print NF-4}'`
+	    ;;
     esac
     if [ $NJOBS -gt 1 ]; then
 	make_opts="-j$NJOBS"
