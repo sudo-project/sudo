@@ -1082,8 +1082,8 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
     /* Write timing file entry. */
     sudo_timevalsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u\n", idx,
-	delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%06ld %u\n",
+	idx, (long long)delay.tv_sec, delay.tv_usec, len);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);
@@ -1165,9 +1165,8 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
 
     /* Write window change event to the timing file. */
     sudo_timevalsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u %u\n",
-	IOFD_TIMING, delay.tv_sec + ((double)delay.tv_usec / 1000000),
-	lines, cols);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%06ld %u %u\n",
+	IOFD_TIMING, (long long)delay.tv_sec, delay.tv_usec, lines, cols);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);
