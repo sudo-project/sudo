@@ -18,7 +18,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -67,7 +66,7 @@ struct iolog_details {
 static struct iolog_details iolog_details;
 static bool iolog_compress = false;
 static bool warned = false;
-static struct timeval last_time;
+static struct timespec last_time;
 static unsigned int sessid_max = SESSID_MAX;
 static mode_t iolog_filemode = S_IRUSR|S_IWUSR;
 static mode_t iolog_dirmode = S_IRWXU;
@@ -785,7 +784,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
  */
 static bool
 write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
-    char * const argv[], struct timeval *now)
+    char * const argv[], struct timespec *now)
 {
     char * const *av;
     FILE *fp;
@@ -958,7 +957,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
 
     /* Write log file with user and command details. */
-    if (gettimeofday(&last_time, NULL) == -1) {
+    if (sudo_gettime_awake(&last_time) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
 	goto done;
@@ -1056,7 +1055,7 @@ sudoers_io_version(int verbose)
 static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
-    struct timeval now, delay;
+    struct timespec now, delay;
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
@@ -1068,7 +1067,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	debug_return_int(-1);
     }
 
-    if (gettimeofday(&now, NULL) == -1) {
+    if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
 	errstr = strerror(errno);
@@ -1081,9 +1080,9 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	goto done;
 
     /* Write timing file entry. */
-    sudo_timevalsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%06ld %u\n",
-	idx, (long long)delay.tv_sec, delay.tv_usec, len);
+    sudo_timespecsub(&now, &last_time, &delay);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %u\n",
+	idx, (long long)delay.tv_sec, delay.tv_nsec, len);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);
@@ -1098,7 +1097,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 done:
     last_time.tv_sec = now.tv_sec;
-    last_time.tv_usec = now.tv_usec;
+    last_time.tv_nsec = now.tv_nsec;
 
     if (ret == -1) {
 	if (errstr != NULL && !warned) {
@@ -1149,14 +1148,14 @@ sudoers_io_log_stderr(const char *buf, unsigned int len)
 static int
 sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
 {
-    struct timeval now, delay;
+    struct timespec now, delay;
     unsigned int len;
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
     debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN)
 
-    if (gettimeofday(&now, NULL) == -1) {
+    if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
 	errstr = strerror(errno);
@@ -1164,9 +1163,9 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
     }
 
     /* Write window change event to the timing file. */
-    sudo_timevalsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%06ld %u %u\n",
-	IOFD_TIMING, (long long)delay.tv_sec, delay.tv_usec, lines, cols);
+    sudo_timespecsub(&now, &last_time, &delay);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %u %u\n",
+	IOFD_TIMING, (long long)delay.tv_sec, delay.tv_nsec, lines, cols);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);
@@ -1181,7 +1180,7 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
 
 done:
     last_time.tv_sec = now.tv_sec;
-    last_time.tv_usec = now.tv_usec;
+    last_time.tv_nsec = now.tv_nsec;
 
     if (ret == -1) {
 	if (errstr != NULL && !warned) {
