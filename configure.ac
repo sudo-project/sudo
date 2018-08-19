@@ -2215,6 +2215,9 @@ case "$host" in
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
+		# Mach monotonic timer that runs while sleeping
+		AC_CHECK_FUNCS([mach_continuous_time])
+
 		# Undocumented API that dynamically allocates the groups.
 		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
 

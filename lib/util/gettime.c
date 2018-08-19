@@ -34,13 +34,25 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
-/* On Linux, CLOCK_MONOTONIC does not run while suspended. */
+/*
+ * On Linux and FreeBSD, CLOCK_MONOTONIC does not run while sleeping.
+ * Linux provides CLOCK_BOOTTIME which runs while sleeping (FreeBSD does not).
+ * Some systems provide CLOCK_UPTIME which only runs while awake.
+ */
 #if defined(CLOCK_BOOTTIME)
-# define SUDO_CLOCK_MONOTONIC	CLOCK_BOOTTIME
+# define SUDO_CLOCK_BOOTTIME	CLOCK_BOOTTIME
 #elif defined(CLOCK_MONOTONIC)
-# define SUDO_CLOCK_MONOTONIC	CLOCK_MONOTONIC
+# define SUDO_CLOCK_BOOTTIME	CLOCK_MONOTONIC
+#endif
+#if defined(CLOCK_UPTIME)
+# define SUDO_CLOCK_AWAKE	CLOCK_UPTIME
+#elif defined(CLOCK_MONOTONIC)
+# define SUDO_CLOCK_AWAKE	CLOCK_MONOTONIC
 #endif
 
+/*
+ * Wall clock time, may run backward.
+ */
 #if defined(HAVE_CLOCK_GETTIME)
 int
 sudo_gettime_real_v1(struct timespec *ts)
@@ -72,24 +84,28 @@ sudo_gettime_real_v1(struct timespec *ts)
 }
 #endif
 
-#if defined(HAVE_CLOCK_GETTIME) && defined(SUDO_CLOCK_MONOTONIC)
+/*
+ * Monotonic time, only runs forward.
+ * We use a timer that only increments while sleeping, if possible.
+ */
+#if defined(HAVE_CLOCK_GETTIME) && defined(SUDO_CLOCK_BOOTTIME)
 int
 sudo_gettime_mono_v1(struct timespec *ts)
 {
     static int has_monoclock = -1;
     debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
 
-    /* Check whether the kernel/libc actually supports CLOCK_MONOTONIC. */
+    /* Check whether the kernel/libc actually supports a monotonic clock. */
 # ifdef _SC_MONOTONIC_CLOCK
     if (has_monoclock == -1)
 	has_monoclock = sysconf(_SC_MONOTONIC_CLOCK) != -1;
 # endif
     if (!has_monoclock)
 	debug_return_int(sudo_gettime_real(ts));
-    if (clock_gettime(SUDO_CLOCK_MONOTONIC, ts) == -1) {
+    if (clock_gettime(SUDO_CLOCK_BOOTTIME, ts) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "clock_gettime(%d) failed, using wall clock",
-	    (int)SUDO_CLOCK_MONOTONIC);
+	    (int)SUDO_CLOCK_BOOTTIME);
 	has_monoclock = 0;
 	debug_return_int(sudo_gettime_real(ts));
     }
@@ -105,7 +121,11 @@ sudo_gettime_mono_v1(struct timespec *ts)
 
     if (timebase_info.denom == 0)
 	(void) mach_timebase_info(&timebase_info);
-    abstime = mach_absolute_time();
+#ifdef HAVE_MACH_CONTINUOUS_TIME
+    abstime = mach_continuous_time();		/* runs while asleep */
+#else
+    abstime = mach_absolute_time();		/* doesn't run while asleep */
+#endif
     nsec = abstime * timebase_info.numer / timebase_info.denom;
     ts->tv_sec = nsec / 1000000000;
     ts->tv_nsec = nsec % 1000000000;
@@ -116,6 +136,58 @@ int
 sudo_gettime_mono_v1(struct timespec *ts)
 {
     /* No monotonic clock available, use wall clock. */
+    return sudo_gettime_real(ts);
+}
+#endif
+
+/*
+ * Monotonic time, only runs forward.
+ * We use a timer that only increments while awake, if possible.
+ */
+#if defined(HAVE_CLOCK_GETTIME) && defined(SUDO_CLOCK_AWAKE)
+int
+sudo_gettime_awake_v1(struct timespec *ts)
+{
+    static int has_monoclock = -1;
+    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL)
+
+    /* Check whether the kernel/libc actually supports a monotonic clock. */
+# ifdef _SC_MONOTONIC_CLOCK
+    if (has_monoclock == -1)
+	has_monoclock = sysconf(_SC_MONOTONIC_CLOCK) != -1;
+# endif
+    if (!has_monoclock)
+	debug_return_int(sudo_gettime_real(ts));
+    if (clock_gettime(SUDO_CLOCK_AWAKE, ts) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+	    "clock_gettime(%d) failed, using wall clock",
+	    (int)SUDO_CLOCK_AWAKE);
+	has_monoclock = 0;
+	debug_return_int(sudo_gettime_real(ts));
+    }
+    debug_return_int(0);
+}
+#elif defined(__MACH__)
+int
+sudo_gettime_awake_v1(struct timespec *ts)
+{
+    uint64_t abstime, nsec;
+    static mach_timebase_info_data_t timebase_info;
+    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL)
+
+    if (timebase_info.denom == 0)
+	(void) mach_timebase_info(&timebase_info);
+    abstime = mach_absolute_time();
+    nsec = abstime * timebase_info.numer / timebase_info.denom;
+    ts->tv_sec = nsec / 1000000000;
+    ts->tv_nsec = nsec % 1000000000;
+    debug_return_int(0);
+}
+#else
+int
+sudo_gettime_awake_v1(struct timespec *ts)
+{
+    /* No monotonic uptime clock available, use wall clock. */
     return sudo_gettime_real(ts);
 }
 #endif

@@ -71,6 +71,7 @@ sudo_fatalx_nodebug_v1
 sudo_get_ttysize_v1
 sudo_getgrouplist2_v1
 sudo_gethostname_v1
+sudo_gettime_awake_v1
 sudo_gettime_mono_v1
 sudo_gettime_real_v1
 sudo_lbuf_append_quoted_v1

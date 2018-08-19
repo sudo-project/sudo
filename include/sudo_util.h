@@ -170,6 +170,8 @@ __dso_public char *sudo_gethostname_v1(void);
 #define sudo_gethostname() sudo_gethostname_v1()
 
 /* gettime.c */
+__dso_public int sudo_gettime_awake_v1(struct timespec *ts);
+#define sudo_gettime_awake(_a) sudo_gettime_awake_v1((_a))
 __dso_public int sudo_gettime_mono_v1(struct timespec *ts);
 #define sudo_gettime_mono(_a) sudo_gettime_mono_v1((_a))
 __dso_public int sudo_gettime_real_v1(struct timespec *ts);
