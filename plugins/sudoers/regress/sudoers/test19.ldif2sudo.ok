@@ -1,5 +1,6 @@
 # sudoRole user0
-user0 ALL = NOTBEFORE=20170301083000Z /usr/bin/id, /bin/ls
+user0 ALL = NOTBEFORE=20170214083000Z NOTAFTER=20170301083000Z /usr/bin/id,\
+    /bin/ls
 
 # sudoRole user1
 user1 ALL = NOTBEFORE=20170214083000Z /usr/bin/id, /bin/ls
