@@ -15604,12 +15604,13 @@ _ACEOF
 		# HP-UX won't unlink a shared lib that is open
 		INSTALL_BACKUP='~'
 
-		for ac_func in pstat_getproc
+		for ac_func in pstat_getproc gethrtime
 do :
-  ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
-if test "x$ac_cv_func_pstat_getproc" = xyes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_PSTAT_GETPROC 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi
@@ -15720,12 +15721,13 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
-		for ac_func in pstat_getproc
+		for ac_func in pstat_getproc gethrtime
 do :
-  ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
-if test "x$ac_cv_func_pstat_getproc" = xyes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_PSTAT_GETPROC 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi

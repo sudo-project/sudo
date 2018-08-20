@@ -1875,7 +1875,7 @@ case "$host" in
 		# HP-UX won't unlink a shared lib that is open
 		INSTALL_BACKUP='~'
 
-		AC_CHECK_FUNCS([pstat_getproc])
+		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-*-hpux*)
 		AC_DEFINE([PAM_SUN_CODEBASE])
@@ -1954,7 +1954,7 @@ case "$host" in
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
-		AC_CHECK_FUNCS([pstat_getproc])
+		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path

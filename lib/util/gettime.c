@@ -111,6 +111,18 @@ sudo_gettime_mono_v1(struct timespec *ts)
     }
     debug_return_int(0);
 }
+#elif defined(HAVE_GETHRTIME)
+int
+sudo_gettime_mono_v1(struct timespec *ts)
+{
+    hrtime_t nsec;
+    debug_decl(sudo_gettime_mono, SUDO_DEBUG_UTIL)
+
+    nsec = gethrtime();
+    ts->tv_sec = nsec / 1000000000;
+    ts->tv_nsec = nsec % 1000000000;
+    debug_return_int(0);
+}
 #elif defined(__MACH__)
 int
 sudo_gettime_mono_v1(struct timespec *ts)
@@ -165,6 +177,19 @@ sudo_gettime_awake_v1(struct timespec *ts)
 	has_monoclock = 0;
 	debug_return_int(sudo_gettime_real(ts));
     }
+    debug_return_int(0);
+}
+#elif defined(HAVE_GETHRTIME)
+int
+sudo_gettime_awake_v1(struct timespec *ts)
+{
+    hrtime_t nsec;
+    debug_decl(sudo_gettime_awake, SUDO_DEBUG_UTIL)
+
+    /* Currently the same as sudo_gettime_mono() */
+    nsec = gethrtime();
+    ts->tv_sec = nsec / 1000000000;
+    ts->tv_nsec = nsec % 1000000000;
     debug_return_int(0);
 }
 #elif defined(__MACH__)
