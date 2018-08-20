@@ -594,6 +594,15 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     if (pipe2(errpipe, O_CLOEXEC) != 0)
 	sudo_fatal(U_("unable to create pipe"));
 
+    /*
+     * Before forking, wait for the main sudo process to tell us to go.
+     * Avoids race conditions when the command exits quickly.
+     */
+    while (recv(backchannel, &cstat, sizeof(cstat), MSG_WAITALL) == -1) {
+	if (errno != EINTR && errno != EAGAIN)
+	    sudo_fatal(U_("unable to receive message from parent"));
+    }
+
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
     case -1:

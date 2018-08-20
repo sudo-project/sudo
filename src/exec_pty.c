@@ -744,23 +744,15 @@ io_buf_new(int rfd, int wfd,
     debug_return;
 }
 
+/*
+ * We already closed the slave pty so reads from the master will not block.
+ */
 static void
-pty_close(struct command_status *cstat)
+pty_finish(struct command_status *cstat)
 {
     struct io_buffer *iob;
     int n;
-    debug_decl(pty_close, SUDO_DEBUG_EXEC);
-
-#ifndef _AIX
-    /*
-     * Close the pty slave first so reads from the master don't block.
-     * On AIX as it will cause us to lose *our* controlling tty too!
-     */
-    if (io_fds[SFD_SLAVE] != -1) {
-	close(io_fds[SFD_SLAVE]);
-	io_fds[SFD_SLAVE] = -1;
-    }
-#endif
+    debug_decl(pty_finish, SUDO_DEBUG_EXEC);
 
     /* Flush any remaining output (the plugin already got it). */
     if (io_fds[SFD_USERTTY] != -1) {
@@ -789,14 +781,6 @@ pty_close(struct command_status *cstat)
     /* Update utmp */
     if (utmp_user != NULL)
 	utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0);
-
-#ifndef _AIX
-    /* Close pty master. */
-    if (io_fds[SFD_MASTER] != -1) {
-	close(io_fds[SFD_MASTER]);
-	io_fds[SFD_MASTER] = -1;
-    }
-#endif
 
     debug_return;
 }
@@ -1421,12 +1405,13 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to copy terminal settings to pty", __func__);
-	}
-
-	/* Start out in raw mode unless part of a pipeline or backgrounded. */
-	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
-	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		ttymode = TERM_RAW;
+	    foreground = false;
+	} else {
+	    /* Start in raw mode unless part of a pipeline or backgrounded. */
+	    if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
+		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		    ttymode = TERM_RAW;
+	    }
 	}
     }
 
@@ -1473,6 +1458,24 @@ exec_pty(struct command_details *details, struct command_status *cstat)
                 "%s: unable to send status to parent", __func__);
 	}
 	_exit(1);
+    }
+
+    /*
+     * We close the pty slave so only the monitor and command have a
+     * reference to it.  This ensures that we can don't block reading
+     * from the master when the command and monitor have exited.
+     */
+    if (io_fds[SFD_SLAVE] != -1) {
+	close(io_fds[SFD_SLAVE]);
+	io_fds[SFD_SLAVE] = -1;
+    }
+
+    /* Tell the monitor to continue now that the slave is closed. */
+    cstat->type = CMD_SIGNO;
+    cstat->val = 0;
+    while (send(sv[0], cstat, sizeof(*cstat), 0) == -1) {
+	if (errno != EINTR && errno != EAGAIN)
+	    sudo_fatal(U_("unable to send message to monitor process"));
     }
 
     /* Close the other end of the stdin/stdout/stderr pipes and socketpair. */
@@ -1523,7 +1526,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
-    pty_close(cstat);
+    pty_finish(cstat);
 
     /* Free things up. */
     free_exec_closure_pty(&ec);
