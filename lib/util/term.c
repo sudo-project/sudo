@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -255,6 +256,7 @@ bool
 sudo_term_copy_v1(int src, int dst)
 {
     struct termios tt_src, tt_dst;
+    struct winsize wsize;
     speed_t speed;
     int i;
     debug_decl(sudo_term_copy, SUDO_DEBUG_UTIL)
@@ -285,7 +287,11 @@ sudo_term_copy_v1(int src, int dst)
     speed = cfgetispeed(&tt_src);
     cfsetispeed(&tt_dst, speed);
 
-    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt_dst) == 0)
-	debug_return_bool(true);
-    debug_return_bool(false);
+    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt_dst) == -1)
+	debug_return_bool(false);
+
+    if (ioctl(src, TIOCGWINSZ, &wsize) == 0)
+	(void)ioctl(dst, TIOCSWINSZ, &wsize);
+
+    debug_return_bool(true);
 }

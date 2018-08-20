@@ -47,12 +47,12 @@
 #define TERM_COOKED	0
 #define TERM_RAW	1
 
-/* We keep a tailq of signals to forward to the monitor. */
-struct sigforward {
-    TAILQ_ENTRY(sigforward) entries;
-    int signo;
+/* Tail queue of messages to send to the monitor. */
+struct monitor_message {
+    TAILQ_ENTRY(monitor_message) entries;
+    struct command_status cstat;
 };
-TAILQ_HEAD(sigfwd_list, sigforward);
+TAILQ_HEAD(monitor_message_list, monitor_message);
 
 struct exec_closure_pty {
     pid_t monitor_pid;
@@ -62,6 +62,7 @@ struct exec_closure_pty {
     struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *backchannel_event;
+    struct sudo_event *fwdchannel_event;
     struct sudo_event *sigint_event;
     struct sudo_event *sigquit_event;
     struct sudo_event *sigtstp_event;
@@ -72,8 +73,7 @@ struct exec_closure_pty {
     struct sudo_event *sigusr2_event;
     struct sudo_event *sigchld_event;
     struct sudo_event *sigwinch_event;
-    struct sudo_event *sigfwd_event;
-    struct sigfwd_list sigfwd_list;
+    struct monitor_message_list monitor_messages;
 };
 
 /*
@@ -98,17 +98,16 @@ SLIST_HEAD(io_buffer_list, io_buffer);
 static char slavename[PATH_MAX];
 int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static bool foreground, pipeline;
-static bool tty_initialized;
 static int ttymode = TERM_COOKED;
 static sigset_t ttyblock;
 static struct io_buffer_list iobufs;
 static const char *utmp_user;
 
 static void del_io_events(bool nonblocking);
-static void sync_ttysize(int src, int dst);
+static void sync_ttysize(struct exec_closure_pty *ec);
 static int safe_close(int fd);
 static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
-static void check_foreground(pid_t ppgrp);
+static void check_foreground(struct exec_closure_pty *ec);
 static void add_io_events(struct sudo_event_base *evbase);
 static void schedule_signal(struct exec_closure_pty *ec, int signo);
 
@@ -161,10 +160,14 @@ pty_setup(uid_t uid, const char *tty)
     debug_return_bool(true);
 }
 
+/*
+ * Make the tty slave the controlling tty.
+ * This is only used by the monitor but slavename[] is static.
+ */
 int
 pty_make_controlling(void)
 {
-    if (io_fds[SFD_USERTTY] != -1) {
+    if (io_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
 	    return -1;
@@ -410,21 +413,15 @@ log_winchange(unsigned int rows, unsigned int cols)
  * the pty slave as needed.
  */
 static void
-check_foreground(pid_t ppgrp)
+check_foreground(struct exec_closure_pty *ec)
 {
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
 
     if (io_fds[SFD_USERTTY] != -1) {
-	/* Always check for window size changes. */
-	sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ec->ppgrp;
 
-	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
-	if (foreground) {
-	    if (!tty_initialized) {
-		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]))
-		    tty_initialized = true;
-	    }
-	}
+	/* Also check for window size changes. */
+	sync_ttysize(ec);
     }
 
     debug_return;
@@ -436,7 +433,7 @@ check_foreground(pid_t ppgrp)
  * foreground or SIGCONT_BG if it is a background process.
  */
 static int
-suspend_sudo(int signo, pid_t ppgrp)
+suspend_sudo(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     struct sigaction sa, osa;
@@ -451,7 +448,7 @@ suspend_sudo(int signo, pid_t ppgrp)
 	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
 	if (!foreground)
-	    check_foreground(ppgrp);
+	    check_foreground(ec);
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
@@ -483,11 +480,11 @@ suspend_sudo(int signo, pid_t ppgrp)
 		sudo_warn(U_("unable to set handler for signal %d"), signo);
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
-	if (killpg(ppgrp, signo) != 0)
-	    sudo_warn("killpg(%d, SIG%s)", (int)ppgrp, signame);
+	if (killpg(ec->ppgrp, signo) != 0)
+	    sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
 
 	/* Check foreground/background status on resume. */
-	check_foreground(ppgrp);
+	check_foreground(ec);
 
 	/*
 	 * We always resume the command in the foreground if sudo itself
@@ -805,12 +802,35 @@ pty_close(struct command_status *cstat)
 }
 
 /*
+ * Send command status to the monitor (signal or window size change).
+ */
+static void
+send_command_status(struct exec_closure_pty *ec, int type, int val)
+{
+    struct monitor_message *msg;
+    debug_decl(send_command, SUDO_DEBUG_EXEC)
+
+    if ((msg = calloc(1, sizeof(*msg))) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    msg->cstat.type = type;
+    msg->cstat.val = val;
+    TAILQ_INSERT_TAIL(&ec->monitor_messages, msg, entries);
+
+    if (sudo_ev_add(ec->evbase, ec->fwdchannel_event, NULL, true) == -1)
+	sudo_fatal(U_("unable to add event to queue"));
+
+    /* Restart event loop to send the command immediately. */
+    sudo_ev_loopcontinue(ec->evbase);
+
+    debug_return;
+}
+
+/*
  * Schedule a signal to be forwarded.
  */
 static void
 schedule_signal(struct exec_closure_pty *ec, int signo)
 {
-    struct sigforward *sigfwd;
     char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC)
 
@@ -822,16 +842,7 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
 	snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for command", signame);
 
-    if ((sigfwd = calloc(1, sizeof(*sigfwd))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    sigfwd->signo = signo;
-    TAILQ_INSERT_TAIL(&ec->sigfwd_list, sigfwd, entries);
-
-    if (sudo_ev_add(ec->evbase, ec->sigfwd_event, NULL, true) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
-
-    /* Restart event loop to service signal immediately. */
-    sudo_ev_loopcontinue(ec->evbase);
+    send_command_status(ec, CMD_SIGNO, signo);
 
     debug_return;
 }
@@ -894,7 +905,7 @@ backchannel_cb(int fd, int what, void *v)
 		/* Suspend parent and tell monitor how to resume on return. */
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "command stopped, suspending parent");
-		signo = suspend_sudo(WSTOPSIG(cstat.val), ec->ppgrp);
+		signo = suspend_sudo(ec, WSTOPSIG(cstat.val));
 		schedule_signal(ec, signo);
 		/* Re-enable I/O events */
 		add_io_events(ec->evbase);
@@ -962,7 +973,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
     if (WIFSTOPPED(status)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "monitor stopped, suspending sudo");
-	n = suspend_sudo(WSTOPSIG(status), ec->ppgrp);
+	n = suspend_sudo(ec, WSTOPSIG(status));
 	kill(pid, SIGCONT);
 	schedule_signal(ec, n);
 	/* Re-enable I/O events */
@@ -1005,7 +1016,7 @@ signal_cb_pty(int signo, int what, void *v)
 	handle_sigchld_pty(ec);
 	break;
     case SIGWINCH:
-	sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
+	sync_ttysize(ec);
 	break;
     default:
 	/*
@@ -1032,41 +1043,52 @@ signal_cb_pty(int signo, int what, void *v)
 }
 
 /*
- * Forward signals in sigfwd_list to the monitor so it can
+ * Forward signals in monitor_messages to the monitor so it can
  * deliver them to the command.
  */
 static void
-sigfwd_cb(int sock, int what, void *v)
+fwdchannel_cb(int sock, int what, void *v)
 {
     struct exec_closure_pty *ec = v;
     char signame[SIG2STR_MAX];
-    struct sigforward *sigfwd;
-    struct command_status cstat;
+    struct monitor_message *msg;
     ssize_t nsent;
-    debug_decl(sigfwd_cb, SUDO_DEBUG_EXEC)
+    debug_decl(fwdchannel_cb, SUDO_DEBUG_EXEC)
 
-    while ((sigfwd = TAILQ_FIRST(&ec->sigfwd_list)) != NULL) {
-	if (sigfwd->signo == SIGCONT_FG)
-	    strlcpy(signame, "CONT_FG", sizeof(signame));
-	else if (sigfwd->signo == SIGCONT_BG)
-	    strlcpy(signame, "CONT_BG", sizeof(signame));
-	else if (sig2str(sigfwd->signo, signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", sigfwd->signo);
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "sending SIG%s to monitor over backchannel", signame);
-	cstat.type = CMD_SIGNO;
-	cstat.val = sigfwd->signo;
-	TAILQ_REMOVE(&ec->sigfwd_list, sigfwd, entries);
-	free(sigfwd);
-	nsent = send(sock, &cstat, sizeof(cstat), 0);
-	if (nsent != sizeof(cstat)) {
+    while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
+	switch (msg->cstat.type) {
+	case CMD_SIGNO:
+	    if (msg->cstat.val == SIGCONT_FG)
+		strlcpy(signame, "CONT_FG", sizeof(signame));
+	    else if (msg->cstat.val == SIGCONT_BG)
+		strlcpy(signame, "CONT_BG", sizeof(signame));
+	    else if (sig2str(msg->cstat.val, signame) == -1)
+		snprintf(signame, sizeof(signame), "%d", msg->cstat.val);
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"sending SIG%s to monitor over backchannel", signame);
+	    break;
+	case CMD_TTYWINCH:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "sending window size change "
+		"to monitor over backchannelL %d x %d",
+		msg->cstat.val & 0xffff, (msg->cstat.val >> 16) & 0xffff);
+	    break;
+	default:
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"sending cstat type %d, value %d to monitor over backchannel",
+		msg->cstat.type, msg->cstat.val);
+	    break;
+	}
+	TAILQ_REMOVE(&ec->monitor_messages, msg, entries);
+	nsent = send(sock, &msg->cstat, sizeof(msg->cstat), 0);
+	if (nsent != sizeof(msg->cstat)) {
 	    if (errno == EPIPE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "broken pipe writing to monitor over backchannel");
-		/* Other end of socket gone, empty out sigfwd_list. */
-		while ((sigfwd = TAILQ_FIRST(&ec->sigfwd_list)) != NULL) {
-		    TAILQ_REMOVE(&ec->sigfwd_list, sigfwd, entries);
-		    free(sigfwd);
+		/* Other end of socket gone, empty out monitor_messages. */
+		free(msg);
+		while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
+		    TAILQ_REMOVE(&ec->monitor_messages, msg, entries);
+		    free(msg);
 		}
 		/* XXX - need new CMD_ type for monitor errors. */
 		ec->cstat->type = CMD_ERRNO;
@@ -1075,6 +1097,7 @@ sigfwd_cb(int sock, int what, void *v)
 	    }
 	    break;
 	}
+	free(msg);
     }
 }
 
@@ -1094,7 +1117,7 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->ppgrp = ppgrp;
     ec->cstat = cstat;
     ec->details = details;
-    TAILQ_INIT(&ec->sigfwd_list);
+    TAILQ_INIT(&ec->monitor_messages);
 
     /* Setup event base and events. */
     ec->evbase = sudo_ev_base_alloc();
@@ -1182,9 +1205,9 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
 	sudo_fatal(U_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
-    ec->sigfwd_event = sudo_ev_alloc(backchannel,
-	SUDO_EV_WRITE, sigfwd_cb, ec);
-    if (ec->sigfwd_event == NULL)
+    ec->fwdchannel_event = sudo_ev_alloc(backchannel,
+	SUDO_EV_WRITE, fwdchannel_cb, ec);
+    if (ec->fwdchannel_event == NULL)
 	sudo_fatal(NULL);
 
     /* Set the default event base. */
@@ -1203,6 +1226,7 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
 
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->backchannel_event);
+    sudo_ev_free(ec->fwdchannel_event);
     sudo_ev_free(ec->sigint_event);
     sudo_ev_free(ec->sigquit_event);
     sudo_ev_free(ec->sigtstp_event);
@@ -1213,7 +1237,6 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
     sudo_ev_free(ec->sigusr2_event);
     sudo_ev_free(ec->sigchld_event);
     sudo_ev_free(ec->sigwinch_event);
-    sudo_ev_free(ec->sigfwd_event);
 
     debug_return;
 }
@@ -1229,7 +1252,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
-    struct sigforward *sigfwd, *sigfwd_next;
+    struct monitor_message *msg;
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
     sigset_t set, oset;
@@ -1393,13 +1416,12 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	}
     }
 
-    /* Set pty window size. */
-    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
-
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
-	if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]))
-	    tty_initialized = true;
+	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+                "%s: unable to copy terminal settings to pty", __func__);
+	}
 
 	/* Start out in raw mode unless part of a pipeline or backgrounded. */
 	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
@@ -1505,8 +1527,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 
     /* Free things up. */
     free_exec_closure_pty(&ec);
-    TAILQ_FOREACH_SAFE(sigfwd, &ec.sigfwd_list, entries, sigfwd_next) {
-	free(sigfwd);
+    while ((msg = TAILQ_FIRST(&ec.monitor_messages)) != NULL) {
+	TAILQ_REMOVE(&ec.monitor_messages, msg, entries);
+	free(msg);
     }
     debug_return_bool(true);
 }
@@ -1651,31 +1674,30 @@ del_io_events(bool nonblocking)
 }
 
 /*
- * Propagates tty size change signals to pty being used by the command
- * and passes new window size to the I/O plugin.
+ * Check for tty size changes.
+ * Passes the new window size to the I/O plugin and to the monitor.
  */
 static void
-sync_ttysize(int src, int dst)
+sync_ttysize(struct exec_closure_pty *ec)
 {
-    struct winsize wsize, owsize;
-    pid_t pgrp;
+    static struct winsize owsize;
+    struct winsize wsize;
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
 
-    if (ioctl(src, TIOCGWINSZ, &wsize) == 0 &&
-	ioctl(dst, TIOCGWINSZ, &owsize) == 0 &&
-	(wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col)) {
+    if (ioctl(io_fds[SFD_USERTTY], TIOCGWINSZ, &wsize) == 0) {
+	if (wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col) {
+	    const unsigned int wsize_packed = (wsize.ws_row & 0xffff) |
+		((wsize.ws_col & 0xffff) << 16);
 
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "window size change %dx%d -> %dx%d",
-	    owsize.ws_col, owsize.ws_row, wsize.ws_col, wsize.ws_row);
-
-	(void)ioctl(dst, TIOCSWINSZ, &wsize);
-	if ((pgrp = tcgetpgrp(dst)) != -1)
-	    killpg(pgrp, SIGWINCH);
-
-	/* Only log window size changes, not the initial setting. */
-	if (tty_initialized)
+	    /* Log window change event. */
 	    log_winchange(wsize.ws_row, wsize.ws_col);
+
+	    /* Send window change event to monitor process. */
+	    send_command_status(ec, CMD_TTYWINCH, wsize_packed);
+
+	    /* Update old value. */
+	    owsize = wsize;
+	}
     }
 
     debug_return;
