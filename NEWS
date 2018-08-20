@@ -1,9 +1,9 @@
 What's new in Sudo 1.8.25
 
- * Fixed formatting of I/O log timing file entries on systems without
-   a C99-compatible snprintf() function.  Our replacement snprintf()
-   doesn't support floating point so we can't use the "%f" format
-   directive.
+ * Fixed a bug introduced in sudo 1.8.20 that broke formatting of
+   I/O log timing file entries on systems without a C99-compatible
+   snprintf() function.  Our replacement snprintf() doesn't support
+   floating point so we can't use the "%f" format directive.
 
  * I/O log timing file entries now use a monotonic timer and include
    nanosecond precision.  A monotonic timer that does not increment
