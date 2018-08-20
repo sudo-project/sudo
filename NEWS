@@ -1,3 +1,24 @@
+What's new in Sudo 1.8.25
+
+ * Fixed formatting of I/O log timing file entries on systems without
+   a C99-compatible snprintf() function.  Our replacement snprintf()
+   doesn't support floating point so we can't use the "%f" format
+   directive.
+
+ * I/O log timing file entries now use a monotonic timer and include
+   nanosecond precision.  A monotonic timer that does not increment
+   while the system is sleeping is used where available.
+
+ * Fixed a bug introduced in sudo 1.8.24 where sudoNotAfter in the LDAP
+   backend was not being properly parsed.  Bug #845.
+
+ * When sudo runs a command in a pseudo-tty, the slave device is
+   now closed in the main process immediately after starting the
+   monitor process.  This removes the need for an AIX-specific
+   workaround that was added in sudo 1.8.24.
+
+ * Added support for monotonic timers on HP-UX.
+
 What's new in Sudo 1.8.24
 
  * The LDAP and SSS back-ends now use the same rule evaluation code
