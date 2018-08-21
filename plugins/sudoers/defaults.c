@@ -166,7 +166,7 @@ dump_defaults(void)
 		    /* display timespec in minutes as a double */
 		    double d = cur->sd_un.tspec.tv_sec +
 			(cur->sd_un.tspec.tv_nsec / 1000000000.0);
-		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d * 60.0);
+		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d / 60.0);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		}
