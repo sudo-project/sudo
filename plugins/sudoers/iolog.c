@@ -40,12 +40,6 @@
 #include "sudoers.h"
 #include "iolog.h"
 
-struct script_buf {
-    int len; /* buffer length (how much read in) */
-    int off; /* write position (how much already consumed) */
-    char buf[16 * 1024];
-};
-
 /* XXX - separate sudoers.h and iolog.h? */
 #undef runas_pw
 #undef runas_gr
