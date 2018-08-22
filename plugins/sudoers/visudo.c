@@ -721,7 +721,8 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
     } else {
 	if (chown(sp->tpath, sudoers_uid, sudoers_gid) != 0) {
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
-		sp->tpath, sudoers_uid, sudoers_gid);
+		sp->tpath, (unsigned int)sudoers_uid,
+		(unsigned int)sudoers_gid);
 	    goto done;
 	}
 	if (chmod(sp->tpath, sudoers_mode) != 0) {
@@ -878,7 +879,7 @@ check_owner(const char *path, bool quiet)
 	    if (!quiet) {
 		fprintf(stderr,
 		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
-		    path, sudoers_uid, sudoers_gid);
+		    path, (unsigned int)sudoers_uid, (unsigned int)sudoers_gid);
 		}
 	}
 	if ((sb.st_mode & ALLPERMS) != sudoers_mode) {

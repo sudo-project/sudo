@@ -85,7 +85,7 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
     if (!ISSET(key->flags, TS_ANYUID) && entry->auth_uid != key->auth_uid) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "%s:%u record uid mismatch (want %u, got %u)", __func__, recno,
-	    key->auth_uid, entry->auth_uid);
+	    (unsigned int)key->auth_uid, (unsigned int)entry->auth_uid);
 	debug_return_bool(false);
     }
     if (entry->type != key->type) {
