@@ -583,7 +583,7 @@ getentropy_fallback(void *buf, size_t len)
 		errno = save_errno;
 		ret = 0;		/* satisfied */
 	} else {
-		errno == EIO;
+		errno = EIO;
 	}
 done:
 	sudo_digest_free(ctx);
