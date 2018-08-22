@@ -2058,6 +2058,8 @@ case "$host" in
 #include <linux/seccomp.h>
 #include <linux/filter.h>
 		])
+		# We call getrandom via syscall(3) in case it is not in libc
+		AC_CHECK_HEADERS([linux/random.h])
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd

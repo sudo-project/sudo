@@ -467,6 +467,9 @@
 /* Define to 1 to enable Linux audit support. */
 #undef HAVE_LINUX_AUDIT
 
+/* Define to 1 if you have the <linux/random.h> header file. */
+#undef HAVE_LINUX_RANDOM_H
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 

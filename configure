@@ -15953,6 +15953,19 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_SECCOMP_SET_MODE_FILTER $ac_have_decl
 _ACEOF
 
+		# We call getrandom via syscall(3) in case it is not in libc
+		for ac_header in linux/random.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "linux/random.h" "ac_cv_header_linux_random_h" "$ac_includes_default"
+if test "x$ac_cv_header_linux_random_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LINUX_RANDOM_H 1
+_ACEOF
+
+fi
+
+done
+
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
