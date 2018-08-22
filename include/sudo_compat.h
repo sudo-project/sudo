@@ -24,9 +24,12 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#ifndef HAVE_MEMSET_S
+#if !defined(HAVE_MEMSET_S) && !defined(rsize_t)
 # include <stddef.h>	/* for rsize_t */
-#endif /* HAVE_MEMSET_S */
+# ifdef HAVE_STRING_H
+#  include <string.h>	/* for rsize_t on AIX */
+# endif /* HAVE_STRING_H */
+#endif /* HAVE_MEMSET_S && rsize_t */
 
 /*
  * Macros and functions that may be missing on some operating systems.
