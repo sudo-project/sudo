@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2017
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,12 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <stddef.h>	/* for rsize_t */
+#ifndef HAVE_MEMSET_S
+# include <stddef.h>	/* for rsize_t */
+# ifdef HAVE_STRING_H
+#  include <string.h>	/* for rsize_t on some systems */
+# endif /* HAVE_STRING_H */
+#endif /* HAVE_MEMSET_S */
 
 /*
  * Macros and functions that may be missing on some operating systems.
