@@ -967,6 +967,7 @@ with_selinux
 enable_sasl
 enable_timestamp_type
 enable_offensive_insults
+enable_package_build
 enable_gss_krb5_ccache_name
 enable_shared
 enable_static
@@ -1655,6 +1656,7 @@ Optional Features:
                           ppid or tty.
   --enable-offensive-insults
                           Enable potentially offensive sudo insults.
+  --enable-package-build  Enable options for package building.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -6858,6 +6860,14 @@ if test "$enable_offensive_insults" = "yes"; then
     $as_echo "#define OFFENSIVE_INSULTS 1" >>confdefs.h
 
 fi
+
+# Check whether --enable-package_build was given.
+if test "${enable_package_build+set}" = set; then :
+  enableval=$enable_package_build;
+else
+  enable_package_build=no
+fi
+
 
 # Check whether --enable-gss_krb5_ccache_name was given.
 if test "${enable_gss_krb5_ccache_name+set}" = set; then :
@@ -15495,14 +15505,18 @@ fi
 
 		# getline() may or may ont be present on AIX <= 6.1.
 		# bos610 is missing getline/getdelim but bos61J has it.
-		if test $OSMAJOR -le 6; then
-		    ac_cv_func_getline=no
+		if test "$enable_package_build" = "yes"; then
+		    if test $OSMAJOR -le 6; then
+			ac_cv_func_getline=no
+		    fi
 		fi
 
 		# memset_s() may or may ont be present on AIX <= 7.1.
 		# bos710 is missing memset_s but bos71L has it.
-		if test $OSMAJOR -le 7; then
-		    ac_cv_func_memset_s=no
+		if test "$enable_package_build" = "yes"; then
+		    if test $OSMAJOR -le 7; then
+			ac_cv_func_memset_s=no
+		    fi
 		fi
 
 		# Remove timedir on boot, AIX does not have /var/run

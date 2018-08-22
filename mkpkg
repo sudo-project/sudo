@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -146,6 +146,10 @@ if [ "$crossbuild" = "false" ]; then
 	    ;;
     esac
 fi
+
+# Give configure a hint that we are building a package.
+# Some libc functions are only available on certain OS revisions.
+configure_opts="${configure_opts}${configure_opts+$tab}--enable-package-build"
 
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.

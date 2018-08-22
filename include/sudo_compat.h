@@ -26,9 +26,6 @@
 #include <stdarg.h>
 #ifndef HAVE_MEMSET_S
 # include <stddef.h>	/* for rsize_t */
-# ifdef HAVE_STRING_H
-#  include <string.h>	/* for rsize_t on some systems */
-# endif /* HAVE_STRING_H */
 #endif /* HAVE_MEMSET_S */
 
 /*

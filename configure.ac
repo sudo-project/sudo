@@ -1603,6 +1603,10 @@ if test "$enable_offensive_insults" = "yes"; then
     AC_DEFINE(OFFENSIVE_INSULTS)
 fi
 
+AC_ARG_ENABLE(package_build,
+[AS_HELP_STRING([--enable-package-build], [Enable options for package building.])],
+[], [enable_package_build=no])
+
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
 dnl
@@ -1824,14 +1828,18 @@ case "$host" in
 
 		# getline() may or may ont be present on AIX <= 6.1.
 		# bos610 is missing getline/getdelim but bos61J has it.
-		if test $OSMAJOR -le 6; then
-		    ac_cv_func_getline=no
+		if test "$enable_package_build" = "yes"; then
+		    if test $OSMAJOR -le 6; then
+			ac_cv_func_getline=no
+		    fi
 		fi
 
 		# memset_s() may or may ont be present on AIX <= 7.1.
 		# bos710 is missing memset_s but bos71L has it.
-		if test $OSMAJOR -le 7; then
-		    ac_cv_func_memset_s=no
+		if test "$enable_package_build" = "yes"; then
+		    if test $OSMAJOR -le 7; then
+			ac_cv_func_memset_s=no
+		    fi
 		fi
 
 		# Remove timedir on boot, AIX does not have /var/run
