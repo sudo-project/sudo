@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)

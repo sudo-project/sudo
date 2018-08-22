@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2017
+ * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
