@@ -55,9 +55,6 @@ static int
 audit_sudo_selected(int sorf)
 {
 	auditinfo_addr_t ainfo_addr;
-#ifdef BSM_AUDIT_COMPAT
-	auditinfo_t ainfo;
-#endif
 	struct au_mask *mask;
 	int rc;
 	debug_decl(audit_sudo_selected, SUDOERS_DEBUG_AUDIT)
@@ -65,6 +62,8 @@ audit_sudo_selected(int sorf)
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
 #ifdef BSM_AUDIT_COMPAT
 		if (errno == ENOSYS) {
+			auditinfo_t ainfo;
+
 			/* Fall back to older BSM API. */
 			if (getaudit(&ainfo) < 0) {
 				sudo_warn("getaudit");
@@ -103,7 +102,6 @@ int
 bsm_audit_success(char *exec_args[])
 {
 	auditinfo_addr_t ainfo_addr;
-	auditinfo_t ainfo;
 	token_t *tok;
 	au_id_t auid;
 	long au_cond;
@@ -143,6 +141,8 @@ bsm_audit_success(char *exec_args[])
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
 #ifdef BSM_AUDIT_COMPAT
 	} else if (errno == ENOSYS) {
+		auditinfo_t ainfo;
+
 		/*
 		 * NB: We should probably watch out for ERANGE here.
 		 */
@@ -193,7 +193,6 @@ int
 bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 {
 	auditinfo_addr_t ainfo_addr;
-	auditinfo_t ainfo;
 	char text[256];
 	token_t *tok;
 	long au_cond;
@@ -229,6 +228,8 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
 #ifdef BSM_AUDIT_COMPAT
 	} else if (errno == ENOSYS) {
+		auditinfo_t ainfo;
+
 		if (getaudit(&ainfo) < 0) {
 			sudo_warn("getaudit");
 			debug_return_int(-1);

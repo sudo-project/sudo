@@ -102,7 +102,7 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
 	if (entry->u.ppid != key->u.ppid) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"%s:%u record ppid mismatch (want %d, got %d)", __func__, recno,
-		key->u.ppid, entry->u.ppid);
+		(int)key->u.ppid, (int)entry->u.ppid);
 	    debug_return_bool(false);
 	}
 	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=)) {
