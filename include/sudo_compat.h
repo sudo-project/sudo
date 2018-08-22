@@ -23,7 +23,10 @@
 #define SUDO_COMPAT_H
 
 #include <stdio.h>
-#include <stdarg.h>
+#if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
+    !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
+# include <stdarg.h>
+#endif
 #if !defined(HAVE_MEMSET_S) && !defined(rsize_t)
 # include <stddef.h>	/* for rsize_t */
 # ifdef HAVE_STRING_H
