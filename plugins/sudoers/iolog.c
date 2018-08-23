@@ -778,12 +778,13 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
  */
 static bool
 write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
-    char * const argv[], struct timespec *now)
+    char * const argv[])
 {
+    time_t now;
     char * const *av;
     FILE *fp;
     int fd;
-    bool ret;
+    bool ret = true;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
@@ -799,7 +800,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	    (int)iolog_uid, (int)iolog_gid, pathbuf);
     }
 
-    fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
+    fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)time(&now),
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,
 	details->runas_gr ? details->runas_gr->gr_name : "",
 	details->tty ? details->tty : "unknown", details->lines, details->cols,
@@ -811,8 +812,12 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     }
     fputc('\n', fp);
     fflush(fp);
-
-    ret = !ferror(fp);
+    if (ferror(fp)) {
+	log_warning(SLOG_SEND_MAIL,
+	    N_("unable to write to I/O log file: %s"), strerror(errno));
+	warned = true;
+	ret = false;
+    }
     fclose(fp);
     debug_return_bool(ret);
 }
@@ -951,12 +956,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
 
     /* Write log file with user and command details. */
-    if (sudo_gettime_awake(&last_time) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to get time of day", __func__);
+    if (!write_info_log(pathbuf, len, &iolog_details, argv))
 	goto done;
-    }
-    write_info_log(pathbuf, len, &iolog_details, argv, &last_time);
 
     /* Create the timing and I/O log files. */
     for (i = 0; i < IOFD_MAX; i++) {
@@ -977,6 +978,12 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	sudoers_io.log_ttyin = NULL;
     if (!io_log_files[IOFD_TTYOUT].enabled)
 	sudoers_io.log_ttyout = NULL;
+
+    if (sudo_gettime_awake(&last_time) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	goto done;
+    }
 
     ret = true;
 
