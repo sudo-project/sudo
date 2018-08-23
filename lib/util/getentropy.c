@@ -35,7 +35,7 @@
 #endif
 #include <sys/stat.h>
 #include <sys/time.h>
-#ifdef HAVE_SYS_SYSCALL
+#ifdef HAVE_SYS_SYSCALL_H
 # include <sys/syscall.h>
 #endif
 #ifdef HAVE_LINUX_RANDOM_H
