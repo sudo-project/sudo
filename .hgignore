@@ -41,3 +41,4 @@ Makefile$
 
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|check_[a-z0-9_]+)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
+^plugins/sudoers/regress/iolog_plugin/iolog$

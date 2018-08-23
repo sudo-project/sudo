@@ -315,6 +315,8 @@ plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
 plugins/sudoers/iolog.h
 plugins/sudoers/iolog_path.c
+plugins/sudoers/iolog_util.c
+plugins/sudoers/iolog_util.h
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
 plugins/sudoers/ldap_util.c
@@ -461,6 +463,7 @@ plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/iolog_path/check_iolog_path.c
 plugins/sudoers/regress/iolog_path/data
+plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/logging/check_wrap.c
 plugins/sudoers/regress/logging/check_wrap.in
 plugins/sudoers/regress/logging/check_wrap.out.ok
