@@ -190,12 +190,12 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 int
 main(int argc, char *argv[], char *envp[])
 {
-    struct passwd pw, rpw;
+    struct passwd pw, rpw, *tpw;
     int rc, tests = 0, errors = 0;
     int cmnd_argc = 1;
     const char *iolog_dir;
-    char iolog_path[PATH_MAX];
-    char buf[1024];
+    char buf[1024], iolog_path[PATH_MAX];
+    char runas_gid[64], runas_uid[64];
     FILE *fp;
     char *cmnd_argv[] = {
 	"/usr/bin/id",
@@ -219,10 +219,8 @@ main(int argc, char *argv[], char *envp[])
 	"iolog_ttyout=true",
 	"iolog_compress=false",
 	"iolog_mode=0644",
-	"runas_gid=0",
-	"runas_egid=0",
-	"runas_uid=0",
-	"runas_euid=0",
+	runas_gid,
+	runas_uid,
 	NULL
     };
     char *settings[] = {
@@ -236,18 +234,30 @@ main(int argc, char *argv[], char *envp[])
 	usage();
     iolog_dir = argv[1];
 
+    /* Bare minimum to link. */
+    memset(&pw, 0, sizeof(pw));
+    memset(&rpw, 0, sizeof(rpw));
+    if ((tpw = getpwuid(0)) == NULL) {
+	if ((tpw = getpwnam("root")) == NULL)
+	    sudo_fatalx("unable to look up uid 0 or root");
+    }
+    rpw.pw_uid = tpw->pw_uid;
+    rpw.pw_gid = tpw->pw_gid;
+    sudo_user.pw = &pw;
+    sudo_user._runas_pw = &rpw;
+
+    /* Set runas uid/gid to root. */
+    snprintf(runas_uid, sizeof(runas_uid), "runas_uid=%u",
+	(unsigned int)rpw.pw_uid);
+    snprintf(runas_gid, sizeof(runas_gid), "runas_gid=%u",
+	(unsigned int)rpw.pw_gid);
+
     /* Set path to the iolog directory the user passed in. */
     snprintf(iolog_path, sizeof(iolog_path), "iolog_path=%s", iolog_dir);
 
     /* Set iolog uid/gid to invoking user. */
     iolog_uid = geteuid();
     iolog_gid = getegid();
-
-    /* Bare minimum to link. */
-    memset(&pw, 0, sizeof(pw));
-    memset(&rpw, 0, sizeof(rpw));
-    sudo_user.pw = &pw;
-    sudo_user._runas_pw = &rpw;
 
     /* Test open endpoint. */
     rc = sudoers_io.open(SUDO_API_VERSION, NULL, sudo_printf_int, settings,
