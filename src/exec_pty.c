@@ -1206,6 +1206,7 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
 static void
 free_exec_closure_pty(struct exec_closure_pty *ec)
 {
+    struct monitor_message *msg;
     debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC)
 
     sudo_ev_base_free(ec->evbase);
@@ -1222,6 +1223,11 @@ free_exec_closure_pty(struct exec_closure_pty *ec)
     sudo_ev_free(ec->sigchld_event);
     sudo_ev_free(ec->sigwinch_event);
 
+    while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
+	TAILQ_REMOVE(&ec->monitor_messages, msg, entries);
+	free(msg);
+    }
+
     debug_return;
 }
 
@@ -1236,7 +1242,6 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
-    struct monitor_message *msg;
     struct exec_closure_pty ec = { 0 };
     struct plugin_container *plugin;
     sigset_t set, oset;
@@ -1530,10 +1535,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 
     /* Free things up. */
     free_exec_closure_pty(&ec);
-    while ((msg = TAILQ_FIRST(&ec.monitor_messages)) != NULL) {
-	TAILQ_REMOVE(&ec.monitor_messages, msg, entries);
-	free(msg);
-    }
+
     debug_return_bool(true);
 }
 
