@@ -28,7 +28,7 @@ Makefile$
 ^pathnames\.h$
 ^src/sudo$
 ^src/sesh$
-^src/check_ttyname$
+^src/check_(noexec|ttyname)$
 ^src/sudo_usage\.h$
 
 ^lib/util/mksiglist$
