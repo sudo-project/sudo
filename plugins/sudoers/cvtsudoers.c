@@ -849,10 +849,10 @@ print_defaults_sudoers(struct sudo_lbuf *lbuf, bool expand_aliases)
 }
 
 static int
-print_alias_sudoers(void *v1, void *v2)
+print_alias_sudoers(struct sudoers_parse_tree *parse_tree, struct alias *a,
+    void *v)
 {
-    struct alias *a = v1;
-    struct sudo_lbuf *lbuf = v2;
+    struct sudo_lbuf *lbuf = v;
     struct member *m;
     debug_decl(print_alias_sudoers, SUDOERS_DEBUG_UTIL)
 
@@ -861,7 +861,7 @@ print_alias_sudoers(void *v1, void *v2)
     TAILQ_FOREACH(m, &a->members, entries) {
 	if (m != TAILQ_FIRST(&a->members))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, &parsed_policy, m, NULL, UNSPEC);
+	sudoers_format_member(lbuf, parse_tree, m, NULL, UNSPEC);
     }
     sudo_lbuf_append(lbuf, "\n");
 
@@ -1199,11 +1199,11 @@ alias_remove_unused(void)
 /*
  * Prune out non-matching entries from user and host aliases.
  */
-int
-alias_prune_helper(void *v, void *cookie)
+static int
+alias_prune_helper(struct sudoers_parse_tree *parse_tree, struct alias *a,
+    void *v)
 {
-    struct alias *a = v;
-    struct cvtsudoers_config *conf = cookie;
+    struct cvtsudoers_config *conf = v;
 
     /* XXX - misue of these functions */
     switch (a->type) {

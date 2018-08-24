@@ -519,11 +519,10 @@ print_member_json(FILE *fp, struct member *m, enum word_type word_type,
  * Callback for alias_apply() to print an alias entry if it matches
  * the type specified in the closure.
  */
-int
-print_alias_json(void *v1, void *v2)
+static int
+print_alias_json(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    struct alias *a = v1;
-    struct json_alias_closure *closure = v2;
+    struct json_alias_closure *closure = v;
     struct member *m;
     debug_decl(print_alias_json, SUDOERS_DEBUG_UTIL)
 

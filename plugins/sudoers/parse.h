@@ -276,7 +276,7 @@ const char *alias_type_to_string(int alias_type);
 struct alias *alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type);
 struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, char *name, int type);
 bool alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases);
-void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(void *, void *), void *cookie);
+void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);
 

@@ -90,7 +90,7 @@ static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool);
-static int print_unused(void *, void *);
+static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(char *, char **);
 static void parse_sudoers_options(void);
@@ -1131,10 +1131,8 @@ check_aliases(bool strict, bool quiet)
 }
 
 static int
-print_unused(void *v1, void *v2)
+print_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    struct alias *a = (struct alias *)v1;
-
     fprintf(stderr, U_("Warning: %s:%d unused %s \"%s\""),
 	a->file, a->lineno, alias_type_to_string(a->type), a->name);
     fputc('\n', stderr);

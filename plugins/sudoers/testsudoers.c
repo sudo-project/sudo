@@ -491,10 +491,9 @@ print_defaults(struct sudo_lbuf *lbuf)
 }
 
 static int
-print_alias(void *v1, void *v2)
+print_alias(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    struct alias *a = v1;
-    struct sudo_lbuf *lbuf = v2;
+    struct sudo_lbuf *lbuf = v;
     struct member *m;
     debug_decl(print_alias, SUDOERS_DEBUG_UTIL)
 
@@ -503,7 +502,7 @@ print_alias(void *v1, void *v2)
     TAILQ_FOREACH(m, &a->members, entries) {
 	if (m != TAILQ_FIRST(&a->members))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, &parsed_policy, m, NULL, UNSPEC);
+	sudoers_format_member(lbuf, parse_tree, m, NULL, UNSPEC);
     }
     sudo_lbuf_append(lbuf, "\n");
 
