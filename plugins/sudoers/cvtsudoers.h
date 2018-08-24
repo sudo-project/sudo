@@ -94,11 +94,11 @@ struct cvtsudoers_string *cvtsudoers_string_alloc(const char *s);
 void cvtsudoers_string_free(struct cvtsudoers_string *ls);
 
 /* cvtsudoers_json.c */
-bool convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf);
+bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_ldif.c */
-bool convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf);
-bool parse_ldif(const char *input_file, struct cvtsudoers_config *conf);
+bool convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
+bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
 void get_hostname(void);
 
 /* cvtsudoers_pwutil.c */

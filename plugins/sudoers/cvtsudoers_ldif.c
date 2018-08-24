@@ -157,7 +157,8 @@ print_options_ldif(FILE *fp, struct defaults_list *options)
  * Print global Defaults in a single sudoRole object.
  */
 static bool
-print_global_defaults_ldif(FILE *fp, const char *base)
+print_global_defaults_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    const char *base)
 {
     unsigned int count = 0;
     struct sudo_lbuf lbuf;
@@ -167,14 +168,14 @@ print_global_defaults_ldif(FILE *fp, const char *base)
 
     sudo_lbuf_init(&lbuf, NULL, 0, NULL, 80);
 
-    TAILQ_FOREACH(opt, &parsed_policy.defaults, entries) {
+    TAILQ_FOREACH(opt, &parse_tree->defaults, entries) {
 	/* Skip bound Defaults (unsupported). */
 	if (opt->type == DEFAULTS) {
 	    count++;
 	} else {
 	    lbuf.len = 0;
 	    sudo_lbuf_append(&lbuf, "# ");
-	    sudoers_format_default_line(&lbuf, &parsed_policy, opt, false, true);
+	    sudoers_format_default_line(&lbuf, parse_tree, opt, false, true);
 	    fprintf(fp, "# Unable to translate %s:%d\n%s\n",
 		opt->file, opt->lineno, lbuf.buf);
 	}
@@ -195,7 +196,7 @@ print_global_defaults_ldif(FILE *fp, const char *base)
     print_attribute_ldif(fp, "cn", "defaults");
     print_attribute_ldif(fp, "description", "Default sudoOption's go here");
 
-    print_options_ldif(fp, &parsed_policy.defaults);
+    print_options_ldif(fp, &parse_tree->defaults);
     putc('\n', fp);
 
     debug_return_bool(!ferror(fp));
@@ -206,8 +207,8 @@ print_global_defaults_ldif(FILE *fp, const char *base)
  * See print_member_int() in parse.c.
  */
 static void
-print_member_ldif(FILE *fp, char *name, int type, bool negated,
-    int alias_type, const char *attr_name)
+print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
+    int type, bool negated, int alias_type, const char *attr_name)
 {
     struct alias *a;
     struct member *m;
@@ -239,9 +240,9 @@ print_member_ldif(FILE *fp, char *name, int type, bool negated,
 	free(attr_val);
 	break;
     case ALIAS:
-	if ((a = alias_get(&parsed_policy, name, alias_type)) != NULL) {
+	if ((a = alias_get(parse_tree, name, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
-		print_member_ldif(fp, m->name, m->type,
+		print_member_ldif(fp, parse_tree, m->name, m->type,
 		    negated ? !m->negated : m->negated, alias_type, attr_name);
 	    }
 	    alias_put(a);
@@ -268,7 +269,8 @@ print_member_ldif(FILE *fp, char *name, int type, bool negated,
  * merge adjacent entries that are identical in all but the command.
  */
 static void
-print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, struct defaults_list *options)
+print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct cmndspec *cs, struct cmndspec **nextp, struct defaults_list *options)
 {
     struct cmndspec *next = *nextp;
     struct member *m;
@@ -280,7 +282,7 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
     /* Print runasuserlist as sudoRunAsUser attributes */
     if (cs->runasuserlist != NULL) {
 	TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-	    print_member_ldif(fp, m->name, m->type, m->negated,
+	    print_member_ldif(fp, parse_tree, m->name, m->type, m->negated,
 		RUNASALIAS, "sudoRunAsUser");
 	}
     }
@@ -288,7 +290,7 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
     /* Print runasgrouplist as sudoRunAsGroup attributes */
     if (cs->runasgrouplist != NULL) {
 	TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-	    print_member_ldif(fp, m->name, m->type, m->negated,
+	    print_member_ldif(fp, parse_tree, m->name, m->type, m->negated,
 		RUNASALIAS, "sudoRunAsGroup");
 	}
     }
@@ -437,8 +439,8 @@ print_cmndspec_ldif(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp, stru
 #endif /* HAVE_SELINUX */
 	    ;
 
-	print_member_ldif(fp, cs->cmnd->name, cs->cmnd->type, cs->cmnd->negated,
-	    CMNDALIAS, "sudoCommand");
+	print_member_ldif(fp, parse_tree, cs->cmnd->name, cs->cmnd->type,
+	    cs->cmnd->negated, CMNDALIAS, "sudoCommand");
 	if (last_one)
 	    break;
 	cs = next;
@@ -532,7 +534,8 @@ bad:
  * Print a single User_Spec.
  */
 static bool
-print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *conf)
+print_userspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct userspec *us, struct cvtsudoers_config *conf)
 {
     struct privilege *priv;
     struct member *m;
@@ -568,16 +571,16 @@ print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *con
 	    free(dn);
 
 	    TAILQ_FOREACH(m, &us->users, entries) {
-		print_member_ldif(fp, m->name, m->type, m->negated,
+		print_member_ldif(fp, parse_tree, m->name, m->type, m->negated,
 		    USERALIAS, "sudoUser");
 	    }
 
 	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
-		print_member_ldif(fp, m->name, m->type, m->negated,
+		print_member_ldif(fp, parse_tree, m->name, m->type, m->negated,
 		    HOSTALIAS, "sudoHost");
 	    }
 
-	    print_cmndspec_ldif(fp, cs, &next, &priv->defaults);
+	    print_cmndspec_ldif(fp, parse_tree, cs, &next, &priv->defaults);
 
 	    if (conf->sudo_order != 0) {
 		char numbuf[(((sizeof(conf->sudo_order) * 8) + 2) / 3) + 2];
@@ -596,13 +599,14 @@ print_userspec_ldif(FILE *fp, struct userspec *us, struct cvtsudoers_config *con
  * Print User_Specs.
  */
 static bool
-print_userspecs_ldif(FILE *fp, struct cvtsudoers_config *conf)
+print_userspecs_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct cvtsudoers_config *conf)
 {
     struct userspec *us;
     debug_decl(print_userspecs_ldif, SUDOERS_DEBUG_UTIL)
  
-    TAILQ_FOREACH(us, &parsed_policy.userspecs, entries) {
-	if (!print_userspec_ldif(fp, us, conf))
+    TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
+	if (!print_userspec_ldif(fp, parse_tree, us, conf))
 	    debug_return_bool(false);
     }
     debug_return_bool(true);
@@ -612,7 +616,8 @@ print_userspecs_ldif(FILE *fp, struct cvtsudoers_config *conf)
  * Export the parsed sudoers file in LDIF format.
  */
 bool
-convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf)
+convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree,
+    const char *output_file, struct cvtsudoers_config *conf)
 {
     bool ret = true;
     FILE *output_fp = stdout;
@@ -632,11 +637,11 @@ convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf)
 
     /* Dump global Defaults in LDIF format. */
     if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS))
-	print_global_defaults_ldif(output_fp, conf->sudoers_base);
+	print_global_defaults_ldif(output_fp, parse_tree, conf->sudoers_base);
 
     /* Dump User_Specs in LDIF format, expanding Aliases. */
     if (!ISSET(conf->suppress, SUPPRESS_PRIVS))
-	print_userspecs_ldif(output_fp, conf);
+	print_userspecs_ldif(output_fp, parse_tree, conf);
 
     /* Clean up. */
     rbdestroy(seen_users, seen_user_free);
@@ -834,7 +839,8 @@ role_order_cmp(const void *va, const void *vb)
  * Parse list of sudoOption and store in global defaults list.
  */
 static void
-ldif_store_options(struct cvtsudoers_str_list *options)
+ldif_store_options(struct sudoers_parse_tree *parse_tree,
+    struct cvtsudoers_str_list *options)
 {
     struct defaults *d;
     struct cvtsudoers_string *ls;
@@ -860,7 +866,7 @@ ldif_store_options(struct cvtsudoers_str_list *options)
 		    U_("unable to allocate memory"));
 	    }
 	}
-	TAILQ_INSERT_TAIL(&parsed_policy.defaults, d, entries);
+	TAILQ_INSERT_TAIL(&parse_tree->defaults, d, entries);
     }
     debug_return;
 }
@@ -913,8 +919,9 @@ str_list_cache(struct rbtree *cache, struct cvtsudoers_str_list **strlistp)
  * data structures.
  */
 static void
-role_to_sudoers(struct sudo_role *role, bool store_options,
-    bool reuse_userspec, bool reuse_privilege, bool reuse_runas)
+role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
+    bool store_options, bool reuse_userspec, bool reuse_privilege,
+    bool reuse_runas)
 {
     struct privilege *priv;
     struct cvtsudoers_string *ls;
@@ -928,7 +935,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 
     if (reuse_userspec) {
 	/* Re-use the previous userspec */
-	us = TAILQ_LAST(&parsed_policy.userspecs, userspec_list);
+	us = TAILQ_LAST(&parse_tree->userspecs, userspec_list);
     } else {
 	/* Allocate a new userspec and fill in the user list. */
 	if ((us = calloc(1, sizeof(*us))) == NULL) {
@@ -1039,7 +1046,7 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
 
     /* Add finished userspec to the list if new. */
     if (!reuse_userspec)
-	TAILQ_INSERT_TAIL(&parsed_policy.userspecs, us, entries);
+	TAILQ_INSERT_TAIL(&parse_tree->userspecs, us, entries);
 
     debug_return;
 }
@@ -1049,8 +1056,8 @@ role_to_sudoers(struct sudo_role *role, bool store_options,
  * store in the global sudoers data structures.
  */
 static void
-ldif_to_sudoers(struct sudo_role_list *roles, unsigned int numroles,
-    bool store_options)
+ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
+    struct sudo_role_list *roles, unsigned int numroles, bool store_options)
 {
     struct sudo_role **role_array, *role = NULL;
     unsigned int n;
@@ -1098,7 +1105,7 @@ ldif_to_sudoers(struct sudo_role_list *roles, unsigned int numroles,
 	    }
 	}
 
-	role_to_sudoers(role, store_options, reuse_userspec,
+	role_to_sudoers(parse_tree, role, store_options, reuse_userspec,
 	    reuse_privilege, reuse_runas);
     }
 
@@ -1138,10 +1145,12 @@ char *unquote_cn(const char *src)
 
 /*
  * Parse a sudoers file in LDIF format, https://tools.ietf.org/html/rfc2849
- * Parsed sudoRole objects are stored in the global sudoers data structures.
+ * Parsed sudoRole objects are stored in the specified parse_tree which
+ * must already be initialized.
  */
 bool
-parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
+parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
+    struct cvtsudoers_config *conf)
 {
     struct sudo_role_list roles = STAILQ_HEAD_INITIALIZER(roles);
     struct sudo_role *role = NULL;
@@ -1161,7 +1170,9 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
         input_file = "stdin";
     } else if ((fp = fopen(input_file, "r")) == NULL)
         sudo_fatal(U_("unable to open %s"), input_file);
-    init_parser(input_file, false);
+
+    /* Free old contents of the parse tree (if any). */
+    free_parse_tree(parse_tree);
 
     /*
      * We cache user, group and host lists to make it eay to detect when there
@@ -1188,7 +1199,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
 	if (len <= 0) {
 	    if (in_role) {
 		if (role->cn != NULL && strcmp(role->cn, "defaults") == 0) {
-		    ldif_store_options(role->options);
+		    ldif_store_options(parse_tree, role->options);
 		    sudo_role_free(role);
 		    role = NULL;
 		} else if (STAILQ_EMPTY(role->users) ||
@@ -1374,7 +1385,7 @@ parse_ldif(const char *input_file, struct cvtsudoers_config *conf)
     free(line);
 
     /* Convert from roles to sudoers data structures. */
-    ldif_to_sudoers(&roles, numroles, conf->store_options);
+    ldif_to_sudoers(parse_tree, &roles, numroles, conf->store_options);
 
     /* Clean up. */
     rbdestroy(usercache, str_list_free);

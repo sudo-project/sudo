@@ -330,8 +330,9 @@ defaults_to_word_type(int defaults_type)
  * that closes the object.
  */
 static void
-print_member_json_int(FILE *fp, char *name, int type, bool negated,
-    enum word_type word_type, bool last_one, int indent, bool expand_aliases)
+print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    char *name, int type, bool negated, enum word_type word_type,
+    bool last_one, int indent, bool expand_aliases)
 {
     struct json_value value;
     const char *typestr = NULL;
@@ -475,9 +476,9 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 	struct alias *a;
 	struct member *m;
 
-	if ((a = alias_get(&parsed_policy, value.u.string, alias_type)) != NULL) {
+	if ((a = alias_get(parse_tree, value.u.string, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
-		print_member_json_int(fp, m->name, m->type,
+		print_member_json_int(fp, parse_tree, m->name, m->type,
 		    negated ? !m->negated : m->negated,
 		    alias_to_word_type(alias_type),
 		    last_one && TAILQ_NEXT(m, entries) == NULL, indent, true);
@@ -508,11 +509,12 @@ print_member_json_int(FILE *fp, char *name, int type, bool negated,
 }
 
 static void
-print_member_json(FILE *fp, struct member *m, enum word_type word_type,
-    bool last_one, int indent, bool expand_aliases)
+print_member_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct member *m, enum word_type word_type, bool last_one,
+    int indent, bool expand_aliases)
 {
-    print_member_json_int(fp, m->name, m->type, m->negated, word_type,
-	last_one, indent, expand_aliases);
+    print_member_json_int(fp, parse_tree, m->name, m->type, m->negated,
+	word_type, last_one, indent, expand_aliases);
 }
 
 /*
@@ -542,7 +544,7 @@ print_alias_json(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v
 
     closure->indent += 4;
     TAILQ_FOREACH(m, &a->members, entries) {
-	print_member_json(closure->fp, m,
+	print_member_json(closure->fp, parse_tree, m,
 	    alias_to_word_type(closure->alias_type),
 	    TAILQ_NEXT(m, entries) == NULL, closure->indent, false);
     }
@@ -554,7 +556,8 @@ print_alias_json(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v
  * Print the binding for a Defaults entry of the specified type.
  */
 static void
-print_binding_json(FILE *fp, struct member_list *binding, int type, int indent, bool expand_aliases)
+print_binding_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct member_list *binding, int type, int indent, bool expand_aliases)
 {
     struct member *m;
     debug_decl(print_binding_json, SUDOERS_DEBUG_UTIL)
@@ -567,7 +570,7 @@ print_binding_json(FILE *fp, struct member_list *binding, int type, int indent, 
 
     /* Print each member object in binding. */
     TAILQ_FOREACH(m, binding, entries) {
-	print_member_json(fp, m, defaults_to_word_type(type),
+	print_member_json(fp, parse_tree, m, defaults_to_word_type(type),
 	     TAILQ_NEXT(m, entries) == NULL, indent, expand_aliases);
     }
 
@@ -653,20 +656,21 @@ get_defaults_type(struct defaults *def)
  * Export all Defaults in JSON format.
  */
 static bool
-print_defaults_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
+print_defaults_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    int indent, bool expand_aliases, bool need_comma)
 {
     struct json_value value;
     struct defaults *def, *next;
     int type;
     debug_decl(print_defaults_json, SUDOERS_DEBUG_UTIL)
 
-    if (TAILQ_EMPTY(&parsed_policy.defaults))
+    if (TAILQ_EMPTY(&parse_tree->defaults))
 	debug_return_bool(need_comma);
 
     fprintf(fp, "%s\n%*s\"Defaults\": [\n", need_comma ? "," : "", indent, "");
     indent += 4;
 
-    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, next) {
+    TAILQ_FOREACH_SAFE(def, &parse_tree->defaults, entries, next) {
 	type = get_defaults_type(def);
 	if (type == -1) {
 	    sudo_warnx(U_("unknown defaults entry \"%s\""), def->var);
@@ -677,7 +681,8 @@ print_defaults_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
 	/* Found it, print object container and binding (if any). */
 	fprintf(fp, "%*s{\n", indent, "");
 	indent += 4;
-	print_binding_json(fp, def->binding, def->type, indent, expand_aliases);
+	print_binding_json(fp, parse_tree, def->binding, def->type,
+	    indent, expand_aliases);
 
 	/* Validation checks. */
 	/* XXX - validate values in addition to names? */
@@ -732,8 +737,8 @@ print_defaults_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
  * Iterates through the entire aliases tree.
  */
 static bool
-print_aliases_by_type_json(FILE *fp, int alias_type, const char *title,
-    int indent, bool need_comma)
+print_aliases_by_type_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    int alias_type, const char *title, int indent, bool need_comma)
 {
     struct json_alias_closure closure;
     debug_decl(print_aliases_by_type_json, SUDOERS_DEBUG_UTIL)
@@ -744,7 +749,7 @@ print_aliases_by_type_json(FILE *fp, int alias_type, const char *title,
     closure.alias_type = alias_type;
     closure.title = title;
     closure.need_comma = need_comma;
-    alias_apply(&parsed_policy, print_alias_json, &closure);
+    alias_apply(parse_tree, print_alias_json, &closure);
     if (closure.count != 0) {
 	print_indent(fp, closure.indent);
 	fputs("]\n", fp);
@@ -761,18 +766,19 @@ print_aliases_by_type_json(FILE *fp, int alias_type, const char *title,
  * Export all aliases in JSON format.
  */
 static bool
-print_aliases_json(FILE *fp, int indent, bool need_comma)
+print_aliases_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    int indent, bool need_comma)
 {
     debug_decl(print_aliases_json, SUDOERS_DEBUG_UTIL)
 
-    need_comma = print_aliases_by_type_json(fp, USERALIAS, "User_Aliases",
-	indent, need_comma);
-    need_comma = print_aliases_by_type_json(fp, RUNASALIAS, "Runas_Aliases",
-	indent, need_comma);
-    need_comma = print_aliases_by_type_json(fp, HOSTALIAS, "Host_Aliases",
-	indent, need_comma);
-    need_comma = print_aliases_by_type_json(fp, CMNDALIAS, "Command_Aliases",
-	indent, need_comma);
+    need_comma = print_aliases_by_type_json(fp, parse_tree, USERALIAS,
+	"User_Aliases", indent, need_comma);
+    need_comma = print_aliases_by_type_json(fp, parse_tree, RUNASALIAS,
+	"Runas_Aliases", indent, need_comma);
+    need_comma = print_aliases_by_type_json(fp, parse_tree, HOSTALIAS,
+	"Host_Aliases", indent, need_comma);
+    need_comma = print_aliases_by_type_json(fp, parse_tree, CMNDALIAS,
+	"Command_Aliases", indent, need_comma);
 
     debug_return_bool(need_comma);
 }
@@ -783,7 +789,8 @@ print_aliases_json(FILE *fp, int indent, bool need_comma)
  * merge adjacent entries that are identical in all but the command.
  */
 static void
-print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
+print_cmndspec_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct cmndspec *cs, struct cmndspec **nextp,
     struct defaults_list *options, bool expand_aliases, int indent)
 {
     struct cmndspec *next = *nextp;
@@ -804,7 +811,7 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 	fprintf(fp, "%*s\"runasusers\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH(m, cs->runasuserlist, entries) {
-	    print_member_json(fp, m, TYPE_RUNASUSER,
+	    print_member_json(fp, parse_tree, m, TYPE_RUNASUSER,
 		TAILQ_NEXT(m, entries) == NULL, indent, expand_aliases);
 	}
 	indent -= 4;
@@ -816,7 +823,7 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 	fprintf(fp, "%*s\"runasgroups\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
-	    print_member_json(fp, m, TYPE_RUNASGROUP,
+	    print_member_json(fp, parse_tree, m, TYPE_RUNASGROUP,
 		TAILQ_NEXT(m, entries) == NULL, indent, expand_aliases);
 	}
 	indent -= 4;
@@ -997,7 +1004,7 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 #endif /* HAVE_SELINUX */
 	    ;
 
-	print_member_json(fp, cs->cmnd, TYPE_COMMAND,
+	print_member_json(fp, parse_tree, cs->cmnd, TYPE_COMMAND,
 	    last_one, indent, expand_aliases);
 	if (last_one)
 	    break;
@@ -1020,7 +1027,8 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
  * Print a User_Spec in JSON format at the specified indent level.
  */
 static void
-print_userspec_json(FILE *fp, struct userspec *us, int indent, bool expand_aliases)
+print_userspec_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    struct userspec *us, int indent, bool expand_aliases)
 {
     struct privilege *priv;
     struct member *m;
@@ -1041,7 +1049,7 @@ print_userspec_json(FILE *fp, struct userspec *us, int indent, bool expand_alias
 	fprintf(fp, "%*s\"User_List\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH(m, &us->users, entries) {
-	    print_member_json(fp, m, TYPE_USERNAME,
+	    print_member_json(fp, parse_tree, m, TYPE_USERNAME,
 		TAILQ_NEXT(m, entries) == NULL, indent, expand_aliases);
 	}
 	indent -= 4;
@@ -1051,7 +1059,7 @@ print_userspec_json(FILE *fp, struct userspec *us, int indent, bool expand_alias
 	fprintf(fp, "%*s\"Host_List\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH(m, &priv->hostlist, entries) {
-	    print_member_json(fp, m, TYPE_HOSTNAME,
+	    print_member_json(fp, parse_tree, m, TYPE_HOSTNAME,
 		TAILQ_NEXT(m, entries) == NULL, indent, expand_aliases);
 	}
 	indent -= 4;
@@ -1061,7 +1069,7 @@ print_userspec_json(FILE *fp, struct userspec *us, int indent, bool expand_alias
 	fprintf(fp, "%*s\"Cmnd_Specs\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, next) {
-	    print_cmndspec_json(fp, cs, &next, &priv->defaults,
+	    print_cmndspec_json(fp, parse_tree, cs, &next, &priv->defaults,
 		expand_aliases, indent);
 	}
 	indent -= 4;
@@ -1077,18 +1085,19 @@ print_userspec_json(FILE *fp, struct userspec *us, int indent, bool expand_alias
 }
 
 static bool
-print_userspecs_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
+print_userspecs_json(FILE *fp, struct sudoers_parse_tree *parse_tree,
+    int indent, bool expand_aliases, bool need_comma)
 {
     struct userspec *us;
     debug_decl(print_userspecs_json, SUDOERS_DEBUG_UTIL)
 
-    if (TAILQ_EMPTY(&parsed_policy.userspecs))
+    if (TAILQ_EMPTY(&parse_tree->userspecs))
 	debug_return_bool(need_comma);
 
     fprintf(fp, "%s\n%*s\"User_Specs\": [\n", need_comma ? "," : "", indent, "");
     indent += 4;
-    TAILQ_FOREACH(us, &parsed_policy.userspecs, entries) {
-	print_userspec_json(fp, us, indent, expand_aliases);
+    TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
+	print_userspec_json(fp, parse_tree, us, indent, expand_aliases);
     }
     indent -= 4;
     fprintf(fp, "%*s]", indent, "");
@@ -1100,7 +1109,8 @@ print_userspecs_json(FILE *fp, int indent, bool expand_aliases, bool need_comma)
  * Export the parsed sudoers file in JSON format.
  */
 bool
-convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf)
+convert_sudoers_json(struct sudoers_parse_tree *parse_tree,
+    const char *output_file, struct cvtsudoers_config *conf)
 {
     bool ret = true, need_comma = false;
     const int indent = 4;
@@ -1117,18 +1127,20 @@ convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf)
 
     /* Dump Defaults in JSON format. */
     if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS)) {
-	need_comma = print_defaults_json(output_fp, indent,
+	need_comma = print_defaults_json(output_fp, parse_tree, indent,
 	    conf->expand_aliases, need_comma);
     }
 
     /* Dump Aliases in JSON format. */
-    if (!conf->expand_aliases && !ISSET(conf->suppress, SUPPRESS_ALIASES))
-	need_comma = print_aliases_json(output_fp, indent, need_comma);
+    if (!conf->expand_aliases && !ISSET(conf->suppress, SUPPRESS_ALIASES)) {
+	need_comma = print_aliases_json(output_fp, parse_tree, indent,
+	    need_comma);
+    }
 
     /* Dump User_Specs in JSON format. */
     if (!ISSET(conf->suppress, SUPPRESS_PRIVS)) {
-	print_userspecs_json(output_fp, indent, conf->expand_aliases,
-	    need_comma);
+	print_userspecs_json(output_fp, parse_tree, indent,
+	    conf->expand_aliases, need_comma);
     }
 
     /* Close JSON output. */
