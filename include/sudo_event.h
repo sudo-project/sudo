@@ -124,8 +124,9 @@ __dso_public void sudo_ev_free_v1(struct sudo_event *ev);
 #define sudo_ev_free(_a) sudo_ev_free_v1((_a))
 
 /* Add an event, returns 0 on success, -1 on error */
-__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timespec *timo, bool tohead);
-#define sudo_ev_add(_a, _b, _c, _d) sudo_ev_add_v1((_a), (_b), (_c), (_d))
+__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
+__dso_public int sudo_ev_add_v2(struct sudo_event_base *head, struct sudo_event *ev, struct timespec *timo, bool tohead);
+#define sudo_ev_add(_a, _b, _c, _d) sudo_ev_add_v2((_a), (_b), (_c), (_d))
 
 /* Delete an event, returns 0 on success, -1 on error */
 __dso_public int sudo_ev_del_v1(struct sudo_event_base *head, struct sudo_event *ev);
@@ -140,8 +141,9 @@ __dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, int flags);
 #define sudo_ev_loop(_a, _b) sudo_ev_loop_v1((_a), (_b))
 
 /* Return the remaining timeout associated with an event. */
-__dso_public int sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timespec *tv);
-#define sudo_ev_get_timeleft(_a, _b) sudo_ev_get_timeleft_v1((_a), (_b))
+__dso_public int sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv);
+__dso_public int sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *tv);
+#define sudo_ev_get_timeleft(_a, _b) sudo_ev_get_timeleft_v2((_a), (_b))
 
 /* Cause the event loop to exit after one run through. */
 __dso_public void sudo_ev_loopexit_v1(struct sudo_event_base *base);

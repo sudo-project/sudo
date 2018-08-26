@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -429,6 +430,20 @@ sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
 
 int
 sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
+    struct timeval *timo, bool tohead)
+{
+    struct timespec tsbuf, *ts = NULL;
+
+    if (timo != NULL) {
+	TIMEVAL_TO_TIMESPEC(timo, &tsbuf);
+	ts = &tsbuf;
+    }
+
+    return sudo_ev_add_v2(base, ev, ts, tohead);
+}
+
+int
+sudo_ev_add_v2(struct sudo_event_base *base, struct sudo_event *ev,
     struct timespec *timo, bool tohead)
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
@@ -748,7 +763,19 @@ sudo_ev_got_break_v1(struct sudo_event_base *base)
 }
 
 int
-sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timespec *ts)
+sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv)
+{
+    struct timespec ts;
+    int ret;
+
+    ret = sudo_ev_get_timeleft_v2(ev, &ts);
+    TIMESPEC_TO_TIMEVAL(tv, &ts);
+
+    return ret;
+}
+
+int
+sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 {
     struct timespec now;
     debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT)
