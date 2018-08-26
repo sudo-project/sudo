@@ -575,6 +575,9 @@
 /* Define to 1 if you have the `posix_spawnp' function. */
 #undef HAVE_POSIX_SPAWNP
 
+/* Define to 1 if you have the `ppoll' function. */
+#undef HAVE_PPOLL
+
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 
@@ -589,6 +592,9 @@
 
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
+
+/* Define to 1 if you have the `pselect' function. */
+#undef HAVE_PSELECT
 
 /* Define to 1 if you have the `pstat_getproc' function. */
 #undef HAVE_PSTAT_GETPROC

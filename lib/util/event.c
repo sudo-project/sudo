@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -33,6 +32,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "sudo_compat.h"
@@ -392,11 +392,11 @@ sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
     /* Install signal handler as needed, saving the original value. */
     if (TAILQ_EMPTY(&base->signals[signo])) {
 	struct sigaction sa;
-        memset(&sa, 0, sizeof(sa));
-        sigfillset(&sa.sa_mask);
-        sa.sa_flags = SA_RESTART|SA_SIGINFO;
-        sa.sa_sigaction = sudo_ev_handler;
-        if (sigaction(signo, &sa, base->orig_handlers[signo]) != 0) {
+	memset(&sa, 0, sizeof(sa));
+	sigfillset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART|SA_SIGINFO;
+	sa.sa_sigaction = sudo_ev_handler;
+	if (sigaction(signo, &sa, base->orig_handlers[signo]) != 0) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to install handler for signo %d", __func__, signo);
 	    debug_return_int(-1);
@@ -429,7 +429,7 @@ sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
 
 int
 sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
-    struct timeval *timo, bool tohead)
+    struct timespec *timo, bool tohead)
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
 
@@ -484,11 +484,11 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 	}
 	/* Convert to absolute time and insert in sorted order; O(n). */
-	gettimeofday(&ev->timeout, NULL);
-	ev->timeout.tv_sec += timo->tv_sec;
-	ev->timeout.tv_usec += timo->tv_usec;
+	/* XXX - use monotime */
+	sudo_gettime_real(&ev->timeout);
+	sudo_timespecadd(&ev->timeout, timo, &ev->timeout);
 	TAILQ_FOREACH(evtmp, &base->timeouts, timeouts_entries) {
-	    if (sudo_timevalcmp(timo, &evtmp->timeout, <))
+	    if (sudo_timespeccmp(timo, &evtmp->timeout, <))
 		break;
 	}
 	if (evtmp != NULL) {
@@ -596,7 +596,7 @@ sudo_ev_dispatch_v1(struct sudo_event_base *base)
 int
 sudo_ev_loop_v1(struct sudo_event_base *base, int flags)
 {
-    struct timeval now;
+    struct timespec now;
     struct sudo_event *ev;
     int nready, rc = 0;
     debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
@@ -637,9 +637,9 @@ rescan:
 	    goto done;
 	case 0:
 	    /* Timed out, activate timeout events. */
-	    gettimeofday(&now, NULL);
+	    sudo_gettime_real(&now);
 	    while ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
-		if (sudo_timevalcmp(&ev->timeout, &now, >))
+		if (sudo_timespeccmp(&ev->timeout, &now, >))
 		    break;
 		/* Remove from timeouts list. */
 		CLR(ev->flags, SUDO_EVQ_TIMEOUTS);
@@ -749,19 +749,19 @@ sudo_ev_got_break_v1(struct sudo_event_base *base)
 }
 
 int
-sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv)
+sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timespec *ts)
 {
-    struct timeval now;
+    struct timespec now;
     debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT)
 
     if (!ISSET(ev->flags, SUDO_EVQ_TIMEOUTS)) {
-	sudo_timevalclear(tv);
+	sudo_timespecclear(ts);
 	debug_return_int(-1);
     }
 
-    gettimeofday(&now, NULL);
-    sudo_timevalsub(&ev->timeout, &now, tv);
-    if (tv->tv_sec < 0 || (tv->tv_sec == 0 && tv->tv_usec < 0))
-	sudo_timevalclear(tv);
+    sudo_gettime_real(&now);
+    sudo_timespecsub(&ev->timeout, &now, ts);
+    if (ts->tv_sec < 0 || (ts->tv_sec == 0 && ts->tv_nsec < 0))
+	sudo_timespecclear(ts);
     debug_return_int(0);
 }

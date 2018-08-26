@@ -37,14 +37,15 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <time.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
-#include "sudo_util.h"
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
@@ -167,25 +168,47 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
     debug_return_int(0);
 }
 
+#ifdef HAVE_PSELECT
+static int
+sudo_ev_select(int nfds, fd_set *readfds, fd_set *writefds,
+    fd_set *exceptfds, const struct timespec *timeout)
+{
+    return pselect(nfds, readfds, writefds, exceptfds, timeout, NULL);
+}
+#else
+static int
+sudo_ev_select(int nfds, fd_set *readfds, fd_set *writefds,
+    fd_set *exceptfds, const struct timespec *timeout)
+{
+    struct timeval tvbuf, *tv = NULL;
+
+    if (timeout != NULL) {
+	TIMESPEC_TO_TIMEVAL(&tvbuf, timeout);
+	tv = &tvbuf;
+    }
+    return select(nfds, readfds, writefds, exceptfds, tv);
+}
+#endif /* HAVE_PSELECT */
+
 int
 sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 {
-    struct timeval now, tv, *timeout;
+    struct timespec now, ts, *timeout;
     struct sudo_event *ev;
     size_t setsize;
     int nready;
     debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
-	gettimeofday(&now, NULL);
-	sudo_timevalsub(&ev->timeout, &now, &tv);
-	if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec < 0))
-	    sudo_timevalclear(&tv);
-	timeout = &tv;
+	sudo_gettime_real(&now);
+	sudo_timespecsub(&ev->timeout, &now, &ts);
+	if (ts.tv_sec < 0 || (ts.tv_sec == 0 && ts.tv_nsec < 0))
+	    sudo_timespecclear(&ts);
+	timeout = &ts;
     } else {
 	if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
-	    sudo_timevalclear(&tv);
-	    timeout = &tv;
+	    sudo_timespecclear(&ts);
+	    timeout = &ts;
 	} else {
 	    timeout = NULL;
 	}
@@ -198,8 +221,8 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: select high fd %d",
 	__func__, base->highfd);
-    nready = select(base->highfd + 1, base->readfds_out, base->writefds_out,
-	NULL, timeout);
+    nready = sudo_ev_select(base->highfd + 1, base->readfds_out,
+	base->writefds_out, NULL, timeout);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
     switch (nready) {
     case -1:

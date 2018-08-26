@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -31,11 +30,13 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <time.h>
 #include <unistd.h>
 #include <errno.h>
 #include <poll.h>
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
@@ -133,26 +134,46 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
     debug_return_int(0);
 }
 
+#ifdef HAVE_PPOLL
+static int
+sudo_ev_poll(struct pollfd *fds, nfds_t nfds, const struct timespec *timo)
+{
+    return ppoll(fds, nfds, timo, NULL);
+}
+#else
+static int
+sudo_ev_poll(struct pollfd *fds, nfds_t nfds, const struct timespec *timo)
+{
+    const int timeout = (timo->tv_sec * 1000) + (timo->tv_nsec / 1000000);
+
+    return poll(fds, nfds, timeout);
+}
+#endif /* HAVE_PPOLL */
+
 int
 sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 {
+    struct timespec now, ts, *timeout;
     struct sudo_event *ev;
-    int nready, timeout;
-    struct timeval now;
+    int nready;
     debug_decl(sudo_ev_scan_impl, SUDO_DEBUG_EVENT)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
-	struct timeval *timo = &ev->timeout;
-	gettimeofday(&now, NULL);
-	timeout = ((timo->tv_sec - now.tv_sec) * 1000) +
-	    ((timo->tv_usec - now.tv_usec) / 1000);
-	if (timeout <= 0)
-	    timeout = 0;
+	sudo_gettime_real(&now);
+	sudo_timespecsub(&ev->timeout, &now, &ts);
+	if (ts.tv_sec < 0 || (ts.tv_sec == 0 && ts.tv_nsec < 0))
+	    sudo_timespecclear(&ts);
+	timeout = &ts;
     } else {
-	timeout = (flags & SUDO_EVLOOP_NONBLOCK) ? 0 : -1;
+	if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
+	    sudo_timespecclear(&ts);
+	    timeout = &ts;
+	} else {
+	    timeout = NULL;
+	}
     }
 
-    nready = poll(base->pfds, base->pfd_high + 1, timeout);
+    nready = sudo_ev_poll(base->pfds, base->pfd_high + 1, timeout);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
     switch (nready) {
     case -1:

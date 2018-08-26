@@ -34,7 +34,7 @@ struct log_info {
 
 struct timing_closure {
     const char *decimal;
-    struct timeval *max_delay;
+    struct timespec *max_delay;
     int idx;
     union {
 	struct {

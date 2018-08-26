@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -49,6 +48,7 @@
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
+#include <time.h>
 #ifdef HAVE_ZLIB_H
 # include <zlib.h>
 #endif
@@ -163,7 +163,7 @@ static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(struct timeval *max_wait, const char *decimal, bool interactive);
+static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -195,7 +195,7 @@ main(int argc, char *argv[])
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
-    struct timeval max_delay_storage, *max_delay = NULL;
+    struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
@@ -256,11 +256,11 @@ main(int argc, char *argv[])
 	    if (*ep != '\0' || errno != 0)
 		sudo_fatalx(U_("invalid max wait: %s"), optarg);
 	    if (dval <= 0.0) {
-		sudo_timevalclear(&max_delay_storage);
+		sudo_timespecclear(&max_delay_storage);
 	    } else {
 		max_delay_storage.tv_sec = dval;
-		max_delay_storage.tv_usec =
-		    (dval - max_delay_storage.tv_sec) * 1000000.0;
+		max_delay_storage.tv_nsec =
+		    (dval - max_delay_storage.tv_sec) * 1000000000.0;
 	    }
 	    max_delay = &max_delay_storage;
 	    break;
@@ -435,7 +435,7 @@ struct getsize_closure {
     int state;
     const char *cp;
     struct sudo_event *ev;
-    struct timeval timeout;
+    struct timespec timeout;
 };
 
 /* getsize states */
@@ -564,7 +564,7 @@ xterm_get_size(int *new_rows, int *new_cols)
     gc.nums_maxdepth = 1;
     gc.cp = getsize_response;
     gc.timeout.tv_sec = 10;
-    gc.timeout.tv_usec = 0;
+    gc.timeout.tv_nsec = 0;
 
     /* Setup an event for reading the terminal size */
     evbase = sudo_ev_base_alloc();
@@ -743,7 +743,7 @@ restore_terminal_size(void)
 static int
 read_timing_record(struct replay_closure *closure)
 {
-    struct timeval timeout;
+    struct timespec timeout;
     char buf[LINE_MAX];
     double delay;
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
@@ -771,13 +771,13 @@ read_timing_record(struct replay_closure *closure)
     /* Adjust delay using speed factor. */
     delay /= speed_factor;
 
-    /* Convert delay to a timeval. */
+    /* Convert delay to a timespec. */
     timeout.tv_sec = delay;
-    timeout.tv_usec = (delay - timeout.tv_sec) * 1000000.0;
+    timeout.tv_nsec = (delay - timeout.tv_sec) * 1000000000.0;
 
     /* Clamp timeout to max delay. */
     if (closure->timing.max_delay != NULL) {
-	if (sudo_timevalcmp(&timeout, closure->timing.max_delay, >))
+	if (sudo_timespeccmp(&timeout, closure->timing.max_delay, >))
 	    timeout = *closure->timing.max_delay;
     }
 
@@ -923,7 +923,7 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(struct timeval *max_delay, const char *decimal, bool interactive)
+replay_closure_alloc(struct timespec *max_delay, const char *decimal, bool interactive)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -1004,7 +1004,7 @@ bad:
 }
 
 static int
-replay_session(struct timeval *max_delay, const char *decimal, bool interactive)
+replay_session(struct timespec *max_delay, const char *decimal, bool interactive)
 {
     struct replay_closure *closure;
     int ret = 0;
@@ -1500,7 +1500,7 @@ read_keyboard(int fd, int what, void *v)
 {
     struct replay_closure *closure = v;
     static bool paused = false;
-    struct timeval tv;
+    struct timespec ts;
     ssize_t nread;
     char ch;
     debug_decl(read_keyboard, SUDO_DEBUG_UTIL)
@@ -1529,16 +1529,16 @@ read_keyboard(int fd, int what, void *v)
 	    break;
 	case '<':
 	    speed_factor /= 2;
-            sudo_ev_get_timeleft(closure->delay_ev, &tv);
-            if (sudo_timevalisset(&tv)) {
+            sudo_ev_get_timeleft(closure->delay_ev, &ts);
+            if (sudo_timespecisset(&ts)) {
 		/* Double remaining timeout. */
-		tv.tv_sec *= 2;
-		tv.tv_usec *= 2;
-		if (tv.tv_usec >= 1000000) {
-		    tv.tv_sec++;
-		    tv.tv_usec -= 1000000;
+		ts.tv_sec *= 2;
+		ts.tv_nsec *= 2;
+		if (ts.tv_nsec >= 1000000000) {
+		    ts.tv_sec++;
+		    ts.tv_nsec -= 1000000000;
 		}
-		if (sudo_ev_add(NULL, closure->delay_ev, &tv, false) == -1) {
+		if (sudo_ev_add(NULL, closure->delay_ev, &ts, false) == -1) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"failed to double remaining delay timeout");
 		}
@@ -1546,14 +1546,14 @@ read_keyboard(int fd, int what, void *v)
 	    break;
 	case '>':
 	    speed_factor *= 2;
-            sudo_ev_get_timeleft(closure->delay_ev, &tv);
-            if (sudo_timevalisset(&tv)) {
+            sudo_ev_get_timeleft(closure->delay_ev, &ts);
+            if (sudo_timespecisset(&ts)) {
 		/* Halve remaining timeout. */
-		if (tv.tv_sec & 1)
-		    tv.tv_usec += 500000;
-		tv.tv_sec /= 2;
-		tv.tv_usec /= 2;
-		if (sudo_ev_add(NULL, closure->delay_ev, &tv, false) == -1) {
+		if (ts.tv_sec & 1)
+		    ts.tv_nsec += 500000000;
+		ts.tv_sec /= 2;
+		ts.tv_nsec /= 2;
+		if (sudo_ev_add(NULL, closure->delay_ev, &ts, false) == -1) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"failed to halve remaining delay timeout");
 		}

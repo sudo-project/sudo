@@ -3778,13 +3778,14 @@ dnl
 dnl Choose event subsystem backend: poll or select
 dnl
 if test X"$enable_poll" = X""; then
-    AC_CHECK_FUNCS([poll], [enable_poll=yes], [enable_poll=no])
+    AC_CHECK_FUNCS([ppoll poll], [enable_poll=yes; break], [enable_poll=no])
 elif test X"$enable_poll" = X"yes"; then
-    AC_DEFINE(HAVE_POLL)
+    AC_CHECK_FUNCS([ppoll], [], AC_DEFINE(HAVE_POLL))
 fi
 if test "$enable_poll" = "yes"; then
     COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
 else
+    AC_CHECK_FUNCS([pselect])
     COMMON_OBJS="${COMMON_OBJS} event_select.lo"
 fi
 

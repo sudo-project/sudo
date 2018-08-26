@@ -70,7 +70,7 @@ struct sudo_event {
     short flags;		/* internal event flags */
     short pfd_idx;		/* index into pfds array (XXX) */
     sudo_ev_callback_t callback;/* user-provided callback */
-    struct timeval timeout;	/* for SUDO_EV_TIMEOUT */
+    struct timespec timeout;	/* for SUDO_EV_TIMEOUT */
     void *closure;		/* user-provided data pointer */
 };
 TAILQ_HEAD(sudo_event_list, sudo_event);
@@ -87,7 +87,7 @@ struct sudo_event_base {
     sig_atomic_t signal_caught;	/* at least one signal caught */
     int num_handlers;		/* number of installed handlers */
     int signal_pipe[2];		/* so we can wake up on singal */
-#ifdef HAVE_POLL
+#if defined(HAVE_POLL) || defined(HAVE_PPOLL)
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */
     int pfd_high;		/* highest slot used */
@@ -124,7 +124,7 @@ __dso_public void sudo_ev_free_v1(struct sudo_event *ev);
 #define sudo_ev_free(_a) sudo_ev_free_v1((_a))
 
 /* Add an event, returns 0 on success, -1 on error */
-__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
+__dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, struct timespec *timo, bool tohead);
 #define sudo_ev_add(_a, _b, _c, _d) sudo_ev_add_v1((_a), (_b), (_c), (_d))
 
 /* Delete an event, returns 0 on success, -1 on error */
@@ -140,7 +140,7 @@ __dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, int flags);
 #define sudo_ev_loop(_a, _b) sudo_ev_loop_v1((_a), (_b))
 
 /* Return the remaining timeout associated with an event. */
-__dso_public int sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv);
+__dso_public int sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timespec *tv);
 #define sudo_ev_get_timeleft(_a, _b) sudo_ev_get_timeleft_v1((_a), (_b))
 
 /* Cause the event loop to exit after one run through. */
