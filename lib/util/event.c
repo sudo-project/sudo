@@ -484,8 +484,7 @@ sudo_ev_add_v1(struct sudo_event_base *base, struct sudo_event *ev,
 	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 	}
 	/* Convert to absolute time and insert in sorted order; O(n). */
-	/* XXX - use monotime */
-	sudo_gettime_real(&ev->timeout);
+	sudo_gettime_mono(&ev->timeout);
 	sudo_timespecadd(&ev->timeout, timo, &ev->timeout);
 	TAILQ_FOREACH(evtmp, &base->timeouts, timeouts_entries) {
 	    if (sudo_timespeccmp(timo, &evtmp->timeout, <))
@@ -637,7 +636,7 @@ rescan:
 	    goto done;
 	case 0:
 	    /* Timed out, activate timeout events. */
-	    sudo_gettime_real(&now);
+	    sudo_gettime_mono(&now);
 	    while ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
 		if (sudo_timespeccmp(&ev->timeout, &now, >))
 		    break;
@@ -759,7 +758,7 @@ sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timespec *ts)
 	debug_return_int(-1);
     }
 
-    sudo_gettime_real(&now);
+    sudo_gettime_mono(&now);
     sudo_timespecsub(&ev->timeout, &now, ts);
     if (ts->tv_sec < 0 || (ts->tv_sec == 0 && ts->tv_nsec < 0))
 	sudo_timespecclear(ts);

@@ -159,7 +159,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     debug_decl(sudo_ev_scan_impl, SUDO_DEBUG_EVENT)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
-	sudo_gettime_real(&now);
+	sudo_gettime_mono(&now);
 	sudo_timespecsub(&ev->timeout, &now, &ts);
 	if (ts.tv_sec < 0 || (ts.tv_sec == 0 && ts.tv_nsec < 0))
 	    sudo_timespecclear(&ts);
