@@ -25,6 +25,9 @@ What's new in Sudo 1.8.25
  * Fixed a build issue on AIX 7.1 BOS levels that include memset_s()
    and define rsize_t in string.h.  Bug #847.
 
+ * The testsudoers utility now supports querying an LDIF-format
+   policy.
+
 What's new in Sudo 1.8.24
 
  * The LDAP and SSS back-ends now use the same rule evaluation code
