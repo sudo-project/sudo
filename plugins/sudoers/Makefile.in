@@ -164,7 +164,7 @@ VISUDO_OBJS = editor.lo find_path.lo goodpath.lo locale.lo stubs.o \
 	      sudo_printf.o visudo.o
 
 CVTSUDOERS_OBJS = cvtsudoers.o cvtsudoers_json.o cvtsudoers_ldif.o \
-		  cvtsudoers_pwutil.o fmtsudoers.lo locale.lo \
+		  cvtsudoers_pwutil.o fmtsudoers.lo locale.lo parse_ldif.o \
 		  strlist.o stubs.o sudo_printf.o ldap_util.lo
 
 REPLAY_OBJS = getdate.o sudoreplay.o iolog_util.lo
@@ -1133,6 +1133,17 @@ parse.lo: $(srcdir)/parse.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/parse.c
+parse_ldif.o: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
+              $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/parse_ldif.c
 passwd.lo: $(authdir)/passwd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \

@@ -346,6 +346,9 @@ int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int validated, 
 int display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
 int display_cmnd(struct sudo_nss_list *snl, struct passwd *pw);
 
+/* parse_ldif.c */
+bool sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree, FILE *fp, const char *sudoers_base, bool store_options);
+
 /* fmtsudoers.c */
 struct sudo_lbuf;
 bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct cmndspec *cs, struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases);

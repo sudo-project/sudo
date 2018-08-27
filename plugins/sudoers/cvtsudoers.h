@@ -83,13 +83,14 @@ bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *out
 
 /* cvtsudoers_ldif.c */
 bool convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
-bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
-void get_hostname(void);
 
 /* cvtsudoers_pwutil.c */
 struct cache_item *cvtsudoers_make_pwitem(uid_t uid, const char *name);
 struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
 struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1, unsigned int type);
 struct cache_item *cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1);
+
+/* stubs.c */
+void get_hostname(void);
 
 #endif /* SUDOERS_CVTSUDOERS_H */

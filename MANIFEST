@@ -332,6 +332,7 @@ plugins/sudoers/mkdefaults
 plugins/sudoers/mkdir_parents.c
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
+plugins/sudoers/parse_ldif.c
 plugins/sudoers/po/README
 plugins/sudoers/po/ca.mo
 plugins/sudoers/po/ca.po

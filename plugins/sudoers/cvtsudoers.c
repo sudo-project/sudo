@@ -80,6 +80,7 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
+static bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
 static bool cvtsudoers_parse_filter(char *expression);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
@@ -579,6 +580,24 @@ cvtsudoers_parse_filter(char *expression)
     }
 
     debug_return_bool(true);
+}
+
+static bool
+parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
+    struct cvtsudoers_config *conf)
+{
+    FILE *fp;
+    debug_decl(parse_ldif, SUDOERS_DEBUG_UTIL)
+
+    /* Open LDIF file and parse it. */
+    if (strcmp(input_file, "-") == 0) {
+	fp = stdin;
+	input_file = "stdin";
+    } else if ((fp = fopen(input_file, "r")) == NULL)
+	sudo_fatal(U_("unable to open %s"), input_file);
+
+    debug_return_bool(sudoers_parse_ldif(parse_tree, fp, conf->sudoers_base,
+     conf->store_options));
 }
 
 static bool
