@@ -55,6 +55,11 @@
 # define YYDEBUG 0
 #endif
 
+enum sudoers_formats {
+    format_ldif,
+    format_sudoers
+};
+
 /*
  * Function Prototypes
  */
@@ -102,6 +107,7 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
+    enum sudoers_formats input_format = format_sudoers;
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
@@ -138,13 +144,10 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "dg:G:h:P:p:tu:U:")) != -1) {
+    while ((ch = getopt(argc, argv, "dg:G:h:i:P:p:tu:U:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
-		break;
-	    case 'h':
-		user_host = optarg;
 		break;
 	    case 'G':
 		sudoers_gid = (gid_t)sudo_strtoid(optarg, NULL, NULL, &errstr);
@@ -154,6 +157,19 @@ main(int argc, char *argv[])
 	    case 'g':
 		runas_group = optarg;
 		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
+		break;
+	    case 'h':
+		user_host = optarg;
+		break;
+	    case 'i':
+		if (strcasecmp(optarg, "ldif") == 0) {
+		    input_format = format_ldif;
+		} else if (strcasecmp(optarg, "sudoers") == 0) {
+		    input_format = format_sudoers;
+		} else {
+		    sudo_warnx(U_("unsupported input format %s"), optarg);
+		    usage();
+		}
 		break;
 	    case 'p':
 		pwfile = optarg;
@@ -273,16 +289,29 @@ main(int argc, char *argv[])
     } else
         set_runaspw(runas_user ? runas_user : def_runas_default);
 
+    /* Parse the policy file. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
-    if (sudoersparse() != 0 || parse_error) {
-	parse_error = true;
-	if (errorlineno != -1)
-	    (void) printf("Parse error in %s near line %d",
-		errorfile, errorlineno);
+    switch (input_format) {
+    case format_ldif:
+        if (!sudoers_parse_ldif(&parsed_policy, stdin, NULL, true))
+	    (void) printf("Parse error in LDIF");
 	else
-	    (void) printf("Parse error in %s", errorfile);
-    } else {
-	(void) fputs("Parses OK", stdout);
+	    (void) fputs("Parses OK", stdout);
+        break;
+    case format_sudoers:
+	if (sudoersparse() != 0 || parse_error) {
+	    parse_error = true;
+	    if (errorlineno != -1)
+		(void) printf("Parse error in %s near line %d",
+		    errorfile, errorlineno);
+	    else
+		(void) printf("Parse error in %s", errorfile);
+	} else {
+	    (void) fputs("Parses OK", stdout);
+	}
+        break;
+    default:
+        sudo_fatalx("error: unhandled input %d", input_format);
     }
 
     if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
@@ -571,6 +600,6 @@ testsudoers_error(const char *buf)
 static void
 usage(void)
 {
-    (void) fprintf(stderr, "usage: %s [-dt] [-G sudoers_gid] [-g group] [-h host] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-dt] [-G sudoers_gid] [-g group] [-h host] [-i input_format] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }

@@ -169,8 +169,9 @@ CVTSUDOERS_OBJS = cvtsudoers.o cvtsudoers_json.o cvtsudoers_ldif.o \
 
 REPLAY_OBJS = getdate.o sudoreplay.o iolog_util.lo
 
-TEST_OBJS = fmtsudoers.lo group_plugin.lo interfaces.lo locale.lo net_ifs.o \
-	    sudo_printf.o testsudoers.o tsgetgrpw.o
+TEST_OBJS = fmtsudoers.lo group_plugin.lo interfaces.lo ldap_util.lo \
+	    locale.lo net_ifs.o parse_ldif.o strlist.o sudo_printf.o \
+	    testsudoers.o tsgetgrpw.o
 
 TSDUMP_OBJS = tsdump.o sudoers_debug.lo locale.lo
 
