@@ -69,6 +69,10 @@
 /* Define to 1 if you have the `auth_challenge' function. */
 #undef HAVE_AUTH_CHALLENGE
 
+/* Define to 1 if the `au_close' functions takes 4 arguments like Solaris 11.
+   */
+#undef HAVE_AU_CLOSE_SOLARIS11
+
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
 

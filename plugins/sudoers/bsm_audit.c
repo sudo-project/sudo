@@ -174,7 +174,7 @@ bsm_audit_success(char *exec_args[])
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-#ifdef __sun
+#ifdef HAVE_AU_CLOSE_SOLARIS11
 	if (au_close(aufd, 1, sudo_audit_event, 0) == -1)
 #else
 	if (au_close(aufd, 1, sudo_audit_event) == -1)
@@ -265,7 +265,7 @@ bsm_audit_failure(char *exec_args[], char const *const fmt, va_list ap)
 		debug_return_int(-1);
 	}
 	au_write(aufd, tok);
-#ifdef __sun
+#ifdef HAVE_AU_CLOSE_SOLARIS11
 	if (au_close(aufd, 1, sudo_audit_event, PAD_FAILURE) == -1)
 #else
 	if (au_close(aufd, 1, sudo_audit_event) == -1)

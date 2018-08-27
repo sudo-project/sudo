@@ -3775,6 +3775,13 @@ if test ${with_passwd-'no'} != "no"; then
 fi
 
 dnl
+dnl Solaris 11 added a 4th argument to the au_close() function
+dnl
+if test X"$with_bsm_audit" = X"yes"; then
+    SUDO_FUNC_AU_CLOSE_SOLARIS11
+fi
+
+dnl
 dnl Choose event subsystem backend: poll or select
 dnl
 if test X"$enable_poll" = X""; then
