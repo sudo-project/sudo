@@ -17,24 +17,13 @@
 #ifndef SUDOERS_CVTSUDOERS_H
 #define SUDOERS_CVTSUDOERS_H
 
+#include "strlist.h"
+
 /* Supported input/output formats. */
 enum sudoers_formats {
     format_json,
     format_ldif,
     format_sudoers
-};
-
-/*
- * Simple string list with optional reference count.
- */
-struct cvtsudoers_string {
-    STAILQ_ENTRY(cvtsudoers_string) entries;
-    char *str;
-};
-struct cvtsudoers_str_list {
-    struct cvtsudoers_string *stqh_first;
-    struct cvtsudoers_string **stqh_last;
-    unsigned int refcnt;
 };
 
 /* Flags for cvtsudoers_config.defaults */
@@ -81,17 +70,13 @@ struct cvtsudoers_conf_table {
 };
 
 struct cvtsudoers_filter {
-    struct cvtsudoers_str_list users;
-    struct cvtsudoers_str_list groups;
-    struct cvtsudoers_str_list hosts;
+    struct sudoers_str_list users;
+    struct sudoers_str_list groups;
+    struct sudoers_str_list hosts;
 };
 
 /* cvtsudoers.c */
 extern struct cvtsudoers_filter *filters;
-struct cvtsudoers_str_list *str_list_alloc(void);
-void str_list_free(void *v);
-struct cvtsudoers_string *cvtsudoers_string_alloc(const char *s);
-void cvtsudoers_string_free(struct cvtsudoers_string *ls);
 
 /* cvtsudoers_json.c */
 bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);

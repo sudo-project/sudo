@@ -661,12 +661,12 @@ struct sudo_role {
     char *notbefore;
     char *notafter;
     double order;
-    struct cvtsudoers_str_list *cmnds;
-    struct cvtsudoers_str_list *hosts;
-    struct cvtsudoers_str_list *users;
-    struct cvtsudoers_str_list *runasusers;
-    struct cvtsudoers_str_list *runasgroups;
-    struct cvtsudoers_str_list *options;
+    struct sudoers_str_list *cmnds;
+    struct sudoers_str_list *hosts;
+    struct sudoers_str_list *users;
+    struct sudoers_str_list *runasusers;
+    struct sudoers_str_list *runasgroups;
+    struct sudoers_str_list *options;
 };
 STAILQ_HEAD(sudo_role_list, sudo_role);
 
@@ -771,23 +771,23 @@ ldif_parse_attribute(char *str)
 }
 
 /*
- * Allocate a struct cvtsudoers_string, store str in it and
+ * Allocate a struct sudoers_string, store str in it and
  * insert into the specified strlist.
  */
 static void
-ldif_store_string(const char *str, struct cvtsudoers_str_list *strlist, bool sorted)
+ldif_store_string(const char *str, struct sudoers_str_list *strlist, bool sorted)
 {
-    struct cvtsudoers_string *ls;
+    struct sudoers_string *ls;
     debug_decl(ldif_store_string, SUDOERS_DEBUG_UTIL)
 
-    if ((ls = cvtsudoers_string_alloc(str)) == NULL) {
+    if ((ls = sudoers_string_alloc(str)) == NULL) {
 	sudo_fatalx(U_("%s: %s"), __func__,
 	    U_("unable to allocate memory"));
     }
     if (!sorted) {
 	STAILQ_INSERT_TAIL(strlist, ls, entries);
     } else {
-	struct cvtsudoers_string *prev, *next;
+	struct sudoers_string *prev, *next;
 
 	/* Insertion sort, list is small. */
 	prev = STAILQ_FIRST(strlist);
@@ -808,13 +808,13 @@ ldif_store_string(const char *str, struct cvtsudoers_str_list *strlist, bool sor
 
 /*
  * Iterator for sudo_ldap_role_to_priv().
- * Takes a pointer to a struct cvtsudoers_string *.
+ * Takes a pointer to a struct sudoers_string *.
  * Returns the string or NULL if we've reached the end.
  */
 static char *
-cvtsudoers_string_iter(void **vp)
+sudoers_string_iter(void **vp)
 {
-    struct cvtsudoers_string *ls = *vp;
+    struct sudoers_string *ls = *vp;
 
     if (ls == NULL)
 	return NULL;
@@ -840,10 +840,10 @@ role_order_cmp(const void *va, const void *vb)
  */
 static void
 ldif_store_options(struct sudoers_parse_tree *parse_tree,
-    struct cvtsudoers_str_list *options)
+    struct sudoers_str_list *options)
 {
     struct defaults *d;
-    struct cvtsudoers_string *ls;
+    struct sudoers_string *ls;
     char *var, *val;
     debug_decl(ldif_store_options, SUDOERS_DEBUG_UTIL)
 
@@ -874,10 +874,10 @@ ldif_store_options(struct sudoers_parse_tree *parse_tree,
 static int
 str_list_cmp(const void *aa, const void *bb)
 {
-    const struct cvtsudoers_str_list *a = aa;
-    const struct cvtsudoers_str_list *b = bb;
-    const struct cvtsudoers_string *lsa = STAILQ_FIRST(a);
-    const struct cvtsudoers_string *lsb = STAILQ_FIRST(b);
+    const struct sudoers_str_list *a = aa;
+    const struct sudoers_str_list *b = bb;
+    const struct sudoers_string *lsa = STAILQ_FIRST(a);
+    const struct sudoers_string *lsb = STAILQ_FIRST(b);
     int ret;
 
     while (lsa != NULL && lsb != NULL) {
@@ -890,9 +890,9 @@ str_list_cmp(const void *aa, const void *bb)
 }
 
 static int
-str_list_cache(struct rbtree *cache, struct cvtsudoers_str_list **strlistp)
+str_list_cache(struct rbtree *cache, struct sudoers_str_list **strlistp)
 {
-    struct cvtsudoers_str_list *strlist = *strlistp;
+    struct sudoers_str_list *strlist = *strlistp;
     struct rbnode *node;
     int ret;
     debug_decl(str_list_cache, SUDOERS_DEBUG_UTIL)
@@ -924,7 +924,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
     bool reuse_runas)
 {
     struct privilege *priv;
-    struct cvtsudoers_string *ls;
+    struct sudoers_string *ls;
     struct userspec *us;
     struct member *m;
     debug_decl(role_to_sudoers, SUDOERS_DEBUG_UTIL)
@@ -1009,7 +1009,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	STAILQ_FIRST(role->runasusers), STAILQ_FIRST(role->runasgroups),
 	STAILQ_FIRST(role->cmnds), STAILQ_FIRST(role->options),
 	role->notbefore, role->notafter, true, store_options,
-	cvtsudoers_string_iter);
+	sudoers_string_iter);
     if (priv == NULL) {
 	sudo_fatalx(U_("%s: %s"), __func__,
 	    U_("unable to allocate memory"));

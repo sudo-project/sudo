@@ -80,7 +80,7 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
     struct cache_item_pw *pwitem;
     struct passwd pw, *newpw;
-    struct cvtsudoers_string *s = NULL;
+    struct sudoers_string *s = NULL;
     debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS)
 
     /* Look up name or uid in filter list. */
@@ -186,7 +186,7 @@ cvtsudoers_make_gritem(gid_t gid, const char *name)
     size_t nsize, psize, nmem, total, len;
     struct cache_item_gr *gritem;
     struct group gr, *newgr;
-    struct cvtsudoers_string *s = NULL;
+    struct sudoers_string *s = NULL;
     debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS)
 
     /* Look up name or gid in filter list. */
@@ -299,7 +299,7 @@ cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
     char *cp;
     size_t nsize, total;
     struct cache_item_gidlist *glitem;
-    struct cvtsudoers_string *s;
+    struct sudoers_string *s;
     struct gid_list *gidlist;
     GETGROUPS_T *gids = NULL;
     int i, ngids = 0;
@@ -397,7 +397,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     char *cp;
     size_t nsize, ngroups, total, len;
     struct cache_item_grlist *grlitem;
-    struct cvtsudoers_string *s;
+    struct sudoers_string *s;
     struct group_list *grlist;
     int groupname_len;
     debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS)

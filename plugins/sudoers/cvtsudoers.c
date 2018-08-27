@@ -548,7 +548,7 @@ cvtsudoers_parse_filter(char *expression)
 	 *	user=foo,group=bar,host=baz
 	 */
 	char *keyword;
-	struct cvtsudoers_string *s;
+	struct sudoers_string *s;
 
 	if ((s = malloc(sizeof(*s))) == NULL) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
@@ -579,65 +579,6 @@ cvtsudoers_parse_filter(char *expression)
     }
 
     debug_return_bool(true);
-}
-
-struct cvtsudoers_string *
-cvtsudoers_string_alloc(const char *s)
-{
-    struct cvtsudoers_string *cs;
-    debug_decl(cvtsudoers_string_alloc, SUDOERS_DEBUG_UTIL)
-
-    if ((cs = malloc(sizeof(*cs))) != NULL) {
-	if ((cs->str = strdup(s)) == NULL) {
-	    free(cs);
-	    cs = NULL;
-	}
-    }
-
-    debug_return_ptr(cs);
-}
-
-void
-cvtsudoers_string_free(struct cvtsudoers_string *cs)
-{
-    if (cs != NULL) {
-	free(cs->str);
-	free(cs);
-    }
-}
-
-struct cvtsudoers_str_list *
-str_list_alloc(void)
-{
-    struct cvtsudoers_str_list *strlist;
-    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
-
-    strlist = malloc(sizeof(*strlist));
-    if (strlist != NULL) {
-	STAILQ_INIT(strlist);
-	strlist->refcnt = 1;
-    }
-
-    debug_return_ptr(strlist);
-}
-
-void
-str_list_free(void *v)
-{
-    struct cvtsudoers_str_list *strlist = v;
-    struct cvtsudoers_string *first;
-    debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
-
-    if (strlist != NULL) {
-	if (--strlist->refcnt == 0) {
-	    while ((first = STAILQ_FIRST(strlist)) != NULL) {
-		STAILQ_REMOVE_HEAD(strlist, entries);
-		cvtsudoers_string_free(first);
-	    }
-	    free(strlist);
-	}
-    }
-    debug_return;
 }
 
 static bool
@@ -680,7 +621,7 @@ static bool
 userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
     struct member_list *users, struct cvtsudoers_config *conf)
 {
-    struct cvtsudoers_string *s;
+    struct sudoers_string *s;
     struct member *m, *next;
     bool ret = false;
     debug_decl(userlist_matches_filter, SUDOERS_DEBUG_UTIL)
@@ -755,7 +696,7 @@ static bool
 hostlist_matches_filter(struct sudoers_parse_tree *parse_tree,
     struct member_list *hostlist, struct cvtsudoers_config *conf)
 {
-    struct cvtsudoers_string *s;
+    struct sudoers_string *s;
     struct member *m, *next;
     char *lhost, *shost;
     bool ret = false;
