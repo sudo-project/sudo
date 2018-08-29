@@ -137,6 +137,8 @@ validate_iolog_info(const char *logfile)
 	return false;
     }
 
+    free_log_info(info);
+
     return true;
 }
 
