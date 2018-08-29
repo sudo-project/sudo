@@ -109,8 +109,7 @@ parse_logfile(const char *logfile)
 	goto bad;
     }
     *ep = '\0';
-    li->tstamp = sizeof(time_t) == 4 ? strtonum(cp, INT_MIN, INT_MAX, &errstr) :
-	strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
+    li->tstamp = strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warn(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
 	goto bad;
