@@ -28,6 +28,9 @@ What's new in Sudo 1.8.25
  * The testsudoers utility now supports querying an LDIF-format
    policy.
 
+ * Sudo now sets the LOGIN environment variable to the same value as
+   LOGNAME on AIX systems.  Bug #848.
+
 What's new in Sudo 1.8.24
 
  * The LDAP and SSS back-ends now use the same rule evaluation code

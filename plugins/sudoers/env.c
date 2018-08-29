@@ -54,42 +54,55 @@
  * Flags used in rebuild_env()
  */
 #undef DID_TERM
-#define DID_TERM	0x0001
+#define DID_TERM	0x00000001
 #undef DID_PATH
-#define DID_PATH	0x0002
+#define DID_PATH	0x00000002
 #undef DID_HOME
-#define DID_HOME	0x0004
+#define DID_HOME	0x00000004
 #undef DID_SHELL
-#define DID_SHELL	0x0008
+#define DID_SHELL	0x00000008
 #undef DID_LOGNAME
-#define DID_LOGNAME	0x0010
+#define DID_LOGNAME	0x00000010
 #undef DID_USER
-#define DID_USER    	0x0020
+#define DID_USER    	0x00000020
 #undef DID_USERNAME
-#define DID_USERNAME   	0x0040
+#define DID_USERNAME   	0x00000040
+#undef DID_LOGIN
+#define DID_LOGIN   	0x00000080
 #undef DID_MAIL
-#define DID_MAIL   	0x0080
+#define DID_MAIL   	0x00000100
 #undef DID_MAX
-#define DID_MAX    	0x00ff
+#define DID_MAX    	0x0000ffff
 
 #undef KEPT_TERM
-#define KEPT_TERM	0x0100
+#define KEPT_TERM	0x00010000
 #undef KEPT_PATH
-#define KEPT_PATH	0x0200
+#define KEPT_PATH	0x00020000
 #undef KEPT_HOME
-#define KEPT_HOME	0x0400
+#define KEPT_HOME	0x00040000
 #undef KEPT_SHELL
-#define KEPT_SHELL	0x0800
+#define KEPT_SHELL	0x00080000
 #undef KEPT_LOGNAME
-#define KEPT_LOGNAME	0x1000
+#define KEPT_LOGNAME	0x00100000
 #undef KEPT_USER
-#define KEPT_USER    	0x2000
+#define KEPT_USER    	0x00200000
 #undef KEPT_USERNAME
-#define KEPT_USERNAME	0x4000
+#define KEPT_USERNAME	0x00400000
+#undef KEPT_LOGIN
+#define KEPT_LOGIN	0x00800000
 #undef KEPT_MAIL
-#define KEPT_MAIL	0x8000
+#define KEPT_MAIL	0x01000000
 #undef KEPT_MAX
-#define KEPT_MAX    	0xff00
+#define KEPT_MAX    	0xffff0000
+
+/*
+ * AIX sets the LOGIN environment variable too.
+ */
+#ifdef _AIX
+# define KEPT_USER_VARIABLES (KEPT_LOGIN|KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)
+#else
+# define KEPT_USER_VARIABLES (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)
+#endif
 
 struct environment {
     char **envp;		/* pointer to the new environment */
@@ -768,6 +781,10 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 		SET(*didvar, DID_HOME);
 	    break;
 	case 'L':
+#ifdef _AIX
+	    if (strncmp(ep, "LOGIN=", 8) == 0)
+		SET(*didvar, DID_LOGIN);
+#endif
 	    if (strncmp(ep, "LOGNAME=", 8) == 0)
 		SET(*didvar, DID_LOGNAME);
 	    break;
@@ -910,6 +927,10 @@ rebuild_env(void)
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    CHECK_SETENV2("SHELL", runas_pw->pw_shell,
 		ISSET(didvar, DID_SHELL), true);
+#ifdef _AIX
+	    CHECK_SETENV2("LOGIN", runas_pw->pw_name,
+		ISSET(didvar, DID_LOGIN), true);
+#endif
 	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name,
 		ISSET(didvar, DID_LOGNAME), true);
 	    CHECK_SETENV2("USER", runas_pw->pw_name,
@@ -919,6 +940,10 @@ rebuild_env(void)
 	} else {
 	    /* We will set LOGNAME later in the def_set_logname case. */
 	    if (!def_set_logname) {
+#ifdef _AIX
+		if (!ISSET(didvar, DID_LOGIN))
+		    CHECK_SETENV2("LOGIN", user_name, false, true);
+#endif
 		if (!ISSET(didvar, DID_LOGNAME))
 		    CHECK_SETENV2("LOGNAME", user_name, false, true);
 		if (!ISSET(didvar, DID_USER))
@@ -977,25 +1002,31 @@ rebuild_env(void)
     }
 
     /*
-     * Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is not
+     * Set LOGIN, LOGNAME, USER and USERNAME to target if "set_logname" is not
      * disabled.  We skip this if we are running a login shell (because
      * they have already been set).
      */
     if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	if (!ISSET(didvar, (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME))) {
-	    /* Nothing preserved, set all three. */
+	if ((didvar & KEPT_USER_VARIABLES) == 0) {
+	    /* Nothing preserved, set them all. */
+#ifdef _AIX
+	    CHECK_SETENV2("LOGIN", runas_pw->pw_name, true, true);
+#endif
 	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name, true, true);
 	    CHECK_SETENV2("USER", runas_pw->pw_name, true, true);
 	    CHECK_SETENV2("USERNAME", runas_pw->pw_name, true, true);
-	} else if ((didvar & (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)) !=
-	    (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)) {
+	} else if ((didvar & KEPT_USER_VARIABLES) != KEPT_USER_VARIABLES) {
 	    /*
-	     * Preserved some of LOGNAME, USER, USERNAME but not all.
+	     * Preserved some of LOGIN, LOGNAME, USER, USERNAME but not all.
 	     * Make the unset ones match so we don't end up with some
 	     * set to the invoking user and others set to the runas user.
 	     */
 	    if (ISSET(didvar, KEPT_LOGNAME))
 		cp = sudo_getenv("LOGNAME");
+#ifdef _AIX
+	    else if (ISSET(didvar, KEPT_LOGIN))
+		cp = sudo_getenv("LOGIN");
+#endif
 	    else if (ISSET(didvar, KEPT_USER))
 		cp = sudo_getenv("USER");
 	    else if (ISSET(didvar, KEPT_USERNAME))
@@ -1003,6 +1034,10 @@ rebuild_env(void)
 	    else
 		cp = NULL;
 	    if (cp != NULL) {
+#ifdef _AIX
+		if (!ISSET(didvar, KEPT_LOGIN))
+		    CHECK_SETENV2("LOGIN", cp, true, true);
+#endif
 		if (!ISSET(didvar, KEPT_LOGNAME))
 		    CHECK_SETENV2("LOGNAME", cp, true, true);
 		if (!ISSET(didvar, KEPT_USER))
