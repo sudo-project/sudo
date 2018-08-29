@@ -59,8 +59,10 @@ struct timing_closure {
 # define IOFD_MAX	6
 #endif
 
-bool parse_timing(const char *buf, double *seconds, struct timing_closure *timing);
+bool parse_timing(const char *buf, struct timespec *delay, struct timing_closure *timing);
+char *parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
 struct log_info *parse_logfile(const char *logfile);
 void free_log_info(struct log_info *li);
+void adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 
 #endif /* SUDOERS_IOLOG_UTIL_H */

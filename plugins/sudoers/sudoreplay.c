@@ -745,7 +745,6 @@ read_timing_record(struct replay_closure *closure)
 {
     struct timespec timeout;
     char buf[LINE_MAX];
-    double delay;
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
@@ -756,7 +755,7 @@ read_timing_record(struct replay_closure *closure)
 
     /* Parse timing file record. */
     buf[strcspn(buf, "\n")] = '\0';
-    if (!parse_timing(buf, &delay, &closure->timing))
+    if (!parse_timing(buf, &timeout, &closure->timing))
 	sudo_fatalx(U_("invalid timing file line: %s"), buf);
 
     /* Record number bytes to read. */
@@ -768,18 +767,8 @@ read_timing_record(struct replay_closure *closure)
     	closure->iobuf.toread = closure->timing.u.nbytes;
     }
 
-    /* Adjust delay using speed factor. */
-    delay /= speed_factor;
-
-    /* Convert delay to a timespec. */
-    timeout.tv_sec = delay;
-    timeout.tv_nsec = (delay - timeout.tv_sec) * 1000000000.0;
-
-    /* Clamp timeout to max delay. */
-    if (closure->timing.max_delay != NULL) {
-	if (sudo_timespeccmp(&timeout, closure->timing.max_delay, >))
-	    timeout = *closure->timing.max_delay;
-    }
+    /* Adjust delay using speed factor and max_delay. */
+    adjust_delay(&timeout, closure->timing.max_delay, speed_factor);
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timeout, false) == -1)

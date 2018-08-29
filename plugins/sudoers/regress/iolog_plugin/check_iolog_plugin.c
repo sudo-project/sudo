@@ -147,7 +147,7 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 {
     struct timing_closure timing;
     char buf[LINE_MAX];
-    double delay;
+    struct timespec delay;
 
     if (!fgets(buf, sizeof(buf), fp)) {
 	sudo_warn("unable to read timing file");
@@ -181,21 +181,23 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	    return false;
 	}
     }
-    if (delay > 0.01) {
-	sudo_warnx("record %d: got excessive delay %f", recno, delay);
+    if (delay.tv_sec != 0 || delay.tv_nsec > 10000000) {
+	sudo_warnx("record %d: got excessive delay %lld.%09ld", recno,
+	    (long long)delay.tv_sec, delay.tv_nsec);
 	return false;
     }
 
     return true;
 }
 
-int
-main(int argc, char *argv[], char *envp[])
+
+/*
+ * Test sudoers I/O log plugin endpoints.
+ */
+void
+test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 {
-    struct passwd pw, rpw, *tpw;
-    int rc, tests = 0, errors = 0;
-    int cmnd_argc = 1;
-    const char *iolog_dir;
+    int rc, cmnd_argc = 1;
     char buf[1024], iolog_path[PATH_MAX];
     char runas_gid[64], runas_uid[64];
     FILE *fp;
@@ -230,6 +232,114 @@ main(int argc, char *argv[], char *envp[])
     };
     const char output[] = "uid=0(root) gid=0(wheel)\r\n";
 
+    /* Set runas uid/gid to root. */
+    snprintf(runas_uid, sizeof(runas_uid), "runas_uid=%u",
+	(unsigned int)runas_pw->pw_uid);
+    snprintf(runas_gid, sizeof(runas_gid), "runas_gid=%u",
+	(unsigned int)runas_pw->pw_gid);
+
+    /* Set path to the iolog directory the user passed in. */
+    snprintf(iolog_path, sizeof(iolog_path), "iolog_path=%s", iolog_dir);
+
+    /* Test open endpoint. */
+    rc = sudoers_io.open(SUDO_API_VERSION, NULL, sudo_printf_int, settings,
+	user_info, command_info, cmnd_argc, cmnd_argv, envp, NULL);
+    (*ntests)++;
+    if (rc != 1) {
+	sudo_warnx("I/O log open endpoint failed");
+	(*nerrors)++;
+	return;
+    }
+
+    /* Validate I/O log info file. */
+    (*ntests)++;
+    snprintf(iolog_path, sizeof(iolog_path), "%s/log", iolog_dir);
+    if (!validate_iolog_info(iolog_path))
+	(*nerrors)++;
+
+    /* Test log_ttyout endpoint. */
+    rc = sudoers_io.log_ttyout(output, strlen(output));
+    (*ntests)++;
+    if (rc != 1) {
+	sudo_warnx("I/O log_ttyout endpoint failed");
+	(*nerrors)++;
+	return;
+    }
+
+    /* Test change_winsize endpoint (twice). */
+    rc = sudoers_io.change_winsize(32, 128);
+    (*ntests)++;
+    if (rc != 1) {
+	sudo_warnx("I/O change_winsize endpoint failed");
+	(*nerrors)++;
+	return;
+    }
+    rc = sudoers_io.change_winsize(24, 80);
+    (*ntests)++;
+    if (rc != 1) {
+	sudo_warnx("I/O change_winsize endpoint failed");
+	(*nerrors)++;
+	return;
+    }
+
+    /* Close the plugin. */
+    sudoers_io.close(0, 0);
+
+    /* Validate the timing file. */
+    snprintf(iolog_path, sizeof(iolog_path), "%s/timing", iolog_dir);
+    (*ntests)++;
+    if ((fp = fopen(iolog_path, "r")) == NULL) {
+	sudo_warn("unable to open %s", iolog_path);
+	(*nerrors)++;
+	return;
+    }
+
+    /* Line 1: output of id command. */
+    if (!validate_timing(fp, 1, IOFD_TTYOUT, strlen(output), 0)) {
+	(*nerrors)++;
+	return;
+    }
+
+    /* Line 2: window size change. */
+    if (!validate_timing(fp, 2, IOFD_TIMING, 32, 128)) {
+	(*nerrors)++;
+	return;
+    }
+
+    /* Line 3: window size change. */
+    if (!validate_timing(fp, 3, IOFD_TIMING, 24, 80)) {
+	(*nerrors)++;
+	return;
+    }
+
+    /* Validate ttyout log file. */
+    snprintf(iolog_path, sizeof(iolog_path), "%s/ttyout", iolog_dir);
+    (*ntests)++;
+    fclose(fp);
+    if ((fp = fopen(iolog_path, "r")) == NULL) {
+	sudo_warn("unable to open %s", iolog_path);
+	(*nerrors)++;
+	return;
+    }
+    if (!fgets(buf, sizeof(buf), fp)) {
+	sudo_warn("unable to read %s", iolog_path);
+	(*nerrors)++;
+	return;
+    }
+    if (strcmp(buf, output) != 0) {
+	sudo_warnx("ttylog mismatch: want \"%s\", got \"%s\"", output, buf);
+	(*nerrors)++;
+	return;
+    }
+}
+
+int
+main(int argc, char *argv[], char *envp[])
+{
+    struct passwd pw, rpw, *tpw;
+    int tests = 0, errors = 0;
+    const char *iolog_dir;
+
     initprogname(argc > 0 ? argv[0] : "check_iolog_plugin");
 
     if (argc != 2)
@@ -248,113 +358,14 @@ main(int argc, char *argv[], char *envp[])
     sudo_user.pw = &pw;
     sudo_user._runas_pw = &rpw;
 
-    /* Set runas uid/gid to root. */
-    snprintf(runas_uid, sizeof(runas_uid), "runas_uid=%u",
-	(unsigned int)rpw.pw_uid);
-    snprintf(runas_gid, sizeof(runas_gid), "runas_gid=%u",
-	(unsigned int)rpw.pw_gid);
-
-    /* Set path to the iolog directory the user passed in. */
-    snprintf(iolog_path, sizeof(iolog_path), "iolog_path=%s", iolog_dir);
-
     /* Set iolog uid/gid to invoking user. */
     iolog_uid = geteuid();
     iolog_gid = getegid();
 
-    /* Test open endpoint. */
-    rc = sudoers_io.open(SUDO_API_VERSION, NULL, sudo_printf_int, settings,
-	user_info, command_info, cmnd_argc, cmnd_argv, envp, NULL);
-    tests++;
-    if (rc != 1) {
-	sudo_warnx("I/O log open endpoint failed");
-	errors++;
-	goto done;
-    }
+    test_endpoints(&tests, &errors, iolog_dir, envp);
 
-    /* Validate I/O log info file. */
-    tests++;
-    snprintf(iolog_path, sizeof(iolog_path), "%s/log", iolog_dir);
-    if (!validate_iolog_info(iolog_path))
-	errors++;
-
-    /* Test log_ttyout endpoint. */
-    rc = sudoers_io.log_ttyout(output, strlen(output));
-    tests++;
-    if (rc != 1) {
-	sudo_warnx("I/O log_ttyout endpoint failed");
-	errors++;
-	goto done;
-    }
-
-    /* Test change_winsize endpoint (twice). */
-    rc = sudoers_io.change_winsize(32, 128);
-    tests++;
-    if (rc != 1) {
-	sudo_warnx("I/O change_winsize endpoint failed");
-	errors++;
-	goto done;
-    }
-    rc = sudoers_io.change_winsize(24, 80);
-    tests++;
-    if (rc != 1) {
-	sudo_warnx("I/O change_winsize endpoint failed");
-	errors++;
-	goto done;
-    }
-
-    /* Close the plugin. */
-    sudoers_io.close(0, 0);
-
-    /* Validate the timing file. */
-    snprintf(iolog_path, sizeof(iolog_path), "%s/timing", iolog_dir);
-    tests++;
-    if ((fp = fopen(iolog_path, "r")) == NULL) {
-	sudo_warn("unable to open %s", iolog_path);
-	errors++;
-	goto done;
-    }
-
-    /* Line 1: output of id command. */
-    if (!validate_timing(fp, 1, IOFD_TTYOUT, strlen(output), 0)) {
-	errors++;
-	goto done;
-    }
-
-    /* Line 2: window size change. */
-    if (!validate_timing(fp, 2, IOFD_TIMING, 32, 128)) {
-	errors++;
-	goto done;
-    }
-
-    /* Line 3: window size change. */
-    if (!validate_timing(fp, 3, IOFD_TIMING, 24, 80)) {
-	errors++;
-	goto done;
-    }
-
-    /* Validate ttyout log file. */
-    snprintf(iolog_path, sizeof(iolog_path), "%s/ttyout", iolog_dir);
-    tests++;
-    fclose(fp);
-    if ((fp = fopen(iolog_path, "r")) == NULL) {
-	sudo_warn("unable to open %s", iolog_path);
-	errors++;
-	goto done;
-    }
-    if (!fgets(buf, sizeof(buf), fp)) {
-	sudo_warn("unable to read %s", iolog_path);
-	errors++;
-	goto done;
-    }
-    if (strcmp(buf, output) != 0) {
-	sudo_warnx("ttylog mismatch: want \"%s\", got \"%s\"", output, buf);
-	errors++;
-	goto done;
-    }
-
-done:
     if (tests != 0) {
-	printf("iolog_plugin: %d test%s run, %d errors, %d%% success rate\n",
+	printf("check_iolog_plugin: %d test%s run, %d errors, %d%% success rate\n",
 	    tests, tests == 1 ? "" : "s", errors,
 	    (tests - errors) * 100 / tests);
     }
