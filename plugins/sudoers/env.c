@@ -917,7 +917,7 @@ rebuild_env(void)
 		env_update_didvar(*ep, &didvar);
 	    }
 	}
-	didvar |= didvar << 8;		/* convert DID_* to KEPT_* */
+	didvar |= didvar << 16;		/* convert DID_* to KEPT_* */
 
 	/*
 	 * Add in defaults.  In -i mode these come from the runas user,
