@@ -1222,12 +1222,12 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
     }
 
-    debug_return_ptr(ldap_userspecs);
+    debug_return_bool(true);
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     free_userspecs(ldap_userspecs);
-    debug_return_ptr(NULL);
+    debug_return_bool(false);
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
