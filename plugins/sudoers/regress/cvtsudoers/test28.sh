@@ -57,7 +57,7 @@ sudoRunAsGroup: ALL
 sudoHost: +sudo-hosts
 sudoCommand: ALL
 sudoOption: !authenticate
-sudoOrder: 10
+sudoOrder: 20
 
 # millert, SUDOers, sudo.ws
 dn: cn=millert,ou=SUDOers,dc=sudo,dc=ws
