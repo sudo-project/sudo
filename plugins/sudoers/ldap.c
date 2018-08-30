@@ -1724,7 +1724,8 @@ done:
 }
 
 /*
- * Comparison function for ldap_entry_wrapper structures, descending order.
+ * Comparison function for ldap_entry_wrapper structures, ascending order.
+ * This should match role_order_cmp() in parse_ldif.c.
  */
 static int
 ldap_entry_compare(const void *a, const void *b)
@@ -1733,8 +1734,8 @@ ldap_entry_compare(const void *a, const void *b)
     const struct ldap_entry_wrapper *bw = b;
     debug_decl(ldap_entry_compare, SUDOERS_DEBUG_LDAP)
 
-    debug_return_int(bw->order < aw->order ? -1 :
-	(bw->order > aw->order ? 1 : 0));
+    debug_return_int(aw->order < bw->order ? -1 :
+	(aw->order > bw->order ? 1 : 0));
 }
 
 /*
