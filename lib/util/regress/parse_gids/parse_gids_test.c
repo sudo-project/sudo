@@ -51,7 +51,7 @@ struct parse_gids_test {
 
 static const GETGROUPS_T test1_out[] = { 0, 1, 2, 3, 4 };
 static const GETGROUPS_T test2_out[] = { 1, 2, 3, 4 };
-static const GETGROUPS_T test3_out[] = { 0, 1, -2, 3, 4 };
+static const GETGROUPS_T test3_out[] = { 0, 1, (gid_t)-2, 3, 4 };
 
 /* XXX - test syntax errors too */
 static struct parse_gids_test test_data[] = {

@@ -1231,7 +1231,8 @@ oom:
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-static unsigned int (*sudo_gss_krb5_ccache_name)(unsigned int *minor_status, const char *name, const char **old_name);
+typedef unsigned int (*sudo_gss_krb5_ccache_name_t)(unsigned int *minor_status, const char *name, const char **old_name);
+static sudo_gss_krb5_ccache_name_t sudo_gss_krb5_ccache_name;
 
 static int
 sudo_set_krb5_ccache_name(const char *name, const char **old_name)
@@ -1242,7 +1243,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
     debug_decl(sudo_set_krb5_ccache_name, SUDOERS_DEBUG_LDAP)
 
     if (!initialized) {
-	sudo_gss_krb5_ccache_name =
+	sudo_gss_krb5_ccache_name = (sudo_gss_krb5_ccache_name_t)
 	    sudo_dso_findsym(SUDO_DSO_DEFAULT, "gss_krb5_ccache_name");
 	initialized = true;
     }
