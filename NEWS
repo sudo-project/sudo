@@ -31,6 +31,9 @@ What's new in Sudo 1.8.25
  * Sudo now sets the LOGIN environment variable to the same value as
    LOGNAME on AIX systems.  Bug #848.
 
+ * Fixed a regression introduced in sudo 1.8.24 where the LDAP and
+   SSSD backends evaluated the rules in reverse sudoOrder.  Bug #849.
+
 What's new in Sudo 1.8.24
 
  * The LDAP and SSS back-ends now use the same rule evaluation code
