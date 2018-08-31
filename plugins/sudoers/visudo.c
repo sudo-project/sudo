@@ -960,6 +960,26 @@ done:
     debug_return_bool(ok);
 }
 
+static bool
+lock_sudoers(struct sudoersfile *entry)
+{
+    int ch;
+    debug_decl(lock_sudoers, SUDOERS_DEBUG_UTIL)
+
+    if (!sudo_lock_file(entry->fd, SUDO_TLOCK)) {
+	if (errno == EAGAIN || errno == EWOULDBLOCK) {
+	    sudo_warnx(U_("%s busy, try again later"), entry->path);
+	    debug_return_bool(false);
+	}
+	sudo_warn(U_("unable to lock %s"), entry->path);
+	(void) fputs(_("Edit anyway? [y/N]"), stdout);
+	ch = getchar();
+	if (tolower(ch) != 'y')
+	    debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
 /*
  * Used to open (and lock) the initial sudoers file and to also open
  * any subsequent files #included via a callback from the parser.
@@ -995,8 +1015,8 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    free(entry);
 	    debug_return_ptr(NULL);
 	}
-	if (!checkonly && !sudo_lock_file(entry->fd, SUDO_TLOCK))
-	    sudo_fatalx(U_("%s busy, try again later"), entry->path);
+	if (!checkonly && !lock_sudoers(entry))
+	    debug_return_ptr(NULL);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    sudo_fatal("%s", entry->path);
 	TAILQ_INSERT_TAIL(&sudoerslist, entry, entries);
