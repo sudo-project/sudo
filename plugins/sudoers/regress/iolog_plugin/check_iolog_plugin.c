@@ -131,7 +131,7 @@ validate_iolog_info(const char *logfile)
 	return false;
     }
 
-    if (info->tstamp < now || info->tstamp > now + 30) {
+    if (info->tstamp < now - 10 || info->tstamp > now + 10) {
 	sudo_warnx("bad tstamp: want %lld got %lld", (long long)now,
 	    (long long)info->tstamp);
 	return false;
