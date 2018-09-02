@@ -90,7 +90,7 @@ static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool);
-static int print_unused(void *, void *);
+static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(char *, char **);
 static void parse_sudoers_options(void);
@@ -721,7 +721,8 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
     } else {
 	if (chown(sp->tpath, sudoers_uid, sudoers_gid) != 0) {
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
-		sp->tpath, sudoers_uid, sudoers_gid);
+		sp->tpath, (unsigned int)sudoers_uid,
+		(unsigned int)sudoers_gid);
 	    goto done;
 	}
 	if (chmod(sp->tpath, sudoers_mode) != 0) {
@@ -878,7 +879,7 @@ check_owner(const char *path, bool quiet)
 	    if (!quiet) {
 		fprintf(stderr,
 		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
-		    path, sudoers_uid, sudoers_gid);
+		    path, (unsigned int)sudoers_uid, (unsigned int)sudoers_gid);
 		}
 	}
 	if ((sb.st_mode & ALLPERMS) != sudoers_mode) {
@@ -959,6 +960,26 @@ done:
     debug_return_bool(ok);
 }
 
+static bool
+lock_sudoers(struct sudoersfile *entry)
+{
+    int ch;
+    debug_decl(lock_sudoers, SUDOERS_DEBUG_UTIL)
+
+    if (!sudo_lock_file(entry->fd, SUDO_TLOCK)) {
+	if (errno == EAGAIN || errno == EWOULDBLOCK) {
+	    sudo_warnx(U_("%s busy, try again later"), entry->path);
+	    debug_return_bool(false);
+	}
+	sudo_warn(U_("unable to lock %s"), entry->path);
+	(void) fputs(_("Edit anyway? [y/N]"), stdout);
+	ch = getchar();
+	if (tolower(ch) != 'y')
+	    debug_return_bool(false);
+    }
+    debug_return_bool(true);
+}
+
 /*
  * Used to open (and lock) the initial sudoers file and to also open
  * any subsequent files #included via a callback from the parser.
@@ -994,8 +1015,8 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    free(entry);
 	    debug_return_ptr(NULL);
 	}
-	if (!checkonly && !sudo_lock_file(entry->fd, SUDO_TLOCK))
-	    sudo_fatalx(U_("%s busy, try again later"), entry->path);
+	if (!checkonly && !lock_sudoers(entry))
+	    debug_return_ptr(NULL);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    sudo_fatal("%s", entry->path);
 	TAILQ_INSERT_TAIL(&sudoerslist, entry, entries);
@@ -1130,10 +1151,8 @@ check_aliases(bool strict, bool quiet)
 }
 
 static int
-print_unused(void *v1, void *v2)
+print_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 {
-    struct alias *a = (struct alias *)v1;
-
     fprintf(stderr, U_("Warning: %s:%d unused %s \"%s\""),
 	a->file, a->lineno, alias_type_to_string(a->type), a->name);
     fputc('\n', stderr);

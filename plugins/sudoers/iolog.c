@@ -18,7 +18,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -41,12 +40,6 @@
 #include "sudoers.h"
 #include "iolog.h"
 
-struct script_buf {
-    int len; /* buffer length (how much read in) */
-    int off; /* write position (how much already consumed) */
-    char buf[16 * 1024];
-};
-
 /* XXX - separate sudoers.h and iolog.h? */
 #undef runas_pw
 #undef runas_gr
@@ -67,7 +60,7 @@ struct iolog_details {
 static struct iolog_details iolog_details;
 static bool iolog_compress = false;
 static bool warned = false;
-static struct timeval last_time;
+static struct timespec last_time;
 static unsigned int sessid_max = SESSID_MAX;
 static mode_t iolog_filemode = S_IRUSR|S_IWUSR;
 static mode_t iolog_dirmode = S_IRWXU;
@@ -785,12 +778,13 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
  */
 static bool
 write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
-    char * const argv[], struct timeval *now)
+    char * const argv[])
 {
+    time_t now;
     char * const *av;
     FILE *fp;
     int fd;
-    bool ret;
+    bool ret = true;
     debug_decl(write_info_log, SUDOERS_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
@@ -806,7 +800,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 	    (int)iolog_uid, (int)iolog_gid, pathbuf);
     }
 
-    fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
+    fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)time(&now),
 	details->user ? details->user : "unknown", details->runas_pw->pw_name,
 	details->runas_gr ? details->runas_gr->gr_name : "",
 	details->tty ? details->tty : "unknown", details->lines, details->cols,
@@ -818,8 +812,12 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     }
     fputc('\n', fp);
     fflush(fp);
-
-    ret = !ferror(fp);
+    if (ferror(fp)) {
+	log_warning(SLOG_SEND_MAIL,
+	    N_("unable to write to I/O log file: %s"), strerror(errno));
+	warned = true;
+	ret = false;
+    }
     fclose(fp);
     debug_return_bool(ret);
 }
@@ -958,12 +956,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
 
     /* Write log file with user and command details. */
-    if (gettimeofday(&last_time, NULL) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to get time of day", __func__);
+    if (!write_info_log(pathbuf, len, &iolog_details, argv))
 	goto done;
-    }
-    write_info_log(pathbuf, len, &iolog_details, argv, &last_time);
 
     /* Create the timing and I/O log files. */
     for (i = 0; i < IOFD_MAX; i++) {
@@ -984,6 +978,12 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	sudoers_io.log_ttyin = NULL;
     if (!io_log_files[IOFD_TTYOUT].enabled)
 	sudoers_io.log_ttyout = NULL;
+
+    if (sudo_gettime_awake(&last_time) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get time of day", __func__);
+	goto done;
+    }
 
     ret = true;
 
@@ -1056,7 +1056,7 @@ sudoers_io_version(int verbose)
 static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
-    struct timeval now, delay;
+    struct timespec now, delay;
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
@@ -1068,7 +1068,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	debug_return_int(-1);
     }
 
-    if (gettimeofday(&now, NULL) == -1) {
+    if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
 	errstr = strerror(errno);
@@ -1081,9 +1081,9 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	goto done;
 
     /* Write timing file entry. */
-    sudo_timevalsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u\n", idx,
-	delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
+    sudo_timespecsub(&now, &last_time, &delay);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %u\n",
+	idx, (long long)delay.tv_sec, delay.tv_nsec, len);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);
@@ -1098,7 +1098,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 done:
     last_time.tv_sec = now.tv_sec;
-    last_time.tv_usec = now.tv_usec;
+    last_time.tv_nsec = now.tv_nsec;
 
     if (ret == -1) {
 	if (errstr != NULL && !warned) {
@@ -1149,14 +1149,14 @@ sudoers_io_log_stderr(const char *buf, unsigned int len)
 static int
 sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
 {
-    struct timeval now, delay;
+    struct timespec now, delay;
     unsigned int len;
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
     debug_decl(sudoers_io_change_winsize, SUDOERS_DEBUG_PLUGIN)
 
-    if (gettimeofday(&now, NULL) == -1) {
+    if (sudo_gettime_awake(&now) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to get time of day", __func__);
 	errstr = strerror(errno);
@@ -1164,10 +1164,9 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
     }
 
     /* Write window change event to the timing file. */
-    sudo_timevalsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %f %u %u\n",
-	IOFD_TIMING, delay.tv_sec + ((double)delay.tv_usec / 1000000),
-	lines, cols);
+    sudo_timespecsub(&now, &last_time, &delay);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %u %u\n",
+	IOFD_TIMING, (long long)delay.tv_sec, delay.tv_nsec, lines, cols);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);
@@ -1182,7 +1181,7 @@ sudoers_io_change_winsize(unsigned int lines, unsigned int cols)
 
 done:
     last_time.tv_sec = now.tv_sec;
-    last_time.tv_usec = now.tv_usec;
+    last_time.tv_nsec = now.tv_nsec;
 
     if (ret == -1) {
 	if (errstr != NULL && !warned) {

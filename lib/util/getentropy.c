@@ -35,9 +35,12 @@
 #endif
 #include <sys/stat.h>
 #include <sys/time.h>
-#ifdef __linux__
-#include <linux/types.h>
-#include <linux/random.h>
+#ifdef HAVE_SYS_SYSCALL_H
+# include <sys/syscall.h>
+#endif
+#ifdef HAVE_LINUX_RANDOM_H
+# include <linux/types.h>
+# include <linux/random.h>
 #endif
 #include <errno.h>
 #include <fcntl.h>
@@ -583,7 +586,7 @@ getentropy_fallback(void *buf, size_t len)
 		errno = save_errno;
 		ret = 0;		/* satisfied */
 	} else {
-		errno == EIO;
+		errno = EIO;
 	}
 done:
 	sudo_digest_free(ctx);

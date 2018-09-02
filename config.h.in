@@ -69,6 +69,10 @@
 /* Define to 1 if you have the `auth_challenge' function. */
 #undef HAVE_AUTH_CHALLENGE
 
+/* Define to 1 if the `au_close' functions takes 4 arguments like Solaris 11.
+   */
+#undef HAVE_AU_CLOSE_SOLARIS11
+
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
 
@@ -298,6 +302,9 @@
 /* Define to 1 if you have the `getgrset' function. */
 #undef HAVE_GETGRSET
 
+/* Define to 1 if you have the `gethrtime' function. */
+#undef HAVE_GETHRTIME
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
@@ -464,13 +471,16 @@
 /* Define to 1 to enable Linux audit support. */
 #undef HAVE_LINUX_AUDIT
 
+/* Define to 1 if you have the <linux/random.h> header file. */
+#undef HAVE_LINUX_RANDOM_H
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
 
-/* Define to 1 if the system has the type `long long int'. */
+/* Define to 1 if the system has the type 'long long int'. */
 #undef HAVE_LONG_LONG_INT
 
 /* Define to 1 if you have the `lrand48' function. */
@@ -478,6 +488,9 @@
 
 /* Define to 1 if you have the <machine/endian.h> header file. */
 #undef HAVE_MACHINE_ENDIAN_H
+
+/* Define to 1 if you have the `mach_continuous_time' function. */
+#undef HAVE_MACH_CONTINUOUS_TIME
 
 /* Define to 1 if you have the <maillock.h> header file. */
 #undef HAVE_MAILLOCK_H
@@ -566,6 +579,9 @@
 /* Define to 1 if you have the `posix_spawnp' function. */
 #undef HAVE_POSIX_SPAWNP
 
+/* Define to 1 if you have the `ppoll' function. */
+#undef HAVE_PPOLL
+
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 
@@ -580,6 +596,9 @@
 
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
+
+/* Define to 1 if you have the `pselect' function. */
+#undef HAVE_PSELECT
 
 /* Define to 1 if you have the `pstat_getproc' function. */
 #undef HAVE_PSTAT_GETPROC
@@ -860,7 +879,7 @@
 /* Define to 1 if you have the `unsetenv' function. */
 #undef HAVE_UNSETENV
 
-/* Define to 1 if the system has the type `unsigned long long int'. */
+/* Define to 1 if the system has the type 'unsigned long long int'. */
 #undef HAVE_UNSIGNED_LONG_LONG_INT
 
 /* Define to 1 if you have the <util.h> header file. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2017
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -23,8 +23,16 @@
 #define SUDO_COMPAT_H
 
 #include <stdio.h>
-#include <stdarg.h>
-#include <stddef.h>	/* for rsize_t */
+#if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
+    !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
+# include <stdarg.h>
+#endif
+#if !defined(HAVE_MEMSET_S) && !defined(rsize_t)
+# include <stddef.h>	/* for rsize_t */
+# ifdef HAVE_STRING_H
+#  include <string.h>	/* for rsize_t on AIX */
+# endif /* HAVE_STRING_H */
+#endif /* HAVE_MEMSET_S && rsize_t */
 
 /*
  * Macros and functions that may be missing on some operating systems.

@@ -62,7 +62,8 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     debug_decl(switch_user, SUDO_DEBUG_EDIT)
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"set uid:gid to %u:%u(%u)", euid, egid, ngroups ? groups[0] : egid);
+	"set uid:gid to %u:%u(%u)", (unsigned int)euid, (unsigned int)egid,
+	ngroups ? (unsigned int)groups[0] : (unsigned int)egid);
 
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
@@ -77,7 +78,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     }
     if (euid != ROOT_UID) {
 	if (seteuid(euid) != 0)
-	    sudo_fatal("seteuid(%d)", (int)euid);
+	    sudo_fatal("seteuid(%u)", (unsigned int)euid);
     }
     errno = serrno;
 
@@ -606,9 +607,9 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	tf[j].osize = sb.st_size;
 	mtim_get(&sb, tf[j].omtim);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "seteuid(%u)", user_details.uid);
+	    "seteuid(%u)", (unsigned int)user_details.uid);
 	if (seteuid(user_details.uid) != 0)
-	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
+	    sudo_fatal("seteuid(%u)", (unsigned int)user_details.uid);
 	tfd = sudo_edit_mktemp(tf[j].ofile, &tf[j].tfile);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", ROOT_UID);
@@ -680,9 +681,9 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     for (i = 0; i < nfiles; i++) {
 	rc = -1;
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "seteuid(%u)", user_details.uid);
+	    "seteuid(%u)", (unsigned int)user_details.uid);
 	if (seteuid(user_details.uid) != 0)
-	    sudo_fatal("seteuid(%d)", (int)user_details.uid);
+	    sudo_fatal("seteuid(%u)", (unsigned int)user_details.uid);
 	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, NULL);
 	if (tfd != -1)

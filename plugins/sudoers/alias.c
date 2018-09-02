@@ -150,16 +150,41 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
 }
 
 /*
+ * Closure to adapt 2-arg rbapply() to 3-arg alias_apply().
+ */
+struct alias_apply_closure {
+    struct sudoers_parse_tree *parse_tree;
+    int (*func)(struct sudoers_parse_tree *, struct alias *, void *);
+    void *cookie;
+};
+
+/* Adapt rbapply() to alias_apply() calling convention. */
+static int
+alias_apply_func(void *v1, void *v2)
+{
+    struct alias *a = v1;
+    struct alias_apply_closure *closure = v2;
+
+    return closure->func(closure->parse_tree, a, closure->cookie);
+}
+
+/*
  * Apply a function to each alias entry and pass in a cookie.
  */
 void
-alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(void *, void *),
+alias_apply(struct sudoers_parse_tree *parse_tree,
+    int (*func)(struct sudoers_parse_tree *, struct alias *, void *),
     void *cookie)
 {
+    struct alias_apply_closure closure;
     debug_decl(alias_apply, SUDOERS_DEBUG_ALIAS)
 
-    if (parse_tree->aliases != NULL)
-	rbapply(parse_tree->aliases, func, cookie, inorder);
+    if (parse_tree->aliases != NULL) {
+	closure.parse_tree = parse_tree;
+	closure.func = func;
+	closure.cookie = cookie;
+	rbapply(parse_tree->aliases, alias_apply_func, &closure, inorder);
+    }
 
     debug_return;
 }

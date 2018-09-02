@@ -50,6 +50,7 @@ sudo_dso_preload_table_v1
 sudo_dso_strerror_v1
 sudo_dso_unload_v1
 sudo_ev_add_v1
+sudo_ev_add_v2
 sudo_ev_alloc_v1
 sudo_ev_base_alloc_v1
 sudo_ev_base_free_v1
@@ -58,6 +59,7 @@ sudo_ev_del_v1
 sudo_ev_dispatch_v1
 sudo_ev_free_v1
 sudo_ev_get_timeleft_v1
+sudo_ev_get_timeleft_v2
 sudo_ev_got_break_v1
 sudo_ev_got_exit_v1
 sudo_ev_loop_v1
@@ -71,6 +73,7 @@ sudo_fatalx_nodebug_v1
 sudo_get_ttysize_v1
 sudo_getgrouplist2_v1
 sudo_gethostname_v1
+sudo_gettime_awake_v1
 sudo_gettime_mono_v1
 sudo_gettime_real_v1
 sudo_lbuf_append_quoted_v1

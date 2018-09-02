@@ -613,7 +613,7 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	/* On BSD systems the effective gid is the first group in the list. */
 	egid = runas_gr ? (unsigned int)runas_gr->gr_gid :
 	    (unsigned int)runas_pw->pw_gid;
-	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
+	len = snprintf(cp, glsize - (cp - gid_list), "%u", (unsigned int)egid);
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    free(gid_list);

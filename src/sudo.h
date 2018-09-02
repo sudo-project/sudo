@@ -172,11 +172,12 @@ struct command_details {
 
 /* Status passed between parent and child via socketpair */
 struct command_status {
-#define CMD_INVALID 0
-#define CMD_ERRNO 1
-#define CMD_WSTATUS 2
-#define CMD_SIGNO 3
-#define CMD_PID 4
+#define CMD_INVALID	0
+#define CMD_ERRNO	1
+#define CMD_WSTATUS	2
+#define CMD_SIGNO	3
+#define CMD_PID		4
+#define CMD_TTYWINCH	5
     int type;
     int val;
 };

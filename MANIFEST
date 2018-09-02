@@ -315,6 +315,8 @@ plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
 plugins/sudoers/iolog.h
 plugins/sudoers/iolog_path.c
+plugins/sudoers/iolog_util.c
+plugins/sudoers/iolog_util.h
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
 plugins/sudoers/ldap_util.c
@@ -330,6 +332,7 @@ plugins/sudoers/mkdefaults
 plugins/sudoers/mkdir_parents.c
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
+plugins/sudoers/parse_ldif.c
 plugins/sudoers/po/README
 plugins/sudoers/po/ca.mo
 plugins/sudoers/po/ca.po
@@ -443,6 +446,10 @@ plugins/sudoers/regress/cvtsudoers/test26.out.ok
 plugins/sudoers/regress/cvtsudoers/test26.sh
 plugins/sudoers/regress/cvtsudoers/test27.out.ok
 plugins/sudoers/regress/cvtsudoers/test27.sh
+plugins/sudoers/regress/cvtsudoers/test28.out.ok
+plugins/sudoers/regress/cvtsudoers/test28.sh
+plugins/sudoers/regress/cvtsudoers/test29.out.ok
+plugins/sudoers/regress/cvtsudoers/test29.sh
 plugins/sudoers/regress/cvtsudoers/test3.out.ok
 plugins/sudoers/regress/cvtsudoers/test3.sh
 plugins/sudoers/regress/cvtsudoers/test4.out.ok
@@ -461,6 +468,8 @@ plugins/sudoers/regress/env_match/check_env_pattern.c
 plugins/sudoers/regress/env_match/data
 plugins/sudoers/regress/iolog_path/check_iolog_path.c
 plugins/sudoers/regress/iolog_path/data
+plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
+plugins/sudoers/regress/iolog_util/check_iolog_util.c
 plugins/sudoers/regress/logging/check_wrap.c
 plugins/sudoers/regress/logging/check_wrap.in
 plugins/sudoers/regress/logging/check_wrap.out.ok
@@ -640,6 +649,8 @@ plugins/sudoers/solaris_audit.c
 plugins/sudoers/solaris_audit.h
 plugins/sudoers/sssd.c
 plugins/sudoers/starttime.c
+plugins/sudoers/strlist.c
+plugins/sudoers/strlist.h
 plugins/sudoers/stubs.c
 plugins/sudoers/sudo_ldap.h
 plugins/sudoers/sudo_ldap_conf.h

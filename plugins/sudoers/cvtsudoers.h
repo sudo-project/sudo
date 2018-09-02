@@ -17,24 +17,13 @@
 #ifndef SUDOERS_CVTSUDOERS_H
 #define SUDOERS_CVTSUDOERS_H
 
+#include "strlist.h"
+
 /* Supported input/output formats. */
 enum sudoers_formats {
     format_json,
     format_ldif,
     format_sudoers
-};
-
-/*
- * Simple string list with optional reference count.
- */
-struct cvtsudoers_string {
-    STAILQ_ENTRY(cvtsudoers_string) entries;
-    char *str;
-};
-struct cvtsudoers_str_list {
-    struct cvtsudoers_string *stqh_first;
-    struct cvtsudoers_string **stqh_last;
-    unsigned int refcnt;
 };
 
 /* Flags for cvtsudoers_config.defaults */
@@ -81,30 +70,27 @@ struct cvtsudoers_conf_table {
 };
 
 struct cvtsudoers_filter {
-    struct cvtsudoers_str_list users;
-    struct cvtsudoers_str_list groups;
-    struct cvtsudoers_str_list hosts;
+    struct sudoers_str_list users;
+    struct sudoers_str_list groups;
+    struct sudoers_str_list hosts;
 };
 
 /* cvtsudoers.c */
 extern struct cvtsudoers_filter *filters;
-struct cvtsudoers_str_list *str_list_alloc(void);
-void str_list_free(void *v);
-struct cvtsudoers_string *cvtsudoers_string_alloc(const char *s);
-void cvtsudoers_string_free(struct cvtsudoers_string *ls);
 
 /* cvtsudoers_json.c */
-bool convert_sudoers_json(const char *output_file, struct cvtsudoers_config *conf);
+bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_ldif.c */
-bool convert_sudoers_ldif(const char *output_file, struct cvtsudoers_config *conf);
-bool parse_ldif(const char *input_file, struct cvtsudoers_config *conf);
-void get_hostname(void);
+bool convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_pwutil.c */
 struct cache_item *cvtsudoers_make_pwitem(uid_t uid, const char *name);
 struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
 struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1, unsigned int type);
 struct cache_item *cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1);
+
+/* stubs.c */
+void get_hostname(void);
 
 #endif /* SUDOERS_CVTSUDOERS_H */

@@ -78,17 +78,18 @@ static struct option long_opts[] = {
 __dso_public int main(int argc, char *argv[]);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
-static bool convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf);
+static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
+static bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
 static bool cvtsudoers_parse_filter(char *expression);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
 static int cvtsudoers_parse_defaults(char *expression);
 static int cvtsudoers_parse_suppression(char *expression);
-static void filter_userspecs(struct cvtsudoers_config *conf);
-static void filter_defaults(struct cvtsudoers_config *conf);
-static void alias_remove_unused(void);
-static void alias_prune(struct cvtsudoers_config *conf);
+static void filter_userspecs(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
+static void filter_defaults(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
+static void alias_remove_unused(struct sudoers_parse_tree *parse_tree);
+static void alias_prune(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 
 int
 main(int argc, char *argv[])
@@ -309,7 +310,7 @@ main(int argc, char *argv[])
 
     switch (input_format) {
     case format_ldif:
-	if (!parse_ldif(input_file, conf))
+	if (!parse_ldif(&parsed_policy, input_file, conf))
 	    goto done;
 	break;
     case format_sudoers:
@@ -321,23 +322,23 @@ main(int argc, char *argv[])
     }
 
     /* Apply filters. */
-    filter_userspecs(conf);
-    filter_defaults(conf);
+    filter_userspecs(&parsed_policy, conf);
+    filter_defaults(&parsed_policy, conf);
     if (filters != NULL) {
-	alias_remove_unused();
+	alias_remove_unused(&parsed_policy);
 	if (conf->prune_matches && conf->expand_aliases)
-	    alias_prune(conf);
+	    alias_prune(&parsed_policy, conf);
     }
 
     switch (output_format) {
     case format_json:
-	exitcode = !convert_sudoers_json(output_file, conf);
+	exitcode = !convert_sudoers_json(&parsed_policy, output_file, conf);
 	break;
     case format_ldif:
-	exitcode = !convert_sudoers_ldif(output_file, conf);
+	exitcode = !convert_sudoers_ldif(&parsed_policy, output_file, conf);
 	break;
     case format_sudoers:
-	exitcode = !convert_sudoers_sudoers(output_file, conf);
+	exitcode = !convert_sudoers_sudoers(&parsed_policy, output_file, conf);
 	break;
     default:
 	sudo_fatalx("error: unhandled output format %d", output_format);
@@ -548,7 +549,7 @@ cvtsudoers_parse_filter(char *expression)
 	 *	user=foo,group=bar,host=baz
 	 */
 	char *keyword;
-	struct cvtsudoers_string *s;
+	struct sudoers_string *s;
 
 	if ((s = malloc(sizeof(*s))) == NULL) {
 	    sudo_fatalx(U_("%s: %s"), __func__,
@@ -581,63 +582,21 @@ cvtsudoers_parse_filter(char *expression)
     debug_return_bool(true);
 }
 
-struct cvtsudoers_string *
-cvtsudoers_string_alloc(const char *s)
+static bool
+parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
+    struct cvtsudoers_config *conf)
 {
-    struct cvtsudoers_string *cs;
-    debug_decl(cvtsudoers_string_alloc, SUDOERS_DEBUG_UTIL)
+    FILE *fp = stdin;
+    debug_decl(parse_ldif, SUDOERS_DEBUG_UTIL)
 
-    if ((cs = malloc(sizeof(*cs))) != NULL) {
-	if ((cs->str = strdup(s)) == NULL) {
-	    free(cs);
-	    cs = NULL;
-	}
+    /* Open LDIF file and parse it. */
+    if (strcmp(input_file, "-") != 0) {
+	if ((fp = fopen(input_file, "r")) == NULL)
+	    sudo_fatal(U_("unable to open %s"), input_file);
     }
 
-    debug_return_ptr(cs);
-}
-
-void
-cvtsudoers_string_free(struct cvtsudoers_string *cs)
-{
-    if (cs != NULL) {
-	free(cs->str);
-	free(cs);
-    }
-}
-
-struct cvtsudoers_str_list *
-str_list_alloc(void)
-{
-    struct cvtsudoers_str_list *strlist;
-    debug_decl(str_list_alloc, SUDOERS_DEBUG_UTIL)
-
-    strlist = malloc(sizeof(*strlist));
-    if (strlist != NULL) {
-	STAILQ_INIT(strlist);
-	strlist->refcnt = 1;
-    }
-
-    debug_return_ptr(strlist);
-}
-
-void
-str_list_free(void *v)
-{
-    struct cvtsudoers_str_list *strlist = v;
-    struct cvtsudoers_string *first;
-    debug_decl(str_list_free, SUDOERS_DEBUG_UTIL)
-
-    if (strlist != NULL) {
-	if (--strlist->refcnt == 0) {
-	    while ((first = STAILQ_FIRST(strlist)) != NULL) {
-		STAILQ_REMOVE_HEAD(strlist, entries);
-		cvtsudoers_string_free(first);
-	    }
-	    free(strlist);
-	}
-    }
-    debug_return;
+    debug_return_bool(sudoers_parse_ldif(parse_tree, fp, conf->sudoers_base,
+	conf->store_options));
 }
 
 static bool
@@ -677,9 +636,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 }
 
 static bool
-userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *conf)
+userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
+    struct member_list *users, struct cvtsudoers_config *conf)
 {
-    struct cvtsudoers_string *s;
+    struct sudoers_string *s;
     struct member *m, *next;
     bool ret = false;
     debug_decl(userlist_matches_filter, SUDOERS_DEBUG_UTIL)
@@ -703,7 +663,7 @@ userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *con
 	    pw.pw_uid = (uid_t)-1;
 	    pw.pw_gid = (gid_t)-1;
 
-	    if (user_matches(&parsed_policy, &pw, m) == true)
+	    if (user_matches(parse_tree, &pw, m) == true)
 		matched = true;
 	} else {
 	    STAILQ_FOREACH(s, &filters->users, entries) {
@@ -729,7 +689,7 @@ userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *con
 		if (pw == NULL)
 		    continue;
 
-		if (user_matches(&parsed_policy, pw, m) == true)
+		if (user_matches(parse_tree, pw, m) == true)
 		    matched = true;
 		sudo_pw_delref(pw);
 
@@ -751,9 +711,10 @@ userlist_matches_filter(struct member_list *users, struct cvtsudoers_config *con
 }
 
 static bool
-hostlist_matches_filter(struct member_list *hostlist, struct cvtsudoers_config *conf)
+hostlist_matches_filter(struct sudoers_parse_tree *parse_tree,
+    struct member_list *hostlist, struct cvtsudoers_config *conf)
 {
-    struct cvtsudoers_string *s;
+    struct sudoers_string *s;
     struct member *m, *next;
     char *lhost, *shost;
     bool ret = false;
@@ -804,7 +765,7 @@ hostlist_matches_filter(struct member_list *hostlist, struct cvtsudoers_config *
 
 	    /* Only need one host in the filter to match. */
 	    /* XXX - can't use netgroup_tuple with NULL pw */
-	    if (host_matches(&parsed_policy, NULL, lhost, shost, m) == true) {
+	    if (host_matches(parse_tree, NULL, lhost, shost, m) == true) {
 		matched = true;
 		break;
 	    }
@@ -835,13 +796,14 @@ hostlist_matches_filter(struct member_list *hostlist, struct cvtsudoers_config *
  * Display Defaults entries
  */
 static bool
-print_defaults_sudoers(struct sudo_lbuf *lbuf, bool expand_aliases)
+print_defaults_sudoers(struct sudoers_parse_tree *parse_tree,
+    struct sudo_lbuf *lbuf, bool expand_aliases)
 {
     struct defaults *def, *next;
     debug_decl(print_defaults_sudoers, SUDOERS_DEBUG_UTIL)
 
-    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, next) {
-	sudoers_format_default_line(lbuf, &parsed_policy, def, &next,
+    TAILQ_FOREACH_SAFE(def, &parse_tree->defaults, entries, next) {
+	sudoers_format_default_line(lbuf, parse_tree, def, &next,
 	    expand_aliases);
     }
 
@@ -849,10 +811,10 @@ print_defaults_sudoers(struct sudo_lbuf *lbuf, bool expand_aliases)
 }
 
 static int
-print_alias_sudoers(void *v1, void *v2)
+print_alias_sudoers(struct sudoers_parse_tree *parse_tree, struct alias *a,
+    void *v)
 {
-    struct alias *a = v1;
-    struct sudo_lbuf *lbuf = v2;
+    struct sudo_lbuf *lbuf = v;
     struct member *m;
     debug_decl(print_alias_sudoers, SUDOERS_DEBUG_UTIL)
 
@@ -861,7 +823,7 @@ print_alias_sudoers(void *v1, void *v2)
     TAILQ_FOREACH(m, &a->members, entries) {
 	if (m != TAILQ_FIRST(&a->members))
 	    sudo_lbuf_append(lbuf, ", ");
-	sudoers_format_member(lbuf, &parsed_policy, m, NULL, UNSPEC);
+	sudoers_format_member(lbuf, parse_tree, m, NULL, UNSPEC);
     }
     sudo_lbuf_append(lbuf, "\n");
 
@@ -872,11 +834,12 @@ print_alias_sudoers(void *v1, void *v2)
  * Display aliases
  */
 static bool
-print_aliases_sudoers(struct sudo_lbuf *lbuf)
+print_aliases_sudoers(struct sudoers_parse_tree *parse_tree,
+    struct sudo_lbuf *lbuf)
 {
     debug_decl(print_aliases_sudoers, SUDOERS_DEBUG_UTIL)
 
-    alias_apply(&parsed_policy, print_alias_sudoers, lbuf);
+    alias_apply(parse_tree, print_alias_sudoers, lbuf);
 
     debug_return_bool(!sudo_lbuf_error(lbuf));
 }
@@ -893,7 +856,8 @@ convert_sudoers_output(const char *buf)
  * Apply filters to userspecs, removing non-matching entries.
  */
 static void
-filter_userspecs(struct cvtsudoers_config *conf)
+filter_userspecs(struct sudoers_parse_tree *parse_tree,
+    struct cvtsudoers_config *conf)
 {
     struct userspec *us, *next_us;
     struct privilege *priv, *next_priv;
@@ -907,20 +871,20 @@ filter_userspecs(struct cvtsudoers_config *conf)
      * host lists.  It acts more like a grep than a true filter.
      * In the future, we may want to add a prune option.
      */
-    TAILQ_FOREACH_SAFE(us, &parsed_policy.userspecs, entries, next_us) {
-	if (!userlist_matches_filter(&us->users, conf)) {
-	    TAILQ_REMOVE(&parsed_policy.userspecs, us, entries);
+    TAILQ_FOREACH_SAFE(us, &parse_tree->userspecs, entries, next_us) {
+	if (!userlist_matches_filter(parse_tree, &us->users, conf)) {
+	    TAILQ_REMOVE(&parse_tree->userspecs, us, entries);
 	    free_userspec(us);
 	    continue;
 	}
 	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, next_priv) {
-	    if (!hostlist_matches_filter(&priv->hostlist, conf)) {
+	    if (!hostlist_matches_filter(parse_tree, &priv->hostlist, conf)) {
 		TAILQ_REMOVE(&us->privileges, priv, entries);
 		free_privilege(priv);
 	    }
 	}
 	if (TAILQ_EMPTY(&us->privileges)) {
-	    TAILQ_REMOVE(&parsed_policy.userspecs, us, entries);
+	    TAILQ_REMOVE(&parse_tree->userspecs, us, entries);
 	    free_userspec(us);
 	    continue;
 	}
@@ -934,7 +898,8 @@ filter_userspecs(struct cvtsudoers_config *conf)
  * Returns true if matched, else false.
  */
 static bool
-alias_matches(const char *name, const char *alias_name, int alias_type)
+alias_matches(struct sudoers_parse_tree *parse_tree, const char *name,
+    const char *alias_name, int alias_type)
 {
     struct alias *a;
     struct member *m;
@@ -944,12 +909,12 @@ alias_matches(const char *name, const char *alias_name, int alias_type)
     if (strcmp(name, alias_name) == 0)
 	debug_return_bool(true);
 
-    a = alias_get(&parsed_policy, alias_name, alias_type);
+    a = alias_get(parse_tree, alias_name, alias_type);
     if (a != NULL) {
 	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type != ALIAS)
 		continue;
-	    if (alias_matches(name, m->name, alias_type)) {
+	    if (alias_matches(parse_tree, name, m->name, alias_type)) {
 		ret = true;
 		break;
 	    }
@@ -966,9 +931,9 @@ alias_matches(const char *name, const char *alias_name, int alias_type)
  * This does *not* check Defaults for used aliases, only userspecs.
  */
 static void
-alias_used_by_userspecs(struct member_list *user_aliases,
-    struct member_list *runas_aliases, struct member_list *host_aliases,
-    struct member_list *cmnd_aliases)
+alias_used_by_userspecs(struct sudoers_parse_tree *parse_tree,
+    struct member_list *user_aliases, struct member_list *runas_aliases,
+    struct member_list *host_aliases, struct member_list *cmnd_aliases)
 {
     struct privilege *priv, *priv_next;
     struct userspec *us, *us_next;
@@ -978,12 +943,12 @@ alias_used_by_userspecs(struct member_list *user_aliases,
     debug_decl(alias_used_by_userspecs, SUDOERS_DEBUG_ALIAS)
 
     /* Iterate over the policy, checking for aliases. */
-    TAILQ_FOREACH_SAFE(us, &parsed_policy.userspecs, entries, us_next) {
+    TAILQ_FOREACH_SAFE(us, &parse_tree->userspecs, entries, us_next) {
 	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
 	    if (m->type == ALIAS) {
 		/* If alias is used, remove from user_aliases and free. */
 		TAILQ_FOREACH_SAFE(am, user_aliases, entries, am_next) {
-		    if (alias_matches(am->name, m->name, USERALIAS)) {
+		    if (alias_matches(parse_tree, am->name, m->name, USERALIAS)) {
 			TAILQ_REMOVE(user_aliases, am, entries);
 			free_member(am);
 		    }
@@ -995,7 +960,7 @@ alias_used_by_userspecs(struct member_list *user_aliases,
 		if (m->type == ALIAS) {
 		    /* If alias is used, remove from host_aliases and free. */
 		    TAILQ_FOREACH_SAFE(am, host_aliases, entries, am_next) {
-			if (alias_matches(am->name, m->name, HOSTALIAS)) {
+			if (alias_matches(parse_tree, am->name, m->name, HOSTALIAS)) {
 			    TAILQ_REMOVE(host_aliases, am, entries);
 			    free_member(am);
 			}
@@ -1008,7 +973,7 @@ alias_used_by_userspecs(struct member_list *user_aliases,
 			if (m->type == ALIAS) {
 			    /* If alias is used, remove from runas_aliases and free. */
 			    TAILQ_FOREACH_SAFE(am, runas_aliases, entries, am_next) {
-				if (alias_matches(am->name, m->name, RUNASALIAS)) {
+				if (alias_matches(parse_tree, am->name, m->name, RUNASALIAS)) {
 				    TAILQ_REMOVE(runas_aliases, am, entries);
 				    free_member(am);
 				}
@@ -1021,7 +986,7 @@ alias_used_by_userspecs(struct member_list *user_aliases,
 			if (m->type == ALIAS) {
 			    /* If alias is used, remove from runas_aliases and free. */
 			    TAILQ_FOREACH_SAFE(am, runas_aliases, entries, am_next) {
-				if (alias_matches(am->name, m->name, RUNASALIAS)) {
+				if (alias_matches(parse_tree, am->name, m->name, RUNASALIAS)) {
 				    TAILQ_REMOVE(runas_aliases, am, entries);
 				    free_member(am);
 				}
@@ -1032,7 +997,7 @@ alias_used_by_userspecs(struct member_list *user_aliases,
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    /* If alias is used, remove from cmnd_aliases and free. */
 		    TAILQ_FOREACH_SAFE(am, cmnd_aliases, entries, am_next) {
-			if (alias_matches(am->name, m->name, CMNDALIAS)) {
+			if (alias_matches(parse_tree, am->name, m->name, CMNDALIAS)) {
 			    TAILQ_REMOVE(cmnd_aliases, am, entries);
 			    free_member(am);
 			}
@@ -1049,7 +1014,8 @@ alias_used_by_userspecs(struct member_list *user_aliases,
  * Apply filters to host/user-based Defaults, removing non-matching entries.
  */
 static void
-filter_defaults(struct cvtsudoers_config *conf)
+filter_defaults(struct sudoers_parse_tree *parse_tree,
+    struct cvtsudoers_config *conf)
 {
     struct member_list user_aliases = TAILQ_HEAD_INITIALIZER(user_aliases);
     struct member_list runas_aliases = TAILQ_HEAD_INITIALIZER(runas_aliases);
@@ -1065,7 +1031,7 @@ filter_defaults(struct cvtsudoers_config *conf)
     if (filters == NULL && conf->defaults == CVT_DEFAULTS_ALL)
 	debug_return;
 
-    TAILQ_FOREACH_SAFE(def, &parsed_policy.defaults, entries, def_next) {
+    TAILQ_FOREACH_SAFE(def, &parse_tree->defaults, entries, def_next) {
 	bool keep = true;
 
 	switch (def->type) {
@@ -1076,7 +1042,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    break;
 	case DEFAULTS_USER:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_USER) ||
-		!userlist_matches_filter(def->binding, conf))
+		!userlist_matches_filter(parse_tree, def->binding, conf))
 		keep = false;
 	    alias_type = USERALIAS;
 	    break;
@@ -1087,7 +1053,7 @@ filter_defaults(struct cvtsudoers_config *conf)
 	    break;
 	case DEFAULTS_HOST:
 	    if (!ISSET(conf->defaults, CVT_DEFAULTS_HOST) ||
-		!hostlist_matches_filter(def->binding, conf))
+		!hostlist_matches_filter(parse_tree, def->binding, conf))
 		keep = false;
 	    alias_type = HOSTALIAS;
 	    break;
@@ -1129,14 +1095,14 @@ filter_defaults(struct cvtsudoers_config *conf)
 		    }
 		}
 	    }
-	    TAILQ_REMOVE(&parsed_policy.defaults, def, entries);
+	    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
 	    free_default(def, &prev_binding);
 	    if (prev_binding != NULL) {
 		/* Remove and free Defaults that share the same binding. */
 		while (def_next != NULL && def_next->binding == prev_binding) {
 		    def = def_next;
 		    def_next = TAILQ_NEXT(def, entries);
-		    TAILQ_REMOVE(&parsed_policy.defaults, def, entries);
+		    TAILQ_REMOVE(&parse_tree->defaults, def, entries);
 		    free_default(def, &prev_binding);
 		}
 	    }
@@ -1146,25 +1112,25 @@ filter_defaults(struct cvtsudoers_config *conf)
     }
 
     /* Remove now-unreferenced aliases. */
-    alias_used_by_userspecs(&user_aliases, &runas_aliases, &host_aliases,
-	&cmnd_aliases);
+    alias_used_by_userspecs(parse_tree, &user_aliases, &runas_aliases,
+	&host_aliases, &cmnd_aliases);
     TAILQ_FOREACH_SAFE(m, &user_aliases, entries, m_next) {
-	a = alias_remove(&parsed_policy, m->name, USERALIAS);
+	a = alias_remove(parse_tree, m->name, USERALIAS);
 	alias_free(a);
 	free_member(m);
     }
     TAILQ_FOREACH_SAFE(m, &runas_aliases, entries, m_next) {
-	a = alias_remove(&parsed_policy, m->name, RUNASALIAS);
+	a = alias_remove(parse_tree, m->name, RUNASALIAS);
 	alias_free(a);
 	free_member(m);
     }
     TAILQ_FOREACH_SAFE(m, &host_aliases, entries, m_next) {
-	a = alias_remove(&parsed_policy, m->name, HOSTALIAS);
+	a = alias_remove(parse_tree, m->name, HOSTALIAS);
 	alias_free(a);
 	free_member(m);
     }
     TAILQ_FOREACH_SAFE(m, &cmnd_aliases, entries, m_next) {
-	a = alias_remove(&parsed_policy, m->name, CMNDALIAS);
+	a = alias_remove(parse_tree, m->name, CMNDALIAS);
 	alias_free(a);
 	free_member(m);
     }
@@ -1176,7 +1142,7 @@ filter_defaults(struct cvtsudoers_config *conf)
  * Remove unreferenced aliases.
  */
 static void
-alias_remove_unused(void)
+alias_remove_unused(struct sudoers_parse_tree *parse_tree)
 {
     struct rbtree *used_aliases;
     debug_decl(alias_remove_unused, SUDOERS_DEBUG_ALIAS)
@@ -1186,12 +1152,12 @@ alias_remove_unused(void)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Move all referenced aliases to used_aliases. */
-    if (!alias_find_used(&parsed_policy, used_aliases))
+    if (!alias_find_used(parse_tree, used_aliases))
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Only unreferenced aliases are left, swap and free the unused ones. */
-    free_aliases(parsed_policy.aliases);
-    parsed_policy.aliases = used_aliases;
+    free_aliases(parse_tree->aliases);
+    parse_tree->aliases = used_aliases;
 
     debug_return;
 }
@@ -1199,19 +1165,19 @@ alias_remove_unused(void)
 /*
  * Prune out non-matching entries from user and host aliases.
  */
-int
-alias_prune_helper(void *v, void *cookie)
+static int
+alias_prune_helper(struct sudoers_parse_tree *parse_tree, struct alias *a,
+    void *v)
 {
-    struct alias *a = v;
-    struct cvtsudoers_config *conf = cookie;
+    struct cvtsudoers_config *conf = v;
 
     /* XXX - misue of these functions */
     switch (a->type) {
     case USERALIAS:
-	userlist_matches_filter(&a->members, conf);
+	userlist_matches_filter(parse_tree, &a->members, conf);
 	break;
     case HOSTALIAS:
-	hostlist_matches_filter(&a->members, conf);
+	hostlist_matches_filter(parse_tree, &a->members, conf);
 	break;
     default:
 	break;
@@ -1224,11 +1190,12 @@ alias_prune_helper(void *v, void *cookie)
  * Prune out non-matching entries from within aliases.
  */
 static void
-alias_prune(struct cvtsudoers_config *conf)
+alias_prune(struct sudoers_parse_tree *parse_tree,
+    struct cvtsudoers_config *conf)
 {
     debug_decl(alias_prune, SUDOERS_DEBUG_ALIAS)
 
-    alias_apply(&parsed_policy, alias_prune_helper, conf);
+    alias_apply(parse_tree, alias_prune_helper, conf);
 
     debug_return;
 }
@@ -1237,7 +1204,8 @@ alias_prune(struct cvtsudoers_config *conf)
  * Convert back to sudoers.
  */
 static bool
-convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
+convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree,
+    const char *output_file, struct cvtsudoers_config *conf)
 {
     bool ret = true;
     struct sudo_lbuf lbuf;
@@ -1255,7 +1223,7 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
 
     /* Print Defaults */
     if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS)) {
-	if (!print_defaults_sudoers(&lbuf, conf->expand_aliases))
+	if (!print_defaults_sudoers(parse_tree, &lbuf, conf->expand_aliases))
 	    goto done;
 	if (lbuf.len > 0) {
 	    sudo_lbuf_print(&lbuf);
@@ -1265,7 +1233,7 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
 
     /* Print Aliases */
     if (!conf->expand_aliases && !ISSET(conf->suppress, SUPPRESS_ALIASES)) {
-	if (!print_aliases_sudoers(&lbuf))
+	if (!print_aliases_sudoers(parse_tree, &lbuf))
 	    goto done;
 	if (lbuf.len > 1) {
 	    sudo_lbuf_print(&lbuf);
@@ -1275,7 +1243,7 @@ convert_sudoers_sudoers(const char *output_file, struct cvtsudoers_config *conf)
 
     /* Print User_Specs, separated by blank lines. */
     if (!ISSET(conf->suppress, SUPPRESS_PRIVS)) {
-	if (!sudoers_format_userspecs(&lbuf, &parsed_policy, "\n",
+	if (!sudoers_format_userspecs(&lbuf, parse_tree, "\n",
 	    conf->expand_aliases, true)) {
 	    goto done;
 	}

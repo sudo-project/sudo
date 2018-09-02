@@ -266,6 +266,26 @@ int putenv(const char *string) {return 0;}], [])],
 ])
 
 dnl
+dnl check whether au_close() takes 3 or 4 arguments
+dnl
+AC_DEFUN([SUDO_FUNC_AU_CLOSE_SOLARIS11],
+[AC_CACHE_CHECK([whether au_close() takes 4 arguments],
+sudo_cv_func_au_close_solaris11,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+#include <bsm/audit.h>
+#include <bsm/libbsm.h>
+#include <bsm/audit_uevents.h>
+
+int au_close(int d, int keep, au_event_t event, au_emod_t emod) {return 0;}], [])],
+    [sudo_cv_func_au_close_solaris11=yes],
+    [sudo_cv_func_au_close_solaris11=no])
+  ])
+  if test $sudo_cv_func_au_close_solaris11 = yes; then
+    AC_DEFINE(HAVE_AU_CLOSE_SOLARIS11, 1, [Define to 1 if the `au_close' functions takes 4 arguments like Solaris 11.])
+  fi
+])
+
+dnl
 dnl Check if the data argument for the sha2 functions is void * or u_char *
 dnl
 AC_DEFUN([SUDO_FUNC_SHA2_VOID_PTR],

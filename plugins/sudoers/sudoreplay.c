@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -49,6 +48,7 @@
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
+#include <time.h>
 #ifdef HAVE_ZLIB_H
 # include <zlib.h>
 #endif
@@ -61,6 +61,7 @@
 #include "sudo_fatal.h"
 #include "logging.h"
 #include "iolog.h"
+#include "iolog_util.h"
 #include "sudo_queue.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
@@ -74,21 +75,6 @@
 # include "compat/getopt.h"
 #endif /* HAVE_GETOPT_LONG */
 
-/*
- * Info present in the I/O log file
- */
-struct log_info {
-    char *cwd;
-    char *user;
-    char *runas_user;
-    char *runas_group;
-    char *tty;
-    char *cmd;
-    time_t tstamp;
-    int rows;
-    int cols;
-};
-
 struct replay_closure {
     struct sudo_event_base *evbase;
     struct sudo_event *delay_ev;
@@ -99,18 +85,7 @@ struct replay_closure {
     struct sudo_event *sigquit_ev;
     struct sudo_event *sigterm_ev;
     struct sudo_event *sigtstp_ev;
-    struct timing_closure {
-	const char *decimal;
-	struct timeval *max_delay;
-	int idx;
-	union {
-	    struct {
-		int rows;
-		int cols;
-	    } winsize;
-	    size_t nbytes; // XXX
-	} u;
-    } timing;
+    struct timing_closure timing;
     bool interactive;
     struct io_buffer {
 	unsigned int len; /* buffer length (how much produced) */
@@ -155,8 +130,6 @@ struct search_node {
 
 static struct search_node_list search_expr = STAILQ_HEAD_INITIALIZER(search_expr);
 
-static int timing_idx_adj;
-
 static double speed_factor = 1.0;
 
 static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
@@ -188,12 +161,9 @@ extern time_t get_date(char *);
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_expr(struct search_node_list *, char **, bool);
-static bool parse_timing(const char *buf, double *seconds, struct timing_closure *timing);
-static struct log_info *parse_logfile(char *logfile);
 static void read_keyboard(int fd, int what, void *v);
-static void free_log_info(struct log_info *li);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(struct timeval *max_wait, const char *decimal, bool interactive);
+static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -225,7 +195,7 @@ main(int argc, char *argv[])
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
-    struct timeval max_delay_storage, *max_delay = NULL;
+    struct timespec max_delay_storage, *max_delay = NULL;
     double dval;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
@@ -286,11 +256,11 @@ main(int argc, char *argv[])
 	    if (*ep != '\0' || errno != 0)
 		sudo_fatalx(U_("invalid max wait: %s"), optarg);
 	    if (dval <= 0.0) {
-		sudo_timevalclear(&max_delay_storage);
+		sudo_timespecclear(&max_delay_storage);
 	    } else {
 		max_delay_storage.tv_sec = dval;
-		max_delay_storage.tv_usec =
-		    (dval - max_delay_storage.tv_sec) * 1000000.0;
+		max_delay_storage.tv_nsec =
+		    (dval - max_delay_storage.tv_sec) * 1000000000.0;
 	    }
 	    max_delay = &max_delay_storage;
 	    break;
@@ -465,7 +435,7 @@ struct getsize_closure {
     int state;
     const char *cp;
     struct sudo_event *ev;
-    struct timeval timeout;
+    struct timespec timeout;
 };
 
 /* getsize states */
@@ -594,7 +564,7 @@ xterm_get_size(int *new_rows, int *new_cols)
     gc.nums_maxdepth = 1;
     gc.cp = getsize_response;
     gc.timeout.tv_sec = 10;
-    gc.timeout.tv_usec = 0;
+    gc.timeout.tv_nsec = 0;
 
     /* Setup an event for reading the terminal size */
     evbase = sudo_ev_base_alloc();
@@ -773,9 +743,8 @@ restore_terminal_size(void)
 static int
 read_timing_record(struct replay_closure *closure)
 {
-    struct timeval timeout;
+    struct timespec timeout;
     char buf[LINE_MAX];
-    double delay;
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
@@ -786,7 +755,7 @@ read_timing_record(struct replay_closure *closure)
 
     /* Parse timing file record. */
     buf[strcspn(buf, "\n")] = '\0';
-    if (!parse_timing(buf, &delay, &closure->timing))
+    if (!parse_timing(buf, &timeout, &closure->timing))
 	sudo_fatalx(U_("invalid timing file line: %s"), buf);
 
     /* Record number bytes to read. */
@@ -798,18 +767,8 @@ read_timing_record(struct replay_closure *closure)
     	closure->iobuf.toread = closure->timing.u.nbytes;
     }
 
-    /* Adjust delay using speed factor. */
-    delay /= speed_factor;
-
-    /* Convert delay to a timeval. */
-    timeout.tv_sec = delay;
-    timeout.tv_usec = (delay - timeout.tv_sec) * 1000000.0;
-
-    /* Clamp timeout to max delay. */
-    if (closure->timing.max_delay != NULL) {
-	if (sudo_timevalcmp(&timeout, closure->timing.max_delay, >))
-	    timeout = *closure->timing.max_delay;
-    }
+    /* Adjust delay using speed factor and max_delay. */
+    adjust_delay(&timeout, closure->timing.max_delay, speed_factor);
 
     /* Schedule the delay event. */
     if (sudo_ev_add(closure->evbase, closure->delay_ev, &timeout, false) == -1)
@@ -953,7 +912,7 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(struct timeval *max_delay, const char *decimal, bool interactive)
+replay_closure_alloc(struct timespec *max_delay, const char *decimal, bool interactive)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -1034,7 +993,7 @@ bad:
 }
 
 static int
-replay_session(struct timeval *max_delay, const char *decimal, bool interactive)
+replay_session(struct timespec *max_delay, const char *decimal, bool interactive)
 {
     struct replay_closure *closure;
     int ret = 0;
@@ -1300,7 +1259,7 @@ static bool
 match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 {
     struct search_node *sn;
-    bool res, matched = last_match;
+    bool res = false, matched = last_match;
     int rc;
     debug_decl(match_expr, SUDO_DEBUG_UTIL)
 
@@ -1316,7 +1275,8 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 	    res = strcmp(sn->u.tty, log->tty) == 0;
 	    break;
 	case ST_RUNASGROUP:
-	    res = strcmp(sn->u.runas_group, log->runas_group) == 0;
+	    if (log->runas_group != NULL)
+		res = strcmp(sn->u.runas_group, log->runas_group) == 0;
 	    break;
 	case ST_RUNASUSER:
 	    res = strcmp(sn->u.runas_user, log->runas_user) == 0;
@@ -1349,146 +1309,6 @@ match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 	last_match = matched;
     }
     debug_return_bool(matched);
-}
-
-static struct log_info *
-parse_logfile(char *logfile)
-{
-    FILE *fp;
-    char *buf = NULL, *cp, *ep;
-    const char *errstr;
-    size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
-    struct log_info *li = NULL;
-    debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
-
-    fp = fopen(logfile, "r");
-    if (fp == NULL) {
-	sudo_warn(U_("unable to open %s"), logfile);
-	goto bad;
-    }
-
-    /*
-     * ID file has three lines:
-     *  1) a log info line
-     *  2) cwd
-     *  3) command with args
-     */
-    if ((li = calloc(1, sizeof(*li))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (getline(&buf, &bufsize, fp) == -1 ||
-	getline(&li->cwd, &cwdsize, fp) == -1 ||
-	getline(&li->cmd, &cmdsize, fp) == -1) {
-	sudo_warn(U_("%s: invalid log file"), logfile);
-	goto bad;
-    }
-
-    /* Strip the newline from the cwd and command. */
-    li->cwd[strcspn(li->cwd, "\n")] = '\0';
-    li->cmd[strcspn(li->cmd, "\n")] = '\0';
-
-    /*
-     * Crack the log line (rows and cols not present in old versions).
-     *	timestamp:user:runas_user:runas_group:tty:rows:cols
-     * XXX - probably better to use strtok and switch on the state.
-     */
-    buf[strcspn(buf, "\n")] = '\0';
-    cp = buf;
-
-    /* timestamp */
-    if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: time stamp field is missing"), logfile);
-	goto bad;
-    }
-    *ep = '\0';
-    li->tstamp = sizeof(time_t) == 4 ? strtonum(cp, INT_MIN, INT_MAX, &errstr) :
-	strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
-    if (errstr != NULL) {
-	sudo_warn(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
-	goto bad;
-    }
-
-    /* user */
-    cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: user field is missing"), logfile);
-	goto bad;
-    }
-    if ((li->user = strndup(cp, (size_t)(ep - cp))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-
-    /* runas user */
-    cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: runas user field is missing"), logfile);
-	goto bad;
-    }
-    if ((li->runas_user = strndup(cp, (size_t)(ep - cp))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-
-    /* runas group */
-    cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL) {
-	sudo_warn(U_("%s: runas group field is missing"), logfile);
-	goto bad;
-    }
-    if (cp != ep) {
-	if ((li->runas_group = strndup(cp, (size_t)(ep - cp))) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    }
-
-    /* tty, followed by optional rows + columns */
-    cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL) {
-	/* just the tty */
-	if ((li->tty = strdup(cp)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    } else {
-	/* tty followed by rows + columns */
-	if ((li->tty = strndup(cp, (size_t)(ep - cp))) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	cp = ep + 1;
-	/* need to NULL out separator to use strtonum() */
-	if ((ep = strchr(cp, ':')) != NULL) {
-	    *ep = '\0';
-	}
-	li->rows = strtonum(cp, 1, INT_MAX, &errstr);
-	if (errstr != NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: tty rows %s: %s", logfile, cp, errstr);
-	}
-	if (ep != NULL) {
-	    cp = ep + 1;
-	    li->cols = strtonum(cp, 1, INT_MAX, &errstr);
-	    if (errstr != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: tty cols %s: %s", logfile, cp, errstr);
-	    }
-	}
-    }
-    fclose(fp);
-    free(buf);
-    debug_return_ptr(li);
-
-bad:
-    if (fp != NULL)
-	fclose(fp);
-    free(buf);
-    free_log_info(li);
-    debug_return_ptr(NULL);
-}
-
-static void
-free_log_info(struct log_info *li)
-{
-    if (li != NULL) {
-	free(li->cwd);
-	free(li->user);
-	free(li->runas_user);
-	free(li->runas_group);
-	free(li->tty);
-	free(li->cmd);
-	free(li);
-    }
 }
 
 static int
@@ -1669,7 +1489,7 @@ read_keyboard(int fd, int what, void *v)
 {
     struct replay_closure *closure = v;
     static bool paused = false;
-    struct timeval tv;
+    struct timespec ts;
     ssize_t nread;
     char ch;
     debug_decl(read_keyboard, SUDO_DEBUG_UTIL)
@@ -1698,16 +1518,16 @@ read_keyboard(int fd, int what, void *v)
 	    break;
 	case '<':
 	    speed_factor /= 2;
-            sudo_ev_get_timeleft(closure->delay_ev, &tv);
-            if (sudo_timevalisset(&tv)) {
+            sudo_ev_get_timeleft(closure->delay_ev, &ts);
+            if (sudo_timespecisset(&ts)) {
 		/* Double remaining timeout. */
-		tv.tv_sec *= 2;
-		tv.tv_usec *= 2;
-		if (tv.tv_usec >= 1000000) {
-		    tv.tv_sec++;
-		    tv.tv_usec -= 1000000;
+		ts.tv_sec *= 2;
+		ts.tv_nsec *= 2;
+		if (ts.tv_nsec >= 1000000000) {
+		    ts.tv_sec++;
+		    ts.tv_nsec -= 1000000000;
 		}
-		if (sudo_ev_add(NULL, closure->delay_ev, &tv, false) == -1) {
+		if (sudo_ev_add(NULL, closure->delay_ev, &ts, false) == -1) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"failed to double remaining delay timeout");
 		}
@@ -1715,14 +1535,14 @@ read_keyboard(int fd, int what, void *v)
 	    break;
 	case '>':
 	    speed_factor *= 2;
-            sudo_ev_get_timeleft(closure->delay_ev, &tv);
-            if (sudo_timevalisset(&tv)) {
+            sudo_ev_get_timeleft(closure->delay_ev, &ts);
+            if (sudo_timespecisset(&ts)) {
 		/* Halve remaining timeout. */
-		if (tv.tv_sec & 1)
-		    tv.tv_usec += 500000;
-		tv.tv_sec /= 2;
-		tv.tv_usec /= 2;
-		if (sudo_ev_add(NULL, closure->delay_ev, &tv, false) == -1) {
+		if (ts.tv_sec & 1)
+		    ts.tv_nsec += 500000000;
+		ts.tv_sec /= 2;
+		ts.tv_nsec /= 2;
+		if (sudo_ev_add(NULL, closure->delay_ev, &ts, false) == -1) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"failed to halve remaining delay timeout");
 		}
@@ -1741,93 +1561,6 @@ read_keyboard(int fd, int what, void *v)
 	break;
     }
     debug_return;
-}
-
-/*
- * Parse a timing line, which is formatted as:
- *	index sleep_time num_bytes
- * Where index is IOFD_*, sleep_time is the number of seconds to sleep
- * before writing the data and num_bytes is the number of bytes to output.
- * Returns true on success and false on failure.
- */
-static bool
-parse_timing(const char *buf, double *seconds, struct timing_closure *timing)
-{
-    unsigned long ul;
-    long l;
-    double d, fract = 0;
-    char *cp, *ep;
-    debug_decl(parse_timing, SUDO_DEBUG_UTIL)
-
-    /* Parse index */
-    ul = strtoul(buf, &ep, 10);
-    if (ep == buf || !isspace((unsigned char) *ep))
-	goto bad;
-    if (ul >= IOFD_MAX) {
-	if (ul != 6)
-	    goto bad;
-	/* work around a bug in timing files generated by sudo 1.8.7 */
-	timing_idx_adj = 2;
-    }
-    timing->idx = (int)ul - timing_idx_adj;
-    for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
-	continue;
-
-    /*
-     * Parse number of seconds.  Sudo logs timing data in the C locale
-     * but this may not match the current locale so we cannot use strtod().
-     * Furthermore, sudo < 1.7.4 logged with the user's locale so we need
-     * to be able to parse those logs too.
-     */
-    errno = 0;
-    l = strtol(cp, &ep, 10);
-    if (ep == cp || (*ep != '.' && strncmp(ep, timing->decimal, strlen(timing->decimal)) != 0))
-	goto bad;
-    if (l < 0 || l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
-	goto bad;
-    *seconds = (double)l;
-    cp = ep + (*ep == '.' ? 1 : strlen(timing->decimal));
-    d = 10.0;
-    while (isdigit((unsigned char) *cp)) {
-	fract += (*cp - '0') / d;
-	d *= 10;
-	cp++;
-    }
-    *seconds += fract;
-    while (isspace((unsigned char) *cp))
-	cp++;
-
-    if (timing->idx == IOFD_TIMING) {
-	errno = 0;
-	ul = strtoul(cp, &ep, 10);
-	if (ep == cp || !isspace((unsigned char) *ep))
-	    goto bad;
-	if (ul > INT_MAX || (errno == ERANGE && ul == ULONG_MAX))
-	    goto bad;
-	timing->u.winsize.rows = (int)ul;
-	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
-	    continue;
-
-	errno = 0;
-	ul = strtoul(cp, &ep, 10);
-	if (ep == cp || *ep != '\0')
-	    goto bad;
-	if (ul > INT_MAX || (errno == ERANGE && ul == ULONG_MAX))
-	    goto bad;
-	timing->u.winsize.cols = (int)ul;
-    } else {
-	errno = 0;
-	ul = strtoul(cp, &ep, 10);
-	if (ep == cp || *ep != '\0')
-	    goto bad;
-	if (ul > SIZE_MAX || (errno == ERANGE && ul == ULONG_MAX))
-	    goto bad;
-	timing->u.nbytes = (size_t)ul;
-    }
-
-    debug_return_bool(true);
-bad:
-    debug_return_bool(false);
 }
 
 static void

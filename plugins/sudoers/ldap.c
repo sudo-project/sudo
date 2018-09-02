@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -1221,16 +1222,17 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 	TAILQ_INSERT_TAIL(&us->privileges, priv, entries);
     }
 
-    debug_return_ptr(ldap_userspecs);
+    debug_return_bool(true);
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     free_userspecs(ldap_userspecs);
-    debug_return_ptr(NULL);
+    debug_return_bool(false);
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-static unsigned int (*sudo_gss_krb5_ccache_name)(unsigned int *minor_status, const char *name, const char **old_name);
+typedef unsigned int (*sudo_gss_krb5_ccache_name_t)(unsigned int *minor_status, const char *name, const char **old_name);
+static sudo_gss_krb5_ccache_name_t sudo_gss_krb5_ccache_name;
 
 static int
 sudo_set_krb5_ccache_name(const char *name, const char **old_name)
@@ -1241,7 +1243,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
     debug_decl(sudo_set_krb5_ccache_name, SUDOERS_DEBUG_LDAP)
 
     if (!initialized) {
-	sudo_gss_krb5_ccache_name =
+	sudo_gss_krb5_ccache_name = (sudo_gss_krb5_ccache_name_t)
 	    sudo_dso_findsym(SUDO_DSO_DEFAULT, "gss_krb5_ccache_name");
 	initialized = true;
     }
@@ -1723,7 +1725,8 @@ done:
 }
 
 /*
- * Comparison function for ldap_entry_wrapper structures, descending order.
+ * Comparison function for ldap_entry_wrapper structures, ascending order.
+ * This should match role_order_cmp() in parse_ldif.c.
  */
 static int
 ldap_entry_compare(const void *a, const void *b)
@@ -1732,8 +1735,8 @@ ldap_entry_compare(const void *a, const void *b)
     const struct ldap_entry_wrapper *bw = b;
     debug_decl(ldap_entry_compare, SUDOERS_DEBUG_LDAP)
 
-    debug_return_int(bw->order < aw->order ? -1 :
-	(bw->order > aw->order ? 1 : 0));
+    debug_return_int(aw->order < bw->order ? -1 :
+	(aw->order > bw->order ? 1 : 0));
 }
 
 /*

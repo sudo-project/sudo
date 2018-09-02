@@ -1,3 +1,39 @@
+What's new in Sudo 1.8.25
+
+ * Fixed a bug introduced in sudo 1.8.20 that broke formatting of
+   I/O log timing file entries on systems without a C99-compatible
+   snprintf() function.  Our replacement snprintf() doesn't support
+   floating point so we can't use the "%f" format directive.
+
+ * I/O log timing file entries now use a monotonic timer and include
+   nanosecond precision.  A monotonic timer that does not increment
+   while the system is sleeping is used where available.
+
+ * Fixed a bug introduced in sudo 1.8.24 where sudoNotAfter in the LDAP
+   backend was not being properly parsed.  Bug #845.
+
+ * When sudo runs a command in a pseudo-tty, the slave device is
+   now closed in the main process immediately after starting the
+   monitor process.  This removes the need for an AIX-specific
+   workaround that was added in sudo 1.8.24.
+
+ * Added support for monotonic timers on HP-UX.
+
+ * Fixed a bug displaying timeout values the "sudo -V" output.
+   The value displayed was 3600 times the actual value.  Bug #846.
+
+ * Fixed a build issue on AIX 7.1 BOS levels that include memset_s()
+   and define rsize_t in string.h.  Bug #847.
+
+ * The testsudoers utility now supports querying an LDIF-format
+   policy.
+
+ * Sudo now sets the LOGIN environment variable to the same value as
+   LOGNAME on AIX systems.  Bug #848.
+
+ * Fixed a regression introduced in sudo 1.8.24 where the LDAP and
+   SSSD backends evaluated the rules in reverse sudoOrder.  Bug #849.
+
 What's new in Sudo 1.8.24
 
  * The LDAP and SSS back-ends now use the same rule evaluation code

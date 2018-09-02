@@ -256,8 +256,14 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
     m->type = ALL;
     TAILQ_INSERT_TAIL(&us->users, m, entries);
 
-    /* Treat each sudoRole as a separate privilege. */
-    for (i = 0; i < sss_result->num_rules; i++) {
+    /*
+     * Treat each sudoRole as a separate privilege.
+     *
+     * Sssd has already sorted the rules in descending order.
+     * The conversion to a sudoers parse tree requires that entries be
+     * in *ascending* order so we we iterate from last to first.
+     */
+    for (i = sss_result->num_rules; i-- > 0; ) {
 	struct sss_sudo_rule *rule = sss_result->rules + i;
 	char **cmnds, **runasusers = NULL, **runasgroups = NULL;
 	char **opts = NULL, **notbefore = NULL, **notafter = NULL;

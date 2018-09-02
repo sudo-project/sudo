@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.24], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.25], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -1603,6 +1603,10 @@ if test "$enable_offensive_insults" = "yes"; then
     AC_DEFINE(OFFENSIVE_INSULTS)
 fi
 
+AC_ARG_ENABLE(package_build,
+[AS_HELP_STRING([--enable-package-build], [Enable options for package building.])],
+[], [enable_package_build=no])
+
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
 dnl
@@ -1824,14 +1828,18 @@ case "$host" in
 
 		# getline() may or may ont be present on AIX <= 6.1.
 		# bos610 is missing getline/getdelim but bos61J has it.
-		if test $OSMAJOR -le 6; then
-		    ac_cv_func_getline=no
+		if test "$enable_package_build" = "yes"; then
+		    if test $OSMAJOR -le 6; then
+			ac_cv_func_getline=no
+		    fi
 		fi
 
 		# memset_s() may or may ont be present on AIX <= 7.1.
 		# bos710 is missing memset_s but bos71L has it.
-		if test $OSMAJOR -le 7; then
-		    ac_cv_func_memset_s=no
+		if test "$enable_package_build" = "yes"; then
+		    if test $OSMAJOR -le 7; then
+			ac_cv_func_memset_s=no
+		    fi
 		fi
 
 		# Remove timedir on boot, AIX does not have /var/run
@@ -1875,7 +1883,7 @@ case "$host" in
 		# HP-UX won't unlink a shared lib that is open
 		INSTALL_BACKUP='~'
 
-		AC_CHECK_FUNCS([pstat_getproc])
+		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-*-hpux*)
 		AC_DEFINE([PAM_SUN_CODEBASE])
@@ -1954,7 +1962,7 @@ case "$host" in
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
-		AC_CHECK_FUNCS([pstat_getproc])
+		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
@@ -2050,6 +2058,8 @@ case "$host" in
 #include <linux/seccomp.h>
 #include <linux/filter.h>
 		])
+		# We call getrandom via syscall(3) in case it is not in libc
+		AC_CHECK_HEADERS([linux/random.h])
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -2214,6 +2224,9 @@ case "$host" in
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# Mach monotonic timer that runs while sleeping
+		AC_CHECK_FUNCS([mach_continuous_time])
 
 		# Undocumented API that dynamically allocates the groups.
 		AC_CHECK_FUNCS([getgrouplist_2], [AC_CHECK_DECLS([getgrouplist_2])])
@@ -3762,16 +3775,24 @@ if test ${with_passwd-'no'} != "no"; then
 fi
 
 dnl
+dnl Solaris 11 added a 4th argument to the au_close() function
+dnl
+if test X"$with_bsm_audit" = X"yes"; then
+    SUDO_FUNC_AU_CLOSE_SOLARIS11
+fi
+
+dnl
 dnl Choose event subsystem backend: poll or select
 dnl
 if test X"$enable_poll" = X""; then
-    AC_CHECK_FUNCS([poll], [enable_poll=yes], [enable_poll=no])
+    AC_CHECK_FUNCS([ppoll poll], [enable_poll=yes; break], [enable_poll=no])
 elif test X"$enable_poll" = X"yes"; then
-    AC_DEFINE(HAVE_POLL)
+    AC_CHECK_FUNCS([ppoll], [], AC_DEFINE(HAVE_POLL))
 fi
 if test "$enable_poll" = "yes"; then
     COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
 else
+    AC_CHECK_FUNCS([pselect])
     COMMON_OBJS="${COMMON_OBJS} event_select.lo"
 fi
 

@@ -28,7 +28,7 @@ Makefile$
 ^pathnames\.h$
 ^src/sudo$
 ^src/sesh$
-^src/check_ttyname$
+^src/check_(noexec|ttyname)$
 ^src/sudo_usage\.h$
 
 ^lib/util/mksiglist$
@@ -41,3 +41,4 @@ Makefile$
 
 ^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|check_[a-z0-9_]+)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
+^plugins/sudoers/regress/iolog_plugin/iolog$

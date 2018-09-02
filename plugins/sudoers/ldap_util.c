@@ -386,7 +386,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    if (notbefore != NULL)
 		cmndspec->notbefore = parse_gentime(notbefore);
 	    if (notafter != NULL)
-		cmndspec->notbefore = parse_gentime(notafter);
+		cmndspec->notafter = parse_gentime(notafter);
 
 	    /* Parse sudoOptions. */
 	    if (opts != NULL) {

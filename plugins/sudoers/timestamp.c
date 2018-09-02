@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(HAVE_STDINT_H)
@@ -84,7 +85,7 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
     if (!ISSET(key->flags, TS_ANYUID) && entry->auth_uid != key->auth_uid) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "%s:%u record uid mismatch (want %u, got %u)", __func__, recno,
-	    key->auth_uid, entry->auth_uid);
+	    (unsigned int)key->auth_uid, (unsigned int)entry->auth_uid);
 	debug_return_bool(false);
     }
     if (entry->type != key->type) {
@@ -102,7 +103,7 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
 	if (entry->u.ppid != key->u.ppid) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"%s:%u record ppid mismatch (want %d, got %d)", __func__, recno,
-		key->u.ppid, entry->u.ppid);
+		(int)key->u.ppid, (int)entry->u.ppid);
 	    debug_return_bool(false);
 	}
 	if (sudo_timespeccmp(&entry->start_time, &key->start_time, !=)) {
