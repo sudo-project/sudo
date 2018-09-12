@@ -144,7 +144,8 @@ sudo_ev_poll(struct pollfd *fds, nfds_t nfds, const struct timespec *timo)
 static int
 sudo_ev_poll(struct pollfd *fds, nfds_t nfds, const struct timespec *timo)
 {
-    const int timeout = (timo->tv_sec * 1000) + (timo->tv_nsec / 1000000);
+    const int timeout =
+	timo ? (timo->tv_sec * 1000) + (timo->tv_nsec / 1000000) : -1;
 
     return poll(fds, nfds, timeout);
 }
