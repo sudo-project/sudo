@@ -500,10 +500,11 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
     } else {
 	print_pair_json(fp, "{ ", typestr, &value, " }", indent);
     }
-    if (!last_one)
-	putc(',', fp);
-    if (need_newline)
+    if (need_newline) {
+	if (!last_one)
+	    putc(',', fp);
 	putc('\n', fp);
+    }
 
     debug_return;
 }
