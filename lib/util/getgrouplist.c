@@ -84,6 +84,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     grpsize = (int)sysconf(_SC_NGROUPS_MAX);
     if (grpsize < 0)
 	grpsize = NGROUPS_MAX;
+    grpsize++;	/* include space for the primary gid */
     /*
      * It is possible to belong to more groups in the group database
      * than NGROUPS_MAX.
