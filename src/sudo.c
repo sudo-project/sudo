@@ -371,7 +371,7 @@ fix_fds(void)
  * Returns 0 on success and -1 on failure.
  */
 static int
-fill_group_list(struct user_details *ud, int system_maxgroups)
+fill_group_list(struct user_details *ud)
 {
     int ret = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
@@ -412,16 +412,16 @@ get_user_groups(struct user_details *ud)
 {
     char *cp, *gid_list = NULL;
     size_t glsize;
-    int i, len, maxgroups, group_source;
+    int i, len, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
-
-    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
-    if (maxgroups < 0)
-	maxgroups = NGROUPS_MAX;
 
     ud->groups = NULL;
     group_source = sudo_conf_group_source();
     if (group_source != GROUP_SOURCE_DYNAMIC) {
+	int maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
+	if (maxgroups < 0)
+	    maxgroups = NGROUPS_MAX;
+
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
 	    /* Use groups from kernel if not too many or source is static. */
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
@@ -447,7 +447,7 @@ get_user_groups(struct user_details *ud)
 	 * Query group database if kernel list is too small or disabled.
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
-	if (fill_group_list(ud, maxgroups) == -1)
+	if (fill_group_list(ud) == -1)
 	    sudo_fatal(U_("unable to get group vector"));
     }
 
