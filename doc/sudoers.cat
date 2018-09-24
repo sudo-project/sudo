@@ -126,16 +126,14 @@ DDEESSCCRRIIPPTTIIOONN
      _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t file.  On BSD systems, if the _u_s_e___l_o_g_i_n_c_l_a_s_s option is
      enabled, the environment is initialized based on the _p_a_t_h and _s_e_t_e_n_v
      settings in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The new environment contains the TERM,
-     PATH, HOME, MAIL, SHELL, LOGNAME, USER, USERNAME and SUDO_* variables in
-     addition to variables from the invoking process permitted by the
-     _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.  This is effectively a whitelist for
-     environment variables.  The environment variables LOGNAME, USER and
-     USERNAME are treated specially.  If one or more variables are preserved
-     from the invoking process, any of the three remaining variables (that
-     were not explicitly preserved) will be set to the same value as the first
-     one in the list that was preserved.  This avoids an inconsistent
-     environment where some of the variables describing the user name are set
-     to the invoking user and some are set to the target user.  () are removed
+     PATH, HOME, MAIL, SHELL, LOGNAME, USER and SUDO_* variables in addition
+     to variables from the invoking process permitted by the _e_n_v___c_h_e_c_k and
+     _e_n_v___k_e_e_p options.  This is effectively a whitelist for environment
+     variables.  The environment variables LOGNAME and USER are treated
+     specially.  If only one of them is preserved from user's environment, the
+     other will be set to the same value.  This avoids an inconsistent
+     environment where one of the variables describing the user name is set to
+     the invoking user and one is set to the target user.  () are removed
      unless both the name and value parts are matched by _e_n_v___k_e_e_p or
      _e_n_v___c_h_e_c_k, as they may be interpreted as functions by the bbaasshh shell.
      Prior to version 1.8.11, such variables were always removed.
@@ -1043,10 +1041,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      env_reset         If set, ssuuddoo will run the command in a minimal
                        environment containing the TERM, PATH, HOME, MAIL,
-                       SHELL, LOGNAME, USER, USERNAME and SUDO_* variables.
-                       Any variables in the caller's environment or in the
-                       file specified by the _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e option that
-                       match the env_keep and env_check lists are then added,
+                       SHELL, LOGNAME, USER and SUDO_* variables.  Any
+                       variables in the caller's environment or in the file
+                       specified by the _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e option that match
+                       the env_keep and env_check lists are then added,
                        followed by any variables present in the file specified
                        by the _e_n_v___f_i_l_e option (if any).  The contents of the
                        env_keep and env_check lists, as modified by global
@@ -1382,7 +1380,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        disabled or HOME is present in the _e_n_v___k_e_e_p list.  This
                        flag is _o_f_f by default.
 
-     set_logname       Normally, ssuuddoo will set the LOGNAME, USER and USERNAME
+     set_logname       Normally, ssuuddoo will set the LOGNAME and USER
                        environment variables to the name of the target user
                        (usually root unless the --uu option is given).  However,
                        since some programs (including the RCS revision control
@@ -1391,8 +1389,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        This can be done by negating the set_logname option.
                        Note that _s_e_t___l_o_g_n_a_m_e will have no effect if the
                        _e_n_v___r_e_s_e_t option has not been disabled and the _e_n_v___k_e_e_p
-                       list contains LOGNAME, USER or USERNAME.  This flag is
-                       _o_n by default.
+                       list contains LOGNAME or USER.  This flag is _o_n by
+                       default.
 
      set_utmp          When enabled, ssuuddoo will create an entry in the utmp (or
                        utmpx) file when a pseudo-tty is allocated.  A pseudo-
@@ -2506,7 +2504,7 @@ EEXXAAMMPPLLEESS
      Here we override some of the compiled in default values.  We want ssuuddoo to
      log via syslog(3) using the _a_u_t_h facility in all cases.  We don't want to
      subject the full time staff to the ssuuddoo lecture, user mmiilllleerrtt need not
-     give a password, and we don't want to reset the LOGNAME, USER or USERNAME
+     give a password, and we don't want to reset the LOGNAME or USER
      environment variables when running commands as root.  Additionally, on
      the machines in the _S_E_R_V_E_R_S Host_Alias, we keep an additional local log
      file and make sure we log the year in each log line since the log entries
@@ -2927,4 +2925,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.25                     August 7, 2018                     Sudo 1.8.25
+Sudo 1.8.26                     August 7, 2018                     Sudo 1.8.26

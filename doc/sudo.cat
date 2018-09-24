@@ -566,8 +566,6 @@ EENNVVIIRROONNMMEENNTT
 
      USER             Set to the same value as LOGNAME, described above.
 
-     USERNAME         Same as USER.
-
      VISUAL           Default editor to use in --ee (sudoedit) mode if
                       SUDO_EDITOR is not set.
 

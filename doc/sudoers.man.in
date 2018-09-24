@@ -309,8 +309,7 @@ The new environment contains the
 \fRMAIL\fR,
 \fRSHELL\fR,
 \fRLOGNAME\fR,
-\fRUSER\fR,
-\fRUSERNAME\fR
+\fRUSER\fR
 and
 \fRSUDO_*\fR
 variables
@@ -322,17 +321,14 @@ options.
 This is effectively a whitelist
 for environment variables.
 The environment variables
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 and
-\fRUSERNAME\fR
+\fRUSER\fR
 are treated specially.
-If one or more variables are preserved from the invoking process,
-any of the three remaining variables (that were not explicitly
-preserved) will be set to the same value as the first one in the
-list that was preserved.
-This avoids an inconsistent environment where some of the variables
-describing the user name are set to the invoking user and some are
+If only one of them is preserved from user's environment, the other
+will be set to the same value.
+This avoids an inconsistent environment where one of the variables
+describing the user name is set to the invoking user and one is
 set to the target user.
 \fR()\fR
 are removed unless both the name and value parts are matched by
@@ -2217,8 +2213,7 @@ will run the command in a minimal environment containing the
 \fRMAIL\fR,
 \fRSHELL\fR,
 \fRLOGNAME\fR,
-\fRUSER\fR,
-\fRUSERNAME\fR
+\fRUSER\fR
 and
 \fRSUDO_*\fR
 variables.
@@ -2884,10 +2879,9 @@ set_logname
 Normally,
 \fBsudo\fR
 will set the
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 and
-\fRUSERNAME\fR
+\fRUSER\fR
 environment variables to the name of the target user (usually root unless the
 \fB\-u\fR
 option is given).
@@ -2904,10 +2898,9 @@ if the
 option has not been disabled and the
 \fIenv_keep\fR
 list contains
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 or
-\fRUSERNAME\fR.
+\fRUSER\fR.
 This flag is
 \fIon\fR
 by default.
@@ -4899,10 +4892,9 @@ We don't want to subject the full time staff to the
 lecture, user
 \fBmillert\fR
 need not give a password, and we don't want to reset the
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 or
-\fRUSERNAME\fR
+\fRUSER\fR
 environment variables when running commands as root.
 Additionally, on the machines in the
 \fISERVERS\fR

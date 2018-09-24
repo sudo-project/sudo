@@ -299,8 +299,7 @@ The new environment contains the
 .Ev MAIL ,
 .Ev SHELL ,
 .Ev LOGNAME ,
-.Ev USER ,
-.Ev USERNAME
+.Ev USER
 and
 .Ev SUDO_*
 variables
@@ -312,17 +311,14 @@ options.
 This is effectively a whitelist
 for environment variables.
 The environment variables
-.Ev LOGNAME ,
-.Ev USER
+.Ev LOGNAME
 and
-.Ev USERNAME
+.Ev USER
 are treated specially.
-If one or more variables are preserved from the invoking process,
-any of the three remaining variables (that were not explicitly
-preserved) will be set to the same value as the first one in the
-list that was preserved.
-This avoids an inconsistent environment where some of the variables
-describing the user name are set to the invoking user and some are
+If only one of them is preserved from user's environment, the other
+will be set to the same value.
+This avoids an inconsistent environment where one of the variables
+describing the user name is set to the invoking user and one is
 set to the target user.
 .Li ()
 are removed unless both the name and value parts are matched by
@@ -2081,8 +2077,7 @@ will run the command in a minimal environment containing the
 .Ev MAIL ,
 .Ev SHELL ,
 .Ev LOGNAME ,
-.Ev USER ,
-.Ev USERNAME
+.Ev USER
 and
 .Ev SUDO_*
 variables.
@@ -2711,10 +2706,9 @@ by default.
 Normally,
 .Nm sudo
 will set the
-.Ev LOGNAME ,
-.Ev USER
+.Ev LOGNAME
 and
-.Ev USERNAME
+.Ev USER
 environment variables to the name of the target user (usually root unless the
 .Fl u
 option is given).
@@ -2731,10 +2725,9 @@ if the
 option has not been disabled and the
 .Em env_keep
 list contains
-.Ev LOGNAME ,
-.Ev USER
+.Ev LOGNAME
 or
-.Ev USERNAME .
+.Ev USER .
 This flag is
 .Em on
 by default.
@@ -4560,10 +4553,9 @@ We don't want to subject the full time staff to the
 lecture, user
 .Sy millert
 need not give a password, and we don't want to reset the
-.Ev LOGNAME ,
-.Ev USER
+.Ev LOGNAME
 or
-.Ev USERNAME
+.Ev USER
 environment variables when running commands as root.
 Additionally, on the machines in the
 .Em SERVERS

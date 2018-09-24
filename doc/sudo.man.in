@@ -1123,10 +1123,6 @@ Set to the same value as
 \fRLOGNAME\fR,
 described above.
 .TP 17n
-\fRUSERNAME\fR
-Same as
-\fRUSER\fR.
-.TP 17n
 \fRVISUAL\fR
 Default editor to use in
 \fB\-e\fR

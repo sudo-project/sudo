@@ -1035,9 +1035,6 @@ Set to the login name of the user who invoked sudo.
 Set to the same value as
 .Ev LOGNAME ,
 described above.
-.It Ev USERNAME
-Same as
-.Ev USER .
 .It Ev VISUAL
 Default editor to use in
 .Fl e

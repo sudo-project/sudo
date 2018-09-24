@@ -637,8 +637,10 @@ send_mail(const char *fmt, ...)
 	"HOME=/",
 	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
 	"LOGNAME=root",
-	"USERNAME=root",
 	"USER=root",
+# ifdef _AIX
+	"LOGIN=root",
+# endif
 	NULL
     };
 #endif /* NO_ROOT_MAILER */
