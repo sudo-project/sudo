@@ -23,6 +23,14 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#ifndef TIME_T_MAX
+# if SIZEOF_TIME_T == 8
+#  define TIME_T_MAX	LLONG_MAX
+# else
+#  define TIME_T_MAX	INT_MAX
+# endif
+#endif
+
 /*
  * Macros for operating on struct timeval.
  */

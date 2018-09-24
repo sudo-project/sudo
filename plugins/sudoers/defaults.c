@@ -858,14 +858,6 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
     debug_return_bool(true);
 }
 
-#ifndef TIME_T_MAX
-# if SIZEOF_TIME_T == 8
-#  define TIME_T_MAX	LLONG_MAX
-# else
-#  define TIME_T_MAX	INT_MAX
-# endif
-#endif
-
 static bool
 store_timespec(const char *str, union sudo_defs_val *sd_un)
 {
