@@ -578,11 +578,42 @@ static bool
 matches_env_list(const char *var, struct list_members *list, bool *full_match)
 {
     struct list_member *cur;
+    bool is_logname = false;
     debug_decl(matches_env_list, SUDOERS_DEBUG_ENV)
 
-    SLIST_FOREACH(cur, list, entries) {
-	if (matches_env_pattern(cur->value, var, full_match))
-	    debug_return_bool(true);
+    switch (*var) {
+    case 'L':
+	if (strncmp(var, "LOGNAME=", 8) == 0)
+	    is_logname = true;
+#ifdef _AIX
+	else if (strncmp(var, "LOGIN=", 6) == 0)
+	    is_logname = true;
+#endif
+	break;
+    case 'U':
+	if (strncmp(var, "USER=", 5) == 0)
+	    is_logname = true;
+	break;
+    }
+
+    if (is_logname) {
+	/*
+	 * We treat LOGIN, LOGNAME and USER specially.
+	 * If one is preserved/deleted we want to preserve/delete them all.
+	 */
+	SLIST_FOREACH(cur, list, entries) {
+	    if (matches_env_pattern(cur->value, "LOGNAME", full_match) ||
+#ifdef _AIX
+		matches_env_pattern(cur->value, "LOGIN", full_match) ||
+#endif
+		matches_env_pattern(cur->value, "USER", full_match))
+		debug_return_bool(true);
+	}
+    } else {
+	SLIST_FOREACH(cur, list, entries) {
+	    if (matches_env_pattern(cur->value, var, full_match))
+		debug_return_bool(true);
+	}
     }
     debug_return_bool(false);
 }

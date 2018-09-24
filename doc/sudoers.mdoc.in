@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 7, 2018
+.Dd September 24, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -315,8 +315,14 @@ The environment variables
 and
 .Ev USER
 are treated specially.
-If only one of them is preserved from user's environment, the other
-will be set to the same value.
+If one of them is preserved (or removed) from user's environment, the other
+will be as well.
+If
+.Ev LOGNAME
+and
+.Ev USER
+are to be preserved but only one of them is present in the user's environment,
+the other will be set to the same value.
 This avoids an inconsistent environment where one of the variables
 describing the user name is set to the invoking user and one is
 set to the target user.
