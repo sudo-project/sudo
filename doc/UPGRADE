@@ -1,6 +1,20 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.26:
+
+    Starting with version 1.8.26, sudo no long sets the USERNAME
+    environment variable when running commands. This is a non-standard
+    environment variable that was set on some older Linux systems.
+    Sudo still sets the LOGNAME, USER and, on AIX systems, LOGIN
+    environment variables.
+
+    Handling of the LOGNAME, USER (and on AIX, LOGIN) environment
+    variables has changed slightly in version 1.8.26.  Sudo now
+    treats those variables as a single unit.  This means that if
+    one variable is preserved or removed from the environment using
+    env_keep, env_check or env_delete, the others are too.
+
 o Upgrading from a version prior to 1.8.23:
 
     In sudo 1.8.23 the "sudoers2ldif" script and the "visudo -x"
