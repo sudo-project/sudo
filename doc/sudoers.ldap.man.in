@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "5" "June 25, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "September 27, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1163,6 +1163,45 @@ The
 utility can be used to manage the key database and create a
 \fIstash file\fR.
 This option is only supported by the Tivoli LDAP libraries.
+.RE
+.TP 6n
+\fBTLS_REQCERT\fR \fIlevel\fR
+The
+\fBTLS_REQCERT\fR
+parameter controls how the LDAP server's TLS certificated will be
+verified (if at all).
+If the server's TLS certificate cannot be verified (usually because it
+is signed by an unknown certificate authority),
+\fBsudo\fR
+will be unable to connect to it.
+The following
+\fIlevel\fR
+values are supported:
+.RS 10n
+.TP 10n
+never
+The server certificate will not be requested or checked.
+.TP 10n
+allow
+The server certificate will be requested.
+A missing or invalid certificate is ignored and not considered an error.
+.TP 10n
+try
+The server certificate will be requested.
+A missing certificate is ignored but an invalid certificate will
+result in a connection error.
+.TP 10n
+demand | \fIhard\fR
+The server certificate will be requested.
+A missing or invalid certificate will result in a connection error.
+This is the default behavior.
+.RE
+.RS 6n
+.sp
+This option is only supported by the OpenLDAP libraries.
+Other LDAP libraries only support the
+\fBTLS_CHECKPEER\fR
+parameter.
 .RE
 .TP 6n
 \fBTLS_RANDFILE\fR \fIfile name\fR

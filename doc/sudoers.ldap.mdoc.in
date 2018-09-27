@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 25, 2018
+.Dd September 27, 2018
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1063,6 +1063,38 @@ The
 utility can be used to manage the key database and create a
 .Em stash file .
 This option is only supported by the Tivoli LDAP libraries.
+.It Sy TLS_REQCERT Ar level
+The
+.Sy TLS_REQCERT
+parameter controls how the LDAP server's TLS certificated will be
+verified (if at all).
+If the server's TLS certificate cannot be verified (usually because it
+is signed by an unknown certificate authority),
+.Nm sudo
+will be unable to connect to it.
+The following
+.Ar level
+values are supported:
+.Bl -tag -width 8n -offset 4n
+.It never
+The server certificate will not be requested or checked.
+.It allow
+The server certificate will be requested.
+A missing or invalid certificate is ignored and not considered an error.
+.It try
+The server certificate will be requested.
+A missing certificate is ignored but an invalid certificate will
+result in a connection error.
+.It demand No | Ar hard
+The server certificate will be requested.
+A missing or invalid certificate will result in a connection error.
+This is the default behavior.
+.El
+.Pp
+This option is only supported by the OpenLDAP libraries.
+Other LDAP libraries only support the
+.Sy TLS_CHECKPEER
+parameter.
 .It Sy TLS_RANDFILE Ar file name
 The
 .Sy TLS_RANDFILE

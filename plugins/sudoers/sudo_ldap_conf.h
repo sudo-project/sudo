@@ -55,11 +55,12 @@
 } while (0)
 #endif
 
-#define CONF_BOOL	0
-#define CONF_INT	1
-#define CONF_STR	2
-#define CONF_LIST_STR	4
-#define CONF_DEREF_VAL	5
+#define CONF_BOOL		0
+#define CONF_INT		1
+#define CONF_STR		2
+#define CONF_LIST_STR		4
+#define CONF_DEREF_VAL		5
+#define CONF_REQCERT_VAL	6
 
 #define SUDO_LDAP_CLEAR		0
 #define SUDO_LDAP_SSL		1
@@ -85,6 +86,7 @@ struct ldap_config {
     int debug;
     int ldap_debug;
     int tls_checkpeer;
+    int tls_reqcert;
     int timelimit;
     int timeout;
     int bind_timelimit;
