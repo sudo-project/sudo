@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "8" "March 8, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "8" "October 5, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -24,7 +24,7 @@
 .SH "SYNOPSIS"
 .HP 11n
 \fBsudoreplay\fR
-[\fB\-hnR\fR]
+[\fB\-hnRS\fR]
 [\fB\-d\fR\ \fIdir\fR]
 [\fB\-f\fR\ \fIfilter\fR]
 [\fB\-m\fR\ \fInum\fR]
@@ -251,6 +251,18 @@ the user's terminal.
 \fB\-R\fR, \fB\--no-resize\fR
 Do not attempt to re-size the terminal to match the terminal size
 of the session.
+.TP 12n
+\fB\-S\fR, \fB\--suspend-wait\fR
+Wait while the command was suspended.
+By default,
+\fBsudoreplay\fR
+will ignore the time interval between when the command was suspended
+and when it was resumed.
+If the
+\fB\-S\fR
+option is specified,
+\fBsudoreplay\fR
+will wait instead.
 .TP 12n
 \fB\-s\fR, \fB\--speed\fR \fIspeed_factor\fR
 This option causes

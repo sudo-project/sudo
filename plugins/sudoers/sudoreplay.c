@@ -84,6 +84,7 @@ struct replay_closure {
     struct sudo_event *sigtstp_ev;
     struct timing_closure timing;
     bool interactive;
+    bool suspend_wait;
     struct io_buffer {
 	unsigned int len; /* buffer length (how much produced) */
 	unsigned int off; /* write position (how much already consumed) */
@@ -137,7 +138,7 @@ static int terminal_rows, terminal_cols;
 
 static int ttyfd = -1;
 
-static const char short_opts[] =  "d:f:hlm:nRs:V";
+static const char short_opts[] =  "d:f:hlm:nRSs:V";
 static struct option long_opts[] = {
     { "directory",	required_argument,	NULL,	'd' },
     { "filter",		required_argument,	NULL,	'f' },
@@ -146,6 +147,7 @@ static struct option long_opts[] = {
     { "max-wait",	required_argument,	NULL,	'm' },
     { "non-interactive", no_argument,		NULL,	'n' },
     { "no-resize",	no_argument,		NULL,	'R' },
+    { "suspend-wait",	no_argument,		NULL,	'S' },
     { "speed",		required_argument,	NULL,	's' },
     { "version",	no_argument,		NULL,	'V' },
     { NULL,		no_argument,		NULL,	'\0' },
@@ -160,7 +162,7 @@ static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive);
+static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive, bool suspend_wait);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -188,7 +190,7 @@ main(int argc, char *argv[])
 {
     int ch, i, plen, exitcode = 0;
     bool def_filter = true, listonly = false;
-    bool interactive = true, resize = true;
+    bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
@@ -267,6 +269,9 @@ main(int argc, char *argv[])
 	case 'R':
 	    resize = false;
 	    break;
+	case 'S':
+	    suspend_wait = true;
+	    break;
 	case 's':
 	    errno = 0;
 	    speed_factor = strtod(optarg, &ep);
@@ -342,7 +347,7 @@ main(int argc, char *argv[])
     li = NULL;
 
     /* Replay session corresponding to io_log_files[]. */
-    exitcode = replay_session(max_delay, decimal, interactive);
+    exitcode = replay_session(max_delay, decimal, interactive, suspend_wait);
 
     restore_terminal_size();
     sudo_term_restore(ttyfd, true);
@@ -784,9 +789,15 @@ next_timing_record(struct replay_closure *closure)
 {
     debug_decl(next_timing_record, SUDO_DEBUG_UTIL)
 
+again:
     switch (read_timing_record(closure)) {
     case 0:
 	/* success */
+	if (closure->timing.event == IO_EVENT_SUSPEND &&
+	    closure->timing.u.signo == SIGCONT && !closure->suspend_wait) {
+	    /* Ignore time spent suspended. */
+	    goto again;
+	}
 	break;
     case 1:
 	/* EOF */
@@ -927,7 +938,8 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(struct timespec *max_delay, const char *decimal, bool interactive)
+replay_closure_alloc(struct timespec *max_delay, const char *decimal,
+    bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -936,6 +948,7 @@ replay_closure_alloc(struct timespec *max_delay, const char *decimal, bool inter
 	debug_return_ptr(NULL);
 
     closure->interactive = interactive;
+    closure->suspend_wait = suspend_wait;
     closure->timing.max_delay = max_delay;
     closure->timing.decimal = decimal;
 
@@ -1008,14 +1021,16 @@ bad:
 }
 
 static int
-replay_session(struct timespec *max_delay, const char *decimal, bool interactive)
+replay_session(struct timespec *max_delay, const char *decimal,
+    bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     int ret = 0;
     debug_decl(replay_session, SUDO_DEBUG_UTIL)
 
     /* Allocate the delay closure and read the first timing record. */
-    closure = replay_closure_alloc(max_delay, decimal, interactive);
+    closure = replay_closure_alloc(max_delay, decimal, interactive,
+	suspend_wait);
     if (read_timing_record(closure) != 0) {
 	ret = 1;
 	goto done;
@@ -1582,7 +1597,7 @@ static void
 usage(int fatal)
 {
     fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-hnR] [-d dir] [-m num] [-s num] ID\n"),
+	_("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
     fprintf(fatal ? stderr : stdout,
 	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
@@ -1602,6 +1617,7 @@ help(void)
 	"  -h, --help           display help message and exit\n"
 	"  -l, --list           list available session IDs, with optional expression\n"
 	"  -m, --max-wait=num   max number of seconds to wait between events\n"
+	"  -S, --suspend-wait   wait while the command was suspended\n"
 	"  -s, --speed=num      speed up or slow down output\n"
 	"  -V, --version        display version information and exit"));
     exit(0);

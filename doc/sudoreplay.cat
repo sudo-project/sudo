@@ -4,7 +4,7 @@ NNAAMMEE
      ssuuddoorreeppllaayy - replay sudo session logs
 
 SSYYNNOOPPSSIISS
-     ssuuddoorreeppllaayy [--hhnnRR] [--dd _d_i_r] [--ff _f_i_l_t_e_r] [--mm _n_u_m] [--ss _n_u_m] ID
+     ssuuddoorreeppllaayy [--hhnnRRSS] [--dd _d_i_r] [--ff _f_i_l_t_e_r] [--mm _n_u_m] [--ss _n_u_m] ID
 
      ssuuddoorreeppllaayy [--hh] [--dd _d_i_r] --ll [search expression]
 
@@ -131,6 +131,12 @@ DDEESSCCRRIIPPTTIIOONN
      --RR, ----nnoo--rreessiizzee
                  Do not attempt to re-size the terminal to match the terminal
                  size of the session.
+
+     --SS, ----ssuussppeenndd--wwaaiitt
+                 Wait while the command was suspended.  By default, ssuuddoorreeppllaayy
+                 will ignore the time interval between when the command was
+                 suspended and when it was resumed.  If the --SS option is
+                 specified, ssuuddoorreeppllaayy will wait instead.
 
      --ss, ----ssppeeeedd _s_p_e_e_d___f_a_c_t_o_r
                  This option causes ssuuddoorreeppllaayy to adjust the number of seconds
@@ -294,4 +300,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.25                      March 8, 2018                     Sudo 1.8.25
+Sudo 1.8.26                     October 5, 2018                    Sudo 1.8.26

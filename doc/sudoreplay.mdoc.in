@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 8, 2018
+.Dd October 5, 2018
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -22,7 +22,7 @@
 .Nd replay sudo session logs
 .Sh SYNOPSIS
 .Nm sudoreplay
-.Op Fl hnR
+.Op Fl hnRS
 .Op Fl d Ar dir
 .Op Fl f Ar filter
 .Op Fl m Ar num
@@ -230,6 +230,17 @@ the user's terminal.
 .It Fl R , -no-resize
 Do not attempt to re-size the terminal to match the terminal size
 of the session.
+.It Fl S , -suspend-wait
+Wait while the command was suspended.
+By default,
+.Nm
+will ignore the time interval between when the command was suspended
+and when it was resumed.
+If the
+.Fl S
+option is specified,
+.Nm
+will wait instead.
 .It Fl s , -speed Ar speed_factor
 This option causes
 .Nm
