@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,6 +58,8 @@ struct exec_closure_pty {
     pid_t monitor_pid;
     pid_t cmnd_pid;
     pid_t ppgrp;
+    short rows;
+    short cols;
     struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
@@ -1101,6 +1103,8 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->ppgrp = ppgrp;
     ec->cstat = cstat;
     ec->details = details;
+    ec->rows = user_details.ts_rows;
+    ec->cols = user_details.ts_cols;
     TAILQ_INIT(&ec->monitor_messages);
 
     /* Setup event base and events. */
@@ -1685,12 +1689,11 @@ del_io_events(bool nonblocking)
 static void
 sync_ttysize(struct exec_closure_pty *ec)
 {
-    static struct winsize owsize;
     struct winsize wsize;
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
 
     if (ioctl(io_fds[SFD_USERTTY], TIOCGWINSZ, &wsize) == 0) {
-	if (wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col) {
+	if (wsize.ws_row != ec->rows || wsize.ws_col != ec->cols) {
 	    const unsigned int wsize_packed = (wsize.ws_row & 0xffff) |
 		((wsize.ws_col & 0xffff) << 16);
 
@@ -1700,8 +1703,9 @@ sync_ttysize(struct exec_closure_pty *ec)
 	    /* Send window change event to monitor process. */
 	    send_command_status(ec, CMD_TTYWINCH, wsize_packed);
 
-	    /* Update old value. */
-	    owsize = wsize;
+	    /* Update rows/cols. */
+	    ec->rows = wsize.ws_row;
+	    ec->cols = wsize.ws_col;
 	}
     }
 

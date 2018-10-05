@@ -595,8 +595,8 @@ get_user_info(struct user_details *ud)
 	goto oom;
     ud->host = user_info[i] + sizeof("host=") - 1;
 
-    sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
-    if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
+    sudo_get_ttysize(&ud->ts_rows, &ud->ts_cols);
+    if (asprintf(&user_info[++i], "lines=%d", ud->ts_rows) == -1)
 	goto oom;
     if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;
