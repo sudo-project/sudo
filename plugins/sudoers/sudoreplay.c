@@ -49,9 +49,6 @@
 #include <regex.h>
 #include <signal.h>
 #include <time.h>
-#ifdef HAVE_ZLIB_H
-# include <zlib.h>
-#endif
 
 #include <pathnames.h>
 
@@ -61,7 +58,7 @@
 #include "sudo_fatal.h"
 #include "logging.h"
 #include "iolog.h"
-#include "iolog_util.h"
+#include "iolog_files.h"
 #include "sudo_queue.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
@@ -154,7 +151,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
-/* XXX move to separate header? */
+/* XXX move to separate header? (currently in sudoers.h) */
 extern char *get_timestr(time_t, int);
 extern time_t get_date(char *);
 
@@ -189,7 +186,7 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    int ch, idx, plen, exitcode = 0;
+    int ch, i, plen, exitcode = 0;
     bool def_filter = true, listonly = false;
     bool interactive = true, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
@@ -321,8 +318,8 @@ main(int argc, char *argv[])
     plen -= 7;
 
     /* Open files for replay, applying replay filter for the -f flag. */
-    for (idx = 0; idx < IOFD_MAX; idx++) {
-	if (open_io_fd(path, plen, &io_log_files[idx]) == -1)
+    for (i = 0; i < IOFD_MAX; i++) {
+	if (open_io_fd(path, plen, &io_log_files[i]) == -1)
 	    sudo_fatal(U_("unable to open %s"), path);
     }
 
@@ -359,7 +356,7 @@ done:
  * Return 0 for EOF or -1 on error.
  */
 static ssize_t
-io_log_read(int idx, char *buf, size_t nbytes)
+io_log_read(union io_fd ifd, char *buf, size_t nbytes)
 {
     ssize_t nread;
     debug_decl(io_log_read, SUDO_DEBUG_UTIL)
@@ -369,39 +366,39 @@ io_log_read(int idx, char *buf, size_t nbytes)
 	debug_return_ssize_t(-1);
     }
 #ifdef HAVE_ZLIB_H
-    nread = gzread(io_log_files[idx].fd.g, buf, nbytes);
+    nread = gzread(ifd.g, buf, nbytes);
 #else
-    nread = (ssize_t)fread(buf, 1, nbytes, io_log_files[idx].fd.f);
-    if (nread == 0 && ferror(io_log_files[idx].fd.f))
+    nread = (ssize_t)fread(buf, 1, nbytes, ifd.f);
+    if (nread == 0 && ferror(ifd.f))
 	nread = -1;
 #endif
     debug_return_ssize_t(nread);
 }
 
 static int
-io_log_eof(int idx)
+io_log_eof(union io_fd ifd)
 {
     int ret;
     debug_decl(io_log_eof, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
-    ret = gzeof(io_log_files[idx].fd.g);
+    ret = gzeof(ifd.g);
 #else
-    ret = feof(io_log_files[idx].fd.f);
+    ret = feof(ifd.f);
 #endif
     debug_return_int(ret);
 }
 
 static char *
-io_log_gets(int idx, char *buf, size_t nbytes)
+io_log_gets(union io_fd ifd, char *buf, size_t nbytes)
 {
     char *str;
     debug_decl(io_log_gets, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
-    str = gzgets(io_log_files[idx].fd.g, buf, nbytes);
+    str = gzgets(ifd.g, buf, nbytes);
 #else
-    str = fgets(buf, nbytes, io_log_files[idx].fd.f);
+    str = fgets(buf, nbytes, ifd.f);
 #endif
     debug_return_str(str);
 }
@@ -748,9 +745,9 @@ read_timing_record(struct replay_closure *closure)
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
-    if (io_log_gets(IOFD_TIMING, buf, sizeof(buf)) == NULL) {
+    if (io_log_gets(io_log_files[IOFD_TIMING].fd, buf, sizeof(buf)) == NULL) {
 	/* EOF or error reading timing file, we are done. */
-	debug_return_int(io_log_eof(IOFD_TIMING) ? 1 : -1);
+	debug_return_int(io_log_eof(io_log_files[IOFD_TIMING].fd) ? 1 : -1);
     }
 
     /* Parse timing file record. */
@@ -760,7 +757,8 @@ read_timing_record(struct replay_closure *closure)
 
     /* Record number bytes to read. */
     /* XXX - remove timing->nbytes? */
-    if (closure->timing.idx != IOFD_TIMING) {
+    if (closure->timing.event != IO_EVENT_WINSIZE &&
+	closure->timing.event != IO_EVENT_SUSPEND) {
     	closure->iobuf.len = 0;
     	closure->iobuf.off = 0;
     	closure->iobuf.lastc = '\0';
@@ -807,25 +805,24 @@ fill_iobuf(struct replay_closure *closure)
 {
     const size_t space = sizeof(closure->iobuf.buf) - closure->iobuf.len;
     const struct timing_closure *timing = &closure->timing;
-    ssize_t nread;
-    size_t len;
     debug_decl(fill_iobuf, SUDO_DEBUG_UTIL)
 
     if (closure->iobuf.toread != 0 && space != 0) {
-	len = closure->iobuf.toread < space ? closure->iobuf.toread : space;
-	nread = io_log_read(timing->idx,
+	const size_t len =
+	    closure->iobuf.toread < space ? closure->iobuf.toread : space;
+	ssize_t nread = io_log_read(timing->fd,
 	    closure->iobuf.buf + closure->iobuf.off, len);
 	if (nread <= 0) {
 	    if (nread == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: premature EOF, expected %u bytes",
-		    io_log_files[timing->idx].suffix, closure->iobuf.toread);
+		    io_log_files[timing->event].suffix, closure->iobuf.toread);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "%s: read error", io_log_files[timing->idx].suffix);
+		    "%s: read error", io_log_files[timing->event].suffix);
 	    }
 	    sudo_warnx(U_("unable to read %s"),
-		io_log_files[timing->idx].suffix);
+		io_log_files[timing->event].suffix);
 	    debug_return_bool(false);
 	}
 	closure->iobuf.toread -= nread;
@@ -844,25 +841,43 @@ static void
 delay_cb(int fd, int what, void *v)
 {
     struct replay_closure *closure = v;
-    const struct timing_closure *timing = &closure->timing;
+    struct timing_closure *timing = &closure->timing;
     debug_decl(delay_cb, SUDO_DEBUG_UTIL)
 
-    /* Check for window change event and resize as needed. */
-    if (timing->idx == IOFD_TIMING) {
+    switch (timing->event) {
+    case IO_EVENT_WINSIZE:
 	resize_terminal(timing->u.winsize.rows, timing->u.winsize.cols);
-	next_timing_record(closure);
-	debug_return;
+	break;
+    case IO_EVENT_STDIN:
+	if (io_log_files[IOFD_STDIN].enabled)
+	    timing->fd = io_log_files[IOFD_STDIN].fd;
+	break;
+    case IO_EVENT_STDOUT:
+	if (io_log_files[IOFD_STDOUT].enabled)
+	    timing->fd = io_log_files[IOFD_STDOUT].fd;
+	break;
+    case IO_EVENT_STDERR:
+	if (io_log_files[IOFD_STDERR].enabled)
+	    timing->fd = io_log_files[IOFD_STDERR].fd;
+	break;
+    case IO_EVENT_TTYIN:
+	if (io_log_files[IOFD_TTYIN].enabled)
+	    timing->fd = io_log_files[IOFD_TTYIN].fd;
+	break;
+    case IO_EVENT_TTYOUT:
+	if (io_log_files[IOFD_TTYOUT].enabled)
+	    timing->fd = io_log_files[IOFD_TTYOUT].fd;
+	break;
     }
 
-    /* If we are not replaying this stream, just read the next record. */
-    if (timing->idx >= IOFD_MAX || !io_log_files[timing->idx].enabled) {
+    if (timing->fd.v != NULL) {
+	/* If the stream is open, enable the write event. */
+	if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
+	    sudo_fatal(U_("unable to add event to queue"));
+    } else {
+	/* Not replaying, get the next timing record and continue. */
 	next_timing_record(closure);
-	debug_return;
     }
-
-    /* We are replaying this strean, enable write event. */
-    if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
 
     debug_return;
 }
@@ -1065,7 +1080,7 @@ write_output(int fd, int what, void *v)
     iov[0].iov_len = nbytes;
 
     if (closure->interactive &&
-	(timing->idx == IOFD_STDOUT || timing->idx == IOFD_STDERR)) {
+	(timing->event == IO_EVENT_STDOUT || timing->event == IO_EVENT_STDERR)) {
 	char *nl;
 
 	/*

@@ -314,9 +314,9 @@ plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
 plugins/sudoers/iolog.h
+plugins/sudoers/iolog_files.h
 plugins/sudoers/iolog_path.c
 plugins/sudoers/iolog_util.c
-plugins/sudoers/iolog_util.h
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
 plugins/sudoers/ldap_util.c

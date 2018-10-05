@@ -377,7 +377,39 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     debug_return_bool(ret);
 }
 
-/* Call I/O plugin stderr log method. */
+/* Call I/O plugin suspend log method. */
+static void
+log_suspend(int signo)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+    debug_decl(log_suspend, SUDO_DEBUG_EXEC);
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->version < SUDO_API_MKVERSION(1, 13))
+	    continue;
+	if (plugin->u.io->log_suspend) {
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_suspend(signo);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_suspend = NULL;
+		}
+		break;
+	    }
+	}
+    }
+    sudo_debug_set_active_instance(sudo_debug_instance);
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+
+    debug_return;
+}
+
+/* Call I/O plugin window change log method. */
 static void
 log_winchange(unsigned int rows, unsigned int cols)
 {
@@ -469,6 +501,9 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	if (ttymode != TERM_COOKED)
 	    sudo_term_restore(io_fds[SFD_USERTTY], false);
 
+	/* Log the suspend event. */
+	log_suspend(signo);
+
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
 
@@ -484,6 +519,9 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
 	if (killpg(ec->ppgrp, signo) != 0)
 	    sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
+
+	/* Log the resume event. */
+	log_suspend(SIGCONT);
 
 	/* Check foreground/background status on resume. */
 	check_foreground(ec);
@@ -513,6 +551,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	    if (sudo_sigaction(signo, &osa, NULL) != 0)
 		sudo_warn(U_("unable to restore handler for signal %d"), signo);
 	}
+
 	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }

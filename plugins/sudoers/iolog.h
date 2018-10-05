@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,17 +17,22 @@
 #ifndef SUDOERS_IOLOG_H
 #define SUDOERS_IOLOG_H
 
+#ifdef HAVE_ZLIB_H
+# include <zlib.h>	/* for gzFile */
+#endif
+
 /*
- * I/O log fd numbers as stored in the timing file.
- * Changing these will result in incompatible I/O log files!
+ * I/O log event types as stored as the first field in the timing file.
+ * Changing existing values will result in incompatible I/O log files.
  */
-#define IOFD_STDIN	0
-#define IOFD_STDOUT	1
-#define IOFD_STDERR	2
-#define IOFD_TTYIN	3
-#define IOFD_TTYOUT	4
-#define IOFD_TIMING	5
-#define IOFD_MAX	6
+#define IO_EVENT_STDIN		0
+#define IO_EVENT_STDOUT		1
+#define IO_EVENT_STDERR		2
+#define IO_EVENT_TTYIN		3
+#define IO_EVENT_TTYOUT		4
+#define IO_EVENT_WINSIZE	5
+#define IO_EVENT_SUSPEND	6
+#define IO_EVENT_COUNT		7
 
 /* Default maximum session ID */
 #define SESSID_MAX      2176782336U
@@ -40,20 +45,41 @@ union io_fd {
     void *v;
 };
 
-struct io_log_file {
-    bool enabled;
-    const char *suffix;
-    union io_fd fd;
+/*
+ * Info present in the I/O log file
+ */
+struct log_info {
+    char *cwd;
+    char *user;
+    char *runas_user;
+    char *runas_group;
+    char *tty;
+    char *cmd;
+    time_t tstamp;
+    int rows;
+    int cols;
 };
 
-static struct io_log_file io_log_files[] = {
-    { false, "/stdin" },	/* IOFD_STDIN */
-    { false, "/stdout" },	/* IOFD_STDOUT */
-    { false, "/stderr" },	/* IOFD_STDERR */
-    { false, "/ttyin" },	/* IOFD_TTYIN  */
-    { false, "/ttyout" },	/* IOFD_TTYOUT */
-    { true,  "/timing" },	/* IOFD_TIMING */
-    { false, NULL }		/* IOFD_MAX */
+struct timing_closure {
+    const char *decimal;
+    struct timespec *max_delay;
+    union io_fd fd;
+    int event;
+    union {
+	struct {
+	    int rows;
+	    int cols;
+	} winsize;
+	size_t nbytes; // XXX
+	int signo;
+    } u;
 };
+
+/* iolog_util.c */
+bool parse_timing(const char *buf, struct timespec *delay, struct timing_closure *timing);
+char *parse_delay(const char *cp, struct timespec *delay, const char *decimal_point);
+struct log_info *parse_logfile(const char *logfile);
+void free_log_info(struct log_info *li);
+void adjust_delay(struct timespec *delay, struct timespec *max_delay, double scale_factor);
 
 #endif /* SUDOERS_IOLOG_H */
