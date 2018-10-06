@@ -69,23 +69,21 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-DOCS =	$(mansrcdir)/sudo.$(mantype) $(mansrcdir)/visudo.$(mantype) \
-	$(mansrcdir)/sudo.conf.$(mantype) $(mansrcdir)/sudoers.$(mantype) \
-	$(mansrcdir)/sudoers.ldap.$(mantype) $(mansrcdir)/sudoers.$(mantype) \
-	$(mansrcdir)/sudoers_timestamp.$(mantype) \
-	$(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudoreplay.$(mantype) \
-	$(mansrcdir)/sudo_plugin.$(mantype)
+DOCS = $(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudo.$(mantype) \
+       $(mansrcdir)/sudo.conf.$(mantype) $(mansrcdir)/sudo_plugin.$(mantype) \
+       $(mansrcdir)/sudoers.$(mantype) $(mansrcdir)/sudoers.ldap.$(mantype) \
+       $(mansrcdir)/sudoers_timestamp.$(mantype) \
+       $(mansrcdir)/sudoreplay.$(mantype) $(mansrcdir)/visudo.$(mantype)
 
-DEVDOCS = $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
-	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
+DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/cvtsudoers.cat \
 	  $(srcdir)/sudo.conf.man.in $(srcdir)/sudo.conf.cat \
-	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+	  $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
+	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
 	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
 	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
 	  $(srcdir)/sudoers_timestamp.man.in $(srcdir)/sudoers_timestamp.cat \
-	  $(srcdir)/cvtsudoers.man.in $(srcdir)/cvtsudoers.cat \
 	  $(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
-	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat
+	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat
 
 OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
 	     $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
