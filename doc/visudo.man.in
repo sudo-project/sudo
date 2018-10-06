@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "8" "January 26, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "8" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -273,7 +273,7 @@ plugin to override the default
 \fIsudoers\fR
 path name, UID, GID and file mode.
 These arguments, if present, should be listed after the path to the plugin
-(i.e.\& after
+(i.e., after
 \fIsudoers.so\fR).
 Multiple arguments may be specified, separated by white space.
 For example:

@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "September 24, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -51,7 +51,7 @@ sudoers.ldap(@mansectform@).
 \fBsudo\fR
 consults the
 sudo.conf(@mansectform@)
-file to determine which policy and and I/O logging plugins to load.
+file to determine which policy and I/O logging plugins to load.
 If no
 sudo.conf(@mansectform@)
 file is present, or if it contains no
@@ -80,7 +80,7 @@ plugin in the
 sudo.conf(@mansectform@)
 file.
 These arguments, if present, should be listed after the path to the plugin
-(i.e.\& after
+(i.e., after
 \fIsudoers.so\fR).
 Multiple arguments may be specified, separated by white space.
 For example:
@@ -707,7 +707,7 @@ or
 may be enclosed in double quotes to avoid the
 need for escaping special characters.
 Alternately, special characters
-may be specified in escaped hex mode, e.g.\& \ex20 for space.
+may be specified in escaped hex mode, e.g., \ex20 for space.
 When
 using double quotes, any prefix characters must be included inside
 the quotes.
@@ -771,7 +771,7 @@ Note that
 user names and groups are matched as strings.
 In other words, two
 users (groups) with the same uid (gid) are considered to be distinct.
-If you wish to match all user names with the same uid (e.g.\&
+If you wish to match all user names with the same uid (e.g.,
 root and toor), you can use a uid instead (#0 in the example given).
 .nf
 .sp
@@ -804,8 +804,8 @@ will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
 interfaces, will use the netmask of that interface.
 The netmask may be specified either in standard IP address notation
-(e.g.\& 255.255.255.0 or ffff:ffff:ffff:ffff::),
-or CIDR notation (number of bits, e.g.\& 24 or 64).
+(e.g., 255.255.255.0 or ffff:ffff:ffff:ffff::),
+or CIDR notation (number of bits, e.g., 24 or 64).
 A host name may include shell-style wildcards (see the
 \fIWildcards\fR
 section below),
@@ -1994,7 +1994,7 @@ is optional.
 .PP
 The following characters must be escaped with a backslash
 (\(oq\e\(cq)
-when used as part of a word (e.g.\& a user name or host name):
+when used as part of a word (e.g., a user name or host name):
 \(oq\&!\(cq,
 \(oq=\&\(cq,
 \(oq:\&\(cq,
@@ -3129,7 +3129,7 @@ has no effect.
 .sp
 A malicious program run under
 \fBsudo\fR
-may be capable of injecting injecting commands into the user's
+may be capable of injecting commands into the user's
 terminal or running a background process that retains access to the
 user's terminal device even after the main program has finished
 executing.
@@ -3407,7 +3407,7 @@ escape sequences are supported:
 .TP 6n
 \fR%{seq}\fR
 expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
-where every two digits are used to form a new directory, e.g.\&
+where every two digits are used to form a new directory, e.g.,
 \fI01/00/A5\fR
 .PD
 .TP 6n
@@ -3419,11 +3419,11 @@ expanded to the name of the invoking user's real group ID
 .TP 6n
 \fR%{runas_user}\fR
 expanded to the login name of the user the command will
-be run as (e.g.\& root)
+be run as (e.g., root)
 .TP 6n
 \fR%{runas_group}\fR
 expanded to the group name of the user the command will
-be run as (e.g.\& wheel)
+be run as (e.g., wheel)
 .TP 6n
 \fR%{hostname}\fR
 expanded to the local host name without the domain name
@@ -3523,7 +3523,7 @@ are honored, everything else is ignored.
 The file permissions will always include the owner read and
 write bits, even if they are not present in the specified mode.
 When creating I/O log directories, search (execute) bits are added
-to to match the read and write bits specified by
+to match the read and write bits specified by
 \fIiolog_mode\fR.
 Defaults to 0600 (read and write by user only).
 .sp
@@ -4418,7 +4418,7 @@ The login name of the user who ran
 \fBsudo\fR.
 .TP 14n
 ttyname
-The short name of the terminal (e.g.\&
+The short name of the terminal (e.g.,
 \(lqconsole\(rq,
 \(lqtty01\(rq,
 or

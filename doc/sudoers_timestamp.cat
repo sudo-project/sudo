@@ -115,8 +115,8 @@ LLOOCCKKIINNGG
      Records of type TS_GLOBAL cannot be locked for a long period of time
      since doing so would interfere with other ssuuddoo processes.  Instead, a
      separate lock record is used to prevent multiple ssuuddoo processes using the
-     same terminal (or parent process ID) from from prompting for a password
-     as the same time.
+     same terminal (or parent process ID) from prompting for a password as the
+     same time.
 
 SSEEEE AALLSSOO
      sudoers(4), sudo(1m)
@@ -198,4 +198,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.25                    December 21, 2017                   Sudo 1.8.25
+Sudo 1.8.26                     October 6, 2018                    Sudo 1.8.26

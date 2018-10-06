@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "8" "October 5, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "8" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -48,7 +48,7 @@ adjusted (faster or slower) based on the command line options.
 The
 \fIID\fR
 should either be a six character sequence of digits and
-upper case letters, e.g.\&
+upper case letters, e.g.,
 \fR0100A5\fR,
 or a pattern matching the
 \fIiolog_file\fR
@@ -195,7 +195,7 @@ The
 \fItty name\fR
 should be specified without the
 \fI/dev/\fR
-prefix, e.g.\&
+prefix, e.g.,
 \fItty01\fR
 instead of
 \fI/dev/tty01\fR.
@@ -237,7 +237,7 @@ option is specified,
 will limit these pauses to at most
 \fImax_wait\fR
 seconds.
-The value may be specified as a floating point number, e.g.\&
+The value may be specified as a floating point number, e.g.,
 \fI2.5\fR.
 A
 \fImax_wait\fR

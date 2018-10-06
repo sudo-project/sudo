@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 1, 2018
+.Dd October 6, 2018
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -265,7 +265,7 @@ This will only be present if there is a corresponding setting in
 A space-separated list of IP network addresses and netmasks in the
 form
 .Dq addr/netmask ,
-e.g.\&
+e.g.,
 .Dq 192.168.1.2/255.255.255.0 .
 The address and netmask pairs may be either IPv4 or IPv6, depending on
 what the operating system supports.
@@ -359,7 +359,7 @@ environment variable to the target user's home directory.
 .It sudoedit=bool
 Set to true when the
 .Fl e
-flag is is specified or if invoked as
+flag is specified or if invoked as
 .Nm sudoedit .
 The plugin shall substitute an editor into
 .Em argv

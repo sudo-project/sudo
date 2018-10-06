@@ -11,7 +11,7 @@ DDEESSCCRRIIPPTTIIOONN
      policy information in LDAP, please see sudoers.ldap(4).
 
    CCoonnffiigguurriinngg ssuuddoo..ccoonnff ffoorr ssuuddooeerrss
-     ssuuddoo consults the sudo.conf(4) file to determine which policy and and I/O
+     ssuuddoo consults the sudo.conf(4) file to determine which policy and I/O
      logging plugins to load.  If no sudo.conf(4) file is present, or if it
      contains no Plugin lines, ssuuddooeerrss will be used for policy decisions and
      I/O logging.  To explicitly configure sudo.conf(4) to use the ssuuddooeerrss
@@ -22,7 +22,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      Starting with ssuuddoo 1.8.5, it is possible to specify optional arguments to
      the ssuuddooeerrss plugin in the sudo.conf(4) file.  These arguments, if
-     present, should be listed after the path to the plugin (i.e. after
+     present, should be listed after the path to the plugin (i.e., after
      _s_u_d_o_e_r_s_._s_o).  Multiple arguments may be specified, separated by white
      space.  For example:
 
@@ -309,7 +309,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      A user name, uid, group, gid, netgroup, nonunix_group or nonunix_gid may
      be enclosed in double quotes to avoid the need for escaping special
      characters.  Alternately, special characters may be specified in escaped
-     hex mode, e.g. \x20 for space.  When using double quotes, any prefix
+     hex mode, e.g., \x20 for space.  When using double quotes, any prefix
      characters must be included inside the quotes.
 
      The actual nonunix_group and nonunix_gid syntax depends on the underlying
@@ -345,7 +345,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      User_Aliases it can contain Runas_Aliases.  Note that user names and
      groups are matched as strings.  In other words, two users (groups) with
      the same uid (gid) are considered to be distinct.  If you wish to match
-     all user names with the same uid (e.g. root and toor), you can use a uid
+     all user names with the same uid (e.g., root and toor), you can use a uid
      instead (#0 in the example given).
 
      Host_List ::= Host |
@@ -366,8 +366,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      host's network interfaces and, if the network number corresponds to one
      of the hosts's network interfaces, will use the netmask of that
      interface.  The netmask may be specified either in standard IP address
-     notation (e.g. 255.255.255.0 or ffff:ffff:ffff:ffff::), or CIDR notation
-     (number of bits, e.g. 24 or 64).  A host name may include shell-style
+     notation (e.g., 255.255.255.0 or ffff:ffff:ffff:ffff::), or CIDR notation
+     (number of bits, e.g., 24 or 64).  A host name may include shell-style
      wildcards (see the _W_i_l_d_c_a_r_d_s section below), but unless the host name
      command on your machine returns the fully qualified host name, you'll
      need to use the _f_q_d_n option for wildcards to be useful.  Note that ssuuddoo
@@ -931,7 +931,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n (`=', `:', `(', `)') is optional.
 
      The following characters must be escaped with a backslash (`\') when used
-     as part of a word (e.g. a user name or host name): `!', `=', `:', `,',
+     as part of a word (e.g., a user name or host name): `!', `=', `:', `,',
      `(', `)', `\'.
 
 SSUUDDOOEERRSS OOPPTTIIOONNSS
@@ -1504,10 +1504,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        terminal, _u_s_e___p_t_y has no effect.
 
                        A malicious program run under ssuuddoo may be capable of
-                       injecting injecting commands into the user's terminal
-                       or running a background process that retains access to
-                       the user's terminal device even after the main program
-                       has finished executing.  By running the command in a
+                       injecting commands into the user's terminal or running
+                       a background process that retains access to the user's
+                       terminal device even after the main program has
+                       finished executing.  By running the command in a
                        separate pseudo-pty, this attack is no longer possible.
                        This flag is _o_f_f by default.
 
@@ -1665,7 +1665,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        %{seq}
                              expanded to a monotonically increasing base-36
                              sequence number, such as 0100A5, where every two
-                             digits are used to form a new directory, e.g.
+                             digits are used to form a new directory, e.g.,
                              _0_1_/_0_0_/_A_5
 
                        %{user}
@@ -1677,11 +1677,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
                        %{runas_user}
                              expanded to the login name of the user the
-                             command will be run as (e.g. root)
+                             command will be run as (e.g., root)
 
                        %{runas_group}
                              expanded to the group name of the user the
-                             command will be run as (e.g. wheel)
+                             command will be run as (e.g., wheel)
 
                        %{hostname}
                              expanded to the local host name without the
@@ -1743,9 +1743,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        file permissions will always include the owner read and
                        write bits, even if they are not present in the
                        specified mode.  When creating I/O log directories,
-                       search (execute) bits are added to to match the read
-                       and write bits specified by _i_o_l_o_g___m_o_d_e.  Defaults to
-                       0600 (read and write by user only).
+                       search (execute) bits are added to match the read and
+                       write bits specified by _i_o_l_o_g___m_o_d_e.  Defaults to 0600
+                       (read and write by user only).
 
                        This setting is only supported by version 1.8.19 or
                        higher.
@@ -2232,8 +2232,8 @@ LLOOGG FFOORRMMAATT
 
      username      The login name of the user who ran ssuuddoo.
 
-     ttyname       The short name of the terminal (e.g. "console", "tty01", or
-                   "pts/0") ssuuddoo was run on, or "unknown" if there was no
+     ttyname       The short name of the terminal (e.g., "console", "tty01",
+                   or "pts/0") ssuuddoo was run on, or "unknown" if there was no
                    terminal present.
 
      cwd           The current working directory that ssuuddoo was run in.
@@ -2927,4 +2927,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                   September 24, 2018                   Sudo 1.8.26
+Sudo 1.8.26                     October 6, 2018                    Sudo 1.8.26

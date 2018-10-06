@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "June 1, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -290,7 +290,7 @@ network_addrs=list
 A space-separated list of IP network addresses and netmasks in the
 form
 \(lqaddr/netmask\(rq,
-e.g.\&
+e.g.,
 \(lq192.168.1.2/255.255.255.0\(rq.
 The address and netmask pairs may be either IPv4 or IPv6, depending on
 what the operating system supports.
@@ -399,7 +399,7 @@ environment variable to the target user's home directory.
 sudoedit=bool
 Set to true when the
 \fB\-e\fR
-flag is is specified or if invoked as
+flag is specified or if invoked as
 \fBsudoedit\fR.
 The plugin shall substitute an editor into
 \fIargv\fR

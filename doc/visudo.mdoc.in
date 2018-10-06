@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 26, 2018
+.Dd October 6, 2018
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -267,7 +267,7 @@ plugin to override the default
 .Em sudoers
 path name, UID, GID and file mode.
 These arguments, if present, should be listed after the path to the plugin
-(i.e.\& after
+(i.e., after
 .Pa sudoers.so ) .
 Multiple arguments may be specified, separated by white space.
 For example:

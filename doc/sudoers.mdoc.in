@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 24, 2018
+.Dd October 6, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -50,7 +50,7 @@ in LDAP, please see
 .Nm sudo
 consults the
 .Xr sudo.conf @mansectform@
-file to determine which policy and and I/O logging plugins to load.
+file to determine which policy and I/O logging plugins to load.
 If no
 .Xr sudo.conf @mansectform@
 file is present, or if it contains no
@@ -76,7 +76,7 @@ plugin in the
 .Xr sudo.conf @mansectform@
 file.
 These arguments, if present, should be listed after the path to the plugin
-(i.e.\& after
+(i.e., after
 .Pa sudoers.so ) .
 Multiple arguments may be specified, separated by white space.
 For example:
@@ -681,7 +681,7 @@ or
 may be enclosed in double quotes to avoid the
 need for escaping special characters.
 Alternately, special characters
-may be specified in escaped hex mode, e.g.\& \ex20 for space.
+may be specified in escaped hex mode, e.g., \ex20 for space.
 When
 using double quotes, any prefix characters must be included inside
 the quotes.
@@ -741,7 +741,7 @@ Note that
 user names and groups are matched as strings.
 In other words, two
 users (groups) with the same uid (gid) are considered to be distinct.
-If you wish to match all user names with the same uid (e.g.\&
+If you wish to match all user names with the same uid (e.g.,
 root and toor), you can use a uid instead (#0 in the example given).
 .Bd -literal
 Host_List ::= Host |
@@ -771,8 +771,8 @@ will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
 interfaces, will use the netmask of that interface.
 The netmask may be specified either in standard IP address notation
-(e.g.\& 255.255.255.0 or ffff:ffff:ffff:ffff::),
-or CIDR notation (number of bits, e.g.\& 24 or 64).
+(e.g., 255.255.255.0 or ffff:ffff:ffff:ffff::),
+or CIDR notation (number of bits, e.g., 24 or 64).
 A host name may include shell-style wildcards (see the
 .Sx Wildcards
 section below),
@@ -1867,7 +1867,7 @@ is optional.
 .Pp
 The following characters must be escaped with a backslash
 .Pq Ql \e
-when used as part of a word (e.g.\& a user name or host name):
+when used as part of a word (e.g., a user name or host name):
 .Ql \&! ,
 .Ql =\& ,
 .Ql :\& ,
@@ -2942,7 +2942,7 @@ has no effect.
 .Pp
 A malicious program run under
 .Nm sudo
-may be capable of injecting injecting commands into the user's
+may be capable of injecting commands into the user's
 terminal or running a background process that retains access to the
 user's terminal device even after the main program has finished
 executing.
@@ -3206,7 +3206,7 @@ escape sequences are supported:
 .Bl -tag -width 4n
 .It Li %{seq}
 expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
-where every two digits are used to form a new directory, e.g.\&
+where every two digits are used to form a new directory, e.g.,
 .Pa 01/00/A5
 .It Li %{user}
 expanded to the invoking user's login name
@@ -3214,10 +3214,10 @@ expanded to the invoking user's login name
 expanded to the name of the invoking user's real group ID
 .It Li %{runas_user}
 expanded to the login name of the user the command will
-be run as (e.g.\& root)
+be run as (e.g., root)
 .It Li %{runas_group}
 expanded to the group name of the user the command will
-be run as (e.g.\& wheel)
+be run as (e.g., wheel)
 .It Li %{hostname}
 expanded to the local host name without the domain name
 .It Li %{command}
@@ -3311,7 +3311,7 @@ are honored, everything else is ignored.
 The file permissions will always include the owner read and
 write bits, even if they are not present in the specified mode.
 When creating I/O log directories, search (execute) bits are added
-to to match the read and write bits specified by
+to match the read and write bits specified by
 .Em iolog_mode .
 Defaults to 0600 (read and write by user only).
 .Pp
@@ -4112,7 +4112,7 @@ This field is only present when logging via
 The login name of the user who ran
 .Nm sudo .
 .It ttyname
-The short name of the terminal (e.g.\&
+The short name of the terminal (e.g.,
 .Dq console ,
 .Dq tty01 ,
 or

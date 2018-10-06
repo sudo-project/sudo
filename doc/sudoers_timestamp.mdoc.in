@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 21, 2017
+.Dd October 6, 2018
 .Dt SUDOERS_TIMESTAMP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -199,7 +199,7 @@ processes.
 Instead, a separate lock record is used to prevent multiple
 .Nm sudo
 processes using the same terminal (or parent process ID) from
-from prompting for a password as the same time.
+prompting for a password as the same time.
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@

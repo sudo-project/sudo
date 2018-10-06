@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -346,7 +346,7 @@ may be either a group name or a numeric group ID
 (GID)
 prefixed with the
 \(oq#\(cq
-character (e.g.
+character (e.g.,
 \fR#0\fR
 for GID 0).
 When running a command as a GID, many shells require that the
@@ -603,7 +603,7 @@ may be either a user name or a numeric user ID
 (UID)
 prefixed with the
 \(oq#\(cq
-character (e.g.
+character (e.g.,
 \fR#0\fR
 for UID 0).
 When running commands as a UID, many shells require that the
@@ -653,7 +653,7 @@ should stop processing command line arguments.
 Environment variables to be set for the command may also be passed
 on the command line in the form of
 \fIVAR\fR=\fIvalue\fR,
-e.g.\&
+e.g.,
 \fRLD_LIBRARY_PATH\fR=\fI/usr/local/pkg/lib\fR.
 Variables passed on the command line are subject to restrictions
 imposed by the security policy plugin.

@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd October 5, 2018
+.Dd October 6, 2018
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -46,7 +46,7 @@ adjusted (faster or slower) based on the command line options.
 The
 .Em ID
 should either be a six character sequence of digits and
-upper case letters, e.g.\&
+upper case letters, e.g.,
 .Li 0100A5 ,
 or a pattern matching the
 .Em iolog_file
@@ -178,7 +178,7 @@ The
 .Ar tty name
 should be specified without the
 .Pa /dev/
-prefix, e.g.\&
+prefix, e.g.,
 .Pa tty01
 instead of
 .Pa /dev/tty01 .
@@ -218,7 +218,7 @@ option is specified,
 will limit these pauses to at most
 .Em max_wait
 seconds.
-The value may be specified as a floating point number, e.g.\&
+The value may be specified as a floating point number, e.g.,
 .Em 2.5 .
 A
 .Em max_wait
