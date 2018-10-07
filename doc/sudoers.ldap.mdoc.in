@@ -937,7 +937,7 @@ An alias for
 for OpenLDAP compatibility.
 .It Sy TLS_CACERTFILE Ar file name
 The path to a certificate authority bundle which contains the certificates
-for all the Certificate Authorities the client knows to be valid, e.g.\&
+for all the Certificate Authorities the client knows to be valid, e.g.,
 .Pa /etc/ssl/ca-bundle.pem .
 This option is only supported by the OpenLDAP libraries.
 Netscape-derived LDAP libraries use the same certificate
@@ -947,7 +947,7 @@ database for CA and client certificates (see
 Similar to
 .Sy TLS_CACERTFILE
 but instead of a file, it is a directory containing individual
-Certificate Authority certificates, e.g.\&
+Certificate Authority certificates, e.g.,
 .Pa /etc/ssl/certs .
 The directory specified by
 .Sy TLS_CACERTDIR
@@ -1052,7 +1052,7 @@ but use a
 .Li .sth
 file extension instead of
 .Li .kdb ,
-e.g.\&
+e.g.,
 .Li ldapkey.sth .
 The default
 .Li ldapkey.kdb
@@ -1381,7 +1381,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #
 # For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
 # a directory, in which case the files in the directory must have the
-# default names (e.g. cert8.db and key4.db), or the path to the cert
+# default names (e.g., cert8.db and key4.db), or the path to the cert
 # and key files themselves.  However, a bug in version 5.0 of the LDAP
 # SDK will prevent specific file names from working.  For this reason
 # it is suggested that tls_cert and tls_key be set to a directory,
@@ -1408,7 +1408,7 @@ The following schema, in OpenLDAP format, is included with
 source and binary distributions as
 .Pa schema.OpenLDAP .
 Simply copy
-it to the schema directory (e.g.\&
+it to the schema directory (e.g.,
 .Pa /etc/openldap/schema ) ,
 add the proper
 .Li include
