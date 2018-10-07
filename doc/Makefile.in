@@ -116,8 +116,8 @@ lint: all
 	else \
 	    rval=0; \
 	    for m in $(DOCS); do \
-		echo $(MANDOC) -Tlint $$m; \
-		$(MANDOC) -Tlint $$m || rval=`expr $$rval + $$?`; \
+		echo $(MANDOC) -Tlint -Wstyle $$m; \
+		$(MANDOC) -Tlint -Wstyle $$m || rval=`expr $$rval + $$?`; \
 	    done; \
 	    exit $$rval; \
 	fi
