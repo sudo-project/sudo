@@ -868,6 +868,7 @@ DDEESSCCRRIIPPTTIIOONN
          void (*deregister_hooks)(int version,
             int (*deregister_hook)(struct sudo_hook *hook));
          int (*change_winsize)(unsigned int lines, unsigned int cols);
+         int (*log_suspend)(int signo);
      };
 
      When an I/O plugin is loaded, ssuuddoo runs the command in a pseudo-tty.
@@ -1130,8 +1131,19 @@ DDEESSCCRRIIPPTTIIOONN
 
            The cchhaannggee__wwiinnssiizzee() function is called whenever the window size of
            the terminal changes from the initial values specified in the
-           user_info list.  It returns 1 on success, 0 on failure, -1 if an
-           error occurred (which will terminate the running command).
+           user_info list.  Returns -1 if an error occurred, in which case no
+           further calls to cchhaannggee__wwiinnssiizzee() will be made,
+
+     log_suspend
+           int (*log_suspend)(int signo);
+
+           The lloogg__ssuussppeenndd() function is called whenever a command is
+           suspended or resumed.  The _s_i_g_n_o argument is either the signal that
+           caused the command to be suspended or SIGCONT if the command was
+           resumed.  Logging this information makes it possible to skip the
+           period of time when the command was suspended during playback of a
+           session.  Returns -1 if an error occurred, in which case no further
+           calls to lloogg__ssuussppeenndd() will be made,
 
      _I_/_O _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
 
@@ -1619,6 +1631,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
      Version 1.12 (sudo 1.8.21)
            The change_winsize field was added to the io_plugin struct.
 
+     Version 1.13 (sudo 1.8.26)
+           The log_suspend field was added to the io_plugin struct.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1648,4 +1663,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                     October 6, 2018                    Sudo 1.8.26
+Sudo 1.8.26                     October 7, 2018                    Sudo 1.8.26
