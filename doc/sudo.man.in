@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -191,7 +191,9 @@ will exit with an error.
 .RE
 .TP 12n
 \fB\-a\fR \fItype\fR, \fB\--auth-type\fR=\fItype\fR
-Use the specified BSD authentication
+Use the specified
+BSD
+authentication
 \fItype\fR
 when validating the user, if allowed by
 \fI/etc/login.conf\fR.
@@ -200,7 +202,9 @@ authentication methods by adding an
 \(lqauth-sudo\(rq
 entry in
 \fI/etc/login.conf\fR.
-This option is only available on systems that support BSD authentication.
+This option is only available on systems that support
+BSD
+authentication.
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
 Run the given command in the background.
@@ -251,7 +255,9 @@ If the command is being run as a login shell, additional
 \fI/etc/login.conf\fR
 settings, such as the umask and environment variables, will
 be applied, if present.
-This option is only available on systems with BSD login classes.
+This option is only available on systems with
+BSD
+login classes.
 .TP 12n
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to

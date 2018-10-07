@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -293,7 +293,9 @@ systems without PAM), the environment is initialized with the
 contents of the
 \fI/etc/environment\fR
 file.
-On BSD systems, if the
+On
+BSD
+systems, if the
 \fIuse_loginclass\fR
 option is enabled, the environment is initialized
 based on the
@@ -484,7 +486,9 @@ systems without PAM), the contents of
 \fI/etc/environment\fR
 are also
 included.
-On BSD systems, if the
+On
+BSD
+systems, if the
 \fIuse_loginclass\fR
 flag is
 enabled, the
@@ -2373,7 +2377,9 @@ If disabled, a command may only be run after the audit event is successfully
 written.
 This flag is only effective on systems for which
 \fBsudoers\fR
-supports audit logging, including FreeBSD, Linux, macOS and Solaris.
+supports audit logging, including
+FreeBSD,
+Linux, macOS and Solaris.
 This flag is
 \fIon\fR
 by default.
@@ -3252,7 +3258,9 @@ at least 480 bytes and should support messages up to 2048 bytes.
 By default,
 \fBsudoers\fR
 creates log messages up to 980 bytes which corresponds to the
-historic BSD syslog implementation which used a 1024 byte buffer
+historic
+BSD
+syslog implementation which used a 1024 byte buffer
 to store the message, date, hostname and program name.
 To prevent syslog messages from being truncated,
 \fBsudoers\fR
@@ -3775,7 +3783,8 @@ Negative
 \fItimestamp_timeout\fR
 values are not supported and positive values are limited to a maximum
 of 60 minutes.
-This is currently only supported on OpenBSD.
+This is currently only supported on
+OpenBSD.
 .PP
 The default value is
 \fI@timestamp_type@\fR.

@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO.CONF" "5" "June 16, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -257,7 +257,9 @@ This option is ignored on systems that support either the
 \fBdevname\fR()
 or
 \fB_ttyname_dev\fR()
-functions, for example BSD, macOS and Solaris.
+functions, for example
+BSD,
+macOS and Solaris.
 .TP 10n
 noexec
 The fully-qualified path to a shared library containing wrappers
@@ -334,7 +336,9 @@ so this option can be enabled without compromising security.
 To actually get a
 \fBsudo\fR
 core file you will likely need to enable core dumps for setuid processes.
-On BSD and Linux systems this is accomplished in the
+On
+BSD
+and Linux systems this is accomplished in the
 sysctl(@mansectsu@)
 command.
 On Solaris, the
@@ -405,8 +409,9 @@ Most operating systems provide an efficient method of performing
 such queries.
 Currently,
 \fBsudo\fR
-supports efficient group queries on AIX, BSD, HP-UX, Linux and
-Solaris.
+supports efficient group queries on AIX,
+BSD,
+HP-UX, Linux and Solaris.
 .TP 10n
 adaptive
 Only query the group database if the static group list returned

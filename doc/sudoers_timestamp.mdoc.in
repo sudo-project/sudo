@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd October 6, 2018
+.Dd October 7, 2018
 .Dt SUDOERS_TIMESTAMP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -253,7 +253,8 @@ now stored in non-global time stamp records.
 This prevents re-use of the time stamp file after logout in most cases.
 .Pp
 Support was added for the kernel-based tty time stamps available in
-OpenBSD which do not use an on-disk time stamp file.
+.Ox
+which do not use an on-disk time stamp file.
 .El
 .Sh AUTHORS
 Many people have worked on

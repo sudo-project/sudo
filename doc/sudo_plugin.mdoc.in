@@ -174,7 +174,9 @@ might.
 Authentication type, if specified by the
 .Fl a
 flag, to use on
-systems where BSD authentication is supported.
+systems where
+.Bx
+authentication is supported.
 .It closefrom=number
 If specified, the user has requested via the
 .Fl C
@@ -248,7 +250,8 @@ If the user does not specify a program on the command line,
 .Nm sudo
 will pass the plugin the path to the user's shell and set
 .It login_class=string
-BSD login class to use when setting resource limits and nice value,
+.Bx
+login class to use when setting resource limits and nice value,
 if specified by the
 .Fl c
 flag.
@@ -844,14 +847,16 @@ terminal output.
 This only includes output to the screen, not output to a pipe or file.
 This is a hint to the I/O logging plugin which may choose to ignore it.
 .It login_class=string
-BSD login class to use when setting resource limits and nice value
-(optional).
+.Bx
+login class to use when setting resource limits and nice value (optional).
 This option is only set on systems that support login classes.
 .It nice=int
 Nice value (priority) to use when executing the command.
 The nice value, if specified, overrides the priority associated with the
 .Em login_class
-on BSD systems.
+on
+.Bx
+systems.
 .It noexec=bool
 If set, prevent the command from executing other programs.
 .It preserve_fds=list

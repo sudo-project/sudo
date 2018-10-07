@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 16, 2018
+.Dd October 7, 2018
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -234,7 +234,9 @@ This option is ignored on systems that support either the
 .Fn devname
 or
 .Fn _ttyname_dev
-functions, for example BSD, macOS and Solaris.
+functions, for example
+.Bx ,
+macOS and Solaris.
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the
@@ -305,7 +307,9 @@ so this option can be enabled without compromising security.
 To actually get a
 .Nm sudo
 core file you will likely need to enable core dumps for setuid processes.
-On BSD and Linux systems this is accomplished in the
+On
+.Bx
+and Linux systems this is accomplished in the
 .Xr sysctl 8
 command.
 On Solaris, the
@@ -370,8 +374,9 @@ Most operating systems provide an efficient method of performing
 such queries.
 Currently,
 .Nm sudo
-supports efficient group queries on AIX, BSD, HP-UX, Linux and
-Solaris.
+supports efficient group queries on AIX,
+.Bx ,
+HP-UX, Linux and Solaris.
 .It adaptive
 Only query the group database if the static group list returned
 by the kernel has the maximum number of entries.
