@@ -302,7 +302,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     debug_return_str_masked(pass);
 }
 
-extern int sudo_term_erase, sudo_term_kill;
+extern int sudo_term_eof, sudo_term_erase, sudo_term_kill;
 
 static char *
 getln(int fd, char *buf, size_t bufsiz, int feedback)
@@ -323,7 +323,10 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
 	if (feedback) {
-	    if (c == sudo_term_kill) {
+	    if (c == sudo_term_eof) {
+		nr = 0;
+		break;
+	    } else if (c == sudo_term_kill) {
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;
