@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 7, 2018
+.Dd October 8, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -499,7 +499,6 @@ the specified
 .It Fl S , -stdin
 Write the prompt to the standard error and read the password from the
 standard input instead of using the terminal device.
-The password must be followed by a newline character.
 .It Fl s , -shell
 Run the shell specified by the
 .Ev SHELL

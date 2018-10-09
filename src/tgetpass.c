@@ -396,21 +396,26 @@ getln(int fd, char *buf, size_t bufsiz, int feedback,
 	}
     }
 
-    if (nr != 1) {
-	if (nr == 0) {
-	    *errval = TGP_ERRVAL_NOPASSWORD;
-	} else if (nr == -1) {
-	    if (errno == EINTR) {
-		if (signo[SIGALRM] == 1)
-		    *errval = TGP_ERRVAL_TIMEOUT;
-	    } else {
-		*errval = TGP_ERRVAL_READERROR;
-	    }
+    switch (nr) {
+    case -1:
+	/* Read error */
+	if (errno == EINTR) {
+	    if (signo[SIGALRM] == 1)
+		*errval = TGP_ERRVAL_TIMEOUT;
+	} else {
+	    *errval = TGP_ERRVAL_READERROR;
 	}
 	debug_return_str(NULL);
+    case 0:
+	/* EOF is only an error if no bytes were read. */
+	if (left == bufsiz - 1) {
+	    *errval = TGP_ERRVAL_NOPASSWORD;
+	    debug_return_str(NULL);
+	}
+	/* FALLTHROUGH */
+    default:
+	debug_return_str_masked(buf);
     }
-
-    debug_return_str_masked(buf);
 }
 
 static void
