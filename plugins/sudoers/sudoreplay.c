@@ -571,10 +571,10 @@ xterm_get_size(int *new_rows, int *new_cols)
     /* Setup an event for reading the terminal size */
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     gc.ev = sudo_ev_alloc(ttyfd, SUDO_EV_READ, getsize_cb, &gc);
     if (gc.ev == NULL)
-        sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Read back terminal size response */
     if (sudo_ev_add(evbase, gc.ev, &gc.timeout, false) == -1)
