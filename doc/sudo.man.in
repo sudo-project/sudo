@@ -1205,6 +1205,118 @@ and file redirection work.
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .RE
 .fi
+.SH "DIAGNOSTICS"
+Error messages produced by
+\fBsudo\fR
+include:
+.TP 6n
+\fRediting files in a writable directory is not permitted\fR
+By default,
+\fBsudoedit\fR
+does not permit editing a file when any of the parent directories are writable
+by the invoking user.
+This avoids a race condition that could allow the user to overwrite
+an arbitrary file.
+See the
+\fIsudoedit_checkdir\fR
+option in
+sudoers(@mansectform@)
+for more information.
+.TP 6n
+\fRediting symbolic links is not permitted\fR
+By default,
+\fBsudoedit\fR
+does not follow symbolic links when opening files.
+See the
+\fIsudoedit_follow\fR
+option in
+sudoers(@mansectform@)
+for more information.
+.TP 6n
+\fReffective uid is not 0, is sudo installed setuid root?\fR
+This error indicates that
+\fBsudo\fR
+was not run with root privileges.
+The
+\fBsudo\fR
+binary must be owned by the root user and have the Set-user-ID bit set.
+Also, it must not be located on a file system mounted with the
+\(oqnosuid\(cq
+option or on an NFS file system that maps uid 0 to an unprivileged uid.
+.TP 6n
+\fReffective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?\fR
+This error indicates that the
+\fBsudo\fR
+binary has the proper owner and permissions but it still did not run
+with root privileges.
+The most common reason for this is that the file system the
+\fBsudo\fR
+binary is located on is mounted with the
+\(oqnosuid\(cq
+option or it is an NFS file system that maps uid 0 to an unprivileged uid.
+.TP 6n
+\fRfatal error, unable to load plugins\fR
+An error occurred while loading or initializing the plugins specified in
+sudo.conf(@mansectform@).
+.TP 6n
+\fRinvalid environment variable name: foo=bar\fR
+One or more environment variable names specified via the
+\fB\-E\fR
+option contained an equal sign
+(\(oq=\(cq).
+The arguments to the
+\fB\-E\fR
+option should be environment variable names without an associated value.
+.TP 6n
+\fRno password was provided\fR
+When
+\fBsudo\fR
+tried to read the password, it did not receive any characters.
+This may happen if no terminal is available (or the
+\fB\-S\fR
+option is specified) and the standard input has been redirected from
+\fI/dev/null\fR.
+.TP 6n
+\fRno tty present and no askpass program specified\fR
+\fBsudo\fR
+needs to read the password but there is no mechanism available to do so.
+A terminal is not present to read the password from,
+\fBsudo\fR
+has not been configured to read from the standard input,
+and no askpass program has been specified either via the
+\fB\-A\fR
+option or the
+\fRSUDO_ASKPASS\fR
+environment variable.
+.TP 6n
+\fRno writable temporary directory found\fR
+\fBsudoedit\fR
+was unable to find a usable temporary directory in which to store its
+intermediate files.
+.TP 6n
+\fRsudo must be owned by uid 0 and have the setuid bit set\fR
+This error indicates that the
+\fBsudo\fR
+binary does not have the correct owner or permissions.
+It must be owned by the root user and have the Set-user-ID bit set.
+.TP 6n
+\fRsudoedit is not supported on this platform\fR
+It is only possible to run
+\fBsudoedit\fR
+on systems that support setting the effective user-ID.
+.TP 6n
+\fRtimed out reading password\fR
+The user did not enter a password before the password timeout
+(5 minutes by default) expired.
+.TP 6n
+\fRunknown uid UID: who are you?\fR
+\fBsudo\fR
+was unable to look up the invoking user's ID in the password database.
+.TP 6n
+\fRyou may not specify environment variables in edit mode\fR
+It is only possible to specify environment variables when running
+a command.
+When editing a file, the editor is run with the user's environment unmodified.
 .SH "SEE ALSO"
 su(1),
 stat(2),

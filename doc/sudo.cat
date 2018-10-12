@@ -606,6 +606,84 @@ EEXXAAMMPPLLEESS
 
            $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
+DDIIAAGGNNOOSSTTIICCSS
+     Error messages produced by ssuuddoo include:
+
+     editing files in a writable directory is not permitted
+           By default, ssuuddooeeddiitt does not permit editing a file when any of the
+           parent directories are writable by the invoking user.  This avoids
+           a race condition that could allow the user to overwrite an
+           arbitrary file.  See the _s_u_d_o_e_d_i_t___c_h_e_c_k_d_i_r option in sudoers(4) for
+           more information.
+
+     editing symbolic links is not permitted
+           By default, ssuuddooeeddiitt does not follow symbolic links when opening
+           files.  See the _s_u_d_o_e_d_i_t___f_o_l_l_o_w option in sudoers(4) for more
+           information.
+
+     effective uid is not 0, is sudo installed setuid root?
+           This error indicates that ssuuddoo was not run with root privileges.
+           The ssuuddoo binary must be owned by the root user and have the Set-
+           user-ID bit set.  Also, it must not be located on a file system
+           mounted with the `nosuid' option or on an NFS file system that maps
+           uid 0 to an unprivileged uid.
+
+     effective uid is not 0, is sudo on a file system with the 'nosuid' option
+           set or an NFS file system without root privileges?
+           This error indicates that the ssuuddoo binary has the proper owner and
+           permissions but it still did not run with root privileges.  The
+           most common reason for this is that the file system the ssuuddoo binary
+           is located on is mounted with the `nosuid' option or it is an NFS
+           file system that maps uid 0 to an unprivileged uid.
+
+     fatal error, unable to load plugins
+           An error occurred while loading or initializing the plugins
+           specified in sudo.conf(4).
+
+     invalid environment variable name: foo=bar
+           One or more environment variable names specified via the --EE option
+           contained an equal sign (`=').  The arguments to the --EE option
+           should be environment variable names without an associated value.
+
+     no password was provided
+           When ssuuddoo tried to read the password, it did not receive any
+           characters.  This may happen if no terminal is available (or the --SS
+           option is specified) and the standard input has been redirected
+           from _/_d_e_v_/_n_u_l_l.
+
+     no tty present and no askpass program specified
+           ssuuddoo needs to read the password but there is no mechanism available
+           to do so.  A terminal is not present to read the password from,
+           ssuuddoo has not been configured to read from the standard input, and
+           no askpass program has been specified either via the --AA option or
+           the SUDO_ASKPASS environment variable.
+
+     no writable temporary directory found
+           ssuuddooeeddiitt was unable to find a usable temporary directory in which
+           to store its intermediate files.
+
+     sudo must be owned by uid 0 and have the setuid bit set
+           This error indicates that the ssuuddoo binary does not have the correct
+           owner or permissions.  It must be owned by the root user and have
+           the Set-user-ID bit set.
+
+     sudoedit is not supported on this platform
+           It is only possible to run ssuuddooeeddiitt on systems that support setting
+           the effective user-ID.
+
+     timed out reading password
+           The user did not enter a password before the password timeout (5
+           minutes by default) expired.
+
+     unknown uid UID: who are you?
+           ssuuddoo was unable to look up the invoking user's ID in the password
+           database.
+
+     you may not specify environment variables in edit mode
+           It is only possible to specify environment variables when running a
+           command.  When editing a file, the editor is run with the user's
+           environment unmodified.
+
 SSEEEE AALLSSOO
      su(1), stat(2), login_cap(3), passwd(4), sudo.conf(4), sudo_plugin(4),
      sudoers(4), sudoreplay(1m), visudo(1m)
