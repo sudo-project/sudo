@@ -403,10 +403,14 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	    struct cmndspec *cmndspec = TAILQ_FIRST(&priv->cmndlist);
 
 	    /* Free duplicate runas lists. */
-	    if (cmndspec->runasuserlist != NULL)
+	    if (cmndspec->runasuserlist != NULL) {
 		free_members(cmndspec->runasuserlist);
-	    if (cmndspec->runasgrouplist != NULL)
+		free(cmndspec->runasuserlist);
+	    }
+	    if (cmndspec->runasgrouplist != NULL) {
 		free_members(cmndspec->runasgrouplist);
+		free(cmndspec->runasgrouplist);
+	    }
 
 	    /* Update cmndspec with previous runas lists. */
 	    TAILQ_FOREACH(cmndspec, &priv->cmndlist, entries) {
