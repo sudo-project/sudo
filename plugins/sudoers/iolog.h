@@ -31,8 +31,9 @@
 #define IO_EVENT_TTYIN		3
 #define IO_EVENT_TTYOUT		4
 #define IO_EVENT_WINSIZE	5
-#define IO_EVENT_SUSPEND	6
-#define IO_EVENT_COUNT		7
+#define IO_EVENT_TTYOUT_1_8_7	6
+#define IO_EVENT_SUSPEND	7
+#define IO_EVENT_COUNT		8
 
 /* Default maximum session ID */
 #define SESSID_MAX      2176782336U
