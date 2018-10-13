@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 8, 2018
+.Dd October 13, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1125,7 +1125,6 @@ option in
 .Xr sudoers @mansectform@
 for more information.
 .It Li effective uid is not 0, is sudo installed setuid root?
-This error indicates that
 .Nm
 was not run with root privileges.
 The
@@ -1135,7 +1134,9 @@ Also, it must not be located on a file system mounted with the
 .Sq nosuid
 option or on an NFS file system that maps uid 0 to an unprivileged uid.
 .It Li effective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?
-This error indicates that the
+.Nm
+was not run with root privileges.
+The
 .Nm
 binary has the proper owner and permissions but it still did not run
 with root privileges.
@@ -1147,7 +1148,7 @@ option or it is an NFS file system that maps uid 0 to an unprivileged uid.
 .It Li fatal error, unable to load plugins
 An error occurred while loading or initializing the plugins specified in
 .Xr sudo.conf @mansectform@ .
-.It Li invalid environment variable name: foo=bar
+.It Li invalid environment variable name
 One or more environment variable names specified via the
 .Fl E
 option contained an equal sign
@@ -1179,7 +1180,9 @@ environment variable.
 was unable to find a usable temporary directory in which to store its
 intermediate files.
 .It Li sudo must be owned by uid 0 and have the setuid bit set
-This error indicates that the
+.Nm
+was not run with root privileges.
+The
 .Nm
 binary does not have the correct owner or permissions.
 It must be owned by the root user and have the Set-user-ID bit set.
@@ -1190,9 +1193,8 @@ on systems that support setting the effective user-ID.
 .It Li timed out reading password
 The user did not enter a password before the password timeout
 (5 minutes by default) expired.
-.It Li unknown uid UID: who are you?
-.Nm
-was unable to look up the invoking user's ID in the password database.
+.It Li you do not exist in the passwd database
+Your user ID does not appear in the system passwd database.
 .It Li you may not specify environment variables in edit mode
 It is only possible to specify environment variables when running
 a command.

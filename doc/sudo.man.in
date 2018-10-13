@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "October 8, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "October 13, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1234,7 +1234,6 @@ sudoers(@mansectform@)
 for more information.
 .TP 6n
 \fReffective uid is not 0, is sudo installed setuid root?\fR
-This error indicates that
 \fBsudo\fR
 was not run with root privileges.
 The
@@ -1245,7 +1244,9 @@ Also, it must not be located on a file system mounted with the
 option or on an NFS file system that maps uid 0 to an unprivileged uid.
 .TP 6n
 \fReffective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?\fR
-This error indicates that the
+\fBsudo\fR
+was not run with root privileges.
+The
 \fBsudo\fR
 binary has the proper owner and permissions but it still did not run
 with root privileges.
@@ -1259,7 +1260,7 @@ option or it is an NFS file system that maps uid 0 to an unprivileged uid.
 An error occurred while loading or initializing the plugins specified in
 sudo.conf(@mansectform@).
 .TP 6n
-\fRinvalid environment variable name: foo=bar\fR
+\fRinvalid environment variable name\fR
 One or more environment variable names specified via the
 \fB\-E\fR
 option contained an equal sign
@@ -1295,7 +1296,9 @@ was unable to find a usable temporary directory in which to store its
 intermediate files.
 .TP 6n
 \fRsudo must be owned by uid 0 and have the setuid bit set\fR
-This error indicates that the
+\fBsudo\fR
+was not run with root privileges.
+The
 \fBsudo\fR
 binary does not have the correct owner or permissions.
 It must be owned by the root user and have the Set-user-ID bit set.
@@ -1309,9 +1312,8 @@ on systems that support setting the effective user-ID.
 The user did not enter a password before the password timeout
 (5 minutes by default) expired.
 .TP 6n
-\fRunknown uid UID: who are you?\fR
-\fBsudo\fR
-was unable to look up the invoking user's ID in the password database.
+\fRyou do not exist in the passwd database\fR
+Your user ID does not appear in the system passwd database.
 .TP 6n
 \fRyou may not specify environment variables in edit mode\fR
 It is only possible to specify environment variables when running

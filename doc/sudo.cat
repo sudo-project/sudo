@@ -622,25 +622,26 @@ DDIIAAGGNNOOSSTTIICCSS
            information.
 
      effective uid is not 0, is sudo installed setuid root?
-           This error indicates that ssuuddoo was not run with root privileges.
-           The ssuuddoo binary must be owned by the root user and have the Set-
-           user-ID bit set.  Also, it must not be located on a file system
-           mounted with the `nosuid' option or on an NFS file system that maps
-           uid 0 to an unprivileged uid.
+           ssuuddoo was not run with root privileges.  The ssuuddoo binary must be
+           owned by the root user and have the Set-user-ID bit set.  Also, it
+           must not be located on a file system mounted with the `nosuid'
+           option or on an NFS file system that maps uid 0 to an unprivileged
+           uid.
 
      effective uid is not 0, is sudo on a file system with the 'nosuid' option
            set or an NFS file system without root privileges?
-           This error indicates that the ssuuddoo binary has the proper owner and
-           permissions but it still did not run with root privileges.  The
-           most common reason for this is that the file system the ssuuddoo binary
-           is located on is mounted with the `nosuid' option or it is an NFS
-           file system that maps uid 0 to an unprivileged uid.
+           ssuuddoo was not run with root privileges.  The ssuuddoo binary has the
+           proper owner and permissions but it still did not run with root
+           privileges.  The most common reason for this is that the file
+           system the ssuuddoo binary is located on is mounted with the `nosuid'
+           option or it is an NFS file system that maps uid 0 to an
+           unprivileged uid.
 
      fatal error, unable to load plugins
            An error occurred while loading or initializing the plugins
            specified in sudo.conf(4).
 
-     invalid environment variable name: foo=bar
+     invalid environment variable name
            One or more environment variable names specified via the --EE option
            contained an equal sign (`=').  The arguments to the --EE option
            should be environment variable names without an associated value.
@@ -663,9 +664,9 @@ DDIIAAGGNNOOSSTTIICCSS
            to store its intermediate files.
 
      sudo must be owned by uid 0 and have the setuid bit set
-           This error indicates that the ssuuddoo binary does not have the correct
-           owner or permissions.  It must be owned by the root user and have
-           the Set-user-ID bit set.
+           ssuuddoo was not run with root privileges.  The ssuuddoo binary does not
+           have the correct owner or permissions.  It must be owned by the
+           root user and have the Set-user-ID bit set.
 
      sudoedit is not supported on this platform
            It is only possible to run ssuuddooeeddiitt on systems that support setting
@@ -675,9 +676,8 @@ DDIIAAGGNNOOSSTTIICCSS
            The user did not enter a password before the password timeout (5
            minutes by default) expired.
 
-     unknown uid UID: who are you?
-           ssuuddoo was unable to look up the invoking user's ID in the password
-           database.
+     you do not exist in the passwd database
+           Your user ID does not appear in the system passwd database.
 
      you may not specify environment variables in edit mode
            It is only possible to specify environment variables when running a
@@ -736,4 +736,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                     October 8, 2018                    Sudo 1.8.26
+Sudo 1.8.26                    October 13, 2018                    Sudo 1.8.26
