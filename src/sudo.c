@@ -529,7 +529,7 @@ get_user_info(struct user_details *ud)
     aix_restoreauthdb();
 #endif
     if (pw == NULL)
-	sudo_fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
+	sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
 
     user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
