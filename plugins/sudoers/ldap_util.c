@@ -405,32 +405,23 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    int op;
 
 		    op = sudo_ldap_parse_option(opt, &var, &val);
-		    if (strcmp(var, "command_timeout") == 0) {
-			if (op == '=')
-			    cmndspec->timeout = parse_timeout(val);
+		    if (strcmp(var, "command_timeout") == 0 && val != NULL) {
+			cmndspec->timeout = parse_timeout(val);
 #ifdef HAVE_SELINUX
-		    } else if (strcmp(var, "role") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->role = strdup(val)) == NULL)
-				goto oom;
-			}
-		    } else if (strcmp(var, "type") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->type = strdup(val)) == NULL)
-				goto oom;
-			}
+		    } else if (strcmp(var, "role") == 0 && val != NULL) {
+			if ((cmndspec->role = strdup(val)) == NULL)
+			    goto oom;
+		    } else if (strcmp(var, "type") == 0 && val != NULL) {
+			if ((cmndspec->type = strdup(val)) == NULL)
+			    goto oom;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
-		    } else if (strcmp(var, "privs") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->privs = strdup(val)) == NULL)
-				goto oom;
-			}
-		    } else if (strcmp(var, "limitprivs") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->limitprivs = strdup(val)) == NULL)
-				goto oom;
-			}
+		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
+			if ((cmndspec->privs = strdup(val)) == NULL)
+			    goto oom;
+		    } else if (strcmp(var, "limitprivs") == 0 && val != NULL) {
+			if ((cmndspec->limitprivs = strdup(val)) == NULL)
+			    goto oom;
 #endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
 			if (!sudo_ldap_add_default(var, val, op, source,
