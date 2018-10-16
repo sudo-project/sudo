@@ -321,7 +321,7 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 	    else \
 		toke_l="$(srcdir)/toke.l"; \
 	    fi; \
-	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
+	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; $(SED) "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 

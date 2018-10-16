@@ -1,6 +1,6 @@
 #include <config.h>
 
-#line 3 "lex.sudoers.c"
+#line 3 "toke.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -2133,7 +2133,7 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 
 
-#line 2136 "lex.sudoers.c"
+#line 2136 "toke.c"
 
 #define INITIAL 0
 #define GOTDEFS 1
@@ -2351,7 +2351,7 @@ YY_DECL
 	{
 #line 116 "toke.l"
 
-#line 2354 "lex.sudoers.c"
+#line 2354 "toke.c"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -3277,7 +3277,7 @@ YY_RULE_SETUP
 #line 745 "toke.l"
 ECHO;
 	YY_BREAK
-#line 3280 "lex.sudoers.c"
+#line 3280 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{
