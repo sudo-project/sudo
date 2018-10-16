@@ -274,7 +274,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	memcpy(++NewArgv, argv, argc * sizeof(char *));
+	NewArgv++;	/* reserve an extra slot for --login */
+	memcpy(NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
 	    NewArgv[0] = strdup(runas_pw->pw_shell);
