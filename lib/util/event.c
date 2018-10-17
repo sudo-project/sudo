@@ -787,7 +787,7 @@ sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 
     sudo_gettime_mono(&now);
     sudo_timespecsub(&ev->timeout, &now, ts);
-    if (ts->tv_sec < 0 || (ts->tv_sec == 0 && ts->tv_nsec < 0))
+    if (ts->tv_sec < 0)
 	sudo_timespecclear(ts);
     debug_return_int(0);
 }
