@@ -69,7 +69,7 @@ do {							\
 /*
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
- * uid is the key.  Fills in datum from struct password.
+ * uid is the key.  Fills in datum from the users filter.
  * Returns NULL on calloc error or unknown name/id, setting errno
  * to ENOMEM or ENOENT respectively.
  */
@@ -175,7 +175,7 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
 /*
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
- * gid is the key.  Fills in datum from struct group.
+ * gid is the key.  Fills in datum from the groups filter.
  * Returns NULL on calloc error or unknown name/id, setting errno
  * to ENOMEM or ENOENT respectively.
  */
@@ -191,14 +191,14 @@ cvtsudoers_make_gritem(gid_t gid, const char *name)
 
     /* Look up name or gid in filter list. */
     if (name != NULL) {
-	STAILQ_FOREACH(s, &filters->users, entries) {
+	STAILQ_FOREACH(s, &filters->groups, entries) {
 	    if (strcasecmp(name, s->str) == 0) {
 		gid = (gid_t)-1;
 		break;
 	    }
 	}
     } else {
-	STAILQ_FOREACH(s, &filters->users, entries) {
+	STAILQ_FOREACH(s, &filters->groups, entries) {
 	    const char *errstr;
 	    gid_t filter_gid;
 
@@ -254,15 +254,10 @@ cvtsudoers_make_gritem(gid_t gid, const char *name)
     memcpy(newgr, &gr, sizeof(gr));
     cp = (char *)(gritem + 1);
     if (nmem != 0) {
-	STAILQ_FOREACH(s, &filters->groups, entries) {
-	    total += strlen(s->str) + 1;
-	}
-    }
-    if (nmem != 0) {
 	newgr->gr_mem = (char **)cp;
 	cp += sizeof(char *) * nmem;
 	nmem = 0;
-	STAILQ_FOREACH(s, &filters->groups, entries) {
+	STAILQ_FOREACH(s, &filters->users, entries) {
 	    len = strlen(s->str) + 1;
 	    memcpy(cp, s->str, len);
 	    newgr->gr_mem[nmem++] = cp;
@@ -290,7 +285,7 @@ static struct cache_item_gidlist *gidlist_item;
 
 /*
  * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from user_gids or from sudo_getgrouplist2(3).
+ * elements.  Fills in datum from the groups filter.
  */
 struct cache_item *
 cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
@@ -389,7 +384,7 @@ static struct cache_item_gidlist *grlist_item;
 
 /*
  * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in group names from a call to sudo_get_gidlist().
+ * elements.  Fills in group names from the groups filter.
  */
 struct cache_item *
 cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
