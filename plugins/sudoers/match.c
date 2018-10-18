@@ -413,20 +413,18 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
      * If no args specified in sudoers, any user args are allowed.
      * If the empty string is specified in sudoers, no user args are allowed.
      */
-    if (!sudoers_args ||
-	(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)))
+    if (!sudoers_args || (!user_args && !strcmp("\"\"", sudoers_args)))
 	debug_return_bool(true);
+
     /*
      * If args are specified in sudoers, they must match the user args.
      * If running as sudoedit, all args are assumed to be paths.
      */
-    if (sudoers_args) {
-	/* For sudoedit, all args are assumed to be pathnames. */
-	if (strcmp(sudoers_cmnd, "sudoedit") == 0)
-	    flags = FNM_PATHNAME;
-	if (fnmatch(sudoers_args, user_args ? user_args : "", flags) == 0)
-	    debug_return_bool(true);
-    }
+    if (strcmp(sudoers_cmnd, "sudoedit") == 0)
+	flags = FNM_PATHNAME;
+    if (fnmatch(sudoers_args, user_args ? user_args : "", flags) == 0)
+	debug_return_bool(true);
+
     debug_return_bool(false);
 }
 
