@@ -117,10 +117,11 @@ ldif_parse_attribute(char *str)
 
     ep = str + strlen(str);
     while (ep > str && ep[-1] == ' ') {
-	/* Don't trim ecaped trailing space if not base64. */
-	if (!encoded && ep != str && ep[-2] == '\\')
+	ep--;
+	/* Don't trim escaped trailing space if not base64. */
+	if (!encoded && ep != str && ep[-1] == '\\')
 	    break;
-	*--ep = '\0';
+	*ep = '\0';
     }
 
     attr = str;
