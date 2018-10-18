@@ -410,23 +410,23 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 #ifdef HAVE_SELINUX
 		    } else if (strcmp(var, "role") == 0 && val != NULL) {
 			if ((cmndspec->role = strdup(val)) == NULL)
-			    goto oom;
+			    break;
 		    } else if (strcmp(var, "type") == 0 && val != NULL) {
 			if ((cmndspec->type = strdup(val)) == NULL)
-			    goto oom;
+			    break;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
 			if ((cmndspec->privs = strdup(val)) == NULL)
-			    goto oom;
+			    break;
 		    } else if (strcmp(var, "limitprivs") == 0 && val != NULL) {
 			if ((cmndspec->limitprivs = strdup(val)) == NULL)
-			    goto oom;
+			    break;
 #endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
 			if (!sudo_ldap_add_default(var, val, op, source,
 			    &priv->defaults)) {
-			    goto oom;
+			    break;
 			}
 		    } else {
 			/* Convert to tags. */
@@ -446,6 +446,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    }
 		}
 		rcstr_delref(source);
+		if (opt != NULL) {
+		    /* Defer oom until we drop the ref on source. */
+		    goto oom;
+		}
 	    }
 
 	    /* So we can inherit previous values. */
