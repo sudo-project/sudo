@@ -395,7 +395,6 @@ fill_group_list(struct user_details *ud)
 	    &ud->ngroups);
     }
     if (ret == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %s: unable to get groups via sudo_getgrouplist2()",
 	    __func__, ud->username);
@@ -427,7 +426,7 @@ get_user_groups(struct user_details *ud)
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
 		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
 		if (ud->groups == NULL)
-		    goto oom;
+		    goto done;
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: %s: unable to get %d groups via getgroups()",
@@ -448,7 +447,7 @@ get_user_groups(struct user_details *ud)
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
 	if (fill_group_list(ud) == -1)
-	    sudo_fatal(U_("unable to get group vector"));
+	    goto done;
     }
 
     /*
@@ -456,7 +455,7 @@ get_user_groups(struct user_details *ud)
      */
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
     if ((gid_list = malloc(glsize)) == NULL)
-	goto oom;
+	goto done;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
@@ -466,9 +465,8 @@ get_user_groups(struct user_details *ud)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
     }
+done:
     debug_return_str(gid_list);
-oom:
-    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 }
 
 /*
@@ -562,8 +560,9 @@ get_user_info(struct user_details *ud)
     if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid) == -1)
 	goto oom;
 
-    if ((cp = get_user_groups(ud)) != NULL)
-	user_info[++i] = cp;
+    if ((cp = get_user_groups(ud)) == NULL)
+	goto oom;
+    user_info[++i] = cp;
 
     mask = umask(0);
     umask(mask);
