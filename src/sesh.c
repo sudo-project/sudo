@@ -221,24 +221,24 @@ sesh_sudoedit(int argc, char *argv[])
 	    }
 	}
 
-	if (fd_dst != -1) {
-	    if (!post) {
-		if (fd_src == -1 || fstat(fd_src, &sb) != 0)
-		    memset(&sb, 0, sizeof(sb));
-		/* Make mtime on temp file match src. */
-		mtim_get(&sb, times[0]);
-		times[1].tv_sec = times[0].tv_sec;
-		times[1].tv_nsec = times[0].tv_nsec;
-		if (futimens(fd_dst, times) == -1) {
-		    if (utimensat(AT_FDCWD, path_dst, times, 0) == -1)
-			sudo_warn("%s", path_dst);
-		}
+	if (!post) {
+	    if (fd_src == -1 || fstat(fd_src, &sb) != 0)
+		memset(&sb, 0, sizeof(sb));
+	    /* Make mtime on temp file match src. */
+	    mtim_get(&sb, times[0]);
+	    times[1].tv_sec = times[0].tv_sec;
+	    times[1].tv_nsec = times[0].tv_nsec;
+	    if (futimens(fd_dst, times) == -1) {
+		if (utimensat(AT_FDCWD, path_dst, times, 0) == -1)
+		    sudo_warn("%s", path_dst);
 	    }
-	    close(fd_dst);
 	}
-	if (fd_src != -1)
+	close(fd_dst);
+	fd_dst = -1;
+	if (fd_src != -1) {
 	    close(fd_src);
-	fd_dst = fd_src = -1;
+	    fd_src = -1;
+	}
     }
 
     ret = SESH_SUCCESS;
