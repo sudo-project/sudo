@@ -412,7 +412,7 @@ ts_init_key_nonglobal(struct timestamp_entry *entry, struct passwd *pw, int flag
 void *
 timestamp_open(const char *user, pid_t sid)
 {
-    struct ts_cookie *cookie = NULL;
+    struct ts_cookie *cookie;
     char *fname = NULL;
     int tries, fd = -1;
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH)
@@ -485,7 +485,6 @@ timestamp_open(const char *user, pid_t sid)
 bad:
     if (fd != -1)
 	close(fd);
-    free(cookie);
     free(fname);
     debug_return_ptr(NULL);
 }
