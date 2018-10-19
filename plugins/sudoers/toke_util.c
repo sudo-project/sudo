@@ -104,11 +104,12 @@ fill_cmnd(const char *src, size_t len)
     arg_len = arg_size = 0;
 
     dst = sudoerslval.command.cmnd = malloc(len + 1);
-    if (sudoerslval.command.cmnd == NULL) {
+    if (dst == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
+    sudoerslval.command.args = NULL;
 
     /* Copy the string and collapse any escaped sudo-specific characters. */
     for (i = 0; i < len; i++) {
@@ -119,7 +120,6 @@ fill_cmnd(const char *src, size_t len)
     }
     *dst = '\0';
 
-    sudoerslval.command.args = NULL;
     debug_return_bool(true);
 }
 

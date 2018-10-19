@@ -44,7 +44,7 @@ sudo_new_key_val_v1(const char *key, const char *val)
     debug_decl(sudo_new_key_val, SUDO_DEBUG_UTIL)
 
     cp = str = malloc(key_len + 1 + val_len + 1);
-    if (str != NULL) {
+    if (cp != NULL) {
 	memcpy(cp, key, key_len);
 	cp += key_len;
 	*cp++ = '=';

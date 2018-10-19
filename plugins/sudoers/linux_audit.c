@@ -71,12 +71,12 @@ linux_audit_command(char *argv[], int result)
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
 	size += strlen(*av) + 1;
-    command = cp = malloc(size);
+    command = malloc(size);
     if (command == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    for (av = argv; *av != NULL; av++) {
+    for (av = argv, cp = command; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);

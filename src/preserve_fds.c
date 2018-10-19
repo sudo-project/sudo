@@ -59,16 +59,18 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"fd %d already preserved", fd);
 	    free(pfd_new);
+	    pfd_new = NULL;
 	    break;
 	}
 	if (fd < pfd->highfd) {
 	    TAILQ_INSERT_BEFORE(pfd, pfd_new, entries);
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"preserving fd %d", fd);
+	    pfd_new = NULL;
 	    break;
 	}
     }
-    if (pfd == NULL) {
+    if (pfd_new != NULL) {
 	TAILQ_INSERT_TAIL(pfds, pfd_new, entries);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "preserving fd %d", fd);
