@@ -326,7 +326,6 @@ parse_timing(const char *buf, struct timespec *delay,
 
     switch (timing->event) {
     case IO_EVENT_SUSPEND:
-	errno = 0;
 	ulval = strtoul(cp, &ep, 10);
 	if (ep == cp || *ep != '\0')
 	    goto bad;
@@ -335,21 +334,19 @@ parse_timing(const char *buf, struct timespec *delay,
 	timing->u.signo = (int)ulval;
 	break;
     case IO_EVENT_WINSIZE:
-	errno = 0;
 	ulval = strtoul(cp, &ep, 10);
 	if (ep == cp || !isspace((unsigned char) *ep))
 	    goto bad;
-	if (ulval > INT_MAX || (errno == ERANGE && ulval == ULONG_MAX))
+	if (ulval > INT_MAX)
 	    goto bad;
 	timing->u.winsize.rows = (int)ulval;
 	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
 
-	errno = 0;
 	ulval = strtoul(cp, &ep, 10);
 	if (ep == cp || *ep != '\0')
 	    goto bad;
-	if (ulval > INT_MAX || (errno == ERANGE && ulval == ULONG_MAX))
+	if (ulval > INT_MAX)
 	    goto bad;
 	timing->u.winsize.cols = (int)ulval;
 	break;
@@ -358,7 +355,8 @@ parse_timing(const char *buf, struct timespec *delay,
 	ulval = strtoul(cp, &ep, 10);
 	if (ep == cp || *ep != '\0')
 	    goto bad;
-	if (ulval > SIZE_MAX || (errno == ERANGE && ulval == ULONG_MAX))
+	/* Note: assumes SIZE_MAX == ULONG_MAX */
+	if (errno == ERANGE && ulval == ULONG_MAX)
 	    goto bad;
 	timing->u.nbytes = (size_t)ulval;
 	break;
