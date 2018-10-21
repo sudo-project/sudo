@@ -44,13 +44,17 @@
  */
 #if defined(CLOCK_BOOTTIME)
 # define SUDO_CLOCK_BOOTTIME	CLOCK_BOOTTIME
+#elif defined(CLOCK_MONOTONIC_RAW)
+# define SUDO_CLOCK_BOOTTIME	CLOCK_MONOTONIC_RAW
 #elif defined(CLOCK_MONOTONIC)
 # define SUDO_CLOCK_BOOTTIME	CLOCK_MONOTONIC
 #endif
-#if defined(CLOCK_UPTIME)
-# define SUDO_CLOCK_AWAKE	CLOCK_UPTIME
+#if defined(CLOCK_UPTIME_RAW)
+# define SUDO_CLOCK_UPTIME	CLOCK_UPTIME_RAW
+#elif defined(CLOCK_UPTIME)
+# define SUDO_CLOCK_UPTIME	CLOCK_UPTIME
 #elif defined(CLOCK_MONOTONIC)
-# define SUDO_CLOCK_AWAKE	CLOCK_MONOTONIC
+# define SUDO_CLOCK_UPTIME	CLOCK_MONOTONIC
 #endif
 
 /*
@@ -159,7 +163,7 @@ sudo_gettime_mono_v1(struct timespec *ts)
  * Monotonic time, only runs forward.
  * We use a timer that only increments while awake, if possible.
  */
-#if defined(HAVE_CLOCK_GETTIME) && defined(SUDO_CLOCK_AWAKE)
+#if defined(HAVE_CLOCK_GETTIME) && defined(SUDO_CLOCK_UPTIME)
 int
 sudo_gettime_awake_v1(struct timespec *ts)
 {
@@ -173,10 +177,10 @@ sudo_gettime_awake_v1(struct timespec *ts)
 # endif
     if (!has_monoclock)
 	debug_return_int(sudo_gettime_real(ts));
-    if (clock_gettime(SUDO_CLOCK_AWAKE, ts) == -1) {
+    if (clock_gettime(SUDO_CLOCK_UPTIME, ts) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 	    "clock_gettime(%d) failed, using wall clock",
-	    (int)SUDO_CLOCK_AWAKE);
+	    (int)SUDO_CLOCK_UPTIME);
 	has_monoclock = 0;
 	debug_return_int(sudo_gettime_real(ts));
     }
