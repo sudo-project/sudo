@@ -384,6 +384,10 @@ splint:
 
 cppcheck:
 
+pvs-log-files:
+
+pvs-studio:
+
 check:
 
 clean:

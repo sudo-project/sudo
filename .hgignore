@@ -1,8 +1,10 @@
 ~$
-\.o$
+\.i$
 \.l[ao]$
 \.lai$
 \.mo$
+\.o$
+\.plog$
 
 \.diff$
 \.orig$
@@ -16,6 +18,7 @@ Makefile$
 ^libtool$
 
 ^ChangeLog$
+^PVS-Studio.cfg$
 ^doc/.*\.man$
 ^doc/.*\.mdoc$
 ^doc/.*\.man\.sed$

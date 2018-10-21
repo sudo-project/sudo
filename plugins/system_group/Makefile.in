@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -72,6 +72,11 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 # splint options, usually set in the top-level Makefile
 SPLINT_OPTS = -D__restrict= -checks
 
+# PVS-studio options
+PVS_CFG = $(top_srcdir)/PVS-Studio.cfg
+PVS_IGNORE = 'V707,V011,V002,V536'
+PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
+
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -100,6 +105,10 @@ SHELL = @SHELL@
 
 OBJS =	system_group.lo
 
+IOBJS = system_group.i
+
+POBJS = system_group.plog
+
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
 VERSION = @PACKAGE_VERSION@
@@ -109,10 +118,16 @@ all: system_group.la
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/system_group/Makefile
 
-.SUFFIXES: .o .c .h .lo
+.SUFFIXES: .c .h .i .lo .plog
 
 .c.lo:
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+
+.c.i:
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+
+.i.plog:
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -152,11 +167,16 @@ splint:
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
+pvs-log-files: $(POBJS)
+
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
+
 check:
 
 clean:
-	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la *.a stamp-* \
-	    core *.core core.*
+	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f *.lo *.o *.la *.a *.i *.plog \
+	    stamp-* core *.core core.*
 
 mostlyclean: clean
 
@@ -176,3 +196,10 @@ system_group.lo: $(srcdir)/system_group.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/system_group.c
+system_group.i: $(srcdir)/system_group.c $(incdir)/compat/stdbool.h \
+                 $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
+                 $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                 $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+system_group.plog: system_group.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/system_group.c --i-file $< --output-file $@

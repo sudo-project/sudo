@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2015, 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -89,6 +89,11 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 # Default splint options when run from the top-level Makefile
 SPLINT_OPTS = -D__restrict= -checks
 
+# Default PVS-studio options when run from the top-level Makefile
+PVS_CFG = $(top_srcdir)/PVS-Studio.cfg
+PVS_IGNORE = 'V707,V011,V002,V536'
+PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
+
 all: config.status
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
@@ -130,6 +135,22 @@ cov-upload:
 	    https://scan.coverity.com/builds?project=sudo
 
 cov-analyze: cov-upload
+
+pvs-studio: config.status
+	files=; \
+	rval=0; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) PVS_IGNORE="$(PVS_IGNORE)" pvs-log-files) || rval=`expr $$rval + $$?`; \
+	    for f in $$d/*.plog; do \
+		if test "$$f" != "$$d/*.plog"; then \
+		    files="$$files $$f"; \
+		fi; \
+	    done; \
+	done; \
+	if test $$rval -ne 0; then \
+	    exit $$rval; \
+	fi; \
+	plog-converter $(PVS_LOG_OPTS) $$files
 
 install-dirs install-binaries install-includes install-plugin: config.status pre-install
 	for d in $(SUBDIRS); do \

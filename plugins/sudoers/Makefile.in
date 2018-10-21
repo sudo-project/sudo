@@ -99,6 +99,11 @@ CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=c
 # splint options, usually set in the top-level Makefile
 SPLINT_OPTS = -D__restrict= -checks
 
+# PVS-studio options
+PVS_CFG = $(top_srcdir)/PVS-Studio.cfg
+PVS_IGNORE = 'V707,V011,V002,V536'
+PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
+
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -153,6 +158,8 @@ LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo digestname.lo \
 		       rcstr.lo redblack.lo sudoers_debug.lo timeout.lo \
 		       timestr.lo toke.lo toke_util.lo
 
+LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
+
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
 	       env_pattern.lo file.lo find_path.lo fmtsudoers.lo gc.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
@@ -160,18 +167,32 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo editor.lo env.lo \
 	       parse.lo policy.lo prompt.lo set_perms.lo starttime.lo \
 	       sudo_nss.lo sudoers.lo timestamp.lo @SUDOERS_OBJS@
 
+SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
+
 VISUDO_OBJS = editor.lo find_path.lo goodpath.lo locale.lo stubs.o \
 	      sudo_printf.o visudo.o
+
+VISUDO_IOBJS = sudo_printf.i visudo.i
 
 CVTSUDOERS_OBJS = cvtsudoers.o cvtsudoers_json.o cvtsudoers_ldif.o \
 		  cvtsudoers_pwutil.o fmtsudoers.lo locale.lo parse_ldif.o \
 		  strlist.o stubs.o sudo_printf.o ldap_util.lo
 
-REPLAY_OBJS = getdate.o sudoreplay.o iolog_util.lo
+CVTSUDOERS_IOBJS = cvtsudoers.i cvtsudoers_json.i cvtsudoers_ldif.i \
+		   cvtsudoers_pwutil.i strlist.i
+
+REPLAY_OBJS = getdate.o sudoreplay.o iolog_util.o
+
+REPLAY_IOBJS = $(REPLAY_OBJS:.o=.i)
 
 TEST_OBJS = fmtsudoers.lo group_plugin.lo interfaces.lo ldap_util.lo \
 	    locale.lo net_ifs.o parse_ldif.o strlist.o sudo_printf.o \
 	    testsudoers.o tsgetgrpw.o
+
+IOBJS = $(LIBPARSESUDOERS_IOBJS) $(SUDOERS_IOBJS) $(VISUDO_IOBJS) \
+	$(CVTSUDOERS_IOBJS) $(REPLAY_IOBJS)
+
+POBJS = $(IOBJS:.i=.plog)
 
 TSDUMP_OBJS = tsdump.o sudoers_debug.lo locale.lo
 
@@ -194,10 +215,10 @@ CHECK_IOLOG_PATH_OBJS = check_iolog_path.o iolog_path.lo locale.lo \
 			pwutil.lo pwutil_impl.lo redblack.lo sudoers_debug.lo
 
 CHECK_IOLOG_PLUGIN_OBJS = check_iolog_plugin.o iolog.lo iolog_path.lo \
-			  iolog_util.lo locale.lo mkdir_parents.lo pwutil.lo \
+			  iolog_util.o locale.lo mkdir_parents.lo pwutil.lo \
 			  pwutil_impl.lo redblack.lo sudoers_debug.lo
 
-CHECK_IOLOG_UTIL_OBJS = check_iolog_util.o iolog_util.lo locale.lo \
+CHECK_IOLOG_UTIL_OBJS = check_iolog_util.o iolog_util.o locale.lo \
 			sudoers_debug.lo
 
 CHECK_SYMBOLS_OBJS = check_symbols.o
@@ -211,13 +232,19 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(PROGS)
 
-.SUFFIXES: .o .c .h .l .y .lo
+.SUFFIXES: .c .h .i .l .lo .o .plog .y
 
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
 
 .c.lo:
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+
+.c.i:
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+
+.i.plog:
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -310,7 +337,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; echo "// This is an open source non-commercial project. Dear PVS-Studio, please check it." > $(devdir)/gram.c; echo "// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $(devdir)/gram.c; echo "#include <config.h>" >> $(devdir)/gram.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -321,7 +348,7 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 	    else \
 		toke_l="$(srcdir)/toke.l"; \
 	    fi; \
-	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; $(SED) "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
+	    cmd='$(FLEX) '"$$toke_l"'; echo "// This is an open source non-commercial project. Dear PVS-Studio, please check it." > $(devdir)/toke.c; echo "// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $(devdir)/toke.c; echo "#include <config.h>" >> $(devdir)/toke.c; $(SED) "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -333,7 +360,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 	    else \
 		getdate_y="$(srcdir)/getdate.y"; \
 	    fi; \
-	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    cmd='$(YACC) '"$$getdate_y"'; echo "// This is an open source non-commercial project. Dear PVS-Studio, please check it." > $(devdir)/getdate.c; echo "// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $(devdir)/getdate.c; echo "#include <config.h>" >> $(devdir)/getdate.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -406,6 +433,11 @@ splint:
 
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
+
+pvs-log-files: $(POBJS)
+
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \
@@ -561,9 +593,9 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
-	    *.lo *.o *.la *.a stamp-* core *.core core.* regress/*/*.out \
-	    regress/*/*.toke regress/*/*.err regress/*/*.json regress/*/*.ldif \
-	    regress/*/*.sudo
+	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* \
+	    regress/*/*.out regress/*/*.toke regress/*/*.err regress/*/*.json \
+	    regress/*/*.ldif regress/*/*.sudo
 
 mostlyclean: clean
 
@@ -590,6 +622,16 @@ afs.lo: $(authdir)/afs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/afs.c
+afs.i: $(authdir)/afs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+        $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+afs.plog: afs.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/afs.c --i-file $< --output-file $@
 aix_auth.lo: $(authdir)/aix_auth.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -600,6 +642,18 @@ aix_auth.lo: $(authdir)/aix_auth.c $(devdir)/def_data.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/aix_auth.c
+aix_auth.i: $(authdir)/aix_auth.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+aix_auth.plog: aix_auth.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/aix_auth.c --i-file $< --output-file $@
 alias.lo: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -609,6 +663,17 @@ alias.lo: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/alias.c
+alias.i: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
+          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+alias.plog: alias.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/alias.c --i-file $< --output-file $@
 audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -618,6 +683,17 @@ audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/audit.c
+audit.i: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/bsm_audit.h $(srcdir)/defaults.h $(srcdir)/linux_audit.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/solaris_audit.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+audit.plog: audit.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/audit.c --i-file $< --output-file $@
 base64.lo: $(srcdir)/base64.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -627,6 +703,17 @@ base64.lo: $(srcdir)/base64.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/base64.c
+base64.i: $(srcdir)/base64.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+base64.plog: base64.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/base64.c --i-file $< --output-file $@
 boottime.lo: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -637,6 +724,18 @@ boottime.lo: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/boottime.c
+boottime.i: $(srcdir)/boottime.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+boottime.plog: boottime.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/boottime.c --i-file $< --output-file $@
 bsdauth.lo: $(authdir)/bsdauth.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -647,6 +746,18 @@ bsdauth.lo: $(authdir)/bsdauth.c $(devdir)/def_data.h \
             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/bsdauth.c
+bsdauth.i: $(authdir)/bsdauth.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+bsdauth.plog: bsdauth.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/bsdauth.c --i-file $< --output-file $@
 bsm_audit.lo: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -657,6 +768,18 @@ bsm_audit.lo: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/bsm_audit.c
+bsm_audit.i: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h $(srcdir)/defaults.h \
+              $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+bsm_audit.plog: bsm_audit.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/bsm_audit.c --i-file $< --output-file $@
 check.lo: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -666,6 +789,17 @@ check.lo: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
           $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/check.c
+check.i: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/check.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+          $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check.plog: check.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/check.c --i-file $< --output-file $@
 check_addr.o: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -677,16 +811,43 @@ check_addr.o: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_addr.c
+check_addr.i: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+              $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_addr.plog: check_addr.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_addr.c --i-file $< --output-file $@
 check_base64.o: $(srcdir)/regress/parser/check_base64.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_base64.c
+check_base64.i: $(srcdir)/regress/parser/check_base64.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_base64.plog: check_base64.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_base64.c --i-file $< --output-file $@
 check_digest.o: $(srcdir)/regress/parser/check_digest.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/parse.h \
                 $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_digest.c
+check_digest.i: $(srcdir)/regress/parser/check_digest.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/parse.h \
+                $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_digest.plog: check_digest.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_digest.c --i-file $< --output-file $@
 check_env_pattern.o: $(srcdir)/regress/env_match/check_env_pattern.c \
                      $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
                      $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -698,22 +859,57 @@ check_env_pattern.o: $(srcdir)/regress/env_match/check_env_pattern.c \
                      $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                      $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/env_match/check_env_pattern.c
+check_env_pattern.i: $(srcdir)/regress/env_match/check_env_pattern.c \
+                     $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+                     $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                     $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                     $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                     $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                     $(srcdir)/defaults.h $(srcdir)/logging.h \
+                     $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                     $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                     $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_env_pattern.plog: check_env_pattern.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/env_match/check_env_pattern.c --i-file $< --output-file $@
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/parse.h $(srcdir)/toke.h \
               $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_fill.c
+check_fill.i: $(srcdir)/regress/parser/check_fill.c $(devdir)/gram.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/parse.h $(srcdir)/toke.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_fill.plog: check_fill.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_fill.c --i-file $< --output-file $@
 check_gentime.o: $(srcdir)/regress/parser/check_gentime.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/parse.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_gentime.c
+check_gentime.i: $(srcdir)/regress/parser/check_gentime.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
+                 $(incdir)/sudo_util.h $(srcdir)/parse.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_gentime.plog: check_gentime.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_gentime.c --i-file $< --output-file $@
 check_hexchar.o: $(srcdir)/regress/parser/check_hexchar.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/parser/check_hexchar.c
+check_hexchar.i: $(srcdir)/regress/parser/check_hexchar.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_hexchar.plog: check_hexchar.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_hexchar.c --i-file $< --output-file $@
 check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(devdir)/def_data.c $(devdir)/def_data.h \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -725,6 +921,19 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                     $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_path/check_iolog_path.c
+check_iolog_path.i: $(srcdir)/regress/iolog_path/check_iolog_path.c \
+                    $(devdir)/def_data.c $(devdir)/def_data.h \
+                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                    $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                    $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                    $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                    $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                    $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_iolog_path.plog: check_iolog_path.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_path/check_iolog_path.c --i-file $< --output-file $@
 check_iolog_plugin.o: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(devdir)/def_data.c $(devdir)/def_data.h \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -737,26 +946,68 @@ check_iolog_plugin.o: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                       $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c
+check_iolog_plugin.i: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
+                      $(devdir)/def_data.c $(devdir)/def_data.h \
+                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                      $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                      $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                      $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                      $(srcdir)/iolog.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                      $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                      $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                      $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_iolog_plugin.plog: check_iolog_plugin.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c --i-file $< --output-file $@
 check_iolog_util.o: $(srcdir)/regress/iolog_util/check_iolog_util.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                     $(srcdir)/iolog.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_util/check_iolog_util.c
+check_iolog_util.i: $(srcdir)/regress/iolog_util/check_iolog_util.c \
+                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                    $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                    $(srcdir)/iolog.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_iolog_util.plog: check_iolog_util.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_util/check_iolog_util.c --i-file $< --output-file $@
 check_starttime.o: $(srcdir)/regress/starttime/check_starttime.c \
                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
                    $(srcdir)/check.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/starttime/check_starttime.c
+check_starttime.i: $(srcdir)/regress/starttime/check_starttime.c \
+                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                   $(srcdir)/check.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_starttime.plog: check_starttime.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/starttime/check_starttime.c --i-file $< --output-file $@
 check_symbols.o: $(srcdir)/regress/check_symbols/check_symbols.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_dso.h $(incdir)/sudo_fatal.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/check_symbols/check_symbols.c
+check_symbols.i: $(srcdir)/regress/check_symbols/check_symbols.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_dso.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_symbols.plog: check_symbols.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/check_symbols/check_symbols.c --i-file $< --output-file $@
 check_wrap.o: $(srcdir)/regress/logging/check_wrap.c \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/logging/check_wrap.c
+check_wrap.i: $(srcdir)/regress/logging/check_wrap.c \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+check_wrap.plog: check_wrap.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/regress/logging/check_wrap.c --i-file $< --output-file $@
 cvtsudoers.o: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -770,6 +1021,21 @@ cvtsudoers.o: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers.c
+cvtsudoers.i: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
+              $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
+              $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+              $(srcdir)/redblack.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cvtsudoers.plog: cvtsudoers.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers.c --i-file $< --output-file $@
 cvtsudoers_json.o: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
                    $(devdir)/gram.h $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -782,6 +1048,20 @@ cvtsudoers_json.o: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                    $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_json.c
+cvtsudoers_json.i: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
+                   $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
+                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/strlist.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cvtsudoers_json.plog: cvtsudoers_json.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_json.c --i-file $< --output-file $@
 cvtsudoers_ldif.o: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(devdir)/gram.h $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -795,6 +1075,21 @@ cvtsudoers_ldif.o: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                    $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_ldif.c
+cvtsudoers_ldif.i: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
+                   $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+                   $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                   $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
+                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                   $(srcdir)/redblack.h $(srcdir)/strlist.h \
+                   $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
+                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cvtsudoers_ldif.plog: cvtsudoers_ldif.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_ldif.c --i-file $< --output-file $@
 cvtsudoers_pwutil.o: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -807,6 +1102,20 @@ cvtsudoers_pwutil.o: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
                      $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                      $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/cvtsudoers_pwutil.c
+cvtsudoers_pwutil.i: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
+                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                     $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                     $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                     $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                     $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
+                     $(srcdir)/defaults.h $(srcdir)/logging.h \
+                     $(srcdir)/parse.h $(srcdir)/pwutil.h $(srcdir)/strlist.h \
+                     $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                     $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                     $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+cvtsudoers_pwutil.plog: cvtsudoers_pwutil.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_pwutil.c --i-file $< --output-file $@
 dce.lo: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -815,6 +1124,16 @@ dce.lo: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/dce.c
+dce.i: $(authdir)/dce.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+        $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+dce.plog: dce.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/dce.c --i-file $< --output-file $@
 defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(devdir)/gram.h $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -825,12 +1144,32 @@ defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/defaults.c
+defaults.i: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
+             $(devdir)/gram.h $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+             $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+defaults.plog: defaults.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/defaults.c --i-file $< --output-file $@
 digestname.lo: $(srcdir)/digestname.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_digest.h $(incdir)/sudo_queue.h \
                $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
                $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/digestname.c
+digestname.i: $(srcdir)/digestname.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_digest.h $(incdir)/sudo_queue.h \
+               $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
+               $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+digestname.plog: digestname.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/digestname.c --i-file $< --output-file $@
 editor.lo: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -840,6 +1179,17 @@ editor.lo: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/editor.c
+editor.i: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+editor.plog: editor.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/editor.c --i-file $< --output-file $@
 env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -848,6 +1198,16 @@ env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/env.c
+env.i: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+        $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+env.plog: env.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/env.c --i-file $< --output-file $@
 env_pattern.lo: $(srcdir)/env_pattern.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -858,6 +1218,18 @@ env_pattern.lo: $(srcdir)/env_pattern.c $(devdir)/def_data.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/env_pattern.c
+env_pattern.i: $(srcdir)/env_pattern.c $(devdir)/def_data.h \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+env_pattern.plog: env_pattern.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/env_pattern.c --i-file $< --output-file $@
 file.lo: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -867,6 +1239,17 @@ file.lo: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/file.c
+file.i: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
+         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+         $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+file.plog: file.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/file.c --i-file $< --output-file $@
 filedigest.lo: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -878,6 +1261,19 @@ filedigest.lo: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/filedigest.c
+filedigest.i: $(srcdir)/filedigest.c $(devdir)/def_data.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+filedigest.plog: filedigest.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/filedigest.c --i-file $< --output-file $@
 find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -888,6 +1284,18 @@ find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/find_path.c
+find_path.i: $(srcdir)/find_path.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+find_path.plog: find_path.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/find_path.c --i-file $< --output-file $@
 fmtsudoers.lo: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -899,6 +1307,19 @@ fmtsudoers.lo: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/fmtsudoers.c
+fmtsudoers.i: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+fmtsudoers.plog: fmtsudoers.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/fmtsudoers.c --i-file $< --output-file $@
 fwtk.lo: $(authdir)/fwtk.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -907,6 +1328,16 @@ fwtk.lo: $(authdir)/fwtk.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/fwtk.c
+fwtk.i: $(authdir)/fwtk.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+fwtk.plog: fwtk.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/fwtk.c --i-file $< --output-file $@
 gc.lo: $(srcdir)/gc.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
@@ -915,13 +1346,34 @@ gc.lo: $(srcdir)/gc.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
        $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
        $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gc.c
+gc.i: $(srcdir)/gc.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+       $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+       $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+       $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+       $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+       $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+gc.plog: gc.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/gc.c --i-file $< --output-file $@
 gentime.lo: $(srcdir)/gentime.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gentime.c
+gentime.i: $(srcdir)/gentime.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
+            $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+gentime.plog: gentime.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/gentime.c --i-file $< --output-file $@
 getdate.o: $(devdir)/getdate.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(devdir)/getdate.c
+getdate.i: $(devdir)/getdate.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+getdate.plog: getdate.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(devdir)/getdate.c --i-file $< --output-file $@
 getspwuid.lo: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -932,11 +1384,30 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getspwuid.c
+getspwuid.i: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+getspwuid.plog: getspwuid.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/getspwuid.c --i-file $< --output-file $@
 gmtoff.lo: $(srcdir)/gmtoff.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
            $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/gmtoff.c
+gmtoff.i: $(srcdir)/gmtoff.c $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+           $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+gmtoff.plog: gmtoff.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/gmtoff.c --i-file $< --output-file $@
 goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -947,6 +1418,18 @@ goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/goodpath.c
+goodpath.i: $(srcdir)/goodpath.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+goodpath.plog: goodpath.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/goodpath.c --i-file $< --output-file $@
 gram.lo: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
@@ -956,6 +1439,17 @@ gram.lo: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(devdir)/gram.c
+gram.i: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+         $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+         $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+gram.plog: gram.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(devdir)/gram.c --i-file $< --output-file $@
 group_plugin.lo: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -967,6 +1461,19 @@ group_plugin.lo: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/group_plugin.c
+group_plugin.i: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_dso.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+group_plugin.plog: group_plugin.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/group_plugin.c --i-file $< --output-file $@
 hexchar.lo: $(srcdir)/hexchar.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -977,6 +1484,18 @@ hexchar.lo: $(srcdir)/hexchar.c $(devdir)/def_data.h \
             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/hexchar.c
+hexchar.i: $(srcdir)/hexchar.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+hexchar.plog: hexchar.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/hexchar.c --i-file $< --output-file $@
 interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -988,6 +1507,19 @@ interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/interfaces.c
+interfaces.i: $(srcdir)/interfaces.c $(devdir)/def_data.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+               $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+               $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+interfaces.plog: interfaces.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/interfaces.c --i-file $< --output-file $@
 iolog.lo: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -997,6 +1529,17 @@ iolog.lo: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog.c
+iolog.i: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/iolog.h $(srcdir)/iolog_files.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog.plog: iolog.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/iolog.c --i-file $< --output-file $@
 iolog_path.lo: $(srcdir)/iolog_path.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1007,12 +1550,32 @@ iolog_path.lo: $(srcdir)/iolog_path.c $(devdir)/def_data.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_path.c
-iolog_util.lo: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
-               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+iolog_path.i: $(srcdir)/iolog_path.c $(devdir)/def_data.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
-               $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_util.c
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+               $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog_path.plog: iolog_path.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/iolog_path.c --i-file $< --output-file $@
+iolog_util.o: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
+              $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_util.c
+iolog_util.i: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+iolog_util.plog: iolog_util.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/iolog_util.c --i-file $< --output-file $@
 kerb5.lo: $(authdir)/kerb5.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1021,6 +1584,16 @@ kerb5.lo: $(authdir)/kerb5.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/kerb5.c
+kerb5.i: $(authdir)/kerb5.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+kerb5.plog: kerb5.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/kerb5.c --i-file $< --output-file $@
 ldap.lo: $(srcdir)/ldap.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_dso.h \
@@ -1031,6 +1604,18 @@ ldap.lo: $(srcdir)/ldap.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/ldap.c
+ldap.i: $(srcdir)/ldap.c $(devdir)/def_data.h $(devdir)/gram.h \
+         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_dso.h \
+         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+         $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+ldap.plog: ldap.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/ldap.c --i-file $< --output-file $@
 ldap_conf.lo: $(srcdir)/ldap_conf.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1043,6 +1628,20 @@ ldap_conf.lo: $(srcdir)/ldap_conf.c $(devdir)/def_data.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/ldap_conf.c
+ldap_conf.i: $(srcdir)/ldap_conf.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+              $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+              $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+ldap_conf.plog: ldap_conf.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/ldap_conf.c --i-file $< --output-file $@
 ldap_util.lo: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1055,6 +1654,20 @@ ldap_util.lo: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/ldap_util.c
+ldap_util.i: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+              $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
+              $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+ldap_util.plog: ldap_util.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/ldap_util.c --i-file $< --output-file $@
 linux_audit.lo: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1066,12 +1679,33 @@ linux_audit.lo: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/linux_audit.c
+linux_audit.i: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                $(srcdir)/linux_audit.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+linux_audit.plog: linux_audit.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/linux_audit.c --i-file $< --output-file $@
 locale.lo: $(srcdir)/locale.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_queue.h $(srcdir)/defaults.h $(srcdir)/logging.h \
            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/locale.c
+locale.i: $(srcdir)/locale.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+           $(incdir)/sudo_queue.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+locale.plog: locale.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/locale.c --i-file $< --output-file $@
 logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1082,6 +1716,18 @@ logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logging.c
+logging.i: $(srcdir)/logging.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+logging.plog: logging.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/logging.c --i-file $< --output-file $@
 logwrap.lo: $(srcdir)/logwrap.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1092,6 +1738,18 @@ logwrap.lo: $(srcdir)/logwrap.c $(devdir)/def_data.h \
             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logwrap.c
+logwrap.i: $(srcdir)/logwrap.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+logwrap.plog: logwrap.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/logwrap.c --i-file $< --output-file $@
 match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/fnmatch.h $(incdir)/compat/glob.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1102,6 +1760,18 @@ match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/match.c
+match.i: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
+          $(incdir)/compat/fnmatch.h $(incdir)/compat/glob.h \
+          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+match.plog: match.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/match.c --i-file $< --output-file $@
 match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1113,6 +1783,19 @@ match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/match_addr.c
+match_addr.i: $(srcdir)/match_addr.c $(devdir)/def_data.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+               $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+               $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+match_addr.plog: match_addr.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/match_addr.c --i-file $< --output-file $@
 mkdir_parents.lo: $(srcdir)/mkdir_parents.c $(devdir)/def_data.h \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1123,12 +1806,32 @@ mkdir_parents.lo: $(srcdir)/mkdir_parents.c $(devdir)/def_data.h \
                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/mkdir_parents.c
+mkdir_parents.i: $(srcdir)/mkdir_parents.c $(devdir)/def_data.h \
+                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                  $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                  $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+mkdir_parents.plog: mkdir_parents.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/mkdir_parents.c --i-file $< --output-file $@
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
            $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(top_srcdir)/src/net_ifs.c
+net_ifs.i: $(top_srcdir)/src/net_ifs.c $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
+           $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+net_ifs.plog: net_ifs.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(top_srcdir)/src/net_ifs.c --i-file $< --output-file $@
 pam.lo: $(authdir)/pam.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1137,6 +1840,16 @@ pam.lo: $(authdir)/pam.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/pam.c
+pam.i: $(authdir)/pam.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+        $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+pam.plog: pam.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/pam.c --i-file $< --output-file $@
 parse.lo: $(srcdir)/parse.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -1146,6 +1859,17 @@ parse.lo: $(srcdir)/parse.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/parse.c
+parse.i: $(srcdir)/parse.c $(devdir)/def_data.h $(devdir)/gram.h \
+          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+parse.plog: parse.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/parse.c --i-file $< --output-file $@
 parse_ldif.o: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1157,6 +1881,19 @@ parse_ldif.o: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/parse_ldif.c
+parse_ldif.i: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
+              $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+parse_ldif.plog: parse_ldif.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/parse_ldif.c --i-file $< --output-file $@
 passwd.lo: $(authdir)/passwd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -1166,6 +1903,17 @@ passwd.lo: $(authdir)/passwd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/passwd.c
+passwd.i: $(authdir)/passwd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+passwd.plog: passwd.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/passwd.c --i-file $< --output-file $@
 policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -1176,6 +1924,18 @@ policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/policy.c
+policy.i: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+           $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
+           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+policy.plog: policy.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/policy.c --i-file $< --output-file $@
 prompt.lo: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -1185,6 +1945,17 @@ prompt.lo: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/prompt.c
+prompt.i: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+prompt.plog: prompt.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/prompt.c --i-file $< --output-file $@
 pwutil.lo: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -1195,6 +1966,18 @@ pwutil.lo: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pwutil.c
+pwutil.i: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pwutil.h \
+           $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+pwutil.plog: pwutil.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/pwutil.c --i-file $< --output-file $@
 pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1205,6 +1988,18 @@ pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/pwutil_impl.c
+pwutil_impl.i: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+                $(srcdir)/parse.h $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+pwutil_impl.plog: pwutil_impl.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/pwutil_impl.c --i-file $< --output-file $@
 rcstr.lo: $(srcdir)/rcstr.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1213,6 +2008,16 @@ rcstr.lo: $(srcdir)/rcstr.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/rcstr.c
+rcstr.i: $(srcdir)/rcstr.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+rcstr.plog: rcstr.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/rcstr.c --i-file $< --output-file $@
 redblack.lo: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1223,6 +2028,18 @@ redblack.lo: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/redblack.c
+redblack.i: $(srcdir)/redblack.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+redblack.plog: redblack.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/redblack.c --i-file $< --output-file $@
 rfc1938.lo: $(authdir)/rfc1938.c $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1233,6 +2050,18 @@ rfc1938.lo: $(authdir)/rfc1938.c $(devdir)/def_data.h \
             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/rfc1938.c
+rfc1938.i: $(authdir)/rfc1938.c $(devdir)/def_data.h \
+            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+rfc1938.plog: rfc1938.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/rfc1938.c --i-file $< --output-file $@
 secureware.lo: $(authdir)/secureware.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1243,6 +2072,18 @@ secureware.lo: $(authdir)/secureware.c $(devdir)/def_data.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/secureware.c
+secureware.i: $(authdir)/secureware.c $(devdir)/def_data.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+               $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+secureware.plog: secureware.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/secureware.c --i-file $< --output-file $@
 securid5.lo: $(authdir)/securid5.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1253,6 +2094,18 @@ securid5.lo: $(authdir)/securid5.c $(devdir)/def_data.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/securid5.c
+securid5.i: $(authdir)/securid5.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+securid5.plog: securid5.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/securid5.c --i-file $< --output-file $@
 set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1263,6 +2116,18 @@ set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/set_perms.c
+set_perms.i: $(srcdir)/set_perms.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+set_perms.plog: set_perms.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/set_perms.c --i-file $< --output-file $@
 sia.lo: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1271,6 +2136,16 @@ sia.lo: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/sia.c
+sia.i: $(authdir)/sia.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+        $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sia.plog: sia.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/sia.c --i-file $< --output-file $@
 solaris_audit.lo: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1282,6 +2157,19 @@ solaris_audit.lo: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/solaris_audit.c
+solaris_audit.i: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
+                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                  $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                  $(srcdir)/logging.h $(srcdir)/parse.h \
+                  $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+solaris_audit.plog: solaris_audit.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/solaris_audit.c --i-file $< --output-file $@
 sssd.lo: $(srcdir)/sssd.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_dso.h \
@@ -1292,6 +2180,18 @@ sssd.lo: $(srcdir)/sssd.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
          $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sssd.c
+sssd.i: $(srcdir)/sssd.c $(devdir)/def_data.h $(devdir)/gram.h \
+         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_dso.h \
+         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+         $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+         $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sssd.plog: sssd.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/sssd.c --i-file $< --output-file $@
 starttime.lo: $(srcdir)/starttime.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1302,11 +2202,30 @@ starttime.lo: $(srcdir)/starttime.c $(devdir)/def_data.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/starttime.c
+starttime.i: $(srcdir)/starttime.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/check.h $(srcdir)/defaults.h \
+              $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+starttime.plog: starttime.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/starttime.c --i-file $< --output-file $@
 strlist.o: $(srcdir)/strlist.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/strlist.h \
            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/strlist.c
+strlist.i: $(srcdir)/strlist.c $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/strlist.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+strlist.plog: strlist.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/strlist.c --i-file $< --output-file $@
 stubs.o: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1316,6 +2235,17 @@ stubs.o: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
          $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/stubs.c
+stubs.i: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
+         $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+         $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+stubs.plog: stubs.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/stubs.c --i-file $< --output-file $@
 sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1329,6 +2259,21 @@ sudo_auth.lo: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(authdir)/sudo_auth.c
+sudo_auth.i: $(authdir)/sudo_auth.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_rand.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+              $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h \
+              $(srcdir)/ins_csops.h $(srcdir)/ins_goons.h \
+              $(srcdir)/ins_python.h $(srcdir)/insults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sudo_auth.plog: sudo_auth.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(authdir)/sudo_auth.c --i-file $< --output-file $@
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1339,11 +2284,30 @@ sudo_nss.lo: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_nss.c
+sudo_nss.i: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sudo_nss.plog: sudo_nss.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/sudo_nss.c --i-file $< --output-file $@
 sudo_printf.o: $(srcdir)/sudo_printf.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudo_printf.c
+sudo_printf.i: $(srcdir)/sudo_printf.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+               $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sudo_printf.plog: sudo_printf.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/sudo_printf.c --i-file $< --output-file $@
 sudoers.lo: $(srcdir)/sudoers.c $(devdir)/def_data.h \
             $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -1355,6 +2319,19 @@ sudoers.lo: $(srcdir)/sudoers.c $(devdir)/def_data.h \
             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoers.c
+sudoers.i: $(srcdir)/sudoers.c $(devdir)/def_data.h \
+            $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+            $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(srcdir)/auth/sudo_auth.h $(srcdir)/defaults.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sudoers.plog: sudoers.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/sudoers.c --i-file $< --output-file $@
 sudoers_debug.lo: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                   $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1365,6 +2342,18 @@ sudoers_debug.lo: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoers_debug.c
+sudoers_debug.i: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
+                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                  $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+                  $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sudoers_debug.plog: sudoers_debug.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/sudoers_debug.c --i-file $< --output-file $@
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1374,6 +2363,17 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(srcdir)/iolog_files.h $(srcdir)/logging.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sudoreplay.c
+sudoreplay.i: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/iolog.h \
+              $(srcdir)/iolog_files.h $(srcdir)/logging.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+sudoreplay.plog: sudoreplay.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/sudoreplay.c --i-file $< --output-file $@
 testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1385,11 +2385,31 @@ testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/testsudoers.c
+testsudoers.i: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+               $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+testsudoers.plog: testsudoers.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/testsudoers.c --i-file $< --output-file $@
 timeout.lo: $(srcdir)/timeout.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timeout.c
+timeout.i: $(srcdir)/timeout.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(srcdir)/parse.h $(srcdir)/sudoers_debug.h \
+            $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+timeout.plog: timeout.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/timeout.c --i-file $< --output-file $@
 timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1400,10 +2420,28 @@ timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timestamp.c
+timestamp.i: $(srcdir)/timestamp.c $(devdir)/def_data.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/check.h $(srcdir)/defaults.h \
+              $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+timestamp.plog: timestamp.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/timestamp.c --i-file $< --output-file $@
 timestr.lo: $(srcdir)/timestr.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(srcdir)/parse.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/timestr.c
+timestr.i: $(srcdir)/timestr.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(srcdir)/parse.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+timestr.plog: timestr.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/timestr.c --i-file $< --output-file $@
 toke.lo: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_digest.h \
@@ -1413,6 +2451,17 @@ toke.lo: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(devdir)/toke.c
+toke.i: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
+         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+         $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_digest.h \
+         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
+         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+toke.plog: toke.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(devdir)/toke.c --i-file $< --output-file $@
 toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1423,6 +2472,18 @@ toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/toke_util.c
+toke_util.i: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
+              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+toke_util.plog: toke_util.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/toke_util.c --i-file $< --output-file $@
 tsdump.o: $(srcdir)/tsdump.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -1432,6 +2493,17 @@ tsdump.o: $(srcdir)/tsdump.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
           $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tsdump.c
+tsdump.i: $(srcdir)/tsdump.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/check.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+          $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+tsdump.plog: tsdump.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/tsdump.c --i-file $< --output-file $@
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1442,6 +2514,18 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tsgetgrpw.c
+tsgetgrpw.i: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
+             $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+tsgetgrpw.plog: tsgetgrpw.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/tsgetgrpw.c --i-file $< --output-file $@
 visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1453,3 +2537,16 @@ visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
           $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/visudo.c
+visudo.i: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
+          $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+          $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
+          $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
+          $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+visudo.plog: visudo.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/visudo.c --i-file $< --output-file $@
