@@ -969,6 +969,7 @@ enable_timestamp_type
 enable_offensive_insults
 enable_package_build
 enable_gss_krb5_ccache_name
+enable_pvs_studio
 enable_shared
 enable_static
 with_pic
@@ -1659,6 +1660,7 @@ Optional Features:
   --enable-package-build  Enable options for package building.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
+  --enable-pvs-studio     Create a PVS-Studio.cfg file.
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -6874,6 +6876,12 @@ if test "${enable_gss_krb5_ccache_name+set}" = set; then :
   enableval=$enable_gss_krb5_ccache_name; check_gss_krb5_ccache_name=$enableval
 else
   check_gss_krb5_ccache_name=no
+fi
+
+
+# Check whether --enable-pvs-studio was given.
+if test "${enable_pvs_studio+set}" = set; then :
+  enableval=$enable_pvs_studio;
 fi
 
 
@@ -16434,6 +16442,37 @@ fi
 		: ${mansectform='4'}
 		;;
 esac
+
+if test X"$enable_pvs_studio" = X"yes"; then
+    # Determine preprocessor type
+    case "$CC" in
+    *clang*) preprocessor=clang;;
+    *gcc*) preprocessor=gcc;;
+    *)
+	case `$CC --version 2>&1` in
+	    *clang*) preprocessor=clang;;
+	    *gcc*) preprocessor=gcc;;
+	    *) as_fn_error $? "Compiler must be gcc or clang for PVS-Studio." "$LINENO" 5;;
+	esac
+	;;
+    esac
+
+    # Determine platform (currently linux or macos)
+    case "$host" in
+    x86_64-*-linux*) pvs_platform=linux64;;
+    *86-*-linux*) pvs_platform=linux32;;
+    darwin*) pvs_platform=macos;;
+    *) as_fn_error $? "PVS-Studio does not support $host_os." "$LINENO" 5;;
+    esac
+
+    # create basic PVS-Studio.cfg file
+    cat > PVS-Studio.cfg <<-EOF
+	preprocessor = $preprocessor
+	platform = $pvs_platform
+	analysis-mode = 4
+	language = C
+EOF
+fi
 
 if test -n "$with_noexec"; then
     cat >>confdefs.h <<EOF

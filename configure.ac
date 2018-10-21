@@ -1614,6 +1614,9 @@ AC_ARG_ENABLE(gss_krb5_ccache_name,
 [AS_HELP_STRING([--enable-gss-krb5-ccache-name], [Use GSS-API to set the Kerberos V cred cache name])],
 [check_gss_krb5_ccache_name=$enableval], [check_gss_krb5_ccache_name=no])
 
+AC_ARG_ENABLE(pvs-studio,
+[AS_HELP_STRING([--enable-pvs-studio], [Create a PVS-Studio.cfg file.])])
+
 dnl
 dnl C compiler checks
 dnl
@@ -2255,6 +2258,37 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
 esac
+
+if test X"$enable_pvs_studio" = X"yes"; then
+    # Determine preprocessor type
+    case "$CC" in
+    *clang*) preprocessor=clang;;
+    *gcc*) preprocessor=gcc;;
+    *)
+	case `$CC --version 2>&1` in
+	    *clang*) preprocessor=clang;;
+	    *gcc*) preprocessor=gcc;;
+	    *) AC_MSG_ERROR([Compiler must be gcc or clang for PVS-Studio.]);;
+	esac
+	;;
+    esac
+
+    # Determine platform (currently linux or macos)
+    case "$host" in
+    x86_64-*-linux*) pvs_platform=linux64;;
+    *86-*-linux*) pvs_platform=linux32;;
+    darwin*) pvs_platform=macos;;
+    *) AC_MSG_ERROR([PVS-Studio does not support $host_os.]);;
+    esac
+
+    # create basic PVS-Studio.cfg file
+    cat > PVS-Studio.cfg <<-EOF
+	preprocessor = $preprocessor
+	platform = $pvs_platform
+	analysis-mode = 4
+	language = C
+EOF
+fi
 
 dnl
 dnl Library preloading to support NOEXEC
