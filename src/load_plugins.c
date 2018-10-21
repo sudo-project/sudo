@@ -14,6 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -208,19 +211,17 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
 	    goto bad;
 	}
-	if (handle != NULL) {
-	    policy_plugin->handle = handle;
-	    policy_plugin->path = strdup(path);
-	    if (policy_plugin->path == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		goto bad;
-	    }
-	    policy_plugin->name = info->symbol_name;
-	    policy_plugin->options = info->options;
-	    policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-	    policy_plugin->u.generic = plugin;
-	    policy_plugin->debug_files = sudo_conf_debug_files(path);
+	policy_plugin->handle = handle;
+	policy_plugin->path = strdup(path);
+	if (policy_plugin->path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto bad;
 	}
+	policy_plugin->name = info->symbol_name;
+	policy_plugin->options = info->options;
+	policy_plugin->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+	policy_plugin->u.generic = plugin;
+	policy_plugin->debug_files = sudo_conf_debug_files(path);
     } else if (plugin->type == SUDO_IO_PLUGIN) {
 	/* Check for duplicate entries. */
 	TAILQ_FOREACH(container, io_plugins, entries) {
@@ -232,20 +233,18 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 		break;
 	    }
 	}
-	if (handle != NULL) {
-	    container = calloc(1, sizeof(*container));
-	    if (container == NULL || (container->path = strdup(path)) == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		goto bad;
-	    }
-	    container->handle = handle;
-	    container->name = info->symbol_name;
-	    container->options = info->options;
-	    container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-	    container->u.generic = plugin;
-	    container->debug_files = sudo_conf_debug_files(path);
-	    TAILQ_INSERT_TAIL(io_plugins, container, entries);
+	container = calloc(1, sizeof(*container));
+	if (container == NULL || (container->path = strdup(path)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto bad;
 	}
+	container->handle = handle;
+	container->name = info->symbol_name;
+	container->options = info->options;
+	container->debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
+	container->u.generic = plugin;
+	container->debug_files = sudo_conf_debug_files(path);
+	TAILQ_INSERT_TAIL(io_plugins, container, entries);
     }
 
     /* Zero out info strings that we now own (see above). */

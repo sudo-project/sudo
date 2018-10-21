@@ -19,6 +19,9 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 #ifdef __TANDEM
 # include <floss.h>
 #endif
