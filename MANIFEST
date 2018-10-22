@@ -683,6 +683,8 @@ plugins/system_group/Makefile.in
 plugins/system_group/system_group.c
 plugins/system_group/system_group.exp
 po/README
+po/ast.mo
+po/ast.po
 po/ca.mo
 po/ca.po
 po/cs.mo
