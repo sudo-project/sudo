@@ -127,7 +127,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -200,7 +200,7 @@ getgrent.i: $(srcdir)/getgrent.c $(incdir)/compat/stdbool.h \
              $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 getgrent.plog: getgrent.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/getgrent.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getgrent.c --i-file $< --output-file $@
 group_file.lo: $(srcdir)/group_file.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_plugin.h \
                $(top_builddir)/config.h
@@ -210,4 +210,4 @@ group_file.i: $(srcdir)/group_file.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 group_file.plog: group_file.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/group_file.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/group_file.c --i-file $< --output-file $@

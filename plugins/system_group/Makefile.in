@@ -127,7 +127,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -202,4 +202,4 @@ system_group.i: $(srcdir)/system_group.c $(incdir)/compat/stdbool.h \
                  $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 system_group.plog: system_group.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --skip-cl-exe yes --source-file $(srcdir)/system_group.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/system_group.c --i-file $< --output-file $@
