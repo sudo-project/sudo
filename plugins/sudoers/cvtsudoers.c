@@ -58,7 +58,7 @@
 struct cvtsudoers_filter *filters;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static const char short_opts[] =  "b:c:d:ef:hi:I:m:Mo:O:ps:V";
+static const char short_opts[] =  "b:c:d:ef:hi:I:m:Mo:O:pP:s:V";
 static struct option long_opts[] = {
     { "base",		required_argument,	NULL,	'b' },
     { "config",		required_argument,	NULL,	'c' },
@@ -71,6 +71,7 @@ static struct option long_opts[] = {
     { "match",		required_argument,	NULL,	'm' },
     { "match-local",	no_argument,		NULL,	'M' },
     { "prune-matches",	no_argument,		NULL,	'p' },
+    { "padding",	required_argument,	NULL,	'P' },
     { "order-start",	required_argument,	NULL,	'O' },
     { "output",		required_argument,	NULL,	'o' },
     { "suppress",	required_argument,	NULL,	's' },
@@ -215,6 +216,13 @@ main(int argc, char *argv[])
 	case 'p':
 	    conf->prune_matches = true;
 	    break;
+	case 'P':
+	    conf->order_padding = sudo_strtonum(optarg, 1, UINT_MAX, &errstr);
+	    if (errstr != NULL ) {
+		sudo_warnx(U_("order padding: %s: %s"), optarg, U_(errstr));
+		usage(1);
+	    }
+	    break;
 	case 's':
 	    conf->supstr = optarg;
 	    break;
@@ -271,6 +279,18 @@ main(int argc, char *argv[])
 	conf->suppress = cvtsudoers_parse_suppression(conf->supstr);
 	if (conf->suppress == -1)
 	    usage(1);
+    }
+
+    /* Apply padding to sudo_order if present. */
+    if (conf->sudo_order != 0 && conf->order_padding != 0) {
+	unsigned int multiplier = 1;
+
+	do {
+	    multiplier *= 10;
+	} while (--conf->order_padding != 0);
+	conf->sudo_order *= multiplier;
+	conf->order_max = conf->sudo_order + (multiplier - 1);
+	conf->order_padding = multiplier;
     }
 
     /* If no base DN specified, check SUDOERS_BASE. */
@@ -360,6 +380,7 @@ static struct cvtsudoers_config cvtsudoers_config = INITIAL_CONFIG;
 static struct cvtsudoers_conf_table cvtsudoers_conf_vars[] = {
     { "order_start", CONF_UINT, &cvtsudoers_config.sudo_order },
     { "order_increment", CONF_UINT, &cvtsudoers_config.order_increment },
+    { "order_padding", CONF_UINT, &cvtsudoers_config.order_padding },
     { "sudoers_base", CONF_STR, &cvtsudoers_config.sudoers_base },
     { "input_format", CONF_STR, &cvtsudoers_config.input_format },
     { "output_format", CONF_STR, &cvtsudoers_config.output_format },
@@ -1280,7 +1301,7 @@ usage(int fatal)
     (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehMpV] [-b dn] "
 	"[-c conf_file ] [-d deftypes] [-f output_format] [-i input_format] "
 	"[-I increment] [-m filter] [-o output_file] [-O start_point] "
-	"[-s sections] [input_file]\n", getprogname());
+	"[-P padding] [-s sections] [input_file]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -1303,6 +1324,7 @@ help(void)
 	"  -o, --output=output_file   write converted sudoers to output_file\n"
 	"  -O, --order-start=num      starting point for first sudoOrder\n"
 	"  -p, --prune-matches        prune non-matching users, groups and hosts\n"
+	"  -P, --padding=num          base padding for sudoOrder increment\n"
 	"  -s, --suppress=sections    suppress output of certain sections\n"
 	"  -V, --version              display version information and exit"));
     exit(0);

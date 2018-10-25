@@ -15,7 +15,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "CVTSUDOERS" "1" "April 14, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "October 24, 2018" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -298,6 +298,30 @@ option is also specified,
 \fBcvtsudoers\fR
 will prune out non-matching users, groups and hosts from
 matching entries.
+.TP 12n
+\fB\-P\fR \fIpadding\fR, \fB\--padding\fR=\fIpadding\fR
+When generating LDIF output, construct the initial sudoOrder value by
+concatenating
+\fIorder_start\fR
+and
+\fIincrement\fR,
+padding the
+\fIincrement\fR
+with zeros until it consists of
+\fIpadding\fR
+digits.
+For example, if
+\fIorder_start\fR
+is 1027,
+\fIpadding\fR
+is 3, and
+\fIincrement\fR
+is 1, the value of sudoOrder for the first entry will be 1027000,
+followed by 1027001, 1027002, etc.
+If the number of sudoRole entries is larger than the padding would allow,
+\fBcvtsudoers\fR
+will exit with an error.
+By default, no padding is performed.
 .TP 12n
 \fB\-s\fR \fIsections\fR, \fB\--suppress\fR=\fIsections\fR
 Suppress the output of specific

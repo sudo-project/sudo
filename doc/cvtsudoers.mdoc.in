@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd April 14, 2018
+.Dd October 24, 2018
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -250,6 +250,29 @@ option is also specified,
 .Nm
 will prune out non-matching users, groups and hosts from
 matching entries.
+.It Fl P Ar padding , Fl -padding Ns = Ns Ar padding
+When generating LDIF output, construct the initial sudoOrder value by
+concatenating
+.Ar order_start
+and
+.Ar increment ,
+padding the
+.Ar increment
+with zeros until it consists of
+.Ar padding
+digits.
+For example, if
+.Ar order_start
+is 1027,
+.Ar padding
+is 3, and
+.Ar increment
+is 1, the value of sudoOrder for the first entry will be 1027000,
+followed by 1027001, 1027002, etc.
+If the number of sudoRole entries is larger than the padding would allow,
+.Nm
+will exit with an error.
+By default, no padding is performed.
 .It Fl s Ar sections , Fl -suppress Ns = Ns Ar sections
 Suppress the output of specific
 .Ar sections
