@@ -142,7 +142,6 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	/* Dynamically-sized group vector, count groups and alloc. */
 	grpsize = 1;	/* reserve one for basegid */
 	if (*grset != '\0') {
-	    grset++;
 	    for (cp = grset; *cp != '\0'; cp++) {
 		if (*cp == ',')
 		    grpsize++;
