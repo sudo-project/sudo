@@ -46,11 +46,13 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
+    int errors = 0;
+#ifndef HAVE_GETGROUPLIST_2
     GETGROUPS_T *groups = NULL;
     struct passwd *pw;
     struct group *grp;
     char *username;
-    int i, j, errors = 0, ntests = 0;
+    int i, j, ntests = 0;
     int ngroups;
     gid_t basegid;
     initprogname(argc > 0 ? argv[0] : "getgrouplist_test");
@@ -97,5 +99,6 @@ main(int argc, char *argv[])
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
+#endif /* HAVE_GETGROUPLIST_2 */
     exit(errors);
 }
