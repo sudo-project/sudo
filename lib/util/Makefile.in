@@ -98,7 +98,7 @@ PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
 TEST_PROGS = atofoo_test conf_test hltq_test parseln_test progname_test \
-	     strsplit_test parse_gids_test @COMPAT_TEST_PROGS@
+	     strsplit_test parse_gids_test getgrouplist_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -142,6 +142,8 @@ GLOBTEST_OBJS = globtest.lo
 STRSPLIT_TEST_OBJS = strsplit_test.lo
 
 PARSE_GIDS_TEST_OBJS = parse_gids_test.lo
+
+GETGROUPLIST_TEST_OBJS = getgrouplist_test.lo
 
 VSYSLOG_TEST_OBJS = vsyslog_test.lo vsyslog.lo
 
@@ -229,6 +231,9 @@ progname_test: $(PROGNAME_TEST_OBJS)
 parse_gids_test: $(PARSE_GIDS_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(PARSE_GIDS_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+getgrouplist_test: $(GETGROUPLIST_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(GETGROUPLIST_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 strsplit_test: $(STRSPLIT_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRSPLIT_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
@@ -294,6 +299,7 @@ check: $(TEST_PROGS)
 	    if test -f mktemp_test; then \
 		./mktemp_test || rval=`expr $$rval + $$?`; \
 	    fi; \
+	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
 	    ./atofoo_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
 	    ./progname_test || rval=`expr $$rval + $$?`; \
@@ -573,6 +579,18 @@ getgrouplist.i: $(srcdir)/getgrouplist.c $(incdir)/compat/nss_dbdefs.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 getgrouplist.plog: getgrouplist.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getgrouplist.c --i-file $< --output-file $@
+getgrouplist_test.lo: $(srcdir)/regress/getgrouplist/getgrouplist_test.c \
+                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                      $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                      $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/getgrouplist/getgrouplist_test.c
+getgrouplist_test.i: $(srcdir)/regress/getgrouplist/getgrouplist_test.c \
+                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                      $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                      $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+getgrouplist_test.plog: getgrouplist_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/getgrouplist/getgrouplist_test.c --i-file $< --output-file $@
 gethostname.lo: $(srcdir)/gethostname.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
                 $(top_builddir)/config.h
