@@ -52,14 +52,16 @@ main(int argc, char *argv[])
     char *username;
     int i, j, errors = 0, ntests = 0;
     int ngroups;
+    gid_t basegid;
     initprogname(argc > 0 ? argv[0] : "getgrouplist_test");
 
     if ((pw = getpwuid(0)) == NULL)
 	sudo_fatal_nodebug("getpwuid(0)");
+    basegid = pw->pw_gid;
     if ((username = strdup(pw->pw_name)) == NULL)
 	sudo_fatal_nodebug(NULL);
 
-    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &groups, &ngroups) == -1)
+    if (sudo_getgrouplist2(username, basegid, &groups, &ngroups) == -1)
 	sudo_fatal_nodebug("sudo_getgroulist2");
 
     for (i = 0; i < ngroups; i++) {
@@ -72,6 +74,10 @@ main(int argc, char *argv[])
 	    errors++;
 	    continue;
 	}
+
+	/* Check user's primary gid from the passwd file. */
+	if (grp->gr_gid == basegid)
+	    continue;
 
 	/* Verify group membership. */
 	for (j = 0; grp->gr_mem[j] != NULL; j++) {
