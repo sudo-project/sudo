@@ -329,29 +329,37 @@ check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
 
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
-$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
+prologue:
+	echo "/*" > $@
+	echo " * This is an open source non-commercial project. Dear PVS-Studio, please check it." >> $@
+	echo " * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $@
+	echo " */" >> $@
+	echo "" >> $@
+	echo "#include <config.h>" >> $@
+
+$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y prologue
 	@if [ -n "$(DEVEL)" ]; then \
 	    if test "$(srcdir)" = "."; then \
 		gram_y="gram.y"; \
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; echo "// This is an open source non-commercial project. Dear PVS-Studio, please check it." > $(devdir)/gram.c; echo "// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $(devdir)/gram.c; echo "#include <config.h>" >> $(devdir)/gram.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; cp prologue $(devdir)/gram.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-$(devdir)/toke.c: $(srcdir)/toke.l
+$(devdir)/toke.c: $(srcdir)/toke.l prologue
 	@if [ -n "$(DEVEL)" ]; then \
 	    if test "$(srcdir)" = "."; then \
 		toke_l="toke.l"; \
 	    else \
 		toke_l="$(srcdir)/toke.l"; \
 	    fi; \
-	    cmd='$(FLEX) '"$$toke_l"'; echo "// This is an open source non-commercial project. Dear PVS-Studio, please check it." > $(devdir)/toke.c; echo "// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $(devdir)/toke.c; echo "#include <config.h>" >> $(devdir)/toke.c; $(SED) "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
+	    cmd='$(FLEX) '"$$toke_l"'; cp prologue $(devdir)/toke.c; $(SED) "s/^\\(#line .*\\) \"lex\\.sudoers\\.c\"/\1 \"toke.c\"/" lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-$(devdir)/getdate.c: $(srcdir)/getdate.y
+$(devdir)/getdate.c: $(srcdir)/getdate.y prologue
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "expect 10 shift/reduce conflicts"; \
 	    if test "$(srcdir)" = "."; then \
@@ -359,7 +367,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 	    else \
 		getdate_y="$(srcdir)/getdate.y"; \
 	    fi; \
-	    cmd='$(YACC) '"$$getdate_y"'; echo "// This is an open source non-commercial project. Dear PVS-Studio, please check it." > $(devdir)/getdate.c; echo "// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $(devdir)/getdate.c; echo "#include <config.h>" >> $(devdir)/getdate.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    cmd='$(YACC) '"$$getdate_y"'; cp prologue $(devdir)/getdate.c; $(SED) "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -593,8 +601,8 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers
 clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(PROGS) $(TEST_PROGS) \
 	    *.lo *.o *.la *.a *.i *.plog stamp-* core *.core core.* \
-	    regress/*/*.out regress/*/*.toke regress/*/*.err regress/*/*.json \
-	    regress/*/*.ldif regress/*/*.sudo
+	    prologue regress/*/*.out regress/*/*.toke regress/*/*.err \
+	    regress/*/*.json regress/*/*.ldif regress/*/*.sudo
 
 mostlyclean: clean
 
