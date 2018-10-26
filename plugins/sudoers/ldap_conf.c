@@ -422,7 +422,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_HARD;
 		else if (strcasecmp(value, "demand") == 0)
 		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_DEMAND;
-#endif
+#endif /* LDAP_OPT_X_TLS_REQUIRE_CERT */
 		break;
 	    case CONF_BOOL:
 		*(int *)(cur->valp) = sudo_strtobool(value) == true;
@@ -641,6 +641,7 @@ sudo_ldap_read_config(void)
 	DPRINTF1("tls_checkpeer    %s",
 	    ldap_conf.tls_checkpeer ? "(yes)" : "(no)");
     }
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
     if (ldap_conf.tls_reqcert != -1) {
 	DPRINTF1("tls_reqcert    %s",
 	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_NEVER ? "hard" :
@@ -650,6 +651,7 @@ sudo_ldap_read_config(void)
 	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_DEMAND ? "demand" :
 	    "unknown");
     }
+#endif /* LDAP_OPT_X_TLS_REQUIRE_CERT */
     if (ldap_conf.tls_cacertfile != NULL) {
 	DPRINTF1("tls_cacertfile   %s", ldap_conf.tls_cacertfile);
     }
