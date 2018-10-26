@@ -132,6 +132,7 @@ lib/util/reallocarray.c
 lib/util/regress/atofoo/atofoo_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
+lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
