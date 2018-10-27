@@ -154,6 +154,22 @@ userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
     debug_return_int(matched);
 }
 
+struct gid_list *
+runas_getgroups(void)
+{
+    const struct passwd *pw;
+    debug_decl(runas_getgroups, SUDOERS_DEBUG_MATCH)
+
+    if (def_preserve_groups) {
+	sudo_gidlist_addref(user_gid_list);
+	debug_return_ptr(user_gid_list);
+    }
+
+    /* Only use results from a group db query, not the front end. */
+    pw = runas_pw ? runas_pw : sudo_user.pw;
+    debug_return_ptr(sudo_get_gidlist(pw, ENTRY_TYPE_QUERIED));
+}
+
 /*
  * Check for user described by pw in a list of members.
  * If both lists are empty compare against def_runas_default.
@@ -263,8 +279,23 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 	    }
 	}
 	if (group_matched == UNSPEC) {
-	    if (runas_pw->pw_gid == runas_gr->gr_gid)
+	    struct gid_list *runas_groups;
+	    /*
+	     * The runas group was not explicitly allowed by sudoers.
+	     * Check whether it is one of the target user's groups.
+	     */
+	    if (runas_pw->pw_gid == runas_gr->gr_gid) {
 		group_matched = ALLOW;	/* runas group matches passwd db */
+	    } else if ((runas_groups = runas_getgroups()) != NULL) {
+		int i;
+
+		for (i = 0; i < runas_groups->ngids; i++) {
+		    if (runas_groups->gids[i] == runas_gr->gr_gid) {
+			group_matched = ALLOW;	/* matched aux group vector */
+			break;
+		    }
+		}
+	    }
 	}
     }
 

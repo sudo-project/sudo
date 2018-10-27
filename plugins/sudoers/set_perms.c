@@ -1695,19 +1695,11 @@ bad:
 static struct gid_list *
 runas_setgroups(void)
 {
-    struct passwd *pw;
     struct gid_list *gidlist;
     debug_decl(runas_setgroups, SUDOERS_DEBUG_PERMS)
 
-    if (def_preserve_groups) {
-	sudo_gidlist_addref(user_gid_list);
-	debug_return_ptr(user_gid_list);
-    }
-
-    /* Only use results from a group db query, not the front end. */
-    pw = runas_pw ? runas_pw : sudo_user.pw;
-    gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_QUERIED);
-    if (gidlist != NULL) {
+    gidlist = runas_getgroups();
+    if (gidlist != NULL && !def_preserve_groups) {
 	if (sudo_setgroups(gidlist->ngids, gidlist->gids) < 0) {
 	    sudo_gidlist_delref(gidlist);
 	    gidlist = NULL;
