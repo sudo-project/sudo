@@ -40,6 +40,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <unistd.h>
 
 #include "tsgetgrpw.h"
 #include "sudoers.h"
@@ -330,4 +331,83 @@ getgrgid(gid_t gid)
 	grf = NULL;
     }
     return gr;
+}
+
+/*
+ * Copied from getgrouplist.c
+ */
+int
+sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+    GETGROUPS_T **groupsp, int *ngroupsp)
+{
+    GETGROUPS_T *groups = *groupsp;
+    int grpsize = *ngroupsp;
+    int i, ngroups = 1;
+    int ret = -1;
+    struct group *grp;
+
+    if (groups == NULL) {
+	/* Dynamically-sized group vector. */
+	grpsize = (int)sysconf(_SC_NGROUPS_MAX);
+	if (grpsize < 0)
+	    grpsize = NGROUPS_MAX;
+	groups = reallocarray(NULL, grpsize, 4 * sizeof(*groups));
+	if (groups == NULL)
+	    return -1;
+	grpsize <<= 2;
+    } else {
+	/* Static group vector. */
+	if (grpsize < 1)
+	    return -1;
+    }
+
+    /* We support BSD semantics where the first element is the base gid */
+    groups[0] = basegid;
+
+    setgrent();
+    while ((grp = getgrent()) != NULL) {
+	if (grp->gr_gid == basegid || grp->gr_mem == NULL)
+	    continue;
+
+	for (i = 0; grp->gr_mem[i] != NULL; i++) {
+	    if (strcmp(name, grp->gr_mem[i]) == 0)
+		break;
+	}
+	if (grp->gr_mem[i] == NULL)
+	    continue; /* user not found */
+
+	/* Only add if it is not the same as an existing gid */
+	for (i = 0; i < ngroups; i++) {
+	    if (grp->gr_gid == groups[i])
+		break;
+	}
+	if (i == ngroups) {
+	    if (ngroups == grpsize) {
+		GETGROUPS_T *tmp;
+
+		if (*groupsp != NULL) {
+		    /* Static group vector. */
+		    goto done;
+		}
+		tmp = reallocarray(groups, grpsize, 2 * sizeof(*groups));
+		if (tmp == NULL) {
+		    free(groups);
+		    groups = NULL;
+		    ngroups = 0;
+		    goto done;
+		}
+		groups = tmp;
+		grpsize <<= 1;
+	    }
+	    groups[ngroups++] = grp->gr_gid;
+	}
+    }
+    ret = 0;
+
+done:
+    endgrent();
+    *groupsp = groups;
+    *ngroupsp = ngroups;
+
+    return ret;
 }
