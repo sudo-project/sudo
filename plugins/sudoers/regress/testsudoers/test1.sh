@@ -6,7 +6,7 @@
 #
 
 exec 2>&1
-./testsudoers -g bin root id <<EOF
+./testsudoers -g bin -P ${TESTDIR}/group root id <<EOF
 root ALL = ALL
 EOF
 
