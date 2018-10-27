@@ -18,7 +18,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 13, 2018
+.Dd October 27, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -330,6 +330,14 @@ If no
 option is specified, the command will be run as the invoking user.
 In either case, the primary group will be set to
 .Ar group .
+The
+.Em sudoers
+policy permits any of the target user's groups to be specified via
+the
+.Fl g
+option as long as the
+.Fl P
+option is not in use.
 .It Fl H , -set-home
 Request that the security policy set the
 .Ev HOME

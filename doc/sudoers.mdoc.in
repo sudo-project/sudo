@@ -18,7 +18,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 7, 2018
+.Dd October 27, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1045,7 +1045,7 @@ option.
 The second defines a list of groups that can be specified via
 .Nm sudo Ns 's
 .Fl g
-option.
+option in addition to any of the target user's groups.
 If both
 .Li Runas_List Ns s
 are specified, the command may be run with any combination of users

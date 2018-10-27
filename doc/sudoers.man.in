@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 27, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1092,7 +1092,7 @@ option.
 The second defines a list of groups that can be specified via
 \fBsudo\fR's
 \fB\-g\fR
-option.
+option in addition to any of the target user's groups.
 If both
 \fRRunas_List\fRs
 are specified, the command may be run with any combination of users

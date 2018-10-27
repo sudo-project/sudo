@@ -167,7 +167,9 @@ DDEESSCCRRIIPPTTIIOONN
                  require that the `#' be escaped with a backslash (`\').  If
                  no --uu option is specified, the command will be run as the
                  invoking user.  In either case, the primary group will be set
-                 to _g_r_o_u_p.
+                 to _g_r_o_u_p.  The _s_u_d_o_e_r_s policy permits any of the target
+                 user's groups to be specified via the --gg option as long as
+                 the --PP option is not in use.
 
      --HH, ----sseett--hhoommee
                  Request that the security policy set the HOME environment
@@ -736,4 +738,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                    October 13, 2018                    Sudo 1.8.26
+Sudo 1.8.26                    October 27, 2018                    Sudo 1.8.26
