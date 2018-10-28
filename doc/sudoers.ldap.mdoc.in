@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 7, 2018
+.Dd October 28, 2018
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -203,6 +203,13 @@ that contains a list of users that commands may be run as.
 The special value
 .Li ALL
 will match any user.
+If a
+.Li sudoRunAsUser
+entry is preceded by an exclamation point,
+.Ql \&! ,
+and the entry matches, the
+.Li sudoRole
+in which it resides will be ignored.
 If
 .Li sudoRunAsUser
 is specified but empty, it will match the invoking user.
@@ -227,6 +234,9 @@ Older versions of
 use the
 .Li sudoRunAs
 attribute instead.
+Negated
+.Li sudoRunAsUser
+entries are only supported by version 1.8.26 or higher.
 .It Sy sudoRunAsGroup
 A Unix group or gid (prefixed with
 .Ql # )
@@ -234,6 +244,13 @@ that commands may be run as.
 The special value
 .Li ALL
 will match any group.
+If a
+.Li sudoRunAsGroup
+entry is preceded by an exclamation point,
+.Ql \&! ,
+and the entry matches, the
+.Li sudoRole
+in which it resides will be ignored.
 .Pp
 The
 .Li sudoRunAsGroup
@@ -241,6 +258,9 @@ attribute is only available in
 .Nm sudo
 versions
 1.7.0 and higher.
+Negated
+.Li sudoRunAsGroup
+entries are only supported by version 1.8.26 or higher.
 .It Sy sudoNotBefore
 A timestamp in the form
 .Li yyyymmddHHMMSSZ

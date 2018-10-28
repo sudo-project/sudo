@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "October 28, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -218,6 +218,13 @@ that contains a list of users that commands may be run as.
 The special value
 \fRALL\fR
 will match any user.
+If a
+\fRsudoRunAsUser\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
 If
 \fRsudoRunAsUser\fR
 is specified but empty, it will match the invoking user.
@@ -242,6 +249,9 @@ Older versions of
 use the
 \fRsudoRunAs\fR
 attribute instead.
+Negated
+\fRsudoRunAsUser\fR
+entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoRunAsGroup\fR
 A Unix group or gid (prefixed with
@@ -250,6 +260,13 @@ that commands may be run as.
 The special value
 \fRALL\fR
 will match any group.
+If a
+\fRsudoRunAsGroup\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
 .sp
 The
 \fRsudoRunAsGroup\fR
@@ -257,6 +274,9 @@ attribute is only available in
 \fBsudo\fR
 versions
 1.7.0 and higher.
+Negated
+\fRsudoRunAsGroup\fR
+entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoNotBefore\fR
 A timestamp in the form

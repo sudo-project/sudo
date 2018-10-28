@@ -123,6 +123,8 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
 static struct member_list *
 array_to_member_list(void *a, sudo_ldap_iter_t iter)
 {
+    struct member_list negated_members =
+	TAILQ_HEAD_INITIALIZER(negated_members);
     struct member_list *members;
     struct member *m;
     char *val;
@@ -135,6 +137,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
     while ((val = iter(&a)) != NULL) {
 	if ((m = calloc(1, sizeof(*m))) == NULL)
 	    goto bad;
+	m->negated = sudo_ldap_is_negated(&val);
 
 	switch (val[0]) {
 	case '\0':
@@ -172,10 +175,17 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 	    }
 	    break;
 	}
-	TAILQ_INSERT_TAIL(members, m, entries);
+	if (m->negated)
+	    TAILQ_INSERT_TAIL(&negated_members, m, entries);
+	else
+	    TAILQ_INSERT_TAIL(members, m, entries);
     }
+
+    /* Negated members take precedence so we insert them at the end. */
+    TAILQ_CONCAT(members, &negated_members, entries);
     debug_return_ptr(members);
 bad:
+    free_members(&negated_members);
     free_members(members);
     free(members);
     debug_return_ptr(NULL);
