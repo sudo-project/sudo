@@ -19,7 +19,7 @@ What's new in Sudo 1.8.26
    time suspended when replaying the session unless the new -S flag
    is used.
 
- * Fix documentation problems found by the igor utility.  Bug #854.
+ * Fixed documentation problems found by the igor utility.  Bug #854.
 
  * Sudo now prints a warning message when there is an error or end
    of file while reading the password instead of exiting silently.
