@@ -295,6 +295,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			break;
 		    }
 		}
+		sudo_gidlist_delref(runas_groups);
 	    }
 	}
     }
