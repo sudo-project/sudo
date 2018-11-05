@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, 2010-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004, 2010-2015, 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,12 +31,16 @@
 #if (defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0) || defined(NO_VARIADIC_MACROS)
 # define sudo_fatal sudo_fatal_nodebug_v1
 # define sudo_fatalx sudo_fatalx_nodebug_v1
+# define sudo_gai_fatal sudo_gai_fatal_nodebug_v1
 # define sudo_warn sudo_warn_nodebug_v1
 # define sudo_warnx sudo_warnx_nodebug_v1
+# define sudo_gai_warn sudo_gai_warn_nodebug_v1
 # define sudo_vfatal(fmt, ap) sudo_vfatal_nodebug_v1((fmt), (ap))
 # define sudo_vfatalx(fmt, ap) sudo_vfatalx_nodebug_v1((fmt), (ap))
+# define sudo_gai_vfatal(en, fmt, ap) sudo_vfatal_nodebug_v1((en), (fmt), (ap))
 # define sudo_vwarn(fmt, ap) sudo_vwarn_nodebug_v1((fmt), (ap))
 # define sudo_vwarnx(fmt, ap) sudo_vwarnx_nodebug_v1((fmt), (ap))
+# define sudo_gai_vwarn(en, fmt, ap) sudo_vwarn_nodebug_v1((en), (fmt), (ap))
 #else /* SUDO_ERROR_WRAP */
 # if defined(__GNUC__) && __GNUC__ == 2
 #  define sudo_fatal(fmt...) do {					       \
@@ -48,7 +52,12 @@
 #  define sudo_fatalx(fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
-    sudo_fatalx_nodebug_v1(fmt);						       \
+    sudo_fatalx_nodebug_v1(fmt);					       \
+} while (0)
+#  define sudo_gai_fatal(en, fmt...) do {				       \
+    sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
+    sudo_gai_fatal_nodebug_v1((en), fmt);				       \
 } while (0)
 #  define sudo_warn(fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
@@ -61,6 +70,11 @@
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
     sudo_warnx_nodebug_v1(fmt);						       \
 } while (0)
+#  define sudo_gai_warn(en, fmt...) do {				       \
+    sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
+    sudo_gai_warn_nodebug_v1((en), fmt);				       \
+} while (0)
 # else
 #  define sudo_fatal(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
@@ -71,7 +85,12 @@
 #  define sudo_fatalx(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);    \
-    sudo_fatalx_nodebug_v1(__VA_ARGS__);					       \
+    sudo_fatalx_nodebug_v1(__VA_ARGS__);				       \
+} while (0)
+#  define sudo_gai_fatal(en, ...) do {					       \
+    sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);    \
+    sudo_gai_fatal_nodebug_v1((en), __VA_ARGS__);			       \
 } while (0)
 #  define sudo_warn(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
@@ -83,6 +102,11 @@
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);     \
     sudo_warnx_nodebug_v1(__VA_ARGS__);					       \
+} while (0)
+#  define sudo_gai_warn(en, ...) do {					       \
+    sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);     \
+    sudo_gai_warn_nodebug_v1((en), __VA_ARGS__);			       \
 } while (0)
 # endif /* __GNUC__ == 2 */
 # define sudo_vfatal(fmt, ap) do {					       \
@@ -98,7 +122,14 @@
     va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);     \
-    sudo_vfatalx_nodebug_v1((fmt), (ap));					       \
+    sudo_vfatalx_nodebug_v1((fmt), (ap));				       \
+} while (0)
+# define sudo_gai_vfatal(en, fmt, ap) do {				       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
+    sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);     \
+    sudo_gai_vfatal_nodebug_v1((en), (fmt), (ap));			       \
 } while (0)
 # define sudo_vwarn(fmt, ap) do {					       \
     va_list ap2;							       \
@@ -113,7 +144,14 @@
     va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);      \
-    sudo_vwarnx_nodebug_v1((fmt), (ap));					       \
+    sudo_vwarnx_nodebug_v1((fmt), (ap));				       \
+} while (0)
+# define sudo_gai_vwarn(en, fmt, ap) do {				       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
+    sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);      \
+    sudo_gai_vwarn_nodebug_v1((en), (fmt), (ap));			       \
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
 
@@ -129,12 +167,16 @@ __dso_public char *sudo_warn_gettext_v1(const char *domainname, const char *msgi
 __dso_public void sudo_warn_set_locale_func_v1(bool (*func)(bool, int *));
 __dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) __printf0like(1, 2) __attribute__((__noreturn__));
 __dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) __printflike(1, 2) __attribute__((__noreturn__));
+__dso_public void sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
 __dso_public void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
 __dso_public void sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
+__dso_public void sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap) __printflike(2, 0) __attribute__((__noreturn__));
 __dso_public void sudo_warn_nodebug_v1(const char *fmt, ...) __printf0like(1, 2);
 __dso_public void sudo_warnx_nodebug_v1(const char *fmt, ...) __printflike(1, 2);
+__dso_public void sudo_gai_warn_nodebug_v1(int errnum, const char *fmt, ...) __printflike(2, 3);
 __dso_public void sudo_vwarn_nodebug_v1(const char *fmt, va_list ap) __printf0like(1, 0);
 __dso_public void sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap) __printflike(1, 0);
+__dso_public void sudo_gai_vwarn_nodebug_v1(int errnum, const char *fmt, va_list ap) __printflike(2, 0);
 __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const struct sudo_conv_message *msgs, struct sudo_conv_reply *replies, struct sudo_conv_callback *callback));
 
 #define sudo_fatal_callback_deregister(_a) sudo_fatal_callback_deregister_v1((_a))
@@ -142,12 +184,16 @@ __dso_public void sudo_warn_set_conversation_v1(int (*conv)(int num_msgs, const 
 #define sudo_warn_set_locale_func(_a) sudo_warn_set_locale_func_v1((_a))
 #define sudo_fatal_nodebug sudo_fatal_nodebug_v1
 #define sudo_fatalx_nodebug sudo_fatalx_nodebug_v1
+#define sudo_gai_fatal_nodebug sudo_gai_fatal_nodebug_v1
 #define sudo_vfatal_nodebug(_a, _b) sudo_vfatal_nodebug_v1((_a), (_b))
 #define sudo_vfatalx_nodebug(_a, _b) sudo_vfatalx_nodebug_v1((_a), (_b))
+#define sudo_gai_vfatal_nodebug(_a, _b, _c) sudo_gai_vfatal_nodebug_v1((_a), (_b), (_c))
 #define sudo_warn_nodebug sudo_warn_nodebug_v1
 #define sudo_warnx_nodebug sudo_warnx_nodebug_v1
+#define sudo_gai_warn_nodebug sudo_gai_warn_nodebug_v1
 #define sudo_vwarn_nodebug(_a, _b) sudo_vwarn_nodebug_v1((_a), (_b))
 #define sudo_vwarnx_nodebug(_a, _b) sudo_vwarnx_nodebug_v1((_a), (_b))
+#define sudo_gai_vwarn_nodebug(_a, _b, _c) sudo_gai_vwarn_nodebug_v1((_a), (_b), (_c))
 #define sudo_warn_set_conversation(_a) sudo_warn_set_conversation_v1(_a)
 
 #ifdef DEFAULT_TEXT_DOMAIN

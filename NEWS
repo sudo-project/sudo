@@ -49,6 +49,10 @@ What's new in Sudo 1.8.26
  * The sudoers LDAP back-end now supports negated sudoRunAsUser and
    sudoRunAsGroup entries.
 
+ * Sudo now provides a proper error message when the "fqdn" sudoers
+   option is set and it is unable to resolve the local host name.
+   Bug #859.
+
 What's new in Sudo 1.8.25p1
 
  * Fixed a bug introduced in sudo 1.8.25 that caused a crash on

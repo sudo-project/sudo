@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,6 +45,7 @@
 #ifdef HAVE_NL_LANGINFO
 # include <langinfo.h>
 #endif /* HAVE_NL_LANGINFO */
+#include <netdb.h>
 #include <pwd.h>
 #include <grp.h>
 #include <signal.h>
@@ -56,6 +57,10 @@
 
 #include "sudoers.h"
 
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
+
 /* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 
@@ -64,7 +69,7 @@ static bool do_logfile(const char *);
 static bool send_mail(const char *fmt, ...);
 static bool should_mail(int);
 static void mysyslog(int, const char *, ...);
-static char *new_logline(const char *, int);
+static char *new_logline(const char *, const char *);
 
 #define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
 
@@ -252,7 +257,7 @@ log_denial(int status, bool inform_user)
     else
 	message = _("command not allowed");
 
-    logline = new_logline(message, 0);
+    logline = new_logline(message, NULL);
     if (logline == NULL)
 	debug_return_bool(false);
 
@@ -396,7 +401,7 @@ log_allowed(int status)
     /* Log and mail messages should be in the sudoers locale. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-    if ((logline = new_logline(NULL, 0)) == NULL)
+    if ((logline = new_logline(NULL, NULL)) == NULL)
 	debug_return_bool(false);
 
     /* Become root if we are not already. */
@@ -486,14 +491,15 @@ done:
  * Perform logging for log_warning()/log_warningx().
  */
 static bool
-vlog_warning(int flags, const char *fmt, va_list ap)
+vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 {
-    int oldlocale, serrno = errno;
+    int oldlocale;
+    const char *errstr = NULL;
     char *logline, *message;
     bool uid_changed, ret = true;
     va_list ap2;
     int len;
-    debug_decl(vlog_error, SUDOERS_DEBUG_LOGGING)
+    debug_decl(vlog_warning, SUDOERS_DEBUG_LOGGING)
 
     /* Need extra copy of ap for sudo_vwarn()/sudo_vwarnx() below. */
     va_copy(ap2, ap);
@@ -513,10 +519,15 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	goto done;
     }
 
+    if (ISSET(flags, SLOG_USE_ERRNO))
+	errstr = strerror(errnum);
+    else if (ISSET(flags, SLOG_GAI_ERRNO))
+	errstr = gai_strerror(errnum);
+
     /* Log to debug file. */
-    if (SLOG_USE_ERRNO) {
+    if (errstr != NULL) {
 	sudo_debug_printf2(NULL, NULL, 0,
-	    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|sudo_debug_subsys, "%s", message);
+	    SUDO_DEBUG_WARN|sudo_debug_subsys, "%s: %s", message, errstr);
     } else {
 	sudo_debug_printf2(NULL, NULL, 0,
 	    SUDO_DEBUG_WARN|sudo_debug_subsys, "%s", message);
@@ -525,7 +536,7 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     if (ISSET(flags, SLOG_RAW_MSG)) {
 	logline = message;
     } else {
-	logline = new_logline(message, ISSET(flags, SLOG_USE_ERRNO) ? serrno : 0);
+	logline = new_logline(message, errstr);
         free(message);
 	if (logline == NULL) {
 	    ret = false;
@@ -577,10 +588,12 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	    sudo_warnx_nodebug("%s", message);
 	    free(message);
 	} else {
-	    errno = serrno;
-	    if (ISSET(flags, SLOG_USE_ERRNO))
+	    if (ISSET(flags, SLOG_USE_ERRNO)) {
+		errno = errnum;
 		sudo_vwarn_nodebug(_(fmt), ap2);
-	    else
+	    } else if (ISSET(flags, SLOG_GAI_ERRNO)) {
+		sudo_gai_vwarn_nodebug(errnum, _(fmt), ap2);
+	    } else
 		sudo_vwarnx_nodebug(_(fmt), ap2);
 	}
     }
@@ -597,11 +610,11 @@ log_warning(int flags, const char *fmt, ...)
 {
     va_list ap;
     bool ret;
-    debug_decl(log_error, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_warning, SUDOERS_DEBUG_LOGGING)
 
     /* Log the error. */
     va_start(ap, fmt);
-    ret = vlog_warning(flags|SLOG_USE_ERRNO, fmt, ap);
+    ret = vlog_warning(flags|SLOG_USE_ERRNO, errno, fmt, ap);
     va_end(ap);
 
     debug_return_bool(ret);
@@ -612,15 +625,31 @@ log_warningx(int flags, const char *fmt, ...)
 {
     va_list ap;
     bool ret;
-    debug_decl(log_error, SUDOERS_DEBUG_LOGGING)
+    debug_decl(log_warningx, SUDOERS_DEBUG_LOGGING)
 
     /* Log the error. */
     va_start(ap, fmt);
-    ret = vlog_warning(flags, fmt, ap);
+    ret = vlog_warning(flags, 0, fmt, ap);
     va_end(ap);
 
     debug_return_bool(ret);
 }
+
+bool
+gai_log_warning(int flags, int errnum, const char *fmt, ...)
+{
+    va_list ap;
+    bool ret;
+    debug_decl(gai_log_warning, SUDOERS_DEBUG_LOGGING)
+
+    /* Log the error. */
+    va_start(ap, fmt);
+    ret = vlog_warning(flags|SLOG_GAI_ERRNO, errnum, fmt, ap);
+    va_end(ap);
+
+    debug_return_bool(ret);
+}
+
 
 #define MAX_MAILFLAGS	63
 
@@ -868,9 +897,9 @@ should_mail(int status)
  * Allocate and fill in a new logline.
  */
 static char *
-new_logline(const char *message, int serrno)
+new_logline(const char *message, const char *errstr)
 {
-    char *line = NULL, *errstr = NULL, *evstr = NULL;
+    char *line = NULL, *evstr = NULL;
 #ifndef SUDOERS_NO_SEQ
     char sessid[7];
 #endif
@@ -901,10 +930,8 @@ new_logline(const char *message, int serrno)
      */
     if (message != NULL)
 	len += strlen(message) + 3;
-    if (serrno) {
-	errstr = strerror(serrno);
+    if (errstr != NULL)
 	len += strlen(errstr) + 3;
-    }
     len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
     len += sizeof(LL_CWD_STR) + 2 + strlen(user_cwd);
     if (runas_pw != NULL)
@@ -951,7 +978,7 @@ new_logline(const char *message, int serrno)
 	    strlcat(line, errstr ? " : " : " ; ", len) >= len)
 	    goto toobig;
     }
-    if (serrno) {
+    if (errstr != NULL) {
 	if (strlcat(line, errstr, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;

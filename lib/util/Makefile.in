@@ -512,12 +512,14 @@ event_select.i: $(srcdir)/event_select.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 event_select.plog: event_select.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/event_select.c --i-file $< --output-file $@
-fatal.lo: $(srcdir)/fatal.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+fatal.lo: $(srcdir)/fatal.c $(incdir)/compat/getaddrinfo.h \
+          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
           $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/fatal.c
-fatal.i: $(srcdir)/fatal.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+fatal.i: $(srcdir)/fatal.c $(incdir)/compat/getaddrinfo.h \
+          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
           $(top_builddir)/config.h

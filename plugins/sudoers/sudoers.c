@@ -1010,29 +1010,30 @@ set_loginclass(struct passwd *pw)
  * Returns true on success, setting longp and shortp.
  * Returns false on failure, longp and shortp are unchanged.
  */
-static bool
+static int
 resolve_host(const char *host, char **longp, char **shortp)
 {
     struct addrinfo *res0, hint;
     char *cp, *lname, *sname;
+    int ret;
     debug_decl(resolve_host, SUDOERS_DEBUG_PLUGIN)
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_FQDN;
 
-    if (getaddrinfo(host, NULL, &hint, &res0) != 0)
-	debug_return_bool(false);
+    if ((ret = getaddrinfo(host, NULL, &hint, &res0)) != 0)
+	debug_return_int(ret);
     if ((lname = strdup(res0->ai_canonname)) == NULL) {
 	freeaddrinfo(res0);
-	debug_return_bool(false);
+	debug_return_int(EAI_MEMORY);
     }
     if ((cp = strchr(lname, '.')) != NULL) {
 	sname = strndup(lname, (size_t)(cp - lname));
 	if (sname == NULL) {
 	    free(lname);
 	    freeaddrinfo(res0);
-	    debug_return_bool(false);
+	    debug_return_int(EAI_MEMORY);
 	}
     } else {
 	sname = lname;
@@ -1041,7 +1042,7 @@ resolve_host(const char *host, char **longp, char **shortp)
     *longp = lname;
     *shortp = sname;
 
-    debug_return_bool(true);
+    debug_return_bool(0);
 }
 
 /*
@@ -1063,9 +1064,10 @@ cb_fqdn(const union sudo_defs_val *sd_un)
     remote = strcmp(user_runhost, user_host) != 0;
 
     /* First resolve user_host, setting user_host and user_shost. */
-    if (!resolve_host(user_host, &lhost, &shost)) {
-	if (!resolve_host(user_runhost, &lhost, &shost)) {
-	    log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG,
+    if (resolve_host(user_host, &lhost, &shost) != 0) {
+	int rc = resolve_host(user_runhost, &lhost, &shost);
+	if (rc != 0) {
+	    gai_log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG, rc,
 		N_("unable to resolve host %s"), user_host);
 	    debug_return_bool(false);
 	}

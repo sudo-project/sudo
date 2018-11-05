@@ -3023,7 +3023,7 @@ LIBS="$OLIBS"
 # If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
+GETADDRINFO_LIBS=
 AX_FUNC_GETADDRINFO
 case " $LIBOBJS " in
     *" getaddrinfo.$ac_objext "* )
@@ -3053,11 +3053,25 @@ case " $LIBOBJS " in
 	;;
     *)
 	for lib in $LIBS; do
-	    case "$NET_LIBS" in
+	    case "$OLIBS" in
 		*"$lib"*) ;;
-		*) NET_LIBS="${NET_LIBS} $lib";;
+		*) GETADDRINFO_LIBS="${GETADDRINFO_LIBS}${GETADDRINFO_LIBS+ }$lib";;
 	    esac
 	done
+	if test -n "${GETADDRINFO_LIBS}"; then
+	    # We need libsudo_util to pull in dependent libraries for
+	    # gai_strerror()
+	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${GETADDRINFO_LIBS}"
+	    LIBS="${LIBS}${LIBS+ }${GETADDRINFO_LIBS}"
+
+	    # Add to NET_LIBS if necessary
+	    for lib in $GETADDRINFO_LIBS; do
+		case "$NET_LIBS" in
+		    *"$lib"*)   ;;
+		    *)		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib";;
+		esac
+	    done
+	fi
 	;;
 esac
 LIBS="$OLIBS"

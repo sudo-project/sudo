@@ -70,6 +70,10 @@ sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1
 sudo_fatalx_nodebug_v1
+sudo_gai_fatal_nodebug_v1
+sudo_gai_vfatal_nodebug_v1
+sudo_gai_vwarn_nodebug_v1
+sudo_gai_warn_nodebug_v1
 sudo_get_ttysize_v1
 sudo_getgrouplist2_v1
 sudo_gethostname_v1
