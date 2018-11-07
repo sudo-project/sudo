@@ -373,6 +373,8 @@ plugins/sudoers/po/nl.mo
 plugins/sudoers/po/nl.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
+plugins/sudoers/po/pt.mo
+plugins/sudoers/po/pt.po
 plugins/sudoers/po/pt_BR.mo
 plugins/sudoers/po/pt_BR.po
 plugins/sudoers/po/ru.mo
@@ -734,6 +736,8 @@ po/nn.mo
 po/nn.po
 po/pl.mo
 po/pl.po
+po/pt.mo
+po/pt.po
 po/pt_BR.mo
 po/pt_BR.po
 po/ru.mo
