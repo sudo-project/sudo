@@ -43,15 +43,11 @@
 # define _POSIX_OPEN_MAX	20
 #endif
 
-#if defined(HAVE_FCNTL_CLOSEM) && !defined(HAVE_DIRFD)
-# define sudo_closefrom	closefrom_fallback
-#endif
-
 /*
  * Close all file descriptors greater than or equal to lowfd.
  * This is the expensive (fallback) method.
  */
-void
+static void
 closefrom_fallback(int lowfd)
 {
     long fd, maxfd;
@@ -131,5 +127,12 @@ sudo_closefrom(int lowfd)
     } else
 	closefrom_fallback(lowfd);
 }
+#else
+void
+sudo_closefrom(int lowfd)
+{
+    closefrom_fallback(lowfd);
+}
 #endif /* HAVE_FCNTL_CLOSEM */
+
 #endif /* HAVE_CLOSEFROM */
