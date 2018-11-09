@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "5" "October 28, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "November 9, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -656,19 +656,28 @@ In addition, be sure to index the
 \fRsudoUser\fR
 attribute.
 .PP
-Three versions of the schema: one for OpenLDAP servers
-(\fIschema.OpenLDAP\fR),
-one for Netscape-derived servers
-(\fIschema.iPlanet\fR),
-and one for Microsoft Active Directory
-(\fIschema.ActiveDirectory\fR)
-may be found in the
+The
 \fBsudo\fR
-distribution.
+distribution includes versions of the
+\fBsudoers\fR
+schema for multiple LDAP servers:
+.TP 6n
+\fIschema.OpenLDAP\fR
+OpenLDAP slapd and
+OpenBSD
+ldapd
+.TP 6n
+\fIschema.olcSudo\fR
+OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+.TP 6n
+\fIschema.iPlanet\fR
+Netscape-derived servers such as the iPlanet, Oracle,
+and 389 Directory Servers
+.TP 6n
+\fIschema.ActiveDirectory\fR
+Microsoft Active Directory
 .PP
-The schema for
-\fBsudo\fR
-in OpenLDAP form is also included in the
+The schema in OpenLDAP format is also included in the
 \fIEXAMPLES\fR
 section.
 .SS "Configuring ldap.conf"
@@ -1560,7 +1569,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 # krb5_ccname /etc/.ldapcache
 .RE
 .fi
-.SS "Sudo schema for OpenLDAP"
+.SS "Sudoers schema for OpenLDAP"
 The following schema, in OpenLDAP format, is included with
 \fBsudo\fR
 source and binary distributions as
@@ -1574,6 +1583,10 @@ line in
 \fIslapd.conf\fR
 and restart
 \fBslapd\fR.
+Sites using the optional on-line configuration supported by OpenLDAP 2.3
+and higher should apply the
+\fIschema.olcSudo\fR
+file instead.
 .nf
 .sp
 .RS 2n

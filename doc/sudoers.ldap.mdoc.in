@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 28, 2018
+.Dd November 9, 2018
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -617,19 +617,26 @@ In addition, be sure to index the
 .Li sudoUser
 attribute.
 .Pp
-Three versions of the schema: one for OpenLDAP servers
-.Pq Pa schema.OpenLDAP ,
-one for Netscape-derived servers
-.Pq Pa schema.iPlanet ,
-and one for Microsoft Active Directory
-.Pq Pa schema.ActiveDirectory
-may be found in the
+The
 .Nm sudo
-distribution.
+distribution includes versions of the
+.Nm sudoers
+schema for multiple LDAP servers:
+.Bl -tag -width 4n
+.It Pa schema.OpenLDAP
+OpenLDAP slapd and
+.Ox
+ldapd
+.It Pa schema.olcSudo
+OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+.It Pa schema.iPlanet
+Netscape-derived servers such as the iPlanet, Oracle,
+and 389 Directory Servers
+.It Pa schema.ActiveDirectory
+Microsoft Active Directory
+.El
 .Pp
-The schema for
-.Nm sudo
-in OpenLDAP form is also included in the
+The schema in OpenLDAP format is also included in the
 .Sx EXAMPLES
 section.
 .Ss Configuring ldap.conf
@@ -1421,7 +1428,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 # sasl_secprops none
 # krb5_ccname /etc/.ldapcache
 .Ed
-.Ss Sudo schema for OpenLDAP
+.Ss Sudoers schema for OpenLDAP
 The following schema, in OpenLDAP format, is included with
 .Nm sudo
 source and binary distributions as
@@ -1435,6 +1442,10 @@ line in
 .Pa slapd.conf
 and restart
 .Nm slapd .
+Sites using the optional on-line configuration supported by OpenLDAP 2.3
+and higher should apply the
+.Pa schema.olcSudo
+file instead.
 .Bd -literal -offset 2n
 attributetype ( 1.3.6.1.4.1.15953.9.1.1
    NAME 'sudoUser'

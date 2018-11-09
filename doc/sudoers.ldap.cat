@@ -375,13 +375,23 @@ DDEESSCCRRIIPPTTIIOONN
      In order to use ssuuddoo's LDAP support, the ssuuddoo schema must be installed on
      your LDAP server.  In addition, be sure to index the sudoUser attribute.
 
-     Three versions of the schema: one for OpenLDAP servers (_s_c_h_e_m_a_._O_p_e_n_L_D_A_P),
-     one for Netscape-derived servers (_s_c_h_e_m_a_._i_P_l_a_n_e_t), and one for Microsoft
-     Active Directory (_s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y) may be found in the ssuuddoo
-     distribution.
+     The ssuuddoo distribution includes versions of the ssuuddooeerrss schema for
+     multiple LDAP servers:
 
-     The schema for ssuuddoo in OpenLDAP form is also included in the _E_X_A_M_P_L_E_S
-     section.
+     _s_c_h_e_m_a_._O_p_e_n_L_D_A_P
+           OpenLDAP slapd and OpenBSD ldapd
+
+     _s_c_h_e_m_a_._o_l_c_S_u_d_o
+           OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+
+     _s_c_h_e_m_a_._i_P_l_a_n_e_t
+           Netscape-derived servers such as the iPlanet, Oracle, and 389
+           Directory Servers
+
+     _s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y
+           Microsoft Active Directory
+
+     The schema in OpenLDAP format is also included in the _E_X_A_M_P_L_E_S section.
 
    CCoonnffiigguurriinngg llddaapp..ccoonnff
      Sudo reads the _/_e_t_c_/_l_d_a_p_._c_o_n_f file for LDAP-specific configuration.
@@ -905,11 +915,13 @@ EEXXAAMMPPLLEESS
        # sasl_secprops none
        # krb5_ccname /etc/.ldapcache
 
-   SSuuddoo sscchheemmaa ffoorr OOppeennLLDDAAPP
+   SSuuddooeerrss sscchheemmaa ffoorr OOppeennLLDDAAPP
      The following schema, in OpenLDAP format, is included with ssuuddoo source
      and binary distributions as _s_c_h_e_m_a_._O_p_e_n_L_D_A_P.  Simply copy it to the
      schema directory (e.g., _/_e_t_c_/_o_p_e_n_l_d_a_p_/_s_c_h_e_m_a), add the proper include
-     line in _s_l_a_p_d_._c_o_n_f and restart ssllaappdd.
+     line in _s_l_a_p_d_._c_o_n_f and restart ssllaappdd.  Sites using the optional on-line
+     configuration supported by OpenLDAP 2.3 and higher should apply the
+     _s_c_h_e_m_a_._o_l_c_S_u_d_o file instead.
 
        attributetype ( 1.3.6.1.4.1.15953.9.1.1
           NAME 'sudoUser'
@@ -1018,4 +1030,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                    October 28, 2018                    Sudo 1.8.26
+Sudo 1.8.26                    November 9, 2018                    Sudo 1.8.26
