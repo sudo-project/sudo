@@ -28,6 +28,7 @@ doc/fixmdoc.sh
 doc/schema.ActiveDirectory
 doc/schema.OpenLDAP
 doc/schema.iPlanet
+doc/schema.olcSudo
 doc/sudo.cat
 doc/sudo.conf.cat
 doc/sudo.conf.man.in

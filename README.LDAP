@@ -57,9 +57,11 @@ Schema Changes
 You must add the appropriate schema to your LDAP server before it
 can store sudoers content.
 
-For OpenLDAP, copy the file schema.OpenLDAP to the schema directory
-(e.g. /etc/openldap/schema).  You must then edit your slapd.conf and
-add an include line the new schema, e.g.
+For OpenLDAP, there are two options, depending on how slapd is configured.
+
+The first option is to copy the file schema.OpenLDAP to the schema
+directory (e.g. /etc/openldap/schema).  You must then edit your
+slapd.conf and add an include line the new schema, e.g.
 
     # Sudo LDAP schema
     include	/etc/openldap/schema/sudo.schema
@@ -71,6 +73,22 @@ the attribute 'sudoUser', e.g.
     index	sudoUser	eq
 
 After making the changes to slapd.conf, restart slapd.
+
+The second option is only for OpenLDAP 2.3 and higher where slapd.conf
+has been configured to use on-line configuration.  If your slapd.conf
+file includes the line:
+
+    database config
+
+it should be possible to use the schema.olcSudo file.
+
+You can apply schema.olcSudo using the ldapadd utility or another
+suitable LDAP browser.  For example:
+
+    # ldapadd -f schema.olcSudo -H ldap://ldapserver -W -x \
+	-D cn=Manager,dc=example,dc=com
+
+There is no need to restart slapd when updating on-line configuration.
 
 For Netscape-derived LDAP servers such as SunONE, iPlanet or Fedora Directory,
 copy the schema.iPlanet file to the schema directory with the name 99sudo.ldif.
@@ -118,7 +136,7 @@ Import into your directory server.  The following example is for
 OpenLDAP.  If you are using another directory, provide the LDIF
 file to your LDAP Administrator.
 
-  # ldapadd -f /tmp/sudoers.ldif -h ldapserver \
+  # ldapadd -f /tmp/sudoers.ldif -H ldap://ldapserver \
     -D cn=Manager,dc=example,dc=com -W -x
 
 Step 3:
