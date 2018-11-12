@@ -55,6 +55,9 @@ What's new in Sudo 1.8.26
 
  * Portuguese translation for sudo and sudoers from translationproject.org.
 
+ * Sudo now includes sudoers LDAP schema for the on-line configuration
+   supported by OpenLDAP.
+
 What's new in Sudo 1.8.25p1
 
  * Fixed a bug introduced in sudo 1.8.25 that caused a crash on
