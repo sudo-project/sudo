@@ -13,9 +13,8 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "5" "June 25, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "5" "November 9, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -219,6 +218,13 @@ that contains a list of users that commands may be run as.
 The special value
 \fRALL\fR
 will match any user.
+If a
+\fRsudoRunAsUser\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
 If
 \fRsudoRunAsUser\fR
 is specified but empty, it will match the invoking user.
@@ -243,6 +249,9 @@ Older versions of
 use the
 \fRsudoRunAs\fR
 attribute instead.
+Negated
+\fRsudoRunAsUser\fR
+entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoRunAsGroup\fR
 A Unix group or gid (prefixed with
@@ -251,6 +260,13 @@ that commands may be run as.
 The special value
 \fRALL\fR
 will match any group.
+If a
+\fRsudoRunAsGroup\fR
+entry is preceded by an exclamation point,
+\(oq\&!\(cq,
+and the entry matches, the
+\fRsudoRole\fR
+in which it resides will be ignored.
 .sp
 The
 \fRsudoRunAsGroup\fR
@@ -258,6 +274,9 @@ attribute is only available in
 \fBsudo\fR
 versions
 1.7.0 and higher.
+Negated
+\fRsudoRunAsGroup\fR
+entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoNotBefore\fR
 A timestamp in the form
@@ -637,19 +656,28 @@ In addition, be sure to index the
 \fRsudoUser\fR
 attribute.
 .PP
-Three versions of the schema: one for OpenLDAP servers
-(\fIschema.OpenLDAP\fR),
-one for Netscape-derived servers
-(\fIschema.iPlanet\fR),
-and one for Microsoft Active Directory
-(\fIschema.ActiveDirectory\fR)
-may be found in the
+The
 \fBsudo\fR
-distribution.
+distribution includes versions of the
+\fBsudoers\fR
+schema for multiple LDAP servers:
+.TP 6n
+\fIschema.OpenLDAP\fR
+OpenLDAP slapd and
+OpenBSD
+ldapd
+.TP 6n
+\fIschema.olcSudo\fR
+OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+.TP 6n
+\fIschema.iPlanet\fR
+Netscape-derived servers such as the iPlanet, Oracle,
+and 389 Directory Servers
+.TP 6n
+\fIschema.ActiveDirectory\fR
+Microsoft Active Directory
 .PP
-The schema for
-\fBsudo\fR
-in OpenLDAP form is also included in the
+The schema in OpenLDAP format is also included in the
 \fIEXAMPLES\fR
 section.
 .SS "Configuring ldap.conf"
@@ -1009,7 +1037,7 @@ for OpenLDAP compatibility.
 .TP 6n
 \fBTLS_CACERTFILE\fR \fIfile name\fR
 The path to a certificate authority bundle which contains the certificates
-for all the Certificate Authorities the client knows to be valid, e.g.\&
+for all the Certificate Authorities the client knows to be valid, e.g.,
 \fI/etc/ssl/ca-bundle.pem\fR.
 This option is only supported by the OpenLDAP libraries.
 Netscape-derived LDAP libraries use the same certificate
@@ -1020,7 +1048,7 @@ database for CA and client certificates (see
 Similar to
 \fBTLS_CACERTFILE\fR
 but instead of a file, it is a directory containing individual
-Certificate Authority certificates, e.g.\&
+Certificate Authority certificates, e.g.,
 \fI/etc/ssl/certs\fR.
 The directory specified by
 \fBTLS_CACERTDIR\fR
@@ -1152,7 +1180,7 @@ but use a
 \fR.sth\fR
 file extension instead of
 \fR.kdb\fR,
-e.g.\&
+e.g.,
 \fRldapkey.sth\fR.
 The default
 \fRldapkey.kdb\fR
@@ -1163,6 +1191,45 @@ The
 utility can be used to manage the key database and create a
 \fIstash file\fR.
 This option is only supported by the Tivoli LDAP libraries.
+.RE
+.TP 6n
+\fBTLS_REQCERT\fR \fIlevel\fR
+The
+\fBTLS_REQCERT\fR
+parameter controls how the LDAP server's TLS certificated will be
+verified (if at all).
+If the server's TLS certificate cannot be verified (usually because it
+is signed by an unknown certificate authority),
+\fBsudo\fR
+will be unable to connect to it.
+The following
+\fIlevel\fR
+values are supported:
+.RS 10n
+.TP 10n
+never
+The server certificate will not be requested or checked.
+.TP 10n
+allow
+The server certificate will be requested.
+A missing or invalid certificate is ignored and not considered an error.
+.TP 10n
+try
+The server certificate will be requested.
+A missing certificate is ignored but an invalid certificate will
+result in a connection error.
+.TP 10n
+demand | \fIhard\fR
+The server certificate will be requested.
+A missing or invalid certificate will result in a connection error.
+This is the default behavior.
+.RE
+.RS 6n
+.sp
+This option is only supported by the OpenLDAP libraries.
+Other LDAP libraries only support the
+\fBTLS_CHECKPEER\fR
+parameter.
 .RE
 .TP 6n
 \fBTLS_RANDFILE\fR \fIfile name\fR
@@ -1480,7 +1547,7 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 #
 # For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
 # a directory, in which case the files in the directory must have the
-# default names (e.g. cert8.db and key4.db), or the path to the cert
+# default names (e.g., cert8.db and key4.db), or the path to the cert
 # and key files themselves.  However, a bug in version 5.0 of the LDAP
 # SDK will prevent specific file names from working.  For this reason
 # it is suggested that tls_cert and tls_key be set to a directory,
@@ -1502,13 +1569,13 @@ sudoers_base   ou=SUDOers,dc=my-domain,dc=com
 # krb5_ccname /etc/.ldapcache
 .RE
 .fi
-.SS "Sudo schema for OpenLDAP"
+.SS "Sudoers schema for OpenLDAP"
 The following schema, in OpenLDAP format, is included with
 \fBsudo\fR
 source and binary distributions as
 \fIschema.OpenLDAP\fR.
 Simply copy
-it to the schema directory (e.g.\&
+it to the schema directory (e.g.,
 \fI/etc/openldap/schema\fR),
 add the proper
 \fRinclude\fR
@@ -1516,6 +1583,10 @@ line in
 \fIslapd.conf\fR
 and restart
 \fBslapd\fR.
+Sites using the optional on-line configuration supported by OpenLDAP 2.3
+and higher should apply the
+\fIschema.olcSudo\fR
+file instead.
 .nf
 .sp
 .RS 2n

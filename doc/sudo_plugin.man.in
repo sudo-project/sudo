@@ -13,9 +13,8 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "June 1, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -189,7 +188,9 @@ bsdauth_type=string
 Authentication type, if specified by the
 \fB\-a\fR
 flag, to use on
-systems where BSD authentication is supported.
+systems where
+BSD
+authentication is supported.
 .PD
 .TP 6n
 closefrom=number
@@ -270,7 +271,8 @@ If the user does not specify a program on the command line,
 will pass the plugin the path to the user's shell and set
 .TP 6n
 login_class=string
-BSD login class to use when setting resource limits and nice value,
+BSD
+login class to use when setting resource limits and nice value,
 if specified by the
 \fB\-c\fR
 flag.
@@ -290,7 +292,7 @@ network_addrs=list
 A space-separated list of IP network addresses and netmasks in the
 form
 \(lqaddr/netmask\(rq,
-e.g.\&
+e.g.,
 \(lq192.168.1.2/255.255.255.0\(rq.
 The address and netmask pairs may be either IPv4 or IPv6, depending on
 what the operating system supports.
@@ -399,7 +401,7 @@ environment variable to the target user's home directory.
 sudoedit=bool
 Set to true when the
 \fB\-e\fR
-flag is is specified or if invoked as
+flag is specified or if invoked as
 \fBsudoedit\fR.
 The plugin shall substitute an editor into
 \fIargv\fR
@@ -953,15 +955,17 @@ This only includes output to the screen, not output to a pipe or file.
 This is a hint to the I/O logging plugin which may choose to ignore it.
 .TP 6n
 login_class=string
-BSD login class to use when setting resource limits and nice value
-(optional).
+BSD
+login class to use when setting resource limits and nice value (optional).
 This option is only set on systems that support login classes.
 .TP 6n
 nice=int
 Nice value (priority) to use when executing the command.
 The nice value, if specified, overrides the priority associated with the
 \fIlogin_class\fR
-on BSD systems.
+on
+BSD
+systems.
 .TP 6n
 noexec=bool
 If set, prevent the command from executing other programs.
@@ -1470,6 +1474,7 @@ struct io_plugin {
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
     int (*change_winsize)(unsigned int lines, unsigned int cols);
+    int (*log_suspend)(int signo);
 };
 .RE
 .fi
@@ -1991,8 +1996,32 @@ function is called whenever the window size of the terminal changes from
 the initial values specified in the
 \fRuser_info\fR
 list.
-It returns 1 on success, 0 on failure, \-1 if an error occurred (which
-will terminate the running command).
+Returns \-1 if an error occurred, in which case no further calls to
+\fBchange_winsize\fR()
+will be made,
+.RE
+.TP 6n
+log_suspend
+.nf
+.RS 6n
+int (*log_suspend)(int signo);
+.RE
+.fi
+.RS 6n
+.sp
+The
+\fBlog_suspend\fR()
+function is called whenever a command is suspended or resumed.
+The
+\fIsigno\fR
+argument is either the signal that caused the command to be suspended or
+\fRSIGCONT\fR
+if the command was resumed.
+Logging this information makes it possible to skip the period of time when
+the command was suspended during playback of a session.
+Returns \-1 if an error occurred, in which case no further calls to
+\fBlog_suspend\fR()
+will be made,
 .RE
 .PP
 \fII/O Plugin Version Macros\fR
@@ -2882,6 +2911,11 @@ list.
 Version 1.12 (sudo 1.8.21)
 The
 \fRchange_winsize\fR
+field was added to the io_plugin struct.
+.TP 6n
+Version 1.13 (sudo 1.8.26)
+The
+\fRlog_suspend\fR
 field was added to the io_plugin struct.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),

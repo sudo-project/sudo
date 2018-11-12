@@ -28,6 +28,7 @@ doc/fixmdoc.sh
 doc/schema.ActiveDirectory
 doc/schema.OpenLDAP
 doc/schema.iPlanet
+doc/schema.olcSudo
 doc/sudo.cat
 doc/sudo.conf.cat
 doc/sudo.conf.man.in
@@ -132,6 +133,7 @@ lib/util/reallocarray.c
 lib/util/regress/atofoo/atofoo_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
+lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
@@ -314,9 +316,9 @@ plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
 plugins/sudoers/iolog.h
+plugins/sudoers/iolog_files.h
 plugins/sudoers/iolog_path.c
 plugins/sudoers/iolog_util.c
-plugins/sudoers/iolog_util.h
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
 plugins/sudoers/ldap_util.c
@@ -372,6 +374,8 @@ plugins/sudoers/po/nl.mo
 plugins/sudoers/po/nl.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
+plugins/sudoers/po/pt.mo
+plugins/sudoers/po/pt.po
 plugins/sudoers/po/pt_BR.mo
 plugins/sudoers/po/pt_BR.po
 plugins/sudoers/po/ru.mo
@@ -452,6 +456,15 @@ plugins/sudoers/regress/cvtsudoers/test29.out.ok
 plugins/sudoers/regress/cvtsudoers/test29.sh
 plugins/sudoers/regress/cvtsudoers/test3.out.ok
 plugins/sudoers/regress/cvtsudoers/test3.sh
+plugins/sudoers/regress/cvtsudoers/test30.out.ok
+plugins/sudoers/regress/cvtsudoers/test30.sh
+plugins/sudoers/regress/cvtsudoers/test31.conf
+plugins/sudoers/regress/cvtsudoers/test31.out.ok
+plugins/sudoers/regress/cvtsudoers/test31.sh
+plugins/sudoers/regress/cvtsudoers/test32.out.ok
+plugins/sudoers/regress/cvtsudoers/test32.sh
+plugins/sudoers/regress/cvtsudoers/test33.out.ok
+plugins/sudoers/regress/cvtsudoers/test33.sh
 plugins/sudoers/regress/cvtsudoers/test4.out.ok
 plugins/sudoers/regress/cvtsudoers/test4.sh
 plugins/sudoers/regress/cvtsudoers/test5.out.ok
@@ -605,6 +618,7 @@ plugins/sudoers/regress/sudoers/test9.json.ok
 plugins/sudoers/regress/sudoers/test9.ldif.ok
 plugins/sudoers/regress/sudoers/test9.out.ok
 plugins/sudoers/regress/sudoers/test9.toke.ok
+plugins/sudoers/regress/testsudoers/group
 plugins/sudoers/regress/testsudoers/test1.out.ok
 plugins/sudoers/regress/testsudoers/test1.sh
 plugins/sudoers/regress/testsudoers/test2.inc
@@ -681,6 +695,8 @@ plugins/system_group/Makefile.in
 plugins/system_group/system_group.c
 plugins/system_group/system_group.exp
 po/README
+po/ast.mo
+po/ast.po
 po/ca.mo
 po/ca.po
 po/cs.mo
@@ -721,6 +737,8 @@ po/nn.mo
 po/nn.po
 po/pl.mo
 po/pl.po
+po/pt.mo
+po/pt.po
 po/pt_BR.mo
 po/pt_BR.po
 po/ru.mo

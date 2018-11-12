@@ -107,8 +107,8 @@ struct user_details {
     const char *shell;
     GETGROUPS_T *groups;
     int ngroups;
+    int ts_rows;
     int ts_cols;
-    int ts_lines;
 };
 
 #define CD_SET_UID		0x00001

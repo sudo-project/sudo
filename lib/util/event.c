@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -787,7 +792,7 @@ sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 
     sudo_gettime_mono(&now);
     sudo_timespecsub(&ev->timeout, &now, ts);
-    if (ts->tv_sec < 0 || (ts->tv_sec == 0 && ts->tv_nsec < 0))
+    if (ts->tv_sec < 0)
 	sudo_timespecclear(ts);
     debug_return_int(0);
 }

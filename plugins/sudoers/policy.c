@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -676,9 +681,9 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    goto oom;
     }
     if (def_command_timeout > 0 || user_timeout > 0) {
-	int timeout = def_command_timeout;
-	if (timeout <= 0 || user_timeout < timeout)
-	    timeout = user_timeout;
+	int timeout = user_timeout;
+	if (timeout == 0 || def_command_timeout < timeout)
+	    timeout = def_command_timeout;
 	if (asprintf(&command_info[info_len++], "timeout=%u", timeout) == -1)
 	    goto oom;
     }

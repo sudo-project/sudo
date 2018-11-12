@@ -1,3 +1,63 @@
+What's new in Sudo 1.8.26
+
+ * Fixed a bug in cvtsudoers when converting to JSON format when
+   alias expansion is enabled. Bug #853.
+
+ * Sudo no long sets the USERNAME environment variable when running
+   commands. This is a non-standard environment variable that was
+   set on some older Linux systems.
+
+ * Sudo now treats the LOGNAME and USER environment variables (as
+   well as the LOGIN variable on AIX) as a single unit.  If one is
+   preserved or removed from the environment using env_keep, env_check
+   or env_delete, so is the other.
+
+ * Added support for OpenLDAP's TLS_REQCERT setting in ldap.conf.
+
+ * Sudo now logs when the command was suspended and resumed in the
+   I/O logs.  This information is used by sudoreplay to skip the
+   time suspended when replaying the session unless the new -S flag
+   is used.
+
+ * Fixed documentation problems found by the igor utility.  Bug #854.
+
+ * Sudo now prints a warning message when there is an error or end
+   of file while reading the password instead of exiting silently.
+
+ * Fixed a bug in the sudoers LDAP back-end parsing the command_timeout,
+   role, type, privs and limitprivs sudoOptions.  This also affected
+   cvtsudoers conversion from LDIF to sudoers or JSON.
+
+ * Fixed a bug that prevented timeout settings in sudoers from
+   functioning unless a timeout was also specified on the command
+   line.
+
+ * Asturian translation for sudo from translationproject.org.
+
+ * When generating LDIF output, cvtsudoers can now be configured
+   to pad the sudoOrder increment such that the start order is used
+   as a prefix.  Bug #856.
+
+ * Fixed a bug introduced in sudo 1.8.25 that prevented sudo from
+   properly setting the user's groups on AIX.  Bug #857.
+
+ * If the user specifies a group via sudo's -g option that matches
+   any of the target user's groups, it is now allowed even if no
+   groups are present in the Runas_Spec.  Previously, it was only
+   allowed if it matched the target user's primary group.
+
+ * The sudoers LDAP back-end now supports negated sudoRunAsUser and
+   sudoRunAsGroup entries.
+
+ * Sudo now provides a proper error message when the "fqdn" sudoers
+   option is set and it is unable to resolve the local host name.
+   Bug #859.
+
+ * Portuguese translation for sudo and sudoers from translationproject.org.
+
+ * Sudo now includes sudoers LDAP schema for the on-line configuration
+   supported by OpenLDAP.
+
 What's new in Sudo 1.8.25p1
 
  * Fixed a bug introduced in sudo 1.8.25 that caused a crash on

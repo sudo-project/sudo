@@ -12,9 +12,8 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 8, 2018
+.Dd October 6, 2018
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -22,7 +21,7 @@
 .Nd replay sudo session logs
 .Sh SYNOPSIS
 .Nm sudoreplay
-.Op Fl hnR
+.Op Fl hnRS
 .Op Fl d Ar dir
 .Op Fl f Ar filter
 .Op Fl m Ar num
@@ -46,7 +45,7 @@ adjusted (faster or slower) based on the command line options.
 The
 .Em ID
 should either be a six character sequence of digits and
-upper case letters, e.g.\&
+upper case letters, e.g.,
 .Li 0100A5 ,
 or a pattern matching the
 .Em iolog_file
@@ -178,7 +177,7 @@ The
 .Ar tty name
 should be specified without the
 .Pa /dev/
-prefix, e.g.\&
+prefix, e.g.,
 .Pa tty01
 instead of
 .Pa /dev/tty01 .
@@ -218,7 +217,7 @@ option is specified,
 will limit these pauses to at most
 .Em max_wait
 seconds.
-The value may be specified as a floating point number, e.g.\&
+The value may be specified as a floating point number, e.g.,
 .Em 2.5 .
 A
 .Em max_wait
@@ -230,6 +229,17 @@ the user's terminal.
 .It Fl R , -no-resize
 Do not attempt to re-size the terminal to match the terminal size
 of the session.
+.It Fl S , -suspend-wait
+Wait while the command was suspended.
+By default,
+.Nm
+will ignore the time interval between when the command was suspended
+and when it was resumed.
+If the
+.Fl S
+option is specified,
+.Nm
+will wait instead.
 .It Fl s , -speed Ar speed_factor
 This option causes
 .Nm

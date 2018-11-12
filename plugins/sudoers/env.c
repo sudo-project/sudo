@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2016
+ * Copyright (c) 2000-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -17,6 +17,11 @@
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ */
+
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
 #include <config.h>
@@ -65,12 +70,10 @@
 #define DID_LOGNAME	0x00000010
 #undef DID_USER
 #define DID_USER    	0x00000020
-#undef DID_USERNAME
-#define DID_USERNAME   	0x00000040
 #undef DID_LOGIN
-#define DID_LOGIN   	0x00000080
+#define DID_LOGIN   	0x00000040
 #undef DID_MAIL
-#define DID_MAIL   	0x00000100
+#define DID_MAIL   	0x00000080
 #undef DID_MAX
 #define DID_MAX    	0x0000ffff
 
@@ -86,12 +89,10 @@
 #define KEPT_LOGNAME	0x00100000
 #undef KEPT_USER
 #define KEPT_USER    	0x00200000
-#undef KEPT_USERNAME
-#define KEPT_USERNAME	0x00400000
 #undef KEPT_LOGIN
-#define KEPT_LOGIN	0x00800000
+#define KEPT_LOGIN	0x00400000
 #undef KEPT_MAIL
-#define KEPT_MAIL	0x01000000
+#define KEPT_MAIL	0x00800000
 #undef KEPT_MAX
 #define KEPT_MAX    	0xffff0000
 
@@ -99,9 +100,9 @@
  * AIX sets the LOGIN environment variable too.
  */
 #ifdef _AIX
-# define KEPT_USER_VARIABLES (KEPT_LOGIN|KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)
+# define KEPT_USER_VARIABLES (KEPT_LOGIN|KEPT_LOGNAME|KEPT_USER)
 #else
-# define KEPT_USER_VARIABLES (KEPT_LOGNAME|KEPT_USER|KEPT_USERNAME)
+# define KEPT_USER_VARIABLES (KEPT_LOGNAME|KEPT_USER)
 #endif
 
 struct environment {
@@ -582,11 +583,42 @@ static bool
 matches_env_list(const char *var, struct list_members *list, bool *full_match)
 {
     struct list_member *cur;
+    bool is_logname = false;
     debug_decl(matches_env_list, SUDOERS_DEBUG_ENV)
 
-    SLIST_FOREACH(cur, list, entries) {
-	if (matches_env_pattern(cur->value, var, full_match))
-	    debug_return_bool(true);
+    switch (*var) {
+    case 'L':
+	if (strncmp(var, "LOGNAME=", 8) == 0)
+	    is_logname = true;
+#ifdef _AIX
+	else if (strncmp(var, "LOGIN=", 6) == 0)
+	    is_logname = true;
+#endif
+	break;
+    case 'U':
+	if (strncmp(var, "USER=", 5) == 0)
+	    is_logname = true;
+	break;
+    }
+
+    if (is_logname) {
+	/*
+	 * We treat LOGIN, LOGNAME and USER specially.
+	 * If one is preserved/deleted we want to preserve/delete them all.
+	 */
+	SLIST_FOREACH(cur, list, entries) {
+	    if (matches_env_pattern(cur->value, "LOGNAME", full_match) ||
+#ifdef _AIX
+		matches_env_pattern(cur->value, "LOGIN", full_match) ||
+#endif
+		matches_env_pattern(cur->value, "USER", full_match))
+		debug_return_bool(true);
+	}
+    } else {
+	SLIST_FOREACH(cur, list, entries) {
+	    if (matches_env_pattern(cur->value, var, full_match))
+		debug_return_bool(true);
+	}
     }
     debug_return_bool(false);
 }
@@ -807,8 +839,6 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 	case 'U':
 	    if (strncmp(ep, "USER=", 5) == 0)
 		SET(*didvar, DID_USER);
-	    if (strncmp(ep, "USERNAME=", 9) == 0)
-		SET(*didvar, DID_USERNAME);
 	    break;
     }
 }
@@ -935,8 +965,6 @@ rebuild_env(void)
 		ISSET(didvar, DID_LOGNAME), true);
 	    CHECK_SETENV2("USER", runas_pw->pw_name,
 		ISSET(didvar, DID_USER), true);
-	    CHECK_SETENV2("USERNAME", runas_pw->pw_name,
-		ISSET(didvar, DID_USERNAME), true);
 	} else {
 	    /* We will set LOGNAME later in the def_set_logname case. */
 	    if (!def_set_logname) {
@@ -948,8 +976,6 @@ rebuild_env(void)
 		    CHECK_SETENV2("LOGNAME", user_name, false, true);
 		if (!ISSET(didvar, DID_USER))
 		    CHECK_SETENV2("USER", user_name, false, true);
-		if (!ISSET(didvar, DID_USERNAME))
-		    CHECK_SETENV2("USERNAME", user_name, false, true);
 	    }
 	}
 
@@ -1002,7 +1028,7 @@ rebuild_env(void)
     }
 
     /*
-     * Set LOGIN, LOGNAME, USER and USERNAME to target if "set_logname" is not
+     * Set LOGIN, LOGNAME, and USER to target if "set_logname" is not
      * disabled.  We skip this if we are running a login shell (because
      * they have already been set).
      */
@@ -1014,10 +1040,9 @@ rebuild_env(void)
 #endif
 	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name, true, true);
 	    CHECK_SETENV2("USER", runas_pw->pw_name, true, true);
-	    CHECK_SETENV2("USERNAME", runas_pw->pw_name, true, true);
 	} else if ((didvar & KEPT_USER_VARIABLES) != KEPT_USER_VARIABLES) {
 	    /*
-	     * Preserved some of LOGIN, LOGNAME, USER, USERNAME but not all.
+	     * Preserved some of LOGIN, LOGNAME, USER but not all.
 	     * Make the unset ones match so we don't end up with some
 	     * set to the invoking user and others set to the runas user.
 	     */
@@ -1029,8 +1054,6 @@ rebuild_env(void)
 #endif
 	    else if (ISSET(didvar, KEPT_USER))
 		cp = sudo_getenv("USER");
-	    else if (ISSET(didvar, KEPT_USERNAME))
-		cp = sudo_getenv("USERNAME");
 	    else
 		cp = NULL;
 	    if (cp != NULL) {
@@ -1042,8 +1065,6 @@ rebuild_env(void)
 		    CHECK_SETENV2("LOGNAME", cp, true, true);
 		if (!ISSET(didvar, KEPT_USER))
 		    CHECK_SETENV2("USER", cp, true, true);
-		if (!ISSET(didvar, KEPT_USERNAME))
-		    CHECK_SETENV2("USERNAME", cp, true, true);
 	    }
 	}
     }

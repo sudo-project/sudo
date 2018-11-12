@@ -365,11 +365,16 @@ Optional features:
         Enable potentially offensive sudo insults from the classic
         version of sudo.
 
+  --enable-pvs-studio
+	Generate a sample PVS-Studio.cfg file based on the compiler and
+	platform type.	The "pvs-studio" Makefile target can then be
+	used if PVS-Studio is installed.
+
 Operating system-specific options:
   --disable-setreuid
-        Disable use of the setreuid() function for operating systems
-        where it is broken.  For instance, 4.4BSD has setreuid()
-        that is not fully functional.
+	Disable use of the setreuid() function for operating systems
+	where it is broken.  For instance, 4.4BSD has setreuid() that
+	is not fully functional.
 
   --disable-setresuid
 	Disable use of the setresuid() function for operating systems

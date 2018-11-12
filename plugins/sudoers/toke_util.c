@@ -13,13 +13,15 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ */
+
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
 #include <config.h>
@@ -104,11 +106,12 @@ fill_cmnd(const char *src, size_t len)
     arg_len = arg_size = 0;
 
     dst = sudoerslval.command.cmnd = malloc(len + 1);
-    if (sudoerslval.command.cmnd == NULL) {
+    if (dst == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }
+    sudoerslval.command.args = NULL;
 
     /* Copy the string and collapse any escaped sudo-specific characters. */
     for (i = 0; i < len; i++) {
@@ -119,7 +122,6 @@ fill_cmnd(const char *src, size_t len)
     }
     *dst = '\0';
 
-    sudoerslval.command.args = NULL;
     debug_return_bool(true);
 }
 

@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.25p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.8.26], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -1614,6 +1614,9 @@ AC_ARG_ENABLE(gss_krb5_ccache_name,
 [AS_HELP_STRING([--enable-gss-krb5-ccache-name], [Use GSS-API to set the Kerberos V cred cache name])],
 [check_gss_krb5_ccache_name=$enableval], [check_gss_krb5_ccache_name=no])
 
+AC_ARG_ENABLE(pvs-studio,
+[AS_HELP_STRING([--enable-pvs-studio], [Create a PVS-Studio.cfg file.])])
+
 dnl
 dnl C compiler checks
 dnl
@@ -2255,6 +2258,37 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
 esac
+
+if test X"$enable_pvs_studio" = X"yes"; then
+    # Determine preprocessor type
+    case "$CC" in
+    *clang*) preprocessor=clang;;
+    *gcc*) preprocessor=gcc;;
+    *)
+	case `$CC --version 2>&1` in
+	    *clang*) preprocessor=clang;;
+	    *gcc*) preprocessor=gcc;;
+	    *) AC_MSG_ERROR([Compiler must be gcc or clang for PVS-Studio.]);;
+	esac
+	;;
+    esac
+
+    # Determine platform (currently linux or macos)
+    case "$host" in
+    x86_64-*-linux*) pvs_platform=linux64;;
+    *86-*-linux*) pvs_platform=linux32;;
+    darwin*) pvs_platform=macos;;
+    *) AC_MSG_ERROR([PVS-Studio does not support $host_os.]);;
+    esac
+
+    # create basic PVS-Studio.cfg file
+    cat > PVS-Studio.cfg <<-EOF
+	preprocessor = $preprocessor
+	platform = $pvs_platform
+	analysis-mode = 4
+	language = C
+EOF
+fi
 
 dnl
 dnl Library preloading to support NOEXEC
@@ -2989,7 +3023,7 @@ LIBS="$OLIBS"
 # If it was added to LIBOBJS we need to export the symbols.
 #
 OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
+GETADDRINFO_LIBS=
 AX_FUNC_GETADDRINFO
 case " $LIBOBJS " in
     *" getaddrinfo.$ac_objext "* )
@@ -3019,11 +3053,25 @@ case " $LIBOBJS " in
 	;;
     *)
 	for lib in $LIBS; do
-	    case "$NET_LIBS" in
+	    case "$OLIBS" in
 		*"$lib"*) ;;
-		*) NET_LIBS="${NET_LIBS} $lib";;
+		*) GETADDRINFO_LIBS="${GETADDRINFO_LIBS}${GETADDRINFO_LIBS+ }$lib";;
 	    esac
 	done
+	if test -n "${GETADDRINFO_LIBS}"; then
+	    # We need libsudo_util to pull in dependent libraries for
+	    # gai_strerror()
+	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${GETADDRINFO_LIBS}"
+	    LIBS="${LIBS}${LIBS+ }${GETADDRINFO_LIBS}"
+
+	    # Add to NET_LIBS if necessary
+	    for lib in $GETADDRINFO_LIBS; do
+		case "$NET_LIBS" in
+		    *"$lib"*)   ;;
+		    *)		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib";;
+		esac
+	    done
+	fi
 	;;
 esac
 LIBS="$OLIBS"

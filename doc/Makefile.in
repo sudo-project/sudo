@@ -12,7 +12,6 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # @configure_input@
 #
@@ -26,6 +25,7 @@ top_srcdir = @top_srcdir@
 
 # Tools to use
 SED = @SED@
+IGOR = igor
 MANDOC = @MANDOCPROG@
 MANCOMPRESS = @MANCOMPRESS@
 MANCOMPRESSEXT = @MANCOMPRESSEXT@
@@ -68,23 +68,21 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-DOCS =	$(mansrcdir)/sudo.$(mantype) $(mansrcdir)/visudo.$(mantype) \
-	$(mansrcdir)/sudo.conf.$(mantype) $(mansrcdir)/sudoers.$(mantype) \
-	$(mansrcdir)/sudoers.ldap.$(mantype) $(mansrcdir)/sudoers.$(mantype) \
-	$(mansrcdir)/sudoers_timestamp.$(mantype) \
-	$(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudoreplay.$(mantype) \
-	$(mansrcdir)/sudo_plugin.$(mantype)
+DOCS = $(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudo.$(mantype) \
+       $(mansrcdir)/sudo.conf.$(mantype) $(mansrcdir)/sudo_plugin.$(mantype) \
+       $(mansrcdir)/sudoers.$(mantype) $(mansrcdir)/sudoers.ldap.$(mantype) \
+       $(mansrcdir)/sudoers_timestamp.$(mantype) \
+       $(mansrcdir)/sudoreplay.$(mantype) $(mansrcdir)/visudo.$(mantype)
 
-DEVDOCS = $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
-	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
+DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/cvtsudoers.cat \
 	  $(srcdir)/sudo.conf.man.in $(srcdir)/sudo.conf.cat \
-	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+	  $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
+	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
 	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
 	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
 	  $(srcdir)/sudoers_timestamp.man.in $(srcdir)/sudoers_timestamp.cat \
-	  $(srcdir)/cvtsudoers.man.in $(srcdir)/cvtsudoers.cat \
 	  $(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
-	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat
+	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat
 
 OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
 	     $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
@@ -97,6 +95,19 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(DEVDOCS) $(DOCS)
 
+igor: all
+	@if [ "$(mantype)" != "mdoc" ]; then \
+	    echo "make igor only supported for mdoc manuals" 1>&2; \
+	    exit 1; \
+	else \
+	    rval=0; \
+	    for m in $(DOCS); do \
+		echo $(IGOR) -D $$m; \
+		$(IGOR) -D $$m || rval=`expr $$rval + $$?`; \
+	    done; \
+	    exit $$rval; \
+	fi
+
 lint: all
 	@if [ "$(mantype)" != "mdoc" ]; then \
 	    echo "make lint only supported for mdoc manuals" 1>&2; \
@@ -104,8 +115,8 @@ lint: all
 	else \
 	    rval=0; \
 	    for m in $(DOCS); do \
-		echo $(MANDOC) -Tlint $$m; \
-		$(MANDOC) -Tlint $$m || rval=`expr $$rval + $$?`; \
+		echo $(MANDOC) -Tlint -Wstyle $$m; \
+		$(MANDOC) -Tlint -Wstyle $$m || rval=`expr $$rval + $$?`; \
 	    done; \
 	    exit $$rval; \
 	fi
@@ -371,6 +382,10 @@ uninstall:
 splint:
 
 cppcheck:
+
+pvs-log-files:
+
+pvs-studio:
 
 check:
 

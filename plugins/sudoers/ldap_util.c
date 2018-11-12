@@ -16,6 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -118,6 +123,8 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
 static struct member_list *
 array_to_member_list(void *a, sudo_ldap_iter_t iter)
 {
+    struct member_list negated_members =
+	TAILQ_HEAD_INITIALIZER(negated_members);
     struct member_list *members;
     struct member *m;
     char *val;
@@ -130,6 +137,7 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
     while ((val = iter(&a)) != NULL) {
 	if ((m = calloc(1, sizeof(*m))) == NULL)
 	    goto bad;
+	m->negated = sudo_ldap_is_negated(&val);
 
 	switch (val[0]) {
 	case '\0':
@@ -167,10 +175,17 @@ array_to_member_list(void *a, sudo_ldap_iter_t iter)
 	    }
 	    break;
 	}
-	TAILQ_INSERT_TAIL(members, m, entries);
+	if (m->negated)
+	    TAILQ_INSERT_TAIL(&negated_members, m, entries);
+	else
+	    TAILQ_INSERT_TAIL(members, m, entries);
     }
+
+    /* Negated members take precedence so we insert them at the end. */
+    TAILQ_CONCAT(members, &negated_members, entries);
     debug_return_ptr(members);
 bad:
+    free_members(&negated_members);
     free_members(members);
     free(members);
     debug_return_ptr(NULL);
@@ -405,37 +420,28 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    int op;
 
 		    op = sudo_ldap_parse_option(opt, &var, &val);
-		    if (strcmp(var, "command_timeout") == 0) {
-			if (op == '=')
-			    cmndspec->timeout = parse_timeout(val);
+		    if (strcmp(var, "command_timeout") == 0 && val != NULL) {
+			cmndspec->timeout = parse_timeout(val);
 #ifdef HAVE_SELINUX
-		    } else if (strcmp(var, "role") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->role = strdup(val)) == NULL)
-				goto oom;
-			}
-		    } else if (strcmp(var, "type") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->type = strdup(val)) == NULL)
-				goto oom;
-			}
+		    } else if (strcmp(var, "role") == 0 && val != NULL) {
+			if ((cmndspec->role = strdup(val)) == NULL)
+			    break;
+		    } else if (strcmp(var, "type") == 0 && val != NULL) {
+			if ((cmndspec->type = strdup(val)) == NULL)
+			    break;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
-		    } else if (strcmp(var, "privs") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->privs = strdup(val)) == NULL)
-				goto oom;
-			}
-		    } else if (strcmp(var, "limitprivs") == 0) {
-			if (op == '=') {
-			    if ((cmndspec->limitprivs = strdup(val)) == NULL)
-				goto oom;
-			}
+		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
+			if ((cmndspec->privs = strdup(val)) == NULL)
+			    break;
+		    } else if (strcmp(var, "limitprivs") == 0 && val != NULL) {
+			if ((cmndspec->limitprivs = strdup(val)) == NULL)
+			    break;
 #endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
 			if (!sudo_ldap_add_default(var, val, op, source,
 			    &priv->defaults)) {
-			    goto oom;
+			    break;
 			}
 		    } else {
 			/* Convert to tags. */
@@ -455,6 +461,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    }
 		}
 		rcstr_delref(source);
+		if (opt != NULL) {
+		    /* Defer oom until we drop the ref on source. */
+		    goto oom;
+		}
 	    }
 
 	    /* So we can inherit previous values. */

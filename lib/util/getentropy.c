@@ -159,6 +159,11 @@ sudo_getentropy(void *buf, size_t len)
 }
 
 /*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+/*
  * Basic sanity checking; wish we could do better.
  */
 static int

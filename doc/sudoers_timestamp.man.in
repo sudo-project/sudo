@@ -1,6 +1,6 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
-.\" Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,9 +13,8 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS_TIMESTAMP" "5" "December 21, 2017" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS_TIMESTAMP" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -211,7 +210,7 @@ processes.
 Instead, a separate lock record is used to prevent multiple
 \fBsudo\fR
 processes using the same terminal (or parent process ID) from
-from prompting for a password as the same time.
+prompting for a password as the same time.
 .SH "SEE ALSO"
 sudoers(@mansectform@),
 sudo(@mansectsu@)
@@ -275,7 +274,8 @@ now stored in non-global time stamp records.
 This prevents re-use of the time stamp file after logout in most cases.
 .sp
 Support was added for the kernel-based tty time stamps available in
-OpenBSD which do not use an on-disk time stamp file.
+OpenBSD
+which do not use an on-disk time stamp file.
 .SH "AUTHORS"
 Many people have worked on
 \fBsudo\fR

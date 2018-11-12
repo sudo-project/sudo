@@ -14,13 +14,12 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .\" Sponsored in part by the Defense Advanced Research Projects
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "August 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "5" "October 27, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -51,7 +50,7 @@ sudoers.ldap(@mansectform@).
 \fBsudo\fR
 consults the
 sudo.conf(@mansectform@)
-file to determine which policy and and I/O logging plugins to load.
+file to determine which policy and I/O logging plugins to load.
 If no
 sudo.conf(@mansectform@)
 file is present, or if it contains no
@@ -80,7 +79,7 @@ plugin in the
 sudo.conf(@mansectform@)
 file.
 These arguments, if present, should be listed after the path to the plugin
-(i.e.\& after
+(i.e., after
 \fIsudoers.so\fR).
 Multiple arguments may be specified, separated by white space.
 For example:
@@ -293,7 +292,9 @@ systems without PAM), the environment is initialized with the
 contents of the
 \fI/etc/environment\fR
 file.
-On BSD systems, if the
+On
+BSD
+systems, if the
 \fIuse_loginclass\fR
 option is enabled, the environment is initialized
 based on the
@@ -309,8 +310,7 @@ The new environment contains the
 \fRMAIL\fR,
 \fRSHELL\fR,
 \fRLOGNAME\fR,
-\fRUSER\fR,
-\fRUSERNAME\fR
+\fRUSER\fR
 and
 \fRSUDO_*\fR
 variables
@@ -322,17 +322,20 @@ options.
 This is effectively a whitelist
 for environment variables.
 The environment variables
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 and
-\fRUSERNAME\fR
+\fRUSER\fR
 are treated specially.
-If one or more variables are preserved from the invoking process,
-any of the three remaining variables (that were not explicitly
-preserved) will be set to the same value as the first one in the
-list that was preserved.
-This avoids an inconsistent environment where some of the variables
-describing the user name are set to the invoking user and some are
+If one of them is preserved (or removed) from user's environment, the other
+will be as well.
+If
+\fRLOGNAME\fR
+and
+\fRUSER\fR
+are to be preserved but only one of them is present in the user's environment,
+the other will be set to the same value.
+This avoids an inconsistent environment where one of the variables
+describing the user name is set to the invoking user and one is
 set to the target user.
 \fR()\fR
 are removed unless both the name and value parts are matched by
@@ -482,7 +485,9 @@ systems without PAM), the contents of
 \fI/etc/environment\fR
 are also
 included.
-On BSD systems, if the
+On
+BSD
+systems, if the
 \fIuse_loginclass\fR
 flag is
 enabled, the
@@ -705,7 +710,7 @@ or
 may be enclosed in double quotes to avoid the
 need for escaping special characters.
 Alternately, special characters
-may be specified in escaped hex mode, e.g.\& \ex20 for space.
+may be specified in escaped hex mode, e.g., \ex20 for space.
 When
 using double quotes, any prefix characters must be included inside
 the quotes.
@@ -769,7 +774,7 @@ Note that
 user names and groups are matched as strings.
 In other words, two
 users (groups) with the same uid (gid) are considered to be distinct.
-If you wish to match all user names with the same uid (e.g.\&
+If you wish to match all user names with the same uid (e.g.,
 root and toor), you can use a uid instead (#0 in the example given).
 .nf
 .sp
@@ -802,8 +807,8 @@ will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
 interfaces, will use the netmask of that interface.
 The netmask may be specified either in standard IP address notation
-(e.g.\& 255.255.255.0 or ffff:ffff:ffff:ffff::),
-or CIDR notation (number of bits, e.g.\& 24 or 64).
+(e.g., 255.255.255.0 or ffff:ffff:ffff:ffff::),
+or CIDR notation (number of bits, e.g., 24 or 64).
 A host name may include shell-style wildcards (see the
 \fIWildcards\fR
 section below),
@@ -1087,7 +1092,7 @@ option.
 The second defines a list of groups that can be specified via
 \fBsudo\fR's
 \fB\-g\fR
-option.
+option in addition to any of the target user's groups.
 If both
 \fRRunas_List\fRs
 are specified, the command may be run with any combination of users
@@ -1992,7 +1997,7 @@ is optional.
 .PP
 The following characters must be escaped with a backslash
 (\(oq\e\(cq)
-when used as part of a word (e.g.\& a user name or host name):
+when used as part of a word (e.g., a user name or host name):
 \(oq\&!\(cq,
 \(oq=\&\(cq,
 \(oq:\&\(cq,
@@ -2217,8 +2222,7 @@ will run the command in a minimal environment containing the
 \fRMAIL\fR,
 \fRSHELL\fR,
 \fRLOGNAME\fR,
-\fRUSER\fR,
-\fRUSERNAME\fR
+\fRUSER\fR
 and
 \fRSUDO_*\fR
 variables.
@@ -2372,7 +2376,9 @@ If disabled, a command may only be run after the audit event is successfully
 written.
 This flag is only effective on systems for which
 \fBsudoers\fR
-supports audit logging, including FreeBSD, Linux, macOS and Solaris.
+supports audit logging, including
+FreeBSD,
+Linux, macOS and Solaris.
 This flag is
 \fIon\fR
 by default.
@@ -2884,10 +2890,9 @@ set_logname
 Normally,
 \fBsudo\fR
 will set the
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 and
-\fRUSERNAME\fR
+\fRUSER\fR
 environment variables to the name of the target user (usually root unless the
 \fB\-u\fR
 option is given).
@@ -2904,10 +2909,9 @@ if the
 option has not been disabled and the
 \fIenv_keep\fR
 list contains
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 or
-\fRUSERNAME\fR.
+\fRUSER\fR.
 This flag is
 \fIon\fR
 by default.
@@ -3130,7 +3134,7 @@ has no effect.
 .sp
 A malicious program run under
 \fBsudo\fR
-may be capable of injecting injecting commands into the user's
+may be capable of injecting commands into the user's
 terminal or running a background process that retains access to the
 user's terminal device even after the main program has finished
 executing.
@@ -3253,7 +3257,9 @@ at least 480 bytes and should support messages up to 2048 bytes.
 By default,
 \fBsudoers\fR
 creates log messages up to 980 bytes which corresponds to the
-historic BSD syslog implementation which used a 1024 byte buffer
+historic
+BSD
+syslog implementation which used a 1024 byte buffer
 to store the message, date, hostname and program name.
 To prevent syslog messages from being truncated,
 \fBsudoers\fR
@@ -3408,7 +3414,7 @@ escape sequences are supported:
 .TP 6n
 \fR%{seq}\fR
 expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
-where every two digits are used to form a new directory, e.g.\&
+where every two digits are used to form a new directory, e.g.,
 \fI01/00/A5\fR
 .PD
 .TP 6n
@@ -3420,11 +3426,11 @@ expanded to the name of the invoking user's real group ID
 .TP 6n
 \fR%{runas_user}\fR
 expanded to the login name of the user the command will
-be run as (e.g.\& root)
+be run as (e.g., root)
 .TP 6n
 \fR%{runas_group}\fR
 expanded to the group name of the user the command will
-be run as (e.g.\& wheel)
+be run as (e.g., wheel)
 .TP 6n
 \fR%{hostname}\fR
 expanded to the local host name without the domain name
@@ -3524,7 +3530,7 @@ are honored, everything else is ignored.
 The file permissions will always include the owner read and
 write bits, even if they are not present in the specified mode.
 When creating I/O log directories, search (execute) bits are added
-to to match the read and write bits specified by
+to match the read and write bits specified by
 \fIiolog_mode\fR.
 Defaults to 0600 (read and write by user only).
 .sp
@@ -3776,7 +3782,8 @@ Negative
 \fItimestamp_timeout\fR
 values are not supported and positive values are limited to a maximum
 of 60 minutes.
-This is currently only supported on OpenBSD.
+This is currently only supported on
+OpenBSD.
 .PP
 The default value is
 \fI@timestamp_type@\fR.
@@ -4419,7 +4426,7 @@ The login name of the user who ran
 \fBsudo\fR.
 .TP 14n
 ttyname
-The short name of the terminal (e.g.\&
+The short name of the terminal (e.g.,
 \(lqconsole\(rq,
 \(lqtty01\(rq,
 or
@@ -4899,10 +4906,9 @@ We don't want to subject the full time staff to the
 lecture, user
 \fBmillert\fR
 need not give a password, and we don't want to reset the
-\fRLOGNAME\fR,
-\fRUSER\fR
+\fRLOGNAME\fR
 or
-\fRUSERNAME\fR
+\fRUSER\fR
 environment variables when running commands as root.
 Additionally, on the machines in the
 \fISERVERS\fR

@@ -107,21 +107,28 @@ DDEESSCCRRIIPPTTIIOONN
            A user name or uid (prefixed with `#') that commands may be run as
            or a Unix group (prefixed with a `%') or user netgroup (prefixed
            with a `+') that contains a list of users that commands may be run
-           as.  The special value ALL will match any user.  If sudoRunAsUser
-           is specified but empty, it will match the invoking user.  If
-           neither sudoRunAsUser nor sudoRunAsGroup are present, the value of
-           the _r_u_n_a_s___d_e_f_a_u_l_t sudoOption is used (defaults to root).
+           as.  The special value ALL will match any user.  If a sudoRunAsUser
+           entry is preceded by an exclamation point, `!', and the entry
+           matches, the sudoRole in which it resides will be ignored.  If
+           sudoRunAsUser is specified but empty, it will match the invoking
+           user.  If neither sudoRunAsUser nor sudoRunAsGroup are present, the
+           value of the _r_u_n_a_s___d_e_f_a_u_l_t sudoOption is used (defaults to root).
 
            The sudoRunAsUser attribute is only available in ssuuddoo versions
            1.7.0 and higher.  Older versions of ssuuddoo use the sudoRunAs
-           attribute instead.
+           attribute instead.  Negated sudoRunAsUser entries are only
+           supported by version 1.8.26 or higher.
 
      ssuuddooRRuunnAAssGGrroouupp
            A Unix group or gid (prefixed with `#') that commands may be run
-           as.  The special value ALL will match any group.
+           as.  The special value ALL will match any group.  If a
+           sudoRunAsGroup entry is preceded by an exclamation point, `!', and
+           the entry matches, the sudoRole in which it resides will be
+           ignored.
 
            The sudoRunAsGroup attribute is only available in ssuuddoo versions
-           1.7.0 and higher.
+           1.7.0 and higher.  Negated sudoRunAsGroup entries are only
+           supported by version 1.8.26 or higher.
 
      ssuuddooNNoottBBeeffoorree
            A timestamp in the form yyyymmddHHMMSSZ that can be used to provide
@@ -368,13 +375,23 @@ DDEESSCCRRIIPPTTIIOONN
      In order to use ssuuddoo's LDAP support, the ssuuddoo schema must be installed on
      your LDAP server.  In addition, be sure to index the sudoUser attribute.
 
-     Three versions of the schema: one for OpenLDAP servers (_s_c_h_e_m_a_._O_p_e_n_L_D_A_P),
-     one for Netscape-derived servers (_s_c_h_e_m_a_._i_P_l_a_n_e_t), and one for Microsoft
-     Active Directory (_s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y) may be found in the ssuuddoo
-     distribution.
+     The ssuuddoo distribution includes versions of the ssuuddooeerrss schema for
+     multiple LDAP servers:
 
-     The schema for ssuuddoo in OpenLDAP form is also included in the _E_X_A_M_P_L_E_S
-     section.
+     _s_c_h_e_m_a_._O_p_e_n_L_D_A_P
+           OpenLDAP slapd and OpenBSD ldapd
+
+     _s_c_h_e_m_a_._o_l_c_S_u_d_o
+           OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+
+     _s_c_h_e_m_a_._i_P_l_a_n_e_t
+           Netscape-derived servers such as the iPlanet, Oracle, and 389
+           Directory Servers
+
+     _s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y
+           Microsoft Active Directory
+
+     The schema in OpenLDAP format is also included in the _E_X_A_M_P_L_E_S section.
 
    CCoonnffiigguurriinngg llddaapp..ccoonnff
      Sudo reads the _/_e_t_c_/_l_d_a_p_._c_o_n_f file for LDAP-specific configuration.
@@ -569,14 +586,14 @@ DDEESSCCRRIIPPTTIIOONN
      TTLLSS__CCAACCEERRTTFFIILLEE _f_i_l_e _n_a_m_e
            The path to a certificate authority bundle which contains the
            certificates for all the Certificate Authorities the client knows
-           to be valid, e.g. _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only
+           to be valid, e.g., _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only
            supported by the OpenLDAP libraries.  Netscape-derived LDAP
            libraries use the same certificate database for CA and client
            certificates (see TTLLSS__CCEERRTT).
 
      TTLLSS__CCAACCEERRTTDDIIRR _d_i_r_e_c_t_o_r_y
            Similar to TTLLSS__CCAACCEERRTTFFIILLEE but instead of a file, it is a directory
-           containing individual Certificate Authority certificates, e.g.
+           containing individual Certificate Authority certificates, e.g.,
            _/_e_t_c_/_s_s_l_/_c_e_r_t_s.  The directory specified by TTLLSS__CCAACCEERRTTDDIIRR is
            checked after TTLLSS__CCAACCEERRTTFFIILLEE.  This option is only supported by the
            OpenLDAP libraries.
@@ -654,11 +671,37 @@ DDEESSCCRRIIPPTTIIOONN
            If no TTLLSS__KKEEYYPPWW is specified, a _s_t_a_s_h _f_i_l_e will be used if it
            exists.  The _s_t_a_s_h _f_i_l_e must have the same path as the file
            specified by TTLLSS__KKEEYY, but use a .sth file extension instead of
-           .kdb, e.g. ldapkey.sth.  The default ldapkey.kdb that ships with
+           .kdb, e.g., ldapkey.sth.  The default ldapkey.kdb that ships with
            Tivoli Directory Server is encrypted with the password
            ssl_password.  The _g_s_k_8_c_a_p_i_c_m_d utility can be used to manage the
            key database and create a _s_t_a_s_h _f_i_l_e.  This option is only
            supported by the Tivoli LDAP libraries.
+
+     TTLLSS__RREEQQCCEERRTT _l_e_v_e_l
+           The TTLLSS__RREEQQCCEERRTT parameter controls how the LDAP server's TLS
+           certificated will be verified (if at all).  If the server's TLS
+           certificate cannot be verified (usually because it is signed by an
+           unknown certificate authority), ssuuddoo will be unable to connect to
+           it.  The following _l_e_v_e_l values are supported:
+
+               never     The server certificate will not be requested or
+                         checked.
+
+               allow     The server certificate will be requested.  A missing
+                         or invalid certificate is ignored and not considered
+                         an error.
+
+               try       The server certificate will be requested.  A missing
+                         certificate is ignored but an invalid certificate
+                         will result in a connection error.
+
+               demand | _h_a_r_d
+                         The server certificate will be requested.  A missing
+                         or invalid certificate will result in a connection
+                         error.  This is the default behavior.
+
+           This option is only supported by the OpenLDAP libraries.  Other
+           LDAP libraries only support the TTLLSS__CCHHEECCKKPPEEEERR parameter.
 
      TTLLSS__RRAANNDDFFIILLEE _f_i_l_e _n_a_m_e
            The TTLLSS__RRAANNDDFFIILLEE parameter specifies the path to an entropy source
@@ -851,7 +894,7 @@ EEXXAAMMPPLLEESS
        #
        # For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
        # a directory, in which case the files in the directory must have the
-       # default names (e.g. cert8.db and key4.db), or the path to the cert
+       # default names (e.g., cert8.db and key4.db), or the path to the cert
        # and key files themselves.  However, a bug in version 5.0 of the LDAP
        # SDK will prevent specific file names from working.  For this reason
        # it is suggested that tls_cert and tls_key be set to a directory,
@@ -872,11 +915,13 @@ EEXXAAMMPPLLEESS
        # sasl_secprops none
        # krb5_ccname /etc/.ldapcache
 
-   SSuuddoo sscchheemmaa ffoorr OOppeennLLDDAAPP
+   SSuuddooeerrss sscchheemmaa ffoorr OOppeennLLDDAAPP
      The following schema, in OpenLDAP format, is included with ssuuddoo source
      and binary distributions as _s_c_h_e_m_a_._O_p_e_n_L_D_A_P.  Simply copy it to the
-     schema directory (e.g. _/_e_t_c_/_o_p_e_n_l_d_a_p_/_s_c_h_e_m_a), add the proper include line
-     in _s_l_a_p_d_._c_o_n_f and restart ssllaappdd.
+     schema directory (e.g., _/_e_t_c_/_o_p_e_n_l_d_a_p_/_s_c_h_e_m_a), add the proper include
+     line in _s_l_a_p_d_._c_o_n_f and restart ssllaappdd.  Sites using the optional on-line
+     configuration supported by OpenLDAP 2.3 and higher should apply the
+     _s_c_h_e_m_a_._o_l_c_S_u_d_o file instead.
 
        attributetype ( 1.3.6.1.4.1.15953.9.1.1
           NAME 'sudoUser'
@@ -985,4 +1030,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.25                      June 25, 2018                     Sudo 1.8.25
+Sudo 1.8.26                    November 9, 2018                    Sudo 1.8.26

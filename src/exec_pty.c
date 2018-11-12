@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,6 +12,11 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
 #include <config.h>
@@ -58,6 +63,8 @@ struct exec_closure_pty {
     pid_t monitor_pid;
     pid_t cmnd_pid;
     pid_t ppgrp;
+    short rows;
+    short cols;
     struct command_status *cstat;
     struct command_details *details;
     struct sudo_event_base *evbase;
@@ -375,7 +382,39 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
     debug_return_bool(ret);
 }
 
-/* Call I/O plugin stderr log method. */
+/* Call I/O plugin suspend log method. */
+static void
+log_suspend(int signo)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+    debug_decl(log_suspend, SUDO_DEBUG_EXEC);
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->version < SUDO_API_MKVERSION(1, 13))
+	    continue;
+	if (plugin->u.io->log_suspend) {
+	    int rc;
+
+	    sudo_debug_set_active_instance(plugin->debug_instance);
+	    rc = plugin->u.io->log_suspend(signo);
+	    if (rc <= 0) {
+		if (rc < 0) {
+		    /* Error: disable plugin's I/O function. */
+		    plugin->u.io->log_suspend = NULL;
+		}
+		break;
+	    }
+	}
+    }
+    sudo_debug_set_active_instance(sudo_debug_instance);
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+
+    debug_return;
+}
+
+/* Call I/O plugin window change log method. */
 static void
 log_winchange(unsigned int rows, unsigned int cols)
 {
@@ -467,6 +506,9 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	if (ttymode != TERM_COOKED)
 	    sudo_term_restore(io_fds[SFD_USERTTY], false);
 
+	/* Log the suspend event. */
+	log_suspend(signo);
+
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
 
@@ -482,6 +524,9 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
 	if (killpg(ec->ppgrp, signo) != 0)
 	    sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
+
+	/* Log the resume event. */
+	log_suspend(SIGCONT);
 
 	/* Check foreground/background status on resume. */
 	check_foreground(ec);
@@ -511,6 +556,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	    if (sudo_sigaction(signo, &osa, NULL) != 0)
 		sudo_warn(U_("unable to restore handler for signal %d"), signo);
 	}
+
 	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
@@ -1101,18 +1147,20 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->ppgrp = ppgrp;
     ec->cstat = cstat;
     ec->details = details;
+    ec->rows = user_details.ts_rows;
+    ec->cols = user_details.ts_cols;
     TAILQ_INIT(&ec->monitor_messages);
 
     /* Setup event base and events. */
     ec->evbase = sudo_ev_base_alloc();
     if (ec->evbase == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Event for command status via backchannel. */
     ec->backchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, backchannel_cb, ec);
     if (ec->backchannel_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->backchannel_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
     sudo_debug_printf(SUDO_DEBUG_INFO, "backchannel fd %d\n", backchannel);
@@ -1121,70 +1169,70 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->sigint_event = sudo_ev_alloc(SIGINT,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigint_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigint_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigquit_event = sudo_ev_alloc(SIGQUIT,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigquit_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigquit_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigtstp_event = sudo_ev_alloc(SIGTSTP,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigtstp_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigtstp_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigterm_event = sudo_ev_alloc(SIGTERM,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigterm_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigterm_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sighup_event = sudo_ev_alloc(SIGHUP,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sighup_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sighup_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigalrm_event = sudo_ev_alloc(SIGALRM,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigalrm_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigalrm_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigusr1_event = sudo_ev_alloc(SIGUSR1,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigusr1_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigusr1_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigusr2_event = sudo_ev_alloc(SIGUSR2,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigusr2_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigusr2_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigchld_event = sudo_ev_alloc(SIGCHLD,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigchld_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigchld_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     ec->sigwinch_event = sudo_ev_alloc(SIGWINCH,
 	SUDO_EV_SIGINFO, signal_cb_pty, ec);
     if (ec->sigwinch_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigwinch_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
@@ -1192,7 +1240,7 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->fwdchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_WRITE, fwdchannel_cb, ec);
     if (ec->fwdchannel_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Set the default event base. */
     sudo_ev_base_setdef(ec->evbase);
@@ -1610,7 +1658,7 @@ del_io_events(bool nonblocking)
     /* Create temporary event base for flushing. */
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Avoid reading from /dev/tty, just flush existing data. */
     SLIST_FOREACH(iob, &iobufs, entries) {
@@ -1685,12 +1733,11 @@ del_io_events(bool nonblocking)
 static void
 sync_ttysize(struct exec_closure_pty *ec)
 {
-    static struct winsize owsize;
     struct winsize wsize;
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
 
     if (ioctl(io_fds[SFD_USERTTY], TIOCGWINSZ, &wsize) == 0) {
-	if (wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col) {
+	if (wsize.ws_row != ec->rows || wsize.ws_col != ec->cols) {
 	    const unsigned int wsize_packed = (wsize.ws_row & 0xffff) |
 		((wsize.ws_col & 0xffff) << 16);
 
@@ -1700,8 +1747,9 @@ sync_ttysize(struct exec_closure_pty *ec)
 	    /* Send window change event to monitor process. */
 	    send_command_status(ec, CMD_TTYWINCH, wsize_packed);
 
-	    /* Update old value. */
-	    owsize = wsize;
+	    /* Update rows/cols. */
+	    ec->rows = wsize.ws_row;
+	    ec->cols = wsize.ws_col;
 	}
     }
 

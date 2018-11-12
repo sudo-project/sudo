@@ -43,6 +43,8 @@ enum sudoers_formats {
 struct cvtsudoers_config {
     unsigned int sudo_order;
     unsigned int order_increment;
+    unsigned int order_padding;
+    unsigned int order_max;
     short defaults;
     short suppress;
     bool expand_aliases;
@@ -57,7 +59,7 @@ struct cvtsudoers_config {
 };
 
 /* Initial config settings for above. */
-#define INITIAL_CONFIG { 1, 1, CVT_DEFAULTS_ALL, 0, false, true, false }
+#define INITIAL_CONFIG { 1, 1, 0, 0, CVT_DEFAULTS_ALL, 0, false, true, false }
 
 #define CONF_BOOL	0
 #define CONF_UINT	1

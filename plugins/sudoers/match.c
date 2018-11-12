@@ -13,12 +13,15 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ */
+
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
 #include <config.h>
@@ -151,6 +154,22 @@ userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
     debug_return_int(matched);
 }
 
+struct gid_list *
+runas_getgroups(void)
+{
+    const struct passwd *pw;
+    debug_decl(runas_getgroups, SUDOERS_DEBUG_MATCH)
+
+    if (def_preserve_groups) {
+	sudo_gidlist_addref(user_gid_list);
+	debug_return_ptr(user_gid_list);
+    }
+
+    /* Only use results from a group db query, not the front end. */
+    pw = runas_pw ? runas_pw : sudo_user.pw;
+    debug_return_ptr(sudo_get_gidlist(pw, ENTRY_TYPE_QUERIED));
+}
+
 /*
  * Check for user described by pw in a list of members.
  * If both lists are empty compare against def_runas_default.
@@ -260,8 +279,24 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 	    }
 	}
 	if (group_matched == UNSPEC) {
-	    if (runas_pw->pw_gid == runas_gr->gr_gid)
+	    struct gid_list *runas_groups;
+	    /*
+	     * The runas group was not explicitly allowed by sudoers.
+	     * Check whether it is one of the target user's groups.
+	     */
+	    if (runas_pw->pw_gid == runas_gr->gr_gid) {
 		group_matched = ALLOW;	/* runas group matches passwd db */
+	    } else if ((runas_groups = runas_getgroups()) != NULL) {
+		int i;
+
+		for (i = 0; i < runas_groups->ngids; i++) {
+		    if (runas_groups->gids[i] == runas_gr->gr_gid) {
+			group_matched = ALLOW;	/* matched aux group vector */
+			break;
+		    }
+		}
+		sudo_gidlist_delref(runas_groups);
+	    }
 	}
     }
 
@@ -413,20 +448,18 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
      * If no args specified in sudoers, any user args are allowed.
      * If the empty string is specified in sudoers, no user args are allowed.
      */
-    if (!sudoers_args ||
-	(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)))
+    if (!sudoers_args || (!user_args && !strcmp("\"\"", sudoers_args)))
 	debug_return_bool(true);
+
     /*
      * If args are specified in sudoers, they must match the user args.
      * If running as sudoedit, all args are assumed to be paths.
      */
-    if (sudoers_args) {
-	/* For sudoedit, all args are assumed to be pathnames. */
-	if (strcmp(sudoers_cmnd, "sudoedit") == 0)
-	    flags = FNM_PATHNAME;
-	if (fnmatch(sudoers_args, user_args ? user_args : "", flags) == 0)
-	    debug_return_bool(true);
-    }
+    if (strcmp(sudoers_cmnd, "sudoedit") == 0)
+	flags = FNM_PATHNAME;
+    if (fnmatch(sudoers_args, user_args ? user_args : "", flags) == 0)
+	debug_return_bool(true);
+
     debug_return_bool(false);
 }
 

@@ -1,6 +1,7 @@
 #
 # OpenLDAP schema file for Sudo
-# Save as /etc/openldap/schema/sudo.schema
+# Save as /etc/openldap/schema/sudo.schema and restart slapd.
+# For a version that uses online configuration, see schema.olcSudo.
 #
 
 attributetype ( 1.3.6.1.4.1.15953.9.1.1

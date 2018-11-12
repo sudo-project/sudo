@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -162,13 +167,14 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     /* Expanded path must be <= PATH_MAX */
     if (prefix != NULL)
 	prelen = strlen(prefix);
-    dst = path = malloc(prelen + PATH_MAX);
+    path = malloc(prelen + PATH_MAX);
     if (path == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
     *path = '\0';
     pathend = path + prelen + PATH_MAX;
+    dst = path;
 
     /* Copy prefix, if present. */
     if (prefix != NULL) {

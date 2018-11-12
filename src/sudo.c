@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #ifdef __TANDEM
 # include <floss.h>
 #endif
@@ -371,7 +376,7 @@ fix_fds(void)
  * Returns 0 on success and -1 on failure.
  */
 static int
-fill_group_list(struct user_details *ud, int system_maxgroups)
+fill_group_list(struct user_details *ud)
 {
     int ret = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
@@ -395,7 +400,6 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
 	    &ud->ngroups);
     }
     if (ret == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %s: unable to get groups via sudo_getgrouplist2()",
 	    __func__, ud->username);
@@ -412,22 +416,22 @@ get_user_groups(struct user_details *ud)
 {
     char *cp, *gid_list = NULL;
     size_t glsize;
-    int i, len, maxgroups, group_source;
+    int i, len, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
-
-    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
-    if (maxgroups < 0)
-	maxgroups = NGROUPS_MAX;
 
     ud->groups = NULL;
     group_source = sudo_conf_group_source();
     if (group_source != GROUP_SOURCE_DYNAMIC) {
+	int maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
+	if (maxgroups < 0)
+	    maxgroups = NGROUPS_MAX;
+
 	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
 	    /* Use groups from kernel if not too many or source is static. */
 	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
 		ud->groups = reallocarray(NULL, ud->ngroups, sizeof(GETGROUPS_T));
 		if (ud->groups == NULL)
-		    goto oom;
+		    goto done;
 		if (getgroups(ud->ngroups, ud->groups) < 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			"%s: %s: unable to get %d groups via getgroups()",
@@ -447,8 +451,8 @@ get_user_groups(struct user_details *ud)
 	 * Query group database if kernel list is too small or disabled.
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
-	if (fill_group_list(ud, maxgroups) == -1)
-	    sudo_fatal(U_("unable to get group vector"));
+	if (fill_group_list(ud) == -1)
+	    goto done;
     }
 
     /*
@@ -456,7 +460,7 @@ get_user_groups(struct user_details *ud)
      */
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
     if ((gid_list = malloc(glsize)) == NULL)
-	goto oom;
+	goto done;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
@@ -466,9 +470,8 @@ get_user_groups(struct user_details *ud)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
     }
+done:
     debug_return_str(gid_list);
-oom:
-    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 }
 
 /*
@@ -529,7 +532,7 @@ get_user_info(struct user_details *ud)
     aix_restoreauthdb();
 #endif
     if (pw == NULL)
-	sudo_fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
+	sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
 
     user_info[i] = sudo_new_key_val("user", pw->pw_name);
     if (user_info[i] == NULL)
@@ -562,8 +565,9 @@ get_user_info(struct user_details *ud)
     if (asprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid) == -1)
 	goto oom;
 
-    if ((cp = get_user_groups(ud)) != NULL)
-	user_info[++i] = cp;
+    if ((cp = get_user_groups(ud)) == NULL)
+	goto oom;
+    user_info[++i] = cp;
 
     mask = umask(0);
     umask(mask);
@@ -595,8 +599,8 @@ get_user_info(struct user_details *ud)
 	goto oom;
     ud->host = user_info[i] + sizeof("host=") - 1;
 
-    sudo_get_ttysize(&ud->ts_lines, &ud->ts_cols);
-    if (asprintf(&user_info[++i], "lines=%d", ud->ts_lines) == -1)
+    sudo_get_ttysize(&ud->ts_rows, &ud->ts_cols);
+    if (asprintf(&user_info[++i], "lines=%d", ud->ts_rows) == -1)
 	goto oom;
     if (asprintf(&user_info[++i], "cols=%d", ud->ts_cols) == -1)
 	goto oom;

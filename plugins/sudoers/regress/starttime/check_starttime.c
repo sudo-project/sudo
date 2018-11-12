@@ -29,14 +29,6 @@
 #include "sudo_fatal.h"
 #include "check.h"
 
-#ifndef TIME_T_MAX
-# if SIZEOF_TIME_T == 8
-#  define TIME_T_MAX    LLONG_MAX
-# else
-#  define TIME_T_MAX    INT_MAX
-# endif
-#endif
-
 __dso_public int main(int argc, char *argv[]);
 
 #ifdef __linux__

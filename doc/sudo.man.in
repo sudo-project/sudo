@@ -14,13 +14,12 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .\" Sponsored in part by the Defense Advanced Research Projects
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "March 21, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "8" "October 27, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -191,7 +190,9 @@ will exit with an error.
 .RE
 .TP 12n
 \fB\-a\fR \fItype\fR, \fB\--auth-type\fR=\fItype\fR
-Use the specified BSD authentication
+Use the specified
+BSD
+authentication
 \fItype\fR
 when validating the user, if allowed by
 \fI/etc/login.conf\fR.
@@ -200,7 +201,9 @@ authentication methods by adding an
 \(lqauth-sudo\(rq
 entry in
 \fI/etc/login.conf\fR.
-This option is only available on systems that support BSD authentication.
+This option is only available on systems that support
+BSD
+authentication.
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
 Run the given command in the background.
@@ -251,7 +254,9 @@ If the command is being run as a login shell, additional
 \fI/etc/login.conf\fR
 settings, such as the umask and environment variables, will
 be applied, if present.
-This option is only available on systems with BSD login classes.
+This option is only available on systems with
+BSD
+login classes.
 .TP 12n
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to
@@ -346,7 +351,7 @@ may be either a group name or a numeric group ID
 (GID)
 prefixed with the
 \(oq#\(cq
-character (e.g.
+character (e.g.,
 \fR#0\fR
 for GID 0).
 When running a command as a GID, many shells require that the
@@ -358,6 +363,14 @@ If no
 option is specified, the command will be run as the invoking user.
 In either case, the primary group will be set to
 \fIgroup\fR.
+The
+\fIsudoers\fR
+policy permits any of the target user's groups to be specified via
+the
+\fB\-g\fR
+option as long as the
+\fB\-P\fR
+option is not in use.
 .TP 12n
 \fB\-H\fR, \fB\--set-home\fR
 Request that the security policy set the
@@ -547,7 +560,6 @@ the specified
 \fB\-S\fR, \fB\--stdin\fR
 Write the prompt to the standard error and read the password from the
 standard input instead of using the terminal device.
-The password must be followed by a newline character.
 .TP 12n
 \fB\-s\fR, \fB\--shell\fR
 Run the shell specified by the
@@ -603,7 +615,7 @@ may be either a user name or a numeric user ID
 (UID)
 prefixed with the
 \(oq#\(cq
-character (e.g.
+character (e.g.,
 \fR#0\fR
 for UID 0).
 When running commands as a UID, many shells require that the
@@ -653,7 +665,7 @@ should stop processing command line arguments.
 Environment variables to be set for the command may also be passed
 on the command line in the form of
 \fIVAR\fR=\fIvalue\fR,
-e.g.\&
+e.g.,
 \fRLD_LIBRARY_PATH\fR=\fI/usr/local/pkg/lib\fR.
 Variables passed on the command line are subject to restrictions
 imposed by the security policy plugin.
@@ -1123,10 +1135,6 @@ Set to the same value as
 \fRLOGNAME\fR,
 described above.
 .TP 17n
-\fRUSERNAME\fR
-Same as
-\fRUSER\fR.
-.TP 17n
 \fRVISUAL\fR
 Default editor to use in
 \fB\-e\fR
@@ -1204,6 +1212,120 @@ and file redirection work.
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .RE
 .fi
+.SH "DIAGNOSTICS"
+Error messages produced by
+\fBsudo\fR
+include:
+.TP 6n
+\fRediting files in a writable directory is not permitted\fR
+By default,
+\fBsudoedit\fR
+does not permit editing a file when any of the parent directories are writable
+by the invoking user.
+This avoids a race condition that could allow the user to overwrite
+an arbitrary file.
+See the
+\fIsudoedit_checkdir\fR
+option in
+sudoers(@mansectform@)
+for more information.
+.TP 6n
+\fRediting symbolic links is not permitted\fR
+By default,
+\fBsudoedit\fR
+does not follow symbolic links when opening files.
+See the
+\fIsudoedit_follow\fR
+option in
+sudoers(@mansectform@)
+for more information.
+.TP 6n
+\fReffective uid is not 0, is sudo installed setuid root?\fR
+\fBsudo\fR
+was not run with root privileges.
+The
+\fBsudo\fR
+binary must be owned by the root user and have the Set-user-ID bit set.
+Also, it must not be located on a file system mounted with the
+\(oqnosuid\(cq
+option or on an NFS file system that maps uid 0 to an unprivileged uid.
+.TP 6n
+\fReffective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?\fR
+\fBsudo\fR
+was not run with root privileges.
+The
+\fBsudo\fR
+binary has the proper owner and permissions but it still did not run
+with root privileges.
+The most common reason for this is that the file system the
+\fBsudo\fR
+binary is located on is mounted with the
+\(oqnosuid\(cq
+option or it is an NFS file system that maps uid 0 to an unprivileged uid.
+.TP 6n
+\fRfatal error, unable to load plugins\fR
+An error occurred while loading or initializing the plugins specified in
+sudo.conf(@mansectform@).
+.TP 6n
+\fRinvalid environment variable name\fR
+One or more environment variable names specified via the
+\fB\-E\fR
+option contained an equal sign
+(\(oq=\(cq).
+The arguments to the
+\fB\-E\fR
+option should be environment variable names without an associated value.
+.TP 6n
+\fRno password was provided\fR
+When
+\fBsudo\fR
+tried to read the password, it did not receive any characters.
+This may happen if no terminal is available (or the
+\fB\-S\fR
+option is specified) and the standard input has been redirected from
+\fI/dev/null\fR.
+.TP 6n
+\fRno tty present and no askpass program specified\fR
+\fBsudo\fR
+needs to read the password but there is no mechanism available to do so.
+A terminal is not present to read the password from,
+\fBsudo\fR
+has not been configured to read from the standard input,
+and no askpass program has been specified either via the
+\fB\-A\fR
+option or the
+\fRSUDO_ASKPASS\fR
+environment variable.
+.TP 6n
+\fRno writable temporary directory found\fR
+\fBsudoedit\fR
+was unable to find a usable temporary directory in which to store its
+intermediate files.
+.TP 6n
+\fRsudo must be owned by uid 0 and have the setuid bit set\fR
+\fBsudo\fR
+was not run with root privileges.
+The
+\fBsudo\fR
+binary does not have the correct owner or permissions.
+It must be owned by the root user and have the Set-user-ID bit set.
+.TP 6n
+\fRsudoedit is not supported on this platform\fR
+It is only possible to run
+\fBsudoedit\fR
+on systems that support setting the effective user-ID.
+.TP 6n
+\fRtimed out reading password\fR
+The user did not enter a password before the password timeout
+(5 minutes by default) expired.
+.TP 6n
+\fRyou do not exist in the passwd database\fR
+Your user ID does not appear in the system passwd database.
+.TP 6n
+\fRyou may not specify environment variables in edit mode\fR
+It is only possible to specify environment variables when running
+a command.
+When editing a file, the editor is run with the user's environment unmodified.
 .SH "SEE ALSO"
 su(1),
 stat(2),

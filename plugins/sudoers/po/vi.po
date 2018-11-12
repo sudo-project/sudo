@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.24b2\n"
+"Project-Id-Version: sudoers 1.8.26b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2018-07-31 07:13-0600\n"
-"PO-Revision-Date: 2018-08-03 06:59+0700\n"
+"POT-Creation-Date: 2018-10-29 08:31-0600\n"
+"PO-Revision-Date: 2018-11-01 14:10+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -45,264 +45,258 @@ msgstr "*** Thông tin AN NINH cho %h ***"
 msgid "Sorry, try again."
 msgstr "Rất tiếc, hãy thử lại."
 
-#: gram.y:194 gram.y:242 gram.y:249 gram.y:256 gram.y:263 gram.y:270
-#: gram.y:286 gram.y:310 gram.y:317 gram.y:324 gram.y:331 gram.y:338
-#: gram.y:401 gram.y:409 gram.y:419 gram.y:452 gram.y:459 gram.y:466
-#: gram.y:473 gram.y:555 gram.y:562 gram.y:571 gram.y:580 gram.y:597
-#: gram.y:709 gram.y:716 gram.y:723 gram.y:731 gram.y:831 gram.y:838
-#: gram.y:845 gram.y:852 gram.y:859 gram.y:885 gram.y:892 gram.y:899
-#: gram.y:1022 gram.y:1296 plugins/sudoers/alias.c:122
-#: plugins/sudoers/alias.c:129 plugins/sudoers/alias.c:145
-#: plugins/sudoers/auth/bsdauth.c:141 plugins/sudoers/auth/kerb5.c:119
-#: plugins/sudoers/auth/kerb5.c:145 plugins/sudoers/auth/pam.c:519
-#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/auth/sia.c:59
-#: plugins/sudoers/cvtsudoers.c:116 plugins/sudoers/cvtsudoers.c:157
-#: plugins/sudoers/cvtsudoers.c:174 plugins/sudoers/cvtsudoers.c:185
-#: plugins/sudoers/cvtsudoers.c:278 plugins/sudoers/cvtsudoers.c:405
-#: plugins/sudoers/cvtsudoers.c:538 plugins/sudoers/cvtsudoers.c:555
-#: plugins/sudoers/cvtsudoers.c:660 plugins/sudoers/cvtsudoers.c:773
-#: plugins/sudoers/cvtsudoers.c:781 plugins/sudoers/cvtsudoers.c:1186
-#: plugins/sudoers/cvtsudoers.c:1190 plugins/sudoers/cvtsudoers.c:1290
-#: plugins/sudoers/cvtsudoers_ldif.c:147 plugins/sudoers/cvtsudoers_ldif.c:189
-#: plugins/sudoers/cvtsudoers_ldif.c:236 plugins/sudoers/cvtsudoers_ldif.c:255
-#: plugins/sudoers/cvtsudoers_ldif.c:325 plugins/sudoers/cvtsudoers_ldif.c:380
-#: plugins/sudoers/cvtsudoers_ldif.c:388 plugins/sudoers/cvtsudoers_ldif.c:405
-#: plugins/sudoers/cvtsudoers_ldif.c:414 plugins/sudoers/cvtsudoers_ldif.c:560
-#: plugins/sudoers/cvtsudoers_ldif.c:753 plugins/sudoers/cvtsudoers_ldif.c:780
-#: plugins/sudoers/cvtsudoers_ldif.c:848 plugins/sudoers/cvtsudoers_ldif.c:855
-#: plugins/sudoers/cvtsudoers_ldif.c:860 plugins/sudoers/cvtsudoers_ldif.c:936
-#: plugins/sudoers/cvtsudoers_ldif.c:947 plugins/sudoers/cvtsudoers_ldif.c:953
-#: plugins/sudoers/cvtsudoers_ldif.c:978 plugins/sudoers/cvtsudoers_ldif.c:990
-#: plugins/sudoers/cvtsudoers_ldif.c:994
-#: plugins/sudoers/cvtsudoers_ldif.c:1008
-#: plugins/sudoers/cvtsudoers_ldif.c:1176
-#: plugins/sudoers/cvtsudoers_ldif.c:1208
-#: plugins/sudoers/cvtsudoers_ldif.c:1233
-#: plugins/sudoers/cvtsudoers_ldif.c:1262
-#: plugins/sudoers/cvtsudoers_ldif.c:1312
-#: plugins/sudoers/cvtsudoers_ldif.c:1358
-#: plugins/sudoers/cvtsudoers_ldif.c:1368 plugins/sudoers/defaults.c:656
-#: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
-#: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
-#: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
-#: plugins/sudoers/filedigest.c:61 plugins/sudoers/filedigest.c:77
-#: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:131
-#: plugins/sudoers/interfaces.c:71 plugins/sudoers/iolog.c:938
-#: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:177
-#: plugins/sudoers/ldap.c:408 plugins/sudoers/ldap.c:412
-#: plugins/sudoers/ldap.c:424 plugins/sudoers/ldap.c:715
-#: plugins/sudoers/ldap.c:879 plugins/sudoers/ldap.c:1228
-#: plugins/sudoers/ldap.c:1654 plugins/sudoers/ldap.c:1691
-#: plugins/sudoers/ldap.c:1771 plugins/sudoers/ldap.c:1906
-#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2023
-#: plugins/sudoers/ldap_conf.c:214 plugins/sudoers/ldap_conf.c:245
-#: plugins/sudoers/ldap_conf.c:297 plugins/sudoers/ldap_conf.c:333
-#: plugins/sudoers/ldap_conf.c:422 plugins/sudoers/ldap_conf.c:437
-#: plugins/sudoers/ldap_conf.c:533 plugins/sudoers/ldap_conf.c:566
-#: plugins/sudoers/ldap_conf.c:647 plugins/sudoers/ldap_conf.c:729
-#: plugins/sudoers/ldap_util.c:519 plugins/sudoers/ldap_util.c:575
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
-#: plugins/sudoers/logging.c:568 plugins/sudoers/logging.c:745
-#: plugins/sudoers/logging.c:1003 plugins/sudoers/match.c:693
-#: plugins/sudoers/match.c:740 plugins/sudoers/match.c:781
-#: plugins/sudoers/match.c:809 plugins/sudoers/match.c:897
-#: plugins/sudoers/match.c:977 plugins/sudoers/parse.c:192
-#: plugins/sudoers/parse.c:204 plugins/sudoers/parse.c:219
-#: plugins/sudoers/parse.c:231 plugins/sudoers/policy.c:497
-#: plugins/sudoers/policy.c:739 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:263
-#: plugins/sudoers/pwutil.c:340 plugins/sudoers/pwutil.c:514
-#: plugins/sudoers/pwutil.c:580 plugins/sudoers/pwutil.c:650
-#: plugins/sudoers/pwutil.c:808 plugins/sudoers/pwutil.c:865
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:968
-#: plugins/sudoers/sssd.c:147 plugins/sudoers/sssd.c:387
-#: plugins/sudoers/sssd.c:450 plugins/sudoers/sssd.c:494
-#: plugins/sudoers/sssd.c:541 plugins/sudoers/sssd.c:732
-#: plugins/sudoers/stubs.c:96 plugins/sudoers/stubs.c:104
-#: plugins/sudoers/sudoers.c:265 plugins/sudoers/sudoers.c:275
-#: plugins/sudoers/sudoers.c:283 plugins/sudoers/sudoers.c:325
-#: plugins/sudoers/sudoers.c:648 plugins/sudoers/sudoers.c:774
-#: plugins/sudoers/sudoers.c:818 plugins/sudoers/sudoers.c:1092
-#: plugins/sudoers/sudoers_debug.c:107 plugins/sudoers/sudoreplay.c:1265
-#: plugins/sudoers/sudoreplay.c:1377 plugins/sudoers/sudoreplay.c:1417
-#: plugins/sudoers/sudoreplay.c:1426 plugins/sudoers/sudoreplay.c:1436
-#: plugins/sudoers/sudoreplay.c:1444 plugins/sudoers/sudoreplay.c:1448
-#: plugins/sudoers/sudoreplay.c:1604 plugins/sudoers/sudoreplay.c:1608
-#: plugins/sudoers/testsudoers.c:125 plugins/sudoers/testsudoers.c:215
-#: plugins/sudoers/testsudoers.c:232 plugins/sudoers/testsudoers.c:554
-#: plugins/sudoers/timestamp.c:401 plugins/sudoers/timestamp.c:445
-#: plugins/sudoers/timestamp.c:923 plugins/sudoers/toke_util.c:55
-#: plugins/sudoers/toke_util.c:108 plugins/sudoers/toke_util.c:145
-#: plugins/sudoers/tsdump.c:125 plugins/sudoers/visudo.c:145
-#: plugins/sudoers/visudo.c:307 plugins/sudoers/visudo.c:313
-#: plugins/sudoers/visudo.c:423 plugins/sudoers/visudo.c:601
-#: plugins/sudoers/visudo.c:920 plugins/sudoers/visudo.c:987
-#: plugins/sudoers/visudo.c:1076 toke.l:847 toke.l:948 toke.l:1105
+#: gram.y:192 gram.y:240 gram.y:247 gram.y:254 gram.y:261 gram.y:268
+#: gram.y:284 gram.y:308 gram.y:315 gram.y:322 gram.y:329 gram.y:336
+#: gram.y:399 gram.y:407 gram.y:417 gram.y:450 gram.y:457 gram.y:464
+#: gram.y:471 gram.y:553 gram.y:560 gram.y:569 gram.y:578 gram.y:595
+#: gram.y:707 gram.y:714 gram.y:721 gram.y:729 gram.y:829 gram.y:836
+#: gram.y:843 gram.y:850 gram.y:857 gram.y:883 gram.y:890 gram.y:897
+#: gram.y:1020 gram.y:1294 plugins/sudoers/alias.c:130
+#: plugins/sudoers/alias.c:137 plugins/sudoers/alias.c:153
+#: plugins/sudoers/auth/bsdauth.c:146 plugins/sudoers/auth/kerb5.c:121
+#: plugins/sudoers/auth/kerb5.c:147 plugins/sudoers/auth/pam.c:524
+#: plugins/sudoers/auth/rfc1938.c:114 plugins/sudoers/auth/sia.c:62
+#: plugins/sudoers/cvtsudoers.c:123 plugins/sudoers/cvtsudoers.c:164
+#: plugins/sudoers/cvtsudoers.c:181 plugins/sudoers/cvtsudoers.c:192
+#: plugins/sudoers/cvtsudoers.c:304 plugins/sudoers/cvtsudoers.c:432
+#: plugins/sudoers/cvtsudoers.c:565 plugins/sudoers/cvtsudoers.c:582
+#: plugins/sudoers/cvtsudoers.c:645 plugins/sudoers/cvtsudoers.c:760
+#: plugins/sudoers/cvtsudoers.c:768 plugins/sudoers/cvtsudoers.c:1178
+#: plugins/sudoers/cvtsudoers.c:1182 plugins/sudoers/cvtsudoers.c:1284
+#: plugins/sudoers/cvtsudoers_ldif.c:152 plugins/sudoers/cvtsudoers_ldif.c:195
+#: plugins/sudoers/cvtsudoers_ldif.c:242 plugins/sudoers/cvtsudoers_ldif.c:261
+#: plugins/sudoers/cvtsudoers_ldif.c:332 plugins/sudoers/cvtsudoers_ldif.c:387
+#: plugins/sudoers/cvtsudoers_ldif.c:395 plugins/sudoers/cvtsudoers_ldif.c:412
+#: plugins/sudoers/cvtsudoers_ldif.c:421 plugins/sudoers/cvtsudoers_ldif.c:568
+#: plugins/sudoers/defaults.c:661 plugins/sudoers/defaults.c:954
+#: plugins/sudoers/defaults.c:1125 plugins/sudoers/editor.c:70
+#: plugins/sudoers/editor.c:88 plugins/sudoers/editor.c:99
+#: plugins/sudoers/env.c:247 plugins/sudoers/filedigest.c:64
+#: plugins/sudoers/filedigest.c:80 plugins/sudoers/gc.c:57
+#: plugins/sudoers/group_plugin.c:136 plugins/sudoers/interfaces.c:76
+#: plugins/sudoers/iolog.c:939 plugins/sudoers/iolog_path.c:172
+#: plugins/sudoers/iolog_util.c:83 plugins/sudoers/iolog_util.c:122
+#: plugins/sudoers/iolog_util.c:131 plugins/sudoers/iolog_util.c:141
+#: plugins/sudoers/iolog_util.c:149 plugins/sudoers/iolog_util.c:153
+#: plugins/sudoers/ldap.c:183 plugins/sudoers/ldap.c:414
+#: plugins/sudoers/ldap.c:418 plugins/sudoers/ldap.c:430
+#: plugins/sudoers/ldap.c:721 plugins/sudoers/ldap.c:885
+#: plugins/sudoers/ldap.c:1233 plugins/sudoers/ldap.c:1660
+#: plugins/sudoers/ldap.c:1697 plugins/sudoers/ldap.c:1778
+#: plugins/sudoers/ldap.c:1913 plugins/sudoers/ldap.c:2014
+#: plugins/sudoers/ldap.c:2030 plugins/sudoers/ldap_conf.c:221
+#: plugins/sudoers/ldap_conf.c:252 plugins/sudoers/ldap_conf.c:304
+#: plugins/sudoers/ldap_conf.c:340 plugins/sudoers/ldap_conf.c:443
+#: plugins/sudoers/ldap_conf.c:458 plugins/sudoers/ldap_conf.c:555
+#: plugins/sudoers/ldap_conf.c:588 plugins/sudoers/ldap_conf.c:680
+#: plugins/sudoers/ldap_conf.c:762 plugins/sudoers/ldap_util.c:508
+#: plugins/sudoers/ldap_util.c:564 plugins/sudoers/linux_audit.c:81
+#: plugins/sudoers/logging.c:195 plugins/sudoers/logging.c:511
+#: plugins/sudoers/logging.c:532 plugins/sudoers/logging.c:573
+#: plugins/sudoers/logging.c:752 plugins/sudoers/logging.c:1010
+#: plugins/sudoers/match.c:725 plugins/sudoers/match.c:772
+#: plugins/sudoers/match.c:813 plugins/sudoers/match.c:841
+#: plugins/sudoers/match.c:929 plugins/sudoers/match.c:1009
+#: plugins/sudoers/parse.c:195 plugins/sudoers/parse.c:207
+#: plugins/sudoers/parse.c:222 plugins/sudoers/parse.c:234
+#: plugins/sudoers/parse_ldif.c:141 plugins/sudoers/parse_ldif.c:168
+#: plugins/sudoers/parse_ldif.c:237 plugins/sudoers/parse_ldif.c:244
+#: plugins/sudoers/parse_ldif.c:249 plugins/sudoers/parse_ldif.c:325
+#: plugins/sudoers/parse_ldif.c:336 plugins/sudoers/parse_ldif.c:342
+#: plugins/sudoers/parse_ldif.c:367 plugins/sudoers/parse_ldif.c:379
+#: plugins/sudoers/parse_ldif.c:383 plugins/sudoers/parse_ldif.c:397
+#: plugins/sudoers/parse_ldif.c:564 plugins/sudoers/parse_ldif.c:594
+#: plugins/sudoers/parse_ldif.c:619 plugins/sudoers/parse_ldif.c:679
+#: plugins/sudoers/parse_ldif.c:698 plugins/sudoers/parse_ldif.c:744
+#: plugins/sudoers/parse_ldif.c:754 plugins/sudoers/policy.c:502
+#: plugins/sudoers/policy.c:744 plugins/sudoers/prompt.c:98
+#: plugins/sudoers/pwutil.c:197 plugins/sudoers/pwutil.c:269
+#: plugins/sudoers/pwutil.c:346 plugins/sudoers/pwutil.c:520
+#: plugins/sudoers/pwutil.c:586 plugins/sudoers/pwutil.c:656
+#: plugins/sudoers/pwutil.c:814 plugins/sudoers/pwutil.c:871
+#: plugins/sudoers/pwutil.c:916 plugins/sudoers/pwutil.c:974
+#: plugins/sudoers/sssd.c:152 plugins/sudoers/sssd.c:398
+#: plugins/sudoers/sssd.c:461 plugins/sudoers/sssd.c:505
+#: plugins/sudoers/sssd.c:552 plugins/sudoers/sssd.c:743
+#: plugins/sudoers/stubs.c:101 plugins/sudoers/stubs.c:109
+#: plugins/sudoers/sudoers.c:269 plugins/sudoers/sudoers.c:279
+#: plugins/sudoers/sudoers.c:288 plugins/sudoers/sudoers.c:330
+#: plugins/sudoers/sudoers.c:653 plugins/sudoers/sudoers.c:779
+#: plugins/sudoers/sudoers.c:823 plugins/sudoers/sudoers.c:1097
+#: plugins/sudoers/sudoers_debug.c:112 plugins/sudoers/sudoreplay.c:579
+#: plugins/sudoers/sudoreplay.c:582 plugins/sudoers/sudoreplay.c:1259
+#: plugins/sudoers/sudoreplay.c:1459 plugins/sudoers/sudoreplay.c:1463
+#: plugins/sudoers/testsudoers.c:134 plugins/sudoers/testsudoers.c:234
+#: plugins/sudoers/testsudoers.c:251 plugins/sudoers/testsudoers.c:585
+#: plugins/sudoers/timestamp.c:437 plugins/sudoers/timestamp.c:481
+#: plugins/sudoers/timestamp.c:958 plugins/sudoers/toke_util.c:57
+#: plugins/sudoers/toke_util.c:110 plugins/sudoers/toke_util.c:147
+#: plugins/sudoers/tsdump.c:128 plugins/sudoers/visudo.c:150
+#: plugins/sudoers/visudo.c:312 plugins/sudoers/visudo.c:318
+#: plugins/sudoers/visudo.c:428 plugins/sudoers/visudo.c:606
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo.c:1013
+#: plugins/sudoers/visudo.c:1102 toke.l:844 toke.l:945 toke.l:1102
 msgid "unable to allocate memory"
 msgstr "không thể cấp phát bộ nhớ"
 
-#: gram.y:484
+#: gram.y:482
 msgid "a digest requires a path name"
 msgstr "tóm lược yêu cầu một đối số là tên đường dẫn"
 
-#: gram.y:610
+#: gram.y:608
 msgid "invalid notbefore value"
 msgstr "giá trị notbefore không hợp lệ"
 
-#: gram.y:618
+#: gram.y:616
 msgid "invalid notafter value"
 msgstr "giá trị notafter không hợp lệ"
 
-#: gram.y:627 plugins/sudoers/policy.c:313
+#: gram.y:625 plugins/sudoers/policy.c:318
 msgid "timeout value too large"
 msgstr "giá trị timeout quá lớn"
 
-#: gram.y:629 plugins/sudoers/policy.c:315
+#: gram.y:627 plugins/sudoers/policy.c:320
 msgid "invalid timeout value"
 msgstr "giá trị timeout không hợp lệ"
 
-#: gram.y:1296 plugins/sudoers/auth/pam.c:349 plugins/sudoers/auth/pam.c:519
-#: plugins/sudoers/auth/rfc1938.c:109 plugins/sudoers/cvtsudoers.c:116
-#: plugins/sudoers/cvtsudoers.c:156 plugins/sudoers/cvtsudoers.c:173
-#: plugins/sudoers/cvtsudoers.c:184 plugins/sudoers/cvtsudoers.c:277
-#: plugins/sudoers/cvtsudoers.c:404 plugins/sudoers/cvtsudoers.c:537
-#: plugins/sudoers/cvtsudoers.c:554 plugins/sudoers/cvtsudoers.c:660
-#: plugins/sudoers/cvtsudoers.c:773 plugins/sudoers/cvtsudoers.c:780
-#: plugins/sudoers/cvtsudoers.c:1186 plugins/sudoers/cvtsudoers.c:1190
-#: plugins/sudoers/cvtsudoers.c:1290 plugins/sudoers/cvtsudoers_ldif.c:146
-#: plugins/sudoers/cvtsudoers_ldif.c:188 plugins/sudoers/cvtsudoers_ldif.c:235
-#: plugins/sudoers/cvtsudoers_ldif.c:254 plugins/sudoers/cvtsudoers_ldif.c:324
-#: plugins/sudoers/cvtsudoers_ldif.c:379 plugins/sudoers/cvtsudoers_ldif.c:387
-#: plugins/sudoers/cvtsudoers_ldif.c:404 plugins/sudoers/cvtsudoers_ldif.c:413
-#: plugins/sudoers/cvtsudoers_ldif.c:559 plugins/sudoers/cvtsudoers_ldif.c:752
-#: plugins/sudoers/cvtsudoers_ldif.c:779 plugins/sudoers/cvtsudoers_ldif.c:847
-#: plugins/sudoers/cvtsudoers_ldif.c:854 plugins/sudoers/cvtsudoers_ldif.c:859
-#: plugins/sudoers/cvtsudoers_ldif.c:935 plugins/sudoers/cvtsudoers_ldif.c:946
-#: plugins/sudoers/cvtsudoers_ldif.c:952 plugins/sudoers/cvtsudoers_ldif.c:977
-#: plugins/sudoers/cvtsudoers_ldif.c:989 plugins/sudoers/cvtsudoers_ldif.c:993
-#: plugins/sudoers/cvtsudoers_ldif.c:1007
-#: plugins/sudoers/cvtsudoers_ldif.c:1176
-#: plugins/sudoers/cvtsudoers_ldif.c:1207
-#: plugins/sudoers/cvtsudoers_ldif.c:1232
-#: plugins/sudoers/cvtsudoers_ldif.c:1261
-#: plugins/sudoers/cvtsudoers_ldif.c:1311
-#: plugins/sudoers/cvtsudoers_ldif.c:1357
-#: plugins/sudoers/cvtsudoers_ldif.c:1367 plugins/sudoers/defaults.c:656
-#: plugins/sudoers/defaults.c:952 plugins/sudoers/defaults.c:1123
-#: plugins/sudoers/editor.c:65 plugins/sudoers/editor.c:83
-#: plugins/sudoers/editor.c:94 plugins/sudoers/env.c:233
-#: plugins/sudoers/filedigest.c:61 plugins/sudoers/filedigest.c:77
-#: plugins/sudoers/gc.c:52 plugins/sudoers/group_plugin.c:131
-#: plugins/sudoers/interfaces.c:71 plugins/sudoers/iolog.c:938
-#: plugins/sudoers/iolog_path.c:167 plugins/sudoers/ldap.c:177
-#: plugins/sudoers/ldap.c:408 plugins/sudoers/ldap.c:412
-#: plugins/sudoers/ldap.c:424 plugins/sudoers/ldap.c:715
-#: plugins/sudoers/ldap.c:879 plugins/sudoers/ldap.c:1228
-#: plugins/sudoers/ldap.c:1654 plugins/sudoers/ldap.c:1691
-#: plugins/sudoers/ldap.c:1771 plugins/sudoers/ldap.c:1906
-#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2023
-#: plugins/sudoers/ldap_conf.c:214 plugins/sudoers/ldap_conf.c:245
-#: plugins/sudoers/ldap_conf.c:297 plugins/sudoers/ldap_conf.c:333
-#: plugins/sudoers/ldap_conf.c:422 plugins/sudoers/ldap_conf.c:437
-#: plugins/sudoers/ldap_conf.c:533 plugins/sudoers/ldap_conf.c:566
-#: plugins/sudoers/ldap_conf.c:646 plugins/sudoers/ldap_conf.c:729
-#: plugins/sudoers/ldap_util.c:519 plugins/sudoers/ldap_util.c:575
-#: plugins/sudoers/linux_audit.c:76 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:506 plugins/sudoers/logging.c:527
-#: plugins/sudoers/logging.c:567 plugins/sudoers/logging.c:1003
-#: plugins/sudoers/match.c:692 plugins/sudoers/match.c:739
-#: plugins/sudoers/match.c:781 plugins/sudoers/match.c:809
-#: plugins/sudoers/match.c:897 plugins/sudoers/match.c:976
-#: plugins/sudoers/parse.c:191 plugins/sudoers/parse.c:203
-#: plugins/sudoers/parse.c:218 plugins/sudoers/parse.c:230
-#: plugins/sudoers/policy.c:127 plugins/sudoers/policy.c:136
-#: plugins/sudoers/policy.c:145 plugins/sudoers/policy.c:171
-#: plugins/sudoers/policy.c:298 plugins/sudoers/policy.c:313
-#: plugins/sudoers/policy.c:315 plugins/sudoers/policy.c:341
-#: plugins/sudoers/policy.c:351 plugins/sudoers/policy.c:395
-#: plugins/sudoers/policy.c:405 plugins/sudoers/policy.c:414
-#: plugins/sudoers/policy.c:423 plugins/sudoers/policy.c:497
-#: plugins/sudoers/policy.c:739 plugins/sudoers/prompt.c:93
-#: plugins/sudoers/pwutil.c:191 plugins/sudoers/pwutil.c:263
-#: plugins/sudoers/pwutil.c:340 plugins/sudoers/pwutil.c:514
-#: plugins/sudoers/pwutil.c:580 plugins/sudoers/pwutil.c:650
-#: plugins/sudoers/pwutil.c:808 plugins/sudoers/pwutil.c:865
-#: plugins/sudoers/pwutil.c:910 plugins/sudoers/pwutil.c:968
-#: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
-#: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
-#: plugins/sudoers/set_perms.c:1641 plugins/sudoers/sssd.c:146
-#: plugins/sudoers/sssd.c:387 plugins/sudoers/sssd.c:450
-#: plugins/sudoers/sssd.c:494 plugins/sudoers/sssd.c:541
-#: plugins/sudoers/sssd.c:732 plugins/sudoers/stubs.c:96
-#: plugins/sudoers/stubs.c:104 plugins/sudoers/sudoers.c:265
-#: plugins/sudoers/sudoers.c:275 plugins/sudoers/sudoers.c:283
-#: plugins/sudoers/sudoers.c:325 plugins/sudoers/sudoers.c:648
-#: plugins/sudoers/sudoers.c:774 plugins/sudoers/sudoers.c:818
-#: plugins/sudoers/sudoers.c:1092 plugins/sudoers/sudoers_debug.c:106
-#: plugins/sudoers/sudoreplay.c:1265 plugins/sudoers/sudoreplay.c:1377
-#: plugins/sudoers/sudoreplay.c:1417 plugins/sudoers/sudoreplay.c:1426
-#: plugins/sudoers/sudoreplay.c:1436 plugins/sudoers/sudoreplay.c:1444
-#: plugins/sudoers/sudoreplay.c:1448 plugins/sudoers/sudoreplay.c:1604
-#: plugins/sudoers/sudoreplay.c:1608 plugins/sudoers/testsudoers.c:125
-#: plugins/sudoers/testsudoers.c:215 plugins/sudoers/testsudoers.c:232
-#: plugins/sudoers/testsudoers.c:554 plugins/sudoers/timestamp.c:401
-#: plugins/sudoers/timestamp.c:445 plugins/sudoers/timestamp.c:923
-#: plugins/sudoers/toke_util.c:55 plugins/sudoers/toke_util.c:108
-#: plugins/sudoers/toke_util.c:145 plugins/sudoers/tsdump.c:125
-#: plugins/sudoers/visudo.c:145 plugins/sudoers/visudo.c:307
-#: plugins/sudoers/visudo.c:313 plugins/sudoers/visudo.c:423
-#: plugins/sudoers/visudo.c:601 plugins/sudoers/visudo.c:920
-#: plugins/sudoers/visudo.c:987 plugins/sudoers/visudo.c:1076 toke.l:847
-#: toke.l:948 toke.l:1105
+#: gram.y:1294 plugins/sudoers/auth/pam.c:354 plugins/sudoers/auth/pam.c:524
+#: plugins/sudoers/auth/rfc1938.c:114 plugins/sudoers/cvtsudoers.c:123
+#: plugins/sudoers/cvtsudoers.c:163 plugins/sudoers/cvtsudoers.c:180
+#: plugins/sudoers/cvtsudoers.c:191 plugins/sudoers/cvtsudoers.c:303
+#: plugins/sudoers/cvtsudoers.c:431 plugins/sudoers/cvtsudoers.c:564
+#: plugins/sudoers/cvtsudoers.c:581 plugins/sudoers/cvtsudoers.c:645
+#: plugins/sudoers/cvtsudoers.c:760 plugins/sudoers/cvtsudoers.c:767
+#: plugins/sudoers/cvtsudoers.c:1178 plugins/sudoers/cvtsudoers.c:1182
+#: plugins/sudoers/cvtsudoers.c:1284 plugins/sudoers/cvtsudoers_ldif.c:151
+#: plugins/sudoers/cvtsudoers_ldif.c:194 plugins/sudoers/cvtsudoers_ldif.c:241
+#: plugins/sudoers/cvtsudoers_ldif.c:260 plugins/sudoers/cvtsudoers_ldif.c:331
+#: plugins/sudoers/cvtsudoers_ldif.c:386 plugins/sudoers/cvtsudoers_ldif.c:394
+#: plugins/sudoers/cvtsudoers_ldif.c:411 plugins/sudoers/cvtsudoers_ldif.c:420
+#: plugins/sudoers/cvtsudoers_ldif.c:567 plugins/sudoers/defaults.c:661
+#: plugins/sudoers/defaults.c:954 plugins/sudoers/defaults.c:1125
+#: plugins/sudoers/editor.c:70 plugins/sudoers/editor.c:88
+#: plugins/sudoers/editor.c:99 plugins/sudoers/env.c:247
+#: plugins/sudoers/filedigest.c:64 plugins/sudoers/filedigest.c:80
+#: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:136
+#: plugins/sudoers/interfaces.c:76 plugins/sudoers/iolog.c:939
+#: plugins/sudoers/iolog_path.c:172 plugins/sudoers/iolog_util.c:83
+#: plugins/sudoers/iolog_util.c:122 plugins/sudoers/iolog_util.c:131
+#: plugins/sudoers/iolog_util.c:141 plugins/sudoers/iolog_util.c:149
+#: plugins/sudoers/iolog_util.c:153 plugins/sudoers/ldap.c:183
+#: plugins/sudoers/ldap.c:414 plugins/sudoers/ldap.c:418
+#: plugins/sudoers/ldap.c:430 plugins/sudoers/ldap.c:721
+#: plugins/sudoers/ldap.c:885 plugins/sudoers/ldap.c:1233
+#: plugins/sudoers/ldap.c:1660 plugins/sudoers/ldap.c:1697
+#: plugins/sudoers/ldap.c:1778 plugins/sudoers/ldap.c:1913
+#: plugins/sudoers/ldap.c:2014 plugins/sudoers/ldap.c:2030
+#: plugins/sudoers/ldap_conf.c:221 plugins/sudoers/ldap_conf.c:252
+#: plugins/sudoers/ldap_conf.c:304 plugins/sudoers/ldap_conf.c:340
+#: plugins/sudoers/ldap_conf.c:443 plugins/sudoers/ldap_conf.c:458
+#: plugins/sudoers/ldap_conf.c:555 plugins/sudoers/ldap_conf.c:588
+#: plugins/sudoers/ldap_conf.c:679 plugins/sudoers/ldap_conf.c:762
+#: plugins/sudoers/ldap_util.c:508 plugins/sudoers/ldap_util.c:564
+#: plugins/sudoers/linux_audit.c:81 plugins/sudoers/logging.c:195
+#: plugins/sudoers/logging.c:511 plugins/sudoers/logging.c:532
+#: plugins/sudoers/logging.c:572 plugins/sudoers/logging.c:1010
+#: plugins/sudoers/match.c:724 plugins/sudoers/match.c:771
+#: plugins/sudoers/match.c:813 plugins/sudoers/match.c:841
+#: plugins/sudoers/match.c:929 plugins/sudoers/match.c:1008
+#: plugins/sudoers/parse.c:194 plugins/sudoers/parse.c:206
+#: plugins/sudoers/parse.c:221 plugins/sudoers/parse.c:233
+#: plugins/sudoers/parse_ldif.c:140 plugins/sudoers/parse_ldif.c:167
+#: plugins/sudoers/parse_ldif.c:236 plugins/sudoers/parse_ldif.c:243
+#: plugins/sudoers/parse_ldif.c:248 plugins/sudoers/parse_ldif.c:324
+#: plugins/sudoers/parse_ldif.c:335 plugins/sudoers/parse_ldif.c:341
+#: plugins/sudoers/parse_ldif.c:366 plugins/sudoers/parse_ldif.c:378
+#: plugins/sudoers/parse_ldif.c:382 plugins/sudoers/parse_ldif.c:396
+#: plugins/sudoers/parse_ldif.c:564 plugins/sudoers/parse_ldif.c:593
+#: plugins/sudoers/parse_ldif.c:618 plugins/sudoers/parse_ldif.c:678
+#: plugins/sudoers/parse_ldif.c:697 plugins/sudoers/parse_ldif.c:743
+#: plugins/sudoers/parse_ldif.c:753 plugins/sudoers/policy.c:132
+#: plugins/sudoers/policy.c:141 plugins/sudoers/policy.c:150
+#: plugins/sudoers/policy.c:176 plugins/sudoers/policy.c:303
+#: plugins/sudoers/policy.c:318 plugins/sudoers/policy.c:320
+#: plugins/sudoers/policy.c:346 plugins/sudoers/policy.c:356
+#: plugins/sudoers/policy.c:400 plugins/sudoers/policy.c:410
+#: plugins/sudoers/policy.c:419 plugins/sudoers/policy.c:428
+#: plugins/sudoers/policy.c:502 plugins/sudoers/policy.c:744
+#: plugins/sudoers/prompt.c:98 plugins/sudoers/pwutil.c:197
+#: plugins/sudoers/pwutil.c:269 plugins/sudoers/pwutil.c:346
+#: plugins/sudoers/pwutil.c:520 plugins/sudoers/pwutil.c:586
+#: plugins/sudoers/pwutil.c:656 plugins/sudoers/pwutil.c:814
+#: plugins/sudoers/pwutil.c:871 plugins/sudoers/pwutil.c:916
+#: plugins/sudoers/pwutil.c:974 plugins/sudoers/set_perms.c:392
+#: plugins/sudoers/set_perms.c:771 plugins/sudoers/set_perms.c:1155
+#: plugins/sudoers/set_perms.c:1481 plugins/sudoers/set_perms.c:1646
+#: plugins/sudoers/sssd.c:151 plugins/sudoers/sssd.c:398
+#: plugins/sudoers/sssd.c:461 plugins/sudoers/sssd.c:505
+#: plugins/sudoers/sssd.c:552 plugins/sudoers/sssd.c:743
+#: plugins/sudoers/stubs.c:101 plugins/sudoers/stubs.c:109
+#: plugins/sudoers/sudoers.c:269 plugins/sudoers/sudoers.c:279
+#: plugins/sudoers/sudoers.c:288 plugins/sudoers/sudoers.c:330
+#: plugins/sudoers/sudoers.c:653 plugins/sudoers/sudoers.c:779
+#: plugins/sudoers/sudoers.c:823 plugins/sudoers/sudoers.c:1097
+#: plugins/sudoers/sudoers_debug.c:111 plugins/sudoers/sudoreplay.c:579
+#: plugins/sudoers/sudoreplay.c:582 plugins/sudoers/sudoreplay.c:1259
+#: plugins/sudoers/sudoreplay.c:1459 plugins/sudoers/sudoreplay.c:1463
+#: plugins/sudoers/testsudoers.c:134 plugins/sudoers/testsudoers.c:234
+#: plugins/sudoers/testsudoers.c:251 plugins/sudoers/testsudoers.c:585
+#: plugins/sudoers/timestamp.c:437 plugins/sudoers/timestamp.c:481
+#: plugins/sudoers/timestamp.c:958 plugins/sudoers/toke_util.c:57
+#: plugins/sudoers/toke_util.c:110 plugins/sudoers/toke_util.c:147
+#: plugins/sudoers/tsdump.c:128 plugins/sudoers/visudo.c:150
+#: plugins/sudoers/visudo.c:312 plugins/sudoers/visudo.c:318
+#: plugins/sudoers/visudo.c:428 plugins/sudoers/visudo.c:606
+#: plugins/sudoers/visudo.c:926 plugins/sudoers/visudo.c:1013
+#: plugins/sudoers/visudo.c:1102 toke.l:844 toke.l:945 toke.l:1102
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: plugins/sudoers/alias.c:140
+#: plugins/sudoers/alias.c:148
 #, c-format
 msgid "Alias \"%s\" already defined"
 msgstr "Bí danh “%s” đã được định nghĩa rồi"
 
-#: plugins/sudoers/auth/bsdauth.c:68
+#: plugins/sudoers/auth/bsdauth.c:73
 #, c-format
 msgid "unable to get login class for user %s"
 msgstr "không thể lấy lớp đăng nhập cho tài khoản %s"
 
-#: plugins/sudoers/auth/bsdauth.c:73
+#: plugins/sudoers/auth/bsdauth.c:78
 msgid "unable to begin bsd authentication"
 msgstr "không thể khởi chạy xác thực kiểu bsd"
 
-#: plugins/sudoers/auth/bsdauth.c:81
+#: plugins/sudoers/auth/bsdauth.c:86
 msgid "invalid authentication type"
 msgstr "kiểu xác thực không hợp lệ"
 
-#: plugins/sudoers/auth/bsdauth.c:90
+#: plugins/sudoers/auth/bsdauth.c:95
 msgid "unable to initialize BSD authentication"
 msgstr "không thể khởi tạo xác thực kiểu BSD"
 
-#: plugins/sudoers/auth/bsdauth.c:178
+#: plugins/sudoers/auth/bsdauth.c:183
 msgid "your account has expired"
 msgstr "tài khoản bạn đã hết hiệu lực"
 
-#: plugins/sudoers/auth/bsdauth.c:180
+#: plugins/sudoers/auth/bsdauth.c:185
 msgid "approval failed"
 msgstr "gặp lỗi khi chấp thuận"
 
-#: plugins/sudoers/auth/fwtk.c:52
+#: plugins/sudoers/auth/fwtk.c:57
 msgid "unable to read fwtk config"
 msgstr "không thể đọc cấu hình fwtk"
 
-#: plugins/sudoers/auth/fwtk.c:57
+#: plugins/sudoers/auth/fwtk.c:62
 msgid "unable to connect to authentication server"
 msgstr "không thể kết nối tới máy chủ xác thực"
 
-#: plugins/sudoers/auth/fwtk.c:63 plugins/sudoers/auth/fwtk.c:87
-#: plugins/sudoers/auth/fwtk.c:119
+#: plugins/sudoers/auth/fwtk.c:68 plugins/sudoers/auth/fwtk.c:92
+#: plugins/sudoers/auth/fwtk.c:124
 msgid "lost connection to authentication server"
 msgstr "mất kết nối đến máy phục vụ xác thực"
 
-#: plugins/sudoers/auth/fwtk.c:67
+#: plugins/sudoers/auth/fwtk.c:72
 #, c-format
 msgid ""
 "authentication server error:\n"
@@ -311,160 +305,160 @@ msgstr ""
 "lỗi máy phục vụ xác thực:\n"
 "%s"
 
-#: plugins/sudoers/auth/kerb5.c:111
+#: plugins/sudoers/auth/kerb5.c:113
 #, c-format
 msgid "%s: unable to convert principal to string ('%s'): %s"
 msgstr "%s: không thể chuyển đổi người ủy nhiệm sang chuỗi (“%s”): %s"
 
-#: plugins/sudoers/auth/kerb5.c:161
+#: plugins/sudoers/auth/kerb5.c:163
 #, c-format
 msgid "%s: unable to parse '%s': %s"
 msgstr "%s: không thể phân tích “%s”: %s"
 
-#: plugins/sudoers/auth/kerb5.c:170
+#: plugins/sudoers/auth/kerb5.c:172
 #, c-format
 msgid "%s: unable to resolve credential cache: %s"
 msgstr "%s: không thể phân giải bộ nhớ đệm “credential”: %s"
 
-#: plugins/sudoers/auth/kerb5.c:217
+#: plugins/sudoers/auth/kerb5.c:219
 #, c-format
 msgid "%s: unable to allocate options: %s"
 msgstr "%s: không thể phân bổ các tùy chọn: %s"
 
-#: plugins/sudoers/auth/kerb5.c:232
+#: plugins/sudoers/auth/kerb5.c:234
 #, c-format
 msgid "%s: unable to get credentials: %s"
 msgstr "%s: không thể lấy giấy ủy nhiệm: %s"
 
-#: plugins/sudoers/auth/kerb5.c:245
+#: plugins/sudoers/auth/kerb5.c:247
 #, c-format
 msgid "%s: unable to initialize credential cache: %s"
 msgstr "%s: không thể khởi tạo bộ nhớ đệm “credential”: %s"
 
-#: plugins/sudoers/auth/kerb5.c:248
+#: plugins/sudoers/auth/kerb5.c:250
 #, c-format
 msgid "%s: unable to store credential in cache: %s"
 msgstr "%s: không thể cất giữ “credential” trong bộ nhớ tạm: %s"
 
-#: plugins/sudoers/auth/kerb5.c:312
+#: plugins/sudoers/auth/kerb5.c:314
 #, c-format
 msgid "%s: unable to get host principal: %s"
 msgstr "%s: không thể lấy tên máy chủ chính: %s"
 
-#: plugins/sudoers/auth/kerb5.c:326
+#: plugins/sudoers/auth/kerb5.c:328
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s: Không thể thẩm tra TGT! Gần như chắc chắn là bị tấn công!: %s"
 
-#: plugins/sudoers/auth/pam.c:108
+#: plugins/sudoers/auth/pam.c:113
 msgid "unable to initialize PAM"
 msgstr "không thể khởi tạo PAM"
 
-#: plugins/sudoers/auth/pam.c:199
+#: plugins/sudoers/auth/pam.c:204
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr "lỗi xác thực PAM: %s"
 
-#: plugins/sudoers/auth/pam.c:216
+#: plugins/sudoers/auth/pam.c:221
 msgid "account validation failure, is your account locked?"
 msgstr "xác thực tài khoản gặp lỗi nghiêm trọng, có phải tài khoản của bạn đã bị khóa?"
 
-#: plugins/sudoers/auth/pam.c:224
+#: plugins/sudoers/auth/pam.c:229
 msgid "Account or password is expired, reset your password and try again"
 msgstr "Mật khẩu hay tài khoản đã hết hạn sử dụng, hãy đặt lại mật khẩu của bạn và thử lại"
 
-#: plugins/sudoers/auth/pam.c:233
+#: plugins/sudoers/auth/pam.c:238
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr "không thể thay đổi mật khẩu đã hết hạn: %s"
 
-#: plugins/sudoers/auth/pam.c:241
+#: plugins/sudoers/auth/pam.c:246
 msgid "Password expired, contact your system administrator"
 msgstr "Mật khẩu đã hết hạn dùng, hãy liên lạc với người quản trị hệ thống của bạn"
 
-#: plugins/sudoers/auth/pam.c:245
+#: plugins/sudoers/auth/pam.c:250
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "Tài khoản hết hạn hoặc cấu hình PAM không có phiên “tài khoản” cho sudo, hãy liên hệ với người quản trị hệ thống của bạn"
 
-#: plugins/sudoers/auth/pam.c:252 plugins/sudoers/auth/pam.c:257
+#: plugins/sudoers/auth/pam.c:257 plugins/sudoers/auth/pam.c:262
 #, c-format
 msgid "PAM account management error: %s"
 msgstr "lỗi quản lý tài khoảnthực PAM: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:97 plugins/sudoers/visudo.c:227
+#: plugins/sudoers/auth/rfc1938.c:102 plugins/sudoers/visudo.c:232
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "bạn không tồn tại trong cơ sở dữ liệu %s"
 
-#: plugins/sudoers/auth/securid5.c:73
+#: plugins/sudoers/auth/securid5.c:75
 msgid "failed to initialise the ACE API library"
 msgstr "gặp lỗi khi khởi tạo thư viện “ACE API”"
 
-#: plugins/sudoers/auth/securid5.c:99
+#: plugins/sudoers/auth/securid5.c:101
 msgid "unable to contact the SecurID server"
 msgstr "không thể liên lạc được với máy chủ SecurID"
 
-#: plugins/sudoers/auth/securid5.c:108
+#: plugins/sudoers/auth/securid5.c:110
 msgid "User ID locked for SecurID Authentication"
 msgstr "ID người dùng bị khóa với “SecurID Authentication”"
 
-#: plugins/sudoers/auth/securid5.c:112 plugins/sudoers/auth/securid5.c:163
+#: plugins/sudoers/auth/securid5.c:114 plugins/sudoers/auth/securid5.c:165
 msgid "invalid username length for SecurID"
 msgstr "sai chiều dài tên tài khoản cho SecurID"
 
-#: plugins/sudoers/auth/securid5.c:116 plugins/sudoers/auth/securid5.c:168
+#: plugins/sudoers/auth/securid5.c:118 plugins/sudoers/auth/securid5.c:170
 msgid "invalid Authentication Handle for SecurID"
 msgstr "sai Bộ Tiếp Hợp Xác Thực cho SecurID"
 
-#: plugins/sudoers/auth/securid5.c:120
+#: plugins/sudoers/auth/securid5.c:122
 msgid "SecurID communication failed"
 msgstr "Truyền thông với SecurID gặp lỗi"
 
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:213
+#: plugins/sudoers/auth/securid5.c:126 plugins/sudoers/auth/securid5.c:215
 msgid "unknown SecurID error"
 msgstr "không hiểu lỗi SecurID"
 
-#: plugins/sudoers/auth/securid5.c:158
+#: plugins/sudoers/auth/securid5.c:160
 msgid "invalid passcode length for SecurID"
 msgstr "sai chiều dài passcode cho SecurID"
 
-#: plugins/sudoers/auth/sia.c:69 plugins/sudoers/auth/sia.c:124
+#: plugins/sudoers/auth/sia.c:72 plugins/sudoers/auth/sia.c:127
 msgid "unable to initialize SIA session"
 msgstr "không thể khởi tạo phiên SIA"
 
-#: plugins/sudoers/auth/sudo_auth.c:131
+#: plugins/sudoers/auth/sudo_auth.c:136
 msgid "invalid authentication methods"
 msgstr "Phương thức xác thực không hợp lệ"
 
-#: plugins/sudoers/auth/sudo_auth.c:133
+#: plugins/sudoers/auth/sudo_auth.c:138
 msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
 msgstr "Phương thức xác thực không hợp lệ được biên dịch vào trong sudo! Bạn không thể pha trộn kiểu xác thực giữa standalone và non-standalone"
 
-#: plugins/sudoers/auth/sudo_auth.c:254 plugins/sudoers/auth/sudo_auth.c:304
+#: plugins/sudoers/auth/sudo_auth.c:259 plugins/sudoers/auth/sudo_auth.c:309
 msgid "no authentication methods"
 msgstr "chưa có phương thức xác thực"
 
-#: plugins/sudoers/auth/sudo_auth.c:256
+#: plugins/sudoers/auth/sudo_auth.c:261
 msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
 msgstr "Ở đây không có phương thức xác thực nào được dịch vào trong sudo! Nếu bạn muốn tắt xác thực, sử dụng tùy chọn cấu hình --disable-authentication"
 
-#: plugins/sudoers/auth/sudo_auth.c:306
+#: plugins/sudoers/auth/sudo_auth.c:311
 msgid "Unable to initialize authentication methods."
 msgstr "Không thể khởi tạo phương thức xác thực."
 
-#: plugins/sudoers/auth/sudo_auth.c:472
+#: plugins/sudoers/auth/sudo_auth.c:477
 msgid "Authentication methods:"
 msgstr "Phương thức xác thực:"
 
-#: plugins/sudoers/bsm_audit.c:120 plugins/sudoers/bsm_audit.c:211
+#: plugins/sudoers/bsm_audit.c:123 plugins/sudoers/bsm_audit.c:215
 msgid "Could not determine audit condition"
 msgstr "Không thể phân giải điều kiện audit"
 
-#: plugins/sudoers/bsm_audit.c:183 plugins/sudoers/bsm_audit.c:273
+#: plugins/sudoers/bsm_audit.c:188 plugins/sudoers/bsm_audit.c:279
 msgid "unable to commit audit record"
 msgstr "không thể chuyển giao bản ghi “audit”"
 
-#: plugins/sudoers/check.c:262
+#: plugins/sudoers/check.c:267
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -484,129 +478,133 @@ msgstr ""
 "    #3) Quyền lực lớn đi kèm với trách nhiệm lớn.\n"
 "\n"
 
-#: plugins/sudoers/check.c:305 plugins/sudoers/check.c:315
-#: plugins/sudoers/sudoers.c:691 plugins/sudoers/sudoers.c:736
-#: plugins/sudoers/tsdump.c:121
+#: plugins/sudoers/check.c:310 plugins/sudoers/check.c:320
+#: plugins/sudoers/sudoers.c:696 plugins/sudoers/sudoers.c:741
+#: plugins/sudoers/tsdump.c:124
 #, c-format
 msgid "unknown uid: %u"
 msgstr "không biết mã số người dùng: %u"
 
-#: plugins/sudoers/check.c:310 plugins/sudoers/iolog.c:257
-#: plugins/sudoers/policy.c:912 plugins/sudoers/sudoers.c:1131
-#: plugins/sudoers/testsudoers.c:206 plugins/sudoers/testsudoers.c:366
+#: plugins/sudoers/check.c:315 plugins/sudoers/iolog.c:253
+#: plugins/sudoers/policy.c:915 plugins/sudoers/sudoers.c:1136
+#: plugins/sudoers/testsudoers.c:225 plugins/sudoers/testsudoers.c:398
 #, c-format
 msgid "unknown user: %s"
 msgstr "không biết người dùng: %s"
 
-#: plugins/sudoers/cvtsudoers.c:191
+#: plugins/sudoers/cvtsudoers.c:198
 #, c-format
 msgid "order increment: %s: %s"
 msgstr "gia tăng thứ tự: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:207
+#: plugins/sudoers/cvtsudoers.c:214
 #, c-format
 msgid "starting order: %s: %s"
 msgstr "bắt đầu thứ tự: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:218 plugins/sudoers/sudoreplay.c:310
-#: plugins/sudoers/visudo.c:177
+#: plugins/sudoers/cvtsudoers.c:224
+#, c-format
+msgid "order padding: %s: %s"
+msgstr "đệm thứ tự: %s: %s"
+
+#: plugins/sudoers/cvtsudoers.c:232 plugins/sudoers/sudoreplay.c:287
+#: plugins/sudoers/visudo.c:182
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s phiên bản %s\n"
 
-#: plugins/sudoers/cvtsudoers.c:220 plugins/sudoers/visudo.c:179
+#: plugins/sudoers/cvtsudoers.c:234 plugins/sudoers/visudo.c:184
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr "Ngữ pháp %s phiên bản %d\n"
 
-#: plugins/sudoers/cvtsudoers.c:237
+#: plugins/sudoers/cvtsudoers.c:251 plugins/sudoers/testsudoers.c:173
 #, c-format
 msgid "unsupported input format %s"
 msgstr "không hỗ trợ định dạng đầu vào %s"
 
-#: plugins/sudoers/cvtsudoers.c:252
+#: plugins/sudoers/cvtsudoers.c:266
 #, c-format
 msgid "unsupported output format %s"
 msgstr "không hỗ trợ định dạng đầu ra %s"
 
-#: plugins/sudoers/cvtsudoers.c:292
+#: plugins/sudoers/cvtsudoers.c:318
 #, c-format
 msgid "%s: input and output files must be different"
 msgstr "%s: các tập tin đầu vào và đầu ra phải khác nhau"
 
-#: plugins/sudoers/cvtsudoers.c:308 plugins/sudoers/sudoers.c:168
-#: plugins/sudoers/testsudoers.c:245 plugins/sudoers/visudo.c:233
-#: plugins/sudoers/visudo.c:589 plugins/sudoers/visudo.c:911
+#: plugins/sudoers/cvtsudoers.c:334 plugins/sudoers/sudoers.c:172
+#: plugins/sudoers/testsudoers.c:264 plugins/sudoers/visudo.c:238
+#: plugins/sudoers/visudo.c:594 plugins/sudoers/visudo.c:917
 msgid "unable to initialize sudoers default values"
 msgstr "không thể khởi giá trị mặc định sudoers"
 
-#: plugins/sudoers/cvtsudoers.c:393 plugins/sudoers/ldap_conf.c:412
+#: plugins/sudoers/cvtsudoers.c:420 plugins/sudoers/ldap_conf.c:433
 #, c-format
 msgid "%s: %s: %s: %s"
 msgstr "%s: %s: %s: %s"
 
-#: plugins/sudoers/cvtsudoers.c:452
+#: plugins/sudoers/cvtsudoers.c:479
 #, c-format
 msgid "%s: unknown key word: %s"
 msgstr "%s: không biết từ khóa: %s"
 
-#: plugins/sudoers/cvtsudoers.c:498
+#: plugins/sudoers/cvtsudoers.c:525
 #, c-format
 msgid "invalid defaults type: %s"
 msgstr "kiểu mặc định không hợp lệ: %s"
 
-#: plugins/sudoers/cvtsudoers.c:521
+#: plugins/sudoers/cvtsudoers.c:548
 #, c-format
 msgid "invalid suppression type: %s"
 msgstr "kiểu biểu thức không hợp lệ: %s"
 
-#: plugins/sudoers/cvtsudoers.c:561 plugins/sudoers/cvtsudoers.c:575
+#: plugins/sudoers/cvtsudoers.c:588 plugins/sudoers/cvtsudoers.c:602
 #, c-format
 msgid "invalid filter: %s"
 msgstr "bộ lọc không hợp lệ: %s"
 
-#: plugins/sudoers/cvtsudoers.c:653 plugins/sudoers/cvtsudoers.c:1250
-#: plugins/sudoers/cvtsudoers_json.c:1113
-#: plugins/sudoers/cvtsudoers_ldif.c:627
-#: plugins/sudoers/cvtsudoers_ldif.c:1163 plugins/sudoers/iolog.c:415
-#: plugins/sudoers/sudoers.c:898 plugins/sudoers/sudoreplay.c:356
-#: plugins/sudoers/sudoreplay.c:1366 plugins/sudoers/sudoreplay.c:1570
-#: plugins/sudoers/timestamp.c:410 plugins/sudoers/tsdump.c:130
-#: plugins/sudoers/visudo.c:907
+#: plugins/sudoers/cvtsudoers.c:621 plugins/sudoers/cvtsudoers.c:638
+#: plugins/sudoers/cvtsudoers.c:1244 plugins/sudoers/cvtsudoers_json.c:1128
+#: plugins/sudoers/cvtsudoers_ldif.c:641 plugins/sudoers/iolog.c:411
+#: plugins/sudoers/iolog_util.c:72 plugins/sudoers/sudoers.c:903
+#: plugins/sudoers/sudoreplay.c:333 plugins/sudoers/sudoreplay.c:1425
+#: plugins/sudoers/timestamp.c:446 plugins/sudoers/tsdump.c:133
+#: plugins/sudoers/visudo.c:913
 #, c-format
 msgid "unable to open %s"
 msgstr "không thể mở “%s”"
 
-#: plugins/sudoers/cvtsudoers.c:656 plugins/sudoers/visudo.c:916
+#: plugins/sudoers/cvtsudoers.c:641 plugins/sudoers/visudo.c:922
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "gặp lỗi khi phân tích tập tin %s, không rõ bị lỗi gì"
 
-#: plugins/sudoers/cvtsudoers.c:664 plugins/sudoers/visudo.c:933
+#: plugins/sudoers/cvtsudoers.c:649 plugins/sudoers/visudo.c:939
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "lỗi cú pháp trong %s gần dòng %d\n"
 
-#: plugins/sudoers/cvtsudoers.c:667 plugins/sudoers/visudo.c:936
+#: plugins/sudoers/cvtsudoers.c:652 plugins/sudoers/visudo.c:942
 #, c-format
 msgid "parse error in %s\n"
 msgstr "lỗi cú pháp trong %s\n"
 
-#: plugins/sudoers/cvtsudoers.c:1297 plugins/sudoers/iolog.c:502
-#: plugins/sudoers/sudoreplay.c:1135 plugins/sudoers/timestamp.c:294
-#: plugins/sudoers/timestamp.c:297
+#: plugins/sudoers/cvtsudoers.c:1291 plugins/sudoers/iolog.c:498
+#: plugins/sudoers/sudoreplay.c:1129 plugins/sudoers/timestamp.c:330
+#: plugins/sudoers/timestamp.c:333
 #, c-format
 msgid "unable to write to %s"
 msgstr "không thể ghi vào %s"
 
-#: plugins/sudoers/cvtsudoers.c:1320
+#: plugins/sudoers/cvtsudoers.c:1314
 #, c-format
 msgid ""
 "%s - convert between sudoers file formats\n"
 "\n"
 msgstr "%s - chuyển đổi giữa các định dạng các tập tin sudoers\n"
 
-#: plugins/sudoers/cvtsudoers.c:1322
+#: plugins/sudoers/cvtsudoers.c:1316
 msgid ""
 "\n"
 "Options:\n"
@@ -622,6 +620,7 @@ msgid ""
 "  -o, --output=output_file   write converted sudoers to output_file\n"
 "  -O, --order-start=num      starting point for first sudoOrder\n"
 "  -p, --prune-matches        prune non-matching users, groups and hosts\n"
+"  -P, --padding=num          base padding for sudoOrder increment\n"
 "  -s, --suppress=sections    suppress output of certain sections\n"
 "  -V, --version              display version information and exit"
 msgstr ""
@@ -632,65 +631,56 @@ msgstr ""
 "  -e, --expand-aliases       khai triển bí danh khi chuyển đổi\n"
 "  -f, --output-format=format đặt định dạng đầu ra: JSON, LDIF hay sudoers\n"
 "  -i, --input-format=format  đặt định dạng đầu vào: LDIF hoặc sudoers\n"
-"  -I, --increment=num        tổng gia tăng cho từng sudoOrder\n"
+"  -I, --increment=số         tổng gia tăng cho từng sudoOrder\n"
 "  -h, --help                 hiển thị trợ giúp rồi thoát\n"
 "  -m, --match=filter         chỉ chuyển đổi những hạng mục khớp bộ lọc\n"
 "  -M, --match-local          khớp lọc sử dụng cơ sở dữ liệu passwd và group người dùng\n"
 "  -o, --output=tập_tin_đầu_ra  ghi sudoers đã chuyển đổi sang tập_tin_đầu_ra\n"
-"  -O, --order-start=num      điểm đầu cho sudoOrder đầu tiên\n"
-"  -s, --suppress=sections    chặn xuất cho từng phần cụ thể\n"
+"  -O, --order-start=số       điểm đầu cho sudoOrder đầu tiên\n"
 "  -p, --prune-matches        cắt bỏ những người dùng, nhóm và máy không khớp mẫu\n"
+"  -P, --padding=số           đệm cơ sở cho gia tăng sudoOrder\n"
+"  -s, --suppress=sections    chặn xuất cho từng phần cụ thể\n"
 "  -V, --version              hiển thị phiên bản rồi thoát"
 
-#: plugins/sudoers/cvtsudoers_json.c:673 plugins/sudoers/cvtsudoers_json.c:708
-#: plugins/sudoers/cvtsudoers_json.c:924
+#: plugins/sudoers/cvtsudoers_json.c:682 plugins/sudoers/cvtsudoers_json.c:718
+#: plugins/sudoers/cvtsudoers_json.c:936
 #, c-format
 msgid "unknown defaults entry \"%s\""
 msgstr "không hiểu mục tin mặc định “%s”"
 
-#: plugins/sudoers/cvtsudoers_json.c:844 plugins/sudoers/cvtsudoers_json.c:859
-#: plugins/sudoers/cvtsudoers_ldif.c:299 plugins/sudoers/cvtsudoers_ldif.c:310
-#: plugins/sudoers/ldap.c:474
+#: plugins/sudoers/cvtsudoers_json.c:856 plugins/sudoers/cvtsudoers_json.c:871
+#: plugins/sudoers/cvtsudoers_ldif.c:306 plugins/sudoers/cvtsudoers_ldif.c:317
+#: plugins/sudoers/ldap.c:480
 msgid "unable to get GMT time"
 msgstr "không thể lấy giờ quốc tế (GMT)"
 
-#: plugins/sudoers/cvtsudoers_json.c:847 plugins/sudoers/cvtsudoers_json.c:862
-#: plugins/sudoers/cvtsudoers_ldif.c:302 plugins/sudoers/cvtsudoers_ldif.c:313
-#: plugins/sudoers/ldap.c:480
+#: plugins/sudoers/cvtsudoers_json.c:859 plugins/sudoers/cvtsudoers_json.c:874
+#: plugins/sudoers/cvtsudoers_ldif.c:309 plugins/sudoers/cvtsudoers_ldif.c:320
+#: plugins/sudoers/ldap.c:486
 msgid "unable to format timestamp"
 msgstr "không thể định dạng dấu-vết-thời-gian"
 
-#: plugins/sudoers/cvtsudoers_ldif.c:517 plugins/sudoers/env.c:295
-#: plugins/sudoers/env.c:302 plugins/sudoers/env.c:407
-#: plugins/sudoers/ldap.c:488 plugins/sudoers/ldap.c:719
-#: plugins/sudoers/ldap.c:1046 plugins/sudoers/ldap_conf.c:218
-#: plugins/sudoers/ldap_conf.c:308 plugins/sudoers/linux_audit.c:82
-#: plugins/sudoers/logging.c:1008 plugins/sudoers/policy.c:618
-#: plugins/sudoers/policy.c:628 plugins/sudoers/prompt.c:161
-#: plugins/sudoers/sudoers.c:840 plugins/sudoers/testsudoers.c:236
-#: plugins/sudoers/toke_util.c:157
+#: plugins/sudoers/cvtsudoers_ldif.c:524 plugins/sudoers/env.c:309
+#: plugins/sudoers/env.c:316 plugins/sudoers/env.c:421
+#: plugins/sudoers/ldap.c:494 plugins/sudoers/ldap.c:725
+#: plugins/sudoers/ldap.c:1052 plugins/sudoers/ldap_conf.c:225
+#: plugins/sudoers/ldap_conf.c:315 plugins/sudoers/linux_audit.c:87
+#: plugins/sudoers/logging.c:1015 plugins/sudoers/policy.c:623
+#: plugins/sudoers/policy.c:633 plugins/sudoers/prompt.c:166
+#: plugins/sudoers/sudoers.c:845 plugins/sudoers/testsudoers.c:255
+#: plugins/sudoers/toke_util.c:159
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "lỗi nội bộ, %s bị tràn"
 
-#: plugins/sudoers/cvtsudoers_ldif.c:622
+#: plugins/sudoers/cvtsudoers_ldif.c:593
+#, c-format
+msgid "too many sudoers entries, maximum %u"
+msgstr "Quá nhiều mục tin sudoers, tối đa là %u"
+
+#: plugins/sudoers/cvtsudoers_ldif.c:636
 msgid "the SUDOERS_BASE environment variable is not set and the -b option was not specified."
 msgstr "biến môi trường SUDOERS_BASE chưa được đặt và tùy chọn chưa được đưa ra."
-
-#: plugins/sudoers/cvtsudoers_ldif.c:757
-#, c-format
-msgid "ignoring invalid attribute value: %s"
-msgstr "bỏ qua giá trị thuộc tính không hợp lệ: %s"
-
-#: plugins/sudoers/cvtsudoers_ldif.c:1197
-#, c-format
-msgid "ignoring incomplete sudoRole: cn: %s"
-msgstr "bỏ qua sudoRole chưa hoàn thiện: cn: %s"
-
-#: plugins/sudoers/cvtsudoers_ldif.c:1349 plugins/sudoers/ldap.c:1778
-#, c-format
-msgid "invalid sudoOrder attribute: %s"
-msgstr "thuộc tính sudoOrder không hợp lệ: %s"
 
 #: plugins/sudoers/def_data.c:42
 #, c-format
@@ -1196,307 +1186,348 @@ msgstr "Bỏ qua HOA/thường khi khớp tên người dùng"
 msgid "Ignore case when matching group names"
 msgstr "Bỏ qua HOA/thường khi khớp tên nhóm"
 
-#: plugins/sudoers/defaults.c:224
+#: plugins/sudoers/defaults.c:229
 #, c-format
 msgid "%s:%d unknown defaults entry \"%s\""
 msgstr "%s:%d không hiểu mục tin mặc định “%s”"
 
-#: plugins/sudoers/defaults.c:227
+#: plugins/sudoers/defaults.c:232
 #, c-format
 msgid "%s: unknown defaults entry \"%s\""
 msgstr "%s: không hiểu mục tin mặc định “%s”"
 
-#: plugins/sudoers/defaults.c:270
+#: plugins/sudoers/defaults.c:275
 #, c-format
 msgid "%s:%d no value specified for \"%s\""
 msgstr "%s:%d chưa chỉ ra giá trị cho “%s”"
 
-#: plugins/sudoers/defaults.c:273
+#: plugins/sudoers/defaults.c:278
 #, c-format
 msgid "%s: no value specified for \"%s\""
 msgstr "%s: chưa chỉ ra giá trị cho “%s”"
 
-#: plugins/sudoers/defaults.c:293
+#: plugins/sudoers/defaults.c:298
 #, c-format
 msgid "%s:%d values for \"%s\" must start with a '/'"
 msgstr "%s:%d giá trị cho “%s” phải bắt đầu bằng dấu “/”"
 
-#: plugins/sudoers/defaults.c:296
+#: plugins/sudoers/defaults.c:301
 #, c-format
 msgid "%s: values for \"%s\" must start with a '/'"
 msgstr "%s: giá trị cho “%s” phải bắt đầu bằng dấu “/”"
 
-#: plugins/sudoers/defaults.c:318
+#: plugins/sudoers/defaults.c:323
 #, c-format
 msgid "%s:%d option \"%s\" does not take a value"
 msgstr "%s:%d tùy chọn “%s” không nhận giá trị"
 
-#: plugins/sudoers/defaults.c:321
+#: plugins/sudoers/defaults.c:326
 #, c-format
 msgid "%s: option \"%s\" does not take a value"
 msgstr "%s: tùy chọn “%s” không nhận giá trị"
 
-#: plugins/sudoers/defaults.c:346
+#: plugins/sudoers/defaults.c:351
 #, c-format
 msgid "%s:%d invalid Defaults type 0x%x for option \"%s\""
 msgstr "%s:%d kiểu Defaults không hợp lệ 0x%x cho tùy chọn “%s”"
 
-#: plugins/sudoers/defaults.c:349
+#: plugins/sudoers/defaults.c:354
 #, c-format
 msgid "%s: invalid Defaults type 0x%x for option \"%s\""
 msgstr "%s: kiểu Defaults không hợp lệ 0x%x cho tùy chọn “%s”"
 
-#: plugins/sudoers/defaults.c:359
+#: plugins/sudoers/defaults.c:364
 #, c-format
 msgid "%s:%d value \"%s\" is invalid for option \"%s\""
 msgstr "%s:%d giá trị “%s” là không hợp lệ đối với tùy chọn “%s”"
 
-#: plugins/sudoers/defaults.c:362
+#: plugins/sudoers/defaults.c:367
 #, c-format
 msgid "%s: value \"%s\" is invalid for option \"%s\""
 msgstr "%s: giá trị “%s” là không hợp lệ đối với tùy chọn “%s”"
 
-#: plugins/sudoers/env.c:376
+#: plugins/sudoers/env.c:390
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp sai hỏng, chiều dài không khớp"
 
-#: plugins/sudoers/env.c:1055
+#: plugins/sudoers/env.c:1111
 msgid "unable to rebuild the environment"
 msgstr "không thể xây dựng lại môi trường"
 
-#: plugins/sudoers/env.c:1129
+#: plugins/sudoers/env.c:1185
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "rất tiếc, bạn không được phép đặt các biến môi trường sau đây: %1s"
 
-#: plugins/sudoers/file.c:111
+#: plugins/sudoers/file.c:114
 #, c-format
 msgid "parse error in %s near line %d"
 msgstr "lỗi phân tích trong %s gần dòng %d"
 
-#: plugins/sudoers/file.c:114
+#: plugins/sudoers/file.c:117
 #, c-format
 msgid "parse error in %s"
 msgstr "gặp lỗi phân tích trong %s"
 
-#: plugins/sudoers/filedigest.c:56
+#: plugins/sudoers/filedigest.c:59
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "không hỗ trợ kiểu tóm lược %d dành cho %s"
 
-#: plugins/sudoers/filedigest.c:85
+#: plugins/sudoers/filedigest.c:88
 #, c-format
 msgid "%s: read error"
 msgstr "%s: lỗi đọc"
 
-#: plugins/sudoers/group_plugin.c:83
+#: plugins/sudoers/group_plugin.c:88
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s phải được sở hữu bởi uid %d"
 
-#: plugins/sudoers/group_plugin.c:87
+#: plugins/sudoers/group_plugin.c:92
 #, c-format
 msgid "%s must only be writable by owner"
 msgstr "%s phải là những thứ chỉ có thể ghi bởi chủ sở hữu"
 
-#: plugins/sudoers/group_plugin.c:95 plugins/sudoers/sssd.c:550
+#: plugins/sudoers/group_plugin.c:100 plugins/sudoers/sssd.c:561
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "không thể tải %s: %s"
 
-#: plugins/sudoers/group_plugin.c:101
+#: plugins/sudoers/group_plugin.c:106
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
 msgstr "không tìm thấy ký hiệu “group_plugin” trong %s"
 
-#: plugins/sudoers/group_plugin.c:106
+#: plugins/sudoers/group_plugin.c:111
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
 msgstr "%s: phiên bản số lớn phần bổ sung nhóm không tương thích %d, mong đợi %d"
 
-#: plugins/sudoers/interfaces.c:79 plugins/sudoers/interfaces.c:96
+#: plugins/sudoers/interfaces.c:84 plugins/sudoers/interfaces.c:101
 #, c-format
 msgid "unable to parse IP address \"%s\""
 msgstr "không thể phân tích địa chỉ IP \"%s\""
 
-#: plugins/sudoers/interfaces.c:84 plugins/sudoers/interfaces.c:101
+#: plugins/sudoers/interfaces.c:89 plugins/sudoers/interfaces.c:106
 #, c-format
 msgid "unable to parse netmask \"%s\""
 msgstr "không thể phân tích mặt nạ mạng \"%s\""
 
-#: plugins/sudoers/interfaces.c:129
+#: plugins/sudoers/interfaces.c:134
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Cặp địa chỉ IP và mặt nạ cục bộ:\n"
 
-#: plugins/sudoers/iolog.c:119 plugins/sudoers/mkdir_parents.c:75
+#: plugins/sudoers/iolog.c:115 plugins/sudoers/mkdir_parents.c:80
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "%s có tồn tại nhưng nó không phải là một thư mục (0%o)"
 
-#: plugins/sudoers/iolog.c:144 plugins/sudoers/iolog.c:184
-#: plugins/sudoers/mkdir_parents.c:64 plugins/sudoers/timestamp.c:174
+#: plugins/sudoers/iolog.c:140 plugins/sudoers/iolog.c:180
+#: plugins/sudoers/mkdir_parents.c:69 plugins/sudoers/timestamp.c:210
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "không thể tạo thư mục “%s”"
 
-#: plugins/sudoers/iolog.c:188 plugins/sudoers/visudo.c:718
-#: plugins/sudoers/visudo.c:728
+#: plugins/sudoers/iolog.c:184 plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:734
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "không thể chuyển đổi chế độ của %s thành 0%o"
 
-#: plugins/sudoers/iolog.c:296 plugins/sudoers/sudoers.c:1162
-#: plugins/sudoers/testsudoers.c:390
+#: plugins/sudoers/iolog.c:292 plugins/sudoers/sudoers.c:1167
+#: plugins/sudoers/testsudoers.c:422
 #, c-format
 msgid "unknown group: %s"
 msgstr "không nhận ra nhóm: %s"
 
-#: plugins/sudoers/iolog.c:466 plugins/sudoers/sudoers.c:902
-#: plugins/sudoers/sudoreplay.c:868 plugins/sudoers/sudoreplay.c:1681
-#: plugins/sudoers/tsdump.c:140
+#: plugins/sudoers/iolog.c:462 plugins/sudoers/sudoers.c:907
+#: plugins/sudoers/sudoreplay.c:840 plugins/sudoers/sudoreplay.c:1536
+#: plugins/sudoers/tsdump.c:143
 #, c-format
 msgid "unable to read %s"
 msgstr "không thể đọc %s"
 
-#: plugins/sudoers/iolog.c:581 plugins/sudoers/iolog.c:800
+#: plugins/sudoers/iolog.c:577 plugins/sudoers/iolog.c:797
 #, c-format
 msgid "unable to create %s"
 msgstr "không thể tạo “%s”"
 
-#: plugins/sudoers/iolog.c:1032 plugins/sudoers/iolog.c:1107
-#: plugins/sudoers/iolog.c:1188
+#: plugins/sudoers/iolog.c:820 plugins/sudoers/iolog.c:1035
+#: plugins/sudoers/iolog.c:1111 plugins/sudoers/iolog.c:1205
+#: plugins/sudoers/iolog.c:1265
 #, c-format
 msgid "unable to write to I/O log file: %s"
 msgstr "không thể ghi vào tập tin nhật ký V/R: %s"
 
-#: plugins/sudoers/iolog.c:1066
+#: plugins/sudoers/iolog.c:1069
 #, c-format
-msgid "%s: internal error, file index %d not open"
-msgstr "%s: lỗi hệ thống, tập tin mục lục %d chưa được mở"
+msgid "%s: internal error, I/O log file for event %d not open"
+msgstr "%s: lỗi bên trong, tập tin nhật ký vào ra cho sự kiện %d chưa được mở"
 
-#: plugins/sudoers/ldap.c:170 plugins/sudoers/ldap_conf.c:287
+#: plugins/sudoers/iolog.c:1228
+#, c-format
+msgid "%s: internal error, invalid signal %d"
+msgstr "%s: lỗi bên trong, tín hiệu %d không hợp lệ"
+
+#: plugins/sudoers/iolog_util.c:87
+#, c-format
+msgid "%s: invalid log file"
+msgstr "%s: tập tin nhật ký không hợp lệ"
+
+#: plugins/sudoers/iolog_util.c:105
+#, c-format
+msgid "%s: time stamp field is missing"
+msgstr "%s: thiếu trường dấu vết thời gian"
+
+#: plugins/sudoers/iolog_util.c:111
+#, c-format
+msgid "%s: time stamp %s: %s"
+msgstr "%s: dấu vết thời gian “%s”: %s"
+
+#: plugins/sudoers/iolog_util.c:118
+#, c-format
+msgid "%s: user field is missing"
+msgstr "%s: thiếu trường tài khoản người dùng"
+
+#: plugins/sudoers/iolog_util.c:127
+#, c-format
+msgid "%s: runas user field is missing"
+msgstr "%s: thiếu trường “runas user” (chạy với tư cách tài khoản này)"
+
+#: plugins/sudoers/iolog_util.c:136
+#, c-format
+msgid "%s: runas group field is missing"
+msgstr "%s: thiếu trường “runas group” (chạy dưới danh nghĩa nhóm này)"
+
+#: plugins/sudoers/ldap.c:176 plugins/sudoers/ldap_conf.c:294
 msgid "starttls not supported when using ldaps"
 msgstr "“starttls” chỉ được hỗ trợ khi dùng với “ldaps”"
 
-#: plugins/sudoers/ldap.c:241
+#: plugins/sudoers/ldap.c:247
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "không thể khởi tạo chứng nhận SSL và csdl khóa: %s"
 
-#: plugins/sudoers/ldap.c:244
+#: plugins/sudoers/ldap.c:250
 #, c-format
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "bạn phải đặt TLS_CERT trong %s để sử dụng SSL"
 
-#: plugins/sudoers/ldap.c:1606
+#: plugins/sudoers/ldap.c:1612
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "không thể khởi tạo LDAP: %s"
 
-#: plugins/sudoers/ldap.c:1642
+#: plugins/sudoers/ldap.c:1648
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls được chỉ ra nhưng thư viện LDAP không hỗ trợ ldap_start_tls_s() hoặc ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap_conf.c:196
+#: plugins/sudoers/ldap.c:1785 plugins/sudoers/parse_ldif.c:735
+#, c-format
+msgid "invalid sudoOrder attribute: %s"
+msgstr "thuộc tính sudoOrder không hợp lệ: %s"
+
+#: plugins/sudoers/ldap_conf.c:203
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: cổng quá lớn"
 
-#: plugins/sudoers/ldap_conf.c:256
+#: plugins/sudoers/ldap_conf.c:263
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "không hỗ trợ kiểu “LDAP uri”: %s"
 
-#: plugins/sudoers/ldap_conf.c:283
+#: plugins/sudoers/ldap_conf.c:290
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "không thể trộn ldap và ldaps URIs"
 
-#: plugins/sudoers/ldap_util.c:470 plugins/sudoers/ldap_util.c:472
+#: plugins/sudoers/ldap_util.c:454 plugins/sudoers/ldap_util.c:456
 #, c-format
 msgid "unable to convert sudoOption: %s%s%s"
 msgstr "không thể chuyển đổi sudoOption: %s%s%s"
 
-#: plugins/sudoers/linux_audit.c:52
+#: plugins/sudoers/linux_audit.c:57
 msgid "unable to open audit system"
 msgstr "không thể mở hệ thống audit"
 
-#: plugins/sudoers/linux_audit.c:93
+#: plugins/sudoers/linux_audit.c:98
 msgid "unable to send audit message"
 msgstr "không thể gửi thông tin audit"
 
-#: plugins/sudoers/logging.c:108
+#: plugins/sudoers/logging.c:113
 #, c-format
 msgid "%8s : %s"
 msgstr "%8s : %s"
 
-#: plugins/sudoers/logging.c:136
+#: plugins/sudoers/logging.c:141
 #, c-format
 msgid "%8s : (command continued) %s"
 msgstr "%8s : (lệnh tiếp tục) %s"
 
-#: plugins/sudoers/logging.c:165
+#: plugins/sudoers/logging.c:170
 #, c-format
 msgid "unable to open log file: %s"
 msgstr "không thể mở tập tin nhật ký: %s"
 
-#: plugins/sudoers/logging.c:173
+#: plugins/sudoers/logging.c:178
 #, c-format
 msgid "unable to lock log file: %s"
 msgstr "không thể khóa tập tin nhật ký: %s"
 
-#: plugins/sudoers/logging.c:206
+#: plugins/sudoers/logging.c:211
 #, c-format
 msgid "unable to write log file: %s"
 msgstr "không thể ghi vào tập tin nhật ký: %s"
 
-#: plugins/sudoers/logging.c:235
+#: plugins/sudoers/logging.c:240
 msgid "No user or host"
 msgstr "Không có tài khoản hay tên máy chủ"
 
-#: plugins/sudoers/logging.c:237
+#: plugins/sudoers/logging.c:242
 msgid "validation failure"
 msgstr "việc phê chuẩn thất bại"
 
-#: plugins/sudoers/logging.c:244
+#: plugins/sudoers/logging.c:249
 msgid "user NOT in sudoers"
 msgstr "tài khoản KHÔNG có trong sudoers"
 
-#: plugins/sudoers/logging.c:246
+#: plugins/sudoers/logging.c:251
 msgid "user NOT authorized on host"
 msgstr "tài khoản KHÔNG được cho phép sử dụng trên máy chủ"
 
-#: plugins/sudoers/logging.c:248
+#: plugins/sudoers/logging.c:253
 msgid "command not allowed"
 msgstr "lệnh không được phép"
 
-#: plugins/sudoers/logging.c:283
+#: plugins/sudoers/logging.c:288
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
 msgstr "%s không trong tập tin sudoers. Sự việc này sẽ được báo cáo.\n"
 
-#: plugins/sudoers/logging.c:286
+#: plugins/sudoers/logging.c:291
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
 msgstr "%s không được phép chạy lệnh sudo trên %s. Sự việc này sẽ được báo cáo.\n"
 
-#: plugins/sudoers/logging.c:290
+#: plugins/sudoers/logging.c:295
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
 msgstr "Rất tiếc, tài khoản %s không được chạy lệnh sudo trên %s.\n"
 
-#: plugins/sudoers/logging.c:293
+#: plugins/sudoers/logging.c:298
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "Rất tiếc, tài khoản %s không được phép thi hành “%s%s%s” như là %s%s%s trên %s.\n"
 
-#: plugins/sudoers/logging.c:330 plugins/sudoers/sudoers.c:433
-#: plugins/sudoers/sudoers.c:435 plugins/sudoers/sudoers.c:437
-#: plugins/sudoers/sudoers.c:439 plugins/sudoers/sudoers.c:594
-#: plugins/sudoers/sudoers.c:596
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:438
+#: plugins/sudoers/sudoers.c:440 plugins/sudoers/sudoers.c:442
+#: plugins/sudoers/sudoers.c:444 plugins/sudoers/sudoers.c:599
+#: plugins/sudoers/sudoers.c:601
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: không tìm thấy lệnh"
 
-#: plugins/sudoers/logging.c:332 plugins/sudoers/sudoers.c:429
+#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:434
 #, c-format
 msgid ""
 "ignoring \"%s\" found in '.'\n"
@@ -1505,56 +1536,56 @@ msgstr ""
 "đang bỏ qua “%s” được tìm thấy trong “.”\n"
 "Sử dụng “sudo ./%s” nếu đây là “%s” bạn muốn chạy."
 
-#: plugins/sudoers/logging.c:349
+#: plugins/sudoers/logging.c:354
 msgid "authentication failure"
 msgstr "xác thực gặp lỗi nghiêm trọng"
 
-#: plugins/sudoers/logging.c:375
+#: plugins/sudoers/logging.c:380
 msgid "a password is required"
 msgstr "bắt buộc phải có mật khẩu"
 
-#: plugins/sudoers/logging.c:438
+#: plugins/sudoers/logging.c:443
 #, c-format
 msgid "%u incorrect password attempt"
 msgid_plural "%u incorrect password attempts"
 msgstr[0] "đã sai mật khẩu %u lần"
 
-#: plugins/sudoers/logging.c:659
+#: plugins/sudoers/logging.c:666
 msgid "unable to fork"
 msgstr "không thể tạo tiến trình con"
 
-#: plugins/sudoers/logging.c:667 plugins/sudoers/logging.c:719
+#: plugins/sudoers/logging.c:674 plugins/sudoers/logging.c:726
 #, c-format
 msgid "unable to fork: %m"
 msgstr "không thể tạo tiến trình con: %m"
 
-#: plugins/sudoers/logging.c:709
+#: plugins/sudoers/logging.c:716
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "không thể mở ống dẫn lệnh: %m"
 
-#: plugins/sudoers/logging.c:734
+#: plugins/sudoers/logging.c:741
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "không thể dup (nhân đôi) stdin: %m"
 
-#: plugins/sudoers/logging.c:772
+#: plugins/sudoers/logging.c:779
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "không thể thực thi %s: %m"
 
-#: plugins/sudoers/match.c:842
+#: plugins/sudoers/match.c:874
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "tóm lược cho %s (%s) không ở dạng thức %s"
 
-#: plugins/sudoers/mkdir_parents.c:70 plugins/sudoers/sudoers.c:913
-#: plugins/sudoers/visudo.c:416 plugins/sudoers/visudo.c:712
+#: plugins/sudoers/mkdir_parents.c:75 plugins/sudoers/sudoers.c:918
+#: plugins/sudoers/visudo.c:421 plugins/sudoers/visudo.c:717
 #, c-format
 msgid "unable to stat %s"
 msgstr "không thể lấy thống kê %s"
 
-#: plugins/sudoers/parse.c:434
+#: plugins/sudoers/parse.c:444
 #, c-format
 msgid ""
 "\n"
@@ -1563,7 +1594,7 @@ msgstr ""
 "\n"
 "Vai trò LDAP: %s\n"
 
-#: plugins/sudoers/parse.c:437
+#: plugins/sudoers/parse.c:447
 #, c-format
 msgid ""
 "\n"
@@ -1572,88 +1603,98 @@ msgstr ""
 "\n"
 "Mục Sudoers:\n"
 
-#: plugins/sudoers/parse.c:439
+#: plugins/sudoers/parse.c:449
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    ChạyVớiTưCáchNgườiDùng: "
 
-#: plugins/sudoers/parse.c:454
+#: plugins/sudoers/parse.c:464
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    ChạyVớiTưCáchNhóm: "
 
-#: plugins/sudoers/parse.c:464
+#: plugins/sudoers/parse.c:474
 #, c-format
 msgid "    Options: "
 msgstr "    Tùy chọn: "
 
-#: plugins/sudoers/parse.c:518
+#: plugins/sudoers/parse.c:528
 #, c-format
 msgid "    Commands:\n"
 msgstr "      Lệnh:\n"
 
-#: plugins/sudoers/parse.c:709
+#: plugins/sudoers/parse.c:719
 #, c-format
 msgid "Matching Defaults entries for %s on %s:\n"
 msgstr "Các mục mặc định khớp cho %s trên máy %s:\n"
 
-#: plugins/sudoers/parse.c:727
+#: plugins/sudoers/parse.c:737
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
 msgstr "Runas và Đặc-tả-lệnh mặc định cho %s:\n"
 
-#: plugins/sudoers/parse.c:745
+#: plugins/sudoers/parse.c:755
 #, c-format
 msgid "User %s may run the following commands on %s:\n"
 msgstr "Người dùng %s có thể chạy những lệnh sau trên máy %s:\n"
 
-#: plugins/sudoers/parse.c:760
+#: plugins/sudoers/parse.c:770
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Tài khoản %s không được phép thi hành sudo trên %s.\n"
 
-#: plugins/sudoers/policy.c:83 plugins/sudoers/policy.c:109
+#: plugins/sudoers/parse_ldif.c:145
+#, c-format
+msgid "ignoring invalid attribute value: %s"
+msgstr "bỏ qua giá trị thuộc tính không hợp lệ: %s"
+
+#: plugins/sudoers/parse_ldif.c:584
+#, c-format
+msgid "ignoring incomplete sudoRole: cn: %s"
+msgstr "bỏ qua sudoRole chưa hoàn thiện: cn: %s"
+
+#: plugins/sudoers/policy.c:88 plugins/sudoers/policy.c:114
 #, c-format
 msgid "invalid %.*s set by sudo front-end"
 msgstr "%.*s không hợp lệ đặt bởi ứng dụng chạy phía trước sudo"
 
-#: plugins/sudoers/policy.c:288 plugins/sudoers/testsudoers.c:259
+#: plugins/sudoers/policy.c:293 plugins/sudoers/testsudoers.c:278
 msgid "unable to parse network address list"
 msgstr "không thể phân tích danh sách địa chỉ mạng"
 
-#: plugins/sudoers/policy.c:432
+#: plugins/sudoers/policy.c:437
 msgid "user name not set by sudo front-end"
 msgstr "tên người dùng không đặt bởi ứng dụng chạy phía trước sudo"
 
-#: plugins/sudoers/policy.c:436
+#: plugins/sudoers/policy.c:441
 msgid "user ID not set by sudo front-end"
 msgstr "mã số người dùng không đặt bởi ứng dụng chạy phía trước sudo"
 
-#: plugins/sudoers/policy.c:440
+#: plugins/sudoers/policy.c:445
 msgid "group ID not set by sudo front-end"
 msgstr "mã số nhóm không đặt bởi ứng dụng chạy phía trước sudo"
 
-#: plugins/sudoers/policy.c:444
+#: plugins/sudoers/policy.c:449
 msgid "host name not set by sudo front-end"
 msgstr "tên máy không đặt bởi ứng dụng chạy phía trước sudo"
 
-#: plugins/sudoers/policy.c:797 plugins/sudoers/visudo.c:215
-#: plugins/sudoers/visudo.c:845
+#: plugins/sudoers/policy.c:802 plugins/sudoers/visudo.c:220
+#: plugins/sudoers/visudo.c:851
 #, c-format
 msgid "unable to execute %s"
 msgstr "không thể thực thi %s"
 
-#: plugins/sudoers/policy.c:930
+#: plugins/sudoers/policy.c:933
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Phiên bản của phần bổ sung chính sách Sudoers %s\n"
 
-#: plugins/sudoers/policy.c:932
+#: plugins/sudoers/policy.c:935
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Phiên bản ngữ pháp tập tin Sudoers %d\n"
 
-#: plugins/sudoers/policy.c:936
+#: plugins/sudoers/policy.c:939
 #, c-format
 msgid ""
 "\n"
@@ -1662,393 +1703,363 @@ msgstr ""
 "\n"
 "Đường dẫn Sudoers: %s\n"
 
-#: plugins/sudoers/policy.c:939
+#: plugins/sudoers/policy.c:942
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "đường dẫn nsswitch: %s\n"
 
-#: plugins/sudoers/policy.c:941
+#: plugins/sudoers/policy.c:944
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "đường dẫn ldap.conf: %s\n"
 
-#: plugins/sudoers/policy.c:942
+#: plugins/sudoers/policy.c:945
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "đường dẫn ldap.secret: %s\n"
 
-#: plugins/sudoers/policy.c:975
+#: plugins/sudoers/policy.c:978
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr "không thể đăng ký móc kiểu %d (phiên bản %d.%d)"
 
-#: plugins/sudoers/pwutil.c:214 plugins/sudoers/pwutil.c:233
+#: plugins/sudoers/pwutil.c:220 plugins/sudoers/pwutil.c:239
 #, c-format
 msgid "unable to cache uid %u, out of memory"
 msgstr "không thể lưu nhớ tạm uid %u, hết bộ nhớ rồi"
 
-#: plugins/sudoers/pwutil.c:227
+#: plugins/sudoers/pwutil.c:233
 #, c-format
 msgid "unable to cache uid %u, already exists"
 msgstr "không thể lưu nhớ tạm uid %u, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:287 plugins/sudoers/pwutil.c:305
-#: plugins/sudoers/pwutil.c:367 plugins/sudoers/pwutil.c:412
+#: plugins/sudoers/pwutil.c:293 plugins/sudoers/pwutil.c:311
+#: plugins/sudoers/pwutil.c:373 plugins/sudoers/pwutil.c:418
 #, c-format
 msgid "unable to cache user %s, out of memory"
 msgstr "không thể lưu nhớ tạm tài khoản %s, hết bộ nhớ rồi"
 
-#: plugins/sudoers/pwutil.c:300
+#: plugins/sudoers/pwutil.c:306
 #, c-format
 msgid "unable to cache user %s, already exists"
 msgstr "không thể lưu nhớ tạm tài khoản %s, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:531 plugins/sudoers/pwutil.c:550
+#: plugins/sudoers/pwutil.c:537 plugins/sudoers/pwutil.c:556
 #, c-format
 msgid "unable to cache gid %u, out of memory"
 msgstr "không thể lưu nhớ tạm gid %u, đã hết bộ nhớ rồi"
 
-#: plugins/sudoers/pwutil.c:544
+#: plugins/sudoers/pwutil.c:550
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "không thể lưu nhớ tạm gid %u, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:598 plugins/sudoers/pwutil.c:616
-#: plugins/sudoers/pwutil.c:663 plugins/sudoers/pwutil.c:705
+#: plugins/sudoers/pwutil.c:604 plugins/sudoers/pwutil.c:622
+#: plugins/sudoers/pwutil.c:669 plugins/sudoers/pwutil.c:711
 #, c-format
 msgid "unable to cache group %s, out of memory"
 msgstr "không thể lưu nhớ tạm nhóm %s, đã hết bộ nhớ rồi"
 
-#: plugins/sudoers/pwutil.c:611
+#: plugins/sudoers/pwutil.c:617
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "không thể lưu nhớ tạm nhóm %s, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:831 plugins/sudoers/pwutil.c:883
-#: plugins/sudoers/pwutil.c:934 plugins/sudoers/pwutil.c:987
+#: plugins/sudoers/pwutil.c:837 plugins/sudoers/pwutil.c:889
+#: plugins/sudoers/pwutil.c:940 plugins/sudoers/pwutil.c:993
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "không thể lưu nhớ tạm danh sách nhóm cho %s, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:837 plugins/sudoers/pwutil.c:888
-#: plugins/sudoers/pwutil.c:940 plugins/sudoers/pwutil.c:992
+#: plugins/sudoers/pwutil.c:843 plugins/sudoers/pwutil.c:894
+#: plugins/sudoers/pwutil.c:946 plugins/sudoers/pwutil.c:998
 #, c-format
 msgid "unable to cache group list for %s, out of memory"
 msgstr "không thể lưu nhớ tạm danh sách nhóm cho %s, đã hết bộ nhớ rồi"
 
-#: plugins/sudoers/pwutil.c:877
+#: plugins/sudoers/pwutil.c:883
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "không thể phân tích nhóm cho %s"
 
-#: plugins/sudoers/pwutil.c:981
+#: plugins/sudoers/pwutil.c:987
 #, c-format
 msgid "unable to parse gids for %s"
 msgstr "không thể phân tích mã số nhóm cho %s"
 
-#: plugins/sudoers/set_perms.c:113 plugins/sudoers/set_perms.c:469
-#: plugins/sudoers/set_perms.c:912 plugins/sudoers/set_perms.c:1239
-#: plugins/sudoers/set_perms.c:1556
+#: plugins/sudoers/set_perms.c:118 plugins/sudoers/set_perms.c:474
+#: plugins/sudoers/set_perms.c:917 plugins/sudoers/set_perms.c:1244
+#: plugins/sudoers/set_perms.c:1561
 msgid "perm stack overflow"
 msgstr "ngăn xếp perm bị tràn"
 
-#: plugins/sudoers/set_perms.c:121 plugins/sudoers/set_perms.c:400
-#: plugins/sudoers/set_perms.c:477 plugins/sudoers/set_perms.c:779
-#: plugins/sudoers/set_perms.c:920 plugins/sudoers/set_perms.c:1163
-#: plugins/sudoers/set_perms.c:1247 plugins/sudoers/set_perms.c:1489
-#: plugins/sudoers/set_perms.c:1564 plugins/sudoers/set_perms.c:1654
+#: plugins/sudoers/set_perms.c:126 plugins/sudoers/set_perms.c:405
+#: plugins/sudoers/set_perms.c:482 plugins/sudoers/set_perms.c:784
+#: plugins/sudoers/set_perms.c:925 plugins/sudoers/set_perms.c:1168
+#: plugins/sudoers/set_perms.c:1252 plugins/sudoers/set_perms.c:1494
+#: plugins/sudoers/set_perms.c:1569 plugins/sudoers/set_perms.c:1659
 msgid "perm stack underflow"
 msgstr "ngăn xếp stack tràn ngầm"
 
-#: plugins/sudoers/set_perms.c:180 plugins/sudoers/set_perms.c:523
-#: plugins/sudoers/set_perms.c:1298 plugins/sudoers/set_perms.c:1596
+#: plugins/sudoers/set_perms.c:185 plugins/sudoers/set_perms.c:528
+#: plugins/sudoers/set_perms.c:1303 plugins/sudoers/set_perms.c:1601
 msgid "unable to change to root gid"
 msgstr "không thể thay đổi mã số nhóm của siêu người dùng root"
 
-#: plugins/sudoers/set_perms.c:269 plugins/sudoers/set_perms.c:620
-#: plugins/sudoers/set_perms.c:1049 plugins/sudoers/set_perms.c:1375
+#: plugins/sudoers/set_perms.c:274 plugins/sudoers/set_perms.c:625
+#: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1380
 msgid "unable to change to runas gid"
 msgstr "không thể thay đổi thành runas gid"
 
-#: plugins/sudoers/set_perms.c:274 plugins/sudoers/set_perms.c:625
-#: plugins/sudoers/set_perms.c:1054 plugins/sudoers/set_perms.c:1380
+#: plugins/sudoers/set_perms.c:279 plugins/sudoers/set_perms.c:630
+#: plugins/sudoers/set_perms.c:1059 plugins/sudoers/set_perms.c:1385
 msgid "unable to set runas group vector"
 msgstr "không thể đặt véc-tơ nhóm runas"
 
-#: plugins/sudoers/set_perms.c:285 plugins/sudoers/set_perms.c:636
-#: plugins/sudoers/set_perms.c:1063 plugins/sudoers/set_perms.c:1389
+#: plugins/sudoers/set_perms.c:290 plugins/sudoers/set_perms.c:641
+#: plugins/sudoers/set_perms.c:1068 plugins/sudoers/set_perms.c:1394
 msgid "unable to change to runas uid"
 msgstr "không thể thay đổi thành runas uid"
 
-#: plugins/sudoers/set_perms.c:303 plugins/sudoers/set_perms.c:654
-#: plugins/sudoers/set_perms.c:1079 plugins/sudoers/set_perms.c:1405
+#: plugins/sudoers/set_perms.c:308 plugins/sudoers/set_perms.c:659
+#: plugins/sudoers/set_perms.c:1084 plugins/sudoers/set_perms.c:1410
 msgid "unable to change to sudoers gid"
 msgstr "không thể thay đổi thành mã số nhóm sudoers"
 
-#: plugins/sudoers/set_perms.c:387 plugins/sudoers/set_perms.c:766
-#: plugins/sudoers/set_perms.c:1150 plugins/sudoers/set_perms.c:1476
-#: plugins/sudoers/set_perms.c:1641
+#: plugins/sudoers/set_perms.c:392 plugins/sudoers/set_perms.c:771
+#: plugins/sudoers/set_perms.c:1155 plugins/sudoers/set_perms.c:1481
+#: plugins/sudoers/set_perms.c:1646
 msgid "too many processes"
 msgstr "quá nhiều tiến trình"
 
-#: plugins/sudoers/solaris_audit.c:51
+#: plugins/sudoers/solaris_audit.c:56
 msgid "unable to get current working directory"
 msgstr "không thể lấy thư mục làm việc hiện tại"
 
-#: plugins/sudoers/solaris_audit.c:59
+#: plugins/sudoers/solaris_audit.c:64
 #, c-format
 msgid "truncated audit path user_cmnd: %s"
 msgstr "đã cắt ngắn đường dẫn audit user_cmnd: %s"
 
-#: plugins/sudoers/solaris_audit.c:66
+#: plugins/sudoers/solaris_audit.c:71
 #, c-format
 msgid "truncated audit path argv[0]: %s"
 msgstr "đã cắt ngắn đường dẫn audit argv[0]: %s"
 
-#: plugins/sudoers/solaris_audit.c:115
+#: plugins/sudoers/solaris_audit.c:120
 msgid "audit_failure message too long"
 msgstr "thông điệp audit_failure quá dài"
 
-#: plugins/sudoers/sssd.c:552
+#: plugins/sudoers/sssd.c:563
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "không thể khởi tạo nguồn SSS. SSSD đã được cài đặt trên máy của bạn chưa vậy?"
 
-#: plugins/sudoers/sssd.c:560 plugins/sudoers/sssd.c:569
-#: plugins/sudoers/sssd.c:578 plugins/sudoers/sssd.c:587
-#: plugins/sudoers/sssd.c:596
+#: plugins/sudoers/sssd.c:571 plugins/sudoers/sssd.c:580
+#: plugins/sudoers/sssd.c:589 plugins/sudoers/sssd.c:598
+#: plugins/sudoers/sssd.c:607
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "không thể tìm thấy ký hiệu “%s” trong %s"
 
-#: plugins/sudoers/sudoers.c:204 plugins/sudoers/sudoers.c:859
+#: plugins/sudoers/sudoers.c:208 plugins/sudoers/sudoers.c:864
 msgid "problem with defaults entries"
 msgstr "trục trặc với các mục mặc định"
 
-#: plugins/sudoers/sudoers.c:208
+#: plugins/sudoers/sudoers.c:212
 msgid "no valid sudoers sources found, quitting"
 msgstr "không có người dùng hợp lệ nào được tìm thấy, đang thoát ra"
 
-#: plugins/sudoers/sudoers.c:246
+#: plugins/sudoers/sudoers.c:250
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "sudoers đã ghi rõ là siêu người dùng (root) không được phép chạy sudo"
 
-#: plugins/sudoers/sudoers.c:303
+#: plugins/sudoers/sudoers.c:308
 msgid "you are not permitted to use the -C option"
 msgstr "bạn không được phép sử dụng tùy chọn -C"
 
-#: plugins/sudoers/sudoers.c:350
+#: plugins/sudoers/sudoers.c:355
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "người sở hữu dấu vết thời gian (%s): Không có người dùng nào như vậy"
 
-#: plugins/sudoers/sudoers.c:365
+#: plugins/sudoers/sudoers.c:370
 msgid "no tty"
 msgstr "không có tty"
 
-#: plugins/sudoers/sudoers.c:366
+#: plugins/sudoers/sudoers.c:371
 msgid "sorry, you must have a tty to run sudo"
 msgstr "rất tiếc, bạn phải có tty mới có thể chạy sudo"
 
-#: plugins/sudoers/sudoers.c:428
+#: plugins/sudoers/sudoers.c:433
 msgid "command in current directory"
 msgstr "lệnh trong thư mục hiện hành"
 
-#: plugins/sudoers/sudoers.c:447
+#: plugins/sudoers/sudoers.c:452
 msgid "sorry, you are not allowed set a command timeout"
 msgstr "rất tiếc, bạn không được phép đặt thời gian chờ lệnh tối đa"
 
-#: plugins/sudoers/sudoers.c:455
+#: plugins/sudoers/sudoers.c:460
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "rất tiếc, bạn không được phép giữ lại môi trường"
 
-#: plugins/sudoers/sudoers.c:803
+#: plugins/sudoers/sudoers.c:808
 msgid "command too long"
 msgstr "lệnh quá dài"
 
-#: plugins/sudoers/sudoers.c:917
+#: plugins/sudoers/sudoers.c:922
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s không phải tập tin thường"
 
-#: plugins/sudoers/sudoers.c:921 plugins/sudoers/timestamp.c:221 toke.l:968
+#: plugins/sudoers/sudoers.c:926 plugins/sudoers/timestamp.c:257 toke.l:965
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s được sở hữu bởi người dùng mang mã số %u, nên là %u"
 
-#: plugins/sudoers/sudoers.c:925 toke.l:973
+#: plugins/sudoers/sudoers.c:930 toke.l:970
 #, c-format
 msgid "%s is world writable"
 msgstr "%s ai ghi cũng được"
 
-#: plugins/sudoers/sudoers.c:929 toke.l:976
+#: plugins/sudoers/sudoers.c:934 toke.l:973
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s được sở hữu bởi nhóm mang mã số %u, nên là %u"
 
-#: plugins/sudoers/sudoers.c:962
+#: plugins/sudoers/sudoers.c:967
 #, c-format
 msgid "only root can use \"-c %s\""
 msgstr "chỉ có siêu người dùng (root) mới có thể sử dụng “-c %s”"
 
-#: plugins/sudoers/sudoers.c:981
+#: plugins/sudoers/sudoers.c:986
 #, c-format
 msgid "unknown login class: %s"
 msgstr "không rõ lớp đăng nhập: %s"
 
-#: plugins/sudoers/sudoers.c:1064 plugins/sudoers/sudoers.c:1078
+#: plugins/sudoers/sudoers.c:1069 plugins/sudoers/sudoers.c:1083
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "không thể phân giải địa chỉ của máy %s"
 
-#: plugins/sudoers/sudoreplay.c:274
+#: plugins/sudoers/sudoreplay.c:248
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "tùy chọn lọc không hợp lệ: %s"
 
-#: plugins/sudoers/sudoreplay.c:287
+#: plugins/sudoers/sudoreplay.c:261
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "thời gian chờ tối đa không hợp lệ: %s"
 
-#: plugins/sudoers/sudoreplay.c:307
+#: plugins/sudoers/sudoreplay.c:284
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "sai hệ số nhân tốc độ: %s"
 
-#: plugins/sudoers/sudoreplay.c:342
+#: plugins/sudoers/sudoreplay.c:319
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/thời-gian: %s"
 
-#: plugins/sudoers/sudoreplay.c:348
+#: plugins/sudoers/sudoreplay.c:325
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/thời-gian: %s"
 
-#: plugins/sudoers/sudoreplay.c:364
+#: plugins/sudoers/sudoreplay.c:341
 #, c-format
 msgid "Replaying sudo session: %s"
 msgstr "Đang chạy lại phiên sudo: %s"
 
-#: plugins/sudoers/sudoreplay.c:562 plugins/sudoers/sudoreplay.c:609
-#: plugins/sudoers/sudoreplay.c:816 plugins/sudoers/sudoreplay.c:906
-#: plugins/sudoers/sudoreplay.c:985 plugins/sudoers/sudoreplay.c:1000
-#: plugins/sudoers/sudoreplay.c:1007 plugins/sudoers/sudoreplay.c:1014
-#: plugins/sudoers/sudoreplay.c:1021 plugins/sudoers/sudoreplay.c:1028
-#: plugins/sudoers/sudoreplay.c:1174
+#: plugins/sudoers/sudoreplay.c:539 plugins/sudoers/sudoreplay.c:586
+#: plugins/sudoers/sudoreplay.c:783 plugins/sudoers/sudoreplay.c:892
+#: plugins/sudoers/sudoreplay.c:977 plugins/sudoers/sudoreplay.c:992
+#: plugins/sudoers/sudoreplay.c:999 plugins/sudoers/sudoreplay.c:1006
+#: plugins/sudoers/sudoreplay.c:1013 plugins/sudoers/sudoreplay.c:1020
+#: plugins/sudoers/sudoreplay.c:1168
 msgid "unable to add event to queue"
 msgstr "không thể thêm sự kiện vào hàng đợi"
 
-#: plugins/sudoers/sudoreplay.c:677
+#: plugins/sudoers/sudoreplay.c:654
 msgid "unable to set tty to raw mode"
 msgstr "không thể đặt thiết bị tty chế độ thô (raw)"
 
-#: plugins/sudoers/sudoreplay.c:728
+#: plugins/sudoers/sudoreplay.c:705
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr "Cảnh báo: thiết bị cuối quá nhỏ để có thể chạy nhật ký một cách đúng đắn.\n"
 
-#: plugins/sudoers/sudoreplay.c:729
+#: plugins/sudoers/sudoreplay.c:706
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Định dạng của nhật ký là %d x %d, định dạng của thiết bị cuối là %d x %d."
 
-#: plugins/sudoers/sudoreplay.c:757
+#: plugins/sudoers/sudoreplay.c:734
 msgid "Replay finished, press any key to restore the terminal."
 msgstr "Trình diễn lại đã kết thúc, vui lòng bấm một phím bất kỳ để hoàn lại thiết bị cuối."
 
-#: plugins/sudoers/sudoreplay.c:790
+#: plugins/sudoers/sudoreplay.c:766
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "sai dòng ghi thời gian trong tập tin: %s"
 
-#: plugins/sudoers/sudoreplay.c:1208 plugins/sudoers/sudoreplay.c:1233
+#: plugins/sudoers/sudoreplay.c:1202 plugins/sudoers/sudoreplay.c:1227
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "biểu thức không rõ ràng “%s”"
 
-#: plugins/sudoers/sudoreplay.c:1255
+#: plugins/sudoers/sudoreplay.c:1249
 msgid "unmatched ')' in expression"
 msgstr "thiếu “)” trong biểu thức"
 
-#: plugins/sudoers/sudoreplay.c:1259
+#: plugins/sudoers/sudoreplay.c:1253
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "không hiểu giới hạn tìm kiếm “%s”"
 
-#: plugins/sudoers/sudoreplay.c:1274
+#: plugins/sudoers/sudoreplay.c:1268
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s yêu cầu một đối số"
 
-#: plugins/sudoers/sudoreplay.c:1277 plugins/sudoers/sudoreplay.c:1657
+#: plugins/sudoers/sudoreplay.c:1271 plugins/sudoers/sudoreplay.c:1512
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "biểu thức chính quy không hợp lệ: %s"
 
-#: plugins/sudoers/sudoreplay.c:1281
+#: plugins/sudoers/sudoreplay.c:1275
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "không thể phân tích ngày tháng “%s”"
 
-#: plugins/sudoers/sudoreplay.c:1290
+#: plugins/sudoers/sudoreplay.c:1284
 msgid "unmatched '(' in expression"
 msgstr "thiếu “(” trong biểu thức"
 
-#: plugins/sudoers/sudoreplay.c:1292
+#: plugins/sudoers/sudoreplay.c:1286
 msgid "illegal trailing \"or\""
 msgstr "thừa “or” ở cuối"
 
-#: plugins/sudoers/sudoreplay.c:1294
+#: plugins/sudoers/sudoreplay.c:1288
 msgid "illegal trailing \"!\""
 msgstr "thừa “!” ở cuối"
 
-#: plugins/sudoers/sudoreplay.c:1343
+#: plugins/sudoers/sudoreplay.c:1338
 #, c-format
 msgid "unknown search type %d"
 msgstr "không hiểu kiểu tìm kiếm “%d”"
 
-#: plugins/sudoers/sudoreplay.c:1381
+#: plugins/sudoers/sudoreplay.c:1605
 #, c-format
-msgid "%s: invalid log file"
-msgstr "%s: tập tin nhật ký không hợp lệ"
+msgid "usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"
+msgstr "cách dùng: %s [-hnRS] [-d thư-mục] [-m số] [-s số] ID\n"
 
-#: plugins/sudoers/sudoreplay.c:1399
-#, c-format
-msgid "%s: time stamp field is missing"
-msgstr "%s: thiếu trường dấu vết thời gian"
-
-#: plugins/sudoers/sudoreplay.c:1406
-#, c-format
-msgid "%s: time stamp %s: %s"
-msgstr "%s: dấu vết thời gian “%s”: %s"
-
-#: plugins/sudoers/sudoreplay.c:1413
-#, c-format
-msgid "%s: user field is missing"
-msgstr "%s: thiếu trường tài khoản người dùng"
-
-#: plugins/sudoers/sudoreplay.c:1422
-#, c-format
-msgid "%s: runas user field is missing"
-msgstr "%s: thiếu trường “runas user” (chạy với tư cách tài khoản này)"
-
-#: plugins/sudoers/sudoreplay.c:1431
-#, c-format
-msgid "%s: runas group field is missing"
-msgstr "%s: thiếu trường “runas group” (chạy dưới danh nghĩa nhóm này)"
-
-#: plugins/sudoers/sudoreplay.c:1837
-#, c-format
-msgid "usage: %s [-hnR] [-d dir] [-m num] [-s num] ID\n"
-msgstr "cách dùng: %s [-hnR] [-d thư-mục] [-m số] [-s số] ID\n"
-
-#: plugins/sudoers/sudoreplay.c:1840
+#: plugins/sudoers/sudoreplay.c:1608
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "cách dùng: %s [-h] [-d th.mục] -l [biểu thức tìm kiếm]\n"
 
-#: plugins/sudoers/sudoreplay.c:1849
+#: plugins/sudoers/sudoreplay.c:1617
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -2057,7 +2068,7 @@ msgstr ""
 "%s - chạy lại nhật ký phiên sudo\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1851
+#: plugins/sudoers/sudoreplay.c:1619
 msgid ""
 "\n"
 "Options:\n"
@@ -2066,6 +2077,7 @@ msgid ""
 "  -h, --help           display help message and exit\n"
 "  -l, --list           list available session IDs, with optional expression\n"
 "  -m, --max-wait=num   max number of seconds to wait between events\n"
+"  -S, --suspend-wait   wait while the command was suspended\n"
 "  -s, --speed=num      speed up or slow down output\n"
 "  -V, --version        display version information and exit"
 msgstr ""
@@ -2076,14 +2088,15 @@ msgstr ""
 "  -h, --help              hiển thị thông tin trợ giúp rồi thoát\n"
 "  -l, --list              liệt kê ID phiên sẵn có, với biểu thức tùy chọn\n"
 "  -m, --max-wait=sô       số giây tối đa sẽ chờ giữa hai sự kiện\n"
+"  -S, --suspend-wait      chờ trong khi lệnh bị treo\n"
 "  -s, --speed=số          tăng hoặc giảm tốc độ kết xuất\n"
 "  -V, --version           hiển thị thông tin về phiên bản rồi thoát"
 
-#: plugins/sudoers/testsudoers.c:328
+#: plugins/sudoers/testsudoers.c:360
 msgid "\thost  unmatched"
 msgstr "\tmáy chủ không khớp"
 
-#: plugins/sudoers/testsudoers.c:331
+#: plugins/sudoers/testsudoers.c:363
 msgid ""
 "\n"
 "Command allowed"
@@ -2091,7 +2104,7 @@ msgstr ""
 "\n"
 "Lệnh được phép"
 
-#: plugins/sudoers/testsudoers.c:332
+#: plugins/sudoers/testsudoers.c:364
 msgid ""
 "\n"
 "Command denied"
@@ -2099,7 +2112,7 @@ msgstr ""
 "\n"
 "Lệnh bị cấm"
 
-#: plugins/sudoers/testsudoers.c:332
+#: plugins/sudoers/testsudoers.c:364
 msgid ""
 "\n"
 "Command unmatched"
@@ -2107,127 +2120,127 @@ msgstr ""
 "\n"
 "Lệnh không khớp"
 
-#: plugins/sudoers/timestamp.c:229
+#: plugins/sudoers/timestamp.c:265
 #, c-format
 msgid "%s is group writable"
 msgstr "%s là người cùng nhóm được ghi"
 
-#: plugins/sudoers/timestamp.c:305
+#: plugins/sudoers/timestamp.c:341
 #, c-format
 msgid "unable to truncate time stamp file to %lld bytes"
 msgstr "không thể cắt ngắn tập tin dấu-vết-thời-gian thành %lld byte"
 
-#: plugins/sudoers/timestamp.c:792 plugins/sudoers/timestamp.c:884
-#: plugins/sudoers/visudo.c:477 plugins/sudoers/visudo.c:483
+#: plugins/sudoers/timestamp.c:827 plugins/sudoers/timestamp.c:919
+#: plugins/sudoers/visudo.c:482 plugins/sudoers/visudo.c:488
 msgid "unable to read the clock"
 msgstr "không thể đọc khóa"
 
-#: plugins/sudoers/timestamp.c:803
+#: plugins/sudoers/timestamp.c:838
 msgid "ignoring time stamp from the future"
 msgstr "bỏ qua dấu vết thời gian nằm ở thì tương lai"
 
-#: plugins/sudoers/timestamp.c:826
+#: plugins/sudoers/timestamp.c:861
 #, c-format
 msgid "time stamp too far in the future: %20.20s"
 msgstr "dấu vết thời gian nằm ở thì tương lai: %20.20s"
 
-#: plugins/sudoers/timestamp.c:948
+#: plugins/sudoers/timestamp.c:983
 #, c-format
 msgid "unable to lock time stamp file %s"
 msgstr "không thể khóa tập tin dấu-vết-thời-gian %s"
 
-#: plugins/sudoers/timestamp.c:992 plugins/sudoers/timestamp.c:1012
+#: plugins/sudoers/timestamp.c:1027 plugins/sudoers/timestamp.c:1047
 #, c-format
 msgid "lecture status path too long: %s/%s"
 msgstr "đường dẫn đến thư mục thuyết trình quá dài: %s/%s"
 
-#: plugins/sudoers/visudo.c:211
+#: plugins/sudoers/visudo.c:216
 msgid "the -x option will be removed in a future release"
 msgstr "tùy chọn -x sẽ bị xóa bỏ trong tương lai"
 
-#: plugins/sudoers/visudo.c:212
+#: plugins/sudoers/visudo.c:217
 msgid "please consider using the cvtsudoers utility instead"
 msgstr "vui lòng cân nhắc sử dụng tiện ích cvtsudoers để thay thế"
 
-#: plugins/sudoers/visudo.c:263 plugins/sudoers/visudo.c:645
+#: plugins/sudoers/visudo.c:268 plugins/sudoers/visudo.c:650
 #, c-format
 msgid "press return to edit %s: "
 msgstr "bấm phím <Enter> để trở về chỉnh sửa %s:"
 
-#: plugins/sudoers/visudo.c:324
+#: plugins/sudoers/visudo.c:329
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "trình biên soạn đã chỉ ra (%s) không tồn tại"
 
-#: plugins/sudoers/visudo.c:326
+#: plugins/sudoers/visudo.c:331
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "không tìm thấy trình biên soạn (đường dẫn của nó = %s)"
 
-#: plugins/sudoers/visudo.c:436 plugins/sudoers/visudo.c:444
+#: plugins/sudoers/visudo.c:441 plugins/sudoers/visudo.c:449
 msgid "write error"
 msgstr "lỗi ghi"
 
-#: plugins/sudoers/visudo.c:490
+#: plugins/sudoers/visudo.c:495
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "không thể lấy thống kê tập tin tạm (%s), %s không thay đổi gì."
 
-#: plugins/sudoers/visudo.c:497
+#: plugins/sudoers/visudo.c:502
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "tập tin tạm (%s) có kích cỡ bằng không, %s không thay đổi gì"
 
-#: plugins/sudoers/visudo.c:503
+#: plugins/sudoers/visudo.c:508
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "trình biên soạn (%s) gặp lỗi, %s không thay đổi gì"
 
-#: plugins/sudoers/visudo.c:525
+#: plugins/sudoers/visudo.c:530
 #, c-format
 msgid "%s unchanged"
 msgstr "%s không thay đổi"
 
-#: plugins/sudoers/visudo.c:584
+#: plugins/sudoers/visudo.c:589
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "không thể mở lại tập tin tạm (%s), %s không thay đổi gì."
 
-#: plugins/sudoers/visudo.c:596
+#: plugins/sudoers/visudo.c:601
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "không thể phân tích tập tin tạm (%s), lỗi chưa được biết"
 
-#: plugins/sudoers/visudo.c:634
+#: plugins/sudoers/visudo.c:639
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "lỗi hệ thống, không thể tìm thấy %s trong danh sách!"
 
-#: plugins/sudoers/visudo.c:714 plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:719 plugins/sudoers/visudo.c:728
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "không thể đặt (uid, gid) của %s thành (%u, %u)"
 
-#: plugins/sudoers/visudo.c:745
+#: plugins/sudoers/visudo.c:751
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s và %s không ở trên cùng một hệ thống tập tin, sử dụng lệnh mv để đổi tên"
 
-#: plugins/sudoers/visudo.c:759
+#: plugins/sudoers/visudo.c:765
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "thực hiện lệnh gặp lỗi: “%s %s %s”, %s không thay đổi"
 
-#: plugins/sudoers/visudo.c:769
+#: plugins/sudoers/visudo.c:775
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "gặp lỗi khi đổi tên %s, %s không thay đổi"
 
-#: plugins/sudoers/visudo.c:790
+#: plugins/sudoers/visudo.c:796
 msgid "What now? "
 msgstr "Vậy làm gì bây giờ? "
 
-#: plugins/sudoers/visudo.c:804
+#: plugins/sudoers/visudo.c:810
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -2239,57 +2252,66 @@ msgstr ""
 "  (x)  thoát ra mà không ghi lại tập tin sudoerse\n"
 "  (q)  thoát ra và ghi lại tập tin sudoers (NGUY HIỂM!)\n"
 
-#: plugins/sudoers/visudo.c:850
+#: plugins/sudoers/visudo.c:856
 #, c-format
 msgid "unable to run %s"
 msgstr "không thể chạy %s"
 
-#: plugins/sudoers/visudo.c:880
+#: plugins/sudoers/visudo.c:886
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: sai sở hữu (uid, gid) đáng lẽ là (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:887
+#: plugins/sudoers/visudo.c:893
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: phân quyền sai, phải ở chế độ 0%o\n"
 
-#: plugins/sudoers/visudo.c:944 plugins/sudoers/visudo.c:951
+#: plugins/sudoers/visudo.c:950 plugins/sudoers/visudo.c:957
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: vượt qua kiểm duyệt\n"
 
-#: plugins/sudoers/visudo.c:998
+#: plugins/sudoers/visudo.c:976
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s đang bận, hãy thử lại sau"
 
-#: plugins/sudoers/visudo.c:1038
+#: plugins/sudoers/visudo.c:979
+#, c-format
+msgid "unable to lock %s"
+msgstr "không thể khóa %s"
+
+#: plugins/sudoers/visudo.c:980
+msgid "Edit anyway? [y/N]"
+msgstr "Vẫn sửa? (có/KHÔNG) [y/N]"
+
+#: plugins/sudoers/visudo.c:1064
 #, c-format
 msgid "Error: %s:%d cycle in %s \"%s\""
 msgstr "Lỗi: %s:%d bị quẩn tròn trong %s “%s”"
 
-#: plugins/sudoers/visudo.c:1039
+#: plugins/sudoers/visudo.c:1065
 #, c-format
 msgid "Warning: %s:%d cycle in %s \"%s\""
 msgstr "Cảnh báo: %s:%d bị quẩn tròn trong %s “%s”"
 
-#: plugins/sudoers/visudo.c:1043
+#: plugins/sudoers/visudo.c:1069
 #, c-format
 msgid "Error: %s:%d %s \"%s\" referenced but not defined"
 msgstr "Lỗi: %s:%d %s “%s” được tham chiếu nhưng chưa được định nghĩa"
 
-#: plugins/sudoers/visudo.c:1044
+#: plugins/sudoers/visudo.c:1070
 #, c-format
 msgid "Warning: %s:%d %s \"%s\" referenced but not defined"
 msgstr "Cảnh báo: %s:%d %s “%s” được tham chiếu nhưng chưa được định nghĩa"
 
-#: plugins/sudoers/visudo.c:1137
+#: plugins/sudoers/visudo.c:1161
 #, c-format
 msgid "Warning: %s:%d unused %s \"%s\""
 msgstr "Cảnh báo: %s:%d không dùng %s “%s”"
 
-#: plugins/sudoers/visudo.c:1252
+#: plugins/sudoers/visudo.c:1276
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -2298,7 +2320,7 @@ msgstr ""
 "%s - sửa tập tin sudoers một cách an toàn\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1254
+#: plugins/sudoers/visudo.c:1278
 msgid ""
 "\n"
 "Options:\n"
@@ -2318,7 +2340,7 @@ msgstr ""
 "  -s, --strict             kiểm tra cú pháp ngặt nghèo\n"
 "  -V, --version            hiển thị thông tin về phiên bản rồi thoát\n"
 
-#: toke.l:942
+#: toke.l:939
 msgid "too many levels of includes"
 msgstr "quá nhiều cấp bao gồm (include)"
 

@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -49,9 +54,6 @@
 #include <regex.h>
 #include <signal.h>
 #include <time.h>
-#ifdef HAVE_ZLIB_H
-# include <zlib.h>
-#endif
 
 #include <pathnames.h>
 
@@ -61,7 +63,7 @@
 #include "sudo_fatal.h"
 #include "logging.h"
 #include "iolog.h"
-#include "iolog_util.h"
+#include "iolog_files.h"
 #include "sudo_queue.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
@@ -87,6 +89,7 @@ struct replay_closure {
     struct sudo_event *sigtstp_ev;
     struct timing_closure timing;
     bool interactive;
+    bool suspend_wait;
     struct io_buffer {
 	unsigned int len; /* buffer length (how much produced) */
 	unsigned int off; /* write position (how much already consumed) */
@@ -140,7 +143,7 @@ static int terminal_rows, terminal_cols;
 
 static int ttyfd = -1;
 
-static const char short_opts[] =  "d:f:hlm:nRs:V";
+static const char short_opts[] =  "d:f:hlm:nRSs:V";
 static struct option long_opts[] = {
     { "directory",	required_argument,	NULL,	'd' },
     { "filter",		required_argument,	NULL,	'f' },
@@ -149,12 +152,13 @@ static struct option long_opts[] = {
     { "max-wait",	required_argument,	NULL,	'm' },
     { "non-interactive", no_argument,		NULL,	'n' },
     { "no-resize",	no_argument,		NULL,	'R' },
+    { "suspend-wait",	no_argument,		NULL,	'S' },
     { "speed",		required_argument,	NULL,	's' },
     { "version",	no_argument,		NULL,	'V' },
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
-/* XXX move to separate header? */
+/* XXX move to separate header? (currently in sudoers.h) */
 extern char *get_timestr(time_t, int);
 extern time_t get_date(char *);
 
@@ -163,7 +167,7 @@ static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
-static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive);
+static int replay_session(struct timespec *max_wait, const char *decimal, bool interactive, bool suspend_wait);
 static void sudoreplay_cleanup(void);
 static void usage(int);
 static void write_output(int fd, int what, void *v);
@@ -189,9 +193,9 @@ __dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    int ch, idx, plen, exitcode = 0;
+    int ch, i, plen, exitcode = 0;
     bool def_filter = true, listonly = false;
-    bool interactive = true, resize = true;
+    bool interactive = true, suspend_wait = false, resize = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
@@ -270,6 +274,9 @@ main(int argc, char *argv[])
 	case 'R':
 	    resize = false;
 	    break;
+	case 'S':
+	    suspend_wait = true;
+	    break;
 	case 's':
 	    errno = 0;
 	    speed_factor = strtod(optarg, &ep);
@@ -321,8 +328,8 @@ main(int argc, char *argv[])
     plen -= 7;
 
     /* Open files for replay, applying replay filter for the -f flag. */
-    for (idx = 0; idx < IOFD_MAX; idx++) {
-	if (open_io_fd(path, plen, &io_log_files[idx]) == -1)
+    for (i = 0; i < IOFD_MAX; i++) {
+	if (open_io_fd(path, plen, &io_log_files[i]) == -1)
 	    sudo_fatal(U_("unable to open %s"), path);
     }
 
@@ -345,7 +352,7 @@ main(int argc, char *argv[])
     li = NULL;
 
     /* Replay session corresponding to io_log_files[]. */
-    exitcode = replay_session(max_delay, decimal, interactive);
+    exitcode = replay_session(max_delay, decimal, interactive, suspend_wait);
 
     restore_terminal_size();
     sudo_term_restore(ttyfd, true);
@@ -359,7 +366,7 @@ done:
  * Return 0 for EOF or -1 on error.
  */
 static ssize_t
-io_log_read(int idx, char *buf, size_t nbytes)
+io_log_read(union io_fd ifd, char *buf, size_t nbytes)
 {
     ssize_t nread;
     debug_decl(io_log_read, SUDO_DEBUG_UTIL)
@@ -369,39 +376,39 @@ io_log_read(int idx, char *buf, size_t nbytes)
 	debug_return_ssize_t(-1);
     }
 #ifdef HAVE_ZLIB_H
-    nread = gzread(io_log_files[idx].fd.g, buf, nbytes);
+    nread = gzread(ifd.g, buf, nbytes);
 #else
-    nread = (ssize_t)fread(buf, 1, nbytes, io_log_files[idx].fd.f);
-    if (nread == 0 && ferror(io_log_files[idx].fd.f))
+    nread = (ssize_t)fread(buf, 1, nbytes, ifd.f);
+    if (nread == 0 && ferror(ifd.f))
 	nread = -1;
 #endif
     debug_return_ssize_t(nread);
 }
 
 static int
-io_log_eof(int idx)
+io_log_eof(union io_fd ifd)
 {
     int ret;
     debug_decl(io_log_eof, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
-    ret = gzeof(io_log_files[idx].fd.g);
+    ret = gzeof(ifd.g);
 #else
-    ret = feof(io_log_files[idx].fd.f);
+    ret = feof(ifd.f);
 #endif
     debug_return_int(ret);
 }
 
 static char *
-io_log_gets(int idx, char *buf, size_t nbytes)
+io_log_gets(union io_fd ifd, char *buf, size_t nbytes)
 {
     char *str;
     debug_decl(io_log_gets, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
-    str = gzgets(io_log_files[idx].fd.g, buf, nbytes);
+    str = gzgets(ifd.g, buf, nbytes);
 #else
-    str = fgets(buf, nbytes, io_log_files[idx].fd.f);
+    str = fgets(buf, nbytes, ifd.f);
 #endif
     debug_return_str(str);
 }
@@ -569,10 +576,10 @@ xterm_get_size(int *new_rows, int *new_cols)
     /* Setup an event for reading the terminal size */
     evbase = sudo_ev_base_alloc();
     if (evbase == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     gc.ev = sudo_ev_alloc(ttyfd, SUDO_EV_READ, getsize_cb, &gc);
     if (gc.ev == NULL)
-        sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Read back terminal size response */
     if (sudo_ev_add(evbase, gc.ev, &gc.timeout, false) == -1)
@@ -748,9 +755,9 @@ read_timing_record(struct replay_closure *closure)
     debug_decl(read_timing_record, SUDO_DEBUG_UTIL)
 
     /* Read next record from timing file. */
-    if (io_log_gets(IOFD_TIMING, buf, sizeof(buf)) == NULL) {
+    if (io_log_gets(io_log_files[IOFD_TIMING].fd, buf, sizeof(buf)) == NULL) {
 	/* EOF or error reading timing file, we are done. */
-	debug_return_int(io_log_eof(IOFD_TIMING) ? 1 : -1);
+	debug_return_int(io_log_eof(io_log_files[IOFD_TIMING].fd) ? 1 : -1);
     }
 
     /* Parse timing file record. */
@@ -760,7 +767,8 @@ read_timing_record(struct replay_closure *closure)
 
     /* Record number bytes to read. */
     /* XXX - remove timing->nbytes? */
-    if (closure->timing.idx != IOFD_TIMING) {
+    if (closure->timing.event != IO_EVENT_WINSIZE &&
+	closure->timing.event != IO_EVENT_SUSPEND) {
     	closure->iobuf.len = 0;
     	closure->iobuf.off = 0;
     	closure->iobuf.lastc = '\0';
@@ -786,9 +794,15 @@ next_timing_record(struct replay_closure *closure)
 {
     debug_decl(next_timing_record, SUDO_DEBUG_UTIL)
 
+again:
     switch (read_timing_record(closure)) {
     case 0:
 	/* success */
+	if (closure->timing.event == IO_EVENT_SUSPEND &&
+	    closure->timing.u.signo == SIGCONT && !closure->suspend_wait) {
+	    /* Ignore time spent suspended. */
+	    goto again;
+	}
 	break;
     case 1:
 	/* EOF */
@@ -807,25 +821,24 @@ fill_iobuf(struct replay_closure *closure)
 {
     const size_t space = sizeof(closure->iobuf.buf) - closure->iobuf.len;
     const struct timing_closure *timing = &closure->timing;
-    ssize_t nread;
-    size_t len;
     debug_decl(fill_iobuf, SUDO_DEBUG_UTIL)
 
     if (closure->iobuf.toread != 0 && space != 0) {
-	len = closure->iobuf.toread < space ? closure->iobuf.toread : space;
-	nread = io_log_read(timing->idx,
+	const size_t len =
+	    closure->iobuf.toread < space ? closure->iobuf.toread : space;
+	ssize_t nread = io_log_read(timing->fd,
 	    closure->iobuf.buf + closure->iobuf.off, len);
 	if (nread <= 0) {
 	    if (nread == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: premature EOF, expected %u bytes",
-		    io_log_files[timing->idx].suffix, closure->iobuf.toread);
+		    io_log_files[timing->event].suffix, closure->iobuf.toread);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "%s: read error", io_log_files[timing->idx].suffix);
+		    "%s: read error", io_log_files[timing->event].suffix);
 	    }
 	    sudo_warnx(U_("unable to read %s"),
-		io_log_files[timing->idx].suffix);
+		io_log_files[timing->event].suffix);
 	    debug_return_bool(false);
 	}
 	closure->iobuf.toread -= nread;
@@ -844,25 +857,43 @@ static void
 delay_cb(int fd, int what, void *v)
 {
     struct replay_closure *closure = v;
-    const struct timing_closure *timing = &closure->timing;
+    struct timing_closure *timing = &closure->timing;
     debug_decl(delay_cb, SUDO_DEBUG_UTIL)
 
-    /* Check for window change event and resize as needed. */
-    if (timing->idx == IOFD_TIMING) {
+    switch (timing->event) {
+    case IO_EVENT_WINSIZE:
 	resize_terminal(timing->u.winsize.rows, timing->u.winsize.cols);
-	next_timing_record(closure);
-	debug_return;
+	break;
+    case IO_EVENT_STDIN:
+	if (io_log_files[IOFD_STDIN].enabled)
+	    timing->fd = io_log_files[IOFD_STDIN].fd;
+	break;
+    case IO_EVENT_STDOUT:
+	if (io_log_files[IOFD_STDOUT].enabled)
+	    timing->fd = io_log_files[IOFD_STDOUT].fd;
+	break;
+    case IO_EVENT_STDERR:
+	if (io_log_files[IOFD_STDERR].enabled)
+	    timing->fd = io_log_files[IOFD_STDERR].fd;
+	break;
+    case IO_EVENT_TTYIN:
+	if (io_log_files[IOFD_TTYIN].enabled)
+	    timing->fd = io_log_files[IOFD_TTYIN].fd;
+	break;
+    case IO_EVENT_TTYOUT:
+	if (io_log_files[IOFD_TTYOUT].enabled)
+	    timing->fd = io_log_files[IOFD_TTYOUT].fd;
+	break;
     }
 
-    /* If we are not replaying this stream, just read the next record. */
-    if (timing->idx >= IOFD_MAX || !io_log_files[timing->idx].enabled) {
+    if (timing->fd.v != NULL) {
+	/* If the stream is open, enable the write event. */
+	if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
+	    sudo_fatal(U_("unable to add event to queue"));
+    } else {
+	/* Not replaying, get the next timing record and continue. */
 	next_timing_record(closure);
-	debug_return;
     }
-
-    /* We are replaying this strean, enable write event. */
-    if (sudo_ev_add(closure->evbase, closure->output_ev, NULL, false) == -1)
-	sudo_fatal(U_("unable to add event to queue"));
 
     debug_return;
 }
@@ -912,7 +943,8 @@ signal_cb(int signo, int what, void *v)
 }
 
 static struct replay_closure *
-replay_closure_alloc(struct timespec *max_delay, const char *decimal, bool interactive)
+replay_closure_alloc(struct timespec *max_delay, const char *decimal,
+    bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     debug_decl(replay_closure_alloc, SUDO_DEBUG_UTIL)
@@ -921,6 +953,7 @@ replay_closure_alloc(struct timespec *max_delay, const char *decimal, bool inter
 	debug_return_ptr(NULL);
 
     closure->interactive = interactive;
+    closure->suspend_wait = suspend_wait;
     closure->timing.max_delay = max_delay;
     closure->timing.decimal = decimal;
 
@@ -993,14 +1026,16 @@ bad:
 }
 
 static int
-replay_session(struct timespec *max_delay, const char *decimal, bool interactive)
+replay_session(struct timespec *max_delay, const char *decimal,
+    bool interactive, bool suspend_wait)
 {
     struct replay_closure *closure;
     int ret = 0;
     debug_decl(replay_session, SUDO_DEBUG_UTIL)
 
     /* Allocate the delay closure and read the first timing record. */
-    closure = replay_closure_alloc(max_delay, decimal, interactive);
+    closure = replay_closure_alloc(max_delay, decimal, interactive,
+	suspend_wait);
     if (read_timing_record(closure) != 0) {
 	ret = 1;
 	goto done;
@@ -1065,7 +1100,7 @@ write_output(int fd, int what, void *v)
     iov[0].iov_len = nbytes;
 
     if (closure->interactive &&
-	(timing->idx == IOFD_STDOUT || timing->idx == IOFD_STDERR)) {
+	(timing->event == IO_EVENT_STDOUT || timing->event == IO_EVENT_STDERR)) {
 	char *nl;
 
 	/*
@@ -1567,7 +1602,7 @@ static void
 usage(int fatal)
 {
     fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-hnR] [-d dir] [-m num] [-s num] ID\n"),
+	_("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
     fprintf(fatal ? stderr : stdout,
 	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
@@ -1587,6 +1622,7 @@ help(void)
 	"  -h, --help           display help message and exit\n"
 	"  -l, --list           list available session IDs, with optional expression\n"
 	"  -m, --max-wait=num   max number of seconds to wait between events\n"
+	"  -S, --suspend-wait   wait while the command was suspended\n"
 	"  -s, --speed=num      speed up or slow down output\n"
 	"  -V, --version        display version information and exit"));
     exit(0);

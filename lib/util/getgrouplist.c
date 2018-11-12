@@ -15,6 +15,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -84,6 +89,7 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     grpsize = (int)sysconf(_SC_NGROUPS_MAX);
     if (grpsize < 0)
 	grpsize = NGROUPS_MAX;
+    grpsize++;	/* include space for the primary gid */
     /*
      * It is possible to belong to more groups in the group database
      * than NGROUPS_MAX.
@@ -138,7 +144,6 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 	/* Dynamically-sized group vector, count groups and alloc. */
 	grpsize = 1;	/* reserve one for basegid */
 	if (*grset != '\0') {
-	    grset++;
 	    for (cp = grset; *cp != '\0'; cp++) {
 		if (*cp == ',')
 		    grpsize++;

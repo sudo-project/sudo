@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -457,13 +462,13 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     /* Setup event base and events. */
     mc->evbase = sudo_ev_base_alloc();
     if (mc->evbase == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Event for command status via errfd. */
     mc->errpipe_event = sudo_ev_alloc(errfd,
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_errpipe_cb, mc);
     if (mc->errpipe_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->errpipe_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
@@ -471,7 +476,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     mc->backchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_backchannel_cb, mc);
     if (mc->backchannel_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->backchannel_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
@@ -479,56 +484,56 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     mc->sigint_event = sudo_ev_alloc(SIGINT,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigint_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigint_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sigquit_event = sudo_ev_alloc(SIGQUIT,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigquit_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigquit_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sigtstp_event = sudo_ev_alloc(SIGTSTP,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigtstp_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigtstp_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sigterm_event = sudo_ev_alloc(SIGTERM,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigterm_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigterm_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sighup_event = sudo_ev_alloc(SIGHUP,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sighup_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sighup_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sigusr1_event = sudo_ev_alloc(SIGUSR1,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigusr1_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigusr1_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sigusr2_event = sudo_ev_alloc(SIGUSR2,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigusr2_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigusr2_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 
     mc->sigchld_event = sudo_ev_alloc(SIGCHLD,
 	SUDO_EV_SIGINFO, mon_signal_cb, mc);
     if (mc->sigchld_event == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(mc->evbase, mc->sigchld_event, NULL, false) == -1)
 	sudo_fatal(U_("unable to add event to queue"));
 

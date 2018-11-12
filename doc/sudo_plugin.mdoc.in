@@ -12,9 +12,8 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd June 1, 2018
+.Dd October 7, 2018
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -174,7 +173,9 @@ might.
 Authentication type, if specified by the
 .Fl a
 flag, to use on
-systems where BSD authentication is supported.
+systems where
+.Bx
+authentication is supported.
 .It closefrom=number
 If specified, the user has requested via the
 .Fl C
@@ -248,7 +249,8 @@ If the user does not specify a program on the command line,
 .Nm sudo
 will pass the plugin the path to the user's shell and set
 .It login_class=string
-BSD login class to use when setting resource limits and nice value,
+.Bx
+login class to use when setting resource limits and nice value,
 if specified by the
 .Fl c
 flag.
@@ -265,7 +267,7 @@ This will only be present if there is a corresponding setting in
 A space-separated list of IP network addresses and netmasks in the
 form
 .Dq addr/netmask ,
-e.g.\&
+e.g.,
 .Dq 192.168.1.2/255.255.255.0 .
 The address and netmask pairs may be either IPv4 or IPv6, depending on
 what the operating system supports.
@@ -359,7 +361,7 @@ environment variable to the target user's home directory.
 .It sudoedit=bool
 Set to true when the
 .Fl e
-flag is is specified or if invoked as
+flag is specified or if invoked as
 .Nm sudoedit .
 The plugin shall substitute an editor into
 .Em argv
@@ -844,14 +846,16 @@ terminal output.
 This only includes output to the screen, not output to a pipe or file.
 This is a hint to the I/O logging plugin which may choose to ignore it.
 .It login_class=string
-BSD login class to use when setting resource limits and nice value
-(optional).
+.Bx
+login class to use when setting resource limits and nice value (optional).
 This option is only set on systems that support login classes.
 .It nice=int
 Nice value (priority) to use when executing the command.
 The nice value, if specified, overrides the priority associated with the
 .Em login_class
-on BSD systems.
+on
+.Bx
+systems.
 .It noexec=bool
 If set, prevent the command from executing other programs.
 .It preserve_fds=list
@@ -1299,6 +1303,7 @@ struct io_plugin {
     void (*deregister_hooks)(int version,
        int (*deregister_hook)(struct sudo_hook *hook));
     int (*change_winsize)(unsigned int lines, unsigned int cols);
+    int (*log_suspend)(int signo);
 };
 .Ed
 .Pp
@@ -1742,8 +1747,27 @@ function is called whenever the window size of the terminal changes from
 the initial values specified in the
 .Li user_info
 list.
-It returns 1 on success, 0 on failure, \-1 if an error occurred (which
-will terminate the running command).
+Returns \-1 if an error occurred, in which case no further calls to
+.Fn change_winsize
+will be made,
+.It log_suspend
+.Bd -literal -compact
+int (*log_suspend)(int signo);
+.Ed
+.Pp
+The
+.Fn log_suspend
+function is called whenever a command is suspended or resumed.
+The
+.Fa signo
+argument is either the signal that caused the command to be suspended or
+.Dv SIGCONT
+if the command was resumed.
+Logging this information makes it possible to skip the period of time when
+the command was suspended during playback of a session.
+Returns \-1 if an error occurred, in which case no further calls to
+.Fn log_suspend
+will be made,
 .El
 .Pp
 .Em I/O Plugin Version Macros
@@ -2527,6 +2551,10 @@ list.
 .It Version 1.12 (sudo 1.8.21)
 The
 .Li change_winsize
+field was added to the io_plugin struct.
+.It Version 1.13 (sudo 1.8.26)
+The
+.Li log_suspend
 field was added to the io_plugin struct.
 .El
 .Sh SEE ALSO

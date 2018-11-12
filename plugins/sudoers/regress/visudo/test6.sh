@@ -13,7 +13,7 @@ Defaults!PAGERS		noexec
 
 Defaults		env_keep -= "HOME"
 Defaults		env_keep =  "COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR LS_COLORS"
-Defaults		env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"
+Defaults		env_keep += "MAIL PS1 PS2 QTDIR LANG LC_ADDRESS LC_CTYPE"
 
 User_Alias		FULLTIMERS = millert, mikef, dowdy
 

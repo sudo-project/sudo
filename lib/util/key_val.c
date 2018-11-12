@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -44,7 +49,7 @@ sudo_new_key_val_v1(const char *key, const char *val)
     debug_decl(sudo_new_key_val, SUDO_DEBUG_UTIL)
 
     cp = str = malloc(key_len + 1 + val_len + 1);
-    if (str != NULL) {
+    if (cp != NULL) {
 	memcpy(cp, key, key_len);
 	cp += key_len;
 	*cp++ = '=';

@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -97,6 +102,7 @@ static struct termios term, oterm;
 static int changed;
 
 /* tgetpass() needs to know the erase and kill chars for cbreak mode. */
+__dso_public int sudo_term_eof;
 __dso_public int sudo_term_erase;
 __dso_public int sudo_term_kill;
 
@@ -232,6 +238,7 @@ sudo_term_cbreak_v1(int fd)
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
     if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
+	sudo_term_eof = term.c_cc[VEOF];
 	sudo_term_erase = term.c_cc[VERASE];
 	sudo_term_kill = term.c_cc[VKILL];
 	changed = 1;

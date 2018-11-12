@@ -19,6 +19,11 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -857,14 +862,6 @@ store_uint(const char *str, union sudo_defs_val *sd_un)
     }
     debug_return_bool(true);
 }
-
-#ifndef TIME_T_MAX
-# if SIZEOF_TIME_T == 8
-#  define TIME_T_MAX	LLONG_MAX
-# else
-#  define TIME_T_MAX	INT_MAX
-# endif
-#endif
 
 static bool
 store_timespec(const char *str, union sudo_defs_val *sd_un)

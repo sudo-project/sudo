@@ -13,13 +13,12 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .\" Sponsored in part by the Defense Advanced Research Projects
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 21, 2018
+.Dd October 27, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -173,7 +172,9 @@ If no askpass program is available,
 .Nm
 will exit with an error.
 .It Fl a Ar type , Fl -auth-type Ns = Ns Ar type
-Use the specified BSD authentication
+Use the specified
+.Bx
+authentication
 .Ar type
 when validating the user, if allowed by
 .Pa /etc/login.conf .
@@ -182,7 +183,9 @@ authentication methods by adding an
 .Dq auth-sudo
 entry in
 .Pa /etc/login.conf .
-This option is only available on systems that support BSD authentication.
+This option is only available on systems that support
+.Bx
+authentication.
 .It Fl b , -background
 Run the given command in the background.
 Note that it is not possible to use shell job control to manipulate
@@ -230,7 +233,9 @@ If the command is being run as a login shell, additional
 .Pa /etc/login.conf
 settings, such as the umask and environment variables, will
 be applied, if present.
-This option is only available on systems with BSD login classes.
+This option is only available on systems with
+.Bx
+login classes.
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
@@ -313,7 +318,7 @@ may be either a group name or a numeric group ID
 .Pq GID
 prefixed with the
 .Ql #
-character (e.g.
+character (e.g.,
 .Li #0
 for GID 0).
 When running a command as a GID, many shells require that the
@@ -325,6 +330,14 @@ If no
 option is specified, the command will be run as the invoking user.
 In either case, the primary group will be set to
 .Ar group .
+The
+.Em sudoers
+policy permits any of the target user's groups to be specified via
+the
+.Fl g
+option as long as the
+.Fl P
+option is not in use.
 .It Fl H , -set-home
 Request that the security policy set the
 .Ev HOME
@@ -493,7 +506,6 @@ the specified
 .It Fl S , -stdin
 Write the prompt to the standard error and read the password from the
 standard input instead of using the terminal device.
-The password must be followed by a newline character.
 .It Fl s , -shell
 Run the shell specified by the
 .Ev SHELL
@@ -544,7 +556,7 @@ may be either a user name or a numeric user ID
 .Pq UID
 prefixed with the
 .Ql #
-character (e.g.
+character (e.g.,
 .Li #0
 for UID 0).
 When running commands as a UID, many shells require that the
@@ -592,7 +604,7 @@ should stop processing command line arguments.
 Environment variables to be set for the command may also be passed
 on the command line in the form of
 .Ar VAR Ns = Ns Ar value ,
-e.g.\&
+e.g.,
 .Ev LD_LIBRARY_PATH Ns = Ns Pa /usr/local/pkg/lib .
 Variables passed on the command line are subject to restrictions
 imposed by the security policy plugin.
@@ -646,7 +658,7 @@ Solaris project
 .It
 Solaris privileges
 .It
-BSD login class
+.Bx No login class
 .It
 scheduling priority (aka nice value)
 .El
@@ -1035,9 +1047,6 @@ Set to the login name of the user who invoked sudo.
 Set to the same value as
 .Ev LOGNAME ,
 described above.
-.It Ev USERNAME
-Same as
-.Ev USER .
 .It Ev VISUAL
 Default editor to use in
 .Fl e
@@ -1096,6 +1105,108 @@ and file redirection work.
 .Bd -literal -offset indent
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Ed
+.Sh DIAGNOSTICS
+Error messages produced by
+.Nm
+include:
+.Bl -tag -width 4n
+.It Li editing files in a writable directory is not permitted
+By default,
+.Nm sudoedit
+does not permit editing a file when any of the parent directories are writable
+by the invoking user.
+This avoids a race condition that could allow the user to overwrite
+an arbitrary file.
+See the
+.Em sudoedit_checkdir
+option in
+.Xr sudoers @mansectform@
+for more information.
+.It Li editing symbolic links is not permitted
+By default,
+.Nm sudoedit
+does not follow symbolic links when opening files.
+See the
+.Em sudoedit_follow
+option in
+.Xr sudoers @mansectform@
+for more information.
+.It Li effective uid is not 0, is sudo installed setuid root?
+.Nm
+was not run with root privileges.
+The
+.Nm
+binary must be owned by the root user and have the Set-user-ID bit set.
+Also, it must not be located on a file system mounted with the
+.Sq nosuid
+option or on an NFS file system that maps uid 0 to an unprivileged uid.
+.It Li effective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?
+.Nm
+was not run with root privileges.
+The
+.Nm
+binary has the proper owner and permissions but it still did not run
+with root privileges.
+The most common reason for this is that the file system the
+.Nm
+binary is located on is mounted with the
+.Sq nosuid
+option or it is an NFS file system that maps uid 0 to an unprivileged uid.
+.It Li fatal error, unable to load plugins
+An error occurred while loading or initializing the plugins specified in
+.Xr sudo.conf @mansectform@ .
+.It Li invalid environment variable name
+One or more environment variable names specified via the
+.Fl E
+option contained an equal sign
+.Pq Ql = .
+The arguments to the
+.Fl E
+option should be environment variable names without an associated value.
+.It Li no password was provided
+When
+.Nm
+tried to read the password, it did not receive any characters.
+This may happen if no terminal is available (or the
+.Fl S
+option is specified) and the standard input has been redirected from
+.Pa /dev/null .
+.It Li no tty present and no askpass program specified
+.Nm
+needs to read the password but there is no mechanism available to do so.
+A terminal is not present to read the password from,
+.Nm
+has not been configured to read from the standard input,
+and no askpass program has been specified either via the
+.Fl A
+option or the
+.Ev SUDO_ASKPASS
+environment variable.
+.It Li no writable temporary directory found
+.Nm sudoedit
+was unable to find a usable temporary directory in which to store its
+intermediate files.
+.It Li sudo must be owned by uid 0 and have the setuid bit set
+.Nm
+was not run with root privileges.
+The
+.Nm
+binary does not have the correct owner or permissions.
+It must be owned by the root user and have the Set-user-ID bit set.
+.It Li sudoedit is not supported on this platform
+It is only possible to run
+.Nm sudoedit
+on systems that support setting the effective user-ID.
+.It Li timed out reading password
+The user did not enter a password before the password timeout
+(5 minutes by default) expired.
+.It Li you do not exist in the passwd database
+Your user ID does not appear in the system passwd database.
+.It Li you may not specify environment variables in edit mode
+It is only possible to specify environment variables when running
+a command.
+When editing a file, the editor is run with the user's environment unmodified.
+.El
 .Sh SEE ALSO
 .Xr su 1 ,
 .Xr stat 2 ,

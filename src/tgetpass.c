@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -17,6 +17,11 @@
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ */
+
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
 #ifdef __TANDEM
@@ -44,11 +49,18 @@
 #include "sudo.h"
 #include "sudo_plugin.h"
 
+enum tgetpass_errval {
+    TGP_ERRVAL_NOERROR,
+    TGP_ERRVAL_TIMEOUT,
+    TGP_ERRVAL_NOPASSWORD,
+    TGP_ERRVAL_READERROR
+};
+
 static volatile sig_atomic_t signo[NSIG];
 
 static bool tty_present(void);
 static void tgetpass_handler(int);
-static char *getln(int, char *, size_t, int);
+static char *getln(int, char *, size_t, int, enum tgetpass_errval *);
 static char *sudo_askpass(const char *, const char *);
 
 static int
@@ -77,6 +89,27 @@ suspend(int signo, struct sudo_conv_callback *callback)
     debug_return_int(ret);
 }
 
+static void
+tgetpass_display_error(enum tgetpass_errval errval)
+{
+    debug_decl(tgetpass_display_error, SUDO_DEBUG_CONV)
+
+    switch (errval) {
+    case TGP_ERRVAL_NOERROR:
+	break;
+    case TGP_ERRVAL_TIMEOUT:
+	sudo_warnx(U_("timed out reading password"));
+	break;
+    case TGP_ERRVAL_NOPASSWORD:
+	sudo_warnx(U_("no password was provided"));
+	break;
+    case TGP_ERRVAL_READERROR:
+	sudo_warn(U_("unable to read password"));
+	break;
+    }
+    debug_return;
+}
+
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
@@ -90,6 +123,7 @@ tgetpass(const char *prompt, int timeout, int flags,
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
     int i, input, output, save_errno, neednl = 0, need_restart;
+    enum tgetpass_errval errval;
     debug_decl(tgetpass, SUDO_DEBUG_CONV)
 
     (void) fflush(stdout);
@@ -175,7 +209,7 @@ restart:
 
     if (timeout > 0)
 	alarm(timeout);
-    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_MASK));
+    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_MASK), &errval);
     alarm(0);
     save_errno = errno;
 
@@ -183,6 +217,7 @@ restart:
 	if (write(output, "\n", 1) == -1)
 	    goto restore;
     }
+    tgetpass_display_error(errval);
 
 restore:
     /* Restore old signal handlers. */
@@ -210,6 +245,8 @@ restore:
     for (i = 0; i < NSIG; i++) {
 	if (signo[i]) {
 	    switch (i) {
+		case SIGALRM:
+		    break;
 		case SIGTSTP:
 		case SIGTTIN:
 		case SIGTTOU:
@@ -239,6 +276,7 @@ sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
     struct sigaction sa, savechld;
+    enum tgetpass_errval errval;
     int pfd[2], status;
     pid_t child;
     debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
@@ -281,8 +319,10 @@ sudo_askpass(const char *askpass, const char *prompt)
 
     /* Get response from child (askpass). */
     (void) close(pfd[1]);
-    pass = getln(pfd[0], buf, sizeof(buf), 0);
+    pass = getln(pfd[0], buf, sizeof(buf), 0, &errval);
     (void) close(pfd[0]);
+
+    tgetpass_display_error(errval);
 
     /* Wait for child to exit. */
     for (;;) {
@@ -302,10 +342,11 @@ sudo_askpass(const char *askpass, const char *prompt)
     debug_return_str_masked(pass);
 }
 
-extern int sudo_term_erase, sudo_term_kill;
+extern int sudo_term_eof, sudo_term_erase, sudo_term_kill;
 
 static char *
-getln(int fd, char *buf, size_t bufsiz, int feedback)
+getln(int fd, char *buf, size_t bufsiz, int feedback,
+    enum tgetpass_errval *errval)
 {
     size_t left = bufsiz;
     ssize_t nr = -1;
@@ -313,7 +354,10 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
     char c = '\0';
     debug_decl(getln, SUDO_DEBUG_CONV)
 
+    *errval = TGP_ERRVAL_NOERROR;
+
     if (left == 0) {
+	*errval = TGP_ERRVAL_READERROR;
 	errno = EINVAL;
 	debug_return_str(NULL);		/* sanity */
     }
@@ -323,7 +367,10 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
 	if (feedback) {
-	    if (c == sudo_term_kill) {
+	    if (c == sudo_term_eof) {
+		nr = 0;
+		break;
+	    } else if (c == sudo_term_kill) {
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) == -1)
 			break;
@@ -354,14 +401,32 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	}
     }
 
-    debug_return_str_masked(nr == 1 ? buf : NULL);
+    switch (nr) {
+    case -1:
+	/* Read error */
+	if (errno == EINTR) {
+	    if (signo[SIGALRM] == 1)
+		*errval = TGP_ERRVAL_TIMEOUT;
+	} else {
+	    *errval = TGP_ERRVAL_READERROR;
+	}
+	debug_return_str(NULL);
+    case 0:
+	/* EOF is only an error if no bytes were read. */
+	if (left == bufsiz - 1) {
+	    *errval = TGP_ERRVAL_NOPASSWORD;
+	    debug_return_str(NULL);
+	}
+	/* FALLTHROUGH */
+    default:
+	debug_return_str_masked(buf);
+    }
 }
 
 static void
 tgetpass_handler(int s)
 {
-    if (s != SIGALRM)
-	signo[s] = 1;
+    signo[s] = 1;
 }
 
 static bool

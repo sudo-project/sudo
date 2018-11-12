@@ -314,6 +314,7 @@ int runaslist_matches(struct sudoers_parse_tree *parse_tree, const struct member
 int user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member *m);
 int userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
 const char *sudo_getdomainname(void);
+struct gid_list *runas_getgroups(void);
 
 /* toke.c */
 void init_lexer(void);

@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -117,10 +122,11 @@ ldif_parse_attribute(char *str)
 
     ep = str + strlen(str);
     while (ep > str && ep[-1] == ' ') {
-	/* Don't trim ecaped trailing space if not base64. */
-	if (!encoded && ep != str && ep[-2] == '\\')
+	ep--;
+	/* Don't trim escaped trailing space if not base64. */
+	if (!encoded && ep != str && ep[-1] == '\\')
 	    break;
-	*--ep = '\0';
+	*ep = '\0';
     }
 
     attr = str;
@@ -403,10 +409,14 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	    struct cmndspec *cmndspec = TAILQ_FIRST(&priv->cmndlist);
 
 	    /* Free duplicate runas lists. */
-	    if (cmndspec->runasuserlist != NULL)
+	    if (cmndspec->runasuserlist != NULL) {
 		free_members(cmndspec->runasuserlist);
-	    if (cmndspec->runasgrouplist != NULL)
+		free(cmndspec->runasuserlist);
+	    }
+	    if (cmndspec->runasgrouplist != NULL) {
 		free_members(cmndspec->runasgrouplist);
+		free(cmndspec->runasgrouplist);
+	    }
 
 	    /* Update cmndspec with previous runas lists. */
 	    TAILQ_FOREACH(cmndspec, &priv->cmndlist, entries) {
@@ -568,14 +578,12 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 		if (role->cn != NULL && strcmp(role->cn, "defaults") == 0) {
 		    ldif_store_options(parse_tree, role->options);
 		    sudo_role_free(role);
-		    role = NULL;
 		} else if (STAILQ_EMPTY(role->users) ||
 		    STAILQ_EMPTY(role->hosts) || STAILQ_EMPTY(role->cmnds)) {
 		    /* Incomplete role. */
 		    sudo_warnx(U_("ignoring incomplete sudoRole: cn: %s"),
 			role->cn ? role->cn : "UNKNOWN");
 		    sudo_role_free(role);
-		    role = NULL;
 		} else {
 		    /* Cache users, hosts, runasusers and runasgroups. */
 		    if (str_list_cache(usercache, &role->users) == -1 ||
@@ -633,14 +641,6 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	    ungetc(ch, fp);
 	}
 
-	/* Allocate new role as needed. */
-	if (role == NULL) {
-	    if ((role = sudo_role_alloc()) == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	}
-
 	/* Parse dn and objectClass. */
 	if (strncasecmp(line, "dn:", 3) == 0) {
 	    /* Compare dn to base, if specified. */
@@ -671,8 +671,16 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	    }
 	} else if (strncmp(line, "objectClass:", 12) == 0) {
 	    attr = ldif_parse_attribute(line + 12);
-	    if (attr != NULL && strcmp(attr, "sudoRole") == 0)
+	    if (attr != NULL && strcmp(attr, "sudoRole") == 0) {
+		/* Allocate new role as needed. */
+		if (role == NULL) {
+		    if ((role = sudo_role_alloc()) == NULL) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+		    }
+		}
 		in_role = true;
+	    }
 	}
 
 	/* Not in a sudoRole, keep reading. */

@@ -1,8 +1,10 @@
 ~$
-\.o$
+\.i$
 \.l[ao]$
 \.lai$
 \.mo$
+\.o$
+\.plog$
 
 \.diff$
 \.orig$
@@ -16,6 +18,7 @@ Makefile$
 ^libtool$
 
 ^ChangeLog$
+^PVS-Studio.cfg$
 ^doc/.*\.man$
 ^doc/.*\.mdoc$
 ^doc/.*\.man\.sed$
@@ -39,6 +42,6 @@ Makefile$
 ^lib/util/[a-z0-9_]+_test$
 ^lib/util/regress/.*\.(out|err)$
 
-^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|check_[a-z0-9_]+)$
+^plugins/sudoers/(cvtsudoers|sudoers|sudoreplay|testsudoers|tsdump|visudo|prologue|check_[a-z0-9_]+)$
 ^plugins/sudoers/.*\.(out|toke|err|json|ldif|sudo|ldif2sudo)$
 ^plugins/sudoers/regress/iolog_plugin/iolog$

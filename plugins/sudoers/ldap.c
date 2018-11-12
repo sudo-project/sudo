@@ -16,6 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -1151,13 +1156,13 @@ ldap_to_sudoers(LDAP *ld, struct ldap_result *lres,
 	struct berval **runasusers = NULL, **runasgroups = NULL;
 	struct berval **opts = NULL, **notbefore = NULL, **notafter = NULL;
 	struct privilege *priv = NULL;
-	char *cn;
+	char *cn = NULL;
 
 	/* Ignore sudoRole without sudoCommand. */
 	cmnds = sudo_ldap_get_values_len(ld, entry, "sudoCommand", &rc);
 	if (cmnds == NULL) {
 	    if (rc == LDAP_NO_MEMORY)
-		goto oom;
+		goto cleanup;
 	    continue;
 	}
 

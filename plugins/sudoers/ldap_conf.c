@@ -16,6 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -87,6 +92,8 @@ static struct ldap_config_table ldap_conf_global[] = {
 #ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
     { "tls_checkpeer", CONF_BOOL, LDAP_OPT_X_TLS_REQUIRE_CERT,
 	&ldap_conf.tls_checkpeer },
+    { "tls_reqcert", CONF_REQCERT_VAL, LDAP_OPT_X_TLS_REQUIRE_CERT,
+	&ldap_conf.tls_reqcert },
 #else
     { "tls_checkpeer", CONF_BOOL, -1, &ldap_conf.tls_checkpeer },
 #endif
@@ -403,6 +410,20 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		else
 		    *(int *)(cur->valp) = LDAP_DEREF_NEVER;
 		break;
+	    case CONF_REQCERT_VAL:
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
+		if (strcasecmp(value, "never") == 0)
+		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_NEVER;
+		else if (strcasecmp(value, "allow") == 0)
+		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_ALLOW;
+		else if (strcasecmp(value, "try") == 0)
+		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_TRY;
+		else if (strcasecmp(value, "hard") == 0)
+		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_HARD;
+		else if (strcasecmp(value, "demand") == 0)
+		    *(int *)(cur->valp) = LDAP_OPT_X_TLS_DEMAND;
+#endif /* LDAP_OPT_X_TLS_REQUIRE_CERT */
+		break;
 	    case CONF_BOOL:
 		*(int *)(cur->valp) = sudo_strtobool(value) == true;
 		break;
@@ -517,6 +538,7 @@ sudo_ldap_read_config(void)
     ldap_conf.version = 3;
     ldap_conf.port = -1;
     ldap_conf.tls_checkpeer = -1;
+    ldap_conf.tls_reqcert = -1;
     ldap_conf.timelimit = -1;
     ldap_conf.timeout = -1;
     ldap_conf.bind_timelimit = -1;
@@ -619,6 +641,17 @@ sudo_ldap_read_config(void)
 	DPRINTF1("tls_checkpeer    %s",
 	    ldap_conf.tls_checkpeer ? "(yes)" : "(no)");
     }
+#ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
+    if (ldap_conf.tls_reqcert != -1) {
+	DPRINTF1("tls_reqcert    %s",
+	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_NEVER ? "hard" :
+	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_ALLOW ? "allow" :
+	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_TRY ? "try" :
+	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_HARD ? "hard" :
+	    ldap_conf.tls_reqcert == LDAP_OPT_X_TLS_DEMAND ? "demand" :
+	    "unknown");
+    }
+#endif /* LDAP_OPT_X_TLS_REQUIRE_CERT */
     if (ldap_conf.tls_cacertfile != NULL) {
 	DPRINTF1("tls_cacertfile   %s", ldap_conf.tls_cacertfile);
     }

@@ -35,7 +35,7 @@
 #include "sudoers.h"
 #include "def_data.c"		/* for iolog_path.c */
 #include "sudo_plugin.h"
-#include "iolog_util.h"
+#include "iolog.h"
 
 extern struct io_plugin sudoers_io;
 
@@ -158,12 +158,12 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 	sudo_warnx("invalid timing file line: %s", buf);
 	return false;
     }
-    if (timing.idx != type) {
+    if (timing.event != type) {
 	sudo_warnx("record %d: want type %d, got type %d", recno, type,
-	    timing.idx);
+	    timing.event);
 	return false;
     }
-    if (type == IOFD_TIMING) {
+    if (type == IO_EVENT_WINSIZE) {
 	if (timing.u.winsize.rows != (int)p1) {
 	    sudo_warnx("record %d: want %u rows, got %u", recno, p1,
 		timing.u.winsize.rows);
@@ -295,19 +295,19 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
     }
 
     /* Line 1: output of id command. */
-    if (!validate_timing(fp, 1, IOFD_TTYOUT, strlen(output), 0)) {
+    if (!validate_timing(fp, 1, IO_EVENT_TTYOUT, strlen(output), 0)) {
 	(*nerrors)++;
 	return;
     }
 
     /* Line 2: window size change. */
-    if (!validate_timing(fp, 2, IOFD_TIMING, 32, 128)) {
+    if (!validate_timing(fp, 2, IO_EVENT_WINSIZE, 32, 128)) {
 	(*nerrors)++;
 	return;
     }
 
     /* Line 3: window size change. */
-    if (!validate_timing(fp, 3, IOFD_TIMING, 24, 80)) {
+    if (!validate_timing(fp, 3, IO_EVENT_WINSIZE, 24, 80)) {
 	(*nerrors)++;
 	return;
     }

@@ -52,6 +52,35 @@ foreach (@ARGV) {
     mkdep($_);
 }
 
+sub fmt_depend {
+    my ($obj, $src) = @_;
+    my $ret;
+
+    my $deps = sprintf("%s: %s %s", $obj, $src,
+	join(' ', find_depends($src)));
+    if (length($deps) > 80) {
+	my $off = 0;
+	my $indent = length($obj) + 2;
+	while (length($deps) - $off > 80 - $indent) {
+	    my $pos;
+	    if ($off != 0) {
+		$ret .= ' ' x $indent;
+		$pos = rindex($deps, ' ', $off + 80 - $indent - 2);
+	    } else {
+		$pos = rindex($deps, ' ', $off + 78);
+	    }
+	    $ret .= substr($deps, $off, $pos - $off) . " \\\n";
+	    $off = $pos + 1;
+	}
+	$ret .= ' ' x $indent;
+	$ret .= substr($deps, $off) . "\n";
+    } else {
+	$ret = "$deps\n";
+    }
+
+    $ret;
+}
+
 sub mkdep {
     my $file = $_[0];
     $file =~ s:^\./+::;		# strip off leading ./
@@ -120,7 +149,7 @@ sub mkdep {
 
     # Find implicit rules for generated .o and .lo files
     %implicit = ();
-    while ($makefile =~ /^\.c\.(l?o):\s*\n\t+(.*)$/mg) {
+    while ($makefile =~ /^\.[ci]\.(l?o|i|plog):\s*\n\t+(.*)$/mg) {
 	$implicit{$1} = $2;
     }
 
@@ -155,28 +184,25 @@ sub mkdep {
 	    my $imp = $implicit{$ext};
 	    $imp =~ s/\$</$src/g;
 
-	    my $deps = sprintf("%s: %s %s", $obj, $src,
-		join(' ', find_depends($src)));
-	    if (length($deps) > 80) {
-		my $off = 0;
-		my $indent = length($obj) + 2;
-		while (length($deps) - $off > 80 - $indent) {
-		    my $pos;
-		    if ($off != 0) {
-			$new_makefile .= ' ' x $indent;
-			$pos = rindex($deps, ' ', $off + 80 - $indent - 2);
-		    } else {
-			$pos = rindex($deps, ' ', $off + 78);
-		    }
-		    $new_makefile .= substr($deps, $off, $pos - $off) . " \\\n";
-		    $off = $pos + 1;
-		}
-		$new_makefile .= ' ' x $indent;
-		$new_makefile .= substr($deps, $off) . "\n";
-	    } else {
-		$new_makefile .= "$deps\n";
-	    }
+	    my $deps = fmt_depend($obj, $src);
+	    $new_makefile .= $deps;
 	    $new_makefile .= "\t$imp\n";
+
+	    # PVS Studio files (.i and .plog)
+	    $imp = $implicit{"i"};
+	    if (exists $implicit{"i"} && exists $implicit{"plog"}) {
+		$imp = $implicit{"i"};
+		$deps =~ s/\.l?o/.i/;
+		$new_makefile .= $deps;
+		$new_makefile .= "\t$imp\n";
+
+		$imp = $implicit{"plog"};
+		$imp =~ s/ifile=\$<; *//;
+		$imp =~ s/\$\$\{ifile\%i\}c/$src/;
+		$obj =~ /(.*)\.[a-z]+$/;
+		$new_makefile .= "${1}.plog: ${1}.i\n";
+		$new_makefile .= "\t$imp\n";
+	    }
 	}
     }
 

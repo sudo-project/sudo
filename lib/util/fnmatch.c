@@ -42,6 +42,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 /* Authored by William A. Rowe Jr. <wrowe; apache.org, vmware.com>, April 2011
  *
  * Derived from The Open Group Base Specifications Issue 7, IEEE Std 1003.1-2008

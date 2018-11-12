@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
 #include <config.h>
 
 #include <sys/types.h>
@@ -338,9 +343,8 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
     const char *typestr = NULL;
     const char *errstr;
     int alias_type = UNSPEC;
-    bool need_newline = true;
     id_t id;
-    debug_decl(print_member_json, SUDOERS_DEBUG_UTIL)
+    debug_decl(print_member_json_int, SUDOERS_DEBUG_UTIL)
 
     /* Most of the time we print a string. */
     value.type = JSON_STRING;
@@ -476,6 +480,7 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	struct alias *a;
 	struct member *m;
 
+	/* Print each member of the alias. */
 	if ((a = alias_get(parse_tree, value.u.string, alias_type)) != NULL) {
 	    TAILQ_FOREACH(m, &a->members, entries) {
 		print_member_json_int(fp, parse_tree, m->name, m->type,
@@ -484,26 +489,27 @@ print_member_json_int(FILE *fp, struct sudoers_parse_tree *parse_tree,
 		    last_one && TAILQ_NEXT(m, entries) == NULL, indent, true);
 	    }
 	    alias_put(a);
-	    need_newline = false;
 	}
-    } else if (negated) {
-	print_indent(fp, indent);
-	fputs("{\n", fp);
-	indent += 4;
-	print_pair_json(fp, NULL, typestr, &value, ",\n", indent);
-	value.type = JSON_BOOL;
-	value.u.boolean = true;
-	print_pair_json(fp, NULL, "negated", &value, "\n", indent);
-	indent -= 4;
-	print_indent(fp, indent);
-	putc('}', fp);
     } else {
-	print_pair_json(fp, "{ ", typestr, &value, " }", indent);
-    }
-    if (!last_one)
-	putc(',', fp);
-    if (need_newline)
+	if (negated) {
+	    print_indent(fp, indent);
+	    fputs("{\n", fp);
+	    indent += 4;
+	    print_pair_json(fp, NULL, typestr, &value, ",\n", indent);
+	    value.type = JSON_BOOL;
+	    value.u.boolean = true;
+	    print_pair_json(fp, NULL, "negated", &value, "\n", indent);
+	    indent -= 4;
+	    print_indent(fp, indent);
+	    putc('}', fp);
+	} else {
+	    print_pair_json(fp, "{ ", typestr, &value, " }", indent);
+	}
+
+	if (!last_one)
+	    putc(',', fp);
 	putc('\n', fp);
+    }
 
     debug_return;
 }
