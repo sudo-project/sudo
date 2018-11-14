@@ -814,6 +814,9 @@
 /* Define to 1 if your struct stat has an st_mtimespec member. */
 #undef HAVE_ST_MTIMESPEC
 
+/* Define to 1 if your struct stat has an st_nmtime member. */
+#undef HAVE_ST_NMTIME
+
 /* Define to 1 if your struct stat uses an st__tim union. */
 #undef HAVE_ST__TIM
 

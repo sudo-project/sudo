@@ -52,6 +52,9 @@
 #elif defined(HAVE_ST_MTIMESPEC)
 # define ATIME_TO_TIMEVAL(_x, _y)	TIMESPEC_TO_TIMEVAL((_x), &(_y)->st_atimespec)
 # define MTIME_TO_TIMEVAL(_x, _y)	TIMESPEC_TO_TIMEVAL((_x), &(_y)->st_mtimespec)
+#elif defined(HAVE_ST_NMTIME)
+# define ATIME_TO_TIMEVAL(_x, _y)      do { (_x)->tv_sec = (_y)->st_atime; (_x)->tv_usec = (_y)->st_natime; } while (0)
+# define MTIME_TO_TIMEVAL(_x, _y)      do { (_x)->tv_sec = (_y)->st_mtime; (_x)->tv_usec = (_y)->st_nmtime; } while (0)
 #else
 # define ATIME_TO_TIMEVAL(_x, _y)      do { (_x)->tv_sec = (_y)->st_atime; (_x)->tv_usec = 0; } while (0)
 # define MTIME_TO_TIMEVAL(_x, _y)      do { (_x)->tv_sec = (_y)->st_mtime; (_x)->tv_usec = 0; } while (0)

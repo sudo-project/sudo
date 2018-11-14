@@ -20975,7 +20975,16 @@ else
 if test "x$ac_cv_member_struct_stat_st_mtimespec" = xyes; then :
   $as_echo "#define HAVE_ST_MTIMESPEC 1" >>confdefs.h
 
+else
+  ac_fn_c_check_member "$LINENO" "struct stat" "st_nmtime" "ac_cv_member_struct_stat_st_nmtime" "$ac_includes_default"
+if test "x$ac_cv_member_struct_stat_st_nmtime" = xyes; then :
+  $as_echo "#define HAVE_ST_NMTIME 1" >>confdefs.h
+
 fi
+
+fi
+
+
 
 fi
 
@@ -29028,6 +29037,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

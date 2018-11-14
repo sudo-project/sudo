@@ -2836,9 +2836,14 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff], [], [], [
 AC_INCLUDES_DEFAULT
 #include <errno.h>
 ])
-AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
+AC_CHECK_MEMBER([struct stat.st_mtim],
+    [AC_DEFINE(HAVE_ST_MTIM)]
     [AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
-    [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
+    [AC_CHECK_MEMBER([struct stat.st_mtimespec],
+	[AC_DEFINE([HAVE_ST_MTIMESPEC])],
+	[AC_CHECK_MEMBER([struct stat.st_nmtime], AC_DEFINE(HAVE_ST_NMTIME))])
+    ]
+)
 # Look for sha2 functions if not using openssl
 if test "$DIGEST" = "digest.lo"; then
     FOUND_SHA2=no
@@ -4578,6 +4583,7 @@ AH_TEMPLATE(HAVE_SOLARIS_AUDIT, [Define to 1 to enable Solaris audit support.])
 AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union.])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member.])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member.])
+AH_TEMPLATE(HAVE_ST_NMTIME, [Define to 1 if your struct stat has an st_nmtime member.])
 AH_TEMPLATE(HAVE___PROGNAME, [Define to 1 if your crt0.o defines the __progname symbol for you.])
 AH_TEMPLATE(HOST_IN_LOG, [Define to 1 if you want the hostname to be entered into the log file.])
 AH_TEMPLATE(IGNORE_DOT_PATH, [Define to 1 if you want to ignore '.' and empty PATH elements.])
