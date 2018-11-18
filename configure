@@ -2867,7 +2867,6 @@ as_fn_append ac_header_list " sys/types.h"
 as_fn_append ac_header_list " netgroup.h"
 as_fn_append ac_header_list " paths.h"
 as_fn_append ac_header_list " spawn.h"
-as_fn_append ac_header_list " utmpx.h"
 as_fn_append ac_header_list " wordexp.h"
 as_fn_append ac_header_list " sys/sockio.h"
 as_fn_append ac_header_list " sys/bsdtypes.h"
@@ -17737,7 +17736,18 @@ fi
 
 
 
+for ac_header in utmps.h utmpx.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ break
+fi
 
+done
 
 for ac_header in endian.h sys/endian.h machine/endian.h
 do :
@@ -18686,72 +18696,195 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-if test $ac_cv_header_utmpx_h = "yes"; then
-    ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_id" "ac_cv_member_struct_utmpx_ut_id" "
+if test $ac_cv_header_utmps_h = "yes"; then
+
+                ac_fn_c_check_member "$LINENO" "struct utmps" "ut_id" "ac_cv_member_struct_utmps_ut_id" "
+#	include <sys/types.h>
+#	include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmps_ut_id" = xyes; then :
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_ID 1" >>confdefs.h
+
+
+fi
+
+    ac_fn_c_check_member "$LINENO" "struct utmps" "ut_pid" "ac_cv_member_struct_utmps_ut_pid" "
+#	include <sys/types.h>
+#	include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmps_ut_pid" = xyes; then :
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_PID 1" >>confdefs.h
+
+
+fi
+
+    ac_fn_c_check_member "$LINENO" "struct utmps" "ut_tv" "ac_cv_member_struct_utmps_ut_tv" "
+#	include <sys/types.h>
+#	include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmps_ut_tv" = xyes; then :
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_TV 1" >>confdefs.h
+
+
+fi
+
+    ac_fn_c_check_member "$LINENO" "struct utmps" "ut_type" "ac_cv_member_struct_utmps_ut_type" "
+#	include <sys/types.h>
+#	include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmps_ut_type" = xyes; then :
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_TYPE 1" >>confdefs.h
+
+
+fi
+
+                if test "utmps" = "utmp"; then
+	ac_fn_c_check_member "$LINENO" "struct utmp" "ut_user" "ac_cv_member_struct_utmp_ut_user" "
+#	include <sys/types.h>
+#	include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmp_ut_user" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMP_UT_USER 1
+_ACEOF
+
+
+fi
+
+    fi
+                        ac_fn_c_check_member "$LINENO" "struct utmps" "ut_exit.__e_termination" "ac_cv_member_struct_utmps_ut_exit___e_termination" "
+#	include <sys/types.h>
+#	include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmps_ut_exit___e_termination" = xyes; then :
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION 1" >>confdefs.h
+
+
+else
+
+	ac_fn_c_check_member "$LINENO" "struct utmps" "ut_exit.e_termination" "ac_cv_member_struct_utmps_ut_exit_e_termination" "
+#	    include <sys/types.h>
+#	    include <utmps.h>
+
+"
+if test "x$ac_cv_member_struct_utmps_ut_exit_e_termination" = xyes; then :
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION 1" >>confdefs.h
+
+
+fi
+
+
+fi
+
+
+elif test $ac_cv_header_utmpx_h = "yes"; then
+
+                ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_id" "ac_cv_member_struct_utmpx_ut_id" "
 #	include <sys/types.h>
 #	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_id" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_ID 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_ID 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_pid" "ac_cv_member_struct_utmpx_ut_pid" "
+
+    ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_pid" "ac_cv_member_struct_utmpx_ut_pid" "
 #	include <sys/types.h>
 #	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_pid" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_PID 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_PID 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_tv" "ac_cv_member_struct_utmpx_ut_tv" "
+
+    ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_tv" "ac_cv_member_struct_utmpx_ut_tv" "
 #	include <sys/types.h>
 #	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_tv" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_TV 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_TV 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_type" "ac_cv_member_struct_utmpx_ut_type" "
+
+    ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_type" "ac_cv_member_struct_utmpx_ut_type" "
 #	include <sys/types.h>
 #	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_type" = xyes; then :
 
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_TYPE 1" >>confdefs.h
+
+
+fi
+
+                if test "utmpx" = "utmp"; then
+	ac_fn_c_check_member "$LINENO" "struct utmp" "ut_user" "ac_cv_member_struct_utmp_ut_user" "
+#	include <sys/types.h>
+#	include <utmpx.h>
+
+"
+if test "x$ac_cv_member_struct_utmp_ut_user" = xyes; then :
+
 cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_TYPE 1
+#define HAVE_STRUCT_UTMP_UT_USER 1
 _ACEOF
 
 
 fi
 
-                ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit.__e_termination" "ac_cv_member_struct_utmpx_ut_exit___e_termination" "
+    fi
+                        ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit.__e_termination" "ac_cv_member_struct_utmpx_ut_exit___e_termination" "
 #	include <sys/types.h>
 #	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_exit___e_termination" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_EXIT___E_TERMINATION 1
-_ACEOF
 
-$as_echo "#define HAVE_STRUCT_UTMPX_UT_EXIT 1" >>confdefs.h
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION 1" >>confdefs.h
+
 
 else
 
@@ -18762,71 +18895,75 @@ else
 "
 if test "x$ac_cv_member_struct_utmpx_ut_exit_e_termination" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_EXIT_E_TERMINATION 1
-_ACEOF
 
-$as_echo "#define HAVE_STRUCT_UTMPX_UT_EXIT 1" >>confdefs.h
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
 
-fi
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION 1" >>confdefs.h
 
 
 fi
+
+
+fi
+
 
 else
-    ac_fn_c_check_member "$LINENO" "struct utmp" "ut_id" "ac_cv_member_struct_utmp_ut_id" "
+
+                ac_fn_c_check_member "$LINENO" "struct utmp" "ut_id" "ac_cv_member_struct_utmp_ut_id" "
 #	include <sys/types.h>
 #	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_id" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_ID 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_ID 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmp" "ut_pid" "ac_cv_member_struct_utmp_ut_pid" "
+
+    ac_fn_c_check_member "$LINENO" "struct utmp" "ut_pid" "ac_cv_member_struct_utmp_ut_pid" "
 #	include <sys/types.h>
 #	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_pid" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_PID 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_PID 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmp" "ut_tv" "ac_cv_member_struct_utmp_ut_tv" "
+
+    ac_fn_c_check_member "$LINENO" "struct utmp" "ut_tv" "ac_cv_member_struct_utmp_ut_tv" "
 #	include <sys/types.h>
 #	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_tv" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_TV 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_TV 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmp" "ut_type" "ac_cv_member_struct_utmp_ut_type" "
+
+    ac_fn_c_check_member "$LINENO" "struct utmp" "ut_type" "ac_cv_member_struct_utmp_ut_type" "
 #	include <sys/types.h>
 #	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_type" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_TYPE 1
-_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_TYPE 1" >>confdefs.h
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmp" "ut_user" "ac_cv_member_struct_utmp_ut_user" "
+
+                if test "utmp" = "utmp"; then
+	ac_fn_c_check_member "$LINENO" "struct utmp" "ut_user" "ac_cv_member_struct_utmp_ut_user" "
 #	include <sys/types.h>
 #	include <utmp.h>
 
@@ -18840,18 +18977,20 @@ _ACEOF
 
 fi
 
-                ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit.__e_termination" "ac_cv_member_struct_utmp_ut_exit___e_termination" "
+    fi
+                        ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit.__e_termination" "ac_cv_member_struct_utmp_ut_exit___e_termination" "
 #	include <sys/types.h>
 #	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_exit___e_termination" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION 1
-_ACEOF
 
 $as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION 1" >>confdefs.h
+
 
 else
 
@@ -18862,16 +19001,18 @@ else
 "
 if test "x$ac_cv_member_struct_utmp_ut_exit_e_termination" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION 1
-_ACEOF
 
 $as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
 
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION 1" >>confdefs.h
+
+
 fi
 
 
 fi
+
 
 fi
 
@@ -19443,7 +19584,7 @@ done
 
 
 utmp_style=LEGACY
-for ac_func in getutxid getutid
+for ac_func in getutsid getutxid getutid
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -29037,8 +29178,6 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
-
 
 
 

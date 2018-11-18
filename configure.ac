@@ -2396,7 +2396,8 @@ dnl
 AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h utmpx.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/syscall.h sys/statvfs.h])
+AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/syscall.h sys/statvfs.h])
+AC_CHECK_HEADERS([utmps.h] [utmpx.h], [break])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2491,45 +2492,12 @@ SUDO_SOCK_SIN_LEN
 AC_CHECK_SIZEOF([id_t])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([time_t])
-dnl
-dnl Check for utmp/utmpx struct members.
-dnl We need to have already defined _GNU_SOURCE on glibc which only has
-dnl __e_termination visible when _GNU_SOURCE is *not* defined.
-dnl
-if test $ac_cv_header_utmpx_h = "yes"; then
-    AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
-#	include <sys/types.h>
-#	include <utmpx.h>
-    ])
-    dnl
-    dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
-    dnl
-    AC_CHECK_MEMBERS([struct utmpx.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [
-	AC_CHECK_MEMBERS([struct utmpx.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [], [
-#	    include <sys/types.h>
-#	    include <utmpx.h>
-	])
-    ], [
-#	include <sys/types.h>
-#	include <utmpx.h>
-    ])
+if test $ac_cv_header_utmps_h = "yes"; then
+    SUDO_CHECK_UTMP_MEMBERS([utmps])
+elif test $ac_cv_header_utmpx_h = "yes"; then
+    SUDO_CHECK_UTMP_MEMBERS([utmpx])
 else
-    AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
-#	include <sys/types.h>
-#	include <utmp.h>
-    ])
-    dnl
-    dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
-    dnl
-    AC_CHECK_MEMBERS([struct utmp.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [
-	AC_CHECK_MEMBERS([struct utmp.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [], [
-#	    include <sys/types.h>
-#	    include <utmp.h>
-	])
-    ], [
-#	include <sys/types.h>
-#	include <utmp.h>
-    ])
+    SUDO_CHECK_UTMP_MEMBERS([utmp])
 fi
 
 dnl
@@ -2616,7 +2584,7 @@ AC_CHECK_FUNCS([arc4random_uniform], [], [
 ])
 
 utmp_style=LEGACY
-AC_CHECK_FUNCS([getutxid getutid], [utmp_style=POSIX; break])
+AC_CHECK_FUNCS([getutsid getutxid getutid], [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS([getttyent ttyslot], [break])
     AC_CHECK_FUNCS([fseeko])
@@ -4614,8 +4582,6 @@ AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for au
 AH_TEMPLATE(clockid_t, [Define to `int' if <time.h> does not define.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(socklen_t, [Define to `unsigned int' if <sys/socket.h> doesn't define.])
-AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
-AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
 AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
 AH_TEMPLATE(HAVE___INTERPOSE, [Define to 1 if you have dyld with __interpose attribute support.])
 AH_TEMPLATE(SUDO_KRB5_INSTANCE, [An instance string to append to the username (separated by a slash) for Kerberos V authentication.])

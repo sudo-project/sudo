@@ -340,6 +340,9 @@
 /* Define to 1 if you have the `getutid' function. */
 #undef HAVE_GETUTID
 
+/* Define to 1 if you have the `getutsid' function. */
+#undef HAVE_GETUTSID
+
 /* Define to 1 if you have the `getutxid' function. */
 #undef HAVE_GETUTXID
 
@@ -763,27 +766,6 @@
 /* Define to 1 if `tm_gmtoff' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_GMTOFF
 
-/* Define to 1 if `ut_exit' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_EXIT
-
-/* Define to 1 if `ut_exit.e_termination' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_EXIT_E_TERMINATION
-
-/* Define to 1 if `ut_exit.__e_termination' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_EXIT___E_TERMINATION
-
-/* Define to 1 if `ut_id' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_ID
-
-/* Define to 1 if `ut_pid' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_PID
-
-/* Define to 1 if `ut_tv' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_TV
-
-/* Define to 1 if `ut_type' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_TYPE
-
 /* Define to 1 if `ut_exit' is a member of `struct utmp'. */
 #undef HAVE_STRUCT_UTMP_UT_EXIT
 
@@ -893,6 +875,9 @@
 
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
+
+/* Define to 1 if you have the <utmps.h> header file. */
+#undef HAVE_UTMPS_H
 
 /* Define to 1 if you have the <utmpx.h> header file. */
 #undef HAVE_UTMPX_H
