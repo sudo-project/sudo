@@ -35,7 +35,7 @@ case "$OUTFILE" in
 	if [ X"$BAMAN" != X"1" ]; then
 		BA_FLAG='/^.*\n\.Op Fl a Ar type/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.It Fl a Ar type/,/\.Bx authentication \.$/d
+			/^\.It Fl a Ar type/,/BSD authentication\.$/d
 		EOF
 	fi
 
@@ -44,11 +44,11 @@ case "$OUTFILE" in
 	if [ X"$LCMAN" != X"1" ]; then
 		LC_FLAG='/^.*\n\.Op Fl c Ar class/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.It Fl c Ar class/,/\.Bx login classes \.$/d
+			/^\.It Fl c Ar class/,/BSD login classes\.$/d
 			/^\.Xr login_cap 3 ,$/d
-			/^\.Bx login class$/ {
+			/^BSD login class$/ {
 				N
-				/^\.Bx login class\n\.It$/d
+				/^BSD login class\n\.It$/d
 			}
 		EOF
 	fi
@@ -110,7 +110,7 @@ case "$OUTFILE" in
 	# BSD login class
 	if [ X"$LCMAN" != X"1" ]; then
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.No On Bx systems/,/\.$/d
+			/^On BSD systems/,/\.$/d
 			/^\.It use_loginclass$/,/^by default\./d
 		EOF
 	fi

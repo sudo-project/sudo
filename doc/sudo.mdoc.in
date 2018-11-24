@@ -18,7 +18,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 23, 2018
+.Dd October 27, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -172,8 +172,7 @@ If no askpass program is available,
 .Nm
 will exit with an error.
 .It Fl a Ar type , Fl -auth-type Ns = Ns Ar type
-Use the specified
-.Bx authentication
+Use the specified BSD authentication
 .Ar type
 when validating the user, if allowed by
 .Pa /etc/login.conf .
@@ -182,8 +181,7 @@ authentication methods by adding an
 .Dq auth-sudo
 entry in
 .Pa /etc/login.conf .
-This option is only available on systems that support
-.Bx authentication .
+This option is only available on systems that support BSD authentication.
 .It Fl b , -background
 Run the given command in the background.
 Note that it is not possible to use shell job control to manipulate
@@ -231,8 +229,7 @@ If the command is being run as a login shell, additional
 .Pa /etc/login.conf
 settings, such as the umask and environment variables, will
 be applied, if present.
-This option is only available on systems with
-.Bx login classes .
+This option is only available on systems with BSD login classes.
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
@@ -655,7 +652,7 @@ Solaris project
 .It
 Solaris privileges
 .It
-.Bx login class
+BSD login class
 .It
 scheduling priority (aka nice value)
 .El

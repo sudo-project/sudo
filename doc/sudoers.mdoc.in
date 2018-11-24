@@ -18,7 +18,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 23, 2018
+.Dd October 27, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -282,7 +282,7 @@ systems without PAM), the environment is initialized with the
 contents of the
 .Pa /etc/environment
 file.
-.No On Bx systems , if the
+On BSD systems, if the
 .Em use_loginclass
 option is enabled, the environment is initialized
 based on the
@@ -470,7 +470,7 @@ systems without PAM), the contents of
 .Pa /etc/environment
 are also
 included.
-.No On Bx systems , if the
+On BSD systems, if the
 .Em use_loginclass
 flag is
 enabled, the

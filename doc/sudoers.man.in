@@ -292,9 +292,7 @@ systems without PAM), the environment is initialized with the
 contents of the
 \fI/etc/environment\fR
 file.
-On
-BSD
-systems, if the
+On BSD systems, if the
 \fIuse_loginclass\fR
 option is enabled, the environment is initialized
 based on the
@@ -485,9 +483,7 @@ systems without PAM), the contents of
 \fI/etc/environment\fR
 are also
 included.
-On
-BSD
-systems, if the
+On BSD systems, if the
 \fIuse_loginclass\fR
 flag is
 enabled, the
