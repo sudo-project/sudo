@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "October 7, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "October 24, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -669,12 +669,16 @@ or
 function using
 \fRSUDO_CONV_INFO_MSG\fR.
 If the user requests detailed version information, the verbose flag will be set.
+.sp
+Returns 1 on success, 0 on failure, \-1 if a general error occurred,
+or \-2 if there was a usage error, although the return value is currently
+ignored.
 .RE
 .TP 6n
 check_policy
 .nf
 .RS 6n
-int (*check_policy)(int argc, char * const argv[]
+int (*check_policy)(int argc, char * const argv[],
                     char *env_add[], char **command_info[],
                     char **argv_out[], char **user_env_out[]);
 .RE
@@ -1117,8 +1121,8 @@ The plugin is responsible for allocating and populating the vector.
 list
 .nf
 .RS 6n
-int (*list)(int verbose, const char *list_user,
-            int argc, char * const argv[]);
+int (*list)(int argc, char * const argv[],
+            int verbose, const char *list_user);
 .RE
 .fi
 .RS 6n
@@ -1434,7 +1438,7 @@ will not be called.
 .RS 0n
 /* Plugin API version major/minor. */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 2
+#define SUDO_API_VERSION_MINOR 13
 #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\e
                                             SUDO_API_VERSION_MINOR)
@@ -1547,8 +1551,9 @@ open
 .RS 6n
 int (*open)(unsigned int version, sudo_conv_t conversation,
             sudo_printf_t plugin_printf, char * const settings[],
-            char * const user_info[], int argc, char * const argv[],
-            char * const user_env[], char * const plugin_options[]);
+            char * const user_info[], char * const command_info[],
+            int argc, char * const argv[], char * const user_env[],
+            char * const plugin_options[]);
 .RE
 .fi
 .RS 6n
@@ -1561,6 +1566,8 @@ function is run before the
 \fBlog_stdin\fR(),
 \fBlog_stdout\fR(),
 \fBlog_stderr\fR(),
+\fBlog_suspend\fR(),
+\fBchange_winsize\fR(),
 or
 \fBshow_version\fR()
 functions are called.
@@ -1682,6 +1689,10 @@ The number of elements in
 not counting the final
 \fRNULL\fR
 pointer.
+It can be zero, when
+\fBsudo\fR
+is called with
+\fB\-V\fR.
 .TP 6n
 argv
 If
@@ -1806,6 +1817,10 @@ or
 function using
 \fRSUDO_CONV_INFO_MSG\fR.
 If the user requests detailed version information, the verbose flag will be set.
+.sp
+Returns 1 on success, 0 on failure, \-1 if a general error occurred,
+or \-2 if there was a usage error, although the return value is currently
+ignored.
 .RE
 .TP 6n
 log_ttyin
@@ -2440,7 +2455,14 @@ There must be a
 and
 \fRstruct sudo_conv_reply\fR
 for
-each message in the conversation.
+each message in the conversation, that is, both arrays must have the same
+number of elements.
+Each
+\fRstruct sudo_conv_reply\fR
+must have its
+\fIreply\fR
+member initialized to
+\fRNULL\fR.
 The
 \fRstruct sudo_conv_callback\fR
 pointer, if not
@@ -2475,13 +2497,15 @@ Prompt the user for input with echo disabled;
 this is generally used for passwords.
 The reply will be stored in the
 \fIreplies\fR
-array.
+array, and it will never be
+\fRNULL\fR.
 .TP 6n
 SUDO_CONV_PROMPT_ECHO_ON
 Prompt the user for input with echo enabled.
 The reply will be stored in the
 \fIreplies\fR
-array.
+array, and it will never be
+\fRNULL\fR.
 .TP 6n
 SUDO_CONV_ERROR_MSG
 Display an error message.
@@ -2500,6 +2524,8 @@ Prompt the user for input but echo an asterisk character for each
 character read.
 The reply will be stored in the
 \fIreplies\fR
+array, and it will never be
+\fRNULL\fR.
 This can be used to provide visual feedback to the user while reading
 sensitive information that should not be displayed.
 .PP
@@ -2530,6 +2556,11 @@ this flag is only used for output.
 or
 \fRSUDO_CONV_INFO_MSG\fR
 was used.
+.PP
+The
+\fItimeout\fR
+in seconds until the prompt will wait for no more input.
+A zero value implies an infinite timeout.
 .PP
 The plugin is responsible for freeing the reply buffer located in each
 \fRstruct sudo_conv_reply\fR,
