@@ -19,7 +19,11 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "8" "October 27, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.nr SL @SEMAN@
+.nr BA @BAMAN@
+.nr LC @LCMAN@
+.nr PS @PSMAN@
+.TH "SUDO" "8" "November 25, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -36,7 +40,7 @@
 \fBsudo\fR
 \fB\-v\fR
 [\fB\-AknS\fR]
-[\fB\-a\fR\ \fItype\fR]
+.if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
@@ -46,7 +50,7 @@
 \fBsudo\fR
 \fB\-l\fR
 [\fB\-AknS\fR]
-[\fB\-a\fR\ \fItype\fR]
+.if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
@@ -57,14 +61,14 @@
 .HP 5n
 \fBsudo\fR
 [\fB\-AbEHnPS\fR]
-[\fB\-a\fR\ \fItype\fR]
+.if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
-[\fB\-c\fR\ \fIclass\fR]
+.if \n(LC [\fB\-c\fR\ \fIclass\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-r\fR\ \fIrole\fR]
-[\fB\-t\fR\ \fItype\fR]
+.if \n(SL [\fB\-r\fR\ \fIrole\fR]
+.if \n(SL [\fB\-t\fR\ \fItype\fR]
 [\fB\-T\fR\ \fItimeout\fR]
 [\fB\-u\fR\ \fIuser\fR]
 [\fIVAR\fR=\fIvalue\fR]
@@ -74,9 +78,9 @@
 .HP 9n
 \fBsudoedit\fR
 [\fB\-AknS\fR]
-[\fB\-a\fR\ \fItype\fR]
+.if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
-[\fB\-c\fR\ \fIclass\fR]
+.if \n(LC [\fB\-c\fR\ \fIclass\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
@@ -188,9 +192,12 @@ If no askpass program is available,
 \fBsudo\fR
 will exit with an error.
 .RE
+.if \n(BA \{\
 .TP 12n
 \fB\-a\fR \fItype\fR, \fB\--auth-type\fR=\fItype\fR
-Use the specified BSD authentication
+Use the specified
+BSD
+authentication
 \fItype\fR
 when validating the user, if allowed by
 \fI/etc/login.conf\fR.
@@ -199,7 +206,10 @@ authentication methods by adding an
 \(lqauth-sudo\(rq
 entry in
 \fI/etc/login.conf\fR.
-This option is only available on systems that support BSD authentication.
+This option is only available on systems that support
+BSD
+authentication.
+.\}
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
 Run the given command in the background.
@@ -226,6 +236,7 @@ policy only permits use of the
 option when the administrator has enabled the
 \fIclosefrom_override\fR
 option.
+.if \n(LC \{\
 .TP 12n
 \fB\-c\fR \fIclass\fR, \fB\--login-class\fR=\fIclass\fR
 Run the command with resource limits and scheduling priority of
@@ -250,7 +261,10 @@ If the command is being run as a login shell, additional
 \fI/etc/login.conf\fR
 settings, such as the umask and environment variables, will
 be applied, if present.
-This option is only available on systems with BSD login classes.
+This option is only available on systems with
+BSD
+login classes.
+.\}
 .TP 12n
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to
@@ -545,11 +559,13 @@ specified by a PAM module unless the
 flag is disabled in
 \fIsudoers\fR.
 .RE
+.if \n(SL \{\
 .TP 12n
 \fB\-r\fR \fIrole\fR, \fB\--role\fR=\fIrole\fR
 Run the command with an SELinux security context that includes
 the specified
 \fIrole\fR.
+.\}
 .TP 12n
 \fB\-S\fR, \fB\--stdin\fR
 Write the prompt to the standard error and read the password from the
@@ -568,6 +584,7 @@ If no command is specified, an interactive shell is executed.
 Note that most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
+.if \n(SL \{\
 .TP 12n
 \fB\-t\fR \fItype\fR, \fB\--type\fR=\fItype\fR
 Run the command with an SELinux security context that includes
@@ -576,6 +593,7 @@ the specified
 If no
 \fItype\fR
 is specified, the default type is derived from the role.
+.\}
 .TP 12n
 \fB\-U\fR \fIuser\fR, \fB\--other-user\fR=\fIuser\fR
 Used in conjunction with the
@@ -711,18 +729,27 @@ current working directory
 .TP 3n
 \fB\(bu\fR
 file creation mode mask (umask)
+.if \n(SL \{\
 .TP 3n
 \fB\(bu\fR
 SELinux role and type
+.\}
+.if \n(PS \{\
 .TP 3n
 \fB\(bu\fR
 Solaris project
+.\}
+.if \n(PS \{\
 .TP 3n
 \fB\(bu\fR
 Solaris privileges
+.\}
+.if \n(LC \{\
 .TP 3n
 \fB\(bu\fR
-BSD login class
+BSD
+login class
+.\}
 .TP 3n
 \fB\(bu\fR
 scheduling priority (aka nice value)

@@ -596,9 +596,9 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      setting the group to operator or system.
 
    OOppttiioonn__SSppeecc
-     A Cmnd may have zero or more options associated with it.  Depending on
-     the system, options may consist of SELinux roles and/or types, Solaris
-     privileges sets, and command timeouts.  Once an option is set for a Cmnd,
+     A Cmnd may have zero or more options associated with it.  Options may
+     consist of SELinux roles and/or types, Solaris privileges sets, start
+     and/or end dates and command timeouts.  Once an option is set for a Cmnd,
      subsequent Cmnds in the Cmnd_Spec_List, inherit that option unless it is
      overridden by another option.
 
@@ -2928,4 +2928,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                    October 27, 2018                    Sudo 1.8.26
+Sudo 1.8.26                    November 25, 2018                   Sudo 1.8.26

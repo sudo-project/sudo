@@ -132,25 +132,22 @@ varsub: $(top_srcdir)/configure.ac
 	    $(SED) -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.ac | $(SED) -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
 	fi
 
-$(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in
+$(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in $(srcdir)/sudo.man.in.sed
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudo.man.in.sed > $@; \
 	fi
 
-sudo.man.sed: $(srcdir)/fixman.sh
-	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
+fixman.sed: $(srcdir)/fixman.sh
+	$(SHELL) $(srcdir)/fixman.sh $@
 
-$(mansrcdir)/sudo.man: $(top_builddir)/config.status $(srcdir)/sudo.man.in sudo.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.man.in | $(SED) -f $@.sed > $@
+$(mansrcdir)/sudo.man: $(top_builddir)/config.status $(srcdir)/sudo.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.man.in | $(SED) -f fixman.sed > $@
 
-sudo.mdoc.sed: $(srcdir)/fixmdoc.sh
-	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
-
-$(mansrcdir)/sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.mdoc.in | $(SED) -f $@.sed > $@
+$(mansrcdir)/sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in
+	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -166,8 +163,8 @@ $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/visudo.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -186,8 +183,8 @@ $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.conf.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -198,25 +195,19 @@ $(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
 	    $(SED) -f varsub $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
-$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
+$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.man.in.sed
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudoers.man.in.sed> $@; \
 	fi
 
-sudoers.man.sed: $(srcdir)/fixman.sh
-	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
+$(mansrcdir)/sudoers.man: $(top_builddir)/config.status $(srcdir)/sudoers.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.man.in | $(SED) -f fixman.sed > $@
 
-$(mansrcdir)/sudoers.man: $(top_builddir)/config.status $(srcdir)/sudoers.man.in sudoers.man.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.man.in | $(SED) -f $@.sed > $@
-
-sudoers.mdoc.sed: $(srcdir)/fixmdoc.sh
-	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
-
-$(mansrcdir)/sudoers.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.mdoc.in | $(SED) -f $@.sed > $@
+$(mansrcdir)/sudoers.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.mdoc.in $(srcdir)/fixmdoc.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.mdoc.in | $(SED) -f $(srcdir)/fixmdoc.sed > $@
 
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -232,8 +223,8 @@ $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.ldap.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -252,8 +243,8 @@ $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/sudoers_timestamp.man: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/sudoers_timestamp.man: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers_timestamp.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/sudoers_timestamp.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -272,8 +263,8 @@ $(srcdir)/cvtsudoers.man.in: $(srcdir)/cvtsudoers.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/cvtsudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/cvtsudoers.man: $(top_builddir)/config.status $(srcdir)/cvtsudoers.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/cvtsudoers.man: $(top_builddir)/config.status $(srcdir)/cvtsudoers.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/cvtsudoers.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/cvtsudoers.mdoc: $(top_builddir)/config.status $(srcdir)/cvtsudoers.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -292,8 +283,8 @@ $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoreplay.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -312,8 +303,8 @@ $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
-$(mansrcdir)/sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin.man.in
-	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
+$(mansrcdir)/sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin.man.in fixman.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin.man.in | $(SED) -f fixman.sed > $@
 
 $(mansrcdir)/sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
@@ -390,7 +381,7 @@ pvs-studio:
 check:
 
 clean:
-	-rm -f varsub *.sed
+	-rm -f varsub fixman.sed
 
 mostlyclean: clean
 

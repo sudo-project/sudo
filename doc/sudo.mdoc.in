@@ -18,7 +18,11 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 27, 2018
+.nr SL @SEMAN@
+.nr BA @BAMAN@
+.nr LC @LCMAN@
+.nr PS @PSMAN@
+.Dd November 25, 2018
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -31,7 +35,9 @@
 .Nm sudo
 .Fl v
 .Op Fl AknS
+.if \n(BA \{\
 .Op Fl a Ar type
+.\}
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
@@ -39,7 +45,9 @@
 .Nm sudo
 .Fl l
 .Op Fl AknS
+.if \n(BA \{\
 .Op Fl a Ar type
+.\}
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
@@ -48,14 +56,20 @@
 .Op Ar command
 .Nm sudo
 .Op Fl AbEHnPS
+.if \n(BA \{\
 .Op Fl a Ar type
+.\}
 .Op Fl C Ar num
+.if \n(LC \{\
 .Op Fl c Ar class
+.\}
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
+.if \n(SL \{\
 .Op Fl r Ar role
 .Op Fl t Ar type
+.\}
 .Op Fl T Ar timeout
 .Op Fl u Ar user
 .Op Ar VAR Ns = Ns Ar value
@@ -63,9 +77,13 @@
 .Op Ar command
 .Nm sudoedit
 .Op Fl AknS
+.if \n(BA \{\
 .Op Fl a Ar type
+.\}
 .Op Fl C Ar num
+.if \n(LC \{\
 .Op Fl c Ar class
+.\}
 .Op Fl g Ar group
 .Op Fl h Ar host
 .Op Fl p Ar prompt
@@ -171,8 +189,11 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 If no askpass program is available,
 .Nm
 will exit with an error.
+.if \n(BA \{\
 .It Fl a Ar type , Fl -auth-type Ns = Ns Ar type
-Use the specified BSD authentication
+Use the specified
+.Bx
+authentication
 .Ar type
 when validating the user, if allowed by
 .Pa /etc/login.conf .
@@ -181,7 +202,10 @@ authentication methods by adding an
 .Dq auth-sudo
 entry in
 .Pa /etc/login.conf .
-This option is only available on systems that support BSD authentication.
+This option is only available on systems that support
+.Bx
+authentication.
+.\}
 .It Fl b , -background
 Run the given command in the background.
 Note that it is not possible to use shell job control to manipulate
@@ -206,6 +230,7 @@ policy only permits use of the
 option when the administrator has enabled the
 .Em closefrom_override
 option.
+.if \n(LC \{\
 .It Fl c Ar class , Fl -login-class Ns = Ns Ar class
 Run the command with resource limits and scheduling priority of
 the specified login
@@ -229,7 +254,10 @@ If the command is being run as a login shell, additional
 .Pa /etc/login.conf
 settings, such as the umask and environment variables, will
 be applied, if present.
-This option is only available on systems with BSD login classes.
+This option is only available on systems with
+.Bx
+login classes.
+.\}
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
@@ -493,10 +521,12 @@ specified by a PAM module unless the
 .Em passprompt_override
 flag is disabled in
 .Em sudoers .
+.if \n(SL \{\
 .It Fl r Ar role , Fl -role Ns = Ns Ar role
 Run the command with an SELinux security context that includes
 the specified
 .Ar role .
+.\}
 .It Fl S , -stdin
 Write the prompt to the standard error and read the password from the
 standard input instead of using the terminal device.
@@ -513,6 +543,7 @@ If no command is specified, an interactive shell is executed.
 Note that most shells behave differently when a command is specified
 as compared to an interactive session; consult the shell's manual
 for details.
+.if \n(SL \{\
 .It Fl t Ar type , Fl -type Ns = Ns Ar type
 Run the command with an SELinux security context that includes
 the specified
@@ -520,6 +551,7 @@ the specified
 If no
 .Ar type
 is specified, the default type is derived from the role.
+.\}
 .It Fl U Ar user , Fl -other-user Ns = Ns Ar user
 Used in conjunction with the
 .Fl l
@@ -645,14 +677,21 @@ the environment list
 current working directory
 .It
 file creation mode mask (umask)
+.if \n(SL \{\
 .It
 SELinux role and type
+.\}
+.if \n(PS \{\
 .It
 Solaris project
 .It
 Solaris privileges
+.\}
+.if \n(LC \{\
 .It
-BSD login class
+.Bx
+login class
+.\}
 .It
 scheduling priority (aka nice value)
 .El

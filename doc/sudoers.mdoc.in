@@ -18,7 +18,11 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 27, 2018
+.nr SL @SEMAN@
+.nr BA @BAMAN@
+.nr LC @LCMAN@
+.nr PS @PSMAN@
+.Dd November 25, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -282,7 +286,10 @@ systems without PAM), the environment is initialized with the
 contents of the
 .Pa /etc/environment
 file.
-On BSD systems, if the
+.if \n(LC \{\
+On
+.Bx
+systems, if the
 .Em use_loginclass
 option is enabled, the environment is initialized
 based on the
@@ -291,6 +298,7 @@ and
 .Em setenv
 settings in
 .Pa /etc/login.conf .
+.\}
 The new environment contains the
 .Ev TERM ,
 .Ev PATH ,
@@ -470,7 +478,10 @@ systems without PAM), the contents of
 .Pa /etc/environment
 are also
 included.
-On BSD systems, if the
+.if \n(LC \{\
+On
+.Bx
+systems, if the
 .Em use_loginclass
 flag is
 enabled, the
@@ -480,6 +491,7 @@ and
 variables in
 .Pa /etc/login.conf
 are also applied.
+.\}
 All other environment variables are removed unless permitted by
 .Em env_keep
 or
@@ -991,12 +1003,23 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
+.ie \n(SL \{\
+.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)
+.\}
+.el \{\
+.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
+.el Option_Spec ::= (Date_Spec | Timeout_Spec)
+.\}
 
+.if \n(SL \{\
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
+.\}
+.if \n(PS \{\
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
+.\}
 Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
@@ -1177,8 +1200,14 @@ optionally setting the group to operator or system.
 A
 .Li Cmnd
 may have zero or more options associated with it.
-Depending on the system, options may consist of SELinux roles
-and/or types, Solaris privileges sets, and command timeouts.
+Options may consist of
+.if \n(SL \{\
+SELinux roles and/or types,
+.\}
+.if \n(PS \{\
+Solaris privileges sets,
+.\}
+start and/or end dates and command timeouts.
 Once an option is set for a
 .Li Cmnd ,
 subsequent
@@ -1186,6 +1215,7 @@ subsequent
 in the
 .Li Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
+.if \n(SL \{\
 .Ss SELinux_Spec
 On systems with SELinux support,
 .Em sudoers
@@ -1198,6 +1228,8 @@ specified in
 A role or type specified on the command line,
 however, will supersede the values in
 .Em sudoers .
+.\}
+.if \n(PS \{\
 .Ss Solaris_Priv_Spec
 On Solaris systems,
 .Em sudoers
@@ -1236,6 +1268,7 @@ name with either an
 or
 .Ql \-
 character.
+.\}
 .Ss Date_Spec
 .Nm sudoers
 rules can be specified with a start and end date via the
@@ -2902,6 +2935,7 @@ will set the umask to be the union of the user's umask and what is specified in
 This flag is
 .Em @umask_override@
 by default.
+.if \n(LC \{\
 .It use_loginclass
 If set,
 .Nm sudo
@@ -2915,6 +2949,7 @@ option.
 This flag is
 .Em off
 by default.
+.\}
 .It use_netgroups
 If set, netgroups (prefixed with
 .Ql + ) ,
@@ -3349,6 +3384,7 @@ This directory should
 be cleared when the system reboots.
 The default is
 .Pa @vardir@/lectured .
+.if \n(PS \{\
 .It limitprivs
 The default Solaris limit privileges to use when constructing a new
 privilege set for a command.
@@ -3358,6 +3394,7 @@ The default limit privileges may be overridden on a per-command basis in
 This option is only available if
 .Nm
 is built on Solaris 10 or higher.
+.\}
 .It mailsub
 Subject of the mail sent to the
 .Em mailto
@@ -3451,6 +3488,7 @@ flag can be used to change this behavior.
 .Pp
 The default value is
 .Dq Li "@passprompt@" .
+.if \n(PS \{\
 .It privs
 The default Solaris privileges to use when constructing a new
 privilege set for a command.
@@ -3467,6 +3505,8 @@ The default privileges may be overridden on a per-command basis in
 This option is only available if
 .Nm
 is built on Solaris 10 or higher.
+.\}
+.if \n(SL \{\
 .It role
 The default SELinux role to use when constructing a new security
 context to run the command.
@@ -3476,6 +3516,7 @@ file or via command line options.
 This option is only available when
 .Nm sudo
 is built with SELinux support.
+.\}
 .It runas_default
 The default user to run commands as if the
 .Fl u
@@ -3558,6 +3599,7 @@ The owner of the lecture status directory, time stamp directory and all
 files stored therein.
 The default is
 .Li root .
+.if \n(SL \{\
 .It type
 The default SELinux type to use when constructing a new security
 context to run the command.
@@ -3567,6 +3609,7 @@ file or via command line options.
 This option is only available when
 .Nm sudo
 is built with SELinux support.
+.\}
 .El
 .Pp
 .Sy Strings that can be used in a boolean context :

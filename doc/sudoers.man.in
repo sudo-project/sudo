@@ -19,7 +19,11 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "5" "October 27, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.nr SL @SEMAN@
+.nr BA @BAMAN@
+.nr LC @LCMAN@
+.nr PS @PSMAN@
+.TH "SUDOERS" "5" "November 25, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -292,7 +296,10 @@ systems without PAM), the environment is initialized with the
 contents of the
 \fI/etc/environment\fR
 file.
-On BSD systems, if the
+.if \n(LC \{\
+On
+BSD
+systems, if the
 \fIuse_loginclass\fR
 option is enabled, the environment is initialized
 based on the
@@ -301,6 +308,7 @@ and
 \fIsetenv\fR
 settings in
 \fI/etc/login.conf\fR.
+.\}
 The new environment contains the
 \fRTERM\fR,
 \fRPATH\fR,
@@ -483,7 +491,10 @@ systems without PAM), the contents of
 \fI/etc/environment\fR
 are also
 included.
-On BSD systems, if the
+.if \n(LC \{\
+On
+BSD
+systems, if the
 \fIuse_loginclass\fR
 flag is
 enabled, the
@@ -493,6 +504,7 @@ and
 variables in
 \fI/etc/login.conf\fR
 are also applied.
+.\}
 All other environment variables are removed unless permitted by
 \fIenv_keep\fR
 or
@@ -1037,12 +1049,23 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
-Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
+.ie \n(SL \{\
+.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)
+.\}
+.el \{\
+.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
+.el Option_Spec ::= (Date_Spec | Timeout_Spec)
+.\}
 
+.if \n(SL \{\
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
+.\}
+.if \n(PS \{\
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
+.\}
 Date_Spec ::= ('NOTBEFORE=timestamp' | 'NOTAFTER=timestamp')
 
 Timeout_Spec ::= 'TIMEOUT=timeout'
@@ -1248,8 +1271,14 @@ optionally setting the group to operator or system.
 A
 \fRCmnd\fR
 may have zero or more options associated with it.
-Depending on the system, options may consist of SELinux roles
-and/or types, Solaris privileges sets, and command timeouts.
+Options may consist of
+.if \n(SL \{\
+SELinux roles and/or types,
+.\}
+.if \n(PS \{\
+Solaris privileges sets,
+.\}
+start and/or end dates and command timeouts.
 Once an option is set for a
 \fRCmnd\fR,
 subsequent
@@ -1257,6 +1286,7 @@ subsequent
 in the
 \fRCmnd_Spec_List\fR,
 inherit that option unless it is overridden by another option.
+.if \n(SL \{\
 .SS "SELinux_Spec"
 On systems with SELinux support,
 \fIsudoers\fR
@@ -1269,6 +1299,8 @@ specified in
 A role or type specified on the command line,
 however, will supersede the values in
 \fIsudoers\fR.
+.\}
+.if \n(PS \{\
 .SS "Solaris_Priv_Spec"
 On Solaris systems,
 \fIsudoers\fR
@@ -1312,6 +1344,7 @@ name with either an
 or
 \(oq\-\(cq
 character.
+.\}
 .SS "Date_Spec"
 \fBsudoers\fR
 rules can be specified with a start and end date via the
@@ -3086,6 +3119,7 @@ will set the umask to be the union of the user's umask and what is specified in
 This flag is
 \fI@umask_override@\fR
 by default.
+.if \n(BA \{\
 .TP 18n
 use_loginclass
 If set,
@@ -3100,6 +3134,7 @@ option.
 This flag is
 \fIoff\fR
 by default.
+.\}
 .TP 18n
 use_netgroups
 If set, netgroups (prefixed with
@@ -3563,6 +3598,7 @@ This directory should
 be cleared when the system reboots.
 The default is
 \fI@vardir@/lectured\fR.
+.if \n(PS \{\
 .TP 18n
 limitprivs
 The default Solaris limit privileges to use when constructing a new
@@ -3573,6 +3609,7 @@ The default limit privileges may be overridden on a per-command basis in
 This option is only available if
 \fBsudoers\fR
 is built on Solaris 10 or higher.
+.\}
 .TP 18n
 mailsub
 Subject of the mail sent to the
@@ -3681,6 +3718,7 @@ flag can be used to change this behavior.
 The default value is
 \(lq\fR@passprompt@\fR\(rq.
 .RE
+.if \n(PS \{\
 .TP 18n
 privs
 The default Solaris privileges to use when constructing a new
@@ -3698,6 +3736,8 @@ The default privileges may be overridden on a per-command basis in
 This option is only available if
 \fBsudoers\fR
 is built on Solaris 10 or higher.
+.\}
+.if \n(SL \{\
 .TP 18n
 role
 The default SELinux role to use when constructing a new security
@@ -3708,6 +3748,7 @@ file or via command line options.
 This option is only available when
 \fBsudo\fR
 is built with SELinux support.
+.\}
 .TP 18n
 runas_default
 The default user to run commands as if the
@@ -3800,6 +3841,7 @@ The owner of the lecture status directory, time stamp directory and all
 files stored therein.
 The default is
 \fRroot\fR.
+.if \n(SL \{\
 .TP 18n
 type
 The default SELinux type to use when constructing a new security
@@ -4199,6 +4241,7 @@ The default value is
 .RE
 .PP
 \fBLists that can be used in a boolean context\fR:
+.\}
 .TP 18n
 env_check
 Environment variables to be removed from the user's environment

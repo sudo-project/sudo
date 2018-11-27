@@ -24,7 +24,7 @@ doc/cvtsudoers.cat
 doc/cvtsudoers.man.in
 doc/cvtsudoers.mdoc.in
 doc/fixman.sh
-doc/fixmdoc.sh
+doc/fixmdoc.sed
 doc/schema.ActiveDirectory
 doc/schema.OpenLDAP
 doc/schema.iPlanet
@@ -34,6 +34,7 @@ doc/sudo.conf.cat
 doc/sudo.conf.man.in
 doc/sudo.conf.mdoc.in
 doc/sudo.man.in
+doc/sudo.man.in.sed
 doc/sudo.mdoc.in
 doc/sudo_plugin.cat
 doc/sudo_plugin.man.in
@@ -43,6 +44,7 @@ doc/sudoers.ldap.cat
 doc/sudoers.ldap.man.in
 doc/sudoers.ldap.mdoc.in
 doc/sudoers.man.in
+doc/sudoers.man.in.sed
 doc/sudoers.mdoc.in
 doc/sudoers_timestamp.cat
 doc/sudoers_timestamp.man.in
