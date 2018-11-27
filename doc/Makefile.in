@@ -137,7 +137,7 @@ $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in $(srcdir)/sudo.man.in.sed
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudo.man.in.sed > $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudo.man.in.sed > $@; \
 	fi
 
 fixman.sed: $(srcdir)/fixman.sh
@@ -152,7 +152,7 @@ $(mansrcdir)/sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
@@ -160,7 +160,7 @@ $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 $(mansrcdir)/visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in fixman.sed
@@ -172,7 +172,7 @@ $(mansrcdir)/visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
@@ -180,7 +180,7 @@ $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO.CONF" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 $(mansrcdir)/sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.man.in fixman.sed
@@ -192,7 +192,7 @@ $(mansrcdir)/sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.m
 $(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.man.in.sed
@@ -200,7 +200,7 @@ $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.man.in.sed
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudoers.man.in.sed> $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudoers.man.in.sed> $@; \
 	fi
 
 $(mansrcdir)/sudoers.man: $(top_builddir)/config.status $(srcdir)/sudoers.man.in fixman.sed
@@ -212,7 +212,7 @@ $(mansrcdir)/sudoers.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.mdoc.
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
@@ -220,7 +220,7 @@ $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 $(mansrcdir)/sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.man.in fixman.sed
@@ -232,7 +232,7 @@ $(mansrcdir)/sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
@@ -240,7 +240,7 @@ $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS_TIMESTAMP" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 $(mansrcdir)/sudoers_timestamp.man: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.man.in fixman.sed
@@ -252,7 +252,7 @@ $(mansrcdir)/sudoers_timestamp.mdoc: $(top_builddir)/config.status $(srcdir)/sud
 $(srcdir)/sudoers_timestamp.cat: varsub $(srcdir)/sudoers_timestamp.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/cvtsudoers.man.in: $(srcdir)/cvtsudoers.mdoc.in
@@ -272,7 +272,7 @@ $(mansrcdir)/cvtsudoers.mdoc: $(top_builddir)/config.status $(srcdir)/cvtsudoers
 $(srcdir)/cvtsudoers.cat: varsub $(srcdir)/cvtsudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/cvtsudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/cvtsudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
@@ -280,7 +280,7 @@ $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 $(mansrcdir)/sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.man.in fixman.sed
@@ -292,7 +292,7 @@ $(mansrcdir)/sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
@@ -300,7 +300,7 @@ $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 $(mansrcdir)/sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin.man.in fixman.sed
@@ -312,7 +312,7 @@ $(mansrcdir)/sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plug
 $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	    $(SED) -f varsub $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
 pre-install:
