@@ -225,8 +225,10 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 	    break;
 	case PAM_NEW_AUTHTOK_REQD:
 	    /* Ignore if user is exempt from password restrictions. */
-	    if (exempt)
+	    if (exempt) {
+		rc = *pam_status;
 		break;
+	    }
 	    /* New password required, try to change it. */
 	    log_warningx(0, N_("Account or password is "
 		"expired, reset your password and try again"));
@@ -241,8 +243,10 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 	    break;
 	case PAM_AUTHTOK_EXPIRED:
 	    /* Ignore if user is exempt from password restrictions. */
-	    if (exempt)
+	    if (exempt) {
+		rc = *pam_status;
 		break;
+	    }
 	    /* Password expired, cannot be updated by user. */
 	    log_warningx(0,
 		N_("Password expired, contact your system administrator"));
@@ -269,8 +273,7 @@ sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 	    status = AUTH_FATAL;
 	    break;
     }
-    /* Ignore errors if user is exempt from password restrictions. */
-    *pam_status = exempt ? PAM_SUCCESS : rc;
+    *pam_status = rc;
     debug_return_int(status);
 }
 
