@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 24, 2018
+.Dd December 11, 2018
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -57,7 +57,7 @@ The options are as follows:
 The base DN (distinguished name) that will be used when performing
 LDAP queries.
 Typically this is of the form
-.Li ou=SUDOers,dc=-mydomain,dc=com
+.Li ou=SUDOers,dc=my-domain,dc=com
 for the domain
 .Li my-domain.com .
 If this option is not specified, the value of the
@@ -110,7 +110,7 @@ Expand aliases in
 Aliases are preserved by default when the output
 .Ar format
 is JSON or sudoers.
-.It Fl f Ar output_format , Fl -format Ns = Ns Ar output_format
+.It Fl f Ar output_format , Fl -output-format Ns = Ns Ar output_format
 Specify the output format (case-insensitive).
 The following formats are supported:
 .Bl -tag -width 8n
