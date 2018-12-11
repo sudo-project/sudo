@@ -31,6 +31,7 @@
 .Op Fl m Ar filter
 .Op Fl o Ar output_file
 .Op Fl O Ar start_point
+.Op Fl P Ar padding
 .Op Fl s Ar sections
 .Op Ar input_file
 .Sh DESCRIPTION
@@ -64,8 +65,8 @@ If this option is not specified, the value of the
 .Ev SUDOERS_BASE
 environment variable will be used instead.
 Only necessary when converting to LDIF format.
-.It Fl c , Fl -config
-Specify the path to a configuration file.
+.It Fl c Ar conf_file , Fl -config Ns = Ns Ar conf_file
+Specify the path to the configuration file.
 Defaults to
 .Pa @sysconfdir@/cvtsudoers.conf .
 .It Fl d Ar deftypes , Fl -defaults Ns = Ns Ar deftypes
@@ -327,6 +328,10 @@ command line option.
 .It Sy output_format = Ar json | ldif | sudoers
 See the description of the
 .Fl f
+command line option.
+.It Sy padding = Ar padding
+See the description of the
+.Fl P
 command line option.
 .It Sy prune_matches = Ar yes | no
 See the description of the

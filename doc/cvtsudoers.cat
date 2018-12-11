@@ -6,8 +6,8 @@ NNAAMMEE
 SSYYNNOOPPSSIISS
      ccvvttssuuddooeerrss [--eehhMMppVV] [--bb _d_n] [--cc _c_o_n_f___f_i_l_e] [--dd _d_e_f_t_y_p_e_s]
                 [--ff _o_u_t_p_u_t___f_o_r_m_a_t] [--ii _i_n_p_u_t___f_o_r_m_a_t] [--II _i_n_c_r_e_m_e_n_t]
-                [--mm _f_i_l_t_e_r] [--oo _o_u_t_p_u_t___f_i_l_e] [--OO _s_t_a_r_t___p_o_i_n_t] [--ss _s_e_c_t_i_o_n_s]
-                [_i_n_p_u_t___f_i_l_e]
+                [--mm _f_i_l_t_e_r] [--oo _o_u_t_p_u_t___f_i_l_e] [--OO _s_t_a_r_t___p_o_i_n_t] [--PP _p_a_d_d_i_n_g]
+                [--ss _s_e_c_t_i_o_n_s] [_i_n_p_u_t___f_i_l_e]
 
 DDEESSCCRRIIPPTTIIOONN
      ccvvttssuuddooeerrss can be used to convert between _s_u_d_o_e_r_s security policy file
@@ -29,8 +29,8 @@ DDEESSCCRRIIPPTTIIOONN
                  SUDOERS_BASE environment variable will be used instead.  Only
                  necessary when converting to LDIF format.
 
-     --cc, ----ccoonnffiigg
-                 Specify the path to a configuration file.  Defaults to
+     --cc _c_o_n_f___f_i_l_e, ----ccoonnffiigg=_c_o_n_f___f_i_l_e
+                 Specify the path to the configuration file.  Defaults to
                  _/_e_t_c_/_c_v_t_s_u_d_o_e_r_s_._c_o_n_f.
 
      --dd _d_e_f_t_y_p_e_s, ----ddeeffaauullttss=_d_e_f_t_y_p_e_s
@@ -205,6 +205,9 @@ DDEESSCCRRIIPPTTIIOONN
 
      oouuttppuutt__ffoorrmmaatt == _j_s_o_n | _l_d_i_f | _s_u_d_o_e_r_s
            See the description of the --ff command line option.
+
+     ppaaddddiinngg == _p_a_d_d_i_n_g
+           See the description of the --PP command line option.
 
      pprruunnee__mmaattcchheess == _y_e_s | _n_o
            See the description of the --pp command line option.

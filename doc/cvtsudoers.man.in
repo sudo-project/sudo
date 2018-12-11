@@ -33,6 +33,7 @@
 [\fB\-m\fR\ \fIfilter\fR]
 [\fB\-o\fR\ \fIoutput_file\fR]
 [\fB\-O\fR\ \fIstart_point\fR]
+[\fB\-P\fR\ \fIpadding\fR]
 [\fB\-s\fR\ \fIsections\fR]
 [\fIinput_file\fR]
 .SH "DESCRIPTION"
@@ -67,8 +68,8 @@ If this option is not specified, the value of the
 environment variable will be used instead.
 Only necessary when converting to LDIF format.
 .TP 12n
-\fB\-c\fR, \fB\--config\fR
-Specify the path to a configuration file.
+\fB\-c\fR \fIconf_file\fR, \fB\--config\fR=\fIconf_file\fR
+Specify the path to the configuration file.
 Defaults to
 \fI@sysconfdir@/cvtsudoers.conf\fR.
 .TP 12n
@@ -383,6 +384,11 @@ command line option.
 \fBoutput_format =\fR \fIjson\fR | \fIldif\fR | \fIsudoers\fR
 See the description of the
 \fB\-f\fR
+command line option.
+.TP 6n
+\fBpadding =\fR \fIpadding\fR
+See the description of the
+\fB\-P\fR
 command line option.
 .TP 6n
 \fBprune_matches =\fR \fIyes\fR | \fIno\fR
