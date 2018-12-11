@@ -1617,14 +1617,16 @@ help(void)
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -d, --directory=dir  specify directory for session logs\n"
-	"  -f, --filter=filter  specify which I/O type(s) to display\n"
-	"  -h, --help           display help message and exit\n"
-	"  -l, --list           list available session IDs, with optional expression\n"
-	"  -m, --max-wait=num   max number of seconds to wait between events\n"
-	"  -S, --suspend-wait   wait while the command was suspended\n"
-	"  -s, --speed=num      speed up or slow down output\n"
-	"  -V, --version        display version information and exit"));
+	"  -d, --directory=dir    specify directory for session logs\n"
+	"  -f, --filter=filter    specify which I/O type(s) to display\n"
+	"  -h, --help             display help message and exit\n"
+	"  -l, --list             list available session IDs, with optional expression\n"
+	"  -m, --max-wait=num     max number of seconds to wait between events\n"
+	"  -n, --non-interactive  no prompts, session is sent to the standard output\n"
+	"  -R, --no-resize        do not attempt to re-size the terminal\n"
+	"  -S, --suspend-wait     wait while the command was suspended\n"
+	"  -s, --speed=num        speed up or slow down output\n"
+	"  -V, --version          display version information and exit"));
     exit(0);
 }
 
