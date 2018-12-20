@@ -22,7 +22,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 25, 2018
+.Dd December 20, 2018
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3059,7 +3059,7 @@ The maximum sequence number that will be substituted for the
 .Dq Li %{seq}
 escape in the I/O log file (see the
 .Em iolog_dir
-description above for more information).
+description below for more information).
 While the value substituted for
 .Dq Li %{seq}
 is in base 36,

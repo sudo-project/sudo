@@ -23,7 +23,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 25, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 20, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3250,7 +3250,7 @@ The maximum sequence number that will be substituted for the
 \(lq\fR%{seq}\fR\(rq
 escape in the I/O log file (see the
 \fIiolog_dir\fR
-description above for more information).
+description below for more information).
 While the value substituted for
 \(lq\fR%{seq}\fR\(rq
 is in base 36,
