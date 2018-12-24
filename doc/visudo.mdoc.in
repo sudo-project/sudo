@@ -18,7 +18,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 6, 2018
+.Dd December 24, 2018
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -27,7 +27,7 @@
 .Sh SYNOPSIS
 .Nm visudo
 .Op Fl chqsV
-.Op Fl f Ar sudoers
+.Op Bo Fl f Bc Ar sudoers
 .Sh DESCRIPTION
 .Nm
 edits the
@@ -167,13 +167,11 @@ The existing
 .Em sudoers
 file (and any other files it includes) will be
 checked for syntax errors.
-If the
-.Fl f
-option has not been specified,
-.Nm
-will also check the
+If the path to the
 .Em sudoers
-file owner and mode.
+file was not specified,
+.Nm
+will also check the file owner and mode.
 A message will be printed to the standard output describing the status of
 .Em sudoers
 unless the
@@ -188,32 +186,12 @@ will exit with a value of 1.
 .It Fl f Ar sudoers , Fl -file Ns = Ns Ar sudoers
 Specify an alternate
 .Em sudoers
-file location.
-With this option,
-.Nm
-will edit (or check) the
+file location, see below.
+As of version 1.8.27, the
 .Em sudoers
-file of your choice,
-instead of the default,
-.Pa @sysconfdir@/sudoers .
-The lock file used is the specified
-.Em sudoers
-file with
-.Dq \.tmp
-appended to it.
-In
-.Em check-only
-mode only, the argument to
+path can be specified without using the
 .Fl f
-may be
-.Ql - ,
-indicating that
-.Em sudoers
-will be read from the standard input.
-Because the policy is evaluated in its entirety, it is not sufficient
-to check an individual
-.Em sudoers
-include file for syntax errors.
+option.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
 .It Fl q , -quiet
@@ -247,6 +225,27 @@ and
 .Em sudoers
 grammar versions and exit.
 .El
+.Pp
+A
+.Em sudoers
+file may be specified instead of the default,
+.Pa @sysconfdir@/sudoers .
+The lock file used is the specified
+.Em sudoers
+file with
+.Dq \.tmp
+appended to it.
+In
+.Em check-only
+mode only,
+.Ql -
+may be used to indicate that
+.Em sudoers
+will be read from the standard input.
+Because the policy is evaluated in its entirety, it is not sufficient
+to check an individual
+.Em sudoers
+include file for syntax errors.
 .Ss Debugging and sudoers plugin arguments
 .Nm
 versions 1.8.4 and higher support a flexible debugging framework

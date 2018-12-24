@@ -4,7 +4,7 @@ NNAAMMEE
      vviissuuddoo - edit the sudoers file
 
 SSYYNNOOPPSSIISS
-     vviissuuddoo [--cchhqqssVV] [--ff _s_u_d_o_e_r_s]
+     vviissuuddoo [--cchhqqssVV] [[--ff] _s_u_d_o_e_r_s]
 
 DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to vipw(1m).
@@ -58,8 +58,8 @@ DDEESSCCRRIIPPTTIIOONN
      --cc, ----cchheecckk
                  Enable _c_h_e_c_k_-_o_n_l_y mode.  The existing _s_u_d_o_e_r_s file (and any
                  other files it includes) will be checked for syntax errors.
-                 If the --ff option has not been specified, vviissuuddoo will also
-                 check the _s_u_d_o_e_r_s file owner and mode.  A message will be
+                 If the path to the _s_u_d_o_e_r_s file was not specified, vviissuuddoo
+                 will also check the file owner and mode.  A message will be
                  printed to the standard output describing the status of
                  _s_u_d_o_e_r_s unless the --qq option was specified.  If the check
                  completes successfully, vviissuuddoo will exit with a value of 0.
@@ -67,15 +67,9 @@ DDEESSCCRRIIPPTTIIOONN
                  1.
 
      --ff _s_u_d_o_e_r_s, ----ffiillee=_s_u_d_o_e_r_s
-                 Specify an alternate _s_u_d_o_e_r_s file location.  With this
-                 option, vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
-                 choice, instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file
-                 used is the specified _s_u_d_o_e_r_s file with ".tmp" appended to
-                 it.  In _c_h_e_c_k_-_o_n_l_y mode only, the argument to --ff may be `-',
-                 indicating that _s_u_d_o_e_r_s will be read from the standard input.
-                 Because the policy is evaluated in its entirety, it is not
-                 sufficient to check an individual _s_u_d_o_e_r_s include file for
-                 syntax errors.
+                 Specify an alternate _s_u_d_o_e_r_s file location, see below.  As of
+                 version 1.8.27, the _s_u_d_o_e_r_s path can be specified without
+                 using the --ff option.
 
      --hh, ----hheellpp  Display a short help message to the standard output and exit.
 
@@ -94,6 +88,13 @@ DDEESSCCRRIIPPTTIIOONN
 
      --VV, ----vveerrssiioonn
                  Print the vviissuuddoo and _s_u_d_o_e_r_s grammar versions and exit.
+
+     A _s_u_d_o_e_r_s file may be specified instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.
+     The lock file used is the specified _s_u_d_o_e_r_s file with ".tmp" appended to
+     it.  In _c_h_e_c_k_-_o_n_l_y mode only, `-' may be used to indicate that _s_u_d_o_e_r_s
+     will be read from the standard input.  Because the policy is evaluated in
+     its entirety, it is not sufficient to check an individual _s_u_d_o_e_r_s include
+     file for syntax errors.
 
    DDeebbuuggggiinngg aanndd ssuuddooeerrss pplluuggiinn aarrgguummeennttss
      vviissuuddoo versions 1.8.4 and higher support a flexible debugging framework
@@ -222,4 +223,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                     October 6, 2018                    Sudo 1.8.26
+Sudo 1.8.26                    December 24, 2018                   Sudo 1.8.26

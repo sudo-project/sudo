@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "October 6, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "December 24, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -29,7 +29,7 @@
 .HP 7n
 \fBvisudo\fR
 [\fB\-chqsV\fR]
-[\fB\-f\fR\ \fIsudoers\fR]
+[[\fB\-f\fR]\ \fIsudoers\fR]
 .SH "DESCRIPTION"
 \fBvisudo\fR
 edits the
@@ -169,13 +169,11 @@ The existing
 \fIsudoers\fR
 file (and any other files it includes) will be
 checked for syntax errors.
-If the
-\fB\-f\fR
-option has not been specified,
-\fBvisudo\fR
-will also check the
+If the path to the
 \fIsudoers\fR
-file owner and mode.
+file was not specified,
+\fBvisudo\fR
+will also check the file owner and mode.
 A message will be printed to the standard output describing the status of
 \fIsudoers\fR
 unless the
@@ -191,32 +189,12 @@ will exit with a value of 1.
 \fB\-f\fR \fIsudoers\fR, \fB\--file\fR=\fIsudoers\fR
 Specify an alternate
 \fIsudoers\fR
-file location.
-With this option,
-\fBvisudo\fR
-will edit (or check) the
+file location, see below.
+As of version 1.8.27, the
 \fIsudoers\fR
-file of your choice,
-instead of the default,
-\fI@sysconfdir@/sudoers\fR.
-The lock file used is the specified
-\fIsudoers\fR
-file with
-\(lq\.tmp\(rq
-appended to it.
-In
-\fIcheck-only\fR
-mode only, the argument to
+path can be specified without using the
 \fB\-f\fR
-may be
-\(oq-\(cq,
-indicating that
-\fIsudoers\fR
-will be read from the standard input.
-Because the policy is evaluated in its entirety, it is not sufficient
-to check an individual
-\fIsudoers\fR
-include file for syntax errors.
+option.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
@@ -253,6 +231,27 @@ Print the
 and
 \fIsudoers\fR
 grammar versions and exit.
+.PP
+A
+\fIsudoers\fR
+file may be specified instead of the default,
+\fI@sysconfdir@/sudoers\fR.
+The lock file used is the specified
+\fIsudoers\fR
+file with
+\(lq\.tmp\(rq
+appended to it.
+In
+\fIcheck-only\fR
+mode only,
+\(oq-\(cq
+may be used to indicate that
+\fIsudoers\fR
+will be read from the standard input.
+Because the policy is evaluated in its entirety, it is not sufficient
+to check an individual
+\fIsudoers\fR
+include file for syntax errors.
 .SS "Debugging and sudoers plugin arguments"
 \fBvisudo\fR
 versions 1.8.4 and higher support a flexible debugging framework
