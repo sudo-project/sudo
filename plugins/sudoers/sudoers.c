@@ -1042,7 +1042,7 @@ resolve_host(const char *host, char **longp, char **shortp)
     *longp = lname;
     *shortp = sname;
 
-    debug_return_bool(0);
+    debug_return_int(0);
 }
 
 /*
