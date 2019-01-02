@@ -140,7 +140,7 @@ pty_cleanup(void)
  * and slavename globals.
  */
 static bool
-pty_setup(uid_t uid, const char *tty)
+pty_setup(struct command_details *details, const char *tty)
 {
     debug_decl(pty_setup, SUDO_DEBUG_EXEC);
 
@@ -152,12 +152,15 @@ pty_setup(uid_t uid, const char *tty)
     }
 
     if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
-	slavename, sizeof(slavename), uid))
+	slavename, sizeof(slavename), details->euid))
 	sudo_fatal(U_("unable to allocate pty"));
 
     /* Add entry to utmp/utmpx? */
-    if (utmp_user != NULL)
+    if (ISSET(details->flags, CD_SET_UTMP)) {
+	utmp_user =
+	    details->utmp_user ? details->utmp_user : user_details.username;
 	utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
+    }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: %s fd %d, pty master fd %d, pty slave fd %d",
@@ -1302,12 +1305,11 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * Allocate a pty.
      */
-    if (pty_setup(details->euid, user_details.tty)) {
-	if (ISSET(details->flags, CD_SET_UTMP))
-	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
-    } else if (TAILQ_EMPTY(&io_plugins)) {
-	/* Not logging I/O and didn't allocate a pty. */
-	debug_return_bool(false);
+    if (!pty_setup(details, user_details.tty)) {
+	if (TAILQ_EMPTY(&io_plugins)) {
+	    /* Not logging I/O and didn't allocate a pty. */
+	    debug_return_bool(false);
+	}
     }
 
     /*
