@@ -11,7 +11,7 @@ What's new in Sudo 1.8.27
  * The sudo manuals no longer require extensive post-processing to
    hide system-specific features.  Conditionals in the roff source
    are now used instead.  This fixes corruption of the sudo manual
-   on systems without BSD login classes.  Bug #861
+   on systems without BSD login classes.  Bug #861.
 
  * If an I/O logging plugin is configured but the plugin does not
    actually log any I/O, sudo will no longer force the command to
@@ -23,7 +23,11 @@ What's new in Sudo 1.8.27
    resulting in a failure when processing PAM session modules.
 
  * In visudo, it is now possible to specify the path to sudoers
-   without using the -f option.
+   without using the -f option.  Bug #864.
+
+ * Fixed a bug introduced in sudo 1.8.22 where the utmp (or utmpx)
+   file would not be updated when a command was run in a pseudo-tty.
+   Bug #865.
 
 What's new in Sudo 1.8.26
 
