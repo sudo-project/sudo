@@ -347,7 +347,12 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     }
 
     if (def_pam_session) {
-	rc = pam_open_session(pamh, 0);
+	/*
+	 * We use PAM_SILENT to prevent pam_lastlog from printing last login
+	 * information except when explicitly running a shell.
+	 */
+	const bool silent = !ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL);
+	rc = pam_open_session(pamh, silent ? PAM_SILENT : 0);
 	switch (rc) {
 	case PAM_SUCCESS:
 	    break;
