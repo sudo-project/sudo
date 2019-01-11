@@ -1315,6 +1315,7 @@ help(void)
     usage(0);
     (void) puts(_("\nOptions:\n"
 	"  -b, --base=dn              the base DN for sudo LDAP queries\n"
+	"  -c, --config=conf_file     the path to the configuration file\n"
 	"  -d, --defaults=deftypes    only convert Defaults of the specified types\n"
 	"  -e, --expand-aliases       expand aliases when converting\n"
 	"  -f, --output-format=format set output format: JSON, LDIF or sudoers\n"

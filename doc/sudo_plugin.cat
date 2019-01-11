@@ -391,8 +391,12 @@ DDEESSCCRRIIPPTTIIOONN
            function using SUDO_CONV_INFO_MSG.  If the user requests detailed
            version information, the verbose flag will be set.
 
+           Returns 1 on success, 0 on failure, -1 if a general error occurred,
+           or -2 if there was a usage error, although the return value is
+           currently ignored.
+
      check_policy
-           int (*check_policy)(int argc, char * const argv[]
+           int (*check_policy)(int argc, char * const argv[],
                                char *env_add[], char **command_info[],
                                char **argv_out[], char **user_env_out[]);
 
@@ -692,8 +696,8 @@ DDEESSCCRRIIPPTTIIOONN
                  populating the vector.
 
      list
-           int (*list)(int verbose, const char *list_user,
-                       int argc, char * const argv[]);
+           int (*list)(int argc, char * const argv[],
+                       int verbose, const char *list_user);
 
            List available privileges for the invoking user.  Returns 1 on
            success, 0 on failure and -1 on error.  On error, the plugin may
@@ -831,7 +835,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      /* Plugin API version major/minor. */
      #define SUDO_API_VERSION_MAJOR 1
-     #define SUDO_API_VERSION_MINOR 2
+     #define SUDO_API_VERSION_MINOR 13
      #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
      #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\
                                                  SUDO_API_VERSION_MINOR)
@@ -914,19 +918,21 @@ DDEESSCCRRIIPPTTIIOONN
      open
            int (*open)(unsigned int version, sudo_conv_t conversation,
                        sudo_printf_t plugin_printf, char * const settings[],
-                       char * const user_info[], int argc, char * const argv[],
-                       char * const user_env[], char * const plugin_options[]);
+                       char * const user_info[], char * const command_info[],
+                       int argc, char * const argv[], char * const user_env[],
+                       char * const plugin_options[]);
 
            The ooppeenn() function is run before the lloogg__ttttyyiinn(), lloogg__ttttyyoouutt(),
-           lloogg__ssttddiinn(), lloogg__ssttddoouutt(), lloogg__ssttddeerrrr(), or sshhooww__vveerrssiioonn()
-           functions are called.  It is only called if the version is being
-           requested or if the policy plugin's cchheecckk__ppoolliiccyy() function has
-           returned successfully.  It returns 1 on success, 0 on failure, -1
-           if a general error occurred, or -2 if there was a usage error.  In
-           the latter case, ssuuddoo will print a usage message before it exits.
-           If an error occurs, the plugin may optionally call the
-           ccoonnvveerrssaattiioonn() or pplluuggiinn__pprriinnttff() function with SUDO_CONF_ERROR_MSG
-           to present additional error information to the user.
+           lloogg__ssttddiinn(), lloogg__ssttddoouutt(), lloogg__ssttddeerrrr(), lloogg__ssuussppeenndd(),
+           cchhaannggee__wwiinnssiizzee(), or sshhooww__vveerrssiioonn() functions are called.  It is
+           only called if the version is being requested or if the policy
+           plugin's cchheecckk__ppoolliiccyy() function has returned successfully.  It
+           returns 1 on success, 0 on failure, -1 if a general error occurred,
+           or -2 if there was a usage error.  In the latter case, ssuuddoo will
+           print a usage message before it exits.  If an error occurs, the
+           plugin may optionally call the ccoonnvveerrssaattiioonn() or pplluuggiinn__pprriinnttff()
+           function with SUDO_CONF_ERROR_MSG to present additional error
+           information to the user.
 
            The function arguments are as follows:
 
@@ -979,7 +985,7 @@ DDEESSCCRRIIPPTTIIOONN
                  strings.
 
            argc  The number of elements in _a_r_g_v, not counting the final NULL
-                 pointer.
+                 pointer.  It can be zero, when ssuuddoo is called with --VV.
 
            argv  If non-NULL, an argument vector describing a command the user
                  wishes to run in the same form as what would be passed to the
@@ -1032,6 +1038,10 @@ DDEESSCCRRIIPPTTIIOONN
            information to the user via the ccoonnvveerrssaattiioonn() or pplluuggiinn__pprriinnttff()
            function using SUDO_CONV_INFO_MSG.  If the user requests detailed
            version information, the verbose flag will be set.
+
+           Returns 1 on success, 0 on failure, -1 if a general error occurred,
+           or -2 if there was a usage error, although the return value is
+           currently ignored.
 
      log_ttyin
            int (*log_ttyin)(const char *buf, unsigned int len);
@@ -1383,9 +1393,11 @@ DDEESSCCRRIIPPTTIIOONN
      To use the ccoonnvveerrssaattiioonn() function, the plugin must pass an array of
      sudo_conv_message and sudo_conv_reply structures.  There must be a struct
      sudo_conv_message and struct sudo_conv_reply for each message in the
-     conversation.  The struct sudo_conv_callback pointer, if not NULL, should
-     contain function pointers to be called when the ssuuddoo process is suspended
-     and/or resumed during conversation input.  The _o_n___s_u_s_p_e_n_d and _o_n___r_e_s_u_m_e
+     conversation, that is, both arrays must have the same number of elements.
+     Each struct sudo_conv_reply must have its _r_e_p_l_y member initialized to
+     NULL.  The struct sudo_conv_callback pointer, if not NULL, should contain
+     function pointers to be called when the ssuuddoo process is suspended and/or
+     resumed during conversation input.  The _o_n___s_u_s_p_e_n_d and _o_n___r_e_s_u_m_e
      functions are called with the signal that caused ssuuddoo to be suspended and
      the _c_l_o_s_u_r_e pointer from the struct sudo_conv_callback.  These functions
      should return 0 on success and -1 on error.  On error, the conversation
@@ -1399,11 +1411,12 @@ DDEESSCCRRIIPPTTIIOONN
 
      SUDO_CONV_PROMPT_ECHO_OFF
            Prompt the user for input with echo disabled; this is generally
-           used for passwords.  The reply will be stored in the _r_e_p_l_i_e_s array.
+           used for passwords.  The reply will be stored in the _r_e_p_l_i_e_s array,
+           and it will never be NULL.
 
      SUDO_CONV_PROMPT_ECHO_ON
            Prompt the user for input with echo enabled.  The reply will be
-           stored in the _r_e_p_l_i_e_s array.
+           stored in the _r_e_p_l_i_e_s array, and it will never be NULL.
 
      SUDO_CONV_ERROR_MSG
            Display an error message.  The message is written to the standard
@@ -1417,9 +1430,10 @@ DDEESSCCRRIIPPTTIIOONN
 
      SUDO_CONV_PROMPT_MASK
            Prompt the user for input but echo an asterisk character for each
-           character read.  The reply will be stored in the _r_e_p_l_i_e_s This can
-           be used to provide visual feedback to the user while reading
-           sensitive information that should not be displayed.
+           character read.  The reply will be stored in the _r_e_p_l_i_e_s array, and
+           it will never be NULL.  This can be used to provide visual feedback
+           to the user while reading sensitive information that should not be
+           displayed.
 
      In addition to the above values, the following flag bits may also be set:
 
@@ -1437,6 +1451,9 @@ DDEESSCCRRIIPPTTIIOONN
            terminal is always used when possible for input, this flag is only
            used for output.  SUDO_CONV_ERROR_MSG or SUDO_CONV_INFO_MSG was
            used.
+
+     The _t_i_m_e_o_u_t in seconds until the prompt will wait for no more input.  A
+     zero value implies an infinite timeout.
 
      The plugin is responsible for freeing the reply buffer located in each
      struct sudo_conv_reply, if it is not NULL.  SUDO_CONV_REPL_MAX represents
@@ -1663,4 +1680,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.26                     October 7, 2018                    Sudo 1.8.26
+Sudo 1.8.26                    October 24, 2018                    Sudo 1.8.26

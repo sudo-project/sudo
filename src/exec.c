@@ -354,6 +354,30 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
+#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 13)
+# error "Update sudo_needs_pty() after changing the plugin API"
+#endif
+static bool
+sudo_needs_pty(struct command_details *details)
+{
+    struct plugin_container *plugin;
+
+    if (ISSET(details->flags, CD_USE_PTY))
+	return true;
+
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
+	if (plugin->u.io->log_ttyin != NULL ||
+	    plugin->u.io->log_ttyout != NULL ||
+	    plugin->u.io->log_stdin != NULL ||
+	    plugin->u.io->log_stdout != NULL ||
+	    plugin->u.io->log_stderr != NULL ||
+	    plugin->u.io->change_winsize != NULL ||
+	    plugin->u.io->log_suspend != NULL)
+	    return true;
+    }
+    return false;
+}
+
 /*
  * Execute a command, potentially in a pty with I/O loggging, and
  * wait for it to finish.
@@ -389,7 +413,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * has requested a pty.  If /dev/tty is unavailable and no I/O plugin
      * is configured, this returns false and we run the command without a pty.
      */
-    if (!TAILQ_EMPTY(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
+    if (sudo_needs_pty(details)) {
 	if (exec_pty(details, cstat))
 	    goto done;
     }

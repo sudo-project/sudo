@@ -210,59 +210,71 @@ int
 sudo_pam_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
 {
     const char *s;
+    int rc, status = AUTH_SUCCESS;
     int *pam_status = (int *) auth->data;
     debug_decl(sudo_pam_approval, SUDOERS_DEBUG_AUTH)
 
-    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
-    switch (*pam_status) {
+    rc = pam_acct_mgmt(pamh, PAM_SILENT);
+    switch (rc) {
 	case PAM_SUCCESS:
-	    debug_return_int(AUTH_SUCCESS);
+	    break;
 	case PAM_AUTH_ERR:
 	    log_warningx(0, N_("account validation failure, "
 		"is your account locked?"));
-	    debug_return_int(AUTH_FATAL);
+	    status = AUTH_FATAL;
+	    break;
 	case PAM_NEW_AUTHTOK_REQD:
 	    /* Ignore if user is exempt from password restrictions. */
-	    if (exempt)
-		debug_return_int(AUTH_SUCCESS);
+	    if (exempt) {
+		rc = *pam_status;
+		break;
+	    }
 	    /* New password required, try to change it. */
 	    log_warningx(0, N_("Account or password is "
 		"expired, reset your password and try again"));
-	    *pam_status = pam_chauthtok(pamh,
-		PAM_CHANGE_EXPIRED_AUTHTOK);
-	    if (*pam_status == PAM_SUCCESS)
-		debug_return_int(AUTH_SUCCESS);
-	    if ((s = pam_strerror(pamh, *pam_status)) == NULL)
+	    rc = pam_chauthtok(pamh, PAM_CHANGE_EXPIRED_AUTHTOK);
+	    if (rc == PAM_SUCCESS)
+		break;
+	    if ((s = pam_strerror(pamh, rc)) == NULL)
 		s = "unknown error";
 	    log_warningx(0,
 		N_("unable to change expired password: %s"), s);
-	    debug_return_int(AUTH_FAILURE);
+	    status = AUTH_FAILURE;
+	    break;
 	case PAM_AUTHTOK_EXPIRED:
 	    /* Ignore if user is exempt from password restrictions. */
-	    if (exempt)
-		debug_return_int(AUTH_SUCCESS);
+	    if (exempt) {
+		rc = *pam_status;
+		break;
+	    }
 	    /* Password expired, cannot be updated by user. */
 	    log_warningx(0,
 		N_("Password expired, contact your system administrator"));
-	    debug_return_int(AUTH_FATAL);
+	    status = AUTH_FATAL;
+	    break;
 	case PAM_ACCT_EXPIRED:
 	    log_warningx(0,
 		N_("Account expired or PAM config lacks an \"account\" "
 		"section for sudo, contact your system administrator"));
-	    debug_return_int(AUTH_FATAL);
+	    status = AUTH_FATAL;
+	    break;
 	case PAM_AUTHINFO_UNAVAIL:
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
-	    s = pam_strerror(pamh, *pam_status);
+	    s = pam_strerror(pamh, rc);
 	    log_warningx(0, N_("PAM account management error: %s"),
 		s ? s : "unknown error");
-	    debug_return_int(AUTH_FAILURE);
+	    status = AUTH_FAILURE;
+	    break;
 	default:
-	    s = pam_strerror(pamh, *pam_status);
+	    s = pam_strerror(pamh, rc);
 	    log_warningx(0, N_("PAM account management error: %s"),
 		s ? s : "unknown error");
-	    debug_return_int(AUTH_FATAL);
+	    status = AUTH_FATAL;
+	    break;
     }
+    *pam_status = rc;
+    debug_return_int(status);
 }
 
 int
@@ -335,7 +347,12 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     }
 
     if (def_pam_session) {
-	rc = pam_open_session(pamh, 0);
+	/*
+	 * We use PAM_SILENT to prevent pam_lastlog from printing last login
+	 * information except when explicitly running a shell.
+	 */
+	const bool silent = !ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL);
+	rc = pam_open_session(pamh, silent ? PAM_SILENT : 0);
 	switch (rc) {
 	case PAM_SUCCESS:
 	    break;

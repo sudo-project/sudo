@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 7, 2018
+.Dd October 24, 2018
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -588,9 +588,13 @@ or
 function using
 .Dv SUDO_CONV_INFO_MSG .
 If the user requests detailed version information, the verbose flag will be set.
+.Pp
+Returns 1 on success, 0 on failure, \-1 if a general error occurred,
+or \-2 if there was a usage error, although the return value is currently
+ignored.
 .It check_policy
 .Bd -literal -compact
-int (*check_policy)(int argc, char * const argv[]
+int (*check_policy)(int argc, char * const argv[],
                     char *env_add[], char **command_info[],
                     char **argv_out[], char **user_env_out[]);
 .Ed
@@ -982,8 +986,8 @@ The plugin is responsible for allocating and populating the vector.
 .El
 .It list
 .Bd -literal -compact
-int (*list)(int verbose, const char *list_user,
-            int argc, char * const argv[]);
+int (*list)(int argc, char * const argv[],
+            int verbose, const char *list_user);
 .Ed
 .Pp
 List available privileges for the invoking user.
@@ -1265,7 +1269,7 @@ will not be called.
 .Bd -literal
 /* Plugin API version major/minor. */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 2
+#define SUDO_API_VERSION_MINOR 13
 #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\e
                                             SUDO_API_VERSION_MINOR)
@@ -1372,8 +1376,9 @@ built against.
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
             sudo_printf_t plugin_printf, char * const settings[],
-            char * const user_info[], int argc, char * const argv[],
-            char * const user_env[], char * const plugin_options[]);
+            char * const user_info[], char * const command_info[],
+            int argc, char * const argv[], char * const user_env[],
+            char * const plugin_options[]);
 .Ed
 .Pp
 The
@@ -1384,6 +1389,8 @@ function is run before the
 .Fn log_stdin ,
 .Fn log_stdout ,
 .Fn log_stderr ,
+.Fn log_suspend ,
+.Fn change_winsize ,
 or
 .Fn show_version
 functions are called.
@@ -1500,6 +1507,10 @@ The number of elements in
 not counting the final
 .Dv NULL
 pointer.
+It can be zero, when
+.Nm sudo
+is called with
+.Fl V .
 .It argv
 If
 .No non- Ns Dv NULL ,
@@ -1604,6 +1615,10 @@ or
 function using
 .Dv SUDO_CONV_INFO_MSG .
 If the user requests detailed version information, the verbose flag will be set.
+.Pp
+Returns 1 on success, 0 on failure, \-1 if a general error occurred,
+or \-2 if there was a usage error, although the return value is currently
+ignored.
 .It log_ttyin
 .Bd -literal -compact
 int (*log_ttyin)(const char *buf, unsigned int len);
@@ -2125,7 +2140,14 @@ There must be a
 and
 .Li struct sudo_conv_reply
 for
-each message in the conversation.
+each message in the conversation, that is, both arrays must have the same
+number of elements.
+Each
+.Li struct sudo_conv_reply
+must have its
+.Em reply
+member initialized to
+.Dv NULL .
 The
 .Li struct sudo_conv_callback
 pointer, if not
@@ -2160,12 +2182,14 @@ Prompt the user for input with echo disabled;
 this is generally used for passwords.
 The reply will be stored in the
 .Em replies
-array.
+array, and it will never be
+.Dv NULL .
 .It SUDO_CONV_PROMPT_ECHO_ON
 Prompt the user for input with echo enabled.
 The reply will be stored in the
 .Em replies
-array.
+array, and it will never be
+.Dv NULL .
 .It SUDO_CONV_ERROR_MSG
 Display an error message.
 The message is written to the standard error unless the
@@ -2181,6 +2205,8 @@ Prompt the user for input but echo an asterisk character for each
 character read.
 The reply will be stored in the
 .Em replies
+array, and it will never be
+.Dv NULL .
 This can be used to provide visual feedback to the user while reading
 sensitive information that should not be displayed.
 .El
@@ -2212,6 +2238,11 @@ or
 .Dv SUDO_CONV_INFO_MSG
 was used.
 .El
+.Pp
+The
+.Em timeout
+in seconds until the prompt will wait for no more input.
+A zero value implies an infinite timeout.
 .Pp
 The plugin is responsible for freeing the reply buffer located in each
 .Li struct sudo_conv_reply ,

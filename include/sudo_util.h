@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -136,6 +136,8 @@
 # else
 #  define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->SUDO_ST_MTIM.tv_sec; (_y).tv_nsec = ((_x)->SUDO_ST_MTIM.tv_nsec / 1000) * 1000; } while (0)
 # endif
+#elif defined(HAVE_ST_NMTIME)
+# define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->st_mtime; (_y).tv_nsec = (_x)->st_nmtime; } while (0)
 #else
 # define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->st_mtime; (_y).tv_nsec = 0; } while (0)
 #endif /* HAVE_ST_MTIM */

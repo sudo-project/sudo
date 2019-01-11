@@ -21,8 +21,7 @@ Makefile$
 ^PVS-Studio.cfg$
 ^doc/.*\.man$
 ^doc/.*\.mdoc$
-^doc/.*\.man\.sed$
-^doc/.*\.mdoc\.sed$
+^doc/fixman\.sed$
 ^doc/varsub$
 
 ^init.d/.*.sh$

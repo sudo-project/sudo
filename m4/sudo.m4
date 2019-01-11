@@ -362,6 +362,69 @@ AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length 
 ])
 
 dnl
+dnl There are three different utmp variants we need to check for.
+dnl SUDO_CHECK_UTMP_MEMBERS(utmp_type)
+dnl
+AC_DEFUN([SUDO_CHECK_UTMP_MEMBERS], [
+    dnl
+    dnl Check for utmp/utmpx/utmps struct members.
+    dnl
+    AC_CHECK_MEMBER([struct $1.ut_id], [
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_ID, 1, [Define to 1 if `ut_id' is a member of `struct utmp'.])
+    ], [], [
+#	include <sys/types.h>
+#	include <$1.h>
+    ])
+    AC_CHECK_MEMBER([struct $1.ut_pid], [
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_PID, 1, [Define to 1 if `ut_pid' is a member of `struct utmp'.])
+    ], [], [
+#	include <sys/types.h>
+#	include <$1.h>
+    ])
+    AC_CHECK_MEMBER([struct $1.ut_tv], [
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_TV, 1, [Define to 1 if `ut_tv' is a member of `struct utmp'.])
+    ], [], [
+#	include <sys/types.h>
+#	include <$1.h>
+    ])
+    AC_CHECK_MEMBER([struct $1.ut_type], [
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_TYPE, 1, [Define to 1 if `ut_type' is a member of `struct utmp'.])
+    ], [], [
+#	include <sys/types.h>
+#	include <$1.h>
+    ])
+    dnl
+    dnl Older struct utmp has ut_name instead of ut_user
+    dnl
+    if test "$1" = "utmp"; then
+	AC_CHECK_MEMBERS([struct utmp.ut_user], [], [], [
+#	include <sys/types.h>
+#	include <$1.h>
+	])
+    fi
+    dnl
+    dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
+    dnl We need to have already defined _GNU_SOURCE on glibc which only has
+    dnl __e_termination visible when _GNU_SOURCE is *not* defined.
+    dnl
+    AC_CHECK_MEMBER([struct $1.ut_exit.__e_termination], [
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT, 1, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION, 1, [Define to 1 if `ut_exit.__e_termination' is a member of `struct utmp'.])
+    ], [
+	AC_CHECK_MEMBER([struct $1.ut_exit.e_termination], [
+	    AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT, 1, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
+	    AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION, 1, [Define to 1 if `ut_exit.e_termination' is a member of `struct utmp'.])
+	], [], [
+#	    include <sys/types.h>
+#	    include <$1.h>
+	])
+    ], [
+#	include <sys/types.h>
+#	include <$1.h>
+    ])
+])
+
+dnl
 dnl Append a libpath to an LDFLAGS style variable if not already present.
 dnl Also appends to the _R version unless rpath is disabled.
 dnl

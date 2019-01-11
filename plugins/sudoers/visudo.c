@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     char *editor, **editor_argv;
     const char *export_path = NULL;
     int ch, oldlocale, editor_argc, exitcode = 0;
-    bool quiet, strict, oldperms;
+    bool quiet, strict, fflag;
     debug_decl(main, SUDOERS_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -175,7 +175,7 @@ main(int argc, char *argv[])
     /*
      * Arg handling.
      */
-    checkonly = oldperms = quiet = strict = false;
+    checkonly = fflag = quiet = strict = false;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'f':
 		sudoers_file = optarg;	/* sudoers file path */
-		oldperms = true;
+		fflag = true;
 		break;
 	    case 'h':
 		help();
@@ -207,9 +207,23 @@ main(int argc, char *argv[])
 		usage(1);
 	}
     }
-    /* There should be no other command line arguments. */
-    if (argc - optind != 0)
+    argc -= optind;
+    argv += optind;
+
+    /* Check for optional sudoers file argument. */
+    switch (argc) {
+    case 0:
+	break;
+    case 1:
+	/* Only accept sudoers file if no -f was specified. */
+	if (!fflag) {
+	    sudoers_file = *argv;
+	    fflag = true;
+	}
+	break;
+    default:
 	usage(1);
+    }
 
     if (export_path != NULL) {
 	/* Backwards compatibility for the time being. */
@@ -238,7 +252,7 @@ main(int argc, char *argv[])
 	sudo_fatalx(U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
-	exitcode = check_syntax(sudoers_file, quiet, strict, oldperms) ? 0 : 1;
+	exitcode = check_syntax(sudoers_file, quiet, strict, fflag) ? 0 : 1;
 	goto done;
     }
 
@@ -278,7 +292,7 @@ main(int argc, char *argv[])
      */
     if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    (void) install_sudoers(sp, oldperms);
+	    (void) install_sudoers(sp, fflag);
 	}
     }
     free(editor);
@@ -1265,7 +1279,7 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-chqsV] [-f sudoers]\n", getprogname());
+	"usage: %s [-chqsV] [[-f] sudoers ]\n", getprogname());
     if (fatal)
 	exit(1);
 }

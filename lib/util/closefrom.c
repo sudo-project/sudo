@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2010, 2012-2015
+ * Copyright (c) 2004-2005, 2007, 2010, 2012-2015, 2017-2018
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -75,34 +75,30 @@ closefrom_fallback(int lowfd)
  * Close all file descriptors greater than or equal to lowfd.
  * We try the fast way first, falling back on the slow method.
  */
-#if defined(HAVE_FCNTL_CLOSEM)
 void
 sudo_closefrom(int lowfd)
 {
-    if (fcntl(lowfd, F_CLOSEM, 0) == -1)
-	closefrom_fallback(lowfd);
-}
-#elif defined(HAVE_PSTAT_GETPROC)
-void
-sudo_closefrom(int lowfd)
-{
+#if defined(HAVE_PSTAT_GETPROC)
     struct pst_status pstat;
-    int fd;
-
-    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1) {
-	for (fd = lowfd; fd <= pstat.pst_highestfd; fd++)
-	    (void) close(fd);
-    } else {
-	closefrom_fallback(lowfd);
-    }
-}
 #elif defined(HAVE_DIRFD)
-void
-sudo_closefrom(int lowfd)
-{
     const char *path;
     DIR *dirp;
+#endif
 
+    /* Try the fast method first, if possible. */
+#if defined(HAVE_FCNTL_CLOSEM)
+    if (fcntl(lowfd, F_CLOSEM, 0) != -1)
+	return;
+#endif
+#if defined(HAVE_PSTAT_GETPROC)
+    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1) {
+	int fd;
+
+	for (fd = lowfd; fd <= pstat.pst_highestfd; fd++)
+	    (void) close(fd);
+	return;
+    }
+#elif defined(HAVE_DIRFD)
     /* Use /proc/self/fd (or /dev/fd on FreeBSD) if it exists. */
 # if defined(__FreeBSD__) || defined(__APPLE__)
     path = _PATH_DEV "fd";
@@ -124,15 +120,12 @@ sudo_closefrom(int lowfd)
 	    }
 	}
 	(void) closedir(dirp);
-    } else
-	closefrom_fallback(lowfd);
-}
-#else
-void
-sudo_closefrom(int lowfd)
-{
+	return;
+    }
+#endif /* HAVE_DIRFD */
+
+    /* Do things the slow way. */
     closefrom_fallback(lowfd);
 }
-#endif /* HAVE_FCNTL_CLOSEM */
 
 #endif /* HAVE_CLOSEFROM */
