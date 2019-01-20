@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2016, 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013, 2016, 2018-2018 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -412,7 +412,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    size_t slen = sizeof("sudoRole") + strlen(priv->ldap_role);
 		    if ((source = rcstr_alloc(slen)) == NULL)
 			goto oom;
-		    snprintf(source, slen, "sudoRole %s", priv->ldap_role);
+		    (void)snprintf(source, slen, "sudoRole %s", priv->ldap_role);
 		}
 
 		while ((opt = iter(&opts)) != NULL) {

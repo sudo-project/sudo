@@ -513,7 +513,7 @@ suspend_sudo(struct exec_closure_pty *ec, int signo)
 	log_suspend(signo);
 
 	if (sig2str(signo, signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", signo);
+	    (void)snprintf(signame, sizeof(signame), "%d", signo);
 
 	/* Suspend self and continue command when we resume. */
 	if (signo != SIGSTOP) {
@@ -872,7 +872,7 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
     else if (signo == SIGCONT_BG)
 	strlcpy(signame, "CONT_BG", sizeof(signame));
     else if (sig2str(signo, signame) == -1)
-	snprintf(signame, sizeof(signame), "%d", signo);
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for command", signame);
 
     send_command_status(ec, CMD_SIGNO, signo);
@@ -1014,7 +1014,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
     } else if (WIFSIGNALED(status)) {
 	char signame[SIG2STR_MAX];
 	if (sig2str(WTERMSIG(status), signame) == -1)
-	    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    (void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
 	    __func__, (int)ec->monitor_pid, signame);
 	ec->monitor_pid = -1;
@@ -1039,7 +1039,7 @@ signal_cb_pty(int signo, int what, void *v)
 	debug_return;
 
     if (sig2str(signo, signame) == -1)
-	snprintf(signame, sizeof(signame), "%d", signo);
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
     sudo_debug_printf(SUDO_DEBUG_DIAG,
 	"%s: evbase %p, monitor: %d, signo %s(%d), cstat %p", __func__,
 	ec->evbase, (int)ec->monitor_pid, signame, signo, ec->cstat);
@@ -1096,7 +1096,7 @@ fwdchannel_cb(int sock, int what, void *v)
 	    else if (msg->cstat.val == SIGCONT_BG)
 		strlcpy(signame, "CONT_BG", sizeof(signame));
 	    else if (sig2str(msg->cstat.val, signame) == -1)
-		snprintf(signame, sizeof(signame), "%d", msg->cstat.val);
+		(void)snprintf(signame, sizeof(signame), "%d", msg->cstat.val);
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"sending SIG%s to monitor over backchannel", signame);
 	    break;

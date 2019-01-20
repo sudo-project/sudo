@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -145,7 +145,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     debug_decl(get_starttime, SUDOERS_DEBUG_UTIL)
 
     /* Determine the start time from pr_start in /proc/pid/psinfo. */
-    snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)pid);
+    (void)snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)pid);
     if ((fd = open(path, O_RDONLY, 0)) != -1) {
 	nread = read(fd, &psinfo, sizeof(psinfo));
 	close(fd);
@@ -189,7 +189,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
      * Ignore /proc/self/stat if it contains embedded NUL bytes.
      * XXX - refactor common code with ttyname.c?
      */
-    snprintf(path, sizeof(path), "/proc/%u/stat", (unsigned int)pid);
+    (void)snprintf(path, sizeof(path), "/proc/%u/stat", (unsigned int)pid);
     if ((fd = open(path, O_RDONLY | O_NOFOLLOW)) != -1) {
 	cp = buf;
 	while ((nread = read(fd, cp, buf + sizeof(buf) - cp)) != 0) {

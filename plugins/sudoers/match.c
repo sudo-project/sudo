@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2018
+ * Copyright (c) 1996, 1998-2005, 2007-2019
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -600,7 +600,7 @@ set_cmnd_fd(int fd)
 	    int flags;
 
 	    /* We can only use fexecve() on a script if /dev/fd/N exists. */
-	    snprintf(fdpath, sizeof(fdpath), "/dev/fd/%d", fd);
+	    (void)snprintf(fdpath, sizeof(fdpath), "/dev/fd/%d", fd);
 	    if (stat(fdpath, &sb) != 0) {
 		/* Missing /dev/fd file, can't use fexecve(). */
 		close(fd);

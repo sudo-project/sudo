@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -205,7 +205,7 @@ type2string(int type)
     case TS_PPID:
 	debug_return_str("TS_PPID");
     }
-    snprintf(name, sizeof(name), "UNKNOWN (0x%x)", type);
+    (void)snprintf(name, sizeof(name), "UNKNOWN (0x%x)", type);
     debug_return_str(name);
 }
 

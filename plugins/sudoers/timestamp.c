@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1021,7 +1021,7 @@ already_lectured(int unused)
     if (ts_secure_dir(def_lecture_status_dir, false, true)) {
 	len = snprintf(status_file, sizeof(status_file), "%s/%s",
 	    def_lecture_status_dir, user_name);
-	if (len > 0 && (size_t)len < sizeof(status_file)) {
+	if (len > 0 && len < (int)sizeof(status_file)) {
 	    debug_return_bool(stat(status_file, &sb) == 0);
 	}
 	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
@@ -1043,7 +1043,7 @@ set_lectured(void)
 
     len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
 	def_lecture_status_dir, user_name);
-    if (len <= 0 || (size_t)len >= sizeof(lecture_status)) {
+    if (len <= 0 || len >= (int)sizeof(lecture_status)) {
 	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
 	    def_lecture_status_dir, user_name);
 	goto done;

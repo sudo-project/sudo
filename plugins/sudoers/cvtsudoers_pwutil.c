@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2018
+ * Copyright (c) 1996, 1998-2005, 2007-2019
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -108,7 +108,8 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
 	    if (errstr == NULL) {
 		if (uid != filter_uid)
 		    continue;
-		snprintf(uidstr, sizeof(uidstr), "#%u", (unsigned int)uid);
+		(void)snprintf(uidstr, sizeof(uidstr), "#%u",
+		    (unsigned int)uid);
 		break;
 	    }
 	}
@@ -214,7 +215,8 @@ cvtsudoers_make_gritem(gid_t gid, const char *name)
 	    if (errstr == NULL) {
 		if (gid != filter_gid)
 		    continue;
-		snprintf(gidstr, sizeof(gidstr), "#%u", (unsigned int)gid);
+		(void)snprintf(gidstr, sizeof(gidstr), "#%u",
+		    (unsigned int)gid);
 		break;
 	    }
 	}

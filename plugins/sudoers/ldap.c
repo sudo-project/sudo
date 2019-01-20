@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -1302,7 +1302,7 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 	if (ofd != -1) {
 	    (void) fcntl(ofd, F_SETFL, 0);
 	    if (sudo_lock_file(ofd, SUDO_LOCK)) {
-		snprintf(new_ccname, sizeof(new_ccname), "%s%s",
+		(void)snprintf(new_ccname, sizeof(new_ccname), "%s%s",
 		    _PATH_TMP, "sudocc_XXXXXXXX");
 		nfd = mkstemp(new_ccname);
 		if (nfd != -1) {

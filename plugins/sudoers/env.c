@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2018
+ * Copyright (c) 2000-2005, 2007-2019
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1100,9 +1100,9 @@ rebuild_env(void)
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
     CHECK_SETENV2("SUDO_USER", user_name, true, true);
-    snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_uid);
+    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_uid);
     CHECK_SETENV2("SUDO_UID", idbuf, true, true);
-    snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
+    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
     CHECK_SETENV2("SUDO_GID", idbuf, true, true);
 
     debug_return_bool(true);

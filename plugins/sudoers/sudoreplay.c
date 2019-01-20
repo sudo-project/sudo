@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -315,13 +315,13 @@ main(int argc, char *argv[])
     if (VALID_ID(id)) {
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
-	if (plen <= 0 || (size_t)plen >= sizeof(path))
+	if (plen <= 0 || plen >= (int)sizeof(path))
 	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
 	    session_dir, id);
-	if (plen <= 0 || (size_t)plen >= sizeof(path))
+	if (plen <= 0 || plen >= (int)sizeof(path))
 	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir,
 		id, strerror(ENAMETOOLONG));
     }
@@ -617,7 +617,7 @@ xterm_set_size(int rows, int cols)
 
     /* XXX - save cursor and position restore after resizing */
     len = snprintf(buf, sizeof(buf), setsize_fmt, rows, cols);
-    if (len < 0 || len >= (int)sizeof(buf)) {
+    if (len <= 0 || len >= (int)sizeof(buf)) {
 	/* not possible due to size of buf */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: internal error, buffer too small?", __func__);

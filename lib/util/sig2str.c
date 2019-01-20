@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2015, 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,7 +62,7 @@ sudo_sig2str(int signo, char *signame)
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
     /* Realtime signal support as per Solaris. */
     if (signo >= SIGRTMIN && signo <= SIGRTMAX) {
-	snprintf(signame, SIG2STR_MAX, "RTMIN+%d", (signo - SIGRTMIN));
+	(void)snprintf(signame, SIG2STR_MAX, "RTMIN+%d", (signo - SIGRTMIN));
 	return 0;
     }
 #endif

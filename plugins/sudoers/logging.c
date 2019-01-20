@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -464,7 +464,7 @@ fmt_authfail_message(char **str, va_list ap)
 		break;
 	    case 'd':
 		len = snprintf(dst, dst_end - dst, "%u", tries);
-		if (len == -1 || len >= (int)(dst_end - dst))
+		if (len <= 0 || len >= (int)(dst_end - dst))
 		    goto done;
 		dst += len;
 		src += 2;

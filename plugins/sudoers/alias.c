@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2018
+ * Copyright (c) 2004-2005, 2007-2019
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -145,12 +145,12 @@ alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
     HLTQ_TO_TAILQ(&a->members, members, entries);
     switch (rbinsert(parse_tree->aliases, a, NULL)) {
     case 1:
-	snprintf(errbuf, sizeof(errbuf), N_("Alias \"%s\" already defined"),
-	    name);
+	(void)snprintf(errbuf, sizeof(errbuf),
+	    N_("Alias \"%s\" already defined"), name);
 	alias_free(a);
 	debug_return_str(errbuf);
     case -1:
-	strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
+	(void)strlcpy(errbuf, N_("unable to allocate memory"), sizeof(errbuf));
 	alias_free(a);
 	debug_return_str(errbuf);
     }

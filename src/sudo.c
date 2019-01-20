@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -862,7 +862,7 @@ sudo_check_suid(const char *sudo)
 
 		    int len = snprintf(pathbuf, sizeof(pathbuf), "%.*s/%s",
 			(int)(ep - cp), cp, sudo);
-		    if (len <= 0 || (size_t)len >= sizeof(pathbuf))
+		    if (len <= 0 || len >= (int)sizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
 			sudo = pathbuf;

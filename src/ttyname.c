@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -158,7 +158,7 @@ get_process_ttyname(char *name, size_t namelen)
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
-    snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
+    (void)snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
     if ((fd = open(path, O_RDONLY, 0)) != -1) {
 	nread = read(fd, &psinfo, sizeof(psinfo));
 	close(fd);

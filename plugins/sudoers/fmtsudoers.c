@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -229,13 +229,13 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
 #endif /* HAVE_SELINUX */
     if (cs->timeout > 0 && FIELD_CHANGED(prev_cs, cs, timeout)) {
 	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
-	snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
+	(void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
     }
     if (cs->notbefore != UNSPEC && FIELD_CHANGED(prev_cs, cs, notbefore)) {
 	char buf[sizeof("CCYYMMDDHHMMSSZ")];
 	struct tm *tm = gmtime(&cs->notbefore);
-	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
+	(void)snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
 	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 	sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
@@ -243,7 +243,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->notafter != UNSPEC && FIELD_CHANGED(prev_cs, cs, notafter)) {
 	char buf[sizeof("CCYYMMDDHHMMSSZ")];
 	struct tm *tm = gmtime(&cs->notafter);
-	snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
+	(void)snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
 	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 	sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);

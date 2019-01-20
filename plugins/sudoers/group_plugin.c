@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -72,7 +72,7 @@ group_plugin_load(char *plugin_info)
 	len = snprintf(path, sizeof(path), "%s%s",
 	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
     }
-    if (len <= 0 || (size_t)len >= sizeof(path)) {
+    if (len <= 0 || len >= (int)sizeof(path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s%s",
 	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);

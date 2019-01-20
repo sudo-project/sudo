@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -401,7 +401,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
      * Open sequence file
      */
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
-    if (len <= 0 || (size_t)len >= sizeof(pathbuf)) {
+    if (len <= 0 || len >= (int)sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
 	goto done;
@@ -429,7 +429,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
-	if (len > 0 && (size_t)len < sizeof(fallback)) {
+	if (len > 0 && len < (int)sizeof(fallback)) {
 	    int fd2 = io_open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
 		if (fchown(fd2, iolog_uid, iolog_gid) != 0) {
@@ -944,9 +944,9 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	    ret = false;
 	    goto done;
 	}
-	snprintf(tofree + sizeof(_PATH_SUDO_IO_LOGDIR), sizeof(sessid) + 2,
-	    "%c%c/%c%c/%c%c", sessid[0], sessid[1], sessid[2], sessid[3],
-	    sessid[4], sessid[5]);
+	(void)snprintf(tofree + sizeof(_PATH_SUDO_IO_LOGDIR),
+	    sizeof(sessid) + 2, "%c%c/%c%c/%c%c", sessid[0], sessid[1],
+	    sessid[2], sessid[3], sessid[4], sessid[5]);
 	iolog_details.iolog_path = tofree;
     }
 

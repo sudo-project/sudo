@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2017-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -93,7 +93,7 @@ main(int argc, char *argv[])
 	"/usr/sbin/newaliases");
 
     /* Test small buffer w/ errno. */
-    snprintf(buf1, sizeof(buf1),
+    (void)snprintf(buf1, sizeof(buf1),
 	 "unable to open %s: %s", "/var/log/sudo-io/seq", strerror(ENOENT));
     expected_result = buf1;
     errno = ENOENT;
@@ -108,7 +108,7 @@ main(int argc, char *argv[])
     /* Test large buffer w/ errno > 8192 bytes. */
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
-    snprintf(buf2, sizeof(buf2), "%s: %s", buf1, strerror(EINVAL));
+    (void)snprintf(buf2, sizeof(buf2), "%s: %s", buf1, strerror(EINVAL));
     expected_result = buf2;
     errno = EINVAL;
     test_vsyslog(0, "%s: %m", buf1);
@@ -116,7 +116,7 @@ main(int argc, char *argv[])
     /* Test large format string > 8192 bytes, expect truncation to 2048. */
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
-    snprintf(buf2, sizeof(buf2), "%.*s", 2047, buf1);
+    (void)snprintf(buf2, sizeof(buf2), "%.*s", 2047, buf1);
     expected_result = buf2;
     test_vsyslog(0, buf1);
 

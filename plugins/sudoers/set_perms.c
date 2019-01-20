@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -169,7 +169,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_ROOT: setresuid(%d, %d, %d)",
 		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
 	    goto bad;
@@ -198,7 +198,8 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_USER: setresgid(%d, %d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_USER: setresgid(%d, %d, %d)",
 		(int)ID(rgid), (int)ID(egid), (int)ID(sgid));
 	    goto bad;
 	}
@@ -218,7 +219,8 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_USER: setresuid(%d, %d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_USER: setresuid(%d, %d, %d)",
 		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
 	    goto bad;
 	}
@@ -234,7 +236,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setresgid(%d, %d, %d)",
 		(int)ID(rgid), (int)ID(egid), (int)ID(sgid));
 	    goto bad;
@@ -255,7 +257,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setresuid(%d, %d, %d)",
 		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
 	    goto bad;
@@ -325,7 +327,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_SUDOERS: setresuid(%d, %d, %d)",
 		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
 	    goto bad;
@@ -346,7 +348,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_TIMESTAMP: setresuid(%d, %d, %d)",
 		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
 	    goto bad;
@@ -367,7 +369,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_IOLOG: setresgid(%d, %d, %d)",
 		(int)ID(rgid), (int)ID(egid), (int)ID(sgid));
 	    goto bad;
@@ -377,7 +379,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_IOLOG: setresuid(%d, %d, %d)",
 		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
 	    goto bad;
@@ -512,7 +514,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_ROOT: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 		ROOT_UID);
 	    goto bad;
@@ -541,7 +543,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, user_gid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_USER: setgidx(ID_EFFECTIVE, %d)", (int)user_gid);
 	    goto bad;
 	}
@@ -562,14 +564,14 @@ set_perms(int perm)
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (ostate->euid != ROOT_UID || ostate->suid != ROOT_UID) {
 	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
-		snprintf(errbuf, sizeof(errbuf),
+		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_USER: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 		    ROOT_UID);
 		goto bad;
 	    }
 	}
 	if (setuidx(ID_EFFECTIVE|ID_REAL, user_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_USER: setuidx(ID_EFFECTIVE|ID_REAL, %d)", (int)user_uid);
 	    goto bad;
 	}
@@ -585,7 +587,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_gid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 		(int)user_gid);
 	    goto bad;
@@ -606,7 +608,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 		(int)user_uid);
 	    goto bad;
@@ -678,14 +680,14 @@ set_perms(int perm)
 	if (UID_CHANGED) {
 	    if (ostate->ruid != ROOT_UID || ostate->suid != ROOT_UID) {
 		if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
-		    snprintf(errbuf, sizeof(errbuf),
+		    (void)snprintf(errbuf, sizeof(errbuf),
 			"PERM_SUDOERS: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 			ROOT_UID);
 		    goto bad;
 		}
 	    }
 	    if (setuidx(ID_EFFECTIVE, state->euid)) {
-		snprintf(errbuf, sizeof(errbuf),
+		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_SUDOERS: setuidx(ID_EFFECTIVE, %d)", (int)sudoers_uid);
 		goto bad;
 	    }
@@ -708,14 +710,14 @@ set_perms(int perm)
 	if (UID_CHANGED) {
 	    if (ostate->ruid != ROOT_UID || ostate->suid != ROOT_UID) {
 		if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
-		    snprintf(errbuf, sizeof(errbuf),
+		    (void)snprintf(errbuf, sizeof(errbuf),
 			"PERM_TIMESTAMP: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 			ROOT_UID);
 		    goto bad;
 		}
 	    }
 	    if (setuidx(ID_EFFECTIVE, timestamp_uid)) {
-		snprintf(errbuf, sizeof(errbuf),
+		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_TIMESTAMP: setuidx(ID_EFFECTIVE, %d)",
 		    (int)timestamp_uid);
 		goto bad;
@@ -737,7 +739,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, iolog_gid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_IOLOG: setgidx(ID_EFFECTIVE, %d)", (int)iolog_gid);
 	    goto bad;
 	}
@@ -748,14 +750,14 @@ set_perms(int perm)
 	if (UID_CHANGED) {
 	    if (ostate->ruid != ROOT_UID || ostate->suid != ROOT_UID) {
 		if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
-		    snprintf(errbuf, sizeof(errbuf),
+		    (void)snprintf(errbuf, sizeof(errbuf),
 			"PERM_IOLOG: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
 			ROOT_UID);
 		    goto bad;
 		}
 	    }
 	    if (setuidx(ID_EFFECTIVE, timestamp_uid)) {
-		snprintf(errbuf, sizeof(errbuf),
+		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_IOLOG: setuidx(ID_EFFECTIVE, %d)",
 		    (int)timestamp_uid);
 		goto bad;
@@ -955,14 +957,14 @@ set_perms(int perm)
 	 */
 	if (ostate->euid != ROOT_UID) {
 	    if (setreuid(-1, ROOT_UID)) {
-		snprintf(errbuf, sizeof(errbuf),
+		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_ROOT: setreuid(-1, %d)", ROOT_UID);
 		goto bad;
 	    }
 	}
 	if (ostate->ruid != ROOT_UID) {
 	    if (setreuid(ROOT_UID, -1)) {
-		snprintf(errbuf, sizeof(errbuf),
+		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_ROOT: setreuid(%d, -1)", ROOT_UID);
 		goto bad;
 	    }
@@ -973,7 +975,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_ROOT: setregid(%d, %d)", (int)ID(rgid), (int)ID(egid));
 	    goto bad;
 	}
@@ -988,7 +990,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_USER: setregid(%d, %d)", (int)ID(rgid), (int)ID(egid));
 	    goto bad;
 	}
@@ -1006,7 +1008,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_USER: setreuid(%d, %d)", (int)ID(ruid), (int)ID(euid));
 	    goto bad;
 	}
@@ -1020,7 +1022,8 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_FULL_USER: setregid(%d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_FULL_USER: setregid(%d, %d)",
 		(int)ID(rgid), (int)ID(egid));
 	    goto bad;
 	}
@@ -1038,7 +1041,8 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_FULL_USER: setreuid(%d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_FULL_USER: setreuid(%d, %d)",
 		(int)ID(ruid), (int)ID(euid));
 	    goto bad;
 	}
@@ -1099,7 +1103,8 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_SUDOERS: setreuid(%d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_SUDOERS: setreuid(%d, %d)",
 		(int)ID(ruid), (int)ID(euid));
 	    goto bad;
 	}
@@ -1116,7 +1121,8 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_TIMESTAMP: setreuid(%d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_TIMESTAMP: setreuid(%d, %d)",
 		(int)ID(ruid), (int)ID(euid));
 	    goto bad;
 	}
@@ -1133,7 +1139,8 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_IOLOG: setregid(%d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_IOLOG: setregid(%d, %d)",
 		(int)ID(rgid), (int)ID(egid));
 	    goto bad;
 	}
@@ -1141,7 +1148,8 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_IOLOG: setreuid(%d, %d)",
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_IOLOG: setreuid(%d, %d)",
 		(int)ID(ruid), (int)ID(euid));
 	    goto bad;
 	}
@@ -1263,11 +1271,13 @@ set_perms(int perm)
      */
     if (perm != PERM_INITIAL) {
 	if (ostate->euid != ROOT_UID && seteuid(ROOT_UID)) {
-	    snprintf(errbuf, sizeof(errbuf), "set_perms: seteuid(%d)", ROOT_UID);
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"set_perms: seteuid(%d)", ROOT_UID);
 	    goto bad;
 	}
 	if (ostate->ruid != ROOT_UID && setuid(ROOT_UID)) {
-	    snprintf(errbuf, sizeof(errbuf), "set_perms: setuid(%d)", ROOT_UID);
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"set_perms: setuid(%d)", ROOT_UID);
 	    goto bad;
 	}
     }
@@ -1314,7 +1324,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setegid(user_gid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_USER: setegid(%d)", (int)user_gid);
 	    goto bad;
 	}
@@ -1332,7 +1342,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (seteuid(user_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_USER: seteuid(%d)", (int)user_uid);
 	    goto bad;
 	}
@@ -1346,7 +1356,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setgid(user_gid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setgid(%d)", (int)user_gid);
 	    goto bad;
 	}
@@ -1364,7 +1374,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (setuid(user_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setuid(%d)", (int)user_uid);
 	    goto bad;
 	}
@@ -1425,7 +1435,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (seteuid(state->euid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_SUDOERS: seteuid(%d)", (int)state->euid);
 	    goto bad;
 	}
@@ -1442,7 +1452,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (seteuid(timestamp_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_TIMESTAMP: seteuid(%d)", (int)timestamp_uid);
 	    goto bad;
 	}
@@ -1459,7 +1469,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setegid(iolog_gid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_IOLOG: setegid(%d)", (int)iolog_gid);
 	    goto bad;
 	}
@@ -1467,7 +1477,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (seteuid(timestamp_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_IOLOG: seteuid(%d)", (int)timestamp_uid);
 	    goto bad;
 	}
@@ -1592,7 +1602,8 @@ set_perms(int perm)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
 	    "[%d] -> [%d]", __func__, (int)ostate->ruid, (int)state->ruid);
 	if (setuid(ROOT_UID)) {
-	    snprintf(errbuf, sizeof(errbuf), "PERM_ROOT: setuid(%d)", ROOT_UID);
+	    (void)snprintf(errbuf, sizeof(errbuf),
+		"PERM_ROOT: setuid(%d)", ROOT_UID);
 	    goto bad;
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
@@ -1620,7 +1631,7 @@ set_perms(int perm)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: uid: "
 	    "[%d] -> [%d]", __func__, (int)ostate->ruid, (int)state->ruid);
 	if (setuid(user_uid)) {
-	    snprintf(errbuf, sizeof(errbuf),
+	    (void)snprintf(errbuf, sizeof(errbuf),
 		"PERM_FULL_USER: setuid(%d)", (int)user_uid);
 	    goto bad;
 	}
