@@ -3755,7 +3755,9 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     if test -z "$LIB_CRYPT"; then
 	_LIBS="$LIBS"
-	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [
+	    test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
+	])
 	LIBS="$_LIBS"
     fi
 
@@ -3775,10 +3777,19 @@ if test ${with_passwd-'no'} != "no"; then
 	LIBS="$_LIBS"
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getspnam], [gen shadow], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([getspnam], [gen shadow], [
+	    AC_DEFINE(HAVE_GETSPNAM)
+	    test "${ac_cv_search_getspnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getspnam}"
+	    CHECKSHADOW=false
+	])
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"])
+	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [
+	    AC_DEFINE(HAVE_GETPRPWNAM)
+	    test "${ac_cv_search_getprpwnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getprpwnam}"
+	    SECUREWARE=1
+	    CHECKSHADOW=false
+	])
     fi
     if test -n "$shadow_libs"; then
 	# sudoers needs to link with shadow libs for password auth
@@ -3843,8 +3854,8 @@ if test ${with_ldap-'no'} != "no"; then
     case "$host_os" in
 	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
-    AC_SEARCH_LIBS(ldap_init, "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}", [
-	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
+    AC_SEARCH_LIBS([ldap_init], ["ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}]", [
+	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
 	found=yes
     ])
     # If nothing linked, try -lldap and hope for the best

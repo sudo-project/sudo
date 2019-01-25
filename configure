@@ -24618,7 +24618,9 @@ $as_echo "$ac_cv_search_crypt" >&6; }
 ac_res=$ac_cv_search_crypt
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"
+
+	    test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
+
 fi
 
 	LIBS="$_LIBS"
@@ -24704,8 +24706,12 @@ $as_echo "$ac_cv_search_getspnam" >&6; }
 ac_res=$ac_cv_search_getspnam
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  $as_echo "#define HAVE_GETSPNAM 1" >>confdefs.h
- CHECKSHADOW=false; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"
+
+	    $as_echo "#define HAVE_GETSPNAM 1" >>confdefs.h
+
+	    test "${ac_cv_search_getspnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getspnam}"
+	    CHECKSHADOW=false
+
 fi
 
     fi
@@ -24763,8 +24769,13 @@ $as_echo "$ac_cv_search_getprpwnam" >&6; }
 ac_res=$ac_cv_search_getprpwnam
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  $as_echo "#define HAVE_GETPRPWNAM 1" >>confdefs.h
- CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && shadow_libs="${shadow_libs} $ac_res"
+
+	    $as_echo "#define HAVE_GETPRPWNAM 1" >>confdefs.h
+
+	    test "${ac_cv_search_getprpwnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getprpwnam}"
+	    SECUREWARE=1
+	    CHECKSHADOW=false
+
 fi
 
     fi
@@ -25100,7 +25111,7 @@ ac_res=$ac_cv_search_ldap_init
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
+	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
 	found=yes
 
 fi
