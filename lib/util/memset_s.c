@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <stddef.h>
 #include <errno.h>
 #include <limits.h>
 #if defined(HAVE_STDINT_H)
