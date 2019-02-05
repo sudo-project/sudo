@@ -181,13 +181,13 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "runas_user=")) {
 	    CHECK(*cur, "runas_user=");
 	    *runas_user = *cur + sizeof("runas_user=") - 1;
-	    sudo_user.flags |= RUNAS_USER_SPECIFIED;
+	    SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_group=")) {
 	    CHECK(*cur, "runas_group=");
 	    *runas_group = *cur + sizeof("runas_group=") - 1;
-	    sudo_user.flags |= RUNAS_GROUP_SPECIFIED;
+	    SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "prompt=")) {
