@@ -224,6 +224,17 @@ struct sudo_user {
 #define	runas_limitprivs	(sudo_user.limitprivs)
 #define user_timeout		(sudo_user.timeout)
 
+/* Default sudoers uid/gid/mode if not set by the Makefile. */
+#ifndef SUDOERS_UID
+# define SUDOERS_UID	0
+#endif
+#ifndef SUDOERS_GID
+# define SUDOERS_GID	0
+#endif
+#ifndef SUDOERS_MODE
+# define SUDOERS_MODE	0600
+#endif
+
 #ifdef __TANDEM
 # define ROOT_UID	65535
 #else
