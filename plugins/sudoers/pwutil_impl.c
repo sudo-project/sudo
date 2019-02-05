@@ -353,6 +353,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
+    total += sizeof(char *) * gidlist->ngids;
     total += groupname_len * gidlist->ngids;
 
 again:
