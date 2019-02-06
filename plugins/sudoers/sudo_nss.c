@@ -38,7 +38,6 @@
 #include <ctype.h>
 
 #include "sudoers.h"
-#include "sudo_lbuf.h"
 
 extern struct sudo_nss sudo_nss_file;
 #ifdef HAVE_LDAP
