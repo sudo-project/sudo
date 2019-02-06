@@ -157,15 +157,16 @@ case "$osversion" in
     centos*|rhel*|f[0-9]*)
 	case "$osversion" in
 	    centos*|rhel*)
-		if [ $osrelease -ge 40 ]; then
+		osmajor=`sed -n -e 's/^.*release \([0-9]*\)[^0-9].*$/\1/p' /etc/redhat-release`
+		if [ $osmajor -ge 4 ]; then
 		    # RHEL 4 and up support SELinux
 		    with_selinux=true
-		    if [ $osrelease -ge 50 ]; then
+		    if [ $osmajor -ge 5 ]; then
 			# RHEL 5 and up has audit support and uses a
 			# separate PAM config file for "sudo -i".
 			with_linux_audit=true
 			with_pam_login=true
-			if [ $osrelease -ge 60 ]; then
+			if [ $osmajor -ge 6 ]; then
 			    # RHEL 6 and above builds sudo with SSSD support
 			    with_sssd=true
 			    # RHEL 6 and above use /etc/sudo-ldap.conf
