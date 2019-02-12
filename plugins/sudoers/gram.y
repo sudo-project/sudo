@@ -115,8 +115,8 @@ static struct command_digest *new_digest(int, char *);
 %token <tok>	 NOLOG_OUTPUT		/* don't log cmnd output */
 %token <tok>	 MAIL			/* mail log message */
 %token <tok>	 NOMAIL			/* don't mail log message */
-%token <tok>	 FOLLOW			/* follow symbolic links */
-%token <tok>	 NOFOLLOW		/* don't follow symbolic links */
+%token <tok>	 FOLLOWLNK		/* follow symbolic links */
+%token <tok>	 NOFOLLOWLNK		/* don't follow symbolic links */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -687,10 +687,10 @@ cmndtag		:	/* empty */ {
 		|	cmndtag NOLOG_OUTPUT {
 			    $$.log_output = false;
 			}
-		|	cmndtag FOLLOW {
+		|	cmndtag FOLLOWLNK {
 			    $$.follow = true;
 			}
-		|	cmndtag NOFOLLOW {
+		|	cmndtag NOFOLLOWLNK {
 			    $$.follow = false;
 			}
 		|	cmndtag MAIL {

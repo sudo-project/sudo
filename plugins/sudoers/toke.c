@@ -2864,7 +2864,7 @@ YY_RULE_SETUP
 #line 453 "toke.l"
 {
 			    	LEXTRACE("FOLLOW ");
-			    	LEXRETURN(FOLLOW);
+			    	LEXRETURN(FOLLOWLNK);
 			}
 	YY_BREAK
 case 37:
@@ -2872,7 +2872,7 @@ YY_RULE_SETUP
 #line 458 "toke.l"
 {
 			    	LEXTRACE("NOFOLLOW ");
-			    	LEXRETURN(NOFOLLOW);
+			    	LEXRETURN(NOFOLLOWLNK);
 			}
 	YY_BREAK
 case 38:

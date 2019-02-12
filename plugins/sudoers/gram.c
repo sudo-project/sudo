@@ -159,8 +159,8 @@ typedef union {
 #define NOLOG_OUTPUT 279
 #define MAIL 280
 #define NOMAIL 281
-#define FOLLOW 282
-#define NOFOLLOW 283
+#define FOLLOWLNK 282
+#define NOFOLLOWLNK 283
 #define ALL 284
 #define COMMENT 285
 #define HOSTALIAS 286
@@ -518,10 +518,10 @@ char *sudoersname[] =
 "COMMAND","ALIAS","DEFVAR","NTWKADDR","NETGROUP","USERGROUP","WORD","DIGEST",
 "DEFAULTS","DEFAULTS_HOST","DEFAULTS_USER","DEFAULTS_RUNAS","DEFAULTS_CMND",
 "NOPASSWD","PASSWD","NOEXEC","EXEC","SETENV","NOSETENV","LOG_INPUT",
-"NOLOG_INPUT","LOG_OUTPUT","NOLOG_OUTPUT","MAIL","NOMAIL","FOLLOW","NOFOLLOW",
-"ALL","COMMENT","HOSTALIAS","CMNDALIAS","USERALIAS","RUNASALIAS","ERROR","TYPE",
-"ROLE","PRIVS","LIMITPRIVS","CMND_TIMEOUT","NOTBEFORE","NOTAFTER","MYSELF",
-"SHA224_TOK","SHA256_TOK","SHA384_TOK","SHA512_TOK",
+"NOLOG_INPUT","LOG_OUTPUT","NOLOG_OUTPUT","MAIL","NOMAIL","FOLLOWLNK",
+"NOFOLLOWLNK","ALL","COMMENT","HOSTALIAS","CMNDALIAS","USERALIAS","RUNASALIAS",
+"ERROR","TYPE","ROLE","PRIVS","LIMITPRIVS","CMND_TIMEOUT","NOTBEFORE",
+"NOTAFTER","MYSELF","SHA224_TOK","SHA256_TOK","SHA384_TOK","SHA512_TOK",
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const char * const sudoersrule[] =
@@ -606,8 +606,8 @@ char *sudoersrule[] =
 "cmndtag : cmndtag NOLOG_INPUT",
 "cmndtag : cmndtag LOG_OUTPUT",
 "cmndtag : cmndtag NOLOG_OUTPUT",
-"cmndtag : cmndtag FOLLOW",
-"cmndtag : cmndtag NOFOLLOW",
+"cmndtag : cmndtag FOLLOWLNK",
+"cmndtag : cmndtag NOFOLLOWLNK",
 "cmndtag : cmndtag MAIL",
 "cmndtag : cmndtag NOMAIL",
 "cmnd : ALL",

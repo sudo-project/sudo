@@ -23,8 +23,8 @@
 #define NOLOG_OUTPUT 279
 #define MAIL 280
 #define NOMAIL 281
-#define FOLLOW 282
-#define NOFOLLOW 283
+#define FOLLOWLNK 282
+#define NOFOLLOWLNK 283
 #define ALL 284
 #define COMMENT 285
 #define HOSTALIAS 286

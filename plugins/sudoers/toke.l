@@ -452,12 +452,12 @@ NOMAIL[[:blank:]]*:	{
 
 FOLLOW[[:blank:]]*:	{
 			    	LEXTRACE("FOLLOW ");
-			    	LEXRETURN(FOLLOW);
+			    	LEXRETURN(FOLLOWLNK);
 			}
 
 NOFOLLOW[[:blank:]]*:	{
 			    	LEXTRACE("NOFOLLOW ");
-			    	LEXRETURN(NOFOLLOW);
+			    	LEXRETURN(NOFOLLOWLNK);
 			}
 
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
