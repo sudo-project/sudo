@@ -297,6 +297,9 @@ void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 /* match_addr.c */
 bool addr_matches(char *n);
 
+/* match_digest.c */
+bool digest_matches(int fd, const char *file, const struct command_digest *digest);
+
 /* match.c */
 struct group;
 struct passwd;
