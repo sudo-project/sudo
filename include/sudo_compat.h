@@ -217,7 +217,8 @@
 #endif
 
 /* For pipe2() emulation. */
-#if !defined(HAVE_PIPE2) && defined(O_NONBLOCK) && !defined(O_CLOEXEC)
+#if !defined(HAVE_PIPE2) && defined(O_NONBLOCK) && (!defined(O_CLOEXEC) || O_CLOEXEC > 0xffffffff)
+# undef O_CLOEXEC
 # define O_CLOEXEC	0x80000000
 #endif
 
