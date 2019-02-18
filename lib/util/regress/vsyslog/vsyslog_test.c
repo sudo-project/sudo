@@ -82,7 +82,9 @@ test_vsyslog(int priority, const char *fmt, ...)
 int
 main(int argc, char *argv[])
 {
+    int len;
     char buf1[1024 * 16], buf2[1024 * 16];
+
     initprogname(argc > 0 ? argv[0] : "vsyslog_test");
 
     /* Test small buffer. */
@@ -93,8 +95,10 @@ main(int argc, char *argv[])
 	"/usr/sbin/newaliases");
 
     /* Test small buffer w/ errno. */
-    (void)snprintf(buf1, sizeof(buf1),
+    len = snprintf(buf1, sizeof(buf1),
 	 "unable to open %s: %s", "/var/log/sudo-io/seq", strerror(ENOENT));
+    if (len < 0 || len >= (int)sizeof(buf1))
+	sudo_warnx_nodebug("buf1 trucated at %s:%d", __FILE__, __LINE__);
     expected_result = buf1;
     errno = ENOENT;
     test_vsyslog(0, "unable to open %s: %m", "/var/log/sudo-io/seq");
@@ -108,7 +112,9 @@ main(int argc, char *argv[])
     /* Test large buffer w/ errno > 8192 bytes. */
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
-    (void)snprintf(buf2, sizeof(buf2), "%s: %s", buf1, strerror(EINVAL));
+    len = snprintf(buf2, sizeof(buf2), "%s: %s", buf1, strerror(EINVAL));
+    if (len < 0 || len >= (int)sizeof(buf2))
+	sudo_warnx_nodebug("buf2 trucated at %s:%d", __FILE__, __LINE__);
     expected_result = buf2;
     errno = EINVAL;
     test_vsyslog(0, "%s: %m", buf1);
@@ -116,7 +122,9 @@ main(int argc, char *argv[])
     /* Test large format string > 8192 bytes, expect truncation to 2048. */
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
-    (void)snprintf(buf2, sizeof(buf2), "%.*s", 2047, buf1);
+    len = snprintf(buf2, sizeof(buf2), "%.*s", 2047, buf1);
+    if (len < 0 || len >= (int)sizeof(buf2))
+	sudo_warnx_nodebug("buf2 trucated at %s:%d", __FILE__, __LINE__);
     expected_result = buf2;
     test_vsyslog(0, buf1);
 
