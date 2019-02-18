@@ -18,8 +18,11 @@
 #ifndef SUDOERS_PARSE_H
 #define SUDOERS_PARSE_H
 
-/* Characters that must be quoted in sudoers */
-#define SUDOERS_QUOTED  ":\\,=#\""
+/* Characters that must be quoted in sudoers. */
+#define SUDOERS_QUOTED	":\\,=#\""
+
+/* Returns true if string 's' contains meta characters. */
+#define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
 #undef UNSPEC
 #define UNSPEC	-1
@@ -297,13 +300,15 @@ void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 /* match_addr.c */
 bool addr_matches(char *n);
 
+/* match_command.c */
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
+
 /* match_digest.c */
 bool digest_matches(int fd, const char *file, const struct command_digest *digest);
 
 /* match.c */
 struct group;
 struct passwd;
-bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct command_digest *digest);
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
 bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);

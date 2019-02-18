@@ -332,6 +332,8 @@ plugins/sudoers/logging.h
 plugins/sudoers/logwrap.c
 plugins/sudoers/match.c
 plugins/sudoers/match_addr.c
+plugins/sudoers/match_command.c
+plugins/sudoers/match_digest.c
 plugins/sudoers/mkdefaults
 plugins/sudoers/mkdir_parents.c
 plugins/sudoers/parse.c

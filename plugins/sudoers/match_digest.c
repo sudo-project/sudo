@@ -36,27 +36,11 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#elif defined(HAVE_INTTYPES_H)
-# include <inttypes.h>
-#endif
 #include <unistd.h>
 
 #include "sudoers.h"
 #include <gram.h>
 
-#ifdef SUDOERS_NAME_MATCH
-bool
-digest_matches(int fd, const char *file, const struct command_digest *digest)
-{
-    debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
-
-    /* Digests are not supported when matching only by name. */
-
-    debug_return_bool(false);
-}
-#else
 bool
 digest_matches(int fd, const char *file, const struct command_digest *digest)
 {
@@ -118,4 +102,3 @@ done:
     free(file_digest);
     debug_return_bool(matched);
 }
-#endif /* SUDOERS_NAME_MATCH */
