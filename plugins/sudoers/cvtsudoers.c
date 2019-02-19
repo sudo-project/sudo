@@ -42,7 +42,6 @@
 
 #include "sudoers.h"
 #include "sudoers_version.h"
-#include "sudo_conf.h"
 #include "sudo_lbuf.h"
 #include "redblack.h"
 #include "cvtsudoers.h"

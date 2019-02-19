@@ -36,6 +36,7 @@
 #include "sudo_fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_queue.h"
 #include "sudo_util.h"
 
 #ifdef HAVE_PRIV_SET

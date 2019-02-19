@@ -32,8 +32,8 @@
 #endif /* HAVE_STRINGS_H */
 
 #include "sudo_compat.h"
-#include "sudo_util.h"
 #include "sudo_queue.h"
+#include "sudo_util.h"
 #include "sudoers_debug.h"
 #include "strlist.h"
 
