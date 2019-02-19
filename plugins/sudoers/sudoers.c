@@ -573,7 +573,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Insert system-wide environment variables. */
     if (def_restricted_env_file) {
-	if (!read_env_file(def_env_file, false, true))
+	if (!read_env_file(def_restricted_env_file, false, true))
 	    sudo_warn("%s", def_restricted_env_file);
     }
     if (def_env_file) {
