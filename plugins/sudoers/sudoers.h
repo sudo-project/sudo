@@ -377,6 +377,7 @@ int sudoers_hook_getenv(const char *name, char **value, void *closure);
 int sudoers_hook_putenv(char *string, void *closure);
 int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
 int sudoers_hook_unsetenv(const char *name, void *closure);
+void register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *), char * (*ef_next)(void *, int *), bool system);
 
 /* env_pattern.c */
 bool matches_env_pattern(const char *pattern, const char *var, bool *full_match);

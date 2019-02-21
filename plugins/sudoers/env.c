@@ -105,6 +105,25 @@
 # define KEPT_USER_VARIABLES (KEPT_LOGNAME|KEPT_USER)
 #endif
 
+/*
+ * Functions to open, close and parse an environment file, either
+ * a system file such as /etc/environment or one specified in sudoers.
+ */
+struct sudoers_env_file {
+    void * (*open)(const char *);
+    void   (*close)(void *);
+    char * (*next)(void *, int *);
+};
+
+/*
+ * State for a local environment file.
+ */
+struct env_file_local {
+    FILE *fp;
+    char *line;
+    size_t linesize;
+};
+
 struct environment {
     char **envp;		/* pointer to the new environment */
     char **old_envp;		/* pointer the old environment we allocated */
@@ -1188,8 +1207,39 @@ validate_env_vars(char * const env_vars[])
     debug_return_bool(ret);
 }
 
+static void *
+env_file_open_local(const char *path)
+{
+    struct env_file_local *efl;
+    debug_decl(env_file_open_local, SUDOERS_DEBUG_ENV)
+
+    efl = calloc(1, sizeof(*efl));
+    if (efl != NULL) {
+	if ((efl->fp = fopen(path, "r")) == NULL) {
+	    free(efl);
+	    efl = NULL;
+	}
+    }
+    debug_return_ptr(efl);
+}
+
+static void
+env_file_close_local(void *cookie)
+{
+    struct env_file_local *efl = cookie;
+    debug_decl(env_file_close_local, SUDOERS_DEBUG_ENV)
+
+    if (efl != NULL) {
+	if (efl->fp != NULL)
+	    fclose(efl->fp);
+	free(efl->line);
+	free(efl);
+    }
+    debug_return;
+}
+
 /*
- * Read in /etc/environment ala AIX and Linux.
+ * Parse /etc/environment lines ala AIX and Linux.
  * Lines may be in either of three formats:
  *  NAME=VALUE
  *  NAME="VALUE"
@@ -1198,24 +1248,24 @@ validate_env_vars(char * const env_vars[])
  * Invalid lines, blank lines, or lines consisting solely of a comment
  * character are skipped.
  */
-bool
-read_env_file(const char *path, bool overwrite, bool restricted)
+static char *
+env_file_next_local(void *cookie, int *errnum)
 {
-    FILE *fp;
-    bool ret = true;
-    char *cp, *var, *val, *line = NULL;
-    size_t var_len, val_len, linesize = 0;
-    debug_decl(read_env_file, SUDOERS_DEBUG_ENV)
+    struct env_file_local *efl = cookie;
+    char *var, *val, *ret = NULL;
+    size_t var_len, val_len;
+    debug_decl(env_file_next_local, SUDOERS_DEBUG_ENV)
 
-    if ((fp = fopen(path, "r")) == NULL) {
-	if (errno != ENOENT)
-	    ret = false;
-	debug_return_bool(ret);
-    }
+    *errnum = 0;
+    for (;;) {
+	if (sudo_parseln(&efl->line, &efl->linesize, NULL, efl->fp, PARSELN_CONT_IGN) == -1) {
+	    if (!feof(efl->fp))
+		*errnum = errno;
+	    break;
+	}
 
-    while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_CONT_IGN) != -1) {
 	/* Skip blank or comment lines */
-	if (*(var = line) == '\0')
+	if (*(var = efl->line) == '\0')
 	    continue;
 
 	/* Skip optional "export " */
@@ -1234,15 +1284,6 @@ read_env_file(const char *path, bool overwrite, bool restricted)
 	var_len = (size_t)(val - var);
 	val_len = strlen(++val);
 
-	/*
-	 * If the env file is restricted, apply env_check and env_keep
-	 * when env_reset is set or env_delete when it is not.
-	 */
-	if (restricted) {
-	    if (def_env_reset ? !env_should_keep(var) : env_should_delete(var))
-		continue;
-	}
-
 	/* Strip leading and trailing single/double quotes */
 	if ((val[0] == '\'' || val[0] == '\"') && val[0] == val[val_len - 1]) {
 	    val[val_len - 1] = '\0';
@@ -1250,25 +1291,91 @@ read_env_file(const char *path, bool overwrite, bool restricted)
 	    val_len -= 2;
 	}
 
-	if ((cp = malloc(var_len + 1 + val_len + 1)) == NULL) {
+	if ((ret = malloc(var_len + 1 + val_len + 1)) == NULL) {
+	    *errnum = errno;
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
-	    /* XXX - no undo on failure */
-	    ret = false;
+	} else {
+	    memcpy(ret, var, var_len + 1); /* includes '=' */
+	    memcpy(ret + var_len + 1, val, val_len + 1); /* includes NUL */
+	    sudoers_gc_add(GC_PTR, ret);
+	}
+	break;
+    }
+    debug_return_str(ret);
+}
+
+static struct sudoers_env_file env_file_sudoers = {
+    env_file_open_local,
+    env_file_close_local,
+    env_file_next_local
+};
+
+static struct sudoers_env_file env_file_system = {
+    env_file_open_local,
+    env_file_close_local,
+    env_file_next_local
+};
+
+void
+register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *),
+    char * (*ef_next)(void *, int *), bool system)
+{
+    struct sudoers_env_file *ef = system ? &env_file_system : &env_file_sudoers;
+
+    ef->open = ef_open;
+    ef->close = ef_close;
+    ef->next = ef_next;
+}
+
+bool
+read_env_file(const char *path, bool overwrite, bool restricted)
+{
+    struct sudoers_env_file *ef;
+    bool ret = true;
+    char *envstr;
+    void *cookie;
+    int errnum;
+    debug_decl(read_env_file, SUDOERS_DEBUG_ENV)
+
+    /*
+     * The environment file may be handled differently depending on
+     * whether it is specified in sudoers or the system.
+     */
+    if (path == def_env_file || path == def_restricted_env_file)
+	ef = &env_file_sudoers;
+    else
+	ef = &env_file_system;
+
+    cookie = ef->open(path);
+    if (cookie == NULL)
+	debug_return_bool(false);
+
+    for (;;) {
+	/* Keep reading until EOF or error. */
+	if ((envstr = ef->next(cookie, &errnum)) == NULL) {
+	    if (errnum != 0)
+		ret = false;
 	    break;
 	}
-	memcpy(cp, var, var_len + 1); /* includes '=' */
-	memcpy(cp + var_len + 1, val, val_len + 1); /* includes NUL */
 
-	sudoers_gc_add(GC_PTR, cp);
-	if (sudo_putenv(cp, true, overwrite) == -1) {
+	/*
+	 * If the env file is restricted, apply env_check and env_keep
+	 * when env_reset is set or env_delete when it is not.
+	 */
+	if (restricted) {
+	    if (def_env_reset ? !env_should_keep(envstr) : env_should_delete(envstr)) {
+		free(envstr);
+		continue;
+	    }
+	}
+	if (sudo_putenv(envstr, true, overwrite) == -1) {
 	    /* XXX - no undo on failure */
 	    ret = false;
 	    break;
 	}
     }
-    free(line);
-    fclose(fp);
+    ef->close(cookie);
 
     debug_return_bool(ret);
 }
