@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 9, 2018
+.Dd February 26, 2018
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1294,7 +1294,7 @@ rules.
 To use SSSD as the
 .Em sudoers
 source, you should use
-.Li sssd
+.Li sss
 instead of
 .Li ldap
 for the sudoers entry in
