@@ -92,10 +92,10 @@ IPV4ADDR		{OCTET}(\.{OCTET}){3}
 IPV6ADDR		({HEX16}?:){2,7}{HEX16}?|({HEX16}?:){2,6}:{IPV4ADDR}
 
 HOSTNAME		[[:alnum:]_-]+
-WORD			([^#>!=:,\(\) \t\n\\\"]|\\[^\n])+
+WORD			([^#>!=:,\(\) \t\r\n\\\"]|\\[^\t\n])+
 ID			#-?[0-9]+
-PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+
-ENVAR			([^#!=, \t\n\\\"]|\\[^\n])([^#=, \t\n\\\"]|\\[^\n])*
+PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\r\n#])+
+ENVAR			([^#!=, \t\r\n\\\"]|\\[^\r\n])([^#=, \t\r\n\\\"]|\\[^\r\n])*
 DEFVAR			[a-z_]+
 
 %option noinput
@@ -164,7 +164,7 @@ DEFVAR			[a-z_]+
 }
 
 <INSTR>{
-    \\[[:blank:]]*\n[[:blank:]]*	{
+    \\[[:blank:]]*\r?\n[[:blank:]]*	{
 			    /* Line continuation char followed by newline. */
 			    sudolineno++;
 			    continued = true;
@@ -208,7 +208,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-    ([^\"\n\\]|\\\")+	{
+    ([^\"\r\n\\]|\\\")+	{
 			    LEXTRACE("STRBODY ");
 			    if (!append(sudoerstext, sudoersleng))
 				yyterminate();
@@ -232,13 +232,13 @@ DEFVAR			[a-z_]+
 			    sawspace = false;
 			}
 
-    [#:\,=\n]		{
+    [#:\,=\r\n]		{
 			    BEGIN INITIAL;
 			    yyless(0);
 			    LEXRETURN(COMMAND);
 			}			/* end of command line args */
 
-    [^#\\:, \t\n]+ 	{
+    [^#\\:, \t\r\n]+ 	{
 			    LEXTRACE("ARG ");
 			    if (!fill_args(sudoerstext, sudoersleng, sawspace))
 				yyterminate();
@@ -283,7 +283,7 @@ DEFVAR			[a-z_]+
 			    yyless(sudoersleng);
 			} /* base64 digest */
 
-<INITIAL>^#include[[:blank:]]+.*\n {
+<INITIAL>^#include[[:blank:]]+.*\r?\n {
 			    char *path;
 
 			    if (continued) {
@@ -301,7 +301,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^#includedir[[:blank:]]+.*\n {
+<INITIAL>^#includedir[[:blank:]]+.*\r?\n {
 			    char *path;
 
 			    if (continued) {
@@ -688,7 +688,7 @@ sudoedit		{
 			    }
 			}
 
-<*>\n			{
+<*>\r?\n		{
 			    if (YY_START == INSTR) {
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);	/* line break in string */
@@ -704,13 +704,13 @@ sudoedit		{
 			    sawspace = true;	/* but remember for fill_args */
 			}
 
-<*>\\[[:blank:]]*\n	{
+<*>\\[[:blank:]]*\r?\n	{
 			    sawspace = true;	/* remember for fill_args */
 			    sudolineno++;
 			    continued = true;
 			}			/* throw away EOL after \ */
 
-<INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n?	{
+<INITIAL,STARTDEFS,INDEFS>#(-[^\r\n0-9].*|[^\r\n0-9-].*)?(\r\n|\n)?	{
 			    if (sudoerstext[sudoersleng - 1] == '\n') {
 				/* comment ending in a newline */
 				BEGIN INITIAL;
