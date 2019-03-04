@@ -1,6 +1,6 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -23,7 +23,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 20, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "March 4, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -838,7 +838,7 @@ only the case for non-networked systems.
 .sp
 .RS 0n
 digest ::= [A-Fa-f0-9]+ |
-	   [[A-Za-z0-9\+/=]+
+	   [A-Za-z0-9\e+/=]+
 
 Digest_Spec ::= "sha224" ':' digest |
 		"sha256" ':' digest |
@@ -2366,7 +2366,7 @@ has the fully-qualified domain name as the
 host name, and the short version as an alias.
 .sp
 .RS 24n
-192.168.1.1	xyzzy.sudo.ws xyzzy
+192.168.1.1 xyzzy.sudo.ws xyzzy
 .RE
 .RS 18n
 .sp
