@@ -91,7 +91,12 @@ sudo_closefrom(int lowfd)
 	return;
 #endif
 #if defined(HAVE_PSTAT_GETPROC)
-    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1) {
+    /*
+     * EOVERFLOW is not a fatal error for the fields we use.
+     * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
+     */                             
+    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1 ||
+	errno == EOVERFLOW) {
 	int fd;
 
 	for (fd = lowfd; fd <= pstat.pst_highestfd; fd++)
