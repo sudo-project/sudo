@@ -276,9 +276,10 @@ get_starttime(pid_t pid, struct timespec *starttime)
 
     /*
      * Determine the start time from pst_start in struct pst_status.
-     * We may get EOVERFLOW if the whole thing doesn't fit but that is OK.
+     * EOVERFLOW is not a fatal error for the fields we use.
+     * See the "EOVERFLOW Error" section of pstat_getvminfo(3).
      */
-    rc = pstat_getproc(&pstat, sizeof(pstat), (size_t)0, (int)pid);
+    rc = pstat_getproc(&pstat, sizeof(pstat), 0, pid);
     if (rc != -1 || errno == EOVERFLOW) {
 	starttime->tv_sec = pstat.pst_start;
 	starttime->tv_nsec = 0;
