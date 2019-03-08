@@ -3,7 +3,6 @@
 # Test cvtsudoers.conf with invalid padding
 #
 
-exec 2>&1
 ./cvtsudoers -c "" -b "ou=SUDOers,dc=my-domain,dc=com" -O 1000 -P 1 <<EOF
 user0  ALL = (ALL:ALL) ALL
 user1  ALL = (ALL:ALL) ALL

@@ -3,7 +3,6 @@
 # Test LDAP base filtering.
 #
 
-exec 2>&1
 ./cvtsudoers -c "" -i ldif -b "ou=SUDOers,dc=sudo,dc=ws" -I 10 -O 10 <<EOF
 dn: dc=sudo,dc=ws
 objectClass: dcObject

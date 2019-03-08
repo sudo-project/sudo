@@ -1,4 +1,3 @@
-cvtsudoers: too many sudoers entries, maximum 10
 dn: cn=user0,ou=SUDOers,dc=my-domain,dc=com
 objectClass: top
 objectClass: sudoRole

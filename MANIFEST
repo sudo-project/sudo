@@ -450,6 +450,7 @@ plugins/sudoers/regress/cvtsudoers/test24.out.ok
 plugins/sudoers/regress/cvtsudoers/test24.sh
 plugins/sudoers/regress/cvtsudoers/test25.out.ok
 plugins/sudoers/regress/cvtsudoers/test25.sh
+plugins/sudoers/regress/cvtsudoers/test26.err.ok
 plugins/sudoers/regress/cvtsudoers/test26.out.ok
 plugins/sudoers/regress/cvtsudoers/test26.sh
 plugins/sudoers/regress/cvtsudoers/test27.out.ok
@@ -465,6 +466,7 @@ plugins/sudoers/regress/cvtsudoers/test30.sh
 plugins/sudoers/regress/cvtsudoers/test31.conf
 plugins/sudoers/regress/cvtsudoers/test31.out.ok
 plugins/sudoers/regress/cvtsudoers/test31.sh
+plugins/sudoers/regress/cvtsudoers/test32.err.ok
 plugins/sudoers/regress/cvtsudoers/test32.out.ok
 plugins/sudoers/regress/cvtsudoers/test32.sh
 plugins/sudoers/regress/cvtsudoers/test33.out.ok
