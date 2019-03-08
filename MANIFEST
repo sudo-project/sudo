@@ -632,7 +632,6 @@ plugins/sudoers/regress/testsudoers/test1.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
-plugins/sudoers/regress/testsudoers/test3.d/root
 plugins/sudoers/regress/testsudoers/test3.out.ok
 plugins/sudoers/regress/testsudoers/test3.sh
 plugins/sudoers/regress/testsudoers/test4.out.ok
