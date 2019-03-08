@@ -401,6 +401,8 @@ plugins/sudoers/po/vi.mo
 plugins/sudoers/po/vi.po
 plugins/sudoers/po/zh_CN.mo
 plugins/sudoers/po/zh_CN.po
+plugins/sudoers/po/zh_TW.mo
+plugins/sudoers/po/zh_TW.po
 plugins/sudoers/policy.c
 plugins/sudoers/prompt.c
 plugins/sudoers/pwutil.c
