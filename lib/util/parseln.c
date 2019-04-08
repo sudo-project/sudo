@@ -46,7 +46,7 @@
  * Read a line of input, honoring line continuation chars.
  * Remove comments and strip off leading and trailing spaces.
  * Returns the line length and updates the buf and bufsize pointers.
- * XXX - just use a struct w/ state, including getline buffer?
+ * XXX - just use a struct w/ state, including getdelim buffer?
  *       could also make comment char and line continuation configurable
  */
 ssize_t
@@ -61,7 +61,7 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
     do {
 	comment = false;
 	continued = false;
-	len = getline(&line, &linesize, fp);
+	len = getdelim(&line, &linesize, '\n', fp);
 	if (len == -1)
 	    break;
 	if (lineno != NULL)

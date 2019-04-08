@@ -566,7 +566,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     /* Read through input, parsing into sudo_roles and global defaults. */
     for (;;) {
 	int ch;
-	ssize_t len = getline(&line, &linesize, fp);
+	ssize_t len = getdelim(&line, &linesize, '\n', fp);
 
 	/* Trim trailing return or newline. */
 	while (len > 0 && (line[len - 1] == '\r' || line[len - 1] == '\n'))

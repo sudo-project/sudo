@@ -15510,11 +15510,11 @@ fi
 		    ac_cv_func_strnlen=no
 		fi
 
-		# getline() may or may ont be present on AIX <= 6.1.
-		# bos610 is missing getline/getdelim but bos61J has it.
+		# getdelim() may or may not be present on AIX <= 6.1.
+		# bos610 is missing getdelim but bos61J has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 6; then
-			ac_cv_func_getline=no
+			ac_cv_func_getdelim=no
 		    fi
 		fi
 
@@ -15731,8 +15731,6 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
-			    # HP-UX 10.20 libc has an incompatible getline
-			    ac_cv_func_getline="no"
 			    # HP-UX 10.x doesn't support LD_PRELOAD
 			    with_noexec=no
 			;;
@@ -19381,38 +19379,33 @@ fi
 fi
 done
 
-for ac_func in getline
+for ac_func in getdelim
 do :
-  ac_fn_c_check_func "$LINENO" "getline" "ac_cv_func_getline"
-if test "x$ac_cv_func_getline" = xyes; then :
+  ac_fn_c_check_func "$LINENO" "getdelim" "ac_cv_func_getdelim"
+if test "x$ac_cv_func_getdelim" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_GETLINE 1
+#define HAVE_GETDELIM 1
 _ACEOF
 
 else
 
     case " $LIBOBJS " in
-  *" getline.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getline.$ac_objext"
+  *" getdelim.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getdelim.$ac_objext"
  ;;
 esac
+
+
+    for _sym in sudo_getdelim; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
 
 
     for _sym in sudo_getline; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
-
-    for ac_func in fgetln
-do :
-  ac_fn_c_check_func "$LINENO" "fgetln" "ac_cv_func_fgetln"
-if test "x$ac_cv_func_fgetln" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FGETLN 1
-_ACEOF
-
-fi
-done
 
 
 fi

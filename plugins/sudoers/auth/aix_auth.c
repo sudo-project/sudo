@@ -65,59 +65,64 @@ sudo_aix_authtype(void)
     FILE *fp;
     debug_decl(sudo_aix_authtype, SUDOERS_DEBUG_AUTH)
 
-    if ((fp = fopen("/etc/security/login.cfg", "r")) != NULL) {
-	while (authtype == AIX_AUTH_UNKNOWN && (len = getline(&line, &linesize, fp)) != -1) {
-	    /* First remove comments. */
-	    if ((cp = strchr(line, '#')) != NULL) {
-		*cp = '\0';
-		len = (ssize_t)(cp - line);
-	    }
+    if ((fp = fopen("/etc/security/login.cfg", "r")) == NULL)
+	debug_return_int(AIX_AUTH_UNKNOWN);
 
-	    /* Next remove trailing newlines and whitespace. */
-	    while (len > 0 && isspace((unsigned char)line[len - 1]))
-		line[--len] = '\0';
-
-	    /* Skip blank lines. */
-	    if (len == 0)
-		continue;
-
-	    /* Match start of the usw stanza. */
-	    if (!in_stanza) {
-		if (strncmp(line, "usw:", 4) == 0)
-		    in_stanza = true;
-		continue;
-	    }
-
-	    /* Check for end of the usw stanza. */
-	    if (!isblank((unsigned char)line[0])) {
-		in_stanza = false;
-		break;
-	    }
-
-	    /* Skip leading blanks. */
-	    cp = line;
-	    do {
-		cp++;
-	    } while (isblank((unsigned char)*cp));
-
-	    /* Match "auth_type = (PAM_AUTH|STD_AUTH)". */
-	    if (strncmp(cp, "auth_type", 9) != 0)
-		continue;
-	    cp += 9;
-	    while (isblank((unsigned char)*cp))
-		cp++;
-	    if (*cp++ != '=')
-		continue;
-	    while (isblank((unsigned char)*cp))
-		cp++;
-	    if (strcmp(cp, "PAM_AUTH") == 0)
-		authtype = AIX_AUTH_PAM;
-	    else if (strcmp(cp, "STD_AUTH") == 0)
-		authtype = AIX_AUTH_STD;
+    while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
+	/* First remove comments. */
+	if ((cp = strchr(line, '#')) != NULL) {
+	    *cp = '\0';
+	    len = (ssize_t)(cp - line);
 	}
-	free(line);
-        fclose(fp);
+
+	/* Next remove trailing newlines and whitespace. */
+	while (len > 0 && isspace((unsigned char)line[len - 1]))
+	    line[--len] = '\0';
+
+	/* Skip blank lines. */
+	if (len == 0)
+	    continue;
+
+	/* Match start of the usw stanza. */
+	if (!in_stanza) {
+	    if (strncmp(line, "usw:", 4) == 0)
+		in_stanza = true;
+	    continue;
+	}
+
+	/* Check for end of the usw stanza. */
+	if (!isblank((unsigned char)line[0])) {
+	    in_stanza = false;
+	    break;
+	}
+
+	/* Skip leading blanks. */
+	cp = line;
+	do {
+	    cp++;
+	} while (isblank((unsigned char)*cp));
+
+	/* Match "auth_type = (PAM_AUTH|STD_AUTH)". */
+	if (strncmp(cp, "auth_type", 9) != 0)
+	    continue;
+	cp += 9;
+	while (isblank((unsigned char)*cp))
+	    cp++;
+	if (*cp++ != '=')
+	    continue;
+	while (isblank((unsigned char)*cp))
+	    cp++;
+	if (strcmp(cp, "PAM_AUTH") == 0) {
+	    authtype = AIX_AUTH_PAM;
+	    break;
+	}
+	if (strcmp(cp, "STD_AUTH") == 0) {
+	    authtype = AIX_AUTH_STD;
+	    break;
+	}
     }
+    free(line);
+    fclose(fp);
 
     debug_return_int(authtype);
 }

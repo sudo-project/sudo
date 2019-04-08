@@ -110,7 +110,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
 
     fp = fopen(_PATH_SSSD_CONF, "r");
     if (fp != NULL) {
-	while ((len = getline(&line, &linesize, fp)) != -1) {
+	while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
 	    char *cp = line;
 
 	    /* Trim trailing and leading spaces. */

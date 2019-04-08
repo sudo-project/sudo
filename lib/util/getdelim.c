@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010, 2012-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#ifndef HAVE_GETLINE
+#ifndef HAVE_GETDELIM
 
 #include <sys/types.h>
 
@@ -37,65 +37,50 @@
 
 #include "sudo_compat.h"
 
-#ifdef HAVE_FGETLN
 ssize_t
-sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
+sudo_getdelim(char **buf, size_t *bufsize, int delim, FILE *fp)
 {
-    char *buf, *cp;
-    size_t bufsize;
-    size_t len;
+    char *cp, *ep;
+    int ch;
 
-    buf = fgetln(fp, &len);
-    if (buf) {
-	bufsize = *bufp ? *bufsizep : 0;
-	if (bufsize == 0 || bufsize - 1 < len) {
-	    bufsize = len + 1;
-	    cp = realloc(*bufp, bufsize);
-	    if (cp == NULL)
-		return -1;
-	    *bufp = cp;
-	    *bufsizep = bufsize;
-	}
-	memcpy(*bufp, buf, len);
-	(*bufp)[len] = '\0';
-    }
-    return buf ? len : -1;
-}
-#else
-ssize_t
-sudo_getline(char **bufp, size_t *bufsizep, FILE *fp)
-{
-    char *buf, *cp;
-    size_t bufsize;
-    ssize_t len = 0;
-
-    buf = *bufp;
-    bufsize = *bufsizep;
-    if (buf == NULL || bufsize == 0) {
-	bufsize = LINE_MAX;
-	cp = realloc(buf, bufsize);
-	if (cp == NULL)
+    if (*buf == NULL || *bufsize == 0) {
+	char *tmp = realloc(*buf, LINE_MAX);
+	if (tmp == NULL)
 	    return -1;
-	buf = cp;
+	*buf = tmp;
+	*bufsize = LINE_MAX;
     }
+    cp = *buf;
+    ep = cp + *bufsize;
 
-    for (;;) {
-	if (fgets(buf + len, bufsize - len, fp) == NULL) {
-	    len = -1;
-	    break;
+    do {
+	if (cp + 1 >= ep) {
+	    char *tmp = reallocarray(*buf, *bufsize, 2);
+	    if (tmp == NULL)
+		goto bad;
+	    cp = tmp + (cp - *buf);
+	    *buf = tmp;
+	    *bufsize *= 2;
 	}
-	len = strlen(buf);
-	if (!len || buf[len - 1] == '\n' || feof(fp))
-	    break;
-	cp = reallocarray(buf, bufsize, 2);
-	if (cp == NULL)
-	    return -1;
-	bufsize *= 2;
-	buf = cp;
+	if ((ch = getc(fp)) == EOF) {
+	    if (feof(fp))
+		break;
+	    goto bad;
+	}
+	*cp++ = ch;
+    } while (ch != delim);
+
+    /* getdelim(3) should never return a length of 0. */
+    if (cp != *buf) {
+	*cp = '\0';
+	return (ssize_t)(cp - *buf);
     }
-    *bufp = buf;
-    *bufsizep = bufsize;
-    return len;
+bad:
+    /* Error, push back what was read if possible. */
+    while (cp > *buf) {
+	if (ungetc(*cp--, fp) == EOF)
+	    break;
+    }
+    return -1;
 }
-#endif /* HAVE_FGETLN */
-#endif /* HAVE_GETLINE */
+#endif /* HAVE_GETDELIM */

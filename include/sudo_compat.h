@@ -405,11 +405,11 @@ __dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGRO
 # undef getgrouplist
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
-#ifndef HAVE_GETLINE
-__dso_public ssize_t sudo_getline(char **bufp, size_t *bufsizep, FILE *fp);
-# undef getline
-# define getline(_a, _b, _c) sudo_getline((_a), (_b), (_c))
-#endif /* HAVE_GETLINE */
+#ifndef HAVE_GETDELIM
+__dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+# undef getdelim
+# define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
+#endif /* HAVE_GETDELIM */
 #ifndef HAVE_UTIMENSAT
 __dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
 # undef utimensat

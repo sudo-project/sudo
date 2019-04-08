@@ -361,7 +361,7 @@ sudo_ldap_read_secret(const char *path)
     debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP)
 
     if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
-	len = getline(&line, &linesize, fp);
+	len = getdelim(&line, &linesize, '\n', fp);
 	if (len != -1) {
 	    /* trim newline */
 	    while (len > 0 && line[len - 1] == '\n')

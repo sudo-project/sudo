@@ -72,7 +72,7 @@ get_boottime(struct timespec *ts)
     /* read btime from /proc/stat */
     fp = fopen("/proc/stat", "r");
     if (fp != NULL) {
-	while ((len = getline(&line, &linesize, fp)) != -1) {
+	while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
 		if (line[len - 1] == '\n')
 		    line[len - 1] = '\0';

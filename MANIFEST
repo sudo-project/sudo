@@ -108,7 +108,7 @@ lib/util/getcwd.c
 lib/util/getentropy.c
 lib/util/getgrouplist.c
 lib/util/gethostname.c
-lib/util/getline.c
+lib/util/getdelim.c
 lib/util/getopt_long.c
 lib/util/gettime.c
 lib/util/gidlist.c
@@ -135,6 +135,7 @@ lib/util/reallocarray.c
 lib/util/regress/atofoo/atofoo_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
+lib/util/regress/getdelim/getdelim_test.c
 lib/util/regress/getgrouplist/getgrouplist_test.c
 lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c

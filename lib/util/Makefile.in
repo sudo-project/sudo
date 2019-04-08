@@ -138,6 +138,8 @@ FNM_TEST_OBJS = fnm_test.lo
 
 GLOBTEST_OBJS = globtest.lo
 
+GETDELIM_TEST_OBJS = getdelim_test.lo
+
 STRSPLIT_TEST_OBJS = strsplit_test.lo
 
 PARSE_GIDS_TEST_OBJS = parse_gids_test.lo
@@ -214,6 +216,9 @@ fnm_test: $(FNM_TEST_OBJS) libsudo_util.la
 
 globtest: $(GLOBTEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(GLOBTEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+getdelim_test: $(GETDELIM_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(GETDELIM_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -294,6 +299,9 @@ check: $(TEST_PROGS)
 		chmod 0711 `grep '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
 		./globtest $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
 		rm -rf fake; \
+	    fi; \
+	    if test -f getdelim_test; then \
+		./getdelim_test || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    if test -f mktemp_test; then \
 		./mktemp_test || rval=`expr $$rval + $$?`; \
@@ -560,6 +568,26 @@ getcwd.i: $(srcdir)/getcwd.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 getcwd.plog: getcwd.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getcwd.c --i-file $< --output-file $@
+getdelim.lo: $(srcdir)/getdelim.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getdelim.c
+getdelim.i: $(srcdir)/getdelim.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+getdelim.plog: getdelim.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getdelim.c --i-file $< --output-file $@
+getdelim_test.lo: $(srcdir)/regress/getdelim/getdelim_test.c \
+                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                  $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                  $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/getdelim/getdelim_test.c
+getdelim_test.i: $(srcdir)/regress/getdelim/getdelim_test.c \
+                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                  $(incdir)/sudo_fatal.h $(incdir)/sudo_util.h \
+                  $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+getdelim_test.plog: getdelim_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/getdelim/getdelim_test.c --i-file $< --output-file $@
 getentropy.lo: $(srcdir)/getentropy.c $(incdir)/sudo_compat.h \
                $(incdir)/sudo_digest.h $(incdir)/sudo_rand.h \
                $(top_builddir)/config.h
@@ -602,12 +630,6 @@ gethostname.i: $(srcdir)/gethostname.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 gethostname.plog: gethostname.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/gethostname.c --i-file $< --output-file $@
-getline.lo: $(srcdir)/getline.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getline.c
-getline.i: $(srcdir)/getline.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-getline.plog: getline.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getline.c --i-file $< --output-file $@
 getopt_long.lo: $(srcdir)/getopt_long.c $(incdir)/compat/getopt.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(top_builddir)/config.h

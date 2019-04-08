@@ -1829,11 +1829,11 @@ case "$host" in
 		    ac_cv_func_strnlen=no
 		fi
 
-		# getline() may or may ont be present on AIX <= 6.1.
-		# bos610 is missing getline/getdelim but bos61J has it.
+		# getdelim() may or may not be present on AIX <= 6.1.
+		# bos610 is missing getdelim but bos61J has it.
 		if test "$enable_package_build" = "yes"; then
 		    if test $OSMAJOR -le 6; then
-			ac_cv_func_getline=no
+			ac_cv_func_getdelim=no
 		    fi
 		fi
 
@@ -1954,8 +1954,6 @@ case "$host" in
 			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
-			    # HP-UX 10.20 libc has an incompatible getline
-			    ac_cv_func_getline="no"
 			    # HP-UX 10.x doesn't support LD_PRELOAD
 			    with_noexec=no
 			;;
@@ -2555,10 +2553,10 @@ AC_CHECK_FUNCS([getgrouplist], [], [
     esac
     SUDO_APPEND_COMPAT_EXP(sudo_getgrouplist)
 ])
-AC_CHECK_FUNCS([getline], [], [
-    AC_LIBOBJ(getline)
-    SUDO_APPEND_COMPAT_EXP(sudo_getline)
-    AC_CHECK_FUNCS([fgetln])
+AC_CHECK_FUNCS([getdelim], [], [
+    AC_LIBOBJ(getdelim)
+    SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
 ])
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)

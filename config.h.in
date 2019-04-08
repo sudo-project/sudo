@@ -248,9 +248,6 @@
 /* Define to 1 if you have the `fexecve' function. */
 #undef HAVE_FEXECVE
 
-/* Define to 1 if you have the `fgetln' function. */
-#undef HAVE_FGETLN
-
 /* Define to 1 if you have the `fnmatch' function. */
 #undef HAVE_FNMATCH
 
@@ -284,6 +281,9 @@
 /* Define to 1 if you have the `getauxval' function. */
 #undef HAVE_GETAUXVAL
 
+/* Define to 1 if you have the `getdelim' function. */
+#undef HAVE_GETDELIM
+
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
@@ -307,9 +307,6 @@
 
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
-
-/* Define to 1 if you have the `getline' function. */
-#undef HAVE_GETLINE
 
 /* Define to 1 if you have the `getopt_long' function. */
 #undef HAVE_GETOPT_LONG

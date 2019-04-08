@@ -81,9 +81,9 @@ parse_logfile(const char *logfile)
      */
     if ((li = calloc(1, sizeof(*li))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (getline(&buf, &bufsize, fp) == -1 ||
-	getline(&li->cwd, &cwdsize, fp) == -1 ||
-	getline(&li->cmd, &cmdsize, fp) == -1) {
+    if (getdelim(&buf, &bufsize, '\n', fp) == -1 ||
+	getdelim(&li->cwd, &cwdsize, '\n', fp) == -1 ||
+	getdelim(&li->cmd, &cmdsize, '\n', fp) == -1) {
 	sudo_warn(U_("%s: invalid log file"), logfile);
 	goto bad;
     }
