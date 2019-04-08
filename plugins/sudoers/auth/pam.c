@@ -92,6 +92,7 @@ static int
 sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 {
     static int pam_status = PAM_SUCCESS;
+    const char *tty = user_ttypath;
     int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH)
 
@@ -135,17 +136,22 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
     }
 #endif
 
+#if defined(__LINUX_PAM__) || defined(__sun__)
     /*
-     * Some versions of pam_lastlog have a bug that
-     * will cause a crash if PAM_TTY is not set so if
-     * there is no tty, set PAM_TTY to the empty string.
+     * Some PAM modules assume PAM_TTY is set and will misbehave (or crash)
+     * if it is not.  Known offenders include pam_lastlog and pam_time.
      */
-    rc = pam_set_item(pamh, PAM_TTY, user_ttypath ? user_ttypath : "");
-    if (rc != PAM_SUCCESS) {
-	const char *errstr = pam_strerror(pamh, rc);
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "pam_set_item(pamh, PAM_TTY, %s): %s",
-	    user_ttypath ? user_ttypath : "", errstr ? errstr : "unknown error");
+    if (tty == NULL)
+	tty = "";
+#endif
+    if (tty != NULL) {
+	rc = pam_set_item(pamh, PAM_TTY, tty);
+	if (rc != PAM_SUCCESS) {
+	    const char *errstr = pam_strerror(pamh, rc);
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"pam_set_item(pamh, PAM_TTY, %s): %s", tty,
+		errstr ? errstr : "unknown error");
+	}
     }
 
     /*
