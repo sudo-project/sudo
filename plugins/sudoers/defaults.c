@@ -621,9 +621,9 @@ init_defaults(void)
 #ifdef _PATH_SUDO_SENDMAIL
     if ((def_mailerpath = strdup(_PATH_SUDO_SENDMAIL)) == NULL)
 	goto oom;
+#endif
     if ((def_mailerflags = strdup("-t")) == NULL)
 	goto oom;
-#endif
 #if (LOGGING & SLOG_FILE)
     if ((def_logfile = strdup(_PATH_SUDO_LOGFILE)) == NULL)
 	goto oom;
