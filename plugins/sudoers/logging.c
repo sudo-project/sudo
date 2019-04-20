@@ -650,8 +650,111 @@ gai_log_warning(int flags, int errnum, const char *fmt, ...)
     debug_return_bool(ret);
 }
 
+static void
+closefrom_nodebug(int lowfd)
+{
+    unsigned char *debug_fds;
+    int fd, startfd;
+    debug_decl(closefrom_nodebug, SUDOERS_DEBUG_LOGGING)
+
+    startfd = sudo_debug_get_fds(&debug_fds) + 1;
+    if (lowfd > startfd)
+	startfd = lowfd;
+
+    /* Close fds higher than the debug fds. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"closing fds >= %d", startfd);
+    closefrom(startfd);
+
+    /* Close fds [lowfd, startfd) that are not in debug_fds. */
+    for (fd = lowfd; fd < startfd; fd++) {
+	if (sudo_isset(debug_fds, fd))
+	    continue;
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "closing fd %d", fd);
+#ifdef __APPLE__
+	/* Avoid potential libdispatch crash when we close its fds. */
+	(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+#else
+	(void) close(fd);
+#endif
+    }
+    debug_return;
+}
 
 #define MAX_MAILFLAGS	63
+
+static void __attribute__((__noreturn__))
+exec_mailer(int *pfd)
+{
+    char *last, *p, *argv[MAX_MAILFLAGS + 1];
+    char *mflags, *mpath = def_mailerpath;
+    int i;
+#ifdef NO_ROOT_MAILER
+    int perm = PERM_FULL_USER;
+#else
+    int perm = PERM_ROOT;
+    static char *envp[] = {
+	"HOME=/",
+	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
+	"LOGNAME=root",
+	"USER=root",
+# ifdef _AIX
+	"LOGIN=root",
+# endif
+	NULL
+    };
+#endif /* NO_ROOT_MAILER */
+    debug_decl(exec_mailer, SUDOERS_DEBUG_LOGGING)
+
+    /* Set stdin to output side of the pipe */
+    if (pfd[0] != STDIN_FILENO) {
+	if (dup2(pfd[0], STDIN_FILENO) == -1) {
+	    mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"unable to dup stdin: %s", strerror(errno));
+	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	    _exit(127);
+	}
+	(void) close(pfd[0]);
+    }
+    (void) close(pfd[1]);
+
+    /* Build up an argv based on the mailer path and flags */
+    if ((mflags = strdup(def_mailerflags)) == NULL) {
+	mysyslog(LOG_ERR, _("unable to allocate memory"));
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+	_exit(127);
+    }
+    if ((argv[0] = strrchr(mpath, '/')))
+	argv[0]++;
+    else
+	argv[0] = mpath;
+
+    i = 1;
+    if ((p = strtok_r(mflags, " \t", &last))) {
+	do {
+	    argv[i] = p;
+	} while (++i < MAX_MAILFLAGS && (p = strtok_r(NULL, " \t", &last)));
+    }
+    argv[i] = NULL;
+
+    /*
+     * Depending on the config, either run the mailer as root
+     * (so user cannot kill it) or as the user (for the paranoid).
+     */
+    (void) set_perms(perm);
+    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+#ifdef NO_ROOT_MAILER
+    execv(mpath, argv);
+#else
+    execve(mpath, argv, envp);
+#endif
+    mysyslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
+    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to execute %s: %s",
+	mpath, strerror(errno));
+    _exit(127);
+}
 
 /*
  * Send a message to MAILTO user
@@ -666,18 +769,6 @@ send_mail(const char *fmt, ...)
     pid_t pid, rv;
     struct stat sb;
     va_list ap;
-#ifndef NO_ROOT_MAILER
-    static char *root_envp[] = {
-	"HOME=/",
-	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
-	"LOGNAME=root",
-	"USER=root",
-# ifdef _AIX
-	"LOGIN=root",
-# endif
-	NULL
-    };
-#endif /* NO_ROOT_MAILER */
     debug_decl(send_mail, SUDOERS_DEBUG_LOGGING)
 
     /* If mailer is disabled just return. */
@@ -703,9 +794,11 @@ send_mail(const char *fmt, ...)
 		    mysyslog(LOG_ERR, _("unable to fork: %m"));
 		    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 			strerror(errno));
+		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 		    _exit(1);
 		case 0:
 		    /* Grandchild continues below. */
+		    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 		    break;
 		default:
 		    /* Parent will wait for us. */
@@ -721,7 +814,9 @@ send_mail(const char *fmt, ...)
 		if (rv != -1 && !WIFSTOPPED(status))
 		    break;
 	    }
-	    return true; /* not debug */
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"child (%d) exit value %d", (int)rv, status);
+	    debug_return_bool(true);
     }
 
     /* Daemonize - disassociate from session/tty. */
@@ -738,8 +833,8 @@ send_mail(const char *fmt, ...)
 
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
 
-    /* Close fds so we don't leak anything. */
-    closefrom(STDERR_FILENO + 1);
+    /* Close non-debug fds so we don't leak anything. */
+    closefrom_nodebug(STDERR_FILENO + 1);
 
     if (pipe(pfd) == -1) {
 	mysyslog(LOG_ERR, _("unable to open pipe: %m"));
@@ -759,58 +854,9 @@ send_mail(const char *fmt, ...)
 	    _exit(1);
 	    break;
 	case 0:
-	    {
-		char *last, *argv[MAX_MAILFLAGS + 1];
-		char *mflags, *mpath = def_mailerpath;
-		int i;
-
-		/* Child, set stdin to output side of the pipe */
-		if (pfd[0] != STDIN_FILENO) {
-		    if (dup2(pfd[0], STDIN_FILENO) == -1) {
-			mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
-			sudo_debug_printf(SUDO_DEBUG_ERROR,
-			    "unable to dup stdin: %s", strerror(errno));
-			_exit(127);
-		    }
-		    (void) close(pfd[0]);
-		}
-		(void) close(pfd[1]);
-
-		/* Build up an argv based on the mailer path and flags */
-		if ((mflags = strdup(def_mailerflags)) == NULL) {
-		    mysyslog(LOG_ERR, _("unable to allocate memory"));
-		    _exit(127);
-		}
-		if ((argv[0] = strrchr(mpath, '/')))
-		    argv[0]++;
-		else
-		    argv[0] = mpath;
-
-		i = 1;
-		if ((p = strtok_r(mflags, " \t", &last))) {
-		    do {
-			argv[i] = p;
-		    } while (++i < MAX_MAILFLAGS && (p = strtok_r(NULL, " \t", &last)));
-		}
-		argv[i] = NULL;
-
-		/*
-		 * Depending on the config, either run the mailer as root
-		 * (so user cannot kill it) or as the user (for the paranoid).
-		 */
-#ifndef NO_ROOT_MAILER
-		(void) set_perms(PERM_ROOT);
-		execve(mpath, argv, root_envp);
-#else
-		(void) set_perms(PERM_FULL_USER);
-		execv(mpath, argv);
-#endif /* NO_ROOT_MAILER */
-		mysyslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
-		sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to execute %s: %s",
-		    mpath, strerror(errno));
-		_exit(127);
-	    }
-	    break;
+	    /* Child. */
+	    exec_mailer(pfd);
+	    /* NOTREACHED */
     }
 
     (void) close(pfd[0]);
@@ -858,6 +904,8 @@ send_mail(const char *fmt, ...)
 	if (rv != -1 && !WIFSTOPPED(status))
 	    break;
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"child (%d) exit value %d", (int)rv, status);
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     _exit(0);
 }
