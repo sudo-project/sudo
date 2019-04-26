@@ -104,8 +104,8 @@ sudo_closefrom(int lowfd)
 	return;
     }
 #elif defined(HAVE_DIRFD)
-    /* Use /proc/self/fd (or /dev/fd on FreeBSD) if it exists. */
-# if defined(__FreeBSD__) || defined(__APPLE__)
+    /* Use /proc/self/fd (or /dev/fd on macOS) if it exists. */
+# ifdef __APPLE__
     path = _PATH_DEV "fd";
 # else
     path = "/proc/self/fd";
