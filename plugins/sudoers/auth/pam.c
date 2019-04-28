@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2007-2019 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,6 +46,10 @@
 # include <security/pam_appl.h>
 #endif
 
+#ifdef __hpux__
+# include <nl_types.h>
+#endif
+
 #ifdef HAVE_LIBINTL_H
 # if defined(__LINUX_PAM__)
 #  define PAM_TEXT_DOMAIN	"Linux-PAM"
@@ -80,6 +84,11 @@
 #define PAM_DATA_SILENT	0
 #endif
 
+struct conv_filter {
+    char *msg;
+    size_t msglen;
+};
+
 static int converse(int, PAM_CONST struct pam_message **,
 		    struct pam_response **, void *);
 static struct sudo_conv_callback *conv_callback;
@@ -87,6 +96,85 @@ static struct pam_conv pam_conv = { converse, &conv_callback };
 static char *def_prompt = PASSPROMPT;
 static bool getpass_error;
 static pam_handle_t *pamh;
+static struct conv_filter *conv_filter;
+
+static void
+conv_filter_init(void)
+{
+    debug_decl(conv_filter_init, SUDOERS_DEBUG_AUTH)
+
+#ifdef __hpux__
+    /*
+     * HP-UX displays last login information as part of either account
+     * management (in trusted mode) or session management (regular mode).
+     * Filter those out in the conversation function unless running a shell.
+     */
+    if (!ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
+	int i, nfilt = 0, maxfilters = 0;
+	struct conv_filter *newfilt;
+	nl_catd catd;
+	char *msg;
+
+	/*
+	 * Messages from PAM account management when trusted mode is enabled:
+	 *  1 Last   successful login for %s: %s  
+	 *  2 Last   successful login for %s: %s on %s 
+	 *  3 Last unsuccessful login for %s: %s      
+	 *  4 Last unsuccessful login for %s: %s on %s 
+	 */
+	if ((catd = catopen("pam_comsec", NL_CAT_LOCALE)) == -1)
+	    catd = catopen("pam_comsec", 0);
+	if (catd != -1) {
+	    maxfilters += 4;
+	    newfilt = reallocarray(conv_filter, maxfilters + 1,
+		sizeof(*conv_filter));
+	    if (newfilt != NULL) {
+		conv_filter = newfilt;
+		for (i = 1; i < 5; i++) {
+		    if ((msg = catgets(catd, 1, i, NULL)) == NULL)
+			break;
+		    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+			"adding \"%s\" to conversation filter", msg);
+		    if ((conv_filter[nfilt].msg = strdup(msg)) == NULL)
+			break;
+		    conv_filter[nfilt].msglen = strcspn(msg, "%");
+		    nfilt++;
+		}
+	    }
+	}
+	/*
+	 * Messages from PAM session management when trusted mode is disabled:
+	 *  3 Last successful login:       %s %s %s %s
+	 *  4 Last authentication failure: %s %s %s %s
+	 */
+	if ((catd = catopen("pam_hpsec", NL_CAT_LOCALE)) == -1)
+	    catd = catopen("pam_hpsec", 0);
+	if (catd != -1) {
+	    maxfilters += 2;
+	    newfilt = reallocarray(conv_filter, maxfilters + 1,
+		sizeof(*conv_filter));
+	    if (newfilt != NULL) {
+		conv_filter = newfilt;
+		for (i = 3; i < 5; i++) {
+		    if ((msg = catgets(catd, 1, i, NULL)) == NULL)
+			break;
+		    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+			"adding \"%s\" to conversation filter", msg);
+		    if ((conv_filter[nfilt].msg = strdup(msg)) == NULL)
+			break;
+		    conv_filter[nfilt].msglen = strcspn(msg, "%");
+		    nfilt++;
+		}
+	    }
+	}
+	if (conv_filter != NULL) {
+	    conv_filter[nfilt].msg = NULL;
+	    conv_filter[nfilt].msglen = 0;
+	}
+    }
+#endif /* __hpux__ */
+    debug_return;
+}
 
 static int
 sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
@@ -114,6 +202,9 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 	    log_warning(0, N_("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);
     }
+
+    /* Initialize conversation function message filter. */
+    conv_filter_init();
 
     /*
      * Set PAM_RUSER to the invoking user (the "from" user).
@@ -520,6 +611,24 @@ use_pam_prompt(const char *pam_prompt)
     debug_return_bool(true);
 }
 
+static bool
+is_filtered(const char *msg)
+{
+    bool filtered = false;
+
+    if (conv_filter != NULL) {
+	struct conv_filter *filt = conv_filter;
+	while (filt->msg != NULL) {
+	    if (strncmp(msg, filt->msg, filt->msglen) == 0) {
+		filtered = true;
+		break;
+	    }
+	    filt++;
+	}
+    }
+    return filtered;
+}
+
 /*
  * ``Conversation function'' for PAM <-> human interaction.
  */
@@ -586,7 +695,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
 		break;
 	    case PAM_TEXT_INFO:
-		if (pm->msg != NULL)
+		if (pm->msg != NULL && !is_filtered(pm->msg))
 		    sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", pm->msg);
 		break;
 	    case PAM_ERROR_MSG:
