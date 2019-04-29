@@ -1,6 +1,9 @@
 /*	$OpenBSD: inet_pton.c,v 1.8 2010/05/06 15:47:14 claudio Exp $	*/
 
-/* Copyright (c) 1996 by Internet Software Consortium.
+/*
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 1996 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

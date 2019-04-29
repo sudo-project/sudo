@@ -1,5 +1,7 @@
 .\" Automatically generated from an mdoc input file.  Do not edit.
 .\"
+.\" SPDX-License-Identifier: ISC
+.\"
 .\" Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any

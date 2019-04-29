@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2004, 2007, 2010, 2013
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *

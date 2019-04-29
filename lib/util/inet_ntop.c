@@ -1,6 +1,9 @@
 /*	$OpenBSD: inet_ntop.c,v 1.9 2014/02/05 14:20:43 millert Exp $	*/
 
-/* Copyright (c) 1996 by Internet Software Consortium.
+/*
+ * SPDX-License-Identifier: ISC
+ *
+ * Copyright (c) 1996 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

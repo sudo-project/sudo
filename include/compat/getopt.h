@@ -3,6 +3,8 @@
 /*	$FreeBSD: head/include/getopt.h 203963 2010-02-16 19:28:10Z imp $ */
 
 /*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
  * Copyright (c) 2000 The NetBSD Foundation, Inc.
  * All rights reserved.
  *

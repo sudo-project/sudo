@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *

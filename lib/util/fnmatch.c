@@ -1,6 +1,9 @@
 /*	$OpenBSD: fnmatch.c,v 1.15 2011/02/10 21:31:59 stsp Exp $	*/
 
-/* Copyright (c) 2011, VMware, Inc.
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ * Copyright (c) 2011, VMware, Inc.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +30,8 @@
  */
 
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2008, 2016 Todd C. Miller <millert@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any

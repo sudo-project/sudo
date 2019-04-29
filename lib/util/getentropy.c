@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: ISC
+ *
  * Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>
  * Copyright (c) 2014 Bob Beck <beck@obtuse.com>
  *
