@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "March 4, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "April 29, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2721,6 +2721,19 @@ section at the end of this manual.
 This flag is
 \fIoff\fR
 by default.
+.TP 18n
+pam_acct_mgmt
+On systems that use PAM for authentication,
+\fBsudo\fR
+will perform PAM account validation for the invoking user by default.
+The actual checks performed depend on which PAM modules are configured.
+If enabled, account validation will be performed regardless of whether
+or not a password is required.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.28 or higher.
 .TP 18n
 pam_session
 On systems that use PAM for authentication,

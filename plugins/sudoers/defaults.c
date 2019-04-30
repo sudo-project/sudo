@@ -641,6 +641,7 @@ init_defaults(void)
     if ((def_editor = strdup(EDITOR)) == NULL)
 	goto oom;
     def_set_utmp = true;
+    def_pam_acct_mgmt = true;
     def_pam_setcred = true;
     def_syslog_maxlen = MAXSYSLOGLEN;
     def_case_insensitive_user = true;

@@ -283,6 +283,9 @@ pam_setcred
 pam_session
 	T_FLAG
 	"Create a new PAM session for the command to run in"
+pam_acct_mgmt
+	T_FLAG
+	"Perform PAM account validation management"
 maxseq
 	T_UINT
 	"Maximum I/O log sequence number: %u"
