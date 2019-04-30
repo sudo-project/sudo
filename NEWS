@@ -1,3 +1,20 @@
+What's new in Sudo 1.8.28
+
+ * Sudo will now only set PAM_TTY to the empty string when no
+   terminal is present on Solaris and Linux.  This workaround is
+   only needed on those systems which may have PAM modules that
+   misbehave when PAM_TTY is not set.
+
+ * The mailerflags sudoers option now has a default value even if
+   sendmail support was disabled at configure time.  Fixes a crash
+   when the mailerpath sudoers option is set but mailerflags is not.
+   Bug #878.
+
+ * Sudo will now filter out last login messages on HP-UX unless it
+   a shell is being run via "sudo -s" or "sudo -i".  Otherwise,
+   when trusted mode is enabled, these messages will be displayed
+   for each command.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command
