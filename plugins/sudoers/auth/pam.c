@@ -124,9 +124,7 @@ conv_filter_init(void)
 	 *  3 Last unsuccessful login for %s: %s      
 	 *  4 Last unsuccessful login for %s: %s on %s 
 	 */
-	if ((catd = catopen("pam_comsec", NL_CAT_LOCALE)) == -1)
-	    catd = catopen("pam_comsec", 0);
-	if (catd != -1) {
+	if ((catd = catopen("pam_comsec", NL_CAT_LOCALE)) != -1) {
 	    maxfilters += 4;
 	    newfilt = reallocarray(conv_filter, maxfilters + 1,
 		sizeof(*conv_filter));
@@ -149,9 +147,7 @@ conv_filter_init(void)
 	 *  3 Last successful login:       %s %s %s %s
 	 *  4 Last authentication failure: %s %s %s %s
 	 */
-	if ((catd = catopen("pam_hpsec", NL_CAT_LOCALE)) == -1)
-	    catd = catopen("pam_hpsec", 0);
-	if (catd != -1) {
+	if ((catd = catopen("pam_hpsec", NL_CAT_LOCALE)) != -1) {
 	    maxfilters += 2;
 	    newfilt = reallocarray(conv_filter, maxfilters + 1,
 		sizeof(*conv_filter));
