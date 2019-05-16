@@ -92,14 +92,6 @@
 # define PENDIN		0
 #endif
 
-#ifndef _POSIX_VDISABLE
-# ifdef VDISABLE
-#  define _POSIX_VDISABLE	VDISABLE
-# else
-#  define _POSIX_VDISABLE	0
-# endif
-#endif
-
 static struct termios term, oterm;
 static int changed;
 
