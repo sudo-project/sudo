@@ -319,14 +319,22 @@ case "$osversion" in
 	esac
 	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
-	    # Newer Xcode puts /Developer under the app Contents dir.
-	    SDK_DIR="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
-	    if test -d "${SDK_DIR}/MacOSX${sdkvers}.sdk"; then
-		SDK_DIR="${SDK_DIR}/MacOSX${sdkvers}.sdk"
-	    elif test -d "/Developer/SDKs/MacOSX${sdkvers}.sdk"; then
-		SDK_DIR="/Developer/SDKs/MacOSX${sdkvers}.sdk"
+	    # SDKs may be under Xcode.app or CommandLineTools (for non-Xcode)
+	    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs" ]; then
+		SDK_DIR="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
+	    elif [ -d "/Library/Developer/CommandLineTools/SDKs" ]; then
+		SDK_DIR="/Library/Developer/CommandLineTools/SDKs"
+	    else
+		echo "unable to find macOS SDKs directory" 1>&2
+		exit 1
 	    fi
-	    SDK_FLAGS="-isysroot ${SDK_DIR} -mmacosx-version-min=${sdkvers}"
+	    SDK_DIR="${SDK_DIR}/MacOSX${sdkvers}.sdk"
+	    if test -d "${SDK_DIR}"; then
+		SDK_FLAGS="-isysroot ${SDK_DIR} -mmacosx-version-min=${sdkvers}"
+	    else
+		echo "unable to find SDKs directory for macOS $sdkvers" 1>&2
+		exit 1
+	    fi
 	fi
 	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
 	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
