@@ -44,7 +44,7 @@
 #include <gram.h>
 
 /*
- * Look up the user in the sudoers prase tree for pseudo-commands like
+ * Look up the user in the sudoers parse tree for pseudo-commands like
  * list, verify and kill.
  */
 static int
@@ -168,6 +168,9 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			}
 			*matching_cs = cs;
 			*defs = &priv->defaults;
+			sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			    "userspec matched @ %s:%d %s", us->file, us->lineno,
+			    cmnd_match ? "allowed" : "denied");
 			debug_return_int(cmnd_match);
 		    }
 		}
@@ -270,7 +273,7 @@ apply_cmndspec(struct cmndspec *cs)
 }
 
 /*
- * Look up the user in the sudoers prase tree and check to see if they are
+ * Look up the user in the sudoers parse tree and check to see if they are
  * allowed to run the specified command on this host as the target user.
  */
 int
