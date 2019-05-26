@@ -147,6 +147,28 @@ sudo_aix_init(struct passwd *pw, sudo_auth *auth)
     debug_return_int(AUTH_SUCCESS);
 }
 
+/* Ignore AIX password incorrect message */
+static bool
+sudo_aix_valid_message(const char *message)
+{
+    const char *cp;
+    const char badpass_msgid[] = "3004-300";
+    debug_decl(sudo_aix_valid_message, SUDOERS_DEBUG_AUTH)
+
+    if (message == NULL || message[0] == '\0')
+	debug_return_bool(false);
+
+    /* Match "3004-300: You entered an invalid login name or password" */
+    for (cp = message; *cp != '\0'; cp++) {
+	if (isdigit((unsigned char)*cp)) {
+	    if (strncmp(cp, badpass_msgid, strlen(badpass_msgid)) == 0)
+		debug_return_bool(false);
+	    break;
+	}
+    }
+    debug_return_bool(true);
+}
+
 int
 sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
@@ -169,16 +191,8 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 
     if (result != 0) {
 	/* Display error message, if any. */
-	if (message != NULL) {
-	    struct sudo_conv_message msg;
-	    struct sudo_conv_reply repl;
-
-	    memset(&msg, 0, sizeof(msg));
-	    msg.msg_type = SUDO_CONV_ERROR_MSG;
-	    msg.msg = message;
-	    memset(&repl, 0, sizeof(repl));
-	    sudo_conv(1, &msg, &repl, NULL);
-	}
+	if (sudo_aix_valid_message(message))
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s", message);
 	ret = pass ? AUTH_FAILURE : AUTH_INTR;
     }
     free(message);
