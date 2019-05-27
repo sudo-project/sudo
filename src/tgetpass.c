@@ -204,6 +204,11 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
+    if (ISSET(flags, TGP_BELL) && output != STDERR_FILENO) {
+	/* Ring the bell if requested and there is a tty. */
+	if (write(output, "\a", 1) == -1)
+	    goto restore;
+    }
     if (prompt) {
 	if (write(output, prompt, strlen(prompt)) == -1)
 	    goto restore;

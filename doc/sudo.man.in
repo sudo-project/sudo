@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "November 25, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "May 27, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -41,7 +41,7 @@
 .HP 5n
 \fBsudo\fR
 \fB\-v\fR
-[\fB\-AknS\fR]
+[\fB\-ABknS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
@@ -51,7 +51,7 @@
 .HP 5n
 \fBsudo\fR
 \fB\-l\fR
-[\fB\-AknS\fR]
+[\fB\-ABknS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
@@ -62,7 +62,7 @@
 .br
 .HP 5n
 \fBsudo\fR
-[\fB\-AbEHnPS\fR]
+[\fB\-ABbEHnPS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR]
@@ -79,7 +79,7 @@
 .br
 .HP 9n
 \fBsudoedit\fR
-[\fB\-AknS\fR]
+[\fB\-ABknS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR]
@@ -212,6 +212,10 @@ This option is only available on systems that support
 BSD
 authentication.
 .\}
+.TP 12n
+\fB\-B\fR, \fB\--bell\fR
+Ring the bell as part of the password promp when a terminal is present.
+This option has no effect if an askpass program is used.
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
 Run the given command in the background.

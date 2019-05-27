@@ -133,11 +133,12 @@ struct environment {
  * Note that we must disable arg permutation to support setting environment
  * variables and to better support the optional arg of the -h flag.
  */
-static const char short_opts[] =  "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:SsT:t:U:u:Vv";
+static const char short_opts[] =  "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:r:SsT:t:U:u:Vv";
 static struct option long_opts[] = {
     { "askpass",	no_argument,		NULL,	'A' },
     { "auth-type",	required_argument,	NULL,	'a' },
     { "background",	no_argument,		NULL,	'b' },
+    { "bell",	        no_argument,		NULL,	'B' },
     { "close-from",	required_argument,	NULL,	'C' },
     { "login-class",	required_argument,	NULL,	'c' },
     { "preserve-env",	optional_argument,	NULL,	'E' },
@@ -316,6 +317,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv,
 #endif
 		case 'b':
 		    SET(flags, MODE_BACKGROUND);
+		    break;
+		case 'B':
+		    SET(tgetpass_flags, TGP_BELL);
 		    break;
 		case 'C':
 		    if (strtonum(optarg, 3, INT_MAX, NULL) == 0) {
@@ -711,6 +715,8 @@ help(void)
 #endif
     sudo_lbuf_append(&lbuf, "  -b, --background              %s\n",
 	_("run command in the background"));
+    sudo_lbuf_append(&lbuf, "  -B, --bell                    %s\n",
+	_("ring bell when prompting"));
     sudo_lbuf_append(&lbuf, "  -C, --close-from=num          %s\n",
 	_("close all file descriptors >= num"));
 #ifdef HAVE_LOGIN_CAP_H

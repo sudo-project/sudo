@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2018
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2019
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 25, 2018
+.Dd May 27, 2019
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -36,7 +36,7 @@
 .Fl h | K | k | V
 .Nm sudo
 .Fl v
-.Op Fl AknS
+.Op Fl ABknS
 .if \n(BA \{\
 .Op Fl a Ar type
 .\}
@@ -46,7 +46,7 @@
 .Op Fl u Ar user
 .Nm sudo
 .Fl l
-.Op Fl AknS
+.Op Fl ABknS
 .if \n(BA \{\
 .Op Fl a Ar type
 .\}
@@ -57,7 +57,7 @@
 .Op Fl u Ar user
 .Op Ar command
 .Nm sudo
-.Op Fl AbEHnPS
+.Op Fl ABbEHnPS
 .if \n(BA \{\
 .Op Fl a Ar type
 .\}
@@ -78,7 +78,7 @@
 .Op Fl i | s
 .Op Ar command
 .Nm sudoedit
-.Op Fl AknS
+.Op Fl ABknS
 .if \n(BA \{\
 .Op Fl a Ar type
 .\}
@@ -208,6 +208,9 @@ This option is only available on systems that support
 .Bx
 authentication.
 .\}
+.It Fl B , -bell
+Ring the bell as part of the password promp when a terminal is present.
+This option has no effect if an askpass program is used.
 .It Fl b , -background
 Run the given command in the background.
 Note that it is not possible to use shell job control to manipulate

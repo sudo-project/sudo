@@ -86,6 +86,7 @@
 #define TGP_ASKPASS	0x04		/* read from askpass helper program */
 #define TGP_MASK	0x08		/* mask user input when reading */
 #define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
+#define TGP_BELL	0x20		/* bell on password prompt */
 
 /* name/value pairs for command line settings. */
 struct sudo_settings {
