@@ -30,6 +30,7 @@
 #ifdef HAVE_AIXAUTH
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STRING_H
@@ -40,7 +41,9 @@
 #endif /* HAVE_STRING_H */
 #include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
 #include <pwd.h>
+#include <signal.h>
 #include <usersec.h>
 
 #include "sudoers.h"
@@ -169,6 +172,67 @@ sudo_aix_valid_message(const char *message)
     debug_return_bool(true);
 }
 
+/* 
+ * Change the user's password.  If root changes the user's password
+ * the ADMCHG flag is set on the account (and the user must change
+ * it again) so we run passwd(1) as the user.  This does mean that
+ * the user will need to re-enter their original password again,
+ * unlike with su(1).  We may consider using pwdadm(1) as root to
+ * change the password and then clear the flag in the future.
+ */
+static bool
+sudo_aix_change_password(const char *user)
+{
+    struct sigaction sa, savechld;
+    pid_t child, pid;
+    bool ret = false;
+    sigset_t mask;
+    int status;
+    debug_decl(sudo_aix_change_password, SUDOERS_DEBUG_AUTH)
+
+    /* Set SIGCHLD handler to default since we call waitpid() below. */
+    memset(&sa, 0, sizeof(sa));                
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;     
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGCHLD, &sa, &savechld);
+
+    switch (child = sudo_debug_fork()) {
+    case -1:
+	/* error */
+	sudo_warn(U_("unable to fork"));
+	break;
+    case 0:
+	/* child, run passwd(1) */
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGINT);
+	sigaddset(&mask, SIGQUIT);
+	(void) sigprocmask(SIG_UNBLOCK, &mask, NULL);
+	set_perms(PERM_USER);
+	execl("/usr/bin/passwd", "passwd", user, (char *)NULL);
+	sudo_warn("passwd");
+	_exit(127);
+	/* NOTREACHED */
+    default:
+	/* parent */
+	break;
+    }
+
+    /* Wait for passwd(1) to complete. */
+    do {
+	pid = waitpid(child, &status, 0);
+    } while (pid == -1 && errno == EINTR);
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"child (%d) exit value %d", (int)child, status);
+    if (pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
+	ret = true;
+
+    /* Restore saved SIGCHLD handler. */
+    (void) sigaction(SIGCHLD, &savechld, NULL);
+
+    debug_return_bool(ret);
+}
+
 int
 sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
@@ -196,6 +260,40 @@ sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_co
 	ret = pass ? AUTH_FAILURE : AUTH_INTR;
     }
     free(message);
+    message = NULL;
+
+    /* Check if password expired and allow user to change it if possible. */
+    if (ret == AUTH_SUCCESS) {
+	result = passwdexpired(pw->pw_name, &message);
+	if (message != NULL && message[0] != '\0') {
+	    sudo_printf(result ? SUDO_CONV_ERROR_MSG : SUDO_CONV_INFO_MSG,
+		"%s", message);
+	    free(message);
+	    message = NULL;
+	}
+	switch (result) {
+	case 0:
+	    /* password not expired. */
+	    break;
+	case 1:
+	    /* password expired, user must change it */
+	    if (!sudo_aix_change_password(pw->pw_name)) {
+		sudo_warnx(U_("unable to change password for %s"), pw->pw_name);
+		ret = AUTH_FATAL;
+	    }
+	    break;
+	case 2:
+	    /* password expired, only admin can change it */
+	    ret = AUTH_FATAL;
+	    break;
+	default:
+	    /* error (-1) */
+	    sudo_warn("passwdexpired");
+	    ret = AUTH_FATAL;
+	    break;
+	}
+    }
+
     debug_return_int(ret);
 }
 
