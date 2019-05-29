@@ -775,7 +775,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 	priv_buf.len = 0;
 	sudo_lbuf_append(&priv_buf,
 	    _("User %s is not allowed to run sudo on %s.\n"),
-	    pw->pw_name, user_shost);
+	    pw->pw_name, user_srunhost);
     }
     if (sudo_lbuf_error(&def_buf) || sudo_lbuf_error(&priv_buf))
 	goto bad;
