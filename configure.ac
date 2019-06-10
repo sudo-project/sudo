@@ -2583,7 +2583,9 @@ AC_CHECK_FUNCS([arc4random_uniform], [], [
 	AC_LIBOBJ(arc4random)
 	SUDO_APPEND_COMPAT_EXP(sudo_arc4random)
 	# arc4random.c needs getentropy()
-	AC_CHECK_FUNCS([getentropy], [], [
+	AC_CHECK_FUNCS([getentropy], [
+	    AC_CHECK_HEADERS([sys/random.h])
+	], [
 	    AC_LIBOBJ(getentropy)
 	    SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
 	])

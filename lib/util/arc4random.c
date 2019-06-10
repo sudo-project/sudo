@@ -36,6 +36,9 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
+#ifdef HAVE_SYS_RANDOM_H
+# include <sys/random.h>
+#endif
 
 #include <fcntl.h>
 #include <limits.h>
