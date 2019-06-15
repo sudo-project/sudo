@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "April 29, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 14, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -311,29 +311,40 @@ and
 settings in
 \fI/etc/login.conf\fR.
 .\}
-The new environment contains the
-\fRTERM\fR,
-\fRPATH\fR,
+The
 \fRHOME\fR,
 \fRMAIL\fR,
 \fRSHELL\fR,
-\fRLOGNAME\fR,
-\fRUSER\fR
-and
-\fRSUDO_*\fR
-variables
-in addition to variables from the invoking process permitted by the
-\fIenv_check\fR
-and
-\fIenv_keep\fR
-options.
-This is effectively a whitelist
-for environment variables.
-The environment variables
 \fRLOGNAME\fR
 and
 \fRUSER\fR
-are treated specially.
+environment variables are initialized based on the target user
+and the
+\fRSUDO_*\fR
+variables are set based on the invoking user.
+Additional variables, such as
+\fRDISPLAY\fR,
+\fRPATH\fR
+and
+\fRTERM\fR,
+are preserved from the invoking user's environment if permitted by the
+\fIenv_check\fR
+or
+\fIenv_keep\fR
+options.
+This is effectively a whitelist for environment variables.
+A few environment variables are treated specially.
+If the
+\fRPATH\fR
+and
+\fRTERM\fR
+variables are not preserved from the user's environment, they will be set
+to default values.
+The
+\fRLOGNAME\fR
+and
+\fRUSER\fR
+are handled as a single entity.
 If one of them is preserved (or removed) from user's environment, the other
 will be as well.
 If
@@ -413,14 +424,27 @@ suffix, this would not match, as
 \fBbash\fR
 shell functions are not preserved by default.
 .PP
-The complete list of environment variables that
+The complete list of environment variables that are preserved or removed,
+as modified by global Defaults parameters in
+\fIsudoers\fR,
+is displayed when
 \fBsudo\fR
-allows or denies is contained in the output of
-\(lq\fRsudo -V\fR\(rq
-when run as root.
-Please note that this list varies based on the operating system
+is run by root with the
+\fB\-V\fR
+option.
+Please note that the list of environment variables to remove
+varies based on the operating system
 \fBsudo\fR
 is running on.
+.PP
+Other
+\fBsudoers\fR
+options may influence the command environment, such as
+\fIalways_set_home\fR,
+\fIsecure_path\fR,
+\fIset_logname\fR,
+and
+\fIset_home\fR.
 .PP
 On systems that support PAM where the
 \fBpam_env\fR

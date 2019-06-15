@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd April 29, 2019
+.Dd June 14, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -301,29 +301,40 @@ and
 settings in
 .Pa /etc/login.conf .
 .\}
-The new environment contains the
-.Ev TERM ,
-.Ev PATH ,
+The
 .Ev HOME ,
 .Ev MAIL ,
 .Ev SHELL ,
-.Ev LOGNAME ,
-.Ev USER
-and
-.Ev SUDO_*
-variables
-in addition to variables from the invoking process permitted by the
-.Em env_check
-and
-.Em env_keep
-options.
-This is effectively a whitelist
-for environment variables.
-The environment variables
 .Ev LOGNAME
 and
 .Ev USER
-are treated specially.
+environment variables are initialized based on the target user
+and the
+.Ev SUDO_*
+variables are set based on the invoking user.
+Additional variables, such as
+.Ev DISPLAY ,
+.Ev PATH
+and
+.Ev TERM ,
+are preserved from the invoking user's environment if permitted by the
+.Em env_check
+or
+.Em env_keep
+options.
+This is effectively a whitelist for environment variables.
+A few environment variables are treated specially.
+If the
+.Ev PATH
+and
+.Ev TERM
+variables are not preserved from the user's environment, they will be set
+to default values.
+The
+.Ev LOGNAME
+and
+.Ev USER
+are handled as a single entity.
 If one of them is preserved (or removed) from user's environment, the other
 will be as well.
 If
@@ -400,14 +411,27 @@ suffix, this would not match, as
 .Sy bash
 shell functions are not preserved by default.
 .Pp
-The complete list of environment variables that
+The complete list of environment variables that are preserved or removed,
+as modified by global Defaults parameters in
+.Em sudoers ,
+is displayed when
 .Nm sudo
-allows or denies is contained in the output of
-.Dq Li sudo -V
-when run as root.
-Please note that this list varies based on the operating system
+is run by root with the
+.Fl V
+option.
+Please note that the list of environment variables to remove
+varies based on the operating system
 .Nm sudo
 is running on.
+.Pp
+Other
+.Nm
+options may influence the command environment, such as
+.Em always_set_home ,
+.Em secure_path ,
+.Em set_logname ,
+and
+.Em set_home .
 .Pp
 On systems that support PAM where the
 .Sy pam_env

@@ -125,20 +125,24 @@ DDEESSCCRRIIPPTTIIOONN
      without PAM), the environment is initialized with the contents of the
      _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t file.  On BSD systems, if the _u_s_e___l_o_g_i_n_c_l_a_s_s option is
      enabled, the environment is initialized based on the _p_a_t_h and _s_e_t_e_n_v
-     settings in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The new environment contains the TERM,
-     PATH, HOME, MAIL, SHELL, LOGNAME, USER and SUDO_* variables in addition
-     to variables from the invoking process permitted by the _e_n_v___c_h_e_c_k and
-     _e_n_v___k_e_e_p options.  This is effectively a whitelist for environment
-     variables.  The environment variables LOGNAME and USER are treated
-     specially.  If one of them is preserved (or removed) from user's
-     environment, the other will be as well.  If LOGNAME and USER are to be
-     preserved but only one of them is present in the user's environment, the
-     other will be set to the same value.  This avoids an inconsistent
-     environment where one of the variables describing the user name is set to
-     the invoking user and one is set to the target user.  () are removed
-     unless both the name and value parts are matched by _e_n_v___k_e_e_p or
-     _e_n_v___c_h_e_c_k, as they may be interpreted as functions by the bbaasshh shell.
-     Prior to version 1.8.11, such variables were always removed.
+     settings in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The HOME, MAIL, SHELL, LOGNAME and USER
+     environment variables are initialized based on the target user and the
+     SUDO_* variables are set based on the invoking user.  Additional
+     variables, such as DISPLAY, PATH and TERM, are preserved from the
+     invoking user's environment if permitted by the _e_n_v___c_h_e_c_k or _e_n_v___k_e_e_p
+     options.  This is effectively a whitelist for environment variables.  A
+     few environment variables are treated specially.  If the PATH and TERM
+     variables are not preserved from the user's environment, they will be set
+     to default values.  The LOGNAME and USER are handled as a single entity.
+     If one of them is preserved (or removed) from user's environment, the
+     other will be as well.  If LOGNAME and USER are to be preserved but only
+     one of them is present in the user's environment, the other will be set
+     to the same value.  This avoids an inconsistent environment where one of
+     the variables describing the user name is set to the invoking user and
+     one is set to the target user.  () are removed unless both the name and
+     value parts are matched by _e_n_v___k_e_e_p or _e_n_v___c_h_e_c_k, as they may be
+     interpreted as functions by the bbaasshh shell.  Prior to version 1.8.11,
+     such variables were always removed.
 
      If, however, the _e_n_v___r_e_s_e_t option is disabled, any variables not
      explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are inherited
@@ -164,9 +168,14 @@ DDEESSCCRRIIPPTTIIOONN
      Without the "=()*" suffix, this would not match, as bbaasshh shell functions
      are not preserved by default.
 
-     The complete list of environment variables that ssuuddoo allows or denies is
-     contained in the output of "sudo -V" when run as root.  Please note that
-     this list varies based on the operating system ssuuddoo is running on.
+     The complete list of environment variables that are preserved or removed,
+     as modified by global Defaults parameters in _s_u_d_o_e_r_s, is displayed when
+     ssuuddoo is run by root with the --VV option.  Please note that the list of
+     environment variables to remove varies based on the operating system ssuuddoo
+     is running on.
+
+     Other ssuuddooeerrss options may influence the command environment, such as
+     _a_l_w_a_y_s___s_e_t___h_o_m_e, _s_e_c_u_r_e___p_a_t_h, _s_e_t___l_o_g_n_a_m_e, and _s_e_t___h_o_m_e.
 
      On systems that support PAM where the ppaamm__eennvv module is enabled for ssuuddoo,
      variables in the PAM environment may be merged in to the environment.  If
@@ -2939,4 +2948,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.28                     April 29, 2019                     Sudo 1.8.28
+Sudo 1.8.28                      June 14, 2019                     Sudo 1.8.28
