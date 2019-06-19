@@ -4159,18 +4159,17 @@ are processed before the contents of
 \fIenv_file\fR.
 .TP 14n
 secure_path
-Path used for every command run from
-\fBsudo\fR.
-If you don't trust the
-people running
+If set,
 \fBsudo\fR
-to have a sane
+will use this value in place of the user's
 \fRPATH\fR
-environment variable you may want to use this.
-Another use is if you want to have the
-\(lqroot path\(rq
-be separate from the
-\(lquser path\(rq.
+environment variable.
+This option can be used to reset the
+\fRPATH\fR
+to a known good value that contains directories for system administrator
+commands such as
+\fI/usr/sbin\fR.
+.sp
 Users in the group specified by the
 \fIexempt_group\fR
 option are not affected by

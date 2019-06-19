@@ -2080,13 +2080,15 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    either case, the contents of _r_e_s_t_r_i_c_t_e_d___e_n_v___f_i_l_e are
                    processed before the contents of _e_n_v___f_i_l_e.
 
-     secure_path   Path used for every command run from ssuuddoo.  If you don't
-                   trust the people running ssuuddoo to have a sane PATH
-                   environment variable you may want to use this.  Another use
-                   is if you want to have the "root path" be separate from the
-                   "user path".  Users in the group specified by the
-                   _e_x_e_m_p_t___g_r_o_u_p option are not affected by _s_e_c_u_r_e___p_a_t_h.  This
-                   option is not set by default.
+     secure_path   If set, ssuuddoo will use this value in place of the user's
+                   PATH environment variable.  This option can be used to
+                   reset the PATH to a known good value that contains
+                   directories for system administrator commands such as
+                   _/_u_s_r_/_s_b_i_n.
+
+                   Users in the group specified by the _e_x_e_m_p_t___g_r_o_u_p option are
+                   not affected by _s_e_c_u_r_e___p_a_t_h.  This option is not set by
+                   default.
 
      syslog        Syslog facility if syslog is being used for logging (negate
                    to disable syslog logging).  Defaults to auth.

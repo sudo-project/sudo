@@ -3885,18 +3885,17 @@ In either case, the contents of
 are processed before the contents of
 .Em env_file .
 .It secure_path
-Path used for every command run from
-.Nm sudo .
-If you don't trust the
-people running
+If set,
 .Nm sudo
-to have a sane
+will use this value in place of the user's
 .Ev PATH
-environment variable you may want to use this.
-Another use is if you want to have the
-.Dq root path
-be separate from the
-.Dq user path .
+environment variable.
+This option can be used to reset the
+.Ev PATH
+to a known good value that contains directories for system administrator
+commands such as
+.Pa /usr/sbin .
+.Pp
 Users in the group specified by the
 .Em exempt_group
 option are not affected by
