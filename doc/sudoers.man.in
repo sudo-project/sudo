@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "June 14, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 19, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -345,8 +345,8 @@ The
 and
 \fRUSER\fR
 are handled as a single entity.
-If one of them is preserved (or removed) from user's environment, the other
-will be as well.
+If one of them is preserved (or removed) from the user's environment,
+the other will be as well.
 If
 \fRLOGNAME\fR
 and
@@ -356,6 +356,7 @@ the other will be set to the same value.
 This avoids an inconsistent environment where one of the variables
 describing the user name is set to the invoking user and one is
 set to the target user.
+Environment variables with a value beginning with
 \fR()\fR
 are removed unless both the name and value parts are matched by
 \fIenv_keep\fR
@@ -893,7 +894,7 @@ shell-style wildcards (see the
 \fIWildcards\fR
 section below).
 A simple file name allows the user to run the command with any
-arguments he/she wishes.
+arguments they wish.
 However, you may also specify command line arguments (including
 wildcards).
 Alternately, you can specify
@@ -1634,14 +1635,15 @@ option.
 By default, if the
 \fRNOPASSWD\fR
 tag is applied to any of the entries for a user on the current host,
-he or she will be able to run
+they will be able to run
 \(lq\fRsudo -l\fR\(rq
 without a password.
 Additionally, a user may only run
 \(lq\fRsudo -v\fR\(rq
-without a password if the
+without a password if all of the user's entries for the current
+host have the
 \fRNOPASSWD\fR
-tag is present for all a user's entries that pertain to the current host.
+tag.
 This behavior may be overridden via the
 \fIverifypw\fR
 and
