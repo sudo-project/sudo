@@ -752,8 +752,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        Note, however, that the PASSWD tag has no effect on users who are in
        the group specified by the _e_x_e_m_p_t___g_r_o_u_p option.
 
-       By default, if the NOPASSWD tag is applied to any of the entries for a
-       user on the current host, they will be able to run "sudo -l" without a
+       By default, if the NOPASSWD tag is applied to any of a user's entries
+       for the current host, the user will be able to run "sudo -l" without a
        password.  Additionally, a user may only run "sudo -v" without a
        password if all of the user's entries for the current host have the
        NOPASSWD tag.  This behavior may be overridden via the _v_e_r_i_f_y_p_w and

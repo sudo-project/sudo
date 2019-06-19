@@ -1634,8 +1634,8 @@ option.
 .sp
 By default, if the
 \fRNOPASSWD\fR
-tag is applied to any of the entries for a user on the current host,
-they will be able to run
+tag is applied to any of a user's entries for the current host,
+the user will be able to run
 \(lq\fRsudo -l\fR\(rq
 without a password.
 Additionally, a user may only run
