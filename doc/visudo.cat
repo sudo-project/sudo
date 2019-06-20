@@ -9,9 +9,9 @@ SSYYNNOOPPSSIISS
 DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to vipw(1m).
      vviissuuddoo locks the _s_u_d_o_e_r_s file against multiple simultaneous edits,
-     provides basic sanity checks, and checks for parse errors.  If the
-     _s_u_d_o_e_r_s file is currently being edited you will receive a message to try
-     again later.
+     provides basic sanity checks, and checks for parse errors before
+     installing the edited file.  If the _s_u_d_o_e_r_s file is currently being
+     edited you will receive a message to try again later.
 
      vviissuuddoo parses the _s_u_d_o_e_r_s file after editing and will not save the
      changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
@@ -90,11 +90,11 @@ DDEESSCCRRIIPPTTIIOONN
                  Print the vviissuuddoo and _s_u_d_o_e_r_s grammar versions and exit.
 
      A _s_u_d_o_e_r_s file may be specified instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.
-     The lock file used is the specified _s_u_d_o_e_r_s file with ".tmp" appended to
-     it.  In _c_h_e_c_k_-_o_n_l_y mode only, `-' may be used to indicate that _s_u_d_o_e_r_s
-     will be read from the standard input.  Because the policy is evaluated in
-     its entirety, it is not sufficient to check an individual _s_u_d_o_e_r_s include
-     file for syntax errors.
+     The temporary file used is the specified _s_u_d_o_e_r_s file with ".tmp"
+     appended to it.  In _c_h_e_c_k_-_o_n_l_y mode only, `-' may be used to indicate
+     that _s_u_d_o_e_r_s will be read from the standard input.  Because the policy is
+     evaluated in its entirety, it is not sufficient to check an individual
+     _s_u_d_o_e_r_s include file for syntax errors.
 
    DDeebbuuggggiinngg aanndd ssuuddooeerrss pplluuggiinn aarrgguummeennttss
      vviissuuddoo versions 1.8.4 and higher support a flexible debugging framework
@@ -147,7 +147,7 @@ FFIILLEESS
 
      _/_e_t_c_/_s_u_d_o_e_r_s              List of who can run what
 
-     _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p          Lock file for visudo
+     _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p          Default temporary file used by visudo
 
 DDIIAAGGNNOOSSTTIICCSS
      In addition to reporting _s_u_d_o_e_r_s parse errors, vviissuuddoo may produce the
@@ -156,7 +156,7 @@ DDIIAAGGNNOOSSTTIICCSS
      sudoers file busy, try again later.
            Someone else is currently editing the _s_u_d_o_e_r_s file.
 
-     /etc/sudoers.tmp: Permission denied
+     /etc/sudoers: Permission denied
            You didn't run vviissuuddoo as root.
 
      you do not exist in the passwd database
@@ -223,4 +223,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or https://www.sudo.ws/license.html for
      complete details.
 
-Sudo 1.8.28                    December 24, 2018                   Sudo 1.8.28
+Sudo 1.8.28                      June 20, 2019                     Sudo 1.8.28

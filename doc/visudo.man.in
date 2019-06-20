@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2018
+.\" Copyright (c) 1996,1998-2005, 2007-2019
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "December 24, 2018" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "June 20, 2019" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -42,7 +42,7 @@ vipw(@mansectsu@).
 locks the
 \fIsudoers\fR
 file against multiple simultaneous edits, provides basic sanity checks,
-and checks for parse errors.
+and checks for parse errors before installing the edited file.
 If the
 \fIsudoers\fR
 file is currently being edited you will receive a message to try again later.
@@ -72,8 +72,7 @@ option should be used with extreme caution because if
 \fBvisudo\fR
 believes there to be a parse error, so will
 \fBsudo\fR
-and no one
-will be able to run
+and no one will be able to run
 \fBsudo\fR
 again until the error is fixed.
 If
@@ -238,7 +237,7 @@ A
 \fIsudoers\fR
 file may be specified instead of the default,
 \fI@sysconfdir@/sudoers\fR.
-The lock file used is the specified
+The temporary file used is the specified
 \fIsudoers\fR
 file with
 \(lq\.tmp\(rq
@@ -352,7 +351,7 @@ Sudo front end configuration
 List of who can run what
 .TP 26n
 \fI@sysconfdir@/sudoers.tmp\fR
-Lock file for visudo
+Default temporary file used by visudo
 .SH "DIAGNOSTICS"
 In addition to reporting
 \fIsudoers\fR
@@ -365,7 +364,7 @@ Someone else is currently editing the
 \fIsudoers\fR
 file.
 .TP 6n
-\fR@sysconfdir@/sudoers.tmp: Permission denied\fR
+\fR@sysconfdir@/sudoers: Permission denied\fR
 You didn't run
 \fBvisudo\fR
 as root.
