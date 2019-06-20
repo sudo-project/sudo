@@ -197,17 +197,15 @@ A) If sudo needs to authenticate a user, it needs access to the
    user's terminal to disable echo and to perform per-terminal
    access control (for cached credentials).  The above message
    indicates that sudo was unable to determine the user's terminal.
-   There are two main reasons why this might happen:
 
-   1) On Linux and most System-V based systems, sudo uses the /proc
-      file system to determine the user's terminal.  On these systems,
-      if sudo is unable to access /proc you will receive the message.
-   2) When running a command via ssh, a terminal is not allocated
-      by default which can cause the message.  The "-t" option to
-      ssh will force it to allocate a tty.  Alternately, if you do
-      not mind your password being echoed to the screen, the
-      "visiblepw" sudoers option will allow the password to be
-      entered even when echo cannot be disable.
+   When running a command via ssh, a terminal is not allocated by default
+   which can cause this message.  The "-t" option to ssh will force it to
+   allocate a tty.  Alternately, you may be able to use the ssh-askpass
+   utility to prompt for the password if X11 forwarding is enabled and an
+   askpass program is configured in the sudo.conf file.  If you do not
+   mind your password being echoed to the screen, the "visiblepw" sudoers
+   option will allow the password to be entered even when echo cannot be
+   disabled, though this is not recommended.
 
 Q) When I try to use SSL-enabled LDAP with sudo I get an error:
     unable to initialize SSL cert and key db: security library: bad database.
