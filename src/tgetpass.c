@@ -60,7 +60,6 @@ enum tgetpass_errval {
 
 static volatile sig_atomic_t signo[NSIG];
 
-static bool tty_present(void);
 static void tgetpass_handler(int);
 static char *getln(int, char *, size_t, int, enum tgetpass_errval *);
 static char *sudo_askpass(const char *, const char *);
@@ -124,7 +123,8 @@ tgetpass(const char *prompt, int timeout, int flags,
     char *pass;
     static const char *askpass;
     static char buf[SUDO_CONV_REPL_MAX + 1];
-    int i, input, output, save_errno, neednl = 0, need_restart;
+    int i, input, output, save_errno, ttyfd;
+    bool need_restart, neednl = false;
     enum tgetpass_errval errval;
     debug_decl(tgetpass, SUDO_DEBUG_CONV)
 
@@ -136,14 +136,19 @@ tgetpass(const char *prompt, int timeout, int flags,
 	    askpass = sudo_conf_askpass_path();
     }
 
-    /* If no tty present and we need to disable echo, try askpass. */
-    if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS|TGP_NOECHO_TRY) &&
-	!tty_present()) {
-	if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-	    sudo_warnx(U_("no tty present and no askpass program specified"));
-	    debug_return_str(NULL);
+restart:
+    /* Try to open /dev/tty if we are going to be using it for I/O. */
+    ttyfd = -1;
+    if (!ISSET(flags, TGP_STDIN|TGP_ASKPASS)) {
+	ttyfd = open(_PATH_TTY, O_RDWR);
+	/* If no tty present and we need to disable echo, try askpass. */
+	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
+	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
+		sudo_warnx(U_("no tty present and no askpass program specified"));
+		debug_return_str(NULL);
+	    }
+	    SET(flags, TGP_ASKPASS);
 	}
-	SET(flags, TGP_ASKPASS);
     }
 
     /* If using a helper program to get the password, run it instead. */
@@ -153,17 +158,20 @@ tgetpass(const char *prompt, int timeout, int flags,
 	debug_return_str_masked(sudo_askpass(askpass, prompt));
     }
 
-restart:
+    /* Reset state. */
     for (i = 0; i < NSIG; i++)
 	signo[i] = 0;
     pass = NULL;
     save_errno = 0;
-    need_restart = 0;
-    /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
-    if (ISSET(flags, TGP_STDIN) ||
-	(input = output = open(_PATH_TTY, O_RDWR)) == -1) {
+    need_restart = false;
+
+    /* Use tty for reading/writing if available else use stdin/stderr. */
+    if (ttyfd == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
+    } else {
+	input = ttyfd;
+	output = ttyfd;
     }
 
     /*
@@ -258,7 +266,7 @@ restore:
 		case SIGTTIN:
 		case SIGTTOU:
 		    if (suspend(i, callback) == 0)
-			need_restart = 1;
+			need_restart = true;
 		    break;
 		default:
 		    kill(getpid(), i);
@@ -434,20 +442,4 @@ static void
 tgetpass_handler(int s)
 {
     signo[s] = 1;
-}
-
-static bool
-tty_present(void)
-{
-#if defined(HAVE_KINFO_PROC2_NETBSD) || defined(HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_44BSD) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
-    debug_decl(tty_present, SUDO_DEBUG_UTIL)
-    debug_return_bool(user_details.tty != NULL);
-#else
-    int fd;
-    debug_decl(tty_present, SUDO_DEBUG_UTIL)
-
-    if ((fd = open(_PATH_TTY, O_RDWR)) != -1)
-	close(fd);
-    debug_return_bool(fd != -1);
-#endif
 }
