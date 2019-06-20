@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 7, 2018
+.Dd June 20, 2019
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -554,7 +554,7 @@ communication with the plugin
 .It Em plugin
 plugin configuration
 .It Em pty
-pseudo-tty related code
+pseudo-terminal related code
 .It Em selinux
 SELinux-specific handling
 .It Em util

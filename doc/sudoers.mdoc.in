@@ -251,7 +251,7 @@ See
 for a description of the log file format.
 .Pp
 .Nm sudoers
-is also capable of running a command in a pseudo-tty and logging all
+is also capable of running a command in a pseudo-terminal and logging all
 input and/or output.
 The standard input, standard output and standard error can be logged
 even when not associated with a terminal.
@@ -2032,8 +2032,8 @@ runs a command as the foreground process as long as
 itself is running in the foreground.
 When the
 .Em exec_background
-flag is enabled and the command is being run in a pty (due to I/O logging
-or the
+flag is enabled and the command is being run in a pseudo-terminal
+(due to I/O logging or the
 .Em use_pty
 flag), the command will be run as a background process.
 Attempts to read from the controlling terminal (or to change terminal
@@ -2054,7 +2054,7 @@ has required it or not (the kernel buffers terminals so it is not possible
 to tell whether the command really wants the input).
 This is different from historic
 .Em sudo
-behavior or when the command is not being run in a pty.
+behavior or when the command is not being run in a pseudo-terminal.
 .Pp
 For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
@@ -2376,7 +2376,7 @@ by default.
 .It log_input
 If set,
 .Nm sudo
-will run the command in a pseudo-tty and log all user input.
+will run the command in a pseudo-terminal and log all user input.
 If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
@@ -2396,7 +2396,7 @@ by default.
 .It log_output
 If set,
 .Nm sudo
-will run the command in a pseudo-tty and log all output that is sent
+will run the command in a pseudo-terminal and log all output that is sent
 to the screen, similar to the
 .Xr script 1
 command.
@@ -2800,16 +2800,16 @@ by default.
 .It set_utmp
 When enabled,
 .Nm sudo
-will create an entry in the utmp (or utmpx) file when a pseudo-tty
+will create an entry in the utmp (or utmpx) file when a pseudo-terminal
 is allocated.
-A pseudo-tty is allocated by
+A pseudo-terminal is allocated by
 .Nm sudo
-when the
+when it is running in a terminal and one or more of the
 .Em log_input ,
 .Em log_output
 or
 .Em use_pty
-flags are enabled.
+flags is enabled.
 By default, the new entry will be a copy of the user's existing utmp
 entry (if any), with the tty, time, type and pid fields updated.
 This flag is
@@ -2994,7 +2994,7 @@ by default.
 .It use_pty
 If set, and
 .Nm sudo
-is running in a terminal, the command will be run in a pseudo-pty
+is running in a terminal, the command will be run in a pseudo-terminal
 (even if no I/O logging is being done).
 If the
 .Nm sudo
@@ -3008,7 +3008,7 @@ may be capable of injecting commands into the user's
 terminal or running a background process that retains access to the
 user's terminal device even after the main program has finished
 executing.
-By running the command in a separate pseudo-pty, this attack is
+By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
 .Em off
@@ -4474,7 +4474,7 @@ word wrap will be disabled.
 .Sh I/O LOG FILES
 When I/O logging is enabled,
 .Nm sudo
-will run the command in a pseudo-tty and log all user input and/or output,
+will run the command in a pseudo-terminal and log all user input and/or output,
 depending on which options are enabled.
 I/O is logged to the directory specified by the
 .Em iolog_dir
@@ -4512,7 +4512,7 @@ input from the user's tty (what the user types)
 .It Pa stdin
 input from a pipe or file
 .It Pa ttyout
-output from the pseudo-tty (what the command writes to the screen)
+output from the pseudo-terminal (what the command writes to the screen)
 .It Pa stdout
 standard output to a pipe or redirected to a file
 .It Pa stderr
@@ -5349,7 +5349,7 @@ The equivalent of
 .Em main
 for the plugin.
 .It Em pty
-pseudo-tty related code
+pseudo-terminal related code
 .It Em rbtree
 redblack tree internals
 .It Em sssd

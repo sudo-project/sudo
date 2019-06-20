@@ -748,8 +748,8 @@ runs a command as the foreground process as long as
 itself is running in the foreground.
 When
 .Em exec_background
-is enabled and the command is being run in a pty (due to I/O logging
-or the
+is enabled and the command is being run in a pseudo-terminal
+(due to I/O logging or the
 .Em use_pty
 setting), the command will be run as a background process.
 Attempts to read from the controlling terminal (or to change terminal
@@ -770,7 +770,7 @@ has required it or not (the kernel buffers terminals so it is not possible
 to tell whether the command really wants the input).
 This is different from historic
 .Em sudo
-behavior or when the command is not being run in a pty.
+behavior or when the command is not being run in a pseudo-terminal.
 .Pp
 For this to work seamlessly, the operating system must support the
 automatic restarting of system calls.
@@ -901,7 +901,7 @@ SELinux role to use when executing the command.
 .It selinux_type=string
 SELinux type to use when executing the command.
 .It set_utmp=bool
-Create a utmp (or utmpx) entry when a pseudo-tty is allocated.
+Create a utmp (or utmpx) entry when a pseudo-terminal is allocated.
 By default, the new entry will be a copy of the user's existing utmp
 entry (if any), with the tty, time, type and pid fields updated.
 .It sudoedit=bool
@@ -954,12 +954,12 @@ If non-zero then when the timeout expires the command will be killed.
 .It umask=octal
 The file creation mask to use when executing the command.
 .It use_pty=bool
-Allocate a pseudo-tty to run the command in, regardless of whether
+Allocate a pseudo-terminal to run the command in, regardless of whether
 or not I/O logging is in use.
 By default,
 .Nm sudo
 will only run
-the command in a pty when an I/O log plugin is loaded.
+the command in a pseudo-terminal when an I/O log plugin is loaded.
 .It utmp_user=string
 User name to use when constructing a new utmp (or utmpx) entry when
 .Em set_utmp
@@ -1315,7 +1315,7 @@ struct io_plugin {
 .Pp
 When an I/O plugin is loaded,
 .Nm sudo
-runs the command in a pseudo-tty.
+runs the command in a pseudo-terminal.
 This makes it possible to log the input and output from the user's
 session.
 If any of the standard input, standard output or standard error do not
@@ -1327,7 +1327,7 @@ the I/O for logging before passing it on.
 The log_ttyin function receives the raw user input from the terminal
 device (note that this will include input even when echo is disabled,
 such as when a password is read).
-The log_ttyout function receives output from the pseudo-tty that is
+The log_ttyout function receives output from the pseudo-terminal that is
 suitable for replaying the user's session at a later time.
 The
 .Fn log_stdin ,
