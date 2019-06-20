@@ -130,10 +130,14 @@ will use the value of the
 or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
-Note that this may create a security hole as it allows the user to
-run any arbitrary command as root without logging.
-A safer alternative is to place a colon-separated list of editors
-in the
+Note that
+\fBvisudo\fR
+is typically run as root so this option may allow a user with
+\fBvisudo\fR
+privileges to run arbitrary commands as root without logging.
+An alternative is to place a colon-separated list of
+\(lqsafe\(rq
+editors int the
 \fIeditor\fR
 variable.
 \fBvisudo\fR

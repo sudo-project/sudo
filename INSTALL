@@ -670,18 +670,19 @@ Options that set runtime-changeable default values:
   --with-editor=PATH
 	Specify the default editor path for use by visudo.  This may be a
 	single path name or a colon-separated list of editors.  In the latter
-	case, visudo will choose the editor that matches the user's VISUAL
-	or EDITOR environment variables or the first editor in the list that
-	exists.  The default is the path to vi on your system.
+	case, visudo will choose the editor that matches the user's SUDO_EDITOR,
+	VISUAL or EDITOR environment variable, or the first editor in the list
+	that exists.  The default is the path to vi on your system.
 	Sudoers option: editor
 
   --with-env-editor
-	Makes visudo consult the VISUAL and EDITOR environment variables before
-	falling back on the default editor list (as specified by --with-editor).
-	Note that this may create a security hole as it allows the user to
-	run any arbitrary command as root without logging.  A safer alternative
-	is to use a colon-separated list of editors with the --with-editor
-	option.  visudo will then only use the VISUAL or EDITOR variables
+	Makes visudo consult the SUDO_EDITOR, VISUAL and EDITOR environment
+	variables before falling back on the default editor list (as specified
+	by --with-editor).  Note that visudo is typically run as root so this
+	option may allow a user with visudo privileges to run arbitrary
+	commands as root without logging.  An alternative is to use a
+	colon-separated list of "safe" editors with the --with-editor option.
+	visudo will then only use the SUDO_EDITOR, VISUAL or EDITOR variables
 	if they match a value specified via --with-editor.
 	Sudoers option: env_editor
 

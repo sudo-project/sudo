@@ -41,17 +41,17 @@ DDEESSCCRRIIPPTTIIOONN
      env_editor
                If set, vviissuuddoo will use the value of the SUDO_EDITOR, VISUAL or
                EDITOR environment variables before falling back on the default
-               editor list.  Note that this may create a security hole as it
-               allows the user to run any arbitrary command as root without
-               logging.  A safer alternative is to place a colon-separated
-               list of editors in the _e_d_i_t_o_r variable.  vviissuuddoo will then only
-               use SUDO_EDITOR, VISUAL or EDITOR if they match a value
-               specified in _e_d_i_t_o_r.  If the _e_n_v___r_e_s_e_t flag is enabled, the
-               SUDO_EDITOR, VISUAL and/or EDITOR environment variables must be
-               present in the _e_n_v___k_e_e_p list for the _e_n_v___e_d_i_t_o_r flag to
-               function when vviissuuddoo is invoked via ssuuddoo.  The default value is
-               _o_f_f, which can be set at compile time via the --with-env-editor
-               configure option.
+               editor list.  Note that vviissuuddoo is typically run as root so this
+               option may allow a user with vviissuuddoo privileges to run arbitrary
+               commands as root without logging.  An alternative is to place a
+               colon-separated list of "safe" editors int the _e_d_i_t_o_r variable.
+               vviissuuddoo will then only use SUDO_EDITOR, VISUAL or EDITOR if they
+               match a value specified in _e_d_i_t_o_r.  If the _e_n_v___r_e_s_e_t flag is
+               enabled, the SUDO_EDITOR, VISUAL and/or EDITOR environment
+               variables must be present in the _e_n_v___k_e_e_p list for the
+               _e_n_v___e_d_i_t_o_r flag to function when vviissuuddoo is invoked via ssuuddoo.
+               The default value is _o_f_f, which can be set at compile time via
+               the --with-env-editor configure option.
 
      The options are as follows:
 
