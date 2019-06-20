@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 24, 2018
+.Dd June 20, 2019
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -153,9 +153,9 @@ strings.
 The vector is terminated by a
 .Dv NULL
 pointer.
-These settings correspond to flags the user specified when running
+These settings correspond to options the user specified when running
 .Nm sudo .
-As such, they will only be present when the corresponding flag has
+As such, they will only be present when the corresponding option has
 been specified on the command line.
 .Pp
 When parsing
@@ -174,14 +174,14 @@ might.
 .It bsdauth_type=string
 Authentication type, if specified by the
 .Fl a
-flag, to use on
+option, to use on
 systems where
 .Bx
 authentication is supported.
 .It closefrom=number
 If specified, the user has requested via the
 .Fl C
-flag that
+option that
 .Nm sudo
 close all files descriptors with a value of
 .Em number
@@ -229,7 +229,7 @@ This setting has been deprecated in favor of
 .It ignore_ticket=bool
 Set to true if the user specified the
 .Fl k
-flag along with a
+option along with a
 command, indicating that the user wishes to ignore any cached
 authentication credentials.
 .Em implied_shell
@@ -255,11 +255,11 @@ will pass the plugin the path to the user's shell and set
 login class to use when setting resource limits and nice value,
 if specified by the
 .Fl c
-flag.
+option.
 .It login_shell=bool
 Set to true if the user specified the
 .Fl i
-flag, indicating that
+option, indicating that
 the user wishes to run a login shell.
 .It max_groups=int
 The maximum number of groups a user may belong to.
@@ -279,7 +279,7 @@ it is an IPv6 address, else it is IPv4.
 .It noninteractive=bool
 Set to true if the user specified the
 .Fl n
-flag, indicating that
+option, indicating that
 .Nm sudo
 should operate in non-interactive mode.
 The plugin may reject a command run in non-interactive mode if user
@@ -301,12 +301,12 @@ statically compiled into
 .It preserve_environment=bool
 Set to true if the user specified the
 .Fl E
-flag, indicating that
+option, indicating that
 the user wishes to preserve the environment.
 .It preserve_groups=bool
 Set to true if the user specified the
 .Fl P
-flag, indicating that
+option, indicating that
 the user wishes to preserve the group vector instead of setting it
 based on the runas user.
 .It progname=string
@@ -318,7 +318,7 @@ or
 The prompt to use when requesting a password, if specified via
 the
 .Fl p
-flag.
+option.
 .It remote_host=string
 The name of the remote host to run the command on, if specified via
 the
@@ -333,37 +333,37 @@ Only available starting with API version 1.4.
 .It run_shell=bool
 Set to true if the user specified the
 .Fl s
-flag, indicating that the user wishes to run a shell.
+option, indicating that the user wishes to run a shell.
 .It runas_group=string
 The group name or gid to run the command as, if specified via
 the
 .Fl g
-flag.
+option.
 .It runas_user=string
 The user name or uid to run the command as, if specified via the
 .Fl u
-flag.
+option.
 .It selinux_role=string
 SELinux role to use when executing the command, if specified by
 the
 .Fl r
-flag.
+option.
 .It selinux_type=string
 SELinux type to use when executing the command, if specified by
 the
 .Fl t
-flag.
+option.
 .It set_home=bool
 Set to true if the user specified the
 .Fl H
-flag.
+option.
 If true, set the
 .Li HOME
 environment variable to the target user's home directory.
 .It sudoedit=bool
 Set to true when the
 .Fl e
-flag is specified or if invoked as
+option is specified or if invoked as
 .Nm sudoedit .
 The plugin shall substitute an editor into
 .Em argv
@@ -634,7 +634,7 @@ in the user's environment, such as
 and include it in
 .Em argv_out
 (note that environment
-variables may include command line flags).
+variables may include command line options).
 The files to be edited should be copied from
 .Em argv
 into
@@ -1046,7 +1046,7 @@ function is called when
 .Nm sudo
 is run with the
 .Fl v
-flag.
+option.
 For policy plugins such as
 .Nm sudoers
 that cache
@@ -1082,7 +1082,7 @@ the
 .Fl k
 or
 .Fl K
-flag.
+option.
 For policy plugins such as
 .Nm sudoers
 that
@@ -1458,9 +1458,9 @@ strings.
 The vector is terminated by a
 .Dv NULL
 pointer.
-These settings correspond to flags the user specified when running
+These settings correspond to options the user specified when running
 .Nm sudo .
-As such, they will only be present when the corresponding flag has
+As such, they will only be present when the corresponding option has
 been specified on the command line.
 .Pp
 When parsing

@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2019 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "October 24, 2018" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "June 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -165,9 +165,9 @@ strings.
 The vector is terminated by a
 \fRNULL\fR
 pointer.
-These settings correspond to flags the user specified when running
+These settings correspond to options the user specified when running
 \fBsudo\fR.
-As such, they will only be present when the corresponding flag has
+As such, they will only be present when the corresponding option has
 been specified on the command line.
 .sp
 When parsing
@@ -189,7 +189,7 @@ might.
 bsdauth_type=string
 Authentication type, if specified by the
 \fB\-a\fR
-flag, to use on
+option, to use on
 systems where
 BSD
 authentication is supported.
@@ -198,7 +198,7 @@ authentication is supported.
 closefrom=number
 If specified, the user has requested via the
 \fB\-C\fR
-flag that
+option that
 \fBsudo\fR
 close all files descriptors with a value of
 \fInumber\fR
@@ -249,7 +249,7 @@ This setting has been deprecated in favor of
 ignore_ticket=bool
 Set to true if the user specified the
 \fB\-k\fR
-flag along with a
+option along with a
 command, indicating that the user wishes to ignore any cached
 authentication credentials.
 \fIimplied_shell\fR
@@ -277,12 +277,12 @@ BSD
 login class to use when setting resource limits and nice value,
 if specified by the
 \fB\-c\fR
-flag.
+option.
 .TP 6n
 login_shell=bool
 Set to true if the user specified the
 \fB\-i\fR
-flag, indicating that
+option, indicating that
 the user wishes to run a login shell.
 .TP 6n
 max_groups=int
@@ -305,7 +305,7 @@ it is an IPv6 address, else it is IPv4.
 noninteractive=bool
 Set to true if the user specified the
 \fB\-n\fR
-flag, indicating that
+option, indicating that
 \fBsudo\fR
 should operate in non-interactive mode.
 The plugin may reject a command run in non-interactive mode if user
@@ -330,13 +330,13 @@ statically compiled into
 preserve_environment=bool
 Set to true if the user specified the
 \fB\-E\fR
-flag, indicating that
+option, indicating that
 the user wishes to preserve the environment.
 .TP 6n
 preserve_groups=bool
 Set to true if the user specified the
 \fB\-P\fR
-flag, indicating that
+option, indicating that
 the user wishes to preserve the group vector instead of setting it
 based on the runas user.
 .TP 6n
@@ -350,7 +350,7 @@ prompt=string
 The prompt to use when requesting a password, if specified via
 the
 \fB\-p\fR
-flag.
+option.
 .TP 6n
 remote_host=string
 The name of the remote host to run the command on, if specified via
@@ -367,35 +367,35 @@ Only available starting with API version 1.4.
 run_shell=bool
 Set to true if the user specified the
 \fB\-s\fR
-flag, indicating that the user wishes to run a shell.
+option, indicating that the user wishes to run a shell.
 .TP 6n
 runas_group=string
 The group name or gid to run the command as, if specified via
 the
 \fB\-g\fR
-flag.
+option.
 .TP 6n
 runas_user=string
 The user name or uid to run the command as, if specified via the
 \fB\-u\fR
-flag.
+option.
 .TP 6n
 selinux_role=string
 SELinux role to use when executing the command, if specified by
 the
 \fB\-r\fR
-flag.
+option.
 .TP 6n
 selinux_type=string
 SELinux type to use when executing the command, if specified by
 the
 \fB\-t\fR
-flag.
+option.
 .TP 6n
 set_home=bool
 Set to true if the user specified the
 \fB\-H\fR
-flag.
+option.
 If true, set the
 \fRHOME\fR
 environment variable to the target user's home directory.
@@ -403,7 +403,7 @@ environment variable to the target user's home directory.
 sudoedit=bool
 Set to true when the
 \fB\-e\fR
-flag is specified or if invoked as
+option is specified or if invoked as
 \fBsudoedit\fR.
 The plugin shall substitute an editor into
 \fIargv\fR
@@ -720,7 +720,7 @@ in the user's environment, such as
 and include it in
 \fIargv_out\fR
 (note that environment
-variables may include command line flags).
+variables may include command line options).
 The files to be edited should be copied from
 \fIargv\fR
 into
@@ -1193,7 +1193,7 @@ function is called when
 \fBsudo\fR
 is run with the
 \fB\-v\fR
-flag.
+option.
 For policy plugins such as
 \fBsudoers\fR
 that cache
@@ -1234,7 +1234,7 @@ the
 \fB\-k\fR
 or
 \fB\-K\fR
-flag.
+option.
 For policy plugins such as
 \fBsudoers\fR
 that
@@ -1638,9 +1638,9 @@ strings.
 The vector is terminated by a
 \fRNULL\fR
 pointer.
-These settings correspond to flags the user specified when running
+These settings correspond to options the user specified when running
 \fBsudo\fR.
-As such, they will only be present when the corresponding flag has
+As such, they will only be present when the corresponding option has
 been specified on the command line.
 .sp
 When parsing
