@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 19, 2019
+.Dd June 20, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3255,11 +3255,13 @@ Unless invoked as
 does not preserve the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
-and
+or
 .Ev EDITOR
-environment variables by default, even when the
+environment variables unless they are present in the
+.Em env_keep
+list or the
 .Em env_reset
-option is enabled.
+option is disabled.
 The default is
 .Pa @editor@ .
 .It iolog_dir

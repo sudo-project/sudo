@@ -101,15 +101,20 @@ or
 \fREDITOR\fR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
-Note that the
+Note that
+\fBsudo\fR
+does not preserve the
 \fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
-and
+or
 \fREDITOR\fR
-environment variables are not preserved by default when the
+environment variables unless they are present in the
+\fIenv_keep\fR
+list or the
 \fIenv_reset\fR
+option is disabled in the
 \fIsudoers\fR
-option is enabled.
+file.
 The default editor path is
 \fI@editor@\fR
 which can be set at compile time via the

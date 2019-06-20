@@ -32,11 +32,11 @@ DDEESSCCRRIIPPTTIIOONN
                vviissuuddoo.  vviissuuddoo will choose the editor that matches the user's
                SUDO_EDITOR, VISUAL or EDITOR environment variable if possible,
                or the first editor in the list that exists and is executable.
-               Note that the SUDO_EDITOR, VISUAL and EDITOR environment
-               variables are not preserved by default when the _e_n_v___r_e_s_e_t
-               _s_u_d_o_e_r_s option is enabled.  The default editor path is _v_i which
-               can be set at compile time via the --with-editor configure
-               option.
+               Note that ssuuddoo does not preserve the SUDO_EDITOR, VISUAL or
+               EDITOR environment variables unless they are present in the
+               _e_n_v___k_e_e_p list or the _e_n_v___r_e_s_e_t option is disabled in the
+               _s_u_d_o_e_r_s file.  The default editor path is _v_i which can be set
+               at compile time via the --with-editor configure option.
 
      env_editor
                If set, vviissuuddoo will use the value of the SUDO_EDITOR, VISUAL or

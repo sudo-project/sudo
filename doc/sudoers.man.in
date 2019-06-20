@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "June 19, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3453,11 +3453,13 @@ Unless invoked as
 does not preserve the
 \fRSUDO_EDITOR\fR,
 \fRVISUAL\fR
-and
+or
 \fREDITOR\fR
-environment variables by default, even when the
+environment variables unless they are present in the
+\fIenv_keep\fR
+list or the
 \fIenv_reset\fR
-option is enabled.
+option is disabled.
 The default is
 \fI@editor@\fR.
 .TP 18n

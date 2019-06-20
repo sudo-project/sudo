@@ -99,15 +99,20 @@ or
 .Ev EDITOR
 environment variable if possible, or the first editor in the
 list that exists and is executable.
-Note that the
+Note that
+.Nm sudo
+does not preserve the
 .Ev SUDO_EDITOR ,
 .Ev VISUAL
-and
+or
 .Ev EDITOR
-environment variables are not preserved by default when the
+environment variables unless they are present in the
+.Em env_keep
+list or the
 .Em env_reset
+option is disabled in the
 .Em sudoers
-option is enabled.
+file.
 The default editor path is
 .Pa @editor@
 which can be set at compile time via the
