@@ -1272,12 +1272,13 @@ create_admin_success_flag(void)
 static bool
 tty_present(void)
 {
-#if defined(HAVE_KINFO_PROC2_NETBSD) || defined(HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_44BSD) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
-    return user_ttypath != NULL;
-#else
-    int fd = open(_PATH_TTY, O_RDWR);
-    if (fd != -1)
+    debug_decl(tty_present, SUDOERS_DEBUG_PLUGIN)
+    
+    if (user_ttypath == NULL) {
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    debug_return_bool(false);
 	close(fd);
-    return fd != -1;
-#endif
+    }
+    debug_return_bool(true);
 }
