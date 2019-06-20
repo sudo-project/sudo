@@ -1051,7 +1051,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        SUDO_EDITOR, VISUAL and/or EDITOR environment variables
                        must be present in the _e_n_v___k_e_e_p list for the _e_n_v___e_d_i_t_o_r
                        flag to function when vviissuuddoo is invoked via ssuuddoo.  This
-                       flag is _o_f_f by default.
+                       flag is _o_n by default.
 
      env_reset         If set, ssuuddoo will run the command in a minimal
                        environment containing the TERM, PATH, HOME, MAIL,
