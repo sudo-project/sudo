@@ -76,15 +76,11 @@ DOCS = $(mansrcdir)/cvtsudoers.$(mantype) $(mansrcdir)/sudo.$(mantype) \
        $(mansrcdir)/sudoers_timestamp.$(mantype) \
        $(mansrcdir)/sudoreplay.$(mantype) $(mansrcdir)/visudo.$(mantype)
 
-DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/cvtsudoers.cat \
-	  $(srcdir)/sudo.conf.man.in $(srcdir)/sudo.conf.cat \
-	  $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
-	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
-	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
-	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
-	  $(srcdir)/sudoers_timestamp.man.in $(srcdir)/sudoers_timestamp.cat \
-	  $(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
-	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat
+DEVDOCS = $(srcdir)/cvtsudoers.man.in $(srcdir)/sudo.conf.man.in \
+	  $(srcdir)/sudo.man.in $(srcdir)/sudo_plugin.man.in \
+	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.man.in \
+	  $(srcdir)/sudoers_timestamp.man.in $(srcdir)/sudoreplay.man.in \
+	  $(srcdir)/visudo.man.in
 
 OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
 	     $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
@@ -128,12 +124,6 @@ Makefile: $(srcdir)/Makefile.in
 
 .SUFFIXES: .man
 
-varsub: $(top_srcdir)/configure.ac
-	@if [ -n "$(DEVEL)" ]; then \
-	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#5#g\ns#@%s@#8#g\ns#@%s@#%s#\n' SEMAN BAMAN LCMAN PSMAN sysconfdir prefix mansectform mansectsu PACKAGE_VERSION $(VERSION) > $@; \
-	    $(SED) -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.ac | $(SED) -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
-	fi
-
 $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in $(srcdir)/sudo.man.in.sed
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -151,12 +141,6 @@ $(mansrcdir)/sudo.man: $(top_builddir)/config.status $(srcdir)/sudo.man.in fixma
 $(mansrcdir)/sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
-$(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
-
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -170,12 +154,6 @@ $(mansrcdir)/visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in f
 
 $(mansrcdir)/visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
-
-$(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
 
 $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -191,12 +169,6 @@ $(mansrcdir)/sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.ma
 $(mansrcdir)/sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
-$(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
-
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.man.in.sed
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -210,12 +182,6 @@ $(mansrcdir)/sudoers.man: $(top_builddir)/config.status $(srcdir)/sudoers.man.in
 
 $(mansrcdir)/sudoers.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.mdoc.in $(srcdir)/fixmdoc.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.mdoc.in | $(SED) -f $(srcdir)/fixmdoc.sed > $@
-
-$(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
 
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -231,12 +197,6 @@ $(mansrcdir)/sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.l
 $(mansrcdir)/sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
-$(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
-
 $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -250,12 +210,6 @@ $(mansrcdir)/sudoers_timestamp.man: $(top_builddir)/config.status $(srcdir)/sudo
 
 $(mansrcdir)/sudoers_timestamp.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
-
-$(srcdir)/sudoers_timestamp.cat: varsub $(srcdir)/sudoers_timestamp.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
 
 $(srcdir)/cvtsudoers.man.in: $(srcdir)/cvtsudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -271,12 +225,6 @@ $(mansrcdir)/cvtsudoers.man: $(top_builddir)/config.status $(srcdir)/cvtsudoers.
 $(mansrcdir)/cvtsudoers.mdoc: $(top_builddir)/config.status $(srcdir)/cvtsudoers.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
-$(srcdir)/cvtsudoers.cat: varsub $(srcdir)/cvtsudoers.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/cvtsudoers.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
-
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -291,12 +239,6 @@ $(mansrcdir)/sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.
 $(mansrcdir)/sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
 
-$(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
-
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -310,12 +252,6 @@ $(mansrcdir)/sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugi
 
 $(mansrcdir)/sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin.mdoc.in
 	cd $(top_builddir) && $(SHELL) config.status --file=doc/$@
-
-$(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
-	@if [ -n "$(DEVEL)" ]; then \
-	    echo "Generating $@"; \
-	    $(SED) -f varsub $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tascii -mdoc | $(SED) -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
-	fi
 
 pre-install:
 
@@ -383,7 +319,7 @@ pvs-studio:
 check:
 
 clean:
-	-rm -f varsub fixman.sed
+	-rm -f fixman.sed
 
 mostlyclean: clean
 

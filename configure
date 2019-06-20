@@ -3106,7 +3106,7 @@ mailsub="*** SECURITY information for %h ***"
 badpass_message="Sorry, try again."
 fqdn=off
 runas_default=root
-env_editor=off
+env_editor=on
 env_reset=on
 editor=vi
 passwd_tries=3
@@ -15393,10 +15393,6 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_mantype" >&5
 $as_echo "$sudo_cv_var_mantype" >&6; }
 	MANTYPE="$sudo_cv_var_mantype"
-    else
-	MANTYPE=cat
-	MANDIRTYPE=cat
-	mansrcdir='$(srcdir)'
     fi
 fi
 
@@ -15867,24 +15863,11 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     *-*-irix*)
 		$as_echo "#define _BSD_TYPES 1" >>confdefs.h
 
-		if test -z "$NROFFPROG"; then
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-			if test -d /usr/share/catman/local; then
-			    mandir="/usr/share/catman/local"
-			else
-			    mandir="/usr/catman/local"
-			fi
-		    fi
-		    # Compress cat pages with pack
-		    MANCOMPRESS='pack'
-		    MANCOMPRESSEXT='.z'
-		else
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-			if test -d "/usr/share/man/local"; then
-			    mandir="/usr/share/man/local"
-			else
-			    mandir="/usr/man/local"
-			fi
+		if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
+		    if test -d "/usr/share/man/local"; then
+			mandir="/usr/share/man/local"
+		    else
+			mandir="/usr/man/local"
 		    fi
 		fi
 		# IRIX <= 4 needs -lsun

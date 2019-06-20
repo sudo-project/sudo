@@ -1748,10 +1748,6 @@ else
 	    ]
 	)
 	MANTYPE="$sudo_cv_var_mantype"
-    else
-	MANTYPE=cat
-	MANDIRTYPE=cat
-	mansrcdir='$(srcdir)'
     fi
 fi
 
@@ -2032,24 +2028,11 @@ case "$host" in
 		;;
     *-*-irix*)
 		AC_DEFINE([_BSD_TYPES])
-		if test -z "$NROFFPROG"; then
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-			if test -d /usr/share/catman/local; then
-			    mandir="/usr/share/catman/local"
-			else
-			    mandir="/usr/catman/local"
-			fi
-		    fi
-		    # Compress cat pages with pack
-		    MANCOMPRESS='pack'
-		    MANCOMPRESSEXT='.z'
-		else
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-			if test -d "/usr/share/man/local"; then
-			    mandir="/usr/share/man/local"
-			else
-			    mandir="/usr/man/local"
-			fi
+		if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
+		    if test -d "/usr/share/man/local"; then
+			mandir="/usr/share/man/local"
+		    else
+			mandir="/usr/man/local"
 		    fi
 		fi
 		# IRIX <= 4 needs -lsun
