@@ -1960,25 +1960,17 @@ If enabled,
 will set the
 .Ev HOME
 environment variable to the home directory of the target user
-(which is root unless the
+(which is root unless
+.Nm sudo Ns 's
 .Fl u
 option is used).
-This effectively means that the
-.Fl H
-option is always implied.
-Note that by default,
-.Ev HOME
-will be set to the home directory of the target user when the
+This option is largely obsolete and has no effect unless the
 .Em env_reset
-option is enabled, so
-.Em always_set_home
-only has an effect for configurations where either
-.Em env_reset
-is disabled or
+option has been disabled or
 .Ev HOME
 is present in the
 .Em env_keep
-list.
+list, both of which are strongly discouraged.
 This flag is
 .Em off
 by default.
@@ -2759,30 +2751,20 @@ If enabled and
 .Nm sudo
 is invoked with the
 .Fl s
-option the
+option, the
 .Ev HOME
 environment variable will be set to the home directory of the target
-user (which is root unless the
+user (which is root unless
+.Nm sudo Ns 's
 .Fl u
 option is used).
-This effectively makes the
-.Fl s
-option imply
-.Fl H .
-Note that
-.Ev HOME
-is already set when the
+This option is largely obsolete and has no effect unless the
 .Em env_reset
-option is enabled, so
-.Em set_home
-is only effective for configurations where either
-.Em env_reset
-is disabled
-or
+option has been disabled or
 .Ev HOME
 is present in the
 .Em env_keep
-list.
+list, both of which are strongly discouraged.
 This flag is
 .Em off
 by default.
@@ -4103,6 +4085,18 @@ is displayed when
 is run by root with the
 .Fl V
 option.
+.Pp
+Preserving the
+.Ev HOME
+environment variable has security implications since many programs use it
+when searching for configuration files.
+Adding
+.Ev HOME
+to
+.Em env_keep
+may enable a user to run unrestricted commands via
+.Nm sudo
+and is strongly discouraged.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The

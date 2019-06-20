@@ -2088,25 +2088,17 @@ If enabled,
 will set the
 \fRHOME\fR
 environment variable to the home directory of the target user
-(which is root unless the
+(which is root unless
+\fBsudo\fR's
 \fB\-u\fR
 option is used).
-This effectively means that the
-\fB\-H\fR
-option is always implied.
-Note that by default,
-\fRHOME\fR
-will be set to the home directory of the target user when the
+This option is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option is enabled, so
-\fIalways_set_home\fR
-only has an effect for configurations where either
-\fIenv_reset\fR
-is disabled or
+option has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
-list.
+list, both of which are strongly discouraged.
 This flag is
 \fIoff\fR
 by default.
@@ -2932,30 +2924,20 @@ If enabled and
 \fBsudo\fR
 is invoked with the
 \fB\-s\fR
-option the
+option, the
 \fRHOME\fR
 environment variable will be set to the home directory of the target
-user (which is root unless the
+user (which is root unless
+\fBsudo\fR's
 \fB\-u\fR
 option is used).
-This effectively makes the
-\fB\-s\fR
-option imply
-\fB\-H\fR.
-Note that
-\fRHOME\fR
-is already set when the
+This option is largely obsolete and has no effect unless the
 \fIenv_reset\fR
-option is enabled, so
-\fIset_home\fR
-is only effective for configurations where either
-\fIenv_reset\fR
-is disabled
-or
+option has been disabled or
 \fRHOME\fR
 is present in the
 \fIenv_keep\fR
-list.
+list, both of which are strongly discouraged.
 This flag is
 \fIoff\fR
 by default.
@@ -4398,6 +4380,18 @@ is displayed when
 is run by root with the
 \fB\-V\fR
 option.
+.sp
+Preserving the
+\fRHOME\fR
+environment variable has security implications since many programs use it
+when searching for configuration files.
+Adding
+\fRHOME\fR
+to
+\fIenv_keep\fR
+may enable a user to run unrestricted commands via
+\fBsudo\fR
+and is strongly discouraged.
 .SH "GROUP PROVIDER PLUGINS"
 The
 \fBsudoers\fR
