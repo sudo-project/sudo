@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 20, 2019
+.Dd June 21, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4089,7 +4089,7 @@ option.
 Preserving the
 .Ev HOME
 environment variable has security implications since many programs use it
-when searching for configuration files.
+when searching for configuration or data files.
 Adding
 .Ev HOME
 to
@@ -4097,6 +4097,14 @@ to
 may enable a user to run unrestricted commands via
 .Nm sudo
 and is strongly discouraged.
+Users wishing to edit files with
+.Nm sudo
+should run
+.Nm sudoedit
+(or
+.Nm sudo Fl e )
+to get their accustomed editor configuration instead of
+invoking the editor directly.
 .El
 .Sh GROUP PROVIDER PLUGINS
 The

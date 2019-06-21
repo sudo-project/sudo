@@ -137,7 +137,9 @@ A) Many programs use the HOME environment variable to locate
 
    While it is possible to preserve the value of the HOME environment
    variable by adding it to the "env_keep" list in the sudoers file,
-   doing so is strongly discouraged.
+   doing so is strongly discouraged.  Users wishing to edit files
+   with sudo should run sudoedit (or sudo -e) to get their accustomed
+   editor configuration instead of invoking the editor directly.
 
 Q) How can I keep sudo from asking for a password?
 A) To specify this on a per-user (and per-command) basis, use the
