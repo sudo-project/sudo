@@ -227,13 +227,21 @@ A) On systems that use a Mozilla-derived LDAP SDK there must be a
     Enter new password: <return>
     Re-enter password: <return>
 
-Q) On Solaris, when I run command via sudo it displays information
-   about the last login for every command.  How can I fix this?
-A) This output comes from /usr/lib/security/pam_unix_session.so.1.
-   To suppress it, first create /etc/pam.d/sudo if it doesn't exist:
-    cp /etc/pam.d/other /etc/pam.d/sudo
-   Then add "nowarn" to the end of the pam_unix_session.so.1 line:
-    session required pam_unix_session.so.1 nowarm
+Q) Why does sudo reset the HOME environment variable?
+A) Many programs use the HOME environment variable to locate
+   configuration and data files.  Often, these configuration files
+   are treated as trusted input that affects how the program operates.
+   By controlling the configuration files, a user may be able to
+   cause the program to execute other commands without sudo's
+   restrictions or logging.
+
+   Some programs perform extra checks when the real and effective
+   user-IDs differ, but because sudo runs commands with all user-IDs
+   set to the target user, these checks are insufficient.
+
+   While it is possible to preserve the value of the HOME environment
+   variable by adding it to the "env_keep" list in the sudoers file,
+   doing so is strongly discouraged.
 
 Q) On HP-UX, the umask setting in sudoers has no effect.
 A) If your /etc/pam.conf file has the libpam_hpsec.so.1 session module
