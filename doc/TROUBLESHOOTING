@@ -112,15 +112,32 @@ A) You can specify the editor to use in visudo in the sudoers file.
    The defaults can also be set at configure time using the
    --with-editor and --with-env-editor configure options.
 
-Q) Sudo appears to be removing some variables from my environment, why?
-A) By default, sudo runs commands with  new, minimal environment.
-   It is possible to control what environment variables are copied
-   from the invoking user's environment using the "env_keep" setting
-   in sudoers.  Another, less secure, option is to disable the
-   "env_reset" setting to copy all variables from the invoking
-   user's environment that are not considered "dangerous".  See the
-   "Command Environment" section of the sudoers manual for more
-   information.
+Q) Sudo appears to be removing some variables from the environment, why?
+A) By default, sudo runs commands with a new, minimal environment.
+   The "env_keep" setting in sudoers can be used to control which
+   environment variables are preserved from the invoking user's
+   environment via the "env_keep" setting in sudoers.
+
+   While it is possible to disable the "env_reset" setting, which
+   will preserve all environment variables that don't match a black
+   list, doing so is strongly discouraged.  See the "Command
+   environment" section of the sudoers manual for more information.
+
+Q) Why does sudo reset the HOME environment variable?
+A) Many programs use the HOME environment variable to locate
+   configuration and data files.  Often, these configuration files
+   are treated as trusted input that affects how the program operates.
+   By controlling the configuration files, a user may be able to
+   cause the program to execute other commands without sudo's
+   restrictions or logging.
+
+   Some programs perform extra checks when the real and effective
+   user-IDs differ, but because sudo runs commands with all user-IDs
+   set to the target user, these checks are insufficient.
+
+   While it is possible to preserve the value of the HOME environment
+   variable by adding it to the "env_keep" list in the sudoers file,
+   doing so is strongly discouraged.
 
 Q) How can I keep sudo from asking for a password?
 A) To specify this on a per-user (and per-command) basis, use the
@@ -226,22 +243,6 @@ A) On systems that use a Mozilla-derived LDAP SDK there must be a
 
     Enter new password: <return>
     Re-enter password: <return>
-
-Q) Why does sudo reset the HOME environment variable?
-A) Many programs use the HOME environment variable to locate
-   configuration and data files.  Often, these configuration files
-   are treated as trusted input that affects how the program operates.
-   By controlling the configuration files, a user may be able to
-   cause the program to execute other commands without sudo's
-   restrictions or logging.
-
-   Some programs perform extra checks when the real and effective
-   user-IDs differ, but because sudo runs commands with all user-IDs
-   set to the target user, these checks are insufficient.
-
-   While it is possible to preserve the value of the HOME environment
-   variable by adding it to the "env_keep" list in the sudoers file,
-   doing so is strongly discouraged.
 
 Q) On HP-UX, the umask setting in sudoers has no effect.
 A) If your /etc/pam.conf file has the libpam_hpsec.so.1 session module
