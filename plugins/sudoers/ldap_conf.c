@@ -201,7 +201,7 @@ sudo_ldap_conf_add_ports(void)
 
     hostbuf[0] = '\0';
     len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
-    if (len <= 0 || len >= (int)sizeof(defport)) {
+    if (len < 0 || len >= ssizeof(defport)) {
 	sudo_warnx(U_("sudo_ldap_conf_add_ports: port too large"));
 	debug_return_bool(false);
     }

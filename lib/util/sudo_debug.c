@@ -653,7 +653,7 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
 	    va_copy(ap2, ap);
 	    buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap2) : 0;
 	    va_end(ap2);
-	    if (buflen >= (int)sizeof(static_buf)) {
+	    if (buflen >= ssizeof(static_buf)) {
 		va_list ap3;
 
 		/* Not enough room in static buf, allocate dynamically. */
@@ -763,7 +763,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 		buflen += strlen(*av) + 1;
 	    buflen--;
 	}
-	if (buflen >= (int)sizeof(static_buf)) {
+	if (buflen >= ssizeof(static_buf)) {
 	    buf = malloc(buflen + 1);
 	    if (buf == NULL)
 		goto out;

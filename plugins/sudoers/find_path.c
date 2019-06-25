@@ -142,7 +142,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	 */
 	len = snprintf(command, sizeof(command), "%.*s/%s",
 	    (int)(ep - cp), cp, infile);
-	if (len <= 0 || len >= (int)sizeof(command)) {
+	if (len < 0 || len >= ssizeof(command)) {
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
@@ -156,7 +156,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
      */
     if (!found && checkdot) {
 	len = snprintf(command, sizeof(command), "./%s", infile);
-	if (len <= 0 || len >= (int)sizeof(command)) {
+	if (len < 0 || len >= ssizeof(command)) {
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}

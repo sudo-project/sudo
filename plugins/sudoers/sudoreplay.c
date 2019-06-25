@@ -317,13 +317,13 @@ main(int argc, char *argv[])
     if (VALID_ID(id)) {
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
-	if (plen <= 0 || plen >= (int)sizeof(path))
+	if (plen < 0 || plen >= ssizeof(path))
 	    sudo_fatalx(U_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
 	    session_dir, id);
-	if (plen <= 0 || plen >= (int)sizeof(path))
+	if (plen < 0 || plen >= ssizeof(path))
 	    sudo_fatalx(U_("%s/%s/timing: %s"), session_dir,
 		id, strerror(ENAMETOOLONG));
     }
@@ -619,7 +619,7 @@ xterm_set_size(int rows, int cols)
 
     /* XXX - save cursor and position restore after resizing */
     len = snprintf(buf, sizeof(buf), setsize_fmt, rows, cols);
-    if (len <= 0 || len >= (int)sizeof(buf)) {
+    if (len < 0 || len >= ssizeof(buf)) {
 	/* not possible due to size of buf */
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: internal error, buffer too small?", __func__);
@@ -1473,7 +1473,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 	for (i = 0; i < sessions_len; i++) {
 	    len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
 		"%s/log", sessions[i]);
-	    if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
+	    if (len < 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
 		errno = ENAMETOOLONG;
 		sudo_fatal("%s/%s/log", dir, sessions[i]);
 	    }

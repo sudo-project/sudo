@@ -88,7 +88,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 
 	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
 	    info->path);
-	if (len <= 0 || (size_t)len >= pathsize) {
+	if (len < 0 || (size_t)len >= pathsize) {
 	    sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
 		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	    sudo_warnx(U_("%s%s: %s"), sudo_conf_plugin_dir_path(), info->path,

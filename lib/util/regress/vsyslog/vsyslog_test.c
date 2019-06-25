@@ -99,7 +99,7 @@ main(int argc, char *argv[])
     /* Test small buffer w/ errno. */
     len = snprintf(buf1, sizeof(buf1),
 	 "unable to open %s: %s", "/var/log/sudo-io/seq", strerror(ENOENT));
-    if (len < 0 || len >= (int)sizeof(buf1))
+    if (len < 0 || len >= ssizeof(buf1))
 	sudo_warnx_nodebug("buf1 trucated at %s:%d", __FILE__, __LINE__);
     expected_result = buf1;
     errno = ENOENT;
@@ -115,7 +115,7 @@ main(int argc, char *argv[])
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
     len = snprintf(buf2, sizeof(buf2), "%s: %s", buf1, strerror(EINVAL));
-    if (len < 0 || len >= (int)sizeof(buf2))
+    if (len < 0 || len >= ssizeof(buf2))
 	sudo_warnx_nodebug("buf2 trucated at %s:%d", __FILE__, __LINE__);
     expected_result = buf2;
     errno = EINVAL;
@@ -125,7 +125,7 @@ main(int argc, char *argv[])
     memset(buf1, 'b', 8184);
     buf1[8184] = '\0';
     len = snprintf(buf2, sizeof(buf2), "%.*s", 2047, buf1);
-    if (len < 0 || len >= (int)sizeof(buf2))
+    if (len < 0 || len >= ssizeof(buf2))
 	sudo_warnx_nodebug("buf2 trucated at %s:%d", __FILE__, __LINE__);
     expected_result = buf2;
     test_vsyslog(0, buf1);

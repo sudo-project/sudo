@@ -144,6 +144,9 @@
 # define mtim_get(_x, _y)	do { (_y).tv_sec = (_x)->st_mtime; (_y).tv_nsec = 0; } while (0)
 #endif /* HAVE_ST_MTIM */
 
+/* sizeof() that returns a signed value */
+#define ssizeof(_x)	((ssize_t)sizeof(_x))
+
 /* Bit map macros. */
 #define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))
 #define sudo_clrbit(_a, _i)	((_a)[(_i) / NBBY] &= ~(1<<((_i) % NBBY)))

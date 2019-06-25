@@ -74,7 +74,7 @@ group_plugin_load(char *plugin_info)
 	len = snprintf(path, sizeof(path), "%s%s",
 	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
     }
-    if (len <= 0 || len >= (int)sizeof(path)) {
+    if (len < 0 || len >= ssizeof(path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s%s",
 	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);

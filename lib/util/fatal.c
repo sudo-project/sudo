@@ -208,7 +208,7 @@ warning(const char *errstr, const char *fmt, va_list ap)
 		va_copy(ap2, ap);
 		buflen = vsnprintf(static_buf, sizeof(static_buf), fmt, ap2);
 		va_end(ap2);
-		if (buflen >= (int)sizeof(static_buf)) {
+		if (buflen >= ssizeof(static_buf)) {
 		    buf = malloc(++buflen);
 		    if (buf != NULL)
 			(void)vsnprintf(buf, buflen, fmt, ap);

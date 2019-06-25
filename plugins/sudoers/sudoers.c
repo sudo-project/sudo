@@ -1246,7 +1246,7 @@ create_admin_success_flag(void)
     /* Build path to flag file. */
     len = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
 	user_dir);
-    if (len <= 0 || len >= (int)sizeof(flagfile))
+    if (len < 0 || len >= ssizeof(flagfile))
 	debug_return_int(false);
 
     /* Create admin flag file if it doesn't already exist. */

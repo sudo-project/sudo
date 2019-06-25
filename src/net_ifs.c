@@ -179,7 +179,7 @@ get_net_ifs(char **addrinfo)
 
 		len = snprintf(cp, ailen - (*addrinfo - cp),
 		    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
-		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
+		if (len < 0 || len >= ailen - (*addrinfo - cp)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
@@ -196,7 +196,7 @@ get_net_ifs(char **addrinfo)
 
 		len = snprintf(cp, ailen - (*addrinfo - cp),
 		    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
-		if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
+		if (len < 0 || len >= ailen - (*addrinfo - cp)) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    goto done;
 		}
@@ -341,7 +341,7 @@ get_net_ifs(char **addrinfo)
 
 	len = snprintf(cp, ailen - (*addrinfo - cp),
 	    "%s%s/%s", cp == *addrinfo ? "" : " ", addrstr, maskstr);
-	if (len <= 0 || len >= ailen - (*addrinfo - cp)) {
+	if (len < 0 || len >= ailen - (*addrinfo - cp)) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}

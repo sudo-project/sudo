@@ -468,7 +468,7 @@ get_user_groups(struct user_details *ud)
     for (i = 0; i < ud->ngroups; i++) {
 	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
 	    i ? "," : "", (unsigned int)ud->groups[i]);
-	if (len <= 0 || (size_t)len >= glsize - (cp - gid_list))
+	if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
     }
@@ -864,7 +864,7 @@ sudo_check_suid(const char *sudo)
 
 		    int len = snprintf(pathbuf, sizeof(pathbuf), "%.*s/%s",
 			(int)(ep - cp), cp, sudo);
-		    if (len <= 0 || len >= (int)sizeof(pathbuf))
+		    if (len < 0 || len >= ssizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
 			sudo = pathbuf;

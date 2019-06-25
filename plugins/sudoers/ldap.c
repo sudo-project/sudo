@@ -492,7 +492,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     /* Build filter. */
     len = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
 	timebuffer, timebuffer);
-    if (len <= 0 || (size_t)len >= buffersize) {
+    if (len < 0 || (size_t)len >= buffersize) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	errno = EOVERFLOW;
 	len = -1;

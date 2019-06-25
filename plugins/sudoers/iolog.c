@@ -403,7 +403,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
      * Open sequence file
      */
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
-    if (len <= 0 || len >= (int)sizeof(pathbuf)) {
+    if (len < 0 || len >= ssizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_warning(SLOG_SEND_MAIL, "%s/seq", pathbuf);
 	goto done;
@@ -431,7 +431,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
-	if (len > 0 && len < (int)sizeof(fallback)) {
+	if (len > 0 && len < ssizeof(fallback)) {
 	    int fd2 = io_open(fallback, O_RDWR|O_CREAT, iolog_filemode);
 	    if (fd2 != -1) {
 		if (fchown(fd2, iolog_uid, iolog_gid) != 0) {

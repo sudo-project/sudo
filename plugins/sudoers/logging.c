@@ -466,7 +466,7 @@ fmt_authfail_message(char **str, va_list ap)
 		break;
 	    case 'd':
 		len = snprintf(dst, dst_end - dst, "%u", tries);
-		if (len <= 0 || len >= (int)(dst_end - dst))
+		if (len < 0 || len >= (int)(dst_end - dst))
 		    goto done;
 		dst += len;
 		src += 2;
