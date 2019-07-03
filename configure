@@ -682,7 +682,7 @@ OBJEXT
 EXEEXT
 ac_ct_CC
 CC
-PLUGINDIR
+plugindir
 pam_login_service
 pam_session
 editor
@@ -3123,7 +3123,7 @@ nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
 pam_login_service=sudo
-PLUGINDIR="$libexecdir/sudo"
+plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -6035,7 +6035,7 @@ if test "${with_plugindir+set}" = set; then :
 		;;
     no)		as_fn_error $? "\"--without-plugindir not supported.\"" "$LINENO" 5
 		;;
-    *)		PLUGINDIR="$with_plugindir"
+    *)		plugindir="$with_plugindir"
 		;;
 esac
 fi
@@ -26913,11 +26913,11 @@ while test X"$sesh_file" != X"$_sesh_file"; do
     eval sesh_file="$_sesh_file"
 done
 
-# Update exec_prefix in PLUGINDIR
-_PLUGINDIR=
-while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-    _PLUGINDIR="$PLUGINDIR"
-    eval PLUGINDIR="$_PLUGINDIR"
+# Update exec_prefix in plugindir
+_plugindir=
+while test X"$plugindir" != X"$_plugindir"; do
+    _plugindir="$plugindir"
+    eval plugindir="$_plugindir"
 done
 exec_prefix="$oexec_prefix"
 
@@ -26953,7 +26953,7 @@ EOF
 fi
 if test X"$enable_shared" != X"no"; then
     cat >>confdefs.h <<EOF
-#define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR/"
+#define _PATH_SUDO_PLUGIN_DIR "$plugindir/"
 EOF
 
 

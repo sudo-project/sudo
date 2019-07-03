@@ -117,7 +117,7 @@ specified by the
 \fIplugin_dir\fR
 \fRPath\fR
 setting, which defaults to
-\fI@PLUGINDIR@\fR.
+\fI@plugindir@\fR.
 In other words:
 .nf
 .sp
@@ -130,7 +130,7 @@ is equivalent to:
 .nf
 .sp
 .RS 6n
-Plugin sudoers_policy @PLUGINDIR@/sudoers.so
+Plugin sudoers_policy @plugindir@/sudoers.so
 .RE
 .fi
 .PP
@@ -295,7 +295,7 @@ plugin_dir
 The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
-\fI@PLUGINDIR@\fR.
+\fI@plugindir@\fR.
 .if \n(SL \{\
 .TP 10n
 sesh
@@ -650,7 +650,7 @@ front end configuration
 #   Debug sudo /var/log/sudo_debug all@warn
 #   Set disable_coredump true
 #
-# The plugin_path is relative to @PLUGINDIR@ unless
+# The plugin_path is relative to @plugindir@ unless
 #   fully qualified.
 # The plugin_name corresponds to a global symbol in the plugin
 #   that contains the plugin interface structure.

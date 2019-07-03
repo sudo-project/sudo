@@ -155,7 +155,7 @@ AC_SUBST([secure_path])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
-AC_SUBST([PLUGINDIR])
+AC_SUBST([plugindir])
 #
 # Begin initial values for man page substitution
 #
@@ -199,7 +199,7 @@ nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
 pam_login_service=sudo
-PLUGINDIR="$libexecdir/sudo"
+plugindir="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -1253,7 +1253,7 @@ AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to
 		;;
     no)		AC_MSG_ERROR(["--without-plugindir not supported."])
 		;;
-    *)		PLUGINDIR="$with_plugindir"
+    *)		plugindir="$with_plugindir"
 		;;
 esac])
 
@@ -4394,11 +4394,11 @@ while test X"$sesh_file" != X"$_sesh_file"; do
     eval sesh_file="$_sesh_file"
 done
 
-# Update exec_prefix in PLUGINDIR
-_PLUGINDIR=
-while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-    _PLUGINDIR="$PLUGINDIR"
-    eval PLUGINDIR="$_PLUGINDIR"
+# Update exec_prefix in plugindir
+_plugindir=
+while test X"$plugindir" != X"$_plugindir"; do
+    _plugindir="$plugindir"
+    eval plugindir="$_plugindir"
 done
 exec_prefix="$oexec_prefix"
 
@@ -4424,7 +4424,7 @@ else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
 fi
 if test X"$enable_shared" != X"no"; then
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$plugindir/")
     AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
 else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, NULL)

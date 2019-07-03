@@ -114,7 +114,7 @@ specified by the
 .Em plugin_dir
 .Li Path
 setting, which defaults to
-.Pa @PLUGINDIR@ .
+.Pa @plugindir@ .
 In other words:
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so
@@ -122,7 +122,7 @@ Plugin sudoers_policy sudoers.so
 .Pp
 is equivalent to:
 .Bd -literal -offset indent
-Plugin sudoers_policy @PLUGINDIR@/sudoers.so
+Plugin sudoers_policy @plugindir@/sudoers.so
 .Ed
 .Pp
 If the plugin was compiled statically into the
@@ -270,7 +270,7 @@ The default value is
 The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
-.Pa @PLUGINDIR@ .
+.Pa @plugindir@ .
 .if \n(SL \{\
 .It sesh
 The fully-qualified path to the
@@ -587,7 +587,7 @@ front end configuration
 #   Debug sudo /var/log/sudo_debug all@warn
 #   Set disable_coredump true
 #
-# The plugin_path is relative to @PLUGINDIR@ unless
+# The plugin_path is relative to @plugindir@ unless
 #   fully qualified.
 # The plugin_name corresponds to a global symbol in the plugin
 #   that contains the plugin interface structure.

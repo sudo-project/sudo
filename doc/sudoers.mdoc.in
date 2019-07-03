@@ -3720,7 +3720,7 @@ A string containing a
 group plugin with optional arguments.
 The string should consist of the plugin
 path, either fully-qualified or relative to the
-.Pa @PLUGINDIR@
+.Pa @plugindir@
 directory, followed by any configuration arguments the plugin requires.
 These arguments (if any) will be passed to the plugin's initialization function.
 If arguments are present, the string must be enclosed in double quotes
@@ -4122,7 +4122,7 @@ Defaults setting.
 The argument to
 .Em group_plugin
 should consist of the plugin path, either fully-qualified or relative to the
-.Pa @PLUGINDIR@
+.Pa @plugindir@
 directory, followed by any configuration options the plugin requires.
 These options (if specified) will be passed to the plugin's initialization
 function.

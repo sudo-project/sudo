@@ -124,7 +124,7 @@ shlib_map = sudoers.map
 shlib_opt = sudoers.opt
 
 # Directory in which to install the sudoers plugin
-plugindir = @PLUGINDIR@
+plugindir = @plugindir@
 
 # Directory in which to install the sudoers file
 sudoersdir = $(sysconfdir)

@@ -87,7 +87,7 @@ sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
-plugindir = @PLUGINDIR@
+plugindir = @plugindir@
 
 # File mode and map file to use for shared libraries/objects
 shlib_enable = @SHLIB_ENABLE@
