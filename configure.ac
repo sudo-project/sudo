@@ -4404,13 +4404,14 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
 	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
     fi
+    # PLUGINDIR gets substitured even when --disable-shared is specified
+    PLUGINDIR="$with_plugindir"
+    _PLUGINDIR=
+    while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
+	_PLUGINDIR="$PLUGINDIR"
+	eval PLUGINDIR="$_PLUGINDIR"
+    done
     if test X"$enable_shared" != X"no"; then
-	PLUGINDIR="$with_plugindir"
-	_PLUGINDIR=
-	while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-	    _PLUGINDIR="$PLUGINDIR"
-	    eval PLUGINDIR="$_PLUGINDIR"
-	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
 	AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
     fi

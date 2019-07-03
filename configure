@@ -26930,13 +26930,14 @@ EOF
 EOF
 
     fi
+    # PLUGINDIR gets substitured even when --disable-shared is specified
+    PLUGINDIR="$with_plugindir"
+    _PLUGINDIR=
+    while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
+	_PLUGINDIR="$PLUGINDIR"
+	eval PLUGINDIR="$_PLUGINDIR"
+    done
     if test X"$enable_shared" != X"no"; then
-	PLUGINDIR="$with_plugindir"
-	_PLUGINDIR=
-	while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-	    _PLUGINDIR="$PLUGINDIR"
-	    eval PLUGINDIR="$_PLUGINDIR"
-	done
 	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR/"
 EOF
