@@ -15,7 +15,8 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 20, 2019
+.nr SL @SEMAN@
+.Dd July 3, 2019
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -228,7 +229,7 @@ If terminal devices may be located in a sub-directory of
 .Pa /dev ,
 that path must be explicitly listed in
 .Em devsearch .
-The default value is:
+The default value is
 .Li /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 .Pp
 This option is ignored on systems that support either the
@@ -263,13 +264,14 @@ This is used to implement the
 functionality on systems that support
 .Ev LD_PRELOAD
 or its equivalent.
-The default value is:
+The default value is
 .Pa @noexec_file@ .
 .It plugin_dir
 The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
 .Pa @PLUGINDIR@ .
+.if \n(SL \{\
 .It sesh
 The fully-qualified path to the
 .Nm sesh
@@ -279,6 +281,7 @@ This setting is only used when
 is built with SELinux support.
 The default value is
 .Pa @sesh_file@ .
+.\}              
 .El
 .Ss Other settings
 The

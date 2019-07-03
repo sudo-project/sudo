@@ -16,7 +16,8 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO.CONF" "@mansectform@" "June 20, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.nr SL @SEMAN@
+.TH "SUDO.CONF" "@mansectform@" "July 3, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -251,7 +252,7 @@ If terminal devices may be located in a sub-directory of
 \fI/dev\fR,
 that path must be explicitly listed in
 \fIdevsearch\fR.
-The default value is:
+The default value is
 \fR/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev\fR
 .sp
 This option is ignored on systems that support either the
@@ -287,7 +288,7 @@ This is used to implement the
 functionality on systems that support
 \fRLD_PRELOAD\fR
 or its equivalent.
-The default value is:
+The default value is
 \fI@noexec_file@\fR.
 .TP 10n
 plugin_dir
@@ -295,6 +296,7 @@ The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
 \fI@PLUGINDIR@\fR.
+.if \n(SL \{\
 .TP 10n
 sesh
 The fully-qualified path to the
@@ -305,6 +307,7 @@ This setting is only used when
 is built with SELinux support.
 The default value is
 \fI@sesh_file@\fR.
+.\}
 .SS "Other settings"
 The
 \fBsudo.conf\fR
