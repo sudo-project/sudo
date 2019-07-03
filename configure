@@ -3117,13 +3117,13 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
-noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
-sesh_file=/usr/local/libexec/sudo/sesh
+noexec_file="$libexecdir/sudo/sudo_noexec.so"
+sesh_file="$libexecdir/sudo/sesh"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
 pam_login_service=sudo
-PLUGINDIR=/usr/local/libexec/sudo
+PLUGINDIR="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -6031,12 +6031,13 @@ fi
 # Check whether --with-plugindir was given.
 if test "${with_plugindir+set}" = set; then :
   withval=$with_plugindir; case $with_plugindir in
-    no)		as_fn_error $? "\"illegal argument: --without-plugindir.\"" "$LINENO" 5
+    yes)	as_fn_error $? "\"must give --with-plugindir an argument.\"" "$LINENO" 5
 		;;
-    *)		;;
+    no)		as_fn_error $? "\"--without-plugindir not supported.\"" "$LINENO" 5
+		;;
+    *)		PLUGINDIR="$with_plugindir"
+		;;
 esac
-else
-  with_plugindir="$libexecdir/sudo"
 fi
 
 
@@ -15189,19 +15190,19 @@ $as_echo_n "checking path to sudo_noexec.so... " >&6; }
 # Check whether --with-noexec was given.
 if test "${with_noexec+set}" = set; then :
   withval=$with_noexec; case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo/sudo_noexec.so"
-		;;
+    yes)	;;
     no)		;;
-    *)		;;
+    *)		noexec_file="$with_noexec"
+		;;
 esac
 else
-  with_noexec="$libexecdir/sudo/sudo_noexec.so"
+  with_noexec="$noexec_file"
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_noexec" >&5
 $as_echo "$with_noexec" >&6; }
 NOEXECFILE="sudo_noexec.so"
-NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
+NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
 
 # Extract the first word of "uname", so it can be a program name with args.
 set dummy uname; ac_word=$2
@@ -16454,7 +16455,7 @@ if test X"$enable_pvs_studio" = X"yes"; then
 EOF
 fi
 
-if test -n "$with_noexec"; then
+if test X"$with_noexec" != X"no"; then
     cat >>confdefs.h <<EOF
 #define RTLD_PRELOAD_VAR "$RTLD_PRELOAD_VAR"
 EOF
@@ -26889,78 +26890,76 @@ CROSS_COMPILING="$cross_compiling"
 
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
-if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_shared" != X"no"; then
-    oexec_prefix="$exec_prefix"
-    if test "$exec_prefix" = '$(prefix)'; then
-	if test "$prefix" = "NONE"; then
-	    exec_prefix="$ac_default_prefix"
-	else
-	    exec_prefix="$prefix"
-	fi
+oexec_prefix="$exec_prefix"
+if test "$exec_prefix" = '$(prefix)'; then
+    if test "$prefix" = "NONE"; then
+	exec_prefix="$ac_default_prefix"
+    else
+	exec_prefix="$prefix"
     fi
-    if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} sudo_noexec.la"
-	INSTALL_NOEXEC="install-noexec"
+fi
 
-	# Can't use asan with LD_PRELOAD
-	if test "$enable_asan" != "yes"; then
-	    CHECK_NOEXEC=check_noexec
-	fi
+# Update exec_prefix in noexec_file
+_noexec_file=
+while test X"$noexec_file" != X"$_noexec_file"; do
+    _noexec_file="$noexec_file"
+    eval noexec_file="$_noexec_file"
+done
 
-	noexec_file="$with_noexec"
-	_noexec_file=
-	while test X"$noexec_file" != X"$_noexec_file"; do
-	    _noexec_file="$noexec_file"
-	    eval noexec_file="$_noexec_file"
-	done
-	cat >>confdefs.h <<EOF
+# Update exec_prefix in sesh_file
+_sesh_file=
+while test X"$sesh_file" != X"$_sesh_file"; do
+    _sesh_file="$sesh_file"
+    eval sesh_file="$_sesh_file"
+done
+
+# Update exec_prefix in PLUGINDIR
+_PLUGINDIR=
+while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
+    _PLUGINDIR="$PLUGINDIR"
+    eval PLUGINDIR="$_PLUGINDIR"
+done
+exec_prefix="$oexec_prefix"
+
+if test X"$with_noexec" != X"no"; then
+    PROGS="${PROGS} sudo_noexec.la"
+    INSTALL_NOEXEC="install-noexec"
+
+    # Can't use asan with LD_PRELOAD
+    if test "$enable_asan" != "yes"; then
+	CHECK_NOEXEC=check_noexec
+    fi
+
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_NOEXEC "$noexec_file"
 EOF
 
-    fi
-    if test X"$with_selinux" != X"no"; then
-	sesh_file="$libexecdir/sudo/sesh"
-	_sesh_file=
-	while test X"$sesh_file" != X"$_sesh_file"; do
-	    _sesh_file="$sesh_file"
-	    eval sesh_file="$_sesh_file"
-	done
-	cat >>confdefs.h <<EOF
+else
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_NOEXEC NULL
+EOF
+
+fi
+if test X"$with_selinux" != X"no"; then
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_SESH "$sesh_file"
 EOF
 
-    fi
-    # PLUGINDIR gets substitured even when --disable-shared is specified
-    PLUGINDIR="$with_plugindir"
-    _PLUGINDIR=
-    while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-	_PLUGINDIR="$PLUGINDIR"
-	eval PLUGINDIR="$_PLUGINDIR"
-    done
-    if test X"$enable_shared" != X"no"; then
-	cat >>confdefs.h <<EOF
+else
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_SESH NULL
+EOF
+
+fi
+if test X"$enable_shared" != X"no"; then
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR/"
 EOF
 
 
 $as_echo "#define ENABLE_SUDO_PLUGIN_API 1" >>confdefs.h
 
-    fi
-    exec_prefix="$oexec_prefix"
-fi
-if test X"$with_noexec" = X"no"; then
-    cat >>confdefs.h <<EOF
-#define _PATH_SUDO_NOEXEC NULL
-EOF
-
-fi
-if test X"$with_selinux" = X"no"; then
-    cat >>confdefs.h <<EOF
-#define _PATH_SUDO_SESH NULL
-EOF
-
-fi
-if test X"$enable_shared" = X"no"; then
+else
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_PLUGIN_DIR NULL
 EOF

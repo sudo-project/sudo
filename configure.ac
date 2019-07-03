@@ -193,13 +193,13 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
-noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
-sesh_file=/usr/local/libexec/sudo/sesh
+noexec_file="$libexecdir/sudo/sudo_noexec.so"
+sesh_file="$libexecdir/sudo/sesh"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
 pam_login_service=sudo
-PLUGINDIR=/usr/local/libexec/sudo
+PLUGINDIR="$libexecdir/sudo"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -1249,10 +1249,13 @@ esac])
 
 AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
-    no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
+    yes)	AC_MSG_ERROR(["must give --with-plugindir an argument."])
 		;;
-    *)		;;
-esac], [with_plugindir="$libexecdir/sudo"])
+    no)		AC_MSG_ERROR(["--without-plugindir not supported."])
+		;;
+    *)		PLUGINDIR="$with_plugindir"
+		;;
+esac])
 
 AC_ARG_WITH(man, [AS_HELP_STRING([--with-man], [manual pages use man macros])],
 [case $with_man in
@@ -1711,14 +1714,14 @@ SHLIB_ENABLE="$enable_dlopen"
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[[=PATH]]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo/sudo_noexec.so"
-		;;
+    yes)	;;
     no)		;;
-    *)		;;
-esac], [with_noexec="$libexecdir/sudo/sudo_noexec.so"])
+    *)		noexec_file="$with_noexec"
+		;;
+esac], [with_noexec="$noexec_file"])
 AC_MSG_RESULT($with_noexec)
 NOEXECFILE="sudo_noexec.so"
-NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
+NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
 
 dnl
 dnl Find programs we use
@@ -2288,7 +2291,7 @@ fi
 dnl
 dnl Library preloading to support NOEXEC
 dnl
-if test -n "$with_noexec"; then
+if test X"$with_noexec" != X"no"; then
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
     if test -n "$RTLD_PRELOAD_DEFAULT"; then
@@ -4366,64 +4369,64 @@ dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 dnl
-dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
-dnl XXX - this is gross!
+dnl Expand exec_prefix in in variables used by the manual pages
 dnl
-if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_shared" != X"no"; then
-    oexec_prefix="$exec_prefix"
-    if test "$exec_prefix" = '$(prefix)'; then
-	if test "$prefix" = "NONE"; then
-	    exec_prefix="$ac_default_prefix"
-	else
-	    exec_prefix="$prefix"
-	fi
+oexec_prefix="$exec_prefix"
+if test "$exec_prefix" = '$(prefix)'; then
+    if test "$prefix" = "NONE"; then
+	exec_prefix="$ac_default_prefix"
+    else
+	exec_prefix="$prefix"
     fi
-    if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} sudo_noexec.la"
-	INSTALL_NOEXEC="install-noexec"
-
-	# Can't use asan with LD_PRELOAD
-	if test "$enable_asan" != "yes"; then
-	    CHECK_NOEXEC=check_noexec
-	fi
-
-	noexec_file="$with_noexec"
-	_noexec_file=
-	while test X"$noexec_file" != X"$_noexec_file"; do
-	    _noexec_file="$noexec_file"
-	    eval noexec_file="$_noexec_file"
-	done
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
-    fi
-    if test X"$with_selinux" != X"no"; then
-	sesh_file="$libexecdir/sudo/sesh"
-	_sesh_file=
-	while test X"$sesh_file" != X"$_sesh_file"; do
-	    _sesh_file="$sesh_file"
-	    eval sesh_file="$_sesh_file"
-	done
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
-    fi
-    # PLUGINDIR gets substitured even when --disable-shared is specified
-    PLUGINDIR="$with_plugindir"
-    _PLUGINDIR=
-    while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-	_PLUGINDIR="$PLUGINDIR"
-	eval PLUGINDIR="$_PLUGINDIR"
-    done
-    if test X"$enable_shared" != X"no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
-	AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
-    fi
-    exec_prefix="$oexec_prefix"
 fi
-if test X"$with_noexec" = X"no"; then
+
+# Update exec_prefix in noexec_file
+_noexec_file=
+while test X"$noexec_file" != X"$_noexec_file"; do
+    _noexec_file="$noexec_file"
+    eval noexec_file="$_noexec_file"
+done
+
+# Update exec_prefix in sesh_file
+_sesh_file=
+while test X"$sesh_file" != X"$_sesh_file"; do
+    _sesh_file="$sesh_file"
+    eval sesh_file="$_sesh_file"
+done
+
+# Update exec_prefix in PLUGINDIR
+_PLUGINDIR=
+while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
+    _PLUGINDIR="$PLUGINDIR"
+    eval PLUGINDIR="$_PLUGINDIR"
+done
+exec_prefix="$oexec_prefix"
+
+dnl
+dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
+dnl
+if test X"$with_noexec" != X"no"; then
+    PROGS="${PROGS} sudo_noexec.la"
+    INSTALL_NOEXEC="install-noexec"
+
+    # Can't use asan with LD_PRELOAD
+    if test "$enable_asan" != "yes"; then
+	CHECK_NOEXEC=check_noexec
+    fi
+
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
+else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, NULL)
 fi
-if test X"$with_selinux" = X"no"; then
+if test X"$with_selinux" != X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
+else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
 fi
-if test X"$enable_shared" = X"no"; then
+if test X"$enable_shared" != X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
+    AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
+else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, NULL)
 fi
 
