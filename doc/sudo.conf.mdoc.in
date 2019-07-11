@@ -281,7 +281,7 @@ This setting is only used when
 is built with SELinux support.
 The default value is
 .Pa @sesh_file@ .
-.\}              
+.\}
 .El
 .Ss Other settings
 The
