@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd July 11, 2019
+.Dd July 12, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4542,7 +4542,7 @@ bug compatibility for
 command suspend or resume, signal number received
 .El
 .It Pa ttyin
-Input from the user's tty, exactly as the user typed it.
+Raw input from the user's terminal, exactly as it was received.
 No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "July 11, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 12, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4881,7 +4881,7 @@ command suspend or resume, signal number received
 .PD
 .TP 10n
 \fIttyin\fR
-Input from the user's tty, exactly as the user typed it.
+Raw input from the user's terminal, exactly as it was received.
 No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.
