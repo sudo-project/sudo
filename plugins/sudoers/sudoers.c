@@ -879,18 +879,11 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
-    bool asroot = true;
+    bool perm_root = false;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN)
 
     if (!set_perms(PERM_SUDOERS))
 	debug_return_ptr(NULL);
-
-    /*
-     * If sudoers_uid == ROOT_UID and sudoers_mode is group readable
-     * set_perms() will use a non-zero uid in order to avoid NFS issues..
-     */
-    if (sudoers_uid != ROOT_UID || ISSET(sudoers_mode, S_IRGRP))
-	asroot = false;
 
 again:
     switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
@@ -902,8 +895,10 @@ again:
 	     */
 	    if (sudoers_uid == ROOT_UID && ISSET(sudoers_mode, S_IRGRP)) {
 		if (!ISSET(sb.st_mode, S_IRGRP) || sb.st_gid != SUDOERS_GID) {
-		    if (!restore_perms() || !set_perms(PERM_ROOT))
-			debug_return_ptr(NULL);
+		    if (!perm_root) {
+			if (!restore_perms() || !set_perms(PERM_ROOT))
+			    debug_return_ptr(NULL);
+		    }
 		}
 	    }
 	    /*
@@ -930,12 +925,12 @@ again:
 	     * If we tried to stat() sudoers as non-root but got EACCES,
 	     * try again as root.
 	     */
-	    if (errno == EACCES && !asroot) {
+	    if (errno == EACCES && geteuid() != ROOT_UID) {
 		int serrno = errno;
 		if (restore_perms()) {
 		    if (!set_perms(PERM_ROOT))
 			debug_return_ptr(NULL);
-		    asroot = true;
+		    perm_root = true;
 		    goto again;
 		}
 		errno = serrno;
