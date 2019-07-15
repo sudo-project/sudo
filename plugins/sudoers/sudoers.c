@@ -879,11 +879,20 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
+    bool asroot = true;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN)
 
     if (!set_perms(PERM_SUDOERS))
 	debug_return_ptr(NULL);
 
+    /*
+     * If sudoers_uid == ROOT_UID and sudoers_mode is group readable
+     * set_perms() will use a non-zero uid in order to avoid NFS issues..
+     */
+    if (sudoers_uid != ROOT_UID || ISSET(sudoers_mode, S_IRGRP))
+	asroot = false;
+
+again:
     switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
 	    /*
@@ -917,6 +926,20 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	    }
 	    break;
 	case SUDO_PATH_MISSING:
+	    /*
+	     * If we tried to stat() sudoers as non-root but got EACCES,
+	     * try again as root.
+	     */
+	    if (errno == EACCES && !asroot) {
+		int serrno = errno;
+		if (restore_perms()) {
+		    if (!set_perms(PERM_ROOT))
+			debug_return_ptr(NULL);
+		    asroot = true;
+		    goto again;
+		}
+		errno = serrno;
+	    }
 	    log_warning(SLOG_SEND_MAIL, N_("unable to stat %s"), sudoers);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
