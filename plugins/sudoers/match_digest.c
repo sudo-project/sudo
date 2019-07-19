@@ -52,6 +52,9 @@ digest_matches(int fd, const char *file, const struct command_digest *digest)
     size_t digest_len;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH)
 
+    if (fd == -1)
+	goto done;
+
     file_digest = sudo_filedigest(fd, file, digest->digest_type, &digest_len);
     if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,

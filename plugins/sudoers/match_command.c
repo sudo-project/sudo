@@ -457,20 +457,23 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args, const
     /* Open the file for fdexec or for digest matching. */
     if (!open_cmnd(sudoers_cmnd, digest, &fd))
 	goto bad;
-    if (!do_stat(fd, sudoers_cmnd, &sudoers_stat))
-	goto bad;
 
     /*
-     * Return true if inode/device matches AND
+     * Return true if command matches AND
      *  a) there are no args in sudoers OR
      *  b) there are no args on command line and none req by sudoers OR
      *  c) there are args in sudoers and on command line and they match
      *  d) there is a digest and it matches
      */
-    if (user_stat != NULL &&
-	(user_stat->st_dev != sudoers_stat.st_dev ||
-	user_stat->st_ino != sudoers_stat.st_ino))
-	goto bad;
+    if (user_stat != NULL && do_stat(fd, sudoers_cmnd, &sudoers_stat)) {
+	if (user_stat->st_dev != sudoers_stat.st_dev ||
+	    user_stat->st_ino != sudoers_stat.st_ino)
+	    goto bad;
+    } else {
+	/* Either user or sudoers command does not exist, match by name. */
+	if (strcmp(user_cmnd, sudoers_cmnd) != 0)
+	    goto bad;
+    }
     if (!command_args_match(sudoers_cmnd, sudoers_args))
 	goto bad;
     if (digest != NULL && !digest_matches(fd, sudoers_cmnd, digest)) {
