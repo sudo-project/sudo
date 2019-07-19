@@ -1312,15 +1312,18 @@ This may happen if no terminal is available (or the
 option is specified) and the standard input has been redirected from
 \fI/dev/null\fR.
 .TP 6n
-\fRno tty present and no askpass program specified\fR
+\fRa terminal is required to read the password\fR
 \fBsudo\fR
-needs to read the password but there is no mechanism available to do so.
+needs to read the password but there is no mechanism available for it
+to do so.
 A terminal is not present to read the password from,
 \fBsudo\fR
 has not been configured to read from the standard input,
-and no askpass program has been specified either via the
-\fB\-A\fR
-option or the
+the
+\fB\-S\fR
+option was not used, and no askpass helper has been specified either via the
+sudo.conf(@mansectform@)
+file or the
 \fRSUDO_ASKPASS\fR
 environment variable.
 .TP 6n
