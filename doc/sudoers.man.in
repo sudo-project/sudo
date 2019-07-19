@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "July 12, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 19, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2761,6 +2761,17 @@ pam_session
 On systems that use PAM for authentication,
 \fBsudo\fR
 will create a new PAM session for the command to be run in.
+Unless
+\fBsudo\fR
+is given the
+\fB\-i\fR
+or
+\fB\-s\fR
+options, PAM session modules are run with the
+\(lqsilent\(rq
+flag enabled.
+This prevents last login information from being displayed for every
+command on some systems.
 Disabling
 \fIpam_session\fR
 may be needed on older PAM implementations or on operating systems where

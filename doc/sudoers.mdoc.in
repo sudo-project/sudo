@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd July 12, 2019
+.Dd July 19, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2598,6 +2598,17 @@ This setting is only supported by version 1.8.28 or higher.
 On systems that use PAM for authentication,
 .Nm sudo
 will create a new PAM session for the command to be run in.
+Unless
+.Nm sudo
+is given the
+.Fl i
+or
+.Fl s
+options, PAM session modules are run with the
+.Dq silent
+flag enabled.
+This prevents last login information from being displayed for every
+command on some systems.
 Disabling
 .Em pam_session
 may be needed on older PAM implementations or on operating systems where
