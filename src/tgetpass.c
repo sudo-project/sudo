@@ -144,7 +144,7 @@ restart:
 	/* If no tty present and we need to disable echo, try askpass. */
 	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
 	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-		sudo_warnx(U_("no tty present and no askpass program specified"));
+		sudo_warnx(U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
 		debug_return_str(NULL);
 	    }
 	    SET(flags, TGP_ASKPASS);
