@@ -237,18 +237,14 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->notbefore != UNSPEC && FIELD_CHANGED(prev_cs, cs, notbefore)) {
 	char buf[sizeof("CCYYMMDDHHMMSSZ")];
 	struct tm *tm = gmtime(&cs->notbefore);
-	(void)snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
-	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-	sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
+	if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
+	    sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
     }
     if (cs->notafter != UNSPEC && FIELD_CHANGED(prev_cs, cs, notafter)) {
 	char buf[sizeof("CCYYMMDDHHMMSSZ")];
 	struct tm *tm = gmtime(&cs->notafter);
-	(void)snprintf(buf, sizeof(buf), "%04d%02d%02d%02d%02d%02dZ",
-	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-	sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
+	if (strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", tm) != 0)
+	    sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
     }
     if (TAG_CHANGED(prev_cs, cs, tags, setenv))
 	sudo_lbuf_append(lbuf, tags.setenv ? "SETENV: " : "NOSETENV: ");
