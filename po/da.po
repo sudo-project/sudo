@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: sudo 1.8.26b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2018-10-29 08:31-0600\n"
-"PO-Revision-Date: 2019-02-17 23:06+0100\n"
+"PO-Revision-Date: 2019-03-08 23:06+0100\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
@@ -97,7 +97,7 @@ msgstr "%s: %s"
 #: src/sudo.c:1266 src/sudo.c:1382 src/sudo_edit.c:256 src/sudo_edit.c:789
 #: src/sudo_edit.c:886 src/sudo_edit.c:1000 src/sudo_edit.c:1020
 msgid "unable to allocate memory"
-msgstr "kunne ikke allokere hukommelse"
+msgstr "kan ikke allokere hukommelse"
 
 #: lib/util/strsignal.c:53
 msgid "Unknown signal"
@@ -179,22 +179,22 @@ msgstr "kan ikke angive brugerkontekst"
 
 #: src/exec.c:194
 msgid "unable to set process priority"
-msgstr "kunne ikke angive procesprioritet"
+msgstr "kan ikke angive procesprioritet"
 
 #: src/exec.c:202
 #, c-format
 msgid "unable to change root to %s"
-msgstr "kunne ikke ændre administrator (root) til %s"
+msgstr "kan ikke ændre administrator (root) til %s"
 
 #: src/exec.c:215 src/exec.c:221 src/exec.c:228
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
-msgstr "kunne ikke ændre til runas uid (%u, %u)"
+msgstr "kan ikke ændre til runas uid (%u, %u)"
 
 #: src/exec.c:246
 #, c-format
 msgid "unable to change directory to %s"
-msgstr "kunne ikke ændre mappe til %s"
+msgstr "kan ikke ændre mappe til %s"
 
 #: src/exec.c:345 src/exec_monitor.c:574 src/exec_monitor.c:576
 #: src/exec_nopty.c:525 src/exec_pty.c:522 src/exec_pty.c:1329
@@ -236,21 +236,21 @@ msgstr "kan ikke tilføje hændelse til kø"
 
 #: src/exec_monitor.c:592
 msgid "unable to set controlling tty"
-msgstr "kunne ikke angive kontrollerende tty"
+msgstr "kan ikke angive kontrollerende tty"
 
 #: src/exec_monitor.c:600 src/exec_nopty.c:364 src/exec_pty.c:1408
 #: src/exec_pty.c:1429 src/exec_pty.c:1449 src/tgetpass.c:292
 msgid "unable to create pipe"
-msgstr "kunne ikke oprette datakanal (pipe)"
+msgstr "kan ikke oprette datakanal (pipe)"
 
 #: src/exec_monitor.c:608
 msgid "unable to receive message from parent"
-msgstr "kunne ikke modtage besked fra overproces"
+msgstr "kan ikke modtage besked fra overproces"
 
 #: src/exec_monitor.c:614 src/exec_nopty.c:382 src/exec_pty.c:1487
 #: src/tgetpass.c:296
 msgid "unable to fork"
-msgstr "kunne ikke forgrene"
+msgstr "kan ikke forgrene"
 
 #: src/exec_monitor.c:628 src/sesh.c:125 src/sudo.c:1130
 #, c-format
@@ -259,7 +259,7 @@ msgstr "kan ikke køre %s"
 
 #: src/exec_monitor.c:711 src/exec_nopty.c:435
 msgid "unable to restore tty label"
-msgstr "kunne ikke gendanne tty-etiket"
+msgstr "kan ikke gendanne tty-etiket"
 
 #: src/exec_nopty.c:358 src/exec_pty.c:1338
 msgid "policy plugin failed session initialization"
@@ -276,15 +276,15 @@ msgstr "kan ikke gendanne håndtering for signal %d"
 
 #: src/exec_pty.c:156
 msgid "unable to allocate pty"
-msgstr "kunne ikke allokere pty"
+msgstr "kan ikke allokere pty"
 
 #: src/exec_pty.c:1318
 msgid "unable to create sockets"
-msgstr "kunne ikke oprette sokler"
+msgstr "kan ikke oprette sokler"
 
 #: src/exec_pty.c:1531
 msgid "unable to send message to monitor process"
-msgstr "kunne ikke sende besked til overvågningsproces"
+msgstr "kan ikke sende besked til overvågningsproces"
 
 #: src/load_plugins.c:55 src/load_plugins.c:68 src/load_plugins.c:90
 #: src/load_plugins.c:120 src/load_plugins.c:128 src/load_plugins.c:134
@@ -313,12 +313,12 @@ msgstr "%s må kun være skrivbar for ejeren"
 #: src/load_plugins.c:177
 #, c-format
 msgid "unable to load %s: %s"
-msgstr "kunne ikke indlæse %s: %s"
+msgstr "kan ikke indlæse %s: %s"
 
 #: src/load_plugins.c:185
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
-msgstr "kunne ikke finde symbol »%s« i %s"
+msgstr "kan ikke finde symbol »%s« i %s"
 
 #: src/load_plugins.c:192
 #, c-format
@@ -545,16 +545,16 @@ msgstr "stop behandling af parametre for kommandolinjen"
 
 #: src/selinux.c:83
 msgid "unable to open audit system"
-msgstr "kunne ikke åbne overvågningssystem"
+msgstr "kan ikke åbne overvågningssystem"
 
 #: src/selinux.c:93
 msgid "unable to send audit message"
-msgstr "kunne ikke sende overvågningsbesked"
+msgstr "kan ikke sende overvågningsbesked"
 
 #: src/selinux.c:121
 #, c-format
 msgid "unable to fgetfilecon %s"
-msgstr "kunne ikke fgetfilecon %s"
+msgstr "kan ikke fgetfilecon %s"
 
 #: src/selinux.c:126
 #, c-format
@@ -623,23 +623,23 @@ msgstr "kunne ikke indhente gammel_kontekst (old_context)"
 
 #: src/selinux.c:359
 msgid "unable to determine enforcing mode."
-msgstr "kunne ikke bestemme tilstanden gennemtving (enforcing)."
+msgstr "kan ikke bestemme tilstanden gennemtving (enforcing)."
 
 #: src/selinux.c:376
 #, c-format
 msgid "unable to set tty context to %s"
-msgstr "kunne ikke angive tty-kontekst for %s"
+msgstr "kan ikke angive tty-kontekst for %s"
 
 #: src/selinux.c:415
 #, c-format
 msgid "unable to set exec context to %s"
-msgstr "kunne ikke angive kørselskontekt til %s"
+msgstr "kan ikke angive kørselskontekt til %s"
 
 # engelsk: mangler vist lidt info her tast eller nøgle. mon ikke det er nøgle
 #: src/selinux.c:422
 #, c-format
 msgid "unable to set key creation context to %s"
-msgstr "kunne ikke angive nøgleoprettelseskontekst til %s"
+msgstr "kan ikke angive nøgleoprettelseskontekst til %s"
 
 #: src/sesh.c:77
 msgid "requires at least one argument"
@@ -743,7 +743,7 @@ msgstr "du findes ikke i %s-databasen"
 
 #: src/sudo.c:592
 msgid "unable to determine tty"
-msgstr "kunne ikke bestemme tty"
+msgstr "kan ikke bestemme tty"
 
 #: src/sudo.c:880
 #, c-format
@@ -762,7 +762,7 @@ msgstr "effektiv uid er ikke %d, er sudo installeret setuid root?"
 
 #: src/sudo.c:942
 msgid "unable to set supplementary group IDs"
-msgstr "kunne ikke angive supplerende gruppe-id'er"
+msgstr "kan ikke angive supplerende gruppe-id'er"
 
 #: src/sudo.c:949
 #, c-format
@@ -772,7 +772,7 @@ msgstr "kan ikke angive effektiv gid til runas gid %u"
 #: src/sudo.c:955
 #, c-format
 msgid "unable to set gid to runas gid %u"
-msgstr "kunne ikke angive gid til runas gid %u"
+msgstr "kan ikke angive gid til runas gid %u"
 
 #: src/sudo.c:1012
 #, c-format
@@ -876,7 +876,7 @@ msgstr "kan ikke kopiere nogle af de midlertidige filer tilbage til deres origin
 #: src/sudo_edit.c:976
 #, c-format
 msgid "unable to change uid to root (%u)"
-msgstr "kunne ikke ændre uid til root (%u)"
+msgstr "kan ikke ændre uid til root (%u)"
 
 #: src/sudo_edit.c:993
 msgid "plugin error: missing file list for sudoedit"
@@ -884,7 +884,7 @@ msgstr "fejl i udvidelsesmodul: mangler filliste for sudoedit"
 
 #: src/sudo_edit.c:1034 src/sudo_edit.c:1047
 msgid "unable to read the clock"
-msgstr "kunne ikke læse uret"
+msgstr "kan ikke læse uret"
 
 #: src/tgetpass.c:101
 msgid "timed out reading password"
