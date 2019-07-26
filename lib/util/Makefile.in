@@ -124,29 +124,29 @@ IOBJS = $(LTOBJS:.lo=.i)
 
 POBJS = $(IOBJS:.i=.plog)
 
-ATOFOO_TEST_OBJS = atofoo_test.lo
+ATOFOO_TEST_OBJS = atofoo_test.lo strtobool.lo strtoid.lo strtomode.lo
 
-MKTEMP_TEST_OBJS = mktemp_test.lo
+MKTEMP_TEST_OBJS = mktemp_test.lo mktemp.lo
 
-PARSELN_TEST_OBJS = parseln_test.lo
+PARSELN_TEST_OBJS = parseln_test.lo parseln.lo
 
 PROGNAME_TEST_OBJS = progname_test.lo progname.lo
 
-CONF_TEST_OBJS = conf_test.lo
+CONF_TEST_OBJS = conf_test.lo sudo_conf.lo
 
 HLTQ_TEST_OBJS = hltq_test.lo
 
-FNM_TEST_OBJS = fnm_test.lo
+FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 
-GLOBTEST_OBJS = globtest.lo
+GLOBTEST_OBJS = globtest.lo glob.lo
 
-GETDELIM_TEST_OBJS = getdelim_test.lo
+GETDELIM_TEST_OBJS = getdelim_test.lo getdelim.lo
 
-STRSPLIT_TEST_OBJS = strsplit_test.lo
+STRSPLIT_TEST_OBJS = strsplit_test.lo strsplit.lo
 
-PARSE_GIDS_TEST_OBJS = parse_gids_test.lo
+PARSE_GIDS_TEST_OBJS = parse_gids_test.lo gidlist.lo
 
-GETGROUPLIST_TEST_OBJS = getgrouplist_test.lo
+GETGROUPLIST_TEST_OBJS = getgrouplist_test.lo getgrouplist.lo
 
 VSYSLOG_TEST_OBJS = vsyslog_test.lo vsyslog.lo
 
