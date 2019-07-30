@@ -309,7 +309,7 @@ get_net_ifs(char **addrinfo)
 
 #ifdef SIOCGIFFLAGS
 	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
-	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
+	memcpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name));
 	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) ifr_tmp) < 0)
 #endif
 	    memcpy(ifr_tmp, ifr, sizeof(*ifr_tmp));
@@ -321,7 +321,7 @@ get_net_ifs(char **addrinfo)
 
 	/* Get the netmask. */
 	memset(ifr_tmp, 0, sizeof(*ifr_tmp));
-	strncpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name) - 1);
+	memcpy(ifr_tmp->ifr_name, ifr->ifr_name, sizeof(ifr_tmp->ifr_name));
 	sin = (struct sockaddr_in *) &ifr_tmp->ifr_addr;
 #ifdef _ISC
 	STRSET(SIOCGIFNETMASK, (caddr_t) ifr_tmp, sizeof(*ifr_tmp));

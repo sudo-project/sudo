@@ -90,8 +90,10 @@ group_plugin_load(char *plugin_info)
 	savedch = *args;
 	*args = '\0';
     }
-    strncpy(path, plugin_info, sizeof(path) - 1);
-    path[sizeof(path) - 1] = '\0';
+    if (strlcpy(path, plugin_info, sizeof(path)) >= sizeof(path)) {
+	fprintf(stderr, "path too long: %s\n", plugin_info);
+	return -1;
+    }
     if (args != NULL)
 	*args++ = savedch;
 
