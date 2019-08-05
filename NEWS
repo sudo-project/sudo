@@ -48,6 +48,9 @@ What's new in Sudo 1.8.28
 
  * Asturian translation for sudoers from translationproject.org.
 
+ * I/O log timing files now store signal suspend and resume information
+   in the form of a signal name instead of a number.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command
