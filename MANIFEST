@@ -333,6 +333,8 @@ plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/parse_ldif.c
 plugins/sudoers/po/README
+plugins/sudoers/po/ast.mo
+plugins/sudoers/po/ast.po
 plugins/sudoers/po/ca.mo
 plugins/sudoers/po/ca.po
 plugins/sudoers/po/cs.mo

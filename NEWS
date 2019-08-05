@@ -46,6 +46,8 @@ What's new in Sudo 1.8.28
    command that is allowed by sudoers but which does not actually
    exist on the file system.  Bug #888.
 
+ * Asturian translation for sudoers from translationproject.org.
+
 What's new in Sudo 1.8.27
 
  * On HP-UX, sudo will now update the utmps file when running a command
