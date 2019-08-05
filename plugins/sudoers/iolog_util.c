@@ -37,6 +37,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <signal.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
@@ -333,12 +334,9 @@ parse_timing(const char *buf, struct timespec *delay,
 
     switch (timing->event) {
     case IO_EVENT_SUSPEND:
-	ulval = strtoul(cp, &ep, 10);
-	if (ep == cp || *ep != '\0')
+	/* Signal name (no leading SIG prefix) or number. */
+	if (str2sig(cp, &timing->u.signo) == -1)
 	    goto bad;
-	if (ulval > INT_MAX)
-	    goto bad;
-	timing->u.signo = (int)ulval;
 	break;
     case IO_EVENT_WINSIZE:
 	ulval = strtoul(cp, &ep, 10);

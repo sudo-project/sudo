@@ -1221,12 +1221,13 @@ sudoers_io_suspend(int signo)
 {
     struct timespec now, delay;
     unsigned int len;
+    char signame[SIG2STR_MAX];
     char tbuf[1024];
     const char *errstr = NULL;
     int ret = -1;
     debug_decl(sudoers_io_suspend, SUDOERS_DEBUG_PLUGIN)
 
-    if (signo <= 0) {
+    if (signo <= 0 || sig2str(signo, signame) == -1) {
 	sudo_warnx(U_("%s: internal error, invalid signal %d"),
 	    __func__, signo);
 	debug_return_int(-1);
@@ -1241,8 +1242,8 @@ sudoers_io_suspend(int signo)
 
     /* Write suspend event to the timing file. */
     sudo_timespecsub(&now, &last_time, &delay);
-    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %d\n",
-	IO_EVENT_SUSPEND, (long long)delay.tv_sec, delay.tv_nsec, signo);
+    len = (unsigned int)snprintf(tbuf, sizeof(tbuf), "%d %lld.%09ld %s\n",
+	IO_EVENT_SUSPEND, (long long)delay.tv_sec, delay.tv_nsec, signame);
     if (len >= sizeof(tbuf)) {
 	/* Not actually possible due to the size of tbuf[]. */
 	errstr = strerror(EOVERFLOW);

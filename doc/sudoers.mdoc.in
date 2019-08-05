@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd July 19, 2019
+.Dd August 5, 2019
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4550,7 +4550,7 @@ bug compatibility for
 .Nm sudo
 1.8.7 terminal output
 .It 7
-command suspend or resume, signal number received
+command suspend or resume, signal received
 .El
 .It Pa ttyin
 Raw input from the user's terminal, exactly as it was received.

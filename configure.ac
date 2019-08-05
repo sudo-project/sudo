@@ -3264,7 +3264,6 @@ AC_CHECK_FUNCS([strsignal], [], [
     HAVE_SIGLIST="false"
     AC_CHECK_DECLS([sys_siglist, _sys_siglist], [
 	HAVE_SIGLIST="true"
-	break
     ], [ ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
@@ -3275,7 +3274,7 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
-dnl Check for sig2str(), sys_signame or sys_sigabbrev
+dnl Check for sig2str() and str2sig(), sys_signame or sys_sigabbrev
 dnl
 AC_CHECK_FUNCS([sig2str], [
     AC_CHECK_DECLS(SIG2STR_MAX, [], [], [
@@ -3283,10 +3282,19 @@ AC_CHECK_FUNCS([sig2str], [
 ])], [
     AC_LIBOBJ(sig2str)
     SUDO_APPEND_COMPAT_EXP(sudo_sig2str)
+])
+AC_CHECK_FUNCS([str2sig], [], [
+    AC_LIBOBJ(str2sig)
+    SUDO_APPEND_COMPAT_EXP(sudo_str2sig)
+])
+
+dnl
+dnl Check for sys_signame or sys_sigabbrev if missing sig2str() or str2sig().
+dnl
+if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
     HAVE_SIGNAME="false"
     AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
-	break
     ], [ ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
@@ -3307,7 +3315,7 @@ AC_INCLUDES_DEFAULT
 	    AC_LIBOBJ(signame)
 	fi
     fi
-])
+fi
 
 dnl
 dnl Check for dl_iterate_phdr, may require -ldl

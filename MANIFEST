@@ -96,10 +96,10 @@ lib/util/fatal.c
 lib/util/fnmatch.c
 lib/util/getaddrinfo.c
 lib/util/getcwd.c
+lib/util/getdelim.c
 lib/util/getentropy.c
 lib/util/getgrouplist.c
 lib/util/gethostname.c
-lib/util/getdelim.c
 lib/util/getopt_long.c
 lib/util/gettime.c
 lib/util/gidlist.c
@@ -173,6 +173,7 @@ lib/util/sha2.c
 lib/util/sig2str.c
 lib/util/siglist.in
 lib/util/snprintf.c
+lib/util/str2sig.c
 lib/util/strlcat.c
 lib/util/strlcpy.c
 lib/util/strndup.c

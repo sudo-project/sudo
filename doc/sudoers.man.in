@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "July 19, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 5, 2019" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4886,7 +4886,7 @@ bug compatibility for
 1.8.7 terminal output
 .TP 6n
 7
-command suspend or resume, signal number received
+command suspend or resume, signal received
 .PP
 .RE
 .PD
