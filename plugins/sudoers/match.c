@@ -72,8 +72,10 @@ int
 user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
     const struct member *m)
 {
-    struct alias *a;
+    const char *lhost = parse_tree->lhost ? parse_tree->lhost : user_runhost;
+    const char *shost = parse_tree->shost ? parse_tree->shost : user_srunhost;
     int matched = UNSPEC;
+    struct alias *a;
     debug_decl(user_matches, SUDOERS_DEBUG_MATCH)
 
     switch (m->type) {
@@ -82,8 +84,8 @@ user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 	    break;
 	case NETGROUP:
 	    if (netgr_matches(m->name,
-		def_netgroup_tuple ? user_runhost : NULL,
-		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
+		def_netgroup_tuple ? lhost : NULL,
+		def_netgroup_tuple ? shost : NULL, pw->pw_name))
 		matched = !m->negated;
 	    break;
 	case USERGROUP:
@@ -153,11 +155,13 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
     const struct member_list *user_list, const struct member_list *group_list,
     struct member **matching_user, struct member **matching_group)
 {
+    const char *lhost = parse_tree->lhost ? parse_tree->lhost : user_runhost;
+    const char *shost = parse_tree->shost ? parse_tree->shost : user_srunhost;
+    int user_matched = UNSPEC;
+    int group_matched = UNSPEC;
     struct member *m;
     struct alias *a;
     int rc;
-    int user_matched = UNSPEC;
-    int group_matched = UNSPEC;
     debug_decl(runaslist_matches, SUDOERS_DEBUG_MATCH)
 
     if (ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) || !ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) {
@@ -175,8 +179,8 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			break;
 		    case NETGROUP:
 			if (netgr_matches(m->name,
-			    def_netgroup_tuple ? user_runhost : NULL,
-			    def_netgroup_tuple ? user_srunhost : NULL,
+			    def_netgroup_tuple ? lhost : NULL,
+			    def_netgroup_tuple ? shost : NULL,
 			    runas_pw->pw_name))
 			    user_matched = !m->negated;
 			break;
@@ -309,7 +313,10 @@ int
 hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
     const struct member_list *list)
 {
-    return hostlist_matches_int(parse_tree, pw, user_runhost, user_srunhost, list);
+    const char *lhost = parse_tree->lhost ? parse_tree->lhost : user_runhost;
+    const char *shost = parse_tree->shost ? parse_tree->shost : user_srunhost;
+
+    return hostlist_matches_int(parse_tree, pw, lhost, shost, list);
 }
 
 /*

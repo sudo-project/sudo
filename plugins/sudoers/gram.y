@@ -63,7 +63,9 @@ char *errorfile = NULL;
 struct sudoers_parse_tree parsed_policy = {
     TAILQ_HEAD_INITIALIZER(parsed_policy.userspecs),
     TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
-    NULL /* aliases */
+    NULL, /* aliases */
+    NULL, /* lhost */
+    NULL /* shost */
 };
 
 /*
@@ -1246,11 +1248,14 @@ free_userspec(struct userspec *us)
  * Initialized a sudoers parse tree.
  */
 void
-init_parse_tree(struct sudoers_parse_tree *parse_tree)
+init_parse_tree(struct sudoers_parse_tree *parse_tree, const char *lhost,
+    const char *shost)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
     parse_tree->aliases = NULL;
+    parse_tree->shost = shost;
+    parse_tree->lhost = lhost;
 }
 
 /*

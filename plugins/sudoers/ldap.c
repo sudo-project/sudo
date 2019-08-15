@@ -1665,7 +1665,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
     handle->ld = ld;
     /* handle->pw = NULL; */
-    init_parse_tree(&handle->parse_tree);
+    init_parse_tree(&handle->parse_tree, NULL, NULL);
     nss->handle = handle;
 
 done:
